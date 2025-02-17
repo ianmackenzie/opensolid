@@ -109,7 +109,8 @@ tangentDirection ::
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 removeStartDegeneracy ::
   Int ->
-  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Point2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 transformBy ::

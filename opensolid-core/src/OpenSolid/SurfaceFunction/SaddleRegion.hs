@@ -141,7 +141,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
       let interpolatingBounds = NonEmpty.one (Bounds2d (Range.from u1 uMid) vBounds)
       let interpolatingCurve =
             HorizontalCurve.bounded derivatives dvdu u1 uMid interpolatingBounds frame boundingAxes
-              |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
+              |> Curve2d.removeStartDegeneracy 2 startPoint [startDerivative]
       if uMid == u2
         then NonEmpty.one interpolatingCurve
         else do
@@ -155,7 +155,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
       let interpolatingBounds = NonEmpty.one (Bounds2d uBounds (Range.from v1 vMid))
       let interpolatingCurve =
             VerticalCurve.bounded derivatives dudv v1 vMid interpolatingBounds frame boundingAxes
-              |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
+              |> Curve2d.removeStartDegeneracy 2 startPoint [startDerivative]
       if vMid == v2
         then NonEmpty.one interpolatingCurve
         else do

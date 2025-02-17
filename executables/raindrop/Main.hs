@@ -36,11 +36,10 @@ top = do
 
 bottom :: Surface3d GlobalCoordinates
 bottom = do
-  let profile =
-        Curve2d.hermite
-          (Point2d.meters 0.0 -2.0, [])
-          (Point2d.meters 1.0 0.0, [Vector2d.meters 0.0 2.0])
-          . SurfaceFunction.v
+  let p1 = Point2d.meters 0.0 -2.0
+  let p2 = Point2d.meters 1.0 0.0
+  let v2 = Vector2d.meters 0.0 2.0
+  let profile = Curve2d.hermite p1 [] p2 [v2] . SurfaceFunction.v
   let r = SurfaceFunction2d.xCoordinate profile
   let z = SurfaceFunction2d.yCoordinate profile
   let theta = Angle.twoPi * SurfaceFunction.u

@@ -724,17 +724,18 @@ cubicBezier ::
   Curve2d (space @ units)
 cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
-{-| Construct a Bezier curve with the given start point, start derivatives, end point and end
-derivatives. For example,
+{-| Construct a Bezier curve with the given endpoints and derivatives at those endpoints.
 
-> Curve2d.hermite (p1, [v1]) (p2, [v2])
+For example,
+
+> Curve2d.hermite p1 [v1] p2 [v2]
 
 will result in a cubic spline from @p1@ to @p2@ with first derivative equal to @v1@ at @p1@ and
 first derivative equal to @v2@ at @p2@.
 
 The numbers of derivatives at each endpoint do not have to be equal; for example,
 
-> Curve2d.hermite (p1, [v1]) (p2, [])
+> Curve2d.hermite p1 [v1] p2 []
 
 will result in a quadratic spline from @p1@ to @p2@ with first derivative at @p1@ equal to @v1@.
 
@@ -742,10 +743,12 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
-  (Point2d (space @ units), List (Vector2d (space @ units))) ->
-  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Point2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
+  Point2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
   Curve2d (space @ units)
-hermite (Point2d xStart yStart, startDerivatives) (Point2d xEnd yEnd, endDerivatives) = do
+hermite (Point2d xStart yStart) startDerivatives (Point2d xEnd yEnd) endDerivatives = do
   let xStartDerivatives = List.map Vector2d.xComponent startDerivatives
   let yStartDerivatives = List.map Vector2d.yComponent startDerivatives
   let xEndDerivatives = List.map Vector2d.xComponent endDerivatives
@@ -1192,14 +1195,17 @@ curvature curve = Result.map Units.specialize (curvature' curve)
 
 removeStartDegeneracy ::
   Int ->
-  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Point2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
-removeStartDegeneracy continuity startCondition curve = Result.do
+removeStartDegeneracy continuity p1 d1 curve = Result.do
   let curveDerivatives = Stream.iterate VectorCurve2d.derivative (derivative curve)
   let endDerivativeValues = Stream.map VectorCurve2d.endValue curveDerivatives
   let endCondition endDegree = (endPoint curve, Stream.take endDegree endDerivativeValues)
-  let baseCurve endDegree = hermite startCondition (endCondition endDegree)
+  let baseCurve endDegree = do
+        let (p2, d2) = endCondition endDegree
+        hermite p1 d1 p2 d2
   let curveDerivative n =
         VectorCurve2d.new $
           SyntheticDerivative

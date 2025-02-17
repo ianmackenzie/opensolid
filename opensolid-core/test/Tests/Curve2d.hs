@@ -344,11 +344,12 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
   let arcSecondDerivative = VectorCurve2d.derivative arcFirstDerivative
   let arcThirdDerivative = VectorCurve2d.derivative arcSecondDerivative
 
+  let startPoint = Curve2d.startPoint arc
   let startFirstDerivative = VectorCurve2d.startValue arcFirstDerivative
   let startSecondDerivative = VectorCurve2d.startValue arcSecondDerivative
-  let startCondition = (Curve2d.startPoint arc, [startFirstDerivative, startSecondDerivative])
+  let startDerivatives = [startFirstDerivative, startSecondDerivative]
 
-  let interpolatedCurve = Curve2d.removeStartDegeneracy 2 startCondition arc
+  let interpolatedCurve = Curve2d.removeStartDegeneracy 2 startPoint startDerivatives arc
   let interpolatedFirstDerivative = Curve2d.derivative interpolatedCurve
   let interpolatedSecondDerivative = VectorCurve2d.derivative interpolatedFirstDerivative
   let interpolatedThirdDerivative = VectorCurve2d.derivative interpolatedSecondDerivative

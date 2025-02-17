@@ -373,7 +373,7 @@ testHermiteBezier = IO.do
   let startDerivatives = [Vector2d.meters 10.0 10.0]
   let endDerivatives = [Vector2d.meters 0.0 -10.0, Vector2d.zero]
   let endPoint = Point2d.meters 10.0 0.0
-  let curve = Curve2d.hermite (startPoint, startDerivatives) (endPoint, endDerivatives)
+  let curve = Curve2d.hermite startPoint startDerivatives endPoint endDerivatives
   log "Hermite Bezier curve" curve
   let curveAttributes =
         [ Drawing2d.strokeColor Color.blue
