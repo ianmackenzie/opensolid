@@ -160,6 +160,7 @@ circle attributes radius centerPoint = do
   let rAttribute = Attribute "r" (lengthText radius)
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
+-- | Draw a curve with the given attributes and accuracy.
 curve ::
   List (Attribute space) ->
   Length ->

@@ -44,6 +44,7 @@ instance Vertex2d vertex (space @ units) => Bounded2d (Mesh vertex) (space @ uni
 instance Vertex3d vertex (space @ units) => Bounded3d (Mesh vertex) (space @ units) where
   bounds mesh = Bounds3d.hullN (NonEmpty.map Vertex3d.position (Array.toNonEmpty (vertices mesh)))
 
+-- | A constraint on the quality of some mesh to be produced.
 data Constraint units
   = MaxError (Qty units)
   | MaxSize (Qty units)
@@ -51,9 +52,11 @@ data Constraint units
 instance FFI (Constraint Meters) where
   representation = FFI.nestedClassRepresentation "Mesh" "Constraint"
 
+-- | Specify the maximum error/deviation of the mesh from the actual shape.
 maxError :: Qty units -> Constraint units
 maxError = MaxError
 
+-- | Specify the maximum size of any triangle in the mesh.
 maxSize :: Qty units -> Constraint units
 maxSize = MaxSize
 

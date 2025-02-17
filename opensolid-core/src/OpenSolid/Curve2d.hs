@@ -158,6 +158,7 @@ import Prelude qualified
 
 type role Curve2d nominal
 
+-- | A parametric curve in 2D space.
 data Curve2d (coordinateSystem :: CoordinateSystem) where
   Curve ::
     Interface curve coordinateSystem =>
@@ -539,16 +540,26 @@ instance
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
 
+-- | Create a degenerate curve that is actually just a single point.
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
 constant = Parametric . Expression.constant
 
+-- | Create a curve from its X and Y coordinate curves.
 xy :: Curve units -> Curve units -> Curve2d (space @ units)
 xy (Curve.Parametric x) (Curve.Parametric y) = Parametric (Expression.xy x y)
 xy x y = XY x y
 
+-- | Create a line between two points.
 line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
 line p1 p2 = p1 + Curve.t * (p2 - p1)
 
+{-| Create an arc with the given start point, end point and swept angle.
+
+A positive swept angle means the arc turns counterclockwise (turns to the left),
+and a negative swept angle means it turns clockwise (turns to the right).
+For example, an arc with a swept angle of positive 90 degrees
+is quarter circle that turns to the left.
+-}
 arc ::
   Tolerance units =>
   Point2d (space @ units) ->
@@ -574,16 +585,22 @@ arc givenStartPoint givenEndPoint sweptAngle =
           let endAngle = startAngle + sweptAngle
           customArc centerPoint xVector yVector startAngle endAngle
 
+-- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
 polarArc centerPoint radius startAngle endAngle =
   customArc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle
 
+{-| Create an arc with the given center point, start point and swept angle.
+
+The start point will be swept around the center point by the given angle.
+-}
 sweptArc :: Point2d (space @ units) -> Point2d (space @ units) -> Angle -> Curve2d (space @ units)
 sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2d.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2d.angleFrom centerPoint givenStartPoint
   polarArc centerPoint radius startAngle (startAngle + sweptAngle)
 
+-- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
   Tolerance units =>
   Point2d (space @ units) ->
@@ -665,13 +682,20 @@ customArc p0 v1 v2 a b = do
   let angle = Curve.line a b
   p0 + v1 * Curve.cos angle + v2 * Curve.sin angle
 
+-- | Create a circle with the given center point and radius.
 circle :: Point2d (space @ units) -> Qty units -> Curve2d (space @ units)
 circle centerPoint radius = polarArc centerPoint radius Angle.zero Angle.twoPi
 
+{-| Create an ellipes with the given principal axes and major/minor radii.
+The first radius given will be the radius along the X axis,
+and the second radius will be the radius along the Y axis.
+-}
 ellipse :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Curve2d (space @ units)
 ellipse axes xRadius yRadius = ellipticalArc axes xRadius yRadius Angle.zero Angle.twoPi
 
-{-| Construct a Bezier curve from its control points. For example,
+{-| Construct a Bezier curve from its control points.
+
+For example,
 
 > Curve2d.bezier (NonEmpty.four p1 p2 p3 p4))
 
@@ -730,6 +754,7 @@ hermite (Point2d xStart yStart, startDerivatives) (Point2d xEnd yEnd, endDerivat
   let y = Curve.hermite (yStart, yStartDerivatives) (yEnd, yEndDerivatives)
   XY x y
 
+-- | Get the start point of a curve.
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint curve = case curve of
   Curve c -> startPointImpl c
@@ -739,6 +764,7 @@ startPoint curve = case curve of
   PlaceIn frame c -> Point2d.placeIn frame (startPoint c)
   Transformed transform c -> Point2d.transformBy transform (startPoint c)
 
+-- | Get the end point of a curve.
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint curve = case curve of
   Curve c -> endPointImpl c
@@ -748,6 +774,10 @@ endPoint curve = case curve of
   PlaceIn frame c -> Point2d.placeIn frame (endPoint c)
   Transformed transform c -> Point2d.transformBy transform (endPoint c)
 
+{-| Evaluate a curve at a given parameter value.
+
+The parameter value should be between 0 and 1.
+-}
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 evaluate curve tValue = case curve of
   Curve c -> evaluateImpl c tValue
@@ -766,6 +796,7 @@ evaluateBounds curve tRange = case curve of
   PlaceIn frame c -> Bounds2d.placeIn frame (evaluateBounds c tRange)
   Transformed transform c -> Bounds2d.transformBy transform (evaluateBounds c tRange)
 
+-- | Get the derivative of a curve.
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve = case curve of
   Curve c -> derivativeImpl c
@@ -775,6 +806,7 @@ derivative curve = case curve of
   PlaceIn frame c -> VectorCurve2d.placeIn frame (derivative c)
   Transformed transform c -> VectorCurve2d.transformBy transform (derivative c)
 
+-- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse curve = case curve of
   Curve c -> Curve (reverseImpl c)
@@ -811,9 +843,11 @@ tangentDirection curve =
 signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
 signedDistanceAlong axis curve = (curve - Axis2d.originPoint axis) <> Axis2d.direction axis
 
+-- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
 xCoordinate = signedDistanceAlong Axis2d.x
 
+-- | Get the Y coordinate of a 2D curve as a scalar curve.
 yCoordinate :: Curve2d (space @ units) -> Curve units
 yCoordinate = signedDistanceAlong Axis2d.y
 

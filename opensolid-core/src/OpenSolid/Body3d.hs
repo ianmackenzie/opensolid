@@ -86,6 +86,7 @@ import OpenSolid.Vertex2d qualified as Vertex2d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
 
+-- | A solid body in 3D, defined by a set of boundary surfaces.
 newtype Body3d (coordinateSystem :: CoordinateSystem)
   = Body3d (NonEmpty (BoundarySurface coordinateSystem))
 
@@ -205,6 +206,7 @@ data Corner (coordinateSystem :: CoordinateSystem) where
 instance Bounded3d (Corner (space @ units)) (space @ units) where
   bounds Corner{point} = Bounds3d.constant point
 
+-- | Create an extruded body from a sketch plane and profile.
 extruded ::
   Tolerance units =>
   Plane3d (space @ units) (Defines local) ->
@@ -237,6 +239,14 @@ translational sketchPlane profile displacement = do
     Positive -> boundedBy (endCap : startCap : sideSurfaces)
     Negative -> boundedBy (startCap : endCap : sideSurfaces)
 
+{-| Create a revolved body from a sketch plane and profile.
+
+Note that the revolution profile and revolution axis
+are both defined within the given sketch plane.
+
+A positive angle will result in a counterclockwise revolution around the axis,
+and a negative angle will result in a clockwise revolution.
+-}
 revolved ::
   Tolerance units =>
   Plane3d (space @ units) (Defines local) ->
@@ -275,6 +285,11 @@ revolved sketchPlane profile axis givenAngle = do
       Positive -> boundedBy (endCap : startCap : sideSurfaces)
       Negative -> boundedBy (startCap : endCap : sideSurfaces)
 
+{-| Create a body bounded by the given surfaces.
+The surfaces do not have to have consistent orientation,
+but currently the *first* surface must have the correct orientation
+since all others will be flipped if necessary to match it.
+-}
 boundedBy ::
   Tolerance units =>
   List (Surface3d (space @ units)) ->

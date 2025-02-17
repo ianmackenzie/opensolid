@@ -73,6 +73,7 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 type role Region2d nominal
 
+-- | A closed 2D region (possibly with holes), defined by a set of boundary curves.
 data Region2d (coordinateSystem :: CoordinateSystem)
   = Region2d (Loop coordinateSystem) (List (Loop coordinateSystem))
 
@@ -96,6 +97,14 @@ instance
       (NonEmpty.map Units.coerce outer)
       (List.map (NonEmpty.map Units.coerce) inners)
 
+{-| Create a region bounded by the given curves.
+
+The curves may be given in any order,
+do not need to have consistent directions
+and can form multiple separate loops if the region has holes.
+However, the curves must not overlap or intersect (other than at endpoints)
+and there must not be any gaps between them.
+-}
 boundedBy ::
   Tolerance units =>
   List (Curve2d (space @ units)) ->
@@ -105,6 +114,7 @@ boundedBy curves = Result.do
   loops <- connect curves
   classifyLoops loops
 
+-- | The unit square in UV space.
 unit :: Region2d UvCoordinates
 unit = do
   let p00 = Point2d 0.0 0.0
@@ -220,12 +230,23 @@ startLoop :: Curve2d (space @ units) -> PartialLoop (space @ units)
 startLoop curve =
   PartialLoop (Curve2d.startPoint curve) (NonEmpty.one curve) (Curve2d.endPoint curve)
 
+{-| Get the list of curves forming the outer boundary of the region.
+
+The curves will be in counterclockwise order around the region,
+and will each be in the counterclockwise direction.
+-}
 outerLoop :: Region2d (space @ units) -> NonEmpty (Curve2d (space @ units))
 outerLoop (Region2d loop _) = loop
 
+{-| Get the lists of curves (if any) forming the holes within the region.
+
+The curves will be in clockwise order around each hole,
+and each curve will be in the clockwise direction.
+-}
 innerLoops :: Region2d (space @ units) -> List (NonEmpty (Curve2d (space @ units)))
 innerLoops (Region2d _ loops) = loops
 
+-- | Get all boundary curves (outer boundary plus any holes) of the given region.
 boundaryCurves :: Region2d (space @ units) -> NonEmpty (Curve2d (space @ units))
 boundaryCurves region = NonEmpty.concat (outerLoop region :| innerLoops region)
 

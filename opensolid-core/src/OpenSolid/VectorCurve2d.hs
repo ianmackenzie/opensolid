@@ -616,12 +616,15 @@ rotateBy angle = transformBy (Transform2d.rotateAround (Point2d.origin @space @u
 new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
 new = VectorCurve2d
 
+-- | The constant zero vector.
 zero :: VectorCurve2d (space @ units)
 zero = constant Vector2d.zero
 
+-- | Create a curve with a constant value.
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 constant = Parametric . Expression.constant
 
+-- | Create a curve from its X and Y component curves.
 xy :: Curve units -> Curve units -> VectorCurve2d (space @ units)
 xy (Curve.Parametric x) (Curve.Parametric y) = Parametric (Expression.xy x y)
 xy x y = XY x y
@@ -668,6 +671,10 @@ startValue curve = evaluate curve 0.0
 endValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
 endValue curve = evaluate curve 1.0
 
+{-| Evaluate a curve at a given parameter value.
+
+The parameter value should be between 0 and 1.
+-}
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
 evaluate curve tValue = case curve of
   VectorCurve2d c -> evaluateImpl c tValue
