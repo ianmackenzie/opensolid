@@ -2,9 +2,12 @@
 
 module Main (main) where
 
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Camera3d qualified as Camera3d
+import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Drawing2d qualified as Drawing2d
@@ -15,9 +18,12 @@ import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Scene3d qualified as Scene3d
+import OpenSolid.Scene3d.Material qualified as Material
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 
@@ -43,11 +49,21 @@ main = Tolerance.using Length.nanometer IO.do
         ]
   let topCurves = topRightCurves + List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
   let allCurves = topCurves + List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
-  Drawing2d.writeTo
-    "executables/i-beam/profile.svg"
-    (Bounds2d (Range (-0.6 * width) (0.6 * width)) (Range (-0.6 * height) (0.6 * height)))
-    (List.map (Drawing2d.curve [] (Length.millimeters 1.0)) allCurves)
   profile <- Region2d.boundedBy allCurves
   body <- Body3d.extruded Plane3d.yz profile (Range (-0.5 * length) (0.5 * length))
-  let constraints = NonEmpty.one (Mesh.maxError (Length.millimeters 1.0))
-  IO.writeFile "executables/i-beam/mesh.stl" (Body3d.toStl constraints Length.inMillimeters body)
+  let meshConstraints = NonEmpty.one (Mesh.maxError (Length.millimeters 1.0))
+  let mesh = Body3d.toMesh meshConstraints body
+  let color = Color.rgb 0.913 0.921 0.925
+  let material = Material.metal color 0.3
+  let entity = Scene3d.mesh mesh material
+  let camera =
+        Camera3d.orbit
+          Plane3d.xy
+          Point3d.origin
+          (Angle.degrees -45.0)
+          Camera3d.isometricElevation
+          (Length.meters 1.0)
+          Camera3d.Perspective
+          (Camera3d.angle (Angle.degrees 30.0))
+  IO.writeBinaryFile "executables/i-beam/mesh.glb" $
+    Scene3d.toGlb Plane3d.xy camera (Length.centimeters 10.0) [entity]
