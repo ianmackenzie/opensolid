@@ -106,8 +106,7 @@ classes =
 
 length :: Class
 length =
-  class_ @Length
-    $(docs ''Length)
+  class_ @Length $(docs ''Length) $
     [ constant "Zero" Length.zero $(docs 'Length.zero)
     , constant "Meter" Length.meter $(docs 'Length.meter)
     , constant "Centimeter" Length.centimeter $(docs 'Length.centimeter)
@@ -163,8 +162,7 @@ length =
 
 area :: Class
 area =
-  class_ @Area
-    $(docs ''Area)
+  class_ @Area $(docs ''Area) $
     [ constant "Zero" Area.zero $(docs 'Area.zero)
     , constant "Square Meter" Area.squareMeter $(docs 'Area.squareMeter)
     , constant "Square Inch" Area.squareInch $(docs 'Area.squareInch)
@@ -204,8 +202,7 @@ area =
 
 angle :: Class
 angle =
-  class_ @Angle
-    $(docs ''Angle)
+  class_ @Angle $(docs ''Angle) $
     [ constant "Zero" Angle.zero $(docs 'Angle.zero)
     , constant "Golden Angle" Angle.goldenAngle $(docs 'Angle.goldenAngle)
     , constant "Radian" Angle.radian $(docs 'Angle.radian)
@@ -384,8 +381,7 @@ angleRange =
 
 color :: Class
 color =
-  class_ @Color
-    $(docs ''Color)
+  class_ @Color $(docs ''Color) $
     [ factory3 "RGB" "Red" "Green" "Blue" Color.rgb $(docs 'Color.rgb)
     , factory3 "RGB 255" "Red" "Green" "Blue" Color.rgb255 $(docs 'Color.rgb255)
     , factory3 "HSL" "Hue" "Saturation" "Lightness" Color.hsl $(docs 'Color.hsl)
@@ -530,8 +526,7 @@ areaVector2d =
 
 direction2d :: Class
 direction2d =
-  class_ @(Direction2d Space)
-    $(docs ''Direction2d)
+  class_ @(Direction2d Space) $(docs ''Direction2d) $
     [ constant "X" Direction2d.x $(docs 'Direction2d.x)
     , constant "Y" Direction2d.y $(docs 'Direction2d.y)
     , constant "Positive X" Direction2d.positiveX $(docs 'Direction2d.positiveX)
