@@ -948,7 +948,7 @@ uvCurve =
 region2d :: Class
 region2d =
   class_ @(Region2d (Space @ Meters)) $(docs ''Region2d) $
-    [ staticM1 "Bounded By" "Curves" (Region2d.boundedBy @Space @Meters) $(docs 'Region2d.boundedBy)
+    [ factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
     , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
     , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
@@ -959,7 +959,7 @@ uvRegion :: Class
 uvRegion =
   class_ @(Region2d (Space @ Unitless)) $(docs ''Region2d) $
     [ constant "Unit" Region2d.unit $(docs 'Region2d.unit)
-    , staticU1 "Bounded By" "Curves" (Region2d.boundedBy @Space @Unitless) $(docs 'Region2d.boundedBy)
+    , factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
     , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
     , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
@@ -969,8 +969,8 @@ uvRegion =
 body3d :: Class
 body3d =
   class_ @(Body3d (Space @ Meters)) $(docs ''Body3d) $
-    [ staticM3 "Extruded" "Sketch Plane" "Profile" "Distance" (Body3d.extruded @Space @Meters @Space) $(docs 'Body3d.extruded)
-    , staticM4 "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3d.revolved @Space @Meters @Space) $(docs 'Body3d.revolved)
+    [ factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
+    , factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
     ]
 
 data Mesh_
@@ -1043,6 +1043,12 @@ constant = Const
 factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Text -> Member value
 factory1 = Static1
 
+factoryU1R :: (FFI a, FFI value) => Text -> Text -> (Tolerance Unitless => a -> Result x value) -> Text -> Member value
+factoryU1R = StaticU1
+
+factoryM1R :: (FFI a, FFI value) => Text -> Text -> (Tolerance Meters => a -> Result x value) -> Text -> Member value
+factoryM1R = StaticM1
+
 factory2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (a -> b -> value) -> Text -> Member value
 factory2 = Static2
 
@@ -1055,6 +1061,9 @@ factoryU3 = StaticU3
 factoryM3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> value) -> Text -> Member value
 factoryM3 = StaticM3
 
+factoryM3R :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> Result x value) -> Text -> Member value
+factoryM3R = StaticM3
+
 factory4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Text -> Member value
 factory4 = Static4
 
@@ -1064,14 +1073,11 @@ factoryU4 = StaticU4
 factoryM4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> value) -> Text -> Member value
 factoryM4 = StaticM4
 
+factoryM4R :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> Result x value) -> Text -> Member value
+factoryM4R = StaticM4
+
 static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
 static1 = Static1
-
-staticU1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Unitless => a -> result) -> Text -> Member value
-staticU1 = StaticU1
-
-staticM1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Meters => a -> result) -> Text -> Member value
-staticM1 = StaticM1
 
 static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
 static2 = Static2
@@ -1081,9 +1087,6 @@ static3 = Static3
 
 staticM3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> result) -> Text -> Member value
 staticM3 = StaticM3
-
-staticM4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> result) -> Text -> Member value
-staticM4 = StaticM4
 
 member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
 member0 = Member0
