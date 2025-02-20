@@ -347,7 +347,10 @@ revolved sketchPlane profile axis givenAngle = do
         let localFunction = SurfaceFunction3d.xyz xLocal yLocal zLocal
         let globalFunction = SurfaceFunction3d.placeIn frame3d localFunction
         Surface3d.parametric globalFunction Region2d.unit
-  let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2d.boundaryCurves localProfile))
+  let localProfileCurves = NonEmpty.toList (Region2d.boundaryCurves localProfile)
+  let isOnAxis curve = Curve2d.xCoordinate curve ~= Qty.zero
+  let revolvedCurves = List.filter (not . isOnAxis) localProfileCurves
+  let sideSurfaces = List.map sideSurface revolvedCurves
   if isFullRevolution
     then boundedBy sideSurfaces
     else case Qty.sign givenAngle * testPointSign of
