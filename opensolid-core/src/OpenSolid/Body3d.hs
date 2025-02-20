@@ -4,6 +4,9 @@
 
 module OpenSolid.Body3d
   ( Body3d
+  , block
+  , cylinder
+  , cylinderAlong
   , extruded
   , translational
   , revolved
@@ -17,10 +20,12 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis3d (Axis3d (Axis3d))
+import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d.BoundedBy qualified as BoundedBy
 import OpenSolid.Bounds2d (Bounded2d, Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounded3d, Bounds3d)
+import OpenSolid.Bounds3d (Bounded3d, Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
 import OpenSolid.Curve2d (Curve2d)
@@ -28,6 +33,7 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Domain1d qualified as Domain1d
+import OpenSolid.Error qualified as Error
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
@@ -205,6 +211,66 @@ data Corner (coordinateSystem :: CoordinateSystem) where
 
 instance Bounded3d (Corner (space @ units)) (space @ units) where
   bounds Corner{point} = Bounds3d.constant point
+
+data EmptyBody = EmptyBody deriving (Eq, Show, Error.Message)
+
+{-| Create a rectangular block body.
+
+Fails if the given bounds are empty
+(the width, height or depth is zero).
+-}
+block :: Tolerance units => Bounds3d (space @ units) -> Result EmptyBody (Body3d (space @ units))
+block (Bounds3d xRange yRange zRange) =
+  case Region2d.rectangle (Bounds2d xRange yRange) of
+    Failure Region2d.EmptyRegion -> Failure EmptyBody
+    Success profile ->
+      if Range.width zRange ~= Qty.zero
+        then Failure EmptyBody
+        else case extruded Plane3d.xy profile zRange of
+          Success body -> Success body
+          Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
+
+{-| Create a cylindrical body from a start point, end point and radius.
+
+Fails if the cylinder length or radius is zero.
+-}
+cylinder ::
+  Tolerance units =>
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Qty units ->
+  Result EmptyBody (Body3d (space @ units))
+cylinder startPoint endPoint radius =
+  case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
+    Failure Vector3d.IsZero -> Failure EmptyBody
+    Success (length, direction) ->
+      cylinderAlong (Axis3d startPoint direction) (Range Qty.zero length) radius
+
+{-| Create a cylindrical body along a given axis.
+
+In addition to the axis itself, you will need to provide:
+
+- Where along the axis the cylinder starts and ends
+  (given as a range of distances along the axis).
+- The cylinder radius.
+
+Failes if the cylinder length or radius is zero.
+-}
+cylinderAlong ::
+  Tolerance units =>
+  Axis3d (space @ units) ->
+  Range units ->
+  Qty units ->
+  Result EmptyBody (Body3d (space @ units))
+cylinderAlong axis distance radius = do
+  case Region2d.circle Point2d.origin radius of
+    Failure Region2d.EmptyRegion -> Failure EmptyBody
+    Success profile ->
+      if Range.width distance ~= Qty.zero
+        then Failure EmptyBody
+        else case extruded (Axis3d.normalPlane axis) profile distance of
+          Success body -> Success body
+          Failure _ -> internalError "Constructing non-empty cylinder body should not fail"
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
