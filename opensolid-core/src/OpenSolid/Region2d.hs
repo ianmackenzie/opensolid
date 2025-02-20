@@ -1,7 +1,10 @@
 module OpenSolid.Region2d
   ( Region2d
+  , EmptyRegion (EmptyRegion)
   , boundedBy
   , unit
+  , rectangle
+  , circle
   , outerLoop
   , innerLoops
   , boundaryCurves
@@ -34,7 +37,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2d (Axis2d)
-import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
 import OpenSolid.Curve qualified as Curve
@@ -44,6 +47,7 @@ import OpenSolid.Curve2d qualified as Curve2d
 -- import OpenSolid.Curve2d.IntersectionPoint qualified as Curve2d.IntersectionPoint
 -- import OpenSolid.Curve2d.Intersections qualified as Curve2d.Intersections
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.FFI (FFI)
@@ -58,7 +62,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
+import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Result qualified as Result
@@ -117,18 +121,54 @@ boundedBy curves = Result.do
 
 -- | The unit square in UV space.
 unit :: Region2d UvCoordinates
-unit = do
-  let p00 = Point2d 0.0 0.0
-  let p01 = Point2d 0.0 1.0
-  let p10 = Point2d 1.0 0.0
-  let p11 = Point2d 1.0 1.0
-  let boundaries =
-        NonEmpty.four
-          (Curve2d.line p00 p10)
-          (Curve2d.line p10 p11)
-          (Curve2d.line p11 p01)
-          (Curve2d.line p01 p00)
-  Region2d boundaries []
+unit = case Tolerance.exactly (rectangle (Bounds2d Range.unit Range.unit)) of
+  Success region -> region
+  Failure EmptyRegion -> internalError "Constructing unit square region should not fail"
+
+data EmptyRegion = EmptyRegion deriving (Eq, Show, Error.Message)
+
+{-| Create a rectangular region.
+
+Fails if the given bounds are empty
+(zero area, i.e. zero width in either direction).
+-}
+rectangle ::
+  Tolerance units =>
+  Bounds2d (space @ units) ->
+  Result EmptyRegion (Region2d (space @ units))
+rectangle (Bounds2d xRange yRange) =
+  if Range.width xRange ~= Qty.zero || Range.width yRange ~= Qty.zero
+    then Failure EmptyRegion
+    else do
+      let Range x1 x2 = xRange
+      let Range y1 y2 = yRange
+      let p11 = Point2d x1 y1
+      let p12 = Point2d x1 y2
+      let p21 = Point2d x2 y1
+      let p22 = Point2d x2 y2
+      let edges =
+            NonEmpty.four
+              (Curve2d.line p11 p21)
+              (Curve2d.line p21 p22)
+              (Curve2d.line p22 p12)
+              (Curve2d.line p12 p11)
+      Success (Region2d edges [])
+
+{-| Create a circular region.
+
+Fails if the given radius is zero.
+-}
+circle ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Qty units ->
+  Result EmptyRegion (Region2d (space @ units))
+circle centerPoint radius =
+  if radius ~= Qty.zero
+    then Failure EmptyRegion
+    else do
+      let boundaryCurve = Curve2d.circle centerPoint (Qty.abs radius)
+      Success (Region2d (NonEmpty.one boundaryCurve) [])
 
 -- checkForInnerIntersection ::
 --   Tolerance units =>
