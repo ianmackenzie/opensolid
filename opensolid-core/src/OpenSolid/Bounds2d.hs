@@ -28,6 +28,8 @@ module OpenSolid.Bounds2d
   , upperRightCorner
   , corners
   , diameter
+  , area'
+  , area
   , interpolate
   , any
   , all
@@ -68,6 +70,7 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform2d (Transform2d (Transform2d))
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 
 class Bounded2d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
@@ -253,6 +256,12 @@ corners box =
 
 diameter :: Bounds2d (space @ units) -> Qty units
 diameter (Bounds2d x y) = Qty.hypot2 (Range.width x) (Range.width y)
+
+area' :: Bounds2d (space @ units) -> Qty (units :*: units)
+area' (Bounds2d x y) = Range.width x .*. Range.width y
+
+area :: Units.Squared units1 units2 => Bounds2d (space @ units1) -> Qty units2
+area (Bounds2d x y) = Range.width x * Range.width y
 
 interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
 interpolate (Bounds2d x y) u v =
