@@ -1,6 +1,7 @@
 module Main (main) where
 
 import API qualified
+import API.Function qualified as Function
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
@@ -15,7 +16,7 @@ main = do
         , "opensolid_free"
         , "opensolid_release"
         ]
-  let functionNames = builtins + List.map API.ffiName API.functions
+  let functionNames = builtins + List.map Function.ffiName API.functions
   let lines = "EXPORTS" : List.map (Text.indent " ") functionNames
   let contents = Text.join "\r\n" lines
   IO.writeFile "opensolid-ffi/opensolid-ffi.def" contents

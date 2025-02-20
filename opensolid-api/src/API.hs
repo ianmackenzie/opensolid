@@ -1,24 +1,63 @@
-module API (Class (..), Function (..), classes, functions) where
+module API (classes, functions) where
 
-import API.AbsFunction qualified as AbsFunction
-import API.BinaryOperator qualified as BinaryOperator
-import API.ComparisonFunction qualified as ComparisonFunction
-import API.Constant (Constant (Constant))
-import API.Constant qualified as Constant
-import API.Constraint (Constraint)
+import API.Class
+  ( Class
+  , Self (Self)
+  , absSelf
+  , comparison
+  , constant
+  , cross
+  , crossSelf
+  , divBy
+  , divByFloat
+  , divBySelf
+  , dot
+  , dotSelf
+  , equality
+  , factory1
+  , factory2
+  , factory3
+  , factory4
+  , factoryM1R
+  , factoryM3
+  , factoryM3R
+  , factoryM4
+  , factoryM4R
+  , factoryU1R
+  , factoryU3
+  , factoryU4
+  , floatDivBy
+  , floatMinus
+  , floatPlus
+  , floatTimes
+  , floorDivBySelf
+  , member0
+  , member1
+  , member2
+  , memberM0
+  , memberR0
+  , memberSM0
+  , memberU0
+  , minus
+  , minusFloat
+  , minusSelf
+  , modBySelf
+  , negateSelf
+  , nested
+  , plus
+  , plusFloat
+  , plusSelf
+  , static1
+  , static2
+  , static3
+  , staticM3
+  , times
+  , timesFloat
+  , timesSelf
+  )
+import API.Class qualified as Class
 import API.Docs (docs)
-import API.EqualityFunction qualified as EqualityFunction
-import API.MemberFunction (MemberFunction (..))
-import API.MemberFunction qualified as MemberFunction
-import API.NegationFunction qualified as NegationFunction
-import API.PostOperator (PostOperator (PostOperator))
-import API.PostOperator qualified as PostOperator
-import API.PreOperator (PreOperator (PreOperator))
-import API.PreOperator qualified as PreOperator
-import API.StaticFunction (StaticFunction (..))
-import API.StaticFunction qualified as StaticFunction
-import Data.Proxy (Proxy (Proxy))
-import Foreign (Ptr)
+import API.Function (Function)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
@@ -39,13 +78,12 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Drawing2d qualified as Drawing2d
-import OpenSolid.FFI (FFI, Name)
+import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d)
@@ -68,32 +106,6 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Prelude (flip)
 
 data Space
-
-data Class where
-  Class ::
-    FFI value =>
-    { id :: FFI.Id value
-    , documentation :: Text
-    , constants :: List (Name, Constant)
-    , staticFunctions :: List (Name, StaticFunction)
-    , memberFunctions :: List (Name, MemberFunction value)
-    , equalityFunction :: Maybe (value -> value -> Bool)
-    , comparisonFunction :: Maybe (value -> value -> Int)
-    , negationFunction :: Maybe (value -> value)
-    , absFunction :: Maybe (value -> value)
-    , preOperators :: List (BinaryOperator.Id, List (PreOperator value))
-    , postOperators :: List (BinaryOperator.Id, List (PostOperator value))
-    , nestedClasses :: List Class
-    } ->
-    Class
-
-data Function = Function
-  { ffiName :: Text
-  , constraint :: Maybe Constraint
-  , argumentTypes :: List FFI.Type
-  , returnType :: FFI.Type
-  , invoke :: Ptr () -> Ptr () -> IO ()
-  }
 
 ----- API DEFINITION -----
 
@@ -136,7 +148,7 @@ classes =
 
 length :: Class
 length =
-  class_ @Length $(docs ''Length) $
+  Class.new @Length $(docs ''Length) $
     [ constant "Zero" Length.zero $(docs 'Length.zero)
     , constant "Meter" Length.meter $(docs 'Length.meter)
     , constant "Centimeter" Length.centimeter $(docs 'Length.centimeter)
@@ -192,7 +204,7 @@ length =
 
 area :: Class
 area =
-  class_ @Area $(docs ''Area) $
+  Class.new @Area $(docs ''Area) $
     [ constant "Zero" Area.zero $(docs 'Area.zero)
     , constant "Square Meter" Area.squareMeter $(docs 'Area.squareMeter)
     , constant "Square Inch" Area.squareInch $(docs 'Area.squareInch)
@@ -232,7 +244,7 @@ area =
 
 angle :: Class
 angle =
-  class_ @Angle $(docs ''Angle) $
+  Class.new @Angle $(docs ''Angle) $
     [ constant "Zero" Angle.zero $(docs 'Angle.zero)
     , constant "Golden Angle" Angle.goldenAngle $(docs 'Angle.goldenAngle)
     , constant "Radian" Angle.radian $(docs 'Angle.radian)
@@ -281,7 +293,7 @@ angle =
 
 range :: Class
 range =
-  class_ @(Range Unitless)
+  Class.new @(Range Unitless)
     "A range of unitless values, with a lower bound and upper bound."
     [ constant "Unit" Range.unit $(docs 'Range.unit)
     , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
@@ -318,7 +330,7 @@ range =
 
 lengthRange :: Class
 lengthRange =
-  class_ @(Range Meters)
+  Class.new @(Range Meters)
     "A range of length values, with a lower bound and upper bound."
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
@@ -351,7 +363,7 @@ lengthRange =
 
 areaRange :: Class
 areaRange =
-  class_ @(Range SquareMeters)
+  Class.new @(Range SquareMeters)
     "A range of area values, with a lower bound and upper bound."
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "Square Meters" "A" "B" Range.squareMeters $(docs 'Range.squareMeters)
@@ -381,7 +393,7 @@ areaRange =
 
 angleRange :: Class
 angleRange =
-  class_ @(Range Radians)
+  Class.new @(Range Radians)
     "A range of angle values, with a lower bound and upper bound."
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
@@ -411,7 +423,7 @@ angleRange =
 
 color :: Class
 color =
-  class_ @Color $(docs ''Color) $
+  Class.new @Color $(docs ''Color) $
     [ factory3 "RGB" "Red" "Green" "Blue" Color.rgb $(docs 'Color.rgb)
     , factory3 "RGB 255" "Red" "Green" "Blue" Color.rgb255 $(docs 'Color.rgb255)
     , factory3 "HSL" "Hue" "Saturation" "Lightness" Color.hsl $(docs 'Color.hsl)
@@ -454,7 +466,7 @@ color =
 
 vector2d :: Class
 vector2d =
-  class_ @(Vector2d (Space @ Unitless))
+  Class.new @(Vector2d (Space @ Unitless))
     "A unitless vector in 2D."
     [ constant "Zero" (Vector2d.zero @Space @Unitless) $(docs 'Vector2d.zero)
     , factory1 "Unit" "Direction" Vector2d.unit $(docs 'Vector2d.unit)
@@ -489,7 +501,7 @@ vector2d =
 
 displacement2d :: Class
 displacement2d =
-  class_ @(Vector2d (Space @ Meters))
+  Class.new @(Vector2d (Space @ Meters))
     "A displacement vector in 2D."
     [ constant "Zero" (Vector2d.zero @Space @Meters) $(docs 'Vector2d.zero)
     , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
@@ -525,7 +537,7 @@ displacement2d =
 
 areaVector2d :: Class
 areaVector2d =
-  class_ @(Vector2d (Space @ SquareMeters))
+  Class.new @(Vector2d (Space @ SquareMeters))
     "A vector in 2D with units of area."
     [ constant "Zero" (Vector2d.zero @Space @SquareMeters) $(docs 'Vector2d.zero)
     , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
@@ -556,7 +568,7 @@ areaVector2d =
 
 direction2d :: Class
 direction2d =
-  class_ @(Direction2d Space) $(docs ''Direction2d) $
+  Class.new @(Direction2d Space) $(docs ''Direction2d) $
     [ constant "X" Direction2d.x $(docs 'Direction2d.x)
     , constant "Y" Direction2d.y $(docs 'Direction2d.y)
     , constant "Positive X" Direction2d.positiveX $(docs 'Direction2d.positiveX)
@@ -588,7 +600,7 @@ direction2d =
 
 point2d :: Class
 point2d =
-  class_ @(Point2d (Space @ Meters))
+  Class.new @(Point2d (Space @ Meters))
     "A point in 2D, defined by its X and Y coordinates."
     [ constant "Origin" (Point2d.origin @Space @Meters) $(docs 'Point2d.origin)
     , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d.xy $(docs 'Point2d.xy)
@@ -612,7 +624,7 @@ point2d =
 
 uvPoint :: Class
 uvPoint =
-  class_ @(Point2d (Space @ Unitless))
+  Class.new @(Point2d (Space @ Unitless))
     "A point in UV parameter space."
     [ constant "Origin" (Point2d.origin @Space @Unitless) $(docs 'Point2d.origin)
     , factory2 "UV" "U Coordinate" "V Coordinate" Point2d.xy $(docs 'Point2d.xy)
@@ -631,7 +643,7 @@ uvPoint =
 
 bounds2d :: Class
 bounds2d =
-  class_ @(Bounds2d (Space @ Meters))
+  Class.new @(Bounds2d (Space @ Meters))
     "A bounding box in 2D."
     [ factory2 "XY" "X Coordinate" "Y Coordinate" Bounds2d.xy $(docs 'Bounds2d.xy)
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
@@ -647,7 +659,7 @@ bounds2d =
 
 uvBounds :: Class
 uvBounds =
-  class_ @(Bounds2d (Space @ Unitless))
+  Class.new @(Bounds2d (Space @ Unitless))
     "A bounding box in UV parameter space."
     [ factory2 "UV" "U Coordinate" "V Coordinate" Bounds2d.xy $(docs 'Bounds2d.xy)
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
@@ -663,7 +675,7 @@ uvBounds =
 
 curve :: Class
 curve =
-  class_ @(Curve Unitless)
+  Class.new @(Curve Unitless)
     "A parametric curve definining a unitless value in terms of a parameter value."
     [ constant "Zero" (Curve.zero @Unitless) $(docs 'Curve.zero)
     , constant "T" Curve.t $(docs 'Curve.t)
@@ -702,7 +714,7 @@ curve =
 
 angleCurve :: Class
 angleCurve =
-  class_ @(Curve Radians)
+  Class.new @(Curve Radians)
     "A parametric curve definining an angle in terms of a parameter value."
     [ constant "Zero" (Curve.zero @Radians) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
@@ -727,7 +739,7 @@ angleCurve =
 
 lengthCurve :: Class
 lengthCurve =
-  class_ @(Curve Meters)
+  Class.new @(Curve Meters)
     "A parametric curve definining a length in terms of a parameter value."
     [ constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
@@ -752,7 +764,7 @@ lengthCurve =
 
 areaCurve :: Class
 areaCurve =
-  class_ @(Curve SquareMeters)
+  Class.new @(Curve SquareMeters)
     "A parametric curve definining an area in terms of a parameter value."
     [ constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
@@ -780,7 +792,7 @@ instance FFI Drawing2d_ where
 
 drawing2d :: Class
 drawing2d =
-  class_ @Drawing2d_
+  Class.new @Drawing2d_
     "A set of functions for constructing 2D drawings."
     [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
     , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
@@ -796,7 +808,7 @@ drawing2d =
 
 axis2d :: Class
 axis2d =
-  class_ @(Axis2d (Space @ Meters)) $(docs ''Axis2d) $
+  Class.new @(Axis2d (Space @ Meters)) $(docs ''Axis2d) $
     [ constant "X" (Axis2d.x @Space @Meters) $(docs 'Axis2d.x)
     , constant "Y" (Axis2d.y @Space @Meters) $(docs 'Axis2d.y)
     ]
@@ -804,14 +816,14 @@ axis2d =
 
 uvAxis :: Class
 uvAxis =
-  class_ @(Axis2d (Space @ Unitless)) $(docs ''Axis2d) $
+  Class.new @(Axis2d (Space @ Unitless)) $(docs ''Axis2d) $
     [ constant "U" (Axis2d.x @Space @Meters) "The U axis."
     , constant "V" (Axis2d.y @Space @Meters) "The V axis."
     ]
 
 plane3d :: Class
 plane3d =
-  class_ @(Plane3d (Space @ Meters) (Defines Space)) $(docs ''Plane3d) $
+  Class.new @(Plane3d (Space @ Meters) (Defines Space)) $(docs ''Plane3d) $
     [ constant "XY" (Plane3d.xy @Space @Meters) $(docs 'Plane3d.xy)
     , constant "YX" (Plane3d.yx @Space @Meters) $(docs 'Plane3d.yx)
     , constant "ZX" (Plane3d.zx @Space @Meters) $(docs 'Plane3d.zx)
@@ -822,7 +834,7 @@ plane3d =
 
 vectorCurve2d :: Class
 vectorCurve2d =
-  class_ @(VectorCurve2d (Space @ Unitless))
+  Class.new @(VectorCurve2d (Space @ Unitless))
     "A parametric curve defining a 2D unitless vector in terms of a parameter value."
     [ constant "Zero" (VectorCurve2d.zero @Space @Unitless) $(docs 'VectorCurve2d.zero)
     , factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
@@ -832,7 +844,7 @@ vectorCurve2d =
 
 displacementCurve2d :: Class
 displacementCurve2d =
-  class_ @(VectorCurve2d (Space @ Meters))
+  Class.new @(VectorCurve2d (Space @ Meters))
     "A parametric curve defining a 2D displacement vector in terms of a parameter value."
     [ constant "Zero" (VectorCurve2d.zero @Space @Meters) $(docs 'VectorCurve2d.zero)
     , factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
@@ -855,7 +867,7 @@ type Transformation2d value space units =
 rigidTransformations2d ::
   Transformation2d value space units =>
   (Transform2d.Rigid (space @ units) -> value -> value) ->
-  List (Member value)
+  List (Class.Member value)
 rigidTransformations2d transformBy =
   [ member1 "Translate By" "Displacement" (Transform2d.translateByImpl transformBy) "Translate by the given displacement."
   , member2 "Translate In" "Direction" "Distance" (Transform2d.translateInImpl transformBy) "Translate in the given direction by the given distance."
@@ -866,7 +878,7 @@ rigidTransformations2d transformBy =
 orthonormalTransformations2d ::
   Transformation2d value space units =>
   (forall tag. Transform.IsOrthonormal tag => Transform2d tag (space @ units) -> value -> value) ->
-  List (Member value)
+  List (Class.Member value)
 orthonormalTransformations2d transformBy =
   member1 "Mirror Across" "Axis" (Transform2d.mirrorAcrossImpl transformBy) "Mirror across the given axis."
     : rigidTransformations2d transformBy
@@ -874,7 +886,7 @@ orthonormalTransformations2d transformBy =
 uniformTransformations2d ::
   Transformation2d value space units =>
   (forall tag. Transform.IsUniform tag => Transform2d tag (space @ units) -> value -> value) ->
-  List (Member value)
+  List (Class.Member value)
 uniformTransformations2d transformBy =
   member2 "Scale About" "Point" "Scale" (Transform2d.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
     : orthonormalTransformations2d transformBy
@@ -888,14 +900,14 @@ affineTransformations2d ::
   , FFI (Point2d (space @ units))
   ) =>
   (forall tag. Transform2d tag (space @ units) -> value -> value) ->
-  List (Member value)
+  List (Class.Member value)
 affineTransformations2d transformBy =
   member2 "Scale Along" "Axis" "Scale" (Transform2d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
     : uniformTransformations2d transformBy
 
 curve2d :: Class
 curve2d =
-  class_ @(Curve2d (Space @ Meters)) $(docs ''Curve2d) $
+  Class.new @(Curve2d (Space @ Meters)) $(docs ''Curve2d) $
     [ factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
     , factory2 "XY" "X Coordinate" "Y Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
     , factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
@@ -921,7 +933,7 @@ curve2d =
 
 uvCurve :: Class
 uvCurve =
-  class_ @(Curve2d (Space @ Unitless)) $(docs ''Curve2d) $
+  Class.new @(Curve2d (Space @ Unitless)) $(docs ''Curve2d) $
     [ factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
     , factory2 "UV" "U Coordinate" "V Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
     , factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
@@ -947,7 +959,7 @@ uvCurve =
 
 region2d :: Class
 region2d =
-  class_ @(Region2d (Space @ Meters)) $(docs ''Region2d) $
+  Class.new @(Region2d (Space @ Meters)) $(docs ''Region2d) $
     [ factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
     , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
@@ -957,7 +969,7 @@ region2d =
 
 uvRegion :: Class
 uvRegion =
-  class_ @(Region2d (Space @ Unitless)) $(docs ''Region2d) $
+  Class.new @(Region2d (Space @ Unitless)) $(docs ''Region2d) $
     [ constant "Unit" Region2d.unit $(docs 'Region2d.unit)
     , factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
@@ -968,7 +980,7 @@ uvRegion =
 
 body3d :: Class
 body3d =
-  class_ @(Body3d (Space @ Meters)) $(docs ''Body3d) $
+  Class.new @(Body3d (Space @ Meters)) $(docs ''Body3d) $
     [ factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
     , factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
     ]
@@ -980,7 +992,7 @@ instance FFI Mesh_ where
 
 mesh :: Class
 mesh =
-  class_ @Mesh_
+  Class.new @Mesh_
     "Meshing-related functionality."
     [ nested @(Mesh.Constraint Meters) $(docs ''Mesh.Constraint) []
     , static1 "Max Error" "Error" (Mesh.maxError @Meters) $(docs 'Mesh.maxError)
@@ -994,7 +1006,7 @@ instance FFI Scene3d_ where
 
 scene3d :: Class
 scene3d =
-  class_ @Scene3d_
+  Class.new @Scene3d_
     "A set of functions for constructing 3D scenes."
     [ staticM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
     , static1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
@@ -1007,685 +1019,7 @@ scene3d =
 
 ----- CLASS MEMBERS -----
 
-class_ :: forall value. FFI value => Text -> List (Member value) -> Class
-class_ classDocs members = buildClass classDocs members [] [] [] Nothing Nothing Nothing Nothing [] [] []
-
-data Member value where
-  Const :: FFI result => Text -> result -> Text -> Member value
-  Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
-  StaticU1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Unitless => a -> result) -> Text -> Member value
-  StaticM1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Meters => a -> result) -> Text -> Member value
-  Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
-  Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
-  StaticU3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> result) -> Text -> Member value
-  StaticM3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> result) -> Text -> Member value
-  Static4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> result) -> Text -> Member value
-  StaticU4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> d -> result) -> Text -> Member value
-  StaticM4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> result) -> Text -> Member value
-  Member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
-  MemberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Text -> Member value
-  MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Text -> Member value
-  MemberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
-  MemberSM0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
-  Member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
-  Member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
-  Equality :: Eq value => Member value
-  Comparison :: Ord value => Member value
-  Negate :: Negation value => Member value
-  Abs :: (value -> value) -> Member value
-  PreOp :: (FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
-  PostOp :: (FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
-  Nested :: FFI nested => Text -> List (Member nested) -> Member value
-
-constant :: FFI result => Text -> result -> Text -> Member value
-constant = Const
-
-factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Text -> Member value
-factory1 = Static1
-
-factoryU1R :: (FFI a, FFI value) => Text -> Text -> (Tolerance Unitless => a -> Result x value) -> Text -> Member value
-factoryU1R = StaticU1
-
-factoryM1R :: (FFI a, FFI value) => Text -> Text -> (Tolerance Meters => a -> Result x value) -> Text -> Member value
-factoryM1R = StaticM1
-
-factory2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (a -> b -> value) -> Text -> Member value
-factory2 = Static2
-
-factory3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
-factory3 = Static3
-
-factoryU3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> value) -> Text -> Member value
-factoryU3 = StaticU3
-
-factoryM3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> value) -> Text -> Member value
-factoryM3 = StaticM3
-
-factoryM3R :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> Result x value) -> Text -> Member value
-factoryM3R = StaticM3
-
-factory4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Text -> Member value
-factory4 = Static4
-
-factoryU4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> d -> value) -> Text -> Member value
-factoryU4 = StaticU4
-
-factoryM4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> value) -> Text -> Member value
-factoryM4 = StaticM4
-
-factoryM4R :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> Result x value) -> Text -> Member value
-factoryM4R = StaticM4
-
-static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
-static1 = Static1
-
-static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
-static2 = Static2
-
-static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
-static3 = Static3
-
-staticM3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> result) -> Text -> Member value
-staticM3 = StaticM3
-
-member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
-member0 = Member0
-
-memberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Text -> Member value
-memberU0 = MemberU0
-
-memberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Text -> Member value
-memberR0 = MemberR0
-
-memberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
-memberM0 = MemberM0
-
-memberSM0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
-memberSM0 = MemberSM0
-
-member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
-member1 = Member1
-
-member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
-member2 = Member2
-
-data Self a = Self
-
-equality :: Eq value => Member value
-equality = Equality
-
-comparison :: Ord value => Member value
-comparison = Comparison
-
-comparisonImpl :: Ord a => a -> a -> Int
-comparisonImpl lhs rhs = case compare lhs rhs of
-  LT -> -1
-  EQ -> 0
-  GT -> 1
-
-negateSelf :: Negation value => Member value
-negateSelf = Negate
-
-absSelf :: (value -> value) -> Member value
-absSelf = Abs
-
-floatPlus ::
-  forall value result.
-  (Addition Float value result, FFI value, FFI result) =>
-  Member value
-floatPlus = PreOp BinaryOperator.Add ((+) :: Float -> value -> result)
-
-floatMinus ::
-  forall value result.
-  (Subtraction Float value result, FFI value, FFI result) =>
-  Member value
-floatMinus = PreOp BinaryOperator.Sub ((-) :: Float -> value -> result)
-
-floatTimes ::
-  forall value result.
-  (Multiplication Float value result, FFI value, FFI result) =>
-  Member value
-floatTimes = PreOp BinaryOperator.Mul ((*) :: Float -> value -> result)
-
-floatDivBy ::
-  forall value result.
-  (Division Float value result, FFI value, FFI result) =>
-  Member value
-floatDivBy = PreOp BinaryOperator.Div ((/) :: Float -> value -> result)
-
-plus ::
-  forall rhs value result.
-  (Addition value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
-  Member value
-plus _ = PostOp BinaryOperator.Add ((+) :: value -> rhs -> result)
-
-plusFloat ::
-  forall value result.
-  (Addition value Float result, FFI value, FFI result) =>
-  Member value
-plusFloat = plus @Float Self
-
-plusSelf ::
-  forall value result.
-  (Addition value value result, FFI value, FFI result) =>
-  Member value
-plusSelf = plus @value Self
-
-minus ::
-  forall rhs value result.
-  (Subtraction value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
-  Member value
-minus _ = PostOp BinaryOperator.Sub ((-) :: value -> rhs -> result)
-
-minusFloat ::
-  forall value result.
-  (Subtraction value Float result, FFI value, FFI result) =>
-  Member value
-minusFloat = minus @Float Self
-
-minusSelf ::
-  forall value result.
-  (Subtraction value value result, FFI value, FFI result) =>
-  Member value
-minusSelf = minus @value Self
-
-times ::
-  forall rhs value result.
-  (Multiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
-  Member value
-times _ = PostOp BinaryOperator.Mul ((*) :: value -> rhs -> result)
-
-timesFloat ::
-  forall value result.
-  (Multiplication value Float result, FFI value, FFI result) =>
-  Member value
-timesFloat = times @Float Self
-
-timesSelf ::
-  forall value result.
-  (Multiplication value value result, FFI value, FFI result) =>
-  Member value
-timesSelf = times @value Self
-
-divBy ::
-  forall rhs value result.
-  (Division value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
-  Member value
-divBy _ = PostOp BinaryOperator.Div ((/) :: value -> rhs -> result)
-
-divByFloat ::
-  forall value result.
-  (Division value Float result, FFI value, FFI result) =>
-  Member value
-divByFloat = divBy @Float Self
-
-divBySelf ::
-  forall value result.
-  (Division value value result, FFI value, FFI result) =>
-  Member value
-divBySelf = divBy @value Self
-
-floorDivBySelf :: forall value. (DivMod value, FFI value) => Member value
-floorDivBySelf = PostOp BinaryOperator.FloorDiv ((//) :: value -> value -> Int)
-
-modBySelf :: forall value. (DivMod value, FFI value) => Member value
-modBySelf = PostOp BinaryOperator.Mod ((%) :: value -> value -> value)
-
-dot ::
-  forall rhs value result.
-  (DotMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
-  Member value
-dot _ = PostOp BinaryOperator.Dot ((<>) :: value -> rhs -> result)
-
-dotSelf ::
-  forall value result.
-  (DotMultiplication value value result, FFI value, FFI result) =>
-  Member value
-dotSelf = dot @value Self
-
-cross ::
-  forall rhs value result.
-  (CrossMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
-  Member value
-cross _ = PostOp BinaryOperator.Cross ((><) :: value -> rhs -> result)
-
-crossSelf ::
-  forall value result.
-  (CrossMultiplication value value result, FFI value, FFI result) =>
-  Member value
-crossSelf = cross @value Self
-
-nested :: FFI nested => Text -> List (Member nested) -> Member value
-nested = Nested
-
-addPreOverload ::
-  BinaryOperator.Id ->
-  PreOperator value ->
-  List (BinaryOperator.Id, List (PreOperator value)) ->
-  List (BinaryOperator.Id, List (PreOperator value))
-addPreOverload operatorId overload [] = [(operatorId, [overload])]
-addPreOverload operatorId overload (first : rest) = do
-  let (existingId, existingOverloads) = first
-  if operatorId == existingId
-    then (existingId, existingOverloads + [overload]) : rest
-    else first : addPreOverload operatorId overload rest
-
-addPostOverload ::
-  BinaryOperator.Id ->
-  PostOperator value ->
-  List (BinaryOperator.Id, List (PostOperator value)) ->
-  List (BinaryOperator.Id, List (PostOperator value))
-addPostOverload operatorId overload [] = [(operatorId, [overload])]
-addPostOverload operatorId overload (first : rest) = do
-  let (existingId, existingOverloads) = first
-  if operatorId == existingId
-    then (existingId, existingOverloads + [overload]) : rest
-    else first : addPostOverload operatorId overload rest
-
-buildClass ::
-  forall value.
-  FFI value =>
-  Text ->
-  List (Member value) ->
-  List (Name, Constant) ->
-  List (Name, StaticFunction) ->
-  List (Name, MemberFunction value) ->
-  Maybe (value -> value -> Bool) ->
-  Maybe (value -> value -> Int) ->
-  Maybe (value -> value) ->
-  Maybe (value -> value) ->
-  List (BinaryOperator.Id, List (PreOperator value)) ->
-  List (BinaryOperator.Id, List (PostOperator value)) ->
-  List Class ->
-  Class
-buildClass
-  classDocs
-  members
-  constantsAcc
-  staticFunctionsAcc
-  memberFunctionsAcc
-  equalityFunctionAcc
-  comparisonFunctionAcc
-  negationFunctionAcc
-  absFunctionAcc
-  preOperatorsAcc
-  postOperatorsAcc
-  nestedClassesAcc =
-    case members of
-      [] ->
-        Class
-          { id = case FFI.typeOf @value Proxy of
-              FFI.Class (FFI.Id Proxy names) -> FFI.Id Proxy names
-              _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
-          , documentation = classDocs
-          , constants = constantsAcc
-          , staticFunctions = staticFunctionsAcc
-          , memberFunctions = memberFunctionsAcc
-          , equalityFunction = equalityFunctionAcc
-          , comparisonFunction = comparisonFunctionAcc
-          , negationFunction = negationFunctionAcc
-          , absFunction = absFunctionAcc
-          , preOperators = preOperatorsAcc
-          , postOperators = postOperatorsAcc
-          , nestedClasses = nestedClassesAcc
-          }
-      first : rest -> do
-        let addStatic name staticFunction =
-              buildClass
-                classDocs
-                rest
-                constantsAcc
-                (staticFunctionsAcc + [(FFI.name name, staticFunction)])
-                memberFunctionsAcc
-                equalityFunctionAcc
-                comparisonFunctionAcc
-                negationFunctionAcc
-                absFunctionAcc
-                preOperatorsAcc
-                postOperatorsAcc
-                nestedClassesAcc
-        let addMember name memberFunction =
-              buildClass
-                classDocs
-                rest
-                constantsAcc
-                staticFunctionsAcc
-                (memberFunctionsAcc + [(FFI.name name, memberFunction)])
-                equalityFunctionAcc
-                comparisonFunctionAcc
-                negationFunctionAcc
-                absFunctionAcc
-                preOperatorsAcc
-                postOperatorsAcc
-                nestedClassesAcc
-        case first of
-          Const name value documentation ->
-            buildClass
-              classDocs
-              rest
-              (constantsAcc + [(FFI.name name, Constant value documentation)])
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          Static1 name arg1 f staticDocs ->
-            addStatic name (StaticFunction1 (FFI.name arg1) f staticDocs)
-          StaticU1 name arg1 f staticDocs ->
-            addStatic name (StaticFunctionU1 (FFI.name arg1) f staticDocs)
-          StaticM1 name arg1 f staticDocs ->
-            addStatic name (StaticFunctionM1 (FFI.name arg1) f staticDocs)
-          Static2 name arg1 arg2 f staticDocs ->
-            addStatic name (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
-          Static3 name arg1 arg2 arg3 f staticDocs ->
-            addStatic name (StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
-          StaticU3 name arg1 arg2 arg3 f staticDocs ->
-            addStatic name (StaticFunctionU3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
-          StaticM3 name arg1 arg2 arg3 f staticDocs ->
-            addStatic name (StaticFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
-          Static4 name arg1 arg2 arg3 arg4 f staticDocs ->
-            addStatic name (StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
-          StaticU4 name arg1 arg2 arg3 arg4 f staticDocs ->
-            addStatic name (StaticFunctionU4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
-          StaticM4 name arg1 arg2 arg3 arg4 f staticDocs ->
-            addStatic name (StaticFunctionM4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
-          Member0 name f memberDocs ->
-            addMember name (MemberFunction0 f memberDocs)
-          MemberU0 name f memberDocs ->
-            addMember name (MemberFunctionU0 f memberDocs)
-          MemberR0 name f memberDocs ->
-            addMember name (MemberFunctionR0 f memberDocs)
-          MemberM0 name f memberDocs ->
-            addMember name (MemberFunctionM0 f memberDocs)
-          MemberSM0 name f memberDocs ->
-            addMember name (MemberFunctionSM0 f memberDocs)
-          Member1 name arg1 f memberDocs ->
-            addMember name (MemberFunction1 (FFI.name arg1) f memberDocs)
-          Member2 name arg1 arg2 f memberDocs ->
-            addMember name (MemberFunction2 (FFI.name arg1) (FFI.name arg2) f memberDocs)
-          Equality ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              (Just (==))
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          Comparison ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              (Just comparisonImpl)
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          Negate ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              (Just negate)
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          Abs function ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              (Just function)
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          PreOp operatorId operator ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
-              postOperatorsAcc
-              nestedClassesAcc
-          PostOp operatorId operator ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
-              nestedClassesAcc
-          Nested nestedDocstring nestedMembers ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              (nestedClassesAcc + [class_ nestedDocstring nestedMembers])
-
 ----- FUNCTION COLLECTION -----
 
 functions :: List Function
-functions = List.collect classFunctions classes
-
-constantFunctionInfo :: FFI.Id a -> (Name, Constant) -> Function
-constantFunctionInfo classId_ (constantName, const@(Constant value _)) =
-  Function
-    { ffiName = Constant.ffiName classId_ constantName
-    , constraint = Nothing
-    , argumentTypes = []
-    , returnType = Constant.valueType value
-    , invoke = Constant.invoke const
-    }
-
-staticFunctionInfo :: FFI.Id a -> (Name, StaticFunction) -> Function
-staticFunctionInfo classId_ (functionName, staticFunction) = do
-  let (constraint, arguments, returnType) = StaticFunction.signature staticFunction
-  Function
-    { ffiName = StaticFunction.ffiName classId_ functionName staticFunction
-    , constraint
-    , argumentTypes = List.map Pair.second arguments
-    , returnType
-    , invoke = StaticFunction.invoke staticFunction
-    }
-
-memberFunctionInfo :: FFI.Id value -> (Name, MemberFunction value) -> Function
-memberFunctionInfo classId_ (functionName, memberFunction) = do
-  let (constraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
-  Function
-    { ffiName = MemberFunction.ffiName classId_ functionName memberFunction
-    , constraint
-    , argumentTypes = List.map Pair.second arguments + [selfType]
-    , returnType
-    , invoke = MemberFunction.invoke memberFunction
-    }
-
-negationFunctionInfo ::
-  forall value.
-  FFI value =>
-  FFI.Id value ->
-  Maybe (value -> value) ->
-  List Function
-negationFunctionInfo classId_ maybeNegationFunction = case maybeNegationFunction of
-  Nothing -> []
-  Just negationFunction -> do
-    let selfType = FFI.typeOf @value Proxy
-    List.singleton $
-      Function
-        { ffiName = NegationFunction.ffiName classId_
-        , constraint = Nothing
-        , argumentTypes = [selfType]
-        , returnType = selfType
-        , invoke = NegationFunction.invoke negationFunction
-        }
-
-absFunctionInfo ::
-  forall value.
-  FFI value =>
-  FFI.Id value ->
-  Maybe (value -> value) ->
-  List Function
-absFunctionInfo classId_ maybeAbsFunction = case maybeAbsFunction of
-  Nothing -> []
-  Just absFunction -> do
-    let selfType = FFI.typeOf @value Proxy
-    List.singleton $
-      Function
-        { ffiName = AbsFunction.ffiName classId_
-        , constraint = Nothing
-        , argumentTypes = [selfType]
-        , returnType = selfType
-        , invoke = AbsFunction.invoke absFunction
-        }
-
-equalityFunctionInfo ::
-  forall value.
-  FFI value =>
-  FFI.Id value ->
-  Maybe (value -> value -> Bool) ->
-  List Function
-equalityFunctionInfo classId_ maybeEqualityFunction = case maybeEqualityFunction of
-  Nothing -> []
-  Just equalityFunction -> do
-    let selfType = FFI.typeOf @value Proxy
-    List.singleton $
-      Function
-        { ffiName = EqualityFunction.ffiName classId_
-        , constraint = Nothing
-        , argumentTypes = [selfType, selfType]
-        , returnType = FFI.typeOf @Bool Proxy
-        , invoke = EqualityFunction.invoke equalityFunction
-        }
-
-comparisonFunctionInfo ::
-  forall value.
-  FFI value =>
-  FFI.Id value ->
-  Maybe (value -> value -> Int) ->
-  List Function
-comparisonFunctionInfo classId_ maybeComparisonFunction = case maybeComparisonFunction of
-  Nothing -> []
-  Just comparisonFunction -> do
-    let selfType = FFI.typeOf @value Proxy
-    List.singleton $
-      Function
-        { ffiName = ComparisonFunction.ffiName classId_
-        , constraint = Nothing
-        , argumentTypes = [selfType, selfType]
-        , returnType = FFI.typeOf @Int Proxy
-        , invoke = ComparisonFunction.invoke comparisonFunction
-        }
-
-preOperatorOverload :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> Function
-preOperatorOverload classId_ operatorId operator = do
-  let (lhsType, selfType, returnType) = PreOperator.signature operator
-  Function
-    { ffiName = PreOperator.ffiName classId_ operatorId operator
-    , constraint = Nothing
-    , argumentTypes = [lhsType, selfType]
-    , returnType = returnType
-    , invoke = PreOperator.invoke operator
-    }
-
-preOperatorOverloads ::
-  FFI.Id value ->
-  (BinaryOperator.Id, List (PreOperator value)) ->
-  List Function
-preOperatorOverloads classId_ (operatorId, overloads) =
-  List.map (preOperatorOverload classId_ operatorId) overloads
-
-postOperatorOverload :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> Function
-postOperatorOverload classId_ operatorId operator = do
-  let (selfType, rhsType, returnType) = PostOperator.signature operator
-  Function
-    { ffiName = PostOperator.ffiName classId_ operatorId operator
-    , constraint = Nothing
-    , argumentTypes = [selfType, rhsType]
-    , returnType = returnType
-    , invoke = PostOperator.invoke operator
-    }
-
-postOperatorOverloads ::
-  FFI.Id value ->
-  (BinaryOperator.Id, List (PostOperator value)) ->
-  List Function
-postOperatorOverloads classId_ (operatorId, overloads) =
-  List.map (postOperatorOverload classId_ operatorId) overloads
-
-classFunctions :: Class -> List Function
-classFunctions
-  ( Class
-      classId_
-      _
-      constants
-      staticFunctions
-      memberFunctions
-      maybeEqualityFunction
-      maybeComparisonFunction
-      maybeNegationFunction
-      maybeAbsFunction
-      preOperators
-      postOperators
-      nestedClasses
-    ) =
-    List.concat
-      [ List.map (constantFunctionInfo classId_) constants
-      , List.map (staticFunctionInfo classId_) staticFunctions
-      , List.map (memberFunctionInfo classId_) memberFunctions
-      , equalityFunctionInfo classId_ maybeEqualityFunction
-      , comparisonFunctionInfo classId_ maybeComparisonFunction
-      , negationFunctionInfo classId_ maybeNegationFunction
-      , absFunctionInfo classId_ maybeAbsFunction
-      , List.collect (preOperatorOverloads classId_) preOperators
-      , List.collect (postOperatorOverloads classId_) postOperators
-      , List.collect classFunctions nestedClasses
-      ]
+functions = List.collect Class.functions classes

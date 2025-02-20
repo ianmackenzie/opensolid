@@ -4,6 +4,7 @@
 module FFI (generateExports) where
 
 import API qualified
+import API.Function qualified as Function
 import Foreign (Ptr)
 import Language.Haskell.TH qualified as TH
 import OpenSolid.Array (Array)
@@ -19,7 +20,7 @@ type Function = Ptr () -> Ptr () -> IO ()
 functionArray :: Array Function
 functionArray = case API.functions of
   [] -> internalError "API somehow has no functions"
-  NonEmpty nonEmpty -> Array.fromNonEmpty (NonEmpty.map API.invoke nonEmpty)
+  NonEmpty nonEmpty -> Array.fromNonEmpty (NonEmpty.map Function.invoke nonEmpty)
 
 invoke :: Int -> Ptr () -> Ptr () -> IO ()
 invoke functionIndex = Array.get functionIndex functionArray
@@ -27,7 +28,7 @@ invoke functionIndex = Array.get functionIndex functionArray
 generateExports :: TH.Q (List TH.Dec)
 generateExports =
   Prelude.fmap List.concat $
-    Prelude.traverse generateExport (List.indexed (List.map API.ffiName API.functions))
+    Prelude.traverse generateExport (List.indexed (List.map Function.ffiName API.functions))
 
 generateExport :: (Int, Text) -> TH.Q (List TH.Dec)
 generateExport (index, name) = Prelude.do

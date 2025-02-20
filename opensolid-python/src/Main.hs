@@ -1,8 +1,11 @@
 module Main (main) where
 
-import API (Class (Class))
 import API qualified
+import API.Class (Class (Class))
+import API.Class qualified as Class
 import API.Constraint (Constraint)
+import API.Function (Function)
+import API.Function qualified as Function
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
@@ -311,7 +314,7 @@ ffiTypeDeclarations = do
   Python.Type.Registry.typeDeclarations registry
 
 topLevelClassName :: Class -> Maybe Text
-topLevelClassName Class{API.id = FFI.Id _ (topLevelName :| nestedNames)} =
+topLevelClassName Class{Class.id = FFI.Id _ (topLevelName :| nestedNames)} =
   case nestedNames of
     [] -> Just (FFI.pascalCase topLevelName)
     List.OneOrMore -> Nothing
@@ -326,11 +329,11 @@ allExportsDefinition = do
     , "]"
     ]
 
-registerFunctionTypes :: API.Function -> Registry -> Registry
+registerFunctionTypes :: Function -> Registry -> Registry
 registerFunctionTypes function registry =
   registry
-    |> registerArgumentTypes (API.constraint function) (API.argumentTypes function)
-    |> Python.FFI.registerType (API.returnType function)
+    |> registerArgumentTypes (Function.constraint function) (Function.argumentTypes function)
+    |> Python.FFI.registerType (Function.returnType function)
 
 registerArgumentTypes :: Maybe Constraint -> List FFI.Type -> Registry -> Registry
 registerArgumentTypes maybeConstraint argumentTypes registry = do

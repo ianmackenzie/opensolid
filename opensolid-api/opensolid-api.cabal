@@ -29,10 +29,12 @@ library
     API
     API.AbsFunction
     API.BinaryOperator
+    API.Class
     API.ComparisonFunction
     API.Constant
     API.Constraint
     API.EqualityFunction
+    API.Function
     API.MemberFunction
     API.NegationFunction
     API.PostOperator
