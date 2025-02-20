@@ -1,4 +1,8 @@
-Add Meters to OpenSolid.Prelude
+Add Meters (and Radians?) to OpenSolid.Prelude
+
+Rename 'SM' to just 'S' in API? Unlikely to have other squared units exposed through API...
+
+Add OpenSolid prefix to API modules
 
 Use actual UvSpace/UvCoordinates in API module?
 
