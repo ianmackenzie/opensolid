@@ -1017,9 +1017,5 @@ scene3d =
     , nested @Scene3d.Material "A material applied to a mesh." []
     ]
 
------ CLASS MEMBERS -----
-
------ FUNCTION COLLECTION -----
-
 functions :: List Function
 functions = List.collect Class.functions classes
