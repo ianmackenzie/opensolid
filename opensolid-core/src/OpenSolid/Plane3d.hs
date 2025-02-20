@@ -9,6 +9,7 @@ module OpenSolid.Plane3d
   , zy
   , originPoint
   , normalDirection
+  , normalAxis
   , xDirection
   , yDirection
   , placeIn
@@ -34,7 +35,7 @@ import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Frame3d, Plane3d (Plane3d), Transform3d)
+import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d, Plane3d (Plane3d), Transform3d)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
@@ -95,6 +96,9 @@ originPoint (Plane3d p0 _) = p0
 
 normalDirection :: Plane3d (space @ units) defines -> Direction3d space
 normalDirection (Plane3d _ basis) = PlanarBasis3d.normalDirection basis
+
+normalAxis :: Plane3d (space @ units) defines -> Axis3d (space @ units)
+normalAxis plane = Axis3d (originPoint plane) (normalDirection plane)
 
 xDirection :: Plane3d (space @ units) defines -> Direction3d space
 xDirection (Plane3d _ basis) = PlanarBasis3d.xDirection basis
