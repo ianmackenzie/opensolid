@@ -312,8 +312,7 @@ angle =
 
 range :: Class
 range =
-  Class.new @(Range Unitless)
-    "A range of unitless values, with a lower bound and upper bound."
+  Class.new @(Range Unitless) "A range of unitless values, with a lower bound and upper bound." $
     [ constant "Unit" Range.unit $(docs 'Range.unit)
     , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
@@ -349,8 +348,7 @@ range =
 
 lengthRange :: Class
 lengthRange =
-  Class.new @(Range Meters)
-    "A range of length values, with a lower bound and upper bound."
+  Class.new @(Range Meters) "A range of length values, with a lower bound and upper bound." $
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
     , factory2 "Meters" "A" "B" Range.meters $(docs 'Range.meters)
@@ -382,8 +380,7 @@ lengthRange =
 
 areaRange :: Class
 areaRange =
-  Class.new @(Range SquareMeters)
-    "A range of area values, with a lower bound and upper bound."
+  Class.new @(Range SquareMeters) "A range of area values, with a lower bound and upper bound." $
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "Square Meters" "A" "B" Range.squareMeters $(docs 'Range.squareMeters)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
@@ -412,8 +409,7 @@ areaRange =
 
 angleRange :: Class
 angleRange =
-  Class.new @(Range Radians)
-    "A range of angle values, with a lower bound and upper bound."
+  Class.new @(Range Radians) "A range of angle values, with a lower bound and upper bound." $
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
     , factory2 "Radians" "A" "B" Range.radians $(docs 'Range.radians)
@@ -485,8 +481,7 @@ color =
 
 vector2d :: Class
 vector2d =
-  Class.new @(Vector2d (Space @ Unitless))
-    "A unitless vector in 2D."
+  Class.new @(Vector2d (Space @ Unitless)) "A unitless vector in 2D." $
     [ constant "Zero" (Vector2d.zero @Space @Unitless) $(docs 'Vector2d.zero)
     , factory1 "Unit" "Direction" Vector2d.unit $(docs 'Vector2d.unit)
     , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
@@ -520,8 +515,7 @@ vector2d =
 
 displacement2d :: Class
 displacement2d =
-  Class.new @(Vector2d (Space @ Meters))
-    "A displacement vector in 2D."
+  Class.new @(Vector2d (Space @ Meters)) "A displacement vector in 2D." $
     [ constant "Zero" (Vector2d.zero @Space @Meters) $(docs 'Vector2d.zero)
     , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
@@ -556,8 +550,7 @@ displacement2d =
 
 areaVector2d :: Class
 areaVector2d =
-  Class.new @(Vector2d (Space @ SquareMeters))
-    "A vector in 2D with units of area."
+  Class.new @(Vector2d (Space @ SquareMeters)) "A vector in 2D with units of area." $
     [ constant "Zero" (Vector2d.zero @Space @SquareMeters) $(docs 'Vector2d.zero)
     , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
@@ -619,8 +612,7 @@ direction2d =
 
 point2d :: Class
 point2d =
-  Class.new @(Point2d (Space @ Meters))
-    "A point in 2D, defined by its X and Y coordinates."
+  Class.new @(Point2d (Space @ Meters)) "A point in 2D, defined by its X and Y coordinates." $
     [ constant "Origin" (Point2d.origin @Space @Meters) $(docs 'Point2d.origin)
     , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d.xy $(docs 'Point2d.xy)
     , factory1 "X" "X Coordinate" Point2d.x $(docs 'Point2d.x)
@@ -643,8 +635,7 @@ point2d =
 
 uvPoint :: Class
 uvPoint =
-  Class.new @(Point2d (Space @ Unitless))
-    "A point in UV parameter space."
+  Class.new @(Point2d (Space @ Unitless)) "A point in UV parameter space." $
     [ constant "Origin" (Point2d.origin @Space @Unitless) $(docs 'Point2d.origin)
     , factory2 "UV" "U Coordinate" "V Coordinate" Point2d.xy $(docs 'Point2d.xy)
     , factory1 "U" "U Coordinate" Point2d.x $(docs 'Point2d.x)
@@ -662,8 +653,7 @@ uvPoint =
 
 bounds2d :: Class
 bounds2d =
-  Class.new @(Bounds2d (Space @ Meters))
-    "A bounding box in 2D."
+  Class.new @(Bounds2d (Space @ Meters)) "A bounding box in 2D." $
     [ factory2 "XY" "X Coordinate" "Y Coordinate" Bounds2d.xy $(docs 'Bounds2d.xy)
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , factory2 "From Corners" "P1" "P2" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
@@ -678,8 +668,7 @@ bounds2d =
 
 uvBounds :: Class
 uvBounds =
-  Class.new @(Bounds2d (Space @ Unitless))
-    "A bounding box in UV parameter space."
+  Class.new @(Bounds2d (Space @ Unitless)) "A bounding box in UV parameter space." $
     [ factory2 "UV" "U Coordinate" "V Coordinate" Bounds2d.xy $(docs 'Bounds2d.xy)
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , factory2 "From Corners" "P1" "P2" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
@@ -694,8 +683,7 @@ uvBounds =
 
 curve :: Class
 curve =
-  Class.new @(Curve Unitless)
-    "A parametric curve definining a unitless value in terms of a parameter value."
+  Class.new @(Curve Unitless) "A parametric curve definining a unitless value in terms of a parameter value." $
     [ constant "Zero" (Curve.zero @Unitless) $(docs 'Curve.zero)
     , constant "T" Curve.t $(docs 'Curve.t)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
@@ -733,8 +721,7 @@ curve =
 
 angleCurve :: Class
 angleCurve =
-  Class.new @(Curve Radians)
-    "A parametric curve definining an angle in terms of a parameter value."
+  Class.new @(Curve Radians) "A parametric curve definining an angle in terms of a parameter value." $
     [ constant "Zero" (Curve.zero @Radians) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , member0 "Sin" Curve.sin $(docs 'Curve.sin)
@@ -758,8 +745,7 @@ angleCurve =
 
 lengthCurve :: Class
 lengthCurve =
-  Class.new @(Curve Meters)
-    "A parametric curve definining a length in terms of a parameter value."
+  Class.new @(Curve Meters) "A parametric curve definining a length in terms of a parameter value." $
     [ constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
@@ -783,8 +769,7 @@ lengthCurve =
 
 areaCurve :: Class
 areaCurve =
-  Class.new @(Curve SquareMeters)
-    "A parametric curve definining an area in terms of a parameter value."
+  Class.new @(Curve SquareMeters) "A parametric curve definining an area in terms of a parameter value." $
     [ constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
@@ -811,8 +796,7 @@ instance FFI Drawing2d_ where
 
 drawing2d :: Class
 drawing2d =
-  Class.new @Drawing2d_
-    "A set of functions for constructing 2D drawings."
+  Class.new @Drawing2d_ "A set of functions for constructing 2D drawings." $
     [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
     , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
     , static3 "Circle" "Attributes" "Radius" "Center Point" Drawing2d.circle $(docs 'Drawing2d.circle)
@@ -842,8 +826,7 @@ uvAxis =
 
 vector3d :: Class
 vector3d =
-  Class.new @(Vector3d (Space @ Unitless))
-    "A unitless vector in 3D."
+  Class.new @(Vector3d (Space @ Unitless)) "A unitless vector in 3D." $
     [ constant "Zero" (Vector3d.zero @Space @Unitless) $(docs 'Vector3d.zero)
     , factory1 "Unit" "Direction" Vector3d.unit $(docs 'Vector3d.unit)
     , factory3 "XYZ" "X Component" "Y Component" "Z Component" Vector3d.xyz $(docs 'Vector3d.xyz)
@@ -877,8 +860,7 @@ vector3d =
 
 displacement3d :: Class
 displacement3d =
-  Class.new @(Vector3d (Space @ Meters))
-    "A displacement vector in 3D."
+  Class.new @(Vector3d (Space @ Meters)) "A displacement vector in 3D." $
     [ constant "Zero" (Vector3d.zero @Space @Meters) $(docs 'Vector3d.zero)
     , factory3 "XYZ" "X Component" "Y Component" "Z Component" Vector3d.xyz $(docs 'Vector3d.xyz)
     , factory1 "X" "X Component" Vector3d.x $(docs 'Vector3d.x)
@@ -913,8 +895,7 @@ displacement3d =
 
 areaVector3d :: Class
 areaVector3d =
-  Class.new @(Vector3d (Space @ SquareMeters))
-    "A vector in 3D with units of area."
+  Class.new @(Vector3d (Space @ SquareMeters)) "A vector in 3D with units of area." $
     [ constant "Zero" (Vector3d.zero @Space @SquareMeters) $(docs 'Vector3d.zero)
     , factory3 "XYZ" "X Component" "Y Component" "Z Component" Vector3d.xyz $(docs 'Vector3d.xyz)
     , factory1 "X" "X Component" Vector3d.x $(docs 'Vector3d.x)
@@ -976,8 +957,7 @@ direction3d =
 
 point3d :: Class
 point3d =
-  Class.new @(Point3d (Space @ Meters))
-    "A point in 3D, defined by its XYZ coordinates."
+  Class.new @(Point3d (Space @ Meters)) "A point in 3D, defined by its XYZ coordinates." $
     [ constant "Origin" (Point3d.origin @Space @Meters) $(docs 'Point3d.origin)
     , factory3 "XYZ" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.xyz $(docs 'Point3d.xyz)
     , factory1 "X" "X Coordinate" Point3d.x $(docs 'Point3d.x)
@@ -1001,8 +981,7 @@ point3d =
 
 bounds3d :: Class
 bounds3d =
-  Class.new @(Bounds3d (Space @ Meters))
-    "A bounding box in 3D."
+  Class.new @(Bounds3d (Space @ Meters)) "A bounding box in 3D." $
     [ factory3 "XYZ" "X Coordinate" "Y Coordinate" "Z Coordinate" Bounds3d.xyz $(docs 'Bounds3d.xyz)
     , factory1 "Constant" "Point" Bounds3d.constant $(docs 'Bounds3d.constant)
     , factory2 "From Corners" "P1" "P2" Bounds3d.hull2 $(docs 'Bounds3d.hull2)
@@ -1048,8 +1027,7 @@ plane3d =
 
 vectorCurve2d :: Class
 vectorCurve2d =
-  Class.new @(VectorCurve2d (Space @ Unitless))
-    "A parametric curve defining a 2D unitless vector in terms of a parameter value."
+  Class.new @(VectorCurve2d (Space @ Unitless)) "A parametric curve defining a 2D unitless vector in terms of a parameter value." $
     [ constant "Zero" (VectorCurve2d.zero @Space @Unitless) $(docs 'VectorCurve2d.zero)
     , factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
     , factory2 "XY" "X Component" "Y Component" VectorCurve2d.xy $(docs 'VectorCurve2d.xy)
@@ -1058,8 +1036,7 @@ vectorCurve2d =
 
 displacementCurve2d :: Class
 displacementCurve2d =
-  Class.new @(VectorCurve2d (Space @ Meters))
-    "A parametric curve defining a 2D displacement vector in terms of a parameter value."
+  Class.new @(VectorCurve2d (Space @ Meters)) "A parametric curve defining a 2D displacement vector in terms of a parameter value." $
     [ constant "Zero" (VectorCurve2d.zero @Space @Meters) $(docs 'VectorCurve2d.zero)
     , factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
     , factory2 "XY" "X Component" "Y Component" VectorCurve2d.xy $(docs 'VectorCurve2d.xy)
@@ -1213,8 +1190,7 @@ instance FFI Mesh_ where
 
 mesh :: Class
 mesh =
-  Class.new @Mesh_
-    "Meshing-related functionality."
+  Class.new @Mesh_ "Meshing-related functionality." $
     [ nested @(Mesh.Constraint Meters) $(docs ''Mesh.Constraint) []
     , static1 "Max Error" "Error" (Mesh.maxError @Meters) $(docs 'Mesh.maxError)
     , static1 "Max Size" "Size" (Mesh.maxSize @Meters) $(docs 'Mesh.maxSize)
@@ -1227,8 +1203,7 @@ instance FFI Scene3d_ where
 
 scene3d :: Class
 scene3d =
-  Class.new @Scene3d_
-    "A set of functions for constructing 3D scenes."
+  Class.new @Scene3d_ "A set of functions for constructing 3D scenes." $
     [ staticM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
     , static1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
     , static2 "Metal" "Base Color" "Roughness" Scene3d.metal $(docs 'Scene3d.metal)
