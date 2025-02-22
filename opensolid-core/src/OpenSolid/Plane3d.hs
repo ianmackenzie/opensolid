@@ -14,6 +14,8 @@ module OpenSolid.Plane3d
   , normalAxis
   , xDirection
   , yDirection
+  , xAxis
+  , yAxis
   , moveTo
   , placeIn
   , relativeTo
@@ -134,6 +136,20 @@ xDirection (Plane3d _ basis) = PlanarBasis3d.xDirection basis
 -- | Get the Y direction of a plane.
 yDirection :: Plane3d (space @ units) defines -> Direction3d space
 yDirection (Plane3d _ basis) = PlanarBasis3d.yDirection basis
+
+{-| Get the X axis of a plane.
+
+This is an axis formed from the plane's origin point and X direction.
+-}
+xAxis :: Plane3d (space @ units) defines -> Axis3d (space @ units)
+xAxis plane = Axis3d (originPoint plane) (xDirection plane)
+
+{-| Get the Y axis of a plane.
+
+This is an axis formed from the plane's origin point and Y direction.
+-}
+yAxis :: Plane3d (space @ units) defines -> Axis3d (space @ units)
+yAxis plane = Axis3d (originPoint plane) (yDirection plane)
 
 {-| Move a plane so that its origin point is the given point.
 
