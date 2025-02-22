@@ -51,6 +51,7 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
+import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -287,7 +288,7 @@ mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ u
 mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
 
 mirrorAcross :: Axis2d (space @ originUnits) -> Vector2d (space @ units) -> Vector2d (space @ units)
-mirrorAcross (Axis2d _ normalDirection) = mirrorIn normalDirection
+mirrorAcross (Axis2d _ axisDirection) = mirrorIn (Direction2d.rotateLeft axisDirection)
 
 scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)
 scaleIn scaleDirection scale vector = vector + (scale - 1.0) * projectionIn scaleDirection vector
