@@ -115,6 +115,12 @@ toSvg viewBox entities = do
     , Maybe.withDefault "" (entityText "" (Node "svg" attributes entities)) + "\n"
     ]
 
+{-| Render SVG to a file.
+
+The given bounding box defines the overall size of the drawing,
+and in general should contain all the drawing entities
+(unless you *want* to crop some of them).
+-}
 writeSvg :: Text -> Bounds2d (space @ Meters) -> List (Entity space) -> IO ()
 writeSvg path viewBox entities = IO.writeFile path (toSvg viewBox entities)
 
