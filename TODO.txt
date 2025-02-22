@@ -1,3 +1,18 @@
+Figure out why plates with holes couldn't generate...
+
+Remove constants Length.millimeter etc. from API
+-> interfere with autocomplete when trying to use e.g. Length.millimeters(...)
+
+Have "high level" (Region2d, Body3d) functions just return 'Result Text a'?
+
+Useful operations:
+- Booleans on regions
+- extract/query region/body curves, points, surfaces?
+
+Generate non-zero normal vectors at poles of revolved surfaces
+
+Add DirectionCurve2d.[rotateLeft,rotateRight] and use in Curve2d.offsetBy, Region2d.fillet
+
 Add Meters (and Radians?) to OpenSolid.Prelude
 
 Remove positiveX, negativeY etc.
@@ -29,6 +44,7 @@ Enforce frames to always be right-handed
 
 Add Curve2d.centerPoint function?
 -> check that evaluating center point from 3-point Gaussian quadrature points gives the same result, then return result for t=0.5
+-> maybe other queries like Surface3d.normalDirection (useful for querying for e.g. "back face")
 
 Reconsider having Axis2d.u, Point2d.uv etc. specialized constants/constructors?
 -> maybe even move UvSpace into main CoordinateSystem module...and remove UvPoint etc. type aliases?
@@ -104,6 +120,7 @@ C API: generate structs with *named* fields
 
 Improve Python bindings
 - Implement constructors?
+- Make axes callable by a Float to give a point?
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
 - Add magic IPython display functions to Curve2d, Drawing2d.Entity etc.
   -> using to-SVG (and eventually to-glTF) Haskell functions under the hood? ('display' functions?)
