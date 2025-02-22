@@ -1083,13 +1083,7 @@ uniformTransformations2d transformBy =
     : orthonormalTransformations2d transformBy
 
 affineTransformations2d ::
-  ( FFI value
-  , FFI (Vector2d (space @ units))
-  , FFI (Qty units)
-  , FFI (Direction2d space)
-  , FFI (Axis2d (space @ units))
-  , FFI (Point2d (space @ units))
-  ) =>
+  Transformation2d value space units =>
   (forall tag. Transform2d tag (space @ units) -> value -> value) ->
   List (Class.Member value)
 affineTransformations2d transformBy =
