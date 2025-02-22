@@ -8,6 +8,10 @@ module API.Class
   , factoryU1R
   , factoryM1R
   , factory2
+  , factoryU2
+  , factoryU2R
+  , factoryM2
+  , factoryM2R
   , factory3
   , factoryU3
   , factoryM3
@@ -106,6 +110,8 @@ data Member value where
   StaticU1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Unitless => a -> result) -> Text -> Member value
   StaticM1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Meters => a -> result) -> Text -> Member value
   Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
+  StaticU2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> result) -> Text -> Member value
+  StaticM2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> result) -> Text -> Member value
   Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
   StaticU3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> result) -> Text -> Member value
   StaticM3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> result) -> Text -> Member value
@@ -144,6 +150,18 @@ factoryM1R = StaticM1
 
 factory2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (a -> b -> value) -> Text -> Member value
 factory2 = Static2
+
+factoryU2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> value) -> Text -> Member value
+factoryU2 = StaticU2
+
+factoryU2R :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> Result x value) -> Text -> Member value
+factoryU2R = StaticU2
+
+factoryM2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> value) -> Text -> Member value
+factoryM2 = StaticM2
+
+factoryM2R :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> Result x value) -> Text -> Member value
+factoryM2R = StaticM2
 
 factory3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
 factory3 = Static3
@@ -480,6 +498,10 @@ buildClass
             addStatic name (StaticFunctionM1 (FFI.name arg1) f staticDocs)
           Static2 name arg1 arg2 f staticDocs ->
             addStatic name (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
+          StaticU2 name arg1 arg2 f staticDocs ->
+            addStatic name (StaticFunctionU2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
+          StaticM2 name arg1 arg2 f staticDocs ->
+            addStatic name (StaticFunctionM2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
           Static3 name arg1 arg2 arg3 f staticDocs ->
             addStatic name (StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
           StaticU3 name arg1 arg2 arg3 f staticDocs ->
