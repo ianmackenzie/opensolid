@@ -40,7 +40,6 @@ module OpenSolid.Vector3d
   , transformBy
   , rotateIn
   , scaleIn
-  , scaleAbout
   )
 where
 
@@ -56,7 +55,6 @@ import OpenSolid.Primitives
   , Basis3d (Basis3d)
   , Direction3d (Unit3d)
   , Frame3d (Frame3d)
-  , Point3d
   , Vector3d (Vector3d)
   )
 import OpenSolid.Qty qualified as Qty
@@ -283,13 +281,6 @@ rotateAround ::
   Vector3d (space @ units) ->
   Vector3d (space @ units)
 rotateAround = Transform3d.rotateAroundImpl transformBy
-
-scaleAbout ::
-  Point3d (space @ pointUnits) ->
-  Float ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units)
-scaleAbout = Transform3d.scaleAboutImpl transformBy
 
 scaleAlong ::
   Axis3d (space @ axisUnits) ->
