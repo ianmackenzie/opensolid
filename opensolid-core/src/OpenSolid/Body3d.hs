@@ -5,6 +5,7 @@
 module OpenSolid.Body3d
   ( Body3d
   , block
+  , sphere
   , cylinder
   , cylinderAlong
   , extruded
@@ -20,6 +21,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Axis3d (Axis3d (Axis3d))
 import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d.BoundedBy qualified as BoundedBy
@@ -32,6 +34,7 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
 import OpenSolid.FFI (FFI)
@@ -229,6 +232,31 @@ block (Bounds3d xRange yRange zRange) =
         else case extruded Plane3d.xy profile zRange of
           Success body -> Success body
           Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
+
+{-| Create a sphere with the given center point and radius.
+
+Fails if the radius is zero.
+-}
+sphere ::
+  Tolerance units =>
+  Point3d (space @ units) ->
+  Qty units ->
+  Result EmptyBody (Body3d (space @ units))
+sphere centerPoint radius =
+  if radius ~= Qty.zero
+    then Failure EmptyBody
+    else do
+      let axis = Axis3d centerPoint Direction3d.z
+      let sketchPlane = Plane3d.fromYAxis axis
+      let p1 = Point2d.y -radius
+      let p2 = Point2d.y radius
+      let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
+      case Region2d.boundedBy profileCurves of
+        Failure _ -> internalError "Semicircle profile construction should always succeed"
+        Success profile ->
+          case revolved sketchPlane profile Axis2d.y Angle.twoPi of
+            Success body -> Success body
+            Failure _ -> internalError "Constructing sphere from non-zero radius should not fail"
 
 {-| Create a cylindrical body from a start point, end point and radius.
 
