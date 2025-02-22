@@ -989,6 +989,9 @@ body3d =
   Class.new @(Body3d (Space @ Meters)) $(docs ''Body3d) $
     [ factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
     , factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
+    , factoryM1R "Block" "Bounding Box" Body3d.block $(docs 'Body3d.block)
+    , factoryM3R "Cylinder" "Start Point" "End Point" "Radius" Body3d.cylinder $(docs 'Body3d.cylinder)
+    , factoryM3R "Cylinder Along" "Axis" "Distance" "Radius" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
     ]
 
 data Mesh_
