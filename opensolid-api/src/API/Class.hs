@@ -31,6 +31,8 @@ module API.Class
   , memberSM0
   , member1
   , member2
+  , memberU2
+  , memberM2
   , equality
   , comparison
   , negateSelf
@@ -125,6 +127,8 @@ data Member value where
   MemberSM0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
   Member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
   Member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
+  MemberU2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> value -> result) -> Text -> Member value
+  MemberM2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> value -> result) -> Text -> Member value
   Equality :: Eq value => Member value
   Comparison :: Ord value => Member value
   Negate :: Negation value => Member value
@@ -219,6 +223,12 @@ member1 = Member1
 
 member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
 member2 = Member2
+
+memberU2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> value -> result) -> Text -> Member value
+memberU2 = MemberU2
+
+memberM2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> value -> result) -> Text -> Member value
+memberM2 = MemberM2
 
 data Self a = Self
 
@@ -528,6 +538,10 @@ buildClass
             addMember name (MemberFunction1 (FFI.name arg1) f memberDocs)
           Member2 name arg1 arg2 f memberDocs ->
             addMember name (MemberFunction2 (FFI.name arg1) (FFI.name arg2) f memberDocs)
+          MemberU2 name arg1 arg2 f memberDocs ->
+            addMember name (MemberFunctionU2 (FFI.name arg1) (FFI.name arg2) f memberDocs)
+          MemberM2 name arg1 arg2 f memberDocs ->
+            addMember name (MemberFunctionM2 (FFI.name arg1) (FFI.name arg2) f memberDocs)
           Equality ->
             buildClass
               classDocs
