@@ -1,5 +1,13 @@
 Add Meters (and Radians?) to OpenSolid.Prelude
 
+Remove positiveX, negativeY etc.
+-> can just write -Direction2d.x etc., or 'negate Direction2d.x' for extra obviousness
+
+Remove 'xyzIn' etc. functions in favour of just using placeIn?
+-> more flexible
+-> generalizes to objects other than points/vectors
+-> dedicated 'In' functions seem like a premature micro-optimization at this point...
+
 Rename 'SM' to just 'S' in API? Unlikely to have other squared units exposed through API...
 
 Add OpenSolid prefix to API modules
@@ -10,12 +18,17 @@ Add 'R' suffix versions of API factory* functions e.g. factory3R, factoryM2R, fo
 -> then remove a few unnecessary 'forall's
 
 Remove Drawing2d.Resolution, *or* use it everywhere
+-> maybe have 'OpenSolid' be a context manager? 'with OpenSolid(tolerance=..., resolution=...):' etc.
+  -> could support just setting tolerance *or* resolution at a time
 
 Add Linear transformation types?
 -> can only be used for vector types
 -> rename Affine to Positioned or Positional similar?
 
 Enforce frames to always be right-handed
+
+Add Curve2d.centerPoint function?
+-> check that evaluating center point from 3-point Gaussian quadrature points gives the same result, then return result for t=0.5
 
 Reconsider having Axis2d.u, Point2d.uv etc. specialized constants/constructors?
 -> maybe even move UvSpace into main CoordinateSystem module...and remove UvPoint etc. type aliases?
