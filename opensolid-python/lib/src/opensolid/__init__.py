@@ -6429,6 +6429,71 @@ class Vector3d:
         _lib.opensolid_Vector3d_isZero(ctypes.byref(inputs), ctypes.byref(output))
         return bool(output.value)
 
+    def rotate_in(self, direction: Direction3d, angle: Angle) -> Vector3d:
+        """Rotate a vector in a given direction.
+
+        This is equivalent to rotating around an axis with the given direction.
+        """
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, angle._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Vector3d_rotateIn_Direction3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    def rotate_around(self, axis: Axis3d, angle: Angle) -> Vector3d:
+        """Rotate around the given axis by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_rotateAround_Axis3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    def mirror_in(self, direction: Direction3d) -> Vector3d:
+        """Mirror in a particular direction.
+
+        This is equivalent to mirroring across a plane with the given normal direction.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(direction._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_mirrorIn_Direction3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    def mirror_across(self, plane: Plane3d) -> Vector3d:
+        """Mirror across the given plane."""
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_mirrorAcross_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    def scale_in(self, direction: Direction3d, scale: float) -> Vector3d:
+        """Scale (stretch) in the given direction by the given scaling factor.
+
+        This is equivalent to scaling along an axis with the given direction.
+        """
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(direction._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_scaleIn_Direction3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    def scale_along(self, axis: Axis3d, scale: float) -> Vector3d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_scaleAlong_Axis3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
     def __neg__(self) -> Vector3d:
         """Return ``-self``."""
         inputs = self._ptr
@@ -6810,6 +6875,71 @@ class Displacement3d:
         _lib.opensolid_Displacement3d_isZero(ctypes.byref(inputs), ctypes.byref(output))
         return bool(output.value)
 
+    def rotate_in(self, direction: Direction3d, angle: Angle) -> Displacement3d:
+        """Rotate a vector in a given direction.
+
+        This is equivalent to rotating around an axis with the given direction.
+        """
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, angle._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_rotateIn_Direction3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    def rotate_around(self, axis: Axis3d, angle: Angle) -> Displacement3d:
+        """Rotate around the given axis by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_rotateAround_Axis3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    def mirror_in(self, plane: Direction3d) -> Displacement3d:
+        """Mirror in a particular direction.
+
+        This is equivalent to mirroring across a plane with the given normal direction.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_mirrorIn_Direction3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    def mirror_across(self, plane: Plane3d) -> Displacement3d:
+        """Mirror across the given plane."""
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_mirrorAcross_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    def scale_in(self, direction: Direction3d, scale: float) -> Displacement3d:
+        """Scale (stretch) in the given direction by the given scaling factor.
+
+        This is equivalent to scaling along an axis with the given direction.
+        """
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(direction._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_scaleIn_Direction3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    def scale_along(self, axis: Axis3d, scale: float) -> Displacement3d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_scaleAlong_Axis3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
     def __neg__(self) -> Displacement3d:
         """Return ``-self``."""
         inputs = self._ptr
@@ -7127,6 +7257,71 @@ class AreaVector3d:
         _lib.opensolid_AreaVector3d_isZero(ctypes.byref(inputs), ctypes.byref(output))
         return bool(output.value)
 
+    def rotate_in(self, direction: Direction3d, angle: Angle) -> AreaVector3d:
+        """Rotate a vector in a given direction.
+
+        This is equivalent to rotating around an axis with the given direction.
+        """
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, angle._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_rotateIn_Direction3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    def rotate_around(self, axis: Axis3d, angle: Angle) -> AreaVector3d:
+        """Rotate around the given axis by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_rotateAround_Axis3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    def mirror_in(self, plane: Direction3d) -> AreaVector3d:
+        """Mirror in a particular direction.
+
+        This is equivalent to mirroring across a plane with the given normal direction.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_mirrorIn_Direction3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    def mirror_across(self, plane: Plane3d) -> AreaVector3d:
+        """Mirror across the given plane."""
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_mirrorAcross_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    def scale_in(self, direction: Direction3d, scale: float) -> AreaVector3d:
+        """Scale (stretch) in the given direction by the given scaling factor.
+
+        This is equivalent to scaling along an axis with the given direction.
+        """
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(direction._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_scaleIn_Direction3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    def scale_along(self, axis: Axis3d, scale: float) -> AreaVector3d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_scaleAlong_Axis3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
     def __neg__(self) -> AreaVector3d:
         """Return ``-self``."""
         inputs = self._ptr
@@ -7354,6 +7549,50 @@ class Direction3d:
         )
         return output.value
 
+    def rotate_in(self, direction: Direction3d, angle: Angle) -> Direction3d:
+        """Rotate a direction in a given other direction.
+
+        This is equivalent to rotating around an axis with the given direction.
+        """
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, angle._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Direction3d_rotateIn_Direction3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Direction3d(ptr=output)
+
+    def rotate_around(self, axis: Axis3d, angle: Angle) -> Direction3d:
+        """Rotate around the given axis by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Direction3d_rotateAround_Axis3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Direction3d(ptr=output)
+
+    def mirror_in(self, plane: Direction3d) -> Direction3d:
+        """Mirror a direction in a given other direction.
+
+        This is equivalent to mirroring across a plane with the given normal direction.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Direction3d_mirrorIn_Direction3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Direction3d(ptr=output)
+
+    def mirror_across(self, plane: Plane3d) -> Direction3d:
+        """Mirror across the given plane."""
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Direction3d_mirrorAcross_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Direction3d(ptr=output)
+
     def __neg__(self) -> Direction3d:
         """Return ``-self``."""
         inputs = self._ptr
@@ -7565,7 +7804,7 @@ class Point3d:
     def meters(
         x_coordinate: float, y_coordinate: float, z_coordinate: float
     ) -> Point3d:
-        """Construct a point from its X, Y and Z  coordinates given in meters."""
+        """Construct a point from its X, Y and Z coordinates given in meters."""
         inputs = _Tuple3_c_double_c_double_c_double(
             x_coordinate, y_coordinate, z_coordinate
         )
@@ -7579,7 +7818,7 @@ class Point3d:
     def centimeters(
         x_coordinate: float, y_coordinate: float, z_coordinate: float
     ) -> Point3d:
-        """Construct a point from its X, Y and Z  coordinates given in centimeters."""
+        """Construct a point from its X, Y and Z coordinates given in centimeters."""
         inputs = _Tuple3_c_double_c_double_c_double(
             x_coordinate, y_coordinate, z_coordinate
         )
@@ -7593,7 +7832,7 @@ class Point3d:
     def millimeters(
         x_coordinate: float, y_coordinate: float, z_coordinate: float
     ) -> Point3d:
-        """Construct a point from its X, Y and Z  coordinates given in millimeters."""
+        """Construct a point from its X, Y and Z coordinates given in millimeters."""
         inputs = _Tuple3_c_double_c_double_c_double(
             x_coordinate, y_coordinate, z_coordinate
         )
@@ -7607,7 +7846,7 @@ class Point3d:
     def inches(
         x_coordinate: float, y_coordinate: float, z_coordinate: float
     ) -> Point3d:
-        """Construct a point from its X, Y and Z  coordinates given in inches."""
+        """Construct a point from its X, Y and Z coordinates given in inches."""
         inputs = _Tuple3_c_double_c_double_c_double(
             x_coordinate, y_coordinate, z_coordinate
         )
@@ -7675,6 +7914,71 @@ class Point3d:
         inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Point3d_midpoint_Point3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def scale_along(self, axis: Axis3d, scale: float) -> Point3d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_scaleAlong_Axis3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def scale_about(self, point: Point3d, scale: float) -> Point3d:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_scaleAbout_Point3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def mirror_across(self, plane: Plane3d) -> Point3d:
+        """Mirror across the given plane."""
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_mirrorAcross_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def translate_by(self, displacement: Displacement3d) -> Point3d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_translateBy_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def translate_in(self, direction: Direction3d, distance: Length) -> Point3d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Point3d_translateIn_Direction3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def translate_along(self, axis: Axis3d, distance: Length) -> Point3d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_translateAlong_Axis3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def rotate_around(self, axis: Axis3d, angle: Angle) -> Point3d:
+        """Rotate around the given axis by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_rotateAround_Axis3d_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Point3d(ptr=output)
@@ -7827,6 +8131,71 @@ class Bounds3d:
         _lib.opensolid_Bounds3d_zCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
 
+    def scale_along(self, axis: Axis3d, scale: float) -> Bounds3d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_scaleAlong_Axis3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    def scale_about(self, point: Point3d, scale: float) -> Bounds3d:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_scaleAbout_Point3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    def mirror_across(self, plane: Plane3d) -> Bounds3d:
+        """Mirror across the given plane."""
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_mirrorAcross_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    def translate_by(self, displacement: Displacement3d) -> Bounds3d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_translateBy_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    def translate_in(self, direction: Direction3d, distance: Length) -> Bounds3d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_translateIn_Direction3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    def translate_along(self, axis: Axis3d, distance: Length) -> Bounds3d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_translateAlong_Axis3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    def rotate_around(self, axis: Axis3d, angle: Angle) -> Bounds3d:
+        """Rotate around the given axis by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_rotateAround_Axis3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
     def __add__(self, rhs: Displacement3d) -> Bounds3d:
         """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -7909,6 +8278,53 @@ class Axis3d:
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Axis3d_reverse(ctypes.byref(inputs), ctypes.byref(output))
+        return Axis3d(ptr=output)
+
+    def mirror_across(self, plane: Plane3d) -> Axis3d:
+        """Mirror across the given plane."""
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis3d_mirrorAcross_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis3d(ptr=output)
+
+    def translate_by(self, displacement: Displacement3d) -> Axis3d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis3d_translateBy_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis3d(ptr=output)
+
+    def translate_in(self, direction: Direction3d, distance: Length) -> Axis3d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Axis3d_translateIn_Direction3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis3d(ptr=output)
+
+    def translate_along(self, axis: Axis3d, distance: Length) -> Axis3d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis3d_translateAlong_Axis3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis3d(ptr=output)
+
+    def rotate_around(self, axis: Axis3d, angle: Angle) -> Axis3d:
+        """Rotate around the given axis by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis3d_rotateAround_Axis3d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return Axis3d(ptr=output)
 
 
@@ -8020,6 +8436,53 @@ class Plane3d:
         inputs = _Tuple2_c_void_p_c_void_p(point._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Plane3d_moveTo_Point3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
+
+    def mirror_across(self, plane: Plane3d) -> Plane3d:
+        """Mirror across the given plane."""
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Plane3d_mirrorAcross_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
+
+    def translate_by(self, displacement: Displacement3d) -> Plane3d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Plane3d_translateBy_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
+
+    def translate_in(self, direction: Direction3d, distance: Length) -> Plane3d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Plane3d_translateIn_Direction3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
+
+    def translate_along(self, axis: Axis3d, distance: Length) -> Plane3d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Plane3d_translateAlong_Axis3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
+
+    def rotate_around(self, axis: Axis3d, angle: Angle) -> Plane3d:
+        """Rotate around the given axis by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Plane3d_rotateAround_Axis3d_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Plane3d(ptr=output)
