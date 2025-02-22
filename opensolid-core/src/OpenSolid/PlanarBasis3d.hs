@@ -16,6 +16,10 @@ module OpenSolid.PlanarBasis3d
   , xDirection
   , yDirection
   , normalDirection
+  , xnBasis
+  , nxBasis
+  , ynBasis
+  , nyBasis
   , transformBy
   , placeIn
   , relativeTo
@@ -99,6 +103,18 @@ yDirection (PlanarBasis3d _ j) = j
 
 normalDirection :: PlanarBasis3d space defines -> Direction3d space
 normalDirection (PlanarBasis3d i j) = Unit3d (i >< j)
+
+xnBasis :: PlanarBasis3d space defines1 -> PlanarBasis3d space defines2
+xnBasis basis = PlanarBasis3d (xDirection basis) (normalDirection basis)
+
+nxBasis :: PlanarBasis3d space defines1 -> PlanarBasis3d space defines2
+nxBasis basis = PlanarBasis3d (normalDirection basis) (xDirection basis)
+
+ynBasis :: PlanarBasis3d space defines1 -> PlanarBasis3d space defines2
+ynBasis basis = PlanarBasis3d (yDirection basis) (normalDirection basis)
+
+nyBasis :: PlanarBasis3d space defines1 -> PlanarBasis3d space defines2
+nyBasis basis = PlanarBasis3d (normalDirection basis) (yDirection basis)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
