@@ -3,6 +3,7 @@ module OpenSolid.Range
   , constant
   , unit
   , from
+  , zeroTo
   , unbounded
   , radians
   , degrees
@@ -258,6 +259,10 @@ and the maximum will be used as the upper bound.
 {-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units
 from = Range
+
+-- | Create a range from zero to the given value.
+zeroTo :: Qty units -> Range units
+zeroTo value = Range Qty.zero value
 
 unbounded :: Range units
 unbounded = Range_ -Qty.infinity Qty.infinity
