@@ -25,6 +25,7 @@ module OpenSolid.Plane3d
   , moveTo
   , placeIn
   , relativeTo
+  , offsetBy
   , transformBy
   , translateBy
   , translateIn
@@ -209,6 +210,10 @@ relativeTo frame (Plane3d p0 basis) =
   Plane3d
     (Point3d.relativeTo frame p0)
     (PlanarBasis3d.relativeTo frame basis)
+
+-- | Offset a plane in its normal direction by the given distance.
+offsetBy :: Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+offsetBy = translateInOwn normalDirection
 
 -- | Reverse a plane's X direction, which also reverses the plane's normal direction.
 flipX :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines
