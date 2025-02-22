@@ -66,10 +66,14 @@ import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Axis3d (Axis3d)
+import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds3d (Bounds3d)
+import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve (Curve)
@@ -79,6 +83,8 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -90,6 +96,8 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point3d (Point3d)
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
@@ -103,6 +111,8 @@ import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Prelude (flip)
@@ -136,6 +146,13 @@ classes =
   , drawing2d
   , axis2d
   , uvAxis
+  , vector3d
+  , displacement3d
+  , areaVector3d
+  , direction3d
+  , point3d
+  , bounds3d
+  , axis3d
   , plane3d
   , vectorCurve2d
   , displacementCurve2d
@@ -821,6 +838,195 @@ uvAxis =
   Class.new @(Axis2d (Space @ Unitless)) $(docs ''Axis2d) $
     [ constant "U" (Axis2d.x @Space @Meters) "The U axis."
     , constant "V" (Axis2d.y @Space @Meters) "The V axis."
+    ]
+
+vector3d :: Class
+vector3d =
+  Class.new @(Vector3d (Space @ Unitless))
+    "A unitless vector in 3D."
+    [ constant "Zero" (Vector3d.zero @Space @Unitless) $(docs 'Vector3d.zero)
+    , factory1 "Unit" "Direction" Vector3d.unit $(docs 'Vector3d.unit)
+    , factory3 "XYZ" "X Component" "Y Component" "Z Component" Vector3d.xyz $(docs 'Vector3d.xyz)
+    , factory1 "X" "X Component" Vector3d.x $(docs 'Vector3d.x)
+    , factory1 "Y" "Y Component" Vector3d.y $(docs 'Vector3d.y)
+    , factory1 "Z" "Z Component" Vector3d.z $(docs 'Vector3d.z)
+    , factory1 "From Components" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , member0 "Components" Vector3d.components $(docs 'Vector3d.components)
+    , member0 "X Component" Vector3d.xComponent $(docs 'Vector3d.xComponent)
+    , member0 "Y Component" Vector3d.yComponent $(docs 'Vector3d.yComponent)
+    , member0 "Z Component" Vector3d.zComponent $(docs 'Vector3d.zComponent)
+    , memberU0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
+    , memberU0 "Is Zero" (~= Vector3d.zero) "Check if a vector is zero, within the current tolerance."
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , minusSelf
+    , timesFloat
+    , times @Length Self
+    , times @Area Self
+    , divByFloat
+    , dotSelf
+    , dot @(Vector3d (Space @ Meters)) Self
+    , dot @(Vector3d (Space @ SquareMeters)) Self
+    , dot @(Direction3d Space) Self
+    , crossSelf
+    , cross @(Vector3d (Space @ Meters)) Self
+    , cross @(Vector3d (Space @ SquareMeters)) Self
+    , cross @(Direction3d Space) Self
+    ]
+
+displacement3d :: Class
+displacement3d =
+  Class.new @(Vector3d (Space @ Meters))
+    "A displacement vector in 3D."
+    [ constant "Zero" (Vector3d.zero @Space @Meters) $(docs 'Vector3d.zero)
+    , factory3 "XYZ" "X Component" "Y Component" "Z Component" Vector3d.xyz $(docs 'Vector3d.xyz)
+    , factory1 "X" "X Component" Vector3d.x $(docs 'Vector3d.x)
+    , factory1 "Y" "Y Component" Vector3d.y $(docs 'Vector3d.y)
+    , factory1 "Z" "Z Component" Vector3d.z $(docs 'Vector3d.z)
+    , factory3 "Meters" "X Component" "Y Component" "Z Component" Vector3d.meters $(docs 'Vector3d.meters)
+    , factory3 "Centimeters" "X Component" "Y Component" "Z Component" Vector3d.centimeters $(docs 'Vector3d.centimeters)
+    , factory3 "Millimeters" "X Component" "Y Component" "Z Component" Vector3d.millimeters $(docs 'Vector3d.millimeters)
+    , factory3 "Inches" "X Component" "Y Component" "Z Component" Vector3d.inches $(docs 'Vector3d.inches)
+    , factory1 "From Components" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , member0 "Components" Vector3d.components $(docs 'Vector3d.components)
+    , member0 "X Component" Vector3d.xComponent $(docs 'Vector3d.xComponent)
+    , member0 "Y Component" Vector3d.yComponent $(docs 'Vector3d.yComponent)
+    , member0 "Z Component" Vector3d.zComponent $(docs 'Vector3d.zComponent)
+    , memberM0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
+    , memberM0 "Is Zero" (~= Vector3d.zero) "Check if a displacement is zero, within the current tolerance."
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , minusSelf
+    , timesFloat
+    , times @Length Self
+    , divByFloat
+    , divBy @Length Self
+    , dotSelf
+    , dot @(Vector3d (Space @ Unitless)) Self
+    , dot @(Direction3d Space) Self
+    , crossSelf
+    , cross @(Vector3d (Space @ Unitless)) Self
+    , cross @(Direction3d Space) Self
+    ]
+
+areaVector3d :: Class
+areaVector3d =
+  Class.new @(Vector3d (Space @ SquareMeters))
+    "A vector in 3D with units of area."
+    [ constant "Zero" (Vector3d.zero @Space @SquareMeters) $(docs 'Vector3d.zero)
+    , factory3 "XYZ" "X Component" "Y Component" "Z Component" Vector3d.xyz $(docs 'Vector3d.xyz)
+    , factory1 "X" "X Component" Vector3d.x $(docs 'Vector3d.x)
+    , factory1 "Y" "Y Component" Vector3d.y $(docs 'Vector3d.y)
+    , factory1 "Z" "Z Component" Vector3d.z $(docs 'Vector3d.z)
+    , factory3 "Square Meters" "X Component" "Y Component" "Z Component" Vector3d.squareMeters $(docs 'Vector3d.squareMeters)
+    , factory1 "From Components" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , member0 "Components" Vector3d.components $(docs 'Vector3d.components)
+    , member0 "X Component" Vector3d.xComponent $(docs 'Vector3d.xComponent)
+    , member0 "Y Component" Vector3d.yComponent $(docs 'Vector3d.yComponent)
+    , member0 "Z Component" Vector3d.zComponent $(docs 'Vector3d.zComponent)
+    , memberSM0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
+    , memberSM0 "Is Zero" (~= Vector3d.zero) "Check if an area vector is zero, within the current tolerance."
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , minusSelf
+    , timesFloat
+    , divByFloat
+    , divBy @Length Self
+    , divBy @Area Self
+    , dot @(Vector3d (Space @ Unitless)) Self
+    , dot @(Direction3d Space) Self
+    , cross @(Vector3d (Space @ Unitless)) Self
+    , cross @(Direction3d Space) Self
+    ]
+
+direction3d :: Class
+direction3d =
+  Class.new @(Direction3d Space) $(docs ''Direction3d) $
+    [ constant "X" Direction3d.x $(docs 'Direction3d.x)
+    , constant "Y" Direction3d.y $(docs 'Direction3d.y)
+    , constant "Z" Direction3d.z $(docs 'Direction3d.z)
+    , constant "Positive X" Direction3d.positiveX $(docs 'Direction3d.positiveX)
+    , constant "Positive Y" Direction3d.positiveY $(docs 'Direction3d.positiveY)
+    , constant "Positive Z" Direction3d.positiveZ $(docs 'Direction3d.positiveZ)
+    , constant "Negative X" Direction3d.negativeX $(docs 'Direction3d.negativeX)
+    , constant "Negative Y" Direction3d.negativeY $(docs 'Direction3d.negativeY)
+    , constant "Negative Z" Direction3d.negativeZ $(docs 'Direction3d.negativeZ)
+    , member1 "Angle To" "Other" Direction3d.angleFrom $(docs 'Direction3d.angleFrom)
+    , member0 "Components" Direction3d.components $(docs 'Direction3d.components)
+    , member0 "X Component" Direction3d.xComponent $(docs 'Direction3d.xComponent)
+    , member0 "Y Component" Direction3d.yComponent $(docs 'Direction3d.yComponent)
+    , member0 "Z Component" Direction3d.zComponent $(docs 'Direction3d.zComponent)
+    , negateSelf
+    , floatTimes
+    , timesFloat
+    , times @Length Self
+    , times @Area Self
+    , dotSelf
+    , dot @(Vector3d (Space @ Unitless)) Self
+    , dot @(Vector3d (Space @ Meters)) Self
+    , dot @(Vector3d (Space @ SquareMeters)) Self
+    , crossSelf
+    , cross @(Vector3d (Space @ Unitless)) Self
+    , cross @(Vector3d (Space @ Meters)) Self
+    , cross @(Vector3d (Space @ SquareMeters)) Self
+    ]
+
+point3d :: Class
+point3d =
+  Class.new @(Point3d (Space @ Meters))
+    "A point in 3D, defined by its XYZ coordinates."
+    [ constant "Origin" (Point3d.origin @Space @Meters) $(docs 'Point3d.origin)
+    , factory3 "XYZ" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.xyz $(docs 'Point3d.xyz)
+    , factory1 "X" "X Coordinate" Point3d.x $(docs 'Point3d.x)
+    , factory1 "Y" "Y Coordinate" Point3d.y $(docs 'Point3d.y)
+    , factory1 "Z" "Z Coordinate" Point3d.z $(docs 'Point3d.z)
+    , factory3 "Meters" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.meters $(docs 'Point3d.meters)
+    , factory3 "Centimeters" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.centimeters $(docs 'Point3d.centimeters)
+    , factory3 "Millimeters" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.millimeters $(docs 'Point3d.millimeters)
+    , factory3 "Inches" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.inches $(docs 'Point3d.inches)
+    , factory1 "From Coordinates" "Coordinates" Point3d.fromCoordinates $(docs 'Point3d.fromCoordinates)
+    , member0 "Coordinates" Point3d.coordinates $(docs 'Point3d.coordinates)
+    , member0 "X Coordinate" Point3d.xCoordinate $(docs 'Point3d.xCoordinate)
+    , member0 "Y Coordinate" Point3d.yCoordinate $(docs 'Point3d.yCoordinate)
+    , member0 "Z Coordinate" Point3d.zCoordinate $(docs 'Point3d.zCoordinate)
+    , member1 "Distance To" "Other" Point3d.distanceFrom $(docs 'Point3d.distanceFrom)
+    , member1 "Midpoint" "Other" Point3d.midpoint $(docs 'Point3d.midpoint)
+    , minusSelf
+    , minus @(Vector3d (Space @ Meters)) Self
+    , plus @(Vector3d (Space @ Meters)) Self
+    ]
+
+bounds3d :: Class
+bounds3d =
+  Class.new @(Bounds3d (Space @ Meters))
+    "A bounding box in 3D."
+    [ factory3 "XYZ" "X Coordinate" "Y Coordinate" "Z Coordinate" Bounds3d.xyz $(docs 'Bounds3d.xyz)
+    , factory1 "Constant" "Point" Bounds3d.constant $(docs 'Bounds3d.constant)
+    , factory2 "From Corners" "P1" "P2" Bounds3d.hull2 $(docs 'Bounds3d.hull2)
+    , factory1 "Hull" "Points" Bounds3d.hullN $(docs 'Bounds3d.hullN)
+    , factory1 "Aggregate" "Bounds" Bounds3d.aggregateN $(docs 'Bounds3d.aggregateN)
+    , member0 "Coordinates" Bounds3d.coordinates $(docs 'Bounds3d.coordinates)
+    , member0 "X Coordinate" Bounds3d.xCoordinate $(docs 'Bounds3d.xCoordinate)
+    , member0 "Y Coordinate" Bounds3d.yCoordinate $(docs 'Bounds3d.yCoordinate)
+    , member0 "Z Coordinate" Bounds3d.zCoordinate $(docs 'Bounds3d.zCoordinate)
+    , plus @(Vector3d (Space @ Meters)) Self
+    , minus @(Vector3d (Space @ Meters)) Self
+    ]
+
+axis3d :: Class
+axis3d =
+  Class.new @(Axis3d (Space @ Meters)) $(docs ''Axis3d) $
+    [ constant "X" (Axis3d.x @Space @Meters) $(docs 'Axis3d.x)
+    , constant "Y" (Axis3d.y @Space @Meters) $(docs 'Axis3d.y)
+    , constant "Z" (Axis3d.z @Space @Meters) $(docs 'Axis3d.z)
+    , member0 "Origin Point" Axis3d.originPoint $(docs 'Axis3d.originPoint)
+    , member0 "Direction" Axis3d.direction $(docs 'Axis3d.direction)
+    , member0 "Normal Plane" Axis3d.normalPlane $(docs 'Axis3d.normalPlane)
+    , member1 "Move To" "Point" Axis3d.moveTo $(docs 'Axis3d.moveTo)
+    , member0 "Reverse" Axis3d.reverse $(docs 'Axis3d.reverse)
     ]
 
 plane3d :: Class
