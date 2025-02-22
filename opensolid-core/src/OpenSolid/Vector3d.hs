@@ -42,6 +42,8 @@ module OpenSolid.Vector3d
   , rotateAround
   , scaleIn
   , scaleAlong
+  , mirrorIn
+  , mirrorAcross
   )
 where
 
@@ -50,6 +52,7 @@ import OpenSolid.Area qualified as Area
 import OpenSolid.Error qualified as Error
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -57,6 +60,7 @@ import OpenSolid.Primitives
   , Basis3d (Basis3d)
   , Direction3d (Unit3d)
   , Frame3d (Frame3d)
+  , Plane3d
   , Vector3d (Vector3d)
   )
 import OpenSolid.Qty qualified as Qty
@@ -285,6 +289,13 @@ This is equivalent to scaling along an axis with the given direction.
 scaleIn :: Direction3d space -> Float -> Vector3d (space @ units) -> Vector3d (space @ units)
 scaleIn axisDirection = scaleAlong (Axis3d Point3d.origin axisDirection)
 
+{-| Mirror in a particular direction.
+
+This is equivalent to mirroring across a plane with the given normal direction.
+-}
+mirrorIn :: Direction3d space -> Vector3d (space @ units) -> Vector3d (space @ units)
+mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
+
 -- | Rotate around the given axis by the given angle.
 rotateAround ::
   Axis3d (space @ axisUnits) ->
@@ -300,3 +311,10 @@ scaleAlong ::
   Vector3d (space @ units) ->
   Vector3d (space @ units)
 scaleAlong = Transform3d.scaleAlongImpl transformBy
+
+-- | Mirror across the given plane.
+mirrorAcross ::
+  Plane3d (space @ planeUnits) defines ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units)
+mirrorAcross plane vector = mirrorIn (Plane3d.normalDirection plane) vector
