@@ -658,7 +658,7 @@ bounds2d =
   Class.new @(Bounds2d (Space @ Meters)) "A bounding box in 2D." $
     [ factory2 "XY" "X Coordinate" "Y Coordinate" Bounds2d.xy $(docs 'Bounds2d.xy)
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
-    , factory2 "From Corners" "P1" "P2" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
+    , factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
@@ -673,7 +673,7 @@ uvBounds =
   Class.new @(Bounds2d (Space @ Unitless)) "A bounding box in UV parameter space." $
     [ factory2 "UV" "U Coordinate" "V Coordinate" Bounds2d.xy $(docs 'Bounds2d.xy)
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
-    , factory2 "From Corners" "P1" "P2" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
+    , factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
@@ -1009,7 +1009,7 @@ bounds3d =
   Class.new @(Bounds3d (Space @ Meters)) "A bounding box in 3D." $
     [ factory3 "XYZ" "X Coordinate" "Y Coordinate" "Z Coordinate" Bounds3d.xyz $(docs 'Bounds3d.xyz)
     , factory1 "Constant" "Point" Bounds3d.constant $(docs 'Bounds3d.constant)
-    , factory2 "From Corners" "P1" "P2" Bounds3d.hull2 $(docs 'Bounds3d.hull2)
+    , factory2 "From Corners" "First Point" "Second Point" Bounds3d.hull2 $(docs 'Bounds3d.hull2)
     , factory1 "Hull" "Points" Bounds3d.hullN $(docs 'Bounds3d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds3d.aggregateN $(docs 'Bounds3d.aggregateN)
     , member0 "Coordinates" Bounds3d.coordinates $(docs 'Bounds3d.coordinates)
