@@ -20,6 +20,8 @@ module OpenSolid.Plane3d
   , yDirection
   , xAxis
   , yAxis
+  , flipX
+  , flipY
   , moveTo
   , placeIn
   , relativeTo
@@ -207,6 +209,14 @@ relativeTo frame (Plane3d p0 basis) =
   Plane3d
     (Point3d.relativeTo frame p0)
     (PlanarBasis3d.relativeTo frame basis)
+
+-- | Reverse a plane's X direction, which also reverses the plane's normal direction.
+flipX :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+flipX (Plane3d p0 b) = Plane3d p0 (PlanarBasis3d.flipX b)
+
+-- | Reverse a plane's Y direction, which also reverses the plane's normal direction.
+flipY :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+flipY (Plane3d p0 b) = Plane3d p0 (PlanarBasis3d.flipY b)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
