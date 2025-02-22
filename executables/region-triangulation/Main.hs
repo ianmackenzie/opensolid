@@ -46,5 +46,5 @@ main = Tolerance.using Length.nanometer IO.do
           , Drawing2d.roundStrokeJoins
           ]
           [a, b, c]
-  Drawing2d.writeTo "executables/region-triangulation/triangulated.svg" drawingBounds $
+  Drawing2d.writeSvg "executables/region-triangulation/triangulated.svg" drawingBounds $
     List.map drawTriangle triangles

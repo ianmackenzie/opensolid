@@ -236,7 +236,7 @@ drawZeros path zeros = IO.do
   let viewBox = Bounds2d.xy uvRange uvRange
   let crossingCurves = SurfaceFunction.Zeros.crossingCurves zeros
   let saddlePoints = SurfaceFunction.Zeros.saddlePoints zeros
-  Drawing2d.writeTo path viewBox $
+  Drawing2d.writeSvg path viewBox $
     [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] $
         [ drawBounds [] (Bounds2d.convert toDrawing SurfaceParameter.domain)
         , Drawing2d.group (List.mapWithIndex drawCrossingCurve crossingCurves)
@@ -365,7 +365,7 @@ testBezierSegment = IO.do
   let coordinateRange = Range.convert toDrawing (Range.from -1.0 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
-  Drawing2d.writeTo "executables/sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
+  Drawing2d.writeSvg "executables/sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
 
 testHermiteBezier :: IO ()
 testHermiteBezier = IO.do
@@ -382,7 +382,7 @@ testHermiteBezier = IO.do
   let curveEntity = Drawing2d.curve curveAttributes Length.millimeter curve
   let coordinateRange = Range.from (Length.meters -1.0) (Length.meters 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
-  Drawing2d.writeTo "executables/sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
+  Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
 
 testExplicitRandomStep :: IO ()
 testExplicitRandomStep = IO.do

@@ -82,7 +82,7 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
         let drawPoint = Drawing2d.circle [Drawing2d.whiteFill] (Length.millimeters 1.5)
         let entities = [curveEntity, Drawing2d.group (List.map drawPoint pointLocations)]
         let drawingBounds = Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30.0 15.0)
-        Drawing2d.writeTo fileName drawingBounds entities
+        Drawing2d.writeSvg fileName drawingBounds entities
   drawCurve "executables/arc-length/cubic-spline.svg" spline
   drawCurve "executables/arc-length/parameterized-spline.svg" parameterized
 

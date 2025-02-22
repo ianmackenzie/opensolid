@@ -4,7 +4,7 @@ module OpenSolid.Drawing2d
   , Resolution
   , Point
   , toSvg
-  , writeTo
+  , writeSvg
   , nothing
   , group
   , with
@@ -115,8 +115,8 @@ toSvg viewBox entities = do
     , Maybe.withDefault "" (entityText "" (Node "svg" attributes entities)) + "\n"
     ]
 
-writeTo :: Text -> Bounds2d (space @ Meters) -> List (Entity space) -> IO ()
-writeTo path viewBox entities = IO.writeFile path (toSvg viewBox entities)
+writeSvg :: Text -> Bounds2d (space @ Meters) -> List (Entity space) -> IO ()
+writeSvg path viewBox entities = IO.writeFile path (toSvg viewBox entities)
 
 nothing :: Entity space
 nothing = Empty
