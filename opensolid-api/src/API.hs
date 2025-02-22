@@ -19,11 +19,13 @@ import API.Class
   , factory3
   , factory4
   , factoryM1R
+  , factoryM2R
   , factoryM3
   , factoryM3R
   , factoryM4
   , factoryM4R
   , factoryU1R
+  , factoryU2R
   , factoryU3
   , factoryU4
   , floatDivBy
@@ -961,6 +963,8 @@ region2d :: Class
 region2d =
   Class.new @(Region2d (Space @ Meters)) $(docs ''Region2d) $
     [ factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
+    , factoryM1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
+    , factoryM2R "Circle" "Center Pointer" "Radius" Region2d.circle $(docs 'Region2d.circle)
     , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
     , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
     , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
@@ -972,6 +976,8 @@ uvRegion =
   Class.new @(Region2d (Space @ Unitless)) $(docs ''Region2d) $
     [ constant "Unit" Region2d.unit $(docs 'Region2d.unit)
     , factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
+    , factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
+    , factoryU2R "Circle" "Center Pointer" "Radius" Region2d.circle $(docs 'Region2d.circle)
     , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
     , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
     , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
