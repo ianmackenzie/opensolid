@@ -108,6 +108,8 @@ import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -840,6 +842,12 @@ vector3d =
     , member0 "Z Component" Vector3d.zComponent $(docs 'Vector3d.zComponent)
     , memberU0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , memberU0 "Is Zero" (~= Vector3d.zero) "Check if a vector is zero, within the current tolerance."
+    , member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
+    , member2 "Rotate Around" "Axis" "Angle" (Vector3d.rotateAround @Space @Meters) $(docs 'Vector3d.rotateAround)
+    , member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
+    , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
+    , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
+    , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -877,6 +885,12 @@ displacement3d =
     , member0 "Z Component" Vector3d.zComponent $(docs 'Vector3d.zComponent)
     , memberM0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , memberM0 "Is Zero" (~= Vector3d.zero) "Check if a displacement is zero, within the current tolerance."
+    , member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
+    , member2 "Rotate Around" "Axis" "Angle" (Vector3d.rotateAround @Space @Meters) $(docs 'Vector3d.rotateAround)
+    , member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
+    , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
+    , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
+    , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -909,6 +923,12 @@ areaVector3d =
     , member0 "Z Component" Vector3d.zComponent $(docs 'Vector3d.zComponent)
     , memberSM0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , memberSM0 "Is Zero" (~= Vector3d.zero) "Check if an area vector is zero, within the current tolerance."
+    , member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
+    , member2 "Rotate Around" "Axis" "Angle" (Vector3d.rotateAround @Space @Meters) $(docs 'Vector3d.rotateAround)
+    , member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
+    , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
+    , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
+    , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -940,6 +960,10 @@ direction3d =
     , member0 "X Component" Direction3d.xComponent $(docs 'Direction3d.xComponent)
     , member0 "Y Component" Direction3d.yComponent $(docs 'Direction3d.yComponent)
     , member0 "Z Component" Direction3d.zComponent $(docs 'Direction3d.zComponent)
+    , member2 "Rotate In" "Direction" "Angle" Direction3d.rotateIn $(docs 'Direction3d.rotateIn)
+    , member2 "Rotate Around" "Axis" "Angle" (Direction3d.rotateAround @Space @Meters) $(docs 'Direction3d.rotateAround)
+    , member1 "Mirror In" "Direction" Direction3d.mirrorIn $(docs 'Direction3d.mirrorIn)
+    , member1 "Mirror Across" "Plane" (Direction3d.mirrorAcross @Space @Meters) $(docs 'Direction3d.mirrorAcross)
     , negateSelf
     , floatTimes
     , timesFloat
@@ -978,6 +1002,7 @@ point3d =
     , minus @(Vector3d (Space @ Meters)) Self
     , plus @(Vector3d (Space @ Meters)) Self
     ]
+      + affineTransformations3d Point3d.transformBy
 
 bounds3d :: Class
 bounds3d =
@@ -994,6 +1019,7 @@ bounds3d =
     , plus @(Vector3d (Space @ Meters)) Self
     , minus @(Vector3d (Space @ Meters)) Self
     ]
+      + affineTransformations3d Bounds3d.transformBy
 
 axis3d :: Class
 axis3d =
@@ -1007,6 +1033,7 @@ axis3d =
     , member1 "Move To" "Point" Axis3d.moveTo $(docs 'Axis3d.moveTo)
     , member0 "Reverse" Axis3d.reverse $(docs 'Axis3d.reverse)
     ]
+      + orthonormalTransformations3d Axis3d.transformBy
 
 plane3d :: Class
 plane3d =
@@ -1024,6 +1051,7 @@ plane3d =
     , member0 "Y Direction" Plane3d.yDirection $(docs 'Plane3d.yDirection)
     , member1 "Move To" "Point" Plane3d.moveTo $(docs 'Plane3d.moveTo)
     ]
+      + orthonormalTransformations3d Plane3d.transformBy
 
 vectorCurve2d :: Class
 vectorCurve2d =
@@ -1089,6 +1117,41 @@ affineTransformations2d ::
 affineTransformations2d transformBy =
   member2 "Scale Along" "Axis" "Scale" (Transform2d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
     : uniformTransformations2d transformBy
+
+rigidTransformations3d ::
+  FFI value =>
+  (Transform3d.Rigid (Space @ Meters) -> value -> value) ->
+  List (Class.Member value)
+rigidTransformations3d transformBy =
+  [ member1 "Translate By" "Displacement" (Transform3d.translateByImpl transformBy) "Translate by the given displacement."
+  , member2 "Translate In" "Direction" "Distance" (Transform3d.translateInImpl transformBy) "Translate in the given direction by the given distance."
+  , member2 "Translate Along" "Axis" "Distance" (Transform3d.translateAlongImpl transformBy) "Translate along the given axis by the given distance."
+  , member2 "Rotate Around" "Axis" "Angle" (Transform3d.rotateAroundImpl transformBy) "Rotate around the given axis by the given angle."
+  ]
+
+orthonormalTransformations3d ::
+  FFI value =>
+  (forall tag. Transform.IsOrthonormal tag => Transform3d tag (Space @ Meters) -> value -> value) ->
+  List (Class.Member value)
+orthonormalTransformations3d transformBy =
+  member1 "Mirror Across" "Plane" (Transform3d.mirrorAcrossImpl transformBy) "Mirror across the given plane."
+    : rigidTransformations3d transformBy
+
+uniformTransformations3d ::
+  FFI value =>
+  (forall tag. Transform.IsUniform tag => Transform3d tag (Space @ Meters) -> value -> value) ->
+  List (Class.Member value)
+uniformTransformations3d transformBy =
+  member2 "Scale About" "Point" "Scale" (Transform3d.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
+    : orthonormalTransformations3d transformBy
+
+affineTransformations3d ::
+  FFI value =>
+  (forall tag. Transform3d tag (Space @ Meters) -> value -> value) ->
+  List (Class.Member value)
+affineTransformations3d transformBy =
+  member2 "Scale Along" "Axis" "Scale" (Transform3d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
+    : uniformTransformations3d transformBy
 
 curve2d :: Class
 curve2d =
