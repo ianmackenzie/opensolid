@@ -7,6 +7,8 @@ module OpenSolid.Plane3d
   , xz
   , yz
   , zy
+  , fromXAxis
+  , fromYAxis
   , originPoint
   , normalDirection
   , normalAxis
@@ -91,6 +93,20 @@ and whose Y direction is the global Y direction.
 -}
 zy :: Plane3d (space @ units) (Defines local)
 zy = Plane3d Point3d.origin PlanarBasis3d.zy
+
+{-| Construct a plane having the given X axis.
+
+A perpendicular Y direction will be chosen arbitrarily.
+-}
+fromXAxis :: Axis3d (space @ units) -> Plane3d (space @ units) defines
+fromXAxis (Axis3d p0 d) = Plane3d p0 (PlanarBasis3d.fromXDirection d)
+
+{-| Construct a plane having the given Y axis.
+
+A perpendicular X direction will be chosen arbitrarily.
+-}
+fromYAxis :: Axis3d (space @ units) -> Plane3d (space @ units) defines
+fromYAxis (Axis3d p0 d) = Plane3d p0 (PlanarBasis3d.fromYDirection d)
 
 {-| Get the origin point of a plane.
 
