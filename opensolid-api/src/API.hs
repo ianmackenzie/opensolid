@@ -1038,6 +1038,12 @@ plane3d =
     , constant "XZ" (Plane3d.xz @Space @Meters) $(docs 'Plane3d.xz)
     , constant "YZ" (Plane3d.yz @Space @Meters) $(docs 'Plane3d.yz)
     , constant "ZY" (Plane3d.zy @Space @Meters) $(docs 'Plane3d.zy)
+    , member0 "Origin Point" Plane3d.originPoint $(docs 'Plane3d.originPoint)
+    , member0 "Normal Direction" Plane3d.normalDirection $(docs 'Plane3d.normalDirection)
+    , member0 "Normal Axis" Plane3d.normalAxis $(docs 'Plane3d.normalAxis)
+    , member0 "X Direction" Plane3d.xDirection $(docs 'Plane3d.xDirection)
+    , member0 "Y Direction" Plane3d.yDirection $(docs 'Plane3d.yDirection)
+    , member1 "Move To" "Point" Plane3d.moveTo $(docs 'Plane3d.moveTo)
     ]
 
 vectorCurve2d :: Class
