@@ -1103,6 +1103,10 @@ instance
 
 ----- Direction3d -----
 
+{-| A direction in 3D.
+
+This is effectively a type-safe unit vector.
+-}
 newtype Direction3d (space :: Type) = Unit3d (Vector3d (space @ Unitless))
   deriving (Eq, Show)
 
@@ -1737,6 +1741,7 @@ instance
 
 ----- Axis3d -----
 
+-- | An axis in 3D, defined by an origin point and direction.
 data Axis3d (coordinateSystem :: CoordinateSystem) where
   Axis3d ::
     Point3d (space @ units) ->

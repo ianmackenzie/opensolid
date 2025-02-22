@@ -91,18 +91,30 @@ and whose Y direction is the global Y direction.
 zy :: Plane3d (space @ units) (Defines local)
 zy = Plane3d Point3d.origin PlanarBasis3d.zy
 
+{-| Get the origin point of a plane.
+
+This is the 3D point corresponding to (0,0) in the plane's local coordinates.
+-}
 originPoint :: Plane3d (space @ units) defines -> Point3d (space @ units)
 originPoint (Plane3d p0 _) = p0
 
+-- | Get the normal direction of a plane.
 normalDirection :: Plane3d (space @ units) defines -> Direction3d space
 normalDirection (Plane3d _ basis) = PlanarBasis3d.normalDirection basis
 
+{-| Construct an axis normal (perpendicular) to a plane.
+
+The origin point of the axis will be the origin point of the plane,
+and the direction of the axis will be the normal direction of the plane.
+-}
 normalAxis :: Plane3d (space @ units) defines -> Axis3d (space @ units)
 normalAxis plane = Axis3d (originPoint plane) (normalDirection plane)
 
+-- | Get the X direction of a plane.
 xDirection :: Plane3d (space @ units) defines -> Direction3d space
 xDirection (Plane3d _ basis) = PlanarBasis3d.xDirection basis
 
+-- | Get the Y direction of a plane.
 yDirection :: Plane3d (space @ units) defines -> Direction3d space
 yDirection (Plane3d _ basis) = PlanarBasis3d.yDirection basis
 

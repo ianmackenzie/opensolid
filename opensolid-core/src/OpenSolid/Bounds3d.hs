@@ -51,22 +51,28 @@ instance Bounded3d (Point3d (space @ units)) (space @ units) where
 instance Bounded3d (Bounds3d (space @ units)) (space @ units) where
   bounds = identity
 
+-- | Get the X coordinate range of a bounding box.
 xCoordinate :: Bounds3d (space @ units) -> Range units
 xCoordinate (Bounds3d x _ _) = x
 
+-- | Get the Y coordinate range of a bounding box.
 yCoordinate :: Bounds3d (space @ units) -> Range units
 yCoordinate (Bounds3d _ y _) = y
 
+-- | Get the Z coordinate range of a bounding box.
 zCoordinate :: Bounds3d (space @ units) -> Range units
 zCoordinate (Bounds3d _ _ z) = z
 
+-- | Get the XYZ coordinate ranges of a bounding box as a tuple.
 {-# INLINE coordinates #-}
 coordinates :: Bounds3d (space @ units) -> (Range units, Range units, Range units)
 coordinates (Bounds3d x y z) = (x, y, z)
 
+-- | Construct a bounding box from its X, Y and Z coordinate ranges.
 xyz :: Range units -> Range units -> Range units -> Bounds3d (space @ units)
 xyz = Bounds3d
 
+-- | Construct a zero-size bounding box containing a single point.
 constant :: Point3d (space @ units) -> Bounds3d (space @ units)
 constant (Point3d x y z) =
   Bounds3d (Range.constant x) (Range.constant y) (Range.constant z)
@@ -161,6 +167,7 @@ intersection (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) = Maybe.do
   z <- Range.intersection z1 z2
   Just (Bounds3d x y z)
 
+-- | Construct a bounding box from two corner points.
 hull2 ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->

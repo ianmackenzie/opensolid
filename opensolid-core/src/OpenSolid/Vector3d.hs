@@ -64,30 +64,57 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters, SquareMeters)
 import OpenSolid.Units qualified as Units
 
+-- | The zero vector.
 zero :: Vector3d (space @ units)
 zero = Vector3d Qty.zero Qty.zero Qty.zero
 
+-- | Construct a unit vector in the given direction.
 unit :: Direction3d space -> Vector3d (space @ Unitless)
 unit (Unit3d vector) = vector
 
+{-| Construct a vector from just an X component.
+
+The Y and Z components will be set to zero.
+-}
 x :: Qty units -> Vector3d (space @ units)
 x vx = Vector3d vx Qty.zero Qty.zero
 
+{-| Construct a vector from just a Y component.
+
+The X and Z components will be set to zero.
+-}
 y :: Qty units -> Vector3d (space @ units)
 y vy = Vector3d Qty.zero vy Qty.zero
 
+{-| Construct a vector from just a Z component.
+
+The X and Y components will be set to zero.
+-}
 z :: Qty units -> Vector3d (space @ units)
 z vz = Vector3d Qty.zero Qty.zero vz
 
+{-| Construct a vector from X and Y components.
+
+The Z component will be set to zero.
+-}
 xy :: Qty units -> Qty units -> Vector3d (space @ units)
 xy vx vz = Vector3d vx vz Qty.zero
 
+{-| Construct a vector from X and Z components.
+
+The Y component will be set to zero.
+-}
 xz :: Qty units -> Qty units -> Vector3d (space @ units)
 xz vx vz = Vector3d vx Qty.zero vz
 
+{-| Construct a vector from Y and Z components.
+
+The X component will be set to zero.
+-}
 yz :: Qty units -> Qty units -> Vector3d (space @ units)
 yz vy vz = Vector3d Qty.zero vy vz
 
+-- | Construct a vector from its X, Y and Z components.
 xyz :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 xyz = Vector3d
 
@@ -110,28 +137,36 @@ xyzInBasis (Basis3d i j k) vx vy vz = vx * i + vy * j + vz * k
 apply :: (Float -> Qty units) -> Float -> Float -> Float -> Vector3d (space @ units)
 apply units px py pz = Vector3d (units px) (units py) (units pz)
 
+-- | Construct a vector from its XYZ components given in meters.
 meters :: Float -> Float -> Float -> Vector3d (space @ Meters)
 meters = apply Length.meters
 
+-- | Construct a vector from its XYZ components given in centimeters.
 centimeters :: Float -> Float -> Float -> Vector3d (space @ Meters)
 centimeters = apply Length.centimeters
 
+-- | Construct a vector from its XYZ components given in millimeters.
 millimeters :: Float -> Float -> Float -> Vector3d (space @ Meters)
 millimeters = apply Length.millimeters
 
+-- | Construct a vector from its XYZ components given in inches.
 inches :: Float -> Float -> Float -> Vector3d (space @ Meters)
 inches = apply Length.inches
 
+-- | Construct a vector from its XYZ components given in square meters.
 squareMeters :: Float -> Float -> Float -> Vector3d (space @ SquareMeters)
 squareMeters vx vy vz =
   Vector3d (Area.squareMeters vx) (Area.squareMeters vy) (Area.squareMeters vz)
 
+-- | Get the X component of a vector.
 xComponent :: Vector3d (space @ units) -> Qty units
 xComponent (Vector3d vx _ _) = vx
 
+-- | Get the Y component of a vector.
 yComponent :: Vector3d (space @ units) -> Qty units
 yComponent (Vector3d _ vy _) = vy
 
+-- | Get the Z component of a vector.
 zComponent :: Vector3d (space @ units) -> Qty units
 zComponent (Vector3d _ _ vz) = vz
 
@@ -141,6 +176,7 @@ componentIn = (<>)
 projectionIn :: Direction3d space -> Vector3d (space @ units) -> Vector3d (space @ units)
 projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
 
+-- | Get the XYZ components of a vector as a tuple.
 {-# INLINE components #-}
 components :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
 components (Vector3d vx vy vz) = (vx, vy, vz)
@@ -171,6 +207,11 @@ squaredMagnitude' (Vector3d vx vy vz) = vx .*. vx + vy .*. vy + vz .*. vz
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
+{-| Attempt to get the direction of a vector.
+
+The current tolerance will be used to check if the vector is zero
+(and therefore does not have a direction).
+-}
 direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
   let vm = magnitude vector

@@ -38,15 +38,19 @@ import OpenSolid.Vector3d qualified as Vector3d
 pattern Direction3d :: Float -> Float -> Float -> Direction3d space
 pattern Direction3d dx dy dz <- Unit3d (Vector3d dx dy dz)
 
+-- | Get the X component of a direction.
 xComponent :: Direction3d space -> Float
 xComponent (Direction3d dx _ _) = dx
 
+-- | Get the Y component of a direction.
 yComponent :: Direction3d space -> Float
 yComponent (Direction3d _ dy _) = dy
 
+-- | Get the Z component of a direction.
 zComponent :: Direction3d space -> Float
 zComponent (Direction3d _ _ dz) = dz
 
+-- | Get the XYZ components of a direction as a tuple.
 {-# INLINE components #-}
 components :: Direction3d space -> (Float, Float, Float)
 components (Unit3d vector) = Vector3d.components vector
@@ -61,33 +65,46 @@ lift ::
   Direction3d spaceB
 lift function (Unit3d vector) = Unit3d (function vector)
 
+-- | The positive X direction.
 positiveX :: Direction3d space
 positiveX = unsafe (Vector3d 1.0 0.0 0.0)
 
+-- | The negative X direction.
 negativeX :: Direction3d space
 negativeX = negate positiveX
 
+-- | The positive Y direction.
 positiveY :: Direction3d space
 positiveY = unsafe (Vector3d 0.0 1.0 0.0)
 
+-- | The negative Y direction.
 negativeY :: Direction3d space
 negativeY = negate positiveY
 
+-- | The positive Z direction.
 positiveZ :: Direction3d space
 positiveZ = unsafe (Vector3d 0.0 0.0 1.0)
 
+-- | The negative Z direction.
 negativeZ :: Direction3d space
 negativeZ = negate positiveZ
 
+-- | The X direction.
 x :: Direction3d space
 x = positiveX
 
+-- | The Y direction.
 y :: Direction3d space
 y = positiveY
 
+-- | The Z direction.
 z :: Direction3d space
 z = positiveZ
 
+{-| Measure the angle from one direction to another.
+
+The result will always be between 0 and 180 degrees.
+-}
 angleFrom :: Direction3d space -> Direction3d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 >< d2)) (d1 <> d2)
 

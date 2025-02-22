@@ -63,40 +63,52 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
 import OpenSolid.Vector3d qualified as Vector3d
 
+-- | Get the X coordinate of a point.
 xCoordinate :: Point3d (space @ units) -> Qty units
 xCoordinate (Point3d px _ _) = px
 
+-- | Get the Y coordinate of a point.
 yCoordinate :: Point3d (space @ units) -> Qty units
 yCoordinate (Point3d _ py _) = py
 
+-- | Get the Z coordinate of a point.
 zCoordinate :: Point3d (space @ units) -> Qty units
 zCoordinate (Point3d _ _ pz) = pz
 
+-- | Get the XYZ coordinates of a point as a tuple.
 {-# INLINE coordinates #-}
 coordinates :: Point3d (space @ units) -> (Qty units, Qty units, Qty units)
 coordinates (Point3d px py pz) = (px, py, pz)
 
+-- | The point with coordinates (0,0, 0).
 origin :: Point3d (space @ units)
 origin = Point3d Qty.zero Qty.zero Qty.zero
 
+-- | Construct a point along the X axis, with the given X coordinate.
 x :: Qty units -> Point3d (space @ units)
 x px = Point3d px Qty.zero Qty.zero
 
+-- | Construct a point along the Y axis, with the given Y coordinate.
 y :: Qty units -> Point3d (space @ units)
 y py = Point3d Qty.zero py Qty.zero
 
+-- | Construct a point along the Z axis, with the given Z coordinate.
 z :: Qty units -> Point3d (space @ units)
 z pz = Point3d Qty.zero Qty.zero pz
 
+-- | Construct a point in the XY plane, with the given X and Y coordinates.
 xy :: Qty units -> Qty units -> Point3d (space @ units)
 xy px py = Point3d px py Qty.zero
 
+-- | Construct a point in the XZ plane, with the given X and Z coordinates.
 xz :: Qty units -> Qty units -> Point3d (space @ units)
 xz px pz = Point3d px Qty.zero pz
 
+-- | Construct a point in the YZ plane, with the given Y and Z coordinates.
 yz :: Qty units -> Qty units -> Point3d (space @ units)
 yz py pz = Point3d Qty.zero py pz
 
+-- | Construct a point from its X, Y and Z coordinates.
 xyz :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 xyz = Point3d
 
@@ -106,15 +118,19 @@ xyOn (Plane3d p0 (PlanarBasis3d i j)) px py = p0 + px * i + py * j
 apply :: (Float -> Qty units) -> Float -> Float -> Float -> Point3d (space @ units)
 apply units px py pz = Point3d (units px) (units py) (units pz)
 
+-- | Construct a point from its X, Y and Z coordinates given in meters.
 meters :: Float -> Float -> Float -> Point3d (space @ Meters)
 meters = apply Length.meters
 
+-- | Construct a point from its X, Y and Z coordinates given in centimeters.
 centimeters :: Float -> Float -> Float -> Point3d (space @ Meters)
 centimeters = apply Length.centimeters
 
+-- | Construct a point from its X, Y and Z coordinates given in millimeters.
 millimeters :: Float -> Float -> Float -> Point3d (space @ Meters)
 millimeters = apply Length.millimeters
 
+-- | Construct a point from its X, Y and Z coordinates given in inches.
 inches :: Float -> Float -> Float -> Point3d (space @ Meters)
 inches = apply Length.inches
 
@@ -129,10 +145,12 @@ interpolateFrom (Point3d x1 y1 z1) (Point3d x2 y2 z2) t =
     (Qty.interpolateFrom y1 y2 t)
     (Qty.interpolateFrom z1 z2 t)
 
+-- | Find the midpoint between two points.
 midpoint :: Point3d (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
 midpoint (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
   Point3d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2) (Qty.midpoint z1 z2)
 
+-- | Compute the distance from one point to another.
 distanceFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Qty units
 distanceFrom p1 p2 = Vector3d.magnitude (p2 - p1)
 
