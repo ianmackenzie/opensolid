@@ -271,12 +271,21 @@ transformBy transform vector = do
   let Vector3d vx vy vz = vector
   vx * i + vy * j + vz * k
 
+{-| Rotate a vector in a given direction.
+
+This is equivalent to rotating around an axis with the given direction.
+-}
 rotateIn :: Direction3d space -> Angle -> Vector3d (space @ units) -> Vector3d (space @ units)
 rotateIn axisDirection = rotateAround (Axis3d Point3d.origin axisDirection)
 
+{-| Scale (stretch) in the given direction by the given scaling factor.
+
+This is equivalent to scaling along an axis with the given direction.
+-}
 scaleIn :: Direction3d space -> Float -> Vector3d (space @ units) -> Vector3d (space @ units)
 scaleIn axisDirection = scaleAlong (Axis3d Point3d.origin axisDirection)
 
+-- | Rotate around the given axis by the given angle.
 rotateAround ::
   Axis3d (space @ axisUnits) ->
   Angle ->
@@ -284,6 +293,7 @@ rotateAround ::
   Vector3d (space @ units)
 rotateAround = Transform3d.rotateAroundImpl transformBy
 
+-- | Scale (stretch) along the given axis by the given scaling factor.
 scaleAlong ::
   Axis3d (space @ axisUnits) ->
   Float ->
