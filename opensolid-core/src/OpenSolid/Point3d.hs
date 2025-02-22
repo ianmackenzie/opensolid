@@ -13,6 +13,7 @@ module OpenSolid.Point3d
   , yz
   , xyz
   , xyOn
+  , fromCoordinates
   , meters
   , centimeters
   , millimeters
@@ -114,6 +115,10 @@ xyz = Point3d
 
 xyOn :: Plane3d (space @ units) (Defines local) -> Qty units -> Qty units -> Point3d (space @ units)
 xyOn (Plane3d p0 (PlanarBasis3d i j)) px py = p0 + px * i + py * j
+
+-- | Construct a point from a tuple of X, Y and Z coordinates.
+fromCoordinates :: (Qty units, Qty units, Qty units) -> Point3d (space @ units)
+fromCoordinates (px, py, pz) = Point3d px py pz
 
 apply :: (Float -> Qty units) -> Float -> Float -> Float -> Point3d (space @ units)
 apply units px py pz = Point3d (units px) (units py) (units pz)
