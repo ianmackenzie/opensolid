@@ -215,13 +215,12 @@ class _Tuple4_c_void_p_List_c_void_p_c_void_p_c_void_p(Structure):
     ]
 
 
-class _Tuple5_c_void_p_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
+class _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
     _fields_ = [
         ("field0", c_void_p),
         ("field1", c_void_p),
         ("field2", c_void_p),
         ("field3", c_void_p),
-        ("field4", c_void_p),
     ]
 
 
@@ -229,12 +228,17 @@ class _Result_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", c_void_p)]
 
 
-class _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
+class _Tuple2_c_void_p_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
+
+
+class _Tuple5_c_void_p_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
     _fields_ = [
         ("field0", c_void_p),
         ("field1", c_void_p),
         ("field2", c_void_p),
         ("field3", c_void_p),
+        ("field4", c_void_p),
     ]
 
 
@@ -246,12 +250,16 @@ class _Tuple3_c_void_p_c_double_c_void_p(Structure):
     _fields_ = [("field0", c_void_p), ("field1", c_double), ("field2", c_void_p)]
 
 
-class _Tuple2_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
-
-
 class _List_List_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", POINTER(_List_c_void_p))]
+
+
+class _Tuple3_c_double_c_void_p_c_double(Structure):
+    _fields_ = [("field0", c_double), ("field1", c_void_p), ("field2", c_double)]
+
+
+class _Tuple2_c_double_c_void_p(Structure):
+    _fields_ = [("field0", c_double), ("field1", c_void_p)]
 
 
 class _Tuple2_c_double_List_c_void_p(Structure):
@@ -260,10 +268,6 @@ class _Tuple2_c_double_List_c_void_p(Structure):
 
 class _Tuple2_c_void_p_List_c_void_p(Structure):
     _fields_ = [("field0", c_void_p), ("field1", _List_c_void_p)]
-
-
-class _Tuple2_c_double_c_void_p(Structure):
-    _fields_ = [("field0", c_double), ("field1", c_void_p)]
 
 
 class _Tuple4_c_void_p_List_c_void_p_c_void_p_List_c_void_p(Structure):
@@ -303,6 +307,10 @@ class _Tuple4_c_double_c_void_p_c_void_p_c_void_p(Structure):
     ]
 
 
+class _Tuple3_c_double_c_double_c_double(Structure):
+    _fields_ = [("field0", c_double), ("field1", c_double), ("field2", c_double)]
+
+
 class _Tuple3_List_c_void_p_c_void_p_c_void_p(Structure):
     _fields_ = [("field0", _List_c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
 
@@ -321,10 +329,6 @@ class _Tuple2_c_double_c_double(Structure):
 
 class _Tuple3_c_int64_c_int64_c_int64(Structure):
     _fields_ = [("field0", c_int64), ("field1", c_int64), ("field2", c_int64)]
-
-
-class _Tuple3_c_double_c_double_c_double(Structure):
-    _fields_ = [("field0", c_double), ("field1", c_double), ("field2", c_double)]
 
 
 class _Tuple3_c_void_p_c_double_c_double(Structure):
@@ -3195,7 +3199,7 @@ class Vector2d:
         return Vector2d(ptr=output)
 
     def components(self) -> tuple[float, float]:
-        """Get the X and Y components of a vector."""
+        """Get the X and Y components of a vector as a tuple."""
         inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_Vector2d_components(ctypes.byref(inputs), ctypes.byref(output))
@@ -3554,7 +3558,7 @@ class Displacement2d:
         return Displacement2d(ptr=output)
 
     def components(self) -> tuple[Length, Length]:
-        """Get the X and Y components of a vector."""
+        """Get the X and Y components of a vector as a tuple."""
         inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Displacement2d_components(
@@ -3882,7 +3886,7 @@ class AreaVector2d:
         return AreaVector2d(ptr=output)
 
     def components(self) -> tuple[Area, Area]:
-        """Get the X and Y components of a vector."""
+        """Get the X and Y components of a vector as a tuple."""
         inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_AreaVector2d_components(
@@ -4208,7 +4212,7 @@ class Direction2d:
         return Angle(ptr=output)
 
     def components(self) -> tuple[float, float]:
-        """Get the X and Y components of a direction."""
+        """Get the XY components of a direction as a tuple."""
         inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_Direction2d_components(
@@ -6295,6 +6299,1619 @@ class UvAxis:
     """The V axis."""
 
 
+class Vector3d:
+    """A unitless vector in 3D."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    zero: Vector3d = None  # type: ignore[assignment]
+    """The zero vector."""
+
+    @staticmethod
+    def unit(direction: Direction3d) -> Vector3d:
+        """Construct a unit vector in the given direction."""
+        inputs = direction._ptr
+        output = c_void_p()
+        _lib.opensolid_Vector3d_unit_Direction3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    @staticmethod
+    def xyz(x_component: float, y_component: float, z_component: float) -> Vector3d:
+        """Construct a vector from its X, Y and Z components."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_component, y_component, z_component
+        )
+        output = c_void_p()
+        _lib.opensolid_Vector3d_xyz_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    @staticmethod
+    def x(x_component: float) -> Vector3d:
+        """Construct a vector from just an X component.
+
+        The Y and Z components will be set to zero.
+        """
+        inputs = c_double(x_component)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_x_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Vector3d(ptr=output)
+
+    @staticmethod
+    def y(y_component: float) -> Vector3d:
+        """Construct a vector from just a Y component.
+
+        The X and Z components will be set to zero.
+        """
+        inputs = c_double(y_component)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_y_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Vector3d(ptr=output)
+
+    @staticmethod
+    def z(z_component: float) -> Vector3d:
+        """Construct a vector from just a Z component.
+
+        The X and Y components will be set to zero.
+        """
+        inputs = c_double(z_component)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_z_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Vector3d(ptr=output)
+
+    @staticmethod
+    def from_components(components: tuple[float, float, float]) -> Vector3d:
+        """Construct a vector from a tuple of XYZ components."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            components[0], components[1], components[2]
+        )
+        output = c_void_p()
+        _lib.opensolid_Vector3d_fromComponents_Tuple3FloatFloatFloat(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    def components(self) -> tuple[float, float, float]:
+        """Get the XYZ components of a vector as a tuple."""
+        inputs = self._ptr
+        output = _Tuple3_c_double_c_double_c_double()
+        _lib.opensolid_Vector3d_components(ctypes.byref(inputs), ctypes.byref(output))
+        return (output.field0, output.field1, output.field2)
+
+    def x_component(self) -> float:
+        """Get the X component of a vector."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Vector3d_xComponent(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def y_component(self) -> float:
+        """Get the Y component of a vector."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Vector3d_yComponent(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def z_component(self) -> float:
+        """Get the Z component of a vector."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Vector3d_zComponent(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def direction(self) -> Direction3d:
+        """Attempt to get the direction of a vector.
+
+        The current tolerance will be used to check if the vector is zero
+        (and therefore does not have a direction).
+        """
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self._ptr)
+        output = _Result_c_void_p()
+        _lib.opensolid_Vector3d_direction(ctypes.byref(inputs), ctypes.byref(output))
+        return (
+            Direction3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    def is_zero(self) -> bool:
+        """Check if a vector is zero, within the current tolerance."""
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self._ptr)
+        output = c_int64()
+        _lib.opensolid_Vector3d_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
+    def __neg__(self) -> Vector3d:
+        """Return ``-self``."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Vector3d_neg(ctypes.byref(inputs), ctypes.byref(output))
+        return Vector3d(ptr=output)
+
+    def __add__(self, rhs: Vector3d) -> Vector3d:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_add_Vector3d_Vector3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    def __sub__(self, rhs: Vector3d) -> Vector3d:
+        """Return ``self - rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_sub_Vector3d_Vector3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    @overload
+    def __mul__(self, rhs: float) -> Vector3d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Length) -> Displacement3d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Area) -> AreaVector3d:
+        pass
+
+    def __mul__(self, rhs):
+        """Return ``self * rhs``."""
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_mul_Vector3d_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector3d(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_mul_Vector3d_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_mul_Vector3d_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __truediv__(self, rhs: float) -> Vector3d:
+        """Return ``self / rhs``."""
+        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_div_Vector3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+    @overload
+    def dot(self, rhs: Vector3d) -> float:
+        pass
+
+    @overload
+    def dot(self, rhs: Displacement3d) -> Length:
+        pass
+
+    @overload
+    def dot(self, rhs: AreaVector3d) -> Area:
+        pass
+
+    @overload
+    def dot(self, rhs: Direction3d) -> float:
+        pass
+
+    def dot(self, rhs):
+        """Compute the dot product of two vector-like values."""
+        match rhs:
+            case Vector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Vector3d_dot_Vector3d_Vector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Displacement3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_dot_Vector3d_Displacement3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case AreaVector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_dot_Vector3d_AreaVector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case Direction3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Vector3d_dot_Vector3d_Direction3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case _:
+                return NotImplemented
+
+    @overload
+    def cross(self, rhs: Vector3d) -> Vector3d:
+        pass
+
+    @overload
+    def cross(self, rhs: Displacement3d) -> Displacement3d:
+        pass
+
+    @overload
+    def cross(self, rhs: AreaVector3d) -> AreaVector3d:
+        pass
+
+    @overload
+    def cross(self, rhs: Direction3d) -> Vector3d:
+        pass
+
+    def cross(self, rhs):
+        """Compute the cross product of two vector-like values."""
+        match rhs:
+            case Vector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_cross_Vector3d_Vector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector3d(ptr=output)
+            case Displacement3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_cross_Vector3d_Displacement3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case AreaVector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_cross_Vector3d_AreaVector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case Direction3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector3d_cross_Vector3d_Direction3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __rmul__(self, lhs: float) -> Vector3d:
+        """Return ``lhs * self``."""
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector3d_mul_Float_Vector3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+
+class Displacement3d:
+    """A displacement vector in 3D."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    zero: Displacement3d = None  # type: ignore[assignment]
+    """The zero vector."""
+
+    @staticmethod
+    def xyz(
+        x_component: Length, y_component: Length, z_component: Length
+    ) -> Displacement3d:
+        """Construct a vector from its X, Y and Z components."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            x_component._ptr, y_component._ptr, z_component._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_xyz_Length_Length_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @staticmethod
+    def x(x_component: Length) -> Displacement3d:
+        """Construct a vector from just an X component.
+
+        The Y and Z components will be set to zero.
+        """
+        inputs = x_component._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_x_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @staticmethod
+    def y(y_component: Length) -> Displacement3d:
+        """Construct a vector from just a Y component.
+
+        The X and Z components will be set to zero.
+        """
+        inputs = y_component._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_y_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @staticmethod
+    def z(z_component: Length) -> Displacement3d:
+        """Construct a vector from just a Z component.
+
+        The X and Y components will be set to zero.
+        """
+        inputs = z_component._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_z_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @staticmethod
+    def meters(
+        x_component: float, y_component: float, z_component: float
+    ) -> Displacement3d:
+        """Construct a vector from its XYZ components given in meters."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_component, y_component, z_component
+        )
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_meters_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @staticmethod
+    def centimeters(
+        x_component: float, y_component: float, z_component: float
+    ) -> Displacement3d:
+        """Construct a vector from its XYZ components given in centimeters."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_component, y_component, z_component
+        )
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_centimeters_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @staticmethod
+    def millimeters(
+        x_component: float, y_component: float, z_component: float
+    ) -> Displacement3d:
+        """Construct a vector from its XYZ components given in millimeters."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_component, y_component, z_component
+        )
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_millimeters_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @staticmethod
+    def inches(
+        x_component: float, y_component: float, z_component: float
+    ) -> Displacement3d:
+        """Construct a vector from its XYZ components given in inches."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_component, y_component, z_component
+        )
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_inches_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @staticmethod
+    def from_components(components: tuple[Length, Length, Length]) -> Displacement3d:
+        """Construct a vector from a tuple of XYZ components."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            components[0]._ptr, components[1]._ptr, components[2]._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_fromComponents_Tuple3LengthLengthLength(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    def components(self) -> tuple[Length, Length, Length]:
+        """Get the XYZ components of a vector as a tuple."""
+        inputs = self._ptr
+        output = _Tuple3_c_void_p_c_void_p_c_void_p()
+        _lib.opensolid_Displacement3d_components(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Length(ptr=c_void_p(output.field0)),
+            Length(ptr=c_void_p(output.field1)),
+            Length(ptr=c_void_p(output.field2)),
+        )
+
+    def x_component(self) -> Length:
+        """Get the X component of a vector."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_xComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def y_component(self) -> Length:
+        """Get the Y component of a vector."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_yComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def z_component(self) -> Length:
+        """Get the Z component of a vector."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_zComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def direction(self) -> Direction3d:
+        """Attempt to get the direction of a vector.
+
+        The current tolerance will be used to check if the vector is zero
+        (and therefore does not have a direction).
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
+        output = _Result_c_void_p()
+        _lib.opensolid_Displacement3d_direction(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Direction3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    def is_zero(self) -> bool:
+        """Check if a displacement is zero, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_Displacement3d_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
+    def __neg__(self) -> Displacement3d:
+        """Return ``-self``."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_neg(ctypes.byref(inputs), ctypes.byref(output))
+        return Displacement3d(ptr=output)
+
+    def __add__(self, rhs: Displacement3d) -> Displacement3d:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_add_Displacement3d_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    def __sub__(self, rhs: Displacement3d) -> Displacement3d:
+        """Return ``self - rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_sub_Displacement3d_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+    @overload
+    def __mul__(self, rhs: float) -> Displacement3d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Length) -> AreaVector3d:
+        pass
+
+    def __mul__(self, rhs):
+        """Return ``self * rhs``."""
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_mul_Displacement3d_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_mul_Displacement3d_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def __truediv__(self, rhs: float) -> Displacement3d:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Length) -> Vector3d:
+        pass
+
+    def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_div_Displacement3d_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_div_Displacement3d_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def dot(self, rhs: Displacement3d) -> Area:
+        pass
+
+    @overload
+    def dot(self, rhs: Vector3d) -> Length:
+        pass
+
+    @overload
+    def dot(self, rhs: Direction3d) -> Length:
+        pass
+
+    def dot(self, rhs):
+        """Compute the dot product of two vector-like values."""
+        match rhs:
+            case Displacement3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_dot_Displacement3d_Displacement3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case Vector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_dot_Displacement3d_Vector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case Direction3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_dot_Displacement3d_Direction3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def cross(self, rhs: Displacement3d) -> AreaVector3d:
+        pass
+
+    @overload
+    def cross(self, rhs: Vector3d) -> Displacement3d:
+        pass
+
+    @overload
+    def cross(self, rhs: Direction3d) -> Displacement3d:
+        pass
+
+    def cross(self, rhs):
+        """Compute the cross product of two vector-like values."""
+        match rhs:
+            case Displacement3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_cross_Displacement3d_Displacement3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case Vector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_cross_Displacement3d_Vector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case Direction3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement3d_cross_Displacement3d_Direction3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __rmul__(self, lhs: float) -> Displacement3d:
+        """Return ``lhs * self``."""
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement3d_mul_Float_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement3d(ptr=output)
+
+
+class AreaVector3d:
+    """A vector in 3D with units of area."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    zero: AreaVector3d = None  # type: ignore[assignment]
+    """The zero vector."""
+
+    @staticmethod
+    def xyz(x_component: Area, y_component: Area, z_component: Area) -> AreaVector3d:
+        """Construct a vector from its X, Y and Z components."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            x_component._ptr, y_component._ptr, z_component._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_xyz_Area_Area_Area(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    @staticmethod
+    def x(x_component: Area) -> AreaVector3d:
+        """Construct a vector from just an X component.
+
+        The Y and Z components will be set to zero.
+        """
+        inputs = x_component._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_x_Area(ctypes.byref(inputs), ctypes.byref(output))
+        return AreaVector3d(ptr=output)
+
+    @staticmethod
+    def y(y_component: Area) -> AreaVector3d:
+        """Construct a vector from just a Y component.
+
+        The X and Z components will be set to zero.
+        """
+        inputs = y_component._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_y_Area(ctypes.byref(inputs), ctypes.byref(output))
+        return AreaVector3d(ptr=output)
+
+    @staticmethod
+    def z(z_component: Area) -> AreaVector3d:
+        """Construct a vector from just a Z component.
+
+        The X and Y components will be set to zero.
+        """
+        inputs = z_component._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_z_Area(ctypes.byref(inputs), ctypes.byref(output))
+        return AreaVector3d(ptr=output)
+
+    @staticmethod
+    def square_meters(
+        x_component: float, y_component: float, z_component: float
+    ) -> AreaVector3d:
+        """Construct a vector from its XYZ components given in square meters."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_component, y_component, z_component
+        )
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_squareMeters_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    @staticmethod
+    def from_components(components: tuple[Area, Area, Area]) -> AreaVector3d:
+        """Construct a vector from a tuple of XYZ components."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            components[0]._ptr, components[1]._ptr, components[2]._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_fromComponents_Tuple3AreaAreaArea(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    def components(self) -> tuple[Area, Area, Area]:
+        """Get the XYZ components of a vector as a tuple."""
+        inputs = self._ptr
+        output = _Tuple3_c_void_p_c_void_p_c_void_p()
+        _lib.opensolid_AreaVector3d_components(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Area(ptr=c_void_p(output.field0)),
+            Area(ptr=c_void_p(output.field1)),
+            Area(ptr=c_void_p(output.field2)),
+        )
+
+    def x_component(self) -> Area:
+        """Get the X component of a vector."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_xComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Area(ptr=output)
+
+    def y_component(self) -> Area:
+        """Get the Y component of a vector."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_yComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Area(ptr=output)
+
+    def z_component(self) -> Area:
+        """Get the Z component of a vector."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_zComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Area(ptr=output)
+
+    def direction(self) -> Direction3d:
+        """Attempt to get the direction of a vector.
+
+        The current tolerance will be used to check if the vector is zero
+        (and therefore does not have a direction).
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(_area_tolerance()._ptr, self._ptr)
+        output = _Result_c_void_p()
+        _lib.opensolid_AreaVector3d_direction(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Direction3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    def is_zero(self) -> bool:
+        """Check if an area vector is zero, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_area_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_AreaVector3d_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
+    def __neg__(self) -> AreaVector3d:
+        """Return ``-self``."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_neg(ctypes.byref(inputs), ctypes.byref(output))
+        return AreaVector3d(ptr=output)
+
+    def __add__(self, rhs: AreaVector3d) -> AreaVector3d:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_add_AreaVector3d_AreaVector3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    def __sub__(self, rhs: AreaVector3d) -> AreaVector3d:
+        """Return ``self - rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_sub_AreaVector3d_AreaVector3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    def __mul__(self, rhs: float) -> AreaVector3d:
+        """Return ``self * rhs``."""
+        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_mul_AreaVector3d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+    @overload
+    def __truediv__(self, rhs: float) -> AreaVector3d:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Length) -> Displacement3d:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Area) -> Vector3d:
+        pass
+
+    def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_AreaVector3d_div_AreaVector3d_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector3d_div_AreaVector3d_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector3d_div_AreaVector3d_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def dot(self, rhs: Vector3d) -> Area:
+        pass
+
+    @overload
+    def dot(self, rhs: Direction3d) -> Area:
+        pass
+
+    def dot(self, rhs):
+        """Compute the dot product of two vector-like values."""
+        match rhs:
+            case Vector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector3d_dot_AreaVector3d_Vector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case Direction3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector3d_dot_AreaVector3d_Direction3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def cross(self, rhs: Vector3d) -> AreaVector3d:
+        pass
+
+    @overload
+    def cross(self, rhs: Direction3d) -> AreaVector3d:
+        pass
+
+    def cross(self, rhs):
+        """Compute the cross product of two vector-like values."""
+        match rhs:
+            case Vector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector3d_cross_AreaVector3d_Vector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case Direction3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector3d_cross_AreaVector3d_Direction3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __rmul__(self, lhs: float) -> AreaVector3d:
+        """Return ``lhs * self``."""
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector3d_mul_Float_AreaVector3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector3d(ptr=output)
+
+
+class Direction3d:
+    """A direction in 3D.
+
+    This is effectively a type-safe unit vector.
+    """
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    x: Direction3d = None  # type: ignore[assignment]
+    """The X direction."""
+
+    y: Direction3d = None  # type: ignore[assignment]
+    """The Y direction."""
+
+    z: Direction3d = None  # type: ignore[assignment]
+    """The Z direction."""
+
+    positive_x: Direction3d = None  # type: ignore[assignment]
+    """The positive X direction."""
+
+    positive_y: Direction3d = None  # type: ignore[assignment]
+    """The positive Y direction."""
+
+    positive_z: Direction3d = None  # type: ignore[assignment]
+    """The positive Z direction."""
+
+    negative_x: Direction3d = None  # type: ignore[assignment]
+    """The negative X direction."""
+
+    negative_y: Direction3d = None  # type: ignore[assignment]
+    """The negative Y direction."""
+
+    negative_z: Direction3d = None  # type: ignore[assignment]
+    """The negative Z direction."""
+
+    def angle_to(self, other: Direction3d) -> Angle:
+        """Measure the angle from one direction to another.
+
+        The result will always be between 0 and 180 degrees.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Direction3d_angleTo_Direction3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Angle(ptr=output)
+
+    def components(self) -> tuple[float, float, float]:
+        """Get the XYZ components of a direction as a tuple."""
+        inputs = self._ptr
+        output = _Tuple3_c_double_c_double_c_double()
+        _lib.opensolid_Direction3d_components(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (output.field0, output.field1, output.field2)
+
+    def x_component(self) -> float:
+        """Get the X component of a direction."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Direction3d_xComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def y_component(self) -> float:
+        """Get the Y component of a direction."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Direction3d_yComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def z_component(self) -> float:
+        """Get the Z component of a direction."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Direction3d_zComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def __neg__(self) -> Direction3d:
+        """Return ``-self``."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Direction3d_neg(ctypes.byref(inputs), ctypes.byref(output))
+        return Direction3d(ptr=output)
+
+    @overload
+    def __mul__(self, rhs: float) -> Vector3d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Length) -> Displacement3d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Area) -> AreaVector3d:
+        pass
+
+    def __mul__(self, rhs):
+        """Return ``self * rhs``."""
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_mul_Direction3d_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector3d(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_mul_Direction3d_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_mul_Direction3d_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def dot(self, rhs: Direction3d) -> float:
+        pass
+
+    @overload
+    def dot(self, rhs: Vector3d) -> float:
+        pass
+
+    @overload
+    def dot(self, rhs: Displacement3d) -> Length:
+        pass
+
+    @overload
+    def dot(self, rhs: AreaVector3d) -> Area:
+        pass
+
+    def dot(self, rhs):
+        """Compute the dot product of two vector-like values."""
+        match rhs:
+            case Direction3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Direction3d_dot_Direction3d_Direction3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Vector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Direction3d_dot_Direction3d_Vector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Displacement3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_dot_Direction3d_Displacement3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case AreaVector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_dot_Direction3d_AreaVector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def cross(self, rhs: Direction3d) -> Vector3d:
+        pass
+
+    @overload
+    def cross(self, rhs: Vector3d) -> Vector3d:
+        pass
+
+    @overload
+    def cross(self, rhs: Displacement3d) -> Displacement3d:
+        pass
+
+    @overload
+    def cross(self, rhs: AreaVector3d) -> AreaVector3d:
+        pass
+
+    def cross(self, rhs):
+        """Compute the cross product of two vector-like values."""
+        match rhs:
+            case Direction3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_cross_Direction3d_Direction3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector3d(ptr=output)
+            case Vector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_cross_Direction3d_Vector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector3d(ptr=output)
+            case Displacement3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_cross_Direction3d_Displacement3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case AreaVector3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction3d_cross_Direction3d_AreaVector3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __rmul__(self, lhs: float) -> Vector3d:
+        """Return ``lhs * self``."""
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Direction3d_mul_Float_Direction3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector3d(ptr=output)
+
+
+class Point3d:
+    """A point in 3D, defined by its XYZ coordinates."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    origin: Point3d = None  # type: ignore[assignment]
+    """The point with coordinates (0,0, 0)."""
+
+    @staticmethod
+    def xyz(
+        x_coordinate: Length, y_coordinate: Length, z_coordinate: Length
+    ) -> Point3d:
+        """Construct a point from its X, Y and Z coordinates."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            x_coordinate._ptr, y_coordinate._ptr, z_coordinate._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Point3d_xyz_Length_Length_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    @staticmethod
+    def x(x_coordinate: Length) -> Point3d:
+        """Construct a point along the X axis, with the given X coordinate."""
+        inputs = x_coordinate._ptr
+        output = c_void_p()
+        _lib.opensolid_Point3d_x_Length(ctypes.byref(inputs), ctypes.byref(output))
+        return Point3d(ptr=output)
+
+    @staticmethod
+    def y(y_coordinate: Length) -> Point3d:
+        """Construct a point along the Y axis, with the given Y coordinate."""
+        inputs = y_coordinate._ptr
+        output = c_void_p()
+        _lib.opensolid_Point3d_y_Length(ctypes.byref(inputs), ctypes.byref(output))
+        return Point3d(ptr=output)
+
+    @staticmethod
+    def z(z_coordinate: Length) -> Point3d:
+        """Construct a point along the Z axis, with the given Z coordinate."""
+        inputs = z_coordinate._ptr
+        output = c_void_p()
+        _lib.opensolid_Point3d_z_Length(ctypes.byref(inputs), ctypes.byref(output))
+        return Point3d(ptr=output)
+
+    @staticmethod
+    def meters(
+        x_coordinate: float, y_coordinate: float, z_coordinate: float
+    ) -> Point3d:
+        """Construct a point from its X, Y and Z  coordinates given in meters."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_coordinate, y_coordinate, z_coordinate
+        )
+        output = c_void_p()
+        _lib.opensolid_Point3d_meters_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    @staticmethod
+    def centimeters(
+        x_coordinate: float, y_coordinate: float, z_coordinate: float
+    ) -> Point3d:
+        """Construct a point from its X, Y and Z  coordinates given in centimeters."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_coordinate, y_coordinate, z_coordinate
+        )
+        output = c_void_p()
+        _lib.opensolid_Point3d_centimeters_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    @staticmethod
+    def millimeters(
+        x_coordinate: float, y_coordinate: float, z_coordinate: float
+    ) -> Point3d:
+        """Construct a point from its X, Y and Z  coordinates given in millimeters."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_coordinate, y_coordinate, z_coordinate
+        )
+        output = c_void_p()
+        _lib.opensolid_Point3d_millimeters_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    @staticmethod
+    def inches(
+        x_coordinate: float, y_coordinate: float, z_coordinate: float
+    ) -> Point3d:
+        """Construct a point from its X, Y and Z  coordinates given in inches."""
+        inputs = _Tuple3_c_double_c_double_c_double(
+            x_coordinate, y_coordinate, z_coordinate
+        )
+        output = c_void_p()
+        _lib.opensolid_Point3d_inches_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    @staticmethod
+    def from_coordinates(coordinates: tuple[Length, Length, Length]) -> Point3d:
+        """Construct a point from a tuple of X, Y and Z coordinates."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            coordinates[0]._ptr, coordinates[1]._ptr, coordinates[2]._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Point3d_fromCoordinates_Tuple3LengthLengthLength(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def coordinates(self) -> tuple[Length, Length, Length]:
+        """Get the XYZ coordinates of a point as a tuple."""
+        inputs = self._ptr
+        output = _Tuple3_c_void_p_c_void_p_c_void_p()
+        _lib.opensolid_Point3d_coordinates(ctypes.byref(inputs), ctypes.byref(output))
+        return (
+            Length(ptr=c_void_p(output.field0)),
+            Length(ptr=c_void_p(output.field1)),
+            Length(ptr=c_void_p(output.field2)),
+        )
+
+    def x_coordinate(self) -> Length:
+        """Get the X coordinate of a point."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Point3d_xCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return Length(ptr=output)
+
+    def y_coordinate(self) -> Length:
+        """Get the Y coordinate of a point."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Point3d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return Length(ptr=output)
+
+    def z_coordinate(self) -> Length:
+        """Get the Z coordinate of a point."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Point3d_zCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return Length(ptr=output)
+
+    def distance_to(self, other: Point3d) -> Length:
+        """Compute the distance from one point to another."""
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_distanceTo_Point3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def midpoint(self, other: Point3d) -> Point3d:
+        """Find the midpoint between two points."""
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_midpoint_Point3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    @overload
+    def __sub__(self, rhs: Point3d) -> Displacement3d:
+        pass
+
+    @overload
+    def __sub__(self, rhs: Displacement3d) -> Point3d:
+        pass
+
+    def __sub__(self, rhs):
+        """Return ``self - rhs``."""
+        match rhs:
+            case Point3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Point3d_sub_Point3d_Point3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement3d(ptr=output)
+            case Displacement3d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Point3d_sub_Point3d_Displacement3d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Point3d(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __add__(self, rhs: Displacement3d) -> Point3d:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point3d_add_Point3d_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+
+class Bounds3d:
+    """A bounding box in 3D."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    @staticmethod
+    def xyz(
+        x_coordinate: LengthRange, y_coordinate: LengthRange, z_coordinate: LengthRange
+    ) -> Bounds3d:
+        """Construct a bounding box from its X, Y and Z coordinate ranges."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            x_coordinate._ptr, y_coordinate._ptr, z_coordinate._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_xyz_LengthRange_LengthRange_LengthRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    @staticmethod
+    def constant(point: Point3d) -> Bounds3d:
+        """Construct a zero-size bounding box containing a single point."""
+        inputs = point._ptr
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_constant_Point3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    @staticmethod
+    def from_corners(p1: Point3d, p2: Point3d) -> Bounds3d:
+        """Construct a bounding box from two corner points."""
+        inputs = _Tuple2_c_void_p_c_void_p(p1._ptr, p2._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_fromCorners_Point3d_Point3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    @staticmethod
+    def hull(points: list[Point3d]) -> Bounds3d:
+        """Construct a bounding box containing all points in the given non-empty list."""
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(points))(*[item._ptr for item in points]),
+            )
+            if points
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_hull_NonEmptyPoint3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    @staticmethod
+    def aggregate(bounds: list[Bounds3d]) -> Bounds3d:
+        """Construct a bounding box containing all bounding boxes in the given non-empty list."""
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(bounds))(*[item._ptr for item in bounds]),
+            )
+            if bounds
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_aggregate_NonEmptyBounds3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    def coordinates(self) -> tuple[LengthRange, LengthRange, LengthRange]:
+        """Get the XYZ coordinate ranges of a bounding box as a tuple."""
+        inputs = self._ptr
+        output = _Tuple3_c_void_p_c_void_p_c_void_p()
+        _lib.opensolid_Bounds3d_coordinates(ctypes.byref(inputs), ctypes.byref(output))
+        return (
+            LengthRange(ptr=c_void_p(output.field0)),
+            LengthRange(ptr=c_void_p(output.field1)),
+            LengthRange(ptr=c_void_p(output.field2)),
+        )
+
+    def x_coordinate(self) -> LengthRange:
+        """Get the X coordinate range of a bounding box."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_xCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return LengthRange(ptr=output)
+
+    def y_coordinate(self) -> LengthRange:
+        """Get the Y coordinate range of a bounding box."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return LengthRange(ptr=output)
+
+    def z_coordinate(self) -> LengthRange:
+        """Get the Z coordinate range of a bounding box."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_zCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return LengthRange(ptr=output)
+
+    def __add__(self, rhs: Displacement3d) -> Bounds3d:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_add_Bounds3d_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+    def __sub__(self, rhs: Displacement3d) -> Bounds3d:
+        """Return ``self - rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds3d_sub_Bounds3d_Displacement3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds3d(ptr=output)
+
+
+class Axis3d:
+    """An axis in 3D, defined by an origin point and direction."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    x: Axis3d = None  # type: ignore[assignment]
+    """The global X axis."""
+
+    y: Axis3d = None  # type: ignore[assignment]
+    """The global Y axis."""
+
+    z: Axis3d = None  # type: ignore[assignment]
+    """The global Z axis."""
+
+    def origin_point(self) -> Point3d:
+        """Get the origin point of an axis."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Axis3d_originPoint(ctypes.byref(inputs), ctypes.byref(output))
+        return Point3d(ptr=output)
+
+    def direction(self) -> Direction3d:
+        """Get the direction of an axis."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Axis3d_direction(ctypes.byref(inputs), ctypes.byref(output))
+        return Direction3d(ptr=output)
+
+    def normal_plane(self) -> Plane3d:
+        """Construct a plane normal (perpendicular) to the given axis.
+
+        The origin point of the plane will be the origin point of the axis,
+        and the normal direction of the plane will be the direction of the axis.
+        The X and Y directions of the plane will be chosen arbitrarily.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Axis3d_normalPlane(ctypes.byref(inputs), ctypes.byref(output))
+        return Plane3d(ptr=output)
+
+    def move_to(self, point: Point3d) -> Axis3d:
+        """Move an axis so that its origin point is the given point.
+
+        The direction of the axis will remain unchanged.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(point._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis3d_moveTo_Point3d(ctypes.byref(inputs), ctypes.byref(output))
+        return Axis3d(ptr=output)
+
+    def reverse(self) -> Axis3d:
+        """Reverse an axis (negate/reverse its direction).
+
+        The origin point of the axis will remain unchanged.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Axis3d_reverse(ctypes.byref(inputs), ctypes.byref(output))
+        return Axis3d(ptr=output)
+
+
 class Plane3d:
     """A plane in 3D, defined by an origin point and two perpendicular X and Y directions.
 
@@ -6350,6 +7967,62 @@ class Plane3d:
     A plane whose X direction is the global Z direction
     and whose Y direction is the global Y direction.
     """
+
+    def origin_point(self) -> Point3d:
+        """Get the origin point of a plane.
+
+        This is the 3D point corresponding to (0,0) in the plane's local coordinates.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_originPoint(ctypes.byref(inputs), ctypes.byref(output))
+        return Point3d(ptr=output)
+
+    def normal_direction(self) -> Direction3d:
+        """Get the normal direction of a plane."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_normalDirection(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Direction3d(ptr=output)
+
+    def normal_axis(self) -> Axis3d:
+        """Construct an axis normal (perpendicular) to a plane.
+
+        The origin point of the axis will be the origin point of the plane,
+        and the direction of the axis will be the normal direction of the plane.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_normalAxis(ctypes.byref(inputs), ctypes.byref(output))
+        return Axis3d(ptr=output)
+
+    def x_direction(self) -> Direction3d:
+        """Get the X direction of a plane."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_xDirection(ctypes.byref(inputs), ctypes.byref(output))
+        return Direction3d(ptr=output)
+
+    def y_direction(self) -> Direction3d:
+        """Get the Y direction of a plane."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_yDirection(ctypes.byref(inputs), ctypes.byref(output))
+        return Direction3d(ptr=output)
+
+    def move_to(self, point: Point3d) -> Plane3d:
+        """Move a plane so that its origin point is the given point.
+
+        The orientation of the plane will remain unchanged.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(point._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Plane3d_moveTo_Point3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
 
 
 class VectorCurve2d:
@@ -7181,6 +8854,43 @@ class Region2d:
             else _error(_text_to_str(output.field1))
         )
 
+    @staticmethod
+    def rectangle(bounding_box: Bounds2d) -> Region2d:
+        """Create a rectangular region.
+
+        Fails if the given bounds are empty
+        (zero area, i.e. zero width in either direction).
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, bounding_box._ptr)
+        output = _Result_c_void_p()
+        _lib.opensolid_Region2d_rectangle_Bounds2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Region2d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    @staticmethod
+    def circle(center_pointer: Point2d, radius: Length) -> Region2d:
+        """Create a circular region.
+
+        Fails if the given radius is zero.
+        """
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr, center_pointer._ptr, radius._ptr
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Region2d_circle_Point2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Region2d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
     def outer_loop(self) -> list[Curve2d]:
         """Get the list of curves forming the outer boundary of the region.
 
@@ -7322,6 +9032,43 @@ class UvRegion:
         )
         output = _Result_c_void_p()
         _lib.opensolid_UvRegion_boundedBy_ListUvCurve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            UvRegion(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    @staticmethod
+    def rectangle(bounding_box: UvBounds) -> UvRegion:
+        """Create a rectangular region.
+
+        Fails if the given bounds are empty
+        (zero area, i.e. zero width in either direction).
+        """
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), bounding_box._ptr)
+        output = _Result_c_void_p()
+        _lib.opensolid_UvRegion_rectangle_UvBounds(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            UvRegion(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    @staticmethod
+    def circle(center_pointer: UvPoint, radius: float) -> UvRegion:
+        """Create a circular region.
+
+        Fails if the given radius is zero.
+        """
+        inputs = _Tuple3_c_double_c_void_p_c_double(
+            _float_tolerance(), center_pointer._ptr, radius
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_UvRegion_circle_UvPoint_Float(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return (
@@ -7486,6 +9233,66 @@ class Body3d:
         )
         output = _Result_c_void_p()
         _lib.opensolid_Body3d_revolved_Plane3d_Region2d_Axis2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Body3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    @staticmethod
+    def block(bounding_box: Bounds3d) -> Body3d:
+        """Create a rectangular block body.
+
+        Fails if the given bounds are empty
+        (the width, height or depth is zero).
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, bounding_box._ptr)
+        output = _Result_c_void_p()
+        _lib.opensolid_Body3d_block_Bounds3d(ctypes.byref(inputs), ctypes.byref(output))
+        return (
+            Body3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    @staticmethod
+    def cylinder(start_point: Point3d, end_point: Point3d, radius: Length) -> Body3d:
+        """Create a cylindrical body from a start point, end point and radius.
+
+        Fails if the cylinder length or radius is zero.
+        """
+        inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr, start_point._ptr, end_point._ptr, radius._ptr
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Body3d_cylinder_Point3d_Point3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Body3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    @staticmethod
+    def cylinder_along(axis: Axis3d, distance: LengthRange, radius: Length) -> Body3d:
+        """Create a cylindrical body along a given axis.
+
+        In addition to the axis itself, you will need to provide:
+
+        - Where along the axis the cylinder starts and ends
+          (given as a range of distances along the axis).
+        - The cylinder radius.
+
+        Failes if the cylinder length or radius is zero.
+        """
+        inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr, axis._ptr, distance._ptr, radius._ptr
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Body3d_cylinderAlong_Axis3d_LengthRange_Length(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return (
@@ -8321,6 +10128,150 @@ def _uvaxis_v() -> Axis2d:
 UvAxis.v = _uvaxis_v()
 
 
+def _vector3d_zero() -> Vector3d:
+    output = c_void_p()
+    _lib.opensolid_Vector3d_zero(c_void_p(), ctypes.byref(output))
+    return Vector3d(ptr=output)
+
+
+Vector3d.zero = _vector3d_zero()
+
+
+def _displacement3d_zero() -> Displacement3d:
+    output = c_void_p()
+    _lib.opensolid_Displacement3d_zero(c_void_p(), ctypes.byref(output))
+    return Displacement3d(ptr=output)
+
+
+Displacement3d.zero = _displacement3d_zero()
+
+
+def _areavector3d_zero() -> AreaVector3d:
+    output = c_void_p()
+    _lib.opensolid_AreaVector3d_zero(c_void_p(), ctypes.byref(output))
+    return AreaVector3d(ptr=output)
+
+
+AreaVector3d.zero = _areavector3d_zero()
+
+
+def _direction3d_x() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_x(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.x = _direction3d_x()
+
+
+def _direction3d_y() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_y(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.y = _direction3d_y()
+
+
+def _direction3d_z() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_z(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.z = _direction3d_z()
+
+
+def _direction3d_positive_x() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_positiveX(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.positive_x = _direction3d_positive_x()
+
+
+def _direction3d_positive_y() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_positiveY(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.positive_y = _direction3d_positive_y()
+
+
+def _direction3d_positive_z() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_positiveZ(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.positive_z = _direction3d_positive_z()
+
+
+def _direction3d_negative_x() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_negativeX(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.negative_x = _direction3d_negative_x()
+
+
+def _direction3d_negative_y() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_negativeY(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.negative_y = _direction3d_negative_y()
+
+
+def _direction3d_negative_z() -> Direction3d:
+    output = c_void_p()
+    _lib.opensolid_Direction3d_negativeZ(c_void_p(), ctypes.byref(output))
+    return Direction3d(ptr=output)
+
+
+Direction3d.negative_z = _direction3d_negative_z()
+
+
+def _point3d_origin() -> Point3d:
+    output = c_void_p()
+    _lib.opensolid_Point3d_origin(c_void_p(), ctypes.byref(output))
+    return Point3d(ptr=output)
+
+
+Point3d.origin = _point3d_origin()
+
+
+def _axis3d_x() -> Axis3d:
+    output = c_void_p()
+    _lib.opensolid_Axis3d_x(c_void_p(), ctypes.byref(output))
+    return Axis3d(ptr=output)
+
+
+Axis3d.x = _axis3d_x()
+
+
+def _axis3d_y() -> Axis3d:
+    output = c_void_p()
+    _lib.opensolid_Axis3d_y(c_void_p(), ctypes.byref(output))
+    return Axis3d(ptr=output)
+
+
+Axis3d.y = _axis3d_y()
+
+
+def _axis3d_z() -> Axis3d:
+    output = c_void_p()
+    _lib.opensolid_Axis3d_z(c_void_p(), ctypes.byref(output))
+    return Axis3d(ptr=output)
+
+
+Axis3d.z = _axis3d_z()
+
+
 def _plane3d_xy() -> Plane3d:
     output = c_void_p()
     _lib.opensolid_Plane3d_xy(c_void_p(), ctypes.byref(output))
@@ -8410,14 +10361,19 @@ __all__ = [
     "AreaCurve",
     "AreaRange",
     "AreaVector2d",
+    "AreaVector3d",
     "Axis2d",
+    "Axis3d",
     "Body3d",
     "Bounds2d",
+    "Bounds3d",
     "Color",
     "Curve",
     "Curve2d",
     "Direction2d",
+    "Direction3d",
     "Displacement2d",
+    "Displacement3d",
     "DisplacementCurve2d",
     "Drawing2d",
     "Length",
@@ -8426,6 +10382,7 @@ __all__ = [
     "Mesh",
     "Plane3d",
     "Point2d",
+    "Point3d",
     "Range",
     "Region2d",
     "Scene3d",
@@ -8436,5 +10393,6 @@ __all__ = [
     "UvPoint",
     "UvRegion",
     "Vector2d",
+    "Vector3d",
     "VectorCurve2d",
 ]
