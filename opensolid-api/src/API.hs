@@ -37,6 +37,7 @@ import API.Class
   , member1
   , member2
   , memberM0
+  , memberM2
   , memberR0
   , memberSM0
   , memberU0
@@ -318,6 +319,7 @@ range =
     [ constant "Unit" Range.unit $(docs 'Range.unit)
     , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
     , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
     , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
     , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
@@ -353,6 +355,7 @@ lengthRange =
   Class.new @(Range Meters) "A range of length values, with a lower bound and upper bound." $
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
     , factory2 "Meters" "A" "B" Range.meters $(docs 'Range.meters)
     , factory2 "Centimeters" "A" "B" Range.centimeters $(docs 'Range.centimeters)
     , factory2 "Millimeters" "A" "B" Range.millimeters $(docs 'Range.millimeters)
@@ -386,6 +389,7 @@ areaRange =
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "Square Meters" "A" "B" Range.squareMeters $(docs 'Range.squareMeters)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
     , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
     , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
     , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
@@ -414,6 +418,7 @@ angleRange =
   Class.new @(Range Radians) "A range of angle values, with a lower bound and upper bound." $
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
     , factory2 "Radians" "A" "B" Range.radians $(docs 'Range.radians)
     , factory2 "Degrees" "A" "B" Range.degrees $(docs 'Range.degrees)
     , factory2 "Turns" "A" "B" Range.turns $(docs 'Range.turns)
@@ -495,6 +500,7 @@ vector2d =
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
+    , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
     , negateSelf
@@ -532,6 +538,7 @@ displacement2d =
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , memberM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
+    , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , memberM0 "Is Zero" (~= Vector2d.zero) "Check if a displacement is zero, within the current tolerance."
     , negateSelf
@@ -564,6 +571,7 @@ areaVector2d =
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , memberSM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
+    , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , memberSM0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
     , negateSelf
@@ -629,11 +637,13 @@ point2d =
     , member0 "Y Coordinate" Point2d.yCoordinate $(docs 'Point2d.yCoordinate)
     , member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
     , member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
+    , member1 "Place On" "Plane" Point2d.placeOn $(docs 'Point2d.placeOn)
     , minusSelf
     , minus @(Vector2d (Space @ Meters)) Self
     , plus @(Vector2d (Space @ Meters)) Self
     , minus @(Curve2d (Space @ Meters)) Self
     ]
+      + affineTransformations2d Point2d.transformBy
 
 uvPoint :: Class
 uvPoint =
@@ -652,6 +662,7 @@ uvPoint =
     , minus @(Vector2d (Space @ Unitless)) Self
     , plus @(Vector2d (Space @ Unitless)) Self
     ]
+      + affineTransformations2d Point2d.transformBy
 
 bounds2d :: Class
 bounds2d =
@@ -667,6 +678,7 @@ bounds2d =
     , plus @(Vector2d (Space @ Meters)) Self
     , minus @(Vector2d (Space @ Meters)) Self
     ]
+      + affineTransformations2d Bounds2d.transformBy
 
 uvBounds :: Class
 uvBounds =
@@ -682,6 +694,7 @@ uvBounds =
     , plus @(Vector2d (Space @ Unitless)) Self
     , minus @(Vector2d (Space @ Unitless)) Self
     ]
+      + affineTransformations2d Bounds2d.transformBy
 
 curve :: Class
 curve =
@@ -689,6 +702,7 @@ curve =
     [ constant "Zero" (Curve.zero @Unitless) $(docs 'Curve.zero)
     , constant "T" Curve.t $(docs 'Curve.t)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
+    , factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
     , member0 "Squared" Curve.squared $(docs 'Curve.squared)
     , member0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
@@ -726,6 +740,7 @@ angleCurve =
   Class.new @(Curve Radians) "A parametric curve definining an angle in terms of a parameter value." $
     [ constant "Zero" (Curve.zero @Radians) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
+    , factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
     , member0 "Sin" Curve.sin $(docs 'Curve.sin)
     , member0 "Cos" Curve.cos $(docs 'Curve.cos)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
@@ -750,6 +765,7 @@ lengthCurve =
   Class.new @(Curve Meters) "A parametric curve definining a length in terms of a parameter value." $
     [ constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
+    , factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberM0 "Is Zero" (~= Length.zero) "Check if a curve is zero everywhere, within the current tolerance."
@@ -774,6 +790,7 @@ areaCurve =
   Class.new @(Curve SquareMeters) "A parametric curve definining an area in terms of a parameter value." $
     [ constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
+    , factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberSM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberSM0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
@@ -956,6 +973,7 @@ direction3d =
     , constant "Negative X" Direction3d.negativeX $(docs 'Direction3d.negativeX)
     , constant "Negative Y" Direction3d.negativeY $(docs 'Direction3d.negativeY)
     , constant "Negative Z" Direction3d.negativeZ $(docs 'Direction3d.negativeZ)
+    , member0 "Perpendicular Direction" Direction3d.perpendicularTo $(docs 'Direction3d.perpendicularTo)
     , member1 "Angle To" "Other" Direction3d.angleFrom $(docs 'Direction3d.angleFrom)
     , member0 "Components" Direction3d.components $(docs 'Direction3d.components)
     , member0 "X Component" Direction3d.xComponent $(docs 'Direction3d.xComponent)
@@ -1045,12 +1063,23 @@ plane3d =
     , constant "XZ" (Plane3d.xz @Space @Meters) $(docs 'Plane3d.xz)
     , constant "YZ" (Plane3d.yz @Space @Meters) $(docs 'Plane3d.yz)
     , constant "ZY" (Plane3d.zy @Space @Meters) $(docs 'Plane3d.zy)
+    , factory1 "From X Axis" "Axis" Plane3d.fromXAxis $(docs 'Plane3d.fromXAxis)
+    , factory1 "From Y Axis" "Axis" Plane3d.fromYAxis $(docs 'Plane3d.fromYAxis)
     , member0 "Origin Point" Plane3d.originPoint $(docs 'Plane3d.originPoint)
     , member0 "Normal Direction" Plane3d.normalDirection $(docs 'Plane3d.normalDirection)
     , member0 "Normal Axis" Plane3d.normalAxis $(docs 'Plane3d.normalAxis)
+    , member0 "XN Plane" Plane3d.xnPlane $(docs 'Plane3d.xnPlane)
+    , member0 "NX Plane" Plane3d.nxPlane $(docs 'Plane3d.nxPlane)
+    , member0 "YN Plane" Plane3d.ynPlane $(docs 'Plane3d.ynPlane)
+    , member0 "NY Plane" Plane3d.nyPlane $(docs 'Plane3d.nyPlane)
     , member0 "X Direction" Plane3d.xDirection $(docs 'Plane3d.xDirection)
     , member0 "Y Direction" Plane3d.yDirection $(docs 'Plane3d.yDirection)
+    , member0 "X Axis" Plane3d.xAxis $(docs 'Plane3d.xAxis)
+    , member0 "Y Axis" Plane3d.yAxis $(docs 'Plane3d.yAxis)
     , member1 "Move To" "Point" Plane3d.moveTo $(docs 'Plane3d.moveTo)
+    , member0 "Flip X" Plane3d.flipX $(docs 'Plane3d.flipX)
+    , member0 "Flip Y" Plane3d.flipY $(docs 'Plane3d.flipY)
+    , member1 "Offset By" "Distance" Plane3d.offsetBy $(docs 'Plane3d.offsetBy)
     ]
       + orthonormalTransformations3d Plane3d.transformBy
 
@@ -1164,6 +1193,7 @@ curve2d =
     , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
     , factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
     , factoryM4 "Corner Arc" "Corner Point" "Incoming Direction" "Outgoing Direction" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
+    , factory2 "Circle" "Center Point" "Radius" Curve2d.circle $(docs 'Curve2d.circle)
     , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
     , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
     , member0 "Start Point" Curve2d.startPoint $(docs 'Curve2d.startPoint)
@@ -1188,6 +1218,7 @@ uvCurve =
     , factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
     , factoryU3 "Arc" "Start Point" "End Point" "Swept Angle" Curve2d.arc $(docs 'Curve2d.arc)
     , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
+    , factory2 "Circle" "Center Point" "Radius" Curve2d.circle $(docs 'Curve2d.circle)
     , factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
     , factoryU4 "Corner Arc" "Corner Point" "Incoming Direction" "Outgoing Direction" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
     , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
@@ -1212,9 +1243,11 @@ region2d =
     [ factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryM1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
     , factoryM2R "Circle" "Center Pointer" "Radius" Region2d.circle $(docs 'Region2d.circle)
+    , factoryM1R "Polygon" "Points" Region2d.polygon $(docs 'Region2d.polygon)
     , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
     , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
     , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
+    , memberM2 "Fillet" "Points" "Radius" Region2d.fillet $(docs 'Region2d.fillet)
     ]
       + affineTransformations2d Region2d.transformBy
 
@@ -1237,6 +1270,7 @@ body3d =
     [ factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
     , factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
     , factoryM1R "Block" "Bounding Box" Body3d.block $(docs 'Body3d.block)
+    , factoryM2R "Sphere" "Center Point" "Radius" Body3d.sphere $(docs 'Body3d.sphere)
     , factoryM3R "Cylinder" "Start Point" "End Point" "Radius" Body3d.cylinder $(docs 'Body3d.cylinder)
     , factoryM3R "Cylinder Along" "Axis" "Distance" "Radius" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
     ]
@@ -1265,6 +1299,15 @@ scene3d =
     [ staticM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
     , static1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
     , static2 "Metal" "Base Color" "Roughness" Scene3d.metal $(docs 'Scene3d.metal)
+    , static1 "Aluminum" "Roughness" Scene3d.aluminum $(docs 'Scene3d.aluminum)
+    , static1 "Brass" "Roughness" Scene3d.brass $(docs 'Scene3d.brass)
+    , static1 "Chromium" "Roughness" Scene3d.chromium $(docs 'Scene3d.chromium)
+    , static1 "Copper" "Roughness" Scene3d.copper $(docs 'Scene3d.copper)
+    , static1 "Gold" "Roughness" Scene3d.gold $(docs 'Scene3d.gold)
+    , static1 "Iron" "Roughness" Scene3d.iron $(docs 'Scene3d.iron)
+    , static1 "Nickel" "Roughness" Scene3d.nickel $(docs 'Scene3d.nickel)
+    , static1 "Silver" "Roughness" Scene3d.silver $(docs 'Scene3d.silver)
+    , static1 "Titanium" "Roughness" Scene3d.titanium $(docs 'Scene3d.titanium)
     , static2 "Nonmetal" "Base Color" "Roughness" Scene3d.nonmetal $(docs 'Scene3d.nonmetal)
     , static3 "Write GLB" "Path" "Ground Plane" "Entities" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
     , nested @(Scene3d.Entity Space) "A scene entity such as a mesh or group." (rigidTransformations3d Scene3d.transformBy)
