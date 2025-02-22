@@ -22,9 +22,8 @@ module OpenSolid.PlanarBasis3d
   )
 where
 
-import OpenSolid.Direction3d (Direction3d (Direction3d))
+import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis3d
@@ -32,7 +31,7 @@ import OpenSolid.Primitives
   , Frame3d (Frame3d)
   , PlanarBasis3d (PlanarBasis3d)
   , Transform3d
-  , Vector3d (Vector3d)
+  , Vector3d
   )
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector3d qualified as Vector3d
@@ -60,23 +59,9 @@ xz = PlanarBasis3d Direction3d.x Direction3d.z
 
 fromNormalDirection :: Direction3d space -> PlanarBasis3d space defines
 fromNormalDirection direction = do
-  let Direction3d dx dy dz = direction
-  let absX = Float.abs dx
-  let absY = Float.abs dy
-  let absZ = Float.abs dz
-  let v1 =
-        if
-          | absX <= absY && absX <= absZ -> do
-              let scale = Float.hypot2 dy dz
-              Vector3d 0.0 (-dz / scale) (dy / scale)
-          | absY <= absX && absY <= absZ -> do
-              let scale = Float.hypot2 dx dz
-              Vector3d (dz / scale) 0.0 (-dx / scale)
-          | otherwise -> do
-              let scale = Float.hypot2 dx dy
-              Vector3d (-dy / scale) (dx / scale) 0.0
-  let v2 = direction >< v1
-  PlanarBasis3d (Unit3d v1) (Unit3d v2)
+  let dx = Direction3d.perpendicularTo direction
+  let dy = Unit3d (direction >< dx)
+  PlanarBasis3d dx dy
 
 orthonormalize ::
   Tolerance units =>

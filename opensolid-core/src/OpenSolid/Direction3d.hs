@@ -14,6 +14,7 @@ module OpenSolid.Direction3d
   , negativeY
   , positiveZ
   , negativeZ
+  , perpendicularTo
   , angleFrom
   , placeIn
   , relativeTo
@@ -29,6 +30,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Axis3d, Basis3d, Direction3d (Unit3d), Frame3d, Plane3d)
 import OpenSolid.Transform qualified as Transform
@@ -104,6 +106,23 @@ y = positiveY
 -- | The Z direction.
 z :: Direction3d space
 z = positiveZ
+
+-- | Generate an arbitrary direction perpendicular to the given one.
+perpendicularTo :: Direction3d space -> Direction3d space
+perpendicularTo (Direction3d dx dy dz) = do
+  let absX = Float.abs dx
+  let absY = Float.abs dy
+  let absZ = Float.abs dz
+  if
+    | absX <= absY && absX <= absZ -> do
+        let scale = Float.hypot2 dy dz
+        Unit3d (Vector3d 0.0 (-dz / scale) (dy / scale))
+    | absY <= absX && absY <= absZ -> do
+        let scale = Float.hypot2 dx dz
+        Unit3d (Vector3d (dz / scale) 0.0 (-dx / scale))
+    | otherwise -> do
+        let scale = Float.hypot2 dx dy
+        Unit3d (Vector3d (-dy / scale) (dx / scale) 0.0)
 
 {-| Measure the angle from one direction to another.
 
