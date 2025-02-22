@@ -20,13 +20,17 @@ module OpenSolid.Direction3d
   , placeInBasis
   , relativeToBasis
   , transformBy
+  , rotateIn
+  , mirrorIn
+  , rotateAround
+  , mirrorAcross
   )
 where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Basis3d, Direction3d (Unit3d), Frame3d)
+import OpenSolid.Primitives (Axis3d, Basis3d, Direction3d (Unit3d), Frame3d, Plane3d)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Vector3d (Vector3d (Vector3d))
@@ -132,3 +136,32 @@ transformBy ::
   Direction3d space ->
   Direction3d space
 transformBy transform = lift (Vector3d.transformBy transform)
+
+{-| Rotate a direction in a given other direction.
+
+This is equivalent to rotating around an axis with the given direction.
+-}
+rotateIn :: Direction3d space -> Angle -> Direction3d space -> Direction3d space
+rotateIn axisDirection angle = lift (Vector3d.rotateIn axisDirection angle)
+
+{-| Mirror a direction in a given other direction.
+
+This is equivalent to mirroring across a plane with the given normal direction.
+-}
+mirrorIn :: Direction3d space -> Direction3d space -> Direction3d space
+mirrorIn mirrorDirection = lift (Vector3d.mirrorIn mirrorDirection)
+
+-- | Rotate around the given axis by the given angle.
+rotateAround ::
+  Axis3d (space @ axisUnits) ->
+  Angle ->
+  Direction3d space ->
+  Direction3d space
+rotateAround axis angle = lift (Vector3d.rotateAround axis angle)
+
+-- | Mirror across the given plane.
+mirrorAcross ::
+  Plane3d (space @ planeUnits) defines ->
+  Direction3d space ->
+  Direction3d space
+mirrorAcross plane = lift (Vector3d.mirrorAcross plane)
