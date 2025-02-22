@@ -151,7 +151,7 @@ componentIn = (<>)
 projectionIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
 projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
 
--- | Get the X and Y components of a vector.
+-- | Get the X and Y components of a vector as a tuple.
 {-# INLINE components #-}
 components :: Vector2d (space @ units) -> (Qty units, Qty units)
 components (Vector2d vx vy) = (vx, vy)

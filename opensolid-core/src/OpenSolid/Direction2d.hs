@@ -67,7 +67,7 @@ xComponent (Direction2d dx _) = dx
 yComponent :: Direction2d space -> Float
 yComponent (Direction2d _ dy) = dy
 
--- | Get the X and Y components of a direction.
+-- | Get the XY components of a direction as a tuple.
 {-# INLINE components #-}
 components :: Direction2d space -> (Float, Float)
 components (Direction2d dx dy) = (dx, dy)
