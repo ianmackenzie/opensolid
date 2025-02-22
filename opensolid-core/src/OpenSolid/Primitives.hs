@@ -1640,10 +1640,32 @@ instance
   ) =>
   Addition
     (Bounds3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
+  where
+  Bounds3d x1 y1 z1 + Vector3d x2 y2 z2 = Bounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Addition
+    (Bounds3d (space1 @ units1))
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
   Bounds3d x1 y1 z1 + VectorBounds3d x2 y2 z2 = Bounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Bounds3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
+  where
+  Bounds3d x1 y1 z1 - Vector3d x2 y2 z2 = Bounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
   ( space1 ~ space2
