@@ -33,10 +33,12 @@ module OpenSolid.Region2d
   , bounds
   , area
   , toMesh
+  , fillet
   )
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
@@ -44,10 +46,13 @@ import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 -- import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint)
 -- import OpenSolid.Curve2d.IntersectionPoint qualified as Curve2d.IntersectionPoint
 -- import OpenSolid.Curve2d.Intersections qualified as Curve2d.Intersections
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
@@ -57,8 +62,10 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
@@ -185,6 +192,103 @@ polygon points = do
   let isZeroLength line = Curve2d.startPoint line ~= Curve2d.endPoint line
   let lines = NonEmpty.successive Curve2d.line closedLoop
   boundedBy (List.filter (not . isZeroLength) lines)
+
+{-| Fillet a region at the given corner points, with the given radius.
+
+Fails if any of the given points are not actually corner points of the region
+(within the given tolerance),
+or if it is not possible to solve for a given fillet
+(e.g. if either of the adjacent edges is not long enough).
+-}
+fillet ::
+  Tolerance units =>
+  List (Point2d (space @ units)) ->
+  Qty units ->
+  Region2d (space @ units) ->
+  Result Text (Region2d (space @ units))
+fillet points radius region = Result.do
+  let initialCurves = NonEmpty.toList (boundaryCurves region)
+  filletedCurves <- Result.try (Result.foldl (addFillet radius) initialCurves points)
+  Result.try (boundedBy filletedCurves)
+
+addFillet ::
+  Tolerance units =>
+  Qty units ->
+  List (Curve2d (space @ units)) ->
+  Point2d (space @ units) ->
+  Result Text (List (Curve2d (space @ units)))
+addFillet radius curves point = do
+  let couldNotFindPointToFillet = Failure "Could not find point to fillet"
+  let couldNotSolveForFilletLocation = Failure "Could not solve for fillet location"
+  let curveIncidences = List.map (curveIncidence point) curves
+  let incidentCurves =
+        curveIncidences
+          |> Maybe.collect incidentCurve
+          -- By this point we should have exactly two curves
+          -- (one 'incoming' and one 'outgoing');
+          -- sort them by the negation of the incident parameter value
+          -- so that the curve with parameter value 1 (the incoming curve) is first
+          -- is and the curve with parameter value 0 (the outgoing curve) is second
+          |> List.sortBy (negate . Pair.second)
+          |> List.map Pair.first
+  let otherCurves = Maybe.collect nonIncidentCurve curveIncidences
+  case incidentCurves of
+    [] -> couldNotFindPointToFillet
+    List.One{} -> couldNotFindPointToFillet
+    List.ThreeOrMore{} -> couldNotFindPointToFillet
+    List.Two firstCurve secondCurve -> Result.do
+      firstTangent <- Result.try (Curve2d.tangentDirection firstCurve)
+      secondTangent <- Result.try (Curve2d.tangentDirection secondCurve)
+      let firstEndDirection = DirectionCurve2d.endValue firstTangent
+      let secondStartDirection = DirectionCurve2d.startValue secondTangent
+      let cornerAngle = Direction2d.angleFrom firstEndDirection secondStartDirection
+      let offset = Qty.sign cornerAngle * Qty.abs radius
+      let firstOffsetDisplacement =
+            VectorCurve2d.rotateBy Angle.quarterTurn (offset * firstTangent)
+      let secondOffsetDisplacement =
+            VectorCurve2d.rotateBy Angle.quarterTurn (offset * secondTangent)
+      let firstOffsetCurve = firstCurve + firstOffsetDisplacement
+      let secondOffsetCurve = secondCurve + secondOffsetDisplacement
+      maybeIntersections <- Result.try (Curve2d.intersections firstOffsetCurve secondOffsetCurve)
+      case maybeIntersections of
+        Nothing -> couldNotSolveForFilletLocation
+        Just Curve2d.OverlappingSegments{} -> couldNotSolveForFilletLocation
+        Just (Curve2d.IntersectionPoints intersectionPoints) -> do
+          let firstParameterValue = Pair.first . IntersectionPoint.parameterValues
+          let secondParameterValue = Pair.second . IntersectionPoint.parameterValues
+          let intersection1 = NonEmpty.maximumBy firstParameterValue intersectionPoints
+          let intersection2 = NonEmpty.minimumBy secondParameterValue intersectionPoints
+          if intersection1 /= intersection2
+            then couldNotSolveForFilletLocation
+            else do
+              let (t1, t2) = IntersectionPoint.parameterValues intersection1
+              let centerPoint = Curve2d.evaluate firstOffsetCurve t1
+              let startPoint = Curve2d.evaluate firstCurve t1
+              let sweptAngle =
+                    Direction2d.angleFrom
+                      (DirectionCurve2d.evaluate firstTangent t1)
+                      (DirectionCurve2d.evaluate secondTangent t2)
+              let filletArc = Curve2d.sweptArc centerPoint startPoint sweptAngle
+              let trimmedFirstCurve = firstCurve . Curve.line 0.0 t1
+              let trimmedSecondCurve = secondCurve . Curve.line t2 1.0
+              Success (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
+
+curveIncidence ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Curve2d (space @ units) ->
+  (Curve2d (space @ units), Maybe Float)
+curveIncidence point curve
+  | point ~= Curve2d.startPoint curve = (curve, Just 0.0)
+  | point ~= Curve2d.endPoint curve = (curve, Just 1.0)
+  | otherwise = (curve, Nothing)
+
+incidentCurve :: (Curve2d (space @ units), Maybe Float) -> Maybe (Curve2d (space @ units), Float)
+incidentCurve (curve, maybeIncidence) = Maybe.map (curve,) maybeIncidence
+
+nonIncidentCurve :: (Curve2d (space @ units), Maybe Float) -> Maybe (Curve2d (space @ units))
+nonIncidentCurve (curve, Nothing) = Just curve
+nonIncidentCurve (_, Just _) = Nothing
 
 -- checkForInnerIntersection ::
 --   Tolerance units =>
