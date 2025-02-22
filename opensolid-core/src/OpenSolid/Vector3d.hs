@@ -39,7 +39,9 @@ module OpenSolid.Vector3d
   , sum
   , transformBy
   , rotateIn
+  , rotateAround
   , scaleIn
+  , scaleAlong
   )
 where
 
