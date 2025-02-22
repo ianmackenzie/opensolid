@@ -11,6 +11,7 @@ module OpenSolid.Vector3d
   , xyz
   , xyzIn
   , xyzInBasis
+  , fromComponents
   , meters
   , centimeters
   , millimeters
@@ -133,6 +134,10 @@ xyzInBasis ::
   Qty units ->
   Vector3d (space @ units)
 xyzInBasis (Basis3d i j k) vx vy vz = vx * i + vy * j + vz * k
+
+-- | Construct a vector from a tuple of XYZ components.
+fromComponents :: (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
+fromComponents (vx, vy, vz) = Vector3d vx vy vz
 
 apply :: (Float -> Qty units) -> Float -> Float -> Float -> Vector3d (space @ units)
 apply units px py pz = Vector3d (units px) (units py) (units pz)
