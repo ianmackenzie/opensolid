@@ -12,6 +12,7 @@ module OpenSolid.Bounds3d
   , hull4
   , hullN
   , aggregate2
+  , aggregateN
   , exclusion
   , inclusion
   , contains
@@ -73,6 +74,36 @@ constant (Point3d x y z) =
 aggregate2 :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bounds3d (space @ units)
 aggregate2 (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) =
   Bounds3d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2) (Range.aggregate2 z1 z2)
+
+-- | Construct a bounding box containing all bounding boxes in the given non-empty list.
+aggregateN :: NonEmpty (Bounds3d (space @ units)) -> Bounds3d (space @ units)
+aggregateN (Bounds3d (Range xLow0 xHigh0) (Range yLow0 yHigh0) (Range zLow0 zHigh0) :| rest) =
+  aggregateImpl xLow0 xHigh0 yLow0 yHigh0 zLow0 zHigh0 rest
+
+aggregateImpl ::
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  List (Bounds3d (space @ units)) ->
+  Bounds3d (space @ units)
+aggregateImpl xLow xHigh yLow yHigh zLow zHigh rest = case rest of
+  [] -> Bounds3d (Range xLow xHigh) (Range yLow yHigh) (Range zLow zHigh)
+  next : remaining -> do
+    let Bounds3d xNext yNext zNext = next
+    let Range xLowNext xHighNext = xNext
+    let Range yLowNext yHighNext = yNext
+    let Range zLowNext zHighNext = zNext
+    aggregateImpl
+      (Qty.min xLow xLowNext)
+      (Qty.max xHigh xHighNext)
+      (Qty.min yLow yLowNext)
+      (Qty.max yHigh yHighNext)
+      (Qty.min zLow zLowNext)
+      (Qty.max zHigh zHighNext)
+      remaining
 
 exclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
 exclusion (Point3d x y z) (Bounds3d bx by bz) = do
