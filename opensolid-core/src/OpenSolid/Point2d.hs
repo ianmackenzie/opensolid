@@ -152,6 +152,11 @@ relativeTo ::
   Point2d (local @ units)
 relativeTo (Frame2d p0 (Basis2d i j)) p = let d = p - p0 in Point2d (d <> i) (d <> j)
 
+{-| Convert a 2D point to 3D point by placing it on a plane.
+
+Given a 2D point defined within a plane's coordinate system,
+this returns the corresponding 3D point.
+-}
 placeOn ::
   Plane3d (space @ units) (Defines localSpace) ->
   Point2d (localSpace @ units) ->

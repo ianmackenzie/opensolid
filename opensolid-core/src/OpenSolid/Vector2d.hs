@@ -217,6 +217,11 @@ magnitudeAndDirection vector = do
   let vm = magnitude vector
   if vm ~= Qty.zero then Failure IsZero else Success (vm, Unit2d (vector / vm))
 
+{-| Normalize a vector.
+
+If the original vector is exactly zero, then the result will be zero as well.
+Otherwise, the result will be a unit vector.
+-}
 normalize :: Vector2d (space @ units) -> Vector2d (space @ Unitless)
 normalize vector = do
   let vm = magnitude vector

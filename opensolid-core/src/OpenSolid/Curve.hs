@@ -203,6 +203,7 @@ and then use arithmetic operators etc. to build up more complex curves.
 t :: Curve Unitless
 t = Parametric Expression.t
 
+-- | Create a curve that linearly interpolates from the first value to the second.
 line :: Qty units -> Qty units -> Curve units
 line a b = a + t * (b - a)
 
