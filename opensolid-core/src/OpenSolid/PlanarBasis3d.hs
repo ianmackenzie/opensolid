@@ -7,6 +7,8 @@ module OpenSolid.PlanarBasis3d
   , zy
   , zx
   , xz
+  , fromXDirection
+  , fromYDirection
   , fromNormalDirection
   , orthonormalize
   , flipX
@@ -56,6 +58,12 @@ zx = PlanarBasis3d Direction3d.z Direction3d.x
 
 xz :: PlanarBasis3d space defines
 xz = PlanarBasis3d Direction3d.x Direction3d.z
+
+fromXDirection :: Direction3d space -> PlanarBasis3d space defines
+fromXDirection dx = PlanarBasis3d dx (Direction3d.perpendicularTo dx)
+
+fromYDirection :: Direction3d space -> PlanarBasis3d space defines
+fromYDirection dy = PlanarBasis3d (Direction3d.perpendicularTo dy) dy
 
 fromNormalDirection :: Direction3d space -> PlanarBasis3d space defines
 fromNormalDirection direction = do
