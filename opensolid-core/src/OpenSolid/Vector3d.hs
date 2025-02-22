@@ -98,7 +98,7 @@ z vz = Vector3d Qty.zero Qty.zero vz
 The Z component will be set to zero.
 -}
 xy :: Qty units -> Qty units -> Vector3d (space @ units)
-xy vx vz = Vector3d vx vz Qty.zero
+xy vx vy = Vector3d vx vy Qty.zero
 
 {-| Construct a vector from X and Z components.
 
