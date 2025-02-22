@@ -5,6 +5,7 @@ module OpenSolid.Region2d
   , unit
   , rectangle
   , circle
+  , polygon
   , outerLoop
   , innerLoops
   , boundaryCurves
@@ -169,6 +170,21 @@ circle centerPoint radius =
     else do
       let boundaryCurve = Curve2d.circle centerPoint (Qty.abs radius)
       Success (Region2d (NonEmpty.one boundaryCurve) [])
+
+{-| Create a polygonal region from the given points.
+
+The last point will be connected back to the first point automatically if needed
+(you do not have to close the polygon manually, although it will still work if you do).
+-}
+polygon ::
+  Tolerance units =>
+  NonEmpty (Point2d (space @ units)) ->
+  Result BoundedBy.Error (Region2d (space @ units))
+polygon points = do
+  let closedLoop = points |> NonEmpty.append (NonEmpty.first points)
+  let isZeroLength line = Curve2d.startPoint line ~= Curve2d.endPoint line
+  let lines = NonEmpty.successive Curve2d.line closedLoop
+  boundedBy (List.filter (not . isZeroLength) lines)
 
 -- checkForInnerIntersection ::
 --   Tolerance units =>
