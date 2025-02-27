@@ -173,13 +173,6 @@ length :: Class
 length =
   Class.new @Length $(docs ''Length) $
     [ constant "Zero" Length.zero $(docs 'Length.zero)
-    , constant "Meter" Length.meter $(docs 'Length.meter)
-    , constant "Centimeter" Length.centimeter $(docs 'Length.centimeter)
-    , constant "Millimeter" Length.millimeter $(docs 'Length.millimeter)
-    , constant "Micrometer" Length.micrometer $(docs 'Length.micrometer)
-    , constant "Nanometer" Length.nanometer $(docs 'Length.nanometer)
-    , constant "Inch" Length.inch $(docs 'Length.inch)
-    , constant "Pixel" Length.pixel $(docs 'Length.pixel)
     , factory1 "Meters" "Value" Length.meters $(docs 'Length.meters)
     , factory1 "Centimeters" "Value" Length.centimeters $(docs 'Length.centimeters)
     , factory1 "Millimeters" "Value" Length.millimeters $(docs 'Length.millimeters)
@@ -229,8 +222,6 @@ area :: Class
 area =
   Class.new @Area $(docs ''Area) $
     [ constant "Zero" Area.zero $(docs 'Area.zero)
-    , constant "Square Meter" Area.squareMeter $(docs 'Area.squareMeter)
-    , constant "Square Inch" Area.squareInch $(docs 'Area.squareInch)
     , factory1 "Square Meters" "Value" Area.squareMeters $(docs 'Area.squareMeters)
     , factory1 "Square Inches" "Value" Area.squareInches $(docs 'Area.squareInches)
     , member0 "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
@@ -270,8 +261,6 @@ angle =
   Class.new @Angle $(docs ''Angle) $
     [ constant "Zero" Angle.zero $(docs 'Angle.zero)
     , constant "Golden Angle" Angle.goldenAngle $(docs 'Angle.goldenAngle)
-    , constant "Radian" Angle.radian $(docs 'Angle.radian)
-    , constant "Degree" Angle.degree $(docs 'Angle.degree)
     , constant "Full Turn" Angle.fullTurn $(docs 'Angle.fullTurn)
     , constant "Half Turn" Angle.halfTurn $(docs 'Angle.halfTurn)
     , constant "Quarter Turn" Angle.quarterTurn $(docs 'Angle.quarterTurn)

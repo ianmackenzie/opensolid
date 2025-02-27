@@ -365,27 +365,6 @@ class Length:
     zero: Length = None  # type: ignore[assignment]
     """The zero value."""
 
-    meter: Length = None  # type: ignore[assignment]
-    """One meter."""
-
-    centimeter: Length = None  # type: ignore[assignment]
-    """One centimeter."""
-
-    millimeter: Length = None  # type: ignore[assignment]
-    """One millimeter."""
-
-    micrometer: Length = None  # type: ignore[assignment]
-    """One micrometer."""
-
-    nanometer: Length = None  # type: ignore[assignment]
-    """One nanometer."""
-
-    inch: Length = None  # type: ignore[assignment]
-    """One inch."""
-
-    pixel: Length = None  # type: ignore[assignment]
-    """One CSS pixel, equal to 1/96 of an inch."""
-
     @staticmethod
     def meters(value: float) -> Length:
         """Construct a length from a number of meters."""
@@ -865,12 +844,6 @@ class Area:
     zero: Area = None  # type: ignore[assignment]
     """The zero value."""
 
-    square_meter: Area = None  # type: ignore[assignment]
-    """One square meter."""
-
-    square_inch: Area = None  # type: ignore[assignment]
-    """One square inch."""
-
     @staticmethod
     def square_meters(value: float) -> Area:
         """Construct an area from a number of square meters."""
@@ -1258,12 +1231,6 @@ class Angle:
 
     golden_angle: Angle = None  # type: ignore[assignment]
     """The [golden angle](https://en.wikipedia.org/wiki/Golden_angle)."""
-
-    radian: Angle = None  # type: ignore[assignment]
-    """One radian."""
-
-    degree: Angle = None  # type: ignore[assignment]
-    """One degree."""
 
     full_turn: Angle = None  # type: ignore[assignment]
     """One full turn, or 360 degrees."""
@@ -10961,69 +10928,6 @@ def _length_zero() -> Length:
 Length.zero = _length_zero()
 
 
-def _length_meter() -> Length:
-    output = c_void_p()
-    _lib.opensolid_Length_meter(c_void_p(), ctypes.byref(output))
-    return Length._new(output)
-
-
-Length.meter = _length_meter()
-
-
-def _length_centimeter() -> Length:
-    output = c_void_p()
-    _lib.opensolid_Length_centimeter(c_void_p(), ctypes.byref(output))
-    return Length._new(output)
-
-
-Length.centimeter = _length_centimeter()
-
-
-def _length_millimeter() -> Length:
-    output = c_void_p()
-    _lib.opensolid_Length_millimeter(c_void_p(), ctypes.byref(output))
-    return Length._new(output)
-
-
-Length.millimeter = _length_millimeter()
-
-
-def _length_micrometer() -> Length:
-    output = c_void_p()
-    _lib.opensolid_Length_micrometer(c_void_p(), ctypes.byref(output))
-    return Length._new(output)
-
-
-Length.micrometer = _length_micrometer()
-
-
-def _length_nanometer() -> Length:
-    output = c_void_p()
-    _lib.opensolid_Length_nanometer(c_void_p(), ctypes.byref(output))
-    return Length._new(output)
-
-
-Length.nanometer = _length_nanometer()
-
-
-def _length_inch() -> Length:
-    output = c_void_p()
-    _lib.opensolid_Length_inch(c_void_p(), ctypes.byref(output))
-    return Length._new(output)
-
-
-Length.inch = _length_inch()
-
-
-def _length_pixel() -> Length:
-    output = c_void_p()
-    _lib.opensolid_Length_pixel(c_void_p(), ctypes.byref(output))
-    return Length._new(output)
-
-
-Length.pixel = _length_pixel()
-
-
 def _area_zero() -> Area:
     output = c_void_p()
     _lib.opensolid_Area_zero(c_void_p(), ctypes.byref(output))
@@ -11031,24 +10935,6 @@ def _area_zero() -> Area:
 
 
 Area.zero = _area_zero()
-
-
-def _area_square_meter() -> Area:
-    output = c_void_p()
-    _lib.opensolid_Area_squareMeter(c_void_p(), ctypes.byref(output))
-    return Area._new(output)
-
-
-Area.square_meter = _area_square_meter()
-
-
-def _area_square_inch() -> Area:
-    output = c_void_p()
-    _lib.opensolid_Area_squareInch(c_void_p(), ctypes.byref(output))
-    return Area._new(output)
-
-
-Area.square_inch = _area_square_inch()
 
 
 def _angle_zero() -> Angle:
@@ -11067,24 +10953,6 @@ def _angle_golden_angle() -> Angle:
 
 
 Angle.golden_angle = _angle_golden_angle()
-
-
-def _angle_radian() -> Angle:
-    output = c_void_p()
-    _lib.opensolid_Angle_radian(c_void_p(), ctypes.byref(output))
-    return Angle._new(output)
-
-
-Angle.radian = _angle_radian()
-
-
-def _angle_degree() -> Angle:
-    output = c_void_p()
-    _lib.opensolid_Angle_degree(c_void_p(), ctypes.byref(output))
-    return Angle._new(output)
-
-
-Angle.degree = _angle_degree()
 
 
 def _angle_full_turn() -> Angle:
