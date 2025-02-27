@@ -1,5 +1,3 @@
-Figure out why plates with holes couldn't generate...
-
 Support default arguments in API?
 -> Allow for 'Point2d()', 'Point2d(y=some_y_value)' etc. with unset coordinates defaulting to zero
 
