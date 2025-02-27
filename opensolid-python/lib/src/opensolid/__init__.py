@@ -190,6 +190,14 @@ def _angle_tolerance() -> Angle:
     raise TypeError(message)
 
 
+class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
+
+
+class _Tuple2_c_void_p_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
+
+
 class _List_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", POINTER(c_void_p))]
 
@@ -228,10 +236,6 @@ class _Result_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", c_void_p)]
 
 
-class _Tuple2_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
-
-
 class _Tuple5_c_void_p_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
     _fields_ = [
         ("field0", c_void_p),
@@ -240,10 +244,6 @@ class _Tuple5_c_void_p_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
         ("field3", c_void_p),
         ("field4", c_void_p),
     ]
-
-
-class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
 
 
 class _Tuple3_c_void_p_c_double_c_void_p(Structure):
@@ -1669,6 +1669,14 @@ class Range:
         return Range(ptr=output)
 
     @staticmethod
+    def zero_to(value: float) -> Range:
+        """Create a range from zero to the given value."""
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Range_zeroTo_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Range(ptr=output)
+
+    @staticmethod
     def hull(values: list[float]) -> Range:
         """Build a range containing all values in the given non-empty list."""
         inputs = (
@@ -2013,6 +2021,16 @@ class LengthRange:
         inputs = _Tuple2_c_void_p_c_void_p(a._ptr, b._ptr)
         output = c_void_p()
         _lib.opensolid_LengthRange_fromEndpoints_Length_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return LengthRange(ptr=output)
+
+    @staticmethod
+    def zero_to(value: Length) -> LengthRange:
+        """Create a range from zero to the given value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_LengthRange_zeroTo_Length(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return LengthRange(ptr=output)
@@ -2375,6 +2393,14 @@ class AreaRange:
         return AreaRange(ptr=output)
 
     @staticmethod
+    def zero_to(value: Area) -> AreaRange:
+        """Create a range from zero to the given value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaRange_zeroTo_Area(ctypes.byref(inputs), ctypes.byref(output))
+        return AreaRange(ptr=output)
+
+    @staticmethod
     def hull(values: list[Area]) -> AreaRange:
         """Build a range containing all values in the given non-empty list."""
         inputs = (
@@ -2674,6 +2700,16 @@ class AngleRange:
         inputs = _Tuple2_c_void_p_c_void_p(a._ptr, b._ptr)
         output = c_void_p()
         _lib.opensolid_AngleRange_fromEndpoints_Angle_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AngleRange(ptr=output)
+
+    @staticmethod
+    def zero_to(value: Angle) -> AngleRange:
+        """Create a range from zero to the given value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_AngleRange_zeroTo_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return AngleRange(ptr=output)
@@ -3234,6 +3270,17 @@ class Vector2d:
             else _error(_text_to_str(output.field1))
         )
 
+    def normalize(self) -> Vector2d:
+        """Normalize a vector.
+
+        If the original vector is exactly zero, then the result will be zero as well.
+        Otherwise, the result will be a unit vector.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Vector2d_normalize(ctypes.byref(inputs), ctypes.byref(output))
+        return Vector2d(ptr=output)
+
     def angle(self) -> Angle:
         """Get the angle of a vector.
 
@@ -3604,6 +3651,19 @@ class Displacement2d:
             else _error(_text_to_str(output.field1))
         )
 
+    def normalize(self) -> Vector2d:
+        """Normalize a vector.
+
+        If the original vector is exactly zero, then the result will be zero as well.
+        Otherwise, the result will be a unit vector.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement2d_normalize(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d(ptr=output)
+
     def angle(self) -> Angle:
         """Get the angle of a vector.
 
@@ -3928,6 +3988,19 @@ class AreaVector2d:
             if output.field0 == 0
             else _error(_text_to_str(output.field1))
         )
+
+    def normalize(self) -> Vector2d:
+        """Normalize a vector.
+
+        If the original vector is exactly zero, then the result will be zero as well.
+        Otherwise, the result will be a unit vector.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_normalize(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d(ptr=output)
 
     def angle(self) -> Angle:
         """Get the angle of a vector.
@@ -4529,6 +4602,84 @@ class Point2d:
         )
         return Point2d(ptr=output)
 
+    def place_on(self, plane: Plane3d) -> Point3d:
+        """Convert a 2D point to 3D point by placing it on a plane.
+
+        Given a 2D point defined within a plane's coordinate system,
+        this returns the corresponding 3D point.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point2d_placeOn_Plane3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point3d(ptr=output)
+
+    def scale_along(self, axis: Axis2d, scale: float) -> Point2d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point2d_scaleAlong_Axis2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
+    def scale_about(self, point: Point2d, scale: float) -> Point2d:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point2d_scaleAbout_Point2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
+    def mirror_across(self, axis: Axis2d) -> Point2d:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point2d_mirrorAcross_Axis2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
+    def translate_by(self, displacement: Displacement2d) -> Point2d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point2d_translateBy_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: Length) -> Point2d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Point2d_translateIn_Direction2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
+    def translate_along(self, axis: Axis2d, distance: Length) -> Point2d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point2d_translateAlong_Axis2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
+    def rotate_around(self, point: Point2d, angle: Angle) -> Point2d:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point2d_rotateAround_Point2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
     @overload
     def __sub__(self, rhs: Point2d) -> Displacement2d:
         pass
@@ -4671,6 +4822,69 @@ class UvPoint:
         )
         return UvPoint(ptr=output)
 
+    def scale_along(self, axis: UvAxis, scale: float) -> UvPoint:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvPoint_scaleAlong_UvAxis_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
+    def scale_about(self, point: UvPoint, scale: float) -> UvPoint:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvPoint_scaleAbout_UvPoint_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
+    def mirror_across(self, axis: UvAxis) -> UvPoint:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvPoint_mirrorAcross_UvAxis(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
+    def translate_by(self, displacement: Vector2d) -> UvPoint:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvPoint_translateBy_Vector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: float) -> UvPoint:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(direction._ptr, distance, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvPoint_translateIn_Direction2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
+    def translate_along(self, axis: UvAxis, distance: float) -> UvPoint:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, distance, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvPoint_translateAlong_UvAxis_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
+    def rotate_around(self, point: UvPoint, angle: Angle) -> UvPoint:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvPoint_rotateAround_UvPoint_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
     @overload
     def __sub__(self, rhs: UvPoint) -> Vector2d:
         pass
@@ -4745,9 +4959,9 @@ class Bounds2d:
         return Bounds2d(ptr=output)
 
     @staticmethod
-    def from_corners(p1: Point2d, p2: Point2d) -> Bounds2d:
+    def from_corners(first_point: Point2d, second_point: Point2d) -> Bounds2d:
         """Construct a bounding box from two corner points."""
-        inputs = _Tuple2_c_void_p_c_void_p(p1._ptr, p2._ptr)
+        inputs = _Tuple2_c_void_p_c_void_p(first_point._ptr, second_point._ptr)
         output = c_void_p()
         _lib.opensolid_Bounds2d_fromCorners_Point2d_Point2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -4812,6 +5026,71 @@ class Bounds2d:
         _lib.opensolid_Bounds2d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
 
+    def scale_along(self, axis: Axis2d, scale: float) -> Bounds2d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_scaleAlong_Axis2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
+    def scale_about(self, point: Point2d, scale: float) -> Bounds2d:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_scaleAbout_Point2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
+    def mirror_across(self, axis: Axis2d) -> Bounds2d:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_mirrorAcross_Axis2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
+    def translate_by(self, displacement: Displacement2d) -> Bounds2d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_translateBy_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: Length) -> Bounds2d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_translateIn_Direction2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
+    def translate_along(self, axis: Axis2d, distance: Length) -> Bounds2d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_translateAlong_Axis2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
+    def rotate_around(self, point: Point2d, angle: Angle) -> Bounds2d:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_rotateAround_Point2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
     def __add__(self, rhs: Displacement2d) -> Bounds2d:
         """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -4867,9 +5146,9 @@ class UvBounds:
         return UvBounds(ptr=output)
 
     @staticmethod
-    def from_corners(p1: UvPoint, p2: UvPoint) -> UvBounds:
+    def from_corners(first_point: UvPoint, second_point: UvPoint) -> UvBounds:
         """Construct a bounding box from two corner points."""
-        inputs = _Tuple2_c_void_p_c_void_p(p1._ptr, p2._ptr)
+        inputs = _Tuple2_c_void_p_c_void_p(first_point._ptr, second_point._ptr)
         output = c_void_p()
         _lib.opensolid_UvBounds_fromCorners_UvPoint_UvPoint(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -4931,6 +5210,69 @@ class UvBounds:
         _lib.opensolid_UvBounds_vCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
+    def scale_along(self, axis: UvAxis, scale: float) -> UvBounds:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_scaleAlong_UvAxis_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
+    def scale_about(self, point: UvPoint, scale: float) -> UvBounds:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_scaleAbout_UvPoint_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
+    def mirror_across(self, axis: UvAxis) -> UvBounds:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_mirrorAcross_UvAxis(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
+    def translate_by(self, displacement: Vector2d) -> UvBounds:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_translateBy_Vector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: float) -> UvBounds:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(direction._ptr, distance, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_translateIn_Direction2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
+    def translate_along(self, axis: UvAxis, distance: float) -> UvBounds:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, distance, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_translateAlong_UvAxis_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
+    def rotate_around(self, point: UvPoint, angle: Angle) -> UvBounds:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_rotateAround_UvPoint_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
     def __add__(self, rhs: Vector2d) -> UvBounds:
         """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -4982,6 +5324,16 @@ class Curve:
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Curve_constant_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Curve(ptr=output)
+
+    @staticmethod
+    def line(start: float, end: float) -> Curve:
+        """Create a curve that linearly interpolates from the first value to the second."""
+        inputs = _Tuple2_c_double_c_double(start, end)
+        output = c_void_p()
+        _lib.opensolid_Curve_line_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return Curve(ptr=output)
 
     def squared(self) -> Curve:
@@ -5352,6 +5704,16 @@ class LengthCurve:
         )
         return LengthCurve(ptr=output)
 
+    @staticmethod
+    def line(start: Length, end: Length) -> LengthCurve:
+        """Create a curve that linearly interpolates from the first value to the second."""
+        inputs = _Tuple2_c_void_p_c_void_p(start._ptr, end._ptr)
+        output = c_void_p()
+        _lib.opensolid_LengthCurve_line_Length_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return LengthCurve(ptr=output)
+
     def evaluate(self, parameter_value: float) -> Length:
         """Evaluate a curve at a given parameter value.
 
@@ -5618,6 +5980,16 @@ class AreaCurve:
         )
         return AreaCurve(ptr=output)
 
+    @staticmethod
+    def line(start: Area, end: Area) -> AreaCurve:
+        """Create a curve that linearly interpolates from the first value to the second."""
+        inputs = _Tuple2_c_void_p_c_void_p(start._ptr, end._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaCurve_line_Area_Area(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaCurve(ptr=output)
+
     def evaluate(self, parameter_value: float) -> Area:
         """Evaluate a curve at a given parameter value.
 
@@ -5842,6 +6214,16 @@ class AngleCurve:
         inputs = value._ptr
         output = c_void_p()
         _lib.opensolid_AngleCurve_constant_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AngleCurve(ptr=output)
+
+    @staticmethod
+    def line(start: Angle, end: Angle) -> AngleCurve:
+        """Create a curve that linearly interpolates from the first value to the second."""
+        inputs = _Tuple2_c_void_p_c_void_p(start._ptr, end._ptr)
+        output = c_void_p()
+        _lib.opensolid_AngleCurve_line_Angle_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return AngleCurve(ptr=output)
@@ -6117,6 +6499,30 @@ class Drawing2d:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return _text_to_str(output)
+
+    @staticmethod
+    def write_svg(
+        path: str, view_box: Bounds2d, entities: list[Drawing2d.Entity]
+    ) -> None:
+        """Render SVG to a file.
+
+        The given bounding box defines the overall size of the drawing,
+        and in general should contain all the drawing entities
+        (unless you *want* to crop some of them).
+        """
+        inputs = _Tuple3_Text_c_void_p_List_c_void_p(
+            _str_to_text(path),
+            view_box._ptr,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(entities))(*[item._ptr for item in entities]),
+            ),
+        )
+        output = _Result_c_int64()
+        _lib.opensolid_Drawing2d_writeSVG_Text_Bounds2d_ListDrawing2dEntity(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return None if output.field0 == 0 else _error(_text_to_str(output.field1))
 
     @staticmethod
     def polygon(
@@ -6898,12 +7304,12 @@ class Displacement3d:
         )
         return Displacement3d(ptr=output)
 
-    def mirror_in(self, plane: Direction3d) -> Displacement3d:
+    def mirror_in(self, direction: Direction3d) -> Displacement3d:
         """Mirror in a particular direction.
 
         This is equivalent to mirroring across a plane with the given normal direction.
         """
-        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        inputs = _Tuple2_c_void_p_c_void_p(direction._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement3d_mirrorIn_Direction3d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -7280,12 +7686,12 @@ class AreaVector3d:
         )
         return AreaVector3d(ptr=output)
 
-    def mirror_in(self, plane: Direction3d) -> AreaVector3d:
+    def mirror_in(self, direction: Direction3d) -> AreaVector3d:
         """Mirror in a particular direction.
 
         This is equivalent to mirroring across a plane with the given normal direction.
         """
-        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        inputs = _Tuple2_c_void_p_c_void_p(direction._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_AreaVector3d_mirrorIn_Direction3d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -7501,6 +7907,15 @@ class Direction3d:
     negative_z: Direction3d = None  # type: ignore[assignment]
     """The negative Z direction."""
 
+    def perpendicular(self) -> Direction3d:
+        """Generate an arbitrary direction perpendicular to the given one."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Direction3d_perpendicular(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Direction3d(ptr=output)
+
     def angle_to(self, other: Direction3d) -> Angle:
         """Measure the angle from one direction to another.
 
@@ -7572,12 +7987,12 @@ class Direction3d:
         )
         return Direction3d(ptr=output)
 
-    def mirror_in(self, plane: Direction3d) -> Direction3d:
+    def mirror_in(self, direction: Direction3d) -> Direction3d:
         """Mirror a direction in a given other direction.
 
         This is equivalent to mirroring across a plane with the given normal direction.
         """
-        inputs = _Tuple2_c_void_p_c_void_p(plane._ptr, self._ptr)
+        inputs = _Tuple2_c_void_p_c_void_p(direction._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Direction3d_mirrorIn_Direction3d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -8056,9 +8471,9 @@ class Bounds3d:
         return Bounds3d(ptr=output)
 
     @staticmethod
-    def from_corners(p1: Point3d, p2: Point3d) -> Bounds3d:
+    def from_corners(first_point: Point3d, second_point: Point3d) -> Bounds3d:
         """Construct a bounding box from two corner points."""
-        inputs = _Tuple2_c_void_p_c_void_p(p1._ptr, p2._ptr)
+        inputs = _Tuple2_c_void_p_c_void_p(first_point._ptr, second_point._ptr)
         output = c_void_p()
         _lib.opensolid_Bounds3d_fromCorners_Point3d_Point3d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -8384,6 +8799,32 @@ class Plane3d:
     and whose Y direction is the global Y direction.
     """
 
+    @staticmethod
+    def from_x_axis(axis: Axis3d) -> Plane3d:
+        """Construct a plane having the given X axis.
+
+        A perpendicular Y direction will be chosen arbitrarily.
+        """
+        inputs = axis._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_fromXAxis_Axis3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
+
+    @staticmethod
+    def from_y_axis(axis: Axis3d) -> Plane3d:
+        """Construct a plane having the given Y axis.
+
+        A perpendicular X direction will be chosen arbitrarily.
+        """
+        inputs = axis._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_fromYAxis_Axis3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
+
     def origin_point(self) -> Point3d:
         """Get the origin point of a plane.
 
@@ -8414,6 +8855,46 @@ class Plane3d:
         _lib.opensolid_Plane3d_normalAxis(ctypes.byref(inputs), ctypes.byref(output))
         return Axis3d(ptr=output)
 
+    def xn_plane(self) -> Plane3d:
+        """Construct a plane from the X and normal directions of the given plane.
+
+        The returned plane will have the same origin point as the original plane.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_xnPlane(ctypes.byref(inputs), ctypes.byref(output))
+        return Plane3d(ptr=output)
+
+    def nx_plane(self) -> Plane3d:
+        """Construct a plane from the normal and X directions of the given plane.
+
+        The returned plane will have the same origin point as the original plane.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_nxPlane(ctypes.byref(inputs), ctypes.byref(output))
+        return Plane3d(ptr=output)
+
+    def yn_plane(self) -> Plane3d:
+        """Construct a plane from the Y and normal directions of the given plane.
+
+        The returned plane will have the same origin point as the original plane.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_ynPlane(ctypes.byref(inputs), ctypes.byref(output))
+        return Plane3d(ptr=output)
+
+    def ny_plane(self) -> Plane3d:
+        """Construct a plane from the normal and Y directions of the given plane.
+
+        The returned plane will have the same origin point as the original plane.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_nyPlane(ctypes.byref(inputs), ctypes.byref(output))
+        return Plane3d(ptr=output)
+
     def x_direction(self) -> Direction3d:
         """Get the X direction of a plane."""
         inputs = self._ptr
@@ -8428,6 +8909,26 @@ class Plane3d:
         _lib.opensolid_Plane3d_yDirection(ctypes.byref(inputs), ctypes.byref(output))
         return Direction3d(ptr=output)
 
+    def x_axis(self) -> Axis3d:
+        """Get the X axis of a plane.
+
+        This is an axis formed from the plane's origin point and X direction.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_xAxis(ctypes.byref(inputs), ctypes.byref(output))
+        return Axis3d(ptr=output)
+
+    def y_axis(self) -> Axis3d:
+        """Get the Y axis of a plane.
+
+        This is an axis formed from the plane's origin point and Y direction.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_yAxis(ctypes.byref(inputs), ctypes.byref(output))
+        return Axis3d(ptr=output)
+
     def move_to(self, point: Point3d) -> Plane3d:
         """Move a plane so that its origin point is the given point.
 
@@ -8436,6 +8937,29 @@ class Plane3d:
         inputs = _Tuple2_c_void_p_c_void_p(point._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Plane3d_moveTo_Point3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Plane3d(ptr=output)
+
+    def flip_x(self) -> Plane3d:
+        """Reverse a plane's X direction, which also reverses the plane's normal direction."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_flipX(ctypes.byref(inputs), ctypes.byref(output))
+        return Plane3d(ptr=output)
+
+    def flip_y(self) -> Plane3d:
+        """Reverse a plane's Y direction, which also reverses the plane's normal direction."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Plane3d_flipY(ctypes.byref(inputs), ctypes.byref(output))
+        return Plane3d(ptr=output)
+
+    def offset_by(self, distance: Length) -> Plane3d:
+        """Offset a plane in its normal direction by the given distance."""
+        inputs = _Tuple2_c_void_p_c_void_p(distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Plane3d_offsetBy_Length(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Plane3d(ptr=output)
@@ -8686,6 +9210,16 @@ class Curve2d:
         )
         output = c_void_p()
         _lib.opensolid_Curve2d_cornerArc_Point2d_Direction2d_Direction2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def circle(center_point: Point2d, radius: Length) -> Curve2d:
+        """Create a circle with the given center point and radius."""
+        inputs = _Tuple2_c_void_p_c_void_p(center_point._ptr, radius._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_circle_Point2d_Length(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Curve2d(ptr=output)
@@ -8999,6 +9533,16 @@ class UvCurve:
         )
         output = c_void_p()
         _lib.opensolid_UvCurve_polarArc_UvPoint_Float_Angle_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def circle(center_point: UvPoint, radius: float) -> UvCurve:
+        """Create a circle with the given center point and radius."""
+        inputs = _Tuple2_c_void_p_c_double(center_point._ptr, radius)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_circle_UvPoint_Float(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return UvCurve(ptr=output)
@@ -9354,6 +9898,34 @@ class Region2d:
             else _error(_text_to_str(output.field1))
         )
 
+    @staticmethod
+    def polygon(points: list[Point2d]) -> Region2d:
+        """Create a polygonal region from the given points.
+
+        The last point will be connected back to the first point automatically if needed
+        (you do not have to close the polygon manually, although it will still work if you do).
+        """
+        inputs = _Tuple2_c_void_p_List_c_void_p(
+            _length_tolerance()._ptr,
+            (
+                _list_argument(
+                    _List_c_void_p,
+                    (c_void_p * len(points))(*[item._ptr for item in points]),
+                )
+                if points
+                else _error("List is empty")
+            ),
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Region2d_polygon_NonEmptyPoint2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Region2d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
     def outer_loop(self) -> list[Curve2d]:
         """Get the list of curves forming the outer boundary of the region.
 
@@ -9396,6 +9968,33 @@ class Region2d:
             Curve2d(ptr=c_void_p(item))
             for item in [output.field1[index] for index in range(output.field0)]
         ]
+
+    def fillet(self, points: list[Point2d], radius: Length) -> Region2d:
+        """Fillet a region at the given corner points, with the given radius.
+
+        Fails if any of the given points are not actually corner points of the region
+        (within the given tolerance),
+        or if it is not possible to solve for a given fillet
+        (e.g. if either of the adjacent edges is not long enough).
+        """
+        inputs = _Tuple4_c_void_p_List_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(points))(*[item._ptr for item in points]),
+            ),
+            radius._ptr,
+            self._ptr,
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Region2d_fillet_ListPoint2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Region2d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
 
     def scale_along(self, axis: Axis2d, scale: float) -> Region2d:
         """Scale (stretch) along the given axis by the given scaling factor."""
@@ -9721,6 +10320,25 @@ class Body3d:
         )
 
     @staticmethod
+    def sphere(center_point: Point3d, radius: Length) -> Body3d:
+        """Create a sphere with the given center point and radius.
+
+        Fails if the radius is zero.
+        """
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr, center_point._ptr, radius._ptr
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Body3d_sphere_Point3d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Body3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    @staticmethod
     def cylinder(start_point: Point3d, end_point: Point3d, radius: Length) -> Body3d:
         """Create a cylindrical body from a start point, end point and radius.
 
@@ -9870,6 +10488,84 @@ class Scene3d:
         return Scene3d.Material(ptr=output)
 
     @staticmethod
+    def aluminum(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_aluminum_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def brass(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_brass_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def chromium(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_chromium_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def copper(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_copper_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def gold(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_gold_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def iron(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_iron_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def nickel(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_nickel_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def silver(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_silver_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def titanium(roughness: float) -> Scene3d.Material:
+        """Create an aluminum material with the given roughness."""
+        inputs = c_double(roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_titanium_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
     def nonmetal(base_color: Color, roughness: float) -> Scene3d.Material:
         """Create a non-metallic material with the given color and roughness."""
         inputs = _Tuple2_c_void_p_c_double(base_color._ptr, roughness)
@@ -9913,6 +10609,50 @@ class Scene3d:
         def __del__(self) -> None:
             """Free the underlying Haskell value."""
             _lib.opensolid_release(self._ptr)
+
+        def translate_by(self, displacement: Displacement3d) -> Scene3d.Entity:
+            """Translate by the given displacement."""
+            inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+            output = c_void_p()
+            _lib.opensolid_Scene3dEntity_translateBy_Displacement3d(
+                ctypes.byref(inputs), ctypes.byref(output)
+            )
+            return Scene3d.Entity(ptr=output)
+
+        def translate_in(
+            self, direction: Direction3d, distance: Length
+        ) -> Scene3d.Entity:
+            """Translate in the given direction by the given distance."""
+            inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+                direction._ptr, distance._ptr, self._ptr
+            )
+            output = c_void_p()
+            _lib.opensolid_Scene3dEntity_translateIn_Direction3d_Length(
+                ctypes.byref(inputs), ctypes.byref(output)
+            )
+            return Scene3d.Entity(ptr=output)
+
+        def translate_along(self, axis: Axis3d, distance: Length) -> Scene3d.Entity:
+            """Translate along the given axis by the given distance."""
+            inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+                axis._ptr, distance._ptr, self._ptr
+            )
+            output = c_void_p()
+            _lib.opensolid_Scene3dEntity_translateAlong_Axis3d_Length(
+                ctypes.byref(inputs), ctypes.byref(output)
+            )
+            return Scene3d.Entity(ptr=output)
+
+        def rotate_around(self, axis: Axis3d, angle: Angle) -> Scene3d.Entity:
+            """Rotate around the given axis by the given angle."""
+            inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+                axis._ptr, angle._ptr, self._ptr
+            )
+            output = c_void_p()
+            _lib.opensolid_Scene3dEntity_rotateAround_Axis3d_Angle(
+                ctypes.byref(inputs), ctypes.byref(output)
+            )
+            return Scene3d.Entity(ptr=output)
 
     class Material:
         """A material applied to a mesh."""
