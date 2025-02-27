@@ -228,8 +228,9 @@ abs :: Estimate units -> Estimate units
 abs estimate = new (Abs estimate)
 
 refineWiderThan :: Qty units -> Estimate units -> Estimate units
-refineWiderThan desiredWidth estimate
-  | Range.width (bounds estimate) > desiredWidth = refine estimate
+refineWiderThan maxWidth estimate
+  | Qty.isInfinite (boundsWidth estimate) = refine estimate
+  | boundsWidth estimate > maxWidth = refine estimate
   | otherwise = estimate
 
 sum :: List (Estimate units) -> Estimate units
