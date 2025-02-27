@@ -13,3 +13,7 @@ build
 
 # Output directory of auditwheel
 wheelhouse
+
+# Generated test files
+*.glb
+*.svg
