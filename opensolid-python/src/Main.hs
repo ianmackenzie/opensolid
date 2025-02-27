@@ -18,6 +18,7 @@ import Python.AbsFunction qualified
 import Python.Class qualified
 import Python.ComparisonFunction qualified
 import Python.Constant qualified
+import Python.Constructor qualified
 import Python.EqualityFunction qualified
 import Python.FFI qualified
 import Python.Function qualified
@@ -192,6 +193,7 @@ classDefinition
       classId
       documentation
       constants
+      maybeConstructor
       staticFunctions
       memberFunctions
       equalityFunction
@@ -207,11 +209,25 @@ classDefinition
           Python.lines
             [ "class " + Python.Class.unqualifiedName classId + ":"
             , Python.indent [Python.docstring documentation]
-            , "    def __init__(self, *, ptr : c_void_p) -> None:"
-            , "        self._ptr = ptr"
-            , "    def __del__(self) -> None:"
-            , "        \"\"\"Free the underlying Haskell value.\"\"\""
-            , "        _lib.opensolid_release(self._ptr)"
+            , Python.indent ["_ptr: c_void_p"]
+            , Python.indent [Python.Constructor.definition classId maybeConstructor]
+            , Python.indent
+                [ "@staticmethod"
+                , "def _new(ptr: c_void_p) -> " + Python.Class.qualifiedName classId + ":"
+                , Python.indent
+                    [ "\"\"\"Construct directly from an underlying C pointer.\"\"\""
+                    , "obj = object.__new__(" + Python.Class.qualifiedName classId + ")"
+                    , "obj._ptr = ptr"
+                    , "return obj"
+                    ]
+                ]
+            , Python.indent
+                [ "def __del__(self) -> None:"
+                , Python.indent
+                    [ "\"\"\"Free the underlying Haskell value.\"\"\""
+                    , "_lib.opensolid_release(self._ptr)"
+                    ]
+                ]
             , Python.indent (List.map Python.Constant.declaration constants)
             , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
             , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)
@@ -245,7 +261,7 @@ extraMemberFunctions className = do
     "Range" ->
       repr
         [ "low, high = self.endpoints()"
-        , "return 'Range.from_endpoints(' + str(low) + ',' + str(high) + ')'"
+        , "return 'Range(' + str(low) + ',' + str(high) + ')'"
         ]
     "LengthRange" ->
       repr

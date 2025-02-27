@@ -4,6 +4,10 @@ module API.Class
   , Self (Self)
   , new
   , constant
+  , constructor1
+  , constructor2
+  , constructor3
+  , constructor4
   , factory1
   , factoryU1R
   , factoryM1R
@@ -69,6 +73,8 @@ import API.BinaryOperator qualified as BinaryOperator
 import API.ComparisonFunction qualified as ComparisonFunction
 import API.Constant (Constant (Constant))
 import API.Constant qualified as Constant
+import API.Constructor (Constructor (..))
+import API.Constructor qualified as Constructor
 import API.EqualityFunction qualified as EqualityFunction
 import API.Function (Function (..))
 import API.MemberFunction (MemberFunction (..))
@@ -94,6 +100,7 @@ data Class where
     { id :: FFI.Id value
     , documentation :: Text
     , constants :: List (FFI.Name, Constant)
+    , constructor :: Maybe (Constructor value)
     , staticFunctions :: List (FFI.Name, StaticFunction)
     , memberFunctions :: List (FFI.Name, MemberFunction value)
     , equalityFunction :: Maybe (value -> value -> Bool)
@@ -108,6 +115,10 @@ data Class where
 
 data Member value where
   Const :: FFI result => Text -> result -> Text -> Member value
+  Ctor1 :: (FFI a, FFI value) => Text -> (a -> value) -> Text -> Member value
+  Ctor2 :: (FFI a, FFI b, FFI value) => Text -> Text -> (a -> b -> value) -> Text -> Member value
+  Ctor3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
+  Ctor4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Text -> Member value
   Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
   StaticU1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Unitless => a -> result) -> Text -> Member value
   StaticM1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Meters => a -> result) -> Text -> Member value
@@ -138,10 +149,22 @@ data Member value where
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
 
 new :: forall value. FFI value => Text -> List (Member value) -> Class
-new classDocs members = buildClass classDocs members [] [] [] Nothing Nothing Nothing Nothing [] [] []
+new classDocs members = buildClass classDocs members [] Nothing [] [] Nothing Nothing Nothing Nothing [] [] []
 
 constant :: FFI result => Text -> result -> Text -> Member value
 constant = Const
+
+constructor1 :: (FFI a, FFI value) => Text -> (a -> value) -> Text -> Member value
+constructor1 = Ctor1
+
+constructor2 :: (FFI a, FFI b, FFI value) => Text -> Text -> (a -> b -> value) -> Text -> Member value
+constructor2 = Ctor2
+
+constructor3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
+constructor3 = Ctor3
+
+constructor4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Text -> Member value
+constructor4 = Ctor4
 
 factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Text -> Member value
 factory1 = Static1
@@ -415,6 +438,7 @@ buildClass ::
   Text ->
   List (Member value) ->
   List (FFI.Name, Constant) ->
+  Maybe (Constructor value) ->
   List (FFI.Name, StaticFunction) ->
   List (FFI.Name, MemberFunction value) ->
   Maybe (value -> value -> Bool) ->
@@ -429,6 +453,7 @@ buildClass
   classDocs
   members
   constantsAcc
+  ctorAcc
   staticFunctionsAcc
   memberFunctionsAcc
   equalityFunctionAcc
@@ -446,6 +471,7 @@ buildClass
               _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
           , documentation = classDocs
           , constants = constantsAcc
+          , constructor = ctorAcc
           , staticFunctions = staticFunctionsAcc
           , memberFunctions = memberFunctionsAcc
           , equalityFunction = equalityFunctionAcc
@@ -457,11 +483,27 @@ buildClass
           , nestedClasses = nestedClassesAcc
           }
       first : rest -> do
+        let addCtor constructor =
+              buildClass
+                classDocs
+                rest
+                constantsAcc
+                (Just constructor)
+                staticFunctionsAcc
+                memberFunctionsAcc
+                equalityFunctionAcc
+                comparisonFunctionAcc
+                negationFunctionAcc
+                absFunctionAcc
+                preOperatorsAcc
+                postOperatorsAcc
+                nestedClassesAcc
         let addStatic name staticFunction =
               buildClass
                 classDocs
                 rest
                 constantsAcc
+                ctorAcc
                 (staticFunctionsAcc + [(FFI.name name, staticFunction)])
                 memberFunctionsAcc
                 equalityFunctionAcc
@@ -476,6 +518,7 @@ buildClass
                 classDocs
                 rest
                 constantsAcc
+                ctorAcc
                 staticFunctionsAcc
                 (memberFunctionsAcc + [(FFI.name name, memberFunction)])
                 equalityFunctionAcc
@@ -491,6 +534,7 @@ buildClass
               classDocs
               rest
               (constantsAcc + [(FFI.name name, Constant value documentation)])
+              ctorAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -500,6 +544,14 @@ buildClass
               preOperatorsAcc
               postOperatorsAcc
               nestedClassesAcc
+          Ctor1 arg1 f ctorDocs ->
+            addCtor (Constructor1 (FFI.name arg1) f ctorDocs)
+          Ctor2 arg1 arg2 f ctorDocs ->
+            addCtor (Constructor2 (FFI.name arg1) (FFI.name arg2) f ctorDocs)
+          Ctor3 arg1 arg2 arg3 f ctorDocs ->
+            addCtor (Constructor3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f ctorDocs)
+          Ctor4 arg1 arg2 arg3 arg4 f ctorDocs ->
+            addCtor (Constructor4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f ctorDocs)
           Static1 name arg1 f staticDocs ->
             addStatic name (StaticFunction1 (FFI.name arg1) f staticDocs)
           StaticU1 name arg1 f staticDocs ->
@@ -547,6 +599,7 @@ buildClass
               classDocs
               rest
               constantsAcc
+              ctorAcc
               staticFunctionsAcc
               memberFunctionsAcc
               (Just (==))
@@ -561,6 +614,7 @@ buildClass
               classDocs
               rest
               constantsAcc
+              ctorAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -575,6 +629,7 @@ buildClass
               classDocs
               rest
               constantsAcc
+              ctorAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -589,6 +644,7 @@ buildClass
               classDocs
               rest
               constantsAcc
+              ctorAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -603,6 +659,7 @@ buildClass
               classDocs
               rest
               constantsAcc
+              ctorAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -617,6 +674,7 @@ buildClass
               classDocs
               rest
               constantsAcc
+              ctorAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -631,6 +689,7 @@ buildClass
               classDocs
               rest
               constantsAcc
+              ctorAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -649,6 +708,7 @@ functions
       classId_
       _
       constants
+      maybeConstructor
       staticFunctions
       memberFunctions
       maybeEqualityFunction
@@ -661,6 +721,7 @@ functions
     ) =
     List.concat
       [ List.map (constantFunctionInfo classId_) constants
+      , constructorInfo classId_ maybeConstructor
       , List.map (staticFunctionInfo classId_) staticFunctions
       , List.map (memberFunctionInfo classId_) memberFunctions
       , equalityFunctionInfo classId_ maybeEqualityFunction
@@ -681,6 +742,25 @@ constantFunctionInfo classId_ (constantName, const@(Constant value _)) =
     , returnType = Constant.valueType value
     , invoke = Constant.invoke const
     }
+
+constructorInfo ::
+  forall value.
+  FFI value =>
+  FFI.Id value ->
+  Maybe (Constructor value) ->
+  List Function
+constructorInfo classId_ maybeConstructor = case maybeConstructor of
+  Nothing -> []
+  Just constructor -> do
+    let (arguments, _) = Constructor.signature constructor
+    List.singleton $
+      Function
+        { ffiName = Constructor.ffiName classId_ constructor
+        , constraint = Nothing
+        , argumentTypes = List.map Pair.second arguments
+        , returnType = FFI.typeOf @value Proxy
+        , invoke = Constructor.invoke constructor
+        }
 
 staticFunctionInfo :: FFI.Id a -> (FFI.Name, StaticFunction) -> Function
 staticFunctionInfo classId_ (functionName, staticFunction) = do

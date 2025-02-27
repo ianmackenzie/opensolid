@@ -42,7 +42,7 @@ with Tolerance(Length.nanometer):
     body = Body3d.extruded(
         Plane3d.yz,
         filleted_region,
-        LengthRange.from_endpoints(-thickness / 2, thickness / 2),
+        LengthRange(-thickness / 2, thickness / 2),
     )
     mesh_constraints = [Mesh.max_error(Length.millimeters(0.1))]
     material = Scene3d.nonmetal(Color.blue, 0.3)

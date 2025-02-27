@@ -95,7 +95,7 @@ outputValue ffiType varName = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
-  FFI.Class id -> Python.Class.qualifiedName id + "(ptr = " + varName + ")"
+  FFI.Class id -> Python.Class.qualifiedName id + "._new(" + varName + ")"
 
 fieldOutputValue :: FFI.Type -> Text -> Text
 fieldOutputValue ffiType varName = case ffiType of
@@ -110,7 +110,7 @@ fieldOutputValue ffiType varName = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
-  FFI.Class id -> Python.Class.qualifiedName id + "(ptr=c_void_p(" + varName + "))"
+  FFI.Class id -> Python.Class.qualifiedName id + "._new(c_void_p(" + varName + "))"
 
 listOutputValue :: FFI.Type -> Text -> Text
 listOutputValue itemType varName =

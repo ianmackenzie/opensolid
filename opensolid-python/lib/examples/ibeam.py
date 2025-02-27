@@ -49,7 +49,7 @@ with Tolerance(Length.nanometer):
     profile = Region2d.bounded_by(curves)
 
     # Extrude the profile to create a solid body
-    extrusion_limits = LengthRange.from_endpoints(-0.5 * length, 0.5 * length)
+    extrusion_limits = LengthRange(-0.5 * length, 0.5 * length)
     body = Body3d.extruded(Plane3d.yz, profile, extrusion_limits)
 
     # Create a 3D scene containing the body and write to GLB file

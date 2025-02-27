@@ -33,6 +33,7 @@ library
     API.ComparisonFunction
     API.Constant
     API.Constraint
+    API.Constructor
     API.EqualityFunction
     API.Function
     API.MemberFunction

@@ -97,6 +97,12 @@ data Range units = Range_ (Qty units) (Qty units)
 
 {-# COMPLETE Range #-}
 
+{-| Construct a range from its lower and upper bounds.
+
+The order of the two arguments does not matter;
+the minimum of the two will be used as the lower bound of the range
+and the maximum will be used as the upper bound.
+-}
 {-# INLINE Range #-}
 pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Range_ low high

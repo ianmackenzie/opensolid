@@ -6,6 +6,7 @@ import API.Class
   , absSelf
   , comparison
   , constant
+  , constructor2
   , cross
   , crossSelf
   , divBy
@@ -101,7 +102,7 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
+import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
@@ -317,8 +318,8 @@ range :: Class
 range =
   Class.new @(Range Unitless) "A range of unitless values, with a lower bound and upper bound." $
     [ constant "Unit" Range.unit $(docs 'Range.unit)
+    , constructor2 "First Value" "Second Value" Range $(docs 'Range)
     , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
-    , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
     , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
     , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
     , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
@@ -353,8 +354,8 @@ range =
 lengthRange :: Class
 lengthRange =
   Class.new @(Range Meters) "A range of length values, with a lower bound and upper bound." $
-    [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
-    , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    [ constructor2 "First Value" "Second Value" Range $(docs 'Range)
+    , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
     , factory2 "Meters" "A" "B" Range.meters $(docs 'Range.meters)
     , factory2 "Centimeters" "A" "B" Range.centimeters $(docs 'Range.centimeters)
@@ -386,9 +387,9 @@ lengthRange =
 areaRange :: Class
 areaRange =
   Class.new @(Range SquareMeters) "A range of area values, with a lower bound and upper bound." $
-    [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
+    [ constructor2 "First Value" "Second Value" Range $(docs 'Range)
+    , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory2 "Square Meters" "A" "B" Range.squareMeters $(docs 'Range.squareMeters)
-    , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
     , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
     , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
     , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
@@ -416,8 +417,8 @@ areaRange =
 angleRange :: Class
 angleRange =
   Class.new @(Range Radians) "A range of angle values, with a lower bound and upper bound." $
-    [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
-    , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    [ constructor2 "First Value" "Second Value" Range $(docs 'Range)
+    , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
     , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
     , factory2 "Radians" "A" "B" Range.radians $(docs 'Range.radians)
     , factory2 "Degrees" "A" "B" Range.degrees $(docs 'Range.degrees)
