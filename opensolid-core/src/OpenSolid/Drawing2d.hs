@@ -130,6 +130,7 @@ nothing = Empty
 with :: List (Attribute space) -> List (Entity space) -> Entity space
 with attributes children = Node "g" attributes children
 
+-- | Group several entities into a single entity.
 group :: List (Entity space) -> Entity space
 group = with []
 
