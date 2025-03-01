@@ -361,14 +361,12 @@ registerArgumentTypes maybeConstraint argumentTypes registry = do
     type1 : type2 : rest -> Python.FFI.registerType (FFI.Tuple type1 type2 rest) registry
 
 main :: IO ()
-main = IO.do
-  let (classDefinitions, constantDefinitions) = List.unzip2 (List.map classDefinition API.classes)
-  let pythonCode =
-        Python.lines
-          [ preamble
-          , ffiTypeDeclarations
-          , Python.lines classDefinitions
-          , Python.lines constantDefinitions
-          , allExportsDefinition
-          ]
-  IO.writeFile "opensolid-python/lib/src/opensolid/__init__.py" pythonCode
+main = do
+  let flatten (classLines, constantLines) = Python.lines [classLines, constantLines]
+  IO.writeFile "opensolid-python/lib/src/opensolid/__init__.py" $
+    Python.lines
+      [ preamble
+      , ffiTypeDeclarations
+      , Python.lines (List.map (flatten . classDefinition) API.classes)
+      , allExportsDefinition
+      ]
