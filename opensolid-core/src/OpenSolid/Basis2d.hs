@@ -66,19 +66,19 @@ placeInBasis ::
   Basis2d global (Defines space) ->
   Basis2d space (Defines local) ->
   Basis2d global (Defines local)
-placeInBasis globalBasis basis =
+placeInBasis globalBasis (Basis2d i j) =
   Basis2d
-    (Direction2d.placeInBasis globalBasis (xDirection basis))
-    (Direction2d.placeInBasis globalBasis (yDirection basis))
+    (Direction2d.placeInBasis globalBasis i)
+    (Direction2d.placeInBasis globalBasis j)
 
 relativeToBasis ::
   Basis2d global (Defines space) ->
   Basis2d global (Defines local) ->
   Basis2d space (Defines local)
-relativeToBasis globalBasis basis =
+relativeToBasis globalBasis (Basis2d i j) =
   Basis2d
-    (Direction2d.relativeToBasis globalBasis (xDirection basis))
-    (Direction2d.relativeToBasis globalBasis (yDirection basis))
+    (Direction2d.relativeToBasis globalBasis i)
+    (Direction2d.relativeToBasis globalBasis j)
 
 inverse :: Basis2d global (Defines local) -> Basis2d local (Defines global)
 inverse basis = xy |> relativeToBasis basis
