@@ -307,9 +307,8 @@ data GltfMesh space where
     GltfMesh space
 
 gltfMeshes ::
-  forall global space.
-  Frame3d (global @ Meters) (Defines space) ->
-  Entity space ->
+  Frame3d (global @ Meters) (Defines local) ->
+  Entity local ->
   List (GltfMesh global)
 gltfMeshes parentFrame entity = case entity of
   Mesh Material{baseColor, roughness, metallic} smoothMesh -> do
@@ -317,7 +316,7 @@ gltfMeshes parentFrame entity = case entity of
     let numVertices = Array.length vertices
     let faceIndices = Mesh.faceIndices smoothMesh
     let numFaces = List.length faceIndices
-    let meshBounds :: Bounds3d (space @ Meters) = Bounds3d.bounds smoothMesh
+    let meshBounds = Bounds3d.bounds smoothMesh
     let Bounds3d xRange yRange zRange = meshBounds
     let Range xLow xHigh = xRange
     let Range yLow yHigh = yRange
