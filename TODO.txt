@@ -1,10 +1,18 @@
-Support default arguments in API?
--> Allow for 'Point2d()', 'Point2d(y=some_y_value)' etc. with unset coordinates defaulting to zero
+Create Haskell gear example and profile
+- test case of cycloid curve starting right at base circle
+  -> dump edges to see where there's a self-intersection, or try checking for zero-length edges ahead of time?
+- implement trochoidal fillet
 
-Remove constants Length.millimeter etc. from API
--> interfere with autocomplete when trying to use e.g. Length.millimeters(...)
+Improve curve linearization to take first-order bounds and even just zeroth-order bounds into account
+-> behave better when second derivative is poorly conditioned
 
 Have "high level" (Region2d, Body3d) functions just return 'Result Text a'?
+-> call that a 'Try a' or 'Attempt a' or similar?
+
+General pattern: arcs take radius, circles take diameter?
+
+Remove Curve2d.cornerArc now that e.g. Region2d.fillet exists?
+-> also add Curve2d.fillet to fillet curves at their (single) intersection point?
 
 Useful operations:
 - Booleans on regions
@@ -14,34 +22,18 @@ Generate non-zero normal vectors at poles of revolved surfaces
 
 Add DirectionCurve2d.[rotateLeft,rotateRight] and use in Curve2d.offsetBy, Region2d.fillet
 
-Add Meters (and Radians?) to OpenSolid.Prelude
-
-Remove positiveX, negativeY etc.
--> can just write -Direction2d.x etc., or 'negate Direction2d.x' for extra obviousness
-
-Remove 'xyzIn' etc. functions in favour of just using placeIn?
--> more flexible
--> generalizes to objects other than points/vectors
--> dedicated 'In' functions seem like a premature micro-optimization at this point...
-
-Rename 'SM' to just 'S' in API? Unlikely to have other squared units exposed through API...
-
 Add OpenSolid prefix to API modules
 
 Use actual UvSpace/UvCoordinates in API module?
 
-Add 'R' suffix versions of API factory* functions e.g. factory3R, factoryM2R, for factory functions that return Result values
--> then remove a few unnecessary 'forall's
-
 Remove Drawing2d.Resolution, *or* use it everywhere
 -> maybe have 'OpenSolid' be a context manager? 'with OpenSolid(tolerance=..., resolution=...):' etc.
   -> could support just setting tolerance *or* resolution at a time
+  -> could also set default display units (tolerance, output_resolution, display_units...)
 
 Add Linear transformation types?
 -> can only be used for vector types
 -> rename Affine to Positioned or Positional similar?
-
-Enforce frames to always be right-handed
 
 Add Curve2d.centerPoint function?
 -> check that evaluating center point from 3-point Gaussian quadrature points gives the same result, then return result for t=0.5
@@ -49,6 +41,7 @@ Add Curve2d.centerPoint function?
 
 Reconsider having Axis2d.u, Point2d.uv etc. specialized constants/constructors?
 -> maybe even move UvSpace into main CoordinateSystem module...and remove UvPoint etc. type aliases?
+-> simpler to just use Point2d constructor directly, instead of Point2d.uv
 
 Have one generic Error type for Body3d construction?
 -> or have separate error types, and e.g. map BoundedBy.Error to Extruded.Error by calling internalError for 'impossible' errors
@@ -64,12 +57,6 @@ Switch parametric types to only specialize for Parametric and Coerce
 Implement curve reversal as composition with (1 - t)?
 -> still efficient for parametric curves, which is the critical case
 -> most curves that have an optimized reverse implementation are parametric anyways...
-
-Refactor vector and direction types to have placeIn/relativeTo *only* support Basis#d?
--> not a big deal to have to call e.g. Frame3d.basis sometimes...and pretty explicit/clean
--> also removes ugliness with originPointUnits type parameter
-
-Replace Range.from with just Range pattern?
 
 Use direct constructors for primitives in more places
 -> search for 'let (' to find places where coordinates/components are being used (or unnecessary parentheses in general)
