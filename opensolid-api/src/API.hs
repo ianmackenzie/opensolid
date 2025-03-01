@@ -170,6 +170,9 @@ classes =
   , scene3d
   ]
 
+functions :: List Function
+functions = List.collect Class.functions classes
+
 length :: Class
 length =
   Class.new @Length $(docs ''Length) $
@@ -1295,6 +1298,3 @@ scene3d =
     , nested @(Scene3d.Entity Space) "A scene entity such as a mesh or group." (rigidTransformations3d Scene3d.transformBy)
     , nested @Scene3d.Material "A material applied to a mesh." []
     ]
-
-functions :: List Function
-functions = List.collect Class.functions classes
