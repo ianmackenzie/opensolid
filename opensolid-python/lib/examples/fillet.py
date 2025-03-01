@@ -14,7 +14,7 @@ from opensolid import (
     Tolerance,
 )
 
-with Tolerance(Length.nanometer):
+with Tolerance(Length.nanometers(1)):
     p1 = Point2d.centimeters(0, 1)
     p2 = Point2d.centimeters(1, 1)
     p3 = Point2d.centimeters(1, 0)

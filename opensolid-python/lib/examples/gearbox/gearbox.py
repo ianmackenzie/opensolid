@@ -54,7 +54,7 @@ output_shaft_front_extension = Length.centimeters(2)
 mesh_constraints = [Mesh.max_error(resolution)]
 
 
-with Tolerance(Length.nanometer):
+with Tolerance(Length.nanometers(1)):
     back_plate_back_plane = Plane3d.yz.flip_x()
     back_plate_front_plane = Plane3d.yz.offset_by(plate_thickness)
 
