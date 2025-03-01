@@ -107,7 +107,6 @@ transformBy (Transform2d _ i j) vector =
   xComponent vector * constant i + yComponent vector * constant j
 
 placeOn ::
-  forall space units local originPointUnits.
   Plane3d (space @ originPointUnits) (Defines local) ->
   Expression Float (Vector2d (local @ units)) ->
   Expression Float (Vector3d (space @ units))

@@ -102,7 +102,7 @@ centerPoint :: Bounds2d (space @ units) -> Point2d (space @ units)
 centerPoint (Bounds2d x y) = Point2d (Range.midpoint x) (Range.midpoint y)
 
 -- | Construct a bounding box from its X and Y coordinate ranges.
-xy :: forall space units. Range units -> Range units -> Bounds2d (space @ units)
+xy :: Range units -> Range units -> Bounds2d (space @ units)
 xy = Bounds2d
 
 -- | Construct a zero-size bounding box containing a single point.

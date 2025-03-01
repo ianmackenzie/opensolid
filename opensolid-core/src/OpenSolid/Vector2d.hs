@@ -84,18 +84,18 @@ unit (Unit2d vector) = vector
 
 The Y component will be set to zero.
 -}
-x :: forall space units. Qty units -> Vector2d (space @ units)
+x :: Qty units -> Vector2d (space @ units)
 x vx = Vector2d vx Qty.zero
 
 {-| Construct a vector from just a Y component.
 
 The X component will be set to zero.
 -}
-y :: forall space units. Qty units -> Vector2d (space @ units)
+y :: Qty units -> Vector2d (space @ units)
 y vy = Vector2d Qty.zero vy
 
 -- | Construct a vector from its X and Y components.
-xy :: forall space units. Qty units -> Qty units -> Vector2d (space @ units)
+xy :: Qty units -> Qty units -> Vector2d (space @ units)
 xy = Vector2d
 
 xyIn :: Frame2d (space @ originUnits) defines -> Qty units -> Qty units -> Vector2d (space @ units)
@@ -105,7 +105,7 @@ xyInBasis :: Basis2d space defines -> Qty units -> Qty units -> Vector2d (space 
 xyInBasis (Basis2d i j) vx vy = vx * i + vy * j
 
 -- | Construct a vector from a pair of X and Y components.
-fromComponents :: forall space units. (Qty units, Qty units) -> Vector2d (space @ units)
+fromComponents :: (Qty units, Qty units) -> Vector2d (space @ units)
 fromComponents (vx, vy) = Vector2d vx vy
 
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)

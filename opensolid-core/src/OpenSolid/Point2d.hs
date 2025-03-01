@@ -61,25 +61,25 @@ origin :: Point2d (space @ units)
 origin = Point2d Qty.zero Qty.zero
 
 -- | Construct a point along the X axis, with the given X coordinate.
-x :: forall space units. Qty units -> Point2d (space @ units)
+x :: Qty units -> Point2d (space @ units)
 x px = Point2d px Qty.zero
 
 -- | Construct a point along the Y axis, with the given Y coordinate.
-y :: forall space units. Qty units -> Point2d (space @ units)
+y :: Qty units -> Point2d (space @ units)
 y py = Point2d Qty.zero py
 
 along :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units)
 along (Axis2d originPoint direction) distance = originPoint + distance * direction
 
 -- | Construct a point from its X and Y coordinates.
-xy :: forall space units. Qty units -> Qty units -> Point2d (space @ units)
+xy :: Qty units -> Qty units -> Point2d (space @ units)
 xy = Point2d
 
 xyIn :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Point2d (space @ units)
 xyIn (Frame2d p0 (Basis2d i j)) px py = p0 + px * i + py * j
 
 -- | Construct a point from a pair of X and Y coordinates.
-fromCoordinates :: forall space units. (Qty units, Qty units) -> Point2d (space @ units)
+fromCoordinates :: (Qty units, Qty units) -> Point2d (space @ units)
 fromCoordinates (px, py) = Point2d px py
 
 apply :: (Float -> Qty units) -> Float -> Float -> Point2d (space @ units)
