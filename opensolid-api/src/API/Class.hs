@@ -32,7 +32,7 @@ module API.Class
   , memberU0
   , memberR0
   , memberM0
-  , memberSM0
+  , memberS0
   , member1
   , member2
   , memberU2
@@ -135,7 +135,7 @@ data Member value where
   MemberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Text -> Member value
   MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Text -> Member value
   MemberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
-  MemberSM0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
+  MemberS0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
   Member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
   Member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
   MemberU2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> value -> result) -> Text -> Member value
@@ -238,8 +238,8 @@ memberR0 = MemberR0
 memberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
 memberM0 = MemberM0
 
-memberSM0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
-memberSM0 = MemberSM0
+memberS0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
+memberS0 = MemberS0
 
 member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
 member1 = Member1
@@ -584,8 +584,8 @@ buildClass
             addMember name (MemberFunctionR0 f memberDocs)
           MemberM0 name f memberDocs ->
             addMember name (MemberFunctionM0 f memberDocs)
-          MemberSM0 name f memberDocs ->
-            addMember name (MemberFunctionSM0 f memberDocs)
+          MemberS0 name f memberDocs ->
+            addMember name (MemberFunctionS0 f memberDocs)
           Member1 name arg1 f memberDocs ->
             addMember name (MemberFunction1 (FFI.name arg1) f memberDocs)
           Member2 name arg1 arg2 f memberDocs ->

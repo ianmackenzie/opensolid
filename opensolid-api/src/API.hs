@@ -40,7 +40,7 @@ import API.Class
   , memberM0
   , memberM2
   , memberR0
-  , memberSM0
+  , memberS0
   , memberU0
   , minus
   , minusFloat
@@ -226,7 +226,7 @@ area =
     , factory1 "Square Inches" "Value" Area.squareInches $(docs 'Area.squareInches)
     , member0 "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
     , member0 "In Square Inches" Area.inSquareInches $(docs 'Area.inSquareInches)
-    , memberSM0 "Is Zero" (~= Area.zero) "Check if an area is zero, within the current tolerance."
+    , memberS0 "Is Zero" (~= Area.zero) "Check if an area is zero, within the current tolerance."
     , equality
     , comparison
     , negateSelf
@@ -560,10 +560,10 @@ areaVector2d =
     , member0 "Components" Vector2d.components $(docs 'Vector2d.components)
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
-    , memberSM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
+    , memberS0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
-    , memberSM0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
+    , memberS0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
     , negateSelf
     , floatTimes
     , plusSelf
@@ -778,8 +778,8 @@ areaCurve =
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
-    , memberSM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , memberSM0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , memberS0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
+    , memberS0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
     , floatTimes
     , plusSelf
@@ -926,8 +926,8 @@ areaVector3d =
     , member0 "X Component" Vector3d.xComponent $(docs 'Vector3d.xComponent)
     , member0 "Y Component" Vector3d.yComponent $(docs 'Vector3d.yComponent)
     , member0 "Z Component" Vector3d.zComponent $(docs 'Vector3d.zComponent)
-    , memberSM0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
-    , memberSM0 "Is Zero" (~= Vector3d.zero) "Check if an area vector is zero, within the current tolerance."
+    , memberS0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
+    , memberS0 "Is Zero" (~= Vector3d.zero) "Check if an area vector is zero, within the current tolerance."
     , member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
     , member2 "Rotate Around" "Axis" "Angle" (Vector3d.rotateAround @Space @Meters) $(docs 'Vector3d.rotateAround)
     , member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
