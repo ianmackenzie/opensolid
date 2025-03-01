@@ -639,11 +639,11 @@ point2d =
 uvPoint :: Class
 uvPoint =
   Class.new @(Point2d (Space @ Unitless)) "A point in UV parameter space." $
-    [ constant "Origin" (Point2d.origin @Space @Unitless) $(docs 'Point2d.origin)
+    [ constant "Origin" (Point2d.origin @Space @Unitless) "The point with coordinates (0,0)."
     , factory2 "UV" "U Coordinate" "V Coordinate" Point2d.xy $(docs 'Point2d.xy)
     , factory1 "U" "U Coordinate" Point2d.x $(docs 'Point2d.x)
     , factory1 "V" "V Coordinate" Point2d.y $(docs 'Point2d.y)
-    , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates $(docs 'Point2d.fromCoordinates)
+    , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates "Construct a point from a pair of U and V coordinates."
     , member0 "Coordinates" Point2d.coordinates "Get the U and V coordinates of a point."
     , member0 "U Coordinate" Point2d.xCoordinate "Get the U coordinate of a point."
     , member0 "V Coordinate" Point2d.yCoordinate "Get the V coordinate of a point."
@@ -674,14 +674,14 @@ bounds2d =
 uvBounds :: Class
 uvBounds =
   Class.new @(Bounds2d (Space @ Unitless)) "A bounding box in UV parameter space." $
-    [ constructor2 "U Coordinate" "V Coordinate" Bounds2d $(docs 'Bounds2d)
+    [ constructor2 "U Coordinate" "V Coordinate" Bounds2d "Construct a bounding box from its U and V coordinate ranges."
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
-    , member0 "U Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
-    , member0 "V Coordinate" Bounds2d.yCoordinate $(docs 'Bounds2d.yCoordinate)
+    , member0 "U Coordinate" Bounds2d.xCoordinate "Get the U coordinate range of a bounding box."
+    , member0 "V Coordinate" Bounds2d.yCoordinate "Get the V coordinate range of a bounding box."
     , plus @(Vector2d (Space @ Unitless)) Self
     , minus @(Vector2d (Space @ Unitless)) Self
     ]
