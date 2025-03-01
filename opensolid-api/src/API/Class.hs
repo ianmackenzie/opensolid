@@ -115,31 +115,9 @@ data Class where
 
 data Member value where
   Const :: FFI result => Text -> result -> Text -> Member value
-  Ctor1 :: (FFI a, FFI value) => Text -> (a -> value) -> Text -> Member value
-  Ctor2 :: (FFI a, FFI b, FFI value) => Text -> Text -> (a -> b -> value) -> Text -> Member value
-  Ctor3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
-  Ctor4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Text -> Member value
-  Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
-  StaticU1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Unitless => a -> result) -> Text -> Member value
-  StaticM1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Meters => a -> result) -> Text -> Member value
-  Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
-  StaticU2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> result) -> Text -> Member value
-  StaticM2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> result) -> Text -> Member value
-  Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
-  StaticU3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> result) -> Text -> Member value
-  StaticM3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> result) -> Text -> Member value
-  Static4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> result) -> Text -> Member value
-  StaticU4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> d -> result) -> Text -> Member value
-  StaticM4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> result) -> Text -> Member value
-  Member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
-  MemberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Text -> Member value
-  MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Text -> Member value
-  MemberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
-  MemberS0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
-  Member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
-  Member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
-  MemberU2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> value -> result) -> Text -> Member value
-  MemberM2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> value -> result) -> Text -> Member value
+  Constructor :: Constructor value -> Member value
+  Static :: FFI.Name -> StaticFunction -> Member value
+  Member :: FFI.Name -> MemberFunction value -> Member value
   Equality :: Eq value => Member value
   Comparison :: Ord value => Member value
   Negate :: Negation value => Member value
@@ -149,109 +127,418 @@ data Member value where
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
 
 new :: forall value. FFI value => Text -> List (Member value) -> Class
-new classDocs members = buildClass classDocs members [] Nothing [] [] Nothing Nothing Nothing Nothing [] [] []
+new classDocs members =
+  buildClass classDocs members [] Nothing [] [] Nothing Nothing Nothing Nothing [] [] []
 
 constant :: FFI result => Text -> result -> Text -> Member value
 constant = Const
 
 constructor1 :: (FFI a, FFI value) => Text -> (a -> value) -> Text -> Member value
-constructor1 = Ctor1
+constructor1 arg1 f docs = Constructor (Constructor1 (FFI.name arg1) f docs)
 
-constructor2 :: (FFI a, FFI b, FFI value) => Text -> Text -> (a -> b -> value) -> Text -> Member value
-constructor2 = Ctor2
+constructor2 ::
+  (FFI a, FFI b, FFI value) =>
+  Text ->
+  Text ->
+  (a -> b -> value) ->
+  Text ->
+  Member value
+constructor2 arg1 arg2 f docs = Constructor (Constructor2 (FFI.name arg1) (FFI.name arg2) f docs)
 
-constructor3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
-constructor3 = Ctor3
+constructor3 ::
+  (FFI a, FFI b, FFI c, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> value) ->
+  Text ->
+  Member value
+constructor3 arg1 arg2 arg3 f docs =
+  Constructor (Constructor3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
 
-constructor4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Text -> Member value
-constructor4 = Ctor4
+constructor4 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> value) ->
+  Text ->
+  Member value
+constructor4 arg1 arg2 arg3 arg4 f docs =
+  Constructor (Constructor4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs)
 
 factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Text -> Member value
-factory1 = Static1
+factory1 = static1
 
-factoryU1R :: (FFI a, FFI value) => Text -> Text -> (Tolerance Unitless => a -> Result x value) -> Text -> Member value
-factoryU1R = StaticU1
+factoryU1R ::
+  (FFI a, FFI value) =>
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> Result x value) ->
+  Text ->
+  Member value
+factoryU1R = staticU1
 
-factoryM1R :: (FFI a, FFI value) => Text -> Text -> (Tolerance Meters => a -> Result x value) -> Text -> Member value
-factoryM1R = StaticM1
+factoryM1R ::
+  (FFI a, FFI value) =>
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> Result x value) ->
+  Text ->
+  Member value
+factoryM1R = staticM1
 
-factory2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (a -> b -> value) -> Text -> Member value
-factory2 = Static2
+factory2 ::
+  (FFI a, FFI b, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> value) ->
+  Text ->
+  Member value
+factory2 = static2
 
-factoryU2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> value) -> Text -> Member value
-factoryU2 = StaticU2
+factoryU2 ::
+  (FFI a, FFI b, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> b -> value) ->
+  Text ->
+  Member value
+factoryU2 = staticU2
 
-factoryU2R :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> Result x value) -> Text -> Member value
-factoryU2R = StaticU2
+factoryU2R ::
+  (FFI a, FFI b, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> b -> Result x value) ->
+  Text ->
+  Member value
+factoryU2R = staticU2
 
-factoryM2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> value) -> Text -> Member value
-factoryM2 = StaticM2
+factoryM2 ::
+  (FFI a, FFI b, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> value) ->
+  Text ->
+  Member value
+factoryM2 = staticM2
 
-factoryM2R :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> Result x value) -> Text -> Member value
-factoryM2R = StaticM2
+factoryM2R ::
+  (FFI a, FFI b, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> Result x value) ->
+  Text ->
+  Member value
+factoryM2R = staticM2
 
-factory3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
-factory3 = Static3
+factory3 ::
+  (FFI a, FFI b, FFI c, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> value) ->
+  Text ->
+  Member value
+factory3 = static3
 
-factoryU3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> value) -> Text -> Member value
-factoryU3 = StaticU3
+factoryU3 ::
+  (FFI a, FFI b, FFI c, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> b -> c -> value) ->
+  Text ->
+  Member value
+factoryU3 = staticU3
 
-factoryM3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> value) -> Text -> Member value
-factoryM3 = StaticM3
+factoryM3 ::
+  (FFI a, FFI b, FFI c, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> c -> value) ->
+  Text ->
+  Member value
+factoryM3 = staticM3
 
-factoryM3R :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> Result x value) -> Text -> Member value
-factoryM3R = StaticM3
+factoryM3R ::
+  (FFI a, FFI b, FFI c, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> c -> Result x value) ->
+  Text ->
+  Member value
+factoryM3R = staticM3
 
-factory4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Text -> Member value
-factory4 = Static4
+factory4 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> value) ->
+  Text ->
+  Member value
+factory4 = static4
 
-factoryU4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> d -> value) -> Text -> Member value
-factoryU4 = StaticU4
+factoryU4 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> b -> c -> d -> value) ->
+  Text ->
+  Member value
+factoryU4 = staticU4
 
-factoryM4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> value) -> Text -> Member value
-factoryM4 = StaticM4
+factoryM4 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> c -> d -> value) ->
+  Text ->
+  Member value
+factoryM4 = staticM4
 
-factoryM4R :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> Result x value) -> Text -> Member value
-factoryM4R = StaticM4
+factoryM4R ::
+  (FFI a, FFI b, FFI c, FFI d, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> c -> d -> Result x value) ->
+  Text ->
+  Member value
+factoryM4R = staticM4
 
 static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
-static1 = Static1
+static1 name arg1 f docs = Static (FFI.name name) (StaticFunction1 (FFI.name arg1) f docs)
 
-static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
-static2 = Static2
+staticU1 ::
+  (FFI a, FFI result) =>
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> result) ->
+  Text ->
+  Member value
+staticU1 name arg1 f docs = Static (FFI.name name) (StaticFunctionU1 (FFI.name arg1) f docs)
 
-static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
-static3 = Static3
+staticM1 ::
+  (FFI a, FFI result) =>
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> result) ->
+  Text ->
+  Member value
+staticM1 name arg1 f docs = Static (FFI.name name) (StaticFunctionM1 (FFI.name arg1) f docs)
 
-staticM3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> result) -> Text -> Member value
-staticM3 = StaticM3
+static2 ::
+  (FFI a, FFI b, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> result) ->
+  Text ->
+  Member value
+static2 name arg1 arg2 f docs =
+  Static (FFI.name name) (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f docs)
+
+staticU2 ::
+  (FFI a, FFI b, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> b -> result) ->
+  Text ->
+  Member value
+staticU2 name arg1 arg2 f docs =
+  Static (FFI.name name) (StaticFunctionU2 (FFI.name arg1) (FFI.name arg2) f docs)
+
+staticM2 ::
+  (FFI a, FFI b, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> result) ->
+  Text ->
+  Member value
+staticM2 name arg1 arg2 f docs =
+  Static (FFI.name name) (StaticFunctionM2 (FFI.name arg1) (FFI.name arg2) f docs)
+
+static3 ::
+  (FFI a, FFI b, FFI c, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> result) ->
+  Text ->
+  Member value
+static3 name arg1 arg2 arg3 f docs =
+  Static (FFI.name name) (StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
+
+staticU3 ::
+  (FFI a, FFI b, FFI c, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> b -> c -> result) ->
+  Text ->
+  Member value
+staticU3 name arg1 arg2 arg3 f docs =
+  Static (FFI.name name) (StaticFunctionU3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
+
+staticM3 ::
+  (FFI a, FFI b, FFI c, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> c -> result) ->
+  Text ->
+  Member value
+staticM3 name arg1 arg2 arg3 f docs =
+  Static (FFI.name name) (StaticFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
+
+static4 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> result) ->
+  Text ->
+  Member value
+static4 name arg1 arg2 arg3 arg4 f docs =
+  Static (FFI.name name) $
+    StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
+
+staticU4 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> b -> c -> d -> result) ->
+  Text ->
+  Member value
+staticU4 name arg1 arg2 arg3 arg4 f docs =
+  Static (FFI.name name) $
+    StaticFunctionU4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
+
+staticM4 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> c -> d -> result) ->
+  Text ->
+  Member value
+staticM4 name arg1 arg2 arg3 arg4 f docs =
+  Static (FFI.name name) $
+    StaticFunctionM4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
 
 member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
-member0 = Member0
+member0 name f docs = Member (FFI.name name) (MemberFunction0 f docs)
 
-memberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Text -> Member value
-memberU0 = MemberU0
+memberU0 ::
+  (FFI value, FFI result) =>
+  Text ->
+  (Tolerance Unitless => value -> result) ->
+  Text ->
+  Member value
+memberU0 name f docs = Member (FFI.name name) (MemberFunctionU0 f docs)
 
-memberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Text -> Member value
-memberR0 = MemberR0
+memberR0 ::
+  (FFI value, FFI result) =>
+  Text ->
+  (Tolerance Radians => value -> result) ->
+  Text ->
+  Member value
+memberR0 name f docs = Member (FFI.name name) (MemberFunctionR0 f docs)
 
-memberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
-memberM0 = MemberM0
+memberM0 ::
+  (FFI value, FFI result) =>
+  Text ->
+  (Tolerance Meters => value -> result) ->
+  Text ->
+  Member value
+memberM0 name f docs = Member (FFI.name name) (MemberFunctionM0 f docs)
 
-memberS0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
-memberS0 = MemberS0
+memberS0 ::
+  (FFI value, FFI result) =>
+  Text ->
+  (Tolerance SquareMeters => value -> result) ->
+  Text ->
+  Member value
+memberS0 name f docs = Member (FFI.name name) (MemberFunctionS0 f docs)
 
-member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
-member1 = Member1
+member1 ::
+  (FFI a, FFI value, FFI result) =>
+  Text ->
+  Text ->
+  (a -> value -> result) ->
+  Text ->
+  Member value
+member1 name arg1 f docs = Member (FFI.name name) (MemberFunction1 (FFI.name arg1) f docs)
 
-member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
-member2 = Member2
+member2 ::
+  (FFI a, FFI b, FFI value, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> value -> result) ->
+  Text ->
+  Member value
+member2 name arg1 arg2 f docs =
+  Member (FFI.name name) (MemberFunction2 (FFI.name arg1) (FFI.name arg2) f docs)
 
-memberU2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Unitless => a -> b -> value -> result) -> Text -> Member value
-memberU2 = MemberU2
+memberU2 ::
+  (FFI a, FFI b, FFI value, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Unitless => a -> b -> value -> result) ->
+  Text ->
+  Member value
+memberU2 name arg1 arg2 f docs =
+  Member (FFI.name name) (MemberFunctionU2 (FFI.name arg1) (FFI.name arg2) f docs)
 
-memberM2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (Tolerance Meters => a -> b -> value -> result) -> Text -> Member value
-memberM2 = MemberM2
+memberM2 ::
+  (FFI a, FFI b, FFI value, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> value -> result) ->
+  Text ->
+  Member value
+memberM2 name arg1 arg2 f docs =
+  Member (FFI.name name) (MemberFunctionM2 (FFI.name arg1) (FFI.name arg2) f docs)
 
 data Self a = Self
 
@@ -482,223 +769,172 @@ buildClass
           , postOperators = postOperatorsAcc
           , nestedClasses = nestedClassesAcc
           }
-      first : rest -> do
-        let addCtor constructor =
-              buildClass
-                classDocs
-                rest
-                constantsAcc
-                (Just constructor)
-                staticFunctionsAcc
-                memberFunctionsAcc
-                equalityFunctionAcc
-                comparisonFunctionAcc
-                negationFunctionAcc
-                absFunctionAcc
-                preOperatorsAcc
-                postOperatorsAcc
-                nestedClassesAcc
-        let addStatic name staticFunction =
-              buildClass
-                classDocs
-                rest
-                constantsAcc
-                ctorAcc
-                (staticFunctionsAcc + [(FFI.name name, staticFunction)])
-                memberFunctionsAcc
-                equalityFunctionAcc
-                comparisonFunctionAcc
-                negationFunctionAcc
-                absFunctionAcc
-                preOperatorsAcc
-                postOperatorsAcc
-                nestedClassesAcc
-        let addMember name memberFunction =
-              buildClass
-                classDocs
-                rest
-                constantsAcc
-                ctorAcc
-                staticFunctionsAcc
-                (memberFunctionsAcc + [(FFI.name name, memberFunction)])
-                equalityFunctionAcc
-                comparisonFunctionAcc
-                negationFunctionAcc
-                absFunctionAcc
-                preOperatorsAcc
-                postOperatorsAcc
-                nestedClassesAcc
-        case first of
-          Const name value documentation ->
-            buildClass
-              classDocs
-              rest
-              (constantsAcc + [(FFI.name name, Constant value documentation)])
-              ctorAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          Ctor1 arg1 f ctorDocs ->
-            addCtor (Constructor1 (FFI.name arg1) f ctorDocs)
-          Ctor2 arg1 arg2 f ctorDocs ->
-            addCtor (Constructor2 (FFI.name arg1) (FFI.name arg2) f ctorDocs)
-          Ctor3 arg1 arg2 arg3 f ctorDocs ->
-            addCtor (Constructor3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f ctorDocs)
-          Ctor4 arg1 arg2 arg3 arg4 f ctorDocs ->
-            addCtor (Constructor4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f ctorDocs)
-          Static1 name arg1 f staticDocs ->
-            addStatic name (StaticFunction1 (FFI.name arg1) f staticDocs)
-          StaticU1 name arg1 f staticDocs ->
-            addStatic name (StaticFunctionU1 (FFI.name arg1) f staticDocs)
-          StaticM1 name arg1 f staticDocs ->
-            addStatic name (StaticFunctionM1 (FFI.name arg1) f staticDocs)
-          Static2 name arg1 arg2 f staticDocs ->
-            addStatic name (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
-          StaticU2 name arg1 arg2 f staticDocs ->
-            addStatic name (StaticFunctionU2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
-          StaticM2 name arg1 arg2 f staticDocs ->
-            addStatic name (StaticFunctionM2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
-          Static3 name arg1 arg2 arg3 f staticDocs ->
-            addStatic name (StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
-          StaticU3 name arg1 arg2 arg3 f staticDocs ->
-            addStatic name (StaticFunctionU3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
-          StaticM3 name arg1 arg2 arg3 f staticDocs ->
-            addStatic name (StaticFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
-          Static4 name arg1 arg2 arg3 arg4 f staticDocs ->
-            addStatic name (StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
-          StaticU4 name arg1 arg2 arg3 arg4 f staticDocs ->
-            addStatic name (StaticFunctionU4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
-          StaticM4 name arg1 arg2 arg3 arg4 f staticDocs ->
-            addStatic name (StaticFunctionM4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
-          Member0 name f memberDocs ->
-            addMember name (MemberFunction0 f memberDocs)
-          MemberU0 name f memberDocs ->
-            addMember name (MemberFunctionU0 f memberDocs)
-          MemberR0 name f memberDocs ->
-            addMember name (MemberFunctionR0 f memberDocs)
-          MemberM0 name f memberDocs ->
-            addMember name (MemberFunctionM0 f memberDocs)
-          MemberS0 name f memberDocs ->
-            addMember name (MemberFunctionS0 f memberDocs)
-          Member1 name arg1 f memberDocs ->
-            addMember name (MemberFunction1 (FFI.name arg1) f memberDocs)
-          Member2 name arg1 arg2 f memberDocs ->
-            addMember name (MemberFunction2 (FFI.name arg1) (FFI.name arg2) f memberDocs)
-          MemberU2 name arg1 arg2 f memberDocs ->
-            addMember name (MemberFunctionU2 (FFI.name arg1) (FFI.name arg2) f memberDocs)
-          MemberM2 name arg1 arg2 f memberDocs ->
-            addMember name (MemberFunctionM2 (FFI.name arg1) (FFI.name arg2) f memberDocs)
-          Equality ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              ctorAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              (Just (==))
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          Comparison ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              ctorAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              (Just comparisonImpl)
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          Negate ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              ctorAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              (Just negate)
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          Abs function ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              ctorAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              (Just function)
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-          PreOp operatorId operator ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              ctorAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
-              postOperatorsAcc
-              nestedClassesAcc
-          PostOp operatorId operator ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              ctorAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
-              nestedClassesAcc
-          Nested nestedDocstring nestedMembers ->
-            buildClass
-              classDocs
-              rest
-              constantsAcc
-              ctorAcc
-              staticFunctionsAcc
-              memberFunctionsAcc
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              absFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              (nestedClassesAcc + [new nestedDocstring nestedMembers])
+      first : rest -> case first of
+        Const name value documentation ->
+          buildClass
+            classDocs
+            rest
+            (constantsAcc + [(FFI.name name, Constant value documentation)])
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        Constructor constructor ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            (Just constructor)
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        Static name staticFunction ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            (staticFunctionsAcc + [(name, staticFunction)])
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        Member name memberFunction ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            (memberFunctionsAcc + [(name, memberFunction)])
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        Equality ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            (Just (==))
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        Comparison ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            (Just comparisonImpl)
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        Negate ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            (Just negate)
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        Abs function ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            (Just function)
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        PreOp operatorId operator ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
+            postOperatorsAcc
+            nestedClassesAcc
+        PostOp operatorId operator ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
+            nestedClassesAcc
+        Nested nestedDocstring nestedMembers ->
+          buildClass
+            classDocs
+            rest
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            (nestedClassesAcc + [new nestedDocstring nestedMembers])
 
 ----- FUNCTION COLLECTION -----
 
