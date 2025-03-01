@@ -3,3 +3,6 @@
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# Generated library file
+lib/src/opensolid/__init__.py
