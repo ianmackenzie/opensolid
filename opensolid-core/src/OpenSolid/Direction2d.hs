@@ -36,7 +36,7 @@ import OpenSolid.Primitives
   , Basis2d
   , Direction2d (Unit2d)
   , Direction3d (Unit3d)
-  , Plane3d
+  , PlanarBasis3d
   , Point2d
   , Transform2d
   , Vector2d (Vector2d)
@@ -161,10 +161,10 @@ relativeTo :: Basis2d global (Defines local) -> Direction2d global -> Direction2
 relativeTo basis = lift (Vector2d.relativeTo basis)
 
 placeOn ::
-  Plane3d (space @ planeUnits) (Defines local) ->
+  PlanarBasis3d space (Defines local) ->
   Direction2d local ->
   Direction3d space
-placeOn plane (Unit2d vector) = Unit3d (Vector2d.placeOn plane vector)
+placeOn planarBasis (Unit2d vector) = Unit3d (Vector2d.placeOn planarBasis vector)
 
 random :: Random.Generator (Direction2d space)
 random = Random.map fromAngle (Qty.random -Angle.pi Angle.pi)

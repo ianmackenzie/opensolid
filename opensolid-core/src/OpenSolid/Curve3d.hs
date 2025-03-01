@@ -45,6 +45,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
@@ -62,6 +63,7 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
@@ -388,7 +390,7 @@ derivative f = case f of
   Addition c v -> derivative c + VectorCurve3d.derivative v
   Subtraction c v -> derivative c - VectorCurve3d.derivative v
   Transformed transform c -> VectorCurve3d.transformBy transform (derivative c)
-  Planar plane curve2d -> VectorCurve3d.planar plane (Curve2d.derivative curve2d)
+  Planar plane curve2d -> VectorCurve2d.placeOn (Plane3d.basis plane) (Curve2d.derivative curve2d)
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
 reverse f = case f of

@@ -18,8 +18,8 @@ import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Plane3d qualified as Plane3d
+import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units qualified as Units
@@ -91,12 +91,12 @@ transformBy (Transform2d _ i j) vector =
   xComponent vector * constant i + yComponent vector * constant j
 
 placeOn ::
-  Plane3d (space @ originPointUnits) (Defines local) ->
+  PlanarBasis3d space (Defines local) ->
   Expression Float (Vector2d (local @ units)) ->
   Expression Float (Vector3d (space @ units))
-placeOn plane vector = do
-  let i = Vector3d.unit (Plane3d.xDirection plane)
-  let j = Vector3d.unit (Plane3d.yDirection plane)
+placeOn planarBasis vector = do
+  let i = Vector3d.unit (PlanarBasis3d.xDirection planarBasis)
+  let j = Vector3d.unit (PlanarBasis3d.yDirection planarBasis)
   xComponent vector * constant3d i + yComponent vector * constant3d j
 
 constant3d :: Vector3d (space @ units) -> Expression Float (Vector3d (space @ units))

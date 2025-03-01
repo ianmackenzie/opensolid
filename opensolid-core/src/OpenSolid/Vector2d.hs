@@ -57,7 +57,6 @@ import OpenSolid.Primitives
   , Basis2d (Basis2d)
   , Direction2d (Unit2d)
   , PlanarBasis3d (PlanarBasis3d)
-  , Plane3d (Plane3d)
   , Point2d
   , Transform2d (Transform2d)
   , Vector2d (Vector2d)
@@ -235,10 +234,10 @@ relativeTo ::
 relativeTo (Basis2d i j) vector = Vector2d (vector <> i) (vector <> j)
 
 placeOn ::
-  Plane3d (space @ planeUnits) (Defines local) ->
+  PlanarBasis3d space (Defines local) ->
   Vector2d (local @ units) ->
   Vector3d (space @ units)
-placeOn (Plane3d _ (PlanarBasis3d i j)) (Vector2d vx vy) = vx * i + vy * j
+placeOn (PlanarBasis3d i j) (Vector2d vx vy) = vx * i + vy * j
 
 convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
 convert factor vector = vector !* factor

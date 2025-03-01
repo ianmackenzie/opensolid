@@ -61,7 +61,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2d (Frame2d (Frame2d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -861,10 +861,13 @@ relativeTo ::
 relativeTo basis = placeIn (Basis2d.inverse basis)
 
 placeOn ::
-  Plane3d (space @ planeUnits) (Defines local) ->
+  PlanarBasis3d space (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve3d (space @ units)
-placeOn plane curve = VectorCurve3d.planar plane curve
+placeOn basis (Parametric expression) =
+  VectorCurve3d.Parametric (Expression.VectorCurve2d.placeOn basis expression)
+placeOn basis curve =
+  VectorCurve3d.Planar basis curve
 
 convert ::
   Qty (units2 :/: units1) ->

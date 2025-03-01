@@ -90,8 +90,9 @@ placeOn ::
   Frame2d (local @ units) defines ->
   Plane3d (space @ units) defines
 placeOn plane (Frame2d p0 (Basis2d i j)) = do
+  let Plane3d _ planarBasis = plane
   Plane3d (Point2d.placeOn plane p0) $
-    PlanarBasis3d (Direction2d.placeOn plane i) (Direction2d.placeOn plane j)
+    PlanarBasis3d (Direction2d.placeOn planarBasis i) (Direction2d.placeOn planarBasis j)
 
 inverse :: Frame2d (global @ units) (Defines local) -> Frame2d (local @ units) (Defines global)
 inverse frame = xy |> relativeTo frame

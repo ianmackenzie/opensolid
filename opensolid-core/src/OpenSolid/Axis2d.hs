@@ -30,7 +30,7 @@ import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis2d (Axis2d), Axis3d (Axis3d), Plane3d, Transform2d)
+import OpenSolid.Primitives (Axis2d (Axis2d), Axis3d (Axis3d), Plane3d (Plane3d), Transform2d)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Vector2d (Vector2d)
@@ -65,7 +65,9 @@ placeOn ::
   Plane3d (space @ units) (Defines local) ->
   Axis2d (local @ units) ->
   Axis3d (space @ units)
-placeOn plane (Axis2d p0 d) = Axis3d (Point2d.placeOn plane p0) (Direction2d.placeOn plane d)
+placeOn plane (Axis2d p0 d) = do
+  let Plane3d _ basis = plane
+  Axis3d (Point2d.placeOn plane p0) (Direction2d.placeOn basis d)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

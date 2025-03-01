@@ -1,5 +1,5 @@
 module OpenSolid.VectorCurve3d
-  ( VectorCurve3d (Parametric, Transformed)
+  ( VectorCurve3d (Parametric, Transformed, Planar)
   , Interface (..)
   , new
   , startValue
@@ -10,7 +10,6 @@ module OpenSolid.VectorCurve3d
   , zero
   , constant
   , xyz
-  , planar
   , line
   , arc
   , quadraticSpline
@@ -55,7 +54,7 @@ import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
 import OpenSolid.Frame3d (Frame3d (Frame3d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -147,7 +146,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
     VectorCurve3d (space @ units) ->
     VectorCurve3d (space @ units)
   Planar ::
-    Plane3d (space @ originPointUnits) (Defines local) ->
+    PlanarBasis3d space (Defines local) ->
     VectorCurve2d (local @ units) ->
     VectorCurve3d (space @ units)
 
@@ -589,12 +588,6 @@ xyz (Curve.Parametric x) (Curve.Parametric y) (Curve.Parametric z) =
   Parametric (Expression.xyz x y z)
 xyz x y z = XYZ x y z
 
-planar ::
-  Plane3d (space @ originPointUnits) (Defines local) ->
-  VectorCurve2d (local @ units) ->
-  VectorCurve3d (space @ units)
-planar = Planar
-
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 line v1 v2 =
   Parametric $
@@ -679,7 +672,7 @@ evaluateBounds curve tRange = case curve of
   CrossProduct' c1 c2 -> evaluateBounds c1 tRange .><. evaluateBounds c2 tRange
   PlaceIn basis c -> VectorBounds3d.placeIn basis (evaluateBounds c tRange)
   Transformed transform c -> VectorBounds3d.transformBy transform (evaluateBounds c tRange)
-  Planar plane curve2d -> VectorBounds2d.placeOn plane (VectorCurve2d.evaluateBounds curve2d tRange)
+  Planar basis curve2d -> VectorBounds2d.placeOn basis (VectorCurve2d.evaluateBounds curve2d tRange)
 
 derivative ::
   VectorCurve3d (space @ units) ->
