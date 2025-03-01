@@ -32,8 +32,6 @@ module OpenSolid.Vector2d
   , rotateLeft
   , placeIn
   , relativeTo
-  , placeInBasis
-  , relativeToBasis
   , placeOn
   , convert
   , unconvert
@@ -58,7 +56,6 @@ import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Basis2d (Basis2d)
   , Direction2d (Unit2d)
-  , Frame2d (Frame2d)
   , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
   , Point2d
@@ -225,31 +222,17 @@ rotateLeft (Vector2d vx vy) = Vector2d (negate vy) vx
 rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateRight (Vector2d vx vy) = Vector2d vy (negate vx)
 
-{-# INLINE placeIn #-}
 placeIn ::
-  Frame2d (global @ originUnits) (Defines local) ->
+  Basis2d global (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
-placeIn (Frame2d _ basis) vector = placeInBasis basis vector
+placeIn (Basis2d i j) (Vector2d vx vy) = vx * i + vy * j
 
-{-# INLINE relativeTo #-}
 relativeTo ::
-  Frame2d (global @ originUnits) (Defines local) ->
-  Vector2d (global @ units) ->
-  Vector2d (local @ units)
-relativeTo (Frame2d _ basis) vector = relativeToBasis basis vector
-
-placeInBasis ::
-  Basis2d global (Defines local) ->
-  Vector2d (local @ units) ->
-  Vector2d (global @ units)
-placeInBasis (Basis2d i j) (Vector2d vx vy) = vx * i + vy * j
-
-relativeToBasis ::
   Basis2d global (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeToBasis (Basis2d i j) vector = Vector2d (vector <> i) (vector <> j)
+relativeTo (Basis2d i j) vector = Vector2d (vector <> i) (vector <> j)
 
 placeOn ::
   Plane3d (space @ planeUnits) (Defines local) ->

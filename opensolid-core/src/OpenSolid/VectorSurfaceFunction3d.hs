@@ -14,14 +14,14 @@ module OpenSolid.VectorSurfaceFunction3d
   )
 where
 
+import OpenSolid.Basis3d (Basis3d)
+import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Composition
 import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
-import OpenSolid.Frame3d (Frame3d)
-import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -97,7 +97,7 @@ data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
     VectorSurfaceFunction3d (space @ units2) ->
     VectorSurfaceFunction3d (space @ (units1 :*: units2))
   PlaceIn ::
-    Frame3d (global @ units) (Defines local) ->
+    Basis3d global (Defines local) ->
     VectorSurfaceFunction3d (local @ units) ->
     VectorSurfaceFunction3d (global @ units)
   Transformed ::
@@ -568,23 +568,23 @@ derivative parameter function = case function of
     (derivative parameter f1 .*. f2 - f1 .*. SurfaceFunction.derivative parameter f2)
       .!/.! SurfaceFunction.squared' f2
   CrossProduct' f1 f2 -> derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
-  PlaceIn frame f -> placeIn frame (derivative parameter f)
+  PlaceIn basis f -> placeIn basis (derivative parameter f)
   Transformed transform f -> transformBy transform (derivative parameter f)
 
 placeIn ::
-  Frame3d (global @ units) (Defines local) ->
+  Basis3d global (Defines local) ->
   VectorSurfaceFunction3d (local @ units) ->
   VectorSurfaceFunction3d (global @ units)
-placeIn frame f = case f of
-  Parametric expression -> Parametric (Expression.VectorSurface3d.placeIn frame expression)
-  Coerce function -> Coerce (placeIn (Units.coerce frame) function)
-  function -> PlaceIn frame function
+placeIn basis f = case f of
+  Parametric expression -> Parametric (Expression.VectorSurface3d.placeIn basis expression)
+  Coerce function -> Coerce (placeIn basis function)
+  function -> PlaceIn basis function
 
 relativeTo ::
-  Frame3d (global @ units) (Defines local) ->
+  Basis3d global (Defines local) ->
   VectorSurfaceFunction3d (global @ units) ->
   VectorSurfaceFunction3d (local @ units)
-relativeTo frame function = placeIn (Frame3d.inverse frame) function
+relativeTo basis function = placeIn (Basis3d.inverse basis) function
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

@@ -12,8 +12,6 @@ module OpenSolid.Direction3d
   , angleFrom
   , placeIn
   , relativeTo
-  , placeInBasis
-  , relativeToBasis
   , transformBy
   , rotateIn
   , mirrorIn
@@ -26,7 +24,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d, Basis3d, Direction3d (Unit3d), Frame3d, Plane3d)
+import OpenSolid.Primitives (Axis3d, Basis3d, Direction3d (Unit3d), Plane3d)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Vector3d (Vector3d (Vector3d))
@@ -101,23 +99,11 @@ The result will always be between 0 and 180 degrees.
 angleFrom :: Direction3d space -> Direction3d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 >< d2)) (d1 <> d2)
 
-placeIn ::
-  Frame3d (global @ originUnits) (Defines local) ->
-  Direction3d local ->
-  Direction3d global
-placeIn frame = lift (Vector3d.placeIn frame)
+placeIn :: Basis3d global (Defines local) -> Direction3d local -> Direction3d global
+placeIn basis = lift (Vector3d.placeIn basis)
 
-relativeTo ::
-  Frame3d (global @ originUnits) (Defines local) ->
-  Direction3d global ->
-  Direction3d local
-relativeTo frame = lift (Vector3d.relativeTo frame)
-
-placeInBasis :: Basis3d global (Defines local) -> Direction3d local -> Direction3d global
-placeInBasis basis = lift (Vector3d.placeInBasis basis)
-
-relativeToBasis :: Basis3d global (Defines local) -> Direction3d global -> Direction3d local
-relativeToBasis basis = lift (Vector3d.relativeToBasis basis)
+relativeTo :: Basis3d global (Defines local) -> Direction3d global -> Direction3d local
+relativeTo basis = lift (Vector3d.relativeTo basis)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

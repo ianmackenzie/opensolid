@@ -807,7 +807,7 @@ derivative curve = case curve of
   Parametric expresssion -> VectorCurve2d.Parametric (Expression.curveDerivative expresssion)
   XY x y -> VectorCurve2d.xy (Curve.derivative x) (Curve.derivative y)
   Coerce c -> Units.coerce (derivative c)
-  PlaceIn frame c -> VectorCurve2d.placeIn frame (derivative c)
+  PlaceIn frame c -> VectorCurve2d.placeIn (Frame2d.basis frame) (derivative c)
   Transformed transform c -> VectorCurve2d.transformBy transform (derivative c)
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.

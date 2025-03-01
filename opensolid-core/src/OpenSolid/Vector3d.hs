@@ -32,8 +32,6 @@ module OpenSolid.Vector3d
   , normalize
   , placeIn
   , relativeTo
-  , placeInBasis
-  , relativeToBasis
   , sum
   , transformBy
   , rotateIn
@@ -57,7 +55,6 @@ import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Basis3d (Basis3d)
   , Direction3d (Unit3d)
-  , Frame3d (Frame3d)
   , Plane3d
   , Vector3d (Vector3d)
   )
@@ -222,28 +219,16 @@ normalize vector = do
   if vm == Qty.zero then zero else vector / vm
 
 placeIn ::
-  Frame3d (global @ originUnits) (Defines local) ->
+  Basis3d global (Defines local) ->
   Vector3d (local @ units) ->
   Vector3d (global @ units)
-placeIn (Frame3d _ basis) vector = placeInBasis basis vector
+placeIn (Basis3d i j k) (Vector3d vx vy vz) = vx * i + vy * j + vz * k
 
 relativeTo ::
-  Frame3d (global @ originUnits) (Defines local) ->
-  Vector3d (global @ units) ->
-  Vector3d (local @ units)
-relativeTo (Frame3d _ basis) vector = relativeToBasis basis vector
-
-placeInBasis ::
-  Basis3d global (Defines local) ->
-  Vector3d (local @ units) ->
-  Vector3d (global @ units)
-placeInBasis (Basis3d i j k) (Vector3d vx vy vz) = vx * i + vy * j + vz * k
-
-relativeToBasis ::
   Basis3d global (Defines local) ->
   Vector3d (global @ units) ->
   Vector3d (local @ units)
-relativeToBasis (Basis3d i j k) vector = Vector3d (vector <> i) (vector <> j) (vector <> k)
+relativeTo (Basis3d i j k) vector = Vector3d (vector <> i) (vector <> j) (vector <> k)
 
 sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
 sum = List.foldl (+) zero

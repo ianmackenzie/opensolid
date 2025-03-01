@@ -23,8 +23,6 @@ module OpenSolid.PlanarBasis3d
   , transformBy
   , placeIn
   , relativeTo
-  , placeInBasis
-  , relativeToBasis
   )
 where
 
@@ -34,7 +32,6 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis3d
   , Direction3d (Unit3d)
-  , Frame3d (Frame3d)
   , PlanarBasis3d (PlanarBasis3d)
   , Transform3d
   , Vector3d
@@ -125,31 +122,15 @@ transformBy transform (PlanarBasis3d i j) =
   PlanarBasis3d (Direction3d.transformBy transform i) (Direction3d.transformBy transform j)
 
 placeIn ::
-  Frame3d (global @ units) (Defines local) ->
+  Basis3d global (Defines local) ->
   PlanarBasis3d local defines ->
   PlanarBasis3d global defines
-placeIn (Frame3d _ basis) = placeInBasis basis
+placeIn globalBasis (PlanarBasis3d i j) =
+  PlanarBasis3d (Direction3d.placeIn globalBasis i) (Direction3d.placeIn globalBasis j)
 
 relativeTo ::
-  Frame3d (global @ units) (Defines local) ->
-  PlanarBasis3d global defines ->
-  PlanarBasis3d local defines
-relativeTo (Frame3d _ basis) = relativeToBasis basis
-
-placeInBasis ::
-  Basis3d global (Defines local) ->
-  PlanarBasis3d local defines ->
-  PlanarBasis3d global defines
-placeInBasis globalBasis (PlanarBasis3d i j) =
-  PlanarBasis3d
-    (Direction3d.placeInBasis globalBasis i)
-    (Direction3d.placeInBasis globalBasis j)
-
-relativeToBasis ::
   Basis3d global (Defines local) ->
   PlanarBasis3d global defines ->
   PlanarBasis3d local defines
-relativeToBasis globalBasis (PlanarBasis3d i j) =
-  PlanarBasis3d
-    (Direction3d.relativeToBasis globalBasis i)
-    (Direction3d.relativeToBasis globalBasis j)
+relativeTo globalBasis (PlanarBasis3d i j) =
+  PlanarBasis3d (Direction3d.relativeTo globalBasis i) (Direction3d.relativeTo globalBasis j)

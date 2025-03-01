@@ -31,8 +31,6 @@ module OpenSolid.VectorCurve3d
   , direction
   , placeIn
   , relativeTo
-  , placeInBasis
-  , relativeToBasis
   , transformBy
   )
 where
@@ -55,7 +53,6 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
 import OpenSolid.Frame3d (Frame3d (Frame3d))
-import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d (Plane3d)
@@ -141,7 +138,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
     VectorCurve3d (space @ units1) ->
     VectorCurve3d (space @ units2) ->
     VectorCurve3d (space @ (units1 :*: units2))
-  PlaceInBasis ::
+  PlaceIn ::
     Basis3d global (Defines local) ->
     VectorCurve3d (local @ units) ->
     VectorCurve3d (global @ units)
@@ -569,9 +566,9 @@ transformBy transform c = case c of
   Product3d1d' curve3d curve1d -> Product3d1d' (transformBy transform curve3d) curve1d
   Quotient' curve3d curve1d -> Quotient' (transformBy transform curve3d) curve1d
   CrossProduct'{} -> Transformed transform c
-  PlaceInBasis basis localCurve -> do
+  PlaceIn basis localCurve -> do
     let localTransform = Transform3d.relativeTo (Frame3d Point3d.origin basis) transform
-    PlaceInBasis basis (transformBy localTransform localCurve)
+    PlaceIn basis (transformBy localTransform localCurve)
   Transformed existing curve -> do
     let transform1 = Units.erase (Transform3d.toAffine existing)
     let transform2 = Units.erase (Transform3d.toAffine transform)
@@ -658,7 +655,7 @@ evaluate curve tValue = case curve of
   Product3d1d' c1 c2 -> evaluate c1 tValue .*. Curve.evaluate c2 tValue
   Quotient' c1 c2 -> evaluate c1 tValue ./. Curve.evaluate c2 tValue
   CrossProduct' c1 c2 -> evaluate c1 tValue .><. evaluate c2 tValue
-  PlaceInBasis basis c -> Vector3d.placeInBasis basis (evaluate c tValue)
+  PlaceIn basis c -> Vector3d.placeIn basis (evaluate c tValue)
   Transformed transform c -> Vector3d.transformBy transform (evaluate c tValue)
   Planar plane curve2d -> Vector2d.placeOn plane (VectorCurve2d.evaluate curve2d tValue)
 
@@ -680,7 +677,7 @@ evaluateBounds curve tRange = case curve of
   Product3d1d' c1 c2 -> evaluateBounds c1 tRange .*. Curve.evaluateBounds c2 tRange
   Quotient' c1 c2 -> evaluateBounds c1 tRange ./. Curve.evaluateBounds c2 tRange
   CrossProduct' c1 c2 -> evaluateBounds c1 tRange .><. evaluateBounds c2 tRange
-  PlaceInBasis basis c -> VectorBounds3d.placeInBasis basis (evaluateBounds c tRange)
+  PlaceIn basis c -> VectorBounds3d.placeIn basis (evaluateBounds c tRange)
   Transformed transform c -> VectorBounds3d.transformBy transform (evaluateBounds c tRange)
   Planar plane curve2d -> VectorBounds2d.placeOn plane (VectorCurve2d.evaluateBounds curve2d tRange)
 
@@ -701,7 +698,7 @@ derivative curve = case curve of
   Quotient' c1 c2 ->
     (derivative c1 .*. c2 - c1 .*. Curve.derivative c2) .!/.! Curve.squared' c2
   CrossProduct' c1 c2 -> derivative c1 .><. c2 + c1 .><. derivative c2
-  PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
+  PlaceIn basis c -> PlaceIn basis (derivative c)
   Transformed transform c -> transformBy transform (derivative c)
   Planar plane curve2d -> Planar plane (VectorCurve2d.derivative curve2d)
 
@@ -721,7 +718,7 @@ reverse curve = case curve of
   Product3d1d' c1 c2 -> Product3d1d' (reverse c1) (Curve.reverse c2)
   Quotient' c1 c2 -> Quotient' (reverse c1) (Curve.reverse c2)
   CrossProduct' c1 c2 -> CrossProduct' (reverse c1) (reverse c2)
-  PlaceInBasis basis c -> PlaceInBasis basis (reverse c)
+  PlaceIn basis c -> PlaceIn basis (reverse c)
   Transformed transform c -> Transformed transform (reverse c)
   Planar plane curve2d -> Planar plane (VectorCurve2d.reverse curve2d)
 
@@ -831,29 +828,17 @@ isRemovableDegeneracy curveDerivative tValue =
   (tValue == 0.0 || tValue == 1.0) && evaluate curveDerivative tValue != Vector3d.zero
 
 placeIn ::
-  Frame3d (global @ originUnits) (Defines local) ->
+  Basis3d global (Defines local) ->
   VectorCurve3d (local @ units) ->
   VectorCurve3d (global @ units)
-placeIn globalFrame = placeInBasis (Frame3d.basis globalFrame)
+placeIn globalBasis (Parametric expression) =
+  Parametric (Expression.VectorCurve3d.placeIn globalBasis expression)
+placeIn globalBasis (PlaceIn basis curve) =
+  PlaceIn (Basis3d.placeIn globalBasis basis) curve
+placeIn globalBasis curve = PlaceIn globalBasis curve
 
 relativeTo ::
-  Frame3d (global @ originUnits) (Defines local) ->
-  VectorCurve3d (global @ units) ->
-  VectorCurve3d (local @ units)
-relativeTo globalFrame = relativeToBasis (Frame3d.basis globalFrame)
-
-placeInBasis ::
-  Basis3d global (Defines local) ->
-  VectorCurve3d (local @ units) ->
-  VectorCurve3d (global @ units)
-placeInBasis globalBasis (Parametric expression) =
-  Parametric (Expression.VectorCurve3d.placeInBasis globalBasis expression)
-placeInBasis globalBasis (PlaceInBasis basis curve) =
-  PlaceInBasis (Basis3d.placeInBasis globalBasis basis) curve
-placeInBasis globalBasis curve = PlaceInBasis globalBasis curve
-
-relativeToBasis ::
   Basis3d global (Defines local) ->
   VectorCurve3d (global @ units) ->
   VectorCurve3d (local @ units)
-relativeToBasis basis = placeInBasis (Basis3d.inverse basis)
+relativeTo basis = placeIn (Basis3d.inverse basis)

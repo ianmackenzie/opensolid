@@ -146,7 +146,7 @@ placeIn ::
 placeIn globalFrame frame =
   Frame3d
     (Point3d.placeIn globalFrame (originPoint frame))
-    (Basis3d.placeIn globalFrame (basis frame))
+    (Basis3d.placeIn (basis globalFrame) (basis frame))
 
 relativeTo ::
   Frame3d (global @ units) (Defines space) ->
@@ -155,7 +155,7 @@ relativeTo ::
 relativeTo globalFrame frame =
   Frame3d
     (Point3d.relativeTo globalFrame (originPoint frame))
-    (Basis3d.relativeTo globalFrame (basis frame))
+    (Basis3d.relativeTo (basis globalFrame) (basis frame))
 
 inverse :: Frame3d (global @ units) (Defines local) -> Frame3d (local @ units) (Defines global)
 inverse frame = xyz |> relativeTo frame

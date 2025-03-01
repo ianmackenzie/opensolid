@@ -9,8 +9,6 @@ module OpenSolid.Expression.VectorSurface2d
   , interpolateFrom
   , placeIn
   , relativeTo
-  , placeInBasis
-  , relativeToBasis
   , transformBy
   )
 where
@@ -19,8 +17,6 @@ import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Frame2d (Frame2d)
-import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvPoint)
 import OpenSolid.Transform2d (Transform2d (Transform2d))
@@ -66,31 +62,19 @@ interpolateFrom ::
 interpolateFrom start end t = start + t * (end - start)
 
 placeIn ::
-  Frame2d (global @ originPointUnits) (Defines local) ->
-  Expression UvPoint (Vector2d (local @ units)) ->
-  Expression UvPoint (Vector2d (global @ units))
-placeIn frame expression = placeInBasis (Frame2d.basis frame) expression
-
-relativeTo ::
-  Frame2d (global @ originPointUnits) (Defines local) ->
-  Expression UvPoint (Vector2d (global @ units)) ->
-  Expression UvPoint (Vector2d (local @ units))
-relativeTo frame expression = relativeToBasis (Frame2d.basis frame) expression
-
-placeInBasis ::
   Basis2d global (Defines local) ->
   Expression UvPoint (Vector2d (local @ units)) ->
   Expression UvPoint (Vector2d (global @ units))
-placeInBasis basis expression = do
+placeIn basis expression = do
   let i = Vector2d.unit (Basis2d.xDirection basis)
   let j = Vector2d.unit (Basis2d.yDirection basis)
   xComponent expression * constant i + yComponent expression * constant j
 
-relativeToBasis ::
+relativeTo ::
   Basis2d global (Defines local) ->
   Expression UvPoint (Vector2d (global @ units)) ->
   Expression UvPoint (Vector2d (local @ units))
-relativeToBasis basis expression = do
+relativeTo basis expression = do
   let i = Vector2d.unit (Basis2d.xDirection basis)
   let j = Vector2d.unit (Basis2d.yDirection basis)
   xy (expression <> constant i) (expression <> constant j)

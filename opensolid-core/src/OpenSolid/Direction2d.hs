@@ -18,8 +18,6 @@ module OpenSolid.Direction2d
   , rotateRight
   , placeIn
   , relativeTo
-  , placeInBasis
-  , relativeToBasis
   , placeOn
   , random
   , transformBy
@@ -38,7 +36,6 @@ import OpenSolid.Primitives
   , Basis2d
   , Direction2d (Unit2d)
   , Direction3d (Unit3d)
-  , Frame2d
   , Plane3d
   , Point2d
   , Transform2d
@@ -157,23 +154,11 @@ rotateLeft = lift Vector2d.rotateLeft
 rotateRight :: Direction2d space -> Direction2d space
 rotateRight = lift Vector2d.rotateRight
 
-placeIn ::
-  Frame2d (global @ originUnits) (Defines local) ->
-  Direction2d local ->
-  Direction2d global
-placeIn frame = lift (Vector2d.placeIn frame)
+placeIn :: Basis2d global (Defines local) -> Direction2d local -> Direction2d global
+placeIn basis = lift (Vector2d.placeIn basis)
 
-relativeTo ::
-  Frame2d (global @ originUnits) (Defines local) ->
-  Direction2d global ->
-  Direction2d local
-relativeTo frame = lift (Vector2d.relativeTo frame)
-
-placeInBasis :: Basis2d global (Defines local) -> Direction2d local -> Direction2d global
-placeInBasis basis = lift (Vector2d.placeInBasis basis)
-
-relativeToBasis :: Basis2d global (Defines local) -> Direction2d global -> Direction2d local
-relativeToBasis basis = lift (Vector2d.relativeToBasis basis)
+relativeTo :: Basis2d global (Defines local) -> Direction2d global -> Direction2d local
+relativeTo basis = lift (Vector2d.relativeTo basis)
 
 placeOn ::
   Plane3d (space @ planeUnits) (Defines local) ->

@@ -203,7 +203,7 @@ placeIn ::
 placeIn givenFrame Camera3d{frame, upDirection, focalDistance, projection, fovAngle} =
   Camera3d
     { frame = Frame3d.placeIn givenFrame frame
-    , upDirection = Direction3d.placeIn givenFrame upDirection
+    , upDirection = Direction3d.placeIn (Frame3d.basis givenFrame) upDirection
     , focalDistance
     , projection
     , fovAngle

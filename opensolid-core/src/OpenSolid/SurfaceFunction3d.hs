@@ -276,7 +276,7 @@ derivative parameter function = case function of
       (SurfaceFunction.derivative parameter z)
   Sum f1 f2 -> derivative parameter f1 + VectorSurfaceFunction3d.derivative parameter f2
   Difference f1 f2 -> derivative parameter f1 - VectorSurfaceFunction3d.derivative parameter f2
-  PlaceIn frame f -> VectorSurfaceFunction3d.placeIn frame (derivative parameter f)
+  PlaceIn frame f -> VectorSurfaceFunction3d.placeIn (Frame3d.basis frame) (derivative parameter f)
   Transformed transform f -> VectorSurfaceFunction3d.transformBy transform (derivative parameter f)
 
 transformBy ::

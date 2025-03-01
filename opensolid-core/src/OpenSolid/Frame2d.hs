@@ -74,7 +74,7 @@ placeIn ::
 placeIn globalFrame frame =
   Frame2d
     (Point2d.placeIn globalFrame (originPoint frame))
-    (Basis2d.placeIn globalFrame (basis frame))
+    (Basis2d.placeIn (basis globalFrame) (basis frame))
 
 relativeTo ::
   Frame2d (global @ units) (Defines space) ->
@@ -83,7 +83,7 @@ relativeTo ::
 relativeTo globalFrame frame =
   Frame2d
     (Point2d.relativeTo globalFrame (originPoint frame))
-    (Basis2d.relativeTo globalFrame (basis frame))
+    (Basis2d.relativeTo (basis globalFrame) (basis frame))
 
 placeOn ::
   Plane3d (space @ units) (Defines local) ->

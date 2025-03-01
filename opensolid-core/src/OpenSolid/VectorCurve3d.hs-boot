@@ -86,7 +86,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
     VectorCurve3d (space @ units1) ->
     VectorCurve3d (space @ units2) ->
     VectorCurve3d (space @ (units1 :*: units2))
-  PlaceInBasis ::
+  PlaceIn ::
     Basis3d global (Defines local) ->
     VectorCurve3d (local @ units) ->
     VectorCurve3d (global @ units)

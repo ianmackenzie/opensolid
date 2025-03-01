@@ -25,8 +25,6 @@ module OpenSolid.VectorBounds3d
   , interpolate
   , relativeTo
   , placeIn
-  , placeInBasis
-  , relativeToBasis
   , transformBy
   , rotateIn
   , rotateAround
@@ -41,7 +39,7 @@ import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d (Frame3d), VectorBounds3d (VectorBounds3d))
+import OpenSolid.Primitives (Axis3d (Axis3d), VectorBounds3d (VectorBounds3d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
@@ -182,29 +180,17 @@ interpolate (VectorBounds3d x y z) u v w =
   Vector3d (Range.interpolate x u) (Range.interpolate y v) (Range.interpolate z w)
 
 placeIn ::
-  Frame3d (global @ originUnits) (Defines local) ->
-  VectorBounds3d (local @ units) ->
-  VectorBounds3d (global @ units)
-placeIn (Frame3d _ basis) = placeInBasis basis
-
-relativeTo ::
-  Frame3d (global @ originUnits) (Defines local) ->
-  VectorBounds3d (global @ units) ->
-  VectorBounds3d (local @ units)
-relativeTo (Frame3d _ basis) = relativeToBasis basis
-
-placeInBasis ::
   Basis3d global (Defines local) ->
   VectorBounds3d (local @ units) ->
   VectorBounds3d (global @ units)
-placeInBasis basis (VectorBounds3d x y z) = do
+placeIn basis (VectorBounds3d x y z) = do
   let xMid = Range.midpoint x
   let yMid = Range.midpoint y
   let zMid = Range.midpoint z
   let xWidth = Range.width x
   let yWidth = Range.width y
   let zWidth = Range.width z
-  let Vector3d x0 y0 z0 = Vector3d.placeInBasis basis (Vector3d xMid yMid zMid)
+  let Vector3d x0 y0 z0 = Vector3d.placeIn basis (Vector3d xMid yMid zMid)
   let (ix, iy, iz) = Direction3d.components (Basis3d.xDirection basis)
   let (jx, jy, jz) = Direction3d.components (Basis3d.yDirection basis)
   let (kx, ky, kz) = Direction3d.components (Basis3d.zDirection basis)
@@ -216,18 +202,18 @@ placeInBasis basis (VectorBounds3d x y z) = do
     (Range.from (y0 - ry) (y0 + ry))
     (Range.from (z0 - rz) (z0 + rz))
 
-relativeToBasis ::
+relativeTo ::
   Basis3d global (Defines local) ->
   VectorBounds3d (global @ units) ->
   VectorBounds3d (local @ units)
-relativeToBasis basis (VectorBounds3d x y z) = do
+relativeTo basis (VectorBounds3d x y z) = do
   let xMid = Range.midpoint x
   let yMid = Range.midpoint y
   let zMid = Range.midpoint z
   let xWidth = Range.width x
   let yWidth = Range.width y
   let zWidth = Range.width z
-  let Vector3d x0 y0 z0 = Vector3d.relativeToBasis basis (Vector3d xMid yMid zMid)
+  let Vector3d x0 y0 z0 = Vector3d.relativeTo basis (Vector3d xMid yMid zMid)
   let (ix, iy, iz) = Direction3d.components (Basis3d.xDirection basis)
   let (jx, jy, jz) = Direction3d.components (Basis3d.yDirection basis)
   let (kx, ky, kz) = Direction3d.components (Basis3d.zDirection basis)

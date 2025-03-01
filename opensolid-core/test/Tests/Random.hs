@@ -5,6 +5,7 @@ module Tests.Random
   , vector2d
   , vectorBounds3d
   , axis2d
+  , basis2d
   , frame2d
   , bounds2d
   , vectorBounds2d
@@ -21,6 +22,8 @@ where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Basis2d (Basis2d)
+import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve2d (Curve2d)
@@ -65,6 +68,9 @@ vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange
 
 axis2d :: Generator (Axis2d (space @ Meters))
 axis2d = Random.map2 Axis2d.through point2d Direction2d.random
+
+basis2d :: Generator (Basis2d global (Defines local))
+basis2d = Random.map Basis2d.fromXDirection Direction2d.random
 
 frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
 frame2d = Random.map Frame2d.fromXAxis axis2d

@@ -47,7 +47,7 @@ import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d, Plane3d (Plane3d), Transform3d)
+import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d (Frame3d), Plane3d (Plane3d), Transform3d)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
@@ -197,19 +197,21 @@ placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Plane3d (local @ units) defines ->
   Plane3d (global @ units) defines
-placeIn frame (Plane3d p0 basis) =
+placeIn frame (Plane3d p0 basis) = do
+  let Frame3d _ frameBasis = frame
   Plane3d
     (Point3d.placeIn frame p0)
-    (PlanarBasis3d.placeIn frame basis)
+    (PlanarBasis3d.placeIn frameBasis basis)
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Plane3d (global @ units) defines ->
   Plane3d (local @ units) defines
-relativeTo frame (Plane3d p0 basis) =
+relativeTo frame (Plane3d p0 basis) = do
+  let Frame3d _ frameBasis = frame
   Plane3d
     (Point3d.relativeTo frame p0)
-    (PlanarBasis3d.relativeTo frame basis)
+    (PlanarBasis3d.relativeTo frameBasis basis)
 
 -- | Offset a plane in its normal direction by the given distance.
 offsetBy :: Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines

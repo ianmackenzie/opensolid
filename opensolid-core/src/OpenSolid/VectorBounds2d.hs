@@ -25,8 +25,6 @@ module OpenSolid.VectorBounds2d
   , interpolate
   , relativeTo
   , placeIn
-  , placeInBasis
-  , relativeToBasis
   , placeOn
   , convert
   , unconvert
@@ -39,7 +37,6 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis2d (Basis2d)
   , Direction2d (Unit2d)
-  , Frame2d (Frame2d)
   , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
   , VectorBounds2d (VectorBounds2d)
@@ -177,27 +174,15 @@ interpolate (VectorBounds2d x y) u v =
   Vector2d.xy (Range.interpolate x u) (Range.interpolate y v)
 
 placeIn ::
-  Frame2d (global @ originUnits) (Defines local) ->
-  VectorBounds2d (local @ units) ->
-  VectorBounds2d (global @ units)
-placeIn (Frame2d _ basis) = placeInBasis basis
-
-relativeTo ::
-  Frame2d (global @ originUnits) (Defines local) ->
-  VectorBounds2d (global @ units) ->
-  VectorBounds2d (local @ units)
-relativeTo (Frame2d _ basis) = relativeToBasis basis
-
-placeInBasis ::
   Basis2d global (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds2d (global @ units)
-placeInBasis basis (VectorBounds2d x y) = do
+placeIn basis (VectorBounds2d x y) = do
   let xMid = Range.midpoint x
   let yMid = Range.midpoint y
   let xWidth = Range.width x
   let yWidth = Range.width y
-  let Vector2d x0 y0 = Vector2d.placeInBasis basis (Vector2d xMid yMid)
+  let Vector2d x0 y0 = Vector2d.placeIn basis (Vector2d xMid yMid)
   let Basis2d i j = basis
   let Unit2d (Vector2d ix iy) = i
   let Unit2d (Vector2d jx jy) = j
@@ -205,16 +190,16 @@ placeInBasis basis (VectorBounds2d x y) = do
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
-relativeToBasis ::
+relativeTo ::
   Basis2d global (Defines local) ->
   VectorBounds2d (global @ units) ->
   VectorBounds2d (local @ units)
-relativeToBasis basis (VectorBounds2d x y) = do
+relativeTo basis (VectorBounds2d x y) = do
   let xMid = Range.midpoint x
   let yMid = Range.midpoint y
   let xWidth = Range.width x
   let yWidth = Range.width y
-  let Vector2d x0 y0 = Vector2d.relativeToBasis basis (Vector2d xMid yMid)
+  let Vector2d x0 y0 = Vector2d.relativeTo basis (Vector2d xMid yMid)
   let Basis2d i j = basis
   let Unit2d (Vector2d ix iy) = i
   let Unit2d (Vector2d jx jy) = j

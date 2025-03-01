@@ -13,9 +13,7 @@ module OpenSolid.DirectionCurve2d
   , xComponent
   , yComponent
   , placeIn
-  , placeInBasis
   , relativeTo
-  , relativeToBasis
   )
 where
 
@@ -27,8 +25,6 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
-import OpenSolid.Frame2d (Frame2d)
-import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Units qualified as Units
@@ -218,25 +214,13 @@ yComponent :: DirectionCurve2d space -> Curve Unitless
 yComponent curve = curve <> Direction2d.y
 
 placeIn ::
-  Frame2d (global @ units) (Defines local) ->
+  Basis2d global (Defines local) ->
   DirectionCurve2d local ->
   DirectionCurve2d global
-placeIn frame = placeInBasis (Frame2d.basis frame)
+placeIn basis (DirectionCurve2d curve) = DirectionCurve2d (VectorCurve2d.placeIn basis curve)
 
 relativeTo ::
-  Frame2d (global @ units) (Defines local) ->
-  DirectionCurve2d global ->
-  DirectionCurve2d local
-relativeTo frame = relativeToBasis (Frame2d.basis frame)
-
-placeInBasis ::
-  Basis2d global (Defines local) ->
-  DirectionCurve2d local ->
-  DirectionCurve2d global
-placeInBasis basis (DirectionCurve2d curve) = DirectionCurve2d (VectorCurve2d.placeInBasis basis curve)
-
-relativeToBasis ::
   Basis2d global (Defines local) ->
   DirectionCurve2d global ->
   DirectionCurve2d local
-relativeToBasis basis = placeInBasis (Basis2d.inverse basis)
+relativeTo basis = placeIn (Basis2d.inverse basis)

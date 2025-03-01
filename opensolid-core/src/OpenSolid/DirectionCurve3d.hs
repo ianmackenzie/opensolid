@@ -13,9 +13,7 @@ module OpenSolid.DirectionCurve3d
   , yComponent
   , zComponent
   , placeIn
-  , placeInBasis
   , relativeTo
-  , relativeToBasis
   )
 where
 
@@ -26,8 +24,6 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.DirectionBounds3d (DirectionBounds3d)
 import OpenSolid.DirectionBounds3d qualified as DirectionBounds3d
-import OpenSolid.Frame3d (Frame3d)
-import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Units qualified as Units
@@ -238,26 +234,14 @@ zComponent :: DirectionCurve3d space -> Curve Unitless
 zComponent curve = curve <> Direction3d.z
 
 placeIn ::
-  Frame3d (global @ units) (Defines local) ->
+  Basis3d global (Defines local) ->
   DirectionCurve3d local ->
   DirectionCurve3d global
-placeIn frame = placeInBasis (Frame3d.basis frame)
+placeIn basis (DirectionCurve3d curve) =
+  DirectionCurve3d (VectorCurve3d.placeIn basis curve)
 
 relativeTo ::
-  Frame3d (global @ units) (Defines local) ->
-  DirectionCurve3d global ->
-  DirectionCurve3d local
-relativeTo frame = relativeToBasis (Frame3d.basis frame)
-
-placeInBasis ::
-  Basis3d global (Defines local) ->
-  DirectionCurve3d local ->
-  DirectionCurve3d global
-placeInBasis basis (DirectionCurve3d curve) =
-  DirectionCurve3d (VectorCurve3d.placeInBasis basis curve)
-
-relativeToBasis ::
   Basis3d global (Defines local) ->
   DirectionCurve3d global ->
   DirectionCurve3d local
-relativeToBasis basis = placeInBasis (Basis3d.inverse basis)
+relativeTo basis = placeIn (Basis3d.inverse basis)
