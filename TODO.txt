@@ -3,6 +3,8 @@ Create Haskell gear example and profile
   -> dump edges to see where there's a self-intersection, or try checking for zero-length edges ahead of time?
 - implement trochoidal fillet
 
+Check glTF sphere rendering
+
 Improve curve linearization to take first-order bounds and even just zeroth-order bounds into account
 -> behave better when second derivative is poorly conditioned
 
@@ -23,8 +25,6 @@ Generate non-zero normal vectors at poles of revolved surfaces
 Add DirectionCurve2d.[rotateLeft,rotateRight] and use in Curve2d.offsetBy, Region2d.fillet
 
 Add OpenSolid prefix to API modules
-
-Use actual UvSpace/UvCoordinates in API module?
 
 Remove Drawing2d.Resolution, *or* use it everywhere
 -> maybe have 'OpenSolid' be a context manager? 'with OpenSolid(tolerance=..., resolution=...):' etc.
