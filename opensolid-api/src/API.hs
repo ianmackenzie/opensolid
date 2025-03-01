@@ -97,9 +97,9 @@ import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d (Point3d)
+import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -114,9 +114,9 @@ import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters, Radians, SquareMeters)
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -486,7 +486,8 @@ vector2d =
   Class.new @(Vector2d (Space @ Unitless)) "A unitless vector in 2D." $
     [ constant "Zero" (Vector2d.zero @Space @Unitless) $(docs 'Vector2d.zero)
     , factory1 "Unit" "Direction" Vector2d.unit $(docs 'Vector2d.unit)
-    , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
+    , constructor2 "X Component" "Y Component" Vector2d $(docs 'Vector2d)
+    , factory2 "XY" "X Component" "Y Component" Vector2d $(docs 'Vector2d)
     , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
@@ -520,7 +521,8 @@ displacement2d :: Class
 displacement2d =
   Class.new @(Vector2d (Space @ Meters)) "A displacement vector in 2D." $
     [ constant "Zero" (Vector2d.zero @Space @Meters) $(docs 'Vector2d.zero)
-    , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
+    , constructor2 "X Component" "Y Component" Vector2d $(docs 'Vector2d)
+    , factory2 "XY" "X Component" "Y Component" Vector2d $(docs 'Vector2d)
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
@@ -556,7 +558,8 @@ areaVector2d :: Class
 areaVector2d =
   Class.new @(Vector2d (Space @ SquareMeters)) "A vector in 2D with units of area." $
     [ constant "Zero" (Vector2d.zero @Space @SquareMeters) $(docs 'Vector2d.zero)
-    , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
+    , constructor2 "X Component" "Y Component" Vector2d $(docs 'Vector2d)
+    , factory2 "XY" "X Component" "Y Component" Vector2d $(docs 'Vector2d)
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
@@ -615,7 +618,8 @@ point2d :: Class
 point2d =
   Class.new @(Point2d (Space @ Meters)) "A point in 2D, defined by its X and Y coordinates." $
     [ constant "Origin" (Point2d.origin @Space @Meters) $(docs 'Point2d.origin)
-    , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d.xy $(docs 'Point2d.xy)
+    , constructor2 "X Coordinate" "Y Coordinate" Point2d $(docs 'Point2d)
+    , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d $(docs 'Point2d)
     , factory1 "X" "X Coordinate" Point2d.x $(docs 'Point2d.x)
     , factory1 "Y" "Y Coordinate" Point2d.y $(docs 'Point2d.y)
     , factory2 "Meters" "X Coordinate" "Y Coordinate" Point2d.meters $(docs 'Point2d.meters)
@@ -640,9 +644,7 @@ uvPoint :: Class
 uvPoint =
   Class.new @(Point2d (Space @ Unitless)) "A point in UV parameter space." $
     [ constant "Origin" (Point2d.origin @Space @Unitless) "The point with coordinates (0,0)."
-    , factory2 "UV" "U Coordinate" "V Coordinate" Point2d.xy $(docs 'Point2d.xy)
-    , factory1 "U" "U Coordinate" Point2d.x $(docs 'Point2d.x)
-    , factory1 "V" "V Coordinate" Point2d.y $(docs 'Point2d.y)
+    , constructor2 "U Coordinate" "V Coordinate" Point2d "Construct a point from its U and V coordinates."
     , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates "Construct a point from a pair of U and V coordinates."
     , member0 "Coordinates" Point2d.coordinates "Get the U and V coordinates of a point."
     , member0 "U Coordinate" Point2d.xCoordinate "Get the U coordinate of a point."
@@ -841,7 +843,8 @@ vector3d =
   Class.new @(Vector3d (Space @ Unitless)) "A unitless vector in 3D." $
     [ constant "Zero" (Vector3d.zero @Space @Unitless) $(docs 'Vector3d.zero)
     , factory1 "Unit" "Direction" Vector3d.unit $(docs 'Vector3d.unit)
-    , factory3 "XYZ" "X Component" "Y Component" "Z Component" Vector3d.xyz $(docs 'Vector3d.xyz)
+    , constructor3 "X Component" "Y Component" "Z Component" Vector3d $(docs 'Vector3d)
+    , factory3 "XYZ" "X Component" "Y Component" "Z Component" Vector3d $(docs 'Vector3d)
     , factory1 "X" "X Component" Vector3d.x $(docs 'Vector3d.x)
     , factory1 "Y" "Y Component" Vector3d.y $(docs 'Vector3d.y)
     , factory1 "Z" "Z Component" Vector3d.z $(docs 'Vector3d.z)
@@ -989,6 +992,7 @@ point3d =
   Class.new @(Point3d (Space @ Meters)) "A point in 3D, defined by its XYZ coordinates." $
     [ constant "Origin" (Point3d.origin @Space @Meters) $(docs 'Point3d.origin)
     , factory3 "XYZ" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.xyz $(docs 'Point3d.xyz)
+    , constructor3 "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d $(docs 'Point3d)
     , factory1 "X" "X Coordinate" Point3d.x $(docs 'Point3d.x)
     , factory1 "Y" "Y Coordinate" Point3d.y $(docs 'Point3d.y)
     , factory1 "Z" "Z Coordinate" Point3d.z $(docs 'Point3d.z)

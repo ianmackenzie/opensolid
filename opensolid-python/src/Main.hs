@@ -310,7 +310,7 @@ extraMemberFunctions className = do
     "UvPoint" ->
       repr
         [ "x, y = self.coordinates()"
-        , "return 'UvPoint.uv(' + str(x) + ',' + str(y) + ')'"
+        , "return 'UvPoint(' + str(x) + ',' + str(y) + ')'"
         ]
     "Bounds2d" ->
       repr

@@ -12,6 +12,7 @@ import OpenSolid.Units qualified as Units
 ----- Vector2d -----
 
 data Vector2d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct a vector from its X and Y components.
   Vector2d :: Qty units -> Qty units -> Vector2d (space @ units)
 
 deriving instance Eq (Vector2d (space @ units))
@@ -905,6 +906,7 @@ instance
 ----- Vector3d -----
 
 data Vector3d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct a vector from its XYZ components.
   Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 
 deriving instance Eq (Vector3d (space @ units))
@@ -1200,6 +1202,7 @@ deriving instance Show (Basis3d space defines)
 ----- Point3d -----
 
 data Point3d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct a point from its XYZ coordinates.
   Point3d :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 
 deriving instance Eq (Point3d (space @ units))
