@@ -4,9 +4,6 @@ module OpenSolid.Basis3d
   , xyz
   , yzx
   , zxy
-  , yxNegativeZ
-  , zyNegativeX
-  , xzNegativeY
   , fromXDirection
   , fromYDirection
   , fromZDirection
@@ -56,15 +53,6 @@ yzx = Basis3d Direction3d.y Direction3d.z Direction3d.x
 
 zxy :: Basis3d space defines
 zxy = Basis3d Direction3d.z Direction3d.x Direction3d.y
-
-yxNegativeZ :: Basis3d space defines
-yxNegativeZ = Basis3d Direction3d.y Direction3d.x Direction3d.negativeZ
-
-zyNegativeX :: Basis3d space defines
-zyNegativeX = Basis3d Direction3d.z Direction3d.y Direction3d.negativeX
-
-xzNegativeY :: Basis3d space defines
-xzNegativeY = Basis3d Direction3d.x Direction3d.z Direction3d.negativeY
 
 fromXDirection :: Direction3d space -> Basis3d space defines
 fromXDirection dx = do

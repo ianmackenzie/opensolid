@@ -4226,22 +4226,10 @@ class Direction2d:
         _lib.opensolid_release(self._ptr)
 
     x: Direction2d = None  # type: ignore[assignment]
-    """Alias for 'positiveX'."""
+    """The X direction."""
 
     y: Direction2d = None  # type: ignore[assignment]
-    """Alias for 'positiveY'."""
-
-    positive_x: Direction2d = None  # type: ignore[assignment]
-    """The positive X direction."""
-
-    positive_y: Direction2d = None  # type: ignore[assignment]
-    """The positive Y direction."""
-
-    negative_x: Direction2d = None  # type: ignore[assignment]
-    """The negative X direction."""
-
-    negative_y: Direction2d = None  # type: ignore[assignment]
-    """The negative Y direction."""
+    """The Y direction."""
 
     @staticmethod
     def from_angle(angle: Angle) -> Direction2d:
@@ -8047,24 +8035,6 @@ class Direction3d:
     z: Direction3d = None  # type: ignore[assignment]
     """The Z direction."""
 
-    positive_x: Direction3d = None  # type: ignore[assignment]
-    """The positive X direction."""
-
-    positive_y: Direction3d = None  # type: ignore[assignment]
-    """The positive Y direction."""
-
-    positive_z: Direction3d = None  # type: ignore[assignment]
-    """The positive Z direction."""
-
-    negative_x: Direction3d = None  # type: ignore[assignment]
-    """The negative X direction."""
-
-    negative_y: Direction3d = None  # type: ignore[assignment]
-    """The negative Y direction."""
-
-    negative_z: Direction3d = None  # type: ignore[assignment]
-    """The negative Z direction."""
-
     def perpendicular_direction(self) -> Direction3d:
         """Generate an arbitrary direction perpendicular to the given one."""
         inputs = self._ptr
@@ -11333,42 +11303,6 @@ def _direction2d_y() -> Direction2d:
 Direction2d.y = _direction2d_y()
 
 
-def _direction2d_positive_x() -> Direction2d:
-    output = c_void_p()
-    _lib.opensolid_Direction2d_positiveX(c_void_p(), ctypes.byref(output))
-    return Direction2d._new(output)
-
-
-Direction2d.positive_x = _direction2d_positive_x()
-
-
-def _direction2d_positive_y() -> Direction2d:
-    output = c_void_p()
-    _lib.opensolid_Direction2d_positiveY(c_void_p(), ctypes.byref(output))
-    return Direction2d._new(output)
-
-
-Direction2d.positive_y = _direction2d_positive_y()
-
-
-def _direction2d_negative_x() -> Direction2d:
-    output = c_void_p()
-    _lib.opensolid_Direction2d_negativeX(c_void_p(), ctypes.byref(output))
-    return Direction2d._new(output)
-
-
-Direction2d.negative_x = _direction2d_negative_x()
-
-
-def _direction2d_negative_y() -> Direction2d:
-    output = c_void_p()
-    _lib.opensolid_Direction2d_negativeY(c_void_p(), ctypes.byref(output))
-    return Direction2d._new(output)
-
-
-Direction2d.negative_y = _direction2d_negative_y()
-
-
 def _point2d_origin() -> Point2d:
     output = c_void_p()
     _lib.opensolid_Point2d_origin(c_void_p(), ctypes.byref(output))
@@ -11538,60 +11472,6 @@ def _direction3d_z() -> Direction3d:
 
 
 Direction3d.z = _direction3d_z()
-
-
-def _direction3d_positive_x() -> Direction3d:
-    output = c_void_p()
-    _lib.opensolid_Direction3d_positiveX(c_void_p(), ctypes.byref(output))
-    return Direction3d._new(output)
-
-
-Direction3d.positive_x = _direction3d_positive_x()
-
-
-def _direction3d_positive_y() -> Direction3d:
-    output = c_void_p()
-    _lib.opensolid_Direction3d_positiveY(c_void_p(), ctypes.byref(output))
-    return Direction3d._new(output)
-
-
-Direction3d.positive_y = _direction3d_positive_y()
-
-
-def _direction3d_positive_z() -> Direction3d:
-    output = c_void_p()
-    _lib.opensolid_Direction3d_positiveZ(c_void_p(), ctypes.byref(output))
-    return Direction3d._new(output)
-
-
-Direction3d.positive_z = _direction3d_positive_z()
-
-
-def _direction3d_negative_x() -> Direction3d:
-    output = c_void_p()
-    _lib.opensolid_Direction3d_negativeX(c_void_p(), ctypes.byref(output))
-    return Direction3d._new(output)
-
-
-Direction3d.negative_x = _direction3d_negative_x()
-
-
-def _direction3d_negative_y() -> Direction3d:
-    output = c_void_p()
-    _lib.opensolid_Direction3d_negativeY(c_void_p(), ctypes.byref(output))
-    return Direction3d._new(output)
-
-
-Direction3d.negative_y = _direction3d_negative_y()
-
-
-def _direction3d_negative_z() -> Direction3d:
-    output = c_void_p()
-    _lib.opensolid_Direction3d_negativeZ(c_void_p(), ctypes.byref(output))
-    return Direction3d._new(output)
-
-
-Direction3d.negative_z = _direction3d_negative_z()
 
 
 def _point3d_origin() -> Point3d:

@@ -5,11 +5,7 @@ module OpenSolid.Direction2d
   , components
   , unsafe
   , x
-  , positiveX
-  , negativeX
   , y
-  , positiveY
-  , negativeY
   , PointsAreCoincident (PointsAreCoincident)
   , from
   , fromAngle
@@ -83,29 +79,13 @@ lift ::
   Direction2d space2
 lift function (Unit2d vector) = Unit2d (function vector)
 
--- | The positive X direction.
-positiveX :: Direction2d space
-positiveX = Unit2d (Vector2d 1.0 0.0)
-
--- | The negative X direction.
-negativeX :: Direction2d space
-negativeX = Unit2d (Vector2d -1.0 0.0)
-
--- | The positive Y direction.
-positiveY :: Direction2d space
-positiveY = Unit2d (Vector2d 0.0 1.0)
-
--- | The negative Y direction.
-negativeY :: Direction2d space
-negativeY = Unit2d (Vector2d 0.0 -1.0)
-
--- | Alias for 'positiveX'.
+-- | The X direction.
 x :: Direction2d space
-x = positiveX
+x = Unit2d (Vector2d 1.0 0.0)
 
--- | Alias for 'positiveY'.
+-- | The Y direction.
 y :: Direction2d space
-y = positiveY
+y = Unit2d (Vector2d 0.0 1.0)
 
 data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, Error.Message)
 

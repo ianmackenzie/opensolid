@@ -8,12 +8,6 @@ module OpenSolid.Direction3d
   , x
   , y
   , z
-  , positiveX
-  , negativeX
-  , positiveY
-  , negativeY
-  , positiveZ
-  , negativeZ
   , perpendicularTo
   , angleFrom
   , placeIn
@@ -71,41 +65,17 @@ lift ::
   Direction3d spaceB
 lift function (Unit3d vector) = Unit3d (function vector)
 
--- | The positive X direction.
-positiveX :: Direction3d space
-positiveX = unsafe (Vector3d 1.0 0.0 0.0)
-
--- | The negative X direction.
-negativeX :: Direction3d space
-negativeX = negate positiveX
-
--- | The positive Y direction.
-positiveY :: Direction3d space
-positiveY = unsafe (Vector3d 0.0 1.0 0.0)
-
--- | The negative Y direction.
-negativeY :: Direction3d space
-negativeY = negate positiveY
-
--- | The positive Z direction.
-positiveZ :: Direction3d space
-positiveZ = unsafe (Vector3d 0.0 0.0 1.0)
-
--- | The negative Z direction.
-negativeZ :: Direction3d space
-negativeZ = negate positiveZ
-
 -- | The X direction.
 x :: Direction3d space
-x = positiveX
+x = Unit3d (Vector3d 1.0 0.0 0.0)
 
 -- | The Y direction.
 y :: Direction3d space
-y = positiveY
+y = Unit3d (Vector3d 0.0 1.0 0.0)
 
 -- | The Z direction.
 z :: Direction3d space
-z = positiveZ
+z = Unit3d (Vector3d 0.0 0.0 1.0)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
 perpendicularTo :: Direction3d space -> Direction3d space
