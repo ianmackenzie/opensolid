@@ -9,7 +9,6 @@ module OpenSolid.Frame2d
   , yDirection
   , xAxis
   , yAxis
-  , handedness
   , fromXAxis
   , fromYAxis
   , placeIn
@@ -67,9 +66,6 @@ xAxis frame = Axis2d.through (originPoint frame) (xDirection frame)
 
 yAxis :: Frame2d (space @ units) defines -> Axis2d (space @ units)
 yAxis frame = Axis2d.through (originPoint frame) (yDirection frame)
-
-handedness :: Frame2d (space @ units) defines -> Sign
-handedness frame = Basis2d.handedness (basis frame)
 
 placeIn ::
   Frame2d (global @ units) (Defines space) ->

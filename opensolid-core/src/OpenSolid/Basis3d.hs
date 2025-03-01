@@ -10,7 +10,6 @@ module OpenSolid.Basis3d
   , xDirection
   , yDirection
   , zDirection
-  , handedness
   , transformBy
   , placeIn
   , relativeTo
@@ -22,16 +21,14 @@ where
 
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Float qualified as Float
 import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis3d (Basis3d)
   , Frame3d (Frame3d)
   , PlanarBasis3d (PlanarBasis3d)
-  , Transform3d
   )
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform3d qualified as Transform3d
 
 coerce :: Basis3d space defines1 -> Basis3d space defines2
 coerce (Basis3d i j k) = Basis3d i j k
@@ -69,12 +66,8 @@ fromZDirection dz = do
   let PlanarBasis3d dx dy = PlanarBasis3d.fromNormalDirection dz
   Basis3d dx dy dz
 
-handedness :: Basis3d space defines -> Sign
-handedness (Basis3d i j k) = Float.sign ((i >< j) <> k)
-
 transformBy ::
-  Transform.IsOrthonormal tag =>
-  Transform3d tag (space @ translationUnits) ->
+  Transform3d.Rigid (space @ translationUnits) ->
   Basis3d space defines ->
   Basis3d space defines
 transformBy transform (Basis3d i j k) =

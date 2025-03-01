@@ -26,7 +26,6 @@ module OpenSolid.Frame3d
   , fromXzPlane
   , fromYzPlane
   , fromZyPlane
-  , handedness
   , placeIn
   , relativeTo
   , inverse
@@ -139,9 +138,6 @@ fromYzPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d (Unit3d (i ><
 
 fromZyPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
 fromZyPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d (Unit3d (j >< i)) j i)
-
-handedness :: Frame3d (space @ units) defines -> Sign
-handedness frame = Basis3d.handedness (basis frame)
 
 placeIn ::
   Frame3d (global @ units) (Defines space) ->
