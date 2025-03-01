@@ -24,7 +24,7 @@ module OpenSolid.Domain2d
   )
 where
 
-import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Prelude
@@ -122,10 +122,10 @@ half :: Domain2d -> Domain2d
 half (Domain2d x y) = Domain2d (Domain1d.half x) (Domain1d.half y)
 
 bounds :: Domain2d -> UvBounds
-bounds (Domain2d x y) = Bounds2d.xy (Domain1d.bounds x) (Domain1d.bounds y)
+bounds (Domain2d x y) = Bounds2d (Domain1d.bounds x) (Domain1d.bounds y)
 
 interior :: Domain2d -> UvBounds
-interior (Domain2d x y) = Bounds2d.xy (Domain1d.interior x) (Domain1d.interior y)
+interior (Domain2d x y) = Bounds2d (Domain1d.interior x) (Domain1d.interior y)
 
 overlaps :: Domain2d -> Domain2d -> Bool
 overlaps (Domain2d x2 y2) (Domain2d x1 y1) = Domain1d.overlaps x2 x1 && Domain1d.overlaps y2 y1

@@ -1,7 +1,6 @@
 module OpenSolid.VectorBounds2d
   ( VectorBounds2d (VectorBounds2d)
   , constant
-  , xy
   , aggregate2
   , aggregate3
   , hull2
@@ -53,12 +52,9 @@ import OpenSolid.Vector2d qualified as Vector2d
 constant :: Vector2d (space @ units) -> VectorBounds2d (space @ units)
 constant (Vector2d x y) = VectorBounds2d (Range.constant x) (Range.constant y)
 
-xy :: Range units -> Range units -> VectorBounds2d (space @ units)
-xy = VectorBounds2d
-
 hull2 :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorBounds2d (space @ units)
 hull2 (Vector2d x1 y1) (Vector2d x2 y2) =
-  VectorBounds2d (Range.from x1 x2) (Range.from y1 y2)
+  VectorBounds2d (Range x1 x2) (Range y1 y2)
 
 hull3 ::
   Vector2d (space @ units) ->
@@ -152,7 +148,7 @@ normalize vectorBounds = do
   VectorBounds2d nx ny
 
 normalizedRange :: Range Unitless
-normalizedRange = Range.from -1.0 1.0
+normalizedRange = Range -1.0 1.0
 
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =
@@ -187,7 +183,7 @@ placeIn basis (VectorBounds2d x y) = do
   let Unit2d (Vector2d jx jy) = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-  VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  VectorBounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))
 
 relativeTo ::
   Basis2d global (Defines local) ->
@@ -204,7 +200,7 @@ relativeTo basis (VectorBounds2d x y) = do
   let Unit2d (Vector2d jx jy) = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
-  VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  VectorBounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))
 
 placeOn ::
   PlanarBasis3d space (Defines local) ->
@@ -239,4 +235,4 @@ transformBy transform (VectorBounds2d x y) = do
   let (jx, jy) = Vector2d.components j
   let rx = 0.5 * Float.abs ix * xWidth + 0.5 * Float.abs jx * yWidth
   let ry = 0.5 * Float.abs iy * xWidth + 0.5 * Float.abs jy * yWidth
-  VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  VectorBounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))

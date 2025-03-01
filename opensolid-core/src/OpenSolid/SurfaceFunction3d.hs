@@ -14,7 +14,7 @@ module OpenSolid.SurfaceFunction3d
 where
 
 import OpenSolid.Arithmetic qualified as Arithmetic
-import OpenSolid.Bounds3d (Bounds3d)
+import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
 import OpenSolid.Expression (Expression)
@@ -249,7 +249,7 @@ evaluateBounds function uvBounds = case function of
   Coerce f -> Units.coerce (evaluateBounds f uvBounds)
   Parametric expression -> Expression.evaluateBounds expression uvBounds
   XYZ x y z ->
-    Bounds3d.xyz
+    Bounds3d
       (SurfaceFunction.evaluateBounds x uvBounds)
       (SurfaceFunction.evaluateBounds y uvBounds)
       (SurfaceFunction.evaluateBounds z uvBounds)

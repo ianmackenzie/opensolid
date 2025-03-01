@@ -315,12 +315,12 @@ extraMemberFunctions className = do
     "Bounds2d" ->
       repr
         [ "x, y = self.coordinates()"
-        , "return 'Bounds2d.xy(' + repr(x) + ',' + repr(y) + ')'"
+        , "return 'Bounds2d(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "UvBounds" ->
       repr
         [ "u, v = self.coordinates()"
-        , "return 'UvBounds.uv(' + repr(u) + ',' + repr(v) + ')'"
+        , "return 'UvBounds(' + repr(u) + ',' + repr(v) + ')'"
         ]
     _ -> ""
 

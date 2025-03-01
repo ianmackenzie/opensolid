@@ -5,7 +5,7 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
-import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
@@ -34,6 +34,7 @@ import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random
+import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
@@ -86,9 +87,9 @@ testVectorArithmetic = IO.do
 
 testRangeArithmetic :: IO ()
 testRangeArithmetic = IO.do
-  let rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
+  let rangeDifference = Range (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
   log "Range difference" rangeDifference
-  let rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
+  let rangeProduct = Length.centimeters 20.0 * Range (Length.meters 2.0) (Length.meters 3.0)
   log "Range product" rangeProduct
 
 testEquality :: IO ()
@@ -130,7 +131,7 @@ testCustomFunction =
 testListOperations :: IO ()
 testListOperations = IO.do
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
-  log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
+  log "Successive intervals" (List.successive Range [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 + [2, 3])
 
 getCrossProduct :: Tolerance Meters => Result Text Float
@@ -232,8 +233,8 @@ strokeWidth = Length.millimeters 0.1
 
 drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
 drawZeros path zeros = IO.do
-  let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
-  let viewBox = Bounds2d.xy uvRange uvRange
+  let uvRange = Range.convert toDrawing (Range -0.05 1.05)
+  let viewBox = Bounds2d uvRange uvRange
   let crossingCurves = SurfaceFunction.Zeros.crossingCurves zeros
   let saddlePoints = SurfaceFunction.Zeros.saddlePoints zeros
   Drawing2d.writeSvg path viewBox $
@@ -362,8 +363,8 @@ testBezierSegment = IO.do
   let p4 = Point2d.xy 5.0 0.0
   let p5 = Point2d.xy 10.0 5.0
   let p6 = Point2d.xy 10.0 10.0
-  let coordinateRange = Range.convert toDrawing (Range.from -1.0 11.0)
-  let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
+  let coordinateRange = Range.convert toDrawing (Range -1.0 11.0)
+  let drawingBounds = Bounds2d coordinateRange coordinateRange
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
   Drawing2d.writeSvg "executables/sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
 
@@ -380,8 +381,8 @@ testHermiteBezier = IO.do
         , Drawing2d.strokeWidth (Length.centimeters 3.0)
         ]
   let curveEntity = Drawing2d.curve curveAttributes Length.millimeter curve
-  let coordinateRange = Range.from (Length.meters -1.0) (Length.meters 11.0)
-  let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
+  let coordinateRange = Range (Length.meters -1.0) (Length.meters 11.0)
+  let drawingBounds = Bounds2d coordinateRange coordinateRange
   Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
 
 testExplicitRandomStep :: IO ()
@@ -427,7 +428,7 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
   let v = SurfaceFunction.v
   let f = SurfaceFunction.squared u + SurfaceFunction.squared v - 4.0
   let g = u - v
-  let bounds = Bounds2d.xy (Range.from 0.0 2.0) (Range.from 0.0 2.0)
+  let bounds = Bounds2d (Range 0.0 2.0) (Range 0.0 2.0)
   let function = VectorSurfaceFunction2d.xy f g
   let solution =
         Solve2d.unique
@@ -444,7 +445,7 @@ testJit = IO.do
   let xSquared = Expression.squared x
   let function = xSquared / (xSquared + Expression.Curve1d.constant 1.0)
   log "JIT evaluated" (Expression.evaluate function 2.0)
-  log "JIT bounds" (Expression.evaluateBounds function (Range.from 1.0 3.0))
+  log "JIT bounds" (Expression.evaluateBounds function (Range 1.0 3.0))
 
 testJitCurve2d :: IO ()
 testJitCurve2d = IO.do

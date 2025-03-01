@@ -582,7 +582,7 @@ classifyNonBoundary point loop = do
   if Range.includes Qty.zero flux then Negative else Positive
 
 bothPossibleFluxValues :: Range Unitless
-bothPossibleFluxValues = Range.from 0.0 Float.twoPi
+bothPossibleFluxValues = Range 0.0 Float.twoPi
 
 containmentIsDeterminate :: Range Unitless -> Bool
 containmentIsDeterminate flux = not (Range.contains bothPossibleFluxValues flux)

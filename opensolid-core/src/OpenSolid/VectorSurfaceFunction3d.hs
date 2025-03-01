@@ -36,7 +36,7 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorBounds3d (VectorBounds3d)
+import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
@@ -533,7 +533,7 @@ evaluateBounds function uvBounds = case function of
   Coerce f -> Units.coerce (evaluateBounds f uvBounds)
   Parametric expression -> Expression.evaluateBounds expression uvBounds
   XYZ x y z ->
-    VectorBounds3d.xyz
+    VectorBounds3d
       (SurfaceFunction.evaluateBounds x uvBounds)
       (SurfaceFunction.evaluateBounds y uvBounds)
       (SurfaceFunction.evaluateBounds z uvBounds)

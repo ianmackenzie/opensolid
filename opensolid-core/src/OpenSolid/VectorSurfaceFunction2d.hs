@@ -32,7 +32,7 @@ import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.VectorBounds2d (VectorBounds2d)
+import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -577,7 +577,7 @@ evaluateBounds function uvBounds = case function of
   Coerce f -> Units.coerce (evaluateBounds f uvBounds)
   Parametric expression -> Expression.evaluateBounds expression uvBounds
   XY x y ->
-    VectorBounds2d.xy
+    VectorBounds2d
       (SurfaceFunction.evaluateBounds x uvBounds)
       (SurfaceFunction.evaluateBounds y uvBounds)
   Negated f -> negate (evaluateBounds f uvBounds)

@@ -4967,6 +4967,14 @@ class Bounds2d:
 
     _ptr: c_void_p
 
+    def __init__(self, x_coordinate: LengthRange, y_coordinate: LengthRange) -> None:
+        """Construct a bounding box from its X and Y coordinate ranges."""
+        inputs = _Tuple2_c_void_p_c_void_p(x_coordinate._ptr, y_coordinate._ptr)
+        self._ptr = c_void_p()
+        _lib.opensolid_Bounds2d_constructor_LengthRange_LengthRange(
+            ctypes.byref(inputs), ctypes.byref(self._ptr)
+        )
+
     @staticmethod
     def _new(ptr: c_void_p) -> Bounds2d:
         """Construct directly from an underlying C pointer."""
@@ -4977,16 +4985,6 @@ class Bounds2d:
     def __del__(self) -> None:
         """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
-
-    @staticmethod
-    def xy(x_coordinate: LengthRange, y_coordinate: LengthRange) -> Bounds2d:
-        """Construct a bounding box from its X and Y coordinate ranges."""
-        inputs = _Tuple2_c_void_p_c_void_p(x_coordinate._ptr, y_coordinate._ptr)
-        output = c_void_p()
-        _lib.opensolid_Bounds2d_xy_LengthRange_LengthRange(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return Bounds2d._new(output)
 
     @staticmethod
     def constant(point: Point2d) -> Bounds2d:
@@ -5152,13 +5150,21 @@ class Bounds2d:
     def __repr__(self) -> str:
         """Return a human-readable representation of this value."""
         x, y = self.coordinates()
-        return "Bounds2d.xy(" + repr(x) + "," + repr(y) + ")"
+        return "Bounds2d(" + repr(x) + "," + repr(y) + ")"
 
 
 class UvBounds:
     """A bounding box in UV parameter space."""
 
     _ptr: c_void_p
+
+    def __init__(self, u_coordinate: Range, v_coordinate: Range) -> None:
+        """Construct a bounding box from its X and Y coordinate ranges."""
+        inputs = _Tuple2_c_void_p_c_void_p(u_coordinate._ptr, v_coordinate._ptr)
+        self._ptr = c_void_p()
+        _lib.opensolid_UvBounds_constructor_Range_Range(
+            ctypes.byref(inputs), ctypes.byref(self._ptr)
+        )
 
     @staticmethod
     def _new(ptr: c_void_p) -> UvBounds:
@@ -5170,16 +5176,6 @@ class UvBounds:
     def __del__(self) -> None:
         """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
-
-    @staticmethod
-    def uv(u_coordinate: Range, v_coordinate: Range) -> UvBounds:
-        """Construct a bounding box from its X and Y coordinate ranges."""
-        inputs = _Tuple2_c_void_p_c_void_p(u_coordinate._ptr, v_coordinate._ptr)
-        output = c_void_p()
-        _lib.opensolid_UvBounds_uv_Range_Range(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return UvBounds._new(output)
 
     @staticmethod
     def constant(point: UvPoint) -> UvBounds:
@@ -5343,7 +5339,7 @@ class UvBounds:
     def __repr__(self) -> str:
         """Return a human-readable representation of this value."""
         u, v = self.coordinates()
-        return "UvBounds.uv(" + repr(u) + "," + repr(v) + ")"
+        return "UvBounds(" + repr(u) + "," + repr(v) + ")"
 
 
 class Curve:
@@ -8575,6 +8571,21 @@ class Bounds3d:
 
     _ptr: c_void_p
 
+    def __init__(
+        self,
+        x_coordinate: LengthRange,
+        y_coordinate: LengthRange,
+        z_coordinate: LengthRange,
+    ) -> None:
+        """Construct a bounding box from its XYZ coordinate ranges."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            x_coordinate._ptr, y_coordinate._ptr, z_coordinate._ptr
+        )
+        self._ptr = c_void_p()
+        _lib.opensolid_Bounds3d_constructor_LengthRange_LengthRange_LengthRange(
+            ctypes.byref(inputs), ctypes.byref(self._ptr)
+        )
+
     @staticmethod
     def _new(ptr: c_void_p) -> Bounds3d:
         """Construct directly from an underlying C pointer."""
@@ -8585,20 +8596,6 @@ class Bounds3d:
     def __del__(self) -> None:
         """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
-
-    @staticmethod
-    def xyz(
-        x_coordinate: LengthRange, y_coordinate: LengthRange, z_coordinate: LengthRange
-    ) -> Bounds3d:
-        """Construct a bounding box from its X, Y and Z coordinate ranges."""
-        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
-            x_coordinate._ptr, y_coordinate._ptr, z_coordinate._ptr
-        )
-        output = c_void_p()
-        _lib.opensolid_Bounds3d_xyz_LengthRange_LengthRange_LengthRange(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return Bounds3d._new(output)
 
     @staticmethod
     def constant(point: Point3d) -> Bounds3d:

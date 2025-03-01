@@ -27,7 +27,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
@@ -138,7 +137,7 @@ tightBounds Subproblem{uvBounds, derivativeBounds, derivativeValues} = do
   let low = Qty.max low0 (Qty.max lowUV lowVU)
   let high = Qty.min high0 (Qty.min highUV highVU)
   Debug.assert (low <= high)
-  Range.from low high
+  Range low high
 
 isZeroCandidate :: Tolerance units => Subproblem units -> Bool
 isZeroCandidate subproblem = do

@@ -10,8 +10,7 @@ module OpenSolid.SurfaceParameter
   )
 where
 
-import OpenSolid.Bounds2d (Bounds2d)
-import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
@@ -32,7 +31,7 @@ type UvBounds = Bounds2d UvCoordinates
 type UvDirection = Direction2d UvSpace
 
 domain :: UvBounds
-domain = Bounds2d.xy Range.unit Range.unit
+domain = Bounds2d Range.unit Range.unit
 
 samples :: List UvPoint
 samples = do

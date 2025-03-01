@@ -26,7 +26,6 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Sign qualified as Sign
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -116,8 +115,7 @@ curveOverlap1 = Test.verify "curveOverlap1" Test.do
   let arc1 = Curve2d.arc (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
   let arc2 = Curve2d.arc (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   actualSegments <- overlappingSegments arc1 arc2
-  let expectedSegments =
-        NonEmpty.one (OverlappingSegment (Range.from 0.0 0.5) (Range.from 0.5 1.0) Positive)
+  let expectedSegments = NonEmpty.one (OverlappingSegment (Range 0.0 0.5) (Range 0.5 1.0) Positive)
   Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
@@ -127,8 +125,8 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
-          (OverlappingSegment (Range.from 0.0 (1 / 4)) (Range.from 0.0 (1 / 6)) Negative)
-          (OverlappingSegment (Range.from (3 / 4) 1.0) (Range.from (5 / 6) 1.0) Negative)
+          (OverlappingSegment (Range 0.0 (1 / 4)) (Range 0.0 (1 / 6)) Negative)
+          (OverlappingSegment (Range (3 / 4) 1.0) (Range (5 / 6) 1.0) Negative)
   Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
 crossingIntersection :: Tolerance Meters => Test

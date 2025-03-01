@@ -24,8 +24,7 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
-import OpenSolid.Bounds2d (Bounds2d)
-import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
@@ -76,7 +75,7 @@ frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
 frame2d = Random.map Frame2d.fromXAxis axis2d
 
 bounds2d :: Generator (Bounds2d (space @ Meters))
-bounds2d = Random.map2 Bounds2d.xy lengthRange lengthRange
+bounds2d = Random.map2 Bounds2d lengthRange lengthRange
 
 vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
 vectorBounds2d = Random.map2 VectorBounds2d lengthRange lengthRange

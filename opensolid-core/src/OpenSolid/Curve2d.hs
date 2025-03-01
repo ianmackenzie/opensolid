@@ -81,7 +81,7 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
-import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
@@ -796,7 +796,7 @@ evaluateBounds curve tRange = case curve of
   Curve c -> evaluateBoundsImpl c tRange
   Parametric expresssion -> Expression.evaluateBounds expresssion tRange
   Coerce c -> Units.coerce (evaluateBounds c tRange)
-  XY x y -> Bounds2d.xy (Curve.evaluateBounds x tRange) (Curve.evaluateBounds y tRange)
+  XY x y -> Bounds2d (Curve.evaluateBounds x tRange) (Curve.evaluateBounds y tRange)
   PlaceIn frame c -> Bounds2d.placeIn frame (evaluateBounds c tRange)
   Transformed transform c -> Bounds2d.transformBy transform (evaluateBounds c tRange)
 
@@ -825,7 +825,7 @@ bounds curve = case curve of
   Curve c -> boundsImpl c
   Parametric expression -> Expression.evaluateBounds expression Range.unit
   Coerce c -> Units.coerce (bounds c)
-  XY x y -> Bounds2d.xy (Curve.evaluateBounds x Range.unit) (Curve.evaluateBounds y Range.unit)
+  XY x y -> Bounds2d (Curve.evaluateBounds x Range.unit) (Curve.evaluateBounds y Range.unit)
   PlaceIn frame c -> Bounds2d.placeIn frame (bounds c)
   Transformed transform c -> Bounds2d.transformBy transform (bounds c)
 
@@ -886,10 +886,8 @@ overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
     |> List.successive
       ( \(Point2d t1Start t2Start) (Point2d t1End t2End) ->
-          OverlappingSegment
-            (Range.from t1Start t1End)
-            (Range.from t2Start t2End)
-            (if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative)
+          OverlappingSegment (Range t1Start t1End) (Range t2Start t2End) $
+            if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative
       )
     |> List.filter (isOverlappingSegment curve1 curve2)
 
@@ -1460,7 +1458,7 @@ evaluatePiecewiseBounds tree startLength endLength = case tree of
           (evaluatePiecewiseBounds leftTree startLength leftLength)
           (evaluatePiecewiseBounds rightTree Qty.zero (endLength - leftLength))
   PiecewiseLeaf curve segmentLength ->
-    evaluateBounds curve (Range.from (startLength / segmentLength) (endLength / segmentLength))
+    evaluateBounds curve (Range (startLength / segmentLength) (endLength / segmentLength))
 
 reversePiecewise :: PiecewiseTree (space @ units) -> (PiecewiseTree (space @ units), Qty units)
 reversePiecewise tree = case tree of
@@ -1565,4 +1563,4 @@ evaluatePiecewiseDerivativeBounds tree startLength endLength = case tree of
           (evaluatePiecewiseDerivativeBounds rightTree Qty.zero (endLength - leftLength))
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2d.evaluateBounds curve $
-      Range.from (startLength / segmentLength) (endLength / segmentLength)
+      Range (startLength / segmentLength) (endLength / segmentLength)

@@ -17,7 +17,7 @@ where
 import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
-import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
@@ -213,7 +213,7 @@ evaluateBounds function uvBounds = case function of
   Coerce f -> Units.coerce (evaluateBounds f uvBounds)
   Parametric expression -> Expression.evaluateBounds expression uvBounds
   XY x y ->
-    Bounds2d.xy
+    Bounds2d
       (SurfaceFunction.evaluateBounds x uvBounds)
       (SurfaceFunction.evaluateBounds y uvBounds)
   Addition f1 f2 ->

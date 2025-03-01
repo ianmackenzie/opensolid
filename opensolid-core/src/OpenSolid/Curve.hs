@@ -53,7 +53,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
+import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)
@@ -536,7 +536,7 @@ instance Estimate.Interface (Integral units) units where
     let y2 = evaluate curve (Range.upperBound domain)
     let m = Range.width derivativeBounds
     let error1 = 0.125 * m * dx * dx
-    let estimate1 = dx * Qty.midpoint y1 y2 + Range.from -error1 error1
+    let estimate1 = dx * Qty.midpoint y1 y2 + Range -error1 error1
     case Range.intersection estimate0 estimate1 of
       Just intersection -> intersection
       Nothing -> estimate0 -- Shouldn't happen if bounds are correct
@@ -655,8 +655,8 @@ findZerosOrder k derivatives subdomain derivativeBounds
           if Qty.abs (evaluate currentDerivative t0) <= Solve1d.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
             else Fuzzy.do
-              let leftRange = Range.from (Range.lowerBound tRange) t0
-              let rightRange = Range.from t0 (Range.upperBound tRange)
+              let leftRange = Range (Range.lowerBound tRange) t0
+              let rightRange = Range t0 (Range.upperBound tRange)
               leftZeros <- solveMonotonic k currentDerivative nextDerivative leftRange
               rightZeros <- solveMonotonic k currentDerivative nextDerivative rightRange
               Resolved (leftZeros + rightZeros)

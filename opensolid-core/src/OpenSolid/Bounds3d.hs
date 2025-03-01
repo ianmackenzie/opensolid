@@ -5,7 +5,6 @@ module OpenSolid.Bounds3d
   , yCoordinate
   , zCoordinate
   , coordinates
-  , xyz
   , constant
   , hull2
   , hull3
@@ -67,10 +66,6 @@ zCoordinate (Bounds3d _ _ z) = z
 {-# INLINE coordinates #-}
 coordinates :: Bounds3d (space @ units) -> (Range units, Range units, Range units)
 coordinates (Bounds3d x y z) = (x, y, z)
-
--- | Construct a bounding box from its X, Y and Z coordinate ranges.
-xyz :: Range units -> Range units -> Range units -> Bounds3d (space @ units)
-xyz = Bounds3d
 
 -- | Construct a zero-size bounding box containing a single point.
 constant :: Point3d (space @ units) -> Bounds3d (space @ units)
@@ -173,7 +168,7 @@ hull2 ::
   Point3d (space @ units) ->
   Bounds3d (space @ units)
 hull2 (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
-  Bounds3d (Range.from x1 x2) (Range.from y1 y2) (Range.from z1 z2)
+  Bounds3d (Range x1 x2) (Range y1 y2) (Range z1 z2)
 
 hull3 ::
   Point3d (space @ units) ->

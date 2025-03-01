@@ -1,7 +1,6 @@
 module OpenSolid.VectorBounds3d
   ( VectorBounds3d (VectorBounds3d)
   , constant
-  , xyz
   , aggregate2
   , aggregate3
   , hull2
@@ -52,12 +51,9 @@ import OpenSolid.Vector3d qualified as Vector3d
 constant :: Vector3d (space @ units) -> VectorBounds3d (space @ units)
 constant (Vector3d x y z) = VectorBounds3d (Range.constant x) (Range.constant y) (Range.constant z)
 
-xyz :: Range units -> Range units -> Range units -> VectorBounds3d (space @ units)
-xyz = VectorBounds3d
-
 hull2 :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorBounds3d (space @ units)
 hull2 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
-  VectorBounds3d (Range.from x1 x2) (Range.from y1 y2) (Range.from z1 z2)
+  VectorBounds3d (Range x1 x2) (Range y1 y2) (Range z1 z2)
 
 hull3 ::
   Vector3d (space @ units) ->
@@ -158,7 +154,7 @@ normalize vectorBounds = do
   VectorBounds3d nx ny nz
 
 normalizedRange :: Range Unitless
-normalizedRange = Range.from -1.0 1.0
+normalizedRange = Range -1.0 1.0
 
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =
@@ -198,9 +194,9 @@ placeIn basis (VectorBounds3d x y z) = do
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs ky
   let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz + 0.5 * zWidth * Float.abs kz
   VectorBounds3d
-    (Range.from (x0 - rx) (x0 + rx))
-    (Range.from (y0 - ry) (y0 + ry))
-    (Range.from (z0 - rz) (z0 + rz))
+    (Range (x0 - rx) (x0 + rx))
+    (Range (y0 - ry) (y0 + ry))
+    (Range (z0 - rz) (z0 + rz))
 
 relativeTo ::
   Basis3d global (Defines local) ->
@@ -221,9 +217,9 @@ relativeTo basis (VectorBounds3d x y z) = do
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs jz
   let rz = 0.5 * xWidth * Float.abs kx + 0.5 * yWidth * Float.abs ky + 0.5 * zWidth * Float.abs kz
   VectorBounds3d
-    (Range.from (x0 - rx) (x0 + rx))
-    (Range.from (y0 - ry) (y0 + ry))
-    (Range.from (z0 - rz) (z0 + rz))
+    (Range (x0 - rx) (x0 + rx))
+    (Range (y0 - ry) (y0 + ry))
+    (Range (z0 - rz) (z0 + rz))
 
 transformBy ::
   Transform3d tag (space @ units1) ->
@@ -245,9 +241,9 @@ transformBy transform (VectorBounds3d x y z) = do
   let ry = 0.5 * Float.abs iy * xWidth + 0.5 * Float.abs jy * yWidth + 0.5 * Float.abs ky * zWidth
   let rz = 0.5 * Float.abs iz * xWidth + 0.5 * Float.abs jz * yWidth + 0.5 * Float.abs kz * zWidth
   VectorBounds3d
-    (Range.from (x0 - rx) (x0 + rx))
-    (Range.from (y0 - ry) (y0 + ry))
-    (Range.from (z0 - rz) (z0 + rz))
+    (Range (x0 - rx) (x0 + rx))
+    (Range (y0 - ry) (y0 + ry))
+    (Range (z0 - rz) (z0 + rz))
 
 rotateIn ::
   Direction3d space ->

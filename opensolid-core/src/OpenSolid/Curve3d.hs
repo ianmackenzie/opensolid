@@ -30,7 +30,7 @@ where
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounded3d, Bounds3d)
+import OpenSolid.Bounds3d (Bounded3d, Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
@@ -368,7 +368,7 @@ evaluateBounds f tRange = case f of
   Curve curve -> evaluateBoundsImpl curve tRange
   Coerce curve -> Units.coerce (evaluateBounds curve tRange)
   XYZ x y z ->
-    Bounds3d.xyz
+    Bounds3d
       (Curve.evaluateBounds x tRange)
       (Curve.evaluateBounds y tRange)
       (Curve.evaluateBounds z tRange)

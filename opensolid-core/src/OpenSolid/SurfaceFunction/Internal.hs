@@ -47,15 +47,15 @@ solveForV f fv uValue vBounds = do
 
 curveBounds :: Float -> Float -> Qty units -> Qty units -> Range units -> Range units
 curveBounds x1 x2 y1 y2 (Range mLow mHigh)
-  | mLow >= Qty.zero || mHigh <= Qty.zero = Range.from y1 y2 -- Monotonic case
+  | mLow >= Qty.zero || mHigh <= Qty.zero = Range y1 y2 -- Monotonic case
   | otherwise = do
       let dX = x2 - x1
       let dY = y2 - y1
-      let dXValley = Qty.clampTo (Range.from 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
-      let dXPeak = Qty.clampTo (Range.from 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
+      let dXValley = Qty.clampTo (Range 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
+      let dXPeak = Qty.clampTo (Range 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
       let yValley = if Qty.isInfinite mLow then -Qty.infinity else y1 + mLow * dXValley
       let yPeak = if Qty.isInfinite mHigh then Qty.infinity else y1 + mHigh * dXPeak
-      Range.from yValley yPeak
+      Range yValley yPeak
 
 curveRangeBounds :: Float -> Float -> Range units -> Range units -> Range units -> Range units
 curveRangeBounds x1 x2 y1 y2 (Range mLow mHigh)
@@ -66,8 +66,8 @@ curveRangeBounds x1 x2 y1 y2 (Range mLow mHigh)
       let Range low2 high2 = y2
       let dYLow = low2 - low1
       let dYHigh = high2 - high1
-      let dXValley = Qty.clampTo (Range.from 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
-      let dXPeak = Qty.clampTo (Range.from 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
+      let dXValley = Qty.clampTo (Range 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
+      let dXPeak = Qty.clampTo (Range 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
       let yValley = if Qty.isInfinite mLow then -Qty.infinity else low1 + mLow * dXValley
       let yPeak = if Qty.isInfinite mHigh then Qty.infinity else high1 + mHigh * dXPeak
-      Range.from yValley yPeak
+      Range yValley yPeak

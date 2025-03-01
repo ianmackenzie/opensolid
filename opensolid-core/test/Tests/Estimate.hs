@@ -48,7 +48,7 @@ data DummyEstimate = DummyEstimate Length (Range Meters)
 instance Estimate.Interface DummyEstimate Meters where
   boundsImpl (DummyEstimate _ range) = range
   refineImpl (DummyEstimate value (Range low high)) = do
-    let refinedRange = Range.from (Qty.midpoint low value) (Qty.midpoint value high)
+    let refinedRange = Range (Qty.midpoint low value) (Qty.midpoint value high)
     Estimate.new (DummyEstimate value refinedRange)
 
 dummyEstimate :: Generator (Length, Estimate Meters)

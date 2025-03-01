@@ -6,7 +6,6 @@ module OpenSolid.Bounds2d
   , coordinates
   , dimensions
   , centerPoint
-  , xy
   , constant
   , hull2
   , hull3
@@ -101,10 +100,6 @@ dimensions (Bounds2d x y) = (Range.width x, Range.width y)
 centerPoint :: Bounds2d (space @ units) -> Point2d (space @ units)
 centerPoint (Bounds2d x y) = Point2d (Range.midpoint x) (Range.midpoint y)
 
--- | Construct a bounding box from its X and Y coordinate ranges.
-xy :: Range units -> Range units -> Bounds2d (space @ units)
-xy = Bounds2d
-
 -- | Construct a zero-size bounding box containing a single point.
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
 constant point = do
@@ -190,7 +185,7 @@ hull2 ::
 hull2 p1 p2 = do
   let (x1, y1) = Point2d.coordinates p1
   let (x2, y2) = Point2d.coordinates p2
-  Bounds2d (Range.from x1 x2) (Range.from y1 y2)
+  Bounds2d (Range x1 x2) (Range y1 y2)
 
 hull3 ::
   Point2d (space @ units) ->
@@ -348,7 +343,7 @@ placeIn frame (Bounds2d x y) = do
   let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-  Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  Bounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
@@ -364,7 +359,7 @@ relativeTo frame (Bounds2d x y) = do
   let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
-  Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  Bounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))
 
 placeOn ::
   Plane3d (space @ units) (Defines local) ->

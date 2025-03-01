@@ -25,7 +25,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
@@ -158,17 +157,17 @@ instance Curve2d.Interface (HorizontalCurve units) UvCoordinates where
     let v1 = solveForV curve u1
     let v2 = solveForV curve u2
     case monotonicity of
-      Monotonic -> Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
+      Monotonic -> Bounds2d (Range u1 u2) (Range v1 v2)
       MonotonicIn frame -> do
         let p1 = Point2d.xy u1 v1
         let p2 = Point2d.xy u2 v2
         Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
           |> Bounds2d.placeIn frame
       NotMonotonic -> do
-        let vRange = ImplicitCurveBounds.evaluateBounds bounds (Range.from u1 u2)
-        let slopeBounds = SurfaceFunction.evaluateBounds dvdu (Bounds2d.xy (Range.from u1 u2) vRange)
+        let vRange = ImplicitCurveBounds.evaluateBounds bounds (Range u1 u2)
+        let slopeBounds = SurfaceFunction.evaluateBounds dvdu (Bounds2d (Range u1 u2) vRange)
         let segmentVBounds = Internal.curveBounds u1 u2 v1 v2 slopeBounds
-        Bounds2d.xy (Range.from u1 u2) segmentVBounds
+        Bounds2d (Range u1 u2) segmentVBounds
 
   derivativeImpl curve@(HorizontalCurve{dvdu, uStart, uEnd}) = do
     let deltaU = uEnd - uStart

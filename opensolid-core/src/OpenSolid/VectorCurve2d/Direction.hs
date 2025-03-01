@@ -5,7 +5,6 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
@@ -46,8 +45,8 @@ instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
       | t2 <= tStart -> DegenerateEndpoint.evaluateBounds degenerateStart inner tRange
       | otherwise ->
           VectorBounds2d.aggregate2
-            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range.from t1 tStart))
-            (VectorCurve2d.evaluateBounds inner (Range.from tStart t2))
+            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range t1 tStart))
+            (VectorCurve2d.evaluateBounds inner (Range tStart t2))
   evaluateBoundsImpl (PiecewiseCurve Nothing inner (Just degenerateEnd)) tRange = do
     let (Range t1 t2) = tRange
     let tEnd = DegenerateEndpoint.cutoff degenerateEnd
@@ -56,8 +55,8 @@ instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
       | t1 >= tEnd -> DegenerateEndpoint.evaluateBounds degenerateEnd inner tRange
       | otherwise ->
           VectorBounds2d.aggregate2
-            (VectorCurve2d.evaluateBounds inner (Range.from t1 tEnd))
-            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range.from tEnd t2))
+            (VectorCurve2d.evaluateBounds inner (Range t1 tEnd))
+            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range tEnd t2))
   evaluateBoundsImpl (PiecewiseCurve (Just degenerateStart) inner (Just degenerateEnd)) tRange = do
     let (Range t1 t2) = tRange
     let tStart = DegenerateEndpoint.cutoff degenerateStart
@@ -68,17 +67,17 @@ instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
       | t1 >= tEnd -> DegenerateEndpoint.evaluateBounds degenerateEnd inner tRange
       | t1 >= tStart ->
           VectorBounds2d.aggregate2
-            (VectorCurve2d.evaluateBounds inner (Range.from t1 tEnd))
-            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range.from tEnd t2))
+            (VectorCurve2d.evaluateBounds inner (Range t1 tEnd))
+            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range tEnd t2))
       | t2 <= tEnd ->
           VectorBounds2d.aggregate2
-            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range.from t1 tStart))
-            (VectorCurve2d.evaluateBounds inner (Range.from tStart t2))
+            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range t1 tStart))
+            (VectorCurve2d.evaluateBounds inner (Range tStart t2))
       | otherwise ->
           VectorBounds2d.aggregate3
-            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range.from t1 tStart))
-            (VectorCurve2d.evaluateBounds inner (Range.from tStart tEnd))
-            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range.from tEnd t2))
+            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range t1 tStart))
+            (VectorCurve2d.evaluateBounds inner (Range tStart tEnd))
+            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range tEnd t2))
 
   derivativeImpl (PiecewiseCurve start general end) =
     VectorCurve2d.new $

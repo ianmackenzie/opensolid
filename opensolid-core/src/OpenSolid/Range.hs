@@ -2,7 +2,6 @@ module OpenSolid.Range
   ( Range (Range)
   , constant
   , unit
-  , from
   , zeroTo
   , unbounded
   , radians
@@ -80,7 +79,7 @@ import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Parameter qualified as Parameter
+import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random

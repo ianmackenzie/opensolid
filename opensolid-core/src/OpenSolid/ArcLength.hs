@@ -7,7 +7,6 @@ import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Text qualified as Text
 import Prelude qualified
 
@@ -75,7 +74,7 @@ instance Curve.Interface Parameterization Unitless where
   evaluateImpl (Parameterization _ tree length) uValue = lookup tree (uValue * length)
 
   evaluateBoundsImpl curve (Range uLow uHigh) =
-    Range.from (Curve.evaluateImpl curve uLow) (Curve.evaluateImpl curve uHigh)
+    Range (Curve.evaluateImpl curve uLow) (Curve.evaluateImpl curve uHigh)
 
   derivativeImpl tCurve@(Parameterization dsdt _ length) = length / (dsdt . Curve.new tCurve)
 

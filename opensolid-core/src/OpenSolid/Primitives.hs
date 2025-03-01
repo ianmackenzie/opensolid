@@ -268,6 +268,7 @@ deriving instance Show (Basis2d space defines)
 ----- Point2d -----
 
 data Point2d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct a point from its X and Y coordinates.
   Point2d :: Qty units -> Qty units -> Point2d (space @ units)
 
 deriving instance Eq (Point2d (space @ units))
@@ -356,6 +357,7 @@ instance
 ----- VectorBounds2d -----
 
 data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct a vector bounding box from its X and Y coordinate ranges.
   VectorBounds2d :: Range units -> Range units -> VectorBounds2d (space @ units)
 
 deriving instance Show (VectorBounds2d (space @ units))
@@ -676,6 +678,7 @@ instance
 ----- Bounds2d -----
 
 data Bounds2d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct a bounding box from its X and Y coordinate ranges.
   Bounds2d ::
     Range units ->
     Range units ->
@@ -1280,6 +1283,7 @@ instance
 ----- VectorBounds3d -----
 
 data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct a vector bounding box from its XYZ coordinate ranges.
   VectorBounds3d ::
     Range units ->
     Range units ->
@@ -1616,6 +1620,7 @@ instance
 ----- Bounds3d -----
 
 data Bounds3d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct a bounding box from its XYZ coordinate ranges.
   Bounds3d ::
     Range units ->
     Range units ->
