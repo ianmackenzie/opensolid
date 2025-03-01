@@ -10,6 +10,7 @@ module OpenSolid.Plane3d
   , fromXAxis
   , fromYAxis
   , originPoint
+  , basis
   , normalDirection
   , normalAxis
   , xnPlane
@@ -43,6 +44,7 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
@@ -124,9 +126,12 @@ This is the 3D point corresponding to (0,0) in the plane's local coordinates.
 originPoint :: Plane3d (space @ units) defines -> Point3d (space @ units)
 originPoint (Plane3d p0 _) = p0
 
+basis :: Plane3d (space @ units) defines -> PlanarBasis3d space defines
+basis (Plane3d _ b) = b
+
 -- | Get the normal direction of a plane.
 normalDirection :: Plane3d (space @ units) defines -> Direction3d space
-normalDirection (Plane3d _ basis) = PlanarBasis3d.normalDirection basis
+normalDirection plane = PlanarBasis3d.normalDirection (basis plane)
 
 {-| Construct an axis normal (perpendicular) to a plane.
 
@@ -166,11 +171,11 @@ nyPlane (Plane3d p0 b) = Plane3d p0 (PlanarBasis3d.nyBasis b)
 
 -- | Get the X direction of a plane.
 xDirection :: Plane3d (space @ units) defines -> Direction3d space
-xDirection (Plane3d _ basis) = PlanarBasis3d.xDirection basis
+xDirection plane = PlanarBasis3d.xDirection (basis plane)
 
 -- | Get the Y direction of a plane.
 yDirection :: Plane3d (space @ units) defines -> Direction3d space
-yDirection (Plane3d _ basis) = PlanarBasis3d.yDirection basis
+yDirection plane = PlanarBasis3d.yDirection (basis plane)
 
 {-| Get the X axis of a plane.
 
@@ -191,27 +196,27 @@ yAxis plane = Axis3d (originPoint plane) (yDirection plane)
 The orientation of the plane will remain unchanged.
 -}
 moveTo :: Point3d (space @ units) -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
-moveTo p0 (Plane3d _ basis) = Plane3d p0 basis
+moveTo p0 plane = Plane3d p0 (basis plane)
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Plane3d (local @ units) defines ->
   Plane3d (global @ units) defines
-placeIn frame (Plane3d p0 basis) = do
+placeIn frame (Plane3d p0 b) = do
   let Frame3d _ frameBasis = frame
   Plane3d
     (Point3d.placeIn frame p0)
-    (PlanarBasis3d.placeIn frameBasis basis)
+    (PlanarBasis3d.placeIn frameBasis b)
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Plane3d (global @ units) defines ->
   Plane3d (local @ units) defines
-relativeTo frame (Plane3d p0 basis) = do
+relativeTo frame (Plane3d p0 b) = do
   let Frame3d _ frameBasis = frame
   Plane3d
     (Point3d.relativeTo frame p0)
-    (PlanarBasis3d.relativeTo frameBasis basis)
+    (PlanarBasis3d.relativeTo frameBasis b)
 
 -- | Offset a plane in its normal direction by the given distance.
 offsetBy :: Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
@@ -230,8 +235,8 @@ transformBy ::
   Transform3d tag (space @ units) ->
   Plane3d (space @ units) defines ->
   Plane3d (space @ units) defines
-transformBy transform (Plane3d p0 basis) =
-  Plane3d (Point3d.transformBy transform p0) (PlanarBasis3d.transformBy transform basis)
+transformBy transform (Plane3d p0 b) =
+  Plane3d (Point3d.transformBy transform p0) (PlanarBasis3d.transformBy transform b)
 
 translateBy ::
   Vector3d (space @ units) ->
