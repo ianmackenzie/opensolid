@@ -265,6 +265,7 @@ angle =
   Class.new @Angle $(docs ''Angle) $
     [ constant "Zero" Angle.zero $(docs 'Angle.zero)
     , constant "Golden Angle" Angle.goldenAngle $(docs 'Angle.goldenAngle)
+    , constant "Radian" Angle.radian $(docs 'Angle.radian)
     , constant "Full Turn" Angle.fullTurn $(docs 'Angle.fullTurn)
     , constant "Half Turn" Angle.halfTurn $(docs 'Angle.halfTurn)
     , constant "Quarter Turn" Angle.quarterTurn $(docs 'Angle.quarterTurn)
