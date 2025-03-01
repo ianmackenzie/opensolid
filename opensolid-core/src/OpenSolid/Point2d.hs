@@ -5,7 +5,6 @@ module OpenSolid.Point2d
   , y
   , along
   , xy
-  , xyIn
   , fromCoordinates
   , meters
   , centimeters
@@ -74,9 +73,6 @@ along (Axis2d originPoint direction) distance = originPoint + distance * directi
 -- | Construct a point from its X and Y coordinates.
 xy :: Qty units -> Qty units -> Point2d (space @ units)
 xy = Point2d
-
-xyIn :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Point2d (space @ units)
-xyIn (Frame2d p0 (Basis2d i j)) px py = p0 + px * i + py * j
 
 -- | Construct a point from a pair of X and Y coordinates.
 fromCoordinates :: (Qty units, Qty units) -> Point2d (space @ units)

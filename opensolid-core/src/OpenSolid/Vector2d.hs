@@ -5,8 +5,6 @@ module OpenSolid.Vector2d
   , x
   , y
   , xy
-  , xyIn
-  , xyInBasis
   , fromComponents
   , from
   , meters
@@ -97,12 +95,6 @@ y vy = Vector2d Qty.zero vy
 -- | Construct a vector from its X and Y components.
 xy :: Qty units -> Qty units -> Vector2d (space @ units)
 xy = Vector2d
-
-xyIn :: Frame2d (space @ originUnits) defines -> Qty units -> Qty units -> Vector2d (space @ units)
-xyIn (Frame2d _ basis) vx vy = xyInBasis basis vx vy
-
-xyInBasis :: Basis2d space defines -> Qty units -> Qty units -> Vector2d (space @ units)
-xyInBasis (Basis2d i j) vx vy = vx * i + vy * j
 
 -- | Construct a vector from a pair of X and Y components.
 fromComponents :: (Qty units, Qty units) -> Vector2d (space @ units)

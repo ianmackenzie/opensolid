@@ -9,8 +9,6 @@ module OpenSolid.Vector3d
   , xz
   , yz
   , xyz
-  , xyzIn
-  , xyzInBasis
   , fromComponents
   , meters
   , centimeters
@@ -122,22 +120,6 @@ yz vy vz = Vector3d Qty.zero vy vz
 -- | Construct a vector from its X, Y and Z components.
 xyz :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 xyz = Vector3d
-
-xyzIn ::
-  Frame3d (space @ originUnits) defines ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Vector3d (space @ units)
-xyzIn (Frame3d _ basis) = xyzInBasis basis
-
-xyzInBasis ::
-  Basis3d space defines ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Vector3d (space @ units)
-xyzInBasis (Basis3d i j k) vx vy vz = vx * i + vy * j + vz * k
 
 -- | Construct a vector from a tuple of XYZ components.
 fromComponents :: (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
