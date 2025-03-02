@@ -39,6 +39,9 @@ cradle:
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
 
+    - path: "opensolid-components/src"
+      component: "lib:opensolid-components"
+
     - path: "opensolid-core/src"
       component: "lib:opensolid-core"
 
@@ -70,6 +73,9 @@ cradle:
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-python/src/Python/Constant.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python/Constructor.hs"
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-python/src/Python/EqualityFunction.hs"
