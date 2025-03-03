@@ -449,10 +449,21 @@ foreign import ccall unsafe "opensolid_expression_cos"
   opensolid_expression_cos :: Ptr -> Ptr
 
 foreign import ccall unsafe "opensolid_expression_quadratic_spline"
-  opensolid_expression_quadratic_spline :: Double -> Double -> Double -> Ptr -> Ptr
+  opensolid_expression_quadratic_spline ::
+    Double ->
+    Double ->
+    Double ->
+    Ptr ->
+    Ptr
 
 foreign import ccall unsafe "opensolid_expression_cubic_spline"
-  opensolid_expression_cubic_spline :: Double -> Double -> Double -> Double -> Ptr -> Ptr
+  opensolid_expression_cubic_spline ::
+    Double ->
+    Double ->
+    Double ->
+    Double ->
+    Ptr ->
+    Ptr
 
 foreign import ccall unsafe "opensolid_expression_quartic_spline"
   opensolid_expression_quartic_spline ::
@@ -476,7 +487,11 @@ foreign import ccall unsafe "opensolid_expression_quintic_spline"
     Ptr
 
 foreign import ccall unsafe "opensolid_expression_bezier_curve"
-  opensolid_expression_bezier_curve :: Int64 -> Foreign.Ptr (Qty units) -> Ptr -> Ptr
+  opensolid_expression_bezier_curve ::
+    Int64 ->
+    Foreign.Ptr (Qty units) ->
+    Ptr ->
+    Ptr
 
 -- TODO attach a finalizer to the returned Ptr value,
 -- to delete the underlying Rust value?
