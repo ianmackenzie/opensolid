@@ -551,28 +551,22 @@ instance
 ----------------
 
 instance Negation (Expression Float (Qty units)) where
-  negate Curve1d{c1x} =
-    curve1d (Scalar.negated c1x)
+  negate Curve1d{c1x} = curve1d -c1x
 
 instance Negation (Expression UvPoint (Qty units)) where
-  negate Surface1d{s1x} =
-    surface1d (Scalar.negated s1x)
+  negate Surface1d{s1x} = surface1d -s1x
 
 instance Negation (Expression Float (Vector2d (space @ units))) where
-  negate VectorCurve2d{vc2x, vc2y} =
-    vectorCurve2d (Scalar.negated vc2x) (Scalar.negated vc2y)
+  negate VectorCurve2d{vc2x, vc2y} = vectorCurve2d -vc2x -vc2y
 
 instance Negation (Expression UvPoint (Vector2d (space @ units))) where
-  negate VectorSurface2d{vs2x, vs2y} =
-    vectorSurface2d (Scalar.negated vs2x) (Scalar.negated vs2y)
+  negate VectorSurface2d{vs2x, vs2y} = vectorSurface2d -vs2x -vs2y
 
 instance Negation (Expression Float (Vector3d (space @ units))) where
-  negate VectorCurve3d{vc3x, vc3y, vc3z} =
-    vectorCurve3d (Scalar.negated vc3x) (Scalar.negated vc3y) (Scalar.negated vc3z)
+  negate VectorCurve3d{vc3x, vc3y, vc3z} = vectorCurve3d -vc3x -vc3y -vc3z
 
 instance Negation (Expression UvPoint (Vector3d (space @ units))) where
-  negate VectorSurface3d{vs3x, vs3y, vs3z} =
-    vectorSurface3d (Scalar.negated vs3x) (Scalar.negated vs3y) (Scalar.negated vs3z)
+  negate VectorSurface3d{vs3x, vs3y, vs3z} = vectorSurface3d -vs3x -vs3y -vs3z
 
 instance
   Multiplication
@@ -693,7 +687,7 @@ instance
     (Expression Float (Qty units2))
     (Expression Float (Qty units1))
   where
-  Curve1d{c1x = lhs} + Curve1d{c1x = rhs} = curve1d (Scalar.sum lhs rhs)
+  Curve1d{c1x = lhs} + Curve1d{c1x = rhs} = curve1d (lhs + rhs)
 
 instance
   units1 ~ units2 =>
@@ -702,7 +696,7 @@ instance
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Qty units1))
   where
-  Surface1d{s1x = lhs} + Surface1d{s1x = rhs} = surface1d (Scalar.sum lhs rhs)
+  Surface1d{s1x = lhs} + Surface1d{s1x = rhs} = surface1d (lhs + rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -712,7 +706,7 @@ instance
     (Expression Float (Vector2d (space1 @ units1)))
   where
   VectorCurve2d{vc2x = x1, vc2y = y1} + VectorCurve2d{vc2x = x2, vc2y = y2} =
-    vectorCurve2d (Scalar.sum x1 x2) (Scalar.sum y1 y2)
+    vectorCurve2d (x1 + x2) (y1 + y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -722,7 +716,7 @@ instance
     (Expression UvPoint (Vector2d (space1 @ units1)))
   where
   VectorSurface2d{vs2x = x1, vs2y = y1} + VectorSurface2d{vs2x = x2, vs2y = y2} =
-    vectorSurface2d (Scalar.sum x1 x2) (Scalar.sum y1 y2)
+    vectorSurface2d (x1 + x2) (y1 + y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -733,7 +727,7 @@ instance
   where
   VectorCurve3d{vc3x = x1, vc3y = y1, vc3z = z1}
     + VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
-      vectorCurve3d (Scalar.sum x1 x2) (Scalar.sum y1 y2) (Scalar.sum z1 z2)
+      vectorCurve3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -744,7 +738,7 @@ instance
   where
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
     + VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
-      vectorSurface3d (Scalar.sum x1 x2) (Scalar.sum y1 y2) (Scalar.sum z1 z2)
+      vectorSurface3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -754,7 +748,7 @@ instance
     (Expression Float (Point2d (space1 @ units1)))
   where
   Curve2d{c2x = x1, c2y = y1} + VectorCurve2d{vc2x = x2, vc2y = y2} =
-    curve2d (Scalar.sum x1 x2) (Scalar.sum y1 y2)
+    curve2d (x1 + x2) (y1 + y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -764,7 +758,7 @@ instance
     (Expression UvPoint (Point2d (space1 @ units1)))
   where
   Surface2d{s2x = x1, s2y = y1} + VectorSurface2d{vs2x = x2, vs2y = y2} =
-    surface2d (Scalar.sum x1 x2) (Scalar.sum y1 y2)
+    surface2d (x1 + x2) (y1 + y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -774,7 +768,7 @@ instance
     (Expression Float (Point3d (space1 @ units1)))
   where
   Curve3d{c3x = x1, c3y = y1, c3z = z1} + VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
-    curve3d (Scalar.sum x1 x2) (Scalar.sum y1 y2) (Scalar.sum z1 z2)
+    curve3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -784,7 +778,7 @@ instance
     (Expression UvPoint (Point3d (space1 @ units1)))
   where
   Surface3d{s3x = x1, s3y = y1, s3z = z1} + VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
-    surface3d (Scalar.sum x1 x2) (Scalar.sum y1 y2) (Scalar.sum z1 z2)
+    surface3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 -------------------
 --- SUBTRACTION ---
@@ -797,7 +791,7 @@ instance
     (Expression Float (Qty units2))
     (Expression Float (Qty units1))
   where
-  Curve1d{c1x = lhs} - Curve1d{c1x = rhs} = curve1d (Scalar.difference lhs rhs)
+  Curve1d{c1x = lhs} - Curve1d{c1x = rhs} = curve1d (lhs - rhs)
 
 instance
   units1 ~ units2 =>
@@ -806,7 +800,7 @@ instance
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Qty units1))
   where
-  Surface1d{s1x = lhs} - Surface1d{s1x = rhs} = surface1d (Scalar.difference lhs rhs)
+  Surface1d{s1x = lhs} - Surface1d{s1x = rhs} = surface1d (lhs - rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -816,7 +810,7 @@ instance
     (Expression Float (Vector2d (space1 @ units1)))
   where
   VectorCurve2d{vc2x = x1, vc2y = y1} - VectorCurve2d{vc2x = x2, vc2y = y2} =
-    vectorCurve2d (Scalar.difference x1 x2) (Scalar.difference y1 y2)
+    vectorCurve2d (x1 - x2) (y1 - y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -826,7 +820,7 @@ instance
     (Expression UvPoint (Vector2d (space1 @ units1)))
   where
   VectorSurface2d{vs2x = x1, vs2y = y1} - VectorSurface2d{vs2x = x2, vs2y = y2} =
-    vectorSurface2d (Scalar.difference x1 x2) (Scalar.difference y1 y2)
+    vectorSurface2d (x1 - x2) (y1 - y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -836,10 +830,7 @@ instance
     (Expression Float (Vector3d (space1 @ units1)))
   where
   VectorCurve3d{vc3x = x1, vc3y = y1, vc3z = z1} - VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
-    vectorCurve3d
-      (Scalar.difference x1 x2)
-      (Scalar.difference y1 y2)
-      (Scalar.difference z1 z2)
+    vectorCurve3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -850,10 +841,7 @@ instance
   where
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
     - VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
-      vectorSurface3d
-        (Scalar.difference x1 x2)
-        (Scalar.difference y1 y2)
-        (Scalar.difference z1 z2)
+      vectorSurface3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -863,7 +851,7 @@ instance
     (Expression Float (Point2d (space1 @ units1)))
   where
   Curve2d{c2x = x1, c2y = y1} - VectorCurve2d{vc2x = x2, vc2y = y2} =
-    curve2d (Scalar.difference x1 x2) (Scalar.difference y1 y2)
+    curve2d (x1 - x2) (y1 - y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -873,7 +861,7 @@ instance
     (Expression UvPoint (Point2d (space1 @ units1)))
   where
   Surface2d{s2x = x1, s2y = y1} - VectorSurface2d{vs2x = x2, vs2y = y2} =
-    surface2d (Scalar.difference x1 x2) (Scalar.difference y1 y2)
+    surface2d (x1 - x2) (y1 - y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -883,7 +871,7 @@ instance
     (Expression Float (Vector2d (space1 @ units1)))
   where
   Curve2d{c2x = x1, c2y = y1} - Curve2d{c2x = x2, c2y = y2} =
-    vectorCurve2d (Scalar.difference x1 x2) (Scalar.difference y1 y2)
+    vectorCurve2d (x1 - x2) (y1 - y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -893,7 +881,7 @@ instance
     (Expression UvPoint (Vector2d (space1 @ units1)))
   where
   Surface2d{s2x = x1, s2y = y1} - Surface2d{s2x = x2, s2y = y2} =
-    vectorSurface2d (Scalar.difference x1 x2) (Scalar.difference y1 y2)
+    vectorSurface2d (x1 - x2) (y1 - y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -903,10 +891,7 @@ instance
     (Expression Float (Point3d (space1 @ units1)))
   where
   Curve3d{c3x = x1, c3y = y1, c3z = z1} - VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
-    curve3d
-      (Scalar.difference x1 x2)
-      (Scalar.difference y1 y2)
-      (Scalar.difference z1 z2)
+    curve3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -916,10 +901,7 @@ instance
     (Expression UvPoint (Point3d (space1 @ units1)))
   where
   Surface3d{s3x = x1, s3y = y1, s3z = z1} - VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
-    surface3d
-      (Scalar.difference x1 x2)
-      (Scalar.difference y1 y2)
-      (Scalar.difference z1 z2)
+    surface3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -929,10 +911,7 @@ instance
     (Expression Float (Vector3d (space1 @ units1)))
   where
   Curve3d{c3x = x1, c3y = y1, c3z = z1} - Curve3d{c3x = x2, c3y = y2, c3z = z2} =
-    vectorCurve3d
-      (Scalar.difference x1 x2)
-      (Scalar.difference y1 y2)
-      (Scalar.difference z1 z2)
+    vectorCurve3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -942,10 +921,7 @@ instance
     (Expression UvPoint (Vector3d (space1 @ units1)))
   where
   Surface3d{s3x = x1, s3y = y1, s3z = z1} - Surface3d{s3x = x2, s3y = y2, s3z = z2} =
-    vectorSurface3d
-      (Scalar.difference x1 x2)
-      (Scalar.difference y1 y2)
-      (Scalar.difference z1 z2)
+    vectorSurface3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 ----------------------
 --- MULTIPLICATION ---
@@ -1073,7 +1049,7 @@ instance
     (Expression Float (Qty units2))
     (Expression Float (Qty (units1 :*: units2)))
   where
-  Curve1d{c1x = lhs} .*. Curve1d{c1x = rhs} = curve1d (Scalar.product lhs rhs)
+  Curve1d{c1x = lhs} .*. Curve1d{c1x = rhs} = curve1d (lhs * rhs)
 
 instance
   Multiplication'
@@ -1081,7 +1057,7 @@ instance
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Qty (units1 :*: units2)))
   where
-  Surface1d{s1x = lhs} .*. Surface1d{s1x = rhs} = surface1d (Scalar.product lhs rhs)
+  Surface1d{s1x = lhs} .*. Surface1d{s1x = rhs} = surface1d (lhs * rhs)
 
 --- Qty-Vector2d ---
 --------------------
@@ -1093,7 +1069,7 @@ instance
     (Expression Float (Vector2d (space @ (units1 :*: units2))))
   where
   Curve1d{c1x = scale} .*. VectorCurve2d{vc2x, vc2y} =
-    vectorCurve2d (Scalar.product scale vc2x) (Scalar.product scale vc2y)
+    vectorCurve2d (scale * vc2x) (scale * vc2y)
 
 instance
   Multiplication'
@@ -1102,7 +1078,7 @@ instance
     (Expression UvPoint (Vector2d (space @ (units1 :*: units2))))
   where
   Surface1d{s1x = scale} .*. VectorSurface2d{vs2x, vs2y} =
-    vectorSurface2d (Scalar.product scale vs2x) (Scalar.product scale vs2y)
+    vectorSurface2d (scale * vs2x) (scale * vs2y)
 
 --- Vector2d-Qty ---
 --------------------
@@ -1114,7 +1090,7 @@ instance
     (Expression Float (Vector2d (space @ (units1 :*: units2))))
   where
   VectorCurve2d{vc2x, vc2y} .*. Curve1d{c1x = scale} =
-    vectorCurve2d (Scalar.product vc2x scale) (Scalar.product vc2y scale)
+    vectorCurve2d (vc2x * scale) (vc2y * scale)
 
 instance
   Multiplication'
@@ -1123,7 +1099,7 @@ instance
     (Expression UvPoint (Vector2d (space @ (units1 :*: units2))))
   where
   VectorSurface2d{vs2x, vs2y} .*. Surface1d{s1x = scale} =
-    vectorSurface2d (Scalar.product vs2x scale) (Scalar.product vs2y scale)
+    vectorSurface2d (vs2x * scale) (vs2y * scale)
 
 --- Qty-Vector3d ---
 --------------------
@@ -1135,10 +1111,7 @@ instance
     (Expression Float (Vector3d (space @ (units1 :*: units2))))
   where
   Curve1d{c1x = scale} .*. VectorCurve3d{vc3x, vc3y, vc3z} =
-    vectorCurve3d
-      (Scalar.product scale vc3x)
-      (Scalar.product scale vc3y)
-      (Scalar.product scale vc3z)
+    vectorCurve3d (scale * vc3x) (scale * vc3y) (scale * vc3z)
 
 instance
   Multiplication'
@@ -1147,10 +1120,7 @@ instance
     (Expression UvPoint (Vector3d (space @ (units1 :*: units2))))
   where
   Surface1d{s1x = scale} .*. VectorSurface3d{vs3x, vs3y, vs3z} =
-    vectorSurface3d
-      (Scalar.product scale vs3x)
-      (Scalar.product scale vs3y)
-      (Scalar.product scale vs3z)
+    vectorSurface3d (scale * vs3x) (scale * vs3y) (scale * vs3z)
 
 --- Vector3d-Qty ---
 --------------------
@@ -1162,10 +1132,7 @@ instance
     (Expression Float (Vector3d (space @ (units1 :*: units2))))
   where
   VectorCurve3d{vc3x, vc3y, vc3z} .*. Curve1d{c1x = scale} =
-    vectorCurve3d
-      (Scalar.product vc3x scale)
-      (Scalar.product vc3y scale)
-      (Scalar.product vc3z scale)
+    vectorCurve3d (vc3x * scale) (vc3y * scale) (vc3z * scale)
 
 instance
   Multiplication'
@@ -1174,10 +1141,7 @@ instance
     (Expression UvPoint (Vector3d (space @ (units1 :*: units2))))
   where
   VectorSurface3d{vs3x, vs3y, vs3z} .*. Surface1d{s1x = scale} =
-    vectorSurface3d
-      (Scalar.product vs3x scale)
-      (Scalar.product vs3y scale)
-      (Scalar.product vs3z scale)
+    vectorSurface3d (vs3x * scale) (vs3y * scale) (vs3z * scale)
 
 ----------------
 --- DIVISION ---
@@ -1262,7 +1226,7 @@ instance
     (Expression Float (Qty units2))
     (Expression Float (Qty (units1 :/: units2)))
   where
-  Curve1d{c1x = lhs} ./. Curve1d{c1x = rhs} = curve1d (Scalar.quotient lhs rhs)
+  Curve1d{c1x = lhs} ./. Curve1d{c1x = rhs} = curve1d (lhs / rhs)
 
 instance
   Division'
@@ -1270,7 +1234,7 @@ instance
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Qty (units1 :/: units2)))
   where
-  Surface1d{s1x = lhs} ./. Surface1d{s1x = rhs} = surface1d (Scalar.quotient lhs rhs)
+  Surface1d{s1x = lhs} ./. Surface1d{s1x = rhs} = surface1d (lhs / rhs)
 
 --- Vector2d-Qty ---
 --------------------
@@ -1282,7 +1246,7 @@ instance
     (Expression Float (Vector2d (space @ (units1 :/: units2))))
   where
   VectorCurve2d{vc2x, vc2y} ./. Curve1d{c1x = scale} =
-    vectorCurve2d (Scalar.quotient vc2x scale) (Scalar.quotient vc2y scale)
+    vectorCurve2d (vc2x / scale) (vc2y / scale)
 
 instance
   Division'
@@ -1291,7 +1255,7 @@ instance
     (Expression UvPoint (Vector2d (space @ (units1 :/: units2))))
   where
   VectorSurface2d{vs2x, vs2y} ./. Surface1d{s1x = scale} =
-    vectorSurface2d (Scalar.quotient vs2x scale) (Scalar.quotient vs2y scale)
+    vectorSurface2d (vs2x / scale) (vs2y / scale)
 
 --- Vector3d-Qty ---
 --------------------
@@ -1303,10 +1267,7 @@ instance
     (Expression Float (Vector3d (space @ (units1 :/: units2))))
   where
   VectorCurve3d{vc3x, vc3y, vc3z} ./. Curve1d{c1x = scale} =
-    vectorCurve3d
-      (Scalar.quotient vc3x scale)
-      (Scalar.quotient vc3y scale)
-      (Scalar.quotient vc3z scale)
+    vectorCurve3d (vc3x / scale) (vc3y / scale) (vc3z / scale)
 
 instance
   Division'
@@ -1315,10 +1276,7 @@ instance
     (Expression UvPoint (Vector3d (space @ (units1 :/: units2))))
   where
   VectorSurface3d{vs3x, vs3y, vs3z} ./. Surface1d{s1x = scale} =
-    vectorSurface3d
-      (Scalar.quotient vs3x scale)
-      (Scalar.quotient vs3y scale)
-      (Scalar.quotient vs3z scale)
+    vectorSurface3d (vs3x / scale) (vs3y / scale) (vs3z / scale)
 
 -------------------
 --- DOT PRODUCT ---
@@ -1374,7 +1332,7 @@ instance
     (Expression Float (Qty (units1 :*: units2)))
   where
   VectorCurve2d{vc2x = x1, vc2y = y1} .<>. VectorCurve2d{vc2x = x2, vc2y = y2} =
-    curve1d (Scalar.sum (Scalar.product x1 x2) (Scalar.product y1 y2))
+    curve1d (x1 * x2 + y1 * y2)
 
 instance
   space1 ~ space2 =>
@@ -1384,7 +1342,7 @@ instance
     (Expression UvPoint (Qty (units1 :*: units2)))
   where
   VectorSurface2d{vs2x = x1, vs2y = y1} .<>. VectorSurface2d{vs2x = x2, vs2y = y2} =
-    surface1d (Scalar.sum (Scalar.product x1 x2) (Scalar.product y1 y2))
+    surface1d (x1 * x2 + y1 * y2)
 
 instance
   space1 ~ space2 =>
@@ -1395,10 +1353,7 @@ instance
   where
   VectorCurve3d{vc3x = x1, vc3y = y1, vc3z = z1}
     .<>. VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
-      curve1d $
-        Scalar.sum
-          (Scalar.sum (Scalar.product x1 x2) (Scalar.product y1 y2))
-          (Scalar.product z1 z2)
+      curve1d (x1 * x2 + y1 * y2 + z1 * z2)
 
 instance
   space1 ~ space2 =>
@@ -1409,10 +1364,7 @@ instance
   where
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
     .<>. VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
-      surface1d $
-        Scalar.sum
-          (Scalar.sum (Scalar.product x1 x2) (Scalar.product y1 y2))
-          (Scalar.product z1 z2)
+      surface1d (x1 * x2 + y1 * y2 + z1 * z2)
 
 ---------------------
 --- CROSS PRODUCT ---
@@ -1468,7 +1420,7 @@ instance
     (Expression Float (Qty (units1 :*: units2)))
   where
   VectorCurve2d{vc2x = x1, vc2y = y1} .><. VectorCurve2d{vc2x = x2, vc2y = y2} =
-    curve1d (Scalar.difference (Scalar.product x1 y2) (Scalar.product y1 x2))
+    curve1d (x1 * y2 - y1 * x2)
 
 instance
   space1 ~ space2 =>
@@ -1478,7 +1430,7 @@ instance
     (Expression UvPoint (Qty (units1 :*: units2)))
   where
   VectorSurface2d{vs2x = x1, vs2y = y1} .><. VectorSurface2d{vs2x = x2, vs2y = y2} =
-    surface1d (Scalar.difference (Scalar.product x1 y2) (Scalar.product y1 x2))
+    surface1d (x1 * y2 - y1 * x2)
 
 instance
   space1 ~ space2 =>
@@ -1490,9 +1442,9 @@ instance
   VectorCurve3d{vc3x = x1, vc3y = y1, vc3z = z1}
     .><. VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
       vectorCurve3d
-        (Scalar.difference (Scalar.product y1 z2) (Scalar.product z1 y2))
-        (Scalar.difference (Scalar.product z1 x2) (Scalar.product x1 z2))
-        (Scalar.difference (Scalar.product x1 y2) (Scalar.product y1 x2))
+        (y1 * z2 - z1 * y2)
+        (z1 * x2 - x1 * z2)
+        (x1 * y2 - y1 * x2)
 
 instance
   space1 ~ space2 =>
@@ -1504,9 +1456,9 @@ instance
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
     .><. VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
       vectorSurface3d
-        (Scalar.difference (Scalar.product y1 z2) (Scalar.product z1 y2))
-        (Scalar.difference (Scalar.product z1 x2) (Scalar.product x1 z2))
-        (Scalar.difference (Scalar.product x1 y2) (Scalar.product y1 x2))
+        (y1 * z2 - z1 * y2)
+        (z1 * x2 - x1 * z2)
+        (x1 * y2 - y1 * x2)
 
 -------------------
 --- COMPOSITION ---
