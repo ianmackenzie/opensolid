@@ -1,3 +1,19 @@
+Try removing 'unitless ~ Unitless' and maybe 'uvPoint ~ UvPoint' constraints everywhere
+
+Throw a Haskell exception for higher-order zeros in Curve solving
+-> possibly also other truly 'exceptional' cases?
+-> make sure to catch those exceptions in FFI...
+-> probably still use a normal error type for second-or-higher order Curve2d intersections etc.
+-> even Surface solving only solves for tangent roots though...
+-> global rule that there should never be second or higher order intersection zeros/intersections?
+  -> helps prevent constructing very complex third/fourth derivatives...
+
+Have Curve.sqrt fail if input is zero anywhere
+
+Add Curve.norm?
+
+Replace DotProductOf and CrossProductOf with Arithmetic.CrossProduct and Arithmetic.DotProduct
+
 Create Haskell gear example and profile
 - test case of cycloid curve starting right at base circle
   -> dump edges to see where there's a self-intersection, or try checking for zero-length edges ahead of time?
