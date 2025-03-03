@@ -17,7 +17,6 @@ where
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Composition
-import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression

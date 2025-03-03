@@ -15,7 +15,6 @@ module OpenSolid.VectorSurfaceFunction2d
 where
 
 import OpenSolid.Composition
-import OpenSolid.CoordinateSystem (Space)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
