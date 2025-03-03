@@ -411,9 +411,9 @@ showParenthesized :: Bool -> Text -> Text
 showParenthesized True text = "(" + text + ")"
 showParenthesized False text = text
 
-data Scalar#
+data RustExpression
 
-type Ptr = Foreign.Ptr Scalar#
+type Ptr = Foreign.Ptr RustExpression
 
 foreign import ccall unsafe "opensolid_expression_constant"
   opensolid_expression_constant :: Double -> Ptr
