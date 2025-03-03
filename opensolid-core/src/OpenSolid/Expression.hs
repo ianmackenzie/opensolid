@@ -459,7 +459,11 @@ vectorSurface3dv x y z sibling = do
 --- UNITS ---
 -------------
 
-instance HasUnits (Expression input (Qty units)) units (Expression input (Qty Unitless))
+instance
+  HasUnits
+    (Expression input (Qty units))
+    units
+    (Expression input (Qty Unitless))
 
 instance
   HasUnits
