@@ -32,6 +32,7 @@ import Foreign qualified
 import Foreign.Marshal.Array qualified
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
+import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -481,9 +482,9 @@ foreign import ccall unsafe "opensolid_expression_bezier_curve"
 -- to delete the underlying Rust value?
 ptr :: Scalar input -> Ptr
 ptr expression = case expression of
-  CurveParameter -> opensolid_expression_argument (fromIntegral 0)
-  SurfaceParameter SurfaceParameter.U -> opensolid_expression_argument (fromIntegral 0)
-  SurfaceParameter SurfaceParameter.V -> opensolid_expression_argument (fromIntegral 1)
+  CurveParameter -> opensolid_expression_argument (Int.toInt64 0)
+  SurfaceParameter SurfaceParameter.U -> opensolid_expression_argument (Int.toInt64 0)
+  SurfaceParameter SurfaceParameter.V -> opensolid_expression_argument (Int.toInt64 1)
   Constant (Qty value) -> opensolid_expression_constant value
   Negated arg -> opensolid_expression_negate (ptr arg)
   Sum lhs rhs -> opensolid_expression_sum (ptr lhs) (ptr rhs)
@@ -503,6 +504,6 @@ ptr expression = case expression of
   QuinticSpline (Qty p1) (Qty p2) (Qty p3) (Qty p4) (Qty p5) (Qty p6) param ->
     opensolid_expression_quintic_spline p1 p2 p3 p4 p5 p6 (ptr param)
   BezierCurve controlPoints param -> unsafeDupablePerformIO $ IO.do
-    let numControlPoints = fromIntegral (NonEmpty.length controlPoints)
+    let numControlPoints = Int.toInt64 (NonEmpty.length controlPoints)
     Foreign.Marshal.Array.withArray (NonEmpty.toList controlPoints) $ \arrayPtr ->
       IO.succeed (opensolid_expression_bezier_curve numControlPoints arrayPtr (ptr param))
