@@ -577,9 +577,6 @@ instance
   derivativeImpl parameter (curve :.: function) =
     (derivative curve . function) * SurfaceFunction.derivative parameter function
 
-  transformByImpl transform (curve :.: function) =
-    transformBy transform curve . function
-
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
   VectorCurve2d (space @ units) ->

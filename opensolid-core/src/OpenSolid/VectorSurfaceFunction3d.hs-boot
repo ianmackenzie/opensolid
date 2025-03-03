@@ -23,10 +23,6 @@ class
   evaluateImpl :: function -> UvPoint -> Vector3d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> VectorBounds3d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction3d coordinateSystem
-  transformByImpl ::
-    Transform3d tag (Space coordinateSystem @ translationUnits) ->
-    function ->
-    VectorSurfaceFunction3d coordinateSystem
 
 type role VectorSurfaceFunction3d nominal
 

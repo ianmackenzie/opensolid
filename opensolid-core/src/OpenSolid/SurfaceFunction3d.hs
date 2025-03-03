@@ -49,7 +49,6 @@ class
   evaluateImpl :: function -> UvPoint -> Point3d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> Bounds3d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction3d coordinateSystem
-  transformByImpl :: Transform3d tag coordinateSystem -> function -> SurfaceFunction3d coordinateSystem
 
 data SurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
   SurfaceFunction3d ::
@@ -159,17 +158,6 @@ instance
   derivativeImpl parameter (Arithmetic.Difference f1 f2) =
     derivative parameter f1 - derivative parameter f2
 
-  transformByImpl transform (Arithmetic.Difference f1 f2) =
-    -- Note the slight hack here:
-    -- the definition of VectorSurfaceFunction3d.Interface states that the units of the transform
-    -- do *not* have to match the units of the vector surface function,
-    -- because vectors and vector surfaces ignore translation
-    -- (and the units of the transform are just the units of its translation part).
-    -- This would in general mean that we couldn't apply the given transform to a SurfaceFunction3d,
-    -- but in this case it's safe since any translation will cancel out
-    -- when the two surface functions are subtracted from each other.
-    transformBy (Units.coerce transform) f1 - transformBy (Units.coerce transform) f2
-
 instance
   uvCoordinates ~ UvCoordinates =>
   Composition
@@ -206,9 +194,6 @@ instance
     let dvOuter = derivative V outer . inner
     let dInner = SurfaceFunction2d.derivative varyingParameter inner
     duOuter * VectorSurfaceFunction2d.xComponent dInner + dvOuter * VectorSurfaceFunction2d.yComponent dInner
-
-  transformByImpl transform (outer :.: inner) =
-    transformBy transform outer . inner
 
 new :: Interface function (space @ units) => function -> SurfaceFunction3d (space @ units)
 new = SurfaceFunction3d
@@ -284,15 +269,13 @@ transformBy ::
   SurfaceFunction3d (space @ units) ->
   SurfaceFunction3d (space @ units)
 transformBy transform function = case function of
-  SurfaceFunction3d f -> transformByImpl transform f
   Coerce f -> Coerce (transformBy (Units.coerce transform) f)
   Parametric expression -> Parametric (Expression.Surface3d.transformBy transform expression)
-  XYZ{} -> Transformed transform function
   Sum f1 f2 -> transformBy transform f1 + VectorSurfaceFunction3d.transformBy transform f2
   Difference f1 f2 -> transformBy transform f1 - VectorSurfaceFunction3d.transformBy transform f2
-  PlaceIn{} -> Transformed transform function
   Transformed existing f ->
     Transformed (Transform3d.toAffine transform . Transform3d.toAffine existing) f
+  _ -> Transformed transform function
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->

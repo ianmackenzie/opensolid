@@ -24,10 +24,6 @@ class
   evaluateImpl :: function -> UvPoint -> Point2d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> Bounds2d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction2d coordinateSystem
-  transformByImpl ::
-    Transform2d tag coordinateSystem ->
-    function ->
-    SurfaceFunction2d coordinateSystem
 
 data SurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
   SurfaceFunction2d ::

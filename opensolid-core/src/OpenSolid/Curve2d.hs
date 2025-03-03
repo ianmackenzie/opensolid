@@ -437,9 +437,6 @@ instance
   derivativeImpl parameter (curve :.: function) =
     (derivative curve . function) * SurfaceFunction.derivative parameter function
 
-  transformByImpl transform (curve :.: function) =
-    transformBy transform curve . function
-
 instance
   uvCoordinates ~ UvCoordinates =>
   Composition

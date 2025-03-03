@@ -25,10 +25,6 @@ class
   evaluateImpl :: function -> UvPoint -> Vector2d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> VectorBounds2d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction2d coordinateSystem
-  transformByImpl ::
-    Transform2d tag (Space coordinateSystem @ translationUnits) ->
-    function ->
-    VectorSurfaceFunction2d coordinateSystem
 
 type role VectorSurfaceFunction2d nominal
 

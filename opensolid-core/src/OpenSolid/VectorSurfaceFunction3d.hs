@@ -48,10 +48,6 @@ class
   evaluateImpl :: function -> UvPoint -> Vector3d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> VectorBounds3d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction3d coordinateSystem
-  transformByImpl ::
-    Transform3d tag (Space coordinateSystem @ translationUnits) ->
-    function ->
-    VectorSurfaceFunction3d coordinateSystem
 
 data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
   VectorSurfaceFunction3d ::
@@ -488,9 +484,6 @@ instance
     let dInner = SurfaceFunction2d.derivative varyingParameter inner
     duOuter * VectorSurfaceFunction2d.xComponent dInner + dvOuter * VectorSurfaceFunction2d.yComponent dInner
 
-  transformByImpl transform (outer :.: inner) =
-    new (transformBy transform outer :.: inner)
-
 new :: Interface function (space @ units) => function -> VectorSurfaceFunction3d (space @ units)
 new = VectorSurfaceFunction3d
 
@@ -591,19 +584,16 @@ transformBy ::
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units)
 transformBy transform function = case function of
-  VectorSurfaceFunction3d f -> transformByImpl transform f
   Coerce f -> Coerce (transformBy transform f)
   Parametric expression -> Parametric (Expression.VectorSurface3d.transformBy transform expression)
-  XYZ{} -> Transformed transform function
   Negated f -> Negated (transformBy transform f)
   Sum f1 f2 -> Sum (transformBy transform f1) (transformBy transform f2)
   Difference f1 f2 -> Difference (transformBy transform f1) (transformBy transform f2)
   Product1d3d' f1 f2 -> Product1d3d' f1 (transformBy transform f2)
   Product3d1d' f1 f2 -> Product3d1d' (transformBy transform f1) f2
   Quotient' f1 f2 -> Quotient' (transformBy transform f1) f2
-  CrossProduct'{} -> Transformed transform function
-  PlaceIn{} -> Transformed transform function
   Transformed existing f -> do
     let transform1 = Units.erase (Transform3d.toAffine existing)
     let transform2 = Units.erase (Transform3d.toAffine transform)
     Transformed (transform1 >> transform2) f
+  _ -> Transformed transform function

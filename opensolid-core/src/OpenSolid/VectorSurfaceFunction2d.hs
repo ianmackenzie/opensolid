@@ -45,10 +45,6 @@ class
   evaluateImpl :: function -> UvPoint -> Vector2d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> VectorBounds2d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction2d coordinateSystem
-  transformByImpl ::
-    Transform2d tag (Space coordinateSystem @ translationUnits) ->
-    function ->
-    VectorSurfaceFunction2d coordinateSystem
 
 data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
   VectorSurfaceFunction2d ::
@@ -539,10 +535,8 @@ transformBy ::
 transformBy transform function = do
   let t = Units.erase (Transform2d.toAffine transform)
   case function of
-    VectorSurfaceFunction2d f -> transformByImpl transform f
     Coerce f -> Coerce (transformBy transform f)
     Parametric expression -> Parametric (Expression.VectorSurface2d.transformBy t expression)
-    XY _ _ -> Transformed t function
     Negated arg -> negate (transformBy transform arg)
     Sum lhs rhs -> transformBy transform lhs + transformBy transform rhs
     Difference lhs rhs -> transformBy transform lhs - transformBy transform rhs
@@ -550,6 +544,7 @@ transformBy transform function = do
     Product2d1d' f1 f2 -> Product2d1d' (transformBy transform f1) f2
     Quotient' f1 f2 -> Quotient' (transformBy transform f1) f2
     Transformed existing c -> Transformed (existing >> t) c
+    _ -> Transformed t function
 
 evaluate :: VectorSurfaceFunction2d (space @ units) -> UvPoint -> Vector2d (space @ units)
 evaluate function uvPoint = case function of

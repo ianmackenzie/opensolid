@@ -243,9 +243,6 @@ instance
     (derivative curve . surfaceFunction)
       * SurfaceFunction.derivative parameter surfaceFunction
 
-  transformByImpl transform (curve :.: surfaceFunction) =
-    transformBy transform curve . surfaceFunction
-
 instance
   (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Curve3d (space1 @ units1)) (Curve3d (space2 @ units2)) units1

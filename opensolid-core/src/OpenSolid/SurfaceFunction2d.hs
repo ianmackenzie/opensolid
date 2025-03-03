@@ -47,10 +47,6 @@ class
   evaluateImpl :: function -> UvPoint -> Point2d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> Bounds2d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction2d coordinateSystem
-  transformByImpl ::
-    Transform2d tag coordinateSystem ->
-    function ->
-    SurfaceFunction2d coordinateSystem
 
 data SurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
   SurfaceFunction2d ::
@@ -153,20 +149,6 @@ instance
   derivativeImpl parameter (Arithmetic.Difference f1 f2) =
     derivative parameter f1 - derivative parameter f2
 
-  transformByImpl transform (Arithmetic.Difference f1 f2) =
-    VectorSurfaceFunction2d.new $
-      Arithmetic.Difference
-        -- Note the slight hack here:
-        -- the definition of VectorCurve2d.Interface states that the units of the transform
-        -- do *not* have to match the units of the vector curve,
-        -- because vectors and vector curves ignore translation
-        -- (and the units of the transform are just the units of its translation part).
-        -- This would in general mean that we couldn't apply the given transform to a Point2d or Curve2d,
-        -- but in this case it's safe since any translation will cancel out
-        -- when the point and curve are subtracted from each other.
-        (transformBy (Units.coerce transform) f1)
-        (transformBy (Units.coerce transform) f2)
-
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
@@ -244,13 +226,12 @@ transformBy ::
   SurfaceFunction2d (space @ units) ->
   SurfaceFunction2d (space @ units)
 transformBy transform function = case function of
-  SurfaceFunction2d f -> transformByImpl transform f
   Coerce c -> Units.coerce (transformBy (Units.coerce transform) c)
   Parametric expression -> Parametric (Expression.Surface2d.transformBy transform expression)
-  XY{} -> Transformed (Transform2d.toAffine transform) function
   Addition f1 f2 -> transformBy transform f1 + VectorSurfaceFunction2d.transformBy transform f2
   Subtraction c v -> transformBy transform c - VectorSurfaceFunction2d.transformBy transform v
   Transformed current f -> Transformed (Transform2d.toAffine transform . current) f
+  _ -> Transformed (Transform2d.toAffine transform) function
 
 instance
   uvCoordinates ~ UvCoordinates =>

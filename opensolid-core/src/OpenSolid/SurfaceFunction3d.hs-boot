@@ -28,7 +28,6 @@ class
   evaluateImpl :: function -> UvPoint -> Point3d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> Bounds3d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction3d coordinateSystem
-  transformByImpl :: Transform3d tag coordinateSystem -> function -> SurfaceFunction3d coordinateSystem
 
 type role SurfaceFunction3d nominal
 
