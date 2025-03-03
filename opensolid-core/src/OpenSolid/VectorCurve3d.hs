@@ -810,7 +810,7 @@ direction curve =
     -- Definitely can't get the direction of a vector curve
     -- if that vector curve is zero everywhere!
     Failure Zeros.ZeroEverywhere -> Failure HasZero
-    -- If a curve has a higher-order zero, that still means it has a zeros...
+    -- If a curve has a higher-order zero, that still means it has a zero...
     Failure Zeros.HigherOrderZero -> Failure HasZero
 
 isRemovableDegeneracy :: Tolerance units => VectorCurve3d (space @ units) -> Float -> Bool
