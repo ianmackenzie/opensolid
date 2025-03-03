@@ -67,8 +67,8 @@ deriving instance Eq (Scalar input)
 
 deriving instance Ord (Scalar input)
 
-instance float ~ Float => Composition (Scalar input) (Scalar float) (Scalar input) where
-  Constant value . _ = constant value
+instance Composition (Scalar input) (Scalar Float) (Scalar input) where
+  Constant value . _ = Constant value
   CurveParameter . input = input
   Negated arg . input = negated (arg . input)
   Sum lhs rhs . input = sum (lhs . input) (rhs . input)
@@ -86,13 +86,10 @@ instance float ~ Float => Composition (Scalar input) (Scalar float) (Scalar inpu
   BezierCurve controlPoints param . input = BezierCurve controlPoints (param . input)
 
 instance
-  (input1 ~ input2, uvPoint ~ UvPoint) =>
-  Composition
-    (Scalar input1, Scalar input2)
-    (Scalar uvPoint)
-    (Scalar input1)
+  input1 ~ input2 =>
+  Composition (Scalar input1, Scalar input2) (Scalar UvPoint) (Scalar input1)
   where
-  Constant value . _ = constant value
+  Constant value . _ = Constant value
   SurfaceParameter SurfaceParameter.U . (input, _) = input
   SurfaceParameter SurfaceParameter.V . (_, input) = input
   Negated arg . inputs = negated (arg . inputs)
