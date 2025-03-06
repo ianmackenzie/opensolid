@@ -1,4 +1,17 @@
-Try removing 'unitless ~ Unitless' and maybe 'uvPoint ~ UvPoint' constraints everywhere
+Add special case to e.g. VectorCurve2d.magnitude to check for zero, to avoid taking square root of zero
+
+Check that function modules only refer to other function types, not geometry types
+
+Replace 'CompiledFunction.abstract' with 'compileImpl' where applicable
+
+Try removing 'unitless ~ Unitless' constraints everywhere
+-> maybe also 'uvPoint ~ UvPoint', 'uvSpace ~ UvSpace', 'uvCoordinates ~ UvCoordinates'
+
+Add Region2d.regularPolygon which takes number of sides and incircle diameter
+-> corresponds to width across flats for polygons with even numbers of sides...
+-> for polygon based on circumcircle: sample Curve2d.circle at N points:
+   circle = Curve2d.circle point diameter
+   Region2d.polygon [Curve2d.pointOn circle t | t <- Parameter.leading n]
 
 Throw a Haskell exception for higher-order zeros in Curve solving
 -> possibly also other truly 'exceptional' cases?
@@ -11,6 +24,11 @@ Throw a Haskell exception for higher-order zeros in Curve solving
 Have Curve.sqrt fail if input is zero anywhere
 
 Add Curve.norm?
+-> or just check for zero-first-derivative zeros in Curve.sqrt...
+
+Ensure all quotient implementations use (p' / q) - (p / q) * (q' / q) form, to better support L'Hopital
+
+Refactor Composition type parameter order to reflect . instead of >> use? (outer then inner)
 
 Replace DotProductOf and CrossProductOf with Arithmetic.CrossProduct and Arithmetic.DotProduct
 
