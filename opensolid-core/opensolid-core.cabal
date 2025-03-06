@@ -231,6 +231,7 @@ library
 
   other-modules:
     OpenSolid.Bootstrap
+    OpenSolid.CompiledFunction
     OpenSolid.ConstrainedDelaunayTriangulation
     OpenSolid.Expression.Scalar
     OpenSolid.Json.FieldSchema
