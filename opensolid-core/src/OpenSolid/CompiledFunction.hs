@@ -15,6 +15,7 @@ where
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Prelude
+import OpenSolid.Units qualified as Units
 
 data CompiledFunction inputValue outputValue inputBounds outputBounds where
   Concrete ::
@@ -25,6 +26,20 @@ data CompiledFunction inputValue outputValue inputBounds outputBounds where
     (inputValue -> outputValue) ->
     (inputBounds -> outputBounds) ->
     CompiledFunction inputValue outputValue inputBounds outputBounds
+
+instance
+  ( Units.Coercion (Expression inputValue outputValue1) (Expression inputValue outputValue2)
+  , Expression.Evaluation inputValue outputValue1 inputBounds outputBounds1
+  , Expression.Evaluation inputValue outputValue2 inputBounds outputBounds2
+  , Units.Coercion outputValue1 outputValue2
+  , Units.Coercion outputBounds1 outputBounds2
+  ) =>
+  Units.Coercion
+    (CompiledFunction inputValue outputValue1 inputBounds outputBounds1)
+    (CompiledFunction inputValue outputValue2 inputBounds outputBounds2)
+  where
+  coerce (Concrete expression) = Concrete (Units.coerce expression)
+  coerce (Abstract value bounds) = Abstract (Units.coerce . value) (Units.coerce . bounds)
 
 concrete ::
   Expression.Evaluation inputValue outputValue inputBounds outputBounds =>
