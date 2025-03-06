@@ -1,5 +1,6 @@
 module OpenSolid.Expression
   ( Expression
+  , Constant
   , zero
   , origin
   , constant
