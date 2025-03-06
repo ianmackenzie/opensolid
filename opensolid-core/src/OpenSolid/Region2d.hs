@@ -184,13 +184,15 @@ The last point will be connected back to the first point automatically if needed
 -}
 polygon ::
   Tolerance units =>
-  NonEmpty (Point2d (space @ units)) ->
+  List (Point2d (space @ units)) ->
   Result BoundedBy.Error (Region2d (space @ units))
-polygon points = do
-  let closedLoop = points |> NonEmpty.append (NonEmpty.first points)
-  let isZeroLength line = Curve2d.startPoint line ~= Curve2d.endPoint line
-  let lines = NonEmpty.successive Curve2d.line closedLoop
-  boundedBy (List.filter (not . isZeroLength) lines)
+polygon pointList = case pointList of
+  [] -> Failure BoundedBy.EmptyRegion
+  NonEmpty points -> do
+    let closedLoop = points |> NonEmpty.append (NonEmpty.first points)
+    let isZeroLength line = Curve2d.startPoint line ~= Curve2d.endPoint line
+    let lines = NonEmpty.successive Curve2d.line closedLoop
+    boundedBy (List.filter (not . isZeroLength) lines)
 
 {-| Fillet a region at the given corner points, with the given radius.
 
