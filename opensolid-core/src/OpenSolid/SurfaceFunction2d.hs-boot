@@ -12,7 +12,6 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)
-import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 

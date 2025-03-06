@@ -6,11 +6,9 @@ module OpenSolid.VectorSurfaceFunction3d
   )
 where
 
-import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
-import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds3d (VectorBounds3d)

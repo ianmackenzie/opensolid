@@ -6,12 +6,10 @@ module OpenSolid.VectorSurfaceFunction2d
   )
 where
 
-import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
-import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
