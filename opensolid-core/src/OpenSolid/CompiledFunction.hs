@@ -41,6 +41,164 @@ instance
   coerce (Concrete expression) = Concrete (Units.coerce expression)
   coerce (Abstract value bounds) = Abstract (Units.coerce . value) (Units.coerce . bounds)
 
+instance
+  ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
+  , Negation (Expression inputValue outputValue)
+  , Negation outputValue
+  , Negation outputBounds
+  ) =>
+  Negation (CompiledFunction inputValue outputValue inputBounds outputBounds)
+  where
+  negate = map negate negate negate
+
+instance
+  ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
+  , Negation (Expression inputValue outputValue)
+  , Negation outputValue
+  , Negation outputBounds
+  ) =>
+  Multiplication
+    Sign
+    (CompiledFunction inputValue outputValue inputBounds outputBounds)
+    (CompiledFunction inputValue outputValue inputBounds outputBounds)
+  where
+  Positive * compiled = compiled
+  Negative * compiled = -compiled
+
+instance
+  ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
+  , Negation (Expression inputValue outputValue)
+  , Negation outputValue
+  , Negation outputBounds
+  ) =>
+  Multiplication
+    (CompiledFunction inputValue outputValue inputBounds outputBounds)
+    Sign
+    (CompiledFunction inputValue outputValue inputBounds outputBounds)
+  where
+  compiled * Positive = compiled
+  compiled * Negative = -compiled
+
+instance
+  ( inputValue1 ~ inputValue2
+  , inputBounds1 ~ inputBounds2
+  , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
+  , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
+  , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
+  , Addition
+      (Expression inputValue1 outputValue1)
+      (Expression inputValue2 outputValue2)
+      (Expression inputValue1 outputValue3)
+  , Addition outputValue1 outputValue2 outputValue3
+  , Addition outputBounds1 outputBounds2 outputBounds3
+  ) =>
+  Addition
+    (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
+    (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
+    (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
+  where
+  (+) = map2 (+) (+) (+)
+
+instance
+  ( inputValue1 ~ inputValue2
+  , inputBounds1 ~ inputBounds2
+  , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
+  , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
+  , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
+  , Subtraction
+      (Expression inputValue1 outputValue1)
+      (Expression inputValue2 outputValue2)
+      (Expression inputValue1 outputValue3)
+  , Subtraction outputValue1 outputValue2 outputValue3
+  , Subtraction outputBounds1 outputBounds2 outputBounds3
+  ) =>
+  Subtraction
+    (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
+    (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
+    (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
+  where
+  (-) = map2 (-) (-) (-)
+
+instance
+  ( inputValue1 ~ inputValue2
+  , inputBounds1 ~ inputBounds2
+  , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
+  , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
+  , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
+  , Multiplication'
+      (Expression inputValue1 outputValue1)
+      (Expression inputValue2 outputValue2)
+      (Expression inputValue1 outputValue3)
+  , Multiplication' outputValue1 outputValue2 outputValue3
+  , Multiplication' outputBounds1 outputBounds2 outputBounds3
+  ) =>
+  Multiplication'
+    (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
+    (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
+    (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
+  where
+  (.*.) = map2 (.*.) (.*.) (.*.)
+
+instance
+  ( inputValue1 ~ inputValue2
+  , inputBounds1 ~ inputBounds2
+  , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
+  , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
+  , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
+  , Division'
+      (Expression inputValue1 outputValue1)
+      (Expression inputValue2 outputValue2)
+      (Expression inputValue1 outputValue3)
+  , Division' outputValue1 outputValue2 outputValue3
+  , Division' outputBounds1 outputBounds2 outputBounds3
+  ) =>
+  Division'
+    (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
+    (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
+    (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
+  where
+  (./.) = map2 (./.) (./.) (./.)
+
+instance
+  ( inputValue1 ~ inputValue2
+  , inputBounds1 ~ inputBounds2
+  , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
+  , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
+  , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
+  , Multiplication
+      (Expression inputValue1 outputValue1)
+      (Expression inputValue2 outputValue2)
+      (Expression inputValue1 outputValue3)
+  , Multiplication outputValue1 outputValue2 outputValue3
+  , Multiplication outputBounds1 outputBounds2 outputBounds3
+  ) =>
+  Multiplication
+    (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
+    (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
+    (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
+  where
+  (*) = map2 (*) (*) (*)
+
+instance
+  ( inputValue1 ~ inputValue2
+  , inputBounds1 ~ inputBounds2
+  , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
+  , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
+  , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
+  , Division
+      (Expression inputValue1 outputValue1)
+      (Expression inputValue2 outputValue2)
+      (Expression inputValue1 outputValue3)
+  , Division outputValue1 outputValue2 outputValue3
+  , Division outputBounds1 outputBounds2 outputBounds3
+  ) =>
+  Division
+    (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
+    (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
+    (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
+  where
+  (/) = map2 (/) (/) (/)
+
 concrete ::
   Expression.Evaluation inputValue outputValue inputBounds outputBounds =>
   Expression inputValue outputValue ->
