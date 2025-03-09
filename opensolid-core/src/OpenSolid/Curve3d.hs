@@ -28,7 +28,6 @@ module OpenSolid.Curve3d
 where
 
 import OpenSolid.ArcLength qualified as ArcLength
-import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d (Bounded3d, Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
@@ -157,36 +156,35 @@ instance
     (VectorCurve3d (space1 @ units1))
   where
   Parametric lhs - Parametric rhs = VectorCurve3d.Parametric (lhs - rhs)
-  lhs - rhs = VectorCurve3d.new (Arithmetic.Difference lhs rhs)
+  lhs - rhs = VectorCurve3d.new (lhs :-: rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   VectorCurve3d.Interface
-    (Arithmetic.Difference (Curve3d (space1 @ units1)) (Curve3d (space2 @ units2)))
+    (Curve3d (space1 @ units1) :-: Curve3d (space2 @ units2))
     (space1 @ units1)
   where
-  evaluateImpl (Arithmetic.Difference curve1 curve2) tValue =
+  evaluateImpl (curve1 :-: curve2) tValue =
     evaluate curve1 tValue - evaluate curve2 tValue
 
-  evaluateBoundsImpl (Arithmetic.Difference curve1 curve2) tRange =
+  evaluateBoundsImpl (curve1 :-: curve2) tRange =
     evaluateBounds curve1 tRange - evaluateBounds curve2 tRange
 
-  derivativeImpl (Arithmetic.Difference curve1 curve2) =
+  derivativeImpl (curve1 :-: curve2) =
     derivative curve1 - derivative curve2
 
-  transformByImpl transform (Arithmetic.Difference curve1 curve2) =
+  transformByImpl transform (curve1 :-: curve2) =
+    -- Note the slight hack here:
+    -- the definition of VectorCurve3d.Interface states that the units of the transform
+    -- do *not* have to match the units of the vector curve,
+    -- because vectors and vector curves ignore translation
+    -- (and the units of the transform are just the units of its translation part).
+    -- This would in general mean that we couldn't apply the given transform to a Curve2d,
+    -- but in this case it's safe since any translation will cancel out
+    -- when the two curves are subtracted from each other.
     VectorCurve3d.new $
-      Arithmetic.Difference
-        -- Note the slight hack here:
-        -- the definition of VectorCurve3d.Interface states that the units of the transform
-        -- do *not* have to match the units of the vector curve,
-        -- because vectors and vector curves ignore translation
-        -- (and the units of the transform are just the units of its translation part).
-        -- This would in general mean that we couldn't apply the given transform to a Curve2d,
-        -- but in this case it's safe since any translation will cancel out
-        -- when the two curves are subtracted from each other.
-        (transformBy (Units.coerce transform) curve1)
-        (transformBy (Units.coerce transform) curve2)
+      (transformBy (Units.coerce transform) curve1)
+        :-: (transformBy (Units.coerce transform) curve2)
 
 instance
   unitless ~ Unitless =>

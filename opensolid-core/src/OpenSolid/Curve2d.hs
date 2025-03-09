@@ -76,7 +76,6 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.ArcLength qualified as ArcLength
-import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2d (Axis2d)
@@ -273,27 +272,25 @@ instance
     (Curve2d (space1 @ units1))
   where
   Parametric lhs + VectorCurve2d.Parametric rhs = Parametric (lhs + rhs)
-  lhs + rhs = new (Arithmetic.Sum lhs rhs)
+  lhs + rhs = new (lhs :+: rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Interface
-    (Arithmetic.Sum (Curve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2)))
-    (space1 @ units1)
+  Interface (Curve2d (space1 @ units1) :+: VectorCurve2d (space2 @ units2)) (space1 @ units1)
   where
-  evaluateImpl (Arithmetic.Sum curve vectorCurve) tValue =
+  evaluateImpl (curve :+: vectorCurve) tValue =
     evaluate curve tValue + VectorCurve2d.evaluate vectorCurve tValue
 
-  evaluateBoundsImpl (Arithmetic.Sum curve vectorCurve) tRange =
+  evaluateBoundsImpl (curve :+: vectorCurve) tRange =
     evaluateBounds curve tRange + VectorCurve2d.evaluateBounds vectorCurve tRange
 
-  derivativeImpl (Arithmetic.Sum curve vectorCurve) =
+  derivativeImpl (curve :+: vectorCurve) =
     derivative curve + VectorCurve2d.derivative vectorCurve
 
-  reverseImpl (Arithmetic.Sum curve vectorCurve) =
+  reverseImpl (curve :+: vectorCurve) =
     reverse curve + VectorCurve2d.reverse vectorCurve
 
-  transformByImpl transform (Arithmetic.Sum curve vectorCurve) =
+  transformByImpl transform (curve :+: vectorCurve) =
     transformBy transform curve + VectorCurve2d.transformBy transform vectorCurve
 
 instance
@@ -306,27 +303,25 @@ instance
     (Curve2d (space1 @ units1))
   where
   Parametric lhs - VectorCurve2d.Parametric rhs = Parametric (lhs - rhs)
-  lhs - rhs = new (Arithmetic.Difference lhs rhs)
+  lhs - rhs = new (lhs :-: rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Interface
-    (Arithmetic.Difference (Curve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2)))
-    (space1 @ units1)
+  Interface (Curve2d (space1 @ units1) :-: VectorCurve2d (space2 @ units2)) (space1 @ units1)
   where
-  evaluateImpl (Arithmetic.Difference curve vectorCurve) tValue =
+  evaluateImpl (curve :-: vectorCurve) tValue =
     evaluate curve tValue - VectorCurve2d.evaluate vectorCurve tValue
 
-  evaluateBoundsImpl (Arithmetic.Difference curve vectorCurve) tRange =
+  evaluateBoundsImpl (curve :-: vectorCurve) tRange =
     evaluateBounds curve tRange - VectorCurve2d.evaluateBounds vectorCurve tRange
 
-  derivativeImpl (Arithmetic.Difference curve vectorCurve) =
+  derivativeImpl (curve :-: vectorCurve) =
     derivative curve - VectorCurve2d.derivative vectorCurve
 
-  reverseImpl (Arithmetic.Difference curve vectorCurve) =
+  reverseImpl (curve :-: vectorCurve) =
     reverse curve - VectorCurve2d.reverse vectorCurve
 
-  transformByImpl transform (Arithmetic.Difference curve vectorCurve) =
+  transformByImpl transform (curve :-: vectorCurve) =
     transformBy transform curve - VectorCurve2d.transformBy transform vectorCurve
 
 instance
@@ -337,36 +332,35 @@ instance
     (VectorCurve2d (space1 @ units1))
   where
   Parametric lhs - Parametric rhs = VectorCurve2d.Parametric (lhs - rhs)
-  lhs - rhs = VectorCurve2d.new (Arithmetic.Difference lhs rhs)
+  lhs - rhs = VectorCurve2d.new (lhs :-: rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   VectorCurve2d.Interface
-    (Arithmetic.Difference (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)))
+    (Curve2d (space1 @ units1) :-: Curve2d (space2 @ units2))
     (space1 @ units1)
   where
-  evaluateImpl (Arithmetic.Difference curve1 curve2) tValue =
+  evaluateImpl (curve1 :-: curve2) tValue =
     evaluate curve1 tValue - evaluate curve2 tValue
 
-  evaluateBoundsImpl (Arithmetic.Difference curve1 curve2) tRange =
+  evaluateBoundsImpl (curve1 :-: curve2) tRange =
     evaluateBounds curve1 tRange - evaluateBounds curve2 tRange
 
-  derivativeImpl (Arithmetic.Difference curve1 curve2) =
+  derivativeImpl (curve1 :-: curve2) =
     derivative curve1 - derivative curve2
 
-  transformByImpl transform (Arithmetic.Difference curve1 curve2) =
+  transformByImpl transform (curve1 :-: curve2) =
+    -- Note the slight hack here:
+    -- the definition of VectorCurve2d.Interface states that the units of the transform
+    -- do *not* have to match the units of the vector curve,
+    -- because vectors and vector curves ignore translation
+    -- (and the units of the transform are just the units of its translation part).
+    -- This would in general mean that we couldn't apply the given transform to a Curve2d,
+    -- but in this case it's safe since any translation will cancel out
+    -- when the two curves are subtracted from each other.
     VectorCurve2d.new $
-      Arithmetic.Difference
-        -- Note the slight hack here:
-        -- the definition of VectorCurve2d.Interface states that the units of the transform
-        -- do *not* have to match the units of the vector curve,
-        -- because vectors and vector curves ignore translation
-        -- (and the units of the transform are just the units of its translation part).
-        -- This would in general mean that we couldn't apply the given transform to a Curve2d,
-        -- but in this case it's safe since any translation will cancel out
-        -- when the two curves are subtracted from each other.
-        (transformBy (Units.coerce transform) curve1)
-        (transformBy (Units.coerce transform) curve2)
+      (transformBy (Units.coerce transform) curve1)
+        :-: (transformBy (Units.coerce transform) curve2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

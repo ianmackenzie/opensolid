@@ -1,23 +1,17 @@
 module OpenSolid.Arithmetic
   ( Negation (negate)
   , Addition ((+))
-  , Sum (Sum)
   , Subtraction ((-))
   , subtract
-  , Difference (Difference)
   , Multiplication' ((.*.))
   , Multiplication ((*))
-  , Product (Product)
   , Division' ((./.))
   , Division ((/))
-  , Quotient (Quotient)
   , DivMod ((//), (%))
   , DotMultiplication' ((.<>.))
   , DotMultiplication ((<>))
-  , DotProduct (DotProduct)
   , CrossMultiplication' ((.><.))
   , CrossMultiplication ((><))
-  , CrossProduct (CrossProduct)
   , Exponentiation ((**))
   , (*!)
   , (!*)
@@ -40,7 +34,8 @@ import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float)
 import {-# SOURCE #-} OpenSolid.Qty (Qty (Qty))
 import {-# SOURCE #-} OpenSolid.Sign (Sign (Negative, Positive))
-import OpenSolid.Units (HasUnits, Unitless, (:*:), (:/:))
+import OpenSolid.SymbolicOperators
+import OpenSolid.Units (HasUnits, Unitless)
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 
@@ -52,8 +47,6 @@ class Addition a b c | a b -> c where
 
 infixl 6 +
 
-data Sum a b = Sum a b deriving (Eq, Show)
-
 class Subtraction a b c | a b -> c where
   (-) :: a -> b -> c
 
@@ -61,8 +54,6 @@ infixl 6 -
 
 subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
-
-data Difference a b = Difference a b deriving (Eq, Show)
 
 class Multiplication' a b c | a b -> c where
   (.*.) :: a -> b -> c
@@ -74,8 +65,6 @@ class Multiplication b a c => Multiplication a b c | a b -> c where
 
 infixl 7 *
 
-data Product a b = Product a b deriving (Eq, Show)
-
 class Division' a b c | a b -> c where
   (./.) :: a -> b -> c
 
@@ -85,8 +74,6 @@ class Division a b c | a b -> c where
   (/) :: a -> b -> c
 
 infixl 7 /
-
-data Quotient a b = Quotient a b deriving (Eq, Show)
 
 class DotMultiplication' a b c | a b -> c where
   (.<>.) :: a -> b -> c
@@ -98,8 +85,6 @@ class DotMultiplication b a c => DotMultiplication a b c | a b -> c where
 
 infixl 7 <>
 
-data DotProduct a b = DotProduct a b deriving (Show)
-
 class CrossMultiplication' a b c | a b -> c where
   (.><.) :: a -> b -> c
 
@@ -109,8 +94,6 @@ class CrossMultiplication b a c => CrossMultiplication a b c | a b -> c where
   (><) :: a -> b -> c
 
 infixl 7 ><
-
-data CrossProduct a b = CrossProduct a b deriving (Show)
 
 class DivMod a where
   (//) :: a -> a -> Int

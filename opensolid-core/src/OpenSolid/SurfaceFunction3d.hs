@@ -13,7 +13,6 @@ module OpenSolid.SurfaceFunction3d
   )
 where
 
-import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
@@ -142,20 +141,20 @@ instance
     (VectorSurfaceFunction3d (space1 @ units1))
   where
   Parametric expression1 - Parametric expression2 = VectorSurfaceFunction3d.Parametric (expression1 - expression2)
-  f1 - f2 = VectorSurfaceFunction3d.new (Arithmetic.Difference f1 f2)
+  f1 - f2 = VectorSurfaceFunction3d.new (f1 :-: f2)
 
 instance
   VectorSurfaceFunction3d.Interface
-    (Arithmetic.Difference (SurfaceFunction3d (space @ units)) (SurfaceFunction3d (space @ units)))
+    (SurfaceFunction3d (space @ units) :-: SurfaceFunction3d (space @ units))
     (space @ units)
   where
-  evaluateImpl (Arithmetic.Difference f1 f2) uvPoint =
+  evaluateImpl (f1 :-: f2) uvPoint =
     evaluate f1 uvPoint - evaluate f2 uvPoint
 
-  evaluateBoundsImpl (Arithmetic.Difference f1 f2) uvBounds =
+  evaluateBoundsImpl (f1 :-: f2) uvBounds =
     evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
 
-  derivativeImpl parameter (Arithmetic.Difference f1 f2) =
+  derivativeImpl parameter (f1 :-: f2) =
     derivative parameter f1 - derivative parameter f2
 
 instance

@@ -14,7 +14,6 @@ module OpenSolid.SurfaceFunction2d
   )
 where
 
-import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -137,16 +136,16 @@ instance
 
 instance
   VectorSurfaceFunction2d.Interface
-    (Arithmetic.Difference (SurfaceFunction2d (space @ units)) (SurfaceFunction2d (space @ units)))
+    (SurfaceFunction2d (space @ units) :-: SurfaceFunction2d (space @ units))
     (space @ units)
   where
-  evaluateImpl (Arithmetic.Difference f1 f2) uvPoint =
+  evaluateImpl (f1 :-: f2) uvPoint =
     evaluate f1 uvPoint - evaluate f2 uvPoint
 
-  evaluateBoundsImpl (Arithmetic.Difference f1 f2) uvBounds =
+  evaluateBoundsImpl (f1 :-: f2) uvBounds =
     evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
 
-  derivativeImpl parameter (Arithmetic.Difference f1 f2) =
+  derivativeImpl parameter (f1 :-: f2) =
     derivative parameter f1 - derivative parameter f2
 
 instance
@@ -157,7 +156,7 @@ instance
     (VectorSurfaceFunction2d (space1 @ units1))
   where
   Parametric lhs - Parametric rhs = VectorSurfaceFunction2d.Parametric (lhs - rhs)
-  lhs - rhs = VectorSurfaceFunction2d.new (Arithmetic.Difference lhs rhs)
+  lhs - rhs = VectorSurfaceFunction2d.new (lhs :-: rhs)
 
 new :: Interface function (space @ units) => function -> SurfaceFunction2d (space @ units)
 new = SurfaceFunction2d

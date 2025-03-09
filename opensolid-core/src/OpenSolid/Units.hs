@@ -2,8 +2,6 @@ module OpenSolid.Units
   ( HasUnits
   , Coercion (coerce)
   , erase
-  , type (:*:)
-  , type (:/:)
   , Specialize
   , specialize
   , unspecialize
@@ -33,6 +31,7 @@ import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Qty (Qty)
 import {-# SOURCE #-} OpenSolid.Result (Result (Failure, Success))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)
+import OpenSolid.SymbolicOperators
 import OpenSolid.Unitless (Unitless)
 
 class HasUnits erased Unitless erased => HasUnits (a :: k) units erased | a -> units, a -> erased
@@ -80,18 +79,6 @@ instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (List a) (List b)
 
 instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (NonEmpty b) where
   coerce = Data.Coerce.coerce
-
-type role (:*:) phantom phantom
-
-data units1 :*: units2 deriving (Eq, Show)
-
-infixl 7 :*:
-
-type role (:/:) phantom phantom
-
-data units1 :/: units2 deriving (Eq, Show)
-
-infixl 7 :/:
 
 {-# INLINE erase #-}
 erase :: (Coercion a erased, HasUnits a units erased) => a -> erased

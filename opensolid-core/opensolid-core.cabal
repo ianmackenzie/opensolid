@@ -200,6 +200,7 @@ library
     OpenSolid.SurfaceFunction2d
     OpenSolid.SurfaceFunction3d
     OpenSolid.SurfaceParameter
+    OpenSolid.SymbolicOperators
     OpenSolid.Text
     OpenSolid.Tolerance
     OpenSolid.Transform
