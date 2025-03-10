@@ -697,7 +697,7 @@ curve =
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
     , member0 "Squared" Curve.squared $(docs 'Curve.squared)
-    , member0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
+    , memberU0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberU0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberU0 "Is Zero" (~= 0.0) "Check if a curve is zero everywhere, within the current tolerance."

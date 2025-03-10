@@ -1,5 +1,6 @@
 module OpenSolid.ArcLength (parameterization) where
 
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Float qualified as Float
@@ -71,12 +72,13 @@ instance Show Parameterization where
   show _ = Text.unpack "ArcLength.Parameterization"
 
 instance Curve.Interface Parameterization Unitless where
-  evaluateImpl (Parameterization _ tree length) uValue = lookup tree (uValue * length)
+  compileImpl (Parameterization _ tree length) = do
+    let evaluate uValue = lookup tree (uValue * length)
+    let evaluateBounds (Range uLow uHigh) = Range (evaluate uLow) (evaluate uHigh)
+    CompiledFunction.abstract evaluate evaluateBounds
 
-  evaluateBoundsImpl curve (Range uLow uHigh) =
-    Range (Curve.evaluateImpl curve uLow) (Curve.evaluateImpl curve uHigh)
-
-  derivativeImpl tCurve@(Parameterization dsdt _ length) = length / (dsdt . Curve.new tCurve)
+  derivativeImpl self (Parameterization dsdt _ length) =
+    length / (dsdt . self)
 
 lookup :: Tree units -> Qty units -> Float
 lookup tree length = case tree of

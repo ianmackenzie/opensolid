@@ -396,7 +396,6 @@ instance
   unitless ~ Unitless =>
   Composition (SurfaceFunction unitless) (Curve units) (SurfaceFunction units)
   where
-  Curve.Parametric outer . Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
 instance unitless ~ Unitless => Interface (Curve units :.: SurfaceFunction unitless) units where

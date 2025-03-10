@@ -395,7 +395,6 @@ instance
   unitless ~ Unitless =>
   Composition (Curve unitless) (Curve2d (space @ units)) (Curve2d (space @ units))
   where
-  Parametric outer . Curve.Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
 instance
@@ -449,20 +448,16 @@ instance
     (SurfaceFunction units)
     (Curve units)
   where
-  SurfaceFunction.Parametric outer . Parametric inner = Curve.Parametric (outer . inner)
   outer . inner = Curve.new (outer :.: inner)
 
 instance
   uvCoordinates ~ UvCoordinates =>
   Curve.Interface (SurfaceFunction units :.: Curve2d uvCoordinates) units
   where
-  evaluateImpl (function :.: uvCurve) t =
-    SurfaceFunction.evaluate function (evaluate uvCurve t)
+  compileImpl (function :.: uvCurve) =
+    SurfaceFunction.compiled function . compiled uvCurve
 
-  evaluateBoundsImpl (function :.: uvCurve) t =
-    SurfaceFunction.evaluateBounds function (evaluateBounds uvCurve t)
-
-  derivativeImpl (function :.: uvCurve) = do
+  derivativeImpl _ (function :.: uvCurve) = do
     let fU = SurfaceFunction.derivative U function
     let fV = SurfaceFunction.derivative V function
     let uvT = derivative uvCurve
@@ -549,7 +544,6 @@ constant = Parametric . Expression.constant
 
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve units -> Curve units -> Curve2d (space @ units)
-xy (Curve.Parametric x) (Curve.Parametric y) = Parametric (Expression.xy x y)
 xy x y = XY x y
 
 -- | Create a line between two points.

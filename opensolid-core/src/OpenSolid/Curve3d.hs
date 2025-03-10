@@ -201,7 +201,6 @@ instance
   unitless ~ Unitless =>
   Composition (Curve unitless) (Curve3d (space @ units)) (Curve3d (space @ units))
   where
-  Parametric outer . Curve.Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
 instance
@@ -274,8 +273,6 @@ parametric :: Expression Float (Point3d (space @ units)) -> Curve3d (space @ uni
 parametric = Parametric
 
 xyz :: Curve units -> Curve units -> Curve units -> Curve3d (space @ units)
-xyz (Curve.Parametric x) (Curve.Parametric y) (Curve.Parametric z) =
-  Parametric (Expression.xyz x y z)
 xyz x y z = XYZ x y z
 
 planar ::

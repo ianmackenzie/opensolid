@@ -285,7 +285,6 @@ instance
     (VectorCurve2d (space @ units2))
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
-  Curve.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product1d2d' lhs rhs
 
 instance
@@ -314,7 +313,6 @@ instance
     (Curve units2)
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
-  Parametric lhs .*. Curve.Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product2d1d' lhs rhs
 
 instance
@@ -343,7 +341,6 @@ instance
     (Curve units2)
     (VectorCurve2d (space @ (units1 :/: units2)))
   where
-  Parametric lhs ./. Curve.Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
@@ -360,18 +357,16 @@ instance
   where
   curve ./. value = curve ./. Curve.constant value
 
-data DotProductOf space units1 units2
-  = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
-  deriving (Show)
+instance
+  space1 ~ space2 =>
+  Curve.Interface
+    (VectorCurve2d (space1 @ units1) :<>: VectorCurve2d (space2 @ units2))
+    (units1 :*: units2)
+  where
+  compileImpl (c1 :<>: c2) =
+    compiled c1 .<>. compiled c2
 
-instance Curve.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
-  evaluateImpl (DotProductOf c1 c2) tValue =
-    evaluate c1 tValue .<>. evaluate c2 tValue
-
-  evaluateBoundsImpl (DotProductOf c1 c2) tRange =
-    evaluateBounds c1 tRange .<>. evaluateBounds c2 tRange
-
-  derivativeImpl (DotProductOf c1 c2) =
+  derivativeImpl _ (c1 :<>: c2) =
     derivative c1 .<>. c2 + c1 .<>. derivative c2
 
 instance
@@ -390,8 +385,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  Parametric lhs .<>. Parametric rhs = Curve.Parametric (lhs .<>. rhs)
-  lhs .<>. rhs = Curve.new (DotProductOf lhs rhs)
+  lhs .<>. rhs = Curve.new (lhs :<>: rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -435,18 +429,16 @@ instance
   where
   lhs <> rhs = Vector2d.unit lhs <> rhs
 
-data CrossProductOf space units1 units2
-  = CrossProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
-  deriving (Show)
+instance
+  space1 ~ space2 =>
+  Curve.Interface
+    (VectorCurve2d (space1 @ units1) :><: VectorCurve2d (space2 @ units2))
+    (units1 :*: units2)
+  where
+  compileImpl (c1 :><: c2) =
+    compiled c1 .><. compiled c2
 
-instance Curve.Interface (CrossProductOf space units1 units2) (units1 :*: units2) where
-  evaluateImpl (CrossProductOf c1 c2) tValue =
-    evaluate c1 tValue .><. evaluate c2 tValue
-
-  evaluateBoundsImpl (CrossProductOf c1 c2) tRange =
-    evaluateBounds c1 tRange .><. evaluateBounds c2 tRange
-
-  derivativeImpl (CrossProductOf c1 c2) =
+  derivativeImpl _ (c1 :><: c2) =
     derivative c1 .><. c2 + c1 .><. derivative c2
 
 instance
@@ -465,8 +457,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  Parametric lhs .><. Parametric rhs = Curve.Parametric (lhs .><. rhs)
-  lhs .><. rhs = Curve.new (CrossProductOf lhs rhs)
+  lhs .><. rhs = Curve.new (lhs :><: rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -541,7 +532,6 @@ instance
     (VectorCurve2d (space @ units))
     (VectorCurve2d (space @ units))
   where
-  Parametric outer . Curve.Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
 instance
@@ -631,7 +621,6 @@ constant = Parametric . Expression.constant
 
 -- | Create a curve from its X and Y component curves.
 xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
-xy (Curve.Parametric x) (Curve.Parametric y) = Parametric (Expression.xy x y)
 xy x y = XY x y
 
 line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
@@ -760,21 +749,20 @@ newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
 deriving instance Show (SquaredMagnitude' (space @ units))
 
 instance Curve.Interface (SquaredMagnitude' (space @ units)) (units :*: units) where
-  evaluateImpl (SquaredMagnitude' curve) tValue =
-    Vector2d.squaredMagnitude' (evaluate curve tValue)
+  compileImpl (SquaredMagnitude' curve) =
+    CompiledFunction.map
+      Expression.VectorCurve2d.squaredMagnitude'
+      Vector2d.squaredMagnitude'
+      VectorBounds2d.squaredMagnitude'
+      (compiled curve)
 
-  evaluateBoundsImpl (SquaredMagnitude' curve) tRange =
-    VectorBounds2d.squaredMagnitude' (evaluateBounds curve tRange)
-
-  derivativeImpl (SquaredMagnitude' curve) =
+  derivativeImpl _ (SquaredMagnitude' curve) =
     2.0 * curve .<>. derivative curve
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
 squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve (units :*: units)
-squaredMagnitude' (Parametric expression) =
-  Curve.Parametric (Expression.VectorCurve2d.squaredMagnitude' expression)
 squaredMagnitude' curve = Curve.new (SquaredMagnitude' curve)
 
 newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
@@ -783,18 +771,17 @@ newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
 deriving instance Show (NonZeroMagnitude (space @ units))
 
 instance Curve.Interface (NonZeroMagnitude (space @ units)) units where
-  evaluateImpl (NonZeroMagnitude curve) tValue =
-    Vector2d.magnitude (evaluate curve tValue)
+  compileImpl (NonZeroMagnitude curve) =
+    CompiledFunction.map
+      Expression.VectorCurve2d.magnitude
+      Vector2d.magnitude
+      VectorBounds2d.magnitude
+      (compiled curve)
 
-  evaluateBoundsImpl (NonZeroMagnitude curve) tRange =
-    VectorBounds2d.magnitude (evaluateBounds curve tRange)
-
-  derivativeImpl (NonZeroMagnitude curve) =
-    (derivative curve .<>. curve) .!/! Curve.new (NonZeroMagnitude curve)
+  derivativeImpl self (NonZeroMagnitude curve) =
+    derivative curve <> (curve / self)
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
-unsafeMagnitude (Parametric expression) =
-  Curve.Parametric (Expression.VectorCurve2d.magnitude expression)
 unsafeMagnitude curve = Curve.new (NonZeroMagnitude curve)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
