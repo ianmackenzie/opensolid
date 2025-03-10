@@ -7,6 +7,9 @@ Don't expose Parametric constructors
 Remove constructors from .hs-boot files
 -> in particular, curve/surface functions
 
+Review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
+-> get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
+
 Try removing 'unitless ~ Unitless' constraints everywhere
 -> maybe also 'uvPoint ~ UvPoint', 'uvSpace ~ UvSpace', 'uvCoordinates ~ UvCoordinates'
 
