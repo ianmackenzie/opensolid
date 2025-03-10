@@ -759,6 +759,7 @@ lengthCurve =
     [ constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
+    , member0 "Squared" Curve.squared $(docs 'Curve.squared)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberM0 "Is Zero" (~= Length.zero) "Check if a curve is zero everywhere, within the current tolerance."
@@ -784,6 +785,7 @@ areaCurve =
     [ constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
+    , memberM0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
     , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberS0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberS0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
