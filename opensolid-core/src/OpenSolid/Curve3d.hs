@@ -2,6 +2,7 @@ module OpenSolid.Curve3d
   ( Curve3d (Parametric)
   , Interface (..)
   , HasDegeneracy (HasDegeneracy)
+  , Compiled
   , new
   , constant
   , planar
@@ -17,6 +18,7 @@ module OpenSolid.Curve3d
   , evaluate
   , evaluateBounds
   , bounds
+  , compiled
   , derivative
   , reverse
   , arcLengthParameterization
@@ -31,6 +33,8 @@ import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d (Bounded3d, Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
+import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
@@ -109,6 +113,13 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
     Plane3d (space @ units) (Defines local) ->
     Curve2d (local @ units) ->
     Curve3d (space @ units)
+
+type Compiled (coordinateSystem :: CoordinateSystem) =
+  CompiledFunction
+    Float
+    (Point3d coordinateSystem)
+    (Range Unitless)
+    (Bounds3d coordinateSystem)
 
 deriving instance Show (Curve3d (space @ units))
 
@@ -374,6 +385,11 @@ evaluateBounds f tRange = case f of
 
 bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
 bounds curve = evaluateBounds curve Range.unit
+
+compiled :: Curve3d (space @ units) -> Compiled (space @ units)
+compiled curve = case curve of
+  Parametric expression -> CompiledFunction.concrete expression
+  _ -> CompiledFunction.abstract (evaluate curve) (evaluateBounds curve)
 
 derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 derivative f = case f of

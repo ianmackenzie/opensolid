@@ -3,6 +3,7 @@ module OpenSolid.Curve2d
   , pattern Point
   , HasDegeneracy (HasDegeneracy)
   , Interface (..)
+  , Compiled
   , new
   , constant
   , xy
@@ -25,6 +26,7 @@ module OpenSolid.Curve2d
   , endPoint
   , evaluate
   , evaluateBounds
+  , compiled
   , derivative
   , tangentDirection
   , offsetBy
@@ -82,6 +84,8 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
@@ -182,6 +186,13 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Transform2d tag (space @ units) ->
     Curve2d (space @ units) ->
     Curve2d (space @ units)
+
+type Compiled (coordinateSystem :: CoordinateSystem) =
+  CompiledFunction
+    Float
+    (Point2d coordinateSystem)
+    (Range Unitless)
+    (Bounds2d coordinateSystem)
 
 deriving instance Show (Curve2d (space @ units))
 
@@ -790,6 +801,11 @@ evaluateBounds curve tRange = case curve of
   XY x y -> Bounds2d (Curve.evaluateBounds x tRange) (Curve.evaluateBounds y tRange)
   PlaceIn frame c -> Bounds2d.placeIn frame (evaluateBounds c tRange)
   Transformed transform c -> Bounds2d.transformBy transform (evaluateBounds c tRange)
+
+compiled :: Curve2d (space @ units) -> Compiled (space @ units)
+compiled curve = case curve of
+  Parametric expression -> CompiledFunction.concrete expression
+  _ -> CompiledFunction.abstract (evaluate curve) (evaluateBounds curve)
 
 -- | Get the derivative of a curve.
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)

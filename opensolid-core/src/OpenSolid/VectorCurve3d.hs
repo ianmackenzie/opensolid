@@ -6,6 +6,7 @@ module OpenSolid.VectorCurve3d
   , endValue
   , evaluate
   , evaluateBounds
+  , compiled
   , derivative
   , zero
   , constant
@@ -38,6 +39,8 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
+import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Curve (Curve)
@@ -149,6 +152,13 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
     PlanarBasis3d space (Defines local) ->
     VectorCurve2d (local @ units) ->
     VectorCurve3d (space @ units)
+
+type Compiled (coordinateSystem :: CoordinateSystem) =
+  CompiledFunction
+    Float
+    (Vector3d coordinateSystem)
+    (Range Unitless)
+    (VectorBounds3d coordinateSystem)
 
 deriving instance Show (VectorCurve3d (space @ units))
 
@@ -670,6 +680,11 @@ evaluateBounds curve tRange = case curve of
   PlaceIn basis c -> VectorBounds3d.placeIn basis (evaluateBounds c tRange)
   Transformed transform c -> VectorBounds3d.transformBy transform (evaluateBounds c tRange)
   Planar basis curve2d -> VectorBounds2d.placeOn basis (VectorCurve2d.evaluateBounds curve2d tRange)
+
+compiled :: VectorCurve3d (space @ units) -> Compiled (space @ units)
+compiled c = case c of
+  Parametric expression -> CompiledFunction.concrete expression
+  curve -> CompiledFunction.abstract (evaluate curve) (evaluateBounds curve)
 
 derivative ::
   VectorCurve3d (space @ units) ->

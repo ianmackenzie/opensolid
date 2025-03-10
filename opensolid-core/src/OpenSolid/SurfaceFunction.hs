@@ -5,8 +5,10 @@
 module OpenSolid.SurfaceFunction
   ( SurfaceFunction (Parametric)
   , Interface (..)
+  , Compiled
   , evaluate
   , evaluateBounds
+  , compiled
   , derivative
   , derivativeIn
   , zero
@@ -29,6 +31,8 @@ where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
@@ -116,6 +120,8 @@ data SurfaceFunction units where
   Coerce ::
     SurfaceFunction units1 ->
     SurfaceFunction units2
+
+type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Range units)
 
 deriving instance Show (SurfaceFunction units)
 
@@ -432,6 +438,11 @@ evaluateBounds function uv = case function of
   SquareRoot' f -> Range.sqrt' (evaluateBounds f uv)
   Sin f -> Range.sin (evaluateBounds f uv)
   Cos f -> Range.cos (evaluateBounds f uv)
+
+compiled :: SurfaceFunction units -> Compiled units
+compiled f = case f of
+  Parametric expression -> CompiledFunction.concrete expression
+  function -> CompiledFunction.abstract (evaluate function) (evaluateBounds function)
 
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 derivative varyingParameter function = case function of

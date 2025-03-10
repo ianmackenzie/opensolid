@@ -1,11 +1,13 @@
 module OpenSolid.VectorCurve2d
   ( VectorCurve2d (Parametric, Transformed)
   , Interface (..)
+  , Compiled
   , new
   , startValue
   , endValue
   , evaluate
   , evaluateBounds
+  , compiled
   , derivative
   , zero
   , constant
@@ -41,6 +43,8 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Curve (Curve)
@@ -147,6 +151,13 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     Transform2d.Affine (space @ Unitless) ->
     VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units)
+
+type Compiled (coordinateSystem :: CoordinateSystem) =
+  CompiledFunction
+    Float
+    (Vector2d coordinateSystem)
+    (Range Unitless)
+    (VectorBounds2d coordinateSystem)
 
 deriving instance Show (VectorCurve2d (space @ units))
 
@@ -700,6 +711,11 @@ evaluateBounds curve tRange = case curve of
   Quotient' c1 c2 -> evaluateBounds c1 tRange ./. Curve.evaluateBounds c2 tRange
   PlaceIn basis c -> VectorBounds2d.placeIn basis (evaluateBounds c tRange)
   Transformed transform c -> VectorBounds2d.transformBy transform (evaluateBounds c tRange)
+
+compiled :: VectorCurve2d (space @ units) -> Compiled (space @ units)
+compiled c = case c of
+  Parametric expression -> CompiledFunction.concrete expression
+  curve -> CompiledFunction.abstract (evaluate curve) (evaluateBounds curve)
 
 derivative ::
   VectorCurve2d (space @ units) ->
