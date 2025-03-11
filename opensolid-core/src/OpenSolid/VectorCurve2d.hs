@@ -358,18 +358,6 @@ instance
   curve ./. value = curve ./. Curve.constant value
 
 instance
-  space1 ~ space2 =>
-  Curve.Interface
-    (VectorCurve2d (space1 @ units1) :<>: VectorCurve2d (space2 @ units2))
-    (units1 :*: units2)
-  where
-  compileImpl (c1 :<>: c2) =
-    compiled c1 .<>. compiled c2
-
-  derivativeImpl _ (c1 :<>: c2) =
-    derivative c1 .<>. c2 + c1 .<>. derivative c2
-
-instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
     (VectorCurve2d (space1 @ units1))
@@ -385,7 +373,10 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  lhs .<>. rhs = Curve.new (lhs :<>: rhs)
+  lhs .<>. rhs =
+    Curve.new
+      (compiled lhs .<>. compiled rhs)
+      (derivative lhs .<>. rhs + lhs .<>. derivative rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -430,18 +421,6 @@ instance
   lhs <> rhs = Vector2d.unit lhs <> rhs
 
 instance
-  space1 ~ space2 =>
-  Curve.Interface
-    (VectorCurve2d (space1 @ units1) :><: VectorCurve2d (space2 @ units2))
-    (units1 :*: units2)
-  where
-  compileImpl (c1 :><: c2) =
-    compiled c1 .><. compiled c2
-
-  derivativeImpl _ (c1 :><: c2) =
-    derivative c1 .><. c2 + c1 .><. derivative c2
-
-instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
     (VectorCurve2d (space1 @ units1))
@@ -457,7 +436,10 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  lhs .><. rhs = Curve.new (lhs :><: rhs)
+  lhs .><. rhs =
+    Curve.new
+      (compiled lhs .><. compiled rhs)
+      (derivative lhs .><. rhs + lhs .><. derivative rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -748,41 +730,35 @@ newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (SquaredMagnitude' (space @ units))
 
-instance Curve.Interface (SquaredMagnitude' (space @ units)) (units :*: units) where
-  compileImpl (SquaredMagnitude' curve) =
-    CompiledFunction.map
-      Expression.VectorCurve2d.squaredMagnitude'
-      Vector2d.squaredMagnitude'
-      VectorBounds2d.squaredMagnitude'
-      (compiled curve)
-
-  derivativeImpl _ (SquaredMagnitude' curve) =
-    2.0 * curve .<>. derivative curve
-
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
 squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve (units :*: units)
-squaredMagnitude' curve = Curve.new (SquaredMagnitude' curve)
+squaredMagnitude' curve = do
+  let compiledSquaredMagnitude =
+        CompiledFunction.map
+          Expression.VectorCurve2d.squaredMagnitude'
+          Vector2d.squaredMagnitude'
+          VectorBounds2d.squaredMagnitude'
+          (compiled curve)
+  let squaredMagnitudeDerivative = 2.0 * curve .<>. derivative curve
+  Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
   = NonZeroMagnitude (VectorCurve2d coordinateSystem)
 
 deriving instance Show (NonZeroMagnitude (space @ units))
 
-instance Curve.Interface (NonZeroMagnitude (space @ units)) units where
-  compileImpl (NonZeroMagnitude curve) =
-    CompiledFunction.map
-      Expression.VectorCurve2d.magnitude
-      Vector2d.magnitude
-      VectorBounds2d.magnitude
-      (compiled curve)
-
-  derivativeImpl self (NonZeroMagnitude curve) =
-    derivative curve <> (curve / self)
-
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
-unsafeMagnitude curve = Curve.new (NonZeroMagnitude curve)
+unsafeMagnitude curve = do
+  let compiledMagnitude =
+        CompiledFunction.map
+          Expression.VectorCurve2d.magnitude
+          Vector2d.magnitude
+          VectorBounds2d.magnitude
+          (compiled curve)
+  let magnitudeDerivative self = derivative curve <> (curve / self)
+  Curve.recursive compiledMagnitude magnitudeDerivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

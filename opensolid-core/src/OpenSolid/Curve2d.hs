@@ -448,22 +448,15 @@ instance
     (SurfaceFunction units)
     (Curve units)
   where
-  outer . inner = Curve.new (outer :.: inner)
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Curve.Interface (SurfaceFunction units :.: Curve2d uvCoordinates) units
-  where
-  compileImpl (function :.: uvCurve) =
-    SurfaceFunction.compiled function . compiled uvCurve
-
-  derivativeImpl _ (function :.: uvCurve) = do
-    let fU = SurfaceFunction.derivative U function
-    let fV = SurfaceFunction.derivative V function
-    let uvT = derivative uvCurve
-    let uT = VectorCurve2d.xComponent uvT
-    let vT = VectorCurve2d.yComponent uvT
-    fU . uvCurve * uT + fV . uvCurve * vT
+  f . g = do
+    let dfdu = SurfaceFunction.derivative U f
+    let dfdv = SurfaceFunction.derivative V f
+    let dgdt = derivative g
+    let dudt = VectorCurve2d.xComponent dgdt
+    let dvdt = VectorCurve2d.yComponent dgdt
+    Curve.new
+      (SurfaceFunction.compiled f . compiled g)
+      (dfdu . g * dudt + dfdv . g * dvdt)
 
 instance
   uvCoordinates ~ UvCoordinates =>

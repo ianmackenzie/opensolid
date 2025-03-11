@@ -1,13 +1,13 @@
 module OpenSolid.Curve
   ( Curve
   , Zero
-  , Interface (..)
   , isEndpoint
   , evaluate
   , evaluateBounds
   , compiled
   , derivative
   , new
+  , recursive
   , zero
   , constant
   , t
@@ -60,6 +60,7 @@ import OpenSolid.Range qualified as Range
 import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
+import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Units qualified as Units
@@ -75,22 +76,13 @@ data Curve units where
   Curve ::
     { compiled :: Compiled units
     , derivative :: ~(Curve units)
-    , shown :: ~(List Char)
     } ->
     Curve units
 
 type Compiled units = CompiledFunction Float (Qty units) (Range Unitless) (Range units)
 
-class
-  Show curve =>
-  Interface curve units
-    | curve -> units
-  where
-  compileImpl :: curve -> Compiled units
-  derivativeImpl :: Curve units -> curve -> Curve units
-
 instance Show (Curve units) where
-  show Curve{shown} = shown
+  show _ = Text.unpack "Curve"
 
 instance FFI (Curve Unitless) where
   representation = FFI.classRepresentation "Curve"
@@ -107,11 +99,10 @@ instance FFI (Curve Radians) where
 instance HasUnits (Curve units) units (Curve Unitless)
 
 instance Units.Coercion (Curve unitsA) (Curve unitsB) where
-  coerce Curve{compiled, derivative, shown} =
+  coerce Curve{compiled, derivative} =
     Curve
       { compiled = Units.coerce compiled
       , derivative = Units.coerce derivative
-      , shown = shown
       }
 
 instance
@@ -149,19 +140,17 @@ instance
 isEndpoint :: Float -> Bool
 isEndpoint tValue = tValue == 0.0 || tValue == 1.0
 
-new :: Interface curve units => curve -> Curve units
-new curve = do
+new :: Compiled units -> Curve units -> Curve units
+new = Curve
+
+recursive :: Compiled units -> (Curve units -> Curve units) -> Curve units
+recursive givenCompiled givenDerivative = do
   let result =
         Curve
-          { compiled = compileImpl curve
-          , derivative = derivativeImpl result curve
-          , shown = Prelude.show curve
+          { compiled = givenCompiled
+          , derivative = givenDerivative result
           }
   result
-
-instance Interface (Qty units) units where
-  compileImpl value = CompiledFunction.constant value
-  derivativeImpl _ _ = zero
 
 -- | A curve equal to zero everywhere.
 zero :: Curve units
@@ -169,7 +158,7 @@ zero = constant Qty.zero
 
 -- | Create a curve with the given constant value.
 constant :: Qty units -> Curve units
-constant = new
+constant value = new (CompiledFunction.constant value) zero
 
 {-| A curve parameter.
 
@@ -178,26 +167,14 @@ When defining parametric curves, you will typically start with 'Curve.t'
 and then use arithmetic operators etc. to build up more complex curves.
 -}
 t :: Curve Unitless
-t = new Parameter
-
-data Parameter = Parameter deriving (Show)
-
-instance Interface Parameter Unitless where
-  compileImpl Parameter = CompiledFunction.concrete Expression.t
-  derivativeImpl _ Parameter = constant 1.0
+t = new (CompiledFunction.concrete Expression.t) (constant 1.0)
 
 -- | Create a curve that linearly interpolates from the first value to the second.
 line :: Qty units -> Qty units -> Curve units
 line a b = a + t * (b - a)
 
 instance Negation (Curve units) where
-  negate = new . Negated
-
-newtype Negated units = Negated (Curve units) deriving (Show)
-
-instance Interface (Negated units) units where
-  compileImpl (Negated curve) = negate (compiled curve)
-  derivativeImpl _ (Negated curve) = negate (derivative curve)
+  negate curve = new (negate (compiled curve)) (negate (derivative curve))
 
 instance Multiplication Sign (Curve units) (Curve units) where
   Positive * curve = curve
@@ -208,11 +185,7 @@ instance Multiplication (Curve units) Sign (Curve units) where
   curve * Negative = -curve
 
 instance units ~ units_ => Addition (Curve units) (Curve units_) (Curve units) where
-  lhs + rhs = new (lhs :+: rhs)
-
-instance units1 ~ units2 => Interface (Curve units1 :+: Curve units2) units1 where
-  compileImpl (f1 :+: f2) = compiled f1 + compiled f2
-  derivativeImpl _ (f1 :+: f2) = derivative f1 + derivative f2
+  lhs + rhs = new (compiled lhs + compiled rhs) (derivative lhs + derivative rhs)
 
 instance units ~ units_ => Addition (Curve units) (Qty units_) (Curve units) where
   curve + value = curve + constant value
@@ -221,11 +194,7 @@ instance units ~ units_ => Addition (Qty units) (Curve units_) (Curve units) whe
   value + curve = constant value + curve
 
 instance units1 ~ units2 => Subtraction (Curve units1) (Curve units2) (Curve units1) where
-  lhs - rhs = new (lhs :-: rhs)
-
-instance units1 ~ units2 => Interface (Curve units1 :-: Curve units2) units1 where
-  compileImpl (f1 :-: f2) = compiled f1 - compiled f2
-  derivativeImpl _ (f1 :-: f2) = derivative f1 - derivative f2
+  lhs - rhs = new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   units1 ~ units2 =>
@@ -246,11 +215,8 @@ instance
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance Multiplication' (Curve units1) (Curve units2) (Curve (units1 :*: units2)) where
-  lhs .*. rhs = new (lhs :*: rhs)
-
-instance Interface (Curve units1 :*: Curve units2) (units1 :*: units2) where
-  compileImpl (c1 :*: c2) = compiled c1 .*. compiled c2
-  derivativeImpl _ (c1 :*: c2) = derivative c1 .*. c2 + c1 .*. derivative c2
+  lhs .*. rhs =
+    new (compiled lhs .*. compiled rhs) (derivative lhs .*. rhs + lhs .*. derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -333,11 +299,10 @@ instance
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance Division' (Curve units1) (Curve units2) (Curve (units1 :/: units2)) where
-  lhs ./. rhs = new (lhs :/: rhs)
-
-instance Interface (Curve units1 :/: Curve units2) (units1 :/: units2) where
-  compileImpl (c1 :/: c2) = compiled c1 ./. compiled c2
-  derivativeImpl self (c1 :/: c2) = derivative c1 ./. c2 + self * (derivative c2 / c2)
+  lhs ./. rhs =
+    recursive
+      (compiled lhs ./. compiled rhs)
+      (\self -> derivative lhs ./. rhs + self * (derivative rhs / rhs))
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -358,34 +323,22 @@ instance Division' (Qty units1) (Curve units2) (Curve (units1 :/: units2)) where
   value ./. curve = constant value ./. curve
 
 instance unitless ~ Unitless => Composition (Curve unitless) (Curve units) (Curve units) where
-  outer . inner = new (outer :.: inner)
-
-instance unitless ~ Unitless => Interface (Curve units :.: Curve unitless) units where
-  compileImpl (outer :.: inner) =
-    compiled outer . compiled inner
-
-  derivativeImpl _ (outer :.: inner) =
-    (derivative outer . inner) * derivative inner
+  f . g = new (compiled f . compiled g) ((derivative f . g) * derivative g)
 
 reverse :: Curve units -> Curve units
 reverse curve = curve . (1.0 - t)
 
 bezier :: NonEmpty (Qty units) -> Curve units
-bezier = new . Bezier
-
-newtype Bezier units = Bezier (NonEmpty (Qty units)) deriving (Show)
-
-instance Interface (Bezier units) units where
-  compileImpl (Bezier controlPoints) =
-    CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-
-  derivativeImpl _ (Bezier controlPoints) = do
-    let scale = Float.int (NonEmpty.length controlPoints - 1)
-    let scaledDifference p1 p2 = scale * (p2 - p1)
-    let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
-    case scaledDifferences of
-      [] -> zero
-      NonEmpty derivativeControlPoints -> bezier derivativeControlPoints
+bezier controlPoints = do
+  let compiledBezier = CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+  let scale = Float.int (NonEmpty.length controlPoints - 1)
+  let scaledDifference p1 p2 = scale * (p2 - p1)
+  let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
+  let bezierDerivative =
+        case scaledDifferences of
+          [] -> zero
+          NonEmpty derivativeControlPoints -> bezier derivativeControlPoints
+  new compiledBezier bezierDerivative
 
 hermite :: (Qty units, List (Qty units)) -> (Qty units, List (Qty units)) -> Curve units
 hermite (startValue, startDerivatives) (endValue, endDerivatives) = do
@@ -463,16 +416,10 @@ squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
 squared curve = Units.specialize (squared' curve)
 
 squared' :: Curve units -> Curve (units :*: units)
-squared' = new . Squared'
-
-newtype Squared' units = Squared' (Curve units) deriving (Show)
-
-instance Interface (Squared' units) (units :*: units) where
-  compileImpl (Squared' curve) =
-    CompiledFunction.map Expression.squared' Qty.squared' Range.squared' (compiled curve)
-
-  derivativeImpl _ (Squared' curve) =
-    2.0 * curve .*. derivative curve
+squared' curve =
+  new
+    (CompiledFunction.map Expression.squared' Qty.squared' Range.squared' (compiled curve))
+    (2.0 * curve .*. derivative curve)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve units1
@@ -482,46 +429,24 @@ sqrt' :: Tolerance units => Curve (units :*: units) -> Curve units
 sqrt' curve =
   if Tolerance.using Tolerance.squared' (curve ~= Qty.zero)
     then zero
-    else new (Sqrt' curve)
-
-data Sqrt' units where
-  Sqrt' :: Tolerance units => Curve (units :*: units) -> Sqrt' units
-
-deriving instance Show (Sqrt' units)
-
--- TODO handle endpoint degeneracies
-instance Interface (Sqrt' units) units where
-  compileImpl (Sqrt' curve) =
-    CompiledFunction.map Expression.sqrt' Qty.sqrt' Range.sqrt' (compiled curve)
-
-  derivativeImpl self (Sqrt' curve) =
-    if self ~= Qty.zero then zero else derivative curve .!/! (2.0 * self)
+    else
+      recursive
+        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Range.sqrt' (compiled curve))
+        (\self -> derivative curve .!/! (2.0 * self))
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless
-sin = new . Sin
-
-newtype Sin = Sin (Curve Radians) deriving (Show)
-
-instance Interface Sin Unitless where
-  compileImpl (Sin curve) =
-    CompiledFunction.map Expression.sin Angle.sin Range.sin (compiled curve)
-
-  derivativeImpl _ (Sin curve) =
-    cos curve * (derivative curve / Angle.radian)
+sin curve =
+  new
+    (CompiledFunction.map Expression.sin Angle.sin Range.sin (compiled curve))
+    (cos curve * (derivative curve / Angle.radian))
 
 -- | Compute the cosine of a curve.
 cos :: Curve Radians -> Curve Unitless
-cos = new . Cos
-
-newtype Cos = Cos (Curve Radians) deriving (Show)
-
-instance Interface Cos Unitless where
-  compileImpl (Cos curve) =
-    CompiledFunction.map Expression.cos Angle.cos Range.cos (compiled curve)
-
-  derivativeImpl _ (Cos curve) =
-    negate (sin curve) * (derivative curve / Angle.radian)
+cos curve =
+  new
+    (CompiledFunction.map Expression.cos Angle.cos Range.cos (compiled curve))
+    (negate (sin curve) * (derivative curve / Angle.radian))
 
 integral :: Curve units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)

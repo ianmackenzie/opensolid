@@ -8,8 +8,6 @@ import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
-import OpenSolid.Text qualified as Text
-import Prelude qualified
 
 data Tree units
   = Node (Tree units) (Qty units) (Tree units)
@@ -25,8 +23,19 @@ parameterization derivativeMagnitude = do
   let dsdt4 = dsdt 1.0
   let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
   let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
-  let curve = Curve.new (Parameterization derivativeMagnitude tree length)
+  let evaluate uValue = lookup tree (uValue * length)
+  let evaluateBounds (Range uLow uHigh) = Range (evaluate uLow) (evaluate uHigh)
+  let compiled = CompiledFunction.abstract evaluate evaluateBounds
+  let derivative self = (length / derivativeMagnitude) . self
+  let curve = Curve.recursive compiled derivative
   (curve, length)
+
+lookup :: Tree units -> Qty units -> Float
+lookup tree length = case tree of
+  Node leftTree leftLength rightTree
+    | length < leftLength -> lookup leftTree length
+    | otherwise -> lookup rightTree (length - leftLength)
+  Leaf segmentLength curve -> Curve.evaluate curve (length / segmentLength)
 
 buildTree ::
   Int ->
@@ -64,25 +73,3 @@ buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
       let (rightTree, rightLength) =
             buildTree (level + 1) dsdt d2sdt2 tMid tEnd dsdtMid dsdtEnd rightEstimate
       (Node leftTree leftLength rightTree, leftLength + rightLength)
-
-data Parameterization where
-  Parameterization :: Curve units -> Tree units -> Qty units -> Parameterization
-
-instance Show Parameterization where
-  show _ = Text.unpack "ArcLength.Parameterization"
-
-instance Curve.Interface Parameterization Unitless where
-  compileImpl (Parameterization _ tree length) = do
-    let evaluate uValue = lookup tree (uValue * length)
-    let evaluateBounds (Range uLow uHigh) = Range (evaluate uLow) (evaluate uHigh)
-    CompiledFunction.abstract evaluate evaluateBounds
-
-  derivativeImpl self (Parameterization dsdt _ length) =
-    length / (dsdt . self)
-
-lookup :: Tree units -> Qty units -> Float
-lookup tree length = case tree of
-  Node leftTree leftLength rightTree
-    | length < leftLength -> lookup leftTree length
-    | otherwise -> lookup rightTree (length - leftLength)
-  Leaf segmentLength curve -> Curve.evaluate curve (length / segmentLength)
