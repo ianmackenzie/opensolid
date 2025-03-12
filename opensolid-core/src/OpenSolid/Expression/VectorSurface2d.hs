@@ -77,7 +77,7 @@ relativeTo ::
 relativeTo basis expression = do
   let i = Vector2d.unit (Basis2d.xDirection basis)
   let j = Vector2d.unit (Basis2d.yDirection basis)
-  xy (expression <> constant i) (expression <> constant j)
+  xy (expression `dot` constant i) (expression `dot` constant j)
 
 transformBy ::
   Transform2d a (space @ translationUnits) ->

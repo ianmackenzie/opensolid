@@ -8,10 +8,10 @@ module OpenSolid.Arithmetic
   , Division' ((./.))
   , Division ((/))
   , DivMod ((//), (%))
-  , DotMultiplication' ((.<>.))
-  , DotMultiplication ((<>))
-  , CrossMultiplication' ((.><.))
-  , CrossMultiplication ((><))
+  , DotMultiplication' (dot')
+  , DotMultiplication (dot)
+  , CrossMultiplication' (cross')
+  , CrossMultiplication (cross)
   , Exponentiation ((**))
   , (*!)
   , (!*)
@@ -77,24 +77,24 @@ class Division a b c | a b -> c where
 infixl 7 /
 
 class DotMultiplication' a b c | a b -> c where
-  (.<>.) :: a -> b -> c
+  dot' :: a -> b -> c
 
-infixl 7 .<>.
+infixl 7 `dot'`
 
 class DotMultiplication b a c => DotMultiplication a b c | a b -> c where
-  (<>) :: a -> b -> c
+  dot :: DotMultiplication a b c => a -> b -> c
 
-infixl 7 <>
+infixl 7 `dot`
 
 class CrossMultiplication' a b c | a b -> c where
-  (.><.) :: a -> b -> c
+  cross' :: a -> b -> c
 
-infixl 7 .><.
+infixl 7 `cross'`
 
 class CrossMultiplication b a c => CrossMultiplication a b c | a b -> c where
-  (><) :: a -> b -> c
+  cross :: a -> b -> c
 
-infixl 7 ><
+infixl 7 `cross`
 
 class DivMod a where
   (//) :: a -> a -> Int

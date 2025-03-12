@@ -71,7 +71,7 @@ identity :: Rigid (space @ units)
 identity = Transform2d Point2d.origin unitX unitY
 
 handedness :: Transform2d tag (space @ units) -> Sign
-handedness (Transform2d _ vx vy) = Float.sign (vx >< vy)
+handedness (Transform2d _ vx vy) = Float.sign (vx `cross` vy)
 
 withFixedPoint ::
   Point2d (space @ units) ->

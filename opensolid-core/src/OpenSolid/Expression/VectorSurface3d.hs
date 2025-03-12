@@ -88,7 +88,7 @@ relativeTo basis expression = do
   let i = Vector3d.unit (Basis3d.xDirection basis)
   let j = Vector3d.unit (Basis3d.yDirection basis)
   let k = Vector3d.unit (Basis3d.zDirection basis)
-  xyz (expression <> constant i) (expression <> constant j) (expression <> constant k)
+  xyz (expression `dot` constant i) (expression `dot` constant j) (expression `dot` constant k)
 
 transformBy ::
   Transform3d a (space @ translationUnits) ->

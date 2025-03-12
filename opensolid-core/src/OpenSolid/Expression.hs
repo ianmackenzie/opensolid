@@ -1297,7 +1297,7 @@ instance
     (Expression Float (Vector2d (space2 @ units2)))
     (Expression Float (Qty units3))
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1306,7 +1306,7 @@ instance
     (Expression UvPoint (Vector2d (space2 @ units2)))
     (Expression UvPoint (Qty units3))
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1315,7 +1315,7 @@ instance
     (Expression Float (Vector3d (space2 @ units2)))
     (Expression Float (Qty units3))
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1324,7 +1324,7 @@ instance
     (Expression UvPoint (Vector3d (space2 @ units2)))
     (Expression UvPoint (Qty units3))
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 --- DotMultiplication' instances ---
 ------------------------------------
@@ -1336,7 +1336,7 @@ instance
     (Expression Float (Vector2d (space2 @ units2)))
     (Expression Float (Qty (units1 :*: units2)))
   where
-  VectorCurve2d{vc2x = x1, vc2y = y1} .<>. VectorCurve2d{vc2x = x2, vc2y = y2} =
+  VectorCurve2d{vc2x = x1, vc2y = y1} `dot'` VectorCurve2d{vc2x = x2, vc2y = y2} =
     curve1d (x1 * x2 + y1 * y2)
 
 instance
@@ -1346,7 +1346,7 @@ instance
     (Expression UvPoint (Vector2d (space2 @ units2)))
     (Expression UvPoint (Qty (units1 :*: units2)))
   where
-  VectorSurface2d{vs2x = x1, vs2y = y1} .<>. VectorSurface2d{vs2x = x2, vs2y = y2} =
+  VectorSurface2d{vs2x = x1, vs2y = y1} `dot'` VectorSurface2d{vs2x = x2, vs2y = y2} =
     surface1d (x1 * x2 + y1 * y2)
 
 instance
@@ -1357,7 +1357,7 @@ instance
     (Expression Float (Qty (units1 :*: units2)))
   where
   VectorCurve3d{vc3x = x1, vc3y = y1, vc3z = z1}
-    .<>. VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
+    `dot'` VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
       curve1d (x1 * x2 + y1 * y2 + z1 * z2)
 
 instance
@@ -1368,7 +1368,7 @@ instance
     (Expression UvPoint (Qty (units1 :*: units2)))
   where
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
-    .<>. VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
+    `dot'` VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
       surface1d (x1 * x2 + y1 * y2 + z1 * z2)
 
 ---------------------
@@ -1385,7 +1385,7 @@ instance
     (Expression Float (Vector2d (space2 @ units2)))
     (Expression Float (Qty units3))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1394,7 +1394,7 @@ instance
     (Expression UvPoint (Vector2d (space2 @ units2)))
     (Expression UvPoint (Qty units3))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1403,7 +1403,7 @@ instance
     (Expression Float (Vector3d (space2 @ units2)))
     (Expression Float (Vector3d (space1 @ units3)))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1412,7 +1412,7 @@ instance
     (Expression UvPoint (Vector3d (space2 @ units2)))
     (Expression UvPoint (Vector3d (space1 @ units3)))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 --- CrossMultiplication' instances ---
 --------------------------------------
@@ -1424,7 +1424,7 @@ instance
     (Expression Float (Vector2d (space2 @ units2)))
     (Expression Float (Qty (units1 :*: units2)))
   where
-  VectorCurve2d{vc2x = x1, vc2y = y1} .><. VectorCurve2d{vc2x = x2, vc2y = y2} =
+  VectorCurve2d{vc2x = x1, vc2y = y1} `cross'` VectorCurve2d{vc2x = x2, vc2y = y2} =
     curve1d (x1 * y2 - y1 * x2)
 
 instance
@@ -1434,7 +1434,7 @@ instance
     (Expression UvPoint (Vector2d (space2 @ units2)))
     (Expression UvPoint (Qty (units1 :*: units2)))
   where
-  VectorSurface2d{vs2x = x1, vs2y = y1} .><. VectorSurface2d{vs2x = x2, vs2y = y2} =
+  VectorSurface2d{vs2x = x1, vs2y = y1} `cross'` VectorSurface2d{vs2x = x2, vs2y = y2} =
     surface1d (x1 * y2 - y1 * x2)
 
 instance
@@ -1445,7 +1445,7 @@ instance
     (Expression Float (Vector3d (space1 @ (units1 :*: units2))))
   where
   VectorCurve3d{vc3x = x1, vc3y = y1, vc3z = z1}
-    .><. VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
+    `cross'` VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
       vectorCurve3d
         (y1 * z2 - z1 * y2)
         (z1 * x2 - x1 * z2)
@@ -1459,7 +1459,7 @@ instance
     (Expression UvPoint (Vector3d (space1 @ (units1 :*: units2))))
   where
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
-    .><. VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
+    `cross'` VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
       vectorSurface3d
         (y1 * z2 - z1 * y2)
         (z1 * x2 - x1 * z2)

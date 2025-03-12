@@ -8,12 +8,12 @@ import API.Class
   , constant
   , constructor2
   , constructor3
-  , cross
+  , crossProduct
   , crossSelf
   , divBy
   , divByFloat
   , divBySelf
-  , dot
+  , dotProduct
   , dotSelf
   , equality
   , factory1
@@ -509,13 +509,13 @@ vector2d =
     , times @Area Self
     , divByFloat
     , dotSelf
-    , dot @(Vector2d (Space @ Meters)) Self
-    , dot @(Vector2d (Space @ SquareMeters)) Self
-    , dot @(Direction2d Space) Self
+    , dotProduct @(Vector2d (Space @ Meters)) Self
+    , dotProduct @(Vector2d (Space @ SquareMeters)) Self
+    , dotProduct @(Direction2d Space) Self
     , crossSelf
-    , cross @(Vector2d (Space @ Meters)) Self
-    , cross @(Vector2d (Space @ SquareMeters)) Self
-    , cross @(Direction2d Space) Self
+    , crossProduct @(Vector2d (Space @ Meters)) Self
+    , crossProduct @(Vector2d (Space @ SquareMeters)) Self
+    , crossProduct @(Direction2d Space) Self
     ]
 
 displacement2d :: Class
@@ -548,11 +548,11 @@ displacement2d =
     , divByFloat
     , divBy @Length Self
     , dotSelf
-    , dot @(Vector2d (Space @ Unitless)) Self
-    , dot @(Direction2d Space) Self
+    , dotProduct @(Vector2d (Space @ Unitless)) Self
+    , dotProduct @(Direction2d Space) Self
     , crossSelf
-    , cross @(Vector2d (Space @ Unitless)) Self
-    , cross @(Direction2d Space) Self
+    , crossProduct @(Vector2d (Space @ Unitless)) Self
+    , crossProduct @(Direction2d Space) Self
     ]
 
 areaVector2d :: Class
@@ -581,10 +581,10 @@ areaVector2d =
     , divByFloat
     , divBy @Length Self
     , divBy @Area Self
-    , dot @(Vector2d (Space @ Unitless)) Self
-    , dot @(Direction2d Space) Self
-    , cross @(Vector2d (Space @ Unitless)) Self
-    , cross @(Direction2d Space) Self
+    , dotProduct @(Vector2d (Space @ Unitless)) Self
+    , dotProduct @(Direction2d Space) Self
+    , crossProduct @(Vector2d (Space @ Unitless)) Self
+    , crossProduct @(Direction2d Space) Self
     ]
 
 direction2d :: Class
@@ -606,13 +606,13 @@ direction2d =
     , times @Length Self
     , times @Area Self
     , dotSelf
-    , dot @(Vector2d (Space @ Unitless)) Self
-    , dot @(Vector2d (Space @ Meters)) Self
-    , dot @(Vector2d (Space @ SquareMeters)) Self
+    , dotProduct @(Vector2d (Space @ Unitless)) Self
+    , dotProduct @(Vector2d (Space @ Meters)) Self
+    , dotProduct @(Vector2d (Space @ SquareMeters)) Self
     , crossSelf
-    , cross @(Vector2d (Space @ Unitless)) Self
-    , cross @(Vector2d (Space @ Meters)) Self
-    , cross @(Vector2d (Space @ SquareMeters)) Self
+    , crossProduct @(Vector2d (Space @ Unitless)) Self
+    , crossProduct @(Vector2d (Space @ Meters)) Self
+    , crossProduct @(Vector2d (Space @ SquareMeters)) Self
     ]
 
 point2d :: Class
@@ -873,13 +873,13 @@ vector3d =
     , times @Area Self
     , divByFloat
     , dotSelf
-    , dot @(Vector3d (Space @ Meters)) Self
-    , dot @(Vector3d (Space @ SquareMeters)) Self
-    , dot @(Direction3d Space) Self
+    , dotProduct @(Vector3d (Space @ Meters)) Self
+    , dotProduct @(Vector3d (Space @ SquareMeters)) Self
+    , dotProduct @(Direction3d Space) Self
     , crossSelf
-    , cross @(Vector3d (Space @ Meters)) Self
-    , cross @(Vector3d (Space @ SquareMeters)) Self
-    , cross @(Direction3d Space) Self
+    , crossProduct @(Vector3d (Space @ Meters)) Self
+    , crossProduct @(Vector3d (Space @ SquareMeters)) Self
+    , crossProduct @(Direction3d Space) Self
     ]
 
 displacement3d :: Class
@@ -916,11 +916,11 @@ displacement3d =
     , divByFloat
     , divBy @Length Self
     , dotSelf
-    , dot @(Vector3d (Space @ Unitless)) Self
-    , dot @(Direction3d Space) Self
+    , dotProduct @(Vector3d (Space @ Unitless)) Self
+    , dotProduct @(Direction3d Space) Self
     , crossSelf
-    , cross @(Vector3d (Space @ Unitless)) Self
-    , cross @(Direction3d Space) Self
+    , crossProduct @(Vector3d (Space @ Unitless)) Self
+    , crossProduct @(Direction3d Space) Self
     ]
 
 areaVector3d :: Class
@@ -953,10 +953,10 @@ areaVector3d =
     , divByFloat
     , divBy @Length Self
     , divBy @Area Self
-    , dot @(Vector3d (Space @ Unitless)) Self
-    , dot @(Direction3d Space) Self
-    , cross @(Vector3d (Space @ Unitless)) Self
-    , cross @(Direction3d Space) Self
+    , dotProduct @(Vector3d (Space @ Unitless)) Self
+    , dotProduct @(Direction3d Space) Self
+    , crossProduct @(Vector3d (Space @ Unitless)) Self
+    , crossProduct @(Direction3d Space) Self
     ]
 
 direction3d :: Class
@@ -981,13 +981,13 @@ direction3d =
     , times @Length Self
     , times @Area Self
     , dotSelf
-    , dot @(Vector3d (Space @ Unitless)) Self
-    , dot @(Vector3d (Space @ Meters)) Self
-    , dot @(Vector3d (Space @ SquareMeters)) Self
+    , dotProduct @(Vector3d (Space @ Unitless)) Self
+    , dotProduct @(Vector3d (Space @ Meters)) Self
+    , dotProduct @(Vector3d (Space @ SquareMeters)) Self
     , crossSelf
-    , cross @(Vector3d (Space @ Unitless)) Self
-    , cross @(Vector3d (Space @ Meters)) Self
-    , cross @(Vector3d (Space @ SquareMeters)) Self
+    , crossProduct @(Vector3d (Space @ Unitless)) Self
+    , crossProduct @(Vector3d (Space @ Meters)) Self
+    , crossProduct @(Vector3d (Space @ SquareMeters)) Self
     ]
 
 point3d :: Class

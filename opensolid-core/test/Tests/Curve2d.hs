@@ -217,11 +217,11 @@ tangentDerivativeIsPerpendicularToTangent =
     tValue <- Parameter.random
     let tangent = DirectionCurve2d.evaluate tangentDirection tValue
     let derivative = VectorCurve2d.evaluate tangentDerivative tValue
-    Test.expect (Tolerance.using 1e-12 (derivative <> tangent ~= 0.0))
+    Test.expect (Tolerance.using 1e-12 (derivative `dot` tangent ~= 0.0))
       |> Test.output "tValue" tValue
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
-      |> Test.output "dot product" (derivative <> tangent)
+      |> Test.output "dot product" (derivative `dot` tangent)
 
 degenerateStartPointTangentDerivative :: Tolerance Meters => Test
 degenerateStartPointTangentDerivative =

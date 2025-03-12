@@ -39,8 +39,8 @@ distanceTo p0 LineSegment2d{start = Vertex2d p1, end = Vertex2d p2} = do
   let v = p2 - p1
   let u = p0 - p1
   let dSquared' = Vector2d.squaredMagnitude' v
-  let dotProduct' = u .<>. v
+  let dotProduct' = u `dot'` v
   if
     | dotProduct' <= Qty.zero -> Point2d.distanceFrom p1 p0
     | dotProduct' >= dSquared' -> Point2d.distanceFrom p2 p0
-    | otherwise -> Qty.abs (u .><. v .!/! Qty.sqrt' dSquared')
+    | otherwise -> Qty.abs (u `cross'` v .!/! Qty.sqrt' dSquared')

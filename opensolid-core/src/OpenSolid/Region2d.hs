@@ -572,7 +572,7 @@ fluxIntegral ::
 fluxIntegral point curve = do
   let displacement = point - curve
   let firstDerivative = Curve2d.derivative curve
-  let integrand = (firstDerivative .><. displacement) / VectorCurve2d.squaredMagnitude' displacement
+  let integrand = (firstDerivative `cross'` displacement) / VectorCurve2d.squaredMagnitude' displacement
   Curve.integral integrand
 
 totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless

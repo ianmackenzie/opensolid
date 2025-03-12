@@ -117,43 +117,43 @@ instance
   space1 ~ space2 =>
   DotMultiplication (DirectionCurve3d space1) (DirectionCurve3d space2) (Curve Unitless)
   where
-  DirectionCurve3d lhs <> DirectionCurve3d rhs = lhs <> rhs
+  DirectionCurve3d lhs `dot` DirectionCurve3d rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionCurve3d space1) (VectorCurve3d (space2 @ units)) (Curve units)
   where
-  DirectionCurve3d lhs <> rhs = lhs <> rhs
+  DirectionCurve3d lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
   DotMultiplication (VectorCurve3d (space1 @ units)) (DirectionCurve3d space2) (Curve units)
   where
-  lhs <> DirectionCurve3d rhs = lhs <> rhs
+  lhs `dot` DirectionCurve3d rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionCurve3d space1) (Direction3d space2) (Curve Unitless)
   where
-  DirectionCurve3d lhs <> rhs = lhs <> rhs
+  DirectionCurve3d lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Direction3d space1) (DirectionCurve3d space2) (Curve Unitless)
   where
-  lhs <> DirectionCurve3d rhs = lhs <> rhs
+  lhs `dot` DirectionCurve3d rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionCurve3d space1) (Vector3d (space2 @ units)) (Curve units)
   where
-  DirectionCurve3d lhs <> rhs = lhs <> rhs
+  DirectionCurve3d lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Vector3d (space1 @ units)) (DirectionCurve3d space2) (Curve units)
   where
-  lhs <> DirectionCurve3d rhs = lhs <> rhs
+  lhs `dot` DirectionCurve3d rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
@@ -162,7 +162,7 @@ instance
     (DirectionCurve3d space2)
     (VectorCurve3d (space1 @ Unitless))
   where
-  DirectionCurve3d lhs >< DirectionCurve3d rhs = lhs >< rhs
+  DirectionCurve3d lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
@@ -171,7 +171,7 @@ instance
     (VectorCurve3d (space2 @ units))
     (VectorCurve3d (space1 @ units))
   where
-  DirectionCurve3d lhs >< rhs = lhs >< rhs
+  DirectionCurve3d lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
@@ -180,7 +180,7 @@ instance
     (DirectionCurve3d space2)
     (VectorCurve3d (space1 @ units))
   where
-  lhs >< DirectionCurve3d rhs = lhs >< rhs
+  lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
@@ -189,7 +189,7 @@ instance
     (Direction3d space2)
     (VectorCurve3d (space1 @ Unitless))
   where
-  DirectionCurve3d lhs >< rhs = lhs >< rhs
+  DirectionCurve3d lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
@@ -198,7 +198,7 @@ instance
     (DirectionCurve3d space2)
     (VectorCurve3d (space1 @ Unitless))
   where
-  lhs >< DirectionCurve3d rhs = lhs >< rhs
+  lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
@@ -207,7 +207,7 @@ instance
     (Vector3d (space2 @ units))
     (VectorCurve3d (space1 @ units))
   where
-  DirectionCurve3d lhs >< rhs = lhs >< rhs
+  DirectionCurve3d lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
@@ -216,7 +216,7 @@ instance
     (DirectionCurve3d space2)
     (VectorCurve3d (space1 @ units))
   where
-  lhs >< DirectionCurve3d rhs = lhs >< rhs
+  lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
 instance
   unitless ~ Unitless =>
@@ -225,13 +225,13 @@ instance
   curve1d >> DirectionCurve3d curve = DirectionCurve3d (curve1d >> curve)
 
 xComponent :: DirectionCurve3d space -> Curve Unitless
-xComponent curve = curve <> Direction3d.x
+xComponent curve = curve `dot` Direction3d.x
 
 yComponent :: DirectionCurve3d space -> Curve Unitless
-yComponent curve = curve <> Direction3d.y
+yComponent curve = curve `dot` Direction3d.y
 
 zComponent :: DirectionCurve3d space -> Curve Unitless
-zComponent curve = curve <> Direction3d.z
+zComponent curve = curve `dot` Direction3d.z
 
 placeIn ::
   Basis3d global (Defines local) ->

@@ -3,8 +3,6 @@ module OpenSolid.SymbolicOperators
   , type (:-:) ((:-:))
   , type (:*:) ((:*:))
   , type (:/:) ((:/:))
-  , type (:<>:) ((:<>:))
-  , type (:><:) ((:><:))
   )
 where
 
@@ -25,11 +23,3 @@ infixl 7 :*:
 data a :/: b = a :/: b deriving (Eq, Show)
 
 infixl 7 :/:
-
-data a :<>: b = a :<>: b deriving (Eq, Show)
-
-infixl 7 :<>:
-
-data a :><: b = a :><: b deriving (Eq, Show)
-
-infixl 7 :><:

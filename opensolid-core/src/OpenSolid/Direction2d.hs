@@ -143,7 +143,7 @@ The angle will be measured counterclockwise from the first direction to the
 second, and will always be between -180 and +180 degrees.
 -}
 angleFrom :: Direction2d space -> Direction2d space -> Angle
-angleFrom d1 d2 = Angle.atan2 (d1 >< d2) (d1 <> d2)
+angleFrom d1 d2 = Angle.atan2 (d1 `cross` d2) (d1 `dot` d2)
 
 perpendicularTo :: Direction2d space -> Direction2d space
 perpendicularTo = rotateLeft

@@ -70,9 +70,9 @@ relativeTo frame expression = do
   let k = Vector3d.unit (Frame3d.zDirection frame)
   let displacement = expression - constant (Frame3d.originPoint frame)
   xyz
-    (displacement <> Expression.VectorCurve3d.constant i)
-    (displacement <> Expression.VectorCurve3d.constant j)
-    (displacement <> Expression.VectorCurve3d.constant k)
+    (displacement `dot` Expression.VectorCurve3d.constant i)
+    (displacement `dot` Expression.VectorCurve3d.constant j)
+    (displacement `dot` Expression.VectorCurve3d.constant k)
 
 transformBy ::
   Transform3d tag (space @ units) ->

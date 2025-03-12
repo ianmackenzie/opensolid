@@ -169,13 +169,15 @@ relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Point3d (global @ units) ->
   Point3d (local @ units)
-relativeTo (Frame3d p0 (Basis3d i j k)) p = let d = p - p0 in Point3d (d <> i) (d <> j) (d <> k)
+relativeTo (Frame3d p0 (Basis3d i j k)) p =
+  let d = p - p0 in Point3d (d `dot` i) (d `dot` j) (d `dot` k)
 
 projectInto ::
   Plane3d (space @ units) (Defines localSpace) ->
   Point3d (space @ units) ->
   Point2d (localSpace @ units)
-projectInto (Plane3d p0 (PlanarBasis3d i j)) p = let d = p - p0 in Point2d (d <> i) (d <> j)
+projectInto (Plane3d p0 (PlanarBasis3d i j)) p =
+  let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
 
 convert :: Qty (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
 convert factor (Point3d px py pz) = Point3d (px !* factor) (py !* factor) (pz !* factor)

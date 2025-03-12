@@ -85,44 +85,44 @@ instance
   space1 ~ space2 =>
   DotMultiplication (DirectionBounds3d space1) (DirectionBounds3d space2) (Range Unitless)
   where
-  DirectionBounds3d vectorBounds1 <> DirectionBounds3d vectorBounds2 =
-    vectorBounds1 <> vectorBounds2
+  DirectionBounds3d vectorBounds1 `dot` DirectionBounds3d vectorBounds2 =
+    vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionBounds3d space1) (VectorBounds3d (space2 @ units)) (Range units)
   where
-  DirectionBounds3d vectorBounds1 <> vectorBounds2 = vectorBounds1 <> vectorBounds2
+  DirectionBounds3d vectorBounds1 `dot` vectorBounds2 = vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (VectorBounds3d (space1 @ units)) (DirectionBounds3d space2) (Range units)
   where
-  vectorBounds1 <> DirectionBounds3d vectorBounds2 = vectorBounds1 <> vectorBounds2
+  vectorBounds1 `dot` DirectionBounds3d vectorBounds2 = vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionBounds3d space1) (Direction3d space2) (Range Unitless)
   where
-  DirectionBounds3d vectorBounds <> direction = vectorBounds <> direction
+  DirectionBounds3d vectorBounds `dot` direction = vectorBounds `dot` direction
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Direction3d space1) (DirectionBounds3d space2) (Range Unitless)
   where
-  direction <> DirectionBounds3d vectorBounds = direction <> vectorBounds
+  direction `dot` DirectionBounds3d vectorBounds = direction `dot` vectorBounds
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionBounds3d space1) (Vector3d (space2 @ units)) (Range units)
   where
-  DirectionBounds3d vectorBounds <> vector = vectorBounds <> vector
+  DirectionBounds3d vectorBounds `dot` vector = vectorBounds `dot` vector
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Vector3d (space1 @ units)) (DirectionBounds3d space2) (Range units)
   where
-  vector <> DirectionBounds3d vectorBounds = vector <> vectorBounds
+  vector `dot` DirectionBounds3d vectorBounds = vector `dot` vectorBounds
 
 instance
   space1 ~ space2 =>
@@ -131,8 +131,8 @@ instance
     (DirectionBounds3d space2)
     (VectorBounds3d (space1 @ Unitless))
   where
-  DirectionBounds3d vectorBounds1 >< DirectionBounds3d vectorBounds2 =
-    vectorBounds1 >< vectorBounds2
+  DirectionBounds3d vectorBounds1 `cross` DirectionBounds3d vectorBounds2 =
+    vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
@@ -141,7 +141,7 @@ instance
     (VectorBounds3d (space2 @ units))
     (VectorBounds3d (space1 @ units))
   where
-  DirectionBounds3d vectorBounds1 >< vectorBounds2 = vectorBounds1 >< vectorBounds2
+  DirectionBounds3d vectorBounds1 `cross` vectorBounds2 = vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
@@ -150,7 +150,7 @@ instance
     (DirectionBounds3d space2)
     (VectorBounds3d (space1 @ units))
   where
-  vectorBounds1 >< DirectionBounds3d vectorBounds2 = vectorBounds1 >< vectorBounds2
+  vectorBounds1 `cross` DirectionBounds3d vectorBounds2 = vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
@@ -159,7 +159,7 @@ instance
     (Direction3d space2)
     (VectorBounds3d (space1 @ Unitless))
   where
-  DirectionBounds3d vectorBounds >< direction = vectorBounds >< direction
+  DirectionBounds3d vectorBounds `cross` direction = vectorBounds `cross` direction
 
 instance
   space1 ~ space2 =>
@@ -168,7 +168,7 @@ instance
     (DirectionBounds3d space2)
     (VectorBounds3d (space1 @ Unitless))
   where
-  direction >< DirectionBounds3d vectorBounds = direction >< vectorBounds
+  direction `cross` DirectionBounds3d vectorBounds = direction `cross` vectorBounds
 
 instance
   space1 ~ space2 =>
@@ -177,7 +177,7 @@ instance
     (Vector3d (space2 @ units))
     (VectorBounds3d (space1 @ units))
   where
-  DirectionBounds3d vectorBounds >< vector = vectorBounds >< vector
+  DirectionBounds3d vectorBounds `cross` vector = vectorBounds `cross` vector
 
 instance
   space1 ~ space2 =>
@@ -186,7 +186,7 @@ instance
     (DirectionBounds3d space2)
     (VectorBounds3d (space1 @ units))
   where
-  vector >< DirectionBounds3d vectorBounds = vector >< vectorBounds
+  vector `cross` DirectionBounds3d vectorBounds = vector `cross` vectorBounds
 
 unsafe :: VectorBounds3d (space @ Unitless) -> DirectionBounds3d space
 unsafe = DirectionBounds3d

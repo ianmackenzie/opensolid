@@ -97,7 +97,7 @@ perpendicularTo (Direction3d dx dy dz) = do
 The result will always be between 0 and 180 degrees.
 -}
 angleFrom :: Direction3d space -> Direction3d space -> Angle
-angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 >< d2)) (d1 <> d2)
+angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
 placeIn :: Basis3d global (Defines local) -> Direction3d local -> Direction3d global
 placeIn basis = lift (Vector3d.placeIn basis)

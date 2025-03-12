@@ -69,7 +69,7 @@ fromYDirection dy = PlanarBasis3d (Direction3d.perpendicularTo dy) dy
 fromNormalDirection :: Direction3d space -> PlanarBasis3d space defines
 fromNormalDirection direction = do
   let dx = Direction3d.perpendicularTo direction
-  let dy = Unit3d (direction >< dx)
+  let dy = Unit3d (direction `cross` dx)
   PlanarBasis3d dx dy
 
 orthonormalize ::
@@ -99,7 +99,7 @@ yDirection :: PlanarBasis3d space defines -> Direction3d space
 yDirection (PlanarBasis3d _ j) = j
 
 normalDirection :: PlanarBasis3d space defines -> Direction3d space
-normalDirection (PlanarBasis3d i j) = Unit3d (i >< j)
+normalDirection (PlanarBasis3d i j) = Unit3d (i `cross` j)
 
 xnBasis :: PlanarBasis3d space defines1 -> PlanarBasis3d space defines2
 xnBasis basis = PlanarBasis3d (xDirection basis) (normalDirection basis)

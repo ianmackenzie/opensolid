@@ -71,16 +71,16 @@ testVectorArithmetic :: IO ()
 testVectorArithmetic = IO.do
   let v1 = Vector2d.meters 1.0 2.0
   let v2 = 0.5 * Vector2d.meters 3.0 4.0
-  let dotProduct = v1 <> v2
+  let dotProduct = v1 `dot` v2
   log "Dot product" dotProduct
-  log "2D cross product" (v1 >< v2)
+  log "2D cross product" (v1 `cross` v2)
   let squareRoot = Qty.sqrt dotProduct
   log "Square root" squareRoot
   let translatedPoint = Point2d.meters 2.0 3.0 + Vector2d.meters 4.0 5.0
   log "Translated point" translatedPoint
   let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
   log "Vector sum" vectorSum
-  let crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
+  let crossProduct = Vector3d.meters 1.0 2.0 3.0 `cross` Vector3d.meters 4.0 5.0 6.0
   log "Cross product" crossProduct
   let scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
   log "Scaled vector" scaledVector
@@ -142,7 +142,7 @@ getCrossProduct = Result.addContext "In getCrossProduct" Result.do
   lineDirection <-
     Direction2d.from Point2d.origin Point2d.origin
       |> Result.addContext "When getting line direction"
-  Success (vectorDirection >< lineDirection)
+  Success (vectorDirection `cross` lineDirection)
 
 testTry :: Tolerance Meters => IO ()
 testTry =

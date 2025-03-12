@@ -356,7 +356,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -365,14 +365,16 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  lhs .<>. rhs =
-    Curve.new (compiled lhs .<>. compiled rhs) (derivative lhs .<>. rhs + lhs .<>. derivative rhs)
+  lhs `dot'` rhs =
+    Curve.new
+      (compiled lhs `dot'` compiled rhs)
+      (derivative lhs `dot'` rhs + lhs `dot'` derivative rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (VectorCurve3d (space1 @ units1)) (Vector3d (space2 @ units2)) (Curve units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -381,13 +383,13 @@ instance
     (Vector3d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  curve .<>. vector = curve .<>. constant vector
+  curve `dot'` vector = curve `dot'` constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (Vector3d (space1 @ units1)) (VectorCurve3d (space2 @ units2)) (Curve units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -396,19 +398,19 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  vector .<>. curve = constant vector .<>. curve
+  vector `dot'` curve = constant vector `dot'` curve
 
 instance
   space1 ~ space2 =>
   DotMultiplication (VectorCurve3d (space1 @ units)) (Direction3d space2) (Curve units)
   where
-  lhs <> rhs = lhs <> Vector3d.unit rhs
+  lhs `dot` rhs = lhs `dot` Vector3d.unit rhs
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Direction3d space1) (VectorCurve3d (space2 @ units)) (Curve units)
   where
-  lhs <> rhs = Vector3d.unit lhs <> rhs
+  lhs `dot` rhs = Vector3d.unit lhs `dot` rhs
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -417,7 +419,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (VectorCurve3d (space1 @ units3))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -426,8 +428,8 @@ instance
     (VectorCurve3d (space2 @ units2))
     (VectorCurve3d (space1 @ (units1 :*: units2)))
   where
-  Parametric lhs .><. Parametric rhs = Parametric (lhs .><. rhs)
-  lhs .><. rhs = CrossProduct' lhs rhs
+  Parametric lhs `cross'` Parametric rhs = Parametric (lhs `cross'` rhs)
+  lhs `cross'` rhs = CrossProduct' lhs rhs
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -436,7 +438,7 @@ instance
     (Vector3d (space2 @ units2))
     (VectorCurve3d (space1 @ units3))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -445,7 +447,7 @@ instance
     (Vector3d (space2 @ units2))
     (VectorCurve3d (space1 @ (units1 :*: units2)))
   where
-  curve .><. vector = curve .><. constant vector
+  curve `cross'` vector = curve `cross'` constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -454,7 +456,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (VectorCurve3d (space1 @ units3))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -463,7 +465,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (VectorCurve3d (space1 @ (units1 :*: units2)))
   where
-  vector .><. curve = constant vector .><. curve
+  vector `cross'` curve = constant vector `cross'` curve
 
 instance
   space1 ~ space2 =>
@@ -472,7 +474,7 @@ instance
     (Direction3d space2)
     (VectorCurve3d (space1 @ units))
   where
-  lhs >< rhs = lhs >< Vector3d.unit rhs
+  lhs `cross` rhs = lhs `cross` Vector3d.unit rhs
 
 instance
   space1 ~ space2 =>
@@ -481,7 +483,7 @@ instance
     (VectorCurve3d (space2 @ units))
     (VectorCurve3d (space1 @ units))
   where
-  lhs >< rhs = Vector3d.unit lhs >< rhs
+  lhs `cross` rhs = Vector3d.unit lhs `cross` rhs
 
 instance
   unitless ~ Unitless =>
@@ -634,7 +636,7 @@ evaluate curve tValue = case curve of
   Product1d3d' c1 c2 -> Curve.evaluate c1 tValue .*. evaluate c2 tValue
   Product3d1d' c1 c2 -> evaluate c1 tValue .*. Curve.evaluate c2 tValue
   Quotient' c1 c2 -> evaluate c1 tValue ./. Curve.evaluate c2 tValue
-  CrossProduct' c1 c2 -> evaluate c1 tValue .><. evaluate c2 tValue
+  CrossProduct' c1 c2 -> evaluate c1 tValue `cross'` evaluate c2 tValue
   PlaceIn basis c -> Vector3d.placeIn basis (evaluate c tValue)
   Transformed transform c -> Vector3d.transformBy transform (evaluate c tValue)
   Planar plane curve2d -> Vector2d.placeOn plane (VectorCurve2d.evaluate curve2d tValue)
@@ -656,7 +658,7 @@ evaluateBounds curve tRange = case curve of
   Product1d3d' c1 c2 -> Curve.evaluateBounds c1 tRange .*. evaluateBounds c2 tRange
   Product3d1d' c1 c2 -> evaluateBounds c1 tRange .*. Curve.evaluateBounds c2 tRange
   Quotient' c1 c2 -> evaluateBounds c1 tRange ./. Curve.evaluateBounds c2 tRange
-  CrossProduct' c1 c2 -> evaluateBounds c1 tRange .><. evaluateBounds c2 tRange
+  CrossProduct' c1 c2 -> evaluateBounds c1 tRange `cross'` evaluateBounds c2 tRange
   PlaceIn basis c -> VectorBounds3d.placeIn basis (evaluateBounds c tRange)
   Transformed transform c -> VectorBounds3d.transformBy transform (evaluateBounds c tRange)
   Planar basis curve2d -> VectorBounds2d.placeOn basis (VectorCurve2d.evaluateBounds curve2d tRange)
@@ -682,7 +684,7 @@ derivative curve = case curve of
   Product3d1d' c1 c2 -> derivative c1 .*. c2 + c1 .*. Curve.derivative c2
   Quotient' c1 c2 ->
     (derivative c1 .*. c2 - c1 .*. Curve.derivative c2) .!/.! Curve.squared' c2
-  CrossProduct' c1 c2 -> derivative c1 .><. c2 + c1 .><. derivative c2
+  CrossProduct' c1 c2 -> derivative c1 `cross'` c2 + c1 `cross'` derivative c2
   PlaceIn basis c -> PlaceIn basis (derivative c)
   Transformed transform c -> transformBy transform (derivative c)
   Planar plane curve2d -> Planar plane (VectorCurve2d.derivative curve2d)
@@ -718,7 +720,7 @@ squaredMagnitude' curve = do
           Vector3d.squaredMagnitude'
           VectorBounds3d.squaredMagnitude'
           (compiled curve)
-  let squaredMagnitudeDerivative = 2.0 * curve .<>. derivative curve
+  let squaredMagnitudeDerivative = 2.0 * curve `dot'` derivative curve
   Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
@@ -729,7 +731,7 @@ unsafeMagnitude curve = do
           Vector3d.magnitude
           VectorBounds3d.magnitude
           (compiled curve)
-  let magnitudeDerivative self = derivative curve <> (curve / self)
+  let magnitudeDerivative self = derivative curve `dot` (curve / self)
   Curve.recursive compiledMagnitude magnitudeDerivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
@@ -756,13 +758,13 @@ zeros curve =
     Failure Curve.Zeros.HigherOrderZero -> Failure Zeros.HigherOrderZero
 
 xComponent :: VectorCurve3d (space @ units) -> Curve units
-xComponent curve = curve <> Direction3d.x
+xComponent curve = curve `dot` Direction3d.x
 
 yComponent :: VectorCurve3d (space @ units) -> Curve units
-yComponent curve = curve <> Direction3d.y
+yComponent curve = curve `dot` Direction3d.y
 
 zComponent :: VectorCurve3d (space @ units) -> Curve units
-zComponent curve = curve <> Direction3d.z
+zComponent curve = curve `dot` Direction3d.z
 
 direction ::
   Tolerance units =>

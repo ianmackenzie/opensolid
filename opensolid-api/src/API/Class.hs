@@ -59,9 +59,9 @@ module API.Class
   , divBySelf
   , floorDivBySelf
   , modBySelf
-  , dot
+  , dotProduct
   , dotSelf
-  , cross
+  , crossProduct
   , crossSelf
   , nested
   , functions
@@ -666,31 +666,31 @@ floorDivBySelf = PostOp BinaryOperator.FloorDiv ((//) :: value -> value -> Int)
 modBySelf :: forall value. (DivMod value, FFI value) => Member value
 modBySelf = PostOp BinaryOperator.Mod ((%) :: value -> value -> value)
 
-dot ::
+dotProduct ::
   forall rhs value result.
   (DotMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
   Self (value -> rhs -> result) ->
   Member value
-dot _ = PostOp BinaryOperator.Dot ((<>) :: value -> rhs -> result)
+dotProduct _ = PostOp BinaryOperator.Dot (dot :: value -> rhs -> result)
 
 dotSelf ::
   forall value result.
   (DotMultiplication value value result, FFI value, FFI result) =>
   Member value
-dotSelf = dot @value Self
+dotSelf = dotProduct @value Self
 
-cross ::
+crossProduct ::
   forall rhs value result.
   (CrossMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
   Self (value -> rhs -> result) ->
   Member value
-cross _ = PostOp BinaryOperator.Cross ((><) :: value -> rhs -> result)
+crossProduct _ = PostOp BinaryOperator.Cross (cross :: value -> rhs -> result)
 
 crossSelf ::
   forall value result.
   (CrossMultiplication value value result, FFI value, FFI result) =>
   Member value
-crossSelf = cross @value Self
+crossSelf = crossProduct @value Self
 
 nested :: FFI nested => Text -> List (Member nested) -> Member value
 nested = Nested

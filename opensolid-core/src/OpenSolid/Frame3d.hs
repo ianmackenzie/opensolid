@@ -122,22 +122,22 @@ fromZAxis :: Axis3d (space @ units) -> Frame3d (space @ units) defines
 fromZAxis (Axis3d p0 d) = Frame3d p0 (Basis3d.fromZDirection d)
 
 fromXyPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromXyPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d i j (Unit3d (i >< j)))
+fromXyPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d i j (Unit3d (i `cross` j)))
 
 fromYxPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromYxPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d j i (Unit3d (j >< i)))
+fromYxPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d j i (Unit3d (j `cross` i)))
 
 fromZxPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromZxPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d j (Unit3d (i >< j)) i)
+fromZxPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d j (Unit3d (i `cross` j)) i)
 
 fromXzPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromXzPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d i (Unit3d (j >< i)) j)
+fromXzPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d i (Unit3d (j `cross` i)) j)
 
 fromYzPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromYzPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d (Unit3d (i >< j)) i j)
+fromYzPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d (Unit3d (i `cross` j)) i j)
 
 fromZyPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromZyPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d (Unit3d (j >< i)) j i)
+fromZyPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d (Unit3d (j `cross` i)) j i)
 
 placeIn ::
   Frame3d (global @ units) (Defines space) ->

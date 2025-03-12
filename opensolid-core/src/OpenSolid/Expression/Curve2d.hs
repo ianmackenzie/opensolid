@@ -69,8 +69,8 @@ relativeTo frame expression = do
   let j = Vector2d.unit (Frame2d.yDirection frame)
   let displacement = expression - constant (Frame2d.originPoint frame)
   xy
-    (displacement <> Expression.VectorCurve2d.constant i)
-    (displacement <> Expression.VectorCurve2d.constant j)
+    (displacement `dot` Expression.VectorCurve2d.constant i)
+    (displacement `dot` Expression.VectorCurve2d.constant j)
 
 placeOn ::
   Plane3d (global @ units) (Defines local) ->

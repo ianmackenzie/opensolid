@@ -159,7 +159,7 @@ zComponent :: Vector3d (space @ units) -> Qty units
 zComponent (Vector3d _ _ vz) = vz
 
 componentIn :: Direction3d space -> Vector3d (space @ units) -> Qty units
-componentIn = (<>)
+componentIn = dot
 
 projectionIn :: Direction3d space -> Vector3d (space @ units) -> Vector3d (space @ units)
 projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
@@ -228,7 +228,7 @@ relativeTo ::
   Basis3d global (Defines local) ->
   Vector3d (global @ units) ->
   Vector3d (local @ units)
-relativeTo (Basis3d i j k) vector = Vector3d (vector <> i) (vector <> j) (vector <> k)
+relativeTo (Basis3d i j k) vector = Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
 
 sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
 sum = List.foldl (+) zero

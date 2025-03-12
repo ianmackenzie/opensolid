@@ -132,7 +132,7 @@ scaleAlong (Axis3d originPoint direction) scale = do
 
 mirrorAcross :: Plane3d (space @ units) defines -> Orthonormal (space @ units)
 mirrorAcross (Plane3d p0 (PlanarBasis3d i j)) = do
-  let Vector3d nx ny nz = i >< j
+  let Vector3d nx ny nz = i `cross` j
   let axx = 1.0 - 2.0 * nx * nx
   let ayy = 1.0 - 2.0 * ny * ny
   let azz = 1.0 - 2.0 * nz * nz

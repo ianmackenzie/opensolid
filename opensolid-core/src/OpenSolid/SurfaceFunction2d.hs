@@ -274,7 +274,7 @@ signedDistanceAlong ::
   SurfaceFunction2d (space @ units) ->
   SurfaceFunction units
 signedDistanceAlong axis function =
-  (function - constant (Axis2d.originPoint axis)) <> Axis2d.direction axis
+  (function - constant (Axis2d.originPoint axis)) `dot` Axis2d.direction axis
 
 xCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units
 xCoordinate = signedDistanceAlong Axis2d.x

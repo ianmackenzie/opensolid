@@ -63,8 +63,8 @@ relativeTo frame expression = do
   let j = Vector2d.unit (Frame2d.yDirection frame)
   let displacement = expression - constant (Frame2d.originPoint frame)
   xy
-    (displacement <> Expression.VectorSurface2d.constant i)
-    (displacement <> Expression.VectorSurface2d.constant j)
+    (displacement `dot` Expression.VectorSurface2d.constant i)
+    (displacement `dot` Expression.VectorSurface2d.constant j)
 
 transformBy ::
   Transform2d tag (space @ units) ->

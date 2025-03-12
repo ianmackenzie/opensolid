@@ -81,7 +81,7 @@ relativeTo ::
 relativeTo basis vector = do
   let i = Vector2d.unit (Basis2d.xDirection basis)
   let j = Vector2d.unit (Basis2d.yDirection basis)
-  xy (vector <> constant i) (vector <> constant j)
+  xy (vector `dot` constant i) (vector `dot` constant j)
 
 transformBy ::
   Transform2d a (space @ translationUnits) ->

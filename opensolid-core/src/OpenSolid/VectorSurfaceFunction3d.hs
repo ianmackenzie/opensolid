@@ -325,7 +325,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space ~ space_ =>
@@ -334,8 +334,8 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  Parametric lhs .><. Parametric rhs = Parametric (lhs .><. rhs)
-  lhs .><. rhs = CrossProduct' lhs rhs
+  Parametric lhs `cross'` Parametric rhs = Parametric (lhs `cross'` rhs)
+  lhs `cross'` rhs = CrossProduct' lhs rhs
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -344,7 +344,7 @@ instance
     (Vector3d (space_ @ units2))
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space ~ space_ =>
@@ -353,7 +353,7 @@ instance
     (Vector3d (space_ @ units2))
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  f .><. v = f .><. constant v
+  f `cross'` v = f `cross'` constant v
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -362,7 +362,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space ~ space_ =>
@@ -371,7 +371,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  v .><. f = constant v .><. f
+  v `cross'` f = constant v `cross'` f
 
 data DotProduct' space units1 units2
   = DotProduct' (VectorSurfaceFunction3d (space @ units1)) (VectorSurfaceFunction3d (space @ units2))
@@ -380,13 +380,13 @@ deriving instance Show (DotProduct' space units1 units2)
 
 instance SurfaceFunction.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
   evaluateImpl (DotProduct' f1 f2) tValue =
-    evaluate f1 tValue .<>. evaluate f2 tValue
+    evaluate f1 tValue `dot'` evaluate f2 tValue
 
   evaluateBoundsImpl (DotProduct' f1 f2) tRange =
-    evaluateBounds f1 tRange .<>. evaluateBounds f2 tRange
+    evaluateBounds f1 tRange `dot'` evaluateBounds f2 tRange
 
   derivativeImpl parameter (DotProduct' f1 f2) =
-    derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
+    derivative parameter f1 `dot'` f2 + f1 `dot'` derivative parameter f2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -395,7 +395,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (SurfaceFunction units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space ~ space_ =>
@@ -404,8 +404,8 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  Parametric lhs .<>. Parametric rhs = SurfaceFunction.Parametric (lhs .<>. rhs)
-  lhs .<>. rhs = SurfaceFunction.new (DotProduct' lhs rhs)
+  Parametric lhs `dot'` Parametric rhs = SurfaceFunction.Parametric (lhs `dot'` rhs)
+  lhs `dot'` rhs = SurfaceFunction.new (DotProduct' lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -414,7 +414,7 @@ instance
     (Vector3d (space_ @ units2))
     (SurfaceFunction units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space ~ space_ =>
@@ -423,7 +423,7 @@ instance
     (Vector3d (space_ @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  function .<>. vector = function .<>. constant vector
+  function `dot'` vector = function `dot'` constant vector
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -432,7 +432,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (SurfaceFunction units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space ~ space_ =>
@@ -441,19 +441,19 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  vector .<>. function = constant vector .<>. function
+  vector `dot'` function = constant vector `dot'` function
 
 instance
   space ~ space_ =>
   DotMultiplication (VectorSurfaceFunction3d (space @ units)) (Direction3d space_) (SurfaceFunction units)
   where
-  lhs <> rhs = lhs <> Vector3d.unit rhs
+  lhs `dot` rhs = lhs `dot` Vector3d.unit rhs
 
 instance
   space ~ space_ =>
   DotMultiplication (Direction3d space) (VectorSurfaceFunction3d (space_ @ units)) (SurfaceFunction units)
   where
-  lhs <> rhs = Vector3d.unit lhs <> rhs
+  lhs `dot` rhs = Vector3d.unit lhs `dot` rhs
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -515,7 +515,7 @@ evaluate function uvPoint = case function of
   Product1d3d' f1 f2 -> SurfaceFunction.evaluate f1 uvPoint .*. evaluate f2 uvPoint
   Product3d1d' f1 f2 -> evaluate f1 uvPoint .*. SurfaceFunction.evaluate f2 uvPoint
   Quotient' f1 f2 -> evaluate f1 uvPoint ./. SurfaceFunction.evaluate f2 uvPoint
-  CrossProduct' f1 f2 -> evaluate f1 uvPoint .><. evaluate f2 uvPoint
+  CrossProduct' f1 f2 -> evaluate f1 uvPoint `cross'` evaluate f2 uvPoint
   PlaceIn frame f -> Vector3d.placeIn frame (evaluate f uvPoint)
   Transformed transform f -> Vector3d.transformBy transform (evaluate f uvPoint)
 
@@ -535,7 +535,7 @@ evaluateBounds function uvBounds = case function of
   Product1d3d' f1 f2 -> SurfaceFunction.evaluateBounds f1 uvBounds .*. evaluateBounds f2 uvBounds
   Product3d1d' f1 f2 -> evaluateBounds f1 uvBounds .*. SurfaceFunction.evaluateBounds f2 uvBounds
   Quotient' f1 f2 -> evaluateBounds f1 uvBounds ./. SurfaceFunction.evaluateBounds f2 uvBounds
-  CrossProduct' f1 f2 -> evaluateBounds f1 uvBounds .><. evaluateBounds f2 uvBounds
+  CrossProduct' f1 f2 -> evaluateBounds f1 uvBounds `cross'` evaluateBounds f2 uvBounds
   PlaceIn frame f -> VectorBounds3d.placeIn frame (evaluateBounds f uvBounds)
   Transformed transform f -> VectorBounds3d.transformBy transform (evaluateBounds f uvBounds)
 
@@ -559,7 +559,7 @@ derivative parameter function = case function of
   Quotient' f1 f2 ->
     (derivative parameter f1 .*. f2 - f1 .*. SurfaceFunction.derivative parameter f2)
       .!/.! SurfaceFunction.squared' f2
-  CrossProduct' f1 f2 -> derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
+  CrossProduct' f1 f2 -> derivative parameter f1 `cross'` f2 + f1 `cross'` derivative parameter f2
   PlaceIn basis f -> placeIn basis (derivative parameter f)
   Transformed transform f -> transformBy transform (derivative parameter f)
 

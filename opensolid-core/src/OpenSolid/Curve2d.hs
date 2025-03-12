@@ -849,7 +849,7 @@ offsetBy offset curve = Result.do
   Success (curve + offsetCurve)
 
 signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-signedDistanceAlong axis curve = (curve - Axis2d.originPoint axis) <> Axis2d.direction axis
+signedDistanceAlong axis curve = (curve - Axis2d.originPoint axis) `dot` Axis2d.direction axis
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
@@ -953,7 +953,7 @@ intersections curve1 curve2 = Result.do
           let f = curve1 . u - curve2 . v
           let fu = VectorSurfaceFunction2d.derivative U f
           let fv = VectorSurfaceFunction2d.derivative V f
-          let g = VectorSurfaceFunction2d.xy (fu .><. fv) ((derivative1 . u) .<>. f)
+          let g = VectorSurfaceFunction2d.xy (fu `cross'` fv) ((derivative1 . u) `dot'` f)
           let gu = VectorSurfaceFunction2d.derivative U g
           let gv = VectorSurfaceFunction2d.derivative V g
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
@@ -995,7 +995,7 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
                   let Point2d t1 t2 = point
                   Solve2d.return (constructor t1 t2 sign)
                 else Solve2d.recurse ()
-        case Range.resolvedSign (fvBounds .><. fuBounds) of
+        case Range.resolvedSign (fvBounds `cross'` fuBounds) of
           Resolved sign -> do
             case endpointIntersection endpointIntersections uvBounds of
               Just point -> validate point IntersectionPoint.crossing sign
@@ -1013,7 +1013,7 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
           Unresolved -> do
             let guBounds = VectorSurfaceFunction2d.evaluateBounds gu uvBounds
             let gvBounds = VectorSurfaceFunction2d.evaluateBounds gv uvBounds
-            case Range.resolvedSign (gvBounds .><. guBounds) of
+            case Range.resolvedSign (gvBounds `cross'` guBounds) of
               Resolved sign -> do
                 case endpointIntersection endpointIntersections uvBounds of
                   Just point -> validate point IntersectionPoint.tangent sign
@@ -1188,7 +1188,7 @@ curvature' curve = Result.do
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
   tangent <- tangentDirection curve
-  Success ((tangent >< secondDerivative) !/!. (firstDerivative .<>. firstDerivative))
+  Success ((tangent `cross` secondDerivative) !/!. (firstDerivative `dot'` firstDerivative))
 
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
@@ -1303,7 +1303,7 @@ medialAxis curve1 curve2 = do
   let v1 = derivative curve1 . SurfaceFunction.u
   let v2 = derivative curve2 . SurfaceFunction.v
   let d = p2 - p1
-  let target = v2 .><. (2.0 * (v1 .<>. d) .*. d - d .<>. d .*. v1)
+  let target = v2 `cross'` (2.0 * (v1 `dot'` d) .*. d - d `dot'` d .*. v1)
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.Zeros.HigherOrderZero -> Failure MedialAxis.HigherOrderSolution
@@ -1315,7 +1315,7 @@ medialAxis curve1 curve2 = do
         Success tangent1 -> do
           let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangent1
           let radius :: SurfaceFunction units =
-                (d .<>. d) .!/! (2.0 * (tangent1 . SurfaceFunction.u) >< d)
+                (d `dot'` d) .!/! (2.0 * (tangent1 . SurfaceFunction.u) `cross` d)
           let curve :: SurfaceFunction2d (space @ units) =
                 (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
           let toSegment solutionCurve =

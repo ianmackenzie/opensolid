@@ -135,7 +135,7 @@ yComponent :: Vector2d (space @ units) -> Qty units
 yComponent (Vector2d _ vy) = vy
 
 componentIn :: Direction2d space -> Vector2d (space @ units) -> Qty units
-componentIn = (<>)
+componentIn = dot
 
 projectionIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
 projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
@@ -231,7 +231,7 @@ relativeTo ::
   Basis2d global (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeTo (Basis2d i j) vector = Vector2d (vector <> i) (vector <> j)
+relativeTo (Basis2d i j) vector = Vector2d (vector `dot` i) (vector `dot` j)
 
 placeOn ::
   PlanarBasis3d space (Defines local) ->

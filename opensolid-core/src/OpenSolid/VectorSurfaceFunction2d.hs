@@ -309,13 +309,13 @@ deriving instance Show (CrossProduct' space units1 units2)
 
 instance SurfaceFunction.Interface (CrossProduct' space units1 units2) (units1 :*: units2) where
   evaluateImpl (CrossProduct' f1 f2) tValue =
-    evaluate f1 tValue .><. evaluate f2 tValue
+    evaluate f1 tValue `cross'` evaluate f2 tValue
 
   evaluateBoundsImpl (CrossProduct' f1 f2) tRange =
-    evaluateBounds f1 tRange .><. evaluateBounds f2 tRange
+    evaluateBounds f1 tRange `cross'` evaluateBounds f2 tRange
 
   derivativeImpl parameter (CrossProduct' f1 f2) =
-    derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
+    derivative parameter f1 `cross'` f2 + f1 `cross'` derivative parameter f2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -324,7 +324,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -333,8 +333,8 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  Parametric lhs .><. Parametric rhs = SurfaceFunction.Parametric (lhs .><. rhs)
-  lhs .><. rhs = SurfaceFunction.new (CrossProduct' lhs rhs)
+  Parametric lhs `cross'` Parametric rhs = SurfaceFunction.Parametric (lhs `cross'` rhs)
+  lhs `cross'` rhs = SurfaceFunction.new (CrossProduct' lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -343,7 +343,7 @@ instance
     (Vector2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -352,7 +352,7 @@ instance
     (Vector2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  function .><. vector = function .><. constant vector
+  function `cross'` vector = function `cross'` constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -361,7 +361,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -370,7 +370,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  vector .><. function = constant vector .><. function
+  vector `cross'` function = constant vector `cross'` function
 
 instance
   space1 ~ space2 =>
@@ -379,7 +379,7 @@ instance
     (Direction2d space2)
     (SurfaceFunction units)
   where
-  lhs >< rhs = lhs >< Vector2d.unit rhs
+  lhs `cross` rhs = lhs `cross` Vector2d.unit rhs
 
 instance
   space1 ~ space2 =>
@@ -388,7 +388,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units))
     (SurfaceFunction units)
   where
-  lhs >< rhs = Vector2d.unit lhs >< rhs
+  lhs `cross` rhs = Vector2d.unit lhs `cross` rhs
 
 data DotProduct' space units1 units2
   = DotProduct'
@@ -399,13 +399,13 @@ deriving instance Show (DotProduct' space units1 units2)
 
 instance SurfaceFunction.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
   evaluateImpl (DotProduct' f1 f2) tValue =
-    evaluate f1 tValue .<>. evaluate f2 tValue
+    evaluate f1 tValue `dot'` evaluate f2 tValue
 
   evaluateBoundsImpl (DotProduct' f1 f2) tRange =
-    evaluateBounds f1 tRange .<>. evaluateBounds f2 tRange
+    evaluateBounds f1 tRange `dot'` evaluateBounds f2 tRange
 
   derivativeImpl parameter (DotProduct' f1 f2) =
-    derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
+    derivative parameter f1 `dot'` f2 + f1 `dot'` derivative parameter f2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -414,7 +414,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -423,8 +423,8 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  Parametric lhs .<>. Parametric rhs = SurfaceFunction.Parametric (lhs .<>. rhs)
-  lhs .<>. rhs = SurfaceFunction.new (DotProduct' lhs rhs)
+  Parametric lhs `dot'` Parametric rhs = SurfaceFunction.Parametric (lhs `dot'` rhs)
+  lhs `dot'` rhs = SurfaceFunction.new (DotProduct' lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -433,7 +433,7 @@ instance
     (Vector2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -442,7 +442,7 @@ instance
     (Vector2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  function .<>. vector = function .<>. constant vector
+  function `dot'` vector = function `dot'` constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -451,7 +451,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
   space1 ~ space2 =>
@@ -460,7 +460,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  vector .<>. function = constant vector .<>. function
+  vector `dot'` function = constant vector `dot'` function
 
 instance
   space1 ~ space2 =>
@@ -469,7 +469,7 @@ instance
     (Direction2d space2)
     (SurfaceFunction units)
   where
-  lhs <> rhs = lhs <> Vector2d.unit rhs
+  lhs `dot` rhs = lhs `dot` Vector2d.unit rhs
 
 instance
   space1 ~ space2 =>
@@ -478,7 +478,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units))
     (SurfaceFunction units)
   where
-  lhs <> rhs = Vector2d.unit lhs <> rhs
+  lhs `dot` rhs = Vector2d.unit lhs `dot` rhs
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -612,7 +612,7 @@ derivative varyingParameter function = case function of
   Transformed transform f -> transformBy transform (derivative varyingParameter f)
 
 xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-xComponent function = function <> Direction2d.x
+xComponent function = function `dot` Direction2d.x
 
 yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-yComponent function = function <> Direction2d.y
+yComponent function = function `dot` Direction2d.y

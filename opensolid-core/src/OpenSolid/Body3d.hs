@@ -327,7 +327,7 @@ translational sketchPlane profile displacement = do
   let sideSurface curve = Surface3d.translational (Curve2d.placeOn sketchPlane curve) displacement
   let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2d.boundaryCurves profile))
   let initialDerivative = VectorCurve3d.startValue (VectorCurve3d.derivative displacement)
-  case Qty.sign (initialDerivative <> Plane3d.normalDirection sketchPlane) of
+  case Qty.sign (initialDerivative `dot` Plane3d.normalDirection sketchPlane) of
     Positive -> boundedBy (endCap : startCap : sideSurfaces)
     Negative -> boundedBy (startCap : endCap : sideSurfaces)
 
@@ -881,7 +881,7 @@ pointAndNormal ::
 pointAndNormal SurfaceFunctions{fu, fv} handedness (Vertex uvPoint point) = do
   let fuValue = VectorSurfaceFunction3d.evaluate fu uvPoint
   let fvValue = VectorSurfaceFunction3d.evaluate fv uvPoint
-  (point, handedness * Vector3d.normalize (fuValue .><. fvValue))
+  (point, handedness * Vector3d.normalize (fuValue `cross'` fvValue))
 
 toPolygon ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->

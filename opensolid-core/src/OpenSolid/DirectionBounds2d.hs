@@ -84,87 +84,87 @@ instance
   space1 ~ space2 =>
   DotMultiplication (DirectionBounds2d space1) (DirectionBounds2d space2) (Range Unitless)
   where
-  DirectionBounds2d vectorBounds1 <> DirectionBounds2d vectorBounds2 =
-    vectorBounds1 <> vectorBounds2
+  DirectionBounds2d vectorBounds1 `dot` DirectionBounds2d vectorBounds2 =
+    vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionBounds2d space1) (VectorBounds2d (space2 @ units)) (Range units)
   where
-  DirectionBounds2d vectorBounds1 <> vectorBounds2 = vectorBounds1 <> vectorBounds2
+  DirectionBounds2d vectorBounds1 `dot` vectorBounds2 = vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (VectorBounds2d (space1 @ units)) (DirectionBounds2d space2) (Range units)
   where
-  vectorBounds1 <> DirectionBounds2d vectorBounds2 = vectorBounds1 <> vectorBounds2
+  vectorBounds1 `dot` DirectionBounds2d vectorBounds2 = vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionBounds2d space1) (Direction2d space2) (Range Unitless)
   where
-  DirectionBounds2d vectorBounds <> direction = vectorBounds <> direction
+  DirectionBounds2d vectorBounds `dot` direction = vectorBounds `dot` direction
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Direction2d space1) (DirectionBounds2d space2) (Range Unitless)
   where
-  direction <> DirectionBounds2d vectorBounds = direction <> vectorBounds
+  direction `dot` DirectionBounds2d vectorBounds = direction `dot` vectorBounds
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionBounds2d space1) (Vector2d (space2 @ units)) (Range units)
   where
-  DirectionBounds2d vectorBounds <> vector = vectorBounds <> vector
+  DirectionBounds2d vectorBounds `dot` vector = vectorBounds `dot` vector
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Vector2d (space1 @ units)) (DirectionBounds2d space2) (Range units)
   where
-  vector <> DirectionBounds2d vectorBounds = vector <> vectorBounds
+  vector `dot` DirectionBounds2d vectorBounds = vector `dot` vectorBounds
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (DirectionBounds2d space1) (DirectionBounds2d space2) (Range Unitless)
   where
-  DirectionBounds2d vectorBounds1 >< DirectionBounds2d vectorBounds2 =
-    vectorBounds1 >< vectorBounds2
+  DirectionBounds2d vectorBounds1 `cross` DirectionBounds2d vectorBounds2 =
+    vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (DirectionBounds2d space1) (VectorBounds2d (space2 @ units)) (Range units)
   where
-  DirectionBounds2d vectorBounds1 >< vectorBounds2 = vectorBounds1 >< vectorBounds2
+  DirectionBounds2d vectorBounds1 `cross` vectorBounds2 = vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (VectorBounds2d (space1 @ units)) (DirectionBounds2d space2) (Range units)
   where
-  vectorBounds1 >< DirectionBounds2d vectorBounds2 = vectorBounds1 >< vectorBounds2
+  vectorBounds1 `cross` DirectionBounds2d vectorBounds2 = vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (DirectionBounds2d space1) (Direction2d space2) (Range Unitless)
   where
-  DirectionBounds2d vectorBounds >< direction = vectorBounds >< direction
+  DirectionBounds2d vectorBounds `cross` direction = vectorBounds `cross` direction
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (Direction2d space1) (DirectionBounds2d space2) (Range Unitless)
   where
-  direction >< DirectionBounds2d vectorBounds = direction >< vectorBounds
+  direction `cross` DirectionBounds2d vectorBounds = direction `cross` vectorBounds
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (DirectionBounds2d space1) (Vector2d (space2 @ units)) (Range units)
   where
-  DirectionBounds2d vectorBounds >< vector = vectorBounds >< vector
+  DirectionBounds2d vectorBounds `cross` vector = vectorBounds `cross` vector
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (Vector2d (space1 @ units)) (DirectionBounds2d space2) (Range units)
   where
-  vector >< DirectionBounds2d vectorBounds = vector >< vectorBounds
+  vector `cross` DirectionBounds2d vectorBounds = vector `cross` vectorBounds
 
 unsafe :: VectorBounds2d (space @ Unitless) -> DirectionBounds2d space
 unsafe = DirectionBounds2d
