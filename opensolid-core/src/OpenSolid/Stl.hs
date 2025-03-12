@@ -96,15 +96,15 @@ triangleText units (v0, v1, v2) = do
   Text.multiline
     [ "facet normal " <> Text.float nx <> " " <> Text.float ny <> " " <> Text.float nz
     , "    outer loop"
-    , "        " <> vertex units p0
-    , "        " <> vertex units p1
-    , "        " <> vertex units p2
+    , "        " <> pointText units p0
+    , "        " <> pointText units p1
+    , "        " <> pointText units p2
     , "    endloop"
     , "endfacet"
     ]
 
-vertex :: (Qty units -> Float) -> Point3d (space @ units) -> Text
-vertex units (Point3d px py pz) =
+pointText :: (Qty units -> Float) -> Point3d (space @ units) -> Text
+pointText units (Point3d px py pz) =
   "vertex "
     <> Text.float (units px)
     <> " "
