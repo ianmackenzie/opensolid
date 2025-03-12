@@ -108,6 +108,7 @@ import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Scene3d qualified as Scene3d
+import OpenSolid.Stl qualified as Stl
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -1265,6 +1266,12 @@ body3d =
     , factoryM2R "Sphere" "Center Point" "Radius" Body3d.sphere $(docs 'Body3d.sphere)
     , factoryM3R "Cylinder" "Start Point" "End Point" "Radius" Body3d.cylinder $(docs 'Body3d.cylinder)
     , factoryM3R "Cylinder Along" "Axis" "Distance" "Radius" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
+    , memberM2
+        "Write STL"
+        "Path"
+        "Mesh Constraints"
+        (\path constraints body -> Stl.writeBinary path Length.inMillimeters (Body3d.toMesh constraints body))
+        "Write a body to a binary STL file, using units of millimeters."
     ]
 
 data Mesh_
