@@ -29,6 +29,7 @@ module OpenSolid.Arithmetic
   )
 where
 
+import Data.ByteString.Builder (Builder)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float)
@@ -145,6 +146,9 @@ instance Addition Text (Maybe Text) Text where
 instance Addition (Maybe Text) Text Text where
   Just prefix + text = prefix + text
   Nothing + text = text
+
+instance Addition Builder Builder Builder where
+  (+) = Prelude.mappend
 
 instance a ~ a' => Addition (List a) (List a') (List a) where
   (+) = Prelude.mappend
