@@ -28,7 +28,10 @@ signedArea' (Polygon2d (v0 :| vs)) = do
   let triangleSignedArea' v1 v2 = Triangle2d.signedArea' (Triangle2d v0 v1 v2)
   Qty.sum (List.successive triangleSignedArea' vs)
 
-signedArea :: (Vertex2d vertex (space @ units), Units.Squared units squaredUnits) => Polygon2d vertex -> Qty squaredUnits
+signedArea ::
+  (Vertex2d vertex (space @ units), Units.Squared units squaredUnits) =>
+  Polygon2d vertex ->
+  Qty squaredUnits
 signedArea = Units.specialize . signedArea'
 
 edges :: Polygon2d vertex -> NonEmpty (LineSegment2d vertex)

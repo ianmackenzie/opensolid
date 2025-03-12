@@ -38,10 +38,20 @@ toBinary units mesh = do
   let triangles = Binary.collect (triangleBuilder units) (Mesh.faceVertices mesh)
   Binary.concat [header, triangleCount, triangles]
 
-writeText :: Vertex3d vertex (space @ units) => Text -> (Qty units -> Float) -> Mesh vertex -> IO ()
+writeText ::
+  Vertex3d vertex (space @ units) =>
+  Text ->
+  (Qty units -> Float) ->
+  Mesh vertex ->
+  IO ()
 writeText path units mesh = IO.writeUtf8 path (toText units mesh)
 
-writeBinary :: Vertex3d vertex (space @ units) => Text -> (Qty units -> Float) -> Mesh vertex -> IO ()
+writeBinary ::
+  Vertex3d vertex (space @ units) =>
+  Text ->
+  (Qty units -> Float) ->
+  Mesh vertex ->
+  IO ()
 writeBinary path units mesh = IO.writeBinary path (toBinary units mesh)
 
 floatBuilder :: Float -> Builder

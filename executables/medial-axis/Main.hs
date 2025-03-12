@@ -52,7 +52,12 @@ testSplineAndLine = do
   let line = Curve2d.line Point2d.origin (Point2d.centimeters 20.0 0.0)
   testCurveMedialAxis "testSplineAndLine" spline line
 
-testCurveMedialAxis :: Tolerance Meters => Text -> Curve2d (Global @ Meters) -> Curve2d (Global @ Meters) -> IO ()
+testCurveMedialAxis ::
+  Tolerance Meters =>
+  Text ->
+  Curve2d (Global @ Meters) ->
+  Curve2d (Global @ Meters) ->
+  IO ()
 testCurveMedialAxis label curve1 curve2 = IO.do
   startTime <- Data.Time.Clock.getCurrentTime
   segments <- Curve2d.medialAxis curve1 curve2
