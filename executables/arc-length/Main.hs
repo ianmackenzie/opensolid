@@ -65,7 +65,7 @@ analyticalLength p0 p1 p2 = do
   let a_32 :: Volume = 2.0 * a * a_2
   let c_2 :: Length = 2.0 * Qty.sqrt c
   let ba :: Length = b / a_2
-  ((a_32 * s_abc + a_2 * b * (s_abc - c_2) + (4.0 * c * a - b * b) * Float.log ((2.0 * a_2 + ba + s_abc) / (ba + c_2))) / (4.0 * a_32))
+  (a_32 * s_abc + a_2 * b * (s_abc - c_2) + (4.0 * c * a - b * b) * Float.log ((2.0 * a_2 + ba + s_abc) / (ba + c_2))) / (4.0 * a_32)
 
 testCubicSplineParameterization :: IO ()
 testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
