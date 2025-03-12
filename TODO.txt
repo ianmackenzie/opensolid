@@ -13,6 +13,8 @@ Review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to 
 Try removing 'unitless ~ Unitless' constraints everywhere
 -> maybe also 'uvPoint ~ UvPoint', 'uvSpace ~ UvSpace', 'uvCoordinates ~ UvCoordinates'
 
+Remove SymbolicOperators module once everything is switched to directly constructing curves/functions
+
 Add Region2d.regularPolygon which takes number of sides and incircle diameter
 -> corresponds to width across flats for polygons with even numbers of sides...
 -> for polygon based on circumcircle: sample Curve2d.circle at N points:
