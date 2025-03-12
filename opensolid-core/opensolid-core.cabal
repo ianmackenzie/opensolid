@@ -104,6 +104,7 @@ library
     OpenSolid.Axis3d
     OpenSolid.Basis2d
     OpenSolid.Basis3d
+    OpenSolid.Binary
     OpenSolid.Body3d
     OpenSolid.Body3d.BoundedBy
     OpenSolid.Bool
