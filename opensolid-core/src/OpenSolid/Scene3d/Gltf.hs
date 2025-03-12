@@ -5,17 +5,16 @@ module OpenSolid.Scene3d.Gltf
   , faceIndices
   , pointsAndNormals
   , builder
-  , toByteString
   )
 where
 
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
-import Data.Monoid qualified
 import GHC.Float qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
+import OpenSolid.Binary qualified as Binary
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Direction3d (Direction3d (Direction3d))
@@ -66,16 +65,16 @@ uint32 :: Int -> Builder
 uint32 value = Builder.word32LE (fromIntegral value)
 
 faceIndices :: List (Int, Int, Int) -> Builder
-faceIndices indices = Data.Monoid.mconcat (List.map faceIndicesBuilder indices)
+faceIndices indices = Binary.collect faceIndicesBuilder indices
 
 pointsAndNormals :: Vertex3d.HasNormal vertex (space @ Meters) => Array vertex -> Builder
 pointsAndNormals vertices = do
-  let addVertex accumulated vertex = Data.Monoid.mappend accumulated (pointNormalBuilder vertex)
-  Array.foldl addVertex Data.Monoid.mempty vertices
+  let addVertex accumulated vertex = accumulated + pointNormalBuilder vertex
+  Array.foldl addVertex Binary.empty vertices
 
 faceIndicesBuilder :: (Int, Int, Int) -> Builder
 faceIndicesBuilder (i, j, k) =
-  Data.Monoid.mconcat
+  Binary.concat
     [ Builder.word32LE (fromIntegral i)
     , Builder.word32LE (fromIntegral j)
     , Builder.word32LE (fromIntegral k)
@@ -85,7 +84,7 @@ pointNormalBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => vertex -> Bu
 pointNormalBuilder vertex = do
   let Point3d (Qty px) (Qty py) (Qty pz) = Vertex3d.position vertex
   let Vector3d (Qty nx) (Qty ny) (Qty nz) = Vertex3d.normal vertex
-  Data.Monoid.mconcat
+  Binary.concat
     [ Builder.floatLE (GHC.Float.double2Float px)
     , Builder.floatLE (GHC.Float.double2Float py)
     , Builder.floatLE (GHC.Float.double2Float pz)
@@ -113,7 +112,7 @@ builder givenFields unpaddedBufferByteLength unpaddedBufferBuilder = do
   let jsonChunkByteLength = 8 + paddedJsonByteLength
   let binaryChunkByteLength = 8 + paddedBufferByteLength
   let fileByteLength = headerByteLength + jsonChunkByteLength + binaryChunkByteLength
-  Data.Monoid.mconcat
+  Binary.concat
     [ uint32 0x46546C67 -- magic 'gltf' identifier
     , uint32 2 -- file format version
     , uint32 fileByteLength
@@ -125,12 +124,6 @@ builder givenFields unpaddedBufferByteLength unpaddedBufferBuilder = do
     , paddedBufferBuilder
     ]
 
-toByteString :: List Json.Field -> Int -> Builder -> ByteString
-toByteString givenFields bufferByteLength bufferBuilder =
-  ByteString.toStrict $
-    Builder.toLazyByteString $
-      builder givenFields bufferByteLength bufferBuilder
-
 paddedByteLength :: Int -> Int
 paddedByteLength unpaddedLength = do
   let excess = unpaddedLength % 4
@@ -140,4 +133,4 @@ padWith :: Char -> Builder -> Int -> (Builder, Int)
 padWith char unpaddedBuilder unpaddedLength = do
   let paddedLength = paddedByteLength unpaddedLength
   let padding = Builder.string7 (List.repeat (paddedLength - unpaddedLength) char)
-  (Data.Monoid.mappend unpaddedBuilder padding, paddedLength)
+  (unpaddedBuilder + padding, paddedLength)
