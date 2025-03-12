@@ -189,7 +189,7 @@ polygon ::
 polygon pointList = case pointList of
   [] -> Failure BoundedBy.EmptyRegion
   NonEmpty points -> do
-    let closedLoop = points |> NonEmpty.append (NonEmpty.first points)
+    let closedLoop = NonEmpty.extend points [NonEmpty.first points]
     let isZeroLength line = Curve2d.startPoint line ~= Curve2d.endPoint line
     let lines = NonEmpty.successive Curve2d.line closedLoop
     boundedBy (List.filter (not . isZeroLength) lines)
@@ -380,7 +380,7 @@ extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
     (List.One curve, remaining) -> do
       let newCurve = if Curve2d.endPoint curve ~= currentStart then curve else Curve2d.reverse curve
       let newStart = Curve2d.startPoint newCurve
-      let updatedCurves = NonEmpty.prepend newCurve currentCurves
+      let updatedCurves = NonEmpty.push newCurve currentCurves
       Success (PartialLoop newStart updatedCurves loopEnd, remaining)
     (List.TwoOrMore, _) -> Failure BoundedBy.BoundaryIntersectsItself
 

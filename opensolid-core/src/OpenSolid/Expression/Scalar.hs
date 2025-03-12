@@ -383,11 +383,19 @@ showWithPrecedence precedence expression = case expression of
   SurfaceParameter SurfaceParameter.U -> "u"
   SurfaceParameter SurfaceParameter.V -> "v"
   Constant value -> Text.float value
-  Negated arg -> showParenthesized (precedence >= 6) ("-" + showWithPrecedence 6 arg)
-  Sum lhs rhs -> showParenthesized (precedence >= 6) (showWithPrecedence 6 lhs + " + " + showWithPrecedence 6 rhs)
-  Difference lhs rhs -> showParenthesized (precedence >= 6) (showWithPrecedence 6 lhs + " - " + showWithPrecedence 6 rhs)
-  Product lhs rhs -> showParenthesized (precedence >= 7) (showWithPrecedence 7 lhs + " * " + showWithPrecedence 7 rhs)
-  Quotient lhs rhs -> showParenthesized (precedence >= 7) (showWithPrecedence 7 lhs + " / " + showWithPrecedence 6 rhs)
+  Negated arg -> showParenthesized (precedence >= 6) ("-" <> showWithPrecedence 6 arg)
+  Sum lhs rhs ->
+    showParenthesized (precedence >= 6) $
+      showWithPrecedence 6 lhs <> " <> " <> showWithPrecedence 6 rhs
+  Difference lhs rhs ->
+    showParenthesized (precedence >= 6) $
+      showWithPrecedence 6 lhs <> " - " <> showWithPrecedence 6 rhs
+  Product lhs rhs ->
+    showParenthesized (precedence >= 7) $
+      showWithPrecedence 7 lhs <> " * " <> showWithPrecedence 7 rhs
+  Quotient lhs rhs ->
+    showParenthesized (precedence >= 7) $
+      showWithPrecedence 7 lhs <> " / " <> showWithPrecedence 6 rhs
   Squared arg -> showFunctionCall precedence "squared" [arg]
   Sqrt arg -> showFunctionCall precedence "sqrt" [arg]
   Sin arg -> showFunctionCall precedence "sin" [arg]
@@ -406,7 +414,10 @@ showWithPrecedence precedence expression = case expression of
     showFunctionCall precedence "quinticSpline" args
   BezierCurve controlPoints param ->
     showParenthesized (precedence >= 10) $
-      "bezierCurve " + Text.show (NonEmpty.toList controlPoints) + " " + showWithPrecedence 10 param
+      "bezierCurve "
+        <> Text.show (NonEmpty.toList controlPoints)
+        <> " "
+        <> showWithPrecedence 10 param
 
 showFunctionCall :: Int -> Text -> List (Scalar input) -> Text
 showFunctionCall precedence functionName arguments =
@@ -414,7 +425,7 @@ showFunctionCall precedence functionName arguments =
     Text.join " " (functionName : List.map (showWithPrecedence 10) arguments)
 
 showParenthesized :: Bool -> Text -> Text
-showParenthesized True text = "(" + text + ")"
+showParenthesized True text = "(" <> text <> ")"
 showParenthesized False text = text
 
 data RustExpression

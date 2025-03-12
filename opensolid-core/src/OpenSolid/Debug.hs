@@ -13,7 +13,6 @@ import Control.Exception qualified
 import Data.Text qualified
 import Debug.Trace qualified
 import GHC.Stack qualified
-import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import OpenSolid.Text qualified as Text
@@ -25,7 +24,7 @@ instance Composition Debug a a where
   Debug action >> value = Prelude.seq (action ()) value
 
 labelled :: Show a => Text -> a -> Text
-labelled label value = label + ": " + Text.show value
+labelled label value = label <> ": " <> Text.show value
 
 print :: Text -> Debug
 print message = Debug (trace message)

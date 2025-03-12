@@ -69,7 +69,7 @@ faceIndices indices = Binary.collect faceIndicesBuilder indices
 
 pointsAndNormals :: Vertex3d.HasNormal vertex (space @ Meters) => Array vertex -> Builder
 pointsAndNormals vertices = do
-  let addVertex accumulated vertex = accumulated + pointNormalBuilder vertex
+  let addVertex accumulated vertex = accumulated <> pointNormalBuilder vertex
   Array.foldl addVertex Binary.empty vertices
 
 faceIndicesBuilder :: (Int, Int, Int) -> Builder
@@ -133,4 +133,4 @@ padWith :: Char -> Builder -> Int -> (Builder, Int)
 padWith char unpaddedBuilder unpaddedLength = do
   let paddedLength = paddedByteLength unpaddedLength
   let padding = Builder.string7 (List.repeat (paddedLength - unpaddedLength) char)
-  (unpaddedBuilder + padding, paddedLength)
+  (unpaddedBuilder <> padding, paddedLength)

@@ -79,7 +79,7 @@ testCurveMedialAxis label curve1 curve2 = IO.do
   let drawCurve = Drawing2d.curve [] (Length.millimeters 0.1)
   let drawingBounds =
         Bounds2d.hull2 (Point2d.centimeters -10.0 -10.0) (Point2d.centimeters 30.0 20.0)
-  Drawing2d.writeSvg ("executables/sandbox/" + label + ".svg") drawingBounds $
+  Drawing2d.writeSvg ("executables/sandbox/" <> label <> ".svg") drawingBounds $
     [ Drawing2d.group (List.concat tangentCircles)
     , Drawing2d.group (List.map (drawCurve . Curve2d.MedialAxis.curve) segments)
     , drawCurve curve1
@@ -87,4 +87,4 @@ testCurveMedialAxis label curve1 curve2 = IO.do
     ]
   endTime <- Data.Time.Clock.getCurrentTime
   let elapsed = Duration.from startTime endTime
-  IO.printLine (label + ": " + Text.int (Float.round (Duration.inMilliseconds elapsed)) + " ms")
+  IO.printLine (label <> ": " <> Text.int (Float.round (Duration.inMilliseconds elapsed)) <> " ms")

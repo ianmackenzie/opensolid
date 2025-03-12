@@ -103,9 +103,9 @@ joinCrossingSegments segment1 segment2 = Maybe.do
   parameterization <- jointParameterization parameterization1 parameterization2
   if
     | Domain2d.adjacent endBoundary1 startBoundary2 ->
-        Just (CrossingSegment parameterization start1 end2 (boxes1 + boxes2))
+        Just (CrossingSegment parameterization start1 end2 (boxes1 <> boxes2))
     | Domain2d.adjacent endBoundary2 startBoundary1 ->
-        Just (CrossingSegment parameterization start2 end1 (boxes2 + boxes1))
+        Just (CrossingSegment parameterization start2 end1 (boxes2 <> boxes1))
     | otherwise -> Nothing
 
 jointParameterization :: Parameterization -> Parameterization -> Maybe Parameterization
@@ -169,11 +169,11 @@ data JoinPiecewiseCurveResult
 joinPiecewiseCurves :: PiecewiseCurve -> PiecewiseCurve -> Maybe JoinPiecewiseCurveResult
 joinPiecewiseCurves (PiecewiseCurve start1 end1 segments1) (PiecewiseCurve start2 end2 segments2)
   | Domain2d.adjacent end1 start2 && Domain2d.adjacent end2 start1 =
-      Just (NewCrossingLoop (segments1 + segments2))
+      Just (NewCrossingLoop (segments1 <> segments2))
   | Domain2d.adjacent end1 start2 =
-      Just (JoinedPiecewiseCurve (PiecewiseCurve start1 end2 (segments1 + segments2)))
+      Just (JoinedPiecewiseCurve (PiecewiseCurve start1 end2 (segments1 <> segments2)))
   | Domain2d.adjacent end2 start1 =
-      Just (JoinedPiecewiseCurve (PiecewiseCurve start2 end1 (segments2 + segments1)))
+      Just (JoinedPiecewiseCurve (PiecewiseCurve start2 end1 (segments2 <> segments1)))
   | otherwise = Nothing
 
 finalize ::
@@ -212,6 +212,6 @@ extend curve saddleRegion = do
           |> NonEmpty.reverseMap Curve2d.reverse
   case (extendStart, extendEnd) of
     (False, False) -> curve
-    (True, False) -> PiecewiseCurve start end (startExtension + segments)
-    (False, True) -> PiecewiseCurve start end (segments + endExtension)
-    (True, True) -> PiecewiseCurve start end (startExtension + segments + endExtension)
+    (True, False) -> PiecewiseCurve start end (startExtension <> segments)
+    (False, True) -> PiecewiseCurve start end (segments <> endExtension)
+    (True, True) -> PiecewiseCurve start end (startExtension <> segments <> endExtension)

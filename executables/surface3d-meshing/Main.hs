@@ -30,5 +30,5 @@ main = IO.do
   domain <- Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle])
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2.0) surface
-  IO.printLine ("Num faces: " + Text.int (List.length (Mesh.faceIndices mesh)))
+  IO.printLine ("Num faces: " <> Text.int (List.length (Mesh.faceIndices mesh)))
   Stl.writeBinary "executables/surface3d-meshing/mesh.stl" Length.inMillimeters mesh

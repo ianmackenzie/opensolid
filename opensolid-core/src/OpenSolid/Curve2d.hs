@@ -1228,7 +1228,7 @@ data Synthetic coordinateSystem where
     Synthetic (space @ units)
 
 instance Show (Synthetic (space @ units)) where
-  show (Synthetic curve _) = Text.unpack ("Synthetic: " + Text.show curve)
+  show (Synthetic curve _) = Text.unpack ("Synthetic: " <> Text.show curve)
 
 -- TODO make Synthetic a first-class constructors,
 -- so that it can participate properly in binary operations?
@@ -1261,7 +1261,7 @@ data SyntheticDerivative coordinateSystem where
     SyntheticDerivative (space @ units)
 
 instance Show (SyntheticDerivative (space @ units)) where
-  show (SyntheticDerivative curve _) = Text.unpack ("SyntheticDerivative: " + Text.show curve)
+  show (SyntheticDerivative curve _) = Text.unpack ("SyntheticDerivative: " <> Text.show curve)
 
 instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ units) where
   evaluateImpl (SyntheticDerivative current _) tValue =

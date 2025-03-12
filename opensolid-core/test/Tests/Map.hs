@@ -18,13 +18,13 @@ simpleMap = Map.fromKeyValuePairs [(1, "a"), (2, "b"), (3, "c")]
 
 foldl :: Test
 foldl = Test.verify "foldl" Test.do
-  let actual = Map.foldl (+) "" simpleMap
+  let actual = Map.foldl (<>) "" simpleMap
   let expected = "abc"
   Test.expect (actual == expected)
 
 foldr :: Test
 foldr = Test.verify "foldr" Test.do
-  let actual = Map.foldr (+) "" simpleMap
+  let actual = Map.foldr (<>) "" simpleMap
   let expected = "abc"
   Test.expect (actual == expected)
 

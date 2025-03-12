@@ -228,7 +228,7 @@ instance
             |> Result.map constructor
             |> Result.andThen (compose fieldValues)
       , properties = properties |> Map.set (FieldSchema.name fieldSchema) (FieldSchema.schema fieldSchema)
-      , required = [FieldSchema.name fieldSchema | FieldSchema.required fieldSchema] + required
+      , required = [FieldSchema.name fieldSchema | FieldSchema.required fieldSchema] <> required
       }
 
 instance
@@ -249,7 +249,7 @@ lastField (Field write read fieldSchema) = do
   Fields{decompose, compose, properties, required}
 
 withinField :: Text -> Result Text a -> Result Text a
-withinField fieldName = Result.addContext ("In field \"" + fieldName + "\"")
+withinField fieldName = Result.addContext ("In field \"" <> fieldName <> "\"")
 
 requiredField :: Text -> (parent -> child) -> Format child -> Field parent child ()
 requiredField fieldName getField fieldFormat = do
@@ -258,7 +258,7 @@ requiredField fieldName getField fieldFormat = do
   let read fields =
         case Map.get fieldName fields of
           Just fieldValue -> withinField fieldName (decodeField fieldValue)
-          Nothing -> Failure ("Expected a field named \"" + fieldName + "\"")
+          Nothing -> Failure ("Expected a field named \"" <> fieldName <> "\"")
   let fieldSchema = FieldSchema{name = fieldName, required = True, schema}
   Field{write, read, fieldSchema}
 

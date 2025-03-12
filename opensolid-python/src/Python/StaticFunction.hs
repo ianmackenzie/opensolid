@@ -20,10 +20,10 @@ definition classId (functionName, staticFunction) = do
   let functionArguments = Text.join "," (List.map Python.Function.argument arguments)
   let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
   let normalArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
-  let allArguments = maybeToleranceArgument + normalArguments
+  let allArguments = List.maybe maybeToleranceArgument <> normalArguments
   Python.lines
     [ "@staticmethod"
-    , "def " + FFI.snakeCase functionName + "(" + functionArguments + ") -> " + Python.Type.qualifiedName returnType + ":"
+    , "def " <> FFI.snakeCase functionName <> "(" <> functionArguments <> ") -> " <> Python.Type.qualifiedName returnType <> ":"
     , Python.indent
         [ Python.docstring (StaticFunction.documentation staticFunction)
         , Python.Function.body ffiFunctionName allArguments returnType

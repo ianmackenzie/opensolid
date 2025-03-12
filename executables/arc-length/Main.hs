@@ -24,12 +24,12 @@ data Space
 
 formatLength :: Length -> Text
 formatLength length =
-  Text.float (Length.inMeters length) + "m"
+  Text.float (Length.inMeters length) <> "m"
 
 testCurve :: Text -> Curve2d (Space @ Meters) -> IO ()
 testCurve label curve = Tolerance.using (Length.meters 1e-12) IO.do
   (_, length) <- Curve2d.arcLengthParameterization curve
-  IO.printLine (label + ": " + formatLength length)
+  IO.printLine (label <> ": " <> formatLength length)
 
 testLineLength :: IO ()
 testLineLength = Tolerance.using (Length.meters 1e-6) IO.do
@@ -42,7 +42,7 @@ testQuadraticSplineLength = IO.do
   let p3 = Point2d.centimeters 40.0 0.0
   let spline = Curve2d.quadraticBezier p1 p2 p3
   testCurve "Quadratic spline" spline
-  IO.printLine ("Analytical value: " + formatLength (analyticalLength p1 p2 p3))
+  IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
 analyticalLength ::
   Point2d (space @ Meters) ->
@@ -75,7 +75,7 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
   let p4 = Point2d.centimeters 25.0 5.0
   let spline = Curve2d.cubicBezier p1 p2 p3 p4
   (parameterized, length) <- Curve2d.parameterizeByArcLength spline
-  IO.printLine ("Cubic spline: " + formatLength length)
+  IO.printLine ("Cubic spline: " <> formatLength length)
   let drawCurve fileName curve = IO.do
         let curveEntity = Drawing2d.curve [] Length.micrometer curve
         let pointLocations = List.map (Curve2d.evaluate curve) (Parameter.steps 30)

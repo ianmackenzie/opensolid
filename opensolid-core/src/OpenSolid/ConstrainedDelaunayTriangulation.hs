@@ -26,7 +26,7 @@ unsafe ::
   Mesh vertex
 unsafe boundaryLoops steinerVertices refinement = do
   let boundaryVertices = NonEmpty.concat boundaryLoops
-  let inputVertices = boundaryVertices + steinerVertices
+  let inputVertices = NonEmpty.extend boundaryVertices steinerVertices
   let prependCoordinates (Vertex2d (Point2d x y)) accumulated = x : y : accumulated
   let inputPointCoordinates = NonEmpty.foldr prependCoordinates [] inputVertices
   let inputEdgeIndices = collectEdgeIndices (NonEmpty.toList boundaryLoops) 0 []
@@ -68,7 +68,7 @@ unsafe boundaryLoops steinerVertices refinement = do
                       Nothing -> []
                       Just (_, toVertex) ->
                         collectRefinementVertices toVertex outputRefinementPointCoordinates
-                let meshVertices = Array.fromNonEmpty (inputVertices + refinementVertices)
+                let meshVertices = Array.fromNonEmpty (NonEmpty.extend inputVertices refinementVertices)
                 IO.succeed (Mesh.indexed meshVertices faceIndices)
 
 collectEdgeIndices :: List (NonEmpty vertex) -> Int -> List CSize -> List CSize

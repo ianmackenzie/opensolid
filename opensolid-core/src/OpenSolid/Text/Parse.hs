@@ -3,7 +3,6 @@ module OpenSolid.Text.Parse (int, float) where
 import Data.Text qualified
 import Data.Text.Read (Reader)
 import Data.Text.Read qualified
-import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Float (Float)
@@ -20,10 +19,10 @@ num reader text =
       | otherwise -> do
           let message =
                 "Could not parse '"
-                  + text
-                  + "' as a number - has extra trailing text '"
-                  + suffix
-                  + "'"
+                  <> text
+                  <> "' as a number - has extra trailing text '"
+                  <> suffix
+                  <> "'"
           Failure message
     Prelude.Left message -> Failure (Data.Text.pack message)
 

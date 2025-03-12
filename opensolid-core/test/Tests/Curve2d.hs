@@ -378,7 +378,7 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
 arcConstruction :: Tolerance Meters => Test
 arcConstruction = do
   let testArcMidpoint numDegrees (expectedX, expectedY) = do
-        let label = Text.int numDegrees + " degrees"
+        let label = Text.int numDegrees <> " degrees"
         let sweptAngle = Angle.degrees (Float.int numDegrees)
         let expectedPoint = Point2d.meters expectedX expectedY
         Test.verify label Test.do

@@ -9,6 +9,7 @@ haddock-style: multi-line-compact
 respectful: false
 fixities:
   # Built-in operators
+  - infixr 6 <>
   - infix 4 ==, /=, <, >, <=, >=
   - infixr 3 &&
   - infixr 2 ||

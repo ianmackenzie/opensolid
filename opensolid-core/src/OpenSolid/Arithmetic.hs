@@ -29,8 +29,6 @@ module OpenSolid.Arithmetic
   )
 where
 
-import Data.ByteString.Builder (Builder)
-import Data.List.NonEmpty (NonEmpty ((:|)))
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float)
 import {-# SOURCE #-} OpenSolid.Qty (Qty (Qty))
@@ -134,57 +132,6 @@ instance Multiplication Int Sign Int where
 instance Addition Int Int Int where
   {-# INLINEABLE (+) #-}
   (+) = (Prelude.+)
-
-instance Addition Text Text Text where
-  {-# INLINEABLE (+) #-}
-  (+) = Prelude.mappend
-
-instance Addition Text (Maybe Text) Text where
-  text + Just suffix = text + suffix
-  text + Nothing = text
-
-instance Addition (Maybe Text) Text Text where
-  Just prefix + text = prefix + text
-  Nothing + text = text
-
-instance Addition Builder Builder Builder where
-  (+) = Prelude.mappend
-
-instance a ~ a' => Addition (List a) (List a') (List a) where
-  (+) = Prelude.mappend
-
-instance a ~ a' => Addition (NonEmpty a) (NonEmpty a') (NonEmpty a) where
-  (a :| as) + (b :| bs) = a :| (as + (b : bs))
-
-instance a ~ a' => Addition (NonEmpty a) (List a') (NonEmpty a) where
-  nonEmpty + [] = nonEmpty
-  (a :| as) + bs = a :| (as + bs)
-
-instance a ~ a' => Addition (List a) (NonEmpty a') (NonEmpty a) where
-  [] + nonEmpty = nonEmpty
-  (a : as) + (b :| bs) = a :| (as + (b : bs))
-
-instance a ~ a' => Addition (Maybe a) (Maybe a') (List a) where
-  Just first + Just second = [first, second]
-  Just first + Nothing = [first]
-  Nothing + Just second = [second]
-  Nothing + Nothing = []
-
-instance a ~ a' => Addition (Maybe a) (List a') (List a) where
-  Just value + list = value : list
-  Nothing + list = list
-
-instance a ~ a' => Addition (List a) (Maybe a') (List a) where
-  list + Nothing = list
-  list + Just value = list + [value]
-
-instance a ~ a' => Addition (Maybe a) (NonEmpty a') (NonEmpty a) where
-  Just a + (b :| bs) = a :| b : bs
-  Nothing + nonEmpty = nonEmpty
-
-instance a ~ a' => Addition (NonEmpty a) (Maybe a') (NonEmpty a) where
-  nonEmpty + Nothing = nonEmpty
-  nonEmpty + Just value = nonEmpty + [value]
 
 instance Subtraction Int Int Int where
   (-) = (Prelude.-)

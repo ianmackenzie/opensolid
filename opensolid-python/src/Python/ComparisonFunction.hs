@@ -17,7 +17,7 @@ definitions classId maybeFunction = case maybeFunction of
     let ffiFunctionName = ComparisonFunction.ffiName classId
     let helperDefinition =
           Python.lines
-            [ "def _compare(self, other: " + valueTypeName + ") -> int:"
+            [ "def _compare(self, other: " <> valueTypeName <> ") -> int:"
             , Python.indent
                 [ Python.Function.body
                     ffiFunctionName
@@ -27,9 +27,9 @@ definitions classId maybeFunction = case maybeFunction of
             ]
     let operatorDefinition name symbol =
           Python.lines
-            [ "def " + name + "(self, other: " + valueTypeName + ") -> bool:"
-            , "    \"\"\"Return ``self " + symbol + " other``.\"\"\""
-            , "    return self._compare(other) " + symbol + " 0"
+            [ "def " <> name <> "(self, other: " <> valueTypeName <> ") -> bool:"
+            , "    \"\"\"Return ``self " <> symbol <> " other``.\"\"\""
+            , "    return self._compare(other) " <> symbol <> " 0"
             ]
     Python.lines
       [ helperDefinition

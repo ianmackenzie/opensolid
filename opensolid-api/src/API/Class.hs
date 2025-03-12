@@ -704,7 +704,7 @@ addPreOverload operatorId overload [] = [(operatorId, [overload])]
 addPreOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
   if operatorId == existingId
-    then (existingId, existingOverloads + [overload]) : rest
+    then (existingId, existingOverloads <> [overload]) : rest
     else first : addPreOverload operatorId overload rest
 
 addPostOverload ::
@@ -716,7 +716,7 @@ addPostOverload operatorId overload [] = [(operatorId, [overload])]
 addPostOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
   if operatorId == existingId
-    then (existingId, existingOverloads + [overload]) : rest
+    then (existingId, existingOverloads <> [overload]) : rest
     else first : addPostOverload operatorId overload rest
 
 buildClass ::
@@ -774,7 +774,7 @@ buildClass
           buildClass
             classDocs
             rest
-            (constantsAcc + [(FFI.name name, Constant value documentation)])
+            (constantsAcc <> [(FFI.name name, Constant value documentation)])
             ctorAcc
             staticFunctionsAcc
             memberFunctionsAcc
@@ -806,7 +806,7 @@ buildClass
             rest
             constantsAcc
             ctorAcc
-            (staticFunctionsAcc + [(name, staticFunction)])
+            (staticFunctionsAcc <> [(name, staticFunction)])
             memberFunctionsAcc
             equalityFunctionAcc
             comparisonFunctionAcc
@@ -822,7 +822,7 @@ buildClass
             constantsAcc
             ctorAcc
             staticFunctionsAcc
-            (memberFunctionsAcc + [(name, memberFunction)])
+            (memberFunctionsAcc <> [(name, memberFunction)])
             equalityFunctionAcc
             comparisonFunctionAcc
             negationFunctionAcc
@@ -934,7 +934,7 @@ buildClass
             absFunctionAcc
             preOperatorsAcc
             postOperatorsAcc
-            (nestedClassesAcc + [new nestedDocstring nestedMembers])
+            (nestedClassesAcc <> [new nestedDocstring nestedMembers])
 
 ----- FUNCTION COLLECTION -----
 
@@ -1015,7 +1015,7 @@ memberFunctionInfo classId_ (functionName, memberFunction) = do
   Function
     { ffiName = MemberFunction.ffiName classId_ functionName memberFunction
     , constraint
-    , argumentTypes = List.map Pair.second arguments + [selfType]
+    , argumentTypes = List.map Pair.second arguments <> [selfType]
     , returnType
     , invoke = MemberFunction.invoke memberFunction
     }

@@ -25,12 +25,12 @@ typeName ffiType = case ffiType of
   FFI.Float -> "c_double"
   FFI.Bool -> "c_int64"
   FFI.Text -> "_Text"
-  FFI.List{} -> "_" + typeNameComponent ffiType
-  FFI.NonEmpty{} -> "_" + typeNameComponent ffiType
-  FFI.Array{} -> "_" + typeNameComponent ffiType
-  FFI.Tuple{} -> "_" + typeNameComponent ffiType
-  FFI.Maybe{} -> "_" + typeNameComponent ffiType
-  FFI.Result{} -> "_" + typeNameComponent ffiType
+  FFI.List{} -> "_" <> typeNameComponent ffiType
+  FFI.NonEmpty{} -> "_" <> typeNameComponent ffiType
+  FFI.Array{} -> "_" <> typeNameComponent ffiType
+  FFI.Tuple{} -> "_" <> typeNameComponent ffiType
+  FFI.Maybe{} -> "_" <> typeNameComponent ffiType
+  FFI.Result{} -> "_" <> typeNameComponent ffiType
   FFI.Class{} -> "c_void_p"
 
 typeNameComponent :: FFI.Type -> Text
@@ -40,20 +40,20 @@ typeNameComponent ffiType = case ffiType of
   FFI.Float -> "c_double"
   FFI.Bool -> "c_int64"
   FFI.Text -> "Text"
-  FFI.List itemType -> "List_" + typeNameComponent itemType
-  FFI.NonEmpty itemType -> "List_" + typeNameComponent itemType
-  FFI.Array itemType -> "List_" + typeNameComponent itemType
+  FFI.List itemType -> "List_" <> typeNameComponent itemType
+  FFI.NonEmpty itemType -> "List_" <> typeNameComponent itemType
+  FFI.Array itemType -> "List_" <> typeNameComponent itemType
   FFI.Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
     let numItems = List.length itemTypes
-    let prefix = "Tuple" + Text.int numItems
+    let prefix = "Tuple" <> Text.int numItems
     Text.join "_" (prefix : List.map typeNameComponent itemTypes)
-  FFI.Maybe valueType -> "Maybe_" + typeNameComponent valueType
-  FFI.Result valueType -> "Result_" + typeNameComponent valueType
+  FFI.Maybe valueType -> "Maybe_" <> typeNameComponent valueType
+  FFI.Result valueType -> "Result_" <> typeNameComponent valueType
   FFI.Class{} -> "c_void_p"
 
 dummyValue :: FFI.Type -> Text
-dummyValue ffiType = typeName ffiType + "()"
+dummyValue ffiType = typeName ffiType <> "()"
 
 dummyFieldValue :: FFI.Type -> Text
 dummyFieldValue ffiType = case ffiType of
@@ -71,67 +71,67 @@ dummyFieldValue ffiType = case ffiType of
   FFI.Class{} -> dummyValue ffiType
 
 fieldName :: Int -> Text
-fieldName index = "field" + Text.int index
+fieldName index = "field" <> Text.int index
 
 structDeclaration :: Text -> List Text -> Text
 structDeclaration name fieldTypes = do
   let fieldTuple index fieldType = Python.tuple [Python.str (fieldName index), fieldType]
   let fieldTuples = List.mapWithIndex fieldTuple fieldTypes
   Python.lines
-    [ "class " + name + "(Structure):"
-    , Python.indent ["_fields_ = " + Python.list fieldTuples]
+    [ "class " <> name <> "(Structure):"
+    , Python.indent ["_fields_ = " <> Python.list fieldTuples]
     ]
 
 outputValue :: FFI.Type -> Text -> Text
 outputValue ffiType varName = case ffiType of
   FFI.Unit -> "None"
-  FFI.Int -> varName + ".value"
-  FFI.Float -> varName + ".value"
-  FFI.Bool -> "bool(" + varName + ".value)"
-  FFI.Text -> "_text_to_str(" + varName + ")"
+  FFI.Int -> varName <> ".value"
+  FFI.Float -> varName <> ".value"
+  FFI.Bool -> "bool(" <> varName <> ".value)"
+  FFI.Text -> "_text_to_str(" <> varName <> ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.NonEmpty itemType -> listOutputValue itemType varName
   FFI.Array itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
-  FFI.Class id -> Python.Class.qualifiedName id + "._new(" + varName + ")"
+  FFI.Class id -> Python.Class.qualifiedName id <> "._new(" <> varName <> ")"
 
 fieldOutputValue :: FFI.Type -> Text -> Text
 fieldOutputValue ffiType varName = case ffiType of
   FFI.Unit -> "None"
   FFI.Int -> varName
   FFI.Float -> varName
-  FFI.Bool -> "bool(" + varName + ")"
-  FFI.Text -> "_text_to_str(" + varName + ")"
+  FFI.Bool -> "bool(" <> varName <> ")"
+  FFI.Text -> "_text_to_str(" <> varName <> ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.NonEmpty itemType -> listOutputValue itemType varName
   FFI.Array itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
-  FFI.Class id -> Python.Class.qualifiedName id + "._new(c_void_p(" + varName + "))"
+  FFI.Class id -> Python.Class.qualifiedName id <> "._new(c_void_p(" <> varName <> "))"
 
 listOutputValue :: FFI.Type -> Text -> Text
 listOutputValue itemType varName =
-  "[" + fieldOutputValue itemType "item" + " for item in [" + varName + ".field1[index] for index in range(" + varName + ".field0)]]"
+  "[" <> fieldOutputValue itemType "item" <> " for item in [" <> varName <> ".field1[index] for index in range(" <> varName <> ".field0)]]"
 
 tupleOutputValue :: Text -> FFI.Type -> FFI.Type -> List FFI.Type -> Text
 tupleOutputValue varName type1 type2 rest = do
   let itemTypes = type1 : type2 : rest
-  let itemValue index itemType = fieldOutputValue itemType (varName + "." + fieldName index)
+  let itemValue index itemType = fieldOutputValue itemType (varName <> "." <> fieldName index)
   Python.tuple (List.mapWithIndex itemValue itemTypes)
 
 maybeOutputValue :: FFI.Type -> Text -> Text
 maybeOutputValue valueType varName =
-  "(" + fieldOutputValue valueType (varName + ".field1") + " if " + varName + ".field0 == 0 else None)"
+  "(" <> fieldOutputValue valueType (varName <> ".field1") <> " if " <> varName <> ".field0 == 0 else None)"
 
 resultOutputValue :: FFI.Type -> Text -> Text
 resultOutputValue valueType varName = do
-  let isSuccess = varName + ".field0 == 0"
-  let success = fieldOutputValue valueType (varName + ".field2")
-  let failure = "_error(_text_to_str(" + varName + ".field1))"
-  "(" + success + " if " + isSuccess + " else " + failure + ")"
+  let isSuccess = varName <> ".field0 == 0"
+  let success = fieldOutputValue valueType (varName <> ".field2")
+  let failure = "_error(_text_to_str(" <> varName <> ".field1))"
+  "(" <> success <> " if " <> isSuccess <> " else " <> failure <> ")"
 
 argumentValue :: List (Text, FFI.Type) -> Text
 argumentValue [] = "c_void_p()"
@@ -145,17 +145,17 @@ argumentValue arguments@((_, type1) : (_, type2) : rest) = do
 singleArgument :: Text -> FFI.Type -> Text
 singleArgument varName ffiType = case ffiType of
   FFI.Unit -> "c_int64()"
-  FFI.Int -> "c_int64(" + varName + ")"
-  FFI.Float -> "c_double(" + varName + ")"
-  FFI.Bool -> "c_int64(" + varName + ")"
-  FFI.Text -> "_str_to_text(" + varName + ")"
+  FFI.Int -> "c_int64(" <> varName <> ")"
+  FFI.Float -> "c_double(" <> varName <> ")"
+  FFI.Bool -> "c_int64(" <> varName <> ")"
+  FFI.Text -> "_str_to_text(" <> varName <> ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
   FFI.Array itemType -> nonEmptyArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
-  FFI.Class{} -> varName + "._ptr"
+  FFI.Class{} -> varName <> "._ptr"
 
 fieldArgumentValue :: Text -> FFI.Type -> Text
 fieldArgumentValue varName ffiType = case ffiType of
@@ -163,31 +163,31 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Int -> varName
   FFI.Float -> varName
   FFI.Bool -> varName
-  FFI.Text -> "_str_to_text(" + varName + ")"
+  FFI.Text -> "_str_to_text(" <> varName <> ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
   FFI.Array itemType -> nonEmptyArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
-  FFI.Class{} -> varName + "._ptr"
+  FFI.Class{} -> varName <> "._ptr"
 
 listArgumentValue :: FFI.Type -> FFI.Type -> Text -> Text
 listArgumentValue listType itemType varName = do
-  let arrayType = "(" + typeName itemType + " * len(" + varName + "))"
-  let arrayItems = "[" + singleArgument "item" itemType + " for item in " + varName + "]"
-  let array = arrayType + "(*" + arrayItems + ")"
-  "_list_argument(" + typeName listType + "," + array + ")"
+  let arrayType = "(" <> typeName itemType <> " * len(" <> varName <> "))"
+  let arrayItems = "[" <> singleArgument "item" itemType <> " for item in " <> varName <> "]"
+  let array = arrayType <> "(*" <> arrayItems <> ")"
+  "_list_argument(" <> typeName listType <> "," <> array <> ")"
 
 nonEmptyArgumentValue :: FFI.Type -> Text -> Text
 nonEmptyArgumentValue itemType varName = do
   let listValue = listArgumentValue (FFI.List itemType) itemType varName
-  "(" + listValue + " if " + varName + " else _error('List is empty'))"
+  "(" <> listValue <> " if " <> varName <> " else _error('List is empty'))"
 
 tupleArgumentValue :: FFI.Type -> FFI.Type -> FFI.Type -> List FFI.Type -> Text -> Text
 tupleArgumentValue tupleType type1 type2 rest varName = do
   let itemTypes = type1 : type2 : rest
-  let itemValue index itemType = fieldArgumentValue (varName + "[" + Text.int index + "]") itemType
+  let itemValue index itemType = fieldArgumentValue (varName <> "[" <> Text.int index <> "]") itemType
   Python.call (typeName tupleType) (List.mapWithIndex itemValue itemTypes)
 
 maybeArgumentValue :: FFI.Type -> FFI.Type -> Text -> Text
@@ -195,7 +195,7 @@ maybeArgumentValue maybeType valueType varName = do
   let constructor = typeName maybeType
   let justExpression = Python.call constructor ["0", fieldArgumentValue varName valueType]
   let nothingExpression = Python.call constructor ["1", dummyFieldValue valueType]
-  "(" + justExpression + " if " + varName + " is not None else " + nothingExpression + ")"
+  "(" <> justExpression <> " if " <> varName <> " is not None else " <> nothingExpression <> ")"
 
 registerType :: FFI.Type -> Registry -> Registry
 registerType ffiType registry = do
@@ -249,4 +249,4 @@ registerResult resultType valueType registry = do
 
 invoke :: Text -> Text -> Text -> Text
 invoke ffiFunctionName inputPtr outputPtr =
-  Python.call ("_lib." + ffiFunctionName) [inputPtr, outputPtr]
+  Python.call ("_lib." <> ffiFunctionName) [inputPtr, outputPtr]

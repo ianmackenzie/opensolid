@@ -337,7 +337,7 @@ gltfMeshes parentFrame entity = case entity of
   Placed frame child -> gltfMeshes (Frame3d.placeIn parentFrame frame) child
 
 meshBuilder :: GltfMesh space -> Builder
-meshBuilder GltfMesh{indices, vertices} = indices + vertices
+meshBuilder GltfMesh{indices, vertices} = indices <> vertices
 
 meshByteLength :: GltfMesh space -> Int
 meshByteLength GltfMesh{indicesByteLength, verticesByteLength} =

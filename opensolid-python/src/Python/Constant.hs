@@ -15,7 +15,7 @@ declaration :: (Name, Constant) -> Text
 declaration (name, (Constant value documentation)) = do
   let typeName = Python.Type.qualifiedName (Constant.valueType value)
   Python.lines
-    [ FFI.snakeCase name + ": " + typeName + " = None # type: ignore[assignment]"
+    [ FFI.snakeCase name <> ": " <> typeName <> " = None # type: ignore[assignment]"
     , Python.docstring documentation
     , ""
     ]
@@ -26,13 +26,13 @@ definition classId (name, (Constant value _)) = do
   let ffiFunctionName = Constant.ffiName classId name
   let constantName = FFI.snakeCase name
   let className = Python.Class.qualifiedName classId
-  let helperFunctionName = "_" + Text.toLower className + "_" + constantName
+  let helperFunctionName = "_" <> Text.toLower className <> "_" <> constantName
   Python.lines
-    [ "def " + helperFunctionName + "() -> " + Python.Type.qualifiedName valueType + ":"
+    [ "def " <> helperFunctionName <> "() -> " <> Python.Type.qualifiedName valueType <> ":"
     , Python.indent
-        [ "output = " + Python.FFI.dummyValue valueType
+        [ "output = " <> Python.FFI.dummyValue valueType
         , Python.FFI.invoke ffiFunctionName "c_void_p()" "ctypes.byref(output)"
-        , "return " + Python.FFI.outputValue valueType "output"
+        , "return " <> Python.FFI.outputValue valueType "output"
         ]
-    , className + "." + constantName + " = " + helperFunctionName + "()"
+    , className <> "." <> constantName <> " = " <> helperFunctionName <> "()"
     ]

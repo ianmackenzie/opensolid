@@ -16,7 +16,7 @@ main = do
         , "opensolid_free"
         , "opensolid_release"
         ]
-  let functionNames = builtins + List.map Function.ffiName API.functions
+  let functionNames = builtins <> List.map Function.ffiName API.functions
   let lines = "EXPORTS" : List.map (Text.indent " ") functionNames
   let contents = Text.join "\r\n" lines
   IO.writeUtf8 "opensolid-ffi/opensolid-ffi.def" contents

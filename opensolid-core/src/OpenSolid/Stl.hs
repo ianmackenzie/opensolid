@@ -94,15 +94,20 @@ triangleText units (v0, v1, v2) = do
   let crossProduct = (p1 - p0) `cross'` (p2 - p0)
   let Vector3d nx ny nz = Vector3d.normalize crossProduct
   Text.multiline
-    [ "facet normal " + Text.float nx + " " + Text.float ny + " " + Text.float nz
+    [ "facet normal " <> Text.float nx <> " " <> Text.float ny <> " " <> Text.float nz
     , "    outer loop"
-    , "        " + vertex units p0
-    , "        " + vertex units p1
-    , "        " + vertex units p2
+    , "        " <> vertex units p0
+    , "        " <> vertex units p1
+    , "        " <> vertex units p2
     , "    endloop"
     , "endfacet"
     ]
 
 vertex :: (Qty units -> Float) -> Point3d (space @ units) -> Text
 vertex units (Point3d px py pz) =
-  "vertex " + Text.float (units px) + " " + Text.float (units py) + " " + Text.float (units pz)
+  "vertex "
+    <> Text.float (units px)
+    <> " "
+    <> Text.float (units py)
+    <> " "
+    <> Text.float (units pz)

@@ -9,7 +9,7 @@ import OpenSolid.Prelude
 sayHello :: Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
 sayHello request respond = respond $
   case Request.parameterValues "name" request of
-    [name] -> Response.ok [] (Response.text ("Hello, " + name + "!"))
+    [name] -> Response.ok [] (Response.text ("Hello, " <> name <> "!"))
     [] -> Response.badRequest "Expected a 'name' query parameter"
     _ -> Response.badRequest "Got multiple 'name' query parameters"
 

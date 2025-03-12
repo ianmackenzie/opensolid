@@ -31,5 +31,5 @@ runOnPort portNumber application = IO.do
   let settings =
         Warp.defaultSettings
           |> Warp.setPort portNumber
-          |> Warp.setBeforeMainLoop (IO.printLine ("Listening on port " + Text.int portNumber))
+          |> Warp.setBeforeMainLoop (IO.printLine ("Listening on port " <> Text.int portNumber))
   Warp.runSettings settings application

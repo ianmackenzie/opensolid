@@ -38,8 +38,8 @@ main = Tolerance.using Length.nanometer IO.do
         , Curve2d.line p3 p4
         , Curve2d.line p4 p5
         ]
-  let topCurves = topRightCurves + List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
-  let allCurves = topCurves + List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
+  let topCurves = topRightCurves <> List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
+  let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- Region2d.boundedBy allCurves
   body <- Body3d.extruded Plane3d.yz profile (Range (-0.5 * length) (0.5 * length))
   let meshConstraints = NonEmpty.one (Mesh.maxError (Length.millimeters 1.0))

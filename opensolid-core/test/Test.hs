@@ -88,7 +88,7 @@ run tests = IO.do
 reportError :: Text -> List Text -> IO (Int, Int)
 reportError context messages = IO.do
   System.Console.ANSI.setSGR [System.Console.ANSI.SetColor System.Console.ANSI.Foreground System.Console.ANSI.Vivid System.Console.ANSI.Red]
-  IO.printLine (context + " failed:")
+  IO.printLine (context <> " failed:")
   System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
   IO.forEach messages (Text.indent "   " >> IO.printLine)
   IO.succeed (0, 1)
@@ -106,9 +106,9 @@ runImpl args context test = case test of
           -- Test filter specified, so print out which tests we're running
           -- and how long they took (with an extra emoji to flag slow tests)
           (results, elapsed) <- IO.time (fuzzImpl fullName count initialSeed generator)
-          let elapsedText = fixed 3 (Duration.inSeconds elapsed) + "s"
+          let elapsedText = fixed 3 (Duration.inSeconds elapsed) <> "s"
           let elapsedSuffix = if elapsed > Duration.seconds 0.1 then " ⏲️" else ""
-          IO.printLine (fullName + ": " + elapsedText + elapsedSuffix)
+          IO.printLine (fullName <> ": " <> elapsedText <> elapsedSuffix)
           IO.succeed results
       | otherwise ->
           -- Current test didn't match filter, so return 0 successes and 0 failures
@@ -119,12 +119,12 @@ runImpl args context test = case test of
 
 fixed :: Int -> Float -> Text
 fixed decimalPlaces value = do
-  let formatString = "%." + Text.int decimalPlaces + "f"
+  let formatString = "%." <> Text.int decimalPlaces <> "f"
   Text.pack (Text.Printf.printf (Text.unpack formatString) (Float.toDouble value))
 
 appendTo :: Text -> Text -> Text
 appendTo "" name = name
-appendTo context name = context + "." + name
+appendTo context name = context <> "." <> name
 
 sum :: List (Int, Int) -> (Int, Int)
 sum [] = (0, 0)
@@ -157,7 +157,7 @@ combineTestResults [] = Passed
 combineTestResults (Passed : rest) = combineTestResults rest
 combineTestResults (Failed messages : rest) = case combineTestResults rest of
   Passed -> Failed messages
-  Failed restMessages -> Failed (messages + restMessages)
+  Failed restMessages -> Failed (messages <> restMessages)
 
 all :: List Expectation -> Expectation
 all expectations =
@@ -169,14 +169,14 @@ output label value (Expectation generator) =
 
 addOutput :: Show a => Text -> a -> TestResult -> TestResult
 addOutput _ _ Passed = Passed
-addOutput label value (Failed messages) = Failed (messages + [label + ": " + Text.show value])
+addOutput label value (Failed messages) = Failed (messages <> [label <> ": " <> Text.show value])
 
 newtype Lines a = Lines (List a)
 
 instance Show a => Show (Lines a) where
   show (Lines values) =
     Text.unpack $
-      Text.concat (List.map (\value -> "\n  " + Text.show value) values)
+      Text.concat (List.map (\value -> "\n  " <> Text.show value) values)
 
 lines :: (Data.Foldable.Foldable container, Show a) => container a -> Lines a
 lines container = Lines (Data.Foldable.toList container)

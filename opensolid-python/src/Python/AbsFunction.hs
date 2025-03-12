@@ -16,7 +16,7 @@ definition classId maybeFunction = case maybeFunction of
     let valueTypeName = Python.Type.qualifiedName valueType
     let ffiFunctionName = AbsFunction.ffiName classId
     Python.lines
-      [ "def __abs__(self) -> " + valueTypeName + ":"
+      [ "def __abs__(self) -> " <> valueTypeName <> ":"
       , Python.indent
           [ Python.docstring "Return ``abs(self)``."
           , Python.Function.body ffiFunctionName [("self", valueType)] valueType

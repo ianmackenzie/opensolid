@@ -4,7 +4,6 @@ module OpenSolid.Error
   )
 where
 
-import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Text qualified as Text
 
@@ -20,4 +19,4 @@ instance Message Text where
 
 addContext :: Text -> Text -> Text
 addContext context "" = context
-addContext context existing = context + ":\n" + Text.indent "  " existing
+addContext context existing = context <> ":\n" <> Text.indent "  " existing

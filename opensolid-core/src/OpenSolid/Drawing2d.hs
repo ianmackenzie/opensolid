@@ -72,11 +72,11 @@ instance FFI (Attribute space) where
 entityText :: Text -> Entity space -> Maybe Text
 entityText _ Empty = Nothing
 entityText indent (Node name attributes children) = do
-  let attributeLines = List.map (attributeText ("\n" + indent + "   ")) attributes
-  let openingTag = indent + "<" + name + Text.concat attributeLines + ">"
-  let childLines = Maybe.collect (entityText (indent + "  ")) children
-  let closingTag = indent + "</" + name + ">"
-  Just (Text.multiline (openingTag : childLines) + "\n" + closingTag)
+  let attributeLines = List.map (attributeText ("\n" <> indent <> "   ")) attributes
+  let openingTag = indent <> "<" <> name <> Text.concat attributeLines <> ">"
+  let childLines = Maybe.collect (entityText (indent <> "  ")) children
+  let closingTag = indent <> "</" <> name <> ">"
+  Just (Text.multiline (openingTag : childLines) <> "\n" <> closingTag)
 
 attributeText :: Text -> Attribute space -> Text
 attributeText indent (Attribute name value) = Text.concat [indent, name, "=\"", value, "\""]
@@ -97,8 +97,8 @@ toSvg viewBox entities = do
   let attributes =
         [ Attribute "xmlns" "http://www.w3.org/2000/svg"
         , Attribute "version" "1.1"
-        , Attribute "width" (lengthText width + "mm")
-        , Attribute "height" (lengthText height + "mm")
+        , Attribute "width" (lengthText width <> "mm")
+        , Attribute "height" (lengthText height <> "mm")
         , Attribute "viewBox" $
             Text.join " " $
               [ lengthText x1
@@ -112,7 +112,7 @@ toSvg viewBox entities = do
         ]
   Text.multiline
     [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-    , Maybe.withDefault "" (entityText "" (Node "svg" attributes entities)) + "\n"
+    , Maybe.withDefault "" (entityText "" (Node "svg" attributes entities)) <> "\n"
     ]
 
 {-| Render SVG to a file.
@@ -184,7 +184,7 @@ pointsAttribute givenPoints =
 coordinatesText :: Point space -> Text
 coordinatesText point = do
   let (x, y) = Point2d.coordinates point
-  lengthText x + "," + lengthText -y
+  lengthText x <> "," <> lengthText -y
 
 lengthText :: Length -> Text
 lengthText givenLength = Text.float (Length.inMillimeters givenLength)

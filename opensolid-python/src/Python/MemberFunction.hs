@@ -21,9 +21,9 @@ definition classId (functionName, memberFunction) = do
   let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
   let normalArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
   let selfArgument = ("self", selfType)
-  let allArguments = maybeToleranceArgument + normalArguments + [selfArgument]
+  let allArguments = List.maybe maybeToleranceArgument <> normalArguments <> [selfArgument]
   Python.lines
-    [ "def " + FFI.snakeCase functionName + "(" + functionArguments + ") -> " + Python.Type.qualifiedName returnType + ":"
+    [ "def " <> FFI.snakeCase functionName <> "(" <> functionArguments <> ") -> " <> Python.Type.qualifiedName returnType <> ":"
     , Python.indent
         [ Python.docstring (MemberFunction.documentation memberFunction)
         , Python.Function.body ffiFunctionName allArguments returnType

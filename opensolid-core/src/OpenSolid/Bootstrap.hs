@@ -16,6 +16,7 @@ module OpenSolid.Bootstrap
   , not
   , (&&)
   , (||)
+  , (<>)
   , IO
   , Async
   , Maybe (Just, Nothing)
@@ -55,6 +56,7 @@ import Prelude
   , otherwise
   , ($)
   , (&&)
+  , (<>)
   , (||)
   )
 import Prelude qualified

@@ -30,8 +30,9 @@ module OpenSolid.NonEmpty
   , rest
   , last
   , toList
+  , push
   , prepend
-  , append
+  , extend
   , length
   , map
   , mapWithIndex
@@ -209,11 +210,16 @@ last = Data.List.NonEmpty.last
 toList :: NonEmpty a -> List a
 toList (x :| xs) = x : xs
 
-prepend :: a -> NonEmpty a -> NonEmpty a
-prepend = Data.List.NonEmpty.cons
+push :: a -> NonEmpty a -> NonEmpty a
+push x (y :| ys) = x :| (y : ys)
 
-append :: a -> NonEmpty a -> NonEmpty a
-append value nonEmpty = nonEmpty + [value]
+prepend :: List a -> NonEmpty a -> NonEmpty a
+prepend [] nonEmpty = nonEmpty
+prepend (NonEmpty prefix) nonEmpty = prefix <> nonEmpty
+
+extend :: NonEmpty a -> List a -> NonEmpty a
+extend nonEmpty [] = nonEmpty
+extend nonEmpty (NonEmpty suffix) = nonEmpty <> suffix
 
 length :: NonEmpty a -> Int
 length = Data.List.NonEmpty.length
@@ -325,7 +331,7 @@ dedup :: Eq a => a -> List a -> NonEmpty a
 dedup current [] = current :| []
 dedup current (next : remaining)
   | current == next = dedup current remaining
-  | otherwise = prepend current (dedup next remaining)
+  | otherwise = push current (dedup next remaining)
 
 allSatisfy :: (a -> Bool) -> NonEmpty a -> Bool
 allSatisfy = Prelude.all

@@ -55,7 +55,7 @@ name input =
     first : rest ->
       if NonEmpty.allSatisfy isCapitalized (first :| rest)
         then Name (first :| rest)
-        else internalError ("API name has non-capitalized component: " + input)
+        else internalError ("API name has non-capitalized component: " <> input)
     _ -> internalError "Text.split should always return at least one component"
 
 isCapitalized :: Text -> Bool
@@ -65,7 +65,7 @@ pascalCase :: Name -> Text
 pascalCase (Name components) = Text.concat (NonEmpty.toList components)
 
 camelCase :: Name -> Text
-camelCase (Name (first :| rest)) = Text.toLower first + Text.concat rest
+camelCase (Name (first :| rest)) = Text.toLower first <> Text.concat rest
 
 snakeCase :: Name -> Text
 snakeCase (Name components) = Text.join "_" (List.map Text.toLower (NonEmpty.toList components))
@@ -224,15 +224,15 @@ typeName ffiType = case ffiType of
   Float -> "Float"
   Bool -> "Bool"
   Text -> "Text"
-  List itemType -> "List" + typeName itemType
-  NonEmpty itemType -> "NonEmpty" + typeName itemType
-  Array itemType -> "Array" + typeName itemType
+  List itemType -> "List" <> typeName itemType
+  NonEmpty itemType -> "NonEmpty" <> typeName itemType
+  Array itemType -> "Array" <> typeName itemType
   Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
     let tupleSize = List.length itemTypes
-    "Tuple" + Text.int tupleSize + Text.concat (List.map typeName itemTypes)
-  Maybe valueType -> "Maybe" + typeName valueType
-  Result valueType -> "Result" + typeName valueType
+    "Tuple" <> Text.int tupleSize <> Text.concat (List.map typeName itemTypes)
+  Maybe valueType -> "Maybe" <> typeName valueType
+  Result valueType -> "Result" <> typeName valueType
   Class id -> className id
 
 className :: Id a -> Text

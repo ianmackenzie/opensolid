@@ -16,7 +16,7 @@ definition classId maybeFunction = case maybeFunction of
     let valueTypeName = Python.Type.qualifiedName valueType
     let ffiFunctionName = NegationFunction.ffiName classId
     Python.lines
-      [ "def __neg__(self) -> " + valueTypeName + ":"
+      [ "def __neg__(self) -> " <> valueTypeName <> ":"
       , Python.indent
           [ Python.docstring "Return ``-self``."
           , Python.Function.body ffiFunctionName [("self", valueType)] valueType

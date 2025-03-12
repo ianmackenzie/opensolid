@@ -89,7 +89,7 @@ splitAt :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
 splitAt 0 _ = internalError "Bad split index in Set2d.new"
 splitAt _ (_ :| []) = internalError "Bad split index in Set2d.new"
 splitAt 1 (first :| NonEmpty rest) = (NonEmpty.one first, rest)
-splitAt n (first :| NonEmpty rest) = Pair.mapFirst (NonEmpty.prepend first) (splitAt (n - 1) rest)
+splitAt n (first :| NonEmpty rest) = Pair.mapFirst (NonEmpty.push first) (splitAt (n - 1) rest)
 
 toNonEmpty :: Set2d a (space @ units) -> NonEmpty a
 toNonEmpty (Node _ leftChild rightChild) = gather leftChild (toNonEmpty rightChild)
@@ -101,7 +101,7 @@ toList = toNonEmpty >> NonEmpty.toList
 gather :: Set2d a (space @ units) -> NonEmpty a -> NonEmpty a
 gather set accumulated = case set of
   Node _ leftChild rightChild -> gather leftChild (gather rightChild accumulated)
-  Leaf _ item -> NonEmpty.prepend item accumulated
+  Leaf _ item -> NonEmpty.push item accumulated
 
 union :: Set2d a (space @ units) -> Set2d a (space @ units) -> Set2d a (space @ units)
 union left right = do

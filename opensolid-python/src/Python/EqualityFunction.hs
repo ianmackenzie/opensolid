@@ -23,7 +23,7 @@ definition classId maybeFunction = case maybeFunction of
           , "(one which will return true if two values are *almost* equal)"
           , "you'll likely want to use an ``is_zero()`` method instead."
           , "\"\"\""
-          , "if not isinstance(other, " + Python.Type.qualifiedName valueType + "):"
+          , "if not isinstance(other, " <> Python.Type.qualifiedName valueType <> "):"
           , "    return False"
           , Python.Function.body
               ffiFunctionName

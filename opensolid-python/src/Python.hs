@@ -23,24 +23,24 @@ stripBlank :: Text -> Text
 stripBlank text = if Text.strip text == "" then "" else text
 
 str :: Text -> Text
-str contents = "\"" + contents + "\""
+str contents = "\"" <> contents <> "\""
 
 list :: List Text -> Text
-list entries = "[" + Text.join "," entries + "]"
+list entries = "[" <> Text.join "," entries <> "]"
 
 tuple :: List Text -> Text
 tuple [] = "()"
-tuple [entry] = "(" + entry + ",)"
-tuple entries = "(" + Text.join "," entries + ")"
+tuple [entry] = "(" <> entry <> ",)"
+tuple entries = "(" <> Text.join "," entries <> ")"
 
 call :: Text -> List Text -> Text
-call function arguments = function + "(" + Text.join "," arguments + ")"
+call function arguments = function <> "(" <> Text.join "," arguments <> ")"
 
 docstring :: Text -> Text
 docstring text = do
   let stripped = if Text.startsWith " " text then Text.drop 1 text else text
   let padded =
         if Text.contains "\n" stripped && not (Text.endsWith "\n" stripped)
-          then stripped + "\n"
+          then stripped <> "\n"
           else stripped
-  "\"\"\"" + padded + "\"\"\""
+  "\"\"\"" <> padded <> "\"\"\""

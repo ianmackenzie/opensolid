@@ -33,7 +33,6 @@ where
 import Data.Char qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified
-import OpenSolid.Arithmetic
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
@@ -87,7 +86,7 @@ indent :: Text -> Text -> Text
 indent indentation paragraph =
   paragraph
     |> lines
-    |> List.map (indentation +)
+    |> List.map (indentation <>)
     |> multiline
 
 repeat :: Int -> Text -> Text

@@ -352,7 +352,7 @@ hermite (startValue, startDerivatives) (endValue, endDerivatives) = do
   let endControlPoints =
         List.reverse $
           derivedControlPoints endValue 1 (numEndDerivatives + 1) scaledEndDerivatives
-  let controlPoints = startValue :| (startControlPoints + endControlPoints + [endValue])
+  let controlPoints = startValue :| (startControlPoints <> endControlPoints <> [endValue])
   bezier controlPoints
 
 quadraticSpline :: Qty units -> Qty units -> Qty units -> Curve units
@@ -585,7 +585,7 @@ findZerosOrder k derivatives subdomain derivativeBounds
               let rightRange = Range t0 (Range.upperBound tRange)
               leftZeros <- solveMonotonic k currentDerivative nextDerivative leftRange
               rightZeros <- solveMonotonic k currentDerivative nextDerivative rightRange
-              Resolved (leftZeros + rightZeros)
+              Resolved (leftZeros <> rightZeros)
         List.TwoOrMore -> Unresolved
 
 solveMonotonic ::

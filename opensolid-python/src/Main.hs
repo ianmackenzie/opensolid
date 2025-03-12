@@ -207,16 +207,16 @@ classDefinition
     let (nestedClassDefinitions, nestedClassConstants) = List.unzip2 (List.map classDefinition nestedClasses)
     let definition =
           Python.lines
-            [ "class " + Python.Class.unqualifiedName classId + ":"
+            [ "class " <> Python.Class.unqualifiedName classId <> ":"
             , Python.indent [Python.docstring documentation]
             , Python.indent ["_ptr: c_void_p"]
             , Python.indent [Python.Constructor.definition classId maybeConstructor]
             , Python.indent
                 [ "@staticmethod"
-                , "def _new(ptr: c_void_p) -> " + Python.Class.qualifiedName classId + ":"
+                , "def _new(ptr: c_void_p) -> " <> Python.Class.qualifiedName classId <> ":"
                 , Python.indent
                     [ "\"\"\"Construct directly from an underlying C pointer.\"\"\""
-                    , "obj = object.__new__(" + Python.Class.qualifiedName classId + ")"
+                    , "obj = object.__new__(" <> Python.Class.qualifiedName classId <> ")"
                     , "obj._ptr = ptr"
                     , "return obj"
                     ]
@@ -241,7 +241,7 @@ classDefinition
             , Python.indent nestedClassDefinitions
             ]
     let constantDefinitions =
-          Python.lines ((List.map (Python.Constant.definition classId) constants) + nestedClassConstants)
+          Python.lines ((List.map (Python.Constant.definition classId) constants) <> nestedClassConstants)
     (definition, constantDefinitions)
 
 extraMemberFunctions :: Text -> Text
@@ -355,7 +355,7 @@ registerArgumentTypes :: Maybe Constraint -> List FFI.Type -> Registry -> Regist
 registerArgumentTypes maybeConstraint argumentTypes registry = do
   let toleranceType constraint = Pair.second (Python.Function.toleranceArgument constraint)
   let maybeToleranceType = Maybe.map toleranceType maybeConstraint
-  case maybeToleranceType + argumentTypes of
+  case List.maybe maybeToleranceType <> argumentTypes of
     [] -> registry
     [type1] -> Python.FFI.registerType type1 registry
     type1 : type2 : rest -> Python.FFI.registerType (FFI.Tuple type1 type2 rest) registry

@@ -53,7 +53,7 @@ import OpenSolid.Volume qualified as Volume
 data Global deriving (Eq, Show)
 
 log :: Show a => Text -> a -> IO ()
-log label value = IO.printLine (label + ": " + Text.show value)
+log label value = IO.printLine (label <> ": " <> Text.show value)
 
 testScalarArithmetic :: IO ()
 testScalarArithmetic = IO.do
@@ -132,7 +132,6 @@ testListOperations :: IO ()
 testListOperations = IO.do
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
   log "Successive intervals" (List.successive Range [1.0, 2.0, 3.0, 4.0])
-  log "Prepend Maybe to List" (Just 1 + [2, 3])
 
 getCrossProduct :: Tolerance Meters => Result Text Float
 getCrossProduct = Result.addContext "In getCrossProduct" Result.do
@@ -180,7 +179,7 @@ testParameter1dGeneration = IO.do
 testEmptyCheck :: List Int -> IO ()
 testEmptyCheck [] = IO.printLine "List is empty"
 testEmptyCheck (NonEmpty nonEmpty) =
-  IO.printLine ("List is non-empty, maximum is " + Text.int (NonEmpty.maximum nonEmpty))
+  IO.printLine ("List is non-empty, maximum is " <> Text.int (NonEmpty.maximum nonEmpty))
 
 testNonEmpty :: IO ()
 testNonEmpty = IO.do
@@ -338,7 +337,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2d.convert toDrawing startPoint
   let drawingEndPoint = Point2d.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
-  let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints + [drawingEndPoint])
+  let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
   let curve = Curve2d.bezier drawingControlPoints
   let drawSegmentBounds tRange = drawBounds [] (Curve2d.evaluateBounds curve tRange)
   Drawing2d.with
@@ -403,7 +402,7 @@ testDebugPrint = do
   Debug.log "xs" xs
   let ys = Text.repeat 3 "y"
   Debug.log "ys" ys
-  IO.printLine (xs + ys)
+  IO.printLine (xs <> ys)
 
 textSum :: Text -> Text -> Result Text Int
 textSum t1 t2 = Result.do

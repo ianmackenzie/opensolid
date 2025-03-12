@@ -40,5 +40,4 @@ edges (Polygon2d (v0 :| vs)) = collectEdges v0 v0 vs
 collectEdges :: vertex -> vertex -> List vertex -> NonEmpty (LineSegment2d vertex)
 collectEdges first current remaining = case remaining of
   [] -> NonEmpty.one (LineSegment2d current first)
-  next : following ->
-    NonEmpty.prepend (LineSegment2d current next) (collectEdges first next following)
+  next : following -> NonEmpty.push (LineSegment2d current next) (collectEdges first next following)

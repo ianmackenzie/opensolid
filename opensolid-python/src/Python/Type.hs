@@ -13,12 +13,12 @@ qualifiedName ffiType = case ffiType of
   FFI.Float -> "float"
   FFI.Bool -> "bool"
   FFI.Text -> "str"
-  FFI.List itemType -> "list[" + qualifiedName itemType + "]"
-  FFI.NonEmpty itemType -> "list[" + qualifiedName itemType + "]"
-  FFI.Array itemType -> "list[" + qualifiedName itemType + "]"
+  FFI.List itemType -> "list[" <> qualifiedName itemType <> "]"
+  FFI.NonEmpty itemType -> "list[" <> qualifiedName itemType <> "]"
+  FFI.Array itemType -> "list[" <> qualifiedName itemType <> "]"
   FFI.Tuple first second rest -> do
     let itemTypeNames = List.map qualifiedName (first : second : rest)
-    "tuple[" + Text.join "," itemTypeNames + "]"
-  FFI.Maybe valueType -> qualifiedName valueType + " | None"
+    "tuple[" <> Text.join "," itemTypeNames <> "]"
+  FFI.Maybe valueType -> qualifiedName valueType <> " | None"
   FFI.Result valueType -> qualifiedName valueType
   FFI.Class id -> Python.Class.qualifiedName id

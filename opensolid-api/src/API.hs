@@ -639,7 +639,7 @@ point2d =
     , plus @(Vector2d (Space @ Meters)) Self
     , minus @(Curve2d (Space @ Meters)) Self
     ]
-      + affineTransformations2d Point2d.transformBy
+      <> affineTransformations2d Point2d.transformBy
 
 uvPoint :: Class
 uvPoint =
@@ -656,7 +656,7 @@ uvPoint =
     , minus @(Vector2d (Space @ Unitless)) Self
     , plus @(Vector2d (Space @ Unitless)) Self
     ]
-      + affineTransformations2d Point2d.transformBy
+      <> affineTransformations2d Point2d.transformBy
 
 bounds2d :: Class
 bounds2d =
@@ -672,7 +672,7 @@ bounds2d =
     , plus @(Vector2d (Space @ Meters)) Self
     , minus @(Vector2d (Space @ Meters)) Self
     ]
-      + affineTransformations2d Bounds2d.transformBy
+      <> affineTransformations2d Bounds2d.transformBy
 
 uvBounds :: Class
 uvBounds =
@@ -688,7 +688,7 @@ uvBounds =
     , plus @(Vector2d (Space @ Unitless)) Self
     , minus @(Vector2d (Space @ Unitless)) Self
     ]
-      + affineTransformations2d Bounds2d.transformBy
+      <> affineTransformations2d Bounds2d.transformBy
 
 curve :: Class
 curve =
@@ -832,7 +832,7 @@ axis2d =
     [ constant "X" (Axis2d.x @Space @Meters) $(docs 'Axis2d.x)
     , constant "Y" (Axis2d.y @Space @Meters) $(docs 'Axis2d.y)
     ]
-      + orthonormalTransformations2d Axis2d.transformBy
+      <> orthonormalTransformations2d Axis2d.transformBy
 
 uvAxis :: Class
 uvAxis =
@@ -1014,7 +1014,7 @@ point3d =
     , minus @(Vector3d (Space @ Meters)) Self
     , plus @(Vector3d (Space @ Meters)) Self
     ]
-      + affineTransformations3d Point3d.transformBy
+      <> affineTransformations3d Point3d.transformBy
 
 bounds3d :: Class
 bounds3d =
@@ -1031,7 +1031,7 @@ bounds3d =
     , plus @(Vector3d (Space @ Meters)) Self
     , minus @(Vector3d (Space @ Meters)) Self
     ]
-      + affineTransformations3d Bounds3d.transformBy
+      <> affineTransformations3d Bounds3d.transformBy
 
 axis3d :: Class
 axis3d =
@@ -1045,7 +1045,7 @@ axis3d =
     , member1 "Move To" "Point" Axis3d.moveTo $(docs 'Axis3d.moveTo)
     , member0 "Reverse" Axis3d.reverse $(docs 'Axis3d.reverse)
     ]
-      + orthonormalTransformations3d Axis3d.transformBy
+      <> orthonormalTransformations3d Axis3d.transformBy
 
 plane3d :: Class
 plane3d =
@@ -1074,7 +1074,7 @@ plane3d =
     , member0 "Flip Y" Plane3d.flipY $(docs 'Plane3d.flipY)
     , member1 "Offset By" "Distance" Plane3d.offsetBy $(docs 'Plane3d.offsetBy)
     ]
-      + orthonormalTransformations3d Plane3d.transformBy
+      <> orthonormalTransformations3d Plane3d.transformBy
 
 vectorCurve2d :: Class
 vectorCurve2d =
@@ -1201,7 +1201,7 @@ curve2d =
     , minusSelf
     , minus @(Point2d (Space @ Meters)) Self
     ]
-      + affineTransformations2d Curve2d.transformBy
+      <> affineTransformations2d Curve2d.transformBy
 
 uvCurve :: Class
 uvCurve =
@@ -1228,7 +1228,7 @@ uvCurve =
     , minusSelf
     , minus @(Point2d (Space @ Unitless)) Self
     ]
-      + affineTransformations2d Curve2d.transformBy
+      <> affineTransformations2d Curve2d.transformBy
 
 region2d :: Class
 region2d =
@@ -1242,7 +1242,7 @@ region2d =
     , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
     , memberM2 "Fillet" "Points" "Radius" Region2d.fillet $(docs 'Region2d.fillet)
     ]
-      + affineTransformations2d Region2d.transformBy
+      <> affineTransformations2d Region2d.transformBy
 
 uvRegion :: Class
 uvRegion =
@@ -1255,7 +1255,7 @@ uvRegion =
     , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
     , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
     ]
-      + affineTransformations2d Region2d.transformBy
+      <> affineTransformations2d Region2d.transformBy
 
 body3d :: Class
 body3d =

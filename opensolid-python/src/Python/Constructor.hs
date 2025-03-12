@@ -20,11 +20,11 @@ definition classId maybeConstructor = case maybeConstructor of
     let functionArguments = Text.join "," (List.map Python.Function.argument arguments)
     let ffiArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
     Python.lines
-      [ "def __init__(self, " + functionArguments + ") -> None:"
+      [ "def __init__(self, " <> functionArguments <> ") -> None:"
       , Python.indent
           [ Python.docstring (Constructor.documentation constructor)
-          , "inputs = " + Python.FFI.argumentValue ffiArguments
-          , "self._ptr = " + Python.FFI.dummyValue selfType
+          , "inputs = " <> Python.FFI.argumentValue ffiArguments
+          , "self._ptr = " <> Python.FFI.dummyValue selfType
           , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(self._ptr)"
           ]
       ]

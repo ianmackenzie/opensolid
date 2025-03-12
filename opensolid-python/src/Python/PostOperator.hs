@@ -29,10 +29,10 @@ definition classId (operatorId, operators) = do
       let overloadCase (_, matchPattern, body) = Python.Function.overloadCase matchPattern [body]
       Python.lines
         [ Python.lines (List.map overloadDeclaration overloads)
-        , "def " + functionName operatorId + "(self, " + rhsArgName + "):"
+        , "def " <> functionName operatorId <> "(self, " <> rhsArgName <> "):"
         , Python.indent
             [ documentation operatorId
-            , "match " + rhsArgName + ":"
+            , "match " <> rhsArgName <> ":"
             , Python.indent
                 [ Python.lines (List.map overloadCase overloads)
                 , "case _:"
@@ -45,12 +45,12 @@ documentation :: BinaryOperator.Id -> Text
 documentation operatorId =
   Python.docstring $
     case operatorId of
-      BinaryOperator.Add -> "Return ``self + " + rhsArgName + "``."
-      BinaryOperator.Sub -> "Return ``self - " + rhsArgName + "``."
-      BinaryOperator.Mul -> "Return ``self * " + rhsArgName + "``."
-      BinaryOperator.Div -> "Return ``self / " + rhsArgName + "``."
-      BinaryOperator.FloorDiv -> "Return ``self // " + rhsArgName + "``."
-      BinaryOperator.Mod -> "Return ``self % " + rhsArgName + "``."
+      BinaryOperator.Add -> "Return ``self <> " <> rhsArgName <> "``."
+      BinaryOperator.Sub -> "Return ``self - " <> rhsArgName <> "``."
+      BinaryOperator.Mul -> "Return ``self * " <> rhsArgName <> "``."
+      BinaryOperator.Div -> "Return ``self / " <> rhsArgName <> "``."
+      BinaryOperator.FloorDiv -> "Return ``self // " <> rhsArgName <> "``."
+      BinaryOperator.Mod -> "Return ``self % " <> rhsArgName <> "``."
       BinaryOperator.Dot -> "Compute the dot product of two vector-like values."
       BinaryOperator.Cross -> "Compute the cross product of two vector-like values."
 
@@ -78,8 +78,8 @@ overloadSignature :: BinaryOperator.Id -> FFI.Type -> FFI.Type -> Text
 overloadSignature operatorId rhsType returnType = do
   let rhsTypeName = Python.Type.qualifiedName rhsType
   let returnTypeName = Python.Type.qualifiedName returnType
-  let rhsArgument = rhsArgName + ": " + rhsTypeName
-  "def " + functionName operatorId + "(self, " + rhsArgument + ") -> " + returnTypeName + ":"
+  let rhsArgument = rhsArgName <> ": " <> rhsTypeName
+  "def " <> functionName operatorId <> "(self, " <> rhsArgument <> ") -> " <> returnTypeName <> ":"
 
 overloadBody :: Text -> FFI.Type -> FFI.Type -> FFI.Type -> Text
 overloadBody ffiFunctionName selfType rhsType returnType =
