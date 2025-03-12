@@ -30,7 +30,7 @@ where
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
 import Data.ByteString qualified
-import Data.ByteString.Char8 qualified
+import Data.Text.IO.Utf8 qualified
 import Data.Time.Clock qualified
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
@@ -113,7 +113,7 @@ addContext :: Text -> IO a -> IO a
 addContext text = mapError (Error.addContext text)
 
 printLine :: Text -> IO ()
-printLine = Text.encodeUtf8 >> Data.ByteString.Char8.putStrLn
+printLine = Data.Text.IO.Utf8.putStrLn
 
 time :: IO a -> IO (a, Duration)
 time io = OpenSolid.IO.do
