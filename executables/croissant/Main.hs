@@ -31,4 +31,4 @@ main = Tolerance.using Length.nanometer $ IO.do
   body <- Body3d.boundedBy [surface]
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
   let mesh = Body3d.toMesh constraints body
-  IO.writeUtf8 "executables/croissant/mesh.stl" (Stl.text Length.inMillimeters mesh)
+  Stl.writeBinary "executables/croissant/mesh.stl" Length.inMillimeters mesh

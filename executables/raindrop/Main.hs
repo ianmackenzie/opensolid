@@ -52,4 +52,4 @@ main = Tolerance.using Length.nanometer $ IO.do
   body <- Body3d.boundedBy [bottom, top]
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
   let mesh = Body3d.toMesh constraints body
-  IO.writeUtf8 "executables/raindrop/mesh.stl" (Stl.text Length.inMillimeters mesh)
+  Stl.writeBinary "executables/raindrop/mesh.stl" Length.inMillimeters mesh

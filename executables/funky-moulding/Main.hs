@@ -37,4 +37,4 @@ main = Tolerance.using Length.nanometer $ IO.do
   body <- Body3d.revolved Plane3d.yz profile Axis2d.y (Angle.degrees 270.0)
   let constraints = NonEmpty.one (Mesh.maxError (Length.millimeters 0.2))
   let mesh = Body3d.toMesh constraints body
-  IO.writeUtf8 "executables/funky-moulding/mesh.stl" (Stl.text Length.inMillimeters mesh)
+  Stl.writeBinary "executables/funky-moulding/mesh.stl" Length.inMillimeters mesh

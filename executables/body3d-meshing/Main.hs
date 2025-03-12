@@ -26,4 +26,4 @@ main = Tolerance.using Length.nanometer $ IO.do
   body <- Body3d.extruded Plane3d.yz profile extrusionLimits
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 30.0))
   let mesh = Body3d.toMesh constraints body
-  IO.writeUtf8 "executables/body3d-meshing/mesh.stl" (Stl.text Length.inMillimeters mesh)
+  Stl.writeBinary "executables/body3d-meshing/mesh.stl" Length.inMillimeters mesh
