@@ -8,6 +8,7 @@ module OpenSolid.Binary
   )
 where
 
+import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder

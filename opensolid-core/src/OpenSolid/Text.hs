@@ -23,7 +23,7 @@ module OpenSolid.Text
   , toUpper
   , capitalize
   , strip
-  , encodeUtf8
+  , toUtf8
   , InvalidUtf8 (InvalidUtf8)
   , decodeUtf8
   , assumeUtf8
@@ -34,6 +34,7 @@ import Data.Char qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import OpenSolid.Arithmetic
+import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import OpenSolid.Error qualified as Error
@@ -119,8 +120,8 @@ capitalize text =
 strip :: Text -> Text
 strip = Data.Text.strip
 
-encodeUtf8 :: Text -> ByteString
-encodeUtf8 = Data.Text.Encoding.encodeUtf8
+toUtf8 :: Text -> Builder
+toUtf8 = Data.Text.Encoding.encodeUtf8Builder
 
 data InvalidUtf8 = InvalidUtf8 deriving (Eq, Show, Error.Message)
 

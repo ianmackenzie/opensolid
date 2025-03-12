@@ -23,10 +23,9 @@ module OpenSolid.Scene3d
   )
 where
 
-import Data.ByteString.Builder (Builder)
-import Data.ByteString.Builder qualified as Builder
-import Data.Monoid qualified
 import OpenSolid.Array qualified as Array
+import OpenSolid.Binary (Builder)
+import OpenSolid.Binary qualified as Binary
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
@@ -37,6 +36,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
 import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
@@ -48,7 +48,6 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Scene3d.Gltf qualified as Gltf
-import OpenSolid.Text qualified as Text
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
 import OpenSolid.Vertex3d qualified as Vertex3d
@@ -160,7 +159,7 @@ nonmetal baseColor roughness = Material{baseColor, roughness, metallic = 0.0}
 
 {-| Convert a scene to binary glTF format.
 
-Same as 'writeGlb' except it just returns the raw binary data instead of writing to a file.
+Same as 'writeGlb' except it just returns the raw binary builder instead of writing to a file.
 -}
 toGlb :: Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> Builder
 toGlb groundPlane givenEntities = do
@@ -168,11 +167,11 @@ toGlb groundPlane givenEntities = do
   let entities = List.map (relativeTo globalFrame) givenEntities
   let meshes = gltfMeshes Frame3d.xyz (group entities)
   let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
-  let bufferBuilder = Data.Monoid.mconcat (List.map meshBuilder meshes)
+  let bufferBuilder = Binary.collect meshBuilder meshes
   let bufferByteLength = Int.sumOf meshByteLength meshes
   let encodedMeshes = encodeMeshes 0 0 meshes
   let bufferObject = Json.object [Json.field "byteLength" $ Json.int bufferByteLength]
-  Gltf.builder
+  Gltf.toBinary
     [ Json.field "scene" $ Json.int 0
     , Json.field "scenes" $ Json.list [sceneObject]
     , Json.field "nodes" $ Json.listOf meshNode encodedMeshes
@@ -194,7 +193,7 @@ The given plane will be used as the ground plane, with:
 -}
 writeGlb :: Text -> Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> IO ()
 writeGlb path groundPlane givenEntities =
-  Builder.writeFile (Text.unpack path) (toGlb groundPlane givenEntities)
+  IO.writeBinary path (toGlb groundPlane givenEntities)
 
 data EncodedMesh = EncodedMesh
   { bufferViews :: List Json
@@ -338,7 +337,7 @@ gltfMeshes parentFrame entity = case entity of
   Placed frame child -> gltfMeshes (Frame3d.placeIn parentFrame frame) child
 
 meshBuilder :: GltfMesh space -> Builder
-meshBuilder GltfMesh{indices, vertices} = Data.Monoid.mappend indices vertices
+meshBuilder GltfMesh{indices, vertices} = indices + vertices
 
 meshByteLength :: GltfMesh space -> Int
 meshByteLength GltfMesh{indicesByteLength, verticesByteLength} =

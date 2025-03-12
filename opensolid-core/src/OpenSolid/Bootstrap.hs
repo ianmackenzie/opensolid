@@ -1,7 +1,6 @@
 module OpenSolid.Bootstrap
   ( List
   , Text
-  , ByteString
   , ifThenElse
   , fromString
   , fromInteger
@@ -35,7 +34,6 @@ module OpenSolid.Bootstrap
 where
 
 import Control.Concurrent.Async (Async)
-import Data.ByteString (ByteString)
 import Data.Kind (Type)
 import Data.Text (Text)
 import Data.Text qualified

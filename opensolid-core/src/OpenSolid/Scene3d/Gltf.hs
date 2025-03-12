@@ -4,16 +4,16 @@ module OpenSolid.Scene3d.Gltf
   , uint32
   , faceIndices
   , pointsAndNormals
-  , builder
+  , toBinary
   )
 where
 
 import Data.ByteString qualified as ByteString
-import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
 import GHC.Float qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
+import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
@@ -93,19 +93,19 @@ pointNormalBuilder vertex = do
     , Builder.floatLE (GHC.Float.double2Float nz)
     ]
 
-builder :: List Json.Field -> Int -> Builder -> Builder
-builder givenFields unpaddedBufferByteLength unpaddedBufferBuilder = do
+toBinary :: List Json.Field -> Int -> Builder -> Builder
+toBinary givenFields unpaddedBufferByteLength unpaddedBufferBuilder = do
   let assetObject =
         Json.object
           [ Json.field "version" $ Json.text "2.0"
           , Json.field "generator" $ Json.text "OpenSolid"
           ]
   let json = Json.object (Json.field "asset" assetObject : givenFields)
-  let unpaddedJsonByteString = Json.encode json
+  let unpaddedJsonBuilder = Json.toBinary json
+  let unpaddedJsonByteString = Binary.bytes unpaddedJsonBuilder
   let unpaddedJsonByteLength = ByteString.length unpaddedJsonByteString
-  let unpaddedJsonBuilder = Builder.byteString unpaddedJsonByteString
   let (paddedJsonBuilder, paddedJsonByteLength) =
-        padWith ' ' unpaddedJsonBuilder unpaddedJsonByteLength
+        padWith ' ' (Builder.byteString unpaddedJsonByteString) unpaddedJsonByteLength
   let (paddedBufferBuilder, paddedBufferByteLength) =
         padWith '\0' unpaddedBufferBuilder unpaddedBufferByteLength
   let headerByteLength = 12

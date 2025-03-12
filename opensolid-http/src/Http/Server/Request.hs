@@ -13,6 +13,8 @@ import Data.CaseInsensitive qualified
 import Network.HTTP.Types qualified
 import Network.Wai (Request)
 import Network.Wai qualified
+import OpenSolid.Binary (ByteString)
+import OpenSolid.Binary qualified as Binary
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
@@ -34,7 +36,7 @@ header (nameCI, valueBytes) =
 
 headerValues :: Text -> Request -> List Text
 headerValues name request = do
-  let nameCI = Data.CaseInsensitive.mk (Text.encodeUtf8 name)
+  let nameCI = Data.CaseInsensitive.mk (Binary.bytes (Text.toUtf8 name))
   Network.Wai.requestHeaders request |> Maybe.collect (headerValue nameCI)
 
 headerValue :: Data.CaseInsensitive.CI ByteString -> Network.HTTP.Types.Header -> Maybe Text
@@ -51,7 +53,7 @@ parameter (nameBytes, maybeValueBytes) =
 
 parameterValues :: Text -> Request -> List Text
 parameterValues name request = do
-  let nameBytes = Text.encodeUtf8 name
+  let nameBytes = Binary.bytes (Text.toUtf8 name)
   Network.Wai.queryString request |> Maybe.collect (parameterValue nameBytes)
 
 parameterValue :: ByteString -> Network.HTTP.Types.QueryItem -> Maybe Text

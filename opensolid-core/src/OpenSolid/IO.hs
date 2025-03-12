@@ -19,10 +19,10 @@ module OpenSolid.IO
   , addContext
   , printLine
   , time
-  , readFile
-  , writeFile
-  , readBinaryFile
-  , writeBinaryFile
+  , readUtf8
+  , writeUtf8
+  , readBinary
+  , writeBinary
   , deleteFile
   )
 where
@@ -30,8 +30,10 @@ where
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
 import Data.ByteString qualified
+import Data.ByteString.Builder qualified as Builder
 import Data.Text.IO.Utf8 qualified
 import Data.Time.Clock qualified
+import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import OpenSolid.Duration (Duration)
@@ -122,17 +124,17 @@ time io = OpenSolid.IO.do
   endTime <- Data.Time.Clock.getCurrentTime
   succeed (result, Duration.from startTime endTime)
 
-readBinaryFile :: Text -> IO ByteString
-readBinaryFile path = Data.ByteString.readFile (Text.unpack path)
+readBinary :: Text -> IO ByteString
+readBinary path = Data.ByteString.readFile (Text.unpack path)
 
-writeBinaryFile :: Text -> ByteString -> IO ()
-writeBinaryFile path bytes = Data.ByteString.writeFile (Text.unpack path) bytes
+writeBinary :: Text -> Builder -> IO ()
+writeBinary path builder = Builder.writeFile (Text.unpack path) builder
 
-readFile :: Text -> IO Text
-readFile path = readBinaryFile path >>= Text.decodeUtf8
+readUtf8 :: Text -> IO Text
+readUtf8 path = readBinary path >>= Text.decodeUtf8
 
-writeFile :: Text -> Text -> IO ()
-writeFile path contents = writeBinaryFile path (Text.encodeUtf8 contents)
+writeUtf8 :: Text -> Text -> IO ()
+writeUtf8 path text = writeBinary path (Text.toUtf8 text)
 
 deleteFile :: Text -> IO ()
 deleteFile path = System.Directory.removeFile (Text.unpack path)

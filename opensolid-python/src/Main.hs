@@ -363,7 +363,7 @@ registerArgumentTypes maybeConstraint argumentTypes registry = do
 main :: IO ()
 main = do
   let flatten (classLines, constantLines) = Python.lines [classLines, constantLines]
-  IO.writeFile "opensolid-python/lib/src/opensolid/__init__.py" $
+  IO.writeUtf8 "opensolid-python/lib/src/opensolid/__init__.py" $
     Python.lines
       [ preamble
       , ffiTypeDeclarations

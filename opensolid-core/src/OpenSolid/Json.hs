@@ -13,16 +13,16 @@ module OpenSolid.Json
   , list
   , listOf
   , map
-  , encode
+  , toBinary
   , decode
   )
 where
 
 import Data.Aeson qualified
 import Data.Aeson.KeyMap qualified
-import Data.ByteString qualified
 import Data.Scientific
 import Data.Vector qualified
+import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Composition
 import OpenSolid.Float qualified as Float
 import {-# SOURCE #-} OpenSolid.Json.Format (Format)
@@ -116,8 +116,8 @@ fromAeson aesonValue = case aesonValue of
   Data.Aeson.Array values -> List (List.map fromAeson (Data.Vector.toList values))
   Data.Aeson.Object values -> Map (Map.map fromAeson (Data.Aeson.KeyMap.toMapText values))
 
-encode :: Json -> ByteString
-encode = Data.Aeson.encode >> Data.ByteString.toStrict
+toBinary :: Json -> Builder
+toBinary json = Data.Aeson.fromEncoding (Data.Aeson.toEncoding json)
 
 decode :: ByteString -> Result Text Json
 decode byteString =

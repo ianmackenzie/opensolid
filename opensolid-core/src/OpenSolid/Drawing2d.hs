@@ -122,7 +122,7 @@ and in general should contain all the drawing entities
 (unless you *want* to crop some of them).
 -}
 writeSvg :: Text -> Bounds2d (space @ Meters) -> List (Entity space) -> IO ()
-writeSvg path viewBox entities = IO.writeFile path (toSvg viewBox entities)
+writeSvg path viewBox entities = IO.writeUtf8 path (toSvg viewBox entities)
 
 nothing :: Entity space
 nothing = Empty

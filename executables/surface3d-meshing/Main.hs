@@ -31,4 +31,4 @@ main = IO.do
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2.0) surface
   IO.printLine ("Num faces: " + Text.int (List.length (Mesh.faceIndices mesh)))
-  IO.writeFile "executables/surface3d-meshing/mesh.stl" (Stl.text Length.inMillimeters mesh)
+  IO.writeUtf8 "executables/surface3d-meshing/mesh.stl" (Stl.text Length.inMillimeters mesh)

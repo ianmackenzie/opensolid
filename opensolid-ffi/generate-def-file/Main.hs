@@ -19,4 +19,4 @@ main = do
   let functionNames = builtins + List.map Function.ffiName API.functions
   let lines = "EXPORTS" : List.map (Text.indent " ") functionNames
   let contents = Text.join "\r\n" lines
-  IO.writeFile "opensolid-ffi/opensolid-ffi.def" contents
+  IO.writeUtf8 "opensolid-ffi/opensolid-ffi.def" contents

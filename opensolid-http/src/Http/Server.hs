@@ -12,6 +12,7 @@ import Data.ByteString qualified
 import Network.Wai (Application, Request, Response, ResponseReceived)
 import Network.Wai qualified
 import Network.Wai.Handler.Warp qualified as Warp
+import OpenSolid.Binary (ByteString)
 import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
