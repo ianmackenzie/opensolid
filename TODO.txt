@@ -1,3 +1,6 @@
+Switch to 'perfect' units coercion for curves and surface function types
+-> can coerce Haskell functions!
+
 Check that function modules only refer to other function types, not geometry types
 
 Replace 'CompiledFunction.abstract' with 'compileImpl' where applicable
