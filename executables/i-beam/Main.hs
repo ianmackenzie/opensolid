@@ -6,6 +6,7 @@ import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.IO qualified as IO
+import OpenSolid.Labels
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
@@ -30,7 +31,7 @@ main = Tolerance.using Length.nanometer IO.do
   let p3 = Point2d.xy (0.5 * width) (0.5 * height - thickness)
   let p4 = Point2d.xy (0.5 * width) (0.5 * height)
   let p5 = Point2d.y (0.5 * height)
-  let fillet = Curve2d.cornerArc p2 Direction2d.y Direction2d.x filletRadius
+  let fillet = Curve2d.cornerArc p2 Direction2d.y Direction2d.x (Radius filletRadius)
   let topRightCurves =
         [ Curve2d.line p1 (Curve2d.startPoint fillet)
         , fillet

@@ -41,6 +41,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Labels
 import OpenSolid.LineSegment2d (LineSegment2d)
 import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.Linearization qualified as Linearization
@@ -231,21 +232,22 @@ block (Bounds3d xRange yRange zRange) =
           Success body -> Success body
           Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
 
-{-| Create a sphere with the given center point and radius.
+{-| Create a sphere with the given center point and diameter.
 
-Fails if the radius is zero.
+Fails if the diameter is zero.
 -}
 sphere ::
   Tolerance units =>
-  Point3d (space @ units) ->
-  Qty units ->
+  CenterPoint (Point3d (space @ units)) ->
+  Diameter (Qty units) ->
   Result EmptyBody (Body3d (space @ units))
-sphere centerPoint radius =
-  if radius ~= Qty.zero
+sphere (CenterPoint centerPoint) (Diameter diameter) =
+  if diameter ~= Qty.zero
     then Failure EmptyBody
     else do
       let axis = Axis3d centerPoint Direction3d.z
       let sketchPlane = Plane3d.fromYAxis axis
+      let radius = 0.5 * diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius
       let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
@@ -256,21 +258,21 @@ sphere centerPoint radius =
             Success body -> Success body
             Failure _ -> internalError "Constructing sphere from non-zero radius should not fail"
 
-{-| Create a cylindrical body from a start point, end point and radius.
+{-| Create a cylindrical body from a start point, end point and diameter.
 
-Fails if the cylinder length or radius is zero.
+Fails if the cylinder length or diameter is zero.
 -}
 cylinder ::
   Tolerance units =>
   Point3d (space @ units) ->
   Point3d (space @ units) ->
-  Qty units ->
+  Diameter (Qty units) ->
   Result EmptyBody (Body3d (space @ units))
-cylinder startPoint endPoint radius =
+cylinder startPoint endPoint (Diameter diameter) =
   case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
     Failure Vector3d.IsZero -> Failure EmptyBody
     Success (length, direction) ->
-      cylinderAlong (Axis3d startPoint direction) (Range Qty.zero length) radius
+      cylinderAlong (Axis3d startPoint direction) (Range Qty.zero length) (Diameter diameter)
 
 {-| Create a cylindrical body along a given axis.
 
@@ -278,18 +280,18 @@ In addition to the axis itself, you will need to provide:
 
 - Where along the axis the cylinder starts and ends
   (given as a range of distances along the axis).
-- The cylinder radius.
+- The cylinder diameter.
 
-Failes if the cylinder length or radius is zero.
+Failes if the cylinder length or diameter is zero.
 -}
 cylinderAlong ::
   Tolerance units =>
   Axis3d (space @ units) ->
   Range units ->
-  Qty units ->
+  Diameter (Qty units) ->
   Result EmptyBody (Body3d (space @ units))
-cylinderAlong axis distance radius = do
-  case Region2d.circle Point2d.origin radius of
+cylinderAlong axis distance (Diameter diameter) = do
+  case Region2d.circle (CenterPoint Point2d.origin) (Diameter diameter) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile ->
       if Range.width distance ~= Qty.zero

@@ -12,6 +12,7 @@ import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
+import OpenSolid.Labels
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Parameter qualified as Parameter
@@ -66,13 +67,15 @@ testCurveMedialAxis label curve1 curve2 = IO.do
         (parameterization, _) <- Curve2d.arcLengthParameterization curve
         let drawTangentCircle u = do
               let t = Curve.evaluate parameterization u
+              let tangentCircleRadius =
+                    Qty.abs (Curve.evaluate (Curve2d.MedialAxis.radius segment) t)
               let tangentCircle =
                     Drawing2d.circle
                       [ Drawing2d.strokeColor Color.gray
                       , Drawing2d.strokeWidth (Length.millimeters 0.2)
                       ]
-                      (Qty.abs (Curve.evaluate (Curve2d.MedialAxis.radius segment) t))
-                      (Curve2d.evaluate curve t)
+                      & CenterPoint (Curve2d.evaluate curve t)
+                      & Diameter (2.0 * tangentCircleRadius)
               tangentCircle
         Success (List.map drawTangentCircle (Parameter.steps 50))
   tangentCircles <- Result.collect drawCircles segments

@@ -9,6 +9,7 @@ module OpenSolid.FFI
   , nestedClassId
   , classRepresentation
   , nestedClassRepresentation
+  , namedArgumentRepresentation
   , Type (..)
   , Id (..)
   , typeOf
@@ -18,10 +19,13 @@ module OpenSolid.FFI
   , store
   , load
   , Representation
+  , argumentName
   )
 where
 
 import Data.ByteString.Unsafe qualified
+import Data.Coerce (Coercible)
+import Data.Coerce qualified
 import Data.Proxy (Proxy (Proxy))
 import Data.Text.Encoding qualified
 import Data.Text.Foreign qualified
@@ -107,6 +111,8 @@ data Representation a where
   ClassRep :: FFI a => Id a -> Representation a
   -- Some IO that returns a representable value
   IORep :: FFI a => Representation (IO a)
+  -- A function argument that should be named-only if supported
+  NamedArgumentRep :: (FFI a, Coercible n a) => Name -> Proxy a -> Representation n
 
 classId :: FFI a => Proxy a -> Text -> Id a
 classId proxy givenName =
@@ -123,6 +129,9 @@ classRepresentation givenName proxy =
 nestedClassRepresentation :: FFI a => Text -> Text -> Proxy a -> Representation a
 nestedClassRepresentation parentName childName proxy =
   ClassRep (nestedClassId proxy parentName childName)
+
+namedArgumentRepresentation :: (FFI a, Coercible n a) => Text -> Proxy a -> Representation n
+namedArgumentRepresentation givenName innerProxy = NamedArgumentRep (name givenName) innerProxy
 
 data Type where
   Unit :: Type
@@ -160,6 +169,7 @@ typeOf proxy = case representation proxy of
   ResultRep -> resultType proxy
   ClassRep id -> Class id
   IORep -> ioResultType proxy
+  NamedArgumentRep _ innerProxy -> typeOf innerProxy
 
 listType :: forall a. FFI a => Proxy (List a) -> Type
 listType _ = List (typeOf @a Proxy)
@@ -413,6 +423,8 @@ store ptr offset value = do
     IORep -> IO.do
       result <- IO.attempt value
       store ptr offset result
+    NamedArgumentRep{} ->
+      internalError "Should never have a named argument as a Haskell return type"
 
 load :: forall parent value. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
@@ -503,6 +515,10 @@ load ptr offset = do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
     IORep -> internalError "Passing IO values as FFI arguments is not supported"
+    NamedArgumentRep _ innerProxy -> IO.map (wrapNamedArgument innerProxy) (load ptr offset)
+
+wrapNamedArgument :: Coercible n a => Proxy a -> a -> n
+wrapNamedArgument _ = Data.Coerce.coerce
 
 listItemSize :: forall item. FFI item => Proxy (List item) -> Int
 listItemSize _ = size (typeOf @item Proxy)
@@ -558,3 +574,8 @@ tuple6ItemSizes _ =
   , size (typeOf @e Proxy)
   , size (typeOf @f Proxy)
   )
+
+argumentName :: FFI a => Proxy a -> Maybe Name
+argumentName proxy = case representation proxy of
+  NamedArgumentRep argName _ -> Just argName
+  _ -> Nothing

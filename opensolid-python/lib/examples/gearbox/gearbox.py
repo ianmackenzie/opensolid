@@ -1,32 +1,19 @@
-# ruff: noqa
-
 from opensolid import (
-    AngleCurve,
-    Drawing2d,
     Length,
-    Axis3d,
     Body3d,
     Point2d,
     Curve2d,
     Displacement2d,
     Direction3d,
     Angle,
-    Direction2d,
-    Axis2d,
-    Bounds2d,
-    Angle,
     Region2d,
-    Body3d,
     Plane3d,
     Mesh,
-    Curve,
     LengthRange,
-    Mesh,
     Scene3d,
     Tolerance,
     Color,
 )
-import math
 from motor import Motor
 from gear import Gear
 from bearing import Bearing
@@ -71,11 +58,16 @@ with Tolerance(Length.nanometers(1)):
     )
     gear_center_distance = (motor_gear_teeth + mating_gear_teeth) * gear_module / 2
     mating_gear_axis = motor_gear.axis().translate_in(
-        -Direction3d.z, gear_center_distance
+        -Direction3d.z,
+        gear_center_distance,
     )
     mating_gear_midplane = gear_midplane.translate_in(
-        -Direction3d.z, gear_center_distance
-    ).rotate_around(mating_gear_axis, 0.5 * Angle.two_pi / mating_gear_teeth)
+        -Direction3d.z,
+        gear_center_distance,
+    ).rotate_around(
+        mating_gear_axis,
+        0.5 * Angle.two_pi / mating_gear_teeth,
+    )
     mating_gear = Gear(
         midplane=mating_gear_midplane,
         num_teeth=mating_gear_teeth,
@@ -85,7 +77,8 @@ with Tolerance(Length.nanometers(1)):
     )
     back_bearing = Bearing(
         mating_plane=back_plate_front_plane.translate_in(
-            -Direction3d.z, gear_center_distance
+            -Direction3d.z,
+            gear_center_distance,
         ),
         bore_diameter=output_shaft_diameter,
         width=bearing_width,
@@ -98,7 +91,8 @@ with Tolerance(Length.nanometers(1)):
 
     front_bearing = Bearing(
         mating_plane=front_plate_back_plane.translate_in(
-            -Direction3d.z, gear_center_distance
+            -Direction3d.z,
+            gear_center_distance,
         ),
         bore_diameter=output_shaft_diameter,
         width=bearing_width,
@@ -116,51 +110,68 @@ with Tolerance(Length.nanometers(1)):
             .distance_to(front_bearing.back_plane().origin_point())
             + output_shaft_front_extension,
         ),
-        output_shaft_diameter / 2,
+        diameter=output_shaft_diameter,
     )
 
     motor_shaft_hole = Curve2d.circle(
-        Point2d.origin, motor.shaft_diameter() / 2 + Length.millimeters(1)
+        center_point=Point2d.origin,
+        diameter=motor.shaft_diameter() + Length.millimeters(2),
     )
     output_shaft_center = Point2d.y(-gear_center_distance)
-    bearing_hole = Curve2d.circle(output_shaft_center, bearing_outer_diameter / 2)
+    bearing_hole = Curve2d.circle(
+        center_point=output_shaft_center,
+        diameter=bearing_outer_diameter,
+    )
     motor_shaft_screw_distance = (
         motor.body_diameter() / 2 + standoff_clearance + standoff_diameter / 2
     )
     top_left_screw_center = Point2d.origin + Displacement2d.polar(
-        motor_shaft_screw_distance, Angle.degrees(135)
+        motor_shaft_screw_distance,
+        Angle.degrees(135),
     )
     top_right_screw_center = Point2d.origin + Displacement2d.polar(
-        motor_shaft_screw_distance, Angle.degrees(45)
+        motor_shaft_screw_distance,
+        Angle.degrees(45),
     )
     output_shaft_screw_distance = (
         mating_gear.outer_diameter() / 2 + standoff_clearance + standoff_diameter / 2
     )
     bottom_left_screw_center = output_shaft_center + Displacement2d.polar(
-        output_shaft_screw_distance, Angle.degrees(225)
+        output_shaft_screw_distance,
+        Angle.degrees(225),
     )
     bottom_right_screw_center = output_shaft_center + Displacement2d.polar(
-        output_shaft_screw_distance, Angle.degrees(315)
+        output_shaft_screw_distance,
+        Angle.degrees(315),
     )
     ear_radius = plate_ear_diameter / 2
     top_left_ear = Curve2d.polar_arc(
-        top_left_screw_center, ear_radius, Angle.degrees(45), Angle.degrees(225)
+        center_point=top_left_screw_center,
+        radius=ear_radius,
+        start_angle=Angle.degrees(45),
+        end_angle=Angle.degrees(225),
     )
     top_right_ear = Curve2d.polar_arc(
-        top_right_screw_center, ear_radius, Angle.degrees(-45), Angle.degrees(135)
+        center_point=top_right_screw_center,
+        radius=ear_radius,
+        start_angle=Angle.degrees(-45),
+        end_angle=Angle.degrees(135),
     )
     bottom_left_ear = Curve2d.polar_arc(
-        bottom_left_screw_center, ear_radius, Angle.degrees(135), Angle.degrees(315)
+        center_point=bottom_left_screw_center,
+        radius=ear_radius,
+        start_angle=Angle.degrees(135),
+        end_angle=Angle.degrees(315),
     )
     bottom_right_ear = Curve2d.polar_arc(
-        bottom_right_screw_center,
-        ear_radius,
-        Angle.degrees(-135),
-        Angle.degrees(45),
+        center_point=bottom_right_screw_center,
+        radius=ear_radius,
+        start_angle=Angle.degrees(-135),
+        end_angle=Angle.degrees(45),
     )
 
     def screw_hole(point) -> Curve2d:
-        return Curve2d.circle(point, screw_diameter / 2)
+        return Curve2d.circle(center_point=point, diameter=screw_diameter)
 
     common_curves = [
         top_left_ear,
@@ -189,14 +200,18 @@ with Tolerance(Length.nanometers(1)):
         bottom_right_ear.end_point(),
     ]
 
-    back_plate_profile = Region2d.bounded_by([*common_curves, motor_shaft_hole]).fillet(
+    back_plate_profile = Region2d.bounded_by(
+        [*common_curves, motor_shaft_hole],
+    ).fillet(
         fillet_points,
-        plate_ear_fillet_radius,
+        radius=plate_ear_fillet_radius,
     )
 
-    front_plate_profile = Region2d.bounded_by(common_curves).fillet(
+    front_plate_profile = Region2d.bounded_by(
+        common_curves,
+    ).fillet(
         fillet_points,
-        plate_ear_fillet_radius,
+        radius=plate_ear_fillet_radius,
     )
 
     back_plate = Body3d.extruded(
@@ -234,9 +249,11 @@ with Tolerance(Length.nanometers(1)):
     ]
 
     def screwhead(plane: Plane3d, point: Point2d) -> Scene3d.Entity:
-        profile = Region2d.circle(point, Length.millimeters(2.5))
+        profile = Region2d.circle(center_point=point, diameter=Length.millimeters(5))
         body = Body3d.extruded(
-            plane, profile, LengthRange.zero_to(Length.millimeters(3))
+            plane,
+            profile,
+            LengthRange.zero_to(Length.millimeters(3)),
         )
         return Scene3d.body(mesh_constraints, Scene3d.nonmetal(Color.black, 0.5), body)
 

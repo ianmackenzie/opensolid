@@ -8,6 +8,7 @@ import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Float qualified as Float
 import OpenSolid.Int qualified as Int
+import OpenSolid.Labels
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -118,7 +119,12 @@ resolvesTo value estimate
 
 area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
-  let curve = Curve2d.polarArc Point2d.origin Length.meter Angle.pi Angle.zero
+  let curve =
+        Curve2d.polarArc
+          & CenterPoint Point2d.origin
+          & Radius Length.meter
+          & StartAngle Angle.pi
+          & EndAngle Angle.zero
   let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
   let areaEstimate = Curve.integral dAdt
   let expectedArea = Area.squareMeters (Float.pi / 2.0)

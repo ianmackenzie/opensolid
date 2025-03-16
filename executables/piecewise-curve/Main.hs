@@ -6,6 +6,7 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
+import OpenSolid.Labels
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -33,11 +34,15 @@ main = Tolerance.using Length.nanometer IO.do
   let arc3 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vW vSW vS / weightCurve
   let arc4 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vS vSE vE / weightCurve
   circle <- Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
+  let drawDot point =
+        Drawing2d.circle [Drawing2d.whiteFill]
+          & CenterPoint point
+          & Diameter (Length.millimeters 4.0)
   let drawCurve n curve =
         Drawing2d.group
           [ Drawing2d.curve [] Length.micrometer curve
           , Drawing2d.group $
-              List.map (Drawing2d.circle [Drawing2d.whiteFill] (Length.millimeters 2.0)) $
+              List.map drawDot $
                 List.map (Curve2d.evaluate curve) (Parameter.steps n)
           ]
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -12.0 -12.0) (Point2d.centimeters 12.0 12.0)

@@ -1000,7 +1000,9 @@ constructorInfo classId_ maybeConstructor = case maybeConstructor of
 
 staticFunctionInfo :: FFI.Id a -> (FFI.Name, StaticFunction) -> Function
 staticFunctionInfo classId_ (functionName, staticFunction) = do
-  let (constraint, arguments, returnType) = StaticFunction.signature staticFunction
+  let (constraint, positionalArguments, namedArguments, returnType) =
+        StaticFunction.signature staticFunction
+  let arguments = positionalArguments <> namedArguments
   Function
     { ffiName = StaticFunction.ffiName classId_ functionName staticFunction
     , constraint
@@ -1011,7 +1013,9 @@ staticFunctionInfo classId_ (functionName, staticFunction) = do
 
 memberFunctionInfo :: FFI.Id value -> (FFI.Name, MemberFunction value) -> Function
 memberFunctionInfo classId_ (functionName, memberFunction) = do
-  let (constraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
+  let (constraint, positionalArguments, namedArguments, selfType, returnType) =
+        MemberFunction.signature memberFunction
+  let arguments = positionalArguments <> namedArguments
   Function
     { ffiName = MemberFunction.ffiName classId_ functionName memberFunction
     , constraint

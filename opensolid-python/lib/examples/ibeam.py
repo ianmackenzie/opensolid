@@ -36,7 +36,7 @@ with Tolerance(Length.nanometers(1)):
     p5 = Point2d.y(top_flange_top_y)
 
     # Create the sketch profile
-    fillet = Curve2d.corner_arc(p2, Direction2d.y, Direction2d.x, fillet_radius)
+    fillet = Curve2d.corner_arc(p2, Direction2d.y, Direction2d.x, radius=fillet_radius)
     template = [
         Curve2d.line(p1, fillet.start_point()),
         fillet,

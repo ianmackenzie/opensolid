@@ -66,7 +66,7 @@ class Motor:
             p3 = Point2d.xy(x2, body_radius)
             p4 = Point2d.xy(x1, body_radius)
             rectangle = Region2d.polygon([p1, p2, p3, p4])
-            profile = rectangle.fillet([p3, p4], body_fillet_radius)
+            profile = rectangle.fillet([p3, p4], radius=body_fillet_radius)
             return Body3d.revolved(sketch_plane, profile, Axis2d.x, Angle.two_pi)
 
         def shaft_cylinder() -> Body3d:
@@ -75,7 +75,8 @@ class Motor:
             p3 = Point2d.xy(self.shaft_length(), shaft_radius)
             p4 = Point2d.y(shaft_radius)
             profile = Region2d.polygon([p1, p2, p3, p4]).fillet(
-                [p3], shaft_fillet_radius
+                [p3],
+                radius=shaft_fillet_radius,
             )
             return Body3d.revolved(sketch_plane, profile, Axis2d.x, Angle.two_pi)
 

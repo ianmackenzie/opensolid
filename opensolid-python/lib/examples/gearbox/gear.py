@@ -96,11 +96,13 @@ class Gear:
 
         right_approximation = left_approximation.mirror_across(Axis2d.y)
         tip = Curve2d.line(
-            left_approximation.end_point(), right_approximation.end_point()
+            left_approximation.end_point(),
+            right_approximation.end_point(),
         )
         angular_spacing = Angle.two_pi / num_teeth
         next_tooth_start = right_approximation.start_point().rotate_around(
-            Point2d.origin, angular_spacing
+            Point2d.origin,
+            angular_spacing,
         )
         connector = (
             Curve2d.line(left_start, next_tooth_start)
@@ -123,7 +125,7 @@ class Gear:
         outer_profile = [
             curve for i in range(num_teeth) for curve in rotated_profile(i)
         ]
-        hole = Curve2d.circle(Point2d.origin, bore_diameter / 2)
+        hole = Curve2d.circle(center_point=Point2d.origin, diameter=bore_diameter)
         profile_curves = [*outer_profile, hole]
 
         profile = Region2d.bounded_by(profile_curves)

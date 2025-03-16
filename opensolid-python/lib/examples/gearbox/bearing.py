@@ -38,6 +38,7 @@ class Bearing:
         y_race_outer = y_outer - t
         y_race_inner = y_bore + t
         ball_radius = t
+        ball_diameter = 2 * ball_radius
         y_ball_center = (y_race_inner + y_race_outer) / 2
         x_mid = width / 2
         ball_center = Point2d.xy(x_mid, y_ball_center)
@@ -47,7 +48,10 @@ class Bearing:
         i3 = Point2d.xy(width, y_race_inner)
         i4 = Point2d.y(y_race_inner)
         inner_groove = Curve2d.polar_arc(
-            ball_center, ball_radius, Angle.degrees(330), Angle.degrees(210)
+            center_point=ball_center,
+            radius=ball_radius,
+            start_angle=Angle.degrees(330),
+            end_angle=Angle.degrees(210),
         )
         inner_race_curves = [
             Curve2d.line(i1, i2),
@@ -66,7 +70,10 @@ class Bearing:
         o5 = Point2d.xy(width - flange_thickness, y_outer)
         o6 = Point2d.y(y_outer)
         outer_groove = Curve2d.polar_arc(
-            ball_center, ball_radius, Angle.degrees(150), Angle.degrees(30)
+            center_point=ball_center,
+            radius=ball_radius,
+            start_angle=Angle.degrees(150),
+            end_angle=Angle.degrees(30),
         )
         outer_race_curves = [
             Curve2d.line(o1, outer_groove.start_point()),
@@ -81,13 +88,20 @@ class Bearing:
         outer_race_profile = Region2d.bounded_by(outer_race_curves)
 
         self._inner_race = Body3d.revolved(
-            sketch_plane, inner_race_profile, Axis2d.x, Angle.full_turn
+            sketch_plane,
+            inner_race_profile,
+            Axis2d.x,
+            Angle.full_turn,
         )
         self._outer_race = Body3d.revolved(
-            sketch_plane, outer_race_profile, Axis2d.x, Angle.full_turn
+            sketch_plane,
+            outer_race_profile,
+            Axis2d.x,
+            Angle.full_turn,
         )
         self._first_ball = Body3d.sphere(
-            ball_center.place_on(sketch_plane), ball_radius
+            center_point=ball_center.place_on(sketch_plane),
+            diameter=ball_diameter,
         )
         self._num_balls = math.floor(2 * math.pi * y_ball_center / (3 * ball_radius))
 

@@ -16,6 +16,7 @@ import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Float qualified as Float
+import OpenSolid.Labels
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -120,8 +121,18 @@ curveOverlap1 = Test.verify "curveOverlap1" Test.do
 
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "curveOverlap2" Test.do
-  let arc1 = Curve2d.polarArc Point2d.origin Length.meter Angle.zero -Angle.pi
-  let arc2 = Curve2d.polarArc Point2d.origin Length.meter (Angle.degrees -45.0) (Angle.degrees 225.0)
+  let arc1 =
+        Curve2d.polarArc
+          & CenterPoint Point2d.origin
+          & Radius Length.meter
+          & StartAngle Angle.zero
+          & EndAngle -Angle.pi
+  let arc2 =
+        Curve2d.polarArc
+          & CenterPoint Point2d.origin
+          & Radius Length.meter
+          & StartAngle (Angle.degrees -45.0)
+          & EndAngle (Angle.degrees 225.0)
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
@@ -147,8 +158,18 @@ crossingIntersection = Test.verify "crossingIntersection" Test.do
 
 tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "tangentIntersection" Test.do
-  let arc1 = Curve2d.polarArc Point2d.origin Length.meter Angle.zero Angle.pi
-  let arc2 = Curve2d.polarArc (Point2d.meters 0.0 1.5) (Length.meters 0.5) -Angle.pi Angle.zero
+  let arc1 =
+        Curve2d.polarArc
+          & CenterPoint Point2d.origin
+          & Radius Length.meter
+          & StartAngle Angle.zero
+          & EndAngle Angle.pi
+  let arc2 =
+        Curve2d.polarArc
+          & CenterPoint (Point2d.meters 0.0 1.5)
+          & Radius (Length.meters 0.5)
+          & StartAngle -Angle.pi
+          & EndAngle Angle.zero
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5 Positive)
   case intersections of
@@ -337,7 +358,12 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
   let arcEndAngle = arcStartAngle + arcSweptAngle
   t <- Parameter.random
 
-  let arc = Curve2d.polarArc arcCenter arcRadius arcStartAngle arcEndAngle
+  let arc =
+        Curve2d.polarArc
+          & CenterPoint arcCenter
+          & Radius arcRadius
+          & StartAngle arcStartAngle
+          & EndAngle arcEndAngle
   let arcFirstDerivative = Curve2d.derivative arc
   let arcSecondDerivative = VectorCurve2d.derivative arcFirstDerivative
   let arcThirdDerivative = VectorCurve2d.derivative arcSecondDerivative

@@ -116,6 +116,7 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.Labels
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -576,8 +577,13 @@ arc givenStartPoint givenEndPoint sweptAngle =
           customArc centerPoint xVector yVector startAngle endAngle
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
-polarArc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
-polarArc centerPoint radius startAngle endAngle =
+polarArc ::
+  CenterPoint (Point2d (space @ units)) ->
+  Radius (Qty units) ->
+  StartAngle Angle ->
+  EndAngle Angle ->
+  Curve2d (space @ units)
+polarArc (CenterPoint centerPoint) (Radius radius) (StartAngle startAngle) (EndAngle endAngle) =
   customArc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle
 
 {-| Create an arc with the given center point, start point and swept angle.
@@ -588,7 +594,11 @@ sweptArc :: Point2d (space @ units) -> Point2d (space @ units) -> Angle -> Curve
 sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2d.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2d.angleFrom centerPoint givenStartPoint
-  polarArc centerPoint radius startAngle (startAngle + sweptAngle)
+  polarArc
+    (CenterPoint centerPoint)
+    (Radius radius)
+    (StartAngle startAngle)
+    (EndAngle (startAngle + sweptAngle))
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
@@ -596,9 +606,9 @@ cornerArc ::
   Point2d (space @ units) ->
   Direction2d space ->
   Direction2d space ->
-  Qty units ->
+  Radius (Qty units) ->
   Curve2d (space @ units)
-cornerArc cornerPoint incomingDirection outgoingDirection givenRadius = do
+cornerArc cornerPoint incomingDirection outgoingDirection (Radius givenRadius) = do
   let radius = Qty.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
   if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
@@ -672,9 +682,14 @@ customArc p0 v1 v2 a b = do
   let angle = Curve.line a b
   p0 + v1 * Curve.cos angle + v2 * Curve.sin angle
 
--- | Create a circle with the given center point and radius.
-circle :: Point2d (space @ units) -> Qty units -> Curve2d (space @ units)
-circle centerPoint radius = polarArc centerPoint radius Angle.zero Angle.twoPi
+-- | Create a circle with the given center point and diameter.
+circle :: CenterPoint (Point2d (space @ units)) -> Diameter (Qty units) -> Curve2d (space @ units)
+circle (CenterPoint centerPoint) (Diameter diameter) =
+  polarArc
+    (CenterPoint centerPoint)
+    (Radius $ 0.5 * diameter)
+    (StartAngle Angle.zero)
+    (EndAngle Angle.twoPi)
 
 {-| Create an ellipes with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,

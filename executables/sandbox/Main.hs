@@ -22,6 +22,7 @@ import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
+import OpenSolid.Labels
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -270,10 +271,9 @@ drawUvCurve attributes curve = do
 
 drawDot :: Color -> UvPoint -> Drawing2d.Entity UvSpace
 drawDot color point =
-  Drawing2d.circle
-    [Drawing2d.fillColor color]
-    (Length.millimeters 0.5)
-    (Point2d.convert toDrawing point)
+  Drawing2d.circle [Drawing2d.fillColor color]
+    & CenterPoint (Point2d.convert toDrawing point)
+    & Diameter (Length.millimeters 1.0)
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint number delay = IO.do
@@ -345,7 +345,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
     [ Drawing2d.with [Drawing2d.opacity 0.3] $
         [ Drawing2d.polyline [] (Polyline2d drawingControlPoints)
         , Drawing2d.with [Drawing2d.fillColor color] $
-            [ Drawing2d.circle [] (Length.millimeters 5.0) point
+            [ Drawing2d.circle [] (CenterPoint point) (Diameter (Length.millimeters 10.0))
             | point <- NonEmpty.toList drawingControlPoints
             ]
         ]

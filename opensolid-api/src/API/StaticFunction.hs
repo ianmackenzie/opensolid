@@ -7,6 +7,7 @@ module API.StaticFunction
   )
 where
 
+import API.Argument qualified as Argument
 import API.Constraint (Constraint (..))
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
@@ -143,8 +144,9 @@ data StaticFunction where
     StaticFunction
 
 ffiName :: FFI.Id a -> Name -> StaticFunction -> Text
-ffiName classId functionName memberFunction = do
-  let (_, arguments, _) = signature memberFunction
+ffiName classId functionName staticFunction = do
+  let (_, positionalArguments, namedArguments, _) = signature staticFunction
+  let arguments = positionalArguments <> namedArguments
   let argumentTypes = List.map Pair.second arguments
   Text.join "_" $
     "opensolid"
@@ -219,10 +221,22 @@ invoke function = case function of
       (tolerance, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4))
 
-type Signature = (Maybe Constraint, List (Name, FFI.Type), FFI.Type)
+type Signature = (Maybe Constraint, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
-signature :: StaticFunction -> (Maybe Constraint, List (Name, FFI.Type), FFI.Type)
-signature staticFunction = case staticFunction of
+normalizeSignature ::
+  (Maybe Constraint, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
+  (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+normalizeSignature (maybeConstraint, arguments, returnType) =
+  if not (List.isOrdered (\(_, _, kind1) (_, _, kind2) -> kind1 <= kind2) arguments)
+    then internalError "Named arguments should always come after positional arguments"
+    else do
+      let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
+      (maybeConstraint, args Argument.Positional, args Argument.Named, returnType)
+
+signature ::
+  StaticFunction ->
+  (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+signature staticFunction = normalizeSignature $ case staticFunction of
   StaticFunction1 arg1 f _ -> signature1 arg1 f
   StaticFunctionU1 arg1 f _ -> signatureU1 arg1 f
   StaticFunctionR1 arg1 f _ -> signatureR1 arg1 f
@@ -240,13 +254,16 @@ signature staticFunction = case staticFunction of
   StaticFunctionR4 arg1 arg2 arg3 arg4 f _ -> signatureR4 arg1 arg2 arg3 arg4 f
   StaticFunctionM4 arg1 arg2 arg3 arg4 f _ -> signatureM4 arg1 arg2 arg3 arg4 f
 
+arg :: forall a. FFI a => Name -> Proxy a -> (Name, FFI.Type, Argument.Kind)
+arg name proxy = (name, FFI.typeOf proxy, Argument.kind name proxy)
+
 signature1 ::
   forall a b.
   (FFI a, FFI b) =>
   Name ->
   (a -> b) ->
   Signature
-signature1 arg1 _ = (Nothing, [(arg1, FFI.typeOf @a Proxy)], FFI.typeOf @b Proxy)
+signature1 arg1 _ = (Nothing, [arg @a arg1 Proxy], FFI.typeOf @b Proxy)
 
 signatureU1 ::
   forall a b.
@@ -254,7 +271,7 @@ signatureU1 ::
   Name ->
   (Tolerance Unitless => a -> b) ->
   Signature
-signatureU1 arg1 _ = (Just ToleranceUnitless, [(arg1, FFI.typeOf @a Proxy)], FFI.typeOf @b Proxy)
+signatureU1 arg1 _ = (Just ToleranceUnitless, [arg @a arg1 Proxy], FFI.typeOf @b Proxy)
 
 signatureR1 ::
   forall a b.
@@ -262,7 +279,7 @@ signatureR1 ::
   Name ->
   (Tolerance Radians => a -> b) ->
   Signature
-signatureR1 arg1 _ = (Just ToleranceRadians, [(arg1, FFI.typeOf @a Proxy)], FFI.typeOf @b Proxy)
+signatureR1 arg1 _ = (Just ToleranceRadians, [arg @a arg1 Proxy], FFI.typeOf @b Proxy)
 
 signatureM1 ::
   forall a b.
@@ -270,7 +287,7 @@ signatureM1 ::
   Name ->
   (Tolerance Meters => a -> b) ->
   Signature
-signatureM1 arg1 _ = (Just ToleranceMeters, [(arg1, FFI.typeOf @a Proxy)], FFI.typeOf @b Proxy)
+signatureM1 arg1 _ = (Just ToleranceMeters, [arg @a arg1 Proxy], FFI.typeOf @b Proxy)
 
 signature2 ::
   forall a b c.
@@ -280,7 +297,7 @@ signature2 ::
   (a -> b -> c) ->
   Signature
 signature2 arg1 arg2 _ =
-  (Nothing, [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)], FFI.typeOf @c Proxy)
+  (Nothing, [arg @a arg1 Proxy, arg @b arg2 Proxy], FFI.typeOf @c Proxy)
 
 signatureU2 ::
   forall a b c.
@@ -290,7 +307,7 @@ signatureU2 ::
   (Tolerance Unitless => a -> b -> c) ->
   Signature
 signatureU2 arg1 arg2 _ =
-  (Just ToleranceUnitless, [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)], FFI.typeOf @c Proxy)
+  (Just ToleranceUnitless, [arg @a arg1 Proxy, arg @b arg2 Proxy], FFI.typeOf @c Proxy)
 
 signatureR2 ::
   forall a b c.
@@ -300,7 +317,7 @@ signatureR2 ::
   (Tolerance Radians => a -> b -> c) ->
   Signature
 signatureR2 arg1 arg2 _ =
-  (Just ToleranceRadians, [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)], FFI.typeOf @c Proxy)
+  (Just ToleranceRadians, [arg @a arg1 Proxy, arg @b arg2 Proxy], FFI.typeOf @c Proxy)
 
 signatureM2 ::
   forall a b c.
@@ -310,7 +327,7 @@ signatureM2 ::
   (Tolerance Meters => a -> b -> c) ->
   Signature
 signatureM2 arg1 arg2 _ =
-  (Just ToleranceMeters, [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)], FFI.typeOf @c Proxy)
+  (Just ToleranceMeters, [arg @a arg1 Proxy, arg @b arg2 Proxy], FFI.typeOf @c Proxy)
 
 signature3 ::
   forall a b c d.
@@ -322,11 +339,7 @@ signature3 ::
   Signature
 signature3 arg1 arg2 arg3 _ =
   ( Nothing
-  ,
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    ]
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy]
   , FFI.typeOf @d Proxy
   )
 
@@ -340,11 +353,7 @@ signatureU3 ::
   Signature
 signatureU3 arg1 arg2 arg3 _ =
   ( Just ToleranceUnitless
-  ,
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    ]
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy]
   , FFI.typeOf @d Proxy
   )
 
@@ -358,11 +367,7 @@ signatureR3 ::
   Signature
 signatureR3 arg1 arg2 arg3 _ =
   ( Just ToleranceRadians
-  ,
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    ]
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy]
   , FFI.typeOf @d Proxy
   )
 
@@ -376,11 +381,7 @@ signatureM3 ::
   Signature
 signatureM3 arg1 arg2 arg3 _ =
   ( Just ToleranceMeters
-  ,
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    ]
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy]
   , FFI.typeOf @d Proxy
   )
 
@@ -395,12 +396,7 @@ signature4 ::
   Signature
 signature4 arg1 arg2 arg3 arg4 _ =
   ( Nothing
-  ,
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    , (arg4, FFI.typeOf @d Proxy)
-    ]
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy]
   , FFI.typeOf @e Proxy
   )
 
@@ -415,12 +411,7 @@ signatureU4 ::
   Signature
 signatureU4 arg1 arg2 arg3 arg4 _ =
   ( Just ToleranceUnitless
-  ,
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    , (arg4, FFI.typeOf @d Proxy)
-    ]
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy]
   , FFI.typeOf @e Proxy
   )
 
@@ -435,12 +426,7 @@ signatureR4 ::
   Signature
 signatureR4 arg1 arg2 arg3 arg4 _ =
   ( Just ToleranceRadians
-  ,
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    , (arg4, FFI.typeOf @d Proxy)
-    ]
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy]
   , FFI.typeOf @e Proxy
   )
 
@@ -455,12 +441,7 @@ signatureM4 ::
   Signature
 signatureM4 arg1 arg2 arg3 arg4 _ =
   ( Just ToleranceMeters
-  ,
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    , (arg4, FFI.typeOf @d Proxy)
-    ]
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy]
   , FFI.typeOf @e Proxy
   )
 

@@ -36,7 +36,7 @@ with Tolerance(Length.nanometers(1)):
     left_fillet_points = [p2, p6, p5]
     right_fillet_points = [p.mirror_across(Axis2d.y) for p in left_fillet_points]
     fillet_points = left_fillet_points + right_fillet_points
-    filleted_region = base_region.fillet(fillet_points, Length.millimeters(4))
+    filleted_region = base_region.fillet(fillet_points, radius=Length.millimeters(4))
 
     thickness = Length.centimeters(2)
     body = Body3d.extruded(

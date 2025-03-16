@@ -4,6 +4,7 @@ module Python.Function
   , matchPattern
   , toleranceArgument
   , typePattern
+  , arguments
   , argument
   , body
   )
@@ -48,8 +49,8 @@ singlePattern (positionalArguments, namedArguments) = do
   "(" <> positionalPattern <> ", " <> keywordPattern <> ")"
 
 matchPattern :: List (Name, FFI.Type) -> Text
-matchPattern arguments =
-  Text.join " | " (List.map singlePattern (List.reverse (splits arguments)))
+matchPattern givenArguments =
+  Text.join " | " (List.map singlePattern (List.reverse (splits givenArguments)))
 
 asPattern :: (Name, FFI.Type) -> Text
 asPattern (argName, argType) = typePattern argType <> " as " <> FFI.snakeCase argName
@@ -94,13 +95,21 @@ toleranceFunction constraint = case constraint of
   Constraint.ToleranceSquareMeters -> "_area_tolerance()"
   Constraint.ToleranceRadians -> "_angle_tolerance()"
 
+arguments :: Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
+arguments includeSelf positional named = do
+  let selfArg = ["self" | includeSelf]
+  let positionalArgs = List.map argument positional
+  let separator = ["*" | not (List.isEmpty named)]
+  let namedArgs = List.map argument named
+  Text.join "," (List.concat [selfArg, positionalArgs, separator, namedArgs])
+
 argument :: (Name, FFI.Type) -> Text
 argument (argName, argType) = FFI.snakeCase argName <> ": " <> Python.Type.qualifiedName argType
 
 body :: Text -> List (Text, FFI.Type) -> FFI.Type -> Text
-body ffiFunctionName arguments returnType =
+body ffiFunctionName ffiArguments returnType =
   Python.lines
-    [ "inputs = " <> Python.FFI.argumentValue arguments
+    [ "inputs = " <> Python.FFI.argumentValue ffiArguments
     , "output = " <> Python.FFI.dummyValue returnType
     , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(output)"
     , "return " <> Python.FFI.outputValue returnType "output"

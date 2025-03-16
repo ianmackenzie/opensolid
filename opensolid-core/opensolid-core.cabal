@@ -158,6 +158,7 @@ library
     OpenSolid.Json
     OpenSolid.Json.Format
     OpenSolid.Json.Schema
+    OpenSolid.Labels
     OpenSolid.Length
     OpenSolid.LineSegment2d
     OpenSolid.List
