@@ -232,6 +232,7 @@ library
     OpenSolid.Volume
 
   other-modules:
+    OpenSolid.Ast
     OpenSolid.Bootstrap
     OpenSolid.CompiledFunction
     OpenSolid.ConstrainedDelaunayTriangulation
