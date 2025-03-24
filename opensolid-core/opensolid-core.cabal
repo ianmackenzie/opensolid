@@ -81,6 +81,7 @@ common config
     UndecidableSuperClasses
     UnliftedFFITypes
     ViewPatterns
+    CApiFFI
 
 custom-setup
   setup-depends:
@@ -254,6 +255,11 @@ library
   hs-source-dirs: src
   extra-libraries:
     opensolid_rs
+
+  cxx-sources:
+    src/OpenSolid/expression.cpp
+  extra-libraries:
+    stdc++
 
 test-suite opensolid-core-test
   import: config

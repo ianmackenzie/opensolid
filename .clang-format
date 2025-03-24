@@ -1,0 +1,26 @@
+AlignAfterOpenBracket: BlockIndent
+AlignTrailingComments:
+  Kind: Never
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseExpressionOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AllowShortLambdasOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: OnePerLine
+BreakAfterReturnType: All
+BreakBeforeBraces: Attach
+ColumnLimit: 100
+ContinuationIndentWidth: 2
+IndentCaseLabels: true
+IndentExternBlock: Indent
+IndentWidth: 2
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: true
+  AtStartOfFile: false
+SeparateDefinitionBlocks: Always
+MaxEmptyLinesToKeep: 1
+PointerAlignment: Left

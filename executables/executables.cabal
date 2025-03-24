@@ -140,3 +140,10 @@ executable i-beam
   hs-source-dirs: i-beam
   build-depends:
     opensolid-core
+
+executable bytecode-evaluation
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: bytecode-evaluation
+  build-depends:
+    opensolid-core
