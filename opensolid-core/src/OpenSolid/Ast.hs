@@ -88,6 +88,9 @@ instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
   Constant2d u v . _ = Constant2d u v
   UV u v . input = UV (u . input) (v . input)
 
+toFloat :: Qty units -> Float
+toFloat = Units.coerce
+
 zero1d :: Ast1d input
 zero1d = constant1d 0.0
 
@@ -95,10 +98,10 @@ zero2d :: Ast2d input
 zero2d = constant2d 0.0 0.0
 
 constant1d :: Qty units -> Ast1d input
-constant1d value = Constant1d (Units.coerce value)
+constant1d value = Constant1d (toFloat value)
 
 constant2d :: Qty units -> Qty units -> Ast2d input
-constant2d u v = Constant2d (Units.coerce u) (Units.coerce v)
+constant2d u v = Constant2d (toFloat u) (toFloat v)
 
 curveParameter :: Ast1d Float
 curveParameter = CurveParameter
@@ -236,11 +239,11 @@ line1d a b param = a + param * (b - a)
 
 quadraticSpline1d :: Qty units -> Qty units -> Qty units -> Ast1d input -> Ast1d input
 quadraticSpline1d p1 p2 p3 param =
-  QuadraticSpline1d (Units.coerce p1) (Units.coerce p2) (Units.coerce p3) param
+  QuadraticSpline1d (toFloat p1) (toFloat p2) (toFloat p3) param
 
 cubicSpline1d :: Qty units -> Qty units -> Qty units -> Qty units -> Ast1d input -> Ast1d input
 cubicSpline1d p1 p2 p3 p4 param =
-  CubicSpline1d (Units.coerce p1) (Units.coerce p2) (Units.coerce p3) (Units.coerce p4) param
+  CubicSpline1d (toFloat p1) (toFloat p2) (toFloat p3) (toFloat p4) param
 
 quarticSpline1d ::
   Qty units ->
@@ -251,13 +254,7 @@ quarticSpline1d ::
   Ast1d input ->
   Ast1d input
 quarticSpline1d p1 p2 p3 p4 p5 param =
-  QuarticSpline1d
-    (Units.coerce p1)
-    (Units.coerce p2)
-    (Units.coerce p3)
-    (Units.coerce p4)
-    (Units.coerce p5)
-    param
+  QuarticSpline1d (toFloat p1) (toFloat p2) (toFloat p3) (toFloat p4) (toFloat p5) param
 
 quinticSpline1d ::
   Qty units ->
@@ -270,12 +267,12 @@ quinticSpline1d ::
   Ast1d input
 quinticSpline1d p1 p2 p3 p4 p5 p6 param =
   QuinticSpline1d
-    (Units.coerce p1)
-    (Units.coerce p2)
-    (Units.coerce p3)
-    (Units.coerce p4)
-    (Units.coerce p5)
-    (Units.coerce p6)
+    (toFloat p1)
+    (toFloat p2)
+    (toFloat p3)
+    (toFloat p4)
+    (toFloat p5)
+    (toFloat p6)
     param
 
 bezierCurve1d :: NonEmpty (Qty units) -> Ast1d input -> Ast1d input
