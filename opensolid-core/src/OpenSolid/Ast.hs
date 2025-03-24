@@ -6,6 +6,10 @@ module OpenSolid.Ast
   , constant2d
   , curveParameter
   , surfaceParameter
+  , squared
+  , sqrt
+  , sin
+  , cos
   , line1d
   , quadraticSpline1d
   , cubicSpline1d
