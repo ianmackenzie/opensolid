@@ -100,6 +100,7 @@ library
     OpenSolid.Arithmetic
     OpenSolid.Array
     OpenSolid.Array2d
+    OpenSolid.Ast
     OpenSolid.Axis2d
     OpenSolid.Axis3d
     OpenSolid.Basis2d
@@ -233,7 +234,6 @@ library
     OpenSolid.Volume
 
   other-modules:
-    OpenSolid.Ast
     OpenSolid.Bootstrap
     OpenSolid.CompiledFunction
     OpenSolid.ConstrainedDelaunayTriangulation
