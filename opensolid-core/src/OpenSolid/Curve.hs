@@ -144,12 +144,8 @@ new :: Compiled units -> Curve units -> Curve units
 new = Curve
 
 recursive :: Compiled units -> (Curve units -> Curve units) -> Curve units
-recursive givenCompiled givenDerivative = do
-  let result =
-        Curve
-          { compiled = givenCompiled
-          , derivative = givenDerivative result
-          }
+recursive givenCompiled derivativeFunction = do
+  let result = Curve{compiled = givenCompiled, derivative = derivativeFunction result}
   result
 
 -- | A curve equal to zero everywhere.
