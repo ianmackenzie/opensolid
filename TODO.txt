@@ -1,8 +1,4 @@
-Refactor Scene3d.Material to use Metallic and Roughness fields (Scene3d.NamedArguments?)
-
-Rename 'NamedArguments' to 'Labels'? Can be used for data structure fields as well as function arguments
-
-Add assertion that API argument names match named argument names
+Refactor Scene3d.Material to use Metallic (Metalness?) and Roughness fields (Scene3d.Labels?)
 
 Switch to 'perfect' units coercion for curves and surface function types
 -> can coerce Haskell functions!
