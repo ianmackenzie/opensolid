@@ -528,8 +528,8 @@ foreign import capi "expression.h value Quintic1d" quintic1dOpcode :: Word8
 
 foreign import capi "expression.h value Bezier1d" bezier1dOpcode :: Word8
 
-foreign import capi "expression.h opensolid_evaluate_curve_1d"
-  opensolid_evaluate_curve_1d :: CString -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
+foreign import capi "expression.h opensolid_curve1d_value"
+  opensolid_curve1d_value :: CString -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
 
 class Evaluation input output where
   evaluate :: Expression input output -> input -> output
@@ -540,7 +540,7 @@ instance Evaluation Float Float where
       Data.ByteString.Unsafe.unsafeUseAsCString constants \constantsPtr ->
         Data.ByteString.Unsafe.unsafeUseAsCString bytecode \bytecodePtr ->
           Foreign.Marshal.Alloc.allocaBytes 8 \outputPtr -> IO.do
-            opensolid_evaluate_curve_1d
+            opensolid_curve1d_value
               bytecodePtr
               (Float.toDouble t)
               (Foreign.Ptr.castPtr constantsPtr)

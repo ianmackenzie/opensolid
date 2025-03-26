@@ -257,7 +257,7 @@ execute(
 
 extern "C" {
   void
-  opensolid_evaluate_curve_1d(
+  opensolid_curve1d_value(
     const std::uint8_t* bytecode,
     double t,
     const double* constants,
@@ -269,7 +269,7 @@ extern "C" {
   }
 
   void
-  opensolid_evaluate_surface_1d(
+  opensolid_surface1d_value(
     const std::uint8_t* bytecode,
     double u,
     double v,
