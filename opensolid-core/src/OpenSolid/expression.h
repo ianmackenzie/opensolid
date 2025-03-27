@@ -19,6 +19,7 @@ enum Opcode {
   Quartic1d,
   Quintic1d,
   Bezier1d,
+  OPCODE_END
 };
 
 #ifdef __cplusplus

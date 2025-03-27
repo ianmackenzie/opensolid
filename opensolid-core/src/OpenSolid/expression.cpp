@@ -141,7 +141,8 @@ execute(
   };
   while (true) {
     std::uint8_t opcode = getByte();
-    switch (opcode) {
+    assert(opcode < OPCODE_END && "Unrecognized opcode");
+    switch (Opcode(opcode)) {
       case Return1d: {
         *returnValuesPointer = *getInputPointer();
         return;
@@ -247,9 +248,9 @@ execute(
         bezierCurve(n, controlPoints, output, *parameter);
         break;
       }
-      default: {
-        assert(false && "Unknown opcode");
-        return;
+      case OPCODE_END: {
+        assert(false && "Should never hit dummy OPCODE_END value");
+        break;
       }
     }
   }
