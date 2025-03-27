@@ -345,8 +345,8 @@ encodeInput (Constant index) = encodeByte 2 <> encodeInt index
 encodeInput (Variable index) = encodeByte 3 <> encodeInt index
 
 encodeInt :: Int -> Builder
-encodeInt index
-  | index < 65536 = encodeByte (index % 256) <> encodeByte (index // 256)
+encodeInt value
+  | value < 65536 = encodeByte (value % 256) <> encodeByte (value // 256)
   | otherwise = internalError "More than 65536 locals or constants in compiled function"
 
 -- Encode a (64-bit) Float value using the current system endianness
