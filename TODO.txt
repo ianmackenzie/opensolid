@@ -1,9 +1,18 @@
+Use alloca in Bezier evaluation functions instead of allocating extra local variables?
+
+Have global 'float' function instead of Float.int?
+
 Refactor Scene3d.Material to use Metallic (Metalness?) and Roughness fields (Scene3d.Labels?)
 
 Switch to 'perfect' units coercion for curves and surface function types
 -> can coerce Haskell functions!
 
 Check that function modules only refer to other function types, not geometry types
+
+Special cases for arithmetic on mixed variable/constant Ast values
+- e.g. 'a + (b + x)' -> (a + b) + x'
+
+Special cases for spline types in Ast operations
 
 Add translateX, translateY, translateZ
 
@@ -40,8 +49,6 @@ Ensure all quotient implementations use (p' / q) - (p / q) * (q' / q) form, to b
 
 Refactor Composition type parameter order to reflect . instead of >> use? (outer then inner)
 
-Replace DotProductOf and CrossProductOf with Arithmetic.CrossProduct and Arithmetic.DotProduct
-
 Remove hasZero functions?
 
 Create Haskell gear example and profile
@@ -56,8 +63,6 @@ Improve curve linearization to take first-order bounds and even just zeroth-orde
 
 Have "high level" (Region2d, Body3d) functions just return 'Result Text a'?
 -> call that a 'Try a' or 'Attempt a' or similar?
-
-General pattern: arcs take radius, circles take diameter?
 
 Remove Curve2d.cornerArc now that e.g. Region2d.fillet exists?
 -> also add Curve2d.fillet to fillet curves at their (single) intersection point?
@@ -109,15 +114,12 @@ Use direct constructors for primitives in more places
 
 General pass to make sure transformation functions are complete and consistent
 
-Create monolithic OpenSolid.Functions module
-
 Refactor Solve2d searching to use 'cross product' of Solve1d?
 
 Verify behaviour of Curve2d intersection when curves are extensions of each other and meet only at an endpoint
 -> rework overlap detection to be based on G2 continuity?
 
 Have Domain.samplingPoints etc. return a 'Result InfiniteRecursion (NonEmpty Float)'?
-Export to glTF
 
 Refactor Surface3d.toMesh to match Body3d
 
@@ -153,8 +155,7 @@ C API: generate structs with *named* fields
 -> can use this in Python too, to have named fields instead of 'field0' etc.
 
 Improve Python bindings
-- Implement constructors?
-- Make axes callable by a Float to give a point?
+- Make axes callable by a Length to give a point?
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
 - Add magic IPython display functions to Curve2d, Drawing2d.Entity etc.
   -> using to-SVG (and eventually to-glTF) Haskell functions under the hood? ('display' functions?)
@@ -184,24 +185,11 @@ Try generating C++ bindings?
 Sandbox executable to start generating Region2d medial axis curves and points?
 -> need to be able to solve for medial axis of curve and *point* first
 
-Implement 1D monotonic solving in Rust
-
-Specialize xComponent etc. for Parametric cases
+Implement 1D monotonic solving in C++
 
 Use space1 ~ space2 instead of space ~ space_ everywhere
 
-Remove explicit use of unboxed Double# etc.?
-- Just use {-# UNPACK #-} where necessary
-
 Refactor Estimate to return an error if convergence fails/stalls
-
-Optimizations to try:
-- cache expressions on Rust side (per thread?)
-- refactor JIT code to directly generate 'primop' style code directly callable from Haskell
-- add CMM wrappers around C functions so they can be directly used as primops
 
 Implement Subtraction for UTCTime instead of having Duration.from function
 -> also allow adding or subtracting Duration from a UTCTime to get another UTCTime
-
-Add specialized Region2d constructors for basic shapes
--> rectangle (Bounds2d), triangle, maybe circle?
