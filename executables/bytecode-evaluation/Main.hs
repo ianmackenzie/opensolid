@@ -14,15 +14,15 @@ main = IO.do
 
   IO.printLine "t^2 / (1 + t^2)"
   let tSquared = Ast.squared t
-  let ast = tSquared / (1.0 + tSquared)
-  let expr = Ast.expression1d ast
+  let fraction = tSquared / (1.0 + tSquared)
+  let fractionFunction = Ast.compileCurve1d fraction
   IO.forEach [0 .. 5] \i -> IO.do
-    let evaluated = Ast.evaluate expr (Float.int i)
+    let evaluated = fractionFunction (Float.int i)
     IO.printLine (Text.float evaluated)
 
   IO.printLine "Bezier curve"
   let curve = Ast.bezierCurve1d (NonEmpty.eight 0.0 0.5 1.0 1.0 1.0 1.0 0.5 0.0) t
-  let curveExpr = Ast.expression1d curve
+  let curveFunction = Ast.compileCurve1d curve
   IO.forEach (Parameter.steps 10) \tValue -> IO.do
-    let evaluated = Ast.evaluate curveExpr tValue
+    let evaluated = curveFunction tValue
     IO.printLine (Text.float evaluated)

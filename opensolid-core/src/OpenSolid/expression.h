@@ -3,13 +3,17 @@
 #include "stdint.h"
 
 enum Opcode {
-  Return1d,
+  Return,
   Negate1d,
   Add1d,
+  AddVariableConstant1d,
   Subtract1d,
+  SubtractConstantVariable1d,
   Square1d,
   Multiply1d,
+  MultiplyVariableConstant1d,
   Divide1d,
+  DivideConstantVariable1d,
   Sqrt1d,
   Sin1d,
   Cos1d,
