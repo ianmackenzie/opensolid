@@ -170,7 +170,7 @@ pattern NineOrMore <- _ :| (_ : _ : _ : _ : _ : _ : _ : _ : _)
 
 (|:) :: List a -> a -> NonEmpty a
 [] |: item = item :| []
-(x : xs) |: item = x :| Prelude.mappend xs [item]
+(x : xs) |: item = x :| (xs <> [item])
 
 infixl 5 |:
 

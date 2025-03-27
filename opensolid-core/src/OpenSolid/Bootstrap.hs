@@ -78,7 +78,7 @@ fromInteger :: Prelude.Integer -> Int
 fromInteger = Prelude.fromInteger
 
 internalError :: HasCallStack => Text -> a
-internalError message = withFrozenCallStack $ abort (Prelude.mappend "Internal error: " message)
+internalError message = withFrozenCallStack $ abort ("Internal error: " <> message)
 
 pattern TODO :: HasCallStack => a
 pattern TODO <- (withFrozenCallStack todo -> ())
