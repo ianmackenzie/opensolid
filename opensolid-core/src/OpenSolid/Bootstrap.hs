@@ -26,6 +26,7 @@ module OpenSolid.Bootstrap
   , (&)
   , fromIntegral
   , internalError
+  , exception
   , pattern TODO
   , (|>)
   , ($)
@@ -79,6 +80,9 @@ fromInteger = Prelude.fromInteger
 
 internalError :: HasCallStack => Text -> a
 internalError message = withFrozenCallStack $ abort ("Internal error: " <> message)
+
+exception :: HasCallStack => Text -> a
+exception message = withFrozenCallStack $ abort ("Exception occurred: " <> message)
 
 pattern TODO :: HasCallStack => a
 pattern TODO <- (withFrozenCallStack todo -> ())
