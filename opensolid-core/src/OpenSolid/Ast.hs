@@ -496,6 +496,23 @@ expression1d ast = do
 
 data Expression input output = Expression ByteString ByteString Int
 
+class Evaluation input output where
+  evaluate :: Expression input output -> input -> output
+
+instance Evaluation Float Float where
+  evaluate (Expression constants bytecode numVariables) t =
+    unsafeDupablePerformIO $
+      Data.ByteString.Unsafe.unsafeUseAsCString constants \constantsPtr ->
+        Data.ByteString.Unsafe.unsafeUseAsCString bytecode \bytecodePtr ->
+          Foreign.Marshal.Alloc.allocaBytes 8 \outputPtr -> IO.do
+            opensolid_curve1d_value
+              bytecodePtr
+              (Float.toDouble t)
+              (Foreign.Ptr.castPtr constantsPtr)
+              numVariables
+              outputPtr
+            IO.map Float.fromDouble (Foreign.peek outputPtr)
+
 foreign import capi "expression.h value Return1d" return1dOpcode :: Word8
 
 foreign import capi "expression.h value Negate1d" negate1dOpcode :: Word8
@@ -530,20 +547,3 @@ foreign import capi "expression.h value Bezier1d" bezier1dOpcode :: Word8
 
 foreign import capi "expression.h opensolid_curve1d_value"
   opensolid_curve1d_value :: CString -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
-
-class Evaluation input output where
-  evaluate :: Expression input output -> input -> output
-
-instance Evaluation Float Float where
-  evaluate (Expression constants bytecode numVariables) t =
-    unsafeDupablePerformIO $
-      Data.ByteString.Unsafe.unsafeUseAsCString constants \constantsPtr ->
-        Data.ByteString.Unsafe.unsafeUseAsCString bytecode \bytecodePtr ->
-          Foreign.Marshal.Alloc.allocaBytes 8 \outputPtr -> IO.do
-            opensolid_curve1d_value
-              bytecodePtr
-              (Float.toDouble t)
-              (Foreign.Ptr.castPtr constantsPtr)
-              numVariables
-              outputPtr
-            IO.map Float.fromDouble (Foreign.peek outputPtr)
