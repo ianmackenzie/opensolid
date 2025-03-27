@@ -96,17 +96,17 @@ bezierCurve(int n, const double* in, double* out, double t) {
 
 void
 execute(
-  const std::uint8_t* bytecode,
-  const double* arguments,
-  const double* constants,
-  double* variables,
-  double* returnValues
+  const std::uint8_t* bytecodePointer,
+  const double* argumentsPointer,
+  const double* constantsPointer,
+  double* variablesPointer,
+  double* returnValuesPointer
 ) {
   // Read a single byte from the bytecode,
   // and advance the bytecode pointer accordingly
   auto getByte = [&]() -> std::uint8_t {
-    std::uint8_t byte = *bytecode;
-    ++bytecode;
+    std::uint8_t byte = *bytecodePointer;
+    ++bytecodePointer;
     return byte;
   };
   // Read a 16-bit unsigned integer from the bytecode
@@ -117,134 +117,134 @@ execute(
   };
   // Get the pointer to a constant double value
   // by reading its index from the bytecode
-  auto getConstant = [&]() -> const double* {
-    return constants + getInt();
+  auto getConstantPointer = [&]() -> const double* {
+    return constantsPointer + getInt();
   };
   // Get the pointer to a local variable double value
   // by reading its index from the bytecode
-  auto getVariable = [&]() -> double* {
-    return variables + getInt();
+  auto getVariablePointer = [&]() -> double* {
+    return variablesPointer + getInt();
   };
   // Get the pointer to an input double value
   // (which could be a variable, a constant or a function argument)
   // by reading a tag and optional index from the bytecode
-  auto getInput = [&]() -> const double* {
+  auto getInputPointer = [&]() -> const double* {
     std::uint8_t tag = getByte();
     assert(tag < 4 && "Invalid input tag");
     if (tag == 3) {
-      return getVariable();
+      return getVariablePointer();
     } else if (tag == 2) {
-      return getConstant();
+      return getConstantPointer();
     } else { // 0 or 1
-      return arguments + tag;
+      return argumentsPointer + tag;
     }
   };
   while (true) {
     std::uint8_t opcode = getByte();
     switch (opcode) {
       case Return1d: {
-        *returnValues = *getInput();
+        *returnValuesPointer = *getInputPointer();
         return;
       }
       case Negate1d: {
-        const double* input = getInput();
-        double* output = getVariable();
+        const double* input = getInputPointer();
+        double* output = getVariablePointer();
         *output = -*input;
         break;
       }
       case Add1d: {
-        const double* lhs = getInput();
-        const double* rhs = getInput();
-        double* output = getVariable();
+        const double* lhs = getInputPointer();
+        const double* rhs = getInputPointer();
+        double* output = getVariablePointer();
         *output = *lhs + *rhs;
         break;
       }
       case Subtract1d: {
-        const double* lhs = getInput();
-        const double* rhs = getInput();
-        double* output = getVariable();
+        const double* lhs = getInputPointer();
+        const double* rhs = getInputPointer();
+        double* output = getVariablePointer();
         *output = *lhs - *rhs;
         break;
       }
       case Square1d: {
-        const double* input = getInput();
-        double* output = getVariable();
+        const double* input = getInputPointer();
+        double* output = getVariablePointer();
         *output = *input * *input;
         break;
       }
       case Multiply1d: {
-        const double* lhs = getInput();
-        const double* rhs = getInput();
-        double* output = getVariable();
+        const double* lhs = getInputPointer();
+        const double* rhs = getInputPointer();
+        double* output = getVariablePointer();
         *output = *lhs * *rhs;
         break;
       }
       case Divide1d: {
-        const double* lhs = getInput();
-        const double* rhs = getInput();
-        double* output = getVariable();
+        const double* lhs = getInputPointer();
+        const double* rhs = getInputPointer();
+        double* output = getVariablePointer();
         *output = *lhs / *rhs;
         break;
       }
       case Sqrt1d: {
-        const double* input = getInput();
-        double* output = getVariable();
+        const double* input = getInputPointer();
+        double* output = getVariablePointer();
         *output = std::sqrt(*input);
         break;
       }
       case Sin1d: {
-        const double* input = getInput();
-        double* output = getVariable();
+        const double* input = getInputPointer();
+        double* output = getVariablePointer();
         *output = std::sin(*input);
         break;
       }
       case Cos1d: {
-        const double* input = getInput();
-        double* output = getVariable();
+        const double* input = getInputPointer();
+        double* output = getVariablePointer();
         *output = std::cos(*input);
         break;
       }
       case Linear1d: {
-        const double* input = getConstant();
-        const double* parameter = getInput();
-        double* output = getVariable();
-        line(input, output, *parameter);
+        const double* controlPoints = getConstantPointer();
+        const double* parameter = getInputPointer();
+        double* output = getVariablePointer();
+        line(controlPoints, output, *parameter);
         break;
       }
       case Quadratic1d: {
-        const double* input = getConstant();
-        const double* parameter = getInput();
-        double* output = getVariable();
-        quadraticSpline(input, output, *parameter);
+        const double* controlPoints = getConstantPointer();
+        const double* parameter = getInputPointer();
+        double* output = getVariablePointer();
+        quadraticSpline(controlPoints, output, *parameter);
         break;
       }
       case Cubic1d: {
-        const double* input = getConstant();
-        const double* parameter = getInput();
-        double* output = getVariable();
-        cubicSpline(input, output, *parameter);
+        const double* controlPoints = getConstantPointer();
+        const double* parameter = getInputPointer();
+        double* output = getVariablePointer();
+        cubicSpline(controlPoints, output, *parameter);
         break;
       }
       case Quartic1d: {
-        const double* input = getConstant();
-        const double* parameter = getInput();
-        double* output = getVariable();
-        quarticSpline(input, output, *parameter);
+        const double* controlPoints = getConstantPointer();
+        const double* parameter = getInputPointer();
+        double* output = getVariablePointer();
+        quarticSpline(controlPoints, output, *parameter);
         break;
       }
       case Quintic1d: {
-        const double* input = getConstant();
-        const double* parameter = getInput();
-        double* output = getVariable();
-        quinticSpline(input, output, *parameter);
+        const double* controlPoints = getConstantPointer();
+        const double* parameter = getInputPointer();
+        double* output = getVariablePointer();
+        quinticSpline(controlPoints, output, *parameter);
         break;
       }
       case Bezier1d: {
         int n = getInt();
-        const double* input = getConstant();
-        const double* parameter = getInput();
-        double* output = getVariable();
-        bezierCurve(n, input, output, *parameter);
+        const double* controlPoints = getConstantPointer();
+        const double* parameter = getInputPointer();
+        double* output = getVariablePointer();
+        bezierCurve(n, controlPoints, output, *parameter);
         break;
       }
       default: {

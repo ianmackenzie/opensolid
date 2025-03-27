@@ -27,21 +27,21 @@ extern "C" {
 
   void
   opensolid_curve1d_value(
-    const uint8_t* bytecode,
+    const uint8_t* bytecodePointer,
     double t,
-    const double* constants,
+    const double* constantsPointer,
     int numVariables,
-    double* output
+    double* returnValuesPointer
   );
 
   void
   opensolid_surface1d_value(
-    const uint8_t* bytecode,
+    const uint8_t* bytecodePointer,
     double u,
     double v,
-    const double* constants,
+    const double* constantsPointer,
     int numVariables,
-    double* output
+    double* returnValuesPointer
   );
 
 #ifdef __cplusplus
