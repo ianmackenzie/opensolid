@@ -113,7 +113,7 @@ execute(
   auto getInt = [&]() -> int {
     std::uint8_t low = getByte();
     std::uint8_t high = getByte();
-    return low + 256 * high;
+    return (high << 8) + low;
   };
   // Get the pointer to a constant double value
   // by reading its index from the bytecode
