@@ -226,10 +226,10 @@ instance input1 ~ input2 => Division (Ast1d input1) (Ast1d input2) (Ast1d input1
   lhs / rhs = Quotient1d lhs rhs
 
 instance Division (Qty units) (Ast1d input) (Ast1d input) where
-  value / scalar = constant1d value / scalar
+  lhs / rhs = constant1d lhs / rhs
 
 instance Division (Ast1d input) (Qty units) (Ast1d input) where
-  scalar / value = scalar / constant1d value
+  lhs / rhs = lhs / constant1d rhs
 
 squared :: Ast1d input -> Ast1d input
 squared (Constant1d value) = constant1d (Float.squared value)
