@@ -95,41 +95,29 @@ bezierCurve(int n, const double* in, double* out, double t) {
 }
 
 void
-execute(
-  const std::uint8_t* bytecodePointer,
+computeValue(
+  const std::uint16_t* wordsPointer,
   const double* constantsPointer,
   double* variablesPointer,
   double* returnValuesPointer
 ) {
-  // Read a single byte from the bytecode,
-  // and advance the bytecode pointer accordingly
-  auto getByte = [&]() -> std::uint8_t {
-    std::uint8_t byte = *bytecodePointer;
-    ++bytecodePointer;
-    return byte;
-  };
-  // Read a 16-bit unsigned integer from the bytecode
   auto getInt = [&]() -> int {
-    std::uint8_t low = getByte();
-    std::uint8_t high = getByte();
-    return (high << 8) + low;
+    int value = *wordsPointer;
+    ++wordsPointer;
+    return value;
   };
-  // Get the pointer to a constant double value
-  // by reading its index from the bytecode
   auto getConstantPointer = [&]() -> const double* {
     return constantsPointer + getInt();
   };
-  // Get the pointer to a local variable double value
-  // by reading its index from the bytecode
   auto getVariablePointer = [&]() -> double* {
     return variablesPointer + getInt();
   };
   while (true) {
-    std::uint8_t opcode = getByte();
+    int opcode = getInt();
     assert(opcode < OPCODE_END && "Unrecognized opcode");
     switch (Opcode(opcode)) {
       case Return: {
-        std::uint8_t dimension = getByte();
+        int dimension = getInt();
         double* valuesPointer = getVariablePointer();
         std::memcpy(returnValuesPointer, valuesPointer, sizeof(double) * dimension);
         return;
@@ -256,7 +244,7 @@ execute(
         break;
       }
       case Bezier1d: {
-        int n = getByte();
+        int n = getInt();
         const double* controlPoints = getConstantPointer();
         const double* parameter = getVariablePointer();
         double* output = getVariablePointer();
@@ -274,7 +262,7 @@ execute(
 extern "C" {
   void
   opensolid_curve1d_value(
-    const std::uint8_t* bytecodePointer,
+    const std::uint16_t* wordsPointer,
     double t,
     const double* constantsPointer,
     int numVariables,
@@ -282,12 +270,12 @@ extern "C" {
   ) {
     double* variablesPointer = static_cast<double*>(alloca(sizeof(double) * numVariables));
     variablesPointer[0] = t;
-    execute(bytecodePointer, constantsPointer, variablesPointer, returnValuesPointer);
+    computeValue(wordsPointer, constantsPointer, variablesPointer, returnValuesPointer);
   }
 
   void
   opensolid_surface1d_value(
-    const std::uint8_t* bytecodePointer,
+    const std::uint16_t* wordsPointer,
     double u,
     double v,
     const double* constantsPointer,
@@ -297,6 +285,6 @@ extern "C" {
     double* variablesPointer = static_cast<double*>(alloca(sizeof(double) * numVariables));
     variablesPointer[0] = u;
     variablesPointer[1] = v;
-    execute(bytecodePointer, constantsPointer, variablesPointer, returnValuesPointer);
+    computeValue(wordsPointer, constantsPointer, variablesPointer, returnValuesPointer);
   }
 }

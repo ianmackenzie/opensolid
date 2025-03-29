@@ -23,13 +23,12 @@ where
 
 import Data.ByteString.Builder qualified as Builder
 import Data.ByteString.Unsafe qualified
-import Data.Word (Word8)
+import Data.Word (Word16)
 import Foreign (Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified
 import Foreign.Ptr qualified
 import GHC.ByteOrder qualified
-import GHC.Foreign (CString)
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Float qualified as Float
@@ -303,7 +302,7 @@ data Compilation = Compilation
   { constantsBuilder :: Builder
   , constants :: Map (NonEmpty Float) ConstantIndex
   , numConstants :: Int
-  , bytecodeBuilder :: Builder
+  , wordsBuilder :: Builder
   , variables :: Map Instruction VariableIndex
   , numVariables :: Int
   }
@@ -328,84 +327,91 @@ data Instruction
 encodeOpcodeAndArguments :: Instruction -> Builder
 encodeOpcodeAndArguments instruction = case instruction of
   Negate1d arg ->
-    Builder.word8 negate1dOpcode
+    encodeInt negate1dOpcode
       <> encodeVariableIndex arg
   Add1d lhs rhs ->
-    Builder.word8 add1dOpcode
+    encodeInt add1dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   AddVariableConstant1d lhs rhs ->
-    Builder.word8 addVariableConstant1dOpcode
+    encodeInt addVariableConstant1dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Subtract1d lhs rhs ->
-    Builder.word8 subtract1dOpcode
+    encodeInt subtract1dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   SubtractConstantVariable1d lhs rhs ->
-    Builder.word8 subtractConstantVariable1dOpcode
+    encodeInt subtractConstantVariable1dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   Square1d arg ->
-    Builder.word8 square1dOpcode
+    encodeInt square1dOpcode
       <> encodeVariableIndex arg
   Multiply1d lhs rhs ->
-    Builder.word8 multiply1dOpcode
+    encodeInt multiply1dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   MultiplyVariableConstant1d lhs rhs ->
-    Builder.word8 multiplyVariableConstant1dOpcode
+    encodeInt multiplyVariableConstant1dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Divide1d lhs rhs ->
-    Builder.word8 divide1dOpcode
+    encodeInt divide1dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   DivideConstantVariable1d lhs rhs ->
-    Builder.word8 divideConstantVariable1dOpcode
+    encodeInt divideConstantVariable1dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   Sqrt1d arg ->
-    Builder.word8 sqrt1dOpcode
+    encodeInt sqrt1dOpcode
       <> encodeVariableIndex arg
   Sin1d arg ->
-    Builder.word8 sin1dOpcode
+    encodeInt sin1dOpcode
       <> encodeVariableIndex arg
   Cos1d arg ->
-    Builder.word8 cos1dOpcode
+    encodeInt cos1dOpcode
       <> encodeVariableIndex arg
   Bezier1d 2 controlPoints parameter ->
-    Builder.word8 linear1dOpcode
+    encodeInt linear1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d 3 controlPoints parameter ->
-    Builder.word8 quadratic1dOpcode
+    encodeInt quadratic1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d 4 controlPoints parameter ->
-    Builder.word8 cubic1dOpcode
+    encodeInt cubic1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d 5 controlPoints parameter ->
-    Builder.word8 quartic1dOpcode
+    encodeInt quartic1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d 6 controlPoints parameter ->
-    Builder.word8 quintic1dOpcode
+    encodeInt quintic1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d n controlPoints parameter ->
-    Builder.word8 bezier1dOpcode
-      <> encodeByte n
+    encodeInt bezier1dOpcode
+      <> encodeInt n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
 
-encodeByte :: Int -> Builder
-encodeByte value = Builder.word8 (fromIntegral value)
+encodeWord :: Word16 -> Builder
+encodeWord = case GHC.ByteOrder.targetByteOrder of
+  GHC.ByteOrder.LittleEndian -> Builder.word16LE
+  GHC.ByteOrder.BigEndian -> Builder.word16BE
+
+encodeDouble :: Double -> Builder
+encodeDouble = case GHC.ByteOrder.targetByteOrder of
+  GHC.ByteOrder.LittleEndian -> Builder.doubleLE
+  GHC.ByteOrder.BigEndian -> Builder.doubleBE
 
 encodeInt :: Int -> Builder
 encodeInt value
-  | value < 65536 = encodeByte (value % 256) <> encodeByte (value // 256)
+  | value < 65536 = encodeWord (fromIntegral value)
   | otherwise = exception "More than 65536 locals or constants in compiled function"
 
 encodeVariableIndex :: VariableIndex -> Builder
@@ -413,11 +419,6 @@ encodeVariableIndex (VariableIndex index) = encodeInt index
 
 encodeConstantIndex :: ConstantIndex -> Builder
 encodeConstantIndex (ConstantIndex index) = encodeInt index
-
-encodeDouble :: Double -> Builder
-encodeDouble = case GHC.ByteOrder.targetByteOrder of
-  GHC.ByteOrder.LittleEndian -> Builder.doubleLE
-  GHC.ByteOrder.BigEndian -> Builder.doubleBE
 
 encodeFloat :: Float -> Builder
 encodeFloat = encodeDouble . Float.toDouble
@@ -446,8 +447,8 @@ addInstruction instruction resultSize initialCompilation =
       let resultIndex = VariableIndex (numVariables initialCompilation)
       let updatedCompilation =
             initialCompilation
-              { bytecodeBuilder =
-                  bytecodeBuilder initialCompilation
+              { wordsBuilder =
+                  wordsBuilder initialCompilation
                     <> encodeOpcodeAndArguments instruction
                     <> encodeVariableIndex resultIndex
               , variables = Map.set instruction resultIndex (variables initialCompilation)
@@ -556,94 +557,94 @@ initCompilation numArguments =
     { constantsBuilder = Binary.empty
     , constants = Map.empty
     , numConstants = 0
-    , bytecodeBuilder = Binary.empty
+    , wordsBuilder = Binary.empty
     , variables = Map.empty
     , numVariables = numArguments
     }
 
 returnInstruction :: Int -> VariableIndex -> Builder
 returnInstruction dimension variableIndex =
-  Builder.word8 returnOpcode <> encodeByte dimension <> encodeVariableIndex variableIndex
+  encodeInt returnOpcode <> encodeInt dimension <> encodeVariableIndex variableIndex
 
 compileCurve1d :: Ast1d Float -> (Float -> Float)
 compileCurve1d (Constant1d value) = always value
 compileCurve1d (Variable1d variable) = do
   let (compilation, resultIndex) = compileVariable1d variable (initCompilation 1)
-  let Compilation{constantsBuilder, bytecodeBuilder, numVariables} = compilation
+  let Compilation{constantsBuilder, wordsBuilder, numVariables} = compilation
   let constantBytes = Binary.bytes constantsBuilder
-  let bytecode = Binary.bytes (bytecodeBuilder <> returnInstruction 1 resultIndex)
+  let words = Binary.bytes (wordsBuilder <> returnInstruction 1 resultIndex)
   \tValue ->
     unsafeDupablePerformIO $
-      Data.ByteString.Unsafe.unsafeUseAsCString constantBytes \constantBytesPtr ->
-        Data.ByteString.Unsafe.unsafeUseAsCString bytecode \bytecodePtr ->
-          Foreign.Marshal.Alloc.allocaBytes 8 \outputPtr -> IO.do
+      Data.ByteString.Unsafe.unsafeUseAsCString constantBytes \constantBytesPointer ->
+        Data.ByteString.Unsafe.unsafeUseAsCString words \wordBytesPointer ->
+          Foreign.Marshal.Alloc.allocaBytes 8 \returnValuePointer -> IO.do
             opensolid_curve1d_value
-              bytecodePtr
+              (Foreign.Ptr.castPtr wordBytesPointer)
               (Float.toDouble tValue)
-              (Foreign.Ptr.castPtr constantBytesPtr)
+              (Foreign.Ptr.castPtr constantBytesPointer)
               numVariables
-              outputPtr
-            IO.map Float.fromDouble (Foreign.peek outputPtr)
+              returnValuePointer
+            IO.map Float.fromDouble (Foreign.peek returnValuePointer)
 
 foreign import capi "expression.h value Return"
-  returnOpcode :: Word8
+  returnOpcode :: Int
 
 foreign import capi "expression.h value Negate1d"
-  negate1dOpcode :: Word8
+  negate1dOpcode :: Int
 
 foreign import capi "expression.h value Add1d"
-  add1dOpcode :: Word8
+  add1dOpcode :: Int
 
 foreign import capi "expression.h value AddVariableConstant1d"
-  addVariableConstant1dOpcode :: Word8
+  addVariableConstant1dOpcode :: Int
 
 foreign import capi "expression.h value Subtract1d"
-  subtract1dOpcode :: Word8
+  subtract1dOpcode :: Int
 
 foreign import capi "expression.h value SubtractConstantVariable1d"
-  subtractConstantVariable1dOpcode :: Word8
+  subtractConstantVariable1dOpcode :: Int
 
 foreign import capi "expression.h value Square1d"
-  square1dOpcode :: Word8
+  square1dOpcode :: Int
 
 foreign import capi "expression.h value Multiply1d"
-  multiply1dOpcode :: Word8
+  multiply1dOpcode :: Int
 
 foreign import capi "expression.h value MultiplyVariableConstant1d"
-  multiplyVariableConstant1dOpcode :: Word8
+  multiplyVariableConstant1dOpcode :: Int
 
 foreign import capi "expression.h value Divide1d"
-  divide1dOpcode :: Word8
+  divide1dOpcode :: Int
 
 foreign import capi "expression.h value DivideConstantVariable1d"
-  divideConstantVariable1dOpcode :: Word8
+  divideConstantVariable1dOpcode :: Int
 
 foreign import capi "expression.h value Sqrt1d"
-  sqrt1dOpcode :: Word8
+  sqrt1dOpcode :: Int
 
 foreign import capi "expression.h value Sin1d"
-  sin1dOpcode :: Word8
+  sin1dOpcode :: Int
 
 foreign import capi "expression.h value Cos1d"
-  cos1dOpcode :: Word8
+  cos1dOpcode :: Int
 
 foreign import capi "expression.h value Linear1d"
-  linear1dOpcode :: Word8
+  linear1dOpcode :: Int
 
 foreign import capi "expression.h value Quadratic1d"
-  quadratic1dOpcode :: Word8
+  quadratic1dOpcode :: Int
 
 foreign import capi "expression.h value Cubic1d"
-  cubic1dOpcode :: Word8
+  cubic1dOpcode :: Int
 
 foreign import capi "expression.h value Quartic1d"
-  quartic1dOpcode :: Word8
+  quartic1dOpcode :: Int
 
 foreign import capi "expression.h value Quintic1d"
-  quintic1dOpcode :: Word8
+  quintic1dOpcode :: Int
 
 foreign import capi "expression.h value Bezier1d"
-  bezier1dOpcode :: Word8
+  bezier1dOpcode :: Int
 
 foreign import capi "expression.h opensolid_curve1d_value"
-  opensolid_curve1d_value :: CString -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
+  opensolid_curve1d_value :: Ptr Word16 -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()

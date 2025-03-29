@@ -32,7 +32,7 @@ extern "C" {
 
   void
   opensolid_curve1d_value(
-    const uint8_t* bytecodePointer,
+    const uint16_t* wordsPointer,
     double t,
     const double* constantsPointer,
     int numVariables,
@@ -41,7 +41,7 @@ extern "C" {
 
   void
   opensolid_surface1d_value(
-    const uint8_t* bytecodePointer,
+    const uint16_t* wordsPointer,
     double u,
     double v,
     const double* constantsPointer,
