@@ -515,27 +515,40 @@ compileBezier1d controlPoints parameter compilation0 = do
 
 compileVariable1d :: Variable1d input -> Compilation -> (Compilation, VariableIndex)
 compileVariable1d variable compilation = case variable of
-  CurveParameter -> (compilation, VariableIndex 0)
-  SurfaceParameter U -> (compilation, VariableIndex 0)
-  SurfaceParameter V -> (compilation, VariableIndex 1)
-  Negated1d argument -> compileUnary1d Negate1d argument compilation
-  Sum1d lhs rhs -> compileBinary1d Add1d lhs rhs compilation
+  CurveParameter ->
+    (compilation, VariableIndex 0)
+  SurfaceParameter U ->
+    (compilation, VariableIndex 0)
+  SurfaceParameter V ->
+    (compilation, VariableIndex 1)
+  Negated1d argument ->
+    compileUnary1d Negate1d argument compilation
+  Sum1d lhs rhs ->
+    compileBinary1d Add1d lhs rhs compilation
   SumVariableConstant1d lhs rhs ->
     compileVariableConstantBinary1d AddVariableConstant1d lhs rhs compilation
-  Difference1d lhs rhs -> compileBinary1d Subtract1d lhs rhs compilation
+  Difference1d lhs rhs ->
+    compileBinary1d Subtract1d lhs rhs compilation
   DifferenceConstantVariable1d lhs rhs ->
     compileConstantVariableBinary1d SubtractConstantVariable1d lhs rhs compilation
-  Squared1d argument -> compileUnary1d Square1d argument compilation
-  Product1d lhs rhs -> compileBinary1d Multiply1d lhs rhs compilation
+  Squared1d argument ->
+    compileUnary1d Square1d argument compilation
+  Product1d lhs rhs ->
+    compileBinary1d Multiply1d lhs rhs compilation
   ProductVariableConstant1d lhs rhs ->
     compileVariableConstantBinary1d MultiplyVariableConstant1d lhs rhs compilation
-  Quotient1d lhs rhs -> compileBinary1d Divide1d lhs rhs compilation
+  Quotient1d lhs rhs ->
+    compileBinary1d Divide1d lhs rhs compilation
   QuotientConstantVariable1d lhs rhs ->
     compileConstantVariableBinary1d DivideConstantVariable1d lhs rhs compilation
-  SquareRoot1d argument -> compileUnary1d Sqrt1d argument compilation
-  Sine1d argument -> compileUnary1d Sin1d argument compilation
-  Cosine1d argument -> compileUnary1d Cos1d argument compilation
-  BezierCurve1d controlPoints t -> compileBezier1d controlPoints t compilation
+  SquareRoot1d argument ->
+    compileUnary1d Sqrt1d argument compilation
+  Sine1d argument ->
+    compileUnary1d Sin1d argument compilation
+  Cosine1d argument ->
+    compileUnary1d Cos1d argument compilation
+  BezierCurve1d controlPoints t ->
+    compileBezier1d controlPoints t compilation
 
 initCompilation :: Int -> Compilation
 initCompilation numArguments =
