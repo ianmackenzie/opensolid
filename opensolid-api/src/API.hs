@@ -1308,6 +1308,7 @@ scene3d =
     , static1 "Silver" "Roughness" Scene3d.silver $(docs 'Scene3d.silver)
     , static1 "Titanium" "Roughness" Scene3d.titanium $(docs 'Scene3d.titanium)
     , static2 "Nonmetal" "Base Color" "Roughness" Scene3d.nonmetal $(docs 'Scene3d.nonmetal)
+    , static3 "Material" "Base Color" "Metallic" "Roughness" Scene3d.material $(docs 'Scene3d.material)
     , static3 "Write GLB" "Path" "Ground Plane" "Entities" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
     , nested @(Scene3d.Entity Space) "A scene entity such as a mesh or group." (rigidTransformations3d Scene3d.transformBy)
     , nested @Scene3d.Material "A material applied to a mesh." []

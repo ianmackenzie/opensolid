@@ -185,6 +185,7 @@ library
     OpenSolid.Region2d.BoundedBy
     OpenSolid.Result
     OpenSolid.Scene3d
+    OpenSolid.Scene3d.Labels
     OpenSolid.Set2d
     OpenSolid.Set3d
     OpenSolid.Sign
