@@ -158,19 +158,19 @@ instance units ~ units_ => Addition (Range units) (Range units_) (Range units) w
   Range low1 high1 + Range low2 high2 = Ordered (low1 + low2) (high1 + high2)
 
 instance units ~ units_ => Addition (Range units) (Qty units_) (Range units) where
-  Range low high + value = Ordered (low + value) (high + value)
+  Range low high + value = Range (low + value) (high + value)
 
 instance units ~ units_ => Addition (Qty units) (Range units_) (Range units) where
-  value + Range low high = Ordered (value + low) (value + high)
+  value + Range low high = Range (value + low) (value + high)
 
 instance units ~ units_ => Subtraction (Range units) (Range units_) (Range units) where
   Range low1 high1 - Range low2 high2 = Ordered (low1 - high2) (high1 - low2)
 
 instance units ~ units_ => Subtraction (Range units) (Qty units_) (Range units) where
-  Range low high - value = Ordered (low - value) (high - value)
+  Range low high - value = Range (low - value) (high - value)
 
 instance units ~ units_ => Subtraction (Qty units) (Range units_) (Range units) where
-  value - Range low high = Ordered (value - high) (value - low)
+  value - Range low high = Range (value - high) (value - low)
 
 instance Multiplication' (Qty units1) (Range units2) (Range (units1 :*: units2)) where
   value .*. Range low high = from (value .*. low) (value .*. high)
@@ -249,7 +249,7 @@ instance
 -- | Construct a zero-width range containing a single value.
 {-# INLINE constant #-}
 constant :: Qty units -> Range units
-constant value = Ordered value value
+constant value = Range value value
 
 -- | The range with endoints [0,1].
 unit :: Range Unitless
