@@ -40,10 +40,32 @@ extern "C" {
   );
 
   void
+  opensolid_curve1d_bounds(
+    const uint16_t* wordsPointer,
+    double tLower,
+    double tUpper,
+    const double* constantsPointer,
+    int numVariables,
+    double* returnValuesPointer
+  );
+
+  void
   opensolid_surface1d_value(
     const uint16_t* wordsPointer,
     double u,
     double v,
+    const double* constantsPointer,
+    int numVariables,
+    double* returnValuesPointer
+  );
+
+  void
+  opensolid_surface1d_bounds(
+    const uint16_t* wordsPointer,
+    double uLower,
+    double uUpper,
+    double vLower,
+    double vUpper,
     const double* constantsPointer,
     int numVariables,
     double* returnValuesPointer

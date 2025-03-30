@@ -29,14 +29,17 @@ import Foreign qualified
 import Foreign.Marshal.Alloc qualified
 import Foreign.Ptr qualified
 import GHC.ByteOrder qualified
-import OpenSolid.Binary (Builder)
+import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvPoint)
 import OpenSolid.Units qualified as Units
 import System.IO.Unsafe (unsafeDupablePerformIO)
@@ -91,7 +94,7 @@ deriving instance Show (Variable1d input)
 
 instance Composition (Ast1d input) (Ast1d Float) (Ast1d input) where
   Constant1d outer . _ = Constant1d outer
-  outer . Constant1d inner = Constant1d (compileCurve1d outer inner)
+  outer . Constant1d inner = Constant1d ((Pair.first (compileCurve1d outer)) inner)
   Variable1d outer . Variable1d inner = Variable1d (outer . inner)
 
 instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) where
@@ -512,7 +515,7 @@ compileBezier1d controlPoints parameter compilation0 = do
   let (compilation2, parameterIndex) = compileVariable1d parameter compilation1
   let numControlPoints = NonEmpty.length controlPoints
   let instruction = Bezier1d numControlPoints controlPointsIndex parameterIndex
-  addInstruction instruction (numControlPoints - 1) compilation2
+  addInstruction instruction 1 compilation2
 
 compileVariable1d :: Variable1d input -> Compilation -> (Compilation, VariableIndex)
 compileVariable1d variable compilation = case variable of
@@ -562,29 +565,55 @@ initCompilation numArguments =
     , numVariables = numArguments
     }
 
-returnInstruction :: Int -> VariableIndex -> Builder
-returnInstruction dimension variableIndex =
+encodeReturn :: Int -> VariableIndex -> Builder
+encodeReturn dimension variableIndex =
   encodeInt returnOpcode <> encodeInt dimension <> encodeVariableIndex variableIndex
 
-compileCurve1d :: Ast1d Float -> (Float -> Float)
-compileCurve1d (Constant1d value) = always value
+callWith :: ByteString -> ByteString -> Int -> (Ptr Word16 -> Ptr Double -> Ptr Double -> IO a) -> a
+callWith wordBytes constantBytes numReturnValues callback =
+  unsafeDupablePerformIO $
+    Data.ByteString.Unsafe.unsafeUseAsCString wordBytes \wordBytesPointer ->
+      Data.ByteString.Unsafe.unsafeUseAsCString constantBytes \constantBytesPointer ->
+        Foreign.Marshal.Alloc.allocaBytes (8 * numReturnValues) \returnValuesPointer -> do
+          let wordsPointer = Foreign.Ptr.castPtr wordBytesPointer
+          let constantsPointer = Foreign.Ptr.castPtr constantBytesPointer
+          callback wordsPointer constantsPointer returnValuesPointer
+
+getReturnValue :: Int -> Ptr Double -> IO Float
+getReturnValue index returnValuesPointer =
+  IO.map Float.fromDouble (Foreign.peekElemOff returnValuesPointer index)
+
+compileCurve1d :: Ast1d Float -> (Float -> Float, Range Unitless -> Range Unitless)
+compileCurve1d (Constant1d value) = (always value, always (Range.constant value))
 compileCurve1d (Variable1d variable) = do
   let (compilation, resultIndex) = compileVariable1d variable (initCompilation 1)
   let Compilation{constantsBuilder, wordsBuilder, numVariables} = compilation
   let constantBytes = Binary.bytes constantsBuilder
-  let words = Binary.bytes (wordsBuilder <> returnInstruction 1 resultIndex)
-  \tValue ->
-    unsafeDupablePerformIO $
-      Data.ByteString.Unsafe.unsafeUseAsCString constantBytes \constantBytesPointer ->
-        Data.ByteString.Unsafe.unsafeUseAsCString words \wordBytesPointer ->
-          Foreign.Marshal.Alloc.allocaBytes 8 \returnValuePointer -> IO.do
+  let wordBytes = Binary.bytes (wordsBuilder <> encodeReturn 1 resultIndex)
+  let value tValue =
+        callWith wordBytes constantBytes 1 $
+          \wordsPointer constantsPointer returnValuePointer -> IO.do
             opensolid_curve1d_value
-              (Foreign.Ptr.castPtr wordBytesPointer)
+              wordsPointer
               (Float.toDouble tValue)
-              (Foreign.Ptr.castPtr constantBytesPointer)
+              constantsPointer
               numVariables
               returnValuePointer
-            IO.map Float.fromDouble (Foreign.peek returnValuePointer)
+            getReturnValue 0 returnValuePointer
+  let bounds (Range tLower tUpper) =
+        callWith wordBytes constantBytes 2 $
+          \wordsPointer constantsPointer returnValuesPointer -> IO.do
+            opensolid_curve1d_bounds
+              wordsPointer
+              (Float.toDouble tLower)
+              (Float.toDouble tUpper)
+              constantsPointer
+              numVariables
+              returnValuesPointer
+            lower <- getReturnValue 0 returnValuesPointer
+            upper <- getReturnValue 1 returnValuesPointer
+            IO.succeed (Range lower upper)
+  (value, bounds)
 
 foreign import capi "expression.h value Return"
   returnOpcode :: Int
@@ -647,4 +676,9 @@ foreign import capi "expression.h value Bezier1d"
   bezier1dOpcode :: Int
 
 foreign import capi "expression.h opensolid_curve1d_value"
-  opensolid_curve1d_value :: Ptr Word16 -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
+  opensolid_curve1d_value ::
+    Ptr Word16 -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
+
+foreign import capi "expression.h opensolid_curve1d_bounds"
+  opensolid_curve1d_bounds ::
+    Ptr Word16 -> Double -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()

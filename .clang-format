@@ -12,6 +12,7 @@ BinPackArguments: false
 BinPackParameters: OnePerLine
 BreakAfterReturnType: All
 BreakBeforeBraces: Attach
+BreakConstructorInitializers: AfterColon
 ColumnLimit: 100
 ContinuationIndentWidth: 2
 IndentCaseLabels: true
@@ -23,4 +24,5 @@ KeepEmptyLines:
   AtStartOfFile: false
 SeparateDefinitionBlocks: Always
 MaxEmptyLinesToKeep: 1
+PackConstructorInitializers: Never
 PointerAlignment: Left
