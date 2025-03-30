@@ -1,8 +1,5 @@
-Use alloca in Bezier evaluation functions instead of allocating extra local variables?
-
-Have global 'float' function instead of Float.int?
-
-Refactor Scene3d.Material to use Metallic (Metalness?) and Roughness fields (Scene3d.Labels?)
+Try requiring a specific coordinate system convention when using 'xyz' functions
+-> implicit argument in Haskell, treated just like tolerance (except it's not passed _through_ anywhere)
 
 Switch to 'perfect' units coercion for curves and surface function types
 -> can coerce Haskell functions!
