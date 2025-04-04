@@ -1,3 +1,11 @@
+Support point/vector transformations in bytecode
+Support dot and cross products in bytecode
+Support discontinuities in bytecode
+
+Encode entire function as <u64 number of constants, constants, words>
+-> only pin/marshal one ByteString instead of two
+-> potentially allow functions to call other functions, by passing the single pointer as a 'function pointer'
+
 Try requiring a specific coordinate system convention when using 'xyz' functions
 -> implicit argument in Haskell, treated just like tolerance (except it's not passed _through_ anywhere)
 
