@@ -12,9 +12,10 @@ import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
+import Data.Foldable qualified
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
-import OpenSolid.List qualified as List
+import Prelude (Foldable)
 import Prelude qualified
 
 bytes :: Builder -> ByteString
@@ -26,5 +27,5 @@ empty = Prelude.mempty
 concat :: List Builder -> Builder
 concat = Prelude.mconcat
 
-collect :: (a -> Builder) -> List a -> Builder
-collect function list = concat (List.map function list)
+collect :: Foldable list => (a -> Builder) -> list a -> Builder
+collect = Data.Foldable.foldMap
