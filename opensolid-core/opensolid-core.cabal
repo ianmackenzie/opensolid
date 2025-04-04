@@ -57,6 +57,7 @@ common config
 
   default-extensions:
     BlockArguments
+    CApiFFI
     DataKinds
     DeriveAnyClass
     DerivingStrategies
@@ -81,7 +82,6 @@ common config
     UndecidableSuperClasses
     UnliftedFFITypes
     ViewPatterns
-    CApiFFI
 
 custom-setup
   setup-depends:
@@ -259,6 +259,7 @@ library
 
   cxx-sources:
     src/OpenSolid/expression.cpp
+
   extra-libraries:
     stdc++
 
