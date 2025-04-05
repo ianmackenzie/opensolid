@@ -1,6 +1,7 @@
 Support point/vector transformations in bytecode
-Support dot and cross products in bytecode
 Support discontinuities in bytecode
+Add Ast3d
+Add arithmetic typeclass instances to Ast2d and Ast3d
 
 Encode entire function as <u64 number of constants, constants, words>
 -> only pin/marshal one ByteString instead of two
@@ -8,6 +9,14 @@ Encode entire function as <u64 number of constants, constants, words>
 
 Try requiring a specific coordinate system convention when using 'xyz' functions
 -> implicit argument in Haskell, treated just like tolerance (except it's not passed _through_ anywhere)
+-> 'Convention.using Convention.yUp' (X left, Z forward), 'Convention.using Convention.zUp' (X right, Y forward)
+-> Conventions: right handed, Y or Z up, no cardinal directions point downward or backward
+    Convention.yUp (alias for xLeftwardYUpwardZForward)
+    Convention.zUp (alias for xRightwardYForwardZUpward)
+    Convention.xLeftwardYUpwardZForward
+    Convention.xRightwardYForwardZUpward
+    Convention.xForwardYLeftwardZUpward
+    Convention.xForwardYUpwardZRightward
 
 Switch to 'perfect' units coercion for curves and surface function types
 -> can coerce Haskell functions!
