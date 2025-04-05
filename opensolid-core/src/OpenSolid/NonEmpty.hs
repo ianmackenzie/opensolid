@@ -289,10 +289,10 @@ collect :: (a -> NonEmpty b) -> NonEmpty a -> NonEmpty b
 collect f nonEmpty = concat (map f nonEmpty)
 
 foldl :: (b -> a -> b) -> b -> NonEmpty a -> b
-foldl = Data.Foldable.foldl'
+foldl = Prelude.foldl'
 
 foldr :: (a -> b -> b) -> b -> NonEmpty a -> b
-foldr = Data.Foldable.foldr
+foldr = Prelude.foldr
 
 reduce :: (a -> a -> a) -> NonEmpty a -> a
 reduce function (x :| xs) = List.foldl function x xs
