@@ -233,9 +233,8 @@ refineWiderThan maxWidth estimate
   | boundsWidth estimate > maxWidth = refine estimate
   | otherwise = estimate
 
-sum :: List (Estimate units) -> Estimate units
-sum [] = exact Qty.zero
-sum (NonEmpty estimates) = new (Sum estimates)
+sum :: NonEmpty (Estimate units) -> Estimate units
+sum = new . Sum
 
 data Min units = Min (Estimate units) (Estimate units)
 

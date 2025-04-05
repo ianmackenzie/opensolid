@@ -577,7 +577,7 @@ fluxIntegral point curve = do
   Curve.integral integrand
 
 totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
-totalFlux point loop = Estimate.sum (List.map (fluxIntegral point) (NonEmpty.toList loop))
+totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
 
 classifyNonBoundary :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Sign
 classifyNonBoundary point loop = do
@@ -622,9 +622,7 @@ pickLargestLoop loops =
 loopSignedArea' :: Loop (space @ units) -> Estimate (units :*: units)
 loopSignedArea' loop = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first loop)
-  NonEmpty.toList loop
-    |> List.map (areaIntegral' referencePoint)
-    |> Estimate.sum
+  Estimate.sum (NonEmpty.map (areaIntegral' referencePoint) loop)
 
 areaIntegral ::
   Units.Squared units1 units2 =>
@@ -657,7 +655,7 @@ bounds region =
 area :: Units.Squared units1 units2 => Region2d (space @ units1) -> Estimate units2
 area region = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first (outerLoop region))
-  Estimate.sum (List.map (areaIntegral referencePoint) (NonEmpty.toList (boundaryCurves region)))
+  Estimate.sum (NonEmpty.map (areaIntegral referencePoint) (boundaryCurves region))
 
 toMesh :: Qty units -> Region2d (space @ units) -> Mesh (Point2d (space @ units))
 toMesh accuracy region = do
