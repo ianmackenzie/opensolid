@@ -22,6 +22,15 @@ struct Range {
   }
 
   inline static Range
+  constant(double value) {
+    if (std::isnan(value)) {
+      return unbounded();
+    } else {
+      return Range(value, value);
+    }
+  }
+
+  inline static Range
   validate(double a, double b) {
     return a <= b ? Range(a, b) : unbounded();
   }
@@ -146,6 +155,11 @@ operator*(Range lhs, Range rhs) {
 inline Range
 operator*(Range lhs, double rhs) {
   return Range::hull2(lhs.lower * rhs, lhs.upper * rhs);
+}
+
+inline Range
+operator*(double lhs, Range rhs) {
+  return Range::hull2(lhs * rhs.lower, lhs * rhs.upper);
 }
 
 inline Range

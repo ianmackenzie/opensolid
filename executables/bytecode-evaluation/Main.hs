@@ -1,6 +1,6 @@
 module Main (main) where
 
-import OpenSolid.Ast qualified as Ast
+import OpenSolid.Bytecode.Ast qualified as Ast
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.NonEmpty qualified as NonEmpty

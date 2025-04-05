@@ -101,7 +101,6 @@ library
     OpenSolid.Arithmetic
     OpenSolid.Array
     OpenSolid.Array2d
-    OpenSolid.Ast
     OpenSolid.Axis2d
     OpenSolid.Axis3d
     OpenSolid.Basis2d
@@ -112,6 +111,7 @@ library
     OpenSolid.Bool
     OpenSolid.Bounds2d
     OpenSolid.Bounds3d
+    OpenSolid.Bytecode.Ast
     OpenSolid.Camera3d
     OpenSolid.Color
     OpenSolid.Composition
@@ -237,6 +237,8 @@ library
 
   other-modules:
     OpenSolid.Bootstrap
+    OpenSolid.Bytecode.Compilation
+    OpenSolid.Bytecode.Instruction
     OpenSolid.CompiledFunction
     OpenSolid.ConstrainedDelaunayTriangulation
     OpenSolid.Expression.Scalar
@@ -258,7 +260,7 @@ library
     opensolid_rs
 
   cxx-sources:
-    src/OpenSolid/expression.cpp
+    src/OpenSolid/Bytecode/bytecode.cpp
 
   extra-libraries:
     stdc++
