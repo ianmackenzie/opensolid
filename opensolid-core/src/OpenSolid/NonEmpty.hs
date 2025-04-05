@@ -86,11 +86,14 @@ module OpenSolid.NonEmpty
 where
 
 import Data.Foldable qualified
+import Data.Foldable1 (Foldable1)
+import Data.Foldable1 qualified as Foldable1
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
+import OpenSolid.Composition
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal qualified as Random
@@ -213,9 +216,8 @@ toList (x :| xs) = x : xs
 push :: a -> NonEmpty a -> NonEmpty a
 push x (y :| ys) = x :| (y : ys)
 
-prepend :: List a -> NonEmpty a -> NonEmpty a
-prepend [] nonEmpty = nonEmpty
-prepend (NonEmpty prefix) nonEmpty = prefix <> nonEmpty
+prepend :: Foldable list => list a -> NonEmpty a -> NonEmpty a
+prepend list nonEmpty = Prelude.foldr push nonEmpty list
 
 extend :: NonEmpty a -> List a -> NonEmpty a
 extend nonEmpty [] = nonEmpty
@@ -285,8 +287,8 @@ find = Data.Foldable.find
 concat :: NonEmpty (NonEmpty a) -> NonEmpty a
 concat = Data.Semigroup.sconcat
 
-collect :: (a -> NonEmpty b) -> NonEmpty a -> NonEmpty b
-collect f nonEmpty = concat (map f nonEmpty)
+collect :: Foldable1 list => (a -> NonEmpty b) -> list a -> NonEmpty b
+collect f list = Foldable1.foldrMap1 f (prepend . f) list
 
 foldl :: (b -> a -> b) -> b -> NonEmpty a -> b
 foldl = Prelude.foldl'

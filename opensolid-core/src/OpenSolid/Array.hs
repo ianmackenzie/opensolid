@@ -27,7 +27,7 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import Prelude (Foldable, Functor)
+import Prelude (Functor)
 import Prelude qualified
 
 newtype Array a = Array (Data.Array.Array Int a) deriving (Eq, Ord, Show)

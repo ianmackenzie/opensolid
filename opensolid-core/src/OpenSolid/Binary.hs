@@ -14,7 +14,6 @@ import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
-import Prelude (Foldable)
 import Prelude qualified
 
 bytes :: Builder -> ByteString

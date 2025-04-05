@@ -18,11 +18,12 @@ module OpenSolid.Maybe
   )
 where
 
-import Data.Maybe qualified
 import OpenSolid.Bool qualified as Bool
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
+import OpenSolid.List qualified as List
 import OpenSolid.Random qualified as Random
+import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
 map function (Just value) = Just (function value)
@@ -52,11 +53,11 @@ find :: (a -> Maybe b) -> List a -> Maybe b
 find _ [] = Nothing
 find f (first : rest) = f first |> orElse (find f rest)
 
-collect :: (a -> Maybe b) -> List a -> List b
-collect = Data.Maybe.mapMaybe
+collect :: Foldable list => (a -> Maybe b) -> list a -> List b
+collect f list = Prelude.foldr (List.prepend . f) [] list
 
-values :: List (Maybe a) -> List a
-values = Data.Maybe.catMaybes
+values :: Foldable list => list (Maybe a) -> List a
+values maybes = Prelude.foldr List.prepend [] maybes
 
 any :: List (Maybe a) -> Maybe a
 any (Just first : _) = Just first

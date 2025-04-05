@@ -98,19 +98,19 @@ try result = case result of
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM
 
-foldl :: (b -> a -> Result x b) -> b -> List a -> Result x b
-foldl _ accumulated [] = Success accumulated
-foldl function accumulated (first : rest) =
-  case function accumulated first of
-    Success updated -> foldl function updated rest
-    failure -> failure
+applyForward :: (b -> a -> Result x b) -> Result x b -> a -> Result x b
+applyForward f (Success acc) item = f acc item
+applyForward _ failure _ = failure
 
-foldr :: (a -> b -> Result x b) -> b -> List a -> Result x b
-foldr _ accumulated [] = Success accumulated
-foldr function accumulated (first : rest) =
-  case foldr function accumulated rest of
-    Success updated -> function first updated
-    failure -> failure
+foldl :: Foldable list => (b -> a -> Result x b) -> b -> list a -> Result x b
+foldl function init list = Prelude.foldl' (applyForward function) (Success init) list
+
+applyBackward :: (a -> b -> Result x b) -> a -> Result x b -> Result x b
+applyBackward f item (Success acc) = f item acc
+applyBackward _ _ failure = failure
+
+foldr :: Foldable list => (a -> b -> Result x b) -> b -> list a -> Result x b
+foldr function init list = Prelude.foldr (applyBackward function) (Success init) list
 
 combine :: List (Result x a) -> Result x (List a)
 combine = Prelude.sequence

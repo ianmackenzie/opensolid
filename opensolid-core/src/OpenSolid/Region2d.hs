@@ -669,7 +669,7 @@ toVertexLoop ::
   NonEmpty (Point2d (space @ units))
 toVertexLoop accuracy loop = do
   let curveVertices curve = NonEmpty.rest (Polyline2d.vertices (Curve2d.toPolyline accuracy curve))
-  let allVertices = List.collect curveVertices (NonEmpty.toList loop)
+  let allVertices = List.collect curveVertices loop
   case allVertices of
     NonEmpty vertices -> vertices
     [] -> internalError "Should always have at least one vertex"

@@ -10,6 +10,7 @@ module OpenSolid.Bootstrap
   , Ord ((<), (<=), (>=), (>), compare)
   , Ordering (EQ, GT, LT)
   , Show
+  , Foldable
   , Traversable
   , Bool (True, False)
   , Char
@@ -46,6 +47,7 @@ import Prelude
   ( Bool (False, True)
   , Char
   , Eq ((/=), (==))
+  , Foldable
   , IO
   , Int
   , Maybe (Just, Nothing)

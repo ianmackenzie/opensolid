@@ -31,6 +31,7 @@ module OpenSolid.List
   , find
   , contains
   , indexOf
+  , prepend
   , collect
   , concat
   , foldl
@@ -177,8 +178,11 @@ contains = Data.List.elem
 indexOf :: Eq a => a -> List a -> Maybe Int
 indexOf = Data.List.elemIndex
 
-collect :: (a -> List b) -> List a -> List b
-collect = Prelude.concatMap
+prepend :: Foldable list => list a -> List a -> List a
+prepend items list = Prelude.foldr (:) list items
+
+collect :: Foldable list => (a -> List b) -> list a -> List b
+collect = Prelude.foldMap
 
 concat :: List (List a) -> List a
 concat = Data.List.concat

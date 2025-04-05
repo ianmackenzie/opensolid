@@ -500,7 +500,7 @@ registerSurfaceWithHalfEdges cornerSet halfEdgeSet surfaceRegistry surfaceWithHa
           , processed = processed |> Map.set id surfaceWithHalfEdges
           , edges
           }
-  let halfEdges = NonEmpty.toList (getAllHalfEdges surfaceWithHalfEdges)
+  let halfEdges = getAllHalfEdges surfaceWithHalfEdges
   Result.foldl (registerHalfEdge handedness cornerSet halfEdgeSet) updatedRegistry halfEdges
 
 registerHalfEdge ::
