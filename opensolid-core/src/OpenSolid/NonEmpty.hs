@@ -220,8 +220,7 @@ prepend :: Foldable list => list a -> NonEmpty a -> NonEmpty a
 prepend list nonEmpty = Prelude.foldr push nonEmpty list
 
 extend :: NonEmpty a -> List a -> NonEmpty a
-extend nonEmpty [] = nonEmpty
-extend nonEmpty (NonEmpty suffix) = nonEmpty <> suffix
+extend = Data.List.NonEmpty.appendList
 
 length :: NonEmpty a -> Int
 length = Data.List.NonEmpty.length
