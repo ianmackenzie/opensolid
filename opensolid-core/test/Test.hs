@@ -178,5 +178,5 @@ instance Show a => Show (Lines a) where
     Text.unpack $
       Text.concat (List.map (\value -> "\n  " <> Text.show value) values)
 
-lines :: (Data.Foldable.Foldable container, Show a) => container a -> Lines a
-lines container = Lines (Data.Foldable.toList container)
+lines :: Foldable list => list a -> Lines a
+lines  = Lines . Data.Foldable.toList
