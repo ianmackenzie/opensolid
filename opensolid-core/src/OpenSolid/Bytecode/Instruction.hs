@@ -50,6 +50,10 @@ data Instruction
   | DivideConstantVariable2d ConstantIndex VariableIndex
   | SquaredNorm2d VariableIndex
   | Norm2d VariableIndex
+  | Dot2d VariableIndex VariableIndex
+  | DotVariableConstant2d VariableIndex ConstantIndex
+  | Cross2d VariableIndex VariableIndex
+  | CrossVariableConstant2d VariableIndex ConstantIndex
   | Bezier2d Int ConstantIndex VariableIndex
   | XYZ3d VariableIndex VariableIndex VariableIndex
   | XYC3d VariableIndex VariableIndex ConstantIndex
@@ -70,6 +74,10 @@ data Instruction
   | DivideConstantVariable3d ConstantIndex VariableIndex
   | SquaredNorm3d VariableIndex
   | Norm3d VariableIndex
+  | Dot3d VariableIndex VariableIndex
+  | DotVariableConstant3d VariableIndex ConstantIndex
+  | Cross3d VariableIndex VariableIndex
+  | CrossVariableConstant3d VariableIndex ConstantIndex
   | Bezier3d Int ConstantIndex VariableIndex
   deriving (Eq, Ord)
 
@@ -233,6 +241,22 @@ encodeOpcodeAndArguments instruction = case instruction of
   Norm2d arg ->
     encodeInt norm2dOpcode
       <> encodeVariableIndex arg
+  Dot2d lhs rhs ->
+    encodeInt dot2dOpcode
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+  DotVariableConstant2d lhs rhs ->
+    encodeInt dotVariableConstant2dOpcode
+      <> encodeVariableIndex lhs
+      <> encodeConstantIndex rhs
+  Cross2d lhs rhs ->
+    encodeInt cross2dOpcode
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+  CrossVariableConstant2d lhs rhs ->
+    encodeInt crossVariableConstant2dOpcode
+      <> encodeVariableIndex lhs
+      <> encodeConstantIndex rhs
   Bezier2d 2 controlPoints parameter ->
     encodeInt linear2dOpcode
       <> encodeConstantIndex controlPoints
@@ -338,6 +362,22 @@ encodeOpcodeAndArguments instruction = case instruction of
   Norm3d arg ->
     encodeInt norm3dOpcode
       <> encodeVariableIndex arg
+  Dot3d lhs rhs ->
+    encodeInt dot3dOpcode
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+  DotVariableConstant3d lhs rhs ->
+    encodeInt dotVariableConstant3dOpcode
+      <> encodeVariableIndex lhs
+      <> encodeConstantIndex rhs
+  Cross3d lhs rhs ->
+    encodeInt cross3dOpcode
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+  CrossVariableConstant3d lhs rhs ->
+    encodeInt crossVariableConstant3dOpcode
+      <> encodeVariableIndex lhs
+      <> encodeConstantIndex rhs
   Bezier3d 2 controlPoints parameter ->
     encodeInt linear3dOpcode
       <> encodeConstantIndex controlPoints
@@ -482,6 +522,18 @@ foreign import capi "bytecode.h value SquaredNorm2d"
 foreign import capi "bytecode.h value Norm2d"
   norm2dOpcode :: Int
 
+foreign import capi "bytecode.h value Dot2d"
+  dot2dOpcode :: Int
+
+foreign import capi "bytecode.h value DotVariableConstant2d"
+  dotVariableConstant2dOpcode :: Int
+
+foreign import capi "bytecode.h value Cross2d"
+  cross2dOpcode :: Int
+
+foreign import capi "bytecode.h value CrossVariableConstant2d"
+  crossVariableConstant2dOpcode :: Int
+
 foreign import capi "bytecode.h value Linear2d"
   linear2dOpcode :: Int
 
@@ -556,6 +608,18 @@ foreign import capi "bytecode.h value SquaredNorm3d"
 
 foreign import capi "bytecode.h value Norm3d"
   norm3dOpcode :: Int
+
+foreign import capi "bytecode.h value Dot3d"
+  dot3dOpcode :: Int
+
+foreign import capi "bytecode.h value DotVariableConstant3d"
+  dotVariableConstant3dOpcode :: Int
+
+foreign import capi "bytecode.h value Cross3d"
+  cross3dOpcode :: Int
+
+foreign import capi "bytecode.h value CrossVariableConstant3d"
+  crossVariableConstant3dOpcode :: Int
 
 foreign import capi "bytecode.h value Linear3d"
   linear3dOpcode :: Int

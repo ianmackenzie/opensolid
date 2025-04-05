@@ -63,6 +63,10 @@ data Variable1d input where
   BezierCurve1d :: NonEmpty Float -> Variable1d input -> Variable1d input
   SquaredNorm2d :: Variable2d input -> Variable1d input
   Norm2d :: Variable2d input -> Variable1d input
+  Dot2d :: Variable2d input -> Variable2d input -> Variable1d input
+  DotVariableConstant2d :: Variable2d input -> (Float, Float) -> Variable1d input
+  Cross2d :: Variable2d input -> Variable2d input -> Variable1d input
+  CrossVariableConstant2d :: Variable2d input -> (Float, Float) -> Variable1d input
 
 deriving instance Eq (Variable1d input)
 
@@ -127,6 +131,10 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   BezierCurve1d controlPoints param . input = BezierCurve1d controlPoints (param . input)
   SquaredNorm2d arg . input = SquaredNorm2d (arg . input)
   Norm2d arg . input = Norm2d (arg . input)
+  Dot2d lhs rhs . input = Dot2d (lhs . input) (rhs . input)
+  DotVariableConstant2d lhs rhs . input = DotVariableConstant2d (lhs . input) rhs
+  Cross2d lhs rhs . input = Cross2d (lhs . input) (rhs . input)
+  CrossVariableConstant2d lhs rhs . input = CrossVariableConstant2d (lhs . input) rhs
 
 instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
@@ -397,6 +405,22 @@ compileVariable1d variable = case variable of
   Norm2d arg -> Compilation.do
     argIndex <- compileVariable2d arg
     Compilation.addVariable1d (Instruction.Norm2d argIndex)
+  Dot2d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable2d lhs
+    rhsIndex <- compileVariable2d rhs
+    Compilation.addVariable1d (Instruction.Dot2d lhsIndex rhsIndex)
+  DotVariableConstant2d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable2d lhs
+    rhsIndex <- Compilation.addConstant2d rhs
+    Compilation.addVariable1d (Instruction.DotVariableConstant2d lhsIndex rhsIndex)
+  Cross2d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable2d lhs
+    rhsIndex <- compileVariable2d rhs
+    Compilation.addVariable1d (Instruction.Cross2d lhsIndex rhsIndex)
+  CrossVariableConstant2d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable2d lhs
+    rhsIndex <- Compilation.addConstant2d rhs
+    Compilation.addVariable1d (Instruction.CrossVariableConstant2d lhsIndex rhsIndex)
 
 compileVariable2d :: Variable2d input -> Compilation.Step VariableIndex
 compileVariable2d variable = case variable of

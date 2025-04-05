@@ -363,6 +363,30 @@ computeValue(
         double y = arg[1];
         *output = std::sqrt(x * x + y * y);
       }
+      case Dot2d: {
+        const double* lhs = getVariablePointer();
+        const double* rhs = getVariablePointer();
+        double* output = getVariablePointer();
+        *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
+      }
+      case DotVariableConstant2d: {
+        const double* lhs = getVariablePointer();
+        const double* rhs = getConstantPointer();
+        double* output = getVariablePointer();
+        *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
+      }
+      case Cross2d: {
+        const double* lhs = getVariablePointer();
+        const double* rhs = getVariablePointer();
+        double* output = getVariablePointer();
+        *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+      }
+      case CrossVariableConstant2d: {
+        const double* lhs = getVariablePointer();
+        const double* rhs = getConstantPointer();
+        double* output = getVariablePointer();
+        *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+      }
       case Linear2d: {
         const double* endpoints = getConstantPointer();
         double parameter = *getVariablePointer();
@@ -580,6 +604,34 @@ computeValue(
         double y = arg[1];
         double z = arg[2];
         *output = std::sqrt(x * x + y * y + z * z);
+      }
+      case Dot3d: {
+        const double* lhs = getVariablePointer();
+        const double* rhs = getVariablePointer();
+        double* output = getVariablePointer();
+        *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+      }
+      case DotVariableConstant3d: {
+        const double* lhs = getVariablePointer();
+        const double* rhs = getConstantPointer();
+        double* output = getVariablePointer();
+        *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+      }
+      case Cross3d: {
+        const double* lhs = getVariablePointer();
+        const double* rhs = getVariablePointer();
+        double* output = getVariablePointer();
+        output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
+        output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
+        output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+      }
+      case CrossVariableConstant3d: {
+        const double* lhs = getVariablePointer();
+        const double* rhs = getConstantPointer();
+        double* output = getVariablePointer();
+        output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
+        output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
+        output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
       }
       case Linear3d: {
         const double* endpoints = getConstantPointer();
@@ -989,6 +1041,30 @@ computeBounds(
         // TODO add specialized Range.hypot2 for tighter bounds
         *output = (arg[0].squared() + arg[1].squared()).sqrt();
       }
+      case Dot2d: {
+        const Range* lhs = getVariablePointer();
+        const Range* rhs = getVariablePointer();
+        Range* output = getVariablePointer();
+        *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
+      }
+      case DotVariableConstant2d: {
+        const Range* lhs = getVariablePointer();
+        const double* rhs = getConstantPointer();
+        Range* output = getVariablePointer();
+        *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
+      }
+      case Cross2d: {
+        const Range* lhs = getVariablePointer();
+        const Range* rhs = getVariablePointer();
+        Range* output = getVariablePointer();
+        *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+      }
+      case CrossVariableConstant2d: {
+        const Range* lhs = getVariablePointer();
+        const double* rhs = getConstantPointer();
+        Range* output = getVariablePointer();
+        *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+      }
       case Linear2d: {
         const double* endpoints = getConstantPointer();
         Range parameter = *getVariablePointer();
@@ -1200,6 +1276,34 @@ computeBounds(
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         *output = (arg[0].squared() + arg[1].squared() + arg[2].squared()).sqrt();
+      }
+      case Dot3d: {
+        const Range* lhs = getVariablePointer();
+        const Range* rhs = getVariablePointer();
+        Range* output = getVariablePointer();
+        *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+      }
+      case DotVariableConstant3d: {
+        const Range* lhs = getVariablePointer();
+        const double* rhs = getConstantPointer();
+        Range* output = getVariablePointer();
+        *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+      }
+      case Cross3d: {
+        const Range* lhs = getVariablePointer();
+        const Range* rhs = getVariablePointer();
+        Range* output = getVariablePointer();
+        output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
+        output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
+        output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+      }
+      case CrossVariableConstant3d: {
+        const Range* lhs = getVariablePointer();
+        const double* rhs = getConstantPointer();
+        Range* output = getVariablePointer();
+        output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
+        output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
+        output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
       }
       case Linear3d: {
         const double* endpoints = getConstantPointer();
