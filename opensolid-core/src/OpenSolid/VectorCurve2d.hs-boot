@@ -1,17 +1,17 @@
 module OpenSolid.VectorCurve2d
-  ( Interface (..)
-  , VectorCurve2d
+  ( VectorCurve2d
+  , compiled
+  , derivative
   , constant
   , new
   , evaluate
   , evaluateBounds
-  , derivative
   , unsafeMagnitude
   , transformBy
   )
 where
 
-import OpenSolid.CoordinateSystem (Space)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
@@ -20,22 +20,19 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
-class
-  Show curve =>
-  Interface curve (coordinateSystem :: CoordinateSystem)
-    | curve -> coordinateSystem
-  where
-  evaluateImpl :: curve -> Float -> Vector2d coordinateSystem
-  evaluateBoundsImpl :: curve -> Range Unitless -> VectorBounds2d coordinateSystem
-  derivativeImpl :: curve -> VectorCurve2d coordinateSystem
-  transformByImpl ::
-    Transform2d tag (Space coordinateSystem @ translationUnits) ->
-    curve ->
-    VectorCurve2d coordinateSystem
+data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
+  VectorCurve2d ::
+    { compiled :: Compiled (space @ units)
+    , derivative :: ~(VectorCurve2d (space @ units))
+    } ->
+    VectorCurve2d (space @ units)
 
-type role VectorCurve2d nominal
-
-data VectorCurve2d (coordinateSystem :: CoordinateSystem)
+type Compiled (coordinateSystem :: CoordinateSystem) =
+  CompiledFunction
+    Float
+    (Vector2d coordinateSystem)
+    (Range Unitless)
+    (VectorBounds2d coordinateSystem)
 
 instance HasUnits (VectorCurve2d (space @ units)) units (VectorCurve2d (space @ Unitless))
 
@@ -96,10 +93,9 @@ instance
     (Curve units3)
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
+new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
 evaluateBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBounds2d (space @ units)
-derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 transformBy ::
   Transform2d tag (space @ translationUnits) ->

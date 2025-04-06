@@ -498,28 +498,13 @@ instance
     (VectorSurfaceFunction2d (space @ units))
     (VectorCurve2d (space @ units))
   where
-  Parametric function . Curve2d.Parametric curve = VectorCurve2d.Parametric (function . curve)
-  function . curve = VectorCurve2d.new (function :.: curve)
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  VectorCurve2d.Interface
-    (VectorSurfaceFunction2d (space @ units) :.: Curve2d uvCoordinates)
-    (space @ units)
-  where
-  evaluateImpl (function :.: curve) tValue =
-    evaluate function (Curve2d.evaluate curve tValue)
-
-  evaluateBoundsImpl (function :.: curve) tRange =
-    evaluateBounds function (Curve2d.evaluateBounds curve tRange)
-
-  derivativeImpl (function :.: curve) = do
+  function . curve = do
     let curveDerivative = Curve2d.derivative curve
     let dudt = VectorCurve2d.xComponent curveDerivative
     let dvdt = VectorCurve2d.yComponent curveDerivative
-    (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
-
-  transformByImpl transform (function :.: curve) = transformBy transform function . curve
+    VectorCurve2d.new
+      (compiled function . Curve2d.compiled curve)
+      ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
 
 compiled :: VectorSurfaceFunction2d (space @ units) -> Compiled (space @ units)
 compiled function = case function of

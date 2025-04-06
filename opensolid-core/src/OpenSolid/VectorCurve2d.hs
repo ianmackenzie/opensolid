@@ -1,6 +1,5 @@
 module OpenSolid.VectorCurve2d
-  ( VectorCurve2d (Parametric, Transformed)
-  , Interface (..)
+  ( VectorCurve2d
   , Compiled
   , new
   , startValue
@@ -11,12 +10,14 @@ module OpenSolid.VectorCurve2d
   , derivative
   , zero
   , constant
+  , parametric
   , xy
   , line
   , arc
   , quadraticSpline
   , cubicSpline
   , bezierCurve
+  , synthetic
   , magnitude
   , unsafeMagnitude
   , squaredMagnitude
@@ -43,10 +44,10 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
-import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
@@ -62,7 +63,6 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Frame2d (Frame2d (Frame2d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.PlanarBasis3d (PlanarBasis3d)
@@ -73,12 +73,13 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (Meters)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
@@ -88,68 +89,13 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-
-class
-  Show curve =>
-  Interface curve (coordinateSystem :: CoordinateSystem)
-    | curve -> coordinateSystem
-  where
-  evaluateImpl :: curve -> Float -> Vector2d coordinateSystem
-  evaluateBoundsImpl :: curve -> Range Unitless -> VectorBounds2d coordinateSystem
-  derivativeImpl :: curve -> VectorCurve2d coordinateSystem
-  transformByImpl ::
-    Transform2d tag (Space coordinateSystem @ translationUnits) ->
-    curve ->
-    VectorCurve2d coordinateSystem
+import Prelude qualified
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
-    Interface curve (space @ units) =>
-    curve ->
-    VectorCurve2d (space @ units)
-  Parametric ::
-    Expression Float (Vector2d (space @ units)) ->
-    VectorCurve2d (space @ units)
-  Coerce ::
-    VectorCurve2d (space @ units1) ->
-    VectorCurve2d (space @ units2)
-  Reversed ::
-    VectorCurve2d (space @ units) ->
-    VectorCurve2d (space @ units)
-  XY ::
-    Curve units ->
-    Curve units ->
-    VectorCurve2d (space @ units)
-  Negated ::
-    VectorCurve2d (space @ units) ->
-    VectorCurve2d (space @ units)
-  Sum ::
-    VectorCurve2d (space @ units) ->
-    VectorCurve2d (space @ units) ->
-    VectorCurve2d (space @ units)
-  Difference ::
-    VectorCurve2d (space @ units) ->
-    VectorCurve2d (space @ units) ->
-    VectorCurve2d (space @ units)
-  Product1d2d' ::
-    Curve units1 ->
-    VectorCurve2d (space @ units2) ->
-    VectorCurve2d (space @ (units1 :*: units2))
-  Product2d1d' ::
-    VectorCurve2d (space @ units1) ->
-    Curve units2 ->
-    VectorCurve2d (space @ (units1 :*: units2))
-  Quotient' ::
-    VectorCurve2d (space @ units1) ->
-    Curve units2 ->
-    VectorCurve2d (space @ (units1 :/: units2))
-  PlaceIn ::
-    Basis2d global (Defines local) ->
-    VectorCurve2d (local @ units) ->
-    VectorCurve2d (global @ units)
-  Transformed ::
-    Transform2d.Affine (space @ Unitless) ->
-    VectorCurve2d (space @ units) ->
+    { compiled :: Compiled (space @ units)
+    , derivative :: ~(VectorCurve2d (space @ units))
+    } ->
     VectorCurve2d (space @ units)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
@@ -159,7 +105,9 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Range Unitless)
     (VectorBounds2d coordinateSystem)
 
-deriving instance Show (VectorCurve2d (space @ units))
+-- TODO remove
+instance Show (VectorCurve2d (space @ units)) where
+  show _ = Text.unpack "VectorCurve2d"
 
 instance FFI (VectorCurve2d (space @ Unitless)) where
   representation = FFI.classRepresentation "VectorCurve2d"
@@ -173,26 +121,14 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
   where
-  coerce (Parametric expression) = Parametric (Units.coerce expression)
-  coerce (Coerce curve) = Coerce curve
-  coerce curve = Coerce curve
-
-instance Interface (VectorCurve2d (space @ units)) (space @ units) where
-  evaluateImpl = evaluate
-  evaluateBoundsImpl = evaluateBounds
-  derivativeImpl = derivative
-  transformByImpl = transformBy
+  coerce VectorCurve2d{compiled, derivative} =
+    VectorCurve2d
+      { compiled = Units.coerce compiled
+      , derivative = Units.coerce derivative
+      }
 
 instance Negation (VectorCurve2d (space @ units)) where
-  negate curve = case curve of
-    Parametric expression -> Parametric -expression
-    Coerce c -> Coerce -c
-    XY x y -> XY -x -y
-    Negated c -> c
-    Difference c1 c2 -> Difference c2 c1
-    Product1d2d' c1 c2 -> Product1d2d' -c1 c2
-    Product2d1d' c1 c2 -> Product2d1d' c1 -c2
-    _ -> Negated curve
+  negate curve = new (negate (compiled curve)) (negate (derivative curve))
 
 instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
   Positive * curve = curve
@@ -209,8 +145,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
-  lhs + rhs = Sum lhs rhs
+  lhs + rhs = new (compiled lhs + compiled rhs) (derivative lhs + derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -237,8 +172,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
-  lhs - rhs = Difference lhs rhs
+  lhs - rhs = new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -273,7 +207,10 @@ instance
     (VectorCurve2d (space @ units2))
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
-  lhs .*. rhs = Product1d2d' lhs rhs
+  lhs .*. rhs =
+    new
+      (Curve.compiled lhs .*. compiled rhs)
+      (Curve.derivative lhs .*. rhs + lhs .*. derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -301,7 +238,10 @@ instance
     (Curve units2)
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
-  lhs .*. rhs = Product2d1d' lhs rhs
+  lhs .*. rhs =
+    new
+      (compiled lhs .*. Curve.compiled rhs)
+      (derivative lhs .*. rhs + lhs .*. Curve.derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -329,7 +269,10 @@ instance
     (Curve units2)
     (VectorCurve2d (space @ (units1 :/: units2)))
   where
-  lhs ./. rhs = Quotient' lhs rhs
+  lhs ./. rhs =
+    recursive
+      (compiled lhs ./. Curve.compiled rhs)
+      (\self -> derivative lhs ./. rhs - self * (Curve.derivative rhs / rhs))
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -502,25 +445,7 @@ instance
     (VectorCurve2d (space @ units))
     (VectorCurve2d (space @ units))
   where
-  outer . inner = new (outer :.: inner)
-
-instance
-  unitless ~ Unitless =>
-  Interface
-    (VectorCurve2d (space @ units) :.: Curve unitless)
-    (space @ units)
-  where
-  evaluateImpl (vectorCurve2d :.: curve1d) tValue =
-    evaluate vectorCurve2d (Curve.evaluate curve1d tValue)
-
-  evaluateBoundsImpl (vectorCurve2d :.: curve1d) tRange =
-    evaluateBounds vectorCurve2d (Curve.evaluateBounds curve1d tRange)
-
-  derivativeImpl (vectorCurve2d :.: curve1d) =
-    (derivative vectorCurve2d . curve1d) * Curve.derivative curve1d
-
-  transformByImpl transform (vectorCurve2d :.: curve1d) =
-    new (transformBy transform vectorCurve2d :.: curve1d)
+  f . g = new (compiled f . Curve.compiled g) ((derivative f . g) * Curve.derivative g)
 
 instance
   unitless ~ Unitless =>
@@ -529,8 +454,6 @@ instance
     (VectorCurve2d (space @ units))
     (VectorSurfaceFunction2d (space @ units))
   where
-  Parametric curve . SurfaceFunction.Parametric function =
-    VectorSurfaceFunction2d.Parametric (curve . function)
   curve . function = VectorSurfaceFunction2d.new (curve :.: function)
 
 instance
@@ -553,23 +476,13 @@ transformBy ::
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
 transformBy transform curve = do
-  let t = Units.erase (Transform2d.toAffine transform)
-  case curve of
-    VectorCurve2d c -> transformByImpl transform c
-    Parametric expression -> Parametric (Expression.VectorCurve2d.transformBy t expression)
-    Coerce c -> Coerce (transformBy transform c)
-    Reversed c -> Reversed (transformBy transform c)
-    XY _ _ -> Transformed t curve
-    Negated c -> Negated (transformBy transform c)
-    Sum c1 c2 -> Sum (transformBy transform c1) (transformBy transform c2)
-    Difference c1 c2 -> Difference (transformBy transform c1) (transformBy transform c2)
-    Product1d2d' curve1d curve2d -> Product1d2d' curve1d (transformBy transform curve2d)
-    Product2d1d' curve2d curve1d -> Product2d1d' (transformBy transform curve2d) curve1d
-    Quotient' curve2d curve1d -> Quotient' (transformBy transform curve2d) curve1d
-    PlaceIn basis c -> do
-      let localTransform = Transform2d.relativeTo (Frame2d Point2d.origin basis) transform
-      PlaceIn basis (transformBy localTransform c)
-    Transformed existing c -> Transformed (existing >> t) c
+  let compiledTransformed =
+        CompiledFunction.map
+          (Expression.VectorCurve2d.transformBy transform)
+          (Vector2d.transformBy transform)
+          (VectorBounds2d.transformBy transform)
+          (compiled curve)
+  new compiledTransformed (transformBy transform (derivative curve))
 
 rotateBy ::
   forall space units.
@@ -578,8 +491,16 @@ rotateBy ::
   VectorCurve2d (space @ units)
 rotateBy angle = transformBy (Transform2d.rotateAround (Point2d.origin @space @units) angle)
 
-new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
+new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 new = VectorCurve2d
+
+recursive ::
+  Compiled (space @ units) ->
+  (VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)) ->
+  VectorCurve2d (space @ units)
+recursive givenCompiled derivativeFunction = do
+  let result = VectorCurve2d{compiled = givenCompiled, derivative = derivativeFunction result}
+  result
 
 -- | The constant zero vector.
 zero :: VectorCurve2d (space @ units)
@@ -587,14 +508,27 @@ zero = constant Vector2d.zero
 
 -- | Create a curve with a constant value.
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-constant = Parametric . Expression.constant
+constant value = new (CompiledFunction.constant value) zero
+
+-- TODO remove
+parametric :: Expression Float (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
+parametric expression =
+  new (CompiledFunction.concrete expression) (parametric (Expression.curveDerivative expression))
 
 -- | Create a curve from its X and Y component curves.
 xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
-xy x y = XY x y
+xy x y = do
+  let compiledXY =
+        CompiledFunction.map2
+          Expression.xy
+          Vector2d
+          VectorBounds2d
+          (Curve.compiled x)
+          (Curve.compiled y)
+  new compiledXY (xy (Curve.derivative x) (Curve.derivative y))
 
 line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
-line v1 v2 = v1 + Curve.t * (v2 - v1)
+line v1 v2 = bezierCurve (NonEmpty.two v1 v2)
 
 arc ::
   Vector2d (space @ units) ->
@@ -614,8 +548,7 @@ quadraticSpline ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   VectorCurve2d (space @ units)
-quadraticSpline v1 v2 v3 =
-  Parametric (Expression.quadraticSpline v1 v2 v3)
+quadraticSpline v1 v2 v3 = bezierCurve (NonEmpty.three v1 v2 v3)
 
 cubicSpline ::
   Vector2d (space @ units) ->
@@ -623,11 +556,19 @@ cubicSpline ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   VectorCurve2d (space @ units)
-cubicSpline v1 v2 v3 v4 =
-  Parametric (Expression.cubicSpline v1 v2 v3 v4)
+cubicSpline v1 v2 v3 v4 = bezierCurve (NonEmpty.four v1 v2 v3 v4)
 
 bezierCurve :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
-bezierCurve = Parametric . Expression.bezierCurve
+bezierCurve controlPoints =
+  new
+    (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
+    (bezierCurve (Bezier.derivative controlPoints))
+
+synthetic ::
+  VectorCurve2d (space @ units) ->
+  VectorCurve2d (space @ units) ->
+  VectorCurve2d (space @ units)
+synthetic curve curveDerivative = new (compiled curve) curveDerivative
 
 startValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
 startValue curve = evaluate curve 0.0
@@ -640,78 +581,13 @@ endValue curve = evaluate curve 1.0
 The parameter value should be between 0 and 1.
 -}
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
-evaluate curve tValue = case curve of
-  VectorCurve2d c -> evaluateImpl c tValue
-  Parametric expression -> Expression.evaluate expression tValue
-  Coerce c -> Units.coerce (evaluate c tValue)
-  Reversed c -> evaluate c (1.0 - tValue)
-  XY x y -> Vector2d.xy (Curve.evaluate x tValue) (Curve.evaluate y tValue)
-  Negated c -> negate (evaluate c tValue)
-  Sum c1 c2 -> evaluate c1 tValue + evaluate c2 tValue
-  Difference c1 c2 -> evaluate c1 tValue - evaluate c2 tValue
-  Product1d2d' c1 c2 -> Curve.evaluate c1 tValue .*. evaluate c2 tValue
-  Product2d1d' c1 c2 -> evaluate c1 tValue .*. Curve.evaluate c2 tValue
-  Quotient' c1 c2 -> evaluate c1 tValue ./. Curve.evaluate c2 tValue
-  PlaceIn basis c -> Vector2d.placeIn basis (evaluate c tValue)
-  Transformed transform c -> Vector2d.transformBy transform (evaluate c tValue)
+evaluate VectorCurve2d{compiled} tValue = CompiledFunction.evaluate compiled tValue
 
 evaluateBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBounds2d (space @ units)
-evaluateBounds curve tRange = case curve of
-  VectorCurve2d c -> evaluateBoundsImpl c tRange
-  Parametric expression -> Expression.evaluateBounds expression tRange
-  Coerce c -> Units.coerce (evaluateBounds c tRange)
-  Reversed c -> evaluateBounds c (1.0 - tRange)
-  XY x y -> VectorBounds2d (Curve.evaluateBounds x tRange) (Curve.evaluateBounds y tRange)
-  Negated c -> negate (evaluateBounds c tRange)
-  Sum c1 c2 -> evaluateBounds c1 tRange + evaluateBounds c2 tRange
-  Difference c1 c2 -> evaluateBounds c1 tRange - evaluateBounds c2 tRange
-  Product1d2d' c1 c2 -> Curve.evaluateBounds c1 tRange .*. evaluateBounds c2 tRange
-  Product2d1d' c1 c2 -> evaluateBounds c1 tRange .*. Curve.evaluateBounds c2 tRange
-  Quotient' c1 c2 -> evaluateBounds c1 tRange ./. Curve.evaluateBounds c2 tRange
-  PlaceIn basis c -> VectorBounds2d.placeIn basis (evaluateBounds c tRange)
-  Transformed transform c -> VectorBounds2d.transformBy transform (evaluateBounds c tRange)
+evaluateBounds VectorCurve2d{compiled} tRange = CompiledFunction.evaluateBounds compiled tRange
 
-compiled :: VectorCurve2d (space @ units) -> Compiled (space @ units)
-compiled c = case c of
-  Parametric expression -> CompiledFunction.concrete expression
-  curve -> CompiledFunction.abstract (evaluate curve) (evaluateBounds curve)
-
-derivative ::
-  VectorCurve2d (space @ units) ->
-  VectorCurve2d (space @ units)
-derivative curve = case curve of
-  VectorCurve2d c -> derivativeImpl c
-  Parametric expression -> Parametric (Expression.curveDerivative expression)
-  Coerce c -> Units.coerce (derivative c)
-  Reversed c -> negate (reverse (derivative c))
-  XY x y -> XY (Curve.derivative x) (Curve.derivative y)
-  Negated c -> -(derivative c)
-  Sum c1 c2 -> derivative c1 + derivative c2
-  Difference c1 c2 -> derivative c1 - derivative c2
-  Product1d2d' c1 c2 -> Curve.derivative c1 .*. c2 + c1 .*. derivative c2
-  Product2d1d' c1 c2 -> derivative c1 .*. c2 + c1 .*. Curve.derivative c2
-  Quotient' c1 c2 ->
-    (derivative c1 .*. c2 - c1 .*. Curve.derivative c2) .!/.! Curve.squared' c2
-  PlaceIn basis c -> PlaceIn basis (derivative c)
-  Transformed transform c -> transformBy transform (derivative c)
-
-reverse ::
-  VectorCurve2d (space @ units) ->
-  VectorCurve2d (space @ units)
-reverse curve = case curve of
-  VectorCurve2d _ -> Reversed curve
-  Parametric expression -> Parametric (expression . Expression.r)
-  Coerce c -> Units.coerce (reverse c)
-  Reversed c -> c
-  XY x y -> XY (Curve.reverse x) (Curve.reverse y)
-  Negated c -> Negated (reverse c)
-  Sum c1 c2 -> Sum (reverse c1) (reverse c2)
-  Difference c1 c2 -> Difference (reverse c1) (reverse c2)
-  Product1d2d' c1 c2 -> Product1d2d' (Curve.reverse c1) (reverse c2)
-  Product2d1d' c1 c2 -> Product2d1d' (reverse c1) (Curve.reverse c2)
-  Quotient' c1 c2 -> Quotient' (reverse c1) (Curve.reverse c2)
-  PlaceIn basis c -> PlaceIn basis (reverse c)
-  Transformed transform c -> Transformed transform (reverse c)
+reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
+reverse curve = curve . (1.0 - Curve.t)
 
 newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
   = SquaredMagnitude' (VectorCurve2d coordinateSystem)
@@ -811,12 +687,14 @@ placeIn ::
   Basis2d global (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve2d (global @ units)
-placeIn globalBasis (Parametric expression) =
-  Parametric (Expression.VectorCurve2d.placeIn globalBasis expression)
-placeIn globalBasis (PlaceIn basis curve) =
-  PlaceIn (Basis2d.placeIn globalBasis basis) curve
-placeIn globalBasis curve =
-  PlaceIn globalBasis curve
+placeIn basis curve = do
+  let compiledPlaced =
+        CompiledFunction.map
+          (Expression.VectorCurve2d.placeIn basis)
+          (Vector2d.placeIn basis)
+          (VectorBounds2d.placeIn basis)
+          (compiled curve)
+  new compiledPlaced (placeIn basis (derivative curve))
 
 relativeTo ::
   Basis2d global (Defines local) ->
@@ -828,10 +706,7 @@ placeOn ::
   PlanarBasis3d space (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve3d (space @ units)
-placeOn basis (Parametric expression) =
-  VectorCurve3d.Parametric (Expression.VectorCurve2d.placeOn basis expression)
-placeOn basis curve =
-  VectorCurve3d.Planar basis curve
+placeOn basis curve = VectorCurve3d.Planar basis curve
 
 convert ::
   Qty (units2 :/: units1) ->

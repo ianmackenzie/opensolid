@@ -283,7 +283,6 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
   where
-  Parametric lhs + VectorCurve2d.Parametric rhs = Parametric (lhs + rhs)
   lhs + rhs = new (lhs :+: rhs)
 
 instance
@@ -314,7 +313,6 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
   where
-  Parametric lhs - VectorCurve2d.Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = new (lhs :-: rhs)
 
 instance
@@ -343,36 +341,7 @@ instance
     (Curve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  Parametric lhs - Parametric rhs = VectorCurve2d.Parametric (lhs - rhs)
-  lhs - rhs = VectorCurve2d.new (lhs :-: rhs)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  VectorCurve2d.Interface
-    (Curve2d (space1 @ units1) :-: Curve2d (space2 @ units2))
-    (space1 @ units1)
-  where
-  evaluateImpl (curve1 :-: curve2) tValue =
-    evaluate curve1 tValue - evaluate curve2 tValue
-
-  evaluateBoundsImpl (curve1 :-: curve2) tRange =
-    evaluateBounds curve1 tRange - evaluateBounds curve2 tRange
-
-  derivativeImpl (curve1 :-: curve2) =
-    derivative curve1 - derivative curve2
-
-  transformByImpl transform (curve1 :-: curve2) =
-    -- Note the slight hack here:
-    -- the definition of VectorCurve2d.Interface states that the units of the transform
-    -- do *not* have to match the units of the vector curve,
-    -- because vectors and vector curves ignore translation
-    -- (and the units of the transform are just the units of its translation part).
-    -- This would in general mean that we couldn't apply the given transform to a Curve2d,
-    -- but in this case it's safe since any translation will cancel out
-    -- when the two curves are subtracted from each other.
-    VectorCurve2d.new $
-      (transformBy (Units.coerce transform) curve1)
-        :-: (transformBy (Units.coerce transform) curve2)
+  lhs - rhs = VectorCurve2d.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -813,7 +782,7 @@ compiled curve = case curve of
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve = case curve of
   Curve c -> derivativeImpl c
-  Parametric expresssion -> VectorCurve2d.Parametric (Expression.curveDerivative expresssion)
+  Parametric expression -> VectorCurve2d.parametric (Expression.curveDerivative expression)
   XY x y -> VectorCurve2d.xy (Curve.derivative x) (Curve.derivative y)
   Coerce c -> Units.coerce (derivative c)
   PlaceIn frame c -> VectorCurve2d.placeIn (Frame2d.basis frame) (derivative c)
@@ -1225,10 +1194,9 @@ removeStartDegeneracy continuity p1 d1 curve = Result.do
         let (p2, d2) = endCondition endDegree
         hermite p1 d1 p2 d2
   let curveDerivative n =
-        VectorCurve2d.new $
-          SyntheticDerivative
-            (nthDerivative n (baseCurve (continuity + n)))
-            (curveDerivative (n + 1))
+        VectorCurve2d.synthetic
+          (nthDerivative n (baseCurve (continuity + n)))
+          (curveDerivative (n + 1))
   new (Synthetic (baseCurve continuity) (curveDerivative 1))
 
 nthDerivative :: Int -> Curve2d (space @ units) -> VectorCurve2d (space @ units)
@@ -1277,21 +1245,6 @@ data SyntheticDerivative coordinateSystem where
 
 instance Show (SyntheticDerivative (space @ units)) where
   show (SyntheticDerivative curve _) = Text.unpack ("SyntheticDerivative: " <> Text.show curve)
-
-instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ units) where
-  evaluateImpl (SyntheticDerivative current _) tValue =
-    VectorCurve2d.evaluate current tValue
-
-  evaluateBoundsImpl (SyntheticDerivative current _) tRange =
-    VectorCurve2d.evaluateBounds current tRange
-
-  derivativeImpl (SyntheticDerivative _ next) = next
-
-  transformByImpl transform (SyntheticDerivative current next) =
-    VectorCurve2d.new $
-      SyntheticDerivative
-        (VectorCurve2d.transformBy transform current)
-        (VectorCurve2d.transformBy transform next)
 
 toPolyline :: Qty units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
 toPolyline accuracy curve =
@@ -1403,7 +1356,7 @@ instance Interface (Piecewise (space @ units)) (space @ units) where
     evaluatePiecewiseBounds tree (length * tLow) (length * tHigh)
 
   derivativeImpl (Piecewise tree length) =
-    VectorCurve2d.new (PiecewiseDerivative (piecewiseTreeDerivative tree length) length)
+    piecewiseDerivative (piecewiseTreeDerivative tree length) length
 
   transformByImpl transform piecewiseCurve =
     Transformed transform (new piecewiseCurve)
@@ -1477,28 +1430,17 @@ reversePiecewise tree = case tree of
     (PiecewiseNode reversedRight rightLength reversedLeft, rightLength + leftLength)
   PiecewiseLeaf curve length -> (PiecewiseLeaf (reverse curve) length, length)
 
-data PiecewiseDerivative (coordinateSystem :: CoordinateSystem) where
-  PiecewiseDerivative ::
-    PiecewiseDerivativeTree (space @ units) ->
-    Qty units ->
-    PiecewiseDerivative (space @ units)
-
-deriving instance Show (PiecewiseDerivative (space @ units))
-
-instance VectorCurve2d.Interface (PiecewiseDerivative (space @ units)) (space @ units) where
-  evaluateImpl (PiecewiseDerivative tree length) tValue =
-    evaluatePiecewiseDerivative tree (length * tValue)
-
-  evaluateBoundsImpl (PiecewiseDerivative tree length) (Range tLow tHigh) =
-    evaluatePiecewiseDerivativeBounds tree (length * tLow) (length * tHigh)
-
-  derivativeImpl (PiecewiseDerivative tree length) =
-    VectorCurve2d.new (PiecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
-
-  transformByImpl transform piecewiseCurve =
-    VectorCurve2d.Transformed
-      (Units.erase (Transform2d.toAffine transform))
-      (VectorCurve2d.new piecewiseCurve)
+piecewiseDerivative ::
+  PiecewiseDerivativeTree (space @ units) ->
+  Qty units ->
+  VectorCurve2d (space @ units)
+piecewiseDerivative tree length = do
+  let evaluateDerivative tValue = evaluatePiecewiseDerivative tree (length * tValue)
+  let evaluateDerivativeBounds (Range tLow tHigh) =
+        evaluatePiecewiseDerivativeBounds tree (length * tLow) (length * tHigh)
+  VectorCurve2d.new
+    (CompiledFunction.abstract evaluateDerivative evaluateDerivativeBounds)
+    (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
 
 data PiecewiseDerivativeTree (coordinateSystem :: CoordinateSystem) where
   PiecewiseDerivativeNode ::
