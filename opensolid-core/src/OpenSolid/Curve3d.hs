@@ -342,9 +342,9 @@ hermite (Point3d x1 y1 z1, derivatives1) (Point3d x2 y2 z2, derivatives2) = do
   let xDerivatives2 = List.map Vector3d.xComponent derivatives2
   let yDerivatives2 = List.map Vector3d.yComponent derivatives2
   let zDerivatives2 = List.map Vector3d.zComponent derivatives2
-  let x = Curve.hermite (x1, xDerivatives1) (x2, xDerivatives2)
-  let y = Curve.hermite (y1, yDerivatives1) (y2, yDerivatives2)
-  let z = Curve.hermite (z1, zDerivatives1) (z2, zDerivatives2)
+  let x = Curve.hermite x1 xDerivatives1 x2 xDerivatives2
+  let y = Curve.hermite y1 yDerivatives1 y2 yDerivatives2
+  let z = Curve.hermite z1 zDerivatives1 z2 zDerivatives2
   XYZ x y z
 
 startPoint :: Curve3d (space @ units) -> Point3d (space @ units)

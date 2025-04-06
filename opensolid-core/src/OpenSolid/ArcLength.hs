@@ -65,7 +65,7 @@ buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
       let dtduEnd = deltaS / dsdtEnd
       let d2tdu2Start = -deltaS .*. d2sdt2 tStart * dtduStart / Qty.squared' dsdtStart
       let d2tdu2End = -deltaS .*. d2sdt2 tEnd * dtduEnd / Qty.squared' dsdtEnd
-      let tCurve = Curve.hermite (tStart, [dtduStart, d2tdu2Start]) (tEnd, [dtduEnd, d2tdu2End])
+      let tCurve = Curve.hermite tStart [dtduStart, d2tdu2Start] tEnd [dtduEnd, d2tdu2End]
       (Leaf deltaS tCurve, fineEstimate)
     else do
       let (leftTree, leftLength) =

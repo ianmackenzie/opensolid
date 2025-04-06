@@ -19,7 +19,7 @@ main :: IO ()
 main = Tolerance.using Length.nanometer $ IO.do
   let majorRadius = Length.meter
   let k = Length.meters 2.0
-  let minorRadius = Curve.hermite (Length.zero, [k]) (Length.zero, [-k]) . SurfaceFunction.u
+  let minorRadius = Curve.hermite Length.zero [k] Length.zero [-k] . SurfaceFunction.u
   let theta = Curve.line (Angle.degrees 45.0) (Angle.degrees 315.0) . SurfaceFunction.u
   let phi = Angle.twoPi * SurfaceFunction.v
   let r = majorRadius + minorRadius * SurfaceFunction.cos phi

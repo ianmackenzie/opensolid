@@ -758,8 +758,8 @@ hermite (Point2d xStart yStart) startDerivatives (Point2d xEnd yEnd) endDerivati
   let yStartDerivatives = List.map Vector2d.yComponent startDerivatives
   let xEndDerivatives = List.map Vector2d.xComponent endDerivatives
   let yEndDerivatives = List.map Vector2d.yComponent endDerivatives
-  let x = Curve.hermite (xStart, xStartDerivatives) (xEnd, xEndDerivatives)
-  let y = Curve.hermite (yStart, yStartDerivatives) (yEnd, yEndDerivatives)
+  let x = Curve.hermite xStart xStartDerivatives xEnd xEndDerivatives
+  let y = Curve.hermite yStart yStartDerivatives yEnd yEndDerivatives
   XY x y
 
 -- | Get the start point of a curve.
