@@ -1,6 +1,8 @@
 module OpenSolid.VectorSurfaceFunction2d
   ( VectorSurfaceFunction2d (Parametric)
   , Interface (..)
+  , Compiled
+  , compiled
   , new
   , zero
   , constant
@@ -14,6 +16,8 @@ module OpenSolid.VectorSurfaceFunction2d
   )
 where
 
+import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
@@ -87,6 +91,13 @@ data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
     Transform2d.Affine (space @ Unitless) ->
     VectorSurfaceFunction2d (space @ units) ->
     VectorSurfaceFunction2d (space @ units)
+
+type Compiled (coordinateSystem :: CoordinateSystem) =
+  CompiledFunction
+    UvPoint
+    (Vector2d coordinateSystem)
+    UvBounds
+    (VectorBounds2d coordinateSystem)
 
 deriving instance Show (VectorSurfaceFunction2d (space @ units))
 
@@ -509,6 +520,11 @@ instance
     (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
 
   transformByImpl transform (function :.: curve) = transformBy transform function . curve
+
+compiled :: VectorSurfaceFunction2d (space @ units) -> Compiled (space @ units)
+compiled function = case function of
+  Parametric expression -> CompiledFunction.concrete expression
+  _ -> CompiledFunction.abstract (evaluate function) (evaluateBounds function)
 
 new :: Interface function (space @ units) => function -> VectorSurfaceFunction2d (space @ units)
 new = VectorSurfaceFunction2d
