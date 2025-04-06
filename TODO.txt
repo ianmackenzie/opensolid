@@ -3,9 +3,15 @@ Support discontinuities in bytecode
 Add Ast3d
 Add arithmetic typeclass instances to Ast2d and Ast3d
 
+Rename CompiledFunction to Evaluator or similar?
+
 Encode entire function as <u64 number of constants, constants, words>
 -> only pin/marshal one ByteString instead of two
 -> potentially allow functions to call other functions, by passing the single pointer as a 'function pointer'
+
+Add Arc2d and Arc3d bytecode instructions
+
+Remove 'planar' functions in favour of calling 'new' directly from 'placeOn' functions
 
 Try requiring a specific coordinate system convention when using 'xyz' functions
 -> implicit argument in Haskell, treated just like tolerance (except it's not passed _through_ anywhere)
