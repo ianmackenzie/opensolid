@@ -98,7 +98,7 @@ instance FFI (Curve Radians) where
 
 instance HasUnits (Curve units) units (Curve Unitless)
 
-instance Units.Coercion (Curve unitsA) (Curve unitsB) where
+instance Units.Coercion (Curve units1) (Curve units2) where
   coerce Curve{compiled, derivative} =
     Curve
       { compiled = Units.coerce compiled
