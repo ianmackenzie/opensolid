@@ -298,7 +298,7 @@ instance Division' (Curve units1) (Curve units2) (Curve (units1 :/: units2)) whe
   lhs ./. rhs =
     recursive
       (compiled lhs ./. compiled rhs)
-      (\self -> derivative lhs ./. rhs + self * (derivative rhs / rhs))
+      (\self -> derivative lhs ./. rhs - self * (derivative rhs / rhs))
 
 instance
   Units.Quotient units1 units2 units3 =>
