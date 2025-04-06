@@ -236,6 +236,7 @@ library
     OpenSolid.Volume
 
   other-modules:
+    OpenSolid.Bezier
     OpenSolid.Bootstrap
     OpenSolid.Bytecode.Compilation
     OpenSolid.Bytecode.Instruction
