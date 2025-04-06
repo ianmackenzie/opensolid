@@ -1,7 +1,9 @@
 module OpenSolid.Curve2d
   ( Curve2d (Parametric, Transformed)
+  , Compiled
   , Interface (..)
   , HasDegeneracy (HasDegeneracy)
+  , compiled
   , constant
   , new
   , startPoint
@@ -20,6 +22,7 @@ module OpenSolid.Curve2d
 where
 
 import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Expression (Expression)
@@ -58,6 +61,13 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Curve2d (space @ units) ->
     Curve2d (space @ units)
 
+type Compiled (coordinateSystem :: CoordinateSystem) =
+  CompiledFunction
+    Float
+    (Point2d coordinateSystem)
+    (Range Unitless)
+    (Bounds2d coordinateSystem)
+
 instance Show (Curve2d (space @ units))
 
 class
@@ -94,6 +104,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
 
+compiled :: Curve2d (space @ units) -> Compiled (space @ units)
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
