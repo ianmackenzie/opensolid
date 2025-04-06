@@ -171,7 +171,7 @@ instance HasUnits (VectorCurve2d (space @ units)) units (VectorCurve2d (space @ 
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (VectorCurve2d (space1 @ unitsA)) (VectorCurve2d (space2 @ unitsB))
+  Units.Coercion (VectorCurve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
   where
   coerce (Parametric expression) = Parametric (Units.coerce expression)
   coerce (Coerce curve) = Coerce curve
@@ -203,70 +203,58 @@ instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (spa
   curve * Negative = -curve
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (VectorCurve2d (space @ units))
-    (VectorCurve2d (space_ @ units_))
-    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
   where
   Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
   lhs + rhs = Sum lhs rhs
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (VectorCurve2d (space @ units))
-    (Vector2d (space_ @ units_))
-    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
   where
   curve + vector = curve + constant vector
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Vector2d (space @ units))
-    (VectorCurve2d (space_ @ units_))
-    (VectorCurve2d (space @ units))
+    (Vector2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
   where
   vector + curve = constant vector + curve
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (VectorCurve2d (space @ units))
-    (VectorCurve2d (space_ @ units_))
-    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
   where
   Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Difference lhs rhs
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (VectorCurve2d (space @ units))
-    (Vector2d (space_ @ units_))
-    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
   where
   curve - vector = curve - constant vector
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Vector2d (space @ units))
-    (VectorCurve2d (space_ @ units_))
-    (VectorCurve2d (space @ units))
+    (Vector2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
   where
   vector - curve = constant vector - curve
 
