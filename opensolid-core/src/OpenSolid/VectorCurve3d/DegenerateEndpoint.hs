@@ -9,6 +9,8 @@ module OpenSolid.VectorCurve3d.DegenerateEndpoint
   )
 where
 
+import OpenSolid.CompiledFunction qualified as CompiledFunction
+import OpenSolid.Expression qualified as Expression
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -44,34 +46,12 @@ derivative :: DegenerateEndpoint space -> DegenerateEndpoint space
 derivative (DegenerateEndpoint t0 t1 curve) =
   DegenerateEndpoint t0 t1 (VectorCurve3d.derivative curve)
 
-data QCurve coordinateSystem where
-  QCurve ::
-    Int ->
-    Float ->
-    VectorCurve3d (space @ units) ->
-    Vector3d (space @ units) ->
-    QCurve (space @ units)
-
-deriving instance Show (QCurve (space @ units))
-
-instance VectorCurve3d.Interface (QCurve (space @ units)) (space @ units) where
-  evaluateImpl (QCurve _ _ _ value) _ = value
-
-  evaluateBoundsImpl (QCurve _ _ _ value) _ = VectorBounds3d.constant value
-
-  derivativeImpl (QCurve n t0 curveDerivative _) =
-    qCurve (n + 1) t0 (VectorCurve3d.derivative curveDerivative)
-
-  transformByImpl transform (QCurve n t0 curveDerivative value) = do
-    let transformedCurveDerivative = VectorCurve3d.transformBy transform curveDerivative
-    let transformedValue = Vector3d.transformBy transform value
-    VectorCurve3d.new (QCurve n t0 transformedCurveDerivative transformedValue)
-
 qCurve :: Int -> Float -> VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
-qCurve n t0 curveDerivative =
-  VectorCurve3d.new $
-    QCurve n t0 curveDerivative $
-      VectorCurve3d.evaluate curveDerivative t0 / Float.int (n + 1)
+qCurve n t0 curveDerivative = do
+  let value = VectorCurve3d.evaluate curveDerivative t0 / Float.int (n + 1)
+  let compiled = CompiledFunction.concrete (Expression.constant value)
+  let qCurveDerivative = qCurve (n + 1) t0 (VectorCurve3d.derivative curveDerivative)
+  VectorCurve3d.new compiled qCurveDerivative
 
 evaluate ::
   DegenerateEndpoint space ->

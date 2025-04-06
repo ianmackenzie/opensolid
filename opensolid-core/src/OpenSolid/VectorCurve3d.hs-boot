@@ -1,20 +1,20 @@
 module OpenSolid.VectorCurve3d
-  ( Interface (..)
-  , VectorCurve3d (Parametric, Transformed, Planar)
+  ( VectorCurve3d
+  , Compiled
+  , compiled
+  , derivative
   , constant
   , new
+  , planar
   , evaluate
   , evaluateBounds
-  , derivative
   , unsafeMagnitude
   , transformBy
   )
 where
 
-import OpenSolid.Basis3d (Basis3d)
-import OpenSolid.CoordinateSystem (Space)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
-import OpenSolid.Expression (Expression)
 import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
@@ -24,79 +24,19 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 
-class
-  Show curve =>
-  Interface curve (coordinateSystem :: CoordinateSystem)
-    | curve -> coordinateSystem
-  where
-  evaluateImpl :: curve -> Float -> Vector3d coordinateSystem
-  evaluateBoundsImpl :: curve -> Range Unitless -> VectorBounds3d coordinateSystem
-  derivativeImpl :: curve -> VectorCurve3d coordinateSystem
-  transformByImpl ::
-    Transform3d tag (Space coordinateSystem @ translationUnits) ->
-    curve ->
-    VectorCurve3d coordinateSystem
-
-type role VectorCurve3d nominal
-
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
   VectorCurve3d ::
-    Interface curve (space @ units) =>
-    curve ->
+    { compiled :: Compiled (space @ units)
+    , derivative :: ~(VectorCurve3d (space @ units))
+    } ->
     VectorCurve3d (space @ units)
-  Parametric ::
-    Expression Float (Vector3d (space @ units)) ->
-    VectorCurve3d (space @ units)
-  Coerce ::
-    VectorCurve3d (space @ units1) ->
-    VectorCurve3d (space @ units2)
-  Reversed ::
-    VectorCurve3d (space @ units) ->
-    VectorCurve3d (space @ units)
-  XYZ ::
-    Curve units ->
-    Curve units ->
-    Curve units ->
-    VectorCurve3d (space @ units)
-  Negated ::
-    VectorCurve3d (space @ units) ->
-    VectorCurve3d (space @ units)
-  Sum ::
-    VectorCurve3d (space @ units) ->
-    VectorCurve3d (space @ units) ->
-    VectorCurve3d (space @ units)
-  Difference ::
-    VectorCurve3d (space @ units) ->
-    VectorCurve3d (space @ units) ->
-    VectorCurve3d (space @ units)
-  Product1d3d' ::
-    Curve units1 ->
-    VectorCurve3d (space @ units2) ->
-    VectorCurve3d (space @ (units1 :*: units2))
-  Product3d1d' ::
-    VectorCurve3d (space @ units1) ->
-    Curve units2 ->
-    VectorCurve3d (space @ (units1 :*: units2))
-  Quotient' ::
-    VectorCurve3d (space @ units1) ->
-    Curve units2 ->
-    VectorCurve3d (space @ (units1 :/: units2))
-  CrossProduct' ::
-    VectorCurve3d (space @ units1) ->
-    VectorCurve3d (space @ units2) ->
-    VectorCurve3d (space @ (units1 :*: units2))
-  PlaceIn ::
-    Basis3d global (Defines local) ->
-    VectorCurve3d (local @ units) ->
-    VectorCurve3d (global @ units)
-  Transformed ::
-    Transform3d tag (space @ translationUnits) ->
-    VectorCurve3d (space @ units) ->
-    VectorCurve3d (space @ units)
-  Planar ::
-    PlanarBasis3d space (Defines local) ->
-    VectorCurve2d (local @ units) ->
-    VectorCurve3d (space @ units)
+
+type Compiled (coordinateSystem :: CoordinateSystem) =
+  CompiledFunction
+    Float
+    (Vector3d coordinateSystem)
+    (Range Unitless)
+    (VectorBounds3d coordinateSystem)
 
 instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
 
@@ -157,10 +97,10 @@ instance
     (Curve units3)
 
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
-new :: Interface curve (space @ units) => curve -> VectorCurve3d (space @ units)
+new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
+planar :: PlanarBasis3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
 evaluateBounds :: VectorCurve3d (space @ units) -> Range Unitless -> VectorBounds3d (space @ units)
-derivative :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
 unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

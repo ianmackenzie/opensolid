@@ -706,7 +706,7 @@ placeOn ::
   PlanarBasis3d space (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve3d (space @ units)
-placeOn basis curve = VectorCurve3d.Planar basis curve
+placeOn basis curve = VectorCurve3d.planar basis curve
 
 convert ::
   Qty (units2 :/: units1) ->

@@ -435,32 +435,15 @@ instance
     (VectorSurfaceFunction3d (space @ units))
     (VectorCurve3d (space @ units))
   where
-  VectorSurfaceFunction3d.Parametric outer . Parametric inner =
-    VectorCurve3d.Parametric (outer . inner)
-  outer . inner = VectorCurve3d.new (outer :.: inner)
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  VectorCurve3d.Interface
-    (VectorSurfaceFunction3d (space @ units) :.: Curve2d uvCoordinates)
-    (space @ units)
-  where
-  evaluateImpl (function :.: uvCurve) tValue =
-    VectorSurfaceFunction3d.evaluate function (evaluate uvCurve tValue)
-
-  evaluateBoundsImpl (function :.: uvCurve) tRange =
-    VectorSurfaceFunction3d.evaluateBounds function (evaluateBounds uvCurve tRange)
-
-  derivativeImpl (function :.: uvCurve) = do
+  function . uvCurve = do
     let fU = VectorSurfaceFunction3d.derivative U function
     let fV = VectorSurfaceFunction3d.derivative V function
     let uvT = derivative uvCurve
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
-    fU . uvCurve * uT + fV . uvCurve * vT
-
-  transformByImpl transform curve =
-    VectorCurve3d.Transformed transform (VectorCurve3d.new curve)
+    VectorCurve3d.new
+      (VectorSurfaceFunction3d.compiled function . compiled uvCurve)
+      (fU . uvCurve * uT + fV . uvCurve * vT)
 
 instance
   uvCoordinates ~ UvCoordinates =>

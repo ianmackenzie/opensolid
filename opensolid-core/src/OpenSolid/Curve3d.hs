@@ -146,7 +146,6 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve3d (space1 @ units1))
   where
-  Parametric lhs + VectorCurve3d.Parametric rhs = Parametric (lhs + rhs)
   lhs + rhs = Addition lhs rhs
 
 instance
@@ -156,7 +155,6 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve3d (space1 @ units1))
   where
-  Parametric lhs - VectorCurve3d.Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Subtraction lhs rhs
 
 instance
@@ -166,36 +164,7 @@ instance
     (Curve3d (space2 @ units2))
     (VectorCurve3d (space1 @ units1))
   where
-  Parametric lhs - Parametric rhs = VectorCurve3d.Parametric (lhs - rhs)
-  lhs - rhs = VectorCurve3d.new (lhs :-: rhs)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  VectorCurve3d.Interface
-    (Curve3d (space1 @ units1) :-: Curve3d (space2 @ units2))
-    (space1 @ units1)
-  where
-  evaluateImpl (curve1 :-: curve2) tValue =
-    evaluate curve1 tValue - evaluate curve2 tValue
-
-  evaluateBoundsImpl (curve1 :-: curve2) tRange =
-    evaluateBounds curve1 tRange - evaluateBounds curve2 tRange
-
-  derivativeImpl (curve1 :-: curve2) =
-    derivative curve1 - derivative curve2
-
-  transformByImpl transform (curve1 :-: curve2) =
-    -- Note the slight hack here:
-    -- the definition of VectorCurve3d.Interface states that the units of the transform
-    -- do *not* have to match the units of the vector curve,
-    -- because vectors and vector curves ignore translation
-    -- (and the units of the transform are just the units of its translation part).
-    -- This would in general mean that we couldn't apply the given transform to a Curve2d,
-    -- but in this case it's safe since any translation will cancel out
-    -- when the two curves are subtracted from each other.
-    VectorCurve3d.new $
-      (transformBy (Units.coerce transform) curve1)
-        :-: (transformBy (Units.coerce transform) curve2)
+  lhs - rhs = VectorCurve3d.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   unitless ~ Unitless =>
@@ -390,7 +359,7 @@ compiled curve = case curve of
 
 derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 derivative f = case f of
-  Parametric expression -> VectorCurve3d.Parametric (Expression.curveDerivative expression)
+  Parametric expression -> VectorCurve3d.parametric (Expression.curveDerivative expression)
   Curve curve -> derivativeImpl curve
   Coerce curve -> Units.coerce (derivative curve)
   XYZ x y z ->
