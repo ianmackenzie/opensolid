@@ -3,6 +3,8 @@ module OpenSolid.Primitives where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.HasZero (HasZero)
+import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
@@ -43,6 +45,9 @@ instance
   ApproximateEquality (Vector2d (space1 @ units1)) (Vector2d (space2 @ units2)) units1
   where
   Vector2d x1 y1 ~= Vector2d x2 y2 = Qty.hypot2 (x2 - x1) (y2 - y1) ~= Qty.zero
+
+instance HasZero (Vector2d (space @ units)) where
+  zero = Vector2d Qty.zero Qty.zero
 
 instance Negation (Vector2d (space @ units)) where
   negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
@@ -937,6 +942,9 @@ instance
   ApproximateEquality (Vector3d (space1 @ units1)) (Vector3d (space2 @ units2)) units1
   where
   Vector3d x1 y1 z1 ~= Vector3d x2 y2 z2 = Qty.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Qty.zero
+
+instance HasZero (Vector3d (space @ units)) where
+  zero = Vector3d Qty.zero Qty.zero Qty.zero
 
 instance Negation (Vector3d (space @ units)) where
   negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)

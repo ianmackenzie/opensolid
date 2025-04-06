@@ -41,6 +41,8 @@ import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Float qualified as Float
+import OpenSolid.HasZero (HasZero)
+import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
 import OpenSolid.Random.Internal qualified as Random
 import {-# SOURCE #-} OpenSolid.Range (Range)
@@ -71,6 +73,9 @@ deriving newtype instance Prelude.RealFloat Float
 deriving newtype instance Prelude.Read Float
 
 deriving newtype instance Storable (Qty units)
+
+instance HasZero (Qty units) where
+  zero = zero
 
 instance Negation (Qty units) where
   {-# INLINE negate #-}
