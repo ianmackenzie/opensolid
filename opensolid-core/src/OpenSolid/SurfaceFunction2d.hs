@@ -12,6 +12,7 @@ module OpenSolid.SurfaceFunction2d
   , signedDistanceAlong
   , xCoordinate
   , yCoordinate
+  , transformBy
   )
 where
 
