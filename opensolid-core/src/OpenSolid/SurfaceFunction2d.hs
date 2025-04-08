@@ -1,5 +1,6 @@
 module OpenSolid.SurfaceFunction2d
   ( SurfaceFunction2d (Parametric)
+  , Compiled
   , Interface (..)
   , new
   , constant
@@ -18,6 +19,8 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
@@ -74,6 +77,13 @@ data SurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
     Transform2d.Affine (space @ units) ->
     SurfaceFunction2d (space @ units) ->
     SurfaceFunction2d (space @ units)
+
+type Compiled coordinateSystem =
+  CompiledFunction
+    UvPoint
+    (Point2d coordinateSystem)
+    UvBounds
+    (Bounds2d coordinateSystem)
 
 deriving instance Show (SurfaceFunction2d (space @ units))
 
@@ -157,6 +167,10 @@ instance
   where
   Parametric lhs - Parametric rhs = VectorSurfaceFunction2d.Parametric (lhs - rhs)
   lhs - rhs = VectorSurfaceFunction2d.new (lhs :-: rhs)
+
+compiled :: SurfaceFunction2d (space @ units) -> Compiled (space @ units)
+compiled (Parametric expression) = CompiledFunction.concrete expression
+compiled function = CompiledFunction.abstract (evaluate function) (evaluateBounds function)
 
 new :: Interface function (space @ units) => function -> SurfaceFunction2d (space @ units)
 new = SurfaceFunction2d
