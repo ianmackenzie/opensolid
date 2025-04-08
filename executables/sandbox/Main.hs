@@ -370,17 +370,17 @@ testBezierSegment = IO.do
 testHermiteBezier :: IO ()
 testHermiteBezier = IO.do
   let startPoint = Point2d.origin @Global
-  let startDerivatives = [Vector2d.meters 10.0 10.0]
-  let endDerivatives = [Vector2d.meters 0.0 -10.0, Vector2d.zero]
-  let endPoint = Point2d.meters 10.0 0.0
+  let startDerivatives = [Vector2d.centimeters 10.0 10.0]
+  let endDerivatives = [Vector2d.centimeters 0.0 -10.0, Vector2d.zero]
+  let endPoint = Point2d.centimeters 10.0 0.0
   let curve = Curve2d.hermite startPoint startDerivatives endPoint endDerivatives
   log "Hermite Bezier curve" curve
   let curveAttributes =
         [ Drawing2d.strokeColor Color.blue
-        , Drawing2d.strokeWidth (Length.centimeters 3.0)
+        , Drawing2d.strokeWidth (Length.millimeters 1.0)
         ]
-  let curveEntity = Drawing2d.curve curveAttributes Length.millimeter curve
-  let coordinateRange = Range (Length.meters -1.0) (Length.meters 11.0)
+  let curveEntity = Drawing2d.curve curveAttributes (Length.millimeters 0.1) curve
+  let coordinateRange = Range (Length.centimeters -1.0) (Length.centimeters 11.0)
   let drawingBounds = Bounds2d coordinateRange coordinateRange
   Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
 
