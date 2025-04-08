@@ -1,3 +1,7 @@
+Rename CompiledFunction to Function.Compiled
+
+Rename CoordinateSystem to Coordinates?
+
 Support point/vector transformations in bytecode
 Support discontinuities in bytecode
 Add Ast3d
