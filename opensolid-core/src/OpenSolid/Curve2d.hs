@@ -1,10 +1,10 @@
 module OpenSolid.Curve2d
-  ( Curve2d (Parametric, Transformed)
+  ( Curve2d
   , pattern Point
   , HasDegeneracy (HasDegeneracy)
-  , Interface (..)
   , Compiled
   , new
+  , recursive
   , constant
   , xy
   , line
@@ -22,6 +22,7 @@ module OpenSolid.Curve2d
   , quadraticBezier
   , cubicBezier
   , hermite
+  , synthetic
   , startPoint
   , endPoint
   , evaluate
@@ -82,6 +83,7 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -107,7 +109,6 @@ import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
-import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.FFI (FFI)
@@ -161,31 +162,13 @@ import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 import Prelude qualified
 
-type role Curve2d nominal
-
 -- | A parametric curve in 2D space.
 data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Curve ::
-    Interface curve coordinateSystem =>
-    curve ->
-    Curve2d coordinateSystem
-  Parametric ::
-    Expression Float (Point2d (space @ units)) ->
-    Curve2d (space @ units)
-  Coerce ::
-    Curve2d (space @ units1) ->
-    Curve2d (space @ units2)
-  XY ::
-    Curve units ->
-    Curve units ->
-    Curve2d (space @ units)
-  PlaceIn ::
-    Frame2d (global @ units) (Defines local) ->
-    Curve2d (local @ units) ->
-    Curve2d (global @ units)
-  Transformed ::
-    Transform2d tag (space @ units) ->
-    Curve2d (space @ units) ->
+  Curve2d ::
+    { compiled :: Compiled (space @ units)
+    , derivative :: ~(VectorCurve2d (space @ units))
+    -- ^ Get the derivative of a curve.
+    } ->
     Curve2d (space @ units)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
@@ -195,7 +178,8 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Range Unitless)
     (Bounds2d coordinateSystem)
 
-deriving instance Show (Curve2d (space @ units))
+instance Show (Curve2d (space @ units)) where
+  show _ = Text.unpack "Curve2d"
 
 instance FFI (Curve2d (space @ Meters)) where
   representation = FFI.classRepresentation "Curve2d"
@@ -209,9 +193,11 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Curve2d (space1 @ unitsA)) (Curve2d (space2 @ unitsB))
   where
-  coerce (Parametric expression) = Parametric (Units.coerce expression)
-  coerce (Coerce c) = Coerce c
-  coerce c = Coerce c
+  coerce Curve2d{compiled, derivative} =
+    Curve2d
+      { compiled = Units.coerce compiled
+      , derivative = Units.coerce derivative
+      }
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -242,34 +228,6 @@ pattern Point point <- (asPoint -> Just point)
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Error.Message)
 
-class
-  Show curve =>
-  Interface curve (coordinateSystem :: CoordinateSystem)
-    | curve -> coordinateSystem
-  where
-  startPointImpl :: curve -> Point2d coordinateSystem
-  endPointImpl :: curve -> Point2d coordinateSystem
-  evaluateImpl :: curve -> Float -> Point2d coordinateSystem
-  evaluateBoundsImpl :: curve -> Range Unitless -> Bounds2d coordinateSystem
-  derivativeImpl :: curve -> VectorCurve2d coordinateSystem
-  reverseImpl :: curve -> Curve2d coordinateSystem
-  boundsImpl :: curve -> Bounds2d coordinateSystem
-  transformByImpl :: Transform2d tag coordinateSystem -> curve -> Curve2d coordinateSystem
-
-  startPointImpl curve = evaluateImpl curve 0.0
-  endPointImpl curve = evaluateImpl curve 1.0
-  boundsImpl curve = evaluateBoundsImpl curve Range.unit
-
-instance Interface (Curve2d (space @ units)) (space @ units) where
-  startPointImpl = startPoint
-  endPointImpl = endPoint
-  evaluateImpl = evaluate
-  evaluateBoundsImpl = evaluateBounds
-  derivativeImpl = derivative
-  reverseImpl = reverse
-  boundsImpl = bounds
-  transformByImpl = transformBy
-
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
@@ -277,56 +235,18 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
   where
-  lhs + rhs = new (lhs :+: rhs)
+  lhs + rhs =
+    new (compiled lhs + VectorCurve2d.compiled rhs) (derivative lhs + VectorCurve2d.derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Interface (Curve2d (space1 @ units1) :+: VectorCurve2d (space2 @ units2)) (space1 @ units1)
-  where
-  evaluateImpl (curve :+: vectorCurve) tValue =
-    evaluate curve tValue + VectorCurve2d.evaluate vectorCurve tValue
-
-  evaluateBoundsImpl (curve :+: vectorCurve) tRange =
-    evaluateBounds curve tRange + VectorCurve2d.evaluateBounds vectorCurve tRange
-
-  derivativeImpl (curve :+: vectorCurve) =
-    derivative curve + VectorCurve2d.derivative vectorCurve
-
-  reverseImpl (curve :+: vectorCurve) =
-    reverse curve + VectorCurve2d.reverse vectorCurve
-
-  transformByImpl transform (curve :+: vectorCurve) =
-    transformBy transform curve + VectorCurve2d.transformBy transform vectorCurve
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
   Subtraction
     (Curve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
   where
-  lhs - rhs = new (lhs :-: rhs)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Interface (Curve2d (space1 @ units1) :-: VectorCurve2d (space2 @ units2)) (space1 @ units1)
-  where
-  evaluateImpl (curve :-: vectorCurve) tValue =
-    evaluate curve tValue - VectorCurve2d.evaluate vectorCurve tValue
-
-  evaluateBoundsImpl (curve :-: vectorCurve) tRange =
-    evaluateBounds curve tRange - VectorCurve2d.evaluateBounds vectorCurve tRange
-
-  derivativeImpl (curve :-: vectorCurve) =
-    derivative curve - VectorCurve2d.derivative vectorCurve
-
-  reverseImpl (curve :-: vectorCurve) =
-    reverse curve - VectorCurve2d.reverse vectorCurve
-
-  transformByImpl transform (curve :-: vectorCurve) =
-    transformBy transform curve - VectorCurve2d.transformBy transform vectorCurve
+  lhs - rhs =
+    new (compiled lhs - VectorCurve2d.compiled rhs) (derivative lhs - VectorCurve2d.derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -359,26 +279,7 @@ instance
   unitless ~ Unitless =>
   Composition (Curve unitless) (Curve2d (space @ units)) (Curve2d (space @ units))
   where
-  outer . inner = new (outer :.: inner)
-
-instance
-  unitless ~ Unitless =>
-  Interface (Curve2d (space @ units) :.: Curve unitless) (space @ units)
-  where
-  evaluateImpl (curve2d :.: curve1d) tRange =
-    evaluate curve2d (Curve.evaluate curve1d tRange)
-
-  evaluateBoundsImpl (curve2d :.: curve1d) tRange =
-    evaluateBounds curve2d (Curve.evaluateBounds curve1d tRange)
-
-  derivativeImpl (curve2d :.: curve1d) =
-    (derivative curve2d . curve1d) * Curve.derivative curve1d
-
-  reverseImpl (curve2d :.: curve1d) =
-    new (curve2d :.: Curve.reverse curve1d)
-
-  transformByImpl transform (curve2d :.: curve1d) =
-    new (transformBy transform curve2d . curve1d)
+  f . g = new (compiled f . Curve.compiled g) ((derivative f . g) * Curve.derivative g)
 
 instance
   unitless ~ Unitless =>
@@ -387,7 +288,6 @@ instance
     (Curve2d (space @ units))
     (SurfaceFunction2d (space @ units))
   where
-  Parametric outer . SurfaceFunction.Parametric inner = SurfaceFunction2d.Parametric (outer . inner)
   curve . function = SurfaceFunction2d.new (curve :.: function)
 
 instance
@@ -446,7 +346,6 @@ instance
     (SurfaceFunction3d (space @ units))
     (Curve3d (space @ units))
   where
-  SurfaceFunction3d.Parametric outer . Parametric inner = Curve3d.Parametric (outer . inner)
   outer . inner = Curve3d.new (outer :.: inner)
 
 instance
@@ -475,20 +374,35 @@ instance
   transformByImpl transform (function :.: uvCurve) =
     SurfaceFunction3d.transformBy transform function . uvCurve
 
-new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
-new = Curve
+new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
+new = Curve2d
+
+recursive ::
+  Compiled (space @ units) ->
+  (Curve2d (space @ units) -> VectorCurve2d (space @ units)) ->
+  Curve2d (space @ units)
+recursive givenCompiled derivativeFunction =
+  let result = new givenCompiled (derivativeFunction result) in result
 
 -- | Create a degenerate curve that is actually just a single point.
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
-constant = Parametric . Expression.constant
+constant point = new (CompiledFunction.constant point) VectorCurve2d.zero
 
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve units -> Curve units -> Curve2d (space @ units)
-xy x y = XY x y
+xy x y =
+  new
+    & CompiledFunction.map2
+      Expression.xy
+      Point2d
+      Bounds2d
+      (Curve.compiled x)
+      (Curve.compiled y)
+    & VectorCurve2d.xy (Curve.derivative x) (Curve.derivative y)
 
 -- | Create a line between two points.
 line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-line p1 p2 = p1 + Curve.t * (p2 - p1)
+line p1 p2 = bezier (NonEmpty.two p1 p2)
 
 {-| Create an arc with the given start point, end point and swept angle.
 
@@ -653,10 +567,10 @@ For example,
 will return a cubic Bezier curve with the given four control points.
 -}
 bezier :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
-bezier controlPoints = do
-  let x = Curve.bezier (NonEmpty.map Point2d.xCoordinate controlPoints)
-  let y = Curve.bezier (NonEmpty.map Point2d.yCoordinate controlPoints)
-  XY x y
+bezier controlPoints =
+  new
+    & CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    & VectorCurve2d.bezierCurve (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
@@ -699,90 +613,36 @@ hermite ::
   Point2d (space @ units) ->
   List (Vector2d (space @ units)) ->
   Curve2d (space @ units)
-hermite (Point2d xStart yStart) startDerivatives (Point2d xEnd yEnd) endDerivatives = do
-  let xStartDerivatives = List.map Vector2d.xComponent startDerivatives
-  let yStartDerivatives = List.map Vector2d.yComponent startDerivatives
-  let xEndDerivatives = List.map Vector2d.xComponent endDerivatives
-  let yEndDerivatives = List.map Vector2d.yComponent endDerivatives
-  let x = Curve.hermite xStart xStartDerivatives xEnd xEndDerivatives
-  let y = Curve.hermite yStart yStartDerivatives yEnd yEndDerivatives
-  XY x y
+hermite start startDerivatives end endDerivatives =
+  bezier (Bezier.hermite start startDerivatives end endDerivatives)
+
+synthetic :: Curve2d (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
+synthetic curve curveDerivative = new (compiled curve) curveDerivative
 
 -- | Get the start point of a curve.
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-startPoint curve = case curve of
-  Curve c -> startPointImpl c
-  Parametric expresssion -> Expression.evaluate expresssion 0.0
-  Coerce c -> Units.coerce (startPoint c)
-  XY x y -> Point2d.xy (Curve.evaluate x 0.0) (Curve.evaluate y 0.0)
-  PlaceIn frame c -> Point2d.placeIn frame (startPoint c)
-  Transformed transform c -> Point2d.transformBy transform (startPoint c)
+startPoint curve = evaluate curve 0.0
 
 -- | Get the end point of a curve.
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-endPoint curve = case curve of
-  Curve c -> endPointImpl c
-  Parametric expresssion -> Expression.evaluate expresssion 1.0
-  Coerce c -> Units.coerce (endPoint c)
-  XY x y -> Point2d.xy (Curve.evaluate x 1.0) (Curve.evaluate y 1.0)
-  PlaceIn frame c -> Point2d.placeIn frame (endPoint c)
-  Transformed transform c -> Point2d.transformBy transform (endPoint c)
+endPoint curve = evaluate curve 1.0
 
 {-| Evaluate a curve at a given parameter value.
 
 The parameter value should be between 0 and 1.
 -}
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-evaluate curve tValue = case curve of
-  Curve c -> evaluateImpl c tValue
-  Parametric expresssion -> Expression.evaluate expresssion tValue
-  Coerce c -> Units.coerce (evaluate c tValue)
-  XY x y -> Point2d.xy (Curve.evaluate x tValue) (Curve.evaluate y tValue)
-  PlaceIn frame c -> Point2d.placeIn frame (evaluate c tValue)
-  Transformed transform c -> Point2d.transformBy transform (evaluate c tValue)
+evaluate Curve2d{compiled} tValue = CompiledFunction.evaluate compiled tValue
 
 evaluateBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
-evaluateBounds curve tRange = case curve of
-  Curve c -> evaluateBoundsImpl c tRange
-  Parametric expresssion -> Expression.evaluateBounds expresssion tRange
-  Coerce c -> Units.coerce (evaluateBounds c tRange)
-  XY x y -> Bounds2d (Curve.evaluateBounds x tRange) (Curve.evaluateBounds y tRange)
-  PlaceIn frame c -> Bounds2d.placeIn frame (evaluateBounds c tRange)
-  Transformed transform c -> Bounds2d.transformBy transform (evaluateBounds c tRange)
-
-compiled :: Curve2d (space @ units) -> Compiled (space @ units)
-compiled curve = case curve of
-  Parametric expression -> CompiledFunction.concrete expression
-  _ -> CompiledFunction.abstract (evaluate curve) (evaluateBounds curve)
-
--- | Get the derivative of a curve.
-derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-derivative curve = case curve of
-  Curve c -> derivativeImpl c
-  Parametric expression -> VectorCurve2d.parametric (Expression.curveDerivative expression)
-  XY x y -> VectorCurve2d.xy (Curve.derivative x) (Curve.derivative y)
-  Coerce c -> Units.coerce (derivative c)
-  PlaceIn frame c -> VectorCurve2d.placeIn (Frame2d.basis frame) (derivative c)
-  Transformed transform c -> VectorCurve2d.transformBy transform (derivative c)
+evaluateBounds Curve2d{compiled} tRange = CompiledFunction.evaluateBounds compiled tRange
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse curve = case curve of
-  Curve c -> Curve (reverseImpl c)
-  Parametric expression -> Parametric (expression . Expression.r)
-  XY x y -> XY (Curve.reverse x) (Curve.reverse y)
-  Coerce c -> Units.coerce (reverse c)
-  PlaceIn frame c -> PlaceIn frame (reverse c)
-  Transformed transform c -> Transformed transform (reverse c)
+reverse curve = curve . (1.0 - Curve.t)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
-bounds curve = case curve of
-  Curve c -> boundsImpl c
-  Parametric expression -> Expression.evaluateBounds expression Range.unit
-  Coerce c -> Units.coerce (bounds c)
-  XY x y -> Bounds2d (Curve.evaluateBounds x Range.unit) (Curve.evaluateBounds y Range.unit)
-  PlaceIn frame c -> Bounds2d.placeIn frame (bounds c)
-  Transformed transform c -> Bounds2d.transformBy transform (bounds c)
+bounds curve = evaluateBounds curve Range.unit
 
 asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @ units))
 asPoint curve = do
@@ -998,10 +858,14 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve2d (global @ units)
-placeIn globalFrame curve = case curve of
-  Parametric expression -> Parametric (Expression.Curve2d.placeIn globalFrame expression)
-  PlaceIn frame localCurve -> PlaceIn (Frame2d.placeIn globalFrame frame) localCurve
-  _ -> PlaceIn globalFrame curve
+placeIn frame curve =
+  new
+    & CompiledFunction.map
+      (Expression.Curve2d.placeIn frame)
+      (Point2d.placeIn frame)
+      (Bounds2d.placeIn frame)
+      (compiled curve)
+    & VectorCurve2d.placeIn (Frame2d.basis frame) (derivative curve)
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
@@ -1019,14 +883,14 @@ transformBy ::
   Transform2d tag (space @ units) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
-transformBy transform curve = case curve of
-  Curve c -> Curve (transformByImpl transform c)
-  Parametric expression -> Parametric (Expression.Curve2d.transformBy transform expression)
-  Coerce c -> Units.coerce (transformBy (Units.coerce transform) c)
-  XY{} -> Transformed transform curve
-  PlaceIn frame c -> PlaceIn frame (transformBy (Transform2d.relativeTo frame transform) c)
-  Transformed existing c ->
-    Transformed (Transform2d.toAffine transform . Transform2d.toAffine existing) c
+transformBy transform curve =
+  new
+    & CompiledFunction.map
+      (Expression.Curve2d.transformBy transform)
+      (Point2d.transformBy transform)
+      (Bounds2d.transformBy transform)
+      (compiled curve)
+    & VectorCurve2d.transformBy transform (derivative curve)
 
 -- | Translate by the given displacement.
 translateBy ::
@@ -1174,54 +1038,12 @@ removeStartDegeneracy continuity p1 d1 curve = Result.do
         VectorCurve2d.synthetic
           (nthDerivative n (baseCurve (continuity + n)))
           (curveDerivative (n + 1))
-  new (Synthetic (baseCurve continuity) (curveDerivative 1))
+  synthetic (baseCurve continuity) (curveDerivative 1)
 
 nthDerivative :: Int -> Curve2d (space @ units) -> VectorCurve2d (space @ units)
 nthDerivative 0 _ = internalError "nthDerivative should always be called with n >= 1"
 nthDerivative 1 curve = derivative curve
 nthDerivative n curve = VectorCurve2d.derivative (nthDerivative (n - 1) curve)
-
-data Synthetic coordinateSystem where
-  Synthetic ::
-    Curve2d (space @ units) ->
-    ~(VectorCurve2d (space @ units)) ->
-    Synthetic (space @ units)
-
-instance Show (Synthetic (space @ units)) where
-  show (Synthetic curve _) = Text.unpack ("Synthetic: " <> Text.show curve)
-
--- TODO make Synthetic a first-class constructors,
--- so that it can participate properly in binary operations?
-instance Interface (Synthetic (space @ units)) (space @ units) where
-  startPointImpl (Synthetic curve _) = startPoint curve
-
-  endPointImpl (Synthetic curve _) = endPoint curve
-
-  evaluateImpl (Synthetic curve _) t = evaluate curve t
-
-  evaluateBoundsImpl (Synthetic curve _) tRange = evaluateBounds curve tRange
-
-  boundsImpl (Synthetic curve _) = bounds curve
-
-  reverseImpl (Synthetic curve curveDerivative) =
-    new (Synthetic (reverse curve) (-(VectorCurve2d.reverse curveDerivative)))
-
-  derivativeImpl (Synthetic _ curveDerivative) = curveDerivative
-
-  transformByImpl transform (Synthetic curve curveDerivative) =
-    new $
-      Synthetic
-        (transformBy transform curve)
-        (VectorCurve2d.transformBy transform curveDerivative)
-
-data SyntheticDerivative coordinateSystem where
-  SyntheticDerivative ::
-    VectorCurve2d (space @ units) ->
-    ~(VectorCurve2d (space @ units)) ->
-    SyntheticDerivative (space @ units)
-
-instance Show (SyntheticDerivative (space @ units)) where
-  show (SyntheticDerivative curve _) = Text.unpack ("SyntheticDerivative: " <> Text.show curve)
 
 toPolyline :: Qty units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
 toPolyline accuracy curve =
@@ -1303,47 +1125,26 @@ unsafeParameterizeByArcLength curve = do
   let (parameterization, length) = unsafeArcLengthParameterization curve
   (curve . parameterization, length)
 
+makePiecewise :: NonEmpty (Curve2d (space @ units), Qty units) -> Curve2d (space @ units)
+makePiecewise parameterizedSegments = do
+  let segmentArray = Array.fromNonEmpty parameterizedSegments
+  let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
+  let evaluateImpl t = piecewiseValue tree (arcLength * t)
+  let evaluateBoundsImpl (Range t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
+  new
+    & CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
+    & piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
+
 piecewise ::
   Tolerance units =>
   NonEmpty (Curve2d (space @ units)) ->
   Result HasDegeneracy (Curve2d (space @ units))
-piecewise (first :| rest) = Result.do
-  parameterizedFirst <- parameterizeByArcLength first
-  parameterizedRest <- Result.collect parameterizeByArcLength rest
-  let segmentArray = Array.fromNonEmpty (parameterizedFirst :| parameterizedRest)
-  let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
-  Success (new (Piecewise tree arcLength))
+piecewise segments = Result.do
+  parameterizedSegments <- Result.collect parameterizeByArcLength segments
+  Success (makePiecewise parameterizedSegments)
 
 unsafePiecewise :: NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
-unsafePiecewise segments = do
-  let segmentArray = Array.fromNonEmpty (NonEmpty.map unsafeParameterizeByArcLength segments)
-  let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
-  new (Piecewise tree arcLength)
-
-data Piecewise (coordinateSystem :: CoordinateSystem) where
-  Piecewise :: PiecewiseTree (space @ units) -> Qty units -> Piecewise (space @ units)
-
-deriving instance Show (Piecewise (space @ units))
-
-instance Interface (Piecewise (space @ units)) (space @ units) where
-  evaluateImpl (Piecewise tree length) tValue =
-    evaluatePiecewise tree (length * tValue)
-
-  evaluateBoundsImpl (Piecewise tree length) (Range tLow tHigh) =
-    evaluatePiecewiseBounds tree (length * tLow) (length * tHigh)
-
-  derivativeImpl (Piecewise tree length) =
-    piecewiseDerivative (piecewiseTreeDerivative tree length) length
-
-  transformByImpl transform piecewiseCurve =
-    Transformed transform (new piecewiseCurve)
-
-  reverseImpl (Piecewise tree length) = do
-    -- Ignore the computed 'reversed length',
-    -- since it should be equal to the original length
-    -- but with (if anything) a bit of extra roundoff error
-    let (reversedTree, _) = reversePiecewise tree
-    new (Piecewise reversedTree length)
+unsafePiecewise segments = makePiecewise (NonEmpty.map unsafeParameterizeByArcLength segments)
 
 buildPiecewiseTree ::
   Array (Curve2d (space @ units), Qty units) ->
@@ -1374,49 +1175,40 @@ data PiecewiseTree (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (PiecewiseTree (space @ units))
 
-evaluatePiecewise :: PiecewiseTree (space @ units) -> Qty units -> Point2d (space @ units)
-evaluatePiecewise tree length = case tree of
+piecewiseValue :: PiecewiseTree (space @ units) -> Qty units -> Point2d (space @ units)
+piecewiseValue tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree
-    | length < leftLength -> evaluatePiecewise leftTree length
-    | otherwise -> evaluatePiecewise rightTree (length - leftLength)
+    | length < leftLength -> piecewiseValue leftTree length
+    | otherwise -> piecewiseValue rightTree (length - leftLength)
   PiecewiseLeaf curve segmentLength -> evaluate curve (length / segmentLength)
 
-evaluatePiecewiseBounds ::
+piecewiseBounds ::
   PiecewiseTree (space @ units) ->
   Qty units ->
   Qty units ->
   Bounds2d (space @ units)
-evaluatePiecewiseBounds tree startLength endLength = case tree of
+piecewiseBounds tree startLength endLength = case tree of
   PiecewiseNode leftTree leftLength rightTree
     | endLength <= leftLength ->
-        evaluatePiecewiseBounds leftTree startLength endLength
+        piecewiseBounds leftTree startLength endLength
     | startLength >= leftLength ->
-        evaluatePiecewiseBounds rightTree (startLength - leftLength) (endLength - leftLength)
+        piecewiseBounds rightTree (startLength - leftLength) (endLength - leftLength)
     | otherwise ->
         Bounds2d.aggregate2
-          (evaluatePiecewiseBounds leftTree startLength leftLength)
-          (evaluatePiecewiseBounds rightTree Qty.zero (endLength - leftLength))
+          (piecewiseBounds leftTree startLength leftLength)
+          (piecewiseBounds rightTree Qty.zero (endLength - leftLength))
   PiecewiseLeaf curve segmentLength ->
     evaluateBounds curve (Range (startLength / segmentLength) (endLength / segmentLength))
-
-reversePiecewise :: PiecewiseTree (space @ units) -> (PiecewiseTree (space @ units), Qty units)
-reversePiecewise tree = case tree of
-  PiecewiseNode leftTree _ rightTree -> do
-    let (reversedRight, rightLength) = reversePiecewise rightTree
-    let (reversedLeft, leftLength) = reversePiecewise leftTree
-    (PiecewiseNode reversedRight rightLength reversedLeft, rightLength + leftLength)
-  PiecewiseLeaf curve length -> (PiecewiseLeaf (reverse curve) length, length)
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree (space @ units) ->
   Qty units ->
   VectorCurve2d (space @ units)
 piecewiseDerivative tree length = do
-  let evaluateDerivative tValue = evaluatePiecewiseDerivative tree (length * tValue)
-  let evaluateDerivativeBounds (Range tLow tHigh) =
-        evaluatePiecewiseDerivativeBounds tree (length * tLow) (length * tHigh)
+  let evaluateImpl t = piecewiseDerivativeValue tree (length * t)
+  let evaluateBoundsImpl (Range t1 t2) = piecewiseDerivativeBounds tree (length * t1) (length * t2)
   VectorCurve2d.new
-    (CompiledFunction.abstract evaluateDerivative evaluateDerivativeBounds)
+    (CompiledFunction.abstract evaluateImpl evaluateBoundsImpl)
     (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
 
 data PiecewiseDerivativeTree (coordinateSystem :: CoordinateSystem) where
@@ -1460,35 +1252,35 @@ piecewiseDerivativeTreeDerivative tree length = case tree of
       ((length / segmentLength) * VectorCurve2d.derivative curve)
       segmentLength
 
-evaluatePiecewiseDerivative ::
+piecewiseDerivativeValue ::
   PiecewiseDerivativeTree (space @ units) ->
   Qty units ->
   Vector2d (space @ units)
-evaluatePiecewiseDerivative tree length = case tree of
+piecewiseDerivativeValue tree length = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
-    | length < leftLength -> evaluatePiecewiseDerivative leftTree length
-    | otherwise -> evaluatePiecewiseDerivative rightTree (length - leftLength)
+    | length < leftLength -> piecewiseDerivativeValue leftTree length
+    | otherwise -> piecewiseDerivativeValue rightTree (length - leftLength)
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2d.evaluate curve (length / segmentLength)
 
-evaluatePiecewiseDerivativeBounds ::
+piecewiseDerivativeBounds ::
   PiecewiseDerivativeTree (space @ units) ->
   Qty units ->
   Qty units ->
   VectorBounds2d (space @ units)
-evaluatePiecewiseDerivativeBounds tree startLength endLength = case tree of
+piecewiseDerivativeBounds tree startLength endLength = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
     | endLength <= leftLength ->
-        evaluatePiecewiseDerivativeBounds leftTree startLength endLength
+        piecewiseDerivativeBounds leftTree startLength endLength
     | startLength >= leftLength ->
-        evaluatePiecewiseDerivativeBounds
+        piecewiseDerivativeBounds
           rightTree
           (startLength - leftLength)
           (endLength - leftLength)
     | otherwise ->
         VectorBounds2d.aggregate2
-          (evaluatePiecewiseDerivativeBounds leftTree startLength leftLength)
-          (evaluatePiecewiseDerivativeBounds rightTree Qty.zero (endLength - leftLength))
+          (piecewiseDerivativeBounds leftTree startLength leftLength)
+          (piecewiseDerivativeBounds rightTree Qty.zero (endLength - leftLength))
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2d.evaluateBounds curve $
       Range (startLength / segmentLength) (endLength / segmentLength)

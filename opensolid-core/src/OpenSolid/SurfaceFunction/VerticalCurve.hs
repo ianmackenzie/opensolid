@@ -1,5 +1,5 @@
 module OpenSolid.SurfaceFunction.VerticalCurve
-  ( VerticalCurve
+  ( MonotonicSpace
   , new
   , monotonic
   , bounded
@@ -10,6 +10,7 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -29,25 +30,10 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds qualified as ImplicitCurveBounds
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates)
-import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.SurfaceParameter (SurfaceParameter (U), UvBounds, UvCoordinates)
 import OpenSolid.Uv.Derivatives (Derivatives)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-
-data VerticalCurve units = VerticalCurve
-  { f :: SurfaceFunction units
-  , fu :: SurfaceFunction units
-  , fv :: SurfaceFunction units
-  , dudv :: SurfaceFunction Unitless
-  , bounds :: ImplicitCurveBounds
-  , vStart :: Float
-  , vEnd :: Float
-  , monotonicity :: Monotonicity
-  , boundingAxes :: List (Axis2d UvCoordinates)
-  , tolerance :: Qty units
-  }
-  deriving (Show)
 
 data MonotonicSpace
 
@@ -69,23 +55,8 @@ new ::
   Float ->
   NonEmpty UvBounds ->
   Curve2d UvCoordinates
-new derivatives dudv vStart vEnd boxes = do
-  let f = Derivatives.get derivatives
-  let fu = Derivatives.get (derivatives >> U)
-  let fv = Derivatives.get (derivatives >> V)
-  Curve2d.new $
-    VerticalCurve
-      { f
-      , fu
-      , fv
-      , dudv
-      , bounds = implicitCurveBounds boxes
-      , vStart
-      , vEnd
-      , monotonicity = NotMonotonic
-      , boundingAxes = []
-      , tolerance = ?tolerance
-      }
+new derivatives dudv vStart vEnd boxes =
+  verticalCurve derivatives dudv vStart vEnd boxes NotMonotonic []
 
 monotonic ::
   Tolerance units =>
@@ -95,23 +66,8 @@ monotonic ::
   Float ->
   NonEmpty UvBounds ->
   Curve2d UvCoordinates
-monotonic derivatives dudv vStart vEnd boxes = do
-  let f = Derivatives.get derivatives
-  let fu = Derivatives.get (derivatives >> U)
-  let fv = Derivatives.get (derivatives >> V)
-  Curve2d.new $
-    VerticalCurve
-      { f
-      , fu
-      , fv
-      , dudv
-      , bounds = implicitCurveBounds boxes
-      , vStart
-      , vEnd
-      , monotonicity = Monotonic
-      , boundingAxes = []
-      , tolerance = ?tolerance
-      }
+monotonic derivatives dudv vStart vEnd boxes =
+  verticalCurve derivatives dudv vStart vEnd boxes Monotonic []
 
 bounded ::
   Tolerance units =>
@@ -124,91 +80,55 @@ bounded ::
   List (Axis2d UvCoordinates) ->
   Curve2d UvCoordinates
 bounded derivatives dudv vStart vEnd boxes monotonicFrame boundingAxes = do
+  let monotonicity = MonotonicIn (Frame2d.coerce monotonicFrame)
+  verticalCurve derivatives dudv vStart vEnd boxes monotonicity boundingAxes
+
+verticalCurve ::
+  Tolerance units =>
+  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction Unitless ->
+  Float ->
+  Float ->
+  NonEmpty UvBounds ->
+  Monotonicity ->
+  List (Axis2d UvCoordinates) ->
+  Curve2d UvCoordinates
+verticalCurve derivatives dudv vStart vEnd boxes monotonicity boundingAxes = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
-  let fv = Derivatives.get (derivatives >> V)
-  Curve2d.new $
-    VerticalCurve
-      { f
-      , fu
-      , fv
-      , dudv
-      , bounds = implicitCurveBounds boxes
-      , vStart
-      , vEnd
-      , monotonicity = MonotonicIn (Frame2d.coerce monotonicFrame)
-      , boundingAxes
-      , tolerance = ?tolerance
-      }
-
-instance Curve2d.Interface (VerticalCurve units) UvCoordinates where
-  evaluateImpl curve tValue = do
-    let VerticalCurve{vStart, vEnd} = curve
-    let vValue = Float.interpolateFrom vStart vEnd tValue
-    let uValue = solveForU curve vValue
-    Point2d.xy uValue vValue
-
-  evaluateBoundsImpl curve tRange = do
-    let VerticalCurve{dudv, bounds, vStart, vEnd, monotonicity} = curve
-    let Range t1 t2 = tRange
-    let v1 = Float.interpolateFrom vStart vEnd t1
-    let v2 = Float.interpolateFrom vStart vEnd t2
-    let u1 = solveForU curve v1
-    let u2 = solveForU curve v2
-    case monotonicity of
-      Monotonic -> Bounds2d (Range u1 u2) (Range v1 v2)
-      MonotonicIn frame -> do
-        let p1 = Point2d.xy u1 v1
-        let p2 = Point2d.xy u2 v2
-        Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
-          |> Bounds2d.placeIn frame
-      NotMonotonic -> do
-        let uRange = ImplicitCurveBounds.evaluateBounds bounds (Range v1 v2)
-        let slopeBounds = SurfaceFunction.evaluateBounds dudv (Bounds2d uRange (Range v1 v2))
-        let segmentUBounds = Internal.curveBounds v1 v2 u1 u2 slopeBounds
-        Bounds2d segmentUBounds (Range v1 v2)
-
-  derivativeImpl curve@(VerticalCurve{dudv, vStart, vEnd}) = do
-    let deltaV = vEnd - vStart
-    let dvdt = Curve.constant deltaV
-    let dudt = dvdt * dudv . Curve2d.new curve
-    VectorCurve2d.xy dudt dvdt
-
-  reverseImpl
-    VerticalCurve
-      { f
-      , fu
-      , fv
-      , dudv
-      , bounds
-      , vStart
-      , vEnd
-      , monotonicity
-      , boundingAxes
-      , tolerance
-      } =
-      Curve2d.new $
-        VerticalCurve
-          { f
-          , fu
-          , fv
-          , dudv
-          , bounds
-          , vStart = vEnd
-          , vEnd = vStart
-          , monotonicity
-          , boundingAxes
-          , tolerance
-          }
-
-  transformByImpl transform curve =
-    Curve2d.Transformed transform (Curve2d.new curve)
-
-solveForU :: VerticalCurve units -> Float -> Float
-solveForU (VerticalCurve{f, fu, bounds, boundingAxes, tolerance}) vValue = do
-  let uRange = ImplicitCurveBounds.evaluate bounds vValue
-  let clampedBounds = List.foldl (clamp vValue) uRange boundingAxes
-  Tolerance.using tolerance (Internal.solveForU f fu clampedBounds vValue)
+  let bounds = implicitCurveBounds boxes
+  let solveForU vValue = do
+        let uRange = ImplicitCurveBounds.evaluate bounds vValue
+        let clampedBounds = List.foldl (clamp vValue) uRange boundingAxes
+        Internal.solveForU f fu clampedBounds vValue
+  let evaluate tValue = do
+        let vValue = Float.interpolateFrom vStart vEnd tValue
+        let uValue = solveForU vValue
+        Point2d.xy uValue vValue
+  let evaluateBounds tRange = do
+        let Range t1 t2 = tRange
+        let v1 = Float.interpolateFrom vStart vEnd t1
+        let v2 = Float.interpolateFrom vStart vEnd t2
+        let u1 = solveForU v1
+        let u2 = solveForU v2
+        case monotonicity of
+          Monotonic -> Bounds2d (Range u1 u2) (Range v1 v2)
+          MonotonicIn frame -> do
+            let p1 = Point2d.xy u1 v1
+            let p2 = Point2d.xy u2 v2
+            Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
+              |> Bounds2d.placeIn frame
+          NotMonotonic -> do
+            let uRange = ImplicitCurveBounds.evaluateBounds bounds (Range v1 v2)
+            let slopeBounds = SurfaceFunction.evaluateBounds dudv (Bounds2d uRange (Range v1 v2))
+            let segmentUBounds = Internal.curveBounds v1 v2 u1 u2 slopeBounds
+            Bounds2d segmentUBounds (Range v1 v2)
+  let derivative self = do
+        let deltaV = vEnd - vStart
+        let dvdt = Curve.constant deltaV
+        let dudt = dvdt * dudv . self
+        VectorCurve2d.xy dudt dvdt
+  Curve2d.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
 
 clamp :: Float -> Range Unitless -> Axis2d UvCoordinates -> Range Unitless
 clamp v (Range uLow uHigh) axis = do

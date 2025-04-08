@@ -254,35 +254,13 @@ instance
     (SurfaceFunction2d (space @ units))
     (Curve2d (space @ units))
   where
-  Parametric function . Curve2d.Parametric curve = Curve2d.Parametric (function . curve)
-  function . curve = Curve2d.new (function :.: curve)
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Curve2d.Interface
-    (SurfaceFunction2d (space @ units) :.: Curve2d uvCoordinates)
-    (space @ units)
-  where
-  evaluateImpl (function :.: curve) tValue =
-    evaluate function (Curve2d.evaluate curve tValue)
-
-  evaluateBoundsImpl (function :.: curve) tRange =
-    evaluateBounds function (Curve2d.evaluateBounds curve tRange)
-
-  boundsImpl (function :.: curve) =
-    evaluateBounds function (Curve2d.bounds curve)
-
-  derivativeImpl (function :.: curve) = do
+  function . curve = do
     let curveDerivative = Curve2d.derivative curve
     let dudt = VectorCurve2d.xComponent curveDerivative
     let dvdt = VectorCurve2d.yComponent curveDerivative
-    (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
-
-  reverseImpl (function :.: curve) =
-    Curve2d.new (function :.: Curve2d.reverse curve)
-
-  transformByImpl transform (function :.: curve) =
-    transformBy transform function . curve
+    Curve2d.new
+      (compiled function . Curve2d.compiled curve)
+      ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
 
 signedDistanceAlong ::
   Axis2d (space @ units) ->
