@@ -226,17 +226,13 @@ instance
   point ^ curve = curve ^ point
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)) units1
   where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
   curve ~= point = List.allTrue [evaluate curve t ~= point | t <- Parameter.samples]
@@ -275,9 +271,7 @@ instance Interface (Curve2d (space @ units)) (space @ units) where
   transformByImpl = transformBy
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
     (Curve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
