@@ -1,9 +1,11 @@
 #include <cmath>
 
+#define PI 3.14159265358979323846
+
 inline bool
 hasSinusoidalExtreme(double lower, double upper, double location) {
-  int lowerIndex = std::floor((lower - location) / (2.0 * M_PI));
-  int upperIndex = std::floor((upper - location) / (2.0 * M_PI));
+  int lowerIndex = std::floor((lower - location) / (2.0 * PI));
+  int upperIndex = std::floor((upper - location) / (2.0 * PI));
   return lowerIndex != upperIndex;
 }
 
@@ -98,8 +100,8 @@ struct Range {
     double sinLower = std::sin(lower);
     double sinUpper = std::sin(upper);
     return Range(
-      hasSinusoidalExtreme(lower, upper, -M_PI_2) ? -1.0 : std::min(sinLower, sinUpper),
-      hasSinusoidalExtreme(lower, upper, M_PI_2) ? 1.0 : std::max(sinLower, sinUpper)
+      hasSinusoidalExtreme(lower, upper, -PI / 2) ? -1.0 : std::min(sinLower, sinUpper),
+      hasSinusoidalExtreme(lower, upper, PI / 2) ? 1.0 : std::max(sinLower, sinUpper)
     );
   }
 
@@ -108,7 +110,7 @@ struct Range {
     double cosLower = std::cos(lower);
     double cosUpper = std::cos(upper);
     return Range(
-      hasSinusoidalExtreme(lower, upper, M_PI) ? -1.0 : std::min(cosLower, cosUpper),
+      hasSinusoidalExtreme(lower, upper, PI) ? -1.0 : std::min(cosLower, cosUpper),
       hasSinusoidalExtreme(lower, upper, 0.0) ? 1.0 : std::max(cosLower, cosUpper)
     );
   }

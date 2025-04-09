@@ -54,8 +54,6 @@ common config
     -fwrite-ide-info
     -hiedir=.hie
     -haddock
-    -pgmlg++
-    -pgml-supports-no-pie
 
   default-extensions:
     BlockArguments
@@ -267,14 +265,11 @@ library
     src/OpenSolid/Bytecode/bytecode.cpp
 
   cxx-options:
-    -fPIC -std=gnu++11
+    -fPIC -std=c++11
 
-  extra-libraries:
-    stdc++
+  build-depends:
+    system-cxx-std-lib
 
-  if os(windows)
-    ghc-options:
-      -optl-static-libstdc++
 
 test-suite opensolid-core-test
   import: config
