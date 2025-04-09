@@ -55,6 +55,7 @@ common config
     -hiedir=.hie
     -haddock
     -pgmlg++
+    -pgml-supports-no-pie
 
   default-extensions:
     BlockArguments
@@ -266,7 +267,7 @@ library
     src/OpenSolid/Bytecode/bytecode.cpp
 
   cxx-options:
-    -fPIC -fPIE -std=gnu++11
+    -fPIC -std=gnu++11
 
   extra-libraries:
     stdc++
