@@ -266,7 +266,7 @@ library
     src/OpenSolid/Bytecode/bytecode.cpp
 
   cxx-options:
-    -std=c++11
+    -fPIC -std=c++11
 
   extra-libraries:
     stdc++
