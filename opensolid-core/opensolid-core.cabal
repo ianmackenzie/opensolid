@@ -265,11 +265,11 @@ library
     src/OpenSolid/Bytecode/bytecode.cpp
 
   cxx-options:
-    -fPIC -std=c++11
+    -fPIC
+    -std=c++11
 
   build-depends:
     system-cxx-std-lib
-
 
 test-suite opensolid-core-test
   import: config
