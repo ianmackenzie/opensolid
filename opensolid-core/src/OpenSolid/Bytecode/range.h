@@ -2,8 +2,8 @@
 
 inline bool
 hasSinusoidalExtreme(double lower, double upper, double location) {
-  int lowerIndex = std::floor((lower - location) / M_2_PI);
-  int upperIndex = std::floor((upper - location) / M_2_PI);
+  int lowerIndex = std::floor((lower - location) / (2.0 * M_PI));
+  int upperIndex = std::floor((upper - location) / (2.0 * M_PI));
   return lowerIndex != upperIndex;
 }
 
