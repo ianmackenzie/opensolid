@@ -272,6 +272,10 @@ library
   extra-libraries:
     stdc++
 
+  if os(windows)
+    ghc-options:
+      -optl-static-libstdc++
+
 test-suite opensolid-core-test
   import: config
   type: exitcode-stdio-1.0
