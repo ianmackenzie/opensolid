@@ -1,6 +1,6 @@
-Rename CompiledFunction to Function.Compiled
+Add 'Abstract' constructor to Ast (or Expression?)
 
-Rename CoordinateSystem to Coordinates?
+Rename CompiledFunction to Function.Compiled
 
 Support point/vector transformations in bytecode
 Support discontinuities in bytecode
@@ -98,6 +98,8 @@ Useful operations:
 Generate non-zero normal vectors at poles of revolved surfaces
 
 Add DirectionCurve2d.[rotateLeft,rotateRight] and use in Curve2d.offsetBy, Region2d.fillet
+
+When updating to GHC 9.12, try out NamedDefaults for Int, Float, Text?
 
 Add OpenSolid prefix to API modules
 
