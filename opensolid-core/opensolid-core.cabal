@@ -54,6 +54,7 @@ common config
     -fwrite-ide-info
     -hiedir=.hie
     -haddock
+    -pgmlg++
 
   default-extensions:
     BlockArguments
@@ -263,6 +264,9 @@ library
 
   cxx-sources:
     src/OpenSolid/Bytecode/bytecode.cpp
+
+  cxx-options:
+    -std=c++11
 
   extra-libraries:
     stdc++
