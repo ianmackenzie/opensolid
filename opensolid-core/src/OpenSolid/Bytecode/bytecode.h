@@ -51,6 +51,8 @@ enum Opcode {
   Quartic2d,
   Quintic2d,
   Bezier2d,
+  TransformVector2d,
+  TransformPoint2d,
   XYZ3d,
   XYC3d,
   XCZ3d,
@@ -80,6 +82,8 @@ enum Opcode {
   Quartic3d,
   Quintic3d,
   Bezier3d,
+  TransformVector3d,
+  TransformPoint3d,
   OPCODE_END
 };
 
