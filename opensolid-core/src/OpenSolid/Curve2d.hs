@@ -346,33 +346,15 @@ instance
     (SurfaceFunction3d (space @ units))
     (Curve3d (space @ units))
   where
-  outer . inner = Curve3d.new (outer :.: inner)
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Curve3d.Interface
-    (SurfaceFunction3d (space @ units) :.: Curve2d uvCoordinates)
-    (space @ units)
-  where
-  evaluateImpl (function :.: uvCurve) tValue =
-    SurfaceFunction3d.evaluate function (evaluate uvCurve tValue)
-
-  evaluateBoundsImpl (function :.: uvCurve) tRange =
-    SurfaceFunction3d.evaluateBounds function (evaluateBounds uvCurve tRange)
-
-  derivativeImpl (function :.: uvCurve) = do
+  function . uvCurve = do
     let fU = SurfaceFunction3d.derivative U function
     let fV = SurfaceFunction3d.derivative V function
     let uvT = derivative uvCurve
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
-    fU . uvCurve * uT + fV . uvCurve * vT
-
-  reverseImpl (function :.: uvCurve) =
-    function . reverse uvCurve
-
-  transformByImpl transform (function :.: uvCurve) =
-    SurfaceFunction3d.transformBy transform function . uvCurve
+    Curve3d.new
+      (SurfaceFunction3d.compiled function . compiled uvCurve)
+      (fU . uvCurve * uT + fV . uvCurve * vT)
 
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 new = Curve2d
