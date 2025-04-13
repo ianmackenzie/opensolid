@@ -1,6 +1,8 @@
 module OpenSolid.SurfaceFunction3d
   ( SurfaceFunction3d (Parametric)
+  , Compiled
   , Interface (..)
+  , compiled
   , new
   , constant
   , xyz
@@ -15,6 +17,8 @@ where
 
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
+import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
@@ -81,6 +85,13 @@ data SurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
     Transform3d tag (space @ units) ->
     SurfaceFunction3d (space @ units) ->
     SurfaceFunction3d (space @ units)
+
+type Compiled coordinateSystem =
+  CompiledFunction
+    UvPoint
+    (Point3d coordinateSystem)
+    UvBounds
+    (Bounds3d coordinateSystem)
 
 deriving instance Show (SurfaceFunction3d (space @ units))
 
@@ -193,6 +204,10 @@ instance
     let dvOuter = derivative V outer . inner
     let dInner = SurfaceFunction2d.derivative varyingParameter inner
     duOuter * VectorSurfaceFunction2d.xComponent dInner + dvOuter * VectorSurfaceFunction2d.yComponent dInner
+
+compiled :: SurfaceFunction3d (space @ units) -> Compiled (space @ units)
+compiled (Parametric expression) = CompiledFunction.concrete expression
+compiled function = CompiledFunction.abstract (evaluate function) (evaluateBounds function)
 
 new :: Interface function (space @ units) => function -> SurfaceFunction3d (space @ units)
 new = SurfaceFunction3d
