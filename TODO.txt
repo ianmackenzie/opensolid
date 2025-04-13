@@ -1,13 +1,18 @@
+Add Coercible constraint to CompiledFunction to enforce zero-overhead coercion?
+-> similarly, enforce zero-overhead coercion of Expression type?
+
 Add 'Abstract' constructor to Ast (or Expression?)
 
 Rename CompiledFunction to Function.Compiled
+-> or possibly Evaluator or similar?
+  -> then might make sense to *not* implement Addition etc. for Evaluator, just use map2 (+) (+) (+) etc.
 
 Support point/vector transformations in bytecode
 Support discontinuities in bytecode
 Add Ast3d
 Add arithmetic typeclass instances to Ast2d and Ast3d
 
-Rename CompiledFunction to Evaluator or similar?
+Update Curve.sqrt' and SurfaceFunction.sqrt' to use specialized square root derivative expression
 
 Encode entire function as <u64 number of constants, constants, words>
 -> only pin/marshal one ByteString instead of two
@@ -56,6 +61,11 @@ Try removing 'unitless ~ Unitless' constraints everywhere
 -> maybe also 'uvPoint ~ UvPoint', 'uvSpace ~ UvSpace', 'uvCoordinates ~ UvCoordinates'
 
 Remove SymbolicOperators module once everything is switched to directly constructing curves/functions
+
+Try defining API in terms of generic units and then *separately* a list of supported units?
+-> C API could then just work on Float values
+-> nicer mapping to F# (or potentially other languages with sufficiently powerful type systems that can represent units reasonably nicely)
+-> could expose current 'flat' structure as convenience layer for languages that don't have good unit support (most of them)
 
 Add Region2d.regularPolygon which takes number of sides and incircle diameter
 -> corresponds to width across flats for polygons with even numbers of sides...
