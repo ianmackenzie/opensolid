@@ -17,6 +17,8 @@ Add Arc2d and Arc3d bytecode instructions
 
 Remove 'planar' functions in favour of calling 'new' directly from 'placeOn' functions
 
+Do a general pass of trimming down .hs-boot files?
+
 Try requiring a specific coordinate system convention when using 'xyz' functions
 -> implicit argument in Haskell, treated just like tolerance (except it's not passed _through_ anywhere)
 -> 'Convention.using Convention.yUp' (X left, Z forward), 'Convention.using Convention.zUp' (X right, Y forward)
