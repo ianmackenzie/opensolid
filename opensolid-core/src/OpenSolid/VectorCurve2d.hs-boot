@@ -36,8 +36,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
 
 instance HasUnits (VectorCurve2d (space @ units)) units (VectorCurve2d (space @ Unitless))
 
-instance Show (VectorCurve2d (space @ units))
-
 instance Negation (VectorCurve2d (space @ units))
 
 instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))

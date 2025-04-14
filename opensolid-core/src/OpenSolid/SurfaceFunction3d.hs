@@ -34,14 +34,12 @@ import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
-import OpenSolid.Text qualified as Text
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
-import Prelude qualified
 
 data SurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
   SurfaceFunction3d ::
@@ -56,9 +54,6 @@ type Compiled coordinateSystem =
     (Point3d coordinateSystem)
     UvBounds
     (Bounds3d coordinateSystem)
-
-instance Show (SurfaceFunction3d (space @ units)) where
-  show _ = Text.unpack "SurfaceFunction3d"
 
 instance HasUnits (SurfaceFunction3d (space @ units)) units (SurfaceFunction3d (space @ Unitless))
 

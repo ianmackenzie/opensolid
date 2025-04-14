@@ -15,8 +15,6 @@ module OpenSolid.Expression.Scalar
   , bezierCurve
   , curveDerivative
   , surfaceDerivative
-  , show
-  , showWithPrecedence
   , Ptr
   , ptr
   )
@@ -28,13 +26,11 @@ import Foreign.Marshal.Array qualified
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
-import OpenSolid.Text qualified as Text
 import OpenSolid.Units qualified as Units
 import System.IO.Unsafe (unsafeDupablePerformIO)
 import Prelude (Double)
@@ -373,60 +369,6 @@ surfaceDerivative varyingParameter expression = case expression of
       [] -> zero
       NonEmpty derivativeControlPoints ->
         bezierCurve derivativeControlPoints param * surfaceDerivative varyingParameter param
-
-show :: Scalar input -> Text
-show = showWithPrecedence 0
-
-showWithPrecedence :: Int -> Scalar input -> Text
-showWithPrecedence precedence expression = case expression of
-  CurveParameter -> "t"
-  SurfaceParameter SurfaceParameter.U -> "u"
-  SurfaceParameter SurfaceParameter.V -> "v"
-  Constant value -> Text.float value
-  Negated arg -> showParenthesized (precedence >= 6) ("-" <> showWithPrecedence 6 arg)
-  Sum lhs rhs ->
-    showParenthesized (precedence >= 6) $
-      showWithPrecedence 6 lhs <> " <> " <> showWithPrecedence 6 rhs
-  Difference lhs rhs ->
-    showParenthesized (precedence >= 6) $
-      showWithPrecedence 6 lhs <> " - " <> showWithPrecedence 6 rhs
-  Product lhs rhs ->
-    showParenthesized (precedence >= 7) $
-      showWithPrecedence 7 lhs <> " * " <> showWithPrecedence 7 rhs
-  Quotient lhs rhs ->
-    showParenthesized (precedence >= 7) $
-      showWithPrecedence 7 lhs <> " / " <> showWithPrecedence 6 rhs
-  Squared arg -> showFunctionCall precedence "squared" [arg]
-  Sqrt arg -> showFunctionCall precedence "sqrt" [arg]
-  Sin arg -> showFunctionCall precedence "sin" [arg]
-  Cos arg -> showFunctionCall precedence "cos" [arg]
-  QuadraticSpline p1 p2 p3 param -> do
-    let args = [constant p1, constant p2, constant p3, param]
-    showFunctionCall precedence "quadraticSpline" args
-  CubicSpline p1 p2 p3 p4 param -> do
-    let args = [constant p1, constant p2, constant p3, constant p4, param]
-    showFunctionCall precedence "cubicSpline" args
-  QuarticSpline p1 p2 p3 p4 p5 param -> do
-    let args = [constant p1, constant p2, constant p3, constant p4, constant p5, param]
-    showFunctionCall precedence "quarticSpline" args
-  QuinticSpline p1 p2 p3 p4 p5 p6 param -> do
-    let args = [constant p1, constant p2, constant p3, constant p4, constant p5, constant p6, param]
-    showFunctionCall precedence "quinticSpline" args
-  BezierCurve controlPoints param ->
-    showParenthesized (precedence >= 10) $
-      "bezierCurve "
-        <> Text.show (NonEmpty.toList controlPoints)
-        <> " "
-        <> showWithPrecedence 10 param
-
-showFunctionCall :: Int -> Text -> List (Scalar input) -> Text
-showFunctionCall precedence functionName arguments =
-  showParenthesized (precedence >= 10) $
-    Text.join " " (functionName : List.map (showWithPrecedence 10) arguments)
-
-showParenthesized :: Bool -> Text -> Text
-showParenthesized True text = "(" <> text <> ")"
-showParenthesized False text = text
 
 data RustExpression
 

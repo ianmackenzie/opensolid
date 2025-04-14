@@ -34,8 +34,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Range Unitless)
     (Bounds3d coordinateSystem)
 
-instance Show (Curve3d (space @ units))
-
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition

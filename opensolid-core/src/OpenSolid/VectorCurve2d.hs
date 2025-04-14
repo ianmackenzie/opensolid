@@ -71,7 +71,6 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -87,7 +86,6 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-import Prelude qualified
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
@@ -102,10 +100,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Vector2d coordinateSystem)
     (Range Unitless)
     (VectorBounds2d coordinateSystem)
-
--- TODO remove
-instance Show (VectorCurve2d (space @ units)) where
-  show _ = Text.unpack "VectorCurve2d"
 
 instance FFI (VectorCurve2d (space @ Unitless)) where
   representation = FFI.classRepresentation "VectorCurve2d"
@@ -569,11 +563,6 @@ evaluateBounds VectorCurve2d{compiled} tRange = CompiledFunction.evaluateBounds 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
 
-newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
-  = SquaredMagnitude' (VectorCurve2d coordinateSystem)
-
-deriving instance Show (SquaredMagnitude' (space @ units))
-
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
@@ -586,11 +575,6 @@ squaredMagnitude' curve =
       VectorBounds2d.squaredMagnitude'
       (compiled curve)
     & 2.0 * curve `dot'` derivative curve
-
-newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
-  = NonZeroMagnitude (VectorCurve2d coordinateSystem)
-
-deriving instance Show (NonZeroMagnitude (space @ units))
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 unsafeMagnitude curve =

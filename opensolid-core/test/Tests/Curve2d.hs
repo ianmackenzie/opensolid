@@ -283,9 +283,6 @@ degenerateEndPointTangentDerivative =
             |> List.map (- endTangentDerivative)
             |> List.map Vector2d.magnitude
     Test.expect (List.isDescending differences)
-      |> Test.output "curve" curve
-      |> Test.output "tangentDirection" tangentDirection
-      |> Test.output "tangentDerivative" tangentDerivative
       |> Test.output "differences" differences
       |> Test.output "endTangentDerivative" endTangentDerivative
 

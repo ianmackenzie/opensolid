@@ -63,7 +63,6 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
@@ -79,7 +78,6 @@ import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
 import OpenSolid.VectorCurve3d.Zeros qualified as Zeros
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
-import Prelude qualified
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
   VectorCurve3d ::
@@ -94,10 +92,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Vector3d coordinateSystem)
     (Range Unitless)
     (VectorBounds3d coordinateSystem)
-
--- TODO remove
-instance Show (VectorCurve3d (space @ units)) where
-  show _ = Text.unpack "VectorCurve3d"
 
 instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
 

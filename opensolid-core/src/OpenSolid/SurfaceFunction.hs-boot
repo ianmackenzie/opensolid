@@ -21,8 +21,6 @@ data SurfaceFunction units
 
 type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Range units)
 
-instance Show (SurfaceFunction units)
-
 instance Negation (SurfaceFunction units)
 
 instance

@@ -29,7 +29,6 @@ import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
-import OpenSolid.Text qualified as Text
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
@@ -38,7 +37,6 @@ import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import Prelude qualified
 
 data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
   VectorSurfaceFunction2d ::
@@ -53,9 +51,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Vector2d coordinateSystem)
     UvBounds
     (VectorBounds2d coordinateSystem)
-
-instance Show (VectorSurfaceFunction2d (space @ units)) where
-  show _ = Text.unpack "VectorSurfaceFunction2d"
 
 instance
   HasUnits

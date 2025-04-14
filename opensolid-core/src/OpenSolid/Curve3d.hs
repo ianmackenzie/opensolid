@@ -61,13 +61,11 @@ import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
-import OpenSolid.Text qualified as Text
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
-import Prelude qualified
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
   Curve3d ::
@@ -82,9 +80,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Point3d coordinateSystem)
     (Range Unitless)
     (Bounds3d coordinateSystem)
-
-instance Show (Curve3d (space @ units)) where
-  show _ = Text.unpack "Curve3d"
 
 instance HasUnits (Curve3d (space @ units)) units (Curve3d (space @ Unitless))
 

@@ -141,7 +141,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
-import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -160,7 +159,6 @@ import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
-import Prelude qualified
 
 -- | A parametric curve in 2D space.
 data Curve2d (coordinateSystem :: CoordinateSystem) where
@@ -177,9 +175,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Point2d coordinateSystem)
     (Range Unitless)
     (Bounds2d coordinateSystem)
-
-instance Show (Curve2d (space @ units)) where
-  show _ = Text.unpack "Curve2d"
 
 instance FFI (Curve2d (space @ Meters)) where
   representation = FFI.classRepresentation "Curve2d"
@@ -1143,8 +1138,6 @@ data PiecewiseTree (coordinateSystem :: CoordinateSystem) where
     Qty units ->
     PiecewiseTree (space @ units)
 
-deriving instance Show (PiecewiseTree (space @ units))
-
 piecewiseValue :: PiecewiseTree (space @ units) -> Qty units -> Point2d (space @ units)
 piecewiseValue tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree
@@ -1191,8 +1184,6 @@ data PiecewiseDerivativeTree (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units) ->
     Qty units ->
     PiecewiseDerivativeTree (space @ units)
-
-deriving instance Show (PiecewiseDerivativeTree (space @ units))
 
 piecewiseTreeDerivative ::
   PiecewiseTree (space @ units) ->

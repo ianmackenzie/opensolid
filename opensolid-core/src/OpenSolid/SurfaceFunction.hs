@@ -64,7 +64,6 @@ import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
 import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvDirection, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
-import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units
@@ -77,7 +76,6 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
-import Prelude qualified
 
 data SurfaceFunction units where
   SurfaceFunction ::
@@ -87,9 +85,6 @@ data SurfaceFunction units where
     SurfaceFunction units
 
 type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Range units)
-
-instance Show (SurfaceFunction units) where
-  show _ = Text.unpack "SurfaceFunction"
 
 instance HasUnits (SurfaceFunction units) units (SurfaceFunction Unitless)
 

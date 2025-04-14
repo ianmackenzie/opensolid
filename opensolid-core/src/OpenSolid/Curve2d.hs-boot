@@ -44,8 +44,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Range Unitless)
     (Bounds2d coordinateSystem)
 
-instance Show (Curve2d (space @ units))
-
 data HasDegeneracy = HasDegeneracy
 
 instance

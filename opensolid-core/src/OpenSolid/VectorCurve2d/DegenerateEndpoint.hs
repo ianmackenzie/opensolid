@@ -25,7 +25,6 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data DegenerateEndpoint space
   = DegenerateEndpoint Float Float (VectorCurve2d (space @ Unitless))
-  deriving (Show)
 
 at :: Tolerance units => Float -> VectorCurve2d (space @ units) -> DegenerateEndpoint space
 at t0 secondDerivative = do

@@ -14,15 +14,10 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
-import OpenSolid.Text qualified as Text
-import Prelude qualified
 
 data ImplicitCurveBounds
   = Node ImplicitCurveBounds Float ImplicitCurveBounds
   | Leaf (Range Unitless)
-
-instance Show ImplicitCurveBounds where
-  show _ = Text.unpack "ImplicitCurveBounds"
 
 build :: NonEmpty (Range Unitless, Range Unitless) -> ImplicitCurveBounds
 build boxes = do

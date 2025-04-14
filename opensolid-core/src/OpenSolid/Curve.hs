@@ -59,7 +59,6 @@ import OpenSolid.Range qualified as Range
 import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
-import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Units qualified as Units
@@ -69,7 +68,6 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
-import Prelude qualified
 
 data Curve units where
   Curve ::
@@ -79,9 +77,6 @@ data Curve units where
     Curve units
 
 type Compiled units = CompiledFunction Float (Qty units) (Range Unitless) (Range units)
-
-instance Show (Curve units) where
-  show _ = Text.unpack "Curve"
 
 instance FFI (Curve Unitless) where
   representation = FFI.classRepresentation "Curve"

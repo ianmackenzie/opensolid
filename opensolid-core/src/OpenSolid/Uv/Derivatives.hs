@@ -8,14 +8,9 @@ where
 
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.Text qualified as Text
-import Prelude qualified
 
 data Derivatives a
   = Derivatives a ~(Derivatives a) ~(Derivatives a)
-
-instance Show (Derivatives a) where
-  show _ = Text.unpack "<Derivatives>"
 
 instance Composition (Derivatives a) SurfaceParameter (Derivatives a) where
   (Derivatives _ du _) >> U = du
