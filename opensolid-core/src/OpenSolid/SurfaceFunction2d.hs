@@ -3,6 +3,7 @@ module OpenSolid.SurfaceFunction2d
   , Compiled
   , Interface (..)
   , new
+  , compiled
   , constant
   , uv
   , xy
