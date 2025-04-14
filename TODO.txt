@@ -1,5 +1,10 @@
 Do a pass through curve and surface function types to ensure derivatives are lazy
 
+Cleanups:
+- Remove :.:, :>>:?
+- Remove Arithmetic.Sum etc.?
+- Remove :+:, :-: (entire SymbolicOperators module)
+
 Add 'components'/'coordinates' functions to curve and surface function types
 -> especially useful for constructing derivatives of function compositions
 
@@ -64,8 +69,6 @@ Review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to 
 
 Try removing 'unitless ~ Unitless' constraints everywhere
 -> maybe also 'uvPoint ~ UvPoint', 'uvSpace ~ UvSpace', 'uvCoordinates ~ UvCoordinates'
-
-Remove SymbolicOperators module once everything is switched to directly constructing curves/functions
 
 Try defining API in terms of generic units and then *separately* a list of supported units?
 -> C API could then just work on Float values
