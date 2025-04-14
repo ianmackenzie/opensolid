@@ -2,7 +2,6 @@ module OpenSolid.VectorCurve3d
   ( VectorCurve3d
   , Compiled
   , new
-  , parametric
   , planar
   , compiled
   , startValue
@@ -53,7 +52,6 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
 import OpenSolid.Error qualified as Error
-import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
@@ -459,11 +457,6 @@ zero = constant Vector3d.zero
 
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 constant value = new (CompiledFunction.constant value) zero
-
--- TODO remove
-parametric :: Expression Float (Vector3d (space @ units)) -> VectorCurve3d (space @ units)
-parametric expression =
-  new (CompiledFunction.concrete expression) (parametric (Expression.curveDerivative expression))
 
 planar :: PlanarBasis3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
 planar basis vectorCurve2d = do
