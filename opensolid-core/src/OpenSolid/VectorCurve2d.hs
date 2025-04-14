@@ -454,22 +454,10 @@ instance
     (VectorCurve2d (space @ units))
     (VectorSurfaceFunction2d (space @ units))
   where
-  curve . function = VectorSurfaceFunction2d.new (curve :.: function)
-
-instance
-  unitless ~ Unitless =>
-  VectorSurfaceFunction2d.Interface
-    (VectorCurve2d (space @ units) :.: SurfaceFunction unitless)
-    (space @ units)
-  where
-  evaluateImpl (curve :.: function) uvPoint =
-    evaluate curve (SurfaceFunction.evaluate function uvPoint)
-
-  evaluateBoundsImpl (curve :.: function) uvBounds =
-    evaluateBounds curve (SurfaceFunction.evaluateBounds function uvBounds)
-
-  derivativeImpl parameter (curve :.: function) =
-    (derivative curve . function) * SurfaceFunction.derivative parameter function
+  curve . function =
+    VectorSurfaceFunction2d.new
+      (compiled curve . SurfaceFunction.compiled function)
+      (\p -> (derivative curve . function) * SurfaceFunction.derivative p function)
 
 transformBy ::
   Transform2d tag (space @ translationUnits) ->

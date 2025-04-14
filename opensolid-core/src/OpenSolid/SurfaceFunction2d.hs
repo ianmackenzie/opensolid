@@ -108,7 +108,6 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction2d (space1 @ units1))
   where
-  Parametric lhs + VectorSurfaceFunction2d.Parametric rhs = Parametric (lhs + rhs)
   lhs + rhs = Addition lhs rhs
 
 instance
@@ -131,7 +130,6 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction2d (space1 @ units1))
   where
-  Parametric lhs - VectorSurfaceFunction2d.Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Subtraction lhs rhs
 
 instance
@@ -146,28 +144,16 @@ instance
   f - v = f - VectorSurfaceFunction2d.constant v
 
 instance
-  VectorSurfaceFunction2d.Interface
-    (SurfaceFunction2d (space @ units) :-: SurfaceFunction2d (space @ units))
-    (space @ units)
-  where
-  evaluateImpl (f1 :-: f2) uvPoint =
-    evaluate f1 uvPoint - evaluate f2 uvPoint
-
-  evaluateBoundsImpl (f1 :-: f2) uvBounds =
-    evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
-
-  derivativeImpl parameter (f1 :-: f2) =
-    derivative parameter f1 - derivative parameter f2
-
-instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (SurfaceFunction2d (space1 @ units1))
     (SurfaceFunction2d (space2 @ units2))
     (VectorSurfaceFunction2d (space1 @ units1))
   where
-  Parametric lhs - Parametric rhs = VectorSurfaceFunction2d.Parametric (lhs - rhs)
-  lhs - rhs = VectorSurfaceFunction2d.new (lhs :-: rhs)
+  lhs - rhs =
+    VectorSurfaceFunction2d.new
+      (compiled lhs - compiled rhs)
+      (\p -> derivative p lhs - derivative p rhs)
 
 compiled :: SurfaceFunction2d (space @ units) -> Compiled (space @ units)
 compiled (Parametric expression) = CompiledFunction.concrete expression
@@ -224,7 +210,7 @@ derivative parameter function = case function of
   SurfaceFunction2d f -> derivativeImpl parameter f
   Coerce f -> Units.coerce (derivative parameter f)
   Parametric expression ->
-    VectorSurfaceFunction2d.Parametric (Expression.surfaceDerivative parameter expression)
+    VectorSurfaceFunction2d.parametric (Expression.surfaceDerivative parameter expression)
   XY x y ->
     VectorSurfaceFunction2d.xy
       (SurfaceFunction.derivative parameter x)

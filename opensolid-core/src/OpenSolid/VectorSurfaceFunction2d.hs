@@ -1,9 +1,10 @@
 module OpenSolid.VectorSurfaceFunction2d
-  ( VectorSurfaceFunction2d (Parametric)
-  , Interface (..)
+  ( VectorSurfaceFunction2d
   , Compiled
   , compiled
   , new
+  , recursive
+  , parametric
   , zero
   , constant
   , xy
@@ -30,66 +31,22 @@ import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.Text qualified as Text
 import OpenSolid.Transform2d (Transform2d)
-import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-
-class
-  Show function =>
-  Interface function (coordinateSystem :: CoordinateSystem)
-    | function -> coordinateSystem
-  where
-  evaluateImpl :: function -> UvPoint -> Vector2d coordinateSystem
-  evaluateBoundsImpl :: function -> UvBounds -> VectorBounds2d coordinateSystem
-  derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction2d coordinateSystem
+import Prelude qualified
 
 data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
   VectorSurfaceFunction2d ::
-    Interface function (space @ units) =>
-    function ->
-    VectorSurfaceFunction2d (space @ units)
-  Coerce ::
-    VectorSurfaceFunction2d (space @ units1) ->
-    VectorSurfaceFunction2d (space @ units2)
-  Parametric ::
-    Expression UvPoint (Vector2d (space @ units)) ->
-    VectorSurfaceFunction2d (space @ units)
-  XY ::
-    SurfaceFunction units ->
-    SurfaceFunction units ->
-    VectorSurfaceFunction2d (space @ units)
-  Negated ::
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units)
-  Sum ::
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units)
-  Difference ::
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units)
-  Product1d2d' ::
-    SurfaceFunction units1 ->
-    VectorSurfaceFunction2d (space @ units2) ->
-    VectorSurfaceFunction2d (space @ (units1 :*: units2))
-  Product2d1d' ::
-    VectorSurfaceFunction2d (space @ units1) ->
-    SurfaceFunction units2 ->
-    VectorSurfaceFunction2d (space @ (units1 :*: units2))
-  Quotient' ::
-    VectorSurfaceFunction2d (space @ units1) ->
-    SurfaceFunction units2 ->
-    VectorSurfaceFunction2d (space @ (units1 :/: units2))
-  Transformed ::
-    Transform2d.Affine (space @ Unitless) ->
-    VectorSurfaceFunction2d (space @ units) ->
+    Compiled (space @ units) ->
+    ~(VectorSurfaceFunction2d (space @ units)) ->
+    ~(VectorSurfaceFunction2d (space @ units)) ->
     VectorSurfaceFunction2d (space @ units)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
@@ -99,7 +56,8 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     UvBounds
     (VectorBounds2d coordinateSystem)
 
-deriving instance Show (VectorSurfaceFunction2d (space @ units))
+instance Show (VectorSurfaceFunction2d (space @ units)) where
+  show _ = Text.unpack "VectorSurfaceFunction2d"
 
 instance
   HasUnits
@@ -113,21 +71,11 @@ instance
     (VectorSurfaceFunction2d (space1 @ unitsA))
     (VectorSurfaceFunction2d (space2 @ unitsB))
   where
-  coerce function = case function of
-    Parametric expression -> Parametric (Units.coerce expression)
-    Coerce f -> Coerce f
-    _ -> Coerce function
+  coerce (VectorSurfaceFunction2d c du dv) =
+    VectorSurfaceFunction2d (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
 instance Negation (VectorSurfaceFunction2d (space @ units)) where
-  negate function = case function of
-    Coerce f -> Coerce -f
-    Parametric expression -> Parametric -expression
-    XY x y -> XY -x -y
-    Negated f -> f
-    Difference f1 f2 -> Difference f2 f1
-    Product1d2d' f1 f2 -> Product1d2d' -f1 f2
-    Product2d1d' f1 f2 -> Product2d1d' f1 -f2
-    _ -> Negated function
+  negate function = new (negate (compiled function)) (\p -> negate (derivative p function))
 
 instance
   Multiplication
@@ -154,10 +102,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (VectorSurfaceFunction2d (space1 @ units1))
   where
-  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
-  lhs + Negated rhs = lhs - rhs
-  Negated lhs + rhs = rhs - lhs
-  lhs + rhs = Sum lhs rhs
+  lhs + rhs = new (compiled lhs + compiled rhs) (\p -> derivative p lhs + derivative p rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -184,9 +129,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (VectorSurfaceFunction2d (space1 @ units1))
   where
-  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
-  lhs - Negated rhs = lhs + rhs
-  lhs - rhs = Difference lhs rhs
+  lhs - rhs = new (compiled lhs - compiled rhs) (\p -> derivative p lhs - derivative p rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -221,7 +164,10 @@ instance
     (VectorSurfaceFunction2d (space @ units2))
     (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
   where
-  lhs .*. rhs = Product1d2d' lhs rhs
+  lhs .*. rhs =
+    new
+      (SurfaceFunction.compiled lhs .*. compiled rhs)
+      (\p -> SurfaceFunction.derivative p lhs .*. rhs + lhs .*. derivative p rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -255,7 +201,10 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
   where
-  lhs .*. rhs = Product2d1d' lhs rhs
+  lhs .*. rhs =
+    new
+      (compiled lhs .*. SurfaceFunction.compiled rhs)
+      (\p -> derivative p lhs .*. rhs + lhs .*. SurfaceFunction.derivative p rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -289,7 +238,10 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ (units1 :/: units2)))
   where
-  lhs ./. rhs = Quotient' lhs rhs
+  lhs ./. rhs =
+    recursive
+      (compiled lhs ./. SurfaceFunction.compiled rhs)
+      (\self p -> derivative p lhs ./. rhs - self * (SurfaceFunction.derivative p rhs / rhs))
 
 instance
   (space1 ~ space2, Units.Quotient units1 units2 units3) =>
@@ -473,109 +425,83 @@ instance
       (compiled function . Curve2d.compiled curve)
       ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
 
+{-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction2d (space @ units) -> Compiled (space @ units)
-compiled function = case function of
-  Parametric expression -> CompiledFunction.concrete expression
-  _ -> CompiledFunction.abstract (evaluate function) (evaluateBounds function)
+compiled (VectorSurfaceFunction2d c _ _) = c
 
-new :: Interface function (space @ units) => function -> VectorSurfaceFunction2d (space @ units)
-new = VectorSurfaceFunction2d
+new ::
+  Compiled (space @ units) ->
+  (SurfaceParameter -> VectorSurfaceFunction2d (space @ units)) ->
+  VectorSurfaceFunction2d (space @ units)
+new c derivativeFunction = do
+  let du = derivativeFunction U
+  let dv = derivativeFunction V
+  let dv' = VectorSurfaceFunction2d (compiled dv) (derivative V du) (derivative V dv)
+  VectorSurfaceFunction2d c du dv'
+
+recursive ::
+  Compiled (space @ units) ->
+  (VectorSurfaceFunction2d (space @ units) -> SurfaceParameter -> VectorSurfaceFunction2d (space @ units)) ->
+  VectorSurfaceFunction2d (space @ units)
+recursive givenCompiled derivativeFunction =
+  let self = new givenCompiled (derivativeFunction self) in self
+
+parametric ::
+  Expression UvPoint (Vector2d (space @ units)) ->
+  VectorSurfaceFunction2d (space @ units)
+parametric expression =
+  new
+    (CompiledFunction.concrete expression)
+    (\p -> parametric (Expression.surfaceDerivative p expression))
 
 zero :: VectorSurfaceFunction2d (space @ units)
 zero = constant Vector2d.zero
 
 constant :: Vector2d (space @ units) -> VectorSurfaceFunction2d (space @ units)
-constant = Parametric . Expression.constant
+constant value = new (CompiledFunction.constant value) (always zero)
 
 xy ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   VectorSurfaceFunction2d (space @ units)
-xy x y = XY x y
+xy x y =
+  new
+    & CompiledFunction.map2
+      Expression.xy
+      Vector2d
+      VectorBounds2d
+      (SurfaceFunction.compiled x)
+      (SurfaceFunction.compiled y)
+    & \p -> xy (SurfaceFunction.derivative p x) (SurfaceFunction.derivative p y)
 
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units)
-transformBy transform function = do
-  let t = Units.erase (Transform2d.toAffine transform)
-  case function of
-    Coerce f -> Coerce (transformBy transform f)
-    Parametric expression -> Parametric (Expression.VectorSurface2d.transformBy t expression)
-    Negated arg -> negate (transformBy transform arg)
-    Sum lhs rhs -> transformBy transform lhs + transformBy transform rhs
-    Difference lhs rhs -> transformBy transform lhs - transformBy transform rhs
-    Product1d2d' f1 f2 -> Product1d2d' f1 (transformBy transform f2)
-    Product2d1d' f1 f2 -> Product2d1d' (transformBy transform f1) f2
-    Quotient' f1 f2 -> Quotient' (transformBy transform f1) f2
-    Transformed existing c -> Transformed (existing >> t) c
-    _ -> Transformed t function
+transformBy transform function =
+  new
+    & CompiledFunction.map
+      (Expression.VectorSurface2d.transformBy transform)
+      (Vector2d.transformBy transform)
+      (VectorBounds2d.transformBy transform)
+      (compiled function)
+    & \p -> transformBy transform (derivative p function)
 
 evaluate :: VectorSurfaceFunction2d (space @ units) -> UvPoint -> Vector2d (space @ units)
-evaluate function uvPoint = case function of
-  VectorSurfaceFunction2d f -> evaluateImpl f uvPoint
-  Coerce f -> Units.coerce (evaluate f uvPoint)
-  Parametric expression -> Expression.evaluate expression uvPoint
-  XY x y ->
-    Vector2d.xy
-      (SurfaceFunction.evaluate x uvPoint)
-      (SurfaceFunction.evaluate y uvPoint)
-  Negated f -> negate (evaluate f uvPoint)
-  Sum f1 f2 -> evaluate f1 uvPoint + evaluate f2 uvPoint
-  Difference f1 f2 -> evaluate f1 uvPoint - evaluate f2 uvPoint
-  Product1d2d' f1 f2 -> SurfaceFunction.evaluate f1 uvPoint .*. evaluate f2 uvPoint
-  Product2d1d' f1 f2 -> evaluate f1 uvPoint .*. SurfaceFunction.evaluate f2 uvPoint
-  Quotient' f1 f2 -> evaluate f1 uvPoint ./. SurfaceFunction.evaluate f2 uvPoint
-  Transformed transform f -> Vector2d.transformBy transform (evaluate f uvPoint)
+evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint
 
 evaluateBounds ::
   VectorSurfaceFunction2d (space @ units) ->
   UvBounds ->
   VectorBounds2d (space @ units)
-evaluateBounds function uvBounds = case function of
-  VectorSurfaceFunction2d f -> evaluateBoundsImpl f uvBounds
-  Coerce f -> Units.coerce (evaluateBounds f uvBounds)
-  Parametric expression -> Expression.evaluateBounds expression uvBounds
-  XY x y ->
-    VectorBounds2d
-      (SurfaceFunction.evaluateBounds x uvBounds)
-      (SurfaceFunction.evaluateBounds y uvBounds)
-  Negated f -> negate (evaluateBounds f uvBounds)
-  Sum f1 f2 -> evaluateBounds f1 uvBounds + evaluateBounds f2 uvBounds
-  Difference f1 f2 -> evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
-  Product1d2d' f1 f2 -> SurfaceFunction.evaluateBounds f1 uvBounds .*. evaluateBounds f2 uvBounds
-  Product2d1d' f1 f2 -> evaluateBounds f1 uvBounds .*. SurfaceFunction.evaluateBounds f2 uvBounds
-  Quotient' f1 f2 -> evaluateBounds f1 uvBounds ./. SurfaceFunction.evaluateBounds f2 uvBounds
-  Transformed transform f -> VectorBounds2d.transformBy transform (evaluateBounds f uvBounds)
+evaluateBounds function uvBounds = CompiledFunction.evaluateBounds (compiled function) uvBounds
 
 derivative ::
   SurfaceParameter ->
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units)
-derivative varyingParameter function = case function of
-  VectorSurfaceFunction2d f -> derivativeImpl varyingParameter f
-  Coerce f -> Coerce (derivative varyingParameter f)
-  Parametric expression -> Parametric (Expression.surfaceDerivative varyingParameter expression)
-  XY x y ->
-    XY
-      (SurfaceFunction.derivative varyingParameter x)
-      (SurfaceFunction.derivative varyingParameter y)
-  Negated f -> -(derivative varyingParameter f)
-  Sum f1 f2 -> derivative varyingParameter f1 + derivative varyingParameter f2
-  Difference f1 f2 -> derivative varyingParameter f1 - derivative varyingParameter f2
-  Product1d2d' f1 f2 ->
-    SurfaceFunction.derivative varyingParameter f1 .*. f2
-      + f1 .*. derivative varyingParameter f2
-  Product2d1d' f1 f2 ->
-    derivative varyingParameter f1 .*. f2
-      + f1 .*. SurfaceFunction.derivative varyingParameter f2
-  Quotient' f1 f2 -> do
-    let numerator =
-          derivative varyingParameter f1 .*. f2
-            - f1 .*. SurfaceFunction.derivative varyingParameter f2
-    let denominator = SurfaceFunction.squared' f2
-    numerator .!/.! denominator
-  Transformed transform f -> transformBy transform (derivative varyingParameter f)
+derivative U (VectorSurfaceFunction2d _ du _) = du
+derivative V (VectorSurfaceFunction2d _ _ dv) = dv
 
 xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
 xComponent function = function `dot` Direction2d.x

@@ -1,73 +1,32 @@
 module OpenSolid.VectorSurfaceFunction2d
-  ( Interface (..)
-  , VectorSurfaceFunction2d (Parametric)
+  ( VectorSurfaceFunction2d
+  , Compiled
   , new
   , constant
+  , compiled
+  , derivative
   )
 where
 
-import OpenSolid.Expression (Expression)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
-import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
-class
-  Show function =>
-  Interface function (coordinateSystem :: CoordinateSystem)
-    | function -> coordinateSystem
-  where
-  evaluateImpl :: function -> UvPoint -> Vector2d coordinateSystem
-  evaluateBoundsImpl :: function -> UvBounds -> VectorBounds2d coordinateSystem
-  derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction2d coordinateSystem
-
 type role VectorSurfaceFunction2d nominal
 
-data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
-  VectorSurfaceFunction2d ::
-    Interface function (space @ units) =>
-    function ->
-    VectorSurfaceFunction2d (space @ units)
-  Coerce ::
-    VectorSurfaceFunction2d (space @ units1) ->
-    VectorSurfaceFunction2d (space @ units2)
-  Parametric ::
-    Expression UvPoint (Vector2d (space @ units)) ->
-    VectorSurfaceFunction2d (space @ units)
-  XY ::
-    SurfaceFunction units ->
-    SurfaceFunction units ->
-    VectorSurfaceFunction2d (space @ units)
-  Negated ::
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units)
-  Sum ::
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units)
-  Difference ::
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units)
-  Product1d2d' ::
-    SurfaceFunction units1 ->
-    VectorSurfaceFunction2d (space @ units2) ->
-    VectorSurfaceFunction2d (space @ (units1 :*: units2))
-  Product2d1d' ::
-    VectorSurfaceFunction2d (space @ units1) ->
-    SurfaceFunction units2 ->
-    VectorSurfaceFunction2d (space @ (units1 :*: units2))
-  Quotient' ::
-    VectorSurfaceFunction2d (space @ units1) ->
-    SurfaceFunction units2 ->
-    VectorSurfaceFunction2d (space @ (units1 :/: units2))
-  Transformed ::
-    Transform2d.Affine (space @ Unitless) ->
-    VectorSurfaceFunction2d (space @ units) ->
-    VectorSurfaceFunction2d (space @ units)
+type VectorSurfaceFunction2d :: CoordinateSystem -> Type
+data VectorSurfaceFunction2d coordinateSystem
+
+type Compiled coordinateSystem =
+  CompiledFunction
+    UvPoint
+    (Vector2d coordinateSystem)
+    UvBounds
+    (VectorBounds2d coordinateSystem)
 
 instance
   HasUnits
@@ -105,5 +64,13 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
 
-new :: Interface function (space @ units) => function -> VectorSurfaceFunction2d (space @ units)
+new ::
+  Compiled (space @ units) ->
+  (SurfaceParameter -> VectorSurfaceFunction2d (space @ units)) ->
+  VectorSurfaceFunction2d (space @ units)
+compiled :: VectorSurfaceFunction2d (space @ units) -> Compiled (space @ units)
+derivative ::
+  SurfaceParameter ->
+  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d (space @ units)
 constant :: Vector2d (space @ units) -> VectorSurfaceFunction2d (space @ units)
