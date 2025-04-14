@@ -25,8 +25,6 @@ module OpenSolid.Expression
   , quadraticSpline
   , cubicSpline
   , bezierCurve
-  , CurveDerivative (curveDerivative)
-  , SurfaceDerivative (surfaceDerivative)
   , Evaluation (evaluate, evaluateBounds)
   )
 where
@@ -50,7 +48,7 @@ import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
-import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
@@ -69,15 +67,12 @@ data Expression input output where
     { c1x :: Scalar Float
     , c1v :: ~Curve1dValueFunction
     , c1b :: ~Curve1dBoundsFunction
-    , c1d :: ~(Expression Float (Qty units))
     } ->
     Expression Float (Qty units)
   Surface1d ::
     { s1x :: Scalar UvPoint
     , s1v :: ~Surface1dValueFunction
     , s1b :: ~Surface1dBoundsFunction
-    , s1du :: ~(Expression UvPoint (Qty units))
-    , s1dv :: ~(Expression UvPoint (Qty units))
     } ->
     Expression UvPoint (Qty units)
   Curve2d ::
@@ -85,7 +80,6 @@ data Expression input output where
     , c2y :: Scalar Float
     , c2v :: ~Curve2dValueFunction
     , c2b :: ~Curve2dBoundsFunction
-    , c2d :: ~(Expression Float (Vector2d (space @ units)))
     } ->
     Expression Float (Point2d (space @ units))
   Surface2d ::
@@ -93,8 +87,6 @@ data Expression input output where
     , s2y :: Scalar UvPoint
     , s2v :: ~Surface2dValueFunction
     , s2b :: ~Surface2dBoundsFunction
-    , s2du :: ~(Expression UvPoint (Vector2d (space @ units)))
-    , s2dv :: ~(Expression UvPoint (Vector2d (space @ units)))
     } ->
     Expression UvPoint (Point2d (space @ units))
   VectorCurve2d ::
@@ -102,7 +94,6 @@ data Expression input output where
     , vc2y :: Scalar Float
     , vc2v :: ~Curve2dValueFunction
     , vc2b :: ~Curve2dBoundsFunction
-    , vc2d :: ~(Expression Float (Vector2d (space @ units)))
     } ->
     Expression Float (Vector2d (space @ units))
   VectorSurface2d ::
@@ -110,8 +101,6 @@ data Expression input output where
     , vs2y :: Scalar UvPoint
     , vs2v :: ~Surface2dValueFunction
     , vs2b :: ~Surface2dBoundsFunction
-    , vs2du :: ~(Expression UvPoint (Vector2d (space @ units)))
-    , vs2dv :: ~(Expression UvPoint (Vector2d (space @ units)))
     } ->
     Expression UvPoint (Vector2d (space @ units))
   Curve3d ::
@@ -120,7 +109,6 @@ data Expression input output where
     , c3z :: Scalar Float
     , c3v :: ~Curve3dValueFunction
     , c3b :: ~Curve3dBoundsFunction
-    , c3d :: ~(Expression Float (Vector3d (space @ units)))
     } ->
     Expression Float (Point3d (space @ units))
   Surface3d ::
@@ -129,8 +117,6 @@ data Expression input output where
     , s3z :: Scalar UvPoint
     , s3v :: ~Surface3dValueFunction
     , s3b :: ~Surface3dBoundsFunction
-    , s3du :: ~(Expression UvPoint (Vector3d (space @ units)))
-    , s3dv :: ~(Expression UvPoint (Vector3d (space @ units)))
     } ->
     Expression UvPoint (Point3d (space @ units))
   VectorCurve3d ::
@@ -139,7 +125,6 @@ data Expression input output where
     , vc3z :: Scalar Float
     , vc3v :: ~Curve3dValueFunction
     , vc3b :: ~Curve3dBoundsFunction
-    , vc3d :: ~(Expression Float (Vector3d (space @ units)))
     } ->
     Expression Float (Vector3d (space @ units))
   VectorSurface3d ::
@@ -148,8 +133,6 @@ data Expression input output where
     , vs3z :: Scalar UvPoint
     , vs3v :: ~Surface3dValueFunction
     , vs3b :: ~Surface3dBoundsFunction
-    , vs3du :: ~(Expression UvPoint (Vector3d (space @ units)))
-    , vs3dv :: ~(Expression UvPoint (Vector3d (space @ units)))
     } ->
     Expression UvPoint (Vector3d (space @ units))
 
@@ -173,32 +156,15 @@ curve1d expression = do
           let fv = curve1d_value_function (opensolid_curve1d_value_function px)
           let fb = curve1d_bounds_function (opensolid_curve1d_bounds_function px)
           (fv, fb)
-  Curve1d{c1x = expression, c1v, c1b, c1d = curve1d (Scalar.curveDerivative expression)}
+  Curve1d{c1x = expression, c1v, c1b}
 
 surface1d :: Scalar UvPoint -> Expression UvPoint (Qty units)
 surface1d expression = do
   let px = Scalar.ptr expression
-  let du = surface1d (Scalar.surfaceDerivative SurfaceParameter.U expression)
-  let dv = surface1dv (Scalar.surfaceDerivative SurfaceParameter.V expression) du
   Surface1d
     { s1x = expression
     , s1v = surface1d_value_function (opensolid_surface1d_value_function px)
     , s1b = surface1d_bounds_function (opensolid_surface1d_bounds_function px)
-    , s1du = du
-    , s1dv = dv
-    }
-
-surface1dv :: Scalar UvPoint -> Expression UvPoint (Qty units) -> Expression UvPoint (Qty units)
-surface1dv expression sibling = do
-  let px = Scalar.ptr expression
-  let du = s1dv sibling
-  let dv = surface1dv (Scalar.surfaceDerivative SurfaceParameter.V expression) du
-  Surface1d
-    { s1x = expression
-    , s1v = surface1d_value_function (opensolid_surface1d_value_function px)
-    , s1b = surface1d_bounds_function (opensolid_surface1d_bounds_function px)
-    , s1du = du
-    , s1dv = dv
     }
 
 curve2d :: Scalar Float -> Scalar Float -> Expression Float (Point2d (space @ units))
@@ -210,7 +176,6 @@ curve2d x y = do
     , c2y = y
     , c2v = curve2d_value_function (opensolid_curve2d_value_function px py)
     , c2b = curve2d_bounds_function (opensolid_curve2d_bounds_function px py)
-    , c2d = vectorCurve2d (Scalar.curveDerivative x) (Scalar.curveDerivative y)
     }
 
 surface2d ::
@@ -220,19 +185,11 @@ surface2d ::
 surface2d x y = do
   let px = Scalar.ptr x
   let py = Scalar.ptr y
-  let xu = Scalar.surfaceDerivative SurfaceParameter.U x
-  let yu = Scalar.surfaceDerivative SurfaceParameter.U y
-  let xv = Scalar.surfaceDerivative SurfaceParameter.V x
-  let yv = Scalar.surfaceDerivative SurfaceParameter.V y
-  let du = vectorSurface2d xu yu
-  let dv = vectorSurface2dv xv yv du
   Surface2d
     { s2x = x
     , s2y = y
     , s2v = surface2d_value_function (opensolid_surface2d_value_function px py)
     , s2b = surface2d_bounds_function (opensolid_surface2d_bounds_function px py)
-    , s2du = du
-    , s2dv = dv
     }
 
 vectorCurve2d :: Scalar Float -> Scalar Float -> Expression Float (Vector2d (space @ units))
@@ -244,7 +201,6 @@ vectorCurve2d x y = do
     , vc2y = y
     , vc2v = curve2d_value_function (opensolid_curve2d_value_function px py)
     , vc2b = curve2d_bounds_function (opensolid_curve2d_bounds_function px py)
-    , vc2d = vectorCurve2d (Scalar.curveDerivative x) (Scalar.curveDerivative y)
     }
 
 vectorSurface2d ::
@@ -254,40 +210,11 @@ vectorSurface2d ::
 vectorSurface2d x y = do
   let px = Scalar.ptr x
   let py = Scalar.ptr y
-  let xu = Scalar.surfaceDerivative SurfaceParameter.U x
-  let yu = Scalar.surfaceDerivative SurfaceParameter.U y
-  let xv = Scalar.surfaceDerivative SurfaceParameter.V x
-  let yv = Scalar.surfaceDerivative SurfaceParameter.V y
-  let du = vectorSurface2d xu yu
-  let dv = vectorSurface2dv xv yv du
   VectorSurface2d
     { vs2x = x
     , vs2y = y
     , vs2v = surface2d_value_function (opensolid_surface2d_value_function px py)
     , vs2b = surface2d_bounds_function (opensolid_surface2d_bounds_function px py)
-    , vs2du = du
-    , vs2dv = dv
-    }
-
-vectorSurface2dv ::
-  Scalar UvPoint ->
-  Scalar UvPoint ->
-  Expression UvPoint (Vector2d (space @ units)) ->
-  Expression UvPoint (Vector2d (space @ units))
-vectorSurface2dv x y sibling = do
-  let px = Scalar.ptr x
-  let py = Scalar.ptr y
-  let du = vs2dv sibling
-  let xv = Scalar.surfaceDerivative SurfaceParameter.V x
-  let yv = Scalar.surfaceDerivative SurfaceParameter.V y
-  let dv = vectorSurface2dv xv yv du
-  VectorSurface2d
-    { vs2x = x
-    , vs2y = y
-    , vs2v = surface2d_value_function (opensolid_surface2d_value_function px py)
-    , vs2b = surface2d_bounds_function (opensolid_surface2d_bounds_function px py)
-    , vs2du = du
-    , vs2dv = dv
     }
 
 curve3d ::
@@ -305,11 +232,6 @@ curve3d x y z = do
     , c3z = z
     , c3v = curve3d_value_function (opensolid_curve3d_value_function px py pz)
     , c3b = curve3d_bounds_function (opensolid_curve3d_bounds_function px py pz)
-    , c3d =
-        vectorCurve3d
-          (Scalar.curveDerivative x)
-          (Scalar.curveDerivative y)
-          (Scalar.curveDerivative z)
     }
 
 surface3d ::
@@ -321,25 +243,12 @@ surface3d x y z = do
   let px = Scalar.ptr x
   let py = Scalar.ptr y
   let pz = Scalar.ptr z
-  let du =
-        vectorSurface3d
-          (Scalar.surfaceDerivative SurfaceParameter.U x)
-          (Scalar.surfaceDerivative SurfaceParameter.U y)
-          (Scalar.surfaceDerivative SurfaceParameter.U z)
-  let dv =
-        vectorSurface3dv
-          (Scalar.surfaceDerivative SurfaceParameter.V x)
-          (Scalar.surfaceDerivative SurfaceParameter.V y)
-          (Scalar.surfaceDerivative SurfaceParameter.V z)
-          du
   Surface3d
     { s3x = x
     , s3y = y
     , s3z = z
     , s3v = surface3d_value_function (opensolid_surface3d_value_function px py pz)
     , s3b = surface3d_bounds_function (opensolid_surface3d_bounds_function px py pz)
-    , s3du = du
-    , s3dv = dv
     }
 
 vectorCurve3d ::
@@ -357,11 +266,6 @@ vectorCurve3d x y z = do
     , vc3z = z
     , vc3v = curve3d_value_function (opensolid_curve3d_value_function px py pz)
     , vc3b = curve3d_bounds_function (opensolid_curve3d_bounds_function px py pz)
-    , vc3d =
-        vectorCurve3d
-          (Scalar.curveDerivative x)
-          (Scalar.curveDerivative y)
-          (Scalar.curveDerivative z)
     }
 
 vectorSurface3d ::
@@ -373,52 +277,12 @@ vectorSurface3d x y z = do
   let px = Scalar.ptr x
   let py = Scalar.ptr y
   let pz = Scalar.ptr z
-  let du =
-        vectorSurface3d
-          (Scalar.surfaceDerivative SurfaceParameter.U x)
-          (Scalar.surfaceDerivative SurfaceParameter.U y)
-          (Scalar.surfaceDerivative SurfaceParameter.U z)
-  let dv =
-        vectorSurface3dv
-          (Scalar.surfaceDerivative SurfaceParameter.V x)
-          (Scalar.surfaceDerivative SurfaceParameter.V y)
-          (Scalar.surfaceDerivative SurfaceParameter.V z)
-          du
   VectorSurface3d
     { vs3x = x
     , vs3y = y
     , vs3z = z
     , vs3v = surface3d_value_function (opensolid_surface3d_value_function px py pz)
     , vs3b = surface3d_bounds_function (opensolid_surface3d_bounds_function px py pz)
-    , vs3du = du
-    , vs3dv = dv
-    }
-
-vectorSurface3dv ::
-  Scalar UvPoint ->
-  Scalar UvPoint ->
-  Scalar UvPoint ->
-  Expression UvPoint (Vector3d (space @ units)) ->
-  Expression UvPoint (Vector3d (space @ units))
-vectorSurface3dv x y z sibling = do
-  let px = Scalar.ptr x
-  let py = Scalar.ptr y
-  let pz = Scalar.ptr z
-  let du = vs3dv sibling
-  let dv =
-        vectorSurface3dv
-          (Scalar.surfaceDerivative SurfaceParameter.V x)
-          (Scalar.surfaceDerivative SurfaceParameter.V y)
-          (Scalar.surfaceDerivative SurfaceParameter.V z)
-          du
-  VectorSurface3d
-    { vs3x = x
-    , vs3y = y
-    , vs3z = z
-    , vs3v = surface3d_value_function (opensolid_surface3d_value_function px py pz)
-    , vs3b = surface3d_bounds_function (opensolid_surface3d_bounds_function px py pz)
-    , vs3du = du
-    , vs3dv = dv
     }
 
 -------------
@@ -461,9 +325,8 @@ instance
     (Expression input1 (Qty units1))
     (Expression input2 (Qty units2))
   where
-  coerce Curve1d{c1x, c1v, c1b, c1d} = Curve1d{c1x, c1v, c1b, c1d = Units.coerce c1d}
-  coerce Surface1d{s1x, s1v, s1b, s1du, s1dv} =
-    Surface1d{s1x, s1v, s1b, s1du = Units.coerce s1du, s1dv = Units.coerce s1dv}
+  coerce Curve1d{c1x, c1v, c1b} = Curve1d{c1x, c1v, c1b}
+  coerce Surface1d{s1x, s1v, s1b} = Surface1d{s1x, s1v, s1b}
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
@@ -471,9 +334,8 @@ instance
     (Expression input1 (Point2d (space @ units1)))
     (Expression input2 (Point2d (space @ units2)))
   where
-  coerce Curve2d{c2x, c2y, c2v, c2b, c2d} = Curve2d{c2x, c2y, c2v, c2b, c2d = Units.coerce c2d}
-  coerce Surface2d{s2x, s2y, s2v, s2b, s2du, s2dv} =
-    Surface2d{s2x, s2y, s2v, s2b, s2du = Units.coerce s2du, s2dv = Units.coerce s2dv}
+  coerce Curve2d{c2x, c2y, c2v, c2b} = Curve2d{c2x, c2y, c2v, c2b}
+  coerce Surface2d{s2x, s2y, s2v, s2b} = Surface2d{s2x, s2y, s2v, s2b}
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
@@ -481,10 +343,8 @@ instance
     (Expression input1 (Vector2d (space @ units1)))
     (Expression input2 (Vector2d (space @ units2)))
   where
-  coerce VectorCurve2d{vc2x, vc2y, vc2v, vc2b, vc2d} =
-    VectorCurve2d{vc2x, vc2y, vc2v, vc2b, vc2d = Units.coerce vc2d}
-  coerce VectorSurface2d{vs2x, vs2y, vs2v, vs2b, vs2du, vs2dv} =
-    VectorSurface2d{vs2x, vs2y, vs2v, vs2b, vs2du = Units.coerce vs2du, vs2dv = Units.coerce vs2dv}
+  coerce VectorCurve2d{vc2x, vc2y, vc2v, vc2b} = VectorCurve2d{vc2x, vc2y, vc2v, vc2b}
+  coerce VectorSurface2d{vs2x, vs2y, vs2v, vs2b} = VectorSurface2d{vs2x, vs2y, vs2v, vs2b}
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
@@ -492,10 +352,8 @@ instance
     (Expression input1 (Point3d (space @ units1)))
     (Expression input2 (Point3d (space @ units2)))
   where
-  coerce Curve3d{c3x, c3y, c3z, c3v, c3b, c3d} =
-    Curve3d{c3x, c3y, c3z, c3v, c3b, c3d = Units.coerce c3d}
-  coerce Surface3d{s3x, s3y, s3z, s3v, s3b, s3du, s3dv} =
-    Surface3d{s3x, s3y, s3z, s3v, s3b, s3du = Units.coerce s3du, s3dv = Units.coerce s3dv}
+  coerce Curve3d{c3x, c3y, c3z, c3v, c3b} = Curve3d{c3x, c3y, c3z, c3v, c3b}
+  coerce Surface3d{s3x, s3y, s3z, s3v, s3b} = Surface3d{s3x, s3y, s3z, s3v, s3b}
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
@@ -503,18 +361,10 @@ instance
     (Expression input1 (Vector3d (space @ units1)))
     (Expression input2 (Vector3d (space @ units2)))
   where
-  coerce VectorCurve3d{vc3x, vc3y, vc3z, vc3v, vc3b, vc3d} =
-    VectorCurve3d{vc3x, vc3y, vc3z, vc3v, vc3b, vc3d = Units.coerce vc3d}
-  coerce VectorSurface3d{vs3x, vs3y, vs3z, vs3v, vs3b, vs3du, vs3dv} =
-    VectorSurface3d
-      { vs3x
-      , vs3y
-      , vs3z
-      , vs3v
-      , vs3b
-      , vs3du = Units.coerce vs3du
-      , vs3dv = Units.coerce vs3dv
-      }
+  coerce VectorCurve3d{vc3x, vc3y, vc3z, vc3v, vc3b} =
+    VectorCurve3d{vc3x, vc3y, vc3z, vc3v, vc3b}
+  coerce VectorSurface3d{vs3x, vs3y, vs3z, vs3v, vs3b} =
+    VectorSurface3d{vs3x, vs3y, vs3z, vs3v, vs3b}
 
 ----------------
 --- NEGATION ---
@@ -1806,91 +1656,6 @@ instance BezierCurve (Vector3d (space @ units)) where
       (Scalar.bezierCurve (NonEmpty.map Vector3d.xComponent controlPoints) Scalar.curveParameter)
       (Scalar.bezierCurve (NonEmpty.map Vector3d.yComponent controlPoints) Scalar.curveParameter)
       (Scalar.bezierCurve (NonEmpty.map Vector3d.zComponent controlPoints) Scalar.curveParameter)
-
------------------------
---- DIFFERENTIATION ---
------------------------
-
-class CurveDerivative expression derivative | expression -> derivative where
-  curveDerivative :: expression -> derivative
-
-class SurfaceDerivative expression derivative | expression -> derivative where
-  surfaceDerivative :: SurfaceParameter -> expression -> derivative
-
-instance
-  CurveDerivative
-    (Expression Float (Qty units))
-    (Expression Float (Qty units))
-  where
-  curveDerivative = c1d
-
-instance
-  SurfaceDerivative
-    (Expression UvPoint (Qty units))
-    (Expression UvPoint (Qty units))
-  where
-  surfaceDerivative SurfaceParameter.U = s1du
-  surfaceDerivative SurfaceParameter.V = s1dv
-
-instance
-  CurveDerivative
-    (Expression Float (Vector2d (space @ units)))
-    (Expression Float (Vector2d (space @ units)))
-  where
-  curveDerivative = vc2d
-
-instance
-  CurveDerivative
-    (Expression Float (Point2d (space @ units)))
-    (Expression Float (Vector2d (space @ units)))
-  where
-  curveDerivative = c2d
-
-instance
-  SurfaceDerivative
-    (Expression UvPoint (Vector2d (space @ units)))
-    (Expression UvPoint (Vector2d (space @ units)))
-  where
-  surfaceDerivative SurfaceParameter.U = vs2du
-  surfaceDerivative SurfaceParameter.V = vs2dv
-
-instance
-  SurfaceDerivative
-    (Expression UvPoint (Point2d (space @ units)))
-    (Expression UvPoint (Vector2d (space @ units)))
-  where
-  surfaceDerivative SurfaceParameter.U = s2du
-  surfaceDerivative SurfaceParameter.V = s2dv
-
-instance
-  CurveDerivative
-    (Expression Float (Vector3d (space @ units)))
-    (Expression Float (Vector3d (space @ units)))
-  where
-  curveDerivative = vc3d
-
-instance
-  CurveDerivative
-    (Expression Float (Point3d (space @ units)))
-    (Expression Float (Vector3d (space @ units)))
-  where
-  curveDerivative = c3d
-
-instance
-  SurfaceDerivative
-    (Expression UvPoint (Vector3d (space @ units)))
-    (Expression UvPoint (Vector3d (space @ units)))
-  where
-  surfaceDerivative SurfaceParameter.U = vs3du
-  surfaceDerivative SurfaceParameter.V = vs3dv
-
-instance
-  SurfaceDerivative
-    (Expression UvPoint (Point3d (space @ units)))
-    (Expression UvPoint (Vector3d (space @ units)))
-  where
-  surfaceDerivative SurfaceParameter.U = s3du
-  surfaceDerivative SurfaceParameter.V = s3dv
 
 -----------------
 --- COMPILING ---

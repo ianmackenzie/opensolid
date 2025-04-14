@@ -13,8 +13,6 @@ module OpenSolid.Expression.Scalar
   , quarticSpline
   , quinticSpline
   , bezierCurve
-  , curveDerivative
-  , surfaceDerivative
   , Ptr
   , ptr
   )
@@ -100,9 +98,6 @@ instance
 
 zero :: Scalar input
 zero = constant 0.0
-
-one :: Scalar input
-one = constant 1.0
 
 constant :: Qty units -> Scalar input
 constant value = Constant (Units.coerce value)
@@ -279,96 +274,6 @@ bezierCurve controlPoints param = case controlPoints of
   NonEmpty.Five p1 p2 p3 p4 p5 -> quarticSpline p1 p2 p3 p4 p5 param
   NonEmpty.Six p1 p2 p3 p4 p5 p6 -> quinticSpline p1 p2 p3 p4 p5 p6 param
   NonEmpty.SevenOrMore -> BezierCurve (NonEmpty.map Units.coerce controlPoints) param
-
-curveDerivative :: Scalar Float -> Scalar Float
-curveDerivative expression = case expression of
-  Constant _ -> zero
-  CurveParameter -> one
-  Negated arg -> negate (curveDerivative arg)
-  Sum lhs rhs -> curveDerivative lhs + curveDerivative rhs
-  Difference lhs rhs -> curveDerivative lhs - curveDerivative rhs
-  Squared arg -> 2.0 * arg * curveDerivative arg
-  Product lhs rhs -> curveDerivative lhs * rhs + lhs * curveDerivative rhs
-  Quotient lhs rhs -> (curveDerivative lhs * rhs - lhs * curveDerivative rhs) / squared rhs
-  Sqrt arg -> curveDerivative arg / (2.0 * expression)
-  Sin arg -> cos arg * curveDerivative arg
-  Cos arg -> sin arg * negate (curveDerivative arg)
-  QuadraticSpline p1 p2 p3 param -> do
-    let d1 = 2.0 * (p2 - p1)
-    let d2 = 2.0 * (p3 - p2)
-    line d1 d2 param * curveDerivative param
-  CubicSpline p1 p2 p3 p4 param -> do
-    let d1 = 3.0 * (p2 - p1)
-    let d2 = 3.0 * (p3 - p2)
-    let d3 = 3.0 * (p4 - p3)
-    quadraticSpline d1 d2 d3 param * curveDerivative param
-  QuarticSpline p1 p2 p3 p4 p5 param -> do
-    let d1 = 4.0 * (p2 - p1)
-    let d2 = 4.0 * (p3 - p2)
-    let d3 = 4.0 * (p4 - p3)
-    let d4 = 4.0 * (p5 - p4)
-    cubicSpline d1 d2 d3 d4 param * curveDerivative param
-  QuinticSpline p1 p2 p3 p4 p5 p6 param -> do
-    let d1 = 5.0 * (p2 - p1)
-    let d2 = 5.0 * (p3 - p2)
-    let d3 = 5.0 * (p4 - p3)
-    let d4 = 5.0 * (p5 - p4)
-    let d5 = 5.0 * (p6 - p5)
-    quarticSpline d1 d2 d3 d4 d5 param * curveDerivative param
-  BezierCurve controlPoints param -> do
-    let scale = Float.int (NonEmpty.length controlPoints - 1)
-    let scaledDifference p1 p2 = scale * (p2 - p1)
-    let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
-    case scaledDifferences of
-      [] -> zero
-      NonEmpty derivativeControlPoints ->
-        bezierCurve derivativeControlPoints param * curveDerivative param
-
-surfaceDerivative :: SurfaceParameter -> Scalar UvPoint -> Scalar UvPoint
-surfaceDerivative varyingParameter expression = case expression of
-  Constant _ -> zero
-  SurfaceParameter parameter -> if parameter == varyingParameter then one else zero
-  Negated arg -> negate (surfaceDerivative varyingParameter arg)
-  Sum lhs rhs -> surfaceDerivative varyingParameter lhs + surfaceDerivative varyingParameter rhs
-  Difference lhs rhs -> surfaceDerivative varyingParameter lhs - surfaceDerivative varyingParameter rhs
-  Squared arg -> 2.0 * arg * surfaceDerivative varyingParameter arg
-  Product lhs rhs -> surfaceDerivative varyingParameter lhs * rhs + lhs * surfaceDerivative varyingParameter rhs
-  Quotient lhs rhs ->
-    (surfaceDerivative varyingParameter lhs * rhs - lhs * surfaceDerivative varyingParameter rhs)
-      / squared rhs
-  Sqrt arg -> surfaceDerivative varyingParameter arg / (2.0 * expression)
-  Sin arg -> cos arg * surfaceDerivative varyingParameter arg
-  Cos arg -> sin arg * negate (surfaceDerivative varyingParameter arg)
-  QuadraticSpline p1 p2 p3 param -> do
-    let d1 = 2.0 * (p2 - p1)
-    let d2 = 2.0 * (p3 - p2)
-    line d1 d2 param * surfaceDerivative varyingParameter param
-  CubicSpline p1 p2 p3 p4 param -> do
-    let d1 = 3.0 * (p2 - p1)
-    let d2 = 3.0 * (p3 - p2)
-    let d3 = 3.0 * (p4 - p3)
-    quadraticSpline d1 d2 d3 param * surfaceDerivative varyingParameter param
-  QuarticSpline p1 p2 p3 p4 p5 param -> do
-    let d1 = 4.0 * (p2 - p1)
-    let d2 = 4.0 * (p3 - p2)
-    let d3 = 4.0 * (p4 - p3)
-    let d4 = 4.0 * (p5 - p4)
-    cubicSpline d1 d2 d3 d4 param * surfaceDerivative varyingParameter param
-  QuinticSpline p1 p2 p3 p4 p5 p6 param -> do
-    let d1 = 5.0 * (p2 - p1)
-    let d2 = 5.0 * (p3 - p2)
-    let d3 = 5.0 * (p4 - p3)
-    let d4 = 5.0 * (p5 - p4)
-    let d5 = 5.0 * (p6 - p5)
-    quarticSpline d1 d2 d3 d4 d5 param * surfaceDerivative varyingParameter param
-  BezierCurve controlPoints param -> do
-    let scale = Float.int (NonEmpty.length controlPoints - 1)
-    let scaledDifference p1 p2 = scale * (p2 - p1)
-    let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
-    case scaledDifferences of
-      [] -> zero
-      NonEmpty derivativeControlPoints ->
-        bezierCurve derivativeControlPoints param * surfaceDerivative varyingParameter param
 
 data RustExpression
 
