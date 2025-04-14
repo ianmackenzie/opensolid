@@ -441,7 +441,10 @@ new c derivativeFunction = do
 
 recursive ::
   Compiled (space @ units) ->
-  (VectorSurfaceFunction2d (space @ units) -> SurfaceParameter -> VectorSurfaceFunction2d (space @ units)) ->
+  ( VectorSurfaceFunction2d (space @ units) ->
+    SurfaceParameter ->
+    VectorSurfaceFunction2d (space @ units)
+  ) ->
   VectorSurfaceFunction2d (space @ units)
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
