@@ -186,8 +186,6 @@ xy ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   SurfaceFunction2d (space @ units)
-xy (SurfaceFunction.Parametric x) (SurfaceFunction.Parametric y) =
-  Parametric (Expression.xy x y)
 xy x y = XY x y
 
 evaluate :: SurfaceFunction2d (space @ units) -> UvPoint -> Point2d (space @ units)

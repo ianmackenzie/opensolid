@@ -220,11 +220,6 @@ xyz ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   SurfaceFunction3d (space @ units)
-xyz
-  (SurfaceFunction.Parametric x)
-  (SurfaceFunction.Parametric y)
-  (SurfaceFunction.Parametric z) =
-    Parametric (Expression.xyz x y z)
 xyz x y z = XYZ x y z
 
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)

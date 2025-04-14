@@ -254,7 +254,6 @@ instance
     (VectorSurfaceFunction3d (space @ units2))
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  SurfaceFunction.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product1d3d' lhs rhs
 
 instance
@@ -283,7 +282,6 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  Parametric lhs .*. SurfaceFunction.Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product3d1d' lhs rhs
 
 instance
@@ -312,7 +310,6 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ (units1 :/: units2)))
   where
-  Parametric lhs ./. SurfaceFunction.Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
@@ -384,21 +381,6 @@ instance
   where
   v `cross'` f = constant v `cross'` f
 
-data DotProduct' space units1 units2
-  = DotProduct' (VectorSurfaceFunction3d (space @ units1)) (VectorSurfaceFunction3d (space @ units2))
-
-deriving instance Show (DotProduct' space units1 units2)
-
-instance SurfaceFunction.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
-  evaluateImpl (DotProduct' f1 f2) tValue =
-    evaluate f1 tValue `dot'` evaluate f2 tValue
-
-  evaluateBoundsImpl (DotProduct' f1 f2) tRange =
-    evaluateBounds f1 tRange `dot'` evaluateBounds f2 tRange
-
-  derivativeImpl parameter (DotProduct' f1 f2) =
-    derivative parameter f1 `dot'` f2 + f1 `dot'` derivative parameter f2
-
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
   DotMultiplication
@@ -415,8 +397,10 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  Parametric lhs `dot'` Parametric rhs = SurfaceFunction.Parametric (lhs `dot'` rhs)
-  lhs `dot'` rhs = SurfaceFunction.new (DotProduct' lhs rhs)
+  lhs `dot'` rhs =
+    SurfaceFunction.new
+      (compiled lhs `dot'` compiled rhs)
+      (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>

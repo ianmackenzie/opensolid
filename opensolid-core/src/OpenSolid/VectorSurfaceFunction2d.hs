@@ -221,7 +221,6 @@ instance
     (VectorSurfaceFunction2d (space @ units2))
     (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
   where
-  SurfaceFunction.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product1d2d' lhs rhs
 
 instance
@@ -256,7 +255,6 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
   where
-  Parametric lhs .*. SurfaceFunction.Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product2d1d' lhs rhs
 
 instance
@@ -291,7 +289,6 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ (units1 :/: units2)))
   where
-  Parametric lhs ./. SurfaceFunction.Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
@@ -311,23 +308,6 @@ instance
   where
   function ./. value = function ./. SurfaceFunction.constant value
 
-data CrossProduct' space units1 units2
-  = CrossProduct'
-      (VectorSurfaceFunction2d (space @ units1))
-      (VectorSurfaceFunction2d (space @ units2))
-
-deriving instance Show (CrossProduct' space units1 units2)
-
-instance SurfaceFunction.Interface (CrossProduct' space units1 units2) (units1 :*: units2) where
-  evaluateImpl (CrossProduct' f1 f2) tValue =
-    evaluate f1 tValue `cross'` evaluate f2 tValue
-
-  evaluateBoundsImpl (CrossProduct' f1 f2) tRange =
-    evaluateBounds f1 tRange `cross'` evaluateBounds f2 tRange
-
-  derivativeImpl parameter (CrossProduct' f1 f2) =
-    derivative parameter f1 `cross'` f2 + f1 `cross'` derivative parameter f2
-
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
@@ -344,8 +324,10 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  Parametric lhs `cross'` Parametric rhs = SurfaceFunction.Parametric (lhs `cross'` rhs)
-  lhs `cross'` rhs = SurfaceFunction.new (CrossProduct' lhs rhs)
+  lhs `cross'` rhs =
+    SurfaceFunction.new
+      (compiled lhs `cross'` compiled rhs)
+      (\p -> derivative p lhs `cross'` rhs + lhs `cross'` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -401,23 +383,6 @@ instance
   where
   lhs `cross` rhs = Vector2d.unit lhs `cross` rhs
 
-data DotProduct' space units1 units2
-  = DotProduct'
-      (VectorSurfaceFunction2d (space @ units1))
-      (VectorSurfaceFunction2d (space @ units2))
-
-deriving instance Show (DotProduct' space units1 units2)
-
-instance SurfaceFunction.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
-  evaluateImpl (DotProduct' f1 f2) tValue =
-    evaluate f1 tValue `dot'` evaluate f2 tValue
-
-  evaluateBoundsImpl (DotProduct' f1 f2) tRange =
-    evaluateBounds f1 tRange `dot'` evaluateBounds f2 tRange
-
-  derivativeImpl parameter (DotProduct' f1 f2) =
-    derivative parameter f1 `dot'` f2 + f1 `dot'` derivative parameter f2
-
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
@@ -434,8 +399,10 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  Parametric lhs `dot'` Parametric rhs = SurfaceFunction.Parametric (lhs `dot'` rhs)
-  lhs `dot'` rhs = SurfaceFunction.new (DotProduct' lhs rhs)
+  lhs `dot'` rhs =
+    SurfaceFunction.new
+      (compiled lhs `dot'` compiled rhs)
+      (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -524,8 +491,6 @@ xy ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   VectorSurfaceFunction2d (space @ units)
-xy (SurfaceFunction.Parametric x) (SurfaceFunction.Parametric y) =
-  Parametric (Expression.xy x y)
 xy x y = XY x y
 
 transformBy ::
