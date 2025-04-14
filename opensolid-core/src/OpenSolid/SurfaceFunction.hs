@@ -131,7 +131,7 @@ instance
   value ^ function = function ^ value
 
 instance Negation (SurfaceFunction units) where
-  negate surface = new (negate (compiled surface)) (\p -> negate (derivative p surface))
+  negate function = new (negate (compiled function)) (\p -> negate (derivative p function))
 
 instance Multiplication Sign (SurfaceFunction units) (SurfaceFunction units) where
   Positive * function = function
