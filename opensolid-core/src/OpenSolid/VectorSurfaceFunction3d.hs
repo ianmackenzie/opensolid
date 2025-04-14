@@ -4,7 +4,6 @@ module OpenSolid.VectorSurfaceFunction3d
   , compiled
   , new
   , recursive
-  , parametric
   , zero
   , constant
   , xyz
@@ -23,7 +22,6 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
 import OpenSolid.Point3d (Point3d)
@@ -436,14 +434,6 @@ recursive ::
   VectorSurfaceFunction3d (space @ units)
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
-
-parametric ::
-  Expression UvPoint (Vector3d (space @ units)) ->
-  VectorSurfaceFunction3d (space @ units)
-parametric expression =
-  new
-    (CompiledFunction.concrete expression)
-    (\p -> parametric (Expression.surfaceDerivative p expression))
 
 zero :: VectorSurfaceFunction3d (space @ units)
 zero = constant Vector3d.zero
