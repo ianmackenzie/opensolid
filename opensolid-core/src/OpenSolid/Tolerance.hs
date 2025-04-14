@@ -20,7 +20,7 @@ import OpenSolid.Float (fromRational)
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import OpenSolid.Qty (Qty)
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.SymbolicOperators
+import OpenSolid.Units ((:*:))
 import OpenSolid.Units qualified as Units
 
 type Tolerance units = ?tolerance :: Qty units

@@ -48,7 +48,7 @@ import OpenSolid.Random.Internal qualified as Random
 import {-# SOURCE #-} OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.Range qualified as Range
 import OpenSolid.Sign (Sign (Negative, Positive))
-import OpenSolid.SymbolicOperators
+import OpenSolid.Units ((:*:), (:/:))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
 import Prelude qualified

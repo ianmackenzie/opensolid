@@ -33,8 +33,7 @@ import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float)
 import {-# SOURCE #-} OpenSolid.Qty (Qty (Qty))
 import {-# SOURCE #-} OpenSolid.Sign (Sign (Negative, Positive))
-import OpenSolid.SymbolicOperators
-import OpenSolid.Units (HasUnits, Unitless)
+import OpenSolid.Units (HasUnits, Unitless, (:*:), (:/:))
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 

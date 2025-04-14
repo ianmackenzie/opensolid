@@ -9,7 +9,6 @@ module OpenSolid.Prelude
   , module OpenSolid.Qty
   , module OpenSolid.Result
   , module OpenSolid.Sign
-  , module OpenSolid.SymbolicOperators
   , module OpenSolid.Tolerance
   , module OpenSolid.Units
   )
@@ -25,6 +24,5 @@ import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import OpenSolid.Qty (Qty)
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Sign (Sign (Negative, Positive))
-import OpenSolid.SymbolicOperators
 import OpenSolid.Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
-import OpenSolid.Units (HasUnits, Unitless)
+import OpenSolid.Units (HasUnits, Unitless, (:*:), (:/:))
