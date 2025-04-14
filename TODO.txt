@@ -1,3 +1,5 @@
+Do a pass through curve and surface function types to ensure derivatives are lazy
+
 Add Coercible constraint to CompiledFunction to enforce zero-overhead coercion?
 -> similarly, enforce zero-overhead coercion of Expression type?
 
