@@ -10,7 +10,6 @@ module OpenSolid.VectorCurve2d
   , derivative
   , zero
   , constant
-  , parametric
   , xy
   , line
   , arc
@@ -58,7 +57,6 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Error qualified as Error
-import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.FFI (FFI)
@@ -496,11 +494,6 @@ zero = constant Vector2d.zero
 -- | Create a curve with a constant value.
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 constant value = new (CompiledFunction.constant value) zero
-
--- TODO remove
-parametric :: Expression Float (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
-parametric expression =
-  new (CompiledFunction.concrete expression) (parametric (Expression.curveDerivative expression))
 
 -- | Create a curve from its X and Y component curves.
 xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
