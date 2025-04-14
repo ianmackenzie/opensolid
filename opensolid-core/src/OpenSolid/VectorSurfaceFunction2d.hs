@@ -4,7 +4,6 @@ module OpenSolid.VectorSurfaceFunction2d
   , compiled
   , new
   , recursive
-  , parametric
   , zero
   , constant
   , xy
@@ -24,7 +23,6 @@ import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
 import OpenSolid.Prelude
@@ -448,14 +446,6 @@ recursive ::
   VectorSurfaceFunction2d (space @ units)
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
-
-parametric ::
-  Expression UvPoint (Vector2d (space @ units)) ->
-  VectorSurfaceFunction2d (space @ units)
-parametric expression =
-  new
-    (CompiledFunction.concrete expression)
-    (\p -> parametric (Expression.surfaceDerivative p expression))
 
 zero :: VectorSurfaceFunction2d (space @ units)
 zero = constant Vector2d.zero
