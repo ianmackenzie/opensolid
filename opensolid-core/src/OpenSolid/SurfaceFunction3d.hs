@@ -113,7 +113,6 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
   where
-  Parametric lhs + VectorSurfaceFunction3d.Parametric rhs = Parametric (lhs + rhs)
   lhs + rhs = Sum lhs rhs
 
 instance
@@ -132,7 +131,6 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
   where
-  Parametric lhs - VectorSurfaceFunction3d.Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Difference lhs rhs
 
 instance
@@ -151,22 +149,10 @@ instance
     (SurfaceFunction3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  Parametric expression1 - Parametric expression2 = VectorSurfaceFunction3d.Parametric (expression1 - expression2)
-  f1 - f2 = VectorSurfaceFunction3d.new (f1 :-: f2)
-
-instance
-  VectorSurfaceFunction3d.Interface
-    (SurfaceFunction3d (space @ units) :-: SurfaceFunction3d (space @ units))
-    (space @ units)
-  where
-  evaluateImpl (f1 :-: f2) uvPoint =
-    evaluate f1 uvPoint - evaluate f2 uvPoint
-
-  evaluateBoundsImpl (f1 :-: f2) uvBounds =
-    evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
-
-  derivativeImpl parameter (f1 :-: f2) =
-    derivative parameter f1 - derivative parameter f2
+  f1 - f2 =
+    VectorSurfaceFunction3d.new
+      (compiled f1 - compiled f2)
+      (\p -> derivative p f1 - derivative p f2)
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -262,7 +248,7 @@ derivative parameter function = case function of
   SurfaceFunction3d f -> derivativeImpl parameter f
   Coerce f -> Units.coerce (derivative parameter f)
   Parametric expression ->
-    VectorSurfaceFunction3d.Parametric (Expression.surfaceDerivative parameter expression)
+    VectorSurfaceFunction3d.parametric (Expression.surfaceDerivative parameter expression)
   XYZ x y z ->
     VectorSurfaceFunction3d.xyz
       (SurfaceFunction.derivative parameter x)

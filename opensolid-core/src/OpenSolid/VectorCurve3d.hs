@@ -425,25 +425,10 @@ instance
     (VectorCurve3d (space @ units))
     (VectorSurfaceFunction3d (space @ units))
   where
-  curve . function = VectorSurfaceFunction3d.new (curve :.: function)
-
-instance
-  unitless ~ Unitless =>
-  VectorSurfaceFunction3d.Interface
-    (VectorCurve3d (space @ units) :.: SurfaceFunction unitless)
-    (space @ units)
-  where
-  evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
-    evaluate curveFunction $
-      SurfaceFunction.evaluate surfaceFunction uvPoint
-
-  evaluateBoundsImpl (curveFunction :.: surfaceFunction) uvBounds =
-    evaluateBounds curveFunction $
-      SurfaceFunction.evaluateBounds surfaceFunction uvBounds
-
-  derivativeImpl parameter (curveFunction :.: surfaceFunction) =
-    (derivative curveFunction . surfaceFunction)
-      * SurfaceFunction.derivative parameter surfaceFunction
+  curve . function =
+    VectorSurfaceFunction3d.new
+      (compiled curve . SurfaceFunction.compiled function)
+      (\p -> derivative curve . function * SurfaceFunction.derivative p function)
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

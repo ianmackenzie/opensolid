@@ -1,9 +1,10 @@
 module OpenSolid.VectorSurfaceFunction3d
-  ( VectorSurfaceFunction3d (Parametric)
+  ( VectorSurfaceFunction3d
   , Compiled
-  , Interface (..)
   , compiled
   , new
+  , recursive
+  , parametric
   , zero
   , constant
   , xyz
@@ -34,84 +35,32 @@ import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.Text qualified as Text
 import OpenSolid.Transform3d (Transform3d)
-import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-
-class
-  Show function =>
-  Interface function (coordinateSystem :: CoordinateSystem)
-    | function -> coordinateSystem
-  where
-  evaluateImpl :: function -> UvPoint -> Vector3d coordinateSystem
-  evaluateBoundsImpl :: function -> UvBounds -> VectorBounds3d coordinateSystem
-  derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction3d coordinateSystem
+import Prelude qualified
 
 data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
   VectorSurfaceFunction3d ::
-    Interface function (space @ units) =>
-    function ->
-    VectorSurfaceFunction3d (space @ units)
-  Coerce ::
-    VectorSurfaceFunction3d (space @ units1) ->
-    VectorSurfaceFunction3d (space @ units2)
-  Parametric ::
-    Expression UvPoint (Vector3d (space @ units)) ->
-    VectorSurfaceFunction3d (space @ units)
-  XYZ ::
-    SurfaceFunction units ->
-    SurfaceFunction units ->
-    SurfaceFunction units ->
-    VectorSurfaceFunction3d (space @ units)
-  Negated ::
-    VectorSurfaceFunction3d (space @ units) ->
-    VectorSurfaceFunction3d (space @ units)
-  Sum ::
-    VectorSurfaceFunction3d (space @ units) ->
-    VectorSurfaceFunction3d (space @ units) ->
-    VectorSurfaceFunction3d (space @ units)
-  Difference ::
-    VectorSurfaceFunction3d (space @ units) ->
-    VectorSurfaceFunction3d (space @ units) ->
-    VectorSurfaceFunction3d (space @ units)
-  Product1d3d' ::
-    SurfaceFunction units1 ->
-    VectorSurfaceFunction3d (space @ units2) ->
-    VectorSurfaceFunction3d (space @ (units1 :*: units2))
-  Product3d1d' ::
-    VectorSurfaceFunction3d (space @ units1) ->
-    SurfaceFunction units2 ->
-    VectorSurfaceFunction3d (space @ (units1 :*: units2))
-  Quotient' ::
-    VectorSurfaceFunction3d (space @ units1) ->
-    SurfaceFunction units2 ->
-    VectorSurfaceFunction3d (space @ (units1 :/: units2))
-  CrossProduct' ::
-    VectorSurfaceFunction3d (space @ units1) ->
-    VectorSurfaceFunction3d (space @ units2) ->
-    VectorSurfaceFunction3d (space @ (units1 :*: units2))
-  PlaceIn ::
-    Basis3d global (Defines local) ->
-    VectorSurfaceFunction3d (local @ units) ->
-    VectorSurfaceFunction3d (global @ units)
-  Transformed ::
-    Transform3d tag (space @ translationUnits) ->
-    VectorSurfaceFunction3d (space @ units) ->
+    Compiled (space @ units) ->
+    ~(VectorSurfaceFunction3d (space @ units)) ->
+    ~(VectorSurfaceFunction3d (space @ units)) ->
     VectorSurfaceFunction3d (space @ units)
 
-type Compiled coordinateSystem =
+type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     UvPoint
     (Vector3d coordinateSystem)
     UvBounds
     (VectorBounds3d coordinateSystem)
 
-deriving instance Show (VectorSurfaceFunction3d (space @ units))
+instance Show (VectorSurfaceFunction3d (space @ units)) where
+  show _ = Text.unpack "VectorSurfaceFunction3d"
 
 instance
   HasUnits
@@ -125,21 +74,11 @@ instance
     (VectorSurfaceFunction3d (space1 @ unitsA))
     (VectorSurfaceFunction3d (space2 @ unitsB))
   where
-  coerce function = case function of
-    Parametric expression -> Parametric (Units.coerce expression)
-    Coerce f -> Coerce f
-    _ -> Coerce function
+  coerce (VectorSurfaceFunction3d c du dv) =
+    VectorSurfaceFunction3d (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
 instance Negation (VectorSurfaceFunction3d (space @ units)) where
-  negate function = case function of
-    Coerce f -> Coerce -f
-    Parametric expression -> Parametric -expression
-    XYZ x y z -> XYZ -x -y -z
-    Negated f -> f
-    Difference f1 f2 -> Difference f2 f1
-    Product1d3d' f1 f2 -> Product1d3d' -f1 f2
-    Product3d1d' f1 f2 -> Product3d1d' f1 -f2
-    _ -> Negated function
+  negate function = new (negate (compiled function)) (\p -> negate (derivative p function))
 
 instance
   Multiplication
@@ -168,10 +107,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units_))
     (VectorSurfaceFunction3d (space @ units))
   where
-  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
-  lhs + Negated rhs = lhs - rhs
-  Negated lhs + rhs = rhs - lhs
-  lhs + rhs = Sum lhs rhs
+  lhs + rhs = new (compiled lhs + compiled rhs) (\p -> derivative p lhs + derivative p rhs)
 
 instance
   ( space ~ space_
@@ -204,9 +140,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units_))
     (VectorSurfaceFunction3d (space @ units))
   where
-  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
-  lhs - Negated rhs = lhs + rhs
-  lhs - rhs = Difference lhs rhs
+  lhs - rhs = new (compiled lhs - compiled rhs) (\p -> derivative p lhs - derivative p rhs)
 
 instance
   ( space ~ space_
@@ -254,7 +188,10 @@ instance
     (VectorSurfaceFunction3d (space @ units2))
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  lhs .*. rhs = Product1d3d' lhs rhs
+  lhs .*. rhs =
+    new
+      (SurfaceFunction.compiled lhs .*. compiled rhs)
+      (\p -> SurfaceFunction.derivative p lhs .*. rhs + lhs .*. derivative p rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -282,7 +219,10 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  lhs .*. rhs = Product3d1d' lhs rhs
+  lhs .*. rhs =
+    new
+      (compiled lhs .*. SurfaceFunction.compiled rhs)
+      (\p -> derivative p lhs .*. rhs + lhs .*. SurfaceFunction.derivative p rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -310,7 +250,10 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ (units1 :/: units2)))
   where
-  lhs ./. rhs = Quotient' lhs rhs
+  lhs ./. rhs =
+    recursive
+      (compiled lhs ./. SurfaceFunction.compiled rhs)
+      (\self p -> derivative p lhs ./. rhs - self * (SurfaceFunction.derivative p rhs / rhs))
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -342,8 +285,10 @@ instance
     (VectorSurfaceFunction3d (space_ @ units2))
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  Parametric lhs `cross'` Parametric rhs = Parametric (lhs `cross'` rhs)
-  lhs `cross'` rhs = CrossProduct' lhs rhs
+  lhs `cross'` rhs =
+    new
+      (compiled lhs `cross'` compiled rhs)
+      (\p -> derivative p lhs `cross'` rhs + lhs `cross'` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -457,119 +402,103 @@ instance
     (VectorSurfaceFunction3d (space @ units))
     (VectorSurfaceFunction3d (space @ units))
   where
-  Parametric outer . SurfaceFunction2d.Parametric inner = Parametric (outer . inner)
-  outer . inner = new (outer :.: inner)
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Interface
-    (VectorSurfaceFunction3d (space @ units) :.: SurfaceFunction2d uvCoordinates)
-    (space @ units)
-  where
-  evaluateImpl (outer :.: inner) uvValue =
-    evaluate outer (SurfaceFunction2d.evaluate inner uvValue)
-
-  evaluateBoundsImpl (outer :.: inner) uvBounds =
-    evaluateBounds outer (SurfaceFunction2d.evaluateBounds inner uvBounds)
-
-  derivativeImpl varyingParameter (outer :.: inner) = do
+  outer . inner = do
     let duOuter = derivative U outer . inner
     let dvOuter = derivative V outer . inner
-    let dInner = SurfaceFunction2d.derivative varyingParameter inner
-    duOuter * VectorSurfaceFunction2d.xComponent dInner + dvOuter * VectorSurfaceFunction2d.yComponent dInner
+    new
+      & compiled outer . SurfaceFunction2d.compiled inner
+      & \p -> do
+        let dInner = SurfaceFunction2d.derivative p inner
+        let dU = VectorSurfaceFunction2d.xComponent dInner
+        let dV = VectorSurfaceFunction2d.yComponent dInner
+        duOuter * dU + dvOuter * dV
 
+{-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction3d (space @ units) -> Compiled (space @ units)
-compiled (Parametric expression) = CompiledFunction.concrete expression
-compiled function = CompiledFunction.abstract (evaluate function) (evaluateBounds function)
+compiled (VectorSurfaceFunction3d c _ _) = c
 
-new :: Interface function (space @ units) => function -> VectorSurfaceFunction3d (space @ units)
-new = VectorSurfaceFunction3d
+new ::
+  Compiled (space @ units) ->
+  (SurfaceParameter -> VectorSurfaceFunction3d (space @ units)) ->
+  VectorSurfaceFunction3d (space @ units)
+new c derivativeFunction = do
+  let du = derivativeFunction U
+  let dv = derivativeFunction V
+  let dv' = VectorSurfaceFunction3d (compiled dv) (derivative V du) (derivative V dv)
+  VectorSurfaceFunction3d c du dv'
+
+recursive ::
+  Compiled (space @ units) ->
+  ( VectorSurfaceFunction3d (space @ units) ->
+    SurfaceParameter ->
+    VectorSurfaceFunction3d (space @ units)
+  ) ->
+  VectorSurfaceFunction3d (space @ units)
+recursive givenCompiled derivativeFunction =
+  let self = new givenCompiled (derivativeFunction self) in self
+
+parametric ::
+  Expression UvPoint (Vector3d (space @ units)) ->
+  VectorSurfaceFunction3d (space @ units)
+parametric expression =
+  new
+    (CompiledFunction.concrete expression)
+    (\p -> parametric (Expression.surfaceDerivative p expression))
 
 zero :: VectorSurfaceFunction3d (space @ units)
 zero = constant Vector3d.zero
 
 constant :: Vector3d (space @ units) -> VectorSurfaceFunction3d (space @ units)
-constant = Parametric . Expression.constant
+constant value = new (CompiledFunction.constant value) (always zero)
 
 xyz ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   SurfaceFunction units ->
   VectorSurfaceFunction3d (space @ units)
-xyz = XYZ
+xyz x y z =
+  new
+    & CompiledFunction.map3
+      Expression.xyz
+      Vector3d
+      VectorBounds3d
+      (SurfaceFunction.compiled x)
+      (SurfaceFunction.compiled y)
+      (SurfaceFunction.compiled z)
+    & \p ->
+      xyz
+        (SurfaceFunction.derivative p x)
+        (SurfaceFunction.derivative p y)
+        (SurfaceFunction.derivative p z)
 
 evaluate :: VectorSurfaceFunction3d (space @ units) -> UvPoint -> Vector3d (space @ units)
-evaluate function uvPoint = case function of
-  VectorSurfaceFunction3d f -> evaluateImpl f uvPoint
-  Coerce f -> Units.coerce (evaluate f uvPoint)
-  Parametric expression -> Expression.evaluate expression uvPoint
-  XYZ x y z ->
-    Vector3d.xyz
-      (SurfaceFunction.evaluate x uvPoint)
-      (SurfaceFunction.evaluate y uvPoint)
-      (SurfaceFunction.evaluate z uvPoint)
-  Negated f -> negate (evaluate f uvPoint)
-  Sum f1 f2 -> evaluate f1 uvPoint + evaluate f2 uvPoint
-  Difference f1 f2 -> evaluate f1 uvPoint - evaluate f2 uvPoint
-  Product1d3d' f1 f2 -> SurfaceFunction.evaluate f1 uvPoint .*. evaluate f2 uvPoint
-  Product3d1d' f1 f2 -> evaluate f1 uvPoint .*. SurfaceFunction.evaluate f2 uvPoint
-  Quotient' f1 f2 -> evaluate f1 uvPoint ./. SurfaceFunction.evaluate f2 uvPoint
-  CrossProduct' f1 f2 -> evaluate f1 uvPoint `cross'` evaluate f2 uvPoint
-  PlaceIn frame f -> Vector3d.placeIn frame (evaluate f uvPoint)
-  Transformed transform f -> Vector3d.transformBy transform (evaluate f uvPoint)
+evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint
 
-evaluateBounds :: VectorSurfaceFunction3d (space @ units) -> UvBounds -> VectorBounds3d (space @ units)
-evaluateBounds function uvBounds = case function of
-  VectorSurfaceFunction3d f -> evaluateBoundsImpl f uvBounds
-  Coerce f -> Units.coerce (evaluateBounds f uvBounds)
-  Parametric expression -> Expression.evaluateBounds expression uvBounds
-  XYZ x y z ->
-    VectorBounds3d
-      (SurfaceFunction.evaluateBounds x uvBounds)
-      (SurfaceFunction.evaluateBounds y uvBounds)
-      (SurfaceFunction.evaluateBounds z uvBounds)
-  Negated f -> negate (evaluateBounds f uvBounds)
-  Sum f1 f2 -> evaluateBounds f1 uvBounds + evaluateBounds f2 uvBounds
-  Difference f1 f2 -> evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
-  Product1d3d' f1 f2 -> SurfaceFunction.evaluateBounds f1 uvBounds .*. evaluateBounds f2 uvBounds
-  Product3d1d' f1 f2 -> evaluateBounds f1 uvBounds .*. SurfaceFunction.evaluateBounds f2 uvBounds
-  Quotient' f1 f2 -> evaluateBounds f1 uvBounds ./. SurfaceFunction.evaluateBounds f2 uvBounds
-  CrossProduct' f1 f2 -> evaluateBounds f1 uvBounds `cross'` evaluateBounds f2 uvBounds
-  PlaceIn frame f -> VectorBounds3d.placeIn frame (evaluateBounds f uvBounds)
-  Transformed transform f -> VectorBounds3d.transformBy transform (evaluateBounds f uvBounds)
+evaluateBounds ::
+  VectorSurfaceFunction3d (space @ units) ->
+  UvBounds ->
+  VectorBounds3d (space @ units)
+evaluateBounds function uvBounds = CompiledFunction.evaluateBounds (compiled function) uvBounds
 
-derivative :: SurfaceParameter -> VectorSurfaceFunction3d (space @ units) -> VectorSurfaceFunction3d (space @ units)
-derivative parameter function = case function of
-  VectorSurfaceFunction3d f -> derivativeImpl parameter f
-  Coerce f -> Coerce (derivative parameter f)
-  Parametric expression -> Parametric (Expression.surfaceDerivative parameter expression)
-  XYZ x y z ->
-    XYZ
-      (SurfaceFunction.derivative parameter x)
-      (SurfaceFunction.derivative parameter y)
-      (SurfaceFunction.derivative parameter z)
-  Negated f -> -(derivative parameter f)
-  Sum f1 f2 -> derivative parameter f1 + derivative parameter f2
-  Difference f1 f2 -> derivative parameter f1 - derivative parameter f2
-  Product1d3d' f1 f2 ->
-    SurfaceFunction.derivative parameter f1 .*. f2 + f1 .*. derivative parameter f2
-  Product3d1d' f1 f2 ->
-    derivative parameter f1 .*. f2 + f1 .*. SurfaceFunction.derivative parameter f2
-  Quotient' f1 f2 ->
-    (derivative parameter f1 .*. f2 - f1 .*. SurfaceFunction.derivative parameter f2)
-      .!/.! SurfaceFunction.squared' f2
-  CrossProduct' f1 f2 -> derivative parameter f1 `cross'` f2 + f1 `cross'` derivative parameter f2
-  PlaceIn basis f -> placeIn basis (derivative parameter f)
-  Transformed transform f -> transformBy transform (derivative parameter f)
+derivative ::
+  SurfaceParameter ->
+  VectorSurfaceFunction3d (space @ units) ->
+  VectorSurfaceFunction3d (space @ units)
+derivative U (VectorSurfaceFunction3d _ du _) = du
+derivative V (VectorSurfaceFunction3d _ _ dv) = dv
 
 placeIn ::
   Basis3d global (Defines local) ->
   VectorSurfaceFunction3d (local @ units) ->
   VectorSurfaceFunction3d (global @ units)
-placeIn basis f = case f of
-  Parametric expression -> Parametric (Expression.VectorSurface3d.placeIn basis expression)
-  Coerce function -> Coerce (placeIn basis function)
-  function -> PlaceIn basis function
+placeIn basis function =
+  new
+    & CompiledFunction.map
+      (Expression.VectorSurface3d.placeIn basis)
+      (Vector3d.placeIn basis)
+      (VectorBounds3d.placeIn basis)
+      (compiled function)
+    & \p -> placeIn basis (derivative p function)
 
 relativeTo ::
   Basis3d global (Defines local) ->
@@ -581,17 +510,11 @@ transformBy ::
   Transform3d tag (space @ translationUnits) ->
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units)
-transformBy transform function = case function of
-  Coerce f -> Coerce (transformBy transform f)
-  Parametric expression -> Parametric (Expression.VectorSurface3d.transformBy transform expression)
-  Negated f -> Negated (transformBy transform f)
-  Sum f1 f2 -> Sum (transformBy transform f1) (transformBy transform f2)
-  Difference f1 f2 -> Difference (transformBy transform f1) (transformBy transform f2)
-  Product1d3d' f1 f2 -> Product1d3d' f1 (transformBy transform f2)
-  Product3d1d' f1 f2 -> Product3d1d' (transformBy transform f1) f2
-  Quotient' f1 f2 -> Quotient' (transformBy transform f1) f2
-  Transformed existing f -> do
-    let transform1 = Units.erase (Transform3d.toAffine existing)
-    let transform2 = Units.erase (Transform3d.toAffine transform)
-    Transformed (transform1 >> transform2) f
-  _ -> Transformed transform function
+transformBy transform function =
+  new
+    & CompiledFunction.map
+      (Expression.VectorSurface3d.transformBy transform)
+      (Vector3d.transformBy transform)
+      (VectorBounds3d.transformBy transform)
+      (compiled function)
+    & \p -> transformBy transform (derivative p function)
