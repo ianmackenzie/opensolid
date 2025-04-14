@@ -288,22 +288,10 @@ instance
     (Curve2d (space @ units))
     (SurfaceFunction2d (space @ units))
   where
-  curve . function = SurfaceFunction2d.new (curve :.: function)
-
-instance
-  unitless ~ Unitless =>
-  SurfaceFunction2d.Interface
-    (Curve2d (space @ units) :.: SurfaceFunction unitless)
-    (space @ units)
-  where
-  evaluateImpl (curve :.: function) uvPoint =
-    evaluate curve (SurfaceFunction.evaluate function uvPoint)
-
-  evaluateBoundsImpl (curve :.: function) uvBounds =
-    evaluateBounds curve (SurfaceFunction.evaluateBounds function uvBounds)
-
-  derivativeImpl parameter (curve :.: function) =
-    (derivative curve . function) * SurfaceFunction.derivative parameter function
+  curve . function =
+    SurfaceFunction2d.new
+      (compiled curve . SurfaceFunction.compiled function)
+      (\p -> derivative curve . function * SurfaceFunction.derivative p function)
 
 instance
   uvCoordinates ~ UvCoordinates =>

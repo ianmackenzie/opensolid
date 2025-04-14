@@ -170,7 +170,6 @@ instance
     (SurfaceFunction3d (space @ units))
     (SurfaceFunction3d (space @ units))
   where
-  Parametric outer . SurfaceFunction2d.Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
 instance
