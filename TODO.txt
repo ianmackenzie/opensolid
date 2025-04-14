@@ -1,5 +1,8 @@
 Do a pass through curve and surface function types to ensure derivatives are lazy
 
+Add 'components'/'coordinates' functions to curve and surface function types
+-> especially useful for constructing derivatives of function compositions
+
 Add Coercible constraint to CompiledFunction to enforce zero-overhead coercion?
 -> similarly, enforce zero-overhead coercion of Expression type?
 
