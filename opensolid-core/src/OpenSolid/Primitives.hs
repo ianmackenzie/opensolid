@@ -19,6 +19,8 @@ data Vector2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Eq (Vector2d (space @ units))
 
+deriving instance Ord (Vector2d (space @ units))
+
 deriving instance Show (Vector2d (space @ units))
 
 instance FFI (Vector2d (space @ Unitless)) where
@@ -209,7 +211,7 @@ instance
 This is effectively a type-safe unit vector.
 -}
 newtype Direction2d (space :: Type) = Unit2d (Vector2d (space @ Unitless))
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 instance HasUnits (Direction2d space) Unitless (Direction2d space)
 
@@ -847,6 +849,8 @@ data Transform2d tag (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Eq (Transform2d tag (space @ units))
 
+deriving instance Ord (Transform2d tag (space @ units))
+
 deriving instance Show (Transform2d tag (space @ units))
 
 instance HasUnits (Transform2d tag (space @ units)) units (Transform2d tag (space @ Unitless))
@@ -915,6 +919,8 @@ data Vector3d (coordinateSystem :: CoordinateSystem) where
   Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 
 deriving instance Eq (Vector3d (space @ units))
+
+deriving instance Ord (Vector3d (space @ units))
 
 deriving instance Show (Vector3d (space @ units))
 
@@ -1121,7 +1127,7 @@ instance
 This is effectively a type-safe unit vector.
 -}
 newtype Direction3d (space :: Type) = Unit3d (Vector3d (space @ Unitless))
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 {-# COMPLETE Direction3d #-}
 
@@ -1195,6 +1201,8 @@ data PlanarBasis3d space defines where
 
 deriving instance Eq (PlanarBasis3d space defines)
 
+deriving instance Ord (PlanarBasis3d space defines)
+
 deriving instance Show (PlanarBasis3d space defines)
 
 ----- Basis3d -----
@@ -1214,6 +1222,8 @@ data Point3d (coordinateSystem :: CoordinateSystem) where
   Point3d :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 
 deriving instance Eq (Point3d (space @ units))
+
+deriving instance Ord (Point3d (space @ units))
 
 deriving instance Show (Point3d (space @ units))
 
@@ -1790,6 +1800,8 @@ data Plane3d coordinateSystem defines where
 
 deriving instance Eq (Plane3d (space @ units) defines)
 
+deriving instance Ord (Plane3d (space @ units) defines)
+
 deriving instance Show (Plane3d (space @ units) defines)
 
 instance FFI (Plane3d (space @ Meters) defines) where
@@ -1826,6 +1838,8 @@ data Transform3d tag (coordinateSystem :: CoordinateSystem) where
     Transform3d tag (space @ units)
 
 deriving instance Eq (Transform3d tag (space @ units))
+
+deriving instance Ord (Transform3d tag (space @ units))
 
 deriving instance Show (Transform3d tag (space @ units))
 
