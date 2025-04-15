@@ -106,6 +106,44 @@ deriving instance Ord (Variable2d input)
 
 deriving instance Show (Variable2d input)
 
+data Ast3d input where
+  Constant3d :: (Float, Float, Float) -> Ast3d input
+  Variable3d :: Variable3d input -> Ast3d input
+
+deriving instance Eq (Ast3d input)
+
+deriving instance Ord (Ast3d input)
+
+deriving instance Show (Ast3d input)
+
+data Variable3d input where
+  XYZ3d :: Variable1d input -> Variable1d input -> Variable1d input -> Variable3d input
+  XYC3d :: Variable1d input -> Variable1d input -> Float -> Variable3d input
+  XCZ3d :: Variable1d input -> Float -> Variable1d input -> Variable3d input
+  CYZ3d :: Float -> Variable1d input -> Variable1d input -> Variable3d input
+  XCC3d :: Variable1d input -> Float -> Float -> Variable3d input
+  CYC3d :: Float -> Variable1d input -> Float -> Variable3d input
+  CCZ3d :: Float -> Float -> Variable1d input -> Variable3d input
+  Negated3d :: Variable3d input -> Variable3d input
+  Sum3d :: Variable3d input -> Variable3d input -> Variable3d input
+  SumVariableConstant3d :: Variable3d input -> (Float, Float, Float) -> Variable3d input
+  Difference3d :: Variable3d input -> Variable3d input -> Variable3d input
+  DifferenceConstantVariable3d :: (Float, Float, Float) -> Variable3d input -> Variable3d input
+  Product3d :: Variable3d input -> Variable1d input -> Variable3d input
+  ProductVariableConstant3d :: Variable3d input -> Float -> Variable3d input
+  ProductConstantVariable3d :: (Float, Float, Float) -> Variable1d input -> Variable3d input
+  Quotient3d :: Variable3d input -> Variable1d input -> Variable3d input
+  QuotientConstantVariable3d :: (Float, Float, Float) -> Variable1d input -> Variable3d input
+  Cross3d :: Variable3d input -> Variable3d input -> Variable3d input
+  CrossVariableConstant3d :: Variable3d input -> (Float, Float, Float) -> Variable3d input
+  BezierCurve3d :: NonEmpty (Float, Float, Float) -> Variable1d input -> Variable3d input
+
+deriving instance Eq (Variable3d input)
+
+deriving instance Ord (Variable3d input)
+
+deriving instance Show (Variable3d input)
+
 instance Composition (Ast1d input) (Ast1d Float) (Ast1d input) where
   Constant1d outer . _ = Constant1d outer
   Variable1d outer . Variable1d inner = Variable1d (outer . inner)
@@ -156,6 +194,33 @@ instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) wh
   Quotient2d lhs rhs . input = Quotient2d (lhs . input) (rhs . input)
   QuotientConstantVariable2d lhs rhs . input = QuotientConstantVariable2d lhs (rhs . input)
   BezierCurve2d controlPoints param . input = BezierCurve2d controlPoints (param . input)
+
+instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
+  Constant3d outer . _ = Constant3d outer
+  Variable3d outer . Variable1d inner = Variable3d (outer . inner)
+  outer . Constant1d inner = let (f, _) = compileCurve3d outer in Constant3d (f inner)
+
+instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) where
+  XYZ3d x y z . input = XYZ3d (x . input) (y . input) (z . input)
+  XYC3d x y z . input = XYC3d (x . input) (y . input) z
+  XCZ3d x y z . input = XCZ3d (x . input) y (z . input)
+  CYZ3d x y z . input = CYZ3d x (y . input) (z . input)
+  XCC3d x y z . input = XCC3d (x . input) y z
+  CYC3d x y z . input = CYC3d x (y . input) z
+  CCZ3d x y z . input = CCZ3d x y (z . input)
+  Negated3d arg . input = Negated3d (arg . input)
+  Sum3d lhs rhs . input = Sum3d (lhs . input) (rhs . input)
+  SumVariableConstant3d lhs rhs . input = SumVariableConstant3d (lhs . input) rhs
+  Difference3d lhs rhs . input = Difference3d (lhs . input) (rhs . input)
+  DifferenceConstantVariable3d lhs rhs . input = DifferenceConstantVariable3d lhs (rhs . input)
+  Product3d lhs rhs . input = Product3d (lhs . input) (rhs . input)
+  ProductVariableConstant3d lhs rhs . input = ProductVariableConstant3d (lhs . input) rhs
+  ProductConstantVariable3d lhs rhs . input = ProductConstantVariable3d lhs (rhs . input)
+  Quotient3d lhs rhs . input = Quotient3d (lhs . input) (rhs . input)
+  QuotientConstantVariable3d lhs rhs . input = QuotientConstantVariable3d lhs (rhs . input)
+  BezierCurve3d controlPoints param . input = BezierCurve3d controlPoints (param . input)
+  Cross3d lhs rhs . input = Cross3d (lhs . input) (rhs . input)
+  CrossVariableConstant3d lhs rhs . input = CrossVariableConstant3d (lhs . input) rhs
 
 constant1d :: Qty units -> Ast1d input
 constant1d value = Constant1d (Units.coerce value)
@@ -484,12 +549,116 @@ compileVariable2d variable = case variable of
     let instruction = Instruction.Bezier2d numControlPoints controlPointsIndex parameterIndex
     Compilation.addVariable2d instruction
 
+compileVariable3d :: Variable3d input -> Compilation.Step VariableIndex
+compileVariable3d variable = case variable of
+  XYZ3d x y z -> Compilation.do
+    xIndex <- compileVariable1d x
+    yIndex <- compileVariable1d y
+    zIndex <- compileVariable1d z
+    Compilation.addVariable3d (Instruction.XYZ3d xIndex yIndex zIndex)
+  XYC3d x y z -> Compilation.do
+    xIndex <- compileVariable1d x
+    yIndex <- compileVariable1d y
+    zIndex <- Compilation.addConstant1d z
+    Compilation.addVariable3d (Instruction.XYC3d xIndex yIndex zIndex)
+  XCZ3d x y z -> Compilation.do
+    xIndex <- compileVariable1d x
+    yIndex <- Compilation.addConstant1d y
+    zIndex <- compileVariable1d z
+    Compilation.addVariable3d (Instruction.XCZ3d xIndex yIndex zIndex)
+  CYZ3d x y z -> Compilation.do
+    xIndex <- Compilation.addConstant1d x
+    yIndex <- compileVariable1d y
+    zIndex <- compileVariable1d z
+    Compilation.addVariable3d (Instruction.CYZ3d xIndex yIndex zIndex)
+  XCC3d x y z -> Compilation.do
+    xIndex <- compileVariable1d x
+    yIndex <- Compilation.addConstant1d y
+    zIndex <- Compilation.addConstant1d z
+    Compilation.addVariable3d (Instruction.XCC3d xIndex yIndex zIndex)
+  CYC3d x y z -> Compilation.do
+    xIndex <- Compilation.addConstant1d x
+    yIndex <- compileVariable1d y
+    zIndex <- Compilation.addConstant1d z
+    Compilation.addVariable3d (Instruction.CYC3d xIndex yIndex zIndex)
+  CCZ3d x y z -> Compilation.do
+    xIndex <- Compilation.addConstant1d x
+    yIndex <- Compilation.addConstant1d y
+    zIndex <- compileVariable1d z
+    Compilation.addVariable3d (Instruction.CCZ3d xIndex yIndex zIndex)
+  Negated3d arg -> Compilation.do
+    argIndex <- compileVariable3d arg
+    Compilation.addVariable3d (Instruction.Negate3d argIndex)
+  Sum3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- compileVariable3d rhs
+    Compilation.addVariable3d (Instruction.Add3d lhsIndex rhsIndex)
+  SumVariableConstant3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- Compilation.addConstant3d rhs
+    Compilation.addVariable3d (Instruction.AddVariableConstant3d lhsIndex rhsIndex)
+  Difference3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- compileVariable3d rhs
+    Compilation.addVariable3d (Instruction.Subtract3d lhsIndex rhsIndex)
+  DifferenceConstantVariable3d lhs rhs -> Compilation.do
+    lhsIndex <- Compilation.addConstant3d lhs
+    rhsIndex <- compileVariable3d rhs
+    Compilation.addVariable3d (Instruction.SubtractConstantVariable3d lhsIndex rhsIndex)
+  Product3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- compileVariable1d rhs
+    Compilation.addVariable3d (Instruction.Multiply3d lhsIndex rhsIndex)
+  ProductVariableConstant3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- Compilation.addConstant1d rhs
+    Compilation.addVariable3d (Instruction.MultiplyVariableConstant3d lhsIndex rhsIndex)
+  ProductConstantVariable3d lhs rhs -> Compilation.do
+    lhsIndex <- Compilation.addConstant3d lhs
+    rhsIndex <- compileVariable1d rhs
+    Compilation.addVariable3d (Instruction.MultiplyConstantVariable3d lhsIndex rhsIndex)
+  Quotient3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- compileVariable1d rhs
+    Compilation.addVariable3d (Instruction.Divide3d lhsIndex rhsIndex)
+  QuotientConstantVariable3d lhs rhs -> Compilation.do
+    lhsIndex <- Compilation.addConstant3d lhs
+    rhsIndex <- compileVariable1d rhs
+    Compilation.addVariable3d (Instruction.DivideConstantVariable3d lhsIndex rhsIndex)
+  BezierCurve3d controlPoints parameter -> Compilation.do
+    let (xControlPoints, yControlPoints, zControlPoints) = NonEmpty.unzip3 controlPoints
+    let flattenedControlPoints = xControlPoints <> yControlPoints <> zControlPoints
+    controlPointsIndex <- Compilation.addConstant flattenedControlPoints
+    parameterIndex <- compileVariable1d parameter
+    let numControlPoints = NonEmpty.length controlPoints
+    let instruction = Instruction.Bezier3d numControlPoints controlPointsIndex parameterIndex
+    Compilation.addVariable3d instruction
+  Cross3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- compileVariable3d rhs
+    Compilation.addVariable3d (Instruction.Cross3d lhsIndex rhsIndex)
+  CrossVariableConstant3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- Compilation.addConstant3d rhs
+    Compilation.addVariable3d (Instruction.CrossVariableConstant3d lhsIndex rhsIndex)
+
 compileCurve1d :: Ast1d Float -> (Float -> Float, Range Unitless -> Range Unitless)
 compileCurve1d (Constant1d value) = (always value, always (Range.constant value))
 compileCurve1d (Variable1d variable) = Compilation.curve1d (compileVariable1d variable)
 
 compileCurve2d ::
   Ast2d Float ->
-  (Float -> (Float, Float), Range Unitless -> (Range Unitless, Range Unitless))
+  ( Float -> (Float, Float)
+  , Range Unitless -> (Range Unitless, Range Unitless)
+  )
 compileCurve2d (Constant2d (x, y)) = (always (x, y), always (Range.constant x, Range.constant y))
 compileCurve2d (Variable2d variable) = Compilation.curve2d (compileVariable2d variable)
+
+compileCurve3d ::
+  Ast3d Float ->
+  ( Float -> (Float, Float, Float)
+  , Range Unitless -> (Range Unitless, Range Unitless, Range Unitless)
+  )
+compileCurve3d (Constant3d (x, y, z)) =
+  (always (x, y, z), always (Range.constant x, Range.constant y, Range.constant z))
+compileCurve3d (Variable3d variable) = Compilation.curve3d (compileVariable3d variable)

@@ -8,12 +8,15 @@ module OpenSolid.Bytecode.Compilation
   , addConstant
   , addConstant1d
   , addConstant2d
+  , addConstant3d
   , addVariable
   , addVariable1d
   , addVariable2d
+  , addVariable3d
   , compile
   , curve1d
   , curve2d
+  , curve3d
   )
 where
 
@@ -112,6 +115,9 @@ addConstant1d value = addConstant (NonEmpty.one value)
 addConstant2d :: (Float, Float) -> Step ConstantIndex
 addConstant2d (x, y) = addConstant (NonEmpty.two x y)
 
+addConstant3d :: (Float, Float, Float) -> Step ConstantIndex
+addConstant3d (x, y, z) = addConstant (NonEmpty.three x y z)
+
 nextVariableIndex :: State -> VariableIndex
 nextVariableIndex State{variableComponents = NumComponents n} = VariableIndex n
 
@@ -140,6 +146,9 @@ addVariable1d instruction = addVariable instruction (OutputComponents 1)
 
 addVariable2d :: Instruction -> Step VariableIndex
 addVariable2d instruction = addVariable instruction (OutputComponents 2)
+
+addVariable3d :: Instruction -> Step VariableIndex
+addVariable3d instruction = addVariable instruction (OutputComponents 3)
 
 init :: InputComponents -> State
 init (InputComponents inputComponents) =
@@ -188,7 +197,7 @@ curve1d step = do
   let value tValue =
         callWith wordBytes constantBytes 1 $
           \wordsPointer constantsPointer returnValuePointer -> IO.do
-            opensolid_curve1d_value
+            opensolid_curve_value
               wordsPointer
               (Float.toDouble tValue)
               constantsPointer
@@ -198,7 +207,7 @@ curve1d step = do
   let bounds (Range tLower tUpper) =
         callWith wordBytes constantBytes 2 $
           \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_curve1d_bounds
+            opensolid_curve_bounds
               wordsPointer
               (Float.toDouble tLower)
               (Float.toDouble tUpper)
@@ -219,7 +228,7 @@ curve2d step = do
   let value tValue =
         callWith wordBytes constantBytes 2 $
           \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_curve2d_value
+            opensolid_curve_value
               wordsPointer
               (Float.toDouble tValue)
               constantsPointer
@@ -231,7 +240,7 @@ curve2d step = do
   let bounds (Range tLower tUpper) =
         callWith wordBytes constantBytes 4 $
           \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_curve2d_bounds
+            opensolid_curve_bounds
               wordsPointer
               (Float.toDouble tLower)
               (Float.toDouble tUpper)
@@ -245,18 +254,50 @@ curve2d step = do
             IO.succeed (Range xLower xUpper, Range yLower yUpper)
   (value, bounds)
 
-foreign import capi "bytecode.h opensolid_curve1d_value"
-  opensolid_curve1d_value ::
+curve3d ::
+  Step VariableIndex ->
+  ( Float -> (Float, Float, Float)
+  , Range Unitless -> (Range Unitless, Range Unitless, Range Unitless)
+  )
+curve3d step = do
+  let output = compile (InputComponents 1) (OutputComponents 3) step
+  let Output{constantBytes, wordBytes, numVariableComponents} = output
+  let value tValue =
+        callWith wordBytes constantBytes 3 $
+          \wordsPointer constantsPointer returnValuesPointer -> IO.do
+            opensolid_curve_value
+              wordsPointer
+              (Float.toDouble tValue)
+              constantsPointer
+              numVariableComponents
+              returnValuesPointer
+            x <- getReturnValue 0 returnValuesPointer
+            y <- getReturnValue 1 returnValuesPointer
+            z <- getReturnValue 2 returnValuesPointer
+            IO.succeed (x, y, z)
+  let bounds (Range tLower tUpper) =
+        callWith wordBytes constantBytes 6 $
+          \wordsPointer constantsPointer returnValuesPointer -> IO.do
+            opensolid_curve_bounds
+              wordsPointer
+              (Float.toDouble tLower)
+              (Float.toDouble tUpper)
+              constantsPointer
+              numVariableComponents
+              returnValuesPointer
+            xLower <- getReturnValue 0 returnValuesPointer
+            xUpper <- getReturnValue 1 returnValuesPointer
+            yLower <- getReturnValue 2 returnValuesPointer
+            yUpper <- getReturnValue 3 returnValuesPointer
+            zLower <- getReturnValue 4 returnValuesPointer
+            zUpper <- getReturnValue 5 returnValuesPointer
+            IO.succeed (Range xLower xUpper, Range yLower yUpper, Range zLower zUpper)
+  (value, bounds)
+
+foreign import capi "bytecode.h opensolid_curve_value"
+  opensolid_curve_value ::
     Ptr Word16 -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
 
-foreign import capi "bytecode.h opensolid_curve1d_bounds"
-  opensolid_curve1d_bounds ::
-    Ptr Word16 -> Double -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
-
-foreign import capi "bytecode.h opensolid_curve2d_value"
-  opensolid_curve2d_value ::
-    Ptr Word16 -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
-
-foreign import capi "bytecode.h opensolid_curve2d_bounds"
-  opensolid_curve2d_bounds ::
+foreign import capi "bytecode.h opensolid_curve_bounds"
+  opensolid_curve_bounds ::
     Ptr Word16 -> Double -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()

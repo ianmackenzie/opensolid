@@ -1467,7 +1467,7 @@ computeBounds(
 
 extern "C" {
   void
-  opensolid_curve1d_value(
+  opensolid_curve_value(
     const uint16_t* wordsPointer,
     double t,
     const double* constantsPointer,
@@ -1480,7 +1480,7 @@ extern "C" {
   }
 
   void
-  opensolid_curve1d_bounds(
+  opensolid_curve_bounds(
     const uint16_t* wordsPointer,
     double tLower,
     double tUpper,
@@ -1494,7 +1494,7 @@ extern "C" {
   }
 
   void
-  opensolid_surface1d_value(
+  opensolid_surface_value(
     const uint16_t* wordsPointer,
     double u,
     double v,
@@ -1509,7 +1509,7 @@ extern "C" {
   }
 
   void
-  opensolid_surface1d_bounds(
+  opensolid_surface_bounds(
     const uint16_t* wordsPointer,
     double uLower,
     double uUpper,
@@ -1522,33 +1522,6 @@ extern "C" {
     Range* variablesPointer = (Range*)alloca(sizeof(Range) * numVariableComponents);
     variablesPointer[0] = Range(uLower, uUpper);
     variablesPointer[1] = Range(vLower, vUpper);
-    computeBounds(wordsPointer, constantsPointer, variablesPointer, (Range*)returnValuesPointer);
-  }
-
-  void
-  opensolid_curve2d_value(
-    const uint16_t* wordsPointer,
-    double t,
-    const double* constantsPointer,
-    int numVariableComponents,
-    double* returnValuesPointer
-  ) {
-    double* variablesPointer = (double*)alloca(sizeof(double) * numVariableComponents);
-    variablesPointer[0] = t;
-    computeValue(wordsPointer, constantsPointer, variablesPointer, returnValuesPointer);
-  }
-
-  void
-  opensolid_curve2d_bounds(
-    const uint16_t* wordsPointer,
-    double tLower,
-    double tUpper,
-    const double* constantsPointer,
-    int numVariableComponents,
-    double* returnValuesPointer
-  ) {
-    Range* variablesPointer = (Range*)alloca(sizeof(Range) * numVariableComponents);
-    variablesPointer[0] = Range(tLower, tUpper);
     computeBounds(wordsPointer, constantsPointer, variablesPointer, (Range*)returnValuesPointer);
   }
 }

@@ -92,7 +92,7 @@ extern "C" {
 #endif
 
   void
-  opensolid_curve1d_value(
+  opensolid_curve_value(
     const uint16_t* wordsPointer,
     double t,
     const double* constantsPointer,
@@ -101,7 +101,7 @@ extern "C" {
   );
 
   void
-  opensolid_curve1d_bounds(
+  opensolid_curve_bounds(
     const uint16_t* wordsPointer,
     double tLower,
     double tUpper,
@@ -111,7 +111,7 @@ extern "C" {
   );
 
   void
-  opensolid_surface1d_value(
+  opensolid_surface_value(
     const uint16_t* wordsPointer,
     double u,
     double v,
@@ -121,31 +121,12 @@ extern "C" {
   );
 
   void
-  opensolid_surface1d_bounds(
+  opensolid_surface_bounds(
     const uint16_t* wordsPointer,
     double uLower,
     double uUpper,
     double vLower,
     double vUpper,
-    const double* constantsPointer,
-    int numVariableComponents,
-    double* returnValuesPointer
-  );
-
-  void
-  opensolid_curve2d_value(
-    const uint16_t* wordsPointer,
-    double t,
-    const double* constantsPointer,
-    int numVariableComponents,
-    double* returnValuesPointer
-  );
-
-  void
-  opensolid_curve2d_bounds(
-    const uint16_t* wordsPointer,
-    double tLower,
-    double tUpper,
     const double* constantsPointer,
     int numVariableComponents,
     double* returnValuesPointer
