@@ -55,6 +55,10 @@ data Instruction
   | Cross2d VariableIndex VariableIndex
   | CrossVariableConstant2d VariableIndex ConstantIndex
   | Bezier2d Int ConstantIndex VariableIndex
+  | TransformVector2d ConstantIndex VariableIndex
+  | TransformPoint2d ConstantIndex VariableIndex
+  | ProjectVector3d ConstantIndex VariableIndex
+  | ProjectPoint3d ConstantIndex VariableIndex
   | XYZ3d VariableIndex VariableIndex VariableIndex
   | XYC3d VariableIndex VariableIndex ConstantIndex
   | XCZ3d VariableIndex ConstantIndex VariableIndex
@@ -79,6 +83,10 @@ data Instruction
   | Cross3d VariableIndex VariableIndex
   | CrossVariableConstant3d VariableIndex ConstantIndex
   | Bezier3d Int ConstantIndex VariableIndex
+  | TransformVector3d ConstantIndex VariableIndex
+  | TransformPoint3d ConstantIndex VariableIndex
+  | PlaceVector2d ConstantIndex VariableIndex
+  | PlacePoint2d ConstantIndex VariableIndex
   deriving (Eq, Ord)
 
 encodeWord :: Word16 -> Builder
@@ -282,6 +290,22 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeInt n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
+  TransformVector2d matrix vector ->
+    encodeInt transformVector2dOpcode
+      <> encodeConstantIndex matrix
+      <> encodeVariableIndex vector
+  TransformPoint2d matrix point ->
+    encodeInt transformPoint2dOpcode
+      <> encodeConstantIndex matrix
+      <> encodeVariableIndex point
+  ProjectVector3d matrix vector ->
+    encodeInt projectVector3dOpcode
+      <> encodeConstantIndex matrix
+      <> encodeVariableIndex vector
+  ProjectPoint3d matrix point ->
+    encodeInt projectPoint3dOpcode
+      <> encodeConstantIndex matrix
+      <> encodeVariableIndex point
   XYZ3d x y z ->
     encodeInt xyz3dOpcode
       <> encodeVariableIndex x
@@ -403,6 +427,22 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeInt n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
+  TransformVector3d matrix vector ->
+    encodeInt transformVector3dOpcode
+      <> encodeConstantIndex matrix
+      <> encodeVariableIndex vector
+  TransformPoint3d matrix point ->
+    encodeInt transformPoint3dOpcode
+      <> encodeConstantIndex matrix
+      <> encodeVariableIndex point
+  PlaceVector2d matrix vector ->
+    encodeInt placeVector2dOpcode
+      <> encodeConstantIndex matrix
+      <> encodeVariableIndex vector
+  PlacePoint2d matrix point ->
+    encodeInt placePoint2dOpcode
+      <> encodeConstantIndex matrix
+      <> encodeVariableIndex point
 
 return :: Int -> VariableIndex -> Builder
 return dimension variableIndex =
@@ -552,6 +592,18 @@ foreign import capi "bytecode.h value Quintic2d"
 foreign import capi "bytecode.h value Bezier2d"
   bezier2dOpcode :: Int
 
+foreign import capi "bytecode.h value TransformVector2d"
+  transformVector2dOpcode :: Int
+
+foreign import capi "bytecode.h value TransformPoint2d"
+  transformPoint2dOpcode :: Int
+
+foreign import capi "bytecode.h value ProjectVector3d"
+  projectVector3dOpcode :: Int
+
+foreign import capi "bytecode.h value ProjectPoint3d"
+  projectPoint3dOpcode :: Int
+
 foreign import capi "bytecode.h value XYZ3d"
   xyz3dOpcode :: Int
 
@@ -638,3 +690,15 @@ foreign import capi "bytecode.h value Quintic3d"
 
 foreign import capi "bytecode.h value Bezier3d"
   bezier3dOpcode :: Int
+
+foreign import capi "bytecode.h value TransformVector3d"
+  transformVector3dOpcode :: Int
+
+foreign import capi "bytecode.h value TransformPoint3d"
+  transformPoint3dOpcode :: Int
+
+foreign import capi "bytecode.h value PlaceVector2d"
+  placeVector2dOpcode :: Int
+
+foreign import capi "bytecode.h value PlacePoint2d"
+  placePoint2dOpcode :: Int
