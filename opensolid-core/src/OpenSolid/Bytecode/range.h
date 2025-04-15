@@ -139,6 +139,11 @@ operator-(Range lhs, Range rhs) {
 }
 
 inline Range
+operator-(Range lhs, double rhs) {
+  return Range(lhs.lower - rhs, lhs.upper - rhs);
+}
+
+inline Range
 operator-(double lhs, Range rhs) {
   return Range::validate(lhs - rhs.upper, lhs - rhs.lower);
 }
