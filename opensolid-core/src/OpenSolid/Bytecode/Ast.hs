@@ -22,15 +22,32 @@ module OpenSolid.Bytecode.Ast
 where
 
 import OpenSolid.Bytecode.Compilation qualified as Compilation
-import OpenSolid.Bytecode.Instruction (VariableIndex (VariableIndex))
+import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
 import OpenSolid.Bytecode.Instruction qualified as Instruction
+import OpenSolid.Direction3d (Direction3d (Direction3d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Plane3d qualified as Plane3d
+import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvPoint)
+import OpenSolid.Transform2d (Transform2d (Transform2d))
+import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Transform3d (Transform3d (Transform3d))
+import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector3d (Vector3d (Vector3d))
+
+data Space
+
+type Coordinates = Space @ Unitless
+
+type Plane = Plane3d Coordinates (Defines Space)
 
 data Ast1d input where
   Constant1d :: Float -> Ast1d input
@@ -99,6 +116,10 @@ data Variable2d input where
   Quotient2d :: Variable2d input -> Variable1d input -> Variable2d input
   QuotientConstantVariable2d :: (Float, Float) -> Variable1d input -> Variable2d input
   BezierCurve2d :: NonEmpty (Float, Float) -> Variable1d input -> Variable2d input
+  TransformVector2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
+  TransformPoint2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
+  ProjectVector3d :: Plane -> Variable3d input -> Variable2d input
+  ProjectPoint3d :: Plane -> Variable3d input -> Variable2d input
 
 deriving instance Eq (Variable2d input)
 
@@ -137,6 +158,10 @@ data Variable3d input where
   Cross3d :: Variable3d input -> Variable3d input -> Variable3d input
   CrossVariableConstant3d :: Variable3d input -> (Float, Float, Float) -> Variable3d input
   BezierCurve3d :: NonEmpty (Float, Float, Float) -> Variable1d input -> Variable3d input
+  TransformVector3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
+  TransformPoint3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
+  PlaceVector2d :: Plane -> Variable2d input -> Variable3d input
+  PlacePoint2d :: Plane -> Variable2d input -> Variable3d input
 
 deriving instance Eq (Variable3d input)
 
@@ -194,6 +219,10 @@ instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) wh
   Quotient2d lhs rhs . input = Quotient2d (lhs . input) (rhs . input)
   QuotientConstantVariable2d lhs rhs . input = QuotientConstantVariable2d lhs (rhs . input)
   BezierCurve2d controlPoints param . input = BezierCurve2d controlPoints (param . input)
+  TransformVector2d transform vector . input = TransformVector2d transform (vector . input)
+  TransformPoint2d transform point . input = TransformPoint2d transform (point . input)
+  ProjectVector3d plane vector . input = ProjectVector3d plane (vector . input)
+  ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
 
 instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
   Constant3d outer . _ = Constant3d outer
@@ -221,6 +250,10 @@ instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) wh
   BezierCurve3d controlPoints param . input = BezierCurve3d controlPoints (param . input)
   Cross3d lhs rhs . input = Cross3d (lhs . input) (rhs . input)
   CrossVariableConstant3d lhs rhs . input = CrossVariableConstant3d (lhs . input) rhs
+  TransformVector3d transform vector . input = TransformVector3d transform (vector . input)
+  TransformPoint3d transform point . input = TransformPoint3d transform (point . input)
+  PlaceVector2d plane vector . input = PlaceVector2d plane (vector . input)
+  PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
 
 constant1d :: Qty units -> Ast1d input
 constant1d value = Constant1d (Units.coerce value)
@@ -400,6 +433,28 @@ bezierCurve1d :: NonEmpty (Qty units) -> Ast1d input -> Ast1d input
 bezierCurve1d controlPoints param =
   Variable1d (BezierCurve1d (NonEmpty.map Units.coerce controlPoints) CurveParameter) . param
 
+addTransform2d :: Transform2d.Affine Coordinates -> Compilation.Step ConstantIndex
+addTransform2d (Transform2d p0 i j) = do
+  let Vector2d ix iy = i
+  let Vector2d jx jy = j
+  let Point2d x0 y0 = p0
+  Compilation.addConstant (ix :| [iy, jx, jy, x0, y0])
+
+addTransform3d :: Transform3d.Affine Coordinates -> Compilation.Step ConstantIndex
+addTransform3d (Transform3d p0 i j k) = do
+  let Vector3d ix iy iz = i
+  let Vector3d jx jy jz = j
+  let Vector3d kx ky kz = k
+  let Point3d x0 y0 z0 = p0
+  Compilation.addConstant (ix :| [iy, iz, jx, jy, jz, kx, ky, kz, x0, y0, z0])
+
+addPlane :: Plane -> Compilation.Step ConstantIndex
+addPlane plane = do
+  let Direction3d ix iy iz = Plane3d.xDirection plane
+  let Direction3d jx jy jz = Plane3d.yDirection plane
+  let Point3d x0 y0 z0 = Plane3d.originPoint plane
+  Compilation.addConstant (ix :| [iy, iz, jx, jy, jz, x0, y0, z0])
+
 compileVariable1d :: Variable1d input -> Compilation.Step VariableIndex
 compileVariable1d variable = case variable of
   CurveParameter -> Compilation.return (VariableIndex 0)
@@ -548,6 +603,22 @@ compileVariable2d variable = case variable of
     let numControlPoints = NonEmpty.length controlPoints
     let instruction = Instruction.Bezier2d numControlPoints controlPointsIndex parameterIndex
     Compilation.addVariable2d instruction
+  TransformVector2d transform vector -> Compilation.do
+    matrixIndex <- addTransform2d transform
+    vectorIndex <- compileVariable2d vector
+    Compilation.addVariable2d (Instruction.TransformVector2d matrixIndex vectorIndex)
+  TransformPoint2d transform point -> Compilation.do
+    matrixIndex <- addTransform2d transform
+    pointIndex <- compileVariable2d point
+    Compilation.addVariable2d (Instruction.TransformPoint2d matrixIndex pointIndex)
+  ProjectVector3d plane vector -> Compilation.do
+    planeIndex <- addPlane plane
+    vectorIndex <- compileVariable3d vector
+    Compilation.addVariable2d (Instruction.ProjectVector3d planeIndex vectorIndex)
+  ProjectPoint3d plane point -> Compilation.do
+    planeIndex <- addPlane plane
+    pointIndex <- compileVariable3d point
+    Compilation.addVariable2d (Instruction.ProjectPoint3d planeIndex pointIndex)
 
 compileVariable3d :: Variable3d input -> Compilation.Step VariableIndex
 compileVariable3d variable = case variable of
@@ -641,6 +712,22 @@ compileVariable3d variable = case variable of
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- Compilation.addConstant3d rhs
     Compilation.addVariable3d (Instruction.CrossVariableConstant3d lhsIndex rhsIndex)
+  TransformVector3d transform vector -> Compilation.do
+    matrixIndex <- addTransform3d transform
+    vectorIndex <- compileVariable3d vector
+    Compilation.addVariable3d (Instruction.TransformVector3d matrixIndex vectorIndex)
+  TransformPoint3d transform point -> Compilation.do
+    matrixIndex <- addTransform3d transform
+    pointIndex <- compileVariable3d point
+    Compilation.addVariable3d (Instruction.TransformPoint3d matrixIndex pointIndex)
+  PlaceVector2d plane vector -> Compilation.do
+    planeIndex <- addPlane plane
+    vectorIndex <- compileVariable2d vector
+    Compilation.addVariable3d (Instruction.PlaceVector2d planeIndex vectorIndex)
+  PlacePoint2d plane point -> Compilation.do
+    planeIndex <- addPlane plane
+    pointIndex <- compileVariable2d point
+    Compilation.addVariable3d (Instruction.PlacePoint2d planeIndex pointIndex)
 
 compileCurve1d :: Ast1d Float -> (Float -> Float, Range Unitless -> Range Unitless)
 compileCurve1d (Constant1d value) = (always value, always (Range.constant value))
