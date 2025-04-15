@@ -718,7 +718,7 @@ computeValue(
         double* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + n;
-        const double* z = controlPoints + 2 * n;
+        const double* z = controlPoints + n * 2;
         output[0] = bezierValue(n, x, parameter);
         output[1] = bezierValue(n, y, parameter);
         output[2] = bezierValue(n, z, parameter);
@@ -1430,7 +1430,7 @@ computeBounds(
         Range* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + n;
-        const double* z = controlPoints + 2 * n;
+        const double* z = controlPoints + n * 2;
         output[0] = bezierBounds(n, x, parameter);
         output[1] = bezierBounds(n, y, parameter);
         output[2] = bezierBounds(n, z, parameter);
