@@ -448,22 +448,22 @@ computeValue(
         output[1] = bezierValue(n, y, parameter);
       }
       case TransformVector2d: {
-        const double* transform = getConstantPointer();
+        const double* matrix = getConstantPointer();
         const double* input = getVariablePointer();
         double* output = getVariablePointer();
         double vx = input[0];
         double vy = input[1];
-        output[0] = transform[0] * vx + transform[2] * vy;
-        output[1] = transform[1] * vx + transform[3] * vy;
+        output[0] = matrix[0] * vx + matrix[2] * vy;
+        output[1] = matrix[1] * vx + matrix[3] * vy;
       }
       case TransformPoint2d: {
-        const double* transform = getConstantPointer();
+        const double* matrix = getConstantPointer();
         const double* input = getVariablePointer();
         double* output = getVariablePointer();
         double px = input[0];
         double py = input[1];
-        output[0] = transform[0] * px + transform[2] * py + transform[4];
-        output[1] = transform[1] * px + transform[3] * py + transform[5];
+        output[0] = matrix[0] * px + matrix[2] * py + matrix[4];
+        output[1] = matrix[1] * px + matrix[3] * py + matrix[5];
       }
       case XYZ3d: {
         double x = *getVariablePointer();
@@ -724,26 +724,26 @@ computeValue(
         output[2] = bezierValue(n, z, parameter);
       }
       case TransformVector3d: {
-        const double* transform = getConstantPointer();
+        const double* matrix = getConstantPointer();
         const double* input = getVariablePointer();
         double* output = getVariablePointer();
         double vx = input[0];
         double vy = input[1];
         double vz = input[2];
-        output[0] = transform[0] * vx + transform[3] * vy + transform[6] * vz;
-        output[1] = transform[1] * vx + transform[4] * vy + transform[7] * vz;
-        output[2] = transform[2] * vx + transform[5] * vy + transform[8] * vz;
+        output[0] = matrix[0] * vx + matrix[3] * vy + matrix[6] * vz;
+        output[1] = matrix[1] * vx + matrix[4] * vy + matrix[7] * vz;
+        output[2] = matrix[2] * vx + matrix[5] * vy + matrix[8] * vz;
       }
       case TransformPoint3d: {
-        const double* transform = getConstantPointer();
+        const double* matrix = getConstantPointer();
         const double* input = getVariablePointer();
         double* output = getVariablePointer();
         double px = input[0];
         double py = input[1];
         double pz = input[2];
-        output[0] = transform[0] * px + transform[3] * py + transform[6] * pz + transform[9];
-        output[1] = transform[1] * px + transform[4] * py + transform[7] * pz + transform[10];
-        output[2] = transform[2] * px + transform[5] * py + transform[8] * pz + transform[11];
+        output[0] = matrix[0] * px + matrix[3] * py + matrix[6] * pz + matrix[9];
+        output[1] = matrix[1] * px + matrix[4] * py + matrix[7] * pz + matrix[10];
+        output[2] = matrix[2] * px + matrix[5] * py + matrix[8] * pz + matrix[11];
       }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
@@ -1166,22 +1166,22 @@ computeBounds(
         output[1] = bezierBounds(n, y, parameter);
       }
       case TransformVector2d: {
-        const double* transform = getConstantPointer();
+        const double* matrix = getConstantPointer();
         const Range* input = getVariablePointer();
         Range* output = getVariablePointer();
         Range vx = input[0];
         Range vy = input[1];
-        output[0] = transform[0] * vx + transform[2] * vy;
-        output[1] = transform[1] * vx + transform[3] * vy;
+        output[0] = matrix[0] * vx + matrix[2] * vy;
+        output[1] = matrix[1] * vx + matrix[3] * vy;
       }
       case TransformPoint2d: {
-        const double* transform = getConstantPointer();
+        const double* matrix = getConstantPointer();
         const Range* point = getVariablePointer();
         Range* output = getVariablePointer();
         Range px = point[0];
         Range py = point[1];
-        output[0] = transform[0] * px + transform[2] * py + transform[4];
-        output[1] = transform[1] * px + transform[3] * py + transform[5];
+        output[0] = matrix[0] * px + matrix[2] * py + matrix[4];
+        output[1] = matrix[1] * px + matrix[3] * py + matrix[5];
       }
       case XYZ3d: {
         Range x = *getVariablePointer();
@@ -1436,26 +1436,26 @@ computeBounds(
         output[2] = bezierBounds(n, z, parameter);
       }
       case TransformVector3d: {
-        const double* transform = getConstantPointer();
+        const double* matrix = getConstantPointer();
         const Range* input = getVariablePointer();
         Range* output = getVariablePointer();
         Range vx = input[0];
         Range vy = input[1];
         Range vz = input[2];
-        output[0] = transform[0] * vx + transform[3] * vy + transform[6] * vz;
-        output[1] = transform[1] * vx + transform[4] * vy + transform[7] * vz;
-        output[2] = transform[2] * vx + transform[5] * vy + transform[8] * vz;
+        output[0] = matrix[0] * vx + matrix[3] * vy + matrix[6] * vz;
+        output[1] = matrix[1] * vx + matrix[4] * vy + matrix[7] * vz;
+        output[2] = matrix[2] * vx + matrix[5] * vy + matrix[8] * vz;
       }
       case TransformPoint3d: {
-        const double* transform = getConstantPointer();
+        const double* matrix = getConstantPointer();
         const Range* input = getVariablePointer();
         Range* output = getVariablePointer();
         Range px = input[0];
         Range py = input[1];
         Range pz = input[2];
-        output[0] = transform[0] * px + transform[3] * py + transform[6] * pz + transform[9];
-        output[1] = transform[1] * px + transform[4] * py + transform[7] * pz + transform[10];
-        output[2] = transform[2] * px + transform[5] * py + transform[8] * pz + transform[11];
+        output[0] = matrix[0] * px + matrix[3] * py + matrix[6] * pz + matrix[9];
+        output[1] = matrix[1] * px + matrix[4] * py + matrix[7] * pz + matrix[10];
+        output[2] = matrix[2] * px + matrix[5] * py + matrix[8] * pz + matrix[11];
       }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
