@@ -465,6 +465,26 @@ computeValue(
         output[0] = matrix[0] * px + matrix[2] * py + matrix[4];
         output[1] = matrix[1] * px + matrix[3] * py + matrix[5];
       }
+      case ProjectVector3d: {
+        const double* matrix = getConstantPointer();
+        const double* input = getVariablePointer();
+        double* output = getVariablePointer();
+        double vx = input[0];
+        double vy = input[1];
+        double vz = input[2];
+        output[0] = matrix[0] * vx + matrix[1] * vy + matrix[2] * vz;
+        output[1] = matrix[3] * vx + matrix[4] * vy + matrix[5] * vz;
+      }
+      case ProjectPoint3d: {
+        const double* matrix = getConstantPointer();
+        const double* input = getVariablePointer();
+        double* output = getVariablePointer();
+        double dx = input[0] - matrix[6];
+        double dy = input[1] - matrix[7];
+        double dz = input[2] - matrix[8];
+        output[0] = matrix[0] * dx + matrix[1] * dy + matrix[2] * dz;
+        output[1] = matrix[3] * dx + matrix[4] * dy + matrix[5] * dz;
+      }
       case XYZ3d: {
         double x = *getVariablePointer();
         double y = *getVariablePointer();
@@ -744,6 +764,26 @@ computeValue(
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6] * pz + matrix[9];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7] * pz + matrix[10];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8] * pz + matrix[11];
+      }
+      case PlaceVector2d: {
+        const double* matrix = getConstantPointer();
+        const double* input = getVariablePointer();
+        double* output = getVariablePointer();
+        double vx = input[0];
+        double vy = input[1];
+        output[0] = matrix[0] * vx + matrix[3] * vy;
+        output[1] = matrix[1] * vx + matrix[4] * vy;
+        output[2] = matrix[2] * vx + matrix[5] * vy;
+      }
+      case PlacePoint2d: {
+        const double* matrix = getConstantPointer();
+        const double* input = getVariablePointer();
+        double* output = getVariablePointer();
+        double px = input[0];
+        double py = input[1];
+        output[0] = matrix[0] * px + matrix[3] * py + matrix[6];
+        output[1] = matrix[1] * px + matrix[4] * py + matrix[7];
+        output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
       }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
@@ -1183,6 +1223,26 @@ computeBounds(
         output[0] = matrix[0] * px + matrix[2] * py + matrix[4];
         output[1] = matrix[1] * px + matrix[3] * py + matrix[5];
       }
+      case ProjectVector3d: {
+        const double* matrix = getConstantPointer();
+        const Range* input = getVariablePointer();
+        Range* output = getVariablePointer();
+        Range vx = input[0];
+        Range vy = input[1];
+        Range vz = input[2];
+        output[0] = matrix[0] * vx + matrix[1] * vy + matrix[2] * vz;
+        output[1] = matrix[3] * vx + matrix[4] * vy + matrix[5] * vz;
+      }
+      case ProjectPoint3d: {
+        const double* matrix = getConstantPointer();
+        const Range* input = getVariablePointer();
+        Range* output = getVariablePointer();
+        Range dx = input[0] - matrix[6];
+        Range dy = input[1] - matrix[7];
+        Range dz = input[2] - matrix[8];
+        output[0] = matrix[0] * dx + matrix[1] * dy + matrix[2] * dz;
+        output[1] = matrix[3] * dx + matrix[4] * dy + matrix[5] * dz;
+      }
       case XYZ3d: {
         Range x = *getVariablePointer();
         Range y = *getVariablePointer();
@@ -1456,6 +1516,26 @@ computeBounds(
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6] * pz + matrix[9];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7] * pz + matrix[10];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8] * pz + matrix[11];
+      }
+      case PlaceVector2d: {
+        const double* matrix = getConstantPointer();
+        const Range* input = getVariablePointer();
+        Range* output = getVariablePointer();
+        Range vx = input[0];
+        Range vy = input[1];
+        output[0] = matrix[0] * vx + matrix[3] * vy;
+        output[1] = matrix[1] * vx + matrix[4] * vy;
+        output[2] = matrix[2] * vx + matrix[5] * vy;
+      }
+      case PlacePoint2d: {
+        const double* matrix = getConstantPointer();
+        const Range* input = getVariablePointer();
+        Range* output = getVariablePointer();
+        Range px = input[0];
+        Range py = input[1];
+        output[0] = matrix[0] * px + matrix[3] * py + matrix[6];
+        output[1] = matrix[1] * px + matrix[4] * py + matrix[7];
+        output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
       }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");

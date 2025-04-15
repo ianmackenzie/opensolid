@@ -53,6 +53,8 @@ enum Opcode {
   Bezier2d,
   TransformVector2d,
   TransformPoint2d,
+  ProjectVector3d,
+  ProjectPoint3d,
   XYZ3d,
   XYC3d,
   XCZ3d,
@@ -84,6 +86,8 @@ enum Opcode {
   Bezier3d,
   TransformVector3d,
   TransformPoint3d,
+  PlaceVector2d,
+  PlacePoint2d,
   OPCODE_END
 };
 
