@@ -1,7 +1,7 @@
+Switch Tolerance in Python to use ContextVar instead of threading.local
+
 Add 'components'/'coordinates' functions to curve and surface function types
 -> especially useful for constructing derivatives of function compositions
-
-Add 'Abstract' constructor to Ast (or Expression?)
 
 Rename CompiledFunction to Function.Compiled
 -> or possibly Evaluator or similar?
