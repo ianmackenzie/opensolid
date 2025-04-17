@@ -85,11 +85,15 @@ data Variable1d input where
   Cos1d :: Variable1d input -> Variable1d input
   BezierCurve1d :: NonEmpty Float -> Variable1d input -> Variable1d input
   SquaredNorm2d :: Variable2d input -> Variable1d input
+  SquaredNorm3d :: Variable3d input -> Variable1d input
   Norm2d :: Variable2d input -> Variable1d input
+  Norm3d :: Variable3d input -> Variable1d input
   Dot2d :: Variable2d input -> Variable2d input -> Variable1d input
   DotVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable1d input
   Cross2d :: Variable2d input -> Variable2d input -> Variable1d input
   CrossVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable1d input
+  Dot3d :: Variable3d input -> Variable3d input -> Variable1d input
+  DotVariableConstant3d :: Variable3d input -> Vector3d Coordinates -> Variable1d input
 
 deriving instance Eq (Variable1d input)
 
@@ -199,11 +203,15 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   Cos1d arg . input = Cos1d (arg . input)
   BezierCurve1d controlPoints param . input = BezierCurve1d controlPoints (param . input)
   SquaredNorm2d arg . input = SquaredNorm2d (arg . input)
+  SquaredNorm3d arg . input = SquaredNorm3d (arg . input)
   Norm2d arg . input = Norm2d (arg . input)
+  Norm3d arg . input = Norm3d (arg . input)
   Dot2d lhs rhs . input = Dot2d (lhs . input) (rhs . input)
   DotVariableConstant2d lhs rhs . input = DotVariableConstant2d (lhs . input) rhs
   Cross2d lhs rhs . input = Cross2d (lhs . input) (rhs . input)
   CrossVariableConstant2d lhs rhs . input = CrossVariableConstant2d (lhs . input) rhs
+  Dot3d lhs rhs . input = Dot3d (lhs . input) (rhs . input)
+  DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
 
 instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
@@ -731,9 +739,15 @@ compileVariable1d variable = case variable of
   SquaredNorm2d arg -> Compilation.do
     argIndex <- compileVariable2d arg
     Compilation.addVariable1d (Instruction.SquaredNorm2d argIndex)
+  SquaredNorm3d arg -> Compilation.do
+    argIndex <- compileVariable3d arg
+    Compilation.addVariable1d (Instruction.SquaredNorm3d argIndex)
   Norm2d arg -> Compilation.do
     argIndex <- compileVariable2d arg
     Compilation.addVariable1d (Instruction.Norm2d argIndex)
+  Norm3d arg -> Compilation.do
+    argIndex <- compileVariable3d arg
+    Compilation.addVariable1d (Instruction.Norm3d argIndex)
   Dot2d lhs rhs -> Compilation.do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- compileVariable2d rhs
@@ -750,6 +764,14 @@ compileVariable1d variable = case variable of
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- Compilation.addConstant2d rhs
     Compilation.addVariable1d (Instruction.CrossVariableConstant2d lhsIndex rhsIndex)
+  Dot3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- compileVariable3d rhs
+    Compilation.addVariable1d (Instruction.Dot3d lhsIndex rhsIndex)
+  DotVariableConstant3d lhs rhs -> Compilation.do
+    lhsIndex <- compileVariable3d lhs
+    rhsIndex <- Compilation.addConstant3d rhs
+    Compilation.addVariable1d (Instruction.DotVariableConstant3d lhsIndex rhsIndex)
 
 compileVariable2d :: Variable2d input -> Compilation.Step VariableIndex
 compileVariable2d variable = case variable of
