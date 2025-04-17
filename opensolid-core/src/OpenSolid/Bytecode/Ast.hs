@@ -268,6 +268,10 @@ constant2d :: Vector2d (space @ units) -> Ast2d input
 constant2d (Vector2d x y) =
   Constant2d (Vector2d (Units.coerce x) (Units.coerce y))
 
+constant3d :: Vector3d (space @ units) -> Ast3d input
+constant3d (Vector3d x y z) =
+  Constant3d (Vector3d (Units.coerce x) (Units.coerce y) (Units.coerce z))
+
 curveParameter :: Ast1d Float
 curveParameter = Variable1d CurveParameter
 
@@ -385,6 +389,204 @@ instance Division (Qty units) (Ast1d input) (Ast1d input) where
   lhs / rhs = constant1d lhs / rhs
 
 instance Division (Ast1d input) (Qty units) (Ast1d input) where
+  lhs / rhs = lhs / constant1d rhs
+
+instance Negation (Ast2d input) where
+  negate (Constant2d val) = Constant2d -val
+  negate (Variable2d var) = Variable2d -var
+
+instance Negation (Variable2d input) where
+  negate (Negated2d arg) = arg
+  negate (Difference2d lhs rhs) = Difference2d rhs lhs
+  negate var = Negated2d var
+
+instance Multiplication Sign (Ast2d input) (Ast2d input) where
+  Positive * ast = ast
+  Negative * ast = -ast
+
+instance Multiplication (Ast2d input) Sign (Ast2d input) where
+  ast * Positive = ast
+  ast * Negative = -ast
+
+instance Multiplication Sign (Variable2d input) (Variable2d input) where
+  Positive * var = var
+  Negative * var = -var
+
+instance Multiplication (Variable2d input) Sign (Variable2d input) where
+  var * Positive = var
+  var * Negative = -var
+
+instance input1 ~ input2 => Addition (Ast2d input1) (Ast2d input2) (Ast2d input1) where
+  Constant2d lhs + rhs | lhs == Vector2d.zero = rhs
+  lhs + Constant2d rhs | rhs == Vector2d.zero = lhs
+  Constant2d lhs + Constant2d rhs = Constant2d (lhs + rhs)
+  Constant2d lhs + Variable2d rhs = Variable2d (SumVariableConstant2d rhs lhs)
+  Variable2d lhs + Constant2d rhs = Variable2d (SumVariableConstant2d lhs rhs)
+  Variable2d lhs + Variable2d rhs = Variable2d (lhs + rhs)
+
+instance
+  input1 ~ input2 =>
+  Addition (Variable2d input1) (Variable2d input2) (Variable2d input1)
+  where
+  lhs + rhs = if lhs <= rhs then Sum2d lhs rhs else Sum2d rhs lhs
+
+instance Addition (Vector2d (space @ units)) (Ast2d input) (Ast2d input) where
+  lhs + rhs = constant2d lhs + rhs
+
+instance Addition (Ast2d input1) (Vector2d (space @ units)) (Ast2d input1) where
+  lhs + rhs = lhs + constant2d rhs
+
+instance input1 ~ input2 => Subtraction (Ast2d input1) (Ast2d input2) (Ast2d input1) where
+  lhs - Constant2d rhs | rhs == Vector2d.zero = lhs
+  Constant2d lhs - rhs | lhs == Vector2d.zero = -rhs
+  Constant2d lhs - Constant2d rhs = Constant2d (lhs - rhs)
+  Constant2d lhs - Variable2d rhs = Variable2d (DifferenceConstantVariable2d lhs rhs)
+  Variable2d lhs - Constant2d rhs = Variable2d (SumVariableConstant2d lhs -rhs)
+  Variable2d lhs - Variable2d rhs = Variable2d (lhs - rhs)
+
+instance
+  input1 ~ input2 =>
+  Subtraction (Variable2d input1) (Variable2d input2) (Variable2d input1)
+  where
+  lhs - rhs = Difference2d lhs rhs
+
+instance Subtraction (Vector2d (space @ units)) (Ast2d input) (Ast2d input) where
+  lhs - rhs = constant2d lhs - rhs
+
+instance Subtraction (Ast2d input1) (Vector2d (space @ units)) (Ast2d input1) where
+  lhs - rhs = lhs - constant2d rhs
+
+instance input1 ~ input2 => Multiplication (Ast2d input1) (Ast1d input2) (Ast2d input1) where
+  Constant2d lhs * Constant1d rhs = Constant2d (lhs * rhs)
+  _ * Constant1d 0.0 = Constant2d Vector2d.zero
+  Constant2d lhs * _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
+  lhs * Constant1d 1.0 = lhs
+  lhs * Constant1d -1.0 = -lhs
+  Variable2d lhs * Constant1d rhs = Variable2d (ProductVariableConstant2d lhs rhs)
+  Constant2d lhs * Variable1d rhs = Variable2d (ProductConstantVariable2d lhs rhs)
+  Variable2d lhs * Variable1d rhs = Variable2d (Product2d lhs rhs)
+
+instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast2d input2) (Ast2d input1) where
+  lhs * rhs = rhs * lhs
+
+instance Multiplication (Ast2d input1) (Qty units) (Ast2d input1) where
+  lhs * rhs = lhs * constant1d rhs
+
+instance Multiplication (Qty units) (Ast2d input) (Ast2d input) where
+  lhs * rhs = constant1d lhs * rhs
+
+instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1) where
+  Constant2d lhs / Constant1d rhs = Constant2d (lhs / rhs)
+  Constant2d lhs / _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
+  lhs / Constant1d 1.0 = lhs
+  lhs / Constant1d -1.0 = -lhs
+  Variable2d lhs / Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1.0 / rhs))
+  Constant2d lhs / Variable1d rhs = Variable2d (QuotientConstantVariable2d lhs rhs)
+  Variable2d lhs / Variable1d rhs = Variable2d (Quotient2d lhs rhs)
+
+instance Division (Vector2d (space @ units)) (Ast1d input) (Ast2d input) where
+  lhs / rhs = constant2d lhs / rhs
+
+instance Division (Ast2d input) (Qty units) (Ast2d input) where
+  lhs / rhs = lhs / constant1d rhs
+
+instance Negation (Ast3d input) where
+  negate (Constant3d val) = Constant3d -val
+  negate (Variable3d var) = Variable3d -var
+
+instance Negation (Variable3d input) where
+  negate (Negated3d arg) = arg
+  negate (Difference3d lhs rhs) = Difference3d rhs lhs
+  negate var = Negated3d var
+
+instance Multiplication Sign (Ast3d input) (Ast3d input) where
+  Positive * ast = ast
+  Negative * ast = -ast
+
+instance Multiplication (Ast3d input) Sign (Ast3d input) where
+  ast * Positive = ast
+  ast * Negative = -ast
+
+instance Multiplication Sign (Variable3d input) (Variable3d input) where
+  Positive * var = var
+  Negative * var = -var
+
+instance Multiplication (Variable3d input) Sign (Variable3d input) where
+  var * Positive = var
+  var * Negative = -var
+
+instance input1 ~ input2 => Addition (Ast3d input1) (Ast3d input2) (Ast3d input1) where
+  Constant3d lhs + rhs | lhs == Vector3d.zero = rhs
+  lhs + Constant3d rhs | rhs == Vector3d.zero = lhs
+  Constant3d lhs + Constant3d rhs = Constant3d (lhs + rhs)
+  Constant3d lhs + Variable3d rhs = Variable3d (SumVariableConstant3d rhs lhs)
+  Variable3d lhs + Constant3d rhs = Variable3d (SumVariableConstant3d lhs rhs)
+  Variable3d lhs + Variable3d rhs = Variable3d (lhs + rhs)
+
+instance
+  input1 ~ input2 =>
+  Addition (Variable3d input1) (Variable3d input2) (Variable3d input1)
+  where
+  lhs + rhs = if lhs <= rhs then Sum3d lhs rhs else Sum3d rhs lhs
+
+instance Addition (Vector3d (space @ units)) (Ast3d input) (Ast3d input) where
+  lhs + rhs = constant3d lhs + rhs
+
+instance Addition (Ast3d input1) (Vector3d (space @ units)) (Ast3d input1) where
+  lhs + rhs = lhs + constant3d rhs
+
+instance input1 ~ input2 => Subtraction (Ast3d input1) (Ast3d input2) (Ast3d input1) where
+  lhs - Constant3d rhs | rhs == Vector3d.zero = lhs
+  Constant3d lhs - rhs | lhs == Vector3d.zero = -rhs
+  Constant3d lhs - Constant3d rhs = Constant3d (lhs - rhs)
+  Constant3d lhs - Variable3d rhs = Variable3d (DifferenceConstantVariable3d lhs rhs)
+  Variable3d lhs - Constant3d rhs = Variable3d (SumVariableConstant3d lhs -rhs)
+  Variable3d lhs - Variable3d rhs = Variable3d (lhs - rhs)
+
+instance
+  input1 ~ input2 =>
+  Subtraction (Variable3d input1) (Variable3d input2) (Variable3d input1)
+  where
+  lhs - rhs = Difference3d lhs rhs
+
+instance Subtraction (Vector3d (space @ units)) (Ast3d input) (Ast3d input) where
+  lhs - rhs = constant3d lhs - rhs
+
+instance Subtraction (Ast3d input1) (Vector3d (space @ units)) (Ast3d input1) where
+  lhs - rhs = lhs - constant3d rhs
+
+instance input1 ~ input2 => Multiplication (Ast3d input1) (Ast1d input2) (Ast3d input1) where
+  Constant3d lhs * Constant1d rhs = Constant3d (lhs * rhs)
+  _ * Constant1d 0.0 = Constant3d Vector3d.zero
+  Constant3d lhs * _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
+  lhs * Constant1d 1.0 = lhs
+  lhs * Constant1d -1.0 = -lhs
+  Variable3d lhs * Constant1d rhs = Variable3d (ProductVariableConstant3d lhs rhs)
+  Constant3d lhs * Variable1d rhs = Variable3d (ProductConstantVariable3d lhs rhs)
+  Variable3d lhs * Variable1d rhs = Variable3d (Product3d lhs rhs)
+
+instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast3d input2) (Ast3d input1) where
+  lhs * rhs = rhs * lhs
+
+instance Multiplication (Ast3d input1) (Qty units) (Ast3d input1) where
+  lhs * rhs = lhs * constant1d rhs
+
+instance Multiplication (Qty units) (Ast3d input) (Ast3d input) where
+  lhs * rhs = constant1d lhs * rhs
+
+instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1) where
+  Constant3d lhs / Constant1d rhs = Constant3d (lhs / rhs)
+  Constant3d lhs / _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
+  lhs / Constant1d 1.0 = lhs
+  lhs / Constant1d -1.0 = -lhs
+  Variable3d lhs / Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1.0 / rhs))
+  Constant3d lhs / Variable1d rhs = Variable3d (QuotientConstantVariable3d lhs rhs)
+  Variable3d lhs / Variable1d rhs = Variable3d (Quotient3d lhs rhs)
+
+instance Division (Vector3d (space @ units)) (Ast1d input) (Ast3d input) where
+  lhs / rhs = constant3d lhs / rhs
+
+instance Division (Ast3d input) (Qty units) (Ast3d input) where
   lhs / rhs = lhs / constant1d rhs
 
 squared :: Ast1d input -> Ast1d input
