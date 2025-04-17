@@ -43,6 +43,10 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
+import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector3d (Vector3d (Vector3d))
+import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 import System.IO.Unsafe (unsafeDupablePerformIO)
 import Prelude (Double)
 
@@ -112,11 +116,11 @@ addConstant components = Step \initialCompilation ->
 addConstant1d :: Float -> Step ConstantIndex
 addConstant1d value = addConstant (NonEmpty.one value)
 
-addConstant2d :: (Float, Float) -> Step ConstantIndex
-addConstant2d (x, y) = addConstant (NonEmpty.two x y)
+addConstant2d :: Vector2d (space @ Unitless) -> Step ConstantIndex
+addConstant2d (Vector2d x y) = addConstant (NonEmpty.two x y)
 
-addConstant3d :: (Float, Float, Float) -> Step ConstantIndex
-addConstant3d (x, y, z) = addConstant (NonEmpty.three x y z)
+addConstant3d :: Vector3d (space @ Unitless) -> Step ConstantIndex
+addConstant3d (Vector3d x y z) = addConstant (NonEmpty.three x y z)
 
 nextVariableIndex :: State -> VariableIndex
 nextVariableIndex State{variableComponents = NumComponents n} = VariableIndex n
@@ -221,7 +225,7 @@ curve1d step = do
 
 curve2d ::
   Step VariableIndex ->
-  (Float -> (Float, Float), Range Unitless -> (Range Unitless, Range Unitless))
+  (Float -> Vector2d (space @ Unitless), Range Unitless -> VectorBounds2d (space @ Unitless))
 curve2d step = do
   let output = compile (InputComponents 1) (OutputComponents 2) step
   let Output{constantBytes, wordBytes, numVariableComponents} = output
@@ -236,7 +240,7 @@ curve2d step = do
               returnValuesPointer
             x <- getReturnValue 0 returnValuesPointer
             y <- getReturnValue 1 returnValuesPointer
-            IO.succeed (x, y)
+            IO.succeed (Vector2d x y)
   let bounds (Range tLower tUpper) =
         callWith wordBytes constantBytes 4 $
           \wordsPointer constantsPointer returnValuesPointer -> IO.do
@@ -251,13 +255,13 @@ curve2d step = do
             xUpper <- getReturnValue 1 returnValuesPointer
             yLower <- getReturnValue 2 returnValuesPointer
             yUpper <- getReturnValue 3 returnValuesPointer
-            IO.succeed (Range xLower xUpper, Range yLower yUpper)
+            IO.succeed (VectorBounds2d (Range xLower xUpper) (Range yLower yUpper))
   (value, bounds)
 
 curve3d ::
   Step VariableIndex ->
-  ( Float -> (Float, Float, Float)
-  , Range Unitless -> (Range Unitless, Range Unitless, Range Unitless)
+  ( Float -> Vector3d (space @ Unitless)
+  , Range Unitless -> VectorBounds3d (space @ Unitless)
   )
 curve3d step = do
   let output = compile (InputComponents 1) (OutputComponents 3) step
@@ -274,7 +278,7 @@ curve3d step = do
             x <- getReturnValue 0 returnValuesPointer
             y <- getReturnValue 1 returnValuesPointer
             z <- getReturnValue 2 returnValuesPointer
-            IO.succeed (x, y, z)
+            IO.succeed (Vector3d x y z)
   let bounds (Range tLower tUpper) =
         callWith wordBytes constantBytes 6 $
           \wordsPointer constantsPointer returnValuesPointer -> IO.do
@@ -291,7 +295,7 @@ curve3d step = do
             yUpper <- getReturnValue 3 returnValuesPointer
             zLower <- getReturnValue 4 returnValuesPointer
             zUpper <- getReturnValue 5 returnValuesPointer
-            IO.succeed (Range xLower xUpper, Range yLower yUpper, Range zLower zUpper)
+            IO.succeed (VectorBounds3d (Range xLower xUpper) (Range yLower yUpper) (Range zLower zUpper))
   (value, bounds)
 
 foreign import capi "bytecode.h opensolid_curve_value"

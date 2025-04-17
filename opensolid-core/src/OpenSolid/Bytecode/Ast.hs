@@ -41,7 +41,13 @@ import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d (Vector3d))
+import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.VectorBounds2d (VectorBounds2d)
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
+import OpenSolid.VectorBounds3d (VectorBounds3d)
+import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
 data Space
 
@@ -81,9 +87,9 @@ data Variable1d input where
   SquaredNorm2d :: Variable2d input -> Variable1d input
   Norm2d :: Variable2d input -> Variable1d input
   Dot2d :: Variable2d input -> Variable2d input -> Variable1d input
-  DotVariableConstant2d :: Variable2d input -> (Float, Float) -> Variable1d input
+  DotVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable1d input
   Cross2d :: Variable2d input -> Variable2d input -> Variable1d input
-  CrossVariableConstant2d :: Variable2d input -> (Float, Float) -> Variable1d input
+  CrossVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable1d input
 
 deriving instance Eq (Variable1d input)
 
@@ -92,7 +98,7 @@ deriving instance Ord (Variable1d input)
 deriving instance Show (Variable1d input)
 
 data Ast2d input where
-  Constant2d :: (Float, Float) -> Ast2d input
+  Constant2d :: Vector2d Coordinates -> Ast2d input
   Variable2d :: Variable2d input -> Ast2d input
 
 deriving instance Eq (Ast2d input)
@@ -107,15 +113,15 @@ data Variable2d input where
   CY2d :: Float -> Variable1d input -> Variable2d input
   Negated2d :: Variable2d input -> Variable2d input
   Sum2d :: Variable2d input -> Variable2d input -> Variable2d input
-  SumVariableConstant2d :: Variable2d input -> (Float, Float) -> Variable2d input
+  SumVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable2d input
   Difference2d :: Variable2d input -> Variable2d input -> Variable2d input
-  DifferenceConstantVariable2d :: (Float, Float) -> Variable2d input -> Variable2d input
+  DifferenceConstantVariable2d :: Vector2d Coordinates -> Variable2d input -> Variable2d input
   Product2d :: Variable2d input -> Variable1d input -> Variable2d input
   ProductVariableConstant2d :: Variable2d input -> Float -> Variable2d input
-  ProductConstantVariable2d :: (Float, Float) -> Variable1d input -> Variable2d input
+  ProductConstantVariable2d :: Vector2d Coordinates -> Variable1d input -> Variable2d input
   Quotient2d :: Variable2d input -> Variable1d input -> Variable2d input
-  QuotientConstantVariable2d :: (Float, Float) -> Variable1d input -> Variable2d input
-  BezierCurve2d :: NonEmpty (Float, Float) -> Variable1d input -> Variable2d input
+  QuotientConstantVariable2d :: Vector2d Coordinates -> Variable1d input -> Variable2d input
+  BezierCurve2d :: NonEmpty (Vector2d Coordinates) -> Variable1d input -> Variable2d input
   TransformVector2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
   TransformPoint2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
   ProjectVector3d :: Plane -> Variable3d input -> Variable2d input
@@ -128,7 +134,7 @@ deriving instance Ord (Variable2d input)
 deriving instance Show (Variable2d input)
 
 data Ast3d input where
-  Constant3d :: (Float, Float, Float) -> Ast3d input
+  Constant3d :: Vector3d Coordinates -> Ast3d input
   Variable3d :: Variable3d input -> Ast3d input
 
 deriving instance Eq (Ast3d input)
@@ -147,17 +153,17 @@ data Variable3d input where
   CCZ3d :: Float -> Float -> Variable1d input -> Variable3d input
   Negated3d :: Variable3d input -> Variable3d input
   Sum3d :: Variable3d input -> Variable3d input -> Variable3d input
-  SumVariableConstant3d :: Variable3d input -> (Float, Float, Float) -> Variable3d input
+  SumVariableConstant3d :: Variable3d input -> Vector3d Coordinates -> Variable3d input
   Difference3d :: Variable3d input -> Variable3d input -> Variable3d input
-  DifferenceConstantVariable3d :: (Float, Float, Float) -> Variable3d input -> Variable3d input
+  DifferenceConstantVariable3d :: Vector3d Coordinates -> Variable3d input -> Variable3d input
   Product3d :: Variable3d input -> Variable1d input -> Variable3d input
   ProductVariableConstant3d :: Variable3d input -> Float -> Variable3d input
-  ProductConstantVariable3d :: (Float, Float, Float) -> Variable1d input -> Variable3d input
+  ProductConstantVariable3d :: Vector3d Coordinates -> Variable1d input -> Variable3d input
   Quotient3d :: Variable3d input -> Variable1d input -> Variable3d input
-  QuotientConstantVariable3d :: (Float, Float, Float) -> Variable1d input -> Variable3d input
+  QuotientConstantVariable3d :: Vector3d Coordinates -> Variable1d input -> Variable3d input
   Cross3d :: Variable3d input -> Variable3d input -> Variable3d input
-  CrossVariableConstant3d :: Variable3d input -> (Float, Float, Float) -> Variable3d input
-  BezierCurve3d :: NonEmpty (Float, Float, Float) -> Variable1d input -> Variable3d input
+  CrossVariableConstant3d :: Variable3d input -> Vector3d Coordinates -> Variable3d input
+  BezierCurve3d :: NonEmpty (Vector3d Coordinates) -> Variable1d input -> Variable3d input
   TransformVector3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
   TransformPoint3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
   PlaceVector2d :: Plane -> Variable2d input -> Variable3d input
@@ -258,8 +264,9 @@ instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) wh
 constant1d :: Qty units -> Ast1d input
 constant1d value = Constant1d (Units.coerce value)
 
-constant2d :: Qty units -> Qty units -> Ast2d input
-constant2d x y = Constant2d (Units.coerce x, Units.coerce y)
+constant2d :: Vector2d (space @ units) -> Ast2d input
+constant2d (Vector2d x y) =
+  Constant2d (Vector2d (Units.coerce x) (Units.coerce y))
 
 curveParameter :: Ast1d Float
 curveParameter = Variable1d CurveParameter
@@ -268,11 +275,11 @@ surfaceParameter :: SurfaceParameter -> Ast1d UvPoint
 surfaceParameter = Variable1d . SurfaceParameter
 
 xComponent2d :: Ast2d input -> Ast1d input
-xComponent2d (Constant2d (x, _)) = Constant1d x
+xComponent2d (Constant2d val) = Constant1d (Vector2d.xComponent val)
 xComponent2d (Variable2d var) = Variable1d (XComponent2d var)
 
 yComponent2d :: Ast2d input -> Ast1d input
-yComponent2d (Constant2d (_, y)) = Constant1d y
+yComponent2d (Constant2d val) = Constant1d (Vector2d.yComponent val)
 yComponent2d (Variable2d var) = Variable1d (YComponent2d var)
 
 instance Negation (Ast1d input) where
@@ -596,7 +603,7 @@ compileVariable2d variable = case variable of
     rhsIndex <- compileVariable1d rhs
     Compilation.addVariable2d (Instruction.DivideConstantVariable2d lhsIndex rhsIndex)
   BezierCurve2d controlPoints parameter -> Compilation.do
-    let (xControlPoints, yControlPoints) = NonEmpty.unzip2 controlPoints
+    let (xControlPoints, yControlPoints) = NonEmpty.unzip2 (NonEmpty.map Vector2d.components controlPoints)
     let flattenedControlPoints = xControlPoints <> yControlPoints
     controlPointsIndex <- Compilation.addConstant flattenedControlPoints
     parameterIndex <- compileVariable1d parameter
@@ -697,7 +704,7 @@ compileVariable3d variable = case variable of
     rhsIndex <- compileVariable1d rhs
     Compilation.addVariable3d (Instruction.DivideConstantVariable3d lhsIndex rhsIndex)
   BezierCurve3d controlPoints parameter -> Compilation.do
-    let (xControlPoints, yControlPoints, zControlPoints) = NonEmpty.unzip3 controlPoints
+    let (xControlPoints, yControlPoints, zControlPoints) = NonEmpty.unzip3 (NonEmpty.map Vector3d.components controlPoints)
     let flattenedControlPoints = xControlPoints <> yControlPoints <> zControlPoints
     controlPointsIndex <- Compilation.addConstant flattenedControlPoints
     parameterIndex <- compileVariable1d parameter
@@ -735,17 +742,12 @@ compileCurve1d (Variable1d variable) = Compilation.curve1d (compileVariable1d va
 
 compileCurve2d ::
   Ast2d Float ->
-  ( Float -> (Float, Float)
-  , Range Unitless -> (Range Unitless, Range Unitless)
-  )
-compileCurve2d (Constant2d (x, y)) = (always (x, y), always (Range.constant x, Range.constant y))
-compileCurve2d (Variable2d variable) = Compilation.curve2d (compileVariable2d variable)
+  (Float -> Vector2d Coordinates, Range Unitless -> VectorBounds2d Coordinates)
+compileCurve2d (Constant2d val) = (always val, always (VectorBounds2d.constant val))
+compileCurve2d (Variable2d var) = Compilation.curve2d (compileVariable2d var)
 
 compileCurve3d ::
   Ast3d Float ->
-  ( Float -> (Float, Float, Float)
-  , Range Unitless -> (Range Unitless, Range Unitless, Range Unitless)
-  )
-compileCurve3d (Constant3d (x, y, z)) =
-  (always (x, y, z), always (Range.constant x, Range.constant y, Range.constant z))
+  (Float -> Vector3d Coordinates, Range Unitless -> VectorBounds3d Coordinates)
+compileCurve3d (Constant3d val) = (always val, always (VectorBounds3d.constant val))
 compileCurve3d (Variable3d variable) = Compilation.curve3d (compileVariable3d variable)
