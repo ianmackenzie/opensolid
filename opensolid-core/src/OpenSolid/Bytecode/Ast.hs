@@ -9,6 +9,9 @@ module OpenSolid.Bytecode.Ast
   , surfaceParameter
   , xComponent2d
   , yComponent2d
+  , xComponent3d
+  , yComponent3d
+  , zComponent3d
   , squared
   , sqrt
   , sin
@@ -72,6 +75,9 @@ data Variable1d input where
   SurfaceParameter :: SurfaceParameter -> Variable1d UvPoint
   XComponent2d :: Variable2d input -> Variable1d input
   YComponent2d :: Variable2d input -> Variable1d input
+  XComponent3d :: Variable3d input -> Variable1d input
+  YComponent3d :: Variable3d input -> Variable1d input
+  ZComponent3d :: Variable3d input -> Variable1d input
   Negated1d :: Variable1d input -> Variable1d input
   Sum1d :: Variable1d input -> Variable1d input -> Variable1d input
   SumVariableConstant1d :: Variable1d input -> Float -> Variable1d input
@@ -190,6 +196,9 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   CurveParameter . input = input
   XComponent2d arg . input = XComponent2d (arg . input)
   YComponent2d arg . input = YComponent2d (arg . input)
+  XComponent3d arg . input = XComponent3d (arg . input)
+  YComponent3d arg . input = YComponent3d (arg . input)
+  ZComponent3d arg . input = ZComponent3d (arg . input)
   Negated1d arg . input = Negated1d (arg . input)
   Sum1d lhs rhs . input = Sum1d (lhs . input) (rhs . input)
   SumVariableConstant1d lhs rhs . input = SumVariableConstant1d (lhs . input) rhs
@@ -295,6 +304,18 @@ xComponent2d (Variable2d var) = Variable1d (XComponent2d var)
 yComponent2d :: Ast2d input -> Ast1d input
 yComponent2d (Constant2d val) = Constant1d (Vector2d.yComponent val)
 yComponent2d (Variable2d var) = Variable1d (YComponent2d var)
+
+xComponent3d :: Ast3d input -> Ast1d input
+xComponent3d (Constant3d val) = Constant1d (Vector3d.xComponent val)
+xComponent3d (Variable3d var) = Variable1d (XComponent3d var)
+
+yComponent3d :: Ast3d input -> Ast1d input
+yComponent3d (Constant3d val) = Constant1d (Vector3d.yComponent val)
+yComponent3d (Variable3d var) = Variable1d (YComponent3d var)
+
+zComponent3d :: Ast3d input -> Ast1d input
+zComponent3d (Constant3d val) = Constant1d (Vector3d.zComponent val)
+zComponent3d (Variable3d var) = Variable1d (ZComponent3d var)
 
 instance Negation (Ast1d input) where
   negate (Constant1d val) = Constant1d -val
@@ -753,6 +774,15 @@ compileVariable1d variable = case variable of
   YComponent2d arg -> Compilation.do
     argIndex <- compileVariable2d arg
     Compilation.addVariable1d (Instruction.YComponent argIndex)
+  XComponent3d arg -> Compilation.do
+    argIndex <- compileVariable3d arg
+    Compilation.addVariable1d (Instruction.XComponent argIndex)
+  YComponent3d arg -> Compilation.do
+    argIndex <- compileVariable3d arg
+    Compilation.addVariable1d (Instruction.YComponent argIndex)
+  ZComponent3d arg -> Compilation.do
+    argIndex <- compileVariable3d arg
+    Compilation.addVariable1d (Instruction.ZComponent argIndex)
   Negated1d arg -> Compilation.do
     argIndex <- compileVariable1d arg
     Compilation.addVariable1d (Instruction.Negate1d argIndex)
