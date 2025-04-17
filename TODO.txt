@@ -1,3 +1,8 @@
+Make Point#d a newtype over Vector#d?
+-> useful for bytecode evaluation code, evaluation functions can return Vector#d and then coerce to Point#d
+-> consistent with Direction#d being a newtype over Vector#d
+-> use Position#d as the internal constructor name?
+
 Switch Tolerance in Python to use ContextVar instead of threading.local
 
 Add 'components'/'coordinates' functions to curve and surface function types
