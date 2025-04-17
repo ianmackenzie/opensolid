@@ -597,6 +597,74 @@ instance Division (Vector3d (space @ units)) (Ast1d input) (Ast3d input) where
 instance Division (Ast3d input) (Qty units) (Ast3d input) where
   lhs / rhs = lhs / constant1d rhs
 
+instance input1 ~ input2 => DotMultiplication (Ast2d input1) (Ast2d input2) (Ast1d input1) where
+  Constant2d lhs `dot` Constant2d rhs = Constant1d (lhs `dot` rhs)
+  Constant2d lhs `dot` _ | lhs == Vector2d.zero = Constant1d 0.0
+  _ `dot` Constant2d rhs | rhs == Vector2d.zero = Constant1d 0.0
+  Variable2d lhs `dot` Constant2d rhs = Variable1d (DotVariableConstant2d lhs rhs)
+  Constant2d lhs `dot` Variable2d rhs = Variable1d (DotVariableConstant2d rhs lhs)
+  Variable2d lhs `dot` Variable2d rhs = Variable1d (lhs `dot` rhs)
+
+instance
+  input1 ~ input2 =>
+  DotMultiplication (Variable2d input1) (Variable2d input2) (Variable1d input1)
+  where
+  lhs `dot` rhs = if lhs <= rhs then Dot2d lhs rhs else Dot2d rhs lhs
+
+instance DotMultiplication (Vector2d (space @ units)) (Ast2d input) (Ast1d input) where
+  lhs `dot` rhs = constant2d lhs `dot` rhs
+
+instance DotMultiplication (Ast2d input) (Vector2d (space @ units)) (Ast1d input) where
+  lhs `dot` rhs = lhs `dot` constant2d rhs
+
+instance input1 ~ input2 => CrossMultiplication (Ast2d input1) (Ast2d input2) (Ast1d input1) where
+  Constant2d lhs `cross` Constant2d rhs = Constant1d (lhs `cross` rhs)
+  Constant2d lhs `cross` _ | lhs == Vector2d.zero = Constant1d 0.0
+  _ `cross` Constant2d rhs | rhs == Vector2d.zero = Constant1d 0.0
+  Variable2d lhs `cross` Constant2d rhs = Variable1d (CrossVariableConstant2d lhs rhs)
+  Constant2d lhs `cross` Variable2d rhs = Variable1d (CrossVariableConstant2d rhs -lhs)
+  Variable2d lhs `cross` Variable2d rhs = Variable1d (Cross2d lhs rhs)
+
+instance CrossMultiplication (Vector2d (space @ units)) (Ast2d input) (Ast1d input) where
+  lhs `cross` rhs = constant2d lhs `cross` rhs
+
+instance CrossMultiplication (Ast2d input) (Vector2d (space @ units)) (Ast1d input) where
+  lhs `cross` rhs = lhs `cross` constant2d rhs
+
+instance input1 ~ input2 => DotMultiplication (Ast3d input1) (Ast3d input2) (Ast1d input1) where
+  Constant3d lhs `dot` Constant3d rhs = Constant1d (lhs `dot` rhs)
+  Constant3d lhs `dot` _ | lhs == Vector3d.zero = Constant1d 0.0
+  _ `dot` Constant3d rhs | rhs == Vector3d.zero = Constant1d 0.0
+  Variable3d lhs `dot` Constant3d rhs = Variable1d (DotVariableConstant3d lhs rhs)
+  Constant3d lhs `dot` Variable3d rhs = Variable1d (DotVariableConstant3d rhs lhs)
+  Variable3d lhs `dot` Variable3d rhs = Variable1d (lhs `dot` rhs)
+
+instance
+  input1 ~ input2 =>
+  DotMultiplication (Variable3d input1) (Variable3d input2) (Variable1d input1)
+  where
+  lhs `dot` rhs = if lhs <= rhs then Dot3d lhs rhs else Dot3d rhs lhs
+
+instance DotMultiplication (Vector3d (space @ units)) (Ast3d input) (Ast1d input) where
+  lhs `dot` rhs = constant3d lhs `dot` rhs
+
+instance DotMultiplication (Ast3d input) (Vector3d (space @ units)) (Ast1d input) where
+  lhs `dot` rhs = lhs `dot` constant3d rhs
+
+instance input1 ~ input2 => CrossMultiplication (Ast3d input1) (Ast3d input2) (Ast3d input1) where
+  Constant3d lhs `cross` Constant3d rhs = Constant3d (lhs `cross` rhs)
+  Constant3d lhs `cross` _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
+  _ `cross` Constant3d rhs | rhs == Vector3d.zero = Constant3d Vector3d.zero
+  Variable3d lhs `cross` Constant3d rhs = Variable3d (CrossVariableConstant3d lhs rhs)
+  Constant3d lhs `cross` Variable3d rhs = Variable3d (CrossVariableConstant3d rhs -lhs)
+  Variable3d lhs `cross` Variable3d rhs = Variable3d (Cross3d lhs rhs)
+
+instance CrossMultiplication (Vector3d (space @ units)) (Ast3d input) (Ast3d input) where
+  lhs `cross` rhs = constant3d lhs `cross` rhs
+
+instance CrossMultiplication (Ast3d input) (Vector3d (space @ units)) (Ast3d input) where
+  lhs `cross` rhs = lhs `cross` constant3d rhs
+
 squared :: Ast1d input -> Ast1d input
 squared ast = case ast of
   Constant1d val -> Constant1d (Float.squared val)
