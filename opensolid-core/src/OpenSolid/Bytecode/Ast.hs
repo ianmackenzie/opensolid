@@ -1,8 +1,10 @@
 module OpenSolid.Bytecode.Ast
   ( Ast1d
   , Ast2d
+  , Ast3d
   , constant1d
   , constant2d
+  , constant3d
   , curveParameter
   , surfaceParameter
   , xComponent2d
