@@ -48,8 +48,8 @@ data Instruction
   | MultiplyConstantVariable2d ConstantIndex VariableIndex
   | Divide2d VariableIndex VariableIndex
   | DivideConstantVariable2d ConstantIndex VariableIndex
-  | SquaredNorm2d VariableIndex
-  | Norm2d VariableIndex
+  | SquaredMagnitude2d VariableIndex
+  | Magnitude2d VariableIndex
   | Dot2d VariableIndex VariableIndex
   | DotVariableConstant2d VariableIndex ConstantIndex
   | Cross2d VariableIndex VariableIndex
@@ -76,8 +76,8 @@ data Instruction
   | MultiplyConstantVariable3d ConstantIndex VariableIndex
   | Divide3d VariableIndex VariableIndex
   | DivideConstantVariable3d ConstantIndex VariableIndex
-  | SquaredNorm3d VariableIndex
-  | Norm3d VariableIndex
+  | SquaredMagnitude3d VariableIndex
+  | Magnitude3d VariableIndex
   | Dot3d VariableIndex VariableIndex
   | DotVariableConstant3d VariableIndex ConstantIndex
   | Cross3d VariableIndex VariableIndex
@@ -243,11 +243,11 @@ encodeOpcodeAndArguments instruction = case instruction of
     encodeInt divideConstantVariable2dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  SquaredNorm2d arg ->
-    encodeInt squaredNorm2dOpcode
+  SquaredMagnitude2d arg ->
+    encodeInt squaredMagnitude2dOpcode
       <> encodeVariableIndex arg
-  Norm2d arg ->
-    encodeInt norm2dOpcode
+  Magnitude2d arg ->
+    encodeInt magnitude2dOpcode
       <> encodeVariableIndex arg
   Dot2d lhs rhs ->
     encodeInt dot2dOpcode
@@ -380,11 +380,11 @@ encodeOpcodeAndArguments instruction = case instruction of
     encodeInt divideConstantVariable3dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  SquaredNorm3d arg ->
-    encodeInt squaredNorm3dOpcode
+  SquaredMagnitude3d arg ->
+    encodeInt squaredMagnitude3dOpcode
       <> encodeVariableIndex arg
-  Norm3d arg ->
-    encodeInt norm3dOpcode
+  Magnitude3d arg ->
+    encodeInt magnitude3dOpcode
       <> encodeVariableIndex arg
   Dot3d lhs rhs ->
     encodeInt dot3dOpcode
@@ -556,11 +556,11 @@ foreign import capi "bytecode.h value Divide2d"
 foreign import capi "bytecode.h value DivideConstantVariable2d"
   divideConstantVariable2dOpcode :: Int
 
-foreign import capi "bytecode.h value SquaredNorm2d"
-  squaredNorm2dOpcode :: Int
+foreign import capi "bytecode.h value SquaredMagnitude2d"
+  squaredMagnitude2dOpcode :: Int
 
-foreign import capi "bytecode.h value Norm2d"
-  norm2dOpcode :: Int
+foreign import capi "bytecode.h value Magnitude2d"
+  magnitude2dOpcode :: Int
 
 foreign import capi "bytecode.h value Dot2d"
   dot2dOpcode :: Int
@@ -655,11 +655,11 @@ foreign import capi "bytecode.h value Divide3d"
 foreign import capi "bytecode.h value DivideConstantVariable3d"
   divideConstantVariable3dOpcode :: Int
 
-foreign import capi "bytecode.h value SquaredNorm3d"
-  squaredNorm3dOpcode :: Int
+foreign import capi "bytecode.h value SquaredMagnitude3d"
+  squaredMagnitude3dOpcode :: Int
 
-foreign import capi "bytecode.h value Norm3d"
-  norm3dOpcode :: Int
+foreign import capi "bytecode.h value Magnitude3d"
+  magnitude3dOpcode :: Int
 
 foreign import capi "bytecode.h value Dot3d"
   dot3dOpcode :: Int

@@ -349,14 +349,14 @@ computeValue(
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
       }
-      case SquaredNorm2d: {
+      case SquaredMagnitude2d: {
         const double* arg = getVariablePointer();
         double* output = getVariablePointer();
         double x = arg[0];
         double y = arg[1];
         *output = x * x + y * y;
       }
-      case Norm2d: {
+      case Magnitude2d: {
         const double* arg = getVariablePointer();
         double* output = getVariablePointer();
         double x = arg[0];
@@ -627,7 +627,7 @@ computeValue(
         output[1] = lhs[1] / rhs;
         output[2] = lhs[2] / rhs;
       }
-      case SquaredNorm3d: {
+      case SquaredMagnitude3d: {
         const double* arg = getVariablePointer();
         double* output = getVariablePointer();
         double x = arg[0];
@@ -635,7 +635,7 @@ computeValue(
         double z = arg[2];
         *output = x * x + y * y + z * z;
       }
-      case Norm3d: {
+      case Magnitude3d: {
         const double* arg = getVariablePointer();
         double* output = getVariablePointer();
         double x = arg[0];
@@ -1110,12 +1110,12 @@ computeBounds(
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
       }
-      case SquaredNorm2d: {
+      case SquaredMagnitude2d: {
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         *output = arg[0].squared() + arg[1].squared();
       }
-      case Norm2d: {
+      case Magnitude2d: {
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         // TODO add specialized Range.hypot2 for tighter bounds
@@ -1385,12 +1385,12 @@ computeBounds(
         output[1] = lhs[1] / rhs;
         output[2] = lhs[2] / rhs;
       }
-      case SquaredNorm3d: {
+      case SquaredMagnitude3d: {
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         *output = arg[0].squared() + arg[1].squared() + arg[2].squared();
       }
-      case Norm3d: {
+      case Magnitude3d: {
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         *output = (arg[0].squared() + arg[1].squared() + arg[2].squared()).sqrt();

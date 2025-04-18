@@ -16,10 +16,10 @@ module OpenSolid.Bytecode.Ast
   , sqrt
   , sin
   , cos
-  , squaredNorm2d
-  , squaredNorm3d
-  , norm2d
-  , norm3d
+  , squaredMagnitude2d
+  , squaredMagnitude3d
+  , magnitude2d
+  , magnitude3d
   , line1d
   , quadraticSpline1d
   , cubicSpline1d
@@ -96,10 +96,10 @@ data Variable1d input where
   Sin1d :: Variable1d input -> Variable1d input
   Cos1d :: Variable1d input -> Variable1d input
   BezierCurve1d :: NonEmpty Float -> Variable1d input -> Variable1d input
-  SquaredNorm2d :: Variable2d input -> Variable1d input
-  SquaredNorm3d :: Variable3d input -> Variable1d input
-  Norm2d :: Variable2d input -> Variable1d input
-  Norm3d :: Variable3d input -> Variable1d input
+  SquaredMagnitude2d :: Variable2d input -> Variable1d input
+  SquaredMagnitude3d :: Variable3d input -> Variable1d input
+  Magnitude2d :: Variable2d input -> Variable1d input
+  Magnitude3d :: Variable3d input -> Variable1d input
   Dot2d :: Variable2d input -> Variable2d input -> Variable1d input
   DotVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable1d input
   Cross2d :: Variable2d input -> Variable2d input -> Variable1d input
@@ -217,10 +217,10 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   Sin1d arg . input = Sin1d (arg . input)
   Cos1d arg . input = Cos1d (arg . input)
   BezierCurve1d controlPoints param . input = BezierCurve1d controlPoints (param . input)
-  SquaredNorm2d arg . input = SquaredNorm2d (arg . input)
-  SquaredNorm3d arg . input = SquaredNorm3d (arg . input)
-  Norm2d arg . input = Norm2d (arg . input)
-  Norm3d arg . input = Norm3d (arg . input)
+  SquaredMagnitude2d arg . input = SquaredMagnitude2d (arg . input)
+  SquaredMagnitude3d arg . input = SquaredMagnitude3d (arg . input)
+  Magnitude2d arg . input = Magnitude2d (arg . input)
+  Magnitude3d arg . input = Magnitude3d (arg . input)
   Dot2d lhs rhs . input = Dot2d (lhs . input) (rhs . input)
   DotVariableConstant2d lhs rhs . input = DotVariableConstant2d (lhs . input) rhs
   Cross2d lhs rhs . input = Cross2d (lhs . input) (rhs . input)
@@ -711,29 +711,29 @@ cos :: Ast1d input -> Ast1d input
 cos (Constant1d value) = constant1d (Float.cos value)
 cos (Variable1d var) = Variable1d (Cos1d var)
 
-squaredNorm2d :: Ast2d input -> Ast1d input
-squaredNorm2d ast = case ast of
+squaredMagnitude2d :: Ast2d input -> Ast1d input
+squaredMagnitude2d ast = case ast of
   Constant2d val -> Constant1d (Vector2d.squaredMagnitude val)
-  Variable2d (Negated2d arg) -> Variable1d (SquaredNorm2d arg)
-  Variable2d var -> Variable1d (SquaredNorm2d var)
+  Variable2d (Negated2d arg) -> Variable1d (SquaredMagnitude2d arg)
+  Variable2d var -> Variable1d (SquaredMagnitude2d var)
 
-squaredNorm3d :: Ast3d input -> Ast1d input
-squaredNorm3d ast = case ast of
+squaredMagnitude3d :: Ast3d input -> Ast1d input
+squaredMagnitude3d ast = case ast of
   Constant3d val -> Constant1d (Vector3d.squaredMagnitude val)
-  Variable3d (Negated3d arg) -> Variable1d (SquaredNorm3d arg)
-  Variable3d var -> Variable1d (SquaredNorm3d var)
+  Variable3d (Negated3d arg) -> Variable1d (SquaredMagnitude3d arg)
+  Variable3d var -> Variable1d (SquaredMagnitude3d var)
 
-norm2d :: Ast2d input -> Ast1d input
-norm2d ast = case ast of
+magnitude2d :: Ast2d input -> Ast1d input
+magnitude2d ast = case ast of
   Constant2d val -> Constant1d (Vector2d.magnitude val)
-  Variable2d (Negated2d arg) -> Variable1d (Norm2d arg)
-  Variable2d var -> Variable1d (Norm2d var)
+  Variable2d (Negated2d arg) -> Variable1d (Magnitude2d arg)
+  Variable2d var -> Variable1d (Magnitude2d var)
 
-norm3d :: Ast3d input -> Ast1d input
-norm3d ast = case ast of
+magnitude3d :: Ast3d input -> Ast1d input
+magnitude3d ast = case ast of
   Constant3d val -> Constant1d (Vector3d.magnitude val)
-  Variable3d (Negated3d arg) -> Variable1d (Norm3d arg)
-  Variable3d var -> Variable1d (Norm3d var)
+  Variable3d (Negated3d arg) -> Variable1d (Magnitude3d arg)
+  Variable3d var -> Variable1d (Magnitude3d var)
 
 line1d :: Qty units -> Qty units -> Ast1d input -> Ast1d input
 line1d p1 p2 param = bezierCurve1d (NonEmpty.two p1 p2) param
@@ -864,18 +864,18 @@ compileVariable1d variable = case variable of
     let numControlPoints = NonEmpty.length controlPoints
     let instruction = Instruction.Bezier1d numControlPoints controlPointsIndex parameterIndex
     Compilation.addVariable1d instruction
-  SquaredNorm2d arg -> Compilation.do
+  SquaredMagnitude2d arg -> Compilation.do
     argIndex <- compileVariable2d arg
-    Compilation.addVariable1d (Instruction.SquaredNorm2d argIndex)
-  SquaredNorm3d arg -> Compilation.do
+    Compilation.addVariable1d (Instruction.SquaredMagnitude2d argIndex)
+  SquaredMagnitude3d arg -> Compilation.do
     argIndex <- compileVariable3d arg
-    Compilation.addVariable1d (Instruction.SquaredNorm3d argIndex)
-  Norm2d arg -> Compilation.do
+    Compilation.addVariable1d (Instruction.SquaredMagnitude3d argIndex)
+  Magnitude2d arg -> Compilation.do
     argIndex <- compileVariable2d arg
-    Compilation.addVariable1d (Instruction.Norm2d argIndex)
-  Norm3d arg -> Compilation.do
+    Compilation.addVariable1d (Instruction.Magnitude2d argIndex)
+  Magnitude3d arg -> Compilation.do
     argIndex <- compileVariable3d arg
-    Compilation.addVariable1d (Instruction.Norm3d argIndex)
+    Compilation.addVariable1d (Instruction.Magnitude3d argIndex)
   Dot2d lhs rhs -> Compilation.do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- compileVariable2d rhs
