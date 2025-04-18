@@ -32,6 +32,8 @@ module OpenSolid.Bytecode.Ast
   , quinticSpline1d
   , bezierCurve1d
   , compileCurve1d
+  , compileCurve2d
+  , compileCurve3d
   )
 where
 
