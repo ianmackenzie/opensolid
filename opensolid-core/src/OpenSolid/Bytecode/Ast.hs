@@ -300,6 +300,106 @@ instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) wh
   PlaceVector2d basis vector . input = PlaceVector2d basis (vector . input)
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
 
+instance Composition (Ast2d input) (Ast1d UvPoint) (Ast1d input) where
+  Constant1d outer . _ = Constant1d outer
+  Variable1d outer . Variable2d inner = Variable1d (outer . inner)
+  outer . Constant2d (Vector2d u v) = do
+    let (f, _) = compileSurface1d outer
+    Constant1d (f (Point2d u v))
+
+instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) where
+  SurfaceParameter U . input = XComponent2d input
+  SurfaceParameter V . input = YComponent2d input
+  XComponent2d arg . input = XComponent2d (arg . input)
+  YComponent2d arg . input = YComponent2d (arg . input)
+  XComponent3d arg . input = XComponent3d (arg . input)
+  YComponent3d arg . input = YComponent3d (arg . input)
+  ZComponent3d arg . input = ZComponent3d (arg . input)
+  Negated1d arg . input = Negated1d (arg . input)
+  Sum1d lhs rhs . input = Sum1d (lhs . input) (rhs . input)
+  SumVariableConstant1d lhs rhs . input = SumVariableConstant1d (lhs . input) rhs
+  Difference1d lhs rhs . input = Difference1d (lhs . input) (rhs . input)
+  DifferenceConstantVariable1d lhs rhs . input = DifferenceConstantVariable1d lhs (rhs . input)
+  Product1d lhs rhs . input = Product1d (lhs . input) (rhs . input)
+  ProductVariableConstant1d lhs rhs . input = ProductVariableConstant1d (lhs . input) rhs
+  Quotient1d lhs rhs . input = Quotient1d (lhs . input) (rhs . input)
+  QuotientConstantVariable1d lhs rhs . input = QuotientConstantVariable1d lhs (rhs . input)
+  Squared1d arg . input = Squared1d (arg . input)
+  Sqrt1d arg . input = Sqrt1d (arg . input)
+  Sin1d arg . input = Sin1d (arg . input)
+  Cos1d arg . input = Cos1d (arg . input)
+  BezierCurve1d controlPoints param . input = BezierCurve1d controlPoints (param . input)
+  SquaredMagnitude2d arg . input = SquaredMagnitude2d (arg . input)
+  SquaredMagnitude3d arg . input = SquaredMagnitude3d (arg . input)
+  Magnitude2d arg . input = Magnitude2d (arg . input)
+  Magnitude3d arg . input = Magnitude3d (arg . input)
+  Dot2d lhs rhs . input = Dot2d (lhs . input) (rhs . input)
+  DotVariableConstant2d lhs rhs . input = DotVariableConstant2d (lhs . input) rhs
+  Cross2d lhs rhs . input = Cross2d (lhs . input) (rhs . input)
+  CrossVariableConstant2d lhs rhs . input = CrossVariableConstant2d (lhs . input) rhs
+  Dot3d lhs rhs . input = Dot3d (lhs . input) (rhs . input)
+  DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
+
+instance Composition (Ast2d input) (Ast2d UvPoint) (Ast2d input) where
+  Constant2d outer . _ = Constant2d outer
+  Variable2d outer . Variable2d inner = Variable2d (outer . inner)
+  outer . Constant2d (Vector2d u v) = do
+    let (f, _) = compileSurface2d outer
+    Constant2d (f (Point2d u v))
+
+instance Composition (Variable2d input) (Variable2d UvPoint) (Variable2d input) where
+  XY2d x y . input = XY2d (x . input) (y . input)
+  XC2d x y . input = XC2d (x . input) y
+  CY2d x y . input = CY2d x (y . input)
+  Negated2d arg . input = Negated2d (arg . input)
+  Sum2d lhs rhs . input = Sum2d (lhs . input) (rhs . input)
+  SumVariableConstant2d lhs rhs . input = SumVariableConstant2d (lhs . input) rhs
+  Difference2d lhs rhs . input = Difference2d (lhs . input) (rhs . input)
+  DifferenceConstantVariable2d lhs rhs . input = DifferenceConstantVariable2d lhs (rhs . input)
+  Product2d lhs rhs . input = Product2d (lhs . input) (rhs . input)
+  ProductVariableConstant2d lhs rhs . input = ProductVariableConstant2d (lhs . input) rhs
+  ProductConstantVariable2d lhs rhs . input = ProductConstantVariable2d lhs (rhs . input)
+  Quotient2d lhs rhs . input = Quotient2d (lhs . input) (rhs . input)
+  QuotientConstantVariable2d lhs rhs . input = QuotientConstantVariable2d lhs (rhs . input)
+  BezierCurve2d controlPoints param . input = BezierCurve2d controlPoints (param . input)
+  TransformVector2d transform vector . input = TransformVector2d transform (vector . input)
+  TransformPoint2d transform point . input = TransformPoint2d transform (point . input)
+  ProjectVector3d basis vector . input = ProjectVector3d basis (vector . input)
+  ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
+
+instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
+  Constant3d outer . _ = Constant3d outer
+  Variable3d outer . Variable2d inner = Variable3d (outer . inner)
+  outer . Constant2d (Vector2d u v) = do
+    let (f, _) = compileSurface3d outer
+    Constant3d (f (Point2d u v))
+
+instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) where
+  XYZ3d x y z . input = XYZ3d (x . input) (y . input) (z . input)
+  XYC3d x y z . input = XYC3d (x . input) (y . input) z
+  XCZ3d x y z . input = XCZ3d (x . input) y (z . input)
+  CYZ3d x y z . input = CYZ3d x (y . input) (z . input)
+  XCC3d x y z . input = XCC3d (x . input) y z
+  CYC3d x y z . input = CYC3d x (y . input) z
+  CCZ3d x y z . input = CCZ3d x y (z . input)
+  Negated3d arg . input = Negated3d (arg . input)
+  Sum3d lhs rhs . input = Sum3d (lhs . input) (rhs . input)
+  SumVariableConstant3d lhs rhs . input = SumVariableConstant3d (lhs . input) rhs
+  Difference3d lhs rhs . input = Difference3d (lhs . input) (rhs . input)
+  DifferenceConstantVariable3d lhs rhs . input = DifferenceConstantVariable3d lhs (rhs . input)
+  Product3d lhs rhs . input = Product3d (lhs . input) (rhs . input)
+  ProductVariableConstant3d lhs rhs . input = ProductVariableConstant3d (lhs . input) rhs
+  ProductConstantVariable3d lhs rhs . input = ProductConstantVariable3d lhs (rhs . input)
+  Quotient3d lhs rhs . input = Quotient3d (lhs . input) (rhs . input)
+  QuotientConstantVariable3d lhs rhs . input = QuotientConstantVariable3d lhs (rhs . input)
+  BezierCurve3d controlPoints param . input = BezierCurve3d controlPoints (param . input)
+  Cross3d lhs rhs . input = Cross3d (lhs . input) (rhs . input)
+  CrossVariableConstant3d lhs rhs . input = CrossVariableConstant3d (lhs . input) rhs
+  TransformVector3d transform vector . input = TransformVector3d transform (vector . input)
+  TransformPoint3d transform point . input = TransformPoint3d transform (point . input)
+  PlaceVector2d basis vector . input = PlaceVector2d basis (vector . input)
+  PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
+
 constant1d :: Qty units -> Ast1d input
 constant1d value = Constant1d (Units.coerce value)
 
