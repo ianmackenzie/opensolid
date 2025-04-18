@@ -119,16 +119,19 @@ computeValue(
         const double* vec = getVariablePointer();
         double* output = getVariablePointer();
         *output = vec[0];
+        break;
       }
       case YComponent: {
         const double* vec = getVariablePointer();
         double* output = getVariablePointer();
         *output = vec[1];
+        break;
       }
       case ZComponent: {
         const double* vec = getVariablePointer();
         double* output = getVariablePointer();
         *output = vec[2];
+        break;
       }
       case Negate1d: {
         double input = *getVariablePointer();
@@ -265,6 +268,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = x;
         output[1] = y;
+        break;
       }
       case XC2d: {
         double x = *getVariablePointer();
@@ -272,6 +276,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = x;
         output[1] = y;
+        break;
       }
       case CY2d: {
         double x = *getConstantPointer();
@@ -279,12 +284,14 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = x;
         output[1] = y;
+        break;
       }
       case Negate2d: {
         const double* input = getVariablePointer();
         double* output = getVariablePointer();
         output[0] = -input[0];
         output[1] = -input[1];
+        break;
       }
       case Add2d: {
         const double* lhs = getVariablePointer();
@@ -292,6 +299,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
+        break;
       }
       case AddVariableConstant2d: {
         const double* lhs = getVariablePointer();
@@ -299,6 +307,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
+        break;
       }
       case Subtract2d: {
         const double* lhs = getVariablePointer();
@@ -306,6 +315,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
+        break;
       }
       case SubtractConstantVariable2d: {
         const double* lhs = getConstantPointer();
@@ -313,6 +323,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
+        break;
       }
       case Multiply2d: {
         const double* lhs = getVariablePointer();
@@ -320,6 +331,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
+        break;
       }
       case MultiplyVariableConstant2d: {
         const double* lhs = getVariablePointer();
@@ -327,6 +339,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
+        break;
       }
       case MultiplyConstantVariable2d: {
         const double* lhs = getConstantPointer();
@@ -334,6 +347,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
+        break;
       }
       case Divide2d: {
         const double* lhs = getVariablePointer();
@@ -341,6 +355,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
+        break;
       }
       case DivideConstantVariable2d: {
         const double* lhs = getConstantPointer();
@@ -348,6 +363,7 @@ computeValue(
         double* output = getVariablePointer();
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
+        break;
       }
       case SquaredMagnitude2d: {
         const double* arg = getVariablePointer();
@@ -355,6 +371,7 @@ computeValue(
         double x = arg[0];
         double y = arg[1];
         *output = x * x + y * y;
+        break;
       }
       case Magnitude2d: {
         const double* arg = getVariablePointer();
@@ -362,30 +379,35 @@ computeValue(
         double x = arg[0];
         double y = arg[1];
         *output = std::sqrt(x * x + y * y);
+        break;
       }
       case Dot2d: {
         const double* lhs = getVariablePointer();
         const double* rhs = getVariablePointer();
         double* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
+        break;
       }
       case DotVariableConstant2d: {
         const double* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
         double* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
+        break;
       }
       case Cross2d: {
         const double* lhs = getVariablePointer();
         const double* rhs = getVariablePointer();
         double* output = getVariablePointer();
         *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        break;
       }
       case CrossVariableConstant2d: {
         const double* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
         double* output = getVariablePointer();
         *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        break;
       }
       case Linear2d: {
         const double* endpoints = getConstantPointer();
@@ -446,6 +468,7 @@ computeValue(
         const double* y = controlPoints + n;
         output[0] = bezierValue(n, x, parameter);
         output[1] = bezierValue(n, y, parameter);
+        break;
       }
       case TransformVector2d: {
         const double* matrix = getConstantPointer();
@@ -455,6 +478,7 @@ computeValue(
         double vy = input[1];
         output[0] = matrix[0] * vx + matrix[2] * vy;
         output[1] = matrix[1] * vx + matrix[3] * vy;
+        break;
       }
       case TransformPoint2d: {
         const double* matrix = getConstantPointer();
@@ -464,6 +488,7 @@ computeValue(
         double py = input[1];
         output[0] = matrix[0] * px + matrix[2] * py + matrix[4];
         output[1] = matrix[1] * px + matrix[3] * py + matrix[5];
+        break;
       }
       case ProjectVector3d: {
         const double* matrix = getConstantPointer();
@@ -474,6 +499,7 @@ computeValue(
         double vz = input[2];
         output[0] = matrix[0] * vx + matrix[1] * vy + matrix[2] * vz;
         output[1] = matrix[3] * vx + matrix[4] * vy + matrix[5] * vz;
+        break;
       }
       case ProjectPoint3d: {
         const double* matrix = getConstantPointer();
@@ -484,6 +510,7 @@ computeValue(
         double dz = input[2] - matrix[8];
         output[0] = matrix[0] * dx + matrix[1] * dy + matrix[2] * dz;
         output[1] = matrix[3] * dx + matrix[4] * dy + matrix[5] * dz;
+        break;
       }
       case XYZ3d: {
         double x = *getVariablePointer();
@@ -493,6 +520,7 @@ computeValue(
         output[0] = x;
         output[1] = y;
         output[2] = z;
+        break;
       }
       case XYC3d: {
         double x = *getVariablePointer();
@@ -502,6 +530,7 @@ computeValue(
         output[0] = x;
         output[1] = y;
         output[2] = z;
+        break;
       }
       case XCZ3d: {
         double x = *getVariablePointer();
@@ -511,6 +540,7 @@ computeValue(
         output[0] = x;
         output[1] = y;
         output[2] = z;
+        break;
       }
       case CYZ3d: {
         double x = *getConstantPointer();
@@ -520,6 +550,7 @@ computeValue(
         output[0] = x;
         output[1] = y;
         output[2] = z;
+        break;
       }
       case XCC3d: {
         double x = *getVariablePointer();
@@ -529,6 +560,7 @@ computeValue(
         output[0] = x;
         output[1] = y;
         output[2] = z;
+        break;
       }
       case CYC3d: {
         double x = *getConstantPointer();
@@ -538,6 +570,7 @@ computeValue(
         output[0] = x;
         output[1] = y;
         output[2] = z;
+        break;
       }
       case CCZ3d: {
         double x = *getConstantPointer();
@@ -547,6 +580,7 @@ computeValue(
         output[0] = x;
         output[1] = y;
         output[2] = z;
+        break;
       }
       case Negate3d: {
         const double* input = getVariablePointer();
@@ -554,6 +588,7 @@ computeValue(
         output[0] = -input[0];
         output[1] = -input[1];
         output[2] = -input[2];
+        break;
       }
       case Add3d: {
         const double* lhs = getVariablePointer();
@@ -562,6 +597,7 @@ computeValue(
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
         output[2] = lhs[2] + rhs[2];
+        break;
       }
       case AddVariableConstant3d: {
         const double* lhs = getVariablePointer();
@@ -570,6 +606,7 @@ computeValue(
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
         output[2] = lhs[2] + rhs[2];
+        break;
       }
       case Subtract3d: {
         const double* lhs = getVariablePointer();
@@ -578,6 +615,7 @@ computeValue(
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
         output[2] = lhs[2] - rhs[2];
+        break;
       }
       case SubtractConstantVariable3d: {
         const double* lhs = getConstantPointer();
@@ -586,6 +624,7 @@ computeValue(
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
         output[2] = lhs[2] - rhs[2];
+        break;
       }
       case Multiply3d: {
         const double* lhs = getVariablePointer();
@@ -594,6 +633,7 @@ computeValue(
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
+        break;
       }
       case MultiplyVariableConstant3d: {
         const double* lhs = getVariablePointer();
@@ -602,6 +642,7 @@ computeValue(
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
+        break;
       }
       case MultiplyConstantVariable3d: {
         const double* lhs = getConstantPointer();
@@ -610,6 +651,7 @@ computeValue(
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
+        break;
       }
       case Divide3d: {
         const double* lhs = getVariablePointer();
@@ -618,6 +660,7 @@ computeValue(
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
         output[2] = lhs[2] / rhs;
+        break;
       }
       case DivideConstantVariable3d: {
         const double* lhs = getConstantPointer();
@@ -626,6 +669,7 @@ computeValue(
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
         output[2] = lhs[2] / rhs;
+        break;
       }
       case SquaredMagnitude3d: {
         const double* arg = getVariablePointer();
@@ -634,6 +678,7 @@ computeValue(
         double y = arg[1];
         double z = arg[2];
         *output = x * x + y * y + z * z;
+        break;
       }
       case Magnitude3d: {
         const double* arg = getVariablePointer();
@@ -642,18 +687,21 @@ computeValue(
         double y = arg[1];
         double z = arg[2];
         *output = std::sqrt(x * x + y * y + z * z);
+        break;
       }
       case Dot3d: {
         const double* lhs = getVariablePointer();
         const double* rhs = getVariablePointer();
         double* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+        break;
       }
       case DotVariableConstant3d: {
         const double* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
         double* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+        break;
       }
       case Cross3d: {
         const double* lhs = getVariablePointer();
@@ -662,6 +710,7 @@ computeValue(
         output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
         output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
         output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        break;
       }
       case CrossVariableConstant3d: {
         const double* lhs = getVariablePointer();
@@ -670,6 +719,7 @@ computeValue(
         output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
         output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
         output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        break;
       }
       case Linear3d: {
         const double* endpoints = getConstantPointer();
@@ -742,6 +792,7 @@ computeValue(
         output[0] = bezierValue(n, x, parameter);
         output[1] = bezierValue(n, y, parameter);
         output[2] = bezierValue(n, z, parameter);
+        break;
       }
       case TransformVector3d: {
         const double* matrix = getConstantPointer();
@@ -753,6 +804,7 @@ computeValue(
         output[0] = matrix[0] * vx + matrix[3] * vy + matrix[6] * vz;
         output[1] = matrix[1] * vx + matrix[4] * vy + matrix[7] * vz;
         output[2] = matrix[2] * vx + matrix[5] * vy + matrix[8] * vz;
+        break;
       }
       case TransformPoint3d: {
         const double* matrix = getConstantPointer();
@@ -764,6 +816,7 @@ computeValue(
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6] * pz + matrix[9];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7] * pz + matrix[10];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8] * pz + matrix[11];
+        break;
       }
       case PlaceVector2d: {
         const double* matrix = getConstantPointer();
@@ -774,6 +827,7 @@ computeValue(
         output[0] = matrix[0] * vx + matrix[3] * vy;
         output[1] = matrix[1] * vx + matrix[4] * vy;
         output[2] = matrix[2] * vx + matrix[5] * vy;
+        break;
       }
       case PlacePoint2d: {
         const double* matrix = getConstantPointer();
@@ -784,6 +838,7 @@ computeValue(
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
+        break;
       }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
@@ -880,16 +935,19 @@ computeBounds(
         const Range* vec = getVariablePointer();
         Range* output = getVariablePointer();
         *output = vec[0];
+        break;
       }
       case YComponent: {
         const Range* vec = getVariablePointer();
         Range* output = getVariablePointer();
         *output = vec[1];
+        break;
       }
       case ZComponent: {
         const Range* vec = getVariablePointer();
         Range* output = getVariablePointer();
         *output = vec[2];
+        break;
       }
       case Negate1d: {
         Range input = *getVariablePointer();
@@ -1026,6 +1084,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = x;
         output[1] = y;
+        break;
       }
       case XC2d: {
         Range x = *getVariablePointer();
@@ -1033,6 +1092,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = x;
         output[1] = Range::constant(y);
+        break;
       }
       case CY2d: {
         double x = *getConstantPointer();
@@ -1040,12 +1100,14 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = Range::constant(x);
         output[1] = y;
+        break;
       }
       case Negate2d: {
         const Range* input = getVariablePointer();
         Range* output = getVariablePointer();
         output[0] = -input[0];
         output[1] = -input[1];
+        break;
       }
       case Add2d: {
         const Range* lhs = getVariablePointer();
@@ -1053,6 +1115,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
+        break;
       }
       case AddVariableConstant2d: {
         const Range* lhs = getVariablePointer();
@@ -1060,6 +1123,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
+        break;
       }
       case Subtract2d: {
         const Range* lhs = getVariablePointer();
@@ -1067,6 +1131,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
+        break;
       }
       case SubtractConstantVariable2d: {
         const double* lhs = getConstantPointer();
@@ -1074,6 +1139,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
+        break;
       }
       case Multiply2d: {
         const Range* lhs = getVariablePointer();
@@ -1081,6 +1147,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
+        break;
       }
       case MultiplyVariableConstant2d: {
         const Range* lhs = getVariablePointer();
@@ -1088,6 +1155,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
+        break;
       }
       case MultiplyConstantVariable2d: {
         const double* lhs = getConstantPointer();
@@ -1095,6 +1163,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
+        break;
       }
       case Divide2d: {
         const Range* lhs = getVariablePointer();
@@ -1102,6 +1171,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
+        break;
       }
       case DivideConstantVariable2d: {
         const double* lhs = getConstantPointer();
@@ -1109,41 +1179,48 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
+        break;
       }
       case SquaredMagnitude2d: {
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         *output = arg[0].squared() + arg[1].squared();
+        break;
       }
       case Magnitude2d: {
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         // TODO add specialized Range.hypot2 for tighter bounds
         *output = (arg[0].squared() + arg[1].squared()).sqrt();
+        break;
       }
       case Dot2d: {
         const Range* lhs = getVariablePointer();
         const Range* rhs = getVariablePointer();
         Range* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
+        break;
       }
       case DotVariableConstant2d: {
         const Range* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
         Range* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
+        break;
       }
       case Cross2d: {
         const Range* lhs = getVariablePointer();
         const Range* rhs = getVariablePointer();
         Range* output = getVariablePointer();
         *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        break;
       }
       case CrossVariableConstant2d: {
         const Range* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
         Range* output = getVariablePointer();
         *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        break;
       }
       case Linear2d: {
         const double* endpoints = getConstantPointer();
@@ -1204,6 +1281,7 @@ computeBounds(
         const double* y = controlPoints + n;
         output[0] = bezierBounds(n, x, parameter);
         output[1] = bezierBounds(n, y, parameter);
+        break;
       }
       case TransformVector2d: {
         const double* matrix = getConstantPointer();
@@ -1213,6 +1291,7 @@ computeBounds(
         Range vy = input[1];
         output[0] = matrix[0] * vx + matrix[2] * vy;
         output[1] = matrix[1] * vx + matrix[3] * vy;
+        break;
       }
       case TransformPoint2d: {
         const double* matrix = getConstantPointer();
@@ -1222,6 +1301,7 @@ computeBounds(
         Range py = point[1];
         output[0] = matrix[0] * px + matrix[2] * py + matrix[4];
         output[1] = matrix[1] * px + matrix[3] * py + matrix[5];
+        break;
       }
       case ProjectVector3d: {
         const double* matrix = getConstantPointer();
@@ -1232,6 +1312,7 @@ computeBounds(
         Range vz = input[2];
         output[0] = matrix[0] * vx + matrix[1] * vy + matrix[2] * vz;
         output[1] = matrix[3] * vx + matrix[4] * vy + matrix[5] * vz;
+        break;
       }
       case ProjectPoint3d: {
         const double* matrix = getConstantPointer();
@@ -1242,6 +1323,7 @@ computeBounds(
         Range dz = input[2] - matrix[8];
         output[0] = matrix[0] * dx + matrix[1] * dy + matrix[2] * dz;
         output[1] = matrix[3] * dx + matrix[4] * dy + matrix[5] * dz;
+        break;
       }
       case XYZ3d: {
         Range x = *getVariablePointer();
@@ -1251,6 +1333,7 @@ computeBounds(
         output[0] = x;
         output[1] = y;
         output[2] = z;
+        break;
       }
       case XYC3d: {
         Range x = *getVariablePointer();
@@ -1260,6 +1343,7 @@ computeBounds(
         output[0] = x;
         output[1] = y;
         output[2] = Range::constant(z);
+        break;
       }
       case XCZ3d: {
         Range x = *getVariablePointer();
@@ -1269,6 +1353,7 @@ computeBounds(
         output[0] = x;
         output[1] = Range::constant(y);
         output[2] = z;
+        break;
       }
       case CYZ3d: {
         double x = *getConstantPointer();
@@ -1278,6 +1363,7 @@ computeBounds(
         output[0] = Range::constant(x);
         output[1] = y;
         output[2] = z;
+        break;
       }
       case XCC3d: {
         Range x = *getVariablePointer();
@@ -1287,6 +1373,7 @@ computeBounds(
         output[0] = x;
         output[1] = Range::constant(y);
         output[2] = Range::constant(z);
+        break;
       }
       case CYC3d: {
         double x = *getConstantPointer();
@@ -1296,6 +1383,7 @@ computeBounds(
         output[0] = Range::constant(x);
         output[1] = y;
         output[2] = Range::constant(z);
+        break;
       }
       case CCZ3d: {
         double x = *getConstantPointer();
@@ -1305,6 +1393,7 @@ computeBounds(
         output[0] = Range::constant(x);
         output[1] = Range::constant(y);
         output[2] = z;
+        break;
       }
       case Negate3d: {
         const Range* input = getVariablePointer();
@@ -1312,6 +1401,7 @@ computeBounds(
         output[0] = -input[0];
         output[1] = -input[1];
         output[2] = -input[2];
+        break;
       }
       case Add3d: {
         const Range* lhs = getVariablePointer();
@@ -1320,6 +1410,7 @@ computeBounds(
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
         output[2] = lhs[2] + rhs[2];
+        break;
       }
       case AddVariableConstant3d: {
         const Range* lhs = getVariablePointer();
@@ -1328,6 +1419,7 @@ computeBounds(
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
         output[2] = lhs[2] + rhs[2];
+        break;
       }
       case Subtract3d: {
         const Range* lhs = getVariablePointer();
@@ -1336,6 +1428,7 @@ computeBounds(
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
         output[2] = lhs[2] - rhs[2];
+        break;
       }
       case SubtractConstantVariable3d: {
         const double* lhs = getConstantPointer();
@@ -1344,6 +1437,7 @@ computeBounds(
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
         output[2] = lhs[2] - rhs[2];
+        break;
       }
       case Multiply3d: {
         const Range* lhs = getVariablePointer();
@@ -1352,6 +1446,7 @@ computeBounds(
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
+        break;
       }
       case MultiplyVariableConstant3d: {
         const Range* lhs = getVariablePointer();
@@ -1360,6 +1455,7 @@ computeBounds(
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
+        break;
       }
       case MultiplyConstantVariable3d: {
         const double* lhs = getConstantPointer();
@@ -1368,6 +1464,7 @@ computeBounds(
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
+        break;
       }
       case Divide3d: {
         const Range* lhs = getVariablePointer();
@@ -1376,6 +1473,7 @@ computeBounds(
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
         output[2] = lhs[2] / rhs;
+        break;
       }
       case DivideConstantVariable3d: {
         const double* lhs = getConstantPointer();
@@ -1384,28 +1482,33 @@ computeBounds(
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
         output[2] = lhs[2] / rhs;
+        break;
       }
       case SquaredMagnitude3d: {
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         *output = arg[0].squared() + arg[1].squared() + arg[2].squared();
+        break;
       }
       case Magnitude3d: {
         const Range* arg = getVariablePointer();
         Range* output = getVariablePointer();
         *output = (arg[0].squared() + arg[1].squared() + arg[2].squared()).sqrt();
+        break;
       }
       case Dot3d: {
         const Range* lhs = getVariablePointer();
         const Range* rhs = getVariablePointer();
         Range* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+        break;
       }
       case DotVariableConstant3d: {
         const Range* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
         Range* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+        break;
       }
       case Cross3d: {
         const Range* lhs = getVariablePointer();
@@ -1414,6 +1517,7 @@ computeBounds(
         output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
         output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
         output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        break;
       }
       case CrossVariableConstant3d: {
         const Range* lhs = getVariablePointer();
@@ -1422,6 +1526,7 @@ computeBounds(
         output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
         output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
         output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        break;
       }
       case Linear3d: {
         const double* endpoints = getConstantPointer();
@@ -1494,6 +1599,7 @@ computeBounds(
         output[0] = bezierBounds(n, x, parameter);
         output[1] = bezierBounds(n, y, parameter);
         output[2] = bezierBounds(n, z, parameter);
+        break;
       }
       case TransformVector3d: {
         const double* matrix = getConstantPointer();
@@ -1505,6 +1611,7 @@ computeBounds(
         output[0] = matrix[0] * vx + matrix[3] * vy + matrix[6] * vz;
         output[1] = matrix[1] * vx + matrix[4] * vy + matrix[7] * vz;
         output[2] = matrix[2] * vx + matrix[5] * vy + matrix[8] * vz;
+        break;
       }
       case TransformPoint3d: {
         const double* matrix = getConstantPointer();
@@ -1516,6 +1623,7 @@ computeBounds(
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6] * pz + matrix[9];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7] * pz + matrix[10];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8] * pz + matrix[11];
+        break;
       }
       case PlaceVector2d: {
         const double* matrix = getConstantPointer();
@@ -1526,6 +1634,7 @@ computeBounds(
         output[0] = matrix[0] * vx + matrix[3] * vy;
         output[1] = matrix[1] * vx + matrix[4] * vy;
         output[2] = matrix[2] * vx + matrix[5] * vy;
+        break;
       }
       case PlacePoint2d: {
         const double* matrix = getConstantPointer();
@@ -1536,6 +1645,7 @@ computeBounds(
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
+        break;
       }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");

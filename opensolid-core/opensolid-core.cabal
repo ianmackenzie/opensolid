@@ -263,6 +263,9 @@ library
     src/OpenSolid/Bytecode/bytecode.cpp
 
   cxx-options:
+    -Wall
+    -Wextra
+    -Werror
     -fPIC
     -std=c++11
 
