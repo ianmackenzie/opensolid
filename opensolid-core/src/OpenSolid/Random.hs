@@ -9,8 +9,8 @@ module OpenSolid.Random
   , map3
   , map4
   , seed
-  , either
   , oneOf
+  , merge
   , retry
   , combine
   , (>>=)
@@ -24,6 +24,7 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import OpenSolid.Int qualified as Int
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal hiding ((>>=))
 import OpenSolid.Random.Internal qualified as Internal
@@ -73,13 +74,11 @@ map4 function generatorA generatorB generatorC generatorD = OpenSolid.Random.do
 seed :: Generator Seed
 seed = Generator (System.Random.split >> Pair.mapFirst Seed)
 
-either :: Generator a -> Generator a -> Generator a
-either firstGenerator secondGenerator = OpenSolid.Random.do
-  coinFlip <- Generator System.Random.uniform
-  if coinFlip then firstGenerator else secondGenerator
+oneOf :: NonEmpty a -> Generator a
+oneOf values = merge (NonEmpty.map return values)
 
-oneOf :: NonEmpty (Generator a) -> Generator a
-oneOf generators = do
+merge :: NonEmpty (Generator a) -> Generator a
+merge generators = do
   let generatorArray = Array.fromNonEmpty generators
   let indexGenerator = Int.random 0 (Array.length generatorArray - 1)
   OpenSolid.Random.do

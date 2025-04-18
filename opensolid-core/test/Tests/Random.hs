@@ -111,11 +111,11 @@ mirror2d :: Generator (Transform2d.Orthonormal (space @ Meters))
 mirror2d = Random.map Transform2d.mirrorAcross axis2d
 
 rigidTransform2d :: Generator (Transform2d.Rigid (space @ Meters))
-rigidTransform2d = Random.oneOf (NonEmpty.two translation2d rotation2d)
+rigidTransform2d = Random.merge (NonEmpty.two translation2d rotation2d)
 
 orthonormalTransform2d :: Generator (Transform2d.Orthonormal (space @ Meters))
 orthonormalTransform2d =
-  Random.oneOf $
+  Random.merge $
     NonEmpty.three
       (Random.map Transform2d.toOrthonormal translation2d)
       (Random.map Transform2d.toOrthonormal rotation2d)
@@ -132,7 +132,7 @@ nonUniformScaling2d = Random.map2 Transform2d.scaleAlong axis2d scalingFactor
 
 affineTransform2d :: Generator (Transform2d.Affine (space @ Meters))
 affineTransform2d =
-  Random.oneOf $
+  Random.merge $
     NonEmpty.five
       (Random.map Transform2d.toAffine translation2d)
       (Random.map Transform2d.toAffine rotation2d)
