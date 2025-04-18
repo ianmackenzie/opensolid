@@ -745,6 +745,8 @@ transformVector2d transform ast = do
   let erasedTransform = Transform2d.coerce transform
   case ast of
     Constant2d val -> Constant2d (Vector2d.transformBy erasedTransform val)
+    Variable2d (TransformVector2d existing var) ->
+      Variable2d (TransformVector2d (erasedTransform . existing) var)
     Variable2d var -> Variable2d (TransformVector2d erasedTransform var)
 
 transformVector3d :: Transform3d tag (space @ units) -> Ast3d input -> Ast3d input
@@ -752,6 +754,8 @@ transformVector3d transform ast = do
   let erasedTransform = Transform3d.coerce transform
   case ast of
     Constant3d val -> Constant3d (Vector3d.transformBy erasedTransform val)
+    Variable3d (TransformVector3d existing var) ->
+      Variable3d (TransformVector3d (erasedTransform . existing) var)
     Variable3d var -> Variable3d (TransformVector3d erasedTransform var)
 
 transformPoint2d :: Transform2d tag (space @ units) -> Ast2d input -> Ast2d input
@@ -760,6 +764,8 @@ transformPoint2d transform ast = do
   case ast of
     -- TODO avoid adding/subtracting Point2d.origin once Point2d is a newtype over Vector2d
     Constant2d val -> Constant2d (Point2d.transformBy erasedTransform (Point2d.origin + val) - Point2d.origin)
+    Variable2d (TransformPoint2d existing var) ->
+      Variable2d (TransformPoint2d (erasedTransform . existing) var)
     Variable2d var -> Variable2d (TransformPoint2d erasedTransform var)
 
 transformPoint3d :: Transform3d tag (space @ units) -> Ast3d input -> Ast3d input
@@ -768,6 +774,8 @@ transformPoint3d transform ast = do
   case ast of
     -- TODO avoid adding/subtracting Point3d.origin once Point3d is a newtype over Vector3d
     Constant3d val -> Constant3d (Point3d.transformBy erasedTransform (Point3d.origin + val) - Point3d.origin)
+    Variable3d (TransformPoint3d existing var) ->
+      Variable3d (TransformPoint3d (erasedTransform . existing) var)
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
 
 line1d :: Qty units -> Qty units -> Ast1d input -> Ast1d input
