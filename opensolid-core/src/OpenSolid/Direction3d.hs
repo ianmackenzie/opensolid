@@ -9,6 +9,12 @@ module OpenSolid.Direction3d
   , x
   , y
   , z
+  , xy
+  , yx
+  , xz
+  , zx
+  , yz
+  , zy
   , perpendicularTo
   , angleFrom
   , placeIn
@@ -79,6 +85,30 @@ y = Unit3d (Vector3d 0.0 1.0 0.0)
 -- | The Z direction.
 z :: Direction3d space
 z = Unit3d (Vector3d 0.0 0.0 1.0)
+
+-- | Construct a direction in the XY plane given an angle from the X axis towards the Y axis.
+xy :: Angle -> Direction3d space
+xy angle = Unit3d (Vector3d (Angle.cos angle) (Angle.sin angle) 0.0)
+
+-- | Construct a direction in the XY plane given an angle from the Y axis towards the X axis.
+yx :: Angle -> Direction3d space
+yx angle = Unit3d (Vector3d (Angle.sin angle) (Angle.cos angle) 0.0)
+
+-- | Construct a direction in the YZ plane given an angle from the Y axis towards the Z axis.
+yz :: Angle -> Direction3d space
+yz angle = Unit3d (Vector3d 0.0 (Angle.cos angle) (Angle.sin angle))
+
+-- | Construct a direction in the YZ plane given an angle from the Z axis towards the Y axis.
+zy :: Angle -> Direction3d space
+zy angle = Unit3d (Vector3d 0.0 (Angle.sin angle) (Angle.cos angle))
+
+-- | Construct a direction in the XZ plane given an angle from the X axis towards the Z axis.
+xz :: Angle -> Direction3d space
+xz angle = Unit3d (Vector3d (Angle.cos angle) 0.0 (Angle.sin angle))
+
+-- | Construct a direction in the XZ plane given an angle from the Z axis towards the X axis.
+zx :: Angle -> Direction3d space
+zx angle = Unit3d (Vector3d (Angle.sin angle) 0.0 (Angle.cos angle))
 
 -- | Generate an arbitrary direction perpendicular to the given one.
 perpendicularTo :: Direction3d space -> Direction3d space
