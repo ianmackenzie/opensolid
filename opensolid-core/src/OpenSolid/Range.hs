@@ -2,6 +2,7 @@ module OpenSolid.Range
   ( Range (Range)
   , constant
   , unit
+  , coerce
   , zeroTo
   , unbounded
   , radians
@@ -258,6 +259,10 @@ constant value = Range value value
 -- | The range with endoints [0,1].
 unit :: Range Unitless
 unit = Range 0.0 1.0
+
+{-# INLINE coerce #-}
+coerce :: Range units1 -> Range units2
+coerce = Data.Coerce.coerce
 
 {-| Construct a range from its lower and upper bounds.
 
