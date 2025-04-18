@@ -34,6 +34,9 @@ module OpenSolid.Bytecode.Ast
   , compileCurve1d
   , compileCurve2d
   , compileCurve3d
+  , compileSurface1d
+  , compileSurface2d
+  , compileSurface3d
   )
 where
 
@@ -54,7 +57,7 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d (Transform3d))
@@ -1158,3 +1161,19 @@ compileCurve3d ::
   (Float -> Vector3d Coordinates, Range Unitless -> VectorBounds3d Coordinates)
 compileCurve3d (Constant3d val) = (always val, always (VectorBounds3d.constant val))
 compileCurve3d (Variable3d variable) = Compilation.curve3d (compileVariable3d variable)
+
+compileSurface1d :: Ast1d UvPoint -> (UvPoint -> Float, UvBounds -> Range Unitless)
+compileSurface1d (Constant1d value) = (always value, always (Range.constant value))
+compileSurface1d (Variable1d variable) = Compilation.surface1d (compileVariable1d variable)
+
+compileSurface2d ::
+  Ast2d UvPoint ->
+  (UvPoint -> Vector2d Coordinates, UvBounds -> VectorBounds2d Coordinates)
+compileSurface2d (Constant2d val) = (always val, always (VectorBounds2d.constant val))
+compileSurface2d (Variable2d var) = Compilation.surface2d (compileVariable2d var)
+
+compileSurface3d ::
+  Ast3d UvPoint ->
+  (UvPoint -> Vector3d Coordinates, UvBounds -> VectorBounds3d Coordinates)
+compileSurface3d (Constant3d val) = (always val, always (VectorBounds3d.constant val))
+compileSurface3d (Variable3d variable) = Compilation.surface3d (compileVariable3d variable)
