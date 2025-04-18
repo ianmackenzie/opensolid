@@ -241,7 +241,6 @@ library
     OpenSolid.Bytecode.Instruction
     OpenSolid.CompiledFunction
     OpenSolid.ConstrainedDelaunayTriangulation
-    OpenSolid.Expression.Scalar
     OpenSolid.HasZero
     OpenSolid.Json.FieldSchema
     OpenSolid.Linearization
