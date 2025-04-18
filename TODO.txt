@@ -2,6 +2,7 @@ Make Point#d a newtype over Vector#d?
 -> useful for bytecode evaluation code, evaluation functions can return Vector#d and then coerce to Point#d
 -> consistent with Direction#d being a newtype over Vector#d
 -> use Position#d as the internal constructor name?
+-> similarly make Bounds#d a newtype over VectorBounds#d?
 
 Switch Tolerance in Python to use ContextVar instead of threading.local
 
@@ -13,8 +14,6 @@ Rename CompiledFunction to Function.Compiled
   -> then might make sense to *not* implement Addition etc. for Evaluator, just use map2 (+) (+) (+) etc.
 
 Support discontinuities in bytecode
-Add Ast3d
-Add arithmetic typeclass instances to Ast2d and Ast3d
 
 Update Curve.sqrt' and SurfaceFunction.sqrt' to use specialized square root derivative expression
 
