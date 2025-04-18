@@ -354,7 +354,6 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
   arcSweptAngle <- Random.map (Angle.degree *) Sign.random
   let arcEndAngle = arcStartAngle + arcSweptAngle
   t <- Parameter.random
-
   let arc =
         Curve2d.polarArc
           & CenterPoint arcCenter
