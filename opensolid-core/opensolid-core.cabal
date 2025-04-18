@@ -308,5 +308,6 @@ test-suite opensolid-core-test
     Tests.Text
     Tests.VectorBounds2d
     Tests.VectorBounds3d
+    Tests.VectorCurve2d
 
   hs-source-dirs: test
