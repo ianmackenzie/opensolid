@@ -295,12 +295,10 @@ constant1d :: Qty units -> Ast1d input
 constant1d value = Constant1d (Units.coerce value)
 
 constant2d :: Vector2d (space @ units) -> Ast2d input
-constant2d (Vector2d x y) =
-  Constant2d (Vector2d (Units.coerce x) (Units.coerce y))
+constant2d = Constant2d . Vector2d.coerce
 
 constant3d :: Vector3d (space @ units) -> Ast3d input
-constant3d (Vector3d x y z) =
-  Constant3d (Vector3d (Units.coerce x) (Units.coerce y) (Units.coerce z))
+constant3d = Constant3d . Vector3d.coerce
 
 curveParameter :: Ast1d Float
 curveParameter = Variable1d CurveParameter
