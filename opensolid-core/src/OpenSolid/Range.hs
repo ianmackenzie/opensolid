@@ -101,6 +101,10 @@ data Range units = Ordered (Qty units) (Qty units)
 The order of the two arguments does not matter;
 the minimum of the two will be used as the lower bound of the range
 and the maximum will be used as the upper bound.
+
+If either argument is NaN,
+then the result will be an open/infinite range
+(with endpoints negative infinity and positive infinity).
 -}
 {-# INLINE Range #-}
 pattern Range :: Qty units -> Qty units -> Range units
@@ -144,7 +148,7 @@ instance units ~ units_ => Intersects (Range units) (Range units_) units where
   first ^ second = separation first second <= ?tolerance
 
 instance Negation (Range units) where
-  negate (Range low high) = Ordered (negate high) (negate low)
+  negate (Range low high) = Range (negate high) (negate low)
 
 instance Multiplication Sign (Range units) (Range units) where
   Positive * range = range
@@ -155,7 +159,7 @@ instance Multiplication (Range units) Sign (Range units) where
   range * Negative = -range
 
 instance units ~ units_ => Addition (Range units) (Range units_) (Range units) where
-  Range low1 high1 + Range low2 high2 = Ordered (low1 + low2) (high1 + high2)
+  Range low1 high1 + Range low2 high2 = Range (low1 + low2) (high1 + high2)
 
 instance units ~ units_ => Addition (Range units) (Qty units_) (Range units) where
   Range low high + value = Range (low + value) (high + value)
@@ -164,7 +168,7 @@ instance units ~ units_ => Addition (Qty units) (Range units_) (Range units) whe
   value + Range low high = Range (value + low) (value + high)
 
 instance units ~ units_ => Subtraction (Range units) (Range units_) (Range units) where
-  Range low1 high1 - Range low2 high2 = Ordered (low1 - high2) (high1 - low2)
+  Range low1 high1 - Range low2 high2 = Range (low1 - high2) (high1 - low2)
 
 instance units ~ units_ => Subtraction (Range units) (Qty units_) (Range units) where
   Range low high - value = Range (low - value) (high - value)
@@ -253,7 +257,7 @@ constant value = Range value value
 
 -- | The range with endoints [0,1].
 unit :: Range Unitless
-unit = Ordered 0.0 1.0
+unit = Range 0.0 1.0
 
 {-| Construct a range from its lower and upper bounds.
 
@@ -270,7 +274,7 @@ zeroTo :: Qty units -> Range units
 zeroTo value = Range Qty.zero value
 
 unbounded :: Range units
-unbounded = Ordered -Qty.infinity Qty.infinity
+unbounded = Range -Qty.infinity Qty.infinity
 
 -- | Construct an angle range from lower and upper bounds given in radians.
 radians :: Float -> Float -> Range Radians
@@ -306,16 +310,16 @@ squareMeters a b = from (Area.squareMeters a) (Area.squareMeters b)
 
 aggregate2 :: Range units -> Range units -> Range units
 aggregate2 (Range low1 high1) (Range low2 high2) =
-  Ordered (Qty.min low1 low2) (Qty.max high1 high2)
+  Range (Qty.min low1 low2) (Qty.max high1 high2)
 
 aggregate3 :: Range units -> Range units -> Range units -> Range units
 aggregate3 (Range low1 high1) (Range low2 high2) (Range low3 high3) =
-  Ordered (Qty.min (Qty.min low1 low2) low3) (Qty.max (Qty.max high1 high2) high3)
+  Range (Qty.min (Qty.min low1 low2) low3) (Qty.max (Qty.max high1 high2) high3)
 
 -- | Build a range containing all ranges in the given non-empty list.
 aggregateN :: NonEmpty (Range units) -> Range units
 aggregateN (Range low1 high1 :| rest) = do
-  let go low high [] = Ordered low high
+  let go low high [] = Range low high
       go low high (Range nextLow nextHigh : remaining) =
         go (Qty.min low nextLow) (Qty.max high nextHigh) remaining
   go low1 high1 rest
@@ -325,20 +329,20 @@ intersection :: Range units -> Range units -> Maybe (Range units)
 intersection (Range low1 high1) (Range low2 high2)
   | high1 < low2 = Nothing
   | low1 > high2 = Nothing
-  | otherwise = Just (Ordered (Qty.max low1 low2) (Qty.min high1 high2))
+  | otherwise = Just (Range (Qty.max low1 low2) (Qty.min high1 high2))
 
 {-# INLINE hull3 #-}
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
-hull3 a b c = Ordered (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
+hull3 a b c = Range (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 
 {-# INLINE hull4 #-}
 hull4 :: Qty units -> Qty units -> Qty units -> Qty units -> Range units
-hull4 a b c d = Ordered (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
+hull4 a b c d = Range (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
 
 -- | Build a range containing all values in the given non-empty list.
 hullN :: NonEmpty (Qty units) -> Range units
 hullN (first :| rest) = do
-  let go low high [] = Ordered low high
+  let go low high [] = Range low high
       go low high (next : remaining) = go (Qty.min low next) (Qty.max high next) remaining
   go first first rest
 
@@ -383,13 +387,13 @@ squared' (Range low high) = do
   let ll = low .*. low
   let hh = high .*. high
   if
-    | low >= Qty.zero -> Ordered ll hh
-    | high <= Qty.zero -> Ordered hh ll
-    | otherwise -> Ordered Qty.zero (Qty.max ll hh)
+    | low >= Qty.zero -> Range ll hh
+    | high <= Qty.zero -> Range hh ll
+    | otherwise -> Range Qty.zero (Qty.max ll hh)
 
 sqrt' :: Range (units :*: units) -> Range units
 sqrt' (Range low high) =
-  Ordered
+  Range
     (Qty.sqrt' (Qty.max low Qty.zero))
     (Qty.sqrt' (Qty.max high Qty.zero))
 
@@ -406,15 +410,15 @@ hypot2 (Range xMin xMax) (Range yMin yMax) = do
   let yMagnitude = Qty.max (Qty.abs yMin) (Qty.abs yMax)
   let maxMagnitude = Qty.hypot2 xMagnitude yMagnitude
   if
-    | positiveX && positiveY -> Ordered (Qty.hypot2 xMin yMin) maxMagnitude
-    | positiveX && negativeY -> Ordered (Qty.hypot2 xMin yMax) maxMagnitude
-    | negativeX && positiveY -> Ordered (Qty.hypot2 xMax yMin) maxMagnitude
-    | negativeX && negativeY -> Ordered (Qty.hypot2 xMax yMax) maxMagnitude
-    | positiveX -> Ordered xMin maxMagnitude
-    | negativeX -> Ordered -xMax maxMagnitude
-    | positiveY -> Ordered yMin maxMagnitude
-    | negativeY -> Ordered -yMax maxMagnitude
-    | otherwise -> Ordered Qty.zero maxMagnitude
+    | positiveX && positiveY -> Range (Qty.hypot2 xMin yMin) maxMagnitude
+    | positiveX && negativeY -> Range (Qty.hypot2 xMin yMax) maxMagnitude
+    | negativeX && positiveY -> Range (Qty.hypot2 xMax yMin) maxMagnitude
+    | negativeX && negativeY -> Range (Qty.hypot2 xMax yMax) maxMagnitude
+    | positiveX -> Range xMin maxMagnitude
+    | negativeX -> Range -xMax maxMagnitude
+    | positiveY -> Range yMin maxMagnitude
+    | negativeY -> Range -yMax maxMagnitude
+    | otherwise -> Range Qty.zero maxMagnitude
 
 hypot3 :: Range units -> Range units -> Range units -> Range units
 hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax) = do
@@ -429,31 +433,31 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax) = do
   let zMagnitude = Qty.max (Qty.abs zMin) (Qty.abs zMax)
   let maxMagnitude = Qty.hypot3 xMagnitude yMagnitude zMagnitude
   if
-    | positiveX && positiveY && positiveZ -> Ordered (Qty.hypot3 xMin yMin zMin) maxMagnitude
-    | positiveX && positiveY && negativeZ -> Ordered (Qty.hypot3 xMin yMin zMax) maxMagnitude
-    | positiveX && negativeY && positiveZ -> Ordered (Qty.hypot3 xMin yMax zMin) maxMagnitude
-    | positiveX && negativeY && negativeZ -> Ordered (Qty.hypot3 xMin yMax zMax) maxMagnitude
-    | negativeX && positiveY && positiveZ -> Ordered (Qty.hypot3 xMax yMin zMin) maxMagnitude
-    | negativeX && positiveY && negativeZ -> Ordered (Qty.hypot3 xMax yMin zMax) maxMagnitude
-    | negativeX && negativeY && positiveZ -> Ordered (Qty.hypot3 xMax yMax zMin) maxMagnitude
-    | negativeX && negativeY && negativeZ -> Ordered (Qty.hypot3 xMax yMax zMax) maxMagnitude
-    | positiveY && positiveZ -> Ordered (Qty.hypot2 yMin zMin) maxMagnitude
-    | positiveY && negativeZ -> Ordered (Qty.hypot2 yMin zMax) maxMagnitude
-    | negativeY && positiveZ -> Ordered (Qty.hypot2 yMax zMin) maxMagnitude
-    | negativeY && negativeZ -> Ordered (Qty.hypot2 yMax zMax) maxMagnitude
-    | positiveX && positiveZ -> Ordered (Qty.hypot2 xMin zMin) maxMagnitude
-    | positiveX && negativeZ -> Ordered (Qty.hypot2 xMin zMax) maxMagnitude
-    | negativeX && positiveZ -> Ordered (Qty.hypot2 xMax zMin) maxMagnitude
-    | negativeX && negativeZ -> Ordered (Qty.hypot2 xMax zMax) maxMagnitude
-    | positiveX && positiveY -> Ordered (Qty.hypot2 xMin yMin) maxMagnitude
-    | positiveX && negativeY -> Ordered (Qty.hypot2 xMin yMax) maxMagnitude
-    | negativeX && positiveY -> Ordered (Qty.hypot2 xMax yMin) maxMagnitude
-    | negativeX && negativeY -> Ordered (Qty.hypot2 xMax yMax) maxMagnitude
-    | positiveX -> Ordered xMin maxMagnitude
-    | negativeX -> Ordered -xMax maxMagnitude
-    | positiveY -> Ordered yMin maxMagnitude
-    | negativeY -> Ordered -yMax maxMagnitude
-    | otherwise -> Ordered Qty.zero maxMagnitude
+    | positiveX && positiveY && positiveZ -> Range (Qty.hypot3 xMin yMin zMin) maxMagnitude
+    | positiveX && positiveY && negativeZ -> Range (Qty.hypot3 xMin yMin zMax) maxMagnitude
+    | positiveX && negativeY && positiveZ -> Range (Qty.hypot3 xMin yMax zMin) maxMagnitude
+    | positiveX && negativeY && negativeZ -> Range (Qty.hypot3 xMin yMax zMax) maxMagnitude
+    | negativeX && positiveY && positiveZ -> Range (Qty.hypot3 xMax yMin zMin) maxMagnitude
+    | negativeX && positiveY && negativeZ -> Range (Qty.hypot3 xMax yMin zMax) maxMagnitude
+    | negativeX && negativeY && positiveZ -> Range (Qty.hypot3 xMax yMax zMin) maxMagnitude
+    | negativeX && negativeY && negativeZ -> Range (Qty.hypot3 xMax yMax zMax) maxMagnitude
+    | positiveY && positiveZ -> Range (Qty.hypot2 yMin zMin) maxMagnitude
+    | positiveY && negativeZ -> Range (Qty.hypot2 yMin zMax) maxMagnitude
+    | negativeY && positiveZ -> Range (Qty.hypot2 yMax zMin) maxMagnitude
+    | negativeY && negativeZ -> Range (Qty.hypot2 yMax zMax) maxMagnitude
+    | positiveX && positiveZ -> Range (Qty.hypot2 xMin zMin) maxMagnitude
+    | positiveX && negativeZ -> Range (Qty.hypot2 xMin zMax) maxMagnitude
+    | negativeX && positiveZ -> Range (Qty.hypot2 xMax zMin) maxMagnitude
+    | negativeX && negativeZ -> Range (Qty.hypot2 xMax zMax) maxMagnitude
+    | positiveX && positiveY -> Range (Qty.hypot2 xMin yMin) maxMagnitude
+    | positiveX && negativeY -> Range (Qty.hypot2 xMin yMax) maxMagnitude
+    | negativeX && positiveY -> Range (Qty.hypot2 xMax yMin) maxMagnitude
+    | negativeX && negativeY -> Range (Qty.hypot2 xMax yMax) maxMagnitude
+    | positiveX -> Range xMin maxMagnitude
+    | negativeX -> Range -xMax maxMagnitude
+    | positiveY -> Range yMin maxMagnitude
+    | negativeY -> Range -yMax maxMagnitude
+    | otherwise -> Range Qty.zero maxMagnitude
 
 {-| Check if a given value is included in a range.
 
@@ -500,7 +504,7 @@ bisect (Range low high) = do
         | otherwise = internalError "'Impossible' case hit in Range.bisect"
   Debug.assert (low < mid)
   Debug.assert (mid < high)
-  (Ordered low mid, Ordered mid high)
+  (Range low mid, Range mid high)
 
 {-# INLINE isAtomic #-}
 isAtomic :: Range units -> Bool
@@ -516,15 +520,15 @@ abs :: Range units -> Range units
 abs range@(Range low high)
   | low >= Qty.zero = range
   | high <= Qty.zero = -range
-  | otherwise = Ordered Qty.zero (Qty.max high -low)
+  | otherwise = Range Qty.zero (Qty.max high -low)
 
 min :: Range units -> Range units -> Range units
 min (Range low1 high1) (Range low2 high2) =
-  Ordered (Qty.min low1 low2) (Qty.min high1 high2)
+  Range (Qty.min low1 low2) (Qty.min high1 high2)
 
 max :: Range units -> Range units -> Range units
 max (Range low1 high1) (Range low2 high2) =
-  Ordered (Qty.max low1 low2) (Qty.max high1 high2)
+  Range (Qty.max low1 low2) (Qty.max high1 high2)
 
 smaller :: Range units -> Range units -> Range units
 smaller first second = do
@@ -536,7 +540,7 @@ smaller first second = do
     | otherwise -> do
         let (Range aggregateMin aggregateMax) = aggregate2 first second
         let high = Qty.min high1 high2
-        Ordered (Qty.max -high aggregateMin) (Qty.min aggregateMax high)
+        Range (Qty.max -high aggregateMin) (Qty.min aggregateMax high)
 
 larger :: Range units -> Range units -> Range units
 larger first second = do
@@ -547,8 +551,8 @@ larger first second = do
   if
     | low1 > high2 -> first
     | low2 > high1 -> second
-    | aggregateMin > -low -> Ordered (Qty.max aggregateMin low) aggregateMax
-    | aggregateMax < low -> Ordered aggregateMin (Qty.min aggregateMax -low)
+    | aggregateMin > -low -> Range (Qty.max aggregateMin low) aggregateMax
+    | aggregateMax < low -> Range aggregateMin (Qty.min aggregateMax -low)
     | otherwise -> aggregate
 
 minimum :: NonEmpty (Range units) -> Range units
@@ -564,7 +568,7 @@ smallest ranges = do
   let conditionalAggregate current (Range low high)
         | low > clipRadius || high < -clipRadius = current
         | otherwise =
-            aggregate2 current (Ordered (Qty.max low -clipRadius) (Qty.min high clipRadius))
+            aggregate2 current (Range (Qty.max low -clipRadius) (Qty.min high clipRadius))
   NonEmpty.foldl conditionalAggregate initial ranges
 
 largest :: NonEmpty (Range units) -> Range units
@@ -573,8 +577,8 @@ largest ranges = do
   let clipRadius = minAbs initial
   let conditionalAggregate current range@(Range low high)
         | low > -clipRadius && high < clipRadius = current
-        | low > -clipRadius = aggregate2 current (Ordered clipRadius high)
-        | high < clipRadius = aggregate2 current (Ordered low -clipRadius)
+        | low > -clipRadius = aggregate2 current (Range clipRadius high)
+        | high < clipRadius = aggregate2 current (Range low -clipRadius)
         | otherwise = aggregate2 current range
   NonEmpty.foldl conditionalAggregate initial ranges
 
@@ -583,14 +587,14 @@ sin range@(Range low high) = do
   let (includesMin, includesMax) = sinIncludesMinMax range
   let newLow = if includesMin then -1.0 else Qty.min (Angle.sin low) (Angle.sin high)
   let newHigh = if includesMax then 1.0 else Qty.max (Angle.sin low) (Angle.sin high)
-  Ordered newLow newHigh
+  Range newLow newHigh
 
 cos :: Range Radians -> Range Unitless
 cos range@(Range low high) = do
   let (includesMin, includesMax) = cosIncludesMinMax range
   let newLow = if includesMin then -1.0 else Qty.min (Angle.cos low) (Angle.cos high)
   let newHigh = if includesMax then 1.0 else Qty.max (Angle.cos low) (Angle.cos high)
-  Ordered newLow newHigh
+  Range newLow newHigh
 
 sinIncludesMinMax :: Range Radians -> (Bool, Bool)
 sinIncludesMinMax range = cosIncludesMinMax (range - Angle.quarterTurn)

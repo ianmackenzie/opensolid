@@ -18,23 +18,27 @@ struct Range {
   double lower;
   double upper;
 
-  inline Range(double lower, double upper) :
-      lower(lower),
-      upper(upper) {
-  }
-
-  inline static Range
-  constant(double value) {
+  inline Range(double value) {
     if (std::isnan(value)) {
-      return unbounded();
+      this->lower = -INFINITY;
+      this->upper = INFINITY;
     } else {
-      return Range(value, value);
+      this->lower = value;
+      this->upper = value;
     }
   }
 
-  inline static Range
-  validate(double a, double b) {
-    return a <= b ? Range(a, b) : unbounded();
+  inline Range(double a, double b) {
+    if (std::isnan(a) || std::isnan(b)) {
+      this->lower = -INFINITY;
+      this->upper = INFINITY;
+    } else if (a <= b) {
+      this->lower = a;
+      this->upper = b;
+    } else {
+      this->lower = b;
+      this->upper = a;
+    }
   }
 
   inline static Range
@@ -46,35 +50,35 @@ struct Range {
   hull2(double a, double b) {
     double min = std::min(a, b);
     double max = std::max(a, b);
-    return validate(min, max);
+    return Range(min, max);
   }
 
   inline static Range
   hull3(double a, double b, double c) {
     double min = std::min(std::min(a, b), c);
     double max = std::max(std::max(a, b), c);
-    return validate(min, max);
+    return Range(min, max);
   }
 
   inline static Range
   hull4(double a, double b, double c, double d) {
     double min = std::min(std::min(std::min(a, b), c), d);
     double max = std::max(std::max(std::max(a, b), c), d);
-    return validate(min, max);
+    return Range(min, max);
   }
 
   inline static Range
   hull5(double a, double b, double c, double d, double e) {
     double min = std::min(std::min(std::min(std::min(a, b), c), d), e);
     double max = std::max(std::max(std::max(std::max(a, b), c), d), e);
-    return validate(min, max);
+    return Range(min, max);
   }
 
   inline static Range
   hull6(double a, double b, double c, double d, double e, double f) {
     double min = std::min(std::min(std::min(std::min(std::min(a, b), c), d), e), f);
     double max = std::max(std::max(std::max(std::max(std::max(a, b), c), d), e), f);
-    return validate(min, max);
+    return Range(min, max);
   }
 
   inline Range
@@ -125,7 +129,7 @@ operator-(Range arg) {
 
 inline Range
 operator+(Range lhs, double rhs) {
-  return Range::validate(lhs.lower + rhs, lhs.upper + rhs);
+  return Range(lhs.lower + rhs, lhs.upper + rhs);
 }
 
 inline Range
@@ -145,7 +149,7 @@ operator-(Range lhs, double rhs) {
 
 inline Range
 operator-(double lhs, Range rhs) {
-  return Range::validate(lhs - rhs.upper, lhs - rhs.lower);
+  return Range(lhs - rhs.upper, lhs - rhs.lower);
 }
 
 inline Range

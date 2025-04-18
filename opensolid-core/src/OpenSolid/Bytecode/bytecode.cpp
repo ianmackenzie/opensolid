@@ -1094,14 +1094,14 @@ computeBounds(
         double y = *getConstantPointer();
         Range* output = getVariablePointer();
         output[0] = x;
-        output[1] = Range::constant(y);
+        output[1] = Range(y);
         break;
       }
       case CY2d: {
         double x = *getConstantPointer();
         Range y = *getVariablePointer();
         Range* output = getVariablePointer();
-        output[0] = Range::constant(x);
+        output[0] = Range(x);
         output[1] = y;
         break;
       }
@@ -1345,7 +1345,7 @@ computeBounds(
         Range* output = getVariablePointer();
         output[0] = x;
         output[1] = y;
-        output[2] = Range::constant(z);
+        output[2] = Range(z);
         break;
       }
       case XCZ3d: {
@@ -1354,7 +1354,7 @@ computeBounds(
         Range z = *getVariablePointer();
         Range* output = getVariablePointer();
         output[0] = x;
-        output[1] = Range::constant(y);
+        output[1] = Range(y);
         output[2] = z;
         break;
       }
@@ -1363,7 +1363,7 @@ computeBounds(
         Range y = *getVariablePointer();
         Range z = *getVariablePointer();
         Range* output = getVariablePointer();
-        output[0] = Range::constant(x);
+        output[0] = Range(x);
         output[1] = y;
         output[2] = z;
         break;
@@ -1374,8 +1374,8 @@ computeBounds(
         double z = *getConstantPointer();
         Range* output = getVariablePointer();
         output[0] = x;
-        output[1] = Range::constant(y);
-        output[2] = Range::constant(z);
+        output[1] = Range(y);
+        output[2] = Range(z);
         break;
       }
       case CYC3d: {
@@ -1383,9 +1383,9 @@ computeBounds(
         Range y = *getVariablePointer();
         double z = *getConstantPointer();
         Range* output = getVariablePointer();
-        output[0] = Range::constant(x);
+        output[0] = Range(x);
         output[1] = y;
-        output[2] = Range::constant(z);
+        output[2] = Range(z);
         break;
       }
       case CCZ3d: {
@@ -1393,8 +1393,8 @@ computeBounds(
         double y = *getConstantPointer();
         Range z = *getVariablePointer();
         Range* output = getVariablePointer();
-        output[0] = Range::constant(x);
-        output[1] = Range::constant(y);
+        output[0] = Range(x);
+        output[1] = Range(y);
         output[2] = z;
         break;
       }
