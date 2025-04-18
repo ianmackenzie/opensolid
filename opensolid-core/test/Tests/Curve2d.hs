@@ -1,6 +1,7 @@
 module Tests.Curve2d
   ( tests
   , firstDerivativeIsConsistent
+  , firstDerivativeIsConsistentWithin
   , secondDerivativeIsConsistent
   )
 where
@@ -287,14 +288,16 @@ degenerateEndPointTangentDerivative =
       |> Test.output "endTangentDerivative" endTangentDerivative
 
 firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
-firstDerivativeIsConsistent curve tValue = do
+firstDerivativeIsConsistent = firstDerivativeIsConsistentWithin (Length.meters 1e-6)
+firstDerivativeIsConsistentWithin :: Qty units -> Curve2d (space @ units) -> Float -> Expectation
+firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let firstDerivative = Curve2d.derivative curve
   let dt = 1e-6
   let p1 = Curve2d.evaluate curve (tValue - dt)
   let p2 = Curve2d.evaluate curve (tValue + dt)
   let numericalFirstDerivative = (p2 - p1) / (2.0 * dt)
   let analyticFirstDerivative = VectorCurve2d.evaluate firstDerivative tValue
-  Tolerance.using (Length.meters 1e-6) do
+  Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
       |> Test.output "numericalFirstDerivative" numericalFirstDerivative
       |> Test.output "analyticFirstDerivative" analyticFirstDerivative
