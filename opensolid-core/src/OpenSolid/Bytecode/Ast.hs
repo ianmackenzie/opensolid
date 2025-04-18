@@ -25,6 +25,14 @@ module OpenSolid.Bytecode.Ast
   , transformPoint2d
   , transformVector3d
   , transformPoint3d
+  , placeVector2dIn
+  , placePoint2dIn
+  , placeVector3dIn
+  , placePoint3dIn
+  , placeVector2dOn
+  , placePoint2dOn
+  , projectVector3dInto
+  , projectPoint3dInto
   , xy
   , xyz
   , line1d
@@ -54,11 +62,20 @@ module OpenSolid.Bytecode.Ast
   )
 where
 
+import OpenSolid.Basis2d (Basis2d)
+import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Basis3d (Basis3d)
+import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Bytecode.Compilation qualified as Compilation
 import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
 import OpenSolid.Bytecode.Instruction qualified as Instruction
+import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Direction3d (Direction3d (Direction3d))
 import OpenSolid.Float qualified as Float
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
@@ -900,6 +917,66 @@ transformPoint3d transform ast = do
     Variable3d (TransformPoint3d existing var) ->
       Variable3d (TransformPoint3d (erasedTransform . existing) var)
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
+
+vectorPlacementTransform2d :: Basis2d global (Defines local) -> Transform2d.Affine Coordinates
+vectorPlacementTransform2d basis = do
+  let Direction2d ix iy = Basis2d.xDirection basis
+  let Direction2d jx jy = Basis2d.yDirection basis
+  Transform2d Point2d.origin (Vector2d ix iy) (Vector2d jx jy)
+
+vectorPlacementTransform3d :: Basis3d global (Defines local) -> Transform3d.Affine Coordinates
+vectorPlacementTransform3d basis = do
+  let Direction3d ix iy iz = Basis3d.xDirection basis
+  let Direction3d jx jy jz = Basis3d.yDirection basis
+  let Direction3d kx ky kz = Basis3d.zDirection basis
+  Transform3d Point3d.origin (Vector3d ix iy iz) (Vector3d jx jy jz) (Vector3d kx ky kz)
+
+pointPlacementTransform2d :: Frame2d (global @ units) (Defines local) -> Transform2d.Affine Coordinates
+pointPlacementTransform2d frame = do
+  let p0 = Frame2d.originPoint frame
+  let Direction2d ix iy = Frame2d.xDirection frame
+  let Direction2d jx jy = Frame2d.yDirection frame
+  Transform2d (Point2d.coerce p0) (Vector2d ix iy) (Vector2d jx jy)
+
+pointPlacementTransform3d :: Frame3d (global @ units) (Defines local) -> Transform3d.Affine Coordinates
+pointPlacementTransform3d frame = do
+  let p0 = Frame3d.originPoint frame
+  let Direction3d ix iy iz = Frame3d.xDirection frame
+  let Direction3d jx jy jz = Frame3d.yDirection frame
+  let Direction3d kx ky kz = Frame3d.zDirection frame
+  Transform3d (Point3d.coerce p0) (Vector3d ix iy iz) (Vector3d jx jy jz) (Vector3d kx ky kz)
+
+placeVector2dIn :: Basis2d global (Defines local) -> Ast2d input -> Ast2d input
+placeVector2dIn basis ast = transformVector2d (vectorPlacementTransform2d basis) ast
+
+placePoint2dIn :: Frame2d (global @ units) (Defines local) -> Ast2d input -> Ast2d input
+placePoint2dIn frame ast = transformPoint2d (pointPlacementTransform2d frame) ast
+
+placeVector3dIn :: Basis3d global (Defines local) -> Ast3d input -> Ast3d input
+placeVector3dIn basis ast = transformVector3d (vectorPlacementTransform3d basis) ast
+
+placePoint3dIn :: Frame3d (global @ units) (Defines local) -> Ast3d input -> Ast3d input
+placePoint3dIn frame ast = transformPoint3d (pointPlacementTransform3d frame) ast
+
+placeVector2dOn :: PlanarBasis3d global (Defines local) -> Ast2d input -> Ast3d input
+placeVector2dOn basis ast = case ast of
+  Constant2d val -> Constant3d (Vector2d.placeOn (PlanarBasis3d.coerce basis) val)
+  Variable2d var -> Variable3d (PlaceVector2d (PlanarBasis3d.coerce basis) var)
+
+placePoint2dOn :: Plane3d (global @ units) (Defines local) -> Ast2d input -> Ast3d input
+placePoint2dOn plane ast = case ast of
+  Constant2d val -> Constant3d (Point2d.placeOn (Plane3d.coerce plane) (Point2d.origin + val) - Point3d.origin)
+  Variable2d var -> Variable3d (PlacePoint2d (Plane3d.coerce plane) var)
+
+projectVector3dInto :: PlanarBasis3d global (Defines local) -> Ast3d input -> Ast2d input
+projectVector3dInto basis ast = case ast of
+  Constant3d val -> Constant2d (Vector3d.projectInto (PlanarBasis3d.coerce basis) val)
+  Variable3d var -> Variable2d (ProjectVector3d (PlanarBasis3d.coerce basis) var)
+
+projectPoint3dInto :: Plane3d (global @ units) (Defines local) -> Ast3d input -> Ast2d input
+projectPoint3dInto plane ast = case ast of
+  Constant3d val -> Constant2d (Point3d.projectInto (Plane3d.coerce plane) (Point3d.origin + val) - Point2d.origin)
+  Variable3d var -> Variable2d (ProjectPoint3d (Plane3d.coerce plane) var)
 
 xy :: Ast1d input -> Ast1d input -> Ast2d input
 xy (Constant1d x) (Constant1d y) = Constant2d (Vector2d x y)
