@@ -3,6 +3,7 @@ module Tests.Curve2d
   , firstDerivativeIsConsistent
   , firstDerivativeIsConsistentWithin
   , secondDerivativeIsConsistent
+  , boundsConsistency
   )
 where
 
@@ -28,6 +29,7 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
 import OpenSolid.Sign qualified as Sign
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -289,6 +291,7 @@ degenerateEndPointTangentDerivative =
 
 firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
 firstDerivativeIsConsistent = firstDerivativeIsConsistentWithin (Length.meters 1e-6)
+
 firstDerivativeIsConsistentWithin :: Qty units -> Curve2d (space @ units) -> Float -> Expectation
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let firstDerivative = Curve2d.derivative curve
@@ -348,6 +351,18 @@ reversalConsistency =
           let reversedCurve = Curve2d.reverse curve
           t <- Parameter.random
           Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1.0 - t))
+
+boundsConsistency :: Tolerance units => Curve2d (space @ units) -> Expectation
+boundsConsistency curve = Test.do
+  tRange <- Range.random Parameter.random
+  tValue <- Random.map (Range.interpolate tRange) Parameter.random
+  let curveValue = Curve2d.evaluate curve tValue
+  let curveBounds = Curve2d.evaluateBounds curve tRange
+  Test.expect (curveValue ^ curveBounds)
+    |> Test.output "tValue" tValue
+    |> Test.output "tRange" tRange
+    |> Test.output "curveValue" curveValue
+    |> Test.output "curveBounds" curveBounds
 
 degeneracyRemoval :: Tolerance Meters => Test
 degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
