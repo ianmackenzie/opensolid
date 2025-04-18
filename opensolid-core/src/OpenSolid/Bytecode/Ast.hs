@@ -2,6 +2,7 @@ module OpenSolid.Bytecode.Ast
   ( Ast1d
   , Ast2d
   , Ast3d
+  , Coordinates
   , constant1d
   , constant2d
   , constant3d
