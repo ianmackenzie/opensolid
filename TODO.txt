@@ -1,3 +1,14 @@
+Refactor SurfaceParameter module
+- Remove UvDirection in favour of just using 'Direction2d UvSpace' in the few places it's used
+- Move UvPoint into its own module with UvPoint.random, UvPoint.samples
+- Move UvBounds into its own module with UvBounds.unit (or unitSquare? if so, rename Region2d.unit)
+- Change SurfaceParameter.random to generate a random SurfaceParameter value (U or V)
+
+Remove Derivatives type now that functions cache their own derivatives
+
+Have Units.Coercion implementations just call a type-specific 'coerce' function everywhere?
+-> some places may not need Units.Coercion at all, should only be needed for arithmetic?
+
 Make Point#d a newtype over Vector#d?
 -> useful for bytecode evaluation code, evaluation functions can return Vector#d and then coerce to Point#d
 -> consistent with Direction#d being a newtype over Vector#d
