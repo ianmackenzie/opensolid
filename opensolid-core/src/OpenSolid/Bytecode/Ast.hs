@@ -16,6 +16,10 @@ module OpenSolid.Bytecode.Ast
   , sqrt
   , sin
   , cos
+  , squaredNorm2d
+  , squaredNorm3d
+  , norm2d
+  , norm3d
   , line1d
   , quadraticSpline1d
   , cubicSpline1d
@@ -706,6 +710,30 @@ sin (Variable1d var) = Variable1d (Sin1d var)
 cos :: Ast1d input -> Ast1d input
 cos (Constant1d value) = constant1d (Float.cos value)
 cos (Variable1d var) = Variable1d (Cos1d var)
+
+squaredNorm2d :: Ast2d input -> Ast1d input
+squaredNorm2d ast = case ast of
+  Constant2d val -> Constant1d (Vector2d.squaredMagnitude val)
+  Variable2d (Negated2d arg) -> Variable1d (SquaredNorm2d arg)
+  Variable2d var -> Variable1d (SquaredNorm2d var)
+
+squaredNorm3d :: Ast3d input -> Ast1d input
+squaredNorm3d ast = case ast of
+  Constant3d val -> Constant1d (Vector3d.squaredMagnitude val)
+  Variable3d (Negated3d arg) -> Variable1d (SquaredNorm3d arg)
+  Variable3d var -> Variable1d (SquaredNorm3d var)
+
+norm2d :: Ast2d input -> Ast1d input
+norm2d ast = case ast of
+  Constant2d val -> Constant1d (Vector2d.magnitude val)
+  Variable2d (Negated2d arg) -> Variable1d (Norm2d arg)
+  Variable2d var -> Variable1d (Norm2d var)
+
+norm3d :: Ast3d input -> Ast1d input
+norm3d ast = case ast of
+  Constant3d val -> Constant1d (Vector3d.magnitude val)
+  Variable3d (Negated3d arg) -> Variable1d (Norm3d arg)
+  Variable3d var -> Variable1d (Norm3d var)
 
 line1d :: Qty units -> Qty units -> Ast1d input -> Ast1d input
 line1d p1 p2 param = bezierCurve1d (NonEmpty.two p1 p2) param
