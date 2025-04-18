@@ -1025,6 +1025,7 @@ quinticSpline1d ::
 quinticSpline1d p1 p2 p3 p4 p5 p6 param = bezierCurve1d (NonEmpty.six p1 p2 p3 p4 p5 p6) param
 
 bezierCurve1d :: NonEmpty (Qty units) -> Ast1d input -> Ast1d input
+bezierCurve1d (NonEmpty.One value) _ = constant1d value
 bezierCurve1d controlPoints param =
   Variable1d (BezierCurve1d (NonEmpty.map Units.coerce controlPoints) CurveParameter) . param
 
@@ -1070,6 +1071,7 @@ quinticSpline2d ::
 quinticSpline2d p1 p2 p3 p4 p5 p6 param = bezierCurve2d (NonEmpty.six p1 p2 p3 p4 p5 p6) param
 
 bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast1d input -> Ast2d input
+bezierCurve2d (NonEmpty.One value) _ = constant2d value
 bezierCurve2d controlPoints param =
   Variable2d (BezierCurve2d (NonEmpty.map Vector2d.coerce controlPoints) CurveParameter) . param
 
@@ -1115,6 +1117,7 @@ quinticSpline3d ::
 quinticSpline3d p1 p2 p3 p4 p5 p6 param = bezierCurve3d (NonEmpty.six p1 p2 p3 p4 p5 p6) param
 
 bezierCurve3d :: NonEmpty (Vector3d (space @ units)) -> Ast1d input -> Ast3d input
+bezierCurve3d (NonEmpty.One value) _ = constant3d value
 bezierCurve3d controlPoints param =
   Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter) . param
 
