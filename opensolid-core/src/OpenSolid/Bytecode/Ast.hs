@@ -25,6 +25,8 @@ module OpenSolid.Bytecode.Ast
   , transformPoint2d
   , transformVector3d
   , transformPoint3d
+  , xy
+  , xyz
   , line1d
   , quadraticSpline1d
   , cubicSpline1d
@@ -886,6 +888,22 @@ transformPoint3d transform ast = do
     Variable3d (TransformPoint3d existing var) ->
       Variable3d (TransformPoint3d (erasedTransform . existing) var)
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
+
+xy :: Ast1d input -> Ast1d input -> Ast2d input
+xy (Constant1d x) (Constant1d y) = Constant2d (Vector2d x y)
+xy (Constant1d x) (Variable1d y) = Variable2d (CY2d x y)
+xy (Variable1d x) (Constant1d y) = Variable2d (XC2d x y)
+xy (Variable1d x) (Variable1d y) = Variable2d (XY2d x y)
+
+xyz :: Ast1d input -> Ast1d input -> Ast1d input -> Ast3d input
+xyz (Constant1d x) (Constant1d y) (Constant1d z) = Constant3d (Vector3d x y z)
+xyz (Constant1d x) (Constant1d y) (Variable1d z) = Variable3d (CCZ3d x y z)
+xyz (Constant1d x) (Variable1d y) (Constant1d z) = Variable3d (CYC3d x y z)
+xyz (Variable1d x) (Constant1d y) (Constant1d z) = Variable3d (XCC3d x y z)
+xyz (Constant1d x) (Variable1d y) (Variable1d z) = Variable3d (CYZ3d x y z)
+xyz (Variable1d x) (Constant1d y) (Variable1d z) = Variable3d (XCZ3d x y z)
+xyz (Variable1d x) (Variable1d y) (Constant1d z) = Variable3d (XYC3d x y z)
+xyz (Variable1d x) (Variable1d y) (Variable1d z) = Variable3d (XYZ3d x y z)
 
 line1d :: Qty units -> Qty units -> Ast1d input -> Ast1d input
 line1d p1 p2 param = bezierCurve1d (NonEmpty.two p1 p2) param
