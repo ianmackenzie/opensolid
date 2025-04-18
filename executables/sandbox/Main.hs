@@ -13,6 +13,7 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
@@ -49,6 +50,7 @@ import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
+import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 import OpenSolid.Volume qualified as Volume
 
 data Global deriving (Eq, Show)
@@ -198,19 +200,9 @@ testPlaneTorusIntersection = IO.do
   let y = r * SurfaceFunction.sin theta
   let z = minorRadius * SurfaceFunction.sin phi
   let alpha = Angle.asin (minorRadius / majorRadius)
-  let nx = -(Angle.sin alpha)
-  let ny = 0.0
-  let nz = Angle.cos alpha
-  -- let nx = 1 / Float.sqrt 2.0
-  -- let ny = 1 / Float.sqrt 2.0
-  -- let nz = 0.0
-  -- let nx = 0.0
-  -- let ny = 0.0
-  -- let nz = 1.0
-  let f = x * nx + y * ny + z * nz
-  -- let u = SurfaceFunction.u
-  -- let v = SurfaceFunction.v
-  -- let f = (SurfaceFunction.squared (u - 0.5) - SurfaceFunction.squared (v - 0.5)) * Length.meter
+  -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
+  let planeNormal = Direction3d.zx -alpha
+  let f = planeNormal `dot` VectorSurfaceFunction3d.xyz x y z
   zeros <- SurfaceFunction.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
