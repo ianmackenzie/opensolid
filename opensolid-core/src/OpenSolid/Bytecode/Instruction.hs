@@ -13,9 +13,9 @@ import GHC.ByteOrder qualified
 import OpenSolid.Binary (Builder)
 import OpenSolid.Prelude
 
-newtype ConstantIndex = ConstantIndex Int deriving (Eq, Ord)
+newtype ConstantIndex = ConstantIndex Int deriving (Eq, Ord, Show)
 
-newtype VariableIndex = VariableIndex Int deriving (Eq, Ord)
+newtype VariableIndex = VariableIndex Int deriving (Eq, Ord, Show)
 
 data Instruction
   = XComponent VariableIndex
@@ -87,7 +87,7 @@ data Instruction
   | TransformPoint3d ConstantIndex VariableIndex
   | PlaceVector2d ConstantIndex VariableIndex
   | PlacePoint2d ConstantIndex VariableIndex
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
 
 encodeWord :: Word16 -> Builder
 encodeWord = case GHC.ByteOrder.targetByteOrder of
