@@ -305,6 +305,7 @@ test-suite opensolid-core-test
     Tests.Region2d
     Tests.Set2d
     Tests.Stream
+    Tests.SurfaceFunction
     Tests.Text
     Tests.VectorBounds2d
     Tests.VectorBounds3d
