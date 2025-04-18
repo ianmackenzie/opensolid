@@ -33,6 +33,18 @@ module OpenSolid.Bytecode.Ast
   , quarticSpline1d
   , quinticSpline1d
   , bezierCurve1d
+  , line2d
+  , quadraticSpline2d
+  , cubicSpline2d
+  , quarticSpline2d
+  , quinticSpline2d
+  , bezierCurve2d
+  , line3d
+  , quadraticSpline3d
+  , cubicSpline3d
+  , quarticSpline3d
+  , quinticSpline3d
+  , bezierCurve3d
   , compileCurve1d
   , compileCurve2d
   , compileCurve3d
@@ -938,6 +950,96 @@ quinticSpline1d p1 p2 p3 p4 p5 p6 param = bezierCurve1d (NonEmpty.six p1 p2 p3 p
 bezierCurve1d :: NonEmpty (Qty units) -> Ast1d input -> Ast1d input
 bezierCurve1d controlPoints param =
   Variable1d (BezierCurve1d (NonEmpty.map Units.coerce controlPoints) CurveParameter) . param
+
+line2d :: Vector2d (space @ units) -> Vector2d (space @ units) -> Ast1d input -> Ast2d input
+line2d p1 p2 param = bezierCurve2d (NonEmpty.two p1 p2) param
+
+quadraticSpline2d ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Ast1d input ->
+  Ast2d input
+quadraticSpline2d p1 p2 p3 param = bezierCurve2d (NonEmpty.three p1 p2 p3) param
+
+cubicSpline2d ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Ast1d input ->
+  Ast2d input
+cubicSpline2d p1 p2 p3 p4 param = bezierCurve2d (NonEmpty.four p1 p2 p3 p4) param
+
+quarticSpline2d ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Ast1d input ->
+  Ast2d input
+quarticSpline2d p1 p2 p3 p4 p5 param = bezierCurve2d (NonEmpty.five p1 p2 p3 p4 p5) param
+
+quinticSpline2d ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Ast1d input ->
+  Ast2d input
+quinticSpline2d p1 p2 p3 p4 p5 p6 param = bezierCurve2d (NonEmpty.six p1 p2 p3 p4 p5 p6) param
+
+bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast1d input -> Ast2d input
+bezierCurve2d controlPoints param =
+  Variable2d (BezierCurve2d (NonEmpty.map Vector2d.coerce controlPoints) CurveParameter) . param
+
+line3d :: Vector3d (space @ units) -> Vector3d (space @ units) -> Ast1d input -> Ast3d input
+line3d p1 p2 param = bezierCurve3d (NonEmpty.two p1 p2) param
+
+quadraticSpline3d ::
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Ast1d input ->
+  Ast3d input
+quadraticSpline3d p1 p2 p3 param = bezierCurve3d (NonEmpty.three p1 p2 p3) param
+
+cubicSpline3d ::
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Ast1d input ->
+  Ast3d input
+cubicSpline3d p1 p2 p3 p4 param = bezierCurve3d (NonEmpty.four p1 p2 p3 p4) param
+
+quarticSpline3d ::
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Ast1d input ->
+  Ast3d input
+quarticSpline3d p1 p2 p3 p4 p5 param = bezierCurve3d (NonEmpty.five p1 p2 p3 p4 p5) param
+
+quinticSpline3d ::
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Ast1d input ->
+  Ast3d input
+quinticSpline3d p1 p2 p3 p4 p5 p6 param = bezierCurve3d (NonEmpty.six p1 p2 p3 p4 p5 p6) param
+
+bezierCurve3d :: NonEmpty (Vector3d (space @ units)) -> Ast1d input -> Ast3d input
+bezierCurve3d controlPoints param =
+  Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter) . param
 
 addTransform2d :: Transform2d.Affine Coordinates -> Compilation.Step ConstantIndex
 addTransform2d (Transform2d p0 i j) = do
