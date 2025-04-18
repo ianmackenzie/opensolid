@@ -1,6 +1,7 @@
 module Test
   ( Test
   , Expectation
+  , abort
   , verify
   , check
   , group
@@ -54,8 +55,12 @@ instance Bind (Result x) where
   Failure error >>= _ = fail error
 
 data Test
-  = Check Int Text ~Expectation
+  = Abort Text
+  | Check Int Text ~Expectation
   | Group Text (List Test)
+
+abort :: Text -> Test
+abort = Abort
 
 verify :: Text -> Expectation -> Test
 verify = check 1
@@ -95,6 +100,7 @@ reportError context messages = IO.do
 
 runImpl :: List Text -> Text -> Test -> IO (Int, Int)
 runImpl args context test = case test of
+  Abort message -> reportError context [message]
   Check count label generator -> do
     let fullName = appendTo context label
     let initialSeed = Random.init 0
