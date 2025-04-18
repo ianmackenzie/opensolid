@@ -57,6 +57,7 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Transform2d (Transform2d)
@@ -1671,8 +1672,8 @@ instance
     (Range Unitless)
     (Range units)
   where
-  evaluate (Curve1d _ (f, _)) tValue = Units.coerce (f tValue)
-  evaluateBounds (Curve1d _ (_, f)) tRange = Units.coerce (f tRange)
+  evaluate (Curve1d _ (f, _)) tValue = Qty.coerce (f tValue)
+  evaluateBounds (Curve1d _ (_, f)) tRange = Range.coerce (f tRange)
 
 instance
   Evaluation
@@ -1681,8 +1682,8 @@ instance
     UvBounds
     (Range units)
   where
-  evaluate (Surface1d _ (f, _)) uvPoint = Units.coerce (f uvPoint)
-  evaluateBounds (Surface1d _ (_, f)) uvBounds = Units.coerce (f uvBounds)
+  evaluate (Surface1d _ (f, _)) uvPoint = Qty.coerce (f uvPoint)
+  evaluateBounds (Surface1d _ (_, f)) uvBounds = Range.coerce (f uvBounds)
 
 instance
   Evaluation
@@ -1693,11 +1694,11 @@ instance
   where
   evaluate (Curve2d _ (f, _)) tValue = do
     let Vector2d x y = f tValue
-    Point2d (Units.coerce x) (Units.coerce y)
+    Point2d (Qty.coerce x) (Qty.coerce y)
 
   evaluateBounds (Curve2d _ (_, f)) tRange = do
     let VectorBounds2d x y = f tRange
-    Bounds2d (Units.coerce x) (Units.coerce y)
+    Bounds2d (Range.coerce x) (Range.coerce y)
 
 instance
   Evaluation
@@ -1708,11 +1709,11 @@ instance
   where
   evaluate (Surface2d _ (f, _)) uvPoint = do
     let Vector2d x y = f uvPoint
-    Point2d (Units.coerce x) (Units.coerce y)
+    Point2d (Qty.coerce x) (Qty.coerce y)
 
   evaluateBounds (Surface2d _ (_, f)) uvBounds = do
     let VectorBounds2d x y = f uvBounds
-    Bounds2d (Units.coerce x) (Units.coerce y)
+    Bounds2d (Range.coerce x) (Range.coerce y)
 
 instance
   Evaluation
@@ -1723,11 +1724,11 @@ instance
   where
   evaluate (VectorCurve2d _ (f, _)) tValue = do
     let Vector2d x y = f tValue
-    Vector2d (Units.coerce x) (Units.coerce y)
+    Vector2d (Qty.coerce x) (Qty.coerce y)
 
   evaluateBounds (VectorCurve2d _ (_, f)) tRange = do
     let VectorBounds2d x y = f tRange
-    VectorBounds2d (Units.coerce x) (Units.coerce y)
+    VectorBounds2d (Range.coerce x) (Range.coerce y)
 
 instance
   Evaluation
@@ -1738,11 +1739,11 @@ instance
   where
   evaluate (VectorSurface2d _ (f, _)) uvPoint = do
     let Vector2d x y = f uvPoint
-    Vector2d (Units.coerce x) (Units.coerce y)
+    Vector2d (Qty.coerce x) (Qty.coerce y)
 
   evaluateBounds (VectorSurface2d _ (_, f)) uvBounds = do
     let VectorBounds2d x y = f uvBounds
-    VectorBounds2d (Units.coerce x) (Units.coerce y)
+    VectorBounds2d (Range.coerce x) (Range.coerce y)
 
 instance
   Evaluation
@@ -1753,11 +1754,11 @@ instance
   where
   evaluate (Curve3d _ (f, _)) tValue = do
     let Vector3d x y z = f tValue
-    Point3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+    Point3d (Qty.coerce x) (Qty.coerce y) (Qty.coerce z)
 
   evaluateBounds (Curve3d _ (_, f)) tRange = do
     let VectorBounds3d x y z = f tRange
-    Bounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+    Bounds3d (Range.coerce x) (Range.coerce y) (Range.coerce z)
 
 instance
   Evaluation
@@ -1768,11 +1769,11 @@ instance
   where
   evaluate (Surface3d _ (f, _)) uvPoint = do
     let Vector3d x y z = f uvPoint
-    Point3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+    Point3d (Qty.coerce x) (Qty.coerce y) (Qty.coerce z)
 
   evaluateBounds (Surface3d _ (_, f)) uvBounds = do
     let VectorBounds3d x y z = f uvBounds
-    Bounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+    Bounds3d (Range.coerce x) (Range.coerce y) (Range.coerce z)
 
 instance
   Evaluation
@@ -1783,11 +1784,11 @@ instance
   where
   evaluate (VectorCurve3d _ (f, _)) tValue = do
     let Vector3d x y z = f tValue
-    Vector3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+    Vector3d (Qty.coerce x) (Qty.coerce y) (Qty.coerce z)
 
   evaluateBounds (VectorCurve3d _ (_, f)) tRange = do
     let VectorBounds3d x y z = f tRange
-    VectorBounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+    VectorBounds3d (Range.coerce x) (Range.coerce y) (Range.coerce z)
 
 instance
   Evaluation
@@ -1798,8 +1799,8 @@ instance
   where
   evaluate (VectorSurface3d _ (f, _)) uvPoint = do
     let Vector3d x y z = f uvPoint
-    Vector3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+    Vector3d (Qty.coerce x) (Qty.coerce y) (Qty.coerce z)
 
   evaluateBounds (VectorSurface3d _ (_, f)) uvBounds = do
     let VectorBounds3d x y z = f uvBounds
-    VectorBounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+    VectorBounds3d (Range.coerce x) (Range.coerce y) (Range.coerce z)
