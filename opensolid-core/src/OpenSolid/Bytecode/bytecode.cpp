@@ -71,6 +71,9 @@ quinticValue(const double* p, double t) {
 
 inline double
 bezierBlossom(int n, const double* p, double tLower, double tUpper, int nLow) {
+  if (n == 1) {
+    return *p;
+  }
   double* q = (double*)alloca(sizeof(double) * (n - 1));
   for (int m = n - 1; m > 0; --m) { // m is number of points to collapse to
     double t = m <= nLow ? tLower : tUpper;
