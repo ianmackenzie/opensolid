@@ -20,6 +20,10 @@ module OpenSolid.Bytecode.Ast
   , squaredMagnitude3d
   , magnitude2d
   , magnitude3d
+  , transformVector2d
+  , transformPoint2d
+  , transformVector3d
+  , transformPoint3d
   , line1d
   , quadraticSpline1d
   , cubicSpline1d
@@ -39,7 +43,9 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d (Point3d))
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
@@ -734,6 +740,58 @@ magnitude3d ast = case ast of
   Constant3d val -> Constant1d (Vector3d.magnitude val)
   Variable3d (Negated3d arg) -> Variable1d (Magnitude3d arg)
   Variable3d var -> Variable1d (Magnitude3d var)
+
+eraseTransform2d :: Transform2d tag (space @ units) -> Transform2d.Affine Coordinates
+eraseTransform2d (Transform2d p0 i j) = do
+  let Point2d x0 y0 = p0
+  let Vector2d ix iy = i
+  let Vector2d jx jy = j
+  Transform2d
+    (Point2d (Units.coerce x0) (Units.coerce y0))
+    (Vector2d ix iy)
+    (Vector2d jx jy)
+
+eraseTransform3d :: Transform3d tag (space @ units) -> Transform3d.Affine Coordinates
+eraseTransform3d (Transform3d p0 i j k) = do
+  let Point3d x0 y0 z0 = p0
+  let Vector3d ix iy iz = i
+  let Vector3d jx jy jz = j
+  let Vector3d kx ky kz = k
+  Transform3d
+    (Point3d (Units.coerce x0) (Units.coerce y0) (Units.coerce z0))
+    (Vector3d ix iy iz)
+    (Vector3d jx jy jz)
+    (Vector3d kx ky kz)
+
+transformVector2d :: Transform2d tag (space @ units) -> Ast2d input -> Ast2d input
+transformVector2d transform ast = do
+  let erasedTransform = eraseTransform2d transform
+  case ast of
+    Constant2d val -> Constant2d (Vector2d.transformBy erasedTransform val)
+    Variable2d var -> Variable2d (TransformVector2d erasedTransform var)
+
+transformVector3d :: Transform3d tag (space @ units) -> Ast3d input -> Ast3d input
+transformVector3d transform ast = do
+  let erasedTransform = eraseTransform3d transform
+  case ast of
+    Constant3d val -> Constant3d (Vector3d.transformBy erasedTransform val)
+    Variable3d var -> Variable3d (TransformVector3d erasedTransform var)
+
+transformPoint2d :: Transform2d tag (space @ units) -> Ast2d input -> Ast2d input
+transformPoint2d transform ast = do
+  let erasedTransform = eraseTransform2d transform
+  case ast of
+    -- TODO avoid adding/subtracting Point2d.origin once Point2d is a newtype over Vector2d
+    Constant2d val -> Constant2d (Point2d.transformBy erasedTransform (Point2d.origin + val) - Point2d.origin)
+    Variable2d var -> Variable2d (TransformPoint2d erasedTransform var)
+
+transformPoint3d :: Transform3d tag (space @ units) -> Ast3d input -> Ast3d input
+transformPoint3d transform ast = do
+  let erasedTransform = eraseTransform3d transform
+  case ast of
+    -- TODO avoid adding/subtracting Point3d.origin once Point3d is a newtype over Vector3d
+    Constant3d val -> Constant3d (Point3d.transformBy erasedTransform (Point3d.origin + val) - Point3d.origin)
+    Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
 
 line1d :: Qty units -> Qty units -> Ast1d input -> Ast1d input
 line1d p1 p2 param = bezierCurve1d (NonEmpty.two p1 p2) param
