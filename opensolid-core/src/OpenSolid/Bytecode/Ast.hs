@@ -41,6 +41,8 @@ import OpenSolid.Bytecode.Instruction qualified as Instruction
 import OpenSolid.Direction3d (Direction3d (Direction3d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -70,6 +72,8 @@ data Space
 type Coordinates = Space @ Unitless
 
 type Plane = Plane3d Coordinates (Defines Space)
+
+type PlanarBasis = PlanarBasis3d Space (Defines Space)
 
 data Ast1d input where
   Constant1d :: Float -> Ast1d input
@@ -147,7 +151,7 @@ data Variable2d input where
   BezierCurve2d :: NonEmpty (Vector2d Coordinates) -> Variable1d input -> Variable2d input
   TransformVector2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
   TransformPoint2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
-  ProjectVector3d :: Plane -> Variable3d input -> Variable2d input
+  ProjectVector3d :: PlanarBasis -> Variable3d input -> Variable2d input
   ProjectPoint3d :: Plane -> Variable3d input -> Variable2d input
 
 deriving instance Eq (Variable2d input)
@@ -189,7 +193,7 @@ data Variable3d input where
   BezierCurve3d :: NonEmpty (Vector3d Coordinates) -> Variable1d input -> Variable3d input
   TransformVector3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
   TransformPoint3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
-  PlaceVector2d :: Plane -> Variable2d input -> Variable3d input
+  PlaceVector2d :: PlanarBasis -> Variable2d input -> Variable3d input
   PlacePoint2d :: Plane -> Variable2d input -> Variable3d input
 
 deriving instance Eq (Variable3d input)
@@ -257,7 +261,7 @@ instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) wh
   BezierCurve2d controlPoints param . input = BezierCurve2d controlPoints (param . input)
   TransformVector2d transform vector . input = TransformVector2d transform (vector . input)
   TransformPoint2d transform point . input = TransformPoint2d transform (point . input)
-  ProjectVector3d plane vector . input = ProjectVector3d plane (vector . input)
+  ProjectVector3d basis vector . input = ProjectVector3d basis (vector . input)
   ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
 
 instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
@@ -288,7 +292,7 @@ instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) wh
   CrossVariableConstant3d lhs rhs . input = CrossVariableConstant3d (lhs . input) rhs
   TransformVector3d transform vector . input = TransformVector3d transform (vector . input)
   TransformPoint3d transform point . input = TransformPoint3d transform (point . input)
-  PlaceVector2d plane vector . input = PlaceVector2d plane (vector . input)
+  PlaceVector2d basis vector . input = PlaceVector2d basis (vector . input)
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
 
 constant1d :: Qty units -> Ast1d input
@@ -827,6 +831,12 @@ addTransform3d (Transform3d p0 i j k) = do
   let Point3d x0 y0 z0 = p0
   Compilation.addConstant (ix :| [iy, iz, jx, jy, jz, kx, ky, kz, x0, y0, z0])
 
+addPlanarBasis :: PlanarBasis -> Compilation.Step ConstantIndex
+addPlanarBasis basis = do
+  let Direction3d ix iy iz = PlanarBasis3d.xDirection basis
+  let Direction3d jx jy jz = PlanarBasis3d.yDirection basis
+  Compilation.addConstant (NonEmpty.six ix iy iz jx jy jz)
+
 addPlane :: Plane -> Compilation.Step ConstantIndex
 addPlane plane = do
   let Direction3d ix iy iz = Plane3d.xDirection plane
@@ -1013,10 +1023,10 @@ compileVariable2d variable = case variable of
     matrixIndex <- addTransform2d transform
     pointIndex <- compileVariable2d point
     Compilation.addVariable2d (Instruction.TransformPoint2d matrixIndex pointIndex)
-  ProjectVector3d plane vector -> Compilation.do
-    planeIndex <- addPlane plane
+  ProjectVector3d basis vector -> Compilation.do
+    basisIndex <- addPlanarBasis basis
     vectorIndex <- compileVariable3d vector
-    Compilation.addVariable2d (Instruction.ProjectVector3d planeIndex vectorIndex)
+    Compilation.addVariable2d (Instruction.ProjectVector3d basisIndex vectorIndex)
   ProjectPoint3d plane point -> Compilation.do
     planeIndex <- addPlane plane
     pointIndex <- compileVariable3d point
@@ -1122,10 +1132,10 @@ compileVariable3d variable = case variable of
     matrixIndex <- addTransform3d transform
     pointIndex <- compileVariable3d point
     Compilation.addVariable3d (Instruction.TransformPoint3d matrixIndex pointIndex)
-  PlaceVector2d plane vector -> Compilation.do
-    planeIndex <- addPlane plane
+  PlaceVector2d basis vector -> Compilation.do
+    basisIndex <- addPlanarBasis basis
     vectorIndex <- compileVariable2d vector
-    Compilation.addVariable3d (Instruction.PlaceVector2d planeIndex vectorIndex)
+    Compilation.addVariable3d (Instruction.PlaceVector2d basisIndex vectorIndex)
   PlacePoint2d plane point -> Compilation.do
     planeIndex <- addPlane plane
     pointIndex <- compileVariable2d point
