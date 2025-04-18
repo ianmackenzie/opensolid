@@ -1,6 +1,7 @@
 module OpenSolid.Point2d
   ( Point2d (Point2d)
   , origin
+  , coerce
   , x
   , y
   , along
@@ -58,6 +59,10 @@ import OpenSolid.Vector2d qualified as Vector2d
 -- | The point with coordinates (0,0).
 origin :: Point2d (space @ units)
 origin = Point2d Qty.zero Qty.zero
+
+{-# INLINE coerce #-}
+coerce :: Point2d (space1 @ units1) -> Point2d (space2 @ units2)
+coerce (Point2d px py) = Point2d (Qty.coerce px) (Qty.coerce py)
 
 -- | Construct a point along the X axis, with the given X coordinate.
 x :: Qty units -> Point2d (space @ units)

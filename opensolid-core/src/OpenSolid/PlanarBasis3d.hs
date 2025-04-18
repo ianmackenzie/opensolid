@@ -39,8 +39,8 @@ import OpenSolid.Primitives
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector3d qualified as Vector3d
 
-coerce :: PlanarBasis3d space defines1 -> PlanarBasis3d space defines2
-coerce (PlanarBasis3d i j) = PlanarBasis3d i j
+coerce :: PlanarBasis3d space1 defines1 -> PlanarBasis3d space2 defines2
+coerce (PlanarBasis3d i j) = PlanarBasis3d (Direction3d.coerce i) (Direction3d.coerce j)
 
 xy :: PlanarBasis3d space defines
 xy = PlanarBasis3d Direction3d.x Direction3d.y

@@ -9,6 +9,7 @@ module OpenSolid.Plane3d
   , zy
   , fromXAxis
   , fromYAxis
+  , coerce
   , originPoint
   , basis
   , normalDirection
@@ -118,6 +119,9 @@ A perpendicular X direction will be chosen arbitrarily.
 -}
 fromYAxis :: Axis3d (space @ units) -> Plane3d (space @ units) defines
 fromYAxis (Axis3d p0 d) = Plane3d p0 (PlanarBasis3d.fromYDirection d)
+
+coerce :: Plane3d (space1 @ units1) defines1 -> Plane3d (space2 @ units2) defines2
+coerce (Plane3d p0 b) = Plane3d (Point3d.coerce p0) (PlanarBasis3d.coerce b)
 
 {-| Get the origin point of a plane.
 

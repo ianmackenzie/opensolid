@@ -1,5 +1,6 @@
 module OpenSolid.Vector3d
-  ( transformBy
+  ( coerce
+  , transformBy
   , placeIn
   , relativeTo
   )
@@ -8,6 +9,7 @@ where
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Basis3d, Transform3d, Vector3d)
 
+coerce :: Vector3d (space1 @ units1) -> Vector3d (space2 @ units2)
 transformBy ::
   Transform3d tag (space @ units1) ->
   Vector3d (space @ units2) ->

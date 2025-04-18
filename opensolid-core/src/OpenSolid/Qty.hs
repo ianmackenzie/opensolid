@@ -3,6 +3,7 @@ module OpenSolid.Qty
   , zero
   , unit
   , infinity
+  , coerce
   , sign
   , isNaN
   , isInfinite
@@ -137,6 +138,10 @@ unit = Data.Coerce.coerce 1.0
 
 infinity :: Qty units
 infinity = Data.Coerce.coerce (1.0 / 0.0)
+
+{-# INLINE coerce #-}
+coerce :: Qty units1 -> Qty units2
+coerce (Qty x) = Qty x
 
 sign :: Qty units -> Sign
 sign value = if value >= zero then Positive else Negative

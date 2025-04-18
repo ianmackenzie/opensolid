@@ -5,6 +5,7 @@ module OpenSolid.Transform3d
   , Uniform
   , Affine
   , identity
+  , coerce
   , translateBy
   , translateIn
   , translateAlong
@@ -71,6 +72,10 @@ unitZ = Vector3d 0.0 0.0 1.0
 
 identity :: Rigid (space @ units)
 identity = Transform3d Point3d.origin unitX unitY unitZ
+
+coerce :: Transform3d tag1 (space1 @ units1) -> Transform3d tag2 (space2 @ units2)
+coerce (Transform3d p0 i j k) =
+  Transform3d (Point3d.coerce p0) (Vector3d.coerce i) (Vector3d.coerce j) (Vector3d.coerce k)
 
 withFixedPoint ::
   Point3d (space @ units) ->

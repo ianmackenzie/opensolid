@@ -5,6 +5,7 @@ module OpenSolid.Transform2d
   , Uniform
   , Affine
   , identity
+  , coerce
   , handedness
   , translateBy
   , translateIn
@@ -69,6 +70,10 @@ unitY = Vector2d 0.0 1.0
 
 identity :: Rigid (space @ units)
 identity = Transform2d Point2d.origin unitX unitY
+
+coerce :: Transform2d tag1 (space1 @ units1) -> Transform2d tag2 (space2 @ units2)
+coerce (Transform2d p0 i j) =
+  Transform2d (Point2d.coerce p0) (Vector2d.coerce i) (Vector2d.coerce j)
 
 handedness :: Transform2d tag (space @ units) -> Sign
 handedness (Transform2d _ vx vy) = Float.sign (vx `cross` vy)

@@ -5,6 +5,7 @@ module OpenSolid.Direction3d
   , zComponent
   , components
   , unsafe
+  , coerce
   , x
   , y
   , z
@@ -55,6 +56,10 @@ components (Unit3d vector) = Vector3d.components vector
 
 unsafe :: Vector3d (space @ Unitless) -> Direction3d space
 unsafe = Unit3d
+
+{-# INLINE coerce #-}
+coerce :: Direction3d space1 -> Direction3d space2
+coerce (Unit3d (Vector3d dx dy dz)) = Unit3d (Vector3d dx dy dz)
 
 {-# INLINE lift #-}
 lift ::

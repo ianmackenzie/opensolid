@@ -1,6 +1,7 @@
 module OpenSolid.Vector3d
   ( Vector3d (Vector3d)
   , zero
+  , coerce
   , unit
   , x
   , y
@@ -67,6 +68,10 @@ import OpenSolid.Units qualified as Units
 -- | The zero vector.
 zero :: Vector3d (space @ units)
 zero = Vector3d Qty.zero Qty.zero Qty.zero
+
+{-# INLINE coerce #-}
+coerce :: Vector3d (space1 @ units1) -> Vector3d (space2 @ units2)
+coerce (Vector3d vx vy vz) = Vector3d (Qty.coerce vx) (Qty.coerce vy) (Qty.coerce vz)
 
 -- | Construct a unit vector in the given direction.
 unit :: Direction3d space -> Vector3d (space @ Unitless)

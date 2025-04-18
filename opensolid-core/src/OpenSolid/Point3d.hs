@@ -5,6 +5,7 @@ module OpenSolid.Point3d
   , zCoordinate
   , coordinates
   , origin
+  , coerce
   , x
   , y
   , z
@@ -84,6 +85,10 @@ coordinates (Point3d px py pz) = (px, py, pz)
 -- | The point with coordinates (0,0, 0).
 origin :: Point3d (space @ units)
 origin = Point3d Qty.zero Qty.zero Qty.zero
+
+{-# INLINE coerce #-}
+coerce :: Point3d (space1 @ units1) -> Point3d (space2 @ units2)
+coerce (Point3d px py pz) = Point3d (Qty.coerce px) (Qty.coerce py) (Qty.coerce pz)
 
 -- | Construct a point along the X axis, with the given X coordinate.
 x :: Qty units -> Point3d (space @ units)

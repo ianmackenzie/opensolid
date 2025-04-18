@@ -1,6 +1,7 @@
 module OpenSolid.Vector2d
   ( Vector2d (Vector2d)
   , zero
+  , coerce
   , unit
   , x
   , y
@@ -69,6 +70,10 @@ import OpenSolid.Units qualified as Units
 -- | The zero vector.
 zero :: Vector2d (space @ units)
 zero = Vector2d Qty.zero Qty.zero
+
+{-# INLINE coerce #-}
+coerce :: Vector2d (space1 @ units1) -> Vector2d (space2 @ units2)
+coerce (Vector2d vx vy) = Vector2d (Qty.coerce vx) (Qty.coerce vy)
 
 -- | Construct a unit vector in the given direction.
 unit :: Direction2d space -> Vector2d (space @ Unitless)
