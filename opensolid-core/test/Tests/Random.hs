@@ -16,6 +16,7 @@ module Tests.Random
   , rigidTransform2d
   , orthonormalTransform2d
   , affineTransform2d
+  , surfaceParameter
   )
 where
 
@@ -43,6 +44,7 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Sign qualified as Sign
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d (Vector2d)
@@ -139,3 +141,6 @@ affineTransform2d =
       (Random.map Transform2d.toAffine mirror2d)
       (Random.map Transform2d.toAffine uniformScaling2d)
       nonUniformScaling2d
+
+surfaceParameter :: Generator SurfaceParameter
+surfaceParameter = Random.oneOf (NonEmpty.two U V)
