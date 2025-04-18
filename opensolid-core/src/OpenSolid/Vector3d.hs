@@ -33,6 +33,7 @@ module OpenSolid.Vector3d
   , normalize
   , placeIn
   , relativeTo
+  , projectInto
   , sum
   , transformBy
   , rotateIn
@@ -56,7 +57,9 @@ import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Basis3d (Basis3d)
   , Direction3d (Unit3d)
+  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d
+  , Vector2d (Vector2d)
   , Vector3d (Vector3d)
   )
 import OpenSolid.Qty qualified as Qty
@@ -234,6 +237,12 @@ relativeTo ::
   Vector3d (global @ units) ->
   Vector3d (local @ units)
 relativeTo (Basis3d i j k) vector = Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
+
+projectInto ::
+  PlanarBasis3d global (Defines local) ->
+  Vector3d (global @ units) ->
+  Vector2d (local @ units)
+projectInto (PlanarBasis3d i j) v = Vector2d (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
 sum = List.foldl (+) zero
