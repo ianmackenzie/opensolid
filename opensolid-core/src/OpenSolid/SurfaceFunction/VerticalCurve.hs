@@ -15,6 +15,7 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d (Direction2d))
+import OpenSolid.Expression qualified as Expression
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -97,10 +98,13 @@ verticalCurve derivatives dudv vStart vEnd boxes monotonicity boundingAxes = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let bounds = implicitCurveBounds boxes
-  let solveForU vValue = do
-        let uRange = ImplicitCurveBounds.evaluate bounds vValue
-        let clampedBounds = List.foldl (clamp vValue) uRange boundingAxes
-        Internal.solveForU f fu clampedBounds vValue
+  let clampedURange vValue =
+        List.foldl (clamp vValue) (ImplicitCurveBounds.evaluate bounds vValue) boundingAxes
+  let solveForU =
+        case (SurfaceFunction.compiled f, SurfaceFunction.compiled fu) of
+          (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fuExpr) ->
+            \vValue -> Expression.solveMonotonicSurfaceU fExpr fuExpr (clampedURange vValue) vValue
+          _ -> \vValue -> Internal.solveForU f fu (clampedURange vValue) vValue
   let evaluate tValue = do
         let vValue = Float.interpolateFrom vStart vEnd tValue
         let uValue = solveForU vValue

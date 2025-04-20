@@ -237,8 +237,9 @@ library
   other-modules:
     OpenSolid.Bezier
     OpenSolid.Bootstrap
-    OpenSolid.Bytecode.Compilation
+    OpenSolid.Bytecode.Compile
     OpenSolid.Bytecode.Encode
+    OpenSolid.Bytecode.Evaluate
     OpenSolid.Bytecode.Instruction
     OpenSolid.CompiledFunction
     OpenSolid.ConstrainedDelaunayTriangulation
