@@ -332,8 +332,7 @@ surface1d step = do
   (surface1dValue output, surface1dBounds output)
 
 surface1dValue :: ByteString -> UvPoint -> Float
-surface1dValue functionBytes uvPoint = do
-  let Point2d uValue vValue = uvPoint
+surface1dValue functionBytes (Point2d uValue vValue) =
   callWith functionBytes 1 $
     \functionPointer returnValuePointer -> IO.do
       opensolid_surface_value
@@ -344,8 +343,7 @@ surface1dValue functionBytes uvPoint = do
       getReturnValue 0 returnValuePointer
 
 surface1dBounds :: ByteString -> UvBounds -> Range Unitless
-surface1dBounds functionBytes uvBounds = do
-  let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
+surface1dBounds functionBytes (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
   callWith functionBytes 2 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
@@ -369,8 +367,7 @@ surface2d step = do
   (surface2dValue output, surface2dBounds output)
 
 surface2dValue :: ByteString -> UvPoint -> Vector2d (space @ Unitless)
-surface2dValue functionBytes uvPoint = do
-  let Point2d uValue vValue = uvPoint
+surface2dValue functionBytes (Point2d uValue vValue) =
   callWith functionBytes 2 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_value
@@ -383,8 +380,7 @@ surface2dValue functionBytes uvPoint = do
       IO.succeed (Vector2d x y)
 
 surface2dBounds :: ByteString -> UvBounds -> VectorBounds2d (space @ Unitless)
-surface2dBounds functionBytes uvBounds = do
-  let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
+surface2dBounds functionBytes (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
   callWith functionBytes 4 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
@@ -410,8 +406,7 @@ surface3d step = do
   (surface3dValue output, surface3dBounds output)
 
 surface3dValue :: ByteString -> UvPoint -> Vector3d (space @ Unitless)
-surface3dValue functionBytes uvPoint = do
-  let Point2d uValue vValue = uvPoint
+surface3dValue functionBytes (Point2d uValue vValue) =
   callWith functionBytes 3 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_value
@@ -425,8 +420,7 @@ surface3dValue functionBytes uvPoint = do
       IO.succeed (Vector3d x y z)
 
 surface3dBounds :: ByteString -> UvBounds -> VectorBounds3d (space @ Unitless)
-surface3dBounds functionBytes uvBounds = do
-  let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
+surface3dBounds functionBytes (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
   callWith functionBytes 6 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
