@@ -1,6 +1,7 @@
 module OpenSolid.VectorBounds2d
   ( VectorBounds2d (VectorBounds2d)
   , constant
+  , coerce
   , aggregate2
   , aggregate3
   , hull2
@@ -51,6 +52,10 @@ import OpenSolid.Vector2d qualified as Vector2d
 
 constant :: Vector2d (space @ units) -> VectorBounds2d (space @ units)
 constant (Vector2d x y) = VectorBounds2d (Range.constant x) (Range.constant y)
+
+{-# INLINE coerce #-}
+coerce :: VectorBounds2d (space1 @ units1) -> VectorBounds2d (space2 @ units2)
+coerce (VectorBounds2d x y) = VectorBounds2d (Range.coerce x) (Range.coerce y)
 
 hull2 :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorBounds2d (space @ units)
 hull2 (Vector2d x1 y1) (Vector2d x2 y2) =

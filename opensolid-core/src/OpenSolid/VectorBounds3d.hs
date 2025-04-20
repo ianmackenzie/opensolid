@@ -1,6 +1,7 @@
 module OpenSolid.VectorBounds3d
   ( VectorBounds3d (VectorBounds3d)
   , constant
+  , coerce
   , aggregate2
   , aggregate3
   , hull2
@@ -50,6 +51,10 @@ import OpenSolid.Vector3d qualified as Vector3d
 
 constant :: Vector3d (space @ units) -> VectorBounds3d (space @ units)
 constant (Vector3d x y z) = VectorBounds3d (Range.constant x) (Range.constant y) (Range.constant z)
+
+{-# INLINE coerce #-}
+coerce :: VectorBounds3d (space1 @ units1) -> VectorBounds3d (space2 @ units2)
+coerce (VectorBounds3d x y z) = VectorBounds3d (Range.coerce x) (Range.coerce y) (Range.coerce z)
 
 hull2 :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorBounds3d (space @ units)
 hull2 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
