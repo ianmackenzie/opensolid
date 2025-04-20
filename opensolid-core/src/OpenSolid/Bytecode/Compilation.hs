@@ -227,69 +227,81 @@ getReturnValue :: Int -> Ptr Double -> IO Float
 getReturnValue index returnValuesPointer =
   IO.map Float.fromDouble (Foreign.peekElemOff returnValuesPointer index)
 
-curve1d :: Step VariableIndex -> (Float -> Float, Range Unitless -> Range Unitless)
+curve1d ::
+  Step VariableIndex ->
+  ( Float -> Float
+  , Range Unitless -> Range Unitless
+  )
 curve1d step = do
   let output = compile (InputComponents 1) (OutputComponents 1) step
-  let Output{constantBytes, wordBytes, numVariableComponents} = output
-  let value tValue =
-        callWith wordBytes constantBytes 1 $
-          \wordsPointer constantsPointer returnValuePointer -> IO.do
-            opensolid_curve_value
-              wordsPointer
-              (Float.toDouble tValue)
-              constantsPointer
-              numVariableComponents
-              returnValuePointer
-            getReturnValue 0 returnValuePointer
-  let bounds (Range tLower tUpper) =
-        callWith wordBytes constantBytes 2 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_curve_bounds
-              wordsPointer
-              (Float.toDouble tLower)
-              (Float.toDouble tUpper)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            lower <- getReturnValue 0 returnValuesPointer
-            upper <- getReturnValue 1 returnValuesPointer
-            IO.succeed (Range lower upper)
-  (value, bounds)
+  (curve1dValue output, curve1dBounds output)
+
+curve1dValue :: Output -> Float -> Float
+curve1dValue Output{constantBytes, wordBytes, numVariableComponents} tValue =
+  callWith wordBytes constantBytes 1 $
+    \wordsPointer constantsPointer returnValuePointer -> IO.do
+      opensolid_curve_value
+        wordsPointer
+        (Float.toDouble tValue)
+        constantsPointer
+        numVariableComponents
+        returnValuePointer
+      getReturnValue 0 returnValuePointer
+
+curve1dBounds :: Output -> Range Unitless -> Range Unitless
+curve1dBounds Output{constantBytes, wordBytes, numVariableComponents} (Range tLower tUpper) =
+  callWith wordBytes constantBytes 2 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_curve_bounds
+        wordsPointer
+        (Float.toDouble tLower)
+        (Float.toDouble tUpper)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      lower <- getReturnValue 0 returnValuesPointer
+      upper <- getReturnValue 1 returnValuesPointer
+      IO.succeed (Range lower upper)
 
 curve2d ::
   Step VariableIndex ->
-  (Float -> Vector2d (space @ Unitless), Range Unitless -> VectorBounds2d (space @ Unitless))
+  ( Float -> Vector2d (space @ Unitless)
+  , Range Unitless -> VectorBounds2d (space @ Unitless)
+  )
 curve2d step = do
   let output = compile (InputComponents 1) (OutputComponents 2) step
-  let Output{constantBytes, wordBytes, numVariableComponents} = output
-  let value tValue =
-        callWith wordBytes constantBytes 2 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_curve_value
-              wordsPointer
-              (Float.toDouble tValue)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            x <- getReturnValue 0 returnValuesPointer
-            y <- getReturnValue 1 returnValuesPointer
-            IO.succeed (Vector2d x y)
-  let bounds (Range tLower tUpper) =
-        callWith wordBytes constantBytes 4 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_curve_bounds
-              wordsPointer
-              (Float.toDouble tLower)
-              (Float.toDouble tUpper)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            xLower <- getReturnValue 0 returnValuesPointer
-            xUpper <- getReturnValue 1 returnValuesPointer
-            yLower <- getReturnValue 2 returnValuesPointer
-            yUpper <- getReturnValue 3 returnValuesPointer
-            IO.succeed (VectorBounds2d (Range xLower xUpper) (Range yLower yUpper))
-  (value, bounds)
+  (curve2dValue output, curve2dBounds output)
+
+curve2dValue :: Output -> Float -> Vector2d (space @ Unitless)
+curve2dValue Output{constantBytes, wordBytes, numVariableComponents} tValue =
+  callWith wordBytes constantBytes 2 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_curve_value
+        wordsPointer
+        (Float.toDouble tValue)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      x <- getReturnValue 0 returnValuesPointer
+      y <- getReturnValue 1 returnValuesPointer
+      IO.succeed (Vector2d x y)
+
+curve2dBounds :: Output -> Range Unitless -> VectorBounds2d (space @ Unitless)
+curve2dBounds Output{constantBytes, wordBytes, numVariableComponents} (Range tLower tUpper) =
+  callWith wordBytes constantBytes 4 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_curve_bounds
+        wordsPointer
+        (Float.toDouble tLower)
+        (Float.toDouble tUpper)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      xLower <- getReturnValue 0 returnValuesPointer
+      xUpper <- getReturnValue 1 returnValuesPointer
+      yLower <- getReturnValue 2 returnValuesPointer
+      yUpper <- getReturnValue 3 returnValuesPointer
+      IO.succeed (VectorBounds2d (Range xLower xUpper) (Range yLower yUpper))
 
 curve3d ::
   Step VariableIndex ->
@@ -298,108 +310,127 @@ curve3d ::
   )
 curve3d step = do
   let output = compile (InputComponents 1) (OutputComponents 3) step
-  let Output{constantBytes, wordBytes, numVariableComponents} = output
-  let value tValue =
-        callWith wordBytes constantBytes 3 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_curve_value
-              wordsPointer
-              (Float.toDouble tValue)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            x <- getReturnValue 0 returnValuesPointer
-            y <- getReturnValue 1 returnValuesPointer
-            z <- getReturnValue 2 returnValuesPointer
-            IO.succeed (Vector3d x y z)
-  let bounds (Range tLower tUpper) =
-        callWith wordBytes constantBytes 6 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_curve_bounds
-              wordsPointer
-              (Float.toDouble tLower)
-              (Float.toDouble tUpper)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            xLower <- getReturnValue 0 returnValuesPointer
-            xUpper <- getReturnValue 1 returnValuesPointer
-            yLower <- getReturnValue 2 returnValuesPointer
-            yUpper <- getReturnValue 3 returnValuesPointer
-            zLower <- getReturnValue 4 returnValuesPointer
-            zUpper <- getReturnValue 5 returnValuesPointer
-            IO.succeed (VectorBounds3d (Range xLower xUpper) (Range yLower yUpper) (Range zLower zUpper))
-  (value, bounds)
+  (curve3dValue output, curve3dBounds output)
 
-surface1d :: Step VariableIndex -> (UvPoint -> Float, UvBounds -> Range Unitless)
+curve3dValue :: Output -> Float -> Vector3d (space @ Unitless)
+curve3dValue Output{constantBytes, wordBytes, numVariableComponents} tValue =
+  callWith wordBytes constantBytes 3 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_curve_value
+        wordsPointer
+        (Float.toDouble tValue)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      x <- getReturnValue 0 returnValuesPointer
+      y <- getReturnValue 1 returnValuesPointer
+      z <- getReturnValue 2 returnValuesPointer
+      IO.succeed (Vector3d x y z)
+
+curve3dBounds :: Output -> Range Unitless -> VectorBounds3d (space @ Unitless)
+curve3dBounds Output{constantBytes, wordBytes, numVariableComponents} (Range tLower tUpper) =
+  callWith wordBytes constantBytes 6 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_curve_bounds
+        wordsPointer
+        (Float.toDouble tLower)
+        (Float.toDouble tUpper)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      xLower <- getReturnValue 0 returnValuesPointer
+      xUpper <- getReturnValue 1 returnValuesPointer
+      yLower <- getReturnValue 2 returnValuesPointer
+      yUpper <- getReturnValue 3 returnValuesPointer
+      zLower <- getReturnValue 4 returnValuesPointer
+      zUpper <- getReturnValue 5 returnValuesPointer
+      IO.succeed (VectorBounds3d (Range xLower xUpper) (Range yLower yUpper) (Range zLower zUpper))
+
+surface1d ::
+  Step VariableIndex ->
+  ( UvPoint -> Float
+  , UvBounds -> Range Unitless
+  )
 surface1d step = do
   let output = compile (InputComponents 2) (OutputComponents 1) step
-  let Output{constantBytes, wordBytes, numVariableComponents} = output
-  let value (Point2d uValue vValue) =
-        callWith wordBytes constantBytes 1 $
-          \wordsPointer constantsPointer returnValuePointer -> IO.do
-            opensolid_surface_value
-              wordsPointer
-              (Float.toDouble uValue)
-              (Float.toDouble vValue)
-              constantsPointer
-              numVariableComponents
-              returnValuePointer
-            getReturnValue 0 returnValuePointer
-  let bounds (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
-        callWith wordBytes constantBytes 2 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_surface_bounds
-              wordsPointer
-              (Float.toDouble uLower)
-              (Float.toDouble uUpper)
-              (Float.toDouble vLower)
-              (Float.toDouble vUpper)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            lower <- getReturnValue 0 returnValuesPointer
-            upper <- getReturnValue 1 returnValuesPointer
-            IO.succeed (Range lower upper)
-  (value, bounds)
+  (surface1dValue output, surface1dBounds output)
+
+surface1dValue :: Output -> UvPoint -> Float
+surface1dValue Output{constantBytes, wordBytes, numVariableComponents} uvPoint = do
+  let Point2d uValue vValue = uvPoint
+  callWith wordBytes constantBytes 1 $
+    \wordsPointer constantsPointer returnValuePointer -> IO.do
+      opensolid_surface_value
+        wordsPointer
+        (Float.toDouble uValue)
+        (Float.toDouble vValue)
+        constantsPointer
+        numVariableComponents
+        returnValuePointer
+      getReturnValue 0 returnValuePointer
+
+surface1dBounds :: Output -> UvBounds -> Range Unitless
+surface1dBounds Output{constantBytes, wordBytes, numVariableComponents} uvBounds = do
+  let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
+  callWith wordBytes constantBytes 2 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_surface_bounds
+        wordsPointer
+        (Float.toDouble uLower)
+        (Float.toDouble uUpper)
+        (Float.toDouble vLower)
+        (Float.toDouble vUpper)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      lower <- getReturnValue 0 returnValuesPointer
+      upper <- getReturnValue 1 returnValuesPointer
+      IO.succeed (Range lower upper)
 
 surface2d ::
   Step VariableIndex ->
-  (UvPoint -> Vector2d (space @ Unitless), UvBounds -> VectorBounds2d (space @ Unitless))
+  ( UvPoint -> Vector2d (space @ Unitless)
+  , UvBounds -> VectorBounds2d (space @ Unitless)
+  )
 surface2d step = do
   let output = compile (InputComponents 2) (OutputComponents 2) step
-  let Output{constantBytes, wordBytes, numVariableComponents} = output
-  let value (Point2d uValue vValue) =
-        callWith wordBytes constantBytes 2 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_surface_value
-              wordsPointer
-              (Float.toDouble uValue)
-              (Float.toDouble vValue)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            x <- getReturnValue 0 returnValuesPointer
-            y <- getReturnValue 1 returnValuesPointer
-            IO.succeed (Vector2d x y)
-  let bounds (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
-        callWith wordBytes constantBytes 4 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_surface_bounds
-              wordsPointer
-              (Float.toDouble uLower)
-              (Float.toDouble uUpper)
-              (Float.toDouble vLower)
-              (Float.toDouble vUpper)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            xLower <- getReturnValue 0 returnValuesPointer
-            xUpper <- getReturnValue 1 returnValuesPointer
-            yLower <- getReturnValue 2 returnValuesPointer
-            yUpper <- getReturnValue 3 returnValuesPointer
-            IO.succeed (VectorBounds2d (Range xLower xUpper) (Range yLower yUpper))
-  (value, bounds)
+  (surface2dValue output, surface2dBounds output)
+
+surface2dValue :: Output -> UvPoint -> Vector2d (space @ Unitless)
+surface2dValue Output{constantBytes, wordBytes, numVariableComponents} uvPoint = do
+  let Point2d uValue vValue = uvPoint
+  callWith wordBytes constantBytes 2 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_surface_value
+        wordsPointer
+        (Float.toDouble uValue)
+        (Float.toDouble vValue)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      x <- getReturnValue 0 returnValuesPointer
+      y <- getReturnValue 1 returnValuesPointer
+      IO.succeed (Vector2d x y)
+
+surface2dBounds :: Output -> UvBounds -> VectorBounds2d (space @ Unitless)
+surface2dBounds Output{constantBytes, wordBytes, numVariableComponents} uvBounds = do
+  let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
+  callWith wordBytes constantBytes 4 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_surface_bounds
+        wordsPointer
+        (Float.toDouble uLower)
+        (Float.toDouble uUpper)
+        (Float.toDouble vLower)
+        (Float.toDouble vUpper)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      xLower <- getReturnValue 0 returnValuesPointer
+      xUpper <- getReturnValue 1 returnValuesPointer
+      yLower <- getReturnValue 2 returnValuesPointer
+      yUpper <- getReturnValue 3 returnValuesPointer
+      IO.succeed (VectorBounds2d (Range xLower xUpper) (Range yLower yUpper))
 
 surface3d ::
   Step VariableIndex ->
@@ -408,41 +439,46 @@ surface3d ::
   )
 surface3d step = do
   let output = compile (InputComponents 2) (OutputComponents 3) step
-  let Output{constantBytes, wordBytes, numVariableComponents} = output
-  let value (Point2d uValue vValue) =
-        callWith wordBytes constantBytes 3 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_surface_value
-              wordsPointer
-              (Float.toDouble uValue)
-              (Float.toDouble vValue)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            x <- getReturnValue 0 returnValuesPointer
-            y <- getReturnValue 1 returnValuesPointer
-            z <- getReturnValue 2 returnValuesPointer
-            IO.succeed (Vector3d x y z)
-  let bounds (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
-        callWith wordBytes constantBytes 6 $
-          \wordsPointer constantsPointer returnValuesPointer -> IO.do
-            opensolid_surface_bounds
-              wordsPointer
-              (Float.toDouble uLower)
-              (Float.toDouble uUpper)
-              (Float.toDouble vLower)
-              (Float.toDouble vUpper)
-              constantsPointer
-              numVariableComponents
-              returnValuesPointer
-            xLower <- getReturnValue 0 returnValuesPointer
-            xUpper <- getReturnValue 1 returnValuesPointer
-            yLower <- getReturnValue 2 returnValuesPointer
-            yUpper <- getReturnValue 3 returnValuesPointer
-            zLower <- getReturnValue 4 returnValuesPointer
-            zUpper <- getReturnValue 5 returnValuesPointer
-            IO.succeed (VectorBounds3d (Range xLower xUpper) (Range yLower yUpper) (Range zLower zUpper))
-  (value, bounds)
+  (surface3dValue output, surface3dBounds output)
+
+surface3dValue :: Output -> UvPoint -> Vector3d (space @ Unitless)
+surface3dValue Output{constantBytes, wordBytes, numVariableComponents} uvPoint = do
+  let Point2d uValue vValue = uvPoint
+  callWith wordBytes constantBytes 3 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_surface_value
+        wordsPointer
+        (Float.toDouble uValue)
+        (Float.toDouble vValue)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      x <- getReturnValue 0 returnValuesPointer
+      y <- getReturnValue 1 returnValuesPointer
+      z <- getReturnValue 2 returnValuesPointer
+      IO.succeed (Vector3d x y z)
+
+surface3dBounds :: Output -> UvBounds -> VectorBounds3d (space @ Unitless)
+surface3dBounds Output{constantBytes, wordBytes, numVariableComponents} uvBounds = do
+  let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
+  callWith wordBytes constantBytes 6 $
+    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+      opensolid_surface_bounds
+        wordsPointer
+        (Float.toDouble uLower)
+        (Float.toDouble uUpper)
+        (Float.toDouble vLower)
+        (Float.toDouble vUpper)
+        constantsPointer
+        numVariableComponents
+        returnValuesPointer
+      xLower <- getReturnValue 0 returnValuesPointer
+      xUpper <- getReturnValue 1 returnValuesPointer
+      yLower <- getReturnValue 2 returnValuesPointer
+      yUpper <- getReturnValue 3 returnValuesPointer
+      zLower <- getReturnValue 4 returnValuesPointer
+      zUpper <- getReturnValue 5 returnValuesPointer
+      IO.succeed (VectorBounds3d (Range xLower xUpper) (Range yLower yUpper) (Range zLower zUpper))
 
 foreign import capi "bytecode.h opensolid_curve_value"
   opensolid_curve_value ::
