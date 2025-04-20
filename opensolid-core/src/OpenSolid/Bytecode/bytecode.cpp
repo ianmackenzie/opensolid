@@ -1658,63 +1658,88 @@ computeBounds(
   }
 }
 
+struct Function {
+  const double* constantsPointer;
+  const uint16_t* wordsPointer;
+  int numVariableComponents;
+
+  inline Function(const char* functionPointer) {
+    int numConstantComponents = *(const std::uint16_t*)functionPointer;
+    this->numVariableComponents = *(const std::uint16_t*)(functionPointer + 2);
+    this->constantsPointer = (const double*)(functionPointer + 8);
+    this->wordsPointer = (const std::uint16_t*)(this->constantsPointer + numConstantComponents);
+  }
+};
+
 extern "C" {
   void
-  opensolid_curve_value(
-    const uint16_t* wordsPointer,
-    double t,
-    const double* constantsPointer,
-    int numVariableComponents,
-    double* returnValuesPointer
-  ) {
-    double* variablesPointer = (double*)alloca(sizeof(double) * numVariableComponents);
+  opensolid_curve_value(const char* functionPointer, double t, double* returnValuesPointer) {
+    Function function(functionPointer);
+    double* variablesPointer = (double*)alloca(sizeof(double) * function.numVariableComponents);
     variablesPointer[0] = t;
-    computeValue(wordsPointer, constantsPointer, variablesPointer, returnValuesPointer);
+    computeValue(
+      function.wordsPointer,
+      function.constantsPointer,
+      variablesPointer,
+      returnValuesPointer
+    );
   }
 
   void
   opensolid_curve_bounds(
-    const uint16_t* wordsPointer,
+    const char* functionPointer,
     double tLower,
     double tUpper,
-    const double* constantsPointer,
-    int numVariableComponents,
     double* returnValuesPointer
   ) {
-    Range* variablesPointer = (Range*)alloca(sizeof(Range) * numVariableComponents);
+    Function function(functionPointer);
+    Range* variablesPointer = (Range*)alloca(sizeof(Range) * function.numVariableComponents);
     variablesPointer[0] = Range(tLower, tUpper);
-    computeBounds(wordsPointer, constantsPointer, variablesPointer, (Range*)returnValuesPointer);
+    computeBounds(
+      function.wordsPointer,
+      function.constantsPointer,
+      variablesPointer,
+      (Range*)returnValuesPointer
+    );
   }
 
   void
   opensolid_surface_value(
-    const uint16_t* wordsPointer,
+    const char* functionPointer,
     double u,
     double v,
-    const double* constantsPointer,
-    int numVariableComponents,
     double* returnValuesPointer
   ) {
-    double* variablesPointer = (double*)alloca(sizeof(double) * numVariableComponents);
+    Function function(functionPointer);
+    double* variablesPointer = (double*)alloca(sizeof(double) * function.numVariableComponents);
     variablesPointer[0] = u;
     variablesPointer[1] = v;
-    computeValue(wordsPointer, constantsPointer, variablesPointer, returnValuesPointer);
+    computeValue(
+      function.wordsPointer,
+      function.constantsPointer,
+      variablesPointer,
+      returnValuesPointer
+    );
   }
 
   void
   opensolid_surface_bounds(
-    const uint16_t* wordsPointer,
+    const char* functionPointer,
     double uLower,
     double uUpper,
     double vLower,
     double vUpper,
-    const double* constantsPointer,
-    int numVariableComponents,
     double* returnValuesPointer
   ) {
-    Range* variablesPointer = (Range*)alloca(sizeof(Range) * numVariableComponents);
+    Function function(functionPointer);
+    Range* variablesPointer = (Range*)alloca(sizeof(Range) * function.numVariableComponents);
     variablesPointer[0] = Range(uLower, uUpper);
     variablesPointer[1] = Range(vLower, vUpper);
-    computeBounds(wordsPointer, constantsPointer, variablesPointer, (Range*)returnValuesPointer);
+    computeBounds(
+      function.wordsPointer,
+      function.constantsPointer,
+      variablesPointer,
+      (Range*)returnValuesPointer
+    );
   }
 }

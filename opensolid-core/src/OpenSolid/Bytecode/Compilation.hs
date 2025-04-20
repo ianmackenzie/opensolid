@@ -26,11 +26,10 @@ module OpenSolid.Bytecode.Compilation
 where
 
 import Data.ByteString.Unsafe qualified
-import Data.Word (Word16)
 import Foreign (Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified
-import Foreign.Ptr qualified
+import GHC.Foreign (CString)
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -76,7 +75,7 @@ data State = State
   { constantsBuilder :: Builder
   , constants :: Map (NonEmpty Float) ConstantIndex
   , constantComponents :: NumComponents
-  , wordsBuilder :: Builder
+  , variablesBuilder :: Builder
   , variables :: Map Instruction VariableIndex
   , variableComponents :: NumComponents
   }
@@ -135,8 +134,8 @@ addVariable instruction (OutputComponents outputComponents) = Step \initialCompi
       let resultIndex = nextVariableIndex initialCompilation
       let updatedCompilation =
             initialCompilation
-              { wordsBuilder =
-                  wordsBuilder initialCompilation
+              { variablesBuilder =
+                  variablesBuilder initialCompilation
                     <> Instruction.encode instruction resultIndex
               , variables =
                   variables initialCompilation
@@ -162,25 +161,26 @@ init (InputComponents inputComponents) =
     { constantsBuilder = Binary.empty
     , constants = Map.empty
     , constantComponents = NumComponents 0
-    , wordsBuilder = Binary.empty
+    , variablesBuilder = Binary.empty
     , variables = Map.empty
     , variableComponents = NumComponents inputComponents
     }
 
-data Output = Output
-  { constantBytes :: ByteString
-  , wordBytes :: ByteString
-  , numVariableComponents :: Int
-  }
-
-compile :: InputComponents -> OutputComponents -> Step VariableIndex -> Output
+compile :: InputComponents -> OutputComponents -> Step VariableIndex -> ByteString
 compile (InputComponents inputComponents) (OutputComponents outputComponents) (Step step) = do
   let (finalState, resultIndex) = step (init (InputComponents inputComponents))
-  let constantBytes = Binary.bytes (constantsBuilder finalState)
-  let returnInstruction = Instruction.return outputComponents resultIndex
-  let wordBytes = Binary.bytes (wordsBuilder finalState <> returnInstruction)
+  let NumComponents numConstantComponents = constantComponents finalState
   let NumComponents numVariableComponents = variableComponents finalState
-  Output{constantBytes, wordBytes, numVariableComponents}
+  Binary.bytes $
+    Binary.concat
+      [ Encode.int numConstantComponents
+      , Encode.int numVariableComponents
+      , Encode.int 0
+      , Encode.int 0
+      , constantsBuilder finalState
+      , variablesBuilder finalState
+      , Instruction.return outputComponents resultIndex
+      ]
 
 debug :: InputComponents -> Step VariableIndex -> Text
 debug (InputComponents inputComponents) (Step step) = do
@@ -204,15 +204,12 @@ debugCurve = debug (InputComponents 1)
 debugSurface :: Step VariableIndex -> Text
 debugSurface = debug (InputComponents 2)
 
-callWith :: ByteString -> ByteString -> Int -> (Ptr Word16 -> Ptr Double -> Ptr Double -> IO a) -> a
-callWith wordBytes constantBytes numReturnValues callback =
+callWith :: ByteString -> Int -> (CString -> Ptr Double -> IO a) -> a
+callWith functionBytes numReturnValues callback =
   unsafeDupablePerformIO $
-    Data.ByteString.Unsafe.unsafeUseAsCString wordBytes \wordBytesPointer ->
-      Data.ByteString.Unsafe.unsafeUseAsCString constantBytes \constantBytesPointer ->
-        Foreign.Marshal.Alloc.allocaBytes (8 * numReturnValues) \returnValuesPointer -> do
-          let wordsPointer = Foreign.Ptr.castPtr wordBytesPointer
-          let constantsPointer = Foreign.Ptr.castPtr constantBytesPointer
-          callback wordsPointer constantsPointer returnValuesPointer
+    Data.ByteString.Unsafe.unsafeUseAsCString functionBytes \functionPointer ->
+      Foreign.Marshal.Alloc.allocaBytes (8 * numReturnValues) \returnValuesPointer -> do
+        callback functionPointer returnValuesPointer
 
 getReturnValue :: Int -> Ptr Double -> IO Float
 getReturnValue index returnValuesPointer =
@@ -227,28 +224,24 @@ curve1d step = do
   let output = compile (InputComponents 1) (OutputComponents 1) step
   (curve1dValue output, curve1dBounds output)
 
-curve1dValue :: Output -> Float -> Float
-curve1dValue Output{constantBytes, wordBytes, numVariableComponents} tValue =
-  callWith wordBytes constantBytes 1 $
-    \wordsPointer constantsPointer returnValuePointer -> IO.do
+curve1dValue :: ByteString -> Float -> Float
+curve1dValue functionBytes tValue =
+  callWith functionBytes 1 $
+    \functionPointer returnValuePointer -> IO.do
       opensolid_curve_value
-        wordsPointer
+        functionPointer
         (Float.toDouble tValue)
-        constantsPointer
-        numVariableComponents
         returnValuePointer
       getReturnValue 0 returnValuePointer
 
-curve1dBounds :: Output -> Range Unitless -> Range Unitless
-curve1dBounds Output{constantBytes, wordBytes, numVariableComponents} (Range tLower tUpper) =
-  callWith wordBytes constantBytes 2 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+curve1dBounds :: ByteString -> Range Unitless -> Range Unitless
+curve1dBounds functionBytes (Range tLower tUpper) =
+  callWith functionBytes 2 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_curve_bounds
-        wordsPointer
+        functionPointer
         (Float.toDouble tLower)
         (Float.toDouble tUpper)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       lower <- getReturnValue 0 returnValuesPointer
       upper <- getReturnValue 1 returnValuesPointer
@@ -263,30 +256,26 @@ curve2d step = do
   let output = compile (InputComponents 1) (OutputComponents 2) step
   (curve2dValue output, curve2dBounds output)
 
-curve2dValue :: Output -> Float -> Vector2d (space @ Unitless)
-curve2dValue Output{constantBytes, wordBytes, numVariableComponents} tValue =
-  callWith wordBytes constantBytes 2 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+curve2dValue :: ByteString -> Float -> Vector2d (space @ Unitless)
+curve2dValue functionBytes tValue =
+  callWith functionBytes 2 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_curve_value
-        wordsPointer
+        functionPointer
         (Float.toDouble tValue)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       x <- getReturnValue 0 returnValuesPointer
       y <- getReturnValue 1 returnValuesPointer
       IO.succeed (Vector2d x y)
 
-curve2dBounds :: Output -> Range Unitless -> VectorBounds2d (space @ Unitless)
-curve2dBounds Output{constantBytes, wordBytes, numVariableComponents} (Range tLower tUpper) =
-  callWith wordBytes constantBytes 4 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+curve2dBounds :: ByteString -> Range Unitless -> VectorBounds2d (space @ Unitless)
+curve2dBounds functionBytes (Range tLower tUpper) =
+  callWith functionBytes 4 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_curve_bounds
-        wordsPointer
+        functionPointer
         (Float.toDouble tLower)
         (Float.toDouble tUpper)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       xLower <- getReturnValue 0 returnValuesPointer
       xUpper <- getReturnValue 1 returnValuesPointer
@@ -303,31 +292,27 @@ curve3d step = do
   let output = compile (InputComponents 1) (OutputComponents 3) step
   (curve3dValue output, curve3dBounds output)
 
-curve3dValue :: Output -> Float -> Vector3d (space @ Unitless)
-curve3dValue Output{constantBytes, wordBytes, numVariableComponents} tValue =
-  callWith wordBytes constantBytes 3 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+curve3dValue :: ByteString -> Float -> Vector3d (space @ Unitless)
+curve3dValue functionBytes tValue =
+  callWith functionBytes 3 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_curve_value
-        wordsPointer
+        functionPointer
         (Float.toDouble tValue)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       x <- getReturnValue 0 returnValuesPointer
       y <- getReturnValue 1 returnValuesPointer
       z <- getReturnValue 2 returnValuesPointer
       IO.succeed (Vector3d x y z)
 
-curve3dBounds :: Output -> Range Unitless -> VectorBounds3d (space @ Unitless)
-curve3dBounds Output{constantBytes, wordBytes, numVariableComponents} (Range tLower tUpper) =
-  callWith wordBytes constantBytes 6 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+curve3dBounds :: ByteString -> Range Unitless -> VectorBounds3d (space @ Unitless)
+curve3dBounds functionBytes (Range tLower tUpper) =
+  callWith functionBytes 6 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_curve_bounds
-        wordsPointer
+        functionPointer
         (Float.toDouble tLower)
         (Float.toDouble tUpper)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       xLower <- getReturnValue 0 returnValuesPointer
       xUpper <- getReturnValue 1 returnValuesPointer
@@ -346,33 +331,29 @@ surface1d step = do
   let output = compile (InputComponents 2) (OutputComponents 1) step
   (surface1dValue output, surface1dBounds output)
 
-surface1dValue :: Output -> UvPoint -> Float
-surface1dValue Output{constantBytes, wordBytes, numVariableComponents} uvPoint = do
+surface1dValue :: ByteString -> UvPoint -> Float
+surface1dValue functionBytes uvPoint = do
   let Point2d uValue vValue = uvPoint
-  callWith wordBytes constantBytes 1 $
-    \wordsPointer constantsPointer returnValuePointer -> IO.do
+  callWith functionBytes 1 $
+    \functionPointer returnValuePointer -> IO.do
       opensolid_surface_value
-        wordsPointer
+        functionPointer
         (Float.toDouble uValue)
         (Float.toDouble vValue)
-        constantsPointer
-        numVariableComponents
         returnValuePointer
       getReturnValue 0 returnValuePointer
 
-surface1dBounds :: Output -> UvBounds -> Range Unitless
-surface1dBounds Output{constantBytes, wordBytes, numVariableComponents} uvBounds = do
+surface1dBounds :: ByteString -> UvBounds -> Range Unitless
+surface1dBounds functionBytes uvBounds = do
   let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
-  callWith wordBytes constantBytes 2 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+  callWith functionBytes 2 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
-        wordsPointer
+        functionPointer
         (Float.toDouble uLower)
         (Float.toDouble uUpper)
         (Float.toDouble vLower)
         (Float.toDouble vUpper)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       lower <- getReturnValue 0 returnValuesPointer
       upper <- getReturnValue 1 returnValuesPointer
@@ -387,35 +368,31 @@ surface2d step = do
   let output = compile (InputComponents 2) (OutputComponents 2) step
   (surface2dValue output, surface2dBounds output)
 
-surface2dValue :: Output -> UvPoint -> Vector2d (space @ Unitless)
-surface2dValue Output{constantBytes, wordBytes, numVariableComponents} uvPoint = do
+surface2dValue :: ByteString -> UvPoint -> Vector2d (space @ Unitless)
+surface2dValue functionBytes uvPoint = do
   let Point2d uValue vValue = uvPoint
-  callWith wordBytes constantBytes 2 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+  callWith functionBytes 2 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_value
-        wordsPointer
+        functionPointer
         (Float.toDouble uValue)
         (Float.toDouble vValue)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       x <- getReturnValue 0 returnValuesPointer
       y <- getReturnValue 1 returnValuesPointer
       IO.succeed (Vector2d x y)
 
-surface2dBounds :: Output -> UvBounds -> VectorBounds2d (space @ Unitless)
-surface2dBounds Output{constantBytes, wordBytes, numVariableComponents} uvBounds = do
+surface2dBounds :: ByteString -> UvBounds -> VectorBounds2d (space @ Unitless)
+surface2dBounds functionBytes uvBounds = do
   let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
-  callWith wordBytes constantBytes 4 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+  callWith functionBytes 4 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
-        wordsPointer
+        functionPointer
         (Float.toDouble uLower)
         (Float.toDouble uUpper)
         (Float.toDouble vLower)
         (Float.toDouble vUpper)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       xLower <- getReturnValue 0 returnValuesPointer
       xUpper <- getReturnValue 1 returnValuesPointer
@@ -432,36 +409,32 @@ surface3d step = do
   let output = compile (InputComponents 2) (OutputComponents 3) step
   (surface3dValue output, surface3dBounds output)
 
-surface3dValue :: Output -> UvPoint -> Vector3d (space @ Unitless)
-surface3dValue Output{constantBytes, wordBytes, numVariableComponents} uvPoint = do
+surface3dValue :: ByteString -> UvPoint -> Vector3d (space @ Unitless)
+surface3dValue functionBytes uvPoint = do
   let Point2d uValue vValue = uvPoint
-  callWith wordBytes constantBytes 3 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+  callWith functionBytes 3 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_value
-        wordsPointer
+        functionPointer
         (Float.toDouble uValue)
         (Float.toDouble vValue)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       x <- getReturnValue 0 returnValuesPointer
       y <- getReturnValue 1 returnValuesPointer
       z <- getReturnValue 2 returnValuesPointer
       IO.succeed (Vector3d x y z)
 
-surface3dBounds :: Output -> UvBounds -> VectorBounds3d (space @ Unitless)
-surface3dBounds Output{constantBytes, wordBytes, numVariableComponents} uvBounds = do
+surface3dBounds :: ByteString -> UvBounds -> VectorBounds3d (space @ Unitless)
+surface3dBounds functionBytes uvBounds = do
   let Bounds2d (Range uLower uUpper) (Range vLower vUpper) = uvBounds
-  callWith wordBytes constantBytes 6 $
-    \wordsPointer constantsPointer returnValuesPointer -> IO.do
+  callWith functionBytes 6 $
+    \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
-        wordsPointer
+        functionPointer
         (Float.toDouble uLower)
         (Float.toDouble uUpper)
         (Float.toDouble vLower)
         (Float.toDouble vUpper)
-        constantsPointer
-        numVariableComponents
         returnValuesPointer
       xLower <- getReturnValue 0 returnValuesPointer
       xUpper <- getReturnValue 1 returnValuesPointer
@@ -473,16 +446,16 @@ surface3dBounds Output{constantBytes, wordBytes, numVariableComponents} uvBounds
 
 foreign import capi "bytecode.h opensolid_curve_value"
   opensolid_curve_value ::
-    Ptr Word16 -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
+    CString -> Double -> Ptr Double -> IO ()
 
 foreign import capi "bytecode.h opensolid_curve_bounds"
   opensolid_curve_bounds ::
-    Ptr Word16 -> Double -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
+    CString -> Double -> Double -> Ptr Double -> IO ()
 
 foreign import capi "bytecode.h opensolid_surface_value"
   opensolid_surface_value ::
-    Ptr Word16 -> Double -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
+    CString -> Double -> Double -> Ptr Double -> IO ()
 
 foreign import capi "bytecode.h opensolid_surface_bounds"
   opensolid_surface_bounds ::
-    Ptr Word16 -> Double -> Double -> Double -> Double -> Ptr Double -> Int -> Ptr Double -> IO ()
+    CString -> Double -> Double -> Double -> Double -> Ptr Double -> IO ()
