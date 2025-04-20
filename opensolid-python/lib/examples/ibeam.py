@@ -14,7 +14,7 @@ from opensolid import (
     Color,
 )
 
-with Tolerance(Length.nanometers(1)):
+with Tolerance(Length.meters(1e-9)):
     # Define dimensions
     length = Length.centimeters(30)
     width = Length.centimeters(10)
