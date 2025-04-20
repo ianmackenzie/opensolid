@@ -78,7 +78,7 @@ structDeclaration name fieldTypes = do
   let fieldTuple index fieldType = Python.tuple [Python.str (fieldName index), fieldType]
   let fieldTuples = List.mapWithIndex fieldTuple fieldTypes
   Python.lines
-    [ "class " <> name <> "(Structure):"
+    [ "class " <> name <> "(ctypes.Structure):"
     , Python.indent ["_fields_ = " <> Python.list fieldTuples]
     ]
 
