@@ -156,12 +156,12 @@ topology = {
 
 dummy_value = {
     float: 1.0,
-    Length: Length.meter,
-    Area: Area.square_meter,
+    Length: Length.meters(1),
+    Area: Area.square_meters(1),
     Angle: Angle.radian,
     Range: Range.constant(1),
-    LengthRange: LengthRange.constant(Length.meter),
-    AreaRange: AreaRange.constant(Area.square_meter),
+    LengthRange: LengthRange.constant(Length.meters(1)),
+    AreaRange: AreaRange.constant(Area.square_meters(1)),
     AngleRange: AngleRange.constant(Angle.radian),
     Vector2d: Vector2d.zero,
     Displacement2d: Displacement2d.zero,
@@ -172,8 +172,8 @@ dummy_value = {
     Bounds2d: Bounds2d.constant(Point2d.origin),
     UvBounds: UvBounds.constant(UvPoint.origin),
     Curve: Curve.constant(1),
-    LengthCurve: LengthCurve.constant(Length.meter),
-    AreaCurve: AreaCurve.constant(Area.square_meter),
+    LengthCurve: LengthCurve.constant(Length.meters(1)),
+    AreaCurve: AreaCurve.constant(Area.square_meters(1)),
     AngleCurve: AngleCurve.constant(Angle.radian),
 }
 
