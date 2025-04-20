@@ -124,6 +124,26 @@ extern "C" {
     double* returnValuesPointer
   );
 
+  double
+  opensolid_solve_monotonic_surface_u(
+    double tol,
+    const char* functionPointer,
+    const char* derivativePointer,
+    double uLower,
+    double uUpper,
+    double vValue
+  );
+
+  double
+  opensolid_solve_monotonic_surface_v(
+    double tol,
+    const char* functionPointer,
+    const char* derivativePointer,
+    double uValue,
+    double vLower,
+    double vUpper
+  );
+
 #ifdef __cplusplus
 }
 #endif

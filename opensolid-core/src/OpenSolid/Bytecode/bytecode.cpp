@@ -1658,6 +1658,61 @@ computeBounds(
   }
 }
 
+template <class F, class D>
+double
+solveMonotonic(double tol, F f, D d, double xMin, double xMax, bool pos1, double x1, double x2) {
+  double xMid = 0.5 * (x1 + x2);
+  if (xMid == x1 || xMid == x2) return xMid; // Found a root by bisection
+  double yMid = f(xMid);
+  if (yMid == 0.0) return xMid; // Got lucky, root was exactly at the subdomain midpoint
+  double x = newtonRaphson(tol, f, d, xMin, xMax, xMid, yMid, 0); // Attempt Newton-Raphson
+  if (std::isnan(x)) { // Newton-Raphson did not converge
+    if ((yMid > 0) == pos1) {
+      // yMid has the same sign as y1, so replace x1 with xMid
+      return solveMonotonic(tol, f, d, xMin, xMax, pos1, xMid, x2);
+    } else {
+      // yMid has the same sign as y2, so replace x2 with xMid
+      return solveMonotonic(tol, f, d, xMin, xMax, pos1, x1, xMid);
+    }
+  } else { // Newton-Raphson converged, so return the found root
+    return x;
+  }
+}
+
+template <class F, class D>
+double
+newtonRaphson(double tol, F f, D d, double xMin, double xMax, double x1, double y1, int n) {
+  if (n > 10) return NAN; // Too many iterations
+  double dy1 = d(x1);
+  if (dy1 == 0.0) return NAN; // Can't converge if derivative is zero
+  double x2 = x1 - y1 / dy1; // Perform Newton step
+  if (x2 < xMin || x2 > xMax) { // Check if we stepped outside the given bounds
+    // If so, clamp to the given bounds then try one more step
+    double xBorder = std::clamp(x2, xMin, xMax);
+    double yBorder = f(xBorder);
+    double dyBorder = d(xBorder);
+    if (dyBorder == 0.0) return NAN;
+    x2 = xBorder - yBorder / dyBorder;
+    // If even after clamping we stepped outside the bounds again,
+    // then return NaN to indicate divergence
+    if (x2 < xMin || x2 > xMax) return NAN;
+    // Otherwise, x2 is now a valid point inside the bounds
+    // so we can continue with the logic below
+  }
+  double y2 = f(x2);
+  double y1Abs = std::abs(y1);
+  double y2Abs = std::abs(y2);
+  if (y2Abs >= y1Abs) { // Check if we've stopped converging
+    // We've stopped converging,
+    // so either return the root if we've converged to one
+    // or return NaN if we're diverging
+    return y1Abs <= tol ? x1 : NAN;
+  } else {
+    // We're still converging, so keep going
+    return newtonRaphson(tol, f, d, xMin, xMax, x2, y2, n + 1);
+  }
+}
+
 struct Function {
   const double* constantsPointer;
   const uint16_t* wordsPointer;
@@ -1741,5 +1796,105 @@ extern "C" {
       variablesPointer,
       (Range*)returnValuesPointer
     );
+  }
+
+  double
+  opensolid_solve_monotonic_surface_u(
+    double tol,
+    const char* functionPointer,
+    const char* derivativePointer,
+    double u1,
+    double u2,
+    double v
+  ) {
+    Function function(functionPointer);
+    Function derivative(derivativePointer);
+    double* functionVariablesPointer =
+      (double*)alloca(sizeof(double) * function.numVariableComponents);
+    double* derivativeVariablesPointer =
+      (double*)alloca(sizeof(double) * derivative.numVariableComponents);
+    auto f = [function, functionVariablesPointer, v](double u) {
+      functionVariablesPointer[0] = u;
+      functionVariablesPointer[1] = v;
+      double result;
+      computeValue(
+        function.wordsPointer,
+        function.constantsPointer,
+        functionVariablesPointer,
+        &result
+      );
+      return result;
+    };
+    auto d = [derivative, derivativeVariablesPointer, v](double u) {
+      derivativeVariablesPointer[0] = u;
+      derivativeVariablesPointer[1] = v;
+      double result;
+      computeValue(
+        derivative.wordsPointer,
+        derivative.constantsPointer,
+        derivativeVariablesPointer,
+        &result
+      );
+      return result;
+    };
+    double f1 = f(u1);
+    double f2 = f(u2);
+    if (f1 >= 0.0 && f2 >= 0.0) {
+      return f1 <= f2 ? u1 : u2;
+    } else if (f1 <= 0.0 && f2 <= 0.0) {
+      return f1 >= f2 ? u1 : u2;
+    } else {
+      return solveMonotonic(tol, f, d, u1, u2, f1 > 0, u1, u2);
+    }
+  }
+
+  double
+  opensolid_solve_monotonic_surface_v(
+    double tol,
+    const char* functionPointer,
+    const char* derivativePointer,
+    double u,
+    double v1,
+    double v2
+  ) {
+    Function function(functionPointer);
+    Function derivative(derivativePointer);
+    double* functionVariablesPointer =
+      (double*)alloca(sizeof(double) * function.numVariableComponents);
+    double* derivativeVariablesPointer =
+      (double*)alloca(sizeof(double) * derivative.numVariableComponents);
+    auto f = [function, functionVariablesPointer, u](double v) {
+      functionVariablesPointer[0] = u;
+      functionVariablesPointer[1] = v;
+      double result;
+      computeValue(
+        function.wordsPointer,
+        function.constantsPointer,
+        functionVariablesPointer,
+        &result
+      );
+      return result;
+    };
+    auto d = [derivative, derivativeVariablesPointer, u](double v) {
+      derivativeVariablesPointer[0] = u;
+      derivativeVariablesPointer[1] = v;
+      double result;
+      computeValue(
+        derivative.wordsPointer,
+        derivative.constantsPointer,
+        derivativeVariablesPointer,
+        &result
+      );
+      return result;
+    };
+    double f1 = f(v1);
+    double f2 = f(v2);
+    if (f1 >= 0.0 && f2 >= 0.0) {
+      return f1 <= f2 ? v1 : v2;
+    } else if (f1 <= 0.0 && f2 <= 0.0) {
+      return f1 >= f2 ? v1 : v2;
+    } else {
+      return solveMonotonic(tol, f, d, v1, v2, f1 > 0, v1, v2);
+    }
   }
 }

@@ -268,7 +268,7 @@ library
     -Wextra
     -Werror
     -fPIC
-    -std=c++11
+    -std=c++17
 
   build-depends:
     system-cxx-std-lib
