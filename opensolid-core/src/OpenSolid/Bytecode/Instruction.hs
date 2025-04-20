@@ -7,10 +7,8 @@ module OpenSolid.Bytecode.Instruction
   )
 where
 
-import Data.ByteString.Builder qualified as Builder
-import Data.Word (Word16)
-import GHC.ByteOrder qualified
 import OpenSolid.Binary (Builder)
+import OpenSolid.Bytecode.Encode qualified as Encode
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import Prelude qualified
@@ -97,21 +95,11 @@ data Instruction
   | PlacePoint2d ConstantIndex VariableIndex
   deriving (Eq, Ord, Show)
 
-encodeWord :: Word16 -> Builder
-encodeWord = case GHC.ByteOrder.targetByteOrder of
-  GHC.ByteOrder.LittleEndian -> Builder.word16LE
-  GHC.ByteOrder.BigEndian -> Builder.word16BE
-
-encodeInt :: Int -> Builder
-encodeInt value
-  | value < 65536 = encodeWord (fromIntegral value)
-  | otherwise = exception "More than 65536 locals or constants in compiled function"
-
 encodeVariableIndex :: VariableIndex -> Builder
-encodeVariableIndex (VariableIndex index) = encodeInt index
+encodeVariableIndex (VariableIndex index) = Encode.int index
 
 encodeConstantIndex :: ConstantIndex -> Builder
-encodeConstantIndex (ConstantIndex index) = encodeInt index
+encodeConstantIndex (ConstantIndex index) = Encode.int index
 
 encode :: Instruction -> VariableIndex -> Builder
 encode instruction outputIndex =
@@ -120,341 +108,341 @@ encode instruction outputIndex =
 encodeOpcodeAndArguments :: Instruction -> Builder
 encodeOpcodeAndArguments instruction = case instruction of
   XComponent arg ->
-    encodeInt xComponentOpcode
+    Encode.int xComponentOpcode
       <> encodeVariableIndex arg
   YComponent arg ->
-    encodeInt yComponentOpcode
+    Encode.int yComponentOpcode
       <> encodeVariableIndex arg
   ZComponent arg ->
-    encodeInt zComponentOpcode
+    Encode.int zComponentOpcode
       <> encodeVariableIndex arg
   Negate1d arg ->
-    encodeInt negate1dOpcode
+    Encode.int negate1dOpcode
       <> encodeVariableIndex arg
   Add1d lhs rhs ->
-    encodeInt add1dOpcode
+    Encode.int add1dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   AddVariableConstant1d lhs rhs ->
-    encodeInt addVariableConstant1dOpcode
+    Encode.int addVariableConstant1dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Subtract1d lhs rhs ->
-    encodeInt subtract1dOpcode
+    Encode.int subtract1dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   SubtractConstantVariable1d lhs rhs ->
-    encodeInt subtractConstantVariable1dOpcode
+    Encode.int subtractConstantVariable1dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   Multiply1d lhs rhs ->
-    encodeInt multiply1dOpcode
+    Encode.int multiply1dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   MultiplyVariableConstant1d lhs rhs ->
-    encodeInt multiplyVariableConstant1dOpcode
+    Encode.int multiplyVariableConstant1dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Divide1d lhs rhs ->
-    encodeInt divide1dOpcode
+    Encode.int divide1dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   DivideConstantVariable1d lhs rhs ->
-    encodeInt divideConstantVariable1dOpcode
+    Encode.int divideConstantVariable1dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   Square1d arg ->
-    encodeInt square1dOpcode
+    Encode.int square1dOpcode
       <> encodeVariableIndex arg
   Sqrt1d arg ->
-    encodeInt sqrt1dOpcode
+    Encode.int sqrt1dOpcode
       <> encodeVariableIndex arg
   Sin1d arg ->
-    encodeInt sin1dOpcode
+    Encode.int sin1dOpcode
       <> encodeVariableIndex arg
   Cos1d arg ->
-    encodeInt cos1dOpcode
+    Encode.int cos1dOpcode
       <> encodeVariableIndex arg
   Bezier1d 2 controlPoints parameter ->
-    encodeInt linear1dOpcode
+    Encode.int linear1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d 3 controlPoints parameter ->
-    encodeInt quadratic1dOpcode
+    Encode.int quadratic1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d 4 controlPoints parameter ->
-    encodeInt cubic1dOpcode
+    Encode.int cubic1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d 5 controlPoints parameter ->
-    encodeInt quartic1dOpcode
+    Encode.int quartic1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d 6 controlPoints parameter ->
-    encodeInt quintic1dOpcode
+    Encode.int quintic1dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier1d n controlPoints parameter ->
-    encodeInt bezier1dOpcode
-      <> encodeInt n
+    Encode.int bezier1dOpcode
+      <> Encode.int n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   XY2d x y ->
-    encodeInt xy2dOpcode
+    Encode.int xy2dOpcode
       <> encodeVariableIndex x
       <> encodeVariableIndex y
   XC2d x y ->
-    encodeInt xc2dOpcode
+    Encode.int xc2dOpcode
       <> encodeVariableIndex x
       <> encodeConstantIndex y
   CY2d x y ->
-    encodeInt cy2dOpcode
+    Encode.int cy2dOpcode
       <> encodeConstantIndex x
       <> encodeVariableIndex y
   Negate2d arg ->
-    encodeInt negate2dOpcode
+    Encode.int negate2dOpcode
       <> encodeVariableIndex arg
   Add2d lhs rhs ->
-    encodeInt add2dOpcode
+    Encode.int add2dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   AddVariableConstant2d lhs rhs ->
-    encodeInt addVariableConstant2dOpcode
+    Encode.int addVariableConstant2dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Subtract2d lhs rhs ->
-    encodeInt subtract2dOpcode
+    Encode.int subtract2dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   SubtractConstantVariable2d lhs rhs ->
-    encodeInt subtractConstantVariable2dOpcode
+    Encode.int subtractConstantVariable2dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   Multiply2d lhs rhs ->
-    encodeInt multiply2dOpcode
+    Encode.int multiply2dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   MultiplyVariableConstant2d lhs rhs ->
-    encodeInt multiplyVariableConstant2dOpcode
+    Encode.int multiplyVariableConstant2dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   MultiplyConstantVariable2d lhs rhs ->
-    encodeInt multiplyConstantVariable2dOpcode
+    Encode.int multiplyConstantVariable2dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   Divide2d lhs rhs ->
-    encodeInt divide2dOpcode
+    Encode.int divide2dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   DivideConstantVariable2d lhs rhs ->
-    encodeInt divideConstantVariable2dOpcode
+    Encode.int divideConstantVariable2dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   SquaredMagnitude2d arg ->
-    encodeInt squaredMagnitude2dOpcode
+    Encode.int squaredMagnitude2dOpcode
       <> encodeVariableIndex arg
   Magnitude2d arg ->
-    encodeInt magnitude2dOpcode
+    Encode.int magnitude2dOpcode
       <> encodeVariableIndex arg
   Dot2d lhs rhs ->
-    encodeInt dot2dOpcode
+    Encode.int dot2dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   DotVariableConstant2d lhs rhs ->
-    encodeInt dotVariableConstant2dOpcode
+    Encode.int dotVariableConstant2dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Cross2d lhs rhs ->
-    encodeInt cross2dOpcode
+    Encode.int cross2dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   CrossVariableConstant2d lhs rhs ->
-    encodeInt crossVariableConstant2dOpcode
+    Encode.int crossVariableConstant2dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Bezier2d 2 controlPoints parameter ->
-    encodeInt linear2dOpcode
+    Encode.int linear2dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier2d 3 controlPoints parameter ->
-    encodeInt quadratic2dOpcode
+    Encode.int quadratic2dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier2d 4 controlPoints parameter ->
-    encodeInt cubic2dOpcode
+    Encode.int cubic2dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier2d 5 controlPoints parameter ->
-    encodeInt quartic2dOpcode
+    Encode.int quartic2dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier2d 6 controlPoints parameter ->
-    encodeInt quintic2dOpcode
+    Encode.int quintic2dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier2d n controlPoints parameter ->
-    encodeInt bezier2dOpcode
-      <> encodeInt n
+    Encode.int bezier2dOpcode
+      <> Encode.int n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   TransformVector2d matrix vector ->
-    encodeInt transformVector2dOpcode
+    Encode.int transformVector2dOpcode
       <> encodeConstantIndex matrix
       <> encodeVariableIndex vector
   TransformPoint2d matrix point ->
-    encodeInt transformPoint2dOpcode
+    Encode.int transformPoint2dOpcode
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
   ProjectVector3d matrix vector ->
-    encodeInt projectVector3dOpcode
+    Encode.int projectVector3dOpcode
       <> encodeConstantIndex matrix
       <> encodeVariableIndex vector
   ProjectPoint3d matrix point ->
-    encodeInt projectPoint3dOpcode
+    Encode.int projectPoint3dOpcode
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
   XYZ3d x y z ->
-    encodeInt xyz3dOpcode
+    Encode.int xyz3dOpcode
       <> encodeVariableIndex x
       <> encodeVariableIndex y
       <> encodeVariableIndex z
   XYC3d x y z ->
-    encodeInt xyc3dOpcode
+    Encode.int xyc3dOpcode
       <> encodeVariableIndex x
       <> encodeVariableIndex y
       <> encodeConstantIndex z
   XCZ3d x y z ->
-    encodeInt xcz3dOpcode
+    Encode.int xcz3dOpcode
       <> encodeVariableIndex x
       <> encodeConstantIndex y
       <> encodeVariableIndex z
   CYZ3d x y z ->
-    encodeInt cyz3dOpcode
+    Encode.int cyz3dOpcode
       <> encodeConstantIndex x
       <> encodeVariableIndex y
       <> encodeVariableIndex z
   XCC3d x y z ->
-    encodeInt xcc3dOpcode
+    Encode.int xcc3dOpcode
       <> encodeVariableIndex x
       <> encodeConstantIndex y
       <> encodeConstantIndex z
   CYC3d x y z ->
-    encodeInt cyc3dOpcode
+    Encode.int cyc3dOpcode
       <> encodeConstantIndex x
       <> encodeVariableIndex y
       <> encodeConstantIndex z
   CCZ3d x y z ->
-    encodeInt ccz3dOpcode
+    Encode.int ccz3dOpcode
       <> encodeConstantIndex x
       <> encodeConstantIndex y
       <> encodeVariableIndex z
   Negate3d arg ->
-    encodeInt negate3dOpcode
+    Encode.int negate3dOpcode
       <> encodeVariableIndex arg
   Add3d lhs rhs ->
-    encodeInt add3dOpcode
+    Encode.int add3dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   AddVariableConstant3d lhs rhs ->
-    encodeInt addVariableConstant3dOpcode
+    Encode.int addVariableConstant3dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Subtract3d lhs rhs ->
-    encodeInt subtract3dOpcode
+    Encode.int subtract3dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   SubtractConstantVariable3d lhs rhs ->
-    encodeInt subtractConstantVariable3dOpcode
+    Encode.int subtractConstantVariable3dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   Multiply3d lhs rhs ->
-    encodeInt multiply3dOpcode
+    Encode.int multiply3dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   MultiplyVariableConstant3d lhs rhs ->
-    encodeInt multiplyVariableConstant3dOpcode
+    Encode.int multiplyVariableConstant3dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   MultiplyConstantVariable3d lhs rhs ->
-    encodeInt multiplyConstantVariable3dOpcode
+    Encode.int multiplyConstantVariable3dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   Divide3d lhs rhs ->
-    encodeInt divide3dOpcode
+    Encode.int divide3dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   DivideConstantVariable3d lhs rhs ->
-    encodeInt divideConstantVariable3dOpcode
+    Encode.int divideConstantVariable3dOpcode
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
   SquaredMagnitude3d arg ->
-    encodeInt squaredMagnitude3dOpcode
+    Encode.int squaredMagnitude3dOpcode
       <> encodeVariableIndex arg
   Magnitude3d arg ->
-    encodeInt magnitude3dOpcode
+    Encode.int magnitude3dOpcode
       <> encodeVariableIndex arg
   Dot3d lhs rhs ->
-    encodeInt dot3dOpcode
+    Encode.int dot3dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   DotVariableConstant3d lhs rhs ->
-    encodeInt dotVariableConstant3dOpcode
+    Encode.int dotVariableConstant3dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Cross3d lhs rhs ->
-    encodeInt cross3dOpcode
+    Encode.int cross3dOpcode
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
   CrossVariableConstant3d lhs rhs ->
-    encodeInt crossVariableConstant3dOpcode
+    Encode.int crossVariableConstant3dOpcode
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
   Bezier3d 2 controlPoints parameter ->
-    encodeInt linear3dOpcode
+    Encode.int linear3dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier3d 3 controlPoints parameter ->
-    encodeInt quadratic3dOpcode
+    Encode.int quadratic3dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier3d 4 controlPoints parameter ->
-    encodeInt cubic3dOpcode
+    Encode.int cubic3dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier3d 5 controlPoints parameter ->
-    encodeInt quartic3dOpcode
+    Encode.int quartic3dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier3d 6 controlPoints parameter ->
-    encodeInt quintic3dOpcode
+    Encode.int quintic3dOpcode
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   Bezier3d n controlPoints parameter ->
-    encodeInt bezier3dOpcode
-      <> encodeInt n
+    Encode.int bezier3dOpcode
+      <> Encode.int n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
   TransformVector3d matrix vector ->
-    encodeInt transformVector3dOpcode
+    Encode.int transformVector3dOpcode
       <> encodeConstantIndex matrix
       <> encodeVariableIndex vector
   TransformPoint3d matrix point ->
-    encodeInt transformPoint3dOpcode
+    Encode.int transformPoint3dOpcode
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
   PlaceVector2d matrix vector ->
-    encodeInt placeVector2dOpcode
+    Encode.int placeVector2dOpcode
       <> encodeConstantIndex matrix
       <> encodeVariableIndex vector
   PlacePoint2d matrix point ->
-    encodeInt placePoint2dOpcode
+    Encode.int placePoint2dOpcode
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
 
 return :: Int -> VariableIndex -> Builder
 return dimension variableIndex =
-  encodeInt returnOpcode <> encodeInt dimension <> encodeVariableIndex variableIndex
+  Encode.int returnOpcode <> Encode.int dimension <> encodeVariableIndex variableIndex
 
 foreign import capi "bytecode.h value Return"
   returnOpcode :: Int

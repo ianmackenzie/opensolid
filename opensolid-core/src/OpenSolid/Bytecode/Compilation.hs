@@ -25,17 +25,16 @@ module OpenSolid.Bytecode.Compilation
   )
 where
 
-import Data.ByteString.Builder qualified as Builder
 import Data.ByteString.Unsafe qualified
 import Data.Word (Word16)
 import Foreign (Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified
 import Foreign.Ptr qualified
-import GHC.ByteOrder qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bytecode.Encode qualified as Encode
 import OpenSolid.Bytecode.Instruction
   ( ConstantIndex (ConstantIndex)
   , Instruction
@@ -93,14 +92,6 @@ Step step1 >>= f = Step $ \compilation0 -> do
 nextConstantIndex :: State -> ConstantIndex
 nextConstantIndex State{constantComponents = NumComponents n} = ConstantIndex n
 
-encodeDouble :: Double -> Builder
-encodeDouble = case GHC.ByteOrder.targetByteOrder of
-  GHC.ByteOrder.LittleEndian -> Builder.doubleLE
-  GHC.ByteOrder.BigEndian -> Builder.doubleBE
-
-encodeFloat :: Float -> Builder
-encodeFloat = encodeDouble . Float.toDouble
-
 return :: a -> Step a
 return value = Step (\compilation -> (compilation, value))
 
@@ -114,7 +105,7 @@ addConstant components = Step \initialCompilation ->
             initialCompilation
               { constantsBuilder =
                   constantsBuilder initialCompilation
-                    <> Binary.collect encodeFloat components
+                    <> Binary.collect Encode.float components
               , constants =
                   constants initialCompilation
                     |> Map.set components constantIndex

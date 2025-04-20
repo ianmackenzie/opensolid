@@ -238,6 +238,7 @@ library
     OpenSolid.Bezier
     OpenSolid.Bootstrap
     OpenSolid.Bytecode.Compilation
+    OpenSolid.Bytecode.Encode
     OpenSolid.Bytecode.Instruction
     OpenSolid.CompiledFunction
     OpenSolid.ConstrainedDelaunayTriangulation
