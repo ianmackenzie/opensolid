@@ -13,6 +13,8 @@ module OpenSolid.VectorSurfaceFunction2d
   , transformBy
   , xComponent
   , yComponent
+  , squaredMagnitude'
+  , squaredMagnitude
   )
 where
 
@@ -496,3 +498,19 @@ xComponent function = function `dot` Direction2d.x
 
 yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
 yComponent function = function `dot` Direction2d.y
+
+squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units :*: units)
+squaredMagnitude' function =
+  SurfaceFunction.new
+    & CompiledFunction.map
+      Expression.squaredMagnitude'
+      Vector2d.squaredMagnitude'
+      VectorBounds2d.squaredMagnitude'
+      (compiled function)
+    & \p -> 2.0 * function `dot'` derivative p function
+
+squaredMagnitude ::
+  Units.Squared units1 units2 =>
+  VectorSurfaceFunction2d (space @ units1) ->
+  SurfaceFunction units2
+squaredMagnitude = Units.specialize . squaredMagnitude'
