@@ -1,3 +1,17 @@
+Profile and optimize medial axis computation:
+- Add 'arc' bytecode instructions
+- Try to split out value and bounds evaluation to see how much time is spent in each
+- Try (temporarily?) adding a dedicated "medial axis target" instruction to see if repeated branching is indeed the issue
+  -> or maybe other high-level operations like "mirror one vector across another"
+- Try adding Vector#d and VectorBounds#d types to avoid repeated pointer offset lookups for components
+  -> refactor Bezier curve evaluation to use 2D/3D vector operations directly (slightly nicer for compilation!)
+- Try removing NaN checks in Range-Range operations e.g. addition/subtraction
+- Try switching cubicBlossom etc. to take separate double values instead of a pointer
+
+Replace & with <| to avoid clashing with Haskell's existing & operator(s)?
+
+Replace Units.coerce with monomorphic 'coerce' functions wherever possible
+
 Refactor SurfaceParameter module
 - Remove UvDirection in favour of just using 'Direction2d UvSpace' in the few places it's used
 - Move UvPoint into its own module with UvPoint.random, UvPoint.samples
@@ -15,8 +29,6 @@ Make Point#d a newtype over Vector#d?
 -> use Position#d as the internal constructor name?
 -> similarly make Bounds#d a newtype over VectorBounds#d?
 
-Switch Tolerance in Python to use ContextVar instead of threading.local
-
 Add 'components'/'coordinates' functions to curve and surface function types
 -> especially useful for constructing derivatives of function compositions
 
@@ -27,10 +39,6 @@ Rename CompiledFunction to Function.Compiled
 Support discontinuities in bytecode
 
 Update Curve.sqrt' and SurfaceFunction.sqrt' to use specialized square root derivative expression
-
-Encode entire function as <u64 number of constants, constants, words>
--> only pin/marshal one ByteString instead of two
--> potentially allow functions to call other functions, by passing the single pointer as a 'function pointer'
 
 Add Arc2d and Arc3d bytecode instructions
 
@@ -62,8 +70,6 @@ Special cases for spline types in Ast operations
 Add translateX, translateY, translateZ
 
 Replace 'CompiledFunction.abstract' with 'compileImpl' where applicable
-
-Don't expose Parametric constructors
 
 Remove constructors from .hs-boot files
 -> in particular, curve/surface functions
@@ -123,8 +129,6 @@ Generate non-zero normal vectors at poles of revolved surfaces
 
 Add DirectionCurve2d.[rotateLeft,rotateRight] and use in Curve2d.offsetBy, Region2d.fillet
 
-When updating to GHC 9.12, try out NamedDefaults for Int, Float, Text?
-
 Add OpenSolid prefix to API modules
 
 Remove Drawing2d.Resolution, *or* use it everywhere
@@ -151,13 +155,6 @@ Steiner point optimization: discard UV subdomains that touch an outer boundary o
 -> useful for thin regions, e.g. those resulting from domain stretching...
 
 Search for Vector#d.unit calls and implement direct operations on Direction#d values directly where possible
-
-Switch parametric types to only specialize for Parametric and Coerce
--> similarly, remove transformByImpl?
-
-Implement curve reversal as composition with (1 - t)?
--> still efficient for parametric curves, which is the critical case
--> most curves that have an optimized reverse implementation are parametric anyways...
 
 Use direct constructors for primitives in more places
 -> search for 'let (' to find places where coordinates/components are being used (or unnecessary parentheses in general)
