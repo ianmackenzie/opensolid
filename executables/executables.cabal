@@ -141,9 +141,9 @@ executable i-beam
   build-depends:
     opensolid-core
 
-executable bytecode-evaluation
+executable expression-evaluation
   import: config
   main-is: Main.hs
-  hs-source-dirs: bytecode-evaluation
+  hs-source-dirs: expression-evaluation
   build-depends:
     opensolid-core

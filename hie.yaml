@@ -36,8 +36,8 @@ cradle:
     - path: "executables/i-beam/Main.hs"
       component: "executables:exe:i-beam"
 
-    - path: "executables/bytecode-evaluation/Main.hs"
-      component: "executables:exe:bytecode-evaluation"
+    - path: "executables/expression-evaluation/Main.hs"
+      component: "executables:exe:expression-evaluation"
 
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
