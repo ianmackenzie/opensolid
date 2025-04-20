@@ -1,5 +1,6 @@
 module OpenSolid.Expression
   ( Expression
+  , debug
   , Constant (constant)
   , Zero (zero)
   , Origin (origin)
@@ -143,6 +144,19 @@ vectorCurve3d ast = VectorCurve3d ast (Ast.compileCurve3d ast)
 
 vectorSurface3d :: Ast3d UvPoint -> Expression UvPoint (Vector3d (space @ units))
 vectorSurface3d ast = VectorSurface3d ast (Ast.compileSurface3d ast)
+
+debug :: Expression input outpu -> Text
+debug expression = case expression of
+  Curve1d ast _ -> Ast.debugCurve1d ast
+  Surface1d ast _ -> Ast.debugSurface1d ast
+  Curve2d ast _ -> Ast.debugCurve2d ast
+  Surface2d ast _ -> Ast.debugSurface2d ast
+  VectorCurve2d ast _ -> Ast.debugCurve2d ast
+  VectorSurface2d ast _ -> Ast.debugSurface2d ast
+  Curve3d ast _ -> Ast.debugCurve3d ast
+  Surface3d ast _ -> Ast.debugSurface3d ast
+  VectorCurve3d ast _ -> Ast.debugCurve3d ast
+  VectorSurface3d ast _ -> Ast.debugSurface3d ast
 
 -------------
 --- UNITS ---

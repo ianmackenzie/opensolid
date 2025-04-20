@@ -20,6 +20,8 @@ module OpenSolid.Bytecode.Compilation
   , surface1d
   , surface2d
   , surface3d
+  , debugCurve
+  , debugSurface
   )
 where
 
@@ -42,13 +44,16 @@ import OpenSolid.Bytecode.Instruction
 import OpenSolid.Bytecode.Instruction qualified as Instruction
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
+import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
+import OpenSolid.Text qualified as Text
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
@@ -185,6 +190,28 @@ compile (InputComponents inputComponents) (OutputComponents outputComponents) (S
   let wordBytes = Binary.bytes (wordsBuilder finalState <> returnInstruction)
   let NumComponents numVariableComponents = variableComponents finalState
   Output{constantBytes, wordBytes, numVariableComponents}
+
+debug :: InputComponents -> Step VariableIndex -> Text
+debug (InputComponents inputComponents) (Step step) = do
+  let (finalState, _) = step (init (InputComponents inputComponents))
+  debugText finalState
+
+debugText :: State -> Text
+debugText State{variables} =
+  Map.toList variables
+    |> List.sortBy Pair.second
+    |> List.map showInstruction
+    |> Text.multiline
+
+showInstruction :: (Instruction, VariableIndex) -> Text
+showInstruction (instruction, variableIndex) =
+  Text.show variableIndex <> " = " <> Text.show instruction
+
+debugCurve :: Step VariableIndex -> Text
+debugCurve = debug (InputComponents 1)
+
+debugSurface :: Step VariableIndex -> Text
+debugSurface = debug (InputComponents 2)
 
 callWith :: ByteString -> ByteString -> Int -> (Ptr Word16 -> Ptr Double -> Ptr Double -> IO a) -> a
 callWith wordBytes constantBytes numReturnValues callback =

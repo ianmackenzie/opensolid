@@ -9,6 +9,7 @@ module OpenSolid.CompiledFunction
   , map
   , map2
   , map3
+  , debug
   )
 where
 
@@ -393,3 +394,7 @@ instance
     let (outerValue, outerBounds) = evaluators outer
     let (innerValue, innerBounds) = evaluators inner
     Abstract (outerValue . innerValue) (outerBounds . innerBounds)
+
+debug :: CompiledFunction input output inputBounds outputBounds -> Text
+debug (Concrete expression) = Expression.debug expression
+debug Abstract{} = "Abstract"

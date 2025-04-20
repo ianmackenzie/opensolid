@@ -59,6 +59,12 @@ module OpenSolid.Bytecode.Ast
   , compileSurface1d
   , compileSurface2d
   , compileSurface3d
+  , debugCurve1d
+  , debugCurve2d
+  , debugCurve3d
+  , debugSurface1d
+  , debugSurface2d
+  , debugSurface3d
   )
 where
 
@@ -89,6 +95,7 @@ import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
+import OpenSolid.Text qualified as Text
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d (Transform3d))
@@ -1477,3 +1484,51 @@ compileSurface3d ::
   (UvPoint -> Vector3d Coordinates, UvBounds -> VectorBounds3d Coordinates)
 compileSurface3d (Constant3d val) = (always val, always (VectorBounds3d.constant val))
 compileSurface3d (Variable3d variable) = Compilation.surface3d (compileVariable3d variable)
+
+debugCurve1d :: Ast1d Float -> Text
+debugCurve1d (Constant1d value) = "Constant: " <> Text.float value
+debugCurve1d (Variable1d variable) =
+  Text.multiline
+    [ "Bytecode:"
+    , Text.indent " " (Compilation.debugCurve (compileVariable1d variable))
+    ]
+
+debugCurve2d :: Ast2d Float -> Text
+debugCurve2d (Constant2d value) = "Constant: " <> Text.show value
+debugCurve2d (Variable2d variable) =
+  Text.multiline
+    [ "Bytecode:"
+    , Text.indent " " (Compilation.debugCurve (compileVariable2d variable))
+    ]
+
+debugCurve3d :: Ast3d Float -> Text
+debugCurve3d (Constant3d value) = "Constant: " <> Text.show value
+debugCurve3d (Variable3d variable) =
+  Text.multiline
+    [ "Bytecode:"
+    , Text.indent " " (Compilation.debugCurve (compileVariable3d variable))
+    ]
+
+debugSurface1d :: Ast1d UvPoint -> Text
+debugSurface1d (Constant1d value) = "Constant: " <> Text.float value
+debugSurface1d (Variable1d variable) =
+  Text.multiline
+    [ "Bytecode:"
+    , Text.indent " " (Compilation.debugSurface (compileVariable1d variable))
+    ]
+
+debugSurface2d :: Ast2d UvPoint -> Text
+debugSurface2d (Constant2d value) = "Constant: " <> Text.show value
+debugSurface2d (Variable2d variable) =
+  Text.multiline
+    [ "Bytecode:"
+    , Text.indent " " (Compilation.debugSurface (compileVariable2d variable))
+    ]
+
+debugSurface3d :: Ast3d UvPoint -> Text
+debugSurface3d (Constant3d value) = "Constant: " <> Text.show value
+debugSurface3d (Variable3d variable) =
+  Text.multiline
+    [ "Bytecode:"
+    , Text.indent " " (Compilation.debugSurface (compileVariable3d variable))
+    ]

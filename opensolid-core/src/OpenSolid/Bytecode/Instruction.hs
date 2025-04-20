@@ -12,10 +12,18 @@ import Data.Word (Word16)
 import GHC.ByteOrder qualified
 import OpenSolid.Binary (Builder)
 import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
+import Prelude qualified
 
-newtype ConstantIndex = ConstantIndex Int deriving (Eq, Ord, Show)
+newtype ConstantIndex = ConstantIndex Int deriving (Eq, Ord)
 
-newtype VariableIndex = VariableIndex Int deriving (Eq, Ord, Show)
+instance Show ConstantIndex where
+  show (ConstantIndex index) = Text.unpack ("C" <> Text.int index)
+
+newtype VariableIndex = VariableIndex Int deriving (Eq, Ord)
+
+instance Show VariableIndex where
+  show (VariableIndex index) = Text.unpack ("V" <> Text.int index)
 
 data Instruction
   = XComponent VariableIndex
