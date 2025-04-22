@@ -17,6 +17,8 @@ module OpenSolid.Mesh
   )
 where
 
+import Data.Foldable1 (Foldable1)
+import Data.Foldable1 qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Bounds2d (Bounded2d)
@@ -101,8 +103,8 @@ concat meshes = do
   let combinedFaceIndices = List.concat (offsetFaceIndices 0 arrayLengths faceIndexLists)
   Mesh combinedVertices combinedFaceIndices
 
-collect :: (a -> Mesh b) -> NonEmpty a -> Mesh b
-collect toMesh values = concat (NonEmpty.map toMesh values)
+collect :: Foldable1 list => (a -> Mesh b) -> list a -> Mesh b
+collect toMesh values = concat (NonEmpty.map toMesh (Data.Foldable1.toNonEmpty values))
 
 offsetFaceIndices :: Int -> List Int -> List (List (Int, Int, Int)) -> List (List (Int, Int, Int))
 offsetFaceIndices _ [] _ = []
