@@ -31,6 +31,7 @@ common config
     containers,
     deque,
     directory,
+    indexed-traversable,
     random,
     scientific,
     text,

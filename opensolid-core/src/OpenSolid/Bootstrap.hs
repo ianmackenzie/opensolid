@@ -11,7 +11,9 @@ module OpenSolid.Bootstrap
   , Ordering (EQ, GT, LT)
   , Show
   , Foldable
+  , FoldableWithIndex
   , Traversable
+  , TraversableWithIndex
   , Bool (True, False)
   , Char
   , not
@@ -38,9 +40,11 @@ module OpenSolid.Bootstrap
 where
 
 import Control.Concurrent.Async (Async)
+import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Kind (Type)
 import Data.Text (Text)
 import Data.Text qualified
+import Data.Traversable.WithIndex (TraversableWithIndex)
 import Data.Type.Equality (type (~))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude

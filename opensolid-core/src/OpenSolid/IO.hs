@@ -30,7 +30,10 @@ import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
 import Data.ByteString qualified
 import Data.ByteString.Builder qualified as Builder
+import Data.Foldable qualified
+import Data.Foldable.WithIndex qualified
 import Data.Text.IO.Utf8 qualified
+import Data.Traversable.WithIndex qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
@@ -68,20 +71,14 @@ instance Bind (Result x) IO where
 map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap
 
-forEach :: List a -> (a -> IO ()) -> IO ()
-forEach [] _ = succeed ()
-forEach (first : rest) function = function first >> forEach rest function
+forEach :: Foldable list => list a -> (a -> IO ()) -> IO ()
+forEach list function = Data.Foldable.foldMap function list
 
-forEachWithIndex :: List a -> (Int -> a -> IO ()) -> IO ()
-forEachWithIndex list function =
-  forEach (List.indexed list) (\(index, item) -> function index item)
+forEachWithIndex :: FoldableWithIndex Int list => list a -> (Int -> a -> IO ()) -> IO ()
+forEachWithIndex list function = Data.Foldable.WithIndex.ifoldMap function list
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Prelude.mapM
-
-collectWithIndex :: (Int -> a -> IO b) -> List a -> IO (List b)
-collectWithIndex function list =
-  collect (\(index, item) -> function index item) (List.indexed list)
 
 parallel :: (a -> IO b) -> List a -> IO (List b)
 parallel = Async.mapConcurrently
@@ -95,6 +92,9 @@ async = Async.async
 
 await :: Async a -> IO a
 await = Async.wait
+
+collectWithIndex :: TraversableWithIndex Int list => (Int -> a -> IO b) -> list a -> IO (list b)
+collectWithIndex = Data.Traversable.WithIndex.imapM
 
 sleep :: Duration -> IO ()
 sleep duration = Control.Concurrent.threadDelay (Float.round (Duration.inMicroseconds duration))
