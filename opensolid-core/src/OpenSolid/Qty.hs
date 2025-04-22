@@ -32,6 +32,11 @@ module OpenSolid.Qty
   , sum
   , sumOf
   , random
+  , steps
+  , leading
+  , trailing
+  , inBetween
+  , midpoints
   )
 where
 
@@ -257,3 +262,35 @@ unconvert factor value = value !/ factor
 random :: Qty units -> Qty units -> Random.Generator (Qty units)
 random (Qty low) (Qty high) =
   Random.map Qty (Random.Generator (System.Random.uniformR (low, high)))
+
+{-| Interpolate between two values by subdividing into the given number of steps.
+
+The result is an empty list if the given number of steps is zero (or negative).
+Otherwise, the number of values in the resulting list will be equal to one plus the number of steps.
+For example, for one step the returned values will just be the given start and end values;
+for two steps the returned values will be the start value, the midpoint and then the end value.
+-}
+steps :: Qty units -> Qty units -> Int -> List (Qty units)
+steps start end n = if n > 0 then sequence start end n [0 .. n] else []
+
+-- | Interpolate between two values like 'steps', but skip the first value.
+leading :: Qty units -> Qty units -> Int -> List (Qty units)
+leading start end n = sequence start end n [0 .. n - 1]
+
+-- | Interpolate between two values like 'steps', but skip the last value.
+trailing :: Qty units -> Qty units -> Int -> List (Qty units)
+trailing start end n = sequence start end n [1 .. n]
+
+-- | Interpolate between two values like 'steps', but skip the first and last values.
+inBetween :: Qty units -> Qty units -> Int -> List (Qty units)
+inBetween start end n = sequence start end n [1 .. n - 1]
+
+{-| Subdivide a given range into the given number of steps, and return the midpoint of each step.
+
+This can be useful if you want to sample a curve or other function at the midpoint of several intervals.
+-}
+midpoints :: Qty units -> Qty units -> Int -> List (Qty units)
+midpoints start end n = sequence start end (2 * n) [1, 3 .. 2 * n - 1]
+
+sequence :: Qty units -> Qty units -> Int -> List Int -> List (Qty units)
+sequence start end n indices = let delta = end - start in [start + (i / n) * delta | i <- indices]
