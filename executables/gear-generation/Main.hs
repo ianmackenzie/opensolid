@@ -43,8 +43,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
         let basePath = "executables/gear-generation/gear" <> Text.int numTeeth
         let glbPath = basePath <> ".glb"
         let stlPath = basePath <> ".stl"
-        let roughness = 0.3
-        let material = Scene3d.iron roughness
+        let material = Scene3d.iron (#roughness 0.3)
         let mesh = Body3d.toMesh meshConstraints body
         Scene3d.writeGlb glbPath Plane3d.xy [Scene3d.mesh material mesh]
         Stl.writeBinary stlPath Length.inMillimeters mesh

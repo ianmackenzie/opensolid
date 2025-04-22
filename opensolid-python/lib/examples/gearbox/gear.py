@@ -70,4 +70,4 @@ class Gear:
 
     def scene_entity(self, resolution: Length) -> Scene3d.Entity:
         mesh_constraints = [Mesh.max_error(resolution)]
-        return Scene3d.body(mesh_constraints, Scene3d.iron(0.3), self._body)
+        return Scene3d.body(mesh_constraints, Scene3d.iron(roughness=0.3), self._body)

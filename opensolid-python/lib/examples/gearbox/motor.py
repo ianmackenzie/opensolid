@@ -36,9 +36,9 @@ class Motor:
 
     def scene_entity(self, resolution: Length) -> Scene3d.Entity:
         mesh_constraints = [Mesh.max_error(resolution)]
-        cap_material = Scene3d.aluminum(0.3)
-        housing_material = Scene3d.nonmetal(Color.black, 0.2)
-        shaft_material = Scene3d.silver(0.2)
+        cap_material = Scene3d.aluminum(roughness=0.3)
+        housing_material = Scene3d.nonmetal(Color.black, roughness=0.2)
+        shaft_material = Scene3d.silver(roughness=0.2)
         return Scene3d.group(
             [
                 Scene3d.body(mesh_constraints, cap_material, self._back_cap),

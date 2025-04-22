@@ -107,8 +107,8 @@ class Bearing:
 
     def scene_entity(self, resolution: Length) -> Scene3d.Entity:
         mesh_constraints = [Mesh.max_error(resolution)]
-        race_material = Scene3d.silver(0.2)
-        ball_material = Scene3d.chromium(0.1)
+        race_material = Scene3d.silver(roughness=0.2)
+        ball_material = Scene3d.chromium(roughness=0.1)
         first_ball = Scene3d.body(mesh_constraints, ball_material, self._first_ball)
         balls = Scene3d.group(
             [

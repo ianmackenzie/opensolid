@@ -45,6 +45,6 @@ with Tolerance(Length.nanometers(1)):
         LengthRange(-thickness / 2, thickness / 2),
     )
     mesh_constraints = [Mesh.max_error(Length.millimeters(0.1))]
-    material = Scene3d.nonmetal(Color.blue, 0.3)
+    material = Scene3d.nonmetal(Color.blue, roughness=0.3)
     scene = [Scene3d.body(mesh_constraints, material, body)]
     Scene3d.write_glb("fillet.glb", Plane3d.xy, scene)
