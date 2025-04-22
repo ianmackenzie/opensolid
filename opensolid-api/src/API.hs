@@ -181,6 +181,7 @@ length :: Class
 length =
   Class.new @Length $(docs ''Length) $
     [ constant "Zero" Length.zero $(docs 'Length.zero)
+    , factory3 "Interpolate" "Start" "End" "Parameter Value" Qty.interpolateFrom $(docs 'Qty.interpolateFrom)
     , factory1 "Meters" "Value" Length.meters $(docs 'Length.meters)
     , factory1 "Centimeters" "Value" Length.centimeters $(docs 'Length.centimeters)
     , factory1 "Millimeters" "Value" Length.millimeters $(docs 'Length.millimeters)
@@ -230,6 +231,7 @@ area :: Class
 area =
   Class.new @Area $(docs ''Area) $
     [ constant "Zero" Area.zero $(docs 'Area.zero)
+    , factory3 "Interpolate" "Start" "End" "Parameter Value" Qty.interpolateFrom $(docs 'Qty.interpolateFrom)
     , factory1 "Square Meters" "Value" Area.squareMeters $(docs 'Area.squareMeters)
     , factory1 "Square Inches" "Value" Area.squareInches $(docs 'Area.squareInches)
     , member0 "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
@@ -268,6 +270,7 @@ angle :: Class
 angle =
   Class.new @Angle $(docs ''Angle) $
     [ constant "Zero" Angle.zero $(docs 'Angle.zero)
+    , factory3 "Interpolate" "Start" "End" "Parameter Value" Qty.interpolateFrom $(docs 'Qty.interpolateFrom)
     , constant "Golden Angle" Angle.goldenAngle $(docs 'Angle.goldenAngle)
     , constant "Radian" Angle.radian $(docs 'Angle.radian)
     , constant "Full Turn" Angle.fullTurn $(docs 'Angle.fullTurn)

@@ -233,6 +233,7 @@ largestBy function (x :| xs) = go x (abs (function x)) xs
       then go next nextAbsValue remaining
       else go current currentAbsValue remaining
 
+-- | Interpolate from one value to another, based on a parameter that ranges from 0 to 1.
 {-# INLINE interpolateFrom #-}
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t = a + (b - a) * t
