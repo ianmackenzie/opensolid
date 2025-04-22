@@ -152,7 +152,7 @@ vectorCurve3d ast = VectorCurve3d ast (Ast.compileCurve3d ast)
 vectorSurface3d :: Ast3d UvPoint -> Expression UvPoint (Vector3d (space @ units))
 vectorSurface3d ast = VectorSurface3d ast (Ast.compileSurface3d ast)
 
-debug :: Expression input outpu -> Text
+debug :: Expression input output -> Text
 debug expression = case expression of
   Curve1d ast _ -> Ast.debugCurve1d ast
   Surface1d ast _ -> Ast.debugSurface1d ast
