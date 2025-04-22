@@ -1,6 +1,6 @@
 [project]
 name = "opensolid"
-version = "0.2.3"
+version = "0.2.4"
 requires-python = ">=3.12"
 authors = [{ name = "Ian Mackenzie", email = "ian.e.mackenzie@gmail.com" }]
 description = "An under-development 2D/3D CAD library"
