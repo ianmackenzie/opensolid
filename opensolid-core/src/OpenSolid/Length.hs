@@ -30,7 +30,6 @@ where
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Units (Meters)
-import OpenSolid.Units qualified as Units
 
 {-| A length in millimeters, meters, inches etc.
 
@@ -48,11 +47,11 @@ meter = meters 1.0
 
 -- | Construct a length from a number of meters.
 meters :: Float -> Length
-meters = Units.coerce
+meters = Qty.coerce
 
 -- | Convert a length to a number of meters.
 inMeters :: Length -> Float
-inMeters = Units.coerce
+inMeters = Qty.coerce
 
 -- | One millimeter.
 millimeter :: Length

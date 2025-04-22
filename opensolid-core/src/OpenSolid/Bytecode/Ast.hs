@@ -96,13 +96,13 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvPoint)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
-import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d (Vector3d))
@@ -442,7 +442,7 @@ instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) 
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
 
 constant1d :: Qty units -> Ast1d input
-constant1d value = Constant1d (Units.coerce value)
+constant1d value = Constant1d (Qty.coerce value)
 
 constant2d :: Vector2d (space @ units) -> Ast2d input
 constant2d = Constant2d . Vector2d.coerce
@@ -1040,7 +1040,7 @@ quinticSpline1d p1 p2 p3 p4 p5 p6 param = bezierCurve1d (NonEmpty.six p1 p2 p3 p
 bezierCurve1d :: NonEmpty (Qty units) -> Ast1d input -> Ast1d input
 bezierCurve1d (NonEmpty.One value) _ = constant1d value
 bezierCurve1d controlPoints param =
-  Variable1d (BezierCurve1d (NonEmpty.map Units.coerce controlPoints) CurveParameter) . param
+  Variable1d (BezierCurve1d (NonEmpty.map Qty.coerce controlPoints) CurveParameter) . param
 
 line2d :: Vector2d (space @ units) -> Vector2d (space @ units) -> Ast1d input -> Ast2d input
 line2d p1 p2 param = bezierCurve2d (NonEmpty.two p1 p2) param

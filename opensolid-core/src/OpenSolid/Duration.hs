@@ -22,7 +22,6 @@ where
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Units (Seconds)
-import OpenSolid.Units qualified as Units
 
 type Duration = Qty Seconds
 
@@ -33,10 +32,10 @@ second :: Duration
 second = seconds 1.0
 
 seconds :: Float -> Duration
-seconds = Units.coerce
+seconds = Qty.coerce
 
 inSeconds :: Duration -> Float
-inSeconds = Units.coerce
+inSeconds = Qty.coerce
 
 microsecond :: Duration
 microsecond = seconds 1e-6

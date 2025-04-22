@@ -64,7 +64,7 @@ exact value = new value
 
 bounds :: Estimate units -> Bounds units
 bounds (Estimate _ cachedBounds) = cachedBounds
-bounds (Coerce estimate) = Units.coerce (bounds estimate)
+bounds (Coerce estimate) = Bounds.coerce (bounds estimate)
 
 refine :: Estimate units -> Estimate units
 refine (Estimate implementation _) = refineImpl implementation

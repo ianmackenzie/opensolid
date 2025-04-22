@@ -14,7 +14,6 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Units (SquareMeters)
-import OpenSolid.Units qualified as Units
 
 {-| An area in square meters, square inches etc.
 
@@ -36,11 +35,11 @@ squareInch = Length.inch * Length.inch
 
 -- | Construct an area from a number of square meters.
 squareMeters :: Float -> Area
-squareMeters = Units.coerce
+squareMeters = Qty.coerce
 
 -- | Convert an area to a number of square meters.
 inSquareMeters :: Area -> Float
-inSquareMeters = Units.coerce
+inSquareMeters = Qty.coerce
 
 -- | Construct an area from a number of square inches.
 squareInches :: Float -> Area

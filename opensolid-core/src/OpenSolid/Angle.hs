@@ -31,7 +31,6 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Units (Radians)
-import OpenSolid.Units qualified as Units
 import Prelude qualified
 
 {-|  An angle in degrees, radians, turns etc.
@@ -88,11 +87,11 @@ radian = radians 1.0
 
 -- | Construct an angle from a number of radians.
 radians :: Float -> Angle
-radians = Units.coerce
+radians = Qty.coerce
 
 -- | Convert an angle to a number of radians.
 inRadians :: Angle -> Float
-inRadians = Units.coerce
+inRadians = Qty.coerce
 
 -- | π radians, or 180 degrees.
 pi :: Angle

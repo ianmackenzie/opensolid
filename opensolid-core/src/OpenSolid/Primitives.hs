@@ -40,7 +40,7 @@ instance
     (Vector2d (space1 @ unitsA))
     (Vector2d (space2 @ unitsB))
   where
-  coerce (Vector2d vx vy) = Vector2d (Units.coerce vx) (Units.coerce vy)
+  coerce (Vector2d vx vy) = Vector2d (Qty.coerce vx) (Qty.coerce vy)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -297,7 +297,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Point2d (space1 @ unitsA)) (Point2d (space2 @ unitsB))
   where
-  coerce (Point2d px py) = Point2d (Units.coerce px) (Units.coerce py)
+  coerce (Point2d px py) = Point2d (Qty.coerce px) (Qty.coerce py)
 
 instance
   ( space1 ~ space2
@@ -944,7 +944,7 @@ instance
     (Vector3d (space1 @ unitsA))
     (Vector3d (space2 @ unitsB))
   where
-  coerce (Vector3d vx vy vz) = Vector3d (Units.coerce vx) (Units.coerce vy) (Units.coerce vz)
+  coerce (Vector3d vx vy vz) = Vector3d (Qty.coerce vx) (Qty.coerce vy) (Qty.coerce vz)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -1239,7 +1239,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Point3d (space1 @ unitsA)) (Point3d (space2 @ unitsB))
   where
-  coerce (Point3d px py pz) = Point3d (Units.coerce px) (Units.coerce py) (Units.coerce pz)
+  coerce (Point3d px py pz) = Point3d (Qty.coerce px) (Qty.coerce py) (Qty.coerce pz)
 
 instance
   ( space1 ~ space2
