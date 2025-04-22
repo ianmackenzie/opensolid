@@ -16,6 +16,7 @@ module OpenSolid.Expression
   , r
   , u
   , v
+  , uv
   , sqrt
   , sqrt'
   , squared
@@ -1349,6 +1350,9 @@ u = surface1d (Ast.surfaceParameter SurfaceParameter.U)
 
 v :: Expression UvPoint Float
 v = surface1d (Ast.surfaceParameter SurfaceParameter.V)
+
+uv :: Expression UvPoint UvPoint
+uv = surface2d Ast.surfaceParameters
 
 squared' :: Expression input (Qty units) -> Expression input (Qty (units :*: units))
 squared' (Curve1d ast _) = curve1d (Ast.squared ast)
