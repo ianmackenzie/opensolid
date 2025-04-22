@@ -64,6 +64,7 @@ executable opensolid-python
 
   default-extensions:
     GADTs
+    OverloadedLabels
     OverloadedStrings
     PatternSynonyms
     QualifiedDo

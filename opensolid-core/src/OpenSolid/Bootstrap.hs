@@ -26,7 +26,7 @@ module OpenSolid.Bootstrap
   , Type
   , identity
   , always
-  , (&)
+  , (#)
   , fromIntegral
   , internalError
   , exception
@@ -117,8 +117,8 @@ identity value = value
 always :: a -> b -> a
 always value _ = value
 
-{-# INLINE (&) #-}
-(&) :: (a -> b) -> a -> b
-(&) f a = f a
+{-# INLINE (#) #-}
+(#) :: (a -> b) -> a -> b
+(#) f a = f a
 
-infixl 0 &
+infixl 0 #

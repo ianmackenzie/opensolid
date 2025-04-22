@@ -4,7 +4,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
-import OpenSolid.Labels
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
@@ -27,7 +26,7 @@ main = IO.do
   let y = r * SurfaceFunction.sin theta
   let z = h * SurfaceFunction.v
   let surfaceFunction = SurfaceFunction3d.xyz x y z
-  let domainCircle = Curve2d.circle (CenterPoint (Point2d.xy 0.5 0.5)) (Diameter (2 / 3))
+  let domainCircle = Curve2d.circle (#centerPoint (Point2d.xy 0.5 0.5)) (#diameter (2 / 3))
   domain <- Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle])
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2.0) surface

@@ -7,7 +7,6 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
-import OpenSolid.Labels
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -82,8 +81,8 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
         let pointLocations = List.map (Curve2d.evaluate curve) (Parameter.steps 30)
         let drawPoint point =
               Drawing2d.circle [Drawing2d.whiteFill]
-                & CenterPoint point
-                & Diameter (Length.millimeters 3.0)
+                # #centerPoint point
+                # #diameter (Length.millimeters 3.0)
         let entities = [curveEntity, Drawing2d.group (List.map drawPoint pointLocations)]
         let drawingBounds = Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30.0 15.0)
         Drawing2d.writeSvg fileName drawingBounds entities

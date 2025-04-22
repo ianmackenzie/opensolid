@@ -6,7 +6,6 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
-import OpenSolid.Labels
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -36,8 +35,8 @@ main = Tolerance.using Length.nanometer IO.do
   circle <- Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point =
         Drawing2d.circle [Drawing2d.whiteFill]
-          & CenterPoint point
-          & Diameter (Length.millimeters 4.0)
+          # #centerPoint point
+          # #diameter (Length.millimeters 4.0)
   let drawCurve n curve =
         Drawing2d.group
           [ Drawing2d.curve [] Length.micrometer curve

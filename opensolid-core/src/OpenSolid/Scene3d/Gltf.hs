@@ -27,7 +27,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty))
-import OpenSolid.Scene3d.Labels
 import OpenSolid.Units (Meters)
 import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vertex3d qualified as Vertex3d
@@ -50,8 +49,8 @@ matrixComponents frame =
 matrixField :: Frame3d (space @ Meters) defines -> Json.Field
 matrixField frame = Json.optional "matrix" $ matrixComponents frame
 
-pbrMaterial :: Color -> Metallic Float -> Roughness Float -> Json
-pbrMaterial baseColor (Metallic metallic) (Roughness roughness) = do
+pbrMaterial :: Color -> Named "metallic" Float -> Named "roughness" Float -> Json
+pbrMaterial baseColor (Named metallic) (Named roughness) = do
   let (r, g, b) = Color.components baseColor
   Json.object
     [ Json.field "pbrMetallicRoughness" $

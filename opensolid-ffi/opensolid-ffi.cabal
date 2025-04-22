@@ -44,6 +44,7 @@ foreign-library opensolid-ffi
     -threaded
 
   default-extensions:
+    OverloadedLabels
     OverloadedStrings
     QualifiedDo
     RebindableSyntax
@@ -66,6 +67,7 @@ executable generate-def-file
     -Wno-missed-extra-shared-lib
 
   default-extensions:
+    OverloadedLabels
     OverloadedStrings
     QualifiedDo
     RebindableSyntax

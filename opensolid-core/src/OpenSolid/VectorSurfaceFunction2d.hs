@@ -456,13 +456,13 @@ xy ::
   VectorSurfaceFunction2d (space @ units)
 xy x y =
   new
-    & CompiledFunction.map2
+    # CompiledFunction.map2
       Expression.xy
       Vector2d
       VectorBounds2d
       (SurfaceFunction.compiled x)
       (SurfaceFunction.compiled y)
-    & \p -> xy (SurfaceFunction.derivative p x) (SurfaceFunction.derivative p y)
+    # \p -> xy (SurfaceFunction.derivative p x) (SurfaceFunction.derivative p y)
 
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
@@ -470,12 +470,12 @@ transformBy ::
   VectorSurfaceFunction2d (space @ units)
 transformBy transform function =
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.VectorSurface2d.transformBy transform)
       (Vector2d.transformBy transform)
       (VectorBounds2d.transformBy transform)
       (compiled function)
-    & \p -> transformBy transform (derivative p function)
+    # \p -> transformBy transform (derivative p function)
 
 evaluate :: VectorSurfaceFunction2d (space @ units) -> UvPoint -> Vector2d (space @ units)
 evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint
@@ -502,12 +502,12 @@ yComponent function = function `dot` Direction2d.y
 squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units :*: units)
 squaredMagnitude' function =
   SurfaceFunction.new
-    & CompiledFunction.map
+    # CompiledFunction.map
       Expression.squaredMagnitude'
       Vector2d.squaredMagnitude'
       VectorBounds2d.squaredMagnitude'
       (compiled function)
-    & \p -> 2.0 * function `dot'` derivative p function
+    # \p -> 2.0 * function `dot'` derivative p function
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

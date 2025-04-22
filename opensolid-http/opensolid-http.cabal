@@ -61,6 +61,7 @@ common config
     LexicalNegation
     MagicHash
     MultiWayIf
+    OverloadedLabels
     OverloadedStrings
     PatternSynonyms
     QualifiedDo

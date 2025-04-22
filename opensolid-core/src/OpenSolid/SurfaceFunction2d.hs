@@ -166,13 +166,13 @@ xy ::
   SurfaceFunction2d (space @ units)
 xy x y =
   new
-    & CompiledFunction.map2
+    # CompiledFunction.map2
       Expression.xy
       Point2d
       Bounds2d
       (SurfaceFunction.compiled x)
       (SurfaceFunction.compiled y)
-    & \p ->
+    # \p ->
       VectorSurfaceFunction2d.xy
         (SurfaceFunction.derivative p x)
         (SurfaceFunction.derivative p y)
@@ -196,12 +196,12 @@ transformBy ::
   SurfaceFunction2d (space @ units)
 transformBy transform function =
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.Surface2d.transformBy transform)
       (Point2d.transformBy transform)
       (Bounds2d.transformBy transform)
       (compiled function)
-    & \p -> VectorSurfaceFunction2d.transformBy transform (derivative p function)
+    # \p -> VectorSurfaceFunction2d.transformBy transform (derivative p function)
 
 instance
   uvCoordinates ~ UvCoordinates =>

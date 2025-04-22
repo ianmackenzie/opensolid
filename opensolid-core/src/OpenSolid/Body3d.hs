@@ -42,7 +42,6 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d qualified as Frame3d
-import OpenSolid.Labels
 import OpenSolid.LineSegment2d (LineSegment2d)
 import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.Linearization qualified as Linearization
@@ -240,10 +239,10 @@ Fails if the diameter is zero.
 -}
 sphere ::
   Tolerance units =>
-  CenterPoint (Point3d (space @ units)) ->
-  Diameter (Qty units) ->
+  Named "centerPoint" (Point3d (space @ units)) ->
+  Named "diameter" (Qty units) ->
   Result EmptyBody (Body3d (space @ units))
-sphere (CenterPoint centerPoint) (Diameter diameter) =
+sphere (Named centerPoint) (Named diameter) =
   if diameter ~= Qty.zero
     then Failure EmptyBody
     else do
@@ -268,13 +267,13 @@ cylinder ::
   Tolerance units =>
   Point3d (space @ units) ->
   Point3d (space @ units) ->
-  Diameter (Qty units) ->
+  Named "diameter" (Qty units) ->
   Result EmptyBody (Body3d (space @ units))
-cylinder startPoint endPoint (Diameter diameter) =
+cylinder startPoint endPoint (Named diameter) =
   case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
     Failure Vector3d.IsZero -> Failure EmptyBody
     Success (length, direction) ->
-      cylinderAlong (Axis3d startPoint direction) (Range Qty.zero length) (Diameter diameter)
+      cylinderAlong (Axis3d startPoint direction) (Range Qty.zero length) (#diameter diameter)
 
 {-| Create a cylindrical body along a given axis.
 
@@ -290,10 +289,10 @@ cylinderAlong ::
   Tolerance units =>
   Axis3d (space @ units) ->
   Range units ->
-  Diameter (Qty units) ->
+  Named "diameter" (Qty units) ->
   Result EmptyBody (Body3d (space @ units))
-cylinderAlong axis distance (Diameter diameter) = do
-  case Region2d.circle (CenterPoint Point2d.origin) (Diameter diameter) of
+cylinderAlong axis distance (Named diameter) = do
+  case Region2d.circle (#centerPoint Point2d.origin) (#diameter diameter) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile ->
       if Range.width distance ~= Qty.zero

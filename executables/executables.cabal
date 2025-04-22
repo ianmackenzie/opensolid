@@ -41,6 +41,7 @@ common config
     DisambiguateRecordFields
     GADTs
     LexicalNegation
+    OverloadedLabels
     OverloadedStrings
     PatternSynonyms
     QualifiedDo

@@ -457,12 +457,12 @@ transformBy ::
   VectorCurve2d (space @ units)
 transformBy transform curve =
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.VectorCurve2d.transformBy transform)
       (Vector2d.transformBy transform)
       (VectorBounds2d.transformBy transform)
       (compiled curve)
-    & transformBy transform (derivative curve)
+    # transformBy transform (derivative curve)
 
 rotateBy ::
   forall space units.
@@ -493,13 +493,13 @@ constant value = new (CompiledFunction.constant value) zero
 xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
 xy x y =
   new
-    & CompiledFunction.map2
+    # CompiledFunction.map2
       Expression.xy
       Vector2d
       VectorBounds2d
       (Curve.compiled x)
       (Curve.compiled y)
-    & xy (Curve.derivative x) (Curve.derivative y)
+    # xy (Curve.derivative x) (Curve.derivative y)
 
 line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
 line v1 v2 = bezierCurve (NonEmpty.two v1 v2)
@@ -535,8 +535,8 @@ cubicSpline v1 v2 v3 v4 = bezierCurve (NonEmpty.four v1 v2 v3 v4)
 bezierCurve :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
 bezierCurve controlPoints =
   new
-    & CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    & bezierCurve (Bezier.derivative controlPoints)
+    # CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    # bezierCurve (Bezier.derivative controlPoints)
 
 synthetic ::
   VectorCurve2d (space @ units) ->
@@ -569,22 +569,22 @@ squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve (units :*: units)
 squaredMagnitude' curve =
   Curve.new
-    & CompiledFunction.map
+    # CompiledFunction.map
       Expression.VectorCurve2d.squaredMagnitude'
       Vector2d.squaredMagnitude'
       VectorBounds2d.squaredMagnitude'
       (compiled curve)
-    & 2.0 * curve `dot'` derivative curve
+    # 2.0 * curve `dot'` derivative curve
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 unsafeMagnitude curve =
   Curve.recursive
-    & CompiledFunction.map
+    # CompiledFunction.map
       Expression.VectorCurve2d.magnitude
       Vector2d.magnitude
       VectorBounds2d.magnitude
       (compiled curve)
-    & \self -> derivative curve `dot` (curve / self)
+    # \self -> derivative curve `dot` (curve / self)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

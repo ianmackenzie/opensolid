@@ -61,7 +61,6 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Labels
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
@@ -168,14 +167,14 @@ Fails if the given dimeter is zero.
 -}
 circle ::
   Tolerance units =>
-  CenterPoint (Point2d (space @ units)) ->
-  Diameter (Qty units) ->
+  Named "centerPoint" (Point2d (space @ units)) ->
+  Named "diameter" (Qty units) ->
   Result EmptyRegion (Region2d (space @ units))
-circle (CenterPoint centerPoint) (Diameter diameter) =
+circle (Named centerPoint) (Named diameter) =
   if diameter ~= Qty.zero
     then Failure EmptyRegion
     else do
-      let boundaryCurve = Curve2d.circle (CenterPoint centerPoint) (Diameter diameter)
+      let boundaryCurve = Curve2d.circle (#centerPoint centerPoint) (#diameter diameter)
       Success (Region2d (NonEmpty.one boundaryCurve) [])
 
 {-| Create a polygonal region from the given points.
@@ -205,10 +204,10 @@ or if it is not possible to solve for a given fillet
 fillet ::
   Tolerance units =>
   List (Point2d (space @ units)) ->
-  Radius (Qty units) ->
+  Named "radius" (Qty units) ->
   Region2d (space @ units) ->
   Result Text (Region2d (space @ units))
-fillet points (Radius radius) region = Result.do
+fillet points (Named radius) region = Result.do
   let initialCurves = NonEmpty.toList (boundaryCurves region)
   filletedCurves <- Result.try (Result.foldl (addFillet radius) initialCurves points)
   Result.try (boundedBy filletedCurves)

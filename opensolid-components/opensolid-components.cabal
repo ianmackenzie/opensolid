@@ -53,6 +53,7 @@ common config
     ImplicitParams
     LexicalNegation
     MultiWayIf
+    OverloadedLabels
     OverloadedStrings
     PatternSynonyms
     QualifiedDo

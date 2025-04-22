@@ -117,7 +117,6 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.Labels
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -357,13 +356,13 @@ constant point = new (CompiledFunction.constant point) VectorCurve2d.zero
 xy :: Curve units -> Curve units -> Curve2d (space @ units)
 xy x y =
   new
-    & CompiledFunction.map2
+    # CompiledFunction.map2
       Expression.xy
       Point2d
       Bounds2d
       (Curve.compiled x)
       (Curve.compiled y)
-    & VectorCurve2d.xy (Curve.derivative x) (Curve.derivative y)
+    # VectorCurve2d.xy (Curve.derivative x) (Curve.derivative y)
 
 -- | Create a line between two points.
 line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
@@ -403,12 +402,12 @@ arc givenStartPoint givenEndPoint sweptAngle =
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
-  CenterPoint (Point2d (space @ units)) ->
-  Radius (Qty units) ->
-  StartAngle Angle ->
-  EndAngle Angle ->
+  Named "centerPoint" (Point2d (space @ units)) ->
+  Named "radius" (Qty units) ->
+  Named "startAngle" Angle ->
+  Named "endAngle" Angle ->
   Curve2d (space @ units)
-polarArc (CenterPoint centerPoint) (Radius radius) (StartAngle startAngle) (EndAngle endAngle) =
+polarArc (Named centerPoint) (Named radius) (Named startAngle) (Named endAngle) =
   customArc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle
 
 {-| Create an arc with the given center point, start point and swept angle.
@@ -420,10 +419,10 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2d.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2d.angleFrom centerPoint givenStartPoint
   polarArc
-    (CenterPoint centerPoint)
-    (Radius radius)
-    (StartAngle startAngle)
-    (EndAngle (startAngle + sweptAngle))
+    # #centerPoint centerPoint
+    # #radius radius
+    # #startAngle startAngle
+    # #endAngle (startAngle + sweptAngle)
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
@@ -431,9 +430,9 @@ cornerArc ::
   Point2d (space @ units) ->
   Direction2d space ->
   Direction2d space ->
-  Radius (Qty units) ->
+  Named "radius" (Qty units) ->
   Curve2d (space @ units)
-cornerArc cornerPoint incomingDirection outgoingDirection (Radius givenRadius) = do
+cornerArc cornerPoint incomingDirection outgoingDirection (Named givenRadius) = do
   let radius = Qty.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
   if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
@@ -508,13 +507,16 @@ customArc p0 v1 v2 a b = do
   p0 + v1 * Curve.cos angle + v2 * Curve.sin angle
 
 -- | Create a circle with the given center point and diameter.
-circle :: CenterPoint (Point2d (space @ units)) -> Diameter (Qty units) -> Curve2d (space @ units)
-circle (CenterPoint centerPoint) (Diameter diameter) =
+circle ::
+  Named "centerPoint" (Point2d (space @ units)) ->
+  Named "diameter" (Qty units) ->
+  Curve2d (space @ units)
+circle (Named centerPoint) (Named diameter) =
   polarArc
-    (CenterPoint centerPoint)
-    (Radius $ 0.5 * diameter)
-    (StartAngle Angle.zero)
-    (EndAngle Angle.twoPi)
+    # #centerPoint centerPoint
+    # #radius (0.5 * diameter)
+    # #startAngle Angle.zero
+    # #endAngle Angle.twoPi
 
 {-| Create an ellipes with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,
@@ -534,8 +536,8 @@ will return a cubic Bezier curve with the given four control points.
 bezier :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
 bezier controlPoints =
   new
-    & CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    & VectorCurve2d.bezierCurve (Bezier.derivative controlPoints)
+    # CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    # VectorCurve2d.bezierCurve (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
@@ -825,12 +827,12 @@ placeIn ::
   Curve2d (global @ units)
 placeIn frame curve =
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.Curve2d.placeIn frame)
       (Point2d.placeIn frame)
       (Bounds2d.placeIn frame)
       (compiled curve)
-    & VectorCurve2d.placeIn (Frame2d.basis frame) (derivative curve)
+    # VectorCurve2d.placeIn (Frame2d.basis frame) (derivative curve)
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
@@ -850,12 +852,12 @@ transformBy ::
   Curve2d (space @ units)
 transformBy transform curve =
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.Curve2d.transformBy transform)
       (Point2d.transformBy transform)
       (Bounds2d.transformBy transform)
       (compiled curve)
-    & VectorCurve2d.transformBy transform (derivative curve)
+    # VectorCurve2d.transformBy transform (derivative curve)
 
 -- | Translate by the given displacement.
 translateBy ::
@@ -1097,8 +1099,8 @@ makePiecewise parameterizedSegments = do
   let evaluateImpl t = piecewiseValue tree (arcLength * t)
   let evaluateBoundsImpl (Range t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
   new
-    & CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
-    & piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
+    # CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
+    # piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
 
 piecewise ::
   Tolerance units =>

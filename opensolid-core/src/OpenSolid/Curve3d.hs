@@ -176,14 +176,14 @@ constant point = new (CompiledFunction.constant point) VectorCurve3d.zero
 xyz :: Curve units -> Curve units -> Curve units -> Curve3d (space @ units)
 xyz x y z =
   new
-    & CompiledFunction.map3
+    # CompiledFunction.map3
       Expression.xyz
       Point3d
       Bounds3d
       (Curve.compiled x)
       (Curve.compiled y)
       (Curve.compiled z)
-    & VectorCurve3d.xyz (Curve.derivative x) (Curve.derivative y) (Curve.derivative z)
+    # VectorCurve3d.xyz (Curve.derivative x) (Curve.derivative y) (Curve.derivative z)
 
 planar ::
   Plane3d (space @ units) (Defines local) ->
@@ -191,12 +191,12 @@ planar ::
   Curve3d (space @ units)
 planar plane curve2d = do
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.Curve2d.placeOn plane)
       (Point2d.placeOn plane)
       (Bounds2d.placeOn plane)
       (Curve2d.compiled curve2d)
-    & VectorCurve3d.planar (Plane3d.basis plane) (Curve2d.derivative curve2d)
+    # VectorCurve3d.planar (Plane3d.basis plane) (Curve2d.derivative curve2d)
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve.t * (p2 - p1)
@@ -210,8 +210,8 @@ will return a cubic Bezier curve with the given four control points.
 bezier :: NonEmpty (Point3d (space @ units)) -> Curve3d (space @ units)
 bezier controlPoints =
   new
-    & CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    & VectorCurve3d.bezierCurve (Bezier.derivative controlPoints)
+    # CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    # VectorCurve3d.bezierCurve (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
@@ -309,9 +309,9 @@ transformBy ::
   Curve3d (space @ units)
 transformBy transform curve =
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.Curve3d.transformBy transform)
       (Point3d.transformBy transform)
       (Bounds3d.transformBy transform)
       (compiled curve)
-    & VectorCurve3d.transformBy transform (derivative curve)
+    # VectorCurve3d.transformBy transform (derivative curve)

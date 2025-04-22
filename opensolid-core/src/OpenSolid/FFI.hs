@@ -24,15 +24,19 @@ module OpenSolid.FFI
 where
 
 import Data.ByteString.Unsafe qualified
+import Data.Char qualified
 import Data.Coerce (Coercible)
 import Data.Coerce qualified
 import Data.Proxy (Proxy (Proxy))
+import Data.Text qualified
 import Data.Text.Encoding qualified
 import Data.Text.Foreign qualified
 import Data.Word (Word8)
 import Foreign (Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified
+import GHC.TypeLits (KnownSymbol)
+import GHC.TypeLits qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Area (Area)
 import OpenSolid.Array (Array)
@@ -290,6 +294,23 @@ instance FFI Area where
 
 instance FFI Angle where
   representation = classRepresentation "Angle"
+
+instance (KnownSymbol name, FFI a) => FFI (Named name a) where
+  representation _ = do
+    let camelCaseName = Text.pack (GHC.TypeLits.symbolVal @name Proxy)
+    NamedArgumentRep (splitCamelCase camelCaseName) (Proxy @a)
+
+splitCamelCase :: Text -> Name
+splitCamelCase text = do
+  let (first, rest) = Data.Text.span Data.Char.isLower text
+  Name (Text.capitalize first :| splitPascalCase rest)
+
+splitPascalCase :: Text -> List Text
+splitPascalCase text = case Data.Text.uncons text of
+  Nothing -> []
+  Just (firstHead, rest) -> do
+    let (firstTail, following) = Data.Text.span Data.Char.isLower rest
+    Data.Text.cons firstHead firstTail : splitPascalCase following
 
 instance FFI item => FFI (List item) where
   representation _ = ListRep

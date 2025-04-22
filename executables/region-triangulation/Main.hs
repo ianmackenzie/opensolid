@@ -6,7 +6,6 @@ import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.IO qualified as IO
-import OpenSolid.Labels
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
@@ -34,7 +33,7 @@ main = Tolerance.using Length.nanometer IO.do
       , Curve2d.arc p2 p3 Angle.quarterTurn
       , Curve2d.line p3 p4
       , Curve2d.line p4 p0
-      , Curve2d.circle (CenterPoint holeCenter) (Diameter holeDiameter)
+      , Curve2d.circle (#centerPoint holeCenter) (#diameter holeDiameter)
       ]
   let mesh = Region2d.toMesh (Length.millimeters 1.0) region
   let triangles = Mesh.faceVertices mesh

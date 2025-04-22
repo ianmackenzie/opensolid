@@ -6,7 +6,6 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
-import OpenSolid.Labels (CenterPoint (CenterPoint), Diameter (Diameter))
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -17,7 +16,6 @@ import OpenSolid.Range (Range (Range))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Result qualified as Result
 import OpenSolid.Scene3d qualified as Scene3d
-import OpenSolid.SpurGear (Module (Module), NumTeeth (NumTeeth))
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Text qualified as Text
@@ -29,9 +27,9 @@ gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))
 gearBody numTeeth = Result.do
   let gearModule = Length.millimeters 1.0
   let holeDiameter = Length.millimeters 8.0
-  let spurGear = SpurGear.metric (NumTeeth numTeeth) (Module gearModule)
+  let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
   let outerProfile = SpurGear.profile spurGear
-  let hole = Curve2d.circle (CenterPoint Point2d.origin) (Diameter holeDiameter)
+  let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
   profile <- Result.try (Region2d.boundedBy (hole : outerProfile))
   let width = Length.millimeters 8.0
   Result.try (Body3d.extruded Plane3d.xy profile (Range (-width / 2.0) (width / 2.0)))

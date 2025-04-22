@@ -70,6 +70,7 @@ common config
     LexicalNegation
     MagicHash
     MultiWayIf
+    OverloadedLabels
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
@@ -152,13 +153,13 @@ library
     OpenSolid.Json
     OpenSolid.Json.Format
     OpenSolid.Json.Schema
-    OpenSolid.Labels
     OpenSolid.Length
     OpenSolid.LineSegment2d
     OpenSolid.List
     OpenSolid.Map
     OpenSolid.Maybe
     OpenSolid.Mesh
+    OpenSolid.Named
     OpenSolid.NonEmpty
     OpenSolid.Pair
     OpenSolid.Parameter
@@ -177,7 +178,6 @@ library
     OpenSolid.Region2d.BoundedBy
     OpenSolid.Result
     OpenSolid.Scene3d
-    OpenSolid.Scene3d.Labels
     OpenSolid.Set2d
     OpenSolid.Set3d
     OpenSolid.Sign

@@ -38,7 +38,6 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.IO qualified as IO
-import OpenSolid.Labels
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -160,8 +159,12 @@ polygon attributes vertices =
   Node "polygon" (pointsAttribute vertices : attributes) []
 
 -- | Create a circle with the given attributes, center point and diameter.
-circle :: List (Attribute space) -> CenterPoint (Point space) -> Diameter Length -> Entity space
-circle attributes (CenterPoint centerPoint) (Diameter diameter) = do
+circle ::
+  List (Attribute space) ->
+  Named "centerPoint" (Point space) ->
+  Named "diameter" Length ->
+  Entity space
+circle attributes (Named centerPoint) (Named diameter) = do
   let (cx, cy) = Point2d.coordinates centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)

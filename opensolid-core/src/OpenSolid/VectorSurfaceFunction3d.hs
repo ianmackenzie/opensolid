@@ -399,8 +399,8 @@ instance
     let duOuter = derivative U outer . inner
     let dvOuter = derivative V outer . inner
     new
-      & compiled outer . SurfaceFunction2d.compiled inner
-      & \p -> do
+      # compiled outer . SurfaceFunction2d.compiled inner
+      # \p -> do
         let dInner = SurfaceFunction2d.derivative p inner
         let dU = VectorSurfaceFunction2d.xComponent dInner
         let dV = VectorSurfaceFunction2d.yComponent dInner
@@ -443,14 +443,14 @@ xyz ::
   VectorSurfaceFunction3d (space @ units)
 xyz x y z =
   new
-    & CompiledFunction.map3
+    # CompiledFunction.map3
       Expression.xyz
       Vector3d
       VectorBounds3d
       (SurfaceFunction.compiled x)
       (SurfaceFunction.compiled y)
       (SurfaceFunction.compiled z)
-    & \p ->
+    # \p ->
       xyz
         (SurfaceFunction.derivative p x)
         (SurfaceFunction.derivative p y)
@@ -478,12 +478,12 @@ placeIn ::
   VectorSurfaceFunction3d (global @ units)
 placeIn basis function =
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.VectorSurface3d.placeIn basis)
       (Vector3d.placeIn basis)
       (VectorBounds3d.placeIn basis)
       (compiled function)
-    & \p -> placeIn basis (derivative p function)
+    # \p -> placeIn basis (derivative p function)
 
 relativeTo ::
   Basis3d global (Defines local) ->
@@ -497,9 +497,9 @@ transformBy ::
   VectorSurfaceFunction3d (space @ units)
 transformBy transform function =
   new
-    & CompiledFunction.map
+    # CompiledFunction.map
       (Expression.VectorSurface3d.transformBy transform)
       (Vector3d.transformBy transform)
       (VectorBounds3d.transformBy transform)
       (compiled function)
-    & \p -> transformBy transform (derivative p function)
+    # \p -> transformBy transform (derivative p function)

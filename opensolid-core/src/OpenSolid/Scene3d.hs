@@ -49,7 +49,6 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Scene3d.Gltf qualified as Gltf
-import OpenSolid.Scene3d.Labels
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
 import OpenSolid.Vertex3d qualified as Vertex3d
@@ -68,7 +67,7 @@ data Entity space where
     Entity local ->
     Entity global
 
-data Material = Material Color (Metallic Float) (Roughness Float)
+data Material = Material {baseColor :: Color, roughness :: Float, metallic :: Float}
 
 data Ground
 
@@ -114,7 +113,7 @@ relativeTo frame = placeIn (Frame3d.inverse frame)
 
 -- | Create a metallic material with the given color and roughness.
 metal :: Color -> Float -> Material
-metal baseColor roughness = Material baseColor (Metallic 1.0) (Roughness roughness)
+metal baseColor roughness = Material{baseColor, metallic = 1.0, roughness}
 
 -- | Create an aluminum material with the given roughness.
 aluminum :: Float -> Material
@@ -154,11 +153,11 @@ titanium = metal (Color.rgb 0.807 0.787 0.764)
 
 -- | Create a non-metallic material with the given color and roughness.
 nonmetal :: Color -> Float -> Material
-nonmetal baseColor roughness = Material baseColor (Metallic 0.0) (Roughness roughness)
+nonmetal baseColor roughness = Material{baseColor, roughness, metallic = 0.0}
 
 -- | Create a material with the given base color, metallic factor and roughness.
-material :: Color -> Metallic Float -> Roughness Float -> Material
-material = Material
+material :: Color -> Named "metallic" Float -> Named "roughness" Float -> Material
+material baseColor (Named metallic) (Named roughness) = Material{baseColor, metallic, roughness}
 
 {-| Convert a scene to binary glTF format.
 
@@ -313,7 +312,7 @@ gltfMeshes ::
   Entity local ->
   List (GltfMesh global)
 gltfMeshes parentFrame entity = case entity of
-  Mesh (Material baseColor metallic roughness) smoothMesh -> do
+  Mesh Material{baseColor, metallic, roughness} smoothMesh -> do
     let vertices = Mesh.vertices smoothMesh
     let numVertices = Array.length vertices
     let faceIndices = Mesh.faceIndices smoothMesh
@@ -326,7 +325,7 @@ gltfMeshes parentFrame entity = case entity of
     List.singleton
       GltfMesh
         { frame = parentFrame
-        , gltfMaterial = Gltf.pbrMaterial baseColor metallic roughness
+        , gltfMaterial = Gltf.pbrMaterial baseColor (#metallic metallic) (#roughness roughness)
         , numFaces
         , indices = Gltf.faceIndices faceIndices
         , indicesByteLength = 3 * 4 * numFaces
