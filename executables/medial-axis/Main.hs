@@ -11,6 +11,7 @@ import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
+import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Labels
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -28,8 +29,10 @@ data Global
 
 main :: IO ()
 main = Tolerance.using Length.micrometer IO.do
-  testSplineAndArc
-  testSplineAndLine
+  timer <- Timer.start
+  IO.Parallel.run [testSplineAndArc, testSplineAndLine]
+  elapsed <- Timer.elapsed timer
+  IO.printLine ("Overall" <> ": " <> Text.int (Float.round (Duration.inMilliseconds elapsed)) <> " ms")
 
 testSplineAndArc :: Tolerance Meters => IO ()
 testSplineAndArc = do
