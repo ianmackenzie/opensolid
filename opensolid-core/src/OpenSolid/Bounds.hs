@@ -84,7 +84,9 @@ type Bounds :: Type -> Type
 
 -- | A range of possible values, with a lower bound and upper bound.
 data Bounds units = Ordered (Qty units) (Qty units)
-  deriving (Eq, Show)
+  deriving (Eq)
+
+deriving instance Show (Qty units) => Show (Bounds units)
 
 {-# COMPLETE Bounds #-}
 

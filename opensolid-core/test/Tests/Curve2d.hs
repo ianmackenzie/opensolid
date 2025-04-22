@@ -291,7 +291,12 @@ degenerateEndPointTangentDerivative =
 firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
 firstDerivativeIsConsistent = firstDerivativeIsConsistentWithin (Length.meters 1e-6)
 
-firstDerivativeIsConsistentWithin :: Qty units -> Curve2d (space @ units) -> Float -> Expectation
+firstDerivativeIsConsistentWithin ::
+  Show (Qty units) =>
+  Qty units ->
+  Curve2d (space @ units) ->
+  Float ->
+  Expectation
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let firstDerivative = Curve2d.derivative curve
   let dt = 1e-6
@@ -351,7 +356,7 @@ reversalConsistency =
           t <- Parameter.random
           Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1.0 - t))
 
-boundsConsistency :: Tolerance units => Curve2d (space @ units) -> Expectation
+boundsConsistency :: (Tolerance units, Show (Qty units)) => Curve2d (space @ units) -> Expectation
 boundsConsistency curve = Test.do
   tBounds <- Bounds.random Parameter.random
   tValue <- Random.map (Bounds.interpolate tBounds) Parameter.random

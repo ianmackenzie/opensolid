@@ -21,7 +21,7 @@ deriving instance Eq (Vector2d (space @ units))
 
 deriving instance Ord (Vector2d (space @ units))
 
-deriving instance Show (Vector2d (space @ units))
+deriving instance Show (Qty units) => Show (Vector2d (space @ units))
 
 instance FFI (Vector2d (space @ Unitless)) where
   representation = FFI.classRepresentation "Vector2d"
@@ -283,7 +283,7 @@ deriving instance Eq (Point2d (space @ units))
 
 deriving instance Ord (Point2d (space @ units))
 
-deriving instance Show (Point2d (space @ units))
+deriving instance Show (Qty units) => Show (Point2d (space @ units))
 
 instance FFI (Point2d (space @ Meters)) where
   representation = FFI.classRepresentation "Point2d"
@@ -368,7 +368,7 @@ data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
   -- | Construct a vector bounding box from its X and Y coordinate bounds.
   VectorBounds2d :: Bounds units -> Bounds units -> VectorBounds2d (space @ units)
 
-deriving instance Show (VectorBounds2d (space @ units))
+deriving instance Show (Qty units) => Show (VectorBounds2d (space @ units))
 
 instance HasUnits (VectorBounds2d (space @ units)) units (VectorBounds2d (space @ Unitless))
 
@@ -695,7 +695,7 @@ data Bounds2d (coordinateSystem :: CoordinateSystem) where
     Bounds units ->
     Bounds2d (space @ units)
 
-deriving instance Show (Bounds2d (space @ units))
+deriving instance Show (Qty units) => Show (Bounds2d (space @ units))
 
 instance HasUnits (Bounds2d (space @ units)) units (Bounds2d (space @ Unitless))
 
@@ -815,7 +815,7 @@ data Axis2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Eq (Axis2d (space @ units))
 
-deriving instance Show (Axis2d (space @ units))
+deriving instance Show (Qty units) => Show (Axis2d (space @ units))
 
 instance HasUnits (Axis2d (space @ units)) units (Axis2d (space @ Unitless))
 
@@ -836,7 +836,7 @@ data Frame2d coordinateSystem defines where
 
 deriving instance Eq (Frame2d (space @ units) defines)
 
-deriving instance Show (Frame2d (space @ units) defines)
+deriving instance Show (Qty units) => Show (Frame2d (space @ units) defines)
 
 ----- Transform2d -----
 
@@ -854,7 +854,7 @@ deriving instance Eq (Transform2d tag (space @ units))
 
 deriving instance Ord (Transform2d tag (space @ units))
 
-deriving instance Show (Transform2d tag (space @ units))
+deriving instance Show (Qty units) => Show (Transform2d tag (space @ units))
 
 instance HasUnits (Transform2d tag (space @ units)) units (Transform2d tag (space @ Unitless))
 
@@ -925,7 +925,7 @@ deriving instance Eq (Vector3d (space @ units))
 
 deriving instance Ord (Vector3d (space @ units))
 
-deriving instance Show (Vector3d (space @ units))
+deriving instance Show (Qty units) => Show (Vector3d (space @ units))
 
 instance FFI (Vector3d (space @ Unitless)) where
   representation = FFI.classRepresentation "Vector3d"
@@ -1228,7 +1228,7 @@ deriving instance Eq (Point3d (space @ units))
 
 deriving instance Ord (Point3d (space @ units))
 
-deriving instance Show (Point3d (space @ units))
+deriving instance Show (Qty units) => Show (Point3d (space @ units))
 
 instance FFI (Point3d (space @ Meters)) where
   representation = FFI.classRepresentation "Point3d"
@@ -1314,7 +1314,7 @@ data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
     Bounds units ->
     VectorBounds3d (space @ units)
 
-deriving instance Show (VectorBounds3d (space @ units))
+deriving instance Show (Qty units) => Show (VectorBounds3d (space @ units))
 
 instance HasUnits (VectorBounds3d (space @ units)) units (VectorBounds3d (space @ Unitless))
 
@@ -1651,7 +1651,7 @@ data Bounds3d (coordinateSystem :: CoordinateSystem) where
     Bounds units ->
     Bounds3d (space @ units)
 
-deriving instance Show (Bounds3d (space @ units))
+deriving instance Show (Qty units) => Show (Bounds3d (space @ units))
 
 instance FFI (Bounds3d (space @ Meters)) where
   representation = FFI.classRepresentation "Bounds3d"
@@ -1776,7 +1776,7 @@ data Axis3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Eq (Axis3d (space @ units))
 
-deriving instance Show (Axis3d (space @ units))
+deriving instance Show (Qty units) => Show (Axis3d (space @ units))
 
 instance FFI (Axis3d (space @ Meters)) where
   representation = FFI.classRepresentation "Axis3d"
@@ -1802,7 +1802,7 @@ deriving instance Eq (Plane3d (space @ units) defines)
 
 deriving instance Ord (Plane3d (space @ units) defines)
 
-deriving instance Show (Plane3d (space @ units) defines)
+deriving instance Show (Qty units) => Show (Plane3d (space @ units) defines)
 
 instance FFI (Plane3d (space @ Meters) defines) where
   representation = FFI.classRepresentation "Plane3d"
@@ -1815,7 +1815,7 @@ data Frame3d coordinateSystem defines where
 
 deriving instance Eq (Frame3d (space @ units) defines)
 
-deriving instance Show (Frame3d (space @ units) defines)
+deriving instance Show (Qty units) => Show (Frame3d (space @ units) defines)
 
 instance FFI (Frame3d (space @ Meters) defines) where
   representation = FFI.classRepresentation "Frame3d"
@@ -1841,7 +1841,7 @@ deriving instance Eq (Transform3d tag (space @ units))
 
 deriving instance Ord (Transform3d tag (space @ units))
 
-deriving instance Show (Transform3d tag (space @ units))
+deriving instance Show (Qty units) => Show (Transform3d tag (space @ units))
 
 instance HasUnits (Transform3d tag (space @ units)) units (Transform3d tag (space @ Unitless))
 

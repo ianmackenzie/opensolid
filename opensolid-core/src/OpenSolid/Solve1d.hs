@@ -45,7 +45,8 @@ data Neighborhood units = Neighborhood
   , magnitude :: Qty units
   , radius :: Float
   }
-  deriving (Show)
+
+deriving instance Show (Qty units) => Show (Neighborhood units)
 
 neighborhood :: Tolerance units => Int -> Qty units -> Neighborhood units
 neighborhood n value = do

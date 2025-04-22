@@ -10,7 +10,11 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation)
 import Test qualified
 
-derivativeConsistency :: Qty units -> VectorCurve2d (space @ units) -> Expectation
+derivativeConsistency ::
+  Show (Qty units) =>
+  Qty units ->
+  VectorCurve2d (space @ units) ->
+  Expectation
 derivativeConsistency givenTolerance curve = Test.do
   tValue <- Parameter.random
   let firstDerivative = VectorCurve2d.derivative curve
@@ -24,7 +28,10 @@ derivativeConsistency givenTolerance curve = Test.do
       |> Test.output "numericalFirstDerivative" numericalFirstDerivative
       |> Test.output "analyticFirstDerivative" analyticFirstDerivative
 
-boundsConsistency :: Tolerance units => VectorCurve2d (space @ units) -> Expectation
+boundsConsistency ::
+  (Tolerance units, Show (Qty units)) =>
+  VectorCurve2d (space @ units) ->
+  Expectation
 boundsConsistency vectorCurve = Test.do
   tBounds <- Bounds.random Parameter.random
   tValue <- Random.map (Bounds.interpolate tBounds) Parameter.random

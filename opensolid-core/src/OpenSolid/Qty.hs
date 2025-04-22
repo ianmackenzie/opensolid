@@ -42,11 +42,13 @@ where
 
 import Data.Coerce qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.Text qualified
 import Foreign.Storable (Storable)
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import OpenSolid.HasZero (HasZero)
@@ -54,7 +56,8 @@ import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
 import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
-import OpenSolid.Units ((:*:), (:/:))
+import OpenSolid.Unitless (Unitless)
+import OpenSolid.Units (CubicMeters, Meters, Radians, SquareMeters, (:*:), (:/:))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
 import Prelude qualified
@@ -62,7 +65,27 @@ import Prelude qualified
 type role Qty phantom
 
 type Qty :: Type -> Type
-newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
+newtype Qty units = Qty Prelude.Double deriving (Eq, Ord)
+
+instance Show (Qty Unitless) where
+  show (Qty x) = Prelude.show x
+
+showsPrec :: Text -> Int -> Qty units -> Prelude.ShowS
+showsPrec constructor prec (Qty x) =
+  Prelude.showParen (prec > 10) $
+    Prelude.showString (Data.Text.unpack (constructor <> " ")) . Prelude.showsPrec 11 x
+
+instance Show (Qty Meters) where
+  showsPrec = showsPrec "Length.meters"
+
+instance Show (Qty Radians) where
+  showsPrec = showsPrec "Angle.radians"
+
+instance Show (Qty SquareMeters) where
+  showsPrec = showsPrec "Area.squareMeters"
+
+instance Show (Qty CubicMeters) where
+  showsPrec = showsPrec "Area.cubicMeters"
 
 deriving newtype instance Prelude.Num Float
 
