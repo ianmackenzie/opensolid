@@ -1,24 +1,51 @@
-Profile and optimize medial axis computation:
-- Add 'arc' bytecode instructions
-- Try to split out value and bounds evaluation to see how much time is spent in each
-- Try (temporarily?) adding a dedicated "medial axis target" instruction to see if repeated branching is indeed the issue
-  -> or maybe other high-level operations like "mirror one vector across another"
-- Try adding Vector#d and VectorBounds#d types to avoid repeated pointer offset lookups for components
-  -> refactor Bezier curve evaluation to use 2D/3D vector operations directly (slightly nicer for compilation!)
-- Try removing NaN checks in Range-Range operations e.g. addition/subtraction
-- Try switching cubicBlossom etc. to take separate double values instead of a pointer
+Re-add Line#d, Arc#d, Bezier#d etc. types with corresponding Curve#d.line, Curve#d.arc, Curve#d.bezier functions
+-> in target languages, Line#d can be a *subclass* of Curve#d for convenience
+  -> then don't need to expose Curve#d.line, Curve#d.arc etc. to target languages
+-> move most curve constructors into the 'concrete' modules
+-> also add Cylinder3d, Sphere3d, Circle2d, Disk3d (maybe Circle3d?) etc.
+  -> useful as return type of e.g. Gear.bore or Bearing.bore function; Cylinder3d.startCap and endCap can return Disk3d...
+-> also need UvLine, UvArc, UvBezier etc., but that seems OK...
 
-Replace & with <| to avoid clashing with Haskell's existing & operator(s)?
+Have SpurGear be a pure interface?
+-> possibly add typeclass instance for '(Named "numTeeth" Int, Named "module" Length)' (anonymous record!)
 
-Replace Units.coerce with monomorphic 'coerce' functions wherever possible
+Switch to providing an Axis3d instead of Axis2d for revolutions?
+-> might be just fine to allow axes that do not in fact lie within the sketch plane
+-> providing an absolute axis seems generally more readable than a relative one...
+-> a bit tricky, since we need to check for profile curves that lie *on* the axis...
+
+Switch to FFI Name values being defined (and stored?) as camelCase
+-> have functions to convert camelCase to snake_case or PascalCase
+-> should then be able to use the same logic for converting function names in docs to match the target language
+
+Optimized representation for planar surface functions
+- Update Ast module to use p0/i/j representation instead of planes?
+- Rename Ast.PlacePoint2d to Ast.PlanarPoint2d, Ast.PlaceVector2d to PlanarVector2d
+
+Add Arc#d bytecode instructions
+
+Base arc length parameterization on *square* of first derivative magnitude, then cache it by storing it lazily?
+-> will require a bit of tweaking derivative logic, but hopefully doable...
+
+Specialized implementation of Qty types in target languages to avoid FFI calls?
+-> represent as plain float value internally
+-> defined in API as list of unit names and conversion factors, to create constructors/conversion functions like 'inches'/'inInches'
+
+Implement generic Mesh class manually in each target language?
+-> probably expose something like a MeshImpl class that just works with positions and vertex indices
+-> expect target language to store actual vertices in its own array
+
+Profile with ThreadScope to check for parallelization issues?
+
+Implement arc length parameterization in C++
+
+Update UV version in GitHub Actions
 
 Refactor SurfaceParameter module
 - Remove UvDirection in favour of just using 'Direction2d UvSpace' in the few places it's used
 - Move UvPoint into its own module with UvPoint.random, UvPoint.samples
 - Move UvBounds into its own module with UvBounds.unit (or unitSquare? if so, rename Region2d.unit)
 - Change SurfaceParameter.random to generate a random SurfaceParameter value (U or V)
-
-Remove Derivatives type now that functions cache their own derivatives
 
 Have Units.Coercion implementations just call a type-specific 'coerce' function everywhere?
 -> some places may not need Units.Coercion at all, should only be needed for arithmetic?
@@ -45,6 +72,9 @@ Add Arc2d and Arc3d bytecode instructions
 Remove 'planar' functions in favour of calling 'new' directly from 'placeOn' functions
 
 Do a general pass of trimming down .hs-boot files?
+-> remove constructors, in particular curve/surface functions
+
+Specialized docstrings for UvCurve and UvRegion
 
 Try requiring a specific coordinate system convention when using 'xyz' functions
 -> implicit argument in Haskell, treated just like tolerance (except it's not passed _through_ anywhere)
@@ -70,9 +100,6 @@ Special cases for spline types in Ast operations
 Add translateX, translateY, translateZ
 
 Replace 'CompiledFunction.abstract' with 'compileImpl' where applicable
-
-Remove constructors from .hs-boot files
--> in particular, curve/surface functions
 
 Review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
 -> get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
@@ -223,9 +250,15 @@ Try using Pandoc to convert from Haddock to reStructuredText?
 Add support for Drawing2d.auto or similar, that computes an appropriate bounding box?
 -> or perhaps a few different options for specifying canvas: Drawing2d.bounds, Drawing2d.padding etc.
 
-Support spaces / coordinate systems in bindings
+Support spaces / coordinate systems in bindings?
 
 Try generating C# bindings?
+
+Try generating Dart bindings?
+
+Add extension method to tuple types in target languages that support them:
+  -> (start, end).steps(10) <-- nicely symmetric with Parameter.steps(10)
+  -> (start, end).interpolate(0.3)
 
 Try generating C++ bindings?
 
