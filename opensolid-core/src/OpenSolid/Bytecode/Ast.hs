@@ -248,6 +248,7 @@ instance Composition (Ast1d input) (Ast1d Float) (Ast1d input) where
   outer . Constant1d inner = Constant1d (Evaluate.curve1dValue (compileCurve1d outer) inner)
 
 instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) where
+  input . CurveParameter = input
   CurveParameter . input = input
   XComponent2d arg . input = XComponent2d (arg . input)
   YComponent2d arg . input = YComponent2d (arg . input)
@@ -285,6 +286,7 @@ instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
   outer . Constant1d inner = Constant2d (Evaluate.curve2dValue (compileCurve2d outer) inner)
 
 instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) where
+  input . CurveParameter = input
   XY2d x y . input = XY2d (x . input) (y . input)
   XC2d x y . input = XC2d (x . input) y
   CY2d x y . input = CY2d x (y . input)
@@ -310,6 +312,7 @@ instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
   outer . Constant1d inner = Constant3d (Evaluate.curve3dValue (compileCurve3d outer) inner)
 
 instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) where
+  input . CurveParameter = input
   XYZ3d x y z . input = XYZ3d (x . input) (y . input) (z . input)
   XYC3d x y z . input = XYC3d (x . input) (y . input) z
   XCZ3d x y z . input = XCZ3d (x . input) y (z . input)
