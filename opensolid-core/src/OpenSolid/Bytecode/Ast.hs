@@ -34,6 +34,7 @@ module OpenSolid.Bytecode.Ast
   , placePoint2dOn
   , projectVector3dInto
   , projectPoint3dInto
+  , surfaceParameters
   , xy
   , xyz
   , line1d
@@ -175,6 +176,7 @@ deriving instance Ord (Ast2d input)
 deriving instance Show (Ast2d input)
 
 data Variable2d input where
+  SurfaceParameters :: Variable2d UvPoint
   XY2d :: Variable1d input -> Variable1d input -> Variable2d input
   XC2d :: Variable1d input -> Float -> Variable2d input
   CY2d :: Float -> Variable1d input -> Variable2d input
@@ -345,6 +347,7 @@ instance Composition (Ast2d input) (Ast1d UvPoint) (Ast1d input) where
     Constant1d (Evaluate.surface1dValue (compileSurface1d outer) (Point2d u v))
 
 instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) where
+  input . SurfaceParameters = input
   SurfaceParameter U . input = XComponent2d input
   SurfaceParameter V . input = YComponent2d input
   XComponent2d arg . input = XComponent2d (arg . input)
@@ -384,6 +387,8 @@ instance Composition (Ast2d input) (Ast2d UvPoint) (Ast2d input) where
     Constant2d (Evaluate.surface2dValue (compileSurface2d outer) (Point2d u v))
 
 instance Composition (Variable2d input) (Variable2d UvPoint) (Variable2d input) where
+  input . SurfaceParameters = input
+  SurfaceParameters . input = input
   XY2d x y . input = XY2d (x . input) (y . input)
   XC2d x y . input = XC2d (x . input) y
   CY2d x y . input = CY2d x (y . input)
@@ -410,6 +415,7 @@ instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
     Constant3d (Evaluate.surface3dValue (compileSurface3d outer) (Point2d u v))
 
 instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) where
+  input . SurfaceParameters = input
   XYZ3d x y z . input = XYZ3d (x . input) (y . input) (z . input)
   XYC3d x y z . input = XYC3d (x . input) (y . input) z
   XCZ3d x y z . input = XCZ3d (x . input) y (z . input)
@@ -449,6 +455,9 @@ curveParameter = Variable1d CurveParameter
 
 surfaceParameter :: SurfaceParameter -> Ast1d UvPoint
 surfaceParameter = Variable1d . SurfaceParameter
+
+surfaceParameters :: Ast2d UvPoint
+surfaceParameters = Variable2d SurfaceParameters
 
 xComponent2d :: Ast2d input -> Ast1d input
 xComponent2d (Constant2d val) = Constant1d (Vector2d.xComponent val)
@@ -1265,6 +1274,7 @@ compileVariable1d variable = case variable of
 
 compileVariable2d :: Variable2d input -> Compile.Step VariableIndex
 compileVariable2d variable = case variable of
+  SurfaceParameters -> Compile.return (VariableIndex 0)
   XY2d x y -> Compile.do
     xIndex <- compileVariable1d x
     yIndex <- compileVariable1d y
