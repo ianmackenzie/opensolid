@@ -1035,7 +1035,7 @@ medialAxis curve1 curve2 = do
   let v1 = derivative curve1 . SurfaceFunction.u
   let v2 = derivative curve2 . SurfaceFunction.v
   let d = p2 - p1
-  let target = v2 `cross'` (2.0 * (v1 `dot'` d) .*. d - d `dot'` d .*. v1)
+  let target = v2 `cross'` (2.0 * (v1 `dot'` d) .*. d - VectorSurfaceFunction2d.squaredMagnitude' d .*. v1)
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.Zeros.HigherOrderZero -> Failure MedialAxis.HigherOrderSolution
