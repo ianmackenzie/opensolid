@@ -13,6 +13,7 @@ module OpenSolid.Body3d
   , revolved
   , boundedBy
   , toMesh
+  , surfaces
   )
 where
 
@@ -104,6 +105,7 @@ instance FFI (Body3d (space @ Meters)) where
 data BoundarySurface (coordinateSystem :: CoordinateSystem) where
   BoundarySurface ::
     { id :: SurfaceId
+    , orientedSurface :: Surface3d (space @ units)
     , surfaceFunctions :: SurfaceFunctions (space @ units)
     , handedness :: Sign
     , uvBounds :: UvBounds
@@ -392,8 +394,8 @@ boundedBy ::
   List (Surface3d (space @ units)) ->
   Result BoundedBy.Error (Body3d (space @ units))
 boundedBy [] = Failure BoundedBy.EmptyBody
-boundedBy (NonEmpty surfaces) = Result.do
-  surfacesWithHalfEdges <- Result.collect toSurfaceWithHalfEdges (NonEmpty.indexed surfaces)
+boundedBy (NonEmpty givenSurfaces) = Result.do
+  surfacesWithHalfEdges <- Result.collect toSurfaceWithHalfEdges (NonEmpty.indexed givenSurfaces)
   let firstSurfaceWithHalfEdges = NonEmpty.first surfacesWithHalfEdges
   let halfEdges = NonEmpty.collect getAllHalfEdges surfacesWithHalfEdges
   let halfEdgeSet = Set3d.fromNonEmpty halfEdges
@@ -567,6 +569,9 @@ toBoundarySurface ::
 toBoundarySurface edges SurfaceWithHalfEdges{id, surface, handedness, halfEdgeLoops} =
   BoundarySurface
     { id
+    , orientedSurface = case handedness of
+        Positive -> surface
+        Negative -> Surface3d.flip surface
     , surfaceFunctions = toSurfaceFunctions (Surface3d.function surface)
     , handedness
     , uvBounds = Region2d.bounds (Surface3d.domain surface)
@@ -934,3 +939,7 @@ isValidSteinerPoint edgeSet uvPoint = case edgeSet of
     Range.lowerBound distance >= 0.5 * Bounds2d.diameter nodeBounds
       || (isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint)
   Set2d.Leaf _ edge -> LineSegment2d.distanceTo uvPoint edge >= 0.5 * LineSegment2d.length edge
+
+surfaces :: Body3d (space @ units) -> NonEmpty (Surface3d (space @ units))
+surfaces (Body3d boundarySurfaces) =
+  NonEmpty.forEach boundarySurfaces do \BoundarySurface{orientedSurface} -> orientedSurface
