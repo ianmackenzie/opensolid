@@ -246,7 +246,7 @@ extraMemberFunctions className = do
   case className of
     "Length" -> repr ["return 'Length.meters(' + str(self.in_meters()) + ')'"]
     "Area" -> repr ["return 'Area.square_meters(' + str(self.in_square_meters()) + ')'"]
-    "Angle" -> repr ["return 'Angle.degrees(' + str(self.in_degrees()) + ')'"]
+    "Angle" -> repr ["return 'Angle.radians(' + str(self.in_radians()) + ')'"]
     "Bounds" ->
       repr
         [ "low, high = self.endpoints()"
@@ -255,17 +255,17 @@ extraMemberFunctions className = do
     "LengthBounds" ->
       repr
         [ "low, high = self.endpoints()"
-        , "return 'LengthBounds.meters(' + str(low.in_meters()) + ',' + str(high.in_meters()) + ')'"
+        , "return 'LengthBounds(' + repr(low) + ',' + repr(high) + ')'"
         ]
     "AreaBounds" ->
       repr
         [ "low, high = self.endpoints()"
-        , "return 'AreaBounds.square_meters(' + str(low.in_square_meters()) + ',' + str(high.in_square_meters()) + ')'"
+        , "return 'AreaBounds(' + repr(low) + ',' + repr(high) + ')'"
         ]
     "AngleBounds" ->
       repr
         [ "low, high = self.endpoints()"
-        , "return 'AngleBounds.degrees(' + str(low.in_degrees()) + ',' + str(high.in_degrees()) + ')'"
+        , "return 'AngleBounds(' + repr(low) + ',' + repr(high) + ')'"
         ]
     "Color" ->
       repr
@@ -280,21 +280,17 @@ extraMemberFunctions className = do
     "Displacement2d" ->
       repr
         [ "x, y = self.components()"
-        , "return 'Displacement2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
+        , "return 'Displacement2d(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "AreaVector2d" ->
       repr
         [ "x, y = self.components()"
-        , "return 'AreaVector2d.square_meters(' + str(x.in_square_meters()) + ',' + str(y.in_square_meters()) + ')'"
-        ]
-    "Direction2d" ->
-      repr
-        [ "return 'Direction2d.degrees(' + str(self.to_angle().in_degrees()) + ')'"
+        , "return 'AreaVector2d(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "Point2d" ->
       repr
         [ "x, y = self.coordinates()"
-        , "return 'Point2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
+        , "return 'Point2d.meters(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "UvPoint" ->
       repr
