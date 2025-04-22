@@ -22,6 +22,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
+import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Int qualified as Int
 import OpenSolid.Labels
 import OpenSolid.Length (Length)
@@ -276,16 +277,13 @@ testConcurrency :: IO ()
 testConcurrency = IO.do
   IO.printLine "Starting concurrency test..."
   IO.printLine "0"
-  print5 <- IO.async (delayedPrint 5 (Duration.milliseconds 250.0))
-  print2 <- IO.async (delayedPrint 2 (Duration.milliseconds 100.0))
-  print3 <- IO.async (delayedPrint 3 (Duration.milliseconds 150.0))
-  print4 <- IO.async (delayedPrint 4 (Duration.milliseconds 200.0))
-  print1 <- IO.async (delayedPrint 1 (Duration.milliseconds 50.0))
-  IO.await print4
-  IO.await print2
-  IO.await print3
-  IO.await print5
-  IO.await print1
+  IO.Parallel.run
+    [ delayedPrint 5 (Duration.milliseconds 250.0)
+    , delayedPrint 2 (Duration.milliseconds 100.0)
+    , delayedPrint 3 (Duration.milliseconds 150.0)
+    , delayedPrint 4 (Duration.milliseconds 200.0)
+    , delayedPrint 1 (Duration.milliseconds 50.0)
+    ]
   IO.printLine "Concurrency test complete!"
 
 computeSquareRoot :: Float -> IO Float
@@ -295,28 +293,8 @@ computeSquareRoot value = IO.do
 
 testIOParallel :: IO ()
 testIOParallel = IO.do
-  IO.printLine "Computing square roots with IO.parallel"
-  let values = List.map Float.int [0 .. 9]
-  squareRoots <- IO.parallel computeSquareRoot values
+  squareRoots <- IO.Parallel.collect computeSquareRoot [1.0, 4.0, 9.0, 16.0, 25.0]
   log "Square roots" squareRoots
-
-testParallelComputation :: IO ()
-testParallelComputation = IO.do
-  computeSqrt1 <- IO.async (computeSquareRoot 1.0)
-  computeSqrt4 <- IO.async (computeSquareRoot 4.0)
-  computeSqrt9 <- IO.async (computeSquareRoot 9.0)
-  computeSqrt16 <- IO.async (computeSquareRoot 16.0)
-  computeSqrt25 <- IO.async (computeSquareRoot 25.0)
-  sqrt1 <- IO.await computeSqrt1
-  sqrt4 <- IO.await computeSqrt4
-  sqrt9 <- IO.await computeSqrt9
-  sqrt16 <- IO.await computeSqrt16
-  sqrt25 <- IO.await computeSqrt25
-  log "sqrt1" sqrt1
-  log "sqrt4" sqrt4
-  log "sqrt9" sqrt9
-  log "sqrt16" sqrt16
-  log "sqrt25" sqrt25
 
 drawBezier ::
   Tolerance Meters =>
@@ -467,7 +445,6 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testExplicitRandomStep
   testConcurrency
   testIOParallel
-  testParallelComputation
   testDebugPrint
   testTextSum
   testNewtonRaphson2d

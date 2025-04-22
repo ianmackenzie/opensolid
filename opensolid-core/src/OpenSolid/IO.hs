@@ -5,10 +5,6 @@ module OpenSolid.IO
   , forEachWithIndex
   , collect
   , collectWithIndex
-  , parallel
-  , parallelWithIndex
-  , async
-  , await
   , sleep
   , (>>)
   , Bind ((>>=))
@@ -26,8 +22,7 @@ module OpenSolid.IO
   )
 where
 
-import Control.Concurrent
-import Control.Concurrent.Async qualified as Async
+import Control.Concurrent qualified
 import Data.ByteString qualified
 import Data.ByteString.Builder qualified as Builder
 import Data.Foldable qualified
@@ -41,7 +36,6 @@ import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Error qualified as Error
 import OpenSolid.Float qualified as Float
-import OpenSolid.List qualified as List
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
@@ -79,19 +73,6 @@ forEachWithIndex list function = Data.Foldable.WithIndex.ifoldMap function list
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Prelude.mapM
-
-parallel :: (a -> IO b) -> List a -> IO (List b)
-parallel = Async.mapConcurrently
-
-parallelWithIndex :: (Int -> a -> IO b) -> List a -> IO (List b)
-parallelWithIndex function list =
-  parallel (\(index, item) -> function index item) (List.indexed list)
-
-async :: IO a -> IO (Async a)
-async = Async.async
-
-await :: Async a -> IO a
-await = Async.wait
 
 collectWithIndex :: TraversableWithIndex Int list => (Int -> a -> IO b) -> list a -> IO (list b)
 collectWithIndex = Data.Traversable.WithIndex.imapM

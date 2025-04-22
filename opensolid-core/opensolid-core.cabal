@@ -146,6 +146,7 @@ library
     OpenSolid.Frame3d
     OpenSolid.Fuzzy
     OpenSolid.IO
+    OpenSolid.IO.Parallel
     OpenSolid.Int
     OpenSolid.Intersects
     OpenSolid.Json
