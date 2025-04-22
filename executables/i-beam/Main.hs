@@ -13,7 +13,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.Tolerance qualified as Tolerance
@@ -41,7 +41,7 @@ main = Tolerance.using Length.nanometer IO.do
   let topCurves = topRightCurves <> List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- Region2d.boundedBy allCurves
-  body <- Body3d.extruded Plane3d.yz profile (Range (-0.5 * length) (0.5 * length))
+  body <- Body3d.extruded Plane3d.yz profile (Range.symmetric (#width length))
   let meshConstraints = NonEmpty.one (Mesh.maxError (Length.millimeters 1.0))
   let mesh = Body3d.toMesh meshConstraints body
   let material = Scene3d.metal (Color.rgb 0.913 0.921 0.925) 0.3

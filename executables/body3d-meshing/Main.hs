@@ -10,7 +10,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Tolerance qualified as Tolerance
@@ -27,7 +27,7 @@ main = Tolerance.using Length.nanometer $ IO.do
           # #endAngle (Angle.degrees 225.0)
   let line = Curve2d.line (Curve2d.endPoint arc) (Curve2d.startPoint arc)
   profile <- Region2d.boundedBy [arc, line]
-  let extrusionLimits = Range (-0.5 * length) (0.5 * length)
+  let extrusionLimits = Range.symmetric (#width length)
   body <- Body3d.extruded Plane3d.yz profile extrusionLimits
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 30.0))
   let mesh = Body3d.toMesh constraints body

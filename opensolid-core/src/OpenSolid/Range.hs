@@ -4,6 +4,7 @@ module OpenSolid.Range
   , unit
   , coerce
   , zeroTo
+  , symmetric
   , unbounded
   , radians
   , degrees
@@ -277,6 +278,13 @@ from = Range
 -- | Create a range from zero to the given value.
 zeroTo :: Qty units -> Range units
 zeroTo value = Range Qty.zero value
+
+{-| Create a range symmetric about zero, with the given width.
+
+The lower bound of the range will be -w/2 and the upper bound will be w/2.
+-}
+symmetric :: Named "width" (Qty units) -> Range units
+symmetric (Named w) = let r = 0.5 * w in Range -r r
 
 unbounded :: Range units
 unbounded = Range -Qty.infinity Qty.infinity
