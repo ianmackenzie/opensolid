@@ -38,6 +38,7 @@ module OpenSolid.NonEmpty
   , mapWithIndex
   , indexed
   , reverseMap
+  , forEach
   , map2
   , map3
   , map4
@@ -239,6 +240,9 @@ reverseMap function (x :| xs) = go x xs []
  where
   go item [] acc = function item :| acc
   go item (next : following) acc = go next following (function item : acc)
+
+forEach :: NonEmpty a -> (a -> b) -> NonEmpty b
+forEach nonEmpty function = map function nonEmpty
 
 map2 :: (a -> b -> c) -> NonEmpty a -> NonEmpty b -> NonEmpty c
 map2 = Data.List.NonEmpty.zipWith
