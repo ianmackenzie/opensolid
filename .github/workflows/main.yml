@@ -258,7 +258,7 @@ jobs:
   pypi:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    if: github.event.name == 'release'
+    if: github.event_name == 'release'
     environment:
       name: publish-to-pypi
       url: http://pypi.org/p/opensolid
