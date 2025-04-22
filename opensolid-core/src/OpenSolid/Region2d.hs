@@ -78,6 +78,7 @@ import OpenSolid.SurfaceParameter (UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Meters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
@@ -207,10 +208,10 @@ fillet ::
   Named "radius" (Qty units) ->
   Region2d (space @ units) ->
   Result Text (Region2d (space @ units))
-fillet points (Named radius) region = Result.do
+fillet points (Named radius) region = Try.do
   let initialCurves = NonEmpty.toList (boundaryCurves region)
-  filletedCurves <- Result.try (Result.foldl (addFillet radius) initialCurves points)
-  Result.try (boundedBy filletedCurves)
+  filletedCurves <- Result.foldl (addFillet radius) initialCurves points
+  boundedBy filletedCurves
 
 addFillet ::
   Tolerance units =>
@@ -218,7 +219,7 @@ addFillet ::
   List (Curve2d (space @ units)) ->
   Point2d (space @ units) ->
   Result Text (List (Curve2d (space @ units)))
-addFillet radius curves point = do
+addFillet radius curves point = Try.do
   let couldNotFindPointToFillet = Failure "Could not find point to fillet"
   let couldNotSolveForFilletLocation = Failure "Could not solve for fillet location"
   let curveIncidences = List.map (curveIncidence point) curves
@@ -237,9 +238,9 @@ addFillet radius curves point = do
     [] -> couldNotFindPointToFillet
     List.One{} -> couldNotFindPointToFillet
     List.ThreeOrMore{} -> couldNotFindPointToFillet
-    List.Two firstCurve secondCurve -> Result.do
-      firstTangent <- Result.try (Curve2d.tangentDirection firstCurve)
-      secondTangent <- Result.try (Curve2d.tangentDirection secondCurve)
+    List.Two firstCurve secondCurve -> Try.do
+      firstTangent <- Curve2d.tangentDirection firstCurve
+      secondTangent <- Curve2d.tangentDirection secondCurve
       let firstEndDirection = DirectionCurve2d.endValue firstTangent
       let secondStartDirection = DirectionCurve2d.startValue secondTangent
       let cornerAngle = Direction2d.angleFrom firstEndDirection secondStartDirection
@@ -250,7 +251,7 @@ addFillet radius curves point = do
             VectorCurve2d.rotateBy Angle.quarterTurn (offset * secondTangent)
       let firstOffsetCurve = firstCurve + firstOffsetDisplacement
       let secondOffsetCurve = secondCurve + secondOffsetDisplacement
-      maybeIntersections <- Result.try (Curve2d.intersections firstOffsetCurve secondOffsetCurve)
+      maybeIntersections <- Curve2d.intersections firstOffsetCurve secondOffsetCurve
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
         Just Curve2d.OverlappingSegments{} -> couldNotSolveForFilletLocation

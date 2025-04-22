@@ -46,6 +46,7 @@ import OpenSolid.SurfaceParameter (UvCoordinates, UvPoint, UvSpace)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
@@ -137,7 +138,7 @@ testListOperations = IO.do
   log "Successive intervals" (List.successive Bounds [1.0, 2.0, 3.0, 4.0])
 
 getCrossProduct :: Tolerance Meters => Result Text Float
-getCrossProduct = Result.addContext "In getCrossProduct" Result.do
+getCrossProduct = Result.addContext "In getCrossProduct" Try.do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2.0 3.0)
       |> Result.addContext "When getting vector direction"
@@ -373,7 +374,7 @@ testDebugPrint = do
   IO.printLine (xs <> ys)
 
 textSum :: Text -> Text -> Result Text Int
-textSum t1 t2 = Result.do
+textSum t1 t2 = Try.do
   n1 <- Int.parse t1
   Debug.log "n1" n1
   n2 <- Int.parse t2

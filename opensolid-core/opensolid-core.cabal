@@ -206,6 +206,7 @@ library
     OpenSolid.Transform2d
     OpenSolid.Transform3d
     OpenSolid.Triangle2d
+    OpenSolid.Try
     OpenSolid.Unitless
     OpenSolid.Units
     OpenSolid.Vector2d

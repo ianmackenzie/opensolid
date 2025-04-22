@@ -14,25 +14,25 @@ import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
-import OpenSolid.Result qualified as Result
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Meters)
 
 gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))
-gearBody numTeeth = Result.do
+gearBody numTeeth = Try.do
   let gearModule = Length.millimeters 1.0
   let holeDiameter = Length.millimeters 8.0
   let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
   let outerProfile = SpurGear.profile spurGear
   let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
-  profile <- Result.try (Region2d.boundedBy (hole : outerProfile))
+  profile <- Region2d.boundedBy (hole : outerProfile)
   let width = Length.millimeters 8.0
-  Result.try (Body3d.extruded Plane3d.xy profile (Bounds.symmetric (#width width)))
+  Body3d.extruded Plane3d.xy profile (Bounds.symmetric (#width width))
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
