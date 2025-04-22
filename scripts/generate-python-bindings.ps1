@@ -8,5 +8,4 @@ cabal run generate-def-file
 cabal build opensolid-ffi
 # Copy the native shared library to beside __init__.py
 # so that it can be loaded properly
-Copy-Item -Path .\opensolid-rs\target\release\opensolid_rs.dll -Destination .\opensolid-python\opensolid\
 Get-ChildItem -Path .\dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\opensolid\

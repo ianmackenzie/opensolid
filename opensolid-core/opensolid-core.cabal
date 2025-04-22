@@ -83,15 +83,6 @@ common config
     UnliftedFFITypes
     ViewPatterns
 
-custom-setup
-  setup-depends:
-    Cabal,
-    Cabal-syntax,
-    base,
-    directory,
-    filepath,
-    process,
-
 library
   import: config
   exposed-modules:
@@ -241,8 +232,8 @@ library
     OpenSolid.Bytecode.Encode
     OpenSolid.Bytecode.Evaluate
     OpenSolid.Bytecode.Instruction
+    OpenSolid.CDT
     OpenSolid.CompiledFunction
-    OpenSolid.ConstrainedDelaunayTriangulation
     OpenSolid.HasZero
     OpenSolid.Json.FieldSchema
     OpenSolid.Linearization
@@ -258,11 +249,9 @@ library
     OpenSolid.Text.Parse
 
   hs-source-dirs: src
-  extra-libraries:
-    opensolid_rs
-
   cxx-sources:
     src/OpenSolid/Bytecode/bytecode.cpp
+    src/OpenSolid/CDT.cpp
 
   cxx-options:
     -Wall

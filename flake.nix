@@ -16,12 +16,8 @@
             };
           };
           pkgs = nixpkgs.legacyPackages.${system}.extend overlay;
-          ld_library_path = builtins.concatStringsSep ":" [
-            # Allow Haskell to find libopensolid_rs
-            "$PWD/opensolid-rs/target/release"
-            # Allow Python packages to be built against libstdc++.so
-            "${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}"
-          ];
+          # Allow Python packages to be built against libstdc++.so
+          ld_library_path = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
         in {
           # Define the configuration for an OpenSolid development shell
           default = pkgs.mkShell {
@@ -57,12 +53,6 @@
               # (somehow Zed wants *both* of these)
               pkgs.nixd
               pkgs.nil
-              # The Rust compiler, for libopensolidjit
-              pkgs.rustc
-              # The Cargo build tool for Rust
-              pkgs.cargo
-              # For formatting Rust files
-              pkgs.rustfmt
               # For formatting/linting Python files
               # (used in the opensolid-python executable
               # for formatting the generated code)
@@ -79,8 +69,6 @@
               # Set PYTHONPATH so 'import opensolid' works
               # when running Python interactively from the repository root
               "export PYTHONPATH=$PWD/opensolid-python"
-              # Ensure rust-analyzer can find Rust core library source code
-              "export RUST_SRC_PATH=${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}"
             ];
           };
         });

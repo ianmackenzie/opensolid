@@ -28,7 +28,7 @@ import OpenSolid.Bounds2d (Bounded2d, Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d (Bounded3d, Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
-import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
+import OpenSolid.CDT qualified as CDT
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
@@ -866,7 +866,7 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
       let steinerVertices = List.map steinerVertex steinerPoints
       let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
       -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
-      let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices Nothing
+      let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices
       let pointsAndNormals =
             Array.map (pointAndNormal surfaceFunctions handedness) (Mesh.vertices vertexMesh)
       let faceIndices =

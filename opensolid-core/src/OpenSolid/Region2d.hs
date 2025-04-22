@@ -42,7 +42,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
+import OpenSolid.CDT qualified as CDT
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -661,7 +661,7 @@ toMesh :: Qty units -> Region2d (space @ units) -> Mesh (Point2d (space @ units)
 toMesh accuracy region = do
   let allLoops = outerLoop region :| innerLoops region
   let vertexLoops = NonEmpty.map (toVertexLoop accuracy) allLoops
-  CDT.unsafe vertexLoops [] Nothing
+  CDT.unsafe vertexLoops []
 
 toVertexLoop ::
   Qty units ->

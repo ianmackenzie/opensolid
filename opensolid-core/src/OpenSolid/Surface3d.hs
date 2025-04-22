@@ -18,7 +18,7 @@ where
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
+import OpenSolid.CDT qualified as CDT
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
@@ -150,7 +150,7 @@ toMesh accuracy surface = do
   let edgeSet = Set2d.fromNonEmpty boundaryEdges
   let steinerPoints = generateSteinerPoints accuracy (Region2d.bounds surfaceDomain) edgeSet fuu fuv fvv []
   let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
-  let uvMesh = CDT.unsafe boundaryVertexLoops steinerPoints Nothing
+  let uvMesh = CDT.unsafe boundaryVertexLoops steinerPoints
   Mesh.map (SurfaceFunction3d.evaluate surfaceFunction) uvMesh
 
 toPolygon ::
