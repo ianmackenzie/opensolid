@@ -22,5 +22,5 @@ magnitude = Test.check 100 "magnitude" Test.do
   tz <- Parameter.random
   let vector = VectorBounds3d.interpolate vectorBounds tx ty tz
   let vectorMagnitude = Vector3d.magnitude vector
-  let magnitudeRange = VectorBounds3d.magnitude vectorBounds
-  Test.expect (vectorMagnitude ^ magnitudeRange)
+  let magnitudeBounds = VectorBounds3d.magnitude vectorBounds
+  Test.expect (vectorMagnitude ^ magnitudeBounds)

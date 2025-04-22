@@ -43,12 +43,12 @@ where
 import Data.Coerce qualified
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
+import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import OpenSolid.NonEmpty (NonEmpty)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random.Internal qualified as Random
-import {-# SOURCE #-} OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.Result (Result)
 import OpenSolid.Sign (Sign)
 import OpenSolid.Text.Parse qualified as Text.Parse
@@ -103,7 +103,7 @@ squared = Qty.squared
 abs :: Float -> Float
 abs = Qty.abs
 
-clampTo :: Range Unitless -> Float -> Float
+clampTo :: Bounds Unitless -> Float -> Float
 clampTo = Qty.clampTo
 
 interpolateFrom :: Float -> Float -> Float -> Float

@@ -19,13 +19,13 @@ where
 
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Curve (Curve)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.DirectionBounds3d (DirectionBounds3d)
 import OpenSolid.DirectionBounds3d qualified as DirectionBounds3d
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
@@ -58,9 +58,9 @@ evaluate :: DirectionCurve3d space -> Float -> Direction3d space
 evaluate (DirectionCurve3d vectorCurve) tValue =
   Direction3d.unsafe (VectorCurve3d.evaluate vectorCurve tValue)
 
-evaluateBounds :: DirectionCurve3d space -> Range Unitless -> DirectionBounds3d space
-evaluateBounds (DirectionCurve3d vectorCurve) tRange =
-  DirectionBounds3d.unsafe (VectorCurve3d.evaluateBounds vectorCurve tRange)
+evaluateBounds :: DirectionCurve3d space -> Bounds Unitless -> DirectionBounds3d space
+evaluateBounds (DirectionCurve3d vectorCurve) tBounds =
+  DirectionBounds3d.unsafe (VectorCurve3d.evaluateBounds vectorCurve tBounds)
 
 derivative :: DirectionCurve3d space -> VectorCurve3d (space @ Unitless)
 derivative (DirectionCurve3d vectorCurve) = VectorCurve3d.derivative vectorCurve

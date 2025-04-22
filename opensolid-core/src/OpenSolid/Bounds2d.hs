@@ -1,6 +1,5 @@
 module OpenSolid.Bounds2d
   ( Bounds2d (Bounds2d)
-  , Bounded2d (bounds)
   , xCoordinate
   , yCoordinate
   , coordinates
@@ -45,6 +44,8 @@ where
 
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d (Direction3d (Direction3d))
@@ -66,59 +67,48 @@ import OpenSolid.Primitives
   , Plane3d (Plane3d)
   )
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 
-class Bounded2d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
-  bounds :: a -> Bounds2d coordinateSystem
-
-instance Bounded2d (Bounds2d (space @ units)) (space @ units) where
-  bounds = identity
-
-instance Bounded2d (Point2d (space @ units)) (space @ units) where
-  bounds = constant
-
--- | Get the X coordinate range of a bounding box.
-xCoordinate :: Bounds2d (space @ units) -> Range units
+-- | Get the X coordinate bounds of a bounding box.
+xCoordinate :: Bounds2d (space @ units) -> Bounds units
 xCoordinate (Bounds2d x _) = x
 
--- | Get the Y coordinate range of a bounding box.
-yCoordinate :: Bounds2d (space @ units) -> Range units
+-- | Get the Y coordinate bounds of a bounding box.
+yCoordinate :: Bounds2d (space @ units) -> Bounds units
 yCoordinate (Bounds2d _ y) = y
 
--- | Get the X and Y coordinate ranges of a bounding box.
+-- | Get the X and Y coordinate bounds of a bounding box.
 {-# INLINE coordinates #-}
-coordinates :: Bounds2d (space @ units) -> (Range units, Range units)
+coordinates :: Bounds2d (space @ units) -> (Bounds units, Bounds units)
 coordinates (Bounds2d x y) = (x, y)
 
 dimensions :: Bounds2d (space @ units) -> (Qty units, Qty units)
-dimensions (Bounds2d x y) = (Range.width x, Range.width y)
+dimensions (Bounds2d x y) = (Bounds.width x, Bounds.width y)
 
 centerPoint :: Bounds2d (space @ units) -> Point2d (space @ units)
-centerPoint (Bounds2d x y) = Point2d (Range.midpoint x) (Range.midpoint y)
+centerPoint (Bounds2d x y) = Point2d (Bounds.midpoint x) (Bounds.midpoint y)
 
 -- | Construct a zero-size bounding box containing a single point.
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
 constant point = do
   let (x, y) = Point2d.coordinates point
-  Bounds2d (Range.constant x) (Range.constant y)
+  Bounds2d (Bounds.constant x) (Bounds.constant y)
 
 aggregate2 :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bounds2d (space @ units)
 aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
-  Bounds2d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2)
+  Bounds2d (Bounds.aggregate2 x1 x2) (Bounds.aggregate2 y1 y2)
 
 -- | Construct a bounding box containing all bounding boxes in the given non-empty list.
 aggregateN :: NonEmpty (Bounds2d (space @ units)) -> Bounds2d (space @ units)
-aggregateN (Bounds2d (Range xLow0 xHigh0) (Range yLow0 yHigh0) :| rest) =
+aggregateN (Bounds2d (Bounds xLow0 xHigh0) (Bounds yLow0 yHigh0) :| rest) =
   aggregateImpl xLow0 xHigh0 yLow0 yHigh0 rest
 
 aggregateImpl :: Qty units -> Qty units -> Qty units -> Qty units -> List (Bounds2d (space @ units)) -> Bounds2d (space @ units)
-aggregateImpl xLow xHigh yLow yHigh [] = Bounds2d (Range xLow xHigh) (Range yLow yHigh)
+aggregateImpl xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
 aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
-  let Bounds2d (Range xLowNext xHighNext) (Range yLowNext yHighNext) = next
+  let Bounds2d (Bounds xLowNext xHighNext) (Bounds yLowNext yHighNext) = next
   aggregateImpl
     (Qty.min xLow xLowNext)
     (Qty.max xHigh xHighNext)
@@ -130,8 +120,8 @@ exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 exclusion point box = do
   let (x, y) = Point2d.coordinates point
   let (bx, by) = coordinates box
-  let dx = Range.exclusion x bx
-  let dy = Range.exclusion y by
+  let dx = Bounds.exclusion x bx
+  let dy = Bounds.exclusion y by
   let px = dx >= Qty.zero
   let py = dy >= Qty.zero
   if
@@ -147,19 +137,19 @@ includes :: Point2d (space @ units) -> Bounds2d (space @ units) -> Bool
 includes point box = do
   let (px, py) = Point2d.coordinates point
   let (bx, by) = coordinates box
-  Range.includes px bx && Range.includes py by
+  Bounds.includes px bx && Bounds.includes py by
 
 contains :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
 contains (Bounds2d x2 y2) (Bounds2d x1 y1) =
-  Range.contains x2 x1 && Range.contains y2 y1
+  Bounds.contains x2 x1 && Bounds.contains y2 y1
 
 isContainedIn :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 separation (Bounds2d x1 y1) (Bounds2d x2 y2) = do
-  let dx = Range.separation x1 x2
-  let dy = Range.separation y1 y2
+  let dx = Bounds.separation x1 x2
+  let dy = Bounds.separation y1 y2
   let px = dx >= Qty.zero
   let py = dy >= Qty.zero
   if
@@ -173,8 +163,8 @@ overlap first second = -(separation first second)
 
 intersection :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Maybe (Bounds2d (space @ units))
 intersection (Bounds2d x1 y1) (Bounds2d x2 y2) = Maybe.do
-  x <- Range.intersection x1 x2
-  y <- Range.intersection y1 y2
+  x <- Bounds.intersection x1 x2
+  y <- Bounds.intersection y1 y2
   Just (Bounds2d x y)
 
 -- | Construct a bounding box from two corner points.
@@ -185,7 +175,7 @@ hull2 ::
 hull2 p1 p2 = do
   let (x1, y1) = Point2d.coordinates p1
   let (x2, y2) = Point2d.coordinates p2
-  Bounds2d (Range x1 x2) (Range y1 y2)
+  Bounds2d (Bounds x1 x2) (Bounds y1 y2)
 
 hull3 ::
   Point2d (space @ units) ->
@@ -200,7 +190,7 @@ hull3 p1 p2 p3 = do
   let maxX = Qty.max (Qty.max x1 x2) x3
   let minY = Qty.min (Qty.min y1 y2) y3
   let maxY = Qty.max (Qty.max y1 y2) y3
-  Bounds2d (Range minX maxX) (Range minY maxY)
+  Bounds2d (Bounds minX maxX) (Bounds minY maxY)
 
 hull4 ::
   Point2d (space @ units) ->
@@ -217,29 +207,29 @@ hull4 p1 p2 p3 p4 = do
   let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
   let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
   let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
-  Bounds2d (Range minX maxX) (Range minY maxY)
+  Bounds2d (Bounds minX maxX) (Bounds minY maxY)
 
 -- | Construct a bounding box containing all points in the given non-empty list.
 hullN :: NonEmpty (Point2d (space @ units)) -> Bounds2d (space @ units)
 hullN (p0 :| rest) = do
   let (x0, y0) = Point2d.coordinates p0
-  let go xLow xHigh yLow yHigh [] = Bounds2d (Range xLow xHigh) (Range yLow yHigh)
+  let go xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
       go xLow xHigh yLow yHigh (point : remaining) = do
         let (x, y) = Point2d.coordinates point
         go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
   go x0 x0 y0 y0 rest
 
 lowerLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-lowerLeftCorner (Bounds2d x y) = Point2d.xy (Range.lowerBound x) (Range.lowerBound y)
+lowerLeftCorner (Bounds2d x y) = Point2d.xy (Bounds.lower x) (Bounds.lower y)
 
 lowerRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-lowerRightCorner (Bounds2d x y) = Point2d.xy (Range.upperBound x) (Range.lowerBound y)
+lowerRightCorner (Bounds2d x y) = Point2d.xy (Bounds.upper x) (Bounds.lower y)
 
 upperLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-upperLeftCorner (Bounds2d x y) = Point2d.xy (Range.lowerBound x) (Range.upperBound y)
+upperLeftCorner (Bounds2d x y) = Point2d.xy (Bounds.lower x) (Bounds.upper y)
 
 upperRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-upperRightCorner (Bounds2d x y) = Point2d.xy (Range.upperBound x) (Range.upperBound y)
+upperRightCorner (Bounds2d x y) = Point2d.xy (Bounds.upper x) (Bounds.upper y)
 
 corners :: Bounds2d (space @ units) -> List (Point2d (space @ units))
 corners box =
@@ -250,33 +240,33 @@ corners box =
   ]
 
 diameter :: Bounds2d (space @ units) -> Qty units
-diameter (Bounds2d x y) = Qty.hypot2 (Range.width x) (Range.width y)
+diameter (Bounds2d x y) = Qty.hypot2 (Bounds.width x) (Bounds.width y)
 
 area' :: Bounds2d (space @ units) -> Qty (units :*: units)
-area' (Bounds2d x y) = Range.width x .*. Range.width y
+area' (Bounds2d x y) = Bounds.width x .*. Bounds.width y
 
 area :: Units.Squared units1 units2 => Bounds2d (space @ units1) -> Qty units2
-area (Bounds2d x y) = Range.width x * Range.width y
+area (Bounds2d x y) = Bounds.width x * Bounds.width y
 
 interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
 interpolate (Bounds2d x y) u v =
-  Point2d.xy (Range.interpolate x u) (Range.interpolate y v)
+  Point2d.xy (Bounds.interpolate x u) (Bounds.interpolate y v)
 
 any :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
 any assess box@(Bounds2d x y) =
   case assess box of
     Resolved assessment -> assessment
     Unresolved
-      | Range.isAtomic x && Range.isAtomic y -> False
-      | Range.isAtomic x -> do
-          let (y1, y2) = Range.bisect y
+      | Bounds.isAtomic x && Bounds.isAtomic y -> False
+      | Bounds.isAtomic x -> do
+          let (y1, y2) = Bounds.bisect y
           any assess (Bounds2d x y1) || any assess (Bounds2d x y2)
-      | Range.isAtomic y -> do
-          let (x1, x2) = Range.bisect x
+      | Bounds.isAtomic y -> do
+          let (x1, x2) = Bounds.bisect x
           any assess (Bounds2d x1 y) || any assess (Bounds2d x2 y)
       | otherwise -> do
-          let (x1, x2) = Range.bisect x
-          let (y1, y2) = Range.bisect y
+          let (x1, x2) = Bounds.bisect x
+          let (y1, y2) = Bounds.bisect y
           any assess (Bounds2d x1 y1)
             || any assess (Bounds2d x1 y2)
             || any assess (Bounds2d x2 y1)
@@ -287,16 +277,16 @@ all assess box@(Bounds2d x y) =
   case assess box of
     Resolved assessment -> assessment
     Unresolved
-      | Range.isAtomic x && Range.isAtomic y -> True
-      | Range.isAtomic x -> do
-          let (y1, y2) = Range.bisect y
+      | Bounds.isAtomic x && Bounds.isAtomic y -> True
+      | Bounds.isAtomic x -> do
+          let (y1, y2) = Bounds.bisect y
           all assess (Bounds2d x y1) && all assess (Bounds2d x y2)
-      | Range.isAtomic y -> do
-          let (x1, x2) = Range.bisect x
+      | Bounds.isAtomic y -> do
+          let (x1, x2) = Bounds.bisect x
           all assess (Bounds2d x1 y) && all assess (Bounds2d x2 y)
       | otherwise -> do
-          let (x1, x2) = Range.bisect x
-          let (y1, y2) = Range.bisect y
+          let (x1, x2) = Bounds.bisect x
+          let (y1, y2) = Bounds.bisect y
           all assess (Bounds2d x1 y1)
             && all assess (Bounds2d x1 y2)
             && all assess (Bounds2d x2 y1)
@@ -307,20 +297,20 @@ resolve assess box@(Bounds2d x y) =
   case assess box of
     Resolved value -> Resolved value
     Unresolved
-      | Range.isAtomic x && Range.isAtomic y -> Unresolved
-      | Range.isAtomic x -> Fuzzy.do
-          let (y1, y2) = Range.bisect y
+      | Bounds.isAtomic x && Bounds.isAtomic y -> Unresolved
+      | Bounds.isAtomic x -> Fuzzy.do
+          let (y1, y2) = Bounds.bisect y
           value1 <- resolve assess (Bounds2d x y1)
           value2 <- resolve assess (Bounds2d x y2)
           if value1 == value2 then Resolved value1 else Unresolved
-      | Range.isAtomic y -> Fuzzy.do
-          let (x1, x2) = Range.bisect x
+      | Bounds.isAtomic y -> Fuzzy.do
+          let (x1, x2) = Bounds.bisect x
           value1 <- resolve assess (Bounds2d x1 y)
           value2 <- resolve assess (Bounds2d x2 y)
           if value1 == value2 then Resolved value1 else Unresolved
       | otherwise -> Fuzzy.do
-          let (x1, x2) = Range.bisect x
-          let (y1, y2) = Range.bisect y
+          let (x1, x2) = Bounds.bisect x
+          let (y1, y2) = Bounds.bisect y
           value11 <- resolve assess (Bounds2d x1 y1)
           value12 <- resolve assess (Bounds2d x1 y2)
           value21 <- resolve assess (Bounds2d x2 y1)
@@ -334,32 +324,32 @@ placeIn ::
   Bounds2d (local @ units) ->
   Bounds2d (global @ units)
 placeIn frame (Bounds2d x y) = do
-  let xMid = Range.midpoint x
-  let yMid = Range.midpoint y
-  let xWidth = Range.width x
-  let yWidth = Range.width y
+  let xMid = Bounds.midpoint x
+  let yMid = Bounds.midpoint y
+  let xWidth = Bounds.width x
+  let yWidth = Bounds.width y
   let Point2d x0 y0 = Point2d.placeIn frame (Point2d xMid yMid)
   let (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
   let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-  Bounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))
+  Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Bounds2d (global @ units) ->
   Bounds2d (local @ units)
 relativeTo frame (Bounds2d x y) = do
-  let xMid = Range.midpoint x
-  let yMid = Range.midpoint y
-  let xWidth = Range.width x
-  let yWidth = Range.width y
+  let xMid = Bounds.midpoint x
+  let yMid = Bounds.midpoint y
+  let xWidth = Bounds.width x
+  let yWidth = Bounds.width y
   let (x0, y0) = Point2d.coordinates (Point2d.relativeTo frame (Point2d.xy xMid yMid))
   let (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
   let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
-  Bounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))
+  Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 placeOn ::
   Plane3d (space @ units) (Defines local) ->
@@ -369,43 +359,43 @@ placeOn plane (Bounds2d x y) = do
   let Plane3d _ (PlanarBasis3d i j) = plane
   let Direction3d ix iy iz = i
   let Direction3d jx jy jz = j
-  let xMid = Range.midpoint x
-  let yMid = Range.midpoint y
-  let xWidth = Range.width x
-  let yWidth = Range.width y
+  let xMid = Bounds.midpoint x
+  let yMid = Bounds.midpoint y
+  let xWidth = Bounds.width x
+  let yWidth = Bounds.width y
   let Point3d x0 y0 z0 = Point3d.xyOn plane xMid yMid
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz
-  Bounds3d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry)) (Range (z0 - rz) (z0 + rz))
+  Bounds3d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry)) (Bounds (z0 - rz) (z0 + rz))
 
 transformBy ::
   Transform2d tag (space @ units) ->
   Bounds2d (space @ units) ->
   Bounds2d (space @ units)
 transformBy transform (Bounds2d x y) = do
-  let xMid = Range.midpoint x
-  let yMid = Range.midpoint y
-  let xWidth = Range.width x
-  let yWidth = Range.width y
+  let xMid = Bounds.midpoint x
+  let yMid = Bounds.midpoint y
+  let xWidth = Bounds.width x
+  let yWidth = Bounds.width y
   let Point2d x0 y0 = Point2d.transformBy transform (Point2d.xy xMid yMid)
   let Transform2d _ i j = transform
   let Vector2d ix iy = i
   let Vector2d jx jy = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-  Bounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))
+  Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
-signedDistanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Range units
+signedDistanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Bounds units
 signedDistanceAlong axis (Bounds2d x y) = do
-  let xMid = Range.midpoint x
-  let yMid = Range.midpoint y
-  let xWidth = Range.width x
-  let yWidth = Range.width y
+  let xMid = Bounds.midpoint x
+  let yMid = Bounds.midpoint y
+  let xWidth = Bounds.width x
+  let yWidth = Bounds.width y
   let d0 = Point2d.signedDistanceAlong axis (Point2d.xy xMid yMid)
   let Direction2d ax ay = Axis2d.direction axis
   let r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
-  Range (d0 - r) (d0 + r)
+  Bounds (d0 - r) (d0 + r)
 
 convert :: Qty (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
 convert factor (Bounds2d x y) = Bounds2d (x !* factor) (y !* factor)

@@ -11,10 +11,10 @@ module OpenSolid.VectorCurve2d
   )
 where
 
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
@@ -31,7 +31,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     Float
     (Vector2d coordinateSystem)
-    (Range Unitless)
+    (Bounds Unitless)
     (VectorBounds2d coordinateSystem)
 
 instance HasUnits (VectorCurve2d (space @ units)) units (VectorCurve2d (space @ Unitless))
@@ -93,7 +93,7 @@ instance
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
-evaluateBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBounds2d (space @ units)
+evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 transformBy ::
   Transform2d tag (space @ translationUnits) ->

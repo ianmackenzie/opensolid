@@ -30,8 +30,12 @@ where
 
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bezier qualified as Bezier
+import OpenSolid.Bounded3d (Bounded3d)
+import OpenSolid.Bounded3d qualified as Bounded3d
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounded3d, Bounds3d (Bounds3d))
+import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -54,8 +58,6 @@ import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -78,7 +80,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     Float
     (Point3d coordinateSystem)
-    (Range Unitless)
+    (Bounds Unitless)
     (Bounds3d coordinateSystem)
 
 instance HasUnits (Curve3d (space @ units)) units (Curve3d (space @ Unitless))
@@ -265,11 +267,11 @@ endPoint curve = evaluate curve 1.0
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
 evaluate Curve3d{compiled} tValue = CompiledFunction.evaluate compiled tValue
 
-evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
-evaluateBounds Curve3d{compiled} tRange = CompiledFunction.evaluateBounds compiled tRange
+evaluateBounds :: Curve3d (space @ units) -> Bounds Unitless -> Bounds3d (space @ units)
+evaluateBounds Curve3d{compiled} tBounds = CompiledFunction.evaluateBounds compiled tBounds
 
 bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
-bounds curve = evaluateBounds curve Range.unit
+bounds curve = evaluateBounds curve Bounds.unitInterval
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)

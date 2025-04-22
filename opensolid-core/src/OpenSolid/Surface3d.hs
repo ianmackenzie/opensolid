@@ -16,6 +16,8 @@ module OpenSolid.Surface3d
 where
 
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CDT qualified as CDT
@@ -42,8 +44,6 @@ import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Set2d (Set2d)
@@ -104,20 +104,20 @@ planar plane region = do
 
 extruded :: Curve3d (space @ units) -> Vector3d (space @ units) -> Surface3d (space @ units)
 extruded curve displacement =
-  parametric (curve . SurfaceFunction.u + SurfaceFunction.v * displacement) Region2d.unit
+  parametric (curve . SurfaceFunction.u + SurfaceFunction.v * displacement) Region2d.unitSquare
 
 translational ::
   Curve3d (space @ units) ->
   VectorCurve3d (space @ units) ->
   Surface3d (space @ units)
 translational uCurve vCurve =
-  parametric (uCurve . SurfaceFunction.u + vCurve . SurfaceFunction.v) Region2d.unit
+  parametric (uCurve . SurfaceFunction.u + vCurve . SurfaceFunction.v) Region2d.unitSquare
 
 ruled :: Curve3d (space @ units) -> Curve3d (space @ units) -> Surface3d (space @ units)
 ruled bottom top = do
   let f1 = bottom . SurfaceFunction.u
   let f2 = top . SurfaceFunction.u
-  parametric (f1 + SurfaceFunction.v * (f2 - f1)) Region2d.unit
+  parametric (f1 + SurfaceFunction.v * (f2 - f1)) Region2d.unitSquare
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
 boundaryCurves surface = NonEmpty.concat (outerLoop surface :| innerLoops surface)
@@ -191,7 +191,7 @@ linearizationPredicate ::
   VectorSurfaceFunction3d (space @ units) ->
   Curve2d UvCoordinates ->
   VectorCurve3d (space @ units) ->
-  Range Unitless ->
+  Bounds Unitless ->
   Bool
 linearizationPredicate accuracy fuu fuv fvv curve2d secondDerivative3d subdomain = do
   let curveSecondDerivativeBounds = VectorCurve3d.evaluateBounds secondDerivative3d subdomain
@@ -210,10 +210,10 @@ generateSteinerPoints ::
   List UvPoint ->
   List UvPoint
 generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
-  let Bounds2d uRange vRange = uvBounds
+  let Bounds2d uBounds vBounds = uvBounds
   let recurse = do
-        let (u1, u2) = Range.bisect uRange
-        let (v1, v2) = Range.bisect vRange
+        let (u1, u2) = Bounds.bisect uBounds
+        let (v1, v2) = Bounds.bisect vBounds
         let bounds11 = Bounds2d u1 v1
         let bounds12 = Bounds2d u1 v2
         let bounds21 = Bounds2d u2 v1
@@ -223,7 +223,7 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
           |> generateSteinerPoints accuracy bounds12 edgeSet fuu fuv fvv
           |> generateSteinerPoints accuracy bounds21 edgeSet fuu fuv fvv
           |> generateSteinerPoints accuracy bounds22 edgeSet fuu fuv fvv
-  let return = Point2d (Range.midpoint uRange) (Range.midpoint vRange) : accumulated
+  let return = Point2d (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
   case includeSubdomain uvBounds edgeSet of
     Resolved False -> accumulated
     Resolved True -> if surfaceError fuu fuv fvv uvBounds <= accuracy then return else recurse

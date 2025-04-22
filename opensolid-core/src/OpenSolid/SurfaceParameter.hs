@@ -11,6 +11,7 @@ module OpenSolid.SurfaceParameter
   )
 where
 
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Parameter qualified as Parameter
@@ -20,7 +21,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Range qualified as Range
 
 data SurfaceParameter = U | V deriving (Eq, Show, Ord)
 
@@ -35,7 +35,7 @@ type UvBounds = Bounds2d UvCoordinates
 type UvDirection = Direction2d UvSpace
 
 domain :: UvBounds
-domain = Bounds2d Range.unit Range.unit
+domain = Bounds2d Bounds.unitInterval Bounds.unitInterval
 
 random :: Generator UvPoint
 random = Random.map2 Point2d Parameter.random Parameter.random

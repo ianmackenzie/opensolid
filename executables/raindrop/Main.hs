@@ -32,7 +32,7 @@ top = do
   let x = r * SurfaceFunction.cos phi * SurfaceFunction.cos theta
   let y = r * SurfaceFunction.cos phi * SurfaceFunction.sin theta
   let z = r * SurfaceFunction.sin phi
-  Surface3d.parametric (SurfaceFunction3d.xyz x y z) Region2d.unit
+  Surface3d.parametric (SurfaceFunction3d.xyz x y z) Region2d.unitSquare
 
 bottom :: Surface3d GlobalCoordinates
 bottom = do
@@ -45,7 +45,7 @@ bottom = do
   let theta = Angle.twoPi * SurfaceFunction.u
   let x = r * SurfaceFunction.cos theta
   let y = r * SurfaceFunction.sin theta
-  Surface3d.parametric (SurfaceFunction3d.xyz x y z) Region2d.unit
+  Surface3d.parametric (SurfaceFunction3d.xyz x y z) Region2d.unitSquare
 
 main :: IO ()
 main = Tolerance.using Length.nanometer $ IO.do

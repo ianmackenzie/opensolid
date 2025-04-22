@@ -8,23 +8,23 @@ where
 
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 
 data ImplicitCurveBounds
   = Node ImplicitCurveBounds Float ImplicitCurveBounds
-  | Leaf (Range Unitless)
+  | Leaf (Bounds Unitless)
 
-build :: NonEmpty (Range Unitless, Range Unitless) -> ImplicitCurveBounds
+build :: NonEmpty (Bounds Unitless, Bounds Unitless) -> ImplicitCurveBounds
 build boxes = do
-  let array = Array.fromNonEmpty (NonEmpty.sortBy (Range.lowerBound . Pair.first) boxes)
+  let array = Array.fromNonEmpty (NonEmpty.sortBy (Bounds.lower . Pair.first) boxes)
   subtree array 0 (Array.length array)
 
-subtree :: Array (Range Unitless, Range Unitless) -> Int -> Int -> ImplicitCurveBounds
+subtree :: Array (Bounds Unitless, Bounds Unitless) -> Int -> Int -> ImplicitCurveBounds
 subtree boxes begin end = case end - begin of
   1 -> Leaf (Pair.second (Array.get begin boxes))
   n -> do
@@ -32,18 +32,18 @@ subtree boxes begin end = case end - begin of
     let mid = begin + n // 2
     let left = subtree boxes begin mid
     let right = subtree boxes mid end
-    let split = Range.lowerBound (Pair.first (Array.get mid boxes))
+    let split = Bounds.lower (Pair.first (Array.get mid boxes))
     Node left split right
 
-evaluate :: ImplicitCurveBounds -> Float -> Range Unitless
-evaluate bounds x = case bounds of
+evaluate :: ImplicitCurveBounds -> Float -> Bounds Unitless
+evaluate implicitCurveBounds x = case implicitCurveBounds of
   Node left split right -> if x < split then evaluate left x else evaluate right x
-  Leaf range -> range
+  Leaf bounds -> bounds
 
-evaluateBounds :: ImplicitCurveBounds -> Range Unitless -> Range Unitless
-evaluateBounds bounds x = case bounds of
+evaluateBounds :: ImplicitCurveBounds -> Bounds Unitless -> Bounds Unitless
+evaluateBounds implicitCurveBounds x = case implicitCurveBounds of
   Node left split right
-    | Range.upperBound x <= split -> evaluateBounds left x
-    | Range.lowerBound x >= split -> evaluateBounds right x
-    | otherwise -> Range.aggregate2 (evaluateBounds left x) (evaluateBounds right x)
-  Leaf range -> range
+    | Bounds.upper x <= split -> evaluateBounds left x
+    | Bounds.lower x >= split -> evaluateBounds right x
+    | otherwise -> Bounds.aggregate2 (evaluateBounds left x) (evaluateBounds right x)
+  Leaf bounds -> bounds

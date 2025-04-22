@@ -89,16 +89,16 @@ infix 4 !=
 {-| Take an expression which would normally require a tolerance,
 and evaluate it using a tolerance of zero. For example, the expression
 
-  value ^ range
+  value ^ bounds
 
 would normally require an implicit tolerance to be present;
 
-  exactly (value ^ range)
+  exactly (value ^ bounds)
 
 will evaluate that expression with a tolerance of zero,
 equivalent to
 
-  let ?tolerance = Qty.zero in value ^ range
+  let ?tolerance = Qty.zero in value ^ bounds
 -}
 exactly :: (Tolerance units => a) -> a
 exactly expression = using Qty.zero expression

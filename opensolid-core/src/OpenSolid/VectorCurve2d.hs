@@ -68,7 +68,7 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
+import OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
@@ -98,7 +98,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     Float
     (Vector2d coordinateSystem)
-    (Range Unitless)
+    (Bounds Unitless)
     (VectorBounds2d coordinateSystem)
 
 instance FFI (VectorCurve2d (space @ Unitless)) where
@@ -557,8 +557,8 @@ The parameter value should be between 0 and 1.
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
 evaluate VectorCurve2d{compiled} tValue = CompiledFunction.evaluate compiled tValue
 
-evaluateBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBounds2d (space @ units)
-evaluateBounds VectorCurve2d{compiled} tRange = CompiledFunction.evaluateBounds compiled tRange
+evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
+evaluateBounds VectorCurve2d{compiled} tBounds = CompiledFunction.evaluateBounds compiled tBounds
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)

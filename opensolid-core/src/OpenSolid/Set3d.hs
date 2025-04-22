@@ -11,15 +11,17 @@ module OpenSolid.Set3d
   )
 where
 
-import OpenSolid.Bounds3d (Bounded3d, Bounds3d)
+import OpenSolid.Bounded3d (Bounded3d)
+import OpenSolid.Bounded3d qualified as Bounded3d
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 
 data Set3d a (coordinateSystem :: CoordinateSystem) where
   Node ::
@@ -40,18 +42,18 @@ bounds (Node nodeBounds _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
 one :: Bounded3d a (space @ units) => a -> Set3d a (space @ units)
-one item = Leaf (Bounds3d.bounds item) item
+one item = Leaf (Bounded3d.bounds item) item
 
 two :: Bounded3d a (space @ units) => a -> a -> Set3d a (space @ units)
 two firstItem secondItem = do
-  let firstBounds = Bounds3d.bounds firstItem
-  let secondBounds = Bounds3d.bounds secondItem
+  let firstBounds = Bounded3d.bounds firstItem
+  let secondBounds = Bounded3d.bounds secondItem
   let nodeBounds = Bounds3d.aggregate2 firstBounds secondBounds
   Node nodeBounds (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
 
 fromNonEmpty :: Bounded3d a (space @ units) => NonEmpty a -> Set3d a (space @ units)
 fromNonEmpty givenItems = do
-  let boundedItem item = (Bounds3d.bounds item, item)
+  let boundedItem item = (Bounded3d.bounds item, item)
   let boundedItems = NonEmpty.map boundedItem givenItems
   buildX (NonEmpty.length boundedItems) boundedItems
 
@@ -65,7 +67,7 @@ buildZ :: Int -> NonEmpty (Bounds3d (space @ units), a) -> Set3d a (space @ unit
 buildZ = build Bounds3d.zCoordinate buildX
 
 build ::
-  (Bounds3d (space @ units) -> Range units) ->
+  (Bounds3d (space @ units) -> Bounds units) ->
   (Int -> NonEmpty (Bounds3d (space @ units), a) -> Set3d a (space @ units)) ->
   Int ->
   NonEmpty (Bounds3d (space @ units), a) ->
@@ -78,7 +80,7 @@ build boundsCoordinate buildSubset n boundedItems
   | otherwise = do
       Debug.assert (n >= 2)
       Debug.assert (NonEmpty.length boundedItems == n)
-      let sorted = NonEmpty.sortBy (Range.midpoint . boundsCoordinate . Pair.first) boundedItems
+      let sorted = NonEmpty.sortBy (Bounds.midpoint . boundsCoordinate . Pair.first) boundedItems
       let leftN = n // 2
       let rightN = n - leftN
       let (leftBoundedItems, rightBoundedItems) = splitAt leftN sorted

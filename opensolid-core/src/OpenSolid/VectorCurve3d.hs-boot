@@ -13,11 +13,11 @@ module OpenSolid.VectorCurve3d
   )
 where
 
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
@@ -35,7 +35,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     Float
     (Vector3d coordinateSystem)
-    (Range Unitless)
+    (Bounds Unitless)
     (VectorBounds3d coordinateSystem)
 
 instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
@@ -98,7 +98,7 @@ constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
 planar :: PlanarBasis3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
-evaluateBounds :: VectorCurve3d (space @ units) -> Range Unitless -> VectorBounds3d (space @ units)
+evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
 unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

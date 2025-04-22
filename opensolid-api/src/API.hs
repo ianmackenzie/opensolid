@@ -73,6 +73,8 @@ import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
@@ -103,8 +105,6 @@ import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Scene3d qualified as Scene3d
@@ -134,10 +134,10 @@ classes =
   [ length
   , area
   , angle
-  , range
-  , lengthRange
-  , areaRange
-  , angleRange
+  , bounds
+  , lengthBounds
+  , areaBounds
+  , angleBounds
   , color
   , vector2d
   , displacement2d
@@ -210,15 +210,15 @@ length =
     , absSelf Qty.abs
     , floatTimes
     , plusSelf
-    , plus @(Range Meters) Self
+    , plus @(Bounds Meters) Self
     , plus @(Curve Meters) Self
     , minusSelf
-    , minus @(Range Meters) Self
+    , minus @(Bounds Meters) Self
     , minus @(Curve Meters) Self
     , timesFloat
     , timesSelf
-    , times @(Range Unitless) Self
-    , times @(Range Meters) Self
+    , times @(Bounds Unitless) Self
+    , times @(Bounds Meters) Self
     , times @(Curve Unitless) Self
     , times @(Curve Meters) Self
     , times @(Direction2d Space) Self
@@ -226,8 +226,8 @@ length =
     , times @(Vector2d (Space @ Meters)) Self
     , divByFloat
     , divBySelf
-    , divBy @(Range Unitless) Self
-    , divBy @(Range Meters) Self
+    , divBy @(Bounds Unitless) Self
+    , divBy @(Bounds Meters) Self
     , divBy @(Curve Unitless) Self
     , divBy @(Curve Meters) Self
     , floorDivBySelf
@@ -255,22 +255,22 @@ area =
     , absSelf Qty.abs
     , floatTimes
     , plusSelf
-    , plus @(Range SquareMeters) Self
+    , plus @(Bounds SquareMeters) Self
     , plus @(Curve SquareMeters) Self
     , minusSelf
-    , minus @(Range SquareMeters) Self
+    , minus @(Bounds SquareMeters) Self
     , minus @(Curve SquareMeters) Self
     , timesFloat
-    , times @(Range Unitless) Self
+    , times @(Bounds Unitless) Self
     , times @(Curve Unitless) Self
     , times @(Direction2d Space) Self
     , times @(Vector2d (Space @ Unitless)) Self
     , divByFloat
     , divBySelf
     , divBy @Length Self
-    , divBy @(Range Unitless) Self
-    , divBy @(Range Meters) Self
-    , divBy @(Range SquareMeters) Self
+    , divBy @(Bounds Unitless) Self
+    , divBy @(Bounds Meters) Self
+    , divBy @(Bounds SquareMeters) Self
     , divBy @(Curve Unitless) Self
     , divBy @(Curve Meters) Self
     , divBy @(Curve SquareMeters) Self
@@ -314,42 +314,42 @@ angle =
     , absSelf Qty.abs
     , floatTimes
     , plusSelf
-    , plus @(Range Radians) Self
+    , plus @(Bounds Radians) Self
     , plus @(Curve Radians) Self
     , minusSelf
-    , minus @(Range Radians) Self
+    , minus @(Bounds Radians) Self
     , minus @(Curve Radians) Self
     , timesFloat
-    , times @(Range Unitless) Self
+    , times @(Bounds Unitless) Self
     , times @(Curve Unitless) Self
     , divByFloat
     , divBySelf
-    , divBy @(Range Unitless) Self
-    , divBy @(Range Radians) Self
+    , divBy @(Bounds Unitless) Self
+    , divBy @(Bounds Radians) Self
     , divBy @(Curve Unitless) Self
     , divBy @(Curve Radians) Self
     , floorDivBySelf
     , modBySelf
     ]
 
-range :: Class
-range =
-  Class.new @(Range Unitless) "A range of unitless values, with a lower bound and upper bound." $
-    [ constant "Unit" Range.unit $(docs 'Range.unit)
-    , constructor2 "First Value" "Second Value" Range $(docs 'Range)
-    , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
-    , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
-    , factory1 "Symmetric" "Width" Range.symmetric $(docs 'Range.symmetric)
-    , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
-    , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
-    , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
-    , member0 "Lower Bound" Range.lowerBound $(docs 'Range.lowerBound)
-    , member0 "Upper Bound" Range.upperBound $(docs 'Range.upperBound)
-    , member1 "Intersection" "Other" Range.intersection $(docs 'Range.intersection)
-    , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
-    , member1 "Contains" "Other" Range.contains $(docs 'Range.contains)
+bounds :: Class
+bounds =
+  Class.new @(Bounds Unitless) "A range of unitless values, with a lower bound and upper bound." $
+    [ constant "Unit Interval" Bounds.unitInterval $(docs 'Bounds.unitInterval)
+    , constructor2 "First Value" "Second Value" Bounds $(docs 'Bounds)
+    , factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
+    , factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
+    , factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
+    , factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
+    , factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
+    , member0 "Endpoints" Bounds.endpoints $(docs 'Bounds.endpoints)
+    , member0 "Lower" Bounds.lower $(docs 'Bounds.lower)
+    , member0 "Upper" Bounds.upper $(docs 'Bounds.upper)
+    , member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
+    , member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
+    , member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
     , negateSelf
-    , absSelf Range.abs
+    , absSelf Bounds.abs
     , floatPlus
     , floatMinus
     , floatTimes
@@ -363,34 +363,36 @@ range =
     , times @Length Self
     , times @Area Self
     , times @Angle Self
-    , times @(Range Meters) Self
-    , times @(Range SquareMeters) Self
-    , times @(Range Radians) Self
+    , times @(Bounds Meters) Self
+    , times @(Bounds SquareMeters) Self
+    , times @(Bounds Radians) Self
     , divByFloat
     , divBySelf
     ]
 
-lengthRange :: Class
-lengthRange =
-  Class.new @(Range Meters) "A range of length values, with a lower bound and upper bound." $
-    [ constructor2 "First Value" "Second Value" Range $(docs 'Range)
-    , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
-    , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
-    , factory1 "Symmetric" "Width" Range.symmetric $(docs 'Range.symmetric)
-    , factory2 "Meters" "A" "B" Range.meters $(docs 'Range.meters)
-    , factory2 "Centimeters" "A" "B" Range.centimeters $(docs 'Range.centimeters)
-    , factory2 "Cm" "A" "B" Range.cm $(docs 'Range.cm)
-    , factory2 "Millimeters" "A" "B" Range.millimeters $(docs 'Range.millimeters)
-    , factory2 "Mm" "A" "B" Range.mm $(docs 'Range.mm)
-    , factory2 "Inches" "A" "B" Range.inches $(docs 'Range.inches)
-    , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
-    , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
-    , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
-    , member1 "Intersection" "Other" Range.intersection $(docs 'Range.intersection)
-    , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
-    , member1 "Contains" "Other" Range.contains $(docs 'Range.contains)
+lengthBounds :: Class
+lengthBounds =
+  Class.new @(Bounds Meters) "A range of length values, with a lower bound and upper bound." $
+    [ constructor2 "First Value" "Second Value" Bounds $(docs 'Bounds)
+    , factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
+    , factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
+    , factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
+    , factory2 "Meters" "A" "B" Bounds.meters $(docs 'Bounds.meters)
+    , factory2 "Centimeters" "A" "B" Bounds.centimeters $(docs 'Bounds.centimeters)
+    , factory2 "Cm" "A" "B" Bounds.cm $(docs 'Bounds.cm)
+    , factory2 "Millimeters" "A" "B" Bounds.millimeters $(docs 'Bounds.millimeters)
+    , factory2 "Mm" "A" "B" Bounds.mm $(docs 'Bounds.mm)
+    , factory2 "Inches" "A" "B" Bounds.inches $(docs 'Bounds.inches)
+    , factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
+    , factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
+    , member0 "Endpoints" Bounds.endpoints $(docs 'Bounds.endpoints)
+    , member0 "Lower" Bounds.lower $(docs 'Bounds.lower)
+    , member0 "Upper" Bounds.upper $(docs 'Bounds.upper)
+    , member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
+    , member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
+    , member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
     , negateSelf
-    , absSelf Range.abs
+    , absSelf Bounds.abs
     , floatTimes
     , plusSelf
     , plus @Length Self
@@ -399,73 +401,77 @@ lengthRange =
     , timesFloat
     , timesSelf
     , times @Length Self
-    , times @(Range Unitless) Self
+    , times @(Bounds Unitless) Self
     , divByFloat
     , divBySelf
     , divBy @Length Self
-    , divBy @(Range Unitless) Self
+    , divBy @(Bounds Unitless) Self
     ]
 
-areaRange :: Class
-areaRange =
-  Class.new @(Range SquareMeters) "A range of area values, with a lower bound and upper bound." $
-    [ constructor2 "First Value" "Second Value" Range $(docs 'Range)
-    , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
-    , factory2 "Square Meters" "A" "B" Range.squareMeters $(docs 'Range.squareMeters)
-    , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
-    , factory1 "Symmetric" "Width" Range.symmetric $(docs 'Range.symmetric)
-    , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
-    , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
-    , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
-    , member1 "Intersection" "Other" Range.intersection $(docs 'Range.intersection)
-    , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
-    , member1 "Contains" "Other" Range.contains $(docs 'Range.contains)
+areaBounds :: Class
+areaBounds =
+  Class.new @(Bounds SquareMeters) "A range of area values, with a lower bound and upper bound." $
+    [ constructor2 "First Value" "Second Value" Bounds $(docs 'Bounds)
+    , factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
+    , factory2 "Square Meters" "A" "B" Bounds.squareMeters $(docs 'Bounds.squareMeters)
+    , factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
+    , factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
+    , factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
+    , factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
+    , member0 "Endpoints" Bounds.endpoints $(docs 'Bounds.endpoints)
+    , member0 "Lower" Bounds.lower $(docs 'Bounds.lower)
+    , member0 "Upper" Bounds.upper $(docs 'Bounds.upper)
+    , member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
+    , member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
+    , member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
     , negateSelf
-    , absSelf Range.abs
+    , absSelf Bounds.abs
     , floatTimes
     , plusSelf
     , plus @Area Self
     , minusSelf
     , minus @Area Self
     , timesFloat
-    , times @(Range Unitless) Self
+    , times @(Bounds Unitless) Self
     , divByFloat
     , divBySelf
     , divBy @Length Self
     , divBy @Area Self
-    , divBy @(Range Unitless) Self
-    , divBy @(Range Meters) Self
+    , divBy @(Bounds Unitless) Self
+    , divBy @(Bounds Meters) Self
     ]
 
-angleRange :: Class
-angleRange =
-  Class.new @(Range Radians) "A range of angle values, with a lower bound and upper bound." $
-    [ constructor2 "First Value" "Second Value" Range $(docs 'Range)
-    , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
-    , factory1 "Zero To" "Value" Range.zeroTo $(docs 'Range.zeroTo)
-    , factory1 "Symmetric" "Width" Range.symmetric $(docs 'Range.symmetric)
-    , factory2 "Radians" "A" "B" Range.radians $(docs 'Range.radians)
-    , factory2 "Degrees" "A" "B" Range.degrees $(docs 'Range.degrees)
-    , factory2 "Turns" "A" "B" Range.turns $(docs 'Range.turns)
-    , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
-    , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
-    , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
-    , member1 "Intersection" "Other" Range.intersection $(docs 'Range.intersection)
-    , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
-    , member1 "Contains" "Other" Range.contains $(docs 'Range.contains)
+angleBounds :: Class
+angleBounds =
+  Class.new @(Bounds Radians) "A range of angle values, with a lower bound and upper bound." $
+    [ constructor2 "First Value" "Second Value" Bounds $(docs 'Bounds)
+    , factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
+    , factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
+    , factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
+    , factory2 "Radians" "A" "B" Bounds.radians $(docs 'Bounds.radians)
+    , factory2 "Degrees" "A" "B" Bounds.degrees $(docs 'Bounds.degrees)
+    , factory2 "Turns" "A" "B" Bounds.turns $(docs 'Bounds.turns)
+    , factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
+    , factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
+    , member0 "Endpoints" Bounds.endpoints $(docs 'Bounds.endpoints)
+    , member0 "Lower" Bounds.lower $(docs 'Bounds.lower)
+    , member0 "Upper" Bounds.upper $(docs 'Bounds.upper)
+    , member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
+    , member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
+    , member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
     , negateSelf
-    , absSelf Range.abs
+    , absSelf Bounds.abs
     , floatTimes
     , plusSelf
     , plus @Angle Self
     , minusSelf
     , minus @Angle Self
     , timesFloat
-    , times @(Range Unitless) Self
+    , times @(Bounds Unitless) Self
     , divByFloat
     , divBySelf
     , divBy @Angle Self
-    , divBy @(Range Unitless) Self
+    , divBy @(Bounds Unitless) Self
     ]
 
 color :: Class
@@ -710,14 +716,14 @@ bounds2d =
 uvBounds :: Class
 uvBounds =
   Class.new @(Bounds2d (Space @ Unitless)) "A bounding box in UV parameter space." $
-    [ constructor2 "U Coordinate" "V Coordinate" Bounds2d "Construct a bounding box from its U and V coordinate ranges."
+    [ constructor2 "U Coordinate" "V Coordinate" Bounds2d "Construct a bounding box from its U and V coordinate bounds."
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
-    , member0 "U Coordinate" Bounds2d.xCoordinate "Get the U coordinate range of a bounding box."
-    , member0 "V Coordinate" Bounds2d.yCoordinate "Get the V coordinate range of a bounding box."
+    , member0 "U Coordinate" Bounds2d.xCoordinate "Get the U coordinate bounds of a bounding box."
+    , member0 "V Coordinate" Bounds2d.yCoordinate "Get the V coordinate bounds of a bounding box."
     , plus @(Vector2d (Space @ Unitless)) Self
     , minus @(Vector2d (Space @ Unitless)) Self
     ]
@@ -1284,7 +1290,7 @@ region2d =
 uvRegion :: Class
 uvRegion =
   Class.new @(Region2d (Space @ Unitless)) $(docs ''Region2d) $
-    [ constant "Unit" Region2d.unit $(docs 'Region2d.unit)
+    [ constant "Unit Square" Region2d.unitSquare $(docs 'Region2d.unitSquare)
     , factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
     , factoryU2R "Circle" "Center Point" "Diameter" Region2d.circle $(docs 'Region2d.circle)

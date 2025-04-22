@@ -5,6 +5,8 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
@@ -36,8 +38,6 @@ import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -88,12 +88,12 @@ testVectorArithmetic = IO.do
   let scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
   log "Scaled vector" scaledVector
 
-testRangeArithmetic :: IO ()
-testRangeArithmetic = IO.do
-  let rangeDifference = Range (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
-  log "Range difference" rangeDifference
-  let rangeProduct = Length.centimeters 20.0 * Range (Length.meters 2.0) (Length.meters 3.0)
-  log "Range product" rangeProduct
+testBoundsArithmetic :: IO ()
+testBoundsArithmetic = IO.do
+  let boundsDifference = Bounds (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
+  log "Bounds difference" boundsDifference
+  let boundsProduct = Length.centimeters 20.0 * Bounds (Length.meters 2.0) (Length.meters 3.0)
+  log "Bounds product" boundsProduct
 
 testEquality :: IO ()
 testEquality = Tolerance.using Length.centimeter do
@@ -134,7 +134,7 @@ testCustomFunction =
 testListOperations :: IO ()
 testListOperations = IO.do
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
-  log "Successive intervals" (List.successive Range [1.0, 2.0, 3.0, 4.0])
+  log "Successive intervals" (List.successive Bounds [1.0, 2.0, 3.0, 4.0])
 
 getCrossProduct :: Tolerance Meters => Result Text Float
 getCrossProduct = Result.addContext "In getCrossProduct" Result.do
@@ -225,8 +225,8 @@ strokeWidth = Length.millimeters 0.1
 
 drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
 drawZeros path zeros = IO.do
-  let uvRange = Range.convert toDrawing (Range -0.05 1.05)
-  let viewBox = Bounds2d uvRange uvRange
+  let uvBounds = Bounds.convert toDrawing (Bounds -0.05 1.05)
+  let viewBox = Bounds2d uvBounds uvBounds
   let crossingCurves = SurfaceFunction.Zeros.crossingCurves zeros
   let saddlePoints = SurfaceFunction.Zeros.saddlePoints zeros
   Drawing2d.writeSvg path viewBox $
@@ -308,7 +308,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
   let curve = Curve2d.bezier drawingControlPoints
-  let drawSegmentBounds tRange = drawBounds [] (Curve2d.evaluateBounds curve tRange)
+  let drawSegmentBounds tBounds = drawBounds [] (Curve2d.evaluateBounds curve tBounds)
   Drawing2d.with
     [Drawing2d.strokeColor color, Drawing2d.strokeWidth (Length.millimeters 1.0)]
     [ Drawing2d.with [Drawing2d.opacity 0.3] $
@@ -331,8 +331,8 @@ testBezierSegment = IO.do
   let p4 = Point2d.xy 5.0 0.0
   let p5 = Point2d.xy 10.0 5.0
   let p6 = Point2d.xy 10.0 10.0
-  let coordinateRange = Range.convert toDrawing (Range -1.0 11.0)
-  let drawingBounds = Bounds2d coordinateRange coordinateRange
+  let coordinateBounds = Bounds.convert toDrawing (Bounds -1.0 11.0)
+  let drawingBounds = Bounds2d coordinateBounds coordinateBounds
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
   Drawing2d.writeSvg "executables/sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
 
@@ -348,8 +348,8 @@ testHermiteBezier = IO.do
         , Drawing2d.strokeWidth (Length.millimeters 1.0)
         ]
   let curveEntity = Drawing2d.curve curveAttributes (Length.millimeters 0.1) curve
-  let coordinateRange = Range (Length.centimeters -1.0) (Length.centimeters 11.0)
-  let drawingBounds = Bounds2d coordinateRange coordinateRange
+  let coordinateBounds = Bounds (Length.centimeters -1.0) (Length.centimeters 11.0)
+  let drawingBounds = Bounds2d coordinateBounds coordinateBounds
   Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
 
 testExplicitRandomStep :: IO ()
@@ -395,7 +395,7 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
   let v = SurfaceFunction.v
   let f = SurfaceFunction.squared u + SurfaceFunction.squared v - 4.0
   let g = u - v
-  let bounds = Bounds2d (Range 0.0 2.0) (Range 0.0 2.0)
+  let bounds = Bounds2d (Bounds 0.0 2.0) (Bounds 0.0 2.0)
   let function = VectorSurfaceFunction2d.xy f g
   let solution =
         Solve2d.unique
@@ -412,7 +412,7 @@ testExpression = IO.do
   let xSquared = Expression.squared x
   let function = xSquared / (xSquared + Expression.Curve1d.constant 1.0)
   log "Expression value" (Expression.evaluate function 2.0)
-  log "Expression bounds" (Expression.evaluateBounds function (Range 1.0 3.0))
+  log "Expression bounds" (Expression.evaluateBounds function (Bounds 1.0 3.0))
 
 testCurve2dExpression :: IO ()
 testCurve2dExpression = IO.do
@@ -425,7 +425,7 @@ main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
   testScalarArithmetic
   testVectorArithmetic
-  testRangeArithmetic
+  testBoundsArithmetic
   testEquality
   testTransformation
   testTry

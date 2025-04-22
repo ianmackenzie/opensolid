@@ -84,6 +84,8 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bezier qualified as Bezier
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -127,8 +129,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Stream qualified as Stream
@@ -172,7 +172,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     Float
     (Point2d coordinateSystem)
-    (Range Unitless)
+    (Bounds Unitless)
     (Bounds2d coordinateSystem)
 
 instance FFI (Curve2d (space @ Meters)) where
@@ -601,15 +601,15 @@ The parameter value should be between 0 and 1.
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 evaluate Curve2d{compiled} tValue = CompiledFunction.evaluate compiled tValue
 
-evaluateBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
-evaluateBounds Curve2d{compiled} tRange = CompiledFunction.evaluateBounds compiled tRange
+evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
+evaluateBounds Curve2d{compiled} tBounds = CompiledFunction.evaluateBounds compiled tBounds
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
-bounds curve = evaluateBounds curve Range.unit
+bounds curve = evaluateBounds curve Bounds.unitInterval
 
 asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @ units))
 asPoint curve = do
@@ -668,7 +668,7 @@ overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
     |> List.successive
       ( \(Point2d t1Start t2Start) (Point2d t1End t2End) ->
-          OverlappingSegment (Range t1Start t1End) (Range t2Start t2End) $
+          OverlappingSegment (Bounds t1Start t1End) (Bounds t2Start t2End) $
             if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative
       )
     |> List.filter (isOverlappingSegment curve1 curve2)
@@ -680,8 +680,8 @@ isOverlappingSegment ::
   OverlappingSegment ->
   Bool
 isOverlappingSegment curve1 curve2 (OverlappingSegment{t1}) = do
-  let segmentStartPoint = evaluate curve1 (Range.lowerBound t1)
-  let curve1TestPoints = List.map (evaluate curve1) (Range.samples t1)
+  let segmentStartPoint = evaluate curve1 (Bounds.lower t1)
+  let curve1TestPoints = List.map (evaluate curve1) (Bounds.sampleValues t1)
   let segment1IsNondegenerate = List.anySatisfy (!= segmentStartPoint) curve1TestPoints
   let segment1LiesOnSegment2 = List.allSatisfy (^ curve2) curve1TestPoints
   segment1IsNondegenerate && segment1LiesOnSegment2
@@ -783,7 +783,7 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
                   let Point2d t1 t2 = point
                   Solve2d.return (constructor t1 t2 sign)
                 else Solve2d.recurse ()
-        case Range.resolvedSign (fvBounds `cross'` fuBounds) of
+        case Bounds.resolvedSign (fvBounds `cross'` fuBounds) of
           Resolved sign -> do
             case endpointIntersection endpointIntersections uvBounds of
               Just point -> validate point IntersectionPoint.crossing sign
@@ -801,13 +801,14 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
           Unresolved -> do
             let guBounds = VectorSurfaceFunction2d.evaluateBounds gu uvBounds
             let gvBounds = VectorSurfaceFunction2d.evaluateBounds gv uvBounds
-            case Range.resolvedSign (gvBounds `cross'` guBounds) of
+            case Bounds.resolvedSign (gvBounds `cross'` guBounds) of
               Resolved sign -> do
                 case endpointIntersection endpointIntersections uvBounds of
                   Just point -> validate point IntersectionPoint.tangent sign
                   Nothing -> do
                     let gBounds = VectorSurfaceFunction2d.evaluateBounds g uvBounds
-                    let convergenceTolerance = 1e-9 * Range.upperBound (VectorBounds2d.magnitude gBounds)
+                    let convergenceTolerance =
+                          1e-9 * Bounds.upper (VectorBounds2d.magnitude gBounds)
                     let solution =
                           Tolerance.using convergenceTolerance $
                             Solve2d.unique
@@ -1097,7 +1098,7 @@ makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   let evaluateImpl t = piecewiseValue tree (arcLength * t)
-  let evaluateBoundsImpl (Range t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
+  let evaluateBoundsImpl (Bounds t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
   new
     # CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
     # piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
@@ -1163,7 +1164,7 @@ piecewiseBounds tree startLength endLength = case tree of
           (piecewiseBounds leftTree startLength leftLength)
           (piecewiseBounds rightTree Qty.zero (endLength - leftLength))
   PiecewiseLeaf curve segmentLength ->
-    evaluateBounds curve (Range (startLength / segmentLength) (endLength / segmentLength))
+    evaluateBounds curve (Bounds (startLength / segmentLength) (endLength / segmentLength))
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree (space @ units) ->
@@ -1171,7 +1172,7 @@ piecewiseDerivative ::
   VectorCurve2d (space @ units)
 piecewiseDerivative tree length = do
   let evaluateImpl t = piecewiseDerivativeValue tree (length * t)
-  let evaluateBoundsImpl (Range t1 t2) = piecewiseDerivativeBounds tree (length * t1) (length * t2)
+  let evaluateBoundsImpl (Bounds t1 t2) = piecewiseDerivativeBounds tree (length * t1) (length * t2)
   VectorCurve2d.new
     (CompiledFunction.abstract evaluateImpl evaluateBoundsImpl)
     (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
@@ -1246,4 +1247,4 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
           (piecewiseDerivativeBounds rightTree Qty.zero (endLength - leftLength))
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2d.evaluateBounds curve $
-      Range (startLength / segmentLength) (endLength / segmentLength)
+      Bounds (startLength / segmentLength) (endLength / segmentLength)

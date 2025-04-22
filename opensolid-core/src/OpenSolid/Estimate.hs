@@ -28,26 +28,26 @@ module OpenSolid.Estimate
   )
 where
 
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Units qualified as Units
 
 class Interface a units | a -> units where
-  boundsImpl :: a -> Range units
+  boundsImpl :: a -> Bounds units
   refineImpl :: a -> Estimate units
 
 instance Interface (Qty units) units where
-  boundsImpl = Range.constant
+  boundsImpl = Bounds.constant
   refineImpl = exact
 
 data Estimate units where
-  Estimate :: Interface a units => a -> Range units -> Estimate units
+  Estimate :: Interface a units => a -> Bounds units -> Estimate units
   Coerce :: Estimate units1 -> Estimate units2
 
 instance HasUnits (Estimate units) units (Estimate Unitless)
@@ -62,7 +62,7 @@ new implementation = Estimate implementation (boundsImpl implementation)
 exact :: Qty units -> Estimate units
 exact value = new value
 
-bounds :: Estimate units -> Range units
+bounds :: Estimate units -> Bounds units
 bounds (Estimate _ cachedBounds) = cachedBounds
 bounds (Coerce estimate) = Units.coerce (bounds estimate)
 
@@ -70,15 +70,15 @@ refine :: Estimate units -> Estimate units
 refine (Estimate implementation _) = refineImpl implementation
 refine (Coerce estimate) = Coerce (refine estimate)
 
-satisfy :: (Range units -> Bool) -> Estimate units -> Range units
+satisfy :: (Bounds units -> Bool) -> Estimate units -> Bounds units
 satisfy predicate estimate = do
   let current = bounds estimate
   if predicate current then current else satisfy predicate (refine estimate)
 
-within :: Qty units -> Estimate units -> Range units
-within tolerance = satisfy (Range.width >> (<= tolerance))
+within :: Qty units -> Estimate units -> Bounds units
+within tolerance = satisfy (Bounds.width >> (<= tolerance))
 
-resolve :: (Range units -> Fuzzy a) -> Estimate units -> a
+resolve :: (Bounds units -> Fuzzy a) -> Estimate units -> a
 resolve function estimate =
   case function (bounds estimate) of
     Resolved value -> value
@@ -106,8 +106,8 @@ data Add units = Add (Estimate units) (Estimate units)
 instance Interface (Add units) units where
   boundsImpl (Add first second) = bounds first + bounds second
   refineImpl (Add first second) = do
-    let width1 = Range.width (bounds first)
-    let width2 = Range.width (bounds second)
+    let width1 = Bounds.width (bounds first)
+    let width2 = Bounds.width (bounds second)
     if
       | width1 >= 2.0 * width2 -> refine first + second
       | width2 >= 2.0 * width1 -> first + refine second
@@ -127,8 +127,8 @@ data Subtract units = Subtract (Estimate units) (Estimate units)
 instance Interface (Subtract units) units where
   boundsImpl (Subtract first second) = bounds first - bounds second
   refineImpl (Subtract first second) = do
-    let width1 = Range.width (bounds first)
-    let width2 = Range.width (bounds second)
+    let width1 = Bounds.width (bounds first)
+    let width2 = Bounds.width (bounds second)
     if
       | width1 >= 2.0 * width2 -> refine first - second
       | width2 >= 2.0 * width1 -> first - refine second
@@ -150,10 +150,10 @@ instance Interface (Product units1 units2) (units1 :*: units2) where
   refineImpl (Product first second) = do
     let firstBounds = bounds first
     let secondBounds = bounds second
-    let firstWidth = Range.width firstBounds
-    let secondWidth = Range.width secondBounds
-    let firstMetric = firstWidth .*. Range.midpoint secondBounds
-    let secondMetric = Range.midpoint firstBounds .*. secondWidth
+    let firstWidth = Bounds.width firstBounds
+    let secondWidth = Bounds.width secondBounds
+    let firstMetric = firstWidth .*. Bounds.midpoint secondBounds
+    let secondMetric = Bounds.midpoint firstBounds .*. secondWidth
     let combinedMetric = firstWidth .*. secondWidth
     let refinedProduct
           | firstMetric > secondMetric && firstMetric > combinedMetric = Product (refine first) second
@@ -221,7 +221,7 @@ instance Interface (Sum units) units where
 newtype Abs units = Abs (Estimate units)
 
 instance Interface (Abs units) units where
-  boundsImpl (Abs estimate) = Range.abs (bounds estimate)
+  boundsImpl (Abs estimate) = Bounds.abs (bounds estimate)
   refineImpl (Abs estimate) = new (Abs (refine estimate))
 
 abs :: Estimate units -> Estimate units
@@ -239,10 +239,10 @@ sum = new . Sum
 data Min units = Min (Estimate units) (Estimate units)
 
 instance Interface (Min units) units where
-  boundsImpl (Min first second) = Range.min (bounds first) (bounds second)
+  boundsImpl (Min first second) = Bounds.min (bounds first) (bounds second)
   refineImpl (Min first second) = do
-    let (Range min1 max1) = bounds first
-    let (Range min2 max2) = bounds second
+    let (Bounds min1 max1) = bounds first
+    let (Bounds min2 max2) = bounds second
     if
       | max1 <= min2 -> refine first
       | max2 <= min1 -> refine second
@@ -254,10 +254,10 @@ min first second = new (Min first second)
 data Max units = Max (Estimate units) (Estimate units)
 
 instance Interface (Max units) units where
-  boundsImpl (Max first second) = Range.max (bounds first) (bounds second)
+  boundsImpl (Max first second) = Bounds.max (bounds first) (bounds second)
   refineImpl (Max first second) = do
-    let (Range min1 max1) = bounds first
-    let (Range min2 max2) = bounds second
+    let (Bounds min1 max1) = bounds first
+    let (Bounds min2 max2) = bounds second
     if
       | min1 >= max2 -> refine first
       | min2 >= max1 -> refine second
@@ -269,10 +269,10 @@ max first second = new (Max first second)
 data Smaller units = Smaller (Estimate units) (Estimate units)
 
 instance Interface (Smaller units) units where
-  boundsImpl (Smaller first second) = Range.smaller (bounds first) (bounds second)
+  boundsImpl (Smaller first second) = Bounds.smaller (bounds first) (bounds second)
   refineImpl (Smaller first second) = do
-    let (Range low1 high1) = Range.abs (bounds first)
-    let (Range low2 high2) = Range.abs (bounds second)
+    let (Bounds low1 high1) = Bounds.abs (bounds first)
+    let (Bounds low2 high2) = Bounds.abs (bounds second)
     if
       | high1 <= low2 -> refine first
       | high2 <= low1 -> refine second
@@ -284,10 +284,10 @@ smaller first second = new (Smaller first second)
 data Larger units = Larger (Estimate units) (Estimate units)
 
 instance Interface (Larger units) units where
-  boundsImpl (Larger first second) = Range.larger (bounds first) (bounds second)
+  boundsImpl (Larger first second) = Bounds.larger (bounds first) (bounds second)
   refineImpl (Larger first second) = do
-    let (Range low1 high1) = Range.abs (bounds first)
-    let (Range low2 high2) = Range.abs (bounds second)
+    let (Bounds low1 high1) = Bounds.abs (bounds first)
+    let (Bounds low2 high2) = Bounds.abs (bounds second)
     if
       | low1 >= high2 -> refine first
       | low2 >= high1 -> refine second
@@ -301,12 +301,12 @@ internalErrorFilteredListIsEmpty =
   internalError "Filtered list should be non-empty by construction"
 
 boundsWidth :: Estimate units -> Qty units
-boundsWidth estimate = Range.width (bounds estimate)
+boundsWidth estimate = Bounds.width (bounds estimate)
 
-overlaps :: Range units -> Estimate units -> Bool
-overlaps range estimate = Range.overlap range (bounds estimate) > Qty.zero
+overlaps :: Bounds units -> Estimate units -> Bool
+overlaps givenBounds estimate = Bounds.overlap givenBounds (bounds estimate) > Qty.zero
 
-data Smallest units = Smallest (NonEmpty (Estimate units)) (Range units)
+data Smallest units = Smallest (NonEmpty (Estimate units)) (Bounds units)
 
 instance Interface (Smallest units) units where
   boundsImpl (Smallest _ currentBounds) = currentBounds
@@ -321,9 +321,9 @@ instance Interface (Smallest units) units where
 
 smallest :: NonEmpty (Estimate units) -> Estimate units
 smallest estimates =
-  new (Smallest estimates (Range.smallest (NonEmpty.map bounds estimates)))
+  new (Smallest estimates (Bounds.smallest (NonEmpty.map bounds estimates)))
 
-data Largest units = Largest (NonEmpty (Estimate units)) (Range units)
+data Largest units = Largest (NonEmpty (Estimate units)) (Bounds units)
 
 instance Interface (Largest units) units where
   boundsImpl (Largest _ currentBounds) = currentBounds
@@ -338,22 +338,22 @@ instance Interface (Largest units) units where
 
 largest :: NonEmpty (Estimate units) -> Estimate units
 largest estimates =
-  new (Largest estimates (Range.largest (NonEmpty.map bounds estimates)))
+  new (Largest estimates (Bounds.largest (NonEmpty.map bounds estimates)))
 
 estimateUpperBound :: (a, Estimate units) -> Qty units
-estimateUpperBound (_, estimate) = Range.upperBound (bounds estimate)
+estimateUpperBound (_, estimate) = Bounds.upper (bounds estimate)
 
 estimateUpperBoundAtLeast :: Qty units -> (a, Estimate units) -> Bool
 estimateUpperBoundAtLeast cutoff pair = estimateUpperBound pair >= cutoff
 
 estimateLowerBound :: (a, Estimate units) -> Qty units
-estimateLowerBound (_, estimate) = Range.lowerBound (bounds estimate)
+estimateLowerBound (_, estimate) = Bounds.lower (bounds estimate)
 
 estimateLowerBoundAtMost :: Qty units -> (a, Estimate units) -> Bool
 estimateLowerBoundAtMost cutoff pair = estimateLowerBound pair <= cutoff
 
 itemBoundsWidth :: (a, Estimate units) -> Qty units
-itemBoundsWidth (_, estimate) = Range.width (bounds estimate)
+itemBoundsWidth (_, estimate) = Bounds.width (bounds estimate)
 
 refinePairs :: NonEmpty (a, Estimate units) -> NonEmpty (a, Estimate units)
 refinePairs pairs = do
@@ -430,7 +430,7 @@ pickLargestBy function items = pickMaximumBy (abs . function) items
 
 sign :: Tolerance units => Estimate units -> Sign
 sign estimate
-  | Range.lowerBound (bounds estimate) > ?tolerance = Positive
-  | Range.upperBound (bounds estimate) < negate ?tolerance = Negative
-  | Range.width (bounds estimate) ~= Qty.zero = Positive
+  | Bounds.lower (bounds estimate) > ?tolerance = Positive
+  | Bounds.upper (bounds estimate) < negate ?tolerance = Negative
+  | Bounds.width (bounds estimate) ~= Qty.zero = Positive
   | otherwise = sign (refine estimate)

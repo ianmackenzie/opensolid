@@ -4,7 +4,7 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range qualified as Range
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.SurfaceParameter (UvBounds)
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
@@ -16,14 +16,14 @@ error ::
   UvBounds ->
   Qty units
 error fuu fuv fvv subdomain = do
-  let Bounds2d uRange vRange = subdomain
-  let uWidthSquared = Float.squared (Range.width uRange)
-  let vWidthSquared = Float.squared (Range.width vRange)
+  let Bounds2d uBounds vBounds = subdomain
+  let uWidthSquared = Float.squared (Bounds.width uBounds)
+  let vWidthSquared = Float.squared (Bounds.width vBounds)
   let uvWidthSquared = uWidthSquared + vWidthSquared
-  let uuMagnitude = Range.maxAbs (VectorBounds3d.magnitude fuu)
-  let vvMagnitude = Range.maxAbs (VectorBounds3d.magnitude fvv)
-  let uvMagnitude1 = Range.maxAbs (VectorBounds3d.magnitude (fuu + fvv + 2.0 * fuv))
-  let uvMagnitude2 = Range.maxAbs (VectorBounds3d.magnitude (fuu + fvv - 2.0 * fuv))
+  let uuMagnitude = Bounds.maxAbs (VectorBounds3d.magnitude fuu)
+  let vvMagnitude = Bounds.maxAbs (VectorBounds3d.magnitude fvv)
+  let uvMagnitude1 = Bounds.maxAbs (VectorBounds3d.magnitude (fuu + fvv + 2.0 * fuv))
+  let uvMagnitude2 = Bounds.maxAbs (VectorBounds3d.magnitude (fuu + fvv - 2.0 * fuv))
   let uuError = 0.125 * uuMagnitude * uWidthSquared
   let vvError = 0.125 * vvMagnitude * vWidthSquared
   let uvError1 = 0.125 * uvMagnitude1 * uvWidthSquared

@@ -8,6 +8,7 @@ where
 
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -25,7 +26,6 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
@@ -98,35 +98,35 @@ horizontalCurve derivatives dvdu uStart uEnd boxes monotonicity boundingAxes = d
   let f = Derivatives.get derivatives
   let fv = Derivatives.get (derivatives >> V)
   let bounds = implicitCurveBounds boxes
-  let clampedVRange uValue =
+  let clampedVBounds uValue =
         List.foldl (clamp uValue) (ImplicitCurveBounds.evaluate bounds uValue) boundingAxes
   let solveForV =
         case (SurfaceFunction.compiled f, SurfaceFunction.compiled fv) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fvExpr) ->
-            \uValue -> Expression.solveMonotonicSurfaceV fExpr fvExpr uValue (clampedVRange uValue)
-          _ -> \uValue -> Internal.solveForV f fv uValue (clampedVRange uValue)
+            \uValue -> Expression.solveMonotonicSurfaceV fExpr fvExpr uValue (clampedVBounds uValue)
+          _ -> \uValue -> Internal.solveForV f fv uValue (clampedVBounds uValue)
   let evaluate tValue = do
         let uValue = Float.interpolateFrom uStart uEnd tValue
         let vValue = solveForV uValue
         Point2d.xy uValue vValue
-  let evaluateBounds tRange = do
-        let Range t1 t2 = tRange
+  let evaluateBounds tBounds = do
+        let Bounds t1 t2 = tBounds
         let u1 = Float.interpolateFrom uStart uEnd t1
         let u2 = Float.interpolateFrom uStart uEnd t2
         let v1 = solveForV u1
         let v2 = solveForV u2
         case monotonicity of
-          Monotonic -> Bounds2d (Range u1 u2) (Range v1 v2)
+          Monotonic -> Bounds2d (Bounds u1 u2) (Bounds v1 v2)
           MonotonicIn frame -> do
             let p1 = Point2d.xy u1 v1
             let p2 = Point2d.xy u2 v2
             Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
               |> Bounds2d.placeIn frame
           NotMonotonic -> do
-            let vRange = ImplicitCurveBounds.evaluateBounds bounds (Range u1 u2)
-            let slopeBounds = SurfaceFunction.evaluateBounds dvdu (Bounds2d (Range u1 u2) vRange)
-            let segmentVBounds = Internal.curveBounds u1 u2 v1 v2 slopeBounds
-            Bounds2d (Range u1 u2) segmentVBounds
+            let vBounds = ImplicitCurveBounds.evaluateBounds bounds (Bounds u1 u2)
+            let slopeBounds = SurfaceFunction.evaluateBounds dvdu (Bounds2d (Bounds u1 u2) vBounds)
+            let segmentVBounds = Internal.curveBoundsAt u1 u2 v1 v2 slopeBounds
+            Bounds2d (Bounds u1 u2) segmentVBounds
   let derivative self = do
         let deltaU = uEnd - uStart
         let dudt = Curve.constant deltaU
@@ -134,12 +134,12 @@ horizontalCurve derivatives dvdu uStart uEnd boxes monotonicity boundingAxes = d
         VectorCurve2d.xy dudt dvdt
   Curve2d.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
 
-clamp :: Float -> Range Unitless -> Axis2d UvCoordinates -> Range Unitless
-clamp u (Range vLow vHigh) axis = do
+clamp :: Float -> Bounds Unitless -> Axis2d UvCoordinates -> Bounds Unitless
+clamp u (Bounds vLow vHigh) axis = do
   let Point2d u0 v0 = Axis2d.originPoint axis
   let Direction2d du dv = Axis2d.direction axis
   let v = v0 + (u - u0) * dv / du
   if
-    | du > 0.0 -> Range (Qty.max vLow v) vHigh
-    | du < 0.0 -> Range vLow (Qty.min vHigh v)
-    | otherwise -> Range vLow vHigh
+    | du > 0.0 -> Bounds (Qty.max vLow v) vHigh
+    | du < 0.0 -> Bounds vLow (Qty.min vHigh v)
+    | otherwise -> Bounds vLow vHigh

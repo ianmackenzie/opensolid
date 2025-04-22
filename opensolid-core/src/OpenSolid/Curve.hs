@@ -33,6 +33,8 @@ where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
@@ -54,8 +56,6 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
@@ -76,7 +76,7 @@ data Curve units where
     } ->
     Curve units
 
-type Compiled units = CompiledFunction Float (Qty units) (Range Unitless) (Range units)
+type Compiled units = CompiledFunction Float (Qty units) (Bounds Unitless) (Bounds units)
 
 instance FFI (Curve Unitless) where
   representation = FFI.classRepresentation "Curve"
@@ -362,7 +362,7 @@ The parameter value should be between 0 and 1.
 evaluate :: Curve units -> Float -> Qty units
 evaluate Curve{compiled} = CompiledFunction.evaluate compiled
 
-evaluateBounds :: Curve units -> Range Unitless -> Range units
+evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units
 evaluateBounds Curve{compiled} = CompiledFunction.evaluateBounds compiled
 
 -- | Compute the square of a curve.
@@ -372,7 +372,7 @@ squared curve = Units.specialize (squared' curve)
 squared' :: Curve units -> Curve (units :*: units)
 squared' curve =
   new
-    (CompiledFunction.map Expression.squared' Qty.squared' Range.squared' (compiled curve))
+    (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' (compiled curve))
     (2.0 * curve .*. derivative curve)
 
 -- | Compute the square root of a curve.
@@ -385,44 +385,44 @@ sqrt' curve =
     then zero
     else
       recursive
-        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Range.sqrt' (compiled curve))
+        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' (compiled curve))
         (\self -> derivative curve .!/! (2.0 * self))
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless
 sin curve =
   new
-    (CompiledFunction.map Expression.sin Angle.sin Range.sin (compiled curve))
+    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin (compiled curve))
     (cos curve * (derivative curve / Angle.radian))
 
 -- | Compute the cosine of a curve.
 cos :: Curve Radians -> Curve Unitless
 cos curve =
   new
-    (CompiledFunction.map Expression.cos Angle.cos Range.cos (compiled curve))
+    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos (compiled curve))
     (negate (sin curve) * (derivative curve / Angle.radian))
 
 integral :: Curve units -> Estimate units
-integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
+integral curve = Estimate.new (Integral curve (derivative curve) Bounds.unitInterval)
 
-data Integral units = Integral (Curve units) (Curve units) (Range Unitless)
+data Integral units = Integral (Curve units) (Curve units) (Bounds Unitless)
 
 instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve curveDerivative domain) = do
-    let dx = Range.width domain
+    let dx = Bounds.width domain
     let derivativeBounds = evaluateBounds curveDerivative domain
     let estimate0 = dx * evaluateBounds curve domain
-    let y1 = evaluate curve (Range.lowerBound domain)
-    let y2 = evaluate curve (Range.upperBound domain)
-    let m = Range.width derivativeBounds
+    let y1 = evaluate curve (Bounds.lower domain)
+    let y2 = evaluate curve (Bounds.upper domain)
+    let m = Bounds.width derivativeBounds
     let error1 = 0.125 * m * dx * dx
-    let estimate1 = dx * Qty.midpoint y1 y2 + Range -error1 error1
-    case Range.intersection estimate0 estimate1 of
+    let estimate1 = dx * Qty.midpoint y1 y2 + Bounds -error1 error1
+    case Bounds.intersection estimate0 estimate1 of
       Just intersection -> intersection
       Nothing -> estimate0 -- Shouldn't happen if bounds are correct
 
   refineImpl (Integral curve curveDerivative domain) = do
-    let (leftDomain, rightDomain) = Range.bisect domain
+    let (leftDomain, rightDomain) = Bounds.bisect domain
     let leftIntegral = Integral curve curveDerivative leftDomain
     let rightIntegral = Integral curve curveDerivative rightDomain
     Estimate.new leftIntegral + Estimate.new rightIntegral
@@ -470,7 +470,7 @@ zeros curve
   | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
       let derivatives = Stream.iterate derivative curve
-      let derivativeBounds tRange = Stream.map (\f -> evaluateBounds f tRange) derivatives
+      let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
         Success foundZeros -> Success (List.sortBy Zero.location foundZeros)
@@ -480,7 +480,7 @@ findZeros ::
   Tolerance units =>
   Stream (Curve units) ->
   Domain1d ->
-  Stream (Range units) ->
+  Stream (Bounds units) ->
   Solve1d.Exclusions exclusions ->
   Solve1d.Action exclusions Zero
 findZeros derivatives subdomain derivativeBounds exclusions
@@ -489,7 +489,7 @@ findZeros derivatives subdomain derivativeBounds exclusions
   -- Optimization heuristic: bisect down to small subdomains first,
   -- to quickly eliminate most of the curve based on simple value bounds
   -- before attempting more complex/sophisticated solving
-  | Range.width (Domain1d.bounds subdomain) > 1 / 1024 = Solve1d.recurse
+  | Bounds.width (Domain1d.bounds subdomain) > 1 / 1024 = Solve1d.recurse
   | otherwise = case exclusions of
       Solve1d.SomeExclusions -> Solve1d.recurse
       Solve1d.NoExclusions ->
@@ -498,7 +498,7 @@ findZeros derivatives subdomain derivativeBounds exclusions
           Resolved [] -> Solve1d.pass
           Resolved (NonEmpty subdomainZeros) -> do
             let subdomainInterior = Domain1d.interior subdomain
-            if NonEmpty.allSatisfy (\(t0, _) -> Range.includes t0 subdomainInterior) subdomainZeros
+            if NonEmpty.allSatisfy (\(t0, _) -> Bounds.includes t0 subdomainInterior) subdomainZeros
               then Solve1d.return (NonEmpty.map toZero subdomainZeros)
               else Solve1d.recurse
 
@@ -513,12 +513,12 @@ findZerosOrder ::
   Int ->
   Stream (Curve units) ->
   Domain1d ->
-  Stream (Range units) ->
+  Stream (Bounds units) ->
   Fuzzy (List (Float, Solve1d.Neighborhood units))
 findZerosOrder k derivatives subdomain derivativeBounds
   -- A derivative is resolved, so it has no zeros
   -- (note that if k == 0, we already checked for the curve being non-zero in findZeros above)
-  | k > 0 && Range.isResolved (Stream.head derivativeBounds) = Resolved []
+  | k > 0 && Bounds.isResolved (Stream.head derivativeBounds) = Resolved []
   -- We've exceeded the maximum zero order without finding a non-zero derivative
   | k > maxZeroOrder = Unresolved
   -- Otherwise, find higher-order zeros and then search in between them
@@ -527,18 +527,18 @@ findZerosOrder k derivatives subdomain derivativeBounds
       let higherDerivativeBounds = Stream.tail derivativeBounds
       let currentDerivative = Stream.head derivatives
       let nextDerivative = Stream.head higherDerivatives
-      let tRange = Domain1d.bounds subdomain
+      let tBounds = Domain1d.bounds subdomain
       higherOrderZeros <- findZerosOrder (k + 1) higherDerivatives subdomain higherDerivativeBounds
       case higherOrderZeros of
-        [] -> solveMonotonic k currentDerivative nextDerivative tRange
+        [] -> solveMonotonic k currentDerivative nextDerivative tBounds
         List.One (t0, neighborhood) -> do
           if Qty.abs (evaluate currentDerivative t0) <= Solve1d.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
             else Fuzzy.do
-              let leftRange = Range (Range.lowerBound tRange) t0
-              let rightRange = Range t0 (Range.upperBound tRange)
-              leftZeros <- solveMonotonic k currentDerivative nextDerivative leftRange
-              rightZeros <- solveMonotonic k currentDerivative nextDerivative rightRange
+              let leftBounds = Bounds (Bounds.lower tBounds) t0
+              let rightBounds = Bounds t0 (Bounds.upper tBounds)
+              leftZeros <- solveMonotonic k currentDerivative nextDerivative leftBounds
+              rightZeros <- solveMonotonic k currentDerivative nextDerivative rightBounds
               Resolved (leftZeros <> rightZeros)
         List.TwoOrMore -> Unresolved
 
@@ -547,11 +547,11 @@ solveMonotonic ::
   Int ->
   Curve units ->
   Curve units ->
-  Range Unitless ->
+  Bounds Unitless ->
   Fuzzy (List (Float, Solve1d.Neighborhood units))
-solveMonotonic m fm fn tRange = do
+solveMonotonic m fm fn tBounds = do
   let n = m + 1
-  let (tLow, tHigh) = Range.endpoints tRange
+  let (tLow, tHigh) = Bounds.endpoints tBounds
   let startNeighborhood = Solve1d.neighborhood n (evaluate fn tLow)
   if Qty.abs (evaluate fm tLow) <= Solve1d.derivativeTolerance startNeighborhood m
     then if tLow == 0.0 then Resolved [(0.0, startNeighborhood)] else Unresolved
@@ -560,6 +560,6 @@ solveMonotonic m fm fn tRange = do
       if Qty.abs (evaluate fm tHigh) <= Solve1d.derivativeTolerance endNeighborhood m
         then if tHigh == 1.0 then Resolved [(1.0, endNeighborhood)] else Unresolved
         else do
-          case Solve1d.monotonic (evaluate fm) (evaluate fn) tRange of
+          case Solve1d.monotonic (evaluate fm) (evaluate fn) tBounds of
             Solve1d.Exact t0 -> Resolved [(t0, Solve1d.neighborhood n (evaluate fn t0))]
             Solve1d.Closest _ -> Unresolved

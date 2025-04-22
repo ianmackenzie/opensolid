@@ -11,13 +11,13 @@ module OpenSolid.Curve3d
   )
 where
 
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 
 type role Curve3d nominal
@@ -28,7 +28,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     Float
     (Point3d coordinateSystem)
-    (Range Unitless)
+    (Bounds Unitless)
     (Bounds3d coordinateSystem)
 
 instance
@@ -53,5 +53,5 @@ planar ::
   Curve3d (space @ units)
 derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
-evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
+evaluateBounds :: Curve3d (space @ units) -> Bounds Unitless -> Bounds3d (space @ units)
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)

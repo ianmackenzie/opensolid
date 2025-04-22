@@ -19,8 +19,8 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -43,20 +43,20 @@ tests =
   , pickLargestBy
   ]
 
-data DummyEstimate = DummyEstimate Length (Range Meters)
+data DummyEstimate = DummyEstimate Length (Bounds Meters)
 
 instance Estimate.Interface DummyEstimate Meters where
-  boundsImpl (DummyEstimate _ range) = range
-  refineImpl (DummyEstimate value (Range low high)) = do
-    let refinedRange = Range (Qty.midpoint low value) (Qty.midpoint value high)
-    Estimate.new (DummyEstimate value refinedRange)
+  boundsImpl (DummyEstimate _ bounds) = bounds
+  refineImpl (DummyEstimate value (Bounds low high)) = do
+    let refinedBounds = Bounds (Qty.midpoint low value) (Qty.midpoint value high)
+    Estimate.new (DummyEstimate value refinedBounds)
 
 dummyEstimate :: Generator (Length, Estimate Meters)
 dummyEstimate = Random.do
-  range <- Range.random Random.length
+  bounds <- Bounds.random Random.length
   t <- Parameter.random
-  let value = Range.interpolate range t
-  Random.return (value, Estimate.new (DummyEstimate value range))
+  let value = Bounds.interpolate bounds t
+  Random.return (value, Estimate.new (DummyEstimate value bounds))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 duplicatedDummyEstimates = Random.do
@@ -70,12 +70,12 @@ dummyEstimates = Random.do
   let flattened = NonEmpty.concat nested
   NonEmpty.shuffle flattened
 
-check :: Tolerance units => Estimate units -> Qty units -> (Bool, Range units)
+check :: Tolerance units => Estimate units -> Qty units -> (Bool, Bounds units)
 check estimate value = do
   let bounds = Estimate.bounds estimate
   if
-    | not (Range.includes value bounds) -> (False, bounds)
-    | Range.width bounds ~= Qty.zero -> (True, bounds)
+    | not (Bounds.includes value bounds) -> (False, bounds)
+    | Bounds.width bounds ~= Qty.zero -> (True, bounds)
     | otherwise -> check (Estimate.refine estimate) value
 
 smallest :: Tolerance Meters => Test
@@ -112,7 +112,7 @@ resolvesTo value estimate
   | Estimate.bounds estimate ~= value = Success True
   | otherwise = do
       let refinedEstimate = Estimate.refine estimate
-      if Range.width (Estimate.bounds refinedEstimate) < Range.width (Estimate.bounds estimate)
+      if Bounds.width (Estimate.bounds refinedEstimate) < Bounds.width (Estimate.bounds estimate)
         then resolvesTo value refinedEstimate
         else Failure "Refined bounds are not narrower than original bounds"
 

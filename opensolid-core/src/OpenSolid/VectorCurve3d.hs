@@ -60,7 +60,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
@@ -90,7 +90,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     Float
     (Vector3d coordinateSystem)
-    (Range Unitless)
+    (Bounds Unitless)
     (VectorBounds3d coordinateSystem)
 
 instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
@@ -520,8 +520,8 @@ endValue curve = evaluate curve 1.0
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
 evaluate VectorCurve3d{compiled} tValue = CompiledFunction.evaluate compiled tValue
 
-evaluateBounds :: VectorCurve3d (space @ units) -> Range Unitless -> VectorBounds3d (space @ units)
-evaluateBounds VectorCurve3d{compiled} tRange = CompiledFunction.evaluateBounds compiled tRange
+evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
+evaluateBounds VectorCurve3d{compiled} tBounds = CompiledFunction.evaluateBounds compiled tBounds
 
 reverse :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)

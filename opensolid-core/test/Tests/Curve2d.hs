@@ -27,8 +27,8 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Sign qualified as Sign
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -98,8 +98,8 @@ overlappingSegments curve1 curve2 =
     Success Nothing -> Failure "Should have found some overlapping segments"
     Failure error -> Failure (Error.message error)
 
-equalUBounds :: Range Unitless -> Range Unitless -> Bool
-equalUBounds (Range actualLow actualHigh) (Range expectedLow expectedHigh) =
+equalUBounds :: Bounds Unitless -> Bounds Unitless -> Bool
+equalUBounds (Bounds actualLow actualHigh) (Bounds expectedLow expectedHigh) =
   Tolerance.using 1e-12 (actualLow ~= expectedLow && actualHigh ~= expectedHigh)
 
 equalOverlapSegments :: OverlappingSegment -> OverlappingSegment -> Bool
@@ -118,7 +118,7 @@ curveOverlap1 = Test.verify "curveOverlap1" Test.do
   let arc1 = Curve2d.arc (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
   let arc2 = Curve2d.arc (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   actualSegments <- overlappingSegments arc1 arc2
-  let expectedSegments = NonEmpty.one (OverlappingSegment (Range 0.0 0.5) (Range 0.5 1.0) Positive)
+  let expectedSegments = NonEmpty.one (OverlappingSegment (Bounds 0.0 0.5) (Bounds 0.5 1.0) Positive)
   Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
@@ -138,8 +138,8 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
-          (OverlappingSegment (Range 0.0 (1 / 4)) (Range 0.0 (1 / 6)) Negative)
-          (OverlappingSegment (Range (3 / 4) 1.0) (Range (5 / 6) 1.0) Negative)
+          (OverlappingSegment (Bounds 0.0 (1 / 4)) (Bounds 0.0 (1 / 6)) Negative)
+          (OverlappingSegment (Bounds (3 / 4) 1.0) (Bounds (5 / 6) 1.0) Negative)
   Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
 crossingIntersection :: Tolerance Meters => Test
@@ -353,13 +353,13 @@ reversalConsistency =
 
 boundsConsistency :: Tolerance units => Curve2d (space @ units) -> Expectation
 boundsConsistency curve = Test.do
-  tRange <- Range.random Parameter.random
-  tValue <- Random.map (Range.interpolate tRange) Parameter.random
+  tBounds <- Bounds.random Parameter.random
+  tValue <- Random.map (Bounds.interpolate tBounds) Parameter.random
   let curveValue = Curve2d.evaluate curve tValue
-  let curveBounds = Curve2d.evaluateBounds curve tRange
+  let curveBounds = Curve2d.evaluateBounds curve tBounds
   Test.expect (curveValue ^ curveBounds)
     |> Test.output "tValue" tValue
-    |> Test.output "tRange" tRange
+    |> Test.output "tBounds" tBounds
     |> Test.output "curveValue" curveValue
     |> Test.output "curveBounds" curveBounds
 

@@ -21,9 +21,11 @@ import Data.Foldable1 (Foldable1)
 import Data.Foldable1 qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
-import OpenSolid.Bounds2d (Bounded2d)
+import OpenSolid.Bounded2d (Bounded2d)
+import OpenSolid.Bounded2d qualified as Bounded2d
+import OpenSolid.Bounded3d (Bounded3d)
+import OpenSolid.Bounded3d qualified as Bounded3d
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounded3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI

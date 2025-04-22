@@ -8,7 +8,7 @@ from opensolid import (
     Body3d,
     Plane3d,
     Mesh,
-    LengthRange,
+    LengthBounds,
     Scene3d,
     Tolerance,
     Color,
@@ -49,7 +49,7 @@ with Tolerance(Length.meters(1e-9)):
     profile = Region2d.bounded_by(curves)
 
     # Extrude the profile to create a solid body
-    extrusion_limits = LengthRange.symmetric(width=length)
+    extrusion_limits = LengthBounds.symmetric(width=length)
     body = Body3d.extruded(Plane3d.yz, profile, extrusion_limits)
 
     # Create a 3D scene containing the body and write to GLB file

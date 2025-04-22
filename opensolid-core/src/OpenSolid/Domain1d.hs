@@ -27,10 +27,10 @@ module OpenSolid.Domain1d
   )
 where
 
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 
 data Domain1d = Domain1d
   { n :: Float
@@ -94,16 +94,16 @@ half (Domain1d{n, i, j}) = do
   let delta = j - i
   Domain1d (4.0 * n) (4.0 * i + delta) (4.0 * j - delta)
 
-bounds :: Domain1d -> Range Unitless
-bounds (Domain1d{n, i, j}) = Range (i / n) (j / n)
+bounds :: Domain1d -> Bounds Unitless
+bounds (Domain1d{n, i, j}) = Bounds (i / n) (j / n)
 
-interior :: Domain1d -> Range Unitless
+interior :: Domain1d -> Bounds Unitless
 interior (Domain1d{n, i, j}) = do
   let n8 = 8.0 * n
   let delta = j - i
   let low = if i == 0.0 then 0.0 else (8.0 * i + delta) / n8
   let high = if j == n then 1.0 else (8.0 * j - delta) / n8
-  Range low high
+  Bounds low high
 
 overlaps :: Domain1d -> Domain1d -> Bool
 overlaps (Domain1d n2 i2 j2) (Domain1d n1 i1 j1) =
@@ -127,24 +127,24 @@ intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do
   let high = Float.min (j1 / n1) (j2 / n2)
   Float.max (high - low) 0.0
 
-samplingPoints :: (Range Unitless -> Bool) -> NonEmpty Float
-samplingPoints predicate = 0.0 :| collectSamplingPoints predicate Range.unit [1.0]
+samplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Float
+samplingPoints predicate = 0.0 :| collectSamplingPoints predicate Bounds.unitInterval [1.0]
 
-innerSamplingPoints :: (Range Unitless -> Bool) -> List Float
-innerSamplingPoints predicate = collectSamplingPoints predicate Range.unit []
+innerSamplingPoints :: (Bounds Unitless -> Bool) -> List Float
+innerSamplingPoints predicate = collectSamplingPoints predicate Bounds.unitInterval []
 
-leadingSamplingPoints :: (Range Unitless -> Bool) -> NonEmpty Float
+leadingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Float
 leadingSamplingPoints predicate = 0.0 :| innerSamplingPoints predicate
 
-collectSamplingPoints :: (Range Unitless -> Bool) -> Range Unitless -> List Float -> List Float
+collectSamplingPoints :: (Bounds Unitless -> Bool) -> Bounds Unitless -> List Float -> List Float
 collectSamplingPoints predicate subdomain accumulated = do
   if predicate subdomain
     then accumulated
     else
-      if Range.isAtomic subdomain
+      if Bounds.isAtomic subdomain
         then internalError "Infinite recursion in Domain1d.samplingPoints"
         else do
-          let (left, right) = Range.bisect subdomain
-          let subdomainMidpoint = Range.midpoint subdomain
+          let (left, right) = Bounds.bisect subdomain
+          let subdomainMidpoint = Bounds.midpoint subdomain
           let rightAccumulated = collectSamplingPoints predicate right accumulated
           collectSamplingPoints predicate left (subdomainMidpoint : rightAccumulated)

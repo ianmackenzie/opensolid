@@ -45,14 +45,14 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Foreign.Storable (Storable)
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
+import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
+import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
 import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
 import OpenSolid.Random.Internal qualified as Random
-import {-# SOURCE #-} OpenSolid.Range (Range)
-import {-# SOURCE #-} OpenSolid.Range qualified as Range
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Units ((:*:), (:/:))
 import OpenSolid.Units qualified as Units
@@ -185,8 +185,8 @@ hypot3 x y z = sqrt' (squared' x + squared' y + squared' z)
 abs :: Qty units -> Qty units
 abs (Qty x) = Qty (Prelude.abs x)
 
-clampTo :: Range units -> Qty units -> Qty units
-clampTo range value = min (max (Range.lowerBound range) value) (Range.upperBound range)
+clampTo :: Bounds units -> Qty units -> Qty units
+clampTo bounds value = min (max (Bounds.lower bounds) value) (Bounds.upper bounds)
 
 {-# INLINE min #-}
 min :: Qty units -> Qty units -> Qty units

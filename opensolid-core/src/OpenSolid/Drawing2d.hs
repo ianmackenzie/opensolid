@@ -29,6 +29,7 @@ module OpenSolid.Drawing2d
   )
 where
 
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
@@ -48,7 +49,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d)
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
-import OpenSolid.Range qualified as Range
 import OpenSolid.Text qualified as Text
 import OpenSolid.Units (Meters)
 import OpenSolid.Vertex2d (Vertex2d)
@@ -89,9 +89,9 @@ and in general should contain all the drawing entities
 -}
 toSvg :: Bounds2d (space @ Meters) -> List (Entity space) -> Text
 toSvg viewBox entities = do
-  let (xRange, yRange) = Bounds2d.coordinates viewBox
-  let (x1, x2) = Range.endpoints xRange
-  let (y1, y2) = Range.endpoints yRange
+  let (xBounds, yBounds) = Bounds2d.coordinates viewBox
+  let (x1, x2) = Bounds.endpoints xBounds
+  let (y1, y2) = Bounds.endpoints yBounds
   let width = x2 - x1
   let height = y2 - y1
   let attributes =

@@ -29,8 +29,9 @@ import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
+import OpenSolid.Bounded3d qualified as Bounded3d
+import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
-import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.FFI (FFI)
@@ -47,7 +48,6 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
-import OpenSolid.Range (Range (Range))
 import OpenSolid.Scene3d.Gltf qualified as Gltf
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
@@ -317,11 +317,11 @@ gltfMeshes parentFrame entity = case entity of
     let numVertices = Array.length vertices
     let faceIndices = Mesh.faceIndices smoothMesh
     let numFaces = List.length faceIndices
-    let meshBounds = Bounds3d.bounds smoothMesh
-    let Bounds3d xRange yRange zRange = meshBounds
-    let Range xLow xHigh = xRange
-    let Range yLow yHigh = yRange
-    let Range zLow zHigh = zRange
+    let meshBounds = Bounded3d.bounds smoothMesh
+    let Bounds3d xBounds yBounds zBounds = meshBounds
+    let Bounds xLow xHigh = xBounds
+    let Bounds yLow yHigh = yBounds
+    let Bounds zLow zHigh = zBounds
     List.singleton
       GltfMesh
         { frame = parentFrame

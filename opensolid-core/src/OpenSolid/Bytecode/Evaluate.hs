@@ -23,14 +23,14 @@ import Foreign qualified
 import Foreign.Marshal.Alloc qualified
 import GHC.Foreign (CString)
 import OpenSolid.Binary (ByteString)
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector3d (Vector3d (Vector3d))
@@ -67,9 +67,9 @@ curve1dValue (Bytecode bytecode) tValue =
         returnValuePointer
       getReturnValue 0 returnValuePointer
 
-curve1dBounds :: Compiled Float Float -> Range Unitless -> Range Unitless
-curve1dBounds (Constant value) _ = Range.constant value
-curve1dBounds (Bytecode bytecode) (Range tLower tUpper) =
+curve1dBounds :: Compiled Float Float -> Bounds Unitless -> Bounds Unitless
+curve1dBounds (Constant value) _ = Bounds.constant value
+curve1dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
   callFunction bytecode 2 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_curve_bounds
@@ -79,7 +79,7 @@ curve1dBounds (Bytecode bytecode) (Range tLower tUpper) =
         returnValuesPointer
       lower <- getReturnValue 0 returnValuesPointer
       upper <- getReturnValue 1 returnValuesPointer
-      IO.succeed (Range lower upper)
+      IO.succeed (Bounds lower upper)
 
 curve2dValue ::
   Compiled Float (Vector2d (space @ Unitless)) ->
@@ -99,10 +99,10 @@ curve2dValue (Bytecode bytecode) tValue =
 
 curve2dBounds ::
   Compiled Float (Vector2d (space @ Unitless)) ->
-  Range Unitless ->
+  Bounds Unitless ->
   VectorBounds2d (space @ Unitless)
 curve2dBounds (Constant value) _ = VectorBounds2d.constant value
-curve2dBounds (Bytecode bytecode) (Range tLower tUpper) =
+curve2dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
   callFunction bytecode 4 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_curve_bounds
@@ -114,7 +114,7 @@ curve2dBounds (Bytecode bytecode) (Range tLower tUpper) =
       xUpper <- getReturnValue 1 returnValuesPointer
       yLower <- getReturnValue 2 returnValuesPointer
       yUpper <- getReturnValue 3 returnValuesPointer
-      IO.succeed (VectorBounds2d (Range xLower xUpper) (Range yLower yUpper))
+      IO.succeed (VectorBounds2d (Bounds xLower xUpper) (Bounds yLower yUpper))
 
 curve3dValue ::
   Compiled Float (Vector3d (space @ Unitless)) ->
@@ -135,10 +135,10 @@ curve3dValue (Bytecode bytecode) tValue =
 
 curve3dBounds ::
   Compiled Float (Vector3d (space @ Unitless)) ->
-  Range Unitless ->
+  Bounds Unitless ->
   VectorBounds3d (space @ Unitless)
 curve3dBounds (Constant value) _ = VectorBounds3d.constant value
-curve3dBounds (Bytecode bytecode) (Range tLower tUpper) =
+curve3dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
   callFunction bytecode 6 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_curve_bounds
@@ -152,7 +152,7 @@ curve3dBounds (Bytecode bytecode) (Range tLower tUpper) =
       yUpper <- getReturnValue 3 returnValuesPointer
       zLower <- getReturnValue 4 returnValuesPointer
       zUpper <- getReturnValue 5 returnValuesPointer
-      IO.succeed (VectorBounds3d (Range xLower xUpper) (Range yLower yUpper) (Range zLower zUpper))
+      IO.succeed (VectorBounds3d (Bounds xLower xUpper) (Bounds yLower yUpper) (Bounds zLower zUpper))
 
 surface1dValue :: Compiled UvPoint Float -> UvPoint -> Float
 surface1dValue (Constant value) _ = value
@@ -166,9 +166,9 @@ surface1dValue (Bytecode bytecode) (Point2d uValue vValue) =
         returnValuePointer
       getReturnValue 0 returnValuePointer
 
-surface1dBounds :: Compiled UvPoint Float -> UvBounds -> Range Unitless
-surface1dBounds (Constant value) _ = Range.constant value
-surface1dBounds (Bytecode bytecode) (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
+surface1dBounds :: Compiled UvPoint Float -> UvBounds -> Bounds Unitless
+surface1dBounds (Constant value) _ = Bounds.constant value
+surface1dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLower vUpper)) =
   callFunction bytecode 2 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
@@ -180,7 +180,7 @@ surface1dBounds (Bytecode bytecode) (Bounds2d (Range uLower uUpper) (Range vLowe
         returnValuesPointer
       lower <- getReturnValue 0 returnValuesPointer
       upper <- getReturnValue 1 returnValuesPointer
-      IO.succeed (Range lower upper)
+      IO.succeed (Bounds lower upper)
 
 surface2dValue ::
   Compiled UvPoint (Vector2d (space @ Unitless)) ->
@@ -204,7 +204,7 @@ surface2dBounds ::
   UvBounds ->
   VectorBounds2d (space @ Unitless)
 surface2dBounds (Constant value) _ = VectorBounds2d.constant value
-surface2dBounds (Bytecode bytecode) (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
+surface2dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLower vUpper)) =
   callFunction bytecode 4 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
@@ -218,7 +218,7 @@ surface2dBounds (Bytecode bytecode) (Bounds2d (Range uLower uUpper) (Range vLowe
       xUpper <- getReturnValue 1 returnValuesPointer
       yLower <- getReturnValue 2 returnValuesPointer
       yUpper <- getReturnValue 3 returnValuesPointer
-      IO.succeed (VectorBounds2d (Range xLower xUpper) (Range yLower yUpper))
+      IO.succeed (VectorBounds2d (Bounds xLower xUpper) (Bounds yLower yUpper))
 
 surface3dValue ::
   Compiled UvPoint (Vector3d (space @ Unitless)) ->
@@ -243,7 +243,7 @@ surface3dBounds ::
   UvBounds ->
   VectorBounds3d (space @ Unitless)
 surface3dBounds (Constant value) _ = VectorBounds3d.constant value
-surface3dBounds (Bytecode bytecode) (Bounds2d (Range uLower uUpper) (Range vLower vUpper)) =
+surface3dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLower vUpper)) =
   callFunction bytecode 6 $
     \functionPointer returnValuesPointer -> IO.do
       opensolid_surface_bounds
@@ -259,7 +259,7 @@ surface3dBounds (Bytecode bytecode) (Bounds2d (Range uLower uUpper) (Range vLowe
       yUpper <- getReturnValue 3 returnValuesPointer
       zLower <- getReturnValue 4 returnValuesPointer
       zUpper <- getReturnValue 5 returnValuesPointer
-      IO.succeed (VectorBounds3d (Range xLower xUpper) (Range yLower yUpper) (Range zLower zUpper))
+      IO.succeed (VectorBounds3d (Bounds xLower xUpper) (Bounds yLower yUpper) (Bounds zLower zUpper))
 
 callSolver :: ByteString -> ByteString -> (CString -> CString -> IO a) -> a
 callSolver functionBytes derivativeBytes callback =
@@ -272,13 +272,13 @@ solveMonotonicSurfaceU ::
   Tolerance units =>
   Compiled UvPoint Float ->
   Compiled UvPoint Float ->
-  Range Unitless ->
+  Bounds Unitless ->
   Float ->
   Float
-solveMonotonicSurfaceU (Constant _) _ (Range u1 _) _ = u1
-solveMonotonicSurfaceU linearFunction (Constant slope) (Range u1 _) vValue =
+solveMonotonicSurfaceU (Constant _) _ (Bounds u1 _) _ = u1
+solveMonotonicSurfaceU linearFunction (Constant slope) (Bounds u1 _) vValue =
   if slope == 0.0 then u1 else u1 - surface1dValue linearFunction (Point2d u1 vValue) / slope
-solveMonotonicSurfaceU (Bytecode functionBytecode) (Bytecode derivativeBytecode) uRange vValue =
+solveMonotonicSurfaceU (Bytecode functionBytecode) (Bytecode derivativeBytecode) uBounds vValue =
   callSolver functionBytecode derivativeBytecode $
     \functionPointer derivativePointer ->
       IO.succeed $
@@ -287,8 +287,8 @@ solveMonotonicSurfaceU (Bytecode functionBytecode) (Bytecode derivativeBytecode)
             (Float.toDouble (Qty.coerce ?tolerance))
             functionPointer
             derivativePointer
-            (Float.toDouble (Range.lowerBound uRange))
-            (Float.toDouble (Range.upperBound uRange))
+            (Float.toDouble (Bounds.lower uBounds))
+            (Float.toDouble (Bounds.upper uBounds))
             (Float.toDouble vValue)
 
 solveMonotonicSurfaceV ::
@@ -296,12 +296,12 @@ solveMonotonicSurfaceV ::
   Compiled UvPoint Float ->
   Compiled UvPoint Float ->
   Float ->
-  Range Unitless ->
+  Bounds Unitless ->
   Float
-solveMonotonicSurfaceV (Constant _) _ _ (Range v1 _) = v1
-solveMonotonicSurfaceV linearFunction (Constant slope) uValue (Range v1 _) =
+solveMonotonicSurfaceV (Constant _) _ _ (Bounds v1 _) = v1
+solveMonotonicSurfaceV linearFunction (Constant slope) uValue (Bounds v1 _) =
   if slope == 0.0 then v1 else v1 - surface1dValue linearFunction (Point2d uValue v1) / slope
-solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode) uValue vRange =
+solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode) uValue vBounds =
   callSolver functionBytecode derivativeBytecode $
     \functionPointer derivativePointer ->
       IO.succeed $
@@ -311,8 +311,8 @@ solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode)
             functionPointer
             derivativePointer
             (Float.toDouble uValue)
-            (Float.toDouble (Range.lowerBound vRange))
-            (Float.toDouble (Range.upperBound vRange))
+            (Float.toDouble (Bounds.lower vBounds))
+            (Float.toDouble (Bounds.upper vBounds))
 
 foreign import ccall unsafe "bytecode.h opensolid_curve_value"
   opensolid_curve_value ::

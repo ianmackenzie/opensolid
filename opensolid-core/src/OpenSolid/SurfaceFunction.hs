@@ -28,6 +28,8 @@ module OpenSolid.SurfaceFunction
 where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -49,8 +51,6 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 import OpenSolid.Solve2d qualified as Solve2d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.PartialZeros (PartialZeros)
@@ -84,7 +84,7 @@ data SurfaceFunction units where
     ~(SurfaceFunction units) ->
     SurfaceFunction units
 
-type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Range units)
+type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
 
 instance HasUnits (SurfaceFunction units) units (SurfaceFunction Unitless)
 
@@ -349,7 +349,7 @@ instance
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint
 
-evaluateBounds :: SurfaceFunction units -> UvBounds -> Range units
+evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
 evaluateBounds function uvBounds = CompiledFunction.evaluateBounds (compiled function) uvBounds
 
 {-# INLINE compiled #-}
@@ -403,7 +403,7 @@ squared function = Units.specialize (squared' function)
 squared' :: SurfaceFunction units -> SurfaceFunction (units :*: units)
 squared' function =
   new
-    (CompiledFunction.map Expression.squared' Qty.squared' Range.squared' (compiled function))
+    (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' (compiled function))
     (\p -> 2.0 * function .*. derivative p function)
 
 sqrt ::
@@ -418,19 +418,19 @@ sqrt' function =
     then zero
     else
       recursive
-        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Range.sqrt' (compiled function))
+        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' (compiled function))
         (\self p -> derivative p function .!/! (2.0 * self))
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =
   new
-    (CompiledFunction.map Expression.sin Angle.sin Range.sin (compiled function))
+    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin (compiled function))
     (\p -> cos function * (derivative p function / Angle.radian))
 
 cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
 cos function =
   new
-    (CompiledFunction.map Expression.cos Angle.cos Range.cos (compiled function))
+    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos (compiled function))
     (\p -> negate (sin function) * (derivative p function / Angle.radian))
 
 zeros :: Tolerance units => SurfaceFunction units -> Result Zeros.Error Zeros
@@ -493,7 +493,7 @@ findZeros derivatives dudv dvdu context subdomain exclusions = do
             let Subproblem{derivativeBounds} = subproblem
             let fuBounds = Derivatives.get (derivativeBounds >> U)
             let fvBounds = Derivatives.get (derivativeBounds >> V)
-            if Range.isResolved fuBounds || Range.isResolved fvBounds
+            if Bounds.isResolved fuBounds || Bounds.isResolved fvBounds
               then findCrossingCurves subproblem
               else findTangentSolutions subproblem
 
@@ -507,7 +507,7 @@ findTangentSolutions subproblem = do
   let fuvBounds = Derivatives.get (derivativeBounds >> U >> V)
   let fvvBounds = Derivatives.get (derivativeBounds >> V >> V)
   let determinant = fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds
-  case Range.resolvedSign determinant of
+  case Bounds.resolvedSign determinant of
     Resolved determinantSign -> do
       let f = Derivatives.get derivatives
       let fu = Derivatives.get (derivatives >> U)
@@ -532,7 +532,7 @@ findTangentSolutions subproblem = do
                 -- Note that fuu and fvv must be either both positive or both negative
                 -- to reach this code path, so we can take the sign of either one
                 -- to determine the sign of the tangent point
-                let sign = Qty.sign (Range.lowerBound fuuBounds)
+                let sign = Qty.sign (Bounds.lower fuuBounds)
                 Solve2d.return (TangentPointSolution (point, sign))
               Negative -> do
                 -- Saddle region
@@ -573,8 +573,8 @@ diagonalCrossingCurve subproblem = Fuzzy.do
   let Subproblem{derivativeBounds} = subproblem
   let fuBounds = Derivatives.get (derivativeBounds >> U)
   let fvBounds = Derivatives.get (derivativeBounds >> V)
-  fuSign <- Range.resolvedSign fuBounds
-  fvSign <- Range.resolvedSign fvBounds
+  fuSign <- Bounds.resolvedSign fuBounds
+  fvSign <- Bounds.resolvedSign fvBounds
   Resolved $
     case (fuSign, fvSign) of
       (Negative, Negative) -> southeastCrossingCurve subproblem
@@ -671,12 +671,12 @@ horizontalCrossingCurve ::
 horizontalCrossingCurve subproblem = Fuzzy.do
   let Subproblem{derivativeBounds} = subproblem
   let fvBounds = Derivatives.get (derivativeBounds >> V)
-  if Range.isResolved fvBounds
+  if Bounds.isResolved fvBounds
     then Fuzzy.do
       let bottomEdgeBounds = Subproblem.bottomEdgeBounds subproblem
       let topEdgeBounds = Subproblem.topEdgeBounds subproblem
-      bottomEdgeSign <- Range.resolvedSign bottomEdgeBounds
-      topEdgeSign <- Range.resolvedSign topEdgeBounds
+      bottomEdgeSign <- Bounds.resolvedSign bottomEdgeBounds
+      topEdgeSign <- Bounds.resolvedSign topEdgeBounds
       case (bottomEdgeSign, topEdgeSign) of
         (Negative, Negative) -> Resolved Nothing
         (Positive, Positive) -> Resolved Nothing
@@ -710,7 +710,7 @@ horizontalCurve Subproblem{derivatives, dvdu, subdomain, uvBounds} start end = d
   let curve = HorizontalCurve.new derivatives dvdu uStart uEnd (NonEmpty.one uvBounds)
   let Domain2d _ vSubdomain = subdomain
   let Bounds2d _ curveVBounds = Curve2d.bounds curve
-  if Range.contains curveVBounds (Domain1d.interior vSubdomain)
+  if Bounds.contains curveVBounds (Domain1d.interior vSubdomain)
     then Resolved (PartialZeros.horizontalSegment start end uvBounds)
     else Unresolved
 
@@ -721,12 +721,12 @@ verticalCrossingCurve ::
 verticalCrossingCurve subproblem = Fuzzy.do
   let Subproblem{derivativeBounds} = subproblem
   let fuBounds = Derivatives.get (derivativeBounds >> U)
-  if Range.isResolved fuBounds
+  if Bounds.isResolved fuBounds
     then Fuzzy.do
       let leftEdgeBounds = Subproblem.leftEdgeBounds subproblem
       let rightEdgeBounds = Subproblem.rightEdgeBounds subproblem
-      leftEdgeSign <- Range.resolvedSign leftEdgeBounds
-      rightEdgeSign <- Range.resolvedSign rightEdgeBounds
+      leftEdgeSign <- Bounds.resolvedSign leftEdgeBounds
+      rightEdgeSign <- Bounds.resolvedSign rightEdgeBounds
       case (leftEdgeSign, rightEdgeSign) of
         (Negative, Negative) -> Resolved Nothing
         (Positive, Positive) -> Resolved Nothing
@@ -760,6 +760,6 @@ verticalCurve Subproblem{derivatives, dudv, subdomain, uvBounds} start end = do
   let curve = VerticalCurve.new derivatives dudv vStart vEnd (NonEmpty.one uvBounds)
   let Domain2d uSubdomain _ = subdomain
   let Bounds2d curveUBounds _ = Curve2d.bounds curve
-  if Range.contains curveUBounds (Domain1d.interior uSubdomain)
+  if Bounds.contains curveUBounds (Domain1d.interior uSubdomain)
     then Resolved (PartialZeros.verticalSegment start end uvBounds)
     else Unresolved

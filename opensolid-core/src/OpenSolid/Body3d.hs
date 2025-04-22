@@ -25,9 +25,15 @@ import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Axis3d (Axis3d (Axis3d))
 import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d.BoundedBy qualified as BoundedBy
-import OpenSolid.Bounds2d (Bounded2d, Bounds2d (Bounds2d))
+import OpenSolid.Bounded2d (Bounded2d)
+import OpenSolid.Bounded2d qualified
+import OpenSolid.Bounded3d (Bounded3d)
+import OpenSolid.Bounded3d qualified as Bounded3d
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounded3d, Bounds3d (Bounds3d))
+import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Curve2d (Curve2d)
@@ -63,8 +69,6 @@ import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Result qualified as Result
@@ -223,13 +227,13 @@ Fails if the given bounds are empty
 (the width, height or depth is zero).
 -}
 block :: Tolerance units => Bounds3d (space @ units) -> Result EmptyBody (Body3d (space @ units))
-block (Bounds3d xRange yRange zRange) =
-  case Region2d.rectangle (Bounds2d xRange yRange) of
+block (Bounds3d xBounds yBounds zBounds) =
+  case Region2d.rectangle (Bounds2d xBounds yBounds) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile ->
-      if Range.width zRange ~= Qty.zero
+      if Bounds.width zBounds ~= Qty.zero
         then Failure EmptyBody
-        else case extruded Plane3d.xy profile zRange of
+        else case extruded Plane3d.xy profile zBounds of
           Success body -> Success body
           Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
 
@@ -273,7 +277,7 @@ cylinder startPoint endPoint (Named diameter) =
   case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
     Failure Vector3d.IsZero -> Failure EmptyBody
     Success (length, direction) ->
-      cylinderAlong (Axis3d startPoint direction) (Range Qty.zero length) (#diameter diameter)
+      cylinderAlong (Axis3d startPoint direction) (Bounds.zeroTo length) (#diameter diameter)
 
 {-| Create a cylindrical body along a given axis.
 
@@ -288,14 +292,14 @@ Failes if the cylinder length or diameter is zero.
 cylinderAlong ::
   Tolerance units =>
   Axis3d (space @ units) ->
-  Range units ->
+  Bounds units ->
   Named "diameter" (Qty units) ->
   Result EmptyBody (Body3d (space @ units))
 cylinderAlong axis distance (Named diameter) = do
   case Region2d.circle (#centerPoint Point2d.origin) (#diameter diameter) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile ->
-      if Range.width distance ~= Qty.zero
+      if Bounds.width distance ~= Qty.zero
         then Failure EmptyBody
         else case extruded (Axis3d.normalPlane axis) profile distance of
           Success body -> Success body
@@ -306,9 +310,9 @@ extruded ::
   Tolerance units =>
   Plane3d (space @ units) (Defines local) ->
   Region2d (local @ units) ->
-  Range units ->
+  Bounds units ->
   Result BoundedBy.Error (Body3d (space @ units))
-extruded sketchPlane profile (Range d1 d2) = do
+extruded sketchPlane profile (Bounds d1 d2) = do
   let normal = Plane3d.normalDirection sketchPlane
   let v1 = d1 * normal
   let v2 = d2 * normal
@@ -359,7 +363,7 @@ revolved sketchPlane profile axis givenAngle = do
   let testPoint = Curve2d.startPoint (NonEmpty.first (Region2d.outerLoop profile))
   let testPointSign = Qty.sign (Point2d.signedDistanceFrom axis testPoint)
   let localProfile = Region2d.relativeTo frame2d profile
-  let maxRadius = Range.maxAbs (Bounds2d.xCoordinate (Region2d.bounds localProfile))
+  let maxRadius = Bounds.maxAbs (Bounds2d.xCoordinate (Region2d.bounds localProfile))
   let angleTolerance = Angle.radians (?tolerance / maxRadius)
   let isFullRevolution = Tolerance.using angleTolerance (Qty.abs givenAngle ~= Angle.fullTurn)
   let normalizedAngle = if isFullRevolution then testPointSign * Angle.fullTurn else givenAngle
@@ -372,7 +376,7 @@ revolved sketchPlane profile axis givenAngle = do
         let zLocal = h
         let localFunction = SurfaceFunction3d.xyz xLocal yLocal zLocal
         let globalFunction = SurfaceFunction3d.placeIn frame3d localFunction
-        Surface3d.parametric globalFunction Region2d.unit
+        Surface3d.parametric globalFunction Region2d.unitSquare
   let localProfileCurves = NonEmpty.toList (Region2d.boundaryCurves localProfile)
   let isOnAxis curve = Curve2d.xCoordinate curve ~= Qty.zero
   let revolvedCurves = List.filter (not . isOnAxis) localProfileCurves
@@ -520,7 +524,7 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
       let edge = DegenerateEdge{id, uvCurve, point = canonicalPoint}
       Success SurfaceRegistry{unprocessed, processed, edges = Map.set id edge edges}
     HalfEdge{id, uvCurve, curve3d} -> do
-      let matingEdgeCandidates = Set3d.filter (Bounds3d.bounds halfEdge) halfEdgeSet
+      let matingEdgeCandidates = Set3d.filter (Bounded3d.bounds halfEdge) halfEdgeSet
       case Maybe.collect (toMatingEdge id curve3d) matingEdgeCandidates of
         [] -> Failure BoundedBy.BoundaryHasGaps
         List.TwoOrMore -> Failure BoundedBy.BoundaryIntersectsItself
@@ -679,15 +683,15 @@ boundarySurfaceSegmentSet constraints surfaceFunctions uvBounds = do
     && surfaceError surfaceFunctions uvBounds <= maxError
     then Set2d.Leaf uvBounds uvBounds
     else do
-      let Bounds2d uRange vRange = uvBounds
-      let (u1, u2) = Range.bisect uRange
-      let (v1, v2) = Range.bisect vRange
+      let Bounds2d uBounds vBounds = uvBounds
+      let (u1, u2) = Bounds.bisect uBounds
+      let (v1, v2) = Bounds.bisect vBounds
       let set11 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u1 v1)
       let set12 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u1 v2)
       let set21 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u2 v1)
       let set22 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u2 v2)
-      let set1 = Set2d.Node (Bounds2d u1 vRange) set11 set12
-      let set2 = Set2d.Node (Bounds2d u2 vRange) set21 set22
+      let set1 = Set2d.Node (Bounds2d u1 vBounds) set11 set12
+      let set2 = Set2d.Node (Bounds2d u2 vBounds) set21 set22
       Set2d.Node uvBounds set1 set2
 
 surfaceSize :: SurfaceFunctions (space @ units) -> UvBounds -> Qty units
@@ -785,7 +789,7 @@ edgeLinearizationPredicate ::
   Set2d UvBounds UvCoordinates ->
   Set2d UvBounds UvCoordinates ->
   VectorCurve3d (space @ units) ->
-  Range Unitless ->
+  Bounds Unitless ->
   Bool
 edgeLinearizationPredicate
   constraints
@@ -796,8 +800,8 @@ edgeLinearizationPredicate
   surfaceSegments
   matingSurfaceSegments
   edgeSecondDerivative
-  tRange = do
-    let Range tStart tEnd = tRange
+  tBounds = do
+    let Bounds tStart tEnd = tBounds
     let uvStart = Curve2d.evaluate uvCurve tStart
     let uvEnd = Curve2d.evaluate uvCurve tEnd
     let matingTStart = if correctlyAligned then 1.0 - tStart else tStart
@@ -811,21 +815,21 @@ edgeLinearizationPredicate
     let startPoint = Curve3d.evaluate curve3d tStart
     let endPoint = Curve3d.evaluate curve3d tEnd
     let edgeLength = Point3d.distanceFrom startPoint endPoint
-    let edgeSecondDerivativeBounds = VectorCurve3d.evaluateBounds edgeSecondDerivative tRange
+    let edgeSecondDerivativeBounds = VectorCurve3d.evaluateBounds edgeSecondDerivative tBounds
     let edgeSecondDerivativeMagnitude = VectorBounds3d.magnitude edgeSecondDerivativeBounds
     let Mesh.Constraints{maxError, maxSize} = constraints
     edgeLength <= maxSize
-      && Linearization.error edgeSecondDerivativeMagnitude tRange <= maxError
+      && Linearization.error edgeSecondDerivativeMagnitude tBounds <= maxError
       && validEdge uvBounds edgeSize surfaceSegments
       && validEdge matingUvBounds matingEdgeSize matingSurfaceSegments
 
 degenerateEdgeLinearizationPredicate ::
   Curve2d UvCoordinates ->
   Set2d UvBounds UvCoordinates ->
-  Range Unitless ->
+  Bounds Unitless ->
   Bool
-degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tRange = do
-  let Range tStart tEnd = tRange
+degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
+  let Bounds tStart tEnd = tBounds
   let uvStart = Curve2d.evaluate uvCurve tStart
   let uvEnd = Curve2d.evaluate uvCurve tEnd
   let uvBounds = Bounds2d.hull2 uvStart uvEnd
@@ -924,8 +928,8 @@ steinerPoint ::
   UvBounds ->
   Maybe UvPoint
 steinerPoint boundarySegmentSet uvBounds = do
-  let Bounds2d uRange vRange = uvBounds
-  let uvPoint = Point2d (Range.midpoint uRange) (Range.midpoint vRange)
+  let Bounds2d uBounds vBounds = uvBounds
+  let uvPoint = Point2d (Bounds.midpoint uBounds) (Bounds.midpoint vBounds)
   if isValidSteinerPoint boundarySegmentSet uvPoint then Just uvPoint else Nothing
 
 isValidSteinerPoint ::
@@ -935,7 +939,7 @@ isValidSteinerPoint ::
 isValidSteinerPoint edgeSet uvPoint = case edgeSet of
   Set2d.Node nodeBounds left right -> do
     let distance = VectorBounds2d.magnitude (uvPoint - nodeBounds)
-    Range.lowerBound distance >= 0.5 * Bounds2d.diameter nodeBounds
+    Bounds.lower distance >= 0.5 * Bounds2d.diameter nodeBounds
       || (isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint)
   Set2d.Leaf _ edge -> LineSegment2d.distanceTo uvPoint edge >= 0.5 * LineSegment2d.length edge
 

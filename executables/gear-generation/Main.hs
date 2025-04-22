@@ -2,6 +2,7 @@ module Main (main) where
 
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
@@ -12,7 +13,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Range (Range (Range))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Result qualified as Result
 import OpenSolid.Scene3d qualified as Scene3d
@@ -32,7 +32,7 @@ gearBody numTeeth = Result.do
   let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
   profile <- Result.try (Region2d.boundedBy (hole : outerProfile))
   let width = Length.millimeters 8.0
-  Result.try (Body3d.extruded Plane3d.xy profile (Range (-width / 2.0) (width / 2.0)))
+  Result.try (Body3d.extruded Plane3d.xy profile (Bounds.symmetric (#width width)))
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do

@@ -10,7 +10,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty (zero)
-import OpenSolid.Range qualified as Range
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Region2d.BoundedBy qualified as Region2d.BoundedBy
@@ -31,7 +31,7 @@ tests =
 areaIsApproximately :: Area -> Region2d (space @ Meters) -> Bool
 areaIsApproximately expectedArea region =
   Estimate.within (Area.squareMeters 1e-4) (Region2d.area region)
-    |> Range.includes expectedArea
+    |> Bounds.includes expectedArea
 
 square :: Tolerance Meters => Test
 square = Test.verify "square" Test.do

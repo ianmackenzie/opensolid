@@ -14,7 +14,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
+import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
@@ -66,9 +66,9 @@ evaluate (DegenerateEndpoint t0 t1 endpointCurve) innerCurve tValue =
 evaluateBounds ::
   DegenerateEndpoint space ->
   VectorCurve3d (space @ Unitless) ->
-  Range Unitless ->
+  Bounds Unitless ->
   VectorBounds3d (space @ Unitless)
-evaluateBounds (DegenerateEndpoint t0 t1 endpointCurve) innerCurve (Range tLow tHigh) = do
+evaluateBounds (DegenerateEndpoint t0 t1 endpointCurve) innerCurve (Bounds tLow tHigh) = do
   let v0 = VectorCurve3d.evaluate endpointCurve t0
   let v1 = VectorCurve3d.evaluate innerCurve t1
   VectorBounds3d.hull2

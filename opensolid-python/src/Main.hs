@@ -247,25 +247,25 @@ extraMemberFunctions className = do
     "Length" -> repr ["return 'Length.meters(' + str(self.in_meters()) + ')'"]
     "Area" -> repr ["return 'Area.square_meters(' + str(self.in_square_meters()) + ')'"]
     "Angle" -> repr ["return 'Angle.degrees(' + str(self.in_degrees()) + ')'"]
-    "Range" ->
+    "Bounds" ->
       repr
         [ "low, high = self.endpoints()"
-        , "return 'Range(' + str(low) + ',' + str(high) + ')'"
+        , "return 'Bounds(' + str(low) + ',' + str(high) + ')'"
         ]
-    "LengthRange" ->
+    "LengthBounds" ->
       repr
         [ "low, high = self.endpoints()"
-        , "return 'LengthRange.meters(' + str(low.in_meters()) + ',' + str(high.in_meters()) + ')'"
+        , "return 'LengthBounds.meters(' + str(low.in_meters()) + ',' + str(high.in_meters()) + ')'"
         ]
-    "AreaRange" ->
+    "AreaBounds" ->
       repr
         [ "low, high = self.endpoints()"
-        , "return 'AreaRange.square_meters(' + str(low.in_square_meters()) + ',' + str(high.in_square_meters()) + ')'"
+        , "return 'AreaBounds.square_meters(' + str(low.in_square_meters()) + ',' + str(high.in_square_meters()) + ')'"
         ]
-    "AngleRange" ->
+    "AngleBounds" ->
       repr
         [ "low, high = self.endpoints()"
-        , "return 'AngleRange.degrees(' + str(low.in_degrees()) + ',' + str(high.in_degrees()) + ')'"
+        , "return 'AngleBounds.degrees(' + str(low.in_degrees()) + ',' + str(high.in_degrees()) + ')'"
         ]
     "Color" ->
       repr

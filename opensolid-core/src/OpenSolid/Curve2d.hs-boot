@@ -20,12 +20,12 @@ module OpenSolid.Curve2d
   )
 where
 
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Vector2d (Vector2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
@@ -38,7 +38,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     Float
     (Point2d coordinateSystem)
-    (Range Unitless)
+    (Bounds Unitless)
     (Bounds2d coordinateSystem)
 
 data HasDegeneracy = HasDegeneracy
@@ -64,7 +64,7 @@ derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-evaluateBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
+evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 tangentDirection ::
   Tolerance units =>

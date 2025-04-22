@@ -5,7 +5,8 @@ module OpenSolid.LineSegment2d
   )
 where
 
-import OpenSolid.Bounds2d (Bounded2d)
+import OpenSolid.Bounded2d (Bounded2d)
+import OpenSolid.Bounded2d qualified as Bounded2d
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d

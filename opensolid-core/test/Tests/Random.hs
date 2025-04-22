@@ -1,6 +1,6 @@
 module Tests.Random
   ( length
-  , lengthRange
+  , lengthBounds
   , point2d
   , vector2d
   , vectorBounds3d
@@ -25,6 +25,8 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -41,8 +43,6 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 import OpenSolid.Sign qualified as Sign
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform2d qualified as Transform2d
@@ -55,8 +55,8 @@ import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 length :: Generator Length
 length = Qty.random (Length.meters -10.0) (Length.meters 10.0)
 
-lengthRange :: Generator (Range Meters)
-lengthRange = Range.random length
+lengthBounds :: Generator (Bounds Meters)
+lengthBounds = Bounds.random length
 
 point2d :: Generator (Point2d (space @ Meters))
 point2d = Random.map2 Point2d.xy length length
@@ -65,7 +65,7 @@ vector2d :: Generator (Vector2d (space @ Meters))
 vector2d = Random.map2 Vector2d.xy length length
 
 vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
-vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange
+vectorBounds3d = Random.map3 VectorBounds3d lengthBounds lengthBounds lengthBounds
 
 axis2d :: Generator (Axis2d (space @ Meters))
 axis2d = Random.map2 Axis2d.through point2d Direction2d.random
@@ -77,10 +77,10 @@ frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
 frame2d = Random.map Frame2d.fromXAxis axis2d
 
 bounds2d :: Generator (Bounds2d (space @ Meters))
-bounds2d = Random.map2 Bounds2d lengthRange lengthRange
+bounds2d = Random.map2 Bounds2d lengthBounds lengthBounds
 
 vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
-vectorBounds2d = Random.map2 VectorBounds2d lengthRange lengthRange
+vectorBounds2d = Random.map2 VectorBounds2d lengthBounds lengthBounds
 
 line2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
 line2d = Random.map2 Curve2d.line point2d point2d

@@ -1,11 +1,11 @@
 module OpenSolid.Linearization (error) where
 
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 
-error :: Range units -> Range Unitless -> Qty units
+error :: Bounds units -> Bounds Unitless -> Qty units
 error secondDerivativeMagnitude subdomain = do
-  let maxSecondDerivativeMagnitude = Range.maxAbs secondDerivativeMagnitude
-  0.125 * maxSecondDerivativeMagnitude * Float.squared (Range.width subdomain)
+  let maxSecondDerivativeMagnitude = Bounds.maxAbs secondDerivativeMagnitude
+  0.125 * maxSecondDerivativeMagnitude * Float.squared (Bounds.width subdomain)

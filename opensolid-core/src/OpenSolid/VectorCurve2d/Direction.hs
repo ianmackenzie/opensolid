@@ -5,7 +5,7 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
-import OpenSolid.Range (Range (Range))
+import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
@@ -40,51 +40,51 @@ evaluateBounds ::
   Maybe (DegenerateEndpoint space) ->
   VectorCurve2d (space @ Unitless) ->
   Maybe (DegenerateEndpoint space) ->
-  Range Unitless ->
+  Bounds Unitless ->
   VectorBounds2d (space @ Unitless)
-evaluateBounds Nothing inner Nothing tRange =
-  VectorCurve2d.evaluateBounds inner tRange
-evaluateBounds (Just degenerateStart) inner Nothing tRange = do
-  let (Range t1 t2) = tRange
+evaluateBounds Nothing inner Nothing tBounds =
+  VectorCurve2d.evaluateBounds inner tBounds
+evaluateBounds (Just degenerateStart) inner Nothing tBounds = do
+  let (Bounds t1 t2) = tBounds
   let tStart = DegenerateEndpoint.cutoff degenerateStart
   if
-    | t1 >= tStart -> VectorCurve2d.evaluateBounds inner tRange
-    | t2 <= tStart -> DegenerateEndpoint.evaluateBounds degenerateStart inner tRange
+    | t1 >= tStart -> VectorCurve2d.evaluateBounds inner tBounds
+    | t2 <= tStart -> DegenerateEndpoint.evaluateBounds degenerateStart inner tBounds
     | otherwise ->
         VectorBounds2d.aggregate2
-          (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range t1 tStart))
-          (VectorCurve2d.evaluateBounds inner (Range tStart t2))
-evaluateBounds Nothing inner (Just degenerateEnd) tRange = do
-  let (Range t1 t2) = tRange
+          (DegenerateEndpoint.evaluateBounds degenerateStart inner (Bounds t1 tStart))
+          (VectorCurve2d.evaluateBounds inner (Bounds tStart t2))
+evaluateBounds Nothing inner (Just degenerateEnd) tBounds = do
+  let (Bounds t1 t2) = tBounds
   let tEnd = DegenerateEndpoint.cutoff degenerateEnd
   if
-    | t2 <= tEnd -> VectorCurve2d.evaluateBounds inner tRange
-    | t1 >= tEnd -> DegenerateEndpoint.evaluateBounds degenerateEnd inner tRange
+    | t2 <= tEnd -> VectorCurve2d.evaluateBounds inner tBounds
+    | t1 >= tEnd -> DegenerateEndpoint.evaluateBounds degenerateEnd inner tBounds
     | otherwise ->
         VectorBounds2d.aggregate2
-          (VectorCurve2d.evaluateBounds inner (Range t1 tEnd))
-          (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range tEnd t2))
-evaluateBounds (Just degenerateStart) inner (Just degenerateEnd) tRange = do
-  let (Range t1 t2) = tRange
+          (VectorCurve2d.evaluateBounds inner (Bounds t1 tEnd))
+          (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Bounds tEnd t2))
+evaluateBounds (Just degenerateStart) inner (Just degenerateEnd) tBounds = do
+  let (Bounds t1 t2) = tBounds
   let tStart = DegenerateEndpoint.cutoff degenerateStart
   let tEnd = DegenerateEndpoint.cutoff degenerateEnd
   if
-    | t1 >= tStart && t2 <= tEnd -> VectorCurve2d.evaluateBounds inner tRange
-    | t2 <= tStart -> DegenerateEndpoint.evaluateBounds degenerateStart inner tRange
-    | t1 >= tEnd -> DegenerateEndpoint.evaluateBounds degenerateEnd inner tRange
+    | t1 >= tStart && t2 <= tEnd -> VectorCurve2d.evaluateBounds inner tBounds
+    | t2 <= tStart -> DegenerateEndpoint.evaluateBounds degenerateStart inner tBounds
+    | t1 >= tEnd -> DegenerateEndpoint.evaluateBounds degenerateEnd inner tBounds
     | t1 >= tStart ->
         VectorBounds2d.aggregate2
-          (VectorCurve2d.evaluateBounds inner (Range t1 tEnd))
-          (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range tEnd t2))
+          (VectorCurve2d.evaluateBounds inner (Bounds t1 tEnd))
+          (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Bounds tEnd t2))
     | t2 <= tEnd ->
         VectorBounds2d.aggregate2
-          (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range t1 tStart))
-          (VectorCurve2d.evaluateBounds inner (Range tStart t2))
+          (DegenerateEndpoint.evaluateBounds degenerateStart inner (Bounds t1 tStart))
+          (VectorCurve2d.evaluateBounds inner (Bounds tStart t2))
     | otherwise ->
         VectorBounds2d.aggregate3
-          (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range t1 tStart))
-          (VectorCurve2d.evaluateBounds inner (Range tStart tEnd))
-          (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range tEnd t2))
+          (DegenerateEndpoint.evaluateBounds degenerateStart inner (Bounds t1 tStart))
+          (VectorCurve2d.evaluateBounds inner (Bounds tStart tEnd))
+          (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Bounds tEnd t2))
 
 derivative ::
   Maybe (DegenerateEndpoint space) ->

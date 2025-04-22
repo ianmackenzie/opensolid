@@ -101,6 +101,9 @@ library
     OpenSolid.Body3d
     OpenSolid.Body3d.BoundedBy
     OpenSolid.Bool
+    OpenSolid.Bounded2d
+    OpenSolid.Bounded3d
+    OpenSolid.Bounds
     OpenSolid.Bounds2d
     OpenSolid.Bounds3d
     OpenSolid.Bytecode.Ast
@@ -173,7 +176,6 @@ library
     OpenSolid.Qty
     OpenSolid.Queue
     OpenSolid.Random
-    OpenSolid.Range
     OpenSolid.Region2d
     OpenSolid.Region2d.BoundedBy
     OpenSolid.Result
@@ -281,6 +283,7 @@ test-suite opensolid-core-test
   other-modules:
     Test
     Tests.Array
+    Tests.Bounds
     Tests.Bounds2d
     Tests.Curve
     Tests.Curve2d
@@ -294,7 +297,6 @@ test-suite opensolid-core-test
     Tests.Parameter
     Tests.Qty
     Tests.Random
-    Tests.Range
     Tests.Region2d
     Tests.Set2d
     Tests.Stream

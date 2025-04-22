@@ -7,7 +7,7 @@ from opensolid import (
     Point2d,
     Region2d,
     Mesh,
-    LengthRange,
+    LengthBounds,
     Curve2d,
     SpurGear,
 )
@@ -41,7 +41,7 @@ class Gear:
 
         profile = Region2d.bounded_by(profile_curves)
 
-        body = Body3d.extruded(midplane, profile, LengthRange(-width / 2, width / 2))
+        body = Body3d.extruded(midplane, profile, LengthBounds.symmetric(width=width))
         self._body = body
 
     def module(self) -> Length:

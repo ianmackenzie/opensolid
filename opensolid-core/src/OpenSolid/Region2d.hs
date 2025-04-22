@@ -2,7 +2,7 @@ module OpenSolid.Region2d
   ( Region2d
   , EmptyRegion (EmptyRegion)
   , boundedBy
-  , unit
+  , unitSquare
   , rectangle
   , circle
   , polygon
@@ -40,6 +40,8 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CDT qualified as CDT
@@ -70,8 +72,6 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceParameter (UvCoordinates)
@@ -127,8 +127,8 @@ boundedBy curves = Result.do
   classifyLoops loops
 
 -- | The unit square in UV space.
-unit :: Region2d UvCoordinates
-unit = case Tolerance.exactly (rectangle (Bounds2d Range.unit Range.unit)) of
+unitSquare :: Region2d UvCoordinates
+unitSquare = case Tolerance.exactly (rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval)) of
   Success region -> region
   Failure EmptyRegion -> internalError "Constructing unit square region should not fail"
 
@@ -143,12 +143,12 @@ rectangle ::
   Tolerance units =>
   Bounds2d (space @ units) ->
   Result EmptyRegion (Region2d (space @ units))
-rectangle (Bounds2d xRange yRange) =
-  if Range.width xRange ~= Qty.zero || Range.width yRange ~= Qty.zero
+rectangle (Bounds2d xBounds yBounds) =
+  if Bounds.width xBounds ~= Qty.zero || Bounds.width yBounds ~= Qty.zero
     then Failure EmptyRegion
     else do
-      let Range x1 x2 = xRange
-      let Range y1 y2 = yRange
+      let Bounds x1 x2 = xBounds
+      let Bounds y1 y2 = yBounds
       let p11 = Point2d x1 y1
       let p12 = Point2d x1 y2
       let p21 = Point2d x2 y1
@@ -581,13 +581,13 @@ totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
 classifyNonBoundary :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Sign
 classifyNonBoundary point loop = do
   let flux = Estimate.satisfy containmentIsDeterminate (totalFlux point loop)
-  if Range.includes Qty.zero flux then Negative else Positive
+  if Bounds.includes Qty.zero flux then Negative else Positive
 
-bothPossibleFluxValues :: Range Unitless
-bothPossibleFluxValues = Range 0.0 Float.twoPi
+bothPossibleFluxValues :: Bounds Unitless
+bothPossibleFluxValues = Bounds 0.0 Float.twoPi
 
-containmentIsDeterminate :: Range Unitless -> Bool
-containmentIsDeterminate flux = not (Range.contains bothPossibleFluxValues flux)
+containmentIsDeterminate :: Bounds Unitless -> Bool
+containmentIsDeterminate flux = not (Bounds.contains bothPossibleFluxValues flux)
 
 classifyLoops ::
   Tolerance units =>

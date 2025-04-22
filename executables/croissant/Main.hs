@@ -27,7 +27,7 @@ main = Tolerance.using Length.nanometer $ IO.do
   let y = r * SurfaceFunction.sin theta
   let z = minorRadius * SurfaceFunction.sin phi
   let surfaceFunction = SurfaceFunction3d.xyz x y z
-  let surface = Surface3d.parametric surfaceFunction Region2d.unit
+  let surface = Surface3d.parametric surfaceFunction Region2d.unitSquare
   body <- Body3d.boundedBy [surface]
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
   let mesh = Body3d.toMesh constraints body

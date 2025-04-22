@@ -6,8 +6,8 @@ module OpenSolid.Curve
   )
 where
 
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 
 type role Curve nominal
 
@@ -15,5 +15,5 @@ type Curve :: Type -> Type
 data Curve units
 
 evaluate :: Curve units -> Float -> Qty units
-evaluateBounds :: Curve units -> Range Unitless -> Range units
+evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units
 derivative :: Curve units -> Curve units

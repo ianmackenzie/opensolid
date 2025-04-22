@@ -4,7 +4,7 @@ from opensolid import (
     Body3d,
     Color,
     Curve2d,
-    LengthRange,
+    LengthBounds,
     Length,
     Mesh,
     Plane3d,
@@ -42,7 +42,7 @@ with Tolerance(Length.nanometers(1)):
     body = Body3d.extruded(
         Plane3d.yz,
         filleted_region,
-        LengthRange(-thickness / 2, thickness / 2),
+        LengthBounds.symmetric(width=thickness),
     )
     mesh_constraints = [Mesh.max_error(Length.millimeters(0.1))]
     material = Scene3d.nonmetal(Color.blue, roughness=0.3)

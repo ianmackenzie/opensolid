@@ -13,6 +13,7 @@ module OpenSolid.Solve2d
   )
 where
 
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Domain1d qualified as Domain1d
@@ -28,7 +29,6 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
-import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
@@ -193,9 +193,9 @@ solveUnique localBounds fBounds f fu fv globalBounds =
   -- First check if it's *possible* that there's a solution within localBounds
   if fBounds localBounds ^ Vector2d.zero
     then do
-      let (uRange, vRange) = Bounds2d.coordinates localBounds
-      let uMid = Range.midpoint uRange
-      let vMid = Range.midpoint vRange
+      let (uBounds, vBounds) = Bounds2d.coordinates localBounds
+      let uMid = Bounds.midpoint uBounds
+      let vMid = Bounds.midpoint vBounds
       let pMid = Point2d.xy uMid vMid
       let fMid = f pMid
       -- First, try applying Newton-Raphson starting at the center point of localBounds
@@ -203,15 +203,15 @@ solveUnique localBounds fBounds f fu fv globalBounds =
       case newtonRaphson f fu fv globalBounds pMid fMid of
         Success point -> Just point -- Newton-Raphson converged to a zero, return it
         Failure Divergence -- Newton-Raphson did not converge starting from pMid
-          | Range.isAtomic uRange || Range.isAtomic vRange ->
+          | Bounds.isAtomic uBounds || Bounds.isAtomic vBounds ->
               -- We can't bisect any further
               -- (Newton-Raphson somehow never converged),
               -- so check if we've found a zero by bisection
               if fMid ~= Vector2d.zero then Just pMid else Nothing
           | otherwise -> do
               -- Recurse into subdomains
-              let (u1, u2) = Range.bisect uRange
-              let (v1, v2) = Range.bisect vRange
+              let (u1, u2) = Bounds.bisect uBounds
+              let (v1, v2) = Bounds.bisect vBounds
               let solveRecursively uv = solveUnique uv fBounds f fu fv globalBounds
               solveRecursively (Bounds2d u1 v1)
                 |> Maybe.orElse (solveRecursively (Bounds2d u1 v2))
@@ -269,11 +269,11 @@ boundedStep uvBounds p1 p2 =
     else do
       -- Stepped point is outside the given bounds,
       -- pull it back in along the step direction
-      let Bounds2d uRange vRange = uvBounds
+      let Bounds2d uBounds vBounds = uvBounds
       let Point2d u1 v1 = p1
       let Point2d u2 v2 = p2
-      let clampedU = Qty.clampTo uRange u2
-      let clampedV = Qty.clampTo vRange v2
+      let clampedU = Qty.clampTo uBounds u2
+      let clampedV = Qty.clampTo vBounds v2
       let uScale = if u1 == u2 then 1.0 else (clampedU - u1) / (u2 - u1)
       let vScale = if v1 == v2 then 1.0 else (clampedV - v1) / (v2 - v1)
       let scale = Qty.min uScale vScale
@@ -281,4 +281,4 @@ boundedStep uvBounds p1 p2 =
       -- Perform a final clamping step
       -- in case numerical roundoff during interpolation
       -- left the point *slightly* outside uvBounds
-      Point2d.xy (Qty.clampTo uRange u) (Qty.clampTo vRange v)
+      Point2d.xy (Qty.clampTo uBounds u) (Qty.clampTo vBounds v)

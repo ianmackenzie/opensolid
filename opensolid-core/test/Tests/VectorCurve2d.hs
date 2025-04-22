@@ -3,7 +3,7 @@ module Tests.VectorCurve2d (boundsConsistency, derivativeConsistency) where
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
-import OpenSolid.Range qualified as Range
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -26,12 +26,12 @@ derivativeConsistency givenTolerance curve = Test.do
 
 boundsConsistency :: Tolerance units => VectorCurve2d (space @ units) -> Expectation
 boundsConsistency vectorCurve = Test.do
-  tRange <- Range.random Parameter.random
-  tValue <- Random.map (Range.interpolate tRange) Parameter.random
+  tBounds <- Bounds.random Parameter.random
+  tValue <- Random.map (Bounds.interpolate tBounds) Parameter.random
   let vectorCurveValue = VectorCurve2d.evaluate vectorCurve tValue
-  let vectorCurveBounds = VectorCurve2d.evaluateBounds vectorCurve tRange
+  let vectorCurveBounds = VectorCurve2d.evaluateBounds vectorCurve tBounds
   Test.expect (vectorCurveValue ^ vectorCurveBounds)
     |> Test.output "tValue" tValue
-    |> Test.output "tRange" tRange
+    |> Test.output "tBounds" tBounds
     |> Test.output "vectorCurveValue" vectorCurveValue
     |> Test.output "vectorCurveBounds" vectorCurveBounds

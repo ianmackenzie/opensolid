@@ -43,6 +43,8 @@ import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bytecode.Ast (Ast1d, Ast2d, Ast3d)
@@ -62,8 +64,6 @@ import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Transform2d (Transform2d)
@@ -1665,40 +1665,40 @@ instance
   Evaluation
     Float
     (Qty units)
-    (Range Unitless)
-    (Range units)
+    (Bounds Unitless)
+    (Bounds units)
   where
   evaluate (Curve1d _ compiled) tValue =
     Qty.coerce (Evaluate.curve1dValue compiled tValue)
-  evaluateBounds (Curve1d _ compiled) tRange =
-    Range.coerce (Evaluate.curve1dBounds compiled tRange)
+  evaluateBounds (Curve1d _ compiled) tBounds =
+    Bounds.coerce (Evaluate.curve1dBounds compiled tBounds)
 
 instance
   Evaluation
     UvPoint
     (Qty units)
     UvBounds
-    (Range units)
+    (Bounds units)
   where
   evaluate (Surface1d _ compiled) uvPoint =
     Qty.coerce (Evaluate.surface1dValue compiled uvPoint)
   evaluateBounds (Surface1d _ compiled) uvBounds =
-    Range.coerce (Evaluate.surface1dBounds compiled uvBounds)
+    Bounds.coerce (Evaluate.surface1dBounds compiled uvBounds)
 
 instance
   Evaluation
     Float
     (Point2d (space @ units))
-    (Range Unitless)
+    (Bounds Unitless)
     (Bounds2d (space @ units))
   where
   evaluate (Curve2d _ compiled) tValue = do
     let Vector2d x y = Evaluate.curve2dValue compiled tValue
     Point2d (Qty.coerce x) (Qty.coerce y)
 
-  evaluateBounds (Curve2d _ compiled) tRange = do
-    let VectorBounds2d x y = Evaluate.curve2dBounds compiled tRange
-    Bounds2d (Range.coerce x) (Range.coerce y)
+  evaluateBounds (Curve2d _ compiled) tBounds = do
+    let VectorBounds2d x y = Evaluate.curve2dBounds compiled tBounds
+    Bounds2d (Bounds.coerce x) (Bounds.coerce y)
 
 instance
   Evaluation
@@ -1713,20 +1713,20 @@ instance
 
   evaluateBounds (Surface2d _ compiled) uvBounds = do
     let VectorBounds2d x y = Evaluate.surface2dBounds compiled uvBounds
-    Bounds2d (Range.coerce x) (Range.coerce y)
+    Bounds2d (Bounds.coerce x) (Bounds.coerce y)
 
 instance
   Evaluation
     Float
     (Vector2d (space @ units))
-    (Range Unitless)
+    (Bounds Unitless)
     (VectorBounds2d (space @ units))
   where
   evaluate (VectorCurve2d _ compiled) tValue =
     Vector2d.coerce (Evaluate.curve2dValue compiled tValue)
 
-  evaluateBounds (VectorCurve2d _ compiled) tRange =
-    VectorBounds2d.coerce (Evaluate.curve2dBounds compiled tRange)
+  evaluateBounds (VectorCurve2d _ compiled) tBounds =
+    VectorBounds2d.coerce (Evaluate.curve2dBounds compiled tBounds)
 
 instance
   Evaluation
@@ -1745,16 +1745,16 @@ instance
   Evaluation
     Float
     (Point3d (space @ units))
-    (Range Unitless)
+    (Bounds Unitless)
     (Bounds3d (space @ units))
   where
   evaluate (Curve3d _ compiled) tValue = do
     let Vector3d x y z = Evaluate.curve3dValue compiled tValue
     Point3d (Qty.coerce x) (Qty.coerce y) (Qty.coerce z)
 
-  evaluateBounds (Curve3d _ compiled) tRange = do
-    let VectorBounds3d x y z = Evaluate.curve3dBounds compiled tRange
-    Bounds3d (Range.coerce x) (Range.coerce y) (Range.coerce z)
+  evaluateBounds (Curve3d _ compiled) tBounds = do
+    let VectorBounds3d x y z = Evaluate.curve3dBounds compiled tBounds
+    Bounds3d (Bounds.coerce x) (Bounds.coerce y) (Bounds.coerce z)
 
 instance
   Evaluation
@@ -1769,20 +1769,20 @@ instance
 
   evaluateBounds (Surface3d _ compiled) uvBounds = do
     let VectorBounds3d x y z = Evaluate.surface3dBounds compiled uvBounds
-    Bounds3d (Range.coerce x) (Range.coerce y) (Range.coerce z)
+    Bounds3d (Bounds.coerce x) (Bounds.coerce y) (Bounds.coerce z)
 
 instance
   Evaluation
     Float
     (Vector3d (space @ units))
-    (Range Unitless)
+    (Bounds Unitless)
     (VectorBounds3d (space @ units))
   where
   evaluate (VectorCurve3d _ compiled) tValue =
     Vector3d.coerce (Evaluate.curve3dValue compiled tValue)
 
-  evaluateBounds (VectorCurve3d _ compiled) tRange =
-    VectorBounds3d.coerce (Evaluate.curve3dBounds compiled tRange)
+  evaluateBounds (VectorCurve3d _ compiled) tBounds =
+    VectorBounds3d.coerce (Evaluate.curve3dBounds compiled tBounds)
 
 instance
   Evaluation
@@ -1801,18 +1801,18 @@ solveMonotonicSurfaceU ::
   Tolerance units =>
   Expression UvPoint (Qty units) ->
   Expression UvPoint (Qty units) ->
-  Range Unitless ->
+  Bounds Unitless ->
   Float ->
   Float
-solveMonotonicSurfaceU (Surface1d _ function) (Surface1d _ derivative) uRange vValue =
-  Evaluate.solveMonotonicSurfaceU function derivative uRange vValue
+solveMonotonicSurfaceU (Surface1d _ function) (Surface1d _ derivative) uBounds vValue =
+  Evaluate.solveMonotonicSurfaceU function derivative uBounds vValue
 
 solveMonotonicSurfaceV ::
   Tolerance units =>
   Expression UvPoint (Qty units) ->
   Expression UvPoint (Qty units) ->
   Float ->
-  Range Unitless ->
+  Bounds Unitless ->
   Float
-solveMonotonicSurfaceV (Surface1d _ function) (Surface1d _ derivative) uValue vRange =
-  Evaluate.solveMonotonicSurfaceV function derivative uValue vRange
+solveMonotonicSurfaceV (Surface1d _ function) (Surface1d _ derivative) uValue vBounds =
+  Evaluate.solveMonotonicSurfaceV function derivative uValue vBounds

@@ -12,15 +12,17 @@ module OpenSolid.Set2d
   )
 where
 
-import OpenSolid.Bounds2d (Bounded2d, Bounds2d)
+import OpenSolid.Bounded2d (Bounded2d)
+import OpenSolid.Bounded2d qualified as Bounded2d
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 
 data Set2d a (coordinateSystem :: CoordinateSystem) where
   Node ::
@@ -41,18 +43,18 @@ bounds (Node nodeBounds _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
 one :: Bounded2d a (space @ units) => a -> Set2d a (space @ units)
-one item = Leaf (Bounds2d.bounds item) item
+one item = Leaf (Bounded2d.bounds item) item
 
 two :: Bounded2d a (space @ units) => a -> a -> Set2d a (space @ units)
 two firstItem secondItem = do
-  let firstBounds = Bounds2d.bounds firstItem
-  let secondBounds = Bounds2d.bounds secondItem
+  let firstBounds = Bounded2d.bounds firstItem
+  let secondBounds = Bounded2d.bounds secondItem
   let nodeBounds = Bounds2d.aggregate2 firstBounds secondBounds
   Node nodeBounds (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
 
 fromNonEmpty :: Bounded2d a (space @ units) => NonEmpty a -> Set2d a (space @ units)
 fromNonEmpty givenItems = do
-  let boundedItem item = (Bounds2d.bounds item, item)
+  let boundedItem item = (Bounded2d.bounds item, item)
   let boundedItems = NonEmpty.map boundedItem givenItems
   buildX (NonEmpty.length boundedItems) boundedItems
 
@@ -63,7 +65,7 @@ buildY :: Int -> NonEmpty (Bounds2d (space @ units), a) -> Set2d a (space @ unit
 buildY = build Bounds2d.yCoordinate buildX
 
 build ::
-  (Bounds2d (space @ units) -> Range units) ->
+  (Bounds2d (space @ units) -> Bounds units) ->
   (Int -> NonEmpty (Bounds2d (space @ units), a) -> Set2d a (space @ units)) ->
   Int ->
   NonEmpty (Bounds2d (space @ units), a) ->
@@ -76,7 +78,7 @@ build boundsCoordinate buildSubset n boundedItems
   | otherwise = do
       Debug.assert (n >= 2)
       Debug.assert (NonEmpty.length boundedItems == n)
-      let sorted = NonEmpty.sortBy (Range.midpoint . boundsCoordinate . Pair.first) boundedItems
+      let sorted = NonEmpty.sortBy (Bounds.midpoint . boundsCoordinate . Pair.first) boundedItems
       let leftN = n // 2
       let rightN = n - leftN
       let (leftBoundedItems, rightBoundedItems) = splitAt leftN sorted

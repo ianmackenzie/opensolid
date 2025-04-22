@@ -20,13 +20,13 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Curve (Curve)
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -59,9 +59,9 @@ evaluate :: DirectionCurve2d space -> Float -> Direction2d space
 evaluate (DirectionCurve2d vectorCurve) tValue =
   Direction2d.unsafe (VectorCurve2d.evaluate vectorCurve tValue)
 
-evaluateBounds :: DirectionCurve2d space -> Range Unitless -> DirectionBounds2d space
-evaluateBounds (DirectionCurve2d vectorCurve) tRange =
-  DirectionBounds2d.unsafe (VectorCurve2d.evaluateBounds vectorCurve tRange)
+evaluateBounds :: DirectionCurve2d space -> Bounds Unitless -> DirectionBounds2d space
+evaluateBounds (DirectionCurve2d vectorCurve) tBounds =
+  DirectionBounds2d.unsafe (VectorCurve2d.evaluateBounds vectorCurve tBounds)
 
 derivative :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 derivative (DirectionCurve2d vectorCurve) = VectorCurve2d.derivative vectorCurve

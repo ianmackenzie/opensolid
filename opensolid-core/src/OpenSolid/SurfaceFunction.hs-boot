@@ -8,9 +8,9 @@ module OpenSolid.SurfaceFunction
   )
 where
 
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
 import OpenSolid.Units qualified as Units
 
@@ -19,7 +19,7 @@ type role SurfaceFunction nominal
 type SurfaceFunction :: Type -> Type
 data SurfaceFunction units
 
-type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Range units)
+type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
 
 instance Negation (SurfaceFunction units)
 
@@ -35,5 +35,5 @@ instance
 
 compiled :: SurfaceFunction units -> Compiled units
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
-evaluateBounds :: SurfaceFunction units -> UvBounds -> Range units
+evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
