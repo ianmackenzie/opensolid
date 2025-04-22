@@ -39,6 +39,9 @@ class Gear:
     def axis(self) -> Axis3d:
         return self.midplane().normal_axis()
 
+    def body(self) -> Body3d:
+        return self._body
+
     def scene_entity(self, resolution: Length) -> Scene3d.Entity:
         mesh_constraints = [Mesh.max_error(resolution)]
         return Scene3d.body(mesh_constraints, Scene3d.iron(0.3), self._body)

@@ -28,6 +28,12 @@ class Motor:
     def shaft_tip_plane(self):
         return self._mating_plane.flip_x().offset_by(self.shaft_length())
 
+    def free_speed_rpm(self):
+        return 5330
+
+    def stall_torque_nm(self):
+        return 2.41
+
     def scene_entity(self, resolution: Length) -> Scene3d.Entity:
         mesh_constraints = [Mesh.max_error(resolution)]
         cap_material = Scene3d.aluminum(0.3)
