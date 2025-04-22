@@ -1,6 +1,7 @@
 module OpenSolid.IO
   ( fail
   , map
+  , run
   , forEach
   , forEachWithIndex
   , collect
@@ -64,6 +65,9 @@ instance Bind (Result x) IO where
 
 map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap
+
+run :: Foldable list => list (IO ()) -> IO ()
+run = Data.Foldable.fold
 
 forEach :: Foldable list => list a -> (a -> IO ()) -> IO ()
 forEach list function = Data.Foldable.foldMap function list
