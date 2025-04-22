@@ -6,16 +6,6 @@ module OpenSolid.Bounds
   , zeroTo
   , symmetric
   , infinite
-  , radians
-  , degrees
-  , turns
-  , meters
-  , centimeters
-  , cm
-  , millimeters
-  , mm
-  , inches
-  , squareMeters
   , hull3
   , hull4
   , hullN
@@ -73,14 +63,12 @@ where
 
 import Data.Coerce qualified
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Area qualified as Area
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
-import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
@@ -289,52 +277,6 @@ symmetric (Named w) = let r = 0.5 * w in Bounds -r r
 
 infinite :: Bounds units
 infinite = Bounds -Qty.infinity Qty.infinity
-
--- | Construct an angle bounds from two values given in radians.
-radians :: Float -> Float -> Bounds Radians
-radians a b = from (Angle.radians a) (Angle.radians b)
-
--- | Construct an angle bounds from two values given in degrees.
-degrees :: Float -> Float -> Bounds Radians
-degrees a b = from (Angle.degrees a) (Angle.degrees b)
-
--- | Construct an angle bounds from two values given in turns.
-turns :: Float -> Float -> Bounds Radians
-turns a b = from (Angle.turns a) (Angle.turns b)
-
--- | Construct a length bounds from two values given in meters.
-meters :: Float -> Float -> Bounds Meters
-meters a b = from (Length.meters a) (Length.meters b)
-
--- | Construct a length bounds from two values given in millimeters.
-millimeters :: Float -> Float -> Bounds Meters
-millimeters a b = from (Length.millimeters a) (Length.millimeters b)
-
-{-| Construct a length bounds from two values given in millimeters.
-
-Short form alias for 'millimeters'.
--}
-mm :: Float -> Float -> Bounds Meters
-mm = millimeters
-
--- | Construct a length bounds from two values given in centimeters.
-centimeters :: Float -> Float -> Bounds Meters
-centimeters a b = from (Length.centimeters a) (Length.centimeters b)
-
-{-| Construct a length bounds from two values given in centimeters.
-
-Short form alias for 'centimeters'.
--}
-cm :: Float -> Float -> Bounds Meters
-cm = centimeters
-
--- | Construct a length bounds from two values given in inches.
-inches :: Float -> Float -> Bounds Meters
-inches a b = from (Length.inches a) (Length.inches b)
-
--- | Construct an area bounds from two values given in square meters.
-squareMeters :: Float -> Float -> Bounds SquareMeters
-squareMeters a b = from (Area.squareMeters a) (Area.squareMeters b)
 
 aggregate2 :: Bounds units -> Bounds units -> Bounds units
 aggregate2 (Bounds low1 high1) (Bounds low2 high2) =
