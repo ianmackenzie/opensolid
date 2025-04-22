@@ -64,13 +64,25 @@ import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
 data Surface3d (coordinateSystem :: CoordinateSystem) where
   Surface3d ::
-    SurfaceFunction3d (space @ units) -> Region2d UvCoordinates -> Surface3d (space @ units)
+    { function :: SurfaceFunction3d (space @ units)
+    , domain :: Region2d UvCoordinates
+    , outerLoop :: ~(NonEmpty (Curve3d (space @ units)))
+    , innerLoops :: ~(List (NonEmpty (Curve3d (space @ units))))
+    } ->
+    Surface3d (space @ units)
 
 parametric ::
   SurfaceFunction3d (space @ units) ->
   Region2d UvCoordinates ->
   Surface3d (space @ units)
-parametric = Surface3d
+parametric givenFunction givenDomain = do
+  let boundaryLoop domainLoop = NonEmpty.map (givenFunction .) domainLoop
+  Surface3d
+    { function = givenFunction
+    , domain = givenDomain
+    , outerLoop = boundaryLoop (Region2d.outerLoop givenDomain)
+    , innerLoops = List.map boundaryLoop (Region2d.innerLoops givenDomain)
+    }
 
 planar ::
   Plane3d (space @ units) (Defines local) ->
@@ -107,33 +119,14 @@ ruled bottom top = do
   let f2 = top . SurfaceFunction.u
   parametric (f1 + SurfaceFunction.v * (f2 - f1)) Region2d.unit
 
-function :: Surface3d (space @ units) -> SurfaceFunction3d (space @ units)
-function (Surface3d f _) = f
-
-domain :: Surface3d (space @ units) -> Region2d UvCoordinates
-domain (Surface3d _ d) = d
-
-outerLoop :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
-outerLoop surface = boundaryLoop (function surface) (Region2d.outerLoop (domain surface))
-
-innerLoops :: Surface3d (space @ units) -> List (NonEmpty (Curve3d (space @ units)))
-innerLoops surface =
-  List.map (boundaryLoop (function surface)) (Region2d.innerLoops (domain surface))
-
-boundaryLoop ::
-  SurfaceFunction3d (space @ units) ->
-  NonEmpty (Curve2d UvCoordinates) ->
-  NonEmpty (Curve3d (space @ units))
-boundaryLoop surfaceFunction domainLoop = NonEmpty.map (surfaceFunction .) domainLoop
-
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
 boundaryCurves surface = NonEmpty.concat (outerLoop surface :| innerLoops surface)
 
 flip :: Surface3d (space @ units) -> Surface3d (space @ units)
-flip (Surface3d f d) =
-  Surface3d
-    (f . SurfaceFunction2d.xy (1.0 - SurfaceFunction.u) SurfaceFunction.v)
-    (Region2d.mirrorAcross Axis2d.y d)
+flip surface =
+  parametric
+    (function surface . SurfaceFunction2d.xy (1.0 - SurfaceFunction.u) SurfaceFunction.v)
+    (Region2d.mirrorAcross Axis2d.y (domain surface))
 
 toMesh :: Qty units -> Surface3d (space @ units) -> Mesh (Point3d (space @ units))
 toMesh accuracy surface = do
