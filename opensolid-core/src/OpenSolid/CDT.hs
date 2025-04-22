@@ -68,7 +68,7 @@ collectLoopEdgeIndices startIndex loopLength accumulated = do
         Int.toWord32 edgeStart : Int.toWord32 edgeEnd : acc
   List.foldr addEdge accumulated [0 .. loopLength - 1]
 
-foreign import ccall unsafe "opensolid_cdt"
+foreign import ccall safe "opensolid_cdt"
   opensolid_cdt ::
     Word32 -> -- input_point_count
     Foreign.Ptr (Qty units) -> -- input_point_data
