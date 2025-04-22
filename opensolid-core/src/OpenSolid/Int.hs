@@ -19,6 +19,8 @@ module OpenSolid.Int
   , lcm
   , toInt64
   , fromInt64
+  , toWord32
+  , fromWord32
   , toWord64
   , fromWord64
   , toCSize
@@ -28,7 +30,7 @@ where
 
 import Data.Int (Int64)
 import Data.Ord qualified
-import Data.Word (Word64)
+import Data.Word (Word32, Word64)
 import Foreign.C.Types (CSize)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -114,6 +116,12 @@ toInt64 = fromIntegral
 
 fromInt64 :: Int64 -> Int
 fromInt64 = fromIntegral
+
+toWord32 :: Int -> Word32
+toWord32 = fromIntegral
+
+fromWord32 :: Word32 -> Int
+fromWord32 = fromIntegral
 
 toWord64 :: Int -> Word64
 toWord64 = fromIntegral
