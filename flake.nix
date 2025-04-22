@@ -69,6 +69,8 @@
               # Set PYTHONPATH so 'import opensolid' works
               # when running Python interactively from the repository root
               "export PYTHONPATH=$PWD/opensolid-python"
+              # Allow clangd to find GHC's Rts.h
+              "export CPATH=$(find $(ghc --print-libdir) -name Rts.h | sed -r 's|Rts.h||')"
             ];
           };
         });
