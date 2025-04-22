@@ -429,16 +429,16 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
           bounds
   log "Solve2d.unique solution" solution
 
-testJit :: IO ()
-testJit = IO.do
+testExpression :: IO ()
+testExpression = IO.do
   let x = Expression.t
   let xSquared = Expression.squared x
   let function = xSquared / (xSquared + Expression.Curve1d.constant 1.0)
-  log "JIT evaluated" (Expression.evaluate function 2.0)
-  log "JIT bounds" (Expression.evaluateBounds function (Range 1.0 3.0))
+  log "Expression value" (Expression.evaluate function 2.0)
+  log "Expression bounds" (Expression.evaluateBounds function (Range 1.0 3.0))
 
-testJitCurve2d :: IO ()
-testJitCurve2d = IO.do
+testCurve2dExpression :: IO ()
+testCurve2dExpression = IO.do
   let x = Expression.Curve1d.constant 10.0 * Expression.t
   let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression Float (Point2d (Global @ Unitless))
@@ -460,8 +460,8 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testNonEmpty
   testBezierSegment
   testHermiteBezier
-  testJit
-  testJitCurve2d
+  testExpression
+  testCurve2dExpression
   testPlaneParaboloidIntersection
   testPlaneTorusIntersection
   testExplicitRandomStep
