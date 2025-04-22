@@ -9,7 +9,9 @@ module OpenSolid.Point2d
   , fromCoordinates
   , meters
   , centimeters
+  , cm
   , millimeters
+  , mm
   , inches
   , xCoordinate
   , yCoordinate
@@ -97,6 +99,20 @@ centimeters = apply Length.centimeters
 -- | Construct a point from its X and Y coordinates given in millimeters.
 millimeters :: Float -> Float -> Point2d (space @ Meters)
 millimeters = apply Length.millimeters
+
+{-| Construct a point from its X and Y coordinates given in centimeters.
+
+Short form alias for 'centimeters'.
+-}
+cm :: Float -> Float -> Point2d (space @ Meters)
+cm = centimeters
+
+{-| Construct a point from its X and Y coordinates given in millimeters.
+
+Short form alias for 'millimeters'.
+-}
+mm :: Float -> Float -> Point2d (space @ Meters)
+mm = millimeters
 
 -- | Construct a point from its X and Y coordinates given in inches.
 inches :: Float -> Float -> Point2d (space @ Meters)

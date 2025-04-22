@@ -8,8 +8,10 @@ module OpenSolid.Length
   , nanometer
   , meters
   , inMeters
+  , mm
   , millimeters
   , inMillimeters
+  , cm
   , centimeters
   , inCentimeters
   , micrometers
@@ -60,6 +62,13 @@ millimeter = meters 0.001
 millimeters :: Float -> Length
 millimeters = (* millimeter)
 
+{-| Construct a length value from a number of millimeters.
+
+Short form alias for 'millimeters'.
+-}
+mm :: Float -> Length
+mm = millimeters
+
 -- | Convert a length to a number of millimeters.
 inMillimeters :: Length -> Float
 inMillimeters = (/ millimeter)
@@ -71,6 +80,13 @@ centimeter = meters 0.01
 -- | Construct a length from a number of centimeters.
 centimeters :: Float -> Length
 centimeters = (* centimeter)
+
+{-| Construct a length from a number of centimeters.
+
+Short form alias for 'centimeters'.
+-}
+cm :: Float -> Length
+cm = centimeters
 
 -- | Convert a length to a number of centimeters.
 inCentimeters :: Length -> Float

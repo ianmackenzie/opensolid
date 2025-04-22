@@ -13,7 +13,9 @@ module OpenSolid.Vector3d
   , fromComponents
   , meters
   , centimeters
+  , cm
   , millimeters
+  , mm
   , inches
   , squareMeters
   , xComponent
@@ -141,9 +143,23 @@ meters = apply Length.meters
 centimeters :: Float -> Float -> Float -> Vector3d (space @ Meters)
 centimeters = apply Length.centimeters
 
+{-| Construct a vector from its XYZ components given in centimeters.
+
+Short form alias for 'centimeters'.
+-}
+cm :: Float -> Float -> Float -> Vector3d (space @ Meters)
+cm = centimeters
+
 -- | Construct a vector from its XYZ components given in millimeters.
 millimeters :: Float -> Float -> Float -> Vector3d (space @ Meters)
 millimeters = apply Length.millimeters
+
+{-| Construct a vector from its XYZ components given in millimeters.
+
+Short form alias for 'millimeters'.
+-}
+mm :: Float -> Float -> Float -> Vector3d (space @ Meters)
+mm = millimeters
 
 -- | Construct a vector from its XYZ components given in inches.
 inches :: Float -> Float -> Float -> Vector3d (space @ Meters)

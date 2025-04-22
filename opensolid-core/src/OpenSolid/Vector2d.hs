@@ -10,7 +10,9 @@ module OpenSolid.Vector2d
   , from
   , meters
   , centimeters
+  , cm
   , millimeters
+  , mm
   , inches
   , squareMeters
   , polar
@@ -115,9 +117,23 @@ meters = apply Length.meters
 centimeters :: Float -> Float -> Vector2d (space @ Meters)
 centimeters = apply Length.centimeters
 
+{-| Construct a vector from its X and Y components given in centimeters.
+
+Short form alias for 'centimeters'.
+-}
+cm :: Float -> Float -> Vector2d (space @ Meters)
+cm = centimeters
+
 -- | Construct a vector from its X and Y components given in millimeters.
 millimeters :: Float -> Float -> Vector2d (space @ Meters)
 millimeters = apply Length.millimeters
+
+{-| Construct a vector from its X and Y components given in millimeters.
+
+Short form alias for 'millimeters'.
+-}
+mm :: Float -> Float -> Vector2d (space @ Meters)
+mm = millimeters
 
 -- | Construct a vector from its X and Y components given in inches.
 inches :: Float -> Float -> Vector2d (space @ Meters)

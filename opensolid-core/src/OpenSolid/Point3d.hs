@@ -17,7 +17,9 @@ module OpenSolid.Point3d
   , fromCoordinates
   , meters
   , centimeters
+  , cm
   , millimeters
+  , mm
   , inches
   , midpoint
   , interpolateFrom
@@ -136,9 +138,23 @@ meters = apply Length.meters
 centimeters :: Float -> Float -> Float -> Point3d (space @ Meters)
 centimeters = apply Length.centimeters
 
+{-| Construct a point from its X, Y and Z coordinates given in centimeters.
+
+Short form alias for 'centimeters'.
+-}
+cm :: Float -> Float -> Float -> Point3d (space @ Meters)
+cm = centimeters
+
 -- | Construct a point from its X, Y and Z coordinates given in millimeters.
 millimeters :: Float -> Float -> Float -> Point3d (space @ Meters)
 millimeters = apply Length.millimeters
+
+{-| Construct a point from its X, Y and Z coordinates given in millimeters.
+
+Short form alias for 'millimeters'.
+-}
+mm :: Float -> Float -> Float -> Point3d (space @ Meters)
+mm = millimeters
 
 -- | Construct a point from its X, Y and Z coordinates given in inches.
 inches :: Float -> Float -> Float -> Point3d (space @ Meters)

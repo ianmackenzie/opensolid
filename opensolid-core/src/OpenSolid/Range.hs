@@ -11,7 +11,9 @@ module OpenSolid.Range
   , turns
   , meters
   , centimeters
+  , cm
   , millimeters
+  , mm
   , inches
   , squareMeters
   , hull3
@@ -309,9 +311,23 @@ meters a b = from (Length.meters a) (Length.meters b)
 millimeters :: Float -> Float -> Range Meters
 millimeters a b = from (Length.millimeters a) (Length.millimeters b)
 
+{-| Construct a length range from lower and upper bounds given in millimeters.
+
+Short form alias for 'millimeters'.
+-}
+mm :: Float -> Float -> Range Meters
+mm = millimeters
+
 -- | Construct a length range from lower and upper bounds given in centimeters.
 centimeters :: Float -> Float -> Range Meters
 centimeters a b = from (Length.centimeters a) (Length.centimeters b)
+
+{-| Construct a length range from lower and upper bounds given in centimeters.
+
+Short form alias for 'centimeters'.
+-}
+cm :: Float -> Float -> Range Meters
+cm = centimeters
 
 -- | Construct a length range from lower and upper bounds given in inches.
 inches :: Float -> Float -> Range Meters
