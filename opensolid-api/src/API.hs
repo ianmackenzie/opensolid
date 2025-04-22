@@ -108,6 +108,8 @@ import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Scene3d qualified as Scene3d
+import OpenSolid.SpurGear (SpurGear)
+import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d (Transform2d)
@@ -169,6 +171,7 @@ classes =
   , body3d
   , mesh
   , scene3d
+  , spurGear
   ]
 
 functions :: List Function
@@ -1312,4 +1315,15 @@ scene3d =
     , static3 "Write GLB" "Path" "Ground Plane" "Entities" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
     , nested @(Scene3d.Entity Space) "A scene entity such as a mesh or group." (rigidTransformations3d Scene3d.transformBy)
     , nested @Scene3d.Material "A material applied to a mesh." []
+    ]
+
+spurGear :: Class
+spurGear =
+  Class.new @SpurGear $(docs ''SpurGear) $
+    [ factory2 "Metric" "Num Teeth" "Module" SpurGear.metric $(docs 'SpurGear.metric)
+    , member0 "Num Teeth" SpurGear.numTeeth $(docs 'SpurGear.numTeeth)
+    , member0 "Module" SpurGear.module_ $(docs 'SpurGear.module_)
+    , member0 "Pitch Diameter" SpurGear.pitchDiameter $(docs 'SpurGear.pitchDiameter)
+    , member0 "Outer Diameter" SpurGear.outerDiameter $(docs 'SpurGear.outerDiameter)
+    , memberM0 "Profile" SpurGear.profile $(docs 'SpurGear.profile)
     ]

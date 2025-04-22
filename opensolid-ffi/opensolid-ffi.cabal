@@ -25,6 +25,7 @@ foreign-library opensolid-ffi
   build-depends:
     base,
     opensolid-api,
+    opensolid-components,
     opensolid-core,
     template-haskell,
 
@@ -55,6 +56,7 @@ executable generate-def-file
   build-depends:
     base,
     opensolid-api,
+    opensolid-components,
     opensolid-core,
 
   ghc-options:

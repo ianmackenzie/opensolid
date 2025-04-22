@@ -21,6 +21,7 @@ library
   default-language: GHC2021
   build-depends:
     base,
+    opensolid-components,
     opensolid-core,
     template-haskell,
 
