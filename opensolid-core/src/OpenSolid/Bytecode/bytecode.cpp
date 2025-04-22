@@ -207,7 +207,7 @@ computeValue(
       case Sqrt1d: {
         double input = *getVariablePointer();
         double* output = getVariablePointer();
-        *output = std::sqrt(input);
+        *output = std::sqrt(std::max(input, 0.0));
         break;
       }
       case Sin1d: {
