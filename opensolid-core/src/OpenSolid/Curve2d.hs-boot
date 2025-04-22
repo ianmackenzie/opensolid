@@ -30,12 +30,9 @@ import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Vector2d (Vector2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 
-data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Curve2d ::
-    { compiled :: Compiled (space @ units)
-    , derivative :: ~(VectorCurve2d (space @ units))
-    } ->
-    Curve2d (space @ units)
+type role Curve2d nominal
+
+data Curve2d (coordinateSystem :: CoordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
@@ -62,6 +59,8 @@ instance
 
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
+compiled :: Curve2d (space @ units) -> Compiled (space @ units)
+derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)

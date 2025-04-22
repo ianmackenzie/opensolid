@@ -20,12 +20,9 @@ import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 
-data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d ::
-    { compiled :: Compiled (space @ units)
-    , derivative :: ~(VectorCurve3d (space @ units))
-    } ->
-    Curve3d (space @ units)
+type role Curve3d nominal
+
+data Curve3d (coordinateSystem :: CoordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
@@ -54,6 +51,7 @@ planar ::
   Plane3d (space @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve3d (space @ units)
+derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
 evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
