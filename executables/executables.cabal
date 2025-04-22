@@ -147,3 +147,12 @@ executable expression-evaluation
   hs-source-dirs: expression-evaluation
   build-depends:
     opensolid-core
+
+executable gear-generation
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: gear-generation
+  build-depends:
+    opensolid-components,
+    opensolid-core,
+    time,

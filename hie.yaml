@@ -39,6 +39,9 @@ cradle:
     - path: "executables/expression-evaluation/Main.hs"
       component: "executables:exe:expression-evaluation"
 
+    - path: "executables/gear-generation/Main.hs"
+      component: "executables:exe:gear-generation"
+
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
 
