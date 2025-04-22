@@ -8,6 +8,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import Python qualified
+import Python.Class qualified
 import Python.FFI qualified
 import Python.Function qualified
 
@@ -19,12 +20,15 @@ definition classId maybeConstructor = case maybeConstructor of
     let (arguments, selfType) = Constructor.signature constructor
     let functionArguments = Text.join "," (List.map Python.Function.argument arguments)
     let ffiArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
+    let pointerFieldName = Python.Class.pointerFieldName classId
     Python.lines
       [ "def __init__(self, " <> functionArguments <> ") -> None:"
       , Python.indent
           [ Python.docstring (Constructor.documentation constructor)
           , "inputs = " <> Python.FFI.argumentValue ffiArguments
-          , "self.__ptr = " <> Python.FFI.dummyValue selfType
-          , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(self.__ptr)"
+          , "self." <> pointerFieldName <> " = " <> Python.FFI.dummyValue selfType
+          , Python.FFI.invoke ffiFunctionName
+              # "ctypes.byref(inputs)"
+              # "ctypes.byref(self." <> pointerFieldName <> ")"
           ]
       ]

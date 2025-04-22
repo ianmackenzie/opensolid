@@ -13,7 +13,7 @@ ruff format opensolid-python/lib/src/opensolid/__init__.py
 #   COM812: conflicts with 'ruff format'
 #   RUF012: attempting to annotate _fields_ gets very messy
 #   PLR0911: limitation on number of return statements is silly for generated code
-#   SLF001: often need to access private _ptr variable
+#   SLF001: often need to access private _ClassName_ptr variable
 #   N801: concrete types use underscores in names
 #   D107: constructors are not meant for public use
 #   S101: 'assert' is only used here for debug checks like in C/C++

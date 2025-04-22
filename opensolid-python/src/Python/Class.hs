@@ -1,4 +1,9 @@
-module Python.Class (qualifiedName, unqualifiedName) where
+module Python.Class
+  ( qualifiedName
+  , unqualifiedName
+  , pointerFieldName
+  )
+where
 
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
@@ -13,3 +18,6 @@ qualifiedName (FFI.Id _ classNames) = do
 unqualifiedName :: FFI.Id a -> Text
 unqualifiedName (FFI.Id _ classNames) = do
   FFI.pascalCase (NonEmpty.last classNames)
+
+pointerFieldName :: FFI.Id a -> Text
+pointerFieldName id = "_" <> unqualifiedName id <> "_ptr"
