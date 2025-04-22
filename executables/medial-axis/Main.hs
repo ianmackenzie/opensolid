@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Data.Time.Clock qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color qualified as Color
@@ -21,6 +20,7 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
+import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
 
@@ -60,7 +60,7 @@ testCurveMedialAxis ::
   Curve2d (Global @ Meters) ->
   IO ()
 testCurveMedialAxis label curve1 curve2 = IO.do
-  startTime <- Data.Time.Clock.getCurrentTime
+  timer <- Timer.start
   segments <- Curve2d.medialAxis curve1 curve2
   let drawCircles (segment :: Curve2d.MedialAxis.Segment (Global @ Meters)) = Result.do
         let curve = Curve2d.MedialAxis.curve segment
@@ -88,6 +88,5 @@ testCurveMedialAxis label curve1 curve2 = IO.do
     , drawCurve curve1
     , drawCurve curve2
     ]
-  endTime <- Data.Time.Clock.getCurrentTime
-  let elapsed = Duration.from startTime endTime
+  elapsed <- Timer.elapsed timer
   IO.printLine (label <> ": " <> Text.int (Float.round (Duration.inMilliseconds elapsed)) <> " ms")

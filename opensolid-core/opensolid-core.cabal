@@ -34,7 +34,6 @@ common config
     random,
     scientific,
     text,
-    time,
     vector,
 
   ghc-options:
@@ -197,6 +196,7 @@ library
     OpenSolid.SurfaceFunction3d
     OpenSolid.SurfaceParameter
     OpenSolid.Text
+    OpenSolid.Timer
     OpenSolid.Tolerance
     OpenSolid.Transform
     OpenSolid.Transform2d

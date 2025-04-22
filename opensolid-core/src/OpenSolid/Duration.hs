@@ -1,7 +1,6 @@
 module OpenSolid.Duration
   ( Duration
   , zero
-  , from
   , second
   , seconds
   , inSeconds
@@ -20,23 +19,15 @@ module OpenSolid.Duration
   )
 where
 
-import Data.Time.Clock (UTCTime)
-import Data.Time.Clock qualified
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Units (Seconds)
 import OpenSolid.Units qualified as Units
-import Prelude qualified
 
 type Duration = Qty Seconds
 
 zero :: Duration
 zero = Qty.zero
-
-from :: UTCTime -> UTCTime -> Duration
-from startTime endTime = do
-  let diffTime = Data.Time.Clock.diffUTCTime endTime startTime
-  seconds (Prelude.realToFrac diffTime)
 
 second :: Duration
 second = seconds 1.0

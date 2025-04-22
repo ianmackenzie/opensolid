@@ -21,6 +21,7 @@ import Data.Foldable qualified
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Error qualified as Error
 import OpenSolid.Float qualified as Float
+import OpenSolid.Timer qualified as Timer
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
@@ -111,7 +112,9 @@ runImpl args context test = case test of
       | List.anySatisfy (\arg -> Text.contains arg fullName) args -> IO.do
           -- Test filter specified, so print out which tests we're running
           -- and how long they took (with an extra emoji to flag slow tests)
-          (results, elapsed) <- IO.time (fuzzImpl fullName count initialSeed generator)
+          timer <- Timer.start
+          results <- fuzzImpl fullName count initialSeed generator
+          elapsed <- Timer.elapsed timer
           let elapsedText = fixed 3 (Duration.inSeconds elapsed) <> "s"
           let elapsedSuffix = if elapsed > Duration.seconds 0.1 then " ⏲️" else ""
           IO.printLine (fullName <> ": " <> elapsedText <> elapsedSuffix)
