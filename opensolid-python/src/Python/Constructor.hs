@@ -24,7 +24,7 @@ definition classId maybeConstructor = case maybeConstructor of
       , Python.indent
           [ Python.docstring (Constructor.documentation constructor)
           , "inputs = " <> Python.FFI.argumentValue ffiArguments
-          , "self._ptr = " <> Python.FFI.dummyValue selfType
-          , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(self._ptr)"
+          , "self.__ptr = " <> Python.FFI.dummyValue selfType
+          , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(self.__ptr)"
           ]
       ]

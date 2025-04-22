@@ -198,7 +198,7 @@ classDefinition
           Python.lines
             [ "class " <> Python.Class.unqualifiedName classId <> ":"
             , Python.indent [Python.docstring documentation]
-            , Python.indent ["_ptr: c_void_p"]
+            , Python.indent ["__ptr: c_void_p"]
             , Python.indent [Python.Constructor.definition classId maybeConstructor]
             , Python.indent
                 [ "@staticmethod"
@@ -206,7 +206,7 @@ classDefinition
                 , Python.indent
                     [ "\"\"\"Construct directly from an underlying C pointer.\"\"\""
                     , "obj = object.__new__(" <> Python.Class.qualifiedName classId <> ")"
-                    , "obj._ptr = ptr"
+                    , "obj.__ptr = ptr"
                     , "return obj"
                     ]
                 ]
@@ -214,7 +214,7 @@ classDefinition
                 [ "def __del__(self) -> None:"
                 , Python.indent
                     [ "\"\"\"Free the underlying Haskell value.\"\"\""
-                    , "_lib.opensolid_release(self._ptr)"
+                    , "_lib.opensolid_release(self.__ptr)"
                     ]
                 ]
             , Python.indent (List.map Python.Constant.declaration constants)
