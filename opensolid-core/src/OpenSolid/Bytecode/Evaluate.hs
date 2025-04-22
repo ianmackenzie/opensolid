@@ -314,26 +314,26 @@ solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode)
             (Float.toDouble (Range.lowerBound vRange))
             (Float.toDouble (Range.upperBound vRange))
 
-foreign import capi safe "bytecode.h opensolid_curve_value"
+foreign import ccall unsafe "bytecode.h opensolid_curve_value"
   opensolid_curve_value ::
     CString -> Double -> Ptr Double -> IO ()
 
-foreign import capi safe "bytecode.h opensolid_curve_bounds"
+foreign import ccall unsafe "bytecode.h opensolid_curve_bounds"
   opensolid_curve_bounds ::
     CString -> Double -> Double -> Ptr Double -> IO ()
 
-foreign import capi safe "bytecode.h opensolid_surface_value"
+foreign import ccall unsafe "bytecode.h opensolid_surface_value"
   opensolid_surface_value ::
     CString -> Double -> Double -> Ptr Double -> IO ()
 
-foreign import capi safe "bytecode.h opensolid_surface_bounds"
+foreign import ccall unsafe "bytecode.h opensolid_surface_bounds"
   opensolid_surface_bounds ::
     CString -> Double -> Double -> Double -> Double -> Ptr Double -> IO ()
 
-foreign import capi safe "bytecode.h opensolid_solve_monotonic_surface_u"
+foreign import ccall unsafe "bytecode.h opensolid_solve_monotonic_surface_u"
   opensolid_solve_monotonic_surface_u ::
     Double -> CString -> CString -> Double -> Double -> Double -> Double
 
-foreign import capi safe "bytecode.h opensolid_solve_monotonic_surface_v"
+foreign import ccall unsafe "bytecode.h opensolid_solve_monotonic_surface_v"
   opensolid_solve_monotonic_surface_v ::
     Double -> CString -> CString -> Double -> Double -> Double -> Double
