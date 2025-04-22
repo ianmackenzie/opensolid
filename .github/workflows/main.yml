@@ -251,3 +251,26 @@ jobs:
         with:
           name: ${{ github.job }}-wheel
           path: opensolid-python/lib/wheelhouse/*.whl
+
+  pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: publish-to-pypi
+      url: http://pypi.org/p/opensolid
+    permissions:
+      id-token: write
+    needs:
+      - windows
+      - linux
+      - macos-x86
+      - macos-arm64
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-wheel"
+          path: dist
+          merge-multiple: true
+      - name: Publish wheels
+        uses: pypa/gh-action-pypi-publish@release/v1
