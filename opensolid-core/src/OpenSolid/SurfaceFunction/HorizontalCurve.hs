@@ -32,8 +32,6 @@ import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds qualified as ImplicitCurveBounds
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
 import OpenSolid.SurfaceParameter (SurfaceParameter (V), UvBounds, UvCoordinates)
-import OpenSolid.Uv.Derivatives (Derivatives)
-import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data MonotonicSpace
@@ -50,7 +48,7 @@ implicitCurveBounds boxes =
 
 new ::
   Tolerance units =>
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   Float ->
   Float ->
@@ -61,7 +59,7 @@ new derivatives dvdu uStart uEnd boxes =
 
 monotonic ::
   Tolerance units =>
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   Float ->
   Float ->
@@ -72,7 +70,7 @@ monotonic derivatives dvdu uStart uEnd boxes =
 
 bounded ::
   Tolerance units =>
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   Float ->
   Float ->
@@ -86,7 +84,7 @@ bounded derivatives dvdu uStart uEnd boxes monotonicFrame boundingAxes = do
 
 horizontalCurve ::
   Tolerance units =>
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   Float ->
   Float ->
@@ -94,9 +92,8 @@ horizontalCurve ::
   Monotonicity ->
   List (Axis2d UvCoordinates) ->
   Curve2d UvCoordinates
-horizontalCurve derivatives dvdu uStart uEnd boxes monotonicity boundingAxes = do
-  let f = Derivatives.get derivatives
-  let fv = Derivatives.get (derivatives >> V)
+horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
+  let fv = SurfaceFunction.derivative V f
   let bounds = implicitCurveBounds boxes
   let clampedVBounds uValue =
         List.foldl (clamp uValue) (ImplicitCurveBounds.evaluate bounds uValue) boundingAxes

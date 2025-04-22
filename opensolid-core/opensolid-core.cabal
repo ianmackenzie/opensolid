@@ -208,7 +208,6 @@ library
     OpenSolid.Triangle2d
     OpenSolid.Unitless
     OpenSolid.Units
-    OpenSolid.Uv.Derivatives
     OpenSolid.Vector2d
     OpenSolid.Vector3d
     OpenSolid.VectorBounds2d

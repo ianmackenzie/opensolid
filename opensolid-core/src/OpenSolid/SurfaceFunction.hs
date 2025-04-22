@@ -67,8 +67,6 @@ import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Uv.Derivatives (Derivatives)
-import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
@@ -437,18 +435,17 @@ zeros :: Tolerance units => SurfaceFunction units -> Result Zeros.Error Zeros
 zeros function
   | function ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
-      let derivatives = Derivatives.init function derivative
-      let fu = Derivatives.get (derivatives >> U)
-      let fv = Derivatives.get (derivatives >> V)
+      let fu = derivative U function
+      let fv = derivative V function
       let dudv = -fv / fu
       let dvdu = -fu / fv
-      case Solve2d.search (findZeros derivatives dudv dvdu) AllZeroTypes of
+      case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
         Success solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions
           Success $
             PartialZeros.finalize
-              (HorizontalCurve.new derivatives dvdu)
-              (VerticalCurve.new derivatives dudv)
+              (HorizontalCurve.new function dvdu)
+              (VerticalCurve.new function dudv)
               partialZeros
         Failure Solve2d.InfiniteRecursion -> Failure Zeros.HigherOrderZero
 
@@ -470,18 +467,18 @@ data Solution units
 
 findZeros ::
   Tolerance units =>
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   SurfaceFunction Unitless ->
   FindZerosContext ->
   Domain2d ->
   Solve2d.Exclusions exclusions ->
   Solve2d.Action exclusions FindZerosContext (Solution units)
-findZeros derivatives dudv dvdu context subdomain exclusions = do
+findZeros f dudv dvdu context subdomain exclusions = do
   -- TODO find zeros along unit domain boundaries
   -- (including nasty cases like curves emanating from a saddle point
   -- being along a domain boundary)
-  let subproblem = Subproblem.new derivatives dudv dvdu subdomain
+  let subproblem = Subproblem.new f dudv dvdu subdomain
   if not (Subproblem.isZeroCandidate subproblem)
     then Solve2d.pass
     else case exclusions of
@@ -490,9 +487,7 @@ findZeros derivatives dudv dvdu context subdomain exclusions = do
         case context of
           CrossingCurvesOnly -> findCrossingCurves subproblem
           AllZeroTypes -> do
-            let Subproblem{derivativeBounds} = subproblem
-            let fuBounds = Derivatives.get (derivativeBounds >> U)
-            let fvBounds = Derivatives.get (derivativeBounds >> V)
+            let Subproblem{fuBounds, fvBounds} = subproblem
             if Bounds.isResolved fuBounds || Bounds.isResolved fvBounds
               then findCrossingCurves subproblem
               else findTangentSolutions subproblem
@@ -502,19 +497,15 @@ findTangentSolutions ::
   Subproblem units ->
   Solve2d.Action Solve2d.NoExclusions FindZerosContext (Solution units)
 findTangentSolutions subproblem = do
-  let Subproblem{derivatives, subdomain, uvBounds, derivativeBounds} = subproblem
-  let fuuBounds = Derivatives.get (derivativeBounds >> U >> U)
-  let fuvBounds = Derivatives.get (derivativeBounds >> U >> V)
-  let fvvBounds = Derivatives.get (derivativeBounds >> V >> V)
+  let Subproblem{f, subdomain, uvBounds, fuuBounds, fuvBounds, fvvBounds} = subproblem
   let determinant = fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds
   case Bounds.resolvedSign determinant of
     Resolved determinantSign -> do
-      let f = Derivatives.get derivatives
-      let fu = Derivatives.get (derivatives >> U)
-      let fv = Derivatives.get (derivatives >> V)
-      let fuu = Derivatives.get (derivatives >> U >> U)
-      let fuv = Derivatives.get (derivatives >> U >> V)
-      let fvv = Derivatives.get (derivatives >> V >> V)
+      let fu = f |> derivative U
+      let fv = f |> derivative V
+      let fuu = fu |> derivative U
+      let fuv = fu |> derivative V
+      let fvv = fv |> derivative V
       let maybePoint =
             Solve2d.unique
               (\bounds -> VectorBounds2d (evaluateBounds fu bounds) (evaluateBounds fv bounds))
@@ -570,9 +561,7 @@ diagonalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 diagonalCrossingCurve subproblem = Fuzzy.do
-  let Subproblem{derivativeBounds} = subproblem
-  let fuBounds = Derivatives.get (derivativeBounds >> U)
-  let fvBounds = Derivatives.get (derivativeBounds >> V)
+  let Subproblem{fuBounds, fvBounds} = subproblem
   fuSign <- Bounds.resolvedSign fuBounds
   fvSign <- Bounds.resolvedSign fvBounds
   Resolved $
@@ -584,8 +573,7 @@ diagonalCrossingCurve subproblem = Fuzzy.do
 
 southeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingSegment
 southeastCrossingCurve subproblem = do
-  let Subproblem{derivativeValues} = subproblem
-  let fValues = Derivatives.get derivativeValues
+  let Subproblem{fValues} = subproblem
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   if f11 <= Qty.zero || f22 >= Qty.zero
     then Nothing
@@ -602,8 +590,7 @@ southeastCrossingCurve subproblem = do
 
 southwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingSegment
 southwestCrossingCurve subproblem = do
-  let Subproblem{derivativeValues} = subproblem
-  let fValues = Derivatives.get derivativeValues
+  let Subproblem{fValues} = subproblem
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   if f12 <= Qty.zero || f21 >= Qty.zero
     then Nothing
@@ -620,8 +607,7 @@ southwestCrossingCurve subproblem = do
 
 northeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingSegment
 northeastCrossingCurve subproblem = do
-  let Subproblem{derivativeValues} = subproblem
-  let fValues = Derivatives.get derivativeValues
+  let Subproblem{fValues} = subproblem
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   if f21 <= Qty.zero || f12 >= Qty.zero
     then Nothing
@@ -638,8 +624,7 @@ northeastCrossingCurve subproblem = do
 
 northwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingSegment
 northwestCrossingCurve subproblem = do
-  let Subproblem{derivativeValues} = subproblem
-  let fValues = Derivatives.get derivativeValues
+  let Subproblem{fValues} = subproblem
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   if f22 <= Qty.zero || f11 >= Qty.zero
     then Nothing
@@ -669,8 +654,7 @@ horizontalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 horizontalCrossingCurve subproblem = Fuzzy.do
-  let Subproblem{derivativeBounds} = subproblem
-  let fvBounds = Derivatives.get (derivativeBounds >> V)
+  let Subproblem{fvBounds} = subproblem
   if Bounds.isResolved fvBounds
     then Fuzzy.do
       let bottomEdgeBounds = Subproblem.bottomEdgeBounds subproblem
@@ -702,12 +686,12 @@ horizontalCurve ::
   (UvPoint, Domain2d.Boundary) ->
   (UvPoint, Domain2d.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
-horizontalCurve Subproblem{derivatives, dvdu, subdomain, uvBounds} start end = do
+horizontalCurve Subproblem{f, dvdu, subdomain, uvBounds} start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
   let uStart = Point2d.xCoordinate startPoint
   let uEnd = Point2d.xCoordinate endPoint
-  let curve = HorizontalCurve.new derivatives dvdu uStart uEnd (NonEmpty.one uvBounds)
+  let curve = HorizontalCurve.new f dvdu uStart uEnd (NonEmpty.one uvBounds)
   let Domain2d _ vSubdomain = subdomain
   let Bounds2d _ curveVBounds = Curve2d.bounds curve
   if Bounds.contains curveVBounds (Domain1d.interior vSubdomain)
@@ -719,8 +703,7 @@ verticalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 verticalCrossingCurve subproblem = Fuzzy.do
-  let Subproblem{derivativeBounds} = subproblem
-  let fuBounds = Derivatives.get (derivativeBounds >> U)
+  let Subproblem{fuBounds} = subproblem
   if Bounds.isResolved fuBounds
     then Fuzzy.do
       let leftEdgeBounds = Subproblem.leftEdgeBounds subproblem
@@ -752,12 +735,12 @@ verticalCurve ::
   (UvPoint, Domain2d.Boundary) ->
   (UvPoint, Domain2d.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
-verticalCurve Subproblem{derivatives, dudv, subdomain, uvBounds} start end = do
+verticalCurve Subproblem{f, dudv, subdomain, uvBounds} start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
   let vStart = Point2d.yCoordinate startPoint
   let vEnd = Point2d.yCoordinate endPoint
-  let curve = VerticalCurve.new derivatives dudv vStart vEnd (NonEmpty.one uvBounds)
+  let curve = VerticalCurve.new f dudv vStart vEnd (NonEmpty.one uvBounds)
   let Domain2d uSubdomain _ = subdomain
   let Bounds2d curveUBounds _ = Curve2d.bounds curve
   if Bounds.contains curveUBounds (Domain1d.interior uSubdomain)

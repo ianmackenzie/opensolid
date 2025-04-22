@@ -29,7 +29,6 @@ import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))
 import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
-import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d qualified as Vector2d
 
 data SaddleRegion units = SaddleRegion
@@ -54,21 +53,24 @@ bounds SaddleRegion{subproblem} = Subproblem.uvBounds subproblem
 
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
-  let Subproblem{derivatives} = subproblem
-  let fuu = SurfaceFunction.evaluate (Derivatives.get (derivatives >> U >> U)) saddlePoint
-  let fuv = SurfaceFunction.evaluate (Derivatives.get (derivatives >> U >> V)) saddlePoint
-  let fvv = SurfaceFunction.evaluate (Derivatives.get (derivatives >> V >> V)) saddlePoint
+  let Subproblem{f} = subproblem
+  let fuu = f |> SurfaceFunction.derivative U |> SurfaceFunction.derivative U
+  let fuv = f |> SurfaceFunction.derivative U |> SurfaceFunction.derivative V
+  let fvv = f |> SurfaceFunction.derivative V |> SurfaceFunction.derivative V
+  let fuuValue = SurfaceFunction.evaluate fuu saddlePoint
+  let fuvValue = SurfaceFunction.evaluate fuv saddlePoint
+  let fvvValue = SurfaceFunction.evaluate fvv saddlePoint
   let bDirectionCandidates = NonEmpty.three Direction2d.x Direction2d.y (Direction2d.degrees 45.0)
-  let directionalSecondDerivative = secondDerivative fuu fuv fvv
+  let directionalSecondDerivative = secondDerivative fuuValue fuvValue fvvValue
   let dB = NonEmpty.maximumBy (Qty.abs . directionalSecondDerivative) bDirectionCandidates
   let dA = Direction2d.rotateRight dB
   let vA = Vector2d.unit dA
   let vB = Vector2d.unit dB
   let (ua, va) = Vector2d.components vA
   let (ub, vb) = Vector2d.components vB
-  let faa = ua * ua * fuu + 2.0 * ua * va * fuv + va * va * fvv
-  let fab = ua * ub * fuu + (ua * vb + ub * va) * fuv + va * vb * fvv
-  let fbb = ub * ub * fuu + 2.0 * ub * vb * fuv + vb * vb * fvv
+  let faa = ua * ua * fuuValue + 2.0 * ua * va * fuvValue + va * va * fvvValue
+  let fab = ua * ub * fuuValue + (ua * vb + ub * va) * fuvValue + va * vb * fvvValue
+  let fbb = ub * ub * fuuValue + 2.0 * ub * vb * fuvValue + vb * vb * fvvValue
   let determinant = fab .*. fab - faa .*. faa
   let sqrtD = Qty.sqrt' determinant
   let m1 = (-fab + sqrtD) / fbb
@@ -129,7 +131,7 @@ connect ::
   NonEmpty (Curve2d UvCoordinates)
 connect subproblem frame startDirection endPoint boundingAxes = do
   let startPoint = Frame2d.originPoint frame
-  let Subproblem{derivatives, dvdu, dudv, uvBounds} = subproblem
+  let Subproblem{f, dvdu, dudv, uvBounds} = subproblem
   let Bounds2d uBounds vBounds = uvBounds
   let (u1, v1) = Point2d.coordinates startPoint
   let (u2, v2) = Point2d.coordinates endPoint
@@ -140,26 +142,26 @@ connect subproblem frame startDirection endPoint boundingAxes = do
       let startDerivative = Vector2d.xy (uMid - u1) ((uMid - u1) * (dv / du))
       let interpolatingBounds = NonEmpty.one (Bounds2d (Bounds u1 uMid) vBounds)
       let interpolatingCurve =
-            HorizontalCurve.bounded derivatives dvdu u1 uMid interpolatingBounds frame boundingAxes
+            HorizontalCurve.bounded f dvdu u1 uMid interpolatingBounds frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 startPoint [startDerivative]
       if uMid == u2
         then NonEmpty.one interpolatingCurve
         else do
           let implicitBounds = NonEmpty.one (Bounds2d (Bounds uMid u2) vBounds)
           let implicitCurve =
-                HorizontalCurve.bounded derivatives dvdu uMid u2 implicitBounds frame boundingAxes
+                HorizontalCurve.bounded f dvdu uMid u2 implicitBounds frame boundingAxes
           NonEmpty.two interpolatingCurve implicitCurve
     else do
       let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clampTo (Bounds v1 v2)
       let startDerivative = Vector2d.xy ((vMid - v1) * (du / dv)) (vMid - v1)
       let interpolatingBounds = NonEmpty.one (Bounds2d uBounds (Bounds v1 vMid))
       let interpolatingCurve =
-            VerticalCurve.bounded derivatives dudv v1 vMid interpolatingBounds frame boundingAxes
+            VerticalCurve.bounded f dudv v1 vMid interpolatingBounds frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 startPoint [startDerivative]
       if vMid == v2
         then NonEmpty.one interpolatingCurve
         else do
           let implicitBounds = NonEmpty.one (Bounds2d uBounds (Bounds vMid v2))
           let implicitCurve =
-                VerticalCurve.bounded derivatives dudv vMid v2 implicitBounds frame boundingAxes
+                VerticalCurve.bounded f dudv vMid v2 implicitBounds frame boundingAxes
           NonEmpty.two interpolatingCurve implicitCurve

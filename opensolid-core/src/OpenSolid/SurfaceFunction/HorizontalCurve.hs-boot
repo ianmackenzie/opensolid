@@ -11,11 +11,10 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates)
-import OpenSolid.Uv.Derivatives (Derivatives)
 
 new ::
   Tolerance units =>
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   Float ->
   Float ->
@@ -23,7 +22,7 @@ new ::
   Curve2d UvCoordinates
 monotonic ::
   Tolerance units =>
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   Float ->
   Float ->
@@ -31,7 +30,7 @@ monotonic ::
   Curve2d UvCoordinates
 bounded ::
   Tolerance units =>
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   Float ->
   Float ->

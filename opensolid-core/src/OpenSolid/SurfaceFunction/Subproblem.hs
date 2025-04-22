@@ -31,17 +31,20 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
-import OpenSolid.Uv.Derivatives (Derivatives)
-import OpenSolid.Uv.Derivatives qualified as Derivatives
 
 data Subproblem units = Subproblem
-  { derivatives :: Derivatives (SurfaceFunction units)
+  { f :: SurfaceFunction units
   , dudv :: SurfaceFunction Unitless
   , dvdu :: SurfaceFunction Unitless
   , subdomain :: Domain2d
   , uvBounds :: UvBounds
-  , derivativeBounds :: Derivatives (Bounds units)
-  , derivativeValues :: Derivatives (CornerValues units)
+  , fValues :: ~(CornerValues units)
+  , fBounds :: ~(Bounds units)
+  , fuBounds :: ~(Bounds units)
+  , fvBounds :: ~(Bounds units)
+  , fuuBounds :: ~(Bounds units)
+  , fuvBounds :: ~(Bounds units)
+  , fvvBounds :: ~(Bounds units)
   }
 
 data CornerValues units = CornerValues
@@ -52,16 +55,32 @@ data CornerValues units = CornerValues
   }
 
 new ::
-  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction units ->
   SurfaceFunction Unitless ->
   SurfaceFunction Unitless ->
   Domain2d ->
   Subproblem units
-new derivatives dudv dvdu subdomain = do
+new f dudv dvdu subdomain = do
   let uvBounds = Domain2d.bounds subdomain
-  let derivativeBounds = Derivatives.map (\d -> SurfaceFunction.evaluateBounds d uvBounds) derivatives
-  let derivativeValues = Derivatives.map (cornerValues uvBounds) derivatives
-  Subproblem{derivatives, dudv, dvdu, subdomain, uvBounds, derivativeBounds, derivativeValues}
+  let fu = SurfaceFunction.derivative U f
+  let fv = SurfaceFunction.derivative V f
+  let fuu = SurfaceFunction.derivative U fu
+  let fuv = SurfaceFunction.derivative V fu
+  let fvv = SurfaceFunction.derivative V fv
+  Subproblem
+    { f
+    , dudv
+    , dvdu
+    , subdomain
+    , uvBounds
+    , fValues = cornerValues uvBounds f
+    , fBounds = SurfaceFunction.evaluateBounds f uvBounds
+    , fuBounds = SurfaceFunction.evaluateBounds fu uvBounds
+    , fvBounds = SurfaceFunction.evaluateBounds fv uvBounds
+    , fuuBounds = SurfaceFunction.evaluateBounds fuu uvBounds
+    , fuvBounds = SurfaceFunction.evaluateBounds fuv uvBounds
+    , fvvBounds = SurfaceFunction.evaluateBounds fvv uvBounds
+    }
 
 cornerValues :: UvBounds -> SurfaceFunction units -> CornerValues units
 cornerValues (Bounds2d (Bounds u1 u2) (Bounds v1 v2)) function =
@@ -73,31 +92,27 @@ cornerValues (Bounds2d (Bounds u1 u2) (Bounds v1 v2)) function =
     }
 
 leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
-leftEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
+leftEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d (Bounds u1 _) vBounds = uvBounds
-  let f = Derivatives.get derivatives
-  let fv = Derivatives.get (derivatives >> V)
+  let fv = SurfaceFunction.derivative V f
   (Point2d.xy u1 (Internal.solveForV f fv u1 vBounds), Domain2d.leftEdge subdomain)
 
 rightEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
-rightEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
+rightEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d (Bounds _ u2) vBounds = uvBounds
-  let f = Derivatives.get derivatives
-  let fv = Derivatives.get (derivatives >> V)
+  let fv = SurfaceFunction.derivative V f
   (Point2d.xy u2 (Internal.solveForV f fv u2 vBounds), Domain2d.rightEdge subdomain)
 
 bottomEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
-bottomEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
+bottomEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d uBounds (Bounds v1 _) = uvBounds
-  let f = Derivatives.get derivatives
-  let fu = Derivatives.get (derivatives >> U)
+  let fu = SurfaceFunction.derivative U f
   (Point2d.xy (Internal.solveForU f fu uBounds v1) v1, Domain2d.bottomEdge subdomain)
 
 topEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
-topEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
+topEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d uBounds (Bounds _ v2) = uvBounds
-  let f = Derivatives.get derivatives
-  let fu = Derivatives.get (derivatives >> U)
+  let fu = SurfaceFunction.derivative U f
   (Point2d.xy (Internal.solveForU f fu uBounds v2) v2, Domain2d.topEdge subdomain)
 
 bottomLeftPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
@@ -121,17 +136,14 @@ topRightPoint Subproblem{subdomain, uvBounds} = do
   (Point2d.xy u2 v2, Domain2d.topRightCorner subdomain)
 
 tightBounds :: Subproblem units -> Bounds units
-tightBounds Subproblem{uvBounds, derivativeBounds, derivativeValues} = do
-  let fValues = Derivatives.get derivativeValues
+tightBounds Subproblem{uvBounds, fValues, fBounds, fuBounds, fvBounds} = do
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   let Bounds2d (Bounds u1 u2) (Bounds v1 v2) = uvBounds
-  let fuBounds = Derivatives.get (derivativeBounds >> U)
-  let fvBounds = Derivatives.get (derivativeBounds >> V)
   let u1Bounds = Internal.curveBoundsAt v1 v2 f11 f12 fvBounds
   let u2Bounds = Internal.curveBoundsAt v1 v2 f21 f22 fvBounds
   let v1Bounds = Internal.curveBoundsAt u1 u2 f11 f21 fuBounds
   let v2Bounds = Internal.curveBoundsAt u1 u2 f12 f22 fuBounds
-  let Bounds low0 high0 = Derivatives.get derivativeBounds
+  let Bounds low0 high0 = fBounds
   let Bounds lowUV highUV = Internal.curveBoundsOver v1 v2 v1Bounds v2Bounds fvBounds
   let Bounds lowVU highVU = Internal.curveBoundsOver u1 u2 u1Bounds u2Bounds fuBounds
   let low = Qty.max low0 (Qty.max lowUV lowVU)
@@ -141,34 +153,29 @@ tightBounds Subproblem{uvBounds, derivativeBounds, derivativeValues} = do
 
 isZeroCandidate :: Tolerance units => Subproblem units -> Bool
 isZeroCandidate subproblem = do
-  let Subproblem{derivativeBounds} = subproblem
-  let fBounds = Derivatives.get derivativeBounds
+  let Subproblem{fBounds} = subproblem
   fBounds ^ Qty.zero && tightBounds subproblem ^ Qty.zero
 
 leftEdgeBounds :: Subproblem units -> Bounds units
-leftEdgeBounds Subproblem{uvBounds, derivativeBounds, derivativeValues} = do
+leftEdgeBounds Subproblem{uvBounds, fvBounds, fValues} = do
   let Bounds2d _ (Bounds v1 v2) = uvBounds
-  let fvBounds = Derivatives.get (derivativeBounds >> V)
-  let CornerValues{bottomLeft, topLeft} = Derivatives.get derivativeValues
+  let CornerValues{bottomLeft, topLeft} = fValues
   Internal.curveBoundsAt v1 v2 bottomLeft topLeft fvBounds
 
 rightEdgeBounds :: Subproblem units -> Bounds units
-rightEdgeBounds Subproblem{uvBounds, derivativeBounds, derivativeValues} = do
+rightEdgeBounds Subproblem{uvBounds, fvBounds, fValues} = do
   let Bounds2d _ (Bounds v1 v2) = uvBounds
-  let fvBounds = Derivatives.get (derivativeBounds >> V)
-  let CornerValues{bottomRight, topRight} = Derivatives.get derivativeValues
+  let CornerValues{bottomRight, topRight} = fValues
   Internal.curveBoundsAt v1 v2 bottomRight topRight fvBounds
 
 bottomEdgeBounds :: Subproblem units -> Bounds units
-bottomEdgeBounds Subproblem{uvBounds, derivativeBounds, derivativeValues} = do
+bottomEdgeBounds Subproblem{uvBounds, fuBounds, fValues} = do
   let Bounds2d (Bounds u1 u2) _ = uvBounds
-  let fuBounds = Derivatives.get (derivativeBounds >> U)
-  let CornerValues{bottomLeft, bottomRight} = Derivatives.get derivativeValues
+  let CornerValues{bottomLeft, bottomRight} = fValues
   Internal.curveBoundsAt u1 u2 bottomLeft bottomRight fuBounds
 
 topEdgeBounds :: Subproblem units -> Bounds units
-topEdgeBounds Subproblem{uvBounds, derivativeBounds, derivativeValues} = do
+topEdgeBounds Subproblem{uvBounds, fuBounds, fValues} = do
   let Bounds2d (Bounds u1 u2) _ = uvBounds
-  let fuBounds = Derivatives.get (derivativeBounds >> U)
-  let CornerValues{topLeft, topRight} = Derivatives.get derivativeValues
+  let CornerValues{topLeft, topRight} = fValues
   Internal.curveBoundsAt u1 u2 topLeft topRight fuBounds
