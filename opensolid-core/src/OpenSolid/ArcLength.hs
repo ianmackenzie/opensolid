@@ -8,6 +8,7 @@ import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
+import OpenSolid.Tolerance qualified as Tolerance
 
 data Tree units
   = Node (Tree units) (Qty units) (Tree units)
@@ -21,14 +22,31 @@ parameterization derivativeMagnitude = do
   let dsdt2 = dsdt Lobatto.p2
   let dsdt3 = dsdt Lobatto.p3
   let dsdt4 = dsdt 1.0
-  let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
-  let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
-  let evaluate uValue = lookup tree (uValue * length)
-  let evaluateBounds (Range uLow uHigh) = Range (evaluate uLow) (evaluate uHigh)
-  let compiled = CompiledFunction.abstract evaluate evaluateBounds
-  let derivative self = (length / derivativeMagnitude) . self
-  let curve = Curve.recursive compiled derivative
-  (curve, length)
+  Tolerance.using (1e-12 * Qty.max dsdt1 dsdt4) do
+    if
+      | isConstant dsdt1 dsdt2 dsdt3 dsdt4 -> (Curve.t, dsdt1)
+      | isLinear dsdt1 dsdt2 dsdt3 dsdt4 -> do
+          let delta = dsdt4 - dsdt1
+          let t0 = -dsdt1 / delta
+          let sqrt = Tolerance.exactly (Curve.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * Curve.t))
+          let curve = if delta > Qty.zero then t0 + sqrt else t0 - sqrt
+          let length = 0.5 * (dsdt1 + dsdt4)
+          (curve, length)
+      | otherwise -> do
+          let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
+          let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
+          let evaluate uValue = lookup tree (uValue * length)
+          let evaluateBounds (Range uLow uHigh) = Range (evaluate uLow) (evaluate uHigh)
+          let compiled = CompiledFunction.abstract evaluate evaluateBounds
+          let derivative self = (length / derivativeMagnitude) . self
+          let curve = Curve.recursive compiled derivative
+          (curve, length)
+
+isConstant :: Tolerance units => Qty units -> Qty units -> Qty units -> Qty units -> Bool
+isConstant y1 y2 y3 y4 = y1 ~= y2 && y1 ~= y3 && y1 ~= y4
+
+isLinear :: Tolerance units => Qty units -> Qty units -> Qty units -> Qty units -> Bool
+isLinear y1 y2 y3 y4 = let dy = y4 - y1 in y2 ~= y1 + dy * Lobatto.p2 && y3 ~= y1 + dy * Lobatto.p3
 
 lookup :: Tree units -> Qty units -> Float
 lookup tree length = case tree of
