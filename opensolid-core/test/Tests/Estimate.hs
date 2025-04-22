@@ -2,6 +2,8 @@ module Tests.Estimate (tests) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Estimate (Estimate)
@@ -19,8 +21,6 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d

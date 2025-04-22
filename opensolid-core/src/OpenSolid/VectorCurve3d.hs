@@ -41,6 +41,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Bezier qualified as Bezier
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
@@ -60,7 +61,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Bounds (Bounds)
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance

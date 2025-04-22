@@ -9,12 +9,12 @@ module OpenSolid.VectorCurve3d.DegenerateEndpoint
   )
 where
 
+import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d

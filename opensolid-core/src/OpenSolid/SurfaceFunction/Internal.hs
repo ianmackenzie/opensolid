@@ -6,11 +6,11 @@ module OpenSolid.SurfaceFunction.Internal
   )
 where
 
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Solve1d qualified as Solve1d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction

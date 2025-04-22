@@ -32,6 +32,8 @@ module OpenSolid.VectorBounds2d
   )
 where
 
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -42,8 +44,6 @@ import OpenSolid.Primitives
   , VectorBounds3d
   )
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units

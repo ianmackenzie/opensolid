@@ -1,11 +1,11 @@
 module OpenSolid.VectorCurve3d.Direction (unsafe) where
 
+import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d qualified as DirectionCurve3d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
-import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)

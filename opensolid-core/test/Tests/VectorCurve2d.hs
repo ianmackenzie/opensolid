@@ -1,9 +1,9 @@
 module Tests.VectorCurve2d (boundsConsistency, derivativeConsistency) where
 
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d

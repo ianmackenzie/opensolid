@@ -8,6 +8,8 @@ module Tests.Curve2d
 where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Curve2d (Curve2d)
@@ -27,8 +29,6 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Sign qualified as Sign
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance

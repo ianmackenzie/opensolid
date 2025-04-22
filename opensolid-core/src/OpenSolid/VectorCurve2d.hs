@@ -44,6 +44,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Bezier qualified as Bezier
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
@@ -68,7 +69,6 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance

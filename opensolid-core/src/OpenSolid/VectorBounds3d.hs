@@ -34,6 +34,8 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
@@ -41,8 +43,6 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Axis3d (Axis3d), VectorBounds3d (VectorBounds3d))
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units

@@ -1,9 +1,9 @@
-module API.Function (Function(..)) where
+module API.Function (Function (..)) where
 
-import OpenSolid.Prelude
 import API.Constraint (Constraint)
-import OpenSolid.FFI qualified as FFI
 import Foreign qualified
+import OpenSolid.FFI qualified as FFI
+import OpenSolid.Prelude
 
 data Function = Function
   { ffiName :: Text

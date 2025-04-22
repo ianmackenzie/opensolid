@@ -11,6 +11,7 @@ where
 
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
@@ -22,7 +23,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Bounds (Bounds (Bounds))
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))

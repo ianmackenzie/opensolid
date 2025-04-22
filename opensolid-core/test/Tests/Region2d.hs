@@ -3,6 +3,7 @@ module Tests.Region2d (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Float qualified as Float
@@ -10,7 +11,6 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty (zero)
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Region2d.BoundedBy qualified as Region2d.BoundedBy
