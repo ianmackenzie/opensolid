@@ -9,7 +9,6 @@ module OpenSolid.FFI
   , nestedClassId
   , classRepresentation
   , nestedClassRepresentation
-  , namedArgumentRepresentation
   , Type (..)
   , Id (..)
   , typeOf
@@ -133,9 +132,6 @@ classRepresentation givenName proxy =
 nestedClassRepresentation :: FFI a => Text -> Text -> Proxy a -> Representation a
 nestedClassRepresentation parentName childName proxy =
   ClassRep (nestedClassId proxy parentName childName)
-
-namedArgumentRepresentation :: (FFI a, Coercible n a) => Text -> Proxy a -> Representation n
-namedArgumentRepresentation givenName innerProxy = NamedArgumentRep (name givenName) innerProxy
 
 data Type where
   Unit :: Type
