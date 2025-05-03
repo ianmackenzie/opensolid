@@ -9,7 +9,7 @@ from opensolid import (
     Region2d,
     Plane3d,
     Mesh,
-    LengthRange,
+    LengthBounds,
     Scene3d,
     Tolerance,
     Color,
@@ -103,7 +103,7 @@ with Tolerance(Length.nanometers(1)):
 
     output_shaft = Body3d.cylinder_along(
         back_bearing.back_plane().normal_axis().reverse(),
-        LengthRange(
+        LengthBounds(
             -output_shaft_back_extension,
             back_bearing.back_plane()
             .origin_point()
@@ -217,14 +217,14 @@ with Tolerance(Length.nanometers(1)):
     back_plate = Body3d.extruded(
         back_plate_front_plane,
         back_plate_profile,
-        LengthRange.zero_to(-plate_thickness),
+        LengthBounds.zero_to(-plate_thickness),
     )
     front_plate = Body3d.extruded(
         front_plate_back_plane,
         front_plate_profile,
-        LengthRange.zero_to(-plate_thickness),
+        LengthBounds.zero_to(-plate_thickness),
     )
-    plate_material = Scene3d.aluminum(0.3)
+    plate_material = Scene3d.aluminum(roughness=0.3)
 
     standoff_profile = Region2d.polygon(
         [
@@ -242,9 +242,9 @@ with Tolerance(Length.nanometers(1)):
             bottom_right_screw_center,
         ]
     ]
-    standoff_material = Scene3d.aluminum(0.3)
+    standoff_material = Scene3d.aluminum(roughness=0.3)
     standoffs = [
-        Body3d.extruded(plane, standoff_profile, LengthRange.zero_to(plate_distance))
+        Body3d.extruded(plane, standoff_profile, LengthBounds.zero_to(plate_distance))
         for plane in standoff_sketch_planes
     ]
 
@@ -253,9 +253,13 @@ with Tolerance(Length.nanometers(1)):
         body = Body3d.extruded(
             plane,
             profile,
-            LengthRange.zero_to(Length.millimeters(3)),
+            LengthBounds.zero_to(Length.millimeters(3)),
         )
-        return Scene3d.body(mesh_constraints, Scene3d.nonmetal(Color.black, 0.5), body)
+        return Scene3d.body(
+            mesh_constraints,
+            Scene3d.nonmetal(Color.black, roughness=0.5),
+            body,
+        )
 
     scene = [
         motor.scene_entity(resolution),
@@ -263,7 +267,7 @@ with Tolerance(Length.nanometers(1)):
         mating_gear.scene_entity(resolution),
         back_bearing.scene_entity(resolution),
         front_bearing.scene_entity(resolution),
-        Scene3d.body(mesh_constraints, Scene3d.chromium(0.2), output_shaft),
+        Scene3d.body(mesh_constraints, Scene3d.chromium(roughness=0.2), output_shaft),
         Scene3d.body(mesh_constraints, plate_material, back_plate),
         Scene3d.body(mesh_constraints, plate_material, front_plate),
         Scene3d.group(
