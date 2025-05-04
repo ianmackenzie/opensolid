@@ -941,31 +941,31 @@ buildClass
 functions :: Class -> List Function
 functions
   ( Class
-      ffiClass_
+      ffiClass
       _
       constants
-      maybeConstructor
+      constructor
       staticFunctions
       memberFunctions
-      maybeEqualityFunction
-      maybeComparisonFunction
-      maybeNegationFunction
-      maybeAbsFunction
+      equalityFunction
+      comparisonFunction
+      negationFunction
+      absFunction
       preOperators
       postOperators
       nestedClasses
     ) =
     List.concat
-      [ List.map (constantFunctionInfo ffiClass_) constants
-      , constructorInfo ffiClass_ maybeConstructor
-      , List.map (staticFunctionInfo ffiClass_) staticFunctions
-      , List.map (memberFunctionInfo ffiClass_) memberFunctions
-      , equalityFunctionInfo ffiClass_ maybeEqualityFunction
-      , comparisonFunctionInfo ffiClass_ maybeComparisonFunction
-      , negationFunctionInfo ffiClass_ maybeNegationFunction
-      , absFunctionInfo ffiClass_ maybeAbsFunction
-      , List.collect (preOperatorOverloads ffiClass_) preOperators
-      , List.collect (postOperatorOverloads ffiClass_) postOperators
+      [ List.map (constantFunctionInfo ffiClass) constants
+      , constructorInfo ffiClass constructor
+      , List.map (staticFunctionInfo ffiClass) staticFunctions
+      , List.map (memberFunctionInfo ffiClass) memberFunctions
+      , equalityFunctionInfo ffiClass equalityFunction
+      , comparisonFunctionInfo ffiClass comparisonFunction
+      , negationFunctionInfo ffiClass negationFunction
+      , absFunctionInfo ffiClass absFunction
+      , List.collect (preOperatorOverloads ffiClass) preOperators
+      , List.collect (postOperatorOverloads ffiClass) postOperators
       , List.collect functions nestedClasses
       ]
 
