@@ -1,3 +1,5 @@
+Add support for named arguments in constructors
+
 Re-add Line#d, Arc#d, Bezier#d etc. types with corresponding Curve#d.line, Curve#d.arc, Curve#d.bezier functions
 -> in target languages, Line#d can be a *subclass* of Curve#d for convenience
   -> then don't need to expose Curve#d.line, Curve#d.arc etc. to target languages
@@ -13,6 +15,7 @@ Switch to providing an Axis3d instead of Axis2d for revolutions?
 -> might be just fine to allow axes that do not in fact lie within the sketch plane
 -> providing an absolute axis seems generally more readable than a relative one...
 -> a bit tricky, since we need to check for profile curves that lie *on* the axis...
+  -> convert everything to 3D and *then* check for curves lying on the axis?
 
 Switch to FFI Name values being defined (and stored?) as camelCase
 -> have functions to convert camelCase to snake_case or PascalCase
