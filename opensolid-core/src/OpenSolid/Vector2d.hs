@@ -27,6 +27,7 @@ module OpenSolid.Vector2d
   , squaredMagnitude
   , squaredMagnitude'
   , angle
+  , angleFrom
   , IsZero (IsZero)
   , direction
   , magnitudeAndDirection
@@ -202,6 +203,14 @@ The returned angle will be between -180 and +180 degrees.
 -}
 angle :: Vector2d (space @ units) -> Angle
 angle (Vector2d vx vy) = Angle.atan2 vy vx
+
+{-| Measure the signed angle from one vector to another.
+
+The angle will be measured counterclockwise from the first vector to the
+second, and will always be between -180 and +180 degrees.
+-}
+angleFrom :: Vector2d (space @ units) -> Vector2d (space @ units) -> Angle
+angleFrom v1 v2 = Angle.atan2 (v1 `cross'` v2) (v1 `dot'` v2)
 
 data IsZero = IsZero deriving (Eq, Show)
 

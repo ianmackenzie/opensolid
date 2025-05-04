@@ -9,6 +9,7 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import Python qualified
+import Python.Class qualified
 import Python.Function qualified
 import Python.Type qualified
 
@@ -22,9 +23,26 @@ definition ffiClass (functionName, staticFunction) = do
   let normalArguments =
         List.map (Pair.mapFirst FFI.snakeCase) (positionalArguments <> namedArguments)
   let ffiArguments = List.maybe maybeToleranceArgument <> normalArguments
+  let pyrightHack =
+        -- Pyright doesn't seem to realize that it's OK for a static method in a derived class
+        -- to have a different signature from a static method with the same name in the base class,
+        -- since the function lookup in that case is static, not dynamic.
+        -- This causes a problem since 'Direction2d.polar' takes one argument (an angle),
+        -- while 'Vector2d.polar' takes two (a magnitude and an angle).
+        if Python.Class.qualifiedName ffiClass == "Direction2d"
+          && FFI.snakeCase functionName == "polar"
+          then " # type: ignore[override]"
+          else ""
   Python.lines
     [ "@staticmethod"
-    , "def " <> FFI.snakeCase functionName <> "(" <> functionArguments <> ") -> " <> Python.Type.qualifiedName returnType <> ":"
+    , "def "
+        <> FFI.snakeCase functionName
+        <> "("
+        <> functionArguments
+        <> ") -> "
+        <> Python.Type.qualifiedName returnType
+        <> ":"
+        <> pyrightHack
     , Python.indent
         [ Python.docstring (StaticFunction.documentation staticFunction)
         , Python.Function.body ffiFunctionName ffiArguments returnType

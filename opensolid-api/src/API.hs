@@ -527,6 +527,7 @@ vector2d =
     , memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
+    , member1 "Angle To" "Other" Vector2d.angleFrom $(docs 'Vector2d.angleFrom)
     , memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
     , negateSelf
     , floatTimes
@@ -566,6 +567,7 @@ displacement2d =
     , memberM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
+    , member1 "Angle To" "Other" Vector2d.angleFrom $(docs 'Vector2d.angleFrom)
     , memberM0 "Is Zero" (~= Vector2d.zero) "Check if a displacement is zero, within the current tolerance."
     , negateSelf
     , floatTimes
@@ -598,6 +600,7 @@ areaVector2d =
     , memberS0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
+    , member1 "Angle To" "Other" Vector2d.angleFrom $(docs 'Vector2d.angleFrom)
     , memberS0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
     , negateSelf
     , floatTimes
@@ -617,11 +620,9 @@ direction2d =
     [ upcast Vector2d.unit
     , constant "X" Direction2d.x $(docs 'Direction2d.x)
     , constant "Y" Direction2d.y $(docs 'Direction2d.y)
-    , factory1 "From Angle" "Angle" Direction2d.fromAngle $(docs 'Direction2d.fromAngle)
+    , factory1 "Polar" "Angle" Direction2d.polar $(docs 'Direction2d.polar)
     , factory1 "Degrees" "Value" Direction2d.degrees $(docs 'Direction2d.degrees)
     , factory1 "Radians" "Value" Direction2d.radians $(docs 'Direction2d.radians)
-    , member0 "To Angle" Direction2d.toAngle $(docs 'Direction2d.toAngle)
-    , member1 "Angle To" "Other" Direction2d.angleFrom $(docs 'Direction2d.angleFrom)
     , negateSelf
     ]
 

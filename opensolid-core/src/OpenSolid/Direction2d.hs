@@ -9,8 +9,8 @@ module OpenSolid.Direction2d
   , y
   , PointsAreCoincident (PointsAreCoincident)
   , from
-  , fromAngle
-  , toAngle
+  , polar
+  , angle
   , degrees
   , radians
   , angleFrom
@@ -109,10 +109,24 @@ The angle is measured counterclockwise from the positive X direction, so:
   * An angle of 90 degrees corresponds to the positive Y direction
   * An angle of 180 degrees (or -180 degrees) corresponds to the negative X direction
 -}
-fromAngle :: Angle -> Direction2d space
-fromAngle angle = Unit2d (Vector2d (Angle.cos angle) (Angle.sin angle))
+polar :: Angle -> Direction2d space
+polar theta = Unit2d (Vector2d (Angle.cos theta) (Angle.sin theta))
 
-{-| Convert a direction to an angle.
+{-| Construct a direction from an angle given in degrees.
+
+See 'polar' for details.
+-}
+degrees :: Float -> Direction2d space
+degrees value = polar (Angle.degrees value)
+
+{-| Construct a direction from an angle given in radians.
+
+See 'polar' for details.
+-}
+radians :: Float -> Direction2d space
+radians value = polar (Angle.radians value)
+
+{-| Get the angle of a direction.
 
 The angle is measured counterclockwise from the positive X direction, so:
 
@@ -125,22 +139,8 @@ The angle is measured counterclockwise from the positive X direction, so:
 
 The returned angle will be between -180 and +180 degrees.
 -}
-toAngle :: Direction2d space -> Angle
-toAngle (Unit2d vector) = Vector2d.angle vector
-
-{-| Construct a direction from an angle given in degrees.
-
-See 'fromAngle' for details.
--}
-degrees :: Float -> Direction2d space
-degrees value = fromAngle (Angle.degrees value)
-
-{-| Construct a direction from an angle given in radians.
-
-See 'fromAngle' for details.
--}
-radians :: Float -> Direction2d space
-radians value = fromAngle (Angle.radians value)
+angle :: Direction2d space -> Angle
+angle (Unit2d vector) = Vector2d.angle vector
 
 {-| Measure the signed angle from one direction to another.
 
@@ -148,7 +148,7 @@ The angle will be measured counterclockwise from the first direction to the
 second, and will always be between -180 and +180 degrees.
 -}
 angleFrom :: Direction2d space -> Direction2d space -> Angle
-angleFrom d1 d2 = Angle.atan2 (d1 `cross` d2) (d1 `dot` d2)
+angleFrom (Unit2d v1) (Unit2d v2) = Vector2d.angleFrom v1 v2
 
 perpendicularTo :: Direction2d space -> Direction2d space
 perpendicularTo = rotateLeft
@@ -172,7 +172,7 @@ placeOn ::
 placeOn planarBasis (Unit2d vector) = Unit3d (Vector2d.placeOn planarBasis vector)
 
 random :: Random.Generator (Direction2d space)
-random = Random.map fromAngle (Qty.random -Angle.pi Angle.pi)
+random = Random.map polar (Qty.random -Angle.pi Angle.pi)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
