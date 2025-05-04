@@ -9,7 +9,7 @@ where
 
 import OpenSolid.Binary (Builder)
 import OpenSolid.Bytecode.Encode qualified as Encode
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (return)
 import OpenSolid.Text qualified as Text
 import Prelude qualified
 

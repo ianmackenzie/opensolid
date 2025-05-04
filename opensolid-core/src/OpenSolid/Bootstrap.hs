@@ -25,6 +25,7 @@ module OpenSolid.Bootstrap
   , Maybe (Just, Nothing)
   , Type
   , identity
+  , return
   , always
   , (#)
   , fromIntegral
@@ -112,6 +113,10 @@ infixl 0 |>
 {-# INLINE identity #-}
 identity :: a -> a
 identity value = value
+
+{-# INLINE return #-}
+return :: a -> a
+return value = value
 
 {-# INLINE always #-}
 always :: a -> b -> a

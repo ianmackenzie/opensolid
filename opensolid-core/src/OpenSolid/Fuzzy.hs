@@ -10,7 +10,7 @@ module OpenSolid.Fuzzy
   )
 where
 
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (return)
 import OpenSolid.Composition
 import Prelude (Applicative, Functor, Monad)
 import Prelude qualified

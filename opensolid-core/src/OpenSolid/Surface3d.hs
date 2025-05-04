@@ -223,11 +223,13 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
           |> generateSteinerPoints accuracy bounds12 edgeSet fuu fuv fvv
           |> generateSteinerPoints accuracy bounds21 edgeSet fuu fuv fvv
           |> generateSteinerPoints accuracy bounds22 edgeSet fuu fuv fvv
-  let return = Point2d (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
   case includeSubdomain uvBounds edgeSet of
-    Resolved False -> accumulated
-    Resolved True -> if surfaceError fuu fuv fvv uvBounds <= accuracy then return else recurse
     Unresolved -> recurse
+    Resolved False -> accumulated
+    Resolved True ->
+      if surfaceError fuu fuv fvv uvBounds <= accuracy
+        then Point2d (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
+        else recurse
 
 includeSubdomain :: UvBounds -> Set2d (LineSegment2d UvPoint) UvCoordinates -> Fuzzy Bool
 includeSubdomain subdomain edgeSet = Tolerance.exactly $

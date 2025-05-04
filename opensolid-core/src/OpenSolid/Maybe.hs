@@ -19,7 +19,7 @@ module OpenSolid.Maybe
 where
 
 import OpenSolid.Bool qualified as Bool
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (return)
 import OpenSolid.Composition
 import OpenSolid.List qualified as List
 import OpenSolid.Random qualified as Random
