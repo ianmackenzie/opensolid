@@ -806,7 +806,9 @@ areaCurve =
     , negateSelf
     , floatTimes
     , plusSelf
+    , plus @Area Self
     , minusSelf
+    , minus @Area Self
     , timesFloat
     , times @(Curve Unitless) Self
     , divByFloat
