@@ -49,13 +49,13 @@ data Constructor value where
     Text ->
     Constructor value
 
-ffiName :: FFI.Id value -> Constructor value -> Text
-ffiName classId constructor = do
+ffiName :: FFI.Class -> Constructor value -> Text
+ffiName ffiClass constructor = do
   let (arguments, _) = signature constructor
   let argumentTypes = List.map Pair.second arguments
   Text.join "_" $
     "opensolid"
-      : FFI.className classId
+      : FFI.concatenatedName ffiClass
       : "constructor"
       : List.map FFI.typeName argumentTypes
 

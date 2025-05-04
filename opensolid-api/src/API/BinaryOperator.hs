@@ -13,11 +13,11 @@ import OpenSolid.Text qualified as Text
 
 data Id = Add | Sub | Mul | Div | FloorDiv | Mod | Dot | Cross deriving (Eq)
 
-ffiName :: FFI.Id value -> Id -> (FFI.Type, FFI.Type, FFI.Type) -> Text
-ffiName classId operatorId (lhsType, rhsType, _) =
+ffiName :: FFI.Class -> Id -> (FFI.Type, FFI.Type, FFI.Type) -> Text
+ffiName ffiClass operatorId (lhsType, rhsType, _) =
   Text.join "_" $
     [ "opensolid"
-    , FFI.className classId
+    , FFI.concatenatedName ffiClass
     , functionName operatorId
     , FFI.typeName lhsType
     , FFI.typeName rhsType

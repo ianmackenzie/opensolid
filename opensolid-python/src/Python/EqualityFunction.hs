@@ -8,12 +8,12 @@ import Python qualified
 import Python.Function qualified
 import Python.Type qualified
 
-definition :: forall value. FFI value => FFI.Id value -> Maybe (value -> value -> Bool) -> Text
-definition classId maybeFunction = case maybeFunction of
+definition :: forall value. FFI value => FFI.Class -> Maybe (value -> value -> Bool) -> Text
+definition ffiClass maybeFunction = case maybeFunction of
   Nothing -> ""
   Just function -> do
     let valueType = EqualityFunction.valueType function
-    let ffiFunctionName = EqualityFunction.ffiName classId
+    let ffiFunctionName = EqualityFunction.ffiName ffiClass
     Python.lines
       [ "def __eq__(self, other: object) -> bool:"
       , Python.indent

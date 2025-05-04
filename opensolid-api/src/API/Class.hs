@@ -97,7 +97,7 @@ import OpenSolid.Units (Meters, Radians, SquareMeters)
 data Class where
   Class ::
     FFI value =>
-    { id :: FFI.Id value
+    { ffiClass :: FFI.Class
     , documentation :: Text
     , constants :: List (FFI.Name, Constant)
     , constructor :: Maybe (Constructor value)
@@ -753,8 +753,8 @@ buildClass
     case members of
       [] ->
         Class
-          { id = case FFI.typeOf @value Proxy of
-              FFI.Class (FFI.Id Proxy names) -> FFI.Id Proxy names
+          { ffiClass = case FFI.typeOf @value Proxy of
+              FFI.Class ffiClass -> ffiClass
               _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
           , documentation = classDocs
           , constants = constantsAcc
@@ -941,7 +941,7 @@ buildClass
 functions :: Class -> List Function
 functions
   ( Class
-      classId_
+      ffiClass_
       _
       constants
       maybeConstructor
@@ -956,23 +956,23 @@ functions
       nestedClasses
     ) =
     List.concat
-      [ List.map (constantFunctionInfo classId_) constants
-      , constructorInfo classId_ maybeConstructor
-      , List.map (staticFunctionInfo classId_) staticFunctions
-      , List.map (memberFunctionInfo classId_) memberFunctions
-      , equalityFunctionInfo classId_ maybeEqualityFunction
-      , comparisonFunctionInfo classId_ maybeComparisonFunction
-      , negationFunctionInfo classId_ maybeNegationFunction
-      , absFunctionInfo classId_ maybeAbsFunction
-      , List.collect (preOperatorOverloads classId_) preOperators
-      , List.collect (postOperatorOverloads classId_) postOperators
+      [ List.map (constantFunctionInfo ffiClass_) constants
+      , constructorInfo ffiClass_ maybeConstructor
+      , List.map (staticFunctionInfo ffiClass_) staticFunctions
+      , List.map (memberFunctionInfo ffiClass_) memberFunctions
+      , equalityFunctionInfo ffiClass_ maybeEqualityFunction
+      , comparisonFunctionInfo ffiClass_ maybeComparisonFunction
+      , negationFunctionInfo ffiClass_ maybeNegationFunction
+      , absFunctionInfo ffiClass_ maybeAbsFunction
+      , List.collect (preOperatorOverloads ffiClass_) preOperators
+      , List.collect (postOperatorOverloads ffiClass_) postOperators
       , List.collect functions nestedClasses
       ]
 
-constantFunctionInfo :: FFI.Id a -> (FFI.Name, Constant) -> Function
-constantFunctionInfo classId_ (constantName, const@(Constant value _)) =
+constantFunctionInfo :: FFI.Class -> (FFI.Name, Constant) -> Function
+constantFunctionInfo ffiClass_ (constantName, const@(Constant value _)) =
   Function
-    { ffiName = Constant.ffiName classId_ constantName
+    { ffiName = Constant.ffiName ffiClass_ constantName
     , constraint = Nothing
     , argumentTypes = []
     , returnType = Constant.valueType value
@@ -982,42 +982,42 @@ constantFunctionInfo classId_ (constantName, const@(Constant value _)) =
 constructorInfo ::
   forall value.
   FFI value =>
-  FFI.Id value ->
+  FFI.Class ->
   Maybe (Constructor value) ->
   List Function
-constructorInfo classId_ maybeConstructor = case maybeConstructor of
+constructorInfo ffiClass_ maybeConstructor = case maybeConstructor of
   Nothing -> []
   Just constructor -> do
     let (arguments, _) = Constructor.signature constructor
     List.singleton $
       Function
-        { ffiName = Constructor.ffiName classId_ constructor
+        { ffiName = Constructor.ffiName ffiClass_ constructor
         , constraint = Nothing
         , argumentTypes = List.map Pair.second arguments
         , returnType = FFI.typeOf @value Proxy
         , invoke = Constructor.invoke constructor
         }
 
-staticFunctionInfo :: FFI.Id a -> (FFI.Name, StaticFunction) -> Function
-staticFunctionInfo classId_ (functionName, staticFunction) = do
+staticFunctionInfo :: FFI.Class -> (FFI.Name, StaticFunction) -> Function
+staticFunctionInfo ffiClass_ (functionName, staticFunction) = do
   let (constraint, positionalArguments, namedArguments, returnType) =
         StaticFunction.signature staticFunction
   let arguments = positionalArguments <> namedArguments
   Function
-    { ffiName = StaticFunction.ffiName classId_ functionName staticFunction
+    { ffiName = StaticFunction.ffiName ffiClass_ functionName staticFunction
     , constraint
     , argumentTypes = List.map Pair.second arguments
     , returnType
     , invoke = StaticFunction.invoke staticFunction
     }
 
-memberFunctionInfo :: FFI.Id value -> (FFI.Name, MemberFunction value) -> Function
-memberFunctionInfo classId_ (functionName, memberFunction) = do
+memberFunctionInfo :: FFI.Class -> (FFI.Name, MemberFunction value) -> Function
+memberFunctionInfo ffiClass_ (functionName, memberFunction) = do
   let (constraint, positionalArguments, namedArguments, selfType, returnType) =
         MemberFunction.signature memberFunction
   let arguments = positionalArguments <> namedArguments
   Function
-    { ffiName = MemberFunction.ffiName classId_ functionName memberFunction
+    { ffiName = MemberFunction.ffiName ffiClass_ functionName memberFunction
     , constraint
     , argumentTypes = List.map Pair.second arguments <> [selfType]
     , returnType
@@ -1027,16 +1027,16 @@ memberFunctionInfo classId_ (functionName, memberFunction) = do
 negationFunctionInfo ::
   forall value.
   FFI value =>
-  FFI.Id value ->
+  FFI.Class ->
   Maybe (value -> value) ->
   List Function
-negationFunctionInfo classId_ maybeNegationFunction = case maybeNegationFunction of
+negationFunctionInfo ffiClass_ maybeNegationFunction = case maybeNegationFunction of
   Nothing -> []
   Just negationFunction -> do
     let selfType = FFI.typeOf @value Proxy
     List.singleton $
       Function
-        { ffiName = NegationFunction.ffiName classId_
+        { ffiName = NegationFunction.ffiName ffiClass_
         , constraint = Nothing
         , argumentTypes = [selfType]
         , returnType = selfType
@@ -1046,16 +1046,16 @@ negationFunctionInfo classId_ maybeNegationFunction = case maybeNegationFunction
 absFunctionInfo ::
   forall value.
   FFI value =>
-  FFI.Id value ->
+  FFI.Class ->
   Maybe (value -> value) ->
   List Function
-absFunctionInfo classId_ maybeAbsFunction = case maybeAbsFunction of
+absFunctionInfo ffiClass_ maybeAbsFunction = case maybeAbsFunction of
   Nothing -> []
   Just absFunction -> do
     let selfType = FFI.typeOf @value Proxy
     List.singleton $
       Function
-        { ffiName = AbsFunction.ffiName classId_
+        { ffiName = AbsFunction.ffiName ffiClass_
         , constraint = Nothing
         , argumentTypes = [selfType]
         , returnType = selfType
@@ -1065,16 +1065,16 @@ absFunctionInfo classId_ maybeAbsFunction = case maybeAbsFunction of
 equalityFunctionInfo ::
   forall value.
   FFI value =>
-  FFI.Id value ->
+  FFI.Class ->
   Maybe (value -> value -> Bool) ->
   List Function
-equalityFunctionInfo classId_ maybeEqualityFunction = case maybeEqualityFunction of
+equalityFunctionInfo ffiClass_ maybeEqualityFunction = case maybeEqualityFunction of
   Nothing -> []
   Just equalityFunction -> do
     let selfType = FFI.typeOf @value Proxy
     List.singleton $
       Function
-        { ffiName = EqualityFunction.ffiName classId_
+        { ffiName = EqualityFunction.ffiName ffiClass_
         , constraint = Nothing
         , argumentTypes = [selfType, selfType]
         , returnType = FFI.typeOf @Bool Proxy
@@ -1084,27 +1084,27 @@ equalityFunctionInfo classId_ maybeEqualityFunction = case maybeEqualityFunction
 comparisonFunctionInfo ::
   forall value.
   FFI value =>
-  FFI.Id value ->
+  FFI.Class ->
   Maybe (value -> value -> Int) ->
   List Function
-comparisonFunctionInfo classId_ maybeComparisonFunction = case maybeComparisonFunction of
+comparisonFunctionInfo ffiClass_ maybeComparisonFunction = case maybeComparisonFunction of
   Nothing -> []
   Just comparisonFunction -> do
     let selfType = FFI.typeOf @value Proxy
     List.singleton $
       Function
-        { ffiName = ComparisonFunction.ffiName classId_
+        { ffiName = ComparisonFunction.ffiName ffiClass_
         , constraint = Nothing
         , argumentTypes = [selfType, selfType]
         , returnType = FFI.typeOf @Int Proxy
         , invoke = ComparisonFunction.invoke comparisonFunction
         }
 
-preOperatorOverload :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> Function
-preOperatorOverload classId_ operatorId operator = do
+preOperatorOverload :: FFI.Class -> BinaryOperator.Id -> PreOperator value -> Function
+preOperatorOverload ffiClass_ operatorId operator = do
   let (lhsType, selfType, returnType) = PreOperator.signature operator
   Function
-    { ffiName = PreOperator.ffiName classId_ operatorId operator
+    { ffiName = PreOperator.ffiName ffiClass_ operatorId operator
     , constraint = Nothing
     , argumentTypes = [lhsType, selfType]
     , returnType = returnType
@@ -1112,17 +1112,17 @@ preOperatorOverload classId_ operatorId operator = do
     }
 
 preOperatorOverloads ::
-  FFI.Id value ->
+  FFI.Class ->
   (BinaryOperator.Id, List (PreOperator value)) ->
   List Function
-preOperatorOverloads classId_ (operatorId, overloads) =
-  List.map (preOperatorOverload classId_ operatorId) overloads
+preOperatorOverloads ffiClass_ (operatorId, overloads) =
+  List.map (preOperatorOverload ffiClass_ operatorId) overloads
 
-postOperatorOverload :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> Function
-postOperatorOverload classId_ operatorId operator = do
+postOperatorOverload :: FFI.Class -> BinaryOperator.Id -> PostOperator value -> Function
+postOperatorOverload ffiClass_ operatorId operator = do
   let (selfType, rhsType, returnType) = PostOperator.signature operator
   Function
-    { ffiName = PostOperator.ffiName classId_ operatorId operator
+    { ffiName = PostOperator.ffiName ffiClass_ operatorId operator
     , constraint = Nothing
     , argumentTypes = [selfType, rhsType]
     , returnType = returnType
@@ -1130,8 +1130,8 @@ postOperatorOverload classId_ operatorId operator = do
     }
 
 postOperatorOverloads ::
-  FFI.Id value ->
+  FFI.Class ->
   (BinaryOperator.Id, List (PostOperator value)) ->
   List Function
-postOperatorOverloads classId_ (operatorId, overloads) =
-  List.map (postOperatorOverload classId_ operatorId) overloads
+postOperatorOverloads ffiClass_ (operatorId, overloads) =
+  List.map (postOperatorOverload ffiClass_ operatorId) overloads

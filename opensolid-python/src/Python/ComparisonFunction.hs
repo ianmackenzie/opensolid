@@ -8,13 +8,13 @@ import Python qualified
 import Python.Function qualified
 import Python.Type qualified
 
-definitions :: forall value. FFI value => FFI.Id value -> Maybe (value -> value -> Int) -> Text
-definitions classId maybeFunction = case maybeFunction of
+definitions :: forall value. FFI value => FFI.Class -> Maybe (value -> value -> Int) -> Text
+definitions ffiClass maybeFunction = case maybeFunction of
   Nothing -> ""
   Just function -> do
     let valueType = ComparisonFunction.valueType function
     let valueTypeName = Python.Type.qualifiedName valueType
-    let ffiFunctionName = ComparisonFunction.ffiName classId
+    let ffiFunctionName = ComparisonFunction.ffiName ffiClass
     let helperDefinition =
           Python.lines
             [ "def _compare(self, other: " <> valueTypeName <> ") -> int:"

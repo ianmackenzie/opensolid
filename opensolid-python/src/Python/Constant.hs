@@ -20,12 +20,12 @@ declaration (name, (Constant value documentation)) = do
     , ""
     ]
 
-definition :: FFI.Id a -> (Name, Constant) -> Text
-definition classId (name, (Constant value _)) = do
+definition :: FFI.Class -> (Name, Constant) -> Text
+definition ffiClass (name, (Constant value _)) = do
   let valueType = Constant.valueType value
-  let ffiFunctionName = Constant.ffiName classId name
+  let ffiFunctionName = Constant.ffiName ffiClass name
   let constantName = FFI.snakeCase name
-  let className = Python.Class.qualifiedName classId
+  let className = Python.Class.qualifiedName ffiClass
   let helperFunctionName = "_" <> Text.toLower className <> "_" <> constantName
   Python.lines
     [ "def " <> helperFunctionName <> "() -> " <> Python.Type.qualifiedName valueType <> ":"

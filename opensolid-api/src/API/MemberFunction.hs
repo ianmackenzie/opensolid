@@ -198,14 +198,14 @@ data MemberFunction value where
     Text ->
     MemberFunction value
 
-ffiName :: FFI.Id value -> Name -> MemberFunction value -> Text
-ffiName classId functionName memberFunction = do
+ffiName :: FFI.Class -> Name -> MemberFunction value -> Text
+ffiName ffiClass functionName memberFunction = do
   let (_, positionalArguments, namedArguments, _, _) = signature memberFunction
   let arguments = positionalArguments <> namedArguments
   let argumentTypes = List.map Pair.second arguments
   Text.join "_" $
     "opensolid"
-      : FFI.className classId
+      : FFI.concatenatedName ffiClass
       : FFI.camelCase functionName
       : List.map FFI.typeName argumentTypes
 

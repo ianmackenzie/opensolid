@@ -13,9 +13,9 @@ import Python.Type qualified
 rhsArgName :: Text
 rhsArgName = FFI.snakeCase PostOperator.rhsName
 
-definition :: FFI.Id value -> (BinaryOperator.Id, List (PostOperator value)) -> Text
-definition classId (operatorId, operators) = do
-  case List.map (overload classId operatorId) operators of
+definition :: FFI.Class -> (BinaryOperator.Id, List (PostOperator value)) -> Text
+definition ffiClass (operatorId, operators) = do
+  case List.map (overload ffiClass operatorId) operators of
     [(signature, _, body)] ->
       Python.lines
         [ signature
@@ -65,9 +65,9 @@ functionName operatorId = case operatorId of
   BinaryOperator.Dot -> "dot"
   BinaryOperator.Cross -> "cross"
 
-overload :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> (Text, Text, Text)
-overload classId operatorId memberFunction = do
-  let ffiFunctionName = PostOperator.ffiName classId operatorId memberFunction
+overload :: FFI.Class -> BinaryOperator.Id -> PostOperator value -> (Text, Text, Text)
+overload ffiClass operatorId memberFunction = do
+  let ffiFunctionName = PostOperator.ffiName ffiClass operatorId memberFunction
   let (selfType, rhsType, returnType) = PostOperator.signature memberFunction
   let signature = overloadSignature operatorId rhsType returnType
   let matchPattern = Python.Function.typePattern rhsType

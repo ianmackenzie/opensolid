@@ -143,14 +143,14 @@ data StaticFunction where
     Text ->
     StaticFunction
 
-ffiName :: FFI.Id a -> Name -> StaticFunction -> Text
-ffiName classId functionName staticFunction = do
+ffiName :: FFI.Class -> Name -> StaticFunction -> Text
+ffiName ffiClass functionName staticFunction = do
   let (_, positionalArguments, namedArguments, _) = signature staticFunction
   let arguments = positionalArguments <> namedArguments
   let argumentTypes = List.map Pair.second arguments
   Text.join "_" $
     "opensolid"
-      : FFI.className classId
+      : FFI.concatenatedName ffiClass
       : FFI.camelCase functionName
       : List.map FFI.typeName argumentTypes
 

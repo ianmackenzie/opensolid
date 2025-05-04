@@ -13,9 +13,9 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
-ffiName :: FFI.Id a -> Text
-ffiName classId =
-  Text.join "_" ["opensolid", FFI.className classId, "neg"]
+ffiName :: FFI.Class -> Text
+ffiName ffiClass =
+  Text.join "_" ["opensolid", FFI.concatenatedName ffiClass, "neg"]
 
 invoke :: FFI value => (value -> value) -> Ptr () -> Ptr () -> IO ()
 invoke f inputPtr outputPtr = IO.do

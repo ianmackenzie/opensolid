@@ -13,9 +13,9 @@ import Python.Type qualified
 lhsArgName :: Text
 lhsArgName = FFI.snakeCase PreOperator.lhsName
 
-definition :: FFI.Id value -> (BinaryOperator.Id, List (PreOperator value)) -> Text
-definition classId (operatorId, operators) = do
-  case List.map (overload classId operatorId) operators of
+definition :: FFI.Class -> (BinaryOperator.Id, List (PreOperator value)) -> Text
+definition ffiClass (operatorId, operators) = do
+  case List.map (overload ffiClass operatorId) operators of
     [(signature, _, body)] ->
       Python.lines
         [ signature
@@ -65,9 +65,9 @@ functionName operatorId = case operatorId of
   BinaryOperator.Dot -> internalError "Dot product should never be a pre-operator"
   BinaryOperator.Cross -> internalError "Cross product should never be a pre-operator"
 
-overload :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> (Text, Text, Text)
-overload classId operatorId memberFunction = do
-  let ffiFunctionName = PreOperator.ffiName classId operatorId memberFunction
+overload :: FFI.Class -> BinaryOperator.Id -> PreOperator value -> (Text, Text, Text)
+overload ffiClass operatorId memberFunction = do
+  let ffiFunctionName = PreOperator.ffiName ffiClass operatorId memberFunction
   let (lhsType, selfType, returnType) = PreOperator.signature memberFunction
   let signature = overloadSignature operatorId lhsType returnType
   let matchPattern = Python.Function.typePattern lhsType

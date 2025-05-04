@@ -1,19 +1,19 @@
 module OpenSolid.FFI
   ( FFI (representation)
   , Name
+  , Class
   , name
   , pascalCase
   , camelCase
   , snakeCase
-  , classId
-  , nestedClassId
   , classRepresentation
   , nestedClassRepresentation
   , Type (..)
-  , Id (..)
   , typeOf
   , typeName
-  , className
+  , qualifiedName
+  , unqualifiedName
+  , concatenatedName
   , size
   , store
   , load
@@ -55,6 +55,8 @@ class FFI a where
   representation :: Proxy a -> Representation a
 
 newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
+
+newtype Class = ClassDefinition (NonEmpty Text)
 
 name :: Text -> Name
 name input =
@@ -111,27 +113,19 @@ data Representation a where
   -- followed by the representation of the successful value or exception
   ResultRep :: FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
-  ClassRep :: FFI a => Id a -> Representation a
+  ClassRep :: FFI a => Class -> Representation a
   -- Some IO that returns a representable value
   IORep :: FFI a => Representation (IO a)
   -- A function argument that should be named-only if supported
   NamedArgumentRep :: (FFI a, Coercible n a) => Name -> Proxy a -> Representation n
 
-classId :: FFI a => Proxy a -> Text -> Id a
-classId proxy givenName =
-  Id proxy (NonEmpty.one (name givenName))
-
-nestedClassId :: FFI a => Proxy a -> Text -> Text -> Id a
-nestedClassId proxy parentName childName =
-  Id proxy (NonEmpty.two (name parentName) (name childName))
-
 classRepresentation :: FFI a => Text -> Proxy a -> Representation a
-classRepresentation givenName proxy =
-  ClassRep (classId proxy givenName)
+classRepresentation givenName _ =
+  ClassRep (ClassDefinition (NonEmpty.one givenName))
 
 nestedClassRepresentation :: FFI a => Text -> Text -> Proxy a -> Representation a
-nestedClassRepresentation parentName childName proxy =
-  ClassRep (nestedClassId proxy parentName childName)
+nestedClassRepresentation parentName childName _ =
+  ClassRep (ClassDefinition (NonEmpty.two parentName childName))
 
 data Type where
   Unit :: Type
@@ -145,10 +139,7 @@ data Type where
   Tuple :: Type -> Type -> List Type -> Type
   Maybe :: Type -> Type
   Result :: Type -> Type
-  Class :: FFI a => Id a -> Type
-
-data Id a where
-  Id :: FFI a => Proxy a -> NonEmpty Name -> Id a
+  Class :: Class -> Type
 
 typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
@@ -167,7 +158,7 @@ typeOf proxy = case representation proxy of
   Tuple6Rep -> tuple6Type proxy
   MaybeRep -> maybeType proxy
   ResultRep -> resultType proxy
-  ClassRep id -> Class id
+  ClassRep class_ -> Class class_
   IORep -> ioResultType proxy
   NamedArgumentRep _ innerProxy -> typeOf innerProxy
 
@@ -243,11 +234,16 @@ typeName ffiType = case ffiType of
     "Tuple" <> Text.int tupleSize <> Text.concat (List.map typeName itemTypes)
   Maybe valueType -> "Maybe" <> typeName valueType
   Result valueType -> "Result" <> typeName valueType
-  Class id -> className id
+  Class class_ -> concatenatedName class_
 
-className :: Id a -> Text
-className (Id _ classNames) =
-  Text.concat (List.map pascalCase (NonEmpty.toList classNames))
+concatenatedName :: Class -> Text
+concatenatedName (ClassDefinition names) = Text.concat (NonEmpty.toList names)
+
+qualifiedName :: Text -> Class -> Text
+qualifiedName separator (ClassDefinition names) = Text.join separator (NonEmpty.toList names)
+
+unqualifiedName :: Class -> Text
+unqualifiedName (ClassDefinition names) = NonEmpty.last names
 
 size :: Type -> Int
 size ffiType = case ffiType of

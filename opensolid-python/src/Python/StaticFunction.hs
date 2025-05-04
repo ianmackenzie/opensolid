@@ -12,9 +12,9 @@ import Python qualified
 import Python.Function qualified
 import Python.Type qualified
 
-definition :: FFI.Id a -> (Name, StaticFunction) -> Text
-definition classId (functionName, staticFunction) = do
-  let ffiFunctionName = StaticFunction.ffiName classId functionName staticFunction
+definition :: FFI.Class -> (Name, StaticFunction) -> Text
+definition ffiClass (functionName, staticFunction) = do
+  let ffiFunctionName = StaticFunction.ffiName ffiClass functionName staticFunction
   let (maybeConstraint, positionalArguments, namedArguments, returnType) =
         StaticFunction.signature staticFunction
   let functionArguments = Python.Function.arguments False positionalArguments namedArguments

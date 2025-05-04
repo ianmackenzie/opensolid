@@ -316,10 +316,9 @@ ffiTypeDeclarations = do
   Python.Type.Registry.typeDeclarations registry
 
 topLevelClassName :: Class -> Maybe Text
-topLevelClassName Class{Class.id = FFI.Id _ (topLevelName :| nestedNames)} =
-  case nestedNames of
-    [] -> Just (FFI.pascalCase topLevelName)
-    List.OneOrMore -> Nothing
+topLevelClassName class_ = do
+  let qualifiedName = Python.Class.qualifiedName (Class.ffiClass class_)
+  if Text.contains "." qualifiedName then Nothing else Just qualifiedName
 
 allExportsDefinition :: Text
 allExportsDefinition = do

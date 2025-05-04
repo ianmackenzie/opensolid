@@ -6,18 +6,13 @@ module Python.Class
 where
 
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.List qualified as List
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Text qualified as Text
 
-qualifiedName :: FFI.Id a -> Text
-qualifiedName (FFI.Id _ classNames) = do
-  Text.join "." (List.map FFI.pascalCase (NonEmpty.toList classNames))
+qualifiedName :: FFI.Class -> Text
+qualifiedName = FFI.qualifiedName "."
 
-unqualifiedName :: FFI.Id a -> Text
-unqualifiedName (FFI.Id _ classNames) = do
-  FFI.pascalCase (NonEmpty.last classNames)
+unqualifiedName :: FFI.Class -> Text
+unqualifiedName = FFI.unqualifiedName
 
-pointerFieldName :: FFI.Id a -> Text
-pointerFieldName id = "_" <> unqualifiedName id <> "_ptr"
+pointerFieldName :: FFI.Class -> Text
+pointerFieldName ffiClass = "_" <> unqualifiedName ffiClass <> "_ptr"
