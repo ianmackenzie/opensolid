@@ -7,12 +7,12 @@ import Python qualified
 import Python.Class qualified
 import Python.Function qualified
 
-definition :: FFI.Class -> Text
-definition ffiClass = do
-  let ffiFunctionName = AbsFunction.ffiName ffiClass
-  let selfType = FFI.Class ffiClass
+definition :: FFI.ClassName -> Text
+definition className = do
+  let ffiFunctionName = AbsFunction.ffiName className
+  let selfType = FFI.Class className
   Python.lines
-    [ "def __abs__(self) -> " <> Python.Class.qualifiedName ffiClass <> ":"
+    [ "def __abs__(self) -> " <> Python.Class.qualifiedName className <> ":"
     , Python.indent
         [ Python.docstring "Return ``abs(self)``."
         , Python.Function.body ffiFunctionName [("self", selfType)] selfType

@@ -14,16 +14,16 @@ import Python.FFI qualified
 import Python.Function qualified
 import Python.Upcast qualified
 
-definition :: FFI.Class -> Maybe Constructor -> Maybe Upcast -> Text
-definition ffiClass maybeConstructor maybeUpcast = case maybeConstructor of
+definition :: FFI.ClassName -> Maybe Constructor -> Maybe Upcast -> Text
+definition className maybeConstructor maybeUpcast = case maybeConstructor of
   Nothing -> ""
   Just constructor -> do
-    let ffiFunctionName = Constructor.ffiName ffiClass constructor
-    let selfType = FFI.Class ffiClass
+    let ffiFunctionName = Constructor.ffiName className constructor
+    let selfType = FFI.Class className
     let arguments = Constructor.signature constructor
     let functionArguments = Text.join "," (List.map Python.Function.argument arguments)
     let ffiArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
-    let pointerFieldName = Python.Class.pointerFieldName ffiClass
+    let pointerFieldName = Python.Class.pointerFieldName className
     Python.lines
       [ "def __init__(self, " <> functionArguments <> ") -> None:"
       , Python.indent
@@ -33,6 +33,6 @@ definition ffiClass maybeConstructor maybeUpcast = case maybeConstructor of
           , Python.FFI.invoke ffiFunctionName
               # "ctypes.byref(inputs)"
               # "ctypes.byref(self." <> pointerFieldName <> ")"
-          , Python.Upcast.lines ffiClass "self" maybeUpcast
+          , Python.Upcast.lines className "self" maybeUpcast
           ]
       ]

@@ -7,11 +7,11 @@ import Python qualified
 import Python.Class qualified
 import Python.Function qualified
 
-definitions :: FFI.Class -> Text
-definitions ffiClass = do
-  let selfType = FFI.Class ffiClass
-  let selfTypeName = Python.Class.qualifiedName ffiClass
-  let ffiFunctionName = ComparisonFunction.ffiName ffiClass
+definitions :: FFI.ClassName -> Text
+definitions className = do
+  let selfType = FFI.Class className
+  let selfTypeName = Python.Class.qualifiedName className
+  let ffiFunctionName = ComparisonFunction.ffiName className
   let helperDefinition =
         Python.lines
           [ "def _compare(self, other: " <> selfTypeName <> ") -> int:"

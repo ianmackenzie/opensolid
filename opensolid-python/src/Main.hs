@@ -182,7 +182,7 @@ preamble =
 classDefinition :: Class -> (Text, Text)
 classDefinition
   ( Class
-      ffiClass
+      className
       documentation
       maybeUpcast
       constants
@@ -198,21 +198,21 @@ classDefinition
       nestedClasses
     ) = do
     let (nestedClassDefinitions, nestedClassConstants) = List.unzip2 (List.map classDefinition nestedClasses)
-    let pointerFieldName = Python.Class.pointerFieldName ffiClass
+    let pointerFieldName = Python.Class.pointerFieldName className
     let definition =
           Python.lines
-            [ "class " <> Python.Class.unqualifiedName ffiClass <> parentClass maybeUpcast <> ":"
+            [ "class " <> Python.Class.unqualifiedName className <> parentClass maybeUpcast <> ":"
             , Python.indent [Python.docstring documentation]
             , Python.indent [pointerFieldName <> ": c_void_p"]
-            , Python.indent [Python.Constructor.definition ffiClass maybeConstructor maybeUpcast]
+            , Python.indent [Python.Constructor.definition className maybeConstructor maybeUpcast]
             , Python.indent
                 [ "@staticmethod"
-                , "def _new(ptr: c_void_p) -> " <> Python.Class.qualifiedName ffiClass <> ":"
+                , "def _new(ptr: c_void_p) -> " <> Python.Class.qualifiedName className <> ":"
                 , Python.indent
                     [ "\"\"\"Construct directly from an underlying C pointer.\"\"\""
-                    , "obj = object.__new__(" <> Python.Class.qualifiedName ffiClass <> ")"
+                    , "obj = object.__new__(" <> Python.Class.qualifiedName className <> ")"
                     , "obj." <> pointerFieldName <> " = ptr"
-                    , Python.Upcast.lines ffiClass "obj" maybeUpcast
+                    , Python.Upcast.lines className "obj" maybeUpcast
                     , "return obj"
                     ]
                 ]
@@ -224,32 +224,32 @@ classDefinition
                     ]
                 ]
             , Python.indent (List.map Python.Constant.declaration constants)
-            , Python.indent (List.map (Python.StaticFunction.definition ffiClass) staticFunctions)
-            , Python.indent (List.map (Python.MemberFunction.definition ffiClass) memberFunctions)
+            , Python.indent (List.map (Python.StaticFunction.definition className) staticFunctions)
+            , Python.indent (List.map (Python.MemberFunction.definition className) memberFunctions)
             , case equalityFunction of
-                Just _ -> Python.indent [Python.EqualityFunction.definition ffiClass]
+                Just _ -> Python.indent [Python.EqualityFunction.definition className]
                 Nothing -> ""
             , case comparisonFunction of
-                Just _ -> Python.indent [Python.ComparisonFunction.definitions ffiClass]
+                Just _ -> Python.indent [Python.ComparisonFunction.definitions className]
                 Nothing -> ""
             , case negationFunction of
-                Just _ -> Python.indent [Python.NegationFunction.definition ffiClass]
+                Just _ -> Python.indent [Python.NegationFunction.definition className]
                 Nothing -> ""
             , case absFunction of
-                Just _ -> Python.indent [Python.AbsFunction.definition ffiClass]
+                Just _ -> Python.indent [Python.AbsFunction.definition className]
                 Nothing -> ""
-            , Python.indent (List.map (Python.PostOperator.definition ffiClass) postOperators)
-            , Python.indent (List.map (Python.PreOperator.definition ffiClass) preOperators)
-            , Python.indent [extraMemberFunctions (Python.Class.qualifiedName ffiClass)]
+            , Python.indent (List.map (Python.PostOperator.definition className) postOperators)
+            , Python.indent (List.map (Python.PreOperator.definition className) preOperators)
+            , Python.indent [extraMemberFunctions (Python.Class.qualifiedName className)]
             , Python.indent nestedClassDefinitions
             ]
     let constantDefinitions =
-          Python.lines ((List.map (Python.Constant.definition ffiClass) constants) <> nestedClassConstants)
+          Python.lines ((List.map (Python.Constant.definition className) constants) <> nestedClassConstants)
     (definition, constantDefinitions)
 
 parentClass :: Maybe Upcast -> Text
 parentClass Nothing = ""
-parentClass (Just upcast) = "(" <> Python.Class.qualifiedName (Upcast.parentClass upcast) <> ")"
+parentClass (Just upcast) = "(" <> Python.Class.qualifiedName (Upcast.parentClassName upcast) <> ")"
 
 extraMemberFunctions :: Text -> Text
 extraMemberFunctions className = do
@@ -334,7 +334,7 @@ ffiTypeDeclarations = do
 
 topLevelClassName :: Class -> Maybe Text
 topLevelClassName class_ = do
-  let qualifiedName = Python.Class.qualifiedName (Class.ffiClass class_)
+  let qualifiedName = Python.Class.qualifiedName (Class.name class_)
   if Text.contains "." qualifiedName then Nothing else Just qualifiedName
 
 allExportsDefinition :: Text

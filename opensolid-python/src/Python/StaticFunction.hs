@@ -13,9 +13,9 @@ import Python.Class qualified
 import Python.Function qualified
 import Python.Type qualified
 
-definition :: FFI.Class -> (Name, StaticFunction) -> Text
-definition ffiClass (functionName, staticFunction) = do
-  let ffiFunctionName = StaticFunction.ffiName ffiClass functionName staticFunction
+definition :: FFI.ClassName -> (Name, StaticFunction) -> Text
+definition className (functionName, staticFunction) = do
+  let ffiFunctionName = StaticFunction.ffiName className functionName staticFunction
   let (maybeConstraint, positionalArguments, namedArguments, returnType) =
         StaticFunction.signature staticFunction
   let functionArguments = Python.Function.arguments False positionalArguments namedArguments
@@ -29,7 +29,7 @@ definition ffiClass (functionName, staticFunction) = do
         -- since the function lookup in that case is static, not dynamic.
         -- This causes a problem since 'Direction2d.polar' takes one argument (an angle),
         -- while 'Vector2d.polar' takes two (a magnitude and an angle).
-        if Python.Class.qualifiedName ffiClass == "Direction2d"
+        if Python.Class.qualifiedName className == "Direction2d"
           && FFI.snakeCase functionName == "polar"
           then " # type: ignore[override]"
           else ""

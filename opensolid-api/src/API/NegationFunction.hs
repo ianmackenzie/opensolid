@@ -15,9 +15,9 @@ import OpenSolid.Text qualified as Text
 data NegationFunction where
   NegationFunction :: FFI value => (value -> value) -> NegationFunction
 
-ffiName :: FFI.Class -> Text
-ffiName ffiClass =
-  Text.join "_" ["opensolid", FFI.concatenatedName ffiClass, "neg"]
+ffiName :: FFI.ClassName -> Text
+ffiName className =
+  Text.join "_" ["opensolid", FFI.concatenatedName className, "neg"]
 
 invoke :: NegationFunction -> Ptr () -> Ptr () -> IO ()
 invoke (NegationFunction f) inputPtr outputPtr = IO.do

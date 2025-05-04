@@ -30,7 +30,6 @@ module OpenSolid.Drawing2d
   )
 where
 
-import Data.Proxy (Proxy (Proxy))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
@@ -71,10 +70,10 @@ instance FFI Drawing2d where
   representation = FFI.classRepresentation "Drawing2d"
 
 instance FFI (Entity space) where
-  representation = FFI.nestedClassRepresentation @Drawing2d Proxy "Entity"
+  representation = FFI.nestedClassRepresentation "Drawing2d" "Entity"
 
 instance FFI (Attribute space) where
-  representation = FFI.nestedClassRepresentation @Drawing2d Proxy "Attribute"
+  representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute"
 
 entityText :: Text -> Entity space -> Maybe Text
 entityText _ Empty = Nothing

@@ -3,17 +3,16 @@
 module OpenSolid.FFI
   ( FFI (representation)
   , Name
-  , Class
+  , ClassName
   , name
   , pascalCase
   , camelCase
   , snakeCase
   , classRepresentation
-  , subclassRepresentation
   , nestedClassRepresentation
   , Type (..)
   , typeOf
-  , classOf
+  , className
   , typeName
   , qualifiedName
   , unqualifiedName
@@ -60,13 +59,7 @@ class FFI a where
 
 newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 
-data Class where
-  ClassDefinition ::
-    { className :: Text
-    , outerClass :: Maybe Class
-    , parentClass :: Maybe Class
-    } ->
-    Class
+newtype ClassName = ClassName (NonEmpty Text)
 
 name :: Text -> Name
 name input =
@@ -123,7 +116,7 @@ data Representation a where
   -- followed by the representation of the successful value or exception
   ResultRep :: FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
-  ClassRep :: FFI a => Class -> Representation a
+  ClassRep :: FFI a => ClassName -> Representation a
   -- Some IO that returns a representable value
   IORep :: FFI a => Representation (IO a)
   -- A function argument that should be named-only if supported
@@ -131,35 +124,11 @@ data Representation a where
 
 classRepresentation :: FFI a => Text -> Proxy a -> Representation a
 classRepresentation givenName _ =
-  ClassRep ClassDefinition{className = givenName, outerClass = Nothing, parentClass = Nothing}
+  ClassRep (ClassName (NonEmpty.one givenName))
 
-subclassRepresentation ::
-  (FFI parent, FFI child) =>
-  Proxy parent ->
-  Text ->
-  Proxy child ->
-  Representation child
-subclassRepresentation parentProxy givenName _ =
-  ClassRep
-    ClassDefinition
-      { className = givenName
-      , outerClass = Nothing
-      , parentClass = Just (classOf parentProxy)
-      }
-
-nestedClassRepresentation ::
-  (FFI outer, FFI inner) =>
-  Proxy outer ->
-  Text ->
-  Proxy inner ->
-  Representation inner
-nestedClassRepresentation outerProxy givenName _ =
-  ClassRep
-    ClassDefinition
-      { className = givenName
-      , outerClass = Just (classOf outerProxy)
-      , parentClass = Nothing
-      }
+nestedClassRepresentation :: FFI a => Text -> Text -> Proxy a -> Representation a
+nestedClassRepresentation outerName innerName _ =
+  ClassRep (ClassName (NonEmpty.two outerName innerName))
 
 data Type where
   Unit :: Type
@@ -173,12 +142,12 @@ data Type where
   Tuple :: Type -> Type -> List Type -> Type
   Maybe :: Type -> Type
   Result :: Type -> Type
-  Class :: Class -> Type
+  Class :: ClassName -> Type
 
-classOf :: FFI a => Proxy a -> Class
-classOf proxy = case representation proxy of
-  ClassRep class_ -> class_
-  _ -> internalError "Attempting to get the class representation of a non-class type"
+className :: FFI a => Proxy a -> ClassName
+className proxy = case representation proxy of
+  ClassRep className_ -> className_
+  _ -> internalError "Attempting to get the class name of a non-class type"
 
 typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
@@ -275,16 +244,14 @@ typeName ffiType = case ffiType of
   Result valueType -> "Result" <> typeName valueType
   Class class_ -> concatenatedName class_
 
-concatenatedName :: Class -> Text
+concatenatedName :: ClassName -> Text
 concatenatedName = qualifiedName ""
 
-qualifiedName :: Text -> Class -> Text
-qualifiedName separator ClassDefinition{className, outerClass} = case outerClass of
-  Nothing -> className
-  Just outer -> qualifiedName separator outer <> separator <> className
+qualifiedName :: Text -> ClassName -> Text
+qualifiedName separator (ClassName components) = Text.join separator (NonEmpty.toList components)
 
-unqualifiedName :: Class -> Text
-unqualifiedName ClassDefinition{className} = className
+unqualifiedName :: ClassName -> Text
+unqualifiedName (ClassName components) = NonEmpty.last components
 
 size :: Type -> Int
 size ffiType = case ffiType of

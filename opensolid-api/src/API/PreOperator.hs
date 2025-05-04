@@ -20,9 +20,9 @@ data PreOperator where
     (other -> value -> result) ->
     PreOperator
 
-ffiName :: FFI.Class -> BinaryOperator.Id -> PreOperator -> Text
-ffiName ffiClass operatorId (PreOperator f) =
-  BinaryOperator.ffiName ffiClass operatorId (BinaryOperator.functionSignature f)
+ffiName :: FFI.ClassName -> BinaryOperator.Id -> PreOperator -> Text
+ffiName className operatorId (PreOperator f) =
+  BinaryOperator.ffiName className operatorId (BinaryOperator.functionSignature f)
 
 signature :: PreOperator -> (FFI.Type, FFI.Type)
 signature (PreOperator f) = do

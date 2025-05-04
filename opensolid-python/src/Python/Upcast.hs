@@ -8,14 +8,14 @@ import Python qualified
 import Python.Class qualified
 import Python.FFI qualified
 
-lines :: FFI.Class -> Text -> Maybe Upcast -> Text
+lines :: FFI.ClassName -> Text -> Maybe Upcast -> Text
 lines _ _ Nothing = ""
-lines ffiClass target (Just upcast) = do
-  let childPointerFieldName = Python.Class.pointerFieldName ffiClass
-  let parentPointerFieldName = Python.Class.pointerFieldName (Upcast.parentClass upcast)
+lines className target (Just upcast) = do
+  let childPointerFieldName = Python.Class.pointerFieldName className
+  let parentPointerFieldName = Python.Class.pointerFieldName (Upcast.parentClassName upcast)
   Python.lines
     [ target <> "." <> parentPointerFieldName <> " = c_void_p()"
-    , Python.FFI.invoke (Upcast.ffiName ffiClass)
+    , Python.FFI.invoke (Upcast.ffiName className)
         # "ctypes.byref(" <> target <> "." <> childPointerFieldName <> ")"
         # "ctypes.byref(" <> target <> "." <> parentPointerFieldName <> ")"
     ]

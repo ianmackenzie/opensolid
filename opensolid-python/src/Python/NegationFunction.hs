@@ -7,12 +7,12 @@ import Python qualified
 import Python.Class qualified
 import Python.Function qualified
 
-definition :: FFI.Class -> Text
-definition ffiClass = do
-  let ffiFunctionName = NegationFunction.ffiName ffiClass
-  let selfType = FFI.Class ffiClass
+definition :: FFI.ClassName -> Text
+definition className = do
+  let ffiFunctionName = NegationFunction.ffiName className
+  let selfType = FFI.Class className
   Python.lines
-    [ "def __neg__(self) -> " <> Python.Class.qualifiedName ffiClass <> ":"
+    [ "def __neg__(self) -> " <> Python.Class.qualifiedName className <> ":"
     , Python.indent
         [ Python.docstring "Return ``-self``."
         , Python.Function.body ffiFunctionName [("self", selfType)] selfType

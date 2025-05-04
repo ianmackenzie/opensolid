@@ -17,9 +17,9 @@ import OpenSolid.Text qualified as Text
 data Constant where
   Constant :: FFI a => a -> Text -> Constant
 
-ffiName :: FFI.Class -> Name -> Text
-ffiName ffiClass constantName = do
-  Text.join "_" ["opensolid", FFI.concatenatedName ffiClass, FFI.camelCase constantName]
+ffiName :: FFI.ClassName -> Name -> Text
+ffiName className constantName = do
+  Text.join "_" ["opensolid", FFI.concatenatedName className, FFI.camelCase constantName]
 
 invoke :: Constant -> Ptr () -> Ptr () -> IO ()
 invoke (Constant value _) _ outputPtr = FFI.store outputPtr 0 value

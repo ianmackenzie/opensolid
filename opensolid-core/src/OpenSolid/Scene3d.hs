@@ -25,7 +25,6 @@ module OpenSolid.Scene3d
   )
 where
 
-import Data.Proxy (Proxy (Proxy))
 import OpenSolid.Array qualified as Array
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
@@ -79,10 +78,10 @@ instance FFI Scene3d where
   representation = FFI.classRepresentation "Scene3d"
 
 instance FFI (Entity space) where
-  representation = FFI.nestedClassRepresentation @Scene3d Proxy "Entity"
+  representation = FFI.nestedClassRepresentation "Scene3d" "Entity"
 
 instance FFI Material where
-  representation = FFI.nestedClassRepresentation @Scene3d Proxy "Material"
+  representation = FFI.nestedClassRepresentation "Scene3d" "Material"
 
 mesh :: Vertex3d.HasNormal vertex (space @ Meters) => Material -> Mesh vertex -> Entity space
 mesh = Mesh

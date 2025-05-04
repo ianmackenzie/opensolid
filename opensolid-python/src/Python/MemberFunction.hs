@@ -12,10 +12,10 @@ import Python qualified
 import Python.Function qualified
 import Python.Type qualified
 
-definition :: FFI.Class -> (Name, MemberFunction) -> Text
-definition ffiClass (functionName, memberFunction) = do
-  let ffiFunctionName = MemberFunction.ffiName ffiClass functionName memberFunction
-  let selfType = FFI.Class ffiClass
+definition :: FFI.ClassName -> (Name, MemberFunction) -> Text
+definition className (functionName, memberFunction) = do
+  let ffiFunctionName = MemberFunction.ffiName className functionName memberFunction
+  let selfType = FFI.Class className
   let (maybeConstraint, positionalArguments, namedArguments, returnType) =
         MemberFunction.signature memberFunction
   let functionArguments = Python.Function.arguments True positionalArguments namedArguments

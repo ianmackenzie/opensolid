@@ -15,9 +15,9 @@ import OpenSolid.Text qualified as Text
 data ComparisonFunction where
   ComparisonFunction :: FFI value => (value -> value -> Int) -> ComparisonFunction
 
-ffiName :: FFI.Class -> Text
-ffiName ffiClass =
-  Text.join "_" ["opensolid", FFI.concatenatedName ffiClass, "compare"]
+ffiName :: FFI.ClassName -> Text
+ffiName className =
+  Text.join "_" ["opensolid", FFI.concatenatedName className, "compare"]
 
 invoke :: ComparisonFunction -> Ptr () -> Ptr () -> IO ()
 invoke (ComparisonFunction f) inputPtr outputPtr = IO.do

@@ -7,10 +7,10 @@ import Python qualified
 import Python.Class qualified
 import Python.Function qualified
 
-definition :: FFI.Class -> Text
-definition ffiClass = do
-  let selfType = FFI.Class ffiClass
-  let ffiFunctionName = EqualityFunction.ffiName ffiClass
+definition :: FFI.ClassName -> Text
+definition className = do
+  let selfType = FFI.Class className
+  let ffiFunctionName = EqualityFunction.ffiName className
   Python.lines
     [ "def __eq__(self, other: object) -> bool:"
     , Python.indent
@@ -20,7 +20,7 @@ definition ffiClass = do
         , "(one which will return true if two values are *almost* equal)"
         , "you'll likely want to use an ``is_zero()`` method instead."
         , "\"\"\""
-        , "if not isinstance(other, " <> Python.Class.qualifiedName ffiClass <> "):"
+        , "if not isinstance(other, " <> Python.Class.qualifiedName className <> "):"
         , "    return False"
         , Python.Function.body
             ffiFunctionName

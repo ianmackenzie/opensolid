@@ -20,13 +20,13 @@ declaration (name, (Constant value documentation)) = do
     , ""
     ]
 
-definition :: FFI.Class -> (Name, Constant) -> Text
-definition ffiClass (name, (Constant value _)) = do
+definition :: FFI.ClassName -> (Name, Constant) -> Text
+definition className (name, (Constant value _)) = do
   let valueType = Constant.valueType value
-  let ffiFunctionName = Constant.ffiName ffiClass name
+  let ffiFunctionName = Constant.ffiName className name
   let constantName = FFI.snakeCase name
-  let className = Python.Class.qualifiedName ffiClass
-  let helperFunctionName = "_" <> Text.toLower className <> "_" <> constantName
+  let pythonClassName = Python.Class.qualifiedName className
+  let helperFunctionName = "_" <> Text.toLower pythonClassName <> "_" <> constantName
   Python.lines
     [ "def " <> helperFunctionName <> "() -> " <> Python.Type.qualifiedName valueType <> ":"
     , Python.indent
@@ -34,5 +34,5 @@ definition ffiClass (name, (Constant value _)) = do
         , Python.FFI.invoke ffiFunctionName "c_void_p()" "ctypes.byref(output)"
         , "return " <> Python.FFI.outputValue valueType "output"
         ]
-    , className <> "." <> constantName <> " = " <> helperFunctionName <> "()"
+    , pythonClassName <> "." <> constantName <> " = " <> helperFunctionName <> "()"
     ]

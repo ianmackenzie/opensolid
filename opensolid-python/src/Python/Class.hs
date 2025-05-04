@@ -9,11 +9,11 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
-qualifiedName :: FFI.Class -> Text
+qualifiedName :: FFI.ClassName -> Text
 qualifiedName = FFI.qualifiedName "."
 
-unqualifiedName :: FFI.Class -> Text
+unqualifiedName :: FFI.ClassName -> Text
 unqualifiedName = FFI.unqualifiedName
 
-pointerFieldName :: FFI.Class -> Text
-pointerFieldName ffiClass = "_" <> Text.toLower (unqualifiedName ffiClass) <> "_ptr"
+pointerFieldName :: FFI.ClassName -> Text
+pointerFieldName className = "_" <> Text.toLower (unqualifiedName className) <> "_ptr"

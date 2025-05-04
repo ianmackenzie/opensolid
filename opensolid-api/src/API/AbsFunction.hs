@@ -15,9 +15,9 @@ import OpenSolid.Text qualified as Text
 data AbsFunction where
   AbsFunction :: FFI value => (value -> value) -> AbsFunction
 
-ffiName :: FFI.Class -> Text
-ffiName ffiClass =
-  Text.join "_" ["opensolid", FFI.concatenatedName ffiClass, "abs"]
+ffiName :: FFI.ClassName -> Text
+ffiName className =
+  Text.join "_" ["opensolid", FFI.concatenatedName className, "abs"]
 
 invoke :: AbsFunction -> Ptr () -> Ptr () -> IO ()
 invoke (AbsFunction f) inputPtr outputPtr = IO.do

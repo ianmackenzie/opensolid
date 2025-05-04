@@ -19,7 +19,6 @@ where
 
 import Data.Foldable1 (Foldable1)
 import Data.Foldable1 qualified
-import Data.Proxy (Proxy (Proxy))
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Bounded2d (Bounded2d)
@@ -58,7 +57,7 @@ data Constraint units
   | MaxSize (Qty units)
 
 instance FFI (Constraint Meters) where
-  representation = FFI.nestedClassRepresentation @(Mesh ()) Proxy "Constraint"
+  representation = FFI.nestedClassRepresentation "Mesh" "Constraint"
 
 -- | Specify the maximum error/deviation of the mesh from the actual shape.
 maxError :: Qty units -> Constraint units

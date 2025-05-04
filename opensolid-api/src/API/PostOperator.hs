@@ -20,9 +20,9 @@ data PostOperator where
     (value -> other -> result) ->
     PostOperator
 
-ffiName :: FFI.Class -> BinaryOperator.Id -> PostOperator -> Text
-ffiName ffiClass operatorId (PostOperator f) =
-  BinaryOperator.ffiName ffiClass operatorId (BinaryOperator.functionSignature f)
+ffiName :: FFI.ClassName -> BinaryOperator.Id -> PostOperator -> Text
+ffiName className operatorId (PostOperator f) =
+  BinaryOperator.ffiName className operatorId (BinaryOperator.functionSignature f)
 
 signature :: PostOperator -> (FFI.Type, FFI.Type)
 signature (PostOperator f) = do
