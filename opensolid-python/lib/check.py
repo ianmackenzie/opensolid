@@ -2,12 +2,13 @@ from opensolid import (
     Angle,
     Curve,
     Point2d,
-    LengthRange,
+    LengthBounds,
     Tolerance,
     Vector2d,
     Color,
     Bounds2d,
     Drawing2d,
+    Length,
 )
 
 p1 = Point2d.meters(1, 2)
@@ -16,10 +17,10 @@ print(p1.distance_to(p2))
 print(Curve.t.evaluate(0.5))
 print(Curve.t.squared().evaluate(0.5))
 
-r1 = LengthRange.meters(1, 5)
-r2 = LengthRange.meters(3, 7)
-r3 = LengthRange.meters(1, 5)
-r4 = LengthRange.meters(4, 10)
+r1 = LengthBounds(Length.meters(1), Length.meters(5))
+r2 = LengthBounds(Length.meters(3), Length.meters(7))
+r3 = LengthBounds(Length.meters(1), Length.meters(5))
+r4 = LengthBounds(Length.meters(4), Length.meters(10))
 r = r3.intersection(r4)
 if r is None:
     print("No intersection!")
