@@ -102,13 +102,13 @@ data Class where
     , constants :: List (FFI.Name, Constant)
     , constructor :: Maybe (Constructor value)
     , staticFunctions :: List (FFI.Name, StaticFunction)
-    , memberFunctions :: List (FFI.Name, MemberFunction value)
+    , memberFunctions :: List (FFI.Name, MemberFunction)
     , equalityFunction :: Maybe (value -> value -> Bool)
     , comparisonFunction :: Maybe (value -> value -> Int)
     , negationFunction :: Maybe (value -> value)
     , absFunction :: Maybe (value -> value)
-    , preOperators :: List (BinaryOperator.Id, List (PreOperator value))
-    , postOperators :: List (BinaryOperator.Id, List (PostOperator value))
+    , preOperators :: List (BinaryOperator.Id, List PreOperator)
+    , postOperators :: List (BinaryOperator.Id, List PostOperator)
     , nestedClasses :: List Class
     } ->
     Class
@@ -117,7 +117,7 @@ data Member value where
   Const :: FFI result => Text -> result -> Text -> Member value
   Constructor :: Constructor value -> Member value
   Static :: FFI.Name -> StaticFunction -> Member value
-  Member :: FFI.Name -> MemberFunction value -> Member value
+  Member :: FFI.Name -> MemberFunction -> Member value
   Equality :: Eq value => Member value
   Comparison :: Ord value => Member value
   Negate :: Negation value => Member value
@@ -697,9 +697,9 @@ nested = Nested
 
 addPreOverload ::
   BinaryOperator.Id ->
-  PreOperator value ->
-  List (BinaryOperator.Id, List (PreOperator value)) ->
-  List (BinaryOperator.Id, List (PreOperator value))
+  PreOperator ->
+  List (BinaryOperator.Id, List PreOperator) ->
+  List (BinaryOperator.Id, List PreOperator)
 addPreOverload operatorId overload [] = [(operatorId, [overload])]
 addPreOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
@@ -709,9 +709,9 @@ addPreOverload operatorId overload (first : rest) = do
 
 addPostOverload ::
   BinaryOperator.Id ->
-  PostOperator value ->
-  List (BinaryOperator.Id, List (PostOperator value)) ->
-  List (BinaryOperator.Id, List (PostOperator value))
+  PostOperator ->
+  List (BinaryOperator.Id, List PostOperator) ->
+  List (BinaryOperator.Id, List PostOperator)
 addPostOverload operatorId overload [] = [(operatorId, [overload])]
 addPostOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
@@ -727,13 +727,13 @@ buildClass ::
   List (FFI.Name, Constant) ->
   Maybe (Constructor value) ->
   List (FFI.Name, StaticFunction) ->
-  List (FFI.Name, MemberFunction value) ->
+  List (FFI.Name, MemberFunction) ->
   Maybe (value -> value -> Bool) ->
   Maybe (value -> value -> Int) ->
   Maybe (value -> value) ->
   Maybe (value -> value) ->
-  List (BinaryOperator.Id, List (PreOperator value)) ->
-  List (BinaryOperator.Id, List (PostOperator value)) ->
+  List (BinaryOperator.Id, List PreOperator) ->
+  List (BinaryOperator.Id, List PostOperator) ->
   List Class ->
   Class
 buildClass
@@ -1011,7 +1011,7 @@ staticFunctionInfo ffiClass_ (functionName, staticFunction) = do
     , invoke = StaticFunction.invoke staticFunction
     }
 
-memberFunctionInfo :: FFI.Class -> (FFI.Name, MemberFunction value) -> Function
+memberFunctionInfo :: FFI.Class -> (FFI.Name, MemberFunction) -> Function
 memberFunctionInfo ffiClass_ (functionName, memberFunction) = do
   let selfType = FFI.Class ffiClass_
   let (constraint, positionalArguments, namedArguments, returnType) =
@@ -1101,7 +1101,7 @@ comparisonFunctionInfo ffiClass_ maybeComparisonFunction = case maybeComparisonF
         , invoke = ComparisonFunction.invoke comparisonFunction
         }
 
-preOperatorOverload :: FFI.Class -> BinaryOperator.Id -> PreOperator value -> Function
+preOperatorOverload :: FFI.Class -> BinaryOperator.Id -> PreOperator -> Function
 preOperatorOverload ffiClass_ operatorId operator = do
   let selfType = FFI.Class ffiClass_
   let (lhsType, returnType) = PreOperator.signature operator
@@ -1113,14 +1113,11 @@ preOperatorOverload ffiClass_ operatorId operator = do
     , invoke = PreOperator.invoke operator
     }
 
-preOperatorOverloads ::
-  FFI.Class ->
-  (BinaryOperator.Id, List (PreOperator value)) ->
-  List Function
+preOperatorOverloads :: FFI.Class -> (BinaryOperator.Id, List PreOperator) -> List Function
 preOperatorOverloads ffiClass_ (operatorId, overloads) =
   List.map (preOperatorOverload ffiClass_ operatorId) overloads
 
-postOperatorOverload :: FFI.Class -> BinaryOperator.Id -> PostOperator value -> Function
+postOperatorOverload :: FFI.Class -> BinaryOperator.Id -> PostOperator -> Function
 postOperatorOverload ffiClass_ operatorId operator = do
   let selfType = FFI.Class ffiClass_
   let (rhsType, returnType) = PostOperator.signature operator
@@ -1132,9 +1129,6 @@ postOperatorOverload ffiClass_ operatorId operator = do
     , invoke = PostOperator.invoke operator
     }
 
-postOperatorOverloads ::
-  FFI.Class ->
-  (BinaryOperator.Id, List (PostOperator value)) ->
-  List Function
+postOperatorOverloads :: FFI.Class -> (BinaryOperator.Id, List PostOperator) -> List Function
 postOperatorOverloads ffiClass_ (operatorId, overloads) =
   List.map (postOperatorOverload ffiClass_ operatorId) overloads

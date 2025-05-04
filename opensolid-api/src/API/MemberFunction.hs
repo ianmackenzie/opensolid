@@ -21,97 +21,97 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 
-data MemberFunction value where
+data MemberFunction where
   MemberFunction0 ::
     (FFI value, FFI result) =>
     (value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionU0 ::
     (FFI value, FFI result) =>
     (Tolerance Unitless => value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionR0 ::
     (FFI value, FFI result) =>
     (Tolerance Radians => value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionM0 ::
     (FFI value, FFI result) =>
     (Tolerance Meters => value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionS0 ::
     (FFI value, FFI result) =>
     (Tolerance SquareMeters => value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunction1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (a -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionU1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (Tolerance Unitless => a -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionR1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (Tolerance Radians => a -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionM1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (Tolerance Meters => a -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionS1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (Tolerance SquareMeters => a -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunction2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
     (a -> b -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionU2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
     (Tolerance Unitless => a -> b -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionR2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
     (Tolerance Radians => a -> b -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionM2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
     (Tolerance Meters => a -> b -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionS2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
     (Tolerance SquareMeters => a -> b -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunction3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
@@ -119,7 +119,7 @@ data MemberFunction value where
     Name ->
     (a -> b -> c -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionU3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
@@ -127,7 +127,7 @@ data MemberFunction value where
     Name ->
     (Tolerance Unitless => a -> b -> c -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionR3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
@@ -135,7 +135,7 @@ data MemberFunction value where
     Name ->
     (Tolerance Radians => a -> b -> c -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionM3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
@@ -143,7 +143,7 @@ data MemberFunction value where
     Name ->
     (Tolerance Meters => a -> b -> c -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionS3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
@@ -151,7 +151,7 @@ data MemberFunction value where
     Name ->
     (Tolerance SquareMeters => a -> b -> c -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunction4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
@@ -160,7 +160,7 @@ data MemberFunction value where
     Name ->
     (a -> b -> c -> d -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionU4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
@@ -169,7 +169,7 @@ data MemberFunction value where
     Name ->
     (Tolerance Unitless => a -> b -> c -> d -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionR4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
@@ -178,7 +178,7 @@ data MemberFunction value where
     Name ->
     (Tolerance Radians => a -> b -> c -> d -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionM4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
@@ -187,7 +187,7 @@ data MemberFunction value where
     Name ->
     (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
   MemberFunctionS4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
@@ -196,9 +196,9 @@ data MemberFunction value where
     Name ->
     (Tolerance SquareMeters => a -> b -> c -> d -> value -> result) ->
     Text ->
-    MemberFunction value
+    MemberFunction
 
-ffiName :: FFI.Class -> Name -> MemberFunction value -> Text
+ffiName :: FFI.Class -> Name -> MemberFunction -> Text
 ffiName ffiClass functionName memberFunction = do
   let (_, positionalArguments, namedArguments, _) = signature memberFunction
   let arguments = positionalArguments <> namedArguments
@@ -209,7 +209,7 @@ ffiName ffiClass functionName memberFunction = do
       : FFI.camelCase functionName
       : List.map FFI.typeName argumentTypes
 
-invoke :: MemberFunction value -> Ptr () -> Ptr () -> IO ()
+invoke :: MemberFunction -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
   MemberFunction0 f _ ->
     \inputPtr outputPtr -> IO.do
@@ -325,7 +325,7 @@ normalizeSignature (maybeConstraint, arguments, returnType) =
       (maybeConstraint, args Argument.Positional, args Argument.Named, returnType)
 
 signature ::
-  MemberFunction value ->
+  MemberFunction ->
   (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 signature memberFunction = normalizeSignature $ case memberFunction of
   MemberFunction0 f _ -> signature0 f
@@ -722,7 +722,7 @@ signatureS4 arg1 arg2 arg3 arg4 _ =
   , FFI.typeOf @result Proxy
   )
 
-documentation :: MemberFunction a -> Text
+documentation :: MemberFunction -> Text
 documentation memberFunction = case memberFunction of
   MemberFunction0 _ docs -> docs
   MemberFunctionU0 _ docs -> docs

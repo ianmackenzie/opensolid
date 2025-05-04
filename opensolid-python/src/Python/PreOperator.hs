@@ -13,7 +13,7 @@ import Python.Type qualified
 lhsArgName :: Text
 lhsArgName = FFI.snakeCase PreOperator.lhsName
 
-definition :: FFI.Class -> (BinaryOperator.Id, List (PreOperator value)) -> Text
+definition :: FFI.Class -> (BinaryOperator.Id, List PreOperator) -> Text
 definition ffiClass (operatorId, operators) = do
   case List.map (overload ffiClass operatorId) operators of
     [(signature, _, body)] ->
@@ -65,7 +65,7 @@ functionName operatorId = case operatorId of
   BinaryOperator.Dot -> internalError "Dot product should never be a pre-operator"
   BinaryOperator.Cross -> internalError "Cross product should never be a pre-operator"
 
-overload :: FFI.Class -> BinaryOperator.Id -> PreOperator value -> (Text, Text, Text)
+overload :: FFI.Class -> BinaryOperator.Id -> PreOperator -> (Text, Text, Text)
 overload ffiClass operatorId memberFunction = do
   let ffiFunctionName = PreOperator.ffiName ffiClass operatorId memberFunction
   let selfType = FFI.Class ffiClass

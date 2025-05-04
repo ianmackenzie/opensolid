@@ -13,7 +13,7 @@ import Python.Type qualified
 rhsArgName :: Text
 rhsArgName = FFI.snakeCase PostOperator.rhsName
 
-definition :: FFI.Class -> (BinaryOperator.Id, List (PostOperator value)) -> Text
+definition :: FFI.Class -> (BinaryOperator.Id, List PostOperator) -> Text
 definition ffiClass (operatorId, operators) = do
   case List.map (overload ffiClass operatorId) operators of
     [(signature, _, body)] ->
@@ -65,7 +65,7 @@ functionName operatorId = case operatorId of
   BinaryOperator.Dot -> "dot"
   BinaryOperator.Cross -> "cross"
 
-overload :: FFI.Class -> BinaryOperator.Id -> PostOperator value -> (Text, Text, Text)
+overload :: FFI.Class -> BinaryOperator.Id -> PostOperator -> (Text, Text, Text)
 overload ffiClass operatorId memberFunction = do
   let ffiFunctionName = PostOperator.ffiName ffiClass operatorId memberFunction
   let selfType = FFI.Class ffiClass
