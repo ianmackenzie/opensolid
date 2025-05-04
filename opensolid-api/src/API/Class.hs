@@ -68,6 +68,7 @@ module API.Class
   )
 where
 
+import API.AbsFunction (AbsFunction (AbsFunction))
 import API.AbsFunction qualified as AbsFunction
 import API.BinaryOperator qualified as BinaryOperator
 import API.ComparisonFunction qualified as ComparisonFunction
@@ -79,6 +80,7 @@ import API.EqualityFunction qualified as EqualityFunction
 import API.Function (Function (..))
 import API.MemberFunction (MemberFunction (..))
 import API.MemberFunction qualified as MemberFunction
+import API.NegationFunction (NegationFunction (NegationFunction))
 import API.NegationFunction qualified as NegationFunction
 import API.PostOperator (PostOperator (PostOperator))
 import API.PostOperator qualified as PostOperator
@@ -105,8 +107,8 @@ data Class where
     , memberFunctions :: List (FFI.Name, MemberFunction)
     , equalityFunction :: Maybe (value -> value -> Bool)
     , comparisonFunction :: Maybe (value -> value -> Int)
-    , negationFunction :: Maybe (value -> value)
-    , absFunction :: Maybe (value -> value)
+    , negationFunction :: Maybe NegationFunction
+    , absFunction :: Maybe AbsFunction
     , preOperators :: List (BinaryOperator.Id, List PreOperator)
     , postOperators :: List (BinaryOperator.Id, List PostOperator)
     , nestedClasses :: List Class
@@ -120,8 +122,8 @@ data Member value where
   Member :: FFI.Name -> MemberFunction -> Member value
   Equality :: Eq value => Member value
   Comparison :: Ord value => Member value
-  Negate :: Negation value => Member value
-  Abs :: (value -> value) -> Member value
+  Negate :: NegationFunction -> Member value
+  Abs :: AbsFunction -> Member value
   PreOp :: (FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
   PostOp :: (FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
@@ -554,11 +556,11 @@ comparisonImpl lhs rhs = case compare lhs rhs of
   EQ -> 0
   GT -> 1
 
-negateSelf :: Negation value => Member value
-negateSelf = Negate
+negateSelf :: forall value. (FFI value, Negation value) => Member value
+negateSelf = Negate (NegationFunction (negate @value))
 
-absSelf :: (value -> value) -> Member value
-absSelf = Abs
+absSelf :: FFI value => (value -> value) -> Member value
+absSelf = Abs . AbsFunction
 
 floatPlus ::
   forall value result.
@@ -730,8 +732,8 @@ buildClass ::
   List (FFI.Name, MemberFunction) ->
   Maybe (value -> value -> Bool) ->
   Maybe (value -> value -> Int) ->
-  Maybe (value -> value) ->
-  Maybe (value -> value) ->
+  Maybe NegationFunction ->
+  Maybe AbsFunction ->
   List (BinaryOperator.Id, List PreOperator) ->
   List (BinaryOperator.Id, List PostOperator) ->
   List Class ->
@@ -860,7 +862,7 @@ buildClass
             preOperatorsAcc
             postOperatorsAcc
             nestedClassesAcc
-        Negate ->
+        Negate negationFunction ->
           buildClass
             classDocs
             rest
@@ -870,12 +872,12 @@ buildClass
             memberFunctionsAcc
             equalityFunctionAcc
             comparisonFunctionAcc
-            (Just negate)
+            (Just negationFunction)
             absFunctionAcc
             preOperatorsAcc
             postOperatorsAcc
             nestedClassesAcc
-        Abs function ->
+        Abs absFunction ->
           buildClass
             classDocs
             rest
@@ -886,7 +888,7 @@ buildClass
             equalityFunctionAcc
             comparisonFunctionAcc
             negationFunctionAcc
-            (Just function)
+            (Just absFunction)
             preOperatorsAcc
             postOperatorsAcc
             nestedClassesAcc
@@ -1025,16 +1027,11 @@ memberFunctionInfo ffiClass_ (functionName, memberFunction) = do
     , invoke = MemberFunction.invoke memberFunction
     }
 
-negationFunctionInfo ::
-  forall value.
-  FFI value =>
-  FFI.Class ->
-  Maybe (value -> value) ->
-  List Function
+negationFunctionInfo :: FFI.Class -> Maybe NegationFunction -> List Function
 negationFunctionInfo ffiClass_ maybeNegationFunction = case maybeNegationFunction of
   Nothing -> []
   Just negationFunction -> do
-    let selfType = FFI.typeOf @value Proxy
+    let selfType = FFI.Class ffiClass_
     List.singleton $
       Function
         { ffiName = NegationFunction.ffiName ffiClass_
@@ -1044,16 +1041,11 @@ negationFunctionInfo ffiClass_ maybeNegationFunction = case maybeNegationFunctio
         , invoke = NegationFunction.invoke negationFunction
         }
 
-absFunctionInfo ::
-  forall value.
-  FFI value =>
-  FFI.Class ->
-  Maybe (value -> value) ->
-  List Function
+absFunctionInfo :: FFI.Class -> Maybe AbsFunction -> List Function
 absFunctionInfo ffiClass_ maybeAbsFunction = case maybeAbsFunction of
   Nothing -> []
   Just absFunction -> do
-    let selfType = FFI.typeOf @value Proxy
+    let selfType = FFI.Class ffiClass_
     List.singleton $
       Function
         { ffiName = AbsFunction.ffiName ffiClass_

@@ -1,5 +1,6 @@
 module API.AbsFunction
-  ( invoke
+  ( AbsFunction (AbsFunction)
+  , invoke
   , ffiName
   )
 where
@@ -11,11 +12,14 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
+data AbsFunction where
+  AbsFunction :: FFI value => (value -> value) -> AbsFunction
+
 ffiName :: FFI.Class -> Text
 ffiName ffiClass =
   Text.join "_" ["opensolid", FFI.concatenatedName ffiClass, "abs"]
 
-invoke :: FFI value => (value -> value) -> Ptr () -> Ptr () -> IO ()
-invoke f inputPtr outputPtr = IO.do
+invoke :: AbsFunction -> Ptr () -> Ptr () -> IO ()
+invoke (AbsFunction f) inputPtr outputPtr = IO.do
   value <- FFI.load inputPtr 0
   FFI.store outputPtr 0 (f value)
