@@ -19,7 +19,7 @@ definitions ffiClass = do
               [ Python.Function.body
                   ffiFunctionName
                   [("self", selfType), ("other", selfType)]
-                  ComparisonFunction.returnType
+                  FFI.Int
               ]
           ]
   let operatorDefinition name symbol =

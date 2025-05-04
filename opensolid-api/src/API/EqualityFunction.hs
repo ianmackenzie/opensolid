@@ -1,9 +1,4 @@
-module API.EqualityFunction
-  ( invoke
-  , ffiName
-  , returnType
-  )
-where
+module API.EqualityFunction (ffiName, invoke) where
 
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI)
@@ -20,6 +15,3 @@ invoke :: FFI value => (value -> value -> Bool) -> Ptr () -> Ptr () -> IO ()
 invoke f inputPtr outputPtr = IO.do
   (lhs, rhs) <- FFI.load inputPtr 0
   FFI.store outputPtr 0 (f lhs rhs)
-
-returnType :: FFI.Type
-returnType = FFI.Bool

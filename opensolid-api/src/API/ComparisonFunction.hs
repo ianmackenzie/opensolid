@@ -1,9 +1,4 @@
-module API.ComparisonFunction
-  ( invoke
-  , ffiName
-  , returnType
-  )
-where
+module API.ComparisonFunction (ffiName, invoke) where
 
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI)
@@ -20,6 +15,3 @@ invoke :: FFI value => (value -> value -> Int) -> Ptr () -> Ptr () -> IO ()
 invoke f inputPtr outputPtr = IO.do
   (lhs, rhs) <- FFI.load inputPtr 0
   FFI.store outputPtr 0 (f lhs rhs)
-
-returnType :: FFI.Type
-returnType = FFI.Int

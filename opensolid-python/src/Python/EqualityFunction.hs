@@ -25,6 +25,6 @@ definition ffiClass = do
         , Python.Function.body
             ffiFunctionName
             [("self", selfType), ("other", selfType)]
-            EqualityFunction.returnType
+            FFI.Bool
         ]
     ]
