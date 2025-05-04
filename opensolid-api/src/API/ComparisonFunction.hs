@@ -1,4 +1,9 @@
-module API.ComparisonFunction (ffiName, invoke) where
+module API.ComparisonFunction
+  ( ComparisonFunction (ComparisonFunction)
+  , ffiName
+  , invoke
+  )
+where
 
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI)
@@ -7,11 +12,14 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
+data ComparisonFunction where
+  ComparisonFunction :: FFI value => (value -> value -> Int) -> ComparisonFunction
+
 ffiName :: FFI.Class -> Text
 ffiName ffiClass =
   Text.join "_" ["opensolid", FFI.concatenatedName ffiClass, "compare"]
 
-invoke :: FFI value => (value -> value -> Int) -> Ptr () -> Ptr () -> IO ()
-invoke f inputPtr outputPtr = IO.do
+invoke :: ComparisonFunction -> Ptr () -> Ptr () -> IO ()
+invoke (ComparisonFunction f) inputPtr outputPtr = IO.do
   (lhs, rhs) <- FFI.load inputPtr 0
   FFI.store outputPtr 0 (f lhs rhs)

@@ -71,11 +71,13 @@ where
 import API.AbsFunction (AbsFunction (AbsFunction))
 import API.AbsFunction qualified as AbsFunction
 import API.BinaryOperator qualified as BinaryOperator
+import API.ComparisonFunction (ComparisonFunction (ComparisonFunction))
 import API.ComparisonFunction qualified as ComparisonFunction
 import API.Constant (Constant (Constant))
 import API.Constant qualified as Constant
 import API.Constructor (Constructor (..))
 import API.Constructor qualified as Constructor
+import API.EqualityFunction (EqualityFunction (EqualityFunction))
 import API.EqualityFunction qualified as EqualityFunction
 import API.Function (Function (..))
 import API.MemberFunction (MemberFunction (..))
@@ -98,15 +100,14 @@ import OpenSolid.Units (Meters, Radians, SquareMeters)
 
 data Class where
   Class ::
-    FFI value =>
     { ffiClass :: FFI.Class
     , documentation :: Text
     , constants :: List (FFI.Name, Constant)
-    , constructor :: Maybe (Constructor value)
+    , constructor :: Maybe Constructor
     , staticFunctions :: List (FFI.Name, StaticFunction)
     , memberFunctions :: List (FFI.Name, MemberFunction)
-    , equalityFunction :: Maybe (value -> value -> Bool)
-    , comparisonFunction :: Maybe (value -> value -> Int)
+    , equalityFunction :: Maybe EqualityFunction
+    , comparisonFunction :: Maybe ComparisonFunction
     , negationFunction :: Maybe NegationFunction
     , absFunction :: Maybe AbsFunction
     , preOperators :: List (BinaryOperator.Id, List PreOperator)
@@ -117,11 +118,11 @@ data Class where
 
 data Member value where
   Const :: FFI result => Text -> result -> Text -> Member value
-  Constructor :: Constructor value -> Member value
+  Constructor :: Constructor -> Member value
   Static :: FFI.Name -> StaticFunction -> Member value
   Member :: FFI.Name -> MemberFunction -> Member value
-  Equality :: Eq value => Member value
-  Comparison :: Ord value => Member value
+  Equality :: EqualityFunction -> Member value
+  Comparison :: ComparisonFunction -> Member value
   Negate :: NegationFunction -> Member value
   Abs :: AbsFunction -> Member value
   PreOp :: (FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
@@ -544,17 +545,14 @@ memberM2 name arg1 arg2 f docs =
 
 data Self a = Self
 
-equality :: Eq value => Member value
-equality = Equality
+equality :: forall value. (FFI value, Eq value) => Member value
+equality = Equality (EqualityFunction ((==) @value))
 
-comparison :: Ord value => Member value
-comparison = Comparison
+comparison :: forall value. (FFI value, Ord value) => Member value
+comparison = Comparison (ComparisonFunction (comparisonImpl @value))
 
 comparisonImpl :: Ord a => a -> a -> Int
-comparisonImpl lhs rhs = case compare lhs rhs of
-  LT -> -1
-  EQ -> 0
-  GT -> 1
+comparisonImpl lhs rhs = case compare lhs rhs of LT -> -1; EQ -> 0; GT -> 1
 
 negateSelf :: forall value. (FFI value, Negation value) => Member value
 negateSelf = Negate (NegationFunction (negate @value))
@@ -727,11 +725,11 @@ buildClass ::
   Text ->
   List (Member value) ->
   List (FFI.Name, Constant) ->
-  Maybe (Constructor value) ->
+  Maybe Constructor ->
   List (FFI.Name, StaticFunction) ->
   List (FFI.Name, MemberFunction) ->
-  Maybe (value -> value -> Bool) ->
-  Maybe (value -> value -> Int) ->
+  Maybe EqualityFunction ->
+  Maybe ComparisonFunction ->
   Maybe NegationFunction ->
   Maybe AbsFunction ->
   List (BinaryOperator.Id, List PreOperator) ->
@@ -832,7 +830,7 @@ buildClass
             preOperatorsAcc
             postOperatorsAcc
             nestedClassesAcc
-        Equality ->
+        Equality equalityFunction ->
           buildClass
             classDocs
             rest
@@ -840,14 +838,14 @@ buildClass
             ctorAcc
             staticFunctionsAcc
             memberFunctionsAcc
-            (Just (==))
+            (Just equalityFunction)
             comparisonFunctionAcc
             negationFunctionAcc
             absFunctionAcc
             preOperatorsAcc
             postOperatorsAcc
             nestedClassesAcc
-        Comparison ->
+        Comparison comparisonFunction ->
           buildClass
             classDocs
             rest
@@ -856,7 +854,7 @@ buildClass
             staticFunctionsAcc
             memberFunctionsAcc
             equalityFunctionAcc
-            (Just comparisonImpl)
+            (Just comparisonFunction)
             negationFunctionAcc
             absFunctionAcc
             preOperatorsAcc
@@ -981,22 +979,17 @@ constantFunctionInfo ffiClass_ (constantName, const@(Constant value _)) =
     , invoke = Constant.invoke const
     }
 
-constructorInfo ::
-  forall value.
-  FFI value =>
-  FFI.Class ->
-  Maybe (Constructor value) ->
-  List Function
+constructorInfo :: FFI.Class -> Maybe Constructor -> List Function
 constructorInfo ffiClass_ maybeConstructor = case maybeConstructor of
   Nothing -> []
   Just constructor -> do
-    let (arguments, _) = Constructor.signature constructor
+    let arguments = Constructor.signature constructor
     List.singleton $
       Function
         { ffiName = Constructor.ffiName ffiClass_ constructor
         , constraint = Nothing
         , argumentTypes = List.map Pair.second arguments
-        , returnType = FFI.typeOf @value Proxy
+        , returnType = FFI.Class ffiClass_
         , invoke = Constructor.invoke constructor
         }
 
@@ -1055,16 +1048,11 @@ absFunctionInfo ffiClass_ maybeAbsFunction = case maybeAbsFunction of
         , invoke = AbsFunction.invoke absFunction
         }
 
-equalityFunctionInfo ::
-  forall value.
-  FFI value =>
-  FFI.Class ->
-  Maybe (value -> value -> Bool) ->
-  List Function
+equalityFunctionInfo :: FFI.Class -> Maybe EqualityFunction -> List Function
 equalityFunctionInfo ffiClass_ maybeEqualityFunction = case maybeEqualityFunction of
   Nothing -> []
   Just equalityFunction -> do
-    let selfType = FFI.typeOf @value Proxy
+    let selfType = FFI.Class ffiClass_
     List.singleton $
       Function
         { ffiName = EqualityFunction.ffiName ffiClass_
@@ -1074,16 +1062,11 @@ equalityFunctionInfo ffiClass_ maybeEqualityFunction = case maybeEqualityFunctio
         , invoke = EqualityFunction.invoke equalityFunction
         }
 
-comparisonFunctionInfo ::
-  forall value.
-  FFI value =>
-  FFI.Class ->
-  Maybe (value -> value -> Int) ->
-  List Function
+comparisonFunctionInfo :: FFI.Class -> Maybe ComparisonFunction -> List Function
 comparisonFunctionInfo ffiClass_ maybeComparisonFunction = case maybeComparisonFunction of
   Nothing -> []
   Just comparisonFunction -> do
-    let selfType = FFI.typeOf @value Proxy
+    let selfType = FFI.Class ffiClass_
     List.singleton $
       Function
         { ffiName = ComparisonFunction.ffiName ffiClass_

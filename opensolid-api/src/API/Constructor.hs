@@ -17,20 +17,20 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
-data Constructor value where
+data Constructor where
   Constructor1 ::
     (FFI a, FFI value) =>
     Name ->
     (a -> value) ->
     Text ->
-    Constructor value
+    Constructor
   Constructor2 ::
     (FFI a, FFI b, FFI value) =>
     Name ->
     Name ->
     (a -> b -> value) ->
     Text ->
-    Constructor value
+    Constructor
   Constructor3 ::
     (FFI a, FFI b, FFI c, FFI value) =>
     Name ->
@@ -38,7 +38,7 @@ data Constructor value where
     Name ->
     (a -> b -> c -> value) ->
     Text ->
-    Constructor value
+    Constructor
   Constructor4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value) =>
     Name ->
@@ -47,11 +47,11 @@ data Constructor value where
     Name ->
     (a -> b -> c -> d -> value) ->
     Text ->
-    Constructor value
+    Constructor
 
-ffiName :: FFI.Class -> Constructor value -> Text
+ffiName :: FFI.Class -> Constructor -> Text
 ffiName ffiClass constructor = do
-  let (arguments, _) = signature constructor
+  let arguments = signature constructor
   let argumentTypes = List.map Pair.second arguments
   Text.join "_" $
     "opensolid"
@@ -59,7 +59,7 @@ ffiName ffiClass constructor = do
       : "constructor"
       : List.map FFI.typeName argumentTypes
 
-invoke :: Constructor value -> Ptr () -> Ptr () -> IO ()
+invoke :: Constructor -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
   Constructor1 _ f _ ->
     \inputPtr outputPtr -> IO.do
@@ -78,9 +78,9 @@ invoke function = case function of
       (arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4)
 
-type Signature = (List (Name, FFI.Type), FFI.Type)
+type Signature = List (Name, FFI.Type)
 
-signature :: Constructor value -> (List (Name, FFI.Type), FFI.Type)
+signature :: Constructor -> List (Name, FFI.Type)
 signature constructor = case constructor of
   Constructor1 arg1 f _ -> signature1 arg1 f
   Constructor2 arg1 arg2 f _ -> signature2 arg1 arg2 f
@@ -93,7 +93,7 @@ signature1 ::
   Name ->
   (a -> value) ->
   Signature
-signature1 arg1 _ = ([(arg1, FFI.typeOf @a Proxy)], FFI.typeOf @value Proxy)
+signature1 arg1 _ = [(arg1, FFI.typeOf @a Proxy)]
 
 signature2 ::
   forall a b value.
@@ -103,7 +103,7 @@ signature2 ::
   (a -> b -> value) ->
   Signature
 signature2 arg1 arg2 _ =
-  ([(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)], FFI.typeOf @value Proxy)
+  [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)]
 
 signature3 ::
   forall a b c value.
@@ -114,9 +114,7 @@ signature3 ::
   (a -> b -> c -> value) ->
   Signature
 signature3 arg1 arg2 arg3 _ =
-  ( [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy), (arg3, FFI.typeOf @c Proxy)]
-  , FFI.typeOf @value Proxy
-  )
+  [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy), (arg3, FFI.typeOf @c Proxy)]
 
 signature4 ::
   forall a b c d value.
@@ -128,16 +126,13 @@ signature4 ::
   (a -> b -> c -> d -> value) ->
   Signature
 signature4 arg1 arg2 arg3 arg4 _ =
-  (
-    [ (arg1, FFI.typeOf @a Proxy)
-    , (arg2, FFI.typeOf @b Proxy)
-    , (arg3, FFI.typeOf @c Proxy)
-    , (arg4, FFI.typeOf @d Proxy)
-    ]
-  , FFI.typeOf @value Proxy
-  )
+  [ (arg1, FFI.typeOf @a Proxy)
+  , (arg2, FFI.typeOf @b Proxy)
+  , (arg3, FFI.typeOf @c Proxy)
+  , (arg4, FFI.typeOf @d Proxy)
+  ]
 
-documentation :: Constructor value -> Text
+documentation :: Constructor -> Text
 documentation constructor = case constructor of
   Constructor1 _ _ docs -> docs
   Constructor2 _ _ _ docs -> docs

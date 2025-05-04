@@ -12,12 +12,13 @@ import Python.Class qualified
 import Python.FFI qualified
 import Python.Function qualified
 
-definition :: FFI.Class -> Maybe (Constructor value) -> Text
+definition :: FFI.Class -> Maybe Constructor -> Text
 definition ffiClass maybeConstructor = case maybeConstructor of
   Nothing -> ""
   Just constructor -> do
     let ffiFunctionName = Constructor.ffiName ffiClass constructor
-    let (arguments, selfType) = Constructor.signature constructor
+    let selfType = FFI.Class ffiClass
+    let arguments = Constructor.signature constructor
     let functionArguments = Text.join "," (List.map Python.Function.argument arguments)
     let ffiArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
     let pointerFieldName = Python.Class.pointerFieldName ffiClass
