@@ -25,7 +25,13 @@ definition ffiClass (functionName, memberFunction) = do
   let selfArgument = ("self", selfType)
   let ffiArguments = List.maybe maybeToleranceArgument <> normalArguments <> [selfArgument]
   Python.lines
-    [ "def " <> FFI.snakeCase functionName <> "(" <> functionArguments <> ") -> " <> Python.Type.qualifiedName returnType <> ":"
+    [ "def "
+        <> FFI.snakeCase functionName
+        <> "("
+        <> functionArguments
+        <> ") -> "
+        <> Python.Type.qualifiedName returnType
+        <> ":"
     , Python.indent
         [ Python.docstring (MemberFunction.documentation memberFunction)
         , Python.Function.body ffiFunctionName ffiArguments returnType
