@@ -200,7 +200,7 @@ data MemberFunction value where
 
 ffiName :: FFI.Class -> Name -> MemberFunction value -> Text
 ffiName ffiClass functionName memberFunction = do
-  let (_, positionalArguments, namedArguments, _, _) = signature memberFunction
+  let (_, positionalArguments, namedArguments, _) = signature memberFunction
   let arguments = positionalArguments <> namedArguments
   let argumentTypes = List.map Pair.second arguments
   Text.join "_" $
@@ -312,21 +312,21 @@ invoke function = case function of
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
 
-type Signature = (Maybe Constraint, List (Name, FFI.Type, Argument.Kind), FFI.Type, FFI.Type)
+type Signature = (Maybe Constraint, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
 normalizeSignature ::
-  (Maybe Constraint, List (Name, FFI.Type, Argument.Kind), FFI.Type, FFI.Type) ->
-  (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type, FFI.Type)
-normalizeSignature (maybeConstraint, arguments, valueType, returnType) =
+  (Maybe Constraint, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
+  (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+normalizeSignature (maybeConstraint, arguments, returnType) =
   if not (List.isOrdered (\(_, _, kind1) (_, _, kind2) -> kind1 <= kind2) arguments)
     then internalError "Named arguments should always come after positional arguments"
     else do
       let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
-      (maybeConstraint, args Argument.Positional, args Argument.Named, valueType, returnType)
+      (maybeConstraint, args Argument.Positional, args Argument.Named, returnType)
 
 signature ::
   MemberFunction value ->
-  (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type, FFI.Type)
+  (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 signature memberFunction = normalizeSignature $ case memberFunction of
   MemberFunction0 f _ -> signature0 f
   MemberFunctionU0 f _ -> signatureU0 f
@@ -362,35 +362,35 @@ signature0 ::
   (FFI value, FFI result) =>
   (value -> result) ->
   Signature
-signature0 _ = (Nothing, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+signature0 _ = (Nothing, [], FFI.typeOf @result Proxy)
 
 signatureU0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Unitless => value -> result) ->
   Signature
-signatureU0 _ = (Just ToleranceUnitless, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+signatureU0 _ = (Just ToleranceUnitless, [], FFI.typeOf @result Proxy)
 
 signatureR0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Radians => value -> result) ->
   Signature
-signatureR0 _ = (Just ToleranceRadians, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+signatureR0 _ = (Just ToleranceRadians, [], FFI.typeOf @result Proxy)
 
 signatureM0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Meters => value -> result) ->
   Signature
-signatureM0 _ = (Just ToleranceMeters, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+signatureM0 _ = (Just ToleranceMeters, [], FFI.typeOf @result Proxy)
 
 signatureS0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance SquareMeters => value -> result) ->
   Signature
-signatureS0 _ = (Just ToleranceSquareMeters, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+signatureS0 _ = (Just ToleranceSquareMeters, [], FFI.typeOf @result Proxy)
 
 signature1 ::
   forall a value result.
@@ -401,7 +401,6 @@ signature1 ::
 signature1 arg1 _ =
   ( Nothing
   , [arg @a arg1 Proxy]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -414,7 +413,6 @@ signatureU1 ::
 signatureU1 arg1 _ =
   ( Just ToleranceUnitless
   , [arg @a arg1 Proxy]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -427,7 +425,6 @@ signatureR1 ::
 signatureR1 arg1 _ =
   ( Just ToleranceRadians
   , [arg @a arg1 Proxy]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -440,7 +437,6 @@ signatureM1 ::
 signatureM1 arg1 _ =
   ( Just ToleranceMeters
   , [arg @a arg1 Proxy]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -453,7 +449,6 @@ signatureS1 ::
 signatureS1 arg1 _ =
   ( Just ToleranceSquareMeters
   , [arg @a arg1 Proxy]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -470,7 +465,6 @@ signature2 arg1 arg2 _ =
     [ arg @a arg1 Proxy
     , arg @b arg2 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -487,7 +481,6 @@ signatureU2 arg1 arg2 _ =
     [ arg @a arg1 Proxy
     , arg @b arg2 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -504,7 +497,6 @@ signatureR2 arg1 arg2 _ =
     [ arg @a arg1 Proxy
     , arg @b arg2 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -521,7 +513,6 @@ signatureM2 arg1 arg2 _ =
     [ arg @a arg1 Proxy
     , arg @b arg2 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -538,7 +529,6 @@ signatureS2 arg1 arg2 _ =
     [ arg @a arg1 Proxy
     , arg @b arg2 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -557,7 +547,6 @@ signature3 arg1 arg2 arg3 _ =
     , arg @b arg2 Proxy
     , arg @c arg3 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -576,7 +565,6 @@ signatureU3 arg1 arg2 arg3 _ =
     , arg @b arg2 Proxy
     , arg @c arg3 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -595,7 +583,6 @@ signatureR3 arg1 arg2 arg3 _ =
     , arg @b arg2 Proxy
     , arg @c arg3 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -614,7 +601,6 @@ signatureM3 arg1 arg2 arg3 _ =
     , arg @b arg2 Proxy
     , arg @c arg3 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -633,7 +619,6 @@ signatureS3 arg1 arg2 arg3 _ =
     , arg @b arg2 Proxy
     , arg @c arg3 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -654,7 +639,6 @@ signature4 arg1 arg2 arg3 arg4 _ =
     , arg @c arg3 Proxy
     , arg @d arg4 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -675,7 +659,6 @@ signatureU4 arg1 arg2 arg3 arg4 _ =
     , arg @c arg3 Proxy
     , arg @d arg4 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -696,7 +679,6 @@ signatureR4 arg1 arg2 arg3 arg4 _ =
     , arg @c arg3 Proxy
     , arg @d arg4 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -717,7 +699,6 @@ signatureM4 arg1 arg2 arg3 arg4 _ =
     , arg @c arg3 Proxy
     , arg @d arg4 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
@@ -738,7 +719,6 @@ signatureS4 arg1 arg2 arg3 arg4 _ =
     , arg @c arg3 Proxy
     , arg @d arg4 Proxy
     ]
-  , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 

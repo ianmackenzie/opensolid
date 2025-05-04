@@ -21,11 +21,13 @@ data PostOperator value where
     PostOperator value
 
 ffiName :: FFI.Class -> BinaryOperator.Id -> PostOperator value -> Text
-ffiName ffiClass operatorId operator =
-  BinaryOperator.ffiName ffiClass operatorId (signature operator)
+ffiName ffiClass operatorId (PostOperator f) =
+  BinaryOperator.ffiName ffiClass operatorId (BinaryOperator.functionSignature f)
 
-signature :: PostOperator value -> (FFI.Type, FFI.Type, FFI.Type)
-signature (PostOperator f) = BinaryOperator.functionSignature f
+signature :: PostOperator value -> (FFI.Type, FFI.Type)
+signature (PostOperator f) = do
+  let (_selfType, rhsType, returnType) = BinaryOperator.functionSignature f
+  (rhsType, returnType)
 
 rhsName :: Name
 rhsName = FFI.name "Rhs"

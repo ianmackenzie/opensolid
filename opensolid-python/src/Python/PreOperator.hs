@@ -68,7 +68,8 @@ functionName operatorId = case operatorId of
 overload :: FFI.Class -> BinaryOperator.Id -> PreOperator value -> (Text, Text, Text)
 overload ffiClass operatorId memberFunction = do
   let ffiFunctionName = PreOperator.ffiName ffiClass operatorId memberFunction
-  let (lhsType, selfType, returnType) = PreOperator.signature memberFunction
+  let selfType = FFI.Class ffiClass
+  let (lhsType, returnType) = PreOperator.signature memberFunction
   let signature = overloadSignature operatorId lhsType returnType
   let matchPattern = Python.Function.typePattern lhsType
   let body = overloadBody ffiFunctionName selfType lhsType returnType

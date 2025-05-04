@@ -1013,7 +1013,8 @@ staticFunctionInfo ffiClass_ (functionName, staticFunction) = do
 
 memberFunctionInfo :: FFI.Class -> (FFI.Name, MemberFunction value) -> Function
 memberFunctionInfo ffiClass_ (functionName, memberFunction) = do
-  let (constraint, positionalArguments, namedArguments, selfType, returnType) =
+  let selfType = FFI.Class ffiClass_
+  let (constraint, positionalArguments, namedArguments, returnType) =
         MemberFunction.signature memberFunction
   let arguments = positionalArguments <> namedArguments
   Function
@@ -1102,7 +1103,8 @@ comparisonFunctionInfo ffiClass_ maybeComparisonFunction = case maybeComparisonF
 
 preOperatorOverload :: FFI.Class -> BinaryOperator.Id -> PreOperator value -> Function
 preOperatorOverload ffiClass_ operatorId operator = do
-  let (lhsType, selfType, returnType) = PreOperator.signature operator
+  let selfType = FFI.Class ffiClass_
+  let (lhsType, returnType) = PreOperator.signature operator
   Function
     { ffiName = PreOperator.ffiName ffiClass_ operatorId operator
     , constraint = Nothing
@@ -1120,7 +1122,8 @@ preOperatorOverloads ffiClass_ (operatorId, overloads) =
 
 postOperatorOverload :: FFI.Class -> BinaryOperator.Id -> PostOperator value -> Function
 postOperatorOverload ffiClass_ operatorId operator = do
-  let (selfType, rhsType, returnType) = PostOperator.signature operator
+  let selfType = FFI.Class ffiClass_
+  let (rhsType, returnType) = PostOperator.signature operator
   Function
     { ffiName = PostOperator.ffiName ffiClass_ operatorId operator
     , constraint = Nothing

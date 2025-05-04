@@ -1,12 +1,10 @@
 module API.EqualityFunction
   ( invoke
   , ffiName
-  , valueType
   , returnType
   )
 where
 
-import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -23,8 +21,5 @@ invoke f inputPtr outputPtr = IO.do
   (lhs, rhs) <- FFI.load inputPtr 0
   FFI.store outputPtr 0 (f lhs rhs)
 
-valueType :: forall value. FFI value => (value -> value -> Bool) -> FFI.Type
-valueType _ = FFI.typeOf @value Proxy
-
 returnType :: FFI.Type
-returnType = FFI.typeOf @Bool Proxy
+returnType = FFI.Bool

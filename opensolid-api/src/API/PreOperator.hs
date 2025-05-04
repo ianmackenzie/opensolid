@@ -21,11 +21,13 @@ data PreOperator value where
     PreOperator value
 
 ffiName :: FFI.Class -> BinaryOperator.Id -> PreOperator value -> Text
-ffiName ffiClass operatorId operator =
-  BinaryOperator.ffiName ffiClass operatorId (signature operator)
+ffiName ffiClass operatorId (PreOperator f) =
+  BinaryOperator.ffiName ffiClass operatorId (BinaryOperator.functionSignature f)
 
-signature :: PreOperator value -> (FFI.Type, FFI.Type, FFI.Type)
-signature (PreOperator f) = BinaryOperator.functionSignature f
+signature :: PreOperator value -> (FFI.Type, FFI.Type)
+signature (PreOperator f) = do
+  let (lhsType, _selfType, returnType) = BinaryOperator.functionSignature f
+  (lhsType, returnType)
 
 lhsName :: Name
 lhsName = FFI.name "Lhs"

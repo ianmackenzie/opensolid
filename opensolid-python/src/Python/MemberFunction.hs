@@ -15,7 +15,8 @@ import Python.Type qualified
 definition :: FFI.Class -> (Name, MemberFunction value) -> Text
 definition ffiClass (functionName, memberFunction) = do
   let ffiFunctionName = MemberFunction.ffiName ffiClass functionName memberFunction
-  let (maybeConstraint, positionalArguments, namedArguments, selfType, returnType) =
+  let selfType = FFI.Class ffiClass
+  let (maybeConstraint, positionalArguments, namedArguments, returnType) =
         MemberFunction.signature memberFunction
   let functionArguments = Python.Function.arguments True positionalArguments namedArguments
   let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
