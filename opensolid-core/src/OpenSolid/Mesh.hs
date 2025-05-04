@@ -19,6 +19,7 @@ where
 
 import Data.Foldable1 (Foldable1)
 import Data.Foldable1 qualified
+import Data.Proxy (Proxy (Proxy))
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Bounded2d (Bounded2d)
@@ -42,6 +43,9 @@ import OpenSolid.Vertex3d qualified as Vertex3d
 data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
   deriving (Eq, Show)
 
+instance FFI (Mesh ()) where
+  representation = FFI.classRepresentation "Mesh"
+
 instance Vertex2d vertex (space @ units) => Bounded2d (Mesh vertex) (space @ units) where
   bounds mesh = Bounds2d.hullN (NonEmpty.map Vertex2d.position (Array.toNonEmpty (vertices mesh)))
 
@@ -54,7 +58,7 @@ data Constraint units
   | MaxSize (Qty units)
 
 instance FFI (Constraint Meters) where
-  representation = FFI.nestedClassRepresentation "Mesh" "Constraint"
+  representation = FFI.nestedClassRepresentation @(Mesh ()) Proxy "Constraint"
 
 -- | Specify the maximum error/deviation of the mesh from the actual shape.
 maxError :: Qty units -> Constraint units

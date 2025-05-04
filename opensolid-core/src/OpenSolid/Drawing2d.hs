@@ -3,6 +3,7 @@ module OpenSolid.Drawing2d
   , Attribute
   , Resolution
   , Point
+  , Drawing2d
   , toSvg
   , writeSvg
   , nothing
@@ -29,6 +30,7 @@ module OpenSolid.Drawing2d
   )
 where
 
+import Data.Proxy (Proxy (Proxy))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
@@ -63,11 +65,16 @@ type Resolution = ?resolution :: Length
 
 type Point space = Point2d (space @ Meters)
 
+data Drawing2d
+
+instance FFI Drawing2d where
+  representation = FFI.classRepresentation "Drawing2d"
+
 instance FFI (Entity space) where
-  representation = FFI.nestedClassRepresentation "Drawing2d" "Entity"
+  representation = FFI.nestedClassRepresentation @Drawing2d Proxy "Entity"
 
 instance FFI (Attribute space) where
-  representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute"
+  representation = FFI.nestedClassRepresentation @Drawing2d Proxy "Attribute"
 
 entityText :: Text -> Entity space -> Maybe Text
 entityText _ Empty = Nothing

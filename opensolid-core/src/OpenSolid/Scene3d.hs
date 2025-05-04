@@ -1,6 +1,7 @@
 module OpenSolid.Scene3d
   ( Entity
   , Material
+  , Scene3d
   , mesh
   , body
   , group
@@ -24,6 +25,7 @@ module OpenSolid.Scene3d
   )
 where
 
+import Data.Proxy (Proxy (Proxy))
 import OpenSolid.Array qualified as Array
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
@@ -71,11 +73,16 @@ data Material = Material {baseColor :: Color, roughness :: Float, metallic :: Fl
 
 data Ground
 
+data Scene3d
+
+instance FFI Scene3d where
+  representation = FFI.classRepresentation "Scene3d"
+
 instance FFI (Entity space) where
-  representation = FFI.nestedClassRepresentation "Scene3d" "Entity"
+  representation = FFI.nestedClassRepresentation @Scene3d Proxy "Entity"
 
 instance FFI Material where
-  representation = FFI.nestedClassRepresentation "Scene3d" "Material"
+  representation = FFI.nestedClassRepresentation @Scene3d Proxy "Material"
 
 mesh :: Vertex3d.HasNormal vertex (space @ Meters) => Material -> Mesh vertex -> Entity space
 mesh = Mesh

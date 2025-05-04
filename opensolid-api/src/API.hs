@@ -59,6 +59,7 @@ import API.Class
   , times
   , timesFloat
   , timesSelf
+  , upcast
   )
 import API.Class qualified as Class
 import API.Docs (docs)
@@ -90,12 +91,13 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
+import OpenSolid.Drawing2d (Drawing2d)
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
@@ -107,6 +109,7 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Scene3d (Scene3d)
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
@@ -536,11 +539,9 @@ vector2d =
     , dotSelf
     , dotProduct @(Vector2d (Space @ Meters)) Self
     , dotProduct @(Vector2d (Space @ SquareMeters)) Self
-    , dotProduct @(Direction2d Space) Self
     , crossSelf
     , crossProduct @(Vector2d (Space @ Meters)) Self
     , crossProduct @(Vector2d (Space @ SquareMeters)) Self
-    , crossProduct @(Direction2d Space) Self
     ]
 
 displacement2d :: Class
@@ -576,10 +577,8 @@ displacement2d =
     , divBy @Length Self
     , dotSelf
     , dotProduct @(Vector2d (Space @ Unitless)) Self
-    , dotProduct @(Direction2d Space) Self
     , crossSelf
     , crossProduct @(Vector2d (Space @ Unitless)) Self
-    , crossProduct @(Direction2d Space) Self
     ]
 
 areaVector2d :: Class
@@ -609,37 +608,21 @@ areaVector2d =
     , divBy @Length Self
     , divBy @Area Self
     , dotProduct @(Vector2d (Space @ Unitless)) Self
-    , dotProduct @(Direction2d Space) Self
     , crossProduct @(Vector2d (Space @ Unitless)) Self
-    , crossProduct @(Direction2d Space) Self
     ]
 
 direction2d :: Class
 direction2d =
   Class.new @(Direction2d Space) $(docs ''Direction2d) $
-    [ constant "X" Direction2d.x $(docs 'Direction2d.x)
+    [ upcast Vector2d.unit
+    , constant "X" Direction2d.x $(docs 'Direction2d.x)
     , constant "Y" Direction2d.y $(docs 'Direction2d.y)
     , factory1 "From Angle" "Angle" Direction2d.fromAngle $(docs 'Direction2d.fromAngle)
     , factory1 "Degrees" "Value" Direction2d.degrees $(docs 'Direction2d.degrees)
     , factory1 "Radians" "Value" Direction2d.radians $(docs 'Direction2d.radians)
     , member0 "To Angle" Direction2d.toAngle $(docs 'Direction2d.toAngle)
     , member1 "Angle To" "Other" Direction2d.angleFrom $(docs 'Direction2d.angleFrom)
-    , member0 "Components" Direction2d.components $(docs 'Direction2d.components)
-    , member0 "X Component" Direction2d.xComponent $(docs 'Direction2d.xComponent)
-    , member0 "Y Component" Direction2d.yComponent $(docs 'Direction2d.yComponent)
     , negateSelf
-    , floatTimes
-    , timesFloat
-    , times @Length Self
-    , times @Area Self
-    , dotSelf
-    , dotProduct @(Vector2d (Space @ Unitless)) Self
-    , dotProduct @(Vector2d (Space @ Meters)) Self
-    , dotProduct @(Vector2d (Space @ SquareMeters)) Self
-    , crossSelf
-    , crossProduct @(Vector2d (Space @ Unitless)) Self
-    , crossProduct @(Vector2d (Space @ Meters)) Self
-    , crossProduct @(Vector2d (Space @ SquareMeters)) Self
     ]
 
 point2d :: Class
@@ -833,14 +816,9 @@ areaCurve =
     , divBy @(Curve Meters) Self
     ]
 
-data Drawing2d_
-
-instance FFI Drawing2d_ where
-  representation = FFI.classRepresentation "Drawing2d"
-
 drawing2d :: Class
 drawing2d =
-  Class.new @Drawing2d_ "A set of functions for constructing 2D drawings." $
+  Class.new @Drawing2d "A set of functions for constructing 2D drawings." $
     [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
     , static3 "Write SVG" "Path" "View Box" "Entities" Drawing2d.writeSvg $(docs 'Drawing2d.writeSvg)
     , static1 "Group" "Entities" Drawing2d.group $(docs 'Drawing2d.group)
@@ -904,11 +882,9 @@ vector3d =
     , dotSelf
     , dotProduct @(Vector3d (Space @ Meters)) Self
     , dotProduct @(Vector3d (Space @ SquareMeters)) Self
-    , dotProduct @(Direction3d Space) Self
     , crossSelf
     , crossProduct @(Vector3d (Space @ Meters)) Self
     , crossProduct @(Vector3d (Space @ SquareMeters)) Self
-    , crossProduct @(Direction3d Space) Self
     ]
 
 displacement3d :: Class
@@ -948,10 +924,8 @@ displacement3d =
     , divBy @Length Self
     , dotSelf
     , dotProduct @(Vector3d (Space @ Unitless)) Self
-    , dotProduct @(Direction3d Space) Self
     , crossSelf
     , crossProduct @(Vector3d (Space @ Unitless)) Self
-    , crossProduct @(Direction3d Space) Self
     ]
 
 areaVector3d :: Class
@@ -985,40 +959,23 @@ areaVector3d =
     , divBy @Length Self
     , divBy @Area Self
     , dotProduct @(Vector3d (Space @ Unitless)) Self
-    , dotProduct @(Direction3d Space) Self
     , crossProduct @(Vector3d (Space @ Unitless)) Self
-    , crossProduct @(Direction3d Space) Self
     ]
 
 direction3d :: Class
 direction3d =
   Class.new @(Direction3d Space) $(docs ''Direction3d) $
-    [ constant "X" Direction3d.x $(docs 'Direction3d.x)
+    [ upcast Vector3d.unit
+    , constant "X" Direction3d.x $(docs 'Direction3d.x)
     , constant "Y" Direction3d.y $(docs 'Direction3d.y)
     , constant "Z" Direction3d.z $(docs 'Direction3d.z)
     , member0 "Perpendicular Direction" Direction3d.perpendicularTo $(docs 'Direction3d.perpendicularTo)
     , member1 "Angle To" "Other" Direction3d.angleFrom $(docs 'Direction3d.angleFrom)
-    , member0 "Components" Direction3d.components $(docs 'Direction3d.components)
-    , member0 "X Component" Direction3d.xComponent $(docs 'Direction3d.xComponent)
-    , member0 "Y Component" Direction3d.yComponent $(docs 'Direction3d.yComponent)
-    , member0 "Z Component" Direction3d.zComponent $(docs 'Direction3d.zComponent)
     , member2 "Rotate In" "Direction" "Angle" Direction3d.rotateIn $(docs 'Direction3d.rotateIn)
     , member2 "Rotate Around" "Axis" "Angle" (Direction3d.rotateAround @Space @Meters) $(docs 'Direction3d.rotateAround)
     , member1 "Mirror In" "Direction" Direction3d.mirrorIn $(docs 'Direction3d.mirrorIn)
     , member1 "Mirror Across" "Plane" (Direction3d.mirrorAcross @Space @Meters) $(docs 'Direction3d.mirrorAcross)
     , negateSelf
-    , floatTimes
-    , timesFloat
-    , times @Length Self
-    , times @Area Self
-    , dotSelf
-    , dotProduct @(Vector3d (Space @ Unitless)) Self
-    , dotProduct @(Vector3d (Space @ Meters)) Self
-    , dotProduct @(Vector3d (Space @ SquareMeters)) Self
-    , crossSelf
-    , crossProduct @(Vector3d (Space @ Unitless)) Self
-    , crossProduct @(Vector3d (Space @ Meters)) Self
-    , crossProduct @(Vector3d (Space @ SquareMeters)) Self
     ]
 
 point3d :: Class
@@ -1307,27 +1264,17 @@ body3d =
         "Write a body to a binary STL file, using units of millimeters."
     ]
 
-data Mesh_
-
-instance FFI Mesh_ where
-  representation = FFI.classRepresentation "Mesh"
-
 mesh :: Class
 mesh =
-  Class.new @Mesh_ "Meshing-related functionality." $
+  Class.new @(Mesh ()) "Meshing-related functionality." $
     [ nested @(Mesh.Constraint Meters) $(docs ''Mesh.Constraint) []
     , static1 "Max Error" "Error" (Mesh.maxError @Meters) $(docs 'Mesh.maxError)
     , static1 "Max Size" "Size" (Mesh.maxSize @Meters) $(docs 'Mesh.maxSize)
     ]
 
-data Scene3d_
-
-instance FFI Scene3d_ where
-  representation = FFI.classRepresentation "Scene3d"
-
 scene3d :: Class
 scene3d =
-  Class.new @Scene3d_ "A set of functions for constructing 3D scenes." $
+  Class.new @Scene3d "A set of functions for constructing 3D scenes." $
     [ staticM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
     , static1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
     , static2 "Metal" "Base Color" "Roughness" Scene3d.metal $(docs 'Scene3d.metal)

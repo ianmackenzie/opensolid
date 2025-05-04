@@ -3,6 +3,7 @@ module API.Class
   , Member
   , Self (Self)
   , new
+  , upcast
   , constant
   , constructor1
   , constructor2
@@ -90,6 +91,8 @@ import API.PreOperator (PreOperator (PreOperator))
 import API.PreOperator qualified as PreOperator
 import API.StaticFunction (StaticFunction (..))
 import API.StaticFunction qualified as StaticFunction
+import API.Upcast (Upcast (Upcast))
+import API.Upcast qualified as Upcast
 import Data.Proxy (Proxy (Proxy))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -102,6 +105,7 @@ data Class where
   Class ::
     { ffiClass :: FFI.Class
     , documentation :: Text
+    , toParent :: Maybe Upcast
     , constants :: List (FFI.Name, Constant)
     , constructor :: Maybe Constructor
     , staticFunctions :: List (FFI.Name, StaticFunction)
@@ -117,6 +121,7 @@ data Class where
     Class
 
 data Member value where
+  ToParent :: Upcast -> Member value
   Const :: FFI result => Text -> result -> Text -> Member value
   Constructor :: Constructor -> Member value
   Static :: FFI.Name -> StaticFunction -> Member value
@@ -131,10 +136,13 @@ data Member value where
 
 new :: forall value. FFI value => Text -> List (Member value) -> Class
 new classDocs members =
-  buildClass classDocs members [] Nothing [] [] Nothing Nothing Nothing Nothing [] [] []
+  buildClass classDocs members Nothing [] Nothing [] [] Nothing Nothing Nothing Nothing [] [] []
 
 constant :: FFI result => Text -> result -> Text -> Member value
 constant = Const
+
+upcast :: (FFI parent, FFI value) => (value -> parent) -> Member value
+upcast = ToParent . Upcast
 
 constructor1 :: (FFI a, FFI value) => Text -> (a -> value) -> Text -> Member value
 constructor1 arg1 f docs = Constructor (Constructor1 (FFI.name arg1) f docs)
@@ -724,6 +732,7 @@ buildClass ::
   FFI value =>
   Text ->
   List (Member value) ->
+  Maybe Upcast ->
   List (FFI.Name, Constant) ->
   Maybe Constructor ->
   List (FFI.Name, StaticFunction) ->
@@ -739,6 +748,7 @@ buildClass ::
 buildClass
   classDocs
   members
+  upcastAcc
   constantsAcc
   ctorAcc
   staticFunctionsAcc
@@ -757,6 +767,7 @@ buildClass
               FFI.Class ffiClass -> ffiClass
               _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
           , documentation = classDocs
+          , toParent = upcastAcc
           , constants = constantsAcc
           , constructor = ctorAcc
           , staticFunctions = staticFunctionsAcc
@@ -770,10 +781,27 @@ buildClass
           , nestedClasses = nestedClassesAcc
           }
       first : rest -> case first of
+        ToParent toParent ->
+          buildClass
+            classDocs
+            rest
+            (Just toParent)
+            constantsAcc
+            ctorAcc
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
+            negationFunctionAcc
+            absFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
         Const name value documentation ->
           buildClass
             classDocs
             rest
+            upcastAcc
             (constantsAcc <> [(FFI.name name, Constant value documentation)])
             ctorAcc
             staticFunctionsAcc
@@ -789,6 +817,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             (Just constructor)
             staticFunctionsAcc
@@ -804,6 +833,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             (staticFunctionsAcc <> [(name, staticFunction)])
@@ -819,6 +849,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             staticFunctionsAcc
@@ -834,6 +865,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             staticFunctionsAcc
@@ -849,6 +881,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             staticFunctionsAcc
@@ -864,6 +897,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             staticFunctionsAcc
@@ -879,6 +913,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             staticFunctionsAcc
@@ -894,6 +929,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             staticFunctionsAcc
@@ -909,6 +945,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             staticFunctionsAcc
@@ -924,6 +961,7 @@ buildClass
           buildClass
             classDocs
             rest
+            upcastAcc
             constantsAcc
             ctorAcc
             staticFunctionsAcc
@@ -943,6 +981,7 @@ functions
   ( Class
       ffiClass
       _
+      toParent
       constants
       constructor
       staticFunctions
@@ -956,7 +995,8 @@ functions
       nestedClasses
     ) =
     List.concat
-      [ List.map (constantFunctionInfo ffiClass) constants
+      [ upcastInfo ffiClass toParent
+      , List.map (constantFunctionInfo ffiClass) constants
       , constructorInfo ffiClass constructor
       , List.map (staticFunctionInfo ffiClass) staticFunctions
       , List.map (memberFunctionInfo ffiClass) memberFunctions
@@ -968,6 +1008,19 @@ functions
       , List.collect (postOperatorOverloads ffiClass) postOperators
       , List.collect functions nestedClasses
       ]
+
+upcastInfo :: FFI.Class -> Maybe Upcast -> List Function
+upcastInfo ffiClass_ maybeToParent = case maybeToParent of
+  Nothing -> []
+  Just toParent -> do
+    List.singleton $
+      Function
+        { ffiName = Upcast.ffiName ffiClass_
+        , constraint = Nothing
+        , argumentTypes = [FFI.Class ffiClass_]
+        , returnType = FFI.Class (Upcast.parentClass toParent)
+        , invoke = Upcast.invoke toParent
+        }
 
 constantFunctionInfo :: FFI.Class -> (FFI.Name, Constant) -> Function
 constantFunctionInfo ffiClass_ (constantName, const@(Constant value _)) =

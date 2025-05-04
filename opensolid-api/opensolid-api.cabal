@@ -43,6 +43,7 @@ library
     API.PostOperator
     API.PreOperator
     API.StaticFunction
+    API.Upcast
 
   other-modules:
     API.Docs

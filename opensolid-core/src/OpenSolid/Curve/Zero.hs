@@ -1,5 +1,7 @@
 module OpenSolid.Curve.Zero (Zero (Zero, location, order, sign)) where
 
+import Data.Proxy (Proxy (Proxy))
+import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
@@ -34,4 +36,4 @@ instance ApproximateEquality Zero Zero Unitless where
     location1 ~= location2 && order1 == order2 && sign1 == sign2
 
 instance FFI Zero where
-  representation = FFI.nestedClassRepresentation "Curve" "Zero"
+  representation = FFI.nestedClassRepresentation @(Curve Unitless) Proxy "Zero"
