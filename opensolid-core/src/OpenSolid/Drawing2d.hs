@@ -3,7 +3,6 @@ module OpenSolid.Drawing2d
   , Attribute
   , Resolution
   , Point
-  , Drawing2d
   , toSvg
   , writeSvg
   , nothing
@@ -63,11 +62,6 @@ data Attribute space = Attribute Text Text deriving (Show)
 type Resolution = ?resolution :: Length
 
 type Point space = Point2d (space @ Meters)
-
-data Drawing2d
-
-instance FFI Drawing2d where
-  representation = FFI.classRepresentation "Drawing2d"
 
 instance FFI (Entity space) where
   representation = FFI.nestedClassRepresentation "Drawing2d" "Entity"

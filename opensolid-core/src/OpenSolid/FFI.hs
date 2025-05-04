@@ -10,6 +10,7 @@ module OpenSolid.FFI
   , snakeCase
   , classRepresentation
   , nestedClassRepresentation
+  , staticClassName
   , Type (..)
   , typeOf
   , className
@@ -129,6 +130,9 @@ classRepresentation givenName _ =
 nestedClassRepresentation :: FFI a => Text -> Text -> Proxy a -> Representation a
 nestedClassRepresentation outerName innerName _ =
   ClassRep (ClassName (NonEmpty.two outerName innerName))
+
+staticClassName :: Text -> ClassName
+staticClassName givenName = ClassName (NonEmpty.one givenName)
 
 data Type where
   Unit :: Type

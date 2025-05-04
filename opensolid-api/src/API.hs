@@ -91,13 +91,11 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Drawing2d (Drawing2d)
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
@@ -109,7 +107,6 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
-import OpenSolid.Scene3d (Scene3d)
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
@@ -821,7 +818,7 @@ areaCurve =
 
 drawing2d :: Class
 drawing2d =
-  Class.new @Drawing2d "A set of functions for constructing 2D drawings." $
+  Class.static "Drawing2d" "A set of functions for constructing 2D drawings." $
     [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
     , static3 "Write SVG" "Path" "View Box" "Entities" Drawing2d.writeSvg $(docs 'Drawing2d.writeSvg)
     , static1 "Group" "Entities" Drawing2d.group $(docs 'Drawing2d.group)
@@ -1269,7 +1266,7 @@ body3d =
 
 mesh :: Class
 mesh =
-  Class.new @(Mesh ()) "Meshing-related functionality." $
+  Class.static "Mesh" "Meshing-related functionality." $
     [ nested @(Mesh.Constraint Meters) $(docs ''Mesh.Constraint) []
     , static1 "Max Error" "Error" (Mesh.maxError @Meters) $(docs 'Mesh.maxError)
     , static1 "Max Size" "Size" (Mesh.maxSize @Meters) $(docs 'Mesh.maxSize)
@@ -1277,7 +1274,7 @@ mesh =
 
 scene3d :: Class
 scene3d =
-  Class.new @Scene3d "A set of functions for constructing 3D scenes." $
+  Class.static "Scene3d" "A set of functions for constructing 3D scenes." $
     [ staticM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
     , static1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
     , static2 "Metal" "Base Color" "Roughness" Scene3d.metal $(docs 'Scene3d.metal)

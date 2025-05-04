@@ -1,7 +1,6 @@
 module OpenSolid.Scene3d
   ( Entity
   , Material
-  , Scene3d
   , mesh
   , body
   , group
@@ -71,11 +70,6 @@ data Entity space where
 data Material = Material {baseColor :: Color, roughness :: Float, metallic :: Float}
 
 data Ground
-
-data Scene3d
-
-instance FFI Scene3d where
-  representation = FFI.classRepresentation "Scene3d"
 
 instance FFI (Entity space) where
   representation = FFI.nestedClassRepresentation "Scene3d" "Entity"

@@ -3,6 +3,7 @@ module API.Class
   , Member
   , Self (Self)
   , new
+  , static
   , upcast
   , constant
   , constructor1
@@ -94,6 +95,7 @@ import API.StaticFunction qualified as StaticFunction
 import API.Upcast (Upcast (Upcast))
 import API.Upcast qualified as Upcast
 import Data.Proxy (Proxy (Proxy))
+import Data.Void (Void)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
@@ -122,7 +124,7 @@ data Class where
 
 data Member value where
   ToParent :: Upcast -> Member value
-  Const :: FFI result => Text -> result -> Text -> Member value
+  Const :: FFI.Name -> Constant -> Member value
   Constructor :: Constructor -> Member value
   Static :: FFI.Name -> StaticFunction -> Member value
   Member :: FFI.Name -> MemberFunction -> Member value
@@ -130,16 +132,20 @@ data Member value where
   Comparison :: ComparisonFunction -> Member value
   Negate :: NegationFunction -> Member value
   Abs :: AbsFunction -> Member value
-  PreOp :: (FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
-  PostOp :: (FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
+  PreOp :: (FFI value, FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
+  PostOp :: (FFI value, FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
 
 new :: forall value. FFI value => Text -> List (Member value) -> Class
-new classDocs members =
-  buildClass classDocs members Nothing [] Nothing [] [] Nothing Nothing Nothing Nothing [] [] []
+new givenDocumentation members =
+  buildClass members (init (FFI.className @value Proxy) givenDocumentation)
+
+static :: Text -> Text -> List (Member Void) -> Class
+static className givenDocumentation members =
+  buildClass members (init (FFI.staticClassName className) givenDocumentation)
 
 constant :: FFI result => Text -> result -> Text -> Member value
-constant = Const
+constant name value docs = Const (FFI.name name) (Constant value docs)
 
 upcast :: (FFI parent, FFI value) => (value -> parent) -> Member value
 upcast = ToParent . Upcast
@@ -727,250 +733,53 @@ addPostOverload operatorId overload (first : rest) = do
     then (existingId, existingOverloads <> [overload]) : rest
     else first : addPostOverload operatorId overload rest
 
-buildClass ::
-  forall value.
-  FFI value =>
-  Text ->
-  List (Member value) ->
-  Maybe Upcast ->
-  List (FFI.Name, Constant) ->
-  Maybe Constructor ->
-  List (FFI.Name, StaticFunction) ->
-  List (FFI.Name, MemberFunction) ->
-  Maybe EqualityFunction ->
-  Maybe ComparisonFunction ->
-  Maybe NegationFunction ->
-  Maybe AbsFunction ->
-  List (BinaryOperator.Id, List PreOperator) ->
-  List (BinaryOperator.Id, List PostOperator) ->
-  List Class ->
+init :: FFI.ClassName -> Text -> Class
+init givenName givenDocumentation =
   Class
-buildClass
-  classDocs
-  members
-  upcastAcc
-  constantsAcc
-  ctorAcc
-  staticFunctionsAcc
-  memberFunctionsAcc
-  equalityFunctionAcc
-  comparisonFunctionAcc
-  negationFunctionAcc
-  absFunctionAcc
-  preOperatorsAcc
-  postOperatorsAcc
-  nestedClassesAcc =
-    case members of
-      [] ->
-        Class
-          { name = FFI.className @value Proxy
-          , documentation = classDocs
-          , toParent = upcastAcc
-          , constants = constantsAcc
-          , constructor = ctorAcc
-          , staticFunctions = staticFunctionsAcc
-          , memberFunctions = memberFunctionsAcc
-          , equalityFunction = equalityFunctionAcc
-          , comparisonFunction = comparisonFunctionAcc
-          , negationFunction = negationFunctionAcc
-          , absFunction = absFunctionAcc
-          , preOperators = preOperatorsAcc
-          , postOperators = postOperatorsAcc
-          , nestedClasses = nestedClassesAcc
-          }
-      first : rest -> case first of
-        ToParent toParent ->
-          buildClass
-            classDocs
-            rest
-            (Just toParent)
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Const name value documentation ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            (constantsAcc <> [(FFI.name name, Constant value documentation)])
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Constructor constructor ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            (Just constructor)
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Static name staticFunction ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            (staticFunctionsAcc <> [(name, staticFunction)])
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Member name memberFunction ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            (memberFunctionsAcc <> [(name, memberFunction)])
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Equality equalityFunction ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            (Just equalityFunction)
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Comparison comparisonFunction ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            (Just comparisonFunction)
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Negate negationFunction ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            (Just negationFunction)
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Abs absFunction ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            (Just absFunction)
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        PreOp operatorId operator ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
-            postOperatorsAcc
-            nestedClassesAcc
-        PostOp operatorId operator ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
-            nestedClassesAcc
-        Nested nestedDocstring nestedMembers ->
-          buildClass
-            classDocs
-            rest
-            upcastAcc
-            constantsAcc
-            ctorAcc
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            absFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            (nestedClassesAcc <> [new nestedDocstring nestedMembers])
+    { name = givenName
+    , documentation = givenDocumentation
+    , toParent = Nothing
+    , constants = []
+    , constructor = Nothing
+    , staticFunctions = []
+    , memberFunctions = []
+    , equalityFunction = Nothing
+    , comparisonFunction = Nothing
+    , negationFunction = Nothing
+    , absFunction = Nothing
+    , preOperators = []
+    , postOperators = []
+    , nestedClasses = []
+    }
+
+buildClass :: List (Member value) -> Class -> Class
+buildClass members built = case members of
+  [] -> built
+  first : rest -> buildClass rest $ case first of
+    ToParent toParent ->
+      built{toParent = Just toParent}
+    Const name const ->
+      built{constants = constants built <> [(name, const)]}
+    Constructor constructor ->
+      built{constructor = Just constructor}
+    Static name staticFunction ->
+      built{staticFunctions = staticFunctions built <> [(name, staticFunction)]}
+    Member name memberFunction ->
+      built{memberFunctions = memberFunctions built <> [(name, memberFunction)]}
+    Equality equalityFunction ->
+      built{equalityFunction = Just equalityFunction}
+    Comparison comparisonFunction ->
+      built{comparisonFunction = Just comparisonFunction}
+    Negate negationFunction ->
+      built{negationFunction = Just negationFunction}
+    Abs absFunction ->
+      built{absFunction = Just absFunction}
+    PreOp operatorId operator ->
+      built{preOperators = addPreOverload operatorId (PreOperator operator) (preOperators built)}
+    PostOp operatorId operator ->
+      built{postOperators = addPostOverload operatorId (PostOperator operator) (postOperators built)}
+    Nested nestedDocstring nestedMembers ->
+      built{nestedClasses = nestedClasses built <> [new nestedDocstring nestedMembers]}
 
 ----- FUNCTION COLLECTION -----
 

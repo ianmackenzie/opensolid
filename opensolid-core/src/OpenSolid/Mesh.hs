@@ -42,9 +42,6 @@ import OpenSolid.Vertex3d qualified as Vertex3d
 data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
   deriving (Eq, Show)
 
-instance FFI (Mesh ()) where
-  representation = FFI.classRepresentation "Mesh"
-
 instance Vertex2d vertex (space @ units) => Bounded2d (Mesh vertex) (space @ units) where
   bounds mesh = Bounds2d.hullN (NonEmpty.map Vertex2d.position (Array.toNonEmpty (vertices mesh)))
 
