@@ -8,6 +8,41 @@ Re-add Line#d, Arc#d, Bezier#d etc. types with corresponding Curve#d.line, Curve
   -> useful as return type of e.g. Gear.bore or Bearing.bore function; Cylinder3d.startCap and endCap can return Disk3d...
 -> also need UvLine, UvArc, UvBezier etc., but that seems OK...
 
+Switch to having Direction3d.[upward,downward,leftward,rightward,forward,backward]
+
+Add Interface3d type
+- defined by 'outward' and 'upward' direction ('localUpward'?)
+- Interface3d.[upward,downward,leftward,rightward,forward,backward] point
+- Interface3d.on plane point2d
+- Interface3d.along axis distance
+- Interface3d.flip interface
+- Frame3d.mate interface1 interface2
+  -> computes placement frame for object1
+- Interface3d.rotateBy
+  -> rotates around the outward axis
+- Interface3d.plane interface
+- Interface3d.axis interface
+- Interface3d.frame interface
+
+Add Convention3d module
+- Convention3d.xyz Direction3d.forward Direction3d.leftward Direction3d.upward do ...
+- Convention3d.zUpwardYForward do ...
+- type Convention3d = forall space . (?x :: Direction3d space, ?y :: Direction3d space, ?z :: Direction3d space)
+- Convention3d.xDirection :: Convention3d => Direction3d space
+  -> or maybe just: Direction3d.x :: Convention3d => Direction3d space
+
+Add Text.Display class
+- 'format' or similar function that returns a structured value defining how to display something (e.g. as a function call with arguments)
+- Text.display for converting that to Text
+- design the display data structure so it can also be used to generate valid 'to string' functions in target languages
+  -> with correct function name convention etc.
+
+Get Python docs publishing working
+-> maybe just generate Sphinx-flavoured reStructuredText instead of tyring to use autodoc?
+  -> full control over docs structure
+  -> don't have to mess around with settings to get autodoc to be able to import 'opensolid' module
+  -> one less dependency
+
 Have SpurGear be a pure interface?
 -> possibly add typeclass instance for '(Named "numTeeth" Int, Named "module" Length)' (anonymous record!)
 
@@ -221,19 +256,12 @@ Rewrite scripts in Haskell?
 -> first up: regenerating hie.yaml to use 'flib' for opensolid-ffi
   -> perhaps also combined script to add a new test executable and update hie.yaml
 
-Build out publishing workflow
-- Collect wheels and publish combined package
-  - might need intermediate step to merge Mac wheels into universal one, or just build universal one to start with?
-- Docs publishing: generate-python-docs then e.g. 'cp -r opensolid-python/lib/docs/build ../../opensolid/opensolid.github.io/docs/0.1.1'
-- Wheel publishing: uvx twine upload wheelhouse/*
-
 C API: generate structs with *named* fields
 -> have the struct be named as function_name_inputs, function_name_outputs etc.
 -> can use this in Python too, to have named fields instead of 'field0' etc.
 
 Improve Python bindings
 - Make axes callable by a Length to give a point?
-- Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
 - Add magic IPython display functions to Curve2d, Drawing2d.Entity etc.
   -> using to-SVG (and eventually to-glTF) Haskell functions under the hood? ('display' functions?)
 - Actual error types instead of strings
@@ -273,6 +301,3 @@ Implement 1D monotonic solving in C++
 Use space1 ~ space2 instead of space ~ space_ everywhere
 
 Refactor Estimate to return an error if convergence fails/stalls
-
-Implement Subtraction for UTCTime instead of having Duration.from function
--> also allow adding or subtracting Duration from a UTCTime to get another UTCTime
