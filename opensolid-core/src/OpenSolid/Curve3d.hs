@@ -25,6 +25,8 @@ module OpenSolid.Curve3d
   , parameterizeByArcLength
   , unsafeParameterizeByArcLength
   , transformBy
+  , placeIn
+  , relativeTo
   )
 where
 
@@ -48,6 +50,8 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.Expression.Curve3d qualified as Expression.Curve3d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -320,3 +324,22 @@ transformBy transform curve =
       (Bounds3d.transformBy transform)
       (compiled curve)
     # VectorCurve3d.transformBy transform (derivative curve)
+
+placeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  Curve3d (local @ units) ->
+  Curve3d (global @ units)
+placeIn frame curve =
+  new
+    # CompiledFunction.map
+      (Expression.Curve3d.placeIn frame)
+      (Point3d.placeIn frame)
+      (Bounds3d.placeIn frame)
+      (compiled curve)
+    # VectorCurve3d.placeIn (Frame3d.basis frame) (derivative curve)
+
+relativeTo ::
+  Frame3d (global @ units) (Defines local) ->
+  Curve3d (global @ units) ->
+  Curve3d (local @ units)
+relativeTo frame curve = placeIn (Frame3d.inverse frame) curve
