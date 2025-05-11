@@ -49,7 +49,8 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
         Scene3d.writeGlb glbPath [Scene3d.mesh material mesh]
         Stl.writeBinary stlPath Convention3d.yUp Length.inMillimeters mesh
         elapsed <- Timer.elapsed timer
-        IO.printLine ("Elapsed for " <> Text.int numTeeth <> " teeth: " <> Text.float (Duration.inSeconds elapsed) <> "s")
+        let elapsedText = Text.float (Duration.inSeconds elapsed) <> "s"
+        IO.printLine ("Elapsed for " <> Text.int numTeeth <> " teeth: " <> elapsedText)
   overallTimer <- Timer.start
   let toothCounts = [32, 48, 80, 64, 96, 112, 128]
   -- IO.forEach toothCounts writeGlb
