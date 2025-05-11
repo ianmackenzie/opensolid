@@ -9,11 +9,11 @@ module OpenSolid.Bytecode.Ast
   , constant3d
   , curveParameter
   , surfaceParameter
-  , xComponent2d
-  , yComponent2d
-  , xComponent3d
-  , yComponent3d
-  , zComponent3d
+  , xComponent
+  , yComponent
+  , rightwardComponent
+  , forwardComponent
+  , upwardComponent
   , squared
   , sqrt
   , sin
@@ -36,7 +36,7 @@ module OpenSolid.Bytecode.Ast
   , projectPoint3dInto
   , surfaceParameters
   , xy
-  , xyz
+  , rightwardForwardUpward
   , line1d
   , quadraticSpline1d
   , cubicSpline1d
@@ -79,8 +79,6 @@ import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
 import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
 import OpenSolid.Bytecode.Instruction qualified as Instruction
-import OpenSolid.Direction2d (Direction2d (Direction2d))
-import OpenSolid.Direction3d (Direction3d (Direction3d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -93,9 +91,9 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Direction3d (Direction3d), Point3d (Point3d), Vector3d (Vector3d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvPoint)
 import OpenSolid.Text qualified as Text
@@ -105,7 +103,6 @@ import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 
 data Space
@@ -129,11 +126,11 @@ deriving instance Show (Ast1d input)
 data Variable1d input where
   CurveParameter :: Variable1d Float
   SurfaceParameter :: SurfaceParameter -> Variable1d UvPoint
-  XComponent2d :: Variable2d input -> Variable1d input
-  YComponent2d :: Variable2d input -> Variable1d input
-  XComponent3d :: Variable3d input -> Variable1d input
-  YComponent3d :: Variable3d input -> Variable1d input
-  ZComponent3d :: Variable3d input -> Variable1d input
+  XComponent :: Variable2d input -> Variable1d input
+  YComponent :: Variable2d input -> Variable1d input
+  RightwardComponent :: Variable3d input -> Variable1d input
+  ForwardComponent :: Variable3d input -> Variable1d input
+  UpwardComponent :: Variable3d input -> Variable1d input
   Negated1d :: Variable1d input -> Variable1d input
   Sum1d :: Variable1d input -> Variable1d input -> Variable1d input
   SumVariableConstant1d :: Variable1d input -> Float -> Variable1d input
@@ -177,9 +174,9 @@ deriving instance Show (Ast2d input)
 
 data Variable2d input where
   SurfaceParameters :: Variable2d UvPoint
-  XY2d :: Variable1d input -> Variable1d input -> Variable2d input
-  XC2d :: Variable1d input -> Float -> Variable2d input
-  CY2d :: Float -> Variable1d input -> Variable2d input
+  XY :: Variable1d input -> Variable1d input -> Variable2d input
+  XC :: Variable1d input -> Float -> Variable2d input
+  CY :: Float -> Variable1d input -> Variable2d input
   Negated2d :: Variable2d input -> Variable2d input
   Sum2d :: Variable2d input -> Variable2d input -> Variable2d input
   SumVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable2d input
@@ -213,13 +210,13 @@ deriving instance Ord (Ast3d input)
 deriving instance Show (Ast3d input)
 
 data Variable3d input where
-  XYZ3d :: Variable1d input -> Variable1d input -> Variable1d input -> Variable3d input
-  XYC3d :: Variable1d input -> Variable1d input -> Float -> Variable3d input
-  XCZ3d :: Variable1d input -> Float -> Variable1d input -> Variable3d input
-  CYZ3d :: Float -> Variable1d input -> Variable1d input -> Variable3d input
-  XCC3d :: Variable1d input -> Float -> Float -> Variable3d input
-  CYC3d :: Float -> Variable1d input -> Float -> Variable3d input
-  CCZ3d :: Float -> Float -> Variable1d input -> Variable3d input
+  RFU :: Variable1d input -> Variable1d input -> Variable1d input -> Variable3d input
+  RFC :: Variable1d input -> Variable1d input -> Float -> Variable3d input
+  RCU :: Variable1d input -> Float -> Variable1d input -> Variable3d input
+  CFU :: Float -> Variable1d input -> Variable1d input -> Variable3d input
+  RCC :: Variable1d input -> Float -> Float -> Variable3d input
+  CFC :: Float -> Variable1d input -> Float -> Variable3d input
+  CCU :: Float -> Float -> Variable1d input -> Variable3d input
   Negated3d :: Variable3d input -> Variable3d input
   Sum3d :: Variable3d input -> Variable3d input -> Variable3d input
   SumVariableConstant3d :: Variable3d input -> Vector3d Coordinates -> Variable3d input
@@ -252,11 +249,11 @@ instance Composition (Ast1d input) (Ast1d Float) (Ast1d input) where
 instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) where
   input . CurveParameter = input
   CurveParameter . input = input
-  XComponent2d arg . input = XComponent2d (arg . input)
-  YComponent2d arg . input = YComponent2d (arg . input)
-  XComponent3d arg . input = XComponent3d (arg . input)
-  YComponent3d arg . input = YComponent3d (arg . input)
-  ZComponent3d arg . input = ZComponent3d (arg . input)
+  XComponent arg . input = XComponent (arg . input)
+  YComponent arg . input = YComponent (arg . input)
+  RightwardComponent arg . input = RightwardComponent (arg . input)
+  ForwardComponent arg . input = ForwardComponent (arg . input)
+  UpwardComponent arg . input = UpwardComponent (arg . input)
   Negated1d arg . input = Negated1d (arg . input)
   Sum1d lhs rhs . input = Sum1d (lhs . input) (rhs . input)
   SumVariableConstant1d lhs rhs . input = SumVariableConstant1d (lhs . input) rhs
@@ -289,9 +286,9 @@ instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
 
 instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) where
   input . CurveParameter = input
-  XY2d x y . input = XY2d (x . input) (y . input)
-  XC2d x y . input = XC2d (x . input) y
-  CY2d x y . input = CY2d x (y . input)
+  XY x y . input = XY (x . input) (y . input)
+  XC x y . input = XC (x . input) y
+  CY x y . input = CY x (y . input)
   Negated2d arg . input = Negated2d (arg . input)
   Sum2d lhs rhs . input = Sum2d (lhs . input) (rhs . input)
   SumVariableConstant2d lhs rhs . input = SumVariableConstant2d (lhs . input) rhs
@@ -315,13 +312,13 @@ instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
 
 instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) where
   input . CurveParameter = input
-  XYZ3d x y z . input = XYZ3d (x . input) (y . input) (z . input)
-  XYC3d x y z . input = XYC3d (x . input) (y . input) z
-  XCZ3d x y z . input = XCZ3d (x . input) y (z . input)
-  CYZ3d x y z . input = CYZ3d x (y . input) (z . input)
-  XCC3d x y z . input = XCC3d (x . input) y z
-  CYC3d x y z . input = CYC3d x (y . input) z
-  CCZ3d x y z . input = CCZ3d x y (z . input)
+  RFU r f u . input = RFU (r . input) (f . input) (u . input)
+  RFC r f u . input = RFC (r . input) (f . input) u
+  RCU r f u . input = RCU (r . input) f (u . input)
+  CFU r f u . input = CFU r (f . input) (u . input)
+  RCC r f u . input = RCC (r . input) f u
+  CFC r f u . input = CFC r (f . input) u
+  CCU r f u . input = CCU r f (u . input)
   Negated3d arg . input = Negated3d (arg . input)
   Sum3d lhs rhs . input = Sum3d (lhs . input) (rhs . input)
   SumVariableConstant3d lhs rhs . input = SumVariableConstant3d (lhs . input) rhs
@@ -348,13 +345,13 @@ instance Composition (Ast2d input) (Ast1d UvPoint) (Ast1d input) where
 
 instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) where
   input . SurfaceParameters = input
-  SurfaceParameter U . input = XComponent2d input
-  SurfaceParameter V . input = YComponent2d input
-  XComponent2d arg . input = XComponent2d (arg . input)
-  YComponent2d arg . input = YComponent2d (arg . input)
-  XComponent3d arg . input = XComponent3d (arg . input)
-  YComponent3d arg . input = YComponent3d (arg . input)
-  ZComponent3d arg . input = ZComponent3d (arg . input)
+  SurfaceParameter U . input = XComponent input
+  SurfaceParameter V . input = YComponent input
+  XComponent arg . input = XComponent (arg . input)
+  YComponent arg . input = YComponent (arg . input)
+  RightwardComponent arg . input = RightwardComponent (arg . input)
+  ForwardComponent arg . input = ForwardComponent (arg . input)
+  UpwardComponent arg . input = UpwardComponent (arg . input)
   Negated1d arg . input = Negated1d (arg . input)
   Sum1d lhs rhs . input = Sum1d (lhs . input) (rhs . input)
   SumVariableConstant1d lhs rhs . input = SumVariableConstant1d (lhs . input) rhs
@@ -389,9 +386,9 @@ instance Composition (Ast2d input) (Ast2d UvPoint) (Ast2d input) where
 instance Composition (Variable2d input) (Variable2d UvPoint) (Variable2d input) where
   input . SurfaceParameters = input
   SurfaceParameters . input = input
-  XY2d x y . input = XY2d (x . input) (y . input)
-  XC2d x y . input = XC2d (x . input) y
-  CY2d x y . input = CY2d x (y . input)
+  XY x y . input = XY (x . input) (y . input)
+  XC x y . input = XC (x . input) y
+  CY x y . input = CY x (y . input)
   Negated2d arg . input = Negated2d (arg . input)
   Sum2d lhs rhs . input = Sum2d (lhs . input) (rhs . input)
   SumVariableConstant2d lhs rhs . input = SumVariableConstant2d (lhs . input) rhs
@@ -416,13 +413,13 @@ instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
 
 instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) where
   input . SurfaceParameters = input
-  XYZ3d x y z . input = XYZ3d (x . input) (y . input) (z . input)
-  XYC3d x y z . input = XYC3d (x . input) (y . input) z
-  XCZ3d x y z . input = XCZ3d (x . input) y (z . input)
-  CYZ3d x y z . input = CYZ3d x (y . input) (z . input)
-  XCC3d x y z . input = XCC3d (x . input) y z
-  CYC3d x y z . input = CYC3d x (y . input) z
-  CCZ3d x y z . input = CCZ3d x y (z . input)
+  RFU r f u . input = RFU (r . input) (f . input) (u . input)
+  RFC r f u . input = RFC (r . input) (f . input) u
+  RCU r f u . input = RCU (r . input) f (u . input)
+  CFU r f u . input = CFU r (f . input) (u . input)
+  RCC r f u . input = RCC (r . input) f u
+  CFC r f u . input = CFC r (f . input) u
+  CCU r f u . input = CCU r f (u . input)
   Negated3d arg . input = Negated3d (arg . input)
   Sum3d lhs rhs . input = Sum3d (lhs . input) (rhs . input)
   SumVariableConstant3d lhs rhs . input = SumVariableConstant3d (lhs . input) rhs
@@ -459,25 +456,25 @@ surfaceParameter = Variable1d . SurfaceParameter
 surfaceParameters :: Ast2d UvPoint
 surfaceParameters = Variable2d SurfaceParameters
 
-xComponent2d :: Ast2d input -> Ast1d input
-xComponent2d (Constant2d val) = Constant1d (Vector2d.xComponent val)
-xComponent2d (Variable2d var) = Variable1d (XComponent2d var)
+xComponent :: Ast2d input -> Ast1d input
+xComponent (Constant2d val) = Constant1d (Vector2d.xComponent val)
+xComponent (Variable2d var) = Variable1d (XComponent var)
 
-yComponent2d :: Ast2d input -> Ast1d input
-yComponent2d (Constant2d val) = Constant1d (Vector2d.yComponent val)
-yComponent2d (Variable2d var) = Variable1d (YComponent2d var)
+yComponent :: Ast2d input -> Ast1d input
+yComponent (Constant2d val) = Constant1d (Vector2d.yComponent val)
+yComponent (Variable2d var) = Variable1d (YComponent var)
 
-xComponent3d :: Ast3d input -> Ast1d input
-xComponent3d (Constant3d val) = Constant1d (Vector3d.xComponent val)
-xComponent3d (Variable3d var) = Variable1d (XComponent3d var)
+rightwardComponent :: Ast3d input -> Ast1d input
+rightwardComponent (Constant3d val) = Constant1d (Vector3d.rightwardComponent val)
+rightwardComponent (Variable3d var) = Variable1d (RightwardComponent var)
 
-yComponent3d :: Ast3d input -> Ast1d input
-yComponent3d (Constant3d val) = Constant1d (Vector3d.yComponent val)
-yComponent3d (Variable3d var) = Variable1d (YComponent3d var)
+forwardComponent :: Ast3d input -> Ast1d input
+forwardComponent (Constant3d val) = Constant1d (Vector3d.forwardComponent val)
+forwardComponent (Variable3d var) = Variable1d (ForwardComponent var)
 
-zComponent3d :: Ast3d input -> Ast1d input
-zComponent3d (Constant3d val) = Constant1d (Vector3d.zComponent val)
-zComponent3d (Variable3d var) = Variable1d (ZComponent3d var)
+upwardComponent :: Ast3d input -> Ast1d input
+upwardComponent (Constant3d val) = Constant1d (Vector3d.upwardComponent val)
+upwardComponent (Variable3d var) = Variable1d (UpwardComponent var)
 
 instance Negation (Ast1d input) where
   negate (Constant1d val) = Constant1d -val
@@ -932,32 +929,34 @@ transformPoint3d transform ast = do
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
 
 vectorPlacementTransform2d :: Basis2d global (Defines local) -> Transform2d.Affine Coordinates
-vectorPlacementTransform2d basis = do
-  let Direction2d ix iy = Basis2d.xDirection basis
-  let Direction2d jx jy = Basis2d.yDirection basis
-  Transform2d Point2d.origin (Vector2d ix iy) (Vector2d jx jy)
+vectorPlacementTransform2d basis =
+  Transform2d
+    # Point2d.origin
+    # Vector2d.coerce (Vector2d.unit (Basis2d.xDirection basis))
+    # Vector2d.coerce (Vector2d.unit (Basis2d.yDirection basis))
 
 vectorPlacementTransform3d :: Basis3d global (Defines local) -> Transform3d.Affine Coordinates
-vectorPlacementTransform3d basis = do
-  let Direction3d ix iy iz = Basis3d.xDirection basis
-  let Direction3d jx jy jz = Basis3d.yDirection basis
-  let Direction3d kx ky kz = Basis3d.zDirection basis
-  Transform3d Point3d.origin (Vector3d ix iy iz) (Vector3d jx jy jz) (Vector3d kx ky kz)
+vectorPlacementTransform3d basis =
+  Transform3d
+    # Point3d.origin
+    # Vector3d.coerce (Vector3d.unit (Basis3d.rightwardDirection basis))
+    # Vector3d.coerce (Vector3d.unit (Basis3d.forwardDirection basis))
+    # Vector3d.coerce (Vector3d.unit (Basis3d.upwardDirection basis))
 
 pointPlacementTransform2d :: Frame2d (global @ units) (Defines local) -> Transform2d.Affine Coordinates
-pointPlacementTransform2d frame = do
-  let p0 = Frame2d.originPoint frame
-  let Direction2d ix iy = Frame2d.xDirection frame
-  let Direction2d jx jy = Frame2d.yDirection frame
-  Transform2d (Point2d.coerce p0) (Vector2d ix iy) (Vector2d jx jy)
+pointPlacementTransform2d frame =
+  Transform2d
+    # Point2d.coerce (Frame2d.originPoint frame)
+    # Vector2d.coerce (Vector2d.unit (Frame2d.xDirection frame))
+    # Vector2d.coerce (Vector2d.unit (Frame2d.yDirection frame))
 
 pointPlacementTransform3d :: Frame3d (global @ units) (Defines local) -> Transform3d.Affine Coordinates
-pointPlacementTransform3d frame = do
-  let p0 = Frame3d.originPoint frame
-  let Direction3d ix iy iz = Frame3d.xDirection frame
-  let Direction3d jx jy jz = Frame3d.yDirection frame
-  let Direction3d kx ky kz = Frame3d.zDirection frame
-  Transform3d (Point3d.coerce p0) (Vector3d ix iy iz) (Vector3d jx jy jz) (Vector3d kx ky kz)
+pointPlacementTransform3d frame =
+  Transform3d
+    # Point3d.coerce (Frame3d.originPoint frame)
+    # Vector3d.coerce (Vector3d.unit (Frame3d.rightwardDirection frame))
+    # Vector3d.coerce (Vector3d.unit (Frame3d.forwardDirection frame))
+    # Vector3d.coerce (Vector3d.unit (Frame3d.upwardDirection frame))
 
 placeVector2dIn :: Basis2d global (Defines local) -> Ast2d input -> Ast2d input
 placeVector2dIn basis ast = transformVector2d (vectorPlacementTransform2d basis) ast
@@ -993,19 +992,19 @@ projectPoint3dInto plane ast = case ast of
 
 xy :: Ast1d input -> Ast1d input -> Ast2d input
 xy (Constant1d x) (Constant1d y) = Constant2d (Vector2d x y)
-xy (Constant1d x) (Variable1d y) = Variable2d (CY2d x y)
-xy (Variable1d x) (Constant1d y) = Variable2d (XC2d x y)
-xy (Variable1d x) (Variable1d y) = Variable2d (XY2d x y)
+xy (Constant1d x) (Variable1d y) = Variable2d (CY x y)
+xy (Variable1d x) (Constant1d y) = Variable2d (XC x y)
+xy (Variable1d x) (Variable1d y) = Variable2d (XY x y)
 
-xyz :: Ast1d input -> Ast1d input -> Ast1d input -> Ast3d input
-xyz (Constant1d x) (Constant1d y) (Constant1d z) = Constant3d (Vector3d x y z)
-xyz (Constant1d x) (Constant1d y) (Variable1d z) = Variable3d (CCZ3d x y z)
-xyz (Constant1d x) (Variable1d y) (Constant1d z) = Variable3d (CYC3d x y z)
-xyz (Variable1d x) (Constant1d y) (Constant1d z) = Variable3d (XCC3d x y z)
-xyz (Constant1d x) (Variable1d y) (Variable1d z) = Variable3d (CYZ3d x y z)
-xyz (Variable1d x) (Constant1d y) (Variable1d z) = Variable3d (XCZ3d x y z)
-xyz (Variable1d x) (Variable1d y) (Constant1d z) = Variable3d (XYC3d x y z)
-xyz (Variable1d x) (Variable1d y) (Variable1d z) = Variable3d (XYZ3d x y z)
+rightwardForwardUpward :: Ast1d input -> Ast1d input -> Ast1d input -> Ast3d input
+rightwardForwardUpward (Constant1d r) (Constant1d f) (Constant1d u) = Constant3d (Vector3d r f u)
+rightwardForwardUpward (Constant1d r) (Constant1d f) (Variable1d u) = Variable3d (CCU r f u)
+rightwardForwardUpward (Constant1d r) (Variable1d f) (Constant1d u) = Variable3d (CFC r f u)
+rightwardForwardUpward (Variable1d r) (Constant1d f) (Constant1d u) = Variable3d (RCC r f u)
+rightwardForwardUpward (Constant1d r) (Variable1d f) (Variable1d u) = Variable3d (CFU r f u)
+rightwardForwardUpward (Variable1d r) (Constant1d f) (Variable1d u) = Variable3d (RCU r f u)
+rightwardForwardUpward (Variable1d r) (Variable1d f) (Constant1d u) = Variable3d (RFC r f u)
+rightwardForwardUpward (Variable1d r) (Variable1d f) (Variable1d u) = Variable3d (RFU r f u)
 
 line1d :: Qty units -> Qty units -> Ast1d input -> Ast1d input
 line1d p1 p2 param = bezierCurve1d (NonEmpty.two p1 p2) param
@@ -1135,53 +1134,53 @@ bezierCurve3d controlPoints param =
   Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter) . param
 
 addTransform2d :: Transform2d.Affine Coordinates -> Compile.Step ConstantIndex
-addTransform2d (Transform2d p0 i j) = do
-  let Vector2d ix iy = i
-  let Vector2d jx jy = j
-  let Point2d x0 y0 = p0
-  Compile.addConstant (ix :| [iy, jx, jy, x0, y0])
+addTransform2d (Transform2d origin i j) = do
+  let Vector2d iX iY = i
+  let Vector2d jX jY = j
+  let Point2d oX oY = origin
+  Compile.addConstant (iX :| [iY, jX, jY, oX, oY])
 
 addTransform3d :: Transform3d.Affine Coordinates -> Compile.Step ConstantIndex
-addTransform3d (Transform3d p0 i j k) = do
-  let Vector3d ix iy iz = i
-  let Vector3d jx jy jz = j
-  let Vector3d kx ky kz = k
-  let Point3d x0 y0 z0 = p0
-  Compile.addConstant (ix :| [iy, iz, jx, jy, jz, kx, ky, kz, x0, y0, z0])
+addTransform3d (Transform3d origin i j k) = do
+  let Vector3d iR iF iU = i
+  let Vector3d jR jF jU = j
+  let Vector3d kR kF kU = k
+  let Point3d oR oF oU = origin
+  Compile.addConstant (iR :| [iF, iU, jR, jF, jU, kR, kF, kU, oR, oF, oU])
 
 addPlanarBasis :: PlanarBasis -> Compile.Step ConstantIndex
 addPlanarBasis basis = do
-  let Direction3d ix iy iz = PlanarBasis3d.xDirection basis
-  let Direction3d jx jy jz = PlanarBasis3d.yDirection basis
-  Compile.addConstant (NonEmpty.six ix iy iz jx jy jz)
+  let Direction3d iR iF iU = PlanarBasis3d.xDirection basis
+  let Direction3d jR jF jU = PlanarBasis3d.yDirection basis
+  Compile.addConstant (NonEmpty.six iR iF iU jR jF jU)
 
 addPlane :: Plane -> Compile.Step ConstantIndex
 addPlane plane = do
-  let Direction3d ix iy iz = Plane3d.xDirection plane
-  let Direction3d jx jy jz = Plane3d.yDirection plane
-  let Point3d x0 y0 z0 = Plane3d.originPoint plane
-  Compile.addConstant (ix :| [iy, iz, jx, jy, jz, x0, y0, z0])
+  let Direction3d iR iF iU = Plane3d.xDirection plane
+  let Direction3d jR jF jU = Plane3d.yDirection plane
+  let Point3d oR oF oU = Plane3d.originPoint plane
+  Compile.addConstant (iR :| [iF, iU, jR, jF, jU, oR, oF, oU])
 
 compileVariable1d :: Variable1d input -> Compile.Step VariableIndex
 compileVariable1d variable = case variable of
   CurveParameter -> Compile.return (VariableIndex 0)
   SurfaceParameter U -> Compile.return (VariableIndex 0)
   SurfaceParameter V -> Compile.return (VariableIndex 1)
-  XComponent2d arg -> Compile.do
+  XComponent arg -> Compile.do
     argIndex <- compileVariable2d arg
-    Compile.addVariable1d (Instruction.XComponent argIndex)
-  YComponent2d arg -> Compile.do
+    Compile.addVariable1d (Instruction.Component0 argIndex)
+  YComponent arg -> Compile.do
     argIndex <- compileVariable2d arg
-    Compile.addVariable1d (Instruction.YComponent argIndex)
-  XComponent3d arg -> Compile.do
+    Compile.addVariable1d (Instruction.Component1 argIndex)
+  RightwardComponent arg -> Compile.do
     argIndex <- compileVariable3d arg
-    Compile.addVariable1d (Instruction.XComponent argIndex)
-  YComponent3d arg -> Compile.do
+    Compile.addVariable1d (Instruction.Component0 argIndex)
+  ForwardComponent arg -> Compile.do
     argIndex <- compileVariable3d arg
-    Compile.addVariable1d (Instruction.YComponent argIndex)
-  ZComponent3d arg -> Compile.do
+    Compile.addVariable1d (Instruction.Component1 argIndex)
+  UpwardComponent arg -> Compile.do
     argIndex <- compileVariable3d arg
-    Compile.addVariable1d (Instruction.ZComponent argIndex)
+    Compile.addVariable1d (Instruction.Component2 argIndex)
   Negated1d arg -> Compile.do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Negate1d argIndex)
@@ -1275,18 +1274,18 @@ compileVariable1d variable = case variable of
 compileVariable2d :: Variable2d input -> Compile.Step VariableIndex
 compileVariable2d variable = case variable of
   SurfaceParameters -> Compile.return (VariableIndex 0)
-  XY2d x y -> Compile.do
+  XY x y -> Compile.do
     xIndex <- compileVariable1d x
     yIndex <- compileVariable1d y
-    Compile.addVariable2d (Instruction.XY2d xIndex yIndex)
-  XC2d x y -> Compile.do
+    Compile.addVariable2d (Instruction.XY xIndex yIndex)
+  XC x y -> Compile.do
     xIndex <- compileVariable1d x
     yIndex <- Compile.addConstant1d y
-    Compile.addVariable2d (Instruction.XC2d xIndex yIndex)
-  CY2d x y -> Compile.do
+    Compile.addVariable2d (Instruction.XC xIndex yIndex)
+  CY x y -> Compile.do
     xIndex <- Compile.addConstant1d x
     yIndex <- compileVariable1d y
-    Compile.addVariable2d (Instruction.CY2d xIndex yIndex)
+    Compile.addVariable2d (Instruction.CY xIndex yIndex)
   Negated2d arg -> Compile.do
     argIndex <- compileVariable2d arg
     Compile.addVariable2d (Instruction.Negate2d argIndex)
@@ -1353,41 +1352,41 @@ compileVariable2d variable = case variable of
 
 compileVariable3d :: Variable3d input -> Compile.Step VariableIndex
 compileVariable3d variable = case variable of
-  XYZ3d x y z -> Compile.do
-    xIndex <- compileVariable1d x
-    yIndex <- compileVariable1d y
-    zIndex <- compileVariable1d z
-    Compile.addVariable3d (Instruction.XYZ3d xIndex yIndex zIndex)
-  XYC3d x y z -> Compile.do
-    xIndex <- compileVariable1d x
-    yIndex <- compileVariable1d y
-    zIndex <- Compile.addConstant1d z
-    Compile.addVariable3d (Instruction.XYC3d xIndex yIndex zIndex)
-  XCZ3d x y z -> Compile.do
-    xIndex <- compileVariable1d x
-    yIndex <- Compile.addConstant1d y
-    zIndex <- compileVariable1d z
-    Compile.addVariable3d (Instruction.XCZ3d xIndex yIndex zIndex)
-  CYZ3d x y z -> Compile.do
-    xIndex <- Compile.addConstant1d x
-    yIndex <- compileVariable1d y
-    zIndex <- compileVariable1d z
-    Compile.addVariable3d (Instruction.CYZ3d xIndex yIndex zIndex)
-  XCC3d x y z -> Compile.do
-    xIndex <- compileVariable1d x
-    yIndex <- Compile.addConstant1d y
-    zIndex <- Compile.addConstant1d z
-    Compile.addVariable3d (Instruction.XCC3d xIndex yIndex zIndex)
-  CYC3d x y z -> Compile.do
-    xIndex <- Compile.addConstant1d x
-    yIndex <- compileVariable1d y
-    zIndex <- Compile.addConstant1d z
-    Compile.addVariable3d (Instruction.CYC3d xIndex yIndex zIndex)
-  CCZ3d x y z -> Compile.do
-    xIndex <- Compile.addConstant1d x
-    yIndex <- Compile.addConstant1d y
-    zIndex <- compileVariable1d z
-    Compile.addVariable3d (Instruction.CCZ3d xIndex yIndex zIndex)
+  RFU r f u -> Compile.do
+    rIndex <- compileVariable1d r
+    fIndex <- compileVariable1d f
+    uIndex <- compileVariable1d u
+    Compile.addVariable3d (Instruction.RFU rIndex fIndex uIndex)
+  RFC r f u -> Compile.do
+    rIndex <- compileVariable1d r
+    fIndex <- compileVariable1d f
+    uIndex <- Compile.addConstant1d u
+    Compile.addVariable3d (Instruction.RFC rIndex fIndex uIndex)
+  RCU r f u -> Compile.do
+    rIndex <- compileVariable1d r
+    fIndex <- Compile.addConstant1d f
+    uIndex <- compileVariable1d u
+    Compile.addVariable3d (Instruction.RCU rIndex fIndex uIndex)
+  CFU r f u -> Compile.do
+    rIndex <- Compile.addConstant1d r
+    fIndex <- compileVariable1d f
+    uIndex <- compileVariable1d u
+    Compile.addVariable3d (Instruction.CFU rIndex fIndex uIndex)
+  RCC r f u -> Compile.do
+    rIndex <- compileVariable1d r
+    fIndex <- Compile.addConstant1d f
+    uIndex <- Compile.addConstant1d u
+    Compile.addVariable3d (Instruction.RCC rIndex fIndex uIndex)
+  CFC r f u -> Compile.do
+    rIndex <- Compile.addConstant1d r
+    fIndex <- compileVariable1d f
+    uIndex <- Compile.addConstant1d u
+    Compile.addVariable3d (Instruction.CFC rIndex fIndex uIndex)
+  CCU r f u -> Compile.do
+    rIndex <- Compile.addConstant1d r
+    fIndex <- Compile.addConstant1d f
+    uIndex <- compileVariable1d u
+    Compile.addVariable3d (Instruction.CCU rIndex fIndex uIndex)
   Negated3d arg -> Compile.do
     argIndex <- compileVariable3d arg
     Compile.addVariable3d (Instruction.Negate3d argIndex)
@@ -1428,8 +1427,8 @@ compileVariable3d variable = case variable of
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable3d (Instruction.DivideConstantVariable3d lhsIndex rhsIndex)
   BezierCurve3d controlPoints parameter -> Compile.do
-    let (xControlPoints, yControlPoints, zControlPoints) = NonEmpty.unzip3 (NonEmpty.map Vector3d.components controlPoints)
-    let flattenedControlPoints = xControlPoints <> yControlPoints <> zControlPoints
+    let (rControlPoints, fControlPoints, uControlPoints) = NonEmpty.unzip3 (NonEmpty.map unwrap3d controlPoints)
+    let flattenedControlPoints = rControlPoints <> fControlPoints <> uControlPoints
     controlPointsIndex <- Compile.addConstant flattenedControlPoints
     parameterIndex <- compileVariable1d parameter
     let numControlPoints = NonEmpty.length controlPoints
@@ -1459,6 +1458,9 @@ compileVariable3d variable = case variable of
     planeIndex <- addPlane plane
     pointIndex <- compileVariable2d point
     Compile.addVariable3d (Instruction.PlacePoint2d planeIndex pointIndex)
+
+unwrap3d :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
+unwrap3d (Vector3d r f u) = (r, f, u)
 
 compileCurve1d :: Ast1d Float -> Compiled Float Float
 compileCurve1d (Constant1d val) = Evaluate.Constant val

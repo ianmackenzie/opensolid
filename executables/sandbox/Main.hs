@@ -31,8 +31,10 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
@@ -40,6 +42,7 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
+import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import OpenSolid.SurfaceParameter (UvCoordinates, UvPoint, UvSpace)
@@ -51,7 +54,6 @@ import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 import OpenSolid.Volume qualified as Volume
 
 data Global deriving (Eq, Show)
@@ -73,6 +75,8 @@ testScalarArithmetic = IO.do
 
 testVectorArithmetic :: IO ()
 testVectorArithmetic = IO.do
+  let vector r f u =
+        Vector3d.rightwardForwardUpward (Length.meters r) (Length.meters f) (Length.meters u)
   let v1 = Vector2d.meters 1.0 2.0
   let v2 = 0.5 * Vector2d.meters 3.0 4.0
   let dotProduct = v1 `dot` v2
@@ -84,7 +88,7 @@ testVectorArithmetic = IO.do
   log "Translated point" translatedPoint
   let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
   log "Vector sum" vectorSum
-  let crossProduct = Vector3d.meters 1.0 2.0 3.0 `cross` Vector3d.meters 4.0 5.0 6.0
+  let crossProduct = vector 1.0 2.0 3.0 `cross` vector 4.0 5.0 6.0
   log "Cross product" crossProduct
   let scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
   log "Scaled vector" scaledVector
@@ -192,18 +196,17 @@ testNonEmpty = IO.do
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = IO.do
-  let theta = Angle.twoPi * SurfaceFunction.u
-  let phi = Angle.twoPi * SurfaceFunction.v
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
-  let r = majorRadius + minorRadius * SurfaceFunction.cos phi
-  let x = r * SurfaceFunction.cos theta
-  let y = r * SurfaceFunction.sin theta
-  let z = minorRadius * SurfaceFunction.sin phi
+  let crossSection =
+        Curve2d.circle
+          # #centerPoint (Point2d.x majorRadius)
+          # #diameter (2.0 * minorRadius)
+  surface <- Surface3d.revolved Plane3d.front crossSection Axis2d.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  let planeNormal = Direction3d.zx -alpha
-  let f = planeNormal `dot` VectorSurfaceFunction3d.xyz x y z
+  let planeNormal = Direction3d.upwardRightward alpha
+  let f = planeNormal `dot` (Surface3d.function surface - Point3d.origin)
   zeros <- SurfaceFunction.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"

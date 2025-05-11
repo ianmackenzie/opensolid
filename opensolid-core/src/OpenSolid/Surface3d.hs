@@ -5,6 +5,7 @@ module OpenSolid.Surface3d
   , extruded
   , translational
   , ruled
+  , revolved
   , function
   , domain
   , outerLoop
@@ -15,18 +16,22 @@ module OpenSolid.Surface3d
   )
 where
 
+import OpenSolid.Angle (Angle)
+import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CDT qualified as CDT
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.LineSegment2d (LineSegment2d)
@@ -48,6 +53,7 @@ import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Set2d (Set2d)
 import OpenSolid.Set2d qualified as Set2d
+import OpenSolid.Surface3d.Revolved qualified as Revolved
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
@@ -118,6 +124,37 @@ ruled bottom top = do
   let f1 = bottom . SurfaceFunction.u
   let f2 = top . SurfaceFunction.u
   parametric (f1 + SurfaceFunction.v * (f2 - f1)) Region2d.unitSquare
+
+revolved ::
+  Tolerance units =>
+  Plane3d (space @ units) (Defines local) ->
+  Curve2d (local @ units) ->
+  Axis2d (local @ units) ->
+  Angle ->
+  Result Revolved.Error (Surface3d (space @ units))
+revolved sketchPlane curve axis angle = do
+  let frame2d = Frame2d.fromYAxis axis
+  let localCurve = Curve2d.relativeTo frame2d curve
+  let xCoordinate = Curve2d.xCoordinate localCurve
+  if xCoordinate ~= Qty.zero
+    then Failure Revolved.ProfileIsOnAxis
+    else case Curve.sign xCoordinate of
+      Failure Curve.CrossesZero -> Failure Revolved.ProfileCrossesAxis
+      Success profileSign -> do
+        let frame3d = Frame3d.fromBackPlane (Frame2d.placeOn sketchPlane frame2d)
+        let (revolutionParameter, curveParameter) = case profileSign of
+              Positive -> (SurfaceFunction.u, SurfaceFunction.v)
+              Negative -> (SurfaceFunction.v, SurfaceFunction.u)
+        let theta = angle * revolutionParameter
+        let radius = xCoordinate . curveParameter
+        let height = Curve2d.yCoordinate localCurve . curveParameter
+        let function =
+              SurfaceFunction3d.placeIn frame3d do
+                SurfaceFunction3d.rightwardForwardUpward
+                  # radius * SurfaceFunction.cos theta
+                  # radius * SurfaceFunction.sin theta
+                  # height
+        Success (parametric function Region2d.unitSquare)
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
 boundaryCurves surface = NonEmpty.concat (outerLoop surface :| innerLoops surface)

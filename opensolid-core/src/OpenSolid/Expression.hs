@@ -5,15 +5,18 @@ module OpenSolid.Expression
   , Zero (zero)
   , Origin (origin)
   , XY (xy)
-  , XYZ (xyz)
-  , XComponent (xComponent)
-  , YComponent (yComponent)
-  , ZComponent (zComponent)
-  , XCoordinate (xCoordinate)
-  , YCoordinate (yCoordinate)
-  , ZCoordinate (zCoordinate)
+  , RightwardForwardUpward (rightwardForwardUpward)
+  , xComponent
+  , yComponent
+  , rightwardComponent
+  , forwardComponent
+  , upwardComponent
+  , xCoordinate
+  , yCoordinate
+  , rightwardCoordinate
+  , forwardCoordinate
+  , upwardCoordinate
   , t
-  , r
   , u
   , v
   , uv
@@ -46,7 +49,6 @@ import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
-import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bytecode.Ast (Ast1d, Ast2d, Ast3d)
 import OpenSolid.Bytecode.Ast qualified as Ast
 import OpenSolid.Bytecode.Evaluate (Compiled)
@@ -60,9 +62,14 @@ import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Primitives
+  ( Bounds3d (Bounds3d)
+  , Point3d (Point3d)
+  , Vector3d (Vector3d)
+  , VectorBounds3d (VectorBounds3d)
+  )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
@@ -71,11 +78,9 @@ import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
-import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
 type role Expression nominal nominal
@@ -1262,88 +1267,71 @@ instance XY Float (Point2d (space @ units)) units where
 instance XY UvPoint (Point2d (space @ units)) units where
   xy (Surface1d x _) (Surface1d y _) = surface2d (Ast.xy x y)
 
-class XYZ input output units | output -> units where
-  xyz ::
+class RightwardForwardUpward input output units | output -> units where
+  rightwardForwardUpward ::
     Expression input (Qty units) ->
     Expression input (Qty units) ->
     Expression input (Qty units) ->
     Expression input output
 
-instance XYZ Float (Vector3d (space @ units)) units where
-  xyz (Curve1d x _) (Curve1d y _) (Curve1d z _) = vectorCurve3d (Ast.xyz x y z)
+instance RightwardForwardUpward Float (Vector3d (space @ units)) units where
+  rightwardForwardUpward (Curve1d vr _) (Curve1d vf _) (Curve1d vu _) =
+    vectorCurve3d (Ast.rightwardForwardUpward vr vf vu)
 
-instance XYZ UvPoint (Vector3d (space @ units)) units where
-  xyz (Surface1d x _) (Surface1d y _) (Surface1d z _) = vectorSurface3d (Ast.xyz x y z)
+instance RightwardForwardUpward UvPoint (Vector3d (space @ units)) units where
+  rightwardForwardUpward (Surface1d vr _) (Surface1d vf _) (Surface1d vu _) =
+    vectorSurface3d (Ast.rightwardForwardUpward vr vf vu)
 
-instance XYZ Float (Point3d (space @ units)) units where
-  xyz (Curve1d x _) (Curve1d y _) (Curve1d z _) = curve3d (Ast.xyz x y z)
+instance RightwardForwardUpward Float (Point3d (space @ units)) units where
+  rightwardForwardUpward (Curve1d pr _) (Curve1d pf _) (Curve1d pu _) =
+    curve3d (Ast.rightwardForwardUpward pr pf pu)
 
-instance XYZ UvPoint (Point3d (space @ units)) units where
-  xyz (Surface1d x _) (Surface1d y _) (Surface1d z _) = surface3d (Ast.xyz x y z)
+instance RightwardForwardUpward UvPoint (Point3d (space @ units)) units where
+  rightwardForwardUpward (Surface1d pr _) (Surface1d pf _) (Surface1d pu _) =
+    surface3d (Ast.rightwardForwardUpward pr pf pu)
 
-class XComponent input output units | output -> units where
-  xComponent :: Expression input output -> Expression input (Qty units)
+xComponent :: Expression input (Vector2d (space @ units)) -> Expression input (Qty units)
+xComponent (VectorCurve2d ast _) = curve1d (Ast.xComponent ast)
+xComponent (VectorSurface2d ast _) = surface1d (Ast.xComponent ast)
 
-class YComponent input output units | output -> units where
-  yComponent :: Expression input output -> Expression input (Qty units)
+yComponent :: Expression input (Vector2d (space @ units)) -> Expression input (Qty units)
+yComponent (VectorCurve2d ast _) = curve1d (Ast.yComponent ast)
+yComponent (VectorSurface2d ast _) = surface1d (Ast.yComponent ast)
 
-class ZComponent input output units | output -> units where
-  zComponent :: Expression input output -> Expression input (Qty units)
+xCoordinate :: Expression input (Point2d (space @ units)) -> Expression input (Qty units)
+xCoordinate (Curve2d ast _) = curve1d (Ast.xComponent ast)
+xCoordinate (Surface2d ast _) = surface1d (Ast.xComponent ast)
 
-instance XComponent input (Vector2d (space @ units)) units where
-  xComponent (VectorCurve2d ast _) = curve1d (Ast.xComponent2d ast)
-  xComponent (VectorSurface2d ast _) = surface1d (Ast.xComponent2d ast)
+yCoordinate :: Expression input (Point2d (space @ units)) -> Expression input (Qty units)
+yCoordinate (Curve2d ast _) = curve1d (Ast.yComponent ast)
+yCoordinate (Surface2d ast _) = surface1d (Ast.yComponent ast)
 
-instance XComponent input (Vector3d (space @ units)) units where
-  xComponent (VectorCurve3d ast _) = curve1d (Ast.xComponent3d ast)
-  xComponent (VectorSurface3d ast _) = surface1d (Ast.xComponent3d ast)
+rightwardComponent :: Expression input (Vector3d (space @ units)) -> Expression input (Qty units)
+rightwardComponent (VectorCurve3d ast _) = curve1d (Ast.rightwardComponent ast)
+rightwardComponent (VectorSurface3d ast _) = surface1d (Ast.rightwardComponent ast)
 
-instance YComponent input (Vector2d (space @ units)) units where
-  yComponent (VectorCurve2d ast _) = curve1d (Ast.yComponent2d ast)
-  yComponent (VectorSurface2d ast _) = surface1d (Ast.yComponent2d ast)
+forwardComponent :: Expression input (Vector3d (space @ units)) -> Expression input (Qty units)
+forwardComponent (VectorCurve3d ast _) = curve1d (Ast.forwardComponent ast)
+forwardComponent (VectorSurface3d ast _) = surface1d (Ast.forwardComponent ast)
 
-instance YComponent input (Vector3d (space @ units)) units where
-  yComponent (VectorCurve3d ast _) = curve1d (Ast.yComponent3d ast)
-  yComponent (VectorSurface3d ast _) = surface1d (Ast.yComponent3d ast)
+upwardComponent :: Expression input (Vector3d (space @ units)) -> Expression input (Qty units)
+upwardComponent (VectorCurve3d ast _) = curve1d (Ast.upwardComponent ast)
+upwardComponent (VectorSurface3d ast _) = surface1d (Ast.upwardComponent ast)
 
-instance ZComponent input (Vector3d (space @ units)) units where
-  zComponent (VectorCurve3d ast _) = curve1d (Ast.zComponent3d ast)
-  zComponent (VectorSurface3d ast _) = surface1d (Ast.zComponent3d ast)
+rightwardCoordinate :: Expression input (Point3d (space @ units)) -> Expression input (Qty units)
+rightwardCoordinate (Curve3d ast _) = curve1d (Ast.rightwardComponent ast)
+rightwardCoordinate (Surface3d ast _) = surface1d (Ast.rightwardComponent ast)
 
-class XCoordinate input output units | output -> units where
-  xCoordinate :: Expression input output -> Expression input (Qty units)
+forwardCoordinate :: Expression input (Point3d (space @ units)) -> Expression input (Qty units)
+forwardCoordinate (Curve3d ast _) = curve1d (Ast.forwardComponent ast)
+forwardCoordinate (Surface3d ast _) = surface1d (Ast.forwardComponent ast)
 
-class YCoordinate input output units | output -> units where
-  yCoordinate :: Expression input output -> Expression input (Qty units)
-
-class ZCoordinate input output units | output -> units where
-  zCoordinate :: Expression input output -> Expression input (Qty units)
-
-instance XCoordinate input (Point2d (space @ units)) units where
-  xCoordinate (Curve2d ast _) = curve1d (Ast.xComponent2d ast)
-  xCoordinate (Surface2d ast _) = surface1d (Ast.xComponent2d ast)
-
-instance XCoordinate input (Point3d (space @ units)) units where
-  xCoordinate (Curve3d ast _) = curve1d (Ast.xComponent3d ast)
-  xCoordinate (Surface3d ast _) = surface1d (Ast.xComponent3d ast)
-
-instance YCoordinate input (Point2d (space @ units)) units where
-  yCoordinate (Curve2d ast _) = curve1d (Ast.yComponent2d ast)
-  yCoordinate (Surface2d ast _) = surface1d (Ast.yComponent2d ast)
-
-instance YCoordinate input (Point3d (space @ units)) units where
-  yCoordinate (Curve3d ast _) = curve1d (Ast.yComponent3d ast)
-  yCoordinate (Surface3d ast _) = surface1d (Ast.yComponent3d ast)
-
-instance ZCoordinate input (Point3d (space @ units)) units where
-  zCoordinate (Curve3d ast _) = curve1d (Ast.zComponent3d ast)
-  zCoordinate (Surface3d ast _) = surface1d (Ast.zComponent3d ast)
+upwardCoordinate :: Expression input (Point3d (space @ units)) -> Expression input (Qty units)
+upwardCoordinate (Curve3d ast _) = curve1d (Ast.upwardComponent ast)
+upwardCoordinate (Surface3d ast _) = surface1d (Ast.upwardComponent ast)
 
 t :: Expression Float Float
 t = curve1d Ast.curveParameter
-
-r :: Expression Float Float
-r = constant @Float 1.0 - t
 
 u :: Expression UvPoint Float
 u = surface1d (Ast.surfaceParameter SurfaceParameter.U)

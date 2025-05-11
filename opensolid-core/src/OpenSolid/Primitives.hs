@@ -1,4 +1,26 @@
-module OpenSolid.Primitives where
+module OpenSolid.Primitives
+  ( Vector2d (Vector2d)
+  , Direction2d (Unit2d, Direction2d)
+  , Basis2d (Basis2d)
+  , Point2d (Point2d)
+  , VectorBounds2d (VectorBounds2d)
+  , Bounds2d (Bounds2d)
+  , Axis2d (Axis2d)
+  , Frame2d (Frame2d)
+  , Transform2d (Transform2d)
+  , Vector3d (Vector3d)
+  , Direction3d (Unit3d, Direction3d)
+  , PlanarBasis3d (PlanarBasis3d)
+  , Basis3d (Basis3d, rightwardDirection, forwardDirection, upwardDirection)
+  , Point3d (Point3d)
+  , VectorBounds3d (VectorBounds3d)
+  , Bounds3d (Bounds3d)
+  , Axis3d (Axis3d)
+  , Plane3d (Plane3d)
+  , Frame3d (Frame3d)
+  , Transform3d (Transform3d)
+  )
+where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds)
@@ -212,6 +234,12 @@ This is effectively a type-safe unit vector.
 -}
 newtype Direction2d (space :: Type) = Unit2d (Vector2d (space @ Unitless))
   deriving (Eq, Ord, Show)
+
+{-# COMPLETE Direction2d #-}
+
+{-# INLINE Direction2d #-}
+pattern Direction2d :: Float -> Float -> Direction2d space
+pattern Direction2d dX dY = Unit2d (Vector2d dX dY)
 
 instance HasUnits (Direction2d space) Unitless (Direction2d space)
 
@@ -787,6 +815,18 @@ instance
   box ~= point = point ~= box
 
 instance
+  (units1 ~ units2, space1 ~ space2) =>
+  Intersects (Point2d (space1 @ units1)) (Axis2d (space2 @ units2)) units1
+  where
+  p ^ (Axis2d p0 d) = (p - p0) `cross` d ~= Qty.zero
+
+instance
+  (units1 ~ units2, space1 ~ space2) =>
+  Intersects (Axis2d (space2 @ units2)) (Point2d (space1 @ units1)) units1
+  where
+  axis ^ point = point ^ axis
+
+instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
@@ -1136,7 +1176,7 @@ newtype Direction3d (space :: Type) = Unit3d (Vector3d (space @ Unitless))
 
 {-# INLINE Direction3d #-}
 pattern Direction3d :: Float -> Float -> Float -> Direction3d space
-pattern Direction3d dx dy dz <- Unit3d (Vector3d dx dy dz)
+pattern Direction3d dR dF dU = Unit3d (Vector3d dR dF dU)
 
 instance FFI (Direction3d space) where
   representation = FFI.classRepresentation "Direction3d"
@@ -1212,7 +1252,12 @@ deriving instance Show (PlanarBasis3d space defines)
 
 type Basis3d :: Type -> LocalSpace -> Type
 data Basis3d space defines where
-  Basis3d :: Direction3d space -> Direction3d space -> Direction3d space -> Basis3d space defines
+  Basis3d ::
+    { rightwardDirection :: Direction3d space
+    , forwardDirection :: Direction3d space
+    , upwardDirection :: Direction3d space
+    } ->
+    Basis3d space defines
 
 deriving instance Eq (Basis3d space defines)
 
@@ -1323,6 +1368,24 @@ instance
   Units.Coercion (VectorBounds3d (space1 @ unitsA)) (VectorBounds3d (space2 @ unitsB))
   where
   coerce (VectorBounds3d x y z) = VectorBounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Intersects (Vector3d (space1 @ units1)) (VectorBounds3d (space2 @ units2)) units1
+  where
+  Vector3d vR vF vU ^ VectorBounds3d bR bF bU = vR ^ bR && vF ^ bF && vU ^ bU
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Intersects (VectorBounds3d (space1 @ units1)) (Vector3d (space2 @ units2)) units1
+  where
+  box ^ point = point ^ box
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Intersects (VectorBounds3d (space1 @ units1)) (VectorBounds3d (space2 @ units2)) units1
+  where
+  VectorBounds3d r1 f1 u1 ^ VectorBounds3d r2 f2 u2 = r1 ^ r2 && f1 ^ f2 && u1 ^ u2
 
 instance Negation (VectorBounds3d (space @ units)) where
   negate (VectorBounds3d x y z) = VectorBounds3d (negate x) (negate y) (negate z)

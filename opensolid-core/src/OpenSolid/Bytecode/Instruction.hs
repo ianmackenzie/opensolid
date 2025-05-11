@@ -24,9 +24,9 @@ instance Show VariableIndex where
   show (VariableIndex index) = Text.unpack ("V" <> Text.int index)
 
 data Instruction
-  = XComponent VariableIndex
-  | YComponent VariableIndex
-  | ZComponent VariableIndex
+  = Component0 VariableIndex
+  | Component1 VariableIndex
+  | Component2 VariableIndex
   | Negate1d VariableIndex
   | Add1d VariableIndex VariableIndex
   | AddVariableConstant1d VariableIndex ConstantIndex
@@ -41,9 +41,9 @@ data Instruction
   | Sin1d VariableIndex
   | Cos1d VariableIndex
   | Bezier1d Int ConstantIndex VariableIndex
-  | XY2d VariableIndex VariableIndex
-  | XC2d VariableIndex ConstantIndex
-  | CY2d ConstantIndex VariableIndex
+  | XY VariableIndex VariableIndex
+  | XC VariableIndex ConstantIndex
+  | CY ConstantIndex VariableIndex
   | Negate2d VariableIndex
   | Add2d VariableIndex VariableIndex
   | AddVariableConstant2d VariableIndex ConstantIndex
@@ -65,13 +65,13 @@ data Instruction
   | TransformPoint2d ConstantIndex VariableIndex
   | ProjectVector3d ConstantIndex VariableIndex
   | ProjectPoint3d ConstantIndex VariableIndex
-  | XYZ3d VariableIndex VariableIndex VariableIndex
-  | XYC3d VariableIndex VariableIndex ConstantIndex
-  | XCZ3d VariableIndex ConstantIndex VariableIndex
-  | CYZ3d ConstantIndex VariableIndex VariableIndex
-  | XCC3d VariableIndex ConstantIndex ConstantIndex
-  | CYC3d ConstantIndex VariableIndex ConstantIndex
-  | CCZ3d ConstantIndex ConstantIndex VariableIndex
+  | RFU VariableIndex VariableIndex VariableIndex
+  | RFC VariableIndex VariableIndex ConstantIndex
+  | RCU VariableIndex ConstantIndex VariableIndex
+  | CFU ConstantIndex VariableIndex VariableIndex
+  | RCC VariableIndex ConstantIndex ConstantIndex
+  | CFC ConstantIndex VariableIndex ConstantIndex
+  | CCU ConstantIndex ConstantIndex VariableIndex
   | Negate3d VariableIndex
   | Add3d VariableIndex VariableIndex
   | AddVariableConstant3d VariableIndex ConstantIndex
@@ -107,13 +107,13 @@ encode instruction outputIndex =
 
 encodeOpcodeAndArguments :: Instruction -> Builder
 encodeOpcodeAndArguments instruction = case instruction of
-  XComponent arg ->
+  Component0 arg ->
     Encode.int 1
       <> encodeVariableIndex arg
-  YComponent arg ->
+  Component1 arg ->
     Encode.int 2
       <> encodeVariableIndex arg
-  ZComponent arg ->
+  Component2 arg ->
     Encode.int 3
       <> encodeVariableIndex arg
   Negate1d arg ->
@@ -188,15 +188,15 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> Encode.int n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  XY2d x y ->
+  XY x y ->
     Encode.int 23
       <> encodeVariableIndex x
       <> encodeVariableIndex y
-  XC2d x y ->
+  XC x y ->
     Encode.int 24
       <> encodeVariableIndex x
       <> encodeConstantIndex y
-  CY2d x y ->
+  CY x y ->
     Encode.int 25
       <> encodeConstantIndex x
       <> encodeVariableIndex y
@@ -302,41 +302,41 @@ encodeOpcodeAndArguments instruction = case instruction of
     Encode.int 51
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
-  XYZ3d x y z ->
+  RFU r f u ->
     Encode.int 52
-      <> encodeVariableIndex x
-      <> encodeVariableIndex y
-      <> encodeVariableIndex z
-  XYC3d x y z ->
+      <> encodeVariableIndex r
+      <> encodeVariableIndex f
+      <> encodeVariableIndex u
+  RFC r f u ->
     Encode.int 53
-      <> encodeVariableIndex x
-      <> encodeVariableIndex y
-      <> encodeConstantIndex z
-  XCZ3d x y z ->
+      <> encodeVariableIndex r
+      <> encodeVariableIndex f
+      <> encodeConstantIndex u
+  RCU r f u ->
     Encode.int 54
-      <> encodeVariableIndex x
-      <> encodeConstantIndex y
-      <> encodeVariableIndex z
-  CYZ3d x y z ->
+      <> encodeVariableIndex r
+      <> encodeConstantIndex f
+      <> encodeVariableIndex u
+  CFU r f u ->
     Encode.int 55
-      <> encodeConstantIndex x
-      <> encodeVariableIndex y
-      <> encodeVariableIndex z
-  XCC3d x y z ->
+      <> encodeConstantIndex r
+      <> encodeVariableIndex f
+      <> encodeVariableIndex u
+  RCC r f u ->
     Encode.int 56
-      <> encodeVariableIndex x
-      <> encodeConstantIndex y
-      <> encodeConstantIndex z
-  CYC3d x y z ->
+      <> encodeVariableIndex r
+      <> encodeConstantIndex f
+      <> encodeConstantIndex u
+  CFC r f u ->
     Encode.int 57
-      <> encodeConstantIndex x
-      <> encodeVariableIndex y
-      <> encodeConstantIndex z
-  CCZ3d x y z ->
+      <> encodeConstantIndex r
+      <> encodeVariableIndex f
+      <> encodeConstantIndex u
+  CCU r f u ->
     Encode.int 58
-      <> encodeConstantIndex x
-      <> encodeConstantIndex y
-      <> encodeVariableIndex z
+      <> encodeConstantIndex r
+      <> encodeConstantIndex f
+      <> encodeVariableIndex u
   Negate3d arg ->
     Encode.int 59
       <> encodeVariableIndex arg

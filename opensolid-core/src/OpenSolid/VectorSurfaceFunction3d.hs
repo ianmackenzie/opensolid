@@ -6,7 +6,7 @@ module OpenSolid.VectorSurfaceFunction3d
   , recursive
   , zero
   , constant
-  , xyz
+  , rightwardForwardUpward
   , evaluate
   , evaluateBounds
   , derivative
@@ -35,9 +35,9 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector3d (Vector3d (Vector3d))
+import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
@@ -436,25 +436,25 @@ zero = constant Vector3d.zero
 constant :: Vector3d (space @ units) -> VectorSurfaceFunction3d (space @ units)
 constant value = new (CompiledFunction.constant value) (always zero)
 
-xyz ::
+rightwardForwardUpward ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   SurfaceFunction units ->
   VectorSurfaceFunction3d (space @ units)
-xyz x y z =
+rightwardForwardUpward r f u =
   new
     # CompiledFunction.map3
-      Expression.xyz
-      Vector3d
-      VectorBounds3d
-      (SurfaceFunction.compiled x)
-      (SurfaceFunction.compiled y)
-      (SurfaceFunction.compiled z)
+      Expression.rightwardForwardUpward
+      Vector3d.rightwardForwardUpward
+      VectorBounds3d.rightwardForwardUpward
+      (SurfaceFunction.compiled r)
+      (SurfaceFunction.compiled f)
+      (SurfaceFunction.compiled u)
     # \p ->
-      xyz
-        (SurfaceFunction.derivative p x)
-        (SurfaceFunction.derivative p y)
-        (SurfaceFunction.derivative p z)
+      rightwardForwardUpward
+        (SurfaceFunction.derivative p r)
+        (SurfaceFunction.derivative p f)
+        (SurfaceFunction.derivative p u)
 
 evaluate :: VectorSurfaceFunction3d (space @ units) -> UvPoint -> Vector3d (space @ units)
 evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint

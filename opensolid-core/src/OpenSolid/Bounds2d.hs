@@ -48,7 +48,6 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Direction3d (Direction3d (Direction3d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -57,14 +56,15 @@ import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Bounds2d (Bounds2d)
   , Bounds3d (Bounds3d)
+  , Direction3d (Direction3d)
   , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
+  , Point3d (Point3d)
   )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform2d (Transform2d (Transform2d))
@@ -363,7 +363,7 @@ placeOn plane (Bounds2d x y) = do
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Point3d x0 y0 z0 = Point3d.xyOn plane xMid yMid
+  let Point3d x0 y0 z0 = Point3d.on plane (Point2d xMid yMid)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz

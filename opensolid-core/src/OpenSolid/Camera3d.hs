@@ -14,7 +14,6 @@ module OpenSolid.Camera3d
   , viewDirection
   , viewPlane
   , frame
-  , upDirection
   , focalDistance
   , projection
   , fovAngle
@@ -37,7 +36,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Axis3d (Axis3d (Axis3d))
+import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
@@ -45,7 +44,6 @@ import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Plane3d (Plane3d (Plane3d))
-import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -59,7 +57,6 @@ data ScreenSpace
 data Camera3d (coordinateSystem :: CoordinateSystem) where
   Camera3d ::
     { frame :: Frame3d (space @ units) (Defines ScreenSpace)
-    , upDirection :: Direction3d space
     , focalDistance :: Qty units
     , projection :: Projection
     , fovAngle :: Angle
@@ -88,15 +85,13 @@ height = Height
 
 new ::
   Frame3d (space @ units) (Defines ScreenSpace) ->
-  Direction3d space ->
   Qty units ->
   Projection ->
   FieldOfView units ->
   Camera3d (space @ units)
-new givenFrame givenUpDirection givenFocalDistance projection givenFieldOfView =
+new givenFrame givenFocalDistance projection givenFieldOfView =
   Camera3d
     { frame = givenFrame
-    , upDirection = givenUpDirection
     , focalDistance = givenFocalDistance
     , projection = projection
     , fovAngle = case givenFieldOfView of
@@ -108,46 +103,51 @@ lookAt ::
   Tolerance units =>
   Point3d (space @ units) -> -- Eye point
   Point3d (space @ units) -> -- Focal point
-  Direction3d space -> -- Up direction
   Projection ->
   FieldOfView units ->
   Camera3d (space @ units)
-lookAt givenEyePoint givenFocalPoint givenUpDirection givenProjection givenFieldOfView = do
+lookAt givenEyePoint givenFocalPoint givenProjection givenFieldOfView = do
   let computedFocalDistance = Point3d.distanceFrom givenEyePoint givenFocalPoint
   let computedFrame =
         case Vector3d.direction (givenFocalPoint - givenEyePoint) of
           Success computedViewDirection -> do
             let viewVector = Vector3d.unit computedViewDirection
-            let upVector = Vector3d.unit givenUpDirection
+            let upVector = Vector3d.unit Direction3d.upward
             case Tolerance.using 1e-9 (PlanarBasis3d.orthonormalize viewVector upVector) of
-              Just basis -> Frame3d.fromZyPlane (Plane3d givenEyePoint (PlanarBasis3d.flipX basis))
-              Nothing ->
-                -- View direction is straight up or straight down,
-                -- so choose an arbitrary frame with the given view direction
-                Frame3d.fromZAxis (Axis3d givenEyePoint -computedViewDirection)
+              Just rightPlaneBasis ->
+                Frame3d.fromRightPlane (Plane3d givenEyePoint rightPlaneBasis)
+              Nothing -- View direction is either straight up or straight down
+                | Direction3d.upwardComponent computedViewDirection > 0.0 ->
+                    Frame3d.upwardFacing givenEyePoint
+                | otherwise ->
+                    Frame3d.downwardFacing givenEyePoint
           Failure Vector3d.IsZero ->
             -- Given eye and focal points are coincident,
-            -- so choose an arbitrary frame with given up direction
-            Frame3d.fromYAxis (Axis3d givenEyePoint givenUpDirection)
-  new computedFrame givenUpDirection computedFocalDistance givenProjection givenFieldOfView
+            -- so just look straight forwards
+            Frame3d.forwardFacing givenEyePoint
+  new computedFrame computedFocalDistance givenProjection givenFieldOfView
 
 orbit ::
-  Plane3d (space @ units) defines ->
   Point3d (space @ units) ->
-  Angle ->
-  Angle ->
+  Named "azimuth" Angle ->
+  Named "elevation" Angle ->
   Qty units ->
   Projection ->
   FieldOfView units ->
   Camera3d (space @ units)
-orbit groundPlane givenFocalPoint azimuth elevation distance givenProjection givenFieldOfView = do
-  let computedFrame =
-        Frame3d.fromZxPlane groundPlane
-          |> Frame3d.moveTo givenFocalPoint
-          |> Frame3d.rotateAroundOwn Frame3d.yAxis azimuth
-          |> Frame3d.rotateAroundOwn Frame3d.xAxis -elevation
-          |> Frame3d.translateInOwn Frame3d.zDirection distance
-  new computedFrame (Plane3d.normalDirection groundPlane) distance givenProjection givenFieldOfView
+orbit
+  givenFocalPoint
+  (Named azimuth)
+  (Named elevation)
+  distance
+  givenProjection
+  givenFieldOfView = do
+    let computedFrame =
+          Frame3d.backwardFacing givenFocalPoint
+            |> Frame3d.turnRightBy azimuth
+            |> Frame3d.rotateDownBy elevation
+            |> Frame3d.offsetBackwardBy distance
+    new computedFrame distance givenProjection givenFieldOfView
 
 isometricElevation :: Angle
 isometricElevation = Angle.atan2 1.0 (Float.sqrt 2.0)
@@ -160,22 +160,21 @@ isometric ::
   Camera3d (space @ units)
 isometric givenFocalPoint distance givenProjection givenFieldOfView =
   orbit
-    Plane3d.xy
-    givenFocalPoint
-    (Angle.degrees 45.0)
-    isometricElevation
-    distance
-    givenProjection
-    givenFieldOfView
+    # givenFocalPoint
+    # #azimuth (Angle.degrees 45.0)
+    # #elevation isometricElevation
+    # distance
+    # givenProjection
+    # givenFieldOfView
 
 eyePoint :: Camera3d (space @ units) -> Point3d (space @ units)
 eyePoint camera = Frame3d.originPoint (frame camera)
 
 viewDirection :: Camera3d (space @ units) -> Direction3d space
-viewDirection camera = negate (Frame3d.zDirection (frame camera))
+viewDirection camera = Frame3d.forwardDirection (frame camera)
 
 viewPlane :: Camera3d (space @ units) -> Plane3d (space @ units) (Defines ScreenSpace)
-viewPlane camera = Frame3d.xyPlane (frame camera)
+viewPlane camera = Frame3d.backPlane (frame camera)
 
 frustumSlope :: Camera3d (space @ units) -> Float
 frustumSlope camera = Angle.tan (0.5 * fovAngle camera)
@@ -187,27 +186,15 @@ moveTo ::
   Point3d (space @ units) ->
   Camera3d (space @ units) ->
   Camera3d (space @ units)
-moveTo newEyePoint Camera3d{frame, upDirection, focalDistance, projection, fovAngle} =
-  Camera3d
-    { frame = Frame3d.moveTo newEyePoint frame
-    , upDirection
-    , focalDistance
-    , projection
-    , fovAngle
-    }
+moveTo newEyePoint Camera3d{frame, focalDistance, projection, fovAngle} =
+  Camera3d{frame = Frame3d.moveTo newEyePoint frame, focalDistance, projection, fovAngle}
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Camera3d (local @ units) ->
   Camera3d (global @ units)
-placeIn givenFrame Camera3d{frame, upDirection, focalDistance, projection, fovAngle} =
-  Camera3d
-    { frame = Frame3d.placeIn givenFrame frame
-    , upDirection = Direction3d.placeIn (Frame3d.basis givenFrame) upDirection
-    , focalDistance
-    , projection
-    , fovAngle
-    }
+placeIn givenFrame Camera3d{frame, focalDistance, projection, fovAngle} =
+  Camera3d{frame = Frame3d.placeIn givenFrame frame, focalDistance, projection, fovAngle}
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
@@ -219,14 +206,8 @@ transformBy ::
   Transform3d.Rigid (space @ units) ->
   Camera3d (space @ units) ->
   Camera3d (space @ units)
-transformBy transform Camera3d{frame, upDirection, focalDistance, projection, fovAngle} =
-  Camera3d
-    { frame = Frame3d.transformBy transform frame
-    , upDirection = Direction3d.transformBy transform upDirection
-    , focalDistance
-    , projection
-    , fovAngle
-    }
+transformBy transform Camera3d{frame, focalDistance, projection, fovAngle} =
+  Camera3d{frame = Frame3d.transformBy transform frame, focalDistance, projection, fovAngle}
 
 translateBy ::
   Vector3d (space @ units) ->

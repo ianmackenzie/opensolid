@@ -1,21 +1,28 @@
 module OpenSolid.Direction3d
-  ( Direction3d (Direction3d)
-  , xComponent
-  , yComponent
-  , zComponent
+  ( Direction3d
   , components
   , unsafe
   , coerce
-  , x
-  , y
-  , z
-  , xy
-  , yx
-  , xz
-  , zx
-  , yz
-  , zy
-  , perpendicularTo
+  , upward
+  , downward
+  , forward
+  , backward
+  , rightward
+  , leftward
+  , rightwardForward
+  , forwardRightward
+  , forwardUpward
+  , upwardForward
+  , rightwardUpward
+  , upwardRightward
+  , arbitraryPerpendicularDirection
+  , arbitraryNormalBasis
+  , forwardComponent
+  , backwardComponent
+  , rightwardComponent
+  , leftwardComponent
+  , upwardComponent
+  , downwardComponent
   , angleFrom
   , placeIn
   , relativeTo
@@ -24,48 +31,39 @@ module OpenSolid.Direction3d
   , mirrorIn
   , rotateAround
   , mirrorAcross
+  , random
   )
 where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d, Basis3d, Direction3d (Unit3d), Plane3d)
+import OpenSolid.Primitives
+  ( Axis3d
+  , Basis3d
+  , Direction3d (Direction3d, Unit3d)
+  , PlanarBasis3d (PlanarBasis3d)
+  , Plane3d
+  , Vector3d
+  )
+import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d (Transform3d)
-import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 
-{-# COMPLETE Direction3d #-}
-
-{-# INLINE Direction3d #-}
-pattern Direction3d :: Float -> Float -> Float -> Direction3d space
-pattern Direction3d dx dy dz <- Unit3d (Vector3d dx dy dz)
-
--- | Get the X component of a direction.
-xComponent :: Direction3d space -> Float
-xComponent (Direction3d dx _ _) = dx
-
--- | Get the Y component of a direction.
-yComponent :: Direction3d space -> Float
-yComponent (Direction3d _ dy _) = dy
-
--- | Get the Z component of a direction.
-zComponent :: Direction3d space -> Float
-zComponent (Direction3d _ _ dz) = dz
-
--- | Get the XYZ components of a direction as a tuple.
+-- | Get the XYZ components of a direction, given an XYZ coordinate convention to use.
 {-# INLINE components #-}
-components :: Direction3d space -> (Float, Float, Float)
-components (Unit3d vector) = Vector3d.components vector
+components :: Convention3d space -> Direction3d space -> (Float, Float, Float)
+components convention (Unit3d vector) = Vector3d.components convention vector
 
 unsafe :: Vector3d (space @ Unitless) -> Direction3d space
 unsafe = Unit3d
 
 {-# INLINE coerce #-}
 coerce :: Direction3d space1 -> Direction3d space2
-coerce (Unit3d (Vector3d dx dy dz)) = Unit3d (Vector3d dx dy dz)
+coerce (Direction3d dx dy dz) = Direction3d dx dy dz
 
 {-# INLINE lift #-}
 lift ::
@@ -74,58 +72,94 @@ lift ::
   Direction3d spaceB
 lift function (Unit3d vector) = Unit3d (function vector)
 
--- | The X direction.
-x :: Direction3d space
-x = Unit3d (Vector3d 1.0 0.0 0.0)
+-- | The upward direction in a particular space.
+upward :: Direction3d space
+upward = Direction3d 0.0 0.0 1.0
 
--- | The Y direction.
-y :: Direction3d space
-y = Unit3d (Vector3d 0.0 1.0 0.0)
+-- | The downward direction in a particular space.
+downward :: Direction3d space
+downward = Direction3d 0.0 0.0 -1.0
 
--- | The Z direction.
-z :: Direction3d space
-z = Unit3d (Vector3d 0.0 0.0 1.0)
+-- | The forward direction in a particular space.
+forward :: Direction3d space
+forward = Direction3d 0.0 1.0 0.0
 
--- | Construct a direction in the XY plane given an angle from the X axis towards the Y axis.
-xy :: Angle -> Direction3d space
-xy angle = Unit3d (Vector3d (Angle.cos angle) (Angle.sin angle) 0.0)
+-- | The backward direction in a particular space.
+backward :: Direction3d space
+backward = Direction3d 0.0 -1.0 0.0
 
--- | Construct a direction in the XY plane given an angle from the Y axis towards the X axis.
-yx :: Angle -> Direction3d space
-yx angle = Unit3d (Vector3d (Angle.sin angle) (Angle.cos angle) 0.0)
+-- | The rightward direction in a particular space.
+rightward :: Direction3d space
+rightward = Direction3d 1.0 0.0 0.0
 
--- | Construct a direction in the YZ plane given an angle from the Y axis towards the Z axis.
-yz :: Angle -> Direction3d space
-yz angle = Unit3d (Vector3d 0.0 (Angle.cos angle) (Angle.sin angle))
+-- | The leftward direction in a particular space.
+leftward :: Direction3d space
+leftward = Direction3d -1.0 0.0 0.0
 
--- | Construct a direction in the YZ plane given an angle from the Z axis towards the Y axis.
-zy :: Angle -> Direction3d space
-zy angle = Unit3d (Vector3d 0.0 (Angle.sin angle) (Angle.cos angle))
+rightwardForward :: Angle -> Direction3d space
+rightwardForward angle = Direction3d (Angle.cos angle) (Angle.sin angle) 0.0
 
--- | Construct a direction in the XZ plane given an angle from the X axis towards the Z axis.
-xz :: Angle -> Direction3d space
-xz angle = Unit3d (Vector3d (Angle.cos angle) 0.0 (Angle.sin angle))
+forwardRightward :: Angle -> Direction3d space
+forwardRightward angle = Direction3d (Angle.sin angle) (Angle.cos angle) 0.0
 
--- | Construct a direction in the XZ plane given an angle from the Z axis towards the X axis.
-zx :: Angle -> Direction3d space
-zx angle = Unit3d (Vector3d (Angle.sin angle) 0.0 (Angle.cos angle))
+forwardUpward :: Angle -> Direction3d space
+forwardUpward angle = Direction3d 0.0 (Angle.cos angle) (Angle.sin angle)
+
+upwardForward :: Angle -> Direction3d space
+upwardForward angle = Direction3d 0.0 (Angle.sin angle) (Angle.cos angle)
+
+rightwardUpward :: Angle -> Direction3d space
+rightwardUpward angle = Direction3d (Angle.cos angle) 0.0 (Angle.sin angle)
+
+upwardRightward :: Angle -> Direction3d space
+upwardRightward angle = Direction3d (Angle.sin angle) 0.0 (Angle.cos angle)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
-perpendicularTo :: Direction3d space -> Direction3d space
-perpendicularTo (Direction3d dx dy dz) = do
+arbitraryPerpendicularDirection :: Direction3d space -> Direction3d space
+arbitraryPerpendicularDirection (Direction3d dx dy dz) = do
   let absX = Float.abs dx
   let absY = Float.abs dy
   let absZ = Float.abs dz
   if
     | absX <= absY && absX <= absZ -> do
         let scale = Float.hypot2 dy dz
-        Unit3d (Vector3d 0.0 (-dz / scale) (dy / scale))
+        Direction3d 0.0 (-dz / scale) (dy / scale)
     | absY <= absX && absY <= absZ -> do
         let scale = Float.hypot2 dx dz
-        Unit3d (Vector3d (dz / scale) 0.0 (-dx / scale))
+        Direction3d (dz / scale) 0.0 (-dx / scale)
     | otherwise -> do
         let scale = Float.hypot2 dx dy
-        Unit3d (Vector3d (-dy / scale) (dx / scale) 0.0)
+        Direction3d (-dy / scale) (dx / scale) 0.0
+
+{-| Construct an arbitrary planar basis normal to the given direction.
+
+Both the X and Y directions of the returned basis will be perpendicular to the given direction
+(and, of course, they will be perpendicular to each other),
+but otherwise they will be chosen arbitrarily.
+-}
+arbitraryNormalBasis :: Direction3d space -> PlanarBasis3d space defines
+arbitraryNormalBasis normalDirection = do
+  let xDirection = arbitraryPerpendicularDirection normalDirection
+  let yDirection = Unit3d (normalDirection `cross` xDirection)
+  PlanarBasis3d xDirection yDirection
+
+forwardComponent :: Direction3d space -> Float
+forwardComponent (Unit3d vector) = Vector3d.forwardComponent vector
+
+backwardComponent :: Direction3d space -> Float
+backwardComponent (Unit3d vector) = Vector3d.backwardComponent vector
+
+leftwardComponent :: Direction3d space -> Float
+leftwardComponent (Unit3d vector) = Vector3d.leftwardComponent vector
+
+rightwardComponent :: Direction3d space -> Float
+rightwardComponent (Unit3d vector) = Vector3d.rightwardComponent vector
+
+upwardComponent :: Direction3d space -> Float
+upwardComponent (Unit3d vector) = Vector3d.upwardComponent vector
+
+downwardComponent :: Direction3d space -> Float
+downwardComponent (Unit3d vector) = Vector3d.downwardComponent vector
 
 {-| Measure the angle from one direction to another.
 
@@ -175,3 +209,22 @@ mirrorAcross ::
   Direction3d space ->
   Direction3d space
 mirrorAcross plane = lift (Vector3d.mirrorAcross plane)
+
+-- | Generate a random direction.
+random :: Random.Generator (Direction3d space)
+random = Random.do
+  -- Generate a random vector to normalize
+  vector <- randomVector
+  let magnitude = Vector3d.magnitude vector
+  -- Reject very small vectors
+  -- (to avoid roundoff error during normalization),
+  -- and only accept vectors inside the unit sphere
+  -- (otherwise we'll get a non-uniform distribution)
+  if magnitude > 0.1 && magnitude <= 1.0
+    then Random.return (Unit3d (vector / magnitude))
+    else random -- Generated a 'bad' vector, try again
+
+randomVector :: Random.Generator (Vector3d (space @ Unitless))
+randomVector = do
+  let randomComponent = Float.random -1.0 1.0
+  Random.map3 Vector3d.rightwardForwardUpward randomComponent randomComponent randomComponent

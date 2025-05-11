@@ -1,28 +1,18 @@
 module OpenSolid.Vector3d
-  ( Vector3d (Vector3d)
+  ( Vector3d
   , zero
   , coerce
   , unit
-  , x
-  , y
-  , z
-  , xy
-  , xz
-  , yz
-  , xyz
+  , rightwardForwardUpward
   , fromComponents
-  , meters
-  , centimeters
-  , cm
-  , millimeters
-  , mm
-  , inches
-  , squareMeters
-  , xComponent
-  , yComponent
-  , zComponent
   , componentIn
   , projectionIn
+  , forwardComponent
+  , backwardComponent
+  , rightwardComponent
+  , leftwardComponent
+  , upwardComponent
+  , downwardComponent
   , components
   , midpoint
   , interpolateFrom
@@ -48,9 +38,9 @@ module OpenSolid.Vector3d
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Area qualified as Area
+import OpenSolid.Convention3d (Convention3d)
+import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Error qualified as Error
-import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
@@ -58,7 +48,7 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Basis3d (Basis3d)
-  , Direction3d (Unit3d)
+  , Direction3d (Direction3d, Unit3d)
   , PlanarBasis3d (PlanarBasis3d)
   , Plane3d
   , Vector2d (Vector2d)
@@ -67,7 +57,6 @@ import OpenSolid.Primitives
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
-import OpenSolid.Units (Meters, SquareMeters)
 import OpenSolid.Units qualified as Units
 
 -- | The zero vector.
@@ -83,105 +72,23 @@ coerce (Vector3d vx vy vz) = Vector3d (Qty.coerce vx) (Qty.coerce vy) (Qty.coerc
 unit :: Direction3d space -> Vector3d (space @ Unitless)
 unit (Unit3d vector) = vector
 
-{-| Construct a vector from just an X component.
+{-# INLINE rightwardForwardUpward #-}
+rightwardForwardUpward :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
+rightwardForwardUpward = Vector3d
 
-The Y and Z components will be set to zero.
--}
-x :: Qty units -> Vector3d (space @ units)
-x vx = Vector3d vx Qty.zero Qty.zero
-
-{-| Construct a vector from just a Y component.
-
-The X and Z components will be set to zero.
--}
-y :: Qty units -> Vector3d (space @ units)
-y vy = Vector3d Qty.zero vy Qty.zero
-
-{-| Construct a vector from just a Z component.
-
-The X and Y components will be set to zero.
--}
-z :: Qty units -> Vector3d (space @ units)
-z vz = Vector3d Qty.zero Qty.zero vz
-
-{-| Construct a vector from X and Y components.
-
-The Z component will be set to zero.
--}
-xy :: Qty units -> Qty units -> Vector3d (space @ units)
-xy vx vy = Vector3d vx vy Qty.zero
-
-{-| Construct a vector from X and Z components.
-
-The Y component will be set to zero.
--}
-xz :: Qty units -> Qty units -> Vector3d (space @ units)
-xz vx vz = Vector3d vx Qty.zero vz
-
-{-| Construct a vector from Y and Z components.
-
-The X component will be set to zero.
--}
-yz :: Qty units -> Qty units -> Vector3d (space @ units)
-yz vy vz = Vector3d Qty.zero vy vz
-
--- | Construct a vector from its X, Y and Z components.
-xyz :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
-xyz = Vector3d
-
--- | Construct a vector from a tuple of XYZ components.
-fromComponents :: (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
-fromComponents (vx, vy, vz) = Vector3d vx vy vz
-
-apply :: (Float -> Qty units) -> Float -> Float -> Float -> Vector3d (space @ units)
-apply units px py pz = Vector3d (units px) (units py) (units pz)
-
--- | Construct a vector from its XYZ components given in meters.
-meters :: Float -> Float -> Float -> Vector3d (space @ Meters)
-meters = apply Length.meters
-
--- | Construct a vector from its XYZ components given in centimeters.
-centimeters :: Float -> Float -> Float -> Vector3d (space @ Meters)
-centimeters = apply Length.centimeters
-
-{-| Construct a vector from its XYZ components given in centimeters.
-
-Short form alias for 'centimeters'.
--}
-cm :: Float -> Float -> Float -> Vector3d (space @ Meters)
-cm = centimeters
-
--- | Construct a vector from its XYZ components given in millimeters.
-millimeters :: Float -> Float -> Float -> Vector3d (space @ Meters)
-millimeters = apply Length.millimeters
-
-{-| Construct a vector from its XYZ components given in millimeters.
-
-Short form alias for 'millimeters'.
--}
-mm :: Float -> Float -> Float -> Vector3d (space @ Meters)
-mm = millimeters
-
--- | Construct a vector from its XYZ components given in inches.
-inches :: Float -> Float -> Float -> Vector3d (space @ Meters)
-inches = apply Length.inches
-
--- | Construct a vector from its XYZ components given in square meters.
-squareMeters :: Float -> Float -> Float -> Vector3d (space @ SquareMeters)
-squareMeters vx vy vz =
-  Vector3d (Area.squareMeters vx) (Area.squareMeters vy) (Area.squareMeters vz)
-
--- | Get the X component of a vector.
-xComponent :: Vector3d (space @ units) -> Qty units
-xComponent (Vector3d vx _ _) = vx
-
--- | Get the Y component of a vector.
-yComponent :: Vector3d (space @ units) -> Qty units
-yComponent (Vector3d _ vy _) = vy
-
--- | Get the Z component of a vector.
-zComponent :: Vector3d (space @ units) -> Qty units
-zComponent (Vector3d _ _ vz) = vz
+-- | Construct a vector from its XYZ components, given the coordinate convention to use.
+fromComponents ::
+  Convention3d space ->
+  (Qty units, Qty units, Qty units) ->
+  Vector3d (space @ units)
+fromComponents convention (vX, vY, vZ) = do
+  let Direction3d iR iF iU = Convention3d.xDirection convention
+  let Direction3d jR jF jU = Convention3d.yDirection convention
+  let Direction3d kR kF kU = Convention3d.zDirection convention
+  Vector3d
+    # vX * iR + vY * jR + vZ * kR
+    # vX * iF + vY * jF + vZ * kF
+    # vX * iU + vY * jU + vZ * kU
 
 componentIn :: Direction3d space -> Vector3d (space @ units) -> Qty units
 componentIn = dot
@@ -189,10 +96,31 @@ componentIn = dot
 projectionIn :: Direction3d space -> Vector3d (space @ units) -> Vector3d (space @ units)
 projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
 
--- | Get the XYZ components of a vector as a tuple.
-{-# INLINE components #-}
-components :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
-components (Vector3d vx vy vz) = (vx, vy, vz)
+forwardComponent :: Vector3d (space @ units) -> Qty units
+forwardComponent (Vector3d _ f _) = f
+
+backwardComponent :: Vector3d (space @ units) -> Qty units
+backwardComponent (Vector3d _ f _) = -f
+
+leftwardComponent :: Vector3d (space @ units) -> Qty units
+leftwardComponent (Vector3d r _ _) = -r
+
+rightwardComponent :: Vector3d (space @ units) -> Qty units
+rightwardComponent (Vector3d r _ _) = r
+
+upwardComponent :: Vector3d (space @ units) -> Qty units
+upwardComponent (Vector3d _ _ u) = u
+
+downwardComponent :: Vector3d (space @ units) -> Qty units
+downwardComponent (Vector3d _ _ u) = -u
+
+-- | Get the XYZ components of a vector, given an XYZ coordinate convention to use.
+components :: Convention3d space -> Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
+components convention vector =
+  ( vector `dot` Convention3d.xDirection convention
+  , vector `dot` Convention3d.yDirection convention
+  , vector `dot` Convention3d.zDirection convention
+  )
 
 interpolateFrom ::
   Vector3d (space @ units) ->

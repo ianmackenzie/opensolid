@@ -31,7 +31,7 @@ import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounded3d qualified as Bounded3d
 import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
+import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.FFI (FFI)
@@ -46,7 +46,6 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Scene3d.Gltf qualified as Gltf
 import OpenSolid.Transform3d qualified as Transform3d
@@ -68,8 +67,6 @@ data Entity space where
     Entity global
 
 data Material = Material {baseColor :: Color, roughness :: Float, metallic :: Float}
-
-data Ground
 
 instance FFI (Entity space) where
   representation = FFI.nestedClassRepresentation "Scene3d" "Entity"
@@ -102,7 +99,7 @@ group = Group
 
 transformBy :: Transform3d.Rigid (space @ Meters) -> Entity space -> Entity space
 transformBy transform (Placed frame entity) = Placed (Frame3d.transformBy transform frame) entity
-transformBy transform entity = Placed (Frame3d.transformBy transform Frame3d.xyz) entity
+transformBy transform entity = Placed (Frame3d.transformBy transform Frame3d.identity) entity
 
 placeIn :: Frame3d (global @ Meters) (Defines local) -> Entity local -> Entity global
 placeIn frame (Placed entityFrame entity) = Placed (Frame3d.placeIn frame entityFrame) entity
@@ -163,11 +160,9 @@ material baseColor (Named metallic) (Named roughness) = Material{baseColor, meta
 
 Same as 'writeGlb' except it just returns the raw binary builder instead of writing to a file.
 -}
-toGlb :: Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> Builder
-toGlb groundPlane givenEntities = do
-  let globalFrame = Frame3d.fromZxPlane groundPlane
-  let entities = List.map (relativeTo globalFrame) givenEntities
-  let meshes = gltfMeshes Frame3d.xyz (group entities)
+toGlb :: List (Entity space) -> Builder
+toGlb entities = do
+  let meshes = gltfMeshes Frame3d.identity (group entities)
   let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
   let bufferBuilder = Binary.collect meshBuilder meshes
   let bufferByteLength = Int.sumOf meshByteLength meshes
@@ -193,9 +188,8 @@ The given plane will be used as the ground plane, with:
 - the normal direction of the plane being the global up direction (positive Y in glTF), and
 - the positive X direction of the plane being the 'forwards' direction (positive Z in glTF).
 -}
-writeGlb :: Text -> Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> IO ()
-writeGlb path groundPlane givenEntities =
-  IO.writeBinary path (toGlb groundPlane givenEntities)
+writeGlb :: Text -> List (Entity space) -> IO ()
+writeGlb path givenEntities = IO.writeBinary path (toGlb givenEntities)
 
 data EncodedMesh = EncodedMesh
   { bufferViews :: List Json
@@ -294,7 +288,7 @@ encodeMeshes index offset meshes = case meshes of
 
 data GltfMesh space where
   GltfMesh ::
-    { frame :: Frame3d (space @ Meters) defines
+    { frame :: Frame3d (space @ Meters) (Defines local)
     , gltfMaterial :: Json
     , numFaces :: Int
     , indices :: Builder
@@ -318,7 +312,7 @@ gltfMeshes parentFrame entity = case entity of
     let faceIndices = Mesh.faceIndices smoothMesh
     let numFaces = List.length faceIndices
     let meshBounds = Bounded3d.bounds smoothMesh
-    let Bounds3d xBounds yBounds zBounds = meshBounds
+    let (xBounds, yBounds, zBounds) = Bounds3d.coordinates Gltf.convention meshBounds
     let Bounds xLow xHigh = xBounds
     let Bounds yLow yHigh = yBounds
     let Bounds zLow zHigh = zBounds

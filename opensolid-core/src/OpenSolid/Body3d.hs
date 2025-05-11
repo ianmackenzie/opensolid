@@ -33,21 +33,19 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
+import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CDT qualified as CDT
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
-import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
-import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.LineSegment2d (LineSegment2d)
 import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.Linearization qualified as Linearization
@@ -78,7 +76,7 @@ import OpenSolid.Set3d (Set3d)
 import OpenSolid.Set3d qualified as Set3d
 import OpenSolid.Surface3d (Surface3d)
 import OpenSolid.Surface3d qualified as Surface3d
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.Surface3d.Revolved qualified as Surface3d.Revolved
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
@@ -224,16 +222,17 @@ data EmptyBody = EmptyBody deriving (Eq, Show, Error.Message)
 {-| Create a rectangular block body.
 
 Fails if the given bounds are empty
-(the width, height or depth is zero).
+(the length, width, or height is zero).
 -}
 block :: Tolerance units => Bounds3d (space @ units) -> Result EmptyBody (Body3d (space @ units))
-block (Bounds3d xBounds yBounds zBounds) =
-  case Region2d.rectangle (Bounds2d xBounds yBounds) of
+block bounds =
+  case Region2d.rectangle (Bounds3d.projectInto Plane3d.top bounds) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
-    Success profile ->
-      if Bounds.width zBounds ~= Qty.zero
+    Success profile -> do
+      let heightBounds = Bounds3d.upwardCoordinate bounds
+      if Bounds.width heightBounds ~= Qty.zero
         then Failure EmptyBody
-        else case extruded Plane3d.xy profile zBounds of
+        else case extruded Plane3d.top profile heightBounds of
           Success body -> Success body
           Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
 
@@ -250,8 +249,7 @@ sphere (Named centerPoint) (Named diameter) =
   if diameter ~= Qty.zero
     then Failure EmptyBody
     else do
-      let axis = Axis3d centerPoint Direction3d.z
-      let sketchPlane = Plane3d.fromYAxis axis
+      let sketchPlane = Plane3d.forwardFacing centerPoint
       let radius = 0.5 * diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius
@@ -301,7 +299,7 @@ cylinderAlong axis distance (Named diameter) = do
     Success profile ->
       if Bounds.width distance ~= Qty.zero
         then Failure EmptyBody
-        else case extruded (Axis3d.normalPlane axis) profile distance of
+        else case extruded (Axis3d.arbitraryNormalPlane axis) profile distance of
           Success body -> Success body
           Failure _ -> internalError "Constructing non-empty cylinder body should not fail"
 
@@ -353,39 +351,40 @@ revolved ::
   Axis2d (local @ units) ->
   Angle ->
   Result BoundedBy.Error (Body3d (space @ units))
-revolved sketchPlane profile axis givenAngle = do
-  let frame2d = Frame2d.fromYAxis axis
-  let frame3d = Frame3d.fromXzPlane (Frame2d.placeOn sketchPlane frame2d)
-  let axis3d = Frame3d.zAxis frame3d
-  let endPlane = Plane3d.rotateAround axis3d givenAngle sketchPlane
-  let startCap = Surface3d.planar sketchPlane profile
-  let endCap = Surface3d.planar endPlane profile
-  let testPoint = Curve2d.startPoint (NonEmpty.first (Region2d.outerLoop profile))
-  let testPointSign = Qty.sign (Point2d.distanceLeftOf axis testPoint)
-  let localProfile = Region2d.relativeTo frame2d profile
-  let maxRadius = Bounds.maxAbs (Bounds2d.xCoordinate (Region2d.bounds localProfile))
-  let angleTolerance = Angle.radians (?tolerance / maxRadius)
-  let isFullRevolution = Tolerance.using angleTolerance (Qty.abs givenAngle ~= Angle.fullTurn)
-  let normalizedAngle = if isFullRevolution then testPointSign * Angle.fullTurn else givenAngle
-  let sideSurface localCurve = do
-        let r = Curve2d.xCoordinate localCurve . SurfaceFunction.u
-        let h = Curve2d.yCoordinate localCurve . SurfaceFunction.u
-        let theta = SurfaceFunction.v * normalizedAngle
-        let xLocal = r * SurfaceFunction.cos theta
-        let yLocal = r * SurfaceFunction.sin theta
-        let zLocal = h
-        let localFunction = SurfaceFunction3d.xyz xLocal yLocal zLocal
-        let globalFunction = SurfaceFunction3d.placeIn frame3d localFunction
-        Surface3d.parametric globalFunction Region2d.unitSquare
-  let localProfileCurves = NonEmpty.toList (Region2d.boundaryCurves localProfile)
-  let isOnAxis curve = Curve2d.xCoordinate curve ~= Qty.zero
-  let revolvedCurves = List.filter (not . isOnAxis) localProfileCurves
-  let sideSurfaces = List.map sideSurface revolvedCurves
-  if isFullRevolution
-    then boundedBy sideSurfaces
-    else case Qty.sign givenAngle * testPointSign of
-      Positive -> boundedBy (endCap : startCap : sideSurfaces)
-      Negative -> boundedBy (startCap : endCap : sideSurfaces)
+revolved startPlane profile axis2d angle = Result.do
+  let axis3d = Axis2d.placeOn startPlane axis2d
+  let profileCurves = Region2d.boundaryCurves profile
+  let offAxisCurves = NonEmpty.filter (not . Curve2d.isOnAxis axis2d) profileCurves
+  let signedDistanceCurves = List.map (Curve2d.distanceRightOf axis2d) offAxisCurves
+  profileSign <-
+    case Result.collect Curve.sign signedDistanceCurves of
+      Failure Curve.CrossesZero -> Failure BoundedBy.BoundaryIntersectsItself
+      Success curveSigns
+        | List.allSatisfy ((==) Positive) curveSigns -> Success Positive
+        | List.allSatisfy ((==) Negative) curveSigns -> Success Negative
+        | otherwise -> Failure BoundedBy.BoundaryIntersectsItself
+
+  let endPlane = Plane3d.rotateAround axis3d angle startPlane
+  let unflippedStartCap = Surface3d.planar startPlane profile
+  let unflippedEndCap = Surface3d.planar endPlane profile
+  let sideSurface profileCurve = Surface3d.revolved startPlane profileCurve axis2d angle
+  sideSurfaces <-
+    case Result.collect sideSurface offAxisCurves of
+      Failure Surface3d.Revolved.ProfileIsOnAxis ->
+        internalError "Should have already filtered out all on-axis curves"
+      Failure Surface3d.Revolved.ProfileCrossesAxis ->
+        internalError "Should have already failed computing profileSign if any profile curve crosses the revolution axis"
+      Success surface -> Success surface
+  let startBoundaryCurves = Surface3d.boundaryCurves unflippedStartCap
+  let endBoundaryCurves = Surface3d.boundaryCurves unflippedEndCap
+  let isFullRevolution = startBoundaryCurves ~= endBoundaryCurves
+  let endSurfaces =
+        if isFullRevolution
+          then []
+          else case profileSign of
+            Positive -> [unflippedStartCap, Surface3d.flip unflippedEndCap]
+            Negative -> [Surface3d.flip unflippedStartCap, unflippedEndCap]
+  boundedBy (endSurfaces <> sideSurfaces)
 
 {-| Create a body bounded by the given surfaces.
 The surfaces do not have to have consistent orientation,

@@ -30,13 +30,12 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Vector3d (Vector3d), VectorBounds3d (VectorBounds3d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
-import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import System.IO.Unsafe qualified
 import Prelude (Double)

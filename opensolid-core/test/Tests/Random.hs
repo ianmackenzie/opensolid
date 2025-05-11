@@ -2,55 +2,84 @@ module Tests.Random
   ( length
   , lengthBounds
   , point2d
+  , point3d
   , vector2d
+  , vector3d
   , vectorBounds3d
   , axis2d
+  , axis3d
+  , plane3d
   , basis2d
+  , planarBasis3d
+  , basis3d
   , frame2d
+  , frame3d
   , bounds2d
+  , bounds3d
   , vectorBounds2d
   , line2d
   , arc2d
   , quadraticSpline2d
   , cubicSpline2d
   , rigidTransform2d
+  , rigidTransform3d
   , orthonormalTransform2d
+  , orthonormalTransform3d
+  , uniformTransform2d
+  , uniformTransform3d
   , affineTransform2d
+  , affineTransform3d
   , surfaceParameter
   )
 where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Axis2d (Axis2d)
-import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Axis2d (Axis2d (Axis2d))
+import OpenSolid.Axis3d (Axis3d (Axis3d))
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bounds3d (Bounds3d)
+import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
+import OpenSolid.Plane3d (Plane3d (Plane3d))
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point3d (Point3d)
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Sign qualified as Sign
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import OpenSolid.VectorBounds3d (VectorBounds3d)
+import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
 length :: Generator Length
 length = Qty.random (Length.meters -10.0) (Length.meters 10.0)
@@ -61,23 +90,55 @@ lengthBounds = Bounds.random length
 point2d :: Generator (Point2d (space @ Meters))
 point2d = Random.map2 Point2d.xy length length
 
+point3d :: Generator (Point3d (space @ Meters))
+point3d = Random.map3 Point3d.rightwardForwardUpward length length length
+
 vector2d :: Generator (Vector2d (space @ Meters))
 vector2d = Random.map2 Vector2d.xy length length
 
+vector3d :: Generator (Vector3d (space @ Meters))
+vector3d = Random.map3 Vector3d.rightwardForwardUpward length length length
+
 vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
-vectorBounds3d = Random.map3 VectorBounds3d lengthBounds lengthBounds lengthBounds
+vectorBounds3d =
+  Random.map3 VectorBounds3d.rightwardForwardUpward
+    # lengthBounds
+    # lengthBounds
+    # lengthBounds
 
 axis2d :: Generator (Axis2d (space @ Meters))
-axis2d = Random.map2 Axis2d.through point2d Direction2d.random
+axis2d = Random.map2 Axis2d point2d Direction2d.random
+
+axis3d :: Generator (Axis3d (space @ Meters))
+axis3d = Random.map2 Axis3d point3d Direction3d.random
 
 basis2d :: Generator (Basis2d global (Defines local))
 basis2d = Random.map Basis2d.fromXDirection Direction2d.random
 
+planarBasis3d :: Generator (PlanarBasis3d global (Defines local))
+planarBasis3d =
+  Random.retry $
+    Random.map2 (Tolerance.using 0.1 PlanarBasis3d.orthogonalize)
+      # Direction3d.random
+      # Direction3d.random
+
+basis3d :: Generator (Basis3d global (Defines local))
+basis3d = Random.map Frame3d.basis frame3d
+
+plane3d :: Generator (Plane3d (global @ Meters) (Defines local))
+plane3d = Random.map2 Plane3d point3d planarBasis3d
+
 frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
 frame2d = Random.map Frame2d.fromXAxis axis2d
 
+frame3d :: Generator (Frame3d (global @ Meters) (Defines local))
+frame3d = Random.map Frame3d.fromTopPlane plane3d
+
 bounds2d :: Generator (Bounds2d (space @ Meters))
 bounds2d = Random.map2 Bounds2d lengthBounds lengthBounds
+
+bounds3d :: Generator (Bounds3d (space @ Meters))
+bounds3d = Random.map3 Bounds3d.rightwardForwardUpward lengthBounds lengthBounds lengthBounds
 
 vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
 vectorBounds2d = Random.map2 VectorBounds2d lengthBounds lengthBounds
@@ -119,15 +180,24 @@ orthonormalTransform2d :: Generator (Transform2d.Orthonormal (space @ Meters))
 orthonormalTransform2d =
   Random.merge $
     NonEmpty.three
-      (Random.map Transform2d.toOrthonormal translation2d)
-      (Random.map Transform2d.toOrthonormal rotation2d)
-      mirror2d
+      # Random.map Transform2d.toOrthonormal translation2d
+      # Random.map Transform2d.toOrthonormal rotation2d
+      # mirror2d
 
 scalingFactor :: Generator Float
 scalingFactor = Float.random 0.5 2.0
 
 uniformScaling2d :: Generator (Transform2d.Uniform (space @ Meters))
 uniformScaling2d = Random.map2 Transform2d.scaleAbout point2d scalingFactor
+
+uniformTransform2d :: Generator (Transform2d.Uniform (space @ Meters))
+uniformTransform2d =
+  Random.merge $
+    NonEmpty.four
+      # Random.map Transform2d.toUniform translation2d
+      # Random.map Transform2d.toUniform rotation2d
+      # Random.map Transform2d.toUniform mirror2d
+      # uniformScaling2d
 
 nonUniformScaling2d :: Generator (Transform2d.Affine (space @ Meters))
 nonUniformScaling2d = Random.map2 Transform2d.scaleAlong axis2d scalingFactor
@@ -136,11 +206,59 @@ affineTransform2d :: Generator (Transform2d.Affine (space @ Meters))
 affineTransform2d =
   Random.merge $
     NonEmpty.five
-      (Random.map Transform2d.toAffine translation2d)
-      (Random.map Transform2d.toAffine rotation2d)
-      (Random.map Transform2d.toAffine mirror2d)
-      (Random.map Transform2d.toAffine uniformScaling2d)
-      nonUniformScaling2d
+      # Random.map Transform2d.toAffine translation2d
+      # Random.map Transform2d.toAffine rotation2d
+      # Random.map Transform2d.toAffine mirror2d
+      # Random.map Transform2d.toAffine uniformScaling2d
+      # nonUniformScaling2d
 
 surfaceParameter :: Generator SurfaceParameter
 surfaceParameter = Random.oneOf (NonEmpty.two U V)
+
+translation3d :: Generator (Transform3d.Rigid (space @ Meters))
+translation3d = Random.map Transform3d.translateBy vector3d
+
+rotation3d :: Generator (Transform3d.Rigid (space @ Meters))
+rotation3d = Random.do
+  axis <- axis3d
+  angle <- Qty.random (Angle.degrees -360.0) (Angle.degrees 360.0)
+  Random.return (Transform3d.rotateAround axis angle)
+
+mirror3d :: Generator (Transform3d.Orthonormal (space @ Meters))
+mirror3d = Random.map Transform3d.mirrorAcross plane3d
+
+rigidTransform3d :: Generator (Transform3d.Rigid (space @ Meters))
+rigidTransform3d = Random.merge (NonEmpty.two translation3d rotation3d)
+
+orthonormalTransform3d :: Generator (Transform3d.Orthonormal (space @ Meters))
+orthonormalTransform3d =
+  Random.merge $
+    NonEmpty.three
+      # Random.map Transform3d.toOrthonormal translation3d
+      # Random.map Transform3d.toOrthonormal rotation3d
+      # mirror3d
+
+uniformScaling3d :: Generator (Transform3d.Uniform (space @ Meters))
+uniformScaling3d = Random.map2 Transform3d.scaleAbout point3d scalingFactor
+
+uniformTransform3d :: Generator (Transform3d.Uniform (space @ Meters))
+uniformTransform3d =
+  Random.merge $
+    NonEmpty.four
+      # Random.map Transform3d.toUniform translation3d
+      # Random.map Transform3d.toUniform rotation3d
+      # Random.map Transform3d.toUniform mirror3d
+      # uniformScaling3d
+
+nonUniformScaling3d :: Generator (Transform3d.Affine (space @ Meters))
+nonUniformScaling3d = Random.map2 Transform3d.scaleAlong axis3d scalingFactor
+
+affineTransform3d :: Generator (Transform3d.Affine (space @ Meters))
+affineTransform3d =
+  Random.merge $
+    NonEmpty.five
+      # Random.map Transform3d.toAffine translation3d
+      # Random.map Transform3d.toAffine rotation3d
+      # Random.map Transform3d.toAffine mirror3d
+      # Random.map Transform3d.toAffine uniformScaling3d
+      # nonUniformScaling3d

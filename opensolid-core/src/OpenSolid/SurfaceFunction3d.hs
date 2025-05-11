@@ -4,7 +4,7 @@ module OpenSolid.SurfaceFunction3d
   , compiled
   , new
   , constant
-  , xyz
+  , rightwardForwardUpward
   , evaluate
   , evaluateBounds
   , derivative
@@ -14,7 +14,7 @@ module OpenSolid.SurfaceFunction3d
   )
 where
 
-import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
+import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -23,7 +23,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Surface3d qualified as Expression.Surface3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
-import OpenSolid.Point3d (Point3d (Point3d))
+import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Region2d (Region2d)
@@ -184,25 +184,25 @@ new c derivativeFunction = do
 constant :: Point3d (space @ units) -> SurfaceFunction3d (space @ units)
 constant value = new (CompiledFunction.constant value) (always VectorSurfaceFunction3d.zero)
 
-xyz ::
+rightwardForwardUpward ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   SurfaceFunction units ->
   SurfaceFunction3d (space @ units)
-xyz x y z =
+rightwardForwardUpward r f u =
   new
     # CompiledFunction.map3
-      Expression.xyz
-      Point3d
-      Bounds3d
-      (SurfaceFunction.compiled x)
-      (SurfaceFunction.compiled y)
-      (SurfaceFunction.compiled z)
-    # \p ->
-      VectorSurfaceFunction3d.xyz
-        (SurfaceFunction.derivative p x)
-        (SurfaceFunction.derivative p y)
-        (SurfaceFunction.derivative p z)
+      Expression.rightwardForwardUpward
+      Point3d.rightwardForwardUpward
+      Bounds3d.rightwardForwardUpward
+      (SurfaceFunction.compiled r)
+      (SurfaceFunction.compiled f)
+      (SurfaceFunction.compiled u)
+    # \parameter ->
+      VectorSurfaceFunction3d.rightwardForwardUpward
+        (SurfaceFunction.derivative parameter r)
+        (SurfaceFunction.derivative parameter f)
+        (SurfaceFunction.derivative parameter u)
 
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)
 evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint

@@ -42,7 +42,7 @@ import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
-  , Direction3d (Unit3d)
+  , Direction3d (Direction3d)
   , Frame3d (Frame3d)
   , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
@@ -98,7 +98,7 @@ translateAlong (Axis3d _ direction) distance = translateIn direction distance
 
 rotateAround :: Axis3d (space @ units) -> Angle -> Rigid (space @ units)
 rotateAround (Axis3d originPoint direction) angle = do
-  let Unit3d (Vector3d dx dy dz) = direction
+  let Direction3d dx dy dz = direction
   let halfAngle = 0.5 * angle
   let sinHalfAngle = Angle.sin halfAngle
   let qx = dx * sinHalfAngle
@@ -128,7 +128,7 @@ scaleAbout point scale = do
 
 scaleAlong :: Axis3d (space @ units) -> Float -> Affine (space @ units)
 scaleAlong (Axis3d originPoint direction) scale = do
-  let Unit3d (Vector3d dx dy dz) = direction
+  let Direction3d dx dy dz = direction
   -- TODO refactor to use Vector3d.scaleIn?
   let vx = unitX + (scale - 1.0) * dx * direction
   let vy = unitY + (scale - 1.0) * dy * direction

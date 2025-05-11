@@ -1,6 +1,6 @@
 module OpenSolid.Expression.VectorSurface3d
   ( constant
-  , xyz
+  , rightwardForwardUpward
   , squaredMagnitude
   , squaredMagnitude'
   , magnitude
@@ -27,12 +27,12 @@ import OpenSolid.Vector3d qualified as Vector3d
 constant :: Vector3d (space @ units) -> Expression UvPoint (Vector3d (space @ units))
 constant = Expression.constant
 
-xyz ::
+rightwardForwardUpward ::
   Expression UvPoint (Qty units) ->
   Expression UvPoint (Qty units) ->
   Expression UvPoint (Qty units) ->
   Expression UvPoint (Vector3d (space @ units))
-xyz = Expression.xyz
+rightwardForwardUpward = Expression.rightwardForwardUpward
 
 squaredMagnitude' ::
   Expression UvPoint (Vector3d (space @ units)) ->
@@ -58,11 +58,11 @@ relativeTo ::
   Basis3d global (Defines local) ->
   Expression UvPoint (Vector3d (global @ units)) ->
   Expression UvPoint (Vector3d (local @ units))
-relativeTo basis expression = do
-  let i = Vector3d.unit (Basis3d.xDirection basis)
-  let j = Vector3d.unit (Basis3d.yDirection basis)
-  let k = Vector3d.unit (Basis3d.zDirection basis)
-  xyz (expression `dot` constant i) (expression `dot` constant j) (expression `dot` constant k)
+relativeTo basis expression =
+  rightwardForwardUpward
+    # expression `dot` constant (Vector3d.unit (Basis3d.rightwardDirection basis))
+    # expression `dot` constant (Vector3d.unit (Basis3d.forwardDirection basis))
+    # expression `dot` constant (Vector3d.unit (Basis3d.upwardDirection basis))
 
 projectInto ::
   PlanarBasis3d global (Defines local) ->

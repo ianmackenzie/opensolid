@@ -1,6 +1,7 @@
 module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
@@ -22,13 +23,14 @@ main = IO.do
   let r = Length.meters 1.0
   let h = Float.twoPi * r
   let theta = Angle.twoPi * SurfaceFunction.u
-  let x = r * SurfaceFunction.cos theta
-  let y = r * SurfaceFunction.sin theta
-  let z = h * SurfaceFunction.v
-  let surfaceFunction = SurfaceFunction3d.xyz x y z
+  let rightward = r * SurfaceFunction.cos theta
+  let forward = r * SurfaceFunction.sin theta
+  let upward = h * SurfaceFunction.v
+  let surfaceFunction = SurfaceFunction3d.rightwardForwardUpward rightward forward upward
   let domainCircle = Curve2d.circle (#centerPoint (Point2d.xy 0.5 0.5)) (#diameter (2 / 3))
   domain <- Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle])
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2.0) surface
   IO.printLine ("Num faces: " <> Text.int (List.length (Mesh.faceIndices mesh)))
-  Stl.writeBinary "executables/surface3d-meshing/mesh.stl" Length.inMillimeters mesh
+  let path = "executables/surface3d-meshing/mesh.stl"
+  Stl.writeBinary path Convention3d.yUp Length.inMillimeters mesh

@@ -1,15 +1,17 @@
 module OpenSolid.PlanarBasis3d
   ( PlanarBasis3d
   , coerce
-  , xy
-  , yx
-  , yz
-  , zy
-  , zx
-  , xz
-  , fromXDirection
-  , fromYDirection
-  , fromNormalDirection
+  , unsafe
+  , forwardFacing
+  , backwardFacing
+  , leftwardFacing
+  , rightwardFacing
+  , upwardFacing
+  , downwardFacing
+  , arbitraryNormalBasis
+  , withArbitraryYDirection
+  , withArbitraryXDirection
+  , orthogonalize
   , orthonormalize
   , flipX
   , flipY
@@ -26,7 +28,7 @@ module OpenSolid.PlanarBasis3d
   )
 where
 
-import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Direction3d (Direction3d, arbitraryNormalBasis)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -42,35 +44,77 @@ import OpenSolid.Vector3d qualified as Vector3d
 coerce :: PlanarBasis3d space1 defines1 -> PlanarBasis3d space2 defines2
 coerce (PlanarBasis3d i j) = PlanarBasis3d (Direction3d.coerce i) (Direction3d.coerce j)
 
-xy :: PlanarBasis3d space defines
-xy = PlanarBasis3d Direction3d.x Direction3d.y
+unsafe :: Direction3d space -> Direction3d space -> PlanarBasis3d space defines
+unsafe = PlanarBasis3d
 
-yx :: PlanarBasis3d space defines
-yx = PlanarBasis3d Direction3d.y Direction3d.x
+{-| The basis for a forward-facing plane.
 
-yz :: PlanarBasis3d space defines
-yz = PlanarBasis3d Direction3d.y Direction3d.z
+The normal direction of the basis will point forward,
+the X direction of the basis will point leftward,
+and the Y direction of the basis will point upward.
+-}
+forwardFacing :: PlanarBasis3d space defines
+forwardFacing = PlanarBasis3d Direction3d.leftward Direction3d.upward
 
-zy :: PlanarBasis3d space defines
-zy = PlanarBasis3d Direction3d.z Direction3d.y
+{-| The basis for a backward-facing plane.
 
-zx :: PlanarBasis3d space defines
-zx = PlanarBasis3d Direction3d.z Direction3d.x
+The normal direction of the basis will point backward,
+the X direction of the basis will point rightward,
+and the Y direction of the basis will point upward.
+-}
+backwardFacing :: PlanarBasis3d space defines
+backwardFacing = PlanarBasis3d Direction3d.rightward Direction3d.upward
 
-xz :: PlanarBasis3d space defines
-xz = PlanarBasis3d Direction3d.x Direction3d.z
+{-| The basis for a leftward-facing plane.
 
-fromXDirection :: Direction3d space -> PlanarBasis3d space defines
-fromXDirection dx = PlanarBasis3d dx (Direction3d.perpendicularTo dx)
+The normal direction of the basis will point leftward,
+the X direction of the basis will point backward,
+and the Y direction of the basis will point upward.
+-}
+leftwardFacing :: PlanarBasis3d space defines
+leftwardFacing = PlanarBasis3d Direction3d.backward Direction3d.upward
 
-fromYDirection :: Direction3d space -> PlanarBasis3d space defines
-fromYDirection dy = PlanarBasis3d (Direction3d.perpendicularTo dy) dy
+{-| The basis for a rightward-facing plane.
 
-fromNormalDirection :: Direction3d space -> PlanarBasis3d space defines
-fromNormalDirection direction = do
-  let dx = Direction3d.perpendicularTo direction
-  let dy = Unit3d (direction `cross` dx)
-  PlanarBasis3d dx dy
+The normal direction of the basis will point rightward,
+the X direction of the basis will point forward,
+and the Y direction of the basis will point upward.
+-}
+rightwardFacing :: PlanarBasis3d space defines
+rightwardFacing = PlanarBasis3d Direction3d.forward Direction3d.upward
+
+{-| The basis for an upward-facing plane.
+
+The normal direction of the basis will point upward,
+the X direction of the basis will point rightward,
+and the Y direction of the basis will point forward.
+-}
+upwardFacing :: PlanarBasis3d space defines
+upwardFacing = PlanarBasis3d Direction3d.rightward Direction3d.forward
+
+{-| The basis for a downward-facing plane.
+
+The normal direction of the basis will point downward,
+the X direction of the basis will point leftward,
+and the Y direction of the basis will point forward.
+-}
+downwardFacing :: PlanarBasis3d space defines
+downwardFacing = PlanarBasis3d Direction3d.leftward Direction3d.forward
+
+withArbitraryYDirection :: Named "xDirection" (Direction3d space) -> PlanarBasis3d space defines
+withArbitraryYDirection (Named dx) =
+  PlanarBasis3d dx (Direction3d.arbitraryPerpendicularDirection dx)
+
+withArbitraryXDirection :: Named "yDirection" (Direction3d space) -> PlanarBasis3d space defines
+withArbitraryXDirection (Named dy) =
+  PlanarBasis3d (Direction3d.arbitraryPerpendicularDirection dy) dy
+
+orthogonalize ::
+  Tolerance Unitless =>
+  Direction3d space ->
+  Direction3d space ->
+  Maybe (PlanarBasis3d space defines)
+orthogonalize dx dxy = gramSchmidt dx (Vector3d.unit dxy)
 
 orthonormalize ::
   Tolerance units =>
@@ -80,11 +124,18 @@ orthonormalize ::
 orthonormalize vx vxy =
   case Vector3d.direction vx of
     Failure Vector3d.IsZero -> Nothing
-    Success dx -> do
-      let vy = vxy - Vector3d.projectionIn dx vxy
-      case Vector3d.direction vy of
-        Failure Vector3d.IsZero -> Nothing
-        Success dy -> Just (PlanarBasis3d dx dy)
+    Success dx -> gramSchmidt dx vxy
+
+gramSchmidt ::
+  Tolerance units =>
+  Direction3d space ->
+  Vector3d (space @ units) ->
+  Maybe (PlanarBasis3d space defines)
+gramSchmidt dx vxy = do
+  let vy = vxy - Vector3d.projectionIn dx vxy
+  case Vector3d.direction vy of
+    Failure Vector3d.IsZero -> Nothing
+    Success dy -> Just (PlanarBasis3d dx dy)
 
 flipX :: PlanarBasis3d space defines1 -> PlanarBasis3d space defines2
 flipX (PlanarBasis3d i j) = PlanarBasis3d -i j

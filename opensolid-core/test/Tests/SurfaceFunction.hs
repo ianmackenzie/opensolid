@@ -103,12 +103,13 @@ planeTorusSurface = do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let r = majorRadius + minorRadius * SurfaceFunction.cos phi
-  let x = r * SurfaceFunction.cos theta
-  let y = r * SurfaceFunction.sin theta
-  let z = minorRadius * SurfaceFunction.sin phi
+  let rightward = r * SurfaceFunction.cos theta
+  let forward = r * SurfaceFunction.sin theta
+  let upward = minorRadius * SurfaceFunction.sin phi
   let alpha = Angle.asin (minorRadius / majorRadius)
+  let surfaceFunction = VectorSurfaceFunction3d.rightwardForwardUpward rightward forward upward
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  Direction3d.zx -alpha `dot` VectorSurfaceFunction3d.xyz x y z
+  Direction3d.upwardRightward -alpha `dot` surfaceFunction
 
 samplingRadius :: Float
 samplingRadius = 1e-6

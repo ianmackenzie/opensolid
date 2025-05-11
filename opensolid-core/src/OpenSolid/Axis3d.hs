@@ -1,12 +1,17 @@
 module OpenSolid.Axis3d
   ( Axis3d (Axis3d)
+  , coerce
+  , erase
   , originPoint
   , direction
-  , x
-  , y
-  , z
+  , forward
+  , backward
+  , leftward
+  , rightward
+  , upward
+  , downward
   , through
-  , normalPlane
+  , arbitraryNormalPlane
   , moveTo
   , reverse
   , transformBy
@@ -15,13 +20,20 @@ where
 
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
+import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d (Axis3d), Plane3d)
+import OpenSolid.Primitives (Axis3d (Axis3d), Plane3d (Plane3d))
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d (Transform3d)
+
+{-# INLINE coerce #-}
+coerce :: Axis3d (space1 @ units1) -> Axis3d (space2 @ units2)
+coerce (Axis3d p0 d) = Axis3d (Point3d.coerce p0) (Direction3d.coerce d)
+
+erase :: Axis3d (space @ units) -> Axis3d (space @ Unitless)
+erase = coerce
 
 -- | Get the origin point of an axis.
 originPoint :: Axis3d (space @ units) -> Point3d (space @ units)
@@ -31,17 +43,29 @@ originPoint (Axis3d p0 _) = p0
 direction :: Axis3d (space @ units) -> Direction3d space
 direction (Axis3d _ d) = d
 
--- | The global X axis.
-x :: Axis3d (space @ units)
-x = Axis3d Point3d.origin Direction3d.x
+-- | Construct an axis in the forward direction with the given origin point.
+forward :: Point3d (space @ units) -> Axis3d (space @ units)
+forward point = Axis3d point Direction3d.forward
 
--- | The global Y axis.
-y :: Axis3d (space @ units)
-y = Axis3d Point3d.origin Direction3d.y
+-- | Construct an axis in the backward direction with the given origin point.
+backward :: Point3d (space @ units) -> Axis3d (space @ units)
+backward point = Axis3d point Direction3d.backward
 
--- | The global Z axis.
-z :: Axis3d (space @ units)
-z = Axis3d Point3d.origin Direction3d.z
+-- | Construct an axis in the leftward direction with the given origin point.
+leftward :: Point3d (space @ units) -> Axis3d (space @ units)
+leftward point = Axis3d point Direction3d.leftward
+
+-- | Construct an axis in the rightward direction with the given origin point.
+rightward :: Point3d (space @ units) -> Axis3d (space @ units)
+rightward point = Axis3d point Direction3d.rightward
+
+-- | Construct an axis in the upward direction with the given origin point.
+upward :: Point3d (space @ units) -> Axis3d (space @ units)
+upward point = Axis3d point Direction3d.upward
+
+-- | Construct an axis in the downward direction with the given origin point.
+downward :: Point3d (space @ units) -> Axis3d (space @ units)
+downward point = Axis3d point Direction3d.downward
 
 through :: Point3d (space @ units) -> Direction3d space -> Axis3d (space @ units)
 through = Axis3d
@@ -52,8 +76,8 @@ The origin point of the plane will be the origin point of the axis,
 and the normal direction of the plane will be the direction of the axis.
 The X and Y directions of the plane will be chosen arbitrarily.
 -}
-normalPlane :: Axis3d (space @ units) -> Plane3d (space @ units) defines
-normalPlane (Axis3d p0 d) = Plane3d.through p0 d
+arbitraryNormalPlane :: Axis3d (space @ units) -> Plane3d (space @ units) defines
+arbitraryNormalPlane (Axis3d p0 d) = Plane3d p0 (PlanarBasis3d.arbitraryNormalBasis d)
 
 {-| Move an axis so that its origin point is the given point.
 

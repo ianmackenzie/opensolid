@@ -1,31 +1,62 @@
 module OpenSolid.Frame3d
   ( Frame3d (Frame3d)
   , coerce
-  , xyz
-  , atPoint
+  , erase
+  , identity
+  , forwardFacing
+  , backwardFacing
+  , leftwardFacing
+  , rightwardFacing
+  , upwardFacing
+  , downwardFacing
   , originPoint
   , basis
+  , rightwardDirection
+  , leftwardDirection
+  , forwardDirection
+  , backwardDirection
+  , upwardDirection
+  , downwardDirection
   , xDirection
   , yDirection
   , zDirection
-  , xAxis
-  , yAxis
-  , zAxis
-  , xyPlane
-  , yxPlane
-  , zxPlane
-  , xzPlane
-  , yzPlane
-  , zyPlane
-  , fromXAxis
-  , fromYAxis
-  , fromZAxis
-  , fromXyPlane
-  , fromYxPlane
-  , fromZxPlane
-  , fromXzPlane
-  , fromYzPlane
-  , fromZyPlane
+  , rightwardAxis
+  , leftwardAxis
+  , forwardAxis
+  , backwardAxis
+  , upwardAxis
+  , downwardAxis
+  , frontPlane
+  , backPlane
+  , leftPlane
+  , rightPlane
+  , topPlane
+  , bottomPlane
+  , fromFrontPlane
+  , fromBackPlane
+  , fromLeftPlane
+  , fromRightPlane
+  , fromTopPlane
+  , fromBottomPlane
+  , reverse
+  , offsetForwardBy
+  , offsetBackwardBy
+  , offsetRightwardBy
+  , offsetLeftwardBy
+  , offsetUpwardBy
+  , offsetDownwardBy
+  , turnRightBy
+  , turnLeftBy
+  , rollRightBy
+  , rollLeftBy
+  , rotateUpBy
+  , rotateDownBy
+  , turnRight
+  , turnLeft
+  , rollRight
+  , rollLeft
+  , rotateUp
+  , rotateDown
   , placeIn
   , relativeTo
   , inverse
@@ -43,14 +74,17 @@ module OpenSolid.Frame3d
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3d (Axis3d (Axis3d))
-import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
+import OpenSolid.Convention3d (Convention3d)
+import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Basis3d (Basis3d)
   , Direction3d (Unit3d)
@@ -61,83 +95,194 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Transform3d qualified as Transform3d
 
+identity :: Frame3d (space @ units) (Defines space)
+identity = forwardFacing Point3d.origin
+
+forwardFacing :: Point3d (space @ units) -> Frame3d (space @ units) defines
+forwardFacing p0 = Frame3d p0 Basis3d.forwardFacing
+
+backwardFacing :: Point3d (space @ units) -> Frame3d (space @ units) defines
+backwardFacing p0 = Frame3d p0 Basis3d.backwardFacing
+
+leftwardFacing :: Point3d (space @ units) -> Frame3d (space @ units) defines
+leftwardFacing p0 = Frame3d p0 Basis3d.leftwardFacing
+
+rightwardFacing :: Point3d (space @ units) -> Frame3d (space @ units) defines
+rightwardFacing p0 = Frame3d p0 Basis3d.rightwardFacing
+
+upwardFacing :: Point3d (space @ units) -> Frame3d (space @ units) defines
+upwardFacing p0 = Frame3d p0 Basis3d.upwardFacing
+
+downwardFacing :: Point3d (space @ units) -> Frame3d (space @ units) defines
+downwardFacing p0 = Frame3d p0 Basis3d.downwardFacing
+
 originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)
 originPoint (Frame3d p0 _) = p0
 
 basis :: Frame3d (space @ units) defines -> Basis3d space defines
 basis (Frame3d _ b) = b
 
-coerce :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-coerce (Frame3d p0 b) = Frame3d p0 (Basis3d.coerce b)
+coerce :: Frame3d (space1 @ units1) defines1 -> Frame3d (space2 @ units2) defines2
+coerce (Frame3d p0 b) = Frame3d (Point3d.coerce p0) (Basis3d.coerce b)
 
-xDirection :: Frame3d (space @ units) defines -> Direction3d space
-xDirection frame = Basis3d.xDirection (basis frame)
+erase :: Frame3d (space @ units) defines -> Frame3d (space @ Unitless) defines
+erase = coerce
 
-yDirection :: Frame3d (space @ units) defines -> Direction3d space
-yDirection frame = Basis3d.yDirection (basis frame)
+rightwardDirection :: Frame3d (space @ units) defines -> Direction3d space
+rightwardDirection frame = Basis3d.rightwardDirection (basis frame)
 
-zDirection :: Frame3d (space @ units) defines -> Direction3d space
-zDirection frame = Basis3d.zDirection (basis frame)
+leftwardDirection :: Frame3d (space @ units) defines -> Direction3d space
+leftwardDirection frame = Basis3d.leftwardDirection (basis frame)
 
-xyz :: Frame3d (space @ units) defines
-xyz = atPoint Point3d.origin
+forwardDirection :: Frame3d (space @ units) defines -> Direction3d space
+forwardDirection frame = Basis3d.forwardDirection (basis frame)
 
-atPoint :: Point3d (space @ units) -> Frame3d (space @ units) defines
-atPoint p0 = Frame3d p0 Basis3d.xyz
+backwardDirection :: Frame3d (space @ units) defines -> Direction3d space
+backwardDirection frame = Basis3d.backwardDirection (basis frame)
 
-xAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-xAxis frame = Axis3d.through (originPoint frame) (xDirection frame)
+upwardDirection :: Frame3d (space @ units) defines -> Direction3d space
+upwardDirection frame = Basis3d.upwardDirection (basis frame)
 
-yAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-yAxis frame = Axis3d.through (originPoint frame) (yDirection frame)
+downwardDirection :: Frame3d (space @ units) defines -> Direction3d space
+downwardDirection frame = Basis3d.downwardDirection (basis frame)
 
-zAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-zAxis frame = Axis3d.through (originPoint frame) (zDirection frame)
+xDirection :: Convention3d local -> Frame3d (space @ units) (Defines local) -> Direction3d space
+xDirection convention frame = Direction3d.placeIn (basis frame) (Convention3d.xDirection convention)
 
-xyPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-xyPlane (Frame3d p0 (Basis3d i j _)) = Plane3d p0 (PlanarBasis3d i j)
+yDirection :: Convention3d local -> Frame3d (space @ units) (Defines local) -> Direction3d space
+yDirection convention frame = Direction3d.placeIn (basis frame) (Convention3d.yDirection convention)
 
-yxPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-yxPlane (Frame3d p0 (Basis3d i j _)) = Plane3d p0 (PlanarBasis3d j i)
+zDirection :: Convention3d local -> Frame3d (space @ units) (Defines local) -> Direction3d space
+zDirection convention frame = Direction3d.placeIn (basis frame) (Convention3d.zDirection convention)
 
-zxPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-zxPlane (Frame3d p0 (Basis3d i _ k)) = Plane3d p0 (PlanarBasis3d k i)
+rightwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
+rightwardAxis frame = Axis3d (originPoint frame) (rightwardDirection frame)
 
-xzPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-xzPlane (Frame3d p0 (Basis3d i _ k)) = Plane3d p0 (PlanarBasis3d i k)
+leftwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
+leftwardAxis frame = Axis3d (originPoint frame) (leftwardDirection frame)
 
-yzPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-yzPlane (Frame3d p0 (Basis3d _ j k)) = Plane3d p0 (PlanarBasis3d j k)
+forwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
+forwardAxis frame = Axis3d (originPoint frame) (forwardDirection frame)
 
-zyPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-zyPlane (Frame3d p0 (Basis3d _ j k)) = Plane3d p0 (PlanarBasis3d k j)
+backwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
+backwardAxis frame = Axis3d (originPoint frame) (backwardDirection frame)
 
-fromXAxis :: Axis3d (space @ units) -> Frame3d (space @ units) defines
-fromXAxis (Axis3d p0 d) = Frame3d p0 (Basis3d.fromXDirection d)
+upwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
+upwardAxis frame = Axis3d (originPoint frame) (upwardDirection frame)
 
-fromYAxis :: Axis3d (space @ units) -> Frame3d (space @ units) defines
-fromYAxis (Axis3d p0 d) = Frame3d p0 (Basis3d.fromYDirection d)
+downwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
+downwardAxis frame = Axis3d (originPoint frame) (downwardDirection frame)
 
-fromZAxis :: Axis3d (space @ units) -> Frame3d (space @ units) defines
-fromZAxis (Axis3d p0 d) = Frame3d p0 (Basis3d.fromZDirection d)
+frontPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+frontPlane (Frame3d p0 (Basis3d r _ u)) = Plane3d p0 (PlanarBasis3d -r u)
 
-fromXyPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromXyPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d i j (Unit3d (i `cross` j)))
+backPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+backPlane (Frame3d p0 (Basis3d r _ u)) = Plane3d p0 (PlanarBasis3d r u)
 
-fromYxPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromYxPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d j i (Unit3d (j `cross` i)))
+leftPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+leftPlane (Frame3d p0 (Basis3d _ f u)) = Plane3d p0 (PlanarBasis3d -f u)
 
-fromZxPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromZxPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d j (Unit3d (i `cross` j)) i)
+rightPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+rightPlane (Frame3d p0 (Basis3d _ f u)) = Plane3d p0 (PlanarBasis3d f u)
 
-fromXzPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromXzPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d i (Unit3d (j `cross` i)) j)
+topPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+topPlane (Frame3d p0 (Basis3d r f _)) = Plane3d p0 (PlanarBasis3d r f)
 
-fromYzPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromYzPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d (Unit3d (i `cross` j)) i j)
+bottomPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+bottomPlane (Frame3d p0 (Basis3d r f _)) = Plane3d p0 (PlanarBasis3d -r f)
 
-fromZyPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromZyPlane (Plane3d p0 (PlanarBasis3d i j)) = Frame3d p0 (Basis3d (Unit3d (j `cross` i)) j i)
+fromFrontPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromFrontPlane (Plane3d p0 (PlanarBasis3d l u)) = Frame3d p0 (Basis3d -l (Unit3d (l `cross` u)) u)
+
+fromBackPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromBackPlane (Plane3d p0 (PlanarBasis3d r u)) = Frame3d p0 (Basis3d r (Unit3d (u `cross` r)) u)
+
+fromLeftPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromLeftPlane (Plane3d p0 (PlanarBasis3d b u)) = Frame3d p0 (Basis3d (Unit3d (u `cross` b)) -b u)
+
+fromRightPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromRightPlane (Plane3d p0 (PlanarBasis3d f u)) = Frame3d p0 (Basis3d (Unit3d (f `cross` u)) f u)
+
+fromTopPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromTopPlane (Plane3d p0 (PlanarBasis3d r f)) = Frame3d p0 (Basis3d r f (Unit3d (r `cross` f)))
+
+fromBottomPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromBottomPlane (Plane3d p0 (PlanarBasis3d l f)) = Frame3d p0 (Basis3d -l f (Unit3d (f `cross` l)))
+
+reverse :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+reverse (Frame3d p0 (Basis3d r f u)) = Frame3d p0 (Basis3d -r -f u)
+
+offsetForwardBy ::
+  Qty units ->
+  Frame3d (space @ units) defines1 ->
+  Frame3d (space @ units) defines2
+offsetForwardBy distance = translateInOwn forwardDirection distance
+
+offsetBackwardBy ::
+  Qty units ->
+  Frame3d (space @ units) defines1 ->
+  Frame3d (space @ units) defines2
+offsetBackwardBy distance = translateInOwn backwardDirection distance
+
+offsetRightwardBy ::
+  Qty units ->
+  Frame3d (space @ units) defines1 ->
+  Frame3d (space @ units) defines2
+offsetRightwardBy distance = translateInOwn rightwardDirection distance
+
+offsetLeftwardBy ::
+  Qty units ->
+  Frame3d (space @ units) defines1 ->
+  Frame3d (space @ units) defines2
+offsetLeftwardBy distance = translateInOwn leftwardDirection distance
+
+offsetUpwardBy ::
+  Qty units ->
+  Frame3d (space @ units) defines1 ->
+  Frame3d (space @ units) defines2
+offsetUpwardBy distance = translateInOwn upwardDirection distance
+
+offsetDownwardBy ::
+  Qty units ->
+  Frame3d (space @ units) defines1 ->
+  Frame3d (space @ units) defines2
+offsetDownwardBy distance = translateInOwn downwardDirection distance
+
+turnLeftBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+turnLeftBy angle = rotateAroundOwn upwardAxis angle
+
+turnRightBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+turnRightBy angle = rotateAroundOwn upwardAxis -angle
+
+rollRightBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rollRightBy angle = rotateAroundOwn forwardAxis angle
+
+rollLeftBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rollLeftBy angle = rotateAroundOwn forwardAxis -angle
+
+rotateUpBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rotateUpBy angle = rotateAroundOwn rightwardAxis angle
+
+rotateDownBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rotateDownBy angle = rotateAroundOwn rightwardAxis -angle
+
+turnLeft :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+turnLeft = turnLeftBy Angle.halfPi
+
+turnRight :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+turnRight = turnRightBy Angle.halfPi
+
+rollLeft :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rollLeft = rollLeftBy Angle.halfPi
+
+rollRight :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rollRight = rollRightBy Angle.halfPi
+
+rotateUp :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rotateUp = rotateUpBy Angle.halfPi
+
+rotateDown :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rotateDown = rotateDownBy Angle.halfPi
 
 placeIn ::
   Frame3d (global @ units) (Defines space) ->
@@ -158,7 +303,7 @@ relativeTo globalFrame frame =
     (Basis3d.relativeTo (basis globalFrame) (basis frame))
 
 inverse :: Frame3d (global @ units) (Defines local) -> Frame3d (local @ units) (Defines global)
-inverse frame = xyz |> relativeTo frame
+inverse frame = identity |> relativeTo frame
 
 moveTo ::
   Point3d (space @ units) ->

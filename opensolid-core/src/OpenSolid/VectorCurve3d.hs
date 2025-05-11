@@ -11,7 +11,7 @@ module OpenSolid.VectorCurve3d
   , derivative
   , zero
   , constant
-  , xyz
+  , rightwardForwardUpward
   , line
   , arc
   , quadraticSpline
@@ -26,9 +26,9 @@ module OpenSolid.VectorCurve3d
   , hasZero
   , zeros
   , HasZero (HasZero)
-  , xComponent
-  , yComponent
-  , zComponent
+  , rightwardComponent
+  , forwardComponent
+  , upwardComponent
   , direction
   , placeIn
   , relativeTo
@@ -67,10 +67,10 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.Vector3d (Vector3d (Vector3d))
+import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
-import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -462,17 +462,20 @@ planar basis vectorCurve2d = do
           (VectorCurve2d.compiled vectorCurve2d)
   new compiledPlanar (planar basis (VectorCurve2d.derivative vectorCurve2d))
 
-xyz :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units)
-xyz x y z = do
-  let compiledXYZ =
-        CompiledFunction.map3
-          Expression.xyz
-          Vector3d
-          VectorBounds3d
-          (Curve.compiled x)
-          (Curve.compiled y)
-          (Curve.compiled z)
-  new compiledXYZ (xyz (Curve.derivative x) (Curve.derivative y) (Curve.derivative z))
+rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units)
+rightwardForwardUpward r f u =
+  new
+    # CompiledFunction.map3
+      Expression.rightwardForwardUpward
+      Vector3d.rightwardForwardUpward
+      VectorBounds3d.rightwardForwardUpward
+      (Curve.compiled r)
+      (Curve.compiled f)
+      (Curve.compiled u)
+    # rightwardForwardUpward
+      (Curve.derivative r)
+      (Curve.derivative f)
+      (Curve.derivative u)
 
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 line v1 v2 = bezierCurve (NonEmpty.two v1 v2)
@@ -572,14 +575,14 @@ zeros curve =
     Success zeros1d -> Success (List.map Curve.Zero.location zeros1d)
     Failure Curve.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
 
-xComponent :: VectorCurve3d (space @ units) -> Curve units
-xComponent curve = curve `dot` Direction3d.x
+rightwardComponent :: VectorCurve3d (space @ units) -> Curve units
+rightwardComponent curve = curve `dot` Direction3d.rightward
 
-yComponent :: VectorCurve3d (space @ units) -> Curve units
-yComponent curve = curve `dot` Direction3d.y
+forwardComponent :: VectorCurve3d (space @ units) -> Curve units
+forwardComponent curve = curve `dot` Direction3d.forward
 
-zComponent :: VectorCurve3d (space @ units) -> Curve units
-zComponent curve = curve `dot` Direction3d.z
+upwardComponent :: VectorCurve3d (space @ units) -> Curve units
+upwardComponent curve = curve `dot` Direction3d.upward
 
 direction ::
   Tolerance units =>

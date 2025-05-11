@@ -1,5 +1,6 @@
 module OpenSolid.Scene3d.Gltf
-  ( matrixField
+  ( convention
+  , matrixField
   , pbrMaterial
   , uint32
   , faceIndices
@@ -17,36 +18,51 @@ import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.Direction3d (Direction3d (Direction3d))
+import OpenSolid.Convention3d (Convention3d (Convention3d))
+import OpenSolid.Convention3d qualified as Convention3d
+import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Point3d (Point3d (Point3d))
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Units (Meters)
-import OpenSolid.Vector3d (Vector3d (Vector3d))
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vertex3d qualified as Vertex3d
 
-matrixComponents :: Frame3d (space @ Meters) defines -> Maybe Json
+xDirection :: Direction3d space
+xDirection = Direction3d.leftward
+
+yDirection :: Direction3d space
+yDirection = Direction3d.upward
+
+zDirection :: Direction3d space
+zDirection = Direction3d.forward
+
+convention :: Convention3d space
+convention = Convention3d{xDirection, yDirection, zDirection}
+
+matrixComponents :: Frame3d (space @ Meters) (Defines local) -> Maybe Json
 matrixComponents frame =
-  if frame == Frame3d.xyz
+  if frame == Frame3d.forwardFacing Point3d.origin
     then Nothing
     else do
-      let Direction3d ix iy iz = Frame3d.xDirection frame
-      let Direction3d jx jy jz = Frame3d.yDirection frame
-      let Direction3d kx ky kz = Frame3d.zDirection frame
-      let Point3d x0 y0 z0 = Frame3d.originPoint frame
+      let (ix, iy, iz) = Direction3d.components convention (Frame3d.xDirection convention frame)
+      let (jx, jy, jz) = Direction3d.components convention (Frame3d.yDirection convention frame)
+      let (kx, ky, kz) = Direction3d.components convention (Frame3d.zDirection convention frame)
+      let (x0, y0, z0) = Point3d.coordinates convention (Frame3d.originPoint frame)
       let tx = Length.inMeters x0
       let ty = Length.inMeters y0
       let tz = Length.inMeters z0
       let components = [ix, iy, iz, 0.0, jx, jy, jz, 0.0, kx, ky, kz, 0.0, tx, ty, tz, 1.0]
       Just (Json.listOf Json.float components)
 
-matrixField :: Frame3d (space @ Meters) defines -> Json.Field
+matrixField :: Frame3d (space @ Meters) (Defines local) -> Json.Field
 matrixField frame = Json.optional "matrix" $ matrixComponents frame
 
 pbrMaterial :: Color -> Named "metallic" Float -> Named "roughness" Float -> Json
@@ -82,8 +98,8 @@ faceIndicesBuilder (i, j, k) =
 
 pointNormalBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => vertex -> Builder
 pointNormalBuilder vertex = do
-  let Point3d (Qty px) (Qty py) (Qty pz) = Vertex3d.position vertex
-  let Vector3d (Qty nx) (Qty ny) (Qty nz) = Vertex3d.normal vertex
+  let (Qty px, Qty py, Qty pz) = Point3d.coordinates convention (Vertex3d.position vertex)
+  let (Qty nx, Qty ny, Qty nz) = Vector3d.components convention (Vertex3d.normal vertex)
   Binary.concat
     [ Builder.floatLE (GHC.Float.double2Float px)
     , Builder.floatLE (GHC.Float.double2Float py)

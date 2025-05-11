@@ -1,37 +1,53 @@
 module Tests.Bounds2d (tests) where
 
+import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
+import OpenSolid.Random (Generator)
+import OpenSolid.Random qualified as Random
+import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
 
-tests :: List Test
+tests :: Tolerance Meters => List Test
 tests =
   [ placeIn
   , relativeTo
+  , transformBy
   ]
 
-placeIn :: Test
-placeIn = Test.check 100 "placeIn" Test.do
-  localBounds <- Random.bounds2d
+boundsAndContainedPoint :: Generator (Bounds2d (space @ Meters), Point2d (space @ Meters))
+boundsAndContainedPoint = Random.do
+  bounds <- Random.bounds2d
   u <- Parameter.random
   v <- Parameter.random
-  let localPoint = Bounds2d.interpolate localBounds u v
+  let point = Bounds2d.interpolate bounds u v
+  Random.return (bounds, point)
+
+placeIn :: Tolerance Meters => Test
+placeIn = Test.check 100 "placeIn" Test.do
+  (localBounds, localPoint) <- boundsAndContainedPoint
   frame <- Random.frame2d
   let globalBounds = Bounds2d.placeIn frame localBounds
   let globalPoint = Point2d.placeIn frame localPoint
-  Test.expect (Bounds2d.includes globalPoint globalBounds)
+  Test.expect (globalPoint ^ globalBounds)
 
-relativeTo :: Test
+relativeTo :: Tolerance Meters => Test
 relativeTo = Test.check 100 "relativeTo" Test.do
-  globalBounds <- Random.bounds2d
-  u <- Parameter.random
-  v <- Parameter.random
-  let globalPoint = Bounds2d.interpolate globalBounds u v
+  (globalBounds, globalPoint) <- boundsAndContainedPoint
   frame <- Random.frame2d
   let localBounds = Bounds2d.relativeTo frame globalBounds
   let localPoint = Point2d.relativeTo frame globalPoint
-  Test.expect (Bounds2d.includes localPoint localBounds)
+  Test.expect (localPoint ^ localBounds)
+
+transformBy :: Tolerance Meters => Test
+transformBy = Test.check 100 "transformBy" Test.do
+  (originalBounds, originalPoint) <- boundsAndContainedPoint
+  transform <- Random.affineTransform2d
+  let transformedBounds = Bounds2d.transformBy transform originalBounds
+  let transformedPoint = Point2d.transformBy transform originalPoint
+  Test.expect (transformedPoint ^ transformedBounds)

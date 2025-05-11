@@ -1,8 +1,9 @@
 module OpenSolid.Bounds3d
-  ( Bounds3d (Bounds3d)
-  , xCoordinate
-  , yCoordinate
-  , zCoordinate
+  ( Bounds3d
+  , rightwardForwardUpward
+  , rightwardCoordinate
+  , forwardCoordinate
+  , upwardCoordinate
   , coordinates
   , constant
   , hull2
@@ -11,6 +12,10 @@ module OpenSolid.Bounds3d
   , hullN
   , aggregate2
   , aggregateN
+  , centerPoint
+  , length
+  , width
+  , height
   , exclusion
   , inclusion
   , contains
@@ -22,40 +27,63 @@ module OpenSolid.Bounds3d
   , interpolate
   , placeIn
   , relativeTo
+  , projectInto
+  , distanceAlong
   , transformBy
   )
 where
 
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Direction3d (Direction3d (Direction3d))
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Convention3d (Convention3d)
+import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.Point3d (Point3d (Point3d))
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Basis3d (Basis3d), Bounds3d (Bounds3d), Frame3d (Frame3d))
+import OpenSolid.Primitives
+  ( Axis3d (Axis3d)
+  , Basis3d (Basis3d)
+  , Bounds3d (Bounds3d)
+  , Direction3d (Direction3d)
+  , Frame3d (Frame3d)
+  , PlanarBasis3d (PlanarBasis3d)
+  , Plane3d (Plane3d)
+  , Point3d (Point3d)
+  , Vector3d (Vector3d)
+  )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))
-import OpenSolid.Vector3d (Vector3d (Vector3d))
 
--- | Get the X coordinate bounds of a bounding box.
-xCoordinate :: Bounds3d (space @ units) -> Bounds units
-xCoordinate (Bounds3d x _ _) = x
+{-# INLINE rightwardForwardUpward #-}
+rightwardForwardUpward :: Bounds units -> Bounds units -> Bounds units -> Bounds3d (space @ units)
+rightwardForwardUpward = Bounds3d
 
--- | Get the Y coordinate bounds of a bounding box.
-yCoordinate :: Bounds3d (space @ units) -> Bounds units
-yCoordinate (Bounds3d _ y _) = y
+-- | Get the bounds on the rightward coordinate of a bounding box.
+rightwardCoordinate :: Bounds3d (space @ units) -> Bounds units
+rightwardCoordinate (Bounds3d r _ _) = r
 
--- | Get the Z coordinate bounds of a bounding box.
-zCoordinate :: Bounds3d (space @ units) -> Bounds units
-zCoordinate (Bounds3d _ _ z) = z
+-- | Get the bounds on the forward coordinate of a bounding box.
+forwardCoordinate :: Bounds3d (space @ units) -> Bounds units
+forwardCoordinate (Bounds3d _ f _) = f
 
--- | Get the XYZ coordinate bounds of a bounding box as a tuple.
-{-# INLINE coordinates #-}
-coordinates :: Bounds3d (space @ units) -> (Bounds units, Bounds units, Bounds units)
-coordinates (Bounds3d x y z) = (x, y, z)
+-- | Get the bounds on the upward coordinate of a bounding box.
+upwardCoordinate :: Bounds3d (space @ units) -> Bounds units
+upwardCoordinate (Bounds3d _ _ u) = u
+
+-- | Get the XYZ coordinate ranges of a bounding box, given an XYZ coordinate convention to use.
+coordinates ::
+  Convention3d space ->
+  Bounds3d (space @ units) ->
+  (Bounds units, Bounds units, Bounds units)
+coordinates convention bounds =
+  ( distanceAlong (Convention3d.xAxis convention) bounds
+  , distanceAlong (Convention3d.yAxis convention) bounds
+  , distanceAlong (Convention3d.zAxis convention) bounds
+  )
 
 -- | Construct a zero-size bounding box containing a single point.
 constant :: Point3d (space @ units) -> Bounds3d (space @ units)
@@ -95,6 +123,18 @@ aggregateImpl xLow xHigh yLow yHigh zLow zHigh rest = case rest of
       (Qty.min zLow zLowNext)
       (Qty.max zHigh zHighNext)
       remaining
+
+centerPoint :: Bounds3d (space @ units) -> Point3d (space @ units)
+centerPoint (Bounds3d r f u) = Point3d (Bounds.midpoint r) (Bounds.midpoint f) (Bounds.midpoint u)
+
+length :: Bounds3d (space @ units) -> Qty units
+length (Bounds3d _ f _) = Bounds.width f
+
+width :: Bounds3d (space @ units) -> Qty units
+width (Bounds3d r _ _) = Bounds.width r
+
+height :: Bounds3d (space @ units) -> Qty units
+height (Bounds3d _ _ u) = Bounds.width u
 
 exclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
 exclusion (Point3d x y z) (Bounds3d bx by bz) = do
@@ -225,61 +265,101 @@ placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Bounds3d (local @ units) ->
   Bounds3d (global @ units)
-placeIn frame (Bounds3d x y z) = do
+placeIn frame (Bounds3d pR pF pU) = do
   let Frame3d _ (Basis3d i j k) = frame
-  let Direction3d ix iy iz = i
-  let Direction3d jx jy jz = j
-  let Direction3d kx ky kz = k
-  let xMid = Bounds.midpoint x
-  let yMid = Bounds.midpoint y
-  let zMid = Bounds.midpoint z
-  let xWidth = Bounds.width x
-  let yWidth = Bounds.width y
-  let zWidth = Bounds.width z
-  let Point3d x0 y0 z0 = Point3d.placeIn frame (Point3d xMid yMid zMid)
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx + 0.5 * zWidth * Float.abs kx
-  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs ky
-  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz + 0.5 * zWidth * Float.abs kz
-  Bounds3d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry)) (Bounds (z0 - rz) (z0 + rz))
+  let Direction3d iR iF iU = i
+  let Direction3d jR jF jU = j
+  let Direction3d kR kF kU = k
+  let cR = Bounds.midpoint pR
+  let cF = Bounds.midpoint pF
+  let cU = Bounds.midpoint pU
+  let rR = 0.5 * Bounds.width pR
+  let rF = 0.5 * Bounds.width pF
+  let rU = 0.5 * Bounds.width pU
+  let Point3d cR' cF' cU' = Point3d.placeIn frame (Point3d cR cF cU)
+  let rR' = rR * Float.abs iR + rF * Float.abs jR + rU * Float.abs kR
+  let rF' = rR * Float.abs iF + rF * Float.abs jF + rU * Float.abs kF
+  let rU' = rR * Float.abs iU + rF * Float.abs jU + rU * Float.abs kU
+  Bounds3d
+    # Bounds (cR' - rR') (cR' + rR')
+    # Bounds (cF' - rF') (cF' + rF')
+    # Bounds (cU' - rU') (cU' + rU')
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Bounds3d (global @ units) ->
   Bounds3d (local @ units)
-relativeTo frame (Bounds3d x y z) = do
+relativeTo frame (Bounds3d pR pF pU) = do
   let Frame3d _ (Basis3d i j k) = frame
-  let Direction3d ix iy iz = i
-  let Direction3d jx jy jz = j
-  let Direction3d kx ky kz = k
-  let xMid = Bounds.midpoint x
-  let yMid = Bounds.midpoint y
-  let zMid = Bounds.midpoint z
-  let xWidth = Bounds.width x
-  let yWidth = Bounds.width y
-  let zWidth = Bounds.width z
-  let Point3d x0 y0 z0 = Point3d.relativeTo frame (Point3d xMid yMid zMid)
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy + 0.5 * zWidth * Float.abs iz
-  let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs jz
-  let rz = 0.5 * xWidth * Float.abs kx + 0.5 * yWidth * Float.abs ky + 0.5 * zWidth * Float.abs kz
-  Bounds3d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry)) (Bounds (z0 - rz) (z0 + rz))
+  let Direction3d iR iF iU = i
+  let Direction3d jR jF jU = j
+  let Direction3d kR kF kU = k
+  let cR = Bounds.midpoint pR
+  let cF = Bounds.midpoint pF
+  let cU = Bounds.midpoint pU
+  let rR = 0.5 * Bounds.width pR
+  let rF = 0.5 * Bounds.width pF
+  let rU = 0.5 * Bounds.width pU
+  let Point3d cR' cF' cU' = Point3d.relativeTo frame (Point3d cR cF cU)
+  let rR' = rR * Float.abs iR + rF * Float.abs iF + rU * Float.abs iU
+  let rF' = rR * Float.abs jR + rF * Float.abs jF + rU * Float.abs jU
+  let rU' = rR * Float.abs kR + rF * Float.abs kF + rU * Float.abs kU
+  Bounds3d
+    # Bounds (cR' - rR') (cR' + rR')
+    # Bounds (cF' - rF') (cF' + rF')
+    # Bounds (cU' - rU') (cU' + rU')
+
+projectInto ::
+  Plane3d (global @ units) (Defines local) ->
+  Bounds3d (global @ units) ->
+  Bounds2d (local @ units)
+projectInto plane (Bounds3d pR pF pU) = do
+  let Plane3d _ (PlanarBasis3d i j) = plane
+  let Direction3d iR iF iU = i
+  let Direction3d jR jF jU = j
+  let cR = Bounds.midpoint pR
+  let cF = Bounds.midpoint pF
+  let cU = Bounds.midpoint pU
+  let rR = 0.5 * Bounds.width pR
+  let rF = 0.5 * Bounds.width pF
+  let rU = 0.5 * Bounds.width pU
+  let Point2d cX cY = Point3d.projectInto plane (Point3d cR cF cU)
+  let rX = rR * Float.abs iR + rF * Float.abs iF + rU * Float.abs iU
+  let rY = rR * Float.abs jR + rF * Float.abs jF + rU * Float.abs jU
+  Bounds2d
+    # Bounds (cX - rX) (cX + rX)
+    # Bounds (cY - rY) (cY + rY)
+
+distanceAlong :: Axis3d (space @ units) -> Bounds3d (space @ units) -> Bounds units
+distanceAlong axis bounds = do
+  let Axis3d _ (Direction3d dR dF dU) = axis
+  let mid = Point3d.distanceAlong axis (centerPoint bounds)
+  let rR = 0.5 * width bounds
+  let rF = 0.5 * length bounds
+  let rU = 0.5 * height bounds
+  let radius = rR * Float.abs dR + rF * Float.abs dF + rU * Float.abs dU
+  Bounds (mid - radius) (mid + radius)
 
 transformBy ::
   Transform3d tag (space @ units) ->
   Bounds3d (space @ units) ->
   Bounds3d (space @ units)
-transformBy transform (Bounds3d x y z) = do
-  let xMid = Bounds.midpoint x
-  let yMid = Bounds.midpoint y
-  let zMid = Bounds.midpoint z
-  let xWidth = Bounds.width x
-  let yWidth = Bounds.width y
-  let zWidth = Bounds.width z
-  let Point3d x0 y0 z0 = Point3d.transformBy transform (Point3d xMid yMid zMid)
+transformBy transform (Bounds3d pR pF pU) = do
+  let cR = Bounds.midpoint pR
+  let cF = Bounds.midpoint pF
+  let cU = Bounds.midpoint pU
+  let rR = 0.5 * Bounds.width pR
+  let rF = 0.5 * Bounds.width pF
+  let rU = 0.5 * Bounds.width pU
+  let Point3d cR' cF' cU' = Point3d.transformBy transform (Point3d cR cF cU)
   let Transform3d _ i j k = transform
-  let Vector3d ix iy iz = i
-  let Vector3d jx jy jz = j
-  let Vector3d kx ky kz = k
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx + 0.5 * zWidth * Float.abs kx
-  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs ky
-  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz + 0.5 * zWidth * Float.abs kz
-  Bounds3d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry)) (Bounds (z0 - rz) (z0 + rz))
+  let Vector3d iR iF iU = i
+  let Vector3d jR jF jU = j
+  let Vector3d kR kF kU = k
+  let rR' = rR * Float.abs iR + rF * Float.abs jR + rU * Float.abs kR
+  let rF' = rR * Float.abs iF + rF * Float.abs jF + rU * Float.abs kF
+  let rU' = rR * Float.abs iU + rF * Float.abs jU + rU * Float.abs kU
+  Bounds3d
+    # Bounds (cR' - rR') (cR' + rR')
+    # Bounds (cF' - rF') (cF' + rF')
+    # Bounds (cU' - rU') (cU' + rU')

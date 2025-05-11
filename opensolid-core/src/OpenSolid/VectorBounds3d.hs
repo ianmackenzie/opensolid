@@ -1,6 +1,7 @@
 module OpenSolid.VectorBounds3d
-  ( VectorBounds3d (VectorBounds3d)
+  ( VectorBounds3d
   , constant
+  , rightwardForwardUpward
   , coerce
   , aggregate2
   , aggregate3
@@ -36,25 +37,36 @@ import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d (Axis3d), VectorBounds3d (VectorBounds3d))
+import OpenSolid.Primitives
+  ( Axis3d (Axis3d)
+  , Direction3d (Direction3d)
+  , Vector3d (Vector3d)
+  , VectorBounds3d (VectorBounds3d)
+  )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 
 constant :: Vector3d (space @ units) -> VectorBounds3d (space @ units)
-constant (Vector3d x y z) = VectorBounds3d (Bounds.constant x) (Bounds.constant y) (Bounds.constant z)
+constant (Vector3d x y z) =
+  VectorBounds3d (Bounds.constant x) (Bounds.constant y) (Bounds.constant z)
 
 {-# INLINE coerce #-}
 coerce :: VectorBounds3d (space1 @ units1) -> VectorBounds3d (space2 @ units2)
 coerce (VectorBounds3d x y z) = VectorBounds3d (Bounds.coerce x) (Bounds.coerce y) (Bounds.coerce z)
+
+{-# INLINE rightwardForwardUpward #-}
+rightwardForwardUpward ::
+  Bounds units ->
+  Bounds units ->
+  Bounds units ->
+  VectorBounds3d (space @ units)
+rightwardForwardUpward = VectorBounds3d
 
 hull2 :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorBounds3d (space @ units)
 hull2 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
@@ -184,71 +196,71 @@ placeIn ::
   Basis3d global (Defines local) ->
   VectorBounds3d (local @ units) ->
   VectorBounds3d (global @ units)
-placeIn basis (VectorBounds3d x y z) = do
-  let xMid = Bounds.midpoint x
-  let yMid = Bounds.midpoint y
-  let zMid = Bounds.midpoint z
-  let xWidth = Bounds.width x
-  let yWidth = Bounds.width y
-  let zWidth = Bounds.width z
-  let Vector3d x0 y0 z0 = Vector3d.placeIn basis (Vector3d xMid yMid zMid)
-  let (ix, iy, iz) = Direction3d.components (Basis3d.xDirection basis)
-  let (jx, jy, jz) = Direction3d.components (Basis3d.yDirection basis)
-  let (kx, ky, kz) = Direction3d.components (Basis3d.zDirection basis)
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx + 0.5 * zWidth * Float.abs kx
-  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs ky
-  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz + 0.5 * zWidth * Float.abs kz
+placeIn basis (VectorBounds3d vR vF vU) = do
+  let cR = Bounds.midpoint vR
+  let cF = Bounds.midpoint vF
+  let cU = Bounds.midpoint vU
+  let rR = 0.5 * Bounds.width vR
+  let rF = 0.5 * Bounds.width vF
+  let rU = 0.5 * Bounds.width vU
+  let Vector3d cR' cF' cU' = Vector3d.placeIn basis (Vector3d cR cF cU)
+  let Direction3d iR iF iU = Basis3d.rightwardDirection basis
+  let Direction3d jR jF jU = Basis3d.forwardDirection basis
+  let Direction3d kR kF kU = Basis3d.upwardDirection basis
+  let rR' = rR * Float.abs iR + rF * Float.abs jR + rU * Float.abs kR
+  let rF' = rR * Float.abs iF + rF * Float.abs jF + rU * Float.abs kF
+  let rU' = rR * Float.abs iU + rF * Float.abs jU + rU * Float.abs kU
   VectorBounds3d
-    (Bounds (x0 - rx) (x0 + rx))
-    (Bounds (y0 - ry) (y0 + ry))
-    (Bounds (z0 - rz) (z0 + rz))
+    # Bounds (cR' - rR') (cR' + rR')
+    # Bounds (cF' - rF') (cF' + rF')
+    # Bounds (cU' - rU') (cU' + rU')
 
 relativeTo ::
   Basis3d global (Defines local) ->
   VectorBounds3d (global @ units) ->
   VectorBounds3d (local @ units)
-relativeTo basis (VectorBounds3d x y z) = do
-  let xMid = Bounds.midpoint x
-  let yMid = Bounds.midpoint y
-  let zMid = Bounds.midpoint z
-  let xWidth = Bounds.width x
-  let yWidth = Bounds.width y
-  let zWidth = Bounds.width z
-  let Vector3d x0 y0 z0 = Vector3d.relativeTo basis (Vector3d xMid yMid zMid)
-  let (ix, iy, iz) = Direction3d.components (Basis3d.xDirection basis)
-  let (jx, jy, jz) = Direction3d.components (Basis3d.yDirection basis)
-  let (kx, ky, kz) = Direction3d.components (Basis3d.zDirection basis)
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy + 0.5 * zWidth * Float.abs iz
-  let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs jz
-  let rz = 0.5 * xWidth * Float.abs kx + 0.5 * yWidth * Float.abs ky + 0.5 * zWidth * Float.abs kz
+relativeTo basis (VectorBounds3d vR vF vU) = do
+  let cR = Bounds.midpoint vR
+  let cF = Bounds.midpoint vF
+  let cU = Bounds.midpoint vU
+  let rR = 0.5 * Bounds.width vR
+  let rF = 0.5 * Bounds.width vF
+  let rU = 0.5 * Bounds.width vU
+  let Vector3d cR' cF' cU' = Vector3d.relativeTo basis (Vector3d cR cF cU)
+  let Direction3d iR iF iU = Basis3d.rightwardDirection basis
+  let Direction3d jR jF jU = Basis3d.forwardDirection basis
+  let Direction3d kR kF kU = Basis3d.upwardDirection basis
+  let rR' = rR * Float.abs iR + rF * Float.abs iF + rU * Float.abs iU
+  let rF' = rR * Float.abs jR + rF * Float.abs jF + rU * Float.abs jU
+  let rU' = rR * Float.abs kR + rF * Float.abs kF + rU * Float.abs kU
   VectorBounds3d
-    (Bounds (x0 - rx) (x0 + rx))
-    (Bounds (y0 - ry) (y0 + ry))
-    (Bounds (z0 - rz) (z0 + rz))
+    # Bounds (cR' - rR') (cR' + rR')
+    # Bounds (cF' - rF') (cF' + rF')
+    # Bounds (cU' - rU') (cU' + rU')
 
 transformBy ::
   Transform3d tag (space @ units1) ->
   VectorBounds3d (space @ units2) ->
   VectorBounds3d (space @ units2)
-transformBy transform (VectorBounds3d x y z) = do
-  let xMid = Bounds.midpoint x
-  let yMid = Bounds.midpoint y
-  let zMid = Bounds.midpoint z
-  let xWidth = Bounds.width x
-  let yWidth = Bounds.width y
-  let zWidth = Bounds.width z
-  let Vector3d x0 y0 z0 = Vector3d.transformBy transform (Vector3d.xyz xMid yMid zMid)
+transformBy transform (VectorBounds3d vR vF vU) = do
+  let cR = Bounds.midpoint vR
+  let cF = Bounds.midpoint vF
+  let cU = Bounds.midpoint vU
+  let rR = 0.5 * Bounds.width vR
+  let rF = 0.5 * Bounds.width vF
+  let rU = 0.5 * Bounds.width vU
+  let Vector3d cR' cF' cU' = Vector3d.transformBy transform (Vector3d cR cF cU)
   let (Transform3d _ i j k) = transform
-  let (ix, iy, iz) = Vector3d.components i
-  let (jx, jy, jz) = Vector3d.components j
-  let (kx, ky, kz) = Vector3d.components k
-  let rx = 0.5 * Float.abs ix * xWidth + 0.5 * Float.abs jx * yWidth + 0.5 * Float.abs kx * zWidth
-  let ry = 0.5 * Float.abs iy * xWidth + 0.5 * Float.abs jy * yWidth + 0.5 * Float.abs ky * zWidth
-  let rz = 0.5 * Float.abs iz * xWidth + 0.5 * Float.abs jz * yWidth + 0.5 * Float.abs kz * zWidth
+  let Vector3d iR iF iU = i
+  let Vector3d jR jF jU = j
+  let Vector3d kR kF kU = k
+  let rR' = Float.abs iR * rR + Float.abs jR * rF + Float.abs kR * rU
+  let rF' = Float.abs iF * rR + Float.abs jF * rF + Float.abs kF * rU
+  let rU' = Float.abs iU * rR + Float.abs jU * rF + Float.abs kU * rU
   VectorBounds3d
-    (Bounds (x0 - rx) (x0 + rx))
-    (Bounds (y0 - ry) (y0 + ry))
-    (Bounds (z0 - rz) (z0 + rz))
+    # Bounds (cR' - rR') (cR' + rR')
+    # Bounds (cF' - rF') (cF' + rF')
+    # Bounds (cU' - rU') (cU' + rU')
 
 rotateIn ::
   Direction3d space ->

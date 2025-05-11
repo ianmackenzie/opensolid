@@ -1,15 +1,23 @@
 module OpenSolid.Plane3d
   ( Plane3d (Plane3d)
-  , through
-  , xy
-  , yx
-  , zx
-  , xz
-  , yz
-  , zy
-  , fromXAxis
-  , fromYAxis
+  , top
+  , bottom
+  , front
+  , back
+  , left
+  , right
+  , forwardFacing
+  , backwardFacing
+  , leftwardFacing
+  , rightwardFacing
+  , upwardFacing
+  , downwardFacing
+  , arbitraryNormalPlane
+  , withArbitraryBasis
+  , withArbitraryYDirection
+  , withArbitraryXDirection
   , coerce
+  , erase
   , originPoint
   , basis
   , normalDirection
@@ -43,7 +51,7 @@ module OpenSolid.Plane3d
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Axis3d (Axis3d)
+import OpenSolid.Axis3d (Axis3d, arbitraryNormalPlane)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
@@ -55,73 +63,139 @@ import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 
-through :: Point3d (space @ units) -> Direction3d space -> Plane3d (space @ units) defines
-through p0 n = Plane3d p0 (PlanarBasis3d.fromNormalDirection n)
+{-| An upward-facing plane centered at the origin.
 
-{-| The XY plane.
-
-A plane whose X direction is the global X direction
-and whose Y direction is the global Y direction.
+The normal direction of the plane will point upward,
+the X direction of the plane will point rightward,
+and the Y direction of the plane will point forward.
 -}
-xy :: Plane3d (space @ units) (Defines local)
-xy = Plane3d Point3d.origin PlanarBasis3d.xy
+top :: Plane3d (space @ units) defines
+top = upwardFacing Point3d.origin
 
-{-| The YX plane.
+{-| A downward-facing plane centered at the origin.
 
-A plane whose X direction is the global Y direction
-and whose Y direction is the global X direction.
+The normal direction of the plane will point downward,
+the X direction of the plane will point leftward,
+and the Y direction of the plane will point forward.
 -}
-yx :: Plane3d (space @ units) (Defines local)
-yx = Plane3d Point3d.origin PlanarBasis3d.yx
+bottom :: Plane3d (space @ units) defines
+bottom = downwardFacing Point3d.origin
 
-{-| The ZX plane.
+{-| A forward-facing plane centered at the origin.
 
-A plane whose X direction is the global Z direction
-and whose Y direction is the global X direction.
+The normal direction of the plane will point forward,
+the X direction of the plane will point leftward,
+and the Y direction of the plane will point upward.
 -}
-zx :: Plane3d (space @ units) (Defines local)
-zx = Plane3d Point3d.origin PlanarBasis3d.zx
+front :: Plane3d (space @ units) defines
+front = forwardFacing Point3d.origin
 
-{-| The XZ plane.
+{-| A backward-facing plane centered at the origin.
 
-A plane whose X direction is the global X direction
-and whose Y direction is the global Z direction.
+The normal direction of the plane will point backward,
+the X direction of the plane will point rightward,
+and the Y direction of the plane will point upward.
 -}
-xz :: Plane3d (space @ units) (Defines local)
-xz = Plane3d Point3d.origin PlanarBasis3d.xz
+back :: Plane3d (space @ units) defines
+back = backwardFacing Point3d.origin
 
-{-| The YZ plane.
+{-| A leftward-facing plane centered at the origin.
 
-A plane whose X direction is the global Y direction
-and whose Y direction is the global Z direction.
+The normal direction of the plane will point leftward,
+the X direction of the plane will point backward,
+and the Y direction of the plane will point upward.
 -}
-yz :: Plane3d (space @ units) (Defines local)
-yz = Plane3d Point3d.origin PlanarBasis3d.yz
+left :: Plane3d (space @ units) defines
+left = leftwardFacing Point3d.origin
 
-{-| The ZY plane.
+{-| A rightward-facing plane centered at the origin.
 
-A plane whose X direction is the global Z direction
-and whose Y direction is the global Y direction.
+The normal direction of the plane will point rightward,
+the X direction of the plane will point forward,
+and the Y direction of the plane will point upward.
 -}
-zy :: Plane3d (space @ units) (Defines local)
-zy = Plane3d Point3d.origin PlanarBasis3d.zy
+right :: Plane3d (space @ units) defines
+right = rightwardFacing Point3d.origin
 
-{-| Construct a plane having the given X axis.
+{-| Construct a forward-facing plane with the given origin point.
 
-A perpendicular Y direction will be chosen arbitrarily.
+The normal direction of the plane will point forward,
+the X direction of the plane will point leftward,
+and the Y direction of the plane will point upward.
 -}
-fromXAxis :: Axis3d (space @ units) -> Plane3d (space @ units) defines
-fromXAxis (Axis3d p0 d) = Plane3d p0 (PlanarBasis3d.fromXDirection d)
+forwardFacing :: Point3d (space @ units) -> Plane3d (space @ units) defines
+forwardFacing p0 = Plane3d p0 PlanarBasis3d.forwardFacing
 
-{-| Construct a plane having the given Y axis.
+{-| Construct a backward-facing plane with the given origin point.
 
-A perpendicular X direction will be chosen arbitrarily.
+The normal direction of the plane will point backward,
+the X direction of the plane will point rightward,
+and the Y direction of the plane will point upward.
 -}
-fromYAxis :: Axis3d (space @ units) -> Plane3d (space @ units) defines
-fromYAxis (Axis3d p0 d) = Plane3d p0 (PlanarBasis3d.fromYDirection d)
+backwardFacing :: Point3d (space @ units) -> Plane3d (space @ units) defines
+backwardFacing p0 = Plane3d p0 PlanarBasis3d.backwardFacing
+
+{-| Construct a leftward-facing plane with the given origin point.
+
+The normal direction of the plane will point leftward,
+the X direction of the plane will point backward,
+and the Y direction of the plane will point upward.
+-}
+leftwardFacing :: Point3d (space @ units) -> Plane3d (space @ units) defines
+leftwardFacing p0 = Plane3d p0 PlanarBasis3d.leftwardFacing
+
+{-| Construct a rightward-facing plane with the given origin point.
+
+The normal direction of the plane will point rightward,
+the X direction of the plane will point forward,
+and the Y direction of the plane will point upward.
+-}
+rightwardFacing :: Point3d (space @ units) -> Plane3d (space @ units) defines
+rightwardFacing p0 = Plane3d p0 PlanarBasis3d.rightwardFacing
+
+{-| Construct a upward-facing plane with the given origin point.
+
+The normal direction of the plane will point upward,
+the X direction of the plane will point rightward,
+and the Y direction of the plane will point forward.
+-}
+upwardFacing :: Point3d (space @ units) -> Plane3d (space @ units) defines
+upwardFacing p0 = Plane3d p0 PlanarBasis3d.upwardFacing
+
+{-| Construct a downward-facing plane with the given origin point.
+
+The normal direction of the plane will point downward,
+the X direction of the plane will point leftward,
+and the Y direction of the plane will point forward.
+-}
+downwardFacing :: Point3d (space @ units) -> Plane3d (space @ units) defines
+downwardFacing p0 = Plane3d p0 PlanarBasis3d.downwardFacing
+
+{-| Construct a plane with given origin point and normal direction.
+
+The plane's basis (its X and Y directions) will be chosen arbitrarily.
+-}
+withArbitraryBasis ::
+  Point3d (space @ units) ->
+  Direction3d space ->
+  Plane3d (space @ units) defines
+withArbitraryBasis p0 n = arbitraryNormalPlane (Axis3d p0 n)
+
+-- | Construct a plane having the given X axis, with an arbitrarily-chosen Y direction.
+withArbitraryYDirection :: Named "xAxis" (Axis3d (space @ units)) -> Plane3d (space @ units) defines
+withArbitraryYDirection (Named (Axis3d p0 dx)) =
+  Plane3d p0 (PlanarBasis3d.withArbitraryYDirection (#xDirection dx))
+
+-- | Construct a plane having the given Y axis, with an arbitrarily-chosen X direction.
+withArbitraryXDirection :: Named "yAxis" (Axis3d (space @ units)) -> Plane3d (space @ units) defines
+withArbitraryXDirection (Named (Axis3d p0 dy)) =
+  Plane3d p0 (PlanarBasis3d.withArbitraryXDirection (#yDirection dy))
 
 coerce :: Plane3d (space1 @ units1) defines1 -> Plane3d (space2 @ units2) defines2
 coerce (Plane3d p0 b) = Plane3d (Point3d.coerce p0) (PlanarBasis3d.coerce b)
+
+erase :: Plane3d (space @ units) defines -> Plane3d (space @ Unitless) defines
+erase = coerce
 
 {-| Get the origin point of a plane.
 

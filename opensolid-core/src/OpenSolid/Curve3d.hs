@@ -11,7 +11,7 @@ module OpenSolid.Curve3d
   , quadraticBezier
   , cubicBezier
   , hermite
-  , xyz
+  , rightwardForwardUpward
   , startPoint
   , endPoint
   , evaluate
@@ -35,7 +35,7 @@ import OpenSolid.Bounded3d qualified as Bounded3d
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
+import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -54,7 +54,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d (Point3d (Point3d))
+import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -175,17 +175,20 @@ recursive givenCompiled derivativeFunction =
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
 constant point = new (CompiledFunction.constant point) VectorCurve3d.zero
 
-xyz :: Curve units -> Curve units -> Curve units -> Curve3d (space @ units)
-xyz x y z =
+rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> Curve3d (space @ units)
+rightwardForwardUpward r f u =
   new
     # CompiledFunction.map3
-      Expression.xyz
-      Point3d
-      Bounds3d
-      (Curve.compiled x)
-      (Curve.compiled y)
-      (Curve.compiled z)
-    # VectorCurve3d.xyz (Curve.derivative x) (Curve.derivative y) (Curve.derivative z)
+      Expression.rightwardForwardUpward
+      Point3d.rightwardForwardUpward
+      Bounds3d.rightwardForwardUpward
+      (Curve.compiled r)
+      (Curve.compiled f)
+      (Curve.compiled u)
+    # VectorCurve3d.rightwardForwardUpward
+      (Curve.derivative r)
+      (Curve.derivative f)
+      (Curve.derivative u)
 
 planar ::
   Plane3d (space @ units) (Defines local) ->

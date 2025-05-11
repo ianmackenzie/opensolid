@@ -1,15 +1,19 @@
 module OpenSolid.Basis3d
   ( Basis3d
   , coerce
-  , xyz
-  , yzx
-  , zxy
-  , fromXDirection
-  , fromYDirection
-  , fromZDirection
-  , xDirection
-  , yDirection
-  , zDirection
+  , identity
+  , forwardFacing
+  , backwardFacing
+  , leftwardFacing
+  , rightwardFacing
+  , upwardFacing
+  , downwardFacing
+  , upwardDirection
+  , downwardDirection
+  , forwardDirection
+  , backwardDirection
+  , rightwardDirection
+  , leftwardDirection
   , transformBy
   , placeIn
   , relativeTo
@@ -19,54 +23,78 @@ where
 
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
-import OpenSolid.Prelude
-import OpenSolid.Primitives
-  ( Basis3d (Basis3d)
-  , PlanarBasis3d (PlanarBasis3d)
-  )
+import OpenSolid.Prelude hiding (identity)
+import OpenSolid.Primitives (Basis3d (..))
 import OpenSolid.Transform3d qualified as Transform3d
 
-coerce :: Basis3d space defines1 -> Basis3d space defines2
-coerce (Basis3d i j k) = Basis3d i j k
+coerce :: Basis3d space1 defines1 -> Basis3d space2 defines2
+coerce (Basis3d i j k) =
+  Basis3d (Direction3d.coerce i) (Direction3d.coerce j) (Direction3d.coerce k)
 
-xDirection :: Basis3d space defines -> Direction3d space
-xDirection (Basis3d i _ _) = i
+identity :: Basis3d space (Defines space)
+identity = forwardFacing
 
-yDirection :: Basis3d space defines -> Direction3d space
-yDirection (Basis3d _ j _) = j
+forwardFacing :: Basis3d space defines
+forwardFacing =
+  Basis3d
+    { upwardDirection = Direction3d.upward
+    , forwardDirection = Direction3d.forward
+    , rightwardDirection = Direction3d.rightward
+    }
 
-zDirection :: Basis3d space defines -> Direction3d space
-zDirection (Basis3d _ _ k) = k
+backwardFacing :: Basis3d space defines
+backwardFacing =
+  Basis3d
+    { upwardDirection = Direction3d.upward
+    , forwardDirection = Direction3d.backward
+    , rightwardDirection = Direction3d.leftward
+    }
 
-xyz :: Basis3d space defines
-xyz = Basis3d Direction3d.x Direction3d.y Direction3d.z
+leftwardFacing :: Basis3d space defines
+leftwardFacing =
+  Basis3d
+    { upwardDirection = Direction3d.upward
+    , forwardDirection = Direction3d.leftward
+    , rightwardDirection = Direction3d.forward
+    }
 
-yzx :: Basis3d space defines
-yzx = Basis3d Direction3d.y Direction3d.z Direction3d.x
+rightwardFacing :: Basis3d space defines
+rightwardFacing =
+  Basis3d
+    { upwardDirection = Direction3d.upward
+    , forwardDirection = Direction3d.rightward
+    , rightwardDirection = Direction3d.backward
+    }
 
-zxy :: Basis3d space defines
-zxy = Basis3d Direction3d.z Direction3d.x Direction3d.y
+upwardFacing :: Basis3d space defines
+upwardFacing =
+  Basis3d
+    { upwardDirection = Direction3d.forward
+    , forwardDirection = Direction3d.upward
+    , rightwardDirection = Direction3d.leftward
+    }
 
-fromXDirection :: Direction3d space -> Basis3d space defines
-fromXDirection dx = do
-  let PlanarBasis3d dy dz = PlanarBasis3d.fromNormalDirection dx
-  Basis3d dx dy dz
+downwardFacing :: Basis3d space defines
+downwardFacing =
+  Basis3d
+    { upwardDirection = Direction3d.forward
+    , forwardDirection = Direction3d.downward
+    , rightwardDirection = Direction3d.rightward
+    }
 
-fromYDirection :: Direction3d space -> Basis3d space defines
-fromYDirection dy = do
-  let PlanarBasis3d dz dx = PlanarBasis3d.fromNormalDirection dy
-  Basis3d dx dy dz
+leftwardDirection :: Basis3d space defines -> Direction3d space
+leftwardDirection = negate . rightwardDirection
 
-fromZDirection :: Direction3d space -> Basis3d space defines
-fromZDirection dz = do
-  let PlanarBasis3d dx dy = PlanarBasis3d.fromNormalDirection dz
-  Basis3d dx dy dz
+backwardDirection :: Basis3d space defines -> Direction3d space
+backwardDirection = negate . forwardDirection
+
+downwardDirection :: Basis3d space defines -> Direction3d space
+downwardDirection = negate . upwardDirection
 
 transformBy ::
   Transform3d.Rigid (space @ translationUnits) ->
-  Basis3d space defines ->
-  Basis3d space defines
+  Basis3d space defines1 ->
+  Basis3d space defines2
 transformBy transform (Basis3d i j k) =
   Basis3d
     (Direction3d.transformBy transform i)
@@ -94,4 +122,4 @@ relativeTo globalBasis (Basis3d i j k) =
     (Direction3d.relativeTo globalBasis k)
 
 inverse :: Basis3d global (Defines local) -> Basis3d local (Defines global)
-inverse basis = xyz |> relativeTo basis
+inverse basis = forwardFacing |> relativeTo basis

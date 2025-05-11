@@ -3,6 +3,7 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
@@ -28,7 +29,7 @@ main = Tolerance.using Length.nanometer $ IO.do
   let line = Curve2d.line (Curve2d.endPoint arc) (Curve2d.startPoint arc)
   profile <- Region2d.boundedBy [arc, line]
   let extrusionLimits = Bounds.symmetric (#width length)
-  body <- Body3d.extruded Plane3d.yz profile extrusionLimits
+  body <- Body3d.extruded Plane3d.front profile extrusionLimits
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 30.0))
   let mesh = Body3d.toMesh constraints body
-  Stl.writeBinary "executables/body3d-meshing/mesh.stl" Length.inMillimeters mesh
+  Stl.writeBinary "executables/body3d-meshing/mesh.stl" Convention3d.yUp Length.inMillimeters mesh

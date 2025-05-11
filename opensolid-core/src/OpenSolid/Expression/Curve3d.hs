@@ -1,6 +1,6 @@
 module OpenSolid.Expression.Curve3d
   ( constant
-  , xyz
+  , rightwardForwardUpward
   , placeIn
   , relativeTo
   , transformBy
@@ -20,12 +20,12 @@ import OpenSolid.Transform3d (Transform3d)
 constant :: Point3d (space @ units) -> Expression Float (Point3d (space @ units))
 constant = Expression.constant
 
-xyz ::
+rightwardForwardUpward ::
   Expression Float (Qty units) ->
   Expression Float (Qty units) ->
   Expression Float (Qty units) ->
   Expression Float (Point3d (space @ units))
-xyz = Expression.xyz
+rightwardForwardUpward = Expression.rightwardForwardUpward
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->

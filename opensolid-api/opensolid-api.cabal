@@ -50,6 +50,7 @@ library
     API.Docs
 
   default-extensions:
+    DataKinds
     DisambiguateRecordFields
     GADTs
     ImplicitParams

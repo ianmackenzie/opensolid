@@ -110,6 +110,7 @@ library
     OpenSolid.Camera3d
     OpenSolid.Color
     OpenSolid.Composition
+    OpenSolid.Convention3d
     OpenSolid.CoordinateSystem
     OpenSolid.Curve
     OpenSolid.Curve.Zero
@@ -190,6 +191,7 @@ library
     OpenSolid.Surface
     OpenSolid.Surface2d
     OpenSolid.Surface3d
+    OpenSolid.Surface3d.Revolved
     OpenSolid.SurfaceFunction
     OpenSolid.SurfaceFunction.HorizontalCurve
     OpenSolid.SurfaceFunction.ImplicitCurveBounds
@@ -285,6 +287,7 @@ test-suite opensolid-core-test
     Tests.Array
     Tests.Bounds
     Tests.Bounds2d
+    Tests.Bounds3d
     Tests.Curve
     Tests.Curve2d
     Tests.Direction2d

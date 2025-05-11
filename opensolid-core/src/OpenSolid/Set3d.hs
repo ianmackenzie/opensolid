@@ -55,16 +55,16 @@ fromNonEmpty :: Bounded3d a (space @ units) => NonEmpty a -> Set3d a (space @ un
 fromNonEmpty givenItems = do
   let boundedItem item = (Bounded3d.bounds item, item)
   let boundedItems = NonEmpty.map boundedItem givenItems
-  buildX (NonEmpty.length boundedItems) boundedItems
+  buildRightward (NonEmpty.length boundedItems) boundedItems
 
-buildX :: Int -> NonEmpty (Bounds3d (space @ units), a) -> Set3d a (space @ units)
-buildX = build Bounds3d.xCoordinate buildY
+buildRightward :: Int -> NonEmpty (Bounds3d (space @ units), a) -> Set3d a (space @ units)
+buildRightward = build Bounds3d.rightwardCoordinate buildForward
 
-buildY :: Int -> NonEmpty (Bounds3d (space @ units), a) -> Set3d a (space @ units)
-buildY = build Bounds3d.yCoordinate buildZ
+buildForward :: Int -> NonEmpty (Bounds3d (space @ units), a) -> Set3d a (space @ units)
+buildForward = build Bounds3d.forwardCoordinate buildUpward
 
-buildZ :: Int -> NonEmpty (Bounds3d (space @ units), a) -> Set3d a (space @ units)
-buildZ = build Bounds3d.zCoordinate buildX
+buildUpward :: Int -> NonEmpty (Bounds3d (space @ units), a) -> Set3d a (space @ units)
+buildUpward = build Bounds3d.upwardCoordinate buildRightward
 
 build ::
   (Bounds3d (space @ units) -> Bounds units) ->

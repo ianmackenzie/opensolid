@@ -3,6 +3,7 @@ module Main (main) where
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
@@ -32,7 +33,7 @@ gearBody numTeeth = Try.do
   let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
   profile <- Region2d.boundedBy (hole : outerProfile)
   let width = Length.millimeters 8.0
-  Body3d.extruded Plane3d.xy profile (Bounds.symmetric (#width width))
+  Body3d.extruded Plane3d.front profile (Bounds.symmetric (#width width))
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
@@ -45,8 +46,8 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
         let stlPath = basePath <> ".stl"
         let material = Scene3d.iron (#roughness 0.3)
         let mesh = Body3d.toMesh meshConstraints body
-        Scene3d.writeGlb glbPath Plane3d.xy [Scene3d.mesh material mesh]
-        Stl.writeBinary stlPath Length.inMillimeters mesh
+        Scene3d.writeGlb glbPath [Scene3d.mesh material mesh]
+        Stl.writeBinary stlPath Convention3d.yUp Length.inMillimeters mesh
         elapsed <- Timer.elapsed timer
         IO.printLine ("Elapsed for " <> Text.int numTeeth <> " teeth: " <> Text.float (Duration.inSeconds elapsed) <> "s")
   overallTimer <- Timer.start

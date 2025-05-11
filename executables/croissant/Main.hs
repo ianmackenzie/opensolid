@@ -2,6 +2,7 @@ module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Body3d qualified as Body3d
+import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
@@ -23,12 +24,12 @@ main = Tolerance.using Length.nanometer $ IO.do
   let theta = Curve.line (Angle.degrees 45.0) (Angle.degrees 315.0) . SurfaceFunction.u
   let phi = Angle.twoPi * SurfaceFunction.v
   let r = majorRadius + minorRadius * SurfaceFunction.cos phi
-  let x = r * SurfaceFunction.cos theta
-  let y = r * SurfaceFunction.sin theta
-  let z = minorRadius * SurfaceFunction.sin phi
-  let surfaceFunction = SurfaceFunction3d.xyz x y z
+  let rightward = r * SurfaceFunction.cos theta
+  let forward = r * SurfaceFunction.sin theta
+  let upward = minorRadius * SurfaceFunction.sin phi
+  let surfaceFunction = SurfaceFunction3d.rightwardForwardUpward rightward forward upward
   let surface = Surface3d.parametric surfaceFunction Region2d.unitSquare
   body <- Body3d.boundedBy [surface]
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
   let mesh = Body3d.toMesh constraints body
-  Stl.writeBinary "executables/croissant/mesh.stl" Length.inMillimeters mesh
+  Stl.writeBinary "executables/croissant/mesh.stl" Convention3d.yUp Length.inMillimeters mesh

@@ -8,6 +8,7 @@ import Test qualified
 import Tests.Array qualified
 import Tests.Bounds qualified
 import Tests.Bounds2d qualified
+import Tests.Bounds3d qualified
 import Tests.Curve qualified
 import Tests.Curve2d qualified
 import Tests.Direction2d qualified
@@ -48,6 +49,7 @@ tests =
     , Test.group "Tests.Text" Tests.Text.tests
     , Test.group "Tests.Bounds2d" Tests.Bounds2d.tests
     , Test.group "Tests.VectorBounds2d" Tests.VectorBounds2d.tests
+    , Test.group "Tests.Bounds3d" Tests.Bounds3d.tests
     , Test.group "Tests.Array" Tests.Array.tests
     , Test.group "Tests.Set2d" Tests.Set2d.tests
     , Test.group "Tests.SurfaceFunction" Tests.SurfaceFunction.tests
