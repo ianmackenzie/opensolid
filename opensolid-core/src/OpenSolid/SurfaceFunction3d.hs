@@ -119,6 +119,24 @@ instance
       (\parameter -> derivative parameter f1 - derivative parameter f2)
 
 instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (SurfaceFunction3d (space1 @ units1))
+    (Point3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
+  where
+  function - point = function - constant point
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Point3d (space1 @ units1))
+    (SurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
+  where
+  point - function = constant point - function
+
+instance
   uvCoordinates ~ UvCoordinates =>
   Composition
     (Region2d uvCoordinates)
