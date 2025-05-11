@@ -55,7 +55,6 @@ import OpenSolid.Curve.Zeros qualified as Curve.Zeros
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Direction2d qualified as Direction2d
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
@@ -608,10 +607,24 @@ zeros curve =
     Failure Curve.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
 
 xComponent :: VectorCurve2d (space @ units) -> Curve units
-xComponent curve = curve `dot` Direction2d.x
+xComponent curve =
+  Curve.new
+    # CompiledFunction.map
+      Expression.xComponent
+      Vector2d.xComponent
+      VectorBounds2d.xComponent
+      (compiled curve)
+    # xComponent (derivative curve)
 
 yComponent :: VectorCurve2d (space @ units) -> Curve units
-yComponent curve = curve `dot` Direction2d.y
+yComponent curve =
+  Curve.new
+    # CompiledFunction.map
+      Expression.yComponent
+      Vector2d.yComponent
+      VectorBounds2d.yComponent
+      (compiled curve)
+    # yComponent (derivative curve)
 
 direction ::
   Tolerance units =>

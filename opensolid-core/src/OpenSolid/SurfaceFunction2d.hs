@@ -226,7 +226,21 @@ signedDistanceAlong axis function =
   (function - constant (Axis2d.originPoint axis)) `dot` Axis2d.direction axis
 
 xCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units
-xCoordinate = signedDistanceAlong Axis2d.x
+xCoordinate surface =
+  SurfaceFunction.new
+    # CompiledFunction.map
+      Expression.xCoordinate
+      Point2d.xCoordinate
+      Bounds2d.xCoordinate
+      (compiled surface)
+    # \parameter -> VectorSurfaceFunction2d.xComponent (derivative parameter surface)
 
 yCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units
-yCoordinate = signedDistanceAlong Axis2d.y
+yCoordinate surface =
+  SurfaceFunction.new
+    # CompiledFunction.map
+      Expression.yCoordinate
+      Point2d.yCoordinate
+      Bounds2d.yCoordinate
+      (compiled surface)
+    # \parameter -> VectorSurfaceFunction2d.yComponent (derivative parameter surface)

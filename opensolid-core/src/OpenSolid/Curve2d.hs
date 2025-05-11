@@ -643,11 +643,25 @@ signedDistanceAlong axis curve = (curve - Axis2d.originPoint axis) `dot` Axis2d.
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
-xCoordinate = signedDistanceAlong Axis2d.x
+xCoordinate curve =
+  Curve.new
+    # CompiledFunction.map
+      Expression.xCoordinate
+      Point2d.xCoordinate
+      Bounds2d.xCoordinate
+      (compiled curve)
+    # VectorCurve2d.xComponent (derivative curve)
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yCoordinate :: Curve2d (space @ units) -> Curve units
-yCoordinate = signedDistanceAlong Axis2d.y
+yCoordinate curve =
+  Curve.new
+    # CompiledFunction.map
+      Expression.yCoordinate
+      Point2d.yCoordinate
+      Bounds2d.yCoordinate
+      (compiled curve)
+    # VectorCurve2d.yComponent (derivative curve)
 
 findPoint ::
   Tolerance units =>

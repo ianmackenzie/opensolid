@@ -24,7 +24,6 @@ import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
 import OpenSolid.Prelude
@@ -494,10 +493,24 @@ derivative U (VectorSurfaceFunction2d _ du _) = du
 derivative V (VectorSurfaceFunction2d _ _ dv) = dv
 
 xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-xComponent function = function `dot` Direction2d.x
+xComponent function =
+  SurfaceFunction.new
+    # CompiledFunction.map
+      Expression.xComponent
+      Vector2d.xComponent
+      VectorBounds2d.xComponent
+      (compiled function)
+    # \parameter -> xComponent (derivative parameter function)
 
 yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-yComponent function = function `dot` Direction2d.y
+yComponent function =
+  SurfaceFunction.new
+    # CompiledFunction.map
+      Expression.yComponent
+      Vector2d.yComponent
+      VectorBounds2d.yComponent
+      (compiled function)
+    # \parameter -> yComponent (derivative parameter function)
 
 squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units :*: units)
 squaredMagnitude' function =

@@ -207,10 +207,10 @@ instance
   curve1d >> DirectionCurve2d curve = DirectionCurve2d (curve1d >> curve)
 
 xComponent :: DirectionCurve2d space -> Curve Unitless
-xComponent curve = curve `dot` Direction2d.x
+xComponent (DirectionCurve2d curve) = VectorCurve2d.xComponent curve
 
 yComponent :: DirectionCurve2d space -> Curve Unitless
-yComponent curve = curve `dot` Direction2d.y
+yComponent (DirectionCurve2d curve) = VectorCurve2d.yComponent curve
 
 placeIn ::
   Basis2d global (Defines local) ->
