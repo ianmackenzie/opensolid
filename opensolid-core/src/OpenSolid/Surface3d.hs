@@ -12,6 +12,8 @@ module OpenSolid.Surface3d
   , innerLoops
   , boundaryCurves
   , flip
+  , placeIn
+  , relativeTo
   , toMesh
   )
 where
@@ -31,6 +33,7 @@ import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
@@ -164,6 +167,24 @@ flip surface =
   parametric
     # function surface . SurfaceFunction2d.xy -SurfaceFunction.u SurfaceFunction.v
     # Region2d.mirrorAcross Axis2d.y (domain surface)
+
+placeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  Surface3d (local @ units) ->
+  Surface3d (global @ units)
+placeIn frame surface =
+  parametric
+    # SurfaceFunction3d.placeIn frame (function surface)
+    # domain surface
+
+relativeTo ::
+  Frame3d (global @ units) (Defines local) ->
+  Surface3d (global @ units) ->
+  Surface3d (local @ units)
+relativeTo frame surface =
+  parametric
+    # SurfaceFunction3d.relativeTo frame (function surface)
+    # domain surface
 
 toMesh :: Qty units -> Surface3d (space @ units) -> Mesh (Point3d (space @ units))
 toMesh accuracy surface = do
