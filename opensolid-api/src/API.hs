@@ -64,6 +64,7 @@ import API.Class
 import API.Class qualified as Class
 import API.Docs (docs)
 import API.Function (Function)
+import API.Space (Space)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
@@ -124,8 +125,6 @@ import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Prelude (flip)
-
-data Space
 
 ----- API DEFINITION -----
 
