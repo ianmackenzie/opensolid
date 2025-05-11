@@ -35,9 +35,11 @@ import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Vector2d (Vector2d)
 
+-- | Get the origin point of an axis.
 originPoint :: Axis2d (space @ units) -> Point2d (space @ units)
 originPoint (Axis2d p0 _) = p0
 
+-- | Get the direction of an axis.
 direction :: Axis2d (space @ units) -> Direction2d space
 direction (Axis2d _ d) = d
 

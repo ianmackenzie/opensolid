@@ -70,7 +70,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
-import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis2d (Axis2d (Axis2d))
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Axis3d qualified as Axis3d
@@ -849,7 +849,10 @@ drawing2d =
 axis2d :: Class
 axis2d =
   Class.new @(Axis2d (Space @ Meters)) $(docs ''Axis2d) $
-    [ constant "X" (Axis2d.x @Space @Meters) $(docs 'Axis2d.x)
+    [ constructor2 "Origin Point" "Direction" Axis2d $(docs 'Axis2d)
+    , member0 "Origin Point" Axis2d.originPoint $(docs 'Axis2d.originPoint)
+    , member0 "Direction" Axis2d.direction $(docs 'Axis2d.direction)
+    , constant "X" (Axis2d.x @Space @Meters) $(docs 'Axis2d.x)
     , constant "Y" (Axis2d.y @Space @Meters) $(docs 'Axis2d.y)
     ]
       <> orthonormalTransformations2d Axis2d.transformBy
@@ -857,7 +860,10 @@ axis2d =
 uvAxis :: Class
 uvAxis =
   Class.new @(Axis2d (Space @ Unitless)) $(docs ''Axis2d) $
-    [ constant "U" (Axis2d.x @Space @Meters) "The U axis."
+    [ constructor2 "Origin Point" "Direction" Axis2d $(docs 'Axis2d)
+    , member0 "Origin Point" Axis2d.originPoint $(docs 'Axis2d.originPoint)
+    , member0 "Direction" Axis2d.direction $(docs 'Axis2d.direction)
+    , constant "U" (Axis2d.x @Space @Meters) "The U axis."
     , constant "V" (Axis2d.y @Space @Meters) "The V axis."
     ]
 

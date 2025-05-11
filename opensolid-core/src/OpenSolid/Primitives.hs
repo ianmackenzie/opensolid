@@ -848,6 +848,7 @@ instance
 
 -- | An axis in 2D, defined by an origin point and direction.
 data Axis2d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct an axis from its origin point and direction.
   Axis2d ::
     Point2d (space @ units) ->
     Direction2d space ->
