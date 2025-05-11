@@ -1363,6 +1363,8 @@ body3d = do
     , factoryM2R "Sphere" "Center Point" "Diameter" Body3d.sphere $(docs 'Body3d.sphere)
     , factoryM3R "Cylinder" "Start Point" "End Point" "Diameter" Body3d.cylinder $(docs 'Body3d.cylinder)
     , factoryM3R "Cylinder Along" "Axis" "Distance" "Diameter" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
+    , member1 "Place In" "Frame" Body3d.placeIn $(docs 'Body3d.placeIn)
+    , member1 "Relative To" "Frame" Body3d.relativeTo $(docs 'Body3d.relativeTo)
     , memberM3 "Write STL" "Path" "Convention" "Mesh Constraints" writeStl "Write a body to a binary STL file, using units of millimeters."
     ]
 
