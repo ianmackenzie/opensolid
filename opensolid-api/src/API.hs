@@ -74,6 +74,8 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Axis3d qualified as Axis3d
+import OpenSolid.Basis3d (Basis3d)
+import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds (Bounds (Bounds))
@@ -97,10 +99,14 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI)
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -162,7 +168,10 @@ classes =
   , point3d
   , bounds3d
   , axis3d
+  , planarBasis3d
   , plane3d
+  , basis3d
+  , frame3d
   , vectorCurve2d
   , displacementCurve2d
   , curve2d
@@ -879,6 +888,8 @@ vector3d =
     , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
     , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
     , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
+    , member1 "Place In" "Basis" Vector3d.placeIn $(docs 'Vector3d.placeIn)
+    , member1 "Relative To" "Basis" Vector3d.relativeTo $(docs 'Vector3d.relativeTo)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -909,6 +920,8 @@ displacement3d =
     , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
     , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
     , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
+    , member1 "Place In" "Basis" Vector3d.placeIn $(docs 'Vector3d.placeIn)
+    , member1 "Relative To" "Basis" Vector3d.relativeTo $(docs 'Vector3d.relativeTo)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -937,6 +950,8 @@ areaVector3d =
     , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
     , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
     , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
+    , member1 "Place In" "Basis" Vector3d.placeIn $(docs 'Vector3d.placeIn)
+    , member1 "Relative To" "Basis" Vector3d.relativeTo $(docs 'Vector3d.relativeTo)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -960,11 +975,14 @@ direction3d =
     , constant "Upward" Direction3d.upward $(docs 'Direction3d.upward)
     , constant "Downward" Direction3d.downward $(docs 'Direction3d.downward)
     , member0 "Arbitrary Perpendicular Direction" Direction3d.arbitraryPerpendicularDirection $(docs 'Direction3d.arbitraryPerpendicularDirection)
+    , member0 "Arbitrary Normal Basis" Direction3d.arbitraryNormalBasis $(docs 'Direction3d.arbitraryNormalBasis)
     , member1 "Angle To" "Other" Direction3d.angleFrom $(docs 'Direction3d.angleFrom)
     , member2 "Rotate In" "Direction" "Angle" Direction3d.rotateIn $(docs 'Direction3d.rotateIn)
     , member2 "Rotate Around" "Axis" "Angle" (Direction3d.rotateAround @Space @Meters) $(docs 'Direction3d.rotateAround)
     , member1 "Mirror In" "Direction" Direction3d.mirrorIn $(docs 'Direction3d.mirrorIn)
     , member1 "Mirror Across" "Plane" (Direction3d.mirrorAcross @Space @Meters) $(docs 'Direction3d.mirrorAcross)
+    , member1 "Place In" "Basis" Direction3d.placeIn $(docs 'Direction3d.placeIn)
+    , member1 "Relative To" "Basis" Direction3d.relativeTo $(docs 'Direction3d.relativeTo)
     , negateSelf
     ]
 
@@ -979,6 +997,8 @@ point3d =
     , minusSelf
     , minus @(Vector3d (Space @ Meters)) Self
     , plus @(Vector3d (Space @ Meters)) Self
+    , member1 "Place In" "Frame" Point3d.placeIn $(docs 'Point3d.placeIn)
+    , member1 "Relative To" "Frame" Point3d.relativeTo $(docs 'Point3d.relativeTo)
     ]
       <> affineTransformations3d Point3d.transformBy
 
@@ -1009,8 +1029,26 @@ axis3d =
     , member0 "Arbitrary Normal Plane" Axis3d.arbitraryNormalPlane $(docs 'Axis3d.arbitraryNormalPlane)
     , member1 "Move To" "Point" Axis3d.moveTo $(docs 'Axis3d.moveTo)
     , member0 "Reverse" Axis3d.reverse $(docs 'Axis3d.reverse)
+    , member1 "Place In" "Frame" Axis3d.placeIn $(docs 'Axis3d.placeIn)
+    , member1 "Relative To" "Frame" Axis3d.relativeTo $(docs 'Axis3d.relativeTo)
     ]
       <> orthonormalTransformations3d Axis3d.transformBy
+
+planarBasis3d :: Class
+planarBasis3d =
+  Class.new @(PlanarBasis3d Space (Defines Space)) $(docs ''PlanarBasis3d) $
+    [ constant "Forward Facing" (PlanarBasis3d.forwardFacing @Space @(Defines Space)) $(docs 'PlanarBasis3d.forwardFacing)
+    , constant "Backward Facing" (PlanarBasis3d.backwardFacing @Space @(Defines Space)) $(docs 'PlanarBasis3d.backwardFacing)
+    , constant "Rightward Facing" (PlanarBasis3d.rightwardFacing @Space @(Defines Space)) $(docs 'PlanarBasis3d.rightwardFacing)
+    , constant "Leftward Facing" (PlanarBasis3d.leftwardFacing @Space @(Defines Space)) $(docs 'PlanarBasis3d.leftwardFacing)
+    , constant "Upward Facing" (PlanarBasis3d.upwardFacing @Space @(Defines Space)) $(docs 'PlanarBasis3d.upwardFacing)
+    , constant "Downward Facing" (PlanarBasis3d.downwardFacing @Space @(Defines Space)) $(docs 'PlanarBasis3d.downwardFacing)
+    , member0 "X Direction" PlanarBasis3d.xDirection $(docs 'PlanarBasis3d.xDirection)
+    , member0 "Y Direction" PlanarBasis3d.yDirection $(docs 'PlanarBasis3d.yDirection)
+    , member0 "Normal Direction" PlanarBasis3d.normalDirection $(docs 'PlanarBasis3d.normalDirection)
+    , member1 "Place In" "Basis" PlanarBasis3d.placeIn $(docs 'PlanarBasis3d.placeIn)
+    , member1 "Relative To" "Basis" PlanarBasis3d.relativeTo $(docs 'PlanarBasis3d.relativeTo)
+    ]
 
 plane3d :: Class
 plane3d =
@@ -1043,8 +1081,93 @@ plane3d =
     , member0 "Flip X" Plane3d.flipX $(docs 'Plane3d.flipX)
     , member0 "Flip Y" Plane3d.flipY $(docs 'Plane3d.flipY)
     , member1 "Offset By" "Distance" Plane3d.offsetBy $(docs 'Plane3d.offsetBy)
+    , member1 "Place In" "Frame" Plane3d.placeIn $(docs 'Plane3d.placeIn)
+    , member1 "Relative To" "Frame" Plane3d.relativeTo $(docs 'Plane3d.relativeTo)
     ]
       <> rigidTransformations3d Plane3d.transformBy
+
+basis3d :: Class
+basis3d =
+  Class.new @(Basis3d Space (Defines Space)) $(docs ''Basis3d) $
+    [ constant "Identity" (Basis3d.identity @Space @(Defines Space)) $(docs 'Basis3d.identity)
+    , constant "Forward Facing" (Basis3d.forwardFacing @Space @(Defines Space)) $(docs 'Basis3d.forwardFacing)
+    , constant "Backward Facing" (Basis3d.backwardFacing @Space @(Defines Space)) $(docs 'Basis3d.backwardFacing)
+    , constant "Rightward Facing" (Basis3d.rightwardFacing @Space @(Defines Space)) $(docs 'Basis3d.rightwardFacing)
+    , constant "Leftward Facing" (Basis3d.leftwardFacing @Space @(Defines Space)) $(docs 'Basis3d.leftwardFacing)
+    , constant "Upward Facing" (Basis3d.upwardFacing @Space @(Defines Space)) $(docs 'Basis3d.upwardFacing)
+    , constant "Downward Facing" (Basis3d.downwardFacing @Space @(Defines Space)) $(docs 'Basis3d.downwardFacing)
+    , member0 "Forward Direction" Basis3d.forwardDirection $(docs 'Basis3d.forwardDirection)
+    , member0 "Backward Direction" Basis3d.backwardDirection $(docs 'Basis3d.backwardDirection)
+    , member0 "Leftward Direction" Basis3d.leftwardDirection $(docs 'Basis3d.leftwardDirection)
+    , member0 "Rightward Direction" Basis3d.rightwardDirection $(docs 'Basis3d.rightwardDirection)
+    , member0 "Upward Direction" Basis3d.upwardDirection $(docs 'Basis3d.upwardDirection)
+    , member0 "Downward Direction" Basis3d.downwardDirection $(docs 'Basis3d.downwardDirection)
+    , member1 "Place In" "Other Basis" Basis3d.placeIn $(docs 'Basis3d.placeIn)
+    , member1 "Relative To" "Other Basis" Basis3d.relativeTo $(docs 'Basis3d.relativeTo)
+    ]
+
+frame3d :: Class
+frame3d =
+  Class.new @(Frame3d (Space @ Meters) (Defines Space)) $(docs ''Frame3d) $
+    [ constant "Identity" (Frame3d.identity @Space @Meters @(Defines Space)) $(docs 'Frame3d.identity)
+    , factory1 "Forward Facing" "Origin Point" Frame3d.forwardFacing $(docs 'Frame3d.forwardFacing)
+    , factory1 "Backward Facing" "Origin Point" Frame3d.backwardFacing $(docs 'Frame3d.backwardFacing)
+    , factory1 "Rightward Facing" "Origin Point" Frame3d.rightwardFacing $(docs 'Frame3d.rightwardFacing)
+    , factory1 "Leftward Facing" "Origin Point" Frame3d.leftwardFacing $(docs 'Frame3d.leftwardFacing)
+    , factory1 "Upward Facing" "Origin Point" Frame3d.upwardFacing $(docs 'Frame3d.upwardFacing)
+    , factory1 "Downward Facing" "Origin Point" Frame3d.downwardFacing $(docs 'Frame3d.downwardFacing)
+    , factory1 "From Front Plane" "Plane" Frame3d.fromFrontPlane $(docs 'Frame3d.fromFrontPlane)
+    , factory1 "From Back Plane" "Plane" Frame3d.fromBackPlane $(docs 'Frame3d.fromBackPlane)
+    , factory1 "From Right Plane" "Plane" Frame3d.fromRightPlane $(docs 'Frame3d.fromRightPlane)
+    , factory1 "From Left Plane" "Plane" Frame3d.fromLeftPlane $(docs 'Frame3d.fromLeftPlane)
+    , factory1 "From Top Plane" "Plane" Frame3d.fromTopPlane $(docs 'Frame3d.fromTopPlane)
+    , factory1 "From Bottom Plane" "Plane" Frame3d.fromBottomPlane $(docs 'Frame3d.fromBottomPlane)
+    , factory2 "Align" "Local Frame" "Global Frame" Frame3d.align $(docs 'Frame3d.align)
+    , factory2 "Mate" "Local Frame" "Global Frame" Frame3d.mate $(docs 'Frame3d.mate)
+    , member0 "Origin Point" Frame3d.originPoint $(docs 'Frame3d.originPoint)
+    , member0 "Forward Direction" Frame3d.forwardDirection $(docs 'Frame3d.forwardDirection)
+    , member0 "Backward Direction" Frame3d.backwardDirection $(docs 'Frame3d.backwardDirection)
+    , member0 "Rightward Direction" Frame3d.rightwardDirection $(docs 'Frame3d.rightwardDirection)
+    , member0 "Leftward Direction" Frame3d.leftwardDirection $(docs 'Frame3d.leftwardDirection)
+    , member0 "Upward Direction" Frame3d.upwardDirection $(docs 'Frame3d.upwardDirection)
+    , member0 "Downward Direction" Frame3d.downwardDirection $(docs 'Frame3d.downwardDirection)
+    , member0 "Forward Axis" Frame3d.forwardAxis $(docs 'Frame3d.forwardAxis)
+    , member0 "Backward Axis" Frame3d.backwardAxis $(docs 'Frame3d.backwardAxis)
+    , member0 "Rightward Axis" Frame3d.rightwardAxis $(docs 'Frame3d.rightwardAxis)
+    , member0 "Leftward Axis" Frame3d.leftwardAxis $(docs 'Frame3d.leftwardAxis)
+    , member0 "Upward Axis" Frame3d.upwardAxis $(docs 'Frame3d.upwardAxis)
+    , member0 "Downward Axis" Frame3d.downwardAxis $(docs 'Frame3d.downwardAxis)
+    , member0 "Front Plane" Frame3d.frontPlane $(docs 'Frame3d.frontPlane)
+    , member0 "Back Plane" Frame3d.backPlane $(docs 'Frame3d.backPlane)
+    , member0 "Right Plane" Frame3d.rightPlane $(docs 'Frame3d.rightPlane)
+    , member0 "Left Plane" Frame3d.leftPlane $(docs 'Frame3d.leftPlane)
+    , member0 "Top Plane" Frame3d.topPlane $(docs 'Frame3d.topPlane)
+    , member0 "Bottom Plane" Frame3d.bottomPlane $(docs 'Frame3d.bottomPlane)
+    , member1 "Place In" "Other Frame" Frame3d.placeIn $(docs 'Frame3d.placeIn)
+    , member1 "Relative To" "Other Frame" Frame3d.relativeTo $(docs 'Frame3d.relativeTo)
+    , member0 "Inverse" Frame3d.inverse $(docs 'Frame3d.inverse)
+    , member0 "Reverse" Frame3d.reverse $(docs 'Frame3d.reverse)
+    , member1 "Move To" "Point" Frame3d.moveTo $(docs 'Frame3d.moveTo)
+    , member1 "Offset Forward By" "Distance" Frame3d.offsetForwardBy $(docs 'Frame3d.offsetForwardBy)
+    , member1 "Offset Backward By" "Distance" Frame3d.offsetBackwardBy $(docs 'Frame3d.offsetBackwardBy)
+    , member1 "Offset Rightward By" "Distance" Frame3d.offsetRightwardBy $(docs 'Frame3d.offsetRightwardBy)
+    , member1 "Offset Leftward By" "Distance" Frame3d.offsetLeftwardBy $(docs 'Frame3d.offsetLeftwardBy)
+    , member1 "Offset Upward By" "Distance" Frame3d.offsetUpwardBy $(docs 'Frame3d.offsetUpwardBy)
+    , member1 "Offset Downward By" "Distance" Frame3d.offsetDownwardBy $(docs 'Frame3d.offsetDownwardBy)
+    , member1 "Turn Right By" "Angle" Frame3d.turnRightBy $(docs 'Frame3d.turnRightBy)
+    , member1 "Turn Left By" "Angle" Frame3d.turnLeftBy $(docs 'Frame3d.turnLeftBy)
+    , member1 "Roll Right By" "Angle" Frame3d.rollRightBy $(docs 'Frame3d.rollRightBy)
+    , member1 "Roll Left By" "Angle" Frame3d.rollLeftBy $(docs 'Frame3d.rollLeftBy)
+    , member1 "Rotate Up By" "Angle" Frame3d.rotateUpBy $(docs 'Frame3d.rotateUpBy)
+    , member1 "Rotate Down By" "Angle" Frame3d.rotateDownBy $(docs 'Frame3d.rotateDownBy)
+    , member0 "Turn Right" Frame3d.turnRight $(docs 'Frame3d.turnRight)
+    , member0 "Turn Left" Frame3d.turnLeft $(docs 'Frame3d.turnLeft)
+    , member0 "Roll Right" Frame3d.rollRight $(docs 'Frame3d.rollRight)
+    , member0 "Roll Left" Frame3d.rollLeft $(docs 'Frame3d.rollLeft)
+    , member0 "Rotate Up" Frame3d.rotateUp $(docs 'Frame3d.rotateUp)
+    , member0 "Rotate Down" Frame3d.rotateDown $(docs 'Frame3d.rotateDown)
+    ]
+      <> rigidTransformations3d Frame3d.transformBy
 
 vectorCurve2d :: Class
 vectorCurve2d =
