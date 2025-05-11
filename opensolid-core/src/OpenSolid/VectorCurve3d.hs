@@ -24,6 +24,7 @@ module OpenSolid.VectorCurve3d
   , reverse
   , isZero
   , hasZero
+  , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , HasZero (HasZero)
   , rightwardComponent
@@ -48,7 +49,6 @@ import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
-import OpenSolid.Curve.Zeros qualified as Curve.Zeros
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
@@ -75,7 +75,6 @@ import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
-import OpenSolid.VectorCurve3d.Zeros qualified as Zeros
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
@@ -561,7 +560,7 @@ magnitude curve =
   case zeros curve of
     Success [] -> Success (unsafeMagnitude curve)
     Success List.OneOrMore -> Failure HasZero
-    Failure Zeros.ZeroEverywhere -> Failure HasZero
+    Failure ZeroEverywhere -> Failure HasZero
 
 isZero :: Tolerance units => VectorCurve3d (space @ units) -> Bool
 isZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ~= Qty.zero)
@@ -569,11 +568,13 @@ isZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ~= Qt
 hasZero :: Tolerance units => VectorCurve3d (space @ units) -> Bool
 hasZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ^ Qty.zero)
 
-zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result Zeros.Error (List Float)
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
+
+zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result ZeroEverywhere (List Float)
 zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
     Success zeros1d -> Success (List.map Curve.Zero.location zeros1d)
-    Failure Curve.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
+    Failure Curve.ZeroEverywhere -> Failure ZeroEverywhere
 
 rightwardComponent :: VectorCurve3d (space @ units) -> Curve units
 rightwardComponent curve = curve `dot` Direction3d.rightward
@@ -603,7 +604,7 @@ direction curve =
         else Failure HasZero
     -- Definitely can't get the direction of a vector curve
     -- if that vector curve is zero everywhere!
-    Failure Zeros.ZeroEverywhere -> Failure HasZero
+    Failure ZeroEverywhere -> Failure HasZero
 
 isRemovableDegeneracy :: Tolerance units => VectorCurve3d (space @ units) -> Float -> Bool
 isRemovableDegeneracy curveDerivative tValue =

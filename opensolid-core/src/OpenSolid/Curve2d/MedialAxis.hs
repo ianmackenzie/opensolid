@@ -1,16 +1,9 @@
-module OpenSolid.Curve2d.MedialAxis
-  ( Error (..)
-  , Segment (..)
-  )
-where
+module OpenSolid.Curve2d.MedialAxis (Segment (..)) where
 
 import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvCoordinates)
-
-data Error = DegenerateCurve deriving (Eq, Show, Error.Message)
 
 data Segment (coordinateSystem :: CoordinateSystem) where
   Segment ::

@@ -1,12 +1,10 @@
 module OpenSolid.SurfaceFunction.Zeros
   ( Zeros (..)
   , empty
-  , Error (..)
   )
 where
 
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvCoordinates, UvPoint)
 
@@ -25,5 +23,3 @@ empty =
     , tangentPoints = []
     , saddlePoints = []
     }
-
-data Error = ZeroEverywhere deriving (Eq, Show, Error.Message)

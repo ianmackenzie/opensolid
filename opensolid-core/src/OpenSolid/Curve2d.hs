@@ -37,6 +37,7 @@ module OpenSolid.Curve2d
   , IntersectionPoint
   , OverlappingSegment
   , intersections
+  , IsCoincidentWithPoint (IsCoincidentWithPoint)
   , findPoint
   , distanceAlong
   , distanceLeftOf
@@ -95,7 +96,6 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve2d.FindPoint qualified as FindPoint
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.Intersections qualified as Intersections
@@ -108,7 +108,6 @@ import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
-import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
@@ -153,7 +152,6 @@ import OpenSolid.VectorBounds2d (VectorBounds2d)
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.VectorCurve2d.Zeros qualified as VectorCurve2d.Zeros
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
@@ -680,14 +678,16 @@ yCoordinate curve =
       (compiled curve)
     # VectorCurve2d.yComponent (derivative curve)
 
+data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, Error.Message)
+
 findPoint ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result FindPoint.Error (List Float)
+  Result IsCoincidentWithPoint (List Float)
 findPoint point curve =
   case VectorCurve2d.zeros (point - curve) of
-    Failure VectorCurve2d.Zeros.ZeroEverywhere -> Failure FindPoint.CurveIsCoincidentWithPoint
+    Failure VectorCurve2d.ZeroEverywhere -> Failure IsCoincidentWithPoint
     Success parameterValues -> Success parameterValues
 
 overlappingSegments ::
@@ -727,7 +727,7 @@ findEndpointZeros ::
 findEndpointZeros endpoint curve curveIsPointError =
   case findPoint endpoint curve of
     Success parameterValues -> Success parameterValues
-    Failure FindPoint.CurveIsCoincidentWithPoint -> Failure curveIsPointError
+    Failure IsCoincidentWithPoint -> Failure curveIsPointError
 
 findEndpointIntersections ::
   Tolerance units =>
@@ -1062,7 +1062,7 @@ medialAxis ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result MedialAxis.Error (List (MedialAxis.Segment (space @ units)))
+  Result HasDegeneracy (List (MedialAxis.Segment (space @ units)))
 medialAxis curve1 curve2 = do
   let p1 = curve1 . SurfaceFunction.u
   let p2 = curve2 . SurfaceFunction.v
@@ -1072,27 +1072,26 @@ medialAxis curve1 curve2 = do
   let target = v2 `cross'` (2.0 * (v1 `dot'` d) .*. d - VectorSurfaceFunction2d.squaredMagnitude' d .*. v1)
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
-    Failure SurfaceFunction.Zeros.ZeroEverywhere -> TODO -- curves are identical arcs?
-    Success zeros -> do
+    Failure SurfaceFunction.ZeroEverywhere -> TODO -- curves are identical arcs?
+    Success zeros -> Result.do
       Debug.assert (List.isEmpty (SurfaceFunction.Zeros.crossingLoops zeros))
       Debug.assert (List.isEmpty (SurfaceFunction.Zeros.tangentPoints zeros))
-      case Result.map DirectionCurve2d.unwrap (tangentDirection curve1) of
-        Success tangent1 -> do
-          let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangent1
-          let radius :: SurfaceFunction units =
-                (d `dot'` d) .!/! (2.0 * (tangent1 . SurfaceFunction.u) `cross` d)
-          let curve :: SurfaceFunction2d (space @ units) =
-                (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
-          let toSegment solutionCurve =
-                MedialAxis.Segment
-                  { t1 = SurfaceFunction.u . solutionCurve
-                  , t2 = SurfaceFunction.v . solutionCurve
-                  , t12 = solutionCurve
-                  , curve = curve . solutionCurve
-                  , radius = radius . solutionCurve
-                  }
-          Success (List.map toSegment (SurfaceFunction.Zeros.crossingCurves zeros))
-        Failure HasDegeneracy -> Failure MedialAxis.DegenerateCurve
+      tangentDirection1 <- tangentDirection curve1
+      let tangentVector1 = VectorCurve2d.unit tangentDirection1
+      let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangentVector1
+      let radius :: SurfaceFunction units =
+            (d `dot'` d) .!/! (2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d)
+      let curve :: SurfaceFunction2d (space @ units) =
+            (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
+      let toSegment solutionCurve =
+            MedialAxis.Segment
+              { t1 = SurfaceFunction.u . solutionCurve
+              , t2 = SurfaceFunction.v . solutionCurve
+              , t12 = solutionCurve
+              , curve = curve . solutionCurve
+              , radius = radius . solutionCurve
+              }
+      Success (List.map toSegment (SurfaceFunction.Zeros.crossingCurves zeros))
 
 arcLengthParameterization ::
   Tolerance units =>

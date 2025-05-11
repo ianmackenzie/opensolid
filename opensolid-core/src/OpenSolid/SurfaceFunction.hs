@@ -16,6 +16,7 @@ module OpenSolid.SurfaceFunction
   , v
   , parameter
   , Zeros
+  , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , new
   , squared
@@ -42,6 +43,7 @@ import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
@@ -61,7 +63,6 @@ import OpenSolid.SurfaceFunction.Subproblem (CornerValues (..), Subproblem (..))
 import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
-import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvDirection, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Tolerance qualified as Tolerance
@@ -114,7 +115,7 @@ instance
     case zeros (function - value) of
       Success (Zeros [] [] [] []) -> False
       Success (Zeros{}) -> True
-      Failure Zeros.ZeroEverywhere -> True
+      Failure ZeroEverywhere -> True
 
 instance
   units1 ~ units2 =>
@@ -430,9 +431,11 @@ cos function =
     (CompiledFunction.map Expression.cos Angle.cos Bounds.cos (compiled function))
     (\p -> negate (sin function) * (derivative p function / Angle.radian))
 
-zeros :: Tolerance units => SurfaceFunction units -> Result Zeros.Error Zeros
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
+
+zeros :: Tolerance units => SurfaceFunction units -> Result ZeroEverywhere Zeros
 zeros function
-  | function ~= Qty.zero = Failure Zeros.ZeroEverywhere
+  | function ~= Qty.zero = Failure ZeroEverywhere
   | otherwise = Result.do
       let fu = derivative U function
       let fv = derivative V function

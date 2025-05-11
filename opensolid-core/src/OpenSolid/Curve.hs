@@ -25,6 +25,7 @@ module OpenSolid.Curve
   , sqrt'
   , sin
   , cos
+  , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , CrossesZero (CrossesZero)
   , sign
@@ -42,7 +43,6 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve.Zero (Zero)
 import OpenSolid.Curve.Zero qualified as Zero
-import OpenSolid.Curve.Zeros qualified as Zeros
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
@@ -126,7 +126,7 @@ instance
     case zeros (curve - value) of
       Success [] -> False
       Success List.OneOrMore -> True
-      Failure Zeros.ZeroEverywhere -> True
+      Failure ZeroEverywhere -> True
 
 instance
   units1 ~ units2 =>
@@ -432,6 +432,8 @@ instance Estimate.Interface (Integral units) units where
 
 ----- ZERO FINDING -----
 
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
+
 {-| Find all points at which the given curve is zero.
 
 This includes not only points where the curve *crosses* zero,
@@ -468,9 +470,9 @@ we consider 0.0001 as just roundoff error,
 so we would end up reporting a single order-1 zero at x=0
 (the point at which the *first derivative* is zero).
 -}
-zeros :: Tolerance units => Curve units -> Result Zeros.Error (List Zero)
+zeros :: Tolerance units => Curve units -> Result ZeroEverywhere (List Zero)
 zeros curve
-  | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
+  | curve ~= Qty.zero = Failure ZeroEverywhere
   | otherwise = Result.do
       let derivatives = Stream.iterate derivative curve
       let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
@@ -577,7 +579,7 @@ If the curve is zero everywhere, then returns positive.
 -}
 sign :: Tolerance units => Curve units -> Result CrossesZero Sign
 sign curve = case zeros curve of
-  Failure Zeros.ZeroEverywhere -> Success Positive
+  Failure ZeroEverywhere -> Success Positive
   Success curveZeros ->
     case List.filter (not . isEndpoint . Zero.location) curveZeros of
       [] -> Success (Qty.sign (evaluate curve 0.5)) -- No inner zeros, so check sign at t=0.5

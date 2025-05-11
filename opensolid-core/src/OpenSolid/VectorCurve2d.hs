@@ -25,6 +25,7 @@ module OpenSolid.VectorCurve2d
   , reverse
   , isZero
   , hasZero
+  , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , HasZero (HasZero)
   , xComponent
@@ -52,11 +53,11 @@ import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
-import OpenSolid.Curve.Zeros qualified as Curve.Zeros
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import {-# SOURCE #-} OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
@@ -81,7 +82,6 @@ import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d.Direction qualified as VectorCurve2d.Direction
-import OpenSolid.VectorCurve2d.Zeros qualified as Zeros
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
@@ -491,6 +491,7 @@ constant value = new (CompiledFunction.constant value) zero
 
 unit :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 unit = DirectionCurve2d.unwrap
+
 -- | Create a curve from its X and Y component curves.
 xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
 xy x y =
@@ -595,7 +596,7 @@ magnitude curve =
   case zeros curve of
     Success [] -> Success (unsafeMagnitude curve)
     Success List.OneOrMore -> Failure HasZero
-    Failure Zeros.ZeroEverywhere -> Failure HasZero
+    Failure ZeroEverywhere -> Failure HasZero
 
 isZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
 isZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ~= Qty.zero)
@@ -603,11 +604,13 @@ isZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ~= Qt
 hasZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
 hasZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ^ Qty.zero)
 
-zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result Zeros.Error (List Float)
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
+
+zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
 zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
     Success zeros1d -> Success (List.map Curve.Zero.location zeros1d)
-    Failure Curve.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
+    Failure Curve.ZeroEverywhere -> Failure ZeroEverywhere
 
 xComponent :: VectorCurve2d (space @ units) -> Curve units
 xComponent curve =
@@ -648,7 +651,7 @@ direction curve =
         else Failure HasZero
     -- Definitely can't get the direction of a vector curve
     -- if that vector curve is zero everywhere!
-    Failure Zeros.ZeroEverywhere -> Failure HasZero
+    Failure ZeroEverywhere -> Failure HasZero
 
 isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
 isRemovableDegeneracy curveDerivative tValue =

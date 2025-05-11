@@ -114,9 +114,7 @@ library
     OpenSolid.CoordinateSystem
     OpenSolid.Curve
     OpenSolid.Curve.Zero
-    OpenSolid.Curve.Zeros
     OpenSolid.Curve2d
-    OpenSolid.Curve2d.FindPoint
     OpenSolid.Curve2d.IntersectionPoint
     OpenSolid.Curve2d.Intersections
     OpenSolid.Curve2d.MedialAxis
@@ -218,11 +216,9 @@ library
     OpenSolid.VectorCurve2d
     OpenSolid.VectorCurve2d.DegenerateEndpoint
     OpenSolid.VectorCurve2d.Direction
-    OpenSolid.VectorCurve2d.Zeros
     OpenSolid.VectorCurve3d
     OpenSolid.VectorCurve3d.DegenerateEndpoint
     OpenSolid.VectorCurve3d.Direction
-    OpenSolid.VectorCurve3d.Zeros
     OpenSolid.VectorSurface2d
     OpenSolid.VectorSurface3d
     OpenSolid.VectorSurfaceFunction2d
