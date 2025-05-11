@@ -1400,7 +1400,8 @@ pbrMaterial =
 scene3d :: Class
 scene3d =
   Class.new @(Scene3d Space) $(docs ''Scene3d) $
-    [ factoryM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
+    [ constant "Nothing" (Scene3d.nothing @Space) $(docs 'Scene3d.nothing)
+    , factoryM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
     , factory1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
     , member1 "Write GLB" "Path" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
     ]

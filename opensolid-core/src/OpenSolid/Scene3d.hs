@@ -1,5 +1,6 @@
 module OpenSolid.Scene3d
   ( Scene3d
+  , nothing
   , mesh
   , body
   , group
@@ -55,6 +56,10 @@ data Scene3d space where
 
 instance FFI (Scene3d space) where
   representation = FFI.classRepresentation "Scene3d"
+
+-- | An empty scene.
+nothing :: Scene3d space
+nothing = group []
 
 mesh :: Vertex3d.HasNormal vertex (space @ Meters) => PbrMaterial -> Mesh vertex -> Scene3d space
 mesh = Mesh
