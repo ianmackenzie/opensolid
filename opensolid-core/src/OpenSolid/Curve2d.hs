@@ -41,6 +41,7 @@ module OpenSolid.Curve2d
   , distanceAlong
   , distanceLeftOf
   , distanceRightOf
+  , isOnAxis
   , xCoordinate
   , yCoordinate
   , placeIn
@@ -647,6 +648,15 @@ distanceLeftOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateLeft d
 
 distanceRightOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
 distanceRightOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateRight d
+
+{-| Check if the given curve curve is collinear with (lies on) the given axis.
+
+If the curve merely intersects/touches the axis at one or more points,
+then it is not considered to lie on the axis;
+it is only considered to lie on the axis if every point on the curve is also on the axis.
+-}
+isOnAxis :: Tolerance units => Axis2d (space @ units) -> Curve2d (space @ units) -> Bool
+isOnAxis axis curve = List.allSatisfy (^ axis) (samplePoints curve)
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
