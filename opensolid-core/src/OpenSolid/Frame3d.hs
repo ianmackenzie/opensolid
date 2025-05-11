@@ -446,8 +446,8 @@ placeIn ::
   Frame3d (global @ units) (Defines local2)
 placeIn globalFrame frame =
   Frame3d
-    (Point3d.placeIn globalFrame (originPoint frame))
-    (Basis3d.placeIn (basis globalFrame) (basis frame))
+    # Point3d.placeIn globalFrame (originPoint frame)
+    # Basis3d.placeIn (basis globalFrame) (basis frame)
 
 -- | Convert a frame defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -456,8 +456,8 @@ relativeTo ::
   Frame3d (local1 @ units) (Defines local2)
 relativeTo globalFrame frame =
   Frame3d
-    (Point3d.relativeTo globalFrame (originPoint frame))
-    (Basis3d.relativeTo (basis globalFrame) (basis frame))
+    # Point3d.relativeTo globalFrame (originPoint frame)
+    # Basis3d.relativeTo (basis globalFrame) (basis frame)
 
 {-| Compute the "inverse" of a given frame.
 
