@@ -26,6 +26,8 @@ module OpenSolid.Curve
   , sin
   , cos
   , zeros
+  , CrossesZero (CrossesZero)
+  , sign
   , reverse
   , integral
   )
@@ -43,6 +45,7 @@ import OpenSolid.Curve.Zero qualified as Zero
 import OpenSolid.Curve.Zeros qualified as Zeros
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
+import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Expression qualified as Expression
@@ -50,6 +53,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
@@ -562,3 +566,27 @@ solveMonotonic m fm fn tBounds = do
           case Solve1d.monotonic (evaluate fm) (evaluate fn) tBounds of
             Solve1d.Exact t0 -> Resolved [(t0, Solve1d.neighborhood n (evaluate fn t0))]
             Solve1d.Closest _ -> Unresolved
+
+data CrossesZero = CrossesZero deriving (Eq, Show, Error.Message)
+
+{-| Attempt to find the (consistent) sign of all values on the curve.
+
+Will return an error if the curve crosses zero,
+or has an indeterminate higher-order zero anywhere.
+If the curve is zero everywhere, then returns positive.
+-}
+sign :: Tolerance units => Curve units -> Result CrossesZero Sign
+sign curve = case zeros curve of
+  Failure Zeros.ZeroEverywhere -> Success Positive
+  Success curveZeros ->
+    case List.filter (not . isEndpoint . Zero.location) curveZeros of
+      [] -> Success (Qty.sign (evaluate curve 0.5)) -- No inner zeros, so check sign at t=0.5
+      NonEmpty innerZeros ->
+        case NonEmpty.filter (Int.isEven . Zero.order) innerZeros of
+          NonEmpty _ -> Failure CrossesZero -- There exists an inner crossing zero
+          [] -> do
+            -- All inner zeros are non-crossing (e.g. quadratic) ones,
+            -- so we can safely test the curve
+            -- halfway between t=0 and the first inner zero
+            let testPoint = 0.5 * Zero.location (NonEmpty.first innerZeros)
+            Success (Qty.sign (evaluate curve testPoint))
