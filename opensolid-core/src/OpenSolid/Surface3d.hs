@@ -125,8 +125,8 @@ boundaryCurves surface = NonEmpty.concat (outerLoop surface :| innerLoops surfac
 flip :: Surface3d (space @ units) -> Surface3d (space @ units)
 flip surface =
   parametric
-    (function surface . SurfaceFunction2d.xy (1.0 - SurfaceFunction.u) SurfaceFunction.v)
-    (Region2d.mirrorAcross Axis2d.y (domain surface))
+    # function surface . SurfaceFunction2d.xy -SurfaceFunction.u SurfaceFunction.v
+    # Region2d.mirrorAcross Axis2d.y (domain surface)
 
 toMesh :: Qty units -> Surface3d (space @ units) -> Mesh (Point3d (space @ units))
 toMesh accuracy surface = do
