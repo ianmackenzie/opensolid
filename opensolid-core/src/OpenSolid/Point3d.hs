@@ -14,6 +14,7 @@ module OpenSolid.Point3d
   , distanceAlong
   , placeIn
   , relativeTo
+  , projectOnto
   , projectInto
   , convert
   , unconvert
@@ -158,6 +159,13 @@ relativeTo ::
   Point3d (local @ units)
 relativeTo (Frame3d p0 (Basis3d i j k)) p =
   let d = p - p0 in Point3d (d `dot` i) (d `dot` j) (d `dot` k)
+
+-- | Project a point onto a plane.
+projectOnto ::
+  Plane3d (space @ units) (Defines localSpace) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units)
+projectOnto plane point = on plane (projectInto plane point)
 
 projectInto ::
   Plane3d (space @ units) (Defines localSpace) ->
