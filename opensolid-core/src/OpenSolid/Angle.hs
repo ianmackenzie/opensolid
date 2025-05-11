@@ -13,6 +13,7 @@ module OpenSolid.Angle
   , inRadians
   , radian
   , pi
+  , halfPi
   , twoPi
   , degrees
   , inDegrees
@@ -96,6 +97,10 @@ inRadians = Qty.coerce
 -- | π radians, or 180 degrees.
 pi :: Angle
 pi = radians Float.pi
+
+-- | π/2 radians, or 90 degrees.
+halfPi :: Angle
+halfPi = radians Float.halfPi
 
 -- | 2π radians, or 360 degrees.
 twoPi :: Angle

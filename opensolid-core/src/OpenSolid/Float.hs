@@ -11,6 +11,7 @@ module OpenSolid.Float
   , max
   , floor
   , pi
+  , halfPi
   , twoPi
   , sqrt
   , hypot2
@@ -120,6 +121,9 @@ max = Qty.max
 
 pi :: Float
 pi = Prelude.pi
+
+halfPi :: Float
+halfPi = 0.5 * pi
 
 twoPi :: Float
 twoPi = 2.0 * pi
