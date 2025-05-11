@@ -997,6 +997,8 @@ point3d =
     , member1 "Coordinates" "Convention" Point3d.coordinates $(docs 'Point3d.coordinates)
     , member1 "Distance To" "Other" Point3d.distanceFrom $(docs 'Point3d.distanceFrom)
     , member1 "Midpoint" "Other" Point3d.midpoint $(docs 'Point3d.midpoint)
+    , member1 "Project Onto" "Plane" Point3d.projectOnto $(docs 'Point3d.projectOnto)
+    , member1 "Project Into" "Plane" Point3d.projectInto $(docs 'Point3d.projectInto)
     , minusSelf
     , minus @(Vector3d (Space @ Meters)) Self
     , plus @(Vector3d (Space @ Meters)) Self
