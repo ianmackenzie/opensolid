@@ -569,7 +569,7 @@ cos bounds@(Bounds low high) = do
   Bounds newLow newHigh
 
 sinIncludesMinMax :: Bounds Radians -> (Bool, Bool)
-sinIncludesMinMax bounds = cosIncludesMinMax (bounds - Angle.quarterTurn)
+sinIncludesMinMax bounds = cosIncludesMinMax (bounds - Angle.halfPi)
 
 cosIncludesMinMax :: Bounds Radians -> (Bool, Bool)
 cosIncludesMinMax bounds =
