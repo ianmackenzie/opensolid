@@ -79,6 +79,7 @@ coerce :: Vector2d (space1 @ units1) -> Vector2d (space2 @ units2)
 coerce (Vector2d vx vy) = Vector2d (Qty.coerce vx) (Qty.coerce vy)
 
 -- | Construct a unit vector in the given direction.
+{-# INLINE unit #-}
 unit :: Direction2d space -> Vector2d (space @ Unitless)
 unit (Unit2d vector) = vector
 

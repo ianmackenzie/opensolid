@@ -79,6 +79,7 @@ coerce :: Vector3d (space1 @ units1) -> Vector3d (space2 @ units2)
 coerce (Vector3d vx vy vz) = Vector3d (Qty.coerce vx) (Qty.coerce vy) (Qty.coerce vz)
 
 -- | Construct a unit vector in the given direction.
+{-# INLINE unit #-}
 unit :: Direction3d space -> Vector3d (space @ Unitless)
 unit (Unit3d vector) = vector
 
