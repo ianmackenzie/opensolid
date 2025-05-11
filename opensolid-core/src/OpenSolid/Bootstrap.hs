@@ -124,6 +124,6 @@ always value _ = value
 
 {-# INLINE (#) #-}
 (#) :: (a -> b) -> a -> b
-(#) f a = f a
+(#) function value = function value
 
 infixl 1 #
