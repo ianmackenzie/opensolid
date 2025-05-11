@@ -7,7 +7,6 @@ import API.Class
   , comparison
   , constant
   , constructor2
-  , constructor3
   , crossProduct
   , crossSelf
   , divBy
@@ -86,7 +85,7 @@ import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.Convention3d (Convention3d (Convention3d))
+import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
@@ -868,17 +867,9 @@ uvAxis =
     ]
 
 convention3d :: Class
-convention3d = do
-  let constructor ::
-        Named "xDirection" (Direction3d Space) ->
-        Named "yDirection" (Direction3d Space) ->
-        Named "zDirection" (Direction3d Space) ->
-        Convention3d Space
-      constructor (Named xDirection) (Named yDirection) (Named zDirection) =
-        Convention3d{xDirection, yDirection, zDirection}
+convention3d =
   Class.new @(Convention3d Space) $(docs ''Convention3d) $
-    [ constructor3 "X Direction" "Y Direction" "Z Direction" constructor "Construct a coordinate convention from given X, Y and Z directions."
-    , constant "Y Up" Convention3d.yUp $(docs 'Convention3d.yUp)
+    [ constant "Y Up" Convention3d.yUp $(docs 'Convention3d.yUp)
     , constant "Z Up" Convention3d.zUp $(docs 'Convention3d.zUp)
     ]
 
