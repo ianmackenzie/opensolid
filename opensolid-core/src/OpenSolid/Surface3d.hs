@@ -168,6 +168,7 @@ flip surface =
     # function surface . SurfaceFunction2d.xy -SurfaceFunction.u SurfaceFunction.v
     # Region2d.mirrorAcross Axis2d.y (domain surface)
 
+-- | Convert a surface defined in local coordinates to one defined in global coordinates.
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Surface3d (local @ units) ->
@@ -177,6 +178,7 @@ placeIn frame surface =
     # SurfaceFunction3d.placeIn frame (function surface)
     # domain surface
 
+-- | Convert a surface defined in global coordinates to one defined in local coordinates.
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Surface3d (global @ units) ->
