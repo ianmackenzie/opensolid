@@ -5,6 +5,8 @@ module OpenSolid.Region2d
   , unitSquare
   , rectangle
   , circle
+  , inscribedPolygon
+  , circumscribedPolygon
   , polygon
   , outerLoop
   , innerLoops
@@ -82,6 +84,7 @@ import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Meters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 type role Region2d nominal
@@ -177,6 +180,51 @@ circle (Named centerPoint) (Named diameter) =
     else do
       let boundaryCurve = Curve2d.circle (#centerPoint centerPoint) (#diameter diameter)
       Success (Region2d (NonEmpty.one boundaryCurve) [])
+
+{-| Create a regular polygon with the given number of sides.
+
+The polygon will be sized to fit within a circle with the given center point and diameter
+(each polygon vertex will lie on the circle).
+The polygon will be oriented such that its bottom-most edge is horizontal.
+-}
+inscribedPolygon ::
+  Tolerance units =>
+  Int ->
+  Named "centerPoint" (Point2d (space @ units)) ->
+  Named "diameter" (Qty units) ->
+  Result EmptyRegion (Region2d (space @ units))
+inscribedPolygon n (Named centerPoint) (Named diameter) = do
+  if diameter < Qty.zero || diameter ~= Qty.zero || n < 3
+    then Failure EmptyRegion
+    else do
+      let radius = 0.5 * diameter
+      let vertexAngles = Qty.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
+      let vertex angle = centerPoint + Vector2d.polar radius angle
+      let vertices = List.map vertex vertexAngles
+      case polygon vertices of
+        Success region -> Success region
+        Failure _ ->
+          internalError "Regular polygon construction with non-zero diameter should not fail"
+
+{-| Create a regular polygon with the given number of sides.
+
+The polygon will be sized so that
+a circle with the given center point and diameter will just fit within the polygon
+(each polygon edge will touch the circle at the edge's midpoint).
+For a polygon with an even number of sides (square, hexagon, octagon etc.),
+this means that the "width across flats" will be equal to the given circle diameter.
+The polygon will be oriented such that its bottom-most edge is horizontal.
+-}
+circumscribedPolygon ::
+  Tolerance units =>
+  Int ->
+  Named "centerPoint" (Point2d (space @ units)) ->
+  Named "diameter" (Qty units) ->
+  Result EmptyRegion (Region2d (space @ units))
+circumscribedPolygon n (Named centerPoint) (Named diameter) =
+  inscribedPolygon n
+    # #centerPoint centerPoint
+    # #diameter (diameter / Angle.cos (Angle.pi / Float.int n))
 
 {-| Create a polygonal region from the given points.
 
