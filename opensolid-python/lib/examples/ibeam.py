@@ -1,16 +1,17 @@
 from opensolid import (
-    Length,
-    Point2d,
+    Axis2d,
+    Body3d,
+    Color,
     Curve2d,
     Direction2d,
-    Axis2d,
-    Region2d,
-    Body3d,
-    Mesh,
+    Length,
     LengthBounds,
+    Mesh,
+    PbrMaterial,
+    Point2d,
+    Region2d,
     Scene3d,
     Tolerance,
-    Color,
     World3d,
 )
 
@@ -54,6 +55,5 @@ with Tolerance(Length.meters(1e-9)):
 
     # Create a 3D scene containing the body and write to GLB file
     mesh_constraints = [Mesh.max_error(Length.millimeters(0.1))]
-    material = Scene3d.metal(Color.rgb(0.913, 0.921, 0.925), roughness=0.3)
-    entity = Scene3d.body(mesh_constraints, material, body)
-    Scene3d.write_glb("i-beam.glb", [entity])
+    material = PbrMaterial.metal(Color.rgb(0.913, 0.921, 0.925), roughness=0.3)
+    Scene3d.body(mesh_constraints, material, body).write_glb("ibeam.glb")
