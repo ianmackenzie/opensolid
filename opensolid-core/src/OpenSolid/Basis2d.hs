@@ -23,8 +23,8 @@ xDirection (Basis2d i _) = i
 yDirection :: Basis2d space defines -> Direction2d space
 yDirection (Basis2d _ j) = j
 
-coerce :: Basis2d space defines1 -> Basis2d space defines2
-coerce (Basis2d i j) = Basis2d i j
+coerce :: Basis2d space1 defines1 -> Basis2d space2 defines2
+coerce (Basis2d i j) = Basis2d (Direction2d.coerce i) (Direction2d.coerce j)
 
 xy :: Basis2d space defines
 xy = Basis2d Direction2d.x Direction2d.y
