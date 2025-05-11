@@ -1028,8 +1028,6 @@ plane3d =
     , factory1 "Upward Facing" "Origin Point" Plane3d.upwardFacing $(docs 'Plane3d.upwardFacing)
     , factory1 "Downward Facing" "Origin Point" Plane3d.downwardFacing $(docs 'Plane3d.downwardFacing)
     , factory2 "With Arbitrary Basis" "Origin Point" "Normal Direction" Plane3d.withArbitraryBasis $(docs 'Plane3d.withArbitraryBasis)
-    , factory1 "With Arbitrary Y Direction" "X Axis" Plane3d.withArbitraryYDirection $(docs 'Plane3d.withArbitraryYDirection)
-    , factory1 "With Arbitrary X Direction" "Y Axis" Plane3d.withArbitraryXDirection $(docs 'Plane3d.withArbitraryXDirection)
     , member0 "Origin Point" Plane3d.originPoint $(docs 'Plane3d.originPoint)
     , member0 "Normal Direction" Plane3d.normalDirection $(docs 'Plane3d.normalDirection)
     , member0 "Normal Axis" Plane3d.normalAxis $(docs 'Plane3d.normalAxis)
