@@ -45,7 +45,7 @@ import {-# SOURCE #-} OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
-  , Direction2d (Unit2d)
+  , Direction2d (Direction2d)
   , Frame2d (Frame2d)
   , Point2d (Point2d)
   , Transform2d (Transform2d)
@@ -106,7 +106,7 @@ rotateAround centerPoint angle = do
 
 mirrorAcross :: Axis2d (space @ units) -> Orthonormal (space @ units)
 mirrorAcross (Axis2d originPoint direction) = do
-  let Unit2d (Vector2d dx dy) = direction
+  let Direction2d dx dy = direction
   let vx = Vector2d (1.0 - 2.0 * dy * dy) (2.0 * dx * dy)
   let vy = Vector2d (2.0 * dx * dy) (1.0 - 2.0 * dx * dx)
   withFixedPoint originPoint vx vy
@@ -119,7 +119,7 @@ scaleAbout point scale = do
 
 scaleAlong :: Axis2d (space @ units) -> Float -> Affine (space @ units)
 scaleAlong (Axis2d originPoint direction) scale = do
-  let Unit2d (Vector2d dx dy) = direction
+  let Direction2d dx dy = direction
   let dx2 = dx * dx
   let dy2 = dy * dy
   let xy = (scale - 1.0) * dx * dy

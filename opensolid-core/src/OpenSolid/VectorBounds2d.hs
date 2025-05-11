@@ -38,7 +38,7 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis2d (Basis2d)
-  , Direction2d (Unit2d)
+  , Direction2d (Direction2d)
   , PlanarBasis3d (PlanarBasis3d)
   , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d
@@ -184,8 +184,8 @@ placeIn basis (VectorBounds2d x y) = do
   let yWidth = Bounds.width y
   let Vector2d x0 y0 = Vector2d.placeIn basis (Vector2d xMid yMid)
   let Basis2d i j = basis
-  let Unit2d (Vector2d ix iy) = i
-  let Unit2d (Vector2d jx jy) = j
+  let Direction2d ix iy = i
+  let Direction2d jx jy = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
@@ -201,8 +201,8 @@ relativeTo basis (VectorBounds2d x y) = do
   let yWidth = Bounds.width y
   let Vector2d x0 y0 = Vector2d.relativeTo basis (Vector2d xMid yMid)
   let Basis2d i j = basis
-  let Unit2d (Vector2d ix iy) = i
-  let Unit2d (Vector2d jx jy) = j
+  let Direction2d ix iy = i
+  let Direction2d jx jy = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
