@@ -39,6 +39,7 @@ module API.Class
   , member2
   , memberU2
   , memberM2
+  , memberM3
   , equality
   , comparison
   , negateSelf
@@ -556,6 +557,18 @@ memberM2 ::
   Member value
 memberM2 name arg1 arg2 f docs =
   Member (FFI.name name) (MemberFunctionM2 (FFI.name arg1) (FFI.name arg2) f docs)
+
+memberM3 ::
+  (FFI a, FFI b, FFI c, FFI value, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> b -> c -> value -> result) ->
+  Text ->
+  Member value
+memberM3 name arg1 arg2 arg3 f docs =
+  Member (FFI.name name) (MemberFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
 
 data Self a = Self
 
