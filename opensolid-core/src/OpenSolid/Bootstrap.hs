@@ -126,4 +126,4 @@ always value _ = value
 (#) :: (a -> b) -> a -> b
 (#) f a = f a
 
-infixl 0 #
+infixl 1 #
