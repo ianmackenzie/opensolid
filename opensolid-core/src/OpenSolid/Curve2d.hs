@@ -209,13 +209,13 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)) units1
   where
-  curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
+  curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  curve ~= point = List.allTrue [evaluate curve t ~= point | t <- Parameter.samples]
+  curve ~= point = List.allSatisfy (~= point) (samplePoints curve)
 
 pattern Point :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units)
 pattern Point point <- (asPoint -> Just point)
@@ -604,6 +604,9 @@ evaluate Curve2d{compiled} tValue = CompiledFunction.evaluate compiled tValue
 evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
 evaluateBounds Curve2d{compiled} tBounds = CompiledFunction.evaluateBounds compiled tBounds
 
+samplePoints :: Curve2d (space @ units) -> List (Point2d (space @ units))
+samplePoints curve = List.map (evaluate curve) Parameter.samples
+
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
@@ -614,8 +617,7 @@ bounds curve = evaluateBounds curve Bounds.unitInterval
 asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @ units))
 asPoint curve = do
   let testPoint = evaluate curve 0.5
-  let sampledPoints = List.map (evaluate curve) Parameter.samples
-  if List.allSatisfy (~= testPoint) sampledPoints then Just testPoint else Nothing
+  if List.allSatisfy (~= testPoint) (samplePoints curve) then Just testPoint else Nothing
 
 tangentDirection ::
   Tolerance units =>
