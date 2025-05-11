@@ -38,6 +38,12 @@ This is a basis whose forward direction points forward, upward direction points 
 identity :: Basis3d space defines
 identity = forwardFacing
 
+{-| A forward facing basis.
+
+The forward direction of the basis will point forward,
+the rightward direction of the basis will point rightward,
+and the upward direction of the basis will point upward.
+-}
 forwardFacing :: Basis3d space defines
 forwardFacing =
   Basis3d
@@ -46,6 +52,12 @@ forwardFacing =
     , rightwardDirection = Direction3d.rightward
     }
 
+{-| A backward facing basis.
+
+The forward direction of the basis will point backward,
+the rightward direction of the basis will point leftward,
+and the upward direction of the basis will point upward.
+-}
 backwardFacing :: Basis3d space defines
 backwardFacing =
   Basis3d
@@ -54,6 +66,12 @@ backwardFacing =
     , rightwardDirection = Direction3d.leftward
     }
 
+{-| A leftward facing basis.
+
+The forward direction of the basis will point leftward,
+the rightward direction of the basis will point forward,
+and the upward direction of the basis will point upward.
+-}
 leftwardFacing :: Basis3d space defines
 leftwardFacing =
   Basis3d
@@ -62,6 +80,12 @@ leftwardFacing =
     , rightwardDirection = Direction3d.forward
     }
 
+{-| A rightward facing basis.
+
+The forward direction of the basis will point rightward,
+the rightward direction of the basis will point backward,
+and the upward direction of the basis will point upward.
+-}
 rightwardFacing :: Basis3d space defines
 rightwardFacing =
   Basis3d
@@ -70,6 +94,12 @@ rightwardFacing =
     , rightwardDirection = Direction3d.backward
     }
 
+{-| An upward facing basis.
+
+The forward direction of the basis will point upward,
+the rightward direction of the basis will point leftward,
+and the upward direction of the basis will point forward.
+-}
 upwardFacing :: Basis3d space defines
 upwardFacing =
   Basis3d
@@ -78,6 +108,12 @@ upwardFacing =
     , rightwardDirection = Direction3d.leftward
     }
 
+{-| A downward facing basis.
+
+The forward direction of the basis will point downward,
+the rightward direction of the basis will point rightward,
+and the upward direction of the basis will point forward.
+-}
 downwardFacing :: Basis3d space defines
 downwardFacing =
   Basis3d
@@ -86,12 +122,15 @@ downwardFacing =
     , rightwardDirection = Direction3d.rightward
     }
 
+-- | Get the leftward direction of a basis.
 leftwardDirection :: Basis3d space defines -> Direction3d space
 leftwardDirection = negate . rightwardDirection
 
+-- | Get the backward direction of a basis.
 backwardDirection :: Basis3d space defines -> Direction3d space
 backwardDirection = negate . forwardDirection
 
+-- | Get the downward direction of a basis.
 downwardDirection :: Basis3d space defines -> Direction3d space
 downwardDirection = negate . upwardDirection
 
@@ -105,6 +144,7 @@ transformBy transform (Basis3d i j k) =
     (Direction3d.transformBy transform j)
     (Direction3d.transformBy transform k)
 
+-- | Convert a basis defined in local coordinates to one defined in global coordinates.
 placeIn ::
   Basis3d global (Defines local) ->
   Basis3d local defines ->
@@ -115,6 +155,7 @@ placeIn globalBasis (Basis3d i j k) =
     (Direction3d.placeIn globalBasis j)
     (Direction3d.placeIn globalBasis k)
 
+-- | Convert a basis defined in global coordinates to one defined in local coordinates.
 relativeTo ::
   Basis3d global (Defines local) ->
   Basis3d global defines ->

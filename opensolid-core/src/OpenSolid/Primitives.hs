@@ -1259,8 +1259,11 @@ type Basis3d :: Type -> LocalSpace -> Type
 data Basis3d space defines where
   Basis3d ::
     { rightwardDirection :: Direction3d space
+    -- ^ Get the rightward direction of a basis.
     , forwardDirection :: Direction3d space
+    -- ^ Get the forward direction of a basis.
     , upwardDirection :: Direction3d space
+    -- ^ Get the upward direction of a basis.
     } ->
     Basis3d space defines
 
