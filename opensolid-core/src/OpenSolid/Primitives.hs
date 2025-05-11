@@ -1238,6 +1238,7 @@ instance
 
 ----- PlanarBasis3d -----
 
+-- | A pair of perpendicular X and Y directions defining the orientation of a plane in 3D.
 type PlanarBasis3d :: Type -> LocalSpace -> Type
 data PlanarBasis3d space defines where
   PlanarBasis3d :: Direction3d space -> Direction3d space -> PlanarBasis3d space defines
@@ -1250,6 +1251,7 @@ deriving instance Show (PlanarBasis3d space defines)
 
 ----- Basis3d -----
 
+-- | A set of cardinal directions (forward, upward etc.) defining a 3D orientation.
 type Basis3d :: Type -> LocalSpace -> Type
 data Basis3d space defines where
   Basis3d ::
@@ -1872,6 +1874,7 @@ instance FFI (Plane3d (space @ Meters) defines) where
 
 ----- Frame3d -----
 
+-- | A frame of reference in 3D, defined by an origin point and orientation.
 type Frame3d :: CoordinateSystem -> LocalSpace -> Type
 data Frame3d coordinateSystem defines where
   Frame3d :: Point3d (space @ units) -> Basis3d space defines -> Frame3d (space @ units) defines
