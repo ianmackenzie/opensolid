@@ -10,9 +10,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvCoordinates)
 
-data Error
-  = HigherOrderSolution
-  | DegenerateCurve
+data Error = DegenerateCurve
 
 instance Eq Error
 

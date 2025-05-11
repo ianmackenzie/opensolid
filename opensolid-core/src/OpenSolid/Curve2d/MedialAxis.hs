@@ -10,10 +10,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvCoordinates)
 
-data Error
-  = HigherOrderSolution
-  | DegenerateCurve
-  deriving (Eq, Show, Error.Message)
+data Error = DegenerateCurve deriving (Eq, Show, Error.Message)
 
 data Segment (coordinateSystem :: CoordinateSystem) where
   Segment ::

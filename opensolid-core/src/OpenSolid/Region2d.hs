@@ -320,8 +320,6 @@ nonIncidentCurve (_, Just _) = Nothing
 --   case Curve2d.intersections curve1 curve2 of
 --     Failure Curve2d.Intersections.CurveHasDegeneracy ->
 --       Failure BoundedBy.BoundaryCurveHasDegeneracy
---     Failure Curve2d.Intersections.HigherOrderIntersection ->
---       Failure BoundedBy.BoundaryCurvesHaveHigherOrderIntersection
 --     -- We can ignore cases where either curve is actually a point,
 --     -- since we'll still find any inner intersections
 --     -- when we check with the *neighbours* of those degenerate curves

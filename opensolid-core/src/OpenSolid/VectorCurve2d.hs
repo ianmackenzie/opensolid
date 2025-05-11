@@ -594,7 +594,6 @@ magnitude curve =
     Success [] -> Success (unsafeMagnitude curve)
     Success List.OneOrMore -> Failure HasZero
     Failure Zeros.ZeroEverywhere -> Failure HasZero
-    Failure Zeros.HigherOrderZero -> Failure HasZero
 
 isZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
 isZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ~= Qty.zero)
@@ -607,7 +606,6 @@ zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
     Success zeros1d -> Success (List.map Curve.Zero.location zeros1d)
     Failure Curve.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
-    Failure Curve.Zeros.HigherOrderZero -> Failure Zeros.HigherOrderZero
 
 xComponent :: VectorCurve2d (space @ units) -> Curve units
 xComponent curve = curve `dot` Direction2d.x
@@ -635,8 +633,6 @@ direction curve =
     -- Definitely can't get the direction of a vector curve
     -- if that vector curve is zero everywhere!
     Failure Zeros.ZeroEverywhere -> Failure HasZero
-    -- If a curve has a higher-order zero, that still means it has a zero...
-    Failure Zeros.HigherOrderZero -> Failure HasZero
 
 isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
 isRemovableDegeneracy curveDerivative tValue =

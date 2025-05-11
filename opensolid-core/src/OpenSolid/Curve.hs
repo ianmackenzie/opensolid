@@ -123,7 +123,6 @@ instance
       Success [] -> False
       Success List.OneOrMore -> True
       Failure Zeros.ZeroEverywhere -> True
-      Failure Zeros.HigherOrderZero -> True
 
 instance
   units1 ~ units2 =>
@@ -474,7 +473,7 @@ zeros curve
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
         Success foundZeros -> Success (List.sortBy Zero.location foundZeros)
-        Failure Solve1d.InfiniteRecursion -> Failure Zeros.HigherOrderZero
+        Failure Solve1d.InfiniteRecursion -> exception "Higher-order zero detected"
 
 findZeros ::
   Tolerance units =>

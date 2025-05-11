@@ -26,7 +26,4 @@ empty =
     , saddlePoints = []
     }
 
-data Error
-  = HigherOrderZero
-  | ZeroEverywhere
-  deriving (Eq, Show, Error.Message)
+data Error = ZeroEverywhere deriving (Eq, Show, Error.Message)

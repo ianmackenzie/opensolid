@@ -5,7 +5,6 @@ import OpenSolid.Prelude
 
 data Error
   = CurveHasDegeneracy
-  | HigherOrderIntersection
   | FirstCurveIsPoint
   | SecondCurveIsPoint
   deriving (Eq, Show, Error.Message)

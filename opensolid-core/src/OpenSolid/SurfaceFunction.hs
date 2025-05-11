@@ -115,7 +115,6 @@ instance
       Success (Zeros [] [] [] []) -> False
       Success (Zeros{}) -> True
       Failure Zeros.ZeroEverywhere -> True
-      Failure Zeros.HigherOrderZero -> True
 
 instance
   units1 ~ units2 =>
@@ -447,7 +446,7 @@ zeros function
               (HorizontalCurve.new function dvdu)
               (VerticalCurve.new function dudv)
               partialZeros
-        Failure Solve2d.InfiniteRecursion -> Failure Zeros.HigherOrderZero
+        Failure Solve2d.InfiniteRecursion -> exception "Higher-order zero detected"
 
 addSolution :: PartialZeros units -> Solution units -> PartialZeros units
 addSolution partialZeros solution = case solution of

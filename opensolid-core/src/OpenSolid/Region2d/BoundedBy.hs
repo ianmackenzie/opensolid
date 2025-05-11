@@ -9,5 +9,4 @@ data Error
   | BoundaryIntersectsItself
   | MultipleDisjointRegions
   | BoundaryCurveHasDegeneracy
-  | BoundaryCurvesHaveHigherOrderIntersection
   deriving (Eq, Show, Error.Message)

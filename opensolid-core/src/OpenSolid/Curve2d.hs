@@ -655,7 +655,6 @@ findPoint ::
 findPoint point curve =
   case VectorCurve2d.zeros (point - curve) of
     Failure VectorCurve2d.Zeros.ZeroEverywhere -> Failure FindPoint.CurveIsCoincidentWithPoint
-    Failure VectorCurve2d.Zeros.HigherOrderZero -> Failure FindPoint.HigherOrderSolution
     Success parameterValues -> Success parameterValues
 
 overlappingSegments ::
@@ -695,7 +694,6 @@ findEndpointZeros ::
 findEndpointZeros endpoint curve curveIsPointError =
   case findPoint endpoint curve of
     Success parameterValues -> Success parameterValues
-    Failure FindPoint.HigherOrderSolution -> Failure Intersections.HigherOrderIntersection
     Failure FindPoint.CurveIsCoincidentWithPoint -> Failure curveIsPointError
 
 findEndpointIntersections ::
@@ -747,7 +745,7 @@ intersections curve1 curve2 = Result.do
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
             Success (NonEmpty points) -> Success (Just (IntersectionPoints points))
             Success [] -> Success Nothing
-            Failure Solve2d.InfiniteRecursion -> Failure Intersections.HigherOrderIntersection
+            Failure Solve2d.InfiniteRecursion -> exception "Higher-order intersection detected"
     NonEmpty segments -> Success (Just (OverlappingSegments segments))
 
 endpointIntersection :: List UvPoint -> UvBounds -> Maybe UvPoint
@@ -1041,7 +1039,6 @@ medialAxis curve1 curve2 = do
   let target = v2 `cross'` (2.0 * (v1 `dot'` d) .*. d - VectorSurfaceFunction2d.squaredMagnitude' d .*. v1)
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
-    Failure SurfaceFunction.Zeros.HigherOrderZero -> Failure MedialAxis.HigherOrderSolution
     Failure SurfaceFunction.Zeros.ZeroEverywhere -> TODO -- curves are identical arcs?
     Success zeros -> do
       Debug.assert (List.isEmpty (SurfaceFunction.Zeros.crossingLoops zeros))
