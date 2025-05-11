@@ -181,13 +181,7 @@ toGlb entities = do
     bufferByteLength
     bufferBuilder
 
-{-| Write a scene to a binary glTF file.
-
-The given plane will be used as the ground plane, with:
-- the origin of the plane being the global origin,
-- the normal direction of the plane being the global up direction (positive Y in glTF), and
-- the positive X direction of the plane being the 'forwards' direction (positive Z in glTF).
--}
+-- | Write a scene to a binary glTF file.
 writeGlb :: Text -> List (Entity space) -> IO ()
 writeGlb path givenEntities = IO.writeBinary path (toGlb givenEntities)
 
