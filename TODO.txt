@@ -1,4 +1,79 @@
+search for all remaining instances of 'basis' in any case
+orthonormalize -> fromVectors, orthogonalize -> fromDirections
+search for variables named 'b' and rename to 'o' or 'orientation'
+
+potentially rename 'placeVector2dOn' and similar?
+
+back to fromXDirection etc. instead of withArbitraryYDirection?
+-> not using 'automagic' construction of e.g. Frame3d from point and forward direction, so shouldn't expect fromXDirection to be 'automagical'
+
+remove nyPlane, ynPlane etc.
+-> better to construct from a *frame* instead
+-> if necessary, can construct frame from plane, then plane from frame (or rotate plane around one of its axes)
+
+Replace Plane3d.flip[X,Y] with just 'flip'? (implicitly "flip X, and therefore normal")
+-> also PlaneOrientation3d.flip
+
+Have Plane3d inherit from PlaneOrientation3d and Frame3d inherit from Orientation3d in target languages
+-> allow e.g. direction.on(plane) instead of having to write the awkward direction.on(plane.basis)
+
+Refactor e.g. Frame3d.backPlane to use Orientation3d.backPlaneOrientation
+
+Add line breaks to Frame3d.fromFrontPlane etc.
+
+Use special 'facing' naming for planar basis/orientation?
+
+Rename Orientation3d to Orientation3d?
+-> then maybe PlanarOrientation3d to Orientation3d...or PlaneOrientation3d
+
+Replace Axis2d.normalDirection with Axis2d.[leftward,rightward]Direction
+-> also offsetBy -> offsetLeftBy, offsetRightBy
+
+In target languages: verbs are functions, nouns are properties?
+
+
+Arc2d.from :: Point2d -> Point2d -> Angle -> Arc2d
+Arc2d.leftTurn :: Point2d -> Point2d -> Arc2d
+Arc2d.rightTurn :: Point2d -> Point2d -> Arc2d
+
+Direction3d.[forward,backward,upward,downward,leftward,rightward] :: Direction3d
+Direction3d.[forwardUpward,forwardDownward,forwardRightward,forwardLeftward] :: Angle -> Direction3d
+Direction3d.[leftwardUpward,leftwardDownward,leftwardForward,leftwardBackward] :: Angle -> Direction3d
+Direction3d.[rightwardUpward,rightwardDownward,rightwardForward,rightwardBackward] :: Angle -> Direction3d
+Direction3d.[upwardForward,upwardBackward,upwardRightward,upwardLeftward] :: Angle -> Direction3d
+-> also 'backward' and 'downward' versions, e.g. 'downwardForward' or 'backwardLeftward'?
+  -> confusing! e.g. 'backwardLeftward'...which way does that turn, exactly?
+
+Frame3d.oriented :: Direction3d -> Point3d -> Frame3d
+Frame3d :: Point3d -> Orientation3d -> Frame3d
+
+Use abscissae5 for Parameter.samples, 'rotated square' based on abscissae5 for SurfaceParameter.samples
+-> nicely symmetric (5 points each, both cases include the center point)
+
+Have separate rotateClockwiseAround and rotateCounterclockwiseAround functions everywhere?
+
+General pattern:
+- all types have constructors for cardinal directions
+- Direction3d also has forwardUpward etc. for constructing non-cardinal directions
+
+Maybe Axis3d, Plane3d, Frame3d constructors *all* take a point and a direction?
+-> axis: point and direction
+-> plane: point and normal direction
+-> frame: point and forward direction
+-> then use Plane3d.new and Frame3d.new for versions taking a basis argument?
+
+Remove uses of Vector3d and Point3d constructors where possible
+-> search for Point3d(Point3d) and Vector3d(Vector3d)
+
+Refactor PlanarOrientation3d to be newtype over Orientation3d?
+-> reduce duplication
+-> cache normal direction
+
+Remove Point2d.xy, Vector2d.xy in favour of just using constructors?
+-> one canonical way of doing things...
+
 Add support for named arguments in constructors
+-> and overloading?
 
 Re-add Line#d, Arc#d, Bezier#d etc. types with corresponding Curve#d.line, Curve#d.arc, Curve#d.bezier functions
 -> in target languages, Line#d can be a *subclass* of Curve#d for convenience
@@ -7,8 +82,6 @@ Re-add Line#d, Arc#d, Bezier#d etc. types with corresponding Curve#d.line, Curve
 -> also add Cylinder3d, Sphere3d, Circle2d, Disk3d (maybe Circle3d?) etc.
   -> useful as return type of e.g. Gear.bore or Bearing.bore function; Cylinder3d.startCap and endCap can return Disk3d...
 -> also need UvLine, UvArc, UvBezier etc., but that seems OK...
-
-Switch to having Direction3d.[upward,downward,leftward,rightward,forward,backward]
 
 Add Interface3d type
 - defined by 'outward' and 'upward' direction ('localUpward'?)
@@ -24,18 +97,16 @@ Add Interface3d type
 - Interface3d.axis interface
 - Interface3d.frame interface
 
-Add Convention3d module
-- Convention3d.xyz Direction3d.forward Direction3d.leftward Direction3d.upward do ...
-- Convention3d.zUpwardYForward do ...
-- type Convention3d = forall space . (?x :: Direction3d space, ?y :: Direction3d space, ?z :: Direction3d space)
-- Convention3d.xDirection :: Convention3d => Direction3d space
-  -> or maybe just: Direction3d.x :: Convention3d => Direction3d space
-
 Add Text.Display class
 - 'format' or similar function that returns a structured value defining how to display something (e.g. as a function call with arguments)
 - Text.display for converting that to Text
 - design the display data structure so it can also be used to generate valid 'to string' functions in target languages
   -> with correct function name convention etc.
+
+Add random generation to API
+-> Direction3d.random() : returns a random value directly
+-> maybe eventually add support for generator objects with seeds and stepping?
+   -> opensolid.Random class with init(int) function, nested Seed class..
 
 Get Python docs publishing working
 -> maybe just generate Sphinx-flavoured reStructuredText instead of tyring to use autodoc?
@@ -61,6 +132,11 @@ Optimized representation for planar surface functions
 - Rename Ast.PlacePoint2d to Ast.PlanarPoint2d, Ast.PlaceVector2d to PlanarVector2d
 
 Add Arc#d bytecode instructions
+
+Optimize Ast operations for Bezier curves
+-> xComponent, yComponent, rightwardComponent, forwardComponent, upwardComponent
+-> dot product and cross product
+-> sum, difference, product and quotient with constant
 
 Base arc length parameterization on *square* of first derivative magnitude, then cache it by storing it lazily?
 -> will require a bit of tweaking derivative logic, but hopefully doable...
@@ -107,7 +183,7 @@ Update Curve.sqrt' and SurfaceFunction.sqrt' to use specialized square root deri
 
 Add Arc2d and Arc3d bytecode instructions
 
-Remove 'planar' functions in favour of calling 'new' directly from 'placeOn' functions
+Remove 'planar' functions in favour of calling 'new' directly from 'on' functions
 
 Do a general pass of trimming down .hs-boot files?
 -> remove constructors, in particular curve/surface functions
