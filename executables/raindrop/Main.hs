@@ -9,13 +9,13 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
@@ -29,7 +29,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
       , Curve2d.arc p2 p3 Angle.quarterTurn
       , Curve2d.line p3 p1
       ]
-  body <- Body3d.revolved Plane3d.front profile Axis2d.y Angle.twoPi
+  body <- Body3d.revolved World3d.frontPlane profile Axis2d.y Angle.twoPi
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
   let mesh = Body3d.toMesh constraints body
   let material = Scene3d.nonmetal Color.blue (#roughness 0.2)

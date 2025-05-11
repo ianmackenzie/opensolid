@@ -7,11 +7,11 @@ from opensolid import (
     LengthBounds,
     Length,
     Mesh,
-    Plane3d,
     Point2d,
     Region2d,
     Scene3d,
     Tolerance,
+    World3d,
 )
 
 with Tolerance(Length.nanometers(1)):
@@ -40,7 +40,7 @@ with Tolerance(Length.nanometers(1)):
 
     thickness = Length.centimeters(2)
     body = Body3d.extruded(
-        Plane3d.front,
+        World3d.front_plane,
         filleted_region,
         LengthBounds.symmetric(width=thickness),
     )

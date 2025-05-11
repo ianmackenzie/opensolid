@@ -40,7 +40,7 @@ import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
-import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d (Frame3d (Frame3d))
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Plane3d (Plane3d (Plane3d))
@@ -51,6 +51,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.World3d qualified as World3d
 
 data ScreenSpace
 
@@ -112,19 +113,19 @@ lookAt givenEyePoint givenFocalPoint givenProjection givenFieldOfView = do
         case Vector3d.direction (givenFocalPoint - givenEyePoint) of
           Success computedViewDirection -> do
             let viewVector = Vector3d.unit computedViewDirection
-            let upVector = Vector3d.unit Direction3d.upward
+            let upVector = Vector3d.unit World3d.upwardDirection
             case Tolerance.using 1e-9 (PlanarBasis3d.orthonormalize viewVector upVector) of
               Just rightPlaneBasis ->
                 Frame3d.fromRightPlane (Plane3d givenEyePoint rightPlaneBasis)
               Nothing -- View direction is either straight up or straight down
                 | Direction3d.upwardComponent computedViewDirection > 0.0 ->
-                    Frame3d.upwardFacing givenEyePoint
+                    Frame3d givenEyePoint World3d.upwardBasis
                 | otherwise ->
-                    Frame3d.downwardFacing givenEyePoint
+                    Frame3d givenEyePoint World3d.downwardBasis
           Failure Vector3d.IsZero ->
             -- Given eye and focal points are coincident,
             -- so just look straight forward
-            Frame3d.forwardFacing givenEyePoint
+            Frame3d givenEyePoint World3d.forwardBasis
   new computedFrame computedFocalDistance givenProjection givenFieldOfView
 
 orbit ::
@@ -135,19 +136,13 @@ orbit ::
   Projection ->
   FieldOfView units ->
   Camera3d (space @ units)
-orbit
-  givenFocalPoint
-  (Named azimuth)
-  (Named elevation)
-  distance
-  givenProjection
-  givenFieldOfView = do
-    let computedFrame =
-          Frame3d.backwardFacing givenFocalPoint
-            |> Frame3d.turnRightBy azimuth
-            |> Frame3d.rotateDownBy elevation
-            |> Frame3d.offsetBackwardBy distance
-    new computedFrame distance givenProjection givenFieldOfView
+orbit focalPoint (Named azimuth) (Named elevation) distance givenProjection givenFieldOfView = do
+  let computedFrame =
+        Frame3d focalPoint World3d.backwardBasis
+          |> Frame3d.turnRightBy azimuth
+          |> Frame3d.rotateDownBy elevation
+          |> Frame3d.offsetBackwardBy distance
+  new computedFrame distance givenProjection givenFieldOfView
 
 isometricElevation :: Angle
 isometricElevation = Angle.atan2 1.0 (Float.sqrt 2.0)

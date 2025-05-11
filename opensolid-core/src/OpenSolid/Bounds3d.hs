@@ -40,6 +40,7 @@ import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point3d qualified as Point3d
@@ -76,13 +77,13 @@ upwardCoordinate (Bounds3d _ _ u) = u
 
 -- | Get the XYZ coordinate ranges of a bounding box, given an XYZ coordinate convention to use.
 coordinates ::
-  Convention3d space ->
+  Convention3d ->
   Bounds3d (space @ units) ->
   (Bounds units, Bounds units, Bounds units)
 coordinates convention bounds =
-  ( distanceAlong (Convention3d.xAxis convention) bounds
-  , distanceAlong (Convention3d.yAxis convention) bounds
-  , distanceAlong (Convention3d.zAxis convention) bounds
+  ( distanceAlong (Convention3d.xAxis Frame3d.world convention) bounds
+  , distanceAlong (Convention3d.yAxis Frame3d.world convention) bounds
+  , distanceAlong (Convention3d.zAxis Frame3d.world convention) bounds
   )
 
 -- | Construct a zero-size bounding box containing a single point.

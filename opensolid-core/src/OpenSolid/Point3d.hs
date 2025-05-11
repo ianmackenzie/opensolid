@@ -37,6 +37,7 @@ module OpenSolid.Point3d
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Direction3d (Direction3d)
@@ -58,11 +59,11 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d qualified as Vector3d
 
 -- | Get the XYZ coordinates of a point, given an XYZ coordinate convention to use.
-coordinates :: Convention3d space -> Point3d (space @ units) -> (Qty units, Qty units, Qty units)
+coordinates :: Convention3d -> Point3d (space @ units) -> (Qty units, Qty units, Qty units)
 coordinates convention (Point3d pR pF pU) = do
-  let Direction3d iR iF iU = Convention3d.xDirection convention
-  let Direction3d jR jF jU = Convention3d.yDirection convention
-  let Direction3d kR kF kU = Convention3d.zDirection convention
+  let Direction3d iR iF iU = Convention3d.xDirection Basis3d.world convention
+  let Direction3d jR jF jU = Convention3d.yDirection Basis3d.world convention
+  let Direction3d kR kF kU = Convention3d.zDirection Basis3d.world convention
   let pX = pR * iR + pF * iF + pU * iU
   let pY = pR * jR + pF * jF + pU * jU
   let pZ = pR * kR + pF * kF + pU * kU
@@ -105,14 +106,11 @@ erase :: Point3d (space @ units) -> Point3d (space @ Unitless)
 erase = coerce
 
 -- | Construct a point from its XYZ coordinates, given the coordinate convention to use.
-fromCoordinates ::
-  Convention3d space ->
-  (Qty units, Qty units, Qty units) ->
-  Point3d (space @ units)
+fromCoordinates :: Convention3d -> (Qty units, Qty units, Qty units) -> Point3d (space @ units)
 fromCoordinates convention (pX, pY, pZ) = do
-  let Direction3d iR iF iU = Convention3d.xDirection convention
-  let Direction3d jR jF jU = Convention3d.yDirection convention
-  let Direction3d kR kF kU = Convention3d.zDirection convention
+  let Direction3d iR iF iU = Convention3d.xDirection Basis3d.world convention
+  let Direction3d jR jF jU = Convention3d.yDirection Basis3d.world convention
+  let Direction3d kR kF kU = Convention3d.zDirection Basis3d.world convention
   Point3d
     # pX * iR + pY * jR + pZ * kR
     # pX * iF + pY * jF + pZ * kF

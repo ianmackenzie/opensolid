@@ -15,7 +15,6 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
@@ -31,7 +30,6 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
@@ -55,6 +53,7 @@ import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.Volume qualified as Volume
+import OpenSolid.World3d qualified as World3d
 
 data Global deriving (Eq, Show)
 
@@ -202,10 +201,10 @@ testPlaneTorusIntersection = IO.do
         Curve2d.circle
           # #centerPoint (Point2d.x majorRadius)
           # #diameter (2.0 * minorRadius)
-  surface <- Surface3d.revolved Plane3d.front crossSection Axis2d.y Angle.twoPi
+  surface <- Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  let planeNormal = Direction3d.upwardRightward alpha
+  let planeNormal = World3d.upwardRightwardDirection alpha
   let f = planeNormal `dot` (Surface3d.function surface - Point3d.origin)
   zeros <- SurfaceFunction.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros

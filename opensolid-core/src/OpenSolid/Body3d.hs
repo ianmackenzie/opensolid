@@ -61,7 +61,7 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Plane3d (Plane3d (Plane3d))
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
@@ -98,6 +98,7 @@ import OpenSolid.Vertex2d as Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
+import OpenSolid.World3d qualified as World3d
 
 -- | A solid body in 3D, defined by a set of boundary surfaces.
 newtype Body3d (coordinateSystem :: CoordinateSystem)
@@ -218,13 +219,13 @@ Fails if the given bounds are empty
 -}
 block :: Tolerance units => Bounds3d (space @ units) -> Result EmptyBody (Body3d (space @ units))
 block bounds =
-  case Region2d.rectangle (Bounds3d.projectInto Plane3d.top bounds) of
+  case Region2d.rectangle (Bounds3d.projectInto World3d.topPlane bounds) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile -> do
       let heightBounds = Bounds3d.upwardCoordinate bounds
       if Bounds.width heightBounds ~= Qty.zero
         then Failure EmptyBody
-        else case extruded Plane3d.top profile heightBounds of
+        else case extruded World3d.topPlane profile heightBounds of
           Success body -> Success body
           Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
 
@@ -241,7 +242,7 @@ sphere (Named centerPoint) (Named diameter) =
   if diameter ~= Qty.zero
     then Failure EmptyBody
     else do
-      let sketchPlane = Plane3d.forwardFacing centerPoint
+      let sketchPlane = Plane3d centerPoint World3d.frontPlaneBasis
       let radius = 0.5 * diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius

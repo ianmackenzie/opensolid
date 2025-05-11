@@ -38,6 +38,7 @@ module OpenSolid.Vector3d
 where
 
 import OpenSolid.Angle (Angle)
+import {-# SOURCE #-} OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Error qualified as Error
@@ -77,14 +78,11 @@ rightwardForwardUpward :: Qty units -> Qty units -> Qty units -> Vector3d (space
 rightwardForwardUpward = Vector3d
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
-fromComponents ::
-  Convention3d space ->
-  (Qty units, Qty units, Qty units) ->
-  Vector3d (space @ units)
+fromComponents :: Convention3d -> (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
 fromComponents convention (vX, vY, vZ) = do
-  let Direction3d iR iF iU = Convention3d.xDirection convention
-  let Direction3d jR jF jU = Convention3d.yDirection convention
-  let Direction3d kR kF kU = Convention3d.zDirection convention
+  let Direction3d iR iF iU = Convention3d.xDirection Basis3d.world convention
+  let Direction3d jR jF jU = Convention3d.yDirection Basis3d.world convention
+  let Direction3d kR kF kU = Convention3d.zDirection Basis3d.world convention
   Vector3d
     # vX * iR + vY * jR + vZ * kR
     # vX * iF + vY * jF + vZ * kF
@@ -115,11 +113,11 @@ downwardComponent :: Vector3d (space @ units) -> Qty units
 downwardComponent (Vector3d _ _ u) = -u
 
 -- | Get the XYZ components of a vector, given an XYZ coordinate convention to use.
-components :: Convention3d space -> Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
+components :: Convention3d -> Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
 components convention vector =
-  ( vector `dot` Convention3d.xDirection convention
-  , vector `dot` Convention3d.yDirection convention
-  , vector `dot` Convention3d.zDirection convention
+  ( vector `dot` Convention3d.xDirection Basis3d.world convention
+  , vector `dot` Convention3d.yDirection Basis3d.world convention
+  , vector `dot` Convention3d.zDirection Basis3d.world convention
   )
 
 interpolateFrom ::

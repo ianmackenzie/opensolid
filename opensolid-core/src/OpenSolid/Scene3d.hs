@@ -99,7 +99,7 @@ group = Group
 
 transformBy :: Transform3d.Rigid (space @ Meters) -> Entity space -> Entity space
 transformBy transform (Placed frame entity) = Placed (Frame3d.transformBy transform frame) entity
-transformBy transform entity = Placed (Frame3d.transformBy transform Frame3d.identity) entity
+transformBy transform entity = Placed (Frame3d.transformBy transform Frame3d.world) entity
 
 placeIn :: Frame3d (global @ Meters) (Defines local) -> Entity local -> Entity global
 placeIn frame (Placed entityFrame entity) = Placed (Frame3d.placeIn frame entityFrame) entity
@@ -162,7 +162,7 @@ Same as 'writeGlb' except it just returns the raw binary builder instead of writ
 -}
 toGlb :: List (Entity space) -> Builder
 toGlb entities = do
-  let meshes = gltfMeshes Frame3d.identity (group entities)
+  let meshes = gltfMeshes Frame3d.world (group entities)
   let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
   let bufferBuilder = Binary.collect meshBuilder meshes
   let bufferByteLength = Int.sumOf meshByteLength meshes

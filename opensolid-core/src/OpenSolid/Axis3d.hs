@@ -4,12 +4,6 @@ module OpenSolid.Axis3d
   , erase
   , originPoint
   , direction
-  , forward
-  , backward
-  , leftward
-  , rightward
-  , upward
-  , downward
   , through
   , arbitraryNormalPlane
   , moveTo
@@ -44,30 +38,6 @@ originPoint (Axis3d p0 _) = p0
 -- | Get the direction of an axis.
 direction :: Axis3d (space @ units) -> Direction3d space
 direction (Axis3d _ d) = d
-
--- | Construct an axis in the forward direction with the given origin point.
-forward :: Point3d (space @ units) -> Axis3d (space @ units)
-forward point = Axis3d point Direction3d.forward
-
--- | Construct an axis in the backward direction with the given origin point.
-backward :: Point3d (space @ units) -> Axis3d (space @ units)
-backward point = Axis3d point Direction3d.backward
-
--- | Construct an axis in the leftward direction with the given origin point.
-leftward :: Point3d (space @ units) -> Axis3d (space @ units)
-leftward point = Axis3d point Direction3d.leftward
-
--- | Construct an axis in the rightward direction with the given origin point.
-rightward :: Point3d (space @ units) -> Axis3d (space @ units)
-rightward point = Axis3d point Direction3d.rightward
-
--- | Construct an axis in the upward direction with the given origin point.
-upward :: Point3d (space @ units) -> Axis3d (space @ units)
-upward point = Axis3d point Direction3d.upward
-
--- | Construct an axis in the downward direction with the given origin point.
-downward :: Point3d (space @ units) -> Axis3d (space @ units)
-downward point = Axis3d point Direction3d.downward
 
 through :: Point3d (space @ units) -> Direction3d space -> Axis3d (space @ units)
 through = Axis3d

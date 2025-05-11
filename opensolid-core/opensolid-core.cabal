@@ -226,6 +226,7 @@ library
     OpenSolid.Vertex2d
     OpenSolid.Vertex3d
     OpenSolid.Volume
+    OpenSolid.World3d
 
   other-modules:
     OpenSolid.Bezier

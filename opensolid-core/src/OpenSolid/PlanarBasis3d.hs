@@ -2,12 +2,6 @@ module OpenSolid.PlanarBasis3d
   ( PlanarBasis3d
   , coerce
   , unsafe
-  , forwardFacing
-  , backwardFacing
-  , leftwardFacing
-  , rightwardFacing
-  , upwardFacing
-  , downwardFacing
   , arbitraryNormalBasis
   , withArbitraryYDirection
   , withArbitraryXDirection
@@ -46,60 +40,6 @@ coerce (PlanarBasis3d i j) = PlanarBasis3d (Direction3d.coerce i) (Direction3d.c
 
 unsafe :: Direction3d space -> Direction3d space -> PlanarBasis3d space defines
 unsafe = PlanarBasis3d
-
-{-| The basis for a forward-facing plane.
-
-The normal direction of the basis will point forward,
-the X direction of the basis will point leftward,
-and the Y direction of the basis will point upward.
--}
-forwardFacing :: PlanarBasis3d space defines
-forwardFacing = PlanarBasis3d Direction3d.leftward Direction3d.upward
-
-{-| The basis for a backward-facing plane.
-
-The normal direction of the basis will point backward,
-the X direction of the basis will point rightward,
-and the Y direction of the basis will point upward.
--}
-backwardFacing :: PlanarBasis3d space defines
-backwardFacing = PlanarBasis3d Direction3d.rightward Direction3d.upward
-
-{-| The basis for a leftward-facing plane.
-
-The normal direction of the basis will point leftward,
-the X direction of the basis will point backward,
-and the Y direction of the basis will point upward.
--}
-leftwardFacing :: PlanarBasis3d space defines
-leftwardFacing = PlanarBasis3d Direction3d.backward Direction3d.upward
-
-{-| The basis for a rightward-facing plane.
-
-The normal direction of the basis will point rightward,
-the X direction of the basis will point forward,
-and the Y direction of the basis will point upward.
--}
-rightwardFacing :: PlanarBasis3d space defines
-rightwardFacing = PlanarBasis3d Direction3d.forward Direction3d.upward
-
-{-| The basis for an upward-facing plane.
-
-The normal direction of the basis will point upward,
-the X direction of the basis will point rightward,
-and the Y direction of the basis will point forward.
--}
-upwardFacing :: PlanarBasis3d space defines
-upwardFacing = PlanarBasis3d Direction3d.rightward Direction3d.forward
-
-{-| The basis for a downward-facing plane.
-
-The normal direction of the basis will point downward,
-the X direction of the basis will point leftward,
-and the Y direction of the basis will point forward.
--}
-downwardFacing :: PlanarBasis3d space defines
-downwardFacing = PlanarBasis3d Direction3d.leftward Direction3d.forward
 
 withArbitraryYDirection :: Named "xDirection" (Direction3d space) -> PlanarBasis3d space defines
 withArbitraryYDirection (Named dx) =

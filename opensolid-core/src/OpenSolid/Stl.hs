@@ -27,7 +27,7 @@ import OpenSolid.Vertex3d qualified as Vertex3d
 
 toText ::
   Vertex3d vertex (space @ units) =>
-  Convention3d space ->
+  Convention3d ->
   (Qty units -> Float) ->
   Mesh vertex ->
   Text
@@ -40,7 +40,7 @@ toText convention units mesh =
 
 toBinary ::
   Vertex3d vertex (space @ units) =>
-  Convention3d space ->
+  Convention3d ->
   (Qty units -> Float) ->
   Mesh vertex ->
   Builder
@@ -53,7 +53,7 @@ toBinary convention units mesh = do
 writeText ::
   Vertex3d vertex (space @ units) =>
   Text ->
-  Convention3d space ->
+  Convention3d ->
   (Qty units -> Float) ->
   Mesh vertex ->
   IO ()
@@ -62,7 +62,7 @@ writeText path convention units mesh = IO.writeUtf8 path (toText convention unit
 writeBinary ::
   Vertex3d vertex (space @ units) =>
   Text ->
-  Convention3d space ->
+  Convention3d ->
   (Qty units -> Float) ->
   Mesh vertex ->
   IO ()
@@ -71,19 +71,19 @@ writeBinary path convention units mesh = IO.writeBinary path (toBinary conventio
 floatBuilder :: Float -> Builder
 floatBuilder value = Builder.floatLE (GHC.Float.double2Float (Float.toDouble value))
 
-vectorBuilder :: Convention3d space -> Vector3d (space @ Unitless) -> Builder
+vectorBuilder :: Convention3d -> Vector3d (space @ Unitless) -> Builder
 vectorBuilder convention vector = do
   let (x, y, z) = Vector3d.components convention vector
   Binary.concat [floatBuilder x, floatBuilder y, floatBuilder z]
 
-pointBuilder :: Convention3d space -> (Qty units -> Float) -> Point3d (space @ units) -> Builder
+pointBuilder :: Convention3d -> (Qty units -> Float) -> Point3d (space @ units) -> Builder
 pointBuilder convention units point = do
   let (x, y, z) = Point3d.coordinates convention point
   Binary.concat [floatBuilder (units x), floatBuilder (units y), floatBuilder (units z)]
 
 triangleBuilder ::
   Vertex3d vertex (space @ units) =>
-  Convention3d space ->
+  Convention3d ->
   (Qty units -> Float) ->
   (vertex, vertex, vertex) ->
   Builder
@@ -102,7 +102,7 @@ triangleBuilder convention units (v0, v1, v2) = do
 
 triangleText ::
   Vertex3d vertex (space @ units) =>
-  Convention3d space ->
+  Convention3d ->
   (Qty units -> Float) ->
   (vertex, vertex, vertex) ->
   Text
@@ -122,7 +122,7 @@ triangleText convention units (v0, v1, v2) = do
     , "endfacet"
     ]
 
-pointText :: Convention3d space -> (Qty units -> Float) -> Point3d (space @ units) -> Text
+pointText :: Convention3d -> (Qty units -> Float) -> Point3d (space @ units) -> Text
 pointText convention units point = do
   let (px, py, pz) = Point3d.coordinates convention point
   Text.join " " ["vertex", Text.float (units px), Text.float (units py), Text.float (units pz)]

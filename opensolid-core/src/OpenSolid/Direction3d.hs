@@ -37,6 +37,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import {-# SOURCE #-} OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
@@ -55,7 +56,7 @@ import OpenSolid.Vector3d qualified as Vector3d
 
 -- | Get the XYZ components of a direction, given an XYZ coordinate convention to use.
 {-# INLINE components #-}
-components :: Convention3d space -> Direction3d space -> (Float, Float, Float)
+components :: Convention3d -> Direction3d space -> (Float, Float, Float)
 components convention (Unit3d vector) = Vector3d.components convention vector
 
 unsafe :: Vector3d (space @ Unitless) -> Direction3d space
@@ -72,47 +73,47 @@ lift ::
   Direction3d spaceB
 lift function (Unit3d vector) = Unit3d (function vector)
 
--- | The upward direction in a particular space.
-upward :: Direction3d space
-upward = Direction3d 0.0 0.0 1.0
+upward :: Basis3d space defines -> Direction3d space
+upward = Basis3d.upwardDirection
 
--- | The downward direction in a particular space.
-downward :: Direction3d space
-downward = Direction3d 0.0 0.0 -1.0
+downward :: Basis3d space defines -> Direction3d space
+downward = Basis3d.downwardDirection
 
--- | The forward direction in a particular space.
-forward :: Direction3d space
-forward = Direction3d 0.0 1.0 0.0
+forward :: Basis3d space defines -> Direction3d space
+forward = Basis3d.forwardDirection
 
--- | The backward direction in a particular space.
-backward :: Direction3d space
-backward = Direction3d 0.0 -1.0 0.0
+backward :: Basis3d space defines -> Direction3d space
+backward = Basis3d.backwardDirection
 
--- | The rightward direction in a particular space.
-rightward :: Direction3d space
-rightward = Direction3d 1.0 0.0 0.0
+rightward :: Basis3d space defines -> Direction3d space
+rightward = Basis3d.rightwardDirection
 
--- | The leftward direction in a particular space.
-leftward :: Direction3d space
-leftward = Direction3d -1.0 0.0 0.0
+leftward :: Basis3d space defines -> Direction3d space
+leftward = Basis3d.leftwardDirection
 
-rightwardForward :: Angle -> Direction3d space
-rightwardForward angle = Direction3d (Angle.cos angle) (Angle.sin angle) 0.0
+rightwardForward :: Basis3d space defines -> Angle -> Direction3d space
+rightwardForward basis angle =
+  Unit3d (Angle.cos angle * rightward basis + Angle.sin angle * forward basis)
 
-forwardRightward :: Angle -> Direction3d space
-forwardRightward angle = Direction3d (Angle.sin angle) (Angle.cos angle) 0.0
+forwardRightward :: Basis3d space defines -> Angle -> Direction3d space
+forwardRightward basis angle =
+  Unit3d (Angle.cos angle * forward basis + Angle.sin angle * rightward basis)
 
-forwardUpward :: Angle -> Direction3d space
-forwardUpward angle = Direction3d 0.0 (Angle.cos angle) (Angle.sin angle)
+forwardUpward :: Basis3d space defines -> Angle -> Direction3d space
+forwardUpward basis angle =
+  Unit3d (Angle.cos angle * forward basis + Angle.sin angle * upward basis)
 
-upwardForward :: Angle -> Direction3d space
-upwardForward angle = Direction3d 0.0 (Angle.sin angle) (Angle.cos angle)
+upwardForward :: Basis3d space defines -> Angle -> Direction3d space
+upwardForward basis angle =
+  Unit3d (Angle.cos angle * upward basis + Angle.sin angle * forward basis)
 
-rightwardUpward :: Angle -> Direction3d space
-rightwardUpward angle = Direction3d (Angle.cos angle) 0.0 (Angle.sin angle)
+rightwardUpward :: Basis3d space defines -> Angle -> Direction3d space
+rightwardUpward basis angle =
+  Unit3d (Angle.cos angle * rightward basis + Angle.sin angle * upward basis)
 
-upwardRightward :: Angle -> Direction3d space
-upwardRightward angle = Direction3d (Angle.sin angle) 0.0 (Angle.cos angle)
+upwardRightward :: Basis3d space defines -> Angle -> Direction3d space
+upwardRightward basis angle =
+  Unit3d (Angle.cos angle * upward basis + Angle.sin angle * rightward basis)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
 arbitraryPerpendicularDirection :: Direction3d space -> Direction3d space

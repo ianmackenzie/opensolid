@@ -6,12 +6,12 @@ from opensolid import (
     Axis2d,
     Region2d,
     Body3d,
-    Plane3d,
     Mesh,
     LengthBounds,
     Scene3d,
     Tolerance,
     Color,
+    World3d,
 )
 
 with Tolerance(Length.meters(1e-9)):
@@ -50,10 +50,10 @@ with Tolerance(Length.meters(1e-9)):
 
     # Extrude the profile to create a solid body
     extrusion_limits = LengthBounds.symmetric(width=length)
-    body = Body3d.extruded(Plane3d.front, profile, extrusion_limits)
+    body = Body3d.extruded(World3d.front_plane, profile, extrusion_limits)
 
     # Create a 3D scene containing the body and write to GLB file
-    mesh_constraints = [Mesh.max_error(Length.millimeters(1))]
+    mesh_constraints = [Mesh.max_error(Length.millimeters(0.1))]
     material = Scene3d.metal(Color.rgb(0.913, 0.921, 0.925), roughness=0.3)
     entity = Scene3d.body(mesh_constraints, material, body)
     Scene3d.write_glb("i-beam.glb", [entity])

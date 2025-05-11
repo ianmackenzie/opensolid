@@ -3,7 +3,6 @@ module Tests.SurfaceFunction (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
@@ -19,6 +18,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
+import OpenSolid.World3d qualified as World3d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Curve2d qualified
@@ -109,7 +109,7 @@ planeTorusSurface = do
   let alpha = Angle.asin (minorRadius / majorRadius)
   let surfaceFunction = VectorSurfaceFunction3d.rightwardForwardUpward rightward forward upward
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  Direction3d.upwardRightward -alpha `dot` surfaceFunction
+  World3d.upwardRightwardDirection -alpha `dot` surfaceFunction
 
 samplingRadius :: Float
 samplingRadius = 1e-6

@@ -27,9 +27,6 @@ module OpenSolid.VectorCurve3d
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , HasZero (HasZero)
-  , rightwardComponent
-  , forwardComponent
-  , upwardComponent
   , direction
   , placeIn
   , relativeTo
@@ -50,7 +47,6 @@ import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Direction3d qualified as Direction3d
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
@@ -575,15 +571,6 @@ zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
     Success zeros1d -> Success (List.map Curve.Zero.location zeros1d)
     Failure Curve.ZeroEverywhere -> Failure ZeroEverywhere
-
-rightwardComponent :: VectorCurve3d (space @ units) -> Curve units
-rightwardComponent curve = curve `dot` Direction3d.rightward
-
-forwardComponent :: VectorCurve3d (space @ units) -> Curve units
-forwardComponent curve = curve `dot` Direction3d.forward
-
-upwardComponent :: VectorCurve3d (space @ units) -> Curve units
-upwardComponent curve = curve `dot` Direction3d.upward
 
 direction ::
   Tolerance units =>

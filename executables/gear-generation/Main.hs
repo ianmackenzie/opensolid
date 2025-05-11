@@ -11,7 +11,6 @@ import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
@@ -23,6 +22,7 @@ import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Meters)
+import OpenSolid.World3d qualified as World3d
 
 gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))
 gearBody numTeeth = Try.do
@@ -33,7 +33,7 @@ gearBody numTeeth = Try.do
   let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
   profile <- Region2d.boundedBy (hole : outerProfile)
   let width = Length.millimeters 8.0
-  Body3d.extruded Plane3d.front profile (Bounds.symmetric (#width width))
+  Body3d.extruded World3d.frontPlane profile (Bounds.symmetric (#width width))
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do

@@ -9,9 +9,6 @@ module OpenSolid.DirectionCurve3d
   , derivative
   , constant
   , reverse
-  , rightwardComponent
-  , forwardComponent
-  , upwardComponent
   , placeIn
   , relativeTo
   )
@@ -222,15 +219,6 @@ instance
   Composition (Curve unitless) (DirectionCurve3d space) (DirectionCurve3d space)
   where
   curve1d >> DirectionCurve3d curve = DirectionCurve3d (curve1d >> curve)
-
-rightwardComponent :: DirectionCurve3d space -> Curve Unitless
-rightwardComponent curve = curve `dot` Direction3d.rightward
-
-forwardComponent :: DirectionCurve3d space -> Curve Unitless
-forwardComponent curve = curve `dot` Direction3d.forward
-
-upwardComponent :: DirectionCurve3d space -> Curve Unitless
-upwardComponent curve = curve `dot` Direction3d.upward
 
 placeIn ::
   Basis3d global (Defines local) ->

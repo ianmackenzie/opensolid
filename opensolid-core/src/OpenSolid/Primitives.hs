@@ -11,7 +11,7 @@ module OpenSolid.Primitives
   , Vector3d (Vector3d)
   , Direction3d (Unit3d, Direction3d)
   , PlanarBasis3d (PlanarBasis3d)
-  , Basis3d (Basis3d, rightwardDirection, forwardDirection, upwardDirection)
+  , Basis3d (Basis3d)
   , Point3d (Point3d)
   , VectorBounds3d (VectorBounds3d)
   , Bounds3d (Bounds3d)
@@ -1257,15 +1257,7 @@ instance FFI (PlanarBasis3d space defines) where
 -- | A set of cardinal directions (forward, upward etc.) defining a 3D orientation.
 type Basis3d :: Type -> LocalSpace -> Type
 data Basis3d space defines where
-  Basis3d ::
-    { rightwardDirection :: Direction3d space
-    -- ^ Get the rightward direction of a basis.
-    , forwardDirection :: Direction3d space
-    -- ^ Get the forward direction of a basis.
-    , upwardDirection :: Direction3d space
-    -- ^ Get the upward direction of a basis.
-    } ->
-    Basis3d space defines
+  Basis3d :: Direction3d space -> Direction3d space -> Direction3d space -> Basis3d space defines
 
 deriving instance Eq (Basis3d space defines)
 
