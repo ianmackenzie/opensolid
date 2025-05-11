@@ -10,6 +10,7 @@ module OpenSolid.VectorCurve2d
   , derivative
   , zero
   , constant
+  , unit
   , xy
   , line
   , arc
@@ -488,6 +489,8 @@ zero = constant Vector2d.zero
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 constant value = new (CompiledFunction.constant value) zero
 
+unit :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
+unit = DirectionCurve2d.unwrap
 -- | Create a curve from its X and Y component curves.
 xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
 xy x y =
