@@ -28,7 +28,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal hiding ((>>=))
 import OpenSolid.Random.Internal qualified as Internal
-import OpenSolid.Result (Result (Failure, Success))
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
@@ -85,12 +84,12 @@ merge generators = do
     index <- indexGenerator
     Array.get index generatorArray
 
-retry :: Generator (Result x a) -> Generator a
+retry :: Generator (Maybe a) -> Generator a
 retry fallibleGenerator = OpenSolid.Random.do
   result <- fallibleGenerator
   case result of
-    Success value -> return value
-    Failure _ -> retry fallibleGenerator
+    Just value -> return value
+    Nothing -> retry fallibleGenerator
 
 combine :: List (Generator a) -> Generator (List a)
 combine [] = return []
