@@ -552,7 +552,7 @@ align ::
   Frame3d (local @ units) (Defines space) ->
   Frame3d (global @ units) (Defines space) ->
   Frame3d (global @ units) (Defines local)
-align localFrame globalFrame = identity |> relativeTo localFrame |> placeIn globalFrame
+align frame referenceFrame = inverse frame |> placeIn referenceFrame
 
 {-| Compute the relative orientation of two parent frames in order to "mate" two child frames.
 
@@ -564,4 +564,4 @@ mate ::
   Frame3d (local @ units) (Defines space) ->
   Frame3d (global @ units) (Defines space) ->
   Frame3d (global @ units) (Defines local)
-mate localFrame globalFrame = align (reverse localFrame) globalFrame
+mate frame referenceFrame = align (reverse frame) referenceFrame
