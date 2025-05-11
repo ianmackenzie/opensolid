@@ -140,7 +140,7 @@ orbit focalPoint (Named azimuth) (Named elevation) distance givenProjection give
   let computedFrame =
         Frame3d focalPoint World3d.backwardBasis
           |> Frame3d.turnRightBy azimuth
-          |> Frame3d.rotateDownBy elevation
+          |> Frame3d.tiltDownBy elevation
           |> Frame3d.offsetBackwardBy distance
   new computedFrame distance givenProjection givenFieldOfView
 

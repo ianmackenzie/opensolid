@@ -1159,14 +1159,14 @@ frame3d =
     , member1 "Turn Left By" "Angle" Frame3d.turnLeftBy $(docs 'Frame3d.turnLeftBy)
     , member1 "Roll Right By" "Angle" Frame3d.rollRightBy $(docs 'Frame3d.rollRightBy)
     , member1 "Roll Left By" "Angle" Frame3d.rollLeftBy $(docs 'Frame3d.rollLeftBy)
-    , member1 "Rotate Up By" "Angle" Frame3d.rotateUpBy $(docs 'Frame3d.rotateUpBy)
-    , member1 "Rotate Down By" "Angle" Frame3d.rotateDownBy $(docs 'Frame3d.rotateDownBy)
+    , member1 "Tilt Up By" "Angle" Frame3d.tiltUpBy $(docs 'Frame3d.tiltUpBy)
+    , member1 "Tilt Down By" "Angle" Frame3d.tiltDownBy $(docs 'Frame3d.tiltDownBy)
     , member0 "Turn Right" Frame3d.turnRight $(docs 'Frame3d.turnRight)
     , member0 "Turn Left" Frame3d.turnLeft $(docs 'Frame3d.turnLeft)
     , member0 "Roll Right" Frame3d.rollRight $(docs 'Frame3d.rollRight)
     , member0 "Roll Left" Frame3d.rollLeft $(docs 'Frame3d.rollLeft)
-    , member0 "Rotate Up" Frame3d.rotateUp $(docs 'Frame3d.rotateUp)
-    , member0 "Rotate Down" Frame3d.rotateDown $(docs 'Frame3d.rotateDown)
+    , member0 "Tilt Up" Frame3d.tiltUp $(docs 'Frame3d.tiltUp)
+    , member0 "Tilt Down" Frame3d.tiltDown $(docs 'Frame3d.tiltDown)
     ]
       <> rigidTransformations3d Frame3d.transformBy
 
