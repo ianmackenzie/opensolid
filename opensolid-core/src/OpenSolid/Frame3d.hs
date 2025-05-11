@@ -67,6 +67,8 @@ module OpenSolid.Frame3d
   , translateInOwn
   , translateAlongOwn
   , rotateAroundOwn
+  , mate
+  , align
   )
 where
 
@@ -534,3 +536,32 @@ rotateAroundOwn ::
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 rotateAroundOwn = Transform3d.rotateAroundOwnImpl transformBy
+
+{-| Compute the relative orientation of two parent frames in order to align two child frames.
+
+Imagine you have one object defined in coordinate system A ("local"),
+with a particular frame X defined in coordinate system A.
+Similarly, you have another object defined in coordinate system B ("global"),
+with a particular frame Y defined in coordinate system B.
+This function lets you determine the necessary relative alignment between A and B
+such that the two frames X and Y are aligned with each other.
+Given the two frames X and Y, this function returns a new frame
+that defines the necessary orientation of A ("local") relative to B ("global").
+-}
+align ::
+  Frame3d (local @ units) (Defines space) ->
+  Frame3d (global @ units) (Defines space) ->
+  Frame3d (global @ units) (Defines local)
+align localFrame globalFrame = identity |> relativeTo localFrame |> placeIn globalFrame
+
+{-| Compute the relative orientation of two parent frames in order to "mate" two child frames.
+
+This is the same as 'align' except that the two child frames will end up facing towards each other
+(with reversed forward directions, but the same upward directions)
+instead of being aligned with each other.
+-}
+mate ::
+  Frame3d (local @ units) (Defines space) ->
+  Frame3d (global @ units) (Defines space) ->
+  Frame3d (global @ units) (Defines local)
+mate localFrame globalFrame = align (reverse localFrame) globalFrame
