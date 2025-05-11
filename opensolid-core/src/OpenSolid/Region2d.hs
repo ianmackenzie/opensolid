@@ -5,6 +5,7 @@ module OpenSolid.Region2d
   , unitSquare
   , rectangle
   , circle
+  , hexagon
   , inscribedPolygon
   , circumscribedPolygon
   , polygon
@@ -180,6 +181,18 @@ circle (Named centerPoint) (Named diameter) =
     else do
       let boundaryCurve = Curve2d.circle (#centerPoint centerPoint) (#diameter diameter)
       Success (Region2d (NonEmpty.one boundaryCurve) [])
+
+{-| Create a hexagon with the given center point and height.
+
+The hexagon will be oriented such that its top and bottom edges are horizontal.
+-}
+hexagon ::
+  Tolerance units =>
+  Named "centerPoint" (Point2d (space @ units)) ->
+  Named "height" (Qty units) ->
+  Result EmptyRegion (Region2d (space @ units))
+hexagon (Named centerPoint) (Named height) =
+  circumscribedPolygon 6 (#centerPoint centerPoint) (#diameter height)
 
 {-| Create a regular polygon with the given number of sides.
 
