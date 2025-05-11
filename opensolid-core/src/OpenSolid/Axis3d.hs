@@ -15,6 +15,8 @@ module OpenSolid.Axis3d
   , moveTo
   , reverse
   , transformBy
+  , placeIn
+  , relativeTo
   )
 where
 
@@ -24,7 +26,7 @@ import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d (Axis3d), Plane3d (Plane3d))
+import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d (Frame3d), Plane3d (Plane3d))
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d (Transform3d)
 
@@ -102,3 +104,21 @@ transformBy transform axis = do
   let transformedOriginPoint = Point3d.transformBy transform (originPoint axis)
   let transformedDirection = Direction3d.transformBy transform (direction axis)
   Axis3d transformedOriginPoint transformedDirection
+
+-- | Convert an axis defined in local coordinates to one defined in global coordinates.
+placeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  Axis3d (local @ units) ->
+  Axis3d (global @ units)
+placeIn frame (Axis3d p0 d) = do
+  let Frame3d _ basis = frame
+  Axis3d (Point3d.placeIn frame p0) (Direction3d.placeIn basis d)
+
+-- | Convert an axis defined in global coordinates to one defined in local coordinates.
+relativeTo ::
+  Frame3d (global @ units) (Defines local) ->
+  Axis3d (global @ units) ->
+  Axis3d (local @ units)
+relativeTo frame (Axis3d p0 d) = do
+  let Frame3d _ basis = frame
+  Axis3d (Point3d.relativeTo frame p0) (Direction3d.relativeTo basis d)
