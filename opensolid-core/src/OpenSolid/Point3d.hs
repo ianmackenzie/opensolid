@@ -167,6 +167,11 @@ projectOnto ::
   Point3d (space @ units)
 projectOnto plane point = on plane (projectInto plane point)
 
+{-| Project a point *into* a plane.
+
+Conceptualy, this projects the point onto the plane in 3D,
+then expresses the projected point in 2D planar XY coordinates.
+-}
 projectInto ::
   Plane3d (space @ units) (Defines localSpace) ->
   Point3d (space @ units) ->
