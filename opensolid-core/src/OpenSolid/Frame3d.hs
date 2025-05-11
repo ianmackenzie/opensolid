@@ -439,9 +439,9 @@ rotateDown = rotateDownBy Angle.halfPi
 
 -- | Convert a frame defined in local coordinates to one defined in global coordinates.
 placeIn ::
-  Frame3d (global @ units) (Defines space) ->
-  Frame3d (space @ units) (Defines local) ->
-  Frame3d (global @ units) (Defines local)
+  Frame3d (global @ units) (Defines local1) ->
+  Frame3d (local1 @ units) (Defines local2) ->
+  Frame3d (global @ units) (Defines local2)
 placeIn globalFrame frame =
   Frame3d
     (Point3d.placeIn globalFrame (originPoint frame))
@@ -449,9 +449,9 @@ placeIn globalFrame frame =
 
 -- | Convert a frame defined in global coordinates to one defined in local coordinates.
 relativeTo ::
-  Frame3d (global @ units) (Defines space) ->
-  Frame3d (global @ units) (Defines local) ->
-  Frame3d (space @ units) (Defines local)
+  Frame3d (global @ units) (Defines local1) ->
+  Frame3d (global @ units) (Defines local2) ->
+  Frame3d (local1 @ units) (Defines local2)
 relativeTo globalFrame frame =
   Frame3d
     (Point3d.relativeTo globalFrame (originPoint frame))
