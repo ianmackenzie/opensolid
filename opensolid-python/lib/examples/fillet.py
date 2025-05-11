@@ -40,11 +40,11 @@ with Tolerance(Length.nanometers(1)):
 
     thickness = Length.centimeters(2)
     body = Body3d.extruded(
-        Plane3d.yz,
+        Plane3d.front,
         filleted_region,
         LengthBounds.symmetric(width=thickness),
     )
     mesh_constraints = [Mesh.max_error(Length.millimeters(0.05))]
     material = Scene3d.nonmetal(Color.blue, roughness=0.3)
     scene = [Scene3d.body(mesh_constraints, material, body)]
-    Scene3d.write_glb("fillet.glb", Plane3d.xy, scene)
+    Scene3d.write_glb("fillet.glb", scene)
