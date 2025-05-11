@@ -6,6 +6,7 @@ module OpenSolid.Point2d
   , y
   , along
   , xy
+  , polar
   , fromCoordinates
   , meters
   , centimeters
@@ -40,6 +41,7 @@ module OpenSolid.Point2d
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
@@ -81,6 +83,13 @@ along (Axis2d originPoint direction) distance = originPoint + distance * directi
 -- | Construct a point from its X and Y coordinates.
 xy :: Qty units -> Qty units -> Point2d (space @ units)
 xy = Point2d
+
+{-| Construct a point from polar coordinates (radius and angle).
+
+The angle is measured counterclockwise from the positive X axis.
+-}
+polar :: Qty units -> Angle -> Point2d (space @ units)
+polar r theta = Point2d (r * Angle.cos theta) (r * Angle.sin theta)
 
 -- | Construct a point from a pair of X and Y coordinates.
 fromCoordinates :: (Qty units, Qty units) -> Point2d (space @ units)

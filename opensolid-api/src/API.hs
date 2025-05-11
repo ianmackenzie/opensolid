@@ -641,6 +641,7 @@ point2d =
     , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d $(docs 'Point2d)
     , factory1 "X" "X Coordinate" Point2d.x $(docs 'Point2d.x)
     , factory1 "Y" "Y Coordinate" Point2d.y $(docs 'Point2d.y)
+    , factory2 "Polar" "Radius" "Angle" Point2d.polar $(docs 'Point2d.polar)
     , factory2 "Meters" "X Coordinate" "Y Coordinate" Point2d.meters $(docs 'Point2d.meters)
     , factory2 "Centimeters" "X Coordinate" "Y Coordinate" Point2d.centimeters $(docs 'Point2d.centimeters)
     , factory2 "Cm" "X Coordinate" "Y Coordinate" Point2d.cm $(docs 'Point2d.cm)
