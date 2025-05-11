@@ -1046,7 +1046,7 @@ plane3d =
     , member0 "Flip Y" Plane3d.flipY $(docs 'Plane3d.flipY)
     , member1 "Offset By" "Distance" Plane3d.offsetBy $(docs 'Plane3d.offsetBy)
     ]
-      <> orthonormalTransformations3d Plane3d.transformBy
+      <> rigidTransformations3d Plane3d.transformBy
 
 vectorCurve2d :: Class
 vectorCurve2d =

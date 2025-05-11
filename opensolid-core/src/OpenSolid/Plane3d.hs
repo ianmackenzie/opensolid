@@ -41,12 +41,10 @@ module OpenSolid.Plane3d
   , translateIn
   , translateAlong
   , rotateAround
-  , mirrorAcross
   , translateByOwn
   , translateInOwn
   , translateAlongOwn
   , rotateAroundOwn
-  , mirrorAcrossOwn
   )
 where
 
@@ -58,8 +56,7 @@ import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d (Frame3d), Plane3d (Plane3d), Transform3d)
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d (Frame3d), Plane3d (Plane3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 
@@ -311,8 +308,7 @@ flipY :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines
 flipY (Plane3d p0 b) = Plane3d p0 (PlanarBasis3d.flipY b)
 
 transformBy ::
-  Transform.IsOrthonormal tag =>
-  Transform3d tag (space @ units) ->
+  Transform3d.Rigid (space @ units) ->
   Plane3d (space @ units) defines ->
   Plane3d (space @ units) defines
 transformBy transform (Plane3d p0 b) =
@@ -345,12 +341,6 @@ rotateAround ::
   Plane3d (space @ units) defines
 rotateAround = Transform3d.rotateAroundImpl transformBy
 
-mirrorAcross ::
-  Plane3d (space @ units) defines ->
-  Plane3d (space @ units) defines ->
-  Plane3d (space @ units) defines
-mirrorAcross = Transform3d.mirrorAcrossImpl transformBy
-
 translateByOwn ::
   (Plane3d (space @ units) defines -> Vector3d (space @ units)) ->
   Plane3d (space @ units) defines ->
@@ -377,9 +367,3 @@ rotateAroundOwn ::
   Plane3d (space @ units) defines ->
   Plane3d (space @ units) defines
 rotateAroundOwn = Transform3d.rotateAroundOwnImpl transformBy
-
-mirrorAcrossOwn ::
-  (Plane3d (space @ units) defines -> Plane3d (space @ units) defines) ->
-  Plane3d (space @ units) defines ->
-  Plane3d (space @ units) defines
-mirrorAcrossOwn = Transform3d.mirrorAcrossOwnImpl transformBy
