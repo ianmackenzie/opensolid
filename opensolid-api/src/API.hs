@@ -859,7 +859,7 @@ convention3d = do
       constructor (Named xDirection) (Named yDirection) (Named zDirection) =
         Convention3d{xDirection, yDirection, zDirection}
   Class.new @(Convention3d Space) $(docs ''Convention3d) $
-    [ constructor3 "X Direction" "Y Direction" "Z Direction" constructor "Construct a coordinate convention from given X, Y and Z directions"
+    [ constructor3 "X Direction" "Y Direction" "Z Direction" constructor "Construct a coordinate convention from given X, Y and Z directions."
     , constant "Y Up" Convention3d.yUp $(docs 'Convention3d.yUp)
     , constant "Z Up" Convention3d.zUp $(docs 'Convention3d.zUp)
     ]
