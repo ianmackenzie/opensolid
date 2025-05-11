@@ -40,8 +40,8 @@ originPoint (Frame2d p0 _) = p0
 basis :: Frame2d (space @ units) defines -> Basis2d space defines
 basis (Frame2d _ b) = b
 
-coerce :: Frame2d (space @ units) defines1 -> Frame2d (space @ units) defines2
-coerce (Frame2d p0 b) = Frame2d p0 (Basis2d.coerce b)
+coerce :: Frame2d (space1 @ units1) defines1 -> Frame2d (space2 @ units2) defines2
+coerce (Frame2d p0 b) = Frame2d (Point2d.coerce p0) (Basis2d.coerce b)
 
 xDirection :: Frame2d (space @ units) defines -> Direction2d space
 xDirection frame = Basis2d.xDirection (basis frame)
