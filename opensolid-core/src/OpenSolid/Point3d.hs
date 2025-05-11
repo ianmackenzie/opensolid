@@ -85,7 +85,7 @@ along (Axis3d originPoint direction) distance = do
     # oF + dF * distance
     # oU + dU * distance
 
--- | Construct a point on the given plane, with the given local coordinates within the plane.
+-- | Construct a point on the given plane, at the given position within the plane.
 on :: Plane3d (space @ units) (Defines local) -> Point2d (local @ units) -> Point3d (space @ units)
 on (Plane3d originPoint (PlanarBasis3d i j)) (Point2d pX pY) = do
   let Point3d oR oF oU = originPoint
