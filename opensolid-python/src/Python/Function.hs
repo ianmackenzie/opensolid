@@ -2,7 +2,7 @@ module Python.Function
   ( overloadDeclaration
   , overloadCase
   , matchPattern
-  , toleranceArgument
+  , implicitValue
   , typePattern
   , arguments
   , argument
@@ -10,8 +10,8 @@ module Python.Function
   )
 where
 
-import API.Constraint (Constraint)
-import API.Constraint qualified as Constraint
+import API.ImplicitArgument (ImplicitArgument)
+import API.ImplicitArgument qualified as ImplicitArgument
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
@@ -85,18 +85,18 @@ tuplePattern type1 type2 rest = do
   let itemPatterns = List.map typePattern (type1 : type2 : rest)
   "(" <> Text.join "," itemPatterns <> ")"
 
-toleranceArgument :: Constraint -> (Text, FFI.Type)
-toleranceArgument constraint = (toleranceFunction constraint, Constraint.toleranceType constraint)
+implicitValue :: ImplicitArgument -> (Text, FFI.Type)
+implicitValue argType = (implicitGetter argType, ImplicitArgument.ffiType argType)
 
-toleranceFunction :: Constraint -> Text
-toleranceFunction constraint = case constraint of
-  Constraint.ToleranceUnitless -> "_float_tolerance()"
-  Constraint.ToleranceMeters -> "_length_tolerance()"
-  Constraint.ToleranceSquareMeters -> "_area_tolerance()"
-  Constraint.ToleranceRadians -> "_angle_tolerance()"
+implicitGetter :: ImplicitArgument -> Text
+implicitGetter argType = case argType of
+  ImplicitArgument.ToleranceUnitless -> "_float_tolerance()"
+  ImplicitArgument.ToleranceMeters -> "_length_tolerance()"
+  ImplicitArgument.ToleranceSquareMeters -> "_area_tolerance()"
+  ImplicitArgument.ToleranceRadians -> "_angle_tolerance()"
 
-arguments :: Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
-arguments includeSelf positional named = do
+arguments :: Named "includeSelf" Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
+arguments (Named includeSelf) positional named = do
   let selfArg = ["self" | includeSelf]
   let positionalArgs = List.map argument positional
   let separator = ["*" | not (List.isEmpty named)]

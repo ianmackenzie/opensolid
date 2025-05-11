@@ -16,13 +16,12 @@ import Python.Type qualified
 definition :: FFI.ClassName -> (Name, StaticFunction) -> Text
 definition className (functionName, staticFunction) = do
   let ffiFunctionName = StaticFunction.ffiName className functionName staticFunction
-  let (maybeConstraint, positionalArguments, namedArguments, returnType) =
+  let (maybeImplicitArgument, positionalArguments, namedArguments, returnType) =
         StaticFunction.signature staticFunction
-  let functionArguments = Python.Function.arguments False positionalArguments namedArguments
-  let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
+  let maybeImplicitValue = Maybe.map Python.Function.implicitValue maybeImplicitArgument
   let normalArguments =
         List.map (Pair.mapFirst FFI.snakeCase) (positionalArguments <> namedArguments)
-  let ffiArguments = List.maybe maybeToleranceArgument <> normalArguments
+  let ffiArguments = List.maybe maybeImplicitValue <> normalArguments
   let pyrightHack =
         -- Pyright doesn't seem to realize that it's OK for a static method in a derived class
         -- to have a different signature from a static method with the same name in the base class,
@@ -38,7 +37,7 @@ definition className (functionName, staticFunction) = do
     , "def "
         <> FFI.snakeCase functionName
         <> "("
-        <> functionArguments
+        <> Python.Function.arguments (#includeSelf False) positionalArguments namedArguments
         <> ") -> "
         <> Python.Type.qualifiedName returnType
         <> ":"

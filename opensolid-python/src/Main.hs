@@ -3,9 +3,9 @@ module Main (main) where
 import API qualified
 import API.Class (Class (Class))
 import API.Class qualified as Class
-import API.Constraint (Constraint)
 import API.Function (Function)
 import API.Function qualified as Function
+import API.ImplicitArgument (ImplicitArgument)
 import API.Upcast (Upcast)
 import API.Upcast qualified as Upcast
 import OpenSolid.FFI qualified as FFI
@@ -350,14 +350,15 @@ allExportsDefinition = do
 registerFunctionTypes :: Function -> Registry -> Registry
 registerFunctionTypes function registry =
   registry
-    |> registerArgumentTypes (Function.constraint function) (Function.argumentTypes function)
+    |> registerArgumentTypes (Function.implicitArgument function) (Function.argumentTypes function)
     |> Python.FFI.registerType (Function.returnType function)
 
-registerArgumentTypes :: Maybe Constraint -> List FFI.Type -> Registry -> Registry
-registerArgumentTypes maybeConstraint argumentTypes registry = do
-  let toleranceType constraint = Pair.second (Python.Function.toleranceArgument constraint)
-  let maybeToleranceType = Maybe.map toleranceType maybeConstraint
-  case List.maybe maybeToleranceType <> argumentTypes of
+registerArgumentTypes :: Maybe ImplicitArgument -> List FFI.Type -> Registry -> Registry
+registerArgumentTypes maybeImplicitArgument argumentTypes registry = do
+  let implicitArgumentType implicitArgument =
+        Pair.second (Python.Function.implicitValue implicitArgument)
+  let maybeImplicitArgumentType = Maybe.map implicitArgumentType maybeImplicitArgument
+  case List.maybe maybeImplicitArgumentType <> argumentTypes of
     [] -> registry
     [type1] -> Python.FFI.registerType type1 registry
     type1 : type2 : rest -> Python.FFI.registerType (FFI.Tuple type1 type2 rest) registry

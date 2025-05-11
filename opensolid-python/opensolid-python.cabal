@@ -64,6 +64,7 @@ executable opensolid-python
     -with-rtsopts=-N
 
   default-extensions:
+    DataKinds
     GADTs
     OverloadedLabels
     OverloadedStrings

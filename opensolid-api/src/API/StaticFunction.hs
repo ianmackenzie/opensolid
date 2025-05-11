@@ -8,7 +8,7 @@ module API.StaticFunction
 where
 
 import API.Argument qualified as Argument
-import API.Constraint (Constraint (..))
+import API.ImplicitArgument (ImplicitArgument (..))
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI, Name)
@@ -221,21 +221,21 @@ invoke function = case function of
       (tolerance, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4))
 
-type Signature = (Maybe Constraint, List (Name, FFI.Type, Argument.Kind), FFI.Type)
+type Signature = (Maybe ImplicitArgument, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
 normalizeSignature ::
-  (Maybe Constraint, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
-  (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
-normalizeSignature (maybeConstraint, arguments, returnType) =
+  (Maybe ImplicitArgument, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
+  (Maybe ImplicitArgument, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+normalizeSignature (maybeImplicitArgument, arguments, returnType) =
   if not (List.isOrdered (\(_, _, kind1) (_, _, kind2) -> kind1 <= kind2) arguments)
     then internalError "Named arguments should always come after positional arguments"
     else do
       let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
-      (maybeConstraint, args Argument.Positional, args Argument.Named, returnType)
+      (maybeImplicitArgument, args Argument.Positional, args Argument.Named, returnType)
 
 signature ::
   StaticFunction ->
-  (Maybe Constraint, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+  (Maybe ImplicitArgument, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 signature staticFunction = normalizeSignature $ case staticFunction of
   StaticFunction1 arg1 f _ -> signature1 arg1 f
   StaticFunctionU1 arg1 f _ -> signatureU1 arg1 f

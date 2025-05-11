@@ -34,10 +34,10 @@ library
     API.Class
     API.ComparisonFunction
     API.Constant
-    API.Constraint
     API.Constructor
     API.EqualityFunction
     API.Function
+    API.ImplicitArgument
     API.MemberFunction
     API.NegationFunction
     API.PostOperator

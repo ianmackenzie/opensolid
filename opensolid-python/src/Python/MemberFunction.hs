@@ -16,19 +16,18 @@ definition :: FFI.ClassName -> (Name, MemberFunction) -> Text
 definition className (functionName, memberFunction) = do
   let ffiFunctionName = MemberFunction.ffiName className functionName memberFunction
   let selfType = FFI.Class className
-  let (maybeConstraint, positionalArguments, namedArguments, returnType) =
+  let (maybeImplicitArgument, positionalArguments, namedArguments, returnType) =
         MemberFunction.signature memberFunction
-  let functionArguments = Python.Function.arguments True positionalArguments namedArguments
-  let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
+  let maybeImplicitValue = Maybe.map Python.Function.implicitValue maybeImplicitArgument
   let normalArguments =
         List.map (Pair.mapFirst FFI.snakeCase) (positionalArguments <> namedArguments)
   let selfArgument = ("self", selfType)
-  let ffiArguments = List.maybe maybeToleranceArgument <> normalArguments <> [selfArgument]
+  let ffiArguments = List.maybe maybeImplicitValue <> normalArguments <> [selfArgument]
   Python.lines
     [ "def "
         <> FFI.snakeCase functionName
         <> "("
-        <> functionArguments
+        <> Python.Function.arguments (#includeSelf True) positionalArguments namedArguments
         <> ") -> "
         <> Python.Type.qualifiedName returnType
         <> ":"
