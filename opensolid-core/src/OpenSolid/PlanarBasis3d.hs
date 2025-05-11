@@ -143,12 +143,15 @@ flipX (PlanarBasis3d i j) = PlanarBasis3d -i j
 flipY :: PlanarBasis3d space defines1 -> PlanarBasis3d space defines2
 flipY (PlanarBasis3d i j) = PlanarBasis3d i -j
 
+-- | Get the X direction of a planar basis.
 xDirection :: PlanarBasis3d space defines -> Direction3d space
 xDirection (PlanarBasis3d i _) = i
 
+-- | Get the Y direction of a planar basis.
 yDirection :: PlanarBasis3d space defines -> Direction3d space
 yDirection (PlanarBasis3d _ j) = j
 
+-- | Get the normal (outward) direction of a planar basis.
 normalDirection :: PlanarBasis3d space defines -> Direction3d space
 normalDirection (PlanarBasis3d i j) = Unit3d (i `cross` j)
 
