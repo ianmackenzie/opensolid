@@ -89,7 +89,6 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
-import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 import OpenSolid.Vertex2d as Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
@@ -107,7 +106,7 @@ data BoundarySurface (coordinateSystem :: CoordinateSystem) where
   BoundarySurface ::
     { id :: SurfaceId
     , orientedSurface :: Surface3d (space @ units)
-    , surfaceFunctions :: SurfaceFunctions (space @ units)
+    , surfaceFunction :: SurfaceFunction3d (space @ units)
     , handedness :: Sign
     , uvBounds :: UvBounds
     , edgeLoops :: NonEmpty (NonEmpty (Edge (space @ units)))
@@ -115,17 +114,6 @@ data BoundarySurface (coordinateSystem :: CoordinateSystem) where
     BoundarySurface (space @ units)
 
 newtype SurfaceId = SurfaceId Int deriving (Eq, Ord, Show)
-
-data SurfaceFunctions (coordinateSystem :: CoordinateSystem) where
-  SurfaceFunctions ::
-    { f :: SurfaceFunction3d (space @ units)
-    , fu :: VectorSurfaceFunction3d (space @ units)
-    , fv :: VectorSurfaceFunction3d (space @ units)
-    , fuu :: VectorSurfaceFunction3d (space @ units)
-    , fuv :: VectorSurfaceFunction3d (space @ units)
-    , fvv :: VectorSurfaceFunction3d (space @ units)
-    } ->
-    SurfaceFunctions (space @ units)
 
 data Edge (coordinateSystem :: CoordinateSystem) where
   PrimaryEdge ::
@@ -574,7 +562,7 @@ toBoundarySurface edges SurfaceWithHalfEdges{id, surface, handedness, halfEdgeLo
     , orientedSurface = case handedness of
         Positive -> surface
         Negative -> Surface3d.flip surface
-    , surfaceFunctions = toSurfaceFunctions (Surface3d.function surface)
+    , surfaceFunction = Surface3d.function surface
     , handedness
     , uvBounds = Region2d.bounds (Surface3d.domain surface)
     , edgeLoops = NonEmpty.map (NonEmpty.map (toEdge edges)) halfEdgeLoops
@@ -589,15 +577,6 @@ toEdge edges halfEdge =
 halfEdgeId :: HalfEdge (space @ units) -> HalfEdgeId
 halfEdgeId HalfEdge{id} = id
 halfEdgeId DegenerateHalfEdge{id} = id
-
-toSurfaceFunctions :: SurfaceFunction3d (space @ units) -> SurfaceFunctions (space @ units)
-toSurfaceFunctions f = do
-  let fu = SurfaceFunction3d.derivative U f
-  let fv = SurfaceFunction3d.derivative V f
-  let fuu = VectorSurfaceFunction3d.derivative U fu
-  let fuv = VectorSurfaceFunction3d.derivative V fu
-  let fvv = VectorSurfaceFunction3d.derivative V fv
-  SurfaceFunctions{f, fu, fv, fuu, fuv, fvv}
 
 cornerSurfaceId :: Corner (space @ units) -> SurfaceId
 cornerSurfaceId Corner{surfaceId} = surfaceId
@@ -668,33 +647,33 @@ boundarySurfaceSegments ::
   Mesh.Constraints units ->
   BoundarySurface (space @ units) ->
   (SurfaceId, Set2d UvBounds UvCoordinates)
-boundarySurfaceSegments constraints BoundarySurface{id, surfaceFunctions, uvBounds} =
-  (id, boundarySurfaceSegmentSet constraints surfaceFunctions uvBounds)
+boundarySurfaceSegments constraints BoundarySurface{id, surfaceFunction, uvBounds} =
+  (id, boundarySurfaceSegmentSet constraints surfaceFunction uvBounds)
 
 boundarySurfaceSegmentSet ::
   Mesh.Constraints units ->
-  SurfaceFunctions (space @ units) ->
+  SurfaceFunction3d (space @ units) ->
   UvBounds ->
   Set2d UvBounds UvCoordinates
-boundarySurfaceSegmentSet constraints surfaceFunctions uvBounds = do
+boundarySurfaceSegmentSet constraints surfaceFunction uvBounds = do
   let Mesh.Constraints{maxError, maxSize} = constraints
-  if surfaceSize surfaceFunctions uvBounds <= maxSize
-    && surfaceError surfaceFunctions uvBounds <= maxError
+  if surfaceSize surfaceFunction uvBounds <= maxSize
+    && surfaceError surfaceFunction uvBounds <= maxError
     then Set2d.Leaf uvBounds uvBounds
     else do
       let Bounds2d uBounds vBounds = uvBounds
       let (u1, u2) = Bounds.bisect uBounds
       let (v1, v2) = Bounds.bisect vBounds
-      let set11 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u1 v1)
-      let set12 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u1 v2)
-      let set21 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u2 v1)
-      let set22 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u2 v2)
+      let set11 = boundarySurfaceSegmentSet constraints surfaceFunction (Bounds2d u1 v1)
+      let set12 = boundarySurfaceSegmentSet constraints surfaceFunction (Bounds2d u1 v2)
+      let set21 = boundarySurfaceSegmentSet constraints surfaceFunction (Bounds2d u2 v1)
+      let set22 = boundarySurfaceSegmentSet constraints surfaceFunction (Bounds2d u2 v2)
       let set1 = Set2d.Node (Bounds2d u1 vBounds) set11 set12
       let set2 = Set2d.Node (Bounds2d u2 vBounds) set21 set22
       Set2d.Node uvBounds set1 set2
 
-surfaceSize :: SurfaceFunctions (space @ units) -> UvBounds -> Qty units
-surfaceSize SurfaceFunctions{f} uvBounds = do
+surfaceSize :: SurfaceFunction3d (space @ units) -> UvBounds -> Qty units
+surfaceSize f uvBounds = do
   let p00 = SurfaceFunction3d.evaluate f (Bounds2d.lowerLeftCorner uvBounds)
   let p10 = SurfaceFunction3d.evaluate f (Bounds2d.lowerRightCorner uvBounds)
   let p01 = SurfaceFunction3d.evaluate f (Bounds2d.upperLeftCorner uvBounds)
@@ -706,8 +685,13 @@ surfaceSize SurfaceFunctions{f} uvBounds = do
     |> Qty.max (Point3d.distanceFrom p00 p11)
     |> Qty.max (Point3d.distanceFrom p10 p01)
 
-surfaceError :: SurfaceFunctions (space @ units) -> UvBounds -> Qty units
-surfaceError SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
+surfaceError :: SurfaceFunction3d (space @ units) -> UvBounds -> Qty units
+surfaceError f uvBounds = do
+  let fu = f |> SurfaceFunction3d.derivative U
+  let fv = f |> SurfaceFunction3d.derivative V
+  let fuu = fu |> VectorSurfaceFunction3d.derivative U
+  let fuv = fu |> VectorSurfaceFunction3d.derivative V
+  let fvv = fv |> VectorSurfaceFunction3d.derivative V
   let fuuBounds = VectorSurfaceFunction3d.evaluateBounds fuu uvBounds
   let fuvBounds = VectorSurfaceFunction3d.evaluateBounds fuv uvBounds
   let fvvBounds = VectorSurfaceFunction3d.evaluateBounds fvv uvBounds
@@ -851,7 +835,7 @@ boundarySurfaceMesh ::
   BoundarySurface (space @ units) ->
   Mesh (Point3d (space @ units), Vector3d (space @ Unitless))
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
-  let BoundarySurface{id, surfaceFunctions, handedness, edgeLoops} = boundarySurface
+  let BoundarySurface{id, surfaceFunction, handedness, edgeLoops} = boundarySurface
   let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
   let boundarySegments = NonEmpty.collect Polygon2d.edges boundaryPolygons
   let boundarySegmentSet = Set2d.fromNonEmpty boundarySegments
@@ -868,14 +852,14 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
                 []
               Set2d.Node{} ->
                 Maybe.collect (steinerPoint boundarySegmentSet) (Set2d.toList surfaceSegments)
-      let SurfaceFunctions{f} = surfaceFunctions
-      let steinerVertex uvPoint = Vertex uvPoint (SurfaceFunction3d.evaluate f uvPoint)
+      let steinerVertex uvPoint =
+            Vertex uvPoint (SurfaceFunction3d.evaluate surfaceFunction uvPoint)
       let steinerVertices = List.map steinerVertex steinerPoints
       let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
       -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
       let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices
       let pointsAndNormals =
-            Array.map (pointAndNormal surfaceFunctions handedness) (Mesh.vertices vertexMesh)
+            Array.map (pointAndNormal surfaceFunction handedness) (Mesh.vertices vertexMesh)
       let faceIndices =
             case handedness of
               Positive -> Mesh.faceIndices vertexMesh
@@ -883,11 +867,13 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
       Mesh.indexed pointsAndNormals faceIndices
 
 pointAndNormal ::
-  SurfaceFunctions (space @ units) ->
+  SurfaceFunction3d (space @ units) ->
   Sign ->
   Vertex (space @ units) ->
   (Point3d (space @ units), Vector3d (space @ Unitless))
-pointAndNormal SurfaceFunctions{fu, fv} handedness (Vertex uvPoint point) = do
+pointAndNormal f handedness (Vertex uvPoint point) = do
+  let fu = f |> SurfaceFunction3d.derivative U
+  let fv = f |> SurfaceFunction3d.derivative V
   let fuValue = VectorSurfaceFunction3d.evaluate fu uvPoint
   let fvValue = VectorSurfaceFunction3d.evaluate fv uvPoint
   (point, handedness * Vector3d.normalize (fuValue `cross'` fvValue))
