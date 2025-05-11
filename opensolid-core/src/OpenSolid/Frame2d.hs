@@ -1,6 +1,7 @@
 module OpenSolid.Frame2d
   ( Frame2d (Frame2d)
   , coerce
+  , erase
   , xy
   , atPoint
   , originPoint
@@ -42,6 +43,9 @@ basis (Frame2d _ b) = b
 
 coerce :: Frame2d (space1 @ units1) defines1 -> Frame2d (space2 @ units2) defines2
 coerce (Frame2d p0 b) = Frame2d (Point2d.coerce p0) (Basis2d.coerce b)
+
+erase :: Frame2d (space @ units) defines -> Frame2d (space @ Unitless) defines
+erase = coerce
 
 xDirection :: Frame2d (space @ units) defines -> Direction2d space
 xDirection frame = Basis2d.xDirection (basis frame)
