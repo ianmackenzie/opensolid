@@ -19,7 +19,7 @@ module OpenSolid.Direction2d
   , rotateRight
   , placeIn
   , relativeTo
-  , placeOn
+  , on
   , random
   , transformBy
   , rotateBy
@@ -167,11 +167,11 @@ placeIn basis = lift (Vector2d.placeIn basis)
 relativeTo :: Basis2d global (Defines local) -> Direction2d global -> Direction2d local
 relativeTo basis = lift (Vector2d.relativeTo basis)
 
-placeOn ::
+on ::
   PlanarBasis3d space (Defines local) ->
   Direction2d local ->
   Direction3d space
-placeOn planarBasis (Unit2d vector) = Unit3d (Vector2d.placeOn planarBasis vector)
+on planarBasis (Unit2d vector) = Unit3d (Vector2d.on planarBasis vector)
 
 random :: Random.Generator (Direction2d space)
 random = Random.map polar (Qty.random -Angle.pi Angle.pi)

@@ -2,7 +2,7 @@ module OpenSolid.VectorCurve3d
   ( VectorCurve3d
   , Compiled
   , new
-  , planar
+  , on
   , compiled
   , startValue
   , endValue
@@ -447,15 +447,15 @@ zero = constant Vector3d.zero
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 constant value = new (CompiledFunction.constant value) zero
 
-planar :: PlanarBasis3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
-planar basis vectorCurve2d = do
+on :: PlanarBasis3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
+on basis vectorCurve2d = do
   let compiledPlanar =
         CompiledFunction.map
-          (Expression.VectorCurve2d.placeOn basis)
-          (Vector2d.placeOn basis)
-          (VectorBounds2d.placeOn basis)
+          (Expression.VectorCurve2d.on basis)
+          (Vector2d.on basis)
+          (VectorBounds2d.on basis)
           (VectorCurve2d.compiled vectorCurve2d)
-  new compiledPlanar (planar basis (VectorCurve2d.derivative vectorCurve2d))
+  new compiledPlanar (on basis (VectorCurve2d.derivative vectorCurve2d))
 
 rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units)
 rightwardForwardUpward r f u =

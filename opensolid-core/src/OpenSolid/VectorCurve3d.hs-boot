@@ -5,7 +5,7 @@ module OpenSolid.VectorCurve3d
   , derivative
   , constant
   , new
-  , planar
+  , on
   , evaluate
   , evaluateBounds
   , unsafeMagnitude
@@ -96,7 +96,7 @@ instance
 
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
-planar :: PlanarBasis3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
+on :: PlanarBasis3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
 evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
 unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units

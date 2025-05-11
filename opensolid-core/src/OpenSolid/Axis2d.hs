@@ -8,7 +8,7 @@ module OpenSolid.Axis2d
   , through
   , moveTo
   , reverse
-  , placeOn
+  , on
   , transformBy
   , translateBy
   , translateByOwn
@@ -63,13 +63,13 @@ moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
 reverse :: Axis2d (space @ units) -> Axis2d (space @ units)
 reverse (Axis2d p0 d) = Axis2d p0 -d
 
-placeOn ::
+on ::
   Plane3d (space @ units) (Defines local) ->
   Axis2d (local @ units) ->
   Axis3d (space @ units)
-placeOn plane (Axis2d p0 d) = do
+on plane (Axis2d p0 d) = do
   let Plane3d _ basis = plane
-  Axis3d (Point2d.placeOn plane p0) (Direction2d.placeOn basis d)
+  Axis3d (Point2d.on plane p0) (Direction2d.on basis d)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

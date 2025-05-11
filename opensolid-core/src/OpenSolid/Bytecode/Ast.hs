@@ -972,12 +972,12 @@ placePoint3dIn frame ast = transformPoint3d (pointPlacementTransform3d frame) as
 
 placeVector2dOn :: PlanarBasis3d global (Defines local) -> Ast2d input -> Ast3d input
 placeVector2dOn basis ast = case ast of
-  Constant2d val -> Constant3d (Vector2d.placeOn (PlanarBasis3d.coerce basis) val)
+  Constant2d val -> Constant3d (Vector2d.on (PlanarBasis3d.coerce basis) val)
   Variable2d var -> Variable3d (PlaceVector2d (PlanarBasis3d.coerce basis) var)
 
 placePoint2dOn :: Plane3d (global @ units) (Defines local) -> Ast2d input -> Ast3d input
 placePoint2dOn plane ast = case ast of
-  Constant2d val -> Constant3d (Point2d.placeOn (Plane3d.coerce plane) (Point2d.origin + val) - Point3d.origin)
+  Constant2d val -> Constant3d (Point2d.on (Plane3d.coerce plane) (Point2d.origin + val) - Point3d.origin)
   Variable2d var -> Variable3d (PlacePoint2d (Plane3d.coerce plane) var)
 
 projectVector3dInto :: PlanarBasis3d global (Defines local) -> Ast3d input -> Ast2d input

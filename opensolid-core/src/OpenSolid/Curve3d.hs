@@ -5,7 +5,7 @@ module OpenSolid.Curve3d
   , new
   , recursive
   , constant
-  , planar
+  , on
   , line
   , bezier
   , quadraticBezier
@@ -194,18 +194,18 @@ rightwardForwardUpward r f u =
       (Curve.derivative f)
       (Curve.derivative u)
 
-planar ::
+on ::
   Plane3d (space @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve3d (space @ units)
-planar plane curve2d = do
+on plane curve2d = do
   new
     # CompiledFunction.map
-      (Expression.Curve2d.placeOn plane)
-      (Point2d.placeOn plane)
-      (Bounds2d.placeOn plane)
+      (Expression.Curve2d.on plane)
+      (Point2d.on plane)
+      (Bounds2d.on plane)
       (Curve2d.compiled curve2d)
-    # VectorCurve3d.planar (Plane3d.basis plane) (Curve2d.derivative curve2d)
+    # VectorCurve3d.on (Plane3d.basis plane) (Curve2d.derivative curve2d)
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve.t * (p2 - p1)

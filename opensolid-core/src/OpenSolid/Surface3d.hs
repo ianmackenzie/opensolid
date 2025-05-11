@@ -1,7 +1,7 @@
 module OpenSolid.Surface3d
   ( Surface3d
   , parametric
-  , planar
+  , on
   , extruded
   , translational
   , ruled
@@ -93,11 +93,11 @@ parametric givenFunction givenDomain = do
     , innerLoops = List.map boundaryLoop (Region2d.innerLoops givenDomain)
     }
 
-planar ::
+on ::
   Plane3d (space @ units) (Defines local) ->
   Region2d (local @ units) ->
   Surface3d (space @ units)
-planar plane region = do
+on plane region = do
   let regionBounds = Region2d.bounds region
   let (width, height) = Bounds2d.dimensions regionBounds
   let centerPoint = Bounds2d.centerPoint regionBounds
@@ -105,7 +105,7 @@ planar plane region = do
   let regionSize = Qty.max width height
   let centeredRegion = Region2d.relativeTo centerFrame region
   let normalizedRegion = Region2d.convert (1.0 ./. regionSize) centeredRegion
-  let p0 = Point2d.placeOn plane centerPoint
+  let p0 = Point2d.on plane centerPoint
   let vx = regionSize * Plane3d.xDirection plane
   let vy = regionSize * Plane3d.yDirection plane
   let planeFunction = p0 + SurfaceFunction.u * vx + SurfaceFunction.v * vy
@@ -144,7 +144,7 @@ revolved sketchPlane curve axis angle = do
     else case Curve.sign xCoordinate of
       Failure Curve.CrossesZero -> Failure Revolved.ProfileCrossesAxis
       Success profileSign -> do
-        let frame3d = Frame3d.fromBackPlane (Frame2d.placeOn sketchPlane frame2d)
+        let frame3d = Frame3d.fromBackPlane (Frame2d.on sketchPlane frame2d)
         let (revolutionParameter, curveParameter) = case profileSign of
               Positive -> (SurfaceFunction.u, SurfaceFunction.v)
               Negative -> (SurfaceFunction.v, SurfaceFunction.u)

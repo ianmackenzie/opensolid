@@ -36,7 +36,7 @@ module OpenSolid.Vector2d
   , rotateLeft
   , placeIn
   , relativeTo
-  , placeOn
+  , on
   , convert
   , unconvert
   , sum
@@ -264,11 +264,11 @@ relativeTo ::
   Vector2d (local @ units)
 relativeTo (Basis2d i j) vector = Vector2d (vector `dot` i) (vector `dot` j)
 
-placeOn ::
+on ::
   PlanarBasis3d space (Defines local) ->
   Vector2d (local @ units) ->
   Vector3d (space @ units)
-placeOn (PlanarBasis3d i j) (Vector2d vx vy) = vx * i + vy * j
+on (PlanarBasis3d i j) (Vector2d vx vy) = vx * i + vy * j
 
 convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
 convert factor vector = vector !* factor

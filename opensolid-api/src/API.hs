@@ -660,7 +660,7 @@ point2d =
     , member0 "Y Coordinate" Point2d.yCoordinate $(docs 'Point2d.yCoordinate)
     , member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
     , member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
-    , member1 "Place On" "Plane" Point2d.placeOn $(docs 'Point2d.placeOn)
+    , member1 "On" "Plane" Point2d.on $(docs 'Point2d.on)
     , minusSelf
     , minus @(Vector2d (Space @ Meters)) Self
     , plus @(Vector2d (Space @ Meters)) Self

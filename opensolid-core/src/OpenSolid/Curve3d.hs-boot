@@ -3,7 +3,7 @@ module OpenSolid.Curve3d
   , Compiled
   , constant
   , new
-  , planar
+  , on
   , evaluate
   , evaluateBounds
   , derivative
@@ -47,7 +47,7 @@ instance
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> Curve3d (space @ units)
-planar ::
+on ::
   Plane3d (space @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve3d (space @ units)

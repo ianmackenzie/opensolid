@@ -320,9 +320,9 @@ translational sketchPlane profile displacement = do
   let v1 = VectorCurve3d.endValue displacement
   let startPlane = Plane3d.translateBy v0 sketchPlane
   let endPlane = Plane3d.translateBy v1 sketchPlane
-  let startCap = Surface3d.planar startPlane profile
-  let endCap = Surface3d.planar endPlane profile
-  let sideSurface curve = Surface3d.translational (Curve2d.placeOn sketchPlane curve) displacement
+  let startCap = Surface3d.on startPlane profile
+  let endCap = Surface3d.on endPlane profile
+  let sideSurface curve = Surface3d.translational (Curve2d.on sketchPlane curve) displacement
   let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2d.boundaryCurves profile))
   let initialDerivative = VectorCurve3d.startValue (VectorCurve3d.derivative displacement)
   case Qty.sign (initialDerivative `dot` Plane3d.normalDirection sketchPlane) of
@@ -345,7 +345,7 @@ revolved ::
   Angle ->
   Result BoundedBy.Error (Body3d (space @ units))
 revolved startPlane profile axis2d angle = Result.do
-  let axis3d = Axis2d.placeOn startPlane axis2d
+  let axis3d = Axis2d.on startPlane axis2d
   let profileCurves = Region2d.boundaryCurves profile
   let offAxisCurves = NonEmpty.filter (not . Curve2d.isOnAxis axis2d) profileCurves
   let signedDistanceCurves = List.map (Curve2d.distanceRightOf axis2d) offAxisCurves
@@ -358,8 +358,8 @@ revolved startPlane profile axis2d angle = Result.do
         | otherwise -> Failure BoundedBy.BoundaryIntersectsItself
 
   let endPlane = Plane3d.rotateAround axis3d angle startPlane
-  let unflippedStartCap = Surface3d.planar startPlane profile
-  let unflippedEndCap = Surface3d.planar endPlane profile
+  let unflippedStartCap = Surface3d.on startPlane profile
+  let unflippedEndCap = Surface3d.on endPlane profile
   let sideSurface profileCurve = Surface3d.revolved startPlane profileCurve axis2d angle
   sideSurfaces <-
     case Result.collect sideSurface offAxisCurves of

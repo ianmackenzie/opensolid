@@ -32,7 +32,7 @@ module OpenSolid.Expression
   , TransformBy (transformBy)
   , PlaceIn (placeIn)
   , RelativeTo (relativeTo)
-  , PlaceOn (placeOn)
+  , On (on)
   , ProjectInto (projectInto)
   , bezierCurve
   , Evaluation (evaluate, evaluateBounds)
@@ -1571,28 +1571,28 @@ instance
   where
   relativeTo frame ast = placeIn (Frame3d.inverse frame) ast
 
-class PlaceOn plane expression1 expression2 | plane expression1 -> expression2 where
-  placeOn :: plane -> expression1 -> expression2
+class On plane expression1 expression2 | plane expression1 -> expression2 where
+  on :: plane -> expression1 -> expression2
 
 instance
   local1 ~ local2 =>
-  PlaceOn
+  On
     (PlanarBasis3d global (Defines local1))
     (Expression input (Vector2d (local2 @ units2)))
     (Expression input (Vector3d (global @ units2)))
   where
-  placeOn basis (VectorCurve2d ast _) = vectorCurve3d (Ast.placeVector2dOn basis ast)
-  placeOn basis (VectorSurface2d ast _) = vectorSurface3d (Ast.placeVector2dOn basis ast)
+  on basis (VectorCurve2d ast _) = vectorCurve3d (Ast.placeVector2dOn basis ast)
+  on basis (VectorSurface2d ast _) = vectorSurface3d (Ast.placeVector2dOn basis ast)
 
 instance
   (local1 ~ local2, units1 ~ units2) =>
-  PlaceOn
+  On
     (Plane3d (global @ units1) (Defines local1))
     (Expression input (Point2d (local2 @ units2)))
     (Expression input (Point3d (global @ units2)))
   where
-  placeOn plane (Curve2d ast _) = curve3d (Ast.placePoint2dOn plane ast)
-  placeOn plane (Surface2d ast _) = surface3d (Ast.placePoint2dOn plane ast)
+  on plane (Curve2d ast _) = curve3d (Ast.placePoint2dOn plane ast)
+  on plane (Surface2d ast _) = surface3d (Ast.placePoint2dOn plane ast)
 
 class ProjectInto plane expression1 expression2 | plane expression1 -> expression2 where
   projectInto :: plane -> expression1 -> expression2

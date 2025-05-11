@@ -14,7 +14,7 @@ module OpenSolid.Frame2d
   , fromYAxis
   , placeIn
   , relativeTo
-  , placeOn
+  , on
   , inverse
   )
 where
@@ -89,14 +89,14 @@ relativeTo globalFrame frame =
     (Point2d.relativeTo globalFrame (originPoint frame))
     (Basis2d.relativeTo (basis globalFrame) (basis frame))
 
-placeOn ::
+on ::
   Plane3d (space @ units) (Defines local) ->
   Frame2d (local @ units) defines ->
   Plane3d (space @ units) defines
-placeOn plane (Frame2d p0 (Basis2d i j)) = do
+on plane (Frame2d p0 (Basis2d i j)) = do
   let Plane3d _ planarBasis = plane
-  Plane3d (Point2d.placeOn plane p0) $
-    PlanarBasis3d (Direction2d.placeOn planarBasis i) (Direction2d.placeOn planarBasis j)
+  Plane3d (Point2d.on plane p0) $
+    PlanarBasis3d (Direction2d.on planarBasis i) (Direction2d.on planarBasis j)
 
 inverse :: Frame2d (global @ units) (Defines local) -> Frame2d (local @ units) (Defines global)
 inverse frame = xy |> relativeTo frame

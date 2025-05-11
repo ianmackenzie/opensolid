@@ -4,7 +4,7 @@ module OpenSolid.Expression.Curve2d
   , placeIn
   , relativeTo
   , transformBy
-  , placeOn
+  , on
   )
 where
 
@@ -38,11 +38,11 @@ relativeTo ::
   Expression Float (Point2d (local @ units))
 relativeTo = Expression.relativeTo
 
-placeOn ::
+on ::
   Plane3d (global @ units) (Defines local) ->
   Expression Float (Point2d (local @ units)) ->
   Expression Float (Point3d (global @ units))
-placeOn = Expression.placeOn
+on = Expression.on
 
 transformBy ::
   Transform2d tag (space @ units) ->

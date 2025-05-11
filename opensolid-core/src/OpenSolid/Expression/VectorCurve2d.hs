@@ -7,7 +7,7 @@ module OpenSolid.Expression.VectorCurve2d
   , placeIn
   , relativeTo
   , transformBy
-  , placeOn
+  , on
   )
 where
 
@@ -62,8 +62,8 @@ transformBy ::
   Expression Float (Vector2d (space @ units))
 transformBy = Expression.transformBy
 
-placeOn ::
+on ::
   PlanarBasis3d space (Defines local) ->
   Expression Float (Vector2d (local @ units)) ->
   Expression Float (Vector3d (space @ units))
-placeOn = Expression.placeOn
+on = Expression.on

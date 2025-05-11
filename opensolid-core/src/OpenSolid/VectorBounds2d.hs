@@ -25,7 +25,7 @@ module OpenSolid.VectorBounds2d
   , interpolate
   , relativeTo
   , placeIn
-  , placeOn
+  , on
   , convert
   , unconvert
   , transformBy
@@ -207,11 +207,11 @@ relativeTo basis (VectorBounds2d x y) = do
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
-placeOn ::
+on ::
   PlanarBasis3d space (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds3d (space @ units)
-placeOn (PlanarBasis3d i j) (VectorBounds2d x y) = x * i + y * j
+on (PlanarBasis3d i j) (VectorBounds2d x y) = x * i + y * j
 
 convert ::
   Qty (units2 :/: units1) ->
