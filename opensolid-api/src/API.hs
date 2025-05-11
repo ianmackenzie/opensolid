@@ -630,6 +630,8 @@ direction2d =
     , factory1 "Polar" "Angle" Direction2d.polar $(docs 'Direction2d.polar)
     , factory1 "Degrees" "Value" Direction2d.degrees $(docs 'Direction2d.degrees)
     , factory1 "Radians" "Value" Direction2d.radians $(docs 'Direction2d.radians)
+    , member0 "Rotate Left" Direction2d.rotateLeft $(docs 'Direction2d.rotateLeft)
+    , member0 "Rotate Right" Direction2d.rotateRight $(docs 'Direction2d.rotateRight)
     , negateSelf
     ]
 
