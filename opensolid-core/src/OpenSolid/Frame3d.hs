@@ -89,7 +89,7 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Transform3d qualified as Transform3d
 
-identity :: Frame3d (space @ units) (Defines space)
+identity :: Frame3d (space @ units) defines
 identity = forwardFacing Point3d.origin
 
 forwardFacing :: Point3d (space @ units) -> Frame3d (space @ units) defines
