@@ -129,8 +129,6 @@ import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Prelude (flip)
 
------ API DEFINITION -----
-
 classes :: List Class
 classes =
   [ length
