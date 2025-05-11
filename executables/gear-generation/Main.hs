@@ -11,6 +11,7 @@ import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
@@ -44,7 +45,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
         let basePath = "executables/gear-generation/gear" <> Text.int numTeeth
         let glbPath = basePath <> ".glb"
         let stlPath = basePath <> ".stl"
-        let material = Scene3d.iron (#roughness 0.3)
+        let material = PbrMaterial.iron (#roughness 0.3)
         let mesh = Body3d.toMesh meshConstraints body
         Scene3d.writeGlb glbPath [Scene3d.mesh material mesh]
         Stl.writeBinary stlPath Convention3d.yUp Length.inMillimeters mesh

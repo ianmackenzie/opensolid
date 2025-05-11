@@ -104,6 +104,8 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.PbrMaterial (PbrMaterial)
+import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.PlanarBasis3d (PlanarBasis3d)
 import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Plane3d (Plane3d)
@@ -181,6 +183,7 @@ classes =
   , uvRegion
   , body3d
   , mesh
+  , pbrMaterial
   , scene3d
   , spurGear
   ]
@@ -1377,26 +1380,30 @@ mesh =
     , static1 "Max Size" "Size" (Mesh.maxSize @Meters) $(docs 'Mesh.maxSize)
     ]
 
+pbrMaterial :: Class
+pbrMaterial =
+  Class.new @PbrMaterial $(docs ''PbrMaterial) $
+    [ factory2 "Metal" "Base Color" "Roughness" PbrMaterial.metal $(docs 'PbrMaterial.metal)
+    , factory1 "Aluminum" "Roughness" PbrMaterial.aluminum $(docs 'PbrMaterial.aluminum)
+    , factory1 "Brass" "Roughness" PbrMaterial.brass $(docs 'PbrMaterial.brass)
+    , factory1 "Chromium" "Roughness" PbrMaterial.chromium $(docs 'PbrMaterial.chromium)
+    , factory1 "Copper" "Roughness" PbrMaterial.copper $(docs 'PbrMaterial.copper)
+    , factory1 "Gold" "Roughness" PbrMaterial.gold $(docs 'PbrMaterial.gold)
+    , factory1 "Iron" "Roughness" PbrMaterial.iron $(docs 'PbrMaterial.iron)
+    , factory1 "Nickel" "Roughness" PbrMaterial.nickel $(docs 'PbrMaterial.nickel)
+    , factory1 "Silver" "Roughness" PbrMaterial.silver $(docs 'PbrMaterial.silver)
+    , factory1 "Titanium" "Roughness" PbrMaterial.titanium $(docs 'PbrMaterial.titanium)
+    , factory2 "Nonmetal" "Base Color" "Roughness" PbrMaterial.nonmetal $(docs 'PbrMaterial.nonmetal)
+    , factory3 "Custom" "Base Color" "Metallic" "Roughness" PbrMaterial.custom $(docs 'PbrMaterial.custom)
+    ]
+
 scene3d :: Class
 scene3d =
   Class.static "Scene3d" "A set of functions for constructing 3D scenes." $
     [ staticM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
     , static1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
-    , static2 "Metal" "Base Color" "Roughness" Scene3d.metal $(docs 'Scene3d.metal)
-    , static1 "Aluminum" "Roughness" Scene3d.aluminum $(docs 'Scene3d.aluminum)
-    , static1 "Brass" "Roughness" Scene3d.brass $(docs 'Scene3d.brass)
-    , static1 "Chromium" "Roughness" Scene3d.chromium $(docs 'Scene3d.chromium)
-    , static1 "Copper" "Roughness" Scene3d.copper $(docs 'Scene3d.copper)
-    , static1 "Gold" "Roughness" Scene3d.gold $(docs 'Scene3d.gold)
-    , static1 "Iron" "Roughness" Scene3d.iron $(docs 'Scene3d.iron)
-    , static1 "Nickel" "Roughness" Scene3d.nickel $(docs 'Scene3d.nickel)
-    , static1 "Silver" "Roughness" Scene3d.silver $(docs 'Scene3d.silver)
-    , static1 "Titanium" "Roughness" Scene3d.titanium $(docs 'Scene3d.titanium)
-    , static2 "Nonmetal" "Base Color" "Roughness" Scene3d.nonmetal $(docs 'Scene3d.nonmetal)
-    , static3 "Material" "Base Color" "Metallic" "Roughness" Scene3d.material $(docs 'Scene3d.material)
     , static2 "Write GLB" "Path" "Entities" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
     , nested @(Scene3d.Entity Space) "A scene entity such as a mesh or group." (rigidTransformations3d Scene3d.transformBy)
-    , nested @Scene3d.Material "A material applied to a mesh." []
     ]
 
 spurGear :: Class

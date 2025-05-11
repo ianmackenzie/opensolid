@@ -9,6 +9,7 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
@@ -32,6 +33,6 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   body <- Body3d.revolved World3d.frontPlane profile Axis2d.y Angle.twoPi
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
   let mesh = Body3d.toMesh constraints body
-  let material = Scene3d.nonmetal Color.blue (#roughness 0.2)
+  let material = PbrMaterial.nonmetal Color.blue (#roughness 0.2)
   let scene = [Scene3d.mesh material mesh]
   Scene3d.writeGlb "executables/raindrop/mesh.glb" scene

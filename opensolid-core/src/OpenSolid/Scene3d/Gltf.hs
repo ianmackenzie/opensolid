@@ -18,7 +18,6 @@ import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
-import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3d (Convention3d (Convention3d))
 import OpenSolid.Direction3d (Direction3d)
@@ -29,6 +28,8 @@ import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import OpenSolid.PbrMaterial (PbrMaterial)
+import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty))
@@ -67,15 +68,15 @@ matrixComponents frame =
 matrixField :: Frame3d (space @ Meters) (Defines local) -> Json.Field
 matrixField frame = Json.optional "matrix" $ matrixComponents frame
 
-pbrMaterial :: Color -> Named "metallic" Float -> Named "roughness" Float -> Json
-pbrMaterial baseColor (Named metallic) (Named roughness) = do
-  let (r, g, b) = Color.components baseColor
+pbrMaterial :: PbrMaterial -> Json
+pbrMaterial material = do
+  let (r, g, b) = Color.components (PbrMaterial.baseColor material)
   Json.object
     [ Json.field "pbrMetallicRoughness" $
         Json.object
           [ Json.field "baseColorFactor" $ Json.listOf Json.float [r, g, b, 1.0]
-          , Json.field "metallicFactor" $ Json.float metallic
-          , Json.field "roughnessFactor" $ Json.float roughness
+          , Json.field "metallicFactor" $ Json.float (PbrMaterial.metallic material)
+          , Json.field "roughnessFactor" $ Json.float (PbrMaterial.roughness material)
           ]
     ]
 

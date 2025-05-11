@@ -165,6 +165,7 @@ library
     OpenSolid.NonEmpty
     OpenSolid.Pair
     OpenSolid.Parameter
+    OpenSolid.PbrMaterial
     OpenSolid.PlanarBasis3d
     OpenSolid.Plane3d
     OpenSolid.Point2d

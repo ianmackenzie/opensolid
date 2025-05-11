@@ -1,24 +1,11 @@
 module OpenSolid.Scene3d
   ( Entity
-  , Material
   , mesh
   , body
   , group
   , transformBy
   , placeIn
   , relativeTo
-  , metal
-  , aluminum
-  , iron
-  , chromium
-  , brass
-  , copper
-  , gold
-  , nickel
-  , silver
-  , titanium
-  , nonmetal
-  , material
   , toGlb
   , writeGlb
   )
@@ -32,8 +19,6 @@ import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounded3d qualified as Bounded3d
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds3d qualified as Bounds3d
-import OpenSolid.Color (Color)
-import OpenSolid.Color qualified as Color
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3d (Frame3d)
@@ -46,6 +31,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.Prelude
 import OpenSolid.Scene3d.Gltf qualified as Gltf
 import OpenSolid.Transform3d qualified as Transform3d
@@ -55,7 +41,7 @@ import OpenSolid.Vertex3d qualified as Vertex3d
 data Entity space where
   Mesh ::
     Vertex3d.HasNormal vertex (space @ Meters) =>
-    Material ->
+    PbrMaterial ->
     Mesh vertex ->
     Entity space
   Group ::
@@ -66,15 +52,10 @@ data Entity space where
     Entity local ->
     Entity global
 
-data Material = Material {baseColor :: Color, roughness :: Float, metallic :: Float}
-
 instance FFI (Entity space) where
   representation = FFI.nestedClassRepresentation "Scene3d" "Entity"
 
-instance FFI Material where
-  representation = FFI.nestedClassRepresentation "Scene3d" "Material"
-
-mesh :: Vertex3d.HasNormal vertex (space @ Meters) => Material -> Mesh vertex -> Entity space
+mesh :: Vertex3d.HasNormal vertex (space @ Meters) => PbrMaterial -> Mesh vertex -> Entity space
 mesh = Mesh
 
 {-| Render the given body with the given material.
@@ -84,7 +65,7 @@ The body will first be converted to a mesh using the given constraints.
 body ::
   Tolerance Meters =>
   NonEmpty (Mesh.Constraint Meters) ->
-  Material ->
+  PbrMaterial ->
   Body3d (space @ Meters) ->
   Entity space
 body meshConstraints givenMaterial givenBody =
@@ -107,54 +88,6 @@ placeIn frame entity = Placed frame entity
 
 relativeTo :: Frame3d (global @ Meters) (Defines local) -> Entity global -> Entity local
 relativeTo frame = placeIn (Frame3d.inverse frame)
-
--- | Create a metallic material with the given color and roughness.
-metal :: Color -> Named "roughness" Float -> Material
-metal baseColor (Named roughness) = Material{baseColor, metallic = 1.0, roughness}
-
--- | Create an aluminum material with the given roughness.
-aluminum :: Named "roughness" Float -> Material
-aluminum = metal (Color.rgb 0.960 0.961 0.964)
-
--- | Create a brass material with the given roughness.
-brass :: Named "roughness" Float -> Material
-brass = metal (Color.rgb 0.949 0.901 0.690)
-
--- | Create a chromium material with the given roughness.
-chromium :: Named "roughness" Float -> Material
-chromium = metal (Color.rgb 0.820 0.827 0.834)
-
--- | Create a copper material with the given roughness.
-copper :: Named "roughness" Float -> Material
-copper = metal (Color.rgb 0.967 0.866 0.738)
-
--- | Create a gold material with the given roughness.
-gold :: Named "roughness" Float -> Material
-gold = metal (Color.rgb 0.975 0.894 0.645)
-
--- | Create an iron material with the given roughness.
-iron :: Named "roughness" Float -> Material
-iron = metal (Color.rgb 0.755 0.743 0.733)
-
--- | Create a nickel material with the given roughness.
-nickel :: Named "roughness" Float -> Material
-nickel = metal (Color.rgb 0.826 0.804 0.762)
-
--- | Create a silver material with the given roughness.
-silver :: Named "roughness" Float -> Material
-silver = metal (Color.rgb 0.983 0.977 0.965)
-
--- | Create a titanium material with the given roughness.
-titanium :: Named "roughness" Float -> Material
-titanium = metal (Color.rgb 0.807 0.787 0.764)
-
--- | Create a non-metallic material with the given color and roughness.
-nonmetal :: Color -> Named "roughness" Float -> Material
-nonmetal baseColor (Named roughness) = Material{baseColor, roughness, metallic = 0.0}
-
--- | Create a material with the given base color, metallic factor and roughness.
-material :: Color -> Named "metallic" Float -> Named "roughness" Float -> Material
-material baseColor (Named metallic) (Named roughness) = Material{baseColor, metallic, roughness}
 
 {-| Convert a scene to binary glTF format.
 
@@ -300,7 +233,7 @@ gltfMeshes ::
   Entity local ->
   List (GltfMesh global)
 gltfMeshes parentFrame entity = case entity of
-  Mesh Material{baseColor, metallic, roughness} smoothMesh -> do
+  Mesh pbrMaterial smoothMesh -> do
     let vertices = Mesh.vertices smoothMesh
     let numVertices = Array.length vertices
     let faceIndices = Mesh.faceIndices smoothMesh
@@ -313,7 +246,7 @@ gltfMeshes parentFrame entity = case entity of
     List.singleton
       GltfMesh
         { frame = parentFrame
-        , gltfMaterial = Gltf.pbrMaterial baseColor (#metallic metallic) (#roughness roughness)
+        , gltfMaterial = Gltf.pbrMaterial pbrMaterial
         , numFaces
         , indices = Gltf.faceIndices faceIndices
         , indicesByteLength = 3 * 4 * numFaces

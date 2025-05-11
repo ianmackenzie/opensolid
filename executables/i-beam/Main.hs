@@ -11,6 +11,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
@@ -44,6 +45,6 @@ main = Tolerance.using Length.nanometer IO.do
   body <- Body3d.extruded World3d.frontPlane profile (Bounds.symmetric (#width length))
   let meshConstraints = NonEmpty.one (Mesh.maxError (Length.millimeters 1.0))
   let mesh = Body3d.toMesh meshConstraints body
-  let material = Scene3d.metal (Color.rgb 0.913 0.921 0.925) (#roughness 0.3)
+  let material = PbrMaterial.metal (Color.rgb 0.913 0.921 0.925) (#roughness 0.3)
   let entity = Scene3d.mesh material mesh
   Scene3d.writeGlb "executables/i-beam/mesh.glb" [entity]
