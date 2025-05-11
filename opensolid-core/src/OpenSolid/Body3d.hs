@@ -14,6 +14,8 @@ module OpenSolid.Body3d
   , boundedBy
   , toMesh
   , surfaces
+  , placeIn
+  , relativeTo
   )
 where
 
@@ -46,6 +48,8 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.LineSegment2d (LineSegment2d)
 import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.Linearization qualified as Linearization
@@ -931,3 +935,60 @@ isValidSteinerPoint edgeSet uvPoint = case edgeSet of
 surfaces :: Body3d (space @ units) -> NonEmpty (Surface3d (space @ units))
 surfaces (Body3d boundarySurfaces) =
   NonEmpty.forEach boundarySurfaces do \BoundarySurface{orientedSurface} -> orientedSurface
+
+-- | Convert a body defined in local coordinates to one defined in global coordinates.
+placeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  Body3d (local @ units) ->
+  Body3d (global @ units)
+placeIn frame (Body3d boundarySurfaces) =
+  Body3d (NonEmpty.map (placeBoundarySurfaceIn frame) boundarySurfaces)
+
+placeBoundarySurfaceIn ::
+  Frame3d (global @ units) (Defines local) ->
+  BoundarySurface (local @ units) ->
+  BoundarySurface (global @ units)
+placeBoundarySurfaceIn frame boundarySurface = do
+  let BoundarySurface
+        { id
+        , orientedSurface
+        , surfaceFunction
+        , handedness
+        , uvBounds
+        , edgeLoops
+        } = boundarySurface
+  BoundarySurface
+    { id
+    , orientedSurface = Surface3d.placeIn frame orientedSurface
+    , surfaceFunction = SurfaceFunction3d.placeIn frame surfaceFunction
+    , handedness
+    , uvBounds
+    , edgeLoops = NonEmpty.map (NonEmpty.map (placeEdgeIn frame)) edgeLoops
+    }
+
+placeEdgeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  Edge (local @ units) ->
+  Edge (global @ units)
+placeEdgeIn frame edge = case edge of
+  PrimaryEdge{id, startPoint, uvCurve, curve3d, matingId, matingUvCurve, correctlyAligned} ->
+    PrimaryEdge
+      { id
+      , startPoint = Point3d.placeIn frame startPoint
+      , uvCurve
+      , curve3d = Curve3d.placeIn frame curve3d
+      , matingId
+      , matingUvCurve
+      , correctlyAligned
+      }
+  SecondaryEdge{id, startPoint, uvStartPoint} ->
+    SecondaryEdge{id, startPoint = Point3d.placeIn frame startPoint, uvStartPoint}
+  DegenerateEdge{id, point, uvCurve} ->
+    DegenerateEdge{id, point = Point3d.placeIn frame point, uvCurve}
+
+-- | Convert a body defined in global coordinates to one defined in local coordinates.
+relativeTo ::
+  Frame3d (global @ units) (Defines local) ->
+  Body3d (global @ units) ->
+  Body3d (local @ units)
+relativeTo frame body = placeIn (Frame3d.inverse frame) body
