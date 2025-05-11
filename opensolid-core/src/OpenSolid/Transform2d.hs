@@ -26,13 +26,6 @@ module OpenSolid.Transform2d
   , mirrorAcrossImpl
   , scaleAboutImpl
   , scaleAlongImpl
-  , translateByOwnImpl
-  , translateInOwnImpl
-  , translateAlongOwnImpl
-  , rotateAroundOwnImpl
-  , mirrorAcrossOwnImpl
-  , scaleAboutOwnImpl
-  , scaleAlongOwnImpl
   )
 where
 
@@ -180,31 +173,3 @@ scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoi
 
 scaleAlongImpl :: (Affine (space @ units) -> a -> b) -> Axis2d (space @ units) -> Float -> a -> b
 scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
-
-translateByOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Vector2d (space @ units)) -> a -> b
-translateByOwnImpl transformBy getVector argument =
-  transformBy (translateBy (getVector argument)) argument
-
-translateInOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Direction2d space) -> Qty units -> a -> b
-translateInOwnImpl transformBy getDirection distance argument =
-  transformBy (translateIn (getDirection argument) distance) argument
-
-translateAlongOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Axis2d (space @ units)) -> Qty units -> a -> b
-translateAlongOwnImpl transformBy getAxis distance argument =
-  transformBy (translateAlong (getAxis argument) distance) argument
-
-rotateAroundOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Point2d (space @ units)) -> Angle -> a -> b
-rotateAroundOwnImpl transformBy getCenterPoint angle argument =
-  transformBy (rotateAround (getCenterPoint argument) angle) argument
-
-mirrorAcrossOwnImpl :: (Orthonormal (space @ units) -> a -> b) -> (a -> Axis2d (space @ units)) -> a -> b
-mirrorAcrossOwnImpl transformBy getAxis argument =
-  transformBy (mirrorAcross (getAxis argument)) argument
-
-scaleAboutOwnImpl :: (Uniform (space @ units) -> a -> b) -> (a -> Point2d (space @ units)) -> Float -> a -> b
-scaleAboutOwnImpl transformBy getCenterPoint scale argument =
-  transformBy (scaleAbout (getCenterPoint argument) scale) argument
-
-scaleAlongOwnImpl :: (Affine (space @ units) -> a -> b) -> (a -> Axis2d (space @ units)) -> Float -> a -> b
-scaleAlongOwnImpl transformBy getAxis scale argument =
-  transformBy (scaleAlong (getAxis argument) scale) argument

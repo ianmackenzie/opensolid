@@ -111,11 +111,6 @@ testTransformation = IO.do
   let rotationFunction = Point2d.rotateAround Point2d.origin Angle.quarterTurn
   let rotatedPoints = List.map rotationFunction originalPoints
   log "Rotated points" rotatedPoints
-  let transformedAxis =
-        Axis2d.x
-          |> Axis2d.translateInOwn Axis2d.direction (Length.meters 2.0)
-          |> Axis2d.rotateAroundOwn Axis2d.originPoint Angle.quarterTurn
-  log "Transformed axis" transformedAxis
 
 offsetPoint ::
   Tolerance units =>

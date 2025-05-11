@@ -22,13 +22,6 @@ module OpenSolid.Region2d
   , mirrorAcross
   , scaleAbout
   , scaleAlong
-  , translateByOwn
-  , translateInOwn
-  , translateAlongOwn
-  , rotateAroundOwn
-  , mirrorAcrossOwn
-  , scaleAboutOwn
-  , scaleAlongOwn
   , convert
   , unconvert
   , classify
@@ -543,53 +536,6 @@ scaleAlong ::
   Region2d (space @ units) ->
   Region2d (space @ units)
 scaleAlong = Transform2d.scaleAlongImpl transformBy
-
-translateByOwn ::
-  (Region2d (space @ units) -> Vector2d (space @ units)) ->
-  Region2d (space @ units) ->
-  Region2d (space @ units)
-translateByOwn = Transform2d.translateByOwnImpl transformBy
-
-translateInOwn ::
-  (Region2d (space @ units) -> Direction2d space) ->
-  Qty units ->
-  Region2d (space @ units) ->
-  Region2d (space @ units)
-translateInOwn = Transform2d.translateInOwnImpl transformBy
-
-translateAlongOwn ::
-  (Region2d (space @ units) -> Axis2d (space @ units)) ->
-  Qty units ->
-  Region2d (space @ units) ->
-  Region2d (space @ units)
-translateAlongOwn = Transform2d.translateAlongOwnImpl transformBy
-
-rotateAroundOwn ::
-  (Region2d (space @ units) -> Point2d (space @ units)) ->
-  Angle ->
-  Region2d (space @ units) ->
-  Region2d (space @ units)
-rotateAroundOwn = Transform2d.rotateAroundOwnImpl transformBy
-
-mirrorAcrossOwn ::
-  (Region2d (space @ units) -> Axis2d (space @ units)) ->
-  Region2d (space @ units) ->
-  Region2d (space @ units)
-mirrorAcrossOwn = Transform2d.mirrorAcrossOwnImpl transformBy
-
-scaleAboutOwn ::
-  (Region2d (space @ units) -> Point2d (space @ units)) ->
-  Float ->
-  Region2d (space @ units) ->
-  Region2d (space @ units)
-scaleAboutOwn = Transform2d.scaleAboutOwnImpl transformBy
-
-scaleAlongOwn ::
-  (Region2d (space @ units) -> Axis2d (space @ units)) ->
-  Float ->
-  Region2d (space @ units) ->
-  Region2d (space @ units)
-scaleAlongOwn = Transform2d.scaleAlongOwnImpl transformBy
 
 convert ::
   Qty (units2 :/: units1) ->

@@ -29,10 +29,6 @@ module OpenSolid.Plane3d
   , translateIn
   , translateAlong
   , rotateAround
-  , translateByOwn
-  , translateInOwn
-  , translateAlongOwn
-  , rotateAroundOwn
   )
 where
 
@@ -177,7 +173,7 @@ relativeTo frame (Plane3d p0 b) = do
 
 -- | Offset a plane in its normal direction by the given distance.
 offsetBy :: Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
-offsetBy = translateInOwn normalDirection
+offsetBy distance plane = plane |> translateIn (normalDirection plane) distance
 
 -- | Reverse a plane's X direction, which also reverses the plane's normal direction.
 flipX :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines
@@ -220,30 +216,3 @@ rotateAround ::
   Plane3d (space @ units) defines ->
   Plane3d (space @ units) defines
 rotateAround = Transform3d.rotateAroundImpl transformBy
-
-translateByOwn ::
-  (Plane3d (space @ units) defines -> Vector3d (space @ units)) ->
-  Plane3d (space @ units) defines ->
-  Plane3d (space @ units) defines
-translateByOwn = Transform3d.translateByOwnImpl transformBy
-
-translateInOwn ::
-  (Plane3d (space @ units) defines -> Direction3d space) ->
-  Qty units ->
-  Plane3d (space @ units) defines ->
-  Plane3d (space @ units) defines
-translateInOwn = Transform3d.translateInOwnImpl transformBy
-
-translateAlongOwn ::
-  (Plane3d (space @ units) defines -> Axis3d (space @ units)) ->
-  Qty units ->
-  Plane3d (space @ units) defines ->
-  Plane3d (space @ units) defines
-translateAlongOwn = Transform3d.translateAlongOwnImpl transformBy
-
-rotateAroundOwn ::
-  (Plane3d (space @ units) defines -> Axis3d (space @ units)) ->
-  Angle ->
-  Plane3d (space @ units) defines ->
-  Plane3d (space @ units) defines
-rotateAroundOwn = Transform3d.rotateAroundOwnImpl transformBy

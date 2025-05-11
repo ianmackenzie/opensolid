@@ -27,10 +27,6 @@ module OpenSolid.Camera3d
   , translateIn
   , translateAlong
   , rotateAround
-  , translateByOwn
-  , translateInOwn
-  , translateAlongOwn
-  , rotateAroundOwn
   )
 where
 
@@ -230,30 +226,3 @@ rotateAround ::
   Camera3d (space @ units) ->
   Camera3d (space @ units)
 rotateAround = Transform3d.rotateAroundImpl transformBy
-
-translateByOwn ::
-  (Camera3d (space @ units) -> Vector3d (space @ units)) ->
-  Camera3d (space @ units) ->
-  Camera3d (space @ units)
-translateByOwn = Transform3d.translateByOwnImpl transformBy
-
-translateInOwn ::
-  (Camera3d (space @ units) -> Direction3d space) ->
-  Qty units ->
-  Camera3d (space @ units) ->
-  Camera3d (space @ units)
-translateInOwn = Transform3d.translateInOwnImpl transformBy
-
-translateAlongOwn ::
-  (Camera3d (space @ units) -> Axis3d (space @ units)) ->
-  Qty units ->
-  Camera3d (space @ units) ->
-  Camera3d (space @ units)
-translateAlongOwn = Transform3d.translateAlongOwnImpl transformBy
-
-rotateAroundOwn ::
-  (Camera3d (space @ units) -> Axis3d (space @ units)) ->
-  Angle ->
-  Camera3d (space @ units) ->
-  Camera3d (space @ units)
-rotateAroundOwn = Transform3d.rotateAroundOwnImpl transformBy
