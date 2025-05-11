@@ -31,7 +31,7 @@ coerce :: Basis3d space1 defines1 -> Basis3d space2 defines2
 coerce (Basis3d i j k) =
   Basis3d (Direction3d.coerce i) (Direction3d.coerce j) (Direction3d.coerce k)
 
-identity :: Basis3d space (Defines space)
+identity :: Basis3d space defines
 identity = forwardFacing
 
 forwardFacing :: Basis3d space defines
