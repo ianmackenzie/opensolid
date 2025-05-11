@@ -73,8 +73,8 @@ instance
   where
   lhs + rhs =
     new
-      (compiled lhs + VectorSurfaceFunction3d.compiled rhs)
-      (\p -> derivative p lhs + VectorSurfaceFunction3d.derivative p rhs)
+      # compiled lhs + VectorSurfaceFunction3d.compiled rhs
+      # \parameter -> derivative parameter lhs + VectorSurfaceFunction3d.derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -94,8 +94,8 @@ instance
   where
   lhs - rhs =
     new
-      (compiled lhs - VectorSurfaceFunction3d.compiled rhs)
-      (\p -> derivative p lhs - VectorSurfaceFunction3d.derivative p rhs)
+      # compiled lhs - VectorSurfaceFunction3d.compiled rhs
+      # \parameter -> derivative parameter lhs - VectorSurfaceFunction3d.derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -116,7 +116,7 @@ instance
   f1 - f2 =
     VectorSurfaceFunction3d.new
       (compiled f1 - compiled f2)
-      (\p -> derivative p f1 - derivative p f2)
+      (\parameter -> derivative parameter f1 - derivative parameter f2)
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -139,8 +139,8 @@ instance
     let dvOuter = derivative V outer . inner
     new
       # compiled outer . SurfaceFunction2d.compiled inner
-      # \p -> do
-        let dInner = SurfaceFunction2d.derivative p inner
+      # \parameter -> do
+        let dInner = SurfaceFunction2d.derivative parameter inner
         let dU = VectorSurfaceFunction2d.xComponent dInner
         let dV = VectorSurfaceFunction2d.yComponent dInner
         duOuter * dU + dvOuter * dV
@@ -158,7 +158,7 @@ new c derivativeFunction = do
   let dv = derivativeFunction V
   let dv' =
         VectorSurfaceFunction3d.new (VectorSurfaceFunction3d.compiled dv) $
-          \p -> case p of
+          \parameter -> case parameter of
             U -> VectorSurfaceFunction3d.derivative V du
             V -> VectorSurfaceFunction3d.derivative V dv
   SurfaceFunction3d c du dv'
@@ -210,7 +210,7 @@ transformBy transform function =
       (Point3d.transformBy transform)
       (Bounds3d.transformBy transform)
       (compiled function)
-    # \p -> VectorSurfaceFunction3d.transformBy transform (derivative p function)
+    # \parameter -> VectorSurfaceFunction3d.transformBy transform (derivative parameter function)
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
@@ -223,7 +223,8 @@ placeIn frame function =
       (Point3d.placeIn frame)
       (Bounds3d.placeIn frame)
       (compiled function)
-    # \p -> VectorSurfaceFunction3d.placeIn (Frame3d.basis frame) (derivative p function)
+    # \parameter ->
+      VectorSurfaceFunction3d.placeIn (Frame3d.basis frame) (derivative parameter function)
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
