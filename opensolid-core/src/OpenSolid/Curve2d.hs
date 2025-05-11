@@ -30,7 +30,8 @@ module OpenSolid.Curve2d
   , compiled
   , derivative
   , tangentDirection
-  , offsetBy
+  , offsetLeftBy
+  , offsetRightBy
   , reverse
   , bounds
   , Intersections (..)
@@ -628,15 +629,22 @@ tangentDirection curve =
     Success directionCurve -> Success directionCurve
     Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
 
-offsetBy ::
+offsetLeftBy ::
   Tolerance units =>
   Qty units ->
   Curve2d (space @ units) ->
   Result HasDegeneracy (Curve2d (space @ units))
-offsetBy offset curve = Result.do
+offsetLeftBy offset curve = Result.do
   tangentCurve <- tangentDirection curve
   let offsetCurve = VectorCurve2d.rotateBy Angle.quarterTurn (offset * tangentCurve)
   Success (curve + offsetCurve)
+
+offsetRightBy ::
+  Tolerance units =>
+  Qty units ->
+  Curve2d (space @ units) ->
+  Result HasDegeneracy (Curve2d (space @ units))
+offsetRightBy distance = offsetLeftBy -distance
 
 distanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
 distanceAlong (Axis2d p0 d) curve = (curve - p0) `dot` d
