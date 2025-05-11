@@ -153,9 +153,11 @@ angleFrom (Unit2d v1) (Unit2d v2) = Vector2d.angleFrom v1 v2
 perpendicularTo :: Direction2d space -> Direction2d space
 perpendicularTo = rotateLeft
 
+-- | Rotate a direction left (counterclockwise) by 90 degrees.
 rotateLeft :: Direction2d space -> Direction2d space
 rotateLeft = lift Vector2d.rotateLeft
 
+-- | Rotate a direction right (clockwise) by 90 degrees.
 rotateRight :: Direction2d space -> Direction2d space
 rotateRight = lift Vector2d.rotateRight
 
