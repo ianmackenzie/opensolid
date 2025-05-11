@@ -959,7 +959,6 @@ instance
 ----- Vector3d -----
 
 data Vector3d (coordinateSystem :: CoordinateSystem) where
-  -- | Construct a vector from its XYZ components.
   Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 
 deriving instance Eq (Vector3d (space @ units))
@@ -1278,7 +1277,6 @@ instance FFI (Basis3d space defines) where
 ----- Point3d -----
 
 data Point3d (coordinateSystem :: CoordinateSystem) where
-  -- | Construct a point from its XYZ coordinates.
   Point3d :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 
 deriving instance Eq (Point3d (space @ units))
@@ -1364,7 +1362,6 @@ instance
 ----- VectorBounds3d -----
 
 data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
-  -- | Construct a vector bounding box from its XYZ coordinate bounds.
   VectorBounds3d ::
     Bounds units ->
     Bounds units ->
@@ -1719,7 +1716,6 @@ instance
 ----- Bounds3d -----
 
 data Bounds3d (coordinateSystem :: CoordinateSystem) where
-  -- | Construct a bounding box from its XYZ coordinate bounds.
   Bounds3d ::
     Bounds units ->
     Bounds units ->
