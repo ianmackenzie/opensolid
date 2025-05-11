@@ -36,7 +36,7 @@ module OpenSolid.Bounds2d
   , relativeTo
   , placeOn
   , transformBy
-  , signedDistanceAlong
+  , distanceAlong
   , convert
   , unconvert
   )
@@ -386,13 +386,13 @@ transformBy transform (Bounds2d x y) = do
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
-signedDistanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Bounds units
-signedDistanceAlong axis (Bounds2d x y) = do
+distanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Bounds units
+distanceAlong axis (Bounds2d x y) = do
   let xMid = Bounds.midpoint x
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let d0 = Point2d.signedDistanceAlong axis (Point2d.xy xMid yMid)
+  let d0 = Point2d.distanceAlong axis (Point2d.xy xMid yMid)
   let Direction2d ax ay = Axis2d.direction axis
   let r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
   Bounds (d0 - r) (d0 + r)

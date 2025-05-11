@@ -10,7 +10,7 @@ module OpenSolid.SurfaceFunction2d
   , evaluate
   , evaluateBounds
   , derivative
-  , signedDistanceAlong
+  , distanceAlong
   , xCoordinate
   , yCoordinate
   , transformBy
@@ -218,11 +218,11 @@ instance
       (compiled function . Curve2d.compiled curve)
       ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
 
-signedDistanceAlong ::
+distanceAlong ::
   Axis2d (space @ units) ->
   SurfaceFunction2d (space @ units) ->
   SurfaceFunction units
-signedDistanceAlong axis function =
+distanceAlong axis function =
   (function - constant (Axis2d.originPoint axis)) `dot` Axis2d.direction axis
 
 xCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units

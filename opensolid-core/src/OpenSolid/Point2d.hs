@@ -20,8 +20,9 @@ module OpenSolid.Point2d
   , interpolateFrom
   , distanceFrom
   , angleFrom
-  , signedDistanceAlong
-  , signedDistanceFrom
+  , distanceAlong
+  , distanceLeftOf
+  , distanceRightOf
   , placeIn
   , relativeTo
   , placeOn
@@ -151,11 +152,14 @@ distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
 angleFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Angle
 angleFrom p1 p2 = Vector2d.angle (p2 - p1)
 
-signedDistanceAlong :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
-signedDistanceAlong (Axis2d originPoint direction) point = direction `dot` (point - originPoint)
+distanceAlong :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
+distanceAlong (Axis2d originPoint direction) point = direction `dot` (point - originPoint)
 
-signedDistanceFrom :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
-signedDistanceFrom (Axis2d originPoint direction) point = direction `cross` (point - originPoint)
+distanceLeftOf :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
+distanceLeftOf (Axis2d originPoint direction) point = direction `cross` (point - originPoint)
+
+distanceRightOf :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
+distanceRightOf (Axis2d originPoint direction) point = direction `cross` (originPoint - point)
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

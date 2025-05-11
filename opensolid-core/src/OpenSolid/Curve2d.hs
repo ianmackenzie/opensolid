@@ -38,7 +38,9 @@ module OpenSolid.Curve2d
   , OverlappingSegment
   , intersections
   , findPoint
-  , signedDistanceAlong
+  , distanceAlong
+  , distanceLeftOf
+  , distanceRightOf
   , xCoordinate
   , yCoordinate
   , placeIn
@@ -81,8 +83,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
-import OpenSolid.Axis2d (Axis2d)
-import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Axis2d (Axis2d (Axis2d))
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
@@ -638,8 +639,14 @@ offsetBy offset curve = Result.do
   let offsetCurve = VectorCurve2d.rotateBy Angle.quarterTurn (offset * tangentCurve)
   Success (curve + offsetCurve)
 
-signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-signedDistanceAlong axis curve = (curve - Axis2d.originPoint axis) `dot` Axis2d.direction axis
+distanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
+distanceAlong (Axis2d p0 d) curve = (curve - p0) `dot` d
+
+distanceLeftOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
+distanceLeftOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateLeft d
+
+distanceRightOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
+distanceRightOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateRight d
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
