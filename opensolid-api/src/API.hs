@@ -534,7 +534,7 @@ vector2d =
     , memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
-    , member1 "Angle To" "Other" Vector2d.angleFrom $(docs 'Vector2d.angleFrom)
+    , member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
     , negateSelf
     , floatTimes
@@ -574,7 +574,7 @@ displacement2d =
     , memberM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
-    , member1 "Angle To" "Other" Vector2d.angleFrom $(docs 'Vector2d.angleFrom)
+    , member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , memberM0 "Is Zero" (~= Vector2d.zero) "Check if a displacement is zero, within the current tolerance."
     , negateSelf
     , floatTimes
@@ -607,7 +607,7 @@ areaVector2d =
     , memberS0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
-    , member1 "Angle To" "Other" Vector2d.angleFrom $(docs 'Vector2d.angleFrom)
+    , member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , memberS0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
     , negateSelf
     , floatTimes
