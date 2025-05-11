@@ -28,6 +28,8 @@ module OpenSolid.Bootstrap
   , return
   , always
   , (#)
+  , (##)
+  , (###)
   , fromIntegral
   , internalError
   , exception
@@ -127,3 +129,15 @@ always value _ = value
 (#) function value = function value
 
 infixl 1 #
+
+{-# INLINE (##) #-}
+(##) :: (a -> b) -> a -> b
+(##) function value = function value
+
+infixl 2 ##
+
+{-# INLINE (###) #-}
+(###) :: (a -> b) -> a -> b
+(###) function value = function value
+
+infixl 3 ###
