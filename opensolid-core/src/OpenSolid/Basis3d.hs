@@ -31,6 +31,10 @@ coerce :: Basis3d space1 defines1 -> Basis3d space2 defines2
 coerce (Basis3d i j k) =
   Basis3d (Direction3d.coerce i) (Direction3d.coerce j) (Direction3d.coerce k)
 
+{-| A basis with the same orientation as the current coordinate system.
+
+This is a basis whose forward direction points forward, upward direction points upward, etc.
+-}
 identity :: Basis3d space defines
 identity = forwardFacing
 
