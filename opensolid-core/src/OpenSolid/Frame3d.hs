@@ -457,15 +457,23 @@ relativeTo globalFrame frame =
     (Point3d.relativeTo globalFrame (originPoint frame))
     (Basis3d.relativeTo (basis globalFrame) (basis frame))
 
+{-| Compute the "inverse" of a given frame.
+
+This is a frame that defines the current global coordinate system
+in terms of the frame's local coordinate system,
+instead of the other way around.
+-}
 inverse :: Frame3d (global @ units) (Defines local) -> Frame3d (local @ units) (Defines global)
 inverse frame = identity |> relativeTo frame
 
+-- | Move a frame to a new origin point.
 moveTo ::
   Point3d (space @ units) ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 moveTo newOriginPoint (Frame3d _ b) = Frame3d newOriginPoint (Basis3d.coerce b)
 
+-- | Apply the given transform to a frame.
 transformBy ::
   Transform3d.Rigid (space @ units) ->
   Frame3d (space @ units) defines1 ->
