@@ -55,7 +55,6 @@ import API.Class
   , static1
   , static2
   , static3
-  , staticM3
   , times
   , timesFloat
   , timesSelf
@@ -118,6 +117,7 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Scene3d (Scene3d)
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
@@ -1399,12 +1399,12 @@ pbrMaterial =
 
 scene3d :: Class
 scene3d =
-  Class.static "Scene3d" "A set of functions for constructing 3D scenes." $
-    [ staticM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
-    , static1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
-    , static2 "Write GLB" "Path" "Entities" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
-    , nested @(Scene3d.Entity Space) "A scene entity such as a mesh or group." (rigidTransformations3d Scene3d.transformBy)
+  Class.new @(Scene3d Space) $(docs ''Scene3d) $
+    [ factoryM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
+    , factory1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
+    , member1 "Write GLB" "Path" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
     ]
+      <> rigidTransformations3d Scene3d.transformBy
 
 spurGear :: Class
 spurGear =

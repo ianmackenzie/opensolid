@@ -34,5 +34,5 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
   let mesh = Body3d.toMesh constraints body
   let material = PbrMaterial.nonmetal Color.blue (#roughness 0.2)
-  let scene = [Scene3d.mesh material mesh]
+  let scene = Scene3d.mesh material mesh
   Scene3d.writeGlb "executables/raindrop/mesh.glb" scene

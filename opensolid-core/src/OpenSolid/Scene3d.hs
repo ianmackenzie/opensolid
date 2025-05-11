@@ -1,5 +1,5 @@
 module OpenSolid.Scene3d
-  ( Entity
+  ( Scene3d
   , mesh
   , body
   , group
@@ -38,24 +38,25 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
 import OpenSolid.Vertex3d qualified as Vertex3d
 
-data Entity space where
+-- | A collection of graphical objects in 3D space.
+data Scene3d space where
   Mesh ::
     Vertex3d.HasNormal vertex (space @ Meters) =>
     PbrMaterial ->
     Mesh vertex ->
-    Entity space
+    Scene3d space
   Group ::
-    List (Entity space) ->
-    Entity space
+    List (Scene3d space) ->
+    Scene3d space
   Placed ::
     Frame3d (global @ Meters) (Defines local) ->
-    Entity local ->
-    Entity global
+    Scene3d local ->
+    Scene3d global
 
-instance FFI (Entity space) where
-  representation = FFI.nestedClassRepresentation "Scene3d" "Entity"
+instance FFI (Scene3d space) where
+  representation = FFI.classRepresentation "Scene3d"
 
-mesh :: Vertex3d.HasNormal vertex (space @ Meters) => PbrMaterial -> Mesh vertex -> Entity space
+mesh :: Vertex3d.HasNormal vertex (space @ Meters) => PbrMaterial -> Mesh vertex -> Scene3d space
 mesh = Mesh
 
 {-| Render the given body with the given material.
@@ -67,35 +68,35 @@ body ::
   NonEmpty (Mesh.Constraint Meters) ->
   PbrMaterial ->
   Body3d (space @ Meters) ->
-  Entity space
+  Scene3d space
 body meshConstraints givenMaterial givenBody =
   mesh givenMaterial (Body3d.toMesh meshConstraints givenBody)
 
-{-| Group several entities into a single one.
+{-| Create a composite scene out of several sub-scenes.
 
-Useful to allow multiple entities to be transformed as a group.
+Sometimes useful to allow multiple objects to be transformed as one.
 -}
-group :: List (Entity space) -> Entity space
+group :: List (Scene3d space) -> Scene3d space
 group = Group
 
-transformBy :: Transform3d.Rigid (space @ Meters) -> Entity space -> Entity space
-transformBy transform (Placed frame entity) = Placed (Frame3d.transformBy transform frame) entity
-transformBy transform entity = Placed (Frame3d.transformBy transform Frame3d.world) entity
+transformBy :: Transform3d.Rigid (space @ Meters) -> Scene3d space -> Scene3d space
+transformBy transform (Placed frame scene) = Placed (Frame3d.transformBy transform frame) scene
+transformBy transform scene = Placed (Frame3d.transformBy transform Frame3d.world) scene
 
-placeIn :: Frame3d (global @ Meters) (Defines local) -> Entity local -> Entity global
-placeIn frame (Placed entityFrame entity) = Placed (Frame3d.placeIn frame entityFrame) entity
-placeIn frame entity = Placed frame entity
+placeIn :: Frame3d (global @ Meters) (Defines local) -> Scene3d local -> Scene3d global
+placeIn frame (Placed sceneFrame scene) = Placed (Frame3d.placeIn frame sceneFrame) scene
+placeIn frame scene = Placed frame scene
 
-relativeTo :: Frame3d (global @ Meters) (Defines local) -> Entity global -> Entity local
+relativeTo :: Frame3d (global @ Meters) (Defines local) -> Scene3d global -> Scene3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)
 
 {-| Convert a scene to binary glTF format.
 
 Same as 'writeGlb' except it just returns the raw binary builder instead of writing to a file.
 -}
-toGlb :: List (Entity space) -> Builder
-toGlb entities = do
-  let meshes = gltfMeshes Frame3d.world (group entities)
+toGlb :: Scene3d space -> Builder
+toGlb scene = do
+  let meshes = gltfMeshes Frame3d.world scene
   let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
   let bufferBuilder = Binary.collect meshBuilder meshes
   let bufferByteLength = Int.sumOf meshByteLength meshes
@@ -115,8 +116,8 @@ toGlb entities = do
     bufferBuilder
 
 -- | Write a scene to a binary glTF file.
-writeGlb :: Text -> List (Entity space) -> IO ()
-writeGlb path givenEntities = IO.writeBinary path (toGlb givenEntities)
+writeGlb :: Text -> Scene3d space -> IO ()
+writeGlb path scene = IO.writeBinary path (toGlb scene)
 
 data EncodedMesh = EncodedMesh
   { bufferViews :: List Json
@@ -230,9 +231,9 @@ data GltfMesh space where
 
 gltfMeshes ::
   Frame3d (global @ Meters) (Defines local) ->
-  Entity local ->
+  Scene3d local ->
   List (GltfMesh global)
-gltfMeshes parentFrame entity = case entity of
+gltfMeshes parentFrame scene = case scene of
   Mesh pbrMaterial smoothMesh -> do
     let vertices = Mesh.vertices smoothMesh
     let numVertices = Array.length vertices

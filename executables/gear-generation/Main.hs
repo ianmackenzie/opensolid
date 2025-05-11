@@ -47,7 +47,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
         let stlPath = basePath <> ".stl"
         let material = PbrMaterial.iron (#roughness 0.3)
         let mesh = Body3d.toMesh meshConstraints body
-        Scene3d.writeGlb glbPath [Scene3d.mesh material mesh]
+        Scene3d.writeGlb glbPath (Scene3d.mesh material mesh)
         Stl.writeBinary stlPath Convention3d.yUp Length.inMillimeters mesh
         elapsed <- Timer.elapsed timer
         let elapsedText = Text.float (Duration.inSeconds elapsed) <> "s"
