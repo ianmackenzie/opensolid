@@ -276,6 +276,7 @@ The orientation of the plane will remain unchanged.
 moveTo :: Point3d (space @ units) -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
 moveTo p0 plane = Plane3d p0 (basis plane)
 
+-- | Convert a plane defined in local coordinates to one defined in global coordinates.
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Plane3d (local @ units) defines ->
@@ -286,6 +287,7 @@ placeIn frame (Plane3d p0 b) = do
     (Point3d.placeIn frame p0)
     (PlanarBasis3d.placeIn frameBasis b)
 
+-- | Convert a plane defined in global coordinates to one defined in local coordinates.
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Plane3d (global @ units) defines ->

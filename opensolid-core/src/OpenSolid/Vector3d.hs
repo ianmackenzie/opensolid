@@ -171,12 +171,14 @@ normalize vector = do
   let vm = magnitude vector
   if vm == Qty.zero then zero else vector / vm
 
+-- | Convert a vectr defined in local coordinates to one defined in global coordinates.
 placeIn ::
   Basis3d global (Defines local) ->
   Vector3d (local @ units) ->
   Vector3d (global @ units)
 placeIn (Basis3d i j k) (Vector3d vx vy vz) = vx * i + vy * j + vz * k
 
+-- | Convert a vector defined in global coordinates to one defined in local coordinates.
 relativeTo ::
   Basis3d global (Defines local) ->
   Vector3d (global @ units) ->

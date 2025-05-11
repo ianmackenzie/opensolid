@@ -140,12 +140,14 @@ distanceFrom p1 p2 = Vector3d.magnitude (p2 - p1)
 distanceAlong :: Axis3d (space @ units) -> Point3d (space @ units) -> Qty units
 distanceAlong (Axis3d p0 d) p = (p - p0) `dot` d
 
+-- | Convert a point defined in local coordinates to one defined in global coordinates.
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Point3d (local @ units) ->
   Point3d (global @ units)
 placeIn (Frame3d p0 (Basis3d i j k)) (Point3d px py pz) = p0 + px * i + py * j + pz * k
 
+-- | Convert a point defined in global coordinates to one defined in local coordinates.
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Point3d (global @ units) ->

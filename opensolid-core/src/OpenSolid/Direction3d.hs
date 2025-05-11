@@ -168,9 +168,11 @@ The result will always be between 0 and 180 degrees.
 angleFrom :: Direction3d space -> Direction3d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
+-- | Convert a direction defined in local coordinates to one defined in global coordinates.
 placeIn :: Basis3d global (Defines local) -> Direction3d local -> Direction3d global
 placeIn basis = lift (Vector3d.placeIn basis)
 
+-- | Convert a direction defined in global coordinates to one defined in local coordinates.
 relativeTo :: Basis3d global (Defines local) -> Direction3d global -> Direction3d local
 relativeTo basis = lift (Vector3d.relativeTo basis)
 

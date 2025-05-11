@@ -172,6 +172,7 @@ transformBy ::
 transformBy transform (PlanarBasis3d i j) =
   PlanarBasis3d (Direction3d.transformBy transform i) (Direction3d.transformBy transform j)
 
+-- | Convert a basis defined in local coordinates to one defined in global coordinates.
 placeIn ::
   Basis3d global (Defines local) ->
   PlanarBasis3d local defines ->
@@ -179,6 +180,7 @@ placeIn ::
 placeIn globalBasis (PlanarBasis3d i j) =
   PlanarBasis3d (Direction3d.placeIn globalBasis i) (Direction3d.placeIn globalBasis j)
 
+-- | Convert a basis defined in global coordinates to one defined in local coordinates.
 relativeTo ::
   Basis3d global (Defines local) ->
   PlanarBasis3d global defines ->
