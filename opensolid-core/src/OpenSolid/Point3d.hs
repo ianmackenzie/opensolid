@@ -137,6 +137,10 @@ midpoint (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
 distanceFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Qty units
 distanceFrom p1 p2 = Vector3d.magnitude (p2 - p1)
 
+{-| Compute the (signed) distance of a point along an axis.
+
+This is the position along the axis of the given point projected onto the axis.
+-}
 distanceAlong :: Axis3d (space @ units) -> Point3d (space @ units) -> Qty units
 distanceAlong (Axis3d p0 d) p = (p - p0) `dot` d
 
