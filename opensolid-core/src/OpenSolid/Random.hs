@@ -12,6 +12,7 @@ module OpenSolid.Random
   , oneOf
   , merge
   , retry
+  , filter
   , combine
   , (>>=)
   , return
@@ -90,6 +91,13 @@ retry fallibleGenerator = OpenSolid.Random.do
   case result of
     Just value -> return value
     Nothing -> retry fallibleGenerator
+
+filter :: (a -> Bool) -> Generator a -> Generator a
+filter predicate generator = OpenSolid.Random.do
+  result <- generator
+  if predicate result
+    then return result
+    else filter predicate generator
 
 combine :: List (Generator a) -> Generator (List a)
 combine [] = return []
