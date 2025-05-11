@@ -161,7 +161,6 @@ classes =
   , axis2d
   , uvAxis
   , convention3d
-  , world3d
   , vector3d
   , displacement3d
   , areaVector3d
@@ -173,6 +172,7 @@ classes =
   , plane3d
   , basis3d
   , frame3d
+  , world3d
   , vectorCurve2d
   , displacementCurve2d
   , curve2d
