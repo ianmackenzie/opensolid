@@ -123,7 +123,7 @@ lookAt givenEyePoint givenFocalPoint givenProjection givenFieldOfView = do
                     Frame3d.downwardFacing givenEyePoint
           Failure Vector3d.IsZero ->
             -- Given eye and focal points are coincident,
-            -- so just look straight forwards
+            -- so just look straight forward
             Frame3d.forwardFacing givenEyePoint
   new computedFrame computedFocalDistance givenProjection givenFieldOfView
 
