@@ -1249,6 +1249,9 @@ deriving instance Ord (PlanarBasis3d space defines)
 
 deriving instance Show (PlanarBasis3d space defines)
 
+instance FFI (PlanarBasis3d space defines) where
+  representation = FFI.classRepresentation "PlanarBasis3d"
+
 ----- Basis3d -----
 
 -- | A set of cardinal directions (forward, upward etc.) defining a 3D orientation.
@@ -1264,6 +1267,9 @@ data Basis3d space defines where
 deriving instance Eq (Basis3d space defines)
 
 deriving instance Show (Basis3d space defines)
+
+instance FFI (Basis3d space defines) where
+  representation = FFI.classRepresentation "Basis3d"
 
 ----- Point3d -----
 
