@@ -17,9 +17,6 @@ module OpenSolid.Frame3d
   , backwardDirection
   , upwardDirection
   , downwardDirection
-  , xDirection
-  , yDirection
-  , zDirection
   , rightwardAxis
   , leftwardAxis
   , forwardAxis
@@ -78,10 +75,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3d (Axis3d (Axis3d))
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
-import OpenSolid.Convention3d (Convention3d)
-import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
@@ -145,15 +139,6 @@ upwardDirection frame = Basis3d.upwardDirection (basis frame)
 
 downwardDirection :: Frame3d (space @ units) defines -> Direction3d space
 downwardDirection frame = Basis3d.downwardDirection (basis frame)
-
-xDirection :: Convention3d local -> Frame3d (space @ units) (Defines local) -> Direction3d space
-xDirection convention frame = Direction3d.placeIn (basis frame) (Convention3d.xDirection convention)
-
-yDirection :: Convention3d local -> Frame3d (space @ units) (Defines local) -> Direction3d space
-yDirection convention frame = Direction3d.placeIn (basis frame) (Convention3d.yDirection convention)
-
-zDirection :: Convention3d local -> Frame3d (space @ units) (Defines local) -> Direction3d space
-zDirection convention frame = Direction3d.placeIn (basis frame) (Convention3d.zDirection convention)
 
 rightwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
 rightwardAxis frame = Axis3d (originPoint frame) (rightwardDirection frame)

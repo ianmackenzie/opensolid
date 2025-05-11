@@ -52,9 +52,13 @@ matrixComponents frame =
   if frame == Frame3d.forwardFacing Point3d.origin
     then Nothing
     else do
-      let (ix, iy, iz) = Direction3d.components convention (Frame3d.xDirection convention frame)
-      let (jx, jy, jz) = Direction3d.components convention (Frame3d.yDirection convention frame)
-      let (kx, ky, kz) = Direction3d.components convention (Frame3d.zDirection convention frame)
+      let basis = Frame3d.basis frame
+      let i = Direction3d.placeIn basis xDirection
+      let j = Direction3d.placeIn basis yDirection
+      let k = Direction3d.placeIn basis zDirection
+      let (ix, iy, iz) = Direction3d.components convention i
+      let (jx, jy, jz) = Direction3d.components convention j
+      let (kx, ky, kz) = Direction3d.components convention k
       let (x0, y0, z0) = Point3d.coordinates convention (Frame3d.originPoint frame)
       let tx = Length.inMeters x0
       let ty = Length.inMeters y0
