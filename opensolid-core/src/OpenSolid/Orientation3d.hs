@@ -14,6 +14,12 @@ module OpenSolid.Orientation3d
   , backPlaneOrientation
   , rightPlaneOrientation
   , leftPlaneOrientation
+  , fromTopPlaneOrientation
+  , fromBottomPlaneOrientation
+  , fromFrontPlaneOrientation
+  , fromBackPlaneOrientation
+  , fromRightPlaneOrientation
+  , fromLeftPlaneOrientation
   , forwardOrientation
   , backwardOrientation
   , leftwardOrientation
@@ -31,7 +37,7 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
-  ( Direction3d (Direction3d)
+  ( Direction3d (Direction3d, Unit3d)
   , Orientation3d (Orientation3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   )
@@ -145,6 +151,30 @@ and the Y direction of the plane orientation will point forward.
 bottomPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
 bottomPlaneOrientation orientation =
   PlaneOrientation3d (leftwardDirection orientation) (forwardDirection orientation)
+
+-- | Construct an orientation from its front plane orientation.
+fromFrontPlaneOrientation :: PlaneOrientation3d space defines1 -> Orientation3d space defines2
+fromFrontPlaneOrientation (PlaneOrientation3d l u) = Orientation3d -l (Unit3d (l `cross` u)) u
+
+-- | Construct an orientation from its back plane orientation.
+fromBackPlaneOrientation :: PlaneOrientation3d space defines1 -> Orientation3d space defines2
+fromBackPlaneOrientation (PlaneOrientation3d r u) = Orientation3d r (Unit3d (u `cross` r)) u
+
+-- | Construct an orientation from its left plane orientation.
+fromLeftPlaneOrientation :: PlaneOrientation3d space defines1 -> Orientation3d space defines2
+fromLeftPlaneOrientation (PlaneOrientation3d b u) = Orientation3d (Unit3d (u `cross` b)) -b u
+
+-- | Construct an orientation from its right plane orientation.
+fromRightPlaneOrientation :: PlaneOrientation3d space defines1 -> Orientation3d space defines2
+fromRightPlaneOrientation (PlaneOrientation3d f u) = Orientation3d (Unit3d (f `cross` u)) f u
+
+-- | Construct an orientation from its top plane orientation.
+fromTopPlaneOrientation :: PlaneOrientation3d space defines1 -> Orientation3d space defines2
+fromTopPlaneOrientation (PlaneOrientation3d r f) = Orientation3d r f (Unit3d (r `cross` f))
+
+-- | Construct an orientation from its bottom plane orientation.
+fromBottomPlaneOrientation :: PlaneOrientation3d space defines1 -> Orientation3d space defines2
+fromBottomPlaneOrientation (PlaneOrientation3d l f) = Orientation3d -l f (Unit3d (f `cross` l))
 
 {-| Construct a forward facing orientation relative to a parent/reference orientation.
 
