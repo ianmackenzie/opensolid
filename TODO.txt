@@ -1,36 +1,12 @@
-search for all remaining instances of 'basis' in any case
-orthonormalize -> fromVectors, orthogonalize -> fromDirections
-search for variables named 'b' and rename to 'o' or 'orientation'
-
-potentially rename 'placeVector2dOn' and similar?
-
-back to fromXDirection etc. instead of withArbitraryYDirection?
--> not using 'automagic' construction of e.g. Frame3d from point and forward direction, so shouldn't expect fromXDirection to be 'automagical'
-
-remove nyPlane, ynPlane etc.
--> better to construct from a *frame* instead
--> if necessary, can construct frame from plane, then plane from frame (or rotate plane around one of its axes)
-
-Replace Plane3d.flip[X,Y] with just 'flip'? (implicitly "flip X, and therefore normal")
--> also PlaneOrientation3d.flip
-
 Have Plane3d inherit from PlaneOrientation3d and Frame3d inherit from Orientation3d in target languages
 -> allow e.g. direction.on(plane) instead of having to write the awkward direction.on(plane.basis)
-
-Refactor e.g. Frame3d.backPlane to use Orientation3d.backPlaneOrientation
-
-Add line breaks to Frame3d.fromFrontPlane etc.
-
-Use special 'facing' naming for planar basis/orientation?
-
-Rename Orientation3d to Orientation3d?
--> then maybe PlanarOrientation3d to Orientation3d...or PlaneOrientation3d
 
 Replace Axis2d.normalDirection with Axis2d.[leftward,rightward]Direction
 -> also offsetBy -> offsetLeftBy, offsetRightBy
 
 In target languages: verbs are functions, nouns are properties?
 
+Support coordinate space type parameters in target languages...
 
 Arc2d.from :: Point2d -> Point2d -> Angle -> Arc2d
 Arc2d.leftTurn :: Point2d -> Point2d -> Arc2d
