@@ -110,7 +110,7 @@ lookAt givenEyePoint givenFocalPoint givenProjection givenFieldOfView = do
           Success computedViewDirection -> do
             let viewVector = Vector3d.unit computedViewDirection
             let upVector = Vector3d.unit World3d.upwardDirection
-            case Tolerance.using 1e-9 (PlaneOrientation3d.orthonormalize viewVector upVector) of
+            case Tolerance.using 1e-9 (PlaneOrientation3d.fromVectors viewVector upVector) of
               Just rightPlaneOrientation ->
                 Frame3d.fromRightPlane (Plane3d givenEyePoint rightPlaneOrientation)
               Nothing -- View direction is either straight up or straight down

@@ -118,7 +118,7 @@ orientation2d = Random.map Orientation2d.fromXDirection Direction2d.random
 planeOrientation3d :: Generator (PlaneOrientation3d global (Defines local))
 planeOrientation3d =
   Random.retry $
-    Random.map2 (Tolerance.using 0.1 PlaneOrientation3d.orthogonalize)
+    Random.map2 (Tolerance.using 0.1 PlaneOrientation3d.fromDirections)
       # Direction3d.random
       # Direction3d.random
 

@@ -5,8 +5,8 @@ module OpenSolid.PlaneOrientation3d
   , arbitraryNormalOrientation
   , withArbitraryYDirection
   , withArbitraryXDirection
-  , orthogonalize
-  , orthonormalize
+  , fromDirections
+  , fromVectors
   , flip
   , xDirection
   , yDirection
@@ -44,19 +44,19 @@ withArbitraryXDirection :: Named "yDirection" (Direction3d space) -> PlaneOrient
 withArbitraryXDirection (Named dy) =
   PlaneOrientation3d (Direction3d.arbitraryPerpendicularDirection dy) dy
 
-orthogonalize ::
+fromDirections ::
   Tolerance Unitless =>
   Direction3d space ->
   Direction3d space ->
   Maybe (PlaneOrientation3d space defines)
-orthogonalize dx dxy = gramSchmidt dx (Vector3d.unit dxy)
+fromDirections dx dxy = gramSchmidt dx (Vector3d.unit dxy)
 
-orthonormalize ::
+fromVectors ::
   Tolerance units =>
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   Maybe (PlaneOrientation3d space defines)
-orthonormalize vx vxy =
+fromVectors vx vxy =
   case Vector3d.direction vx of
     Failure Vector3d.IsZero -> Nothing
     Success dx -> gramSchmidt dx vxy
