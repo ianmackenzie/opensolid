@@ -12,10 +12,6 @@ module OpenSolid.PlaneOrientation3d
   , xDirection
   , yDirection
   , normalDirection
-  , xnOrientation
-  , nxOrientation
-  , ynOrientation
-  , nyOrientation
   , transformBy
   , placeIn
   , relativeTo
@@ -94,18 +90,6 @@ yDirection (PlaneOrientation3d _ j) = j
 -- | Get the normal (outward) direction of a plane orientation.
 normalDirection :: PlaneOrientation3d space defines -> Direction3d space
 normalDirection (PlaneOrientation3d i j) = Unit3d (i `cross` j)
-
-xnOrientation :: PlaneOrientation3d space defines1 -> PlaneOrientation3d space defines2
-xnOrientation orientation = PlaneOrientation3d (xDirection orientation) (normalDirection orientation)
-
-nxOrientation :: PlaneOrientation3d space defines1 -> PlaneOrientation3d space defines2
-nxOrientation orientation = PlaneOrientation3d (normalDirection orientation) (xDirection orientation)
-
-ynOrientation :: PlaneOrientation3d space defines1 -> PlaneOrientation3d space defines2
-ynOrientation orientation = PlaneOrientation3d (yDirection orientation) (normalDirection orientation)
-
-nyOrientation :: PlaneOrientation3d space defines1 -> PlaneOrientation3d space defines2
-nyOrientation orientation = PlaneOrientation3d (normalDirection orientation) (yDirection orientation)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

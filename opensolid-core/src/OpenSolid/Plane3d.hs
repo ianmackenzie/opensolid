@@ -10,10 +10,6 @@ module OpenSolid.Plane3d
   , orientation
   , normalDirection
   , normalAxis
-  , xnPlane
-  , nxPlane
-  , ynPlane
-  , nyPlane
   , xDirection
   , yDirection
   , xAxis
@@ -91,34 +87,6 @@ and the direction of the axis will be the normal direction of the plane.
 -}
 normalAxis :: Plane3d (space @ units) defines -> Axis3d (space @ units)
 normalAxis plane = Axis3d (originPoint plane) (normalDirection plane)
-
-{-| Construct a plane from the X and normal directions of the given plane.
-
-The returned plane will have the same origin point as the original plane.
--}
-xnPlane :: Plane3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-xnPlane (Plane3d p o) = Plane3d p (PlaneOrientation3d.xnOrientation o)
-
-{-| Construct a plane from the normal and X directions of the given plane.
-
-The returned plane will have the same origin point as the original plane.
--}
-nxPlane :: Plane3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-nxPlane (Plane3d p o) = Plane3d p (PlaneOrientation3d.nxOrientation o)
-
-{-| Construct a plane from the Y and normal directions of the given plane.
-
-The returned plane will have the same origin point as the original plane.
--}
-ynPlane :: Plane3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-ynPlane (Plane3d p o) = Plane3d p (PlaneOrientation3d.ynOrientation o)
-
-{-| Construct a plane from the normal and Y directions of the given plane.
-
-The returned plane will have the same origin point as the original plane.
--}
-nyPlane :: Plane3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-nyPlane (Plane3d p o) = Plane3d p (PlaneOrientation3d.nyOrientation o)
 
 -- | Get the X direction of a plane.
 xDirection :: Plane3d (space @ units) defines -> Direction3d space
