@@ -9,6 +9,7 @@ module OpenSolid.Orientation2d
   , placeIn
   , relativeTo
   , inverse
+  , random
   )
 where
 
@@ -16,6 +17,7 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Orientation2d (Orientation2d))
+import OpenSolid.Random qualified as Random
 
 xDirection :: Orientation2d space defines -> Direction2d space
 xDirection (Orientation2d i _) = i
@@ -55,3 +57,7 @@ relativeTo globalOrientation (Orientation2d i j) =
 
 inverse :: Orientation2d global (Defines local) -> Orientation2d local (Defines global)
 inverse orientation = xy |> relativeTo orientation
+
+-- | Generate a random orientation.
+random :: Random.Generator (Orientation2d global (Defines local))
+random = Random.map fromXDirection Direction2d.random

@@ -30,17 +30,20 @@ module OpenSolid.Orientation3d
   , placeIn
   , relativeTo
   , inverse
+  , random
   )
 where
 
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
+import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Direction3d (Direction3d, Unit3d)
   , Orientation3d (Orientation3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   )
+import OpenSolid.Random qualified as Random
 import OpenSolid.Transform3d qualified as Transform3d
 
 {-| The global orientation of the current coordinate space.
@@ -267,3 +270,6 @@ relativeTo globalOrientation (Orientation3d i j k) =
 
 inverse :: Orientation3d global (Defines local) -> Orientation3d local (Defines global)
 inverse orientation = world |> relativeTo orientation
+
+random :: Random.Generator (Orientation3d local (Defines global))
+random = Random.map fromTopPlaneOrientation PlaneOrientation3d.random

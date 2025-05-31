@@ -14,6 +14,7 @@ module OpenSolid.PlaneOrientation3d
   , transformBy
   , placeIn
   , relativeTo
+  , random
   )
 where
 
@@ -27,6 +28,8 @@ import OpenSolid.Primitives
   , Transform3d
   , Vector3d
   )
+import OpenSolid.Random qualified as Random
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector3d qualified as Vector3d
 
@@ -110,3 +113,11 @@ relativeTo ::
   PlaneOrientation3d local defines
 relativeTo globalOrientation (PlaneOrientation3d i j) =
   PlaneOrientation3d (Direction3d.relativeTo globalOrientation i) (Direction3d.relativeTo globalOrientation j)
+
+-- | Generate a random plane orientation.
+random :: Random.Generator (PlaneOrientation3d global (Defines local))
+random =
+  Random.retry $
+    Random.map2 (Tolerance.using 0.1 fromDirections)
+      # Direction3d.random
+      # Direction3d.random
