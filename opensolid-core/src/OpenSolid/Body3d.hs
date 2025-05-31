@@ -292,7 +292,7 @@ cylinderAlong axis distance (Named diameter) = do
     Success profile ->
       if Bounds.width distance ~= Qty.zero
         then Failure EmptyBody
-        else case extruded (Axis3d.arbitraryNormalPlane axis) profile distance of
+        else case extruded (Axis3d.normalPlane axis) profile distance of
           Success body -> Success body
           Failure _ -> internalError "Constructing non-empty cylinder body should not fail"
 

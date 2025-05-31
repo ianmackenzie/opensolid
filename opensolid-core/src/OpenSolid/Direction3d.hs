@@ -15,8 +15,7 @@ module OpenSolid.Direction3d
   , upwardForward
   , rightwardUpward
   , upwardRightward
-  , arbitraryPerpendicularDirection
-  , arbitraryNormalOrientation
+  , perpendicularDirection
   , forwardComponent
   , backwardComponent
   , rightwardComponent
@@ -46,7 +45,6 @@ import OpenSolid.Primitives
   , Direction3d (Direction3d, Unit3d)
   , Orientation3d
   , Plane3d
-  , PlaneOrientation3d (PlaneOrientation3d)
   , Vector3d
   )
 import OpenSolid.Random qualified as Random
@@ -116,8 +114,8 @@ upwardRightward orientation angle =
   Unit3d (Angle.cos angle * upward orientation + Angle.sin angle * rightward orientation)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
-arbitraryPerpendicularDirection :: Direction3d space -> Direction3d space
-arbitraryPerpendicularDirection (Direction3d dx dy dz) = do
+perpendicularDirection :: Direction3d space -> Direction3d space
+perpendicularDirection (Direction3d dx dy dz) = do
   let absX = Float.abs dx
   let absY = Float.abs dy
   let absZ = Float.abs dz
@@ -131,18 +129,6 @@ arbitraryPerpendicularDirection (Direction3d dx dy dz) = do
     | otherwise -> do
         let scale = Float.hypot2 dx dy
         Direction3d (-dy / scale) (dx / scale) 0.0
-
-{-| Construct an arbitrary plane orientation normal to the given direction.
-
-Both the X and Y directions of the returned orientation will be perpendicular to the given direction
-(and, of course, they will be perpendicular to each other),
-but otherwise they will be chosen arbitrarily.
--}
-arbitraryNormalOrientation :: Direction3d space -> PlaneOrientation3d space defines
-arbitraryNormalOrientation normalDirection = do
-  let xDirection = arbitraryPerpendicularDirection normalDirection
-  let yDirection = Unit3d (normalDirection `cross` xDirection)
-  PlaneOrientation3d xDirection yDirection
 
 forwardComponent :: Direction3d space -> Float
 forwardComponent (Unit3d vector) = Vector3d.forwardComponent vector

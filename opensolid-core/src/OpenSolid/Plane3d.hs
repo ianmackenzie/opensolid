@@ -1,9 +1,8 @@
 module OpenSolid.Plane3d
   ( Plane3d (Plane3d)
-  , arbitraryNormalPlane
-  , withArbitraryOrientation
-  , withArbitraryYDirection
-  , withArbitraryXDirection
+  , fromPointAndNormal
+  , fromXAxis
+  , fromYAxis
   , coerce
   , erase
   , originPoint
@@ -28,7 +27,7 @@ module OpenSolid.Plane3d
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Axis3d (Axis3d, arbitraryNormalPlane)
+import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
@@ -39,25 +38,25 @@ import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d (Frame3d), Plane3d (Plane3
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 
-{-| Construct a plane with given origin point and normal direction.
+{-| Construct a plane with the given origin point and normal direction.
 
-The plane's orientation (its X and Y directions) will be chosen arbitrarily.
+Both the X and Y directions of the returned plane will be perpendicular to the given direction
+(and, of course, they will be perpendicular to each other),
+but otherwise they will be chosen arbitrarily.
 -}
-withArbitraryOrientation ::
+fromPointAndNormal ::
   Point3d (space @ units) ->
   Direction3d space ->
   Plane3d (space @ units) defines
-withArbitraryOrientation p0 n = arbitraryNormalPlane (Axis3d p0 n)
+fromPointAndNormal p n = Plane3d p (PlaneOrientation3d.fromNormalDirection n)
 
 -- | Construct a plane having the given X axis, with an arbitrarily-chosen Y direction.
-withArbitraryYDirection :: Named "xAxis" (Axis3d (space @ units)) -> Plane3d (space @ units) defines
-withArbitraryYDirection (Named (Axis3d p0 dx)) =
-  Plane3d p0 (PlaneOrientation3d.withArbitraryYDirection (#xDirection dx))
+fromXAxis :: Axis3d (space @ units) -> Plane3d (space @ units) defines
+fromXAxis (Axis3d p0 dx) = Plane3d p0 (PlaneOrientation3d.fromXDirection dx)
 
 -- | Construct a plane having the given Y axis, with an arbitrarily-chosen X direction.
-withArbitraryXDirection :: Named "yAxis" (Axis3d (space @ units)) -> Plane3d (space @ units) defines
-withArbitraryXDirection (Named (Axis3d p0 dy)) =
-  Plane3d p0 (PlaneOrientation3d.withArbitraryXDirection (#yDirection dy))
+fromYAxis :: Axis3d (space @ units) -> Plane3d (space @ units) defines
+fromYAxis (Axis3d p0 dy) = Plane3d p0 (PlaneOrientation3d.fromYDirection dy)
 
 coerce :: Plane3d (space1 @ units1) defines1 -> Plane3d (space2 @ units2) defines2
 coerce (Plane3d p o) = Plane3d (Point3d.coerce p) (PlaneOrientation3d.coerce o)

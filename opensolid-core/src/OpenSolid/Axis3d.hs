@@ -5,7 +5,7 @@ module OpenSolid.Axis3d
   , originPoint
   , direction
   , through
-  , arbitraryNormalPlane
+  , normalPlane
   , moveTo
   , reverse
   , transformBy
@@ -48,8 +48,8 @@ The origin point of the plane will be the origin point of the axis,
 and the normal direction of the plane will be the direction of the axis.
 The X and Y directions of the plane will be chosen arbitrarily.
 -}
-arbitraryNormalPlane :: Axis3d (space @ units) -> Plane3d (space @ units) defines
-arbitraryNormalPlane (Axis3d p0 d) = Plane3d p0 (PlaneOrientation3d.arbitraryNormalOrientation d)
+normalPlane :: Axis3d (space @ units) -> Plane3d (space @ units) defines
+normalPlane (Axis3d p0 d) = Plane3d p0 (PlaneOrientation3d.fromNormalDirection d)
 
 {-| Move an axis so that its origin point is the given point.
 

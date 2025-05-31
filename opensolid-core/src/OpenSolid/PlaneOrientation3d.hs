@@ -2,9 +2,9 @@ module OpenSolid.PlaneOrientation3d
   ( PlaneOrientation3d
   , coerce
   , unsafe
-  , arbitraryNormalOrientation
-  , withArbitraryYDirection
-  , withArbitraryXDirection
+  , fromNormalDirection
+  , fromXDirection
+  , fromYDirection
   , fromDirections
   , fromVectors
   , flip
@@ -18,7 +18,7 @@ module OpenSolid.PlaneOrientation3d
   )
 where
 
-import OpenSolid.Direction3d (Direction3d, arbitraryNormalOrientation)
+import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -39,13 +39,33 @@ coerce (PlaneOrientation3d i j) = PlaneOrientation3d (Direction3d.coerce i) (Dir
 unsafe :: Direction3d space -> Direction3d space -> PlaneOrientation3d space defines
 unsafe = PlaneOrientation3d
 
-withArbitraryYDirection :: Named "xDirection" (Direction3d space) -> PlaneOrientation3d space defines
-withArbitraryYDirection (Named dx) =
-  PlaneOrientation3d dx (Direction3d.arbitraryPerpendicularDirection dx)
+{-| Construct a plane orientation normal to the given direction.
 
-withArbitraryXDirection :: Named "yDirection" (Direction3d space) -> PlaneOrientation3d space defines
-withArbitraryXDirection (Named dy) =
-  PlaneOrientation3d (Direction3d.arbitraryPerpendicularDirection dy) dy
+Both the X and Y directions of the returned orientation will be perpendicular to the given direction
+(and, of course, they will be perpendicular to each other),
+but otherwise they will be chosen arbitrarily.
+-}
+fromNormalDirection :: Direction3d space -> PlaneOrientation3d space defines
+fromNormalDirection n = do
+  let x = Direction3d.perpendicularDirection n
+  let y = Unit3d (n `cross` x)
+  PlaneOrientation3d x y
+
+{-| Construct a plane orientation from its X direction.
+
+The Y direction of the returned basis will be perpendicular to the given X direction,
+but otherwise will be chosen arbitrarily.
+-}
+fromXDirection :: Direction3d space -> PlaneOrientation3d space defines
+fromXDirection dx = PlaneOrientation3d dx (Direction3d.perpendicularDirection dx)
+
+{-| Construct a plane orientation from its Y direction.
+
+The X direction of the returned basis will be perpendicular to the given Y direction,
+but otherwise will be chosen arbitrarily.
+-}
+fromYDirection :: Direction3d space -> PlaneOrientation3d space defines
+fromYDirection dy = PlaneOrientation3d (Direction3d.perpendicularDirection dy) dy
 
 fromDirections ::
   Tolerance Unitless =>

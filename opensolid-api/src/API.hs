@@ -993,8 +993,7 @@ direction3d :: Class
 direction3d =
   Class.new @(Direction3d Space) $(docs ''Direction3d) $
     [ upcast Vector3d.unit
-    , member0 "Arbitrary Perpendicular Direction" Direction3d.arbitraryPerpendicularDirection $(docs 'Direction3d.arbitraryPerpendicularDirection)
-    , member0 "Arbitrary Normal Orientation" Direction3d.arbitraryNormalOrientation $(docs 'Direction3d.arbitraryNormalOrientation)
+    , member0 "Perpendicular Direction" Direction3d.perpendicularDirection $(docs 'Direction3d.perpendicularDirection)
     , member1 "Angle To" "Other" Direction3d.angleFrom $(docs 'Direction3d.angleFrom)
     , member2 "Rotate In" "Direction" "Angle" Direction3d.rotateIn $(docs 'Direction3d.rotateIn)
     , member2 "Rotate Around" "Axis" "Angle" (Direction3d.rotateAround @Space @Meters) $(docs 'Direction3d.rotateAround)
@@ -1043,7 +1042,7 @@ axis3d =
   Class.new @(Axis3d (Space @ Meters)) $(docs ''Axis3d) $
     [ member0 "Origin Point" Axis3d.originPoint $(docs 'Axis3d.originPoint)
     , member0 "Direction" Axis3d.direction $(docs 'Axis3d.direction)
-    , member0 "Arbitrary Normal Plane" Axis3d.arbitraryNormalPlane $(docs 'Axis3d.arbitraryNormalPlane)
+    , member0 "Normal Plane" Axis3d.normalPlane $(docs 'Axis3d.normalPlane)
     , member1 "Move To" "Point" Axis3d.moveTo $(docs 'Axis3d.moveTo)
     , member0 "Reverse" Axis3d.reverse $(docs 'Axis3d.reverse)
     , member1 "Place In" "Frame" Axis3d.placeIn $(docs 'Axis3d.placeIn)
@@ -1054,7 +1053,10 @@ axis3d =
 planeOrientation3d :: Class
 planeOrientation3d =
   Class.new @(PlaneOrientation3d Space (Defines Space)) $(docs ''PlaneOrientation3d) $
-    [ member0 "X Direction" PlaneOrientation3d.xDirection $(docs 'PlaneOrientation3d.xDirection)
+    [ factory1 "From Normal Direction" "Direction" PlaneOrientation3d.fromNormalDirection $(docs 'PlaneOrientation3d.fromNormalDirection)
+    , factory1 "From X Direction" "Direction" PlaneOrientation3d.fromXDirection $(docs 'PlaneOrientation3d.fromXDirection)
+    , factory1 "From Y Direction" "Direction" PlaneOrientation3d.fromYDirection $(docs 'PlaneOrientation3d.fromYDirection)
+    , member0 "X Direction" PlaneOrientation3d.xDirection $(docs 'PlaneOrientation3d.xDirection)
     , member0 "Y Direction" PlaneOrientation3d.yDirection $(docs 'PlaneOrientation3d.yDirection)
     , member0 "Normal Direction" PlaneOrientation3d.normalDirection $(docs 'PlaneOrientation3d.normalDirection)
     , member1 "Place In" "Orientation" PlaneOrientation3d.placeIn $(docs 'PlaneOrientation3d.placeIn)
@@ -1064,7 +1066,9 @@ planeOrientation3d =
 plane3d :: Class
 plane3d =
   Class.new @(Plane3d (Space @ Meters) (Defines Space)) $(docs ''Plane3d) $
-    [ factory2 "With Arbitrary Orientation" "Origin Point" "Normal Direction" Plane3d.withArbitraryOrientation $(docs 'Plane3d.withArbitraryOrientation)
+    [ factory2 "From Point And Normal" "Origin Point" "Normal Direction" Plane3d.fromPointAndNormal $(docs 'Plane3d.fromPointAndNormal)
+    , factory1 "From X Axis" "Axis" Plane3d.fromXAxis $(docs 'Plane3d.fromXAxis)
+    , factory1 "From Y Axis" "Axis" Plane3d.fromYAxis $(docs 'Plane3d.fromYAxis)
     , member0 "Origin Point" Plane3d.originPoint $(docs 'Plane3d.originPoint)
     , member0 "X Direction" Plane3d.xDirection $(docs 'Plane3d.xDirection)
     , member0 "Y Direction" Plane3d.yDirection $(docs 'Plane3d.yDirection)
