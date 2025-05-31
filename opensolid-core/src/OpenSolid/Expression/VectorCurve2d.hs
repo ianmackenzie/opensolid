@@ -11,10 +11,10 @@ module OpenSolid.Expression.VectorCurve2d
   )
 where
 
-import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.Orientation2d (Orientation2d)
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
@@ -45,13 +45,13 @@ magnitude :: Expression Float (Vector2d (space @ units)) -> Expression Float (Qt
 magnitude = Expression.magnitude
 
 placeIn ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   Expression Float (Vector2d (local @ units)) ->
   Expression Float (Vector2d (global @ units))
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   Expression Float (Vector2d (global @ units)) ->
   Expression Float (Vector2d (local @ units))
 relativeTo = Expression.relativeTo
@@ -63,7 +63,7 @@ transformBy ::
 transformBy = Expression.transformBy
 
 on ::
-  PlanarBasis3d space (Defines local) ->
+  PlaneOrientation3d space (Defines local) ->
   Expression Float (Vector2d (local @ units)) ->
   Expression Float (Vector3d (space @ units))
 on = Expression.on

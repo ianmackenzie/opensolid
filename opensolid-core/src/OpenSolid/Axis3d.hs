@@ -16,7 +16,7 @@ where
 
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
+import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -49,7 +49,7 @@ and the normal direction of the plane will be the direction of the axis.
 The X and Y directions of the plane will be chosen arbitrarily.
 -}
 arbitraryNormalPlane :: Axis3d (space @ units) -> Plane3d (space @ units) defines
-arbitraryNormalPlane (Axis3d p0 d) = Plane3d p0 (PlanarBasis3d.arbitraryNormalBasis d)
+arbitraryNormalPlane (Axis3d p0 d) = Plane3d p0 (PlaneOrientation3d.arbitraryNormalOrientation d)
 
 {-| Move an axis so that its origin point is the given point.
 
@@ -81,8 +81,8 @@ placeIn ::
   Axis3d (local @ units) ->
   Axis3d (global @ units)
 placeIn frame (Axis3d p0 d) = do
-  let Frame3d _ basis = frame
-  Axis3d (Point3d.placeIn frame p0) (Direction3d.placeIn basis d)
+  let Frame3d _ orientation = frame
+  Axis3d (Point3d.placeIn frame p0) (Direction3d.placeIn orientation d)
 
 -- | Convert an axis defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -90,5 +90,5 @@ relativeTo ::
   Axis3d (global @ units) ->
   Axis3d (local @ units)
 relativeTo frame (Axis3d p0 d) = do
-  let Frame3d _ basis = frame
-  Axis3d (Point3d.relativeTo frame p0) (Direction3d.relativeTo basis d)
+  let Frame3d _ orientation = frame
+  Axis3d (Point3d.relativeTo frame p0) (Direction3d.relativeTo orientation d)

@@ -63,8 +63,8 @@ on ::
   Axis2d (local @ units) ->
   Axis3d (space @ units)
 on plane (Axis2d p0 d) = do
-  let Plane3d _ basis = plane
-  Axis3d (Point2d.on plane p0) (Direction2d.on basis d)
+  let Plane3d _ orientation = plane
+  Axis3d (Point2d.on plane p0) (Direction2d.on orientation d)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

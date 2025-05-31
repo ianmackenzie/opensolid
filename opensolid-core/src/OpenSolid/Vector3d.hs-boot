@@ -7,7 +7,7 @@ module OpenSolid.Vector3d
 where
 
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Basis3d, Transform3d, Vector3d)
+import OpenSolid.Primitives (Orientation3d, Transform3d, Vector3d)
 
 coerce :: Vector3d (space1 @ units1) -> Vector3d (space2 @ units2)
 transformBy ::
@@ -15,10 +15,10 @@ transformBy ::
   Vector3d (space @ units2) ->
   Vector3d (space @ units2)
 placeIn ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   Vector3d (local @ units) ->
   Vector3d (global @ units)
 relativeTo ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   Vector3d (global @ units) ->
   Vector3d (local @ units)

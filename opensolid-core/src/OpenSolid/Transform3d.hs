@@ -37,8 +37,8 @@ import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d)
   , Frame3d (Frame3d)
-  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Point3d (Point3d)
   , Transform3d (Transform3d)
   , Vector3d (Vector3d)
@@ -129,7 +129,7 @@ scaleAlong (Axis3d originPoint direction) scale = do
   withFixedPoint originPoint vx vy vz
 
 mirrorAcross :: Plane3d (space @ units) defines -> Orthonormal (space @ units)
-mirrorAcross (Plane3d p0 (PlanarBasis3d i j)) = do
+mirrorAcross (Plane3d p0 (PlaneOrientation3d i j)) = do
   let Vector3d nx ny nz = i `cross` j
   let axx = 1.0 - 2.0 * nx * nx
   let ayy = 1.0 - 2.0 * ny * ny
@@ -147,11 +147,11 @@ placeIn ::
   Transform3d tag (local @ units) ->
   Transform3d tag (global @ units)
 placeIn frame transform = do
-  let Frame3d _ basis = frame
+  let Frame3d _ orientation = frame
   let p0 = Point3d.origin |> Point3d.relativeTo frame |> Point3d.transformBy transform |> Point3d.placeIn frame
-  let vx = unitX |> Vector3d.relativeTo basis |> Vector3d.transformBy transform |> Vector3d.placeIn basis
-  let vy = unitY |> Vector3d.relativeTo basis |> Vector3d.transformBy transform |> Vector3d.placeIn basis
-  let vz = unitZ |> Vector3d.relativeTo basis |> Vector3d.transformBy transform |> Vector3d.placeIn basis
+  let vx = unitX |> Vector3d.relativeTo orientation |> Vector3d.transformBy transform |> Vector3d.placeIn orientation
+  let vy = unitY |> Vector3d.relativeTo orientation |> Vector3d.transformBy transform |> Vector3d.placeIn orientation
+  let vz = unitZ |> Vector3d.relativeTo orientation |> Vector3d.transformBy transform |> Vector3d.placeIn orientation
   Transform3d p0 vx vy vz
 
 relativeTo ::
@@ -159,11 +159,11 @@ relativeTo ::
   Transform3d tag (global @ units) ->
   Transform3d tag (local @ units)
 relativeTo frame transform = do
-  let Frame3d _ basis = frame
+  let Frame3d _ orientation = frame
   let p0 = Point3d.origin |> Point3d.placeIn frame |> Point3d.transformBy transform |> Point3d.relativeTo frame
-  let vx = unitX |> Vector3d.placeIn basis |> Vector3d.transformBy transform |> Vector3d.relativeTo basis
-  let vy = unitY |> Vector3d.placeIn basis |> Vector3d.transformBy transform |> Vector3d.relativeTo basis
-  let vz = unitZ |> Vector3d.placeIn basis |> Vector3d.transformBy transform |> Vector3d.relativeTo basis
+  let vx = unitX |> Vector3d.placeIn orientation |> Vector3d.transformBy transform |> Vector3d.relativeTo orientation
+  let vy = unitY |> Vector3d.placeIn orientation |> Vector3d.transformBy transform |> Vector3d.relativeTo orientation
+  let vz = unitZ |> Vector3d.placeIn orientation |> Vector3d.transformBy transform |> Vector3d.relativeTo orientation
   Transform3d p0 vx vy vz
 
 toOrthonormal :: Transform.IsOrthonormal tag => Transform3d tag (space @ units) -> Orthonormal (space @ units)

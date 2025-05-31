@@ -9,9 +9,9 @@ module Tests.Random
   , axis2d
   , axis3d
   , plane3d
-  , basis2d
-  , planarBasis3d
-  , basis3d
+  , orientation2d
+  , planeOrientation3d
+  , orientation3d
   , frame2d
   , frame3d
   , bounds2d
@@ -36,9 +36,6 @@ where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2d (Axis2d (Axis2d))
 import OpenSolid.Axis3d (Axis3d (Axis3d))
-import OpenSolid.Basis2d (Basis2d)
-import OpenSolid.Basis2d qualified as Basis2d
-import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -56,9 +53,12 @@ import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.PlanarBasis3d (PlanarBasis3d)
-import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
+import OpenSolid.Orientation2d (Orientation2d)
+import OpenSolid.Orientation2d qualified as Orientation2d
+import OpenSolid.Orientation3d (Orientation3d)
 import OpenSolid.Plane3d (Plane3d (Plane3d))
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
+import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
@@ -112,21 +112,21 @@ axis2d = Random.map2 Axis2d point2d Direction2d.random
 axis3d :: Generator (Axis3d (space @ Meters))
 axis3d = Random.map2 Axis3d point3d Direction3d.random
 
-basis2d :: Generator (Basis2d global (Defines local))
-basis2d = Random.map Basis2d.fromXDirection Direction2d.random
+orientation2d :: Generator (Orientation2d global (Defines local))
+orientation2d = Random.map Orientation2d.fromXDirection Direction2d.random
 
-planarBasis3d :: Generator (PlanarBasis3d global (Defines local))
-planarBasis3d =
+planeOrientation3d :: Generator (PlaneOrientation3d global (Defines local))
+planeOrientation3d =
   Random.retry $
-    Random.map2 (Tolerance.using 0.1 PlanarBasis3d.orthogonalize)
+    Random.map2 (Tolerance.using 0.1 PlaneOrientation3d.orthogonalize)
       # Direction3d.random
       # Direction3d.random
 
-basis3d :: Generator (Basis3d global (Defines local))
-basis3d = Random.map Frame3d.basis frame3d
+orientation3d :: Generator (Orientation3d global (Defines local))
+orientation3d = Random.map Frame3d.orientation frame3d
 
 plane3d :: Generator (Plane3d (global @ Meters) (Defines local))
-plane3d = Random.map2 Plane3d point3d planarBasis3d
+plane3d = Random.map2 Plane3d point3d planeOrientation3d
 
 frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
 frame2d = Random.map Frame2d.fromXAxis axis2d

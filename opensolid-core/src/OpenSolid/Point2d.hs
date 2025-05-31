@@ -47,10 +47,10 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
-  , Basis2d (Basis2d)
   , Frame2d (Frame2d)
-  , PlanarBasis3d (PlanarBasis3d)
+  , Orientation2d (Orientation2d)
   , Plane3d (Plane3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Point2d (Point2d)
   , Point3d
   , Transform2d (Transform2d)
@@ -174,13 +174,13 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (local @ units) ->
   Point2d (global @ units)
-placeIn (Frame2d p0 (Basis2d i j)) (Point2d px py) = p0 + px * i + py * j
+placeIn (Frame2d p0 (Orientation2d i j)) (Point2d px py) = p0 + px * i + py * j
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (global @ units) ->
   Point2d (local @ units)
-relativeTo (Frame2d p0 (Basis2d i j)) p = let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
+relativeTo (Frame2d p0 (Orientation2d i j)) p = let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
 
 {-| Convert a 2D point to 3D point by placing it on a plane.
 
@@ -191,7 +191,7 @@ on ::
   Plane3d (space @ units) (Defines localSpace) ->
   Point2d (localSpace @ units) ->
   Point3d (space @ units)
-on (Plane3d originPoint (PlanarBasis3d i j)) (Point2d px py) = originPoint + px * i + py * j
+on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d px py) = originPoint + px * i + py * j
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert factor (Point2d px py) = Point2d (px !* factor) (py !* factor)

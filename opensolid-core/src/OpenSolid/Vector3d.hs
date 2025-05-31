@@ -38,20 +38,20 @@ module OpenSolid.Vector3d
 where
 
 import OpenSolid.Angle (Angle)
-import {-# SOURCE #-} OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Error qualified as Error
 import OpenSolid.List qualified as List
+import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
-  , Basis3d (Basis3d)
   , Direction3d (Direction3d, Unit3d)
-  , PlanarBasis3d (PlanarBasis3d)
+  , Orientation3d (Orientation3d)
   , Plane3d
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Vector2d (Vector2d)
   , Vector3d (Vector3d)
   )
@@ -80,9 +80,9 @@ rightwardForwardUpward = Vector3d
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
 fromComponents :: Convention3d -> (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
 fromComponents convention (vX, vY, vZ) = do
-  let Direction3d iR iF iU = Convention3d.xDirection Basis3d.world convention
-  let Direction3d jR jF jU = Convention3d.yDirection Basis3d.world convention
-  let Direction3d kR kF kU = Convention3d.zDirection Basis3d.world convention
+  let Direction3d iR iF iU = Convention3d.xDirection Orientation3d.world convention
+  let Direction3d jR jF jU = Convention3d.yDirection Orientation3d.world convention
+  let Direction3d kR kF kU = Convention3d.zDirection Orientation3d.world convention
   Vector3d
     # vX * iR + vY * jR + vZ * kR
     # vX * iF + vY * jF + vZ * kF
@@ -115,9 +115,9 @@ downwardComponent (Vector3d _ _ u) = -u
 -- | Get the XYZ components of a vector, given an XYZ coordinate convention to use.
 components :: Convention3d -> Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
 components convention vector =
-  ( vector `dot` Convention3d.xDirection Basis3d.world convention
-  , vector `dot` Convention3d.yDirection Basis3d.world convention
-  , vector `dot` Convention3d.zDirection Basis3d.world convention
+  ( vector `dot` Convention3d.xDirection Orientation3d.world convention
+  , vector `dot` Convention3d.yDirection Orientation3d.world convention
+  , vector `dot` Convention3d.zDirection Orientation3d.world convention
   )
 
 interpolateFrom ::
@@ -171,23 +171,23 @@ normalize vector = do
 
 -- | Convert a vectr defined in local coordinates to one defined in global coordinates.
 placeIn ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   Vector3d (local @ units) ->
   Vector3d (global @ units)
-placeIn (Basis3d i j k) (Vector3d vx vy vz) = vx * i + vy * j + vz * k
+placeIn (Orientation3d i j k) (Vector3d vx vy vz) = vx * i + vy * j + vz * k
 
 -- | Convert a vector defined in global coordinates to one defined in local coordinates.
 relativeTo ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   Vector3d (global @ units) ->
   Vector3d (local @ units)
-relativeTo (Basis3d i j k) vector = Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
+relativeTo (Orientation3d i j k) vector = Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
 
 projectInto ::
-  PlanarBasis3d global (Defines local) ->
+  PlaneOrientation3d global (Defines local) ->
   Vector3d (global @ units) ->
   Vector2d (local @ units)
-projectInto (PlanarBasis3d i j) v = Vector2d (v `dot` i) (v `dot` j)
+projectInto (PlaneOrientation3d i j) v = Vector2d (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
 sum = List.foldl (+) zero

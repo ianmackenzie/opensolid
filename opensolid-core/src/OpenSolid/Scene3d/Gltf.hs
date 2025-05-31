@@ -14,8 +14,6 @@ import Data.ByteString.Builder qualified as Builder
 import GHC.Float qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
-import OpenSolid.Basis3d (Basis3d)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Color qualified as Color
@@ -28,6 +26,8 @@ import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import OpenSolid.Orientation3d (Orientation3d)
+import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point3d qualified as Point3d
@@ -37,14 +37,14 @@ import OpenSolid.Units (Meters)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vertex3d qualified as Vertex3d
 
-xDirection :: Basis3d space defines -> Direction3d space
-xDirection = Basis3d.leftwardDirection
+xDirection :: Orientation3d space defines -> Direction3d space
+xDirection = Orientation3d.leftwardDirection
 
-yDirection :: Basis3d space defines -> Direction3d space
-yDirection = Basis3d.upwardDirection
+yDirection :: Orientation3d space defines -> Direction3d space
+yDirection = Orientation3d.upwardDirection
 
-zDirection :: Basis3d space defines -> Direction3d space
-zDirection = Basis3d.forwardDirection
+zDirection :: Orientation3d space defines -> Direction3d space
+zDirection = Orientation3d.forwardDirection
 
 convention :: Convention3d
 convention = Convention3d xDirection yDirection zDirection
@@ -54,10 +54,10 @@ matrixComponents frame =
   if frame == Frame3d.coerce Frame3d.world
     then Nothing
     else do
-      let basis = Frame3d.basis frame
-      let (ix, iy, iz) = Direction3d.components convention (xDirection basis)
-      let (jx, jy, jz) = Direction3d.components convention (yDirection basis)
-      let (kx, ky, kz) = Direction3d.components convention (zDirection basis)
+      let orientation = Frame3d.orientation frame
+      let (ix, iy, iz) = Direction3d.components convention (xDirection orientation)
+      let (jx, jy, jz) = Direction3d.components convention (yDirection orientation)
+      let (kx, ky, kz) = Direction3d.components convention (zDirection orientation)
       let (x0, y0, z0) = Point3d.coordinates convention (Frame3d.originPoint frame)
       let tx = Length.inMeters x0
       let ty = Length.inMeters y0

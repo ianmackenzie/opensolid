@@ -37,9 +37,9 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Basis2d (Basis2d)
-  , Direction2d (Direction2d)
-  , PlanarBasis3d (PlanarBasis3d)
+  ( Direction2d (Direction2d)
+  , Orientation2d (Orientation2d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d
   )
@@ -174,16 +174,16 @@ interpolate (VectorBounds2d x y) u v =
   Vector2d.xy (Bounds.interpolate x u) (Bounds.interpolate y v)
 
 placeIn ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds2d (global @ units)
-placeIn basis (VectorBounds2d x y) = do
+placeIn orientation (VectorBounds2d x y) = do
   let xMid = Bounds.midpoint x
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector2d x0 y0 = Vector2d.placeIn basis (Vector2d xMid yMid)
-  let Basis2d i j = basis
+  let Vector2d x0 y0 = Vector2d.placeIn orientation (Vector2d xMid yMid)
+  let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
@@ -191,16 +191,16 @@ placeIn basis (VectorBounds2d x y) = do
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 relativeTo ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   VectorBounds2d (global @ units) ->
   VectorBounds2d (local @ units)
-relativeTo basis (VectorBounds2d x y) = do
+relativeTo orientation (VectorBounds2d x y) = do
   let xMid = Bounds.midpoint x
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector2d x0 y0 = Vector2d.relativeTo basis (Vector2d xMid yMid)
-  let Basis2d i j = basis
+  let Vector2d x0 y0 = Vector2d.relativeTo orientation (Vector2d xMid yMid)
+  let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
@@ -208,10 +208,10 @@ relativeTo basis (VectorBounds2d x y) = do
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 on ::
-  PlanarBasis3d space (Defines local) ->
+  PlaneOrientation3d space (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds3d (space @ units)
-on (PlanarBasis3d i j) (VectorBounds2d x y) = x * i + y * j
+on (PlaneOrientation3d i j) (VectorBounds2d x y) = x * i + y * j
 
 convert ::
   Qty (units2 :/: units1) ->

@@ -62,8 +62,8 @@ import OpenSolid.Primitives
   ( Bounds2d (Bounds2d)
   , Bounds3d (Bounds3d)
   , Direction3d (Direction3d)
-  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Point3d (Point3d)
   )
 import OpenSolid.Qty qualified as Qty
@@ -356,7 +356,7 @@ on ::
   Bounds2d (local @ units) ->
   Bounds3d (space @ units)
 on plane (Bounds2d x y) = do
-  let Plane3d _ (PlanarBasis3d i j) = plane
+  let Plane3d _ (PlaneOrientation3d i j) = plane
   let Direction3d ix iy iz = i
   let Direction3d jx jy jz = j
   let xMid = Bounds.midpoint x

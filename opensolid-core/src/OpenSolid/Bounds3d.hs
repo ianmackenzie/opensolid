@@ -47,12 +47,12 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
-  , Basis3d (Basis3d)
   , Bounds3d (Bounds3d)
   , Direction3d (Direction3d)
   , Frame3d (Frame3d)
-  , PlanarBasis3d (PlanarBasis3d)
+  , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Point3d (Point3d)
   , Vector3d (Vector3d)
   )
@@ -267,7 +267,7 @@ placeIn ::
   Bounds3d (local @ units) ->
   Bounds3d (global @ units)
 placeIn frame (Bounds3d pR pF pU) = do
-  let Frame3d _ (Basis3d i j k) = frame
+  let Frame3d _ (Orientation3d i j k) = frame
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   let Direction3d kR kF kU = k
@@ -291,7 +291,7 @@ relativeTo ::
   Bounds3d (global @ units) ->
   Bounds3d (local @ units)
 relativeTo frame (Bounds3d pR pF pU) = do
-  let Frame3d _ (Basis3d i j k) = frame
+  let Frame3d _ (Orientation3d i j k) = frame
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   let Direction3d kR kF kU = k
@@ -315,7 +315,7 @@ projectInto ::
   Bounds3d (global @ units) ->
   Bounds2d (local @ units)
 projectInto plane (Bounds3d pR pF pU) = do
-  let Plane3d _ (PlanarBasis3d i j) = plane
+  let Plane3d _ (PlaneOrientation3d i j) = plane
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   let cR = Bounds.midpoint pR

@@ -205,7 +205,7 @@ on plane curve2d = do
       (Point2d.on plane)
       (Bounds2d.on plane)
       (Curve2d.compiled curve2d)
-    # VectorCurve3d.on (Plane3d.basis plane) (Curve2d.derivative curve2d)
+    # VectorCurve3d.on (Plane3d.orientation plane) (Curve2d.derivative curve2d)
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve.t * (p2 - p1)
@@ -336,7 +336,7 @@ placeIn frame curve =
       (Point3d.placeIn frame)
       (Bounds3d.placeIn frame)
       (compiled curve)
-    # VectorCurve3d.placeIn (Frame3d.basis frame) (derivative curve)
+    # VectorCurve3d.placeIn (Frame3d.orientation frame) (derivative curve)
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->

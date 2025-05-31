@@ -125,10 +125,10 @@ placeIn ::
   Transform2d tag (local @ units) ->
   Transform2d tag (global @ units)
 placeIn frame transform = do
-  let Frame2d _ basis = frame
+  let Frame2d _ orientation = frame
   let p0 = Point2d.origin |> Point2d.relativeTo frame |> Point2d.transformBy transform |> Point2d.placeIn frame
-  let vx = unitX |> Vector2d.relativeTo basis |> Vector2d.transformBy transform |> Vector2d.placeIn basis
-  let vy = unitY |> Vector2d.relativeTo basis |> Vector2d.transformBy transform |> Vector2d.placeIn basis
+  let vx = unitX |> Vector2d.relativeTo orientation |> Vector2d.transformBy transform |> Vector2d.placeIn orientation
+  let vy = unitY |> Vector2d.relativeTo orientation |> Vector2d.transformBy transform |> Vector2d.placeIn orientation
   Transform2d p0 vx vy
 
 relativeTo ::
@@ -136,10 +136,10 @@ relativeTo ::
   Transform2d tag (global @ units) ->
   Transform2d tag (local @ units)
 relativeTo frame transform = do
-  let Frame2d _ basis = frame
+  let Frame2d _ orientation = frame
   let p0 = Point2d.origin |> Point2d.placeIn frame |> Point2d.transformBy transform |> Point2d.relativeTo frame
-  let vx = unitX |> Vector2d.placeIn basis |> Vector2d.transformBy transform |> Vector2d.relativeTo basis
-  let vy = unitY |> Vector2d.placeIn basis |> Vector2d.transformBy transform |> Vector2d.relativeTo basis
+  let vx = unitX |> Vector2d.placeIn orientation |> Vector2d.transformBy transform |> Vector2d.relativeTo orientation
+  let vy = unitY |> Vector2d.placeIn orientation |> Vector2d.transformBy transform |> Vector2d.relativeTo orientation
   Transform2d p0 vx vy
 
 toOrthonormal :: Transform.IsOrthonormal tag => Transform2d tag (space @ units) -> Orthonormal (space @ units)

@@ -42,10 +42,6 @@ module OpenSolid.Expression
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Basis2d (Basis2d)
-import OpenSolid.Basis2d qualified as Basis2d
-import OpenSolid.Basis3d (Basis3d)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -58,8 +54,12 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.Orientation2d (Orientation2d)
+import OpenSolid.Orientation2d qualified as Orientation2d
+import OpenSolid.Orientation3d (Orientation3d)
+import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
@@ -1491,12 +1491,12 @@ class
 instance
   local1 ~ local2 =>
   PlaceIn
-    (Basis2d global (Defines local1))
+    (Orientation2d global (Defines local1))
     (Expression input (Vector2d (local2 @ units)))
     (Expression input (Vector2d (global @ units)))
   where
-  placeIn basis (VectorCurve2d ast _) = vectorCurve2d (Ast.placeVector2dIn basis ast)
-  placeIn basis (VectorSurface2d ast _) = vectorSurface2d (Ast.placeVector2dIn basis ast)
+  placeIn orientation (VectorCurve2d ast _) = vectorCurve2d (Ast.placeVector2dIn orientation ast)
+  placeIn orientation (VectorSurface2d ast _) = vectorSurface2d (Ast.placeVector2dIn orientation ast)
 
 instance
   (local1 ~ local2, units1 ~ units2) =>
@@ -1511,12 +1511,12 @@ instance
 instance
   local1 ~ local2 =>
   PlaceIn
-    (Basis3d global (Defines local1))
+    (Orientation3d global (Defines local1))
     (Expression input (Vector3d (local2 @ units)))
     (Expression input (Vector3d (global @ units)))
   where
-  placeIn basis (VectorCurve3d ast _) = vectorCurve3d (Ast.placeVector3dIn basis ast)
-  placeIn basis (VectorSurface3d ast _) = vectorSurface3d (Ast.placeVector3dIn basis ast)
+  placeIn orientation (VectorCurve3d ast _) = vectorCurve3d (Ast.placeVector3dIn orientation ast)
+  placeIn orientation (VectorSurface3d ast _) = vectorSurface3d (Ast.placeVector3dIn orientation ast)
 
 instance
   (local1 ~ local2, units1 ~ units2) =>
@@ -1538,11 +1538,11 @@ class
 instance
   global1 ~ global2 =>
   RelativeTo
-    (Basis2d global1 (Defines local))
+    (Orientation2d global1 (Defines local))
     (Expression input (Vector2d (global2 @ units)))
     (Expression input (Vector2d (local @ units)))
   where
-  relativeTo frame ast = placeIn (Basis2d.inverse frame) ast
+  relativeTo frame ast = placeIn (Orientation2d.inverse frame) ast
 
 instance
   (global1 ~ global2, units1 ~ units2) =>
@@ -1556,11 +1556,11 @@ instance
 instance
   global1 ~ global2 =>
   RelativeTo
-    (Basis3d global1 (Defines local))
+    (Orientation3d global1 (Defines local))
     (Expression input (Vector3d (global2 @ units)))
     (Expression input (Vector3d (local @ units)))
   where
-  relativeTo basis ast = placeIn (Basis3d.inverse basis) ast
+  relativeTo orientation ast = placeIn (Orientation3d.inverse orientation) ast
 
 instance
   (global1 ~ global2, units1 ~ units2) =>
@@ -1577,12 +1577,12 @@ class On plane expression1 expression2 | plane expression1 -> expression2 where
 instance
   local1 ~ local2 =>
   On
-    (PlanarBasis3d global (Defines local1))
+    (PlaneOrientation3d global (Defines local1))
     (Expression input (Vector2d (local2 @ units2)))
     (Expression input (Vector3d (global @ units2)))
   where
-  on basis (VectorCurve2d ast _) = vectorCurve3d (Ast.placeVector2dOn basis ast)
-  on basis (VectorSurface2d ast _) = vectorSurface3d (Ast.placeVector2dOn basis ast)
+  on orientation (VectorCurve2d ast _) = vectorCurve3d (Ast.placeVector2dOn orientation ast)
+  on orientation (VectorSurface2d ast _) = vectorSurface3d (Ast.placeVector2dOn orientation ast)
 
 instance
   (local1 ~ local2, units1 ~ units2) =>
@@ -1600,12 +1600,12 @@ class ProjectInto plane expression1 expression2 | plane expression1 -> expressio
 instance
   global1 ~ global2 =>
   ProjectInto
-    (PlanarBasis3d global1 (Defines local))
+    (PlaneOrientation3d global1 (Defines local))
     (Expression input (Vector3d (global2 @ units2)))
     (Expression input (Vector2d (local @ units2)))
   where
-  projectInto basis (VectorCurve3d ast _) = vectorCurve2d (Ast.projectVector3dInto basis ast)
-  projectInto basis (VectorSurface3d ast _) = vectorSurface2d (Ast.projectVector3dInto basis ast)
+  projectInto orientation (VectorCurve3d ast _) = vectorCurve2d (Ast.projectVector3dInto orientation ast)
+  projectInto orientation (VectorSurface3d ast _) = vectorSurface2d (Ast.projectVector3dInto orientation ast)
 
 instance
   (global1 ~ global2, units1 ~ units2) =>

@@ -95,8 +95,8 @@ library
     OpenSolid.Array2d
     OpenSolid.Axis2d
     OpenSolid.Axis3d
-    OpenSolid.Basis2d
-    OpenSolid.Basis3d
+    OpenSolid.Orientation2d
+    OpenSolid.Orientation3d
     OpenSolid.Binary
     OpenSolid.Body3d
     OpenSolid.Body3d.BoundedBy
@@ -166,8 +166,8 @@ library
     OpenSolid.Pair
     OpenSolid.Parameter
     OpenSolid.PbrMaterial
-    OpenSolid.PlanarBasis3d
     OpenSolid.Plane3d
+    OpenSolid.PlaneOrientation3d
     OpenSolid.Point2d
     OpenSolid.Point3d
     OpenSolid.Polygon2d

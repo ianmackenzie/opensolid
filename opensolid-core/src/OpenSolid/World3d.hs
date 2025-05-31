@@ -1,6 +1,6 @@
 module OpenSolid.World3d
   ( originPoint
-  , basis
+  , orientation
   , frame
   , rightwardDirection
   , leftwardDirection
@@ -14,18 +14,18 @@ module OpenSolid.World3d
   , upwardForwardDirection
   , rightwardUpwardDirection
   , upwardRightwardDirection
-  , rightwardBasis
-  , leftwardBasis
-  , forwardBasis
-  , backwardBasis
-  , upwardBasis
-  , downwardBasis
-  , rightPlaneBasis
-  , leftPlaneBasis
-  , frontPlaneBasis
-  , backPlaneBasis
-  , topPlaneBasis
-  , bottomPlaneBasis
+  , rightwardOrientation
+  , leftwardOrientation
+  , forwardOrientation
+  , backwardOrientation
+  , upwardOrientation
+  , downwardOrientation
+  , rightPlaneOrientation
+  , leftPlaneOrientation
+  , frontPlaneOrientation
+  , backPlaneOrientation
+  , topPlaneOrientation
+  , bottomPlaneOrientation
   , rightPlane
   , leftPlane
   , frontPlane
@@ -39,11 +39,11 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Basis3d (Basis3d)
-  , Direction3d (Direction3d, Unit3d)
+  ( Direction3d (Direction3d, Unit3d)
   , Frame3d (Frame3d)
-  , PlanarBasis3d (PlanarBasis3d)
+  , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Point3d (Point3d)
   )
 import OpenSolid.Qty qualified as Qty
@@ -100,70 +100,70 @@ upwardRightwardDirection :: Angle -> Direction3d space
 upwardRightwardDirection angle =
   Unit3d (Angle.cos angle * upwardDirection + Angle.sin angle * rightwardDirection)
 
--- | The global coordinate system basis.
-basis :: Basis3d space (Defines space)
-basis = Basis3d rightwardDirection forwardDirection upwardDirection
+-- | The global coordinate system orientation.
+orientation :: Orientation3d space (Defines space)
+orientation = Orientation3d rightwardDirection forwardDirection upwardDirection
 
 -- | The global coordinate system frame.
 frame :: Frame3d (space @ units) (Defines space)
-frame = Frame3d originPoint basis
+frame = Frame3d originPoint orientation
 
-forwardBasis :: Basis3d space defines
-forwardBasis = Basis3d rightwardDirection forwardDirection upwardDirection
+forwardOrientation :: Orientation3d space defines
+forwardOrientation = Orientation3d rightwardDirection forwardDirection upwardDirection
 
-backwardBasis :: Basis3d space defines
-backwardBasis = Basis3d leftwardDirection backwardDirection upwardDirection
+backwardOrientation :: Orientation3d space defines
+backwardOrientation = Orientation3d leftwardDirection backwardDirection upwardDirection
 
-leftwardBasis :: Basis3d space defines
-leftwardBasis = Basis3d forwardDirection leftwardDirection upwardDirection
+leftwardOrientation :: Orientation3d space defines
+leftwardOrientation = Orientation3d forwardDirection leftwardDirection upwardDirection
 
-rightwardBasis :: Basis3d space defines
-rightwardBasis = Basis3d backwardDirection rightwardDirection upwardDirection
+rightwardOrientation :: Orientation3d space defines
+rightwardOrientation = Orientation3d backwardDirection rightwardDirection upwardDirection
 
-upwardBasis :: Basis3d space defines
-upwardBasis = Basis3d leftwardDirection upwardDirection forwardDirection
+upwardOrientation :: Orientation3d space defines
+upwardOrientation = Orientation3d leftwardDirection upwardDirection forwardDirection
 
-downwardBasis :: Basis3d space defines
-downwardBasis = Basis3d rightwardDirection downwardDirection forwardDirection
+downwardOrientation :: Orientation3d space defines
+downwardOrientation = Orientation3d rightwardDirection downwardDirection forwardDirection
 
-rightPlaneBasis :: PlanarBasis3d space defines
-rightPlaneBasis = PlanarBasis3d forwardDirection upwardDirection
+rightPlaneOrientation :: PlaneOrientation3d space defines
+rightPlaneOrientation = PlaneOrientation3d forwardDirection upwardDirection
 
-leftPlaneBasis :: PlanarBasis3d space defines
-leftPlaneBasis = PlanarBasis3d backwardDirection upwardDirection
+leftPlaneOrientation :: PlaneOrientation3d space defines
+leftPlaneOrientation = PlaneOrientation3d backwardDirection upwardDirection
 
-frontPlaneBasis :: PlanarBasis3d space defines
-frontPlaneBasis = PlanarBasis3d leftwardDirection upwardDirection
+frontPlaneOrientation :: PlaneOrientation3d space defines
+frontPlaneOrientation = PlaneOrientation3d leftwardDirection upwardDirection
 
-backPlaneBasis :: PlanarBasis3d space defines
-backPlaneBasis = PlanarBasis3d rightwardDirection upwardDirection
+backPlaneOrientation :: PlaneOrientation3d space defines
+backPlaneOrientation = PlaneOrientation3d rightwardDirection upwardDirection
 
-topPlaneBasis :: PlanarBasis3d space defines
-topPlaneBasis = PlanarBasis3d rightwardDirection forwardDirection
+topPlaneOrientation :: PlaneOrientation3d space defines
+topPlaneOrientation = PlaneOrientation3d rightwardDirection forwardDirection
 
-bottomPlaneBasis :: PlanarBasis3d space defines
-bottomPlaneBasis = PlanarBasis3d leftwardDirection forwardDirection
+bottomPlaneOrientation :: PlaneOrientation3d space defines
+bottomPlaneOrientation = PlaneOrientation3d leftwardDirection forwardDirection
 
 -- | The rightward-facing plane of the global coordinate system.
 rightPlane :: Plane3d (space @ units) defines
-rightPlane = Plane3d originPoint rightPlaneBasis
+rightPlane = Plane3d originPoint rightPlaneOrientation
 
 -- | The leftward-facing plane of the global coordinate system.
 leftPlane :: Plane3d (space @ units) defines
-leftPlane = Plane3d originPoint leftPlaneBasis
+leftPlane = Plane3d originPoint leftPlaneOrientation
 
 -- | The forward-facing plane of the global coordinate system.
 frontPlane :: Plane3d (space @ units) defines
-frontPlane = Plane3d originPoint frontPlaneBasis
+frontPlane = Plane3d originPoint frontPlaneOrientation
 
 -- | The backward-facing plane of the global coordinate system.
 backPlane :: Plane3d (space @ units) defines
-backPlane = Plane3d originPoint backPlaneBasis
+backPlane = Plane3d originPoint backPlaneOrientation
 
 -- | The upward-facing plane of the global coordinate system.
 topPlane :: Plane3d (space @ units) defines
-topPlane = Plane3d originPoint topPlaneBasis
+topPlane = Plane3d originPoint topPlaneOrientation
 
 -- | The downward-facing plane of the global coordinate system.
 bottomPlane :: Plane3d (space @ units) defines
-bottomPlane = Plane3d originPoint bottomPlaneBasis
+bottomPlane = Plane3d originPoint bottomPlaneOrientation

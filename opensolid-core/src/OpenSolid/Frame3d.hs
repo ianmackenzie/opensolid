@@ -10,7 +10,7 @@ module OpenSolid.Frame3d
   , upwardFrame
   , downwardFrame
   , originPoint
-  , basis
+  , orientation
   , rightwardDirection
   , leftwardDirection
   , forwardDirection
@@ -70,17 +70,17 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3d (Axis3d (Axis3d))
-import OpenSolid.Basis3d (Basis3d)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Orientation3d (Orientation3d)
+import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
-  ( Basis3d (Basis3d)
-  , Direction3d (Unit3d)
+  ( Direction3d (Unit3d)
   , Frame3d (Frame3d)
-  , PlanarBasis3d (PlanarBasis3d)
+  , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Point3d
   , Vector3d
   )
@@ -88,45 +88,45 @@ import OpenSolid.Transform3d qualified as Transform3d
 
 -- | A frame of reference defining a new coordinate system.
 world :: Frame3d (space @ units) (Defines space)
-world = Frame3d Point3d.origin Basis3d.world
+world = Frame3d Point3d.origin Orientation3d.world
 
 -- | Get the origin point of a frame.
 originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)
 originPoint (Frame3d p0 _) = p0
 
--- | Get the basis (orientation) of a frame.
-basis :: Frame3d (space @ units) defines -> Basis3d space defines
-basis (Frame3d _ b) = b
+-- | Get the orientation of a frame.
+orientation :: Frame3d (space @ units) defines -> Orientation3d space defines
+orientation (Frame3d _ o) = o
 
 coerce :: Frame3d (space1 @ units1) defines1 -> Frame3d (space2 @ units2) defines2
-coerce (Frame3d p0 b) = Frame3d (Point3d.coerce p0) (Basis3d.coerce b)
+coerce (Frame3d p o) = Frame3d (Point3d.coerce p) (Orientation3d.coerce o)
 
 erase :: Frame3d (space @ units) defines -> Frame3d (space @ Unitless) defines
 erase = coerce
 
 -- | Get the local rightward direction of a frame.
 rightwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-rightwardDirection frame = Basis3d.rightwardDirection (basis frame)
+rightwardDirection frame = Orientation3d.rightwardDirection (orientation frame)
 
 -- | Get the local leftward direction of a frame.
 leftwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-leftwardDirection frame = Basis3d.leftwardDirection (basis frame)
+leftwardDirection frame = Orientation3d.leftwardDirection (orientation frame)
 
 -- | Get the local forward direction of a frame.
 forwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-forwardDirection frame = Basis3d.forwardDirection (basis frame)
+forwardDirection frame = Orientation3d.forwardDirection (orientation frame)
 
 -- | Get the local backward direction of a frame.
 backwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-backwardDirection frame = Basis3d.backwardDirection (basis frame)
+backwardDirection frame = Orientation3d.backwardDirection (orientation frame)
 
 -- | Get the local upward direction of a frame.
 upwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-upwardDirection frame = Basis3d.upwardDirection (basis frame)
+upwardDirection frame = Orientation3d.upwardDirection (orientation frame)
 
 -- | Get the local downward direction of a frame.
 downwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-downwardDirection frame = Basis3d.downwardDirection (basis frame)
+downwardDirection frame = Orientation3d.downwardDirection (orientation frame)
 
 -- | Get the rightward axis of a frame.
 rightwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
@@ -160,7 +160,7 @@ its X direction will be the frame's leftward direction
 and its Y direction will be frame's upward direction.
 -}
 frontPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-frontPlane (Frame3d p0 (Basis3d r _ u)) = Plane3d p0 (PlanarBasis3d -r u)
+frontPlane (Frame3d p0 (Orientation3d r _ u)) = Plane3d p0 (PlaneOrientation3d -r u)
 
 {-| Construct a locally backward-facing plane from a frame.
 
@@ -170,7 +170,7 @@ its X direction will be the frame's rightward direction
 and its Y direction will be frame's upward direction.
 -}
 backPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-backPlane (Frame3d p0 (Basis3d r _ u)) = Plane3d p0 (PlanarBasis3d r u)
+backPlane (Frame3d p0 (Orientation3d r _ u)) = Plane3d p0 (PlaneOrientation3d r u)
 
 {-| Construct a locally leftward-facing plane from a frame.
 
@@ -180,7 +180,7 @@ its X direction will be the frame's backward direction
 and its Y direction will be frame's upward direction.
 -}
 leftPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-leftPlane (Frame3d p0 (Basis3d _ f u)) = Plane3d p0 (PlanarBasis3d -f u)
+leftPlane (Frame3d p0 (Orientation3d _ f u)) = Plane3d p0 (PlaneOrientation3d -f u)
 
 {-| Construct a locally rightward-facing plane from a frame.
 
@@ -190,7 +190,7 @@ its X direction will be the frame's forward direction
 and its Y direction will be frame's upward direction.
 -}
 rightPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-rightPlane (Frame3d p0 (Basis3d _ f u)) = Plane3d p0 (PlanarBasis3d f u)
+rightPlane (Frame3d p0 (Orientation3d _ f u)) = Plane3d p0 (PlaneOrientation3d f u)
 
 {-| Construct a locally upward-facing plane from a frame.
 
@@ -200,7 +200,7 @@ its X direction will be the frame's rightward direction
 and its Y direction will be frame's forward direction.
 -}
 topPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-topPlane (Frame3d p0 (Basis3d r f _)) = Plane3d p0 (PlanarBasis3d r f)
+topPlane (Frame3d p0 (Orientation3d r f _)) = Plane3d p0 (PlaneOrientation3d r f)
 
 {-| Construct a locally downward-facing plane from a frame.
 
@@ -210,31 +210,37 @@ its X direction will be the frame's leftward direction
 and its Y direction will be frame's forward direction.
 -}
 bottomPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-bottomPlane (Frame3d p0 (Basis3d r f _)) = Plane3d p0 (PlanarBasis3d -r f)
+bottomPlane (Frame3d p0 (Orientation3d r f _)) = Plane3d p0 (PlaneOrientation3d -r f)
 
 -- | Construct a plane from its front plane.
 fromFrontPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromFrontPlane (Plane3d p0 (PlanarBasis3d l u)) = Frame3d p0 (Basis3d -l (Unit3d (l `cross` u)) u)
+fromFrontPlane (Plane3d p0 (PlaneOrientation3d l u)) =
+  Frame3d p0 (Orientation3d -l (Unit3d (l `cross` u)) u)
 
 -- | Construct a plane from its back plane.
 fromBackPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromBackPlane (Plane3d p0 (PlanarBasis3d r u)) = Frame3d p0 (Basis3d r (Unit3d (u `cross` r)) u)
+fromBackPlane (Plane3d p0 (PlaneOrientation3d r u)) =
+  Frame3d p0 (Orientation3d r (Unit3d (u `cross` r)) u)
 
 -- | Construct a plane from its left plane.
 fromLeftPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromLeftPlane (Plane3d p0 (PlanarBasis3d b u)) = Frame3d p0 (Basis3d (Unit3d (u `cross` b)) -b u)
+fromLeftPlane (Plane3d p0 (PlaneOrientation3d b u)) =
+  Frame3d p0 (Orientation3d (Unit3d (u `cross` b)) -b u)
 
 -- | Construct a plane from its right plane.
 fromRightPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromRightPlane (Plane3d p0 (PlanarBasis3d f u)) = Frame3d p0 (Basis3d (Unit3d (f `cross` u)) f u)
+fromRightPlane (Plane3d p0 (PlaneOrientation3d f u)) =
+  Frame3d p0 (Orientation3d (Unit3d (f `cross` u)) f u)
 
 -- | Construct a plane from its top plane.
 fromTopPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromTopPlane (Plane3d p0 (PlanarBasis3d r f)) = Frame3d p0 (Basis3d r f (Unit3d (r `cross` f)))
+fromTopPlane (Plane3d p0 (PlaneOrientation3d r f)) =
+  Frame3d p0 (Orientation3d r f (Unit3d (r `cross` f)))
 
 -- | Construct a plane from its bottom plane.
 fromBottomPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-fromBottomPlane (Plane3d p0 (PlanarBasis3d l f)) = Frame3d p0 (Basis3d -l f (Unit3d (f `cross` l)))
+fromBottomPlane (Plane3d p0 (PlaneOrientation3d l f)) =
+  Frame3d p0 (Orientation3d -l f (Unit3d (f `cross` l)))
 
 {-| Construct a forward-facing frame relative to a parent/reference frame.
 
@@ -242,7 +248,7 @@ This is actually just the parent frame itself,
 but may be used to define a different local coordinate system.
 -}
 forwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-forwardFrame (Frame3d p0 b) = Frame3d p0 (Basis3d.forwardBasis b)
+forwardFrame (Frame3d p o) = Frame3d p (Orientation3d.forwardOrientation o)
 
 {-| Construct a backward-facing frame relative to a parent/reference frame.
 
@@ -252,7 +258,7 @@ and the rightward direction of the frame will point leftward
 (all relative to the parent frame).
 -}
 backwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-backwardFrame (Frame3d p0 b) = Frame3d p0 (Basis3d.backwardBasis b)
+backwardFrame (Frame3d p o) = Frame3d p (Orientation3d.backwardOrientation o)
 
 {-| Construct a leftward-facing frame relative to a parent/reference frame.
 
@@ -262,7 +268,7 @@ and the rightward direction of the frame will point forward
 (all relative to the parent frame).
 -}
 leftwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-leftwardFrame (Frame3d p0 b) = Frame3d p0 (Basis3d.leftwardBasis b)
+leftwardFrame (Frame3d p o) = Frame3d p (Orientation3d.leftwardOrientation o)
 
 {-| Construct a rightward-facing frame relative to a parent/reference frame.
 
@@ -272,7 +278,7 @@ and the rightward direction of the frame will point backward
 (all relative to the parent frame).
 -}
 rightwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rightwardFrame (Frame3d p0 b) = Frame3d p0 (Basis3d.rightwardBasis b)
+rightwardFrame (Frame3d p o) = Frame3d p (Orientation3d.rightwardOrientation o)
 
 {-| Construct an upward-facing frame relative to a parent/reference frame.
 
@@ -282,7 +288,7 @@ and the rightward direction of the frame will point leftward
 (all relative to the parent frame).
 -}
 upwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-upwardFrame (Frame3d p0 b) = Frame3d p0 (Basis3d.upwardBasis b)
+upwardFrame (Frame3d p o) = Frame3d p (Orientation3d.upwardOrientation o)
 
 {-| Construct a downward-facing frame relative to a parent/reference frame.
 
@@ -292,7 +298,7 @@ and the rightward direction of the frame will point rightward
 (all relative to the parent frame).
 -}
 downwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-downwardFrame (Frame3d p0 b) = Frame3d p0 (Basis3d.downwardBasis b)
+downwardFrame (Frame3d p o) = Frame3d p (Orientation3d.downwardOrientation o)
 
 -- | Move a frame in its own forward direction by the given distance.
 offsetForwardBy ::
@@ -434,7 +440,7 @@ placeIn ::
 placeIn globalFrame frame =
   Frame3d
     # Point3d.placeIn globalFrame (originPoint frame)
-    # Basis3d.placeIn (basis globalFrame) (basis frame)
+    # Orientation3d.placeIn (orientation globalFrame) (orientation frame)
 
 -- | Convert a frame defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -444,7 +450,7 @@ relativeTo ::
 relativeTo globalFrame frame =
   Frame3d
     # Point3d.relativeTo globalFrame (originPoint frame)
-    # Basis3d.relativeTo (basis globalFrame) (basis frame)
+    # Orientation3d.relativeTo (orientation globalFrame) (orientation frame)
 
 {-| Compute the "inverse" of a given frame.
 
@@ -460,15 +466,15 @@ moveTo ::
   Point3d (space @ units) ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
-moveTo newOriginPoint (Frame3d _ b) = Frame3d newOriginPoint (Basis3d.coerce b)
+moveTo newOriginPoint (Frame3d _ o) = Frame3d newOriginPoint (Orientation3d.coerce o)
 
 -- | Apply the given transform to a frame.
 transformBy ::
   Transform3d.Rigid (space @ units) ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
-transformBy transform (Frame3d p0 b) =
-  Frame3d (Point3d.transformBy transform p0) (Basis3d.transformBy transform b)
+transformBy transform (Frame3d p o) =
+  Frame3d (Point3d.transformBy transform p) (Orientation3d.transformBy transform o)
 
 translateBy ::
   Vector3d (space @ units) ->

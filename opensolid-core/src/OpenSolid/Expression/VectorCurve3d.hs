@@ -11,10 +11,10 @@ module OpenSolid.Expression.VectorCurve3d
   )
 where
 
-import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.Orientation3d (Orientation3d)
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
@@ -46,19 +46,19 @@ magnitude :: Expression Float (Vector3d (space @ units)) -> Expression Float (Qt
 magnitude = Expression.magnitude
 
 placeIn ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   Expression Float (Vector3d (local @ units)) ->
   Expression Float (Vector3d (global @ units))
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   Expression Float (Vector3d (global @ units)) ->
   Expression Float (Vector3d (local @ units))
 relativeTo = Expression.relativeTo
 
 projectInto ::
-  PlanarBasis3d global (Defines local) ->
+  PlaneOrientation3d global (Defines local) ->
   Expression Float (Vector3d (global @ units)) ->
   Expression Float (Vector2d (local @ units))
 projectInto = Expression.projectInto

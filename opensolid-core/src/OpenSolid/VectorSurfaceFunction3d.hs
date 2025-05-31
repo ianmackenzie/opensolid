@@ -16,14 +16,14 @@ module OpenSolid.VectorSurfaceFunction3d
   )
 where
 
-import OpenSolid.Basis3d (Basis3d)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
+import OpenSolid.Orientation3d (Orientation3d)
+import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -473,23 +473,23 @@ derivative U (VectorSurfaceFunction3d _ du _) = du
 derivative V (VectorSurfaceFunction3d _ _ dv) = dv
 
 placeIn ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   VectorSurfaceFunction3d (local @ units) ->
   VectorSurfaceFunction3d (global @ units)
-placeIn basis function =
+placeIn orientation function =
   new
     # CompiledFunction.map
-      (Expression.VectorSurface3d.placeIn basis)
-      (Vector3d.placeIn basis)
-      (VectorBounds3d.placeIn basis)
+      (Expression.VectorSurface3d.placeIn orientation)
+      (Vector3d.placeIn orientation)
+      (VectorBounds3d.placeIn orientation)
       (compiled function)
-    # \p -> placeIn basis (derivative p function)
+    # \p -> placeIn orientation (derivative p function)
 
 relativeTo ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   VectorSurfaceFunction3d (global @ units) ->
   VectorSurfaceFunction3d (local @ units)
-relativeTo basis function = placeIn (Basis3d.inverse basis) function
+relativeTo orientation function = placeIn (Orientation3d.inverse orientation) function
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

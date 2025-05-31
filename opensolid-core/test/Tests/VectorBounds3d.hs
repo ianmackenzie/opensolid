@@ -44,17 +44,17 @@ boundsAndContainedVector = Random.do
 placeIn :: Tolerance Meters => Test
 placeIn = Test.check 100 "placeIn" Test.do
   (localBounds, localVector) <- boundsAndContainedVector
-  basis <- Tests.Random.basis3d
-  let globalBounds = VectorBounds3d.placeIn basis localBounds
-  let globalVector = Vector3d.placeIn basis localVector
+  orientation <- Tests.Random.orientation3d
+  let globalBounds = VectorBounds3d.placeIn orientation localBounds
+  let globalVector = Vector3d.placeIn orientation localVector
   Test.expect (globalVector ^ globalBounds)
 
 relativeTo :: Tolerance Meters => Test
 relativeTo = Test.check 100 "relativeTo" Test.do
   (globalBounds, globalVector) <- boundsAndContainedVector
-  basis <- Tests.Random.basis3d
-  let localBounds = VectorBounds3d.relativeTo basis globalBounds
-  let localVector = Vector3d.relativeTo basis globalVector
+  orientation <- Tests.Random.orientation3d
+  let localBounds = VectorBounds3d.relativeTo orientation globalBounds
+  let localVector = Vector3d.relativeTo orientation globalVector
   Test.expect (localVector ^ localBounds)
 
 transformBy :: Tolerance Meters => Test

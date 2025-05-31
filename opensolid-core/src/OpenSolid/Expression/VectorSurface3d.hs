@@ -11,11 +11,11 @@ module OpenSolid.Expression.VectorSurface3d
   )
 where
 
-import OpenSolid.Basis3d (Basis3d)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.Orientation3d (Orientation3d)
+import OpenSolid.Orientation3d qualified as Orientation3d
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvPoint)
 import OpenSolid.Transform3d (Transform3d)
@@ -49,23 +49,23 @@ magnitude :: Expression UvPoint (Vector3d (space @ units)) -> Expression UvPoint
 magnitude = Expression.magnitude
 
 placeIn ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   Expression UvPoint (Vector3d (local @ units)) ->
   Expression UvPoint (Vector3d (global @ units))
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   Expression UvPoint (Vector3d (global @ units)) ->
   Expression UvPoint (Vector3d (local @ units))
-relativeTo basis expression =
+relativeTo orientation expression =
   rightwardForwardUpward
-    # expression `dot` constant (Vector3d.unit (Basis3d.rightwardDirection basis))
-    # expression `dot` constant (Vector3d.unit (Basis3d.forwardDirection basis))
-    # expression `dot` constant (Vector3d.unit (Basis3d.upwardDirection basis))
+    # expression `dot` constant (Vector3d.unit (Orientation3d.rightwardDirection orientation))
+    # expression `dot` constant (Vector3d.unit (Orientation3d.forwardDirection orientation))
+    # expression `dot` constant (Vector3d.unit (Orientation3d.upwardDirection orientation))
 
 projectInto ::
-  PlanarBasis3d global (Defines local) ->
+  PlaneOrientation3d global (Defines local) ->
   Expression UvPoint (Vector3d (global @ units)) ->
   Expression UvPoint (Vector2d (local @ units))
 projectInto = Expression.projectInto

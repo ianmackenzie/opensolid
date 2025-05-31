@@ -70,10 +70,6 @@ module OpenSolid.Bytecode.Ast
   )
 where
 
-import OpenSolid.Basis2d (Basis2d)
-import OpenSolid.Basis2d qualified as Basis2d
-import OpenSolid.Basis3d (Basis3d)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Bytecode.Compile qualified as Compile
 import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
@@ -85,10 +81,14 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.PlanarBasis3d (PlanarBasis3d)
-import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
+import OpenSolid.Orientation2d (Orientation2d)
+import OpenSolid.Orientation2d qualified as Orientation2d
+import OpenSolid.Orientation3d (Orientation3d)
+import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
+import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
@@ -111,7 +111,7 @@ type Coordinates = Space @ Unitless
 
 type Plane = Plane3d Coordinates (Defines Space)
 
-type PlanarBasis = PlanarBasis3d Space (Defines Space)
+type PlaneOrientation = PlaneOrientation3d Space (Defines Space)
 
 data Ast1d input where
   Constant1d :: Float -> Ast1d input
@@ -190,7 +190,7 @@ data Variable2d input where
   BezierCurve2d :: NonEmpty (Vector2d Coordinates) -> Variable1d input -> Variable2d input
   TransformVector2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
   TransformPoint2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
-  ProjectVector3d :: PlanarBasis -> Variable3d input -> Variable2d input
+  ProjectVector3d :: PlaneOrientation -> Variable3d input -> Variable2d input
   ProjectPoint3d :: Plane -> Variable3d input -> Variable2d input
 
 deriving instance Eq (Variable2d input)
@@ -232,7 +232,7 @@ data Variable3d input where
   BezierCurve3d :: NonEmpty (Vector3d Coordinates) -> Variable1d input -> Variable3d input
   TransformVector3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
   TransformPoint3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
-  PlaceVector2d :: PlanarBasis -> Variable2d input -> Variable3d input
+  PlaceVector2d :: PlaneOrientation -> Variable2d input -> Variable3d input
   PlacePoint2d :: Plane -> Variable2d input -> Variable3d input
 
 deriving instance Eq (Variable3d input)
@@ -302,7 +302,7 @@ instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) wh
   BezierCurve2d controlPoints param . input = BezierCurve2d controlPoints (param . input)
   TransformVector2d transform vector . input = TransformVector2d transform (vector . input)
   TransformPoint2d transform point . input = TransformPoint2d transform (point . input)
-  ProjectVector3d basis vector . input = ProjectVector3d basis (vector . input)
+  ProjectVector3d orientation vector . input = ProjectVector3d orientation (vector . input)
   ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
 
 instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
@@ -334,7 +334,7 @@ instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) wh
   CrossVariableConstant3d lhs rhs . input = CrossVariableConstant3d (lhs . input) rhs
   TransformVector3d transform vector . input = TransformVector3d transform (vector . input)
   TransformPoint3d transform point . input = TransformPoint3d transform (point . input)
-  PlaceVector2d basis vector . input = PlaceVector2d basis (vector . input)
+  PlaceVector2d orientation vector . input = PlaceVector2d orientation (vector . input)
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
 
 instance Composition (Ast2d input) (Ast1d UvPoint) (Ast1d input) where
@@ -402,7 +402,7 @@ instance Composition (Variable2d input) (Variable2d UvPoint) (Variable2d input) 
   BezierCurve2d controlPoints param . input = BezierCurve2d controlPoints (param . input)
   TransformVector2d transform vector . input = TransformVector2d transform (vector . input)
   TransformPoint2d transform point . input = TransformPoint2d transform (point . input)
-  ProjectVector3d basis vector . input = ProjectVector3d basis (vector . input)
+  ProjectVector3d orientation vector . input = ProjectVector3d orientation (vector . input)
   ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
 
 instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
@@ -435,7 +435,7 @@ instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) 
   CrossVariableConstant3d lhs rhs . input = CrossVariableConstant3d (lhs . input) rhs
   TransformVector3d transform vector . input = TransformVector3d transform (vector . input)
   TransformPoint3d transform point . input = TransformPoint3d transform (point . input)
-  PlaceVector2d basis vector . input = PlaceVector2d basis (vector . input)
+  PlaceVector2d orientation vector . input = PlaceVector2d orientation (vector . input)
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
 
 constant1d :: Qty units -> Ast1d input
@@ -928,20 +928,20 @@ transformPoint3d transform ast = do
       Variable3d (TransformPoint3d (erasedTransform . existing) var)
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
 
-vectorPlacementTransform2d :: Basis2d global (Defines local) -> Transform2d.Affine Coordinates
-vectorPlacementTransform2d basis =
+vectorPlacementTransform2d :: Orientation2d global (Defines local) -> Transform2d.Affine Coordinates
+vectorPlacementTransform2d orientation =
   Transform2d
     # Point2d.origin
-    # Vector2d.coerce (Vector2d.unit (Basis2d.xDirection basis))
-    # Vector2d.coerce (Vector2d.unit (Basis2d.yDirection basis))
+    # Vector2d.coerce (Vector2d.unit (Orientation2d.xDirection orientation))
+    # Vector2d.coerce (Vector2d.unit (Orientation2d.yDirection orientation))
 
-vectorPlacementTransform3d :: Basis3d global (Defines local) -> Transform3d.Affine Coordinates
-vectorPlacementTransform3d basis =
+vectorPlacementTransform3d :: Orientation3d global (Defines local) -> Transform3d.Affine Coordinates
+vectorPlacementTransform3d orientation =
   Transform3d
     # Point3d.origin
-    # Vector3d.coerce (Vector3d.unit (Basis3d.rightwardDirection basis))
-    # Vector3d.coerce (Vector3d.unit (Basis3d.forwardDirection basis))
-    # Vector3d.coerce (Vector3d.unit (Basis3d.upwardDirection basis))
+    # Vector3d.coerce (Vector3d.unit (Orientation3d.rightwardDirection orientation))
+    # Vector3d.coerce (Vector3d.unit (Orientation3d.forwardDirection orientation))
+    # Vector3d.coerce (Vector3d.unit (Orientation3d.upwardDirection orientation))
 
 pointPlacementTransform2d :: Frame2d (global @ units) (Defines local) -> Transform2d.Affine Coordinates
 pointPlacementTransform2d frame =
@@ -958,32 +958,32 @@ pointPlacementTransform3d frame =
     # Vector3d.coerce (Vector3d.unit (Frame3d.forwardDirection frame))
     # Vector3d.coerce (Vector3d.unit (Frame3d.upwardDirection frame))
 
-placeVector2dIn :: Basis2d global (Defines local) -> Ast2d input -> Ast2d input
-placeVector2dIn basis ast = transformVector2d (vectorPlacementTransform2d basis) ast
+placeVector2dIn :: Orientation2d global (Defines local) -> Ast2d input -> Ast2d input
+placeVector2dIn orientation ast = transformVector2d (vectorPlacementTransform2d orientation) ast
 
 placePoint2dIn :: Frame2d (global @ units) (Defines local) -> Ast2d input -> Ast2d input
 placePoint2dIn frame ast = transformPoint2d (pointPlacementTransform2d frame) ast
 
-placeVector3dIn :: Basis3d global (Defines local) -> Ast3d input -> Ast3d input
-placeVector3dIn basis ast = transformVector3d (vectorPlacementTransform3d basis) ast
+placeVector3dIn :: Orientation3d global (Defines local) -> Ast3d input -> Ast3d input
+placeVector3dIn orientation ast = transformVector3d (vectorPlacementTransform3d orientation) ast
 
 placePoint3dIn :: Frame3d (global @ units) (Defines local) -> Ast3d input -> Ast3d input
 placePoint3dIn frame ast = transformPoint3d (pointPlacementTransform3d frame) ast
 
-placeVector2dOn :: PlanarBasis3d global (Defines local) -> Ast2d input -> Ast3d input
-placeVector2dOn basis ast = case ast of
-  Constant2d val -> Constant3d (Vector2d.on (PlanarBasis3d.coerce basis) val)
-  Variable2d var -> Variable3d (PlaceVector2d (PlanarBasis3d.coerce basis) var)
+placeVector2dOn :: PlaneOrientation3d global (Defines local) -> Ast2d input -> Ast3d input
+placeVector2dOn orientation ast = case ast of
+  Constant2d val -> Constant3d (Vector2d.on (PlaneOrientation3d.coerce orientation) val)
+  Variable2d var -> Variable3d (PlaceVector2d (PlaneOrientation3d.coerce orientation) var)
 
 placePoint2dOn :: Plane3d (global @ units) (Defines local) -> Ast2d input -> Ast3d input
 placePoint2dOn plane ast = case ast of
   Constant2d val -> Constant3d (Point2d.on (Plane3d.coerce plane) (Point2d.origin + val) - Point3d.origin)
   Variable2d var -> Variable3d (PlacePoint2d (Plane3d.coerce plane) var)
 
-projectVector3dInto :: PlanarBasis3d global (Defines local) -> Ast3d input -> Ast2d input
-projectVector3dInto basis ast = case ast of
-  Constant3d val -> Constant2d (Vector3d.projectInto (PlanarBasis3d.coerce basis) val)
-  Variable3d var -> Variable2d (ProjectVector3d (PlanarBasis3d.coerce basis) var)
+projectVector3dInto :: PlaneOrientation3d global (Defines local) -> Ast3d input -> Ast2d input
+projectVector3dInto orientation ast = case ast of
+  Constant3d val -> Constant2d (Vector3d.projectInto (PlaneOrientation3d.coerce orientation) val)
+  Variable3d var -> Variable2d (ProjectVector3d (PlaneOrientation3d.coerce orientation) var)
 
 projectPoint3dInto :: Plane3d (global @ units) (Defines local) -> Ast3d input -> Ast2d input
 projectPoint3dInto plane ast = case ast of
@@ -1148,10 +1148,10 @@ addTransform3d (Transform3d origin i j k) = do
   let Point3d oR oF oU = origin
   Compile.addConstant (iR :| [iF, iU, jR, jF, jU, kR, kF, kU, oR, oF, oU])
 
-addPlanarBasis :: PlanarBasis -> Compile.Step ConstantIndex
-addPlanarBasis basis = do
-  let Direction3d iR iF iU = PlanarBasis3d.xDirection basis
-  let Direction3d jR jF jU = PlanarBasis3d.yDirection basis
+addPlaneOrientation :: PlaneOrientation -> Compile.Step ConstantIndex
+addPlaneOrientation orientation = do
+  let Direction3d iR iF iU = PlaneOrientation3d.xDirection orientation
+  let Direction3d jR jF jU = PlaneOrientation3d.yDirection orientation
   Compile.addConstant (NonEmpty.six iR iF iU jR jF jU)
 
 addPlane :: Plane -> Compile.Step ConstantIndex
@@ -1341,10 +1341,10 @@ compileVariable2d variable = case variable of
     matrixIndex <- addTransform2d transform
     pointIndex <- compileVariable2d point
     Compile.addVariable2d (Instruction.TransformPoint2d matrixIndex pointIndex)
-  ProjectVector3d basis vector -> Compile.do
-    basisIndex <- addPlanarBasis basis
+  ProjectVector3d orientation vector -> Compile.do
+    orientationIndex <- addPlaneOrientation orientation
     vectorIndex <- compileVariable3d vector
-    Compile.addVariable2d (Instruction.ProjectVector3d basisIndex vectorIndex)
+    Compile.addVariable2d (Instruction.ProjectVector3d orientationIndex vectorIndex)
   ProjectPoint3d plane point -> Compile.do
     planeIndex <- addPlane plane
     pointIndex <- compileVariable3d point
@@ -1450,10 +1450,10 @@ compileVariable3d variable = case variable of
     matrixIndex <- addTransform3d transform
     pointIndex <- compileVariable3d point
     Compile.addVariable3d (Instruction.TransformPoint3d matrixIndex pointIndex)
-  PlaceVector2d basis vector -> Compile.do
-    basisIndex <- addPlanarBasis basis
+  PlaceVector2d orientation vector -> Compile.do
+    orientationIndex <- addPlaneOrientation orientation
     vectorIndex <- compileVariable2d vector
-    Compile.addVariable3d (Instruction.PlaceVector2d basisIndex vectorIndex)
+    Compile.addVariable3d (Instruction.PlaceVector2d orientationIndex vectorIndex)
   PlacePoint2d plane point -> Compile.do
     planeIndex <- addPlane plane
     pointIndex <- compileVariable2d point

@@ -43,8 +43,6 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Basis2d (Basis2d)
-import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -65,7 +63,9 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.Orientation2d (Orientation2d)
+import OpenSolid.Orientation2d qualified as Orientation2d
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -661,29 +661,29 @@ isRemovableDegeneracy curveDerivative tValue =
   (tValue == 0.0 || tValue == 1.0) && evaluate curveDerivative tValue != Vector2d.zero
 
 placeIn ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve2d (global @ units)
-placeIn basis curve = do
+placeIn orientation curve = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.VectorCurve2d.placeIn basis)
-          (Vector2d.placeIn basis)
-          (VectorBounds2d.placeIn basis)
+          (Expression.VectorCurve2d.placeIn orientation)
+          (Vector2d.placeIn orientation)
+          (VectorBounds2d.placeIn orientation)
           (compiled curve)
-  new compiledPlaced (placeIn basis (derivative curve))
+  new compiledPlaced (placeIn orientation (derivative curve))
 
 relativeTo ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   VectorCurve2d (global @ units) ->
   VectorCurve2d (local @ units)
-relativeTo basis = placeIn (Basis2d.inverse basis)
+relativeTo orientation = placeIn (Orientation2d.inverse orientation)
 
 on ::
-  PlanarBasis3d space (Defines local) ->
+  PlaneOrientation3d space (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve3d (space @ units)
-on basis curve = VectorCurve3d.on basis curve
+on orientation curve = VectorCurve3d.on orientation curve
 
 convert ::
   Qty (units2 :/: units1) ->

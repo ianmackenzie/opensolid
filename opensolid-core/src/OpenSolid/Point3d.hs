@@ -30,18 +30,18 @@ module OpenSolid.Point3d
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
-  , Basis3d (Basis3d)
   , Direction3d (Direction3d)
   , Frame3d (Frame3d)
-  , PlanarBasis3d (PlanarBasis3d)
+  , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Point2d (Point2d)
   , Point3d (Point3d)
   , Transform3d (Transform3d)
@@ -54,9 +54,9 @@ import OpenSolid.Vector3d qualified as Vector3d
 -- | Get the XYZ coordinates of a point, given an XYZ coordinate convention to use.
 coordinates :: Convention3d -> Point3d (space @ units) -> (Qty units, Qty units, Qty units)
 coordinates convention (Point3d pR pF pU) = do
-  let Direction3d iR iF iU = Convention3d.xDirection Basis3d.world convention
-  let Direction3d jR jF jU = Convention3d.yDirection Basis3d.world convention
-  let Direction3d kR kF kU = Convention3d.zDirection Basis3d.world convention
+  let Direction3d iR iF iU = Convention3d.xDirection Orientation3d.world convention
+  let Direction3d jR jF jU = Convention3d.yDirection Orientation3d.world convention
+  let Direction3d kR kF kU = Convention3d.zDirection Orientation3d.world convention
   let pX = pR * iR + pF * iF + pU * iU
   let pY = pR * jR + pF * jF + pU * jU
   let pZ = pR * kR + pF * kF + pU * kU
@@ -82,7 +82,7 @@ along (Axis3d originPoint direction) distance = do
 
 -- | Construct a point on the given plane, at the given position within the plane.
 on :: Plane3d (space @ units) (Defines local) -> Point2d (local @ units) -> Point3d (space @ units)
-on (Plane3d originPoint (PlanarBasis3d i j)) (Point2d pX pY) = do
+on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d pX pY) = do
   let Point3d oR oF oU = originPoint
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
@@ -101,9 +101,9 @@ erase = coerce
 -- | Construct a point from its XYZ coordinates, given the coordinate convention to use.
 fromCoordinates :: Convention3d -> (Qty units, Qty units, Qty units) -> Point3d (space @ units)
 fromCoordinates convention (pX, pY, pZ) = do
-  let Direction3d iR iF iU = Convention3d.xDirection Basis3d.world convention
-  let Direction3d jR jF jU = Convention3d.yDirection Basis3d.world convention
-  let Direction3d kR kF kU = Convention3d.zDirection Basis3d.world convention
+  let Direction3d iR iF iU = Convention3d.xDirection Orientation3d.world convention
+  let Direction3d jR jF jU = Convention3d.yDirection Orientation3d.world convention
+  let Direction3d kR kF kU = Convention3d.zDirection Orientation3d.world convention
   Point3d
     # pX * iR + pY * jR + pZ * kR
     # pX * iF + pY * jF + pZ * kF
@@ -141,14 +141,14 @@ placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Point3d (local @ units) ->
   Point3d (global @ units)
-placeIn (Frame3d p0 (Basis3d i j k)) (Point3d px py pz) = p0 + px * i + py * j + pz * k
+placeIn (Frame3d p0 (Orientation3d i j k)) (Point3d px py pz) = p0 + px * i + py * j + pz * k
 
 -- | Convert a point defined in global coordinates to one defined in local coordinates.
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Point3d (global @ units) ->
   Point3d (local @ units)
-relativeTo (Frame3d p0 (Basis3d i j k)) p =
+relativeTo (Frame3d p0 (Orientation3d i j k)) p =
   let d = p - p0 in Point3d (d `dot` i) (d `dot` j) (d `dot` k)
 
 -- | Project a point onto a plane.
@@ -167,7 +167,7 @@ projectInto ::
   Plane3d (space @ units) (Defines localSpace) ->
   Point3d (space @ units) ->
   Point2d (localSpace @ units)
-projectInto (Plane3d p0 (PlanarBasis3d i j)) p =
+projectInto (Plane3d p0 (PlaneOrientation3d i j)) p =
   let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
 
 convert :: Qty (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)

@@ -14,14 +14,14 @@ module OpenSolid.DirectionCurve3d
   )
 where
 
-import OpenSolid.Basis3d (Basis3d)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Curve (Curve)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.DirectionBounds3d (DirectionBounds3d)
 import OpenSolid.DirectionBounds3d qualified as DirectionBounds3d
+import OpenSolid.Orientation3d (Orientation3d)
+import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
@@ -221,14 +221,14 @@ instance
   curve1d >> DirectionCurve3d curve = DirectionCurve3d (curve1d >> curve)
 
 placeIn ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   DirectionCurve3d local ->
   DirectionCurve3d global
-placeIn basis (DirectionCurve3d curve) =
-  DirectionCurve3d (VectorCurve3d.placeIn basis curve)
+placeIn orientation (DirectionCurve3d curve) =
+  DirectionCurve3d (VectorCurve3d.placeIn orientation curve)
 
 relativeTo ::
-  Basis3d global (Defines local) ->
+  Orientation3d global (Defines local) ->
   DirectionCurve3d global ->
   DirectionCurve3d local
-relativeTo basis = placeIn (Basis3d.inverse basis)
+relativeTo orientation = placeIn (Orientation3d.inverse orientation)

@@ -242,7 +242,7 @@ sphere (Named centerPoint) (Named diameter) =
   if diameter ~= Qty.zero
     then Failure EmptyBody
     else do
-      let sketchPlane = Plane3d centerPoint World3d.frontPlaneBasis
+      let sketchPlane = Plane3d centerPoint World3d.frontPlaneOrientation
       let radius = 0.5 * diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius

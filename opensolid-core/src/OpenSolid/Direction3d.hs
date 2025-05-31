@@ -16,7 +16,7 @@ module OpenSolid.Direction3d
   , rightwardUpward
   , upwardRightward
   , arbitraryPerpendicularDirection
-  , arbitraryNormalBasis
+  , arbitraryNormalOrientation
   , forwardComponent
   , backwardComponent
   , rightwardComponent
@@ -37,16 +37,16 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import {-# SOURCE #-} OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Float qualified as Float
+import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d
-  , Basis3d
   , Direction3d (Direction3d, Unit3d)
-  , PlanarBasis3d (PlanarBasis3d)
+  , Orientation3d
   , Plane3d
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Vector3d
   )
 import OpenSolid.Random qualified as Random
@@ -73,47 +73,47 @@ lift ::
   Direction3d spaceB
 lift function (Unit3d vector) = Unit3d (function vector)
 
-upward :: Basis3d space defines -> Direction3d space
-upward = Basis3d.upwardDirection
+upward :: Orientation3d space defines -> Direction3d space
+upward = Orientation3d.upwardDirection
 
-downward :: Basis3d space defines -> Direction3d space
-downward = Basis3d.downwardDirection
+downward :: Orientation3d space defines -> Direction3d space
+downward = Orientation3d.downwardDirection
 
-forward :: Basis3d space defines -> Direction3d space
-forward = Basis3d.forwardDirection
+forward :: Orientation3d space defines -> Direction3d space
+forward = Orientation3d.forwardDirection
 
-backward :: Basis3d space defines -> Direction3d space
-backward = Basis3d.backwardDirection
+backward :: Orientation3d space defines -> Direction3d space
+backward = Orientation3d.backwardDirection
 
-rightward :: Basis3d space defines -> Direction3d space
-rightward = Basis3d.rightwardDirection
+rightward :: Orientation3d space defines -> Direction3d space
+rightward = Orientation3d.rightwardDirection
 
-leftward :: Basis3d space defines -> Direction3d space
-leftward = Basis3d.leftwardDirection
+leftward :: Orientation3d space defines -> Direction3d space
+leftward = Orientation3d.leftwardDirection
 
-rightwardForward :: Basis3d space defines -> Angle -> Direction3d space
-rightwardForward basis angle =
-  Unit3d (Angle.cos angle * rightward basis + Angle.sin angle * forward basis)
+rightwardForward :: Orientation3d space defines -> Angle -> Direction3d space
+rightwardForward orientation angle =
+  Unit3d (Angle.cos angle * rightward orientation + Angle.sin angle * forward orientation)
 
-forwardRightward :: Basis3d space defines -> Angle -> Direction3d space
-forwardRightward basis angle =
-  Unit3d (Angle.cos angle * forward basis + Angle.sin angle * rightward basis)
+forwardRightward :: Orientation3d space defines -> Angle -> Direction3d space
+forwardRightward orientation angle =
+  Unit3d (Angle.cos angle * forward orientation + Angle.sin angle * rightward orientation)
 
-forwardUpward :: Basis3d space defines -> Angle -> Direction3d space
-forwardUpward basis angle =
-  Unit3d (Angle.cos angle * forward basis + Angle.sin angle * upward basis)
+forwardUpward :: Orientation3d space defines -> Angle -> Direction3d space
+forwardUpward orientation angle =
+  Unit3d (Angle.cos angle * forward orientation + Angle.sin angle * upward orientation)
 
-upwardForward :: Basis3d space defines -> Angle -> Direction3d space
-upwardForward basis angle =
-  Unit3d (Angle.cos angle * upward basis + Angle.sin angle * forward basis)
+upwardForward :: Orientation3d space defines -> Angle -> Direction3d space
+upwardForward orientation angle =
+  Unit3d (Angle.cos angle * upward orientation + Angle.sin angle * forward orientation)
 
-rightwardUpward :: Basis3d space defines -> Angle -> Direction3d space
-rightwardUpward basis angle =
-  Unit3d (Angle.cos angle * rightward basis + Angle.sin angle * upward basis)
+rightwardUpward :: Orientation3d space defines -> Angle -> Direction3d space
+rightwardUpward orientation angle =
+  Unit3d (Angle.cos angle * rightward orientation + Angle.sin angle * upward orientation)
 
-upwardRightward :: Basis3d space defines -> Angle -> Direction3d space
-upwardRightward basis angle =
-  Unit3d (Angle.cos angle * upward basis + Angle.sin angle * rightward basis)
+upwardRightward :: Orientation3d space defines -> Angle -> Direction3d space
+upwardRightward orientation angle =
+  Unit3d (Angle.cos angle * upward orientation + Angle.sin angle * rightward orientation)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
 arbitraryPerpendicularDirection :: Direction3d space -> Direction3d space
@@ -132,17 +132,17 @@ arbitraryPerpendicularDirection (Direction3d dx dy dz) = do
         let scale = Float.hypot2 dx dy
         Direction3d (-dy / scale) (dx / scale) 0.0
 
-{-| Construct an arbitrary planar basis normal to the given direction.
+{-| Construct an arbitrary plane orientation normal to the given direction.
 
-Both the X and Y directions of the returned basis will be perpendicular to the given direction
+Both the X and Y directions of the returned orientation will be perpendicular to the given direction
 (and, of course, they will be perpendicular to each other),
 but otherwise they will be chosen arbitrarily.
 -}
-arbitraryNormalBasis :: Direction3d space -> PlanarBasis3d space defines
-arbitraryNormalBasis normalDirection = do
+arbitraryNormalOrientation :: Direction3d space -> PlaneOrientation3d space defines
+arbitraryNormalOrientation normalDirection = do
   let xDirection = arbitraryPerpendicularDirection normalDirection
   let yDirection = Unit3d (normalDirection `cross` xDirection)
-  PlanarBasis3d xDirection yDirection
+  PlaneOrientation3d xDirection yDirection
 
 forwardComponent :: Direction3d space -> Float
 forwardComponent (Unit3d vector) = Vector3d.forwardComponent vector
@@ -170,12 +170,12 @@ angleFrom :: Direction3d space -> Direction3d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
 -- | Convert a direction defined in local coordinates to one defined in global coordinates.
-placeIn :: Basis3d global (Defines local) -> Direction3d local -> Direction3d global
-placeIn basis = lift (Vector3d.placeIn basis)
+placeIn :: Orientation3d global (Defines local) -> Direction3d local -> Direction3d global
+placeIn orientation = lift (Vector3d.placeIn orientation)
 
 -- | Convert a direction defined in global coordinates to one defined in local coordinates.
-relativeTo :: Basis3d global (Defines local) -> Direction3d global -> Direction3d local
-relativeTo basis = lift (Vector3d.relativeTo basis)
+relativeTo :: Orientation3d global (Defines local) -> Direction3d global -> Direction3d local
+relativeTo orientation = lift (Vector3d.relativeTo orientation)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

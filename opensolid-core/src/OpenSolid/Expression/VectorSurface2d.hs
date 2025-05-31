@@ -11,10 +11,10 @@ module OpenSolid.Expression.VectorSurface2d
   )
 where
 
-import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.PlanarBasis3d (PlanarBasis3d)
+import OpenSolid.Orientation2d (Orientation2d)
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvPoint)
 import OpenSolid.Transform2d (Transform2d)
@@ -46,19 +46,19 @@ magnitude :: Expression UvPoint (Vector2d (space @ units)) -> Expression UvPoint
 magnitude = Expression.magnitude
 
 placeIn ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   Expression UvPoint (Vector2d (local @ units)) ->
   Expression UvPoint (Vector2d (global @ units))
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   Expression UvPoint (Vector2d (global @ units)) ->
   Expression UvPoint (Vector2d (local @ units))
 relativeTo = Expression.relativeTo
 
 on ::
-  PlanarBasis3d global (Defines local) ->
+  PlaneOrientation3d global (Defines local) ->
   Expression UvPoint (Vector2d (local @ units)) ->
   Expression UvPoint (Vector3d (global @ units))
 on = Expression.on

@@ -1,7 +1,7 @@
 module OpenSolid.Primitives
   ( Vector2d (Vector2d)
   , Direction2d (Unit2d, Direction2d)
-  , Basis2d (Basis2d)
+  , Orientation2d (Orientation2d)
   , Point2d (Point2d)
   , VectorBounds2d (VectorBounds2d)
   , Bounds2d (Bounds2d)
@@ -10,8 +10,8 @@ module OpenSolid.Primitives
   , Transform2d (Transform2d)
   , Vector3d (Vector3d)
   , Direction3d (Unit3d, Direction3d)
-  , PlanarBasis3d (PlanarBasis3d)
-  , Basis3d (Basis3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
+  , Orientation3d (Orientation3d)
   , Point3d (Point3d)
   , VectorBounds3d (VectorBounds3d)
   , Bounds3d (Bounds3d)
@@ -289,17 +289,17 @@ instance
   where
   Unit2d v1 `cross` Unit2d v2 = v1 `cross` v2
 
------ Basis2d -----
+----- Orientation2d -----
 
-type role Basis2d nominal nominal
+type role Orientation2d nominal nominal
 
-type Basis2d :: Type -> LocalSpace -> Type
-data Basis2d space defines where
-  Basis2d :: Direction2d space -> Direction2d space -> Basis2d space defines
+type Orientation2d :: Type -> LocalSpace -> Type
+data Orientation2d space defines where
+  Orientation2d :: Direction2d space -> Direction2d space -> Orientation2d space defines
 
-deriving instance Eq (Basis2d space defines)
+deriving instance Eq (Orientation2d space defines)
 
-deriving instance Show (Basis2d space defines)
+deriving instance Show (Orientation2d space defines)
 
 ----- Point2d -----
 
@@ -872,7 +872,7 @@ type Frame2d :: CoordinateSystem -> LocalSpace -> Type
 data Frame2d coordinateSystem defines where
   Frame2d ::
     Point2d (space @ units) ->
-    Basis2d space defines ->
+    Orientation2d space defines ->
     Frame2d (space @ units) defines
 
 deriving instance Eq (Frame2d (space @ units) defines)
@@ -1236,35 +1236,35 @@ instance
   where
   Unit3d vector1 `cross` Unit3d vector2 = vector1 `cross` vector2
 
------ PlanarBasis3d -----
+----- PlaneOrientation3d -----
 
 -- | A pair of perpendicular X and Y directions defining the orientation of a plane in 3D.
-type PlanarBasis3d :: Type -> LocalSpace -> Type
-data PlanarBasis3d space defines where
-  PlanarBasis3d :: Direction3d space -> Direction3d space -> PlanarBasis3d space defines
+type PlaneOrientation3d :: Type -> LocalSpace -> Type
+data PlaneOrientation3d space defines where
+  PlaneOrientation3d :: Direction3d space -> Direction3d space -> PlaneOrientation3d space defines
 
-deriving instance Eq (PlanarBasis3d space defines)
+deriving instance Eq (PlaneOrientation3d space defines)
 
-deriving instance Ord (PlanarBasis3d space defines)
+deriving instance Ord (PlaneOrientation3d space defines)
 
-deriving instance Show (PlanarBasis3d space defines)
+deriving instance Show (PlaneOrientation3d space defines)
 
-instance FFI (PlanarBasis3d space defines) where
-  representation = FFI.classRepresentation "PlanarBasis3d"
+instance FFI (PlaneOrientation3d space defines) where
+  representation = FFI.classRepresentation "PlaneOrientation3d"
 
------ Basis3d -----
+----- Orientation3d -----
 
 -- | A set of cardinal directions (forward, upward etc.) defining a 3D orientation.
-type Basis3d :: Type -> LocalSpace -> Type
-data Basis3d space defines where
-  Basis3d :: Direction3d space -> Direction3d space -> Direction3d space -> Basis3d space defines
+type Orientation3d :: Type -> LocalSpace -> Type
+data Orientation3d space defines where
+  Orientation3d :: Direction3d space -> Direction3d space -> Direction3d space -> Orientation3d space defines
 
-deriving instance Eq (Basis3d space defines)
+deriving instance Eq (Orientation3d space defines)
 
-deriving instance Show (Basis3d space defines)
+deriving instance Show (Orientation3d space defines)
 
-instance FFI (Basis3d space defines) where
-  representation = FFI.classRepresentation "Basis3d"
+instance FFI (Orientation3d space defines) where
+  representation = FFI.classRepresentation "Orientation3d"
 
 ----- Point3d -----
 
@@ -1858,7 +1858,7 @@ the cross product of its X and Y directions.
 data Plane3d coordinateSystem defines where
   Plane3d ::
     Point3d (space @ units) ->
-    PlanarBasis3d space defines ->
+    PlaneOrientation3d space defines ->
     Plane3d (space @ units) defines
 
 deriving instance Eq (Plane3d (space @ units) defines)
@@ -1875,7 +1875,7 @@ instance FFI (Plane3d (space @ Meters) defines) where
 -- | A frame of reference in 3D, defined by an origin point and orientation.
 type Frame3d :: CoordinateSystem -> LocalSpace -> Type
 data Frame3d coordinateSystem defines where
-  Frame3d :: Point3d (space @ units) -> Basis3d space defines -> Frame3d (space @ units) defines
+  Frame3d :: Point3d (space @ units) -> Orientation3d space defines -> Frame3d (space @ units) defines
 
 deriving instance Eq (Frame3d (space @ units) defines)
 
@@ -1888,7 +1888,7 @@ instance
   (space1 ~ space2, defines1 ~ defines2) =>
   Units.Coercion (Frame3d (space1 @ units1) defines1) (Frame3d (space2 @ units2) defines2)
   where
-  coerce (Frame3d p0 b) = Frame3d (Units.coerce p0) b
+  coerce (Frame3d p o) = Frame3d (Units.coerce p) o
 
 ----- Transform3d -----
 

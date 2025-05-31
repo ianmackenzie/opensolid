@@ -58,9 +58,9 @@ import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
-  , Basis2d (Basis2d)
   , Direction2d (Unit2d)
-  , PlanarBasis3d (PlanarBasis3d)
+  , Orientation2d (Orientation2d)
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Point2d
   , Transform2d (Transform2d)
   , Vector2d (Vector2d)
@@ -253,22 +253,22 @@ rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateRight (Vector2d vx vy) = Vector2d vy (negate vx)
 
 placeIn ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
-placeIn (Basis2d i j) (Vector2d vx vy) = vx * i + vy * j
+placeIn (Orientation2d i j) (Vector2d vx vy) = vx * i + vy * j
 
 relativeTo ::
-  Basis2d global (Defines local) ->
+  Orientation2d global (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeTo (Basis2d i j) vector = Vector2d (vector `dot` i) (vector `dot` j)
+relativeTo (Orientation2d i j) vector = Vector2d (vector `dot` i) (vector `dot` j)
 
 on ::
-  PlanarBasis3d space (Defines local) ->
+  PlaneOrientation3d space (Defines local) ->
   Vector2d (local @ units) ->
   Vector3d (space @ units)
-on (PlanarBasis3d i j) (Vector2d vx vy) = vx * i + vy * j
+on (PlaneOrientation3d i j) (Vector2d vx vy) = vx * i + vy * j
 
 convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
 convert factor vector = vector !* factor
