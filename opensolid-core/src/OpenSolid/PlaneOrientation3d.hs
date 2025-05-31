@@ -7,8 +7,7 @@ module OpenSolid.PlaneOrientation3d
   , withArbitraryXDirection
   , orthogonalize
   , orthonormalize
-  , flipX
-  , flipY
+  , flip
   , xDirection
   , yDirection
   , normalDirection
@@ -73,11 +72,8 @@ gramSchmidt dx vxy = do
     Failure Vector3d.IsZero -> Nothing
     Success dy -> Just (PlaneOrientation3d dx dy)
 
-flipX :: PlaneOrientation3d space defines1 -> PlaneOrientation3d space defines2
-flipX (PlaneOrientation3d i j) = PlaneOrientation3d -i j
-
-flipY :: PlaneOrientation3d space defines1 -> PlaneOrientation3d space defines2
-flipY (PlaneOrientation3d i j) = PlaneOrientation3d i -j
+flip :: PlaneOrientation3d space defines1 -> PlaneOrientation3d space defines2
+flip (PlaneOrientation3d i j) = PlaneOrientation3d -i j
 
 -- | Get the X direction of a plane orientation.
 xDirection :: PlaneOrientation3d space defines -> Direction3d space

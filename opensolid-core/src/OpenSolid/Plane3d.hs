@@ -14,8 +14,7 @@ module OpenSolid.Plane3d
   , yDirection
   , xAxis
   , yAxis
-  , flipX
-  , flipY
+  , flip
   , moveTo
   , placeIn
   , relativeTo
@@ -143,13 +142,12 @@ relativeTo frame (Plane3d p o) = do
 offsetBy :: Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
 offsetBy distance plane = plane |> translateIn (normalDirection plane) distance
 
--- | Reverse a plane's X direction, which also reverses the plane's normal direction.
-flipX :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines
-flipX (Plane3d p o) = Plane3d p (PlaneOrientation3d.flipX o)
+{-| Flip a plane such that its normal and X directions are reversed.
 
--- | Reverse a plane's Y direction, which also reverses the plane's normal direction.
-flipY :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines
-flipY (Plane3d p o) = Plane3d p (PlaneOrientation3d.flipY o)
+The Y direction will remain constant.
+-}
+flip :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+flip (Plane3d p o) = Plane3d p (PlaneOrientation3d.flip o)
 
 transformBy ::
   Transform3d.Rigid (space @ units) ->
