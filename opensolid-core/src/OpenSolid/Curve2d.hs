@@ -1030,13 +1030,12 @@ medialAxis curve1 curve2 = do
       let curve :: SurfaceFunction2d (space @ units) =
             (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
       let toSegment solutionCurve =
-            MedialAxis.Segment
-              { t1 = SurfaceFunction.u . solutionCurve
-              , t2 = SurfaceFunction.v . solutionCurve
-              , t12 = solutionCurve
-              , curve = curve . solutionCurve
-              , radius = radius . solutionCurve
-              }
+            MedialAxis.Segment do
+              #t1 solutionCurve.xCoordinate
+              #t2 solutionCurve.yCoordinate
+              #t12 solutionCurve
+              #curve (curve . solutionCurve)
+              #radius (radius . solutionCurve)
       Success (List.map toSegment zeros.crossingCurves)
 
 arcLengthParameterization ::
