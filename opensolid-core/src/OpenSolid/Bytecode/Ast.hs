@@ -920,38 +920,15 @@ transformPoint3d transform ast = do
       Variable3d (TransformPoint3d (erasedTransform . existing) var)
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
 
-vectorPlacementTransform2d ::
-  Frame2d (global @ frameUnits) (Defines local) ->
-  Transform2d.Affine Coordinates
-vectorPlacementTransform2d frame =
-  Transform2d
-    @ Point2d.origin
-    @ Vector2d.coerce (Vector2d.unit frame.xDirection)
-    @ Vector2d.coerce (Vector2d.unit frame.yDirection)
-
-vectorPlacementTransform3d ::
-  Frame3d (global @ frameUnits) (Defines local) ->
-  Transform3d.Affine Coordinates
-vectorPlacementTransform3d frame =
-  Transform3d
-    @ Point3d.origin
-    @ Vector3d.coerce (Vector3d.unit frame.rightwardDirection)
-    @ Vector3d.coerce (Vector3d.unit frame.forwardDirection)
-    @ Vector3d.coerce (Vector3d.unit frame.upwardDirection)
-
-pointPlacementTransform2d ::
-  Frame2d (global @ units) (Defines local) ->
-  Transform2d.Affine Coordinates
-pointPlacementTransform2d frame =
+placementTransform2d :: Frame2d (global @ units) (Defines local) -> Transform2d.Affine Coordinates
+placementTransform2d frame =
   Transform2d
     @ Point2d.coerce (Frame2d.originPoint frame)
     @ Vector2d.coerce (Vector2d.unit (Frame2d.xDirection frame))
     @ Vector2d.coerce (Vector2d.unit (Frame2d.yDirection frame))
 
-pointPlacementTransform3d ::
-  Frame3d (global @ units) (Defines local) ->
-  Transform3d.Affine Coordinates
-pointPlacementTransform3d frame =
+placementTransform3d :: Frame3d (global @ units) (Defines local) -> Transform3d.Affine Coordinates
+placementTransform3d frame =
   Transform3d
     @ Point3d.coerce (Frame3d.originPoint frame)
     @ Vector3d.coerce (Vector3d.unit (Frame3d.rightwardDirection frame))
@@ -959,16 +936,16 @@ pointPlacementTransform3d frame =
     @ Vector3d.coerce (Vector3d.unit (Frame3d.upwardDirection frame))
 
 placeVector2dIn :: Frame2d (global @ frameUnits) (Defines local) -> Ast2d input -> Ast2d input
-placeVector2dIn frame ast = transformVector2d (vectorPlacementTransform2d frame) ast
+placeVector2dIn frame ast = transformVector2d (placementTransform2d frame) ast
 
 placePoint2dIn :: Frame2d (global @ units) (Defines local) -> Ast2d input -> Ast2d input
-placePoint2dIn frame ast = transformPoint2d (pointPlacementTransform2d frame) ast
+placePoint2dIn frame ast = transformPoint2d (placementTransform2d frame) ast
 
 placeVector3dIn :: Frame3d (global @ frameUnits) (Defines local) -> Ast3d input -> Ast3d input
-placeVector3dIn frame ast = transformVector3d (vectorPlacementTransform3d frame) ast
+placeVector3dIn frame ast = transformVector3d (placementTransform3d frame) ast
 
 placePoint3dIn :: Frame3d (global @ units) (Defines local) -> Ast3d input -> Ast3d input
-placePoint3dIn frame ast = transformPoint3d (pointPlacementTransform3d frame) ast
+placePoint3dIn frame ast = transformPoint3d (placementTransform3d frame) ast
 
 placeVector2dOn :: Plane3d (global @ planeUnits) (Defines local) -> Ast2d input -> Ast3d input
 placeVector2dOn plane ast = case ast of
