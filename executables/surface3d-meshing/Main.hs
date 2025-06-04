@@ -4,6 +4,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Float qualified as Float
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d qualified as Point2d
@@ -12,19 +13,20 @@ import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
 main = IO.do
+  let world = Frame3d.world
   let r = Length.meters 1.0
   let h = Float.twoPi * r
   let theta = Angle.twoPi * SurfaceFunction.u
-  let rightward = r * SurfaceFunction.cos theta
-  let forward = r * SurfaceFunction.sin theta
-  let upward = h * SurfaceFunction.v
-  let surfaceFunction = SurfaceFunction3d.rightwardForwardUpward rightward forward upward
+  let surfaceFunction =
+        world.originPoint
+          + r * SurfaceFunction.cos theta * world.rightwardDirection
+          + r * SurfaceFunction.sin theta * world.forwardDirection
+          + h * SurfaceFunction.v * world.upwardDirection
   let domainCenter = Point2d.xy 0.5 0.5
   let domainDiameter = 2 / 3
   let domainCircle = Curve2d.circle (#centerPoint domainCenter, #diameter domainDiameter)
