@@ -24,6 +24,7 @@ module OpenSolid.Domain1d
   , samplingPoints
   , innerSamplingPoints
   , leadingSamplingPoints
+  , trailingSamplingPoints
   )
 where
 
@@ -135,6 +136,12 @@ innerSamplingPoints predicate = collectSamplingPoints predicate Bounds.unitInter
 
 leadingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Float
 leadingSamplingPoints predicate = 0.0 :| innerSamplingPoints predicate
+
+trailingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Float
+trailingSamplingPoints predicate =
+  case collectSamplingPoints predicate Bounds.unitInterval [1.0] of
+    NonEmpty points -> points
+    [] -> internalError "collectSamplingPoints should always return at least the point it was given"
 
 collectSamplingPoints :: (Bounds Unitless -> Bool) -> Bounds Unitless -> List Float -> List Float
 collectSamplingPoints predicate subdomain accumulated
