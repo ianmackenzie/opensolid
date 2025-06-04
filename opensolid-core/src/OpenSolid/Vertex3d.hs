@@ -15,7 +15,11 @@ import OpenSolid.SurfaceParameter (UvPoint, UvSpace)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 
-class Eq vertex => Vertex3d vertex (coordinateSystem :: CoordinateSystem) | vertex -> coordinateSystem where
+class
+  Eq vertex =>
+  Vertex3d vertex (coordinateSystem :: CoordinateSystem)
+    | vertex -> coordinateSystem
+  where
   position :: vertex -> Point3d coordinateSystem
 
 instance Vertex3d (Point3d (space @ units)) (space @ units) where
