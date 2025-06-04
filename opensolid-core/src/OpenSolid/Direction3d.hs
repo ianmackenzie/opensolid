@@ -44,7 +44,7 @@ import OpenSolid.Primitives
   , Orientation3d
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Vector3d
+  , Vector3d (Vector3d)
   )
 import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform
@@ -200,4 +200,4 @@ random = Random.do
 randomVector :: Random.Generator (Vector3d (space @ Unitless))
 randomVector = do
   let randomComponent = Float.random -1.0 1.0
-  Random.map3 Vector3d.rightwardForwardUpward randomComponent randomComponent randomComponent
+  Random.map3 Vector3d randomComponent randomComponent randomComponent
