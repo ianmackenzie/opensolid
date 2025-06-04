@@ -2,7 +2,8 @@ module OpenSolid.Axis2d
   ( Axis2d (Axis2d)
   , originPoint
   , direction
-  , normalDirection
+  , leftwardDirection
+  , rightwardDirection
   , x
   , y
   , through
@@ -15,7 +16,8 @@ module OpenSolid.Axis2d
   , translateAlong
   , rotateAround
   , mirrorAcross
-  , offsetBy
+  , offsetLeftwardBy
+  , offsetRightwardBy
   )
 where
 
@@ -38,8 +40,11 @@ originPoint (Axis2d p0 _) = p0
 direction :: Axis2d (space @ units) -> Direction2d space
 direction (Axis2d _ d) = d
 
-normalDirection :: Axis2d (space @ units) -> Direction2d space
-normalDirection axis = Direction2d.perpendicularTo (direction axis)
+leftwardDirection :: Axis2d (space @ units) -> Direction2d space
+leftwardDirection axis = Direction2d.rotateLeftward (direction axis)
+
+rightwardDirection :: Axis2d (space @ units) -> Direction2d space
+rightwardDirection axis = Direction2d.rotateRightward (direction axis)
 
 -- | The X axis.
 x :: Axis2d (space @ units)
@@ -76,8 +81,11 @@ transformBy transform axis = do
   let transformedDirection = Direction2d.transformBy transform (direction axis)
   Axis2d transformedOriginPoint transformedDirection
 
-offsetBy :: Qty units -> Axis2d (space @ units) -> Axis2d (space @ units)
-offsetBy distance axis = axis |> translateIn (normalDirection axis) distance
+offsetLeftwardBy :: Qty units -> Axis2d (space @ units) -> Axis2d (space @ units)
+offsetLeftwardBy distance axis = axis |> translateIn (leftwardDirection axis) distance
+
+offsetRightwardBy :: Qty units -> Axis2d (space @ units) -> Axis2d (space @ units)
+offsetRightwardBy distance axis = axis |> translateIn (rightwardDirection axis) distance
 
 translateBy ::
   Vector2d (space @ units) ->
