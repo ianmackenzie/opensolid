@@ -8,7 +8,9 @@ module OpenSolid.Mesh
   , Constraints (..)
   , constraints
   , indexed
+  , numVertices
   , vertices
+  , numFaces
   , faceIndices
   , faceVertices
   , map
@@ -81,6 +83,12 @@ constraints nonEmpty = NonEmpty.foldl apply unconstrained nonEmpty
 
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex
 indexed = Mesh
+
+numVertices :: Mesh vertex -> Int
+numVertices = Array.length . vertices
+
+numFaces :: Mesh vertex -> Int
+numFaces = List.length . faceIndices
 
 vertices :: Mesh vertex -> Array vertex
 vertices (Mesh vs _) = vs
