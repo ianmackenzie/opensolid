@@ -300,6 +300,7 @@ test-suite opensolid-core-test
     Tests.Map
     Tests.NonEmpty
     Tests.Parameter
+    Tests.Polygon2d
     Tests.Qty
     Tests.Random
     Tests.Region2d

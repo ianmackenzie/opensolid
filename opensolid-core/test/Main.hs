@@ -19,6 +19,7 @@ import Tests.List qualified
 import Tests.Map qualified
 import Tests.NonEmpty qualified
 import Tests.Parameter qualified
+import Tests.Polygon2d qualified
 import Tests.Qty qualified
 import Tests.Region2d qualified
 import Tests.Set2d qualified
@@ -53,6 +54,7 @@ tests =
     , Test.group "Tests.Array" Tests.Array.tests
     , Test.group "Tests.Set2d" Tests.Set2d.tests
     , Test.group "Tests.SurfaceFunction" Tests.SurfaceFunction.tests
+    , Test.group "Tests.Polygon2d" Tests.Polygon2d.tests
     ]
 
 main :: IO ()

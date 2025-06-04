@@ -67,7 +67,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
+import OpenSolid.Polygon2d (Polygon2d)
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -839,7 +839,7 @@ boundarySurfaceMesh ::
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
   let BoundarySurface{id, surfaceFunction, handedness, edgeLoops} = boundarySurface
   let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
-  let boundarySegments = NonEmpty.collect Polygon2d.edges boundaryPolygons
+  let boundarySegments = NonEmpty.collect (.edges) boundaryPolygons
   let boundarySegmentSet = Set2d.fromNonEmpty boundarySegments
   case Map.get id surfaceSegmentsById of
     Nothing -> internalError "Should always be able to look up surface segments by ID"
@@ -885,7 +885,7 @@ toPolygon ::
   NonEmpty (Edge (space @ units)) ->
   Polygon2d (Vertex (space @ units))
 toPolygon innerEdgeVerticesById loop =
-  Polygon2d (NonEmpty.collect (leadingEdgeVertices innerEdgeVerticesById) loop)
+  Polygon2d.unsafe (NonEmpty.collect (leadingEdgeVertices innerEdgeVerticesById) loop)
 
 leadingEdgeVertices ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->
