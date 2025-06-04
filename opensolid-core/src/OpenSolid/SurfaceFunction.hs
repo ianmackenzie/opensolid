@@ -193,7 +193,9 @@ instance
     (SurfaceFunction (units1 :*: units2))
   where
   lhs .*. rhs =
-    new (lhs.compiled .*. rhs.compiled) (\p -> derivative p lhs .*. rhs + lhs .*. derivative p rhs)
+    new
+      @ lhs.compiled .*. rhs.compiled
+      @ \p -> derivative p lhs .*. rhs + lhs .*. derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -337,8 +339,8 @@ instance
   where
   lhs ./. rhs =
     recursive
-      (lhs.compiled ./. rhs.compiled)
-      (\self p -> derivative p lhs ./. rhs - self * (derivative p rhs / rhs))
+      @ lhs.compiled ./. rhs.compiled
+      @ \self p -> derivative p lhs ./. rhs - self * (derivative p rhs / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -433,8 +435,8 @@ squared function = Units.specialize (squared' function)
 squared' :: SurfaceFunction units -> SurfaceFunction (units :*: units)
 squared' function =
   new
-    (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' function.compiled)
-    (\p -> 2.0 * function .*. derivative p function)
+    @ CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' function.compiled
+    @ \p -> 2.0 * function .*. derivative p function
 
 sqrt ::
   (Tolerance units1, Units.Squared units1 units2) =>
@@ -448,20 +450,20 @@ sqrt' function =
     then zero
     else
       recursive
-        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled)
-        (\self p -> derivative p function .!/! (2.0 * self))
+        @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled
+        @ \self p -> derivative p function .!/! (2.0 * self)
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =
   new
-    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin function.compiled)
-    (\p -> cos function * (derivative p function / Angle.radian))
+    @ CompiledFunction.map Expression.sin Angle.sin Bounds.sin function.compiled
+    @ \p -> cos function * (derivative p function / Angle.radian)
 
 cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
 cos function =
   new
-    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled)
-    (\p -> negate (sin function) * (derivative p function / Angle.radian))
+    @ CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled
+    @ \p -> negate (sin function) * (derivative p function / Angle.radian)
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
 
