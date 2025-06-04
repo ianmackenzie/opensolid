@@ -60,7 +60,6 @@ import OpenSolid.Polyline2d (Polyline2d)
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import OpenSolid.Units (Meters)
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 

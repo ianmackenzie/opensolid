@@ -72,7 +72,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d qualified as Transform3d
-import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d)

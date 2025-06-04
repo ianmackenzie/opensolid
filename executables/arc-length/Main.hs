@@ -17,7 +17,6 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters)
 import OpenSolid.Volume (Volume)
 
 data Space

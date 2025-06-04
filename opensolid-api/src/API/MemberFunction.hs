@@ -19,7 +19,6 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters, Radians, SquareMeters)
 
 data MemberFunction where
   MemberFunction0 ::

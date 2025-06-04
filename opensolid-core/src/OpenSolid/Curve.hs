@@ -63,7 +63,6 @@ import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)

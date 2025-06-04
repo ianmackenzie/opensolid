@@ -13,7 +13,6 @@ where
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Units (SquareMeters)
 
 {-| An area in square meters, square inches etc.
 

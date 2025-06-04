@@ -14,7 +14,6 @@ import OpenSolid.Qty (zero)
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Region2d.BoundedBy qualified as Region2d.BoundedBy
-import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
 

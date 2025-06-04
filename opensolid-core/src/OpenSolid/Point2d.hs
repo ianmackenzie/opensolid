@@ -57,7 +57,6 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
-import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 

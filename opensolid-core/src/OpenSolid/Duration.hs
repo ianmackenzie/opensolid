@@ -21,7 +21,6 @@ where
 
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Units (Seconds)
 
 type Duration = Qty Seconds
 

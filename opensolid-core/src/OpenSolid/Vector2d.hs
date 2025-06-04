@@ -67,7 +67,6 @@ import OpenSolid.Primitives
   , Vector3d
   )
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Units (Meters, SquareMeters)
 import OpenSolid.Units qualified as Units
 
 -- | The zero vector.

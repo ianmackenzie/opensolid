@@ -23,7 +23,6 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Try qualified as Try
-import OpenSolid.Units (Meters)
 
 data Global
 

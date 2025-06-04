@@ -75,7 +75,6 @@ import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random
-import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Units qualified as Units
 
 type role Bounds phantom

@@ -49,7 +49,6 @@ import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Try qualified as Try
-import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d

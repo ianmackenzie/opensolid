@@ -50,7 +50,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding (Field)
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 

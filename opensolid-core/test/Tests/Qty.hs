@@ -6,7 +6,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
-import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random

@@ -29,7 +29,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Units (Meters)
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex3d (Vertex3d)
 

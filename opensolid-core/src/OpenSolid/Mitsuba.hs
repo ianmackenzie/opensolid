@@ -16,7 +16,6 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Units (Meters)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d

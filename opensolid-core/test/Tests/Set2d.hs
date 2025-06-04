@@ -10,7 +10,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Set2d (Set2d)
 import OpenSolid.Set2d qualified as Set2d
-import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
 

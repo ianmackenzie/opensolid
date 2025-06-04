@@ -29,7 +29,6 @@ where
 
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Units (Meters)
 
 {-| A length in millimeters, meters, inches etc.
 

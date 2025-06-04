@@ -35,7 +35,6 @@ import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.Prelude
 import OpenSolid.Scene3d.Gltf qualified as Gltf
 import OpenSolid.Transform3d qualified as Transform3d
-import OpenSolid.Units (Meters)
 import OpenSolid.Vertex3d qualified as Vertex3d
 
 -- | A collection of graphical objects in 3D space.

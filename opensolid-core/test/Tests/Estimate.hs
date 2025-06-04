@@ -22,7 +22,6 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random

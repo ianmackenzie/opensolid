@@ -8,7 +8,6 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
 import Tests.Random qualified

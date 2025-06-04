@@ -16,7 +16,6 @@ import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvCoordinates, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 import Test (Expectation, Test)

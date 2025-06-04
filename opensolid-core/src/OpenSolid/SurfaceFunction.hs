@@ -64,7 +64,6 @@ import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvDirection, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector3d (Vector3d)
