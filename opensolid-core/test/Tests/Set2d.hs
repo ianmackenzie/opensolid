@@ -52,5 +52,6 @@ find =
 filter :: Tolerance Meters => Test
 filter = Test.verify "filter" Test.do
   let searchBounds = Bounds2d.hull2 (point 2 2) (point 6 6)
+  let filteredPoints = Set2d.filter searchBounds testSet
   let expectedPoints = [point 3 5, point 5 5]
-  Test.expect (List.sort (Set2d.filter searchBounds testSet) == expectedPoints)
+  Test.expect (List.sort filteredPoints == List.sort expectedPoints)
