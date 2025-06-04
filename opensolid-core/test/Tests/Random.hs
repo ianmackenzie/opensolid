@@ -40,7 +40,6 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds3d (Bounds3d)
-import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
@@ -62,8 +61,13 @@ import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
-import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Primitives
+  ( Bounds3d (Bounds3d)
+  , Point3d (Point3d)
+  , Vector3d (Vector3d)
+  , VectorBounds3d (VectorBounds3d)
+  )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
@@ -74,11 +78,7 @@ import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.Vector3d (Vector3d)
-import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import OpenSolid.VectorBounds3d (VectorBounds3d)
-import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
 length :: Generator Length
 length = Qty.random (Length.meters -10.0) (Length.meters 10.0)
@@ -90,17 +90,17 @@ point2d :: Generator (Point2d (space @ Meters))
 point2d = Random.map2 Point2d.xy length length
 
 point3d :: Generator (Point3d (space @ Meters))
-point3d = Random.map3 Point3d.rightwardForwardUpward length length length
+point3d = Random.map3 Point3d length length length
 
 vector2d :: Generator (Vector2d (space @ Meters))
 vector2d = Random.map2 Vector2d.xy length length
 
 vector3d :: Generator (Vector3d (space @ Meters))
-vector3d = Random.map3 Vector3d.rightwardForwardUpward length length length
+vector3d = Random.map3 Vector3d length length length
 
 vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
 vectorBounds3d =
-  Random.map3 VectorBounds3d.rightwardForwardUpward
+  Random.map3 VectorBounds3d
     @ lengthBounds
     @ lengthBounds
     @ lengthBounds
@@ -137,7 +137,7 @@ bounds2d :: Generator (Bounds2d (space @ Meters))
 bounds2d = Random.map2 Bounds2d lengthBounds lengthBounds
 
 bounds3d :: Generator (Bounds3d (space @ Meters))
-bounds3d = Random.map3 Bounds3d.rightwardForwardUpward lengthBounds lengthBounds lengthBounds
+bounds3d = Random.map3 Bounds3d lengthBounds lengthBounds lengthBounds
 
 vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
 vectorBounds2d = Random.map2 VectorBounds2d lengthBounds lengthBounds

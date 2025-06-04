@@ -177,6 +177,7 @@ library
     OpenSolid.Polygon2d
     OpenSolid.Polyline2d
     OpenSolid.Prelude
+    OpenSolid.Primitives
     OpenSolid.Qty
     OpenSolid.Queue
     OpenSolid.Random
@@ -245,7 +246,6 @@ library
     OpenSolid.Json.FieldSchema
     OpenSolid.Linearization
     OpenSolid.Lobatto
-    OpenSolid.Primitives
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
     OpenSolid.Scene3d.Gltf
