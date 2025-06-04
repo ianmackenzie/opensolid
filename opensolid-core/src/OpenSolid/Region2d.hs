@@ -511,7 +511,7 @@ fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate U
 fluxIntegral point curve = do
   let displacement = point - curve
   let integrand = (curve.derivative `cross'` displacement) / displacement.squaredMagnitude'
-  Curve.integral integrand
+  Curve.integrate integrand
 
 totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
 totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
@@ -575,7 +575,7 @@ areaIntegral' referencePoint curve = do
   let displacement = curve - referencePoint
   let y = displacement.yComponent
   let dx = displacement.xComponent.derivative
-  -(Curve.integral (y .*. dx))
+  -(Curve.integrate (y .*. dx))
 
 loopIsInside :: Tolerance units => Loop (space @ units) -> Loop (space @ units) -> Bool
 loopIsInside outer inner = do

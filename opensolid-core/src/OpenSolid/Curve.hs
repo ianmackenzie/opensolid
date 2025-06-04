@@ -29,7 +29,7 @@ module OpenSolid.Curve
   , CrossesZero (CrossesZero)
   , sign
   , reverse
-  , integral
+  , integrate
   )
 where
 
@@ -400,8 +400,8 @@ cos curve =
     (CompiledFunction.map Expression.cos Angle.cos Bounds.cos curve.compiled)
     (negate (sin curve) * (curve.derivative / Angle.radian))
 
-integral :: Curve units -> Estimate units
-integral curve = Estimate.new (Integral curve curve.derivative Bounds.unitInterval)
+integrate :: Curve units -> Estimate units
+integrate curve = Estimate.new (Integral curve curve.derivative Bounds.unitInterval)
 
 data Integral units = Integral (Curve units) (Curve units) (Bounds Unitless)
 
