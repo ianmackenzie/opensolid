@@ -58,6 +58,7 @@ library
     LambdaCase
     LexicalNegation
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo

@@ -45,6 +45,7 @@ foreign-library opensolid-ffi
 
   default-extensions:
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     QualifiedDo
     RebindableSyntax
@@ -68,6 +69,7 @@ executable generate-def-file
 
   default-extensions:
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     QualifiedDo
     RebindableSyntax

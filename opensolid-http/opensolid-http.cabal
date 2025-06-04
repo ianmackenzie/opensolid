@@ -62,6 +62,7 @@ common config
     MagicHash
     MultiWayIf
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
