@@ -105,6 +105,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.Mitsuba qualified as Mitsuba
 import OpenSolid.Orientation3d (Orientation3d)
 import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.PbrMaterial (PbrMaterial)
@@ -1368,6 +1369,8 @@ body3d :: Class
 body3d = do
   let writeStl path convention constraints body =
         Stl.writeBinary path convention Length.inMillimeters (Body3d.toMesh constraints body)
+  let writeMitsuba path constraints body =
+        Mitsuba.writeBinary path (Body3d.toMesh constraints body)
   Class.new @(Body3d (Space @ Meters)) $(docs ''Body3d) $
     [ factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
     , factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
@@ -1378,6 +1381,7 @@ body3d = do
     , member1 "Place In" "Frame" Body3d.placeIn $(docs 'Body3d.placeIn)
     , member1 "Relative To" "Frame" Body3d.relativeTo $(docs 'Body3d.relativeTo)
     , memberM3 "Write STL" "Path" "Convention" "Mesh Constraints" writeStl "Write a body to a binary STL file, using units of millimeters."
+    , memberM2 "Write Mitsuba" "Path" "Mesh Constraints" writeMitsuba "Write a body to Mitsuba 'serialized' file."
     ]
 
 mesh :: Class

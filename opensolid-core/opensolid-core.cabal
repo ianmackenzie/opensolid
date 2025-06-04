@@ -36,6 +36,7 @@ common config
     scientific,
     text,
     vector,
+    zlib,
 
   ghc-options:
     -Wall
@@ -162,6 +163,7 @@ library
     OpenSolid.Map
     OpenSolid.Maybe
     OpenSolid.Mesh
+    OpenSolid.Mitsuba
     OpenSolid.NonEmpty
     OpenSolid.Orientation2d
     OpenSolid.Orientation3d
