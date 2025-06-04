@@ -147,11 +147,10 @@ revolved sketchPlane curve axis angle = do
         let radius = xCoordinate . curveParameter
         let height = Curve2d.yCoordinate localCurve . curveParameter
         let function =
-              SurfaceFunction3d.placeIn frame3d do
-                SurfaceFunction3d.rightwardForwardUpward
-                  @ radius * SurfaceFunction.cos theta
-                  @ radius * SurfaceFunction.sin theta
-                  @ height
+              frame3d.originPoint
+                + radius * SurfaceFunction.cos theta * frame3d.rightwardDirection
+                + radius * SurfaceFunction.sin theta * frame3d.forwardDirection
+                + height * frame3d.upwardDirection
         Success (parametric function Region2d.unitSquare)
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
