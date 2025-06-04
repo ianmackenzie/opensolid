@@ -1363,7 +1363,7 @@ region2d =
     [ factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryM1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
     , factoryM2R "Circle" "Center Point" "Diameter" (curryT2 Region2d.circle) $(docs 'Region2d.circle)
-    , factoryM1R "Polygon" "Points" Region2d.polygon $(docs 'Region2d.polygon)
+    , factoryM1R "Polygon" "Points" (Region2d.polygon @(Point2d (Space @ Meters))) $(docs 'Region2d.polygon)
     , factoryM2R "Hexagon" "Center Point" "Height" (curryT2 Region2d.hexagon) $(docs 'Region2d.hexagon)
     , factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" (curry1T2 Region2d.inscribedPolygon) $(docs 'Region2d.inscribedPolygon)
     , factoryM3R "Circumscribed Polygon" "Num Sides" "Center Point" "Diameter" (curry1T2 Region2d.circumscribedPolygon) $(docs 'Region2d.circumscribedPolygon)

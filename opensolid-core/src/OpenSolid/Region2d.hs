@@ -77,6 +77,8 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
+import OpenSolid.Vertex2d (Vertex2d)
+import OpenSolid.Vertex2d qualified as Vertex2d
 
 type role Region2d nominal
 
@@ -225,21 +227,22 @@ circumscribedPolygon n (Field centerPoint, Field diameter) =
     #centerPoint centerPoint
     #diameter (diameter / Angle.cos (Angle.pi / Float.int n))
 
-{-| Create a polygonal region from the given points.
+{-| Create a polygonal region from the given vertices.
 
-The last point will be connected back to the first point automatically if needed
+The last vertex will be connected back to the first vertex automatically if needed
 (you do not have to close the polygon manually, although it will still work if you do).
 -}
 polygon ::
-  Tolerance units =>
-  List (Point2d (space @ units)) ->
+  (Vertex2d vertex (space @ units), Tolerance units) =>
+  List vertex ->
   Result BoundedBy.Error (Region2d (space @ units))
-polygon pointList = case pointList of
+polygon vertexList = case vertexList of
   [] -> Failure BoundedBy.EmptyRegion
-  NonEmpty points -> do
-    let closedLoop = NonEmpty.extend points [points.first]
-    let lines = NonEmpty.successive Curve2d.line closedLoop
-    let isNonZeroLength line = line.startPoint != line.endPoint
+  NonEmpty vertices -> do
+    let closedLoop = NonEmpty.extend vertices [vertices.first]
+    let line start end = Curve2d.line (Vertex2d.position start) (Vertex2d.position end)
+    let lines = NonEmpty.successive line closedLoop
+    let isNonZeroLength curve = curve.startPoint != curve.endPoint
     boundedBy (List.filter isNonZeroLength lines)
 
 {-| Fillet a region at the given corner points, with the given radius.
