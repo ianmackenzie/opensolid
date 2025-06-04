@@ -5,7 +5,6 @@ module OpenSolid.Expression
   , Zero (zero)
   , Origin (origin)
   , XY (xy)
-  , RightwardForwardUpward (rightwardForwardUpward)
   , xComponent
   , yComponent
   , rightwardComponent
@@ -1261,29 +1260,6 @@ instance XY Float (Point2d (space @ units)) units where
 
 instance XY UvPoint (Point2d (space @ units)) units where
   xy (Surface1d x _) (Surface1d y _) = surface2d (Ast.xy x y)
-
-class RightwardForwardUpward input output units | output -> units where
-  rightwardForwardUpward ::
-    Expression input (Qty units) ->
-    Expression input (Qty units) ->
-    Expression input (Qty units) ->
-    Expression input output
-
-instance RightwardForwardUpward Float (Vector3d (space @ units)) units where
-  rightwardForwardUpward (Curve1d vr _) (Curve1d vf _) (Curve1d vu _) =
-    vectorCurve3d (Ast.rightwardForwardUpward vr vf vu)
-
-instance RightwardForwardUpward UvPoint (Vector3d (space @ units)) units where
-  rightwardForwardUpward (Surface1d vr _) (Surface1d vf _) (Surface1d vu _) =
-    vectorSurface3d (Ast.rightwardForwardUpward vr vf vu)
-
-instance RightwardForwardUpward Float (Point3d (space @ units)) units where
-  rightwardForwardUpward (Curve1d pr _) (Curve1d pf _) (Curve1d pu _) =
-    curve3d (Ast.rightwardForwardUpward pr pf pu)
-
-instance RightwardForwardUpward UvPoint (Point3d (space @ units)) units where
-  rightwardForwardUpward (Surface1d pr _) (Surface1d pf _) (Surface1d pu _) =
-    surface3d (Ast.rightwardForwardUpward pr pf pu)
 
 xComponent :: Expression input (Vector2d (space @ units)) -> Expression input (Qty units)
 xComponent (VectorCurve2d ast _) = curve1d (Ast.xComponent ast)

@@ -1,6 +1,5 @@
 module OpenSolid.Expression.Surface3d
   ( constant
-  , rightwardForwardUpward
   , placeIn
   , relativeTo
   , projectInto
@@ -20,13 +19,6 @@ import OpenSolid.Transform3d (Transform3d)
 
 constant :: Point3d (space @ units) -> Expression UvPoint (Point3d (space @ units))
 constant = Expression.constant
-
-rightwardForwardUpward ::
-  Expression UvPoint (Qty units) ->
-  Expression UvPoint (Qty units) ->
-  Expression UvPoint (Qty units) ->
-  Expression UvPoint (Point3d (space @ units))
-rightwardForwardUpward = Expression.rightwardForwardUpward
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->

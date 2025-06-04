@@ -11,7 +11,6 @@ module OpenSolid.Curve3d
   , quadraticBezier
   , cubicBezier
   , hermite
-  , rightwardForwardUpward
   , startPoint
   , endPoint
   , evaluate
@@ -170,21 +169,6 @@ recursive givenCompiled derivativeFunction =
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
 constant point = new (CompiledFunction.constant point) VectorCurve3d.zero
-
-rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> Curve3d (space @ units)
-rightwardForwardUpward r f u =
-  new
-    @ CompiledFunction.map3
-      Expression.rightwardForwardUpward
-      Point3d.rightwardForwardUpward
-      Bounds3d.rightwardForwardUpward
-      r.compiled
-      f.compiled
-      u.compiled
-    @ VectorCurve3d.rightwardForwardUpward
-      r.derivative
-      f.derivative
-      u.derivative
 
 on ::
   Plane3d (space @ units) (Defines local) ->

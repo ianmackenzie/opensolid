@@ -3,7 +3,6 @@ module OpenSolid.SurfaceFunction3d
   , Compiled
   , new
   , constant
-  , rightwardForwardUpward
   , evaluate
   , evaluateBounds
   , derivative
@@ -18,7 +17,6 @@ import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
-import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Surface3d qualified as Expression.Surface3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
@@ -28,8 +26,6 @@ import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Region2d (Region2d)
 import {-# SOURCE #-} OpenSolid.Surface3d (Surface3d)
 import {-# SOURCE #-} OpenSolid.Surface3d qualified as Surface3d
-import OpenSolid.SurfaceFunction (SurfaceFunction)
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
@@ -180,26 +176,6 @@ new c derivativeFunction = do
 
 constant :: Point3d (space @ units) -> SurfaceFunction3d (space @ units)
 constant value = new (CompiledFunction.constant value) (always VectorSurfaceFunction3d.zero)
-
-rightwardForwardUpward ::
-  SurfaceFunction units ->
-  SurfaceFunction units ->
-  SurfaceFunction units ->
-  SurfaceFunction3d (space @ units)
-rightwardForwardUpward r f u =
-  new
-    @ CompiledFunction.map3
-      Expression.rightwardForwardUpward
-      Point3d.rightwardForwardUpward
-      Bounds3d.rightwardForwardUpward
-      r.compiled
-      f.compiled
-      u.compiled
-    @ \parameter ->
-      VectorSurfaceFunction3d.rightwardForwardUpward
-        (SurfaceFunction.derivative parameter r)
-        (SurfaceFunction.derivative parameter f)
-        (SurfaceFunction.derivative parameter u)
 
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint

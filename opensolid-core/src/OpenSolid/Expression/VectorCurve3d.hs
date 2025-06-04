@@ -1,6 +1,5 @@
 module OpenSolid.Expression.VectorCurve3d
   ( constant
-  , rightwardForwardUpward
   , squaredMagnitude
   , squaredMagnitude'
   , magnitude
@@ -23,13 +22,6 @@ import OpenSolid.Vector3d (Vector3d)
 
 constant :: Vector3d (space @ units) -> Expression Float (Vector3d (space @ units))
 constant = Expression.constant
-
-rightwardForwardUpward ::
-  Expression Float (Qty units) ->
-  Expression Float (Qty units) ->
-  Expression Float (Qty units) ->
-  Expression Float (Vector3d (space @ units))
-rightwardForwardUpward = Expression.rightwardForwardUpward
 
 squaredMagnitude' ::
   Expression Float (Vector3d (space @ units)) ->

@@ -9,7 +9,6 @@ module OpenSolid.VectorCurve3d
   , evaluateBounds
   , zero
   , constant
-  , rightwardForwardUpward
   , line
   , arc
   , quadraticSpline
@@ -457,18 +456,6 @@ on plane vectorCurve2d = do
           (VectorBounds2d.on plane)
           vectorCurve2d.compiled
   new compiledPlanar (on plane vectorCurve2d.derivative)
-
-rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units)
-rightwardForwardUpward r f u =
-  new
-    @ CompiledFunction.map3
-      Expression.rightwardForwardUpward
-      Vector3d.rightwardForwardUpward
-      VectorBounds3d.rightwardForwardUpward
-      r.compiled
-      f.compiled
-      u.compiled
-    @ rightwardForwardUpward r.derivative f.derivative u.derivative
 
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 line v1 v2 = bezierCurve (NonEmpty.two v1 v2)

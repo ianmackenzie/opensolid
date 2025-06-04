@@ -36,7 +36,6 @@ module OpenSolid.Bytecode.Ast
   , projectPoint3dInto
   , surfaceParameters
   , xy
-  , rightwardForwardUpward
   , line1d
   , quadraticSpline1d
   , cubicSpline1d
@@ -972,16 +971,6 @@ xy (Constant1d x) (Constant1d y) = Constant2d (Vector2d x y)
 xy (Constant1d x) (Variable1d y) = Variable2d (CY x y)
 xy (Variable1d x) (Constant1d y) = Variable2d (XC x y)
 xy (Variable1d x) (Variable1d y) = Variable2d (XY x y)
-
-rightwardForwardUpward :: Ast1d input -> Ast1d input -> Ast1d input -> Ast3d input
-rightwardForwardUpward (Constant1d r) (Constant1d f) (Constant1d u) = Constant3d (Vector3d r f u)
-rightwardForwardUpward (Constant1d r) (Constant1d f) (Variable1d u) = Variable3d (CCU r f u)
-rightwardForwardUpward (Constant1d r) (Variable1d f) (Constant1d u) = Variable3d (CFC r f u)
-rightwardForwardUpward (Variable1d r) (Constant1d f) (Constant1d u) = Variable3d (RCC r f u)
-rightwardForwardUpward (Constant1d r) (Variable1d f) (Variable1d u) = Variable3d (CFU r f u)
-rightwardForwardUpward (Variable1d r) (Constant1d f) (Variable1d u) = Variable3d (RCU r f u)
-rightwardForwardUpward (Variable1d r) (Variable1d f) (Constant1d u) = Variable3d (RFC r f u)
-rightwardForwardUpward (Variable1d r) (Variable1d f) (Variable1d u) = Variable3d (RFU r f u)
 
 line1d :: Qty units -> Qty units -> Ast1d input -> Ast1d input
 line1d p1 p2 param = bezierCurve1d (NonEmpty.two p1 p2) param

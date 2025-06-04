@@ -3,7 +3,6 @@ module OpenSolid.Vector3d
   , zero
   , coerce
   , unit
-  , rightwardForwardUpward
   , fromComponents
   , componentIn
   , projectionIn
@@ -73,10 +72,6 @@ coerce (Vector3d vx vy vz) = Vector3d (Qty.coerce vx) (Qty.coerce vy) (Qty.coerc
 {-# INLINE unit #-}
 unit :: Direction3d space -> Vector3d (space @ Unitless)
 unit (Unit3d vector) = vector
-
-{-# INLINE rightwardForwardUpward #-}
-rightwardForwardUpward :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
-rightwardForwardUpward = Vector3d
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
 fromComponents :: Convention3d -> (Qty units, Qty units, Qty units) -> Vector3d (space @ units)

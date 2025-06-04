@@ -5,7 +5,6 @@ module OpenSolid.VectorSurfaceFunction3d
   , recursive
   , zero
   , constant
-  , rightwardForwardUpward
   , evaluate
   , evaluateBounds
   , derivative
@@ -19,7 +18,6 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
@@ -437,26 +435,6 @@ zero = constant Vector3d.zero
 
 constant :: Vector3d (space @ units) -> VectorSurfaceFunction3d (space @ units)
 constant value = new (CompiledFunction.constant value) (always zero)
-
-rightwardForwardUpward ::
-  SurfaceFunction units ->
-  SurfaceFunction units ->
-  SurfaceFunction units ->
-  VectorSurfaceFunction3d (space @ units)
-rightwardForwardUpward r f u =
-  new
-    @ CompiledFunction.map3
-      Expression.rightwardForwardUpward
-      Vector3d.rightwardForwardUpward
-      VectorBounds3d.rightwardForwardUpward
-      r.compiled
-      f.compiled
-      u.compiled
-    @ \p ->
-      rightwardForwardUpward
-        (SurfaceFunction.derivative p r)
-        (SurfaceFunction.derivative p f)
-        (SurfaceFunction.derivative p u)
 
 evaluate :: VectorSurfaceFunction3d (space @ units) -> UvPoint -> Vector3d (space @ units)
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint

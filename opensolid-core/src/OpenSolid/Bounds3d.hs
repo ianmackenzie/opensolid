@@ -1,6 +1,5 @@
 module OpenSolid.Bounds3d
   ( Bounds3d
-  , rightwardForwardUpward
   , rightwardCoordinate
   , forwardCoordinate
   , upwardCoordinate
@@ -60,10 +59,6 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
-
-{-# INLINE rightwardForwardUpward #-}
-rightwardForwardUpward :: Bounds units -> Bounds units -> Bounds units -> Bounds3d (space @ units)
-rightwardForwardUpward = Bounds3d
 
 -- | Get the bounds on the rightward coordinate of a bounding box.
 rightwardCoordinate :: Bounds3d (space @ units) -> Bounds units

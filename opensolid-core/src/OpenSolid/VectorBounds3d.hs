@@ -1,7 +1,6 @@
 module OpenSolid.VectorBounds3d
   ( VectorBounds3d
   , constant
-  , rightwardForwardUpward
   , coerce
   , aggregate2
   , aggregate3
@@ -58,14 +57,6 @@ constant (Vector3d x y z) =
 {-# INLINE coerce #-}
 coerce :: VectorBounds3d (space1 @ units1) -> VectorBounds3d (space2 @ units2)
 coerce (VectorBounds3d x y z) = VectorBounds3d (Bounds.coerce x) (Bounds.coerce y) (Bounds.coerce z)
-
-{-# INLINE rightwardForwardUpward #-}
-rightwardForwardUpward ::
-  Bounds units ->
-  Bounds units ->
-  Bounds units ->
-  VectorBounds3d (space @ units)
-rightwardForwardUpward = VectorBounds3d
 
 hull2 :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorBounds3d (space @ units)
 hull2 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =

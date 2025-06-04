@@ -1,6 +1,5 @@
 module OpenSolid.Expression.VectorSurface3d
   ( constant
-  , rightwardForwardUpward
   , squaredMagnitude
   , squaredMagnitude'
   , magnitude
@@ -24,13 +23,6 @@ import OpenSolid.Vector3d (Vector3d)
 
 constant :: Vector3d (space @ units) -> Expression UvPoint (Vector3d (space @ units))
 constant = Expression.constant
-
-rightwardForwardUpward ::
-  Expression UvPoint (Qty units) ->
-  Expression UvPoint (Qty units) ->
-  Expression UvPoint (Qty units) ->
-  Expression UvPoint (Vector3d (space @ units))
-rightwardForwardUpward = Expression.rightwardForwardUpward
 
 squaredMagnitude' ::
   Expression UvPoint (Vector3d (space @ units)) ->

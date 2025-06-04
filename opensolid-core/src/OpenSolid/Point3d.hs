@@ -2,7 +2,6 @@ module OpenSolid.Point3d
   ( Point3d
   , coordinates
   , origin
-  , rightwardForwardUpward
   , on
   , along
   , coerce
@@ -65,10 +64,6 @@ coordinates convention (Point3d pR pF pU) = do
 -- | The point with coordinates (0,0, 0).
 origin :: Point3d (space @ units)
 origin = Point3d Qty.zero Qty.zero Qty.zero
-
-{-# INLINE rightwardForwardUpward #-}
-rightwardForwardUpward :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
-rightwardForwardUpward = Point3d
 
 -- | Construct a point the given distance along the given axis.
 along :: Axis3d (space @ units) -> Qty units -> Point3d (space @ units)
