@@ -17,7 +17,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvCoordinates, UvPoi
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Curve2d qualified
@@ -99,12 +98,12 @@ planeTorusSurface = do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let r = majorRadius + minorRadius * SurfaceFunction.cos phi
-  let rightward = r * SurfaceFunction.cos theta
-  let forward = r * SurfaceFunction.sin theta
-  let upward = minorRadius * SurfaceFunction.sin phi
   let alpha = Angle.asin (minorRadius / majorRadius)
   let normalDirection = Direction3d.polar world.frontPlane (alpha + Angle.halfPi)
-  let surfaceFunction = VectorSurfaceFunction3d.rightwardForwardUpward rightward forward upward
+  let surfaceFunction =
+        r * SurfaceFunction.cos theta * world.rightwardDirection
+          + r * SurfaceFunction.sin theta * world.forwardDirection
+          + minorRadius * SurfaceFunction.sin phi * world.upwardDirection
   normalDirection `dot` surfaceFunction
 
 samplingRadius :: Float
