@@ -33,6 +33,7 @@ import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Orientation3d qualified as Orientation3d
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
@@ -41,7 +42,6 @@ import OpenSolid.Primitives
   , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Point2d (Point2d)
   , Point3d (Point3d)
   , Transform3d (Transform3d)
   , Vector3d
