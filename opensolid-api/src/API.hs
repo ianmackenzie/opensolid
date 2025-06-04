@@ -634,8 +634,8 @@ direction2d =
     , factory1 "Polar" "Angle" Direction2d.polar $(docs 'Direction2d.polar)
     , factory1 "Degrees" "Value" Direction2d.degrees $(docs 'Direction2d.degrees)
     , factory1 "Radians" "Value" Direction2d.radians $(docs 'Direction2d.radians)
-    , member0 "Rotate Left" Direction2d.rotateLeft $(docs 'Direction2d.rotateLeft)
-    , member0 "Rotate Right" Direction2d.rotateRight $(docs 'Direction2d.rotateRight)
+    , member0 "Rotate Leftward" Direction2d.rotateLeftward $(docs 'Direction2d.rotateLeftward)
+    , member0 "Rotate Rightward" Direction2d.rotateRightward $(docs 'Direction2d.rotateRightward)
     , negateSelf
     ]
 
@@ -1157,18 +1157,18 @@ frame3d =
     , member1 "Offset Leftward By" "Distance" Frame3d.offsetLeftwardBy $(docs 'Frame3d.offsetLeftwardBy)
     , member1 "Offset Upward By" "Distance" Frame3d.offsetUpwardBy $(docs 'Frame3d.offsetUpwardBy)
     , member1 "Offset Downward By" "Distance" Frame3d.offsetDownwardBy $(docs 'Frame3d.offsetDownwardBy)
-    , member1 "Turn Right By" "Angle" Frame3d.turnRightBy $(docs 'Frame3d.turnRightBy)
-    , member1 "Turn Left By" "Angle" Frame3d.turnLeftBy $(docs 'Frame3d.turnLeftBy)
-    , member1 "Roll Right By" "Angle" Frame3d.rollRightBy $(docs 'Frame3d.rollRightBy)
-    , member1 "Roll Left By" "Angle" Frame3d.rollLeftBy $(docs 'Frame3d.rollLeftBy)
-    , member1 "Tilt Up By" "Angle" Frame3d.tiltUpBy $(docs 'Frame3d.tiltUpBy)
-    , member1 "Tilt Down By" "Angle" Frame3d.tiltDownBy $(docs 'Frame3d.tiltDownBy)
-    , member0 "Turn Right" Frame3d.turnRight $(docs 'Frame3d.turnRight)
-    , member0 "Turn Left" Frame3d.turnLeft $(docs 'Frame3d.turnLeft)
-    , member0 "Roll Right" Frame3d.rollRight $(docs 'Frame3d.rollRight)
-    , member0 "Roll Left" Frame3d.rollLeft $(docs 'Frame3d.rollLeft)
-    , member0 "Tilt Up" Frame3d.tiltUp $(docs 'Frame3d.tiltUp)
-    , member0 "Tilt Down" Frame3d.tiltDown $(docs 'Frame3d.tiltDown)
+    , member1 "Turn Rightward By" "Angle" Frame3d.turnRightwardBy $(docs 'Frame3d.turnRightwardBy)
+    , member1 "Turn Leftward By" "Angle" Frame3d.turnLeftwardBy $(docs 'Frame3d.turnLeftwardBy)
+    , member1 "Roll Rightward By" "Angle" Frame3d.rollRightwardBy $(docs 'Frame3d.rollRightwardBy)
+    , member1 "Roll Leftward By" "Angle" Frame3d.rollLeftwardBy $(docs 'Frame3d.rollLeftwardBy)
+    , member1 "Tilt Upward By" "Angle" Frame3d.tiltUpwardBy $(docs 'Frame3d.tiltUpwardBy)
+    , member1 "Tilt Downward By" "Angle" Frame3d.tiltDownwardBy $(docs 'Frame3d.tiltDownwardBy)
+    , member0 "Turn Rightward" Frame3d.turnRightward $(docs 'Frame3d.turnRightward)
+    , member0 "Turn Leftward" Frame3d.turnLeftward $(docs 'Frame3d.turnLeftward)
+    , member0 "Roll Rightward" Frame3d.rollRightward $(docs 'Frame3d.rollRightward)
+    , member0 "Roll Leftward" Frame3d.rollLeftward $(docs 'Frame3d.rollLeftward)
+    , member0 "Tilt Upward" Frame3d.tiltUpward $(docs 'Frame3d.tiltUpward)
+    , member0 "Tilt Downward" Frame3d.tiltDownward $(docs 'Frame3d.tiltDownward)
     ]
       <> rigidTransformations3d Frame3d.transformBy
 

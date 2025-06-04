@@ -41,18 +41,18 @@ module OpenSolid.Frame3d
   , offsetLeftwardBy
   , offsetUpwardBy
   , offsetDownwardBy
-  , turnRightBy
-  , turnLeftBy
-  , rollRightBy
-  , rollLeftBy
-  , tiltUpBy
-  , tiltDownBy
-  , turnRight
-  , turnLeft
-  , rollRight
-  , rollLeft
-  , tiltUp
-  , tiltDown
+  , turnRightwardBy
+  , turnLeftwardBy
+  , rollRightwardBy
+  , rollLeftwardBy
+  , tiltUpwardBy
+  , tiltDownwardBy
+  , turnRightward
+  , turnLeftward
+  , rollRightward
+  , rollLeftward
+  , tiltUpward
+  , tiltDownward
   , placeIn
   , relativeTo
   , inverse
@@ -334,91 +334,91 @@ offsetDownwardBy distance frame = frame |> translateIn (downwardDirection frame)
 
 This rotates the frame's forward direction toward its leftward direction.
 -}
-turnLeftBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-turnLeftBy angle frame = frame |> rotateAround (upwardAxis frame) angle
+turnLeftwardBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+turnLeftwardBy angle frame = frame |> rotateAround (upwardAxis frame) angle
 
 {-| Rotate a frame clockwise around its own upward axis by the given angle.
 
 This rotates the frame's forward direction toward its rightward direction.
 -}
-turnRightBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-turnRightBy angle frame = frame |> rotateAround (upwardAxis frame) -angle
+turnRightwardBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+turnRightwardBy angle frame = frame |> rotateAround (upwardAxis frame) -angle
 
 {-| Rotate a frame counterclockwise around its own forward axis by the given angle.
 
 This rotates the frame's upward direction toward its rightward direction.
 -}
-rollRightBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rollRightBy angle frame = frame |> rotateAround (forwardAxis frame) angle
+rollRightwardBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rollRightwardBy angle frame = frame |> rotateAround (forwardAxis frame) angle
 
 {-| Rotate a frame clockwise around its own forward axis by the given angle.
 
 This rotates the frame's upward direction toward its leftward direction.
 -}
-rollLeftBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rollLeftBy angle frame = frame |> rotateAround (forwardAxis frame) -angle
+rollLeftwardBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rollLeftwardBy angle frame = frame |> rotateAround (forwardAxis frame) -angle
 
 {-| Rotate a frame counterclockwise around its own rightward axis by the given angle.
 
 This rotates the frame's forward direction toward its upward direction.
 -}
-tiltUpBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-tiltUpBy angle frame = frame |> rotateAround (rightwardAxis frame) angle
+tiltUpwardBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+tiltUpwardBy angle frame = frame |> rotateAround (rightwardAxis frame) angle
 
 {-| Rotate a frame clockwise around its own rightward axis by the given angle.
 
 This rotates the frame's forward direction toward its downward direction.
 -}
-tiltDownBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-tiltDownBy angle frame = frame |> rotateAround (rightwardAxis frame) -angle
+tiltDownwardBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+tiltDownwardBy angle frame = frame |> rotateAround (rightwardAxis frame) -angle
 
 {-| Turn a frame left by 90 degrees.
 
 The forward direction of the returned frame
 will be equal to the leftward direction of the original frame.
 -}
-turnLeft :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-turnLeft = turnLeftBy Angle.halfPi
+turnLeftward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+turnLeftward = turnLeftwardBy Angle.halfPi
 
 {-| Turn a frame right by 90 degrees.
 
 The forward direction of the returned frame
 will be equal to the rightward direction of the original frame.
 -}
-turnRight :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-turnRight = turnRightBy Angle.halfPi
+turnRightward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+turnRightward = turnRightwardBy Angle.halfPi
 
 {-| Roll a frame left by 90 degrees.
 
 The upward direction of the returned frame
 will be equal to the leftward direction of the original frame.
 -}
-rollLeft :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rollLeft = rollLeftBy Angle.halfPi
+rollLeftward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rollLeftward = rollLeftwardBy Angle.halfPi
 
 {-| Roll a frame right by 90 degrees.
 
 The upward direction of the returned frame
 will be equal to the rightward direction of the original frame.
 -}
-rollRight :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rollRight = rollRightBy Angle.halfPi
+rollRightward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rollRightward = rollRightwardBy Angle.halfPi
 
 {-| Tilt a frame up by 90 degrees.
 
 The forward direction of the returned frame
 will be equal to the upward direction of the original frame.
 -}
-tiltUp :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-tiltUp = tiltUpBy Angle.halfPi
+tiltUpward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+tiltUpward = tiltUpwardBy Angle.halfPi
 
 {-| Tilt a frame down by 90 degrees.
 
 The forward direction of the returned frame
 will be equal to the downward direction of the original frame.
 -}
-tiltDown :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-tiltDown = tiltDownBy Angle.halfPi
+tiltDownward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+tiltDownward = tiltDownwardBy Angle.halfPi
 
 -- | Convert a frame defined in local coordinates to one defined in global coordinates.
 placeIn ::

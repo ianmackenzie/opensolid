@@ -1,5 +1,5 @@
-module OpenSolid.Direction2d (rotateLeft) where
+module OpenSolid.Direction2d (rotateLeftward) where
 
 import OpenSolid.Primitives (Direction2d)
 
-rotateLeft :: Direction2d space -> Direction2d space
+rotateLeftward :: Direction2d space -> Direction2d space

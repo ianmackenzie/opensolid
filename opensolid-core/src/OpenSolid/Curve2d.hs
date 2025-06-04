@@ -30,8 +30,8 @@ module OpenSolid.Curve2d
   , compiled
   , derivative
   , tangentDirection
-  , offsetLeftBy
-  , offsetRightBy
+  , offsetLeftwardBy
+  , offsetRightwardBy
   , reverse
   , bounds
   , Intersections (..)
@@ -385,7 +385,7 @@ arc givenStartPoint givenEndPoint sweptAngle =
       if linearDeviation ~= Qty.zero
         then line givenStartPoint givenEndPoint
         else do
-          let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
+          let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeftward directionBetweenPoints
           let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
           let radius = Point2d.distanceFrom centerPoint givenStartPoint
           let xVector = Vector2d.x radius
@@ -456,7 +456,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       let halfDistance = 0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint
       let radius = Qty.max (Qty.abs givenRadius) halfDistance
       let offsetMagnitude = Qty.sqrt' (Qty.squared' radius - Qty.squared' halfDistance)
-      let offsetDirection = Direction2d.rotateLeft chordDirection
+      let offsetDirection = Direction2d.rotateLeftward chordDirection
       let offsetDistance =
             case whichArc of
               SmallCounterclockwise -> offsetMagnitude
@@ -622,31 +622,31 @@ tangentDirection curve =
     Success directionCurve -> Success directionCurve
     Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
 
-offsetLeftBy ::
+offsetLeftwardBy ::
   Tolerance units =>
   Qty units ->
   Curve2d (space @ units) ->
   Result HasDegeneracy (Curve2d (space @ units))
-offsetLeftBy offset curve = Result.do
+offsetLeftwardBy offset curve = Result.do
   tangentCurve <- tangentDirection curve
   let offsetCurve = VectorCurve2d.rotateBy Angle.quarterTurn (offset * tangentCurve)
   Success (curve + offsetCurve)
 
-offsetRightBy ::
+offsetRightwardBy ::
   Tolerance units =>
   Qty units ->
   Curve2d (space @ units) ->
   Result HasDegeneracy (Curve2d (space @ units))
-offsetRightBy distance = offsetLeftBy -distance
+offsetRightwardBy distance = offsetLeftwardBy -distance
 
 distanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
 distanceAlong (Axis2d p0 d) curve = (curve - p0) `dot` d
 
 distanceLeftOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-distanceLeftOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateLeft d
+distanceLeftOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateLeftward d
 
 distanceRightOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-distanceRightOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateRight d
+distanceRightOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateRightward d
 
 {-| Check if the given curve curve is collinear with (lies on) the given axis.
 
