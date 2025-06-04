@@ -39,7 +39,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.World3d qualified as World3d
 
 data CameraSpace
 
@@ -130,13 +129,13 @@ lookAt givenEyePoint givenFocalPoint givenProjection givenFieldOfView = do
                 Frame3d.fromRightPlane (Plane3d givenEyePoint rightPlaneOrientation)
               Nothing -- View direction is either straight up or straight down
                 | Direction3d.upwardComponent computedViewDirection > 0.0 ->
-                    Frame3d givenEyePoint World3d.upwardOrientation
+                    Frame3d givenEyePoint world.upwardOrientation
                 | otherwise ->
-                    Frame3d givenEyePoint World3d.downwardOrientation
+                    Frame3d givenEyePoint world.downwardOrientation
           Failure Vector3d.IsZero ->
             -- Given eye and focal points are coincident,
             -- so just look straight forward
-            Frame3d givenEyePoint World3d.forwardOrientation
+            Frame3d givenEyePoint world.orientation
   new computedFrame computedFocalDistance givenProjection givenFieldOfView
 
 orbit ::
@@ -148,8 +147,9 @@ orbit ::
   FieldOfView units ->
   Camera3d (space @ units)
 orbit focalPoint (Field azimuth) (Field elevation) distance givenProjection givenFieldOfView = do
+  let world = Frame3d.world
   let computedFrame =
-        Frame3d focalPoint World3d.backwardOrientation
+        Frame3d focalPoint world.backwardOrientation
           |> Frame3d.turnRightwardBy azimuth
           |> Frame3d.tiltDownwardBy elevation
           |> Frame3d.offsetBackwardBy distance

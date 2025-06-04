@@ -25,9 +25,9 @@ in terms of forward, backward, leftward, rightward, upward and downward.
 -}
 data Convention3d where
   Convention3d ::
-    (forall space defines. Orientation3d space defines -> Direction3d space) ->
-    (forall space defines. Orientation3d space defines -> Direction3d space) ->
-    (forall space defines. Orientation3d space defines -> Direction3d space) ->
+    (forall space. Orientation3d space -> Direction3d space) ->
+    (forall space. Orientation3d space -> Direction3d space) ->
+    (forall space. Orientation3d space -> Direction3d space) ->
     Convention3d
 
 instance FFI Convention3d where
@@ -56,15 +56,15 @@ zUp =
     Orientation3d.upwardDirection
 
 -- | Get the X direction of a given orientation for a particular coordinate convention.
-xDirection :: Orientation3d space defines -> Convention3d -> Direction3d space
+xDirection :: Orientation3d space -> Convention3d -> Direction3d space
 xDirection orientation (Convention3d dx _ _) = dx orientation
 
 -- | Get the Y direction of a given orientation for a particular coordinate convention.
-yDirection :: Orientation3d space defines -> Convention3d -> Direction3d space
+yDirection :: Orientation3d space -> Convention3d -> Direction3d space
 yDirection orientation (Convention3d _ dy _) = dy orientation
 
 -- | Get the Z direction of a given orientation for a particular coordinate convention.
-zDirection :: Orientation3d space defines -> Convention3d -> Direction3d space
+zDirection :: Orientation3d space -> Convention3d -> Direction3d space
 zDirection orientation (Convention3d _ _ dz) = dz orientation
 
 -- | Get the X axis of a given frame for a particular coordinate convention.

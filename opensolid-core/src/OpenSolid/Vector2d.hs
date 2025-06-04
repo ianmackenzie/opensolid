@@ -59,7 +59,9 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Direction2d (Unit2d)
+  , Frame2d (Frame2d)
   , Orientation2d (Orientation2d)
+  , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   , Point2d
   , Transform2d (Transform2d)
@@ -252,22 +254,22 @@ rotateRightward :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateRightward (Vector2d vx vy) = Vector2d vy (negate vx)
 
 placeIn ::
-  Orientation2d global (Defines local) ->
+  Frame2d (global @ frameUnits) (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
-placeIn (Orientation2d i j) (Vector2d vx vy) = vx * i + vy * j
+placeIn (Frame2d _ (Orientation2d i j)) (Vector2d vx vy) = vx * i + vy * j
 
 relativeTo ::
-  Orientation2d global (Defines local) ->
+  Frame2d (global @ frameUnits) (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeTo (Orientation2d i j) vector = Vector2d (vector `dot` i) (vector `dot` j)
+relativeTo (Frame2d _ (Orientation2d i j)) vector = Vector2d (vector `dot` i) (vector `dot` j)
 
 on ::
-  PlaneOrientation3d space (Defines local) ->
+  Plane3d (space @ planeUnits) (Defines local) ->
   Vector2d (local @ units) ->
   Vector3d (space @ units)
-on (PlaneOrientation3d i j) (Vector2d vx vy) = vx * i + vy * j
+on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vx vy) = vx * i + vy * j
 
 convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
 convert factor vector = vector !* factor

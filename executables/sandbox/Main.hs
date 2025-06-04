@@ -201,7 +201,7 @@ testPlaneTorusIntersection = IO.do
   surface <- Surface3d.revolved world.frontPlane crossSection Axis2d.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  let planeNormal = Direction3d.polar world.frontPlane.orientation (alpha + Angle.halfPi)
+  let planeNormal = Direction3d.polar world.frontPlane (alpha + Angle.halfPi)
   let f = planeNormal `dot` (surface.function - world.originPoint)
   zeros <- SurfaceFunction.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros

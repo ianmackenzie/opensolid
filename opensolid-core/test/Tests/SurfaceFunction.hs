@@ -103,7 +103,7 @@ planeTorusSurface = do
   let forward = r * SurfaceFunction.sin theta
   let upward = minorRadius * SurfaceFunction.sin phi
   let alpha = Angle.asin (minorRadius / majorRadius)
-  let normalDirection = Direction3d.polar world.frontPlane.orientation (alpha + Angle.halfPi)
+  let normalDirection = Direction3d.polar world.frontPlane (alpha + Angle.halfPi)
   let surfaceFunction = VectorSurfaceFunction3d.rightwardForwardUpward rightward forward upward
   normalDirection `dot` surfaceFunction
 

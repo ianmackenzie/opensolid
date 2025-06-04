@@ -111,17 +111,17 @@ axis2d = Random.map2 Axis2d point2d Direction2d.random
 axis3d :: Generator (Axis3d (space @ Meters))
 axis3d = Random.map2 Axis3d point3d Direction3d.random
 
-orientation2d :: Generator (Orientation2d global (Defines local))
+orientation2d :: Generator (Orientation2d global)
 orientation2d = Random.map Orientation2d.fromXDirection Direction2d.random
 
-planeOrientation3d :: Generator (PlaneOrientation3d global (Defines local))
+planeOrientation3d :: Generator (PlaneOrientation3d global)
 planeOrientation3d =
   Random.retry $
     Random.map2 (Tolerance.using 0.1 PlaneOrientation3d.fromDirections)
       @ Direction3d.random
       @ Direction3d.random
 
-orientation3d :: Generator (Orientation3d global (Defines local))
+orientation3d :: Generator (Orientation3d global)
 orientation3d = Random.map Frame3d.orientation frame3d
 
 plane3d :: Generator (Plane3d (global @ Meters) (Defines local))

@@ -238,8 +238,7 @@ placeIn frame function =
       (Point3d.placeIn frame)
       (Bounds3d.placeIn frame)
       function.compiled
-    @ \parameter ->
-      VectorSurfaceFunction3d.placeIn (Frame3d.orientation frame) (derivative parameter function)
+    @ \parameter -> VectorSurfaceFunction3d.placeIn frame (derivative parameter function)
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->

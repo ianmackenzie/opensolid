@@ -40,8 +40,9 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d
   , Direction3d (Direction3d, Unit3d)
+  , Frame3d
   , Orientation3d
-  , Plane3d
+  , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   , Vector3d
   )
@@ -69,29 +70,29 @@ lift ::
   Direction3d spaceB
 lift function (Unit3d vector) = Unit3d (function vector)
 
-upward :: Orientation3d space defines -> Direction3d space
+upward :: Orientation3d space -> Direction3d space
 upward = Orientation3d.upwardDirection
 
-downward :: Orientation3d space defines -> Direction3d space
+downward :: Orientation3d space -> Direction3d space
 downward = Orientation3d.downwardDirection
 
-forward :: Orientation3d space defines -> Direction3d space
+forward :: Orientation3d space -> Direction3d space
 forward = Orientation3d.forwardDirection
 
-backward :: Orientation3d space defines -> Direction3d space
+backward :: Orientation3d space -> Direction3d space
 backward = Orientation3d.backwardDirection
 
-rightward :: Orientation3d space defines -> Direction3d space
+rightward :: Orientation3d space -> Direction3d space
 rightward = Orientation3d.rightwardDirection
 
-leftward :: Orientation3d space defines -> Direction3d space
+leftward :: Orientation3d space -> Direction3d space
 leftward = Orientation3d.leftwardDirection
 
-on :: PlaneOrientation3d space (Defines local) -> Direction2d local -> Direction3d space
-on (PlaneOrientation3d i j) (Direction2d x y) = Unit3d (x * i + y * j)
+on :: Plane3d (space @ planeUnits) (Defines local) -> Direction2d local -> Direction3d space
+on (Plane3d _ (PlaneOrientation3d i j)) (Direction2d x y) = Unit3d (x * i + y * j)
 
-polar :: PlaneOrientation3d space defines -> Angle -> Direction3d space
-polar (PlaneOrientation3d i j) angle = Unit3d (Angle.cos angle * i + Angle.sin angle * j)
+polar :: Plane3d (space @ planeUnits) defines -> Angle -> Direction3d space
+polar (Plane3d _ (PlaneOrientation3d i j)) angle = Unit3d (Angle.cos angle * i + Angle.sin angle * j)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
 perpendicularDirection :: Direction3d space -> Direction3d space
@@ -136,12 +137,15 @@ angleFrom :: Direction3d space -> Direction3d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
 -- | Convert a direction defined in local coordinates to one defined in global coordinates.
-placeIn :: Orientation3d global (Defines local) -> Direction3d local -> Direction3d global
-placeIn orientation = lift (Vector3d.placeIn orientation)
+placeIn :: Frame3d (global @ frameUnits) (Defines local) -> Direction3d local -> Direction3d global
+placeIn frame = lift (Vector3d.placeIn frame)
 
 -- | Convert a direction defined in global coordinates to one defined in local coordinates.
-relativeTo :: Orientation3d global (Defines local) -> Direction3d global -> Direction3d local
-relativeTo orientation = lift (Vector3d.relativeTo orientation)
+relativeTo ::
+  Frame3d (global @ frameUnits) (Defines local) ->
+  Direction3d global ->
+  Direction3d local
+relativeTo frame = lift (Vector3d.relativeTo frame)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

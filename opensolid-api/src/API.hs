@@ -141,7 +141,6 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.World3d qualified as World3d
 import Prelude (flip)
 
 classes :: List Class
@@ -181,7 +180,6 @@ classes =
   , plane3d
   , orientation3d
   , frame3d
-  , world3d
   , vectorCurve2d
   , displacementCurve2d
   , curve2d
@@ -890,26 +888,6 @@ convention3d =
     , constant "Z Up" Convention3d.zUp $(docs 'Convention3d.zUp)
     ]
 
-world3d :: Class
-world3d =
-  Class.static "World3d" "Helpers for working with global directions, axes etc." $
-    [ constant "Origin Point" (World3d.originPoint @Space @Meters) $(docs 'World3d.originPoint)
-    , constant "Orientation" (World3d.orientation @Space) $(docs 'World3d.orientation)
-    , constant "Frame" (World3d.frame @Space @Meters) $(docs 'World3d.frame)
-    , constant "Rightward Direction" (World3d.rightwardDirection @Space) $(docs 'World3d.rightwardDirection)
-    , constant "Leftward Direction" (World3d.leftwardDirection @Space) $(docs 'World3d.leftwardDirection)
-    , constant "Forward Direction" (World3d.forwardDirection @Space) $(docs 'World3d.forwardDirection)
-    , constant "Backward Direction" (World3d.backwardDirection @Space) $(docs 'World3d.backwardDirection)
-    , constant "Upward Direction" (World3d.upwardDirection @Space) $(docs 'World3d.upwardDirection)
-    , constant "Downward Direction" (World3d.downwardDirection @Space) $(docs 'World3d.downwardDirection)
-    , constant "Front Plane" (World3d.frontPlane @Space @Meters @(Defines Space)) $(docs 'World3d.frontPlane)
-    , constant "Back Plane" (World3d.backPlane @Space @Meters @(Defines Space)) $(docs 'World3d.backPlane)
-    , constant "Left Plane" (World3d.leftPlane @Space @Meters @(Defines Space)) $(docs 'World3d.leftPlane)
-    , constant "Right Plane" (World3d.rightPlane @Space @Meters @(Defines Space)) $(docs 'World3d.rightPlane)
-    , constant "Top Plane" (World3d.topPlane @Space @Meters @(Defines Space)) $(docs 'World3d.topPlane)
-    , constant "Bottom Plane" (World3d.bottomPlane @Space @Meters @(Defines Space)) $(docs 'World3d.bottomPlane)
-    ]
-
 vector3d :: Class
 vector3d =
   Class.new @(Vector3d (Space @ Unitless)) "A unitless vector in 3D." $
@@ -925,8 +903,8 @@ vector3d =
     , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
     , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
     , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
-    , member1 "Place In" "Orientation" Vector3d.placeIn $(docs 'Vector3d.placeIn)
-    , member1 "Relative To" "Orientation" Vector3d.relativeTo $(docs 'Vector3d.relativeTo)
+    , member1 "Place In" "Frame" (Vector3d.placeIn @Space @Meters) $(docs 'Vector3d.placeIn)
+    , member1 "Relative To" "Frame" (Vector3d.relativeTo @Space @Meters) $(docs 'Vector3d.relativeTo)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -957,8 +935,8 @@ displacement3d =
     , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
     , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
     , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
-    , member1 "Place In" "Orientation" Vector3d.placeIn $(docs 'Vector3d.placeIn)
-    , member1 "Relative To" "Orientation" Vector3d.relativeTo $(docs 'Vector3d.relativeTo)
+    , member1 "Place In" "Frame" (Vector3d.placeIn @Space @Meters) $(docs 'Vector3d.placeIn)
+    , member1 "Relative To" "Frame" (Vector3d.relativeTo @Space @Meters) $(docs 'Vector3d.relativeTo)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -987,8 +965,8 @@ areaVector3d =
     , member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross @Space @Meters) $(docs 'Vector3d.mirrorAcross)
     , member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
     , member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong @Space @Meters) $(docs 'Vector3d.scaleAlong)
-    , member1 "Place In" "Orientation" Vector3d.placeIn $(docs 'Vector3d.placeIn)
-    , member1 "Relative To" "Orientation" Vector3d.relativeTo $(docs 'Vector3d.relativeTo)
+    , member1 "Place In" "Frame" (Vector3d.placeIn @Space @Meters) $(docs 'Vector3d.placeIn)
+    , member1 "Relative To" "Frame" (Vector3d.relativeTo @Space @Meters) $(docs 'Vector3d.relativeTo)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -1011,8 +989,8 @@ direction3d =
     , member2 "Rotate Around" "Axis" "Angle" (Direction3d.rotateAround @Space @Meters) $(docs 'Direction3d.rotateAround)
     , member1 "Mirror In" "Direction" Direction3d.mirrorIn $(docs 'Direction3d.mirrorIn)
     , member1 "Mirror Across" "Plane" (Direction3d.mirrorAcross @Space @Meters) $(docs 'Direction3d.mirrorAcross)
-    , member1 "Place In" "Orientation" Direction3d.placeIn $(docs 'Direction3d.placeIn)
-    , member1 "Relative To" "Orientation" Direction3d.relativeTo $(docs 'Direction3d.relativeTo)
+    , member1 "Place In" "Frame" (Direction3d.placeIn @Space @Meters) $(docs 'Direction3d.placeIn)
+    , member1 "Relative To" "Frame" (Direction3d.relativeTo @Space @Meters) $(docs 'Direction3d.relativeTo)
     , negateSelf
     ]
 
@@ -1064,15 +1042,15 @@ axis3d =
 
 planeOrientation3d :: Class
 planeOrientation3d =
-  Class.new @(PlaneOrientation3d Space (Defines Space)) $(docs ''PlaneOrientation3d) $
+  Class.new @(PlaneOrientation3d Space) $(docs ''PlaneOrientation3d) $
     [ factory1 "From Normal Direction" "Direction" PlaneOrientation3d.fromNormalDirection $(docs 'PlaneOrientation3d.fromNormalDirection)
     , factory1 "From X Direction" "Direction" PlaneOrientation3d.fromXDirection $(docs 'PlaneOrientation3d.fromXDirection)
     , factory1 "From Y Direction" "Direction" PlaneOrientation3d.fromYDirection $(docs 'PlaneOrientation3d.fromYDirection)
     , member0 "X Direction" PlaneOrientation3d.xDirection $(docs 'PlaneOrientation3d.xDirection)
     , member0 "Y Direction" PlaneOrientation3d.yDirection $(docs 'PlaneOrientation3d.yDirection)
     , member0 "Normal Direction" PlaneOrientation3d.normalDirection $(docs 'PlaneOrientation3d.normalDirection)
-    , member1 "Place In" "Orientation" PlaneOrientation3d.placeIn $(docs 'PlaneOrientation3d.placeIn)
-    , member1 "Relative To" "Orientation" PlaneOrientation3d.relativeTo $(docs 'PlaneOrientation3d.relativeTo)
+    , member1 "Place In" "Frame" (PlaneOrientation3d.placeIn @Space @Meters) $(docs 'PlaneOrientation3d.placeIn)
+    , member1 "Relative To" "Frame" (PlaneOrientation3d.relativeTo @Space @Meters) $(docs 'PlaneOrientation3d.relativeTo)
     ]
 
 plane3d :: Class
@@ -1098,7 +1076,7 @@ plane3d =
 
 orientation3d :: Class
 orientation3d =
-  Class.new @(Orientation3d Space (Defines Space)) $(docs ''Orientation3d) $
+  Class.new @(Orientation3d Space) $(docs ''Orientation3d) $
     [ constant "World" (Orientation3d.world @Space) $(docs 'Orientation3d.world)
     , member0 "Forward Direction" Orientation3d.forwardDirection $(docs 'Orientation3d.forwardDirection)
     , member0 "Backward Direction" Orientation3d.backwardDirection $(docs 'Orientation3d.backwardDirection)
@@ -1112,20 +1090,25 @@ orientation3d =
     , member0 "Left Plane Orientation" Orientation3d.leftPlaneOrientation $(docs 'Orientation3d.leftPlaneOrientation)
     , member0 "Bottom Plane Orientation" Orientation3d.bottomPlaneOrientation $(docs 'Orientation3d.bottomPlaneOrientation)
     , member0 "Top Plane Orientation" Orientation3d.topPlaneOrientation $(docs 'Orientation3d.topPlaneOrientation)
-    , member0 "Forward Orientation" Orientation3d.forwardOrientation $(docs 'Orientation3d.forwardOrientation)
     , member0 "Backward Orientation" Orientation3d.backwardOrientation $(docs 'Orientation3d.backwardOrientation)
     , member0 "Rightward Orientation" Orientation3d.rightwardOrientation $(docs 'Orientation3d.rightwardOrientation)
     , member0 "Leftward Orientation" Orientation3d.leftwardOrientation $(docs 'Orientation3d.leftwardOrientation)
     , member0 "Upward Orientation" Orientation3d.upwardOrientation $(docs 'Orientation3d.upwardOrientation)
     , member0 "Downward Orientation" Orientation3d.downwardOrientation $(docs 'Orientation3d.downwardOrientation)
-    , member1 "Place In" "Other Orientation" Orientation3d.placeIn $(docs 'Orientation3d.placeIn)
-    , member1 "Relative To" "Other Orientation" Orientation3d.relativeTo $(docs 'Orientation3d.relativeTo)
+    , member1 "Place In" "Frame" (Orientation3d.placeIn @Space @Meters) $(docs 'Orientation3d.placeIn)
+    , member1 "Relative To" "Frame" (Orientation3d.relativeTo @Space @Meters) $(docs 'Orientation3d.relativeTo)
     ]
 
 frame3d :: Class
 frame3d =
   Class.new @(Frame3d (Space @ Meters) (Defines Space)) $(docs ''Frame3d) $
     [ constant "World" (Frame3d.world @Space @Meters) $(docs 'Frame3d.world)
+    , factory1 "Forward" "Reference Frame" Frame3d.forward $(docs 'Frame3d.forward)
+    , factory1 "Backward" "Reference Frame" Frame3d.backward $(docs 'Frame3d.backward)
+    , factory1 "Rightward" "Reference Frame" Frame3d.rightward $(docs 'Frame3d.rightward)
+    , factory1 "Leftward" "Reference Frame" Frame3d.leftward $(docs 'Frame3d.leftward)
+    , factory1 "Upward" "Reference Frame" Frame3d.upward $(docs 'Frame3d.upward)
+    , factory1 "Downward" "Reference Frame" Frame3d.downward $(docs 'Frame3d.downward)
     , factory1 "From Front Plane" "Plane" Frame3d.fromFrontPlane $(docs 'Frame3d.fromFrontPlane)
     , factory1 "From Back Plane" "Plane" Frame3d.fromBackPlane $(docs 'Frame3d.fromBackPlane)
     , factory1 "From Right Plane" "Plane" Frame3d.fromRightPlane $(docs 'Frame3d.fromRightPlane)
@@ -1153,12 +1136,6 @@ frame3d =
     , member0 "Left Plane" Frame3d.leftPlane $(docs 'Frame3d.leftPlane)
     , member0 "Top Plane" Frame3d.topPlane $(docs 'Frame3d.topPlane)
     , member0 "Bottom Plane" Frame3d.bottomPlane $(docs 'Frame3d.bottomPlane)
-    , member0 "Forward Frame" Frame3d.forwardFrame $(docs 'Frame3d.forwardFrame)
-    , member0 "Backward Frame" Frame3d.backwardFrame $(docs 'Frame3d.backwardFrame)
-    , member0 "Rightward Frame" Frame3d.rightwardFrame $(docs 'Frame3d.rightwardFrame)
-    , member0 "Leftward Frame" Frame3d.leftwardFrame $(docs 'Frame3d.leftwardFrame)
-    , member0 "Upward Frame" Frame3d.upwardFrame $(docs 'Frame3d.upwardFrame)
-    , member0 "Downward Frame" Frame3d.downwardFrame $(docs 'Frame3d.downwardFrame)
     , member1 "Place In" "Other Frame" Frame3d.placeIn $(docs 'Frame3d.placeIn)
     , member1 "Relative To" "Other Frame" Frame3d.relativeTo $(docs 'Frame3d.relativeTo)
     , member0 "Inverse" Frame3d.inverse $(docs 'Frame3d.inverse)

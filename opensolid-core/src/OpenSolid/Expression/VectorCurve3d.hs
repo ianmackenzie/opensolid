@@ -13,8 +13,8 @@ where
 
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Orientation3d (Orientation3d)
-import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
@@ -46,19 +46,19 @@ magnitude :: Expression Float (Vector3d (space @ units)) -> Expression Float (Qt
 magnitude = Expression.magnitude
 
 placeIn ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   Expression Float (Vector3d (local @ units)) ->
   Expression Float (Vector3d (global @ units))
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   Expression Float (Vector3d (global @ units)) ->
   Expression Float (Vector3d (local @ units))
 relativeTo = Expression.relativeTo
 
 projectInto ::
-  PlaneOrientation3d global (Defines local) ->
+  Plane3d (global @ planeUnits) (Defines local) ->
   Expression Float (Vector3d (global @ units)) ->
   Expression Float (Vector2d (local @ units))
 projectInto = Expression.projectInto

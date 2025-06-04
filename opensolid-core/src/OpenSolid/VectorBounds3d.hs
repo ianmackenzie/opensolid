@@ -36,13 +36,12 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
-import OpenSolid.Orientation3d (Orientation3d)
-import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d)
+  , Frame3d
   , Vector3d (Vector3d)
   , VectorBounds3d (VectorBounds3d)
   )
@@ -193,20 +192,20 @@ interpolate (VectorBounds3d x y z) u v w =
   Vector3d (Bounds.interpolate x u) (Bounds.interpolate y v) (Bounds.interpolate z w)
 
 placeIn ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   VectorBounds3d (local @ units) ->
   VectorBounds3d (global @ units)
-placeIn orientation (VectorBounds3d vR vF vU) = do
+placeIn frame (VectorBounds3d vR vF vU) = do
   let cR = Bounds.midpoint vR
   let cF = Bounds.midpoint vF
   let cU = Bounds.midpoint vU
   let rR = 0.5 * Bounds.width vR
   let rF = 0.5 * Bounds.width vF
   let rU = 0.5 * Bounds.width vU
-  let Vector3d cR' cF' cU' = Vector3d.placeIn orientation (Vector3d cR cF cU)
-  let Direction3d iR iF iU = Orientation3d.rightwardDirection orientation
-  let Direction3d jR jF jU = Orientation3d.forwardDirection orientation
-  let Direction3d kR kF kU = Orientation3d.upwardDirection orientation
+  let Vector3d cR' cF' cU' = Vector3d.placeIn frame (Vector3d cR cF cU)
+  let Direction3d iR iF iU = frame.rightwardDirection
+  let Direction3d jR jF jU = frame.forwardDirection
+  let Direction3d kR kF kU = frame.upwardDirection
   let rR' = rR * Float.abs iR + rF * Float.abs jR + rU * Float.abs kR
   let rF' = rR * Float.abs iF + rF * Float.abs jF + rU * Float.abs kF
   let rU' = rR * Float.abs iU + rF * Float.abs jU + rU * Float.abs kU
@@ -216,20 +215,20 @@ placeIn orientation (VectorBounds3d vR vF vU) = do
     @ Bounds (cU' - rU') (cU' + rU')
 
 relativeTo ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   VectorBounds3d (global @ units) ->
   VectorBounds3d (local @ units)
-relativeTo orientation (VectorBounds3d vR vF vU) = do
+relativeTo frame (VectorBounds3d vR vF vU) = do
   let cR = Bounds.midpoint vR
   let cF = Bounds.midpoint vF
   let cU = Bounds.midpoint vU
   let rR = 0.5 * Bounds.width vR
   let rF = 0.5 * Bounds.width vF
   let rU = 0.5 * Bounds.width vU
-  let Vector3d cR' cF' cU' = Vector3d.relativeTo orientation (Vector3d cR cF cU)
-  let Direction3d iR iF iU = Orientation3d.rightwardDirection orientation
-  let Direction3d jR jF jU = Orientation3d.forwardDirection orientation
-  let Direction3d kR kF kU = Orientation3d.upwardDirection orientation
+  let Vector3d cR' cF' cU' = Vector3d.relativeTo frame (Vector3d cR cF cU)
+  let Direction3d iR iF iU = frame.rightwardDirection
+  let Direction3d jR jF jU = frame.forwardDirection
+  let Direction3d kR kF kU = frame.upwardDirection
   let rR' = rR * Float.abs iR + rF * Float.abs iF + rU * Float.abs iU
   let rF' = rR * Float.abs jR + rF * Float.abs jF + rU * Float.abs jU
   let rU' = rR * Float.abs kR + rF * Float.abs kF + rU * Float.abs kU

@@ -36,13 +36,13 @@ import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vertex3d qualified as Vertex3d
 
-xDirection :: Orientation3d space defines -> Direction3d space
+xDirection :: Orientation3d space -> Direction3d space
 xDirection = Orientation3d.leftwardDirection
 
-yDirection :: Orientation3d space defines -> Direction3d space
+yDirection :: Orientation3d space -> Direction3d space
 yDirection = Orientation3d.upwardDirection
 
-zDirection :: Orientation3d space defines -> Direction3d space
+zDirection :: Orientation3d space -> Direction3d space
 zDirection = Orientation3d.forwardDirection
 
 convention :: Convention3d

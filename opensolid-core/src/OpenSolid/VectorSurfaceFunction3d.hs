@@ -21,8 +21,8 @@ import OpenSolid.Composition
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
-import OpenSolid.Orientation3d (Orientation3d)
-import OpenSolid.Orientation3d qualified as Orientation3d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -475,23 +475,23 @@ derivative U (VectorSurfaceFunction3d _ du _) = du
 derivative V (VectorSurfaceFunction3d _ _ dv) = dv
 
 placeIn ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   VectorSurfaceFunction3d (local @ units) ->
   VectorSurfaceFunction3d (global @ units)
-placeIn orientation function =
+placeIn frame function =
   new
     @ CompiledFunction.map
-      (Expression.VectorSurface3d.placeIn orientation)
-      (Vector3d.placeIn orientation)
-      (VectorBounds3d.placeIn orientation)
+      (Expression.VectorSurface3d.placeIn frame)
+      (Vector3d.placeIn frame)
+      (VectorBounds3d.placeIn frame)
       function.compiled
-    @ \p -> placeIn orientation (derivative p function)
+    @ \p -> placeIn frame (derivative p function)
 
 relativeTo ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   VectorSurfaceFunction3d (global @ units) ->
   VectorSurfaceFunction3d (local @ units)
-relativeTo orientation function = placeIn (Orientation3d.inverse orientation) function
+relativeTo frame function = placeIn (Frame3d.inverse frame) function
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

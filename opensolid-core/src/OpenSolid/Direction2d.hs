@@ -36,8 +36,8 @@ import OpenSolid.Primitives
   ( Axis2d
   , Direction2d (Unit2d)
   , Direction3d (Unit3d)
-  , Orientation2d
-  , PlaneOrientation3d
+  , Frame2d
+  , Plane3d
   , Point2d
   , Transform2d
   , Vector2d (Vector2d)
@@ -161,17 +161,20 @@ rotateLeftward = lift Vector2d.rotateLeftward
 rotateRightward :: Direction2d space -> Direction2d space
 rotateRightward = lift Vector2d.rotateRightward
 
-placeIn :: Orientation2d global (Defines local) -> Direction2d local -> Direction2d global
-placeIn orientation = lift (Vector2d.placeIn orientation)
-
-relativeTo :: Orientation2d global (Defines local) -> Direction2d global -> Direction2d local
-relativeTo orientation = lift (Vector2d.relativeTo orientation)
-
-on ::
-  PlaneOrientation3d space (Defines local) ->
+placeIn ::
+  Frame2d (global @ frameUnits) (Defines local) ->
   Direction2d local ->
-  Direction3d space
-on planeOrientation (Unit2d vector) = Unit3d (Vector2d.on planeOrientation vector)
+  Direction2d global
+placeIn frame = lift (Vector2d.placeIn frame)
+
+relativeTo ::
+  Frame2d (global @ frameUnits) (Defines local) ->
+  Direction2d global ->
+  Direction2d local
+relativeTo frame = lift (Vector2d.relativeTo frame)
+
+on :: Plane3d (space @ planeUnits) (Defines local) -> Direction2d local -> Direction3d space
+on plane (Unit2d vector) = Unit3d (Vector2d.on plane vector)
 
 random :: Random.Generator (Direction2d space)
 random = Random.map polar (Qty.random -Angle.pi Angle.pi)

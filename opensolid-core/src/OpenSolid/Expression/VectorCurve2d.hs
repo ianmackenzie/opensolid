@@ -13,8 +13,8 @@ where
 
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Orientation2d (Orientation2d)
-import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
@@ -45,13 +45,13 @@ magnitude :: Expression Float (Vector2d (space @ units)) -> Expression Float (Qt
 magnitude = Expression.magnitude
 
 placeIn ::
-  Orientation2d global (Defines local) ->
+  Frame2d (global @ frameUnits) (Defines local) ->
   Expression Float (Vector2d (local @ units)) ->
   Expression Float (Vector2d (global @ units))
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Orientation2d global (Defines local) ->
+  Frame2d (global @ frameUnits) (Defines local) ->
   Expression Float (Vector2d (global @ units)) ->
   Expression Float (Vector2d (local @ units))
 relativeTo = Expression.relativeTo
@@ -63,7 +63,7 @@ transformBy ::
 transformBy = Expression.transformBy
 
 on ::
-  PlaneOrientation3d space (Defines local) ->
+  Plane3d (space @ planeUnits) (Defines local) ->
   Expression Float (Vector2d (local @ units)) ->
   Expression Float (Vector3d (space @ units))
 on = Expression.on

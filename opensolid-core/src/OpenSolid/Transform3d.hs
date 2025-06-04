@@ -36,7 +36,7 @@ import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d)
-  , Frame3d (Frame3d)
+  , Frame3d
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   , Point3d (Point3d)
@@ -147,11 +147,10 @@ placeIn ::
   Transform3d tag (local @ units) ->
   Transform3d tag (global @ units)
 placeIn frame transform = do
-  let Frame3d _ orientation = frame
   let p0 = Point3d.origin |> Point3d.relativeTo frame |> Point3d.transformBy transform |> Point3d.placeIn frame
-  let vx = unitX |> Vector3d.relativeTo orientation |> Vector3d.transformBy transform |> Vector3d.placeIn orientation
-  let vy = unitY |> Vector3d.relativeTo orientation |> Vector3d.transformBy transform |> Vector3d.placeIn orientation
-  let vz = unitZ |> Vector3d.relativeTo orientation |> Vector3d.transformBy transform |> Vector3d.placeIn orientation
+  let vx = unitX |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
+  let vy = unitY |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
+  let vz = unitZ |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
   Transform3d p0 vx vy vz
 
 relativeTo ::
@@ -159,11 +158,10 @@ relativeTo ::
   Transform3d tag (global @ units) ->
   Transform3d tag (local @ units)
 relativeTo frame transform = do
-  let Frame3d _ orientation = frame
   let p0 = Point3d.origin |> Point3d.placeIn frame |> Point3d.transformBy transform |> Point3d.relativeTo frame
-  let vx = unitX |> Vector3d.placeIn orientation |> Vector3d.transformBy transform |> Vector3d.relativeTo orientation
-  let vy = unitY |> Vector3d.placeIn orientation |> Vector3d.transformBy transform |> Vector3d.relativeTo orientation
-  let vz = unitZ |> Vector3d.placeIn orientation |> Vector3d.transformBy transform |> Vector3d.relativeTo orientation
+  let vx = unitX |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
+  let vy = unitY |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
+  let vz = unitZ |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
   Transform3d p0 vx vy vz
 
 toOrthonormal :: Transform.IsOrthonormal tag => Transform3d tag (space @ units) -> Orthonormal (space @ units)

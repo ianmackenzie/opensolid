@@ -27,7 +27,7 @@ import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis2d (Axis2d), Axis3d (Axis3d), Plane3d (Plane3d), Transform2d)
+import OpenSolid.Primitives (Axis2d (Axis2d), Axis3d (Axis3d), Plane3d, Transform2d)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Vector2d (Vector2d)
@@ -63,13 +63,8 @@ moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
 reverse :: Axis2d (space @ units) -> Axis2d (space @ units)
 reverse (Axis2d p0 d) = Axis2d p0 -d
 
-on ::
-  Plane3d (space @ units) (Defines local) ->
-  Axis2d (local @ units) ->
-  Axis3d (space @ units)
-on plane (Axis2d p0 d) = do
-  let Plane3d _ orientation = plane
-  Axis3d (Point2d.on plane p0) (Direction2d.on orientation d)
+on :: Plane3d (space @ units) (Defines local) -> Axis2d (local @ units) -> Axis3d (space @ units)
+on plane (Axis2d p0 d) = Axis3d (Point2d.on plane p0) (Direction2d.on plane d)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

@@ -53,7 +53,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
@@ -198,7 +197,7 @@ on plane curve2d = do
       (Point2d.on plane)
       (Bounds2d.on plane)
       curve2d.compiled
-    @ VectorCurve3d.on (Plane3d.orientation plane) curve2d.derivative
+    @ VectorCurve3d.on plane curve2d.derivative
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve.t * (p2 - p1)
@@ -328,7 +327,7 @@ placeIn frame curve =
       (Point3d.placeIn frame)
       (Bounds3d.placeIn frame)
       curve.compiled
-    @ VectorCurve3d.placeIn (Frame3d.orientation frame) curve.derivative
+    @ VectorCurve3d.placeIn frame curve.derivative
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->

@@ -38,7 +38,7 @@ import OpenSolid.Primitives
 originPoint :: Frame2d (space @ units) defines -> Point2d (space @ units)
 originPoint (Frame2d p0 _) = p0
 
-orientation :: Frame2d (space @ units) defines -> Orientation2d space defines
+orientation :: Frame2d (space @ units) defines -> Orientation2d space
 orientation (Frame2d _ o) = o
 
 coerce :: Frame2d (space1 @ units1) defines1 -> Frame2d (space2 @ units2) defines2
@@ -78,7 +78,7 @@ placeIn ::
 placeIn globalFrame frame =
   Frame2d
     (Point2d.placeIn globalFrame (originPoint frame))
-    (Orientation2d.placeIn (orientation globalFrame) (orientation frame))
+    (Orientation2d.placeIn globalFrame (orientation frame))
 
 relativeTo ::
   Frame2d (global @ units) (Defines space) ->
@@ -87,16 +87,15 @@ relativeTo ::
 relativeTo globalFrame frame =
   Frame2d
     (Point2d.relativeTo globalFrame (originPoint frame))
-    (Orientation2d.relativeTo (orientation globalFrame) (orientation frame))
+    (Orientation2d.relativeTo globalFrame (orientation frame))
 
 on ::
   Plane3d (space @ units) (Defines local) ->
   Frame2d (local @ units) defines ->
   Plane3d (space @ units) defines
-on plane (Frame2d p0 (Orientation2d i j)) = do
-  let Plane3d _ planeOrientation = plane
+on plane (Frame2d p0 (Orientation2d i j)) =
   Plane3d (Point2d.on plane p0) $
-    PlaneOrientation3d (Direction2d.on planeOrientation i) (Direction2d.on planeOrientation j)
+    PlaneOrientation3d (Direction2d.on plane i) (Direction2d.on plane j)
 
 inverse :: Frame2d (global @ units) (Defines local) -> Frame2d (local @ units) (Defines global)
 inverse frame = xy |> relativeTo frame

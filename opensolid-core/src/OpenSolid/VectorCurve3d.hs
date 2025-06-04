@@ -48,11 +48,11 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Orientation3d (Orientation3d)
-import OpenSolid.Orientation3d qualified as Orientation3d
-import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -445,15 +445,18 @@ zero = constant Vector3d.zero
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 constant value = new (CompiledFunction.constant value) zero
 
-on :: PlaneOrientation3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
-on orientation vectorCurve2d = do
+on ::
+  Plane3d (space @ planeUnits) (Defines local) ->
+  VectorCurve2d (local @ units) ->
+  VectorCurve3d (space @ units)
+on plane vectorCurve2d = do
   let compiledPlanar =
         CompiledFunction.map
-          (Expression.VectorCurve2d.on orientation)
-          (Vector2d.on orientation)
-          (VectorBounds2d.on orientation)
+          (Expression.VectorCurve2d.on plane)
+          (Vector2d.on plane)
+          (VectorBounds2d.on plane)
           vectorCurve2d.compiled
-  new compiledPlanar (on orientation vectorCurve2d.derivative)
+  new compiledPlanar (on plane vectorCurve2d.derivative)
 
 rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units)
 rightwardForwardUpward r f u =
@@ -595,20 +598,20 @@ isRemovableDegeneracy curveDerivative tValue =
   (tValue == 0.0 || tValue == 1.0) && evaluate curveDerivative tValue != Vector3d.zero
 
 placeIn ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   VectorCurve3d (local @ units) ->
   VectorCurve3d (global @ units)
-placeIn orientation curve = do
+placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.VectorCurve3d.placeIn orientation)
-          (Vector3d.placeIn orientation)
-          (VectorBounds3d.placeIn orientation)
+          (Expression.VectorCurve3d.placeIn frame)
+          (Vector3d.placeIn frame)
+          (VectorBounds3d.placeIn frame)
           curve.compiled
-  new compiledPlaced (placeIn orientation curve.derivative)
+  new compiledPlaced (placeIn frame curve.derivative)
 
 relativeTo ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   VectorCurve3d (global @ units) ->
   VectorCurve3d (local @ units)
-relativeTo orientation = placeIn (Orientation3d.inverse orientation)
+relativeTo frame = placeIn (Frame3d.inverse frame)

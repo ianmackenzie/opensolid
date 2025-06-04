@@ -49,8 +49,9 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d, Unit3d)
+  , Frame3d (Frame3d)
   , Orientation3d (Orientation3d)
-  , Plane3d
+  , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   , Vector2d (Vector2d)
   , Vector3d (Vector3d)
@@ -171,23 +172,24 @@ normalize vector = do
 
 -- | Convert a vectr defined in local coordinates to one defined in global coordinates.
 placeIn ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   Vector3d (local @ units) ->
   Vector3d (global @ units)
-placeIn (Orientation3d i j k) (Vector3d vx vy vz) = vx * i + vy * j + vz * k
+placeIn (Frame3d _ (Orientation3d i j k)) (Vector3d vx vy vz) = vx * i + vy * j + vz * k
 
 -- | Convert a vector defined in global coordinates to one defined in local coordinates.
 relativeTo ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   Vector3d (global @ units) ->
   Vector3d (local @ units)
-relativeTo (Orientation3d i j k) vector = Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
+relativeTo (Frame3d _ (Orientation3d i j k)) vector =
+  Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
 
 projectInto ::
-  PlaneOrientation3d global (Defines local) ->
+  Plane3d (global @ planeUnits) (Defines local) ->
   Vector3d (global @ units) ->
   Vector2d (local @ units)
-projectInto (PlaneOrientation3d i j) v = Vector2d (v `dot` i) (v `dot` j)
+projectInto (Plane3d _ (PlaneOrientation3d i j)) v = Vector2d (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
 sum = List.foldl (+) zero

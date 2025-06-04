@@ -3,12 +3,12 @@ module OpenSolid.Frame3d
   , coerce
   , erase
   , world
-  , forwardFrame
-  , backwardFrame
-  , leftwardFrame
-  , rightwardFrame
-  , upwardFrame
-  , downwardFrame
+  , forward
+  , backward
+  , leftward
+  , rightward
+  , upward
+  , downward
   , originPoint
   , orientation
   , rightwardDirection
@@ -89,7 +89,7 @@ originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)
 originPoint = (.originPoint)
 
 -- | Get the orientation of a frame.
-orientation :: Frame3d (space @ units) defines -> Orientation3d space defines
+orientation :: Frame3d (space @ units) defines -> Orientation3d space
 orientation = (.orientation)
 
 coerce :: Frame3d (space1 @ units1) defines1 -> Frame3d (space2 @ units2) defines2
@@ -244,11 +244,11 @@ fromBottomPlane (Plane3d p o) = Frame3d p (Orientation3d.fromBottomPlaneOrientat
 
 {-| Construct a forward-facing frame relative to a parent/reference frame.
 
-This is actually just the parent frame itself,
-but may be used to define a different local coordinate system.
+This is just an identical copy of the parent frame,
+but can be used to define a new/different local space.
 -}
-forwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-forwardFrame (Frame3d p o) = Frame3d p (Orientation3d.forwardOrientation o)
+forward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+forward frame = Frame3d frame.originPoint frame.orientation
 
 {-| Construct a backward-facing frame relative to a parent/reference frame.
 
@@ -257,8 +257,8 @@ the upward direction of the frame will point upward,
 and the rightward direction of the frame will point leftward
 (all relative to the parent frame).
 -}
-backwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-backwardFrame (Frame3d p o) = Frame3d p (Orientation3d.backwardOrientation o)
+backward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+backward frame = Frame3d frame.originPoint frame.backwardOrientation
 
 {-| Construct a leftward-facing frame relative to a parent/reference frame.
 
@@ -267,8 +267,8 @@ the upward direction of the frame will point upward,
 and the rightward direction of the frame will point forward
 (all relative to the parent frame).
 -}
-leftwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-leftwardFrame (Frame3d p o) = Frame3d p (Orientation3d.leftwardOrientation o)
+leftward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+leftward frame = Frame3d frame.originPoint frame.leftwardOrientation
 
 {-| Construct a rightward-facing frame relative to a parent/reference frame.
 
@@ -277,8 +277,8 @@ the upward direction of the frame will point upward,
 and the rightward direction of the frame will point backward
 (all relative to the parent frame).
 -}
-rightwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rightwardFrame (Frame3d p o) = Frame3d p (Orientation3d.rightwardOrientation o)
+rightward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+rightward frame = Frame3d frame.originPoint frame.rightwardOrientation
 
 {-| Construct an upward-facing frame relative to a parent/reference frame.
 
@@ -287,8 +287,8 @@ the upward direction of the frame will point forward,
 and the rightward direction of the frame will point leftward
 (all relative to the parent frame).
 -}
-upwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-upwardFrame (Frame3d p o) = Frame3d p (Orientation3d.upwardOrientation o)
+upward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+upward frame = Frame3d frame.originPoint frame.upwardOrientation
 
 {-| Construct a downward-facing frame relative to a parent/reference frame.
 
@@ -297,8 +297,8 @@ the upward direction of the frame will point upward,
 and the rightward direction of the frame will point rightward
 (all relative to the parent frame).
 -}
-downwardFrame :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-downwardFrame (Frame3d p o) = Frame3d p (Orientation3d.downwardOrientation o)
+downward :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+downward frame = Frame3d frame.originPoint frame.downwardOrientation
 
 -- | Move a frame in its own forward direction by the given distance.
 offsetForwardBy ::
@@ -440,7 +440,7 @@ placeIn ::
 placeIn globalFrame frame =
   Frame3d
     @ Point3d.placeIn globalFrame (originPoint frame)
-    @ Orientation3d.placeIn (orientation globalFrame) (orientation frame)
+    @ Orientation3d.placeIn globalFrame (orientation frame)
 
 -- | Convert a frame defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -450,7 +450,7 @@ relativeTo ::
 relativeTo globalFrame frame =
   Frame3d
     @ Point3d.relativeTo globalFrame (originPoint frame)
-    @ Orientation3d.relativeTo (orientation globalFrame) (orientation frame)
+    @ Orientation3d.relativeTo globalFrame (orientation frame)
 
 {-| Compute the "inverse" of a given frame.
 
@@ -530,4 +530,4 @@ mate ::
   Frame3d (local @ units) (Defines space) ->
   Frame3d (global @ units) (Defines space) ->
   Frame3d (global @ units) (Defines local)
-mate frame referenceFrame = align (backwardFrame frame) referenceFrame
+mate frame referenceFrame = align (backward frame) referenceFrame

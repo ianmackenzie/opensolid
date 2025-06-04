@@ -34,7 +34,7 @@ import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d (Frame3d), Plane3d (Plane3d))
+import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d, Plane3d (Plane3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 
@@ -71,7 +71,7 @@ This is the 3D point corresponding to (0,0) in the plane's local coordinates.
 originPoint :: Plane3d (space @ units) defines -> Point3d (space @ units)
 originPoint = (.originPoint)
 
-orientation :: Plane3d (space @ units) defines -> PlaneOrientation3d space defines
+orientation :: Plane3d (space @ units) defines -> PlaneOrientation3d space
 orientation = (.orientation)
 
 -- | Get the normal direction of a plane.
@@ -120,22 +120,16 @@ placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Plane3d (local @ units) defines ->
   Plane3d (global @ units) defines
-placeIn frame (Plane3d p o) = do
-  let Frame3d _ frameOrientation = frame
-  Plane3d
-    (Point3d.placeIn frame p)
-    (PlaneOrientation3d.placeIn frameOrientation o)
+placeIn frame (Plane3d p o) =
+  Plane3d (Point3d.placeIn frame p) (PlaneOrientation3d.placeIn frame o)
 
 -- | Convert a plane defined in global coordinates to one defined in local coordinates.
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Plane3d (global @ units) defines ->
   Plane3d (local @ units) defines
-relativeTo frame (Plane3d p o) = do
-  let Frame3d _ frameOrientation = frame
-  Plane3d
-    (Point3d.relativeTo frame p)
-    (PlaneOrientation3d.relativeTo frameOrientation o)
+relativeTo frame (Plane3d p o) =
+  Plane3d (Point3d.relativeTo frame p) (PlaneOrientation3d.relativeTo frame o)
 
 -- | Offset a plane in its normal direction by the given distance.
 offsetBy :: Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines

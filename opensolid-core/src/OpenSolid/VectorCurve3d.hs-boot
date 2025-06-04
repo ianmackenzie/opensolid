@@ -14,7 +14,7 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
-import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
@@ -94,7 +94,10 @@ instance
 
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
-on :: PlaneOrientation3d space (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve3d (space @ units)
+on ::
+  Plane3d (space @ planeUnits) (Defines local) ->
+  VectorCurve2d (local @ units) ->
+  VectorCurve3d (space @ units)
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
 evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
 unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units

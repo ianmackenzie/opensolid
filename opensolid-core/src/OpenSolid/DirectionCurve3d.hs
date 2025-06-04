@@ -20,8 +20,8 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.DirectionBounds3d (DirectionBounds3d)
 import OpenSolid.DirectionBounds3d qualified as DirectionBounds3d
-import OpenSolid.Orientation3d (Orientation3d)
-import OpenSolid.Orientation3d qualified as Orientation3d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
@@ -221,14 +221,14 @@ instance
   curve1d >> DirectionCurve3d curve = DirectionCurve3d (curve1d >> curve)
 
 placeIn ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   DirectionCurve3d local ->
   DirectionCurve3d global
-placeIn orientation (DirectionCurve3d curve) =
-  DirectionCurve3d (VectorCurve3d.placeIn orientation curve)
+placeIn frame (DirectionCurve3d curve) =
+  DirectionCurve3d (VectorCurve3d.placeIn frame curve)
 
 relativeTo ::
-  Orientation3d global (Defines local) ->
+  Frame3d (global @ frameUnits) (Defines local) ->
   DirectionCurve3d global ->
   DirectionCurve3d local
-relativeTo orientation = placeIn (Orientation3d.inverse orientation)
+relativeTo frame = placeIn (Frame3d.inverse frame)

@@ -22,8 +22,8 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
-import OpenSolid.Orientation2d (Orientation2d)
-import OpenSolid.Orientation2d qualified as Orientation2d
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
@@ -211,13 +211,13 @@ instance HasField "yComponent" (DirectionCurve2d space) (Curve Unitless) where
   getField (DirectionCurve2d curve) = curve.yComponent
 
 placeIn ::
-  Orientation2d global (Defines local) ->
+  Frame2d (global @ frameUnits) (Defines local) ->
   DirectionCurve2d local ->
   DirectionCurve2d global
-placeIn orientation (DirectionCurve2d curve) = DirectionCurve2d (VectorCurve2d.placeIn orientation curve)
+placeIn frame (DirectionCurve2d curve) = DirectionCurve2d (VectorCurve2d.placeIn frame curve)
 
 relativeTo ::
-  Orientation2d global (Defines local) ->
+  Frame2d (global @ frameUnits) (Defines local) ->
   DirectionCurve2d global ->
   DirectionCurve2d local
-relativeTo orientation = placeIn (Orientation2d.inverse orientation)
+relativeTo frame = placeIn (Frame2d.inverse frame)

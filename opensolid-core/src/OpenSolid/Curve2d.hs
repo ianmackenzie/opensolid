@@ -851,7 +851,7 @@ placeIn frame curve =
       (Point2d.placeIn frame)
       (Bounds2d.placeIn frame)
       curve.compiled
-    @ VectorCurve2d.placeIn (Frame2d.orientation frame) curve.derivative
+    @ VectorCurve2d.placeIn frame curve.derivative
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
