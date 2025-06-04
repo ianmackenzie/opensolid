@@ -120,7 +120,7 @@ abort message = Prelude.error (Data.Text.unpack message)
 
 {-# INLINE (|>) #-}
 (|>) :: a -> (a -> b) -> b
-(|>) value function = function value
+value |> function = function value
 
 infixl 0 |>
 
