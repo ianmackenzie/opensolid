@@ -34,7 +34,7 @@ with Tolerance(1e-9):
 theta = Angle.two_pi * Curve.t
 c = theta.cos()
 with Tolerance(1e-9):
-    roots = [zero.location() for zero in c.zeros()]
+    roots = [zero.location for zero in c.zeros()]
     print(roots)
 
 color1 = Color.from_hex("#555555")
@@ -49,5 +49,5 @@ vertices = [
     Point2d.centimeters(25, 5),
     Point2d.centimeters(25, 15),
 ]
-triangle = Drawing2d.polygon([], vertices)
-print(Drawing2d.to_svg(bounds, [triangle]))
+triangle = Drawing2d.polygon(vertices)
+print(Drawing2d.to_svg(bounds, triangle))
