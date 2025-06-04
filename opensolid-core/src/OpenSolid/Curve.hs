@@ -1,11 +1,10 @@
 module OpenSolid.Curve
   ( Curve
+  , Compiled
   , Zero
   , isEndpoint
   , evaluate
   , evaluateBounds
-  , compiled
-  , derivative
   , new
   , recursive
   , zero
@@ -74,13 +73,15 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 data Curve units where
-  Curve ::
-    { compiled :: Compiled units
-    , derivative :: ~(Curve units)
-    } ->
-    Curve units
+  Curve :: Compiled units -> ~(Curve units) -> Curve units
 
 type Compiled units = CompiledFunction Float (Qty units) (Bounds Unitless) (Bounds units)
+
+instance HasField "compiled" (Curve units) (Compiled units) where
+  getField (Curve c _) = c
+
+instance HasField "derivative" (Curve units) (Curve units) where
+  getField (Curve _ d) = d
 
 instance FFI (Curve Unitless) where
   representation = FFI.classRepresentation "Curve"
@@ -97,11 +98,7 @@ instance FFI (Curve Radians) where
 instance HasUnits (Curve units) units (Curve Unitless)
 
 instance Units.Coercion (Curve units1) (Curve units2) where
-  coerce Curve{compiled, derivative} =
-    Curve
-      { compiled = Units.coerce compiled
-      , derivative = Units.coerce derivative
-      }
+  coerce curve = Curve (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
 instance
   units1 ~ units2 =>
@@ -141,9 +138,8 @@ new :: Compiled units -> Curve units -> Curve units
 new = Curve
 
 recursive :: Compiled units -> (Curve units -> Curve units) -> Curve units
-recursive givenCompiled derivativeFunction = do
-  let result = Curve{compiled = givenCompiled, derivative = derivativeFunction result}
-  result
+recursive givenCompiled derivativeFunction =
+  let result = Curve givenCompiled (derivativeFunction result) in result
 
 -- | A curve equal to zero everywhere.
 zero :: Curve units
@@ -167,7 +163,7 @@ line :: Qty units -> Qty units -> Curve units
 line a b = a + t * (b - a)
 
 instance Negation (Curve units) where
-  negate curve = new (negate (compiled curve)) (negate (derivative curve))
+  negate curve = new (negate curve.compiled) (negate curve.derivative)
 
 instance Multiplication Sign (Curve units) (Curve units) where
   Positive * curve = curve
@@ -178,7 +174,7 @@ instance Multiplication (Curve units) Sign (Curve units) where
   curve * Negative = -curve
 
 instance units ~ units_ => Addition (Curve units) (Curve units_) (Curve units) where
-  lhs + rhs = new (compiled lhs + compiled rhs) (derivative lhs + derivative rhs)
+  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
 
 instance units ~ units_ => Addition (Curve units) (Qty units_) (Curve units) where
   curve + value = curve + constant value
@@ -187,7 +183,7 @@ instance units ~ units_ => Addition (Qty units) (Curve units_) (Curve units) whe
   value + curve = constant value + curve
 
 instance units1 ~ units2 => Subtraction (Curve units1) (Curve units2) (Curve units1) where
-  lhs - rhs = new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
+  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
 
 instance
   units1 ~ units2 =>
@@ -209,7 +205,7 @@ instance
 
 instance Multiplication' (Curve units1) (Curve units2) (Curve (units1 :*: units2)) where
   lhs .*. rhs =
-    new (compiled lhs .*. compiled rhs) (derivative lhs .*. rhs + lhs .*. derivative rhs)
+    new (lhs.compiled .*. rhs.compiled) (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -294,8 +290,8 @@ instance
 instance Division' (Curve units1) (Curve units2) (Curve (units1 :/: units2)) where
   lhs ./. rhs =
     recursive
-      (compiled lhs ./. compiled rhs)
-      (\self -> derivative lhs ./. rhs - self * (derivative rhs / rhs))
+      # lhs.compiled ./. rhs.compiled
+      # \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -316,7 +312,7 @@ instance Division' (Qty units1) (Curve units2) (Curve (units1 :/: units2)) where
   value ./. curve = constant value ./. curve
 
 instance unitless ~ Unitless => Composition (Curve unitless) (Curve units) (Curve units) where
-  f . g = new (compiled f . compiled g) ((derivative f . g) * derivative g)
+  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 reverse :: Curve units -> Curve units
 reverse curve = curve . (1.0 - t)
@@ -363,10 +359,10 @@ rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 
 The parameter value should be between 0 and 1.
 -}
 evaluate :: Curve units -> Float -> Qty units
-evaluate Curve{compiled} = CompiledFunction.evaluate compiled
+evaluate curve = CompiledFunction.evaluate curve.compiled
 
 evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units
-evaluateBounds Curve{compiled} = CompiledFunction.evaluateBounds compiled
+evaluateBounds curve = CompiledFunction.evaluateBounds curve.compiled
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
@@ -375,8 +371,8 @@ squared curve = Units.specialize (squared' curve)
 squared' :: Curve units -> Curve (units :*: units)
 squared' curve =
   new
-    (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' (compiled curve))
-    (2.0 * curve .*. derivative curve)
+    (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' curve.compiled)
+    (2.0 * curve .*. curve.derivative)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve units1
@@ -388,25 +384,25 @@ sqrt' curve =
     then zero
     else
       recursive
-        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' (compiled curve))
-        (\self -> derivative curve .!/! (2.0 * self))
+        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled)
+        (\self -> curve.derivative .!/! (2.0 * self))
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless
 sin curve =
   new
-    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin (compiled curve))
-    (cos curve * (derivative curve / Angle.radian))
+    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin curve.compiled)
+    (cos curve * (curve.derivative / Angle.radian))
 
 -- | Compute the cosine of a curve.
 cos :: Curve Radians -> Curve Unitless
 cos curve =
   new
-    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos (compiled curve))
-    (negate (sin curve) * (derivative curve / Angle.radian))
+    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos curve.compiled)
+    (negate (sin curve) * (curve.derivative / Angle.radian))
 
 integral :: Curve units -> Estimate units
-integral curve = Estimate.new (Integral curve (derivative curve) Bounds.unitInterval)
+integral curve = Estimate.new (Integral curve curve.derivative Bounds.unitInterval)
 
 data Integral units = Integral (Curve units) (Curve units) (Bounds Unitless)
 
@@ -474,11 +470,11 @@ zeros :: Tolerance units => Curve units -> Result ZeroEverywhere (List Zero)
 zeros curve
   | curve ~= Qty.zero = Failure ZeroEverywhere
   | otherwise = Result.do
-      let derivatives = Stream.iterate derivative curve
+      let derivatives = Stream.iterate (.derivative) curve
       let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
-        Success foundZeros -> Success (List.sortBy Zero.location foundZeros)
+        Success foundZeros -> Success (List.sortBy (.location) foundZeros)
         Failure Solve1d.InfiniteRecursion -> exception "Higher-order zero detected"
 
 findZeros ::
@@ -581,14 +577,25 @@ sign :: Tolerance units => Curve units -> Result CrossesZero Sign
 sign curve = case zeros curve of
   Failure ZeroEverywhere -> Success Positive
   Success curveZeros ->
-    case List.filter (not . isEndpoint . Zero.location) curveZeros of
+    case List.filter isInnerZero curveZeros of
       [] -> Success (Qty.sign (evaluate curve 0.5)) -- No inner zeros, so check sign at t=0.5
       NonEmpty innerZeros ->
-        case NonEmpty.filter (Int.isEven . Zero.order) innerZeros of
-          NonEmpty _ -> Failure CrossesZero -- There exists an inner crossing zero
+        case NonEmpty.filter isCrossingZero innerZeros of
+          List.OneOrMore -> Failure CrossesZero -- There exists at least one inner crossing zero
           [] -> do
             -- All inner zeros are non-crossing (e.g. quadratic) ones,
             -- so we can safely test the curve
             -- halfway between t=0 and the first inner zero
-            let testPoint = 0.5 * Zero.location (NonEmpty.first innerZeros)
+            let testPoint = 0.5 * innerZeros.first.location
             Success (Qty.sign (evaluate curve testPoint))
+
+isInnerZero :: Zero -> Bool
+isInnerZero curveZero = not (isEndpoint curveZero.location)
+
+isCrossingZero :: Zero -> Bool
+isCrossingZero curveZero =
+  -- Curve order 0 is linear (crossing) zero
+  -- Curve order 1 is quadratic (non-crossing) zero
+  -- Curve order 2 is cubic (crossing) zero
+  -- Curve order 3 is quartic (non-crossing) zero, etc.
+  Int.isEven curveZero.order

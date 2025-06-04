@@ -10,8 +10,6 @@ module OpenSolid.DirectionCurve2d
   , constant
   , arc
   , reverse
-  , xComponent
-  , yComponent
   , placeIn
   , relativeTo
   )
@@ -64,7 +62,7 @@ evaluateBounds (DirectionCurve2d vectorCurve) tBounds =
   DirectionBounds2d.unsafe (VectorCurve2d.evaluateBounds vectorCurve tBounds)
 
 derivative :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
-derivative (DirectionCurve2d vectorCurve) = VectorCurve2d.derivative vectorCurve
+derivative (DirectionCurve2d vectorCurve) = vectorCurve.derivative
 
 constant :: Direction2d space -> DirectionCurve2d space
 constant direction = DirectionCurve2d (VectorCurve2d.constant (Vector2d.unit direction))
@@ -206,11 +204,11 @@ instance
   where
   curve1d >> DirectionCurve2d curve = DirectionCurve2d (curve1d >> curve)
 
-xComponent :: DirectionCurve2d space -> Curve Unitless
-xComponent (DirectionCurve2d curve) = VectorCurve2d.xComponent curve
+instance HasField "xComponent" (DirectionCurve2d space) (Curve Unitless) where
+  getField (DirectionCurve2d curve) = curve.xComponent
 
-yComponent :: DirectionCurve2d space -> Curve Unitless
-yComponent (DirectionCurve2d curve) = VectorCurve2d.yComponent curve
+instance HasField "yComponent" (DirectionCurve2d space) (Curve Unitless) where
+  getField (DirectionCurve2d curve) = curve.yComponent
 
 placeIn ::
   Orientation2d global (Defines local) ->

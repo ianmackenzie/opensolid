@@ -1,8 +1,6 @@
 module OpenSolid.VectorCurve3d
-  ( VectorCurve3d
+  ( VectorCurve3d (compiled, derivative)
   , Compiled
-  , compiled
-  , derivative
   , constant
   , new
   , on

@@ -28,6 +28,7 @@ import Python.MemberFunction qualified
 import Python.NegationFunction qualified
 import Python.PostOperator qualified
 import Python.PreOperator qualified
+import Python.Property qualified
 import Python.StaticFunction qualified
 import Python.Type.Registry (Registry)
 import Python.Type.Registry qualified
@@ -45,8 +46,9 @@ preamble =
     , "import platform"
     , "from contextvars import ContextVar"
     , "from ctypes import CDLL, POINTER, c_char_p, c_double, c_int64, c_size_t, c_void_p"
+    , "from functools import cached_property"
     , "from pathlib import Path"
-    , "from typing import Any, Union, overload"
+    , "from typing import Any, Never, Union, overload"
     , ""
     , "def _load_library() -> CDLL:"
     , "    \"\"\"Load the native library from the same directory as __init__.py.\"\"\""
@@ -95,7 +97,12 @@ preamble =
     , "def _list_argument(list_type: Any, array: Any) -> Any: # noqa: ANN401"
     , "    return list_type(len(array), array)"
     , ""
-    , "def _error(message: str) -> Any: # noqa: ANN401"
+    , "def _sign_argument(value: int) -> int:"
+    , "    if value in (1, -1):"
+    , "        return value"
+    , "    return _error('Sign value must be 1 or -1')"
+    , ""
+    , "def _error(message: str) -> Never:"
     , "    raise Error(message)"
     , ""
     , "class Tolerance:"
@@ -188,6 +195,7 @@ classDefinition
       constants
       maybeConstructor
       staticFunctions
+      properties
       memberFunctions
       equalityFunction
       comparisonFunction
@@ -225,6 +233,7 @@ classDefinition
                 ]
             , Python.indent (List.map Python.Constant.declaration constants)
             , Python.indent (List.map (Python.StaticFunction.definition className) staticFunctions)
+            , Python.indent (List.map (Python.Property.definition className) properties)
             , Python.indent (List.map (Python.MemberFunction.definition className) memberFunctions)
             , case equalityFunction of
                 Just _ -> Python.indent [Python.EqualityFunction.definition className]

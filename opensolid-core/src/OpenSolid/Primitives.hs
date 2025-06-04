@@ -289,6 +289,12 @@ instance
   where
   Unit2d v1 `cross` Unit2d v2 = v1 `cross` v2
 
+instance HasField "xComponent" (Direction2d space) Float where
+  getField (Direction2d dx _) = dx
+
+instance HasField "yComponent" (Direction2d space) Float where
+  getField (Direction2d _ dy) = dy
+
 ----- Orientation2d -----
 
 type role Orientation2d nominal nominal
@@ -1252,6 +1258,12 @@ deriving instance Show (PlaneOrientation3d space defines)
 instance FFI (PlaneOrientation3d space defines) where
   representation = FFI.classRepresentation "PlaneOrientation3d"
 
+instance HasField "xDirection" (PlaneOrientation3d space defines) (Direction3d space) where
+  getField (PlaneOrientation3d dx _) = dx
+
+instance HasField "yDirection" (PlaneOrientation3d space defines) (Direction3d space) where
+  getField (PlaneOrientation3d _ dy) = dy
+
 ----- Orientation3d -----
 
 -- | A set of cardinal directions (forward, upward etc.) defining a 3D orientation.
@@ -1265,6 +1277,78 @@ deriving instance Show (Orientation3d space defines)
 
 instance FFI (Orientation3d space defines) where
   representation = FFI.classRepresentation "Orientation3d"
+
+instance HasField "rightwardDirection" (Orientation3d space defines) (Direction3d space) where
+  getField (Orientation3d r _ _) = r
+
+instance HasField "leftwardDirection" (Orientation3d space defines) (Direction3d space) where
+  getField orientation = negate orientation.rightwardDirection
+
+instance HasField "forwardDirection" (Orientation3d space defines) (Direction3d space) where
+  getField (Orientation3d _ f _) = f
+
+instance HasField "backwardDirection" (Orientation3d space defines) (Direction3d space) where
+  getField orientation = negate orientation.forwardDirection
+
+instance HasField "upwardDirection" (Orientation3d space defines) (Direction3d space) where
+  getField (Orientation3d _ _ u) = u
+
+instance HasField "downwardDirection" (Orientation3d space defines) (Direction3d space) where
+  getField orientation = negate orientation.upwardDirection
+
+instance
+  HasField
+    "rightPlaneOrientation"
+    (Orientation3d space (Defines local))
+    (PlaneOrientation3d space (Defines (RightPlane local)))
+  where
+  getField orientation =
+    PlaneOrientation3d orientation.forwardDirection orientation.upwardDirection
+
+instance
+  HasField
+    "leftPlaneOrientation"
+    (Orientation3d space (Defines local))
+    (PlaneOrientation3d space (Defines (LeftPlane local)))
+  where
+  getField orientation =
+    PlaneOrientation3d orientation.backwardDirection orientation.upwardDirection
+
+instance
+  HasField
+    "frontPlaneOrientation"
+    (Orientation3d space (Defines local))
+    (PlaneOrientation3d space (Defines (FrontPlane local)))
+  where
+  getField orientation =
+    PlaneOrientation3d orientation.leftwardDirection orientation.upwardDirection
+
+instance
+  HasField
+    "backPlaneOrientation"
+    (Orientation3d space (Defines local))
+    (PlaneOrientation3d space (Defines (BackPlane local)))
+  where
+  getField orientation =
+    PlaneOrientation3d orientation.rightwardDirection orientation.upwardDirection
+
+instance
+  HasField
+    "topPlaneOrientation"
+    (Orientation3d space (Defines local))
+    (PlaneOrientation3d space (Defines (TopPlane local)))
+  where
+  getField orientation =
+    PlaneOrientation3d orientation.rightwardDirection orientation.forwardDirection
+
+instance
+  HasField
+    "bottomPlaneOrientation"
+    (Orientation3d space (Defines local))
+    (PlaneOrientation3d space (Defines (BottomPlane local)))
+  where
+  getField orientation =
+    PlaneOrientation3d orientation.leftwardDirection orientation.forwardDirection
 
 ----- Point3d -----
 
@@ -1870,12 +1954,140 @@ deriving instance Show (Qty units) => Show (Plane3d (space @ units) defines)
 instance FFI (Plane3d (space @ Meters) defines) where
   representation = FFI.classRepresentation "Plane3d"
 
+instance
+  HasField
+    "originPoint"
+    (Plane3d (space @ units) defines)
+    (Point3d (space @ units))
+  where
+  getField (Plane3d p _) = p
+
+instance
+  HasField
+    "orientation"
+    (Plane3d (space @ units) defines)
+    (PlaneOrientation3d space defines)
+  where
+  getField (Plane3d _ o) = o
+
 ----- Frame3d -----
 
 -- | A frame of reference in 3D, defined by an origin point and orientation.
 type Frame3d :: CoordinateSystem -> LocalSpace -> Type
 data Frame3d coordinateSystem defines where
   Frame3d :: Point3d (space @ units) -> Orientation3d space defines -> Frame3d (space @ units) defines
+
+instance
+  HasField
+    "originPoint"
+    (Frame3d (space @ units) defines)
+    (Point3d (space @ units))
+  where
+  getField (Frame3d p _) = p
+
+instance
+  HasField
+    "orientation"
+    (Frame3d (space @ units) defines)
+    (Orientation3d space defines)
+  where
+  getField (Frame3d _ o) = o
+
+instance
+  HasField
+    "rightwardDirection"
+    (Frame3d (space @ units) defines)
+    (Direction3d space)
+  where
+  getField = (.orientation.rightwardDirection)
+
+instance
+  HasField
+    "leftwardDirection"
+    (Frame3d (space @ units) defines)
+    (Direction3d space)
+  where
+  getField = (.orientation.leftwardDirection)
+
+instance
+  HasField
+    "forwardDirection"
+    (Frame3d (space @ units) defines)
+    (Direction3d space)
+  where
+  getField = (.orientation.forwardDirection)
+
+instance
+  HasField
+    "backwardDirection"
+    (Frame3d (space @ units) defines)
+    (Direction3d space)
+  where
+  getField = (.orientation.backwardDirection)
+
+instance
+  HasField
+    "upwardDirection"
+    (Frame3d (space @ units) defines)
+    (Direction3d space)
+  where
+  getField = (.orientation.upwardDirection)
+
+instance
+  HasField
+    "downwardDirection"
+    (Frame3d (space @ units) defines)
+    (Direction3d space)
+  where
+  getField = (.orientation.downwardDirection)
+
+instance
+  HasField
+    "rightPlane"
+    (Frame3d (space @ units) (Defines local))
+    (Plane3d (space @ units) (Defines (RightPlane local)))
+  where
+  getField frame = Plane3d frame.originPoint frame.orientation.rightPlaneOrientation
+
+instance
+  HasField
+    "leftPlane"
+    (Frame3d (space @ units) (Defines local))
+    (Plane3d (space @ units) (Defines (LeftPlane local)))
+  where
+  getField frame = Plane3d frame.originPoint frame.orientation.leftPlaneOrientation
+
+instance
+  HasField
+    "frontPlane"
+    (Frame3d (space @ units) (Defines local))
+    (Plane3d (space @ units) (Defines (FrontPlane local)))
+  where
+  getField frame = Plane3d frame.originPoint frame.orientation.frontPlaneOrientation
+
+instance
+  HasField
+    "backPlane"
+    (Frame3d (space @ units) (Defines local))
+    (Plane3d (space @ units) (Defines (BackPlane local)))
+  where
+  getField frame = Plane3d frame.originPoint frame.orientation.backPlaneOrientation
+
+instance
+  HasField
+    "topPlane"
+    (Frame3d (space @ units) (Defines local))
+    (Plane3d (space @ units) (Defines (TopPlane local)))
+  where
+  getField frame = Plane3d frame.originPoint frame.orientation.topPlaneOrientation
+
+instance
+  HasField
+    "bottomPlane"
+    (Frame3d (space @ units) (Defines local))
+    (Plane3d (space @ units) (Defines (BottomPlane local)))
+  where
+  getField frame = Plane3d frame.originPoint frame.orientation.bottomPlaneOrientation
 
 deriving instance Eq (Frame3d (space @ units) defines)
 

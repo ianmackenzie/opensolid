@@ -2,8 +2,9 @@ module Tests.SurfaceFunction (tests) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Error qualified as Error
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -18,7 +19,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
-import OpenSolid.World3d qualified as World3d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Curve2d qualified
@@ -51,7 +51,7 @@ withIntersectionCurves :: Tolerance Meters => (NonEmpty (Curve2d UvCoordinates) 
 withIntersectionCurves callback =
   case SurfaceFunction.zeros planeTorusSurface of
     Failure error -> Test.abort (Error.message error)
-    Success zeros -> case SurfaceFunction.Zeros.crossingCurves zeros of
+    Success zeros -> case zeros.crossingCurves of
       [] -> Test.abort "No intersection curves found"
       NonEmpty crossingCurves -> callback crossingCurves
 
@@ -76,28 +76,25 @@ intersectionCurveFirstDerivativeBoundsConsistency =
   withIntersectionCurves \curves ->
     Test.check 100 "intersectionCurveBoundsConsistency" Test.do
       curve <- Random.oneOf curves
-      let firstDerivative = Curve2d.derivative curve
-      Tolerance.using 1e-9 (Tests.VectorCurve2d.boundsConsistency firstDerivative)
+      Tolerance.using 1e-9 (Tests.VectorCurve2d.boundsConsistency curve.derivative)
 
 intersectionCurveSecondDerivativeConsistency :: Tolerance Meters => Test
 intersectionCurveSecondDerivativeConsistency =
   withIntersectionCurves \curves ->
     Test.check 100 "intersectionCurveSecondDerivativeConsistency" Test.do
       curve <- Random.oneOf curves
-      let firstDerivative = Curve2d.derivative curve
-      Tests.VectorCurve2d.derivativeConsistency 1e-6 firstDerivative
+      Tests.VectorCurve2d.derivativeConsistency 1e-6 curve.derivative
 
 intersectionCurveSecondDerivativeBoundsConsistency :: Tolerance Meters => Test
 intersectionCurveSecondDerivativeBoundsConsistency =
   withIntersectionCurves \curves ->
     Test.check 100 "intersectionCurveSecondDerivativeBoundsConsistency" Test.do
       curve <- Random.oneOf curves
-      let firstDerivative = Curve2d.derivative curve
-      let secondDerivative = VectorCurve2d.derivative firstDerivative
-      Tolerance.using 1e-9 (Tests.VectorCurve2d.boundsConsistency secondDerivative)
+      Tolerance.using 1e-9 (Tests.VectorCurve2d.boundsConsistency curve.derivative.derivative)
 
 planeTorusSurface :: SurfaceFunction Meters
 planeTorusSurface = do
+  let world = Frame3d.world
   let theta = Angle.twoPi * SurfaceFunction.u
   let phi = Angle.twoPi * SurfaceFunction.v
   let minorRadius = Length.centimeters 1.0
@@ -107,9 +104,9 @@ planeTorusSurface = do
   let forward = r * SurfaceFunction.sin theta
   let upward = minorRadius * SurfaceFunction.sin phi
   let alpha = Angle.asin (minorRadius / majorRadius)
+  let normalDirection = Direction3d.polar world.frontPlane.orientation (alpha + Angle.halfPi)
   let surfaceFunction = VectorSurfaceFunction3d.rightwardForwardUpward rightward forward upward
-  -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  World3d.upwardRightwardDirection -alpha `dot` surfaceFunction
+  normalDirection `dot` surfaceFunction
 
 samplingRadius :: Float
 samplingRadius = 1e-6

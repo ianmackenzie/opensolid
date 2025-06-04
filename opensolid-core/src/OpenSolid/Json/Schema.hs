@@ -1,5 +1,5 @@
 module OpenSolid.Json.Schema
-  ( Schema (..)
+  ( Schema (title, description, default_, examples, type_, required, properties, items, minItems)
   , integer
   , number
   , boolean

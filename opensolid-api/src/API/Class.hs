@@ -1,8 +1,15 @@
+-- Needed for 'property', since call sites will explicitly specify the property name
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
 module API.Class
   ( Class (..)
   , Member
   , Self (Self)
   , new
+  , curryT2
+  , curry1T2
+  , curryT3
+  , curryT4
   , static
   , upcast
   , constant
@@ -30,6 +37,7 @@ module API.Class
   , static2
   , static3
   , staticM3
+  , property
   , member0
   , memberU0
   , memberR0
@@ -91,17 +99,22 @@ import API.PostOperator (PostOperator (PostOperator))
 import API.PostOperator qualified as PostOperator
 import API.PreOperator (PreOperator (PreOperator))
 import API.PreOperator qualified as PreOperator
+import API.Property (Property (Property))
+import API.Property qualified as Property
 import API.StaticFunction (StaticFunction (..))
 import API.StaticFunction qualified as StaticFunction
 import API.Upcast (Upcast (Upcast))
 import API.Upcast qualified as Upcast
 import Data.Proxy (Proxy (Proxy))
 import Data.Void (Void)
+import GHC.TypeLits (KnownSymbol)
+import GHC.TypeLits qualified
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 
 data Class where
@@ -112,6 +125,7 @@ data Class where
     , constants :: List (FFI.Name, Constant)
     , constructor :: Maybe Constructor
     , staticFunctions :: List (FFI.Name, StaticFunction)
+    , properties :: List (FFI.Name, Property)
     , memberFunctions :: List (FFI.Name, MemberFunction)
     , equalityFunction :: Maybe EqualityFunction
     , comparisonFunction :: Maybe ComparisonFunction
@@ -128,6 +142,7 @@ data Member value where
   Const :: FFI.Name -> Constant -> Member value
   Constructor :: Constructor -> Member value
   Static :: FFI.Name -> StaticFunction -> Member value
+  Prop :: FFI.Name -> Property -> Member value
   Member :: FFI.Name -> MemberFunction -> Member value
   Equality :: EqualityFunction -> Member value
   Comparison :: ComparisonFunction -> Member value
@@ -136,6 +151,18 @@ data Member value where
   PreOp :: (FFI value, FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
   PostOp :: (FFI value, FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
+
+curryT2 :: ((a, b) -> c) -> a -> b -> c
+curryT2 f a b = f (a, b)
+
+curry1T2 :: (a -> (b, c) -> d) -> a -> b -> c -> d
+curry1T2 f a b c = f a (b, c)
+
+curryT3 :: ((a, b, c) -> d) -> a -> b -> c -> d
+curryT3 f a b c = f (a, b, c)
+
+curryT4 :: ((a, b, c, d) -> e) -> a -> b -> c -> d -> e
+curryT4 f a b c d = f (a, b, c, d)
 
 new :: forall value. FFI value => Text -> List (Member value) -> Class
 new givenDocumentation members =
@@ -481,6 +508,15 @@ staticM4 name arg1 arg2 arg3 arg4 f docs =
   Static (FFI.name name) $
     StaticFunctionM4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
 
+property ::
+  forall name value result.
+  (KnownSymbol name, HasField name value result, FFI value, FFI result) =>
+  Text ->
+  Member value
+property docs = do
+  let propertyName = Text.pack (GHC.TypeLits.symbolVal @name Proxy)
+  Prop (FFI.splitCamelCase propertyName) (Property (getField @name @value @result) docs)
+
 member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
 member0 name f docs = Member (FFI.name name) (MemberFunction0 f docs)
 
@@ -755,6 +791,7 @@ init givenName givenDocumentation =
     , constants = []
     , constructor = Nothing
     , staticFunctions = []
+    , properties = []
     , memberFunctions = []
     , equalityFunction = Nothing
     , comparisonFunction = Nothing
@@ -777,6 +814,8 @@ buildClass members built = case members of
       built{constructor = Just constructor}
     Static name staticFunction ->
       built{staticFunctions = staticFunctions built <> [(name, staticFunction)]}
+    Prop name prop ->
+      built{properties = properties built <> [(name, prop)]}
     Member name memberFunction ->
       built{memberFunctions = memberFunctions built <> [(name, memberFunction)]}
     Equality equalityFunction ->
@@ -805,6 +844,7 @@ functions
       constants
       constructor
       staticFunctions
+      properties
       memberFunctions
       equalityFunction
       comparisonFunction
@@ -819,6 +859,7 @@ functions
       , List.map (constantFunctionInfo className) constants
       , constructorInfo className constructor
       , List.map (staticFunctionInfo className) staticFunctions
+      , List.map (propertyInfo className) properties
       , List.map (memberFunctionInfo className) memberFunctions
       , equalityFunctionInfo className equalityFunction
       , comparisonFunctionInfo className comparisonFunction
@@ -877,6 +918,17 @@ staticFunctionInfo className (functionName, staticFunction) = do
     , argumentTypes = List.map Pair.second arguments
     , returnType
     , invoke = StaticFunction.invoke staticFunction
+    }
+
+propertyInfo :: FFI.ClassName -> (FFI.Name, Property) -> Function
+propertyInfo className (propertyName, prop) = do
+  let selfType = FFI.Class className
+  Function
+    { ffiName = Property.ffiName className propertyName
+    , implicitArgument = Nothing
+    , argumentTypes = [selfType]
+    , returnType = Property.returnType prop
+    , invoke = Property.invoke prop
     }
 
 memberFunctionInfo :: FFI.ClassName -> (FFI.Name, MemberFunction) -> Function

@@ -1,5 +1,5 @@
 module OpenSolid.LineSegment2d
-  ( LineSegment2d (..)
+  ( LineSegment2d (LineSegment2d, start, end)
   , length
   , distanceTo
   )

@@ -45,8 +45,9 @@ toBinary ::
   Mesh vertex ->
   Builder
 toBinary convention units mesh = do
-  let header = Binary.concat (List.repeat 80 (Builder.word8 (fromIntegral 0)))
-  let triangleCount = Builder.word32LE (fromIntegral (List.length (Mesh.faceIndices mesh)))
+  let emptyHeaderBytes = List.repeat 80 (Binary.uint8 0)
+  let header = Binary.concat emptyHeaderBytes
+  let triangleCount = Binary.uint32LE mesh.numFaces
   let triangles = Binary.collect (triangleBuilder convention units) (Mesh.faceVertices mesh)
   Binary.concat [header, triangleCount, triangles]
 

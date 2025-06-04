@@ -12,7 +12,6 @@ module OpenSolid.Scene3d
   )
 where
 
-import OpenSolid.Array qualified as Array
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Body3d (Body3d)
@@ -102,7 +101,7 @@ Same as 'writeGlb' except it just returns the raw binary builder instead of writ
 toGlb :: Scene3d space -> Builder
 toGlb scene = do
   let meshes = gltfMeshes Frame3d.world scene
-  let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
+  let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. meshes.length - 1]]
   let bufferBuilder = Binary.collect meshBuilder meshes
   let bufferByteLength = Int.sumOf meshByteLength meshes
   let encodedMeshes = encodeMeshes 0 0 meshes
@@ -110,11 +109,11 @@ toGlb scene = do
   Gltf.toBinary
     [ Json.field "scene" $ Json.int 0
     , Json.field "scenes" $ Json.list [sceneObject]
-    , Json.field "nodes" $ Json.listOf meshNode encodedMeshes
-    , Json.field "meshes" $ Json.listOf meshObject encodedMeshes
-    , Json.field "bufferViews" $ Json.list (List.collect bufferViews encodedMeshes)
-    , Json.field "accessors" $ Json.list (List.collect accessors encodedMeshes)
-    , Json.field "materials" $ Json.listOf materialObject encodedMeshes
+    , Json.field "nodes" $ Json.listOf (.meshNode) encodedMeshes
+    , Json.field "meshes" $ Json.listOf (.meshObject) encodedMeshes
+    , Json.field "bufferViews" $ Json.list (List.collect (.bufferViews) encodedMeshes)
+    , Json.field "accessors" $ Json.list (List.collect (.accessors) encodedMeshes)
+    , Json.field "materials" $ Json.listOf (.materialObject) encodedMeshes
     , Json.field "buffers" $ Json.list [bufferObject]
     ]
     bufferByteLength
@@ -240,10 +239,10 @@ gltfMeshes ::
   List (GltfMesh global)
 gltfMeshes parentFrame scene = case scene of
   Mesh pbrMaterial smoothMesh -> do
-    let vertices = Mesh.vertices smoothMesh
-    let numVertices = Array.length vertices
-    let faceIndices = Mesh.faceIndices smoothMesh
-    let numFaces = List.length faceIndices
+    let vertices = smoothMesh.vertices
+    let numVertices = vertices.length
+    let faceIndices = smoothMesh.faceIndices
+    let numFaces = faceIndices.length
     let meshBounds = Bounded3d.bounds smoothMesh
     let (xBounds, yBounds, zBounds) = Bounds3d.coordinates Gltf.convention meshBounds
     let Bounds xLow xHigh = xBounds

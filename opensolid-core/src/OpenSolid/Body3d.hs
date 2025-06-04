@@ -98,7 +98,6 @@ import OpenSolid.Vertex2d as Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
-import OpenSolid.World3d qualified as World3d
 
 -- | A solid body in 3D, defined by a set of boundary surfaces.
 newtype Body3d (coordinateSystem :: CoordinateSystem)
@@ -218,14 +217,15 @@ Fails if the given bounds are empty
 (the length, width, or height is zero).
 -}
 block :: Tolerance units => Bounds3d (space @ units) -> Result EmptyBody (Body3d (space @ units))
-block bounds =
-  case Region2d.rectangle (Bounds3d.projectInto World3d.topPlane bounds) of
+block bounds = do
+  let world = Frame3d.world
+  case Region2d.rectangle (Bounds3d.projectInto world.topPlane bounds) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile -> do
       let heightBounds = Bounds3d.upwardCoordinate bounds
       if Bounds.width heightBounds ~= Qty.zero
         then Failure EmptyBody
-        else case extruded World3d.topPlane profile heightBounds of
+        else case extruded world.topPlane profile heightBounds of
           Success body -> Success body
           Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
 
@@ -235,14 +235,14 @@ Fails if the diameter is zero.
 -}
 sphere ::
   Tolerance units =>
-  Named "centerPoint" (Point3d (space @ units)) ->
-  Named "diameter" (Qty units) ->
+  ("centerPoint" ::: Point3d (space @ units), "diameter" ::: Qty units) ->
   Result EmptyBody (Body3d (space @ units))
-sphere (Named centerPoint) (Named diameter) =
+sphere (Field centerPoint, Field diameter) =
   if diameter ~= Qty.zero
     then Failure EmptyBody
     else do
-      let sketchPlane = Plane3d centerPoint World3d.frontPlaneOrientation
+      let world = Frame3d.world
+      let sketchPlane = Plane3d centerPoint world.frontPlane.orientation
       let radius = 0.5 * diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius
@@ -262,9 +262,9 @@ cylinder ::
   Tolerance units =>
   Point3d (space @ units) ->
   Point3d (space @ units) ->
-  Named "diameter" (Qty units) ->
+  "diameter" ::: Qty units ->
   Result EmptyBody (Body3d (space @ units))
-cylinder startPoint endPoint (Named diameter) =
+cylinder startPoint endPoint (Field diameter) =
   case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
     Failure Vector3d.IsZero -> Failure EmptyBody
     Success (length, direction) ->
@@ -284,10 +284,10 @@ cylinderAlong ::
   Tolerance units =>
   Axis3d (space @ units) ->
   Bounds units ->
-  Named "diameter" (Qty units) ->
+  "diameter" ::: Qty units ->
   Result EmptyBody (Body3d (space @ units))
-cylinderAlong axis distance (Named diameter) = do
-  case Region2d.circle (#centerPoint Point2d.origin) (#diameter diameter) of
+cylinderAlong axis distance (Field diameter) = do
+  case Region2d.circle (#centerPoint Point2d.origin, #diameter diameter) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile ->
       if Bounds.width distance ~= Qty.zero
@@ -323,8 +323,8 @@ translational sketchPlane profile displacement = do
   let startCap = Surface3d.on startPlane profile
   let endCap = Surface3d.on endPlane profile
   let sideSurface curve = Surface3d.translational (Curve2d.on sketchPlane curve) displacement
-  let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2d.boundaryCurves profile))
-  let initialDerivative = VectorCurve3d.startValue (VectorCurve3d.derivative displacement)
+  let sideSurfaces = List.map sideSurface (NonEmpty.toList profile.boundaryCurves)
+  let initialDerivative = VectorCurve3d.startValue displacement.derivative
   case Qty.sign (initialDerivative `dot` Plane3d.normalDirection sketchPlane) of
     Positive -> boundedBy (endCap : startCap : sideSurfaces)
     Negative -> boundedBy (startCap : endCap : sideSurfaces)
@@ -346,7 +346,7 @@ revolved ::
   Result BoundedBy.Error (Body3d (space @ units))
 revolved startPlane profile axis2d angle = Result.do
   let axis3d = Axis2d.on startPlane axis2d
-  let profileCurves = Region2d.boundaryCurves profile
+  let profileCurves = profile.boundaryCurves
   let offAxisCurves = NonEmpty.filter (not . Curve2d.isOnAxis axis2d) profileCurves
   let signedDistanceCurves = List.map (Curve2d.distanceRightOf axis2d) offAxisCurves
   profileSign <-
@@ -391,7 +391,7 @@ boundedBy ::
 boundedBy [] = Failure BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = Result.do
   surfacesWithHalfEdges <- Result.collect toSurfaceWithHalfEdges (NonEmpty.indexed givenSurfaces)
-  let firstSurfaceWithHalfEdges = NonEmpty.first surfacesWithHalfEdges
+  let firstSurfaceWithHalfEdges = surfacesWithHalfEdges.first
   let halfEdges = NonEmpty.collect getAllHalfEdges surfacesWithHalfEdges
   let halfEdgeSet = Set3d.fromNonEmpty halfEdges
   let corners = NonEmpty.map halfEdgeStartPoint halfEdges
@@ -429,12 +429,10 @@ toSurfaceWithHalfEdges ::
   (Int, Surface3d (space @ units)) ->
   Result BoundedBy.Error (SurfaceWithHalfEdges (space @ units))
 toSurfaceWithHalfEdges (surfaceIndex, surface) = do
-  let surfaceFunction = Surface3d.function surface
-  let surfaceDomain = Surface3d.domain surface
-  let loops = Region2d.outerLoop surfaceDomain :| Region2d.innerLoops surfaceDomain
+  let loops = surface.domain.boundaryLoops
   let surfaceId = SurfaceId surfaceIndex
   Result.map (SurfaceWithHalfEdges surfaceId surface Positive) $
-    Result.collect (loopHalfEdges surfaceId surfaceFunction) (NonEmpty.indexed loops)
+    Result.collect (loopHalfEdges surfaceId surface.function) (NonEmpty.indexed loops)
 
 loopHalfEdges ::
   Tolerance units =>
@@ -535,7 +533,7 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
                       , matingUvCurve
                       , correctlyAligned
                       }
-                  else SecondaryEdge{id, startPoint, uvStartPoint = Curve2d.startPoint uvCurve}
+                  else SecondaryEdge{id, startPoint, uvStartPoint = uvCurve.startPoint}
           let updatedRegistry =
                 SurfaceRegistry{unprocessed, processed, edges = edges |> Map.set id edge}
           let matingHandedness = if correctlyAligned then parentHandedness else -parentHandedness
@@ -567,9 +565,9 @@ toBoundarySurface edges SurfaceWithHalfEdges{id, surface, handedness, halfEdgeLo
     , orientedSurface = case handedness of
         Positive -> surface
         Negative -> Surface3d.flip surface
-    , surfaceFunction = Surface3d.function surface
+    , surfaceFunction = surface.function
     , handedness
-    , uvBounds = Region2d.bounds (Surface3d.domain surface)
+    , uvBounds = Region2d.bounds surface.domain
     , edgeLoops = NonEmpty.map (NonEmpty.map (toEdge edges)) halfEdgeLoops
     }
 
@@ -753,7 +751,7 @@ addInnerEdgeVertices constraints surfaceSegmentsById edge accumulated = do
                   correctlyAligned
                   surfaceSegments
                   matingSurfaceSegments
-                  (VectorCurve3d.derivative (Curve3d.derivative curve3d))
+                  curve3d.derivative.derivative
           let tValues = Domain1d.innerSamplingPoints edgePredicate
           let vertexPair tValue = do
                 let point = Curve3d.evaluate curve3d tValue
@@ -860,15 +858,15 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
       let steinerVertex uvPoint =
             Vertex uvPoint (SurfaceFunction3d.evaluate surfaceFunction uvPoint)
       let steinerVertices = List.map steinerVertex steinerPoints
-      let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
+      let boundaryVertexLoops = NonEmpty.map (.vertices) boundaryPolygons
       -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
       let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices
       let pointsAndNormals =
-            Array.map (pointAndNormal surfaceFunction handedness) (Mesh.vertices vertexMesh)
+            Array.map (pointAndNormal surfaceFunction handedness) vertexMesh.vertices
       let faceIndices =
             case handedness of
-              Positive -> Mesh.faceIndices vertexMesh
-              Negative -> List.map (\(i, j, k) -> (k, j, i)) (Mesh.faceIndices vertexMesh)
+              Positive -> vertexMesh.faceIndices
+              Negative -> List.map (\(i, j, k) -> (k, j, i)) vertexMesh.faceIndices
       Mesh.indexed pointsAndNormals faceIndices
 
 pointAndNormal ::
@@ -896,9 +894,9 @@ leadingEdgeVertices ::
   NonEmpty (Vertex (space @ units))
 leadingEdgeVertices innerEdgeVerticesById edge = case edge of
   DegenerateEdge{id, uvCurve, point} ->
-    leadingEdgeVerticesImpl innerEdgeVerticesById id point (Curve2d.startPoint uvCurve)
+    leadingEdgeVerticesImpl innerEdgeVerticesById id point uvCurve.startPoint
   PrimaryEdge{id, uvCurve, startPoint} ->
-    leadingEdgeVerticesImpl innerEdgeVerticesById id startPoint (Curve2d.startPoint uvCurve)
+    leadingEdgeVerticesImpl innerEdgeVerticesById id startPoint uvCurve.startPoint
   SecondaryEdge{id, uvStartPoint, startPoint} ->
     leadingEdgeVerticesImpl innerEdgeVerticesById id startPoint uvStartPoint
 

@@ -1,7 +1,6 @@
 module OpenSolid.SurfaceFunction2d
   ( SurfaceFunction2d
   , Compiled
-  , compiled
   , derivative
   , new
   )
@@ -26,6 +25,8 @@ type Compiled coordinateSystem =
     (Point2d coordinateSystem)
     UvBounds
     (Bounds2d coordinateSystem)
+
+instance HasField "compiled" (SurfaceFunction2d (space @ units)) (Compiled (space @ units))
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -52,7 +53,6 @@ new ::
   Compiled (space @ units) ->
   (SurfaceParameter -> VectorSurfaceFunction2d (space @ units)) ->
   SurfaceFunction2d (space @ units)
-compiled :: SurfaceFunction2d (space @ units) -> Compiled (space @ units)
 derivative ::
   SurfaceParameter ->
   SurfaceFunction2d (space @ units) ->

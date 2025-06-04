@@ -58,6 +58,8 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))
+import OpenSolid.Vertex3d (Vertex3d)
+import OpenSolid.Vertex3d qualified as Vertex3d
 
 {-# INLINE rightwardForwardUpward #-}
 rightwardForwardUpward :: Bounds units -> Bounds units -> Bounds units -> Bounds3d (space @ units)
@@ -230,22 +232,26 @@ hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4
   let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
   Bounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)
 
--- | Construct a bounding box containing all points in the given non-empty list.
-hullN :: NonEmpty (Point3d (space @ units)) -> Bounds3d (space @ units)
-hullN (Point3d x0 y0 z0 :| rest) = accumulateHull x0 x0 y0 y0 z0 z0 rest
+-- | Construct a bounding box containing all vertices in the given non-empty list.
+hullN :: Vertex3d vertex (space @ units) => NonEmpty vertex -> Bounds3d (space @ units)
+hullN (v0 :| rest) = do
+  let Point3d x0 y0 z0 = Vertex3d.position v0
+  accumulateHull x0 x0 y0 y0 z0 z0 rest
 
 accumulateHull ::
+  Vertex3d vertex (space @ units) =>
   Qty units ->
   Qty units ->
   Qty units ->
   Qty units ->
   Qty units ->
   Qty units ->
-  List (Point3d (space @ units)) ->
+  List vertex ->
   Bounds3d (space @ units)
 accumulateHull xLow xHigh yLow yHigh zLow zHigh remaining = case remaining of
   [] -> Bounds3d (Bounds xLow xHigh) (Bounds yLow yHigh) (Bounds zLow zHigh)
-  Point3d x y z : following ->
+  vertex : following -> do
+    let Point3d x y z = Vertex3d.position vertex
     accumulateHull
       (Qty.min xLow x)
       (Qty.max xHigh x)

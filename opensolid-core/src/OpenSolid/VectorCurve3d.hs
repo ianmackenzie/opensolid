@@ -1,14 +1,12 @@
 module OpenSolid.VectorCurve3d
-  ( VectorCurve3d
+  ( VectorCurve3d (compiled, derivative)
   , Compiled
   , new
   , on
-  , compiled
   , startValue
   , endValue
   , evaluate
   , evaluateBounds
-  , derivative
   , zero
   , constant
   , rightwardForwardUpward
@@ -101,7 +99,7 @@ instance
       }
 
 instance Negation (VectorCurve3d (space @ units)) where
-  negate curve = new (negate (compiled curve)) (negate (derivative curve))
+  negate curve = new (negate curve.compiled) (negate curve.derivative)
 
 instance Multiplication Sign (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units)) where
   Positive * curve = curve
@@ -118,7 +116,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (VectorCurve3d (space1 @ units1))
   where
-  lhs + rhs = new (compiled lhs + compiled rhs) (derivative lhs + derivative rhs)
+  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -145,7 +143,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (VectorCurve3d (space1 @ units1))
   where
-  lhs - rhs = new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
+  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -179,8 +177,8 @@ instance
   where
   lhs .*. rhs =
     new
-      (Curve.compiled lhs .*. compiled rhs)
-      (Curve.derivative lhs .*. rhs + lhs .*. derivative rhs)
+      # lhs.compiled .*. rhs.compiled
+      # lhs.derivative .*. rhs + lhs .*. rhs.derivative
 
 instance
   Units.Product units1 units2 units3 =>
@@ -210,8 +208,8 @@ instance
   where
   lhs .*. rhs =
     new
-      (compiled lhs .*. Curve.compiled rhs)
-      (derivative lhs .*. rhs + lhs .*. Curve.derivative rhs)
+      (lhs.compiled .*. rhs.compiled)
+      (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -241,8 +239,8 @@ instance
   where
   lhs ./. rhs =
     recursive
-      (compiled lhs ./. Curve.compiled rhs)
-      (\self -> derivative lhs ./. rhs - self * (Curve.derivative rhs / rhs))
+      # lhs.compiled ./. rhs.compiled
+      # \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -276,8 +274,8 @@ instance
   where
   lhs `dot'` rhs =
     Curve.new
-      (compiled lhs `dot'` compiled rhs)
-      (derivative lhs `dot'` rhs + lhs `dot'` derivative rhs)
+      (lhs.compiled `dot'` rhs.compiled)
+      (lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -339,8 +337,8 @@ instance
   where
   lhs `cross'` rhs =
     new
-      (compiled lhs `cross'` compiled rhs)
-      (derivative lhs `cross'` rhs + lhs `cross'` derivative rhs)
+      (lhs.compiled `cross'` rhs.compiled)
+      (lhs.derivative `cross'` rhs + lhs `cross'` rhs.derivative)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -403,7 +401,7 @@ instance
     (VectorCurve3d (space @ units))
     (VectorCurve3d (space @ units))
   where
-  f . g = new (compiled f . Curve.compiled g) ((derivative f . g) * Curve.derivative g)
+  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 instance
   unitless ~ Unitless =>
@@ -414,8 +412,8 @@ instance
   where
   curve . function =
     VectorSurfaceFunction3d.new
-      (compiled curve . SurfaceFunction.compiled function)
-      (\p -> derivative curve . function * SurfaceFunction.derivative p function)
+      # curve.compiled . function.compiled
+      # \p -> curve.derivative . function * SurfaceFunction.derivative p function
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->
@@ -427,8 +425,8 @@ transformBy transform curve = do
           (Expression.VectorCurve3d.transformBy transform)
           (Vector3d.transformBy transform)
           (VectorBounds3d.transformBy transform)
-          (compiled curve)
-  new compiledTransformed (transformBy transform (derivative curve))
+          curve.compiled
+  new compiledTransformed (transformBy transform curve.derivative)
 
 new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
 new = VectorCurve3d
@@ -454,8 +452,8 @@ on orientation vectorCurve2d = do
           (Expression.VectorCurve2d.on orientation)
           (Vector2d.on orientation)
           (VectorBounds2d.on orientation)
-          (VectorCurve2d.compiled vectorCurve2d)
-  new compiledPlanar (on orientation (VectorCurve2d.derivative vectorCurve2d))
+          vectorCurve2d.compiled
+  new compiledPlanar (on orientation vectorCurve2d.derivative)
 
 rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units)
 rightwardForwardUpward r f u =
@@ -464,13 +462,10 @@ rightwardForwardUpward r f u =
       Expression.rightwardForwardUpward
       Vector3d.rightwardForwardUpward
       VectorBounds3d.rightwardForwardUpward
-      (Curve.compiled r)
-      (Curve.compiled f)
-      (Curve.compiled u)
-    # rightwardForwardUpward
-      (Curve.derivative r)
-      (Curve.derivative f)
-      (Curve.derivative u)
+      r.compiled
+      f.compiled
+      u.compiled
+    # rightwardForwardUpward r.derivative f.derivative u.derivative
 
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 line v1 v2 = bezierCurve (NonEmpty.two v1 v2)
@@ -534,8 +529,8 @@ squaredMagnitude' curve = do
           Expression.VectorCurve3d.squaredMagnitude'
           Vector3d.squaredMagnitude'
           VectorBounds3d.squaredMagnitude'
-          (compiled curve)
-  let squaredMagnitudeDerivative = 2.0 * curve `dot'` derivative curve
+          curve.compiled
+  let squaredMagnitudeDerivative = 2.0 * curve `dot'` curve.derivative
   Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
@@ -545,8 +540,8 @@ unsafeMagnitude curve = do
           Expression.VectorCurve3d.magnitude
           Vector3d.magnitude
           VectorBounds3d.magnitude
-          (compiled curve)
-  let magnitudeDerivative self = derivative curve `dot` (curve / self)
+          curve.compiled
+  let magnitudeDerivative self = curve.derivative `dot` (curve / self)
   Curve.recursive compiledMagnitude magnitudeDerivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
@@ -569,7 +564,7 @@ data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
 zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result ZeroEverywhere (List Float)
 zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
-    Success zeros1d -> Success (List.map Curve.Zero.location zeros1d)
+    Success zeros1d -> Success (List.map (.location) zeros1d)
     Failure Curve.ZeroEverywhere -> Failure ZeroEverywhere
 
 direction ::
@@ -579,15 +574,14 @@ direction ::
 direction curve =
   case zeros curve of
     -- If the vector curve has no zeros, then we can safely compute its direction
-    Success [] -> Success (VectorCurve3d.Direction.unsafe curve (derivative curve))
+    Success [] -> Success (VectorCurve3d.Direction.unsafe curve curve.derivative)
     -- Otherwise, check where the vector curve is zero:
     -- if it's only zero at one or both endpoints,
     -- and the curve's *derivative* is non-zero at those endpoints,
     -- then it's still possible to uniquely determine a tangent direction everywhere
-    Success (NonEmpty curveZeros) -> do
-      let curveDerivative = derivative curve
-      if NonEmpty.allSatisfy (isRemovableDegeneracy curveDerivative) curveZeros
-        then Success (VectorCurve3d.Direction.unsafe curve curveDerivative)
+    Success (NonEmpty curveZeros) ->
+      if NonEmpty.allSatisfy (isRemovableDegeneracy curve.derivative) curveZeros
+        then Success (VectorCurve3d.Direction.unsafe curve curve.derivative)
         else Failure HasZero
     -- Definitely can't get the direction of a vector curve
     -- if that vector curve is zero everywhere!
@@ -610,8 +604,8 @@ placeIn orientation curve = do
           (Expression.VectorCurve3d.placeIn orientation)
           (Vector3d.placeIn orientation)
           (VectorBounds3d.placeIn orientation)
-          (compiled curve)
-  new compiledPlaced (placeIn orientation (derivative curve))
+          curve.compiled
+  new compiledPlaced (placeIn orientation curve.derivative)
 
 relativeTo ::
   Orientation3d global (Defines local) ->

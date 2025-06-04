@@ -1,5 +1,5 @@
 module OpenSolid.Curve2d.IntersectionPoint
-  ( IntersectionPoint (..)
+  ( IntersectionPoint (Crossing, Tangent, Continuation)
   , crossing
   , tangent
   , continuation

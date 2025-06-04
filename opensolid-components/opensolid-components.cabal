@@ -46,6 +46,7 @@ common config
   default-extensions:
     BlockArguments
     DataKinds
+    DerivingStrategies
     DisambiguateRecordFields
     ExplicitNamespaces
     FunctionalDependencies
@@ -54,6 +55,7 @@ common config
     LexicalNegation
     MultiWayIf
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo

@@ -7,7 +7,6 @@ module OpenSolid.SurfaceFunction
   , Compiled
   , evaluate
   , evaluateBounds
-  , compiled
   , derivative
   , derivativeIn
   , zero
@@ -37,7 +36,6 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Domain1d qualified as Domain1d
@@ -124,7 +122,7 @@ instance
   value ^ function = function ^ value
 
 instance Negation (SurfaceFunction units) where
-  negate function = new (negate (compiled function)) (\p -> negate (derivative p function))
+  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
 
 instance Multiplication Sign (SurfaceFunction units) (SurfaceFunction units) where
   Positive * function = function
@@ -141,7 +139,7 @@ instance
     (SurfaceFunction units_)
     (SurfaceFunction units)
   where
-  lhs + rhs = new (compiled lhs + compiled rhs) (\p -> derivative p lhs + derivative p rhs)
+  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
 
 instance
   units ~ units_ =>
@@ -165,7 +163,7 @@ instance
   units1 ~ units2 =>
   Subtraction (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units1)
   where
-  lhs - rhs = new (compiled lhs - compiled rhs) (\p -> derivative p lhs - derivative p rhs)
+  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
 
 instance
   units1 ~ units2 =>
@@ -192,7 +190,7 @@ instance
     (SurfaceFunction (units1 :*: units2))
   where
   lhs .*. rhs =
-    new (compiled lhs .*. compiled rhs) (\p -> derivative p lhs .*. rhs + lhs .*. derivative p rhs)
+    new (lhs.compiled .*. rhs.compiled) (\p -> derivative p lhs .*. rhs + lhs .*. derivative p rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -304,7 +302,7 @@ instance
   where
   lhs ./. rhs =
     recursive
-      (compiled lhs ./. compiled rhs)
+      (lhs.compiled ./. rhs.compiled)
       (\self p -> derivative p lhs ./. rhs - self * (derivative p rhs / rhs))
 
 instance
@@ -341,18 +339,17 @@ instance
   where
   curve . function =
     new
-      (Curve.compiled curve . compiled function)
-      (\p -> Curve.derivative curve . function * derivative p function)
+      # curve.compiled . function.compiled
+      # \p -> curve.derivative . function * derivative p function
 
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
-evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint
+evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds (compiled function) uvBounds
+evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
 
-{-# INLINE compiled #-}
-compiled :: SurfaceFunction units -> Compiled units
-compiled (SurfaceFunction c _ _) = c
+instance HasField "compiled" (SurfaceFunction units) (Compiled units) where
+  getField (SurfaceFunction c _ _) = c
 
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 derivative U (SurfaceFunction _ du _) = du
@@ -386,7 +383,7 @@ new :: Compiled units -> (SurfaceParameter -> SurfaceFunction units) -> SurfaceF
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  SurfaceFunction c du (SurfaceFunction (compiled dv) (derivative V du) (derivative V dv))
+  SurfaceFunction c du (SurfaceFunction dv.compiled (derivative V du) (derivative V dv))
 
 recursive ::
   Compiled units ->
@@ -401,7 +398,7 @@ squared function = Units.specialize (squared' function)
 squared' :: SurfaceFunction units -> SurfaceFunction (units :*: units)
 squared' function =
   new
-    (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' (compiled function))
+    (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' function.compiled)
     (\p -> 2.0 * function .*. derivative p function)
 
 sqrt ::
@@ -416,19 +413,19 @@ sqrt' function =
     then zero
     else
       recursive
-        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' (compiled function))
+        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled)
         (\self p -> derivative p function .!/! (2.0 * self))
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =
   new
-    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin (compiled function))
+    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin function.compiled)
     (\p -> cos function * (derivative p function / Angle.radian))
 
 cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
 cos function =
   new
-    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos (compiled function))
+    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled)
     (\p -> negate (sin function) * (derivative p function / Angle.radian))
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)

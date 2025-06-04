@@ -69,10 +69,10 @@ erase = coerce
 This is the 3D point corresponding to (0,0) in the plane's local coordinates.
 -}
 originPoint :: Plane3d (space @ units) defines -> Point3d (space @ units)
-originPoint (Plane3d p0 _) = p0
+originPoint = (.originPoint)
 
 orientation :: Plane3d (space @ units) defines -> PlaneOrientation3d space defines
-orientation (Plane3d _ o) = o
+orientation = (.orientation)
 
 -- | Get the normal direction of a plane.
 normalDirection :: Plane3d (space @ units) defines -> Direction3d space

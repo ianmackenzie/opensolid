@@ -7,7 +7,6 @@ import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
@@ -34,17 +33,13 @@ main = Tolerance.using Length.nanometer IO.do
   let arc4 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vS vSE vE / weightCurve
   circle <- Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point =
-        Drawing2d.circle [Drawing2d.whiteFill]
-          # #centerPoint point
-          # #diameter (Length.millimeters 4.0)
-  let drawCurve n curve =
-        Drawing2d.group
-          [ Drawing2d.curve [] Length.micrometer curve
-          , Drawing2d.group $
-              List.map drawDot $
-                List.map (Curve2d.evaluate curve) (Parameter.steps n)
-          ]
+        Drawing2d.circleWith [Drawing2d.whiteFill] do
+          #centerPoint point
+          #diameter (Length.millimeters 4.0)
+  let drawCurve n curve = do
+        Drawing2d.curve Length.micrometer curve
+        Drawing2d.collect (drawDot . Curve2d.evaluate curve) (Parameter.steps n)
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -12.0 -12.0) (Point2d.centimeters 12.0 12.0)
-  Drawing2d.writeSvg "executables/piecewise-curve/arcs.svg" drawingBounds $
-    List.map (drawCurve 10) [arc1, arc2, arc3, arc4]
-  Drawing2d.writeSvg "executables/piecewise-curve/circle.svg" drawingBounds [drawCurve 40 circle]
+  Drawing2d.writeSvg "executables/piecewise-curve/circle.svg" drawingBounds (drawCurve 40 circle)
+  Drawing2d.writeSvg "executables/piecewise-curve/arcs.svg" drawingBounds do
+    Drawing2d.collect (drawCurve 10) [arc1, arc2, arc3, arc4]

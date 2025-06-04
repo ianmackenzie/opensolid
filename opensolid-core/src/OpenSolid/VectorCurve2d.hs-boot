@@ -1,7 +1,5 @@
 module OpenSolid.VectorCurve2d
-  ( VectorCurve2d
-  , compiled
-  , derivative
+  ( VectorCurve2d (compiled, derivative)
   , constant
   , new
   , evaluate

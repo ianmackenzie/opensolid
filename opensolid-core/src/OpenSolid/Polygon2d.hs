@@ -1,6 +1,5 @@
 module OpenSolid.Polygon2d
-  ( Polygon2d (Polygon2d)
-  , vertices
+  ( Polygon2d (Polygon2d, vertices)
   , edges
   , signedArea
   , signedArea'
@@ -21,7 +20,7 @@ import OpenSolid.Vertex2d (Vertex2d)
 newtype Polygon2d vertex = Polygon2d {vertices :: NonEmpty vertex}
 
 map :: (a -> b) -> Polygon2d a -> Polygon2d b
-map function (Polygon2d vertices) = Polygon2d (NonEmpty.map function vertices)
+map function polygon = Polygon2d (NonEmpty.map function polygon.vertices)
 
 signedArea' :: Vertex2d vertex (space @ units) => Polygon2d vertex -> Qty (units :*: units)
 signedArea' (Polygon2d (v0 :| vs)) = do

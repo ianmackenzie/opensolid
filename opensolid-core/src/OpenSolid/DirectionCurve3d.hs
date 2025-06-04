@@ -60,7 +60,7 @@ evaluateBounds (DirectionCurve3d vectorCurve) tBounds =
   DirectionBounds3d.unsafe (VectorCurve3d.evaluateBounds vectorCurve tBounds)
 
 derivative :: DirectionCurve3d space -> VectorCurve3d (space @ Unitless)
-derivative (DirectionCurve3d vectorCurve) = VectorCurve3d.derivative vectorCurve
+derivative (DirectionCurve3d vectorCurve) = vectorCurve.derivative
 
 constant :: Direction3d space -> DirectionCurve3d space
 constant direction = DirectionCurve3d (VectorCurve3d.constant (Vector3d.unit direction))

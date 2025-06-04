@@ -1,7 +1,6 @@
 module OpenSolid.SurfaceFunction3d
   ( SurfaceFunction3d
   , Compiled
-  , compiled
   , constant
   , evaluate
   , evaluateBounds
@@ -31,6 +30,8 @@ type Compiled coordinateSystem =
     UvBounds
     (Bounds3d coordinateSystem)
 
+instance HasField "compiled" (SurfaceFunction3d (space @ units)) (Compiled (space @ units))
+
 instance HasUnits (SurfaceFunction3d (space @ units)) units (SurfaceFunction3d (space @ Unitless))
 
 instance
@@ -44,7 +45,6 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
 
-compiled :: SurfaceFunction3d (space @ units) -> Compiled (space @ units)
 constant :: Point3d (space @ units) -> SurfaceFunction3d (space @ units)
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)
 evaluateBounds :: SurfaceFunction3d (space @ units) -> UvBounds -> Bounds3d (space @ units)

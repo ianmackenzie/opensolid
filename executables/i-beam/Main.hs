@@ -6,6 +6,7 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -17,10 +18,10 @@ import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
 main = Tolerance.using Length.nanometer IO.do
+  let world = Frame3d.world
   let length = Length.centimeters 30.0
   let width = Length.centimeters 10.0
   let height = Length.centimeters 15.0
@@ -33,17 +34,18 @@ main = Tolerance.using Length.nanometer IO.do
   let p5 = Point2d.y (0.5 * height)
   let fillet = Curve2d.cornerArc p2 Direction2d.y Direction2d.x (#radius filletRadius)
   let topRightCurves =
-        [ Curve2d.line p1 (Curve2d.startPoint fillet)
+        [ Curve2d.line p1 fillet.startPoint
         , fillet
-        , Curve2d.line (Curve2d.endPoint fillet) p3
+        , Curve2d.line fillet.endPoint p3
         , Curve2d.line p3 p4
         , Curve2d.line p4 p5
         ]
   let topCurves = topRightCurves <> List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- Region2d.boundedBy allCurves
-  body <- Body3d.extruded World3d.frontPlane profile (Bounds.symmetric (#width length))
-  let meshConstraints = NonEmpty.one (Mesh.maxError (Length.millimeters 1.0))
+  body <- Body3d.extruded world.frontPlane profile (Bounds.symmetric (#width length))
+  let maxErrorConstraint = Mesh.maxError (Length.millimeters 1.0)
+  let meshConstraints = NonEmpty.one maxErrorConstraint
   let mesh = Body3d.toMesh meshConstraints body
   let material = PbrMaterial.metal (Color.rgb 0.913 0.921 0.925) (#roughness 0.3)
   let scene = Scene3d.mesh material mesh

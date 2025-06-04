@@ -41,6 +41,7 @@ executable opensolid-python
     Python.NegationFunction
     Python.PostOperator
     Python.PreOperator
+    Python.Property
     Python.StaticFunction
     Python.Type
     Python.Type.Registry
@@ -67,6 +68,7 @@ executable opensolid-python
     DataKinds
     GADTs
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo

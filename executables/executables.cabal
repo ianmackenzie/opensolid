@@ -38,10 +38,12 @@ common config
 
   default-extensions:
     BlockArguments
+    DataKinds
     DisambiguateRecordFields
     GADTs
     LexicalNegation
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo

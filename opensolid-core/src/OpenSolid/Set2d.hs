@@ -73,7 +73,7 @@ build ::
 build boundsCoordinate buildSubset n boundedItems
   | n == 1 = do
       Debug.assert (NonEmpty.length boundedItems == 1)
-      let (itemBounds, item) = NonEmpty.first boundedItems
+      let (itemBounds, item) = boundedItems.first
       Leaf itemBounds item
   | otherwise = do
       Debug.assert (n >= 2)

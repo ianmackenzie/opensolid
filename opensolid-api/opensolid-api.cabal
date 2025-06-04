@@ -42,6 +42,7 @@ library
     API.NegationFunction
     API.PostOperator
     API.PreOperator
+    API.Property
     API.Space
     API.StaticFunction
     API.Upcast

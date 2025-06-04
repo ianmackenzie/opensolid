@@ -23,6 +23,7 @@ module OpenSolid.FFI
   , load
   , Representation
   , argumentName
+  , splitCamelCase
   )
 where
 
@@ -92,6 +93,8 @@ data Representation a where
   FloatRep :: Representation Float
   -- A Boolean value
   BoolRep :: Representation Bool
+  -- A Sign value
+  SignRep :: Representation Sign
   -- UTF-8 text
   TextRep :: Representation Text
   -- A struct with a 64-bit integer size and a pointer to an array of items
@@ -139,6 +142,7 @@ data Type where
   Int :: Type
   Float :: Type
   Bool :: Type
+  Sign :: Type
   Text :: Type
   List :: Type -> Type
   NonEmpty :: Type -> Type
@@ -159,6 +163,7 @@ typeOf proxy = case representation proxy of
   IntRep -> Int
   FloatRep -> Float
   BoolRep -> Bool
+  SignRep -> Sign
   TextRep -> Text
   ListRep -> listType proxy
   NonEmptyRep -> nonEmptyType proxy
@@ -236,13 +241,14 @@ typeName ffiType = case ffiType of
   Int -> "Int"
   Float -> "Float"
   Bool -> "Bool"
+  Sign -> "Sign"
   Text -> "Text"
   List itemType -> "List" <> typeName itemType
   NonEmpty itemType -> "NonEmpty" <> typeName itemType
   Array itemType -> "Array" <> typeName itemType
   Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
-    let tupleSize = List.length itemTypes
+    let tupleSize = itemTypes.length
     "Tuple" <> Text.int tupleSize <> Text.concat (List.map typeName itemTypes)
   Maybe valueType -> "Maybe" <> typeName valueType
   Result valueType -> "Result" <> typeName valueType
@@ -255,7 +261,7 @@ qualifiedName :: Text -> ClassName -> Text
 qualifiedName separator (ClassName components) = Text.join separator (NonEmpty.toList components)
 
 unqualifiedName :: ClassName -> Text
-unqualifiedName (ClassName components) = NonEmpty.last components
+unqualifiedName (ClassName components) = components.last
 
 size :: Type -> Int
 size ffiType = case ffiType of
@@ -263,6 +269,7 @@ size ffiType = case ffiType of
   Int -> 8
   Float -> 8
   Bool -> 8
+  Sign -> 8
   Text -> 8
   List _ -> 16
   NonEmpty _ -> 16
@@ -284,6 +291,9 @@ instance FFI Int where
 instance FFI Bool where
   representation _ = BoolRep
 
+instance FFI Sign where
+  representation _ = SignRep
+
 instance FFI Text where
   representation _ = TextRep
 
@@ -299,7 +309,7 @@ instance FFI Area where
 instance FFI Angle where
   representation = classRepresentation "Angle"
 
-instance (KnownSymbol name, FFI a) => FFI (Named name a) where
+instance (KnownSymbol name, FFI a) => FFI (name ::: a) where
   representation _ = do
     let camelCaseName = Text.pack (GHC.TypeLits.symbolVal @name Proxy)
     NamedArgumentRep (splitCamelCase camelCaseName) (Proxy @a)
@@ -357,6 +367,7 @@ store ptr offset value = do
     IntRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 value)
     FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
     BoolRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 (if value then 1 else 0))
+    SignRep -> store ptr offset (1 * value)
     TextRep -> IO.do
       let numBytes = Data.Text.Foreign.lengthWord8 value
       contentsPtr <- Foreign.Marshal.Alloc.mallocBytes (numBytes + 1)
@@ -364,7 +375,7 @@ store ptr offset value = do
       Foreign.pokeByteOff contentsPtr numBytes (fromIntegral 0 :: Word8)
       Foreign.pokeByteOff ptr offset contentsPtr
     ListRep -> IO.do
-      let numItems = List.length value
+      let numItems = value.length
       let itemSize = listItemSize proxy
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
       let storeItem index item = store itemsPtr (index * itemSize) item
@@ -459,6 +470,7 @@ load ptr offset = do
     IntRep -> IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
     FloatRep -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
     BoolRep -> IO.map ((/=) 0 . Int.fromInt64) (Foreign.peekByteOff ptr offset)
+    SignRep -> IO.map Int.sign (load ptr offset)
     TextRep -> IO.do
       dataPtr <- Foreign.peekByteOff ptr offset
       byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr

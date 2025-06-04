@@ -1,7 +1,6 @@
 module OpenSolid.VectorSurfaceFunction3d
   ( VectorSurfaceFunction3d
   , Compiled
-  , compiled
   , new
   , recursive
   , zero
@@ -39,7 +38,6 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
-import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
 data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
   VectorSurfaceFunction3d ::
@@ -71,7 +69,7 @@ instance
     VectorSurfaceFunction3d (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
 instance Negation (VectorSurfaceFunction3d (space @ units)) where
-  negate function = new (negate (compiled function)) (\p -> negate (derivative p function))
+  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
 
 instance
   Multiplication
@@ -100,7 +98,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units_))
     (VectorSurfaceFunction3d (space @ units))
   where
-  lhs + rhs = new (compiled lhs + compiled rhs) (\p -> derivative p lhs + derivative p rhs)
+  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
 
 instance
   ( space ~ space_
@@ -133,7 +131,7 @@ instance
     (VectorSurfaceFunction3d (space_ @ units_))
     (VectorSurfaceFunction3d (space @ units))
   where
-  lhs - rhs = new (compiled lhs - compiled rhs) (\p -> derivative p lhs - derivative p rhs)
+  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
 
 instance
   ( space ~ space_
@@ -183,8 +181,8 @@ instance
   where
   lhs .*. rhs =
     new
-      (SurfaceFunction.compiled lhs .*. compiled rhs)
-      (\p -> SurfaceFunction.derivative p lhs .*. rhs + lhs .*. derivative p rhs)
+      # lhs.compiled .*. rhs.compiled
+      # \p -> SurfaceFunction.derivative p lhs .*. rhs + lhs .*. derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -214,8 +212,8 @@ instance
   where
   lhs .*. rhs =
     new
-      (compiled lhs .*. SurfaceFunction.compiled rhs)
-      (\p -> derivative p lhs .*. rhs + lhs .*. SurfaceFunction.derivative p rhs)
+      # lhs.compiled .*. rhs.compiled
+      # \p -> derivative p lhs .*. rhs + lhs .*. SurfaceFunction.derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -245,8 +243,8 @@ instance
   where
   lhs ./. rhs =
     recursive
-      (compiled lhs ./. SurfaceFunction.compiled rhs)
-      (\self p -> derivative p lhs ./. rhs - self * (SurfaceFunction.derivative p rhs / rhs))
+      # lhs.compiled ./. rhs.compiled
+      # \self p -> derivative p lhs ./. rhs - self * (SurfaceFunction.derivative p rhs / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -280,7 +278,7 @@ instance
   where
   lhs `cross'` rhs =
     new
-      (compiled lhs `cross'` compiled rhs)
+      (lhs.compiled `cross'` rhs.compiled)
       (\p -> derivative p lhs `cross'` rhs + lhs `cross'` derivative p rhs)
 
 instance
@@ -337,7 +335,7 @@ instance
   where
   lhs `dot'` rhs =
     SurfaceFunction.new
-      (compiled lhs `dot'` compiled rhs)
+      (lhs.compiled `dot'` rhs.compiled)
       (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
 
 instance
@@ -399,16 +397,20 @@ instance
     let duOuter = derivative U outer . inner
     let dvOuter = derivative V outer . inner
     new
-      # compiled outer . SurfaceFunction2d.compiled inner
+      # outer.compiled . inner.compiled
       # \p -> do
         let dInner = SurfaceFunction2d.derivative p inner
-        let dU = VectorSurfaceFunction2d.xComponent dInner
-        let dV = VectorSurfaceFunction2d.yComponent dInner
+        let dU = dInner.xComponent
+        let dV = dInner.yComponent
         duOuter * dU + dvOuter * dV
 
-{-# INLINE compiled #-}
-compiled :: VectorSurfaceFunction3d (space @ units) -> Compiled (space @ units)
-compiled (VectorSurfaceFunction3d c _ _) = c
+instance
+  HasField
+    "compiled"
+    (VectorSurfaceFunction3d (space @ units))
+    (Compiled (space @ units))
+  where
+  getField (VectorSurfaceFunction3d c _ _) = c
 
 new ::
   Compiled (space @ units) ->
@@ -417,7 +419,7 @@ new ::
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction3d (compiled dv) (derivative V du) (derivative V dv)
+  let dv' = VectorSurfaceFunction3d dv.compiled (derivative V du) (derivative V dv)
   VectorSurfaceFunction3d c du dv'
 
 recursive ::
@@ -447,9 +449,9 @@ rightwardForwardUpward r f u =
       Expression.rightwardForwardUpward
       Vector3d.rightwardForwardUpward
       VectorBounds3d.rightwardForwardUpward
-      (SurfaceFunction.compiled r)
-      (SurfaceFunction.compiled f)
-      (SurfaceFunction.compiled u)
+      r.compiled
+      f.compiled
+      u.compiled
     # \p ->
       rightwardForwardUpward
         (SurfaceFunction.derivative p r)
@@ -457,13 +459,13 @@ rightwardForwardUpward r f u =
         (SurfaceFunction.derivative p u)
 
 evaluate :: VectorSurfaceFunction3d (space @ units) -> UvPoint -> Vector3d (space @ units)
-evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint
+evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 evaluateBounds ::
   VectorSurfaceFunction3d (space @ units) ->
   UvBounds ->
   VectorBounds3d (space @ units)
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds (compiled function) uvBounds
+evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->
@@ -482,7 +484,7 @@ placeIn orientation function =
       (Expression.VectorSurface3d.placeIn orientation)
       (Vector3d.placeIn orientation)
       (VectorBounds3d.placeIn orientation)
-      (compiled function)
+      function.compiled
     # \p -> placeIn orientation (derivative p function)
 
 relativeTo ::
@@ -501,5 +503,5 @@ transformBy transform function =
       (Expression.VectorSurface3d.transformBy transform)
       (Vector3d.transformBy transform)
       (VectorBounds3d.transformBy transform)
-      (compiled function)
+      function.compiled
     # \p -> transformBy transform (derivative p function)

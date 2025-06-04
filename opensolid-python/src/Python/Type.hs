@@ -12,6 +12,7 @@ qualifiedName ffiType = case ffiType of
   FFI.Int -> "int"
   FFI.Float -> "float"
   FFI.Bool -> "bool"
+  FFI.Sign -> "int"
   FFI.Text -> "str"
   FFI.List itemType -> "list[" <> qualifiedName itemType <> "]"
   FFI.NonEmpty itemType -> "list[" <> qualifiedName itemType <> "]"

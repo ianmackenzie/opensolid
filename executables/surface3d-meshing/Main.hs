@@ -6,8 +6,6 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.List qualified as List
-import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
@@ -27,10 +25,12 @@ main = IO.do
   let forward = r * SurfaceFunction.sin theta
   let upward = h * SurfaceFunction.v
   let surfaceFunction = SurfaceFunction3d.rightwardForwardUpward rightward forward upward
-  let domainCircle = Curve2d.circle (#centerPoint (Point2d.xy 0.5 0.5)) (#diameter (2 / 3))
+  let domainCenter = Point2d.xy 0.5 0.5
+  let domainDiameter = 2 / 3
+  let domainCircle = Curve2d.circle (#centerPoint domainCenter, #diameter domainDiameter)
   domain <- Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle])
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2.0) surface
-  IO.printLine ("Num faces: " <> Text.int (List.length (Mesh.faceIndices mesh)))
+  IO.printLine ("Num faces: " <> Text.int mesh.numFaces)
   let path = "executables/surface3d-meshing/mesh.stl"
   Stl.writeBinary path Convention3d.yUp Length.inMillimeters mesh

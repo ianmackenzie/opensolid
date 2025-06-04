@@ -6,7 +6,6 @@ module OpenSolid.Curve3d
   , on
   , evaluate
   , evaluateBounds
-  , derivative
   , reverse
   )
 where
@@ -31,6 +30,10 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Bounds Unitless)
     (Bounds3d coordinateSystem)
 
+instance HasField "compiled" (Curve3d (space @ units)) (Compiled (space @ units))
+
+instance HasField "derivative" (Curve3d (space @ units)) (VectorCurve3d (space @ units))
+
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
@@ -51,7 +54,6 @@ on ::
   Plane3d (space @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve3d (space @ units)
-derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
 evaluateBounds :: Curve3d (space @ units) -> Bounds Unitless -> Bounds3d (space @ units)
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)

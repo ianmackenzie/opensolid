@@ -1,10 +1,6 @@
 module OpenSolid.Polyline2d
-  ( Polyline2d (..)
+  ( Polyline2d (Polyline2d, vertices)
   , map
-  , start
-  , end
-  , length
-  , segments
   )
 where
 
@@ -20,14 +16,17 @@ newtype Polyline2d vertex = Polyline2d {vertices :: NonEmpty vertex}
 map :: (a -> b) -> Polyline2d a -> Polyline2d b
 map function (Polyline2d vertices) = Polyline2d (NonEmpty.map function vertices)
 
-start :: Polyline2d vertex -> vertex
-start polyline = NonEmpty.first (vertices polyline)
+instance HasField "numVertices" (Polyline2d vertex) Int where
+  getField = (.vertices.length)
 
-end :: Polyline2d vertex -> vertex
-end polyline = NonEmpty.last (vertices polyline)
+instance HasField "start" (Polyline2d vertex) vertex where
+  getField = (.vertices.first)
 
-segments :: Polyline2d vertex -> List (LineSegment2d vertex)
-segments polyline = NonEmpty.successive LineSegment2d (vertices polyline)
+instance HasField "end" (Polyline2d vertex) vertex where
+  getField = (.vertices.last)
 
-length :: Vertex2d vertex (space @ units) => Polyline2d vertex -> Qty units
-length polyline = Qty.sumOf LineSegment2d.length (segments polyline)
+instance HasField "segments" (Polyline2d vertex) (List (LineSegment2d vertex)) where
+  getField polyline = NonEmpty.successive LineSegment2d polyline.vertices
+
+instance Vertex2d vertex (space @ units) => HasField "length" (Polyline2d vertex) (Qty units) where
+  getField polyline = Qty.sumOf LineSegment2d.length polyline.segments

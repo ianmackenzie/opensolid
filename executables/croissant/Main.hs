@@ -17,7 +17,7 @@ import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
-main = Tolerance.using Length.nanometer $ IO.do
+main = Tolerance.using Length.nanometer IO.do
   let majorRadius = Length.meter
   let k = Length.meters 2.0
   let minorRadius = Curve.hermite Length.zero [k] Length.zero [-k] . SurfaceFunction.u

@@ -1,13 +1,11 @@
 module OpenSolid.VectorCurve2d
-  ( VectorCurve2d
+  ( VectorCurve2d (compiled, derivative)
   , Compiled
   , new
   , startValue
   , endValue
   , evaluate
   , evaluateBounds
-  , compiled
-  , derivative
   , zero
   , constant
   , unit
@@ -20,16 +18,12 @@ module OpenSolid.VectorCurve2d
   , synthetic
   , magnitude
   , unsafeMagnitude
-  , squaredMagnitude
-  , squaredMagnitude'
   , reverse
   , isZero
   , hasZero
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , HasZero (HasZero)
-  , xComponent
-  , yComponent
   , direction
   , placeIn
   , relativeTo
@@ -120,7 +114,7 @@ instance
       }
 
 instance Negation (VectorCurve2d (space @ units)) where
-  negate curve = new (negate (compiled curve)) (negate (derivative curve))
+  negate curve = new (negate curve.compiled) (negate curve.derivative)
 
 instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
   Positive * curve = curve
@@ -137,7 +131,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  lhs + rhs = new (compiled lhs + compiled rhs) (derivative lhs + derivative rhs)
+  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -164,7 +158,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  lhs - rhs = new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
+  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -200,9 +194,7 @@ instance
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
   lhs .*. rhs =
-    new
-      (Curve.compiled lhs .*. compiled rhs)
-      (Curve.derivative lhs .*. rhs + lhs .*. derivative rhs)
+    new (lhs.compiled .*. rhs.compiled) (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -231,9 +223,7 @@ instance
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
   lhs .*. rhs =
-    new
-      (compiled lhs .*. Curve.compiled rhs)
-      (derivative lhs .*. rhs + lhs .*. Curve.derivative rhs)
+    new (lhs.compiled .*. rhs.compiled) (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -263,8 +253,8 @@ instance
   where
   lhs ./. rhs =
     recursive
-      (compiled lhs ./. Curve.compiled rhs)
-      (\self -> derivative lhs ./. rhs - self * (Curve.derivative rhs / rhs))
+      # lhs.compiled ./. rhs.compiled
+      # \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -298,8 +288,8 @@ instance
   where
   lhs `dot'` rhs =
     Curve.new
-      (compiled lhs `dot'` compiled rhs)
-      (derivative lhs `dot'` rhs + lhs `dot'` derivative rhs)
+      # lhs.compiled `dot'` rhs.compiled
+      # lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -361,8 +351,8 @@ instance
   where
   lhs `cross'` rhs =
     Curve.new
-      (compiled lhs `cross'` compiled rhs)
-      (derivative lhs `cross'` rhs + lhs `cross'` derivative rhs)
+      # lhs.compiled `cross'` rhs.compiled
+      # lhs.derivative `cross'` rhs + lhs `cross'` rhs.derivative
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -437,7 +427,7 @@ instance
     (VectorCurve2d (space @ units))
     (VectorCurve2d (space @ units))
   where
-  f . g = new (compiled f . Curve.compiled g) ((derivative f . g) * Curve.derivative g)
+  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 instance
   unitless ~ Unitless =>
@@ -448,8 +438,8 @@ instance
   where
   curve . function =
     VectorSurfaceFunction2d.new
-      (compiled curve . SurfaceFunction.compiled function)
-      (\p -> (derivative curve . function) * SurfaceFunction.derivative p function)
+      # curve.compiled . function.compiled
+      # \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
 
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
@@ -461,8 +451,8 @@ transformBy transform curve =
       (Expression.VectorCurve2d.transformBy transform)
       (Vector2d.transformBy transform)
       (VectorBounds2d.transformBy transform)
-      (compiled curve)
-    # transformBy transform (derivative curve)
+      curve.compiled
+    # transformBy transform curve.derivative
 
 rotateBy ::
   forall space units.
@@ -500,9 +490,9 @@ xy x y =
       Expression.xy
       Vector2d
       VectorBounds2d
-      (Curve.compiled x)
-      (Curve.compiled y)
-    # xy (Curve.derivative x) (Curve.derivative y)
+      x.compiled
+      y.compiled
+    # xy x.derivative y.derivative
 
 line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
 line v1 v2 = bezierCurve (NonEmpty.two v1 v2)
@@ -545,7 +535,7 @@ synthetic ::
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
-synthetic curve curveDerivative = new (compiled curve) curveDerivative
+synthetic curve curveDerivative = new curve.compiled curveDerivative
 
 startValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
 startValue curve = evaluate curve 0.0
@@ -566,18 +556,26 @@ evaluateBounds VectorCurve2d{compiled} tBounds = CompiledFunction.evaluateBounds
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
 
-squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
-squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
+instance
+  Units.Squared units1 units2 =>
+  HasField "squaredMagnitude" (VectorCurve2d (space @ units1)) (Curve units2)
+  where
+  getField curve = Units.specialize curve.squaredMagnitude'
 
-squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve (units :*: units)
-squaredMagnitude' curve =
-  Curve.new
-    # CompiledFunction.map
-      Expression.VectorCurve2d.squaredMagnitude'
-      Vector2d.squaredMagnitude'
-      VectorBounds2d.squaredMagnitude'
-      (compiled curve)
-    # 2.0 * curve `dot'` derivative curve
+instance
+  HasField
+    "squaredMagnitude'"
+    (VectorCurve2d (space @ units))
+    (Curve (units :*: units))
+  where
+  getField curve =
+    Curve.new
+      # CompiledFunction.map
+        Expression.VectorCurve2d.squaredMagnitude'
+        Vector2d.squaredMagnitude'
+        VectorBounds2d.squaredMagnitude'
+        curve.compiled
+      # 2.0 * curve `dot'` curve.derivative
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 unsafeMagnitude curve =
@@ -586,8 +584,8 @@ unsafeMagnitude curve =
       Expression.VectorCurve2d.magnitude
       Vector2d.magnitude
       VectorBounds2d.magnitude
-      (compiled curve)
-    # \self -> derivative curve `dot` (curve / self)
+      curve.compiled
+    # \self -> curve.derivative `dot` (curve / self)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
@@ -599,38 +597,38 @@ magnitude curve =
     Failure ZeroEverywhere -> Failure HasZero
 
 isZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
-isZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ~= Qty.zero)
+isZero curve = Tolerance.using Tolerance.squared' (curve.squaredMagnitude' ~= Qty.zero)
 
 hasZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
-hasZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ^ Qty.zero)
+hasZero curve = Tolerance.using Tolerance.squared' (curve.squaredMagnitude' ^ Qty.zero)
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
 zeros curve =
-  case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
-    Success zeros1d -> Success (List.map Curve.Zero.location zeros1d)
+  case Tolerance.using Tolerance.squared' (Curve.zeros curve.squaredMagnitude') of
+    Success zeros1d -> Success (List.map (.location) zeros1d)
     Failure Curve.ZeroEverywhere -> Failure ZeroEverywhere
 
-xComponent :: VectorCurve2d (space @ units) -> Curve units
-xComponent curve =
-  Curve.new
-    # CompiledFunction.map
-      Expression.xComponent
-      Vector2d.xComponent
-      VectorBounds2d.xComponent
-      (compiled curve)
-    # xComponent (derivative curve)
+instance HasField "xComponent" (VectorCurve2d (space @ units)) (Curve units) where
+  getField curve =
+    Curve.new
+      # CompiledFunction.map
+        Expression.xComponent
+        Vector2d.xComponent
+        VectorBounds2d.xComponent
+        curve.compiled
+      # curve.derivative.xComponent
 
-yComponent :: VectorCurve2d (space @ units) -> Curve units
-yComponent curve =
-  Curve.new
-    # CompiledFunction.map
-      Expression.yComponent
-      Vector2d.yComponent
-      VectorBounds2d.yComponent
-      (compiled curve)
-    # yComponent (derivative curve)
+instance HasField "yComponent" (VectorCurve2d (space @ units)) (Curve units) where
+  getField curve =
+    Curve.new
+      # CompiledFunction.map
+        Expression.yComponent
+        Vector2d.yComponent
+        VectorBounds2d.yComponent
+        curve.compiled
+      # curve.derivative.yComponent
 
 direction ::
   Tolerance units =>
@@ -639,15 +637,14 @@ direction ::
 direction curve =
   case zeros curve of
     -- If the vector curve has no zeros, then we can safely compute its direction
-    Success [] -> Success (VectorCurve2d.Direction.unsafe curve (derivative curve))
+    Success [] -> Success (VectorCurve2d.Direction.unsafe curve curve.derivative)
     -- Otherwise, check where the vector curve is zero:
     -- if it's only zero at one or both endpoints,
     -- and the curve's *derivative* is non-zero at those endpoints,
     -- then it's still possible to uniquely determine a tangent direction everywhere
-    Success (NonEmpty curveZeros) -> do
-      let curveDerivative = derivative curve
-      if NonEmpty.allSatisfy (isRemovableDegeneracy curveDerivative) curveZeros
-        then Success (VectorCurve2d.Direction.unsafe curve curveDerivative)
+    Success (NonEmpty curveZeros) ->
+      if NonEmpty.allSatisfy (isRemovableDegeneracy curve.derivative) curveZeros
+        then Success (VectorCurve2d.Direction.unsafe curve curve.derivative)
         else Failure HasZero
     -- Definitely can't get the direction of a vector curve
     -- if that vector curve is zero everywhere!
@@ -670,8 +667,8 @@ placeIn orientation curve = do
           (Expression.VectorCurve2d.placeIn orientation)
           (Vector2d.placeIn orientation)
           (VectorBounds2d.placeIn orientation)
-          (compiled curve)
-  new compiledPlaced (placeIn orientation (derivative curve))
+          curve.compiled
+  new compiledPlaced (placeIn orientation curve.derivative)
 
 relativeTo ::
   Orientation2d global (Defines local) ->

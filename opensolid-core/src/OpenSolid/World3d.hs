@@ -8,12 +8,6 @@ module OpenSolid.World3d
   , backwardDirection
   , upwardDirection
   , downwardDirection
-  , rightwardForwardDirection
-  , forwardRightwardDirection
-  , forwardUpwardDirection
-  , upwardForwardDirection
-  , rightwardUpwardDirection
-  , upwardRightwardDirection
   , rightwardOrientation
   , leftwardOrientation
   , forwardOrientation
@@ -35,11 +29,9 @@ module OpenSolid.World3d
   )
 where
 
-import OpenSolid.Angle (Angle)
-import OpenSolid.Angle qualified as Angle
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Direction3d (Direction3d, Unit3d)
+  ( Direction3d (Direction3d)
   , Frame3d (Frame3d)
   , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
@@ -75,30 +67,6 @@ upwardDirection = Direction3d 0.0 0.0 1.0
 -- | The downward direction of the current global coordinate system.
 downwardDirection :: Direction3d space
 downwardDirection = Direction3d 0.0 0.0 -1.0
-
-rightwardForwardDirection :: Angle -> Direction3d space
-rightwardForwardDirection angle =
-  Unit3d (Angle.cos angle * rightwardDirection + Angle.sin angle * forwardDirection)
-
-forwardRightwardDirection :: Angle -> Direction3d space
-forwardRightwardDirection angle =
-  Unit3d (Angle.cos angle * forwardDirection + Angle.sin angle * rightwardDirection)
-
-forwardUpwardDirection :: Angle -> Direction3d space
-forwardUpwardDirection angle =
-  Unit3d (Angle.cos angle * forwardDirection + Angle.sin angle * upwardDirection)
-
-upwardForwardDirection :: Angle -> Direction3d space
-upwardForwardDirection angle =
-  Unit3d (Angle.cos angle * upwardDirection + Angle.sin angle * forwardDirection)
-
-rightwardUpwardDirection :: Angle -> Direction3d space
-rightwardUpwardDirection angle =
-  Unit3d (Angle.cos angle * rightwardDirection + Angle.sin angle * upwardDirection)
-
-upwardRightwardDirection :: Angle -> Direction3d space
-upwardRightwardDirection angle =
-  Unit3d (Angle.cos angle * upwardDirection + Angle.sin angle * rightwardDirection)
 
 -- | The global coordinate system orientation.
 orientation :: Orientation3d space (Defines space)

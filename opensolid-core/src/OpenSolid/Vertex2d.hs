@@ -1,5 +1,5 @@
 module OpenSolid.Vertex2d
-  ( Vertex2d (..)
+  ( Vertex2d (position)
   , pattern Vertex2d
   )
 where

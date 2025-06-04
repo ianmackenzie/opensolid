@@ -17,8 +17,6 @@ module OpenSolid.Curve3d
   , evaluate
   , evaluateBounds
   , bounds
-  , compiled
-  , derivative
   , reverse
   , arcLengthParameterization
   , unsafeArcLengthParameterization
@@ -45,7 +43,6 @@ import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
@@ -74,11 +71,7 @@ import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d ::
-    { compiled :: Compiled (space @ units)
-    , derivative :: ~(VectorCurve3d (space @ units))
-    } ->
-    Curve3d (space @ units)
+  Curve3d :: Compiled (space @ units) -> ~(VectorCurve3d (space @ units)) -> Curve3d (space @ units)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
@@ -87,17 +80,19 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Bounds Unitless)
     (Bounds3d coordinateSystem)
 
+instance HasField "compiled" (Curve3d (space @ units)) (Compiled (space @ units)) where
+  getField (Curve3d c _) = c
+
+instance HasField "derivative" (Curve3d (space @ units)) (VectorCurve3d (space @ units)) where
+  getField (Curve3d _ d) = d
+
 instance HasUnits (Curve3d (space @ units)) units (Curve3d (space @ Unitless))
 
 instance
   space1 ~ space2 =>
   Units.Coercion (Curve3d (space1 @ unitsA)) (Curve3d (space2 @ unitsB))
   where
-  coerce Curve3d{compiled, derivative} =
-    Curve3d
-      { compiled = Units.coerce compiled
-      , derivative = Units.coerce derivative
-      }
+  coerce curve = Curve3d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
 instance Bounded3d (Curve3d (space @ units)) (space @ units) where
   bounds = bounds
@@ -111,8 +106,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve3d (space1 @ units1))
   where
-  lhs + rhs =
-    new (compiled lhs + VectorCurve3d.compiled rhs) (derivative lhs + VectorCurve3d.derivative rhs)
+  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -121,8 +115,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve3d (space1 @ units1))
   where
-  lhs - rhs =
-    new (compiled lhs - VectorCurve3d.compiled rhs) (derivative lhs - VectorCurve3d.derivative rhs)
+  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -131,7 +124,7 @@ instance
     (Curve3d (space2 @ units2))
     (VectorCurve3d (space1 @ units1))
   where
-  lhs - rhs = VectorCurve3d.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
+  lhs - rhs = VectorCurve3d.new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
 
 instance
   unitless ~ Unitless =>
@@ -139,8 +132,8 @@ instance
   where
   outer . inner =
     new
-      (compiled outer . Curve.compiled inner)
-      ((derivative outer . inner) * Curve.derivative inner)
+      # outer.compiled . inner.compiled
+      # (outer.derivative . inner) * inner.derivative
 
 instance
   unitless ~ Unitless =>
@@ -151,8 +144,8 @@ instance
   where
   curve . function =
     SurfaceFunction3d.new
-      (compiled curve . SurfaceFunction.compiled function)
-      (\p -> derivative curve . function * SurfaceFunction.derivative p function)
+      # curve.compiled . function.compiled
+      # \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -186,13 +179,13 @@ rightwardForwardUpward r f u =
       Expression.rightwardForwardUpward
       Point3d.rightwardForwardUpward
       Bounds3d.rightwardForwardUpward
-      (Curve.compiled r)
-      (Curve.compiled f)
-      (Curve.compiled u)
+      r.compiled
+      f.compiled
+      u.compiled
     # VectorCurve3d.rightwardForwardUpward
-      (Curve.derivative r)
-      (Curve.derivative f)
-      (Curve.derivative u)
+      r.derivative
+      f.derivative
+      u.derivative
 
 on ::
   Plane3d (space @ units) (Defines local) ->
@@ -204,8 +197,8 @@ on plane curve2d = do
       (Expression.Curve2d.on plane)
       (Point2d.on plane)
       (Bounds2d.on plane)
-      (Curve2d.compiled curve2d)
-    # VectorCurve3d.on (Plane3d.orientation plane) (Curve2d.derivative curve2d)
+      curve2d.compiled
+    # VectorCurve3d.on (Plane3d.orientation plane) curve2d.derivative
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve.t * (p2 - p1)
@@ -272,10 +265,10 @@ endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
 endPoint curve = evaluate curve 1.0
 
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
-evaluate Curve3d{compiled} tValue = CompiledFunction.evaluate compiled tValue
+evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 evaluateBounds :: Curve3d (space @ units) -> Bounds Unitless -> Bounds3d (space @ units)
-evaluateBounds Curve3d{compiled} tBounds = CompiledFunction.evaluateBounds compiled tBounds
+evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
 bounds curve = evaluateBounds curve Bounds.unitInterval
@@ -287,17 +280,16 @@ arcLengthParameterization ::
   Tolerance units =>
   Curve3d (space @ units) ->
   Result HasDegeneracy (Curve Unitless, Qty units)
-arcLengthParameterization curve = do
-  let curveDerivative = derivative curve
-  if VectorCurve3d.isZero curveDerivative
+arcLengthParameterization curve =
+  if VectorCurve3d.isZero curve.derivative
     then Success (Curve.t, Qty.zero) -- Curve is a constant point
-    else case VectorCurve3d.magnitude (derivative curve) of
+    else case VectorCurve3d.magnitude curve.derivative of
       Failure VectorCurve3d.HasZero -> Failure HasDegeneracy
       Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
 
 unsafeArcLengthParameterization :: Curve3d (space @ units) -> (Curve Unitless, Qty units)
 unsafeArcLengthParameterization curve =
-  ArcLength.parameterization (VectorCurve3d.unsafeMagnitude (derivative curve))
+  ArcLength.parameterization (VectorCurve3d.unsafeMagnitude curve.derivative)
 
 parameterizeByArcLength ::
   Tolerance units =>
@@ -322,8 +314,8 @@ transformBy transform curve =
       (Expression.Curve3d.transformBy transform)
       (Point3d.transformBy transform)
       (Bounds3d.transformBy transform)
-      (compiled curve)
-    # VectorCurve3d.transformBy transform (derivative curve)
+      curve.compiled
+    # VectorCurve3d.transformBy transform curve.derivative
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
@@ -335,8 +327,8 @@ placeIn frame curve =
       (Expression.Curve3d.placeIn frame)
       (Point3d.placeIn frame)
       (Bounds3d.placeIn frame)
-      (compiled curve)
-    # VectorCurve3d.placeIn (Frame3d.orientation frame) (derivative curve)
+      curve.compiled
+    # VectorCurve3d.placeIn (Frame3d.orientation frame) curve.derivative
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->

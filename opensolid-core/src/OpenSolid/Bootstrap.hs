@@ -1,3 +1,10 @@
+-- Needed for List and NonEmpty HasField instances
+-- (should hopefully be safe having those instances here,
+-- since pretty much *any* modules that use OpenSolid
+-- will indirectly import this module, even if e.g.
+-- they don't import OpenSolid.List or OpenSolid.NonEmpty)
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.Bootstrap
   ( List
   , Text
@@ -39,16 +46,21 @@ module OpenSolid.Bootstrap
   , type (~)
   , HasCallStack
   , withFrozenCallStack
+  , HasField (getField)
   )
 where
 
 import Control.Concurrent.Async (Async)
 import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Kind (Type)
+import Data.List qualified
+import Data.List.NonEmpty (NonEmpty)
+import Data.List.NonEmpty qualified
 import Data.Text (Text)
 import Data.Text qualified
 import Data.Traversable.WithIndex (TraversableWithIndex)
 import Data.Type.Equality (type (~))
+import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude
   ( Bool (False, True)
@@ -141,3 +153,18 @@ infixl 2 ##
 (###) function value = function value
 
 infixl 3 ###
+
+instance HasField "length" (List a) Int where
+  getField = Data.List.length
+
+instance HasField "first" (NonEmpty a) a where
+  getField = Data.List.NonEmpty.head
+
+instance HasField "rest" (NonEmpty a) [a] where
+  getField = Data.List.NonEmpty.tail
+
+instance HasField "last" (NonEmpty a) a where
+  getField = Data.List.NonEmpty.last
+
+instance HasField "length" (NonEmpty a) Int where
+  getField = Data.List.NonEmpty.length

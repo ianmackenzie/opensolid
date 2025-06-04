@@ -5,7 +5,7 @@ module OpenSolid.Prelude
   , module OpenSolid.CoordinateSystem
   , module OpenSolid.Float
   , module OpenSolid.Intersects
-  , module OpenSolid.Named
+  , module OpenSolid.Field
   , module OpenSolid.NonEmpty
   , module OpenSolid.Qty
   , module OpenSolid.Result
@@ -18,10 +18,21 @@ where
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Composition (Composition ((>>)), (.))
-import OpenSolid.CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
+import OpenSolid.CoordinateSystem
+  ( BackPlane
+  , BottomPlane
+  , CoordinateSystem
+  , Defines
+  , FrontPlane
+  , LeftPlane
+  , LocalSpace
+  , RightPlane
+  , TopPlane
+  , type (@)
+  )
+import OpenSolid.Field
 import OpenSolid.Float (Float, fromRational)
 import OpenSolid.Intersects (Intersects ((^)))
-import OpenSolid.Named
 import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import OpenSolid.Qty (Qty)
 import OpenSolid.Result (Result (Failure, Success))

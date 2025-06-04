@@ -3,7 +3,6 @@ module OpenSolid.VectorSurfaceFunction3d
   , Compiled
   , new
   , constant
-  , compiled
   , derivative
   )
 where
@@ -27,6 +26,12 @@ type Compiled coordinateSystem =
     (Vector3d coordinateSystem)
     UvBounds
     (VectorBounds3d coordinateSystem)
+
+instance
+  HasField
+    "compiled"
+    (VectorSurfaceFunction3d (space @ units))
+    (Compiled (space @ units))
 
 instance
   HasUnits
@@ -70,7 +75,6 @@ new ::
   Compiled (space @ units) ->
   (SurfaceParameter -> VectorSurfaceFunction3d (space @ units)) ->
   VectorSurfaceFunction3d (space @ units)
-compiled :: VectorSurfaceFunction3d (space @ units) -> Compiled (space @ units)
 derivative ::
   SurfaceParameter ->
   VectorSurfaceFunction3d (space @ units) ->

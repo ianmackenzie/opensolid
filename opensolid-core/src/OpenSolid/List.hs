@@ -12,7 +12,6 @@ module OpenSolid.List
   , singleton
   , maybe
   , isEmpty
-  , length
   , map
   , mapWithIndex
   , indexed
@@ -79,9 +78,6 @@ maybe Nothing = []
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null
-
-length :: List a -> Int
-length = Data.List.length
 
 {-# COMPLETE [], OneOrMore #-}
 
@@ -282,6 +278,6 @@ random n randomItem
 
 shuffle :: List a -> Random.Generator (List a)
 shuffle original = Random.do
-  keys <- random (length original) (Random.Generator System.Random.genWord64)
+  keys <- random original.length (Random.Generator System.Random.genWord64)
   let shuffledPairs = sortBy Pair.second (zip2 original keys)
   Random.return (map Pair.first shuffledPairs)

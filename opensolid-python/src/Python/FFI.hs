@@ -24,6 +24,7 @@ typeName ffiType = case ffiType of
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
   FFI.Bool -> "c_int64"
+  FFI.Sign -> "c_int64"
   FFI.Text -> "_Text"
   FFI.List{} -> "_" <> typeNameComponent ffiType
   FFI.NonEmpty{} -> "_" <> typeNameComponent ffiType
@@ -39,13 +40,14 @@ typeNameComponent ffiType = case ffiType of
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
   FFI.Bool -> "c_int64"
+  FFI.Sign -> "c_int64"
   FFI.Text -> "Text"
   FFI.List itemType -> "List_" <> typeNameComponent itemType
   FFI.NonEmpty itemType -> "List_" <> typeNameComponent itemType
   FFI.Array itemType -> "List_" <> typeNameComponent itemType
   FFI.Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
-    let numItems = List.length itemTypes
+    let numItems = itemTypes.length
     let prefix = "Tuple" <> Text.int numItems
     Text.join "_" (prefix : List.map typeNameComponent itemTypes)
   FFI.Maybe valueType -> "Maybe_" <> typeNameComponent valueType
@@ -61,6 +63,7 @@ dummyFieldValue ffiType = case ffiType of
   FFI.Int -> "0"
   FFI.Float -> "0.0"
   FFI.Bool -> "0"
+  FFI.Sign -> "0"
   FFI.Text -> dummyValue ffiType
   FFI.List{} -> dummyValue ffiType
   FFI.NonEmpty{} -> dummyValue ffiType
@@ -88,6 +91,7 @@ outputValue ffiType varName = case ffiType of
   FFI.Int -> varName <> ".value"
   FFI.Float -> varName <> ".value"
   FFI.Bool -> "bool(" <> varName <> ".value)"
+  FFI.Sign -> varName <> ".value"
   FFI.Text -> "_text_to_str(" <> varName <> ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.NonEmpty itemType -> listOutputValue itemType varName
@@ -103,6 +107,7 @@ fieldOutputValue ffiType varName = case ffiType of
   FFI.Int -> varName
   FFI.Float -> varName
   FFI.Bool -> "bool(" <> varName <> ")"
+  FFI.Sign -> varName
   FFI.Text -> "_text_to_str(" <> varName <> ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.NonEmpty itemType -> listOutputValue itemType varName
@@ -148,6 +153,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Int -> "c_int64(" <> varName <> ")"
   FFI.Float -> "c_double(" <> varName <> ")"
   FFI.Bool -> "c_int64(" <> varName <> ")"
+  FFI.Sign -> "c_int64(_sign_argument(" <> varName <> "))"
   FFI.Text -> "_str_to_text(" <> varName <> ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
@@ -163,6 +169,7 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Int -> varName
   FFI.Float -> varName
   FFI.Bool -> varName
+  FFI.Sign -> "_sign_argument(" <> varName <> ")"
   FFI.Text -> "_str_to_text(" <> varName <> ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
@@ -207,6 +214,7 @@ registerType ffiType registry = do
       FFI.Int -> registry
       FFI.Float -> registry
       FFI.Bool -> registry
+      FFI.Sign -> registry
       FFI.Text -> registry
       FFI.List itemType -> registerList ffiType itemType registry
       FFI.NonEmpty itemType -> registerList (FFI.List itemType) itemType registry

@@ -67,27 +67,27 @@ coerce (Orientation3d rightward forward upward) =
 
 -- | Get the rightward direction of a orientation.
 rightwardDirection :: Orientation3d space defines -> Direction3d space
-rightwardDirection (Orientation3d r _ _) = r
+rightwardDirection = (.rightwardDirection)
 
 -- | Get the forward direction of a orientation.
 forwardDirection :: Orientation3d space defines -> Direction3d space
-forwardDirection (Orientation3d _ f _) = f
+forwardDirection = (.forwardDirection)
 
 -- | Get the upward direction of a orientation.
 upwardDirection :: Orientation3d space defines -> Direction3d space
-upwardDirection (Orientation3d _ _ u) = u
+upwardDirection = (.upwardDirection)
 
 -- | Get the leftward direction of a orientation.
 leftwardDirection :: Orientation3d space defines -> Direction3d space
-leftwardDirection = negate . rightwardDirection
+leftwardDirection = (.leftwardDirection)
 
 -- | Get the backward direction of a orientation.
 backwardDirection :: Orientation3d space defines -> Direction3d space
-backwardDirection = negate . forwardDirection
+backwardDirection = (.backwardDirection)
 
 -- | Get the downward direction of a orientation.
 downwardDirection :: Orientation3d space defines -> Direction3d space
-downwardDirection = negate . upwardDirection
+downwardDirection = (.downwardDirection)
 
 {-| Construct a forward-facing plane orientation from a parent orientation.
 
@@ -96,9 +96,10 @@ the normal direction of the plane orientation will point forward,
 the X direction of the plane orientation will point leftward,
 and the Y direction of the plane orientation will point upward.
 -}
-frontPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-frontPlaneOrientation orientation =
-  PlaneOrientation3d (leftwardDirection orientation) (upwardDirection orientation)
+frontPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (FrontPlane local))
+frontPlaneOrientation = (.frontPlaneOrientation)
 
 {-| Construct a backward-facing plane orientation from a parent orientation.
 
@@ -107,9 +108,10 @@ the normal direction of the plane orientation will point backward,
 the X direction of the plane orientation will point rightward,
 and the Y direction of the plane orientation will point upward.
 -}
-backPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-backPlaneOrientation orientation =
-  PlaneOrientation3d (rightwardDirection orientation) (upwardDirection orientation)
+backPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (BackPlane local))
+backPlaneOrientation = (.backPlaneOrientation)
 
 {-| Construct a leftward-facing plane orientation from a parent orientation.
 
@@ -118,9 +120,10 @@ the normal direction of the plane orientation will point leftward,
 the X direction of the plane orientation will point backward,
 and the Y direction of the plane orientation will point upward.
 -}
-leftPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-leftPlaneOrientation orientation =
-  PlaneOrientation3d (backwardDirection orientation) (upwardDirection orientation)
+leftPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (LeftPlane local))
+leftPlaneOrientation = (.leftPlaneOrientation)
 
 {-| Construct a rightward-facing plane orientation from a parent orientation.
 
@@ -129,9 +132,10 @@ the normal direction of the plane orientation will point rightward,
 the X direction of the plane orientation will point forward,
 and the Y direction of the plane orientation will point upward.
 -}
-rightPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-rightPlaneOrientation orientation =
-  PlaneOrientation3d (forwardDirection orientation) (upwardDirection orientation)
+rightPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (RightPlane local))
+rightPlaneOrientation = (.rightPlaneOrientation)
 
 {-| Construct a upward-facing plane orientation from a parent orientation.
 
@@ -140,9 +144,10 @@ the normal direction of the plane orientation will point upward,
 the X direction of the plane orientation will point rightward,
 and the Y direction of the plane orientation will point forward.
 -}
-topPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-topPlaneOrientation orientation =
-  PlaneOrientation3d (rightwardDirection orientation) (forwardDirection orientation)
+topPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (TopPlane local))
+topPlaneOrientation = (.topPlaneOrientation)
 
 {-| Construct a downward-facing plane orientation from a parent orientation.
 
@@ -151,9 +156,10 @@ the normal direction of the plane orientation will point downward,
 the X direction of the plane orientation will point leftward,
 and the Y direction of the plane orientation will point forward.
 -}
-bottomPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-bottomPlaneOrientation orientation =
-  PlaneOrientation3d (leftwardDirection orientation) (forwardDirection orientation)
+bottomPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (BottomPlane local))
+bottomPlaneOrientation = (.bottomPlaneOrientation)
 
 -- | Construct an orientation from its front plane orientation.
 fromFrontPlaneOrientation :: PlaneOrientation3d space defines1 -> Orientation3d space defines2

@@ -9,12 +9,8 @@ module OpenSolid.Direction3d
   , backward
   , rightward
   , leftward
-  , rightwardForward
-  , forwardRightward
-  , forwardUpward
-  , upwardForward
-  , rightwardUpward
-  , upwardRightward
+  , on
+  , polar
   , perpendicularDirection
   , forwardComponent
   , backwardComponent
@@ -37,6 +33,7 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Convention3d (Convention3d)
+import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Float qualified as Float
 import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Prelude
@@ -45,6 +42,7 @@ import OpenSolid.Primitives
   , Direction3d (Direction3d, Unit3d)
   , Orientation3d
   , Plane3d
+  , PlaneOrientation3d (PlaneOrientation3d)
   , Vector3d
   )
 import OpenSolid.Random qualified as Random
@@ -89,29 +87,11 @@ rightward = Orientation3d.rightwardDirection
 leftward :: Orientation3d space defines -> Direction3d space
 leftward = Orientation3d.leftwardDirection
 
-rightwardForward :: Orientation3d space defines -> Angle -> Direction3d space
-rightwardForward orientation angle =
-  Unit3d (Angle.cos angle * rightward orientation + Angle.sin angle * forward orientation)
+on :: PlaneOrientation3d space (Defines local) -> Direction2d local -> Direction3d space
+on (PlaneOrientation3d i j) (Direction2d x y) = Unit3d (x * i + y * j)
 
-forwardRightward :: Orientation3d space defines -> Angle -> Direction3d space
-forwardRightward orientation angle =
-  Unit3d (Angle.cos angle * forward orientation + Angle.sin angle * rightward orientation)
-
-forwardUpward :: Orientation3d space defines -> Angle -> Direction3d space
-forwardUpward orientation angle =
-  Unit3d (Angle.cos angle * forward orientation + Angle.sin angle * upward orientation)
-
-upwardForward :: Orientation3d space defines -> Angle -> Direction3d space
-upwardForward orientation angle =
-  Unit3d (Angle.cos angle * upward orientation + Angle.sin angle * forward orientation)
-
-rightwardUpward :: Orientation3d space defines -> Angle -> Direction3d space
-rightwardUpward orientation angle =
-  Unit3d (Angle.cos angle * rightward orientation + Angle.sin angle * upward orientation)
-
-upwardRightward :: Orientation3d space defines -> Angle -> Direction3d space
-upwardRightward orientation angle =
-  Unit3d (Angle.cos angle * upward orientation + Angle.sin angle * rightward orientation)
+polar :: PlaneOrientation3d space defines -> Angle -> Direction3d space
+polar (PlaneOrientation3d i j) angle = Unit3d (Angle.cos angle * i + Angle.sin angle * j)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
 perpendicularDirection :: Direction3d space -> Direction3d space

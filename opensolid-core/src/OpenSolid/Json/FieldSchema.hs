@@ -1,4 +1,4 @@
-module OpenSolid.Json.FieldSchema (FieldSchema (..)) where
+module OpenSolid.Json.FieldSchema (FieldSchema (FieldSchema, name, required, schema)) where
 
 import OpenSolid.Json qualified as Json
 import OpenSolid.Prelude

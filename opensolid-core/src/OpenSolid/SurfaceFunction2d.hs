@@ -3,7 +3,6 @@ module OpenSolid.SurfaceFunction2d
   , Compiled
   , new
   , recursive
-  , compiled
   , constant
   , uv
   , xy
@@ -37,7 +36,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordina
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
@@ -75,8 +73,8 @@ instance
   where
   lhs + rhs =
     new
-      (compiled lhs + VectorSurfaceFunction2d.compiled rhs)
-      (\p -> derivative p lhs + VectorSurfaceFunction2d.derivative p rhs)
+      # lhs.compiled + rhs.compiled
+      # \p -> derivative p lhs + VectorSurfaceFunction2d.derivative p rhs
 
 instance
   ( space1 ~ space2
@@ -100,8 +98,8 @@ instance
   where
   lhs - rhs =
     new
-      (compiled lhs - VectorSurfaceFunction2d.compiled rhs)
-      (\p -> derivative p lhs - VectorSurfaceFunction2d.derivative p rhs)
+      # lhs.compiled - rhs.compiled
+      # \p -> derivative p lhs - VectorSurfaceFunction2d.derivative p rhs
 
 instance
   ( space1 ~ space2
@@ -123,12 +121,11 @@ instance
   where
   lhs - rhs =
     VectorSurfaceFunction2d.new
-      (compiled lhs - compiled rhs)
-      (\p -> derivative p lhs - derivative p rhs)
+      # lhs.compiled - rhs.compiled
+      # \p -> derivative p lhs - derivative p rhs
 
-{-# INLINE compiled #-}
-compiled :: SurfaceFunction2d (space @ units) -> Compiled (space @ units)
-compiled (SurfaceFunction2d c _ _) = c
+instance HasField "compiled" (SurfaceFunction2d (space @ units)) (Compiled (space @ units)) where
+  getField (SurfaceFunction2d c _ _) = c
 
 new ::
   Compiled (space @ units) ->
@@ -138,8 +135,9 @@ new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
   let dv' =
-        VectorSurfaceFunction2d.new (VectorSurfaceFunction2d.compiled dv) $
-          \p -> case p of
+        VectorSurfaceFunction2d.new
+          # dv.compiled
+          # \p -> case p of
             U -> VectorSurfaceFunction2d.derivative V du
             V -> VectorSurfaceFunction2d.derivative V dv
   SurfaceFunction2d c du dv'
@@ -170,18 +168,18 @@ xy x y =
       Expression.xy
       Point2d
       Bounds2d
-      (SurfaceFunction.compiled x)
-      (SurfaceFunction.compiled y)
+      x.compiled
+      y.compiled
     # \p ->
       VectorSurfaceFunction2d.xy
-        (SurfaceFunction.derivative p x)
-        (SurfaceFunction.derivative p y)
+        # SurfaceFunction.derivative p x
+        # SurfaceFunction.derivative p y
 
 evaluate :: SurfaceFunction2d (space @ units) -> UvPoint -> Point2d (space @ units)
-evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint
+evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 evaluateBounds :: SurfaceFunction2d (space @ units) -> UvBounds -> Bounds2d (space @ units)
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds (compiled function) uvBounds
+evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->
@@ -200,7 +198,7 @@ transformBy transform function =
       (Expression.Surface2d.transformBy transform)
       (Point2d.transformBy transform)
       (Bounds2d.transformBy transform)
-      (compiled function)
+      function.compiled
     # \p -> VectorSurfaceFunction2d.transformBy transform (derivative p function)
 
 instance
@@ -211,12 +209,11 @@ instance
     (Curve2d (space @ units))
   where
   function . curve = do
-    let curveDerivative = Curve2d.derivative curve
-    let dudt = VectorCurve2d.xComponent curveDerivative
-    let dvdt = VectorCurve2d.yComponent curveDerivative
+    let dudt = curve.derivative.xComponent
+    let dvdt = curve.derivative.yComponent
     Curve2d.new
-      (compiled function . Curve2d.compiled curve)
-      ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
+      # function.compiled . curve.compiled
+      # (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
 
 distanceAlong ::
   Axis2d (space @ units) ->
@@ -226,21 +223,21 @@ distanceAlong axis function =
   (function - constant (Axis2d.originPoint axis)) `dot` Axis2d.direction axis
 
 xCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units
-xCoordinate surface =
+xCoordinate function =
   SurfaceFunction.new
     # CompiledFunction.map
       Expression.xCoordinate
       Point2d.xCoordinate
       Bounds2d.xCoordinate
-      (compiled surface)
-    # \parameter -> VectorSurfaceFunction2d.xComponent (derivative parameter surface)
+      function.compiled
+    # \parameter -> (derivative parameter function).xComponent
 
 yCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units
-yCoordinate surface =
+yCoordinate function =
   SurfaceFunction.new
     # CompiledFunction.map
       Expression.yCoordinate
       Point2d.yCoordinate
       Bounds2d.yCoordinate
-      (compiled surface)
-    # \parameter -> VectorSurfaceFunction2d.yComponent (derivative parameter surface)
+      function.compiled
+    # \parameter -> (derivative parameter function).yComponent

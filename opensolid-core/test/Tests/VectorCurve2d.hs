@@ -17,12 +17,11 @@ derivativeConsistency ::
   Expectation
 derivativeConsistency givenTolerance curve = Test.do
   tValue <- Parameter.random
-  let firstDerivative = VectorCurve2d.derivative curve
   let dt = 1e-6
   let p1 = VectorCurve2d.evaluate curve (tValue - dt)
   let p2 = VectorCurve2d.evaluate curve (tValue + dt)
   let numericalFirstDerivative = (p2 - p1) / (2.0 * dt)
-  let analyticFirstDerivative = VectorCurve2d.evaluate firstDerivative tValue
+  let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
       |> Test.output "numericalFirstDerivative" numericalFirstDerivative

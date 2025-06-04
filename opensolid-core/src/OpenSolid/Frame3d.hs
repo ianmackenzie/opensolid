@@ -86,11 +86,11 @@ world = Frame3d Point3d.origin Orientation3d.world
 
 -- | Get the origin point of a frame.
 originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)
-originPoint (Frame3d p0 _) = p0
+originPoint = (.originPoint)
 
 -- | Get the orientation of a frame.
 orientation :: Frame3d (space @ units) defines -> Orientation3d space defines
-orientation (Frame3d _ o) = o
+orientation = (.orientation)
 
 coerce :: Frame3d (space1 @ units1) defines1 -> Frame3d (space2 @ units2) defines2
 coerce (Frame3d p o) = Frame3d (Point3d.coerce p) (Orientation3d.coerce o)
@@ -100,27 +100,27 @@ erase = coerce
 
 -- | Get the local rightward direction of a frame.
 rightwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-rightwardDirection frame = Orientation3d.rightwardDirection (orientation frame)
+rightwardDirection = (.rightwardDirection)
 
 -- | Get the local leftward direction of a frame.
 leftwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-leftwardDirection frame = Orientation3d.leftwardDirection (orientation frame)
+leftwardDirection = (.leftwardDirection)
 
 -- | Get the local forward direction of a frame.
 forwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-forwardDirection frame = Orientation3d.forwardDirection (orientation frame)
+forwardDirection = (.forwardDirection)
 
 -- | Get the local backward direction of a frame.
 backwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-backwardDirection frame = Orientation3d.backwardDirection (orientation frame)
+backwardDirection = (.backwardDirection)
 
 -- | Get the local upward direction of a frame.
 upwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-upwardDirection frame = Orientation3d.upwardDirection (orientation frame)
+upwardDirection = (.upwardDirection)
 
 -- | Get the local downward direction of a frame.
 downwardDirection :: Frame3d (space @ units) defines -> Direction3d space
-downwardDirection frame = Orientation3d.downwardDirection (orientation frame)
+downwardDirection = (.downwardDirection)
 
 -- | Get the rightward axis of a frame.
 rightwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
@@ -153,8 +153,10 @@ its normal direction will be the frame's forward direction,
 its X direction will be the frame's leftward direction
 and its Y direction will be frame's upward direction.
 -}
-frontPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-frontPlane (Frame3d p o) = Plane3d p (Orientation3d.frontPlaneOrientation o)
+frontPlane ::
+  Frame3d (space @ units) (Defines local) ->
+  Plane3d (space @ units) (Defines (FrontPlane local))
+frontPlane = (.frontPlane)
 
 {-| Construct a locally backward-facing plane from a frame.
 
@@ -163,8 +165,10 @@ its normal direction will be the frame's backward direction,
 its X direction will be the frame's rightward direction
 and its Y direction will be frame's upward direction.
 -}
-backPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-backPlane (Frame3d p o) = Plane3d p (Orientation3d.backPlaneOrientation o)
+backPlane ::
+  Frame3d (space @ units) (Defines local) ->
+  Plane3d (space @ units) (Defines (BackPlane local))
+backPlane = (.backPlane)
 
 {-| Construct a locally leftward-facing plane from a frame.
 
@@ -173,8 +177,10 @@ its normal direction will be the frame's leftward direction,
 its X direction will be the frame's backward direction
 and its Y direction will be frame's upward direction.
 -}
-leftPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-leftPlane (Frame3d p o) = Plane3d p (Orientation3d.leftPlaneOrientation o)
+leftPlane ::
+  Frame3d (space @ units) (Defines local) ->
+  Plane3d (space @ units) (Defines (LeftPlane local))
+leftPlane = (.leftPlane)
 
 {-| Construct a locally rightward-facing plane from a frame.
 
@@ -183,8 +189,10 @@ its normal direction will be the frame's rightward direction,
 its X direction will be the frame's forward direction
 and its Y direction will be frame's upward direction.
 -}
-rightPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-rightPlane (Frame3d p o) = Plane3d p (Orientation3d.rightPlaneOrientation o)
+rightPlane ::
+  Frame3d (space @ units) (Defines local) ->
+  Plane3d (space @ units) (Defines (RightPlane local))
+rightPlane = (.rightPlane)
 
 {-| Construct a locally upward-facing plane from a frame.
 
@@ -193,8 +201,10 @@ its normal direction will be the frame's upward direction,
 its X direction will be the frame's rightward direction
 and its Y direction will be frame's forward direction.
 -}
-topPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-topPlane (Frame3d p o) = Plane3d p (Orientation3d.topPlaneOrientation o)
+topPlane ::
+  Frame3d (space @ units) (Defines local) ->
+  Plane3d (space @ units) (Defines (TopPlane local))
+topPlane = (.topPlane)
 
 {-| Construct a locally downward-facing plane from a frame.
 
@@ -203,8 +213,10 @@ its normal direction will be the frame's downward direction,
 its X direction will be the frame's leftward direction
 and its Y direction will be frame's forward direction.
 -}
-bottomPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
-bottomPlane (Frame3d p o) = Plane3d p (Orientation3d.bottomPlaneOrientation o)
+bottomPlane ::
+  Frame3d (space @ units) (Defines local) ->
+  Plane3d (space @ units) (Defines (BottomPlane local))
+bottomPlane = (.bottomPlane)
 
 -- | Construct a plane from its front plane.
 fromFrontPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2

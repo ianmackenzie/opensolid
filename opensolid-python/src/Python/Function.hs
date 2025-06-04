@@ -66,6 +66,7 @@ typePattern ffiType = case ffiType of
   FFI.Int -> "int()"
   FFI.Float -> "float() | int()"
   FFI.Bool -> "bool()"
+  FFI.Sign -> "1 | -1"
   FFI.Text -> "str()"
   -- Note that there's no point trying to overload
   -- based on the type of items in the list, since it might be empty
@@ -95,8 +96,8 @@ implicitGetter argType = case argType of
   ImplicitArgument.ToleranceSquareMeters -> "_area_tolerance()"
   ImplicitArgument.ToleranceRadians -> "_angle_tolerance()"
 
-arguments :: Named "includeSelf" Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
-arguments (Named includeSelf) positional named = do
+arguments :: "includeSelf" ::: Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
+arguments (Field includeSelf) positional named = do
   let selfArg = ["self" | includeSelf]
   let positionalArgs = List.map argument positional
   let separator = ["*" | not (List.isEmpty named)]

@@ -26,9 +26,6 @@ module OpenSolid.NonEmpty
   , six
   , seven
   , eight
-  , first
-  , rest
-  , last
   , toList
   , push
   , prepend
@@ -202,15 +199,6 @@ seven a1 a2 a3 a4 a5 a6 a7 = a1 :| [a2, a3, a4, a5, a6, a7]
 eight :: a -> a -> a -> a -> a -> a -> a -> a -> NonEmpty a
 eight a1 a2 a3 a4 a5 a6 a7 a8 = a1 :| [a2, a3, a4, a5, a6, a7, a8]
 
-first :: NonEmpty a -> a
-first = Data.List.NonEmpty.head
-
-rest :: NonEmpty a -> List a
-rest = Data.List.NonEmpty.tail
-
-last :: NonEmpty a -> a
-last = Data.List.NonEmpty.last
-
 toList :: NonEmpty a -> List a
 toList (x :| xs) = x : xs
 
@@ -271,14 +259,14 @@ unzip2 = Data.List.NonEmpty.unzip
 
 unzip3 :: NonEmpty (a, b, c) -> (NonEmpty a, NonEmpty b, NonEmpty c)
 unzip3 nonEmpty = do
-  let (a, b, c) = first nonEmpty
-  let (as, bs, cs) = List.unzip3 (rest nonEmpty)
+  let (a, b, c) = nonEmpty.first
+  let (as, bs, cs) = List.unzip3 nonEmpty.rest
   (a :| as, b :| bs, c :| cs)
 
 unzip4 :: NonEmpty (a, b, c, d) -> (NonEmpty a, NonEmpty b, NonEmpty c, NonEmpty d)
 unzip4 nonEmpty = do
-  let (a, b, c, d) = first nonEmpty
-  let (as, bs, cs, ds) = List.unzip4 (rest nonEmpty)
+  let (a, b, c, d) = nonEmpty.first
+  let (as, bs, cs, ds) = List.unzip4 nonEmpty.rest
   (a :| as, b :| bs, c :| cs, d :| ds)
 
 filter :: (a -> Bool) -> NonEmpty a -> List a
@@ -330,7 +318,7 @@ sortAndDeduplicate :: Ord a => NonEmpty a -> NonEmpty a
 sortAndDeduplicate nonEmpty = deduplicate (sort nonEmpty)
 
 deduplicate :: Eq a => NonEmpty a -> NonEmpty a
-deduplicate nonEmpty = dedup (first nonEmpty) (rest nonEmpty)
+deduplicate nonEmpty = dedup nonEmpty.first nonEmpty.rest
 
 dedup :: Eq a => a -> List a -> NonEmpty a
 dedup current [] = current :| []

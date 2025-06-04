@@ -17,7 +17,7 @@ module OpenSolid.Orientation3d
 where
 
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Orientation3d, Direction3d, PlaneOrientation3d)
+import OpenSolid.Primitives (Direction3d, Orientation3d, PlaneOrientation3d)
 
 world :: Orientation3d space (Defines space)
 rightwardDirection :: Orientation3d space defines -> Direction3d space
@@ -26,9 +26,21 @@ forwardDirection :: Orientation3d space defines -> Direction3d space
 backwardDirection :: Orientation3d space defines -> Direction3d space
 upwardDirection :: Orientation3d space defines -> Direction3d space
 downwardDirection :: Orientation3d space defines -> Direction3d space
-rightPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-leftPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-frontPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-backPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-topPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
-bottomPlaneOrientation :: Orientation3d space defines1 -> PlaneOrientation3d space defines2
+rightPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (RightPlane local))
+leftPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (LeftPlane local))
+frontPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (FrontPlane local))
+backPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (BackPlane local))
+topPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (TopPlane local))
+bottomPlaneOrientation ::
+  Orientation3d space (Defines local) ->
+  PlaneOrientation3d space (Defines (BottomPlane local))

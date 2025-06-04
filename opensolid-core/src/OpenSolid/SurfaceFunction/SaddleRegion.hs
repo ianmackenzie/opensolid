@@ -2,8 +2,6 @@ module OpenSolid.SurfaceFunction.SaddleRegion
   ( SaddleRegion
   , Frame
   , point
-  , subdomain
-  , bounds
   , quadratic
   , connectingCurves
   )
@@ -45,11 +43,11 @@ type Frame = Frame2d UvCoordinates (Defines PrincipalAxisSpace)
 point :: SaddleRegion units -> UvPoint
 point SaddleRegion{frame} = Frame2d.originPoint frame
 
-subdomain :: SaddleRegion units -> Domain2d
-subdomain SaddleRegion{subproblem} = Subproblem.subdomain subproblem
+instance HasField "subdomain" (SaddleRegion units) Domain2d where
+  getField = (.subproblem.subdomain)
 
-bounds :: SaddleRegion units -> UvBounds
-bounds SaddleRegion{subproblem} = Subproblem.uvBounds subproblem
+instance HasField "bounds" (SaddleRegion units) UvBounds where
+  getField = (.subproblem.uvBounds)
 
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do

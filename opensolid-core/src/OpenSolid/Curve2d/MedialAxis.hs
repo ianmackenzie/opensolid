@@ -1,4 +1,4 @@
-module OpenSolid.Curve2d.MedialAxis (Segment (..)) where
+module OpenSolid.Curve2d.MedialAxis (Segment (Segment, t1, t2, t12, curve, radius)) where
 
 import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)

@@ -23,7 +23,6 @@ import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
@@ -119,12 +118,12 @@ resolvesTo value estimate
 area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
   let curve =
-        Curve2d.polarArc
-          # #centerPoint Point2d.origin
-          # #radius Length.meter
-          # #startAngle Angle.pi
-          # #endAngle Angle.zero
-  let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
+        Curve2d.polarArc do
+          #centerPoint Point2d.origin
+          #radius Length.meter
+          #startAngle Angle.pi
+          #endAngle Angle.zero
+  let dAdt = Curve2d.yCoordinate curve * curve.derivative.xComponent
   let areaEstimate = Curve.integral dAdt
   let expectedArea = Area.squareMeters (Float.pi / 2.0)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)

@@ -70,13 +70,13 @@ matrixField frame = Json.optional "matrix" $ matrixComponents frame
 
 pbrMaterial :: PbrMaterial -> Json
 pbrMaterial material = do
-  let (r, g, b) = Color.components (PbrMaterial.baseColor material)
+  let (r, g, b) = Color.components material.baseColor
   Json.object
     [ Json.field "pbrMetallicRoughness" $
         Json.object
           [ Json.field "baseColorFactor" $ Json.listOf Json.float [r, g, b, 1.0]
-          , Json.field "metallicFactor" $ Json.float (PbrMaterial.metallic material)
-          , Json.field "roughnessFactor" $ Json.float (PbrMaterial.roughness material)
+          , Json.field "metallicFactor" $ Json.float material.metallic
+          , Json.field "roughnessFactor" $ Json.float material.roughness
           ]
     ]
 

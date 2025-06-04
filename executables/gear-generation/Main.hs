@@ -6,6 +6,7 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Duration qualified as Duration
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
@@ -23,22 +24,24 @@ import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Meters)
-import OpenSolid.World3d qualified as World3d
 
 gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))
 gearBody numTeeth = Try.do
+  let world = Frame3d.world
   let gearModule = Length.millimeters 1.0
   let holeDiameter = Length.millimeters 8.0
-  let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
+  let spurGear = SpurGear.metric (#numTeeth numTeeth, #module gearModule)
   let outerProfile = SpurGear.profile spurGear
-  let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
+  let hole = Curve2d.circle (#centerPoint Point2d.origin, #diameter holeDiameter)
   profile <- Region2d.boundedBy (hole : outerProfile)
   let width = Length.millimeters 8.0
-  Body3d.extruded World3d.frontPlane profile (Bounds.symmetric (#width width))
+  let extrusionBounds = Bounds.symmetric (#width width)
+  Body3d.extruded world.frontPlane profile extrusionBounds
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
-  let meshConstraints = NonEmpty.one (Mesh.maxError (Length.millimeters 0.1))
+  let maxErrorConstraint = Mesh.maxError (Length.millimeters 0.1)
+  let meshConstraints = NonEmpty.one maxErrorConstraint
   let writeGlb numTeeth = IO.do
         timer <- Timer.start
         body <- gearBody numTeeth

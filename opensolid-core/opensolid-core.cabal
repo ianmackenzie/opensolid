@@ -70,7 +70,9 @@ common config
     LexicalNegation
     MagicHash
     MultiWayIf
+    NoFieldSelectors
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
@@ -95,8 +97,6 @@ library
     OpenSolid.Array2d
     OpenSolid.Axis2d
     OpenSolid.Axis3d
-    OpenSolid.Orientation2d
-    OpenSolid.Orientation3d
     OpenSolid.Binary
     OpenSolid.Body3d
     OpenSolid.Body3d.BoundedBy
@@ -144,6 +144,7 @@ library
     OpenSolid.Expression.VectorSurface2d
     OpenSolid.Expression.VectorSurface3d
     OpenSolid.FFI
+    OpenSolid.Field
     OpenSolid.Float
     OpenSolid.Frame2d
     OpenSolid.Frame3d
@@ -161,8 +162,9 @@ library
     OpenSolid.Map
     OpenSolid.Maybe
     OpenSolid.Mesh
-    OpenSolid.Named
     OpenSolid.NonEmpty
+    OpenSolid.Orientation2d
+    OpenSolid.Orientation3d
     OpenSolid.Pair
     OpenSolid.Parameter
     OpenSolid.PbrMaterial

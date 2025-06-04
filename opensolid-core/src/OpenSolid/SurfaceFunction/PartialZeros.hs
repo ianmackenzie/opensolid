@@ -202,13 +202,11 @@ finalize horizontalCurve verticalCurve partialZeros = do
 extend :: Tolerance units => PiecewiseCurve -> SaddleRegion units -> PiecewiseCurve
 extend curve saddleRegion = do
   let (PiecewiseCurve start end segments) = curve
-  let subdomain = SaddleRegion.subdomain saddleRegion
-  let extendStart = Domain2d.contacts subdomain start
-  let extendEnd = Domain2d.contacts subdomain end
-  let startExtension =
-        SaddleRegion.connectingCurves (Curve2d.startPoint (NonEmpty.first segments)) saddleRegion
+  let extendStart = Domain2d.contacts saddleRegion.subdomain start
+  let extendEnd = Domain2d.contacts saddleRegion.subdomain end
+  let startExtension = SaddleRegion.connectingCurves segments.first.startPoint saddleRegion
   let endExtension =
-        SaddleRegion.connectingCurves (Curve2d.endPoint (NonEmpty.last segments)) saddleRegion
+        SaddleRegion.connectingCurves segments.last.endPoint saddleRegion
           |> NonEmpty.reverseMap Curve2d.reverse
   case (extendStart, extendEnd) of
     (False, False) -> curve

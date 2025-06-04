@@ -1,5 +1,7 @@
 module OpenSolid.Json.Format
-  ( Format (..)
+  ( Format (schema)
+  , encode
+  , decode
   , coerce
   , convert
   , lift
@@ -45,7 +47,7 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (Field)
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
@@ -53,26 +55,32 @@ import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 
 data Format a = Format
-  { encode :: a -> Json
-  , decode :: Json -> Result Text a
+  { encodeFunction :: a -> Json
+  , decodeFunction :: Json -> Result Text a
   , schema :: Json.Schema
   }
 
+encode :: Format a -> a -> Json
+encode format = format.encodeFunction
+
+decode :: Format a -> Json -> Result Text a
+decode format = format.decodeFunction
+
 title :: Text -> Format a -> Format a
 title value format =
-  format{schema = (schema format){Json.Schema.title = Just value}}
+  format{schema = format.schema{Json.Schema.title = Just value}}
 
 description :: Text -> Format a -> Format a
 description value format =
-  format{schema = (schema format){Json.Schema.description = Just value}}
+  format{schema = format.schema{Json.Schema.description = Just value}}
 
 defaultValue :: a -> Format a -> Format a
 defaultValue value format =
-  format{schema = (schema format){Json.Schema.default_ = Just (encode format value)}}
+  format{schema = format.schema{Json.Schema.default_ = Just (encode format value)}}
 
 examples :: List a -> Format a -> Format a
 examples values format =
-  format{schema = (schema format){Json.Schema.examples = List.map (encode format) values}}
+  format{schema = format.schema{Json.Schema.examples = List.map (encode format) values}}
 
 removeMetadata :: Json.Schema -> Json.Schema
 removeMetadata schema =
@@ -91,16 +99,16 @@ convert up down format = lift (up >> Success) down format
 
 lift :: (a -> Result x b) -> (b -> a) -> Format a -> Format b
 lift up down format = do
-  let Format{encode, decode, schema} = format
+  let Format{encodeFunction, decodeFunction, schema} = format
   Format
-    { encode = down >> encode
-    , decode = decode >> Result.andThen (Result.try . up)
+    { encodeFunction = down >> encodeFunction
+    , decodeFunction = decodeFunction >> Result.andThen (Result.try . up)
     , schema = removeMetadata schema
     }
 
 bool :: Format Bool
 bool =
-  Format{encode = Json.bool, decode = decodeBool, schema = Json.Schema.boolean}
+  Format{encodeFunction = Json.bool, decodeFunction = decodeBool, schema = Json.Schema.boolean}
     |> title "Bool"
     |> description "A boolean true or false"
 
@@ -110,7 +118,7 @@ decodeBool _ = Failure "Expected a boolean"
 
 text :: Format Text
 text =
-  Format{encode = Json.text, decode = decodeText, schema = Json.Schema.string}
+  Format{encodeFunction = Json.text, decodeFunction = decodeText, schema = Json.Schema.string}
     |> title "Text"
     |> description "Arbitrary text"
 
@@ -120,7 +128,7 @@ decodeText _ = Failure "Expected text"
 
 float :: Format Float
 float =
-  Format{encode = Json.float, decode = decodeFloat, schema = Json.Schema.number}
+  Format{encodeFunction = Json.float, decodeFunction = decodeFloat, schema = Json.Schema.number}
     |> title "Float"
     |> description "A unitless floating-point number"
 
@@ -130,7 +138,7 @@ decodeFloat _ = Failure "Expected a number"
 
 int :: Format Int
 int =
-  Format{encode = Json.int, decode = decodeInt, schema = Json.Schema.integer}
+  Format{encodeFunction = Json.int, decodeFunction = decodeInt, schema = Json.Schema.integer}
     |> title "Int"
     |> description "An integer"
 
@@ -146,8 +154,8 @@ decodeList decodeItem json = case json of
 list :: Format item -> Format (List item)
 list (Format encodeItem decodeItem itemSchema) =
   Format
-    { encode = Json.listOf encodeItem
-    , decode = decodeList decodeItem
+    { encodeFunction = Json.listOf encodeItem
+    , decodeFunction = decodeList decodeItem
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema}
     }
 
@@ -158,8 +166,8 @@ toNonEmpty [] = Failure "List is empty"
 nonEmpty :: Format item -> Format (NonEmpty item)
 nonEmpty (Format encodeItem decodeItem itemSchema) =
   Format
-    { encode = NonEmpty.toList >> Json.listOf encodeItem
-    , decode = decodeList decodeItem >> Result.andThen toNonEmpty
+    { encodeFunction = NonEmpty.toList >> Json.listOf encodeItem
+    , decodeFunction = decodeList decodeItem >> Result.andThen toNonEmpty
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema, Json.Schema.minItems = Just 1}
     }
 
@@ -177,8 +185,8 @@ decodeMapField decodeItem (name, json) = Result.map (name,) (decodeItem json)
 map :: Format item -> Format (Map Text item)
 map (Format encodeItem decodeItem itemSchema) =
   Format
-    { encode = Map.map encodeItem >> Json.map
-    , decode = decodeMap decodeItem
+    { encodeFunction = Map.map encodeItem >> Json.map
+    , decodeFunction = decodeMap decodeItem
     , schema = Json.Schema.object{Json.Schema.items = Just itemSchema}
     }
 
@@ -190,8 +198,8 @@ decodeObject fromFields json = case json of
 object :: constructor -> Fields constructor parent () -> Format parent
 object constructor (Fields decompose compose properties required) =
   Format
-    { encode = decompose >> Json.map
-    , decode = decodeObject (\fieldValues -> compose fieldValues constructor)
+    { encodeFunction = decompose >> Json.map
+    , decodeFunction = decodeObject (\fieldValues -> compose fieldValues constructor)
     , schema = Json.Schema.object{Json.Schema.required, Json.Schema.properties}
     }
 
@@ -227,8 +235,8 @@ instance
           read fieldValues
             |> Result.map constructor
             |> Result.andThen (compose fieldValues)
-      , properties = properties |> Map.set (FieldSchema.name fieldSchema) (FieldSchema.schema fieldSchema)
-      , required = [FieldSchema.name fieldSchema | FieldSchema.required fieldSchema] <> required
+      , properties = properties |> Map.set fieldSchema.name fieldSchema.schema
+      , required = [fieldSchema.name | fieldSchema.required] <> required
       }
 
 instance
@@ -244,17 +252,17 @@ lastField :: Field parent child () -> Fields (child -> parent) parent ()
 lastField (Field write read fieldSchema) = do
   let decompose parent = write parent Map.empty
   let compose fields constructor = Result.map constructor (read fields)
-  let properties = Map.singleton (FieldSchema.name fieldSchema) (FieldSchema.schema fieldSchema)
-  let required = [FieldSchema.name fieldSchema | FieldSchema.required fieldSchema]
+  let properties = Map.singleton fieldSchema.name fieldSchema.schema
+  let required = [fieldSchema.name | fieldSchema.required]
   Fields{decompose, compose, properties, required}
 
 withinField :: Text -> Result Text a -> Result Text a
 withinField fieldName = Result.addContext ("In field \"" <> fieldName <> "\"")
 
 requiredField :: Text -> (parent -> child) -> Format child -> Field parent child ()
-requiredField fieldName getField fieldFormat = do
-  let Format{encode = encodeField, decode = decodeField, schema} = fieldFormat
-  let write parent fields = Map.set fieldName (encodeField (getField parent)) fields
+requiredField fieldName getParentField fieldFormat = do
+  let Format{encodeFunction = encodeField, decodeFunction = decodeField, schema} = fieldFormat
+  let write parent fields = Map.set fieldName (encodeField (getParentField parent)) fields
   let read fields =
         case Map.get fieldName fields of
           Just fieldValue -> withinField fieldName (decodeField fieldValue)
@@ -267,10 +275,10 @@ optionalField ::
   (parent -> Maybe child) ->
   Format child ->
   Field parent (Maybe child) ()
-optionalField fieldName getField fieldFormat = do
-  let Format{encode = encodeField, decode = decodeField, schema} = fieldFormat
+optionalField fieldName getParentField fieldFormat = do
+  let Format{encodeFunction = encodeField, decodeFunction = decodeField, schema} = fieldFormat
   let write parent fields =
-        case getField parent of
+        case getParentField parent of
           Just fieldValue -> Map.set fieldName (encodeField fieldValue) fields
           Nothing -> fields
   let read fields =

@@ -81,20 +81,20 @@ return value = Step (\compilation -> (compilation, value))
 
 addConstant :: NonEmpty Float -> Step ConstantIndex
 addConstant components = Step \initialCompilation ->
-  case Map.get components (constants initialCompilation) of
+  case Map.get components initialCompilation.constants of
     Just constantIndex -> (initialCompilation, constantIndex)
     Nothing -> do
       let constantIndex = nextConstantIndex initialCompilation
       let updatedCompilation =
             initialCompilation
               { constantsBuilder =
-                  constantsBuilder initialCompilation
+                  initialCompilation.constantsBuilder
                     <> Binary.collect Encode.float components
               , constants =
-                  constants initialCompilation
+                  initialCompilation.constants
                     |> Map.set components constantIndex
               , constantComponents =
-                  constantComponents initialCompilation
+                  initialCompilation.constantComponents
                     + NonEmpty.length components
               }
       (updatedCompilation, constantIndex)
@@ -113,20 +113,20 @@ nextVariableIndex State{variableComponents = NumComponents n} = VariableIndex n
 
 addVariable :: Instruction -> OutputComponents -> Step VariableIndex
 addVariable instruction (OutputComponents outputComponents) = Step \initialCompilation ->
-  case Map.get instruction (variables initialCompilation) of
+  case Map.get instruction initialCompilation.variables of
     Just resultIndex -> (initialCompilation, resultIndex)
     Nothing -> do
       let resultIndex = nextVariableIndex initialCompilation
       let updatedCompilation =
             initialCompilation
               { variablesBuilder =
-                  variablesBuilder initialCompilation
+                  initialCompilation.variablesBuilder
                     <> Instruction.encode instruction resultIndex
               , variables =
-                  variables initialCompilation
+                  initialCompilation.variables
                     |> Map.set instruction resultIndex
               , variableComponents =
-                  variableComponents initialCompilation
+                  initialCompilation.variableComponents
                     + outputComponents
               }
       (updatedCompilation, resultIndex)
@@ -154,16 +154,16 @@ init (InputComponents inputComponents) =
 compile :: InputComponents -> OutputComponents -> Step VariableIndex -> ByteString
 compile (InputComponents inputComponents) (OutputComponents outputComponents) (Step step) = do
   let (finalState, resultIndex) = step (init (InputComponents inputComponents))
-  let NumComponents numConstantComponents = constantComponents finalState
-  let NumComponents numVariableComponents = variableComponents finalState
+  let NumComponents numConstantComponents = finalState.constantComponents
+  let NumComponents numVariableComponents = finalState.variableComponents
   Binary.bytes $
     Binary.concat
       [ Encode.int numConstantComponents
       , Encode.int numVariableComponents
       , Encode.int 0
       , Encode.int 0
-      , constantsBuilder finalState
-      , variablesBuilder finalState
+      , finalState.constantsBuilder
+      , finalState.variablesBuilder
       , Instruction.return outputComponents resultIndex
       ]
 
@@ -189,7 +189,7 @@ debug :: InputComponents -> Step VariableIndex -> Text
 debug (InputComponents inputComponents) (Step step) = do
   let initialState = init (InputComponents inputComponents)
   let finalState = Pair.first (step initialState)
-  Map.toList (variables finalState)
+  Map.toList finalState.variables
     |> List.sortBy Pair.second
     |> List.map showInstruction
     |> Text.multiline

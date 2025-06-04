@@ -1,5 +1,5 @@
 module OpenSolid.SurfaceFunction.Zeros
-  ( Zeros (..)
+  ( Zeros (Zeros, crossingCurves, crossingLoops, tangentPoints, saddlePoints)
   , empty
   )
 where

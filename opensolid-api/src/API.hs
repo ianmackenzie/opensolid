@@ -9,6 +9,9 @@ import API.Class
   , constructor2
   , crossProduct
   , crossSelf
+  , curry1T2
+  , curryT2
+  , curryT4
   , divBy
   , divByFloat
   , divBySelf
@@ -52,6 +55,7 @@ import API.Class
   , plus
   , plusFloat
   , plusSelf
+  , property
   , static1
   , static2
   , static3
@@ -691,7 +695,7 @@ bounds2d =
     [ constructor2 "X Coordinate" "Y Coordinate" Bounds2d $(docs 'Bounds2d)
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
-    , factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
+    , factory1 "Hull" "Points" (Bounds2d.hullN @(Point2d (Space @ Meters))) $(docs 'Bounds2d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , member0 "X Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
@@ -707,7 +711,7 @@ uvBounds =
     [ constructor2 "U Coordinate" "V Coordinate" Bounds2d "Construct a bounding box from its U and V coordinate bounds."
     , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
-    , factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
+    , factory1 "Hull" "Points" (Bounds2d.hullN @(Point2d (Space @ Unitless))) $(docs 'Bounds2d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , member0 "U Coordinate" Bounds2d.xCoordinate "Get the U coordinate bounds of a bounding box."
@@ -750,9 +754,9 @@ curve =
     , divBySelf
     , nested @Curve.Zero
         "A point where a given curve is equal to zero."
-        [ member0 "Location" Curve.Zero.location $(docs 'Curve.Zero.location)
-        , member0 "Order" Curve.Zero.order $(docs 'Curve.Zero.order)
-        , member0 "Sign" ((1 *) . Curve.Zero.sign) $(docs 'Curve.Zero.sign)
+        [ property @"location" "The parameter value at which the curve is zero."
+        , property @"order" "The order of the solution: 0 for crossing, 1 for tangent, etc."
+        , property @"sign" "The sign of the solution: the sign of the curve to the right of the solution."
         ]
     ]
 
@@ -836,12 +840,16 @@ areaCurve =
 drawing2d :: Class
 drawing2d =
   Class.static "Drawing2d" "A set of functions for constructing 2D drawings." $
-    [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
-    , static3 "Write SVG" "Path" "View Box" "Entities" Drawing2d.writeSvg $(docs 'Drawing2d.writeSvg)
+    [ static2 "To SVG" "View Box" "Entity" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
+    , static3 "Write SVG" "Path" "View Box" "Entity" Drawing2d.writeSvg $(docs 'Drawing2d.writeSvg)
     , static1 "Group" "Entities" Drawing2d.group $(docs 'Drawing2d.group)
-    , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
-    , static3 "Circle" "Attributes" "Center Point" "Diameter" Drawing2d.circle $(docs 'Drawing2d.circle)
-    , static3 "Curve" "Attributes" "Max Error" "Curve" Drawing2d.curve $(docs 'Drawing2d.curve)
+    , static2 "Group With" "Attributes" "Entities" Drawing2d.groupWith $(docs 'Drawing2d.groupWith)
+    , static1 "Polygon" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
+    , static2 "Polygon With" "Attributes" "Vertices" Drawing2d.polygonWith $(docs 'Drawing2d.polygonWith)
+    , static2 "Circle" "Center Point" "Diameter" (curryT2 Drawing2d.circle) $(docs 'Drawing2d.circle)
+    , static3 "Circle With" "Attributes" "Center Point" "Diameter" (curry1T2 Drawing2d.circleWith) $(docs 'Drawing2d.circleWith)
+    , static2 "Curve" "Max Error" "Curve" Drawing2d.curve $(docs 'Drawing2d.curve)
+    , static3 "Curve With" "Attributes" "Max Error" "Curve" Drawing2d.curveWith $(docs 'Drawing2d.curveWith)
     , constant "Black Stroke" Drawing2d.blackStroke $(docs 'Drawing2d.blackStroke)
     , static1 "Stroke Color" "Color" Drawing2d.strokeColor $(docs 'Drawing2d.strokeColor)
     , constant "No Fill" Drawing2d.noFill $(docs 'Drawing2d.noFill)
@@ -1029,7 +1037,7 @@ bounds3d =
   Class.new @(Bounds3d (Space @ Meters)) "A bounding box in 3D." $
     [ factory1 "Constant" "Point" Bounds3d.constant $(docs 'Bounds3d.constant)
     , factory2 "From Corners" "First Point" "Second Point" Bounds3d.hull2 $(docs 'Bounds3d.hull2)
-    , factory1 "Hull" "Points" Bounds3d.hullN $(docs 'Bounds3d.hullN)
+    , factory1 "Hull" "Points" (Bounds3d.hullN @(Point3d (Space @ Meters))) $(docs 'Bounds3d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds3d.aggregateN $(docs 'Bounds3d.aggregateN)
     , member1 "Coordinates" "Convention" Bounds3d.coordinates $(docs 'Bounds3d.coordinates)
     , plus @(Vector3d (Space @ Meters)) Self
@@ -1279,16 +1287,16 @@ curve2d =
     , factory2 "XY" "X Coordinate" "Y Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
     , factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
     , factoryM3 "Arc" "Start Point" "End Point" "Swept Angle" Curve2d.arc $(docs 'Curve2d.arc)
-    , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
+    , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (curryT4 Curve2d.polarArc) $(docs 'Curve2d.polarArc)
     , factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
     , factoryM4 "Corner Arc" "Corner Point" "Incoming Direction" "Outgoing Direction" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
-    , factory2 "Circle" "Center Point" "Diameter" Curve2d.circle $(docs 'Curve2d.circle)
+    , factory2 "Circle" "Center Point" "Diameter" (curryT2 Curve2d.circle) $(docs 'Curve2d.circle)
     , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
     , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
-    , member0 "Start Point" Curve2d.startPoint $(docs 'Curve2d.startPoint)
-    , member0 "End Point" Curve2d.endPoint $(docs 'Curve2d.endPoint)
+    , property @"startPoint" "The start point of the curve."
+    , property @"endPoint" "The end point of the curve."
     , member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
-    , member0 "Derivative" Curve2d.derivative $(docs 'Curve2d.derivative)
+    , property @"derivative" "The derivative of the curve."
     , member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
     , member0 "X Coordinate" Curve2d.xCoordinate $(docs 'Curve2d.xCoordinate)
     , member0 "Y Coordinate" Curve2d.yCoordinate $(docs 'Curve2d.yCoordinate)
@@ -1306,16 +1314,16 @@ uvCurve =
     , factory2 "UV" "U Coordinate" "V Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
     , factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
     , factoryU3 "Arc" "Start Point" "End Point" "Swept Angle" Curve2d.arc $(docs 'Curve2d.arc)
-    , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
-    , factory2 "Circle" "Center Point" "Diameter" Curve2d.circle $(docs 'Curve2d.circle)
+    , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (curryT4 Curve2d.polarArc) $(docs 'Curve2d.polarArc)
+    , factory2 "Circle" "Center Point" "Diameter" (curryT2 Curve2d.circle) $(docs 'Curve2d.circle)
     , factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
     , factoryU4 "Corner Arc" "Corner Point" "Incoming Direction" "Outgoing Direction" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
     , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
     , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
-    , member0 "Start Point" Curve2d.startPoint $(docs 'Curve2d.startPoint)
-    , member0 "End Point" Curve2d.endPoint $(docs 'Curve2d.endPoint)
+    , property @"startPoint" "The start point of the curve."
+    , property @"endPoint" "The end point of the curve."
     , member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
-    , member0 "Derivative" Curve2d.derivative $(docs 'Curve2d.derivative)
+    , property @"derivative" "The derivative of the curve."
     , member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
     , member0 "U Coordinate" Curve2d.xCoordinate $(docs 'Curve2d.xCoordinate)
     , member0 "V Coordinate" Curve2d.yCoordinate $(docs 'Curve2d.yCoordinate)
@@ -1331,14 +1339,14 @@ region2d =
   Class.new @(Region2d (Space @ Meters)) $(docs ''Region2d) $
     [ factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryM1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
-    , factoryM2R "Circle" "Center Point" "Diameter" Region2d.circle $(docs 'Region2d.circle)
+    , factoryM2R "Circle" "Center Point" "Diameter" (curryT2 Region2d.circle) $(docs 'Region2d.circle)
     , factoryM1R "Polygon" "Points" Region2d.polygon $(docs 'Region2d.polygon)
-    , factoryM2R "Hexagon" "Center Point" "Height" Region2d.hexagon $(docs 'Region2d.hexagon)
-    , factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.inscribedPolygon $(docs 'Region2d.inscribedPolygon)
-    , factoryM3R "Circumscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.circumscribedPolygon $(docs 'Region2d.circumscribedPolygon)
-    , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
-    , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
-    , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
+    , factoryM2R "Hexagon" "Center Point" "Height" (curryT2 Region2d.hexagon) $(docs 'Region2d.hexagon)
+    , factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" (curry1T2 Region2d.inscribedPolygon) $(docs 'Region2d.inscribedPolygon)
+    , factoryM3R "Circumscribed Polygon" "Num Sides" "Center Point" "Diameter" (curry1T2 Region2d.circumscribedPolygon) $(docs 'Region2d.circumscribedPolygon)
+    , property @"outerLoop" "The list of curves forming the outer boundary of a region."
+    , property @"innerLoops" "The lists of curves (if any) forming the holes within a region."
+    , property @"boundaryCurves" "All (outer and inner) boundary curves of a region."
     , memberM2 "Fillet" "Points" "Radius" Region2d.fillet $(docs 'Region2d.fillet)
     ]
       <> affineTransformations2d Region2d.transformBy
@@ -1349,10 +1357,10 @@ uvRegion =
     [ constant "Unit Square" Region2d.unitSquare $(docs 'Region2d.unitSquare)
     , factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
-    , factoryU2R "Circle" "Center Point" "Diameter" Region2d.circle $(docs 'Region2d.circle)
-    , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
-    , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
-    , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
+    , factoryU2R "Circle" "Center Point" "Diameter" (curryT2 Region2d.circle) $(docs 'Region2d.circle)
+    , property @"outerLoop" "The list of curves forming the outer boundary of a region."
+    , property @"innerLoops" "The lists of curves (if any) forming the holes within a region."
+    , property @"boundaryCurves" "All (outer and inner) boundary curves of a region."
     ]
       <> affineTransformations2d Region2d.transformBy
 
@@ -1364,7 +1372,7 @@ body3d = do
     [ factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
     , factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
     , factoryM1R "Block" "Bounding Box" Body3d.block $(docs 'Body3d.block)
-    , factoryM2R "Sphere" "Center Point" "Diameter" Body3d.sphere $(docs 'Body3d.sphere)
+    , factoryM2R "Sphere" "Center Point" "Diameter" (curryT2 Body3d.sphere) $(docs 'Body3d.sphere)
     , factoryM3R "Cylinder" "Start Point" "End Point" "Diameter" Body3d.cylinder $(docs 'Body3d.cylinder)
     , factoryM3R "Cylinder Along" "Axis" "Distance" "Diameter" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
     , member1 "Place In" "Frame" Body3d.placeIn $(docs 'Body3d.placeIn)
@@ -1394,7 +1402,7 @@ pbrMaterial =
     , factory1 "Silver" "Roughness" PbrMaterial.silver $(docs 'PbrMaterial.silver)
     , factory1 "Titanium" "Roughness" PbrMaterial.titanium $(docs 'PbrMaterial.titanium)
     , factory2 "Nonmetal" "Base Color" "Roughness" PbrMaterial.nonmetal $(docs 'PbrMaterial.nonmetal)
-    , factory3 "Custom" "Base Color" "Metallic" "Roughness" PbrMaterial.custom $(docs 'PbrMaterial.custom)
+    , factory3 "Custom" "Base Color" "Metallic" "Roughness" (curry1T2 PbrMaterial.custom) $(docs 'PbrMaterial.custom)
     ]
 
 scene3d :: Class
@@ -1410,10 +1418,10 @@ scene3d =
 spurGear :: Class
 spurGear =
   Class.new @SpurGear $(docs ''SpurGear) $
-    [ factory2 "Metric" "Num Teeth" "Module" SpurGear.metric $(docs 'SpurGear.metric)
-    , member0 "Num Teeth" SpurGear.numTeeth $(docs 'SpurGear.numTeeth)
-    , member0 "Module" SpurGear.module_ $(docs 'SpurGear.module_)
-    , member0 "Pitch Diameter" SpurGear.pitchDiameter $(docs 'SpurGear.pitchDiameter)
-    , member0 "Outer Diameter" SpurGear.outerDiameter $(docs 'SpurGear.outerDiameter)
+    [ factory2 "Metric" "Num Teeth" "Module" (curryT2 SpurGear.metric) $(docs 'SpurGear.metric)
+    , property @"numTeeth" "The number of teeth of a gear."
+    , property @"module" "The module of a gear."
+    , property @"pitchDiameter" "The pitch diameter of a gear."
+    , property @"outerDiameter" "The outer diameter of a gear."
     , memberM0 "Profile" SpurGear.profile $(docs 'SpurGear.profile)
     ]

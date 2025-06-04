@@ -15,6 +15,7 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
@@ -22,6 +23,7 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
 import OpenSolid.Float qualified as Float
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Int qualified as Int
@@ -32,7 +34,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
@@ -53,7 +54,6 @@ import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.Volume qualified as Volume
-import OpenSolid.World3d qualified as World3d
 
 data Global deriving (Eq, Show)
 
@@ -105,8 +105,8 @@ testEquality = Tolerance.using Length.centimeter do
 
 testTransformation :: IO ()
 testTransformation = IO.do
-  log "Rotated axis" $
-    (Axis2d.x |> Axis2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
+  let rotatedAxis = Axis2d.x |> Axis2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn
+  log "Rotated axis" rotatedAxis
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
   let rotationFunction = Point2d.rotateAround Point2d.origin Angle.quarterTurn
   let rotatedPoints = List.map rotationFunction originalPoints
@@ -126,14 +126,16 @@ offsetPoint startPoint endPoint distance =
       Point2d.midpoint startPoint endPoint + displacement
 
 testCustomFunction :: Tolerance Meters => IO ()
-testCustomFunction =
-  log "Offset point" $
-    offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
+testCustomFunction = IO.do
+  let point = offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
+  log "Offset point" point
 
 testListOperations :: IO ()
 testListOperations = IO.do
-  log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
-  log "Successive intervals" (List.successive Bounds [1.0, 2.0, 3.0, 4.0])
+  let deltas = List.successive subtract [0, 1, 4, 9, 16, 25]
+  let intervals = List.successive Bounds [1.0, 2.0, 3.0, 4.0]
+  log "Successive deltas" deltas
+  log "Successive intervals" intervals
 
 getCrossProduct :: Tolerance Meters => Result Text Float
 getCrossProduct = Result.addContext "In getCrossProduct" Try.do
@@ -147,7 +149,7 @@ getCrossProduct = Result.addContext "In getCrossProduct" Try.do
 
 testTry :: Tolerance Meters => IO ()
 testTry =
-  IO.onError IO.printLine $
+  IO.onError IO.printLine do
     IO.addContext "In testTry" IO.do
       crossProduct <- getCrossProduct
       log "Got cross product" crossProduct
@@ -190,22 +192,23 @@ testNonEmpty = IO.do
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = IO.do
+  let world = Frame3d.world
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let crossSection =
-        Curve2d.circle
-          # #centerPoint (Point2d.x majorRadius)
-          # #diameter (2.0 * minorRadius)
-  surface <- Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi
+        Curve2d.circle do
+          #centerPoint (Point2d.x majorRadius)
+          #diameter (2.0 * minorRadius)
+  surface <- Surface3d.revolved world.frontPlane crossSection Axis2d.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  let planeNormal = World3d.upwardRightwardDirection alpha
-  let f = planeNormal `dot` (Surface3d.function surface - Point3d.origin)
+  let planeNormal = Direction3d.polar world.frontPlane.orientation (alpha + Angle.halfPi)
+  let f = planeNormal `dot` (surface.function - world.originPoint)
   zeros <- SurfaceFunction.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
-  log "  Crossing curves" (List.length (SurfaceFunction.Zeros.crossingCurves zeros))
-  log "  Saddle points" (List.length (SurfaceFunction.Zeros.saddlePoints zeros))
+  log "  Crossing curves" zeros.crossingCurves.length
+  log "  Saddle points" zeros.saddlePoints.length
 
 testPlaneParaboloidIntersection :: IO ()
 testPlaneParaboloidIntersection = Tolerance.using 1e-9 IO.do
@@ -215,8 +218,8 @@ testPlaneParaboloidIntersection = Tolerance.using 1e-9 IO.do
   zeros <- SurfaceFunction.zeros f
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
-  log "  Crossing curves" (List.length (SurfaceFunction.Zeros.crossingCurves zeros))
-  log "  Saddle points" (List.length (SurfaceFunction.Zeros.saddlePoints zeros))
+  log "  Crossing curves" zeros.crossingCurves.length
+  log "  Saddle points" zeros.saddlePoints.length
 
 strokeWidth :: Length
 strokeWidth = Length.millimeters 0.1
@@ -225,25 +228,16 @@ drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
 drawZeros path zeros = IO.do
   let uvBounds = Bounds.convert toDrawing (Bounds -0.05 1.05)
   let viewBox = Bounds2d uvBounds uvBounds
-  let crossingCurves = SurfaceFunction.Zeros.crossingCurves zeros
-  let saddlePoints = SurfaceFunction.Zeros.saddlePoints zeros
-  Drawing2d.writeSvg path viewBox $
-    [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] $
-        [ drawBounds [] (Bounds2d.convert toDrawing SurfaceParameter.domain)
-        , Drawing2d.group (List.mapWithIndex drawCrossingCurve crossingCurves)
-        , Drawing2d.group (List.map (drawDot Color.orange) saddlePoints)
-        ]
-    ]
+  Drawing2d.writeSvg path viewBox do
+    Drawing2d.with [Drawing2d.strokeWidth strokeWidth] do
+      drawBounds (Bounds2d.convert toDrawing SurfaceParameter.domain)
+      Drawing2d.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
+      Drawing2d.collect (drawDot Color.orange) zeros.saddlePoints
 
-drawBounds :: List (Drawing2d.Attribute space) -> Bounds2d (space @ Meters) -> Drawing2d.Entity space
-drawBounds attributes bounds = do
-  let point x y = Bounds2d.interpolate bounds x y
-  Drawing2d.polygon attributes $
-    [ point 0.0 0.0
-    , point 1.0 0.0
-    , point 1.0 1.0
-    , point 0.0 1.0
-    ]
+drawBounds :: Bounds2d (space @ Meters) -> Drawing2d.Entity space
+drawBounds bounds = do
+  let corner x y = Bounds2d.interpolate bounds x y
+  Drawing2d.polygon [corner 0.0 0.0, corner 1.0 0.0, corner 1.0 1.0, corner 0.0 1.0]
 
 drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
 drawCrossingCurve index curve = do
@@ -254,16 +248,19 @@ drawCrossingCurve index curve = do
 toDrawing :: Qty (Meters :/: Unitless)
 toDrawing = Length.centimeters 10.0 ./. 1.0
 
-drawUvCurve :: List (Drawing2d.Attribute UvSpace) -> Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
+drawUvCurve ::
+  List (Drawing2d.Attribute UvSpace) ->
+  Curve2d UvCoordinates ->
+  Drawing2d.Entity UvSpace
 drawUvCurve attributes curve = do
   let polyline = Curve2d.toPolyline 0.001 curve
-  Drawing2d.polyline attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
+  Drawing2d.polylineWith attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
 drawDot :: Color -> UvPoint -> Drawing2d.Entity UvSpace
 drawDot color point =
-  Drawing2d.circle [Drawing2d.fillColor color]
-    # #centerPoint (Point2d.convert toDrawing point)
-    # #diameter (Length.millimeters 1.0)
+  Drawing2d.circleWith [Drawing2d.fillColor color] do
+    #centerPoint (Point2d.convert toDrawing point)
+    #diameter (Length.millimeters 1.0)
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint number delay = IO.do
@@ -306,20 +303,15 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
   let curve = Curve2d.bezier drawingControlPoints
-  let drawSegmentBounds tBounds = drawBounds [] (Curve2d.evaluateBounds curve tBounds)
-  Drawing2d.with
-    [Drawing2d.strokeColor color, Drawing2d.strokeWidth (Length.millimeters 1.0)]
-    [ Drawing2d.with [Drawing2d.opacity 0.3] $
-        [ Drawing2d.polyline [] (Polyline2d drawingControlPoints)
-        , Drawing2d.with [Drawing2d.fillColor color] $
-            [ Drawing2d.circle [] (#centerPoint point) (#diameter (Length.millimeters 10.0))
-            | point <- NonEmpty.toList drawingControlPoints
-            ]
-        ]
-    , Drawing2d.with [Drawing2d.opacity 0.3] $
-        List.map drawSegmentBounds (Parameter.intervals 10)
-    , Drawing2d.curve [] Length.millimeter curve
-    ]
+  let drawSegmentBounds tBounds = drawBounds (Curve2d.evaluateBounds curve tBounds)
+  let controlPointDiameter = Length.millimeters 10.0
+  let drawControlPoint point = Drawing2d.circle (#centerPoint point, #diameter controlPointDiameter)
+  Drawing2d.with [Drawing2d.strokeColor color, Drawing2d.strokeWidth (Length.millimeters 1.0)] do
+    Drawing2d.with [Drawing2d.opacity 0.3] do
+      Drawing2d.polyline (Polyline2d drawingControlPoints)
+      Drawing2d.collectWith [Drawing2d.fillColor color] drawControlPoint drawingControlPoints
+      Drawing2d.collect drawSegmentBounds (Parameter.intervals 10)
+    Drawing2d.curve Length.millimeter curve
 
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = IO.do
@@ -332,7 +324,7 @@ testBezierSegment = IO.do
   let coordinateBounds = Bounds.convert toDrawing (Bounds -1.0 11.0)
   let drawingBounds = Bounds2d coordinateBounds coordinateBounds
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
-  Drawing2d.writeSvg "executables/sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
+  Drawing2d.writeSvg "executables/sandbox/test-bezier-segment.svg" drawingBounds curveEntity
 
 testHermiteBezier :: IO ()
 testHermiteBezier = IO.do
@@ -345,10 +337,10 @@ testHermiteBezier = IO.do
         [ Drawing2d.strokeColor Color.blue
         , Drawing2d.strokeWidth (Length.millimeters 1.0)
         ]
-  let curveEntity = Drawing2d.curve curveAttributes (Length.millimeters 0.1) curve
+  let curveEntity = Drawing2d.curveWith curveAttributes (Length.millimeters 0.1) curve
   let coordinateBounds = Bounds (Length.centimeters -1.0) (Length.centimeters 11.0)
   let drawingBounds = Bounds2d coordinateBounds coordinateBounds
-  Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
+  Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity
 
 testExplicitRandomStep :: IO ()
 testExplicitRandomStep = IO.do

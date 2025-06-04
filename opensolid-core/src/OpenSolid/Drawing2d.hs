@@ -3,16 +3,25 @@ module OpenSolid.Drawing2d
   , Attribute
   , Resolution
   , Point
+  , (>>)
   , toSvg
   , writeSvg
   , nothing
   , group
+  , groupWith
   , with
+  , collect
+  , collectWith
   , line
+  , lineWith
   , polyline
+  , polylineWith
   , polygon
+  , polygonWith
   , circle
+  , circleWith
   , curve
+  , curveWith
   , blackStroke
   , strokeColor
   , strokeWidth
@@ -29,6 +38,7 @@ module OpenSolid.Drawing2d
   )
 where
 
+import Data.Foldable qualified
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
@@ -69,6 +79,10 @@ instance FFI (Entity space) where
 instance FFI (Attribute space) where
   representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute"
 
+instance Composition (Entity space) (Entity space) (Entity space) where
+  entity >> Node "g" [] entities = Node "g" [] (entity : entities)
+  entity1 >> entity2 = Node "g" [] [entity1, entity2]
+
 entityText :: Text -> Entity space -> Maybe Text
 entityText _ Empty = Nothing
 entityText indent (Node name attributes children) = do
@@ -87,8 +101,8 @@ The given bounding box defines the overall size of the drawing,
 and in general should contain all the drawing entities
 (unless you *want* to crop some of them).
 -}
-toSvg :: Bounds2d (space @ Meters) -> List (Entity space) -> Text
-toSvg viewBox entities = do
+toSvg :: Bounds2d (space @ Meters) -> Entity space -> Text
+toSvg viewBox entity = do
   let (xBounds, yBounds) = Bounds2d.coordinates viewBox
   let (x1, x2) = Bounds.endpoints xBounds
   let (y1, y2) = Bounds.endpoints yBounds
@@ -112,7 +126,7 @@ toSvg viewBox entities = do
         ]
   Text.multiline
     [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-    , Maybe.withDefault "" (entityText "" (Node "svg" attributes entities)) <> "\n"
+    , Maybe.withDefault "" (entityText "" (Node "svg" attributes [entity])) <> "\n"
     ]
 
 {-| Render SVG to a file.
@@ -121,21 +135,39 @@ The given bounding box defines the overall size of the drawing,
 and in general should contain all the drawing entities
 (unless you *want* to crop some of them).
 -}
-writeSvg :: Text -> Bounds2d (space @ Meters) -> List (Entity space) -> IO ()
-writeSvg path viewBox entities = IO.writeUtf8 path (toSvg viewBox entities)
+writeSvg :: Text -> Bounds2d (space @ Meters) -> Entity space -> IO ()
+writeSvg path viewBox entity = IO.writeUtf8 path (toSvg viewBox entity)
 
 nothing :: Entity space
 nothing = Empty
 
-with :: List (Attribute space) -> List (Entity space) -> Entity space
-with attributes children = Node "g" attributes children
+-- | Group several entities into a single entity, applying the given attributes to the group.
+groupWith :: List (Attribute space) -> List (Entity space) -> Entity space
+groupWith = Node "g"
 
 -- | Group several entities into a single entity.
 group :: List (Entity space) -> Entity space
-group = with []
+group = groupWith []
 
-line :: List (Attribute space) -> Point space -> Point space -> Entity space
-line attributes p1 p2 = do
+with :: List (Attribute space) -> Entity space -> Entity space
+with _ Empty = Empty
+with attributes (Node tag existingAttributes children) =
+  Node tag (existingAttributes <> attributes) children
+
+collect :: Foldable list => (a -> Entity space) -> list a -> Entity space
+collect = collectWith []
+
+collectWith ::
+  Foldable list =>
+  List (Attribute space) ->
+  (a -> Entity space) ->
+  list a ->
+  Entity space
+collectWith attributes function list =
+  groupWith attributes (List.map function (Data.Foldable.toList list))
+
+lineWith :: List (Attribute space) -> Point space -> Point space -> Entity space
+lineWith attributes p1 p2 = do
   let (x1, y1) = Point2d.coordinates p1
   let (x2, y2) = Point2d.coordinates p2
   let x1Attribute = Attribute "x1" (lengthText x1)
@@ -144,42 +176,55 @@ line attributes p1 p2 = do
   let y2Attribute = Attribute "y2" (lengthText -y2)
   Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
 
-polyline ::
+line :: Point space -> Point space -> Entity space
+line = lineWith []
+
+polylineWith ::
   Vertex2d vertex (space @ Meters) =>
   List (Attribute space) ->
   Polyline2d vertex ->
   Entity space
-polyline attributes givenPolyline = do
-  let vertices = List.map Vertex2d.position (NonEmpty.toList (Polyline2d.vertices givenPolyline))
+polylineWith attributes givenPolyline = do
+  let vertices = List.map Vertex2d.position (NonEmpty.toList givenPolyline.vertices)
   Node "polyline" (noFill : pointsAttribute vertices : attributes) []
 
+polyline :: Vertex2d vertex (space @ Meters) => Polyline2d vertex -> Entity space
+polyline = polylineWith []
+
 -- | Create a polygon with the given attributes and vertices.
-polygon :: List (Attribute space) -> List (Point space) -> Entity space
-polygon attributes vertices =
+polygonWith :: List (Attribute space) -> List (Point space) -> Entity space
+polygonWith attributes vertices =
   Node "polygon" (pointsAttribute vertices : attributes) []
 
+-- | Create a polygon with the given vertices.
+polygon :: List (Point space) -> Entity space
+polygon = polygonWith []
+
 -- | Create a circle with the given attributes, center point and diameter.
-circle ::
+circleWith ::
   List (Attribute space) ->
-  Named "centerPoint" (Point space) ->
-  Named "diameter" Length ->
+  ("centerPoint" ::: Point space, "diameter" ::: Length) ->
   Entity space
-circle attributes (Named centerPoint) (Named diameter) = do
+circleWith attributes (Field centerPoint, Field diameter) = do
   let (cx, cy) = Point2d.coordinates centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
   let rAttribute = Attribute "r" (lengthText (0.5 * diameter))
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
+-- | Create a circle with the given center point and diameter.
+circle :: ("centerPoint" ::: Point space, "diameter" ::: Length) -> Entity space
+circle = circleWith []
+
 -- | Draw a curve with the given attributes and accuracy.
-curve ::
-  List (Attribute space) ->
-  Length ->
-  Curve2d (space @ Meters) ->
-  Entity space
-curve attributes maxError givenCurve = do
+curveWith :: List (Attribute space) -> Length -> Curve2d (space @ Meters) -> Entity space
+curveWith attributes maxError givenCurve = do
   let approximation = Curve2d.toPolyline maxError givenCurve
-  polyline attributes approximation
+  polylineWith attributes approximation
+
+-- | Draw a curve with the given attributes and accuracy.
+curve :: Length -> Curve2d (space @ Meters) -> Entity space
+curve = curveWith []
 
 pointsAttribute :: List (Point space) -> Attribute space
 pointsAttribute givenPoints =

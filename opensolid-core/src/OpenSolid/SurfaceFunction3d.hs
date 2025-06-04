@@ -1,7 +1,6 @@
 module OpenSolid.SurfaceFunction3d
   ( SurfaceFunction3d
   , Compiled
-  , compiled
   , new
   , constant
   , rightwardForwardUpward
@@ -37,7 +36,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordina
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
-import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
@@ -73,7 +71,7 @@ instance
   where
   lhs + rhs =
     new
-      # compiled lhs + VectorSurfaceFunction3d.compiled rhs
+      # lhs.compiled + rhs.compiled
       # \parameter -> derivative parameter lhs + VectorSurfaceFunction3d.derivative parameter rhs
 
 instance
@@ -94,7 +92,7 @@ instance
   where
   lhs - rhs =
     new
-      # compiled lhs - VectorSurfaceFunction3d.compiled rhs
+      # lhs.compiled - rhs.compiled
       # \parameter -> derivative parameter lhs - VectorSurfaceFunction3d.derivative parameter rhs
 
 instance
@@ -113,10 +111,10 @@ instance
     (SurfaceFunction3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  f1 - f2 =
+  lhs - rhs =
     VectorSurfaceFunction3d.new
-      (compiled f1 - compiled f2)
-      (\parameter -> derivative parameter f1 - derivative parameter f2)
+      # lhs.compiled - rhs.compiled
+      # \parameter -> derivative parameter lhs - derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -156,16 +154,15 @@ instance
     let duOuter = derivative U outer . inner
     let dvOuter = derivative V outer . inner
     new
-      # compiled outer . SurfaceFunction2d.compiled inner
+      # outer.compiled . inner.compiled
       # \parameter -> do
         let dInner = SurfaceFunction2d.derivative parameter inner
-        let dU = VectorSurfaceFunction2d.xComponent dInner
-        let dV = VectorSurfaceFunction2d.yComponent dInner
+        let dU = dInner.xComponent
+        let dV = dInner.yComponent
         duOuter * dU + dvOuter * dV
 
-{-# INLINE compiled #-}
-compiled :: SurfaceFunction3d (space @ units) -> Compiled (space @ units)
-compiled (SurfaceFunction3d c _ _) = c
+instance HasField "compiled" (SurfaceFunction3d (space @ units)) (Compiled (space @ units)) where
+  getField (SurfaceFunction3d c _ _) = c
 
 new ::
   Compiled (space @ units) ->
@@ -175,7 +172,7 @@ new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
   let dv' =
-        VectorSurfaceFunction3d.new (VectorSurfaceFunction3d.compiled dv) $
+        VectorSurfaceFunction3d.new dv.compiled $
           \parameter -> case parameter of
             U -> VectorSurfaceFunction3d.derivative V du
             V -> VectorSurfaceFunction3d.derivative V dv
@@ -195,9 +192,9 @@ rightwardForwardUpward r f u =
       Expression.rightwardForwardUpward
       Point3d.rightwardForwardUpward
       Bounds3d.rightwardForwardUpward
-      (SurfaceFunction.compiled r)
-      (SurfaceFunction.compiled f)
-      (SurfaceFunction.compiled u)
+      r.compiled
+      f.compiled
+      u.compiled
     # \parameter ->
       VectorSurfaceFunction3d.rightwardForwardUpward
         (SurfaceFunction.derivative parameter r)
@@ -205,10 +202,10 @@ rightwardForwardUpward r f u =
         (SurfaceFunction.derivative parameter u)
 
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)
-evaluate function uvPoint = CompiledFunction.evaluate (compiled function) uvPoint
+evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 evaluateBounds :: SurfaceFunction3d (space @ units) -> UvBounds -> Bounds3d (space @ units)
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds (compiled function) uvBounds
+evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->
@@ -227,7 +224,7 @@ transformBy transform function =
       (Expression.Surface3d.transformBy transform)
       (Point3d.transformBy transform)
       (Bounds3d.transformBy transform)
-      (compiled function)
+      function.compiled
     # \parameter -> VectorSurfaceFunction3d.transformBy transform (derivative parameter function)
 
 placeIn ::
@@ -240,7 +237,7 @@ placeIn frame function =
       (Expression.Surface3d.placeIn frame)
       (Point3d.placeIn frame)
       (Bounds3d.placeIn frame)
-      (compiled function)
+      function.compiled
     # \parameter ->
       VectorSurfaceFunction3d.placeIn (Frame3d.orientation frame) (derivative parameter function)
 

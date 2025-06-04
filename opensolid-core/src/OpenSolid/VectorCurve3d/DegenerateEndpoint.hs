@@ -1,7 +1,6 @@
 module OpenSolid.VectorCurve3d.DegenerateEndpoint
   ( DegenerateEndpoint
   , at
-  , derivative
   , cutoff
   , evaluate
   , evaluateBounds
@@ -41,15 +40,14 @@ computeRadius secondDerivative = Qty.sqrt (2.0 * ?tolerance / Vector3d.magnitude
 cutoff :: DegenerateEndpoint space -> Float
 cutoff (DegenerateEndpoint _ t1 _) = t1
 
-derivative :: DegenerateEndpoint space -> DegenerateEndpoint space
-derivative (DegenerateEndpoint t0 t1 curve) =
-  DegenerateEndpoint t0 t1 (VectorCurve3d.derivative curve)
+instance HasField "derivative" (DegenerateEndpoint space) (DegenerateEndpoint space) where
+  getField (DegenerateEndpoint t0 t1 curve) = DegenerateEndpoint t0 t1 curve.derivative
 
 qCurve :: Int -> Float -> VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
 qCurve n t0 curveDerivative = do
   let value = VectorCurve3d.evaluate curveDerivative t0 / Float.int (n + 1)
   let compiled = CompiledFunction.concrete (Expression.constant value)
-  let qCurveDerivative = qCurve (n + 1) t0 (VectorCurve3d.derivative curveDerivative)
+  let qCurveDerivative = qCurve (n + 1) t0 curveDerivative.derivative
   VectorCurve3d.new compiled qCurveDerivative
 
 evaluate ::

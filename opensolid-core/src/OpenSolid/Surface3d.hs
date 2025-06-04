@@ -1,15 +1,11 @@
 module OpenSolid.Surface3d
-  ( Surface3d
+  ( Surface3d (function, domain, outerLoop, innerLoops)
   , parametric
   , on
   , extruded
   , translational
   , ruled
   , revolved
-  , function
-  , domain
-  , outerLoop
-  , innerLoops
   , boundaryCurves
   , flip
   , placeIn
@@ -30,7 +26,6 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
-import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
@@ -89,8 +84,8 @@ parametric givenFunction givenDomain = do
   Surface3d
     { function = givenFunction
     , domain = givenDomain
-    , outerLoop = boundaryLoop (Region2d.outerLoop givenDomain)
-    , innerLoops = List.map boundaryLoop (Region2d.innerLoops givenDomain)
+    , outerLoop = boundaryLoop givenDomain.outerLoop
+    , innerLoops = List.map boundaryLoop givenDomain.innerLoops
     }
 
 on ::
@@ -160,13 +155,13 @@ revolved sketchPlane curve axis angle = do
         Success (parametric function Region2d.unitSquare)
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
-boundaryCurves surface = NonEmpty.concat (outerLoop surface :| innerLoops surface)
+boundaryCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoops)
 
 flip :: Surface3d (space @ units) -> Surface3d (space @ units)
 flip surface =
   parametric
-    # function surface . SurfaceFunction2d.xy -SurfaceFunction.u SurfaceFunction.v
-    # Region2d.mirrorAcross Axis2d.y (domain surface)
+    # surface.function . SurfaceFunction2d.xy -SurfaceFunction.u SurfaceFunction.v
+    # Region2d.mirrorAcross Axis2d.y surface.domain
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.
 placeIn ::
@@ -174,9 +169,7 @@ placeIn ::
   Surface3d (local @ units) ->
   Surface3d (global @ units)
 placeIn frame surface =
-  parametric
-    # SurfaceFunction3d.placeIn frame (function surface)
-    # domain surface
+  parametric (SurfaceFunction3d.placeIn frame surface.function) surface.domain
 
 -- | Convert a surface defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -184,27 +177,23 @@ relativeTo ::
   Surface3d (global @ units) ->
   Surface3d (local @ units)
 relativeTo frame surface =
-  parametric
-    # SurfaceFunction3d.relativeTo frame (function surface)
-    # domain surface
+  parametric (SurfaceFunction3d.relativeTo frame surface.function) surface.domain
 
 toMesh :: Qty units -> Surface3d (space @ units) -> Mesh (Point3d (space @ units))
 toMesh accuracy surface = do
-  let surfaceFunction = function surface
-  let surfaceDomain = domain surface
-  let fu = SurfaceFunction3d.derivative U surfaceFunction
-  let fv = SurfaceFunction3d.derivative V surfaceFunction
+  let fu = SurfaceFunction3d.derivative U surface.function
+  let fv = SurfaceFunction3d.derivative V surface.function
   let fuu = VectorSurfaceFunction3d.derivative U fu
   let fuv = VectorSurfaceFunction3d.derivative V fu
   let fvv = VectorSurfaceFunction3d.derivative V fv
-  let boundaryLoops = Region2d.outerLoop surfaceDomain :| Region2d.innerLoops surfaceDomain
-  let boundaryPolygons = NonEmpty.map (toPolygon accuracy surfaceFunction fuu fuv fvv) boundaryLoops
+  let boundaryLoops = surface.domain.outerLoop :| surface.domain.innerLoops
+  let boundaryPolygons = NonEmpty.map (toPolygon accuracy surface.function fuu fuv fvv) boundaryLoops
   let boundaryEdges = NonEmpty.collect Polygon2d.edges boundaryPolygons
   let edgeSet = Set2d.fromNonEmpty boundaryEdges
-  let steinerPoints = generateSteinerPoints accuracy (Region2d.bounds surfaceDomain) edgeSet fuu fuv fvv []
-  let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
+  let steinerPoints = generateSteinerPoints accuracy (Region2d.bounds surface.domain) edgeSet fuu fuv fvv []
+  let boundaryVertexLoops = NonEmpty.map (.vertices) boundaryPolygons
   let uvMesh = CDT.unsafe boundaryVertexLoops steinerPoints
-  Mesh.map (SurfaceFunction3d.evaluate surfaceFunction) uvMesh
+  Mesh.map (SurfaceFunction3d.evaluate surface.function) uvMesh
 
 toPolygon ::
   Qty units ->
@@ -227,7 +216,7 @@ boundaryPoints ::
   NonEmpty UvPoint
 boundaryPoints accuracy surfaceFunction fuu fuv fvv uvCurve = do
   let curve3d = surfaceFunction . uvCurve
-  let secondDerivative3d = VectorCurve3d.derivative (Curve3d.derivative curve3d)
+  let secondDerivative3d = curve3d.derivative.derivative
   let predicate = linearizationPredicate accuracy fuu fuv fvv uvCurve secondDerivative3d
   let parameterValues = Domain1d.leadingSamplingPoints predicate
   NonEmpty.map (Curve2d.evaluate uvCurve) parameterValues

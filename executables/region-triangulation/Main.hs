@@ -7,7 +7,6 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -33,18 +32,18 @@ main = Tolerance.using Length.nanometer IO.do
       , Curve2d.arc p2 p3 Angle.quarterTurn
       , Curve2d.line p3 p4
       , Curve2d.line p4 p0
-      , Curve2d.circle (#centerPoint holeCenter) (#diameter holeDiameter)
+      , Curve2d.circle (#centerPoint holeCenter, #diameter holeDiameter)
       ]
   let mesh = Region2d.toMesh (Length.millimeters 1.0) region
   let triangles = Mesh.faceVertices mesh
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -3.0 -3.0) (Point2d.centimeters 21.0 15.0)
   let drawTriangle (a, b, c) =
-        Drawing2d.polygon
+        Drawing2d.polygonWith
           [ Drawing2d.fillColor Color.lightGrey
           , Drawing2d.strokeColor Color.lightBlue
           , Drawing2d.strokeWidth (Length.millimeters 0.1)
           , Drawing2d.roundStrokeJoins
           ]
           [a, b, c]
-  Drawing2d.writeSvg "executables/region-triangulation/triangulated.svg" drawingBounds $
-    List.map drawTriangle triangles
+  Drawing2d.writeSvg "executables/region-triangulation/triangulated.svg" drawingBounds do
+    Drawing2d.collect drawTriangle triangles

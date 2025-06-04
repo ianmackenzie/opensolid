@@ -98,7 +98,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
   let clampedVBounds uValue =
         List.foldl (clamp uValue) (ImplicitCurveBounds.evaluate bounds uValue) boundingAxes
   let solveForV =
-        case (SurfaceFunction.compiled f, SurfaceFunction.compiled fv) of
+        case (f.compiled, fv.compiled) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fvExpr) ->
             \uValue -> Expression.solveMonotonicSurfaceV fExpr fvExpr uValue (clampedVBounds uValue)
           _ -> \uValue -> Internal.solveForV f fv uValue (clampedVBounds uValue)

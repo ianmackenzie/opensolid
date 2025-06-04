@@ -22,7 +22,7 @@ data ImplicitCurveBounds
 build :: NonEmpty (Bounds Unitless, Bounds Unitless) -> ImplicitCurveBounds
 build boxes = do
   let array = Array.fromNonEmpty (NonEmpty.sortBy (Bounds.lower . Pair.first) boxes)
-  subtree array 0 (Array.length array)
+  subtree array 0 array.length
 
 subtree :: Array (Bounds Unitless, Bounds Unitless) -> Int -> Int -> ImplicitCurveBounds
 subtree boxes begin end = case end - begin of

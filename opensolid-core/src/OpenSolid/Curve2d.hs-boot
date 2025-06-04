@@ -2,15 +2,11 @@ module OpenSolid.Curve2d
   ( Curve2d
   , Compiled
   , HasDegeneracy (HasDegeneracy)
-  , compiled
   , constant
   , new
-  , startPoint
-  , endPoint
   , evaluate
   , evaluateBounds
   , bounds
-  , derivative
   , tangentDirection
   , reverse
   , removeStartDegeneracy
@@ -43,6 +39,14 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
 
 data HasDegeneracy = HasDegeneracy
 
+instance HasField "compiled" (Curve2d (space @ units)) (Compiled (space @ units))
+
+instance HasField "derivative" (Curve2d (space @ units)) (VectorCurve2d (space @ units))
+
+instance HasField "startPoint" (Curve2d (space @ units)) (Point2d (space @ units))
+
+instance HasField "endPoint" (Curve2d (space @ units)) (Point2d (space @ units))
+
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
@@ -59,10 +63,6 @@ instance
 
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
-compiled :: Curve2d (space @ units) -> Compiled (space @ units)
-derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)

@@ -92,10 +92,7 @@ derivative ::
   Maybe (DegenerateEndpoint space) ->
   VectorCurve3d (space @ Unitless)
 derivative start general end =
-  vectorCurve
-    (Maybe.map DegenerateEndpoint.derivative start)
-    (VectorCurve3d.derivative general)
-    (Maybe.map DegenerateEndpoint.derivative end)
+  vectorCurve (Maybe.map (.derivative) start) general.derivative (Maybe.map (.derivative) end)
 
 vectorCurve ::
   Maybe (DegenerateEndpoint space) ->

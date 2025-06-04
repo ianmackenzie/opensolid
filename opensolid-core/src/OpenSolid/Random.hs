@@ -80,7 +80,7 @@ oneOf values = merge (NonEmpty.map return values)
 merge :: NonEmpty (Generator a) -> Generator a
 merge generators = do
   let generatorArray = Array.fromNonEmpty generators
-  let indexGenerator = Int.random 0 (Array.length generatorArray - 1)
+  let indexGenerator = Int.random 0 (generatorArray.length - 1)
   OpenSolid.Random.do
     index <- indexGenerator
     Array.get index generatorArray

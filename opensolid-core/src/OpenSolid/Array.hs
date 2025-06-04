@@ -4,10 +4,7 @@ module OpenSolid.Array
   , fromNonEmpty
   , toNonEmpty
   , toList
-  , length
   , get
-  , first
-  , last
   , map
   , map2
   , map3
@@ -53,8 +50,8 @@ instance Foldable1 Array where
   foldlMap1' = Foldable1.foldlMap1
 
   toNonEmpty = toNonEmpty
-  head = first
-  last = last
+  head = (.first)
+  last = (.last)
 
 foldrMap1Help :: Int -> (a -> b -> b) -> b -> Data.Array.Array Int a -> b
 foldrMap1Help i g !acc array
@@ -82,19 +79,18 @@ toNonEmpty array = case toList array of
 toList :: Array a -> List a
 toList (Array array) = Data.Array.elems array
 
-{-# INLINE length #-}
-length :: Array a -> Int
-length (Array array) = Prelude.length array
+instance HasField "length" (Array a) Int where
+  getField (Array array) = Prelude.length array
 
 {-# INLINE get #-}
 get :: Int -> Array a -> a
 get index (Array array) = array ! (index % (Prelude.length array))
 
-first :: Array a -> a
-first (Array array) = array ! 0
+instance HasField "first" (Array a) a where
+  getField (Array array) = array ! 0
 
-last :: Array a -> a
-last (Array array) = array ! (Prelude.length array - 1)
+instance HasField "last" (Array a) a where
+  getField (Array array) = array ! (Prelude.length array - 1)
 
 map :: (a -> b) -> Array a -> Array b
 map f (Array array) = Array (Prelude.fmap f array)
@@ -119,13 +115,13 @@ mapWithIndex f (Array array) = do
 
 reverse :: Array a -> Array a
 reverse array = do
-  let n = length array
+  let n = array.length
   let reversedItems = foldl (\acc item -> item : acc) [] array
   Array (Data.Array.listArray (0, n - 1) reversedItems)
 
 reverseMap :: (a -> b) -> Array a -> Array b
 reverseMap f array = do
-  let n = length array
+  let n = array.length
   let newItems = foldl (\acc item -> f item : acc) [] array
   Array (Data.Array.listArray (0, n - 1) newItems)
 

@@ -25,8 +25,8 @@ singleton item = Array2d (1, 1) (Data.Array.listArray ((0, 0), (0, 0)) [item])
 
 new :: (a -> b -> c) -> Array a -> Array b -> Array2d c
 new f uItems vItems = do
-  let n = Array.length uItems
-  let m = Array.length vItems
+  let n = uItems.length
+  let m = vItems.length
   let item i = f (Array.get (i // m) uItems) (Array.get (i % m) vItems)
   let items = List.map item [0 .. n * m - 1]
   Array2d (n, m) (Data.Array.listArray ((0, 0), (n - 1, m - 1)) items)

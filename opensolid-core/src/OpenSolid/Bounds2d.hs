@@ -70,6 +70,8 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vertex2d (Vertex2d)
+import OpenSolid.Vertex2d qualified as Vertex2d
 
 -- | Get the X coordinate bounds of a bounding box.
 xCoordinate :: Bounds2d (space @ units) -> Bounds units
@@ -209,13 +211,13 @@ hull4 p1 p2 p3 p4 = do
   let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
   Bounds2d (Bounds minX maxX) (Bounds minY maxY)
 
--- | Construct a bounding box containing all points in the given non-empty list.
-hullN :: NonEmpty (Point2d (space @ units)) -> Bounds2d (space @ units)
-hullN (p0 :| rest) = do
-  let (x0, y0) = Point2d.coordinates p0
+-- | Construct a bounding box containing all vertices in the given non-empty list.
+hullN :: Vertex2d vertex (space @ units) => NonEmpty vertex -> Bounds2d (space @ units)
+hullN (v0 :| rest) = do
+  let (x0, y0) = Point2d.coordinates (Vertex2d.position v0)
   let go xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
-      go xLow xHigh yLow yHigh (point : remaining) = do
-        let (x, y) = Point2d.coordinates point
+      go xLow xHigh yLow yHigh (vertex : remaining) = do
+        let (x, y) = Point2d.coordinates (Vertex2d.position vertex)
         go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
   go x0 x0 y0 y0 rest
 
