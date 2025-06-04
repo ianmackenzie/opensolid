@@ -4,6 +4,7 @@ module OpenSolid.VectorBounds2d
   , coerce
   , aggregate2
   , aggregate3
+  , aggregateN
   , hull2
   , hull3
   , hull4
@@ -19,9 +20,14 @@ module OpenSolid.VectorBounds2d
   , maxSquaredMagnitude
   , maxSquaredMagnitude'
   , normalize
+  , exclusion
+  , inclusion
   , includes
   , contains
   , isContainedIn
+  , separation
+  , overlap
+  , intersection
   , interpolate
   , relativeTo
   , placeIn
@@ -35,6 +41,7 @@ where
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction2d (Direction2d)
@@ -110,6 +117,28 @@ aggregate3 ::
 aggregate3 (VectorBounds2d x1 y1) (VectorBounds2d x2 y2) (VectorBounds2d x3 y3) =
   VectorBounds2d (Bounds.aggregate3 x1 x2 x3) (Bounds.aggregate3 y1 y2 y3)
 
+-- | Construct a vector bounding box containing all vector bounding boxes in the given list.
+aggregateN :: NonEmpty (VectorBounds2d (space @ units)) -> VectorBounds2d (space @ units)
+aggregateN (VectorBounds2d (Bounds xLow0 xHigh0) (Bounds yLow0 yHigh0) :| rest) =
+  aggregateImpl xLow0 xHigh0 yLow0 yHigh0 rest
+
+aggregateImpl ::
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  List (VectorBounds2d (space @ units)) ->
+  VectorBounds2d (space @ units)
+aggregateImpl xLow xHigh yLow yHigh [] = VectorBounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
+aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
+  let VectorBounds2d (Bounds xLowNext xHighNext) (Bounds yLowNext yHighNext) = next
+  aggregateImpl
+    (Qty.min xLow xLowNext)
+    (Qty.max xHigh xHighNext)
+    (Qty.min yLow yLowNext)
+    (Qty.max yHigh yHighNext)
+    remaining
+
 polar :: Bounds units -> Bounds Radians -> VectorBounds2d (space @ units)
 polar r theta = VectorBounds2d (r * Bounds.cos theta) (r * Bounds.sin theta)
 
@@ -160,6 +189,21 @@ clampNormalized :: Bounds Unitless -> Bounds Unitless
 clampNormalized (Bounds low high) =
   Bounds (Qty.clampTo normalizedBounds low) (Qty.clampTo normalizedBounds high)
 
+exclusion :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Qty units
+exclusion (Vector2d vx vy) (VectorBounds2d bx by) = do
+  let exclusionX = Bounds.exclusion vx bx
+  let exclusionY = Bounds.exclusion vy by
+  let positiveX = exclusionX >= Qty.zero
+  let positiveY = exclusionY >= Qty.zero
+  if
+    | positiveX && positiveY -> Qty.hypot2 exclusionX exclusionY
+    | positiveX -> exclusionX
+    | positiveY -> exclusionY
+    | otherwise -> Qty.max exclusionX exclusionY
+
+inclusion :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Qty units
+inclusion vector box = -(exclusion vector box)
+
 includes :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
 includes (Vector2d vx vy) (VectorBounds2d x y) = Bounds.includes vx x && Bounds.includes vy y
 
@@ -169,6 +213,28 @@ contains (VectorBounds2d x2 y2) (VectorBounds2d x1 y1) =
 
 isContainedIn :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
+
+separation :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Qty units
+separation (VectorBounds2d x1 y1) (VectorBounds2d x2 y2) = do
+  let separationX = Bounds.separation x1 x2
+  let separationY = Bounds.separation y1 y2
+  let positiveX = separationX >= Qty.zero
+  let positiveY = separationY >= Qty.zero
+  if
+    | positiveX && positiveY -> Qty.hypot2 separationX separationY
+    | positiveX -> separationX
+    | positiveY -> separationY
+    | otherwise -> Qty.max separationX separationY
+
+overlap :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Qty units
+overlap first second = -(separation first second)
+
+intersection ::
+  VectorBounds2d (space @ units) ->
+  VectorBounds2d (space @ units) ->
+  Maybe (VectorBounds2d (space @ units))
+intersection (VectorBounds2d x1 y1) (VectorBounds2d x2 y2) =
+  Maybe.map2 VectorBounds2d (Bounds.intersection x1 x2) (Bounds.intersection y1 y2)
 
 interpolate :: VectorBounds2d (space @ units) -> Float -> Float -> Vector2d (space @ units)
 interpolate (VectorBounds2d x y) u v =

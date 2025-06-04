@@ -29,9 +29,6 @@ module OpenSolid.Bounds2d
   , area'
   , area
   , interpolate
-  , any
-  , all
-  , resolve
   , placeIn
   , relativeTo
   , on
@@ -42,6 +39,7 @@ module OpenSolid.Bounds2d
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds (Bounds (Bounds))
@@ -49,40 +47,51 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Bounds2d (Bounds2d)
+  ( Bounds2d (PositionBounds2d)
   , Bounds3d (Bounds3d)
   , Direction3d (Direction3d)
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
+  , Point2d (Position2d)
   , Point3d (Point3d)
   )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 
+{-# COMPLETE Bounds2d #-}
+
+{-# INLINE Bounds2d #-}
+
+-- | Construct a bounding box from its X and Y coordinate bounds.
+pattern Bounds2d :: Bounds units -> Bounds units -> Bounds2d (space @ units)
+pattern Bounds2d bx by <- PositionBounds2d (VectorBounds2d bx by)
+  where
+    Bounds2d bx by = PositionBounds2d (VectorBounds2d bx by)
+
 -- | Get the X coordinate bounds of a bounding box.
 xCoordinate :: Bounds2d (space @ units) -> Bounds units
-xCoordinate (Bounds2d x _) = x
+xCoordinate (PositionBounds2d pb) = VectorBounds2d.xComponent pb
 
 -- | Get the Y coordinate bounds of a bounding box.
 yCoordinate :: Bounds2d (space @ units) -> Bounds units
-yCoordinate (Bounds2d _ y) = y
+yCoordinate (PositionBounds2d pb) = VectorBounds2d.yComponent pb
 
 -- | Get the X and Y coordinate bounds of a bounding box.
 {-# INLINE coordinates #-}
 coordinates :: Bounds2d (space @ units) -> (Bounds units, Bounds units)
-coordinates (Bounds2d x y) = (x, y)
+coordinates (PositionBounds2d pb) = VectorBounds2d.components pb
 
 dimensions :: Bounds2d (space @ units) -> (Qty units, Qty units)
 dimensions (Bounds2d x y) = (Bounds.width x, Bounds.width y)
@@ -95,75 +104,40 @@ constant :: Point2d (space @ units) -> Bounds2d (space @ units)
 constant (Point2d x y) = Bounds2d (Bounds.constant x) (Bounds.constant y)
 
 aggregate2 :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bounds2d (space @ units)
-aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
-  Bounds2d (Bounds.aggregate2 x1 x2) (Bounds.aggregate2 y1 y2)
+aggregate2 (PositionBounds2d pb1) (PositionBounds2d pb2) =
+  PositionBounds2d (VectorBounds2d.aggregate2 pb1 pb2)
 
 -- | Construct a bounding box containing all bounding boxes in the given non-empty list.
 aggregateN :: NonEmpty (Bounds2d (space @ units)) -> Bounds2d (space @ units)
-aggregateN (Bounds2d (Bounds xLow0 xHigh0) (Bounds yLow0 yHigh0) :| rest) =
-  aggregateImpl xLow0 xHigh0 yLow0 yHigh0 rest
-
-aggregateImpl ::
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  List (Bounds2d (space @ units)) ->
-  Bounds2d (space @ units)
-aggregateImpl xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
-aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
-  let Bounds2d (Bounds xLowNext xHighNext) (Bounds yLowNext yHighNext) = next
-  aggregateImpl
-    (Qty.min xLow xLowNext)
-    (Qty.max xHigh xHighNext)
-    (Qty.min yLow yLowNext)
-    (Qty.max yHigh yHighNext)
-    remaining
+aggregateN list = PositionBounds2d (VectorBounds2d.aggregateN (Data.Coerce.coerce list))
 
 exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-exclusion (Point2d px py) (Bounds2d bx by) = do
-  let exclusionX = Bounds.exclusion px bx
-  let exclusionY = Bounds.exclusion py by
-  let positiveX = exclusionX >= Qty.zero
-  let positiveY = exclusionY >= Qty.zero
-  if
-    | positiveX && positiveY -> Qty.hypot2 exclusionX exclusionY
-    | positiveX -> exclusionX
-    | positiveY -> exclusionY
-    | otherwise -> Qty.max exclusionX exclusionY
+exclusion (Position2d p) (PositionBounds2d pb) = VectorBounds2d.exclusion p pb
 
 inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-inclusion point box = -(exclusion point box)
+inclusion (Position2d p) (PositionBounds2d pb) = VectorBounds2d.inclusion p pb
 
 includes :: Point2d (space @ units) -> Bounds2d (space @ units) -> Bool
-includes (Point2d px py) (Bounds2d bx by) = Bounds.includes px bx && Bounds.includes py by
+includes (Position2d p) (PositionBounds2d pb) = VectorBounds2d.includes p pb
 
 contains :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
-contains (Bounds2d x2 y2) (Bounds2d x1 y1) = Bounds.contains x2 x1 && Bounds.contains y2 y1
+contains (PositionBounds2d pb2) (PositionBounds2d pb1) = VectorBounds2d.contains pb2 pb1
 
 isContainedIn :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-separation (Bounds2d x1 y1) (Bounds2d x2 y2) = do
-  let dx = Bounds.separation x1 x2
-  let dy = Bounds.separation y1 y2
-  let px = dx >= Qty.zero
-  let py = dy >= Qty.zero
-  if
-    | px && py -> Qty.hypot2 dx dy
-    | px -> dx
-    | py -> dy
-    | otherwise -> Qty.max dx dy
+separation (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.separation pb1 pb2
 
 overlap :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-overlap first second = -(separation first second)
+overlap (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.overlap pb1 pb2
 
-intersection :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Maybe (Bounds2d (space @ units))
-intersection (Bounds2d x1 y1) (Bounds2d x2 y2) = Maybe.do
-  x <- Bounds.intersection x1 x2
-  y <- Bounds.intersection y1 y2
-  Just (Bounds2d x y)
+intersection ::
+  Bounds2d (space @ units) ->
+  Bounds2d (space @ units) ->
+  Maybe (Bounds2d (space @ units))
+intersection (PositionBounds2d pb1) (PositionBounds2d pb2) =
+  Maybe.map PositionBounds2d (VectorBounds2d.intersection pb1 pb2)
 
 -- | Construct a bounding box from two corner points.
 hull2 ::
@@ -208,16 +182,16 @@ hullN (v0 :| rest) = do
   go x0 x0 y0 y0 rest
 
 lowerLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-lowerLeftCorner (Bounds2d x y) = Point2d.xy (Bounds.lower x) (Bounds.lower y)
+lowerLeftCorner (Bounds2d x y) = Point2d (Bounds.lower x) (Bounds.lower y)
 
 lowerRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-lowerRightCorner (Bounds2d x y) = Point2d.xy (Bounds.upper x) (Bounds.lower y)
+lowerRightCorner (Bounds2d x y) = Point2d (Bounds.upper x) (Bounds.lower y)
 
 upperLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-upperLeftCorner (Bounds2d x y) = Point2d.xy (Bounds.lower x) (Bounds.upper y)
+upperLeftCorner (Bounds2d x y) = Point2d (Bounds.lower x) (Bounds.upper y)
 
 upperRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-upperRightCorner (Bounds2d x y) = Point2d.xy (Bounds.upper x) (Bounds.upper y)
+upperRightCorner (Bounds2d x y) = Point2d (Bounds.upper x) (Bounds.upper y)
 
 corners :: Bounds2d (space @ units) -> List (Point2d (space @ units))
 corners box =
@@ -237,75 +211,7 @@ area :: Units.Squared units1 units2 => Bounds2d (space @ units1) -> Qty units2
 area (Bounds2d x y) = Bounds.width x * Bounds.width y
 
 interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
-interpolate (Bounds2d x y) u v =
-  Point2d.xy (Bounds.interpolate x u) (Bounds.interpolate y v)
-
-any :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
-any assess box@(Bounds2d x y) =
-  case assess box of
-    Resolved assessment -> assessment
-    Unresolved
-      | Bounds.isAtomic x && Bounds.isAtomic y -> False
-      | Bounds.isAtomic x -> do
-          let (y1, y2) = Bounds.bisect y
-          any assess (Bounds2d x y1) || any assess (Bounds2d x y2)
-      | Bounds.isAtomic y -> do
-          let (x1, x2) = Bounds.bisect x
-          any assess (Bounds2d x1 y) || any assess (Bounds2d x2 y)
-      | otherwise -> do
-          let (x1, x2) = Bounds.bisect x
-          let (y1, y2) = Bounds.bisect y
-          any assess (Bounds2d x1 y1)
-            || any assess (Bounds2d x1 y2)
-            || any assess (Bounds2d x2 y1)
-            || any assess (Bounds2d x2 y2)
-
-all :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
-all assess box@(Bounds2d x y) =
-  case assess box of
-    Resolved assessment -> assessment
-    Unresolved
-      | Bounds.isAtomic x && Bounds.isAtomic y -> True
-      | Bounds.isAtomic x -> do
-          let (y1, y2) = Bounds.bisect y
-          all assess (Bounds2d x y1) && all assess (Bounds2d x y2)
-      | Bounds.isAtomic y -> do
-          let (x1, x2) = Bounds.bisect x
-          all assess (Bounds2d x1 y) && all assess (Bounds2d x2 y)
-      | otherwise -> do
-          let (x1, x2) = Bounds.bisect x
-          let (y1, y2) = Bounds.bisect y
-          all assess (Bounds2d x1 y1)
-            && all assess (Bounds2d x1 y2)
-            && all assess (Bounds2d x2 y1)
-            && all assess (Bounds2d x2 y2)
-
-resolve :: Eq a => (Bounds2d (space @ units) -> Fuzzy a) -> Bounds2d (space @ units) -> Fuzzy a
-resolve assess box@(Bounds2d x y) =
-  case assess box of
-    Resolved value -> Resolved value
-    Unresolved
-      | Bounds.isAtomic x && Bounds.isAtomic y -> Unresolved
-      | Bounds.isAtomic x -> Fuzzy.do
-          let (y1, y2) = Bounds.bisect y
-          value1 <- resolve assess (Bounds2d x y1)
-          value2 <- resolve assess (Bounds2d x y2)
-          if value1 == value2 then Resolved value1 else Unresolved
-      | Bounds.isAtomic y -> Fuzzy.do
-          let (x1, x2) = Bounds.bisect x
-          value1 <- resolve assess (Bounds2d x1 y)
-          value2 <- resolve assess (Bounds2d x2 y)
-          if value1 == value2 then Resolved value1 else Unresolved
-      | otherwise -> Fuzzy.do
-          let (x1, x2) = Bounds.bisect x
-          let (y1, y2) = Bounds.bisect y
-          value11 <- resolve assess (Bounds2d x1 y1)
-          value12 <- resolve assess (Bounds2d x1 y2)
-          value21 <- resolve assess (Bounds2d x2 y1)
-          value22 <- resolve assess (Bounds2d x2 y2)
-          if value11 == value12 && value11 == value21 && value11 == value22
-            then Resolved value11
-            else Unresolved
+interpolate (PositionBounds2d pb) u v = Position2d (VectorBounds2d.interpolate pb u v)
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->
@@ -386,7 +292,7 @@ distanceAlong axis (Bounds2d x y) = do
   Bounds (d0 - r) (d0 + r)
 
 convert :: Qty (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
-convert factor (Bounds2d x y) = Bounds2d (x !* factor) (y !* factor)
+convert factor (PositionBounds2d pb) = PositionBounds2d (VectorBounds2d.convert factor pb)
 
 unconvert :: Qty (units2 :/: units1) -> Bounds2d (space @ units2) -> Bounds2d (space @ units1)
-unconvert factor (Bounds2d x y) = Bounds2d (x !/ factor) (y !/ factor)
+unconvert factor (PositionBounds2d pb) = PositionBounds2d (VectorBounds2d.unconvert factor pb)

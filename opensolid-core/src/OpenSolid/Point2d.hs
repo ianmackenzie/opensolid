@@ -41,7 +41,6 @@ module OpenSolid.Point2d
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
@@ -51,22 +50,32 @@ import OpenSolid.Primitives
   , Orientation2d (Orientation2d)
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Point2d (Point2d)
+  , Point2d (Position2d)
   , Point3d
   , Transform2d (Transform2d)
   )
 import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
+
+{-# COMPLETE Point2d #-}
+
+{-# INLINE Point2d #-}
+
+-- | Construct a point from its X and Y coordinates.
+pattern Point2d :: Qty units -> Qty units -> Point2d (space @ units)
+pattern Point2d px py <- Position2d (Vector2d px py)
+  where
+    Point2d px py = Position2d (Vector2d px py)
 
 -- | The point with coordinates (0,0).
 origin :: Point2d (space @ units)
-origin = Point2d Qty.zero Qty.zero
+origin = Position2d Vector2d.zero
 
 {-# INLINE coerce #-}
 coerce :: Point2d (space1 @ units1) -> Point2d (space2 @ units2)
-coerce (Point2d px py) = Point2d (Qty.coerce px) (Qty.coerce py)
+coerce (Position2d p) = Position2d (Vector2d.coerce p)
 
 -- | Construct a point along the X axis, with the given X coordinate.
 x :: Qty units -> Point2d (space @ units)
@@ -88,11 +97,11 @@ xy = Point2d
 The angle is measured counterclockwise from the positive X axis.
 -}
 polar :: Qty units -> Angle -> Point2d (space @ units)
-polar r theta = Point2d (r * Angle.cos theta) (r * Angle.sin theta)
+polar r theta = Position2d (Vector2d.polar r theta)
 
 -- | Construct a point from a pair of X and Y coordinates.
 fromCoordinates :: (Qty units, Qty units) -> Point2d (space @ units)
-fromCoordinates (px, py) = Point2d px py
+fromCoordinates = Position2d . Vector2d.fromComponents
 
 apply :: (Float -> Qty units) -> Float -> Float -> Point2d (space @ units)
 apply units fx fy = Point2d (units fx) (units fy)
@@ -129,29 +138,27 @@ inches = apply Length.inches
 
 -- | Get the X coordinate of a point.
 xCoordinate :: Point2d (space @ units) -> Qty units
-xCoordinate (Point2d px _) = px
+xCoordinate (Position2d p) = Vector2d.xComponent p
 
 -- | Get the Y coordinate of a point.
 yCoordinate :: Point2d (space @ units) -> Qty units
-yCoordinate (Point2d _ py) = py
+yCoordinate (Position2d p) = Vector2d.yComponent p
 
 -- | Get the X and Y coordinates of a point.
 {-# INLINE coordinates #-}
 coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
-coordinates (Point2d px py) = (px, py)
+coordinates (Position2d p) = Vector2d.components p
 
 interpolateFrom ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Float ->
   Point2d (space @ units)
-interpolateFrom (Point2d x1 y1) (Point2d x2 y2) t =
-  Point2d (x1 + t * (x2 - x1)) (y1 + t * (y2 - y1))
+interpolateFrom (Position2d p1) (Position2d p2) t = Position2d (Vector2d.interpolateFrom p1 p2 t)
 
 -- | Find the midpoint between two points.
 midpoint :: Point2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
-midpoint (Point2d x1 y1) (Point2d x2 y2) =
-  Point2d (0.5 * (x1 + x2)) (0.5 * (y1 + y2))
+midpoint (Position2d p1) (Position2d p2) = Position2d (Vector2d.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
 distanceFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Qty units
@@ -193,10 +200,10 @@ on ::
 on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d px py) = originPoint + px * i + py * j
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
-convert factor (Point2d px py) = Point2d (px !* factor) (py !* factor)
+convert factor (Position2d p) = Position2d (Vector2d.convert factor p)
 
 unconvert :: Qty (units2 :/: units1) -> Point2d (space @ units2) -> Point2d (space @ units1)
-unconvert factor (Point2d px py) = Point2d (px !/ factor) (py !/ factor)
+unconvert factor (Position2d p) = Position2d (Vector2d.unconvert factor p)
 
 transformBy :: Transform2d tag (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
 transformBy transform point = do

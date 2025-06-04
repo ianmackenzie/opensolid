@@ -2,9 +2,9 @@ module OpenSolid.Primitives
   ( Vector2d (Vector2d)
   , Direction2d (Unit2d, Direction2d)
   , Orientation2d (Orientation2d)
-  , Point2d (Point2d)
+  , Point2d (Position2d)
   , VectorBounds2d (VectorBounds2d)
-  , Bounds2d (Bounds2d)
+  , Bounds2d (PositionBounds2d)
   , Axis2d (Axis2d)
   , Frame2d (Frame2d)
   , Transform2d (Transform2d)
@@ -314,9 +314,7 @@ deriving instance Show (Orientation2d space)
 
 ----- Point2d -----
 
-data Point2d (coordinateSystem :: CoordinateSystem) where
-  -- | Construct a point from its X and Y coordinates.
-  Point2d :: Qty units -> Qty units -> Point2d (space @ units)
+newtype Point2d (coordinateSystem :: CoordinateSystem) = Position2d (Vector2d coordinateSystem)
 
 deriving instance Eq (Point2d (space @ units))
 
@@ -336,7 +334,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Point2d (space1 @ unitsA)) (Point2d (space2 @ unitsB))
   where
-  coerce (Point2d px py) = Point2d (Qty.coerce px) (Qty.coerce py)
+  coerce (Position2d vector) = Position2d (Units.coerce vector)
 
 instance
   ( space1 ~ space2
@@ -347,7 +345,7 @@ instance
     (Vector2d (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Point2d px py + Vector2d vx vy = Point2d (px + vx) (py + vy)
+  Position2d p + v = Position2d (p + v)
 
 instance
   ( space1 ~ space2
@@ -358,7 +356,7 @@ instance
     (Vector2d (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Point2d px py - Vector2d vx vy = Point2d (px - vx) (py - vy)
+  Position2d p - v = Position2d (p - v)
 
 instance
   ( space1 ~ space2
@@ -369,7 +367,7 @@ instance
     (Point2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Point2d x1 y1 - Point2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
+  Position2d p1 - Position2d p2 = p1 - p2
 
 instance
   ( space1 ~ space2
@@ -380,7 +378,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Point2d px py + VectorBounds2d vx vy = Bounds2d (px + vx) (py + vy)
+  Position2d p + vb = PositionBounds2d (p + vb)
 
 instance
   ( space1 ~ space2
@@ -391,7 +389,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Point2d px py - VectorBounds2d vx vy = Bounds2d (px - vx) (py - vy)
+  Position2d p - vb = PositionBounds2d (p - vb)
 
 instance
   ( space1 ~ space2
@@ -399,7 +397,7 @@ instance
   ) =>
   ApproximateEquality (Point2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  Point2d x1 y1 ~= Point2d x2 y2 = Qty.hypot2 (x2 - x1) (y2 - y1) ~= Qty.zero
+  Position2d p1 ~= Position2d p2 = p1 ~= p2
 
 ----- VectorBounds2d -----
 
@@ -416,6 +414,12 @@ instance
   Units.Coercion (VectorBounds2d (space1 @ unitsA)) (VectorBounds2d (space2 @ unitsB))
   where
   coerce (VectorBounds2d x y) = VectorBounds2d (Units.coerce x) (Units.coerce y)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  ApproximateEquality (Vector2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) units1
+  where
+  Vector2d vx vy ~= VectorBounds2d bx by = vx ~= bx && vy ~= by
 
 instance
   ( space1 ~ space2
@@ -727,12 +731,8 @@ instance
 
 ----- Bounds2d -----
 
-data Bounds2d (coordinateSystem :: CoordinateSystem) where
-  -- | Construct a bounding box from its X and Y coordinate bounds.
-  Bounds2d ::
-    Bounds units ->
-    Bounds units ->
-    Bounds2d (space @ units)
+newtype Bounds2d (coordinateSystem :: CoordinateSystem)
+  = PositionBounds2d (VectorBounds2d coordinateSystem)
 
 deriving instance Show (Qty units) => Show (Bounds2d (space @ units))
 
@@ -742,7 +742,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Bounds2d (space1 @ unitsA)) (Bounds2d (space2 @ unitsB))
   where
-  coerce (Bounds2d x y) = Bounds2d (Units.coerce x) (Units.coerce y)
+  coerce (PositionBounds2d pb) = PositionBounds2d (Units.coerce pb)
 
 instance FFI (Bounds2d (space @ Meters)) where
   representation = FFI.classRepresentation "Bounds2d"
@@ -757,7 +757,7 @@ instance
     (Bounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  Point2d px py - Bounds2d bx by = VectorBounds2d (px - bx) (py - by)
+  Position2d p - PositionBounds2d pb = p - pb
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -766,7 +766,7 @@ instance
     (Point2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  Bounds2d bx by - Point2d px py = VectorBounds2d (bx - px) (by - py)
+  PositionBounds2d pb - Position2d p = pb - p
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -775,7 +775,7 @@ instance
     (Bounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  Bounds2d x1 y1 - Bounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
+  PositionBounds2d pb1 - PositionBounds2d pb2 = pb1 - pb2
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -784,7 +784,7 @@ instance
     (Vector2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Bounds2d x1 y1 + Vector2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
+  PositionBounds2d pb + v = PositionBounds2d (pb + v)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -793,7 +793,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Bounds2d x1 y1 + VectorBounds2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
+  PositionBounds2d pb + vb = PositionBounds2d (pb + vb)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -802,7 +802,7 @@ instance
     (Vector2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Bounds2d x1 y1 - Vector2d x2 y2 = Bounds2d (x1 - x2) (y1 - y2)
+  PositionBounds2d pb - v = PositionBounds2d (pb - v)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -811,13 +811,13 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Bounds2d x1 y1 - VectorBounds2d x2 y2 = Bounds2d (x1 - x2) (y1 - y2)
+  PositionBounds2d pb - vb = PositionBounds2d (pb - vb)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
-  Point2d px py ~= Bounds2d bx by = px ~= bx && py ~= by
+  Position2d p ~= PositionBounds2d pb = p ~= pb
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -841,7 +841,7 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
-  Point2d px py ^ Bounds2d bx by = px ^ bx && py ^ by
+  Position2d p ^ PositionBounds2d pb = p ^ pb
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -853,7 +853,7 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Bounds2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
-  Bounds2d x1 y1 ^ Bounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
+  PositionBounds2d pb1 ^ PositionBounds2d pb2 = pb1 ^ pb2
 
 ----- Axis2d -----
 
@@ -952,7 +952,7 @@ instance
     (Transform2d tag (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Point2d px py * Transform2d p0 i j = p0 + px * i + py * j
+  Position2d (Vector2d px py) * Transform2d p0 i j = p0 + px * i + py * j
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -972,9 +972,9 @@ instance
   where
   transform1 >> transform2 =
     Transform2d
-      (Point2d Qty.zero Qty.zero * transform1 * transform2)
-      (Vector2d 1.0 0.0 * transform1 * transform2)
-      (Vector2d 0.0 1.0 * transform1 * transform2)
+      @ Position2d (Vector2d Qty.zero Qty.zero) * transform1 * transform2
+      @ Vector2d 1.0 0.0 * transform1 * transform2
+      @ Vector2d 0.0 1.0 * transform1 * transform2
 
 ----- Vector3d -----
 
