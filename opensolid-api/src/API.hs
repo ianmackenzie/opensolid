@@ -127,6 +127,7 @@ import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Stl qualified as Stl
+import OpenSolid.Text qualified as Text
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -1335,6 +1336,27 @@ uvCurve =
     ]
       <> affineTransformations2d Curve2d.transformBy
 
+region2dOuterLoopDocs :: Text
+region2dOuterLoopDocs =
+  Text.multiline
+    [ "The list of curves forming the outer boundary of the region."
+    , ""
+    , "The curves will be in counterclockwise order around the region,"
+    , "and will each be in the counterclockwise direction."
+    ]
+
+region2dInnerLoopsDocs :: Text
+region2dInnerLoopsDocs =
+  Text.multiline
+    [ "The lists of curves (if any) forming the holes within the region."
+    , ""
+    , "The curves will be in clockwise order around each hole,"
+    , "and each curve will be in the clockwise direction."
+    ]
+
+region2dBoundaryCurvesDocs :: Text
+region2dBoundaryCurvesDocs = "The list of all (outer and inner) boundary curves of a region."
+
 region2d :: Class
 region2d =
   Class.new @(Region2d (Space @ Meters)) $(docs ''Region2d) $
@@ -1345,9 +1367,9 @@ region2d =
     , factoryM2R "Hexagon" "Center Point" "Height" (curryT2 Region2d.hexagon) $(docs 'Region2d.hexagon)
     , factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" (curry1T2 Region2d.inscribedPolygon) $(docs 'Region2d.inscribedPolygon)
     , factoryM3R "Circumscribed Polygon" "Num Sides" "Center Point" "Diameter" (curry1T2 Region2d.circumscribedPolygon) $(docs 'Region2d.circumscribedPolygon)
-    , property @"outerLoop" "The list of curves forming the outer boundary of a region."
-    , property @"innerLoops" "The lists of curves (if any) forming the holes within a region."
-    , property @"boundaryCurves" "All (outer and inner) boundary curves of a region."
+    , property @"outerLoop" region2dOuterLoopDocs
+    , property @"innerLoops" region2dInnerLoopsDocs
+    , property @"boundaryCurves" region2dBoundaryCurvesDocs
     , memberM2 "Fillet" "Points" "Radius" Region2d.fillet $(docs 'Region2d.fillet)
     ]
       <> affineTransformations2d Region2d.transformBy
@@ -1359,9 +1381,9 @@ uvRegion =
     , factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
     , factoryU2R "Circle" "Center Point" "Diameter" (curryT2 Region2d.circle) $(docs 'Region2d.circle)
-    , property @"outerLoop" "The list of curves forming the outer boundary of a region."
-    , property @"innerLoops" "The lists of curves (if any) forming the holes within a region."
-    , property @"boundaryCurves" "All (outer and inner) boundary curves of a region."
+    , property @"outerLoop" region2dOuterLoopDocs
+    , property @"innerLoops" region2dInnerLoopsDocs
+    , property @"boundaryCurves" region2dBoundaryCurvesDocs
     ]
       <> affineTransformations2d Region2d.transformBy
 
