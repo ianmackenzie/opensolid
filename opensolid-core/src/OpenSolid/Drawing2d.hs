@@ -39,9 +39,8 @@ module OpenSolid.Drawing2d
 where
 
 import Data.Foldable qualified
-import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Bounds2d (Bounds2d)
-import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d (Curve2d)
@@ -54,8 +53,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d (Polyline2d)
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
@@ -102,9 +100,9 @@ and in general should contain all the drawing entities
 -}
 toSvg :: Bounds2d (space @ Meters) -> Entity space -> Text
 toSvg viewBox entity = do
-  let (xBounds, yBounds) = Bounds2d.coordinates viewBox
-  let (x1, x2) = Bounds.endpoints xBounds
-  let (y1, y2) = Bounds.endpoints yBounds
+  let Bounds2d xBounds yBounds = viewBox
+  let Bounds x1 x2 = xBounds
+  let Bounds y1 y2 = yBounds
   let width = x2 - x1
   let height = y2 - y1
   let attributes =
@@ -166,9 +164,7 @@ collectWith attributes function list =
   groupWith attributes (List.map function (Data.Foldable.toList list))
 
 lineWith :: List (Attribute space) -> Point space -> Point space -> Entity space
-lineWith attributes p1 p2 = do
-  let (x1, y1) = Point2d.coordinates p1
-  let (x2, y2) = Point2d.coordinates p2
+lineWith attributes (Point2d x1 y1) (Point2d x2 y2) = do
   let x1Attribute = Attribute "x1" (lengthText x1)
   let y1Attribute = Attribute "y1" (lengthText -y1)
   let x2Attribute = Attribute "x2" (lengthText x2)
@@ -205,7 +201,7 @@ circleWith ::
   ("centerPoint" ::: Point space, "diameter" ::: Length) ->
   Entity space
 circleWith attributes (Field centerPoint, Field diameter) = do
-  let (cx, cy) = Point2d.coordinates centerPoint
+  let Point2d cx cy = centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
   let rAttribute = Attribute "r" (lengthText (0.5 * diameter))
@@ -230,9 +226,7 @@ pointsAttribute givenPoints =
   Attribute "points" (Text.join " " (List.map coordinatesText givenPoints))
 
 coordinatesText :: Point space -> Text
-coordinatesText point = do
-  let (x, y) = Point2d.coordinates point
-  lengthText x <> "," <> lengthText -y
+coordinatesText (Point2d x y) = lengthText x <> "," <> lengthText -y
 
 lengthText :: Length -> Text
 lengthText givenLength = Text.float (Length.inMillimeters givenLength)

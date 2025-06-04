@@ -45,7 +45,7 @@ evaluateBounds ::
 evaluateBounds Nothing inner Nothing tBounds =
   VectorCurve2d.evaluateBounds inner tBounds
 evaluateBounds (Just degenerateStart) inner Nothing tBounds = do
-  let (Bounds t1 t2) = tBounds
+  let Bounds t1 t2 = tBounds
   let tStart = DegenerateEndpoint.cutoff degenerateStart
   if
     | t1 >= tStart -> VectorCurve2d.evaluateBounds inner tBounds
@@ -55,7 +55,7 @@ evaluateBounds (Just degenerateStart) inner Nothing tBounds = do
           (DegenerateEndpoint.evaluateBounds degenerateStart inner (Bounds t1 tStart))
           (VectorCurve2d.evaluateBounds inner (Bounds tStart t2))
 evaluateBounds Nothing inner (Just degenerateEnd) tBounds = do
-  let (Bounds t1 t2) = tBounds
+  let Bounds t1 t2 = tBounds
   let tEnd = DegenerateEndpoint.cutoff degenerateEnd
   if
     | t2 <= tEnd -> VectorCurve2d.evaluateBounds inner tBounds

@@ -148,7 +148,7 @@ maxSquaredMagnitude' (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
 
 normalize :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ Unitless)
 normalize vectorBounds = do
-  let (VectorBounds2d x y) = vectorBounds / magnitude vectorBounds
+  let VectorBounds2d x y = vectorBounds / magnitude vectorBounds
   let nx = clampNormalized x
   let ny = clampNormalized y
   VectorBounds2d nx ny
@@ -235,10 +235,10 @@ transformBy transform (VectorBounds2d x y) = do
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let (x0, y0) = Vector2d.components (Vector2d.transformBy transform (Vector2d.xy xMid yMid))
-  let (Transform2d _ i j) = transform
-  let (ix, iy) = Vector2d.components i
-  let (jx, jy) = Vector2d.components j
+  let Vector2d x0 y0 = Vector2d.transformBy transform (Vector2d.xy xMid yMid)
+  let Transform2d _ i j = transform
+  let Vector2d ix iy = i
+  let Vector2d jx jy = j
   let rx = 0.5 * Float.abs ix * xWidth + 0.5 * Float.abs jx * yWidth
   let ry = 0.5 * Float.abs iy * xWidth + 0.5 * Float.abs jy * yWidth
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))

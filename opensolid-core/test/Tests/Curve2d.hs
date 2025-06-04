@@ -103,8 +103,8 @@ equalUBounds (Bounds actualLow actualHigh) (Bounds expectedLow expectedHigh) =
 
 equalOverlapSegments :: OverlappingSegment -> OverlappingSegment -> Bool
 equalOverlapSegments segment1 segment2 = do
-  let (OverlappingSegment actual1 actual2 actualSign) = segment1
-  let (OverlappingSegment expected1 expected2 expectedSign) = segment2
+  let OverlappingSegment actual1 actual2 actualSign = segment1
+  let OverlappingSegment expected1 expected2 expectedSign = segment2
   equalUBounds actual1 expected1 && equalUBounds actual2 expected2 && actualSign == expectedSign
 
 equalOverlapSegmentLists :: NonEmpty OverlappingSegment -> NonEmpty OverlappingSegment -> Bool

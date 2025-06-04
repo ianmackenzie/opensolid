@@ -47,10 +47,8 @@ import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction2d (Direction2d (Direction2d))
-import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
-import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Maybe qualified as Maybe
@@ -94,9 +92,7 @@ centerPoint (Bounds2d x y) = Point2d (Bounds.midpoint x) (Bounds.midpoint y)
 
 -- | Construct a zero-size bounding box containing a single point.
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
-constant point = do
-  let (x, y) = Point2d.coordinates point
-  Bounds2d (Bounds.constant x) (Bounds.constant y)
+constant (Point2d x y) = Bounds2d (Bounds.constant x) (Bounds.constant y)
 
 aggregate2 :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bounds2d (space @ units)
 aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
@@ -107,7 +103,13 @@ aggregateN :: NonEmpty (Bounds2d (space @ units)) -> Bounds2d (space @ units)
 aggregateN (Bounds2d (Bounds xLow0 xHigh0) (Bounds yLow0 yHigh0) :| rest) =
   aggregateImpl xLow0 xHigh0 yLow0 yHigh0 rest
 
-aggregateImpl :: Qty units -> Qty units -> Qty units -> Qty units -> List (Bounds2d (space @ units)) -> Bounds2d (space @ units)
+aggregateImpl ::
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  List (Bounds2d (space @ units)) ->
+  Bounds2d (space @ units)
 aggregateImpl xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
 aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
   let Bounds2d (Bounds xLowNext xHighNext) (Bounds yLowNext yHighNext) = next
@@ -119,31 +121,25 @@ aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
     remaining
 
 exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-exclusion point box = do
-  let (x, y) = Point2d.coordinates point
-  let (bx, by) = coordinates box
-  let dx = Bounds.exclusion x bx
-  let dy = Bounds.exclusion y by
-  let px = dx >= Qty.zero
-  let py = dy >= Qty.zero
+exclusion (Point2d px py) (Bounds2d bx by) = do
+  let exclusionX = Bounds.exclusion px bx
+  let exclusionY = Bounds.exclusion py by
+  let positiveX = exclusionX >= Qty.zero
+  let positiveY = exclusionY >= Qty.zero
   if
-    | px && py -> Qty.hypot2 dx dy
-    | px -> dx
-    | py -> dy
-    | otherwise -> Qty.max dx dy
+    | positiveX && positiveY -> Qty.hypot2 exclusionX exclusionY
+    | positiveX -> exclusionX
+    | positiveY -> exclusionY
+    | otherwise -> Qty.max exclusionX exclusionY
 
 inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 inclusion point box = -(exclusion point box)
 
 includes :: Point2d (space @ units) -> Bounds2d (space @ units) -> Bool
-includes point box = do
-  let (px, py) = Point2d.coordinates point
-  let (bx, by) = coordinates box
-  Bounds.includes px bx && Bounds.includes py by
+includes (Point2d px py) (Bounds2d bx by) = Bounds.includes px bx && Bounds.includes py by
 
 contains :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
-contains (Bounds2d x2 y2) (Bounds2d x1 y1) =
-  Bounds.contains x2 x1 && Bounds.contains y2 y1
+contains (Bounds2d x2 y2) (Bounds2d x1 y1) = Bounds.contains x2 x1 && Bounds.contains y2 y1
 
 isContainedIn :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
@@ -174,20 +170,14 @@ hull2 ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Bounds2d (space @ units)
-hull2 p1 p2 = do
-  let (x1, y1) = Point2d.coordinates p1
-  let (x2, y2) = Point2d.coordinates p2
-  Bounds2d (Bounds x1 x2) (Bounds y1 y2)
+hull2 (Point2d x1 y1) (Point2d x2 y2) = Bounds2d (Bounds x1 x2) (Bounds y1 y2)
 
 hull3 ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Bounds2d (space @ units)
-hull3 p1 p2 p3 = do
-  let (x1, y1) = Point2d.coordinates p1
-  let (x2, y2) = Point2d.coordinates p2
-  let (x3, y3) = Point2d.coordinates p3
+hull3 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) = do
   let minX = Qty.min (Qty.min x1 x2) x3
   let maxX = Qty.max (Qty.max x1 x2) x3
   let minY = Qty.min (Qty.min y1 y2) y3
@@ -200,11 +190,7 @@ hull4 ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Bounds2d (space @ units)
-hull4 p1 p2 p3 p4 = do
-  let (x1, y1) = Point2d.coordinates p1
-  let (x2, y2) = Point2d.coordinates p2
-  let (x3, y3) = Point2d.coordinates p3
-  let (x4, y4) = Point2d.coordinates p4
+hull4 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) = do
   let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
   let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
   let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
@@ -214,7 +200,7 @@ hull4 p1 p2 p3 p4 = do
 -- | Construct a bounding box containing all vertices in the given non-empty list.
 hullN :: Vertex2d vertex (space @ units) => NonEmpty vertex -> Bounds2d (space @ units)
 hullN (v0 :| rest) = do
-  let (x0, y0) = Point2d.coordinates (Vertex2d.position v0)
+  let Point2d x0 y0 = Vertex2d.position v0
   let go xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
       go xLow xHigh yLow yHigh (vertex : remaining) = do
         let (x, y) = Point2d.coordinates (Vertex2d.position vertex)
@@ -331,8 +317,8 @@ placeIn frame (Bounds2d x y) = do
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
   let Point2d x0 y0 = Point2d.placeIn frame (Point2d xMid yMid)
-  let (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
-  let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
+  let Direction2d ix iy = frame.xDirection
+  let Direction2d jx jy = frame.yDirection
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
@@ -346,9 +332,9 @@ relativeTo frame (Bounds2d x y) = do
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let (x0, y0) = Point2d.coordinates (Point2d.relativeTo frame (Point2d.xy xMid yMid))
-  let (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
-  let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
+  let Point2d x0 y0 = Point2d.relativeTo frame (Point2d.xy xMid yMid)
+  let Direction2d ix iy = frame.xDirection
+  let Direction2d jx jy = frame.yDirection
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))

@@ -503,22 +503,23 @@ max (Bounds low1 high1) (Bounds low2 high2) =
 
 smaller :: Bounds units -> Bounds units -> Bounds units
 smaller first second = do
-  let (Bounds low1 high1) = abs first
-  let (Bounds low2 high2) = abs second
+  let Bounds low1 high1 = abs first
+  let Bounds low2 high2 = abs second
   if
     | high1 < low2 -> first
     | high2 < low1 -> second
     | otherwise -> do
-        let (Bounds aggregateMin aggregateMax) = aggregate2 first second
+        let Bounds aggregateMin aggregateMax = aggregate2 first second
         let high = Qty.min high1 high2
         Bounds (Qty.max -high aggregateMin) (Qty.min aggregateMax high)
 
 larger :: Bounds units -> Bounds units -> Bounds units
 larger first second = do
-  let (Bounds low1 high1) = abs first
-  let (Bounds low2 high2) = abs second
+  let Bounds low1 high1 = abs first
+  let Bounds low2 high2 = abs second
   let low = Qty.max low1 low2
-  let aggregate@(Bounds aggregateMin aggregateMax) = aggregate2 first second
+  let aggregate = aggregate2 first second
+  let Bounds aggregateMin aggregateMax = aggregate
   if
     | low1 > high2 -> first
     | low2 > high1 -> second

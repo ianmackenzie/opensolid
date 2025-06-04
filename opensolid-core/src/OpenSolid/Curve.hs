@@ -551,7 +551,7 @@ solveMonotonic ::
   Fuzzy (List (Float, Solve1d.Neighborhood units))
 solveMonotonic m fm fn tBounds = do
   let n = m + 1
-  let (tLow, tHigh) = Bounds.endpoints tBounds
+  let Bounds tLow tHigh = tBounds
   let startNeighborhood = Solve1d.neighborhood n (evaluate fn tLow)
   if Qty.abs (evaluate fm tLow) <= Solve1d.derivativeTolerance startNeighborhood m
     then if tLow == 0.0 then Resolved [(0.0, startNeighborhood)] else Unresolved

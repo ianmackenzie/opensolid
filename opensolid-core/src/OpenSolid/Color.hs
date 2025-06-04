@@ -80,7 +80,7 @@ toHex = Data.Colour.SRGB.sRGB24show >> Text.pack
 -- | Get the RGB components of a color as values in the range [0,1].
 components :: Color -> (Float, Float, Float)
 components color = do
-  let (Data.Colour.SRGB.RGB r g b) = Data.Colour.SRGB.toSRGB color
+  let Data.Colour.SRGB.RGB r g b = Data.Colour.SRGB.toSRGB color
   (r, g, b)
 
 -- | Get the RGB components of a color as values in the range [0,255].
