@@ -34,13 +34,13 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Float qualified as Float
-import {-# SOURCE #-} OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Direction2d (Direction2d)
   , Frame2d
-  , Point2d (Point2d)
   , Transform2d (Transform2d)
   , Vector2d (Vector2d)
   )
