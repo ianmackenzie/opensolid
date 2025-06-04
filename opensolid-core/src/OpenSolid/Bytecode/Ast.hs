@@ -201,13 +201,6 @@ deriving instance Ord (Ast3d input)
 deriving instance Show (Ast3d input)
 
 data Variable3d input where
-  RFU :: Variable1d input -> Variable1d input -> Variable1d input -> Variable3d input
-  RFC :: Variable1d input -> Variable1d input -> Float -> Variable3d input
-  RCU :: Variable1d input -> Float -> Variable1d input -> Variable3d input
-  CFU :: Float -> Variable1d input -> Variable1d input -> Variable3d input
-  RCC :: Variable1d input -> Float -> Float -> Variable3d input
-  CFC :: Float -> Variable1d input -> Float -> Variable3d input
-  CCU :: Float -> Float -> Variable1d input -> Variable3d input
   Negated3d :: Variable3d input -> Variable3d input
   Sum3d :: Variable3d input -> Variable3d input -> Variable3d input
   SumVariableConstant3d :: Variable3d input -> Vector3d Coordinates -> Variable3d input
@@ -303,13 +296,6 @@ instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
 
 instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) where
   input . CurveParameter = input
-  RFU r f u . input = RFU (r . input) (f . input) (u . input)
-  RFC r f u . input = RFC (r . input) (f . input) u
-  RCU r f u . input = RCU (r . input) f (u . input)
-  CFU r f u . input = CFU r (f . input) (u . input)
-  RCC r f u . input = RCC (r . input) f u
-  CFC r f u . input = CFC r (f . input) u
-  CCU r f u . input = CCU r f (u . input)
   Negated3d arg . input = Negated3d (arg . input)
   Sum3d lhs rhs . input = Sum3d (lhs . input) (rhs . input)
   SumVariableConstant3d lhs rhs . input = SumVariableConstant3d (lhs . input) rhs
@@ -404,13 +390,6 @@ instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
 
 instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) where
   input . SurfaceParameters = input
-  RFU r f u . input = RFU (r . input) (f . input) (u . input)
-  RFC r f u . input = RFC (r . input) (f . input) u
-  RCU r f u . input = RCU (r . input) f (u . input)
-  CFU r f u . input = CFU r (f . input) (u . input)
-  RCC r f u . input = RCC (r . input) f u
-  CFC r f u . input = CFC r (f . input) u
-  CCU r f u . input = CCU r f (u . input)
   Negated3d arg . input = Negated3d (arg . input)
   Sum3d lhs rhs . input = Sum3d (lhs . input) (rhs . input)
   SumVariableConstant3d lhs rhs . input = SumVariableConstant3d (lhs . input) rhs
@@ -1312,41 +1291,6 @@ compileVariable2d variable = case variable of
 
 compileVariable3d :: Variable3d input -> Compile.Step VariableIndex
 compileVariable3d variable = case variable of
-  RFU r f u -> Compile.do
-    rIndex <- compileVariable1d r
-    fIndex <- compileVariable1d f
-    uIndex <- compileVariable1d u
-    Compile.addVariable3d (Instruction.RFU rIndex fIndex uIndex)
-  RFC r f u -> Compile.do
-    rIndex <- compileVariable1d r
-    fIndex <- compileVariable1d f
-    uIndex <- Compile.addConstant1d u
-    Compile.addVariable3d (Instruction.RFC rIndex fIndex uIndex)
-  RCU r f u -> Compile.do
-    rIndex <- compileVariable1d r
-    fIndex <- Compile.addConstant1d f
-    uIndex <- compileVariable1d u
-    Compile.addVariable3d (Instruction.RCU rIndex fIndex uIndex)
-  CFU r f u -> Compile.do
-    rIndex <- Compile.addConstant1d r
-    fIndex <- compileVariable1d f
-    uIndex <- compileVariable1d u
-    Compile.addVariable3d (Instruction.CFU rIndex fIndex uIndex)
-  RCC r f u -> Compile.do
-    rIndex <- compileVariable1d r
-    fIndex <- Compile.addConstant1d f
-    uIndex <- Compile.addConstant1d u
-    Compile.addVariable3d (Instruction.RCC rIndex fIndex uIndex)
-  CFC r f u -> Compile.do
-    rIndex <- Compile.addConstant1d r
-    fIndex <- compileVariable1d f
-    uIndex <- Compile.addConstant1d u
-    Compile.addVariable3d (Instruction.CFC rIndex fIndex uIndex)
-  CCU r f u -> Compile.do
-    rIndex <- Compile.addConstant1d r
-    fIndex <- Compile.addConstant1d f
-    uIndex <- compileVariable1d u
-    Compile.addVariable3d (Instruction.CCU rIndex fIndex uIndex)
   Negated3d arg -> Compile.do
     argIndex <- compileVariable3d arg
     Compile.addVariable3d (Instruction.Negate3d argIndex)
