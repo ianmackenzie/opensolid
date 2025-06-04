@@ -928,7 +928,7 @@ isValidSteinerPoint edgeSet uvPoint = case edgeSet of
     let distance = VectorBounds2d.magnitude (uvPoint - nodeBounds)
     Bounds.lower distance >= 0.5 * Bounds2d.diameter nodeBounds
       || (isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint)
-  Set2d.Leaf _ edge -> LineSegment2d.distanceTo uvPoint edge >= 0.5 * LineSegment2d.length edge
+  Set2d.Leaf _ edge -> LineSegment2d.distanceTo uvPoint edge >= 0.5 * edge.length
 
 surfaces :: Body3d (space @ units) -> NonEmpty (Surface3d (space @ units))
 surfaces (Body3d boundarySurfaces) =
