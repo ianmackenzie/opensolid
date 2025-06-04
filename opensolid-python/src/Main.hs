@@ -230,6 +230,9 @@ classDefinition
                     [ "\"\"\"Free the underlying Haskell value.\"\"\""
                     , "_lib.opensolid_release(self." <> pointerFieldName <> ")"
                     ]
+                , Python.indent $ case maybeUpcast of
+                    Just _ -> ["super().__del__()"]
+                    Nothing -> []
                 ]
             , Python.indent (List.map Python.Constant.declaration constants)
             , Python.indent (List.map (Python.StaticFunction.definition className) staticFunctions)
