@@ -137,14 +137,11 @@ leadingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Float
 leadingSamplingPoints predicate = 0.0 :| innerSamplingPoints predicate
 
 collectSamplingPoints :: (Bounds Unitless -> Bool) -> Bounds Unitless -> List Float -> List Float
-collectSamplingPoints predicate subdomain accumulated = do
-  if predicate subdomain
-    then accumulated
-    else
-      if Bounds.isAtomic subdomain
-        then internalError "Infinite recursion in Domain1d.samplingPoints"
-        else do
-          let (left, right) = Bounds.bisect subdomain
-          let subdomainMidpoint = Bounds.midpoint subdomain
-          let rightAccumulated = collectSamplingPoints predicate right accumulated
-          collectSamplingPoints predicate left (subdomainMidpoint : rightAccumulated)
+collectSamplingPoints predicate subdomain accumulated
+  | predicate subdomain = accumulated
+  | Bounds.isAtomic subdomain = internalError "Infinite recursion in Domain1d.samplingPoints"
+  | otherwise = do
+      let (left, right) = Bounds.bisect subdomain
+      let subdomainMidpoint = Bounds.midpoint subdomain
+      let rightAccumulated = collectSamplingPoints predicate right accumulated
+      collectSamplingPoints predicate left (subdomainMidpoint : rightAccumulated)
