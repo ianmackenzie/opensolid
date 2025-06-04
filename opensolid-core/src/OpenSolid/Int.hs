@@ -17,8 +17,16 @@ module OpenSolid.Int
   , random
   , gcd
   , lcm
+  , toInt16
+  , fromInt16
+  , toInt32
+  , fromInt32
   , toInt64
   , fromInt64
+  , toWord8
+  , fromWord8
+  , toWord16
+  , fromWord16
   , toWord32
   , fromWord32
   , toWord64
@@ -28,9 +36,9 @@ module OpenSolid.Int
   )
 where
 
-import Data.Int (Int64)
+import Data.Int (Int16, Int32, Int64)
 import Data.Ord qualified
-import Data.Word (Word32, Word64)
+import Data.Word (Word16, Word32, Word64, Word8)
 import Foreign.C.Types (CSize)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -111,11 +119,35 @@ gcd = Prelude.gcd
 lcm :: Int -> Int -> Int
 lcm = Prelude.lcm
 
+toInt16 :: Int -> Int16
+toInt16 = fromIntegral
+
+fromInt16 :: Int16 -> Int
+fromInt16 = fromIntegral
+
+toInt32 :: Int -> Int32
+toInt32 = fromIntegral
+
+fromInt32 :: Int32 -> Int
+fromInt32 = fromIntegral
+
 toInt64 :: Int -> Int64
 toInt64 = fromIntegral
 
 fromInt64 :: Int64 -> Int
 fromInt64 = fromIntegral
+
+toWord8 :: Int -> Word8
+toWord8 = fromIntegral
+
+fromWord8 :: Word8 -> Int
+fromWord8 = fromIntegral
+
+toWord16 :: Int -> Word16
+toWord16 = fromIntegral
+
+fromWord16 :: Word16 -> Int
+fromWord16 = fromIntegral
 
 toWord32 :: Int -> Word32
 toWord32 = fromIntegral
