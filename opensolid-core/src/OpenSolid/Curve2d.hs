@@ -667,6 +667,12 @@ yCoordinate curve =
       curve.compiled
     @ curve.derivative.yComponent
 
+instance HasField "xCoordinate" (Curve2d (space @ units)) (Curve units) where
+  getField = xCoordinate
+
+instance HasField "yCoordinate" (Curve2d (space @ units)) (Curve units) where
+  getField = yCoordinate
+
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, Error.Message)
 
 findPoint ::
