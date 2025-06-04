@@ -177,8 +177,8 @@ instance
   where
   lhs .*. rhs =
     new
-      # lhs.compiled .*. rhs.compiled
-      # lhs.derivative .*. rhs + lhs .*. rhs.derivative
+      @ lhs.compiled .*. rhs.compiled
+      @ lhs.derivative .*. rhs + lhs .*. rhs.derivative
 
 instance
   Units.Product units1 units2 units3 =>
@@ -239,8 +239,8 @@ instance
   where
   lhs ./. rhs =
     recursive
-      # lhs.compiled ./. rhs.compiled
-      # \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
+      @ lhs.compiled ./. rhs.compiled
+      @ \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -412,8 +412,8 @@ instance
   where
   curve . function =
     VectorSurfaceFunction3d.new
-      # curve.compiled . function.compiled
-      # \p -> curve.derivative . function * SurfaceFunction.derivative p function
+      @ curve.compiled . function.compiled
+      @ \p -> curve.derivative . function * SurfaceFunction.derivative p function
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->
@@ -458,14 +458,14 @@ on orientation vectorCurve2d = do
 rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units)
 rightwardForwardUpward r f u =
   new
-    # CompiledFunction.map3
+    @ CompiledFunction.map3
       Expression.rightwardForwardUpward
       Vector3d.rightwardForwardUpward
       VectorBounds3d.rightwardForwardUpward
       r.compiled
       f.compiled
       u.compiled
-    # rightwardForwardUpward r.derivative f.derivative u.derivative
+    @ rightwardForwardUpward r.derivative f.derivative u.derivative
 
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 line v1 v2 = bezierCurve (NonEmpty.two v1 v2)

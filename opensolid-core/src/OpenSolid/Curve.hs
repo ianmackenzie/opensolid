@@ -290,8 +290,8 @@ instance
 instance Division' (Curve units1) (Curve units2) (Curve (units1 :/: units2)) where
   lhs ./. rhs =
     recursive
-      # lhs.compiled ./. rhs.compiled
-      # \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
+      @ lhs.compiled ./. rhs.compiled
+      @ \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>

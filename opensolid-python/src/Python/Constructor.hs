@@ -31,8 +31,8 @@ definition className maybeConstructor maybeUpcast = case maybeConstructor of
           , "inputs = " <> Python.FFI.argumentValue ffiArguments
           , "self." <> pointerFieldName <> " = " <> Python.FFI.dummyValue selfType
           , Python.FFI.invoke ffiFunctionName
-              # "ctypes.byref(inputs)"
-              # "ctypes.byref(self." <> pointerFieldName <> ")"
+              @ "ctypes.byref(inputs)"
+              @ "ctypes.byref(self." <> pointerFieldName <> ")"
           , Python.Upcast.lines className "self" maybeUpcast
           ]
       ]

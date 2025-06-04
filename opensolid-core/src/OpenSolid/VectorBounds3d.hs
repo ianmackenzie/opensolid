@@ -211,9 +211,9 @@ placeIn orientation (VectorBounds3d vR vF vU) = do
   let rF' = rR * Float.abs iF + rF * Float.abs jF + rU * Float.abs kF
   let rU' = rR * Float.abs iU + rF * Float.abs jU + rU * Float.abs kU
   VectorBounds3d
-    # Bounds (cR' - rR') (cR' + rR')
-    # Bounds (cF' - rF') (cF' + rF')
-    # Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' - rR') (cR' + rR')
+    @ Bounds (cF' - rF') (cF' + rF')
+    @ Bounds (cU' - rU') (cU' + rU')
 
 relativeTo ::
   Orientation3d global (Defines local) ->
@@ -234,9 +234,9 @@ relativeTo orientation (VectorBounds3d vR vF vU) = do
   let rF' = rR * Float.abs jR + rF * Float.abs jF + rU * Float.abs jU
   let rU' = rR * Float.abs kR + rF * Float.abs kF + rU * Float.abs kU
   VectorBounds3d
-    # Bounds (cR' - rR') (cR' + rR')
-    # Bounds (cF' - rF') (cF' + rF')
-    # Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' - rR') (cR' + rR')
+    @ Bounds (cF' - rF') (cF' + rF')
+    @ Bounds (cU' - rU') (cU' + rU')
 
 transformBy ::
   Transform3d tag (space @ units1) ->
@@ -258,9 +258,9 @@ transformBy transform (VectorBounds3d vR vF vU) = do
   let rF' = Float.abs iF * rR + Float.abs jF * rF + Float.abs kF * rU
   let rU' = Float.abs iU * rR + Float.abs jU * rF + Float.abs kU * rU
   VectorBounds3d
-    # Bounds (cR' - rR') (cR' + rR')
-    # Bounds (cF' - rF') (cF' + rF')
-    # Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' - rR') (cR' + rR')
+    @ Bounds (cF' - rF') (cF' + rF')
+    @ Bounds (cU' - rU') (cU' + rU')
 
 rotateIn ::
   Direction3d space ->

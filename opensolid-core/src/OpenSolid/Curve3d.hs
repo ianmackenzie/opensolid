@@ -132,8 +132,8 @@ instance
   where
   outer . inner =
     new
-      # outer.compiled . inner.compiled
-      # (outer.derivative . inner) * inner.derivative
+      @ outer.compiled . inner.compiled
+      @ (outer.derivative . inner) * inner.derivative
 
 instance
   unitless ~ Unitless =>
@@ -144,8 +144,8 @@ instance
   where
   curve . function =
     SurfaceFunction3d.new
-      # curve.compiled . function.compiled
-      # \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
+      @ curve.compiled . function.compiled
+      @ \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -175,14 +175,14 @@ constant point = new (CompiledFunction.constant point) VectorCurve3d.zero
 rightwardForwardUpward :: Curve units -> Curve units -> Curve units -> Curve3d (space @ units)
 rightwardForwardUpward r f u =
   new
-    # CompiledFunction.map3
+    @ CompiledFunction.map3
       Expression.rightwardForwardUpward
       Point3d.rightwardForwardUpward
       Bounds3d.rightwardForwardUpward
       r.compiled
       f.compiled
       u.compiled
-    # VectorCurve3d.rightwardForwardUpward
+    @ VectorCurve3d.rightwardForwardUpward
       r.derivative
       f.derivative
       u.derivative
@@ -193,12 +193,12 @@ on ::
   Curve3d (space @ units)
 on plane curve2d = do
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.Curve2d.on plane)
       (Point2d.on plane)
       (Bounds2d.on plane)
       curve2d.compiled
-    # VectorCurve3d.on (Plane3d.orientation plane) curve2d.derivative
+    @ VectorCurve3d.on (Plane3d.orientation plane) curve2d.derivative
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve.t * (p2 - p1)
@@ -212,8 +212,8 @@ will return a cubic Bezier curve with the given four control points.
 bezier :: NonEmpty (Point3d (space @ units)) -> Curve3d (space @ units)
 bezier controlPoints =
   new
-    # CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    # VectorCurve3d.bezierCurve (Bezier.derivative controlPoints)
+    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    @ VectorCurve3d.bezierCurve (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
@@ -310,12 +310,12 @@ transformBy ::
   Curve3d (space @ units)
 transformBy transform curve =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.Curve3d.transformBy transform)
       (Point3d.transformBy transform)
       (Bounds3d.transformBy transform)
       curve.compiled
-    # VectorCurve3d.transformBy transform curve.derivative
+    @ VectorCurve3d.transformBy transform curve.derivative
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
@@ -323,12 +323,12 @@ placeIn ::
   Curve3d (global @ units)
 placeIn frame curve =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.Curve3d.placeIn frame)
       (Point3d.placeIn frame)
       (Bounds3d.placeIn frame)
       curve.compiled
-    # VectorCurve3d.placeIn (Frame3d.orientation frame) curve.derivative
+    @ VectorCurve3d.placeIn (Frame3d.orientation frame) curve.derivative
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->

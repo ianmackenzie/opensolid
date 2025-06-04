@@ -137,7 +137,7 @@ relativeTo globalOrientation (PlaneOrientation3d i j) =
 -- | Generate a random plane orientation.
 random :: Random.Generator (PlaneOrientation3d global (Defines local))
 random =
-  Random.retry $
+  Random.retry do
     Random.map2 (Tolerance.using 0.1 fromDirections)
-      # Direction3d.random
-      # Direction3d.random
+      @ Direction3d.random
+      @ Direction3d.random

@@ -76,9 +76,9 @@ along (Axis3d originPoint direction) distance = do
   let Point3d oR oF oU = originPoint
   let Direction3d dR dF dU = direction
   Point3d
-    # oR + dR * distance
-    # oF + dF * distance
-    # oU + dU * distance
+    @ oR + dR * distance
+    @ oF + dF * distance
+    @ oU + dU * distance
 
 -- | Construct a point on the given plane, at the given position within the plane.
 on :: Plane3d (space @ units) (Defines local) -> Point2d (local @ units) -> Point3d (space @ units)
@@ -87,9 +87,9 @@ on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d pX pY) = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   Point3d
-    # oR + pX * iR + pY * jR
-    # oF + pX * iF + pY * jF
-    # oU + pX * iU + pY * jU
+    @ oR + pX * iR + pY * jR
+    @ oF + pX * iF + pY * jF
+    @ oU + pX * iU + pY * jU
 
 {-# INLINE coerce #-}
 coerce :: Point3d (space1 @ units1) -> Point3d (space2 @ units2)
@@ -105,9 +105,9 @@ fromCoordinates convention (pX, pY, pZ) = do
   let Direction3d jR jF jU = Convention3d.yDirection Orientation3d.world convention
   let Direction3d kR kF kU = Convention3d.zDirection Orientation3d.world convention
   Point3d
-    # pX * iR + pY * jR + pZ * kR
-    # pX * iF + pY * jF + pZ * kF
-    # pX * iU + pY * jU + pZ * kU
+    @ pX * iR + pY * jR + pZ * kR
+    @ pX * iF + pY * jF + pZ * kF
+    @ pX * iU + pY * jU + pZ * kU
 
 interpolateFrom ::
   Point3d (space @ units) ->

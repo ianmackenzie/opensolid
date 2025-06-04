@@ -339,8 +339,8 @@ instance
   where
   curve . function =
     new
-      # curve.compiled . function.compiled
-      # \p -> curve.derivative . function * derivative p function
+      @ curve.compiled . function.compiled
+      @ \p -> curve.derivative . function * derivative p function
 
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint

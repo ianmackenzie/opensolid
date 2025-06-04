@@ -253,8 +253,8 @@ instance
   where
   lhs ./. rhs =
     recursive
-      # lhs.compiled ./. rhs.compiled
-      # \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
+      @ lhs.compiled ./. rhs.compiled
+      @ \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -288,8 +288,8 @@ instance
   where
   lhs `dot'` rhs =
     Curve.new
-      # lhs.compiled `dot'` rhs.compiled
-      # lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative
+      @ lhs.compiled `dot'` rhs.compiled
+      @ lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -351,8 +351,8 @@ instance
   where
   lhs `cross'` rhs =
     Curve.new
-      # lhs.compiled `cross'` rhs.compiled
-      # lhs.derivative `cross'` rhs + lhs `cross'` rhs.derivative
+      @ lhs.compiled `cross'` rhs.compiled
+      @ lhs.derivative `cross'` rhs + lhs `cross'` rhs.derivative
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -438,8 +438,8 @@ instance
   where
   curve . function =
     VectorSurfaceFunction2d.new
-      # curve.compiled . function.compiled
-      # \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
+      @ curve.compiled . function.compiled
+      @ \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
 
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
@@ -447,12 +447,12 @@ transformBy ::
   VectorCurve2d (space @ units)
 transformBy transform curve =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.VectorCurve2d.transformBy transform)
       (Vector2d.transformBy transform)
       (VectorBounds2d.transformBy transform)
       curve.compiled
-    # transformBy transform curve.derivative
+    @ transformBy transform curve.derivative
 
 rotateBy ::
   forall space units.
@@ -486,13 +486,13 @@ unit = DirectionCurve2d.unwrap
 xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
 xy x y =
   new
-    # CompiledFunction.map2
+    @ CompiledFunction.map2
       Expression.xy
       Vector2d
       VectorBounds2d
       x.compiled
       y.compiled
-    # xy x.derivative y.derivative
+    @ xy x.derivative y.derivative
 
 line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
 line v1 v2 = bezierCurve (NonEmpty.two v1 v2)
@@ -528,8 +528,8 @@ cubicSpline v1 v2 v3 v4 = bezierCurve (NonEmpty.four v1 v2 v3 v4)
 bezierCurve :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
 bezierCurve controlPoints =
   new
-    # CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    # bezierCurve (Bezier.derivative controlPoints)
+    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    @ bezierCurve (Bezier.derivative controlPoints)
 
 synthetic ::
   VectorCurve2d (space @ units) ->
@@ -570,22 +570,22 @@ instance
   where
   getField curve =
     Curve.new
-      # CompiledFunction.map
+      @ CompiledFunction.map
         Expression.VectorCurve2d.squaredMagnitude'
         Vector2d.squaredMagnitude'
         VectorBounds2d.squaredMagnitude'
         curve.compiled
-      # 2.0 * curve `dot'` curve.derivative
+      @ 2.0 * curve `dot'` curve.derivative
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 unsafeMagnitude curve =
   Curve.recursive
-    # CompiledFunction.map
+    @ CompiledFunction.map
       Expression.VectorCurve2d.magnitude
       Vector2d.magnitude
       VectorBounds2d.magnitude
       curve.compiled
-    # \self -> curve.derivative `dot` (curve / self)
+    @ \self -> curve.derivative `dot` (curve / self)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
@@ -613,22 +613,22 @@ zeros curve =
 instance HasField "xComponent" (VectorCurve2d (space @ units)) (Curve units) where
   getField curve =
     Curve.new
-      # CompiledFunction.map
+      @ CompiledFunction.map
         Expression.xComponent
         Vector2d.xComponent
         VectorBounds2d.xComponent
         curve.compiled
-      # curve.derivative.xComponent
+      @ curve.derivative.xComponent
 
 instance HasField "yComponent" (VectorCurve2d (space @ units)) (Curve units) where
   getField curve =
     Curve.new
-      # CompiledFunction.map
+      @ CompiledFunction.map
         Expression.yComponent
         Vector2d.yComponent
         VectorBounds2d.yComponent
         curve.compiled
-      # curve.derivative.yComponent
+      @ curve.derivative.yComponent
 
 direction ::
   Tolerance units =>

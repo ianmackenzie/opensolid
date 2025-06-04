@@ -16,6 +16,6 @@ lines className target (Just upcast) = do
   Python.lines
     [ target <> "." <> parentPointerFieldName <> " = c_void_p()"
     , Python.FFI.invoke (Upcast.ffiName className)
-        # "ctypes.byref(" <> target <> "." <> childPointerFieldName <> ")"
-        # "ctypes.byref(" <> target <> "." <> parentPointerFieldName <> ")"
+        @ "ctypes.byref(" <> target <> "." <> childPointerFieldName <> ")"
+        @ "ctypes.byref(" <> target <> "." <> parentPointerFieldName <> ")"
     ]

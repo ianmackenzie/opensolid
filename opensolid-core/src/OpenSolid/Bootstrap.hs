@@ -34,9 +34,7 @@ module OpenSolid.Bootstrap
   , identity
   , return
   , always
-  , (#)
-  , (##)
-  , (###)
+  , (@)
   , fromIntegral
   , internalError
   , exception
@@ -136,23 +134,11 @@ return value = value
 always :: a -> b -> a
 always value _ = value
 
-{-# INLINE (#) #-}
-(#) :: (a -> b) -> a -> b
-(#) function value = function value
+{-# INLINE (@) #-}
+(@) :: (a -> b) -> a -> b
+function @ value = function value
 
-infixl 1 #
-
-{-# INLINE (##) #-}
-(##) :: (a -> b) -> a -> b
-(##) function value = function value
-
-infixl 2 ##
-
-{-# INLINE (###) #-}
-(###) :: (a -> b) -> a -> b
-(###) function value = function value
-
-infixl 3 ###
+infixl 1 @
 
 instance HasField "length" (List a) Int where
   getField = Data.List.length

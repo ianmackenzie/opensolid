@@ -931,32 +931,32 @@ transformPoint3d transform ast = do
 vectorPlacementTransform2d :: Orientation2d global (Defines local) -> Transform2d.Affine Coordinates
 vectorPlacementTransform2d orientation =
   Transform2d
-    # Point2d.origin
-    # Vector2d.coerce (Vector2d.unit (Orientation2d.xDirection orientation))
-    # Vector2d.coerce (Vector2d.unit (Orientation2d.yDirection orientation))
+    @ Point2d.origin
+    @ Vector2d.coerce (Vector2d.unit (Orientation2d.xDirection orientation))
+    @ Vector2d.coerce (Vector2d.unit (Orientation2d.yDirection orientation))
 
 vectorPlacementTransform3d :: Orientation3d global (Defines local) -> Transform3d.Affine Coordinates
 vectorPlacementTransform3d orientation =
   Transform3d
-    # Point3d.origin
-    # Vector3d.coerce (Vector3d.unit (Orientation3d.rightwardDirection orientation))
-    # Vector3d.coerce (Vector3d.unit (Orientation3d.forwardDirection orientation))
-    # Vector3d.coerce (Vector3d.unit (Orientation3d.upwardDirection orientation))
+    @ Point3d.origin
+    @ Vector3d.coerce (Vector3d.unit (Orientation3d.rightwardDirection orientation))
+    @ Vector3d.coerce (Vector3d.unit (Orientation3d.forwardDirection orientation))
+    @ Vector3d.coerce (Vector3d.unit (Orientation3d.upwardDirection orientation))
 
 pointPlacementTransform2d :: Frame2d (global @ units) (Defines local) -> Transform2d.Affine Coordinates
 pointPlacementTransform2d frame =
   Transform2d
-    # Point2d.coerce (Frame2d.originPoint frame)
-    # Vector2d.coerce (Vector2d.unit (Frame2d.xDirection frame))
-    # Vector2d.coerce (Vector2d.unit (Frame2d.yDirection frame))
+    @ Point2d.coerce (Frame2d.originPoint frame)
+    @ Vector2d.coerce (Vector2d.unit (Frame2d.xDirection frame))
+    @ Vector2d.coerce (Vector2d.unit (Frame2d.yDirection frame))
 
 pointPlacementTransform3d :: Frame3d (global @ units) (Defines local) -> Transform3d.Affine Coordinates
 pointPlacementTransform3d frame =
   Transform3d
-    # Point3d.coerce (Frame3d.originPoint frame)
-    # Vector3d.coerce (Vector3d.unit (Frame3d.rightwardDirection frame))
-    # Vector3d.coerce (Vector3d.unit (Frame3d.forwardDirection frame))
-    # Vector3d.coerce (Vector3d.unit (Frame3d.upwardDirection frame))
+    @ Point3d.coerce (Frame3d.originPoint frame)
+    @ Vector3d.coerce (Vector3d.unit (Frame3d.rightwardDirection frame))
+    @ Vector3d.coerce (Vector3d.unit (Frame3d.forwardDirection frame))
+    @ Vector3d.coerce (Vector3d.unit (Frame3d.upwardDirection frame))
 
 placeVector2dIn :: Orientation2d global (Defines local) -> Ast2d input -> Ast2d input
 placeVector2dIn orientation ast = transformVector2d (vectorPlacementTransform2d orientation) ast

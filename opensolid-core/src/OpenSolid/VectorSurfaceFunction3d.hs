@@ -181,8 +181,8 @@ instance
   where
   lhs .*. rhs =
     new
-      # lhs.compiled .*. rhs.compiled
-      # \p -> SurfaceFunction.derivative p lhs .*. rhs + lhs .*. derivative p rhs
+      @ lhs.compiled .*. rhs.compiled
+      @ \p -> SurfaceFunction.derivative p lhs .*. rhs + lhs .*. derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -212,8 +212,8 @@ instance
   where
   lhs .*. rhs =
     new
-      # lhs.compiled .*. rhs.compiled
-      # \p -> derivative p lhs .*. rhs + lhs .*. SurfaceFunction.derivative p rhs
+      @ lhs.compiled .*. rhs.compiled
+      @ \p -> derivative p lhs .*. rhs + lhs .*. SurfaceFunction.derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -243,8 +243,8 @@ instance
   where
   lhs ./. rhs =
     recursive
-      # lhs.compiled ./. rhs.compiled
-      # \self p -> derivative p lhs ./. rhs - self * (SurfaceFunction.derivative p rhs / rhs)
+      @ lhs.compiled ./. rhs.compiled
+      @ \self p -> derivative p lhs ./. rhs - self * (SurfaceFunction.derivative p rhs / rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -397,8 +397,8 @@ instance
     let duOuter = derivative U outer . inner
     let dvOuter = derivative V outer . inner
     new
-      # outer.compiled . inner.compiled
-      # \p -> do
+      @ outer.compiled . inner.compiled
+      @ \p -> do
         let dInner = SurfaceFunction2d.derivative p inner
         let dU = dInner.xComponent
         let dV = dInner.yComponent
@@ -445,14 +445,14 @@ rightwardForwardUpward ::
   VectorSurfaceFunction3d (space @ units)
 rightwardForwardUpward r f u =
   new
-    # CompiledFunction.map3
+    @ CompiledFunction.map3
       Expression.rightwardForwardUpward
       Vector3d.rightwardForwardUpward
       VectorBounds3d.rightwardForwardUpward
       r.compiled
       f.compiled
       u.compiled
-    # \p ->
+    @ \p ->
       rightwardForwardUpward
         (SurfaceFunction.derivative p r)
         (SurfaceFunction.derivative p f)
@@ -480,12 +480,12 @@ placeIn ::
   VectorSurfaceFunction3d (global @ units)
 placeIn orientation function =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.VectorSurface3d.placeIn orientation)
       (Vector3d.placeIn orientation)
       (VectorBounds3d.placeIn orientation)
       function.compiled
-    # \p -> placeIn orientation (derivative p function)
+    @ \p -> placeIn orientation (derivative p function)
 
 relativeTo ::
   Orientation3d global (Defines local) ->
@@ -499,9 +499,9 @@ transformBy ::
   VectorSurfaceFunction3d (space @ units)
 transformBy transform function =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.VectorSurface3d.transformBy transform)
       (Vector3d.transformBy transform)
       (VectorBounds3d.transformBy transform)
       function.compiled
-    # \p -> transformBy transform (derivative p function)
+    @ \p -> transformBy transform (derivative p function)

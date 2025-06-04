@@ -166,12 +166,12 @@ isometric ::
   Camera3d (space @ units)
 isometric givenFocalPoint distance givenProjection givenFieldOfView =
   orbit
-    # givenFocalPoint
-    # #azimuth (Angle.degrees 45.0)
-    # #elevation isometricElevation
-    # distance
-    # givenProjection
-    # givenFieldOfView
+    @ givenFocalPoint
+    @ #azimuth (Angle.degrees 45.0)
+    @ #elevation isometricElevation
+    @ distance
+    @ givenProjection
+    @ givenFieldOfView
 
 moveTo ::
   Point3d (space @ units) ->

@@ -71,8 +71,8 @@ instance
   where
   lhs + rhs =
     new
-      # lhs.compiled + rhs.compiled
-      # \parameter -> derivative parameter lhs + VectorSurfaceFunction3d.derivative parameter rhs
+      @ lhs.compiled + rhs.compiled
+      @ \parameter -> derivative parameter lhs + VectorSurfaceFunction3d.derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -92,8 +92,8 @@ instance
   where
   lhs - rhs =
     new
-      # lhs.compiled - rhs.compiled
-      # \parameter -> derivative parameter lhs - VectorSurfaceFunction3d.derivative parameter rhs
+      @ lhs.compiled - rhs.compiled
+      @ \parameter -> derivative parameter lhs - VectorSurfaceFunction3d.derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -113,8 +113,8 @@ instance
   where
   lhs - rhs =
     VectorSurfaceFunction3d.new
-      # lhs.compiled - rhs.compiled
-      # \parameter -> derivative parameter lhs - derivative parameter rhs
+      @ lhs.compiled - rhs.compiled
+      @ \parameter -> derivative parameter lhs - derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -154,8 +154,8 @@ instance
     let duOuter = derivative U outer . inner
     let dvOuter = derivative V outer . inner
     new
-      # outer.compiled . inner.compiled
-      # \parameter -> do
+      @ outer.compiled . inner.compiled
+      @ \parameter -> do
         let dInner = SurfaceFunction2d.derivative parameter inner
         let dU = dInner.xComponent
         let dV = dInner.yComponent
@@ -188,14 +188,14 @@ rightwardForwardUpward ::
   SurfaceFunction3d (space @ units)
 rightwardForwardUpward r f u =
   new
-    # CompiledFunction.map3
+    @ CompiledFunction.map3
       Expression.rightwardForwardUpward
       Point3d.rightwardForwardUpward
       Bounds3d.rightwardForwardUpward
       r.compiled
       f.compiled
       u.compiled
-    # \parameter ->
+    @ \parameter ->
       VectorSurfaceFunction3d.rightwardForwardUpward
         (SurfaceFunction.derivative parameter r)
         (SurfaceFunction.derivative parameter f)
@@ -220,12 +220,12 @@ transformBy ::
   SurfaceFunction3d (space @ units)
 transformBy transform function =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.Surface3d.transformBy transform)
       (Point3d.transformBy transform)
       (Bounds3d.transformBy transform)
       function.compiled
-    # \parameter -> VectorSurfaceFunction3d.transformBy transform (derivative parameter function)
+    @ \parameter -> VectorSurfaceFunction3d.transformBy transform (derivative parameter function)
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
@@ -233,12 +233,12 @@ placeIn ::
   SurfaceFunction3d (global @ units)
 placeIn frame function =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.Surface3d.placeIn frame)
       (Point3d.placeIn frame)
       (Bounds3d.placeIn frame)
       function.compiled
-    # \parameter ->
+    @ \parameter ->
       VectorSurfaceFunction3d.placeIn (Frame3d.orientation frame) (derivative parameter function)
 
 relativeTo ::

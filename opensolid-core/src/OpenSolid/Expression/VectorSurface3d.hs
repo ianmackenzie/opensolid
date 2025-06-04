@@ -60,9 +60,9 @@ relativeTo ::
   Expression UvPoint (Vector3d (local @ units))
 relativeTo orientation expression =
   rightwardForwardUpward
-    # expression `dot` constant (Vector3d.unit (Orientation3d.rightwardDirection orientation))
-    # expression `dot` constant (Vector3d.unit (Orientation3d.forwardDirection orientation))
-    # expression `dot` constant (Vector3d.unit (Orientation3d.upwardDirection orientation))
+    @ expression `dot` constant (Vector3d.unit (Orientation3d.rightwardDirection orientation))
+    @ expression `dot` constant (Vector3d.unit (Orientation3d.forwardDirection orientation))
+    @ expression `dot` constant (Vector3d.unit (Orientation3d.upwardDirection orientation))
 
 projectInto ::
   PlaneOrientation3d global (Defines local) ->

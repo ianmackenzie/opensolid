@@ -271,8 +271,8 @@ instance
   where
   curve . function =
     SurfaceFunction2d.new
-      # curve.compiled . function.compiled
-      # \p -> curve.derivative . function * SurfaceFunction.derivative p function
+      @ curve.compiled . function.compiled
+      @ \p -> curve.derivative . function * SurfaceFunction.derivative p function
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -303,8 +303,8 @@ instance
     let uT = uvT.xComponent
     let vT = uvT.yComponent
     VectorCurve3d.new
-      # function.compiled . uvCurve.compiled
-      # fU . uvCurve * uT + fV . uvCurve * vT
+      @ function.compiled . uvCurve.compiled
+      @ fU . uvCurve * uT + fV . uvCurve * vT
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -320,8 +320,8 @@ instance
     let uT = uvT.xComponent
     let vT = uvT.yComponent
     Curve3d.new
-      # function.compiled . uvCurve.compiled
-      # fU . uvCurve * uT + fV . uvCurve * vT
+      @ function.compiled . uvCurve.compiled
+      @ fU . uvCurve * uT + fV . uvCurve * vT
 
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 new = Curve2d
@@ -341,13 +341,13 @@ constant point = new (CompiledFunction.constant point) VectorCurve2d.zero
 xy :: Curve units -> Curve units -> Curve2d (space @ units)
 xy x y =
   new
-    # CompiledFunction.map2
+    @ CompiledFunction.map2
       Expression.xy
       Point2d
       Bounds2d
       x.compiled
       y.compiled
-    # VectorCurve2d.xy x.derivative y.derivative
+    @ VectorCurve2d.xy x.derivative y.derivative
 
 -- | Create a line between two points.
 line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
@@ -521,8 +521,8 @@ will return a cubic Bezier curve with the given four control points.
 bezier :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
 bezier controlPoints =
   new
-    # CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    # VectorCurve2d.bezierCurve (Bezier.derivative controlPoints)
+    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    @ VectorCurve2d.bezierCurve (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
@@ -650,23 +650,23 @@ isOnAxis axis curve = List.allSatisfy (^ axis) (samplePoints curve)
 xCoordinate :: Curve2d (space @ units) -> Curve units
 xCoordinate curve =
   Curve.new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       Expression.xCoordinate
       Point2d.xCoordinate
       Bounds2d.xCoordinate
       curve.compiled
-    # curve.derivative.xComponent
+    @ curve.derivative.xComponent
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yCoordinate :: Curve2d (space @ units) -> Curve units
 yCoordinate curve =
   Curve.new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       Expression.yCoordinate
       Point2d.yCoordinate
       Bounds2d.yCoordinate
       curve.compiled
-    # curve.derivative.yComponent
+    @ curve.derivative.yComponent
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, Error.Message)
 
@@ -847,12 +847,12 @@ placeIn ::
   Curve2d (global @ units)
 placeIn frame curve =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.Curve2d.placeIn frame)
       (Point2d.placeIn frame)
       (Bounds2d.placeIn frame)
       curve.compiled
-    # VectorCurve2d.placeIn (Frame2d.orientation frame) curve.derivative
+    @ VectorCurve2d.placeIn (Frame2d.orientation frame) curve.derivative
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
@@ -872,12 +872,12 @@ transformBy ::
   Curve2d (space @ units)
 transformBy transform curve =
   new
-    # CompiledFunction.map
+    @ CompiledFunction.map
       (Expression.Curve2d.transformBy transform)
       (Point2d.transformBy transform)
       (Bounds2d.transformBy transform)
       curve.compiled
-    # VectorCurve2d.transformBy transform curve.derivative
+    @ VectorCurve2d.transformBy transform curve.derivative
 
 -- | Translate by the given displacement.
 translateBy ::
@@ -1069,8 +1069,8 @@ makePiecewise parameterizedSegments = do
   let evaluateImpl t = piecewiseValue tree (arcLength * t)
   let evaluateBoundsImpl (Bounds t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
   new
-    # CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
-    # piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
+    @ CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
+    @ piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
 
 piecewise ::
   Tolerance units =>

@@ -149,9 +149,9 @@ revolved sketchPlane curve axis angle = do
         let function =
               SurfaceFunction3d.placeIn frame3d do
                 SurfaceFunction3d.rightwardForwardUpward
-                  # radius * SurfaceFunction.cos theta
-                  # radius * SurfaceFunction.sin theta
-                  # height
+                  @ radius * SurfaceFunction.cos theta
+                  @ radius * SurfaceFunction.sin theta
+                  @ height
         Success (parametric function Region2d.unitSquare)
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
@@ -160,8 +160,8 @@ boundaryCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoop
 flip :: Surface3d (space @ units) -> Surface3d (space @ units)
 flip surface =
   parametric
-    # surface.function . SurfaceFunction2d.xy -SurfaceFunction.u SurfaceFunction.v
-    # Region2d.mirrorAcross Axis2d.y surface.domain
+    @ surface.function . SurfaceFunction2d.xy -SurfaceFunction.u SurfaceFunction.v
+    @ Region2d.mirrorAcross Axis2d.y surface.domain
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.
 placeIn ::

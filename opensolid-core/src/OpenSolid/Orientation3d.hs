@@ -54,16 +54,16 @@ the upward direction of this orientation is the global upward direction, etc.
 world :: Orientation3d space (Defines space)
 world =
   Orientation3d
-    # Direction3d 1.0 0.0 0.0
-    # Direction3d 0.0 1.0 0.0
-    # Direction3d 0.0 0.0 1.0
+    @ Direction3d 1.0 0.0 0.0
+    @ Direction3d 0.0 1.0 0.0
+    @ Direction3d 0.0 0.0 1.0
 
 coerce :: Orientation3d space1 defines1 -> Orientation3d space2 defines2
 coerce (Orientation3d rightward forward upward) =
   Orientation3d
-    # Direction3d.coerce rightward
-    # Direction3d.coerce forward
-    # Direction3d.coerce upward
+    @ Direction3d.coerce rightward
+    @ Direction3d.coerce forward
+    @ Direction3d.coerce upward
 
 -- | Get the rightward direction of a orientation.
 rightwardDirection :: Orientation3d space defines -> Direction3d space

@@ -84,9 +84,9 @@ fromComponents convention (vX, vY, vZ) = do
   let Direction3d jR jF jU = Convention3d.yDirection Orientation3d.world convention
   let Direction3d kR kF kU = Convention3d.zDirection Orientation3d.world convention
   Vector3d
-    # vX * iR + vY * jR + vZ * kR
-    # vX * iF + vY * jF + vZ * kF
-    # vX * iU + vY * jU + vZ * kU
+    @ vX * iR + vY * jR + vZ * kR
+    @ vX * iF + vY * jF + vZ * kF
+    @ vX * iU + vY * jU + vZ * kU
 
 componentIn :: Direction3d space -> Vector3d (space @ units) -> Qty units
 componentIn = dot
