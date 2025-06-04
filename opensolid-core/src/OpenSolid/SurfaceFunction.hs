@@ -37,7 +37,9 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
@@ -66,7 +68,9 @@ import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
@@ -254,6 +258,22 @@ instance
   vector .*. function = VectorSurfaceFunction2d.constant vector .*. function
 
 instance
+  Multiplication
+    (SurfaceFunction units)
+    (Direction2d space)
+    (VectorSurfaceFunction2d (space @ units))
+  where
+  lhs * rhs = lhs * Vector2d.unit rhs
+
+instance
+  Multiplication
+    (Direction2d space)
+    (SurfaceFunction units)
+    (VectorSurfaceFunction2d (space @ units))
+  where
+  lhs * rhs = Vector2d.unit lhs * rhs
+
+instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
@@ -286,6 +306,22 @@ instance
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
   vector .*. function = VectorSurfaceFunction3d.constant vector .*. function
+
+instance
+  Multiplication
+    (SurfaceFunction units)
+    (Direction3d space)
+    (VectorSurfaceFunction3d (space @ units))
+  where
+  lhs * rhs = lhs * Vector3d.unit rhs
+
+instance
+  Multiplication
+    (Direction3d space)
+    (SurfaceFunction units)
+    (VectorSurfaceFunction3d (space @ units))
+  where
+  lhs * rhs = Vector3d.unit lhs * rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
