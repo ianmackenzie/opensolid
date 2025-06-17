@@ -9,7 +9,6 @@ module OpenSolid.Drawing2d
   , nothing
   , group
   , groupWith
-  , with
   , collect
   , collectWith
   , line
@@ -145,12 +144,6 @@ groupWith = Node "g"
 -- | Group several drawings into a single drawing.
 group :: List (Drawing2d space) -> Drawing2d space
 group = groupWith []
-
--- | Apply the given attributes to the given drawing.
-with :: List (Attribute space) -> Drawing2d space -> Drawing2d space
-with _ Empty = Empty
-with attributes (Node tag existingAttributes children) =
-  Node tag (existingAttributes <> attributes) children
 
 collect :: Foldable list => (a -> Drawing2d space) -> list a -> Drawing2d space
 collect = collectWith []

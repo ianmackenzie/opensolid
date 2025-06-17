@@ -230,11 +230,12 @@ drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
 drawZeros path zeros = IO.do
   let uvBounds = Bounds.convert toDrawing (Bounds -0.05 1.05)
   let viewBox = Bounds2d uvBounds uvBounds
-  Drawing2d.writeSvg path viewBox do
-    Drawing2d.with [Drawing2d.strokeWidth strokeWidth] do
-      drawBounds (Bounds2d.convert toDrawing SurfaceParameter.domain)
-      Drawing2d.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
-      Drawing2d.collect (drawDot Color.orange) zeros.saddlePoints
+  Drawing2d.writeSvg path viewBox $
+    Drawing2d.groupWith [Drawing2d.strokeWidth strokeWidth] $
+      [ drawBounds (Bounds2d.convert toDrawing SurfaceParameter.domain)
+      , Drawing2d.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
+      , Drawing2d.collect (drawDot Color.orange) zeros.saddlePoints
+      ]
 
 drawBounds :: Bounds2d (space @ Meters) -> Drawing2d space
 drawBounds bounds = do
@@ -305,12 +306,17 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawSegmentBounds tBounds = drawBounds (Curve2d.evaluateBounds curve tBounds)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Drawing2d.circle (#centerPoint point, #diameter controlPointDiameter)
-  Drawing2d.with [Drawing2d.strokeColor color, Drawing2d.strokeWidth (Length.millimeters 1.0)] do
-    Drawing2d.with [Drawing2d.opacity 0.3] do
-      Drawing2d.polyline (Polyline2d drawingControlPoints)
-      Drawing2d.collectWith [Drawing2d.fillColor color] drawControlPoint drawingControlPoints
-      Drawing2d.collect drawSegmentBounds (Parameter.intervals 10)
-    Drawing2d.curve Length.millimeter curve
+  Drawing2d.groupWith
+    [ Drawing2d.strokeColor color
+    , Drawing2d.strokeWidth (Length.millimeters 1.0)
+    ]
+    [ Drawing2d.groupWith [Drawing2d.opacity 0.3] $
+        [ Drawing2d.polyline (Polyline2d drawingControlPoints)
+        , Drawing2d.collectWith [Drawing2d.fillColor color] drawControlPoint drawingControlPoints
+        , Drawing2d.collect drawSegmentBounds (Parameter.intervals 10)
+        ]
+    , Drawing2d.curve Length.millimeter curve
+    ]
 
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = IO.do
