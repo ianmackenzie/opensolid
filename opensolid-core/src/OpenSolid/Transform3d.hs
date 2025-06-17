@@ -90,8 +90,8 @@ translateAlong :: Axis3d (space @ units) -> Qty units -> Rigid (space @ units)
 translateAlong (Axis3d _ direction) distance = translateIn direction distance
 
 rotateAround :: Axis3d (space @ units) -> Angle -> Rigid (space @ units)
-rotateAround (Axis3d originPoint direction) angle = do
-  let Direction3d dx dy dz = direction
+rotateAround axis angle = do
+  let Direction3d dx dy dz = axis.direction
   let halfAngle = 0.5 * angle
   let sinHalfAngle = Angle.sin halfAngle
   let qx = dx * sinHalfAngle
@@ -110,7 +110,7 @@ rotateAround (Axis3d originPoint direction) angle = do
   let vx = Vector3d (1.0 - 2.0 * (yy + zz)) (2.0 * (xy + wz)) (2.0 * (xz - wy))
   let vy = Vector3d (2.0 * (xy - wz)) (1.0 - 2.0 * (xx + zz)) (2.0 * (yz + wx))
   let vz = Vector3d (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))
-  withFixedPoint originPoint vx vy vz
+  withFixedPoint axis.originPoint vx vy vz
 
 scaleAbout :: Point3d (space @ units) -> Float -> Uniform (space @ units)
 scaleAbout point scale = do
@@ -120,16 +120,18 @@ scaleAbout point scale = do
   withFixedPoint point vx vy vz
 
 scaleAlong :: Axis3d (space @ units) -> Float -> Affine (space @ units)
-scaleAlong (Axis3d originPoint direction) scale = do
-  let Direction3d dx dy dz = direction
+scaleAlong axis scale = do
+  let d = axis.direction
+  let Direction3d dx dy dz = d
   -- TODO refactor to use Vector3d.scaleIn?
-  let vx = unitX + (scale - 1.0) * dx * direction
-  let vy = unitY + (scale - 1.0) * dy * direction
-  let vz = unitZ + (scale - 1.0) * dz * direction
-  withFixedPoint originPoint vx vy vz
+  let vx = unitX + (scale - 1.0) * dx * d
+  let vy = unitY + (scale - 1.0) * dy * d
+  let vz = unitZ + (scale - 1.0) * dz * d
+  withFixedPoint axis.originPoint vx vy vz
 
 mirrorAcross :: Plane3d (space @ units) defines -> Orthonormal (space @ units)
-mirrorAcross (Plane3d p0 (PlaneOrientation3d i j)) = do
+mirrorAcross plane = do
+  let PlaneOrientation3d i j = plane.orientation
   let Vector3d nx ny nz = i `cross` j
   let axx = 1.0 - 2.0 * nx * nx
   let ayy = 1.0 - 2.0 * ny * ny
@@ -140,7 +142,7 @@ mirrorAcross (Plane3d p0 (PlaneOrientation3d i j)) = do
   let vx = Vector3d axx axy axz
   let vy = Vector3d axy ayy ayz
   let vz = Vector3d axz ayz azz
-  withFixedPoint p0 vx vy vz
+  withFixedPoint plane.originPoint vx vy vz
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
