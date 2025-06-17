@@ -17,6 +17,7 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d qualified as Direction3d
+import OpenSolid.Drawing2d (Drawing2d)
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
@@ -235,12 +236,12 @@ drawZeros path zeros = IO.do
       Drawing2d.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
       Drawing2d.collect (drawDot Color.orange) zeros.saddlePoints
 
-drawBounds :: Bounds2d (space @ Meters) -> Drawing2d.Entity space
+drawBounds :: Bounds2d (space @ Meters) -> Drawing2d space
 drawBounds bounds = do
   let corner x y = Bounds2d.interpolate bounds x y
   Drawing2d.polygon [corner 0.0 0.0, corner 1.0 0.0, corner 1.0 1.0, corner 0.0 1.0]
 
-drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
+drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawCrossingCurve index curve = do
   let hue = (Float.int index * Angle.goldenAngle) % Angle.twoPi
   let color = Color.hsl hue 0.5 0.5
@@ -249,15 +250,12 @@ drawCrossingCurve index curve = do
 toDrawing :: Qty (Meters :/: Unitless)
 toDrawing = Length.centimeters 10.0 ./. 1.0
 
-drawUvCurve ::
-  List (Drawing2d.Attribute UvSpace) ->
-  Curve2d UvCoordinates ->
-  Drawing2d.Entity UvSpace
+drawUvCurve :: List (Drawing2d.Attribute UvSpace) -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawUvCurve attributes curve = do
   let polyline = Curve2d.toPolyline 0.001 curve
   Drawing2d.polylineWith attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
-drawDot :: Color -> UvPoint -> Drawing2d.Entity UvSpace
+drawDot :: Color -> UvPoint -> Drawing2d UvSpace
 drawDot color point =
   Drawing2d.circleWith [Drawing2d.fillColor color] do
     #centerPoint (Point2d.convert toDrawing point)
@@ -297,7 +295,7 @@ drawBezier ::
   Point2d (space @ Unitless) ->
   List (Point2d (space @ Unitless)) ->
   Point2d (space @ Unitless) ->
-  Drawing2d.Entity space
+  Drawing2d space
 drawBezier color startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2d.convert toDrawing startPoint
   let drawingEndPoint = Point2d.convert toDrawing endPoint

@@ -58,7 +58,6 @@ import API.Class
   , plusSelf
   , property
   , static1
-  , static2
   , static3
   , times
   , timesFloat
@@ -98,6 +97,7 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
+import OpenSolid.Drawing2d (Drawing2d)
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.Frame3d (Frame3d)
@@ -841,22 +841,21 @@ areaCurve =
 
 drawing2d :: Class
 drawing2d =
-  Class.static "Drawing2d" "A set of functions for constructing 2D drawings." $
-    [ static2 "To SVG" "View Box" "Entity" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
-    , static3 "Write SVG" "Path" "View Box" "Entity" Drawing2d.writeSvg $(docs 'Drawing2d.writeSvg)
-    , static1 "Group" "Entities" Drawing2d.group $(docs 'Drawing2d.group)
-    , static2 "Group With" "Attributes" "Entities" Drawing2d.groupWith $(docs 'Drawing2d.groupWith)
-    , static1 "Polygon" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
-    , static2 "Polygon With" "Attributes" "Vertices" Drawing2d.polygonWith $(docs 'Drawing2d.polygonWith)
-    , static2 "Circle" "Center Point" "Diameter" (curryT2 Drawing2d.circle) $(docs 'Drawing2d.circle)
-    , static3 "Circle With" "Attributes" "Center Point" "Diameter" (curry1T2 Drawing2d.circleWith) $(docs 'Drawing2d.circleWith)
-    , static2 "Curve" "Max Error" "Curve" Drawing2d.curve $(docs 'Drawing2d.curve)
-    , static3 "Curve With" "Attributes" "Max Error" "Curve" Drawing2d.curveWith $(docs 'Drawing2d.curveWith)
+  Class.new @(Drawing2d Space) $(docs ''Drawing2d) $
+    [ member1 "To SVG" "View Box" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
+    , member2 "Write SVG" "Path" "View Box" Drawing2d.writeSvg $(docs 'Drawing2d.writeSvg)
+    , factory1 "Group" "Drawings" Drawing2d.group $(docs 'Drawing2d.group)
+    , factory2 "Group With" "Attributes" "Drawings" Drawing2d.groupWith $(docs 'Drawing2d.groupWith)
+    , factory1 "Polygon" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
+    , factory2 "Polygon With" "Attributes" "Vertices" Drawing2d.polygonWith $(docs 'Drawing2d.polygonWith)
+    , factory2 "Circle" "Center Point" "Diameter" (curryT2 Drawing2d.circle) $(docs 'Drawing2d.circle)
+    , factory3 "Circle With" "Attributes" "Center Point" "Diameter" (curry1T2 Drawing2d.circleWith) $(docs 'Drawing2d.circleWith)
+    , factory2 "Curve" "Max Error" "Curve" Drawing2d.curve $(docs 'Drawing2d.curve)
+    , factory3 "Curve With" "Attributes" "Max Error" "Curve" Drawing2d.curveWith $(docs 'Drawing2d.curveWith)
     , constant "Black Stroke" Drawing2d.blackStroke $(docs 'Drawing2d.blackStroke)
     , static1 "Stroke Color" "Color" Drawing2d.strokeColor $(docs 'Drawing2d.strokeColor)
     , constant "No Fill" Drawing2d.noFill $(docs 'Drawing2d.noFill)
     , static1 "Fill Color" "Color" Drawing2d.fillColor $(docs 'Drawing2d.fillColor)
-    , nested @(Drawing2d.Entity Space) "A drawing entity such as a shape or group." []
     , nested @(Drawing2d.Attribute Space) "A drawing attribute such as fill color or stroke width." []
     ]
 

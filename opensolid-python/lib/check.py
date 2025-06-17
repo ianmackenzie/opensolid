@@ -50,4 +50,4 @@ vertices = [
     Point2d.centimeters(25, 15),
 ]
 triangle = Drawing2d.polygon(vertices)
-print(Drawing2d.to_svg(bounds, triangle))
+print(triangle.to_svg(bounds))
