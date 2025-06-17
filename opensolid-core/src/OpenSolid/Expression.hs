@@ -42,8 +42,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bytecode.Ast (Ast1d, Ast2d, Ast3d)
 import OpenSolid.Bytecode.Ast qualified as Ast
 import OpenSolid.Bytecode.Evaluate (Compiled)
@@ -59,10 +58,12 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Bounds3d (Bounds3d)
-  , Point3d (Point3d)
+  ( Bounds2d (PositionBounds2d)
+  , Bounds3d (PositionBounds3d)
+  , Point2d (Position2d)
+  , Point3d (Point3d, Position3d)
   , Vector3d (Vector3d)
-  , VectorBounds3d (VectorBounds3d)
+  , VectorBounds3d
   )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
@@ -73,9 +74,7 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import OpenSolid.VectorBounds2d qualified as VectorBounds2d
-import OpenSolid.VectorBounds3d qualified as VectorBounds3d
+import OpenSolid.VectorBounds2d (VectorBounds2d)
 
 type role Expression nominal nominal
 
@@ -1627,10 +1626,8 @@ instance
     (Bounds Unitless)
     (Bounds units)
   where
-  evaluate (Curve1d _ compiled) tValue =
-    Qty.coerce (Evaluate.curve1dValue compiled tValue)
-  evaluateBounds (Curve1d _ compiled) tBounds =
-    Bounds.coerce (Evaluate.curve1dBounds compiled tBounds)
+  evaluate (Curve1d _ compiled) tValue = Evaluate.curve1dValue compiled tValue
+  evaluateBounds (Curve1d _ compiled) tBounds = Evaluate.curve1dBounds compiled tBounds
 
 instance
   Evaluation
@@ -1639,10 +1636,8 @@ instance
     UvBounds
     (Bounds units)
   where
-  evaluate (Surface1d _ compiled) uvPoint =
-    Qty.coerce (Evaluate.surface1dValue compiled uvPoint)
-  evaluateBounds (Surface1d _ compiled) uvBounds =
-    Bounds.coerce (Evaluate.surface1dBounds compiled uvBounds)
+  evaluate (Surface1d _ compiled) uvPoint = Evaluate.surface1dValue compiled uvPoint
+  evaluateBounds (Surface1d _ compiled) uvBounds = Evaluate.surface1dBounds compiled uvBounds
 
 instance
   Evaluation
@@ -1651,13 +1646,11 @@ instance
     (Bounds Unitless)
     (Bounds2d (space @ units))
   where
-  evaluate (Curve2d _ compiled) tValue = do
-    let Vector2d x y = Evaluate.curve2dValue compiled tValue
-    Point2d (Qty.coerce x) (Qty.coerce y)
+  evaluate (Curve2d _ compiled) tValue =
+    Position2d (Evaluate.curve2dValue compiled tValue)
 
-  evaluateBounds (Curve2d _ compiled) tBounds = do
-    let VectorBounds2d x y = Evaluate.curve2dBounds compiled tBounds
-    Bounds2d (Bounds.coerce x) (Bounds.coerce y)
+  evaluateBounds (Curve2d _ compiled) tBounds =
+    PositionBounds2d (Evaluate.curve2dBounds compiled tBounds)
 
 instance
   Evaluation
@@ -1666,13 +1659,11 @@ instance
     UvBounds
     (Bounds2d (space @ units))
   where
-  evaluate (Surface2d _ compiled) uvPoint = do
-    let Vector2d x y = Evaluate.surface2dValue compiled uvPoint
-    Point2d (Qty.coerce x) (Qty.coerce y)
+  evaluate (Surface2d _ compiled) uvPoint =
+    Position2d (Evaluate.surface2dValue compiled uvPoint)
 
-  evaluateBounds (Surface2d _ compiled) uvBounds = do
-    let VectorBounds2d x y = Evaluate.surface2dBounds compiled uvBounds
-    Bounds2d (Bounds.coerce x) (Bounds.coerce y)
+  evaluateBounds (Surface2d _ compiled) uvBounds =
+    PositionBounds2d (Evaluate.surface2dBounds compiled uvBounds)
 
 instance
   Evaluation
@@ -1681,11 +1672,8 @@ instance
     (Bounds Unitless)
     (VectorBounds2d (space @ units))
   where
-  evaluate (VectorCurve2d _ compiled) tValue =
-    Vector2d.coerce (Evaluate.curve2dValue compiled tValue)
-
-  evaluateBounds (VectorCurve2d _ compiled) tBounds =
-    VectorBounds2d.coerce (Evaluate.curve2dBounds compiled tBounds)
+  evaluate (VectorCurve2d _ compiled) tValue = Evaluate.curve2dValue compiled tValue
+  evaluateBounds (VectorCurve2d _ compiled) tBounds = Evaluate.curve2dBounds compiled tBounds
 
 instance
   Evaluation
@@ -1694,11 +1682,8 @@ instance
     UvBounds
     (VectorBounds2d (space @ units))
   where
-  evaluate (VectorSurface2d _ compiled) uvPoint =
-    Vector2d.coerce (Evaluate.surface2dValue compiled uvPoint)
-
-  evaluateBounds (VectorSurface2d _ compiled) uvBounds =
-    VectorBounds2d.coerce (Evaluate.surface2dBounds compiled uvBounds)
+  evaluate (VectorSurface2d _ compiled) uvPoint = Evaluate.surface2dValue compiled uvPoint
+  evaluateBounds (VectorSurface2d _ compiled) uvBounds = Evaluate.surface2dBounds compiled uvBounds
 
 instance
   Evaluation
@@ -1707,13 +1692,11 @@ instance
     (Bounds Unitless)
     (Bounds3d (space @ units))
   where
-  evaluate (Curve3d _ compiled) tValue = do
-    let Vector3d x y z = Evaluate.curve3dValue compiled tValue
-    Point3d (Qty.coerce x) (Qty.coerce y) (Qty.coerce z)
+  evaluate (Curve3d _ compiled) tValue =
+    Position3d (Evaluate.curve3dValue compiled tValue)
 
-  evaluateBounds (Curve3d _ compiled) tBounds = do
-    let VectorBounds3d x y z = Evaluate.curve3dBounds compiled tBounds
-    Bounds3d (Bounds.coerce x) (Bounds.coerce y) (Bounds.coerce z)
+  evaluateBounds (Curve3d _ compiled) tBounds =
+    PositionBounds3d (Evaluate.curve3dBounds compiled tBounds)
 
 instance
   Evaluation
@@ -1722,13 +1705,11 @@ instance
     UvBounds
     (Bounds3d (space @ units))
   where
-  evaluate (Surface3d _ compiled) uvPoint = do
-    let Vector3d x y z = Evaluate.surface3dValue compiled uvPoint
-    Point3d (Qty.coerce x) (Qty.coerce y) (Qty.coerce z)
+  evaluate (Surface3d _ compiled) uvPoint =
+    Position3d (Evaluate.surface3dValue compiled uvPoint)
 
-  evaluateBounds (Surface3d _ compiled) uvBounds = do
-    let VectorBounds3d x y z = Evaluate.surface3dBounds compiled uvBounds
-    Bounds3d (Bounds.coerce x) (Bounds.coerce y) (Bounds.coerce z)
+  evaluateBounds (Surface3d _ compiled) uvBounds =
+    PositionBounds3d (Evaluate.surface3dBounds compiled uvBounds)
 
 instance
   Evaluation
@@ -1737,11 +1718,8 @@ instance
     (Bounds Unitless)
     (VectorBounds3d (space @ units))
   where
-  evaluate (VectorCurve3d _ compiled) tValue =
-    Vector3d.coerce (Evaluate.curve3dValue compiled tValue)
-
-  evaluateBounds (VectorCurve3d _ compiled) tBounds =
-    VectorBounds3d.coerce (Evaluate.curve3dBounds compiled tBounds)
+  evaluate (VectorCurve3d _ compiled) tValue = Evaluate.curve3dValue compiled tValue
+  evaluateBounds (VectorCurve3d _ compiled) tBounds = Evaluate.curve3dBounds compiled tBounds
 
 instance
   Evaluation
@@ -1750,11 +1728,8 @@ instance
     UvBounds
     (VectorBounds3d (space @ units))
   where
-  evaluate (VectorSurface3d _ compiled) uvPoint =
-    Vector3d.coerce (Evaluate.surface3dValue compiled uvPoint)
-
-  evaluateBounds (VectorSurface3d _ compiled) uvBounds = do
-    VectorBounds3d.coerce (Evaluate.surface3dBounds compiled uvBounds)
+  evaluate (VectorSurface3d _ compiled) uvPoint = Evaluate.surface3dValue compiled uvPoint
+  evaluateBounds (VectorSurface3d _ compiled) uvBounds = Evaluate.surface3dBounds compiled uvBounds
 
 solveMonotonicSurfaceU ::
   Tolerance units =>

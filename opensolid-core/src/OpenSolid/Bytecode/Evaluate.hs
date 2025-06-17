@@ -18,6 +18,7 @@ module OpenSolid.Bytecode.Evaluate
 where
 
 import Data.ByteString.Unsafe qualified
+import Data.Coerce qualified
 import Foreign (Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified
@@ -34,6 +35,8 @@ import OpenSolid.Primitives (Vector3d (Vector3d), VectorBounds3d (VectorBounds3d
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
@@ -51,12 +54,12 @@ callFunction functionBytes numReturnValues callback =
       Foreign.Marshal.Alloc.allocaBytes (8 * numReturnValues) \returnValuesPointer ->
         callback functionPointer returnValuesPointer
 
-getReturnValue :: Int -> Ptr Double -> IO Float
+getReturnValue :: Int -> Ptr Double -> IO (Qty units)
 getReturnValue index returnValuesPointer =
-  IO.map Float.fromDouble (Foreign.peekElemOff returnValuesPointer index)
+  IO.map Data.Coerce.coerce (Foreign.peekElemOff @Double returnValuesPointer index)
 
-curve1dValue :: Compiled Float Float -> Float -> Float
-curve1dValue (Constant value) _ = value
+curve1dValue :: Compiled Float (Qty units1) -> Float -> Qty units2
+curve1dValue (Constant value) _ = Qty.coerce value
 curve1dValue (Bytecode bytecode) tValue =
   callFunction bytecode 1 $
     \functionPointer returnValuePointer -> IO.do
@@ -66,8 +69,8 @@ curve1dValue (Bytecode bytecode) tValue =
         returnValuePointer
       getReturnValue 0 returnValuePointer
 
-curve1dBounds :: Compiled Float Float -> Bounds Unitless -> Bounds Unitless
-curve1dBounds (Constant value) _ = Bounds.constant value
+curve1dBounds :: Compiled Float (Qty units1) -> Bounds Unitless -> Bounds units2
+curve1dBounds (Constant value) _ = Bounds.constant (Qty.coerce value)
 curve1dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
   callFunction bytecode 2 $
     \functionPointer returnValuesPointer -> IO.do
@@ -80,11 +83,8 @@ curve1dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
       upper <- getReturnValue 1 returnValuesPointer
       IO.succeed (Bounds lower upper)
 
-curve2dValue ::
-  Compiled Float (Vector2d (space @ Unitless)) ->
-  Float ->
-  Vector2d (space @ Unitless)
-curve2dValue (Constant value) _ = value
+curve2dValue :: Compiled Float (Vector2d (space1 @ units1)) -> Float -> Vector2d (space2 @ units2)
+curve2dValue (Constant value) _ = Vector2d.coerce value
 curve2dValue (Bytecode bytecode) tValue =
   callFunction bytecode 2 $
     \functionPointer returnValuesPointer -> IO.do
@@ -97,10 +97,10 @@ curve2dValue (Bytecode bytecode) tValue =
       IO.succeed (Vector2d x y)
 
 curve2dBounds ::
-  Compiled Float (Vector2d (space @ Unitless)) ->
+  Compiled Float (Vector2d (space1 @ units1)) ->
   Bounds Unitless ->
-  VectorBounds2d (space @ Unitless)
-curve2dBounds (Constant value) _ = VectorBounds2d.constant value
+  VectorBounds2d (space2 @ units2)
+curve2dBounds (Constant value) _ = VectorBounds2d.constant (Vector2d.coerce value)
 curve2dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
   callFunction bytecode 4 $
     \functionPointer returnValuesPointer -> IO.do
@@ -115,11 +115,8 @@ curve2dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
       yUpper <- getReturnValue 3 returnValuesPointer
       IO.succeed (VectorBounds2d (Bounds xLower xUpper) (Bounds yLower yUpper))
 
-curve3dValue ::
-  Compiled Float (Vector3d (space @ Unitless)) ->
-  Float ->
-  Vector3d (space @ Unitless)
-curve3dValue (Constant value) _ = value
+curve3dValue :: Compiled Float (Vector3d (space1 @ units1)) -> Float -> Vector3d (space2 @ units2)
+curve3dValue (Constant value) _ = Vector3d.coerce value
 curve3dValue (Bytecode bytecode) tValue =
   callFunction bytecode 3 $
     \functionPointer returnValuesPointer -> IO.do
@@ -133,10 +130,10 @@ curve3dValue (Bytecode bytecode) tValue =
       IO.succeed (Vector3d x y z)
 
 curve3dBounds ::
-  Compiled Float (Vector3d (space @ Unitless)) ->
+  Compiled Float (Vector3d (space1 @ units1)) ->
   Bounds Unitless ->
-  VectorBounds3d (space @ Unitless)
-curve3dBounds (Constant value) _ = VectorBounds3d.constant value
+  VectorBounds3d (space2 @ units2)
+curve3dBounds (Constant value) _ = VectorBounds3d.constant (Vector3d.coerce value)
 curve3dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
   callFunction bytecode 6 $
     \functionPointer returnValuesPointer -> IO.do
@@ -153,8 +150,8 @@ curve3dBounds (Bytecode bytecode) (Bounds tLower tUpper) =
       zUpper <- getReturnValue 5 returnValuesPointer
       IO.succeed (VectorBounds3d (Bounds xLower xUpper) (Bounds yLower yUpper) (Bounds zLower zUpper))
 
-surface1dValue :: Compiled UvPoint Float -> UvPoint -> Float
-surface1dValue (Constant value) _ = value
+surface1dValue :: Compiled UvPoint (Qty units1) -> UvPoint -> Qty units2
+surface1dValue (Constant value) _ = Qty.coerce value
 surface1dValue (Bytecode bytecode) (Point2d uValue vValue) =
   callFunction bytecode 1 $
     \functionPointer returnValuePointer -> IO.do
@@ -165,8 +162,8 @@ surface1dValue (Bytecode bytecode) (Point2d uValue vValue) =
         returnValuePointer
       getReturnValue 0 returnValuePointer
 
-surface1dBounds :: Compiled UvPoint Float -> UvBounds -> Bounds Unitless
-surface1dBounds (Constant value) _ = Bounds.constant value
+surface1dBounds :: Compiled UvPoint (Qty units1) -> UvBounds -> Bounds units2
+surface1dBounds (Constant value) _ = Bounds.constant (Qty.coerce value)
 surface1dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLower vUpper)) =
   callFunction bytecode 2 $
     \functionPointer returnValuesPointer -> IO.do
@@ -182,10 +179,10 @@ surface1dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLo
       IO.succeed (Bounds lower upper)
 
 surface2dValue ::
-  Compiled UvPoint (Vector2d (space @ Unitless)) ->
+  Compiled UvPoint (Vector2d (space1 @ units1)) ->
   UvPoint ->
-  Vector2d (space @ Unitless)
-surface2dValue (Constant value) _ = value
+  Vector2d (space2 @ units2)
+surface2dValue (Constant value) _ = Vector2d.coerce value
 surface2dValue (Bytecode bytecode) (Point2d uValue vValue) =
   callFunction bytecode 2 $
     \functionPointer returnValuesPointer -> IO.do
@@ -199,10 +196,10 @@ surface2dValue (Bytecode bytecode) (Point2d uValue vValue) =
       IO.succeed (Vector2d x y)
 
 surface2dBounds ::
-  Compiled UvPoint (Vector2d (space @ Unitless)) ->
+  Compiled UvPoint (Vector2d (space1 @ units1)) ->
   UvBounds ->
-  VectorBounds2d (space @ Unitless)
-surface2dBounds (Constant value) _ = VectorBounds2d.constant value
+  VectorBounds2d (space2 @ units2)
+surface2dBounds (Constant value) _ = VectorBounds2d.constant (Vector2d.coerce value)
 surface2dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLower vUpper)) =
   callFunction bytecode 4 $
     \functionPointer returnValuesPointer -> IO.do
@@ -220,10 +217,10 @@ surface2dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLo
       IO.succeed (VectorBounds2d (Bounds xLower xUpper) (Bounds yLower yUpper))
 
 surface3dValue ::
-  Compiled UvPoint (Vector3d (space @ Unitless)) ->
+  Compiled UvPoint (Vector3d (space1 @ units1)) ->
   UvPoint ->
-  Vector3d (space @ Unitless)
-surface3dValue (Constant value) _ = value
+  Vector3d (space2 @ units2)
+surface3dValue (Constant value) _ = Vector3d.coerce value
 surface3dValue (Bytecode bytecode) (Point2d uValue vValue) =
   callFunction bytecode 3 $
     \functionPointer returnValuesPointer -> IO.do
@@ -238,10 +235,10 @@ surface3dValue (Bytecode bytecode) (Point2d uValue vValue) =
       IO.succeed (Vector3d x y z)
 
 surface3dBounds ::
-  Compiled UvPoint (Vector3d (space @ Unitless)) ->
+  Compiled UvPoint (Vector3d (space1 @ units1)) ->
   UvBounds ->
-  VectorBounds3d (space @ Unitless)
-surface3dBounds (Constant value) _ = VectorBounds3d.constant value
+  VectorBounds3d (space2 @ units2)
+surface3dBounds (Constant value) _ = VectorBounds3d.constant (Vector3d.coerce value)
 surface3dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLower vUpper)) =
   callFunction bytecode 6 $
     \functionPointer returnValuesPointer -> IO.do
