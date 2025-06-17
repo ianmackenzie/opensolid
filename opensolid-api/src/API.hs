@@ -488,13 +488,13 @@ angleBounds =
 color :: Class
 color =
   Class.new @Color $(docs ''Color) $
-    [ factory3 "RGB" "Red" "Green" "Blue" Color.rgb $(docs 'Color.rgb)
-    , factory3 "RGB 255" "Red" "Green" "Blue" Color.rgb255 $(docs 'Color.rgb255)
+    [ factory3 "RGB Float" "Red" "Green" "Blue" Color.rgbFloat $(docs 'Color.rgbFloat)
+    , factory3 "RGB Int" "Red" "Green" "Blue" Color.rgbInt $(docs 'Color.rgbInt)
     , factory3 "HSL" "Hue" "Saturation" "Lightness" Color.hsl $(docs 'Color.hsl)
     , factory1 "From Hex" "Hex String" Color.fromHex $(docs 'Color.fromHex)
     , member0 "To Hex" Color.toHex $(docs 'Color.toHex)
-    , member0 "Components" Color.components $(docs 'Color.components)
-    , member0 "Components 255" Color.components255 $(docs 'Color.components255)
+    , property "RGB Float Components" (.rgbFloatComponents) $(docs 'Color.rgbFloatComponents)
+    , property "RGB Int Components" (.rgbIntComponents) $(docs 'Color.rgbIntComponents)
     , constant "Red" Color.red $(docs 'Color.red)
     , constant "Dark Red" Color.darkRed $(docs 'Color.darkRed)
     , constant "Light Orange" Color.lightOrange $(docs 'Color.lightOrange)

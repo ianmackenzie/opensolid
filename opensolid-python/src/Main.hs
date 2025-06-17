@@ -299,8 +299,8 @@ extraMemberFunctions className = do
         ]
     "Color" ->
       repr
-        [ "r, g, b = self.components_255()"
-        , "return 'Color.rgb_255(' + str(r) + ',' + str(g) + ',' + str(b) + ')'"
+        [ "r, g, b = self.rgb_int_components"
+        , "return 'Color.rgb_int(' + str(r) + ',' + str(g) + ',' + str(b) + ')'"
         ]
     "Vector2d" ->
       repr
