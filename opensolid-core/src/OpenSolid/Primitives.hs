@@ -298,13 +298,13 @@ instance
   Unit2d v1 `cross` Unit2d v2 = v1 `cross` v2
 
 instance HasField "xComponent" (Direction2d space) Float where
-  getField (Direction2d dx _) = dx
+  getField (Unit2d v) = v.xComponent
 
 instance HasField "yComponent" (Direction2d space) Float where
-  getField (Direction2d _ dy) = dy
+  getField (Unit2d v) = v.yComponent
 
 instance HasField "components" (Direction2d space) (Float, Float) where
-  getField (Direction2d dx dy) = (dx, dy)
+  getField (Unit2d v) = v.components
 
 ----- Orientation2d -----
 
