@@ -938,7 +938,9 @@ placeVector2dOn plane ast = case ast of
 
 placePoint2dOn :: Plane3d (global @ units) (Defines local) -> Ast2d input -> Ast3d input
 placePoint2dOn plane ast = case ast of
-  Constant2d val -> Constant3d (Point2d.on (Plane3d.coerce plane) (Point2d.origin + val) - Point3d.origin)
+  Constant2d val -> do
+    let Position3d placed = Point3d.on (Plane3d.coerce plane) (Position2d val)
+    Constant3d placed
   Variable2d var -> Variable3d (PlacePoint2d (Plane3d.coerce plane) var)
 
 projectVector3dInto :: Plane3d (global @ planeUnits) (Defines local) -> Ast3d input -> Ast2d input
@@ -948,7 +950,9 @@ projectVector3dInto plane ast = case ast of
 
 projectPoint3dInto :: Plane3d (global @ units) (Defines local) -> Ast3d input -> Ast2d input
 projectPoint3dInto plane ast = case ast of
-  Constant3d val -> Constant2d (Point3d.projectInto (Plane3d.coerce plane) (Point3d.origin + val) - Point2d.origin)
+  Constant3d val -> do
+    let Position2d projected = Point3d.projectInto (Plane3d.coerce plane) (Position3d val)
+    Constant2d projected
   Variable3d var -> Variable2d (ProjectPoint3d (Plane3d.coerce plane) var)
 
 xy :: Ast1d input -> Ast1d input -> Ast2d input
