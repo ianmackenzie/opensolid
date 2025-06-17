@@ -122,7 +122,7 @@ half :: Domain2d -> Domain2d
 half (Domain2d x y) = Domain2d (Domain1d.half x) (Domain1d.half y)
 
 bounds :: Domain2d -> UvBounds
-bounds (Domain2d x y) = Bounds2d (Domain1d.bounds x) (Domain1d.bounds y)
+bounds (Domain2d x y) = Bounds2d x.bounds y.bounds
 
 interior :: Domain2d -> UvBounds
 interior (Domain2d x y) = Bounds2d (Domain1d.interior x) (Domain1d.interior y)
