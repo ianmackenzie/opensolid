@@ -1,81 +1,20 @@
 Move TODO points out to GitHub issues...
 
-Make Point#d a newtype over Vector#d?
--> useful for bytecode evaluation code, evaluation functions can return Vector#d and then coerce to Point#d
--> consistent with Direction#d being a newtype over Vector#d
--> use Position#d as the internal constructor name?
--> similarly make Bounds#d a newtype over VectorBounds#d?
--> then remove Point3d.origin, coerce Vector3d.zero where needed
-
-Field-ify lots of things:
-- 'du' and 'dv' on surface functions (search for instances of hardcoded 'derivative U', 'derivative V')
-- vector and vector curve/function magnitude and squared magnitude
-- Orientation#d.inverse
-- Frame#d.inverse
-- xComponent, yComponent, xCoordinate, yCoordinate
-- Color.components (rgbComponents to make room for e.g. hslComponents?)
-- Frame2d.[lots of stuff]
-- Pair.first, Pair.second (and extend to triples, maybe quadruples)
-- secondDerivative?
-- bounds? (compute lazily where necessary/appropriate...)
-- startValue, endValue
-- Surface3d.boundaryCurves (and add boundaryLoops?)
-- vector curve startValue/endValue
-- Curve2d.[x,y]Coordinate
-
-Rename Drawing2d.Entity to just Drawing
-
-Move Mesh.Constraint to Linearization.Constraint, or even just Linearization?
--> then can use for e.g. curve approximation as well
--> maybe have explicit 'batch' or 'all' function?
-  -> Linearization.maxError error
-  -> Linearization.maxSize size
-  -> Linearization.constraint (#maxError error, #maxSize size)
--> have Linearization module with curveError and surfaceError functions?
-
-Rename 'zeros' functions to 'solve'
--> then rename Zeros types to Solutions...and 'zeros' local variables to 'solutions'
-
-In target languages: verbs are functions, nouns are properties?
-
-Support coordinate space type parameters in target languages...
-
 Arc2d.from :: Point2d -> Point2d -> Angle -> Arc2d
 Arc2d.leftTurn :: Point2d -> Point2d -> Arc2d
 Arc2d.rightTurn :: Point2d -> Point2d -> Arc2d
 
-Use abscissae5 for Parameter.samples, 'rotated square' based on abscissae5 for SurfaceParameter.samples
--> nicely symmetric (5 points each, both cases include the center point)
-
 Have separate rotateClockwiseAround and rotateCounterclockwiseAround functions everywhere?
 -> rotateCwAround, rotateCcwAround? ugh
 -> rotateClockwiseAround, rotateAnticlockwiseAround?
-
-Remove uses of Vector3d and Point3d constructors where possible
--> search for Point3d(Point3d) and Vector3d(Vector3d)
-
-Remove Point2d.xy, Vector2d.xy in favour of just using constructors?
--> one canonical way of doing things...
-
-Re-add Line#d, Arc#d, Bezier#d etc. types with corresponding Curve#d.line, Curve#d.arc, Curve#d.bezier functions
--> in target languages, Line#d can be a *subclass* of Curve#d for convenience
-  -> then don't need to expose Curve#d.line, Curve#d.arc etc. to target languages
--> move most curve constructors into the 'concrete' modules
--> also add Cylinder3d, Sphere3d, Circle2d, Disk3d (maybe Circle3d?) etc.
-  -> useful as return type of e.g. Gear.bore or Bearing.bore function; Cylinder3d.startCap and endCap can return Disk3d...
--> also need UvLine, UvArc, UvBezier etc., but that seems OK...
-
-Refactor SurfaceParameter module
-- Remove UvDirection in favour of just using 'Direction2d UvSpace' in the few places it's used
-- Move UvPoint into its own module with UvPoint.random, UvPoint.samples
-- Move UvBounds into its own module with UvBounds.unit (or unitSquare? if so, rename Region2d.unit)
-- Change SurfaceParameter.random to generate a random SurfaceParameter value (U or V)
 
 Get Python docs publishing working
 -> maybe just generate Sphinx-flavoured reStructuredText instead of tyring to use autodoc?
   -> full control over docs structure
   -> don't have to mess around with settings to get autodoc to be able to import 'opensolid' module
   -> one less dependency
+  -> won't capture manual additions to the generated Python file though...
+-> maybe try running autodoc using built wheel instead of in source directory?
 
 Have SpurGear be a pure interface?
 -> possibly add typeclass instance for '(Named "numTeeth" Int, Named "module" Length)' (anonymous record!)
@@ -85,10 +24,6 @@ Switch to providing an Axis3d instead of Axis2d for revolved bodies?
 -> providing an absolute axis seems generally more readable than a relative one...
 -> a bit tricky, since we need to check for profile curves that lie *on* the axis...
   -> convert everything to 3D and *then* check for curves lying on the axis?
-
-Switch to FFI Name values being defined (and stored?) as camelCase
--> have functions to convert camelCase to snake_case or PascalCase
--> should then be able to use the same logic for converting function names in docs to match the target language
 
 Optimized representation for planar surface functions
 - Update Ast module to use p0/i/j representation instead of planes?
@@ -128,10 +63,6 @@ Support discontinuities in bytecode
 
 Update Curve.sqrt' and SurfaceFunction.sqrt' to use specialized square root derivative expression
 
-Add Arc2d and Arc3d bytecode instructions
-
-Remove 'planar' functions in favour of calling 'new' directly from 'on' functions
-
 Do a general pass of trimming down .hs-boot files?
 -> remove constructors, in particular curve/surface functions
 
@@ -145,41 +76,16 @@ Check that function modules only refer to other function types, not geometry typ
 Special cases for arithmetic on mixed variable/constant Ast values
 - e.g. 'a + (b + x)' -> (a + b) + x'
 
-Add translateX, translateY, translateZ
-
 Review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
 -> get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
 
-Try removing 'unitless ~ Unitless' constraints everywhere
--> maybe also 'uvPoint ~ UvPoint', 'uvSpace ~ UvSpace', 'uvCoordinates ~ UvCoordinates'
-
-Try defining API in terms of generic units and then *separately* a list of supported units?
--> C API could then just work on Float values
--> nicer mapping to F# (or potentially other languages with sufficiently powerful type systems that can represent units reasonably nicely)
--> could expose current 'flat' structure as convenience layer for languages that don't have good unit support (most of them)
-
 Ensure all quotient implementations use (p' / q) - (p / q) * (q' / q) form, to better support L'Hopital
 
-Refactor Composition type parameter order to reflect . instead of >> use? (outer then inner)
-
 Remove hasZero functions?
-
-Create Haskell gear example and profile
-- test case of cycloid curve starting right at base circle
-  -> dump edges to see where there's a self-intersection, or try checking for zero-length edges ahead of time?
-- implement trochoidal fillet
-
-Check glTF sphere rendering
--> hopefully solved with better degeneracy removal when computing normal direction...
+-> also isZero? Just use ^ and ~= instead...
 
 Improve curve linearization to take first-order bounds and even just zeroth-order bounds into account
 -> behave better when second derivative is poorly conditioned
-
-Have "high level" (Region2d, Body3d) functions just return 'Result Text a'?
--> call that a 'Try a' or 'Attempt a' or similar?
-
-Remove Curve2d.cornerArc now that e.g. Region2d.fillet exists?
--> also add Curve2d.fillet to fillet curves at their (single) intersection point?
 
 Useful operations:
 - Booleans on regions
@@ -189,18 +95,9 @@ Add DirectionCurve2d.[rotateLeftward,rotateRightward] and use in Curve2d.offsetB
 
 Add OpenSolid prefix to API modules
 
-Remove Drawing2d.Resolution, *or* use it everywhere
--> maybe have 'OpenSolid' be a context manager? 'with OpenSolid(tolerance=..., resolution=...):' etc.
-  -> could support just setting tolerance *or* resolution at a time
-  -> could also set default display units (tolerance, output_resolution, display_units...)
-
 Add Linear transformation types?
 -> can only be used for vector types
 -> rename Affine to Positioned or Positional similar?
-
-Add Curve2d.centerPoint function?
--> check that evaluating center point from 3-point Gaussian quadrature points gives the same result, then return result for t=0.5
--> maybe other queries like Surface3d.normalDirection (useful for querying for e.g. "back face")
 
 Reconsider having Axis2d.u, Point2d.uv etc. specialized constants/constructors?
 -> maybe even move UvSpace into main CoordinateSystem module...and remove UvPoint etc. type aliases?
@@ -208,8 +105,6 @@ Reconsider having Axis2d.u, Point2d.uv etc. specialized constants/constructors?
 
 Steiner point optimization: discard UV subdomains that touch an outer boundary of the overall domain bounding box but *don't* touch a boundary curve/edge
 -> useful for thin regions, e.g. those resulting from domain stretching...
-
-Search for Vector#d.unit calls and implement direct operations on Direction#d values directly where possible
 
 General pass to make sure transformation functions are complete and consistent
 
@@ -246,7 +141,6 @@ C API: generate structs with *named* fields
 -> can use this in Python too, to have named fields instead of 'field0' etc.
 
 Improve Python bindings
-- Make axes callable by a Length to give a point?
 - Add magic IPython display functions to Curve2d, Drawing2d.Entity etc.
   -> using to-SVG (and eventually to-glTF) Haskell functions under the hood? ('display' functions?)
 - Actual error types instead of strings
@@ -254,8 +148,6 @@ Improve Python bindings
 - Add support for 'intersects' operator (^)
   -> Also (&) for *intersection*?
 - Add extra line to docstring mentioning tolerance, if one is required
-- Remove leading underscores from helper functions, now that we have __all__ to control exports?
-- Add support for enums (new Winding type?)
 - Add support for composition (special support for languages that support callable objects?)
 
 Try using Pandoc to convert from Haddock to reStructuredText?
@@ -265,10 +157,9 @@ Try using Pandoc to convert from Haddock to reStructuredText?
 
 Add support for Drawing2d.auto or similar, that computes an appropriate bounding box?
 -> or perhaps a few different options for specifying canvas: Drawing2d.bounds, Drawing2d.padding etc.
+-> maybe add 'bounds' field to Drawing2d type, and support operations like 'expand bounds by given amount'?
 
 Try generating C# bindings?
-
-Try generating Dart bindings?
 
 Add extension method to tuple types in target languages that support them:
   -> (start, end).steps(10) <-- nicely symmetric with Parameter.steps(10)
@@ -278,7 +169,5 @@ Try generating C++ bindings?
 
 Sandbox executable to start generating Region2d medial axis curves and points?
 -> need to be able to solve for medial axis of curve and *point* first
-
-Use space1 ~ space2 instead of space ~ space_ everywhere
 
 Refactor Estimate to return an error if convergence fails/stalls
