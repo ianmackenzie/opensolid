@@ -1,7 +1,6 @@
 module OpenSolid.Drawing2d
   ( Drawing2d
   , Attribute
-  , Resolution
   , Point
   , (>>)
   , toSvg
@@ -66,8 +65,6 @@ type Drawing2d :: Type -> Type
 data Drawing2d space = Empty | Node Text (List (Attribute space)) (List (Drawing2d space))
 
 data Attribute space = Attribute Text Text deriving (Show)
-
-type Resolution = ?resolution :: Length
 
 type Point space = Point2d (space @ Meters)
 
