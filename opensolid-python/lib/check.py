@@ -29,7 +29,7 @@ else:
 
 v = Vector2d.xy(1, 2)
 with Tolerance(1e-9):
-    print(v.direction().components())
+    print(v.direction().components)
 
 theta = Angle.two_pi * Curve.t
 c = theta.cos()
@@ -43,7 +43,7 @@ color2 = Color.rgb_255(225, 225, 225)
 print(color2.to_hex())
 
 bounds = Bounds2d.from_corners(Point2d.origin, Point2d.centimeters(30, 20))
-print(bounds.x_coordinate())
+print(bounds.x_coordinate)
 vertices = [
     Point2d.centimeters(5, 5),
     Point2d.centimeters(25, 5),
