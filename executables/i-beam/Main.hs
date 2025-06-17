@@ -10,13 +10,12 @@ import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.Tolerance qualified as Tolerance
 
@@ -49,9 +48,8 @@ main = Tolerance.using Length.nanometer IO.do
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- Region2d.boundedBy allCurves
   body <- Body3d.extruded world.frontPlane profile (Bounds.symmetric (#width length))
-  let maxErrorConstraint = Mesh.maxError (Length.millimeters 1.0)
-  let meshConstraints = NonEmpty.one maxErrorConstraint
-  let mesh = Body3d.toMesh meshConstraints body
+  let resolution = Resolution.maxError (Length.millimeters 1.0)
+  let mesh = Body3d.toMesh resolution body
   let material = PbrMaterial.metal (Color.rgbFloat 0.913 0.921 0.925) (#roughness 0.3)
   let scene = Scene3d.mesh material mesh
   Scene3d.writeGlb "executables/i-beam/mesh.glb" scene

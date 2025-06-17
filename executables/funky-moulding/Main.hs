@@ -8,12 +8,11 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Tolerance qualified as Tolerance
 
@@ -38,6 +37,6 @@ main = Tolerance.using Length.nanometer IO.do
       , Curve2d.line p4 p0
       ]
   body <- Body3d.revolved world.rightPlane profile Axis2d.y (Angle.degrees 270.0)
-  let constraints = NonEmpty.one (Mesh.maxError (Length.millimeters 0.2))
-  let mesh = Body3d.toMesh constraints body
+  let resolution = Resolution.maxError (Length.millimeters 0.2)
+  let mesh = Body3d.toMesh resolution body
   Stl.writeBinary "executables/funky-moulding/mesh.stl" Convention3d.yUp Length.inMillimeters mesh

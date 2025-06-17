@@ -30,9 +30,9 @@ import OpenSolid.Json qualified as Json
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
-import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.Prelude
+import OpenSolid.Resolution (Resolution)
 import OpenSolid.Scene3d.Gltf qualified as Gltf
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vertex3d qualified as Vertex3d
@@ -68,12 +68,12 @@ The body will first be converted to a mesh using the given constraints.
 -}
 body ::
   Tolerance Meters =>
-  NonEmpty (Mesh.Constraint Meters) ->
+  Resolution Meters ->
   PbrMaterial ->
   Body3d (space @ Meters) ->
   Scene3d space
-body meshConstraints givenMaterial givenBody =
-  mesh givenMaterial (Body3d.toMesh meshConstraints givenBody)
+body resolution givenMaterial givenBody =
+  mesh givenMaterial (Body3d.toMesh resolution givenBody)
 
 {-| Create a composite scene out of several sub-scenes.
 

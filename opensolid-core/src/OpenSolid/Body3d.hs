@@ -73,6 +73,7 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Resolution (Resolution)
 import OpenSolid.Result qualified as Result
 import OpenSolid.Set2d (Set2d)
 import OpenSolid.Set2d qualified as Set2d
@@ -631,45 +632,43 @@ instance Bounded2d (Vertex (space @ units)) UvCoordinates where
 
 toMesh ::
   Tolerance units =>
-  NonEmpty (Mesh.Constraint units) ->
+  Resolution units ->
   Body3d (space @ units) ->
   Mesh (Point3d (space @ units), Vector3d (space @ Unitless))
-toMesh givenConstraints (Body3d boundarySurfaces) = do
+toMesh resolution (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
-  let constraints = Mesh.constraints givenConstraints
-  let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments constraints) boundarySurfaceList
+  let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments resolution) boundarySurfaceList
   let innerEdgeVerticesById =
         NonEmpty.foldr
-          (addBoundaryInnerEdgeVertices constraints surfaceSegmentsById)
+          (addBoundaryInnerEdgeVertices resolution surfaceSegmentsById)
           Map.empty
           boundarySurfaces
   Mesh.collect (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById) boundarySurfaces
 
 boundarySurfaceSegments ::
-  Mesh.Constraints units ->
+  Resolution units ->
   BoundarySurface (space @ units) ->
   (SurfaceId, Set2d UvBounds UvCoordinates)
-boundarySurfaceSegments constraints BoundarySurface{id, surfaceFunction, uvBounds} =
-  (id, boundarySurfaceSegmentSet constraints surfaceFunction uvBounds)
+boundarySurfaceSegments resolution BoundarySurface{id, surfaceFunction, uvBounds} =
+  (id, boundarySurfaceSegmentSet resolution surfaceFunction uvBounds)
 
 boundarySurfaceSegmentSet ::
-  Mesh.Constraints units ->
+  Resolution units ->
   SurfaceFunction3d (space @ units) ->
   UvBounds ->
   Set2d UvBounds UvCoordinates
-boundarySurfaceSegmentSet constraints surfaceFunction uvBounds = do
-  let Mesh.Constraints{maxError, maxSize} = constraints
-  if surfaceSize surfaceFunction uvBounds <= maxSize
-    && surfaceError surfaceFunction uvBounds <= maxError
+boundarySurfaceSegmentSet resolution surfaceFunction uvBounds =
+  if surfaceSize surfaceFunction uvBounds <= resolution.maxSize
+    && surfaceError surfaceFunction uvBounds <= resolution.maxError
     then Set2d.Leaf uvBounds uvBounds
     else do
       let Bounds2d uBounds vBounds = uvBounds
       let (u1, u2) = Bounds.bisect uBounds
       let (v1, v2) = Bounds.bisect vBounds
-      let set11 = boundarySurfaceSegmentSet constraints surfaceFunction (Bounds2d u1 v1)
-      let set12 = boundarySurfaceSegmentSet constraints surfaceFunction (Bounds2d u1 v2)
-      let set21 = boundarySurfaceSegmentSet constraints surfaceFunction (Bounds2d u2 v1)
-      let set22 = boundarySurfaceSegmentSet constraints surfaceFunction (Bounds2d u2 v2)
+      let set11 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2d u1 v1)
+      let set12 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2d u1 v2)
+      let set21 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2d u2 v1)
+      let set22 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2d u2 v2)
       let set1 = Set2d.Node (Bounds2d u1 vBounds) set11 set12
       let set2 = Set2d.Node (Bounds2d u2 vBounds) set21 set22
       Set2d.Node uvBounds set1 set2
@@ -700,31 +699,31 @@ surfaceError f uvBounds = do
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 addBoundaryInnerEdgeVertices ::
-  Mesh.Constraints units ->
+  Resolution units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   BoundarySurface (space @ units) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addBoundaryInnerEdgeVertices constraints surfaceSegmentsById boundarySurface accumulated = do
+addBoundaryInnerEdgeVertices resolution surfaceSegmentsById boundarySurface accumulated = do
   let BoundarySurface{edgeLoops} = boundarySurface
-  NonEmpty.foldr (addLoopInnerEdgeVertices constraints surfaceSegmentsById) accumulated edgeLoops
+  NonEmpty.foldr (addLoopInnerEdgeVertices resolution surfaceSegmentsById) accumulated edgeLoops
 
 addLoopInnerEdgeVertices ::
-  Mesh.Constraints units ->
+  Resolution units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   NonEmpty (Edge (space @ units)) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addLoopInnerEdgeVertices constraints surfaceSegmentsById loop accumulated =
-  NonEmpty.foldr (addInnerEdgeVertices constraints surfaceSegmentsById) accumulated loop
+addLoopInnerEdgeVertices resolution surfaceSegmentsById loop accumulated =
+  NonEmpty.foldr (addInnerEdgeVertices resolution surfaceSegmentsById) accumulated loop
 
 addInnerEdgeVertices ::
-  Mesh.Constraints units ->
+  Resolution units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   Edge (space @ units) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addInnerEdgeVertices constraints surfaceSegmentsById edge accumulated = do
+addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
   case edge of
     DegenerateEdge{id, uvCurve, point} -> do
       let HalfEdgeId{surfaceId} = id
@@ -743,7 +742,7 @@ addInnerEdgeVertices constraints surfaceSegmentsById edge accumulated = do
         (Just surfaceSegments, Just matingSurfaceSegments) -> do
           let edgePredicate =
                 edgeLinearizationPredicate
-                  constraints
+                  resolution
                   curve3d
                   uvCurve
                   matingUvCurve
@@ -766,7 +765,7 @@ addInnerEdgeVertices constraints surfaceSegmentsById edge accumulated = do
     SecondaryEdge{} -> accumulated
 
 edgeLinearizationPredicate ::
-  Mesh.Constraints units ->
+  Resolution units ->
   Curve3d (space @ units) ->
   Curve2d UvCoordinates ->
   Curve2d UvCoordinates ->
@@ -777,7 +776,7 @@ edgeLinearizationPredicate ::
   Bounds Unitless ->
   Bool
 edgeLinearizationPredicate
-  constraints
+  resolution
   curve3d
   uvCurve
   matingUvCurve
@@ -802,9 +801,8 @@ edgeLinearizationPredicate
     let edgeLength = Point3d.distanceFrom startPoint endPoint
     let edgeSecondDerivativeBounds = VectorCurve3d.evaluateBounds edgeSecondDerivative tBounds
     let edgeSecondDerivativeMagnitude = VectorBounds3d.magnitude edgeSecondDerivativeBounds
-    let Mesh.Constraints{maxError, maxSize} = constraints
-    edgeLength <= maxSize
-      && Linearization.error edgeSecondDerivativeMagnitude tBounds <= maxError
+    edgeLength <= resolution.maxSize
+      && Linearization.error edgeSecondDerivativeMagnitude tBounds <= resolution.maxError
       && validEdge uvBounds edgeSize surfaceSegments
       && validEdge matingUvBounds matingEdgeSize matingSurfaceSegments
 

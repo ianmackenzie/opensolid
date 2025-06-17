@@ -183,6 +183,7 @@ library
     OpenSolid.Random
     OpenSolid.Region2d
     OpenSolid.Region2d.BoundedBy
+    OpenSolid.Resolution
     OpenSolid.Result
     OpenSolid.Scene3d
     OpenSolid.Set2d

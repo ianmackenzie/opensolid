@@ -8,11 +8,10 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Tolerance qualified as Tolerance
 
@@ -31,8 +30,7 @@ main = Tolerance.using Length.nanometer IO.do
   profile <- Region2d.boundedBy [arc, line]
   let extrusionLimits = Bounds.symmetric (#width length)
   body <- Body3d.extruded world.frontPlane profile extrusionLimits
-  let maxSizeConstraint = Mesh.maxSize (Length.centimeters 30.0)
-  let constraints = NonEmpty.one maxSizeConstraint
-  let mesh = Body3d.toMesh constraints body
+  let resolution = Resolution.maxSize (Length.centimeters 30.0)
+  let mesh = Body3d.toMesh resolution body
   let outputPath = "executables/body3d-meshing/mesh.stl"
   Stl.writeBinary outputPath Convention3d.yUp Length.inMillimeters mesh

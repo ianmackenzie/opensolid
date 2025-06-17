@@ -6,7 +6,7 @@ from opensolid import (
     Direction2d,
     Length,
     LengthBounds,
-    Mesh,
+    Resolution,
     PbrMaterial,
     Point2d,
     Region2d,
@@ -61,6 +61,6 @@ with Tolerance(Length.meters(1e-9)):
     body = Body3d.extruded(world.front_plane, profile, extrusion_limits)
 
     # Create a 3D scene containing the body and write to GLB file
-    mesh_constraints = [Mesh.max_error(Length.millimeters(0.1))]
+    resolution = Resolution.max_error(Length.millimeters(0.1))
     material = PbrMaterial.metal(Color.rgb_float(0.913, 0.921, 0.925), roughness=0.3)
-    Scene3d.body(mesh_constraints, material, body).write_glb("ibeam.glb")
+    Scene3d.body(resolution, material, body).write_glb("ibeam.glb")

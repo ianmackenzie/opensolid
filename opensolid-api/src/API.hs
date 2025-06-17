@@ -105,7 +105,6 @@ import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Mitsuba qualified as Mitsuba
 import OpenSolid.Orientation3d (Orientation3d)
 import OpenSolid.Orientation3d qualified as Orientation3d
@@ -125,6 +124,8 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Resolution (Resolution (Resolution))
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Scene3d (Scene3d)
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.SpurGear (SpurGear)
@@ -189,7 +190,7 @@ classes =
   , uvRegion
   , polygon2d
   , body3d
-  , mesh
+  , resolution
   , pbrMaterial
   , scene3d
   , spurGear
@@ -1372,10 +1373,10 @@ polygon2d =
 
 body3d :: Class
 body3d = do
-  let writeStl path convention constraints body =
-        Stl.writeBinary path convention Length.inMillimeters (Body3d.toMesh constraints body)
-  let writeMitsuba path constraints body =
-        Mitsuba.writeBinary path (Body3d.toMesh constraints body)
+  let writeStl path convention givenResolution body =
+        Stl.writeBinary path convention Length.inMillimeters (Body3d.toMesh givenResolution body)
+  let writeMitsuba path givenResolution body =
+        Mitsuba.writeBinary path (Body3d.toMesh givenResolution body)
   Class.new @(Body3d (Space @ Meters)) $(docs ''Body3d) $
     [ factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
     , factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
@@ -1385,16 +1386,16 @@ body3d = do
     , factoryM3R "Cylinder Along" "Axis" "Distance" "Diameter" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
     , member1 "Place In" "Frame" Body3d.placeIn $(docs 'Body3d.placeIn)
     , member1 "Relative To" "Frame" Body3d.relativeTo $(docs 'Body3d.relativeTo)
-    , memberM3 "Write STL" "Path" "Convention" "Mesh Constraints" writeStl "Write a body to a binary STL file, using units of millimeters."
-    , memberM2 "Write Mitsuba" "Path" "Mesh Constraints" writeMitsuba "Write a body to Mitsuba 'serialized' file."
+    , memberM3 "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."
+    , memberM2 "Write Mitsuba" "Path" "Resolution" writeMitsuba "Write a body to Mitsuba 'serialized' file."
     ]
 
-mesh :: Class
-mesh =
-  Class.static "Mesh" "Meshing-related functionality." $
-    [ nested @(Mesh.Constraint Meters) $(docs ''Mesh.Constraint) []
-    , static1 "Max Error" "Error" (Mesh.maxError @Meters) $(docs 'Mesh.maxError)
-    , static1 "Max Size" "Size" (Mesh.maxSize @Meters) $(docs 'Mesh.maxSize)
+resolution :: Class
+resolution =
+  Class.new @(Resolution Meters) $(docs ''Resolution) $
+    [ factory1 "Max Error" "Error" (Resolution.maxError @Meters) $(docs 'Resolution.maxError)
+    , factory1 "Max Size" "Size" (Resolution.maxSize @Meters) $(docs 'Resolution.maxSize)
+    , constructor2 "Max Error" "Max Size" (curryT2 Resolution) $(docs 'Resolution)
     ]
 
 pbrMaterial :: Class
@@ -1418,7 +1419,7 @@ scene3d :: Class
 scene3d =
   Class.new @(Scene3d Space) $(docs ''Scene3d) $
     [ constant "Nothing" (Scene3d.nothing @Space) $(docs 'Scene3d.nothing)
-    , factoryM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
+    , factoryM3 "Body" "Resolution" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
     , factory1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
     , member1 "Write GLB" "Path" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
     ]

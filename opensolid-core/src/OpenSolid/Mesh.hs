@@ -1,10 +1,5 @@
 module OpenSolid.Mesh
   ( Mesh
-  , Constraint
-  , maxError
-  , maxSize
-  , Constraints (..)
-  , constraints
   , indexed
   , faceVertices
   , map
@@ -23,12 +18,9 @@ import OpenSolid.Bounded3d (Bounded3d)
 import OpenSolid.Bounded3d qualified as Bounded3d
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d qualified as Bounds3d
-import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex3d (Vertex3d)
 
@@ -40,37 +32,6 @@ instance Vertex2d vertex (space @ units) => Bounded2d (Mesh vertex) (space @ uni
 
 instance Vertex3d vertex (space @ units) => Bounded3d (Mesh vertex) (space @ units) where
   bounds mesh = Bounds3d.hullN (Array.toNonEmpty mesh.vertices)
-
--- | A constraint on the quality of some mesh to be produced.
-data Constraint units
-  = MaxError (Qty units)
-  | MaxSize (Qty units)
-
-instance FFI (Constraint Meters) where
-  representation = FFI.nestedClassRepresentation "Mesh" "Constraint"
-
--- | Specify the maximum error/deviation of the mesh from the actual shape.
-maxError :: Qty units -> Constraint units
-maxError = MaxError
-
--- | Specify the maximum size of any triangle in the mesh.
-maxSize :: Qty units -> Constraint units
-maxSize = MaxSize
-
-data Constraints units = Constraints
-  { maxError :: Qty units
-  , maxSize :: Qty units
-  }
-
-unconstrained :: Constraints units
-unconstrained = Constraints{maxError = Qty.infinity, maxSize = Qty.infinity}
-
-apply :: Constraints units -> Constraint units -> Constraints units
-apply current (MaxError value) = current{maxError = value}
-apply current (MaxSize value) = current{maxSize = value}
-
-constraints :: NonEmpty (Constraint units) -> Constraints units
-constraints nonEmpty = NonEmpty.foldl apply unconstrained nonEmpty
 
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex
 indexed = Mesh
