@@ -13,12 +13,13 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -88,7 +89,7 @@ quadratic subproblem saddlePoint = do
 
 secondDerivative :: Qty units -> Qty units -> Qty units -> Direction2d UvSpace -> Qty units
 secondDerivative fuu fuv fvv direction = do
-  let (du, dv) = Direction2d.components direction
+  let Direction2d du dv = direction
   du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
 
 connectingCurves ::
@@ -97,7 +98,7 @@ connectingCurves ::
   SaddleRegion units ->
   NonEmpty (Curve2d UvCoordinates)
 connectingCurves boundaryPoint SaddleRegion{subproblem, frame, d1, d2} = do
-  let (x, y) = Point2d.coordinates (Point2d.relativeTo frame boundaryPoint)
+  let Point2d x y = Point2d.relativeTo frame boundaryPoint
   let saddlePoint = Frame2d.originPoint frame
   let dx = Frame2d.xDirection frame
   let dy = Frame2d.yDirection frame
@@ -135,9 +136,9 @@ connect subproblem frame startDirection endPoint boundingAxes = do
   let startPoint = Frame2d.originPoint frame
   let Subproblem{f, dvdu, dudv, uvBounds} = subproblem
   let Bounds2d uBounds vBounds = uvBounds
-  let (u1, v1) = Point2d.coordinates startPoint
-  let (u2, v2) = Point2d.coordinates endPoint
-  let (du, dv) = Direction2d.components startDirection
+  let Point2d u1 v1 = startPoint
+  let Point2d u2 v2 = endPoint
+  let Direction2d du dv = startDirection
   if Qty.abs du >= Qty.abs dv
     then do
       let uMid = u1 + 1e-3 * Qty.sign (u2 - u1) |> Qty.clampTo (Bounds u1 u2)
