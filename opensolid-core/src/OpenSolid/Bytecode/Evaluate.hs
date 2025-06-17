@@ -258,7 +258,10 @@ surface3dBounds (Bytecode bytecode) (Bounds2d (Bounds uLower uUpper) (Bounds vLo
       yUpper <- getReturnValue 3 returnValuesPointer
       zLower <- getReturnValue 4 returnValuesPointer
       zUpper <- getReturnValue 5 returnValuesPointer
-      IO.succeed (VectorBounds3d (Bounds xLower xUpper) (Bounds yLower yUpper) (Bounds zLower zUpper))
+      let x = Bounds xLower xUpper
+      let y = Bounds yLower yUpper
+      let z = Bounds zLower zUpper
+      IO.succeed (VectorBounds3d x y z)
 
 callSolver :: ByteString -> ByteString -> (CString -> CString -> IO a) -> a
 callSolver functionBytes derivativeBytes callback =
