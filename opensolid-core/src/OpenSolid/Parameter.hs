@@ -40,8 +40,8 @@ intervals n = if n > 0 then List.map (intervalOf n) [0 .. n - 1] else []
 
 samples :: List Float
 samples = do
-  let (p1, p2, p3, p4) = Quadrature.abscissae4
-  [p1, p2, p3, p4]
+  let (p1, p2, p3, p4, p5) = Quadrature.abscissae5
+  [p1, p2, p3, p4, p5]
 
 random :: Random.Generator Float
 random = Float.random 0.0 1.0
