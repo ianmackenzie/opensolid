@@ -82,11 +82,15 @@ import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Direction3d (Direction3d), Point3d (Point3d), Vector3d (Vector3d))
+import OpenSolid.Primitives
+  ( Direction3d (Direction3d)
+  , Point2d (Point2d, Position2d)
+  , Point3d (Point3d, Position3d)
+  , Vector3d (Vector3d)
+  )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvPoint)
 import OpenSolid.Text qualified as Text
@@ -882,8 +886,9 @@ transformPoint2d :: Transform2d tag (space @ units) -> Ast2d input -> Ast2d inpu
 transformPoint2d transform ast = do
   let erasedTransform = Transform2d.coerce transform
   case ast of
-    -- TODO avoid adding/subtracting Point2d.origin once Point2d is a newtype over Vector2d
-    Constant2d val -> Constant2d (Point2d.transformBy erasedTransform (Point2d.origin + val) - Point2d.origin)
+    Constant2d val -> do
+      let Position2d transformed = Point2d.transformBy erasedTransform (Position2d val)
+      Constant2d transformed
     Variable2d (TransformPoint2d existing var) ->
       Variable2d (TransformPoint2d (erasedTransform . existing) var)
     Variable2d var -> Variable2d (TransformPoint2d erasedTransform var)
@@ -892,8 +897,9 @@ transformPoint3d :: Transform3d tag (space @ units) -> Ast3d input -> Ast3d inpu
 transformPoint3d transform ast = do
   let erasedTransform = Transform3d.coerce transform
   case ast of
-    -- TODO avoid adding/subtracting Point3d.origin once Point3d is a newtype over Vector3d
-    Constant3d val -> Constant3d (Point3d.transformBy erasedTransform (Point3d.origin + val) - Point3d.origin)
+    Constant3d val -> do
+      let Position3d transformed = Point3d.transformBy erasedTransform (Position3d val)
+      Constant3d transformed
     Variable3d (TransformPoint3d existing var) ->
       Variable3d (TransformPoint3d (erasedTransform . existing) var)
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
