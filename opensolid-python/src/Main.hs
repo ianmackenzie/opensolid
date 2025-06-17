@@ -320,7 +320,7 @@ extraMemberFunctions className = do
     "Point2d" ->
       repr
         [ "x, y = self.coordinates"
-        , "return 'Point2d.meters(' + repr(x) + ',' + repr(y) + ')'"
+        , "return 'Point2d(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "UvPoint" ->
       repr
