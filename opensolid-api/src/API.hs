@@ -363,9 +363,9 @@ bounds =
     , factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
     , factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
     , factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
-    , property @"endpoints" $(docs 'Bounds.endpoints)
-    , property @"lower" $(docs 'Bounds.lower)
-    , property @"upper" $(docs 'Bounds.upper)
+    , property "Endpoints" (.endpoints) $(docs 'Bounds.endpoints)
+    , property "Lower" (.lower) $(docs 'Bounds.lower)
+    , property "Upper" (.upper) $(docs 'Bounds.upper)
     , member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
     , member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
     , member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
@@ -400,9 +400,9 @@ lengthBounds =
     , factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
     , factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
     , factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
-    , property @"endpoints" $(docs 'Bounds.endpoints)
-    , property @"lower" $(docs 'Bounds.lower)
-    , property @"upper" $(docs 'Bounds.upper)
+    , property "Endpoints" (.endpoints) $(docs 'Bounds.endpoints)
+    , property "Lower" (.lower) $(docs 'Bounds.lower)
+    , property "Upper" (.upper) $(docs 'Bounds.upper)
     , member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
     , member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
     , member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
@@ -432,9 +432,9 @@ areaBounds =
     , factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
     , factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
     , factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
-    , property @"endpoints" $(docs 'Bounds.endpoints)
-    , property @"lower" $(docs 'Bounds.lower)
-    , property @"upper" $(docs 'Bounds.upper)
+    , property "Endpoints" (.endpoints) $(docs 'Bounds.endpoints)
+    , property "Lower" (.lower) $(docs 'Bounds.lower)
+    , property "Upper" (.upper) $(docs 'Bounds.upper)
     , member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
     , member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
     , member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
@@ -464,9 +464,9 @@ angleBounds =
     , factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
     , factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
     , factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
-    , property @"endpoints" $(docs 'Bounds.endpoints)
-    , property @"lower" $(docs 'Bounds.lower)
-    , property @"upper" $(docs 'Bounds.upper)
+    , property "Endpoints" (.endpoints) $(docs 'Bounds.endpoints)
+    , property "Lower" (.lower) $(docs 'Bounds.lower)
+    , property "Upper" (.upper) $(docs 'Bounds.upper)
     , member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
     , member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
     , member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
@@ -539,9 +539,9 @@ vector2d =
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
     , factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
-    , property @"components" $(docs 'Vector2d.components)
-    , property @"xComponent" $(docs 'Vector2d.xComponent)
-    , property @"yComponent" $(docs 'Vector2d.yComponent)
+    , property "Components" (.components) $(docs 'Vector2d.components)
+    , property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
+    , property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
     , memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
@@ -579,9 +579,9 @@ displacement2d =
     , factory2 "Mm" "X Component" "Y Component" Vector2d.mm $(docs 'Vector2d.mm)
     , factory2 "Inches" "X Component" "Y Component" Vector2d.inches $(docs 'Vector2d.inches)
     , factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
-    , property @"components" $(docs 'Vector2d.components)
-    , property @"xComponent" $(docs 'Vector2d.xComponent)
-    , property @"yComponent" $(docs 'Vector2d.yComponent)
+    , property "Components" (.components) $(docs 'Vector2d.components)
+    , property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
+    , property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
     , memberM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
@@ -612,9 +612,9 @@ areaVector2d =
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
     , factory2 "Square Meters" "X Component" "Y Component" Vector2d.squareMeters $(docs 'Vector2d.squareMeters)
     , factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
-    , property @"components" $(docs 'Vector2d.components)
-    , property @"xComponent" $(docs 'Vector2d.xComponent)
-    , property @"yComponent" $(docs 'Vector2d.yComponent)
+    , property "Components" (.components) $(docs 'Vector2d.components)
+    , property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
+    , property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
     , memberS0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
@@ -641,9 +641,9 @@ direction2d =
     , factory1 "Polar" "Angle" Direction2d.polar $(docs 'Direction2d.polar)
     , factory1 "Degrees" "Value" Direction2d.degrees $(docs 'Direction2d.degrees)
     , factory1 "Radians" "Value" Direction2d.radians $(docs 'Direction2d.radians)
-    , property @"components" $(docs 'Direction2d.components)
-    , property @"xComponent" $(docs 'Direction2d.xComponent)
-    , property @"yComponent" $(docs 'Direction2d.yComponent)
+    , property "Components" (.components) $(docs 'Direction2d.components)
+    , property "X Component" (.xComponent) $(docs 'Direction2d.xComponent)
+    , property "Y Component" (.yComponent) $(docs 'Direction2d.yComponent)
     , member0 "Rotate Leftward" Direction2d.rotateLeftward $(docs 'Direction2d.rotateLeftward)
     , member0 "Rotate Rightward" Direction2d.rotateRightward $(docs 'Direction2d.rotateRightward)
     , negateSelf
@@ -665,9 +665,9 @@ point2d =
     , factory2 "Mm" "X Coordinate" "Y Coordinate" Point2d.mm $(docs 'Point2d.mm)
     , factory2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches $(docs 'Point2d.inches)
     , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates $(docs 'Point2d.fromCoordinates)
-    , property @"coordinates" $(docs 'Point2d.coordinates)
-    , property @"xCoordinate" $(docs 'Point2d.xCoordinate)
-    , property @"yCoordinate" $(docs 'Point2d.yCoordinate)
+    , property "Coordinates" (.coordinates) $(docs 'Point2d.coordinates)
+    , property "X Coordinate" (.xCoordinate) $(docs 'Point2d.xCoordinate)
+    , property "Y Coordinate" (.yCoordinate) $(docs 'Point2d.yCoordinate)
     , member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
     , member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
     , member1 "On" "Plane" Point2d.on $(docs 'Point2d.on)
@@ -684,9 +684,9 @@ uvPoint =
     [ constant "Origin" (Point2d.origin @Space @Unitless) "The point with coordinates (0,0)."
     , constructor2 "U Coordinate" "V Coordinate" Point2d "Construct a point from its U and V coordinates."
     , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates "Construct a point from a pair of U and V coordinates."
-    , property @"coordinates" "Get the U and V coordinates of a point."
-    , member0 "U Coordinate" Point2d.xCoordinate "Get the U coordinate of a point."
-    , member0 "V Coordinate" Point2d.yCoordinate "Get the V coordinate of a point."
+    , property "Coordinates" (.coordinates) "Get the U and V coordinates of a point."
+    , property "U Coordinate" (.xCoordinate) "Get the U coordinate of a point."
+    , property "V Coordinate" (.yCoordinate) "Get the V coordinate of a point."
     , member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
     , member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
     , minusSelf
@@ -703,9 +703,9 @@ bounds2d =
     , factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , factory1 "Hull" "Points" (Bounds2d.hullN @(Point2d (Space @ Meters))) $(docs 'Bounds2d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
-    , property @"coordinates" $(docs 'Bounds2d.coordinates)
-    , property @"xCoordinate" $(docs 'Bounds2d.xCoordinate)
-    , property @"yCoordinate" $(docs 'Bounds2d.yCoordinate)
+    , property "Coordinates" (.coordinates) $(docs 'Bounds2d.coordinates)
+    , property "X Coordinate" (.xCoordinate) $(docs 'Bounds2d.xCoordinate)
+    , property "Y Coordinate" (.yCoordinate) $(docs 'Bounds2d.yCoordinate)
     , plus @(Vector2d (Space @ Meters)) Self
     , minus @(Vector2d (Space @ Meters)) Self
     ]
@@ -719,9 +719,9 @@ uvBounds =
     , factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , factory1 "Hull" "Points" (Bounds2d.hullN @(Point2d (Space @ Unitless))) $(docs 'Bounds2d.hullN)
     , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
-    , property @"coordinates" $(docs 'Bounds2d.coordinates)
-    , member0 "U Coordinate" Bounds2d.xCoordinate "Get the U coordinate bounds of a bounding box."
-    , member0 "V Coordinate" Bounds2d.yCoordinate "Get the V coordinate bounds of a bounding box."
+    , property "Coordinates" (.coordinates) $(docs 'Bounds2d.coordinates)
+    , property "U Coordinate" (.xCoordinate) "Get the U coordinate bounds of a bounding box."
+    , property "V Coordinate" (.yCoordinate) "Get the V coordinate bounds of a bounding box."
     , plus @(Vector2d (Space @ Unitless)) Self
     , minus @(Vector2d (Space @ Unitless)) Self
     ]
@@ -760,9 +760,9 @@ curve =
     , divBySelf
     , nested @Curve.Zero
         "A point where a given curve is equal to zero."
-        [ property @"location" "The parameter value at which the curve is zero."
-        , property @"order" "The order of the solution: 0 for crossing, 1 for tangent, etc."
-        , property @"sign" "The sign of the solution: the sign of the curve to the right of the solution."
+        [ property "Location" (.location) "The parameter value at which the curve is zero."
+        , property "Order" (.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
+        , property "Sign" (.sign) "The sign of the solution: the sign of the curve to the right of the solution."
         ]
     ]
 
@@ -1277,10 +1277,10 @@ curve2d =
     , factory2 "Circle" "Center Point" "Diameter" (curryT2 Curve2d.circle) $(docs 'Curve2d.circle)
     , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
     , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
-    , property @"startPoint" "The start point of the curve."
-    , property @"endPoint" "The end point of the curve."
+    , property "Start Point" (.startPoint) "The start point of the curve."
+    , property "End Point" (.endPoint) "The end point of the curve."
     , member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
-    , property @"derivative" "The derivative of the curve."
+    , property "Derivative" (.derivative) "The derivative of the curve."
     , member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
     , member0 "X Coordinate" Curve2d.xCoordinate $(docs 'Curve2d.xCoordinate)
     , member0 "Y Coordinate" Curve2d.yCoordinate $(docs 'Curve2d.yCoordinate)
@@ -1304,10 +1304,10 @@ uvCurve =
     , factoryU4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" (curry1T3 Curve2d.cornerArc) $(docs 'Curve2d.cornerArc)
     , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
     , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
-    , property @"startPoint" "The start point of the curve."
-    , property @"endPoint" "The end point of the curve."
+    , property "Start Point" (.startPoint) "The start point of the curve."
+    , property "End Point" (.endPoint) "The end point of the curve."
     , member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
-    , property @"derivative" "The derivative of the curve."
+    , property "Derivative" (.derivative) "The derivative of the curve."
     , member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
     , member0 "U Coordinate" Curve2d.xCoordinate $(docs 'Curve2d.xCoordinate)
     , member0 "V Coordinate" Curve2d.yCoordinate $(docs 'Curve2d.yCoordinate)
@@ -1345,9 +1345,9 @@ region2d =
     [ factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryM1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
     , factoryM2R "Circle" "Center Point" "Diameter" (curryT2 Region2d.circle) $(docs 'Region2d.circle)
-    , property @"outerLoop" region2dOuterLoopDocs
-    , property @"innerLoops" region2dInnerLoopsDocs
-    , property @"boundaryCurves" region2dBoundaryCurvesDocs
+    , property "Outer Loop" (.outerLoop) region2dOuterLoopDocs
+    , property "Inner Loops" (.innerLoops) region2dInnerLoopsDocs
+    , property "Boundary Curves" (.boundaryCurves) region2dBoundaryCurvesDocs
     , memberM2 "Fillet" "Points" "Radius" Region2d.fillet $(docs 'Region2d.fillet)
     ]
       <> affineTransformations2d Region2d.transformBy
@@ -1359,9 +1359,9 @@ uvRegion =
     , factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
     , factoryU2R "Circle" "Center Point" "Diameter" (curryT2 Region2d.circle) $(docs 'Region2d.circle)
-    , property @"outerLoop" region2dOuterLoopDocs
-    , property @"innerLoops" region2dInnerLoopsDocs
-    , property @"boundaryCurves" region2dBoundaryCurvesDocs
+    , property "Outer Loop" (.outerLoop) region2dOuterLoopDocs
+    , property "Inner Loops" (.innerLoops) region2dInnerLoopsDocs
+    , property "Boundary Curves" (.boundaryCurves) region2dBoundaryCurvesDocs
     ]
       <> affineTransformations2d Region2d.transformBy
 
@@ -1433,9 +1433,9 @@ spurGear :: Class
 spurGear =
   Class.new @SpurGear $(docs ''SpurGear) $
     [ factory2 "Metric" "Num Teeth" "Module" (curryT2 SpurGear.metric) $(docs 'SpurGear.metric)
-    , property @"numTeeth" "The number of teeth of a gear."
-    , property @"module" "The module of a gear."
-    , property @"pitchDiameter" "The pitch diameter of a gear."
-    , property @"outerDiameter" "The outer diameter of a gear."
+    , property "Num Teeth" (.numTeeth) "The number of teeth of a gear."
+    , property "Module" (.module_) "The module of a gear."
+    , property "Pitch Diameter" (.pitchDiameter) "The pitch diameter of a gear."
+    , property "Outer Diameter" (.outerDiameter) "The outer diameter of a gear."
     , memberM0 "Profile" SpurGear.profile $(docs 'SpurGear.profile)
     ]

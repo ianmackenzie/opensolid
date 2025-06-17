@@ -108,14 +108,11 @@ import API.Upcast (Upcast (Upcast))
 import API.Upcast qualified as Upcast
 import Data.Proxy (Proxy (Proxy))
 import Data.Void (Void)
-import GHC.TypeLits (KnownSymbol)
-import GHC.TypeLits qualified
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import OpenSolid.Text qualified as Text
 
 data Class where
   Class ::
@@ -511,14 +508,8 @@ staticM4 name arg1 arg2 arg3 arg4 f docs =
   Static (FFI.name name) $
     StaticFunctionM4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
 
-property ::
-  forall name value result.
-  (KnownSymbol name, HasField name value result, FFI value, FFI result) =>
-  Text ->
-  Member value
-property docs = do
-  let propertyName = Text.pack (GHC.TypeLits.symbolVal @name Proxy)
-  Prop (FFI.splitCamelCase propertyName) (Property (getField @name @value @result) docs)
+property :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
+property name f docs = Prop (FFI.name name) (Property f docs)
 
 member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
 member0 name f docs = Member (FFI.name name) (MemberFunction0 f docs)

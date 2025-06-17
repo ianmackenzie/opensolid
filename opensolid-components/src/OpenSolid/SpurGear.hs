@@ -32,9 +32,6 @@ instance HasField "numTeeth" SpurGear Int where
 instance HasField "module_" SpurGear Length where
   getField (Metric fields) = fields.module_
 
-instance HasField "module" SpurGear Length where
-  getField (Metric fields) = fields.module_
-
 instance FFI SpurGear where
   representation = FFI.classRepresentation "SpurGear"
 
