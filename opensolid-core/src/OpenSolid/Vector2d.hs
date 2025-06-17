@@ -204,7 +204,7 @@ The angle is measured counterclockwise from the positive X axis, so:
 The returned angle will be between -180 and +180 degrees.
 -}
 angle :: Vector2d (space @ units) -> Angle
-angle (Vector2d vx vy) = Angle.atan2 vy vx
+angle = (.angle)
 
 {-| Measure the signed angle from one vector to another.
 

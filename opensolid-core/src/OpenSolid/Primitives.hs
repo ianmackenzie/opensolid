@@ -22,6 +22,7 @@ module OpenSolid.Primitives
   )
 where
 
+import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.FFI (FFI)
@@ -46,6 +47,9 @@ instance HasField "yComponent" (Vector2d (space @ units)) (Qty units) where
 
 instance HasField "components" (Vector2d (space @ units)) (Qty units, Qty units) where
   getField (Vector2d vx vy) = (vx, vy)
+
+instance HasField "angle" (Vector2d (space @ units)) Angle where
+  getField (Vector2d vx vy) = Angle.atan2 vy vx
 
 deriving instance Eq (Vector2d (space @ units))
 
@@ -305,6 +309,9 @@ instance HasField "yComponent" (Direction2d space) Float where
 
 instance HasField "components" (Direction2d space) (Float, Float) where
   getField (Unit2d v) = v.components
+
+instance HasField "angle" (Direction2d space) Angle where
+  getField (Unit2d v) = v.angle
 
 ----- Orientation2d -----
 
