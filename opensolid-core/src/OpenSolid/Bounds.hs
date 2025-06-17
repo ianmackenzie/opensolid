@@ -133,19 +133,19 @@ instance HasUnits (Bounds units) units (Bounds Unitless)
 instance Units.Coercion (Bounds unitsA) (Bounds unitsB) where
   coerce = Data.Coerce.coerce
 
-instance units ~ units_ => ApproximateEquality (Bounds units) (Qty units_) units where
+instance units1 ~ units2 => ApproximateEquality (Bounds units1) (Qty units2) units1 where
   Bounds low high ~= value = low >= value - ?tolerance && high <= value + ?tolerance
 
-instance units ~ units_ => ApproximateEquality (Qty units) (Bounds units_) units where
+instance units1 ~ units2 => ApproximateEquality (Qty units1) (Bounds units2) units1 where
   value ~= bounds = bounds ~= value
 
-instance units ~ units_ => Intersects (Qty units) (Bounds units_) units where
+instance units1 ~ units2 => Intersects (Qty units1) (Bounds units2) units1 where
   value ^ bounds = exclusion value bounds <= ?tolerance
 
-instance units ~ units_ => Intersects (Bounds units) (Qty units_) units where
+instance units1 ~ units2 => Intersects (Bounds units1) (Qty units2) units1 where
   bounds ^ value = value ^ bounds
 
-instance units ~ units_ => Intersects (Bounds units) (Bounds units_) units where
+instance units1 ~ units2 => Intersects (Bounds units1) (Bounds units2) units1 where
   first ^ second = separation first second <= ?tolerance
 
 instance Negation (Bounds units) where
@@ -159,22 +159,22 @@ instance Multiplication (Bounds units) Sign (Bounds units) where
   bounds * Positive = bounds
   bounds * Negative = -bounds
 
-instance units ~ units_ => Addition (Bounds units) (Bounds units_) (Bounds units) where
+instance units1 ~ units2 => Addition (Bounds units1) (Bounds units2) (Bounds units1) where
   Bounds low1 high1 + Bounds low2 high2 = Bounds (low1 + low2) (high1 + high2)
 
-instance units ~ units_ => Addition (Bounds units) (Qty units_) (Bounds units) where
+instance units1 ~ units2 => Addition (Bounds units1) (Qty units2) (Bounds units1) where
   Bounds low high + value = Bounds (low + value) (high + value)
 
-instance units ~ units_ => Addition (Qty units) (Bounds units_) (Bounds units) where
+instance units1 ~ units2 => Addition (Qty units1) (Bounds units2) (Bounds units1) where
   value + Bounds low high = Bounds (value + low) (value + high)
 
-instance units ~ units_ => Subtraction (Bounds units) (Bounds units_) (Bounds units) where
+instance units1 ~ units2 => Subtraction (Bounds units1) (Bounds units2) (Bounds units1) where
   Bounds low1 high1 - Bounds low2 high2 = Bounds (low1 - high2) (high1 - low2)
 
-instance units ~ units_ => Subtraction (Bounds units) (Qty units_) (Bounds units) where
+instance units1 ~ units2 => Subtraction (Bounds units1) (Qty units2) (Bounds units1) where
   Bounds low high - value = Bounds (low - value) (high - value)
 
-instance units ~ units_ => Subtraction (Qty units) (Bounds units_) (Bounds units) where
+instance units1 ~ units2 => Subtraction (Qty units1) (Bounds units2) (Bounds units1) where
   value - Bounds low high = Bounds (value - high) (value - low)
 
 instance Multiplication' (Qty units1) (Bounds units2) (Bounds (units1 :*: units2)) where

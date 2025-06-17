@@ -120,11 +120,11 @@ instance Multiplication (Qty units) Sign (Qty units) where
   value * Positive = value
   value * Negative = -value
 
-instance units ~ units_ => Addition (Qty units) (Qty units_) (Qty units) where
+instance units1 ~ units2 => Addition (Qty units1) (Qty units2) (Qty units1) where
   {-# INLINE (+) #-}
   Qty x + Qty y = Qty (x Prelude.+ y)
 
-instance units ~ units_ => Subtraction (Qty units) (Qty units_) (Qty units) where
+instance units1 ~ units2 => Subtraction (Qty units1) (Qty units2) (Qty units1) where
   {-# INLINE (-) #-}
   Qty x - Qty y = Qty (x Prelude.- y)
 

@@ -136,29 +136,29 @@ instance Multiplication (SurfaceFunction units) Sign (SurfaceFunction units) whe
   function * Negative = -function
 
 instance
-  units ~ units_ =>
+  units1 ~ units2 =>
   Addition
-    (SurfaceFunction units)
-    (SurfaceFunction units_)
-    (SurfaceFunction units)
+    (SurfaceFunction units1)
+    (SurfaceFunction units2)
+    (SurfaceFunction units1)
   where
   lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
 
 instance
-  units ~ units_ =>
+  units1 ~ units2 =>
   Addition
-    (SurfaceFunction units)
-    (Qty units_)
-    (SurfaceFunction units)
+    (SurfaceFunction units1)
+    (Qty units2)
+    (SurfaceFunction units1)
   where
   function + value = function + constant value
 
 instance
-  units ~ units_ =>
+  units1 ~ units2 =>
   Addition
-    (Qty units)
-    (SurfaceFunction units_)
-    (SurfaceFunction units)
+    (Qty units1)
+    (SurfaceFunction units2)
+    (SurfaceFunction units1)
   where
   value + function = constant value + function
 

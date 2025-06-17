@@ -172,13 +172,13 @@ instance Multiplication (Curve units) Sign (Curve units) where
   curve * Positive = curve
   curve * Negative = -curve
 
-instance units ~ units_ => Addition (Curve units) (Curve units_) (Curve units) where
+instance units1 ~ units2 => Addition (Curve units1) (Curve units2) (Curve units1) where
   lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
 
-instance units ~ units_ => Addition (Curve units) (Qty units_) (Curve units) where
+instance units1 ~ units2 => Addition (Curve units1) (Qty units2) (Curve units1) where
   curve + value = curve + constant value
 
-instance units ~ units_ => Addition (Qty units) (Curve units_) (Curve units) where
+instance units1 ~ units2 => Addition (Qty units1) (Curve units2) (Curve units1) where
   value + curve = constant value + curve
 
 instance units1 ~ units2 => Subtraction (Curve units1) (Curve units2) (Curve units1) where

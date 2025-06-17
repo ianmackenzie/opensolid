@@ -30,7 +30,7 @@ class ApproximateEquality a b units | a b -> units where
 
 infix 4 ~=
 
-instance units ~ units_ => ApproximateEquality (Qty units) (Qty units_) units where
+instance units1 ~ units2 => ApproximateEquality (Qty units1) (Qty units2) units1 where
   x ~= y = Qty.abs (x - y) <= ?tolerance
 
 instance ApproximateEquality a b units => ApproximateEquality (List a) (List b) units where
@@ -49,35 +49,35 @@ instance ApproximateEquality a b units => ApproximateEquality (Maybe a) (Maybe b
   Nothing ~= Just _ = False
 
 instance
-  ( ApproximateEquality a1 b1 units
-  , ApproximateEquality a2 b2 units_
-  , units ~ units_
+  ( ApproximateEquality a1 b1 units1
+  , ApproximateEquality a2 b2 units2
+  , units1 ~ units2
   ) =>
-  ApproximateEquality (a1, a2) (b1, b2) units
+  ApproximateEquality (a1, a2) (b1, b2) units1
   where
   (a1, a2) ~= (b1, b2) = a1 ~= b1 && a2 ~= b2
 
 instance
-  ( ApproximateEquality a1 b1 units
-  , ApproximateEquality a2 b2 units_
-  , ApproximateEquality a3 b3 units__
-  , units ~ units_
-  , units ~ units__
+  ( ApproximateEquality a1 b1 units1
+  , ApproximateEquality a2 b2 units2
+  , ApproximateEquality a3 b3 units3
+  , units1 ~ units2
+  , units1 ~ units3
   ) =>
-  ApproximateEquality (a1, a2, a3) (b1, b2, b3) units
+  ApproximateEquality (a1, a2, a3) (b1, b2, b3) units1
   where
   (a1, a2, a3) ~= (b1, b2, b3) = a1 ~= b1 && a2 ~= b2 && a3 ~= b3
 
 instance
-  ( ApproximateEquality a1 b1 units
-  , ApproximateEquality a2 b2 units_
-  , ApproximateEquality a3 b3 units__
-  , ApproximateEquality a4 b4 units___
-  , units ~ units_
-  , units ~ units__
-  , units ~ units___
+  ( ApproximateEquality a1 b1 units1
+  , ApproximateEquality a2 b2 units2
+  , ApproximateEquality a3 b3 units3
+  , ApproximateEquality a4 b4 units4
+  , units1 ~ units2
+  , units1 ~ units3
+  , units1 ~ units4
   ) =>
-  ApproximateEquality (a1, a2, a3, a4) (b1, b2, b3, b4) units
+  ApproximateEquality (a1, a2, a3, a4) (b1, b2, b3, b4) units1
   where
   (a1, a2, a3, a4) ~= (b1, b2, b3, b4) = a1 ~= b1 && a2 ~= b2 && a3 ~= b3 && a4 ~= b4
 
