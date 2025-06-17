@@ -279,22 +279,22 @@ extraMemberFunctions className = do
     "Angle" -> repr ["return 'Angle.radians(' + str(self.in_radians()) + ')'"]
     "Bounds" ->
       repr
-        [ "low, high = self.endpoints()"
+        [ "low, high = self.endpoints"
         , "return 'Bounds(' + str(low) + ',' + str(high) + ')'"
         ]
     "LengthBounds" ->
       repr
-        [ "low, high = self.endpoints()"
+        [ "low, high = self.endpoints"
         , "return 'LengthBounds(' + repr(low) + ',' + repr(high) + ')'"
         ]
     "AreaBounds" ->
       repr
-        [ "low, high = self.endpoints()"
+        [ "low, high = self.endpoints"
         , "return 'AreaBounds(' + repr(low) + ',' + repr(high) + ')'"
         ]
     "AngleBounds" ->
       repr
-        [ "low, high = self.endpoints()"
+        [ "low, high = self.endpoints"
         , "return 'AngleBounds(' + repr(low) + ',' + repr(high) + ')'"
         ]
     "Color" ->
@@ -304,37 +304,37 @@ extraMemberFunctions className = do
         ]
     "Vector2d" ->
       repr
-        [ "x, y = self.components()"
+        [ "x, y = self.components"
         , "return 'Vector2d.xy(' + str(x) + ',' + str(y) + ')'"
         ]
     "Displacement2d" ->
       repr
-        [ "x, y = self.components()"
+        [ "x, y = self.components"
         , "return 'Displacement2d(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "AreaVector2d" ->
       repr
-        [ "x, y = self.components()"
+        [ "x, y = self.components"
         , "return 'AreaVector2d(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "Point2d" ->
       repr
-        [ "x, y = self.coordinates()"
+        [ "x, y = self.coordinates"
         , "return 'Point2d.meters(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "UvPoint" ->
       repr
-        [ "x, y = self.coordinates()"
+        [ "x, y = self.coordinates"
         , "return 'UvPoint(' + str(x) + ',' + str(y) + ')'"
         ]
     "Bounds2d" ->
       repr
-        [ "x, y = self.coordinates()"
+        [ "x, y = self.coordinates"
         , "return 'Bounds2d(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "UvBounds" ->
       repr
-        [ "u, v = self.coordinates()"
+        [ "u, v = self.coordinates"
         , "return 'UvBounds(' + repr(u) + ',' + repr(v) + ')'"
         ]
     _ -> ""

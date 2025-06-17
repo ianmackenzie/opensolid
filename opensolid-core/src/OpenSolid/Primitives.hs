@@ -38,6 +38,15 @@ data Vector2d (coordinateSystem :: CoordinateSystem) where
   -- | Construct a vector from its X and Y components.
   Vector2d :: Qty units -> Qty units -> Vector2d (space @ units)
 
+instance HasField "xComponent" (Vector2d (space @ units)) (Qty units) where
+  getField (Vector2d vx _) = vx
+
+instance HasField "yComponent" (Vector2d (space @ units)) (Qty units) where
+  getField (Vector2d _ vy) = vy
+
+instance HasField "components" (Vector2d (space @ units)) (Qty units, Qty units) where
+  getField (Vector2d vx vy) = (vx, vy)
+
 deriving instance Eq (Vector2d (space @ units))
 
 deriving instance Ord (Vector2d (space @ units))
@@ -294,6 +303,9 @@ instance HasField "xComponent" (Direction2d space) Float where
 instance HasField "yComponent" (Direction2d space) Float where
   getField (Direction2d _ dy) = dy
 
+instance HasField "components" (Direction2d space) (Float, Float) where
+  getField (Direction2d dx dy) = (dx, dy)
+
 ----- Orientation2d -----
 
 type role Orientation2d nominal
@@ -325,6 +337,15 @@ pattern Point2d :: Qty units -> Qty units -> Point2d (space @ units)
 pattern Point2d px py <- Position2d (Vector2d px py)
   where
     Point2d px py = Position2d (Vector2d px py)
+
+instance HasField "xCoordinate" (Point2d (space @ units)) (Qty units) where
+  getField (Point2d px _) = px
+
+instance HasField "yCoordinate" (Point2d (space @ units)) (Qty units) where
+  getField (Point2d _ py) = py
+
+instance HasField "coordinates" (Point2d (space @ units)) (Qty units, Qty units) where
+  getField (Point2d px py) = (px, py)
 
 deriving instance Eq (Point2d (space @ units))
 
@@ -753,6 +774,15 @@ pattern Bounds2d :: Bounds units -> Bounds units -> Bounds2d (space @ units)
 pattern Bounds2d bx by <- PositionBounds2d (VectorBounds2d bx by)
   where
     Bounds2d bx by = PositionBounds2d (VectorBounds2d bx by)
+
+instance HasField "xCoordinate" (Bounds2d (space @ units)) (Bounds units) where
+  getField (Bounds2d bx _) = bx
+
+instance HasField "yCoordinate" (Bounds2d (space @ units)) (Bounds units) where
+  getField (Bounds2d _ by) = by
+
+instance HasField "coordinates" (Bounds2d (space @ units)) (Bounds units, Bounds units) where
+  getField (Bounds2d bx by) = (bx, by)
 
 deriving instance Show (Qty units) => Show (Bounds2d (space @ units))
 

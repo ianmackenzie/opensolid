@@ -85,6 +85,15 @@ type Bounds :: Type -> Type
 data Bounds units = Ordered (Qty units) (Qty units)
   deriving (Eq)
 
+instance HasField "endpoints" (Bounds units) (Qty units, Qty units) where
+  getField = endpoints
+
+instance HasField "lower" (Bounds units) (Qty units) where
+  getField = lower
+
+instance HasField "upper" (Bounds units) (Qty units) where
+  getField = upper
+
 deriving instance Show (Qty units) => Show (Bounds units)
 
 {-# COMPLETE Bounds #-}
