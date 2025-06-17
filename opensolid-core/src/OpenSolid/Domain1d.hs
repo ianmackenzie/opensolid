@@ -40,6 +40,9 @@ data Domain1d = Domain1d
   }
   deriving (Show)
 
+instance HasField "bounds" Domain1d (Bounds Unitless) where
+  getField = bounds
+
 instance Eq Domain1d where
   Domain1d n1 i1 j1 == Domain1d n2 i2 j2 =
     i1 * n2 == i2 * n1 && j1 * n2 == j2 * n1
