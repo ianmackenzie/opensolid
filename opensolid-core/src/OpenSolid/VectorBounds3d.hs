@@ -347,7 +347,7 @@ rotateIn ::
   Angle ->
   VectorBounds3d (space @ units) ->
   VectorBounds3d (space @ units)
-rotateIn axisDirection = rotateAround (Axis3d Point3d.origin axisDirection)
+rotateIn axisDirection = rotateAround (Axis3d Point3d.dummy axisDirection)
 
 rotateAround ::
   Axis3d (space @ axisUnits) ->

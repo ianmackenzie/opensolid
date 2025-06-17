@@ -211,14 +211,14 @@ transformBy transform vector = do
 This is equivalent to rotating around an axis with the given direction.
 -}
 rotateIn :: Direction3d space -> Angle -> Vector3d (space @ units) -> Vector3d (space @ units)
-rotateIn axisDirection = rotateAround (Axis3d Point3d.origin axisDirection)
+rotateIn axisDirection = rotateAround (Axis3d Point3d.dummy axisDirection)
 
 {-| Scale (stretch) in the given direction by the given scaling factor.
 
 This is equivalent to scaling along an axis with the given direction.
 -}
 scaleIn :: Direction3d space -> Float -> Vector3d (space @ units) -> Vector3d (space @ units)
-scaleIn axisDirection = scaleAlong (Axis3d Point3d.origin axisDirection)
+scaleIn axisDirection = scaleAlong (Axis3d Point3d.dummy axisDirection)
 
 {-| Mirror in a particular direction.
 

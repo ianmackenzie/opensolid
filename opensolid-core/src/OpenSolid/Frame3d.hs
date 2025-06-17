@@ -76,13 +76,14 @@ import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
-import OpenSolid.Primitives (Frame3d (Frame3d), Plane3d (Plane3d))
+import OpenSolid.Primitives (Frame3d (Frame3d), Plane3d (Plane3d), Point3d (Position3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 
 -- | A frame of reference defining a new coordinate system.
 world :: Frame3d (space @ units) (Defines space)
-world = Frame3d Point3d.origin Orientation3d.world
+world = Frame3d (Position3d Vector3d.zero) Orientation3d.world
 
 -- | Get the origin point of a frame.
 originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)

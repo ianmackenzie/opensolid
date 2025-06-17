@@ -37,12 +37,13 @@ import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d)
   , Frame3d
-  , Plane3d (Plane3d)
+  , Plane3d
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Point3d (Point3d)
+  , Point3d (Point3d, Position3d)
   , Transform3d (Transform3d)
   , Vector3d (Vector3d)
   )
+import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform qualified as Transform
 import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d
 
@@ -54,6 +55,9 @@ type Uniform coordinateSystem = Transform3d Transform.Uniform coordinateSystem
 
 type Affine coordinateSystem = Transform3d Transform.Affine coordinateSystem
 
+originPoint :: Point3d (space @ units)
+originPoint = Point3d Qty.zero Qty.zero Qty.zero
+
 unitX :: Vector3d (space @ Unitless)
 unitX = Vector3d 1.0 0.0 0.0
 
@@ -64,7 +68,7 @@ unitZ :: Vector3d (space @ Unitless)
 unitZ = Vector3d 0.0 0.0 1.0
 
 identity :: Rigid (space @ units)
-identity = Transform3d Point3d.origin unitX unitY unitZ
+identity = Transform3d originPoint unitX unitY unitZ
 
 coerce :: Transform3d tag1 (space1 @ units1) -> Transform3d tag2 (space2 @ units2)
 coerce (Transform3d p0 i j k) =
@@ -81,7 +85,7 @@ withFixedPoint fixedPoint vx vy vz = do
   Transform3d (fixedPoint - x0 * vx - y0 * vy - z0 * vz) vx vy vz
 
 translateBy :: Vector3d (space @ units) -> Rigid (space @ units)
-translateBy vector = Transform3d (Point3d.origin + vector) unitX unitY unitZ
+translateBy vector = Transform3d (Position3d vector) unitX unitY unitZ
 
 translateIn :: Direction3d space -> Qty units -> Rigid (space @ units)
 translateIn direction distance = translateBy (direction * distance)
@@ -149,7 +153,7 @@ placeIn ::
   Transform3d tag (local @ units) ->
   Transform3d tag (global @ units)
 placeIn frame transform = do
-  let p0 = Point3d.origin |> Point3d.relativeTo frame |> Point3d.transformBy transform |> Point3d.placeIn frame
+  let p0 = originPoint |> Point3d.relativeTo frame |> Point3d.transformBy transform |> Point3d.placeIn frame
   let vx = unitX |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
   let vy = unitY |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
   let vz = unitZ |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
@@ -160,7 +164,7 @@ relativeTo ::
   Transform3d tag (global @ units) ->
   Transform3d tag (local @ units)
 relativeTo frame transform = do
-  let p0 = Point3d.origin |> Point3d.placeIn frame |> Point3d.transformBy transform |> Point3d.relativeTo frame
+  let p0 = originPoint |> Point3d.placeIn frame |> Point3d.transformBy transform |> Point3d.relativeTo frame
   let vx = unitX |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
   let vy = unitY |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
   let vz = unitZ |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame

@@ -1,7 +1,7 @@
 module OpenSolid.Point3d
   ( Point3d
   , coordinates
-  , origin
+  , dummy
   , on
   , along
   , coerce
@@ -28,6 +28,7 @@ module OpenSolid.Point3d
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
@@ -61,9 +62,8 @@ coordinates convention (Point3d pR pF pU) = do
   let pZ = pR * kR + pF * kF + pU * kU
   (pX, pY, pZ)
 
--- | The point with coordinates (0,0, 0).
-origin :: Point3d (space @ units)
-origin = Point3d Qty.zero Qty.zero Qty.zero
+dummy :: Point3d (space @ Void)
+dummy = Point3d Qty.zero Qty.zero Qty.zero
 
 -- | Construct a point the given distance along the given axis.
 along :: Axis3d (space @ units) -> Qty units -> Point3d (space @ units)

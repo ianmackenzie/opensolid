@@ -1,5 +1,5 @@
 module OpenSolid.Point3d
-  ( origin
+  ( dummy
   , coerce
   , transformBy
   , placeIn
@@ -7,10 +7,11 @@ module OpenSolid.Point3d
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Frame3d, Point3d, Transform3d)
 
-origin :: Point3d (space @ units)
+dummy :: Point3d (space @ Void)
 coerce :: Point3d (space1 @ units1) -> Point3d (space2 @ units2)
 transformBy :: Transform3d tag (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
 placeIn ::

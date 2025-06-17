@@ -55,7 +55,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Bounds2d (PositionBounds2d)
@@ -1202,12 +1201,6 @@ instance Origin Float (Point2d (space @ units)) where
 
 instance Origin UvPoint (Point2d (space @ units)) where
   origin = constant Point2d.origin
-
-instance Origin Float (Point3d (space @ units)) where
-  origin = constant Point3d.origin
-
-instance Origin UvPoint (Point3d (space @ units)) where
-  origin = constant Point3d.origin
 
 class Constant input output where
   constant :: output -> Expression input output

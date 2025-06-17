@@ -998,8 +998,7 @@ direction3d =
 point3d :: Class
 point3d =
   Class.new @(Point3d (Space @ Meters)) "A point in 3D." $
-    [ constant "Origin" (Point3d.origin @Space @Meters) $(docs 'Point3d.origin)
-    , factory2 "Along" "Axis" "Distance" Point3d.along $(docs 'Point3d.along)
+    [ factory2 "Along" "Axis" "Distance" Point3d.along $(docs 'Point3d.along)
     , factory2 "On" "Plane" "Position" Point3d.on $(docs 'Point3d.on)
     , factory2 "From Coordinates" "Convention" "Coordinates" Point3d.fromCoordinates $(docs 'Point3d.fromCoordinates)
     , member1 "Coordinates" "Convention" Point3d.coordinates $(docs 'Point3d.coordinates)
