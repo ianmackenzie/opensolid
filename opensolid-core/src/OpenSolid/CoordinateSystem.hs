@@ -4,6 +4,7 @@ module OpenSolid.CoordinateSystem
   , LocalSpace
   , Defines
   , Space
+  , Units
   , RightPlane
   , LeftPlane
   , FrontPlane
@@ -29,6 +30,10 @@ instance HasUnits (space @ units) units (space @ Unitless)
 type Space :: CoordinateSystem -> Type
 type family Space coordinateSystem where
   Space ('CoordinateSystem space units) = space
+
+type Units :: CoordinateSystem -> Type
+type family Units coordinateSystem where
+  Units ('CoordinateSystem space units) = units
 
 data RightPlane space
 
