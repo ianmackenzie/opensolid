@@ -885,6 +885,12 @@ data Axis2d (coordinateSystem :: CoordinateSystem) where
     Direction2d space ->
     Axis2d (space @ units)
 
+instance HasField "originPoint" (Axis2d (space @ units)) (Point2d (space @ units)) where
+  getField (Axis2d p _) = p
+
+instance HasField "direction" (Axis2d (space @ units)) (Direction2d space) where
+  getField (Axis2d _ d) = d
+
 deriving instance Eq (Axis2d (space @ units))
 
 deriving instance Show (Qty units) => Show (Axis2d (space @ units))
@@ -1974,6 +1980,12 @@ data Axis3d (coordinateSystem :: CoordinateSystem) where
     Point3d (space @ units) ->
     Direction3d space ->
     Axis3d (space @ units)
+
+instance HasField "originPoint" (Axis3d (space @ units)) (Point3d (space @ units)) where
+  getField (Axis3d p _) = p
+
+instance HasField "direction" (Axis3d (space @ units)) (Direction3d space) where
+  getField (Axis3d _ d) = d
 
 deriving instance Eq (Axis3d (space @ units))
 
