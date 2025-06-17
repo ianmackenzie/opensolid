@@ -30,7 +30,6 @@ import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 
@@ -63,12 +62,7 @@ new ::
   Domain2d ->
   Subproblem units
 new f dudv dvdu subdomain = do
-  let uvBounds = Domain2d.bounds subdomain
-  let fu = SurfaceFunction.derivative U f
-  let fv = SurfaceFunction.derivative V f
-  let fuu = SurfaceFunction.derivative U fu
-  let fuv = SurfaceFunction.derivative V fu
-  let fvv = SurfaceFunction.derivative V fv
+  let uvBounds = subdomain.bounds
   Subproblem
     { f
     , dudv
@@ -77,11 +71,11 @@ new f dudv dvdu subdomain = do
     , uvBounds
     , fValues = cornerValues uvBounds f
     , fBounds = SurfaceFunction.evaluateBounds f uvBounds
-    , fuBounds = SurfaceFunction.evaluateBounds fu uvBounds
-    , fvBounds = SurfaceFunction.evaluateBounds fv uvBounds
-    , fuuBounds = SurfaceFunction.evaluateBounds fuu uvBounds
-    , fuvBounds = SurfaceFunction.evaluateBounds fuv uvBounds
-    , fvvBounds = SurfaceFunction.evaluateBounds fvv uvBounds
+    , fuBounds = SurfaceFunction.evaluateBounds f.du uvBounds
+    , fvBounds = SurfaceFunction.evaluateBounds f.dv uvBounds
+    , fuuBounds = SurfaceFunction.evaluateBounds f.du.du uvBounds
+    , fuvBounds = SurfaceFunction.evaluateBounds f.du.dv uvBounds
+    , fvvBounds = SurfaceFunction.evaluateBounds f.dv.dv uvBounds
     }
 
 cornerValues :: UvBounds -> SurfaceFunction units -> CornerValues units
@@ -96,26 +90,22 @@ cornerValues (Bounds2d (Bounds u1 u2) (Bounds v1 v2)) function =
 leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 leftEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d (Bounds u1 _) vBounds = uvBounds
-  let fv = SurfaceFunction.derivative V f
-  (Point2d u1 (Internal.solveForV f fv u1 vBounds), Domain2d.leftEdge subdomain)
+  (Point2d u1 (Internal.solveForV f f.dv u1 vBounds), Domain2d.leftEdge subdomain)
 
 rightEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 rightEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d (Bounds _ u2) vBounds = uvBounds
-  let fv = SurfaceFunction.derivative V f
-  (Point2d u2 (Internal.solveForV f fv u2 vBounds), Domain2d.rightEdge subdomain)
+  (Point2d u2 (Internal.solveForV f f.dv u2 vBounds), Domain2d.rightEdge subdomain)
 
 bottomEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d uBounds (Bounds v1 _) = uvBounds
-  let fu = SurfaceFunction.derivative U f
-  (Point2d (Internal.solveForU f fu uBounds v1) v1, Domain2d.bottomEdge subdomain)
+  (Point2d (Internal.solveForU f f.du uBounds v1) v1, Domain2d.bottomEdge subdomain)
 
 topEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 topEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d uBounds (Bounds _ v2) = uvBounds
-  let fu = SurfaceFunction.derivative U f
-  (Point2d (Internal.solveForU f fu uBounds v2) v2, Domain2d.topEdge subdomain)
+  (Point2d (Internal.solveForU f f.du uBounds v2) v2, Domain2d.topEdge subdomain)
 
 bottomLeftPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomLeftPoint Subproblem{subdomain, uvBounds} = do

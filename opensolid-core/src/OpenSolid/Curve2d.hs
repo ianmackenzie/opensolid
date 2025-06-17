@@ -284,12 +284,10 @@ instance
     (Curve units)
   where
   f . g = do
-    let dfdu = SurfaceFunction.derivative U f
-    let dfdv = SurfaceFunction.derivative V f
     let dgdt = g.derivative
     let dudt = dgdt.xComponent
     let dvdt = dgdt.yComponent
-    Curve.new (f.compiled . g.compiled) (dfdu . g * dudt + dfdv . g * dvdt)
+    Curve.new (f.compiled . g.compiled) (f.du . g * dudt + f.dv . g * dvdt)
 
 instance
   uvCoordinates ~ UvCoordinates =>

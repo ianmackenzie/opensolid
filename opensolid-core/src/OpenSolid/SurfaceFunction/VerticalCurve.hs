@@ -31,7 +31,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds qualified as ImplicitCurveBounds
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
-import OpenSolid.SurfaceParameter (SurfaceParameter (U))
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
@@ -94,15 +93,14 @@ verticalCurve ::
   List (Axis2d UvCoordinates) ->
   Curve2d UvCoordinates
 verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
-  let fu = SurfaceFunction.derivative U f
   let bounds = implicitCurveBounds boxes
   let clampedUBounds vValue =
         List.foldl (clamp vValue) (ImplicitCurveBounds.evaluate bounds vValue) boundingAxes
   let solveForU =
-        case (f.compiled, fu.compiled) of
+        case (f.compiled, f.du.compiled) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fuExpr) ->
             \vValue -> Expression.solveMonotonicSurfaceU fExpr fuExpr (clampedUBounds vValue) vValue
-          _ -> \vValue -> Internal.solveForU f fu (clampedUBounds vValue) vValue
+          _ -> \vValue -> Internal.solveForU f f.du (clampedUBounds vValue) vValue
   let evaluate tValue = do
         let vValue = Float.interpolateFrom vStart vEnd tValue
         let uValue = solveForU vValue

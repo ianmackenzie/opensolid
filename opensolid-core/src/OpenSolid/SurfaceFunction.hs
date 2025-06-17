@@ -38,7 +38,6 @@ import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d (Domain2d))
@@ -85,6 +84,12 @@ data SurfaceFunction units where
     ~(SurfaceFunction units) ->
     ~(SurfaceFunction units) ->
     SurfaceFunction units
+
+instance HasField "du" (SurfaceFunction units) (SurfaceFunction units) where
+  getField (SurfaceFunction _ du _) = du
+
+instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units) where
+  getField (SurfaceFunction _ _ dv) = dv
 
 type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
 
@@ -388,13 +393,12 @@ instance HasField "compiled" (SurfaceFunction units) (Compiled units) where
   getField (SurfaceFunction c _ _) = c
 
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
-derivative U (SurfaceFunction _ du _) = du
-derivative V (SurfaceFunction _ _ dv) = dv
+derivative U f = f.du
+derivative V f = f.dv
 
 derivativeIn :: Direction2d UvSpace -> SurfaceFunction units -> SurfaceFunction units
 derivativeIn direction function =
-  Direction2d.xComponent direction * derivative U function
-    + Direction2d.yComponent direction * derivative V function
+  direction.xComponent * function.du + direction.yComponent * function.dv
 
 zero :: SurfaceFunction units
 zero = constant Qty.zero
@@ -470,8 +474,8 @@ zeros :: Tolerance units => SurfaceFunction units -> Result ZeroEverywhere Zeros
 zeros function
   | function ~= Qty.zero = Failure ZeroEverywhere
   | otherwise = Result.do
-      let fu = derivative U function
-      let fv = derivative V function
+      let fu = function.du
+      let fv = function.dv
       let dudv = -fv / fu
       let dvdu = -fu / fv
       case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
@@ -536,11 +540,11 @@ findTangentSolutions subproblem = do
   let determinant = fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds
   case Bounds.resolvedSign determinant of
     Resolved determinantSign -> do
-      let fu = f |> derivative U
-      let fv = f |> derivative V
-      let fuu = fu |> derivative U
-      let fuv = fu |> derivative V
-      let fvv = fv |> derivative V
+      let fu = f.du
+      let fv = f.dv
+      let fuu = f.du.du
+      let fuv = f.du.dv
+      let fvv = f.dv.dv
       let maybePoint =
             Solve2d.unique
               (\bounds -> VectorBounds2d (evaluateBounds fu bounds) (evaluateBounds fv bounds))

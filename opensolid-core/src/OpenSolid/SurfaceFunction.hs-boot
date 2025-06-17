@@ -20,6 +20,10 @@ type role SurfaceFunction nominal
 type SurfaceFunction :: Type -> Type
 data SurfaceFunction units
 
+instance HasField "du" (SurfaceFunction units) (SurfaceFunction units)
+
+instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units)
+
 type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
 
 instance HasField "compiled" (SurfaceFunction units) (Compiled units)
