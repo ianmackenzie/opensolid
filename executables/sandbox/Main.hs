@@ -41,6 +41,7 @@ import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Surface3d qualified as Surface3d
@@ -253,7 +254,8 @@ toDrawing = Length.centimeters 10.0 ./. 1.0
 
 drawUvCurve :: List (Drawing2d.Attribute UvSpace) -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawUvCurve attributes curve = do
-  let polyline = Curve2d.toPolyline 0.001 curve
+  let resolution = Resolution.maxError 0.001
+  let polyline = Curve2d.toPolyline resolution curve
   Drawing2d.polylineWith attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
 drawDot :: Color -> UvPoint -> Drawing2d UvSpace
@@ -306,6 +308,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawSegmentBounds tBounds = drawBounds (Curve2d.evaluateBounds curve tBounds)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Drawing2d.circle (#centerPoint point, #diameter controlPointDiameter)
+  let resolution = Resolution.maxError Length.millimeter
   Drawing2d.groupWith
     [ Drawing2d.strokeColor color
     , Drawing2d.strokeWidth (Length.millimeters 1.0)
@@ -315,7 +318,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
         , Drawing2d.collectWith [Drawing2d.fillColor color] drawControlPoint drawingControlPoints
         , Drawing2d.collect drawSegmentBounds (Parameter.intervals 10)
         ]
-    , Drawing2d.curve Length.millimeter curve
+    , Drawing2d.curve resolution curve
     ]
 
 testBezierSegment :: Tolerance Meters => IO ()
@@ -342,7 +345,8 @@ testHermiteBezier = IO.do
         [ Drawing2d.strokeColor Color.blue
         , Drawing2d.strokeWidth (Length.millimeters 1.0)
         ]
-  let curveEntity = Drawing2d.curveWith curveAttributes (Length.millimeters 0.1) curve
+  let curveResolution = Resolution.maxError (Length.millimeters 0.1)
+  let curveEntity = Drawing2d.curveWith curveAttributes curveResolution curve
   let coordinateBounds = Bounds (Length.centimeters -1.0) (Length.centimeters 11.0)
   let drawingBounds = Bounds2d coordinateBounds coordinateBounds
   Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity

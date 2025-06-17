@@ -120,6 +120,8 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Resolution (Resolution)
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Stream qualified as Stream
@@ -164,6 +166,9 @@ instance HasField "compiled" (Curve2d (space @ units)) (Compiled (space @ units)
 
 instance HasField "derivative" (Curve2d (space @ units)) (VectorCurve2d (space @ units)) where
   getField (Curve2d _ d) = d
+
+instance HasField "secondDerivative" (Curve2d (space @ units)) (VectorCurve2d (space @ units)) where
+  getField = (.derivative.derivative)
 
 instance FFI (Curve2d (space @ Meters)) where
   representation = FFI.classRepresentation "Curve2d"
@@ -987,17 +992,21 @@ nthDerivative 0 _ = internalError "nthDerivative should always be called with n 
 nthDerivative 1 curve = curve.derivative
 nthDerivative n curve = (nthDerivative (n - 1) curve).derivative
 
-toPolyline :: Qty units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
-toPolyline accuracy curve =
-  Polyline2d (NonEmpty.map (evaluate curve) (samplingPoints accuracy curve))
+toPolyline :: Resolution units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
+toPolyline resolution curve =
+  Polyline2d (NonEmpty.map (evaluate curve) (samplingPoints resolution curve))
 
-samplingPoints :: Qty units -> Curve2d (space @ units) -> NonEmpty Float
-samplingPoints accuracy curve = do
-  let secondDerivative = curve.derivative.derivative
-  let predicate subdomain = do
-        let secondDerivativeBounds = VectorCurve2d.evaluateBounds secondDerivative subdomain
+samplingPoints :: Resolution units -> Curve2d (space @ units) -> NonEmpty Float
+samplingPoints resolution curve = do
+  let size subdomain = do
+        let startPoint = evaluate curve subdomain.lower
+        let endPoint = evaluate curve subdomain.upper
+        Point2d.distanceFrom startPoint endPoint
+  let error subdomain = do
+        let secondDerivativeBounds = VectorCurve2d.evaluateBounds curve.secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
-        Linearization.error secondDerivativeMagnitude subdomain <= accuracy
+        Linearization.error secondDerivativeMagnitude subdomain
+  let predicate = Resolution.predicate (#size size, #error error) resolution
   Domain1d.samplingPoints predicate
 
 medialAxis ::

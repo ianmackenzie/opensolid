@@ -11,6 +11,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -37,7 +38,7 @@ main = Tolerance.using Length.nanometer IO.do
           #centerPoint point
           #diameter (Length.millimeters 4.0)
   let drawCurve n curve = do
-        Drawing2d.curve Length.micrometer curve
+        Drawing2d.curve (Resolution.maxError Length.micrometer) curve
         Drawing2d.collect (drawDot . Curve2d.evaluate curve) (Parameter.steps n)
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -12.0 -12.0) (Point2d.centimeters 12.0 12.0)
   Drawing2d.writeSvg "executables/piecewise-curve/circle.svg" drawingBounds (drawCurve 40 circle)

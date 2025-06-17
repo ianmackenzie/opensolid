@@ -55,6 +55,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d (Polyline2d)
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
+import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
@@ -202,14 +203,14 @@ circleWith attributes (Field centerPoint, Field diameter) = do
 circle :: ("centerPoint" ::: Point space, "diameter" ::: Length) -> Drawing2d space
 circle = circleWith []
 
--- | Draw a curve with the given attributes and accuracy.
-curveWith :: List (Attribute space) -> Length -> Curve2d (space @ Meters) -> Drawing2d space
-curveWith attributes maxError givenCurve = do
-  let approximation = Curve2d.toPolyline maxError givenCurve
+-- | Draw a curve with the given attributes and resolution.
+curveWith :: List (Attribute space) -> Resolution Meters -> Curve2d (space @ Meters) -> Drawing2d space
+curveWith attributes resolution givenCurve = do
+  let approximation = Curve2d.toPolyline resolution givenCurve
   polylineWith attributes approximation
 
--- | Draw a curve with the given attributes and accuracy.
-curve :: Length -> Curve2d (space @ Meters) -> Drawing2d space
+-- | Draw a curve with the given resolution.
+curve :: Resolution Meters -> Curve2d (space @ Meters) -> Drawing2d space
 curve = curveWith []
 
 pointsAttribute :: List (Point space) -> Attribute space

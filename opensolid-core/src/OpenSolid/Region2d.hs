@@ -64,6 +64,7 @@ import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
+import OpenSolid.Resolution (Resolution)
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceParameter (UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
@@ -596,18 +597,18 @@ area region = do
   let edgeIntegrals = NonEmpty.map (areaIntegral referencePoint) region.boundaryCurves
   Estimate.sum edgeIntegrals
 
-toMesh :: Qty units -> Region2d (space @ units) -> Mesh (Point2d (space @ units))
-toMesh accuracy region = do
+toMesh :: Resolution units -> Region2d (space @ units) -> Mesh (Point2d (space @ units))
+toMesh resolution region = do
   let allLoops = region.outerLoop :| region.innerLoops
-  let vertexLoops = NonEmpty.map (toVertexLoop accuracy) allLoops
+  let vertexLoops = NonEmpty.map (toVertexLoop resolution) allLoops
   CDT.unsafe vertexLoops []
 
 toVertexLoop ::
-  Qty units ->
+  Resolution units ->
   NonEmpty (Curve2d (space @ units)) ->
   NonEmpty (Point2d (space @ units))
-toVertexLoop accuracy loop = do
-  let trailingVertices curve = (Curve2d.toPolyline accuracy curve).vertices.rest
+toVertexLoop resolution loop = do
+  let trailingVertices curve = (Curve2d.toPolyline resolution curve).vertices.rest
   let allVertices = List.collect trailingVertices loop
   case allVertices of
     NonEmpty vertices -> vertices

@@ -18,6 +18,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
@@ -79,7 +80,8 @@ testCurveMedialAxis label curve1 curve2 = IO.do
         [ Drawing2d.strokeColor Color.gray
         , Drawing2d.strokeWidth (Length.millimeters 0.2)
         ]
-  let drawCurve = Drawing2d.curve (Length.millimeters 0.1)
+  let resolution = Resolution.maxError (Length.millimeters 0.1)
+  let drawCurve = Drawing2d.curve resolution
   let drawSegment segment = drawCurve segment.curve
   let drawingBounds =
         Bounds2d.hull2 (Point2d.centimeters -10.0 -10.0) (Point2d.centimeters 30.0 20.0)

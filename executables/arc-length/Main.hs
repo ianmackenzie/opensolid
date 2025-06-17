@@ -14,6 +14,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 
@@ -78,8 +79,9 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
                 #diameter (Length.millimeters 3.0)
 
         let drawingBounds = Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30.0 15.0)
+        let resolution = Resolution.maxError Length.micrometer
         Drawing2d.writeSvg fileName drawingBounds do
-          Drawing2d.curve Length.micrometer curve
+          Drawing2d.curve resolution curve
           Drawing2d.collect drawPoint pointLocations
   drawCurve "executables/arc-length/cubic-spline.svg" spline
   drawCurve "executables/arc-length/parameterized-spline.svg" parameterized

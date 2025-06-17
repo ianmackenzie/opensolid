@@ -12,6 +12,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
@@ -35,7 +36,8 @@ main = Tolerance.using Length.nanometer IO.do
       , Curve2d.line p4 p0
       , Curve2d.circle (#centerPoint holeCenter, #diameter holeDiameter)
       ]
-  let mesh = Region2d.toMesh (Length.millimeters 1.0) region
+  let resolution = Resolution.maxError (Length.millimeters 1.0)
+  let mesh = Region2d.toMesh resolution region
   let triangles = Mesh.faceVertices mesh
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -3.0 -3.0) (Point2d.centimeters 21.0 15.0)
   let drawTriangle (a, b, c) =
