@@ -10,6 +10,7 @@ import API.Class
   , crossProduct
   , crossSelf
   , curry1T2
+  , curry1T3
   , curryT2
   , curryT4
   , divBy
@@ -1270,7 +1271,7 @@ curve2d =
     , factoryM3 "Arc" "Start Point" "End Point" "Swept Angle" Curve2d.arc $(docs 'Curve2d.arc)
     , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (curryT4 Curve2d.polarArc) $(docs 'Curve2d.polarArc)
     , factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
-    , factoryM4 "Corner Arc" "Corner Point" "Incoming Direction" "Outgoing Direction" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
+    , factoryM4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" (curry1T3 Curve2d.cornerArc) $(docs 'Curve2d.cornerArc)
     , factory2 "Circle" "Center Point" "Diameter" (curryT2 Curve2d.circle) $(docs 'Curve2d.circle)
     , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
     , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
@@ -1298,7 +1299,7 @@ uvCurve =
     , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (curryT4 Curve2d.polarArc) $(docs 'Curve2d.polarArc)
     , factory2 "Circle" "Center Point" "Diameter" (curryT2 Curve2d.circle) $(docs 'Curve2d.circle)
     , factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
-    , factoryU4 "Corner Arc" "Corner Point" "Incoming Direction" "Outgoing Direction" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
+    , factoryU4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" (curry1T3 Curve2d.cornerArc) $(docs 'Curve2d.cornerArc)
     , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
     , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
     , property @"startPoint" "The start point of the curve."

@@ -32,7 +32,11 @@ main = Tolerance.using Length.nanometer IO.do
   let p3 = Point2d.xy (0.5 * width) (0.5 * height - thickness)
   let p4 = Point2d.xy (0.5 * width) (0.5 * height)
   let p5 = Point2d.y (0.5 * height)
-  let fillet = Curve2d.cornerArc p2 Direction2d.y Direction2d.x (#radius filletRadius)
+  let fillet =
+        Curve2d.cornerArc p2 do
+          #incoming Direction2d.y
+          #outgoing Direction2d.x
+          #radius filletRadius
   let topRightCurves =
         [ Curve2d.line p1 fillet.startPoint
         , fillet

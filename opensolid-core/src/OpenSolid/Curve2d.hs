@@ -409,19 +409,20 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
 cornerArc ::
   Tolerance units =>
   Point2d (space @ units) ->
-  Direction2d space ->
-  Direction2d space ->
-  "radius" ::: Qty units ->
+  ( "incoming" ::: Direction2d space
+  , "outgoing" ::: Direction2d space
+  , "radius" ::: Qty units
+  ) ->
   Curve2d (space @ units)
-cornerArc cornerPoint incomingDirection outgoingDirection (Field givenRadius) = do
+cornerArc cornerPoint (Field incoming, Field outgoing, Field givenRadius) = do
   let radius = Qty.abs givenRadius
-  let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
+  let sweptAngle = Direction2d.angleFrom incoming outgoing
   if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
     then line cornerPoint cornerPoint
     else do
       let offset = radius * Qty.abs (Angle.tan (0.5 * sweptAngle))
-      let computedStartPoint = cornerPoint - offset * incomingDirection
-      let computedEndPoint = cornerPoint + offset * outgoingDirection
+      let computedStartPoint = cornerPoint - offset * incoming
+      let computedEndPoint = cornerPoint + offset * outgoing
       arc computedStartPoint computedEndPoint sweptAngle
 
 data WhichArc
