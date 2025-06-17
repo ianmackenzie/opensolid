@@ -6,16 +6,18 @@ from opensolid import (
     Curve2d,
     Length,
     LengthBounds,
+    Frame3d,
     Mesh,
     PbrMaterial,
     Point2d,
     Region2d,
     Scene3d,
     Tolerance,
-    World3d,
 )
 
 with Tolerance(Length.nanometers(1)):
+    world = Frame3d.world
+
     p1 = Point2d.centimeters(0, 1)
     p2 = Point2d.centimeters(1, 1)
     p3 = Point2d.centimeters(1, 0)
@@ -40,11 +42,8 @@ with Tolerance(Length.nanometers(1)):
     filleted_region = base_region.fillet(fillet_points, radius=Length.millimeters(4))
 
     thickness = Length.centimeters(2)
-    body = Body3d.extruded(
-        World3d.front_plane,
-        filleted_region,
-        LengthBounds.symmetric(width=thickness),
-    )
+    extrusion_bounds = LengthBounds.symmetric(width=thickness)
+    body = Body3d.extruded(world.front_plane, filleted_region, extrusion_bounds)
     mesh_constraints = [Mesh.max_error(Length.millimeters(0.05))]
     material = PbrMaterial.nonmetal(Color.blue, roughness=0.3)
     Scene3d.body(mesh_constraints, material, body).write_glb("fillet.glb")

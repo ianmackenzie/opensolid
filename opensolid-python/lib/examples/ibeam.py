@@ -10,12 +10,14 @@ from opensolid import (
     PbrMaterial,
     Point2d,
     Region2d,
+    Frame3d,
     Scene3d,
     Tolerance,
-    World3d,
 )
 
 with Tolerance(Length.meters(1e-9)):
+    world = Frame3d.world
+
     # Define dimensions
     length = Length.centimeters(30)
     width = Length.centimeters(10)
@@ -37,7 +39,12 @@ with Tolerance(Length.meters(1e-9)):
     p5 = Point2d.y(top_flange_top_y)
 
     # Create the sketch profile
-    fillet = Curve2d.corner_arc(p2, Direction2d.y, Direction2d.x, radius=fillet_radius)
+    fillet = Curve2d.corner_arc(
+        p2,
+        incoming=Direction2d.y,
+        outgoing=Direction2d.x,
+        radius=fillet_radius,
+    )
     template = [
         Curve2d.line(p1, fillet.start_point),
         fillet,
@@ -51,9 +58,9 @@ with Tolerance(Length.meters(1e-9)):
 
     # Extrude the profile to create a solid body
     extrusion_limits = LengthBounds.symmetric(width=length)
-    body = Body3d.extruded(World3d.front_plane, profile, extrusion_limits)
+    body = Body3d.extruded(world.front_plane, profile, extrusion_limits)
 
     # Create a 3D scene containing the body and write to GLB file
     mesh_constraints = [Mesh.max_error(Length.millimeters(0.1))]
-    material = PbrMaterial.metal(Color.rgb(0.913, 0.921, 0.925), roughness=0.3)
+    material = PbrMaterial.metal(Color.rgb_float(0.913, 0.921, 0.925), roughness=0.3)
     Scene3d.body(mesh_constraints, material, body).write_glb("ibeam.glb")
