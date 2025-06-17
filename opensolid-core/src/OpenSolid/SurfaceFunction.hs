@@ -1,7 +1,3 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE NoFieldSelectors #-}
-{-# OPTIONS_GHC -Wno-partial-fields #-}
-
 module OpenSolid.SurfaceFunction
   ( SurfaceFunction
   , Compiled
