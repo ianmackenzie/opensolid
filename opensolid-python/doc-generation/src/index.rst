@@ -1,4 +1,4 @@
-.. include:: ../../README.rst
+.. include:: ../../lib/README.rst
 
 .. toctree::
    :hidden:
