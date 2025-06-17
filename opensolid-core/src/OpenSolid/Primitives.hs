@@ -12,9 +12,9 @@ module OpenSolid.Primitives
   , Direction3d (Unit3d, Direction3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   , Orientation3d (Orientation3d)
-  , Point3d (Point3d)
+  , Point3d (Point3d, Position3d)
   , VectorBounds3d (VectorBounds3d)
-  , Bounds3d (Bounds3d)
+  , Bounds3d (Bounds3d, PositionBounds3d)
   , Axis3d (Axis3d)
   , Plane3d (Plane3d)
   , Frame3d (Frame3d)
@@ -1371,8 +1371,17 @@ instance HasField "downwardOrientation" (Orientation3d space) (Orientation3d spa
 
 ----- Point3d -----
 
-data Point3d (coordinateSystem :: CoordinateSystem) where
-  Point3d :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
+newtype Point3d (coordinateSystem :: CoordinateSystem) = Position3d (Vector3d coordinateSystem)
+
+{-# COMPLETE Point3d #-}
+
+{-# INLINE Point3d #-}
+
+-- | Construct a point from its X and Y coordinates.
+pattern Point3d :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
+pattern Point3d px py pz <- Position3d (Vector3d px py pz)
+  where
+    Point3d px py pz = Position3d (Vector3d px py pz)
 
 deriving instance Eq (Point3d (space @ units))
 
@@ -1389,7 +1398,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Point3d (space1 @ unitsA)) (Point3d (space2 @ unitsB))
   where
-  coerce (Point3d px py pz) = Point3d (Qty.coerce px) (Qty.coerce py) (Qty.coerce pz)
+  coerce (Position3d p) = Position3d (Units.coerce p)
 
 instance
   ( space1 ~ space2
@@ -1400,7 +1409,7 @@ instance
     (Vector3d (space2 @ units2))
     (Point3d (space1 @ units1))
   where
-  Point3d px py pz + Vector3d vx vy vz = Point3d (px + vx) (py + vy) (pz + vz)
+  Position3d p + v = Position3d (p + v)
 
 instance
   ( space1 ~ space2
@@ -1411,7 +1420,7 @@ instance
     (Vector3d (space2 @ units2))
     (Point3d (space1 @ units1))
   where
-  Point3d px py pz - Vector3d vx vy vz = Point3d (px - vx) (py - vy) (pz - vz)
+  Position3d p - v = Position3d (p - v)
 
 instance
   ( space1 ~ space2
@@ -1422,7 +1431,7 @@ instance
     (Point3d (space2 @ units2))
     (Vector3d (space1 @ units1))
   where
-  Point3d x1 y1 z1 - Point3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
+  Position3d p1 - Position3d p2 = p1 - p2
 
 instance
   ( space1 ~ space2
@@ -1433,7 +1442,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  Point3d px py pz + VectorBounds3d vx vy vz = Bounds3d (px + vx) (py + vy) (pz + vz)
+  Position3d p + vb = PositionBounds3d (p + vb)
 
 instance
   ( space1 ~ space2
@@ -1444,7 +1453,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  Point3d px py pz - VectorBounds3d vx vy vz = Bounds3d (px - vx) (py - vy) (pz - vz)
+  Position3d p - vb = PositionBounds3d (p - vb)
 
 instance
   ( space1 ~ space2
@@ -1452,7 +1461,7 @@ instance
   ) =>
   ApproximateEquality (Point3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
   where
-  Point3d x1 y1 z1 ~= Point3d x2 y2 z2 = Qty.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Qty.zero
+  Position3d p1 ~= Position3d p2 = p1 ~= p2
 
 ----- VectorBounds3d -----
 
@@ -1810,12 +1819,18 @@ instance
 
 ----- Bounds3d -----
 
-data Bounds3d (coordinateSystem :: CoordinateSystem) where
-  Bounds3d ::
-    Bounds units ->
-    Bounds units ->
-    Bounds units ->
-    Bounds3d (space @ units)
+newtype Bounds3d (coordinateSystem :: CoordinateSystem)
+  = PositionBounds3d (VectorBounds3d coordinateSystem)
+
+{-# COMPLETE Bounds3d #-}
+
+{-# INLINE Bounds3d #-}
+
+-- | Construct a point from its X and Y coordinates.
+pattern Bounds3d :: Bounds units -> Bounds units -> Bounds units -> Bounds3d (space @ units)
+pattern Bounds3d bx by bz <- PositionBounds3d (VectorBounds3d bx by bz)
+  where
+    Bounds3d bx by bz = PositionBounds3d (VectorBounds3d bx by bz)
 
 deriving instance Show (Qty units) => Show (Bounds3d (space @ units))
 
@@ -1828,7 +1843,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Bounds3d (space1 @ unitsA)) (Bounds3d (space2 @ unitsB))
   where
-  coerce (Bounds3d x y z) = Bounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+  coerce (PositionBounds3d pb) = PositionBounds3d (Units.coerce pb)
 
 instance
   ( space1 ~ space2
@@ -1839,7 +1854,7 @@ instance
     (Vector3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  Bounds3d x1 y1 z1 + Vector3d x2 y2 z2 = Bounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+  PositionBounds3d pb + v = PositionBounds3d (pb + v)
 
 instance
   ( space1 ~ space2
@@ -1850,7 +1865,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  Bounds3d x1 y1 z1 + VectorBounds3d x2 y2 z2 = Bounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+  PositionBounds3d pb + vb = PositionBounds3d (pb + vb)
 
 instance
   ( space1 ~ space2
@@ -1861,7 +1876,7 @@ instance
     (Vector3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  Bounds3d x1 y1 z1 - Vector3d x2 y2 z2 = Bounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+  PositionBounds3d pb - v = PositionBounds3d (pb - v)
 
 instance
   ( space1 ~ space2
@@ -1872,7 +1887,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  Bounds3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = Bounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+  PositionBounds3d pb - vb = PositionBounds3d (pb - vb)
 
 instance
   ( space1 ~ space2
@@ -1883,7 +1898,7 @@ instance
     (Bounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  Point3d px py pz - Bounds3d bx by bz = VectorBounds3d (px - bx) (py - by) (pz - bz)
+  Position3d p - PositionBounds3d pb = p - pb
 
 instance
   ( space1 ~ space2
@@ -1894,7 +1909,7 @@ instance
     (Point3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  Bounds3d bx by bz - Point3d px py pz = VectorBounds3d (bx - px) (by - py) (bz - pz)
+  PositionBounds3d pb - Position3d p = pb - p
 
 instance
   ( space1 ~ space2
@@ -1905,7 +1920,7 @@ instance
     (Bounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  Bounds3d x1 y1 z1 - Bounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+  PositionBounds3d pb1 - PositionBounds3d pb2 = pb1 - pb2
 
 instance
   ( space1 ~ space2
@@ -1913,7 +1928,7 @@ instance
   ) =>
   Intersects (Point3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
   where
-  Point3d px py pz ^ Bounds3d bx by bz = px ^ bx && py ^ by && pz ^ bz
+  Position3d p ^ PositionBounds3d pb = p ^ pb
 
 instance
   ( space1 ~ space2
@@ -1929,7 +1944,7 @@ instance
   ) =>
   Intersects (Bounds3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
   where
-  Bounds3d x1 y1 z1 ^ Bounds3d x2 y2 z2 = x1 ^ x2 && y1 ^ y2 && z1 ^ z2
+  PositionBounds3d pb1 ^ PositionBounds3d pb2 = pb1 ^ pb2
 
 ----- Axis3d -----
 

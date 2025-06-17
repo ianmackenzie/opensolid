@@ -42,7 +42,7 @@ import OpenSolid.Primitives
   , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Point3d (Point3d)
+  , Point3d (Point3d, Position3d)
   , Transform3d (Transform3d)
   , Vector3d
   )
@@ -88,7 +88,7 @@ on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d pX pY) = do
 
 {-# INLINE coerce #-}
 coerce :: Point3d (space1 @ units1) -> Point3d (space2 @ units2)
-coerce (Point3d pR pF pU) = Point3d (Qty.coerce pR) (Qty.coerce pF) (Qty.coerce pU)
+coerce (Position3d p) = Position3d (Vector3d.coerce p)
 
 erase :: Point3d (space @ units) -> Point3d (space @ Unitless)
 erase = coerce
@@ -109,16 +109,11 @@ interpolateFrom ::
   Point3d (space @ units) ->
   Float ->
   Point3d (space @ units)
-interpolateFrom (Point3d x1 y1 z1) (Point3d x2 y2 z2) t =
-  Point3d
-    (Qty.interpolateFrom x1 x2 t)
-    (Qty.interpolateFrom y1 y2 t)
-    (Qty.interpolateFrom z1 z2 t)
+interpolateFrom (Position3d p1) (Position3d p2) t = Position3d (Vector3d.interpolateFrom p1 p2 t)
 
 -- | Find the midpoint between two points.
 midpoint :: Point3d (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
-midpoint (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
-  Point3d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2) (Qty.midpoint z1 z2)
+midpoint (Position3d p1) (Position3d p2) = Position3d (Vector3d.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
 distanceFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Qty units
@@ -166,10 +161,10 @@ projectInto (Plane3d p0 (PlaneOrientation3d i j)) p =
   let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
 
 convert :: Qty (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
-convert factor (Point3d px py pz) = Point3d (px !* factor) (py !* factor) (pz !* factor)
+convert factor (Position3d p) = Position3d (Vector3d.convert factor p)
 
 unconvert :: Qty (units2 :/: units1) -> Point3d (space @ units2) -> Point3d (space @ units1)
-unconvert factor (Point3d px py pz) = Point3d (px !/ factor) (py !/ factor) (pz !/ factor)
+unconvert factor (Position3d p) = Position3d (Vector3d.unconvert factor p)
 
 transformBy :: Transform3d tag (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
 transformBy transform (Point3d px py pz) = do

@@ -4,6 +4,7 @@ module OpenSolid.VectorBounds3d
   , coerce
   , aggregate2
   , aggregate3
+  , aggregateN
   , hull2
   , hull3
   , hull4
@@ -19,9 +20,14 @@ module OpenSolid.VectorBounds3d
   , maxSquaredMagnitude
   , maxSquaredMagnitude'
   , normalize
+  , exclusion
+  , inclusion
   , includes
   , contains
   , isContainedIn
+  , separation
+  , overlap
+  , intersection
   , interpolate
   , relativeTo
   , placeIn
@@ -35,6 +41,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -114,6 +121,37 @@ aggregate3 ::
 aggregate3 (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) (VectorBounds3d x3 y3 z3) =
   VectorBounds3d (Bounds.aggregate3 x1 x2 x3) (Bounds.aggregate3 y1 y2 y3) (Bounds.aggregate3 z1 z2 z3)
 
+-- | Construct a vector bounding box containing all vector bounding boxes in the given list.
+aggregateN :: NonEmpty (VectorBounds3d (space @ units)) -> VectorBounds3d (space @ units)
+aggregateN (first :| rest) = do
+  let VectorBounds3d (Bounds xLow0 xHigh0) (Bounds yLow0 yHigh0) (Bounds zLow0 zHigh0) = first
+  aggregateImpl xLow0 xHigh0 yLow0 yHigh0 zLow0 zHigh0 rest
+
+aggregateImpl ::
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  List (VectorBounds3d (space @ units)) ->
+  VectorBounds3d (space @ units)
+aggregateImpl xLow xHigh yLow yHigh zLow zHigh rest = case rest of
+  [] -> VectorBounds3d (Bounds xLow xHigh) (Bounds yLow yHigh) (Bounds zLow zHigh)
+  next : remaining -> do
+    let VectorBounds3d xNext yNext zNext = next
+    let Bounds xLowNext xHighNext = xNext
+    let Bounds yLowNext yHighNext = yNext
+    let Bounds zLowNext zHighNext = zNext
+    aggregateImpl
+      (Qty.min xLow xLowNext)
+      (Qty.max xHigh xHighNext)
+      (Qty.min yLow yLowNext)
+      (Qty.max yHigh yHighNext)
+      (Qty.min zLow zLowNext)
+      (Qty.max zHigh zHighNext)
+      remaining
+
 xComponent :: VectorBounds3d (space @ units) -> Bounds units
 xComponent (VectorBounds3d vx _ _) = vx
 
@@ -167,6 +205,27 @@ clampNormalized :: Bounds Unitless -> Bounds Unitless
 clampNormalized (Bounds low high) =
   Bounds (Qty.clampTo normalizedBounds low) (Qty.clampTo normalizedBounds high)
 
+exclusion :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Qty units
+exclusion (Vector3d x y z) (VectorBounds3d bx by bz) = do
+  let exclusionX = Bounds.exclusion x bx
+  let exclusionY = Bounds.exclusion y by
+  let exclusionZ = Bounds.exclusion z bz
+  let positiveX = exclusionX >= Qty.zero
+  let positiveY = exclusionY >= Qty.zero
+  let positiveZ = exclusionZ >= Qty.zero
+  if
+    | positiveX && positiveY && positiveZ -> Qty.hypot3 exclusionX exclusionY exclusionZ
+    | positiveX && positiveY -> Qty.hypot2 exclusionX exclusionY
+    | positiveX && positiveZ -> Qty.hypot2 exclusionX exclusionZ
+    | positiveY && positiveZ -> Qty.hypot2 exclusionY exclusionZ
+    | positiveX -> exclusionX
+    | positiveY -> exclusionY
+    | positiveZ -> exclusionZ
+    | otherwise -> Qty.max (Qty.max exclusionX exclusionY) exclusionZ
+
+inclusion :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Qty units
+inclusion point box = -(exclusion point box)
+
 includes :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Bool
 includes (Vector3d vx vy vz) (VectorBounds3d x y z) =
   Bounds.includes vx x && Bounds.includes vy y && Bounds.includes vz z
@@ -177,6 +236,37 @@ contains (VectorBounds3d x2 y2 z2) (VectorBounds3d x1 y1 z1) =
 
 isContainedIn :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
+
+separation :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Qty units
+separation (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = do
+  let separationX = Bounds.separation x1 x2
+  let separationY = Bounds.separation y1 y2
+  let separationZ = Bounds.separation z1 z2
+  let positiveX = separationX >= Qty.zero
+  let positiveY = separationY >= Qty.zero
+  let positiveZ = separationZ >= Qty.zero
+  if
+    | positiveX && positiveY && positiveZ -> Qty.hypot3 separationX separationY separationZ
+    | positiveX && positiveY -> Qty.hypot2 separationX separationY
+    | positiveX && positiveZ -> Qty.hypot2 separationX separationZ
+    | positiveY && positiveZ -> Qty.hypot2 separationY separationZ
+    | positiveX -> separationX
+    | positiveY -> separationY
+    | positiveZ -> separationZ
+    | otherwise -> Qty.max (Qty.max separationX separationY) separationZ
+
+overlap :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Qty units
+overlap first second = -(separation first second)
+
+intersection ::
+  VectorBounds3d (space @ units) ->
+  VectorBounds3d (space @ units) ->
+  Maybe (VectorBounds3d (space @ units))
+intersection (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = Maybe.do
+  x <- Bounds.intersection x1 x2
+  y <- Bounds.intersection y1 y2
+  z <- Bounds.intersection z1 z2
+  Just (VectorBounds3d x y z)
 
 interpolate :: VectorBounds3d (space @ units) -> Float -> Float -> Float -> Vector3d (space @ units)
 interpolate (VectorBounds3d x y z) u v w =

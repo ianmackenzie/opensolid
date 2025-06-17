@@ -32,6 +32,7 @@ module OpenSolid.Bounds3d
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -41,22 +42,25 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
-  , Bounds3d (Bounds3d)
+  , Bounds3d (Bounds3d, PositionBounds3d)
   , Direction3d (Direction3d)
   , Frame3d (Frame3d)
   , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Point3d (Point3d)
+  , Point3d (Point3d, Position3d)
   , Vector3d (Vector3d)
   )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))
+import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
 
@@ -85,42 +89,15 @@ coordinates convention bounds =
 
 -- | Construct a zero-size bounding box containing a single point.
 constant :: Point3d (space @ units) -> Bounds3d (space @ units)
-constant (Point3d x y z) =
-  Bounds3d (Bounds.constant x) (Bounds.constant y) (Bounds.constant z)
+constant (Position3d p) = PositionBounds3d (VectorBounds3d.constant p)
 
 aggregate2 :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bounds3d (space @ units)
-aggregate2 (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) =
-  Bounds3d (Bounds.aggregate2 x1 x2) (Bounds.aggregate2 y1 y2) (Bounds.aggregate2 z1 z2)
+aggregate2 (PositionBounds3d pb1) (PositionBounds3d pb2) =
+  PositionBounds3d (VectorBounds3d.aggregate2 pb1 pb2)
 
 -- | Construct a bounding box containing all bounding boxes in the given non-empty list.
 aggregateN :: NonEmpty (Bounds3d (space @ units)) -> Bounds3d (space @ units)
-aggregateN (Bounds3d (Bounds xLow0 xHigh0) (Bounds yLow0 yHigh0) (Bounds zLow0 zHigh0) :| rest) =
-  aggregateImpl xLow0 xHigh0 yLow0 yHigh0 zLow0 zHigh0 rest
-
-aggregateImpl ::
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  List (Bounds3d (space @ units)) ->
-  Bounds3d (space @ units)
-aggregateImpl xLow xHigh yLow yHigh zLow zHigh rest = case rest of
-  [] -> Bounds3d (Bounds xLow xHigh) (Bounds yLow yHigh) (Bounds zLow zHigh)
-  next : remaining -> do
-    let Bounds3d xNext yNext zNext = next
-    let Bounds xLowNext xHighNext = xNext
-    let Bounds yLowNext yHighNext = yNext
-    let Bounds zLowNext zHighNext = zNext
-    aggregateImpl
-      (Qty.min xLow xLowNext)
-      (Qty.max xHigh xHighNext)
-      (Qty.min yLow yLowNext)
-      (Qty.max yHigh yHighNext)
-      (Qty.min zLow zLowNext)
-      (Qty.max zHigh zHighNext)
-      remaining
+aggregateN list = PositionBounds3d (VectorBounds3d.aggregateN (Data.Coerce.coerce list))
 
 centerPoint :: Bounds3d (space @ units) -> Point3d (space @ units)
 centerPoint (Bounds3d r f u) = Point3d (Bounds.midpoint r) (Bounds.midpoint f) (Bounds.midpoint u)
@@ -135,82 +112,41 @@ height :: Bounds3d (space @ units) -> Qty units
 height (Bounds3d _ _ u) = Bounds.width u
 
 exclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
-exclusion (Point3d x y z) (Bounds3d bx by bz) = do
-  let dx = Bounds.exclusion x bx
-  let dy = Bounds.exclusion y by
-  let dz = Bounds.exclusion z bz
-  let px = dx >= Qty.zero
-  let py = dy >= Qty.zero
-  let pz = dz >= Qty.zero
-  if
-    | px && py && pz -> Qty.hypot3 dx dy dz
-    | px && py -> Qty.hypot2 dx dy
-    | px && pz -> Qty.hypot2 dx dz
-    | py && pz -> Qty.hypot2 dy dz
-    | px -> dx
-    | py -> dy
-    | pz -> dz
-    | otherwise -> Qty.max (Qty.max dx dy) dz
+exclusion (Position3d p) (PositionBounds3d pb) = VectorBounds3d.exclusion p pb
 
 inclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
-inclusion point box = -(exclusion point box)
+inclusion (Position3d p) (PositionBounds3d pb) = VectorBounds3d.inclusion p pb
 
 contains :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bool
-contains (Bounds3d x2 y2 z2) (Bounds3d x1 y1 z1) =
-  Bounds.contains x2 x1 && Bounds.contains y2 y1 && Bounds.contains z2 z1
+contains (PositionBounds3d pb2) (PositionBounds3d pb1) = VectorBounds3d.contains pb2 pb1
 
 isContainedIn :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bool
-isContainedIn bounds1 bounds2 = contains bounds2 bounds1
+isContainedIn (PositionBounds3d pb1) (PositionBounds3d pb2) = VectorBounds3d.isContainedIn pb1 pb2
 
 separation :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Qty units
-separation (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) = do
-  let dx = Bounds.separation x1 x2
-  let dy = Bounds.separation y1 y2
-  let dz = Bounds.separation z1 z2
-  let px = dx >= Qty.zero
-  let py = dy >= Qty.zero
-  let pz = dz >= Qty.zero
-  if
-    | px && py && pz -> Qty.hypot3 dx dy dz
-    | px && py -> Qty.hypot2 dx dy
-    | px && pz -> Qty.hypot2 dx dz
-    | py && pz -> Qty.hypot2 dy dz
-    | px -> dx
-    | py -> dy
-    | pz -> dz
-    | otherwise -> Qty.max (Qty.max dx dy) dz
+separation (PositionBounds3d pb1) (PositionBounds3d pb2) = VectorBounds3d.separation pb1 pb2
 
 overlap :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Qty units
-overlap first second = -(separation first second)
+overlap (PositionBounds3d pb1) (PositionBounds3d pb2) = VectorBounds3d.overlap pb1 pb2
 
 intersection :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Maybe (Bounds3d (space @ units))
-intersection (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) = Maybe.do
-  x <- Bounds.intersection x1 x2
-  y <- Bounds.intersection y1 y2
-  z <- Bounds.intersection z1 z2
-  Just (Bounds3d x y z)
+intersection (PositionBounds3d pb1) (PositionBounds3d pb2) =
+  Maybe.map PositionBounds3d (VectorBounds3d.intersection pb1 pb2)
 
 -- | Construct a bounding box from two corner points.
 hull2 ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Bounds3d (space @ units)
-hull2 (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
-  Bounds3d (Bounds x1 x2) (Bounds y1 y2) (Bounds z1 z2)
+hull2 (Position3d p1) (Position3d p2) = PositionBounds3d (VectorBounds3d.hull2 p1 p2)
 
 hull3 ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Bounds3d (space @ units)
-hull3 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) = do
-  let minX = Qty.min (Qty.min x1 x2) x3
-  let maxX = Qty.max (Qty.max x1 x2) x3
-  let minY = Qty.min (Qty.min y1 y2) y3
-  let maxY = Qty.max (Qty.max y1 y2) y3
-  let minZ = Qty.min (Qty.min z1 z2) z3
-  let maxZ = Qty.max (Qty.max z1 z2) z3
-  Bounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)
+hull3 (Position3d p1) (Position3d p2) (Position3d p3) =
+  PositionBounds3d (VectorBounds3d.hull3 p1 p2 p3)
 
 hull4 ::
   Point3d (space @ units) ->
@@ -218,50 +154,20 @@ hull4 ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Bounds3d (space @ units)
-hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4) = do
-  let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
-  let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
-  let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
-  let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
-  let minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
-  let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
-  Bounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)
+hull4 (Position3d p1) (Position3d p2) (Position3d p3) (Position3d p4) =
+  PositionBounds3d (VectorBounds3d.hull4 p1 p2 p3 p4)
 
 -- | Construct a bounding box containing all vertices in the given non-empty list.
 hullN :: Vertex3d vertex (space @ units) => NonEmpty vertex -> Bounds3d (space @ units)
-hullN (v0 :| rest) = do
-  let Point3d x0 y0 z0 = Vertex3d.position v0
-  accumulateHull x0 x0 y0 y0 z0 z0 rest
-
-accumulateHull ::
-  Vertex3d vertex (space @ units) =>
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  List vertex ->
-  Bounds3d (space @ units)
-accumulateHull xLow xHigh yLow yHigh zLow zHigh remaining = case remaining of
-  [] -> Bounds3d (Bounds xLow xHigh) (Bounds yLow yHigh) (Bounds zLow zHigh)
-  vertex : following -> do
-    let Point3d x y z = Vertex3d.position vertex
-    accumulateHull
-      (Qty.min xLow x)
-      (Qty.max xHigh x)
-      (Qty.min yLow y)
-      (Qty.max yHigh y)
-      (Qty.min zLow z)
-      (Qty.max zHigh z)
-      following
+hullN vertices = do
+  let positionVectors = Data.Coerce.coerce (NonEmpty.map Vertex3d.position vertices)
+  PositionBounds3d (VectorBounds3d.hullN positionVectors)
 
 diameter :: Bounds3d (space @ units) -> Qty units
 diameter (Bounds3d x y z) = Qty.hypot3 (Bounds.width x) (Bounds.width y) (Bounds.width z)
 
 interpolate :: Bounds3d (space @ units) -> Float -> Float -> Float -> Point3d (space @ units)
-interpolate (Bounds3d x y z) u v w =
-  Point3d (Bounds.interpolate x u) (Bounds.interpolate y v) (Bounds.interpolate z w)
+interpolate (PositionBounds3d pb) u v w = Position3d (VectorBounds3d.interpolate pb u v w)
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
