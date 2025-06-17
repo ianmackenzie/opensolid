@@ -40,6 +40,7 @@ module OpenSolid.Expression
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds2d (Bounds2d)
@@ -51,17 +52,16 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Bounds2d (PositionBounds2d)
   , Bounds3d (PositionBounds3d)
   , Point2d (Position2d)
-  , Point3d (Point3d, Position3d)
-  , Vector3d (Vector3d)
+  , Point3d (Position3d)
+  , Vector3d
   , VectorBounds3d
   )
 import OpenSolid.Qty qualified as Qty
@@ -70,7 +70,7 @@ import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
@@ -1166,12 +1166,6 @@ instance
 --- FUNCTIONS ---
 -----------------
 
-toVector2d :: Point2d (space @ units) -> Vector2d (space @ units)
-toVector2d (Point2d x y) = Vector2d x y
-
-toVector3d :: Point3d (space @ units) -> Vector3d (space @ units)
-toVector3d (Point3d x y z) = Vector3d x y z
-
 class Zero input output where
   zero :: Expression input output
 
@@ -1224,16 +1218,16 @@ instance Constant UvPoint (Vector3d (space @ units)) where
   constant value = vectorSurface3d (Ast.constant3d value)
 
 instance Constant Float (Point2d (space @ units)) where
-  constant point = curve2d (Ast.constant2d (toVector2d point))
+  constant (Position2d p) = curve2d (Ast.constant2d p)
 
 instance Constant UvPoint (Point2d (space @ units)) where
-  constant point = surface2d (Ast.constant2d (toVector2d point))
+  constant (Position2d p) = surface2d (Ast.constant2d p)
 
 instance Constant Float (Point3d (space @ units)) where
-  constant point = curve3d (Ast.constant3d (toVector3d point))
+  constant (Position3d p) = curve3d (Ast.constant3d p)
 
 instance Constant UvPoint (Point3d (space @ units)) where
-  constant point = surface3d (Ast.constant3d (toVector3d point))
+  constant (Position3d p) = surface3d (Ast.constant3d p)
 
 class XY input output units | output -> units where
   xy ::
@@ -1591,14 +1585,14 @@ instance BezierCurve (Vector2d (space @ units)) where
 
 instance BezierCurve (Point2d (space @ units)) where
   bezierCurve controlPoints =
-    curve2d (Ast.bezierCurve2d (NonEmpty.map toVector2d controlPoints) Ast.curveParameter)
+    curve2d (Ast.bezierCurve2d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
 
 instance BezierCurve (Vector3d (space @ units)) where
   bezierCurve controlPoints = vectorCurve3d (Ast.bezierCurve3d controlPoints Ast.curveParameter)
 
 instance BezierCurve (Point3d (space @ units)) where
   bezierCurve controlPoints =
-    curve3d (Ast.bezierCurve3d (NonEmpty.map toVector3d controlPoints) Ast.curveParameter)
+    curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
 
 -----------------
 --- COMPILING ---
