@@ -76,7 +76,7 @@ orientation = (.orientation)
 
 -- | Get the normal direction of a plane.
 normalDirection :: Plane3d (space @ units) defines -> Direction3d space
-normalDirection plane = PlaneOrientation3d.normalDirection (orientation plane)
+normalDirection = (.normalDirection)
 
 {-| Construct an axis normal (perpendicular) to a plane.
 
@@ -84,29 +84,29 @@ The origin point of the axis will be the origin point of the plane,
 and the direction of the axis will be the normal direction of the plane.
 -}
 normalAxis :: Plane3d (space @ units) defines -> Axis3d (space @ units)
-normalAxis plane = Axis3d (originPoint plane) (normalDirection plane)
+normalAxis = (.normalAxis)
 
 -- | Get the X direction of a plane.
 xDirection :: Plane3d (space @ units) defines -> Direction3d space
-xDirection plane = PlaneOrientation3d.xDirection (orientation plane)
+xDirection = (.xDirection)
 
 -- | Get the Y direction of a plane.
 yDirection :: Plane3d (space @ units) defines -> Direction3d space
-yDirection plane = PlaneOrientation3d.yDirection (orientation plane)
+yDirection = (.yDirection)
 
 {-| Get the X axis of a plane.
 
 This is an axis formed from the plane's origin point and X direction.
 -}
 xAxis :: Plane3d (space @ units) defines -> Axis3d (space @ units)
-xAxis plane = Axis3d (originPoint plane) (xDirection plane)
+xAxis = (.xAxis)
 
 {-| Get the Y axis of a plane.
 
 This is an axis formed from the plane's origin point and Y direction.
 -}
 yAxis :: Plane3d (space @ units) defines -> Axis3d (space @ units)
-yAxis plane = Axis3d (originPoint plane) (yDirection plane)
+yAxis = (.yAxis)
 
 {-| Move a plane so that its origin point is the given point.
 

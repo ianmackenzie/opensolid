@@ -100,15 +100,15 @@ flip (PlaneOrientation3d i j) = PlaneOrientation3d -i j
 
 -- | Get the X direction of a plane orientation.
 xDirection :: PlaneOrientation3d space -> Direction3d space
-xDirection (PlaneOrientation3d i _) = i
+xDirection = (.xDirection)
 
 -- | Get the Y direction of a plane orientation.
 yDirection :: PlaneOrientation3d space -> Direction3d space
-yDirection (PlaneOrientation3d _ j) = j
+yDirection = (.yDirection)
 
 -- | Get the normal (outward) direction of a plane orientation.
 normalDirection :: PlaneOrientation3d space -> Direction3d space
-normalDirection (PlaneOrientation3d i j) = Unit3d (i `cross` j)
+normalDirection = (.normalDirection)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

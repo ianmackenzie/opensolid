@@ -1330,6 +1330,9 @@ instance HasField "xDirection" (PlaneOrientation3d space) (Direction3d space) wh
 instance HasField "yDirection" (PlaneOrientation3d space) (Direction3d space) where
   getField (PlaneOrientation3d _ dy) = dy
 
+instance HasField "normalDirection" (PlaneOrientation3d space) (Direction3d space) where
+  getField (PlaneOrientation3d dx dy) = Unit3d (dx `cross` dy)
+
 ----- Orientation3d -----
 
 -- | A set of cardinal directions (forward, upward etc.) defining a 3D orientation.
@@ -2058,6 +2061,24 @@ instance
 instance HasField "orientation" (Plane3d (space @ units) defines) (PlaneOrientation3d space) where
   getField (Plane3d _ o) = o
 
+instance HasField "xDirection" (Plane3d (space @ units) defines) (Direction3d space) where
+  getField = (.orientation.xDirection)
+
+instance HasField "yDirection" (Plane3d (space @ units) defines) (Direction3d space) where
+  getField = (.orientation.yDirection)
+
+instance HasField "normalDirection" (Plane3d (space @ units) defines) (Direction3d space) where
+  getField = (.orientation.normalDirection)
+
+instance HasField "xAxis" (Plane3d (space @ units) defines) (Axis3d (space @ units)) where
+  getField plane = Axis3d plane.originPoint plane.xDirection
+
+instance HasField "yAxis" (Plane3d (space @ units) defines) (Axis3d (space @ units)) where
+  getField plane = Axis3d plane.originPoint plane.yDirection
+
+instance HasField "normalAxis" (Plane3d (space @ units) defines) (Axis3d (space @ units)) where
+  getField plane = Axis3d plane.originPoint plane.normalDirection
+
 ----- Frame3d -----
 
 -- | A frame of reference in 3D, defined by an origin point and orientation.
@@ -2123,6 +2144,54 @@ instance
     (Direction3d space)
   where
   getField = (.orientation.downwardDirection)
+
+instance
+  HasField
+    "rightwardAxis"
+    (Frame3d (space @ units) defines)
+    (Axis3d (space @ units))
+  where
+  getField frame = Axis3d frame.originPoint frame.rightwardDirection
+
+instance
+  HasField
+    "leftwardAxis"
+    (Frame3d (space @ units) defines)
+    (Axis3d (space @ units))
+  where
+  getField frame = Axis3d frame.originPoint frame.leftwardDirection
+
+instance
+  HasField
+    "forwardAxis"
+    (Frame3d (space @ units) defines)
+    (Axis3d (space @ units))
+  where
+  getField frame = Axis3d frame.originPoint frame.forwardDirection
+
+instance
+  HasField
+    "backwardAxis"
+    (Frame3d (space @ units) defines)
+    (Axis3d (space @ units))
+  where
+  getField frame = Axis3d frame.originPoint frame.backwardDirection
+
+instance
+  HasField
+    "upwardAxis"
+    (Frame3d (space @ units) defines)
+    (Axis3d (space @ units))
+  where
+  getField frame = Axis3d frame.originPoint frame.upwardDirection
+
+instance
+  HasField
+    "downwardAxis"
+    (Frame3d (space @ units) defines)
+    (Axis3d (space @ units))
+  where
+  getField frame = Axis3d frame.originPoint frame.downwardDirection
 
 instance
   HasField

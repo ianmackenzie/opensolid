@@ -69,7 +69,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Axis3d (Axis3d (Axis3d))
+import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Orientation3d (Orientation3d)
 import OpenSolid.Orientation3d qualified as Orientation3d
@@ -125,27 +125,27 @@ downwardDirection = (.downwardDirection)
 
 -- | Get the rightward axis of a frame.
 rightwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-rightwardAxis frame = Axis3d (originPoint frame) (rightwardDirection frame)
+rightwardAxis = (.rightwardAxis)
 
 -- | Get the leftward axis of a frame.
 leftwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-leftwardAxis frame = Axis3d (originPoint frame) (leftwardDirection frame)
+leftwardAxis = (.leftwardAxis)
 
 -- | Get the forward axis of a frame.
 forwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-forwardAxis frame = Axis3d (originPoint frame) (forwardDirection frame)
+forwardAxis = (.forwardAxis)
 
 -- | Get the backward axis of a frame.
 backwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-backwardAxis frame = Axis3d (originPoint frame) (backwardDirection frame)
+backwardAxis = (.backwardAxis)
 
 -- | Get the upward axis of a frame.
 upwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-upwardAxis frame = Axis3d (originPoint frame) (upwardDirection frame)
+upwardAxis = (.upwardAxis)
 
 -- | Get the downward axis of a frame.
 downwardAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
-downwardAxis frame = Axis3d (originPoint frame) (downwardDirection frame)
+downwardAxis = (.downwardAxis)
 
 {-| Construct a locally forward-facing plane from a frame.
 
