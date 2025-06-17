@@ -58,8 +58,7 @@ import OpenSolid.Orientation3d (Orientation3d)
 import OpenSolid.Plane3d (Plane3d (Plane3d))
 import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
-import OpenSolid.Point2d (Point2d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -76,8 +75,7 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d qualified as Transform3d
-import OpenSolid.Vector2d (Vector2d)
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 length :: Generator Length
@@ -87,13 +85,13 @@ lengthBounds :: Generator (Bounds Meters)
 lengthBounds = Bounds.random length
 
 point2d :: Generator (Point2d (space @ Meters))
-point2d = Random.map2 Point2d.xy length length
+point2d = Random.map2 Point2d length length
 
 point3d :: Generator (Point3d (space @ Meters))
 point3d = Random.map3 Point3d length length length
 
 vector2d :: Generator (Vector2d (space @ Meters))
-vector2d = Random.map2 Vector2d.xy length length
+vector2d = Random.map2 Vector2d length length
 
 vector3d :: Generator (Vector3d (space @ Meters))
 vector3d = Random.map3 Vector3d length length length

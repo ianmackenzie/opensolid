@@ -10,6 +10,7 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
@@ -25,9 +26,9 @@ main = Tolerance.using Length.nanometer IO.do
   let thickness = Length.millimeters 10.0
   let p0 = Point2d.x innerRadius
   let p1 = Point2d.x outerRadius
-  let p2 = Point2d.xy outerRadius thickness
-  let p3 = Point2d.xy (innerRadius + thickness) width
-  let p4 = Point2d.xy innerRadius width
+  let p2 = Point2d outerRadius thickness
+  let p3 = Point2d (innerRadius + thickness) width
+  let p4 = Point2d innerRadius width
   profile <-
     Region2d.boundedBy
       [ Curve2d.line p0 p1

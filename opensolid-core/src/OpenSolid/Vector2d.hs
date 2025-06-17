@@ -5,7 +5,6 @@ module OpenSolid.Vector2d
   , unit
   , x
   , y
-  , xy
   , fromComponents
   , from
   , meters
@@ -97,10 +96,6 @@ The X component will be set to zero.
 -}
 y :: Qty units -> Vector2d (space @ units)
 y vy = Vector2d Qty.zero vy
-
--- | Construct a vector from its X and Y components.
-xy :: Qty units -> Qty units -> Vector2d (space @ units)
-xy = Vector2d
 
 -- | Construct a vector from a pair of X and Y components.
 fromComponents :: (Qty units, Qty units) -> Vector2d (space @ units)

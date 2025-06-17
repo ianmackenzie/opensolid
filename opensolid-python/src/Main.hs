@@ -305,7 +305,7 @@ extraMemberFunctions className = do
     "Vector2d" ->
       repr
         [ "x, y = self.components"
-        , "return 'Vector2d.xy(' + str(x) + ',' + str(y) + ')'"
+        , "return 'Vector2d(' + str(x) + ',' + str(y) + ')'"
         ]
     "Displacement2d" ->
       repr

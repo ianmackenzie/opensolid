@@ -105,7 +105,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
   let evaluate tValue = do
         let vValue = Float.interpolateFrom vStart vEnd tValue
         let uValue = solveForU vValue
-        Point2d.xy uValue vValue
+        Point2d uValue vValue
   let evaluateBounds tBounds = do
         let Bounds t1 t2 = tBounds
         let v1 = Float.interpolateFrom vStart vEnd t1
@@ -115,8 +115,8 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
         case monotonicity of
           Monotonic -> Bounds2d (Bounds u1 u2) (Bounds v1 v2)
           MonotonicIn frame -> do
-            let p1 = Point2d.xy u1 v1
-            let p2 = Point2d.xy u2 v2
+            let p1 = Point2d u1 v1
+            let p2 = Point2d u2 v2
             Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
               |> Bounds2d.placeIn frame
           NotMonotonic -> do

@@ -26,7 +26,7 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -68,7 +68,7 @@ constant :: Direction2d space -> DirectionCurve2d space
 constant direction = DirectionCurve2d (VectorCurve2d.constant (Vector2d.unit direction))
 
 arc :: Angle -> Angle -> DirectionCurve2d space
-arc a b = DirectionCurve2d (VectorCurve2d.arc (Vector2d.xy 1.0 0.0) (Vector2d.xy 0.0 1.0) a b)
+arc a b = DirectionCurve2d (VectorCurve2d.arc (Vector2d 1.0 0.0) (Vector2d 0.0 1.0) a b)
 
 reverse :: DirectionCurve2d space -> DirectionCurve2d space
 reverse (DirectionCurve2d vectorCurve) = DirectionCurve2d (VectorCurve2d.reverse vectorCurve)

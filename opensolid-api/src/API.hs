@@ -534,7 +534,6 @@ vector2d =
     [ constant "Zero" (Vector2d.zero @Space @Unitless) $(docs 'Vector2d.zero)
     , factory1 "Unit" "Direction" Vector2d.unit $(docs 'Vector2d.unit)
     , constructor2 "X Component" "Y Component" Vector2d $(docs 'Vector2d)
-    , factory2 "XY" "X Component" "Y Component" Vector2d $(docs 'Vector2d)
     , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
@@ -568,7 +567,6 @@ displacement2d =
   Class.new @(Vector2d (Space @ Meters)) "A displacement vector in 2D." $
     [ constant "Zero" (Vector2d.zero @Space @Meters) $(docs 'Vector2d.zero)
     , constructor2 "X Component" "Y Component" Vector2d $(docs 'Vector2d)
-    , factory2 "XY" "X Component" "Y Component" Vector2d $(docs 'Vector2d)
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
@@ -606,7 +604,6 @@ areaVector2d =
   Class.new @(Vector2d (Space @ SquareMeters)) "A vector in 2D with units of area." $
     [ constant "Zero" (Vector2d.zero @Space @SquareMeters) $(docs 'Vector2d.zero)
     , constructor2 "X Component" "Y Component" Vector2d $(docs 'Vector2d)
-    , factory2 "XY" "X Component" "Y Component" Vector2d $(docs 'Vector2d)
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
@@ -654,7 +651,6 @@ point2d =
   Class.new @(Point2d (Space @ Meters)) "A point in 2D, defined by its X and Y coordinates." $
     [ constant "Origin" (Point2d.origin @Space @Meters) $(docs 'Point2d.origin)
     , constructor2 "X Coordinate" "Y Coordinate" Point2d $(docs 'Point2d)
-    , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d $(docs 'Point2d)
     , factory1 "X" "X Coordinate" Point2d.x $(docs 'Point2d.x)
     , factory1 "Y" "Y Coordinate" Point2d.y $(docs 'Point2d.y)
     , factory2 "Polar" "Radius" "Angle" Point2d.polar $(docs 'Point2d.polar)

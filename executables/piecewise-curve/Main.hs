@@ -12,20 +12,20 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 main :: IO ()
 main = Tolerance.using Length.nanometer IO.do
   let weightCurve = Curve.quadraticSpline 1.0 (1.0 / Float.sqrt 2.0) 1.0
-  let vE = Vector2d.xy 1.0 0.0
-  let vNE = Vector2d.xy 1.0 1.0 / Float.sqrt 2.0
-  let vN = Vector2d.xy 0.0 1.0
-  let vNW = Vector2d.xy -1.0 1.0 / Float.sqrt 2.0
-  let vW = Vector2d.xy -1.0 0.0
-  let vSW = Vector2d.xy -1.0 -1.0 / Float.sqrt 2.0
-  let vS = Vector2d.xy 0.0 -1.0
-  let vSE = Vector2d.xy 1.0 -1.0 / Float.sqrt 2.0
+  let vE = Vector2d 1.0 0.0
+  let vNE = Vector2d 1.0 1.0 / Float.sqrt 2.0
+  let vN = Vector2d 0.0 1.0
+  let vNW = Vector2d -1.0 1.0 / Float.sqrt 2.0
+  let vW = Vector2d -1.0 0.0
+  let vSW = Vector2d -1.0 -1.0 / Float.sqrt 2.0
+  let vS = Vector2d 0.0 -1.0
+  let vSE = Vector2d 1.0 -1.0 / Float.sqrt 2.0
   let radius = Length.centimeters 10.0
   let arc1 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vE vNE vN / weightCurve
   let arc2 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vN vNW vW / weightCurve

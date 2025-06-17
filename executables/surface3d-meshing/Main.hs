@@ -7,7 +7,7 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
@@ -27,7 +27,7 @@ main = IO.do
           + r * SurfaceFunction.cos theta * world.rightwardDirection
           + r * SurfaceFunction.sin theta * world.forwardDirection
           + h * SurfaceFunction.v * world.upwardDirection
-  let domainCenter = Point2d.xy 0.5 0.5
+  let domainCenter = Point2d 0.5 0.5
   let domainDiameter = 2 / 3
   let domainCircle = Curve2d.circle (#centerPoint domainCenter, #diameter domainDiameter)
   domain <- Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle])

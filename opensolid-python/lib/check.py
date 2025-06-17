@@ -27,7 +27,7 @@ if r is None:
 else:
     print("Intersection:", r)
 
-v = Vector2d.xy(1, 2)
+v = Vector2d(1, 2)
 with Tolerance(1e-9):
     print(v.direction().components)
 

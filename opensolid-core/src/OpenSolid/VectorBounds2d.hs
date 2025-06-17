@@ -237,8 +237,7 @@ intersection (VectorBounds2d x1 y1) (VectorBounds2d x2 y2) =
   Maybe.map2 VectorBounds2d (Bounds.intersection x1 x2) (Bounds.intersection y1 y2)
 
 interpolate :: VectorBounds2d (space @ units) -> Float -> Float -> Vector2d (space @ units)
-interpolate (VectorBounds2d x y) u v =
-  Vector2d.xy (Bounds.interpolate x u) (Bounds.interpolate y v)
+interpolate (VectorBounds2d x y) u v = Vector2d (Bounds.interpolate x u) (Bounds.interpolate y v)
 
 placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->
@@ -301,7 +300,7 @@ transformBy transform (VectorBounds2d x y) = do
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector2d x0 y0 = Vector2d.transformBy transform (Vector2d.xy xMid yMid)
+  let Vector2d x0 y0 = Vector2d.transformBy transform (Vector2d xMid yMid)
   let Transform2d _ i j = transform
   let Vector2d ix iy = i
   let Vector2d jx jy = j

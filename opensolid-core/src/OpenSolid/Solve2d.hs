@@ -196,7 +196,7 @@ solveUnique localBounds fBounds f fu fv globalBounds =
       let (uBounds, vBounds) = Bounds2d.coordinates localBounds
       let uMid = Bounds.midpoint uBounds
       let vMid = Bounds.midpoint vBounds
-      let pMid = Point2d.xy uMid vMid
+      let pMid = Point2d uMid vMid
       let fMid = f pMid
       -- First, try applying Newton-Raphson starting at the center point of localBounds
       -- to see if that converges to a zero
@@ -255,7 +255,7 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
         else do
           let deltaU = (xv1 .*. y1 - yv1 .*. x1) / determinant
           let deltaV = (yu1 .*. x1 - xu1 .*. y1) / determinant
-          let p2 = boundedStep uvBounds p1 (p1 + Vector2d.xy deltaU deltaV)
+          let p2 = boundedStep uvBounds p1 (p1 + Vector2d deltaU deltaV)
           let f2 = f p2
           if Vector2d.squaredMagnitude' f2 >= Vector2d.squaredMagnitude' f1 -- Check if we've stopped converging
             then if f1 ~= Vector2d.zero then Success p1 else Failure Divergence
@@ -281,4 +281,4 @@ boundedStep uvBounds p1 p2 =
       -- Perform a final clamping step
       -- in case numerical roundoff during interpolation
       -- left the point *slightly* outside uvBounds
-      Point2d.xy (Qty.clampTo uBounds u) (Qty.clampTo vBounds v)
+      Point2d (Qty.clampTo uBounds u) (Qty.clampTo vBounds v)

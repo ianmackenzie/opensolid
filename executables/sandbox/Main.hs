@@ -33,7 +33,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
@@ -317,11 +317,11 @@ drawBezier color startPoint innerControlPoints endPoint = do
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = IO.do
   let p1 = Point2d.origin @Global
-  let p2 = Point2d.xy 0.0 5.0
-  let p3 = Point2d.xy 2.5 10.0
-  let p4 = Point2d.xy 5.0 0.0
-  let p5 = Point2d.xy 10.0 5.0
-  let p6 = Point2d.xy 10.0 10.0
+  let p2 = Point2d 0.0 5.0
+  let p3 = Point2d 2.5 10.0
+  let p4 = Point2d 5.0 0.0
+  let p5 = Point2d 10.0 5.0
+  let p6 = Point2d 10.0 10.0
   let coordinateBounds = Bounds.convert toDrawing (Bounds -1.0 11.0)
   let drawingBounds = Bounds2d coordinateBounds coordinateBounds
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6

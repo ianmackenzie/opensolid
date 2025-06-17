@@ -5,7 +5,6 @@ module OpenSolid.Point2d
   , x
   , y
   , along
-  , xy
   , polar
   , fromCoordinates
   , meters
@@ -77,10 +76,6 @@ y py = Point2d Qty.zero py
 
 along :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units)
 along (Axis2d originPoint direction) distance = originPoint + distance * direction
-
--- | Construct a point from its X and Y coordinates.
-xy :: Qty units -> Qty units -> Point2d (space @ units)
-xy = Point2d
 
 {-| Construct a point from polar coordinates (radius and angle).
 

@@ -31,9 +31,9 @@ with Tolerance(Length.meters(1e-9)):
 
     # Define key points on sketch profile
     p1 = Point2d.x(web_right_x)
-    p2 = Point2d.xy(web_right_x, top_flange_bottom_y)
-    p3 = Point2d.xy(flange_right_x, top_flange_bottom_y)
-    p4 = Point2d.xy(flange_right_x, top_flange_top_y)
+    p2 = Point2d(web_right_x, top_flange_bottom_y)
+    p3 = Point2d(flange_right_x, top_flange_bottom_y)
+    p4 = Point2d(flange_right_x, top_flange_top_y)
     p5 = Point2d.y(top_flange_top_y)
 
     # Create the sketch profile

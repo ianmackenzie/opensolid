@@ -24,7 +24,7 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -85,55 +85,55 @@ new f dudv dvdu subdomain = do
 cornerValues :: UvBounds -> SurfaceFunction units -> CornerValues units
 cornerValues (Bounds2d (Bounds u1 u2) (Bounds v1 v2)) function =
   CornerValues
-    { bottomLeft = SurfaceFunction.evaluate function (Point2d.xy u1 v1)
-    , bottomRight = SurfaceFunction.evaluate function (Point2d.xy u2 v1)
-    , topLeft = SurfaceFunction.evaluate function (Point2d.xy u1 v2)
-    , topRight = SurfaceFunction.evaluate function (Point2d.xy u2 v2)
+    { bottomLeft = SurfaceFunction.evaluate function (Point2d u1 v1)
+    , bottomRight = SurfaceFunction.evaluate function (Point2d u2 v1)
+    , topLeft = SurfaceFunction.evaluate function (Point2d u1 v2)
+    , topRight = SurfaceFunction.evaluate function (Point2d u2 v2)
     }
 
 leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 leftEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d (Bounds u1 _) vBounds = uvBounds
   let fv = SurfaceFunction.derivative V f
-  (Point2d.xy u1 (Internal.solveForV f fv u1 vBounds), Domain2d.leftEdge subdomain)
+  (Point2d u1 (Internal.solveForV f fv u1 vBounds), Domain2d.leftEdge subdomain)
 
 rightEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 rightEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d (Bounds _ u2) vBounds = uvBounds
   let fv = SurfaceFunction.derivative V f
-  (Point2d.xy u2 (Internal.solveForV f fv u2 vBounds), Domain2d.rightEdge subdomain)
+  (Point2d u2 (Internal.solveForV f fv u2 vBounds), Domain2d.rightEdge subdomain)
 
 bottomEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d uBounds (Bounds v1 _) = uvBounds
   let fu = SurfaceFunction.derivative U f
-  (Point2d.xy (Internal.solveForU f fu uBounds v1) v1, Domain2d.bottomEdge subdomain)
+  (Point2d (Internal.solveForU f fu uBounds v1) v1, Domain2d.bottomEdge subdomain)
 
 topEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 topEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d uBounds (Bounds _ v2) = uvBounds
   let fu = SurfaceFunction.derivative U f
-  (Point2d.xy (Internal.solveForU f fu uBounds v2) v2, Domain2d.topEdge subdomain)
+  (Point2d (Internal.solveForU f fu uBounds v2) v2, Domain2d.topEdge subdomain)
 
 bottomLeftPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomLeftPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Bounds u1 _) (Bounds v1 _) = uvBounds
-  (Point2d.xy u1 v1, Domain2d.bottomLeftCorner subdomain)
+  (Point2d u1 v1, Domain2d.bottomLeftCorner subdomain)
 
 bottomRightPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomRightPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Bounds _ u2) (Bounds v1 _) = uvBounds
-  (Point2d.xy u2 v1, Domain2d.bottomRightCorner subdomain)
+  (Point2d u2 v1, Domain2d.bottomRightCorner subdomain)
 
 topLeftPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 topLeftPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Bounds u1 _) (Bounds _ v2) = uvBounds
-  (Point2d.xy u1 v2, Domain2d.topLeftCorner subdomain)
+  (Point2d u1 v2, Domain2d.topLeftCorner subdomain)
 
 topRightPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 topRightPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Bounds _ u2) (Bounds _ v2) = uvBounds
-  (Point2d.xy u2 v2, Domain2d.topRightCorner subdomain)
+  (Point2d u2 v2, Domain2d.topRightCorner subdomain)
 
 tightBounds :: Subproblem units -> Bounds units
 tightBounds Subproblem{uvBounds, fValues, fBounds, fuBounds, fvBounds} = do

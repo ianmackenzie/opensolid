@@ -27,6 +27,7 @@ import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))
 import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 
 data SaddleRegion units = SaddleRegion
@@ -137,7 +138,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
   if Qty.abs du >= Qty.abs dv
     then do
       let uMid = u1 + 1e-3 * Qty.sign (u2 - u1) |> Qty.clampTo (Bounds u1 u2)
-      let startDerivative = Vector2d.xy (uMid - u1) ((uMid - u1) * (dv / du))
+      let startDerivative = Vector2d (uMid - u1) ((uMid - u1) * (dv / du))
       let interpolatingBounds = NonEmpty.one (Bounds2d (Bounds u1 uMid) vBounds)
       let interpolatingCurve =
             HorizontalCurve.bounded f dvdu u1 uMid interpolatingBounds frame boundingAxes
@@ -151,7 +152,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
           NonEmpty.two interpolatingCurve implicitCurve
     else do
       let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clampTo (Bounds v1 v2)
-      let startDerivative = Vector2d.xy ((vMid - v1) * (du / dv)) (vMid - v1)
+      let startDerivative = Vector2d ((vMid - v1) * (du / dv)) (vMid - v1)
       let interpolatingBounds = NonEmpty.one (Bounds2d uBounds (Bounds v1 vMid))
       let interpolatingCurve =
             VerticalCurve.bounded f dudv v1 vMid interpolatingBounds frame boundingAxes

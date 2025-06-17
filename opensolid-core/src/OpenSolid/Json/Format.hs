@@ -45,12 +45,12 @@ import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding (Field)
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 
 data Format a = Format
@@ -307,7 +307,7 @@ direction2d =
       examples [Direction2d.x] $
         Tolerance.exactly $
           lift Vector2d.direction Vector2d.unit $
-            object Vector2d.xy do
+            object Vector2d do
               requiredField "x" Vector2d.xComponent float
               requiredField "y" Vector2d.yComponent float
 
@@ -316,7 +316,7 @@ vector2d =
   title "Vector2d" $
     description "A displacement vector in 2D space, given by its X and Y components" $
       examples [Vector2d.zero] $
-        object Vector2d.xy do
+        object Vector2d do
           requiredField "x" Vector2d.xComponent length
           requiredField "y" Vector2d.yComponent length
 
@@ -325,6 +325,6 @@ point2d =
   title "Point2d" $
     description "A position in 2D space, given by its X and Y coordinates" $
       examples [Point2d.origin] $
-        object Point2d.xy do
+        object Point2d do
           requiredField "x" Point2d.xCoordinate length
           requiredField "y" Point2d.yCoordinate length

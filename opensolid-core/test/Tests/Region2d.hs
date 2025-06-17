@@ -8,6 +8,7 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Float qualified as Float
 import OpenSolid.Length qualified as Length
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty (zero)
@@ -36,9 +37,9 @@ square :: Tolerance Meters => Test
 square = Test.verify "square" Test.do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
-  let p2 = Point2d.xy width zero
-  let p3 = Point2d.xy width width
-  let p4 = Point2d.xy zero width
+  let p2 = Point2d width zero
+  let p3 = Point2d width width
+  let p4 = Point2d zero width
   let line1 = Curve2d.line p1 p2
   let line2 = Curve2d.line p2 p3
   let line3 = Curve2d.line p4 p3
@@ -50,8 +51,8 @@ quarterCircle :: Tolerance Meters => Test
 quarterCircle = Test.verify "quarterCircle" Test.do
   let radius = Length.meters 1.0
   let p1 = Point2d.origin
-  let p2 = Point2d.xy radius zero
-  let p3 = Point2d.xy zero radius
+  let p2 = Point2d radius zero
+  let p3 = Point2d zero radius
   let line1 = Curve2d.line p1 p2
   let line2 = Curve2d.line p1 p3
   let arc = Curve2d.arc p2 p3 Angle.quarterTurn
@@ -63,14 +64,14 @@ squareWithHole :: Tolerance Meters => Test
 squareWithHole = Test.verify "squareWithHole" Test.do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
-  let p2 = Point2d.xy width zero
-  let p3 = Point2d.xy width width
-  let p4 = Point2d.xy zero width
+  let p2 = Point2d width zero
+  let p3 = Point2d width width
+  let p4 = Point2d zero width
   let line1 = Curve2d.line p1 p2
   let line2 = Curve2d.line p2 p3
   let line3 = Curve2d.line p4 p3
   let line4 = Curve2d.line p4 p1
-  let centerPoint = Point2d.xy (0.5 * width) (0.5 * width)
+  let centerPoint = Point2d (0.5 * width) (0.5 * width)
   let holeDiameter = 0.5 * width
   let holeRadius = 0.5 * holeDiameter
   let hole = Curve2d.circle (#centerPoint centerPoint, #diameter holeDiameter)
@@ -82,9 +83,9 @@ incompleteSquare :: Tolerance Meters => Test
 incompleteSquare = Test.verify "incompleteSquare" Test.do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
-  let p2 = Point2d.xy width zero
-  let p3 = Point2d.xy width width
-  let p4 = Point2d.xy zero width
+  let p2 = Point2d width zero
+  let p3 = Point2d width width
+  let p4 = Point2d zero width
   let line1 = Curve2d.line p1 p2
   let line2 = Curve2d.line p2 p3
   let line3 = Curve2d.line p4 p3
@@ -97,14 +98,14 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
 -- squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
 --   let width = Length.meters 2.0
 --   let p1 = Point2d.origin
---   let p2 = Point2d.xy width zero
---   let p3 = Point2d.xy width width
---   let p4 = Point2d.xy zero width
+--   let p2 = Point2d width zero
+--   let p3 = Point2d width width
+--   let p4 = Point2d zero width
 --   let line1 = Curve2d.line p1 p2
 --   let line2 = Curve2d.line p2 p3
 --   let line3 = Curve2d.line p4 p3
 --   let line4 = Curve2d.line p4 p1
---   let centerPoint = Point2d.xy (0.5 * width) (0.5 * width)
+--   let centerPoint = Point2d (0.5 * width) (0.5 * width)
 --   let holeRadius = 0.5 * width
 --   let hole = Curve2d.circle centerPoint holeRadius
 --   case Region2d.boundedBy [line1, line2, line3, line4, hole] of
