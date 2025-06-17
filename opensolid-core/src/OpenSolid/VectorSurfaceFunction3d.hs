@@ -88,68 +88,68 @@ instance
   function * Negative = -function
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (VectorSurfaceFunction3d (space @ units))
-    (VectorSurfaceFunction3d (space_ @ units_))
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
   where
   lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (VectorSurfaceFunction3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
   where
   f + v = f + constant v
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (Vector3d (space @ units))
-    (VectorSurfaceFunction3d (space_ @ units_))
-    (VectorSurfaceFunction3d (space @ units))
+    (Vector3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
   where
   v + f = constant v + f
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (VectorSurfaceFunction3d (space @ units))
-    (VectorSurfaceFunction3d (space_ @ units_))
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
   where
   lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (VectorSurfaceFunction3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
   where
   f - v = f - constant v
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Vector3d (space @ units))
-    (VectorSurfaceFunction3d (space_ @ units_))
-    (VectorSurfaceFunction3d (space @ units))
+    (Vector3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
   where
   v - f = constant v - f
 
@@ -259,20 +259,20 @@ instance
   function ./. value = function ./. SurfaceFunction.constant value
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
-    (VectorSurfaceFunction3d (space @ units1))
-    (VectorSurfaceFunction3d (space_ @ units2))
-    (VectorSurfaceFunction3d (space @ units3))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units3))
   where
   lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
-  space ~ space_ =>
+  space1 ~ space2 =>
   CrossMultiplication'
-    (VectorSurfaceFunction3d (space @ units1))
-    (VectorSurfaceFunction3d (space_ @ units2))
-    (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ (units1 :*: units2)))
   where
   lhs `cross'` rhs =
     new
@@ -280,55 +280,55 @@ instance
       (\p -> derivative p lhs `cross'` rhs + lhs `cross'` derivative p rhs)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
-    (VectorSurfaceFunction3d (space @ units1))
-    (Vector3d (space_ @ units2))
-    (VectorSurfaceFunction3d (space @ units3))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units3))
   where
   lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
-  space ~ space_ =>
+  space1 ~ space2 =>
   CrossMultiplication'
-    (VectorSurfaceFunction3d (space @ units1))
-    (Vector3d (space_ @ units2))
-    (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ (units1 :*: units2)))
   where
   f `cross'` v = f `cross'` constant v
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
-    (Vector3d (space @ units1))
-    (VectorSurfaceFunction3d (space_ @ units2))
-    (VectorSurfaceFunction3d (space @ units3))
+    (Vector3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units3))
   where
   lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
 instance
-  space ~ space_ =>
+  space1 ~ space2 =>
   CrossMultiplication'
-    (Vector3d (space @ units1))
-    (VectorSurfaceFunction3d (space_ @ units2))
-    (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
+    (Vector3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ (units1 :*: units2)))
   where
   v `cross'` f = constant v `cross'` f
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
-    (VectorSurfaceFunction3d (space @ units1))
-    (VectorSurfaceFunction3d (space_ @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
-  space ~ space_ =>
+  space1 ~ space2 =>
   DotMultiplication'
-    (VectorSurfaceFunction3d (space @ units1))
-    (VectorSurfaceFunction3d (space_ @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
   lhs `dot'` rhs =
@@ -337,50 +337,56 @@ instance
       (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
-    (VectorSurfaceFunction3d (space @ units1))
-    (Vector3d (space_ @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
     (SurfaceFunction units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
-  space ~ space_ =>
+  space1 ~ space2 =>
   DotMultiplication'
-    (VectorSurfaceFunction3d (space @ units1))
-    (Vector3d (space_ @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
   function `dot'` vector = function `dot'` constant vector
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
-    (Vector3d (space @ units1))
-    (VectorSurfaceFunction3d (space_ @ units2))
+    (Vector3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
 instance
-  space ~ space_ =>
+  space1 ~ space2 =>
   DotMultiplication'
-    (Vector3d (space @ units1))
-    (VectorSurfaceFunction3d (space_ @ units2))
+    (Vector3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
   vector `dot'` function = constant vector `dot'` function
 
 instance
-  space ~ space_ =>
-  DotMultiplication (VectorSurfaceFunction3d (space @ units)) (Direction3d space_) (SurfaceFunction units)
+  space1 ~ space2 =>
+  DotMultiplication
+    (VectorSurfaceFunction3d (space1 @ units))
+    (Direction3d space2)
+    (SurfaceFunction units)
   where
   lhs `dot` rhs = lhs `dot` Vector3d.unit rhs
 
 instance
-  space ~ space_ =>
-  DotMultiplication (Direction3d space) (VectorSurfaceFunction3d (space_ @ units)) (SurfaceFunction units)
+  space1 ~ space2 =>
+  DotMultiplication
+    (Direction3d space1)
+    (VectorSurfaceFunction3d (space2 @ units))
+    (SurfaceFunction units)
   where
   lhs `dot` rhs = Vector3d.unit lhs `dot` rhs
 
