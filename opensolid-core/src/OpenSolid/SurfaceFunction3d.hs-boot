@@ -25,6 +25,18 @@ type role SurfaceFunction3d nominal
 type SurfaceFunction3d :: CoordinateSystem -> Type
 data SurfaceFunction3d coordinateSystem
 
+instance
+  HasField
+    "du"
+    (SurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+
+instance
+  HasField
+    "dv"
+    (SurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+
 type Compiled coordinateSystem =
   CompiledFunction
     UvPoint

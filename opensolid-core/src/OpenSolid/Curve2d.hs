@@ -131,8 +131,6 @@ import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -150,7 +148,6 @@ import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
-import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
 -- | A parametric curve in 2D space.
 data Curve2d (coordinateSystem :: CoordinateSystem) where
@@ -297,14 +294,12 @@ instance
     (VectorCurve3d (space @ units))
   where
   function . uvCurve = do
-    let fU = VectorSurfaceFunction3d.derivative U function
-    let fV = VectorSurfaceFunction3d.derivative V function
     let uvT = uvCurve.derivative
     let uT = uvT.xComponent
     let vT = uvT.yComponent
     VectorCurve3d.new
       @ function.compiled . uvCurve.compiled
-      @ fU . uvCurve * uT + fV . uvCurve * vT
+      @ function.du . uvCurve * uT + function.dv . uvCurve * vT
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -314,14 +309,12 @@ instance
     (Curve3d (space @ units))
   where
   function . uvCurve = do
-    let fU = SurfaceFunction3d.derivative U function
-    let fV = SurfaceFunction3d.derivative V function
     let uvT = uvCurve.derivative
     let uT = uvT.xComponent
     let vT = uvT.yComponent
     Curve3d.new
       @ function.compiled . uvCurve.compiled
-      @ fU . uvCurve * uT + fV . uvCurve * vT
+      @ function.du . uvCurve * uT + function.dv . uvCurve * vT
 
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 new = Curve2d
@@ -765,11 +758,11 @@ intersections curve1 curve2 = Result.do
           let u = SurfaceFunction.u
           let v = SurfaceFunction.v
           let f = curve1 . u - curve2 . v
-          let fu = VectorSurfaceFunction2d.derivative U f
-          let fv = VectorSurfaceFunction2d.derivative V f
+          let fu = f.du
+          let fv = f.dv
           let g = VectorSurfaceFunction2d.xy (fu `cross'` fv) ((curve1.derivative . u) `dot'` f)
-          let gu = VectorSurfaceFunction2d.derivative U g
-          let gv = VectorSurfaceFunction2d.derivative V g
+          let gu = g.du
+          let gv = g.dv
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
             Success (NonEmpty points) -> Success (Just (IntersectionPoints points))
             Success [] -> Success Nothing

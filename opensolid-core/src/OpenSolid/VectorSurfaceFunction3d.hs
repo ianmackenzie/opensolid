@@ -46,6 +46,22 @@ data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
     ~(VectorSurfaceFunction3d (space @ units)) ->
     VectorSurfaceFunction3d (space @ units)
 
+instance
+  HasField
+    "du"
+    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+  where
+  getField (VectorSurfaceFunction3d _ du _) = du
+
+instance
+  HasField
+    "dv"
+    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+  where
+  getField (VectorSurfaceFunction3d _ _ dv) = dv
+
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     UvPoint
@@ -400,8 +416,8 @@ instance
     (VectorSurfaceFunction3d (space @ units))
   where
   outer . inner = do
-    let duOuter = derivative U outer . inner
-    let dvOuter = derivative V outer . inner
+    let duOuter = outer.du . inner
+    let dvOuter = outer.dv . inner
     new
       @ outer.compiled . inner.compiled
       @ \p -> do
@@ -425,7 +441,7 @@ new ::
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction3d dv.compiled (derivative V du) (derivative V dv)
+  let dv' = VectorSurfaceFunction3d dv.compiled du.dv dv.dv
   VectorSurfaceFunction3d c du dv'
 
 recursive ::
@@ -457,8 +473,8 @@ derivative ::
   SurfaceParameter ->
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units)
-derivative U (VectorSurfaceFunction3d _ du _) = du
-derivative V (VectorSurfaceFunction3d _ _ dv) = dv
+derivative U = (.du)
+derivative V = (.dv)
 
 placeIn ::
   Frame3d (global @ frameUnits) (Defines local) ->

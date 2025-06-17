@@ -85,7 +85,6 @@ import OpenSolid.Surface3d.Revolved qualified as Surface3d.Revolved
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -690,14 +689,9 @@ surfaceSize f uvBounds = do
 
 surfaceError :: SurfaceFunction3d (space @ units) -> UvBounds -> Qty units
 surfaceError f uvBounds = do
-  let fu = f |> SurfaceFunction3d.derivative U
-  let fv = f |> SurfaceFunction3d.derivative V
-  let fuu = fu |> VectorSurfaceFunction3d.derivative U
-  let fuv = fu |> VectorSurfaceFunction3d.derivative V
-  let fvv = fv |> VectorSurfaceFunction3d.derivative V
-  let fuuBounds = VectorSurfaceFunction3d.evaluateBounds fuu uvBounds
-  let fuvBounds = VectorSurfaceFunction3d.evaluateBounds fuv uvBounds
-  let fvvBounds = VectorSurfaceFunction3d.evaluateBounds fvv uvBounds
+  let fuuBounds = VectorSurfaceFunction3d.evaluateBounds f.du.du uvBounds
+  let fuvBounds = VectorSurfaceFunction3d.evaluateBounds f.du.dv uvBounds
+  let fvvBounds = VectorSurfaceFunction3d.evaluateBounds f.dv.dv uvBounds
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 addBoundaryInnerEdgeVertices ::
@@ -874,11 +868,9 @@ pointAndNormal ::
   Vertex (space @ units) ->
   (Point3d (space @ units), Vector3d (space @ Unitless))
 pointAndNormal f handedness (Vertex uvPoint point) = do
-  let fu = f |> SurfaceFunction3d.derivative U
-  let fv = f |> SurfaceFunction3d.derivative V
-  let fuValue = VectorSurfaceFunction3d.evaluate fu uvPoint
-  let fvValue = VectorSurfaceFunction3d.evaluate fv uvPoint
-  (point, handedness * Vector3d.normalize (fuValue `cross'` fvValue))
+  let fu = VectorSurfaceFunction3d.evaluate f.du uvPoint
+  let fv = VectorSurfaceFunction3d.evaluate f.dv uvPoint
+  (point, handedness * Vector3d.normalize (fu `cross'` fv))
 
 toPolygon ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->

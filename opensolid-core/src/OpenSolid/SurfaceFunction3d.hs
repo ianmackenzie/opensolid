@@ -44,6 +44,22 @@ data SurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
     ~(VectorSurfaceFunction3d (space @ units)) ->
     SurfaceFunction3d (space @ units)
 
+instance
+  HasField
+    "du"
+    (SurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+  where
+  getField (SurfaceFunction3d _ du _) = du
+
+instance
+  HasField
+    "dv"
+    (SurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+  where
+  getField (SurfaceFunction3d _ _ dv) = dv
+
 type Compiled coordinateSystem =
   CompiledFunction
     UvPoint
@@ -149,8 +165,8 @@ instance
     (SurfaceFunction3d (space @ units))
   where
   outer . inner = do
-    let duOuter = derivative U outer . inner
-    let dvOuter = derivative V outer . inner
+    let duOuter = outer.du . inner
+    let dvOuter = outer.dv . inner
     new
       @ outer.compiled . inner.compiled
       @ \parameter -> do
@@ -169,11 +185,7 @@ new ::
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  let dv' =
-        VectorSurfaceFunction3d.new dv.compiled $
-          \parameter -> case parameter of
-            U -> VectorSurfaceFunction3d.derivative V du
-            V -> VectorSurfaceFunction3d.derivative V dv
+  let dv' = VectorSurfaceFunction3d.new dv.compiled (\case U -> du.dv; V -> dv.dv)
   SurfaceFunction3d c du dv'
 
 constant :: Point3d (space @ units) -> SurfaceFunction3d (space @ units)
@@ -189,8 +201,8 @@ derivative ::
   SurfaceParameter ->
   SurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units)
-derivative U (SurfaceFunction3d _ du _) = du
-derivative V (SurfaceFunction3d _ _ dv) = dv
+derivative U = (.du)
+derivative V = (.dv)
 
 transformBy ::
   Transform3d tag (space @ units) ->

@@ -389,8 +389,8 @@ instance HasField "compiled" (SurfaceFunction units) (Compiled units) where
   getField (SurfaceFunction c _ _) = c
 
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
-derivative U f = f.du
-derivative V f = f.dv
+derivative U = (.du)
+derivative V = (.dv)
 
 derivativeIn :: Direction2d UvSpace -> SurfaceFunction units -> SurfaceFunction units
 derivativeIn direction function =
@@ -419,7 +419,7 @@ new :: Compiled units -> (SurfaceParameter -> SurfaceFunction units) -> SurfaceF
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  SurfaceFunction c du (SurfaceFunction dv.compiled (derivative V du) (derivative V dv))
+  SurfaceFunction c du (SurfaceFunction dv.compiled du.dv dv.dv)
 
 recursive ::
   Compiled units ->

@@ -44,6 +44,22 @@ data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
     ~(VectorSurfaceFunction2d (space @ units)) ->
     VectorSurfaceFunction2d (space @ units)
 
+instance
+  HasField
+    "du"
+    (VectorSurfaceFunction2d (space @ units))
+    (VectorSurfaceFunction2d (space @ units))
+  where
+  getField (VectorSurfaceFunction2d _ du _) = du
+
+instance
+  HasField
+    "dv"
+    (VectorSurfaceFunction2d (space @ units))
+    (VectorSurfaceFunction2d (space @ units))
+  where
+  getField (VectorSurfaceFunction2d _ _ dv) = dv
+
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
     UvPoint
@@ -414,7 +430,7 @@ instance
     let dvdt = curve.derivative.yComponent
     VectorCurve2d.new
       @ function.compiled . curve.compiled
-      @ (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
+      @ (function.du . curve) * dudt + (function.dv . curve) * dvdt
 
 instance
   HasField
@@ -431,7 +447,7 @@ new ::
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction2d dv.compiled (derivative V du) (derivative V dv)
+  let dv' = VectorSurfaceFunction2d dv.compiled du.dv dv.dv
   VectorSurfaceFunction2d c du dv'
 
 recursive ::
@@ -490,8 +506,8 @@ derivative ::
   SurfaceParameter ->
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units)
-derivative U (VectorSurfaceFunction2d _ du _) = du
-derivative V (VectorSurfaceFunction2d _ _ dv) = dv
+derivative U = (.du)
+derivative V = (.dv)
 
 instance
   HasField
