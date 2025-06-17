@@ -1027,24 +1027,20 @@ instance Multiplication (Vector3d (space @ units)) Sign (Vector3d (space @ units
   vector * Negative = -vector
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Vector3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (Vector3d (space @ units))
+    (Vector3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Vector3d (space1 @ units1))
   where
   Vector3d x1 y1 z1 + Vector3d x2 y2 z2 = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Vector3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (Vector3d (space @ units))
+    (Vector3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Vector3d (space1 @ units1))
   where
   Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
@@ -1119,10 +1115,10 @@ instance
   Vector3d vx vy vz / scale = Vector3d (vx / scale) (vy / scale) (vz / scale)
 
 instance
-  space ~ space_ =>
+  space1 ~ space2 =>
   DotMultiplication'
-    (Vector3d (space @ units1))
-    (Vector3d (space_ @ units2))
+    (Vector3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
     (Qty (units1 :*: units2))
   where
   Vector3d x1 y1 z1 `dot'` Vector3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
@@ -1134,23 +1130,23 @@ instance
   Vector3d x1 y1 z1 `dot` Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance
-  space ~ space_ =>
-  DotMultiplication (Vector3d (space @ units)) (Direction3d space_) (Qty units)
+  space1 ~ space2 =>
+  DotMultiplication (Vector3d (space1 @ units)) (Direction3d space2) (Qty units)
   where
   v1 `dot` Unit3d v2 = v1 `dot` v2
 
 instance
-  space ~ space_ =>
-  DotMultiplication (Direction3d space) (Vector3d (space_ @ units)) (Qty units)
+  space1 ~ space2 =>
+  DotMultiplication (Direction3d space1) (Vector3d (space2 @ units)) (Qty units)
   where
   Unit3d v1 `dot` v2 = v1 `dot` v2
 
 instance
-  space ~ space_ =>
+  space1 ~ space2 =>
   CrossMultiplication'
-    (Vector3d (space @ units1))
-    (Vector3d (space_ @ units2))
-    (Vector3d (space @ (units1 :*: units2)))
+    (Vector3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Vector3d (space1 @ (units1 :*: units2)))
   where
   Vector3d x1 y1 z1 `cross'` Vector3d x2 y2 z2 =
     Vector3d
@@ -1159,11 +1155,11 @@ instance
       (x1 .*. y2 - y1 .*. x2)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
-    (Vector3d (space @ units1))
-    (Vector3d (space_ @ units2))
-    (Vector3d (space @ units3))
+    (Vector3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Vector3d (space1 @ units3))
   where
   Vector3d x1 y1 z1 `cross` Vector3d x2 y2 z2 =
     Vector3d
@@ -1172,14 +1168,14 @@ instance
       (x1 * y2 - y1 * x2)
 
 instance
-  space ~ space_ =>
-  CrossMultiplication (Vector3d (space @ units)) (Direction3d space_) (Vector3d (space @ units))
+  space1 ~ space2 =>
+  CrossMultiplication (Vector3d (space1 @ units)) (Direction3d space2) (Vector3d (space1 @ units))
   where
   v1 `cross` Unit3d v2 = v1 `cross` v2
 
 instance
-  space ~ space_ =>
-  CrossMultiplication (Direction3d space) (Vector3d (space_ @ units)) (Vector3d (space @ units))
+  space1 ~ space2 =>
+  CrossMultiplication (Direction3d space1) (Vector3d (space2 @ units)) (Vector3d (space1 @ units))
   where
   Unit3d v1 `cross` v2 = v1 `cross` v2
 
