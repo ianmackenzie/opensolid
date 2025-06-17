@@ -32,6 +32,9 @@ import OpenSolid.UvBounds (UvBounds)
 
 data Domain2d = Domain2d Domain1d Domain1d deriving (Show)
 
+instance HasField "bounds" Domain2d UvBounds where
+  getField = bounds
+
 data Boundary
   = Corner Sign Sign Domain1d.Boundary Domain1d.Boundary
   | VerticalEdge Sign Domain1d.Boundary Domain1d
