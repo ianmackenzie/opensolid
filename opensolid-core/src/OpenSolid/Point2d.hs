@@ -50,24 +50,14 @@ import OpenSolid.Primitives
   , Orientation2d (Orientation2d)
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Point2d (Position2d)
+  , Point2d (Point2d, Position2d)
   , Point3d
   , Transform2d (Transform2d)
   )
 import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
-import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
-
-{-# COMPLETE Point2d #-}
-
-{-# INLINE Point2d #-}
-
--- | Construct a point from its X and Y coordinates.
-pattern Point2d :: Qty units -> Qty units -> Point2d (space @ units)
-pattern Point2d px py <- Position2d (Vector2d px py)
-  where
-    Point2d px py = Position2d (Vector2d px py)
 
 -- | The point with coordinates (0,0).
 origin :: Point2d (space @ units)

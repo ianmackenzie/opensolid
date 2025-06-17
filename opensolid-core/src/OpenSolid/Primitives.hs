@@ -2,9 +2,9 @@ module OpenSolid.Primitives
   ( Vector2d (Vector2d)
   , Direction2d (Unit2d, Direction2d)
   , Orientation2d (Orientation2d)
-  , Point2d (Position2d)
+  , Point2d (Point2d, Position2d)
   , VectorBounds2d (VectorBounds2d)
-  , Bounds2d (PositionBounds2d)
+  , Bounds2d (Bounds2d, PositionBounds2d)
   , Axis2d (Axis2d)
   , Frame2d (Frame2d)
   , Transform2d (Transform2d)
@@ -315,6 +315,16 @@ deriving instance Show (Orientation2d space)
 ----- Point2d -----
 
 newtype Point2d (coordinateSystem :: CoordinateSystem) = Position2d (Vector2d coordinateSystem)
+
+{-# COMPLETE Point2d #-}
+
+{-# INLINE Point2d #-}
+
+-- | Construct a point from its X and Y coordinates.
+pattern Point2d :: Qty units -> Qty units -> Point2d (space @ units)
+pattern Point2d px py <- Position2d (Vector2d px py)
+  where
+    Point2d px py = Position2d (Vector2d px py)
 
 deriving instance Eq (Point2d (space @ units))
 
@@ -734,6 +744,16 @@ instance
 newtype Bounds2d (coordinateSystem :: CoordinateSystem)
   = PositionBounds2d (VectorBounds2d coordinateSystem)
 
+{-# COMPLETE Bounds2d #-}
+
+{-# INLINE Bounds2d #-}
+
+-- | Construct a bounding box from its X and Y coordinate bounds.
+pattern Bounds2d :: Bounds units -> Bounds units -> Bounds2d (space @ units)
+pattern Bounds2d bx by <- PositionBounds2d (VectorBounds2d bx by)
+  where
+    Bounds2d bx by = PositionBounds2d (VectorBounds2d bx by)
+
 deriving instance Show (Qty units) => Show (Bounds2d (space @ units))
 
 instance HasUnits (Bounds2d (space @ units)) units (Bounds2d (space @ Unitless))
@@ -952,7 +972,7 @@ instance
     (Transform2d tag (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Position2d (Vector2d px py) * Transform2d p0 i j = p0 + px * i + py * j
+  Point2d px py * Transform2d p0 i j = p0 + px * i + py * j
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -972,7 +992,7 @@ instance
   where
   transform1 >> transform2 =
     Transform2d
-      @ Position2d (Vector2d Qty.zero Qty.zero) * transform1 * transform2
+      @ Point2d Qty.zero Qty.zero * transform1 * transform2
       @ Vector2d 1.0 0.0 * transform1 * transform2
       @ Vector2d 0.0 1.0 * transform1 * transform2
 

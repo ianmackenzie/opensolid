@@ -53,7 +53,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Bounds2d (PositionBounds2d)
+  ( Bounds2d (Bounds2d, PositionBounds2d)
   , Bounds3d (Bounds3d)
   , Direction3d (Direction3d)
   , Plane3d (Plane3d)
@@ -65,20 +65,9 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
-
-{-# COMPLETE Bounds2d #-}
-
-{-# INLINE Bounds2d #-}
-
--- | Construct a bounding box from its X and Y coordinate bounds.
-pattern Bounds2d :: Bounds units -> Bounds units -> Bounds2d (space @ units)
-pattern Bounds2d bx by <- PositionBounds2d (VectorBounds2d bx by)
-  where
-    Bounds2d bx by = PositionBounds2d (VectorBounds2d bx by)
 
 -- | Get the X coordinate bounds of a bounding box.
 xCoordinate :: Bounds2d (space @ units) -> Bounds units
