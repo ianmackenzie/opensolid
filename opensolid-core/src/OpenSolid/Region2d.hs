@@ -56,6 +56,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
@@ -77,7 +78,6 @@ import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.Vertex2d (Vertex2d)
-import OpenSolid.Vertex2d qualified as Vertex2d
 
 type role Region2d nominal
 
@@ -238,11 +238,11 @@ polygon ::
 polygon vertexList = case vertexList of
   [] -> Failure BoundedBy.EmptyRegion
   NonEmpty vertices -> do
-    let closedLoop = NonEmpty.extend vertices [vertices.first]
-    let line start end = Curve2d.line (Vertex2d.position start) (Vertex2d.position end)
-    let lines = NonEmpty.successive line closedLoop
-    let isNonZeroLength curve = curve.startPoint != curve.endPoint
-    boundedBy (List.filter isNonZeroLength lines)
+    let closedLoop = NonEmpty.push vertices.last vertices
+    let segments = NonEmpty.successive LineSegment2d closedLoop
+    let nonZeroLengthSegments = List.filter ((.length) >> (!= Qty.zero)) segments
+    let toCurve segment = Curve2d.line segment.startPoint segment.endPoint
+    boundedBy (List.map toCurve nonZeroLengthSegments)
 
 {-| Fillet a region at the given corner points, with the given radius.
 
