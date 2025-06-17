@@ -1,4 +1,10 @@
-module OpenSolid.Resolution (Resolution (Resolution), maxError, maxSize) where
+module OpenSolid.Resolution
+  ( Resolution (Resolution)
+  , maxError
+  , maxSize
+  , predicate
+  )
+where
 
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -29,3 +35,13 @@ maxError error = Resolution (#maxError error, #maxSize Qty.infinity)
 -- | Specify the maximum size of any element (line segment, triangle) in the approximation.
 maxSize :: Qty units -> Resolution units
 maxSize size = Resolution (#maxError Qty.infinity, #maxSize size)
+
+predicate ::
+  ("size" ::: (a -> Qty units), "error" ::: (a -> Qty units)) ->
+  Resolution units ->
+  a ->
+  Bool
+predicate (Field size, Field error) resolution value = do
+  let acceptableSize = Qty.isInfinite resolution.maxSize || size value <= resolution.maxSize
+  let acceptableError = Qty.isInfinite resolution.maxError || error value <= resolution.maxError
+  acceptableSize && acceptableError
