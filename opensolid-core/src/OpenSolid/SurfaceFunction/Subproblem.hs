@@ -30,7 +30,9 @@ import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 
 data Subproblem units = Subproblem
   { f :: SurfaceFunction units

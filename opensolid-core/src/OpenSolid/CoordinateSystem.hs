@@ -5,6 +5,8 @@ module OpenSolid.CoordinateSystem
   , Defines
   , Space
   , Units
+  , UvSpace
+  , UvCoordinates
   , RightPlane
   , LeftPlane
   , FrontPlane
@@ -34,6 +36,10 @@ type family Space coordinateSystem where
 type Units :: CoordinateSystem -> Type
 type family Units coordinateSystem where
   Units ('CoordinateSystem space units) = units
+
+data UvSpace deriving (Eq, Show)
+
+type UvCoordinates = UvSpace @ Unitless
 
 data RightPlane space
 

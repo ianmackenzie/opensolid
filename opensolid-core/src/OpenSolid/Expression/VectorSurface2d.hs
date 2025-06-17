@@ -16,9 +16,9 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
-import OpenSolid.SurfaceParameter (UvPoint)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)
 

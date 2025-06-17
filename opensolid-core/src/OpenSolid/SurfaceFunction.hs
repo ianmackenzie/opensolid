@@ -63,10 +63,12 @@ import OpenSolid.SurfaceFunction.Subproblem (CornerValues (..), Subproblem (..))
 import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvDirection, UvPoint)
-import OpenSolid.SurfaceParameter qualified as SurfaceParameter
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d)
@@ -103,7 +105,7 @@ instance
   ApproximateEquality (SurfaceFunction units1) (Qty units2) units1
   where
   function ~= value =
-    List.allTrue [evaluate function uvPoint ~= value | uvPoint <- SurfaceParameter.samples]
+    List.allTrue [evaluate function uvPoint ~= value | uvPoint <- UvPoint.samples]
 
 instance
   units1 ~ units2 =>
@@ -389,7 +391,7 @@ derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 derivative U (SurfaceFunction _ du _) = du
 derivative V (SurfaceFunction _ _ dv) = dv
 
-derivativeIn :: UvDirection -> SurfaceFunction units -> SurfaceFunction units
+derivativeIn :: Direction2d UvSpace -> SurfaceFunction units -> SurfaceFunction units
 derivativeIn direction function =
   Direction2d.xComponent direction * derivative U function
     + Direction2d.yComponent direction * derivative V function

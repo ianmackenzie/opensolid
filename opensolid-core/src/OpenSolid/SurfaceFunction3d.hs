@@ -28,9 +28,11 @@ import {-# SOURCE #-} OpenSolid.Surface3d (Surface3d)
 import {-# SOURCE #-} OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d

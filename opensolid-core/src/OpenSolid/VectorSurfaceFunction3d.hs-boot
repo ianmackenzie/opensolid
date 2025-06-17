@@ -10,8 +10,10 @@ where
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
-import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 

@@ -15,8 +15,8 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
-import OpenSolid.SurfaceParameter (UvPoint)
 import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.UvPoint (UvPoint)
 
 constant :: Point2d (space @ units) -> Expression UvPoint (Point2d (space @ units))
 constant = Expression.constant

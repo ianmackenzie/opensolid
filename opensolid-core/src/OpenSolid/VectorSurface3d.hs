@@ -6,8 +6,8 @@ module OpenSolid.VectorSurface3d
   )
 where
 
+import OpenSolid.Prelude
 import OpenSolid.Region2d (Region2d)
-import OpenSolid.SurfaceParameter (UvCoordinates)
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 
 type Function = VectorSurfaceFunction3d

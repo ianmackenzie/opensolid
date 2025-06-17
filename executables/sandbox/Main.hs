@@ -47,11 +47,12 @@ import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
-import OpenSolid.SurfaceParameter (UvCoordinates, UvPoint, UvSpace)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Try qualified as Try
+import OpenSolid.UvBounds qualified as UvBounds
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
@@ -233,7 +234,7 @@ drawZeros path zeros = IO.do
   let viewBox = Bounds2d uvBounds uvBounds
   Drawing2d.writeSvg path viewBox $
     Drawing2d.groupWith [Drawing2d.strokeWidth strokeWidth] $
-      [ drawBounds (Bounds2d.convert toDrawing SurfaceParameter.domain)
+      [ drawBounds (Bounds2d.convert toDrawing UvBounds.unitSquare)
       , Drawing2d.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
       , Drawing2d.collect (drawDot Color.orange) zeros.saddlePoints
       ]

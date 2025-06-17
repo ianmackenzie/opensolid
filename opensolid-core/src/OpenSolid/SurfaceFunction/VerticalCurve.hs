@@ -31,7 +31,8 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds qualified as ImplicitCurveBounds
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
-import OpenSolid.SurfaceParameter (SurfaceParameter (U), UvBounds, UvCoordinates)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U))
+import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data MonotonicSpace

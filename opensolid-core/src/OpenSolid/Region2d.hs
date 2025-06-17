@@ -66,7 +66,6 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Result qualified as Result
-import OpenSolid.SurfaceParameter (UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d

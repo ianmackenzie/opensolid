@@ -7,7 +7,6 @@ where
 import OpenSolid.Prelude
 import OpenSolid.Region2d (Region2d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
-import OpenSolid.SurfaceParameter (UvCoordinates)
 
 type role Surface3d nominal
 

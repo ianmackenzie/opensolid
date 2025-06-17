@@ -216,6 +216,8 @@ library
     OpenSolid.Try
     OpenSolid.Unitless
     OpenSolid.Units
+    OpenSolid.UvBounds
+    OpenSolid.UvPoint
     OpenSolid.Vector2d
     OpenSolid.Vector3d
     OpenSolid.VectorBounds2d

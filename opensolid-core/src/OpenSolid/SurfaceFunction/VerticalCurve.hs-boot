@@ -10,7 +10,7 @@ import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
-import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates)
+import OpenSolid.UvBounds (UvBounds)
 
 new ::
   Tolerance units =>

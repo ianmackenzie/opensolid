@@ -30,7 +30,8 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Result qualified as Result
-import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)

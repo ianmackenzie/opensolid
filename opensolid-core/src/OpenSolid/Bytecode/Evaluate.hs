@@ -33,7 +33,8 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3d (Vector3d), VectorBounds3d (VectorBounds3d))
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d

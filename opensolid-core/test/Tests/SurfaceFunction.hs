@@ -13,9 +13,10 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvCoordinates, UvPoint)
-import OpenSolid.SurfaceParameter qualified as SurfaceParameter
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
@@ -41,7 +42,7 @@ planeTorusIntersection =
 
 firstDerivativeConsistency :: Test
 firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" Test.do
-  uvPoint <- SurfaceParameter.random
+  uvPoint <- UvPoint.random
   parameter <- Random.surfaceParameter
   firstDerivativeIsConsistent planeTorusSurface uvPoint parameter
 

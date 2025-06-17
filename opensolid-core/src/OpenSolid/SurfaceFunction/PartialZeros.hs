@@ -26,7 +26,8 @@ import OpenSolid.SurfaceFunction.SaddleRegion (SaddleRegion)
 import OpenSolid.SurfaceFunction.SaddleRegion qualified as SaddleRegion
 import OpenSolid.SurfaceFunction.Zeros (Zeros (Zeros))
 import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
-import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 
 data PartialZeros units = PartialZeros
   { crossingSegments :: List CrossingSegment

@@ -37,6 +37,8 @@ import OpenSolid.CoordinateSystem
   , LocalSpace
   , RightPlane
   , TopPlane
+  , UvCoordinates
+  , UvSpace
   , type (@)
   )
 import OpenSolid.Field

@@ -65,11 +65,12 @@ import OpenSolid.Primitives
   , VectorBounds3d
   )
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d

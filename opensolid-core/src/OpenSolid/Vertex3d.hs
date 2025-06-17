@@ -11,7 +11,7 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
-import OpenSolid.SurfaceParameter (UvPoint, UvSpace)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 

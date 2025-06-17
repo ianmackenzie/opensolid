@@ -6,7 +6,7 @@ where
 
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Prelude
-import OpenSolid.SurfaceParameter (UvCoordinates, UvPoint)
+import OpenSolid.UvPoint (UvPoint)
 
 data Zeros = Zeros
   { crossingCurves :: ~(List (Curve2d UvCoordinates))

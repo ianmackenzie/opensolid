@@ -92,12 +92,13 @@ import OpenSolid.Primitives
   , Vector3d (Vector3d)
   )
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d

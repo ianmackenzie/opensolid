@@ -11,7 +11,9 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
-import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter)
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 
 type role SurfaceFunction2d nominal

@@ -5,9 +5,9 @@ module OpenSolid.Surface2d
   )
 where
 
+import OpenSolid.Prelude
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
-import OpenSolid.SurfaceParameter (UvCoordinates)
 
 data Surface2d units where
   Parametric :: SurfaceFunction2d units -> Region2d UvCoordinates -> Surface2d units

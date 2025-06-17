@@ -13,6 +13,7 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Frame2d (Frame2d)
@@ -26,15 +27,17 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as Hor
 import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))
 import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 
 data SaddleRegion units = SaddleRegion
   { subproblem :: Subproblem units
   , frame :: Frame
-  , d1 :: UvDirection
-  , d2 :: UvDirection
+  , d1 :: Direction2d UvSpace
+  , d2 :: Direction2d UvSpace
   }
 
 data PrincipalAxisSpace
@@ -83,7 +86,7 @@ quadratic subproblem saddlePoint = do
   let frame = Frame2d.fromXAxis (Axis2d.through saddlePoint dX)
   SaddleRegion{subproblem, frame, d1, d2}
 
-secondDerivative :: Qty units -> Qty units -> Qty units -> UvDirection -> Qty units
+secondDerivative :: Qty units -> Qty units -> Qty units -> Direction2d UvSpace -> Qty units
 secondDerivative fuu fuv fvv direction = do
   let (du, dv) = Direction2d.components direction
   du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
@@ -124,7 +127,7 @@ connect ::
   Tolerance units =>
   Subproblem units ->
   Frame2d UvCoordinates (Defines PrincipalAxisSpace) ->
-  UvDirection ->
+  Direction2d UvSpace ->
   UvPoint ->
   List (Axis2d UvCoordinates) ->
   NonEmpty (Curve2d UvCoordinates)

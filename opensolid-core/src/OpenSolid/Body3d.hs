@@ -85,8 +85,10 @@ import OpenSolid.Surface3d.Revolved qualified as Surface3d.Revolved
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d

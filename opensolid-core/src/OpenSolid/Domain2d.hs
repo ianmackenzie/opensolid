@@ -28,7 +28,7 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Prelude
-import OpenSolid.SurfaceParameter (UvBounds)
+import OpenSolid.UvBounds (UvBounds)
 
 data Domain2d = Domain2d Domain1d Domain1d deriving (Show)
 

@@ -132,11 +132,13 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)

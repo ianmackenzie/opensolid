@@ -5,7 +5,7 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.SurfaceParameter (UvBounds)
+import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
