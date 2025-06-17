@@ -255,16 +255,12 @@ instance
   where
   point - curve = constant point - curve
 
-instance
-  unitless ~ Unitless =>
-  Composition (Curve unitless) (Curve2d (space @ units)) (Curve2d (space @ units))
-  where
+instance Composition (Curve Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
   f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 instance
-  unitless ~ Unitless =>
   Composition
-    (SurfaceFunction unitless)
+    (SurfaceFunction Unitless)
     (Curve2d (space @ units))
     (SurfaceFunction2d (space @ units))
   where

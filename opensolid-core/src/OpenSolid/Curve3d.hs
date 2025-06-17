@@ -124,19 +124,15 @@ instance
   where
   lhs - rhs = VectorCurve3d.new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
 
-instance
-  unitless ~ Unitless =>
-  Composition (Curve unitless) (Curve3d (space @ units)) (Curve3d (space @ units))
-  where
+instance Composition (Curve Unitless) (Curve3d (space @ units)) (Curve3d (space @ units)) where
   outer . inner =
     new
       @ outer.compiled . inner.compiled
       @ (outer.derivative . inner) * inner.derivative
 
 instance
-  unitless ~ Unitless =>
   Composition
-    (SurfaceFunction unitless)
+    (SurfaceFunction Unitless)
     (Curve3d (space @ units))
     (SurfaceFunction3d (space @ units))
   where

@@ -420,18 +420,16 @@ instance
   point - curve = Curve2d.constant point - curve
 
 instance
-  unitless ~ Unitless =>
   Composition
-    (Curve unitless)
+    (Curve Unitless)
     (VectorCurve2d (space @ units))
     (VectorCurve2d (space @ units))
   where
   f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 instance
-  unitless ~ Unitless =>
   Composition
-    (SurfaceFunction unitless)
+    (SurfaceFunction Unitless)
     (VectorCurve2d (space @ units))
     (VectorSurfaceFunction2d (space @ units))
   where

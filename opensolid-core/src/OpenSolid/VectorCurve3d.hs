@@ -394,18 +394,16 @@ instance
   lhs `cross` rhs = Vector3d.unit lhs `cross` rhs
 
 instance
-  unitless ~ Unitless =>
   Composition
-    (Curve unitless)
+    (Curve Unitless)
     (VectorCurve3d (space @ units))
     (VectorCurve3d (space @ units))
   where
   f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 instance
-  unitless ~ Unitless =>
   Composition
-    (SurfaceFunction unitless)
+    (SurfaceFunction Unitless)
     (VectorCurve3d (space @ units))
     (VectorSurfaceFunction3d (space @ units))
   where

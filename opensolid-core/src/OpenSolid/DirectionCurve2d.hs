@@ -198,10 +198,7 @@ instance
   where
   lhs `cross` DirectionCurve2d rhs = lhs `cross` rhs
 
-instance
-  unitless ~ Unitless =>
-  Composition (Curve unitless) (DirectionCurve2d space) (DirectionCurve2d space)
-  where
+instance Composition (Curve Unitless) (DirectionCurve2d space) (DirectionCurve2d space) where
   curve1d >> DirectionCurve2d curve = DirectionCurve2d (curve1d >> curve)
 
 instance HasField "xComponent" (DirectionCurve2d space) (Curve Unitless) where

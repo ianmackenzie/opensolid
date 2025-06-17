@@ -370,10 +370,7 @@ instance
   where
   value ./. function = constant value ./. function
 
-instance
-  unitless ~ Unitless =>
-  Composition (SurfaceFunction unitless) (Curve units) (SurfaceFunction units)
-  where
+instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
   curve . function =
     new
       @ curve.compiled . function.compiled

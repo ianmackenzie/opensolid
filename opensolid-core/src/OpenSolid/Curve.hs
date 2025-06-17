@@ -310,7 +310,7 @@ instance
 instance Division' (Qty units1) (Curve units2) (Curve (units1 :/: units2)) where
   value ./. curve = constant value ./. curve
 
-instance unitless ~ Unitless => Composition (Curve unitless) (Curve units) (Curve units) where
+instance Composition (Curve Unitless) (Curve units) (Curve units) where
   f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 reverse :: Curve units -> Curve units
