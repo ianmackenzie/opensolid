@@ -463,8 +463,8 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
             case whichArc of
               SmallCounterclockwise -> shortAngle
               SmallClockwise -> -shortAngle
-              LargeClockwise -> shortAngle - Angle.fullTurn
-              LargeCounterclockwise -> Angle.fullTurn - shortAngle
+              LargeClockwise -> shortAngle - Angle.twoPi
+              LargeCounterclockwise -> Angle.twoPi - shortAngle
       sweptArc centerPoint givenStartPoint sweptAngle
     Failure Direction2d.PointsAreCoincident ->
       line givenStartPoint givenEndPoint

@@ -581,13 +581,12 @@ sinIncludesMinMax :: Bounds Radians -> (Bool, Bool)
 sinIncludesMinMax bounds = cosIncludesMinMax (bounds - Angle.halfPi)
 
 cosIncludesMinMax :: Bounds Radians -> (Bool, Bool)
-cosIncludesMinMax bounds =
-  (cosIncludesMax (bounds + Angle.halfTurn), cosIncludesMax bounds)
+cosIncludesMinMax bounds = (cosIncludesMax (bounds + Angle.pi), cosIncludesMax bounds)
 
 cosIncludesMax :: Bounds Radians -> Bool
 cosIncludesMax (Bounds low high) =
   (Qty.isInfinite low || Qty.isInfinite high)
-    || Float.floor (low / Angle.fullTurn) /= Float.floor (high / Angle.fullTurn)
+    || Float.floor (low / Angle.twoPi) /= Float.floor (high / Angle.twoPi)
 
 interpolate :: Bounds units -> Float -> Qty units
 interpolate (Bounds low high) t =
