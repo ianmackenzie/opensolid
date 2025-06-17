@@ -1282,8 +1282,8 @@ curve2d =
     , member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
     , property "Derivative" (.derivative) "The derivative of the curve."
     , member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
-    , member0 "X Coordinate" Curve2d.xCoordinate $(docs 'Curve2d.xCoordinate)
-    , member0 "Y Coordinate" Curve2d.yCoordinate $(docs 'Curve2d.yCoordinate)
+    , property "X Coordinate" (.xCoordinate) $(docs 'Curve2d.xCoordinate)
+    , property "Y Coordinate" (.yCoordinate) $(docs 'Curve2d.yCoordinate)
     , plus @(VectorCurve2d (Space @ Meters)) Self
     , minus @(VectorCurve2d (Space @ Meters)) Self
     , minusSelf
@@ -1309,8 +1309,8 @@ uvCurve =
     , member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
     , property "Derivative" (.derivative) "The derivative of the curve."
     , member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
-    , member0 "U Coordinate" Curve2d.xCoordinate $(docs 'Curve2d.xCoordinate)
-    , member0 "V Coordinate" Curve2d.yCoordinate $(docs 'Curve2d.yCoordinate)
+    , property "U Coordinate" (.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
+    , property "V Coordinate" (.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
     , plus @(VectorCurve2d (Space @ Unitless)) Self
     , minus @(VectorCurve2d (Space @ Unitless)) Self
     , minusSelf
