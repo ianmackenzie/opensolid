@@ -261,7 +261,10 @@ on plane (Bounds2d x y) = do
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz
-  Bounds3d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry)) (Bounds (z0 - rz) (z0 + rz))
+  let bx = Bounds (x0 - rx) (x0 + rx)
+  let by = Bounds (y0 - ry) (y0 + ry)
+  let bz = Bounds (z0 - rz) (z0 + rz)
+  Bounds3d bx by bz
 
 transformBy ::
   Transform2d tag (space @ units) ->
