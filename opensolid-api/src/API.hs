@@ -118,8 +118,6 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Polygon2d (Polygon2d)
-import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
@@ -188,7 +186,6 @@ classes =
   , uvCurve
   , region2d
   , uvRegion
-  , polygon2d
   , body3d
   , resolution
   , pbrMaterial
@@ -1349,6 +1346,10 @@ region2d =
     , property "Outer Loop" (.outerLoop) region2dOuterLoopDocs
     , property "Inner Loops" (.innerLoops) region2dInnerLoopsDocs
     , property "Boundary Curves" (.boundaryCurves) region2dBoundaryCurvesDocs
+    , factoryM1R "Polygon" "Points" (Region2d.polygon @(Point2d (Space @ Meters))) $(docs 'Region2d.polygon)
+    , factoryM2R "Hexagon" "Center Point" "Height" (curryT2 Region2d.hexagon) $(docs 'Region2d.hexagon)
+    , factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" (curry1T2 Region2d.inscribedPolygon) $(docs 'Region2d.inscribedPolygon)
+    , factoryM3R "Circumscribed Polygon" "Num Sides" "Center Point" "Diameter" (curry1T2 Region2d.circumscribedPolygon) $(docs 'Region2d.circumscribedPolygon)
     , memberM2 "Fillet" "Points" "Radius" Region2d.fillet $(docs 'Region2d.fillet)
     ]
       <> affineTransformations2d Region2d.transformBy
@@ -1365,16 +1366,6 @@ uvRegion =
     , property "Boundary Curves" (.boundaryCurves) region2dBoundaryCurvesDocs
     ]
       <> affineTransformations2d Region2d.transformBy
-
-polygon2d :: Class
-polygon2d =
-  Class.new @(Polygon2d (Point2d (Space @ Meters))) $(docs ''Polygon2d) $
-    [ upcast Region2d.polygon
-    , factoryM1R "From Vertices" "Vertices" Polygon2d.fromVertices $(docs 'Polygon2d.fromVertices)
-    , factoryM3R "Inscribed" "Num Sides" "Center Point" "Diameter" (curry1T2 Polygon2d.inscribed) $(docs 'Polygon2d.inscribed)
-    , factoryM3R "Circumscribed" "Num Sides" "Center Point" "Diameter" (curry1T2 Polygon2d.circumscribed) $(docs 'Polygon2d.circumscribed)
-    , factoryM2R "Hexagon" "Center Point" "Height" (curryT2 Polygon2d.hexagon) $(docs 'Polygon2d.hexagon)
-    ]
 
 body3d :: Class
 body3d = do

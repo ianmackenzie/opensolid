@@ -43,7 +43,7 @@ import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
-import OpenSolid.Polygon2d (Polygon2d)
+import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -189,7 +189,7 @@ toMesh accuracy surface = do
   let fvv = VectorSurfaceFunction3d.derivative V fv
   let boundaryLoops = surface.domain.outerLoop :| surface.domain.innerLoops
   let boundaryPolygons = NonEmpty.map (toPolygon accuracy surface.function fuu fuv fvv) boundaryLoops
-  let boundaryEdges = NonEmpty.collect (.edges) boundaryPolygons
+  let boundaryEdges = NonEmpty.collect Polygon2d.edges boundaryPolygons
   let edgeSet = Set2d.fromNonEmpty boundaryEdges
   let domainBounds = Region2d.bounds surface.domain
   let steinerPoints = generateSteinerPoints accuracy domainBounds edgeSet fuu fuv fvv []
@@ -206,7 +206,7 @@ toPolygon ::
   NonEmpty (Curve2d UvCoordinates) ->
   Polygon2d UvPoint
 toPolygon accuracy f fuu fuv fvv loop =
-  Polygon2d.unsafe (NonEmpty.collect (boundaryPoints accuracy f fuu fuv fvv) loop)
+  Polygon2d (NonEmpty.collect (boundaryPoints accuracy f fuu fuv fvv) loop)
 
 boundaryPoints ::
   Qty units ->

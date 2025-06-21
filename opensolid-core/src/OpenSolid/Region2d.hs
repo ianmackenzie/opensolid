@@ -5,6 +5,9 @@ module OpenSolid.Region2d
   , unitSquare
   , rectangle
   , circle
+  , hexagon
+  , inscribedPolygon
+  , circumscribedPolygon
   , polygon
   , placeIn
   , relativeTo
@@ -59,7 +62,6 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Polygon2d (Polygon2d)
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -72,6 +74,7 @@ import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Try qualified as Try
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
@@ -169,12 +172,77 @@ circle (Field centerPoint, Field diameter) =
       let boundaryCurve = Curve2d.circle (#centerPoint centerPoint, #diameter diameter)
       Region2d (NonEmpty.one boundaryCurve) []
 
--- | Create a polygonal region.
-polygon :: Vertex2d vertex (space @ units) => Polygon2d vertex -> Region2d (space @ units)
-polygon givenPolygon = do
-  let toCurve edge = Curve2d.line (Vertex2d.position edge.start) (Vertex2d.position edge.end)
-  let outerLoop = NonEmpty.map toCurve givenPolygon.edges
-  Region2d outerLoop []
+{-| Create a hexagon with the given center point and height.
+
+The hexagon will be oriented such that its top and bottom edges are horizontal.
+-}
+hexagon ::
+  Tolerance units =>
+  ("centerPoint" ::: Point2d (space @ units), "height" ::: Qty units) ->
+  Result EmptyRegion (Region2d (space @ units))
+hexagon (Field centerPoint, Field height) =
+  circumscribedPolygon 6 (#centerPoint centerPoint, #diameter height)
+
+{-| Create a regular polygon with the given number of sides.
+
+The polygon will be sized to fit within a circle with the given center point and diameter
+(each polygon vertex will lie on the circle).
+The polygon will be oriented such that its bottom-most edge is horizontal.
+-}
+inscribedPolygon ::
+  Tolerance units =>
+  Int ->
+  ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
+  Result EmptyRegion (Region2d (space @ units))
+inscribedPolygon n (Field centerPoint, Field diameter) = do
+  if diameter < Qty.zero || diameter ~= Qty.zero || n < 3
+    then Failure EmptyRegion
+    else Success do
+      let radius = 0.5 * diameter
+      let vertexAngles = Qty.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
+      let vertex angle = centerPoint + Vector2d.polar radius angle
+      let vertices = List.map vertex vertexAngles
+      case polygon vertices of
+        Success region -> region
+        Failure _ ->
+          internalError "Regular polygon construction with non-zero diameter should not fail"
+
+{-| Create a regular polygon with the given number of sides.
+
+The polygon will be sized so that
+a circle with the given center point and diameter will just fit within the polygon
+(each polygon edge will touch the circle at the edge's midpoint).
+For a polygon with an even number of sides (square, hexagon, octagon etc.),
+this means that the "width across flats" will be equal to the given circle diameter.
+The polygon will be oriented such that its bottom-most edge is horizontal.
+-}
+circumscribedPolygon ::
+  Tolerance units =>
+  Int ->
+  ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
+  Result EmptyRegion (Region2d (space @ units))
+circumscribedPolygon n (Field centerPoint, Field diameter) =
+  inscribedPolygon n do
+    #centerPoint centerPoint
+    #diameter (diameter / Angle.cos (Angle.pi / Float.int n))
+
+{-| Create a polygonal region from the given vertices.
+
+The last vertex will be connected back to the first vertex automatically if needed
+(you do not have to close the polygon manually, although it will still work if you do).
+-}
+polygon ::
+  (Vertex2d vertex (space @ units), Tolerance units) =>
+  List vertex ->
+  Result BoundedBy.Error (Region2d (space @ units))
+polygon vertexList = case vertexList of
+  [] -> Failure BoundedBy.EmptyRegion
+  NonEmpty vertices -> do
+    let closedLoop = NonEmpty.extend vertices [vertices.first]
+    let line start end = Curve2d.line (Vertex2d.position start) (Vertex2d.position end)
+    let lines = NonEmpty.successive line closedLoop
+    let isNonZeroLength curve = curve.startPoint != curve.endPoint
+    boundedBy (List.filter isNonZeroLength lines)
 
 {-| Fillet a region at the given corner points, with the given radius.
 
