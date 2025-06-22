@@ -1378,7 +1378,7 @@ body3d = do
   let writeStl path convention givenResolution body =
         Stl.writeBinary path convention Length.inMillimeters (Body3d.toMesh givenResolution body)
   let writeMitsuba path givenResolution body =
-        Mitsuba.writeBinary path (Body3d.toMesh givenResolution body)
+        Mitsuba.writeMeshes path [(Body3d.toMesh givenResolution body, #name "")]
   Class.new @(Body3d (Space @ Meters)) $(docs ''Body3d) $
     [ factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
     , factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
