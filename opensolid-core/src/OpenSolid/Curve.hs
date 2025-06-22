@@ -103,7 +103,8 @@ instance
   units1 ~ units2 =>
   ApproximateEquality (Curve units1) (Curve units2) units1
   where
-  curve1 ~= curve2 = curve1 - curve2 ~= Qty.zero
+  curve1 ~= curve2 =
+    List.allTrue [evaluate curve1 tValue ~= evaluate curve2 tValue | tValue <- Parameter.samples]
 
 instance
   units1 ~ units2 =>

@@ -99,7 +99,9 @@ instance
   units1 ~ units2 =>
   ApproximateEquality (SurfaceFunction units1) (SurfaceFunction units2) units1
   where
-  function1 ~= function2 = function1 - function2 ~= Qty.zero
+  function1 ~= function2 =
+    List.allTrue
+      [evaluate function1 uvPoint ~= evaluate function2 uvPoint | uvPoint <- UvPoint.samples]
 
 instance
   units1 ~ units2 =>
