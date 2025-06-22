@@ -11,6 +11,8 @@ module OpenSolid.API.Class
   , curryT3
   , curry1T3
   , curryT4
+  , curryT5
+  , curryT6
   , static
   , upcast
   , constant
@@ -164,6 +166,12 @@ curry1T3 function a b c d = function a (b, c, d)
 
 curryT4 :: ((a, b, c, d) -> e) -> a -> b -> c -> d -> e
 curryT4 function a b c d = function (a, b, c, d)
+
+curryT5 :: ((a, b, c, d, e) -> f) -> a -> b -> c -> d -> e -> f
+curryT5 function a b c d e = function (a, b, c, d, e)
+
+curryT6 :: ((a, b, c, d, e, f) -> g) -> a -> b -> c -> d -> e -> f -> g
+curryT6 function a b c d e f = function (a, b, c, d, e, f)
 
 new :: forall value. FFI value => Text -> List (Member value) -> Class
 new givenDocumentation members =
