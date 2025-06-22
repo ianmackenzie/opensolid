@@ -13,7 +13,10 @@ kind name proxy =
   case FFI.argumentName proxy of
     Nothing -> Positional
     Just argName ->
-      if name == argName
+      -- Slight hack: use conversion to snake case as a way to do case-insensitive comparison,
+      -- so that e.g. a Haskell "verticalFov" argument is allowed to be exposed as
+      -- "Vertical FOV" instead of "Vertical Fov"
+      if FFI.snakeCase name == FFI.snakeCase argName
         then Named
         else do
           let message = "Argument name mismatch: " <> Text.show name <> " /= " <> Text.show argName
