@@ -88,6 +88,20 @@ instance HasField "compiled" (VectorCurve3d (space @ units)) (Compiled (space @ 
 instance HasField "derivative" (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units)) where
   getField = derivative
 
+instance
+  Units.Squared units1 units2 =>
+  HasField "squaredMagnitude" (VectorCurve3d (space @ units1)) (Curve units2)
+  where
+  getField = squaredMagnitude
+
+instance
+  HasField
+    "squaredMagnitude'"
+    (VectorCurve3d (space @ units))
+    (Curve (units :*: units))
+  where
+  getField = squaredMagnitude'
+
 instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
 
 instance
