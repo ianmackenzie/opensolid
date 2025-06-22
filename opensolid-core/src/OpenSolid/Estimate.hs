@@ -70,12 +70,17 @@ bounds (Estimate _ cachedBounds) = cachedBounds
 bounds (Coerce estimate) = Bounds.coerce (bounds estimate)
 
 refine :: Estimate units -> Estimate units
-refine (Coerce estimate) = Coerce (refine estimate)
-refine (Estimate implementation initialBounds) = do
-  let refinedEstimate = refineImpl implementation
-  if refinedEstimate.bounds.width < initialBounds.width
-    then refinedEstimate
-    else internalError "Estimate refinement stalled"
+refine estimate = checkRefinement 0 estimate
+
+checkRefinement :: Int -> Estimate units -> Estimate units
+checkRefinement stepsWithoutProgress estimate = case estimate of
+  Coerce inner -> Coerce (checkRefinement stepsWithoutProgress inner)
+  Estimate implementation initialBounds -> do
+    let refinedEstimate = refineImpl implementation
+    if
+      | refinedEstimate.bounds.width < initialBounds.width -> refinedEstimate
+      | stepsWithoutProgress < 10 -> checkRefinement (stepsWithoutProgress + 1) refinedEstimate
+      | otherwise -> internalError "Estimate refinement stalled"
 
 satisfy :: (Bounds units -> Bool) -> Estimate units -> Bounds units
 satisfy predicate estimate = do
