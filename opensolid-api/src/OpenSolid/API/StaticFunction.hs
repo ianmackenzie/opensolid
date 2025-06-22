@@ -141,6 +141,90 @@ data StaticFunction where
     (Tolerance Meters => a -> b -> c -> d -> e) ->
     Text ->
     StaticFunction
+  StaticFunction5 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (a -> b -> c -> d -> e -> f) ->
+    Text ->
+    StaticFunction
+  StaticFunctionU5 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Unitless => a -> b -> c -> d -> e -> f) ->
+    Text ->
+    StaticFunction
+  StaticFunctionR5 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Radians => a -> b -> c -> d -> e -> f) ->
+    Text ->
+    StaticFunction
+  StaticFunctionM5 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Meters => a -> b -> c -> d -> e -> f) ->
+    Text ->
+    StaticFunction
+  StaticFunction6 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (a -> b -> c -> d -> e -> f -> g) ->
+    Text ->
+    StaticFunction
+  StaticFunctionU6 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Unitless => a -> b -> c -> d -> e -> f -> g) ->
+    Text ->
+    StaticFunction
+  StaticFunctionR6 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Radians => a -> b -> c -> d -> e -> f -> g) ->
+    Text ->
+    StaticFunction
+  StaticFunctionM6 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Meters => a -> b -> c -> d -> e -> f -> g) ->
+    Text ->
+    StaticFunction
 
 ffiName :: FFI.ClassName -> Name -> StaticFunction -> Text
 ffiName className functionName staticFunction = do
@@ -219,6 +303,38 @@ invoke function = case function of
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4))
+  StaticFunction5 _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> IO.do
+      (arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 arg5)
+  StaticFunctionU5 _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> IO.do
+      (tolerance, arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5))
+  StaticFunctionR5 _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> IO.do
+      (tolerance, arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5))
+  StaticFunctionM5 _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> IO.do
+      (tolerance, arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5))
+  StaticFunction6 _ _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> IO.do
+      (arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 arg5 arg6)
+  StaticFunctionU6 _ _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> IO.do
+      (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5 arg6))
+  StaticFunctionR6 _ _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> IO.do
+      (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5 arg6))
+  StaticFunctionM6 _ _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> IO.do
+      (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5 arg6))
 
 type Signature = (Maybe ImplicitArgument, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
@@ -252,6 +368,14 @@ signature staticFunction = normalizeSignature $ case staticFunction of
   StaticFunctionU4 arg1 arg2 arg3 arg4 f _ -> signatureU4 arg1 arg2 arg3 arg4 f
   StaticFunctionR4 arg1 arg2 arg3 arg4 f _ -> signatureR4 arg1 arg2 arg3 arg4 f
   StaticFunctionM4 arg1 arg2 arg3 arg4 f _ -> signatureM4 arg1 arg2 arg3 arg4 f
+  StaticFunction5 arg1 arg2 arg3 arg4 arg5 f _ -> signature5 arg1 arg2 arg3 arg4 arg5 f
+  StaticFunctionU5 arg1 arg2 arg3 arg4 arg5 f _ -> signatureU5 arg1 arg2 arg3 arg4 arg5 f
+  StaticFunctionR5 arg1 arg2 arg3 arg4 arg5 f _ -> signatureR5 arg1 arg2 arg3 arg4 arg5 f
+  StaticFunctionM5 arg1 arg2 arg3 arg4 arg5 f _ -> signatureM5 arg1 arg2 arg3 arg4 arg5 f
+  StaticFunction6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signature6 arg1 arg2 arg3 arg4 arg5 arg6 f
+  StaticFunctionU6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signatureU6 arg1 arg2 arg3 arg4 arg5 arg6 f
+  StaticFunctionR6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signatureR6 arg1 arg2 arg3 arg4 arg5 arg6 f
+  StaticFunctionM6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signatureM6 arg1 arg2 arg3 arg4 arg5 arg6 f
 
 arg :: forall a. FFI a => Name -> Proxy a -> (Name, FFI.Type, Argument.Kind)
 arg name proxy = (name, FFI.typeOf proxy, Argument.kind name proxy)
@@ -444,6 +568,138 @@ signatureM4 arg1 arg2 arg3 arg4 _ =
   , FFI.typeOf @e Proxy
   )
 
+signature5 ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (a -> b -> c -> d -> e -> f) ->
+  Signature
+signature5 arg1 arg2 arg3 arg4 arg5 _ =
+  ( Nothing
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy]
+  , FFI.typeOf @f Proxy
+  )
+
+signatureU5 ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Unitless => a -> b -> c -> d -> e -> f) ->
+  Signature
+signatureU5 arg1 arg2 arg3 arg4 arg5 _ =
+  ( Just ToleranceUnitless
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy]
+  , FFI.typeOf @f Proxy
+  )
+
+signatureR5 ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Radians => a -> b -> c -> d -> e -> f) ->
+  Signature
+signatureR5 arg1 arg2 arg3 arg4 arg5 _ =
+  ( Just ToleranceRadians
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy]
+  , FFI.typeOf @f Proxy
+  )
+
+signatureM5 ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Meters => a -> b -> c -> d -> e -> f) ->
+  Signature
+signatureM5 arg1 arg2 arg3 arg4 arg5 _ =
+  ( Just ToleranceMeters
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy]
+  , FFI.typeOf @f Proxy
+  )
+
+signature6 ::
+  forall a b c d e f g.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (a -> b -> c -> d -> e -> f -> g) ->
+  Signature
+signature6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
+  ( Nothing
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy, arg @f arg6 Proxy]
+  , FFI.typeOf @g Proxy
+  )
+
+signatureU6 ::
+  forall a b c d e f g.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Unitless => a -> b -> c -> d -> e -> f -> g) ->
+  Signature
+signatureU6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
+  ( Just ToleranceUnitless
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy, arg @f arg6 Proxy]
+  , FFI.typeOf @g Proxy
+  )
+
+signatureR6 ::
+  forall a b c d e f g.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Radians => a -> b -> c -> d -> e -> f -> g) ->
+  Signature
+signatureR6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
+  ( Just ToleranceRadians
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy, arg @f arg6 Proxy]
+  , FFI.typeOf @g Proxy
+  )
+
+signatureM6 ::
+  forall a b c d e f g.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Meters => a -> b -> c -> d -> e -> f -> g) ->
+  Signature
+signatureM6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
+  ( Just ToleranceMeters
+  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy, arg @f arg6 Proxy]
+  , FFI.typeOf @g Proxy
+  )
+
 documentation :: StaticFunction -> Text
 documentation memberFunction = case memberFunction of
   StaticFunction1 _ _ docs -> docs
@@ -462,3 +718,11 @@ documentation memberFunction = case memberFunction of
   StaticFunctionU4 _ _ _ _ _ docs -> docs
   StaticFunctionR4 _ _ _ _ _ docs -> docs
   StaticFunctionM4 _ _ _ _ _ docs -> docs
+  StaticFunction5 _ _ _ _ _ _ docs -> docs
+  StaticFunctionU5 _ _ _ _ _ _ docs -> docs
+  StaticFunctionR5 _ _ _ _ _ _ docs -> docs
+  StaticFunctionM5 _ _ _ _ _ _ docs -> docs
+  StaticFunction6 _ _ _ _ _ _ _ docs -> docs
+  StaticFunctionU6 _ _ _ _ _ _ _ docs -> docs
+  StaticFunctionR6 _ _ _ _ _ _ _ docs -> docs
+  StaticFunctionM6 _ _ _ _ _ _ _ docs -> docs
