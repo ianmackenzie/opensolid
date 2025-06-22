@@ -1,4 +1,4 @@
-module API.NegationFunction
+module OpenSolid.API.NegationFunction
   ( NegationFunction (NegationFunction)
   , invoke
   , ffiName

@@ -1,7 +1,7 @@
 -- Needed for 'property', since call sites will explicitly specify the property name
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
-module API.Class
+module OpenSolid.API.Class
   ( Class (..)
   , Member
   , Self (Self)
@@ -80,34 +80,34 @@ module API.Class
   )
 where
 
-import API.AbsFunction (AbsFunction (AbsFunction))
-import API.AbsFunction qualified as AbsFunction
-import API.BinaryOperator qualified as BinaryOperator
-import API.ComparisonFunction (ComparisonFunction (ComparisonFunction))
-import API.ComparisonFunction qualified as ComparisonFunction
-import API.Constant (Constant (Constant))
-import API.Constant qualified as Constant
-import API.Constructor (Constructor (..))
-import API.Constructor qualified as Constructor
-import API.EqualityFunction (EqualityFunction (EqualityFunction))
-import API.EqualityFunction qualified as EqualityFunction
-import API.Function (Function (..))
-import API.MemberFunction (MemberFunction (..))
-import API.MemberFunction qualified as MemberFunction
-import API.NegationFunction (NegationFunction (NegationFunction))
-import API.NegationFunction qualified as NegationFunction
-import API.PostOperator (PostOperator (PostOperator))
-import API.PostOperator qualified as PostOperator
-import API.PreOperator (PreOperator (PreOperator))
-import API.PreOperator qualified as PreOperator
-import API.Property (Property (Property))
-import API.Property qualified as Property
-import API.StaticFunction (StaticFunction (..))
-import API.StaticFunction qualified as StaticFunction
-import API.Upcast (Upcast (Upcast))
-import API.Upcast qualified as Upcast
 import Data.Proxy (Proxy (Proxy))
 import Data.Void (Void)
+import OpenSolid.API.AbsFunction (AbsFunction (AbsFunction))
+import OpenSolid.API.AbsFunction qualified as AbsFunction
+import OpenSolid.API.BinaryOperator qualified as BinaryOperator
+import OpenSolid.API.ComparisonFunction (ComparisonFunction (ComparisonFunction))
+import OpenSolid.API.ComparisonFunction qualified as ComparisonFunction
+import OpenSolid.API.Constant (Constant (Constant))
+import OpenSolid.API.Constant qualified as Constant
+import OpenSolid.API.Constructor (Constructor (..))
+import OpenSolid.API.Constructor qualified as Constructor
+import OpenSolid.API.EqualityFunction (EqualityFunction (EqualityFunction))
+import OpenSolid.API.EqualityFunction qualified as EqualityFunction
+import OpenSolid.API.Function (Function (..))
+import OpenSolid.API.MemberFunction (MemberFunction (..))
+import OpenSolid.API.MemberFunction qualified as MemberFunction
+import OpenSolid.API.NegationFunction (NegationFunction (NegationFunction))
+import OpenSolid.API.NegationFunction qualified as NegationFunction
+import OpenSolid.API.PostOperator (PostOperator (PostOperator))
+import OpenSolid.API.PostOperator qualified as PostOperator
+import OpenSolid.API.PreOperator (PreOperator (PreOperator))
+import OpenSolid.API.PreOperator qualified as PreOperator
+import OpenSolid.API.Property (Property (Property))
+import OpenSolid.API.Property qualified as Property
+import OpenSolid.API.StaticFunction (StaticFunction (..))
+import OpenSolid.API.StaticFunction qualified as StaticFunction
+import OpenSolid.API.Upcast (Upcast (Upcast))
+import OpenSolid.API.Upcast qualified as Upcast
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List

@@ -10,8 +10,8 @@ module Python.Function
   )
 where
 
-import API.ImplicitArgument (ImplicitArgument)
-import API.ImplicitArgument qualified as ImplicitArgument
+import OpenSolid.API.ImplicitArgument (ImplicitArgument)
+import OpenSolid.API.ImplicitArgument qualified as ImplicitArgument
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List

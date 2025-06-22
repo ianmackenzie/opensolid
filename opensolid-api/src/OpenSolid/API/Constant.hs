@@ -1,4 +1,4 @@
-module API.Constant
+module OpenSolid.API.Constant
   ( Constant (Constant)
   , ffiName
   , invoke

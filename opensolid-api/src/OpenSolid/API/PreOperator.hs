@@ -1,4 +1,4 @@
-module API.PreOperator
+module OpenSolid.API.PreOperator
   ( PreOperator (..)
   , signature
   , lhsName
@@ -7,8 +7,8 @@ module API.PreOperator
   )
 where
 
-import API.BinaryOperator qualified as BinaryOperator
 import Foreign (Ptr)
+import OpenSolid.API.BinaryOperator qualified as BinaryOperator
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.IO qualified as IO

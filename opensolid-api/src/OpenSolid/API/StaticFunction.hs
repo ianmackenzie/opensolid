@@ -1,4 +1,4 @@
-module API.StaticFunction
+module OpenSolid.API.StaticFunction
   ( StaticFunction (..)
   , ffiName
   , invoke
@@ -7,10 +7,10 @@ module API.StaticFunction
   )
 where
 
-import API.Argument qualified as Argument
-import API.ImplicitArgument (ImplicitArgument (..))
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
+import OpenSolid.API.Argument qualified as Argument
+import OpenSolid.API.ImplicitArgument (ImplicitArgument (..))
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.IO qualified as IO

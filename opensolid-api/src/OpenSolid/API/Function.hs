@@ -1,7 +1,7 @@
-module API.Function (Function (..)) where
+module OpenSolid.API.Function (Function (..)) where
 
-import API.ImplicitArgument (ImplicitArgument)
 import Foreign qualified
+import OpenSolid.API.ImplicitArgument (ImplicitArgument)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 

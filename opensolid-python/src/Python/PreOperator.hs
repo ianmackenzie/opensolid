@@ -1,8 +1,8 @@
 module Python.PreOperator (definition) where
 
-import API.BinaryOperator qualified as BinaryOperator
-import API.PreOperator (PreOperator (..))
-import API.PreOperator qualified as PreOperator
+import OpenSolid.API.BinaryOperator qualified as BinaryOperator
+import OpenSolid.API.PreOperator (PreOperator (..))
+import OpenSolid.API.PreOperator qualified as PreOperator
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude

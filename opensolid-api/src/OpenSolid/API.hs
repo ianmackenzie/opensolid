@@ -1,6 +1,6 @@
-module API (classes, functions) where
+module OpenSolid.API (classes, functions) where
 
-import API.Class
+import OpenSolid.API.Class
   ( Class
   , Self (Self)
   , absSelf
@@ -64,10 +64,10 @@ import API.Class
   , timesSelf
   , upcast
   )
-import API.Class qualified as Class
-import API.Docs (docs)
-import API.Function (Function)
-import API.Space (Space)
+import OpenSolid.API.Class qualified as Class
+import OpenSolid.API.Docs (docs)
+import OpenSolid.API.Function (Function)
+import OpenSolid.API.Space (Space)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)

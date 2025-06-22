@@ -1,6 +1,6 @@
 module Python.ComparisonFunction (definitions) where
 
-import API.ComparisonFunction qualified as ComparisonFunction
+import OpenSolid.API.ComparisonFunction qualified as ComparisonFunction
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import Python qualified

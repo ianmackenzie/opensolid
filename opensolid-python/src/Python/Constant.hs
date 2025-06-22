@@ -1,7 +1,7 @@
 module Python.Constant (declaration, definition) where
 
-import API.Constant (Constant (..))
-import API.Constant qualified as Constant
+import OpenSolid.API.Constant (Constant (..))
+import OpenSolid.API.Constant qualified as Constant
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude

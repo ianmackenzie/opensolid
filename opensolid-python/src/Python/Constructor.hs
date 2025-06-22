@@ -1,8 +1,8 @@
 module Python.Constructor (definition) where
 
-import API.Constructor (Constructor (..))
-import API.Constructor qualified as Constructor
-import API.Upcast (Upcast)
+import OpenSolid.API.Constructor (Constructor (..))
+import OpenSolid.API.Constructor qualified as Constructor
+import OpenSolid.API.Upcast (Upcast)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair

@@ -1,4 +1,4 @@
-module API.Constructor
+module OpenSolid.API.Constructor
   ( Constructor (..)
   , ffiName
   , invoke

@@ -1,4 +1,4 @@
-module API.PostOperator
+module OpenSolid.API.PostOperator
   ( PostOperator (..)
   , signature
   , rhsName
@@ -7,8 +7,8 @@ module API.PostOperator
   )
 where
 
-import API.BinaryOperator qualified as BinaryOperator
 import Foreign (Ptr)
+import OpenSolid.API.BinaryOperator qualified as BinaryOperator
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.IO qualified as IO

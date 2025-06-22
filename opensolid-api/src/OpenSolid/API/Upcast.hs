@@ -1,4 +1,4 @@
-module API.Upcast (Upcast (Upcast), ffiName, invoke, parentClassName) where
+module OpenSolid.API.Upcast (Upcast (Upcast), ffiName, invoke, parentClassName) where
 
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)

@@ -1,7 +1,7 @@
 module Python.StaticFunction (definition) where
 
-import API.StaticFunction (StaticFunction (..))
-import API.StaticFunction qualified as StaticFunction
+import OpenSolid.API.StaticFunction (StaticFunction (..))
+import OpenSolid.API.StaticFunction qualified as StaticFunction
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List

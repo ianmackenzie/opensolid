@@ -1,4 +1,4 @@
-module API.Docs (docs) where
+module OpenSolid.API.Docs (docs) where
 
 import Language.Haskell.TH qualified as TH
 import OpenSolid.Prelude

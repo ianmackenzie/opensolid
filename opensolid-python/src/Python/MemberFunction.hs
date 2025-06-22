@@ -1,7 +1,7 @@
 module Python.MemberFunction (definition) where
 
-import API.MemberFunction (MemberFunction (..))
-import API.MemberFunction qualified as MemberFunction
+import OpenSolid.API.MemberFunction (MemberFunction (..))
+import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List

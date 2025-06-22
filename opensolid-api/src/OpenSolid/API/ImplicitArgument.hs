@@ -1,4 +1,4 @@
-module API.ImplicitArgument
+module OpenSolid.API.ImplicitArgument
   ( ImplicitArgument (..)
   , ffiType
   )

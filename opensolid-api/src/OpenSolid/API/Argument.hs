@@ -1,4 +1,4 @@
-module API.Argument (Kind (Positional, Named), kind) where
+module OpenSolid.API.Argument (Kind (Positional, Named), kind) where
 
 import Data.Proxy (Proxy)
 import OpenSolid.FFI (FFI, Name)

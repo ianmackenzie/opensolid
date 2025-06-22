@@ -1,4 +1,4 @@
-module API.Property
+module OpenSolid.API.Property
   ( Property (Property)
   , ffiName
   , invoke

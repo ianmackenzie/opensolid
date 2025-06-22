@@ -3,10 +3,10 @@
 
 module FFI (generateExports) where
 
-import API qualified
-import API.Function qualified as Function
 import Foreign (Ptr)
 import Language.Haskell.TH qualified as TH
+import OpenSolid.API qualified as API
+import OpenSolid.API.Function qualified as Function
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.List qualified as List

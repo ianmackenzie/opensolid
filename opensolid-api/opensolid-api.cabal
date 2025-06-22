@@ -27,28 +27,28 @@ library
 
   hs-source-dirs: src
   exposed-modules:
-    API
-    API.AbsFunction
-    API.Argument
-    API.BinaryOperator
-    API.Class
-    API.ComparisonFunction
-    API.Constant
-    API.Constructor
-    API.EqualityFunction
-    API.Function
-    API.ImplicitArgument
-    API.MemberFunction
-    API.NegationFunction
-    API.PostOperator
-    API.PreOperator
-    API.Property
-    API.Space
-    API.StaticFunction
-    API.Upcast
+    OpenSolid.API
+    OpenSolid.API.AbsFunction
+    OpenSolid.API.Argument
+    OpenSolid.API.BinaryOperator
+    OpenSolid.API.Class
+    OpenSolid.API.ComparisonFunction
+    OpenSolid.API.Constant
+    OpenSolid.API.Constructor
+    OpenSolid.API.EqualityFunction
+    OpenSolid.API.Function
+    OpenSolid.API.ImplicitArgument
+    OpenSolid.API.MemberFunction
+    OpenSolid.API.NegationFunction
+    OpenSolid.API.PostOperator
+    OpenSolid.API.PreOperator
+    OpenSolid.API.Property
+    OpenSolid.API.Space
+    OpenSolid.API.StaticFunction
+    OpenSolid.API.Upcast
 
   other-modules:
-    API.Docs
+    OpenSolid.API.Docs
 
   default-extensions:
     DataKinds

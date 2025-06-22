@@ -1,4 +1,4 @@
-module API.AbsFunction
+module OpenSolid.API.AbsFunction
   ( AbsFunction (AbsFunction)
   , invoke
   , ffiName

@@ -1,4 +1,4 @@
-module API.ComparisonFunction
+module OpenSolid.API.ComparisonFunction
   ( ComparisonFunction (ComparisonFunction)
   , ffiName
   , invoke

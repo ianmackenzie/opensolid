@@ -1,13 +1,13 @@
 module Main (main) where
 
-import API qualified
-import API.Class (Class (Class))
-import API.Class qualified as Class
-import API.Function (Function)
-import API.Function qualified as Function
-import API.ImplicitArgument (ImplicitArgument)
-import API.Upcast (Upcast)
-import API.Upcast qualified as Upcast
+import OpenSolid.API qualified as API
+import OpenSolid.API.Class (Class (Class))
+import OpenSolid.API.Class qualified as Class
+import OpenSolid.API.Function (Function)
+import OpenSolid.API.Function qualified as Function
+import OpenSolid.API.ImplicitArgument (ImplicitArgument)
+import OpenSolid.API.Upcast (Upcast)
+import OpenSolid.API.Upcast qualified as Upcast
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List

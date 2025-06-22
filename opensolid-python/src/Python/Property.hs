@@ -1,7 +1,7 @@
 module Python.Property (definition) where
 
-import API.Property (Property (..))
-import API.Property qualified as Property
+import OpenSolid.API.Property (Property (..))
+import OpenSolid.API.Property qualified as Property
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude

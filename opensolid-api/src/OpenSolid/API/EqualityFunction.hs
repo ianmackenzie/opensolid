@@ -1,4 +1,4 @@
-module API.EqualityFunction
+module OpenSolid.API.EqualityFunction
   ( EqualityFunction (EqualityFunction)
   , ffiName
   , invoke
