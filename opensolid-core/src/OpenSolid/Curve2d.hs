@@ -196,7 +196,7 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  curve ^ point = VectorCurve2d.hasZero (curve - point)
+  curve ^ point = (curve - point) ^ Vector2d.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -752,7 +752,7 @@ intersections curve1 curve2 = Result.do
   endpointIntersections <- findEndpointIntersections curve1 curve2
   case overlappingSegments curve1 curve2 endpointIntersections of
     [] ->
-      if VectorCurve2d.hasZero curve1.derivative || VectorCurve2d.hasZero curve2.derivative
+      if curve1.derivative ^ Vector2d.zero || curve2.derivative ^ Vector2d.zero
         then Failure Intersections.CurveHasDegeneracy
         else do
           let u = SurfaceFunction.u
@@ -1042,7 +1042,7 @@ arcLengthParameterization ::
   Curve2d (space @ units) ->
   Result HasDegeneracy (Curve Unitless, Qty units)
 arcLengthParameterization curve = do
-  if VectorCurve2d.isZero curve.derivative
+  if curve.derivative ~= Vector2d.zero
     then Success (Curve.t, Qty.zero) -- Curve is a constant point
     else case VectorCurve2d.magnitude curve.derivative of
       Failure VectorCurve2d.HasZero -> Failure HasDegeneracy

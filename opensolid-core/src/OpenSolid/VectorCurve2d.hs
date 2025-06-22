@@ -24,8 +24,6 @@ module OpenSolid.VectorCurve2d
   , magnitude
   , unsafeMagnitude
   , reverse
-  , isZero
-  , hasZero
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , HasZero (HasZero)
@@ -64,6 +62,7 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
@@ -123,6 +122,43 @@ instance
   Units.Coercion (VectorCurve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
   where
   coerce curve = VectorCurve2d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  ApproximateEquality
+    (VectorCurve2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    units1
+  where
+  curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  ApproximateEquality
+    (VectorCurve2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    units1
+  where
+  curve ~= vector = List.allTrue [evaluate curve t ~= vector | t <- Parameter.samples]
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Intersects
+    (VectorCurve2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    units1
+  where
+  curve ^ vector = Tolerance.using Tolerance.squared' do
+    (curve - vector).squaredMagnitude' ^ Qty.zero
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Intersects
+    (Vector2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    units1
+  where
+  vector ^ curve = curve ^ vector
 
 instance Negation (VectorCurve2d (space @ units)) where
   negate curve = new (negate curve.compiled) (negate curve.derivative)
@@ -635,12 +671,6 @@ magnitude curve =
     Success [] -> Success (unsafeMagnitude curve)
     Success List.OneOrMore -> Failure HasZero
     Failure ZeroEverywhere -> Failure HasZero
-
-isZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
-isZero curve = Tolerance.using Tolerance.squared' (curve.squaredMagnitude' ~= Qty.zero)
-
-hasZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
-hasZero curve = Tolerance.using Tolerance.squared' (curve.squaredMagnitude' ^ Qty.zero)
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
 
