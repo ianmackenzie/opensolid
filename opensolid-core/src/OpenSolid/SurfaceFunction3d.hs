@@ -170,9 +170,8 @@ instance
     new
       @ outer.compiled . inner.compiled
       @ \parameter -> do
-        let dInner = SurfaceFunction2d.derivative parameter inner
-        let dU = dInner.xComponent
-        let dV = dInner.yComponent
+        let innerDerivative = SurfaceFunction2d.derivative parameter inner
+        let (dU, dV) = innerDerivative.components
         duOuter * dU + dvOuter * dV
 
 instance HasField "compiled" (SurfaceFunction3d (space @ units)) (Compiled (space @ units)) where

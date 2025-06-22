@@ -290,9 +290,7 @@ instance
     (Curve units)
   where
   f . g = do
-    let dgdt = g.derivative
-    let dudt = dgdt.xComponent
-    let dvdt = dgdt.yComponent
+    let (dudt, dvdt) = g.derivative.components
     Curve.new (f.compiled . g.compiled) (f.du . g * dudt + f.dv . g * dvdt)
 
 instance
@@ -303,12 +301,10 @@ instance
     (VectorCurve3d (space @ units))
   where
   function . uvCurve = do
-    let uvT = uvCurve.derivative
-    let uT = uvT.xComponent
-    let vT = uvT.yComponent
+    let (dudt, dvdt) = uvCurve.derivative.components
     VectorCurve3d.new
       @ function.compiled . uvCurve.compiled
-      @ function.du . uvCurve * uT + function.dv . uvCurve * vT
+      @ function.du . uvCurve * dudt + function.dv . uvCurve * dvdt
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -318,12 +314,10 @@ instance
     (Curve3d (space @ units))
   where
   function . uvCurve = do
-    let uvT = uvCurve.derivative
-    let uT = uvT.xComponent
-    let vT = uvT.yComponent
+    let (dudt, dvdt) = uvCurve.derivative.components
     Curve3d.new
       @ function.compiled . uvCurve.compiled
-      @ function.du . uvCurve * uT + function.dv . uvCurve * vT
+      @ function.du . uvCurve * dudt + function.dv . uvCurve * dvdt
 
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 new = Curve2d

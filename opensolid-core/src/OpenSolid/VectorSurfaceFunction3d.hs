@@ -430,9 +430,8 @@ instance
     new
       @ outer.compiled . inner.compiled
       @ \p -> do
-        let dInner = SurfaceFunction2d.derivative p inner
-        let dU = dInner.xComponent
-        let dV = dInner.yComponent
+        let innerDerivative = SurfaceFunction2d.derivative p inner
+        let (dU, dV) = innerDerivative.components
         duOuter * dU + dvOuter * dV
 
 instance

@@ -222,8 +222,7 @@ instance
     (Curve2d (space @ units))
   where
   function . curve = do
-    let dudt = curve.derivative.xComponent
-    let dvdt = curve.derivative.yComponent
+    let (dudt, dvdt) = curve.derivative.components
     Curve2d.new
       @ function.compiled . curve.compiled
       @ (function.du . curve) * dudt + (function.dv . curve) * dvdt
