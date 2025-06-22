@@ -51,6 +51,30 @@ data SurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
 
 instance
   HasField
+    "xCoordinate"
+    (SurfaceFunction2d (space @ units))
+    (SurfaceFunction units)
+  where
+  getField = xCoordinate
+
+instance
+  HasField
+    "yCoordinate"
+    (SurfaceFunction2d (space @ units))
+    (SurfaceFunction units)
+  where
+  getField = yCoordinate
+
+instance
+  HasField
+    "coordinates"
+    (SurfaceFunction2d (space @ units))
+    (SurfaceFunction units, SurfaceFunction units)
+  where
+  getField = coordinates
+
+instance
+  HasField
     "du"
     (SurfaceFunction2d (space @ units))
     (VectorSurfaceFunction2d (space @ units))
