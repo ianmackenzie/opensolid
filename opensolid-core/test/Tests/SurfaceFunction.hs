@@ -17,7 +17,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Curve2d qualified
