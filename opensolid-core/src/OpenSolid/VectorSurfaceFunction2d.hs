@@ -8,6 +8,9 @@ module OpenSolid.VectorSurfaceFunction2d
   , xy
   , evaluate
   , evaluateBounds
+  , xComponent
+  , yComponent
+  , components
   , derivative
   , transformBy
   , squaredMagnitude'
@@ -43,6 +46,30 @@ data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
     ~(VectorSurfaceFunction2d (space @ units)) ->
     ~(VectorSurfaceFunction2d (space @ units)) ->
     VectorSurfaceFunction2d (space @ units)
+
+instance
+  HasField
+    "xComponent"
+    (VectorSurfaceFunction2d (space @ units))
+    (SurfaceFunction units)
+  where
+  getField = xComponent
+
+instance
+  HasField
+    "yComponent"
+    (VectorSurfaceFunction2d (space @ units))
+    (SurfaceFunction units)
+  where
+  getField = yComponent
+
+instance
+  HasField
+    "components"
+    (VectorSurfaceFunction2d (space @ units))
+    (SurfaceFunction units, SurfaceFunction units)
+  where
+  getField = components
 
 instance
   HasField
@@ -509,35 +536,30 @@ derivative ::
 derivative U = (.du)
 derivative V = (.dv)
 
-instance
-  HasField
-    "xComponent"
-    (VectorSurfaceFunction2d (space @ units))
-    (SurfaceFunction units)
-  where
-  getField function =
-    SurfaceFunction.new
-      @ CompiledFunction.map
-        Expression.xComponent
-        Vector2d.xComponent
-        VectorBounds2d.xComponent
-        function.compiled
-      @ \parameter -> (derivative parameter function).xComponent
+xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
+xComponent function =
+  SurfaceFunction.new
+    @ CompiledFunction.map
+      Expression.xComponent
+      Vector2d.xComponent
+      VectorBounds2d.xComponent
+      function.compiled
+    @ \parameter -> (derivative parameter function).xComponent
 
-instance
-  HasField
-    "yComponent"
-    (VectorSurfaceFunction2d (space @ units))
-    (SurfaceFunction units)
-  where
-  getField function =
-    SurfaceFunction.new
-      @ CompiledFunction.map
-        Expression.yComponent
-        Vector2d.yComponent
-        VectorBounds2d.yComponent
-        function.compiled
-      @ \parameter -> (derivative parameter function).yComponent
+yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
+yComponent function =
+  SurfaceFunction.new
+    @ CompiledFunction.map
+      Expression.yComponent
+      Vector2d.yComponent
+      VectorBounds2d.yComponent
+      function.compiled
+    @ \parameter -> (derivative parameter function).yComponent
+
+components ::
+  VectorSurfaceFunction2d (space @ units) ->
+  (SurfaceFunction units, SurfaceFunction units)
+components function = (xComponent function, yComponent function)
 
 squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units :*: units)
 squaredMagnitude' function =
