@@ -1,9 +1,11 @@
 module Main (main) where
 
-import Http.Server (Request, Response, ResponseReceived)
-import Http.Server qualified as Server
-import Http.Server.Request qualified as Request
-import Http.Server.Response qualified as Response
+import OpenSolid.Http.Request (Request)
+import OpenSolid.Http.Request qualified as Request
+import OpenSolid.Http.Response (Response)
+import OpenSolid.Http.Response qualified as Response
+import OpenSolid.Http.Server (ResponseReceived)
+import OpenSolid.Http.Server qualified as Server
 import OpenSolid.Prelude
 
 sayHello :: Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived

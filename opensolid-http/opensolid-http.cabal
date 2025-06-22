@@ -79,8 +79,8 @@ common config
 library
   import: config
   exposed-modules:
-    Http.Server
-    Http.Server.Request
-    Http.Server.Response
+    OpenSolid.Http.Request
+    OpenSolid.Http.Response
+    OpenSolid.Http.Server
 
   hs-source-dirs: src

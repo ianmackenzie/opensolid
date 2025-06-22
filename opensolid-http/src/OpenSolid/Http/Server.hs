@@ -1,4 +1,4 @@
-module Http.Server
+module OpenSolid.Http.Server
   ( Application
   , Request
   , Response

@@ -1,4 +1,4 @@
-module Http.Server.Response
+module OpenSolid.Http.Response
   ( Response
   , Status
   , Body

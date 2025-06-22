@@ -1,4 +1,4 @@
-module Http.Server.Request
+module OpenSolid.Http.Request
   ( Request
   , method
   , path
