@@ -20,6 +20,7 @@ module OpenSolid.IO
   , readBinary
   , writeBinary
   , deleteFile
+  , pathSeparator
   )
 where
 
@@ -41,6 +42,7 @@ import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import System.Directory
+import System.FilePath qualified
 import System.IO.Error qualified
 import Prelude qualified
 
@@ -114,3 +116,6 @@ writeUtf8 path text = writeBinary path (Text.toUtf8 text)
 
 deleteFile :: Text -> IO ()
 deleteFile path = System.Directory.removeFile (Text.unpack path)
+
+pathSeparator :: Text
+pathSeparator = Text.char System.FilePath.pathSeparator
