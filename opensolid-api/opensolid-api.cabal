@@ -51,6 +51,7 @@ library
     OpenSolid.API.Docs
 
   default-extensions:
+    BlockArguments
     DataKinds
     DisambiguateRecordFields
     GADTs

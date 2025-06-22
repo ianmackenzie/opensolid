@@ -8,12 +8,15 @@ import OpenSolid.API.Class
   , constant
   , constructor1
   , constructor2
+  , constructor3
   , crossProduct
   , crossSelf
   , curry1T2
   , curry1T3
   , curryT2
+  , curryT3
   , curryT4
+  , curryT5
   , divBy
   , divByFloat
   , divBySelf
@@ -24,6 +27,7 @@ import OpenSolid.API.Class
   , factory2
   , factory3
   , factory4
+  , factory5
   , factoryM1
   , factoryM1R
   , factoryM2
@@ -61,6 +65,7 @@ import OpenSolid.API.Class
   , plusSelf
   , property
   , static1
+  , static2
   , static3
   , times
   , timesFloat
@@ -87,6 +92,8 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
+import OpenSolid.Camera3d (Camera3d)
+import OpenSolid.Camera3d qualified as Camera3d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3d (Convention3d)
@@ -197,6 +204,8 @@ classes =
   , model3d
   , gltf
   , spurGear
+  , camera3d
+  , mitsuba
   ]
 
 functions :: List Function
@@ -1445,6 +1454,38 @@ gltf = do
   Class.new @Gltf "A glTF model that can be written out to a file." $
     [ constructor1 "Model" Gltf "Construct a glTF model from a generic 3D model."
     , member2 "Write Binary" "Path" "Resolution" writeBinary $(docs 'Gltf.writeBinary)
+    ]
+
+camera3d :: Class
+camera3d =
+  Class.new @(Camera3d (Space @ Meters)) $(docs ''Camera3d) $
+    [ factory3 "Look At" "Eye Point" "Focal Point" "Projection" (curryT3 Camera3d.lookAt) $(docs 'Camera3d.lookAt)
+    , factory5 "Orbit" "Focal Point" "Azimuth" "Elevation" "Distance" "Projection" (curryT5 Camera3d.orbit) $(docs 'Camera3d.orbit)
+    , nested @(Camera3d.Projection Meters) $(docs ''Camera3d.Projection) []
+    , static1 "Perspective" "Vertical FOV" (Camera3d.perspective @Meters) $(docs 'Camera3d.perspective)
+    , static1 "Orthographic" "Viewport Height" (Camera3d.orthographic @Meters) $(docs 'Camera3d.orthographic)
+    ]
+
+data Mitsuba = Mitsuba (Model3d Space) (Camera3d (Space @ Meters)) (Mitsuba.Lighting Space)
+
+instance FFI Mitsuba where
+  representation = FFI.classRepresentation "Mitsuba"
+
+mitsuba :: Class
+mitsuba = do
+  let writeFiles :: Text -> Resolution Meters -> Mitsuba -> IO ()
+      writeFiles path res (Mitsuba model camera lighting) =
+        Mitsuba.writeFiles do
+          #path path
+          #model model
+          #resolution res
+          #camera camera
+          #lighting lighting
+  Class.new @Mitsuba "A Mitsuba scene that can be written out to a file." $
+    [ constructor3 "Model" "Camera" "Lighting" Mitsuba "Construct a Mitsuba scene from a 3D model, a camera and some lighting."
+    , member2 "Write Files" "Path" "Resolution" writeFiles $(docs 'Mitsuba.writeFiles)
+    , nested @(Mitsuba.Lighting Space) $(docs ''Mitsuba.Lighting) []
+    , static2 "Environment Map" "Frame" "Image" (Mitsuba.environmentMap @Space) $(docs 'Mitsuba.environmentMap)
     ]
 
 spurGear :: Class
