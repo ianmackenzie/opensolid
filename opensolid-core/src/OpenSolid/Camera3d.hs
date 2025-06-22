@@ -91,9 +91,7 @@ instance FFI (Camera3d (space @ units)) where
 
 -- | What kind of projection (perspective or orthographic) a camera should use.
 data Projection units where
-  -- | Perspective projection.
   Perspective :: Angle -> Projection units
-  -- | Orthographic projection.
   Orthographic :: Qty units -> Projection units
 
 instance FFI (Projection units) where
