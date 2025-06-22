@@ -22,6 +22,8 @@ module OpenSolid.VectorCurve2d
   , bezierCurve
   , synthetic
   , magnitude
+  , squaredMagnitude
+  , squaredMagnitude'
   , unsafeMagnitude
   , reverse
   , ZeroEverywhere (ZeroEverywhere)
@@ -108,6 +110,20 @@ instance HasField "yComponent" (VectorCurve2d (space @ units)) (Curve units) whe
 
 instance HasField "components" (VectorCurve2d (space @ units)) (Curve units, Curve units) where
   getField = components
+
+instance
+  Units.Squared units1 units2 =>
+  HasField "squaredMagnitude" (VectorCurve2d (space @ units1)) (Curve units2)
+  where
+  getField = squaredMagnitude
+
+instance
+  HasField
+    "squaredMagnitude'"
+    (VectorCurve2d (space @ units))
+    (Curve (units :*: units))
+  where
+  getField = squaredMagnitude'
 
 instance FFI (VectorCurve2d (space @ Unitless)) where
   representation = FFI.classRepresentation "VectorCurve2d"
@@ -632,26 +648,19 @@ components curve = (xComponent curve, yComponent curve)
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
 
-instance
-  Units.Squared units1 units2 =>
-  HasField "squaredMagnitude" (VectorCurve2d (space @ units1)) (Curve units2)
-  where
-  getField curve = Units.specialize curve.squaredMagnitude'
+squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
+squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
-instance
-  HasField
-    "squaredMagnitude'"
-    (VectorCurve2d (space @ units))
-    (Curve (units :*: units))
-  where
-  getField curve =
-    Curve.new
-      @ CompiledFunction.map
-        Expression.VectorCurve2d.squaredMagnitude'
-        Vector2d.squaredMagnitude'
-        VectorBounds2d.squaredMagnitude'
-        curve.compiled
-      @ 2.0 * curve `dot'` curve.derivative
+squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve (units :*: units)
+squaredMagnitude' curve = do
+  let compiledSquaredMagnitude =
+        CompiledFunction.map
+          Expression.VectorCurve2d.squaredMagnitude'
+          Vector2d.squaredMagnitude'
+          VectorBounds2d.squaredMagnitude'
+          curve.compiled
+  let squaredMagnitudeDerivative = 2.0 * curve `dot'` curve.derivative
+  Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 unsafeMagnitude curve =
