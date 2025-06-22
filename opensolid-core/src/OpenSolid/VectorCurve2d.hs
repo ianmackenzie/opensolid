@@ -1,7 +1,9 @@
 module OpenSolid.VectorCurve2d
-  ( VectorCurve2d (compiled, derivative)
+  ( VectorCurve2d
   , Compiled
   , new
+  , compiled
+  , derivative
   , startValue
   , endValue
   , evaluate
@@ -80,12 +82,8 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
-data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve2d ::
-    { compiled :: Compiled (space @ units)
-    , derivative :: ~(VectorCurve2d (space @ units))
-    } ->
-    VectorCurve2d (space @ units)
+data VectorCurve2d (coordinateSystem :: CoordinateSystem)
+  = VectorCurve2d (Compiled coordinateSystem) ~(VectorCurve2d coordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
@@ -93,6 +91,12 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Vector2d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds2d coordinateSystem)
+
+instance HasField "compiled" (VectorCurve2d (space @ units)) (Compiled (space @ units)) where
+  getField = compiled
+
+instance HasField "derivative" (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
+  getField = derivative
 
 instance FFI (VectorCurve2d (space @ Unitless)) where
   representation = FFI.classRepresentation "VectorCurve2d"
@@ -106,11 +110,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
   where
-  coerce VectorCurve2d{compiled, derivative} =
-    VectorCurve2d
-      { compiled = Units.coerce compiled
-      , derivative = Units.coerce derivative
-      }
+  coerce curve = VectorCurve2d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
 instance Negation (VectorCurve2d (space @ units)) where
   negate curve = new (negate curve.compiled) (negate curve.derivative)
@@ -438,6 +438,12 @@ instance
       @ curve.compiled . function.compiled
       @ \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
 
+compiled :: VectorCurve2d (space @ units) -> Compiled (space @ units)
+compiled (VectorCurve2d c _) = c
+
+derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
+derivative (VectorCurve2d _ d) = d
+
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
   VectorCurve2d (space @ units) ->
@@ -545,10 +551,10 @@ endValue curve = evaluate curve 1.0
 The parameter value should be between 0 and 1.
 -}
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
-evaluate VectorCurve2d{compiled} tValue = CompiledFunction.evaluate compiled tValue
+evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
-evaluateBounds VectorCurve2d{compiled} tBounds = CompiledFunction.evaluateBounds compiled tBounds
+evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)

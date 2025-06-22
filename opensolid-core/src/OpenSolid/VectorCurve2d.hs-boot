@@ -1,5 +1,5 @@
 module OpenSolid.VectorCurve2d
-  ( VectorCurve2d (compiled, derivative)
+  ( VectorCurve2d
   , constant
   , new
   , evaluate
@@ -18,12 +18,13 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
-data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve2d ::
-    { compiled :: Compiled (space @ units)
-    , derivative :: ~(VectorCurve2d (space @ units))
-    } ->
-    VectorCurve2d (space @ units)
+type role VectorCurve2d nominal
+
+data VectorCurve2d (coordinateSystem :: CoordinateSystem)
+
+instance HasField "compiled" (VectorCurve2d (space @ units)) (Compiled (space @ units))
+
+instance HasField "derivative" (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction

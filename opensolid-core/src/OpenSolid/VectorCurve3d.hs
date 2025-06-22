@@ -1,8 +1,10 @@
 module OpenSolid.VectorCurve3d
-  ( VectorCurve3d (compiled, derivative)
+  ( VectorCurve3d
   , Compiled
   , new
   , on
+  , compiled
+  , derivative
   , startValue
   , endValue
   , evaluate
@@ -66,17 +68,12 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
-data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve3d ::
-    { compiled :: Compiled (space @ units)
-    , derivative :: ~(VectorCurve3d (space @ units))
-    } ->
-    VectorCurve3d (space @ units)
+data VectorCurve3d (coordinateSystem :: CoordinateSystem)
+  = VectorCurve3d (Compiled coordinateSystem) ~(VectorCurve3d coordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
@@ -85,17 +82,19 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Bounds Unitless)
     (VectorBounds3d coordinateSystem)
 
+instance HasField "compiled" (VectorCurve3d (space @ units)) (Compiled (space @ units)) where
+  getField = compiled
+
+instance HasField "derivative" (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units)) where
+  getField = derivative
+
 instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
 
 instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve3d (space1 @ units1)) (VectorCurve3d (space2 @ units2))
   where
-  coerce VectorCurve3d{compiled, derivative} =
-    VectorCurve3d
-      { compiled = Units.coerce compiled
-      , derivative = Units.coerce derivative
-      }
+  coerce curve = VectorCurve3d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
 instance Negation (VectorCurve3d (space @ units)) where
   negate curve = new (negate curve.compiled) (negate curve.derivative)
@@ -412,6 +411,12 @@ instance
       @ curve.compiled . function.compiled
       @ \p -> curve.derivative . function * SurfaceFunction.derivative p function
 
+compiled :: VectorCurve3d (space @ units) -> Compiled (space @ units)
+compiled (VectorCurve3d c _) = c
+
+derivative :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
+derivative (VectorCurve3d _ d) = d
+
 transformBy ::
   Transform3d tag (space @ translationUnits) ->
   VectorCurve3d (space @ units) ->
@@ -432,9 +437,8 @@ recursive ::
   Compiled (space @ units) ->
   (VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)) ->
   VectorCurve3d (space @ units)
-recursive givenCompiled derivativeFunction = do
-  let result = VectorCurve3d{compiled = givenCompiled, derivative = derivativeFunction result}
-  result
+recursive givenCompiled derivativeFunction =
+  let result = new givenCompiled (derivativeFunction result) in result
 
 zero :: VectorCurve3d (space @ units)
 zero = constant Vector3d.zero
@@ -499,10 +503,10 @@ endValue :: VectorCurve3d (space @ units) -> Vector3d (space @ units)
 endValue curve = evaluate curve 1.0
 
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
-evaluate VectorCurve3d{compiled} tValue = CompiledFunction.evaluate compiled tValue
+evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
-evaluateBounds VectorCurve3d{compiled} tBounds = CompiledFunction.evaluateBounds compiled tBounds
+evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 reverse :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)

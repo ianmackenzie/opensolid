@@ -1,5 +1,5 @@
 module OpenSolid.VectorCurve3d
-  ( VectorCurve3d (compiled, derivative)
+  ( VectorCurve3d
   , Compiled
   , constant
   , new
@@ -22,12 +22,13 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 
-data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve3d ::
-    { compiled :: Compiled (space @ units)
-    , derivative :: ~(VectorCurve3d (space @ units))
-    } ->
-    VectorCurve3d (space @ units)
+type role VectorCurve3d nominal
+
+data VectorCurve3d (coordinateSystem :: CoordinateSystem)
+
+instance HasField "compiled" (VectorCurve3d (space @ units)) (Compiled (space @ units))
+
+instance HasField "derivative" (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units))
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
