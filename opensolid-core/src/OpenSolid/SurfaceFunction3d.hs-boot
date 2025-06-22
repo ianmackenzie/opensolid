@@ -59,6 +59,13 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
 
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (SurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (SurfaceFunction3d (space1 @ units1))
+
 constant :: Point3d (space @ units) -> SurfaceFunction3d (space @ units)
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)
 evaluateBounds :: SurfaceFunction3d (space @ units) -> UvBounds -> Bounds3d (space @ units)

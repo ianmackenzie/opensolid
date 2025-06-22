@@ -181,6 +181,15 @@ instance
   point + function = SurfaceFunction3d.constant point + function
 
 instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Point3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (SurfaceFunction3d (space1 @ units1))
+  where
+  point - function = SurfaceFunction3d.constant point - function
+
+instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
