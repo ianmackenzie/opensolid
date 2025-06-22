@@ -113,6 +113,10 @@ data Representation a where
   Tuple5Rep :: (FFI a, FFI b, FFI c, FFI d, FFI e) => Representation (a, b, c, d, e)
   -- A struct with the six items in order
   Tuple6Rep :: (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) => Representation (a, b, c, d, e, f)
+  -- A struct with the seven items in order
+  Tuple7Rep :: (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) => Representation (a, b, c, d, e, f, g)
+  -- A struct with the eight items in order
+  Tuple8Rep :: (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) => Representation (a, b, c, d, e, f, g, h)
   -- A struct with a 64-bit integer tag (0 = Just, 1 = Nothing)
   -- followed by the representation of the value
   MaybeRep :: FFI a => Representation (Maybe a)
@@ -173,6 +177,8 @@ typeOf proxy = case representation proxy of
   Tuple4Rep -> tuple4Type proxy
   Tuple5Rep -> tuple5Type proxy
   Tuple6Rep -> tuple6Type proxy
+  Tuple7Rep -> tuple7Type proxy
+  Tuple8Rep -> tuple8Type proxy
   MaybeRep -> maybeType proxy
   ResultRep -> resultType proxy
   ClassRep class_ -> Class class_
@@ -224,6 +230,39 @@ tuple6Type _ =
     , typeOf @d Proxy
     , typeOf @e Proxy
     , typeOf @f Proxy
+    ]
+
+tuple7Type ::
+  forall a b c d e f g.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+  Proxy (a, b, c, d, e, f, g) ->
+  Type
+tuple7Type _ =
+  Tuple
+    (typeOf @a Proxy)
+    (typeOf @b Proxy)
+    [ typeOf @c Proxy
+    , typeOf @d Proxy
+    , typeOf @e Proxy
+    , typeOf @f Proxy
+    , typeOf @g Proxy
+    ]
+
+tuple8Type ::
+  forall a b c d e f g h.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) =>
+  Proxy (a, b, c, d, e, f, g, h) ->
+  Type
+tuple8Type _ =
+  Tuple
+    (typeOf @a Proxy)
+    (typeOf @b Proxy)
+    [ typeOf @c Proxy
+    , typeOf @d Proxy
+    , typeOf @e Proxy
+    , typeOf @f Proxy
+    , typeOf @g Proxy
+    , typeOf @h Proxy
     ]
 
 maybeType :: forall a. FFI a => Proxy (Maybe a) -> Type
@@ -350,6 +389,12 @@ instance (FFI a, FFI b, FFI c, FFI d, FFI e) => FFI (a, b, c, d, e) where
 instance (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) => FFI (a, b, c, d, e, f) where
   representation _ = Tuple6Rep
 
+instance (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) => FFI (a, b, c, d, e, f, g) where
+  representation _ = Tuple7Rep
+
+instance (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) => FFI (a, b, c, d, e, f, g, h) where
+  representation _ = Tuple8Rep
+
 instance FFI a => FFI (Maybe a) where
   representation _ = MaybeRep
 
@@ -439,6 +484,42 @@ store ptr offset value = do
       store ptr offset4 value4
       store ptr offset5 value5
       store ptr offset6 value6
+    Tuple7Rep -> IO.do
+      let (value1, value2, value3, value4, value5, value6, value7) = value
+      let (size1, size2, size3, size4, size5, size6, _) = tuple7ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      let offset5 = offset4 + size4
+      let offset6 = offset5 + size5
+      let offset7 = offset6 + size6
+      store ptr offset1 value1
+      store ptr offset2 value2
+      store ptr offset3 value3
+      store ptr offset4 value4
+      store ptr offset5 value5
+      store ptr offset6 value6
+      store ptr offset7 value7
+    Tuple8Rep -> IO.do
+      let (value1, value2, value3, value4, value5, value6, value7, value8) = value
+      let (size1, size2, size3, size4, size5, size6, size7, _) = tuple8ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      let offset5 = offset4 + size4
+      let offset6 = offset5 + size5
+      let offset7 = offset6 + size6
+      let offset8 = offset7 + size7
+      store ptr offset1 value1
+      store ptr offset2 value2
+      store ptr offset3 value3
+      store ptr offset4 value4
+      store ptr offset5 value5
+      store ptr offset6 value6
+      store ptr offset7 value7
+      store ptr offset8 value8
     MaybeRep -> IO.do
       let tag = case value of Just _ -> 0; Nothing -> 1
       Foreign.pokeByteOff ptr offset (Int.toInt64 tag)
@@ -542,6 +623,42 @@ load ptr offset = do
       value5 <- load ptr offset5
       value6 <- load ptr offset6
       IO.succeed (value1, value2, value3, value4, value5, value6)
+    Tuple7Rep -> IO.do
+      let (size1, size2, size3, size4, size5, size6, _) = tuple7ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      let offset5 = offset4 + size4
+      let offset6 = offset5 + size5
+      let offset7 = offset6 + size6
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      value3 <- load ptr offset3
+      value4 <- load ptr offset4
+      value5 <- load ptr offset5
+      value6 <- load ptr offset6
+      value7 <- load ptr offset7
+      IO.succeed (value1, value2, value3, value4, value5, value6, value7)
+    Tuple8Rep -> IO.do
+      let (size1, size2, size3, size4, size5, size6, size7, _) = tuple8ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      let offset5 = offset4 + size4
+      let offset6 = offset5 + size5
+      let offset7 = offset6 + size6
+      let offset8 = offset7 + size7
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      value3 <- load ptr offset3
+      value4 <- load ptr offset4
+      value5 <- load ptr offset5
+      value6 <- load ptr offset6
+      value7 <- load ptr offset7
+      value8 <- load ptr offset8
+      IO.succeed (value1, value2, value3, value4, value5, value6, value7, value8)
     MaybeRep -> IO.do
       tag <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
       if tag == 0
@@ -610,6 +727,37 @@ tuple6ItemSizes _ =
   , size (typeOf @d Proxy)
   , size (typeOf @e Proxy)
   , size (typeOf @f Proxy)
+  )
+
+tuple7ItemSizes ::
+  forall a b c d e f g.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+  Proxy (a, b, c, d, e, f, g) ->
+  (Int, Int, Int, Int, Int, Int, Int)
+tuple7ItemSizes _ =
+  ( size (typeOf @a Proxy)
+  , size (typeOf @b Proxy)
+  , size (typeOf @c Proxy)
+  , size (typeOf @d Proxy)
+  , size (typeOf @e Proxy)
+  , size (typeOf @f Proxy)
+  , size (typeOf @g Proxy)
+  )
+
+tuple8ItemSizes ::
+  forall a b c d e f g h.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) =>
+  Proxy (a, b, c, d, e, f, g, h) ->
+  (Int, Int, Int, Int, Int, Int, Int, Int)
+tuple8ItemSizes _ =
+  ( size (typeOf @a Proxy)
+  , size (typeOf @b Proxy)
+  , size (typeOf @c Proxy)
+  , size (typeOf @d Proxy)
+  , size (typeOf @e Proxy)
+  , size (typeOf @f Proxy)
+  , size (typeOf @g Proxy)
+  , size (typeOf @h Proxy)
   )
 
 argumentName :: FFI a => Proxy a -> Maybe Name
