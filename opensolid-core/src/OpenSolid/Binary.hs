@@ -12,6 +12,7 @@ module OpenSolid.Binary
   , int16LE
   , int32LE
   , int64LE
+  , float32LE
   , float64LE
   )
 where
@@ -20,11 +21,12 @@ import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
+import GHC.Float qualified
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
-import OpenSolid.Float qualified as Float
 import OpenSolid.Int qualified as Int
 import OpenSolid.Prelude
+import OpenSolid.Qty (Qty (Qty))
 import Prelude qualified
 
 bytes :: Builder -> ByteString
@@ -60,5 +62,8 @@ int32LE = Builder.int32LE . Int.toInt32
 int64LE :: Int -> Builder
 int64LE = Builder.int64LE . Int.toInt64
 
+float32LE :: Float -> Builder
+float32LE (Qty double) = Builder.floatLE (GHC.Float.double2Float double)
+
 float64LE :: Float -> Builder
-float64LE = Builder.doubleLE . Float.toDouble
+float64LE (Qty double) = Builder.doubleLE double
