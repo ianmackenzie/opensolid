@@ -150,6 +150,7 @@ library
     OpenSolid.Frame2d
     OpenSolid.Frame3d
     OpenSolid.Fuzzy
+    OpenSolid.Gltf
     OpenSolid.IO
     OpenSolid.IO.Parallel
     OpenSolid.Int
@@ -164,6 +165,7 @@ library
     OpenSolid.Maybe
     OpenSolid.Mesh
     OpenSolid.Mitsuba
+    OpenSolid.Model3d
     OpenSolid.NonEmpty
     OpenSolid.Orientation2d
     OpenSolid.Orientation3d
@@ -185,7 +187,6 @@ library
     OpenSolid.Region2d.BoundedBy
     OpenSolid.Resolution
     OpenSolid.Result
-    OpenSolid.Scene3d
     OpenSolid.Set2d
     OpenSolid.Set3d
     OpenSolid.Sign
@@ -251,7 +252,6 @@ library
     OpenSolid.Lobatto
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
-    OpenSolid.Scene3d.Gltf
     OpenSolid.SurfaceFunction.Internal
     OpenSolid.SurfaceFunction.PartialZeros
     OpenSolid.SurfaceFunction.SaddleRegion

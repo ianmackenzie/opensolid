@@ -23,6 +23,7 @@ import OpenSolid.API.Class
   , factory2
   , factory3
   , factory4
+  , factoryM1
   , factoryM1R
   , factoryM2R
   , factoryM3
@@ -100,12 +101,16 @@ import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Drawing2d (Drawing2d)
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mitsuba qualified as Mitsuba
+import OpenSolid.Model3d (Model3d)
+import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.Orientation3d (Orientation3d)
 import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.PbrMaterial (PbrMaterial)
@@ -124,8 +129,6 @@ import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution (Resolution (Resolution))
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Scene3d (Scene3d)
-import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Stl qualified as Stl
@@ -189,7 +192,8 @@ classes =
   , body3d
   , resolution
   , pbrMaterial
-  , scene3d
+  , model3d
+  , gltf
   , spurGear
   ]
 
@@ -1411,15 +1415,32 @@ pbrMaterial =
     , factory3 "Custom" "Base Color" "Metallic" "Roughness" (curry1T2 PbrMaterial.custom) $(docs 'PbrMaterial.custom)
     ]
 
-scene3d :: Class
-scene3d =
-  Class.new @(Scene3d Space) $(docs ''Scene3d) $
-    [ constant "Nothing" (Scene3d.nothing @Space) $(docs 'Scene3d.nothing)
-    , factoryM3 "Body" "Resolution" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
-    , factory1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
-    , member1 "Write GLB" "Path" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
+model3d :: Class
+model3d =
+  Class.new @(Model3d Space) $(docs ''Model3d) $
+    [ constant "Nothing" (Model3d.nothing @Space) $(docs 'Model3d.nothing)
+    , factoryM1 "Body" "Body" Model3d.body $(docs 'Model3d.body)
+    , factory1 "Group" "Children" Model3d.group $(docs 'Model3d.group)
+    , member1 "With Name" "Name" Model3d.withName $(docs 'Model3d.withName)
+    , member1 "With PBR Material" "Material" Model3d.withPbrMaterial $(docs 'Model3d.withPbrMaterial)
+    , member1 "With Attributes" "Attributes" Model3d.withAttributes $(docs 'Model3d.withAttributes)
+    , nested @Model3d.Attribute $(docs ''Model3d.Attribute) []
+    , static1 "Name" "Name" Model3d.name $(docs 'Model3d.name)
+    , static1 "PBR Material" "Material" Model3d.pbrMaterial $(docs 'Model3d.pbrMaterial)
     ]
-      <> rigidTransformations3d Scene3d.transformBy
+      <> rigidTransformations3d Model3d.transformBy
+
+data Gltf = Gltf (Model3d Space) (Resolution Meters)
+
+instance FFI Gltf where
+  representation = FFI.classRepresentation "Gltf"
+
+gltf :: Class
+gltf =
+  Class.new @Gltf "A glTF model that can be written out to a file." $
+    [ constructor2 "Model" "Resolution" Gltf "Construct a glTF model from a generic 3D model and a desired mesh resolution."
+    , member1 "Write Binary" "Path" (\path (Gltf model res) -> Gltf.writeBinary path model res) $(docs 'Gltf.writeBinary)
+    ]
 
 spurGear :: Class
 spurGear =

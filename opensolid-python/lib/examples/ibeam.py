@@ -11,7 +11,8 @@ from opensolid import (
     Point2d,
     Region2d,
     Frame3d,
-    Scene3d,
+    Model3d,
+    Gltf,
     Tolerance,
 )
 
@@ -60,7 +61,8 @@ with Tolerance(Length.meters(1e-9)):
     extrusion_limits = LengthBounds.symmetric(width=length)
     body = Body3d.extruded(world.front_plane, profile, extrusion_limits)
 
-    # Create a 3D scene containing the body and write to GLB file
-    resolution = Resolution.max_error(Length.millimeters(0.1))
+    # Create a 3D model containing the body and write to GLB file
     material = PbrMaterial.metal(Color.rgb_float(0.913, 0.921, 0.925), roughness=0.3)
-    Scene3d.body(resolution, material, body).write_glb("ibeam.glb")
+    model = Model3d.body(body).with_pbr_material(material)
+    resolution = Resolution.max_error(Length.millimeters(0.1))
+    Gltf(model, resolution).write_binary("ibeam.glb")

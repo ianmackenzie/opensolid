@@ -19,6 +19,7 @@ module OpenSolid.API.Class
   , constructor3
   , constructor4
   , factory1
+  , factoryM1
   , factoryU1R
   , factoryM1R
   , factory2
@@ -215,6 +216,15 @@ constructor4 arg1 arg2 arg3 arg4 f docs =
 
 factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Text -> Member value
 factory1 = static1
+
+factoryM1 ::
+  (FFI a, FFI value) =>
+  Text ->
+  Text ->
+  (Tolerance Meters => a -> value) ->
+  Text ->
+  Member value
+factoryM1 = staticM1
 
 factoryU1R ::
   (FFI a, FFI value) =>

@@ -6,14 +6,15 @@ import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
+import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d qualified as Vector2d
 
@@ -31,8 +32,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
       , Curve2d.line p3 p1
       ]
   body <- Body3d.revolved world.frontPlane profile Axis2d.y Angle.twoPi
-  let resolution = Resolution.maxSize (Length.centimeters 20.0)
-  let mesh = Body3d.toMesh resolution body
   let material = PbrMaterial.nonmetal Color.blue (#roughness 0.2)
-  let scene = Scene3d.mesh material mesh
-  Scene3d.writeGlb "executables/raindrop/mesh.glb" scene
+  let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
+  let resolution = Resolution.maxSize (Length.centimeters 20.0)
+  Gltf.writeBinary "executables/raindrop/mesh.glb" model resolution

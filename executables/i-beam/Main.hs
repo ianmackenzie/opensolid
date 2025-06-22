@@ -7,16 +7,17 @@ import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
@@ -48,8 +49,7 @@ main = Tolerance.using Length.nanometer IO.do
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- Region2d.boundedBy allCurves
   body <- Body3d.extruded world.frontPlane profile (Bounds.symmetric (#width length))
-  let resolution = Resolution.maxError (Length.millimeters 1.0)
-  let mesh = Body3d.toMesh resolution body
   let material = PbrMaterial.metal (Color.rgbFloat 0.913 0.921 0.925) (#roughness 0.3)
-  let scene = Scene3d.mesh material mesh
-  Scene3d.writeGlb "executables/i-beam/mesh.glb" scene
+  let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
+  let resolution = Resolution.maxError (Length.millimeters 1.0)
+  Gltf.writeBinary "executables/i-beam/mesh.glb" model resolution

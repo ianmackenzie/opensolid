@@ -11,7 +11,8 @@ from opensolid import (
     PbrMaterial,
     Point2d,
     Region2d,
-    Scene3d,
+    Model3d,
+    Gltf,
     Tolerance,
 )
 
@@ -44,6 +45,8 @@ with Tolerance(Length.nanometers(1)):
     thickness = Length.centimeters(2)
     extrusion_bounds = LengthBounds.symmetric(width=thickness)
     body = Body3d.extruded(world.front_plane, filleted_region, extrusion_bounds)
-    resolution = Resolution.max_error(Length.millimeters(0.05))
+
     material = PbrMaterial.nonmetal(Color.blue, roughness=0.3)
-    Scene3d.body(resolution, material, body).write_glb("fillet.glb")
+    model = Model3d.body(body).with_pbr_material(material)
+    resolution = Resolution.max_error(Length.millimeters(0.05))
+    Gltf(model, resolution).write_binary("fillet.glb")

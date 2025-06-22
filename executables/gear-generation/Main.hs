@@ -3,21 +3,20 @@ module Main (main) where
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
+import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.SpurGear qualified as SpurGear
-import OpenSolid.Stl qualified as Stl
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
@@ -42,13 +41,10 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   let writeGlb numTeeth = IO.do
         timer <- Timer.start
         body <- gearBody numTeeth
-        let basePath = "executables/gear-generation/gear" <> Text.int numTeeth
-        let glbPath = basePath <> ".glb"
-        let stlPath = basePath <> ".stl"
+        let glbPath = "executables/gear-generation/gear" <> Text.int numTeeth <> ".glb"
         let material = PbrMaterial.iron (#roughness 0.3)
-        let mesh = Body3d.toMesh resolution body
-        Scene3d.writeGlb glbPath (Scene3d.mesh material mesh)
-        Stl.writeBinary stlPath Convention3d.yUp Length.inMillimeters mesh
+        let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
+        Gltf.writeBinary glbPath model resolution
         elapsed <- Timer.elapsed timer
         let elapsedText = Text.float (Duration.inSeconds elapsed) <> "s"
         IO.printLine ("Elapsed for " <> Text.int numTeeth <> " teeth: " <> elapsedText)
