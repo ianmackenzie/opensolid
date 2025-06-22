@@ -37,6 +37,8 @@ module OpenSolid.API.Class
   , factoryU4
   , factoryM4
   , factoryM4R
+  , factory5
+  , factory6
   , static1
   , static2
   , static3
@@ -51,7 +53,9 @@ module OpenSolid.API.Class
   , member2
   , memberU2
   , memberM2
+  , member3
   , memberM3
+  , member4
   , equality
   , comparison
   , negateSelf
@@ -394,6 +398,33 @@ factoryM4R ::
   Member value
 factoryM4R = staticM4
 
+factory5 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> e -> value) ->
+  Text ->
+  Member value
+factory5 = static5
+
+factory6 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> e -> f -> value) ->
+  Text ->
+  Member value
+factory6 = static6
+
 static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
 static1 name arg1 f docs = Static (FFI.name name) (StaticFunction1 (FFI.name arg1) f docs)
 
@@ -526,6 +557,37 @@ staticM4 name arg1 arg2 arg3 arg4 f docs =
   Static (FFI.name name) $
     StaticFunctionM4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
 
+static5 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> e -> result) ->
+  Text ->
+  Member value
+static5 name arg1 arg2 arg3 arg4 arg5 f docs =
+  Static (FFI.name name) $
+    StaticFunction5 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) (FFI.name arg5) f docs
+
+static6 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> e -> f -> result) ->
+  Text ->
+  Member value
+static6 name arg1 arg2 arg3 arg4 arg5 arg6 f docs =
+  Static (FFI.name name) $
+    StaticFunction6 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) (FFI.name arg5) (FFI.name arg6) f docs
+
 property :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
 property name f docs = Prop (FFI.name name) (Property f docs)
 
@@ -606,6 +668,18 @@ memberM2 ::
 memberM2 name arg1 arg2 f docs =
   Member (FFI.name name) (MemberFunctionM2 (FFI.name arg1) (FFI.name arg2) f docs)
 
+member3 ::
+  (FFI a, FFI b, FFI c, FFI value, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> value -> result) ->
+  Text ->
+  Member value
+member3 name arg1 arg2 arg3 f docs =
+  Member (FFI.name name) (MemberFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
+
 memberM3 ::
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
   Text ->
@@ -617,6 +691,20 @@ memberM3 ::
   Member value
 memberM3 name arg1 arg2 arg3 f docs =
   Member (FFI.name name) (MemberFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
+
+member4 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> value -> result) ->
+  Text ->
+  Member value
+member4 name arg1 arg2 arg3 arg4 f docs =
+  Member (FFI.name name) $
+    MemberFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
 
 data Self a = Self
 
