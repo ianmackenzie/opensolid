@@ -49,4 +49,4 @@ with Tolerance(Length.nanometers(1)):
     material = PbrMaterial.nonmetal(Color.blue, roughness=0.3)
     model = Model3d.body(body).with_pbr_material(material)
     resolution = Resolution.max_error(Length.millimeters(0.05))
-    Gltf(model, resolution).write_binary("fillet.glb")
+    Gltf(model).write_binary("fillet.glb", resolution)

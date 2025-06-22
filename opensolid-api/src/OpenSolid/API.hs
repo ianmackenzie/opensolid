@@ -6,6 +6,7 @@ import OpenSolid.API.Class
   , absSelf
   , comparison
   , constant
+  , constructor1
   , constructor2
   , crossProduct
   , crossSelf
@@ -1430,16 +1431,17 @@ model3d =
     ]
       <> rigidTransformations3d Model3d.transformBy
 
-data Gltf = Gltf (Model3d Space) (Resolution Meters)
+newtype Gltf = Gltf (Model3d Space)
 
 instance FFI Gltf where
   representation = FFI.classRepresentation "Gltf"
 
 gltf :: Class
-gltf =
+gltf = do
+  let writeBinary path res (Gltf model) = Gltf.writeBinary path model res
   Class.new @Gltf "A glTF model that can be written out to a file." $
-    [ constructor2 "Model" "Resolution" Gltf "Construct a glTF model from a generic 3D model and a desired mesh resolution."
-    , member1 "Write Binary" "Path" (\path (Gltf model res) -> Gltf.writeBinary path model res) $(docs 'Gltf.writeBinary)
+    [ constructor1 "Model" Gltf "Construct a glTF model from a generic 3D model."
+    , member2 "Write Binary" "Path" "Resolution" writeBinary $(docs 'Gltf.writeBinary)
     ]
 
 spurGear :: Class

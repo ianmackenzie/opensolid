@@ -65,4 +65,4 @@ with Tolerance(Length.meters(1e-9)):
     material = PbrMaterial.metal(Color.rgb_float(0.913, 0.921, 0.925), roughness=0.3)
     model = Model3d.body(body).with_pbr_material(material)
     resolution = Resolution.max_error(Length.millimeters(0.1))
-    Gltf(model, resolution).write_binary("ibeam.glb")
+    Gltf(model).write_binary("ibeam.glb", resolution)
