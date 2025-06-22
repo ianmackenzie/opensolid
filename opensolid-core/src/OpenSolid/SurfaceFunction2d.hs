@@ -12,6 +12,7 @@ module OpenSolid.SurfaceFunction2d
   , distanceAlong
   , xCoordinate
   , yCoordinate
+  , coordinates
   , transformBy
   )
 where
@@ -253,3 +254,6 @@ yCoordinate function =
       Bounds2d.yCoordinate
       function.compiled
     @ \parameter -> (derivative parameter function).yComponent
+
+coordinates :: SurfaceFunction2d (space @ units) -> (SurfaceFunction units, SurfaceFunction units)
+coordinates function = (xCoordinate function, yCoordinate function)
