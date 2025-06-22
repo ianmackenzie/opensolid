@@ -8,6 +8,9 @@ module OpenSolid.VectorCurve2d
   , endValue
   , evaluate
   , evaluateBounds
+  , xComponent
+  , yComponent
+  , components
   , zero
   , constant
   , unit
@@ -97,6 +100,15 @@ instance HasField "compiled" (VectorCurve2d (space @ units)) (Compiled (space @ 
 
 instance HasField "derivative" (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
   getField = derivative
+
+instance HasField "xComponent" (VectorCurve2d (space @ units)) (Curve units) where
+  getField = xComponent
+
+instance HasField "yComponent" (VectorCurve2d (space @ units)) (Curve units) where
+  getField = yComponent
+
+instance HasField "components" (VectorCurve2d (space @ units)) (Curve units, Curve units) where
+  getField = components
 
 instance FFI (VectorCurve2d (space @ Unitless)) where
   representation = FFI.classRepresentation "VectorCurve2d"
@@ -556,6 +568,31 @@ evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
+-- | Get the X coordinate of a 2D curve as a scalar curve.
+xComponent :: VectorCurve2d (space @ units) -> Curve units
+xComponent curve =
+  Curve.new
+    @ CompiledFunction.map
+      Expression.xComponent
+      Vector2d.xComponent
+      VectorBounds2d.xComponent
+      curve.compiled
+    @ curve.derivative.xComponent
+
+-- | Get the Y coordinate of a 2D curve as a scalar curve.
+yComponent :: VectorCurve2d (space @ units) -> Curve units
+yComponent curve =
+  Curve.new
+    @ CompiledFunction.map
+      Expression.yComponent
+      Vector2d.yComponent
+      VectorBounds2d.yComponent
+      curve.compiled
+    @ curve.derivative.yComponent
+
+components :: VectorCurve2d (space @ units) -> (Curve units, Curve units)
+components curve = (xComponent curve, yComponent curve)
+
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
 
@@ -612,26 +649,6 @@ zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros curve.squaredMagnitude') of
     Success zeros1d -> Success (List.map (.location) zeros1d)
     Failure Curve.ZeroEverywhere -> Failure ZeroEverywhere
-
-instance HasField "xComponent" (VectorCurve2d (space @ units)) (Curve units) where
-  getField curve =
-    Curve.new
-      @ CompiledFunction.map
-        Expression.xComponent
-        Vector2d.xComponent
-        VectorBounds2d.xComponent
-        curve.compiled
-      @ curve.derivative.xComponent
-
-instance HasField "yComponent" (VectorCurve2d (space @ units)) (Curve units) where
-  getField curve =
-    Curve.new
-      @ CompiledFunction.map
-        Expression.yComponent
-        Vector2d.yComponent
-        VectorBounds2d.yComponent
-        curve.compiled
-      @ curve.derivative.yComponent
 
 direction ::
   Tolerance units =>

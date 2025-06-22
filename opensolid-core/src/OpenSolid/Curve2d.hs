@@ -169,6 +169,15 @@ instance HasField "derivative" (Curve2d (space @ units)) (VectorCurve2d (space @
 instance HasField "secondDerivative" (Curve2d (space @ units)) (VectorCurve2d (space @ units)) where
   getField = (.derivative.derivative)
 
+instance HasField "xCoordinate" (Curve2d (space @ units)) (Curve units) where
+  getField = xCoordinate
+
+instance HasField "yCoordinate" (Curve2d (space @ units)) (Curve units) where
+  getField = yCoordinate
+
+instance HasField "coordinates" (Curve2d (space @ units)) (Curve units, Curve units) where
+  getField = coordinates
+
 instance FFI (Curve2d (space @ Meters)) where
   representation = FFI.classRepresentation "Curve2d"
 
@@ -662,11 +671,8 @@ yCoordinate curve =
       curve.compiled
     @ curve.derivative.yComponent
 
-instance HasField "xCoordinate" (Curve2d (space @ units)) (Curve units) where
-  getField = xCoordinate
-
-instance HasField "yCoordinate" (Curve2d (space @ units)) (Curve units) where
-  getField = yCoordinate
+coordinates :: Curve2d (space @ units) -> (Curve units, Curve units)
+coordinates curve = (xCoordinate curve, yCoordinate curve)
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, Error.Message)
 
