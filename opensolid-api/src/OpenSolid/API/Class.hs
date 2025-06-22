@@ -151,19 +151,19 @@ data Member value where
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
 
 curryT2 :: ((a, b) -> c) -> a -> b -> c
-curryT2 f a b = f (a, b)
+curryT2 function a b = function (a, b)
 
 curry1T2 :: (a -> (b, c) -> d) -> a -> b -> c -> d
-curry1T2 f a b c = f a (b, c)
+curry1T2 function a b c = function a (b, c)
 
 curryT3 :: ((a, b, c) -> d) -> a -> b -> c -> d
-curryT3 f a b c = f (a, b, c)
+curryT3 function a b c = function (a, b, c)
 
 curry1T3 :: (a -> (b, c, d) -> e) -> a -> b -> c -> d -> e
-curry1T3 f a b c d = f a (b, c, d)
+curry1T3 function a b c d = function a (b, c, d)
 
 curryT4 :: ((a, b, c, d) -> e) -> a -> b -> c -> d -> e
-curryT4 f a b c d = f (a, b, c, d)
+curryT4 function a b c d = function (a, b, c, d)
 
 new :: forall value. FFI value => Text -> List (Member value) -> Class
 new givenDocumentation members =
