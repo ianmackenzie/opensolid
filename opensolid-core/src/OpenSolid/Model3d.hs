@@ -1,6 +1,10 @@
 module OpenSolid.Model3d
-  ( Model3d (..)
-  , Attribute (..)
+  ( Model3d (Body, Group)
+  , Attribute
+  , Context (..)
+  , traversal
+  , traverse
+  , Traversal
   , body
   , bodyWith
   , group
@@ -9,12 +13,13 @@ module OpenSolid.Model3d
   , transformBy
   , placeIn
   , relativeTo
-  , attributes
   , withAttributes
   , name
   , withName
   , pbrMaterial
   , withPbrMaterial
+  , opacity
+  , withOpacity
   )
 where
 
@@ -26,6 +31,7 @@ import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.List qualified as List
 import OpenSolid.PbrMaterial (PbrMaterial)
+import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Prelude
 import OpenSolid.Transform3d qualified as Transform3d
 
@@ -35,35 +41,102 @@ A model is composed of bodies (parts) and groups of models (assemblies),
 each with optional attributes such as name or material.
 -}
 data Model3d space where
-  Body :: Tolerance Meters => List Attribute -> Body3d (space @ Meters) -> Model3d space
-  Group :: List Attribute -> List (Model3d space) -> Model3d space
+  BodyNode :: Tolerance Meters => List Attribute -> Body3d (space @ Meters) -> Model3d space
+  GroupNode :: List Attribute -> List (Model3d space) -> Model3d space
+
+instance FFI (Model3d space) where
+  representation = FFI.classRepresentation "Model3d"
 
 -- | An attribute that can be applied to a model.
 data Attribute
   = Name Text
   | PbrMaterial PbrMaterial
-
-instance HasField "name" (Model3d space) (Maybe Text) where
-  getField = getAttribute (\case Name value -> Just value; _ -> Nothing)
-
-instance HasField "pbrMaterial" (Model3d space) (Maybe PbrMaterial) where
-  getField = getAttribute (\case PbrMaterial value -> Just value; _ -> Nothing)
-
-instance FFI (Model3d space) where
-  representation = FFI.classRepresentation "Model3d"
+  | Opacity Float
 
 instance FFI Attribute where
   representation = FFI.nestedClassRepresentation "Model3d" "Attribute"
 
-getAttribute :: (Attribute -> Maybe a) -> Model3d space -> Maybe a
-getAttribute extract model = findAttribute extract (attributes model)
+data Context = Context
+  { ownName :: Maybe Text
+  , ownPbrMaterial :: Maybe PbrMaterial
+  , currentPbrMaterial :: PbrMaterial
+  , ownOpacity :: Float
+  , currentMultipliedOpacity :: Float
+  }
 
-findAttribute :: (Attribute -> Maybe a) -> List Attribute -> Maybe a
-findAttribute extract attrs = case attrs of
-  [] -> Nothing
-  first : rest -> case extract first of
-    Just value -> Just value
-    Nothing -> findAttribute extract rest
+type Traversal = ?context :: Context
+
+traversal :: Traversal => Context
+traversal = ?context
+
+traverse :: (Traversal => Model3d space -> a) -> Model3d space -> a
+traverse function model = let ?context = rootContext in function model
+
+applyAttribute :: Context -> Attribute -> Context
+applyAttribute ctx attr = case attr of
+  Name value -> ctx{ownName = Just value}
+  PbrMaterial value -> ctx{ownPbrMaterial = Just value, currentPbrMaterial = value}
+  -- Note that here we *don't* update currentMultipliedOpacity here,
+  -- to avoid multiplying it multiple times just in case there are multiple opacity attributes
+  -- (it will be updated below, at the end of inChildContext)
+  Opacity value -> ctx{ownOpacity = value}
+
+inChildContext :: Traversal => List Attribute -> (Traversal => a) -> a
+inChildContext childAttributes callback = do
+  let initialContext =
+        Context
+          { ownName = Nothing
+          , ownPbrMaterial = Nothing
+          , currentPbrMaterial = ?context.currentPbrMaterial
+          , ownOpacity = 1.0
+          , currentMultipliedOpacity = ?context.currentMultipliedOpacity
+          }
+  let appliedContext = List.foldl applyAttribute initialContext childAttributes
+  -- After applying attribute values, update the current multiplied opacity
+  -- (just in case the current node has multiple opacity attribute values,
+  -- we should only multiply the current opacity by the *last*/active one;
+  -- otherwise we could update currentMultipliedOpacity directly within applyAttribute)
+  let updatedContext =
+        appliedContext
+          { currentMultipliedOpacity =
+              appliedContext.currentMultipliedOpacity * appliedContext.ownOpacity
+          }
+  let ?context = updatedContext in callback
+
+rootContext :: Context
+rootContext =
+  Context
+    { ownName = Nothing
+    , ownPbrMaterial = Nothing
+    , currentPbrMaterial = PbrMaterial.aluminum (#roughness 0.2)
+    , ownOpacity = 1.0
+    , currentMultipliedOpacity = 1.0
+    }
+
+data BodyWithContext space where
+  BodyWithContext ::
+    (Traversal, Tolerance Meters) =>
+    Body3d (space @ Meters) ->
+    BodyWithContext space
+
+data GroupWithContext space where
+  GroupWithContext :: Traversal => List (Model3d space) -> GroupWithContext space
+
+visitBody :: Traversal => Model3d space -> Maybe (BodyWithContext space)
+visitBody GroupNode{} = Nothing
+visitBody (BodyNode attrs bod) = inChildContext attrs (Just (BodyWithContext bod))
+
+visitGroup :: Traversal => Model3d space -> Maybe (GroupWithContext space)
+visitGroup BodyNode{} = Nothing
+visitGroup (GroupNode attrs kids) = inChildContext attrs (Just (GroupWithContext kids))
+
+{-# COMPLETE Body, Group #-}
+
+pattern Body :: Traversal => (Traversal, Tolerance Meters) => Body3d (space @ Meters) -> Model3d space
+pattern Body bod <- (visitBody -> Just (BodyWithContext bod))
+
+pattern Group :: Traversal => Traversal => List (Model3d space) -> Model3d space
+pattern Group kids <- (visitGroup -> Just (GroupWithContext kids))
 
 -- | Create a model from a single solid body (a part).
 body :: Tolerance Meters => Body3d (space @ Meters) -> Model3d space
@@ -71,7 +144,7 @@ body = bodyWith []
 
 -- | Create a model from a single solid body (a part), with the given attributes.
 bodyWith :: Tolerance Meters => List Attribute -> Body3d (space @ Meters) -> Model3d space
-bodyWith = Body
+bodyWith = BodyNode
 
 -- | Create a model formed from a group of sub-models (an assembly).
 group :: List (Model3d space) -> Model3d space
@@ -79,7 +152,7 @@ group = groupWith []
 
 -- | Create a model formed from a group of sub-models (an assembly), with the given attributes.
 groupWith :: List Attribute -> List (Model3d space) -> Model3d space
-groupWith = Group
+groupWith = GroupNode
 
 -- | An empty model.
 nothing :: Model3d space
@@ -90,23 +163,17 @@ transformBy transform model = placeIn (Frame3d.transformBy transform Frame3d.wor
 
 placeIn :: Frame3d (global @ Meters) (Defines local) -> Model3d local -> Model3d global
 placeIn frame model = case model of
-  Body attrs bod -> Body attrs (Body3d.placeIn frame bod)
-  Group attrs children -> Group attrs (List.map (placeIn frame) children)
+  BodyNode attrs bod -> BodyNode attrs (Body3d.placeIn frame bod)
+  GroupNode attrs kids -> GroupNode attrs (List.map (placeIn frame) kids)
 
 relativeTo :: Frame3d (global @ Meters) (Defines local) -> Model3d global -> Model3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)
 
--- | Get all attributes of a given model.
-attributes :: Model3d space -> List Attribute
-attributes model = case model of
-  Body attrs _ -> attrs
-  Group attrs _ -> attrs
-
 -- | Add the given attributes to the given model.
 withAttributes :: List Attribute -> Model3d space -> Model3d space
 withAttributes givenAttributes model = case model of
-  Body existingAttributes bod -> Body (givenAttributes <> existingAttributes) bod
-  Group existingAttributes children -> Group (givenAttributes <> existingAttributes) children
+  BodyNode existingAttributes bod -> BodyNode (existingAttributes <> givenAttributes) bod
+  GroupNode existingAttributes kids -> GroupNode (existingAttributes <> givenAttributes) kids
 
 with :: Attribute -> Model3d space -> Model3d space
 with attribute = withAttributes [attribute]
@@ -126,3 +193,11 @@ pbrMaterial = PbrMaterial
 -- | Set the PBR material used by a model.
 withPbrMaterial :: PbrMaterial -> Model3d space -> Model3d space
 withPbrMaterial value = with (pbrMaterial value)
+
+-- | Create an opacity attribute.
+opacity :: Float -> Attribute
+opacity = Opacity
+
+-- | Set the opacity of a model.
+withOpacity :: Float -> Model3d space -> Model3d space
+withOpacity value = with (opacity value)

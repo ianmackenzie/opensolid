@@ -23,7 +23,6 @@ import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Model3d (Model3d)
 import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.Orientation3d (Orientation3d)
@@ -50,7 +49,7 @@ convention = Convention3d xDirection yDirection zDirection
 
 builder :: Resolution Meters -> Model3d space -> Builder
 builder resolution model = do
-  let meshes = gltfMeshes resolution model
+  let meshes = Model3d.traverse (gltfMeshes resolution) model
   let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. meshes.length - 1]]
   let unpaddedBufferBuilder = Binary.collect meshBuilder meshes
   let unpaddedBufferByteLength = Int.sumOf meshByteLength meshes
@@ -122,10 +121,10 @@ data EncodedMesh = EncodedMesh
   , materialObject :: Json
   }
 
-gltfMeshes :: Resolution Meters -> Model3d space -> List GltfMesh
+gltfMeshes :: Model3d.Traversal => Resolution Meters -> Model3d space -> List GltfMesh
 gltfMeshes resolution model = case model of
-  Model3d.Body _ body_ -> do
-    let mesh = Body3d.toMesh resolution body_
+  Model3d.Body body -> do
+    let mesh = Body3d.toMesh resolution body
     let meshVertices = mesh.vertices
     let numVertices = meshVertices.length
     let meshFaceIndices = mesh.faceIndices
@@ -135,9 +134,10 @@ gltfMeshes resolution model = case model of
     let Bounds xLow xHigh = xBounds
     let Bounds yLow yHigh = yBounds
     let Bounds zLow zHigh = zBounds
+    let pbrMaterial = Model3d.traversal.currentPbrMaterial
     List.singleton
       GltfMesh
-        { gltfMaterial = encodeMaterial model.pbrMaterial
+        { gltfMaterial = encodeMaterial pbrMaterial
         , numFaces
         , indices = faceIndicesBuilder meshFaceIndices
         , indicesByteLength = 3 * 4 * numFaces
@@ -147,7 +147,7 @@ gltfMeshes resolution model = case model of
         , minPosition = Json.listOf (Json.float . Length.inMeters) [xLow, yLow, zLow]
         , maxPosition = Json.listOf (Json.float . Length.inMeters) [xHigh, yHigh, zHigh]
         }
-  Model3d.Group _ children -> List.collect (gltfMeshes resolution) children
+  Model3d.Group children -> List.collect (gltfMeshes resolution) children
 
 encodeMeshes :: Int -> Int -> List GltfMesh -> List EncodedMesh
 encodeMeshes index offset meshes = case meshes of
@@ -229,9 +229,8 @@ meshBuilder mesh = mesh.indices <> mesh.vertices
 meshByteLength :: GltfMesh -> Int
 meshByteLength mesh = mesh.indicesByteLength + mesh.verticesByteLength
 
-encodeMaterial :: Maybe PbrMaterial -> Json
-encodeMaterial maybeMaterial = do
-  let material = maybeMaterial |> Maybe.withDefault (PbrMaterial.aluminum (#roughness 0.2))
+encodeMaterial :: PbrMaterial -> Json
+encodeMaterial material = do
   let (r, g, b) = Color.rgbFloatComponents material.baseColor
   Json.object
     [ Json.field "pbrMetallicRoughness" do
