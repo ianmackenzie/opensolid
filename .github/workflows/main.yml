@@ -39,7 +39,7 @@ jobs:
           cabal-version: 3.12.1.0
       - name: Install Python tooling
         run: |
-          pipx install uv==0.5.6
+          pipx install uv==0.7.13
           pipx install ruff==0.7.3
           pipx install delvewheel==1.9.0
       - name: Update Cabal package index
@@ -105,7 +105,7 @@ jobs:
           cabal-version: 3.12.1.0
       - name: Install Python tooling
         run: |
-          pipx install uv==0.5.6
+          pipx install uv==0.7.13
           pipx install ruff==0.7.3
           pipx install auditwheel==6.1.0
       - name: Update Cabal index
@@ -166,7 +166,7 @@ jobs:
           cabal-version: 3.12.1.0
       - name: Install Python tooling
         run: |
-          pipx install uv==0.5.6
+          pipx install uv==0.7.13
           pipx install ruff==0.7.3
           pipx install delocate==0.12.0
       - name: Update Cabal index
@@ -225,7 +225,7 @@ jobs:
           cabal-version: 3.12.1.0
       - name: Install Python tooling
         run: |
-          pipx install uv==0.5.6
+          pipx install uv==0.7.13
           pipx install ruff==0.7.3
           pipx install delocate==0.12.0
       - name: Update Cabal index
