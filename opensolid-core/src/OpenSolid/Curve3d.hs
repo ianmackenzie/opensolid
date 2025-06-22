@@ -65,6 +65,7 @@ import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
@@ -260,7 +261,7 @@ arcLengthParameterization ::
   Curve3d (space @ units) ->
   Result HasDegeneracy (Curve Unitless, Qty units)
 arcLengthParameterization curve =
-  if VectorCurve3d.isZero curve.derivative
+  if curve.derivative ~= Vector3d.zero
     then Success (Curve.t, Qty.zero) -- Curve is a constant point
     else case VectorCurve3d.magnitude curve.derivative of
       Failure VectorCurve3d.HasZero -> Failure HasDegeneracy
