@@ -79,7 +79,7 @@ satisfy predicate estimate = do
   if predicate current then current else satisfy predicate (refine estimate)
 
 within :: Qty units -> Estimate units -> Bounds units
-within tolerance = satisfy (Bounds.width >> (<= tolerance))
+within tolerance = satisfy ((.width) >> (<= tolerance))
 
 resolve :: (Bounds units -> Fuzzy a) -> Estimate units -> a
 resolve function estimate =
