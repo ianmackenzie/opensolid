@@ -1291,7 +1291,7 @@ curve2d =
 
 uvCurve :: Class
 uvCurve =
-  Class.new @(Curve2d (Space @ Unitless)) $(docs ''Curve2d) $
+  Class.new @(Curve2d (Space @ Unitless)) "A curve in UV parameter space." $
     [ factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
     , factory2 "UV" "U Coordinate" "V Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
     , factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
@@ -1356,7 +1356,7 @@ region2d =
 
 uvRegion :: Class
 uvRegion =
-  Class.new @(Region2d (Space @ Unitless)) $(docs ''Region2d) $
+  Class.new @(Region2d (Space @ Unitless)) "A region in UV parameter space." $
     [ constant "Unit Square" Region2d.unitSquare $(docs 'Region2d.unitSquare)
     , factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
