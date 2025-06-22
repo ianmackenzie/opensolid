@@ -26,6 +26,7 @@ import OpenSolid.API.Class
   , factory4
   , factoryM1
   , factoryM1R
+  , factoryM2
   , factoryM2R
   , factoryM3
   , factoryM3R
@@ -1421,7 +1422,9 @@ model3d =
   Class.new @(Model3d Space) $(docs ''Model3d) $
     [ constant "Nothing" (Model3d.nothing @Space) $(docs 'Model3d.nothing)
     , factoryM1 "Body" "Body" Model3d.body $(docs 'Model3d.body)
+    , factoryM2 "Body With" "Attributes" "Body" Model3d.bodyWith $(docs 'Model3d.bodyWith)
     , factory1 "Group" "Children" Model3d.group $(docs 'Model3d.group)
+    , factory2 "Group With" "Attributes" "Children" Model3d.groupWith $(docs 'Model3d.groupWith)
     , member1 "With Name" "Name" Model3d.withName $(docs 'Model3d.withName)
     , member1 "With PBR Material" "Material" Model3d.withPbrMaterial $(docs 'Model3d.withPbrMaterial)
     , member1 "With Attributes" "Attributes" Model3d.withAttributes $(docs 'Model3d.withAttributes)

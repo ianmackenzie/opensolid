@@ -69,6 +69,7 @@ findAttribute extract attrs = case attrs of
 body :: Tolerance Meters => Body3d (space @ Meters) -> Model3d space
 body = bodyWith []
 
+-- | Create a model from a single solid body (a part), with the given attributes.
 bodyWith :: Tolerance Meters => List Attribute -> Body3d (space @ Meters) -> Model3d space
 bodyWith = Body
 
@@ -76,6 +77,7 @@ bodyWith = Body
 group :: List (Model3d space) -> Model3d space
 group = groupWith []
 
+-- | Create a model formed from a group of sub-models (an assembly), with the given attributes.
 groupWith :: List Attribute -> List (Model3d space) -> Model3d space
 groupWith = Group
 
