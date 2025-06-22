@@ -372,7 +372,7 @@ arc givenStartPoint givenEndPoint sweptAngle =
       if linearDeviation ~= Qty.zero
         then line givenStartPoint givenEndPoint
         else do
-          let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeftward directionBetweenPoints
+          let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
           let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
           let radius = Point2d.distanceFrom centerPoint givenStartPoint
           let xVector = Vector2d.x radius
@@ -445,7 +445,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       let halfDistance = 0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint
       let radius = Qty.max (Qty.abs givenRadius) halfDistance
       let offsetMagnitude = Qty.sqrt' (Qty.squared' radius - Qty.squared' halfDistance)
-      let offsetDirection = Direction2d.rotateLeftward chordDirection
+      let offsetDirection = Direction2d.rotateLeft chordDirection
       let offsetDistance =
             case whichArc of
               SmallCounterclockwise -> offsetMagnitude
@@ -629,10 +629,10 @@ distanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve unit
 distanceAlong (Axis2d p0 d) curve = (curve - p0) `dot` d
 
 distanceLeftOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-distanceLeftOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateLeftward d
+distanceLeftOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateLeft d
 
 distanceRightOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-distanceRightOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateRightward d
+distanceRightOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateRight d
 
 {-| Check if the given curve curve is collinear with (lies on) the given axis.
 

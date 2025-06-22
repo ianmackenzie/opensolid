@@ -41,10 +41,10 @@ direction :: Axis2d (space @ units) -> Direction2d space
 direction (Axis2d _ d) = d
 
 leftwardDirection :: Axis2d (space @ units) -> Direction2d space
-leftwardDirection axis = Direction2d.rotateLeftward (direction axis)
+leftwardDirection axis = Direction2d.rotateLeft (direction axis)
 
 rightwardDirection :: Axis2d (space @ units) -> Direction2d space
-rightwardDirection axis = Direction2d.rotateRightward (direction axis)
+rightwardDirection axis = Direction2d.rotateRight (direction axis)
 
 -- | The X axis.
 x :: Axis2d (space @ units)

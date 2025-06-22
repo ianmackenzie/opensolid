@@ -654,8 +654,8 @@ direction2d =
     , property "Components" (.components) $(docs 'Direction2d.components)
     , property "X Component" (.xComponent) $(docs 'Direction2d.xComponent)
     , property "Y Component" (.yComponent) $(docs 'Direction2d.yComponent)
-    , member0 "Rotate Leftward" Direction2d.rotateLeftward $(docs 'Direction2d.rotateLeftward)
-    , member0 "Rotate Rightward" Direction2d.rotateRightward $(docs 'Direction2d.rotateRightward)
+    , member0 "Rotate Left" Direction2d.rotateLeft $(docs 'Direction2d.rotateLeft)
+    , member0 "Rotate Right" Direction2d.rotateRight $(docs 'Direction2d.rotateRight)
     , negateSelf
     ]
 

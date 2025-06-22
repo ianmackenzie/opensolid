@@ -31,8 +31,8 @@ module OpenSolid.Vector2d
   , direction
   , magnitudeAndDirection
   , normalize
-  , rotateRightward
-  , rotateLeftward
+  , rotateRight
+  , rotateLeft
   , placeIn
   , relativeTo
   , on
@@ -242,11 +242,11 @@ normalize vector = do
   let vm = magnitude vector
   if vm == Qty.zero then zero else vector / vm
 
-rotateLeftward :: Vector2d (space @ units) -> Vector2d (space @ units)
-rotateLeftward (Vector2d vx vy) = Vector2d (negate vy) vx
+rotateLeft :: Vector2d (space @ units) -> Vector2d (space @ units)
+rotateLeft (Vector2d vx vy) = Vector2d (negate vy) vx
 
-rotateRightward :: Vector2d (space @ units) -> Vector2d (space @ units)
-rotateRightward (Vector2d vx vy) = Vector2d vy (negate vx)
+rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
+rotateRight (Vector2d vx vy) = Vector2d vy (negate vx)
 
 placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->
@@ -294,7 +294,7 @@ mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ u
 mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
 
 mirrorAcross :: Axis2d (space @ originUnits) -> Vector2d (space @ units) -> Vector2d (space @ units)
-mirrorAcross (Axis2d _ axisDirection) = mirrorIn (Direction2d.rotateLeftward axisDirection)
+mirrorAcross (Axis2d _ axisDirection) = mirrorIn (Direction2d.rotateLeft axisDirection)
 
 scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)
 scaleIn scaleDirection scale vector = vector + (scale - 1.0) * projectionIn scaleDirection vector

@@ -15,8 +15,8 @@ module OpenSolid.Direction2d
   , radians
   , angleFrom
   , perpendicularTo
-  , rotateLeftward
-  , rotateRightward
+  , rotateLeft
+  , rotateRight
   , placeIn
   , relativeTo
   , on
@@ -151,15 +151,15 @@ angleFrom :: Direction2d space -> Direction2d space -> Angle
 angleFrom (Unit2d v1) (Unit2d v2) = Vector2d.angleFrom v1 v2
 
 perpendicularTo :: Direction2d space -> Direction2d space
-perpendicularTo = rotateLeftward
+perpendicularTo = rotateLeft
 
 -- | Rotate a direction left (counterclockwise) by 90 degrees.
-rotateLeftward :: Direction2d space -> Direction2d space
-rotateLeftward = lift Vector2d.rotateLeftward
+rotateLeft :: Direction2d space -> Direction2d space
+rotateLeft = lift Vector2d.rotateLeft
 
 -- | Rotate a direction right (clockwise) by 90 degrees.
-rotateRightward :: Direction2d space -> Direction2d space
-rotateRightward = lift Vector2d.rotateRightward
+rotateRight :: Direction2d space -> Direction2d space
+rotateRight = lift Vector2d.rotateRight
 
 placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->

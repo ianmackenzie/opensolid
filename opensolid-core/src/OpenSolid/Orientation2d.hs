@@ -31,10 +31,10 @@ xy :: Orientation2d space
 xy = Orientation2d Direction2d.x Direction2d.y
 
 fromXDirection :: Direction2d space -> Orientation2d space
-fromXDirection i = Orientation2d i (Direction2d.rotateLeftward i)
+fromXDirection i = Orientation2d i (Direction2d.rotateLeft i)
 
 fromYDirection :: Direction2d space -> Orientation2d space
-fromYDirection j = Orientation2d (Direction2d.rotateRightward j) j
+fromYDirection j = Orientation2d (Direction2d.rotateRight j) j
 
 placeIn ::
   Frame2d (global @ frameUnits) (Defines space) ->
