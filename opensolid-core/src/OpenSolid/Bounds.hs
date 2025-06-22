@@ -94,6 +94,9 @@ instance HasField "lower" (Bounds units) (Qty units) where
 instance HasField "upper" (Bounds units) (Qty units) where
   getField = upper
 
+instance HasField "width" (Bounds units) (Qty units) where
+  getField = width
+
 deriving instance Show (Qty units) => Show (Bounds units)
 
 {-# COMPLETE Bounds #-}
