@@ -58,6 +58,7 @@ instance FFI Attribute where
 
 data Context = Context
   { ownName :: Maybe Text
+  , parentNames :: List Text
   , ownPbrMaterial :: Maybe PbrMaterial
   , currentPbrMaterial :: PbrMaterial
   , ownOpacity :: Float
@@ -83,13 +84,15 @@ applyAttribute ctx attr = case attr of
 
 inChildContext :: Traversal => List Attribute -> (Traversal => a) -> a
 inChildContext childAttributes callback = do
+  let parentContext = ?context
   let initialContext =
         Context
           { ownName = Nothing
+          , parentNames = parentContext.parentNames <> List.maybe parentContext.ownName
           , ownPbrMaterial = Nothing
-          , currentPbrMaterial = ?context.currentPbrMaterial
+          , currentPbrMaterial = parentContext.currentPbrMaterial
           , ownOpacity = 1.0
-          , currentMultipliedOpacity = ?context.currentMultipliedOpacity
+          , currentMultipliedOpacity = parentContext.currentMultipliedOpacity
           }
   let appliedContext = List.foldl applyAttribute initialContext childAttributes
   -- After applying attribute values, update the current multiplied opacity
@@ -107,6 +110,7 @@ rootContext :: Context
 rootContext =
   Context
     { ownName = Nothing
+    , parentNames = []
     , ownPbrMaterial = Nothing
     , currentPbrMaterial = PbrMaterial.aluminum (#roughness 0.2)
     , ownOpacity = 1.0
