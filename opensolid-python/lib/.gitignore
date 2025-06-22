@@ -18,3 +18,5 @@ wheelhouse
 *.glb
 *.svg
 *.stl
+*.serialized
+fillet.xml

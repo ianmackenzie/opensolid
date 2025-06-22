@@ -8,13 +8,17 @@ from opensolid import (
     LengthBounds,
     Frame3d,
     Resolution,
+    Bounds2d,
     PbrMaterial,
     Point2d,
     Region2d,
     Model3d,
     Gltf,
     Tolerance,
+    Camera3d,
+    Mitsuba,
 )
+from pathlib import Path
 
 with Tolerance(Length.nanometers(1)):
     world = Frame3d.world
@@ -47,6 +51,34 @@ with Tolerance(Length.nanometers(1)):
     body = Body3d.extruded(world.front_plane, filleted_region, extrusion_bounds)
 
     material = PbrMaterial.nonmetal(Color.blue, roughness=0.3)
-    model = Model3d.body(body).with_pbr_material(material)
-    resolution = Resolution.max_error(Length.millimeters(0.05))
-    Gltf(model).write_binary("fillet.glb", resolution)
+    model = Model3d.body(body).with_pbr_material(material).with_name("Body")
+    ground_limits = LengthBounds.symmetric(width=Length.meters(2))
+    ground_body = Body3d.extruded(
+        world.bottom_plane,
+        Region2d.rectangle(Bounds2d(ground_limits, ground_limits)),
+        LengthBounds.zero_to(Length.centimeters(1)),
+    )
+    ground_material = PbrMaterial.nonmetal(Color.dark_charcoal, roughness=0.5)
+    ground_model = (
+        Model3d.body(ground_body).with_pbr_material(ground_material).with_name("Ground")
+    )
+    resolution = Resolution.max_error(Length.millimeters(0.01))
+    Gltf(Model3d.group([model, ground_model])).write_binary("fillet.glb", resolution)
+
+    focal_point = world.origin_point.translate_in(
+        world.upward_direction,
+        Length.centimeters(1),
+    )
+    camera = Camera3d.orbit(
+        focal_point=focal_point,
+        azimuth=Angle.degrees(30),
+        elevation=Angle.degrees(30),
+        distance=Length.centimeters(12),
+        projection=Camera3d.perspective(vertical_fov=Angle.degrees(30)),
+    )
+    hdris_path = Path("/home/ian/Downloads/HDRIs")
+    lighting_image = "kloppenheim_07_puresky_4k.exr"
+
+    lighting = Mitsuba.environment_map(world, str(hdris_path / lighting_image))
+    scene = Mitsuba(Model3d.group([model, ground_model]), camera, lighting)
+    scene.write_files("fillet", resolution)
