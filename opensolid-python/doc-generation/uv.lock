@@ -85,7 +85,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "opensolid", specifier = ">=0.6.0" },
+    { name = "opensolid", specifier = ">=0.7.1" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-rtd-theme", specifier = ">=3.0.2" },
 ]
@@ -169,13 +169,13 @@ wheels = [
 
 [[package]]
 name = "opensolid"
-version = "0.6.0"
+version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c7/aa/c310c58c9306bde090b6ddd2c2dbaca5ef86c73eb0f9dca828aed5298974/opensolid-0.6.0-cp312-none-macosx_13_0_x86_64.whl", hash = "sha256:ac164c2cb3ec583b021e62efcb9c0dd25afdd43d3ac6e7c778f5d7e361066a4e", size = 20255324, upload-time = "2025-06-22T03:13:30.797Z" },
-    { url = "https://files.pythonhosted.org/packages/57/b5/86f71aa28f2b0ef8fd3b1a8c3adafd208b267bd10c89b4c39d97e579e2f8/opensolid-0.6.0-cp312-none-macosx_14_0_arm64.whl", hash = "sha256:9e86f00adae4d203bc734d24484b87794d76eae1498c7f7c78f445188c8bbd84", size = 18171853, upload-time = "2025-06-22T03:13:34.579Z" },
-    { url = "https://files.pythonhosted.org/packages/f9/ac/c437c9b21afad21736bdad77e2bf2e899707ef14913f7a42a42c6c74653f/opensolid-0.6.0-cp312-none-manylinux_2_35_x86_64.whl", hash = "sha256:570ca5cdd894173b328113ae079ca163227dc042e8200c421f09e467c39869af", size = 17564827, upload-time = "2025-06-22T03:13:37.29Z" },
-    { url = "https://files.pythonhosted.org/packages/c8/91/33e0ac113cea6304f0a521a52378f607c69d3d5d1a62489ecb3ba90c351e/opensolid-0.6.0-cp312-none-win_amd64.whl", hash = "sha256:2fb0cad001b457df02af330c2f4f99677d79a92bc25a7d085a3c0af413542c09", size = 10608905, upload-time = "2025-06-22T03:13:39.601Z" },
+    { url = "https://files.pythonhosted.org/packages/56/39/cb3b355ecdf69b80ad3af28e7eb9942e0ce41a5d53079ccf3ab8d7e4b734/opensolid-0.7.1-cp312-none-macosx_13_0_x86_64.whl", hash = "sha256:f560b7539d8eed0a5ea3b43945b1710dee03d6801366ae6ae544838720537dd5", size = 20333145, upload-time = "2025-06-30T14:38:07.668Z" },
+    { url = "https://files.pythonhosted.org/packages/fa/63/2912609b367e47658278614b62b1f91e94973e9d335dd8c1c1df368f0aed/opensolid-0.7.1-cp312-none-macosx_14_0_arm64.whl", hash = "sha256:950361c85549f4c07dc0772b748860f4c4499496a1c74fa22038502e70c6c985", size = 18240261, upload-time = "2025-06-30T14:38:11.403Z" },
+    { url = "https://files.pythonhosted.org/packages/10/f0/214dfa32b20f43329a1105ab15db437b4d16e15e528c5d29d6f293b8d1c8/opensolid-0.7.1-cp312-none-manylinux_2_35_x86_64.whl", hash = "sha256:b729b3d034ae5f8c8d9f5d6c4fd4039bfee57d8c50212dadd771653050701ba8", size = 17641565, upload-time = "2025-06-30T14:38:13.841Z" },
+    { url = "https://files.pythonhosted.org/packages/aa/05/66c10064bf0fe3303fb1b27c20b6610e18edd7c13412ee7b1ff17d011925/opensolid-0.7.1-cp312-none-win_amd64.whl", hash = "sha256:5b0a2ef6b9bde07011a239c5cb8442c826d88c809cf0fe9049f210ef8ea8aa80", size = 10672039, upload-time = "2025-06-30T14:38:15.873Z" },
 ]
 
 [[package]]
