@@ -7,6 +7,9 @@ module OpenSolid.Bytecode.Ast
   , constant1d
   , constant2d
   , constant3d
+  , quotient1d
+  , quotient2d
+  , quotient3d
   , curveParameter
   , surfaceParameter
   , xComponent
@@ -94,6 +97,7 @@ import OpenSolid.Primitives
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d (Transform3d))
@@ -134,7 +138,7 @@ data Variable1d input where
   DifferenceConstantVariable1d :: Float -> Variable1d input -> Variable1d input
   Product1d :: Variable1d input -> Variable1d input -> Variable1d input
   ProductVariableConstant1d :: Variable1d input -> Float -> Variable1d input
-  Quotient1d :: Variable1d input -> Variable1d input -> Variable1d input
+  Quotient1d :: Tolerance Unitless => Variable1d input -> Variable1d input -> Variable1d input
   QuotientConstantVariable1d :: Float -> Variable1d input -> Variable1d input
   Squared1d :: Variable1d input -> Variable1d input
   Sqrt1d :: Variable1d input -> Variable1d input
@@ -181,7 +185,7 @@ data Variable2d input where
   Product2d :: Variable2d input -> Variable1d input -> Variable2d input
   ProductVariableConstant2d :: Variable2d input -> Float -> Variable2d input
   ProductConstantVariable2d :: Vector2d Coordinates -> Variable1d input -> Variable2d input
-  Quotient2d :: Variable2d input -> Variable1d input -> Variable2d input
+  Quotient2d :: Tolerance Unitless => Variable2d input -> Variable1d input -> Variable2d input
   QuotientConstantVariable2d :: Vector2d Coordinates -> Variable1d input -> Variable2d input
   BezierCurve2d :: NonEmpty (Vector2d Coordinates) -> Variable1d input -> Variable2d input
   TransformVector2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
@@ -214,7 +218,7 @@ data Variable3d input where
   Product3d :: Variable3d input -> Variable1d input -> Variable3d input
   ProductVariableConstant3d :: Variable3d input -> Float -> Variable3d input
   ProductConstantVariable3d :: Vector3d Coordinates -> Variable1d input -> Variable3d input
-  Quotient3d :: Variable3d input -> Variable1d input -> Variable3d input
+  Quotient3d :: Tolerance Unitless => Variable3d input -> Variable1d input -> Variable3d input
   QuotientConstantVariable3d :: Vector3d Coordinates -> Variable1d input -> Variable3d input
   Cross3d :: Variable3d input -> Variable3d input -> Variable3d input
   CrossVariableConstant3d :: Variable3d input -> Vector3d Coordinates -> Variable3d input
@@ -422,6 +426,36 @@ constant2d = Constant2d . Vector2d.coerce
 constant3d :: Vector3d (space @ units) -> Ast3d input
 constant3d = Constant3d . Vector3d.coerce
 
+quotient1d :: Tolerance units => Ast1d input -> Ast1d input -> Ast1d input
+quotient1d (Constant1d lhs) (Constant1d rhs) = Constant1d (lhs / rhs)
+quotient1d (Constant1d 0.0) _ = Constant1d 0.0
+quotient1d lhs (Constant1d 1.0) = lhs
+quotient1d lhs (Constant1d -1.0) = -lhs
+quotient1d (Variable1d lhs) (Constant1d rhs) = Variable1d (ProductVariableConstant1d lhs (1.0 / rhs))
+quotient1d (Constant1d lhs) (Variable1d rhs) = Variable1d (QuotientConstantVariable1d lhs rhs)
+quotient1d (Variable1d lhs) (Variable1d rhs) =
+  Tolerance.using Tolerance.coerced (Variable1d (Quotient1d lhs rhs))
+
+quotient2d :: Tolerance units => Ast2d input -> Ast1d input -> Ast2d input
+quotient2d (Constant2d lhs) (Constant1d rhs) = Constant2d (lhs / rhs)
+quotient2d (Constant2d lhs) _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
+quotient2d lhs (Constant1d 1.0) = lhs
+quotient2d lhs (Constant1d -1.0) = -lhs
+quotient2d (Variable2d lhs) (Constant1d rhs) = Variable2d (ProductVariableConstant2d lhs (1.0 / rhs))
+quotient2d (Constant2d lhs) (Variable1d rhs) = Variable2d (QuotientConstantVariable2d lhs rhs)
+quotient2d (Variable2d lhs) (Variable1d rhs) =
+  Tolerance.using Tolerance.coerced (Variable2d (Quotient2d lhs rhs))
+
+quotient3d :: Tolerance units => Ast3d input -> Ast1d input -> Ast3d input
+quotient3d (Constant3d lhs) (Constant1d rhs) = Constant3d (lhs / rhs)
+quotient3d (Constant3d lhs) _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
+quotient3d lhs (Constant1d 1.0) = lhs
+quotient3d lhs (Constant1d -1.0) = -lhs
+quotient3d (Variable3d lhs) (Constant1d rhs) = Variable3d (ProductVariableConstant3d lhs (1.0 / rhs))
+quotient3d (Constant3d lhs) (Variable1d rhs) = Variable3d (QuotientConstantVariable3d lhs rhs)
+quotient3d (Variable3d lhs) (Variable1d rhs) =
+  Tolerance.using Tolerance.coerced (Variable3d (Quotient3d lhs rhs))
+
 curveParameter :: Ast1d Float
 curveParameter = Variable1d CurveParameter
 
@@ -535,26 +569,8 @@ instance Multiplication (Qty units) (Ast1d input) (Ast1d input) where
 instance Multiplication (Ast1d input1) (Qty units) (Ast1d input1) where
   lhs * rhs = lhs * constant1d rhs
 
-instance input1 ~ input2 => Division (Ast1d input1) (Ast1d input2) (Ast1d input1) where
-  Constant1d lhs / Constant1d rhs = Constant1d (lhs / rhs)
-  Constant1d 0.0 / _ = Constant1d 0.0
-  lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = -lhs
-  Variable1d lhs / Constant1d rhs = Variable1d (ProductVariableConstant1d lhs (1.0 / rhs))
-  Constant1d lhs / Variable1d rhs = Variable1d (QuotientConstantVariable1d lhs rhs)
-  Variable1d lhs / Variable1d rhs = Variable1d (lhs / rhs)
-
-instance
-  input1 ~ input2 =>
-  Division (Variable1d input1) (Variable1d input2) (Variable1d input1)
-  where
-  lhs / rhs = Quotient1d lhs rhs
-
-instance Division (Qty units) (Ast1d input) (Ast1d input) where
-  lhs / rhs = constant1d lhs / rhs
-
 instance Division (Ast1d input) (Qty units) (Ast1d input) where
-  lhs / rhs = lhs / constant1d rhs
+  lhs / rhs = lhs * (1.0 ./. rhs)
 
 instance Negation (Ast2d input) where
   negate (Constant2d val) = Constant2d -val
@@ -640,20 +656,8 @@ instance Multiplication (Ast2d input1) (Qty units) (Ast2d input1) where
 instance Multiplication (Qty units) (Ast2d input) (Ast2d input) where
   lhs * rhs = constant1d lhs * rhs
 
-instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1) where
-  Constant2d lhs / Constant1d rhs = Constant2d (lhs / rhs)
-  Constant2d lhs / _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
-  lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = -lhs
-  Variable2d lhs / Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1.0 / rhs))
-  Constant2d lhs / Variable1d rhs = Variable2d (QuotientConstantVariable2d lhs rhs)
-  Variable2d lhs / Variable1d rhs = Variable2d (Quotient2d lhs rhs)
-
-instance Division (Vector2d (space @ units)) (Ast1d input) (Ast2d input) where
-  lhs / rhs = constant2d lhs / rhs
-
 instance Division (Ast2d input) (Qty units) (Ast2d input) where
-  lhs / rhs = lhs / constant1d rhs
+  lhs / rhs = lhs * (1.0 ./. rhs)
 
 instance Negation (Ast3d input) where
   negate (Constant3d val) = Constant3d -val
@@ -739,20 +743,8 @@ instance Multiplication (Ast3d input1) (Qty units) (Ast3d input1) where
 instance Multiplication (Qty units) (Ast3d input) (Ast3d input) where
   lhs * rhs = constant1d lhs * rhs
 
-instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1) where
-  Constant3d lhs / Constant1d rhs = Constant3d (lhs / rhs)
-  Constant3d lhs / _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
-  lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = -lhs
-  Variable3d lhs / Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1.0 / rhs))
-  Constant3d lhs / Variable1d rhs = Variable3d (QuotientConstantVariable3d lhs rhs)
-  Variable3d lhs / Variable1d rhs = Variable3d (Quotient3d lhs rhs)
-
-instance Division (Vector3d (space @ units)) (Ast1d input) (Ast3d input) where
-  lhs / rhs = constant3d lhs / rhs
-
 instance Division (Ast3d input) (Qty units) (Ast3d input) where
-  lhs / rhs = lhs / constant1d rhs
+  lhs / rhs = lhs * (1.0 ./. rhs)
 
 instance input1 ~ input2 => DotMultiplication (Ast2d input1) (Ast2d input2) (Ast1d input1) where
   Constant2d lhs `dot` Constant2d rhs = Constant1d (lhs `dot` rhs)

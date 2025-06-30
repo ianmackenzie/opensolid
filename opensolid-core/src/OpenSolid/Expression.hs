@@ -25,6 +25,8 @@ module OpenSolid.Expression
   , squared'
   , sin
   , cos
+  , Quotient' (quotient')
+  , Quotient (quotient)
   , SquaredMagnitude' (squaredMagnitude')
   , SquaredMagnitude (squaredMagnitude)
   , Magnitude (magnitude)
@@ -808,137 +810,6 @@ instance
   where
   VectorSurface3d lhs _ .*. Surface1d rhs _ = vectorSurface3d (lhs * rhs)
 
-----------------
---- DIVISION ---
-----------------
-
---- Division instances ---
---------------------------
-
---- Qty-Qty ---
----------------
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (Expression Float (Qty units1))
-    (Expression Float (Qty units2))
-    (Expression Float (Qty units3))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (Expression UvPoint (Qty units1))
-    (Expression UvPoint (Qty units2))
-    (Expression UvPoint (Qty units3))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
---- Vector2d-Qty ---
---------------------
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (Expression Float (Vector2d (space @ units1)))
-    (Expression Float (Qty units2))
-    (Expression Float (Vector2d (space @ units3)))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (Expression UvPoint (Vector2d (space @ units1)))
-    (Expression UvPoint (Qty units2))
-    (Expression UvPoint (Vector2d (space @ units3)))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
---- Vector3d-Qty ---
---------------------
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (Expression Float (Vector3d (space @ units1)))
-    (Expression Float (Qty units2))
-    (Expression Float (Vector3d (space @ units3)))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (Expression UvPoint (Vector3d (space @ units1)))
-    (Expression UvPoint (Qty units2))
-    (Expression UvPoint (Vector3d (space @ units3)))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
----------------------------
---- Division' instances ---
----------------------------
-
---- Qty-Qty ---
----------------
-
-instance
-  Division'
-    (Expression Float (Qty units1))
-    (Expression Float (Qty units2))
-    (Expression Float (Qty (units1 :/: units2)))
-  where
-  Curve1d lhs _ ./. Curve1d rhs _ = curve1d (lhs / rhs)
-
-instance
-  Division'
-    (Expression UvPoint (Qty units1))
-    (Expression UvPoint (Qty units2))
-    (Expression UvPoint (Qty (units1 :/: units2)))
-  where
-  Surface1d lhs _ ./. Surface1d rhs _ = surface1d (lhs / rhs)
-
---- Vector2d-Qty ---
---------------------
-
-instance
-  Division'
-    (Expression Float (Vector2d (space @ units1)))
-    (Expression Float (Qty units2))
-    (Expression Float (Vector2d (space @ (units1 :/: units2))))
-  where
-  VectorCurve2d lhs _ ./. Curve1d rhs _ = vectorCurve2d (lhs / rhs)
-
-instance
-  Division'
-    (Expression UvPoint (Vector2d (space @ units1)))
-    (Expression UvPoint (Qty units2))
-    (Expression UvPoint (Vector2d (space @ (units1 :/: units2))))
-  where
-  VectorSurface2d lhs _ ./. Surface1d rhs _ = vectorSurface2d (lhs / rhs)
-
---- Vector3d-Qty ---
---------------------
-
-instance
-  Division'
-    (Expression Float (Vector3d (space @ units1)))
-    (Expression Float (Qty units2))
-    (Expression Float (Vector3d (space @ (units1 :/: units2))))
-  where
-  VectorCurve3d lhs _ ./. Curve1d rhs _ = vectorCurve3d (lhs / rhs)
-
-instance
-  Division'
-    (Expression UvPoint (Vector3d (space @ units1)))
-    (Expression UvPoint (Qty units2))
-    (Expression UvPoint (Vector3d (space @ (units1 :/: units2))))
-  where
-  VectorSurface3d lhs _ ./. Surface1d rhs _ = vectorSurface3d (lhs / rhs)
-
 -------------------
 --- DOT PRODUCT ---
 -------------------
@@ -1327,6 +1198,129 @@ sin (Surface1d ast _) = surface1d (Ast.sin ast)
 cos :: Expression input Angle -> Expression input Float
 cos (Curve1d ast _) = curve1d (Ast.cos ast)
 cos (Surface1d ast _) = surface1d (Ast.cos ast)
+
+class Quotient a b c toleranceUnits | a b -> c, b -> toleranceUnits where
+  quotient :: Tolerance toleranceUnits => a -> b -> c
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Quotient
+    (Expression Float (Qty units1))
+    (Expression Float (Qty units2))
+    (Expression Float (Qty units3))
+    units2
+  where
+  quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Quotient
+    (Expression UvPoint (Qty units1))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Qty units3))
+    units2
+  where
+  quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Quotient
+    (Expression Float (Vector2d (space @ units1)))
+    (Expression Float (Qty units2))
+    (Expression Float (Vector2d (space @ units3)))
+    units2
+  where
+  quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Quotient
+    (Expression UvPoint (Vector2d (space @ units1)))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Vector2d (space @ units3)))
+    units2
+  where
+  quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+--- Vector3d-Qty ---
+--------------------
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Quotient
+    (Expression Float (Vector3d (space @ units1)))
+    (Expression Float (Qty units2))
+    (Expression Float (Vector3d (space @ units3)))
+    units2
+  where
+  quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Quotient
+    (Expression UvPoint (Vector3d (space @ units1)))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Vector3d (space @ units3)))
+    units2
+  where
+  quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+class Quotient' a b c toleranceUnits | a b -> c, b -> toleranceUnits where
+  quotient' :: Tolerance toleranceUnits => a -> b -> c
+
+instance
+  Quotient'
+    (Expression Float (Qty units1))
+    (Expression Float (Qty units2))
+    (Expression Float (Qty (units1 :/: units2)))
+    units2
+  where
+  quotient' (Curve1d lhs _) (Curve1d rhs _) = curve1d (Ast.quotient1d lhs rhs)
+
+instance
+  Quotient'
+    (Expression UvPoint (Qty units1))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Qty (units1 :/: units2)))
+    units2
+  where
+  quotient' (Surface1d lhs _) (Surface1d rhs _) = surface1d (Ast.quotient1d lhs rhs)
+
+instance
+  Quotient'
+    (Expression Float (Vector2d (space @ units1)))
+    (Expression Float (Qty units2))
+    (Expression Float (Vector2d (space @ (units1 :/: units2))))
+    units2
+  where
+  quotient' (VectorCurve2d lhs _) (Curve1d rhs _) = vectorCurve2d (Ast.quotient2d lhs rhs)
+
+instance
+  Quotient'
+    (Expression UvPoint (Vector2d (space @ units1)))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Vector2d (space @ (units1 :/: units2))))
+    units2
+  where
+  quotient' (VectorSurface2d lhs _) (Surface1d rhs _) = vectorSurface2d (Ast.quotient2d lhs rhs)
+
+instance
+  Quotient'
+    (Expression Float (Vector3d (space @ units1)))
+    (Expression Float (Qty units2))
+    (Expression Float (Vector3d (space @ (units1 :/: units2))))
+    units2
+  where
+  quotient' (VectorCurve3d lhs _) (Curve1d rhs _) = vectorCurve3d (Ast.quotient3d lhs rhs)
+
+instance
+  Quotient'
+    (Expression UvPoint (Vector3d (space @ units1)))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Vector3d (space @ (units1 :/: units2))))
+    units2
+  where
+  quotient' (VectorSurface3d lhs _) (Surface1d rhs _) = vectorSurface3d (Ast.quotient3d lhs rhs)
 
 class SquaredMagnitude' expression1 expression2 | expression1 -> expression2 where
   squaredMagnitude' :: expression1 -> expression2

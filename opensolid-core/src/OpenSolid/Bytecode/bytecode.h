@@ -88,6 +88,12 @@ enum Opcode {
   TransformPoint3d = 82,
   PlaceVector2d = 83,
   PlacePoint2d = 84,
+  CurveLHopital1d = 85,
+  CurveLHopital2d = 86,
+  CurveLHopital3d = 87,
+  SurfaceLHopital1d = 88,
+  SurfaceLHopital2d = 89,
+  SurfaceLHopital3d = 90,
   OPCODE_END
 };
 

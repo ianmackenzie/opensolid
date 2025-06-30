@@ -953,7 +953,12 @@ curvature' curve = Result.do
   let firstDerivative = curve.derivative
   let secondDerivative = firstDerivative.derivative
   tangent <- tangentDirection curve
-  Success ((tangent `cross` secondDerivative) !/!. (firstDerivative `dot'` firstDerivative))
+  Success $
+    Units.coerce $
+      Tolerance.using Tolerance.squared' $
+        Curve.quotient'
+          @ tangent `cross` secondDerivative
+          @ firstDerivative `dot'` firstDerivative
 
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
@@ -1025,7 +1030,10 @@ medialAxis curve1 curve2 = do
       let tangentVector1 = VectorCurve2d.unit tangentDirection1
       let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangentVector1
       let radius :: SurfaceFunction units =
-            (d `dot'` d) .!/! (2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d)
+            Units.coerce $
+              SurfaceFunction.quotient'
+                @ d `dot'` d
+                @ 2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d
       let curve :: SurfaceFunction2d (space @ units) =
             (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
       let toSegment solutionCurve =

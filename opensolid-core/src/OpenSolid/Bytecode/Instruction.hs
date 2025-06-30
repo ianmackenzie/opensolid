@@ -93,6 +93,12 @@ data Instruction
   | TransformPoint3d ConstantIndex VariableIndex
   | PlaceVector2d ConstantIndex VariableIndex
   | PlacePoint2d ConstantIndex VariableIndex
+  | CurveLHopital1d Int VariableIndex VariableIndex VariableIndex VariableIndex
+  | CurveLHopital2d Int VariableIndex VariableIndex VariableIndex VariableIndex
+  | CurveLHopital3d Int VariableIndex VariableIndex VariableIndex VariableIndex
+  | SurfaceLHopital1d Int VariableIndex VariableIndex VariableIndex VariableIndex VariableIndex VariableIndex
+  | SurfaceLHopital2d Int VariableIndex VariableIndex VariableIndex VariableIndex VariableIndex VariableIndex
+  | SurfaceLHopital3d Int VariableIndex VariableIndex VariableIndex VariableIndex VariableIndex VariableIndex
   deriving (Eq, Ord, Show)
 
 encodeVariableIndex :: VariableIndex -> Builder
@@ -439,6 +445,54 @@ encodeOpcodeAndArguments instruction = case instruction of
     Encode.int 84
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
+  CurveLHopital1d flags lhs rhs lhsDerivative rhsDerivative ->
+    Encode.int 85
+      <> Encode.int flags
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+      <> encodeVariableIndex lhsDerivative
+      <> encodeVariableIndex rhsDerivative
+  CurveLHopital2d flags lhs rhs lhsDerivative rhsDerivative ->
+    Encode.int 86
+      <> Encode.int flags
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+      <> encodeVariableIndex lhsDerivative
+      <> encodeVariableIndex rhsDerivative
+  CurveLHopital3d flags lhs rhs lhsDerivative rhsDerivative ->
+    Encode.int 87
+      <> Encode.int flags
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+      <> encodeVariableIndex lhsDerivative
+      <> encodeVariableIndex rhsDerivative
+  SurfaceLHopital1d flags lhs rhs lhsDU lhsDV rhsDU rhsDV ->
+    Encode.int 88
+      <> Encode.int flags
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+      <> encodeVariableIndex lhsDU
+      <> encodeVariableIndex lhsDV
+      <> encodeVariableIndex rhsDU
+      <> encodeVariableIndex rhsDV
+  SurfaceLHopital2d flags lhs rhs lhsDU lhsDV rhsDU rhsDV ->
+    Encode.int 89
+      <> Encode.int flags
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+      <> encodeVariableIndex lhsDU
+      <> encodeVariableIndex lhsDV
+      <> encodeVariableIndex rhsDU
+      <> encodeVariableIndex rhsDV
+  SurfaceLHopital3d flags lhs rhs lhsDU lhsDV rhsDU rhsDV ->
+    Encode.int 90
+      <> Encode.int flags
+      <> encodeVariableIndex lhs
+      <> encodeVariableIndex rhs
+      <> encodeVariableIndex lhsDU
+      <> encodeVariableIndex lhsDV
+      <> encodeVariableIndex rhsDU
+      <> encodeVariableIndex rhsDV
 
 return :: Int -> VariableIndex -> Builder
 return dimension variableIndex =

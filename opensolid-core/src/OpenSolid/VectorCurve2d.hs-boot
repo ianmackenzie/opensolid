@@ -4,6 +4,8 @@ module OpenSolid.VectorCurve2d
   , new
   , evaluate
   , evaluateBounds
+  , quotient
+  , quotient'
   , unsafeMagnitude
   , transformBy
   )
@@ -66,16 +68,6 @@ instance
   Multiplication (VectorCurve2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
 
 instance
-  Division'
-    (VectorCurve2d (space @ units1))
-    (Curve units2)
-    (VectorCurve2d (space @ (units1 :/: units2)))
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
-
-instance
   space1 ~ space2 =>
   DotMultiplication'
     (VectorCurve2d (space1 @ units1))
@@ -93,6 +85,16 @@ constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
 evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve2d (space @ units3)
+quotient' ::
+  Tolerance units2 =>
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve2d (space @ (units1 :/: units2))
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 transformBy ::
   Transform2d tag (space @ translationUnits) ->

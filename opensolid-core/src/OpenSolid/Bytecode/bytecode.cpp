@@ -97,10 +97,13 @@ computeValue(
   double* variablesPointer,
   double* returnValuesPointer
 ) {
-  auto getInt = [&]() -> int {
-    int value = *wordsPointer;
+  auto getWord = [&]() -> uint16_t {
+    uint16_t value = *wordsPointer;
     ++wordsPointer;
     return value;
+  };
+  auto getInt = [&]() -> int {
+    return int(getWord());
   };
   auto getConstantPointer = [&]() -> const double* {
     return constantsPointer + getInt();
@@ -843,6 +846,153 @@ computeValue(
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
         break;
       }
+      case CurveLHopital1d: {
+        uint16_t flags = getWord();
+        bool singularT0 = flags & 1;
+        bool singularT1 = flags & 2;
+        double t = variablesPointer[0];
+        double lhs = *getVariablePointer();
+        double rhs = *getVariablePointer();
+        double lhsDerivative = *getVariablePointer();
+        double rhsDerivative = *getVariablePointer();
+        double* output = getVariablePointer();
+        bool singular = (singularT0 && t == 0) || (singularT1 && t == 1);
+        if (singular) {
+          *output = lhsDerivative / rhsDerivative;
+        } else {
+          *output = lhs / rhs;
+        }
+        break;
+      }
+      case CurveLHopital2d: {
+        uint16_t flags = getWord();
+        bool singularT0 = flags & 1;
+        bool singularT1 = flags & 2;
+        double t = variablesPointer[0];
+        const double* lhs = getVariablePointer();
+        double rhs = *getVariablePointer();
+        const double* lhsDerivative = getVariablePointer();
+        double rhsDerivative = *getVariablePointer();
+        double* output = getVariablePointer();
+        bool singular = (singularT0 && t == 0) || (singularT1 && t == 1);
+        if (singular) {
+          output[0] = lhsDerivative[0] / rhsDerivative;
+          output[1] = lhsDerivative[1] / rhsDerivative;
+        } else {
+          output[0] = lhs[0] / rhs;
+          output[1] = lhs[1] / rhs;
+        }
+        break;
+      }
+      case CurveLHopital3d: {
+        uint16_t flags = getWord();
+        bool singularT0 = flags & 1;
+        bool singularT1 = flags & 2;
+        double t = variablesPointer[0];
+        const double* lhs = getVariablePointer();
+        double rhs = *getVariablePointer();
+        const double* lhsDerivative = getVariablePointer();
+        double rhsDerivative = *getVariablePointer();
+        double* output = getVariablePointer();
+        bool singular = (singularT0 && t == 0) || (singularT1 && t == 1);
+        if (singular) {
+          output[0] = lhsDerivative[0] / rhsDerivative;
+          output[1] = lhsDerivative[1] / rhsDerivative;
+          output[2] = lhsDerivative[2] / rhsDerivative;
+        } else {
+          output[0] = lhs[0] / rhs;
+          output[1] = lhs[1] / rhs;
+          output[2] = lhs[2] / rhs;
+        }
+        break;
+      }
+      case SurfaceLHopital1d: {
+        uint16_t flags = getWord();
+        bool singularU0 = flags & 1;
+        bool singularU1 = flags & 2;
+        bool singularV0 = flags & 4;
+        bool singularV1 = flags & 8;
+        double u = variablesPointer[0];
+        double v = variablesPointer[1];
+        double lhs = *getVariablePointer();
+        double rhs = *getVariablePointer();
+        double lhsDU = *getVariablePointer();
+        double lhsDV = *getVariablePointer();
+        double rhsDU = *getVariablePointer();
+        double rhsDV = *getVariablePointer();
+        double* output = getVariablePointer();
+        bool singularU = (singularU0 && u == 0) || (singularU1 && u == 1);
+        bool singularV = (singularV0 && v == 0) || (singularV1 && v == 1);
+        if (singularU) {
+          *output = lhsDU / rhsDU;
+        } else if (singularV) {
+          *output = lhsDV / rhsDV;
+        } else {
+          *output = lhs / rhs;
+        }
+        break;
+      }
+      case SurfaceLHopital2d: {
+        uint16_t flags = getWord();
+        bool singularU0 = flags & 1;
+        bool singularU1 = flags & 2;
+        bool singularV0 = flags & 4;
+        bool singularV1 = flags & 8;
+        double u = variablesPointer[0];
+        double v = variablesPointer[1];
+        const double* lhs = getVariablePointer();
+        double rhs = *getVariablePointer();
+        const double* lhsDU = getVariablePointer();
+        const double* lhsDV = getVariablePointer();
+        double rhsDU = *getVariablePointer();
+        double rhsDV = *getVariablePointer();
+        double* output = getVariablePointer();
+        bool singularU = (singularU0 && u == 0) || (singularU1 && u == 1);
+        bool singularV = (singularV0 && v == 0) || (singularV1 && v == 1);
+        if (singularU) {
+          output[0] = lhsDU[0] / rhsDU;
+          output[1] = lhsDU[1] / rhsDU;
+        } else if (singularV) {
+          output[0] = lhsDV[0] / rhsDV;
+          output[1] = lhsDV[1] / rhsDV;
+        } else {
+          output[0] = lhs[0] / rhs;
+          output[1] = lhs[1] / rhs;
+        }
+        break;
+      }
+      case SurfaceLHopital3d: {
+        uint16_t flags = getWord();
+        bool singularU0 = flags & 1;
+        bool singularU1 = flags & 2;
+        bool singularV0 = flags & 4;
+        bool singularV1 = flags & 8;
+        double u = variablesPointer[0];
+        double v = variablesPointer[1];
+        const double* lhs = getVariablePointer();
+        double rhs = *getVariablePointer();
+        const double* lhsDU = getVariablePointer();
+        const double* lhsDV = getVariablePointer();
+        double rhsDU = *getVariablePointer();
+        double rhsDV = *getVariablePointer();
+        double* output = getVariablePointer();
+        bool singularU = (singularU0 && u == 0) || (singularU1 && u == 1);
+        bool singularV = (singularV0 && v == 0) || (singularV1 && v == 1);
+        if (singularU) {
+          output[0] = lhsDU[0] / rhsDU;
+          output[1] = lhsDU[1] / rhsDU;
+          output[2] = lhsDU[2] / rhsDU;
+        } else if (singularV) {
+          output[0] = lhsDV[0] / rhsDV;
+          output[1] = lhsDV[1] / rhsDV;
+          output[2] = lhsDV[2] / rhsDV;
+        } else {
+          output[0] = lhs[0] / rhs;
+          output[1] = lhs[1] / rhs;
+          output[2] = lhs[2] / rhs;
+        }
+        break;
+      }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
         break;
@@ -913,10 +1063,13 @@ computeBounds(
   Range* variablesPointer,
   Range* returnValuesPointer
 ) {
-  auto getInt = [&]() -> int {
-    int value = *wordsPointer;
+  auto getWord = [&]() -> uint16_t {
+    uint16_t value = *wordsPointer;
     ++wordsPointer;
     return value;
+  };
+  auto getInt = [&]() -> int {
+    return int(getWord());
   };
   auto getConstantPointer = [&]() -> const double* {
     return constantsPointer + getInt();
@@ -1648,6 +1801,153 @@ computeBounds(
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
+        break;
+      }
+      case CurveLHopital1d: {
+        uint16_t flags = getWord();
+        bool singularT0 = flags & 1;
+        bool singularT1 = flags & 2;
+        Range t = variablesPointer[0];
+        Range lhs = *getVariablePointer();
+        Range rhs = *getVariablePointer();
+        Range lhsDerivative = *getVariablePointer();
+        Range rhsDerivative = *getVariablePointer();
+        Range* output = getVariablePointer();
+        bool singular = (singularT0 && t.lower == 0) || (singularT1 && t.upper == 1);
+        if (singular) {
+          *output = lhsDerivative / rhsDerivative;
+        } else {
+          *output = lhs / rhs;
+        }
+        break;
+      }
+      case CurveLHopital2d: {
+        uint16_t flags = getWord();
+        bool singularT0 = flags & 1;
+        bool singularT1 = flags & 2;
+        Range t = variablesPointer[0];
+        const Range* lhs = getVariablePointer();
+        Range rhs = *getVariablePointer();
+        const Range* lhsDerivative = getVariablePointer();
+        Range rhsDerivative = *getVariablePointer();
+        Range* output = getVariablePointer();
+        bool singular = (singularT0 && t.lower == 0) || (singularT1 && t.upper == 1);
+        if (singular) {
+          output[0] = lhsDerivative[0] / rhsDerivative;
+          output[1] = lhsDerivative[1] / rhsDerivative;
+        } else {
+          output[0] = lhs[0] / rhs;
+          output[1] = lhs[1] / rhs;
+        }
+        break;
+      }
+      case CurveLHopital3d: {
+        uint16_t flags = getWord();
+        bool singularT0 = flags & 1;
+        bool singularT1 = flags & 2;
+        Range t = variablesPointer[0];
+        const Range* lhs = getVariablePointer();
+        Range rhs = *getVariablePointer();
+        const Range* lhsDerivative = getVariablePointer();
+        Range rhsDerivative = *getVariablePointer();
+        Range* output = getVariablePointer();
+        bool singular = (singularT0 && t.lower == 0) || (singularT1 && t.upper == 1);
+        if (singular) {
+          output[0] = lhsDerivative[0] / rhsDerivative;
+          output[1] = lhsDerivative[1] / rhsDerivative;
+          output[2] = lhsDerivative[2] / rhsDerivative;
+        } else {
+          output[0] = lhs[0] / rhs;
+          output[1] = lhs[1] / rhs;
+          output[2] = lhs[2] / rhs;
+        }
+        break;
+      }
+      case SurfaceLHopital1d: {
+        uint16_t flags = getWord();
+        bool singularU0 = flags & 1;
+        bool singularU1 = flags & 2;
+        bool singularV0 = flags & 4;
+        bool singularV1 = flags & 8;
+        Range u = variablesPointer[0];
+        Range v = variablesPointer[1];
+        Range lhs = *getVariablePointer();
+        Range rhs = *getVariablePointer();
+        Range lhsDU = *getVariablePointer();
+        Range lhsDV = *getVariablePointer();
+        Range rhsDU = *getVariablePointer();
+        Range rhsDV = *getVariablePointer();
+        Range* output = getVariablePointer();
+        bool singularU = (singularU0 && u.lower == 0) || (singularU1 && u.upper == 1);
+        bool singularV = (singularV0 && v.lower == 0) || (singularV1 && v.upper == 1);
+        if (singularU) {
+          *output = lhsDU / rhsDU;
+        } else if (singularV) {
+          *output = lhsDV / rhsDV;
+        } else {
+          *output = lhs / rhs;
+        }
+        break;
+      }
+      case SurfaceLHopital2d: {
+        uint16_t flags = getWord();
+        bool singularU0 = flags & 1;
+        bool singularU1 = flags & 2;
+        bool singularV0 = flags & 4;
+        bool singularV1 = flags & 8;
+        Range u = variablesPointer[0];
+        Range v = variablesPointer[1];
+        const Range* lhs = getVariablePointer();
+        Range rhs = *getVariablePointer();
+        const Range* lhsDU = getVariablePointer();
+        const Range* lhsDV = getVariablePointer();
+        Range rhsDU = *getVariablePointer();
+        Range rhsDV = *getVariablePointer();
+        Range* output = getVariablePointer();
+        bool singularU = (singularU0 && u.lower == 0) || (singularU1 && u.upper == 1);
+        bool singularV = (singularV0 && v.lower == 0) || (singularV1 && v.upper == 1);
+        if (singularU) {
+          output[0] = lhsDU[0] / rhsDU;
+          output[1] = lhsDU[1] / rhsDU;
+        } else if (singularV) {
+          output[0] = lhsDV[0] / rhsDV;
+          output[1] = lhsDV[1] / rhsDV;
+        } else {
+          output[0] = lhs[0] / rhs;
+          output[1] = lhs[1] / rhs;
+        }
+        break;
+      }
+      case SurfaceLHopital3d: {
+        uint16_t flags = getWord();
+        bool singularU0 = flags & 1;
+        bool singularU1 = flags & 2;
+        bool singularV0 = flags & 4;
+        bool singularV1 = flags & 8;
+        Range u = variablesPointer[0];
+        Range v = variablesPointer[1];
+        const Range* lhs = getVariablePointer();
+        Range rhs = *getVariablePointer();
+        const Range* lhsDU = getVariablePointer();
+        const Range* lhsDV = getVariablePointer();
+        Range rhsDU = *getVariablePointer();
+        Range rhsDV = *getVariablePointer();
+        Range* output = getVariablePointer();
+        bool singularU = (singularU0 && u.lower == 0) || (singularU1 && u.upper == 1);
+        bool singularV = (singularV0 && v.lower == 0) || (singularV1 && v.upper == 1);
+        if (singularU) {
+          output[0] = lhsDU[0] / rhsDU;
+          output[1] = lhsDU[1] / rhsDU;
+          output[2] = lhsDU[2] / rhsDU;
+        } else if (singularV) {
+          output[0] = lhsDV[0] / rhsDV;
+          output[1] = lhsDV[1] / rhsDV;
+          output[2] = lhsDV[2] / rhsDV;
+        } else {
+          output[0] = lhs[0] / rhs;
+          output[1] = lhs[1] / rhs;
+          output[2] = lhs[2] / rhs;
+        }
         break;
       }
       case OPCODE_END: {

@@ -8,6 +8,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
+import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
 main = IO.do
@@ -16,7 +17,7 @@ main = IO.do
   IO.printLine "t^2 / (1 + t^2)"
   let tSquared = Expression.squared t
   let one :: Expression Float Float = Expression.constant 1.0
-  let fraction = tSquared / (one + tSquared)
+  let fraction = Tolerance.using 1e-9 $ Expression.quotient tSquared (one + tSquared)
   IO.forEach [0 .. 5] \i -> IO.do
     let evaluated = Expression.evaluate fraction (Float.int i)
     IO.printLine (Text.float evaluated)

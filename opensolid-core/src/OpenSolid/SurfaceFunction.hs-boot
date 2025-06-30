@@ -4,6 +4,8 @@ module OpenSolid.SurfaceFunction
   , evaluate
   , evaluateBounds
   , derivative
+  , quotient
+  , quotient'
   )
 where
 
@@ -30,16 +32,16 @@ instance HasField "compiled" (SurfaceFunction units) (Compiled units)
 
 instance Negation (SurfaceFunction units)
 
-instance
-  Division'
-    (SurfaceFunction units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction (units1 :/: units2))
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units3)
-
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  SurfaceFunction units1 ->
+  SurfaceFunction units2 ->
+  SurfaceFunction units3
+quotient' ::
+  Tolerance units2 =>
+  SurfaceFunction units1 ->
+  SurfaceFunction units2 ->
+  SurfaceFunction (units1 :/: units2)

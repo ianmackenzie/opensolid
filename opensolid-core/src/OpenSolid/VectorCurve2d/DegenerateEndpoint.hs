@@ -31,7 +31,7 @@ at t0 secondDerivative = do
   let t1 = if t0 == 0.0 then r else 1.0 - r
   let q = qCurve 0 t0 secondDerivative
   let sign = if t0 == 0.0 then Positive else Negative
-  let curve = sign * q / VectorCurve2d.unsafeMagnitude q
+  let curve = sign * VectorCurve2d.quotient q (VectorCurve2d.unsafeMagnitude q)
   DegenerateEndpoint t0 t1 curve
 
 computeRadius :: Tolerance units => Vector2d (space @ units) -> Float

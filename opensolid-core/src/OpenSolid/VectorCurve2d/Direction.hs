@@ -114,7 +114,10 @@ unsafe ::
 unsafe firstDerivative secondDerivative = do
   let degenerateStart = endpoint 0.0 firstDerivative secondDerivative
   let degenerateEnd = endpoint 1.0 firstDerivative secondDerivative
-  let normalized = firstDerivative / VectorCurve2d.unsafeMagnitude firstDerivative
+  let normalized =
+        VectorCurve2d.quotient
+          @ firstDerivative
+          @ VectorCurve2d.unsafeMagnitude firstDerivative
   DirectionCurve2d.unsafe $
     case (degenerateStart, degenerateEnd) of
       (Nothing, Nothing) -> normalized

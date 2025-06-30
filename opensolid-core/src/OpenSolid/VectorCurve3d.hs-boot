@@ -6,6 +6,8 @@ module OpenSolid.VectorCurve3d
   , on
   , evaluate
   , evaluateBounds
+  , quotient
+  , quotient'
   , unsafeMagnitude
   , transformBy
   )
@@ -70,16 +72,6 @@ instance
   Multiplication (VectorCurve3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
 
 instance
-  Division'
-    (VectorCurve3d (space @ units1))
-    (Curve units2)
-    (VectorCurve3d (space @ (units1 :/: units2)))
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
-
-instance
   space1 ~ space2 =>
   DotMultiplication'
     (VectorCurve3d (space1 @ units1))
@@ -101,6 +93,16 @@ on ::
   VectorCurve3d (space @ units)
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
 evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  VectorCurve3d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve3d (space @ units3)
+quotient' ::
+  Tolerance units2 =>
+  VectorCurve3d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve3d (space @ (units1 :/: units2))
 unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
 transformBy ::
   Transform3d tag (space @ translationUnits) ->
