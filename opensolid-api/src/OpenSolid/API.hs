@@ -1370,6 +1370,8 @@ model3d =
     , Class.static1 "Name" "Name" Model3d.name $(docs 'Model3d.name)
     , Class.static1 "PBR Material" "Material" Model3d.pbrMaterial $(docs 'Model3d.pbrMaterial)
     , Class.static1 "Opacity" "Opacity" Model3d.opacity $(docs 'Model3d.opacity)
+    , Class.member1 "Place In" "Frame" Model3d.placeIn $(docs 'Model3d.placeIn)
+    , Class.member1 "Relative To" "Frame" Model3d.relativeTo $(docs 'Model3d.relativeTo)
     ]
       <> rigidTransformations3d Model3d.transformBy
 
