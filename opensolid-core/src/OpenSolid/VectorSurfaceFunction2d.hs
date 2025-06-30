@@ -13,6 +13,8 @@ module OpenSolid.VectorSurfaceFunction2d
   , components
   , derivative
   , transformBy
+  , quotient
+  , quotient'
   , squaredMagnitude'
   , squaredMagnitude
   )
@@ -262,26 +264,6 @@ instance
   (space1 ~ space2, Units.Quotient units1 units2 units3) =>
   Division
     (VectorSurfaceFunction2d (space @ units1))
-    (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ units3))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Division'
-    (VectorSurfaceFunction2d (space @ units1))
-    (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ (units1 :/: units2)))
-  where
-  lhs ./. rhs =
-    recursive
-      @ lhs.compiled ./. rhs.compiled
-      @ \self p -> derivative p lhs ./. rhs - self * (SurfaceFunction.derivative p rhs / rhs)
-
-instance
-  (space1 ~ space2, Units.Quotient units1 units2 units3) =>
-  Division
-    (VectorSurfaceFunction2d (space @ units1))
     (Qty units2)
     (VectorSurfaceFunction2d (space @ units3))
   where
@@ -293,7 +275,7 @@ instance
     (Qty units2)
     (VectorSurfaceFunction2d (space @ (units1 :/: units2)))
   where
-  function ./. value = function ./. SurfaceFunction.constant value
+  function ./. value = function ^*. (1.0 ./. value)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -559,6 +541,25 @@ components ::
   VectorSurfaceFunction2d (space @ units) ->
   (SurfaceFunction units, SurfaceFunction units)
 components function = (xComponent function, yComponent function)
+
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  VectorSurfaceFunction2d (space @ units1) ->
+  SurfaceFunction units2 ->
+  VectorSurfaceFunction2d (space @ units3)
+quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+quotient' ::
+  Tolerance units2 =>
+  VectorSurfaceFunction2d (space @ units1) ->
+  SurfaceFunction units2 ->
+  VectorSurfaceFunction2d (space @ (units1 :/: units2))
+quotient' lhs rhs =
+  recursive
+    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
+    @ \self p ->
+      quotient' (derivative p lhs) rhs
+        - self * SurfaceFunction.quotient (SurfaceFunction.derivative p rhs) rhs
 
 squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units :*: units)
 squaredMagnitude' function =

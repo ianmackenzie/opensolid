@@ -1,21 +1,23 @@
 module Python.PostOperator (definition) where
 
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.PostOperator (PostOperator (..))
-import OpenSolid.API.PostOperator qualified as PostOperator
+import OpenSolid.API.ImplicitArgument (ImplicitArgument)
+import OpenSolid.API.PostOperatorOverload (PostOperatorOverload (..))
+import OpenSolid.API.PostOperatorOverload qualified as PostOperatorOverload
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
 import Python qualified
 import Python.Function qualified
 import Python.Type qualified
 
 rhsArgName :: Text
-rhsArgName = FFI.snakeCase PostOperator.rhsName
+rhsArgName = FFI.snakeCase PostOperatorOverload.rhsName
 
-definition :: FFI.ClassName -> (BinaryOperator.Id, List PostOperator) -> Text
+definition :: FFI.ClassName -> (BinaryOperator.Id, List PostOperatorOverload) -> Text
 definition className (operatorId, operators) = do
-  case List.map (overload className operatorId) operators of
+  case List.map (overloadComponents className operatorId) operators of
     [(signature, _, body)] ->
       Python.lines
         [ signature
@@ -65,14 +67,14 @@ functionName operatorId = case operatorId of
   BinaryOperator.Dot -> "dot"
   BinaryOperator.Cross -> "cross"
 
-overload :: FFI.ClassName -> BinaryOperator.Id -> PostOperator -> (Text, Text, Text)
-overload className operatorId memberFunction = do
-  let ffiFunctionName = PostOperator.ffiName className operatorId memberFunction
+overloadComponents :: FFI.ClassName -> BinaryOperator.Id -> PostOperatorOverload -> (Text, Text, Text)
+overloadComponents className operatorId memberFunction = do
+  let ffiFunctionName = PostOperatorOverload.ffiName className operatorId memberFunction
   let selfType = FFI.Class className
-  let (rhsType, returnType) = PostOperator.signature memberFunction
+  let (maybeImplicitArgument, rhsType, returnType) = PostOperatorOverload.signature memberFunction
   let signature = overloadSignature operatorId rhsType returnType
   let matchPattern = Python.Function.typePattern rhsType
-  let body = overloadBody ffiFunctionName selfType rhsType returnType
+  let body = overloadBody ffiFunctionName maybeImplicitArgument selfType rhsType returnType
   (signature, matchPattern, body)
 
 overloadSignature :: BinaryOperator.Id -> FFI.Type -> FFI.Type -> Text
@@ -82,6 +84,8 @@ overloadSignature operatorId rhsType returnType = do
   let rhsArgument = rhsArgName <> ": " <> rhsTypeName
   "def " <> functionName operatorId <> "(self, " <> rhsArgument <> ") -> " <> returnTypeName <> ":"
 
-overloadBody :: Text -> FFI.Type -> FFI.Type -> FFI.Type -> Text
-overloadBody ffiFunctionName selfType rhsType returnType =
-  Python.Function.body ffiFunctionName [("self", selfType), (rhsArgName, rhsType)] returnType
+overloadBody :: Text -> Maybe ImplicitArgument -> FFI.Type -> FFI.Type -> FFI.Type -> Text
+overloadBody ffiFunctionName maybeImplicitArgument selfType rhsType returnType = do
+  let maybeImplicitValue = Maybe.map Python.Function.implicitValue maybeImplicitArgument
+  let ffiArguments = List.maybe maybeImplicitValue <> [("self", selfType), (rhsArgName, rhsType)]
+  Python.Function.body ffiFunctionName ffiArguments returnType

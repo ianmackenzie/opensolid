@@ -40,8 +40,8 @@ library
     OpenSolid.API.ImplicitArgument
     OpenSolid.API.MemberFunction
     OpenSolid.API.NegationFunction
-    OpenSolid.API.PostOperator
-    OpenSolid.API.PreOperator
+    OpenSolid.API.PostOperatorOverload
+    OpenSolid.API.PreOperatorOverload
     OpenSolid.API.Property
     OpenSolid.API.Space
     OpenSolid.API.StaticFunction

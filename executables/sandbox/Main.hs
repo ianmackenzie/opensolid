@@ -410,9 +410,9 @@ testExpression :: IO ()
 testExpression = IO.do
   let x = Expression.t
   let xSquared = Expression.squared x
-  let function = xSquared / (xSquared + Expression.Curve1d.constant 1.0)
-  log "Expression value" (Expression.evaluate function 2.0)
-  log "Expression bounds" (Expression.evaluateBounds function (Bounds 1.0 3.0))
+  let expression = xSquared / (xSquared + Expression.Curve1d.constant 1.0)
+  log "Expression value" (Expression.evaluate expression 2.0)
+  log "Expression bounds" (Expression.evaluateBounds expression (Bounds 1.0 3.0))
 
 testCurve2dExpression :: IO ()
 testCurve2dExpression = IO.do

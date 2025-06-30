@@ -11,6 +11,8 @@ module OpenSolid.VectorSurfaceFunction3d
   , placeIn
   , relativeTo
   , transformBy
+  , quotient
+  , quotient'
   )
 where
 
@@ -256,23 +258,6 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorSurfaceFunction3d (space @ units1)) (SurfaceFunction units2) (VectorSurfaceFunction3d (space @ units3))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Division'
-    (VectorSurfaceFunction3d (space @ units1))
-    (SurfaceFunction units2)
-    (VectorSurfaceFunction3d (space @ (units1 :/: units2)))
-  where
-  lhs ./. rhs =
-    recursive
-      @ lhs.compiled ./. rhs.compiled
-      @ \self p -> derivative p lhs ./. rhs - self * (SurfaceFunction.derivative p rhs / rhs)
-
-instance
-  Units.Quotient units1 units2 units3 =>
   Division (VectorSurfaceFunction3d (space @ units1)) (Qty units2) (VectorSurfaceFunction3d (space @ units3))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
@@ -283,7 +268,7 @@ instance
     (Qty units2)
     (VectorSurfaceFunction3d (space @ (units1 :/: units2)))
   where
-  function ./. value = function ./. SurfaceFunction.constant value
+  function ./. value = function ^*. (1.0 ./. value)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -515,3 +500,22 @@ transformBy transform function =
       (VectorBounds3d.transformBy transform)
       function.compiled
     @ \p -> transformBy transform (derivative p function)
+
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  VectorSurfaceFunction3d (space @ units1) ->
+  SurfaceFunction units2 ->
+  VectorSurfaceFunction3d (space @ units3)
+quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+quotient' ::
+  Tolerance units2 =>
+  VectorSurfaceFunction3d (space @ units1) ->
+  SurfaceFunction units2 ->
+  VectorSurfaceFunction3d (space @ (units1 :/: units2))
+quotient' lhs rhs =
+  recursive
+    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
+    @ \self p ->
+      quotient' (derivative p lhs) rhs
+        - self * SurfaceFunction.quotient (SurfaceFunction.derivative p rhs) rhs

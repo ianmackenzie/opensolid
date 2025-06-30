@@ -575,13 +575,21 @@ classify point curves =
     then Nothing
     else Just (classifyNonBoundary point curves)
 
-fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate Unitless
+fluxIntegral ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Estimate Unitless
 fluxIntegral point curve = do
   let displacement = point - curve
-  let integrand = (curve.derivative `cross'` displacement) / displacement.squaredMagnitude'
+  let integrand =
+        Tolerance.using Tolerance.squared' $
+          Curve.quotient
+            @ curve.derivative `cross'` displacement
+            @ displacement.squaredMagnitude'
   Curve.integrate integrand
 
-totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
+totalFlux :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
 totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
 
 classifyNonBoundary :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Sign

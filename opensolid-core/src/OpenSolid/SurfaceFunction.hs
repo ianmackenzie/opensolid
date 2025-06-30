@@ -14,6 +14,8 @@ module OpenSolid.SurfaceFunction
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , new
+  , quotient
+  , quotient'
   , squared
   , squared'
   , sqrt
@@ -332,23 +334,6 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units3)
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Division'
-    (SurfaceFunction units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction (units1 :/: units2))
-  where
-  lhs ./. rhs =
-    recursive
-      @ lhs.compiled ./. rhs.compiled
-      @ \self p -> derivative p lhs ./. rhs - self * (derivative p rhs / rhs)
-
-instance
-  Units.Quotient units1 units2 units3 =>
   Division (SurfaceFunction units1) (Qty units2) (SurfaceFunction units3)
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
@@ -359,21 +344,7 @@ instance
     (Qty units2)
     (SurfaceFunction (units1 :/: units2))
   where
-  function ./. value = function ./. constant value
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (Qty units1) (SurfaceFunction units2) (SurfaceFunction units3)
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Division'
-    (Qty units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction (units1 :/: units2))
-  where
-  value ./. function = constant value ./. function
+  function ./. value = function ^*. (1.0 ./. value)
 
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
   curve . function =
@@ -430,6 +401,23 @@ recursive ::
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  SurfaceFunction units1 ->
+  SurfaceFunction units2 ->
+  SurfaceFunction units3
+quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+quotient' ::
+  Tolerance units2 =>
+  SurfaceFunction units1 ->
+  SurfaceFunction units2 ->
+  SurfaceFunction (units1 :/: units2)
+quotient' lhs rhs =
+  recursive
+    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
+    @ \self p -> quotient' (derivative p lhs) rhs - self * quotient (derivative p rhs) rhs
+
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared function = Units.specialize (squared' function)
 
@@ -452,7 +440,7 @@ sqrt' function =
     else
       recursive
         @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled
-        @ \self p -> derivative p function .!/! (2.0 * self)
+        @ \self p -> Units.coerce (quotient' (derivative p function) (2.0 * self))
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =
@@ -474,8 +462,8 @@ zeros function
   | otherwise = Result.do
       let fu = function.du
       let fv = function.dv
-      let dudv = -fv / fu
-      let dvdu = -fu / fv
+      let dudv = quotient -fv fu
+      let dvdu = quotient -fu fv
       case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
         Success solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions

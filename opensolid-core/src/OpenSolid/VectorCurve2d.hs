@@ -21,6 +21,8 @@ module OpenSolid.VectorCurve2d
   , cubicSpline
   , bezierCurve
   , synthetic
+  , quotient
+  , quotient'
   , magnitude
   , squaredMagnitude
   , squaredMagnitude'
@@ -295,31 +297,6 @@ instance
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
-  Multiplication'
-    (VectorCurve2d (space @ units1))
-    (Qty units2)
-    (VectorCurve2d (space @ (units1 :*: units2)))
-  where
-  curve .*. value = curve .*. Curve.constant value
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Division'
-    (VectorCurve2d (space @ units1))
-    (Curve units2)
-    (VectorCurve2d (space @ (units1 :/: units2)))
-  where
-  lhs ./. rhs =
-    recursive
-      @ lhs.compiled ./. rhs.compiled
-      @ \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
-
-instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
   where
@@ -331,7 +308,15 @@ instance
     (Qty units2)
     (VectorCurve2d (space @ (units1 :/: units2)))
   where
-  curve ./. value = curve ./. Curve.constant value
+  curve ./. value = curve ^*. (1.0 ./. value)
+
+instance
+  Multiplication'
+    (VectorCurve2d (space @ units1))
+    (Qty units2)
+    (VectorCurve2d (space @ (units1 :*: units2)))
+  where
+  curve .*. value = curve .*. Curve.constant value
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -648,6 +633,23 @@ components curve = (xComponent curve, yComponent curve)
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
 
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve2d (space @ units3)
+quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+quotient' ::
+  Tolerance units2 =>
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve2d (space @ (units1 :/: units2))
+quotient' lhs rhs =
+  recursive
+    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
+    @ \self -> quotient' lhs.derivative rhs - self * (Curve.quotient rhs.derivative rhs)
+
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
@@ -670,7 +672,7 @@ unsafeMagnitude curve =
       Vector2d.magnitude
       VectorBounds2d.magnitude
       curve.compiled
-    @ \self -> curve.derivative `dot` (curve / self)
+    @ \self -> curve.derivative `dot` (Tolerance.exactly (quotient curve self))
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

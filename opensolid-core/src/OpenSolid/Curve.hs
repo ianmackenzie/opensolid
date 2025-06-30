@@ -18,6 +18,8 @@ module OpenSolid.Curve
   , rationalBezier
   , rationalQuadraticSpline
   , rationalCubicSpline
+  , quotient
+  , quotient'
   , squared
   , squared'
   , sqrt
@@ -281,36 +283,6 @@ instance
   where
   vector .*. curve = VectorCurve3d.constant vector .*. curve
 
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (Curve units1) (Curve units2) (Curve units3)
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance Division' (Curve units1) (Curve units2) (Curve (units1 :/: units2)) where
-  lhs ./. rhs =
-    recursive
-      @ lhs.compiled ./. rhs.compiled
-      @ \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (Curve units1) (Qty units2) (Curve units3)
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance Division' (Curve units1) (Qty units2) (Curve (units1 :/: units2)) where
-  curve ./. value = curve ./. constant value
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (Qty units1) (Curve units2) (Curve units3)
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance Division' (Qty units1) (Curve units2) (Curve (units1 :/: units2)) where
-  value ./. curve = constant value ./. curve
-
 instance Composition (Curve Unitless) (Curve units) (Curve units) where
   f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
@@ -333,13 +305,15 @@ quadraticSpline p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 cubicSpline :: Qty units -> Qty units -> Qty units -> Qty units -> Curve units
 cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
-rationalBezier :: NonEmpty (Qty units, Float) -> Curve units
+rationalBezier :: Tolerance Unitless => NonEmpty (Qty units, Float) -> Curve units
 rationalBezier pointsAndWeights = do
   let scaledPoint (point, weight) = point * weight
-  bezier (NonEmpty.map scaledPoint pointsAndWeights)
-    / bezier (NonEmpty.map Pair.second pointsAndWeights)
+  quotient
+    @ bezier (NonEmpty.map scaledPoint pointsAndWeights)
+    @ bezier (NonEmpty.map Pair.second pointsAndWeights)
 
 rationalQuadraticSpline ::
+  Tolerance Unitless =>
   (Qty units, Float) ->
   (Qty units, Float) ->
   (Qty units, Float) ->
@@ -347,6 +321,7 @@ rationalQuadraticSpline ::
 rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.three pw1 pw2 pw3)
 
 rationalCubicSpline ::
+  Tolerance Unitless =>
   (Qty units, Float) ->
   (Qty units, Float) ->
   (Qty units, Float) ->
@@ -363,6 +338,28 @@ evaluate curve = CompiledFunction.evaluate curve.compiled
 
 evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units
 evaluateBounds curve = CompiledFunction.evaluateBounds curve.compiled
+
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  Curve units1 ->
+  Curve units2 ->
+  Curve units3
+quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+quotient' :: Tolerance units2 => Curve units1 -> Curve units2 -> Curve (units1 :/: units2)
+quotient' lhs rhs =
+  recursive
+    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
+    @ \self -> quotient' lhs.derivative rhs - self * (quotient rhs.derivative rhs)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Curve units1) (Qty units2) (Curve units3)
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
+
+instance Division' (Curve units1) (Qty units2) (Curve (units1 :/: units2)) where
+  curve ./. value = curve ^*. (1.0 ./. value)
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
@@ -384,8 +381,8 @@ sqrt' curve =
     then zero
     else
       recursive
-        (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled)
-        (\self -> curve.derivative .!/! (2.0 * self))
+        @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled
+        @ \self -> Units.coerce (quotient' curve.derivative (2.0 * self))
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless

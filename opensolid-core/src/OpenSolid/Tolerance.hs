@@ -10,6 +10,7 @@ module OpenSolid.Tolerance
   , ofSquared'
   , times
   , times'
+  , coerced
   )
 where
 
@@ -123,3 +124,6 @@ times' value = ?tolerance .*. value
 
 times :: (Tolerance units1, Units.Product units1 units2 units3) => Qty units2 -> Qty units3
 times = Units.specialize . times'
+
+coerced :: Tolerance units1 => Qty units2
+coerced = Qty.coerce ?tolerance

@@ -191,8 +191,8 @@ length =
     , Class.divBySelf
     , Class.divBy @(Bounds Unitless) Self
     , Class.divBy @(Bounds Meters) Self
-    , Class.divBy @(Curve Unitless) Self
-    , Class.divBy @(Curve Meters) Self
+    , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.divByM (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -234,9 +234,9 @@ area =
     , Class.divBy @(Bounds Unitless) Self
     , Class.divBy @(Bounds Meters) Self
     , Class.divBy @(Bounds SquareMeters) Self
-    , Class.divBy @(Curve Unitless) Self
-    , Class.divBy @(Curve Meters) Self
-    , Class.divBy @(Curve SquareMeters) Self
+    , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.divByM (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.divByS (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -289,8 +289,8 @@ angle =
     , Class.divBySelf
     , Class.divBy @(Bounds Unitless) Self
     , Class.divBy @(Bounds Radians) Self
-    , Class.divBy @(Curve Unitless) Self
-    , Class.divBy @(Curve Radians) Self
+    , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.divByR (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -681,7 +681,7 @@ curve =
     , Class.floatPlus
     , Class.floatMinus
     , Class.floatTimes
-    , Class.floatDivBy
+    , Class.floatDivByU (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.plusFloat
     , Class.plusSelf
     , Class.minusFloat
@@ -695,7 +695,7 @@ curve =
     , Class.times @(Curve SquareMeters) Self
     , Class.times @(Curve Radians) Self
     , Class.divByFloat
-    , Class.divBySelf
+    , Class.divByU Curve.quotient
     , Class.nested @Curve.Zero "A point where a given curve is equal to zero." $
         [ Class.property "Location" (.location) "The parameter value at which the curve is zero."
         , Class.property "Order" (.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
@@ -723,9 +723,9 @@ angleCurve =
     , Class.timesFloat
     , Class.times @(Curve Unitless) Self
     , Class.divByFloat
-    , Class.divBySelf
+    , Class.divByR Curve.quotient
     , Class.divBy @Angle Self
-    , Class.divBy @(Curve Unitless) Self
+    , Class.divByU Curve.quotient
     ]
 
 lengthCurve :: Class
@@ -749,9 +749,9 @@ lengthCurve =
     , Class.times @Length Self
     , Class.times @(Curve Unitless) Self
     , Class.divByFloat
-    , Class.divBySelf
+    , Class.divByM Curve.quotient
     , Class.divBy @Length Self
-    , Class.divBy @(Curve Unitless) Self
+    , Class.divByU Curve.quotient
     ]
 
 areaCurve :: Class
@@ -773,11 +773,11 @@ areaCurve =
     , Class.timesFloat
     , Class.times @(Curve Unitless) Self
     , Class.divByFloat
-    , Class.divBySelf
+    , Class.divByS Curve.quotient
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.divBy @(Curve Unitless) Self
-    , Class.divBy @(Curve Meters) Self
+    , Class.divByU Curve.quotient
+    , Class.divByM Curve.quotient
     ]
 
 drawing2d :: Class

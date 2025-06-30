@@ -2,6 +2,10 @@ module OpenSolid.API.BinaryOperator
   ( Id (..)
   , ffiName
   , functionSignature
+  , functionSignatureU
+  , functionSignatureR
+  , functionSignatureM
+  , functionSignatureS
   )
 where
 
@@ -40,6 +44,50 @@ functionSignature ::
   (a -> b -> c) ->
   (FFI.Type, FFI.Type, FFI.Type)
 functionSignature _ =
+  ( FFI.typeOf @a Proxy
+  , FFI.typeOf @b Proxy
+  , FFI.typeOf @c Proxy
+  )
+
+functionSignatureU ::
+  forall a b c.
+  (FFI a, FFI b, FFI c) =>
+  (Tolerance Unitless => a -> b -> c) ->
+  (FFI.Type, FFI.Type, FFI.Type)
+functionSignatureU _ =
+  ( FFI.typeOf @a Proxy
+  , FFI.typeOf @b Proxy
+  , FFI.typeOf @c Proxy
+  )
+
+functionSignatureR ::
+  forall a b c.
+  (FFI a, FFI b, FFI c) =>
+  (Tolerance Radians => a -> b -> c) ->
+  (FFI.Type, FFI.Type, FFI.Type)
+functionSignatureR _ =
+  ( FFI.typeOf @a Proxy
+  , FFI.typeOf @b Proxy
+  , FFI.typeOf @c Proxy
+  )
+
+functionSignatureM ::
+  forall a b c.
+  (FFI a, FFI b, FFI c) =>
+  (Tolerance Meters => a -> b -> c) ->
+  (FFI.Type, FFI.Type, FFI.Type)
+functionSignatureM _ =
+  ( FFI.typeOf @a Proxy
+  , FFI.typeOf @b Proxy
+  , FFI.typeOf @c Proxy
+  )
+
+functionSignatureS ::
+  forall a b c.
+  (FFI a, FFI b, FFI c) =>
+  (Tolerance SquareMeters => a -> b -> c) ->
+  (FFI.Type, FFI.Type, FFI.Type)
+functionSignatureS _ =
   ( FFI.typeOf @a Proxy
   , FFI.typeOf @b Proxy
   , FFI.typeOf @c Proxy

@@ -16,6 +16,8 @@ module OpenSolid.VectorCurve3d
   , quadraticSpline
   , cubicSpline
   , bezierCurve
+  , quotient
+  , quotient'
   , magnitude
   , unsafeMagnitude
   , squaredMagnitude
@@ -275,23 +277,6 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
-  where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
-
-instance
-  Division'
-    (VectorCurve3d (space @ units1))
-    (Curve units2)
-    (VectorCurve3d (space @ (units1 :/: units2)))
-  where
-  lhs ./. rhs =
-    recursive
-      @ lhs.compiled ./. rhs.compiled
-      @ \self -> lhs.derivative ./. rhs - self * (rhs.derivative / rhs)
-
-instance
-  Units.Quotient units1 units2 units3 =>
   Division (VectorCurve3d (space @ units1)) (Qty units2) (VectorCurve3d (space @ units3))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
@@ -302,7 +287,7 @@ instance
     (Qty units2)
     (VectorCurve3d (space @ (units1 :/: units2)))
   where
-  curve ./. value = curve ./. Curve.constant value
+  curve ./. value = curve ^*. (1.0 ./. value)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -561,6 +546,23 @@ evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tB
 reverse :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
 
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  VectorCurve3d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve3d (space @ units3)
+quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+quotient' ::
+  Tolerance units2 =>
+  VectorCurve3d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve3d (space @ (units1 :/: units2))
+quotient' lhs rhs =
+  recursive
+    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
+    @ \self -> quotient' lhs.derivative rhs - self * (Curve.quotient rhs.derivative rhs)
+
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
@@ -583,7 +585,7 @@ unsafeMagnitude curve = do
           Vector3d.magnitude
           VectorBounds3d.magnitude
           curve.compiled
-  let magnitudeDerivative self = curve.derivative `dot` (curve / self)
+  let magnitudeDerivative self = curve.derivative `dot` (Tolerance.exactly (quotient curve self))
   Curve.recursive compiledMagnitude magnitudeDerivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)

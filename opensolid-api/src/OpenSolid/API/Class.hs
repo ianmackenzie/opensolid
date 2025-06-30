@@ -64,6 +64,10 @@ module OpenSolid.API.Class
   , floatMinus
   , floatTimes
   , floatDivBy
+  , floatDivByU
+  , floatDivByR
+  , floatDivByM
+  , floatDivByS
   , plus
   , plusFloat
   , plusSelf
@@ -74,6 +78,10 @@ module OpenSolid.API.Class
   , timesFloat
   , timesSelf
   , divBy
+  , divByU
+  , divByR
+  , divByM
+  , divByS
   , divByFloat
   , divBySelf
   , floorDivBySelf
@@ -105,10 +113,10 @@ import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.API.NegationFunction (NegationFunction (NegationFunction))
 import OpenSolid.API.NegationFunction qualified as NegationFunction
-import OpenSolid.API.PostOperator (PostOperator (PostOperator))
-import OpenSolid.API.PostOperator qualified as PostOperator
-import OpenSolid.API.PreOperator (PreOperator (PreOperator))
-import OpenSolid.API.PreOperator qualified as PreOperator
+import OpenSolid.API.PostOperatorOverload (PostOperatorOverload (..))
+import OpenSolid.API.PostOperatorOverload qualified as PostOperatorOverload
+import OpenSolid.API.PreOperatorOverload (PreOperatorOverload (..))
+import OpenSolid.API.PreOperatorOverload qualified as PreOperatorOverload
 import OpenSolid.API.Property (Property (Property))
 import OpenSolid.API.Property qualified as Property
 import OpenSolid.API.StaticFunction (StaticFunction (..))
@@ -135,8 +143,8 @@ data Class where
     , comparisonFunction :: Maybe ComparisonFunction
     , negationFunction :: Maybe NegationFunction
     , absFunction :: Maybe AbsFunction
-    , preOperators :: List (BinaryOperator.Id, List PreOperator)
-    , postOperators :: List (BinaryOperator.Id, List PostOperator)
+    , preOperators :: List (BinaryOperator.Id, List PreOperatorOverload)
+    , postOperators :: List (BinaryOperator.Id, List PostOperatorOverload)
     , nestedClasses :: List Class
     } ->
     Class
@@ -152,8 +160,8 @@ data Member value where
   Comparison :: ComparisonFunction -> Member value
   Negate :: NegationFunction -> Member value
   Abs :: AbsFunction -> Member value
-  PreOp :: (FFI value, FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
-  PostOp :: (FFI value, FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
+  PreOverload :: BinaryOperator.Id -> PreOperatorOverload -> Member value
+  PostOverload :: BinaryOperator.Id -> PostOperatorOverload -> Member value
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
 
 curryT2 :: ((a, b) -> c) -> a -> b -> c
@@ -727,32 +735,66 @@ floatPlus ::
   forall value result.
   (Addition Float value result, FFI value, FFI result) =>
   Member value
-floatPlus = PreOp BinaryOperator.Add ((+) :: Float -> value -> result)
+floatPlus =
+  PreOverload BinaryOperator.Add $
+    PreOperatorOverload ((+) :: Float -> value -> result)
 
 floatMinus ::
   forall value result.
   (Subtraction Float value result, FFI value, FFI result) =>
   Member value
-floatMinus = PreOp BinaryOperator.Sub ((-) :: Float -> value -> result)
+floatMinus =
+  PreOverload BinaryOperator.Sub $
+    PreOperatorOverload ((-) :: Float -> value -> result)
 
 floatTimes ::
   forall value result.
   (Multiplication Float value result, FFI value, FFI result) =>
   Member value
-floatTimes = PreOp BinaryOperator.Mul ((*) :: Float -> value -> result)
+floatTimes =
+  PreOverload BinaryOperator.Mul $
+    PreOperatorOverload ((*) :: Float -> value -> result)
 
 floatDivBy ::
   forall value result.
   (Division Float value result, FFI value, FFI result) =>
   Member value
-floatDivBy = PreOp BinaryOperator.Div ((/) :: Float -> value -> result)
+floatDivBy =
+  PreOverload BinaryOperator.Div $
+    PreOperatorOverload ((/) :: Float -> value -> result)
+
+floatDivByU ::
+  (FFI value, FFI result) =>
+  (Tolerance Unitless => Float -> value -> result) ->
+  Member value
+floatDivByU f = PreOverload BinaryOperator.Div (PreOperatorOverloadU f)
+
+floatDivByR ::
+  (FFI value, FFI result) =>
+  (Tolerance Radians => Float -> value -> result) ->
+  Member value
+floatDivByR f = PreOverload BinaryOperator.Div (PreOperatorOverloadR f)
+
+floatDivByM ::
+  (FFI value, FFI result) =>
+  (Tolerance Meters => Float -> value -> result) ->
+  Member value
+floatDivByM f = PreOverload BinaryOperator.Div (PreOperatorOverloadM f)
+
+floatDivByS ::
+  (FFI value, FFI result) =>
+  (Tolerance SquareMeters => Float -> value -> result) ->
+  Member value
+floatDivByS f = PreOverload BinaryOperator.Div (PreOperatorOverloadS f)
 
 plus ::
   forall rhs value result.
   (Addition value rhs result, FFI value, FFI rhs, FFI result) =>
   Self (value -> rhs -> result) ->
   Member value
-plus _ = PostOp BinaryOperator.Add ((+) :: value -> rhs -> result)
+plus _ =
+  PostOverload BinaryOperator.Add $
+    PostOperatorOverload ((+) :: value -> rhs -> result)
 
 plusFloat ::
   forall value result.
@@ -771,7 +813,9 @@ minus ::
   (Subtraction value rhs result, FFI value, FFI rhs, FFI result) =>
   Self (value -> rhs -> result) ->
   Member value
-minus _ = PostOp BinaryOperator.Sub ((-) :: value -> rhs -> result)
+minus _ =
+  PostOverload BinaryOperator.Sub $
+    PostOperatorOverload ((-) :: value -> rhs -> result)
 
 minusFloat ::
   forall value result.
@@ -790,7 +834,9 @@ times ::
   (Multiplication value rhs result, FFI value, FFI rhs, FFI result) =>
   Self (value -> rhs -> result) ->
   Member value
-times _ = PostOp BinaryOperator.Mul ((*) :: value -> rhs -> result)
+times _ =
+  PostOverload BinaryOperator.Mul $
+    PostOperatorOverload ((*) :: value -> rhs -> result)
 
 timesFloat ::
   forall value result.
@@ -809,7 +855,33 @@ divBy ::
   (Division value rhs result, FFI value, FFI rhs, FFI result) =>
   Self (value -> rhs -> result) ->
   Member value
-divBy _ = PostOp BinaryOperator.Div ((/) :: value -> rhs -> result)
+divBy _ =
+  PostOverload BinaryOperator.Div $
+    PostOperatorOverload ((/) :: value -> rhs -> result)
+
+divByU ::
+  (FFI value, FFI rhs, FFI result) =>
+  (Tolerance Unitless => value -> rhs -> result) ->
+  Member value
+divByU f = PostOverload BinaryOperator.Div (PostOperatorOverloadU f)
+
+divByR ::
+  (FFI value, FFI rhs, FFI result) =>
+  (Tolerance Radians => value -> rhs -> result) ->
+  Member value
+divByR f = PostOverload BinaryOperator.Div (PostOperatorOverloadR f)
+
+divByM ::
+  (FFI value, FFI rhs, FFI result) =>
+  (Tolerance Meters => value -> rhs -> result) ->
+  Member value
+divByM f = PostOverload BinaryOperator.Div (PostOperatorOverloadM f)
+
+divByS ::
+  (FFI value, FFI rhs, FFI result) =>
+  (Tolerance SquareMeters => value -> rhs -> result) ->
+  Member value
+divByS f = PostOverload BinaryOperator.Div (PostOperatorOverloadS f)
 
 divByFloat ::
   forall value result.
@@ -824,17 +896,23 @@ divBySelf ::
 divBySelf = divBy @value Self
 
 floorDivBySelf :: forall value. (DivMod value, FFI value) => Member value
-floorDivBySelf = PostOp BinaryOperator.FloorDiv ((//) :: value -> value -> Int)
+floorDivBySelf =
+  PostOverload BinaryOperator.FloorDiv $
+    PostOperatorOverload ((//) :: value -> value -> Int)
 
 modBySelf :: forall value. (DivMod value, FFI value) => Member value
-modBySelf = PostOp BinaryOperator.Mod ((%) :: value -> value -> value)
+modBySelf =
+  PostOverload BinaryOperator.Mod $
+    PostOperatorOverload ((%) :: value -> value -> value)
 
 dotProduct ::
   forall rhs value result.
   (DotMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
   Self (value -> rhs -> result) ->
   Member value
-dotProduct _ = PostOp BinaryOperator.Dot (dot :: value -> rhs -> result)
+dotProduct _ =
+  PostOverload BinaryOperator.Dot $
+    PostOperatorOverload (dot :: value -> rhs -> result)
 
 dotSelf ::
   forall value result.
@@ -847,7 +925,9 @@ crossProduct ::
   (CrossMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
   Self (value -> rhs -> result) ->
   Member value
-crossProduct _ = PostOp BinaryOperator.Cross (cross :: value -> rhs -> result)
+crossProduct _ =
+  PostOverload BinaryOperator.Cross $
+    PostOperatorOverload (cross :: value -> rhs -> result)
 
 crossSelf ::
   forall value result.
@@ -860,9 +940,9 @@ nested = Nested
 
 addPreOverload ::
   BinaryOperator.Id ->
-  PreOperator ->
-  List (BinaryOperator.Id, List PreOperator) ->
-  List (BinaryOperator.Id, List PreOperator)
+  PreOperatorOverload ->
+  List (BinaryOperator.Id, List PreOperatorOverload) ->
+  List (BinaryOperator.Id, List PreOperatorOverload)
 addPreOverload operatorId overload [] = [(operatorId, [overload])]
 addPreOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
@@ -872,9 +952,9 @@ addPreOverload operatorId overload (first : rest) = do
 
 addPostOverload ::
   BinaryOperator.Id ->
-  PostOperator ->
-  List (BinaryOperator.Id, List PostOperator) ->
-  List (BinaryOperator.Id, List PostOperator)
+  PostOperatorOverload ->
+  List (BinaryOperator.Id, List PostOperatorOverload) ->
+  List (BinaryOperator.Id, List PostOperatorOverload)
 addPostOverload operatorId overload [] = [(operatorId, [overload])]
 addPostOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
@@ -926,10 +1006,10 @@ buildClass members built = case members of
       built{negationFunction = Just negationFunction}
     Abs absFunction ->
       built{absFunction = Just absFunction}
-    PreOp operatorId operator ->
-      built{preOperators = addPreOverload operatorId (PreOperator operator) (preOperators built)}
-    PostOp operatorId operator ->
-      built{postOperators = addPostOverload operatorId (PostOperator operator) (postOperators built)}
+    PreOverload operatorId overload ->
+      built{preOperators = addPreOverload operatorId overload (preOperators built)}
+    PostOverload operatorId overload ->
+      built{postOperators = addPostOverload operatorId overload (postOperators built)}
     Nested nestedDocstring nestedMembers ->
       built{nestedClasses = nestedClasses built <> [new nestedDocstring nestedMembers]}
 
@@ -1101,34 +1181,40 @@ comparisonFunctionInfo className maybeComparisonFunction = case maybeComparisonF
         , invoke = ComparisonFunction.invoke comparisonFunction
         }
 
-preOperatorOverload :: FFI.ClassName -> BinaryOperator.Id -> PreOperator -> Function
-preOperatorOverload className operatorId operator = do
+preOperatorOverload :: FFI.ClassName -> BinaryOperator.Id -> PreOperatorOverload -> Function
+preOperatorOverload className operatorId overload = do
   let selfType = FFI.Class className
-  let (lhsType, returnType) = PreOperator.signature operator
+  let (implicitArgument, lhsType, returnType) = PreOperatorOverload.signature overload
   Function
-    { ffiName = PreOperator.ffiName className operatorId operator
-    , implicitArgument = Nothing
+    { ffiName = PreOperatorOverload.ffiName className operatorId overload
+    , implicitArgument = implicitArgument
     , argumentTypes = [lhsType, selfType]
     , returnType = returnType
-    , invoke = PreOperator.invoke operator
+    , invoke = PreOperatorOverload.invoke overload
     }
 
-preOperatorOverloads :: FFI.ClassName -> (BinaryOperator.Id, List PreOperator) -> List Function
+preOperatorOverloads ::
+  FFI.ClassName ->
+  (BinaryOperator.Id, List PreOperatorOverload) ->
+  List Function
 preOperatorOverloads className (operatorId, overloads) =
   List.map (preOperatorOverload className operatorId) overloads
 
-postOperatorOverload :: FFI.ClassName -> BinaryOperator.Id -> PostOperator -> Function
-postOperatorOverload className operatorId operator = do
+postOperatorOverload :: FFI.ClassName -> BinaryOperator.Id -> PostOperatorOverload -> Function
+postOperatorOverload className operatorId overload = do
   let selfType = FFI.Class className
-  let (rhsType, returnType) = PostOperator.signature operator
+  let (implicitArgument, rhsType, returnType) = PostOperatorOverload.signature overload
   Function
-    { ffiName = PostOperator.ffiName className operatorId operator
-    , implicitArgument = Nothing
+    { ffiName = PostOperatorOverload.ffiName className operatorId overload
+    , implicitArgument = implicitArgument
     , argumentTypes = [selfType, rhsType]
     , returnType = returnType
-    , invoke = PostOperator.invoke operator
+    , invoke = PostOperatorOverload.invoke overload
     }
 
-postOperatorOverloads :: FFI.ClassName -> (BinaryOperator.Id, List PostOperator) -> List Function
+postOperatorOverloads ::
+  FFI.ClassName ->
+  (BinaryOperator.Id, List PostOperatorOverload) ->
+  List Function
 postOperatorOverloads className (operatorId, overloads) =
   List.map (postOperatorOverload className operatorId) overloads
