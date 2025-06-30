@@ -1364,10 +1364,12 @@ model3d =
     , Class.factory2 "Group With" "Attributes" "Children" Model3d.groupWith $(docs 'Model3d.groupWith)
     , Class.member1 "With Name" "Name" Model3d.withName $(docs 'Model3d.withName)
     , Class.member1 "With PBR Material" "Material" Model3d.withPbrMaterial $(docs 'Model3d.withPbrMaterial)
+    , Class.member1 "With Opacity" "Opacity" Model3d.withOpacity $(docs 'Model3d.withOpacity)
     , Class.member1 "With Attributes" "Attributes" Model3d.withAttributes $(docs 'Model3d.withAttributes)
     , Class.nested @Model3d.Attribute $(docs ''Model3d.Attribute) []
     , Class.static1 "Name" "Name" Model3d.name $(docs 'Model3d.name)
     , Class.static1 "PBR Material" "Material" Model3d.pbrMaterial $(docs 'Model3d.pbrMaterial)
+    , Class.static1 "Opacity" "Opacity" Model3d.opacity $(docs 'Model3d.opacity)
     ]
       <> rigidTransformations3d Model3d.transformBy
 
