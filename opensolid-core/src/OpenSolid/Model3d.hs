@@ -198,10 +198,10 @@ pbrMaterial = PbrMaterial
 withPbrMaterial :: PbrMaterial -> Model3d space -> Model3d space
 withPbrMaterial value = with (pbrMaterial value)
 
--- | Create an opacity attribute.
+-- | Create an opacity attribute, where 0 is fully transparent and 1 is fully opaque.
 opacity :: Float -> Attribute
 opacity = Opacity
 
--- | Set the opacity of a model.
+-- | Set the opacity of a model, where 0 is fully transparent and 1 is fully opaque.
 withOpacity :: Float -> Model3d space -> Model3d space
 withOpacity value = with (opacity value)
