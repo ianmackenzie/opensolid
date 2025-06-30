@@ -1,9 +1,14 @@
 Overhaul handling of discontinuities
-- support discontinuities in bytecode
+- update curve and surface function types to have special cases for quotients and square roots
+- switch back to (p'q - q'p / q^2) form for quotients, so L'Hopital can be applied
+- support L'Hopital for e.g. quotients of squares (where we need to divide *second* derivatives)
+- add support for square root discontinuity in bytecode, Ast, Expression, function types
+- support square root discontinuities in bytecode
 - update Curve.sqrt' and SurfaceFunction.sqrt' to use specialized square root derivative expression
 - review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
   - get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
-- ensure all quotient implementations use (p' / q) - (p / q) * (q' / q) form, to better support L'Hopital
+
+Update API.Class.buildClass to use field accessor syntax
 
 Refactor Solve2d searching to use 'cross product' of Solve1d?
 
@@ -13,3 +18,17 @@ Add DirectionCurve2d.[rotateLeft,rotateRight] and use in Curve2d.offsetBy, Regio
 Normalize HasField instances:
 - move to top of file just under type definition
 - always match a corresponding accessor function (usually just forward to that function)
+
+Support optional named arguments in target languages
+- maybe via wrapper functions where one argument is something like an 'Options a' value,
+  wrapping a list of options/attributes in Haskell
+
+Switch Body3d.cylinderAlong to accept separate start and end values instead of a Bounds
+-> maybe Body3d.extruded, too? easier now that named arguments are supported...
+
+Refactor tolerance handling in Python?
+- set tolerances for different units separately/independently
+- convenience functions like 'Tolerance.meters(1e-9)', 'Tolerance.degrees(1e-3)', 'Tolerance.unitless(1e-12)' etc.?
+- also generic ones like 'Tolerance.length(Length.micrometers(10))' etc.
+- have default tolerances pre-configured? 1e-9 meters, radians, and unitless...
+  -> middle ground: 'Tolerance.defaults()' to set up default tolerances for everything
