@@ -56,7 +56,7 @@ with Tolerance(Length.nanometers(1)):
     ground_body = Body3d.extruded(
         world.bottom_plane,
         Region2d.rectangle(Bounds2d(ground_limits, ground_limits)),
-        LengthBounds.zero_to(Length.centimeters(1)),
+        LengthBounds(Length.millimeters(2), Length.centimeters(1)),
     )
     ground_material = PbrMaterial.nonmetal(Color.dark_charcoal, roughness=0.5)
     ground_model = (
