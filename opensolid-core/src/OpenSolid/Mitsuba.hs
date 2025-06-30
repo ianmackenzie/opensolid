@@ -301,12 +301,19 @@ bsdfNode :: PbrMaterial -> Float -> XmlNode
 bsdfNode material opacity = do
   let (r, g, b) = Color.rgbFloatComponents material.baseColor
   let rgbString = Text.join "," (List.map Text.float [r, g, b])
-  XmlNode "bsdf" [("type", "principled")] $
-    [ typedNode "rgb" "base_color" rgbString
-    , floatNode "metallic" material.metallic
-    , floatNode "roughness" material.roughness
-    , floatNode "spec_trans" (1.0 - opacity)
-    ]
+  let principledNode =
+        XmlNode "bsdf" [("type", "principled")] $
+          [ typedNode "rgb" "base_color" rgbString
+          , floatNode "metallic" material.metallic
+          , floatNode "roughness" material.roughness
+          ]
+  if opacity == 1.0
+    then principledNode
+    else
+      XmlNode "bsdf" [("type", "mask")] $
+        [ typedNode "rgb" "opacity" (Text.float opacity)
+        , XmlNode "bsdf" [("type", "twosided")] [principledNode]
+        ]
 
 cameraNode :: Camera3d (space @ Meters) -> XmlNode
 cameraNode camera = do
