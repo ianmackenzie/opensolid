@@ -1,6 +1,6 @@
 [project]
 name = "opensolid"
-version = "0.6.0"
+version = "0.7.0"
 requires-python = ">=3.12"
 authors = [{ name = "Ian Mackenzie", email = "ian.e.mackenzie@gmail.com" }]
 description = "An under-development 2D/3D CAD library"
@@ -8,7 +8,7 @@ readme = "README.rst"
 
 [project.urls]
 source = "https://github.com/ianmackenzie/opensolid"
-documentation = "https://opensolid.github.io/docs/0.6.0"
+documentation = "https://opensolid.github.io/docs/0.7.0"
 
 [build-system]
 requires = ["setuptools"]
