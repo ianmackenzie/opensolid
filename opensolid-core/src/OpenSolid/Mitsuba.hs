@@ -323,7 +323,7 @@ cameraNode camera = do
           , typedNode "integer" "height" "$height"
           ]
   let samplerNode =
-        XmlNode "sampler" [("type", "ldsampler")] $
+        XmlNode "sampler" [("type", "multijitter")] $
           [typedNode "integer" "sample_count" "$spp"]
   case camera.projection of
     Camera3d.Orthographic fovHeight -> do
