@@ -15,6 +15,7 @@ fixities:
   - infixr 2 ||
   - infixr 0 $
   # Custom operators
+  - "infix 0 :::"
   - "infixl 1 @"
   - "infix 4 ^"
   - "infix 4 ~="
