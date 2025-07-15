@@ -113,6 +113,7 @@ unspecialize ::
   a
 unspecialize = coerce
 
+{-# INLINE commute #-}
 commute ::
   ( Coercion a b
   , HasUnits a unitsA erasedA
@@ -124,6 +125,7 @@ commute ::
   b
 commute = coerce
 
+{-# INLINE leftAssociate #-}
 leftAssociate ::
   ( Coercion a b
   , HasUnits a unitsA erasedA
@@ -135,6 +137,7 @@ leftAssociate ::
   b
 leftAssociate = coerce
 
+{-# INLINE rightAssociate #-}
 rightAssociate ::
   ( Coercion a b
   , HasUnits a unitsA erasedA
