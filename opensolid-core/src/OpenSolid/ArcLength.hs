@@ -37,9 +37,11 @@ parameterization derivativeMagnitude = do
           let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
           let evaluate uValue = lookup tree (uValue * length)
           let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
-          let compiled = CompiledFunction.abstract evaluate evaluateBounds
-          let derivative self = (Curve.quotient (Curve.constant length) derivativeMagnitude) . self
-          let curve = Curve.recursive compiled derivative
+          let curve = Curve.recursive \self -> do
+                #compiled (CompiledFunction.abstract evaluate evaluateBounds)
+                #derivative ((Curve.quotient (Curve.constant length) derivativeMagnitude) . self)
+                #composeCurve (\inner -> Curve.ofCurve inner self)
+                #composeSurfaceFunction (\inner -> Curve.ofSurfaceFunction inner self)
           (curve, length)
 
 isConstant :: Tolerance units => Qty units -> Qty units -> Qty units -> Qty units -> Bool

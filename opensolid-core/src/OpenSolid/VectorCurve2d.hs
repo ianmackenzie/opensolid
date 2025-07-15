@@ -334,10 +334,11 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  lhs `dot'` rhs =
-    Curve.new
-      @ lhs.compiled `dot'` rhs.compiled
-      @ lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative
+  lhs `dot'` rhs = Curve.new do
+    #compiled (lhs.compiled `dot'` rhs.compiled)
+    #derivative (lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative)
+    #composeCurve (\inner -> (lhs . inner) `dot'` (rhs . inner))
+    #composeSurfaceFunction (\inner -> (lhs . inner) `dot'` (rhs . inner))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -398,9 +399,11 @@ instance
     (Curve (units1 :*: units2))
   where
   lhs `cross'` rhs =
-    Curve.new
-      @ lhs.compiled `cross'` rhs.compiled
-      @ lhs.derivative `cross'` rhs + lhs `cross'` rhs.derivative
+    Curve.new do
+      #compiled (lhs.compiled `cross'` rhs.compiled)
+      #derivative (lhs.derivative `cross'` rhs + lhs `cross'` rhs.derivative)
+      #composeCurve (\inner -> (lhs . inner) `cross'` (rhs . inner))
+      #composeSurfaceFunction (\inner -> (lhs . inner) `cross'` (rhs . inner))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -580,7 +583,7 @@ cubicSpline v1 v2 v3 v4 = bezierCurve (NonEmpty.four v1 v2 v3 v4)
 bezierCurve :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
 bezierCurve controlPoints =
   new
-    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints Expression.t)
     @ bezierCurve (Bezier.derivative controlPoints)
 
 synthetic ::
@@ -608,24 +611,30 @@ evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tB
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xComponent :: VectorCurve2d (space @ units) -> Curve units
 xComponent curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.xComponent
-      Vector2d.xComponent
-      VectorBounds2d.xComponent
-      curve.compiled
-    @ curve.derivative.xComponent
+  Curve.new do
+    #compiled do
+      CompiledFunction.map
+        Expression.xComponent
+        Vector2d.xComponent
+        VectorBounds2d.xComponent
+        curve.compiled
+    #derivative curve.derivative.xComponent
+    #composeCurve (\inner -> xComponent (curve . inner))
+    #composeSurfaceFunction (\inner -> VectorSurfaceFunction2d.xComponent (curve . inner))
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yComponent :: VectorCurve2d (space @ units) -> Curve units
 yComponent curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.yComponent
-      Vector2d.yComponent
-      VectorBounds2d.yComponent
-      curve.compiled
-    @ curve.derivative.yComponent
+  Curve.new do
+    #compiled do
+      CompiledFunction.map
+        Expression.yComponent
+        Vector2d.yComponent
+        VectorBounds2d.yComponent
+        curve.compiled
+    #derivative curve.derivative.yComponent
+    #composeCurve (\inner -> yComponent (curve . inner))
+    #composeSurfaceFunction (\inner -> VectorSurfaceFunction2d.yComponent (curve . inner))
 
 components :: VectorCurve2d (space @ units) -> (Curve units, Curve units)
 components curve = (xComponent curve, yComponent curve)
@@ -654,25 +663,30 @@ squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
 squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve (units :*: units)
-squaredMagnitude' curve = do
-  let compiledSquaredMagnitude =
-        CompiledFunction.map
-          Expression.VectorCurve2d.squaredMagnitude'
-          Vector2d.squaredMagnitude'
-          VectorBounds2d.squaredMagnitude'
-          curve.compiled
-  let squaredMagnitudeDerivative = 2.0 * curve `dot'` curve.derivative
-  Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
+squaredMagnitude' curve = Curve.new do
+  #compiled do
+    CompiledFunction.map
+      Expression.VectorCurve2d.squaredMagnitude'
+      Vector2d.squaredMagnitude'
+      VectorBounds2d.squaredMagnitude'
+      curve.compiled
+  #derivative (2.0 * curve `dot'` curve.derivative)
+  #composeCurve (\inner -> squaredMagnitude' (curve . inner))
+  #composeSurfaceFunction (\inner -> VectorSurfaceFunction2d.squaredMagnitude' (curve . inner))
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
-unsafeMagnitude curve =
-  Curve.recursive
-    @ CompiledFunction.map
+unsafeMagnitude curve = Curve.recursive \self -> do
+  #compiled do
+    CompiledFunction.map
       Expression.VectorCurve2d.magnitude
       Vector2d.magnitude
       VectorBounds2d.magnitude
       curve.compiled
-    @ \self -> curve.derivative `dot` (Tolerance.exactly (quotient curve self))
+  #derivative (curve.derivative `dot` (Tolerance.exactly (quotient curve self)))
+  #composeCurve (\inner -> unsafeMagnitude (curve . inner))
+  #composeSurfaceFunction do
+    \inner -> Tolerance.exactly do
+      SurfaceFunction.sqrt' (VectorSurfaceFunction2d.squaredMagnitude' (curve . inner))
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

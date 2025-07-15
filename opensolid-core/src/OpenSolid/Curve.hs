@@ -1,7 +1,9 @@
 module OpenSolid.Curve
-  ( Curve
+  ( Curve (compiled, derivative)
   , Compiled
   , Zero
+  , compiled
+  , derivative
   , isEndpoint
   , evaluate
   , evaluateBounds
@@ -26,6 +28,8 @@ module OpenSolid.Curve
   , sqrt'
   , sin
   , cos
+  , ofCurve
+  , ofSurfaceFunction
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , CrossesZero (CrossesZero)
@@ -64,6 +68,8 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
+import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
@@ -74,15 +80,21 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 data Curve units where
-  Curve :: Compiled units -> ~(Curve units) -> Curve units
+  Curve ::
+    { compiled :: Compiled units
+    , derivative :: ~(Curve units)
+    , composeCurve :: Curve Unitless -> Curve units
+    , composeSurfaceFunction :: SurfaceFunction Unitless -> SurfaceFunction units
+    } ->
+    Curve units
 
 type Compiled units = CompiledFunction Float (Qty units) (Bounds Unitless) (Bounds units)
 
-instance HasField "compiled" (Curve units) (Compiled units) where
-  getField (Curve c _) = c
+instance Units.Squared units1 units2 => HasField "squared" (Curve units1) (Curve units2) where
+  getField = squared
 
-instance HasField "derivative" (Curve units) (Curve units) where
-  getField (Curve _ d) = d
+instance HasField "squared'" (Curve units1) (Curve (units1 :*: units1)) where
+  getField = squared'
 
 instance FFI (Curve Unitless) where
   representation = FFI.classRepresentation "Curve"
@@ -99,7 +111,13 @@ instance FFI (Curve Radians) where
 instance HasUnits (Curve units) units (Curve Unitless)
 
 instance Units.Coercion (Curve units1) (Curve units2) where
-  coerce curve = Curve (Units.coerce curve.compiled) (Units.coerce curve.derivative)
+  coerce curve =
+    Curve
+      { compiled = Units.coerce curve.compiled
+      , derivative = Units.coerce curve.derivative
+      , composeCurve = Units.coerce . curve.composeCurve
+      , composeSurfaceFunction = Units.coerce . curve.composeSurfaceFunction
+      }
 
 instance
   units1 ~ units2 =>
@@ -133,15 +151,40 @@ instance
   where
   value ^ curve = curve ^ value
 
+compiled :: Curve units -> Compiled units
+compiled = (.compiled)
+
+derivative :: Curve units -> Curve units
+derivative = (.derivative)
+
 isEndpoint :: Float -> Bool
 isEndpoint tValue = tValue == 0.0 || tValue == 1.0
 
-new :: Compiled units -> Curve units -> Curve units
-new = Curve
+new ::
+  ( "compiled" ::: Compiled units
+  , "derivative" ::: Curve units
+  , "composeCurve" ::: (Curve Unitless -> Curve units)
+  , "composeSurfaceFunction" ::: (SurfaceFunction Unitless -> SurfaceFunction units)
+  ) ->
+  Curve units
+new args =
+  Curve
+    { compiled = args.compiled
+    , derivative = args.derivative
+    , composeCurve = args.composeCurve
+    , composeSurfaceFunction = args.composeSurfaceFunction
+    }
 
-recursive :: Compiled units -> (Curve units -> Curve units) -> Curve units
-recursive givenCompiled derivativeFunction =
-  let result = Curve givenCompiled (derivativeFunction result) in result
+recursive ::
+  ( Curve units ->
+    ( "compiled" ::: Compiled units
+    , "derivative" ::: Curve units
+    , "composeCurve" ::: (Curve Unitless -> Curve units)
+    , "composeSurfaceFunction" ::: (SurfaceFunction Unitless -> SurfaceFunction units)
+    )
+  ) ->
+  Curve units
+recursive callback = let result = new (callback result) in result
 
 -- | A curve equal to zero everywhere.
 zero :: Curve units
@@ -149,7 +192,11 @@ zero = constant Qty.zero
 
 -- | Create a curve with the given constant value.
 constant :: Qty units -> Curve units
-constant value = new (CompiledFunction.constant value) zero
+constant value = recursive \self -> do
+  #compiled (CompiledFunction.constant value)
+  #derivative zero
+  #composeCurve (always self)
+  #composeSurfaceFunction (always (SurfaceFunction.constant value))
 
 {-| A curve parameter.
 
@@ -158,14 +205,23 @@ When defining parametric curves, you will typically start with 'Curve.t'
 and then use arithmetic operators etc. to build up more complex curves.
 -}
 t :: Curve Unitless
-t = new (CompiledFunction.concrete Expression.t) (constant 1.0)
+t = new do
+  #compiled (CompiledFunction.concrete Expression.t)
+  #derivative (constant 1.0)
+  #composeCurve identity
+  #composeSurfaceFunction identity
 
 -- | Create a curve that linearly interpolates from the first value to the second.
 line :: Qty units -> Qty units -> Curve units
 line a b = a + t * (b - a)
 
 instance Negation (Curve units) where
-  negate curve = new (negate curve.compiled) (negate curve.derivative)
+  negate curve =
+    new do
+      #compiled (negate curve.compiled)
+      #derivative (negate curve.derivative)
+      #composeCurve (\inner -> negate (curve . inner))
+      #composeSurfaceFunction (\inner -> negate (curve . inner))
 
 instance Multiplication Sign (Curve units) (Curve units) where
   Positive * curve = curve
@@ -176,7 +232,11 @@ instance Multiplication (Curve units) Sign (Curve units) where
   curve * Negative = -curve
 
 instance units1 ~ units2 => Addition (Curve units1) (Curve units2) (Curve units1) where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
+  lhs + rhs = new do
+    #compiled (lhs.compiled + rhs.compiled)
+    #derivative (lhs.derivative + rhs.derivative)
+    #composeCurve (\inner -> lhs . inner + rhs . inner)
+    #composeSurfaceFunction (\inner -> lhs . inner + rhs . inner)
 
 instance units1 ~ units2 => Addition (Curve units1) (Qty units2) (Curve units1) where
   curve + value = curve + constant value
@@ -185,7 +245,11 @@ instance units1 ~ units2 => Addition (Qty units1) (Curve units2) (Curve units1) 
   value + curve = constant value + curve
 
 instance units1 ~ units2 => Subtraction (Curve units1) (Curve units2) (Curve units1) where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
+  lhs - rhs = new do
+    #compiled (lhs.compiled - rhs.compiled)
+    #derivative (lhs.derivative - rhs.derivative)
+    #composeCurve (\inner -> lhs . inner - rhs . inner)
+    #composeSurfaceFunction (\inner -> lhs . inner - rhs . inner)
 
 instance
   units1 ~ units2 =>
@@ -206,8 +270,11 @@ instance
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance Multiplication' (Curve units1) (Curve units2) (Curve (units1 :*: units2)) where
-  lhs .*. rhs =
-    new (lhs.compiled .*. rhs.compiled) (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
+  lhs .*. rhs = new do
+    #compiled (lhs.compiled .*. rhs.compiled)
+    #derivative (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
+    #composeCurve (\inner -> (lhs . inner) .*. (rhs . inner))
+    #composeSurfaceFunction (\inner -> (lhs . inner) .*. (rhs . inner))
 
 instance
   Units.Product units1 units2 units3 =>
@@ -284,16 +351,59 @@ instance
   vector .*. curve = VectorCurve3d.constant vector .*. curve
 
 instance Composition (Curve Unitless) (Curve units) (Curve units) where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
+  f . g = f.composeCurve g
+
+instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
+  f . g = f.composeSurfaceFunction g
+
+ofCurve :: Curve Unitless -> Curve units -> Curve units
+ofCurve inner outer = new do
+  let eval tValue = evaluate outer (evaluate inner tValue)
+  let evalBounds tRange = evaluateBounds outer (evaluateBounds inner tRange)
+  #compiled (CompiledFunction.abstract eval evalBounds)
+  #derivative ((outer.derivative . inner) * inner.derivative)
+  #composeCurve (\newInner -> ofCurve (inner . newInner) outer)
+  #composeSurfaceFunction (\newInner -> ofSurfaceFunction (inner . newInner) outer)
+
+ofSurfaceFunction :: SurfaceFunction Unitless -> Curve units -> SurfaceFunction units
+ofSurfaceFunction inner outer = do
+  let eval tValue = evaluate outer (SurfaceFunction.evaluate inner tValue)
+  let evalBounds tRange = evaluateBounds outer (SurfaceFunction.evaluateBounds inner tRange)
+  SurfaceFunction.new
+    @ CompiledFunction.abstract eval evalBounds
+    @ (\p -> (outer.derivative . inner) * SurfaceFunction.derivative p inner)
 
 reverse :: Curve units -> Curve units
 reverse curve = curve . (1.0 - t)
 
-bezier :: NonEmpty (Qty units) -> Curve units
-bezier controlPoints = do
-  let compiledBezier = CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+bezierCurve :: NonEmpty (Qty units) -> Curve Unitless -> Curve units
+bezierCurve controlPoints input = new do
+  let baseExpression = Expression.bezierCurve controlPoints Expression.t
   let derivativeControlPoints = Bezier.derivative controlPoints
-  new compiledBezier (bezier derivativeControlPoints)
+  #compiled do
+    CompiledFunction.map
+      (Expression.bezierCurve controlPoints)
+      (Expression.evaluate baseExpression)
+      (Expression.evaluateBounds baseExpression)
+      input.compiled
+  #derivative (bezierCurve derivativeControlPoints input * input.derivative)
+  #composeCurve (\inner -> bezierCurve controlPoints (input . inner))
+  #composeSurfaceFunction (\inner -> bezierSurface controlPoints (input . inner))
+
+bezierSurface :: NonEmpty (Qty units) -> SurfaceFunction Unitless -> SurfaceFunction units
+bezierSurface controlPoints input = do
+  let baseExpression = Expression.bezierCurve controlPoints Expression.t
+  let derivativeControlPoints = Bezier.derivative controlPoints
+  SurfaceFunction.new
+    @ CompiledFunction.map
+      (Expression.bezierCurve controlPoints)
+      (Expression.evaluate baseExpression)
+      (Expression.evaluateBounds baseExpression)
+      input.compiled
+    @ (\p -> bezierSurface derivativeControlPoints input * SurfaceFunction.derivative p input)
+
+bezier :: NonEmpty (Qty units) -> Curve units
+bezier controlPoints = bezierCurve controlPoints t
 
 hermite :: Qty units -> List (Qty units) -> Qty units -> List (Qty units) -> Curve units
 hermite startValue startDerivatives endValue endDerivatives =
@@ -347,10 +457,16 @@ quotient ::
 quotient lhs rhs = Units.specialize (quotient' lhs rhs)
 
 quotient' :: Tolerance units2 => Curve units1 -> Curve units2 -> Curve (units1 :/: units2)
-quotient' lhs rhs =
-  recursive
-    @ CompiledFunction.map2 Expression.quotient' (./.) (./.) lhs.compiled rhs.compiled
-    @ \self -> quotient' lhs.derivative rhs - self * (quotient rhs.derivative rhs)
+quotient' lhs rhs = new do
+  #compiled (CompiledFunction.map2 Expression.quotient' (./.) (./.) lhs.compiled rhs.compiled)
+  #derivative do
+    Units.simplify $
+      Tolerance.using Tolerance.squared' $
+        quotient'
+          @ lhs.derivative .*. rhs - lhs .*. rhs.derivative
+          @ rhs.squared'
+  #composeCurve (\inner -> quotient' (lhs . inner) (rhs . inner))
+  #composeSurfaceFunction (\inner -> SurfaceFunction.quotient' (lhs . inner) (rhs . inner))
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -366,10 +482,11 @@ squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
 squared curve = Units.specialize (squared' curve)
 
 squared' :: Curve units -> Curve (units :*: units)
-squared' curve =
-  new
-    (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' curve.compiled)
-    (2.0 * curve .*. curve.derivative)
+squared' curve = new do
+  #compiled (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' curve.compiled)
+  #derivative (2.0 * curve .*. curve.derivative)
+  #composeCurve (\inner -> squared' (curve . inner))
+  #composeSurfaceFunction (\inner -> SurfaceFunction.squared' (curve . inner))
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve units1
@@ -379,24 +496,27 @@ sqrt' :: Tolerance units => Curve (units :*: units) -> Curve units
 sqrt' curve =
   if Tolerance.using Tolerance.squared' (curve ~= Qty.zero)
     then zero
-    else
-      recursive
-        @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled
-        @ \self -> Units.coerce (quotient' curve.derivative (2.0 * self))
+    else recursive \self -> do
+      #compiled (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled)
+      #derivative (Units.coerce (quotient' curve.derivative (2.0 * self)))
+      #composeCurve (\inner -> sqrt' (curve . inner))
+      #composeSurfaceFunction (\inner -> SurfaceFunction.sqrt' (curve . inner))
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless
-sin curve =
-  new
-    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin curve.compiled)
-    (cos curve * (curve.derivative / Angle.radian))
+sin curve = new do
+  #compiled (CompiledFunction.map Expression.sin Angle.sin Bounds.sin curve.compiled)
+  #derivative (cos curve * (curve.derivative / Angle.radian))
+  #composeCurve (\inner -> sin (curve . inner))
+  #composeSurfaceFunction (\inner -> SurfaceFunction.sin (curve . inner))
 
 -- | Compute the cosine of a curve.
 cos :: Curve Radians -> Curve Unitless
-cos curve =
-  new
-    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos curve.compiled)
-    (negate (sin curve) * (curve.derivative / Angle.radian))
+cos curve = new do
+  #compiled (CompiledFunction.map Expression.cos Angle.cos Bounds.cos curve.compiled)
+  #derivative (negate (sin curve) * (curve.derivative / Angle.radian))
+  #composeCurve (\inner -> cos (curve . inner))
+  #composeSurfaceFunction (\inner -> SurfaceFunction.cos (curve . inner))
 
 integrate :: Curve units -> Estimate units
 integrate curve = Estimate.new (Integral curve curve.derivative Bounds.unitInterval)

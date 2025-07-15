@@ -1,6 +1,8 @@
 module OpenSolid.Curve
   ( Curve
   , Compiled
+  , compiled
+  , derivative
   , evaluate
   , evaluateBounds
   )
@@ -18,11 +20,9 @@ data Curve units
 
 type Compiled units = CompiledFunction Float (Qty units) (Bounds Unitless) (Bounds units)
 
-instance HasField "compiled" (Curve units) (Compiled units)
-
-instance HasField "derivative" (Curve units) (Curve units)
-
 instance FFI (Curve Unitless)
 
+compiled :: Curve units -> Compiled units
+derivative :: Curve units -> Curve units
 evaluate :: Curve units -> Float -> Qty units
 evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units

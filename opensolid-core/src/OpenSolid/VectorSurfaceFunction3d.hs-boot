@@ -4,6 +4,7 @@ module OpenSolid.VectorSurfaceFunction3d
   , new
   , constant
   , derivative
+  , squaredMagnitude'
   )
 where
 
@@ -73,6 +74,20 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ units3))
 
+instance
+  space1 ~ space2 =>
+  DotMultiplication'
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (SurfaceFunction (units1 :*: units2))
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication'
+    (VectorSurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ (units1 :*: units2)))
+
 new ::
   Compiled (space @ units) ->
   (SurfaceParameter -> VectorSurfaceFunction3d (space @ units)) ->
@@ -82,3 +97,4 @@ derivative ::
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units)
 constant :: Vector3d (space @ units) -> VectorSurfaceFunction3d (space @ units)
+squaredMagnitude' :: VectorSurfaceFunction3d (space @ units) -> SurfaceFunction (units :*: units)

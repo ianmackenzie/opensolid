@@ -13,6 +13,8 @@ module OpenSolid.VectorSurfaceFunction3d
   , transformBy
   , quotient
   , quotient'
+  , squaredMagnitude
+  , squaredMagnitude'
   )
 where
 
@@ -520,3 +522,19 @@ quotient' lhs rhs =
     @ \self p ->
       quotient' (derivative p lhs) rhs
         - self * SurfaceFunction.quotient (SurfaceFunction.derivative p rhs) rhs
+
+squaredMagnitude' :: VectorSurfaceFunction3d (space @ units) -> SurfaceFunction (units :*: units)
+squaredMagnitude' function =
+  SurfaceFunction.new
+    @ CompiledFunction.map
+      Expression.squaredMagnitude'
+      Vector3d.squaredMagnitude'
+      VectorBounds3d.squaredMagnitude'
+      function.compiled
+    @ \p -> 2.0 * function `dot'` derivative p function
+
+squaredMagnitude ::
+  Units.Squared units1 units2 =>
+  VectorSurfaceFunction3d (space @ units1) ->
+  SurfaceFunction units2
+squaredMagnitude = Units.specialize . squaredMagnitude'

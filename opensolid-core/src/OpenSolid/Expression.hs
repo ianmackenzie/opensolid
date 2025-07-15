@@ -1570,24 +1570,37 @@ instance
   projectInto plane (Surface3d ast _) = surface2d (Ast.projectPoint3dInto plane ast)
 
 class BezierCurve output where
-  bezierCurve :: NonEmpty output -> Expression Float output
+  bezierCurve :: NonEmpty output -> Expression input Float -> Expression input output
 
 instance BezierCurve (Qty units) where
-  bezierCurve controlPoints = curve1d (Ast.bezierCurve1d controlPoints Ast.curveParameter)
+  bezierCurve controlPoints (Curve1d input _) =
+    curve1d (Ast.bezierCurve1d controlPoints input)
+  bezierCurve controlPoints (Surface1d input _) =
+    surface1d (Ast.bezierCurve1d controlPoints input)
 
 instance BezierCurve (Vector2d (space @ units)) where
-  bezierCurve controlPoints = vectorCurve2d (Ast.bezierCurve2d controlPoints Ast.curveParameter)
+  bezierCurve controlPoints (Curve1d input _) =
+    vectorCurve2d (Ast.bezierCurve2d controlPoints input)
+  bezierCurve controlPoints (Surface1d input _) =
+    vectorSurface2d (Ast.bezierCurve2d controlPoints input)
 
 instance BezierCurve (Point2d (space @ units)) where
-  bezierCurve controlPoints =
-    curve2d (Ast.bezierCurve2d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
+  bezierCurve controlPoints (Curve1d input _) =
+    curve2d (Ast.bezierCurve2d (Data.Coerce.coerce controlPoints) input)
+  bezierCurve controlPoints (Surface1d input _) =
+    surface2d (Ast.bezierCurve2d (Data.Coerce.coerce controlPoints) input)
 
 instance BezierCurve (Vector3d (space @ units)) where
-  bezierCurve controlPoints = vectorCurve3d (Ast.bezierCurve3d controlPoints Ast.curveParameter)
+  bezierCurve controlPoints (Curve1d input _) =
+    vectorCurve3d (Ast.bezierCurve3d controlPoints input)
+  bezierCurve controlPoints (Surface1d input _) =
+    vectorSurface3d (Ast.bezierCurve3d controlPoints input)
 
 instance BezierCurve (Point3d (space @ units)) where
-  bezierCurve controlPoints =
-    curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
+  bezierCurve controlPoints (Curve1d input _) =
+    curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints) input)
+  bezierCurve controlPoints (Surface1d input _) =
+    surface3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints) input)
 
 -----------------
 --- COMPILING ---

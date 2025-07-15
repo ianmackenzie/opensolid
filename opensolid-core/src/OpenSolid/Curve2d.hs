@@ -291,7 +291,11 @@ instance
   where
   f . g = do
     let (dudt, dvdt) = g.derivative.components
-    Curve.new (f.compiled . g.compiled) (f.du . g * dudt + f.dv . g * dvdt)
+    Curve.new do
+      #compiled (f.compiled . g.compiled)
+      #derivative (f.du . g * dudt + f.dv . g * dvdt)
+      #composeCurve (\inner -> f . (g . inner))
+      #composeSurfaceFunction (\inner -> f . (g . inner))
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -518,7 +522,7 @@ will return a cubic Bezier curve with the given four control points.
 bezier :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
 bezier controlPoints =
   new
-    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints Expression.t)
     @ VectorCurve2d.bezierCurve (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
@@ -646,24 +650,30 @@ isOnAxis axis curve = List.allSatisfy (^ axis) (samplePoints curve)
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
 xCoordinate curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.xCoordinate
-      Point2d.xCoordinate
-      Bounds2d.xCoordinate
-      curve.compiled
-    @ curve.derivative.xComponent
+  Curve.new do
+    #compiled do
+      CompiledFunction.map
+        Expression.xCoordinate
+        Point2d.xCoordinate
+        Bounds2d.xCoordinate
+        curve.compiled
+    #derivative curve.derivative.xComponent
+    #composeCurve (\inner -> xCoordinate (curve . inner))
+    #composeSurfaceFunction (\inner -> SurfaceFunction2d.xCoordinate (curve . inner))
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yCoordinate :: Curve2d (space @ units) -> Curve units
 yCoordinate curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.yCoordinate
-      Point2d.yCoordinate
-      Bounds2d.yCoordinate
-      curve.compiled
-    @ curve.derivative.yComponent
+  Curve.new do
+    #compiled do
+      CompiledFunction.map
+        Expression.yCoordinate
+        Point2d.yCoordinate
+        Bounds2d.yCoordinate
+        curve.compiled
+    #derivative curve.derivative.yComponent
+    #composeCurve (\inner -> yCoordinate (curve . inner))
+    #composeSurfaceFunction (\inner -> SurfaceFunction2d.yCoordinate (curve . inner))
 
 coordinates :: Curve2d (space @ units) -> (Curve units, Curve units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)

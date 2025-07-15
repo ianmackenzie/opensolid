@@ -23,7 +23,7 @@ main = IO.do
     IO.printLine (Text.float evaluated)
 
   IO.printLine "Bezier curve"
-  let bezier = Expression.bezierCurve (NonEmpty.eight 0.0 0.5 1.0 1.0 1.0 1.0 0.5 0.0)
+  let bezier = Expression.bezierCurve (NonEmpty.eight 0.0 0.5 1.0 1.0 1.0 1.0 0.5 0.0) Expression.t
   IO.forEach (Parameter.steps 10) \tValue -> IO.do
     let evaluated = Expression.evaluate bezier tValue
     IO.printLine (Text.float evaluated)

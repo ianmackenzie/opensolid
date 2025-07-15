@@ -305,10 +305,11 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve (units1 :*: units2))
   where
-  lhs `dot'` rhs =
-    Curve.new
-      (lhs.compiled `dot'` rhs.compiled)
-      (lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative)
+  lhs `dot'` rhs = Curve.new do
+    #compiled (lhs.compiled `dot'` rhs.compiled)
+    #derivative (lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative)
+    #composeCurve (\inner -> (lhs . inner) `dot'` (rhs . inner))
+    #composeSurfaceFunction (\inner -> (lhs . inner) `dot'` (rhs . inner))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -528,7 +529,7 @@ cubicSpline v1 v2 v3 v4 = bezierCurve (NonEmpty.four v1 v2 v3 v4)
 bezierCurve :: NonEmpty (Vector3d (space @ units)) -> VectorCurve3d (space @ units)
 bezierCurve controlPoints =
   new
-    (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
+    (CompiledFunction.concrete (Expression.bezierCurve controlPoints Expression.t))
     (bezierCurve (Bezier.derivative controlPoints))
 
 startValue :: VectorCurve3d (space @ units) -> Vector3d (space @ units)
@@ -567,26 +568,31 @@ squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
 squaredMagnitude' :: VectorCurve3d (space @ units) -> Curve (units :*: units)
-squaredMagnitude' curve = do
-  let compiledSquaredMagnitude =
-        CompiledFunction.map
-          Expression.VectorCurve3d.squaredMagnitude'
-          Vector3d.squaredMagnitude'
-          VectorBounds3d.squaredMagnitude'
-          curve.compiled
-  let squaredMagnitudeDerivative = 2.0 * curve `dot'` curve.derivative
-  Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
+squaredMagnitude' curve = Curve.new do
+  #compiled do
+    CompiledFunction.map
+      Expression.VectorCurve3d.squaredMagnitude'
+      Vector3d.squaredMagnitude'
+      VectorBounds3d.squaredMagnitude'
+      curve.compiled
+  #derivative (2.0 * curve `dot'` curve.derivative)
+  #composeCurve (\inner -> squaredMagnitude' (curve . inner))
+  #composeSurfaceFunction (\inner -> VectorSurfaceFunction3d.squaredMagnitude' (curve . inner))
 
 unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
-unsafeMagnitude curve = do
-  let compiledMagnitude =
-        CompiledFunction.map
-          Expression.VectorCurve3d.magnitude
-          Vector3d.magnitude
-          VectorBounds3d.magnitude
-          curve.compiled
-  let magnitudeDerivative self = curve.derivative `dot` (Tolerance.exactly (quotient curve self))
-  Curve.recursive compiledMagnitude magnitudeDerivative
+unsafeMagnitude curve = Curve.recursive \self -> do
+  #compiled do
+    CompiledFunction.map
+      Expression.VectorCurve3d.magnitude
+      Vector3d.magnitude
+      VectorBounds3d.magnitude
+      curve.compiled
+  #derivative (curve.derivative `dot` (Tolerance.exactly (quotient curve self)))
+  #composeCurve (\inner -> unsafeMagnitude (curve . inner))
+  #composeSurfaceFunction do
+    \inner ->
+      Tolerance.exactly do
+        SurfaceFunction.sqrt' (VectorSurfaceFunction3d.squaredMagnitude' (curve . inner))
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

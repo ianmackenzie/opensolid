@@ -32,8 +32,6 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Composition
-import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction3d (Direction3d)
@@ -60,6 +58,8 @@ import OpenSolid.SurfaceFunction.Subproblem (CornerValues (..), Subproblem (..))
 import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
@@ -346,11 +346,20 @@ instance
   where
   function ./. value = Units.simplify (function .*. (1.0 ./. value))
 
-instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
-  curve . function =
+instance
+  Composition
+    (SurfaceFunction2d UvCoordinates)
+    (SurfaceFunction units)
+    (SurfaceFunction units)
+  where
+  f . g = do
+    let dfdu = f.du . g
+    let dfdv = f.dv . g
     new
-      @ curve.compiled . function.compiled
-      @ \p -> curve.derivative . function * derivative p function
+      @ f.compiled . g.compiled
+      @ \p -> do
+        let (dudp, dvdp) = VectorSurfaceFunction2d.components (SurfaceFunction2d.derivative p g)
+        dfdu * dudp + dfdv * dvdp
 
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint

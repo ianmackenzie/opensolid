@@ -192,7 +192,7 @@ will return a cubic Bezier curve with the given four control points.
 bezier :: NonEmpty (Point3d (space @ units)) -> Curve3d (space @ units)
 bezier controlPoints =
   new
-    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints Expression.t)
     @ VectorCurve3d.bezierCurve (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
