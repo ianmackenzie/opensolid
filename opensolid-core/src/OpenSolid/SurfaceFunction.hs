@@ -344,7 +344,7 @@ instance
     (Qty units2)
     (SurfaceFunction (units1 :/: units2))
   where
-  function ./. value = function ^*. (1.0 ./. value)
+  function ./. value = Units.simplify (function .*. (1.0 ./. value))
 
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
   curve . function =

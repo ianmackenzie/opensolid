@@ -267,10 +267,10 @@ on ::
 on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vx vy) = vx * i + vy * j
 
 convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
-convert factor vector = vector !* factor
+convert factor vector = Units.simplify (vector .*. factor)
 
 unconvert :: Qty (units2 :/: units1) -> Vector2d (space @ units2) -> Vector2d (space @ units1)
-unconvert factor vector = vector !/ factor
+unconvert factor vector = Units.simplify (vector ./. factor)
 
 sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)
 sum = List.foldl (+) zero

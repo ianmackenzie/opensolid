@@ -192,10 +192,10 @@ sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
 sum = List.foldl (+) zero
 
 convert :: Qty (units2 :/: units1) -> Vector3d (space @ units1) -> Vector3d (space @ units2)
-convert factor vector = vector !* factor
+convert factor vector = Units.simplify (vector .*. factor)
 
 unconvert :: Qty (units2 :/: units1) -> Vector3d (space @ units2) -> Vector3d (space @ units1)
-unconvert factor vector = vector !/ factor
+unconvert factor vector = Units.simplify (vector ./. factor)
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

@@ -663,7 +663,7 @@ sampleValues :: Bounds units -> List (Qty units)
 sampleValues bounds = List.map (interpolate bounds) Parameter.samples
 
 convert :: Qty (units2 :/: units1) -> Bounds units1 -> Bounds units2
-convert factor bounds = bounds !* factor
+convert factor bounds = Units.simplify (bounds .*. factor)
 
 unconvert :: Qty (units2 :/: units1) -> Bounds units2 -> Bounds units1
-unconvert factor bounds = bounds !/ factor
+unconvert factor bounds = Units.simplify (bounds ./. factor)

@@ -277,10 +277,10 @@ sumOf :: (a -> Qty units) -> List a -> Qty units
 sumOf f list = sum (List.map f list)
 
 convert :: Qty (units2 :/: units1) -> Qty units1 -> Qty units2
-convert factor value = value !* factor
+convert factor value = Units.simplify (value .*. factor)
 
 unconvert :: Qty (units2 :/: units1) -> Qty units2 -> Qty units1
-unconvert factor value = value !/ factor
+unconvert factor value = Units.simplify (value ./. factor)
 
 random :: Qty units -> Qty units -> Random.Generator (Qty units)
 random (Qty low) (Qty high) =

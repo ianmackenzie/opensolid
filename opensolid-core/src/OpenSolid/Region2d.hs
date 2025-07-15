@@ -556,7 +556,7 @@ unconvert ::
   Qty (units2 :/: units1) ->
   Region2d (space @ units2) ->
   Region2d (space @ units1)
-unconvert factor region = convert (1.0 /% factor) region
+unconvert factor region = convert (Units.simplify (1.0 ./. factor)) region
 
 contains :: Tolerance units => Point2d (space @ units) -> Region2d (space @ units) -> Bool
 contains point region =
