@@ -359,7 +359,7 @@ instance
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance Division' (Curve units1) (Qty units2) (Curve (units1 :/: units2)) where
-  curve ./. value = curve ^*. (1.0 ./. value)
+  curve ./. value = Units.simplify (curve .*. (1.0 ./. value))
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2

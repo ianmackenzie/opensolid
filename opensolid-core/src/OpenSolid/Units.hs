@@ -10,6 +10,8 @@ module OpenSolid.Units
   , commute
   , leftAssociate
   , rightAssociate
+  , simplify
+  , Simplification
   , Product
   , Squared
   , Quotient
@@ -143,6 +145,35 @@ rightAssociate ::
   a ->
   b
 rightAssociate = coerce
+
+{-# INLINE simplify #-}
+simplify ::
+  ( Coercion a b
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , Simplification unitsA unitsB
+  ) =>
+  a ->
+  b
+simplify = coerce
+
+class Simplification units1 units2
+
+instance Simplification ((units1 :/: units2) :*: units2) units1
+
+instance Simplification (units2 :*: (units1 :/: units2)) units1
+
+instance Simplification ((units1 :*: units3) :/: (units2 :*: units3)) (units1 :/: units2)
+
+instance Simplification (units1 :*: (Unitless :/: units2)) (units1 :/: units2)
+
+instance Simplification ((Unitless :/: units2) :*: units1) (units1 :/: units2)
+
+instance Simplification (Unitless :/: (units1 :/: units2)) (units2 :/: units1)
+
+instance Simplification ((units1 :*: units2) :/: units2) units1
+
+instance Simplification (units1 :/: (units1 :/: units2)) units2
 
 data Radians deriving (Eq, Show)
 

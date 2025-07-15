@@ -308,7 +308,7 @@ instance
     (Qty units2)
     (VectorCurve2d (space @ (units1 :/: units2)))
   where
-  curve ./. value = curve ^*. (1.0 ./. value)
+  curve ./. value = Units.simplify (curve .*. (1.0 ./. value))
 
 instance
   Multiplication'
@@ -747,10 +747,10 @@ convert ::
   Qty (units2 :/: units1) ->
   VectorCurve2d (space @ units1) ->
   VectorCurve2d (space @ units2)
-convert factor curve = curve !* factor
+convert factor curve = Units.simplify (curve .*. factor)
 
 unconvert ::
   Qty (units2 :/: units1) ->
   VectorCurve2d (space @ units2) ->
   VectorCurve2d (space @ units1)
-unconvert factor curve = curve !/ factor
+unconvert factor curve = Units.simplify (curve ./. factor)

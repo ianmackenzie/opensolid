@@ -210,7 +210,7 @@ instance
   value * estimate = exact value * estimate
 
 instance Division' (Estimate units1) (Qty units2) (Estimate (units1 :/: units2)) where
-  estimate ./. value = estimate ^*. (1.0 ./. value)
+  estimate ./. value = Units.simplify (estimate .*. (1.0 ./. value))
 
 instance
   Units.Quotient units1 units2 units3 =>

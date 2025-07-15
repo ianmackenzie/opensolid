@@ -18,6 +18,7 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
@@ -93,4 +94,4 @@ distanceTo p0 segment = do
   if
     | dotProduct' <= Qty.zero -> Point2d.distanceFrom p1 p0
     | dotProduct' >= dSquared' -> Point2d.distanceFrom p2 p0
-    | otherwise -> Qty.abs (u `cross'` v .!/! Qty.sqrt' dSquared')
+    | otherwise -> Qty.abs (Units.simplify (u `cross'` v ./. Qty.sqrt' dSquared'))

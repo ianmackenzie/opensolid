@@ -4,6 +4,10 @@ module OpenSolid.VectorSurfaceFunction2d
   , new
   , constant
   , derivative
+  , xComponent
+  , yComponent
+  , components
+  , squaredMagnitude'
   )
 where
 
@@ -43,7 +47,9 @@ instance
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (VectorSurfaceFunction2d (space1 @ units1)) (VectorSurfaceFunction2d (space2 @ units2))
+  Units.Coercion
+    (VectorSurfaceFunction2d (space1 @ units1))
+    (VectorSurfaceFunction2d (space2 @ units2))
 
 instance
   Units.Product units1 units2 units3 =>
@@ -70,6 +76,20 @@ instance
     (VectorSurfaceFunction2d (space @ units1))
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
+
+instance
+  space1 ~ space2 =>
+  DotMultiplication'
+    (VectorSurfaceFunction2d (space1 @ units1))
+    (VectorSurfaceFunction2d (space2 @ units2))
+    (SurfaceFunction (units1 :*: units2))
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication'
+    (VectorSurfaceFunction2d (space1 @ units1))
+    (VectorSurfaceFunction2d (space2 @ units2))
+    (SurfaceFunction (units1 :*: units2))
 
 new ::
   Compiled (space @ units) ->
@@ -80,3 +100,9 @@ derivative ::
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units)
 constant :: Vector2d (space @ units) -> VectorSurfaceFunction2d (space @ units)
+xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
+yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
+components ::
+  VectorSurfaceFunction2d (space @ units) ->
+  (SurfaceFunction units, SurfaceFunction units)
+squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units :*: units)

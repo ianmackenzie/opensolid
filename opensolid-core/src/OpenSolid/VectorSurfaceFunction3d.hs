@@ -268,7 +268,7 @@ instance
     (Qty units2)
     (VectorSurfaceFunction3d (space @ (units1 :/: units2)))
   where
-  function ./. value = function ^*. (1.0 ./. value)
+  function ./. value = Units.simplify (function .*. (1.0 ./. value))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>

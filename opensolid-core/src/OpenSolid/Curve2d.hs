@@ -943,7 +943,7 @@ unconvert ::
   Qty (units2 :/: units1) ->
   Curve2d (space @ units2) ->
   Curve2d (space @ units1)
-unconvert factor curve = convert (1.0 /% factor) curve
+unconvert factor curve = convert (Units.simplify (1.0 ./. factor)) curve
 
 curvature' ::
   Tolerance units =>
