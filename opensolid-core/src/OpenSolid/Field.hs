@@ -7,6 +7,8 @@ import OpenSolid.Composition
 type (:::) :: Symbol -> Type -> Type
 newtype name ::: a = Field a
 
+infix 0 :::
+
 fromLabel :: forall name a. a -> name ::: a
 fromLabel = Field
 
