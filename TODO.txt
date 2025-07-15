@@ -1,4 +1,5 @@
 Overhaul handling of discontinuities
+- require curves/functions to implement composition directly, then remove Composition from Expression and Ast types
 - update curve and surface function types to have special cases for quotients and square roots
 - switch back to (p'q - q'p / q^2) form for quotients, so L'Hopital can be applied
 - support L'Hopital for e.g. quotients of squares (where we need to divide *second* derivatives)
