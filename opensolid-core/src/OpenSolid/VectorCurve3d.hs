@@ -103,7 +103,7 @@ instance
   where
   getField = squaredMagnitude'
 
-instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
+instance HasUnits (VectorCurve3d (space @ units)) units
 
 instance
   space1 ~ space2 =>

@@ -184,7 +184,7 @@ instance FFI (Curve2d (space @ Meters)) where
 instance FFI (Curve2d (space @ Unitless)) where
   representation = FFI.classRepresentation "UvCurve"
 
-instance HasUnits (Curve2d (space @ units)) units (Curve2d (space @ Unitless))
+instance HasUnits (Curve2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

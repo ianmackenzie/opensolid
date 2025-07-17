@@ -67,7 +67,7 @@ type Compiled coordinateSystem =
     UvBounds
     (Bounds3d coordinateSystem)
 
-instance HasUnits (SurfaceFunction3d (space @ units)) units (SurfaceFunction3d (space @ Unitless))
+instance HasUnits (SurfaceFunction3d (space @ units)) units
 
 instance
   space1 ~ space2 =>

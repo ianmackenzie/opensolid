@@ -39,11 +39,7 @@ instance
     (VectorSurfaceFunction2d (space @ units))
     (Compiled (space @ units))
 
-instance
-  HasUnits
-    (VectorSurfaceFunction2d (space @ units))
-    units
-    (VectorSurfaceFunction2d (space @ Unitless))
+instance HasUnits (VectorSurfaceFunction2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

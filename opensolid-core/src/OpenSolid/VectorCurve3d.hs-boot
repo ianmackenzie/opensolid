@@ -39,7 +39,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Bounds Unitless)
     (VectorBounds3d coordinateSystem)
 
-instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
+instance HasUnits (VectorCurve3d (space @ units)) units
 
 instance Negation (VectorCurve3d (space @ units))
 

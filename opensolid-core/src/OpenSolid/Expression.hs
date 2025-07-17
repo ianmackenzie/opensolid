@@ -167,35 +167,15 @@ debug expression = case expression of
 --- UNITS ---
 -------------
 
-instance
-  HasUnits
-    (Expression input (Qty units))
-    units
-    (Expression input (Qty Unitless))
+instance HasUnits (Expression input (Qty units)) units
 
-instance
-  HasUnits
-    (Expression input (Vector2d (space @ units)))
-    units
-    (Expression input (Vector2d (space @ Unitless)))
+instance HasUnits (Expression input (Vector2d (space @ units))) units
 
-instance
-  HasUnits
-    (Expression input (Vector3d (space @ units)))
-    units
-    (Expression input (Vector3d (space @ Unitless)))
+instance HasUnits (Expression input (Vector3d (space @ units))) units
 
-instance
-  HasUnits
-    (Expression input (Point2d (space @ units)))
-    units
-    (Expression input (Point2d (space @ Unitless)))
+instance HasUnits (Expression input (Point2d (space @ units))) units
 
-instance
-  HasUnits
-    (Expression input (Point3d (space @ units)))
-    units
-    (Expression input (Point3d (space @ Unitless)))
+instance HasUnits (Expression input (Point3d (space @ units))) units
 
 instance
   input1 ~ input2 =>

@@ -53,7 +53,7 @@ data Estimate units where
 instance HasField "bounds" (Estimate units) (Bounds units) where
   getField = bounds
 
-instance HasUnits (Estimate units) units (Estimate Unitless)
+instance HasUnits (Estimate units) units
 
 instance Units.Coercion (Estimate unitsA) (Estimate unitsB) where
   coerce (Coerce estimate) = Coerce estimate

@@ -96,11 +96,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     UvBounds
     (VectorBounds2d coordinateSystem)
 
-instance
-  HasUnits
-    (VectorSurfaceFunction2d (space @ units))
-    units
-    (VectorSurfaceFunction2d (space @ Unitless))
+instance HasUnits (VectorSurfaceFunction2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

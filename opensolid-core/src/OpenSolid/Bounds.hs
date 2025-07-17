@@ -131,7 +131,7 @@ instance FFI (Bounds Meters) where
 instance FFI (Bounds SquareMeters) where
   representation = FFI.classRepresentation "AreaBounds"
 
-instance HasUnits (Bounds units) units (Bounds Unitless)
+instance HasUnits (Bounds units) units
 
 instance Units.Coercion (Bounds unitsA) (Bounds unitsB) where
   coerce = Data.Coerce.coerce
