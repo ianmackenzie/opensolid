@@ -3,8 +3,9 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module OpenSolid.SurfaceFunction
-  ( SurfaceFunction
+  ( SurfaceFunction (compiled, du, dv)
   , Compiled
+  , compiled
   , evaluate
   , evaluateBounds
   , derivative
@@ -18,6 +19,9 @@ module OpenSolid.SurfaceFunction
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , new
+  , recursive
+  , ofCurve
+  , ofSurfaceFunction
   , quotient
   , quotient'
   , squared
@@ -34,8 +38,10 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
+import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
+import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction3d (Direction3d)
@@ -44,7 +50,8 @@ import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Functions (SurfaceFunction (..))
+import OpenSolid.Functions (SurfaceFunction (..), SurfaceFunctionCompiled)
+import OpenSolid.Functions qualified as Functions
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.List qualified as List
@@ -81,13 +88,7 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfa
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
-instance HasField "du" (SurfaceFunction units) (SurfaceFunction units) where
-  getField (SurfaceFunction _ du _) = du
-
-instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units) where
-  getField (SurfaceFunction _ _ dv) = dv
-
-type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
+type Compiled units = SurfaceFunctionCompiled units
 
 instance
   units1 ~ units2 =>
@@ -122,107 +123,6 @@ instance
   Intersects (Qty units1) (SurfaceFunction units2) units1
   where
   value ^ function = function ^ value
-
-instance Negation (SurfaceFunction units) where
-  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
-
-instance Multiplication Sign (SurfaceFunction units) (SurfaceFunction units) where
-  Positive * function = function
-  Negative * function = -function
-
-instance Multiplication (SurfaceFunction units) Sign (SurfaceFunction units) where
-  function * Positive = function
-  function * Negative = -function
-
-instance
-  units1 ~ units2 =>
-  Addition
-    (SurfaceFunction units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction units1)
-  where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
-
-instance
-  units1 ~ units2 =>
-  Addition
-    (SurfaceFunction units1)
-    (Qty units2)
-    (SurfaceFunction units1)
-  where
-  function + value = function + constant value
-
-instance
-  units1 ~ units2 =>
-  Addition
-    (Qty units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction units1)
-  where
-  value + function = constant value + function
-
-instance
-  units1 ~ units2 =>
-  Subtraction (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units1)
-  where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
-
-instance
-  units1 ~ units2 =>
-  Subtraction (SurfaceFunction units1) (Qty units2) (SurfaceFunction units1)
-  where
-  function - value = function - constant value
-
-instance
-  units1 ~ units2 =>
-  Subtraction (Qty units1) (SurfaceFunction units2) (SurfaceFunction units1)
-  where
-  value - function = constant value - function
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units3)
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (SurfaceFunction units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction (units1 :*: units2))
-  where
-  lhs .*. rhs =
-    new
-      @ lhs.compiled .*. rhs.compiled
-      @ \p -> derivative p lhs .*. rhs + lhs .*. derivative p rhs
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (SurfaceFunction units1) (Qty units2) (SurfaceFunction units3)
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (SurfaceFunction units1)
-    (Qty units2)
-    (SurfaceFunction (units1 :*: units2))
-  where
-  function .*. value = function .*. constant value
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (SurfaceFunction units2) (SurfaceFunction units3)
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Qty units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction (units1 :*: units2))
-  where
-  value .*. function = constant value .*. function
 
 instance
   Units.Product units1 units2 units3 =>
@@ -338,69 +238,79 @@ instance
   where
   function ./. value = Units.simplify (function .*. (1.0 ./. value))
 
-instance
-  Composition
-    (SurfaceFunction2d UvCoordinates)
-    (SurfaceFunction units)
-    (SurfaceFunction units)
-  where
-  f . g = do
-    let dfdu = f.du . g
-    let dfdv = f.dv . g
-    new
-      @ f.compiled . g.compiled
-      @ \p -> do
-        let (dudp, dvdp) = VectorSurfaceFunction2d.components (SurfaceFunction2d.derivative p g)
-        dfdu * dudp + dfdv * dvdp
-
+{-# INLINE evaluate #-}
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
-evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
+evaluate = Functions.surfaceFunctionEvaluate
 
+{-# INLINE evaluateBounds #-}
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
+evaluateBounds = Functions.surfaceFunctionEvaluateBounds
 
-instance HasField "compiled" (SurfaceFunction units) (Compiled units) where
-  getField (SurfaceFunction c _ _) = c
+compiled :: SurfaceFunction units -> Compiled units
+compiled = (.compiled)
 
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
-derivative U = (.du)
-derivative V = (.dv)
+derivative = Functions.surfaceFunctionDerivative
 
 derivativeIn :: Direction2d UvSpace -> SurfaceFunction units -> SurfaceFunction units
 derivativeIn direction function =
   direction.xComponent * function.du + direction.yComponent * function.dv
 
 zero :: SurfaceFunction units
-zero = constant Qty.zero
+zero = Functions.surfaceFunctionZero
 
 one :: SurfaceFunction Unitless
 one = constant 1.0
 
 constant :: Qty units -> SurfaceFunction units
-constant value = new (CompiledFunction.constant value) (always zero)
+constant = Functions.surfaceFunctionConstant
 
 u :: SurfaceFunction Unitless
-u = new (CompiledFunction.concrete Expression.u) (\case U -> one; V -> zero)
+u = new do
+  #compiled (CompiledFunction.concrete Expression.u)
+  #derivative (\case U -> one; V -> zero)
+  #composeCurve Curve2d.xCoordinate
+  #composeSurfaceFunction SurfaceFunction2d.xCoordinate
 
 v :: SurfaceFunction Unitless
-v = new (CompiledFunction.concrete Expression.v) (\case U -> zero; V -> one)
+v = new do
+  #compiled (CompiledFunction.concrete Expression.v)
+  #derivative (\case U -> zero; V -> one)
+  #composeCurve Curve2d.yCoordinate
+  #composeSurfaceFunction SurfaceFunction2d.yCoordinate
 
 parameter :: SurfaceParameter -> SurfaceFunction Unitless
 parameter U = u
 parameter V = v
 
-new :: Compiled units -> (SurfaceParameter -> SurfaceFunction units) -> SurfaceFunction units
-new c derivativeFunction = do
-  let du = derivativeFunction U
-  let dv = derivativeFunction V
-  SurfaceFunction c du (SurfaceFunction dv.compiled du.dv dv.dv)
+new ::
+  ( "compiled" ::: Compiled units
+  , "derivative" ::: (SurfaceParameter -> SurfaceFunction units)
+  , "composeCurve" ::: (Curve2d UvCoordinates -> Curve units)
+  , "composeSurfaceFunction" ::: (SurfaceFunction2d UvCoordinates -> SurfaceFunction units)
+  ) ->
+  SurfaceFunction units
+new = Functions.surfaceFunctionNew
 
 recursive ::
-  Compiled units ->
-  (SurfaceFunction units -> SurfaceParameter -> SurfaceFunction units) ->
+  ( SurfaceFunction units ->
+    ( "compiled" ::: Compiled units
+    , "derivative" ::: (SurfaceParameter -> SurfaceFunction units)
+    , "composeCurve" ::: (Curve2d UvCoordinates -> Curve units)
+    , "composeSurfaceFunction" ::: (SurfaceFunction2d UvCoordinates -> SurfaceFunction units)
+    )
+  ) ->
   SurfaceFunction units
-recursive givenCompiled derivativeFunction =
-  let self = new givenCompiled (derivativeFunction self) in self
+recursive = Functions.surfaceFunctionRecursive
+
+ofCurve :: Curve2d UvCoordinates -> SurfaceFunction units -> Curve units
+ofCurve = Functions.surfaceFunctionOfCurve
+
+ofSurfaceFunction ::
+  SurfaceFunction2d UvCoordinates ->
+  SurfaceFunction units ->
+  SurfaceFunction units
+ofSurfaceFunction = Functions.surfaceFunctionOfSurfaceFunction
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
@@ -414,19 +324,26 @@ quotient' ::
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   SurfaceFunction (units1 :/: units2)
-quotient' lhs rhs =
-  recursive
-    @ CompiledFunction.map2 Expression.quotient' (./.) (./.) lhs.compiled rhs.compiled
-    @ \self p -> quotient' (derivative p lhs) rhs - self * quotient (derivative p rhs) rhs
+quotient' lhs rhs = new do
+  #compiled (CompiledFunction.map2 Expression.quotient' (./.) (./.) lhs.compiled rhs.compiled)
+  #derivative do
+    \p -> Units.simplify do
+      Tolerance.using Tolerance.squared' do
+        quotient'
+          @ derivative p lhs .*. rhs - lhs .*. derivative p rhs
+          @ squared' rhs
+  #composeCurve (\inner -> Curve.quotient' (lhs . inner) (rhs . inner))
+  #composeSurfaceFunction (\inner -> quotient' (lhs . inner) (rhs . inner))
 
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared function = Units.specialize (squared' function)
 
 squared' :: SurfaceFunction units -> SurfaceFunction (units :*: units)
-squared' function =
-  new
-    @ CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' function.compiled
-    @ \p -> 2.0 * function .*. derivative p function
+squared' f = new do
+  #compiled (CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' f.compiled)
+  #derivative (\p -> 2.0 * f .*. derivative p f)
+  #composeCurve (\g -> Curve.squared' (f . g))
+  #composeSurfaceFunction (\g -> squared' (f . g))
 
 sqrt ::
   (Tolerance units1, Units.Squared units1 units2) =>
@@ -435,25 +352,28 @@ sqrt ::
 sqrt function = sqrt' (Units.unspecialize function)
 
 sqrt' :: Tolerance units => SurfaceFunction (units :*: units) -> SurfaceFunction units
-sqrt' function =
-  if Tolerance.using Tolerance.squared' (function ~= Qty.zero)
+sqrt' f =
+  if Tolerance.using Tolerance.squared' (f ~= Qty.zero)
     then zero
-    else
-      recursive
-        @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled
-        @ \self p -> Units.coerce (quotient' (derivative p function) (2.0 * self))
+    else recursive \self -> do
+      #compiled (CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' f.compiled)
+      #derivative (\p -> Units.coerce (quotient' (derivative p f) (2.0 * self)))
+      #composeCurve (\g -> Curve.sqrt' (f . g))
+      #composeSurfaceFunction (\g -> sqrt' (f . g))
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
-sin function =
-  new
-    @ CompiledFunction.map Expression.sin Angle.sin Bounds.sin function.compiled
-    @ \p -> cos function * (derivative p function / Angle.radian)
+sin f = new do
+  #compiled (CompiledFunction.map Expression.sin Angle.sin Bounds.sin f.compiled)
+  #derivative (\p -> cos f * (derivative p f / Angle.radian))
+  #composeCurve (\g -> Curve.sin (f . g))
+  #composeSurfaceFunction (\g -> sin (f . g))
 
 cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
-cos function =
-  new
-    @ CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled
-    @ \p -> negate (sin function) * (derivative p function / Angle.radian)
+cos f = new do
+  #compiled (CompiledFunction.map Expression.cos Angle.cos Bounds.cos f.compiled)
+  #derivative (\p -> negate (sin f) * (derivative p f / Angle.radian))
+  #composeCurve (\g -> Curve.cos (f . g))
+  #composeSurfaceFunction (\g -> cos (f . g))
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
 

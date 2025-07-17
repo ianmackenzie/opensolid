@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module OpenSolid.Curve2d
-  ( Curve2d
+  ( Curve2d (compiled, derivative)
   , pattern Point
   , HasDegeneracy (HasDegeneracy)
   , Compiled
@@ -46,6 +46,7 @@ module OpenSolid.Curve2d
   , isOnAxis
   , xCoordinate
   , yCoordinate
+  , coordinates
   , placeIn
   , relativeTo
   , on
@@ -85,7 +86,6 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
@@ -114,6 +114,7 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Functions (Curve2d (..))
+import OpenSolid.Functions qualified as Functions
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
@@ -134,8 +135,6 @@ import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
-import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -148,36 +147,10 @@ import OpenSolid.VectorBounds2d (VectorBounds2d)
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.VectorCurve3d (VectorCurve3d)
-import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 
-type Compiled (coordinateSystem :: CoordinateSystem) =
-  CompiledFunction
-    Float
-    (Point2d coordinateSystem)
-    (Bounds Unitless)
-    (Bounds2d coordinateSystem)
-
-instance HasField "compiled" (Curve2d (space @ units)) (Compiled (space @ units)) where
-  getField (Curve2d c _) = c
-
-instance HasField "derivative" (Curve2d (space @ units)) (VectorCurve2d (space @ units)) where
-  getField (Curve2d _ d) = d
-
-instance HasField "secondDerivative" (Curve2d (space @ units)) (VectorCurve2d (space @ units)) where
-  getField = (.derivative.derivative)
-
-instance HasField "xCoordinate" (Curve2d (space @ units)) (Curve units) where
-  getField = xCoordinate
-
-instance HasField "yCoordinate" (Curve2d (space @ units)) (Curve units) where
-  getField = yCoordinate
-
-instance HasField "coordinates" (Curve2d (space @ units)) (Curve units, Curve units) where
-  getField = coordinates
+type Compiled coordinateSystem = Functions.Curve2dCompiled coordinateSystem
 
 instance FFI (Curve2d (space @ Meters)) where
   representation = FFI.classRepresentation "Curve2d"
@@ -268,61 +241,6 @@ instance
     (VectorCurve2d (space1 @ units1))
   where
   point - curve = constant point - curve
-
-instance Composition (Curve Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
-
-instance
-  Composition
-    (SurfaceFunction Unitless)
-    (Curve2d (space @ units))
-    (SurfaceFunction2d (space @ units))
-  where
-  curve . function =
-    SurfaceFunction2d.new
-      @ curve.compiled . function.compiled
-      @ \p -> curve.derivative . function * SurfaceFunction.derivative p function
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Composition
-    (Curve2d uvCoordinates)
-    (SurfaceFunction units)
-    (Curve units)
-  where
-  f . g = do
-    let (dudt, dvdt) = g.derivative.components
-    Curve.new do
-      #compiled (f.compiled . g.compiled)
-      #derivative (f.du . g * dudt + f.dv . g * dvdt)
-      #composeCurve (\inner -> f . (g . inner))
-      #composeSurfaceFunction (\inner -> f . (g . inner))
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Composition
-    (Curve2d uvCoordinates)
-    (VectorSurfaceFunction3d (space @ units))
-    (VectorCurve3d (space @ units))
-  where
-  function . uvCurve = do
-    let (dudt, dvdt) = uvCurve.derivative.components
-    VectorCurve3d.new
-      @ function.compiled . uvCurve.compiled
-      @ function.du . uvCurve * dudt + function.dv . uvCurve * dvdt
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Composition
-    (Curve2d uvCoordinates)
-    (SurfaceFunction3d (space @ units))
-    (Curve3d (space @ units))
-  where
-  function . uvCurve = do
-    let (dudt, dvdt) = uvCurve.derivative.components
-    Curve3d.new
-      @ function.compiled . uvCurve.compiled
-      @ function.du . uvCurve * dudt + function.dv . uvCurve * dvdt
 
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 new = Curve2d
@@ -583,11 +501,13 @@ instance HasField "endPoint" (Curve2d (space @ units)) (Point2d (space @ units))
 
 The parameter value should be between 0 and 1.
 -}
+{-# INLINE evaluate #-}
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
+evaluate = Functions.curve2dEvaluate
 
+{-# INLINE evaluateBounds #-}
 evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
-evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
+evaluateBounds = Functions.curve2dEvaluateBounds
 
 samplePoints :: Curve2d (space @ units) -> List (Point2d (space @ units))
 samplePoints curve = List.map (evaluate curve) Parameter.samples
@@ -650,34 +570,14 @@ isOnAxis axis curve = List.allSatisfy (^ axis) (samplePoints curve)
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
-xCoordinate curve =
-  Curve.new do
-    #compiled do
-      CompiledFunction.map
-        Expression.xCoordinate
-        Point2d.xCoordinate
-        Bounds2d.xCoordinate
-        curve.compiled
-    #derivative curve.derivative.xComponent
-    #composeCurve (\inner -> xCoordinate (curve . inner))
-    #composeSurfaceFunction (\inner -> SurfaceFunction2d.xCoordinate (curve . inner))
+xCoordinate = Functions.curve2dXCoordinate
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yCoordinate :: Curve2d (space @ units) -> Curve units
-yCoordinate curve =
-  Curve.new do
-    #compiled do
-      CompiledFunction.map
-        Expression.yCoordinate
-        Point2d.yCoordinate
-        Bounds2d.yCoordinate
-        curve.compiled
-    #derivative curve.derivative.yComponent
-    #composeCurve (\inner -> yCoordinate (curve . inner))
-    #composeSurfaceFunction (\inner -> SurfaceFunction2d.yCoordinate (curve . inner))
+yCoordinate = Functions.curve2dYCoordinate
 
 coordinates :: Curve2d (space @ units) -> (Curve units, Curve units)
-coordinates curve = (xCoordinate curve, yCoordinate curve)
+coordinates = Functions.curve2dCoordinates
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, Error.Message)
 

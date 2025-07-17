@@ -24,14 +24,13 @@ module OpenSolid.VectorSurfaceFunction2d
   )
 where
 
-import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
-import OpenSolid.Functions (VectorSurfaceFunction2d (..))
+import OpenSolid.Functions (VectorSurfaceFunction2d (..), VectorSurfaceFunction2dCompiled)
+import OpenSolid.Functions qualified as Functions
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -44,215 +43,9 @@ import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
-import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
-instance
-  HasField
-    "xComponent"
-    (VectorSurfaceFunction2d (space @ units))
-    (SurfaceFunction units)
-  where
-  getField = xComponent
-
-instance
-  HasField
-    "yComponent"
-    (VectorSurfaceFunction2d (space @ units))
-    (SurfaceFunction units)
-  where
-  getField = yComponent
-
-instance
-  HasField
-    "components"
-    (VectorSurfaceFunction2d (space @ units))
-    (SurfaceFunction units, SurfaceFunction units)
-  where
-  getField = components
-
-instance
-  HasField
-    "du"
-    (VectorSurfaceFunction2d (space @ units))
-    (VectorSurfaceFunction2d (space @ units))
-  where
-  getField (VectorSurfaceFunction2d _ du _) = du
-
-instance
-  HasField
-    "dv"
-    (VectorSurfaceFunction2d (space @ units))
-    (VectorSurfaceFunction2d (space @ units))
-  where
-  getField (VectorSurfaceFunction2d _ _ dv) = dv
-
-type Compiled (coordinateSystem :: CoordinateSystem) =
-  CompiledFunction
-    UvPoint
-    (Vector2d coordinateSystem)
-    UvBounds
-    (VectorBounds2d coordinateSystem)
-
-instance HasUnits (VectorSurfaceFunction2d (space @ units)) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion
-    (VectorSurfaceFunction2d (space1 @ unitsA))
-    (VectorSurfaceFunction2d (space2 @ unitsB))
-  where
-  coerce (VectorSurfaceFunction2d c du dv) =
-    VectorSurfaceFunction2d (Units.coerce c) (Units.coerce du) (Units.coerce dv)
-
-instance Negation (VectorSurfaceFunction2d (space @ units)) where
-  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
-
-instance
-  Multiplication
-    Sign
-    (VectorSurfaceFunction2d (space @ units))
-    (VectorSurfaceFunction2d (space @ units))
-  where
-  Positive * function = function
-  Negative * function = -function
-
-instance
-  Multiplication
-    (VectorSurfaceFunction2d (space @ units))
-    Sign
-    (VectorSurfaceFunction2d (space @ units))
-  where
-  function * Positive = function
-  function * Negative = -function
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (VectorSurfaceFunction2d (space1 @ units1))
-    (VectorSurfaceFunction2d (space2 @ units2))
-    (VectorSurfaceFunction2d (space1 @ units1))
-  where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (VectorSurfaceFunction2d (space1 @ units1))
-    (Vector2d (space2 @ units2))
-    (VectorSurfaceFunction2d (space1 @ units1))
-  where
-  f + v = f + constant v
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Vector2d (space1 @ units1))
-    (VectorSurfaceFunction2d (space2 @ units2))
-    (VectorSurfaceFunction2d (space1 @ units1))
-  where
-  v + f = constant v + f
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (VectorSurfaceFunction2d (space1 @ units1))
-    (VectorSurfaceFunction2d (space2 @ units2))
-    (VectorSurfaceFunction2d (space1 @ units1))
-  where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (VectorSurfaceFunction2d (space1 @ units1))
-    (Vector2d (space2 @ units2))
-    (VectorSurfaceFunction2d (space1 @ units1))
-  where
-  f - v = f - constant v
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Vector2d (space1 @ units1))
-    (VectorSurfaceFunction2d (space2 @ units2))
-    (VectorSurfaceFunction2d (space1 @ units1))
-  where
-  v - f = constant v - f
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication
-    (SurfaceFunction units1)
-    (VectorSurfaceFunction2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (SurfaceFunction units1)
-    (VectorSurfaceFunction2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
-  where
-  lhs .*. rhs =
-    new
-      @ lhs.compiled .*. rhs.compiled
-      @ \p -> SurfaceFunction.derivative p lhs .*. rhs + lhs .*. derivative p rhs
-
-instance
-  (space1 ~ space2, Units.Product units1 units2 units3) =>
-  Multiplication
-    (Qty units1)
-    (VectorSurfaceFunction2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Qty units1)
-    (VectorSurfaceFunction2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
-  where
-  f1 .*. f2 = SurfaceFunction.constant f1 .*. f2
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication
-    (VectorSurfaceFunction2d (space @ units1))
-    (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (VectorSurfaceFunction2d (space @ units1))
-    (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
-  where
-  lhs .*. rhs =
-    new
-      @ lhs.compiled .*. rhs.compiled
-      @ \p -> derivative p lhs .*. rhs + lhs .*. SurfaceFunction.derivative p rhs
-
-instance
-  (space1 ~ space2, Units.Product units1 units2 units3) =>
-  Multiplication
-    (VectorSurfaceFunction2d (space @ units1))
-    (Qty units2)
-    (VectorSurfaceFunction2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (VectorSurfaceFunction2d (space @ units1))
-    (Qty units2)
-    (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
-  where
-  function .*. value = function .*. SurfaceFunction.constant value
+type Compiled coordinateSystem = VectorSurfaceFunction2dCompiled coordinateSystem
 
 instance
   (space1 ~ space2, Units.Quotient units1 units2 units3) =>
@@ -287,10 +80,11 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  lhs `cross'` rhs =
-    SurfaceFunction.new
-      (lhs.compiled `cross'` rhs.compiled)
-      (\p -> derivative p lhs `cross'` rhs + lhs `cross'` derivative p rhs)
+  lhs `cross'` rhs = SurfaceFunction.new do
+    #compiled (lhs.compiled `cross'` rhs.compiled)
+    #derivative (\p -> derivative p lhs `cross'` rhs + lhs `cross'` derivative p rhs)
+    #composeCurve (\inner -> lhs . inner `cross'` rhs . inner)
+    #composeSurfaceFunction (\inner -> lhs . inner `cross'` rhs . inner)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -362,10 +156,11 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  lhs `dot'` rhs =
-    SurfaceFunction.new
-      (lhs.compiled `dot'` rhs.compiled)
-      (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
+  lhs `dot'` rhs = SurfaceFunction.new do
+    #compiled (lhs.compiled `dot'` rhs.compiled)
+    #derivative (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
+    #composeCurve (\inner -> lhs . inner `dot'` rhs . inner)
+    #composeSurfaceFunction (\inner -> lhs . inner `dot'` rhs . inner)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -421,36 +216,11 @@ instance
   where
   lhs `dot` rhs = Vector2d.unit lhs `dot` rhs
 
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Composition
-    (Curve2d uvCoordinates)
-    (VectorSurfaceFunction2d (space @ units))
-    (VectorCurve2d (space @ units))
-  where
-  function . curve = do
-    let (dudt, dvdt) = curve.derivative.components
-    VectorCurve2d.new
-      @ function.compiled . curve.compiled
-      @ (function.du . curve) * dudt + (function.dv . curve) * dvdt
-
-instance
-  HasField
-    "compiled"
-    (VectorSurfaceFunction2d (space @ units))
-    (Compiled (space @ units))
-  where
-  getField (VectorSurfaceFunction2d c _ _) = c
-
 new ::
   Compiled (space @ units) ->
   (SurfaceParameter -> VectorSurfaceFunction2d (space @ units)) ->
   VectorSurfaceFunction2d (space @ units)
-new c derivativeFunction = do
-  let du = derivativeFunction U
-  let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction2d dv.compiled du.dv dv.dv
-  VectorSurfaceFunction2d c du dv'
+new = Functions.vectorSurfaceFunction2dNew
 
 recursive ::
   Compiled (space @ units) ->
@@ -463,10 +233,10 @@ recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
 zero :: VectorSurfaceFunction2d (space @ units)
-zero = constant Vector2d.zero
+zero = Functions.vectorSurfaceFunction2dZero
 
 constant :: Vector2d (space @ units) -> VectorSurfaceFunction2d (space @ units)
-constant value = new (CompiledFunction.constant value) (always zero)
+constant = Functions.vectorSurfaceFunction2dConstant
 
 xy ::
   SurfaceFunction units ->
@@ -512,29 +282,15 @@ derivative U = (.du)
 derivative V = (.dv)
 
 xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-xComponent function =
-  SurfaceFunction.new
-    @ CompiledFunction.map
-      Expression.xComponent
-      Vector2d.xComponent
-      VectorBounds2d.xComponent
-      function.compiled
-    @ \parameter -> (derivative parameter function).xComponent
+xComponent = Functions.vectorSurfaceFunction2dXComponent
 
 yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-yComponent function =
-  SurfaceFunction.new
-    @ CompiledFunction.map
-      Expression.yComponent
-      Vector2d.yComponent
-      VectorBounds2d.yComponent
-      function.compiled
-    @ \parameter -> (derivative parameter function).yComponent
+yComponent = Functions.vectorSurfaceFunction2dYComponent
 
 components ::
   VectorSurfaceFunction2d (space @ units) ->
   (SurfaceFunction units, SurfaceFunction units)
-components function = (xComponent function, yComponent function)
+components = Functions.vectorSurfaceFunction2dComponents
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
@@ -556,14 +312,16 @@ quotient' lhs rhs =
         - self * SurfaceFunction.quotient (SurfaceFunction.derivative p rhs) rhs
 
 squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units :*: units)
-squaredMagnitude' function =
-  SurfaceFunction.new
-    @ CompiledFunction.map
+squaredMagnitude' function = SurfaceFunction.new do
+  #compiled do
+    CompiledFunction.map
       Expression.squaredMagnitude'
       Vector2d.squaredMagnitude'
       VectorBounds2d.squaredMagnitude'
       function.compiled
-    @ \p -> 2.0 * function `dot'` derivative p function
+  #derivative (\p -> 2.0 * function `dot'` derivative p function)
+  #composeCurve (\inner -> VectorCurve2d.squaredMagnitude' (function . inner))
+  #composeSurfaceFunction (\inner -> squaredMagnitude' (function . inner))
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

@@ -1,6 +1,7 @@
 module OpenSolid.SurfaceFunction3d
   ( SurfaceFunction3d
   , Compiled
+  , new
   , constant
   , evaluate
   , evaluateBounds
@@ -66,6 +67,10 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
 
+new ::
+  Compiled (space @ units) ->
+  (SurfaceParameter -> VectorSurfaceFunction3d (space @ units)) ->
+  SurfaceFunction3d (space @ units)
 constant :: Point3d (space @ units) -> SurfaceFunction3d (space @ units)
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)
 evaluateBounds :: SurfaceFunction3d (space @ units) -> UvBounds -> Bounds3d (space @ units)

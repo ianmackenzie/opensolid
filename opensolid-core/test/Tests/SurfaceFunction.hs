@@ -2,6 +2,7 @@ module Tests.SurfaceFunction (tests) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Frame3d qualified as Frame3d
@@ -17,6 +18,7 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Curve2d qualified

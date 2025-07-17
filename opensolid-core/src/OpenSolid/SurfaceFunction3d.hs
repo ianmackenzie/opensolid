@@ -17,6 +17,10 @@ import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve3d (Curve3d)
+import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Expression.Surface3d qualified as Expression.Surface3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
@@ -156,6 +160,19 @@ instance
     (Surface3d (space @ units))
   where
   function . domain = Surface3d.parametric function domain
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (Curve2d uvCoordinates)
+    (SurfaceFunction3d (space @ units))
+    (Curve3d (space @ units))
+  where
+  outer . inner = do
+    let (dudt, dvdt) = inner.derivative.components
+    Curve3d.new
+      @ outer.compiled . inner.compiled
+      @ (outer.du . inner) * dudt + (outer.dv . inner) * dvdt
 
 instance
   uvCoordinates ~ UvCoordinates =>

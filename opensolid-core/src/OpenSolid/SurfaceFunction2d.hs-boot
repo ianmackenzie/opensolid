@@ -12,26 +12,13 @@ module OpenSolid.SurfaceFunction2d
   )
 where
 
-import OpenSolid.Bounds2d (Bounds2d)
-import OpenSolid.CompiledFunction (CompiledFunction)
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Functions (SurfaceFunction2d (..))
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Functions (SurfaceFunction2d (..), SurfaceFunction2dCompiled)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
-import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 
-type Compiled coordinateSystem =
-  CompiledFunction
-    UvPoint
-    (Point2d coordinateSystem)
-    UvBounds
-    (Bounds2d coordinateSystem)
-
-instance HasField "compiled" (SurfaceFunction2d (space @ units)) (Compiled (space @ units))
+type Compiled coordinateSystem = SurfaceFunction2dCompiled coordinateSystem
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -46,13 +33,6 @@ instance
     (SurfaceFunction2d (space1 @ units1))
     (SurfaceFunction2d (space2 @ units2))
     (VectorSurfaceFunction2d (space1 @ units1))
-
-instance
-  uvCoordinates ~ UvCoordinates =>
-  Composition
-    (Curve2d uvCoordinates)
-    (SurfaceFunction2d (space @ units))
-    (Curve2d (space @ units))
 
 new ::
   Compiled (space @ units) ->

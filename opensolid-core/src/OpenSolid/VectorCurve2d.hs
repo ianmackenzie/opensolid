@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module OpenSolid.VectorCurve2d
-  ( VectorCurve2d
+  ( VectorCurve2d (compiled, derivative)
   , Compiled
   , new
   , compiled
@@ -50,7 +50,6 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds)
-import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
@@ -68,7 +67,8 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Functions (VectorCurve2d (VectorCurve2d))
+import OpenSolid.Functions (VectorCurve2d (VectorCurve2d), VectorCurve2dCompiled)
+import OpenSolid.Functions qualified as Functions
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -77,7 +77,6 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
@@ -90,30 +89,9 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d.Direction qualified as VectorCurve2d.Direction
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
-type Compiled (coordinateSystem :: CoordinateSystem) =
-  CompiledFunction
-    Float
-    (Vector2d coordinateSystem)
-    (Bounds Unitless)
-    (VectorBounds2d coordinateSystem)
-
-instance HasField "compiled" (VectorCurve2d (space @ units)) (Compiled (space @ units)) where
-  getField = compiled
-
-instance HasField "derivative" (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
-  getField = derivative
-
-instance HasField "xComponent" (VectorCurve2d (space @ units)) (Curve units) where
-  getField = xComponent
-
-instance HasField "yComponent" (VectorCurve2d (space @ units)) (Curve units) where
-  getField = yComponent
-
-instance HasField "components" (VectorCurve2d (space @ units)) (Curve units, Curve units) where
-  getField = components
+type Compiled coordinateSystem = VectorCurve2dCompiled coordinateSystem
 
 instance
   Units.Squared units1 units2 =>
@@ -134,14 +112,6 @@ instance FFI (VectorCurve2d (space @ Unitless)) where
 
 instance FFI (VectorCurve2d (space @ Meters)) where
   representation = FFI.classRepresentation "DisplacementCurve2d"
-
-instance HasUnits (VectorCurve2d (space @ units)) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (VectorCurve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
-  where
-  coerce curve = VectorCurve2d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -180,124 +150,6 @@ instance
   where
   vector ^ curve = curve ^ vector
 
-instance Negation (VectorCurve2d (space @ units)) where
-  negate curve = new (negate curve.compiled) (negate curve.derivative)
-
-instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
-  Positive * curve = curve
-  Negative * curve = -curve
-
-instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units)) where
-  curve * Positive = curve
-  curve * Negative = -curve
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (VectorCurve2d (space1 @ units1))
-    (VectorCurve2d (space2 @ units2))
-    (VectorCurve2d (space1 @ units1))
-  where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (VectorCurve2d (space1 @ units1))
-    (Vector2d (space2 @ units2))
-    (VectorCurve2d (space1 @ units1))
-  where
-  curve + vector = curve + constant vector
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Vector2d (space1 @ units1))
-    (VectorCurve2d (space2 @ units2))
-    (VectorCurve2d (space1 @ units1))
-  where
-  vector + curve = constant vector + curve
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (VectorCurve2d (space1 @ units1))
-    (VectorCurve2d (space2 @ units2))
-    (VectorCurve2d (space1 @ units1))
-  where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (VectorCurve2d (space1 @ units1))
-    (Vector2d (space2 @ units2))
-    (VectorCurve2d (space1 @ units1))
-  where
-  curve - vector = curve - constant vector
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Vector2d (space1 @ units1))
-    (VectorCurve2d (space2 @ units2))
-    (VectorCurve2d (space1 @ units1))
-  where
-  vector - curve = constant vector - curve
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication
-    (Curve units1)
-    (VectorCurve2d (space @ units2))
-    (VectorCurve2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Curve units1)
-    (VectorCurve2d (space @ units2))
-    (VectorCurve2d (space @ (units1 :*: units2)))
-  where
-  lhs .*. rhs =
-    new (lhs.compiled .*. rhs.compiled) (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Qty units1)
-    (VectorCurve2d (space @ units2))
-    (VectorCurve2d (space @ (units1 :*: units2)))
-  where
-  c1 .*. c2 = Curve.constant c1 .*. c2
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (VectorCurve2d (space @ units1))
-    (Curve units2)
-    (VectorCurve2d (space @ (units1 :*: units2)))
-  where
-  lhs .*. rhs =
-    new (lhs.compiled .*. rhs.compiled) (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
@@ -311,14 +163,6 @@ instance
     (VectorCurve2d (space @ (units1 :/: units2)))
   where
   curve ./. value = Units.simplify (curve .*. (1.0 ./. value))
-
-instance
-  Multiplication'
-    (VectorCurve2d (space @ units1))
-    (Qty units2)
-    (VectorCurve2d (space @ (units1 :*: units2)))
-  where
-  curve .*. value = curve .*. Curve.constant value
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -473,25 +317,6 @@ instance
   where
   point - curve = Curve2d.constant point - curve
 
-instance
-  Composition
-    (Curve Unitless)
-    (VectorCurve2d (space @ units))
-    (VectorCurve2d (space @ units))
-  where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
-
-instance
-  Composition
-    (SurfaceFunction Unitless)
-    (VectorCurve2d (space @ units))
-    (VectorSurfaceFunction2d (space @ units))
-  where
-  curve . function =
-    VectorSurfaceFunction2d.new
-      @ curve.compiled . function.compiled
-      @ \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
-
 compiled :: VectorCurve2d (space @ units) -> Compiled (space @ units)
 compiled (VectorCurve2d c _) = c
 
@@ -530,11 +355,11 @@ recursive givenCompiled derivativeFunction =
 
 -- | The constant zero vector.
 zero :: VectorCurve2d (space @ units)
-zero = constant Vector2d.zero
+zero = Functions.vectorCurve2dZero
 
 -- | Create a curve with a constant value.
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-constant value = new (CompiledFunction.constant value) zero
+constant = Functions.vectorCurve2dConstant
 
 unit :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 unit = DirectionCurve2d.unwrap
@@ -612,34 +437,14 @@ evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tB
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xComponent :: VectorCurve2d (space @ units) -> Curve units
-xComponent curve =
-  Curve.new do
-    #compiled do
-      CompiledFunction.map
-        Expression.xComponent
-        Vector2d.xComponent
-        VectorBounds2d.xComponent
-        curve.compiled
-    #derivative curve.derivative.xComponent
-    #composeCurve (\inner -> xComponent (curve . inner))
-    #composeSurfaceFunction (\inner -> VectorSurfaceFunction2d.xComponent (curve . inner))
+xComponent = Functions.vectorCurve2dXComponent
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yComponent :: VectorCurve2d (space @ units) -> Curve units
-yComponent curve =
-  Curve.new do
-    #compiled do
-      CompiledFunction.map
-        Expression.yComponent
-        Vector2d.yComponent
-        VectorBounds2d.yComponent
-        curve.compiled
-    #derivative curve.derivative.yComponent
-    #composeCurve (\inner -> yComponent (curve . inner))
-    #composeSurfaceFunction (\inner -> VectorSurfaceFunction2d.yComponent (curve . inner))
+yComponent = Functions.vectorCurve2dYComponent
 
 components :: VectorCurve2d (space @ units) -> (Curve units, Curve units)
-components curve = (xComponent curve, yComponent curve)
+components = Functions.vectorCurve2dComponents
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
@@ -659,7 +464,8 @@ quotient' ::
 quotient' lhs rhs =
   recursive
     @ CompiledFunction.map2 Expression.quotient' (./.) (./.) lhs.compiled rhs.compiled
-    @ \self -> quotient' lhs.derivative rhs - self * (Curve.quotient rhs.derivative rhs)
+    -- TODO switch back to (p'q - pq' / q^2) form
+    @ \self -> quotient' lhs.derivative rhs - self * Curve.quotient rhs.derivative rhs
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
@@ -684,7 +490,7 @@ unsafeMagnitude curve = Curve.recursive \self -> do
       Vector2d.magnitude
       VectorBounds2d.magnitude
       curve.compiled
-  #derivative (curve.derivative `dot` (Tolerance.exactly (quotient curve self)))
+  #derivative (curve.derivative `dot` Tolerance.exactly (quotient curve self))
   #composeCurve (\inner -> unsafeMagnitude (curve . inner))
   #composeSurfaceFunction do
     \inner -> Tolerance.exactly do

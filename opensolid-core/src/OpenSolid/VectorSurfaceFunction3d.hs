@@ -21,11 +21,13 @@ where
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
+import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Functions qualified as Functions
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -43,6 +45,8 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
+import OpenSolid.VectorCurve3d (VectorCurve3d)
+import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
   VectorSurfaceFunction3d ::
@@ -342,10 +346,11 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction (units1 :*: units2))
   where
-  lhs `dot'` rhs =
-    SurfaceFunction.new
-      (lhs.compiled `dot'` rhs.compiled)
-      (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
+  lhs `dot'` rhs = SurfaceFunction.new do
+    #compiled (lhs.compiled `dot'` rhs.compiled)
+    #derivative (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
+    #composeCurve (\inner -> lhs . inner `dot'` rhs . inner)
+    #composeSurfaceFunction (\inner -> lhs . inner `dot'` rhs . inner)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -400,6 +405,19 @@ instance
     (SurfaceFunction units)
   where
   lhs `dot` rhs = Vector3d.unit lhs `dot` rhs
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (Curve2d uvCoordinates)
+    (VectorSurfaceFunction3d (space @ units))
+    (VectorCurve3d (space @ units))
+  where
+  outer . inner = do
+    let (dudt, dvdt) = inner.derivative.components
+    VectorCurve3d.new
+      @ outer.compiled . inner.compiled
+      @ (outer.du . inner) * dudt + (outer.dv . inner) * dvdt
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -520,14 +538,16 @@ quotient' lhs rhs =
         - self * SurfaceFunction.quotient (SurfaceFunction.derivative p rhs) rhs
 
 squaredMagnitude' :: VectorSurfaceFunction3d (space @ units) -> SurfaceFunction (units :*: units)
-squaredMagnitude' function =
-  SurfaceFunction.new
-    @ CompiledFunction.map
+squaredMagnitude' function = SurfaceFunction.new do
+  #compiled do
+    CompiledFunction.map
       Expression.squaredMagnitude'
       Vector3d.squaredMagnitude'
       VectorBounds3d.squaredMagnitude'
       function.compiled
-    @ \p -> 2.0 * function `dot'` derivative p function
+  #derivative (\p -> 2.0 * function `dot'` derivative p function)
+  #composeCurve (\inner -> VectorCurve3d.squaredMagnitude' (function . inner))
+  #composeSurfaceFunction (\inner -> squaredMagnitude' (function . inner))
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

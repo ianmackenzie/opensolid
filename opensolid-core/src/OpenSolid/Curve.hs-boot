@@ -9,11 +9,10 @@ module OpenSolid.Curve
 where
 
 import OpenSolid.Bounds (Bounds)
-import OpenSolid.CompiledFunction (CompiledFunction)
-import OpenSolid.Functions (Curve (..))
+import OpenSolid.Functions (Curve (..), CurveCompiled)
 import OpenSolid.Prelude
 
-type Compiled units = CompiledFunction Float (Qty units) (Bounds Unitless) (Bounds units)
+type Compiled units = CurveCompiled units
 
 compiled :: Curve units -> Compiled units
 derivative :: Curve units -> Curve units

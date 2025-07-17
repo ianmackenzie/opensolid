@@ -42,6 +42,7 @@ import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
@@ -60,8 +61,8 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
-import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)

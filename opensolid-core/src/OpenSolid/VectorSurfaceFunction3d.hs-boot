@@ -36,6 +36,18 @@ instance
     (VectorSurfaceFunction3d (space @ units))
     (Compiled (space @ units))
 
+instance
+  HasField
+    "du"
+    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+
+instance
+  HasField
+    "dv"
+    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+
 instance HasUnits (VectorSurfaceFunction3d (space @ units)) units
 
 instance

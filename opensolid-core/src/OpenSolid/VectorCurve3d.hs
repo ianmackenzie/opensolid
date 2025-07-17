@@ -51,6 +51,7 @@ import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Functions qualified as Functions
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -70,8 +71,8 @@ import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
-import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
-import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem)
   = VectorCurve3d (Compiled coordinateSystem) ~(VectorCurve3d coordinateSystem)

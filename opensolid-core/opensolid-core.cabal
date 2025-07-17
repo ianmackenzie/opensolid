@@ -64,7 +64,7 @@ common config
     DataKinds
     DeriveAnyClass
     DerivingStrategies
-    DisambiguateRecordFields
+    DuplicateRecordFields
     ExplicitNamespaces
     FunctionalDependencies
     GADTs
