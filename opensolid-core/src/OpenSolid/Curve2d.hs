@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.Curve2d
   ( Curve2d
   , pattern Point
@@ -109,6 +113,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Functions (Curve2d (..))
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
@@ -148,10 +153,6 @@ import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
-
--- | A parametric curve in 2D space.
-data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Curve2d :: Compiled (space @ units) -> ~(VectorCurve2d (space @ units)) -> Curve2d (space @ units)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction

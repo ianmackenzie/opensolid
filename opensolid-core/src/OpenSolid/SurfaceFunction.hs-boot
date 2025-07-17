@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.SurfaceFunction
   ( SurfaceFunction
   , Compiled
@@ -17,18 +21,12 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.Functions (SurfaceFunction (..))
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-
-type role SurfaceFunction nominal
-
-type SurfaceFunction :: Type -> Type
-data SurfaceFunction units
-
-instance Units.Coercion (SurfaceFunction units1) (SurfaceFunction units2)
 
 instance HasField "du" (SurfaceFunction units) (SurfaceFunction units)
 

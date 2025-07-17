@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.VectorSurfaceFunction2d
   ( VectorSurfaceFunction2d
   , Compiled
@@ -27,6 +31,7 @@ import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
+import OpenSolid.Functions (VectorSurfaceFunction2d (..))
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -41,13 +46,6 @@ import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-
-data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
-  VectorSurfaceFunction2d ::
-    Compiled (space @ units) ->
-    ~(VectorSurfaceFunction2d (space @ units)) ->
-    ~(VectorSurfaceFunction2d (space @ units)) ->
-    VectorSurfaceFunction2d (space @ units)
 
 instance
   HasField

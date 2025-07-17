@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.Curve2d
   ( Curve2d
   , Compiled
@@ -20,15 +24,12 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import OpenSolid.Functions (Curve2d (..))
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Vector2d (Vector2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
-
-type role Curve2d nominal
-
-data Curve2d (coordinateSystem :: CoordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction

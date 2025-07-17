@@ -10,17 +10,10 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
-import OpenSolid.FFI (FFI)
+import OpenSolid.Functions (Curve (..))
 import OpenSolid.Prelude
 
-type role Curve nominal
-
-type Curve :: Type -> Type
-data Curve units
-
 type Compiled units = CompiledFunction Float (Qty units) (Bounds Unitless) (Bounds units)
-
-instance FFI (Curve Unitless)
 
 compiled :: Curve units -> Compiled units
 derivative :: Curve units -> Curve units

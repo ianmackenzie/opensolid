@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.SurfaceFunction2d
   ( SurfaceFunction2d
   , Compiled
@@ -11,6 +15,7 @@ where
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Functions (SurfaceFunction2d (..))
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -18,11 +23,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
-
-type role SurfaceFunction2d nominal
-
-type SurfaceFunction2d :: CoordinateSystem -> Type
-data SurfaceFunction2d coordinateSystem
 
 type Compiled coordinateSystem =
   CompiledFunction

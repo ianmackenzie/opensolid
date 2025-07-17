@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.Curve
   ( Curve (compiled, derivative)
   , Compiled
@@ -54,15 +58,14 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
+import OpenSolid.Functions (Curve (..))
+import OpenSolid.Functions qualified as Functions
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Solve1d qualified as Solve1d
@@ -79,15 +82,6 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
-data Curve units where
-  Curve ::
-    { compiled :: Compiled units
-    , derivative :: ~(Curve units)
-    , composeCurve :: Curve Unitless -> Curve units
-    , composeSurfaceFunction :: SurfaceFunction Unitless -> SurfaceFunction units
-    } ->
-    Curve units
-
 type Compiled units = CompiledFunction Float (Qty units) (Bounds Unitless) (Bounds units)
 
 instance Units.Squared units1 units2 => HasField "squared" (Curve units1) (Curve units2) where
@@ -95,42 +89,6 @@ instance Units.Squared units1 units2 => HasField "squared" (Curve units1) (Curve
 
 instance HasField "squared'" (Curve units1) (Curve (units1 :*: units1)) where
   getField = squared'
-
-instance FFI (Curve Unitless) where
-  representation = FFI.classRepresentation "Curve"
-
-instance FFI (Curve Meters) where
-  representation = FFI.classRepresentation "LengthCurve"
-
-instance FFI (Curve SquareMeters) where
-  representation = FFI.classRepresentation "AreaCurve"
-
-instance FFI (Curve Radians) where
-  representation = FFI.classRepresentation "AngleCurve"
-
-instance HasUnits (Curve units) units
-
-instance Units.Coercion (Curve units1) (Curve units2) where
-  coerce curve =
-    Curve
-      { compiled = Units.coerce curve.compiled
-      , derivative = Units.coerce curve.derivative
-      , composeCurve = Units.coerce . curve.composeCurve
-      , composeSurfaceFunction = Units.coerce . curve.composeSurfaceFunction
-      }
-
-instance
-  units1 ~ units2 =>
-  ApproximateEquality (Curve units1) (Curve units2) units1
-  where
-  curve1 ~= curve2 =
-    List.allTrue [evaluate curve1 tValue ~= evaluate curve2 tValue | tValue <- Parameter.samples]
-
-instance
-  units1 ~ units2 =>
-  ApproximateEquality (Curve units1) (Qty units2) units1
-  where
-  curve ~= value = List.allTrue [evaluate curve tValue ~= value | tValue <- Parameter.samples]
 
 instance
   units1 ~ units2 =>
@@ -167,13 +125,7 @@ new ::
   , "composeSurfaceFunction" ::: (SurfaceFunction Unitless -> SurfaceFunction units)
   ) ->
   Curve units
-new args =
-  Curve
-    { compiled = args.compiled
-    , derivative = args.derivative
-    , composeCurve = args.composeCurve
-    , composeSurfaceFunction = args.composeSurfaceFunction
-    }
+new = Functions.newCurve
 
 recursive ::
   ( Curve units ->
@@ -184,7 +136,7 @@ recursive ::
     )
   ) ->
   Curve units
-recursive callback = let result = new (callback result) in result
+recursive = Functions.recursiveCurve
 
 -- | A curve equal to zero everywhere.
 zero :: Curve units
@@ -443,11 +395,13 @@ rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 
 
 The parameter value should be between 0 and 1.
 -}
+{-# INLINE evaluate #-}
 evaluate :: Curve units -> Float -> Qty units
-evaluate curve = CompiledFunction.evaluate curve.compiled
+evaluate = Functions.curveValue
 
+{-# INLINE evaluateBounds #-}
 evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units
-evaluateBounds curve = CompiledFunction.evaluateBounds curve.compiled
+evaluateBounds = Functions.curveBounds
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

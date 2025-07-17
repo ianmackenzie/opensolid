@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.VectorCurve2d
   ( VectorCurve2d
   , Compiled
@@ -64,6 +68,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Functions (VectorCurve2d (VectorCurve2d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -87,9 +92,6 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-
-data VectorCurve2d (coordinateSystem :: CoordinateSystem)
-  = VectorCurve2d (Compiled coordinateSystem) ~(VectorCurve2d coordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction

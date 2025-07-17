@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.VectorCurve2d
   ( VectorCurve2d
   , constant
@@ -14,15 +18,12 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import OpenSolid.Functions (VectorCurve2d (..))
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
-
-type role VectorCurve2d nominal
-
-data VectorCurve2d (coordinateSystem :: CoordinateSystem)
 
 instance HasField "compiled" (VectorCurve2d (space @ units)) (Compiled (space @ units))
 

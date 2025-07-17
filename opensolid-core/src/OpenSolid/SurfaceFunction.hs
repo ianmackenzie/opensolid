@@ -1,3 +1,7 @@
+-- Allow typeclass instances to be declared here
+-- even though the type is actually defined in the Functions module
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.SurfaceFunction
   ( SurfaceFunction
   , Compiled
@@ -40,6 +44,7 @@ import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Functions (SurfaceFunction (..))
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.List qualified as List
@@ -76,13 +81,6 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfa
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
-data SurfaceFunction units where
-  SurfaceFunction ::
-    Compiled units ->
-    ~(SurfaceFunction units) ->
-    ~(SurfaceFunction units) ->
-    SurfaceFunction units
-
 instance HasField "du" (SurfaceFunction units) (SurfaceFunction units) where
   getField (SurfaceFunction _ du _) = du
 
@@ -90,12 +88,6 @@ instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units) where
   getField (SurfaceFunction _ _ dv) = dv
 
 type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
-
-instance HasUnits (SurfaceFunction units) units
-
-instance Units.Coercion (SurfaceFunction unitsA) (SurfaceFunction unitsB) where
-  coerce (SurfaceFunction c du dv) =
-    SurfaceFunction (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
 instance
   units1 ~ units2 =>
