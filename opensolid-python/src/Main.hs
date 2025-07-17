@@ -256,7 +256,8 @@ classDefinition
             , Python.indent nestedClassDefinitions
             ]
     let constantDefinitions =
-          Python.lines ((List.map (Python.Constant.definition className) constants) <> nestedClassConstants)
+          Python.lines $
+            List.map (Python.Constant.definition className) constants <> nestedClassConstants
     (definition, constantDefinitions)
 
 parentClass :: Maybe Upcast -> Text
