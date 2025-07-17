@@ -167,7 +167,7 @@ length =
     , Class.member0 "In Inches" Length.inInches $(docs 'Length.inInches)
     , Class.member0 "In Pixels" Length.inPixels $(docs 'Length.inPixels)
     , Class.memberM0 "Is Zero" (~= Length.zero) "Check if a length is zero, within the current tolerance."
-    , Class.equality
+    , Class.equalityAndHash
     , Class.comparison
     , Class.negateSelf
     , Class.absSelf Qty.abs
@@ -212,7 +212,7 @@ area =
     , Class.member0 "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
     , Class.member0 "In Square Inches" Area.inSquareInches $(docs 'Area.inSquareInches)
     , Class.memberS0 "Is Zero" (~= Area.zero) "Check if an area is zero, within the current tolerance."
-    , Class.equality
+    , Class.equalityAndHash
     , Class.comparison
     , Class.negateSelf
     , Class.absSelf Qty.abs
@@ -271,7 +271,7 @@ angle =
     , Class.member0 "Sin" Angle.sin $(docs 'Angle.sin)
     , Class.member0 "Cos" Angle.cos $(docs 'Angle.cos)
     , Class.member0 "Tan" Angle.tan $(docs 'Angle.tan)
-    , Class.equality
+    , Class.equalityAndHash
     , Class.comparison
     , Class.negateSelf
     , Class.absSelf Qty.abs

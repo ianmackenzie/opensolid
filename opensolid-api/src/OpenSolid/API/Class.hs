@@ -56,7 +56,7 @@ module OpenSolid.API.Class
   , member3
   , memberM3
   , member4
-  , equality
+  , equalityAndHash
   , comparison
   , negateSelf
   , absSelf
@@ -95,6 +95,8 @@ module OpenSolid.API.Class
   )
 where
 
+import Data.Hashable (Hashable)
+import Data.Hashable qualified
 import Data.Proxy (Proxy (Proxy))
 import Data.Void (Void)
 import OpenSolid.API.AbsFunction (AbsFunction (AbsFunction))
@@ -109,6 +111,8 @@ import OpenSolid.API.Constructor qualified as Constructor
 import OpenSolid.API.EqualityFunction (EqualityFunction (EqualityFunction))
 import OpenSolid.API.EqualityFunction qualified as EqualityFunction
 import OpenSolid.API.Function (Function (..))
+import OpenSolid.API.HashFunction (HashFunction (HashFunction))
+import OpenSolid.API.HashFunction qualified as HashFunction
 import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.API.NegationFunction (NegationFunction (NegationFunction))
@@ -139,7 +143,7 @@ data Class where
     , staticFunctions :: List (FFI.Name, StaticFunction)
     , properties :: List (FFI.Name, Property)
     , memberFunctions :: List (FFI.Name, MemberFunction)
-    , equalityFunction :: Maybe EqualityFunction
+    , equalityAndHashFunctions :: Maybe (EqualityFunction, HashFunction)
     , comparisonFunction :: Maybe ComparisonFunction
     , negationFunction :: Maybe NegationFunction
     , absFunction :: Maybe AbsFunction
@@ -156,7 +160,7 @@ data Member value where
   Static :: FFI.Name -> StaticFunction -> Member value
   Prop :: FFI.Name -> Property -> Member value
   Member :: FFI.Name -> MemberFunction -> Member value
-  Equality :: EqualityFunction -> Member value
+  EqualityAndHash :: (EqualityFunction, HashFunction) -> Member value
   Comparison :: ComparisonFunction -> Member value
   Negate :: NegationFunction -> Member value
   Abs :: AbsFunction -> Member value
@@ -716,8 +720,9 @@ member4 name arg1 arg2 arg3 arg4 f docs =
 
 data Self a = Self
 
-equality :: forall value. (FFI value, Eq value) => Member value
-equality = Equality (EqualityFunction ((==) @value))
+equalityAndHash :: forall value. (FFI value, Eq value, Hashable value) => Member value
+equalityAndHash =
+  EqualityAndHash (EqualityFunction ((==) @value), HashFunction (Data.Hashable.hash @value))
 
 comparison :: forall value. (FFI value, Ord value) => Member value
 comparison = Comparison (ComparisonFunction (comparisonImpl @value))
@@ -973,7 +978,7 @@ init givenName givenDocumentation =
     , staticFunctions = []
     , properties = []
     , memberFunctions = []
-    , equalityFunction = Nothing
+    , equalityAndHashFunctions = Nothing
     , comparisonFunction = Nothing
     , negationFunction = Nothing
     , absFunction = Nothing
@@ -998,8 +1003,8 @@ buildClass members built = case members of
       built{properties = properties built <> [(name, prop)]}
     Member name memberFunction ->
       built{memberFunctions = memberFunctions built <> [(name, memberFunction)]}
-    Equality equalityFunction ->
-      built{equalityFunction = Just equalityFunction}
+    EqualityAndHash functionPair ->
+      built{equalityAndHashFunctions = Just functionPair}
     Comparison comparisonFunction ->
       built{comparisonFunction = Just comparisonFunction}
     Negate negationFunction ->
@@ -1026,7 +1031,7 @@ functions
       staticFunctions
       properties
       memberFunctions
-      equalityFunction
+      equalityAndHashFunctions
       comparisonFunction
       negationFunction
       absFunction
@@ -1041,7 +1046,7 @@ functions
       , List.map (staticFunctionInfo className) staticFunctions
       , List.map (propertyInfo className) properties
       , List.map (memberFunctionInfo className) memberFunctions
-      , equalityFunctionInfo className equalityFunction
+      , equalityAndHashFunctionInfo className equalityAndHashFunctions
       , comparisonFunctionInfo className comparisonFunction
       , negationFunctionInfo className negationFunction
       , absFunctionInfo className absFunction
@@ -1153,19 +1158,28 @@ absFunctionInfo className maybeAbsFunction = case maybeAbsFunction of
         , invoke = AbsFunction.invoke absFunction
         }
 
-equalityFunctionInfo :: FFI.ClassName -> Maybe EqualityFunction -> List Function
-equalityFunctionInfo className maybeEqualityFunction = case maybeEqualityFunction of
+equalityAndHashFunctionInfo :: FFI.ClassName -> Maybe (EqualityFunction, HashFunction) -> List Function
+equalityAndHashFunctionInfo className maybeFunctions = case maybeFunctions of
   Nothing -> []
-  Just equalityFunction -> do
+  Just (equalityFunction, hashFunction) -> do
     let selfType = FFI.Class className
-    List.singleton $
-      Function
-        { ffiName = EqualityFunction.ffiName className
-        , implicitArgument = Nothing
-        , argumentTypes = [selfType, selfType]
-        , returnType = FFI.typeOf @Bool Proxy
-        , invoke = EqualityFunction.invoke equalityFunction
-        }
+    let equalityFunctionInfo =
+          Function
+            { ffiName = EqualityFunction.ffiName className
+            , implicitArgument = Nothing
+            , argumentTypes = [selfType, selfType]
+            , returnType = FFI.typeOf @Bool Proxy
+            , invoke = EqualityFunction.invoke equalityFunction
+            }
+    let hashFunctionInfo =
+          Function
+            { ffiName = HashFunction.ffiName className
+            , implicitArgument = Nothing
+            , argumentTypes = [selfType]
+            , returnType = FFI.typeOf @Int Proxy
+            , invoke = HashFunction.invoke hashFunction
+            }
+    [equalityFunctionInfo, hashFunctionInfo]
 
 comparisonFunctionInfo :: FFI.ClassName -> Maybe ComparisonFunction -> List Function
 comparisonFunctionInfo className maybeComparisonFunction = case maybeComparisonFunction of

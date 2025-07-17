@@ -41,6 +41,7 @@ module OpenSolid.Qty
 where
 
 import Data.Coerce qualified
+import Data.Hashable (Hashable)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text qualified
 import Foreign.Storable (Storable)
@@ -102,6 +103,8 @@ deriving newtype instance Prelude.RealFloat Float
 deriving newtype instance Prelude.Read Float
 
 deriving newtype instance Storable (Qty units)
+
+deriving newtype instance Hashable (Qty units)
 
 instance HasZero (Qty units) where
   zero = zero
