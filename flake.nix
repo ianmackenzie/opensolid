@@ -1,5 +1,6 @@
 {
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+  inputs.nixpkgs.url =
+    "github:nixos/nixpkgs?rev=62e0f05ede1da0d54515d4ea8ce9c733f12d9f08";
   outputs = { nixpkgs, ... }:
     # All supported platforms/architectures
     let
@@ -12,7 +13,7 @@
         let
           overlay = final: prev: {
             haskell-language-server = prev.haskell-language-server.override {
-              supportedGhcVersions = [ "910" ];
+              supportedGhcVersions = [ "912" ];
             };
           };
           pkgs = nixpkgs.legacyPackages.${system}.extend overlay;
@@ -27,7 +28,7 @@
               # https://discourse.nixos.org/t/non-interactive-bash-errors-from-flake-nix-mkshell/33310
               pkgs.bashInteractive
               # The Haskell compiler itself
-              pkgs.haskell.compiler.ghc910
+              pkgs.haskell.compiler.ghc912
               # The Cabal build tool for Haskell
               pkgs.cabal-install
               # Haskell editor/IDE support

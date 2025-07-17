@@ -72,7 +72,7 @@ map4 function generatorA generatorB generatorC generatorD = OpenSolid.Random.do
   return (function valueA valueB valueC valueD)
 
 seed :: Generator Seed
-seed = Generator (System.Random.split >> Pair.mapFirst Seed)
+seed = Generator (System.Random.splitGen >> Pair.mapFirst Seed)
 
 oneOf :: NonEmpty a -> Generator a
 oneOf values = merge (NonEmpty.map return values)
