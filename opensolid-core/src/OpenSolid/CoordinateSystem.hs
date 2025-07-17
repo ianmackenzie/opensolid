@@ -27,7 +27,7 @@ newtype LocalSpace = LocalSpace Type
 
 type Defines space = 'LocalSpace space
 
-instance HasUnits (space @ units) units (space @ Unitless)
+instance HasUnits (space @ units) units
 
 type Space :: CoordinateSystem -> Type
 type family Space coordinateSystem where

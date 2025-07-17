@@ -37,21 +37,21 @@ import {-# SOURCE #-} OpenSolid.Result (Result (Failure, Success))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)
 import OpenSolid.Unitless (Unitless)
 
-class HasUnits erased Unitless erased => HasUnits (a :: k) units erased | a -> units, a -> erased
+class HasUnits (a :: k) units | a -> units
 
-instance HasUnits Int Unitless Int
+instance HasUnits Int Unitless
 
-instance HasUnits (Qty units) units (Qty Unitless)
+instance HasUnits (Qty units) units
 
-instance HasUnits Sign Unitless Sign
+instance HasUnits Sign Unitless
 
-instance HasUnits a units erased => HasUnits (Maybe a) units (Maybe erased)
+instance HasUnits a units => HasUnits (Maybe a) units
 
-instance HasUnits a units erased => HasUnits (Result x a) units (Result x erased)
+instance HasUnits a units => HasUnits (Result x a) units
 
-instance HasUnits a units erased => HasUnits (List a) units (List erased)
+instance HasUnits a units => HasUnits (List a) units
 
-instance HasUnits a units erased => HasUnits (NonEmpty a) units (NonEmpty erased)
+instance HasUnits a units => HasUnits (NonEmpty a) units
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
@@ -84,7 +84,7 @@ instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (Non
   coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
-erase :: (Coercion a erased, HasUnits a units erased) => a -> erased
+erase :: forall b a units. (Coercion a b, HasUnits a units, HasUnits b Unitless) => a -> b
 erase = coerce
 
 data a :*: b
@@ -94,8 +94,8 @@ data a :/: b
 {-# INLINE specialize #-}
 specialize ::
   ( Coercion a b
-  , HasUnits a unitsA erasedA
-  , HasUnits b unitsB erasedB
+  , HasUnits a unitsA
+  , HasUnits b unitsB
   , Specialize unitsA unitsB
   ) =>
   a ->
@@ -105,8 +105,8 @@ specialize = coerce
 {-# INLINE unspecialize #-}
 unspecialize ::
   ( Coercion a b
-  , HasUnits a unitsA erasedA
-  , HasUnits b unitsB erasedB
+  , HasUnits a unitsA
+  , HasUnits b unitsB
   , Specialize unitsA unitsB
   ) =>
   b ->
@@ -116,8 +116,8 @@ unspecialize = coerce
 {-# INLINE commute #-}
 commute ::
   ( Coercion a b
-  , HasUnits a unitsA erasedA
-  , HasUnits b unitsB erasedB
+  , HasUnits a unitsA
+  , HasUnits b unitsB
   , unitsA ~ units1 :*: units2
   , unitsB ~ units2 :*: units1
   ) =>
@@ -128,8 +128,8 @@ commute = coerce
 {-# INLINE leftAssociate #-}
 leftAssociate ::
   ( Coercion a b
-  , HasUnits a unitsA erasedA
-  , HasUnits b unitsB erasedB
+  , HasUnits a unitsA
+  , HasUnits b unitsB
   , unitsA ~ units1 :*: (units2 :*: units3)
   , unitsB ~ (units1 :*: units2) :*: units3
   ) =>
@@ -140,8 +140,8 @@ leftAssociate = coerce
 {-# INLINE rightAssociate #-}
 rightAssociate ::
   ( Coercion a b
-  , HasUnits a unitsA erasedA
-  , HasUnits b unitsB erasedB
+  , HasUnits a unitsA
+  , HasUnits b unitsB
   , unitsA ~ (units1 :*: units2) :*: units3
   , unitsB ~ units1 :*: (units2 :*: units3)
   ) =>
@@ -152,8 +152,8 @@ rightAssociate = coerce
 {-# INLINE simplify #-}
 simplify ::
   ( Coercion a b
-  , HasUnits a unitsA erasedA
-  , HasUnits b unitsB erasedB
+  , HasUnits a unitsA
+  , HasUnits b unitsB
   , Simplification unitsA unitsB
   ) =>
   a ->

@@ -133,7 +133,7 @@ instance FFI (VectorCurve2d (space @ Unitless)) where
 instance FFI (VectorCurve2d (space @ Meters)) where
   representation = FFI.classRepresentation "DisplacementCurve2d"
 
-instance HasUnits (VectorCurve2d (space @ units)) units (VectorCurve2d (space @ Unitless))
+instance HasUnits (VectorCurve2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

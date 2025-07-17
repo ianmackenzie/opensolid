@@ -46,7 +46,7 @@ type Compiled coordinateSystem =
 
 instance HasField "compiled" (SurfaceFunction3d (space @ units)) (Compiled (space @ units))
 
-instance HasUnits (SurfaceFunction3d (space @ units)) units (SurfaceFunction3d (space @ Unitless))
+instance HasUnits (SurfaceFunction3d (space @ units)) units
 
 instance
   space1 ~ space2 =>

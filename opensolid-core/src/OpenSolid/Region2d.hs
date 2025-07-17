@@ -94,7 +94,7 @@ instance FFI (Region2d (space @ Meters)) where
 instance FFI (Region2d (space @ Unitless)) where
   representation = FFI.classRepresentation "UvRegion"
 
-instance HasUnits (Region2d (space @ units)) units (Region2d (space @ Unitless))
+instance HasUnits (Region2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

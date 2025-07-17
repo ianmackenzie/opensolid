@@ -85,7 +85,7 @@ instance HasField "compiled" (Curve3d (space @ units)) (Compiled (space @ units)
 instance HasField "derivative" (Curve3d (space @ units)) (VectorCurve3d (space @ units)) where
   getField (Curve3d _ d) = d
 
-instance HasUnits (Curve3d (space @ units)) units (Curve3d (space @ Unitless))
+instance HasUnits (Curve3d (space @ units)) units
 
 instance
   space1 ~ space2 =>

@@ -91,7 +91,7 @@ instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units) where
 
 type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
 
-instance HasUnits (SurfaceFunction units) units (SurfaceFunction Unitless)
+instance HasUnits (SurfaceFunction units) units
 
 instance Units.Coercion (SurfaceFunction unitsA) (SurfaceFunction unitsB) where
   coerce (SurfaceFunction c du dv) =

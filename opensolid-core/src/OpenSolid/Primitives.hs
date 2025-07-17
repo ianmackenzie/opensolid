@@ -66,7 +66,7 @@ instance FFI (Vector2d (space @ Meters)) where
 instance FFI (Vector2d (space @ SquareMeters)) where
   representation = FFI.classRepresentation "AreaVector2d"
 
-instance HasUnits (Vector2d (space @ units)) units (Vector2d (space @ Unitless))
+instance HasUnits (Vector2d (space @ units)) units
 
 instance
   space1 ~ space2 =>
@@ -253,7 +253,7 @@ newtype Direction2d (space :: Type) = Unit2d (Vector2d (space @ Unitless))
 pattern Direction2d :: Float -> Float -> Direction2d space
 pattern Direction2d dX dY = Unit2d (Vector2d dX dY)
 
-instance HasUnits (Direction2d space) Unitless (Direction2d space)
+instance HasUnits (Direction2d space) Unitless
 
 instance FFI (Direction2d space) where
   representation = FFI.classRepresentation "Direction2d"
@@ -366,7 +366,7 @@ instance FFI (Point2d (space @ Meters)) where
 instance FFI (Point2d (space @ Unitless)) where
   representation = FFI.classRepresentation "UvPoint"
 
-instance HasUnits (Point2d (space @ units)) units (Point2d (space @ Unitless))
+instance HasUnits (Point2d (space @ units)) units
 
 instance
   space1 ~ space2 =>
@@ -445,7 +445,7 @@ data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Qty units) => Show (VectorBounds2d (space @ units))
 
-instance HasUnits (VectorBounds2d (space @ units)) units (VectorBounds2d (space @ Unitless))
+instance HasUnits (VectorBounds2d (space @ units)) units
 
 instance
   space1 ~ space2 =>
@@ -793,7 +793,7 @@ instance HasField "coordinates" (Bounds2d (space @ units)) (Bounds units, Bounds
 
 deriving instance Show (Qty units) => Show (Bounds2d (space @ units))
 
-instance HasUnits (Bounds2d (space @ units)) units (Bounds2d (space @ Unitless))
+instance HasUnits (Bounds2d (space @ units)) units
 
 instance
   space1 ~ space2 =>
@@ -932,7 +932,7 @@ deriving instance Eq (Axis2d (space @ units))
 
 deriving instance Show (Qty units) => Show (Axis2d (space @ units))
 
-instance HasUnits (Axis2d (space @ units)) units (Axis2d (space @ Unitless))
+instance HasUnits (Axis2d (space @ units)) units
 
 instance FFI (Axis2d (space @ Meters)) where
   representation = FFI.classRepresentation "Axis2d"
@@ -980,7 +980,7 @@ deriving instance Ord (Transform2d tag (space @ units))
 
 deriving instance Show (Qty units) => Show (Transform2d tag (space @ units))
 
-instance HasUnits (Transform2d tag (space @ units)) units (Transform2d tag (space @ Unitless))
+instance HasUnits (Transform2d tag (space @ units)) units
 
 instance
   (tag1 ~ tag2, space1 ~ space2) =>
@@ -1059,7 +1059,7 @@ instance FFI (Vector3d (space @ Meters)) where
 instance FFI (Vector3d (space @ SquareMeters)) where
   representation = FFI.classRepresentation "AreaVector3d"
 
-instance HasUnits (Vector3d (space @ units)) units (Vector3d (space @ Unitless))
+instance HasUnits (Vector3d (space @ units)) units
 
 instance
   space1 ~ space2 =>
@@ -1260,7 +1260,7 @@ pattern Direction3d dR dF dU = Unit3d (Vector3d dR dF dU)
 instance FFI (Direction3d space) where
   representation = FFI.classRepresentation "Direction3d"
 
-instance HasUnits (Direction3d space) Unitless (Direction3d space)
+instance HasUnits (Direction3d space) Unitless
 
 instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d space2) where
   coerce = identity
@@ -1458,7 +1458,7 @@ deriving instance Show (Qty units) => Show (Point3d (space @ units))
 instance FFI (Point3d (space @ Meters)) where
   representation = FFI.classRepresentation "Point3d"
 
-instance HasUnits (Point3d (space @ units)) units (Point3d (space @ Unitless))
+instance HasUnits (Point3d (space @ units)) units
 
 instance
   space1 ~ space2 =>
@@ -1540,7 +1540,7 @@ data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Qty units) => Show (VectorBounds3d (space @ units))
 
-instance HasUnits (VectorBounds3d (space @ units)) units (VectorBounds3d (space @ Unitless))
+instance HasUnits (VectorBounds3d (space @ units)) units
 
 instance
   space1 ~ space2 =>
@@ -1903,7 +1903,7 @@ deriving instance Show (Qty units) => Show (Bounds3d (space @ units))
 instance FFI (Bounds3d (space @ Meters)) where
   representation = FFI.classRepresentation "Bounds3d"
 
-instance HasUnits (Bounds3d (space @ units)) units (Bounds3d (space @ Unitless))
+instance HasUnits (Bounds3d (space @ units)) units
 
 instance
   space1 ~ space2 =>
@@ -2318,7 +2318,7 @@ deriving instance Ord (Transform3d tag (space @ units))
 
 deriving instance Show (Qty units) => Show (Transform3d tag (space @ units))
 
-instance HasUnits (Transform3d tag (space @ units)) units (Transform3d tag (space @ Unitless))
+instance HasUnits (Transform3d tag (space @ units)) units
 
 instance
   (tag1 ~ tag2, space1 ~ space2) =>
