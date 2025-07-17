@@ -21,6 +21,7 @@ library
   default-language: GHC2021
   build-depends:
     base,
+    hashable,
     opensolid-components,
     opensolid-core,
     template-haskell,
@@ -37,6 +38,7 @@ library
     OpenSolid.API.Constructor
     OpenSolid.API.EqualityFunction
     OpenSolid.API.Function
+    OpenSolid.API.HashFunction
     OpenSolid.API.ImplicitArgument
     OpenSolid.API.MemberFunction
     OpenSolid.API.NegationFunction

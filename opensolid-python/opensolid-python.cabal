@@ -37,6 +37,7 @@ executable opensolid-python
     Python.EqualityFunction
     Python.FFI
     Python.Function
+    Python.HashFunction
     Python.MemberFunction
     Python.NegationFunction
     Python.PostOperator

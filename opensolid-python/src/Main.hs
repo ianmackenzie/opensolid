@@ -24,6 +24,7 @@ import Python.Constructor qualified
 import Python.EqualityFunction qualified
 import Python.FFI qualified
 import Python.Function qualified
+import Python.HashFunction qualified
 import Python.MemberFunction qualified
 import Python.NegationFunction qualified
 import Python.PostOperator qualified
@@ -197,7 +198,7 @@ classDefinition
       staticFunctions
       properties
       memberFunctions
-      equalityFunction
+      equalityAndHashFunctions
       comparisonFunction
       negationFunction
       absFunction
@@ -238,8 +239,12 @@ classDefinition
             , Python.indent (List.map (Python.StaticFunction.definition className) staticFunctions)
             , Python.indent (List.map (Python.Property.definition className) properties)
             , Python.indent (List.map (Python.MemberFunction.definition className) memberFunctions)
-            , case equalityFunction of
-                Just _ -> Python.indent [Python.EqualityFunction.definition className]
+            , case equalityAndHashFunctions of
+                Just _ ->
+                  Python.indent
+                    [ Python.EqualityFunction.definition className
+                    , Python.HashFunction.definition className
+                    ]
                 Nothing -> ""
             , case comparisonFunction of
                 Just _ -> Python.indent [Python.ComparisonFunction.definitions className]
