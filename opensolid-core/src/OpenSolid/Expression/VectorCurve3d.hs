@@ -1,5 +1,6 @@
 module OpenSolid.Expression.VectorCurve3d
   ( constant
+  , on
   , squaredMagnitude
   , squaredMagnitude'
   , magnitude
@@ -22,6 +23,12 @@ import OpenSolid.Vector3d (Vector3d)
 
 constant :: Vector3d (space @ units) -> Expression Float (Vector3d (space @ units))
 constant = Expression.constant
+
+on ::
+  Plane3d (space @ planeUnits) (Defines local) ->
+  Expression Float (Vector2d (local @ units)) ->
+  Expression Float (Vector3d (space @ units))
+on = Expression.on
 
 squaredMagnitude' ::
   Expression Float (Vector3d (space @ units)) ->

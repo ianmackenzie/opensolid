@@ -1,5 +1,6 @@
 module OpenSolid.Expression.Curve3d
   ( constant
+  , on
   , placeIn
   , relativeTo
   , transformBy
@@ -18,6 +19,12 @@ import OpenSolid.Transform3d (Transform3d)
 
 constant :: Point3d (space @ units) -> Expression Float (Point3d (space @ units))
 constant = Expression.constant
+
+on ::
+  Plane3d (space @ units) (Defines local) ->
+  Expression Float (Point2d (local @ units)) ->
+  Expression Float (Point3d (space @ units))
+on = Expression.on
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->

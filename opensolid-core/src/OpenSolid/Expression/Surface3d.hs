@@ -1,5 +1,6 @@
 module OpenSolid.Expression.Surface3d
   ( constant
+  , on
   , placeIn
   , relativeTo
   , projectInto
@@ -19,6 +20,12 @@ import OpenSolid.UvPoint (UvPoint)
 
 constant :: Point3d (space @ units) -> Expression UvPoint (Point3d (space @ units))
 constant = Expression.constant
+
+on ::
+  Plane3d (space @ units) (Defines local) ->
+  Expression UvPoint (Point2d (local @ units)) ->
+  Expression UvPoint (Point3d (space @ units))
+on = Expression.on
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
