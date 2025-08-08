@@ -467,11 +467,7 @@ zeros function
       case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
         Success solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions
-          Success $
-            PartialZeros.finalize
-              (HorizontalCurve.new function dvdu)
-              (VerticalCurve.new function dudv)
-              partialZeros
+          Success (PartialZeros.finalize function dvdu dudv partialZeros)
         Failure Solve2d.InfiniteRecursion -> exception "Higher-order zero detected"
 
 addSolution :: PartialZeros units -> Solution units -> PartialZeros units

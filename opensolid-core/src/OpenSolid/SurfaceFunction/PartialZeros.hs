@@ -22,8 +22,11 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.SaddleRegion (SaddleRegion)
 import OpenSolid.SurfaceFunction.SaddleRegion qualified as SaddleRegion
+import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction.Zeros (Zeros (Zeros))
 import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
 import OpenSolid.UvBounds (UvBounds)
@@ -134,17 +137,19 @@ data PiecewiseCurve
   = PiecewiseCurve Domain2d.Boundary Domain2d.Boundary (NonEmpty (Curve2d UvCoordinates))
 
 piecewiseCurve ::
-  (Float -> Float -> NonEmpty UvBounds -> Curve2d UvCoordinates) ->
-  (Float -> Float -> NonEmpty UvBounds -> Curve2d UvCoordinates) ->
+  Tolerance units =>
+  SurfaceFunction units ->
+  SurfaceFunction Unitless ->
+  SurfaceFunction Unitless ->
   CrossingSegment ->
   PiecewiseCurve
-piecewiseCurve horizontalCurve verticalCurve (CrossingSegment parameterization start end boxes) = do
+piecewiseCurve function dvdu dudv (CrossingSegment parameterization start end boxes) = do
   let (Point2d uStart vStart, startBoundary) = start
   let (Point2d uEnd vEnd, endBoundary) = end
   let curve = case parameterization of
-        Horizontal -> horizontalCurve uStart uEnd boxes
-        Vertical -> verticalCurve vStart vEnd boxes
-        Diagonal -> horizontalCurve uStart uEnd boxes
+        Horizontal -> HorizontalCurve.new function dvdu uStart uEnd boxes
+        Vertical -> VerticalCurve.new function dudv vStart vEnd boxes
+        Diagonal -> HorizontalCurve.new function dvdu uStart uEnd boxes
   PiecewiseCurve startBoundary endBoundary (NonEmpty.one curve)
 
 type PartialCurves = (List PiecewiseCurve, List (NonEmpty (Curve2d UvCoordinates)))
@@ -179,14 +184,15 @@ joinPiecewiseCurves (PiecewiseCurve start1 end1 segments1) (PiecewiseCurve start
 
 finalize ::
   Tolerance units =>
-  (Float -> Float -> NonEmpty UvBounds -> Curve2d UvCoordinates) ->
-  (Float -> Float -> NonEmpty UvBounds -> Curve2d UvCoordinates) ->
+  SurfaceFunction units ->
+  SurfaceFunction Unitless ->
+  SurfaceFunction Unitless ->
   PartialZeros units ->
   Zeros
-finalize horizontalCurve verticalCurve partialZeros = do
+finalize function dvdu dudv partialZeros = do
   let PartialZeros{crossingSegments, tangentPoints, saddleRegions} = partialZeros
   let piecewiseCurveSegments =
-        List.map (piecewiseCurve horizontalCurve verticalCurve) crossingSegments
+        List.map (piecewiseCurve function dvdu dudv) crossingSegments
   let (piecewiseCurves, crossingLoopSegments) =
         List.foldr insertPiecewiseCurve ([], []) piecewiseCurveSegments
   let extendedPiecewiseCurves =
