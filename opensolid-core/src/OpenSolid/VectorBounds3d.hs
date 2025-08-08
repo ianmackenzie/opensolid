@@ -29,6 +29,7 @@ module OpenSolid.VectorBounds3d
   , overlap
   , intersection
   , interpolate
+  , on
   , relativeTo
   , placeIn
   , transformBy
@@ -48,7 +49,11 @@ import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d)
   , Frame3d
+  , Plane3d (Plane3d)
+  , PlaneOrientation3d (PlaneOrientation3d)
+  , Vector2d (Vector2d)
   , Vector3d (Vector3d)
+  , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d (VectorBounds3d)
   )
 import OpenSolid.Qty qualified as Qty
@@ -271,6 +276,28 @@ intersection (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = Maybe.do
 interpolate :: VectorBounds3d (space @ units) -> Float -> Float -> Float -> Vector3d (space @ units)
 interpolate (VectorBounds3d x y z) u v w =
   Vector3d (Bounds.interpolate x u) (Bounds.interpolate y v) (Bounds.interpolate z w)
+
+on ::
+  Plane3d (space @ planeUnits) (Defines local) ->
+  VectorBounds2d (local @ units) ->
+  VectorBounds3d (space @ units)
+on plane bounds2d = do
+  let VectorBounds2d bX bY = bounds2d
+  let cX = Bounds.midpoint bX
+  let cY = Bounds.midpoint bY
+  let rX = 0.5 * Bounds.width bX
+  let rY = 0.5 * Bounds.width bY
+  let Plane3d _ (PlaneOrientation3d i j) = plane
+  let Direction3d iR iF iU = i
+  let Direction3d jR jF jU = j
+  let Vector3d cR cF cU = Vector3d.on plane (Vector2d cX cY)
+  let rR = rX * Float.abs iR + rY * Float.abs jR
+  let rF = rX * Float.abs iF + rY * Float.abs jF
+  let rU = rX * Float.abs iU + rY * Float.abs jU
+  let bR = Bounds (cR - rR) (cR + rR)
+  let bF = Bounds (cF - rF) (cF + rF)
+  let bU = Bounds (cU - rU) (cU + rU)
+  VectorBounds3d bR bF bU
 
 placeIn ::
   Frame3d (global @ frameUnits) (Defines local) ->
