@@ -1,5 +1,6 @@
 module OpenSolid.Bounds2d
   ( Bounds2d (Bounds2d)
+  , coerce
   , xCoordinate
   , yCoordinate
   , coordinates
@@ -68,6 +69,9 @@ import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
+
+coerce :: Bounds2d (space1 @ units1) -> Bounds2d (space2 @ units2)
+coerce (Bounds2d x y) = Bounds2d (Bounds.coerce x) (Bounds.coerce y)
 
 -- | Get the X coordinate bounds of a bounding box.
 xCoordinate :: Bounds2d (space @ units) -> Bounds units
