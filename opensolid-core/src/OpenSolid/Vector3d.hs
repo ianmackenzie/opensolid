@@ -3,6 +3,7 @@ module OpenSolid.Vector3d
   , zero
   , coerce
   , unit
+  , on
   , fromComponents
   , componentIn
   , projectionIn
@@ -74,6 +75,19 @@ coerce (Vector3d vx vy vz) = Vector3d (Qty.coerce vx) (Qty.coerce vy) (Qty.coerc
 {-# INLINE unit #-}
 unit :: Direction3d space -> Vector3d (space @ Unitless)
 unit (Unit3d vector) = vector
+
+-- | Construct a 3D vector on the given plane, given a 2D vector within the plane.
+on ::
+  Plane3d (space @ planeUnits) (Defines local) ->
+  Vector2d (local @ units) ->
+  Vector3d (space @ units)
+on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vX vY) = do
+  let Direction3d iR iF iU = i
+  let Direction3d jR jF jU = j
+  let vR = vX * iR + vY * jR
+  let vF = vX * iF + vY * jF
+  let vU = vX * iU + vY * jU
+  Vector3d vR vF vU
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
 fromComponents :: Convention3d -> (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
