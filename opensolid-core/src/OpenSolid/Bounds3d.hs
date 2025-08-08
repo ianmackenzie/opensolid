@@ -24,6 +24,7 @@ module OpenSolid.Bounds3d
   , intersection
   , diameter
   , interpolate
+  , on
   , placeIn
   , relativeTo
   , projectInto
@@ -36,6 +37,7 @@ import Data.Coerce qualified
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Float qualified as Float
@@ -167,6 +169,26 @@ diameter (Bounds3d x y z) = Qty.hypot3 (Bounds.width x) (Bounds.width y) (Bounds
 
 interpolate :: Bounds3d (space @ units) -> Float -> Float -> Float -> Point3d (space @ units)
 interpolate (PositionBounds3d pb) u v w = Position3d (VectorBounds3d.interpolate pb u v w)
+
+on ::
+  Plane3d (space @ units) (Defines local) ->
+  Bounds2d (local @ units) ->
+  Bounds3d (space @ units)
+on plane bounds2d = do
+  let Bounds2d bX bY = bounds2d
+  let rX = 0.5 * Bounds.width bX
+  let rY = 0.5 * Bounds.width bY
+  let Plane3d _ (PlaneOrientation3d i j) = plane
+  let Direction3d iR iF iU = i
+  let Direction3d jR jF jU = j
+  let Point3d cR cF cU = Point3d.on plane (Bounds2d.centerPoint bounds2d)
+  let rR = rX * Float.abs iR + rY * Float.abs jR
+  let rF = rX * Float.abs iF + rY * Float.abs jF
+  let rU = rX * Float.abs iU + rY * Float.abs jU
+  let bR = Bounds (cR - rR) (cR + rR)
+  let bF = Bounds (cF - rF) (cF + rF)
+  let bU = Bounds (cU - rU) (cU + rU)
+  Bounds3d bR bF bU
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
