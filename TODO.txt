@@ -1,3 +1,6 @@
+Try 'let f = planeNormal `dot` (surface.function - world.originPoint) + Length.millimeters 1.0' in testPlaneTorusIntersection
+-> seemed to be some first derivative discontinuities...
+
 Special case composition to check for constant inputs
 -> fall back to composeCurve/composeSurfaceFunction only if inner curve is non-constant
 -> also add check in curveOfCurve, curveOfSurfaceFunction, surfaceFunctionOfCurve, surfaceFunctionOfSurfaceFunction etc.
@@ -15,6 +18,10 @@ Overhaul handling of discontinuities
 - update Curve.sqrt' and SurfaceFunction.sqrt' to use specialized square root derivative expression
 - review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
   - get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
+
+Rename ZeroEverywhere to IsZero
+
+Remove specialized L'Hopital support from bytecode
 
 Update API.Class.buildClass to use field accessor syntax
 
