@@ -72,8 +72,7 @@ quadratic subproblem saddlePoint = do
   let fbb = ub * ub * fuu + 2.0 * ub * vb * fuv + vb * vb * fvv
   let determinant = fab .*. fab - faa .*. fbb
   let sqrtD = Qty.sqrt' determinant
-  let m1 = (-fab + sqrtD) / fbb
-  let m2 = (-fab - sqrtD) / fbb
+  let (m1, m2) = Qty.minmax ((-fab + sqrtD) / fbb, (-fab - sqrtD) / fbb)
   let v1 = Vector2d.normalize (vA + m1 * vB)
   let v2 = Vector2d.normalize (vA + m2 * vB)
   let d1 = Direction2d.unsafe v1
@@ -100,22 +99,22 @@ connectingCurves boundaryPoint SaddleRegion{subproblem, frame, d1, d2} = do
   let dy = Frame2d.yDirection frame
   case (Qty.sign x, Qty.sign y) of
     (Positive, Positive) ->
-      connect subproblem frame d1 boundaryPoint $
+      connect subproblem frame d2 boundaryPoint $
         [ Axis2d.through saddlePoint dx
         , Axis2d.through saddlePoint -dy
         ]
     (Positive, Negative) ->
-      connect subproblem frame d2 boundaryPoint $
+      connect subproblem frame d1 boundaryPoint $
         [ Axis2d.through saddlePoint -dx
         , Axis2d.through saddlePoint -dy
         ]
     (Negative, Positive) ->
-      connect subproblem frame -d2 boundaryPoint $
+      connect subproblem frame -d1 boundaryPoint $
         [ Axis2d.through saddlePoint dx
         , Axis2d.through saddlePoint dy
         ]
     (Negative, Negative) ->
-      connect subproblem frame -d1 boundaryPoint $
+      connect subproblem frame -d2 boundaryPoint $
         [ Axis2d.through saddlePoint -dx
         , Axis2d.through saddlePoint dy
         ]
