@@ -18,6 +18,7 @@ module OpenSolid.Qty
   , abs
   , min
   , max
+  , minmax
   , smaller
   , larger
   , smallerBy
@@ -221,6 +222,10 @@ min = Prelude.min
 {-# INLINE max #-}
 max :: Qty units -> Qty units -> Qty units
 max = Prelude.max
+
+{-# INLINE minmax #-}
+minmax :: (Qty units, Qty units) -> (Qty units, Qty units)
+minmax (a, b) = if a <= b then (a, b) else (b, a)
 
 smaller :: Qty units -> Qty units -> Qty units
 smaller x y = if abs x <= abs y then x else y
