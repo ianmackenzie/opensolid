@@ -134,9 +134,10 @@ connect subproblem frame startDirection endPoint boundingAxes = do
   let Point2d u1 v1 = startPoint
   let Point2d u2 v2 = endPoint
   let Direction2d du dv = startDirection
+  let interpolantSize = 1e-3
   if Qty.abs du >= Qty.abs dv
     then do
-      let uMid = u1 + 1e-3 * Qty.sign (u2 - u1) |> Qty.clampTo (Bounds u1 u2)
+      let uMid = u1 + interpolantSize * Qty.sign (u2 - u1) |> Qty.clampTo (Bounds u1 u2)
       let startDerivative = Vector2d (uMid - u1) ((uMid - u1) * (dv / du))
       let interpolatingBounds = NonEmpty.one (Bounds2d (Bounds u1 uMid) vBounds)
       let interpolatingCurve =
@@ -150,7 +151,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
                 HorizontalCurve.bounded f dvdu uMid u2 implicitBounds frame boundingAxes
           NonEmpty.two interpolatingCurve implicitCurve
     else do
-      let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clampTo (Bounds v1 v2)
+      let vMid = v1 + interpolantSize * Qty.sign (v2 - v1) |> Qty.clampTo (Bounds v1 v2)
       let startDerivative = Vector2d ((vMid - v1) * (du / dv)) (vMid - v1)
       let interpolatingBounds = NonEmpty.one (Bounds2d uBounds (Bounds v1 vMid))
       let interpolatingCurve =
