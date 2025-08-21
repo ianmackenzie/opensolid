@@ -230,10 +230,13 @@ deriving instance Ord (Variable3d input)
 
 deriving instance Show (Variable3d input)
 
+uvPoint :: Vector2d Coordinates -> UvPoint
+uvPoint position = Point2d.coerce (Position2d position)
+
 instance Composition (Ast1d input) (Ast1d Float) (Ast1d input) where
   Constant1d outer . _ = Constant1d outer
   Variable1d outer . Variable1d inner = Variable1d (outer . inner)
-  outer . Constant1d inner = Constant1d (Evaluate.curve1dValue (compileCurve1d outer) inner)
+  outer . Constant1d inner = Constant1d (evaluateCurve1d outer inner)
 
 instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) where
   input . CurveParameter = input
@@ -271,7 +274,7 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
 instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
   Variable2d outer . Variable1d inner = Variable2d (outer . inner)
-  outer . Constant1d inner = Constant2d (Evaluate.curve2dValue (compileCurve2d outer) inner)
+  outer . Constant1d inner = Constant2d (evaluateCurve2d outer inner)
 
 instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) where
   input . CurveParameter = input
@@ -297,7 +300,7 @@ instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) wh
 instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
   Constant3d outer . _ = Constant3d outer
   Variable3d outer . Variable1d inner = Variable3d (outer . inner)
-  outer . Constant1d inner = Constant3d (Evaluate.curve3dValue (compileCurve3d outer) inner)
+  outer . Constant1d inner = Constant3d (evaluateCurve3d outer inner)
 
 instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) where
   input . CurveParameter = input
@@ -322,8 +325,7 @@ instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) wh
 instance Composition (Ast2d input) (Ast1d UvPoint) (Ast1d input) where
   Constant1d outer . _ = Constant1d outer
   Variable1d outer . Variable2d inner = Variable1d (outer . inner)
-  outer . Constant2d (Vector2d u v) =
-    Constant1d (Evaluate.surface1dValue (compileSurface1d outer) (Point2d u v))
+  outer . Constant2d parameter = Constant1d (evaluateSurface1d outer (uvPoint parameter))
 
 instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) where
   input . SurfaceParameters = input
@@ -362,8 +364,7 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) 
 instance Composition (Ast2d input) (Ast2d UvPoint) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
   Variable2d outer . Variable2d inner = Variable2d (outer . inner)
-  outer . Constant2d (Vector2d u v) =
-    Constant2d (Evaluate.surface2dValue (compileSurface2d outer) (Point2d u v))
+  outer . Constant2d parameter = Constant2d (evaluateSurface2d outer (uvPoint parameter))
 
 instance Composition (Variable2d input) (Variable2d UvPoint) (Variable2d input) where
   input . SurfaceParameters = input
@@ -390,8 +391,7 @@ instance Composition (Variable2d input) (Variable2d UvPoint) (Variable2d input) 
 instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
   Constant3d outer . _ = Constant3d outer
   Variable3d outer . Variable2d inner = Variable3d (outer . inner)
-  outer . Constant2d (Vector2d u v) =
-    Constant3d (Evaluate.surface3dValue (compileSurface3d outer) (Point2d u v))
+  outer . Constant2d parameter = Constant3d (evaluateSurface3d outer (uvPoint parameter))
 
 instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) where
   input . SurfaceParameters = input
@@ -1400,6 +1400,24 @@ compileSurface2d (Variable2d var) = Evaluate.Bytecode (Compile.surface2d (compil
 compileSurface3d :: Ast3d UvPoint -> Compiled UvPoint (Vector3d Coordinates)
 compileSurface3d (Constant3d val) = Evaluate.Constant val
 compileSurface3d (Variable3d var) = Evaluate.Bytecode (Compile.surface3d (compileVariable3d var))
+
+evaluateCurve1d :: Ast1d Float -> Float -> Float
+evaluateCurve1d ast input = Evaluate.curve1dValue (compileCurve1d ast) input
+
+evaluateCurve2d :: Ast2d Float -> Float -> Vector2d Coordinates
+evaluateCurve2d ast input = Evaluate.curve2dValue (compileCurve2d ast) input
+
+evaluateCurve3d :: Ast3d Float -> Float -> Vector3d Coordinates
+evaluateCurve3d ast input = Evaluate.curve3dValue (compileCurve3d ast) input
+
+evaluateSurface1d :: Ast1d UvPoint -> UvPoint -> Float
+evaluateSurface1d ast input = Evaluate.surface1dValue (compileSurface1d ast) input
+
+evaluateSurface2d :: Ast2d UvPoint -> UvPoint -> Vector2d Coordinates
+evaluateSurface2d ast input = Evaluate.surface2dValue (compileSurface2d ast) input
+
+evaluateSurface3d :: Ast3d UvPoint -> UvPoint -> Vector3d Coordinates
+evaluateSurface3d ast input = Evaluate.surface3dValue (compileSurface3d ast) input
 
 debugCurve1d :: Ast1d Float -> Text
 debugCurve1d (Constant1d value) = "Constant: " <> Text.float value
