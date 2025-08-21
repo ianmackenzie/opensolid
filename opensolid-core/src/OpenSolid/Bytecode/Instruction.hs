@@ -93,6 +93,9 @@ data Instruction
   | TransformPoint3d ConstantIndex VariableIndex
   | PlaceVector2d ConstantIndex VariableIndex
   | PlacePoint2d ConstantIndex VariableIndex
+  | Degenerate1d VariableIndex VariableIndex VariableIndex VariableIndex
+  | Degenerate2d VariableIndex VariableIndex VariableIndex VariableIndex
+  | Degenerate3d VariableIndex VariableIndex VariableIndex VariableIndex
   deriving (Eq, Ord, Show)
 
 encodeVariableIndex :: VariableIndex -> Builder
@@ -439,6 +442,24 @@ encodeOpcodeAndArguments instruction = case instruction of
     Encode.int 84
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
+  Degenerate1d parameterValue left middle right ->
+    Encode.int 85
+      <> encodeVariableIndex parameterValue
+      <> encodeVariableIndex left
+      <> encodeVariableIndex middle
+      <> encodeVariableIndex right
+  Degenerate2d parameterValue left middle right ->
+    Encode.int 86
+      <> encodeVariableIndex parameterValue
+      <> encodeVariableIndex left
+      <> encodeVariableIndex middle
+      <> encodeVariableIndex right
+  Degenerate3d parameterValue left middle right ->
+    Encode.int 87
+      <> encodeVariableIndex parameterValue
+      <> encodeVariableIndex left
+      <> encodeVariableIndex middle
+      <> encodeVariableIndex right
 
 return :: Int -> VariableIndex -> Builder
 return dimension variableIndex =

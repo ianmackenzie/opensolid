@@ -7,6 +7,13 @@
 #include "bytecode.h"
 #include "range.h"
 
+// Used when evaluating Degenerate#d opcodes,
+// to determine whether a given parameter value is at a given endpoint
+// or whether a given parameter range includes a given endpoint;
+// should be kept in sync with the constants used in degenerateSelect in Ast.hs
+#define LEFT 0.000001
+#define RIGHT 0.999999
+
 inline double
 lerp(double a, double b, double t) {
   return a + t * (b - a);
@@ -843,6 +850,60 @@ computeValue(
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
         break;
       }
+      case Degenerate1d: {
+        double t = *getVariablePointer();
+        double left = *getVariablePointer();
+        double middle = *getVariablePointer();
+        double right = *getVariablePointer();
+        double* output = getVariablePointer();
+        if (t <= LEFT) {
+          *output = left;
+        } else if (t >= RIGHT) {
+          *output = right;
+        } else {
+          *output = middle;
+        }
+        break;
+      }
+      case Degenerate2d: {
+        double t = *getVariablePointer();
+        double* left = getVariablePointer();
+        double* middle = getVariablePointer();
+        double* right = getVariablePointer();
+        double* output = getVariablePointer();
+        if (t <= LEFT) {
+          output[0] = left[0];
+          output[1] = left[1];
+        } else if (t >= RIGHT) {
+          output[0] = right[0];
+          output[1] = right[1];
+        } else {
+          output[0] = middle[0];
+          output[1] = middle[1];
+        }
+        break;
+      }
+      case Degenerate3d: {
+        double t = *getVariablePointer();
+        double* left = getVariablePointer();
+        double* middle = getVariablePointer();
+        double* right = getVariablePointer();
+        double* output = getVariablePointer();
+        if (t <= LEFT) {
+          output[0] = left[0];
+          output[1] = left[1];
+          output[2] = left[2];
+        } else if (t >= RIGHT) {
+          output[0] = right[0];
+          output[1] = right[1];
+          output[2] = right[2];
+        } else {
+          output[0] = middle[0];
+          output[1] = middle[1];
+          output[2] = middle[2];
+        }
+        break;
+      }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
         break;
@@ -1648,6 +1709,60 @@ computeBounds(
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
+        break;
+      }
+      case Degenerate1d: {
+        Range t = *getVariablePointer();
+        Range left = *getVariablePointer();
+        Range middle = *getVariablePointer();
+        Range right = *getVariablePointer();
+        Range* output = getVariablePointer();
+        if (t.lower <= LEFT) {
+          *output = left;
+        } else if (t.upper >= RIGHT) {
+          *output = right;
+        } else {
+          *output = middle;
+        }
+        break;
+      }
+      case Degenerate2d: {
+        Range t = *getVariablePointer();
+        Range* left = getVariablePointer();
+        Range* middle = getVariablePointer();
+        Range* right = getVariablePointer();
+        Range* output = getVariablePointer();
+        if (t.lower <= LEFT) {
+          output[0] = left[0];
+          output[1] = left[1];
+        } else if (t.upper >= RIGHT) {
+          output[0] = right[0];
+          output[1] = right[1];
+        } else {
+          output[0] = middle[0];
+          output[1] = middle[1];
+        }
+        break;
+      }
+      case Degenerate3d: {
+        Range t = *getVariablePointer();
+        Range* left = getVariablePointer();
+        Range* middle = getVariablePointer();
+        Range* right = getVariablePointer();
+        Range* output = getVariablePointer();
+        if (t.lower <= LEFT) {
+          output[0] = left[0];
+          output[1] = left[1];
+          output[2] = left[2];
+        } else if (t.upper >= RIGHT) {
+          output[0] = right[0];
+          output[1] = right[1];
+          output[2] = right[2];
+        } else {
+          output[0] = middle[0];
+          output[1] = middle[1];
+          output[2] = middle[2];
+        }
         break;
       }
       case OPCODE_END: {
