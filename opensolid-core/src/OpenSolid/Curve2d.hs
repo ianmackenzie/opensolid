@@ -57,7 +57,6 @@ module OpenSolid.Curve2d
   , unconvert
   , curvature
   , curvature'
-  , removeStartDegeneracy
   , toPolyline
   , samplingPoints
   , medialAxis
@@ -124,7 +123,6 @@ import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
-import OpenSolid.Stream qualified as Stream
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
@@ -965,30 +963,6 @@ curvature ::
   Curve2d (space @ units1) ->
   Result HasDegeneracy (Curve units2)
 curvature curve = Result.map Units.specialize (curvature' curve)
-
-removeStartDegeneracy ::
-  Int ->
-  Point2d (space @ units) ->
-  List (Vector2d (space @ units)) ->
-  Curve2d (space @ units) ->
-  Curve2d (space @ units)
-removeStartDegeneracy continuity p1 d1 curve = Result.do
-  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
-  let endDerivativeValues = Stream.map VectorCurve2d.endValue curveDerivatives
-  let endCondition endDegree = (curve.endPoint, Stream.take endDegree endDerivativeValues)
-  let baseCurve endDegree = do
-        let (p2, d2) = endCondition endDegree
-        hermite p1 d1 p2 d2
-  let curveDerivative n =
-        VectorCurve2d.synthetic
-          (nthDerivative n (baseCurve (continuity + n)))
-          (curveDerivative (n + 1))
-  synthetic (baseCurve continuity) (curveDerivative 1)
-
-nthDerivative :: Int -> Curve2d (space @ units) -> VectorCurve2d (space @ units)
-nthDerivative 0 _ = internalError "nthDerivative should always be called with n >= 1"
-nthDerivative 1 curve = curve.derivative
-nthDerivative n curve = (nthDerivative (n - 1) curve).derivative
 
 toPolyline :: Resolution units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
 toPolyline resolution curve =

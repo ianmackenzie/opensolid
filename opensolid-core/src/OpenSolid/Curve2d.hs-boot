@@ -9,7 +9,8 @@ module OpenSolid.Curve2d
   , bounds
   , tangentDirection
   , reverse
-  , removeStartDegeneracy
+  , hermite
+  , synthetic
   , transformBy
   , piecewise
   , unsafePiecewise
@@ -71,12 +72,13 @@ tangentDirection ::
   Curve2d (space @ units) ->
   Result HasDegeneracy (DirectionCurve2d space)
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-removeStartDegeneracy ::
-  Int ->
+hermite ::
   Point2d (space @ units) ->
   List (Vector2d (space @ units)) ->
-  Curve2d (space @ units) ->
+  Point2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
   Curve2d (space @ units)
+synthetic :: Curve2d (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 transformBy ::
   Transform2d tag (space @ units) ->
   Curve2d (space @ units) ->
