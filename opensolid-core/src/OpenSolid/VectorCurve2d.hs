@@ -673,7 +673,7 @@ unsafeMagnitude curve =
       Vector2d.magnitude
       VectorBounds2d.magnitude
       curve.compiled
-    @ \self -> curve.derivative `dot` (Tolerance.exactly (quotient curve self))
+    @ \self -> curve.derivative `dot` Tolerance.exactly (quotient curve self)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

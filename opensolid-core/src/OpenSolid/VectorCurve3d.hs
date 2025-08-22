@@ -586,7 +586,7 @@ unsafeMagnitude curve = do
           Vector3d.magnitude
           VectorBounds3d.magnitude
           curve.compiled
-  let magnitudeDerivative self = curve.derivative `dot` (Tolerance.exactly (quotient curve self))
+  let magnitudeDerivative self = curve.derivative `dot` Tolerance.exactly (quotient curve self)
   Curve.recursive compiledMagnitude magnitudeDerivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
