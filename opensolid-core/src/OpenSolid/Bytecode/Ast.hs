@@ -80,6 +80,7 @@ import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
 import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
 import OpenSolid.Bytecode.Instruction qualified as Instruction
+import OpenSolid.Degenerate qualified as Degenerate
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -1125,16 +1126,9 @@ bezierCurve3d (NonEmpty.One value) _ = constant3d value
 bezierCurve3d controlPoints param =
   Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter) . param
 
-degenerateSelect :: Float -> a -> a -> a -> a
-degenerateSelect parameter left middle right
-  -- The constants here should be kept in sync with the LEFT/RIGHT constants in bytecode.cpp
-  | parameter <= 0.000001 = left
-  | parameter >= 0.999999 = right
-  | otherwise = middle
-
 degenerateCurve1d :: Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float
 degenerateCurve1d (Constant1d parameter) left middle right =
-  degenerateSelect parameter left middle right
+  Degenerate.value parameter left middle right
 degenerateCurve1d _ (Constant1d left) _ _ = Constant1d left
 degenerateCurve1d _ _ (Constant1d middle) _ = Constant1d middle
 degenerateCurve1d _ _ _ (Constant1d right) = Constant1d right
@@ -1143,7 +1137,7 @@ degenerateCurve1d (Variable1d parameter) (Variable1d left) (Variable1d middle) (
 
 degenerateCurve2d :: Ast1d Float -> Ast2d Float -> Ast2d Float -> Ast2d Float -> Ast2d Float
 degenerateCurve2d (Constant1d parameter) left middle right =
-  degenerateSelect parameter left middle right
+  Degenerate.value parameter left middle right
 degenerateCurve2d _ (Constant2d left) _ _ = Constant2d left
 degenerateCurve2d _ _ (Constant2d middle) _ = Constant2d middle
 degenerateCurve2d _ _ _ (Constant2d right) = Constant2d right
@@ -1152,7 +1146,7 @@ degenerateCurve2d (Variable1d parameter) (Variable2d left) (Variable2d middle) (
 
 degenerateCurve3d :: Ast1d Float -> Ast3d Float -> Ast3d Float -> Ast3d Float -> Ast3d Float
 degenerateCurve3d (Constant1d parameter) left middle right =
-  degenerateSelect parameter left middle right
+  Degenerate.value parameter left middle right
 degenerateCurve3d _ (Constant3d left) _ _ = Constant3d left
 degenerateCurve3d _ _ (Constant3d middle) _ = Constant3d middle
 degenerateCurve3d _ _ _ (Constant3d right) = Constant3d right
@@ -1166,7 +1160,7 @@ degenerateSurface1d ::
   Ast1d UvPoint ->
   Ast1d UvPoint
 degenerateSurface1d (Constant1d parameter) left middle right =
-  degenerateSelect parameter left middle right
+  Degenerate.value parameter left middle right
 degenerateSurface1d _ (Constant1d left) _ _ = Constant1d left
 degenerateSurface1d _ _ (Constant1d middle) _ = Constant1d middle
 degenerateSurface1d _ _ _ (Constant1d right) = Constant1d right
@@ -1184,7 +1178,7 @@ degenerateSurface2d ::
   Ast2d UvPoint ->
   Ast2d UvPoint
 degenerateSurface2d (Constant1d parameter) left middle right =
-  degenerateSelect parameter left middle right
+  Degenerate.value parameter left middle right
 degenerateSurface2d _ (Constant2d left) _ _ = Constant2d left
 degenerateSurface2d _ _ (Constant2d middle) _ = Constant2d middle
 degenerateSurface2d _ _ _ (Constant2d right) = Constant2d right
@@ -1202,7 +1196,7 @@ degenerateSurface3d ::
   Ast3d UvPoint ->
   Ast3d UvPoint
 degenerateSurface3d (Constant1d parameter) left middle right =
-  degenerateSelect parameter left middle right
+  Degenerate.value parameter left middle right
 degenerateSurface3d _ (Constant3d left) _ _ = Constant3d left
 degenerateSurface3d _ _ (Constant3d middle) _ = Constant3d middle
 degenerateSurface3d _ _ _ (Constant3d right) = Constant3d right
