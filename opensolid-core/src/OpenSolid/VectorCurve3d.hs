@@ -2,6 +2,7 @@ module OpenSolid.VectorCurve3d
   ( VectorCurve3d
   , Compiled
   , new
+  , recursive
   , on
   , compiled
   , derivative

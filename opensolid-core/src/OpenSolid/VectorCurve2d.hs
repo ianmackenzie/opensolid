@@ -2,6 +2,7 @@ module OpenSolid.VectorCurve2d
   ( VectorCurve2d
   , Compiled
   , new
+  , recursive
   , compiled
   , derivative
   , startValue
