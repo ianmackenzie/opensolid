@@ -21,3 +21,4 @@
 - ignore: { name: "Use bimap" }
 - ignore: { name: "Use camelCase" }
 - ignore: { name: "Use ++" }
+- ignore: { name: "Parenthesize unary negation" }
