@@ -1400,7 +1400,8 @@ compileVariable2d variable = case variable of
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable2d (Instruction.DivideConstantVariable2d lhsIndex rhsIndex)
   BezierCurve2d controlPoints parameter -> Compile.do
-    let (xControlPoints, yControlPoints) = NonEmpty.unzip2 (NonEmpty.map Vector2d.components controlPoints)
+    let (xControlPoints, yControlPoints) =
+          NonEmpty.unzip2 (NonEmpty.map Vector2d.components controlPoints)
     let flattenedControlPoints = xControlPoints <> yControlPoints
     controlPointsIndex <- Compile.addConstant flattenedControlPoints
     parameterIndex <- compileVariable1d parameter
@@ -1472,7 +1473,8 @@ compileVariable3d variable = case variable of
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable3d (Instruction.DivideConstantVariable3d lhsIndex rhsIndex)
   BezierCurve3d controlPoints parameter -> Compile.do
-    let (rControlPoints, fControlPoints, uControlPoints) = NonEmpty.unzip3 (NonEmpty.map unwrap3d controlPoints)
+    let (rControlPoints, fControlPoints, uControlPoints) =
+          NonEmpty.unzip3 (NonEmpty.map unwrap3d controlPoints)
     let flattenedControlPoints = rControlPoints <> fControlPoints <> uControlPoints
     controlPointsIndex <- Compile.addConstant flattenedControlPoints
     parameterIndex <- compileVariable1d parameter
