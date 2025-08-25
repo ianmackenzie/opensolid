@@ -3,7 +3,7 @@ module OpenSolid.CompiledFunction
   , concrete
   , constant
   , abstract
-  , degenerate
+  , desingularized
   , evaluate
   , evaluateBounds
   , evaluators
@@ -16,7 +16,7 @@ module OpenSolid.CompiledFunction
 where
 
 import OpenSolid.Bounds (Bounds)
-import OpenSolid.Degenerate qualified as Degenerate
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Prelude
@@ -304,15 +304,14 @@ abstract ::
   CompiledFunction inputValue outputValue inputBounds outputBounds
 abstract = Abstract
 
-degenerate ::
+desingularized ::
   Expression.Evaluation inputValue outputValue inputBounds outputBounds =>
   CompiledFunction inputValue Float inputBounds (Bounds Unitless) ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds
-degenerate parameterValue start middle end =
-  map4 Expression.degenerate Degenerate.value Degenerate.bounds parameterValue start middle end
+desingularized = map4 Expression.desingularized Desingularization.value Desingularization.bounds
 
 map ::
   Expression.Evaluation inputValue outputValue2 inputBounds outputBounds2 =>

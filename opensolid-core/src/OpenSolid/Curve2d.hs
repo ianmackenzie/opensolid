@@ -954,7 +954,7 @@ curvature' curve = Result.do
   Success $
     Units.simplify $
       Tolerance.using Tolerance.squared' $
-        Curve.quotient'
+        Curve.unsafeQuotient'
           @ tangent `cross` secondDerivative
           @ firstDerivative `dot'` firstDerivative
 

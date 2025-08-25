@@ -1,3 +1,5 @@
+Review uses of unsafeQuotient
+
 Try 'let f = planeNormal `dot` (surface.function - world.originPoint) + Length.millimeters 1.0' in testPlaneTorusIntersection
 -> seemed to be some first derivative discontinuities...
 

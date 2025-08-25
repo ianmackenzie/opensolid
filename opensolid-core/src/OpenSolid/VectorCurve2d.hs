@@ -649,7 +649,7 @@ quotient' ::
 quotient' lhs rhs =
   recursive
     @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
-    @ \self -> quotient' lhs.derivative rhs - self * (Curve.quotient rhs.derivative rhs)
+    @ \self -> quotient' lhs.derivative rhs - self * Curve.unsafeQuotient rhs.derivative rhs
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)

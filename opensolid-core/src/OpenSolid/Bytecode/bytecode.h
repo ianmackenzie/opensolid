@@ -88,9 +88,9 @@ enum Opcode {
   TransformPoint3d = 82,
   PlaceVector2d = 83,
   PlacePoint2d = 84,
-  Degenerate1d = 85,
-  Degenerate2d = 86,
-  Degenerate3d = 87,
+  Desingularized1d = 85,
+  Desingularized2d = 86,
+  Desingularized3d = 87,
   OPCODE_END
 };
 

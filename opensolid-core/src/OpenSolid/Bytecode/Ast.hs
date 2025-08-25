@@ -54,12 +54,12 @@ module OpenSolid.Bytecode.Ast
   , quarticSpline3d
   , quinticSpline3d
   , bezierCurve3d
-  , degenerateCurve1d
-  , degenerateCurve2d
-  , degenerateCurve3d
-  , degenerateSurface1d
-  , degenerateSurface2d
-  , degenerateSurface3d
+  , desingularizedCurve1d
+  , desingularizedCurve2d
+  , desingularizedCurve3d
+  , desingularizedSurface1d
+  , desingularizedSurface2d
+  , desingularizedSurface3d
   , compileCurve1d
   , compileCurve2d
   , compileCurve3d
@@ -80,7 +80,7 @@ import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
 import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
 import OpenSolid.Bytecode.Instruction qualified as Instruction
-import OpenSolid.Degenerate qualified as Degenerate
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -158,7 +158,7 @@ data Variable1d input where
   CrossVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable1d input
   Dot3d :: Variable3d input -> Variable3d input -> Variable1d input
   DotVariableConstant3d :: Variable3d input -> Vector3d Coordinates -> Variable1d input
-  Degenerate1d ::
+  Desingularized1d ::
     Variable1d input ->
     Variable1d input ->
     Variable1d input ->
@@ -201,7 +201,7 @@ data Variable2d input where
   TransformPoint2d :: Transform2d.Affine Coordinates -> Variable2d input -> Variable2d input
   ProjectVector3d :: Plane -> Variable3d input -> Variable2d input
   ProjectPoint3d :: Plane -> Variable3d input -> Variable2d input
-  Degenerate2d ::
+  Desingularized2d ::
     Variable1d input ->
     Variable2d input ->
     Variable2d input ->
@@ -242,7 +242,7 @@ data Variable3d input where
   TransformPoint3d :: Transform3d.Affine Coordinates -> Variable3d input -> Variable3d input
   PlaceVector2d :: Plane -> Variable2d input -> Variable3d input
   PlacePoint2d :: Plane -> Variable2d input -> Variable3d input
-  Degenerate3d ::
+  Desingularized3d ::
     Variable1d input ->
     Variable3d input ->
     Variable3d input ->
@@ -295,8 +295,8 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   CrossVariableConstant2d lhs rhs . input = CrossVariableConstant2d (lhs . input) rhs
   Dot3d lhs rhs . input = Dot3d (lhs . input) (rhs . input)
   DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
-  Degenerate1d parameter left middle right . input =
-    Degenerate1d (parameter . input) (left . input) (middle . input) (right . input)
+  Desingularized1d parameter left middle right . input =
+    Desingularized1d (parameter . input) (left . input) (middle . input) (right . input)
 
 instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
@@ -323,8 +323,8 @@ instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) wh
   TransformPoint2d transform point . input = TransformPoint2d transform (point . input)
   ProjectVector3d orientation vector . input = ProjectVector3d orientation (vector . input)
   ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
-  Degenerate2d parameter left middle right . input =
-    Degenerate2d (parameter . input) (left . input) (middle . input) (right . input)
+  Desingularized2d parameter left middle right . input =
+    Desingularized2d (parameter . input) (left . input) (middle . input) (right . input)
 
 instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
   Constant3d outer . _ = Constant3d outer
@@ -350,8 +350,8 @@ instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) wh
   TransformPoint3d transform point . input = TransformPoint3d transform (point . input)
   PlaceVector2d orientation vector . input = PlaceVector2d orientation (vector . input)
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
-  Degenerate3d parameter left middle right . input =
-    Degenerate3d (parameter . input) (left . input) (middle . input) (right . input)
+  Desingularized3d parameter left middle right . input =
+    Desingularized3d (parameter . input) (left . input) (middle . input) (right . input)
 
 instance Composition (Ast2d input) (Ast1d UvPoint) (Ast1d input) where
   Constant1d outer . _ = Constant1d outer
@@ -391,8 +391,8 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) 
   CrossVariableConstant2d lhs rhs . input = CrossVariableConstant2d (lhs . input) rhs
   Dot3d lhs rhs . input = Dot3d (lhs . input) (rhs . input)
   DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
-  Degenerate1d parameter left middle right . input =
-    Degenerate1d (parameter . input) (left . input) (middle . input) (right . input)
+  Desingularized1d parameter left middle right . input =
+    Desingularized1d (parameter . input) (left . input) (middle . input) (right . input)
 
 instance Composition (Ast2d input) (Ast2d UvPoint) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
@@ -420,8 +420,8 @@ instance Composition (Variable2d input) (Variable2d UvPoint) (Variable2d input) 
   TransformPoint2d transform point . input = TransformPoint2d transform (point . input)
   ProjectVector3d orientation vector . input = ProjectVector3d orientation (vector . input)
   ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
-  Degenerate2d parameter left middle right . input =
-    Degenerate2d (parameter . input) (left . input) (middle . input) (right . input)
+  Desingularized2d parameter left middle right . input =
+    Desingularized2d (parameter . input) (left . input) (middle . input) (right . input)
 
 instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
   Constant3d outer . _ = Constant3d outer
@@ -447,8 +447,8 @@ instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) 
   TransformPoint3d transform point . input = TransformPoint3d transform (point . input)
   PlaceVector2d orientation vector . input = PlaceVector2d orientation (vector . input)
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
-  Degenerate3d parameter left middle right . input =
-    Degenerate3d (parameter . input) (left . input) (middle . input) (right . input)
+  Desingularized3d parameter left middle right . input =
+    Desingularized3d (parameter . input) (left . input) (middle . input) (right . input)
 
 constant1d :: Qty units -> Ast1d input
 constant1d value = Constant1d (Qty.coerce value)
@@ -1126,86 +1126,86 @@ bezierCurve3d (NonEmpty.One value) _ = constant3d value
 bezierCurve3d controlPoints param =
   Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter) . param
 
-degenerateCurve1d :: Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float
-degenerateCurve1d (Constant1d parameter) left middle right =
-  Degenerate.value parameter left middle right
-degenerateCurve1d _ (Constant1d left) _ _ = Constant1d left
-degenerateCurve1d _ _ (Constant1d middle) _ = Constant1d middle
-degenerateCurve1d _ _ _ (Constant1d right) = Constant1d right
-degenerateCurve1d (Variable1d parameter) (Variable1d left) (Variable1d middle) (Variable1d right) =
-  Variable1d (Degenerate1d parameter left middle right)
+desingularizedCurve1d :: Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float
+desingularizedCurve1d (Constant1d parameter) left middle right =
+  Desingularization.value parameter left middle right
+desingularizedCurve1d _ (Constant1d left) _ _ = Constant1d left
+desingularizedCurve1d _ _ (Constant1d middle) _ = Constant1d middle
+desingularizedCurve1d _ _ _ (Constant1d right) = Constant1d right
+desingularizedCurve1d (Variable1d parameter) (Variable1d left) (Variable1d middle) (Variable1d right) =
+  Variable1d (Desingularized1d parameter left middle right)
 
-degenerateCurve2d :: Ast1d Float -> Ast2d Float -> Ast2d Float -> Ast2d Float -> Ast2d Float
-degenerateCurve2d (Constant1d parameter) left middle right =
-  Degenerate.value parameter left middle right
-degenerateCurve2d _ (Constant2d left) _ _ = Constant2d left
-degenerateCurve2d _ _ (Constant2d middle) _ = Constant2d middle
-degenerateCurve2d _ _ _ (Constant2d right) = Constant2d right
-degenerateCurve2d (Variable1d parameter) (Variable2d left) (Variable2d middle) (Variable2d right) =
-  Variable2d (Degenerate2d parameter left middle right)
+desingularizedCurve2d :: Ast1d Float -> Ast2d Float -> Ast2d Float -> Ast2d Float -> Ast2d Float
+desingularizedCurve2d (Constant1d parameter) left middle right =
+  Desingularization.value parameter left middle right
+desingularizedCurve2d _ (Constant2d left) _ _ = Constant2d left
+desingularizedCurve2d _ _ (Constant2d middle) _ = Constant2d middle
+desingularizedCurve2d _ _ _ (Constant2d right) = Constant2d right
+desingularizedCurve2d (Variable1d parameter) (Variable2d left) (Variable2d middle) (Variable2d right) =
+  Variable2d (Desingularized2d parameter left middle right)
 
-degenerateCurve3d :: Ast1d Float -> Ast3d Float -> Ast3d Float -> Ast3d Float -> Ast3d Float
-degenerateCurve3d (Constant1d parameter) left middle right =
-  Degenerate.value parameter left middle right
-degenerateCurve3d _ (Constant3d left) _ _ = Constant3d left
-degenerateCurve3d _ _ (Constant3d middle) _ = Constant3d middle
-degenerateCurve3d _ _ _ (Constant3d right) = Constant3d right
-degenerateCurve3d (Variable1d parameter) (Variable3d left) (Variable3d middle) (Variable3d right) =
-  Variable3d (Degenerate3d parameter left middle right)
+desingularizedCurve3d :: Ast1d Float -> Ast3d Float -> Ast3d Float -> Ast3d Float -> Ast3d Float
+desingularizedCurve3d (Constant1d parameter) left middle right =
+  Desingularization.value parameter left middle right
+desingularizedCurve3d _ (Constant3d left) _ _ = Constant3d left
+desingularizedCurve3d _ _ (Constant3d middle) _ = Constant3d middle
+desingularizedCurve3d _ _ _ (Constant3d right) = Constant3d right
+desingularizedCurve3d (Variable1d parameter) (Variable3d left) (Variable3d middle) (Variable3d right) =
+  Variable3d (Desingularized3d parameter left middle right)
 
-degenerateSurface1d ::
+desingularizedSurface1d ::
   Ast1d UvPoint ->
   Ast1d UvPoint ->
   Ast1d UvPoint ->
   Ast1d UvPoint ->
   Ast1d UvPoint
-degenerateSurface1d (Constant1d parameter) left middle right =
-  Degenerate.value parameter left middle right
-degenerateSurface1d _ (Constant1d left) _ _ = Constant1d left
-degenerateSurface1d _ _ (Constant1d middle) _ = Constant1d middle
-degenerateSurface1d _ _ _ (Constant1d right) = Constant1d right
-degenerateSurface1d
+desingularizedSurface1d (Constant1d parameter) left middle right =
+  Desingularization.value parameter left middle right
+desingularizedSurface1d _ (Constant1d left) _ _ = Constant1d left
+desingularizedSurface1d _ _ (Constant1d middle) _ = Constant1d middle
+desingularizedSurface1d _ _ _ (Constant1d right) = Constant1d right
+desingularizedSurface1d
   (Variable1d parameter)
   (Variable1d left)
   (Variable1d middle)
   (Variable1d right) =
-    Variable1d (Degenerate1d parameter left middle right)
+    Variable1d (Desingularized1d parameter left middle right)
 
-degenerateSurface2d ::
+desingularizedSurface2d ::
   Ast1d UvPoint ->
   Ast2d UvPoint ->
   Ast2d UvPoint ->
   Ast2d UvPoint ->
   Ast2d UvPoint
-degenerateSurface2d (Constant1d parameter) left middle right =
-  Degenerate.value parameter left middle right
-degenerateSurface2d _ (Constant2d left) _ _ = Constant2d left
-degenerateSurface2d _ _ (Constant2d middle) _ = Constant2d middle
-degenerateSurface2d _ _ _ (Constant2d right) = Constant2d right
-degenerateSurface2d
+desingularizedSurface2d (Constant1d parameter) left middle right =
+  Desingularization.value parameter left middle right
+desingularizedSurface2d _ (Constant2d left) _ _ = Constant2d left
+desingularizedSurface2d _ _ (Constant2d middle) _ = Constant2d middle
+desingularizedSurface2d _ _ _ (Constant2d right) = Constant2d right
+desingularizedSurface2d
   (Variable1d parameter)
   (Variable2d left)
   (Variable2d middle)
   (Variable2d right) =
-    Variable2d (Degenerate2d parameter left middle right)
+    Variable2d (Desingularized2d parameter left middle right)
 
-degenerateSurface3d ::
+desingularizedSurface3d ::
   Ast1d UvPoint ->
   Ast3d UvPoint ->
   Ast3d UvPoint ->
   Ast3d UvPoint ->
   Ast3d UvPoint
-degenerateSurface3d (Constant1d parameter) left middle right =
-  Degenerate.value parameter left middle right
-degenerateSurface3d _ (Constant3d left) _ _ = Constant3d left
-degenerateSurface3d _ _ (Constant3d middle) _ = Constant3d middle
-degenerateSurface3d _ _ _ (Constant3d right) = Constant3d right
-degenerateSurface3d
+desingularizedSurface3d (Constant1d parameter) left middle right =
+  Desingularization.value parameter left middle right
+desingularizedSurface3d _ (Constant3d left) _ _ = Constant3d left
+desingularizedSurface3d _ _ (Constant3d middle) _ = Constant3d middle
+desingularizedSurface3d _ _ _ (Constant3d right) = Constant3d right
+desingularizedSurface3d
   (Variable1d parameter)
   (Variable3d left)
   (Variable3d middle)
   (Variable3d right) =
-    Variable3d (Degenerate3d parameter left middle right)
+    Variable3d (Desingularized3d parameter left middle right)
 
 addTransform2d :: Transform2d.Affine Coordinates -> Compile.Step ConstantIndex
 addTransform2d (Transform2d origin i j) = do
@@ -1338,12 +1338,13 @@ compileVariable1d variable = case variable of
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- Compile.addConstant3d rhs
     Compile.addVariable1d (Instruction.DotVariableConstant3d lhsIndex rhsIndex)
-  Degenerate1d parameter left middle right -> Compile.do
+  Desingularized1d parameter left middle right -> Compile.do
     parameterIndex <- compileVariable1d parameter
     leftIndex <- compileVariable1d left
     middleIndex <- compileVariable1d middle
     rightIndex <- compileVariable1d right
-    Compile.addVariable1d (Instruction.Degenerate1d parameterIndex leftIndex middleIndex rightIndex)
+    let instruction = Instruction.Desingularized1d parameterIndex leftIndex middleIndex rightIndex
+    Compile.addVariable1d instruction
 
 compileVariable2d :: Variable2d input -> Compile.Step VariableIndex
 compileVariable2d variable = case variable of
@@ -1424,12 +1425,13 @@ compileVariable2d variable = case variable of
     planeIndex <- addPlane plane
     pointIndex <- compileVariable3d point
     Compile.addVariable2d (Instruction.ProjectPoint3d planeIndex pointIndex)
-  Degenerate2d parameter left middle right -> Compile.do
+  Desingularized2d parameter left middle right -> Compile.do
     parameterIndex <- compileVariable1d parameter
     leftIndex <- compileVariable2d left
     middleIndex <- compileVariable2d middle
     rightIndex <- compileVariable2d right
-    Compile.addVariable2d (Instruction.Degenerate2d parameterIndex leftIndex middleIndex rightIndex)
+    let instruction = Instruction.Desingularized2d parameterIndex leftIndex middleIndex rightIndex
+    Compile.addVariable2d instruction
 
 compileVariable3d :: Variable3d input -> Compile.Step VariableIndex
 compileVariable3d variable = case variable of
@@ -1505,12 +1507,13 @@ compileVariable3d variable = case variable of
     planeIndex <- addPlane plane
     pointIndex <- compileVariable2d point
     Compile.addVariable3d (Instruction.PlacePoint2d planeIndex pointIndex)
-  Degenerate3d parameter left middle right -> Compile.do
+  Desingularized3d parameter left middle right -> Compile.do
     parameterIndex <- compileVariable1d parameter
     leftIndex <- compileVariable3d left
     middleIndex <- compileVariable3d middle
     rightIndex <- compileVariable3d right
-    Compile.addVariable3d (Instruction.Degenerate3d parameterIndex leftIndex middleIndex rightIndex)
+    let instruction = Instruction.Desingularized3d parameterIndex leftIndex middleIndex rightIndex
+    Compile.addVariable3d instruction
 
 unwrap3d :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
 unwrap3d (Vector3d r f u) = (r, f, u)

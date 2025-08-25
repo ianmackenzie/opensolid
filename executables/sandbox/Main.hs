@@ -12,6 +12,7 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3d qualified as Convention3d
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Debug qualified as Debug
@@ -421,6 +422,21 @@ testCurve2dExpression = IO.do
   let curve = Expression.xy x y :: Expression Float (Point2d (Global @ Unitless))
   log "Evaluated 2D curve" (Expression.evaluate curve 3.0)
 
+testQuotientDesingularization :: IO ()
+testQuotientDesingularization = Tolerance.using 1e-9 IO.do
+  let numerator = Curve.sin (Angle.pi * Curve.t)
+  let denominator = Curve.t * (1.0 - Curve.t)
+  quotient <- Curve.quotient numerator denominator
+  let tValues = Qty.steps 0.0 1.0 10
+  IO.forEach tValues \tValue -> IO.do
+    log "quotient" (Curve.evaluate quotient tValue)
+  IO.forEach tValues \tValue -> IO.do
+    log "derivative" (Curve.evaluate quotient.derivative tValue)
+  IO.forEach tValues \tValue -> IO.do
+    log "second derivative" (Curve.evaluate quotient.derivative.derivative tValue)
+  IO.forEach tValues \tValue -> IO.do
+    log "third derivative" (Curve.evaluate quotient.derivative.derivative.derivative tValue)
+
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
   testScalarArithmetic
@@ -447,3 +463,4 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testDebugPrint
   testTextSum
   testNewtonRaphson2d
+  testQuotientDesingularization

@@ -34,7 +34,7 @@ module OpenSolid.Expression
   , On (on)
   , ProjectInto (projectInto)
   , bezierCurve
-  , degenerate
+  , desingularized
   , Evaluation (evaluate, evaluateBounds)
   , solveMonotonicSurfaceU
   , solveMonotonicSurfaceV
@@ -1576,32 +1576,32 @@ instance BezierCurve (Point3d (space @ units)) where
   bezierCurve controlPoints =
     curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
 
-degenerate ::
+desingularized ::
   Expression input Float ->
   Expression input output ->
   Expression input output ->
   Expression input output ->
   Expression input output
-degenerate (Curve1d parameter _) (Curve1d left _) (Curve1d middle _) (Curve1d right _) =
-  curve1d (Ast.degenerateCurve1d parameter left middle right)
-degenerate (Surface1d parameter _) (Surface1d left _) (Surface1d middle _) (Surface1d right _) =
-  surface1d (Ast.degenerateSurface1d parameter left middle right)
-degenerate (Curve1d parameter _) (Curve2d left _) (Curve2d middle _) (Curve2d right _) =
-  curve2d (Ast.degenerateCurve2d parameter left middle right)
-degenerate (Surface1d parameter _) (Surface2d left _) (Surface2d middle _) (Surface2d right _) =
-  surface2d (Ast.degenerateSurface2d parameter left middle right)
-degenerate (Curve1d parameter _) (VectorCurve2d left _) (VectorCurve2d middle _) (VectorCurve2d right _) =
-  vectorCurve2d (Ast.degenerateCurve2d parameter left middle right)
-degenerate (Surface1d parameter _) (VectorSurface2d left _) (VectorSurface2d middle _) (VectorSurface2d right _) =
-  vectorSurface2d (Ast.degenerateSurface2d parameter left middle right)
-degenerate (Curve1d parameter _) (Curve3d left _) (Curve3d middle _) (Curve3d right _) =
-  curve3d (Ast.degenerateCurve3d parameter left middle right)
-degenerate (Surface1d parameter _) (Surface3d left _) (Surface3d middle _) (Surface3d right _) =
-  surface3d (Ast.degenerateSurface3d parameter left middle right)
-degenerate (Curve1d parameter _) (VectorCurve3d left _) (VectorCurve3d middle _) (VectorCurve3d right _) =
-  vectorCurve3d (Ast.degenerateCurve3d parameter left middle right)
-degenerate (Surface1d parameter _) (VectorSurface3d left _) (VectorSurface3d middle _) (VectorSurface3d right _) =
-  vectorSurface3d (Ast.degenerateSurface3d parameter left middle right)
+desingularized (Curve1d parameter _) (Curve1d left _) (Curve1d middle _) (Curve1d right _) =
+  curve1d (Ast.desingularizedCurve1d parameter left middle right)
+desingularized (Surface1d parameter _) (Surface1d left _) (Surface1d middle _) (Surface1d right _) =
+  surface1d (Ast.desingularizedSurface1d parameter left middle right)
+desingularized (Curve1d parameter _) (Curve2d left _) (Curve2d middle _) (Curve2d right _) =
+  curve2d (Ast.desingularizedCurve2d parameter left middle right)
+desingularized (Surface1d parameter _) (Surface2d left _) (Surface2d middle _) (Surface2d right _) =
+  surface2d (Ast.desingularizedSurface2d parameter left middle right)
+desingularized (Curve1d parameter _) (VectorCurve2d left _) (VectorCurve2d middle _) (VectorCurve2d right _) =
+  vectorCurve2d (Ast.desingularizedCurve2d parameter left middle right)
+desingularized (Surface1d parameter _) (VectorSurface2d left _) (VectorSurface2d middle _) (VectorSurface2d right _) =
+  vectorSurface2d (Ast.desingularizedSurface2d parameter left middle right)
+desingularized (Curve1d parameter _) (Curve3d left _) (Curve3d middle _) (Curve3d right _) =
+  curve3d (Ast.desingularizedCurve3d parameter left middle right)
+desingularized (Surface1d parameter _) (Surface3d left _) (Surface3d middle _) (Surface3d right _) =
+  surface3d (Ast.desingularizedSurface3d parameter left middle right)
+desingularized (Curve1d parameter _) (VectorCurve3d left _) (VectorCurve3d middle _) (VectorCurve3d right _) =
+  vectorCurve3d (Ast.desingularizedCurve3d parameter left middle right)
+desingularized (Surface1d parameter _) (VectorSurface3d left _) (VectorSurface3d middle _) (VectorSurface3d right _) =
+  vectorSurface3d (Ast.desingularizedSurface3d parameter left middle right)
 
 -----------------
 --- COMPILING ---

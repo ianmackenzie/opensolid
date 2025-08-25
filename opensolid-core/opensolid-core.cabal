@@ -248,7 +248,7 @@ library
     OpenSolid.Bytecode.Instruction
     OpenSolid.CDT
     OpenSolid.CompiledFunction
-    OpenSolid.Degenerate
+    OpenSolid.Desingularization
     OpenSolid.HasZero
     OpenSolid.Json.FieldSchema
     OpenSolid.Linearization

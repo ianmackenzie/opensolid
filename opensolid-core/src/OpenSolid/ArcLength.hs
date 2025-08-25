@@ -38,7 +38,7 @@ parameterization derivativeMagnitude = do
           let evaluate uValue = lookup tree (uValue * length)
           let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
           let compiled = CompiledFunction.abstract evaluate evaluateBounds
-          let derivative self = (Curve.quotient (Curve.constant length) derivativeMagnitude) . self
+          let derivative self = Curve.unsafeQuotient (Curve.constant length) derivativeMagnitude . self
           let curve = Curve.recursive compiled derivative
           (curve, length)
 

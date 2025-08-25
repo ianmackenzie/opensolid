@@ -4,11 +4,15 @@ module OpenSolid.Curve
   , Zero
   , isEndpoint
   , evaluate
+  , evaluateAt
   , evaluateBounds
+  , startValue
+  , endValue
   , new
   , recursive
   , zero
   , constant
+  , synthetic
   , t
   , line
   , bezier
@@ -20,6 +24,8 @@ module OpenSolid.Curve
   , rationalCubicSpline
   , quotient
   , quotient'
+  , unsafeQuotient
+  , unsafeQuotient'
   , squared
   , squared'
   , sqrt
@@ -44,6 +50,7 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve.Zero (Zero)
 import OpenSolid.Curve.Zero qualified as Zero
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
@@ -289,6 +296,10 @@ instance Composition (Curve Unitless) (Curve units) (Curve units) where
 reverse :: Curve units -> Curve units
 reverse curve = curve . (1.0 - t)
 
+synthetic :: Curve units -> Stream (Curve units) -> Curve units
+synthetic curve derivatives =
+  new curve.compiled (synthetic (Stream.head derivatives) (Stream.tail derivatives))
+
 bezier :: NonEmpty (Qty units) -> Curve units
 bezier controlPoints = do
   let compiledBezier = CompiledFunction.concrete (Expression.bezierCurve controlPoints)
@@ -296,8 +307,8 @@ bezier controlPoints = do
   new compiledBezier (bezier derivativeControlPoints)
 
 hermite :: Qty units -> List (Qty units) -> Qty units -> List (Qty units) -> Curve units
-hermite startValue startDerivatives endValue endDerivatives =
-  bezier (Bezier.hermite startValue startDerivatives endValue endDerivatives)
+hermite value0 derivatives0 value1 derivatives1 =
+  bezier (Bezier.hermite value0 derivatives0 value1 derivatives1)
 
 quadraticSpline :: Qty units -> Qty units -> Qty units -> Curve units
 quadraticSpline p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
@@ -305,7 +316,10 @@ quadraticSpline p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 cubicSpline :: Qty units -> Qty units -> Qty units -> Qty units -> Curve units
 cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
-rationalBezier :: Tolerance Unitless => NonEmpty (Qty units, Float) -> Curve units
+rationalBezier ::
+  Tolerance Unitless =>
+  NonEmpty (Qty units, Float) ->
+  Result ZeroEverywhere (Curve units)
 rationalBezier pointsAndWeights = do
   let scaledPoint (point, weight) = point * weight
   quotient
@@ -317,7 +331,7 @@ rationalQuadraticSpline ::
   (Qty units, Float) ->
   (Qty units, Float) ->
   (Qty units, Float) ->
-  Curve units
+  Result ZeroEverywhere (Curve units)
 rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.three pw1 pw2 pw3)
 
 rationalCubicSpline ::
@@ -326,31 +340,127 @@ rationalCubicSpline ::
   (Qty units, Float) ->
   (Qty units, Float) ->
   (Qty units, Float) ->
-  Curve units
+  Result ZeroEverywhere (Curve units)
 rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 pw4)
 
 {-| Evaluate a curve at a given parameter value.
 
 The parameter value should be between 0 and 1.
 -}
+{-# INLINE evaluate #-}
 evaluate :: Curve units -> Float -> Qty units
 evaluate curve = CompiledFunction.evaluate curve.compiled
 
+{-# INLINE evaluateAt #-}
+evaluateAt :: Float -> Curve units -> Qty units
+evaluateAt tValue curve = evaluate curve tValue
+
+{-# INLINE evaluateBounds #-}
 evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units
 evaluateBounds curve = CompiledFunction.evaluateBounds curve.compiled
+
+startValue :: Curve units -> Qty units
+startValue curve = evaluate curve 0.0
+
+endValue :: Curve units -> Qty units
+endValue curve = evaluate curve 1.0
+
+syntheticStart :: Qty units -> List (Qty units) -> Curve units -> Curve units
+syntheticStart value0 derivatives0 curve = do
+  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
+  let valueT0 = evaluateAt Desingularization.t0 curve
+  let derivativesT0 = Stream.map (evaluateAt Desingularization.t0) curveDerivatives
+  let (baseControlPoints, derivativeControlPoints) =
+        Bezier.syntheticStart value0 derivatives0 valueT0 derivativesT0
+  synthetic (bezier baseControlPoints) (Stream.map bezier derivativeControlPoints)
+
+syntheticEnd :: Qty units -> List (Qty units) -> Curve units -> Curve units
+syntheticEnd value1 derivatives1 curve = do
+  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
+  let valueT1 = evaluateAt Desingularization.t1 curve
+  let derivativesT1 = Stream.map (evaluateAt Desingularization.t1) curveDerivatives
+  let (baseControlPoints, derivativeControlPoints) =
+        Bezier.syntheticEnd valueT1 derivativesT1 value1 derivatives1
+  synthetic (bezier baseControlPoints) (Stream.map bezier derivativeControlPoints)
+
+desingularize ::
+  Maybe (Qty units, List (Qty units)) ->
+  Curve units ->
+  Maybe (Qty units, List (Qty units)) ->
+  Curve units
+desingularize Nothing curve Nothing = curve
+desingularize startSingularity curve endSingularity = do
+  let startCurve = case startSingularity of
+        Nothing -> curve
+        Just (value0, derivatives0) -> syntheticStart value0 derivatives0 curve
+  let endCurve = case endSingularity of
+        Nothing -> curve
+        Just (value1, derivatives1) -> syntheticEnd value1 derivatives1 curve
+  desingularized startCurve curve endCurve
+
+desingularized :: Curve units -> Curve units -> Curve units -> Curve units
+desingularized start middle end =
+  new
+    (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
+    (desingularized start.derivative middle.derivative end.derivative)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   Curve units1 ->
   Curve units2 ->
-  Curve units3
+  Result ZeroEverywhere (Curve units3)
 quotient lhs rhs = Units.specialize (quotient' lhs rhs)
 
-quotient' :: Tolerance units2 => Curve units1 -> Curve units2 -> Curve (units1 :/: units2)
-quotient' lhs rhs =
-  recursive
-    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
-    @ \self -> quotient' lhs.derivative rhs - self * (quotient rhs.derivative rhs)
+quotient' ::
+  Tolerance units2 =>
+  Curve units1 ->
+  Curve units2 ->
+  Result ZeroEverywhere (Curve (units1 :/: units2))
+quotient' numerator denominator = do
+  if denominator ~= Qty.zero
+    then Failure ZeroEverywhere
+    else Success do
+      let singularity0 =
+            if evaluate denominator 0.0 ~= Qty.zero
+              then Just (lhopital' numerator.derivative denominator.derivative 0.0 1, [])
+              else Nothing
+      let singularity1 =
+            if evaluate denominator 1.0 ~= Qty.zero
+              then Just (lhopital' numerator.derivative denominator.derivative 1.0 1, [])
+              else Nothing
+      desingularize singularity0 (unsafeQuotient' numerator denominator) singularity1
+
+lhopital' ::
+  Tolerance units2 =>
+  Curve units1 ->
+  Curve units2 ->
+  Float ->
+  Int ->
+  Qty (units1 :/: units2)
+lhopital' numerator denominator tValue n =
+  if n > 4
+    then exception "Higher-order zero detected"
+    else do
+      let denominatorValue = evaluate denominator tValue
+      if denominatorValue ~= Qty.zero
+        then lhopital' numerator.derivative denominator.derivative tValue (n + 1)
+        else evaluate numerator tValue ./. denominatorValue
+
+unsafeQuotient ::
+  Units.Quotient units1 units2 units3 =>
+  Curve units1 ->
+  Curve units2 ->
+  Curve units3
+unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerator denominator)
+
+unsafeQuotient' :: Curve units1 -> Curve units2 -> Curve (units1 :/: units2)
+unsafeQuotient' numerator denominator = do
+  let quotientCompiled = numerator.compiled ./. denominator.compiled
+  let quotientDerivative = Units.simplify do
+        unsafeQuotient'
+          (numerator.derivative .*. denominator - numerator .*. denominator.derivative)
+          (squared' denominator)
+  new quotientCompiled quotientDerivative
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -382,7 +492,7 @@ sqrt' curve =
     else
       recursive
         @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled
-        @ \self -> Units.coerce (quotient' curve.derivative (2.0 * self))
+        @ \self -> Units.coerce (unsafeQuotient' curve.derivative (2.0 * self))
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless

@@ -10,9 +10,9 @@
 // Used when evaluating Degenerate#d opcodes,
 // to determine whether a given parameter value is at a given endpoint
 // or whether a given parameter range includes a given endpoint;
-// should be kept in sync with the constants used in degenerateSelect in Ast.hs
-#define LEFT 0.000001
-#define RIGHT 0.999999
+// should be kept in sync with the constants used in Degenerate.hs
+#define T0 0.001
+#define T1 0.999
 
 inline double
 lerp(double a, double b, double t) {
@@ -850,53 +850,53 @@ computeValue(
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
         break;
       }
-      case Degenerate1d: {
+      case Desingularized1d: {
         double t = *getVariablePointer();
-        double left = *getVariablePointer();
+        double start = *getVariablePointer();
         double middle = *getVariablePointer();
-        double right = *getVariablePointer();
+        double end = *getVariablePointer();
         double* output = getVariablePointer();
-        if (t <= LEFT) {
-          *output = left;
-        } else if (t >= RIGHT) {
-          *output = right;
+        if (t <= T0) {
+          *output = start;
+        } else if (t >= T1) {
+          *output = end;
         } else {
           *output = middle;
         }
         break;
       }
-      case Degenerate2d: {
+      case Desingularized2d: {
         double t = *getVariablePointer();
-        double* left = getVariablePointer();
+        double* start = getVariablePointer();
         double* middle = getVariablePointer();
-        double* right = getVariablePointer();
+        double* end = getVariablePointer();
         double* output = getVariablePointer();
-        if (t <= LEFT) {
-          output[0] = left[0];
-          output[1] = left[1];
-        } else if (t >= RIGHT) {
-          output[0] = right[0];
-          output[1] = right[1];
+        if (t <= T0) {
+          output[0] = start[0];
+          output[1] = start[1];
+        } else if (t >= T1) {
+          output[0] = end[0];
+          output[1] = end[1];
         } else {
           output[0] = middle[0];
           output[1] = middle[1];
         }
         break;
       }
-      case Degenerate3d: {
+      case Desingularized3d: {
         double t = *getVariablePointer();
-        double* left = getVariablePointer();
+        double* start = getVariablePointer();
         double* middle = getVariablePointer();
-        double* right = getVariablePointer();
+        double* end = getVariablePointer();
         double* output = getVariablePointer();
-        if (t <= LEFT) {
-          output[0] = left[0];
-          output[1] = left[1];
-          output[2] = left[2];
-        } else if (t >= RIGHT) {
-          output[0] = right[0];
-          output[1] = right[1];
-          output[2] = right[2];
+        if (t <= T0) {
+          output[0] = start[0];
+          output[1] = start[1];
+          output[2] = start[2];
+        } else if (t >= T1) {
+          output[0] = end[0];
+          output[1] = end[1];
+          output[2] = end[2];
         } else {
           output[0] = middle[0];
           output[1] = middle[1];
@@ -1711,53 +1711,53 @@ computeBounds(
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
         break;
       }
-      case Degenerate1d: {
+      case Desingularized1d: {
         Range t = *getVariablePointer();
-        Range left = *getVariablePointer();
+        Range start = *getVariablePointer();
         Range middle = *getVariablePointer();
-        Range right = *getVariablePointer();
+        Range end = *getVariablePointer();
         Range* output = getVariablePointer();
-        if (t.lower <= LEFT) {
-          *output = left;
-        } else if (t.upper >= RIGHT) {
-          *output = right;
+        if (t.upper <= T0) {
+          *output = start;
+        } else if (t.lower >= T1) {
+          *output = end;
         } else {
           *output = middle;
         }
         break;
       }
-      case Degenerate2d: {
+      case Desingularized2d: {
         Range t = *getVariablePointer();
-        Range* left = getVariablePointer();
+        Range* start = getVariablePointer();
         Range* middle = getVariablePointer();
-        Range* right = getVariablePointer();
+        Range* end = getVariablePointer();
         Range* output = getVariablePointer();
-        if (t.lower <= LEFT) {
-          output[0] = left[0];
-          output[1] = left[1];
-        } else if (t.upper >= RIGHT) {
-          output[0] = right[0];
-          output[1] = right[1];
+        if (t.upper <= T0) {
+          output[0] = start[0];
+          output[1] = start[1];
+        } else if (t.lower >= T1) {
+          output[0] = end[0];
+          output[1] = end[1];
         } else {
           output[0] = middle[0];
           output[1] = middle[1];
         }
         break;
       }
-      case Degenerate3d: {
+      case Desingularized3d: {
         Range t = *getVariablePointer();
-        Range* left = getVariablePointer();
+        Range* start = getVariablePointer();
         Range* middle = getVariablePointer();
-        Range* right = getVariablePointer();
+        Range* end = getVariablePointer();
         Range* output = getVariablePointer();
-        if (t.lower <= LEFT) {
-          output[0] = left[0];
-          output[1] = left[1];
-          output[2] = left[2];
-        } else if (t.upper >= RIGHT) {
-          output[0] = right[0];
-          output[1] = right[1];
-          output[2] = right[2];
+        if (t.upper <= T0) {
+          output[0] = start[0];
+          output[1] = start[1];
+          output[2] = start[2];
+        } else if (t.lower >= T1) {
+          output[0] = end[0];
+          output[1] = end[1];
+          output[2] = end[2];
         } else {
           output[0] = middle[0];
           output[1] = middle[1];
