@@ -178,6 +178,8 @@ instance Simplification ((units1 :*: units2) :/: units2) units1
 
 instance Simplification (units1 :/: (units1 :/: units2)) units2
 
+instance Simplification (units :/: (units :*: units)) (Unitless :/: units)
+
 data Radians deriving (Eq, Show)
 
 data Meters deriving (Eq, Show)

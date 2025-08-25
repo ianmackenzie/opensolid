@@ -952,7 +952,7 @@ curvature' curve = Result.do
   let secondDerivative = firstDerivative.derivative
   tangent <- tangentDirection curve
   Success $
-    Units.coerce $
+    Units.simplify $
       Tolerance.using Tolerance.squared' $
         Curve.quotient'
           @ tangent `cross` secondDerivative
