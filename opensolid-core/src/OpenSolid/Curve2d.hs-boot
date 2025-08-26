@@ -10,7 +10,7 @@ module OpenSolid.Curve2d
   , tangentDirection
   , reverse
   , hermite
-  , synthetic
+  , desingularize
   , transformBy
   , piecewise
   , unsafePiecewise
@@ -78,7 +78,11 @@ hermite ::
   Point2d (space @ units) ->
   List (Vector2d (space @ units)) ->
   Curve2d (space @ units)
-synthetic :: Curve2d (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
+desingularize ::
+  Maybe (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Curve2d (space @ units) ->
+  Maybe (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Curve2d (space @ units)
 transformBy ::
   Transform2d tag (space @ units) ->
   Curve2d (space @ units) ->

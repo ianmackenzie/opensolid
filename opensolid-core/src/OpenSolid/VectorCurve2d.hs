@@ -23,6 +23,8 @@ module OpenSolid.VectorCurve2d
   , cubicBezier
   , bezier
   , synthetic
+  , desingularize
+  , desingularized
   , quotient
   , quotient'
   , magnitude
@@ -56,6 +58,7 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2d (Direction2d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
@@ -74,6 +77,8 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Stream (Stream)
+import OpenSolid.Stream qualified as Stream
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
@@ -587,15 +592,67 @@ bezier controlPoints =
 
 synthetic ::
   VectorCurve2d (space @ units) ->
-  VectorCurve2d (space @ units) ->
+  Stream (VectorCurve2d (space @ units)) ->
   VectorCurve2d (space @ units)
-synthetic curve curveDerivative = new curve.compiled curveDerivative
+synthetic curve derivatives =
+  new curve.compiled (synthetic (Stream.head derivatives) (Stream.tail derivatives))
 
 startValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
 startValue curve = evaluate curve 0.0
 
 endValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
 endValue curve = evaluate curve 1.0
+
+syntheticStart ::
+  Vector2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
+  VectorCurve2d (space @ units) ->
+  VectorCurve2d (space @ units)
+syntheticStart value0 derivatives0 curve = do
+  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
+  let valueT0 = evaluateAt Desingularization.t0 curve
+  let derivativesT0 = Stream.map (evaluateAt Desingularization.t0) curveDerivatives
+  let (baseControlPoints, derivativeControlPoints) =
+        Bezier.syntheticStart value0 derivatives0 valueT0 derivativesT0
+  synthetic (bezier baseControlPoints) (Stream.map bezier derivativeControlPoints)
+
+syntheticEnd ::
+  Vector2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
+  VectorCurve2d (space @ units) ->
+  VectorCurve2d (space @ units)
+syntheticEnd value1 derivatives1 curve = do
+  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
+  let valueT1 = evaluateAt Desingularization.t1 curve
+  let derivativesT1 = Stream.map (evaluateAt Desingularization.t1) curveDerivatives
+  let (baseControlPoints, derivativeControlPoints) =
+        Bezier.syntheticEnd valueT1 derivativesT1 value1 derivatives1
+  synthetic (bezier baseControlPoints) (Stream.map bezier derivativeControlPoints)
+
+desingularize ::
+  Maybe (Vector2d (space @ units), List (Vector2d (space @ units))) ->
+  VectorCurve2d (space @ units) ->
+  Maybe (Vector2d (space @ units), List (Vector2d (space @ units))) ->
+  VectorCurve2d (space @ units)
+desingularize Nothing curve Nothing = curve
+desingularize startSingularity curve endSingularity = do
+  let startCurve = case startSingularity of
+        Nothing -> curve
+        Just (value0, derivatives0) -> syntheticStart value0 derivatives0 curve
+  let endCurve = case endSingularity of
+        Nothing -> curve
+        Just (value1, derivatives1) -> syntheticEnd value1 derivatives1 curve
+  desingularized startCurve curve endCurve
+
+desingularized ::
+  VectorCurve2d (space @ units) ->
+  VectorCurve2d (space @ units) ->
+  VectorCurve2d (space @ units) ->
+  VectorCurve2d (space @ units)
+desingularized start middle end =
+  new
+    (CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled)
+    (desingularized start.derivative middle.derivative end.derivative)
 
 {-| Evaluate a curve at a given parameter value.
 

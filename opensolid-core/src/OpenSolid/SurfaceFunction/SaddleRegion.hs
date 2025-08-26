@@ -4,7 +4,7 @@ module OpenSolid.SurfaceFunction.SaddleRegion
   , JoiningCurve (Incoming, Outgoing)
   , point
   , quadratic
-  , connectingCurves
+  , connectingCurve
   )
 where
 
@@ -24,8 +24,6 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Stream (Stream)
-import OpenSolid.Stream qualified as Stream
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))
@@ -35,8 +33,6 @@ import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.VectorCurve2d (VectorCurve2d)
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data SaddleRegion units = SaddleRegion
   { subproblem :: Subproblem units
@@ -100,12 +96,12 @@ secondDerivative fuu fuv fvv direction = do
   let Direction2d du dv = direction
   du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
 
-connectingCurves ::
+connectingCurve ::
   Tolerance units =>
   JoiningCurve ->
   SaddleRegion units ->
-  NonEmpty (Curve2d UvCoordinates)
-connectingCurves joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
+  Curve2d UvCoordinates
+connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let Point2d x y = Point2d.relativeTo frame (joiningPoint joiningCurve)
   let saddlePoint = Frame2d.originPoint frame
   let dx = Frame2d.xDirection frame
@@ -128,7 +124,7 @@ connect ::
   Direction2d UvSpace ->
   JoiningCurve ->
   List (Axis2d UvCoordinates) ->
-  NonEmpty (Curve2d UvCoordinates)
+  Curve2d UvCoordinates
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2d.originPoint frame
   let Subproblem{f, dvdu, dudv, uvBounds} = subproblem
@@ -136,125 +132,30 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let Point2d uP vP = saddlePoint
   let Point2d uC vC = joiningPoint joiningCurve
   let Direction2d du dv = outgoingDirection
-  let interpolantSize = 1e-3
-  let midParameter t0 t1 = t0 + interpolantSize * Qty.sign (t1 - t0) |> Qty.clampTo (Bounds t0 t1)
   if Qty.abs du >= Qty.abs dv
     then do
-      let uMid = midParameter uP uC
+      let implicitBounds = NonEmpty.one (Bounds2d (Bounds uP uC) vBounds)
       case joiningCurve of
-        Incoming incomingCurve -> do
-          let dudt = uP - uMid
+        Incoming _ -> do
+          let dudt = uP - uC
           let endDerivative = Vector2d dudt (dudt * (dv / du))
-          let makeSuffix = suffix saddlePoint endDerivative Direction2d.x
-          if uMid == uC
-            then NonEmpty.one (makeSuffix incomingCurve)
-            else do
-              let implicitBounds = NonEmpty.one (Bounds2d (Bounds uMid uC) vBounds)
-              let implicitCurve =
-                    HorizontalCurve.bounded f dvdu uC uMid implicitBounds frame boundingAxes
-              NonEmpty.two implicitCurve (makeSuffix implicitCurve)
-        Outgoing outgoingCurve -> do
-          let dudt = uMid - uP
+          let implicitCurve = HorizontalCurve.bounded f dvdu uC uP implicitBounds frame boundingAxes
+          Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, [endDerivative]))
+        Outgoing _ -> do
+          let dudt = uC - uP
           let startDerivative = Vector2d dudt (dudt * (dv / du))
-          let makePrefix = prefix saddlePoint startDerivative Direction2d.x
-          if uMid == uC
-            then NonEmpty.one (makePrefix outgoingCurve)
-            else do
-              let implicitBounds = NonEmpty.one (Bounds2d (Bounds uMid uC) vBounds)
-              let implicitCurve =
-                    HorizontalCurve.bounded f dvdu uMid uC implicitBounds frame boundingAxes
-              NonEmpty.two (makePrefix implicitCurve) implicitCurve
+          let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
+          Curve2d.desingularize (Just (saddlePoint, [startDerivative])) implicitCurve Nothing
     else do
-      let vMid = midParameter vP vC
+      let implicitBounds = NonEmpty.one (Bounds2d uBounds (Bounds vP vC))
       case joiningCurve of
-        Incoming incomingCurve -> do
-          let dvdt = vP - vMid
+        Incoming _ -> do
+          let dvdt = vP - vC
           let endDerivative = Vector2d (dvdt * (du / dv)) dvdt
-          let makeSuffix = suffix saddlePoint endDerivative Direction2d.y
-          if vMid == vC
-            then NonEmpty.one (makeSuffix incomingCurve)
-            else do
-              let implicitBounds = NonEmpty.one (Bounds2d uBounds (Bounds vMid vC))
-              let implicitCurve =
-                    VerticalCurve.bounded f dudv vC vMid implicitBounds frame boundingAxes
-              NonEmpty.two implicitCurve (makeSuffix implicitCurve)
-        Outgoing outgoingCurve -> do
-          let dvdt = vMid - vP
+          let implicitCurve = VerticalCurve.bounded f dudv vC vP implicitBounds frame boundingAxes
+          Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, [endDerivative]))
+        Outgoing _ -> do
+          let dvdt = vC - vP
           let startDerivative = Vector2d (dvdt * (du / dv)) dvdt
-          let makePrefix = prefix saddlePoint startDerivative Direction2d.y
-          if vMid == vC
-            then NonEmpty.one (makePrefix outgoingCurve)
-            else do
-              let implicitBounds = NonEmpty.one (Bounds2d uBounds (Bounds vMid vC))
-              let implicitCurve =
-                    VerticalCurve.bounded f dudv vMid vC implicitBounds frame boundingAxes
-              NonEmpty.two (makePrefix implicitCurve) implicitCurve
-
-extensionContinuity :: Int
-extensionContinuity = 2
-
-nthDerivative :: Int -> Curve2d (space @ units) -> VectorCurve2d (space @ units)
-nthDerivative 0 _ = internalError "nthDerivative should always be called with n >= 1"
-nthDerivative 1 curve = curve.derivative
-nthDerivative n curve = (nthDerivative (n - 1) curve).derivative
-
-componentRatio :: Direction2d UvSpace -> Vector2d UvCoordinates -> Vector2d UvCoordinates -> Float
-componentRatio d v1 v2 = Vector2d.componentIn d v1 / Vector2d.componentIn d v2
-
-scaledDerivativeValues ::
-  Float ->
-  Curve2d UvCoordinates ->
-  (VectorCurve2d UvCoordinates -> Vector2d UvCoordinates) ->
-  Stream (Vector2d UvCoordinates)
-scaledDerivativeValues scalingFactor curve derivativeEndpoint = do
-  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
-  let scaledDerivativeValue i curveDerivative = do
-        let derivativeScale = scalingFactor ** (i + 1)
-        derivativeScale * derivativeEndpoint curveDerivative
-  Stream.mapWithIndex scaledDerivativeValue curveDerivatives
-
-prefix ::
-  UvPoint ->
-  Vector2d UvCoordinates ->
-  Direction2d UvSpace ->
-  Curve2d UvCoordinates ->
-  Curve2d UvCoordinates
-prefix startPoint startDerivative axisDirection outgoingCurve = do
-  let outgoingFirstDerivative = VectorCurve2d.startValue outgoingCurve.derivative
-  let derivativeScalingFactor = componentRatio axisDirection startDerivative outgoingFirstDerivative
-  let endDerivativeValues =
-        scaledDerivativeValues derivativeScalingFactor outgoingCurve VectorCurve2d.startValue
-  let baseCurve endContinuity =
-        Curve2d.hermite
-          startPoint
-          [startDerivative]
-          outgoingCurve.startPoint
-          (Stream.take endContinuity endDerivativeValues)
-  synthetic baseCurve
-
-suffix ::
-  UvPoint ->
-  Vector2d UvCoordinates ->
-  Direction2d UvSpace ->
-  Curve2d UvCoordinates ->
-  Curve2d UvCoordinates
-suffix endPoint endDerivative axisDirection incomingCurve = do
-  let incomingFirstDerivative = VectorCurve2d.endValue incomingCurve.derivative
-  let derivativeScalingFactor = componentRatio axisDirection endDerivative incomingFirstDerivative
-  let startDerivativeValues =
-        scaledDerivativeValues derivativeScalingFactor incomingCurve VectorCurve2d.endValue
-  let baseCurve startContinuity =
-        Curve2d.hermite
-          incomingCurve.endPoint
-          (Stream.take startContinuity startDerivativeValues)
-          endPoint
-          [endDerivative]
-  synthetic baseCurve
-
-synthetic :: (Int -> Curve2d UvCoordinates) -> Curve2d UvCoordinates
-synthetic baseCurve = do
-  let syntheticDerivative n =
-        VectorCurve2d.synthetic
-          (nthDerivative n (baseCurve (extensionContinuity + n)))
-          (syntheticDerivative (n + 1))
-  Curve2d.synthetic (baseCurve extensionContinuity) (syntheticDerivative 1)
+          let implicitCurve = VerticalCurve.bounded f dudv vP vC implicitBounds frame boundingAxes
+          Curve2d.desingularize (Just (saddlePoint, [startDerivative])) implicitCurve Nothing

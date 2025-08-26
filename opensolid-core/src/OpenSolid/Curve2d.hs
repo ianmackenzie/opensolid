@@ -23,6 +23,8 @@ module OpenSolid.Curve2d
   , cubicBezier
   , hermite
   , synthetic
+  , desingularize
+  , desingularized
   , evaluate
   , evaluateAt
   , evaluateBounds
@@ -95,6 +97,7 @@ import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
 import {-# SOURCE #-} OpenSolid.Curve3d (Curve3d)
 import {-# SOURCE #-} OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Debug qualified as Debug
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
@@ -124,6 +127,8 @@ import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
+import OpenSolid.Stream (Stream)
+import OpenSolid.Stream qualified as Stream
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
@@ -564,8 +569,63 @@ hermite ::
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
-synthetic :: Curve2d (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
-synthetic curve curveDerivative = new curve.compiled curveDerivative
+synthetic ::
+  Curve2d (space @ units) ->
+  Stream (VectorCurve2d (space @ units)) ->
+  Curve2d (space @ units)
+synthetic curve derivatives =
+  new curve.compiled (VectorCurve2d.synthetic (Stream.head derivatives) (Stream.tail derivatives))
+
+syntheticStart ::
+  Point2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
+syntheticStart value0 derivatives0 curve = do
+  let curveDerivatives = Stream.iterate VectorCurve2d.derivative curve.derivative
+  let valueT0 = evaluateAt Desingularization.t0 curve
+  let derivativesT0 = Stream.map (VectorCurve2d.evaluateAt Desingularization.t0) curveDerivatives
+  let (baseControlPoints, derivativeControlPoints) =
+        Bezier.syntheticStart value0 derivatives0 valueT0 derivativesT0
+  synthetic (bezier baseControlPoints) (Stream.map VectorCurve2d.bezier derivativeControlPoints)
+
+syntheticEnd ::
+  Point2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
+syntheticEnd value1 derivatives1 curve = do
+  let curveDerivatives = Stream.iterate VectorCurve2d.derivative curve.derivative
+  let valueT1 = evaluateAt Desingularization.t1 curve
+  let derivativesT1 = Stream.map (VectorCurve2d.evaluateAt Desingularization.t1) curveDerivatives
+  let (baseControlPoints, derivativeControlPoints) =
+        Bezier.syntheticEnd valueT1 derivativesT1 value1 derivatives1
+  synthetic (bezier baseControlPoints) (Stream.map VectorCurve2d.bezier derivativeControlPoints)
+
+desingularize ::
+  Maybe (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Curve2d (space @ units) ->
+  Maybe (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Curve2d (space @ units)
+desingularize Nothing curve Nothing = curve
+desingularize startSingularity curve endSingularity = do
+  let startCurve = case startSingularity of
+        Nothing -> curve
+        Just (value0, derivatives0) -> syntheticStart value0 derivatives0 curve
+  let endCurve = case endSingularity of
+        Nothing -> curve
+        Just (value1, derivatives1) -> syntheticEnd value1 derivatives1 curve
+  desingularized startCurve curve endCurve
+
+desingularized ::
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
+desingularized start middle end =
+  new
+    @ CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled
+    @ VectorCurve2d.desingularized start.derivative middle.derivative end.derivative
 
 instance HasField "startPoint" (Curve2d (space @ units)) (Point2d (space @ units)) where
   getField curve = evaluate curve 0.0
