@@ -302,10 +302,10 @@ synthetic curve derivatives =
   new curve.compiled (synthetic (Stream.head derivatives) (Stream.tail derivatives))
 
 bezier :: NonEmpty (Qty units) -> Curve units
-bezier controlPoints = do
-  let compiledBezier = CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-  let derivativeControlPoints = Bezier.derivative controlPoints
-  new compiledBezier (bezier derivativeControlPoints)
+bezier controlPoints =
+  new
+    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+    @ bezier (Bezier.derivative controlPoints)
 
 hermite :: Qty units -> List (Qty units) -> Qty units -> List (Qty units) -> Curve units
 hermite value0 derivatives0 value1 derivatives1 =
