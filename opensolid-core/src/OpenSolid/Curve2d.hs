@@ -517,7 +517,7 @@ bezier :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
 bezier controlPoints =
   new
     @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    @ VectorCurve2d.bezierCurve (Bezier.derivative controlPoints)
+    @ VectorCurve2d.bezier (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::

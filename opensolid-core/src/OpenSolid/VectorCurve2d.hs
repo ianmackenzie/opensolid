@@ -18,9 +18,9 @@ module OpenSolid.VectorCurve2d
   , xy
   , line
   , arc
-  , quadraticSpline
-  , cubicSpline
-  , bezierCurve
+  , quadraticBezier
+  , cubicBezier
+  , bezier
   , synthetic
   , quotient
   , quotient'
@@ -548,7 +548,7 @@ xy x y =
     @ xy x.derivative y.derivative
 
 line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
-line v1 v2 = bezierCurve (NonEmpty.two v1 v2)
+line v1 v2 = bezier (NonEmpty.two v1 v2)
 
 arc ::
   Vector2d (space @ units) ->
@@ -563,26 +563,26 @@ arc v1 v2 a b
       let angle = Curve.line a b
       v1 * Curve.cos angle + v2 * Curve.sin angle
 
-quadraticSpline ::
+quadraticBezier ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   VectorCurve2d (space @ units)
-quadraticSpline v1 v2 v3 = bezierCurve (NonEmpty.three v1 v2 v3)
+quadraticBezier v1 v2 v3 = bezier (NonEmpty.three v1 v2 v3)
 
-cubicSpline ::
+cubicBezier ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   VectorCurve2d (space @ units)
-cubicSpline v1 v2 v3 v4 = bezierCurve (NonEmpty.four v1 v2 v3 v4)
+cubicBezier v1 v2 v3 v4 = bezier (NonEmpty.four v1 v2 v3 v4)
 
-bezierCurve :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
-bezierCurve controlPoints =
+bezier :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
+bezier controlPoints =
   new
     @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    @ bezierCurve (Bezier.derivative controlPoints)
+    @ bezier (Bezier.derivative controlPoints)
 
 synthetic ::
   VectorCurve2d (space @ units) ->
