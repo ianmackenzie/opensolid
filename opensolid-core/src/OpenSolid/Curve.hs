@@ -13,6 +13,7 @@ module OpenSolid.Curve
   , zero
   , constant
   , synthetic
+  , desingularize
   , t
   , line
   , bezier
