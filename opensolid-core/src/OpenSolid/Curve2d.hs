@@ -24,6 +24,7 @@ module OpenSolid.Curve2d
   , hermite
   , synthetic
   , evaluate
+  , evaluateAt
   , evaluateBounds
   , tangentDirection
   , offsetLeftwardBy
@@ -578,6 +579,10 @@ The parameter value should be between 0 and 1.
 -}
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
+
+{-# INLINE evaluateAt #-}
+evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
+evaluateAt tValue curve = evaluate curve tValue
 
 evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
