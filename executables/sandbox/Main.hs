@@ -256,7 +256,7 @@ toDrawing = Length.centimeters 10.0 ./. 1.0
 
 drawUvCurve :: List (Drawing2d.Attribute UvSpace) -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawUvCurve attributes curve = do
-  let resolution = Resolution.maxError 0.001
+  let resolution = Resolution.maxError 0.0002
   let polyline = Curve2d.toPolyline resolution curve
   Drawing2d.polylineWith attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
