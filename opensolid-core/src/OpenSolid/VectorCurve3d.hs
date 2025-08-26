@@ -9,6 +9,7 @@ module OpenSolid.VectorCurve3d
   , startValue
   , endValue
   , evaluate
+  , evaluateAt
   , evaluateBounds
   , zero
   , constant
@@ -17,6 +18,9 @@ module OpenSolid.VectorCurve3d
   , quadraticBezier
   , cubicBezier
   , bezier
+  , synthetic
+  , desingularize
+  , desingularized
   , quotient
   , quotient'
   , magnitude
@@ -44,6 +48,7 @@ import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction3d (Direction3d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
 import OpenSolid.Error qualified as Error
@@ -58,6 +63,8 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Stream (Stream)
+import OpenSolid.Stream qualified as Stream
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
@@ -532,14 +539,76 @@ bezier controlPoints =
     (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
     (bezier (Bezier.derivative controlPoints))
 
+synthetic ::
+  VectorCurve3d (space @ units) ->
+  Stream (VectorCurve3d (space @ units)) ->
+  VectorCurve3d (space @ units)
+synthetic curve derivatives =
+  new curve.compiled (synthetic (Stream.head derivatives) (Stream.tail derivatives))
+
 startValue :: VectorCurve3d (space @ units) -> Vector3d (space @ units)
 startValue curve = evaluate curve 0.0
 
 endValue :: VectorCurve3d (space @ units) -> Vector3d (space @ units)
 endValue curve = evaluate curve 1.0
 
+syntheticStart ::
+  Vector3d (space @ units) ->
+  List (Vector3d (space @ units)) ->
+  VectorCurve3d (space @ units) ->
+  VectorCurve3d (space @ units)
+syntheticStart value0 derivatives0 curve = do
+  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
+  let valueT0 = evaluateAt Desingularization.t0 curve
+  let derivativesT0 = Stream.map (evaluateAt Desingularization.t0) curveDerivatives
+  let (baseControlPoints, derivativeControlPoints) =
+        Bezier.syntheticStart value0 derivatives0 valueT0 derivativesT0
+  synthetic (bezier baseControlPoints) (Stream.map bezier derivativeControlPoints)
+
+syntheticEnd ::
+  Vector3d (space @ units) ->
+  List (Vector3d (space @ units)) ->
+  VectorCurve3d (space @ units) ->
+  VectorCurve3d (space @ units)
+syntheticEnd value1 derivatives1 curve = do
+  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
+  let valueT1 = evaluateAt Desingularization.t1 curve
+  let derivativesT1 = Stream.map (evaluateAt Desingularization.t1) curveDerivatives
+  let (baseControlPoints, derivativeControlPoints) =
+        Bezier.syntheticEnd valueT1 derivativesT1 value1 derivatives1
+  synthetic (bezier baseControlPoints) (Stream.map bezier derivativeControlPoints)
+
+desingularize ::
+  Maybe (Vector3d (space @ units), List (Vector3d (space @ units))) ->
+  VectorCurve3d (space @ units) ->
+  Maybe (Vector3d (space @ units), List (Vector3d (space @ units))) ->
+  VectorCurve3d (space @ units)
+desingularize Nothing curve Nothing = curve
+desingularize startSingularity curve endSingularity = do
+  let startCurve = case startSingularity of
+        Nothing -> curve
+        Just (value0, derivatives0) -> syntheticStart value0 derivatives0 curve
+  let endCurve = case endSingularity of
+        Nothing -> curve
+        Just (value1, derivatives1) -> syntheticEnd value1 derivatives1 curve
+  desingularized startCurve curve endCurve
+
+desingularized ::
+  VectorCurve3d (space @ units) ->
+  VectorCurve3d (space @ units) ->
+  VectorCurve3d (space @ units) ->
+  VectorCurve3d (space @ units)
+desingularized start middle end =
+  new
+    @ CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled
+    @ desingularized start.derivative middle.derivative end.derivative
+
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
+
+{-# INLINE evaluateAt #-}
+evaluateAt :: Float -> VectorCurve3d (space @ units) -> Vector3d (space @ units)
+evaluateAt tValue curve = evaluate curve tValue
 
 evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
