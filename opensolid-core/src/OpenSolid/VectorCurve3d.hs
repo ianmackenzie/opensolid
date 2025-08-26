@@ -14,9 +14,9 @@ module OpenSolid.VectorCurve3d
   , constant
   , line
   , arc
-  , quadraticSpline
-  , cubicSpline
-  , bezierCurve
+  , quadraticBezier
+  , cubicBezier
+  , bezier
   , quotient
   , quotient'
   , magnitude
@@ -496,7 +496,7 @@ on plane vectorCurve2d = do
   new compiledPlanar (on plane vectorCurve2d.derivative)
 
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
-line v1 v2 = bezierCurve (NonEmpty.two v1 v2)
+line v1 v2 = bezier (NonEmpty.two v1 v2)
 
 arc ::
   Vector3d (space @ units) ->
@@ -511,26 +511,26 @@ arc v1 v2 a b
       let angle = Curve.line a b
       v1 * Curve.cos angle + v2 * Curve.sin angle
 
-quadraticSpline ::
+quadraticBezier ::
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   VectorCurve3d (space @ units)
-quadraticSpline v1 v2 v3 = bezierCurve (NonEmpty.three v1 v2 v3)
+quadraticBezier v1 v2 v3 = bezier (NonEmpty.three v1 v2 v3)
 
-cubicSpline ::
+cubicBezier ::
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   VectorCurve3d (space @ units)
-cubicSpline v1 v2 v3 v4 = bezierCurve (NonEmpty.four v1 v2 v3 v4)
+cubicBezier v1 v2 v3 v4 = bezier (NonEmpty.four v1 v2 v3 v4)
 
-bezierCurve :: NonEmpty (Vector3d (space @ units)) -> VectorCurve3d (space @ units)
-bezierCurve controlPoints =
+bezier :: NonEmpty (Vector3d (space @ units)) -> VectorCurve3d (space @ units)
+bezier controlPoints =
   new
     (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
-    (bezierCurve (Bezier.derivative controlPoints))
+    (bezier (Bezier.derivative controlPoints))
 
 startValue :: VectorCurve3d (space @ units) -> Vector3d (space @ units)
 startValue curve = evaluate curve 0.0

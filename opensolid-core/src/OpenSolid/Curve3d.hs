@@ -193,7 +193,7 @@ bezier :: NonEmpty (Point3d (space @ units)) -> Curve3d (space @ units)
 bezier controlPoints =
   new
     @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    @ VectorCurve3d.bezierCurve (Bezier.derivative controlPoints)
+    @ VectorCurve3d.bezier (Bezier.derivative controlPoints)
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
