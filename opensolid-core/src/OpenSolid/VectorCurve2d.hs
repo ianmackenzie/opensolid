@@ -8,6 +8,7 @@ module OpenSolid.VectorCurve2d
   , startValue
   , endValue
   , evaluate
+  , evaluateAt
   , evaluateBounds
   , xComponent
   , yComponent
@@ -602,6 +603,10 @@ The parameter value should be between 0 and 1.
 -}
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
+
+{-# INLINE evaluateAt #-}
+evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
+evaluateAt tValue curve = evaluate curve tValue
 
 evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
