@@ -18,10 +18,8 @@ import OpenSolid.FFI qualified as FFI
 import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Primitives (Axis3d (Axis3d), Direction3d, Frame3d (Frame3d), Orientation3d)
 
-{-| A coordinate convention in 3D space.
-
-Defined by specifying the meaning of the X, Y and Z directions
-in terms of forward, backward, leftward, rightward, upward and downward.
+{-| A coordinate convention in 3D space,
+defining which of X, Y and Z mean 'forward' or 'upward' or 'rightward'.
 -}
 data Convention3d where
   Convention3d ::
@@ -33,9 +31,9 @@ data Convention3d where
 instance FFI Convention3d where
   representation = FFI.classRepresentation "Convention3d"
 
-{-| A coordinate system where X is leftward, Y is upward, and Z is forward.
+{-| A convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 
-This is the coordinate system used by (among other things) the glTF file format.
+This is the convention used by (among other things) the glTF file format.
 -}
 yUp :: Convention3d
 yUp =
@@ -44,9 +42,9 @@ yUp =
     Orientation3d.upwardDirection
     Orientation3d.forwardDirection
 
-{-| A coordinate system where X is rightward, Y is forward and Z is upward.
+{-| A convention where positive X is rightward, positive Y is forward and positive Z is upward.
 
-This is the coordinate system used by (among other things) the Blender animation package.
+This is the convention used by (among other things) the Blender animation package.
 -}
 zUp :: Convention3d
 zUp =
