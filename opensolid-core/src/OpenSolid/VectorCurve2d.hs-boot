@@ -1,5 +1,7 @@
 module OpenSolid.VectorCurve2d
   ( VectorCurve2d
+  , Compiled
+  , DivisionByZero
   , constant
   , new
   , evaluate
