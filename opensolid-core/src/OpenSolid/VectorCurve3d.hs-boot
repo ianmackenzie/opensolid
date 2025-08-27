@@ -1,6 +1,7 @@
 module OpenSolid.VectorCurve3d
   ( VectorCurve3d
   , Compiled
+  , DivisionByZero
   , constant
   , new
   , on
@@ -8,6 +9,8 @@ module OpenSolid.VectorCurve3d
   , evaluateBounds
   , quotient
   , quotient'
+  , unsafeQuotient
+  , unsafeQuotient'
   , unsafeMagnitude
   , transformBy
   )
@@ -38,6 +41,8 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Vector3d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds3d coordinateSystem)
+
+data DivisionByZero
 
 instance HasUnits (VectorCurve3d (space @ units)) units
 
@@ -97,9 +102,18 @@ quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
-  VectorCurve3d (space @ units3)
+  Result DivisionByZero (VectorCurve3d (space @ units3))
 quotient' ::
   Tolerance units2 =>
+  VectorCurve3d (space @ units1) ->
+  Curve units2 ->
+  Result DivisionByZero (VectorCurve3d (space @ (units1 :/: units2)))
+unsafeQuotient ::
+  Units.Quotient units1 units2 units3 =>
+  VectorCurve3d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve3d (space @ units3)
+unsafeQuotient' ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   VectorCurve3d (space @ (units1 :/: units2))
