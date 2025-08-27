@@ -32,6 +32,8 @@ module OpenSolid.Curve
   , squared'
   , sqrt
   , sqrt'
+  , unsafeSqrt
+  , unsafeSqrt'
   , sin
   , cos
   , ZeroEverywhere (ZeroEverywhere)
@@ -491,10 +493,29 @@ sqrt' :: Tolerance units => Curve (units :*: units) -> Curve units
 sqrt' curve =
   if Tolerance.using Tolerance.squared' (curve ~= Qty.zero)
     then zero
-    else
-      recursive
-        @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled
-        @ \self -> Units.coerce (unsafeQuotient' curve.derivative (2.0 * self))
+    else do
+      let isSingularity tValue =
+            Tolerance.using Tolerance.squared' $
+              (evaluate curve tValue ~= Qty.zero) && (evaluate curve.derivative tValue ~= Qty.zero)
+      let secondDerivative = curve.derivative.derivative
+      let singularity0 =
+            if isSingularity 0.0
+              then Just (Qty.zero, [Qty.sqrt' (evaluate secondDerivative 0.0 / 2.0)])
+              else Nothing
+      let singularity1 =
+            if isSingularity 1.0
+              then Just (Qty.zero, [-(Qty.sqrt' (evaluate secondDerivative 1.0 / 2.0))])
+              else Nothing
+      desingularize singularity0 (unsafeSqrt' curve) singularity1
+
+unsafeSqrt :: Units.Squared units1 units2 => Curve units2 -> Curve units1
+unsafeSqrt curve = unsafeSqrt' (Units.unspecialize curve)
+
+unsafeSqrt' :: Curve (units :*: units) -> Curve units
+unsafeSqrt' curve =
+  recursive
+    @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled
+    @ \self -> Units.coerce (unsafeQuotient' curve.derivative (2.0 * self))
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless
