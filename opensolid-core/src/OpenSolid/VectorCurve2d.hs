@@ -25,7 +25,7 @@ module OpenSolid.VectorCurve2d
   , synthetic
   , desingularize
   , desingularized
-  , DivisionByZero
+  , DivisionByZero (DivisionByZero)
   , quotient
   , quotient'
   , unsafeQuotient
