@@ -1407,6 +1407,12 @@ compileValue1d (Variable1d variable) = Compile.do
   variableIndex <- compileVariable1d variable
   Compile.return (VariableValue variableIndex)
 
+coordinates2d :: Vector2d Coordinates -> NonEmpty Float
+coordinates2d (Vector2d x y) = NonEmpty.two x y
+
+coordinates3d :: Vector3d Coordinates -> NonEmpty Float
+coordinates3d (Vector3d r f u) = NonEmpty.three r f u
+
 compileVariable2d :: Variable2d input -> Compile.Step VariableIndex
 compileVariable2d variable = case variable of
   SurfaceParameters -> Compile.return (VariableIndex 0)
@@ -1462,12 +1468,9 @@ compileVariable2d variable = case variable of
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable2d (Instruction.DivideConstantVariable2d lhsIndex rhsIndex)
   BezierCurve2d controlPoints parameter -> Compile.do
-    let (xControlPoints, yControlPoints) =
-          NonEmpty.unzip2 (NonEmpty.map Vector2d.components controlPoints)
-    let flattenedControlPoints = xControlPoints <> yControlPoints
-    controlPointsIndex <- Compile.addConstant flattenedControlPoints
-    parameterIndex <- compileVariable1d parameter
     let numControlPoints = NonEmpty.length controlPoints
+    controlPointsIndex <- Compile.addConstant (NonEmpty.collect coordinates2d controlPoints)
+    parameterIndex <- compileVariable1d parameter
     let instruction = Instruction.Bezier2d numControlPoints controlPointsIndex parameterIndex
     Compile.addVariable2d instruction
   TransformVector2d transform vector -> Compile.do
@@ -1536,12 +1539,9 @@ compileVariable3d variable = case variable of
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable3d (Instruction.DivideConstantVariable3d lhsIndex rhsIndex)
   BezierCurve3d controlPoints parameter -> Compile.do
-    let (rControlPoints, fControlPoints, uControlPoints) =
-          NonEmpty.unzip3 (NonEmpty.map unwrap3d controlPoints)
-    let flattenedControlPoints = rControlPoints <> fControlPoints <> uControlPoints
-    controlPointsIndex <- Compile.addConstant flattenedControlPoints
-    parameterIndex <- compileVariable1d parameter
     let numControlPoints = NonEmpty.length controlPoints
+    controlPointsIndex <- Compile.addConstant (NonEmpty.collect coordinates3d controlPoints)
+    parameterIndex <- compileVariable1d parameter
     let instruction = Instruction.Bezier3d numControlPoints controlPointsIndex parameterIndex
     Compile.addVariable3d instruction
   Cross3d lhs rhs -> Compile.do
@@ -1575,9 +1575,6 @@ compileVariable3d variable = case variable of
     rightIndex <- compileVariable3d right
     let instruction = Instruction.Desingularized3d parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable3d instruction
-
-unwrap3d :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
-unwrap3d (Vector3d r f u) = (r, f, u)
 
 compileCurve1d :: Ast1d Float -> Compiled Float Float
 compileCurve1d (Constant1d val) = Evaluate.Constant val
