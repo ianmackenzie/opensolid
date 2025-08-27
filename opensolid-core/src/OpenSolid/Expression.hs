@@ -123,7 +123,7 @@ data Expression input output where
     ~(Compiled UvPoint (Vector3d Ast.Coordinates)) ->
     Expression UvPoint (Vector3d (space @ units))
 
-ast1d :: Expression input Float -> Ast1d input
+ast1d :: Expression input (Qty units) -> Ast1d input
 ast1d (Curve1d ast _) = ast
 ast1d (Surface1d ast _) = ast
 
@@ -1591,7 +1591,7 @@ class Blend input value derivative where
     Expression input Float ->
     Expression input value
 
-instance Blend input Float Float where
+instance units1 ~ units2 => Blend input (Qty units1) (Qty units2) where
   blend (Curve1d startValue _) startDerivatives (Curve1d endValue _) endDerivatives (Curve1d parameter _) = do
     let startDerivativeAsts = List.map ast1d startDerivatives
     let endDerivativeAsts = List.map ast1d endDerivatives
