@@ -100,6 +100,7 @@ library
     OpenSolid.Array2d
     OpenSolid.Axis2d
     OpenSolid.Axis3d
+    OpenSolid.Bezier
     OpenSolid.Binary
     OpenSolid.Body3d
     OpenSolid.Body3d.BoundedBy
@@ -239,7 +240,6 @@ library
     OpenSolid.Volume
 
   other-modules:
-    OpenSolid.Bezier
     OpenSolid.Bootstrap
     OpenSolid.Bytecode.Compile
     OpenSolid.Bytecode.Encode

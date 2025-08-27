@@ -129,6 +129,32 @@ extern "C" {
   );
 
   double
+  opensolid_hermite_value_1d(
+    double startValue,
+    int numStartDerivatives,
+    double* startDerivatives,
+    double endValue,
+    int numEndDerivatives,
+    double* endDerivatives,
+    double t
+  );
+
+  void
+  opensolid_hermite_bounds_1d(
+    double startValueLower,
+    double startValueUpper,
+    int numStartDerivatives,
+    double* startDerivatives,
+    double endValueLower,
+    double endValueUpper,
+    int numEndDerivatives,
+    double* endDerivatives,
+    double tLower,
+    double tUpper,
+    double* returnValuesPointer
+  );
+
+  double
   opensolid_solve_monotonic_surface_u(
     double tol,
     const char* functionPointer,

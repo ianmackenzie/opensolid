@@ -14,6 +14,8 @@ module OpenSolid.Bytecode.Evaluate
   , surface3dBounds
   , solveMonotonicSurfaceU
   , solveMonotonicSurfaceV
+  , hermiteValue1d
+  , hermiteBounds1d
   )
 where
 
@@ -32,6 +34,7 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3d (Vector3d), VectorBounds3d (VectorBounds3d))
+import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -314,6 +317,84 @@ solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode)
             (Float.toDouble (Bounds.lower vBounds))
             (Float.toDouble (Bounds.upper vBounds))
 
+hermiteValue1d ::
+  Qty units ->
+  List (Qty units) ->
+  Qty units ->
+  List (Qty units) ->
+  Qty units ->
+  Qty units
+hermiteValue1d
+  (Qty startValue)
+  startDerivatives
+  (Qty endValue)
+  endDerivatives
+  (Qty parameterValue) = do
+    let numStartDerivatives = startDerivatives.length
+    let numEndDerivatives = endDerivatives.length
+    System.IO.Unsafe.unsafeDupablePerformIO $
+      Foreign.Marshal.Alloc.allocaBytes (8 * numStartDerivatives) \startDerivativesPtr ->
+        Foreign.Marshal.Alloc.allocaBytes (8 * numEndDerivatives) \endDerivativesPtr ->
+          IO.do
+            IO.forEachWithIndex startDerivatives $ \index (Qty startDerivative) ->
+              Foreign.pokeElemOff startDerivativesPtr index startDerivative
+            IO.forEachWithIndex endDerivatives $ \index (Qty endDerivative) ->
+              Foreign.pokeElemOff endDerivativesPtr index endDerivative
+            IO.succeed $
+              Qty $
+                opensolid_hermite_value_1d
+                  startValue
+                  numStartDerivatives
+                  startDerivativesPtr
+                  endValue
+                  numEndDerivatives
+                  endDerivativesPtr
+                  parameterValue
+
+hermiteBounds1d ::
+  Bounds units ->
+  List (Bounds units) ->
+  Bounds units ->
+  List (Bounds units) ->
+  Bounds units ->
+  Bounds units
+hermiteBounds1d
+  (Bounds (Qty startValueLower) (Qty startValueUpper))
+  startDerivatives
+  (Bounds (Qty endValueLower) (Qty endValueUpper))
+  endDerivatives
+  (Bounds (Qty parameterValueLower) (Qty parameterValueUpper)) = do
+    let numStartDerivatives = startDerivatives.length
+    let numEndDerivatives = endDerivatives.length
+    System.IO.Unsafe.unsafeDupablePerformIO $
+      Foreign.Marshal.Alloc.allocaBytes (16 * numStartDerivatives) \startDerivativesPtr ->
+        Foreign.Marshal.Alloc.allocaBytes (16 * numEndDerivatives) \endDerivativesPtr ->
+          Foreign.Marshal.Alloc.allocaBytes 16 \returnValuesPtr ->
+            IO.do
+              IO.forEachWithIndex startDerivatives $ \index startDerivative -> IO.do
+                let Bounds (Qty startDerivativeLower) (Qty startDerivativeUpper) = startDerivative
+                Foreign.pokeElemOff startDerivativesPtr (2 * index) startDerivativeLower
+                Foreign.pokeElemOff startDerivativesPtr (2 * index + 1) startDerivativeUpper
+              IO.forEachWithIndex endDerivatives $ \index endDerivative -> IO.do
+                let Bounds (Qty endDerivativeLower) (Qty endDerivativeUpper) = endDerivative
+                Foreign.pokeElemOff endDerivativesPtr (2 * index) endDerivativeLower
+                Foreign.pokeElemOff endDerivativesPtr (2 * index + 1) endDerivativeUpper
+              opensolid_hermite_bounds_1d
+                startValueLower
+                startValueUpper
+                numStartDerivatives
+                startDerivativesPtr
+                endValueLower
+                endValueUpper
+                numEndDerivatives
+                endDerivativesPtr
+                parameterValueLower
+                parameterValueUpper
+                returnValuesPtr
+              lower <- Foreign.peekElemOff returnValuesPtr 0
+              upper <- Foreign.peekElemOff returnValuesPtr 1
+              IO.succeed (Bounds (Qty lower) (Qty upper))
+
 foreign import ccall unsafe "bytecode.h opensolid_curve_value"
   opensolid_curve_value ::
     CString -> Double -> Ptr Double -> IO ()
@@ -337,3 +418,22 @@ foreign import ccall unsafe "bytecode.h opensolid_solve_monotonic_surface_u"
 foreign import ccall unsafe "bytecode.h opensolid_solve_monotonic_surface_v"
   opensolid_solve_monotonic_surface_v ::
     Double -> CString -> CString -> Double -> Double -> Double -> Double
+
+foreign import ccall unsafe "bytecode.h opensolid_hermite_value_1d"
+  opensolid_hermite_value_1d ::
+    Double -> Int -> Ptr Double -> Double -> Int -> Ptr Double -> Double -> Double
+
+foreign import ccall unsafe "bytecode.h opensolid_hermite_bounds_1d"
+  opensolid_hermite_bounds_1d ::
+    Double ->
+    Double ->
+    Int ->
+    Ptr Double ->
+    Double ->
+    Double ->
+    Int ->
+    Ptr Double ->
+    Double ->
+    Double ->
+    Ptr Double ->
+    IO ()

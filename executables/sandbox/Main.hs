@@ -5,6 +5,7 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -437,6 +438,35 @@ testQuotientDesingularization = Tolerance.using 1e-9 IO.do
   IO.forEach tValues \tValue -> IO.do
     log "third derivative" (Curve.evaluate quotient.derivative.derivative.derivative tValue)
 
+testHermiteEvaluation :: IO ()
+testHermiteEvaluation = IO.do
+  let startValue = 1.0
+  let startDerivatives = [2.0]
+  let endValue = 3.0
+  let endDerivatives = [-4.0, 5.0]
+  let hermiteCurve = Curve.hermite startValue startDerivatives endValue endDerivatives
+  let hermiteExpression =
+        Expression.hermite
+          (Expression.constant startValue)
+          (List.map Expression.constant startDerivatives)
+          (Expression.constant endValue)
+          (List.map Expression.constant endDerivatives)
+          Expression.t
+  IO.forEach (Qty.steps 0.0 1.0 10) \tValue -> IO.do
+    log "hermiteCurve" (Curve.evaluate hermiteCurve tValue)
+    log "hermiteExpression" (Expression.evaluate hermiteExpression tValue)
+    log "direct evaluation" (Bezier.hermiteValue1d startValue startDerivatives endValue endDerivatives tValue)
+  IO.forEach (Parameter.intervals 10) \tBounds -> IO.do
+    log "hermiteCurve" (Curve.evaluateBounds hermiteCurve tBounds)
+    log "hermiteExpression" (Expression.evaluateBounds hermiteExpression tBounds)
+    log "direct evaluation" $
+      Bezier.hermiteBounds1d
+        (Bounds.constant startValue)
+        (List.map Bounds.constant startDerivatives)
+        (Bounds.constant endValue)
+        (List.map Bounds.constant endDerivatives)
+        tBounds
+
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
   testScalarArithmetic
@@ -464,3 +494,4 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testTextSum
   testNewtonRaphson2d
   testQuotientDesingularization
+  testHermiteEvaluation
