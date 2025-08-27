@@ -140,6 +140,7 @@ library
     OpenSolid.Expression.Curve1d
     OpenSolid.Expression.Curve2d
     OpenSolid.Expression.Curve3d
+    OpenSolid.Expression.Surface1d
     OpenSolid.Expression.Surface2d
     OpenSolid.Expression.Surface3d
     OpenSolid.Expression.VectorCurve2d
