@@ -1,10 +1,13 @@
 module OpenSolid.Mesh
   ( Mesh
+  , empty
   , indexed
   , faceVertices
   , map
   , concat
   , collect
+  , grid
+  , indexedGrid
   )
 where
 
@@ -14,7 +17,9 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
+import OpenSolid.UvPoint (UvPoint)
 
 data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
   deriving (Eq, Show)
@@ -33,6 +38,9 @@ instance HasField "numVertices" (Mesh vertex) Int where
 
 instance HasField "numFaces" (Mesh vertex) Int where
   getField = (.faceIndices.length)
+
+empty :: Mesh vertex
+empty = Mesh Array.empty []
 
 faceVertices :: Mesh vertex -> List (vertex, vertex, vertex)
 faceVertices (Mesh vs fs) = do
@@ -66,3 +74,42 @@ offsetFaceIndices offset (NonEmpty vertexArraySizes) (NonEmpty faceIndicesLists)
 
 addOffset :: Int -> (Int, Int, Int) -> (Int, Int, Int)
 addOffset offset (i, j, k) = (i + offset, j + offset, k + offset)
+
+grid :: Int -> Int -> (UvPoint -> vertex) -> Mesh vertex
+grid uSteps vSteps function =
+  indexedGrid uSteps vSteps (toIndexedFunction uSteps vSteps function)
+
+toIndexedFunction :: Int -> Int -> (UvPoint -> vertex) -> Int -> Int -> vertex
+toIndexedFunction uSteps vSteps function uIndex vIndex =
+  function (Point2d (uIndex / uSteps) (vIndex / vSteps))
+
+indexedGrid :: Int -> Int -> (Int -> Int -> vertex) -> Mesh vertex
+indexedGrid uSteps vSteps function =
+  gridImpl uSteps vSteps (uSteps + 1) (vSteps + 1) function
+
+gridImpl :: Int -> Int -> Int -> Int -> (Int -> Int -> vertex) -> Mesh vertex
+gridImpl uSteps vSteps uVertices vVertices function =
+  if uVertices <= 1 || vVertices <= 1
+    then empty
+    else do
+      let numVertices = uVertices * vVertices
+      let vertices = Array.initialize numVertices (\i -> function (i % uVertices) (i // uVertices))
+      let faceIndices = gridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vSteps - 1) []
+      Mesh vertices faceIndices
+
+gridFaceIndices :: Int -> Int -> Int -> Int -> Int -> List (Int, Int, Int) -> List (Int, Int, Int)
+gridFaceIndices uSteps uVertices vVertices uIndex0 vIndex0 accumulatedIndices = do
+  let rowStart0 = uVertices * vIndex0
+  let rowStart1 = uVertices * ((vIndex0 + 1) % vVertices)
+  let uIndex1 = (uIndex0 + 1) % uVertices
+  let index00 = rowStart0 + uIndex0
+  let index10 = rowStart0 + uIndex1
+  let index01 = rowStart1 + uIndex0
+  let index11 = rowStart1 + uIndex1
+  let lowerFaceIndices = (index00, index10, index11)
+  let upperFaceIndices = (index00, index11, index01)
+  let updatedIndices = lowerFaceIndices : upperFaceIndices : accumulatedIndices
+  if
+    | uIndex0 > 0 -> gridFaceIndices uSteps uVertices vVertices (uIndex0 - 1) vIndex0 updatedIndices
+    | vIndex0 > 0 -> gridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vIndex0 - 1) updatedIndices
+    | otherwise -> updatedIndices
