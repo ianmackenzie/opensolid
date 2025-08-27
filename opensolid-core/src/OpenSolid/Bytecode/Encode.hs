@@ -6,6 +6,7 @@ import GHC.ByteOrder qualified
 import OpenSolid.Binary (Builder)
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import Prelude (Double)
 
 word :: Word16 -> Builder
@@ -15,8 +16,9 @@ word = case GHC.ByteOrder.targetByteOrder of
 
 int :: Int -> Builder
 int value
-  | value < 65536 = word (fromIntegral value)
-  | otherwise = exception "More than 65536 locals or constants in compiled function"
+  | value >= 0 && value < 65536 = word (fromIntegral value)
+  | otherwise =
+      internalError ("Bytecode only supports integers in 0-65535 range, got " <> Text.int value)
 
 double :: Double -> Builder
 double = case GHC.ByteOrder.targetByteOrder of
