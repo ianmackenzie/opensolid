@@ -104,6 +104,8 @@ data Instruction
   | Desingularized2d VariableIndex VariableIndex VariableIndex VariableIndex
   | Desingularized3d VariableIndex VariableIndex VariableIndex VariableIndex
   | Blend1d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
+  | Blend2d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
+  | Blend3d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
   deriving (Eq, Ord, Show)
 
 maxValues :: Int
@@ -491,6 +493,20 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeVariableIndex right
   Blend1d startValue startDerivatives endValue endDerivatives parameterValue ->
     Encode.int 88
+      <> encodeValueIndex startValue
+      <> Encode.list encodeValueIndex startDerivatives
+      <> encodeValueIndex endValue
+      <> Encode.list encodeValueIndex endDerivatives
+      <> encodeValueIndex parameterValue
+  Blend2d startValue startDerivatives endValue endDerivatives parameterValue ->
+    Encode.int 89
+      <> encodeValueIndex startValue
+      <> Encode.list encodeValueIndex startDerivatives
+      <> encodeValueIndex endValue
+      <> Encode.list encodeValueIndex endDerivatives
+      <> encodeValueIndex parameterValue
+  Blend3d startValue startDerivatives endValue endDerivatives parameterValue ->
+    Encode.int 90
       <> encodeValueIndex startValue
       <> Encode.list encodeValueIndex startDerivatives
       <> encodeValueIndex endValue

@@ -92,6 +92,8 @@ enum Opcode {
   Desingularized2d = 86,
   Desingularized3d = 87,
   Blend1d = 88,
+  Blend2d = 89,
+  Blend3d = 90,
   OPCODE_END
 };
 
