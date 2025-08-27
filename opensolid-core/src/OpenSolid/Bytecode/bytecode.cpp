@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <cstring>
 
+#include "bounds.h"
 #include "bytecode.h"
-#include "range.h"
 
 // Used when evaluating Degenerate#d opcodes,
 // to determine whether a given parameter value is at a given endpoint
@@ -19,8 +19,8 @@ lerp(double a, double b, double t) {
   return a + t * (b - a);
 }
 
-inline Range
-lerp(Range a, Range b, Range t) {
+inline Bounds
+lerp(Bounds a, Bounds b, Bounds t) {
   if (t.midpoint() <= 0.5) {
     return a + t * (b - a);
   } else {
@@ -248,14 +248,14 @@ opensolid_blend_bounds_1d(
   double tUpper,
   double* returnValuesPointer
 ) {
-  Range result = blend(
-    Range(startValueLower, startValueUpper),
+  Bounds result = blend(
+    Bounds(startValueLower, startValueUpper),
     numStartDerivatives,
-    (Range*)startDerivatives,
-    Range(endValueLower, endValueUpper),
+    (Bounds*)startDerivatives,
+    Bounds(endValueLower, endValueUpper),
     numEndDerivatives,
-    (Range*)endDerivatives,
-    Range(tLower, tUpper)
+    (Bounds*)endDerivatives,
+    Bounds(tLower, tUpper)
   );
   returnValuesPointer[0] = result.lower;
   returnValuesPointer[1] = result.upper;
@@ -1109,68 +1109,68 @@ computeValue(
   }
 }
 
-inline Range
-linearBounds(const double* p, Range t) {
+inline Bounds
+linearBounds(const double* p, Bounds t) {
   double a = lerp(p[0], p[1], t.lower);
   double b = lerp(p[0], p[1], t.upper);
-  return Range::hull2(a, b);
+  return Bounds::hull2(a, b);
 }
 
-inline Range
-quadraticBounds(const double* p, Range t) {
+inline Bounds
+quadraticBounds(const double* p, Bounds t) {
   double a = quadraticBlossom(p, t.lower, t.lower);
   double b = quadraticBlossom(p, t.lower, t.upper);
   double c = quadraticBlossom(p, t.upper, t.upper);
-  return Range::hull3(a, b, c);
+  return Bounds::hull3(a, b, c);
 }
 
-inline Range
-cubicBounds(const double* p, Range t) {
+inline Bounds
+cubicBounds(const double* p, Bounds t) {
   double a = cubicBlossom(p, t.lower, t.lower, t.lower);
   double b = cubicBlossom(p, t.lower, t.lower, t.upper);
   double c = cubicBlossom(p, t.lower, t.upper, t.upper);
   double d = cubicBlossom(p, t.upper, t.upper, t.upper);
-  return Range::hull4(a, b, c, d);
+  return Bounds::hull4(a, b, c, d);
 }
 
-inline Range
-quarticBounds(const double* p, Range t) {
+inline Bounds
+quarticBounds(const double* p, Bounds t) {
   double a = quarticBlossom(p, t.lower, t.lower, t.lower, t.lower);
   double b = quarticBlossom(p, t.lower, t.lower, t.lower, t.upper);
   double c = quarticBlossom(p, t.lower, t.lower, t.upper, t.upper);
   double d = quarticBlossom(p, t.lower, t.upper, t.upper, t.upper);
   double e = quarticBlossom(p, t.upper, t.upper, t.upper, t.upper);
-  return Range::hull5(a, b, c, d, e);
+  return Bounds::hull5(a, b, c, d, e);
 }
 
-inline Range
-quinticBounds(const double* p, Range t) {
+inline Bounds
+quinticBounds(const double* p, Bounds t) {
   double a = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.lower);
   double b = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.upper);
   double c = quinticBlossom(p, t.lower, t.lower, t.lower, t.upper, t.upper);
   double d = quinticBlossom(p, t.lower, t.lower, t.upper, t.upper, t.upper);
   double e = quinticBlossom(p, t.lower, t.upper, t.upper, t.upper, t.upper);
   double f = quinticBlossom(p, t.upper, t.upper, t.upper, t.upper, t.upper);
-  return Range::hull6(a, b, c, d, e, f);
+  return Bounds::hull6(a, b, c, d, e, f);
 }
 
-inline Range
-bezierBounds(int numControlPoints, const double* controlPoints, Range t) {
+inline Bounds
+bezierBounds(int numControlPoints, const double* controlPoints, Bounds t) {
   double* hullPoints = (double*)alloca(sizeof(double) * numControlPoints);
   for (int i = 0; i < numControlPoints; ++i) {
     hullPoints[i] = bezierBlossom(numControlPoints, controlPoints, t.lower, t.upper, i);
   }
   std::pair<double*, double*> bounds =
     std::minmax_element(hullPoints, hullPoints + numControlPoints);
-  return Range(*bounds.first, *bounds.second);
+  return Bounds(*bounds.first, *bounds.second);
 }
 
 void
 computeBounds(
   const uint16_t* wordsPointer,
   const double* constantsPointer,
-  Range* variablesPointer,
-  Range* returnValuesPointer
+  Bounds* variablesPointer,
+  Bounds* returnValuesPointer
 ) {
   auto getInt = [&]() -> int {
     int value = *wordsPointer;
@@ -1180,14 +1180,14 @@ computeBounds(
   auto getConstantPointer = [&]() -> const double* {
     return constantsPointer + getInt();
   };
-  auto getVariablePointer = [&]() -> Range* {
+  auto getVariablePointer = [&]() -> Bounds* {
     return variablesPointer + getInt();
   };
-  auto getValue = [&]() -> Range {
+  auto getValue = [&]() -> Bounds {
     int taggedIndex = getInt();
     bool isConstant = taggedIndex >= 32768;
     if (isConstant) {
-      return Range(constantsPointer[taggedIndex - 32768]);
+      return Bounds(constantsPointer[taggedIndex - 32768]);
     } else {
       return variablesPointer[taggedIndex];
     }
@@ -1198,305 +1198,305 @@ computeBounds(
     switch (Opcode(opcode)) {
       case Return: {
         int dimension = getInt();
-        Range* valuesPointer = getVariablePointer();
-        std::memcpy(returnValuesPointer, valuesPointer, sizeof(Range) * dimension);
+        Bounds* valuesPointer = getVariablePointer();
+        std::memcpy(returnValuesPointer, valuesPointer, sizeof(Bounds) * dimension);
         return;
       }
       case XComponent: {
-        const Range* vec = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* vec = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = vec[0];
         break;
       }
       case YComponent: {
-        const Range* vec = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* vec = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = vec[1];
         break;
       }
       case ZComponent: {
-        const Range* vec = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* vec = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = vec[2];
         break;
       }
       case Negate1d: {
-        Range input = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds input = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = -input;
         break;
       }
       case Add1d: {
-        Range lhs = *getVariablePointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds lhs = *getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs + rhs;
         break;
       }
       case AddVariableConstant1d: {
-        Range lhs = *getVariablePointer();
+        Bounds lhs = *getVariablePointer();
         double rhs = *getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs + rhs;
         break;
       }
       case Subtract1d: {
-        Range lhs = *getVariablePointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds lhs = *getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs - rhs;
         break;
       }
       case SubtractConstantVariable1d: {
         double lhs = *getConstantPointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs - rhs;
         break;
       }
       case Multiply1d: {
-        Range lhs = *getVariablePointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds lhs = *getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs * rhs;
         break;
       }
       case MultiplyVariableConstant1d: {
-        Range lhs = *getVariablePointer();
+        Bounds lhs = *getVariablePointer();
         double rhs = *getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs * rhs;
         break;
       }
       case Divide1d: {
-        Range lhs = *getVariablePointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds lhs = *getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs / rhs;
         break;
       }
       case DivideConstantVariable1d: {
         double lhs = *getConstantPointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs / rhs;
         break;
       }
       case Square1d: {
-        Range input = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds input = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = input.squared();
         break;
       }
       case Sqrt1d: {
-        Range input = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds input = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = input.sqrt();
         break;
       }
       case Sin1d: {
-        Range input = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds input = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = input.sin();
         break;
       }
       case Cos1d: {
-        Range input = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds input = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = input.cos();
         break;
       }
       case Linear1d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = linearBounds(controlPoints, parameter);
         break;
       }
       case Quadratic1d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = quadraticBounds(controlPoints, parameter);
         break;
       }
       case Cubic1d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = cubicBounds(controlPoints, parameter);
         break;
       }
       case Quartic1d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = quarticBounds(controlPoints, parameter);
         break;
       }
       case Quintic1d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = quinticBounds(controlPoints, parameter);
         break;
       }
       case Bezier1d: {
         int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = bezierBounds(numControlPoints, controlPoints, parameter);
         break;
       }
       case XY2d: {
-        Range x = *getVariablePointer();
-        Range y = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds x = *getVariablePointer();
+        Bounds y = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = x;
         output[1] = y;
         break;
       }
       case XC2d: {
-        Range x = *getVariablePointer();
+        Bounds x = *getVariablePointer();
         double y = *getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = x;
-        output[1] = Range(y);
+        output[1] = Bounds(y);
         break;
       }
       case CY2d: {
         double x = *getConstantPointer();
-        Range y = *getVariablePointer();
-        Range* output = getVariablePointer();
-        output[0] = Range(x);
+        Bounds y = *getVariablePointer();
+        Bounds* output = getVariablePointer();
+        output[0] = Bounds(x);
         output[1] = y;
         break;
       }
       case Negate2d: {
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = -input[0];
         output[1] = -input[1];
         break;
       }
       case Add2d: {
-        const Range* lhs = getVariablePointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
         break;
       }
       case AddVariableConstant2d: {
-        const Range* lhs = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
         break;
       }
       case Subtract2d: {
-        const Range* lhs = getVariablePointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
         break;
       }
       case SubtractConstantVariable2d: {
         const double* lhs = getConstantPointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
         break;
       }
       case Multiply2d: {
-        const Range* lhs = getVariablePointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         break;
       }
       case MultiplyVariableConstant2d: {
-        const Range* lhs = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
         double rhs = *getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         break;
       }
       case MultiplyConstantVariable2d: {
         const double* lhs = getConstantPointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         break;
       }
       case Divide2d: {
-        const Range* lhs = getVariablePointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
         break;
       }
       case DivideConstantVariable2d: {
         const double* lhs = getConstantPointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
         break;
       }
       case SquaredMagnitude2d: {
-        const Range* arg = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* arg = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = arg[0].squared() + arg[1].squared();
         break;
       }
       case Magnitude2d: {
-        const Range* arg = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* arg = getVariablePointer();
+        Bounds* output = getVariablePointer();
         // TODO add specialized Range.hypot2 for tighter bounds
         *output = (arg[0].squared() + arg[1].squared()).sqrt();
         break;
       }
       case Dot2d: {
-        const Range* lhs = getVariablePointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
         break;
       }
       case DotVariableConstant2d: {
-        const Range* lhs = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1];
         break;
       }
       case Cross2d: {
-        const Range* lhs = getVariablePointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
         break;
       }
       case CrossVariableConstant2d: {
-        const Range* lhs = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs[0] * rhs[1] - lhs[1] * rhs[0];
         break;
       }
       case Linear2d: {
         const double* endpoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = endpoints;
         const double* y = endpoints + 2;
         output[0] = linearBounds(x, parameter);
@@ -1505,8 +1505,8 @@ computeBounds(
       }
       case Quadratic2d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + 3;
         output[0] = quadraticBounds(x, parameter);
@@ -1515,8 +1515,8 @@ computeBounds(
       }
       case Cubic2d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + 4;
         output[0] = cubicBounds(x, parameter);
@@ -1525,8 +1525,8 @@ computeBounds(
       }
       case Quartic2d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + 5;
         output[0] = quarticBounds(x, parameter);
@@ -1535,8 +1535,8 @@ computeBounds(
       }
       case Quintic2d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + 6;
         output[0] = quinticBounds(x, parameter);
@@ -1546,8 +1546,8 @@ computeBounds(
       case Bezier2d: {
         int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + numControlPoints;
         output[0] = bezierBounds(numControlPoints, x, parameter);
@@ -1556,146 +1556,146 @@ computeBounds(
       }
       case TransformVector2d: {
         const double* matrix = getConstantPointer();
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
-        Range vx = input[0];
-        Range vy = input[1];
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
+        Bounds vx = input[0];
+        Bounds vy = input[1];
         output[0] = matrix[0] * vx + matrix[2] * vy;
         output[1] = matrix[1] * vx + matrix[3] * vy;
         break;
       }
       case TransformPoint2d: {
         const double* matrix = getConstantPointer();
-        const Range* point = getVariablePointer();
-        Range* output = getVariablePointer();
-        Range px = point[0];
-        Range py = point[1];
+        const Bounds* point = getVariablePointer();
+        Bounds* output = getVariablePointer();
+        Bounds px = point[0];
+        Bounds py = point[1];
         output[0] = matrix[0] * px + matrix[2] * py + matrix[4];
         output[1] = matrix[1] * px + matrix[3] * py + matrix[5];
         break;
       }
       case ProjectVector3d: {
         const double* matrix = getConstantPointer();
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
-        Range vx = input[0];
-        Range vy = input[1];
-        Range vz = input[2];
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
+        Bounds vx = input[0];
+        Bounds vy = input[1];
+        Bounds vz = input[2];
         output[0] = matrix[0] * vx + matrix[1] * vy + matrix[2] * vz;
         output[1] = matrix[3] * vx + matrix[4] * vy + matrix[5] * vz;
         break;
       }
       case ProjectPoint3d: {
         const double* matrix = getConstantPointer();
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
-        Range dx = input[0] - matrix[6];
-        Range dy = input[1] - matrix[7];
-        Range dz = input[2] - matrix[8];
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
+        Bounds dx = input[0] - matrix[6];
+        Bounds dy = input[1] - matrix[7];
+        Bounds dz = input[2] - matrix[8];
         output[0] = matrix[0] * dx + matrix[1] * dy + matrix[2] * dz;
         output[1] = matrix[3] * dx + matrix[4] * dy + matrix[5] * dz;
         break;
       }
       case XYZ3d: {
-        Range x = *getVariablePointer();
-        Range y = *getVariablePointer();
-        Range z = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds x = *getVariablePointer();
+        Bounds y = *getVariablePointer();
+        Bounds z = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = x;
         output[1] = y;
         output[2] = z;
         break;
       }
       case XYC3d: {
-        Range x = *getVariablePointer();
-        Range y = *getVariablePointer();
+        Bounds x = *getVariablePointer();
+        Bounds y = *getVariablePointer();
         double z = *getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = x;
         output[1] = y;
-        output[2] = Range(z);
+        output[2] = Bounds(z);
         break;
       }
       case XCZ3d: {
-        Range x = *getVariablePointer();
+        Bounds x = *getVariablePointer();
         double y = *getConstantPointer();
-        Range z = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds z = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = x;
-        output[1] = Range(y);
+        output[1] = Bounds(y);
         output[2] = z;
         break;
       }
       case CYZ3d: {
         double x = *getConstantPointer();
-        Range y = *getVariablePointer();
-        Range z = *getVariablePointer();
-        Range* output = getVariablePointer();
-        output[0] = Range(x);
+        Bounds y = *getVariablePointer();
+        Bounds z = *getVariablePointer();
+        Bounds* output = getVariablePointer();
+        output[0] = Bounds(x);
         output[1] = y;
         output[2] = z;
         break;
       }
       case XCC3d: {
-        Range x = *getVariablePointer();
+        Bounds x = *getVariablePointer();
         double y = *getConstantPointer();
         double z = *getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = x;
-        output[1] = Range(y);
-        output[2] = Range(z);
+        output[1] = Bounds(y);
+        output[2] = Bounds(z);
         break;
       }
       case CYC3d: {
         double x = *getConstantPointer();
-        Range y = *getVariablePointer();
+        Bounds y = *getVariablePointer();
         double z = *getConstantPointer();
-        Range* output = getVariablePointer();
-        output[0] = Range(x);
+        Bounds* output = getVariablePointer();
+        output[0] = Bounds(x);
         output[1] = y;
-        output[2] = Range(z);
+        output[2] = Bounds(z);
         break;
       }
       case CCZ3d: {
         double x = *getConstantPointer();
         double y = *getConstantPointer();
-        Range z = *getVariablePointer();
-        Range* output = getVariablePointer();
-        output[0] = Range(x);
-        output[1] = Range(y);
+        Bounds z = *getVariablePointer();
+        Bounds* output = getVariablePointer();
+        output[0] = Bounds(x);
+        output[1] = Bounds(y);
         output[2] = z;
         break;
       }
       case Negate3d: {
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = -input[0];
         output[1] = -input[1];
         output[2] = -input[2];
         break;
       }
       case Add3d: {
-        const Range* lhs = getVariablePointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
         output[2] = lhs[2] + rhs[2];
         break;
       }
       case AddVariableConstant3d: {
-        const Range* lhs = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] + rhs[0];
         output[1] = lhs[1] + rhs[1];
         output[2] = lhs[2] + rhs[2];
         break;
       }
       case Subtract3d: {
-        const Range* lhs = getVariablePointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
         output[2] = lhs[2] - rhs[2];
@@ -1703,26 +1703,26 @@ computeBounds(
       }
       case SubtractConstantVariable3d: {
         const double* lhs = getConstantPointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] - rhs[0];
         output[1] = lhs[1] - rhs[1];
         output[2] = lhs[2] - rhs[2];
         break;
       }
       case Multiply3d: {
-        const Range* lhs = getVariablePointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
         break;
       }
       case MultiplyVariableConstant3d: {
-        const Range* lhs = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
         double rhs = *getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
@@ -1730,17 +1730,17 @@ computeBounds(
       }
       case MultiplyConstantVariable3d: {
         const double* lhs = getConstantPointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] * rhs;
         output[1] = lhs[1] * rhs;
         output[2] = lhs[2] * rhs;
         break;
       }
       case Divide3d: {
-        const Range* lhs = getVariablePointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
         output[2] = lhs[2] / rhs;
@@ -1748,52 +1748,52 @@ computeBounds(
       }
       case DivideConstantVariable3d: {
         const double* lhs = getConstantPointer();
-        Range rhs = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds rhs = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[0] / rhs;
         output[1] = lhs[1] / rhs;
         output[2] = lhs[2] / rhs;
         break;
       }
       case SquaredMagnitude3d: {
-        const Range* arg = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* arg = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = arg[0].squared() + arg[1].squared() + arg[2].squared();
         break;
       }
       case Magnitude3d: {
-        const Range* arg = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* arg = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = (arg[0].squared() + arg[1].squared() + arg[2].squared()).sqrt();
         break;
       }
       case Dot3d: {
-        const Range* lhs = getVariablePointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
         break;
       }
       case DotVariableConstant3d: {
-        const Range* lhs = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
         break;
       }
       case Cross3d: {
-        const Range* lhs = getVariablePointer();
-        const Range* rhs = getVariablePointer();
-        Range* output = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
+        const Bounds* rhs = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
         output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
         output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
         break;
       }
       case CrossVariableConstant3d: {
-        const Range* lhs = getVariablePointer();
+        const Bounds* lhs = getVariablePointer();
         const double* rhs = getConstantPointer();
-        Range* output = getVariablePointer();
+        Bounds* output = getVariablePointer();
         output[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
         output[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
         output[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
@@ -1801,8 +1801,8 @@ computeBounds(
       }
       case Linear3d: {
         const double* endpoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = endpoints;
         const double* y = endpoints + 2;
         const double* z = endpoints + 4;
@@ -1813,8 +1813,8 @@ computeBounds(
       }
       case Quadratic3d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + 3;
         const double* z = controlPoints + 6;
@@ -1825,8 +1825,8 @@ computeBounds(
       }
       case Cubic3d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + 4;
         const double* z = controlPoints + 8;
@@ -1837,8 +1837,8 @@ computeBounds(
       }
       case Quartic3d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + 5;
         const double* z = controlPoints + 10;
@@ -1849,8 +1849,8 @@ computeBounds(
       }
       case Quintic3d: {
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + 6;
         const double* z = controlPoints + 12;
@@ -1862,8 +1862,8 @@ computeBounds(
       case Bezier3d: {
         int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
-        Range parameter = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds parameter = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         const double* x = controlPoints;
         const double* y = controlPoints + numControlPoints;
         const double* z = controlPoints + numControlPoints * 2;
@@ -1874,11 +1874,11 @@ computeBounds(
       }
       case TransformVector3d: {
         const double* matrix = getConstantPointer();
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
-        Range vx = input[0];
-        Range vy = input[1];
-        Range vz = input[2];
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
+        Bounds vx = input[0];
+        Bounds vy = input[1];
+        Bounds vz = input[2];
         output[0] = matrix[0] * vx + matrix[3] * vy + matrix[6] * vz;
         output[1] = matrix[1] * vx + matrix[4] * vy + matrix[7] * vz;
         output[2] = matrix[2] * vx + matrix[5] * vy + matrix[8] * vz;
@@ -1886,11 +1886,11 @@ computeBounds(
       }
       case TransformPoint3d: {
         const double* matrix = getConstantPointer();
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
-        Range px = input[0];
-        Range py = input[1];
-        Range pz = input[2];
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
+        Bounds px = input[0];
+        Bounds py = input[1];
+        Bounds pz = input[2];
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6] * pz + matrix[9];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7] * pz + matrix[10];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8] * pz + matrix[11];
@@ -1898,10 +1898,10 @@ computeBounds(
       }
       case PlaceVector2d: {
         const double* matrix = getConstantPointer();
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
-        Range vx = input[0];
-        Range vy = input[1];
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
+        Bounds vx = input[0];
+        Bounds vy = input[1];
         output[0] = matrix[0] * vx + matrix[3] * vy;
         output[1] = matrix[1] * vx + matrix[4] * vy;
         output[2] = matrix[2] * vx + matrix[5] * vy;
@@ -1909,21 +1909,21 @@ computeBounds(
       }
       case PlacePoint2d: {
         const double* matrix = getConstantPointer();
-        const Range* input = getVariablePointer();
-        Range* output = getVariablePointer();
-        Range px = input[0];
-        Range py = input[1];
+        const Bounds* input = getVariablePointer();
+        Bounds* output = getVariablePointer();
+        Bounds px = input[0];
+        Bounds py = input[1];
         output[0] = matrix[0] * px + matrix[3] * py + matrix[6];
         output[1] = matrix[1] * px + matrix[4] * py + matrix[7];
         output[2] = matrix[2] * px + matrix[5] * py + matrix[8];
         break;
       }
       case Desingularized1d: {
-        Range t = *getVariablePointer();
-        Range start = *getVariablePointer();
-        Range middle = *getVariablePointer();
-        Range end = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds t = *getVariablePointer();
+        Bounds start = *getVariablePointer();
+        Bounds middle = *getVariablePointer();
+        Bounds end = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         if (t.upper <= T0) {
           *output = start;
         } else if (t.lower >= T1) {
@@ -1934,11 +1934,11 @@ computeBounds(
         break;
       }
       case Desingularized2d: {
-        Range t = *getVariablePointer();
-        Range* start = getVariablePointer();
-        Range* middle = getVariablePointer();
-        Range* end = getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds t = *getVariablePointer();
+        Bounds* start = getVariablePointer();
+        Bounds* middle = getVariablePointer();
+        Bounds* end = getVariablePointer();
+        Bounds* output = getVariablePointer();
         if (t.upper <= T0) {
           output[0] = start[0];
           output[1] = start[1];
@@ -1952,11 +1952,11 @@ computeBounds(
         break;
       }
       case Desingularized3d: {
-        Range t = *getVariablePointer();
-        Range* start = getVariablePointer();
-        Range* middle = getVariablePointer();
-        Range* end = getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds t = *getVariablePointer();
+        Bounds* start = getVariablePointer();
+        Bounds* middle = getVariablePointer();
+        Bounds* end = getVariablePointer();
+        Bounds* output = getVariablePointer();
         if (t.upper <= T0) {
           output[0] = start[0];
           output[1] = start[1];
@@ -1973,20 +1973,20 @@ computeBounds(
         break;
       }
       case Blend1d: {
-        Range startValue = getValue();
+        Bounds startValue = getValue();
         int numStartDerivatives = getInt();
-        Range* startDerivatives = (Range*)alloca(sizeof(Range) * numStartDerivatives);
+        Bounds* startDerivatives = (Bounds*)alloca(sizeof(Bounds) * numStartDerivatives);
         for (int i = 0; i < numStartDerivatives; ++i) {
           startDerivatives[i] = getValue();
         }
-        Range endValue = getValue();
+        Bounds endValue = getValue();
         int numEndDerivatives = getInt();
-        Range* endDerivatives = (Range*)alloca(sizeof(Range) * numEndDerivatives);
+        Bounds* endDerivatives = (Bounds*)alloca(sizeof(Bounds) * numEndDerivatives);
         for (int i = 0; i < numEndDerivatives; ++i) {
           endDerivatives[i] = getValue();
         }
-        Range t = *getVariablePointer();
-        Range* output = getVariablePointer();
+        Bounds t = *getVariablePointer();
+        Bounds* output = getVariablePointer();
         *output = blend(
           startValue,
           numStartDerivatives,
@@ -2096,13 +2096,13 @@ extern "C" {
     double* returnValuesPointer
   ) {
     Function function(functionPointer);
-    Range* variablesPointer = (Range*)alloca(sizeof(Range) * function.numVariableComponents);
-    variablesPointer[0] = Range(tLower, tUpper);
+    Bounds* variablesPointer = (Bounds*)alloca(sizeof(Bounds) * function.numVariableComponents);
+    variablesPointer[0] = Bounds(tLower, tUpper);
     computeBounds(
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
-      (Range*)returnValuesPointer
+      (Bounds*)returnValuesPointer
     );
   }
 
@@ -2135,14 +2135,14 @@ extern "C" {
     double* returnValuesPointer
   ) {
     Function function(functionPointer);
-    Range* variablesPointer = (Range*)alloca(sizeof(Range) * function.numVariableComponents);
-    variablesPointer[0] = Range(uLower, uUpper);
-    variablesPointer[1] = Range(vLower, vUpper);
+    Bounds* variablesPointer = (Bounds*)alloca(sizeof(Bounds) * function.numVariableComponents);
+    variablesPointer[0] = Bounds(uLower, uUpper);
+    variablesPointer[1] = Bounds(vLower, vUpper);
     computeBounds(
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
-      (Range*)returnValuesPointer
+      (Bounds*)returnValuesPointer
     );
   }
 
