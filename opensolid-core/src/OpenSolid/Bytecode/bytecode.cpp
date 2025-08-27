@@ -19,6 +19,48 @@ lerp(double a, double b, double t) {
   return a + t * (b - a);
 }
 
+inline Range
+lerp(Range a, Range b, Range t) {
+  if (t.midpoint() <= 0.5) {
+    return a + t * (b - a);
+  } else {
+    return b + (1.0 - t) * (a - b);
+  }
+}
+
+int
+prod(int a, int b) {
+  int result = a;
+  while (a < b) {
+    ++a;
+    result *= a;
+  }
+  return result;
+}
+
+int
+choose(int n, int k) {
+  static const int lookup[] = {
+    /*00*/ 1,
+    /*01*/ 1, 1,
+    /*02*/ 1, 2, 1,
+    /*03*/ 1, 3, 3,  1,
+    /*04*/ 1, 4, 6,  4,  1,
+    /*05*/ 1, 5, 10, 10, 5,  1,
+    /*06*/ 1, 6, 15, 20, 15, 6,  1,
+    /*07*/ 1, 7, 21, 35, 35, 21, 7,  1,
+    /*08*/ 1, 8, 28, 56, 70, 56, 28, 8, 1,
+  };
+  if (n < 0 || k < 0 || k > n) {
+    return 0;
+  } else if (n <= 8) {
+    return lookup[(n * (n + 1)) / 2 + k];
+  } else {
+    int d = std::min(k, n - k);
+    return d == 0 ? 1 : prod(n - d + 1, n) / prod(1, d);
+  }
+}
+
 inline double
 quadraticBlossom(const double* p, double t1, double t2) {
   double q0 = lerp(p[0], p[1], t1);
@@ -76,25 +118,147 @@ quinticValue(const double* p, double t) {
   return quinticBlossom(p, t, t, t, t, t);
 }
 
-inline double
-bezierBlossom(int n, const double* p, double tLower, double tUpper, int nLow) {
-  if (n == 1) {
-    return *p;
+template <class T>
+inline T
+bezierBlossom(int numControlPoints, const T* controlPoints, T tLower, T tUpper, int nLow) {
+  if (numControlPoints == 1) {
+    return *controlPoints;
   }
-  double* q = (double*)alloca(sizeof(double) * (n - 1));
-  for (int m = n - 1; m > 0; --m) { // m is number of points to collapse to
-    double t = m <= nLow ? tLower : tUpper;
+  T* q = (T*)alloca(sizeof(T) * (numControlPoints - 1));
+  for (int m = numControlPoints - 1; m > 0; --m) { // m is number of points to collapse to
+    T t = m <= nLow ? tLower : tUpper;
     for (int i = 0; i < m; ++i) { // i is index of the point to collapse to
-      q[i] = lerp(p[i], p[i + 1], t);
+      q[i] = lerp(controlPoints[i], controlPoints[i + 1], t);
     }
-    p = q; // After the first loop iteration, work in place within the outputs
+    controlPoints = q; // After the first loop iteration, work in place within the outputs
   }
   return *q;
 }
 
-inline double
-bezierValue(int n, const double* p, double t) {
-  return bezierBlossom(n, p, t, t, 0);
+template <class T>
+inline T
+bezierValue(int numControlPoints, const T* controlPoints, T t) {
+  return bezierBlossom(numControlPoints, controlPoints, t, t, 0);
+}
+
+template <class T>
+T
+hermiteControlPointOffset(int controlPointIndex, const T* scaledDerivatives) {
+  T result{};
+  for (int derivativeOrder = 1; derivativeOrder <= controlPointIndex; ++derivativeOrder) {
+    int coefficient = choose(controlPointIndex - 1, derivativeOrder - 1);
+    result = result + coefficient * scaledDerivatives[derivativeOrder - 1];
+  }
+  return result;
+}
+
+template <class T>
+void
+hermiteToBezier(
+  T startValue,
+  int numStartDerivatives,
+  T* startDerivatives,
+  T endValue,
+  int numEndDerivatives,
+  T* endDerivatives,
+  T* controlPoints
+) {
+  int curveDegree = numStartDerivatives + numEndDerivatives + 1;
+  double scale;
+  scale = 1.0;
+  for (int i = 0; i < numStartDerivatives; ++i) {
+    scale /= (curveDegree - i);
+    startDerivatives[i] = startDerivatives[i] * scale;
+  }
+  scale = 1.0;
+  for (int i = 0; i < numEndDerivatives; ++i) {
+    scale /= -(curveDegree - i);
+    endDerivatives[i] = endDerivatives[i] * scale;
+  }
+  controlPoints[0] = startValue;
+  controlPoints[curveDegree] = endValue;
+  for (int forwardIndex = 1; forwardIndex <= numStartDerivatives; ++forwardIndex) {
+    T offset = hermiteControlPointOffset(forwardIndex, startDerivatives);
+    controlPoints[forwardIndex] = controlPoints[forwardIndex - 1] + offset;
+  }
+  for (int reverseIndex = 1; reverseIndex <= numEndDerivatives; ++reverseIndex) {
+    T offset = hermiteControlPointOffset(reverseIndex, endDerivatives);
+    int forwardIndex = curveDegree - reverseIndex;
+    controlPoints[forwardIndex] = controlPoints[forwardIndex + 1] + offset;
+  }
+}
+
+template <class T>
+T
+evaluateHermite(
+  T startValue,
+  int numStartDerivatives,
+  T* startDerivatives,
+  T endValue,
+  int numEndDerivatives,
+  T* endDerivatives,
+  T t
+) {
+  int numControlPoints = numStartDerivatives + numEndDerivatives + 2;
+  T* controlPoints = (T*)alloca(sizeof(T) * numControlPoints);
+  hermiteToBezier(
+    startValue,
+    numStartDerivatives,
+    startDerivatives,
+    endValue,
+    numEndDerivatives,
+    endDerivatives,
+    controlPoints
+  );
+  return bezierValue(numControlPoints, controlPoints, t);
+}
+
+double
+opensolid_hermite_value_1d(
+  double startValue,
+  int numStartDerivatives,
+  double* startDerivatives,
+  double endValue,
+  int numEndDerivatives,
+  double* endDerivatives,
+  double t
+) {
+  return evaluateHermite(
+    startValue,
+    numStartDerivatives,
+    startDerivatives,
+    endValue,
+    numEndDerivatives,
+    endDerivatives,
+    t
+  );
+}
+
+void
+opensolid_hermite_bounds_1d(
+  double startValueLower,
+  double startValueUpper,
+  int numStartDerivatives,
+  double* startDerivatives,
+  double endValueLower,
+  double endValueUpper,
+  int numEndDerivatives,
+  double* endDerivatives,
+  double tLower,
+  double tUpper,
+  double* returnValuesPointer
+) {
+  Range result = evaluateHermite(
+    Range(startValueLower, startValueUpper),
+    numStartDerivatives,
+    (Range*)startDerivatives,
+    Range(endValueLower, endValueUpper),
+    numEndDerivatives,
+    (Range*)endDerivatives,
+    Range(tLower, tUpper)
+  );
+  returnValuesPointer[0] = result.lower;
+  returnValuesPointer[1] = result.upper;
 }
 
 void
@@ -114,6 +278,13 @@ computeValue(
   };
   auto getVariablePointer = [&]() -> double* {
     return variablesPointer + getInt();
+  };
+  auto getValue = [&]() -> double {
+    int taggedIndex = getInt();
+    bool isConstant = taggedIndex >= 32768;
+    const double* pointer = isConstant ? constantsPointer : variablesPointer;
+    int index = isConstant ? taggedIndex - 32768 : taggedIndex;
+    return pointer[index];
   };
   while (true) {
     int opcode = getInt();
@@ -904,6 +1075,32 @@ computeValue(
         }
         break;
       }
+      case Hermite1d: {
+        double startValue = getValue();
+        int numStartDerivatives = getInt();
+        double* startDerivatives = (double*)alloca(sizeof(double) * numStartDerivatives);
+        for (int i = 0; i < numStartDerivatives; ++i) {
+          startDerivatives[i] = getValue();
+        }
+        double endValue = getValue();
+        int numEndDerivatives = getInt();
+        double* endDerivatives = (double*)alloca(sizeof(double) * numEndDerivatives);
+        for (int i = 0; i < numEndDerivatives; ++i) {
+          endDerivatives[i] = getValue();
+        }
+        double t = *getVariablePointer();
+        double* output = getVariablePointer();
+        *output = evaluateHermite(
+          startValue,
+          numStartDerivatives,
+          startDerivatives,
+          endValue,
+          numEndDerivatives,
+          endDerivatives,
+          t
+        );
+        break;
+      }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
         break;
@@ -985,6 +1182,15 @@ computeBounds(
   };
   auto getVariablePointer = [&]() -> Range* {
     return variablesPointer + getInt();
+  };
+  auto getValue = [&]() -> Range {
+    int taggedIndex = getInt();
+    bool isConstant = taggedIndex >= 32768;
+    if (isConstant) {
+      return Range(constantsPointer[taggedIndex - 32768]);
+    } else {
+      return variablesPointer[taggedIndex];
+    }
   };
   while (true) {
     int opcode = getInt();
@@ -1764,6 +1970,32 @@ computeBounds(
           output[1] = middle[1];
           output[2] = middle[2];
         }
+        break;
+      }
+      case Hermite1d: {
+        Range startValue = getValue();
+        int numStartDerivatives = getInt();
+        Range* startDerivatives = (Range*)alloca(sizeof(Range) * numStartDerivatives);
+        for (int i = 0; i < numStartDerivatives; ++i) {
+          startDerivatives[i] = getValue();
+        }
+        Range endValue = getValue();
+        int numEndDerivatives = getInt();
+        Range* endDerivatives = (Range*)alloca(sizeof(Range) * numEndDerivatives);
+        for (int i = 0; i < numEndDerivatives; ++i) {
+          endDerivatives[i] = getValue();
+        }
+        Range t = *getVariablePointer();
+        Range* output = getVariablePointer();
+        *output = evaluateHermite(
+          startValue,
+          numStartDerivatives,
+          startDerivatives,
+          endValue,
+          numEndDerivatives,
+          endDerivatives,
+          t
+        );
         break;
       }
       case OPCODE_END: {

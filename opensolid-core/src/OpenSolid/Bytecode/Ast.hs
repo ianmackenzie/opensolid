@@ -42,6 +42,7 @@ module OpenSolid.Bytecode.Ast
   , quarticSpline1d
   , quinticSpline1d
   , bezierCurve1d
+  , hermite1d
   , line2d
   , quadraticSpline2d
   , cubicSpline2d
@@ -78,7 +79,11 @@ where
 import OpenSolid.Bytecode.Compile qualified as Compile
 import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
-import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
+import OpenSolid.Bytecode.Instruction
+  ( ConstantIndex
+  , ValueIndex (ConstantValue, VariableValue)
+  , VariableIndex (VariableIndex)
+  )
 import OpenSolid.Bytecode.Instruction qualified as Instruction
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Float qualified as Float
@@ -86,6 +91,7 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
@@ -163,6 +169,13 @@ data Variable1d input where
     Variable1d input ->
     Variable1d input ->
     Variable1d input ->
+    Variable1d input
+  Hermite1d ::
+    Ast1d input ->
+    List (Ast1d input) ->
+    Ast1d input ->
+    List (Ast1d input) ->
+    Ast1d input ->
     Variable1d input
 
 deriving instance Eq (Variable1d input)
@@ -297,6 +310,14 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
   Desingularized1d parameter left middle right . input =
     Desingularized1d (parameter . input) (left . input) (middle . input) (right . input)
+  Hermite1d startValue startDerivatives endValue endDerivatives parameter . input = do
+    let inputAst = Variable1d input
+    Hermite1d
+      (startValue . inputAst)
+      (List.map (. inputAst) startDerivatives)
+      (endValue . inputAst)
+      (List.map (. inputAst) endDerivatives)
+      (parameter . inputAst)
 
 instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
@@ -393,6 +414,14 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) 
   DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
   Desingularized1d parameter left middle right . input =
     Desingularized1d (parameter . input) (left . input) (middle . input) (right . input)
+  Hermite1d startValue startDerivatives endValue endDerivatives parameter . input = do
+    let inputAst = Variable2d input
+    Hermite1d
+      (startValue . inputAst)
+      (List.map (. inputAst) startDerivatives)
+      (endValue . inputAst)
+      (List.map (. inputAst) endDerivatives)
+      (parameter . inputAst)
 
 instance Composition (Ast2d input) (Ast2d UvPoint) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
@@ -1034,6 +1063,16 @@ bezierCurve1d (NonEmpty.One value) _ = constant1d value
 bezierCurve1d controlPoints param =
   Variable1d (BezierCurve1d (NonEmpty.map Qty.coerce controlPoints) CurveParameter) . param
 
+hermite1d ::
+  Ast1d input ->
+  List (Ast1d input) ->
+  Ast1d input ->
+  List (Ast1d input) ->
+  Ast1d input ->
+  Ast1d input
+hermite1d startValue startDerivatives endValue endDerivatives param =
+  Variable1d (Hermite1d startValue startDerivatives endValue endDerivatives param)
+
 line2d :: Vector2d (space @ units) -> Vector2d (space @ units) -> Ast1d input -> Ast2d input
 line2d p1 p2 param = bezierCurve2d (NonEmpty.two p1 p2) param
 
@@ -1345,6 +1384,28 @@ compileVariable1d variable = case variable of
     rightIndex <- compileVariable1d right
     let instruction = Instruction.Desingularized1d parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable1d instruction
+  Hermite1d startValue startDerivatives endValue endDerivatives parameter -> Compile.do
+    startValueIndex <- compileValue1d startValue
+    startDerivativeIndices <- Compile.collect compileValue1d startDerivatives
+    endValueIndex <- compileValue1d endValue
+    endDerivativeIndices <- Compile.collect compileValue1d endDerivatives
+    parameterIndex <- compileValue1d parameter
+    let instruction =
+          Instruction.Hermite1d
+            startValueIndex
+            startDerivativeIndices
+            endValueIndex
+            endDerivativeIndices
+            parameterIndex
+    Compile.addVariable1d instruction
+
+compileValue1d :: Ast1d input -> Compile.Step ValueIndex
+compileValue1d (Constant1d value) = Compile.do
+  constantIndex <- Compile.addConstant1d value
+  Compile.return (ConstantValue constantIndex)
+compileValue1d (Variable1d variable) = Compile.do
+  variableIndex <- compileVariable1d variable
+  Compile.return (VariableValue variableIndex)
 
 compileVariable2d :: Variable2d input -> Compile.Step VariableIndex
 compileVariable2d variable = case variable of

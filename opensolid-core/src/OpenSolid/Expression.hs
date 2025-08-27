@@ -34,6 +34,7 @@ module OpenSolid.Expression
   , On (on)
   , ProjectInto (projectInto)
   , bezierCurve
+  , Hermite (hermite)
   , desingularized
   , Evaluation (evaluate, evaluateBounds)
   , solveMonotonicSurfaceU
@@ -53,6 +54,7 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.List qualified as List
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
@@ -120,6 +122,10 @@ data Expression input output where
     Ast3d UvPoint ->
     ~(Compiled UvPoint (Vector3d Ast.Coordinates)) ->
     Expression UvPoint (Vector3d (space @ units))
+
+ast1d :: Expression input Float -> Ast1d input
+ast1d (Curve1d ast _) = ast
+ast1d (Surface1d ast _) = ast
 
 curve1d :: Ast1d Float -> Expression Float (Qty units)
 curve1d ast = Curve1d ast (Ast.compileCurve1d ast)
@@ -1575,6 +1581,25 @@ instance BezierCurve (Vector3d (space @ units)) where
 instance BezierCurve (Point3d (space @ units)) where
   bezierCurve controlPoints =
     curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
+
+class Hermite input value derivative where
+  hermite ::
+    Expression input value ->
+    List (Expression input derivative) ->
+    Expression input value ->
+    List (Expression input derivative) ->
+    Expression input Float ->
+    Expression input value
+
+instance Hermite input Float Float where
+  hermite (Curve1d startValue _) startDerivatives (Curve1d endValue _) endDerivatives (Curve1d parameter _) = do
+    let startDerivativeAsts = List.map ast1d startDerivatives
+    let endDerivativeAsts = List.map ast1d endDerivatives
+    curve1d (Ast.hermite1d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
+  hermite (Surface1d startValue _) startDerivatives (Surface1d endValue _) endDerivatives (Surface1d parameter _) = do
+    let startDerivativeAsts = List.map ast1d startDerivatives
+    let endDerivativeAsts = List.map ast1d endDerivatives
+    surface1d (Ast.hermite1d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
 
 desingularized ::
   Expression input Float ->

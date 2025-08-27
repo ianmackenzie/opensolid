@@ -2,6 +2,7 @@ module OpenSolid.Bytecode.Instruction
   ( Instruction (..)
   , VariableIndex (VariableIndex)
   , ConstantIndex (ConstantIndex)
+  , ValueIndex (ConstantValue, VariableValue)
   , encode
   , return
   )
@@ -22,6 +23,12 @@ newtype VariableIndex = VariableIndex Int deriving (Eq, Ord)
 
 instance Show VariableIndex where
   show (VariableIndex index) = Text.unpack ("V" <> Text.int index)
+
+data ValueIndex = ConstantValue ConstantIndex | VariableValue VariableIndex deriving (Eq, Ord)
+
+instance Show ValueIndex where
+  show (ConstantValue constantIndex) = Prelude.show constantIndex
+  show (VariableValue variableIndex) = Prelude.show variableIndex
 
 data Instruction
   = Component0 VariableIndex
@@ -96,13 +103,35 @@ data Instruction
   | Desingularized1d VariableIndex VariableIndex VariableIndex VariableIndex
   | Desingularized2d VariableIndex VariableIndex VariableIndex VariableIndex
   | Desingularized3d VariableIndex VariableIndex VariableIndex VariableIndex
+  | Hermite1d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
   deriving (Eq, Ord, Show)
 
+maxValues :: Int
+maxValues = 32768
+
+tooManyVariables :: Text
+tooManyVariables = "More than " <> Text.int maxValues <> " variables in compiled bytecode"
+
+tooManyConstants :: Text
+tooManyConstants = "More than " <> Text.int maxValues <> " constants in compiled bytecode"
+
 encodeVariableIndex :: VariableIndex -> Builder
-encodeVariableIndex (VariableIndex index) = Encode.int index
+encodeVariableIndex (VariableIndex index)
+  | index < maxValues = Encode.int index
+  | otherwise = exception tooManyVariables
 
 encodeConstantIndex :: ConstantIndex -> Builder
-encodeConstantIndex (ConstantIndex index) = Encode.int index
+encodeConstantIndex (ConstantIndex index)
+  | index < maxValues = Encode.int index
+  | otherwise = exception tooManyConstants
+
+encodeValueIndex :: ValueIndex -> Builder
+encodeValueIndex (VariableValue (VariableIndex index))
+  | index < maxValues = Encode.int index
+  | otherwise = exception tooManyVariables
+encodeValueIndex (ConstantValue (ConstantIndex index))
+  | index < maxValues = Encode.int (maxValues + index)
+  | otherwise = exception tooManyConstants
 
 encode :: Instruction -> VariableIndex -> Builder
 encode instruction outputIndex =
@@ -460,6 +489,13 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeVariableIndex left
       <> encodeVariableIndex middle
       <> encodeVariableIndex right
+  Hermite1d startValue startDerivatives endValue endDerivatives parameterValue ->
+    Encode.int 88
+      <> encodeValueIndex startValue
+      <> Encode.list encodeValueIndex startDerivatives
+      <> encodeValueIndex endValue
+      <> Encode.list encodeValueIndex endDerivatives
+      <> encodeValueIndex parameterValue
 
 return :: Int -> VariableIndex -> Builder
 return dimension variableIndex =

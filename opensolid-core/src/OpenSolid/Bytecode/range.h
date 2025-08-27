@@ -18,6 +18,11 @@ struct Range {
   double lower;
   double upper;
 
+  inline Range() :
+      lower(0.0),
+      upper(0.0) {
+  }
+
   inline Range(double value) {
     if (std::isnan(value)) {
       this->lower = -INFINITY;
@@ -79,6 +84,11 @@ struct Range {
     double min = std::min(std::min(std::min(std::min(std::min(a, b), c), d), e), f);
     double max = std::max(std::max(std::max(std::max(std::max(a, b), c), d), e), f);
     return Range(min, max);
+  }
+
+  inline double
+  midpoint() const {
+    return 0.5 * (lower + upper);
   }
 
   inline Range

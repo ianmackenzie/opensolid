@@ -91,6 +91,7 @@ enum Opcode {
   Desingularized1d = 85,
   Desingularized2d = 86,
   Desingularized3d = 87,
+  Hermite1d = 88,
   OPCODE_END
 };
 

@@ -1,9 +1,10 @@
-module OpenSolid.Bytecode.Encode (word, int, float) where
+module OpenSolid.Bytecode.Encode (word, int, float, list) where
 
 import Data.ByteString.Builder qualified as Builder
 import Data.Word (Word16)
 import GHC.ByteOrder qualified
 import OpenSolid.Binary (Builder)
+import OpenSolid.Binary qualified as Binary
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
@@ -27,3 +28,6 @@ double = case GHC.ByteOrder.targetByteOrder of
 
 float :: Float -> Builder
 float = double . Float.toDouble
+
+list :: (a -> Builder) -> List a -> Builder
+list encodeItem items = int items.length <> Binary.collect encodeItem items
