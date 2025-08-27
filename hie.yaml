@@ -42,8 +42,8 @@ cradle:
     - path: "executables/gear-generation/Main.hs"
       component: "executables:exe:gear-generation"
 
-    - path: "executables/hermite-surface/Main.hs"
-      component: "executables:exe:hermite-surface"
+    - path: "executables/blended-surface/Main.hs"
+      component: "executables:exe:blended-surface"
 
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"

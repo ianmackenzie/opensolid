@@ -34,7 +34,7 @@ module OpenSolid.Expression
   , On (on)
   , ProjectInto (projectInto)
   , bezierCurve
-  , Hermite (hermite)
+  , Blend (blend)
   , desingularized
   , Evaluation (evaluate, evaluateBounds)
   , solveMonotonicSurfaceU
@@ -1582,8 +1582,8 @@ instance BezierCurve (Point3d (space @ units)) where
   bezierCurve controlPoints =
     curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
 
-class Hermite input value derivative where
-  hermite ::
+class Blend input value derivative where
+  blend ::
     Expression input value ->
     List (Expression input derivative) ->
     Expression input value ->
@@ -1591,15 +1591,15 @@ class Hermite input value derivative where
     Expression input Float ->
     Expression input value
 
-instance Hermite input Float Float where
-  hermite (Curve1d startValue _) startDerivatives (Curve1d endValue _) endDerivatives (Curve1d parameter _) = do
+instance Blend input Float Float where
+  blend (Curve1d startValue _) startDerivatives (Curve1d endValue _) endDerivatives (Curve1d parameter _) = do
     let startDerivativeAsts = List.map ast1d startDerivatives
     let endDerivativeAsts = List.map ast1d endDerivatives
-    curve1d (Ast.hermite1d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
-  hermite (Surface1d startValue _) startDerivatives (Surface1d endValue _) endDerivatives (Surface1d parameter _) = do
+    curve1d (Ast.blend1d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
+  blend (Surface1d startValue _) startDerivatives (Surface1d endValue _) endDerivatives (Surface1d parameter _) = do
     let startDerivativeAsts = List.map ast1d startDerivatives
     let endDerivativeAsts = List.map ast1d endDerivatives
-    surface1d (Ast.hermite1d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
+    surface1d (Ast.blend1d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
 
 desingularized ::
   Expression input Float ->

@@ -190,7 +190,7 @@ hermiteToBezier(
 
 template <class T>
 T
-evaluateHermite(
+blend(
   T startValue,
   int numStartDerivatives,
   T* startDerivatives,
@@ -214,7 +214,7 @@ evaluateHermite(
 }
 
 double
-opensolid_hermite_value_1d(
+opensolid_blend_values_1d(
   double startValue,
   int numStartDerivatives,
   double* startDerivatives,
@@ -223,7 +223,7 @@ opensolid_hermite_value_1d(
   double* endDerivatives,
   double t
 ) {
-  return evaluateHermite(
+  return blend(
     startValue,
     numStartDerivatives,
     startDerivatives,
@@ -235,7 +235,7 @@ opensolid_hermite_value_1d(
 }
 
 void
-opensolid_hermite_bounds_1d(
+opensolid_blend_bounds_1d(
   double startValueLower,
   double startValueUpper,
   int numStartDerivatives,
@@ -248,7 +248,7 @@ opensolid_hermite_bounds_1d(
   double tUpper,
   double* returnValuesPointer
 ) {
-  Range result = evaluateHermite(
+  Range result = blend(
     Range(startValueLower, startValueUpper),
     numStartDerivatives,
     (Range*)startDerivatives,
@@ -1075,7 +1075,7 @@ computeValue(
         }
         break;
       }
-      case Hermite1d: {
+      case Blend1d: {
         double startValue = getValue();
         int numStartDerivatives = getInt();
         double* startDerivatives = (double*)alloca(sizeof(double) * numStartDerivatives);
@@ -1090,7 +1090,7 @@ computeValue(
         }
         double t = *getVariablePointer();
         double* output = getVariablePointer();
-        *output = evaluateHermite(
+        *output = blend(
           startValue,
           numStartDerivatives,
           startDerivatives,
@@ -1972,7 +1972,7 @@ computeBounds(
         }
         break;
       }
-      case Hermite1d: {
+      case Blend1d: {
         Range startValue = getValue();
         int numStartDerivatives = getInt();
         Range* startDerivatives = (Range*)alloca(sizeof(Range) * numStartDerivatives);
@@ -1987,7 +1987,7 @@ computeBounds(
         }
         Range t = *getVariablePointer();
         Range* output = getVariablePointer();
-        *output = evaluateHermite(
+        *output = blend(
           startValue,
           numStartDerivatives,
           startDerivatives,

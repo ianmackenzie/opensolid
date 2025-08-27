@@ -16,9 +16,9 @@ main = IO.do
   let endValue = constant 1.0 + Expression.v * constant 0.5
   let startDerivative = constant 0.0
   let endDerivative = constant 1.0 - Expression.v * constant 1.0
-  let expression = Expression.hermite startValue [startDerivative] endValue [endDerivative] Expression.u
+  let expression = Expression.blend startValue [startDerivative] endValue [endDerivative] Expression.u
   let meshPoint uvPoint = do
         let Point2d u v = uvPoint
         Point3d.zUp u v (Expression.evaluate expression uvPoint)
   let mesh = Mesh.grid 20 20 meshPoint
-  Stl.writeBinary "executables/hermite-surface/mesh.stl" Convention3d.yUp identity mesh
+  Stl.writeBinary "executables/blended-surface/mesh.stl" Convention3d.yUp identity mesh

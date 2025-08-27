@@ -5,12 +5,9 @@ module OpenSolid.Bezier
   , hermite
   , syntheticStart
   , syntheticEnd
-  , hermiteValue1d
-  , hermiteBounds1d
   )
 where
 
-import OpenSolid.Bytecode.Evaluate (hermiteBounds1d, hermiteValue1d)
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Float qualified as Float
 import OpenSolid.HasZero (HasZero (zero))

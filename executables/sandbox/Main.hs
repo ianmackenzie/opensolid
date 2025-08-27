@@ -5,7 +5,6 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
-import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -16,6 +15,7 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Debug qualified as Debug
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Drawing2d (Drawing2d)
@@ -435,15 +435,15 @@ testQuotientDesingularization = Tolerance.using 1e-9 IO.do
   IO.forEach tValues \tValue -> IO.do
     log "third derivative" (Curve.evaluate quotient.derivative.derivative.derivative tValue)
 
-testHermiteEvaluation :: IO ()
-testHermiteEvaluation = IO.do
+testBlending :: IO ()
+testBlending = IO.do
   let startValue = 1.0
   let startDerivatives = [2.0]
   let endValue = 3.0
   let endDerivatives = [-4.0, 5.0]
   let hermiteCurve = Curve.hermite startValue startDerivatives endValue endDerivatives
-  let hermiteExpression =
-        Expression.hermite
+  let blendExpression =
+        Expression.blend
           (Expression.constant startValue)
           (List.map Expression.constant startDerivatives)
           (Expression.constant endValue)
@@ -451,13 +451,13 @@ testHermiteEvaluation = IO.do
           Expression.t
   IO.forEach (Qty.steps 0.0 1.0 10) \tValue -> IO.do
     log "hermiteCurve" (Curve.evaluate hermiteCurve tValue)
-    log "hermiteExpression" (Expression.evaluate hermiteExpression tValue)
-    log "direct evaluation" (Bezier.hermiteValue1d startValue startDerivatives endValue endDerivatives tValue)
+    log "blendExpression" (Expression.evaluate blendExpression tValue)
+    log "direct evaluation" (Desingularization.blendValues1d startValue startDerivatives endValue endDerivatives tValue)
   IO.forEach (Parameter.intervals 10) \tBounds -> IO.do
     log "hermiteCurve" (Curve.evaluateBounds hermiteCurve tBounds)
-    log "hermiteExpression" (Expression.evaluateBounds hermiteExpression tBounds)
+    log "blendExpression" (Expression.evaluateBounds blendExpression tBounds)
     log "direct evaluation" $
-      Bezier.hermiteBounds1d
+      Desingularization.blendBounds1d
         (Bounds.constant startValue)
         (List.map Bounds.constant startDerivatives)
         (Bounds.constant endValue)
@@ -491,4 +491,4 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testTextSum
   testNewtonRaphson2d
   testQuotientDesingularization
-  testHermiteEvaluation
+  testBlending

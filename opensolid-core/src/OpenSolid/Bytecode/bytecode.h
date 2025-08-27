@@ -91,7 +91,7 @@ enum Opcode {
   Desingularized1d = 85,
   Desingularized2d = 86,
   Desingularized3d = 87,
-  Hermite1d = 88,
+  Blend1d = 88,
   OPCODE_END
 };
 
@@ -129,7 +129,7 @@ extern "C" {
   );
 
   double
-  opensolid_hermite_value_1d(
+  opensolid_blend_values_1d(
     double startValue,
     int numStartDerivatives,
     double* startDerivatives,
@@ -140,7 +140,7 @@ extern "C" {
   );
 
   void
-  opensolid_hermite_bounds_1d(
+  opensolid_blend_bounds_1d(
     double startValueLower,
     double startValueUpper,
     int numStartDerivatives,

@@ -42,7 +42,7 @@ module OpenSolid.Bytecode.Ast
   , quarticSpline1d
   , quinticSpline1d
   , bezierCurve1d
-  , hermite1d
+  , blend1d
   , line2d
   , quadraticSpline2d
   , cubicSpline2d
@@ -170,7 +170,7 @@ data Variable1d input where
     Variable1d input ->
     Variable1d input ->
     Variable1d input
-  Hermite1d ::
+  Blend1d ::
     Ast1d input ->
     List (Ast1d input) ->
     Ast1d input ->
@@ -310,9 +310,9 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
   Desingularized1d parameter left middle right . input =
     Desingularized1d (parameter . input) (left . input) (middle . input) (right . input)
-  Hermite1d startValue startDerivatives endValue endDerivatives parameter . input = do
+  Blend1d startValue startDerivatives endValue endDerivatives parameter . input = do
     let inputAst = Variable1d input
-    Hermite1d
+    Blend1d
       (startValue . inputAst)
       (List.map (. inputAst) startDerivatives)
       (endValue . inputAst)
@@ -414,9 +414,9 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) 
   DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
   Desingularized1d parameter left middle right . input =
     Desingularized1d (parameter . input) (left . input) (middle . input) (right . input)
-  Hermite1d startValue startDerivatives endValue endDerivatives parameter . input = do
+  Blend1d startValue startDerivatives endValue endDerivatives parameter . input = do
     let inputAst = Variable2d input
-    Hermite1d
+    Blend1d
       (startValue . inputAst)
       (List.map (. inputAst) startDerivatives)
       (endValue . inputAst)
@@ -1063,15 +1063,15 @@ bezierCurve1d (NonEmpty.One value) _ = constant1d value
 bezierCurve1d controlPoints param =
   Variable1d (BezierCurve1d (NonEmpty.map Qty.coerce controlPoints) CurveParameter) . param
 
-hermite1d ::
+blend1d ::
   Ast1d input ->
   List (Ast1d input) ->
   Ast1d input ->
   List (Ast1d input) ->
   Ast1d input ->
   Ast1d input
-hermite1d startValue startDerivatives endValue endDerivatives param =
-  Variable1d (Hermite1d startValue startDerivatives endValue endDerivatives param)
+blend1d startValue startDerivatives endValue endDerivatives param =
+  Variable1d (Blend1d startValue startDerivatives endValue endDerivatives param)
 
 line2d :: Vector2d (space @ units) -> Vector2d (space @ units) -> Ast1d input -> Ast2d input
 line2d p1 p2 param = bezierCurve2d (NonEmpty.two p1 p2) param
@@ -1384,14 +1384,14 @@ compileVariable1d variable = case variable of
     rightIndex <- compileVariable1d right
     let instruction = Instruction.Desingularized1d parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable1d instruction
-  Hermite1d startValue startDerivatives endValue endDerivatives parameter -> Compile.do
+  Blend1d startValue startDerivatives endValue endDerivatives parameter -> Compile.do
     startValueIndex <- compileValue1d startValue
     startDerivativeIndices <- Compile.collect compileValue1d startDerivatives
     endValueIndex <- compileValue1d endValue
     endDerivativeIndices <- Compile.collect compileValue1d endDerivatives
     parameterIndex <- compileValue1d parameter
     let instruction =
-          Instruction.Hermite1d
+          Instruction.Blend1d
             startValueIndex
             startDerivativeIndices
             endValueIndex

@@ -103,7 +103,7 @@ data Instruction
   | Desingularized1d VariableIndex VariableIndex VariableIndex VariableIndex
   | Desingularized2d VariableIndex VariableIndex VariableIndex VariableIndex
   | Desingularized3d VariableIndex VariableIndex VariableIndex VariableIndex
-  | Hermite1d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
+  | Blend1d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
   deriving (Eq, Ord, Show)
 
 maxValues :: Int
@@ -489,7 +489,7 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeVariableIndex left
       <> encodeVariableIndex middle
       <> encodeVariableIndex right
-  Hermite1d startValue startDerivatives endValue endDerivatives parameterValue ->
+  Blend1d startValue startDerivatives endValue endDerivatives parameterValue ->
     Encode.int 88
       <> encodeValueIndex startValue
       <> Encode.list encodeValueIndex startDerivatives

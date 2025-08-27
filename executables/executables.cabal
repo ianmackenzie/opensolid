@@ -160,9 +160,9 @@ executable gear-generation
     opensolid-core,
     time,
 
-executable hermite-surface
+executable blended-surface
   import: config
   main-is: Main.hs
-  hs-source-dirs: hermite-surface
+  hs-source-dirs: blended-surface
   build-depends:
     opensolid-core
