@@ -7,6 +7,8 @@ module OpenSolid.Point3d
   , coerce
   , erase
   , fromCoordinates
+  , zUp
+  , yUp
   , midpoint
   , interpolateFrom
   , distanceFrom
@@ -103,6 +105,18 @@ fromCoordinates convention (pX, pY, pZ) = do
     @ pX * iR + pY * jR + pZ * kR
     @ pX * iF + pY * jF + pZ * kF
     @ pX * iU + pY * jU + pZ * kU
+
+{-| Construct a point from its XYZ coordinates, using a Z-up convention
+where positive X is rightward, positive Y is forward and positive Z is upward.
+-}
+zUp :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
+zUp pX pY pZ = Point3d pX pY pZ
+
+{-| Construct a point from its XYZ coordinates, using a Y-up convention
+where positive X is leftward, positive Y is upward, and positive Z is forward.
+-}
+yUp :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
+yUp pX pY pZ = Point3d -pX pZ pY
 
 interpolateFrom ::
   Point3d (space @ units) ->

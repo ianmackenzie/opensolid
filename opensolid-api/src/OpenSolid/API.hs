@@ -834,6 +834,8 @@ vector3d =
     [ Class.constant "Zero" (Vector3d.zero @Space @Unitless) $(docs 'Vector3d.zero)
     , Class.factory1 "Unit" "Direction" Vector3d.unit $(docs 'Vector3d.unit)
     , Class.factory2 "From Components" "Convention" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
+    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
     , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
     , Class.memberU0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , Class.memberU0 "Is Zero" (~= Vector3d.zero) "Check if a vector is zero, within the current tolerance."
@@ -866,6 +868,8 @@ displacement3d =
   Class.new @(Vector3d (Space @ Meters)) "A displacement vector in 3D." $
     [ Class.constant "Zero" (Vector3d.zero @Space @Meters) $(docs 'Vector3d.zero)
     , Class.factory2 "From Components" "Convention" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
+    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
     , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
     , Class.memberM0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , Class.memberM0 "Is Zero" (~= Vector3d.zero) "Check if a displacement is zero, within the current tolerance."
@@ -896,6 +900,8 @@ areaVector3d =
   Class.new @(Vector3d (Space @ SquareMeters)) "A vector in 3D with units of area." $
     [ Class.constant "Zero" (Vector3d.zero @Space @SquareMeters) $(docs 'Vector3d.zero)
     , Class.factory2 "From Components" "Convention" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
+    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
     , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
     , Class.memberS0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , Class.memberS0 "Is Zero" (~= Vector3d.zero) "Check if an area vector is zero, within the current tolerance."
@@ -940,6 +946,8 @@ point3d =
     [ Class.factory2 "Along" "Axis" "Distance" Point3d.along $(docs 'Point3d.along)
     , Class.factory2 "On" "Plane" "Position" Point3d.on $(docs 'Point3d.on)
     , Class.factory2 "From Coordinates" "Convention" "Coordinates" Point3d.fromCoordinates $(docs 'Point3d.fromCoordinates)
+    , Class.factory3 "Z Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.zUp $(docs 'Point3d.zUp)
+    , Class.factory3 "Y Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.yUp $(docs 'Point3d.yUp)
     , Class.member1 "Coordinates" "Convention" Point3d.coordinates $(docs 'Point3d.coordinates)
     , Class.member1 "Distance To" "Other" Point3d.distanceFrom $(docs 'Point3d.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point3d.midpoint $(docs 'Point3d.midpoint)

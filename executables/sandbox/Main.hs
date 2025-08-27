@@ -12,7 +12,6 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -79,9 +78,7 @@ testScalarArithmetic = IO.do
 
 testVectorArithmetic :: IO ()
 testVectorArithmetic = IO.do
-  let vector x y z =
-        Vector3d.fromComponents Convention3d.zUp $
-          (Length.meters x, Length.meters y, Length.meters z)
+  let vector x y z = Vector3d.zUp (Length.meters x) (Length.meters y) (Length.meters z)
   let v1 = Vector2d.meters 1.0 2.0
   let v2 = 0.5 * Vector2d.meters 3.0 4.0
   let dotProduct = v1 `dot` v2

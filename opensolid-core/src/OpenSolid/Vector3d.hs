@@ -5,6 +5,8 @@ module OpenSolid.Vector3d
   , unit
   , on
   , fromComponents
+  , zUp
+  , yUp
   , componentIn
   , projectionIn
   , forwardComponent
@@ -99,6 +101,18 @@ fromComponents convention (vX, vY, vZ) = do
     @ vX * iR + vY * jR + vZ * kR
     @ vX * iF + vY * jF + vZ * kF
     @ vX * iU + vY * jU + vZ * kU
+
+{-| Construct a vector from its XYZ components, using a Z-up convention
+where positive X is rightward, positive Y is forward and positive Z is upward.
+-}
+zUp :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
+zUp vX vY vZ = Vector3d vX vY vZ
+
+{-| Construct a vector from its XYZ components, using a Y-up convention
+where positive X is leftward, positive Y is upward, and positive Z is forward.
+-}
+yUp :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
+yUp vX vY vZ = Vector3d -vX vZ vY
 
 componentIn :: Direction3d space -> Vector3d (space @ units) -> Qty units
 componentIn = dot

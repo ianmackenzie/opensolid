@@ -19,6 +19,6 @@ main = IO.do
   let expression = Expression.hermite startValue [startDerivative] endValue [endDerivative] Expression.u
   let meshPoint uvPoint = do
         let Point2d u v = uvPoint
-        Point3d.fromCoordinates Convention3d.zUp (u, v, Expression.evaluate expression uvPoint)
+        Point3d.zUp u v (Expression.evaluate expression uvPoint)
   let mesh = Mesh.grid 20 20 meshPoint
   Stl.writeBinary "executables/hermite-surface/mesh.stl" Convention3d.yUp identity mesh
