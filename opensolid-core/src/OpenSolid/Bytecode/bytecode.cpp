@@ -7,10 +7,10 @@
 #include "bounds.h"
 #include "bytecode.h"
 
-// Used when evaluating Degenerate#d opcodes,
+// Used when evaluating Desingularized#d opcodes,
 // to determine whether a given parameter value is at a given endpoint
 // or whether a given parameter range includes a given endpoint;
-// should be kept in sync with the constants used in Degenerate.hs
+// should be kept in sync with the constants used in Desingularization.hs
 #define T0 0.001
 #define T1 0.999
 
