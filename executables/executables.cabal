@@ -159,3 +159,10 @@ executable gear-generation
     opensolid-components,
     opensolid-core,
     time,
+
+executable hermite-surface
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: hermite-surface
+  build-depends:
+    opensolid-core
