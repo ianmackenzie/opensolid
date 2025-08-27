@@ -750,7 +750,10 @@ unsafeQuotient ::
   VectorCurve2d (space @ units3)
 unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerator denominator)
 
-unsafeQuotient' :: VectorCurve2d (space @ units1) -> Curve units2 -> VectorCurve2d (space @ (units1 :/: units2))
+unsafeQuotient' ::
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve2d (space @ (units1 :/: units2))
 unsafeQuotient' numerator denominator = do
   new
     @ numerator.compiled ./. denominator.compiled
