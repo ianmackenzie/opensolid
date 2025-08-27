@@ -766,15 +766,14 @@ squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
 squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve (units :*: units)
-squaredMagnitude' curve = do
-  let compiledSquaredMagnitude =
-        CompiledFunction.map
-          Expression.VectorCurve2d.squaredMagnitude'
-          Vector2d.squaredMagnitude'
-          VectorBounds2d.squaredMagnitude'
-          curve.compiled
-  let squaredMagnitudeDerivative = 2.0 * curve `dot'` curve.derivative
-  Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
+squaredMagnitude' curve =
+  Curve.new
+    @ CompiledFunction.map
+      Expression.VectorCurve2d.squaredMagnitude'
+      Vector2d.squaredMagnitude'
+      VectorBounds2d.squaredMagnitude'
+      curve.compiled
+    @ 2.0 * curve `dot'` curve.derivative
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 unsafeMagnitude curve =
