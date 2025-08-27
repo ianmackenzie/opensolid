@@ -6,6 +6,8 @@ module OpenSolid.VectorCurve2d
   , evaluateBounds
   , quotient
   , quotient'
+  , unsafeQuotient
+  , unsafeQuotient'
   , unsafeMagnitude
   , transformBy
   )
@@ -34,6 +36,8 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Vector2d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds2d coordinateSystem)
+
+data DivisionByZero
 
 instance HasUnits (VectorCurve2d (space @ units)) units
 
@@ -89,9 +93,18 @@ quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
-  VectorCurve2d (space @ units3)
+  Result DivisionByZero (VectorCurve2d (space @ units3))
 quotient' ::
   Tolerance units2 =>
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  Result DivisionByZero (VectorCurve2d (space @ (units1 :/: units2)))
+unsafeQuotient ::
+  Units.Quotient units1 units2 units3 =>
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve2d (space @ units3)
+unsafeQuotient' ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   VectorCurve2d (space @ (units1 :/: units2))

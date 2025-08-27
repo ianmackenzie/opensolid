@@ -30,7 +30,7 @@ main = Tolerance.using Length.nanometer IO.do
   let radius = Length.centimeters 10.0
   let arc v1 v2 v3 =
         Tolerance.using 1e-9 $
-          VectorCurve2d.quotient
+          VectorCurve2d.unsafeQuotient
             @ VectorCurve2d.quadraticBezier v1 v2 v3
             @ weightCurve
   let arc1 = Point2d.origin + radius * arc vE vNE vN

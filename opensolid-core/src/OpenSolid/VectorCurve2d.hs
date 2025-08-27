@@ -27,6 +27,8 @@ module OpenSolid.VectorCurve2d
   , desingularized
   , quotient
   , quotient'
+  , unsafeQuotient
+  , unsafeQuotient'
   , magnitude
   , squaredMagnitude
   , squaredMagnitude'
@@ -696,22 +698,65 @@ components curve = (xComponent curve, yComponent curve)
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
 
+data DivisionByZero = DivisionByZero deriving (Eq, Show, Error.Message)
+
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
-  VectorCurve2d (space @ units3)
+  Result DivisionByZero (VectorCurve2d (space @ units3))
 quotient lhs rhs = Units.specialize (quotient' lhs rhs)
 
 quotient' ::
   Tolerance units2 =>
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
-  VectorCurve2d (space @ (units1 :/: units2))
-quotient' lhs rhs =
-  recursive
-    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
-    @ \self -> quotient' lhs.derivative rhs - self * Curve.unsafeQuotient rhs.derivative rhs
+  Result DivisionByZero (VectorCurve2d (space @ (units1 :/: units2)))
+quotient' numerator denominator = do
+  if denominator ~= Qty.zero
+    then Failure DivisionByZero
+    else Success do
+      let singularity0 =
+            if Curve.evaluate denominator 0.0 ~= Qty.zero
+              then Just (lhopital' numerator.derivative denominator.derivative 0.0 1, [])
+              else Nothing
+      let singularity1 =
+            if Curve.evaluate denominator 1.0 ~= Qty.zero
+              then Just (lhopital' numerator.derivative denominator.derivative 1.0 1, [])
+              else Nothing
+      desingularize singularity0 (unsafeQuotient' numerator denominator) singularity1
+
+lhopital' ::
+  Tolerance units2 =>
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  Float ->
+  Int ->
+  Vector2d (space @ (units1 :/: units2))
+lhopital' numerator denominator tValue n =
+  if n > 4
+    then exception "Higher-order zero detected"
+    else do
+      let denominatorValue = Curve.evaluate denominator tValue
+      if denominatorValue ~= Qty.zero
+        then lhopital' numerator.derivative denominator.derivative tValue (n + 1)
+        else evaluate numerator tValue ./. denominatorValue
+
+unsafeQuotient ::
+  Units.Quotient units1 units2 units3 =>
+  VectorCurve2d (space @ units1) ->
+  Curve units2 ->
+  VectorCurve2d (space @ units3)
+unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerator denominator)
+
+unsafeQuotient' :: VectorCurve2d (space @ units1) -> Curve units2 -> VectorCurve2d (space @ (units1 :/: units2))
+unsafeQuotient' numerator denominator = do
+  new
+    @ numerator.compiled ./. denominator.compiled
+    @ Units.simplify do
+      unsafeQuotient'
+        (numerator.derivative .*. denominator - numerator .*. denominator.derivative)
+        (Curve.squared' denominator)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
@@ -735,7 +780,7 @@ unsafeMagnitude curve =
       Vector2d.magnitude
       VectorBounds2d.magnitude
       curve.compiled
-    @ \self -> curve.derivative `dot` Tolerance.exactly (quotient curve self)
+    @ \self -> curve.derivative `dot` Tolerance.exactly (unsafeQuotient curve self)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
