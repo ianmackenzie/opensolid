@@ -1,4 +1,17 @@
+Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
+
+Ensure all fields are also available as normal functions
+-> and those functions are the *primary* implementation
+-> probably means we can avoid HasField instances in all .hs-boot files, expose functions instead
+
+Rename ZeroEverywhere -> IsZero?
+-> shorter and more consistent with e.g. IsPoint
+-> keep DivisionByZero to indicate specifically that denominator is zero
+
 Review uses of unsafeQuotient
+
+Refactor Qty.steps etc. to take count argument first?
+-> 'count' refers to the first argument, like 'translateBy' refers to its first argument...
 
 Special case composition to check for constant inputs
 -> fall back to composeCurve/composeSurfaceFunction only if inner curve is non-constant
@@ -18,9 +31,14 @@ Overhaul handling of discontinuities
 - review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
   - get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
 
-Rename ZeroEverywhere to IsZero
+Use FFI struct syntax for calling into C++ as well as for target languages calling into Haskell?
+-> avoid custom pokeElemOff etc. stuff when calling into C++
+-> a bit less efficient in some cases though since e.g. allocating space for a list of values uses callocBytes (maybe should be mallocBytes?) instead of allocaBytes
+  -> maybe have a way to indicate to FFI.store whether to use mallocBytes or allocaBytes?
 
-Remove specialized L'Hopital support from bytecode
+Split bytecode.h/bytecode.cpp into a few more files
+-> e.g. helper functions for Bezier/Hermite evaluation
+-> allow calling non-bytecode-specific functions from Haskell without having to use 'bytecode.h'...
 
 Update API.Class.buildClass to use field accessor syntax
 
