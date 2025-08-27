@@ -1,7 +1,7 @@
 module OpenSolid.Curve2d
   ( Curve2d
   , Compiled
-  , HasDegeneracy (HasDegeneracy)
+  , IsPoint (IsPoint)
   , constant
   , new
   , evaluate
@@ -38,7 +38,7 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Bounds Unitless)
     (Bounds2d coordinateSystem)
 
-data HasDegeneracy = HasDegeneracy
+data IsPoint = IsPoint
 
 instance HasField "compiled" (Curve2d (space @ units)) (Compiled (space @ units))
 
@@ -70,7 +70,7 @@ bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 tangentDirection ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result HasDegeneracy (DirectionCurve2d space)
+  Result IsPoint (DirectionCurve2d space)
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 hermite ::
   Point2d (space @ units) ->
@@ -90,5 +90,5 @@ transformBy ::
 piecewise ::
   Tolerance units =>
   NonEmpty (Curve2d (space @ units)) ->
-  Result HasDegeneracy (Curve2d (space @ units))
+  Curve2d (space @ units)
 unsafePiecewise :: NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)

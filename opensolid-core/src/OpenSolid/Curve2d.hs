@@ -1,7 +1,7 @@
 module OpenSolid.Curve2d
   ( Curve2d
   , pattern Point
-  , HasDegeneracy (HasDegeneracy)
+  , IsPoint (IsPoint)
   , Compiled
   , new
   , recursive
@@ -223,7 +223,7 @@ instance
 pattern Point :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units)
 pattern Point point <- (asPoint -> Just point)
 
-data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Error.Message)
+data IsPoint = IsPoint deriving (Eq, Show, Error.Message)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -665,17 +665,17 @@ asPoint curve = do
 tangentDirection ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result HasDegeneracy (DirectionCurve2d space)
+  Result IsPoint (DirectionCurve2d space)
 tangentDirection curve =
   case VectorCurve2d.direction curve.derivative of
     Success directionCurve -> Success directionCurve
-    Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
+    Failure VectorCurve2d.ZeroEverywhere -> Failure IsPoint
 
 offsetLeftwardBy ::
   Tolerance units =>
   Qty units ->
   Curve2d (space @ units) ->
-  Result HasDegeneracy (Curve2d (space @ units))
+  Result IsPoint (Curve2d (space @ units))
 offsetLeftwardBy offset curve = Result.do
   tangentCurve <- tangentDirection curve
   let offsetCurve = VectorCurve2d.rotateBy Angle.quarterTurn (offset * tangentCurve)
@@ -685,7 +685,7 @@ offsetRightwardBy ::
   Tolerance units =>
   Qty units ->
   Curve2d (space @ units) ->
-  Result HasDegeneracy (Curve2d (space @ units))
+  Result IsPoint (Curve2d (space @ units))
 offsetRightwardBy distance = offsetLeftwardBy -distance
 
 distanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
@@ -1011,7 +1011,7 @@ unconvert factor curve = convert (Units.simplify (1.0 ./. factor)) curve
 curvature' ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result HasDegeneracy (Curve (Unitless :/: units))
+  Result IsPoint (Curve (Unitless :/: units))
 curvature' curve = Result.do
   let firstDerivative = curve.derivative
   let secondDerivative = firstDerivative.derivative
@@ -1026,7 +1026,7 @@ curvature' curve = Result.do
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2d (space @ units1) ->
-  Result HasDegeneracy (Curve units2)
+  Result IsPoint (Curve units2)
 curvature curve = Result.map Units.specialize (curvature' curve)
 
 toPolyline :: Resolution units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
@@ -1051,7 +1051,7 @@ medialAxis ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result HasDegeneracy (List (MedialAxis.Segment (space @ units)))
+  Result IsPoint (List (MedialAxis.Segment (space @ units)))
 medialAxis curve1 curve2 = do
   let p1 = curve1 . SurfaceFunction.u
   let p2 = curve2 . SurfaceFunction.v
@@ -1087,13 +1087,9 @@ medialAxis curve1 curve2 = do
 arcLengthParameterization ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result HasDegeneracy (Curve Unitless, Qty units)
-arcLengthParameterization curve = do
-  if curve.derivative ~= Vector2d.zero
-    then Success (Curve.t, Qty.zero) -- Curve is a constant point
-    else case VectorCurve2d.magnitude curve.derivative of
-      Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
-      Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
+  (Curve Unitless, Qty units)
+arcLengthParameterization curve =
+  ArcLength.parameterization (VectorCurve2d.magnitude curve.derivative)
 
 unsafeArcLengthParameterization :: Curve2d (space @ units) -> (Curve Unitless, Qty units)
 unsafeArcLengthParameterization curve =
@@ -1102,10 +1098,10 @@ unsafeArcLengthParameterization curve =
 parameterizeByArcLength ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result HasDegeneracy (Curve2d (space @ units), Qty units)
-parameterizeByArcLength curve = Result.do
-  (parameterization, length) <- arcLengthParameterization curve
-  Success (curve . parameterization, length)
+  (Curve2d (space @ units), Qty units)
+parameterizeByArcLength curve = do
+  let (parameterization, length) = arcLengthParameterization curve
+  (curve . parameterization, length)
 
 unsafeParameterizeByArcLength :: Curve2d (space @ units) -> (Curve2d (space @ units), Qty units)
 unsafeParameterizeByArcLength curve = do
@@ -1122,13 +1118,8 @@ makePiecewise parameterizedSegments = do
     @ CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
     @ piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
 
-piecewise ::
-  Tolerance units =>
-  NonEmpty (Curve2d (space @ units)) ->
-  Result HasDegeneracy (Curve2d (space @ units))
-piecewise segments = Result.do
-  parameterizedSegments <- Result.collect parameterizeByArcLength segments
-  Success (makePiecewise parameterizedSegments)
+piecewise :: Tolerance units => NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
+piecewise segments = makePiecewise (NonEmpty.map parameterizeByArcLength segments)
 
 unsafePiecewise :: NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
 unsafePiecewise segments = makePiecewise (NonEmpty.map unsafeParameterizeByArcLength segments)

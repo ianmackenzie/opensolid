@@ -19,11 +19,9 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Try qualified as Try
 
 data Global
 
@@ -65,17 +63,16 @@ testCurveMedialAxis ::
 testCurveMedialAxis label curve1 curve2 = IO.do
   timer <- Timer.start
   segments <- Curve2d.medialAxis curve1 curve2
-  let drawTangentCircles (segment :: Curve2d.MedialAxis.Segment (Global @ Meters)) = Try.do
-        (parameterization, _) <- Curve2d.arcLengthParameterization segment.curve
+  let drawTangentCircles (segment :: Curve2d.MedialAxis.Segment (Global @ Meters)) = do
+        let (parameterization, _) = Curve2d.arcLengthParameterization segment.curve
         let drawTangentCircle u = do
               let t = Curve.evaluate parameterization u
               let centerPoint = Curve2d.evaluate segment.curve t
               let diameter = 2.0 * Qty.abs (Curve.evaluate segment.radius t)
               Drawing2d.circle (#centerPoint centerPoint, #diameter diameter)
         let parameterValues = Parameter.steps 50
-        Success (List.map drawTangentCircle parameterValues)
-  tangentCircleLists <- Result.collect drawTangentCircles segments
-  let allTangentCircles = List.concat tangentCircleLists
+        List.map drawTangentCircle parameterValues
+  let tangentCircles = List.collect drawTangentCircles segments
   let tangentCircleAttributes =
         [ Drawing2d.strokeColor Color.gray
         , Drawing2d.strokeWidth (Length.millimeters 0.2)
@@ -86,7 +83,7 @@ testCurveMedialAxis label curve1 curve2 = IO.do
   let drawingBounds =
         Bounds2d.hull2 (Point2d.centimeters -10.0 -10.0) (Point2d.centimeters 30.0 20.0)
   Drawing2d.writeSvg ("executables/medial-axis/" <> label <> ".svg") drawingBounds do
-    Drawing2d.groupWith tangentCircleAttributes allTangentCircles
+    Drawing2d.groupWith tangentCircleAttributes tangentCircles
     Drawing2d.collect drawSegment segments
     drawCurve curve1
     drawCurve curve2

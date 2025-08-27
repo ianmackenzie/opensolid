@@ -37,7 +37,7 @@ main = Tolerance.using Length.nanometer IO.do
   let arc2 = Point2d.origin + radius * arc vN vNW vW
   let arc3 = Point2d.origin + radius * arc vW vSW vS
   let arc4 = Point2d.origin + radius * arc vS vSE vE
-  circle <- Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
+  let circle = Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point =
         Drawing2d.circleWith [Drawing2d.whiteFill] do
           #centerPoint point

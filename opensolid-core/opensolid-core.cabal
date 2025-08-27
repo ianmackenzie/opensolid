@@ -226,8 +226,6 @@ library
     OpenSolid.VectorBounds2d
     OpenSolid.VectorBounds3d
     OpenSolid.VectorCurve2d
-    OpenSolid.VectorCurve2d.DegenerateEndpoint
-    OpenSolid.VectorCurve2d.Direction
     OpenSolid.VectorCurve3d
     OpenSolid.VectorCurve3d.DegenerateEndpoint
     OpenSolid.VectorCurve3d.Direction
