@@ -54,6 +54,11 @@ struct Bounds {
   }
 
   inline static Bounds
+  invalid() {
+    return Bounds(NAN, NAN);
+  }
+
+  inline static Bounds
   hull2(double a, double b) {
     double min = std::min(a, b);
     double max = std::max(a, b);
