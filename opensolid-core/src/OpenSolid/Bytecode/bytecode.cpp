@@ -265,11 +265,11 @@ computeValue(
         break;
       }
       case Bezier1d: {
-        int n = getInt();
+        int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
         double parameter = *getVariablePointer();
         double* output = getVariablePointer();
-        *output = bezierValue(n, controlPoints, parameter);
+        *output = bezierValue(numControlPoints, controlPoints, parameter);
         break;
       }
       case XY2d: {
@@ -470,14 +470,14 @@ computeValue(
         break;
       }
       case Bezier2d: {
-        int n = getInt();
+        int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
         double parameter = *getVariablePointer();
         double* output = getVariablePointer();
         const double* x = controlPoints;
-        const double* y = controlPoints + n;
-        output[0] = bezierValue(n, x, parameter);
-        output[1] = bezierValue(n, y, parameter);
+        const double* y = controlPoints + numControlPoints;
+        output[0] = bezierValue(numControlPoints, x, parameter);
+        output[1] = bezierValue(numControlPoints, y, parameter);
         break;
       }
       case TransformVector2d: {
@@ -792,16 +792,16 @@ computeValue(
         break;
       }
       case Bezier3d: {
-        int n = getInt();
+        int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
         double parameter = *getVariablePointer();
         double* output = getVariablePointer();
         const double* x = controlPoints;
-        const double* y = controlPoints + n;
-        const double* z = controlPoints + n * 2;
-        output[0] = bezierValue(n, x, parameter);
-        output[1] = bezierValue(n, y, parameter);
-        output[2] = bezierValue(n, z, parameter);
+        const double* y = controlPoints + numControlPoints;
+        const double* z = controlPoints + numControlPoints * 2;
+        output[0] = bezierValue(numControlPoints, x, parameter);
+        output[1] = bezierValue(numControlPoints, y, parameter);
+        output[2] = bezierValue(numControlPoints, z, parameter);
         break;
       }
       case TransformVector3d: {
@@ -958,12 +958,13 @@ quinticBounds(const double* p, Range t) {
 }
 
 inline Range
-bezierBounds(int n, const double* p, Range t) {
-  double* hullPoints = (double*)alloca(sizeof(double) * n);
-  for (int i = 0; i < n; ++i) {
-    hullPoints[i] = bezierBlossom(n, p, t.lower, t.upper, i);
+bezierBounds(int numControlPoints, const double* controlPoints, Range t) {
+  double* hullPoints = (double*)alloca(sizeof(double) * numControlPoints);
+  for (int i = 0; i < numControlPoints; ++i) {
+    hullPoints[i] = bezierBlossom(numControlPoints, controlPoints, t.lower, t.upper, i);
   }
-  std::pair<double*, double*> bounds = std::minmax_element(hullPoints, hullPoints + n);
+  std::pair<double*, double*> bounds =
+    std::minmax_element(hullPoints, hullPoints + numControlPoints);
   return Range(*bounds.first, *bounds.second);
 }
 
@@ -1135,11 +1136,11 @@ computeBounds(
         break;
       }
       case Bezier1d: {
-        int n = getInt();
+        int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
         Range parameter = *getVariablePointer();
         Range* output = getVariablePointer();
-        *output = bezierBounds(n, controlPoints, parameter);
+        *output = bezierBounds(numControlPoints, controlPoints, parameter);
         break;
       }
       case XY2d: {
@@ -1337,14 +1338,14 @@ computeBounds(
         break;
       }
       case Bezier2d: {
-        int n = getInt();
+        int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
         Range parameter = *getVariablePointer();
         Range* output = getVariablePointer();
         const double* x = controlPoints;
-        const double* y = controlPoints + n;
-        output[0] = bezierBounds(n, x, parameter);
-        output[1] = bezierBounds(n, y, parameter);
+        const double* y = controlPoints + numControlPoints;
+        output[0] = bezierBounds(numControlPoints, x, parameter);
+        output[1] = bezierBounds(numControlPoints, y, parameter);
         break;
       }
       case TransformVector2d: {
@@ -1653,16 +1654,16 @@ computeBounds(
         break;
       }
       case Bezier3d: {
-        int n = getInt();
+        int numControlPoints = getInt();
         const double* controlPoints = getConstantPointer();
         Range parameter = *getVariablePointer();
         Range* output = getVariablePointer();
         const double* x = controlPoints;
-        const double* y = controlPoints + n;
-        const double* z = controlPoints + n * 2;
-        output[0] = bezierBounds(n, x, parameter);
-        output[1] = bezierBounds(n, y, parameter);
-        output[2] = bezierBounds(n, z, parameter);
+        const double* y = controlPoints + numControlPoints;
+        const double* z = controlPoints + numControlPoints * 2;
+        output[0] = bezierBounds(numControlPoints, x, parameter);
+        output[1] = bezierBounds(numControlPoints, y, parameter);
+        output[2] = bezierBounds(numControlPoints, z, parameter);
         break;
       }
       case TransformVector3d: {
