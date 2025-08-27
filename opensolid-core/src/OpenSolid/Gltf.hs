@@ -8,10 +8,10 @@ where
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder qualified as Builder
 import OpenSolid.Array (Array)
+import OpenSolid.Array qualified as Array
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Bounded3d qualified as Bounded3d
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color qualified as Color
@@ -125,28 +125,30 @@ gltfMeshes :: Model3d.Traversal => Resolution Meters -> Model3d space -> List Gl
 gltfMeshes resolution model = case model of
   Model3d.Body body -> do
     let mesh = Body3d.toMesh resolution body
-    let meshVertices = mesh.vertices
-    let numVertices = meshVertices.length
-    let meshFaceIndices = mesh.faceIndices
-    let numFaces = meshFaceIndices.length
-    let meshBounds = Bounded3d.bounds mesh
-    let (xBounds, yBounds, zBounds) = Bounds3d.coordinates convention meshBounds
-    let Bounds xLow xHigh = xBounds
-    let Bounds yLow yHigh = yBounds
-    let Bounds zLow zHigh = zBounds
-    let pbrMaterial = Model3d.traversal.currentPbrMaterial
-    List.singleton
-      GltfMesh
-        { gltfMaterial = encodeMaterial pbrMaterial
-        , numFaces
-        , indices = faceIndicesBuilder meshFaceIndices
-        , indicesByteLength = 3 * 4 * numFaces
-        , numVertices
-        , vertices = verticesBuilder meshVertices
-        , verticesByteLength = 6 * 4 * numVertices
-        , minPosition = Json.listOf (Json.float . Length.inMeters) [xLow, yLow, zLow]
-        , maxPosition = Json.listOf (Json.float . Length.inMeters) [xHigh, yHigh, zHigh]
-        }
+    case Array.toList mesh.vertices of
+      NonEmpty meshVertices -> do
+        let numVertices = mesh.vertices.length
+        let meshFaceIndices = mesh.faceIndices
+        let numFaces = meshFaceIndices.length
+        let meshBounds = Bounds3d.hullN meshVertices
+        let (xBounds, yBounds, zBounds) = Bounds3d.coordinates convention meshBounds
+        let Bounds xLow xHigh = xBounds
+        let Bounds yLow yHigh = yBounds
+        let Bounds zLow zHigh = zBounds
+        let pbrMaterial = Model3d.traversal.currentPbrMaterial
+        List.singleton
+          GltfMesh
+            { gltfMaterial = encodeMaterial pbrMaterial
+            , numFaces
+            , indices = faceIndicesBuilder meshFaceIndices
+            , indicesByteLength = 3 * 4 * numFaces
+            , numVertices
+            , vertices = verticesBuilder mesh.vertices
+            , verticesByteLength = 6 * 4 * numVertices
+            , minPosition = Json.listOf (Json.float . Length.inMeters) [xLow, yLow, zLow]
+            , maxPosition = Json.listOf (Json.float . Length.inMeters) [xHigh, yHigh, zHigh]
+            }
+      [] -> []
   Model3d.Group children -> List.collect (gltfMeshes resolution) children
 
 encodeMeshes :: Int -> Int -> List GltfMesh -> List EncodedMesh

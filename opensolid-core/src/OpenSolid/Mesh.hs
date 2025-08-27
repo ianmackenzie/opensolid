@@ -12,26 +12,12 @@ import Data.Foldable1 (Foldable1)
 import Data.Foldable1 qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
-import OpenSolid.Bounded2d (Bounded2d)
-import OpenSolid.Bounded2d qualified as Bounded2d
-import OpenSolid.Bounded3d (Bounded3d)
-import OpenSolid.Bounded3d qualified as Bounded3d
-import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Vertex2d (Vertex2d)
-import OpenSolid.Vertex3d (Vertex3d)
 
 data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
   deriving (Eq, Show)
-
-instance Vertex2d vertex (space @ units) => Bounded2d (Mesh vertex) (space @ units) where
-  bounds mesh = Bounds2d.hullN (Array.toNonEmpty mesh.vertices)
-
-instance Vertex3d vertex (space @ units) => Bounded3d (Mesh vertex) (space @ units) where
-  bounds mesh = Bounds3d.hullN (Array.toNonEmpty mesh.vertices)
 
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex
 indexed = Mesh
@@ -61,7 +47,7 @@ concat meshes = do
   let vertexArrays = NonEmpty.map (.vertices) meshes
   let faceIndexLists = NonEmpty.toList (NonEmpty.map (.faceIndices) meshes)
   let arrayLengths = NonEmpty.toList (NonEmpty.map (.length) vertexArrays)
-  let combinedVertices = Array.fromNonEmpty (NonEmpty.collect Array.toNonEmpty vertexArrays)
+  let combinedVertices = Array.fromList (List.collect Array.toList vertexArrays)
   let combinedFaceIndices = List.concat (offsetFaceIndices 0 arrayLengths faceIndexLists)
   Mesh combinedVertices combinedFaceIndices
 

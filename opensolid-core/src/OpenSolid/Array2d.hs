@@ -34,8 +34,9 @@ new f uItems vItems = do
 dimensions :: Array2d a -> (Int, Int)
 dimensions (Array2d dims _) = dims
 
+{-# INLINE get #-}
 get :: (Int, Int) -> Array2d a -> a
-get (i, j) (Array2d (n, m) array) = array ! (i % n, j % m)
+get indices (Array2d _ array) = array ! indices
 
 map :: (a -> b) -> Array2d a -> Array2d b
 map f (Array2d dims array) = Array2d dims (Prelude.fmap f array)

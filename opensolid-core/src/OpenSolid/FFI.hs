@@ -428,7 +428,7 @@ store ptr offset value = do
       Foreign.pokeByteOff ptr offset (Int.toInt64 numItems)
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
     NonEmptyRep -> store ptr offset (NonEmpty.toList value)
-    ArrayRep -> store ptr offset (Array.toNonEmpty value)
+    ArrayRep -> store ptr offset (Array.toList value)
     Tuple2Rep -> IO.do
       let (value1, value2) = value
       let (size1, _) = tuple2ItemSizes proxy
@@ -567,7 +567,7 @@ load ptr offset = do
       case list of
         [] -> internalError "Empty list passed to FFI function expecting a non-empty list"
         first : rest -> IO.succeed (first :| rest)
-    ArrayRep -> IO.map Array.fromNonEmpty (load ptr offset)
+    ArrayRep -> IO.map Array.fromList (load ptr offset)
     Tuple2Rep -> IO.do
       let (size1, _) = tuple2ItemSizes proxy
       let offset1 = offset

@@ -1,9 +1,11 @@
 module OpenSolid.Array
   ( Array
+  , empty
   , singleton
+  , fromList
   , fromNonEmpty
-  , toNonEmpty
   , toList
+  , initialize
   , get
   , map
   , map2
@@ -18,8 +20,6 @@ where
 
 import Data.Array ((!))
 import Data.Array qualified
-import Data.Foldable1 (Foldable1)
-import Data.Foldable1 qualified as Foldable1
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -35,71 +35,39 @@ deriving instance Functor Array
 
 deriving instance Traversable Array
 
-instance Foldable1 Array where
-  foldrMap1 f g (Array array) = do
-    let n = Prelude.length array
-    let init = f (array ! (n - 1))
-    foldrMap1Help (n - 2) g init array
-
-  foldlMap1 f g (Array array) = do
-    let n = Prelude.length array
-    let init = f (array ! 0)
-    foldlMap1Help 1 n g init array
-
-  foldrMap1' = Foldable1.foldrMap1
-  foldlMap1' = Foldable1.foldlMap1
-
-  toNonEmpty = toNonEmpty
-  head = (.first)
-  last = (.last)
-
-foldrMap1Help :: Int -> (a -> b -> b) -> b -> Data.Array.Array Int a -> b
-foldrMap1Help i g !acc array
-  | i >= 0 = foldrMap1Help (i - 1) g (g (array ! i) acc) array
-  | otherwise = acc
-
-foldlMap1Help :: Int -> Int -> (b -> a -> b) -> b -> Data.Array.Array Int a -> b
-foldlMap1Help i n g !acc array
-  | i < n = foldlMap1Help (i + 1) n g (g acc (array ! i)) array
-  | otherwise = acc
+empty :: Array a
+empty = fromList []
 
 singleton :: a -> Array a
-singleton = fromNonEmpty . NonEmpty.one
+singleton value = fromList [value]
+
+fromList :: List a -> Array a
+fromList list = Array (Data.Array.listArray (0, list.length - 1) list)
 
 fromNonEmpty :: NonEmpty a -> Array a
-fromNonEmpty givenItems = do
-  let n = NonEmpty.length givenItems
-  Array (Data.Array.listArray (0, n - 1) (NonEmpty.toList givenItems))
-
-toNonEmpty :: Array a -> NonEmpty a
-toNonEmpty array = case toList array of
-  NonEmpty nonEmpty -> nonEmpty
-  [] -> internalError "Array should never be empty"
+fromNonEmpty = fromList . NonEmpty.toList
 
 toList :: Array a -> List a
 toList (Array array) = Data.Array.elems array
+
+initialize :: Int -> (Int -> a) -> Array a
+initialize n function
+  | n <= 0 = empty
+  | otherwise = Array (Data.Array.listArray (0, n - 1) (List.map function [0 .. n - 1]))
 
 instance HasField "length" (Array a) Int where
   getField (Array array) = Prelude.length array
 
 {-# INLINE get #-}
 get :: Int -> Array a -> a
-get index (Array array) = array ! (index % (Prelude.length array))
-
-instance HasField "first" (Array a) a where
-  getField (Array array) = array ! 0
-
-instance HasField "last" (Array a) a where
-  getField (Array array) = array ! (Prelude.length array - 1)
+get index (Array array) = array ! index
 
 map :: (a -> b) -> Array a -> Array b
 map f (Array array) = Array (Prelude.fmap f array)
 
 map2 :: (a -> b -> c) -> Array a -> Array b -> Array c
-map2 f (Array array1) (Array array2) = do
-  let newItem i = f (array1 ! i) (array2 ! i)
-  let n = Int.min (Prelude.length array1) (Prelude.length array2)
-  Array (Data.Array.listArray (0, n - 1) (List.map newItem [0 .. n - 1]))
+map2 f array1 array2 =
+  initialize (Int.min array1.length array2.length) (\i -> f (get i array1) (get i array2))
 
 map3 :: (a -> b -> c -> d) -> Array a -> Array b -> Array c -> Array d
 map3 f (Array array1) (Array array2) (Array array3) = do
