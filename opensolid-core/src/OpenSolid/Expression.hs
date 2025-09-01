@@ -123,17 +123,17 @@ data Expression input output where
     ~(Compiled UvPoint (Vector3d Ast.Coordinates)) ->
     Expression UvPoint (Vector3d (space @ units))
 
-ast1d :: Expression input (Qty units) -> Ast1d input
-ast1d (Curve1d ast _) = ast
-ast1d (Surface1d ast _) = ast
+derivativeAst1d :: Expression input (Qty units) -> Ast1d input
+derivativeAst1d (Curve1d ast _) = ast
+derivativeAst1d (Surface1d ast _) = ast
 
-ast2d :: Expression input (Vector2d (space @ units)) -> Ast2d input
-ast2d (VectorCurve2d ast _) = ast
-ast2d (VectorSurface2d ast _) = ast
+derivativeAst2d :: Expression input (Vector2d (space @ units)) -> Ast2d input
+derivativeAst2d (VectorCurve2d ast _) = ast
+derivativeAst2d (VectorSurface2d ast _) = ast
 
-ast3d :: Expression input (Vector3d (space @ units)) -> Ast3d input
-ast3d (VectorCurve3d ast _) = ast
-ast3d (VectorSurface3d ast _) = ast
+derivativeAst3d :: Expression input (Vector3d (space @ units)) -> Ast3d input
+derivativeAst3d (VectorCurve3d ast _) = ast
+derivativeAst3d (VectorSurface3d ast _) = ast
 
 curve1d :: Ast1d Float -> Expression Float (Qty units)
 curve1d ast = Curve1d ast (Ast.compileCurve1d ast)
@@ -1601,12 +1601,12 @@ class Blend input value derivative where
 
 instance units1 ~ units2 => Blend input (Qty units1) (Qty units2) where
   blend (Curve1d startValue _) startDerivatives (Curve1d endValue _) endDerivatives (Curve1d parameter _) = do
-    let startDerivativeAsts = List.map ast1d startDerivatives
-    let endDerivativeAsts = List.map ast1d endDerivatives
+    let startDerivativeAsts = List.map derivativeAst1d startDerivatives
+    let endDerivativeAsts = List.map derivativeAst1d endDerivatives
     curve1d (Ast.blend1d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
   blend (Surface1d startValue _) startDerivatives (Surface1d endValue _) endDerivatives (Surface1d parameter _) = do
-    let startDerivativeAsts = List.map ast1d startDerivatives
-    let endDerivativeAsts = List.map ast1d endDerivatives
+    let startDerivativeAsts = List.map derivativeAst1d startDerivatives
+    let endDerivativeAsts = List.map derivativeAst1d endDerivatives
     surface1d (Ast.blend1d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
 
 instance
@@ -1614,12 +1614,12 @@ instance
   Blend input (Point2d (space1 @ units1)) (Vector2d (space2 @ units2))
   where
   blend (Curve2d startValue _) startDerivatives (Curve2d endValue _) endDerivatives (Curve1d parameter _) = do
-    let startDerivativeAsts = List.map ast2d startDerivatives
-    let endDerivativeAsts = List.map ast2d endDerivatives
+    let startDerivativeAsts = List.map derivativeAst2d startDerivatives
+    let endDerivativeAsts = List.map derivativeAst2d endDerivatives
     curve2d (Ast.blend2d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
   blend (Surface2d startValue _) startDerivatives (Surface2d endValue _) endDerivatives (Surface1d parameter _) = do
-    let startDerivativeAsts = List.map ast2d startDerivatives
-    let endDerivativeAsts = List.map ast2d endDerivatives
+    let startDerivativeAsts = List.map derivativeAst2d startDerivatives
+    let endDerivativeAsts = List.map derivativeAst2d endDerivatives
     surface2d (Ast.blend2d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
 
 instance
@@ -1627,12 +1627,12 @@ instance
   Blend input (Point3d (space1 @ units1)) (Vector3d (space2 @ units2))
   where
   blend (Curve3d startValue _) startDerivatives (Curve3d endValue _) endDerivatives (Curve1d parameter _) = do
-    let startDerivativeAsts = List.map ast3d startDerivatives
-    let endDerivativeAsts = List.map ast3d endDerivatives
+    let startDerivativeAsts = List.map derivativeAst3d startDerivatives
+    let endDerivativeAsts = List.map derivativeAst3d endDerivatives
     curve3d (Ast.blend3d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
   blend (Surface3d startValue _) startDerivatives (Surface3d endValue _) endDerivatives (Surface1d parameter _) = do
-    let startDerivativeAsts = List.map ast3d startDerivatives
-    let endDerivativeAsts = List.map ast3d endDerivatives
+    let startDerivativeAsts = List.map derivativeAst3d startDerivatives
+    let endDerivativeAsts = List.map derivativeAst3d endDerivatives
     surface3d (Ast.blend3d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
 
 desingularized ::
