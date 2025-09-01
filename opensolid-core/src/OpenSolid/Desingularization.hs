@@ -50,7 +50,7 @@ blendValues1d ::
   List (Qty units) ->
   Qty units ->
   List (Qty units) ->
-  Qty units ->
+  Float ->
   Qty units
 blendValues1d
   (Qty startValue)
@@ -84,7 +84,7 @@ blendBounds1d ::
   List (Bounds units) ->
   Bounds units ->
   List (Bounds units) ->
-  Bounds units ->
+  Bounds Unitless ->
   Bounds units
 blendBounds1d
   (Bounds (Qty startValueLower) (Qty startValueUpper))
