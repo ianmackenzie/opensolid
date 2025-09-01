@@ -1,3 +1,14 @@
+Switch to desingularization 'width' of 0.005 instead of 0.001
+-> especially important for surfaces not to have to bisect *too* much
+
+Add desingularization of SurfaceFunction and VectorSurfaceFunction#d quotients
+
+Add desingularizaiton of SurfaceFunction.sqrt
+
+Update VectorSurfaceFunction#d.magnitude to use plain square root
+
+Update VectorSurfaceFunction#d.direction to use division by magnitude directly
+
 Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
 
 Ensure all fields are also available as normal functions
