@@ -2,7 +2,9 @@ module OpenSolid.SurfaceFunction
   ( SurfaceFunction
   , Compiled
   , evaluate
+  , evaluateAt
   , evaluateBounds
+  , evaluateBoundsWithin
   , derivative
   , derivativeIn
   , zero
@@ -355,8 +357,16 @@ instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction u
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
+{-# INLINE evaluateAt #-}
+evaluateAt :: UvPoint -> SurfaceFunction units -> Qty units
+evaluateAt uvPoint function = evaluate function uvPoint
+
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
 evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
+
+{-# INLINE evaluateBoundsWithin #-}
+evaluateBoundsWithin :: UvBounds -> SurfaceFunction units -> Bounds units
+evaluateBoundsWithin uvBounds function = evaluateBounds function uvBounds
 
 instance HasField "compiled" (SurfaceFunction units) (Compiled units) where
   getField (SurfaceFunction c _ _) = c
