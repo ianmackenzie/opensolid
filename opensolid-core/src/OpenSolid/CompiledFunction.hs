@@ -11,6 +11,7 @@ module OpenSolid.CompiledFunction
   , map2
   , map3
   , map4
+  , map5
   , debug
   )
 where
@@ -413,6 +414,35 @@ map4 _ combineValues combineBounds compiled1 compiled2 compiled3 compiled4 = do
   Abstract
     (\t -> combineValues (value1 t) (value2 t) (value3 t) (value4 t))
     (\t -> combineBounds (bounds1 t) (bounds2 t) (bounds3 t) (bounds4 t))
+
+map5 ::
+  Expression.Evaluation inputValue outputValue6 inputBounds outputBounds6 =>
+  ( Expression inputValue outputValue1 ->
+    Expression inputValue outputValue2 ->
+    Expression inputValue outputValue3 ->
+    Expression inputValue outputValue4 ->
+    Expression inputValue outputValue5 ->
+    Expression inputValue outputValue6
+  ) ->
+  (outputValue1 -> outputValue2 -> outputValue3 -> outputValue4 -> outputValue5 -> outputValue6) ->
+  (outputBounds1 -> outputBounds2 -> outputBounds3 -> outputBounds4 -> outputBounds5 -> outputBounds6) ->
+  CompiledFunction inputValue outputValue1 inputBounds outputBounds1 ->
+  CompiledFunction inputValue outputValue2 inputBounds outputBounds2 ->
+  CompiledFunction inputValue outputValue3 inputBounds outputBounds3 ->
+  CompiledFunction inputValue outputValue4 inputBounds outputBounds4 ->
+  CompiledFunction inputValue outputValue5 inputBounds outputBounds5 ->
+  CompiledFunction inputValue outputValue6 inputBounds outputBounds6
+map5 combineExpressions _ _ (Concrete expression1) (Concrete expression2) (Concrete expression3) (Concrete expression4) (Concrete expression5) =
+  Concrete (combineExpressions expression1 expression2 expression3 expression4 expression5)
+map5 _ combineValues combineBounds compiled1 compiled2 compiled3 compiled4 compiled5 = do
+  let (value1, bounds1) = evaluators compiled1
+  let (value2, bounds2) = evaluators compiled2
+  let (value3, bounds3) = evaluators compiled3
+  let (value4, bounds4) = evaluators compiled4
+  let (value5, bounds5) = evaluators compiled5
+  Abstract
+    (\t -> combineValues (value1 t) (value2 t) (value3 t) (value4 t) (value5 t))
+    (\t -> combineBounds (bounds1 t) (bounds2 t) (bounds3 t) (bounds4 t) (bounds5 t))
 
 instance
   ( innerOutputValue ~ outerInputValue
