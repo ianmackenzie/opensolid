@@ -2,6 +2,7 @@ module OpenSolid.Stream
   ( Stream (..)
   , repeat
   , iterate
+  , unfold
   , from
   , head
   , tail
@@ -28,6 +29,11 @@ repeat value = Stream value (repeat value)
 
 iterate :: (a -> a) -> a -> Stream a
 iterate function first = Stream first (iterate function (function first))
+
+unfold :: b -> (b -> (a, b)) -> Stream a
+unfold initialState function = do
+  let (initialValue, updatedState) = function initialState
+  Stream initialValue (unfold updatedState function)
 
 from :: Enum a => a -> Stream a
 from value = Stream value (from (Prelude.succ value))
