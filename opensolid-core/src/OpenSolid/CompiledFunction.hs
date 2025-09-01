@@ -3,6 +3,8 @@ module OpenSolid.CompiledFunction
   , concrete
   , constant
   , abstract
+  , IsAbstract (IsAbstract)
+  , expression
   , desingularized
   , evaluate
   , evaluateBounds
@@ -18,6 +20,7 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Prelude
@@ -44,7 +47,7 @@ instance
     (CompiledFunction inputValue outputValue1 inputBounds outputBounds1)
     (CompiledFunction inputValue outputValue2 inputBounds outputBounds2)
   where
-  coerce (Concrete expression) = Concrete (Units.coerce expression)
+  coerce (Concrete expr) = Concrete (Units.coerce expr)
   coerce (Abstract value bounds) = Abstract (Units.coerce . value) (Units.coerce . bounds)
 
 instance
@@ -305,6 +308,14 @@ abstract ::
   CompiledFunction inputValue outputValue inputBounds outputBounds
 abstract = Abstract
 
+data IsAbstract = IsAbstract deriving (Eq, Show, Error.Message)
+
+expression ::
+  CompiledFunction inputValue outputValue inputBounds outputBounds ->
+  Result IsAbstract (Expression inputValue outputValue)
+expression (Concrete expr) = Success expr
+expression Abstract{} = Failure IsAbstract
+
 desingularized ::
   Expression.Evaluation inputValue outputValue inputBounds outputBounds =>
   CompiledFunction inputValue Float inputBounds (Bounds Unitless) ->
@@ -321,7 +332,7 @@ map ::
   (outputBounds1 -> outputBounds2) ->
   CompiledFunction inputValue outputValue1 inputBounds outputBounds1 ->
   CompiledFunction inputValue outputValue2 inputBounds outputBounds2
-map mapExpression _ _ (Concrete expression) = Concrete (mapExpression expression)
+map mapExpression _ _ (Concrete expr) = Concrete (mapExpression expr)
 map _ mapValue mapBounds (Abstract value bounds) =
   Abstract (value >> mapValue) (bounds >> mapBounds)
 
@@ -329,21 +340,20 @@ evaluate ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   inputValue ->
   outputValue
-evaluate (Concrete expression) inputValue = Expression.evaluate expression inputValue
+evaluate (Concrete expr) inputValue = Expression.evaluate expr inputValue
 evaluate (Abstract value _) inputValue = value inputValue
 
 evaluateBounds ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   inputBounds ->
   outputBounds
-evaluateBounds (Concrete expression) inputValue = Expression.evaluateBounds expression inputValue
+evaluateBounds (Concrete expr) inputValue = Expression.evaluateBounds expr inputValue
 evaluateBounds (Abstract _ bounds) inputValue = bounds inputValue
 
 evaluators ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   (inputValue -> outputValue, inputBounds -> outputBounds)
-evaluators (Concrete expression) =
-  (Expression.evaluate expression, Expression.evaluateBounds expression)
+evaluators (Concrete expr) = (Expression.evaluate expr, Expression.evaluateBounds expr)
 evaluators (Abstract value bounds) = (value, bounds)
 
 map2 ::
@@ -465,5 +475,5 @@ instance
     Abstract (outerValue . innerValue) (outerBounds . innerBounds)
 
 debug :: CompiledFunction input output inputBounds outputBounds -> Text
-debug (Concrete expression) = Expression.debug expression
+debug (Concrete expr) = Expression.debug expr
 debug Abstract{} = "Abstract"
