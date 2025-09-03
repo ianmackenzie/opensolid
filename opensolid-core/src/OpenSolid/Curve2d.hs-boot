@@ -9,6 +9,8 @@ module OpenSolid.Curve2d
   , bounds
   , tangentDirection
   , reverse
+  , xy
+  , line
   , hermite
   , desingularize
   , transformBy
@@ -20,9 +22,11 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Vector2d (Vector2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
@@ -62,6 +66,13 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
 
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (Curve2d uvCoordinates)
+    (SurfaceFunction units)
+    (Curve units)
+
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
@@ -72,6 +83,8 @@ tangentDirection ::
   Curve2d (space @ units) ->
   Result IsPoint (DirectionCurve2d space)
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
+xy :: Curve units -> Curve units -> Curve2d (space @ units)
+line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
 hermite ::
   Point2d (space @ units) ->
   List (Vector2d (space @ units)) ->
