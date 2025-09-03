@@ -21,11 +21,11 @@ import Prelude (Double)
 
 t0 :: Float
 -- Should be kept in sync with T0 in bytecode.cpp
-t0 = 0.001
+t0 = 0.00390625 -- 1/256
 
 t1 :: Float
 -- Should be kept in sync with CUTOFF_1 in bytecode.cpp
-t1 = 0.999
+t1 = 0.99609375 -- 1 minus 1/256
 
 value :: Float -> a -> a -> a -> a
 value t start middle end
