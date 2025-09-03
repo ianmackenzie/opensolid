@@ -166,3 +166,10 @@ executable blended-surface
   hs-source-dirs: blended-surface
   build-depends:
     opensolid-core
+
+executable blending-curves
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: blending-curves
+  build-depends:
+    opensolid-core
