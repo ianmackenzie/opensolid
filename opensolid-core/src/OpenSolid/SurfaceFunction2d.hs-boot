@@ -3,6 +3,7 @@ module OpenSolid.SurfaceFunction2d
   , Compiled
   , derivative
   , new
+  , xy
   )
 where
 
@@ -11,6 +12,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -51,10 +53,18 @@ instance
     (SurfaceFunction2d (space @ units))
     (Curve2d (space @ units))
 
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (SurfaceFunction units)
+    (SurfaceFunction units)
+
 new ::
   Compiled (space @ units) ->
   (SurfaceParameter -> VectorSurfaceFunction2d (space @ units)) ->
   SurfaceFunction2d (space @ units)
+xy :: SurfaceFunction units -> SurfaceFunction units -> SurfaceFunction2d (space @ units)
 derivative ::
   SurfaceParameter ->
   SurfaceFunction2d (space @ units) ->
