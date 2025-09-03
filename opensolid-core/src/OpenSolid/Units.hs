@@ -233,6 +233,7 @@ infixl 7 ./.
 type family Square units = squaredUnits | squaredUnits -> units where
   Square Unitless = Unitless
   Square Meters = SquareMeters
+  Square SquareMeters = MetersToTheFourthPower
 
 type Product units1 units2 units3 =
   ( units1 .*. units2 ~ units3
