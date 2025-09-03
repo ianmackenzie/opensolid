@@ -32,6 +32,7 @@ module OpenSolid.Bounds
   , sqrt'
   , hypot2
   , hypot3
+  , cubed
   , aggregate2
   , aggregate3
   , aggregateN
@@ -441,6 +442,9 @@ hypot3 (Bounds xMin xMax) (Bounds yMin yMax) (Bounds zMin zMax) = do
     | positiveY -> Bounds yMin maxMagnitude
     | negativeY -> Bounds -yMax maxMagnitude
     | otherwise -> Bounds Qty.zero maxMagnitude
+
+cubed :: Bounds Unitless -> Bounds Unitless
+cubed (Bounds low high) = Bounds (low * low * low) (high * high * high)
 
 {-| Check if a given value is included in a bounding range.
 

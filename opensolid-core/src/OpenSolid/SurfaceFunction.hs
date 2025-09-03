@@ -22,6 +22,7 @@ module OpenSolid.SurfaceFunction
   , squared'
   , sqrt
   , sqrt'
+  , cubed
   , sin
   , cos
   )
@@ -44,6 +45,7 @@ import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.List qualified as List
@@ -451,6 +453,12 @@ sqrt' function =
       recursive
         @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled
         @ \self p -> Units.coerce (quotient' (derivative p function) (2.0 * self))
+
+cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
+cubed function =
+  new
+    (CompiledFunction.map Expression.cubed Float.cubed Bounds.cubed function.compiled)
+    (\p -> 3.0 * squared function * derivative p function)
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =

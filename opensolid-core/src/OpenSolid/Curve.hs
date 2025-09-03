@@ -34,6 +34,7 @@ module OpenSolid.Curve
   , sqrt'
   , unsafeSqrt
   , unsafeSqrt'
+  , cubed
   , sin
   , cos
   , ZeroEverywhere (ZeroEverywhere)
@@ -63,6 +64,7 @@ import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Int qualified as Int
@@ -516,6 +518,12 @@ unsafeSqrt' curve =
   recursive
     @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled
     @ \self -> Units.coerce (unsafeQuotient' curve.derivative (2.0 * self))
+
+cubed :: Curve Unitless -> Curve Unitless
+cubed curve =
+  new
+    (CompiledFunction.map Expression.cubed Float.cubed Bounds.cubed curve.compiled)
+    (3.0 * squared curve * curve.derivative)
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless

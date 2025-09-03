@@ -106,6 +106,7 @@ data Instruction
   | Blend1d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
   | Blend2d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
   | Blend3d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
+  | Cube1d VariableIndex
   deriving (Eq, Ord, Show)
 
 maxValues :: Int
@@ -512,6 +513,9 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeValueIndex endValue
       <> Encode.list encodeValueIndex endDerivatives
       <> encodeValueIndex parameterValue
+  Cube1d arg ->
+    Encode.int 91
+      <> encodeVariableIndex arg
 
 return :: Int -> VariableIndex -> Builder
 return dimension variableIndex =

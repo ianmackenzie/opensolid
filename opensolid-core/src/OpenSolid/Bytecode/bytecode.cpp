@@ -1089,6 +1089,12 @@ computeValue(
         );
         break;
       }
+      case Cube1d: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = input * input * input;
+        break;
+      }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
         break;
@@ -2120,7 +2126,12 @@ computeBounds(
         );
         break;
       }
-
+      case Cube1d: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = input.cubed();
+        break;
+      }
       case OPCODE_END: {
         assert(false && "Should never hit dummy OPCODE_END value");
         break;

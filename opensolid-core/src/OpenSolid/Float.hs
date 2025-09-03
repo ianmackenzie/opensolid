@@ -29,6 +29,7 @@ module OpenSolid.Float
   , sign
   , isNaN
   , squared
+  , cubed
   , abs
   , clampTo
   , interpolateFrom
@@ -100,6 +101,9 @@ isNaN = Qty.isNaN
 
 squared :: Float -> Float
 squared = Qty.squared
+
+cubed :: Float -> Float
+cubed value = value * value * value
 
 abs :: Float -> Float
 abs = Qty.abs

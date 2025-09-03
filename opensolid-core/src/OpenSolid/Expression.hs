@@ -23,6 +23,7 @@ module OpenSolid.Expression
   , sqrt'
   , squared
   , squared'
+  , cubed
   , sin
   , cos
   , SquaredMagnitude' (squaredMagnitude')
@@ -1314,6 +1315,10 @@ sqrt ::
   Expression input (Qty units2) ->
   Expression input (Qty units1)
 sqrt = sqrt' . Units.unspecialize
+
+cubed :: Expression input Float -> Expression input Float
+cubed (Curve1d ast _) = curve1d (Ast.cubed ast)
+cubed (Surface1d ast _) = surface1d (Ast.cubed ast)
 
 sin :: Expression input Angle -> Expression input Float
 sin (Curve1d ast _) = curve1d (Ast.sin ast)

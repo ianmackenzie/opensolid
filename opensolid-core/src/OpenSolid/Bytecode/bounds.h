@@ -117,6 +117,11 @@ struct Bounds {
   }
 
   inline Bounds
+  cubed() const {
+    return Bounds(lower * lower * lower, upper * upper * upper);
+  }
+
+  inline Bounds
   sin() {
     double sinLower = std::sin(lower);
     double sinUpper = std::sin(upper);

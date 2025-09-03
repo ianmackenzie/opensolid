@@ -16,6 +16,7 @@ module OpenSolid.Bytecode.Ast
   , upwardComponent
   , squared
   , sqrt
+  , cubed
   , sin
   , cos
   , squaredMagnitude2d
@@ -153,6 +154,7 @@ data Variable1d input where
   QuotientConstantVariable1d :: Float -> Variable1d input -> Variable1d input
   Squared1d :: Variable1d input -> Variable1d input
   Sqrt1d :: Variable1d input -> Variable1d input
+  Cubed1d :: Variable1d input -> Variable1d input
   Sin1d :: Variable1d input -> Variable1d input
   Cos1d :: Variable1d input -> Variable1d input
   BezierCurve1d :: NonEmpty Float -> Variable1d input -> Variable1d input
@@ -310,6 +312,7 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   Quotient1d lhs rhs . input = Quotient1d (lhs . input) (rhs . input)
   QuotientConstantVariable1d lhs rhs . input = QuotientConstantVariable1d lhs (rhs . input)
   Squared1d arg . input = Squared1d (arg . input)
+  Cubed1d arg . input = Cubed1d (arg . input)
   Sqrt1d arg . input = Sqrt1d (arg . input)
   Sin1d arg . input = Sin1d (arg . input)
   Cos1d arg . input = Cos1d (arg . input)
@@ -430,6 +433,7 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) 
   Quotient1d lhs rhs . input = Quotient1d (lhs . input) (rhs . input)
   QuotientConstantVariable1d lhs rhs . input = QuotientConstantVariable1d lhs (rhs . input)
   Squared1d arg . input = Squared1d (arg . input)
+  Cubed1d arg . input = Cubed1d (arg . input)
   Sqrt1d arg . input = Sqrt1d (arg . input)
   Sin1d arg . input = Sin1d (arg . input)
   Cos1d arg . input = Cos1d (arg . input)
@@ -947,6 +951,10 @@ sqrt :: Ast1d input -> Ast1d input
 sqrt (Constant1d value) = Constant1d (Float.sqrt value)
 sqrt (Variable1d var) = Variable1d (Sqrt1d var)
 
+cubed :: Ast1d input -> Ast1d input
+cubed (Constant1d value) = Constant1d (Float.cubed value)
+cubed (Variable1d var) = Variable1d (Cubed1d var)
+
 sin :: Ast1d input -> Ast1d input
 sin (Constant1d val) = Constant1d (Float.sin val)
 sin (Variable1d var) = Variable1d (Sin1d var)
@@ -1394,6 +1402,9 @@ compileVariable1d variable = case variable of
   Squared1d arg -> Compile.do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Square1d argIndex)
+  Cubed1d arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.Cube1d argIndex)
   Sqrt1d arg -> Compile.do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Sqrt1d argIndex)

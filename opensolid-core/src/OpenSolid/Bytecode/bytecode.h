@@ -94,6 +94,7 @@ enum Opcode {
   Blend1d = 88,
   Blend2d = 89,
   Blend3d = 90,
+  Cube1d = 91,
   OPCODE_END
 };
 
