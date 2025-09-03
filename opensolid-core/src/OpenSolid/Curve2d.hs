@@ -1070,7 +1070,7 @@ medialAxis curve1 curve2 = do
       let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangentVector1
       let radius :: SurfaceFunction units =
             Units.coerce $
-              SurfaceFunction.quotient'
+              SurfaceFunction.unsafeQuotient'
                 @ d `dot'` d
                 @ 2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d
       let curve :: SurfaceFunction2d (space @ units) =

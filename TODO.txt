@@ -1,5 +1,6 @@
-Switch to desingularization 'width' of 0.005 instead of 0.001
+Switch to desingularization 'width' of (1 / 256) instead of 0.001
 -> especially important for surfaces not to have to bisect *too* much
+-> seems good to use power of 2 so that corresponding derivative scaling is lossless
 
 Add desingularization of SurfaceFunction and VectorSurfaceFunction#d quotients
 
@@ -8,6 +9,11 @@ Add desingularizaiton of SurfaceFunction.sqrt
 Update VectorSurfaceFunction#d.magnitude to use plain square root
 
 Update VectorSurfaceFunction#d.direction to use division by magnitude directly
+
+Replace 'synthetic' curves with plain quartic Hermite splines
+
+Add hasZero functions that do simple check to see if a zero exists (plain bisection until bounds less than tolerance)
+-> then use to check validity of L'Hopital desingularization (see if derivative or denominator has *any* zero)
 
 Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
 
@@ -24,23 +30,10 @@ Review uses of unsafeQuotient
 Refactor Qty.steps etc. to take count argument first?
 -> 'count' refers to the first argument, like 'translateBy' refers to its first argument...
 
-Special case composition to check for constant inputs
--> fall back to composeCurve/composeSurfaceFunction only if inner curve is non-constant
--> also add check in curveOfCurve, curveOfSurfaceFunction, surfaceFunctionOfCurve, surfaceFunctionOfSurfaceFunction etc.
--> need asConstant or similar in Curve, SurfaceFunction etc.?
-  -> delegate to a new CompiledFunction.asConstant function? (and therefore Expression.asConstant, Ast.asConstant...)
-  -> maybe have fancy Constant pattern for all those types?
+Re-introduce Functions or similar module so that all typeclass instances can be defined there?
 
-Overhaul handling of discontinuities
-- require curves/functions to implement composition directly, then remove Composition from Expression and Ast types
-- update curve and surface function types to have special cases for quotients and square roots
-- switch back to (p'q - q'p / q^2) form for quotients, so L'Hopital can be applied
-- support L'Hopital for e.g. quotients of squares (where we need to divide *second* derivatives)
-- add support for square root discontinuity in bytecode, Ast, Expression, function types
-- support square root discontinuities in bytecode
-- update Curve.sqrt' and SurfaceFunction.sqrt' to use specialized square root derivative expression
-- review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
-  - get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
+Review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
+-> get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
 
 Use FFI struct syntax for calling into C++ as well as for target languages calling into Haskell?
 -> avoid custom pokeElemOff etc. stuff when calling into C++

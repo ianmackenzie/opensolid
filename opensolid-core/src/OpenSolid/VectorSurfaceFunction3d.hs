@@ -514,4 +514,4 @@ quotient' lhs rhs =
     @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
     @ \self p ->
       quotient' (derivative p lhs) rhs
-        - self * SurfaceFunction.quotient (SurfaceFunction.derivative p rhs) rhs
+        - self * SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs

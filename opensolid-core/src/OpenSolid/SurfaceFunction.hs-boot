@@ -1,11 +1,14 @@
 module OpenSolid.SurfaceFunction
   ( SurfaceFunction
   , Compiled
+  , DivisionByZero
   , evaluate
   , evaluateBounds
   , derivative
   , quotient
   , quotient'
+  , unsafeQuotient
+  , unsafeQuotient'
   )
 where
 
@@ -32,6 +35,8 @@ instance HasField "compiled" (SurfaceFunction units) (Compiled units)
 
 instance Negation (SurfaceFunction units)
 
+data DivisionByZero
+
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
@@ -39,9 +44,18 @@ quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
-  SurfaceFunction units3
+  Result DivisionByZero (SurfaceFunction units3)
 quotient' ::
   Tolerance units2 =>
+  SurfaceFunction units1 ->
+  SurfaceFunction units2 ->
+  Result DivisionByZero (SurfaceFunction (units1 :/: units2))
+unsafeQuotient ::
+  Units.Quotient units1 units2 units3 =>
+  SurfaceFunction units1 ->
+  SurfaceFunction units2 ->
+  SurfaceFunction units3
+unsafeQuotient' ::
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   SurfaceFunction (units1 :/: units2)

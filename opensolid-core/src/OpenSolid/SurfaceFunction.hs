@@ -16,8 +16,11 @@ module OpenSolid.SurfaceFunction
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , new
+  , DivisionByZero
   , quotient
   , quotient'
+  , unsafeQuotient
+  , unsafeQuotient'
   , squared
   , squared'
   , sqrt
@@ -37,7 +40,10 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
+import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Domain1d qualified as Domain1d
@@ -54,6 +60,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.PartialZeros (PartialZeros)
@@ -64,6 +71,8 @@ import OpenSolid.SurfaceFunction.Subproblem (CornerValues (..), Subproblem (..))
 import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
@@ -413,22 +422,232 @@ recursive ::
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
+desingularize ::
+  ( "function" ::: SurfaceFunction units
+  , "singularityU0" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
+  , "singularityU1" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
+  , "singularityV0" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
+  , "singularityV1" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
+  ) ->
+  SurfaceFunction units
+desingularize args = do
+  let f = args.function
+  case (args.singularityU0, args.singularityU1, args.singularityV0, args.singularityV1) of
+    (Nothing, Nothing, Nothing, Nothing) -> args.function
+    (Just singularityU0, Nothing, Nothing, Nothing) ->
+      desingularized u (blendU0 singularityU0 f) f f
+    (Nothing, Just singularityU1, Nothing, Nothing) ->
+      desingularized u f f (blendU1 f singularityU1)
+    (Just singularityU0, Just singularityU1, Nothing, Nothing) ->
+      desingularized u (blendU0 singularityU0 f) f (blendU1 f singularityU1)
+    (Nothing, Nothing, Just singularityV0, Nothing) ->
+      desingularized v (blendV0 singularityV0 f) f f
+    (Nothing, Nothing, Nothing, Just singularityV1) ->
+      desingularized v f f (blendV1 f singularityV1)
+    (Nothing, Nothing, Just singularityV0, Just singularityV1) ->
+      desingularized v (blendV0 singularityV0 f) f (blendV1 f singularityV1)
+    _ -> exception "Unsupported combination of singularities for surface function: singularities may only be in U or V direction, not both"
+
+desingularized ::
+  SurfaceFunction Unitless ->
+  SurfaceFunction units ->
+  SurfaceFunction units ->
+  SurfaceFunction units ->
+  SurfaceFunction units
+desingularized t start middle end =
+  new
+    (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
+    (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
+
+blendU0 ::
+  (SurfaceFunction units, SurfaceFunction units) ->
+  SurfaceFunction units ->
+  SurfaceFunction units
+blendU0 (f0, dfdu0) f = do
+  let t0 = Desingularization.t0
+  let u0 = vParameterizationU0
+  let uT0 = vParameterizationUT0
+  blend
+    (f . uT0, -t0 * f.du . uT0, t0 * t0 * f.du.du . uT0)
+    (f0 . u0, -t0 * dfdu0 . u0)
+    ((t0 - u) / t0)
+
+blendU1 ::
+  SurfaceFunction units ->
+  (SurfaceFunction units, SurfaceFunction units) ->
+  SurfaceFunction units
+blendU1 f (f1, dfdu1) = do
+  let t0 = Desingularization.t0
+  let t1 = Desingularization.t1
+  let uT1 = vParameterizationUT1
+  let u1 = vParameterizationU1
+  blend
+    (f . uT1, t0 * f.du . uT1, t0 * t0 * f.du.du . uT1)
+    (f1 . u1, t0 * dfdu1 . u1)
+    ((u - t1) / t0)
+
+blendV0 ::
+  (SurfaceFunction units, SurfaceFunction units) ->
+  SurfaceFunction units ->
+  SurfaceFunction units
+blendV0 (f0, dfdv0) f = do
+  let t0 = Desingularization.t0
+  let v0 = uParameterizationV0
+  let vT0 = uParameterizationVT0
+  blend
+    (f . vT0, -t0 * f.dv . vT0, t0 * t0 * f.dv.dv . vT0)
+    (f0 . v0, -t0 * dfdv0 . v0)
+    ((t0 - v) / t0)
+
+blendV1 ::
+  SurfaceFunction units ->
+  (SurfaceFunction units, SurfaceFunction units) ->
+  SurfaceFunction units
+blendV1 f (f1, dfdv1) = do
+  let t0 = Desingularization.t0
+  let t1 = Desingularization.t1
+  let uT1 = uParameterizationVT1
+  let u1 = uParameterizationV1
+  blend
+    (f . uT1, t0 * f.dv . uT1, t0 * t0 * f.dv.dv . uT1)
+    (f1 . u1, t0 * dfdv1 . u1)
+    ((v - t1) / t0)
+
+uParameterization :: Float -> SurfaceFunction2d UvCoordinates
+uParameterization vValue = SurfaceFunction2d.xy u (constant vValue)
+
+uParameterizationV0 :: SurfaceFunction2d UvCoordinates
+uParameterizationV0 = uParameterization 0.0
+
+uParameterizationVT0 :: SurfaceFunction2d UvCoordinates
+uParameterizationVT0 = uParameterization Desingularization.t0
+
+uParameterizationVT1 :: SurfaceFunction2d UvCoordinates
+uParameterizationVT1 = uParameterization Desingularization.t1
+
+uParameterizationV1 :: SurfaceFunction2d UvCoordinates
+uParameterizationV1 = uParameterization 1.0
+
+vParameterization :: Float -> SurfaceFunction2d UvCoordinates
+vParameterization uValue = SurfaceFunction2d.xy (constant uValue) v
+
+vParameterizationU0 :: SurfaceFunction2d UvCoordinates
+vParameterizationU0 = vParameterization 0.0
+
+vParameterizationUT0 :: SurfaceFunction2d UvCoordinates
+vParameterizationUT0 = vParameterization Desingularization.t0
+
+vParameterizationUT1 :: SurfaceFunction2d UvCoordinates
+vParameterizationUT1 = vParameterization Desingularization.t1
+
+vParameterizationU1 :: SurfaceFunction2d UvCoordinates
+vParameterizationU1 = vParameterization 1.0
+
+blend ::
+  (SurfaceFunction units, SurfaceFunction units, SurfaceFunction units) ->
+  (SurfaceFunction units, SurfaceFunction units) ->
+  SurfaceFunction Unitless ->
+  SurfaceFunction units
+blend (f00, f01, f02) (f10, f11) t =
+  b00 t * f00 + b01 t * f01 + b02 t * f02 + b10 t * f10 + b11 t * f11
+
+b00 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
+b00 t = 1.0 - cubed t * (4.0 - 3.0 * t)
+
+b01 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
+b01 t = t * (1.0 + squared t * (2.0 * t - 3.0))
+
+b02 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
+b02 t = squared t * (0.5 + t * (0.5 * t - 1.0))
+
+b10 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
+b10 t = cubed t * (4.0 - 3.0 * t)
+
+b11 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
+b11 t = cubed t * (t - 1.0)
+
+data DivisionByZero = DivisionByZero deriving (Eq, Show, Error.Message)
+
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
-  SurfaceFunction units3
+  Result DivisionByZero (SurfaceFunction units3)
 quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+constantUCurve :: Float -> Curve2d UvCoordinates
+constantUCurve uValue = Curve2d.xy (Curve.constant uValue) Curve.t
+
+constantVCurve :: Float -> Curve2d UvCoordinates
+constantVCurve vValue = Curve2d.xy Curve.t (Curve.constant vValue)
+
+u0Curve :: Curve2d UvCoordinates
+u0Curve = constantUCurve 0.0
+
+u1Curve :: Curve2d UvCoordinates
+u1Curve = constantUCurve 1.0
+
+v0Curve :: Curve2d UvCoordinates
+v0Curve = constantVCurve 0.0
+
+v1Curve :: Curve2d UvCoordinates
+v1Curve = constantVCurve 1.0
 
 quotient' ::
   Tolerance units2 =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
+  Result DivisionByZero (SurfaceFunction (units1 :/: units2))
+quotient' numerator denominator =
+  if denominator ~= Qty.zero
+    then Failure DivisionByZero
+    else Result.do
+      let lhopital p = do
+            let numerator' = derivative p numerator
+            let numerator'' = derivative p numerator'
+            let denominator' = derivative p denominator
+            let denominator'' = derivative p denominator'
+            if denominator' ~= Qty.zero -- TODO switch to "if hasZero denominator'"
+              then Failure DivisionByZero
+              else Success do
+                let value = unsafeQuotient' numerator' denominator'
+                let firstDerivative =
+                      Units.simplify $
+                        unsafeQuotient'
+                          (numerator'' .*. denominator' - numerator' .*. denominator'')
+                          (2.0 * squared' denominator')
+                (value, firstDerivative)
+      singularityU0 <-
+        if denominator . u0Curve ~= Qty.zero then Result.map Just (lhopital U) else Success Nothing
+      singularityU1 <-
+        if denominator . u1Curve ~= Qty.zero then Result.map Just (lhopital U) else Success Nothing
+      singularityV0 <-
+        if denominator . v0Curve ~= Qty.zero then Result.map Just (lhopital V) else Success Nothing
+      singularityV1 <-
+        if denominator . v1Curve ~= Qty.zero then Result.map Just (lhopital V) else Success Nothing
+      Success $ desingularize do
+        #function (unsafeQuotient' numerator denominator)
+        #singularityU0 singularityU0
+        #singularityU1 singularityU1
+        #singularityV0 singularityV0
+        #singularityV1 singularityV1
+
+unsafeQuotient ::
+  Units.Quotient units1 units2 units3 =>
+  SurfaceFunction units1 ->
+  SurfaceFunction units2 ->
+  SurfaceFunction units3
+unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerator denominator)
+
+unsafeQuotient' ::
+  SurfaceFunction units1 ->
+  SurfaceFunction units2 ->
   SurfaceFunction (units1 :/: units2)
-quotient' lhs rhs =
+unsafeQuotient' lhs rhs =
   recursive
     @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
-    @ \self p -> quotient' (derivative p lhs) rhs - self * quotient (derivative p rhs) rhs
+    @ \self p ->
+      unsafeQuotient' (derivative p lhs) rhs - self * unsafeQuotient (derivative p rhs) rhs
 
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared function = Units.specialize (squared' function)
@@ -452,7 +671,7 @@ sqrt' function =
     else
       recursive
         @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled
-        @ \self p -> Units.coerce (quotient' (derivative p function) (2.0 * self))
+        @ \self p -> Units.coerce (unsafeQuotient' (derivative p function) (2.0 * self))
 
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 cubed function =
@@ -480,8 +699,8 @@ zeros function
   | otherwise = Result.do
       let fu = function.du
       let fv = function.dv
-      let dudv = quotient -fv fu
-      let dvdu = quotient -fu fv
+      let dudv = unsafeQuotient -fv fu
+      let dvdu = unsafeQuotient -fu fv
       case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
         Success solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions
