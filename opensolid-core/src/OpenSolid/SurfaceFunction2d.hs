@@ -252,6 +252,22 @@ instance
       @ function.compiled . curve.compiled
       @ (function.du . curve) * dudt + (function.dv . curve) * dvdt
 
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (SurfaceFunction units)
+    (SurfaceFunction units)
+  where
+  f . g = do
+    let dfdu = f.du . g
+    let dfdv = f.dv . g
+    SurfaceFunction.new
+      @ f.compiled . g.compiled
+      @ \p -> do
+        let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
+        dfdu * dudp + dfdv * dvdp
+
 distanceAlong ::
   Axis2d (space @ units) ->
   SurfaceFunction2d (space @ units) ->
