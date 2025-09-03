@@ -230,9 +230,9 @@ type family a ./. b where
 
 infixl 7 ./.
 
-type family Sqr units = squaredUnits | squaredUnits -> units where
-  Sqr Unitless = Unitless
-  Sqr Meters = SquareMeters
+type family Square units = squaredUnits | squaredUnits -> units where
+  Square Unitless = Unitless
+  Square Meters = SquareMeters
 
 type Product units1 units2 units3 =
   ( units1 .*. units2 ~ units3
@@ -249,7 +249,7 @@ type Quotient units1 units2 units3 =
   )
 
 type Squared units1 units2 =
-  ( Sqr units1 ~ units2
+  ( Square units1 ~ units2
   , Product units1 units1 units2
   )
 
