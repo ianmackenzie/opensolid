@@ -20,6 +20,8 @@ module OpenSolid.Drawing2d
   , circleWith
   , curve
   , curveWith
+  , arrow
+  , arrowWith
   , blackStroke
   , strokeColor
   , strokeWidth
@@ -37,14 +39,17 @@ module OpenSolid.Drawing2d
 where
 
 import Data.Foldable qualified
+import OpenSolid.Axis2d (Axis2d (Axis2d))
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
@@ -52,11 +57,13 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d)
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 
@@ -212,6 +219,38 @@ curveWith attributes resolution givenCurve = do
 -- | Draw a curve with the given resolution.
 curve :: Resolution Meters -> Curve2d (space @ Meters) -> Drawing2d space
 curve = curveWith []
+
+arrow ::
+  ( "start" ::: Point2d (space @ Meters)
+  , "end" ::: Point2d (space @ Meters)
+  , "headLength" ::: Length
+  , "headWidth" ::: Length
+  ) ->
+  Drawing2d space
+arrow args = arrowWith [] args
+
+arrowWith ::
+  List (Attribute space) ->
+  ( "start" ::: Point2d (space @ Meters)
+  , "end" ::: Point2d (space @ Meters)
+  , "headLength" ::: Length
+  , "headWidth" ::: Length
+  ) ->
+  Drawing2d space
+arrowWith attributes args =
+  case Tolerance.exactly (Direction2d.from args.start args.end) of
+    Failure Direction2d.PointsAreCoincident -> nothing
+    Success direction -> do
+      let length = Point2d.distanceFrom args.start args.end
+      let axis = Axis2d args.start direction
+      let frame = Frame2d.fromXAxis axis
+      let stemLength = length - args.headLength
+      let stemEndPoint = Point2d.along axis stemLength
+      let leftPoint = Point2d.placeIn frame (Point2d stemLength (0.5 * args.headWidth))
+      let rightPoint = Point2d.mirrorAcross axis leftPoint
+      let stem = line args.start stemEndPoint
+      let tip = polygon [leftPoint, rightPoint, args.end]
+      groupWith attributes [stem, tip]
 
 pointsAttribute :: List (Point space) -> Attribute space
 pointsAttribute givenPoints =
