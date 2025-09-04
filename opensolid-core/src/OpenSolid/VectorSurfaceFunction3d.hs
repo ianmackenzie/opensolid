@@ -3,6 +3,8 @@ module OpenSolid.VectorSurfaceFunction3d
   , Compiled
   , new
   , recursive
+  , desingularize
+  , desingularized
   , zero
   , constant
   , evaluate
@@ -18,7 +20,6 @@ where
 
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Composition
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
 import OpenSolid.Frame3d (Frame3d)
@@ -27,8 +28,7 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
-import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
+import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
@@ -399,23 +399,6 @@ instance
   lhs `dot` rhs = Vector3d.unit lhs `dot` rhs
 
 instance
-  uvCoordinates ~ UvCoordinates =>
-  Composition
-    (SurfaceFunction2d uvCoordinates)
-    (VectorSurfaceFunction3d (space @ units))
-    (VectorSurfaceFunction3d (space @ units))
-  where
-  outer . inner = do
-    let duOuter = outer.du . inner
-    let dvOuter = outer.dv . inner
-    new
-      @ outer.compiled . inner.compiled
-      @ \p -> do
-        let innerDerivative = SurfaceFunction2d.derivative p inner
-        let (dU, dV) = innerDerivative.components
-        duOuter * dU + dvOuter * dV
-
-instance
   HasField
     "compiled"
     (VectorSurfaceFunction3d (space @ units))
@@ -442,6 +425,27 @@ recursive ::
   VectorSurfaceFunction3d (space @ units)
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
+
+desingularize ::
+  ( "function" ::: VectorSurfaceFunction3d (space @ units)
+  , "singularityU0" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))
+  , "singularityU1" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))
+  , "singularityV0" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))
+  , "singularityV1" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))
+  ) ->
+  VectorSurfaceFunction3d (space @ units)
+desingularize = SurfaceFunction.Blending.desingularize desingularized
+
+desingularized ::
+  SurfaceFunction Unitless ->
+  VectorSurfaceFunction3d (space @ units) ->
+  VectorSurfaceFunction3d (space @ units) ->
+  VectorSurfaceFunction3d (space @ units) ->
+  VectorSurfaceFunction3d (space @ units)
+desingularized t start middle end =
+  new
+    (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
+    (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
 
 zero :: VectorSurfaceFunction3d (space @ units)
 zero = constant Vector3d.zero

@@ -3,6 +3,8 @@ module OpenSolid.VectorSurfaceFunction2d
   , Compiled
   , new
   , recursive
+  , desingularize
+  , desingularized
   , zero
   , constant
   , xy
@@ -30,6 +32,7 @@ import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurfac
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
@@ -463,6 +466,27 @@ recursive ::
   VectorSurfaceFunction2d (space @ units)
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
+
+desingularize ::
+  ( "function" ::: VectorSurfaceFunction2d (space @ units)
+  , "singularityU0" ::: Maybe (VectorSurfaceFunction2d (space @ units), VectorSurfaceFunction2d (space @ units))
+  , "singularityU1" ::: Maybe (VectorSurfaceFunction2d (space @ units), VectorSurfaceFunction2d (space @ units))
+  , "singularityV0" ::: Maybe (VectorSurfaceFunction2d (space @ units), VectorSurfaceFunction2d (space @ units))
+  , "singularityV1" ::: Maybe (VectorSurfaceFunction2d (space @ units), VectorSurfaceFunction2d (space @ units))
+  ) ->
+  VectorSurfaceFunction2d (space @ units)
+desingularize = SurfaceFunction.Blending.desingularize desingularized
+
+desingularized ::
+  SurfaceFunction Unitless ->
+  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d (space @ units)
+desingularized t start middle end =
+  new
+    (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
+    (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
 
 zero :: VectorSurfaceFunction2d (space @ units)
 zero = constant Vector2d.zero

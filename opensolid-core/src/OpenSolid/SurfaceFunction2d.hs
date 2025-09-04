@@ -41,6 +41,8 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
+import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
+import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
 data SurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
   SurfaceFunction2d ::
@@ -263,6 +265,38 @@ instance
     let dfdu = f.du . g
     let dfdv = f.dv . g
     SurfaceFunction.new
+      @ f.compiled . g.compiled
+      @ \p -> do
+        let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
+        dfdu * dudp + dfdv * dvdp
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (VectorSurfaceFunction2d (space @ units))
+    (VectorSurfaceFunction2d (space @ units))
+  where
+  f . g = do
+    let dfdu = f.du . g
+    let dfdv = f.dv . g
+    VectorSurfaceFunction2d.new
+      @ f.compiled . g.compiled
+      @ \p -> do
+        let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
+        dfdu * dudp + dfdv * dvdp
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
+  where
+  f . g = do
+    let dfdu = f.du . g
+    let dfdv = f.dv . g
+    VectorSurfaceFunction3d.new
       @ f.compiled . g.compiled
       @ \p -> do
         let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)

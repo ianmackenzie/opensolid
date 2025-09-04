@@ -17,6 +17,7 @@ import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 
 type role SurfaceFunction2d nominal
 
@@ -59,6 +60,20 @@ instance
     (SurfaceFunction2d uvCoordinates)
     (SurfaceFunction units)
     (SurfaceFunction units)
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (VectorSurfaceFunction2d (space @ units))
+    (VectorSurfaceFunction2d (space @ units))
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d (space @ units))
 
 new ::
   Compiled (space @ units) ->
