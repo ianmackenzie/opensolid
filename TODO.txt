@@ -1,3 +1,6 @@
+Add ability to batch-evaluate functions?
+-> try to avoid overhead of calling into C++ many times
+
 Switch to desingularization 'width' of (1 / 256) instead of 0.001
 -> especially important for surfaces not to have to bisect *too* much
 -> seems good to use power of 2 so that corresponding derivative scaling is lossless
