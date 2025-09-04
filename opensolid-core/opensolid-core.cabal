@@ -113,6 +113,7 @@ library
     OpenSolid.Bytecode.Ast
     OpenSolid.Camera3d
     OpenSolid.Color
+    OpenSolid.CompiledFunction
     OpenSolid.Composition
     OpenSolid.Convention3d
     OpenSolid.CoordinateSystem
@@ -248,7 +249,6 @@ library
     OpenSolid.Bytecode.Evaluate
     OpenSolid.Bytecode.Instruction
     OpenSolid.CDT
-    OpenSolid.CompiledFunction
     OpenSolid.HasZero
     OpenSolid.Json.FieldSchema
     OpenSolid.Linearization
