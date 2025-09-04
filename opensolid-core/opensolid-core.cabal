@@ -206,6 +206,7 @@ library
     OpenSolid.Surface3d
     OpenSolid.Surface3d.Revolved
     OpenSolid.SurfaceFunction
+    OpenSolid.SurfaceFunction.Blending
     OpenSolid.SurfaceFunction.HorizontalCurve
     OpenSolid.SurfaceFunction.ImplicitCurveBounds
     OpenSolid.SurfaceFunction.Subproblem
