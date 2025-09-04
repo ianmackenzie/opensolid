@@ -75,12 +75,12 @@ floatBuilder value = Builder.floatLE (GHC.Float.double2Float (Float.toDouble val
 vectorBuilder :: Convention3d -> Vector3d (space @ Unitless) -> Builder
 vectorBuilder convention vector = do
   let (x, y, z) = Vector3d.components convention vector
-  Binary.concat [floatBuilder x, floatBuilder y, floatBuilder z]
+  floatBuilder x <> floatBuilder y <> floatBuilder z
 
 pointBuilder :: Convention3d -> (Qty units -> Float) -> Point3d (space @ units) -> Builder
 pointBuilder convention units point = do
   let (x, y, z) = Point3d.coordinates convention point
-  Binary.concat [floatBuilder (units x), floatBuilder (units y), floatBuilder (units z)]
+  floatBuilder (units x) <> floatBuilder (units y) <> floatBuilder (units z)
 
 triangleBuilder ::
   Vertex3d vertex (space @ units) =>
