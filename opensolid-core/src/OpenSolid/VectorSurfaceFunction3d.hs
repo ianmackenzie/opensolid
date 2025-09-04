@@ -11,8 +11,8 @@ module OpenSolid.VectorSurfaceFunction3d
   , placeIn
   , relativeTo
   , transformBy
-  , quotient
-  , quotient'
+  , unsafeQuotient
+  , unsafeQuotient'
   )
 where
 
@@ -497,21 +497,21 @@ transformBy transform function =
       function.compiled
     @ \p -> transformBy transform (derivative p function)
 
-quotient ::
+unsafeQuotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorSurfaceFunction3d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction3d (space @ units3)
-quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+unsafeQuotient lhs rhs = Units.specialize (unsafeQuotient' lhs rhs)
 
-quotient' ::
+unsafeQuotient' ::
   Tolerance units2 =>
   VectorSurfaceFunction3d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction3d (space @ (units1 :/: units2))
-quotient' lhs rhs =
+unsafeQuotient' lhs rhs =
   recursive
     @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
     @ \self p ->
-      quotient' (derivative p lhs) rhs
+      unsafeQuotient' (derivative p lhs) rhs
         - self * SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs

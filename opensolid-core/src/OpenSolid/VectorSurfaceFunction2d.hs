@@ -13,8 +13,8 @@ module OpenSolid.VectorSurfaceFunction2d
   , components
   , derivative
   , transformBy
-  , quotient
-  , quotient'
+  , unsafeQuotient
+  , unsafeQuotient'
   , squaredMagnitude'
   , squaredMagnitude
   )
@@ -538,23 +538,23 @@ components ::
   (SurfaceFunction units, SurfaceFunction units)
 components function = (xComponent function, yComponent function)
 
-quotient ::
+unsafeQuotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction2d (space @ units3)
-quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+unsafeQuotient lhs rhs = Units.specialize (unsafeQuotient' lhs rhs)
 
-quotient' ::
+unsafeQuotient' ::
   Tolerance units2 =>
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction2d (space @ (units1 :/: units2))
-quotient' lhs rhs =
+unsafeQuotient' lhs rhs =
   recursive
     @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
     @ \self p ->
-      quotient' (derivative p lhs) rhs
+      unsafeQuotient' (derivative p lhs) rhs
         - self * SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
 
 squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units :*: units)
