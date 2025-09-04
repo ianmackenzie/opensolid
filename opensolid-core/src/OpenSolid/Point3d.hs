@@ -33,9 +33,7 @@ where
 import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3d (Convention3d)
-import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -54,15 +52,9 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d qualified as Vector3d
 
 -- | Get the XYZ coordinates of a point, given an XYZ coordinate convention to use.
+{-# INLINE coordinates #-}
 coordinates :: Convention3d -> Point3d (space @ units) -> (Qty units, Qty units, Qty units)
-coordinates convention (Point3d pR pF pU) = do
-  let Direction3d iR iF iU = Convention3d.xDirection Orientation3d.world convention
-  let Direction3d jR jF jU = Convention3d.yDirection Orientation3d.world convention
-  let Direction3d kR kF kU = Convention3d.zDirection Orientation3d.world convention
-  let pX = pR * iR + pF * iF + pU * iU
-  let pY = pR * jR + pF * jF + pU * jU
-  let pZ = pR * kR + pF * kF + pU * kU
-  (pX, pY, pZ)
+coordinates convention (Position3d vector) = Vector3d.components convention vector
 
 dummy :: Point3d (space @ Void)
 dummy = Point3d Qty.zero Qty.zero Qty.zero
@@ -96,15 +88,10 @@ erase :: Point3d (space @ units) -> Point3d (space @ Unitless)
 erase = coerce
 
 -- | Construct a point from its XYZ coordinates, given the coordinate convention to use.
+{-# INLINE fromCoordinates #-}
 fromCoordinates :: Convention3d -> (Qty units, Qty units, Qty units) -> Point3d (space @ units)
-fromCoordinates convention (pX, pY, pZ) = do
-  let Direction3d iR iF iU = Convention3d.xDirection Orientation3d.world convention
-  let Direction3d jR jF jU = Convention3d.yDirection Orientation3d.world convention
-  let Direction3d kR kF kU = Convention3d.zDirection Orientation3d.world convention
-  Point3d
-    @ pX * iR + pY * jR + pZ * kR
-    @ pX * iF + pY * jF + pZ * kF
-    @ pX * iU + pY * jU + pZ * kU
+fromCoordinates convention givenCoordinates =
+  Position3d (Vector3d.fromComponents convention givenCoordinates)
 
 {-| Construct a point from its XYZ coordinates, using a Z-up convention
 where positive X is rightward, positive Y is forward and positive Z is upward.

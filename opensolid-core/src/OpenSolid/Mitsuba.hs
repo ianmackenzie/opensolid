@@ -19,7 +19,7 @@ import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Camera3d (Camera3d)
 import OpenSolid.Camera3d qualified as Camera3d
 import OpenSolid.Color qualified as Color
-import OpenSolid.Convention3d (Convention3d (Convention3d))
+import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
@@ -56,7 +56,7 @@ Source: https://github.com/mitsuba-renderer/mitsuba-blender/discussions/47#discu
 -}
 convention :: Convention3d
 convention =
-  Convention3d
+  Convention3d.custom
     Orientation3d.rightwardDirection
     Orientation3d.upwardDirection
     Orientation3d.backwardDirection

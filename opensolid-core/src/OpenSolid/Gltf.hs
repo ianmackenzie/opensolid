@@ -15,7 +15,8 @@ import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color qualified as Color
-import OpenSolid.Convention3d (Convention3d (Convention3d))
+import OpenSolid.Convention3d (Convention3d)
+import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
@@ -45,7 +46,7 @@ zDirection :: Orientation3d space -> Direction3d space
 zDirection = Orientation3d.forwardDirection
 
 convention :: Convention3d
-convention = Convention3d xDirection yDirection zDirection
+convention = Convention3d.custom xDirection yDirection zDirection
 
 builder :: Resolution Meters -> Model3d space -> Builder
 builder resolution model = do

@@ -42,11 +42,10 @@ module OpenSolid.Vector3d
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Convention3d (Convention3d)
+import OpenSolid.Convention3d (Convention3d (Convention3d))
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Error qualified as Error
 import OpenSolid.List qualified as List
-import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -93,14 +92,11 @@ on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vX vY) = do
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
 fromComponents :: Convention3d -> (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
-fromComponents convention (vX, vY, vZ) = do
-  let Direction3d iR iF iU = Convention3d.xDirection Orientation3d.world convention
-  let Direction3d jR jF jU = Convention3d.yDirection Orientation3d.world convention
-  let Direction3d kR kF kU = Convention3d.zDirection Orientation3d.world convention
+fromComponents Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (vx, vy, vz) = do
   Vector3d
-    @ vX * iR + vY * jR + vZ * kR
-    @ vX * iF + vY * jF + vZ * kF
-    @ vX * iU + vY * jU + vZ * kU
+    (vx * xr + vy * yr + vz * zr)
+    (vx * xf + vy * yf + vz * zf)
+    (vx * xu + vy * yu + vz * zu)
 
 {-| Construct a vector from its XYZ components, using a Z-up convention
 where positive X is rightward, positive Y is forward and positive Z is upward.
@@ -140,10 +136,10 @@ downwardComponent (Vector3d _ _ u) = -u
 
 -- | Get the XYZ components of a vector, given an XYZ coordinate convention to use.
 components :: Convention3d -> Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
-components convention vector =
-  ( vector `dot` Convention3d.xDirection Orientation3d.world convention
-  , vector `dot` Convention3d.yDirection Orientation3d.world convention
-  , vector `dot` Convention3d.zDirection Orientation3d.world convention
+components Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (Vector3d vr vf vu) =
+  ( vr * xr + vf * xf + vu * xu
+  , vr * yr + vf * yf + vu * yu
+  , vr * zr + vf * zf + vu * zu
   )
 
 interpolateFrom ::

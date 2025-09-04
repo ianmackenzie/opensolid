@@ -1,7 +1,8 @@
 module OpenSolid.Convention3d
-  ( Convention3d (Convention3d)
+  ( Convention3d (..)
   , yUp
   , zUp
+  , custom
   , xDirection
   , yDirection
   , zDirection
@@ -11,21 +12,30 @@ module OpenSolid.Convention3d
   )
 where
 
+import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.CoordinateSystem
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
-import OpenSolid.Primitives (Axis3d (Axis3d), Direction3d, Frame3d (Frame3d), Orientation3d)
+import OpenSolid.Primitives (Axis3d (Axis3d), Direction3d (Direction3d, Unit3d), Frame3d (Frame3d), Orientation3d (Orientation3d))
 
 {-| A coordinate convention in 3D space,
 defining which of X, Y and Z mean 'forward' or 'upward' or 'rightward'.
 -}
 data Convention3d where
   Convention3d ::
-    (forall space. Orientation3d space -> Direction3d space) ->
-    (forall space. Orientation3d space -> Direction3d space) ->
-    (forall space. Orientation3d space -> Direction3d space) ->
+    { xr :: Float
+    , xf :: Float
+    , xu :: Float
+    , yr :: Float
+    , yf :: Float
+    , yu :: Float
+    , zr :: Float
+    , zf :: Float
+    , zu :: Float
+    } ->
     Convention3d
 
 instance FFI Convention3d where
@@ -38,9 +48,16 @@ This is the convention used by (among other things) the glTF file format.
 yUp :: Convention3d
 yUp =
   Convention3d
-    Orientation3d.leftwardDirection
-    Orientation3d.upwardDirection
-    Orientation3d.forwardDirection
+    { xr = -1.0
+    , xf = 0.0
+    , xu = 0.0
+    , yr = 0.0
+    , yf = 0.0
+    , yu = 1.0
+    , zr = 0.0
+    , zf = 1.0
+    , zu = 0.0
+    }
 
 {-| A convention where positive X is rightward, positive Y is forward and positive Z is upward.
 
@@ -49,21 +66,39 @@ This is the convention used by (among other things) the Blender animation packag
 zUp :: Convention3d
 zUp =
   Convention3d
-    Orientation3d.rightwardDirection
-    Orientation3d.forwardDirection
-    Orientation3d.upwardDirection
+    { xr = 1.0
+    , xf = 0.0
+    , xu = 0.0
+    , yr = 0.0
+    , yf = 1.0
+    , yu = 0.0
+    , zr = 0.0
+    , zf = 0.0
+    , zu = 1.0
+    }
+
+custom ::
+  (forall space. Orientation3d space -> Direction3d space) ->
+  (forall space. Orientation3d space -> Direction3d space) ->
+  (forall space. Orientation3d space -> Direction3d space) ->
+  Convention3d
+custom givenXDirection givenYDirection givenZDirection = do
+  let Direction3d xr xf xu = givenXDirection Orientation3d.world
+  let Direction3d yr yf yu = givenYDirection Orientation3d.world
+  let Direction3d zr zf zu = givenZDirection Orientation3d.world
+  Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu}
 
 -- | Get the X direction of a given orientation for a particular coordinate convention.
 xDirection :: Orientation3d space -> Convention3d -> Direction3d space
-xDirection orientation (Convention3d dx _ _) = dx orientation
+xDirection (Orientation3d dr df du) Convention3d{xr, xf, xu} = Unit3d (dr * xr + df * xf + du * xu)
 
 -- | Get the Y direction of a given orientation for a particular coordinate convention.
 yDirection :: Orientation3d space -> Convention3d -> Direction3d space
-yDirection orientation (Convention3d _ dy _) = dy orientation
+yDirection (Orientation3d dr df du) Convention3d{yr, yf, yu} = Unit3d (dr * yr + df * yf + du * yu)
 
 -- | Get the Z direction of a given orientation for a particular coordinate convention.
 zDirection :: Orientation3d space -> Convention3d -> Direction3d space
-zDirection orientation (Convention3d _ _ dz) = dz orientation
+zDirection (Orientation3d dr df du) Convention3d{zr, zf, zu} = Unit3d (dr * zr + df * zf + du * zu)
 
 -- | Get the X axis of a given frame for a particular coordinate convention.
 xAxis :: Frame3d (space @ units) defines -> Convention3d -> Axis3d (space @ units)
