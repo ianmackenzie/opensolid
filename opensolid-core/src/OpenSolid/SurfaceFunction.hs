@@ -16,7 +16,6 @@ module OpenSolid.SurfaceFunction
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , new
-  , DivisionByZero
   , quotient
   , quotient'
   , unsafeQuotient
@@ -40,11 +39,10 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
@@ -59,12 +57,12 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.PartialZeros (PartialZeros)
 import OpenSolid.SurfaceFunction.PartialZeros qualified as PartialZeros
+import OpenSolid.SurfaceFunction.Quotient qualified as SurfaceFunction.Quotient
 import OpenSolid.SurfaceFunction.SaddleRegion (SaddleRegion)
 import OpenSolid.SurfaceFunction.SaddleRegion qualified as SaddleRegion
 import OpenSolid.SurfaceFunction.Subproblem (CornerValues (..), Subproblem (..))
@@ -441,8 +439,6 @@ desingularized t start middle end =
     (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
     (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
 
-data DivisionByZero = DivisionByZero deriving (Eq, Show, Error.Message)
-
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   SurfaceFunction units1 ->
@@ -450,62 +446,25 @@ quotient ::
   Result DivisionByZero (SurfaceFunction units3)
 quotient lhs rhs = Units.specialize (quotient' lhs rhs)
 
-constantUCurve :: Float -> Curve2d UvCoordinates
-constantUCurve uValue = Curve2d.xy (Curve.constant uValue) Curve.t
-
-constantVCurve :: Float -> Curve2d UvCoordinates
-constantVCurve vValue = Curve2d.xy Curve.t (Curve.constant vValue)
-
-u0Curve :: Curve2d UvCoordinates
-u0Curve = constantUCurve 0.0
-
-u1Curve :: Curve2d UvCoordinates
-u1Curve = constantUCurve 1.0
-
-v0Curve :: Curve2d UvCoordinates
-v0Curve = constantVCurve 0.0
-
-v1Curve :: Curve2d UvCoordinates
-v1Curve = constantVCurve 1.0
-
 quotient' ::
   Tolerance units2 =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   Result DivisionByZero (SurfaceFunction (units1 :/: units2))
-quotient' numerator denominator =
-  if denominator ~= Qty.zero
-    then Failure DivisionByZero
-    else Result.do
-      let lhopital p = do
-            let numerator' = derivative p numerator
-            let numerator'' = derivative p numerator'
-            let denominator' = derivative p denominator
-            let denominator'' = derivative p denominator'
-            if denominator' ~= Qty.zero -- TODO switch to "if hasZero denominator'"
-              then Failure DivisionByZero
-              else Success do
-                let value = unsafeQuotient' numerator' denominator'
-                let firstDerivative =
-                      Units.simplify $
-                        unsafeQuotient'
-                          (numerator'' .*. denominator' - numerator' .*. denominator'')
-                          (2.0 * squared' denominator')
-                (value, firstDerivative)
-      singularityU0 <-
-        if denominator . u0Curve ~= Qty.zero then Result.map Just (lhopital U) else Success Nothing
-      singularityU1 <-
-        if denominator . u1Curve ~= Qty.zero then Result.map Just (lhopital U) else Success Nothing
-      singularityV0 <-
-        if denominator . v0Curve ~= Qty.zero then Result.map Just (lhopital V) else Success Nothing
-      singularityV1 <-
-        if denominator . v1Curve ~= Qty.zero then Result.map Just (lhopital V) else Success Nothing
-      Success $ desingularize do
-        #function (unsafeQuotient' numerator denominator)
-        #singularityU0 singularityU0
-        #singularityU1 singularityU1
-        #singularityV0 singularityV0
-        #singularityV1 singularityV1
+quotient' numerator denominator = do
+  let lhopital p = do
+        let numerator' = derivative p numerator
+        let numerator'' = derivative p numerator'
+        let denominator' = derivative p denominator
+        let denominator'' = derivative p denominator'
+        let value = unsafeQuotient' numerator' denominator'
+        let firstDerivative =
+              Units.simplify $
+                unsafeQuotient'
+                  (numerator'' .*. denominator' - numerator' .*. denominator'')
+                  (2.0 * squared' denominator')
+        (value, firstDerivative)
+  SurfaceFunction.Quotient.impl unsafeQuotient' lhopital desingularize numerator denominator
 
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>

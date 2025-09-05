@@ -210,6 +210,7 @@ library
     OpenSolid.SurfaceFunction.Blending
     OpenSolid.SurfaceFunction.HorizontalCurve
     OpenSolid.SurfaceFunction.ImplicitCurveBounds
+    OpenSolid.SurfaceFunction.Quotient
     OpenSolid.SurfaceFunction.Subproblem
     OpenSolid.SurfaceFunction.VerticalCurve
     OpenSolid.SurfaceFunction.Zeros

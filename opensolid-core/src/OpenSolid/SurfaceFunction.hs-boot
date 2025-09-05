@@ -1,7 +1,6 @@
 module OpenSolid.SurfaceFunction
   ( SurfaceFunction
   , Compiled
-  , DivisionByZero
   , constant
   , u
   , v
@@ -9,6 +8,7 @@ module OpenSolid.SurfaceFunction
   , evaluateBounds
   , derivative
   , squared
+  , squared'
   , cubed
   , quotient
   , quotient'
@@ -19,6 +19,7 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units qualified as Units
@@ -37,6 +38,10 @@ instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units)
 type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
 
 instance HasField "compiled" (SurfaceFunction units) (Compiled units)
+
+instance units1 ~ units2 => ApproximateEquality (SurfaceFunction units1) (SurfaceFunction units2) units1
+
+instance units1 ~ units2 => ApproximateEquality (SurfaceFunction units1) (Qty units2) units1
 
 instance Negation (SurfaceFunction units)
 
@@ -98,8 +103,6 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (SurfaceFunction units1) (Qty units2) (SurfaceFunction units3)
 
-data DivisionByZero
-
 constant :: Qty units -> SurfaceFunction units
 u :: SurfaceFunction Unitless
 v :: SurfaceFunction Unitless
@@ -107,6 +110,7 @@ evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
+squared' :: SurfaceFunction units1 -> SurfaceFunction (units1 :*: units1)
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
