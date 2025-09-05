@@ -4,15 +4,13 @@ Add dedicated bytecode instructions for blending functions
 -> they'll get evaluated every time a desingularized function is evaluated, regardless of whether or not the result is used...
 -> or maybe add conditional evaluation to bytecode?
 
-Try out direct file output for e.g. STL and glTF output, instead of constructing an entire Builder first?
-
-Add desingularization of VectorSurfaceFunction#d quotients
-
 Add desingularizaiton of SurfaceFunction.sqrt
 
 Update VectorSurfaceFunction#d.magnitude to use plain square root
 
 Update VectorSurfaceFunction#d.direction to use division by magnitude directly
+
+Update Curve.quotient to also compute derivative for use in constructing blending curve
 
 Replace 'synthetic' curves with plain quartic Hermite splines
 
