@@ -15,6 +15,8 @@ module OpenSolid.VectorSurfaceFunction2d
   , components
   , derivative
   , transformBy
+  , quotient
+  , quotient'
   , unsafeQuotient
   , unsafeQuotient'
   , squaredMagnitude'
@@ -27,12 +29,14 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
+import OpenSolid.SurfaceFunction.Quotient qualified as SurfaceFunction.Quotient
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
@@ -562,15 +566,41 @@ components ::
   (SurfaceFunction units, SurfaceFunction units)
 components function = (xComponent function, yComponent function)
 
-unsafeQuotient ::
+quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  VectorSurfaceFunction2d (space @ units1) ->
+  SurfaceFunction units2 ->
+  Result DivisionByZero (VectorSurfaceFunction2d (space @ units3))
+quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+
+quotient' ::
+  Tolerance units2 =>
+  VectorSurfaceFunction2d (space @ units1) ->
+  SurfaceFunction units2 ->
+  Result DivisionByZero (VectorSurfaceFunction2d (space @ (units1 :/: units2)))
+quotient' numerator denominator = do
+  let lhopital p = do
+        let numerator' = derivative p numerator
+        let numerator'' = derivative p numerator'
+        let denominator' = SurfaceFunction.derivative p denominator
+        let denominator'' = SurfaceFunction.derivative p denominator'
+        let value = unsafeQuotient' numerator' denominator'
+        let firstDerivative =
+              Units.simplify $
+                unsafeQuotient'
+                  (numerator'' .*. denominator' - numerator' .*. denominator'')
+                  (2.0 * SurfaceFunction.squared' denominator')
+        (value, firstDerivative)
+  SurfaceFunction.Quotient.impl unsafeQuotient' lhopital desingularize numerator denominator
+
+unsafeQuotient ::
+  Units.Quotient units1 units2 units3 =>
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction2d (space @ units3)
 unsafeQuotient lhs rhs = Units.specialize (unsafeQuotient' lhs rhs)
 
 unsafeQuotient' ::
-  Tolerance units2 =>
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction2d (space @ (units1 :/: units2))
