@@ -1,7 +1,6 @@
 module OpenSolid.VectorCurve2d
   ( VectorCurve2d
   , Compiled
-  , DivisionByZero
   , constant
   , new
   , evaluate
@@ -18,6 +17,7 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
@@ -38,8 +38,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Vector2d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds2d coordinateSystem)
-
-data DivisionByZero
 
 instance HasUnits (VectorCurve2d (space @ units)) units
 

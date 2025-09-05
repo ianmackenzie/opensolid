@@ -25,7 +25,6 @@ module OpenSolid.VectorCurve2d
   , synthetic
   , desingularize
   , desingularized
-  , DivisionByZero (DivisionByZero)
   , quotient
   , quotient'
   , unsafeQuotient
@@ -65,6 +64,7 @@ import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2d (Direction2d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
+import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
@@ -697,8 +697,6 @@ components curve = (xComponent curve, yComponent curve)
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
-
-data DivisionByZero = DivisionByZero deriving (Eq, Show, Error.Message)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

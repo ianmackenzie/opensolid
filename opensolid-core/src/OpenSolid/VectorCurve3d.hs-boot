@@ -1,7 +1,6 @@
 module OpenSolid.VectorCurve3d
   ( VectorCurve3d
   , Compiled
-  , DivisionByZero
   , constant
   , new
   , on
@@ -19,6 +18,7 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
@@ -41,8 +41,6 @@ type Compiled (coordinateSystem :: CoordinateSystem) =
     (Vector3d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds3d coordinateSystem)
-
-data DivisionByZero
 
 instance HasUnits (VectorCurve3d (space @ units)) units
 

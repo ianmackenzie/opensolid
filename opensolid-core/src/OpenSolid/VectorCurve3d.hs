@@ -21,7 +21,6 @@ module OpenSolid.VectorCurve3d
   , synthetic
   , desingularize
   , desingularized
-  , DivisionByZero (DivisionByZero)
   , quotient
   , quotient'
   , unsafeQuotient
@@ -54,6 +53,7 @@ import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction3d (Direction3d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
+import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
@@ -618,8 +618,6 @@ evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tB
 
 reverse :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
 reverse curve = curve . (1.0 - Curve.t)
-
-data DivisionByZero = DivisionByZero deriving (Eq, Show, Error.Message)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
