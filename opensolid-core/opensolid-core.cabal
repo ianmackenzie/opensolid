@@ -134,6 +134,7 @@ library
     OpenSolid.DirectionBounds3d
     OpenSolid.DirectionCurve2d
     OpenSolid.DirectionCurve3d
+    OpenSolid.DivisionByZero
     OpenSolid.Domain1d
     OpenSolid.Domain2d
     OpenSolid.Drawing2d
