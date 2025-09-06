@@ -14,6 +14,8 @@ module OpenSolid.VectorSurfaceFunction2d
   , yComponent
   , components
   , derivative
+  , placeIn
+  , relativeTo
   , transformBy
   , quotient
   , quotient'
@@ -33,6 +35,8 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -512,6 +516,25 @@ xy x y =
       x.compiled
       y.compiled
     @ \p -> xy (SurfaceFunction.derivative p x) (SurfaceFunction.derivative p y)
+
+placeIn ::
+  Frame2d (global @ frameUnits) (Defines local) ->
+  VectorSurfaceFunction2d (local @ units) ->
+  VectorSurfaceFunction2d (global @ units)
+placeIn frame function =
+  new
+    @ CompiledFunction.map
+      (Expression.VectorSurface2d.placeIn frame)
+      (Vector2d.placeIn frame)
+      (VectorBounds2d.placeIn frame)
+      function.compiled
+    @ \p -> placeIn frame (derivative p function)
+
+relativeTo ::
+  Frame2d (global @ frameUnits) (Defines local) ->
+  VectorSurfaceFunction2d (global @ units) ->
+  VectorSurfaceFunction2d (local @ units)
+relativeTo frame = placeIn (Frame2d.inverse frame)
 
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
