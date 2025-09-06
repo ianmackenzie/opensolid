@@ -18,9 +18,7 @@ module OpenSolid.Curve3d
   , bounds
   , reverse
   , arcLengthParameterization
-  , unsafeArcLengthParameterization
   , parameterizeByArcLength
-  , unsafeParameterizeByArcLength
   , transformBy
   , placeIn
   , relativeTo
@@ -56,8 +54,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
-import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
@@ -65,7 +61,6 @@ import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
-import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
@@ -259,29 +254,16 @@ reverse curve = curve . (1.0 - Curve.t)
 arcLengthParameterization ::
   Tolerance units =>
   Curve3d (space @ units) ->
-  Result HasDegeneracy (Curve Unitless, Qty units)
+  (Curve Unitless, Qty units)
 arcLengthParameterization curve =
-  if curve.derivative ~= Vector3d.zero
-    then Success (Curve.t, Qty.zero) -- Curve is a constant point
-    else case VectorCurve3d.magnitude curve.derivative of
-      Failure VectorCurve3d.HasZero -> Failure HasDegeneracy
-      Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
-
-unsafeArcLengthParameterization :: Curve3d (space @ units) -> (Curve Unitless, Qty units)
-unsafeArcLengthParameterization curve =
-  ArcLength.parameterization (VectorCurve3d.unsafeMagnitude curve.derivative)
+  ArcLength.parameterization (VectorCurve3d.magnitude curve.derivative)
 
 parameterizeByArcLength ::
   Tolerance units =>
   Curve3d (space @ units) ->
-  Result HasDegeneracy (Curve3d (space @ units), Qty units)
-parameterizeByArcLength curve = Result.do
-  (parameterization, length) <- arcLengthParameterization curve
-  Success (curve . parameterization, length)
-
-unsafeParameterizeByArcLength :: Curve3d (space @ units) -> (Curve3d (space @ units), Qty units)
-unsafeParameterizeByArcLength curve = do
-  let (parameterization, length) = unsafeArcLengthParameterization curve
+  (Curve3d (space @ units), Qty units)
+parameterizeByArcLength curve = do
+  let (parameterization, length) = arcLengthParameterization curve
   (curve . parameterization, length)
 
 transformBy ::

@@ -10,7 +10,7 @@ module OpenSolid.VectorCurve3d
   , quotient'
   , unsafeQuotient
   , unsafeQuotient'
-  , unsafeMagnitude
+  , magnitude
   , transformBy
   )
 where
@@ -115,7 +115,7 @@ unsafeQuotient' ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   VectorCurve3d (space @ (units1 :/: units2))
-unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
+magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Curve units
 transformBy ::
   Transform3d tag (space @ translationUnits) ->
   VectorCurve3d (space @ units) ->

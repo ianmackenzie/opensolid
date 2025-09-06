@@ -26,7 +26,6 @@ module OpenSolid.VectorCurve3d
   , unsafeQuotient
   , unsafeQuotient'
   , magnitude
-  , unsafeMagnitude
   , squaredMagnitude
   , squaredMagnitude'
   , reverse
@@ -53,6 +52,7 @@ import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction3d (Direction3d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
+import {-# SOURCE #-} OpenSolid.DirectionCurve3d qualified as DirectionCurve3d
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
@@ -80,7 +80,6 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
-import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
@@ -694,25 +693,10 @@ squaredMagnitude' curve = do
   let squaredMagnitudeDerivative = 2.0 * curve `dot'` curve.derivative
   Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
-unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
-unsafeMagnitude curve = do
-  let compiledMagnitude =
-        CompiledFunction.map
-          Expression.VectorCurve3d.magnitude
-          Vector3d.magnitude
-          VectorBounds3d.magnitude
-          curve.compiled
-  let magnitudeDerivative self = curve.derivative `dot` Tolerance.exactly (unsafeQuotient curve self)
-  Curve.recursive compiledMagnitude magnitudeDerivative
-
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
-magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Result HasZero (Curve units)
-magnitude curve =
-  case zeros curve of
-    Success [] -> Success (unsafeMagnitude curve)
-    Success List.OneOrMore -> Failure HasZero
-    Failure ZeroEverywhere -> Failure HasZero
+magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Curve units
+magnitude curve = Curve.sqrt' (squaredMagnitude' curve)
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
 
@@ -725,29 +709,10 @@ zeros curve =
 direction ::
   Tolerance units =>
   VectorCurve3d (space @ units) ->
-  Result HasZero (DirectionCurve3d space)
-direction curve =
-  case zeros curve of
-    -- If the vector curve has no zeros, then we can safely compute its direction
-    Success [] -> Success (VectorCurve3d.Direction.unsafe curve curve.derivative)
-    -- Otherwise, check where the vector curve is zero:
-    -- if it's only zero at one or both endpoints,
-    -- and the curve's *derivative* is non-zero at those endpoints,
-    -- then it's still possible to uniquely determine a tangent direction everywhere
-    Success (NonEmpty curveZeros) ->
-      if NonEmpty.allSatisfy (isRemovableDegeneracy curve.derivative) curveZeros
-        then Success (VectorCurve3d.Direction.unsafe curve curve.derivative)
-        else Failure HasZero
-    -- Definitely can't get the direction of a vector curve
-    -- if that vector curve is zero everywhere!
-    Failure ZeroEverywhere -> Failure HasZero
-
-isRemovableDegeneracy :: Tolerance units => VectorCurve3d (space @ units) -> Float -> Bool
-isRemovableDegeneracy curveDerivative tValue =
-  -- A degeneracy (zero value of a vector curve) when computing the direction of that vector curve
-  -- is removable at an endpoint if the curve derivative at that endpoint is non-zero,
-  -- since in that case we can substitute the curve derivative value for the curve value itself
-  (tValue == 0.0 || tValue == 1.0) && evaluate curveDerivative tValue != Vector3d.zero
+  Result ZeroEverywhere (DirectionCurve3d space)
+direction curve = case quotient curve (magnitude curve) of
+  Failure DivisionByZero -> Failure ZeroEverywhere
+  Success normalizedCurve -> Success (DirectionCurve3d.unsafe normalizedCurve)
 
 placeIn ::
   Frame3d (global @ frameUnits) (Defines local) ->

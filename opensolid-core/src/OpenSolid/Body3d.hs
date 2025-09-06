@@ -393,7 +393,7 @@ boundedBy ::
   Result BoundedBy.Error (Body3d (space @ units))
 boundedBy [] = Failure BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = Result.do
-  surfacesWithHalfEdges <- Result.collect toSurfaceWithHalfEdges (NonEmpty.indexed givenSurfaces)
+  let surfacesWithHalfEdges = NonEmpty.mapWithIndex toSurfaceWithHalfEdges givenSurfaces
   let firstSurfaceWithHalfEdges = surfacesWithHalfEdges.first
   let halfEdges = NonEmpty.collect getAllHalfEdges surfacesWithHalfEdges
   let halfEdgeSet = Set3d.fromNonEmpty halfEdges
@@ -429,50 +429,48 @@ surfaceWithHalfEdgesMapEntry surfaceWithHalfEdges = do
 
 toSurfaceWithHalfEdges ::
   Tolerance units =>
-  (Int, Surface3d (space @ units)) ->
-  Result BoundedBy.Error (SurfaceWithHalfEdges (space @ units))
-toSurfaceWithHalfEdges (surfaceIndex, surface) = do
+  Int ->
+  Surface3d (space @ units) ->
+  SurfaceWithHalfEdges (space @ units)
+toSurfaceWithHalfEdges surfaceIndex surface = do
   let loops = surface.domain.boundaryLoops
   let surfaceId = SurfaceId surfaceIndex
-  Result.map (SurfaceWithHalfEdges surfaceId surface Positive) $
-    Result.collect (loopHalfEdges surfaceId surface.function) (NonEmpty.indexed loops)
+  let halfEdges = NonEmpty.mapWithIndex (loopHalfEdges surfaceId surface.function) loops
+  SurfaceWithHalfEdges surfaceId surface Positive halfEdges
 
 loopHalfEdges ::
   Tolerance units =>
   SurfaceId ->
   SurfaceFunction3d (space @ units) ->
-  (Int, NonEmpty (Curve2d UvCoordinates)) ->
-  Result BoundedBy.Error (NonEmpty (HalfEdge (space @ units)))
-loopHalfEdges surfaceId surfaceFunction (loopIndex, loop) =
-  NonEmpty.indexed loop
-    |> Result.collect (toHalfEdge surfaceId (LoopId loopIndex) surfaceFunction)
+  Int ->
+  NonEmpty (Curve2d UvCoordinates) ->
+  NonEmpty (HalfEdge (space @ units))
+loopHalfEdges surfaceId surfaceFunction loopIndex loop =
+  NonEmpty.mapWithIndex (toHalfEdge surfaceId (LoopId loopIndex) surfaceFunction) loop
 
 toHalfEdge ::
   Tolerance units =>
   SurfaceId ->
   LoopId ->
   SurfaceFunction3d (space @ units) ->
-  (Int, Curve2d UvCoordinates) ->
-  Result BoundedBy.Error (HalfEdge (space @ units))
-toHalfEdge surfaceId loopId surfaceFunction (curveIndex, uvCurve) = do
+  Int ->
+  Curve2d UvCoordinates ->
+  HalfEdge (space @ units)
+toHalfEdge surfaceId loopId surfaceFunction curveIndex uvCurve = do
   let curve3d = surfaceFunction . uvCurve
   let curveId = CurveId curveIndex
   let id = HalfEdgeId{surfaceId, loopId, curveId}
-  case Curve3d.arcLengthParameterization curve3d of
-    Success (parameterization, length) -> do
-      Success
-        if length == Qty.zero
-          then DegenerateHalfEdge{id, uvCurve, point = Curve3d.startPoint curve3d}
-          else
-            HalfEdge
-              { id
-              , uvCurve = uvCurve . parameterization
-              , curve3d = curve3d . parameterization
-              , length
-              , bounds = Curve3d.bounds curve3d
-              }
-    Failure Curve3d.HasDegeneracy ->
-      Failure BoundedBy.BoundaryCurveHasDegeneracy
+  let (parameterization, length) = Curve3d.arcLengthParameterization curve3d
+  if length == Qty.zero
+    then DegenerateHalfEdge{id, uvCurve, point = Curve3d.startPoint curve3d}
+    else
+      HalfEdge
+        { id
+        , uvCurve = uvCurve . parameterization
+        , curve3d = curve3d . parameterization
+        , length
+        , bounds = Curve3d.bounds curve3d
+        }
 
 getAllHalfEdges :: SurfaceWithHalfEdges (space @ units) -> NonEmpty (HalfEdge (space @ units))
 getAllHalfEdges SurfaceWithHalfEdges{halfEdgeLoops} = NonEmpty.concat halfEdgeLoops
