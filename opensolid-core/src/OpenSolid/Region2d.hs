@@ -582,6 +582,9 @@ fluxIntegral ::
   Estimate Unitless
 fluxIntegral point curve = do
   let displacement = point - curve
+  -- By this point we've already checked whether the poing is *on* the curve,
+  -- so the Curve.unsafeQuotient call should be OK
+  -- (if the point is not on the curve, then the displacement will always be non-zero)
   let integrand =
         Tolerance.using Tolerance.squared' $
           Curve.unsafeQuotient
