@@ -24,6 +24,8 @@ module OpenSolid.VectorSurfaceFunction2d
   , squaredMagnitude'
   , squaredMagnitude
   , magnitude
+  , IsZero
+  , direction
   )
 where
 
@@ -32,7 +34,10 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.DivisionByZero (DivisionByZero)
+import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2d (DirectionSurfaceFunction2d)
+import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2d qualified as DirectionSurfaceFunction2d
+import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
 import OpenSolid.Frame2d (Frame2d)
@@ -653,3 +658,13 @@ squaredMagnitude = Units.specialize . squaredMagnitude'
 
 magnitude :: Tolerance units => VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
 magnitude function = SurfaceFunction.sqrt' (squaredMagnitude' function)
+
+data IsZero = IsZero deriving (Eq, Show, Error.Message)
+
+direction ::
+  Tolerance units =>
+  VectorSurfaceFunction2d (space @ units) ->
+  Result IsZero (DirectionSurfaceFunction2d space)
+direction function = case quotient function (magnitude function) of
+  Failure DivisionByZero -> Failure IsZero
+  Success normalizedFunction -> Success (DirectionSurfaceFunction2d.unsafe normalizedFunction)
