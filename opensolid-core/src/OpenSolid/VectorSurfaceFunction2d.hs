@@ -21,6 +21,7 @@ module OpenSolid.VectorSurfaceFunction2d
   , unsafeQuotient'
   , squaredMagnitude'
   , squaredMagnitude
+  , magnitude
   )
 where
 
@@ -626,3 +627,6 @@ squaredMagnitude ::
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2
 squaredMagnitude = Units.specialize . squaredMagnitude'
+
+magnitude :: Tolerance units => VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
+magnitude function = SurfaceFunction.sqrt' (squaredMagnitude' function)
