@@ -29,17 +29,17 @@ impl ::
 impl unsafeQuotient lhopital desingularize numerator denominator
   | denominator ~= Qty.zero = Failure DivisionByZero
   | otherwise = Result.do
-      let singularityIf zeroCheck direction
-            | zeroCheck denominator = do
-                let denominator' = SurfaceFunction.derivative direction denominator
+      let maybeSingularity parameter value
+            | SurfaceFunction.Desingularization.isZero parameter value denominator = do
+                let denominator' = SurfaceFunction.derivative parameter denominator
                 if denominator' ~= Qty.zero -- TODO switch to "if SurfaceFunction.hasZero denominator'"
                   then Failure DivisionByZero
-                  else Success (Just (lhopital direction))
+                  else Success (Just (lhopital parameter))
             | otherwise = Success Nothing
-      maybeSingularityU0 <- singularityIf SurfaceFunction.Desingularization.zeroU0 U
-      maybeSingularityU1 <- singularityIf SurfaceFunction.Desingularization.zeroU1 U
-      maybeSingularityV0 <- singularityIf SurfaceFunction.Desingularization.zeroV0 V
-      maybeSingularityV1 <- singularityIf SurfaceFunction.Desingularization.zeroV1 V
+      maybeSingularityU0 <- maybeSingularity U 0.0
+      maybeSingularityU1 <- maybeSingularity U 1.0
+      maybeSingularityV0 <- maybeSingularity V 0.0
+      maybeSingularityV1 <- maybeSingularity V 1.0
       Success $ desingularize do
         #function (unsafeQuotient numerator denominator)
         #singularityU0 maybeSingularityU0
