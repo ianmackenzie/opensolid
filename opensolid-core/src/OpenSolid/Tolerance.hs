@@ -3,7 +3,6 @@ module OpenSolid.Tolerance
   , ApproximateEquality ((~=))
   , (!=)
   , using
-  , exactly
   , unitless
   , squared
   , squared'
@@ -87,23 +86,6 @@ instance
 (!=) first second = not (first ~= second)
 
 infix 4 !=
-
-{-| Take an expression which would normally require a tolerance,
-and evaluate it using a tolerance of zero. For example, the expression
-
-  value ^ bounds
-
-would normally require an implicit tolerance to be present;
-
-  exactly (value ^ bounds)
-
-will evaluate that expression with a tolerance of zero,
-equivalent to
-
-  let ?tolerance = Qty.zero in value ^ bounds
--}
-exactly :: (Tolerance units => a) -> a
-exactly expression = using Qty.zero expression
 
 -- | A default tolerance (1e-9) for comparing unitless values with expected magnitude near 1.
 unitless :: Float

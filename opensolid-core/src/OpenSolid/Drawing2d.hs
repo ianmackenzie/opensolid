@@ -61,6 +61,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d)
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -238,7 +239,7 @@ arrowWith ::
   ) ->
   Drawing2d space
 arrowWith attributes args =
-  case Tolerance.exactly (Direction2d.from args.start args.end) of
+  case Tolerance.using Qty.zero (Direction2d.from args.start args.end) of
     Failure Direction2d.PointsAreCoincident -> nothing
     Success direction -> do
       let length = Point2d.distanceFrom args.start args.end

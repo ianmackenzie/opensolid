@@ -816,7 +816,7 @@ degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
   validEdge uvBounds edgeSize surfaceSegments
 
 validEdge :: UvBounds -> Float -> Set2d UvBounds UvCoordinates -> Bool
-validEdge edgeBounds edgeLength surfaceSegments = Tolerance.exactly
+validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Qty.zero do
   case surfaceSegments of
     Set2d.Node nodeBounds left right ->
       not (edgeBounds ^ nodeBounds)

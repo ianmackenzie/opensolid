@@ -124,9 +124,10 @@ boundedBy curves = Result.do
 
 -- | The unit square in UV space.
 unitSquare :: Region2d UvCoordinates
-unitSquare = case Tolerance.exactly (rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval)) of
-  Success region -> region
-  Failure EmptyRegion -> internalError "Constructing unit square region should not fail"
+unitSquare =
+  case Tolerance.using Qty.zero (rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval)) of
+    Success region -> region
+    Failure EmptyRegion -> internalError "Constructing unit square region should not fail"
 
 data EmptyRegion = EmptyRegion deriving (Eq, Show, Error.Message)
 

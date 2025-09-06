@@ -22,6 +22,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.SaddleRegion (SaddleRegion)
@@ -203,8 +204,8 @@ finalize function dvdu dudv partialZeros = do
   Zeros
     { tangentPoints
     , saddlePoints = List.map SaddleRegion.point saddleRegions
-    , crossingCurves = List.map (Tolerance.exactly Curve2d.piecewise) crossingCurveSegments
-    , crossingLoops = List.map (Tolerance.exactly Curve2d.piecewise) crossingLoopSegments
+    , crossingCurves = List.map (Tolerance.using Qty.zero Curve2d.piecewise) crossingCurveSegments
+    , crossingLoops = List.map (Tolerance.using Qty.zero Curve2d.piecewise) crossingLoopSegments
     }
 
 extend :: Tolerance units => PiecewiseCurve -> SaddleRegion units -> PiecewiseCurve

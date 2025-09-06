@@ -281,7 +281,7 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
         else recurse
 
 includeSubdomain :: UvBounds -> Set2d (LineSegment2d UvPoint) UvCoordinates -> Fuzzy Bool
-includeSubdomain subdomain edgeSet = Tolerance.exactly $
+includeSubdomain subdomain edgeSet = Tolerance.using Qty.zero $
   case edgeSet of
     Set2d.Node nodeBounds leftChild rightChild
       | not (subdomain ^ nodeBounds) -> Resolved True
