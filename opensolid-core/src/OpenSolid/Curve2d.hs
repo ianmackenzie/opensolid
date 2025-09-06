@@ -101,6 +101,7 @@ import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
@@ -1016,12 +1017,11 @@ curvature' curve = Result.do
   let firstDerivative = curve.derivative
   let secondDerivative = firstDerivative.derivative
   tangent <- tangentDirection curve
-  Success $
-    Units.simplify $
-      Tolerance.using Tolerance.squared' $
-        Curve.unsafeQuotient'
-          @ tangent `cross` secondDerivative
-          @ firstDerivative `dot'` firstDerivative
+  let numerator = tangent `cross` secondDerivative
+  let denominator = VectorCurve2d.squaredMagnitude' firstDerivative
+  case Tolerance.using Tolerance.squared' (Curve.quotient' numerator denominator) of
+    Success quotient' -> Success (Units.simplify quotient')
+    Failure DivisionByZero -> Failure IsPoint
 
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
