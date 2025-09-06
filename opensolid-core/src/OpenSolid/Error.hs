@@ -7,7 +7,7 @@ where
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Text qualified as Text
 
-class (Eq error, Show error) => Message error where
+class Show error => Message error where
   message :: error -> Text
   message = Text.show
 
