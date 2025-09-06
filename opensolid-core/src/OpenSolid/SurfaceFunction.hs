@@ -566,6 +566,9 @@ zeros function
   | otherwise = Result.do
       let fu = function.du
       let fv = function.dv
+      -- Using unsafeQuotient should be OK here
+      -- since we only actually use dudv and dvdu
+      -- in subdomains where we know the denominator is non-zero
       let dudv = unsafeQuotient -fv fu
       let dvdu = unsafeQuotient -fu fv
       case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
