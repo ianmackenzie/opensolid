@@ -586,7 +586,7 @@ fluxIntegral point curve = do
         Tolerance.using Tolerance.squared' $
           Curve.unsafeQuotient
             @ curve.derivative `cross'` displacement
-            @ displacement.squaredMagnitude'
+            @ VectorCurve2d.squaredMagnitude' displacement
   Curve.integrate integrand
 
 totalFlux :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
