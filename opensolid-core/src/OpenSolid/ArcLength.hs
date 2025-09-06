@@ -4,6 +4,7 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Float qualified as Float
 import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Prelude
@@ -38,9 +39,9 @@ parameterization derivativeMagnitude = do
           let evaluate uValue = lookup tree (uValue * length)
           let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
           let compiled = CompiledFunction.abstract evaluate evaluateBounds
-          let derivative self = Curve.unsafeQuotient (Curve.constant length) derivativeMagnitude . self
-          let curve = Curve.recursive compiled derivative
-          (curve, length)
+          case Curve.quotient (Curve.constant length) derivativeMagnitude of
+            Success quotient -> (Curve.recursive compiled (quotient .), length)
+            Failure DivisionByZero -> (Curve.t, Qty.zero)
 
 isConstant :: Tolerance units => Qty units -> Qty units -> Qty units -> Qty units -> Bool
 isConstant y1 y2 y3 y4 = y1 ~= y2 && y1 ~= y3 && y1 ~= y4
