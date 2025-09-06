@@ -503,7 +503,7 @@ sqrt' curve
                     evaluate curve tValue ~= Qty.zero
             let secondDerivativeValue = evaluate secondDerivative tValue
             let firstDerivativeTolerance =
-                  ?tolerance .*. Qty.sqrt' (2.0 * Qty.abs secondDerivativeValue)
+                  ?tolerance .*. Qty.sqrt' (2.0 * secondDerivativeValue)
             let firstDerivativeIsZero =
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative tValue ~= Qty.zero

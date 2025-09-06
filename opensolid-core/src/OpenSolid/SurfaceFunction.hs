@@ -517,7 +517,7 @@ sqrt' function =
             let firstDerivativeIsZeroAt testPoint = do
                   let secondDerivativeValue = evaluate secondDerivative testPoint
                   let firstDerivativeTolerance =
-                        ?tolerance .*. Qty.sqrt' (2.0 * Qty.abs secondDerivativeValue)
+                        ?tolerance .*. Qty.sqrt' (2.0 * secondDerivativeValue)
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative testPoint ~= Qty.zero
             let firstDerivativeIsZero = List.allSatisfy firstDerivativeIsZeroAt testPoints
