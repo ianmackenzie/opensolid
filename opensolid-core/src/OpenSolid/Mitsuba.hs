@@ -40,8 +40,6 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
-import OpenSolid.Vector3d (Vector3d)
-import OpenSolid.Vector3d qualified as Vector3d
 
 -- | The lighting to use for a Mitsuba scene.
 data Lighting space where
@@ -107,7 +105,7 @@ writeFiles args = IO.do
   let sceneFileName = args.path <> ".xml"
   IO.writeUtf8 sceneFileName sceneXml
 
-type Vertex space = (Point3d (space @ Meters), Vector3d (space @ Unitless))
+type Vertex space = (Point3d (space @ Meters), Direction3d space)
 
 type Mesh space = Mesh.Mesh (Vertex space)
 
@@ -212,7 +210,7 @@ pointBuilder (point, _) = do
 
 normalBuilder :: Vertex space -> Builder
 normalBuilder (_, normal) = do
-  let (nx, ny, nz) = Vector3d.components convention normal
+  let (nx, ny, nz) = Direction3d.components convention normal
   Binary.concat
     [ Binary.float64LE nx
     , Binary.float64LE ny

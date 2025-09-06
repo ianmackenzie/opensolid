@@ -43,6 +43,9 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
+import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.DirectionSurfaceFunction3d (DirectionSurfaceFunction3d)
+import OpenSolid.DirectionSurfaceFunction3d qualified as DirectionSurfaceFunction3d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
 import OpenSolid.FFI (FFI)
@@ -88,7 +91,6 @@ import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
@@ -635,7 +637,7 @@ toMesh ::
   Tolerance units =>
   Resolution units ->
   Body3d (space @ units) ->
-  Mesh (Point3d (space @ units), Vector3d (space @ Unitless))
+  Mesh (Point3d (space @ units), Direction3d space)
 toMesh resolution (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
   let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments resolution) boundarySurfaceList
@@ -826,51 +828,53 @@ validEdge edgeBounds edgeLength surfaceSegments = Tolerance.exactly
         || edgeLength <= Float.sqrt 2.0 * Bounds2d.diameter leafBounds
 
 boundarySurfaceMesh ::
+  Tolerance units =>
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   BoundarySurface (space @ units) ->
-  Mesh (Point3d (space @ units), Vector3d (space @ Unitless))
+  Mesh (Point3d (space @ units), Direction3d space)
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
   let BoundarySurface{id, surfaceFunction, handedness, edgeLoops} = boundarySurface
-  let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
-  let boundarySegments = NonEmpty.collect Polygon2d.edges boundaryPolygons
-  let boundarySegmentSet = Set2d.fromNonEmpty boundarySegments
-  case Map.get id surfaceSegmentsById of
-    Nothing -> internalError "Should always be able to look up surface segments by ID"
-    Just surfaceSegments -> do
-      let steinerPoints =
-            case surfaceSegments of
-              Set2d.Leaf{} ->
-                -- Special case, if the surface as a whole is sufficiently linear
-                -- (only needs a single segment to approximate it)
-                -- then we don't need any interior points at all
-                -- (sufficient to just use the boundary points)
-                []
-              Set2d.Node{} ->
-                Maybe.collect (steinerPoint boundarySegmentSet) (Set2d.toList surfaceSegments)
-      let steinerVertex uvPoint =
-            Vertex uvPoint (SurfaceFunction3d.evaluate surfaceFunction uvPoint)
-      let steinerVertices = List.map steinerVertex steinerPoints
-      let boundaryVertexLoops = NonEmpty.map (.vertices) boundaryPolygons
-      -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
-      let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices
-      let pointsAndNormals =
-            Array.map (pointAndNormal surfaceFunction handedness) vertexMesh.vertices
-      let faceIndices =
-            case handedness of
-              Positive -> vertexMesh.faceIndices
-              Negative -> List.map (\(i, j, k) -> (k, j, i)) vertexMesh.faceIndices
-      Mesh.indexed pointsAndNormals faceIndices
+  case SurfaceFunction3d.normalDirection surfaceFunction of
+    Failure SurfaceFunction3d.IsDegenerate -> Mesh.empty
+    Success normalDirection -> do
+      let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
+      let boundarySegments = NonEmpty.collect Polygon2d.edges boundaryPolygons
+      let boundarySegmentSet = Set2d.fromNonEmpty boundarySegments
+      case Map.get id surfaceSegmentsById of
+        Nothing -> internalError "Should always be able to look up surface segments by ID"
+        Just surfaceSegments -> do
+          let steinerPoints =
+                case surfaceSegments of
+                  Set2d.Leaf{} ->
+                    -- Special case, if the surface as a whole is sufficiently linear
+                    -- (only needs a single segment to approximate it)
+                    -- then we don't need any interior points at all
+                    -- (sufficient to just use the boundary points)
+                    []
+                  Set2d.Node{} ->
+                    Maybe.collect (steinerPoint boundarySegmentSet) (Set2d.toList surfaceSegments)
+          let steinerVertex uvPoint =
+                Vertex uvPoint (SurfaceFunction3d.evaluate surfaceFunction uvPoint)
+          let steinerVertices = List.map steinerVertex steinerPoints
+          let boundaryVertexLoops = NonEmpty.map (.vertices) boundaryPolygons
+          -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
+          let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices
+          let pointsAndNormals =
+                Array.map (pointAndNormal normalDirection handedness) vertexMesh.vertices
+          let faceIndices =
+                case handedness of
+                  Positive -> vertexMesh.faceIndices
+                  Negative -> List.map (\(i, j, k) -> (k, j, i)) vertexMesh.faceIndices
+          Mesh.indexed pointsAndNormals faceIndices
 
 pointAndNormal ::
-  SurfaceFunction3d (space @ units) ->
+  DirectionSurfaceFunction3d space ->
   Sign ->
   Vertex (space @ units) ->
-  (Point3d (space @ units), Vector3d (space @ Unitless))
-pointAndNormal f handedness (Vertex uvPoint point) = do
-  let fu = VectorSurfaceFunction3d.evaluate f.du uvPoint
-  let fv = VectorSurfaceFunction3d.evaluate f.dv uvPoint
-  (point, handedness * Vector3d.normalize (fu `cross'` fv))
+  (Point3d (space @ units), Direction3d space)
+pointAndNormal n handedness (Vertex uvPoint point) =
+  (point, handedness * DirectionSurfaceFunction3d.evaluate n uvPoint)
 
 toPolygon ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->
