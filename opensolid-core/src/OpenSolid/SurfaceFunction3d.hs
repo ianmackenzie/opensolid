@@ -6,6 +6,8 @@ module OpenSolid.SurfaceFunction3d
   , evaluate
   , evaluateBounds
   , derivative
+  , IsDegenerate (IsDegenerate)
+  , normalDirection
   , placeIn
   , relativeTo
   , transformBy
@@ -17,6 +19,8 @@ import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
+import OpenSolid.DirectionSurfaceFunction3d (DirectionSurfaceFunction3d)
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression.Surface3d qualified as Expression.Surface3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
@@ -24,11 +28,13 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Region2d (Region2d)
+import OpenSolid.Result qualified as Result
 import {-# SOURCE #-} OpenSolid.Surface3d (Surface3d)
 import {-# SOURCE #-} OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
@@ -202,6 +208,28 @@ derivative ::
   VectorSurfaceFunction3d (space @ units)
 derivative U = (.du)
 derivative V = (.dv)
+
+data IsDegenerate = IsDegenerate deriving (Eq, Show, Error.Message)
+
+derivativeDirection ::
+  Tolerance units =>
+  VectorSurfaceFunction3d (space @ units) ->
+  Result IsDegenerate (DirectionSurfaceFunction3d space)
+derivativeDirection partialDerivative = case VectorSurfaceFunction3d.direction partialDerivative of
+  Success direction -> Success direction
+  Failure VectorSurfaceFunction3d.IsZero -> Failure IsDegenerate
+
+normalDirection ::
+  Tolerance units =>
+  SurfaceFunction3d (space @ units) ->
+  Result IsDegenerate (DirectionSurfaceFunction3d space)
+normalDirection function = Result.do
+  duDirection <- derivativeDirection function.du
+  dvDirection <- derivativeDirection function.dv
+  let crossProduct = duDirection `cross` dvDirection
+  case Tolerance.using Tolerance.unitless (VectorSurfaceFunction3d.direction crossProduct) of
+    Success directionFunction -> Success directionFunction
+    Failure VectorSurfaceFunction3d.IsZero -> Failure IsDegenerate
 
 transformBy ::
   Transform3d tag (space @ units) ->
