@@ -56,6 +56,7 @@ import OpenSolid.Composition
 import OpenSolid.Curve.Zero (Zero)
 import OpenSolid.Curve.Zero qualified as Zero
 import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
@@ -325,7 +326,7 @@ cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 rationalBezier ::
   Tolerance Unitless =>
   NonEmpty (Qty units, Float) ->
-  Result ZeroEverywhere (Curve units)
+  Result DivisionByZero (Curve units)
 rationalBezier pointsAndWeights = do
   let scaledPoint (point, weight) = point * weight
   quotient
@@ -337,7 +338,7 @@ rationalQuadraticSpline ::
   (Qty units, Float) ->
   (Qty units, Float) ->
   (Qty units, Float) ->
-  Result ZeroEverywhere (Curve units)
+  Result DivisionByZero (Curve units)
 rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.three pw1 pw2 pw3)
 
 rationalCubicSpline ::
@@ -346,7 +347,7 @@ rationalCubicSpline ::
   (Qty units, Float) ->
   (Qty units, Float) ->
   (Qty units, Float) ->
-  Result ZeroEverywhere (Curve units)
+  Result DivisionByZero (Curve units)
 rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 pw4)
 
 {-| Evaluate a curve at a given parameter value.
@@ -414,17 +415,17 @@ quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   Curve units1 ->
   Curve units2 ->
-  Result ZeroEverywhere (Curve units3)
+  Result DivisionByZero (Curve units3)
 quotient lhs rhs = Units.specialize (quotient' lhs rhs)
 
 quotient' ::
   Tolerance units2 =>
   Curve units1 ->
   Curve units2 ->
-  Result ZeroEverywhere (Curve (units1 :/: units2))
+  Result DivisionByZero (Curve (units1 :/: units2))
 quotient' numerator denominator = do
   if denominator ~= Qty.zero
-    then Failure ZeroEverywhere
+    then Failure DivisionByZero
     else Success do
       let singularity0 =
             if evaluate denominator 0.0 ~= Qty.zero
