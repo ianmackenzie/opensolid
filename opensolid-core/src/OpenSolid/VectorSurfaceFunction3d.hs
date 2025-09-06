@@ -20,6 +20,7 @@ module OpenSolid.VectorSurfaceFunction3d
   , squaredMagnitude
   , squaredMagnitude'
   , magnitude
+  , IsZero (IsZero)
   , direction
   )
 where
