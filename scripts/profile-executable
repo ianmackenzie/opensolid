@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-cabal run --enable-profiling --profiling-detail=late-toplevel $1 -- +RTS -pj -RTS
+cabal run --enable-profiling --profiling-detail=all-functions $1 -- +RTS -pj -RTS
