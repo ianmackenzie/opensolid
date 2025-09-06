@@ -332,6 +332,24 @@ instance
   v `cross'` f = constant v `cross'` f
 
 instance
+  space1 ~ space2 =>
+  CrossMultiplication
+    (VectorSurfaceFunction3d (space1 @ units))
+    (Direction3d space2)
+    (VectorSurfaceFunction3d (space1 @ units))
+  where
+  lhs `cross` rhs = lhs `cross` Vector3d.unit rhs
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication
+    (Direction3d space1)
+    (VectorSurfaceFunction3d (space2 @ units))
+    (VectorSurfaceFunction3d (space2 @ units))
+  where
+  lhs `cross` rhs = Vector3d.unit lhs `cross` rhs
+
+instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
     (VectorSurfaceFunction3d (space1 @ units1))
