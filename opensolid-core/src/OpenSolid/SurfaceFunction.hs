@@ -24,6 +24,8 @@ module OpenSolid.SurfaceFunction
   , squared'
   , sqrt
   , sqrt'
+  , unsafeSqrt
+  , unsafeSqrt'
   , cubed
   , sin
   , cos
@@ -59,6 +61,7 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
+import OpenSolid.SurfaceFunction.Desingularization qualified as SurfaceFunction.Desingularization
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.PartialZeros (PartialZeros)
 import OpenSolid.SurfaceFunction.PartialZeros qualified as PartialZeros
@@ -502,10 +505,40 @@ sqrt' :: Tolerance units => SurfaceFunction (units :*: units) -> SurfaceFunction
 sqrt' function =
   if Tolerance.using Tolerance.squared' (function ~= Qty.zero)
     then zero
-    else
-      recursive
-        @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled
-        @ \self p -> Units.coerce (unsafeQuotient' (derivative p function) (2.0 * self))
+    else do
+      let maybeSingularity param value sign = do
+            let firstDerivative = derivative param function
+            let secondDerivative = derivative param firstDerivative
+            let testPoints = SurfaceFunction.Desingularization.testPoints param value
+            let functionIsZeroAt testPoint =
+                  Tolerance.using Tolerance.squared' $
+                    evaluate function testPoint ~= Qty.zero
+            let functionIsZero = List.allSatisfy functionIsZeroAt testPoints
+            let firstDerivativeIsZeroAt testPoint = do
+                  let secondDerivativeValue = evaluate secondDerivative testPoint
+                  let firstDerivativeTolerance =
+                        ?tolerance .*. Qty.sqrt' (2.0 * Qty.abs secondDerivativeValue)
+                  Tolerance.using firstDerivativeTolerance $
+                    evaluate firstDerivative testPoint ~= Qty.zero
+            let firstDerivativeIsZero = List.allSatisfy firstDerivativeIsZeroAt testPoints
+            if functionIsZero && firstDerivativeIsZero
+              then Just (zero, sign * unsafeSqrt' (0.5 * secondDerivative))
+              else Nothing
+      desingularize do
+        #function (unsafeSqrt' function)
+        #singularityU0 (maybeSingularity U 0.0 Positive)
+        #singularityU1 (maybeSingularity U 1.0 Negative)
+        #singularityV0 (maybeSingularity V 0.0 Positive)
+        #singularityV1 (maybeSingularity V 1.0 Negative)
+
+unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction units2 -> SurfaceFunction units1
+unsafeSqrt function = unsafeSqrt' (Units.unspecialize function)
+
+unsafeSqrt' :: SurfaceFunction (units :*: units) -> SurfaceFunction units
+unsafeSqrt' function =
+  recursive
+    @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled
+    @ \self p -> Units.coerce (unsafeQuotient' (derivative p function) (2.0 * self))
 
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 cubed function =
