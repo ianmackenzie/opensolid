@@ -492,13 +492,22 @@ sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve
 sqrt curve = sqrt' (Units.unspecialize curve)
 
 sqrt' :: Tolerance units => Curve (units :*: units) -> Curve units
-sqrt' curve = Tolerance.using Tolerance.squared' do
-  if curve ~= Qty.zero
-    then zero
-    else do
-      let isSingularity tValue =
-            (evaluate curve tValue ~= Qty.zero) && (evaluate curve.derivative tValue ~= Qty.zero)
-      let secondDerivative = curve.derivative.derivative
+sqrt' curve
+  | Tolerance.using Tolerance.squared' (curve ~= Qty.zero) = zero
+  | otherwise = do
+      let firstDerivative = curve.derivative
+      let secondDerivative = firstDerivative.derivative
+      let isSingularity tValue = do
+            let curveIsZero =
+                  Tolerance.using Tolerance.squared' $
+                    evaluate curve tValue ~= Qty.zero
+            let secondDerivativeValue = evaluate secondDerivative tValue
+            let firstDerivativeTolerance =
+                  ?tolerance .*. Qty.sqrt' (2.0 * Qty.abs secondDerivativeValue)
+            let firstDerivativeIsZero =
+                  Tolerance.using firstDerivativeTolerance $
+                    evaluate firstDerivative tValue ~= Qty.zero
+            curveIsZero && firstDerivativeIsZero
       let singularity0 =
             if isSingularity 0.0
               then Just (Qty.zero, [Qty.sqrt' (evaluate secondDerivative 0.0 / 2.0)])
