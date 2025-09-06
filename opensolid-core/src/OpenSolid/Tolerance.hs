@@ -4,6 +4,7 @@ module OpenSolid.Tolerance
   , (!=)
   , using
   , exactly
+  , unitless
   , squared
   , squared'
   , ofSquared
@@ -17,7 +18,7 @@ where
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
-import OpenSolid.Float (fromRational)
+import OpenSolid.Float (Float, fromRational)
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import OpenSolid.Qty (Qty)
 import OpenSolid.Qty qualified as Qty
@@ -103,6 +104,10 @@ equivalent to
 -}
 exactly :: (Tolerance units => a) -> a
 exactly expression = using Qty.zero expression
+
+-- | A default tolerance (1e-9) for comparing unitless values with expected magnitude near 1.
+unitless :: Float
+unitless = 1e-9
 
 using :: Qty units -> (Tolerance units => a) -> a
 using tolerance expression = let ?tolerance = tolerance in expression
