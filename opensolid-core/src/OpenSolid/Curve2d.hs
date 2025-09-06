@@ -64,11 +64,8 @@ module OpenSolid.Curve2d
   , samplingPoints
   , medialAxis
   , arcLengthParameterization
-  , unsafeArcLengthParameterization
   , parameterizeByArcLength
-  , unsafeParameterizeByArcLength
   , piecewise
-  , unsafePiecewise
   )
 where
 
@@ -1091,21 +1088,12 @@ arcLengthParameterization ::
 arcLengthParameterization curve =
   ArcLength.parameterization (VectorCurve2d.magnitude curve.derivative)
 
-unsafeArcLengthParameterization :: Curve2d (space @ units) -> (Curve Unitless, Qty units)
-unsafeArcLengthParameterization curve =
-  ArcLength.parameterization (VectorCurve2d.unsafeMagnitude curve.derivative)
-
 parameterizeByArcLength ::
   Tolerance units =>
   Curve2d (space @ units) ->
   (Curve2d (space @ units), Qty units)
 parameterizeByArcLength curve = do
   let (parameterization, length) = arcLengthParameterization curve
-  (curve . parameterization, length)
-
-unsafeParameterizeByArcLength :: Curve2d (space @ units) -> (Curve2d (space @ units), Qty units)
-unsafeParameterizeByArcLength curve = do
-  let (parameterization, length) = unsafeArcLengthParameterization curve
   (curve . parameterization, length)
 
 makePiecewise :: NonEmpty (Curve2d (space @ units), Qty units) -> Curve2d (space @ units)
@@ -1120,9 +1108,6 @@ makePiecewise parameterizedSegments = do
 
 piecewise :: Tolerance units => NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
 piecewise segments = makePiecewise (NonEmpty.map parameterizeByArcLength segments)
-
-unsafePiecewise :: NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
-unsafePiecewise segments = makePiecewise (NonEmpty.map unsafeParameterizeByArcLength segments)
 
 buildPiecewiseTree ::
   Array (Curve2d (space @ units), Qty units) ->

@@ -32,7 +32,6 @@ module OpenSolid.VectorCurve2d
   , magnitude
   , squaredMagnitude
   , squaredMagnitude'
-  , unsafeMagnitude
   , reverse
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
@@ -771,9 +770,6 @@ squaredMagnitude' curve =
       VectorBounds2d.squaredMagnitude'
       curve.compiled
     @ 2.0 * curve `dot'` curve.derivative
-
-unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
-unsafeMagnitude curve = Curve.unsafeSqrt' (squaredMagnitude' curve)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

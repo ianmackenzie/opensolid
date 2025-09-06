@@ -29,6 +29,7 @@ import OpenSolid.SurfaceFunction.SaddleRegion qualified as SaddleRegion
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction.Zeros (Zeros (Zeros))
 import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 
@@ -202,8 +203,8 @@ finalize function dvdu dudv partialZeros = do
   Zeros
     { tangentPoints
     , saddlePoints = List.map SaddleRegion.point saddleRegions
-    , crossingCurves = List.map Curve2d.unsafePiecewise crossingCurveSegments
-    , crossingLoops = List.map Curve2d.unsafePiecewise crossingLoopSegments
+    , crossingCurves = List.map (Tolerance.exactly Curve2d.piecewise) crossingCurveSegments
+    , crossingLoops = List.map (Tolerance.exactly Curve2d.piecewise) crossingLoopSegments
     }
 
 extend :: Tolerance units => PiecewiseCurve -> SaddleRegion units -> PiecewiseCurve
