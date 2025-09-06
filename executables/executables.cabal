@@ -173,3 +173,10 @@ executable blending-curves
   hs-source-dirs: blending-curves
   build-depends:
     opensolid-core
+
+executable oblate-spheroid
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: oblate-spheroid
+  build-depends:
+    opensolid-core
