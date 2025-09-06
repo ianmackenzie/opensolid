@@ -1,6 +1,15 @@
+Review uses of Tolerance.[squared,squared'] to see if there are alternatives...
+-> e.g. for square root desingularization, check if second derivative is at least 1e9 times bigger than zeroth or first derivatives?
+-> maybe go back to idea of explicit normalization functions, where it's known a priori that e.g. first derivative of squared magnitude is zero where magnitude is zero...
+-> also generally review uses of ~= to see where first derivative is being checked
+-> add Tolerance.firstDerivative function that takes second derivative value as input?
+
+Change desingularize functions to take 'function' as regular, unnamed argument?
+-> also change Curve desingularization functions to take 'normal' function as first argument, for consistency?
+
 Add simplified/optimized versions of blending function derivatives
 
-Add dedicated bytecode instructions for blending functions
+Add dedicated bytecode instructions for blending functions (and their derivatives)
 -> they'll get evaluated every time a desingularized function is evaluated, regardless of whether or not the result is used...
 -> or maybe add conditional evaluation to bytecode?
 
