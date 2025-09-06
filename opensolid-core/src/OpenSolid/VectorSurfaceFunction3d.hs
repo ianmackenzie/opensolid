@@ -17,6 +17,8 @@ module OpenSolid.VectorSurfaceFunction3d
   , quotient'
   , unsafeQuotient
   , unsafeQuotient'
+  , squaredMagnitude
+  , squaredMagnitude'
   )
 where
 
@@ -24,6 +26,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.DivisionByZero (DivisionByZero)
+import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
@@ -549,3 +552,19 @@ unsafeQuotient' lhs rhs =
     @ \self p ->
       unsafeQuotient' (derivative p lhs) rhs
         - self * SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
+
+squaredMagnitude' :: VectorSurfaceFunction3d (space @ units) -> SurfaceFunction (units :*: units)
+squaredMagnitude' function =
+  SurfaceFunction.new
+    @ CompiledFunction.map
+      Expression.squaredMagnitude'
+      Vector3d.squaredMagnitude'
+      VectorBounds3d.squaredMagnitude'
+      function.compiled
+    @ \p -> 2.0 * function `dot'` derivative p function
+
+squaredMagnitude ::
+  Units.Squared units1 units2 =>
+  VectorSurfaceFunction3d (space @ units1) ->
+  SurfaceFunction units2
+squaredMagnitude = Units.specialize . squaredMagnitude'
