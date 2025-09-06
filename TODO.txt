@@ -1,3 +1,5 @@
+Implement composition of SurfaceFunction2d and DirectionSurfaceFunction#d
+
 Review uses of Tolerance.[squared,squared'] to see if there are alternatives...
 -> e.g. for square root desingularization, check if second derivative is at least 1e9 times bigger than zeroth or first derivatives?
 -> maybe go back to idea of explicit normalization functions, where it's known a priori that e.g. first derivative of squared magnitude is zero where magnitude is zero...
@@ -7,26 +9,33 @@ Review uses of Tolerance.[squared,squared'] to see if there are alternatives...
 Change desingularize functions to take 'function' as regular, unnamed argument?
 -> also change Curve desingularization functions to take 'normal' function as first argument, for consistency?
 
+Ensure all curves and surface functions implement placeIn, relativeTo, transformBy, projectInto, on as appropriate
+
+Ensure all curves implement composition with Curve Unitless
+
+Ensure all surface functions implement composition or SurfaceFunction2d UvCoordinates
+
 Add simplified/optimized versions of blending function derivatives
 
 Add dedicated bytecode instructions for blending functions (and their derivatives)
 -> they'll get evaluated every time a desingularized function is evaluated, regardless of whether or not the result is used...
 -> or maybe add conditional evaluation to bytecode?
 
-Add desingularizaiton of SurfaceFunction.sqrt
-
-Update VectorSurfaceFunction#d.magnitude to use plain square root
-
-Update VectorSurfaceFunction#d.direction to use division by magnitude directly
-
 Update Curve.quotient to also compute derivative for use in constructing blending curve
 
 Replace 'synthetic' curves with plain quartic Hermite splines
+
+Merge e.g. 'Subdomain' and 'Domain1d'?
+- just base on Float values instead of Int
+- store recursion type (even though that could be inferred from endpoints...)
 
 Add hasZero functions that do simple check to see if a zero exists (plain bisection until bounds less than tolerance)
 -> then use to check validity of L'Hopital desingularization (see if derivative or denominator has *any* zero)
 
 Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
+
+Try using RequiredTypeArguments extension to avoid need for Proxy in FFI-related code?
+-> a bit tricky since the 'representation' function probably still needs to take a Proxy argument...
 
 Ensure all fields are also available as normal functions
 -> and those functions are the *primary* implementation
