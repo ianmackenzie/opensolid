@@ -1,6 +1,6 @@
 module OpenSolid.Random.Internal where
 
-import OpenSolid.Bootstrap hiding (return)
+import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import OpenSolid.Pair qualified as Pair
 import System.Random (StdGen)
