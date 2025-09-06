@@ -253,13 +253,8 @@ newtype Direction2d (space :: Type) = Unit2d (Vector2d (space @ Unitless))
 pattern Direction2d :: Float -> Float -> Direction2d space
 pattern Direction2d dX dY = Unit2d (Vector2d dX dY)
 
-instance HasUnits (Direction2d space) Unitless
-
 instance FFI (Direction2d space) where
   representation = FFI.classRepresentation "Direction2d"
-
-instance space1 ~ space2 => Units.Coercion (Direction2d space1) (Direction2d space2) where
-  coerce = identity
 
 instance
   space1 ~ space2 =>
@@ -1259,11 +1254,6 @@ pattern Direction3d dR dF dU = Unit3d (Vector3d dR dF dU)
 
 instance FFI (Direction3d space) where
   representation = FFI.classRepresentation "Direction3d"
-
-instance HasUnits (Direction3d space) Unitless
-
-instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d space2) where
-  coerce = identity
 
 instance
   space1 ~ space2 =>

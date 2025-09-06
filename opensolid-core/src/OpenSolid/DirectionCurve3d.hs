@@ -23,21 +23,12 @@ import OpenSolid.DirectionBounds3d qualified as DirectionBounds3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
-import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 newtype DirectionCurve3d space = DirectionCurve3d (VectorCurve3d (space @ Unitless))
-
-instance HasUnits (DirectionCurve3d space) Unitless
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (DirectionCurve3d space1) (DirectionCurve3d space2)
-  where
-  coerce = identity
 
 unsafe :: VectorCurve3d (space @ Unitless) -> DirectionCurve3d space
 unsafe = DirectionCurve3d
