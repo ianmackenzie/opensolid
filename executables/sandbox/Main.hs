@@ -15,6 +15,7 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Debug qualified as Debug
+import OpenSolid.Debug.Plot qualified as Debug.Plot
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d qualified as Direction3d
@@ -464,6 +465,21 @@ testBlending = IO.do
         (List.map Bounds.constant endDerivatives)
         tBounds
 
+testCurveSqrt :: IO ()
+testCurveSqrt = Tolerance.using 1e-6 IO.do
+  let t = Curve.t
+  let curve = Curve.sqrt (0.5 * (1.0 - Curve.cos (Angle.twoPi * t)))
+  Drawing2d.writeSvg
+    "executables/sandbox/cos-sqrt.svg"
+    (Debug.Plot.viewBox (Point2d -0.1 -4.1) (Point2d 1.1 4.1))
+    ( Drawing2d.group
+        [ Debug.Plot.xAxis 0.0 1.0
+        , Debug.Plot.yAxis 0.0 1.0
+        , Debug.Plot.curve curve
+        , Debug.Plot.curve curve.derivative
+        ]
+    )
+
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
   testScalarArithmetic
@@ -492,3 +508,4 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testNewtonRaphson2d
   testQuotientDesingularization
   testBlending
+  testCurveSqrt
