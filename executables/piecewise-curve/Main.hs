@@ -12,6 +12,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -28,15 +29,17 @@ main = Tolerance.using Length.nanometer IO.do
   let vS = Vector2d 0.0 -1.0
   let vSE = Vector2d 1.0 -1.0 / Float.sqrt 2.0
   let radius = Length.centimeters 10.0
-  let arc v1 v2 v3 =
-        Tolerance.using 1e-9 $
-          VectorCurve2d.unsafeQuotient
-            @ VectorCurve2d.quadraticBezier v1 v2 v3
-            @ weightCurve
-  let arc1 = Point2d.origin + radius * arc vE vNE vN
-  let arc2 = Point2d.origin + radius * arc vN vNW vW
-  let arc3 = Point2d.origin + radius * arc vW vSW vS
-  let arc4 = Point2d.origin + radius * arc vS vSE vE
+  let arc v1 v2 v3 = Result.do
+        radialUnitVector <-
+          Tolerance.using 1e-9 $
+            VectorCurve2d.quotient
+              @ VectorCurve2d.quadraticBezier v1 v2 v3
+              @ weightCurve
+        Success (Point2d.origin + radius * radialUnitVector)
+  arc1 <- arc vE vNE vN
+  arc2 <- arc vN vNW vW
+  arc3 <- arc vW vSW vS
+  arc4 <- arc vS vSE vE
   let circle = Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point =
         Drawing2d.circleWith [Drawing2d.whiteFill] do
