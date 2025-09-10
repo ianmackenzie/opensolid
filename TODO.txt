@@ -1,3 +1,5 @@
+Try making Qty a primitive (unboxed) type?
+
 Add simplified/optimized versions of blending function derivatives
 
 Add dedicated bytecode instructions for blending functions (and their derivatives)
@@ -12,15 +14,9 @@ Add hasZero functions that do simple check to see if a zero exists (plain bisect
 
 Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
 
-Try using RequiredTypeArguments extension to avoid need for Proxy in FFI-related code?
--> a bit tricky since the 'representation' function probably still needs to take a Proxy argument...
-
 Ensure all fields are also available as normal functions
 -> and those functions are the *primary* implementation
 -> probably means we can avoid HasField instances in all .hs-boot files, expose functions instead
-
-Review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
--> get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
 
 Use FFI struct syntax for calling into C++ as well as for target languages calling into Haskell?
 -> avoid custom pokeElemOff etc. stuff when calling into C++
@@ -30,8 +26,6 @@ Use FFI struct syntax for calling into C++ as well as for target languages calli
 Split bytecode.h/bytecode.cpp into a few more files
 -> e.g. helper functions for Bezier/Hermite evaluation
 -> allow calling non-bytecode-specific functions from Haskell without having to use 'bytecode.h'...
-
-Update API.Class.buildClass to use field accessor syntax
 
 Refactor Solve2d searching to use 'cross product' of Solve1d?
 
@@ -45,9 +39,6 @@ Normalize HasField instances:
 Support optional named arguments in target languages
 - maybe via wrapper functions where one argument is something like an 'Options a' value,
   wrapping a list of options/attributes in Haskell
-
-Switch Body3d.cylinderAlong to accept separate start and end values instead of a Bounds
--> maybe Body3d.extruded, too? easier now that named arguments are supported...
 
 Refactor tolerance handling in Python?
 - set tolerances for different units separately/independently
