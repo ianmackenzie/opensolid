@@ -65,7 +65,7 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
-import OpenSolid.Resolution (Resolution (Resolution))
+import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
@@ -1342,7 +1342,7 @@ resolution =
   Class.new @(Resolution Meters) $(docs ''Resolution) $
     [ Class.factory1 "Max Error" "Error" (Resolution.maxError @Meters) $(docs 'Resolution.maxError)
     , Class.factory1 "Max Size" "Size" (Resolution.maxSize @Meters) $(docs 'Resolution.maxSize)
-    , Class.constructor2 "Max Error" "Max Size" (Class.curryT2 Resolution) $(docs 'Resolution)
+    , Class.constructor2 "Max Error" "Max Size" (Class.curryT2 Resolution.custom) $(docs 'Resolution.custom)
     ]
 
 pbrMaterial :: Class

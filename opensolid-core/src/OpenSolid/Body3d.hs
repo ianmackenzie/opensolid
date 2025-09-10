@@ -77,6 +77,7 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution (Resolution)
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Set2d (Set2d)
 import OpenSolid.Set2d qualified as Set2d
