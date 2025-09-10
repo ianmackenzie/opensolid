@@ -156,7 +156,6 @@ library
     OpenSolid.Expression.VectorSurface2d
     OpenSolid.Expression.VectorSurface3d
     OpenSolid.FFI
-    OpenSolid.Field
     OpenSolid.Float
     OpenSolid.Frame2d
     OpenSolid.Frame3d
@@ -177,6 +176,7 @@ library
     OpenSolid.Mesh
     OpenSolid.Mitsuba
     OpenSolid.Model3d
+    OpenSolid.Named
     OpenSolid.NonEmpty
     OpenSolid.Orientation2d
     OpenSolid.Orientation3d

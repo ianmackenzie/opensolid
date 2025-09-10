@@ -31,7 +31,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.Prelude hiding (Field)
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import Prelude qualified
 

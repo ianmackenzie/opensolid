@@ -33,7 +33,7 @@ instance FFI PbrMaterial where
 
 -- | Create a metallic material with the given color and roughness.
 metal :: Color -> "roughness" ::: Float -> PbrMaterial
-metal baseColor (Field roughness) = PbrMaterial{baseColor, metallic = 1.0, roughness}
+metal baseColor (Named roughness) = PbrMaterial{baseColor, metallic = 1.0, roughness}
 
 -- | Create an aluminum material with the given roughness.
 aluminum :: "roughness" ::: Float -> PbrMaterial
@@ -73,7 +73,7 @@ titanium = metal (Color.rgbFloat 0.807 0.787 0.764)
 
 -- | Create a non-metallic material with the given color and roughness.
 nonmetal :: Color -> "roughness" ::: Float -> PbrMaterial
-nonmetal baseColor (Field roughness) = PbrMaterial{baseColor, roughness, metallic = 0.0}
+nonmetal baseColor (Named roughness) = PbrMaterial{baseColor, roughness, metallic = 0.0}
 
 -- | Create a material with the given base color, metallic factor and roughness.
 custom :: Color -> ("metallic" ::: Float, "roughness" ::: Float) -> PbrMaterial

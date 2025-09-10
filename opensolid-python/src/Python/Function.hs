@@ -97,7 +97,7 @@ implicitGetter argType = case argType of
   ImplicitArgument.ToleranceRadians -> "_angle_tolerance()"
 
 arguments :: "includeSelf" ::: Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
-arguments (Field includeSelf) positional named = do
+arguments (Named includeSelf) positional named = do
   let selfArg = ["self" | includeSelf]
   let positionalArgs = List.map argument positional
   let separator = ["*" | not (List.isEmpty named)]

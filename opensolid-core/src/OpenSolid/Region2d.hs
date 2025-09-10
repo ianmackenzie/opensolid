@@ -256,7 +256,7 @@ fillet ::
   "radius" ::: Qty units ->
   Region2d (space @ units) ->
   Result Text (Region2d (space @ units))
-fillet points (Field radius) region = Try.do
+fillet points (Named radius) region = Try.do
   let initialCurves = NonEmpty.toList region.boundaryCurves
   filletedCurves <- Result.foldl (addFillet radius) initialCurves points
   boundedBy filletedCurves

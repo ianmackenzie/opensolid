@@ -100,11 +100,11 @@ instance FFI (Projection units) where
 
 -- | Define a perspective projection with a given vertical field of view.
 perspective :: "verticalFov" ::: Angle -> Projection units
-perspective (Field verticalFov) = Perspective verticalFov
+perspective (Named verticalFov) = Perspective verticalFov
 
 -- | Define an orthographic projection with a given viewport height.
 orthographic :: "viewportHeight" ::: Qty units -> Projection units
-orthographic (Field viewportHeight) = Orthographic viewportHeight
+orthographic (Named viewportHeight) = Orthographic viewportHeight
 
 new ::
   Frame3d (space @ units) (Defines CameraSpace) ->

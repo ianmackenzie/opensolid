@@ -268,7 +268,7 @@ cylinder ::
   Point3d (space @ units) ->
   "diameter" ::: Qty units ->
   Result EmptyBody (Body3d (space @ units))
-cylinder startPoint endPoint (Field diameter) =
+cylinder startPoint endPoint (Named diameter) =
   case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
     Failure Vector3d.IsZero -> Failure EmptyBody
     Success (length, direction) ->
@@ -291,7 +291,7 @@ cylinderAlong ::
   Qty units ->
   "diameter" ::: Qty units ->
   Result EmptyBody (Body3d (space @ units))
-cylinderAlong axis d1 d2 (Field diameter) = do
+cylinderAlong axis d1 d2 (Named diameter) = do
   case Region2d.circle (#centerPoint Point2d.origin, #diameter diameter) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile ->

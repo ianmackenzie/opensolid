@@ -287,7 +287,7 @@ zeroTo value = Bounds Qty.zero value
 The lower bound of the range will be -w/2 and the upper bound will be w/2.
 -}
 symmetric :: "width" ::: Qty units -> Bounds units
-symmetric (Field w) = let r = 0.5 * w in Bounds -r r
+symmetric (Named width_) = let r = 0.5 * width_ in Bounds -r r
 
 infinite :: Bounds units
 infinite = Bounds -Qty.infinity Qty.infinity

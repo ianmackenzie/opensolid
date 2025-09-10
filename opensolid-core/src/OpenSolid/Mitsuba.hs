@@ -171,7 +171,7 @@ meshOffsets currentOffset meshSizes = case meshSizes of
     Binary.uint64LE currentOffset <> meshOffsets nextOffset remainingSizes
 
 buildSingleMesh :: (Mesh space, "name" ::: Text) -> (Builder, Int)
-buildSingleMesh (mesh, Field name) = do
+buildSingleMesh (mesh, Named name) = do
   let header =
         Binary.concat
           [ Binary.uint16LE 0x041C -- File format identifier

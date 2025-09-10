@@ -37,7 +37,7 @@ instance FFI SpurGear where
 
 -- | Create a metric spur gear with the given number of teeth and module.
 metric :: ("numTeeth" ::: Int, "module" ::: Length) -> SpurGear
-metric (Field numTeeth, Field module_) = Metric (#numTeeth numTeeth, #module_ module_)
+metric (Named numTeeth, Named module_) = Metric (#numTeeth numTeeth, #module_ module_)
 
 -- | The pitch diameter of a gear.
 instance HasField "pitchDiameter" SpurGear Length where

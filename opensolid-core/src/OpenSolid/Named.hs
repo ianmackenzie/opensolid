@@ -1,16 +1,16 @@
-module OpenSolid.Field ((:::) (Field), fromLabel) where
+module OpenSolid.Named ((:::) (Named), fromLabel) where
 
 import GHC.TypeLits (Symbol)
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
 
 type (:::) :: Symbol -> Type -> Type
-newtype name ::: a = Field a
+newtype name ::: a = Named a
 
 infix 0 :::
 
 fromLabel :: forall name a. a -> name ::: a
-fromLabel = Field
+fromLabel = Named
 
 instance
   Composition
@@ -18,7 +18,7 @@ instance
     (name2 ::: value2)
     (name1 ::: value1, name2 ::: value2)
   where
-  field1 >> field2 = (field1, field2)
+  named1 >> named2 = (named1, named2)
 
 instance
   Composition
@@ -26,7 +26,7 @@ instance
     (name2 ::: value2, name3 ::: value3)
     (name1 ::: value1, name2 ::: value2, name3 ::: value3)
   where
-  field1 >> (field2, field3) = (field1, field2, field3)
+  named1 >> (named2, named3) = (named1, named2, named3)
 
 instance
   Composition
@@ -34,7 +34,7 @@ instance
     (name2 ::: value2, name3 ::: value3, name4 ::: value4)
     (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4)
   where
-  field1 >> (field2, field3, field4) = (field1, field2, field3, field4)
+  named1 >> (named2, named3, named4) = (named1, named2, named3, named4)
 
 instance
   Composition
@@ -42,7 +42,7 @@ instance
     (name2 ::: value2, name3 ::: value3, name4 ::: value4, name5 ::: value5)
     (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4, name5 ::: value5)
   where
-  field1 >> (field2, field3, field4, field5) = (field1, field2, field3, field4, field5)
+  named1 >> (named2, named3, named4, named5) = (named1, named2, named3, named4, named5)
 
 instance
   Composition
@@ -61,8 +61,8 @@ instance
     , name6 ::: value6
     )
   where
-  field1 >> (field2, field3, field4, field5, field6) =
-    (field1, field2, field3, field4, field5, field6)
+  named1 >> (named2, named3, named4, named5, named6) =
+    (named1, named2, named3, named4, named5, named6)
 
 instance
   Composition
@@ -83,8 +83,8 @@ instance
     , name7 ::: value7
     )
   where
-  field1 >> (field2, field3, field4, field5, field6, field7) =
-    (field1, field2, field3, field4, field5, field6, field7)
+  named1 >> (named2, named3, named4, named5, named6, named7) =
+    (named1, named2, named3, named4, named5, named6, named7)
 
 instance
   Composition
@@ -107,23 +107,23 @@ instance
     , name8 ::: value8
     )
   where
-  field1 >> (field2, field3, field4, field5, field6, field7, field8) =
-    (field1, field2, field3, field4, field5, field6, field7, field8)
+  named1 >> (named2, named3, named4, named5, named6, named7, named8) =
+    (named1, named2, named3, named4, named5, named6, named7, named8)
 
 instance HasField name1 (name1 ::: value1, name2 ::: value2) value1 where
-  getField (Field value1, _) = value1
+  getField (Named value1, _) = value1
 
 instance HasField name2 (name1 ::: value1, name2 ::: value2) value2 where
-  getField (_, Field value2) = value2
+  getField (_, Named value2) = value2
 
 instance HasField name1 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value1 where
-  getField (Field value1, _, _) = value1
+  getField (Named value1, _, _) = value1
 
 instance HasField name2 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value2 where
-  getField (_, Field value2, _) = value2
+  getField (_, Named value2, _) = value2
 
 instance HasField name3 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value3 where
-  getField (_, _, Field value3) = value3
+  getField (_, _, Named value3) = value3
 
 instance
   HasField
@@ -135,7 +135,7 @@ instance
     )
     value1
   where
-  getField (Field value1, _, _, _) = value1
+  getField (Named value1, _, _, _) = value1
 
 instance
   HasField
@@ -147,7 +147,7 @@ instance
     )
     value2
   where
-  getField (_, Field value2, _, _) = value2
+  getField (_, Named value2, _, _) = value2
 
 instance
   HasField
@@ -159,7 +159,7 @@ instance
     )
     value3
   where
-  getField (_, _, Field value3, _) = value3
+  getField (_, _, Named value3, _) = value3
 
 instance
   HasField
@@ -171,7 +171,7 @@ instance
     )
     value4
   where
-  getField (_, _, _, Field value4) = value4
+  getField (_, _, _, Named value4) = value4
 
 instance
   HasField
@@ -184,7 +184,7 @@ instance
     )
     value1
   where
-  getField (Field value1, _, _, _, _) = value1
+  getField (Named value1, _, _, _, _) = value1
 
 instance
   HasField
@@ -197,7 +197,7 @@ instance
     )
     value2
   where
-  getField (_, Field value2, _, _, _) = value2
+  getField (_, Named value2, _, _, _) = value2
 
 instance
   HasField
@@ -210,7 +210,7 @@ instance
     )
     value3
   where
-  getField (_, _, Field value3, _, _) = value3
+  getField (_, _, Named value3, _, _) = value3
 
 instance
   HasField
@@ -223,7 +223,7 @@ instance
     )
     value4
   where
-  getField (_, _, _, Field value4, _) = value4
+  getField (_, _, _, Named value4, _) = value4
 
 instance
   HasField
@@ -236,7 +236,7 @@ instance
     )
     value5
   where
-  getField (_, _, _, _, Field value5) = value5
+  getField (_, _, _, _, Named value5) = value5
 
 instance
   HasField
@@ -250,7 +250,7 @@ instance
     )
     value1
   where
-  getField (Field value1, _, _, _, _, _) = value1
+  getField (Named value1, _, _, _, _, _) = value1
 
 instance
   HasField
@@ -264,7 +264,7 @@ instance
     )
     value2
   where
-  getField (_, Field value2, _, _, _, _) = value2
+  getField (_, Named value2, _, _, _, _) = value2
 
 instance
   HasField
@@ -278,7 +278,7 @@ instance
     )
     value3
   where
-  getField (_, _, Field value3, _, _, _) = value3
+  getField (_, _, Named value3, _, _, _) = value3
 
 instance
   HasField
@@ -292,7 +292,7 @@ instance
     )
     value4
   where
-  getField (_, _, _, Field value4, _, _) = value4
+  getField (_, _, _, Named value4, _, _) = value4
 
 instance
   HasField
@@ -306,7 +306,7 @@ instance
     )
     value5
   where
-  getField (_, _, _, _, Field value5, _) = value5
+  getField (_, _, _, _, Named value5, _) = value5
 
 instance
   HasField
@@ -320,7 +320,7 @@ instance
     )
     value6
   where
-  getField (_, _, _, _, _, Field value6) = value6
+  getField (_, _, _, _, _, Named value6) = value6
 
 instance
   HasField
@@ -335,7 +335,7 @@ instance
     )
     value1
   where
-  getField (Field value1, _, _, _, _, _, _) = value1
+  getField (Named value1, _, _, _, _, _, _) = value1
 
 instance
   HasField
@@ -350,7 +350,7 @@ instance
     )
     value2
   where
-  getField (_, Field value2, _, _, _, _, _) = value2
+  getField (_, Named value2, _, _, _, _, _) = value2
 
 instance
   HasField
@@ -365,7 +365,7 @@ instance
     )
     value3
   where
-  getField (_, _, Field value3, _, _, _, _) = value3
+  getField (_, _, Named value3, _, _, _, _) = value3
 
 instance
   HasField
@@ -380,7 +380,7 @@ instance
     )
     value4
   where
-  getField (_, _, _, Field value4, _, _, _) = value4
+  getField (_, _, _, Named value4, _, _, _) = value4
 
 instance
   HasField
@@ -395,7 +395,7 @@ instance
     )
     value5
   where
-  getField (_, _, _, _, Field value5, _, _) = value5
+  getField (_, _, _, _, Named value5, _, _) = value5
 
 instance
   HasField
@@ -410,7 +410,7 @@ instance
     )
     value6
   where
-  getField (_, _, _, _, _, Field value6, _) = value6
+  getField (_, _, _, _, _, Named value6, _) = value6
 
 instance
   HasField
@@ -425,7 +425,7 @@ instance
     )
     value7
   where
-  getField (_, _, _, _, _, _, Field value7) = value7
+  getField (_, _, _, _, _, _, Named value7) = value7
 
 instance
   HasField
@@ -441,7 +441,7 @@ instance
     )
     value1
   where
-  getField (Field value1, _, _, _, _, _, _, _) = value1
+  getField (Named value1, _, _, _, _, _, _, _) = value1
 
 instance
   HasField
@@ -457,7 +457,7 @@ instance
     )
     value2
   where
-  getField (_, Field value2, _, _, _, _, _, _) = value2
+  getField (_, Named value2, _, _, _, _, _, _) = value2
 
 instance
   HasField
@@ -473,7 +473,7 @@ instance
     )
     value3
   where
-  getField (_, _, Field value3, _, _, _, _, _) = value3
+  getField (_, _, Named value3, _, _, _, _, _) = value3
 
 instance
   HasField
@@ -489,7 +489,7 @@ instance
     )
     value4
   where
-  getField (_, _, _, Field value4, _, _, _, _) = value4
+  getField (_, _, _, Named value4, _, _, _, _) = value4
 
 instance
   HasField
@@ -505,7 +505,7 @@ instance
     )
     value5
   where
-  getField (_, _, _, _, Field value5, _, _, _) = value5
+  getField (_, _, _, _, Named value5, _, _, _) = value5
 
 instance
   HasField
@@ -521,7 +521,7 @@ instance
     )
     value6
   where
-  getField (_, _, _, _, _, Field value6, _, _) = value6
+  getField (_, _, _, _, _, Named value6, _, _) = value6
 
 instance
   HasField
@@ -537,7 +537,7 @@ instance
     )
     value7
   where
-  getField (_, _, _, _, _, _, Field value7, _) = value7
+  getField (_, _, _, _, _, _, Named value7, _) = value7
 
 instance
   HasField
@@ -553,4 +553,4 @@ instance
     )
     value8
   where
-  getField (_, _, _, _, _, _, _, Field value8) = value8
+  getField (_, _, _, _, _, _, _, Named value8) = value8

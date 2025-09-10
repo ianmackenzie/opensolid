@@ -12,7 +12,7 @@ module OpenSolid.Prelude
   , module OpenSolid.CoordinateSystem
   , module OpenSolid.Float
   , module OpenSolid.Intersects
-  , module OpenSolid.Field
+  , module OpenSolid.Named
   , module OpenSolid.NonEmpty
   , module OpenSolid.Qty
   , module OpenSolid.Result
@@ -41,9 +41,9 @@ import OpenSolid.CoordinateSystem
   , UvSpace
   , type (@)
   )
-import OpenSolid.Field
 import OpenSolid.Float (Float, fromRational)
 import OpenSolid.Intersects (Intersects ((^)))
+import OpenSolid.Named
 import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import OpenSolid.Qty (Qty)
 import OpenSolid.Result (Result (Failure, Success))
