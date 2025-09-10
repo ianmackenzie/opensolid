@@ -15,7 +15,7 @@ data Tree units
   = Node (Tree units) (Qty units) (Tree units)
   | Leaf (Qty units) (Curve Unitless)
 
-parameterization :: Curve units -> (Curve Unitless, Qty units)
+parameterization :: Tolerance units => Curve units -> (Curve Unitless, Qty units)
 parameterization derivativeMagnitude = do
   let dsdt = Curve.evaluate derivativeMagnitude
   let d2sdt2 = Curve.evaluate derivativeMagnitude.derivative
@@ -23,25 +23,24 @@ parameterization derivativeMagnitude = do
   let dsdt2 = dsdt Lobatto.p2
   let dsdt3 = dsdt Lobatto.p3
   let dsdt4 = dsdt 1.0
-  Tolerance.using (1e-12 * Qty.max dsdt1 dsdt4) do
-    if
-      | isConstant dsdt1 dsdt2 dsdt3 dsdt4 -> (Curve.t, dsdt1)
-      | isLinear dsdt1 dsdt2 dsdt3 dsdt4 -> do
-          let delta = dsdt4 - dsdt1
-          let t0 = -dsdt1 / delta
-          let sqrt = Tolerance.using Qty.zero (Curve.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * Curve.t))
-          let curve = if delta > Qty.zero then t0 + sqrt else t0 - sqrt
-          let length = 0.5 * (dsdt1 + dsdt4)
-          (curve, length)
-      | otherwise -> do
-          let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
-          let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
-          let evaluate uValue = lookup tree (uValue * length)
-          let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
-          let compiled = CompiledFunction.abstract evaluate evaluateBounds
-          case Curve.quotient (Curve.constant length) derivativeMagnitude of
-            Success quotient -> (Curve.recursive compiled (quotient .), length)
-            Failure DivisionByZero -> (Curve.t, Qty.zero)
+  if
+    | isConstant dsdt1 dsdt2 dsdt3 dsdt4 -> (Curve.t, dsdt1)
+    | isLinear dsdt1 dsdt2 dsdt3 dsdt4 -> do
+        let delta = dsdt4 - dsdt1
+        let t0 = -dsdt1 / delta
+        let sqrt = Tolerance.using Qty.zero (Curve.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * Curve.t))
+        let curve = if delta > Qty.zero then t0 + sqrt else t0 - sqrt
+        let length = 0.5 * (dsdt1 + dsdt4)
+        (curve, length)
+    | otherwise -> do
+        let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
+        let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
+        let evaluate uValue = lookup tree (uValue * length)
+        let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
+        let compiled = CompiledFunction.abstract evaluate evaluateBounds
+        case Curve.quotient (Curve.constant length) derivativeMagnitude of
+          Success quotient -> (Curve.recursive compiled (quotient .), length)
+          Failure DivisionByZero -> (Curve.t, Qty.zero)
 
 isConstant :: Tolerance units => Qty units -> Qty units -> Qty units -> Qty units -> Bool
 isConstant y1 y2 y3 y4 = y1 ~= y2 && y1 ~= y3 && y1 ~= y4
