@@ -1,29 +1,7 @@
-Implement composition of SurfaceFunction2d and DirectionSurfaceFunction#d
-
-Review uses of Tolerance.[squared,squared'] to see if there are alternatives...
--> e.g. for square root desingularization, check if second derivative is at least 1e9 times bigger than zeroth or first derivatives?
--> maybe go back to idea of explicit normalization functions, where it's known a priori that e.g. first derivative of squared magnitude is zero where magnitude is zero...
--> also generally review uses of ~= to see where first derivative is being checked
--> add Tolerance.firstDerivative function that takes second derivative value as input?
-
-Change desingularize functions to take 'function' as regular, unnamed argument?
--> also change Curve desingularization functions to take 'normal' function as first argument, for consistency?
-
-Ensure all curves and surface functions implement placeIn, relativeTo, transformBy, projectInto, on as appropriate
-
-Ensure all curves implement composition with Curve Unitless
-
-Ensure all surface functions implement composition or SurfaceFunction2d UvCoordinates
-
 Add simplified/optimized versions of blending function derivatives
 
 Add dedicated bytecode instructions for blending functions (and their derivatives)
 -> they'll get evaluated every time a desingularized function is evaluated, regardless of whether or not the result is used...
--> or maybe add conditional evaluation to bytecode?
-
-Update Curve.quotient to also compute derivative for use in constructing blending curve
-
-Replace 'synthetic' curves with plain quartic Hermite splines
 
 Merge e.g. 'Subdomain' and 'Domain1d'?
 - just base on Float values instead of Int
@@ -40,17 +18,6 @@ Try using RequiredTypeArguments extension to avoid need for Proxy in FFI-related
 Ensure all fields are also available as normal functions
 -> and those functions are the *primary* implementation
 -> probably means we can avoid HasField instances in all .hs-boot files, expose functions instead
-
-Rename ZeroEverywhere -> IsZero?
--> shorter and more consistent with e.g. IsPoint
--> keep DivisionByZero to indicate specifically that denominator is zero
-
-Review uses of unsafeQuotient
-
-Refactor Qty.steps etc. to take count argument first?
--> 'count' refers to the first argument, like 'translateBy' refers to its first argument...
-
-Re-introduce Functions or similar module so that all typeclass instances can be defined there?
 
 Review all 'sqrt', 'magnitude', 'direction' and 'tangentDirection' functions to ensure correct degeneracy removal
 -> get rid of 'unsafeMagnitude' functions and 'NonZeroMagnitude' types
