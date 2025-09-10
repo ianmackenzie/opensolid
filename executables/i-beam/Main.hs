@@ -2,7 +2,6 @@ module Main (main) where
 
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
@@ -48,7 +47,7 @@ main = Tolerance.using Length.nanometer IO.do
   let topCurves = topRightCurves <> List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- Region2d.boundedBy allCurves
-  body <- Body3d.extruded world.frontPlane profile (Bounds.symmetric (#width length))
+  body <- Body3d.extruded world.frontPlane profile (-0.5 * length) (0.5 * length)
   let material = PbrMaterial.metal (Color.rgbFloat 0.913 0.921 0.925) (#roughness 0.3)
   let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
   let resolution = Resolution.maxError (Length.millimeters 1.0)

@@ -1325,12 +1325,12 @@ body3d = do
   let writeMitsuba path givenResolution body =
         Mitsuba.writeMeshes path [(Body3d.toMesh givenResolution body, #name "")]
   Class.new @(Body3d (Space @ Meters)) $(docs ''Body3d) $
-    [ Class.factoryM3R "Extruded" "Sketch Plane" "Profile" "Distance" Body3d.extruded $(docs 'Body3d.extruded)
+    [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" Body3d.extruded $(docs 'Body3d.extruded)
     , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" Body3d.revolved $(docs 'Body3d.revolved)
     , Class.factoryM1R "Block" "Bounding Box" Body3d.block $(docs 'Body3d.block)
     , Class.factoryM2R "Sphere" "Center Point" "Diameter" (Class.curryT2 Body3d.sphere) $(docs 'Body3d.sphere)
     , Class.factoryM3R "Cylinder" "Start Point" "End Point" "Diameter" Body3d.cylinder $(docs 'Body3d.cylinder)
-    , Class.factoryM3R "Cylinder Along" "Axis" "Distance" "Diameter" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
+    , Class.factoryM4R "Cylinder Along" "Axis" "Start" "End" "Diameter" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
     , Class.member1 "Place In" "Frame" Body3d.placeIn $(docs 'Body3d.placeIn)
     , Class.member1 "Relative To" "Frame" Body3d.relativeTo $(docs 'Body3d.relativeTo)
     , Class.memberM3 "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."

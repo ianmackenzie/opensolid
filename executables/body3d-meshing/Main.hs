@@ -2,7 +2,6 @@ module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Frame3d qualified as Frame3d
@@ -28,8 +27,7 @@ main = Tolerance.using Length.nanometer IO.do
           #endAngle (Angle.degrees 225.0)
   let line = Curve2d.line arc.endPoint arc.startPoint
   profile <- Region2d.boundedBy [arc, line]
-  let extrusionLimits = Bounds.symmetric (#width length)
-  body <- Body3d.extruded world.frontPlane profile extrusionLimits
+  body <- Body3d.extruded world.frontPlane profile (-0.5 * length) (0.5 * length)
   let resolution = Resolution.maxSize (Length.centimeters 30.0)
   let mesh = Body3d.toMesh resolution body
   let outputPath = "executables/body3d-meshing/mesh.stl"

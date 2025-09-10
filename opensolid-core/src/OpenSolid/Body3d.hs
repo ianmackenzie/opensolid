@@ -225,10 +225,10 @@ block bounds = do
   case Region2d.rectangle (Bounds3d.projectInto world.topPlane bounds) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile -> do
-      let heightBounds = Bounds3d.upwardCoordinate bounds
-      if Bounds.width heightBounds ~= Qty.zero
+      let Bounds h1 h2 = Bounds3d.upwardCoordinate bounds
+      if h1 ~= h2
         then Failure EmptyBody
-        else case extruded world.topPlane profile heightBounds of
+        else case extruded world.topPlane profile h1 h2 of
           Success body -> Success body
           Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
 
@@ -271,7 +271,7 @@ cylinder startPoint endPoint (Field diameter) =
   case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
     Failure Vector3d.IsZero -> Failure EmptyBody
     Success (length, direction) ->
-      cylinderAlong (Axis3d startPoint direction) (Bounds.zeroTo length) (#diameter diameter)
+      cylinderAlong (Axis3d startPoint direction) Qty.zero length (#diameter diameter)
 
 {-| Create a cylindrical body along a given axis.
 
@@ -286,16 +286,17 @@ Failes if the cylinder length or diameter is zero.
 cylinderAlong ::
   Tolerance units =>
   Axis3d (space @ units) ->
-  Bounds units ->
+  Qty units ->
+  Qty units ->
   "diameter" ::: Qty units ->
   Result EmptyBody (Body3d (space @ units))
-cylinderAlong axis distance (Field diameter) = do
+cylinderAlong axis d1 d2 (Field diameter) = do
   case Region2d.circle (#centerPoint Point2d.origin, #diameter diameter) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile ->
-      if Bounds.width distance ~= Qty.zero
+      if d1 ~= d2
         then Failure EmptyBody
-        else case extruded (Axis3d.normalPlane axis) profile distance of
+        else case extruded (Axis3d.normalPlane axis) profile d1 d2 of
           Success body -> Success body
           Failure _ -> internalError "Constructing non-empty cylinder body should not fail"
 
@@ -304,9 +305,10 @@ extruded ::
   Tolerance units =>
   Plane3d (space @ units) (Defines local) ->
   Region2d (local @ units) ->
-  Bounds units ->
+  Qty units ->
+  Qty units ->
   Result BoundedBy.Error (Body3d (space @ units))
-extruded sketchPlane profile (Bounds d1 d2) = do
+extruded sketchPlane profile d1 d2 = do
   let normal = Plane3d.normalDirection sketchPlane
   let v1 = d1 * normal
   let v2 = d2 * normal

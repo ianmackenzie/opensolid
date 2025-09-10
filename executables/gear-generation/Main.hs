@@ -2,7 +2,6 @@ module Main (main) where
 
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Frame3d qualified as Frame3d
@@ -32,8 +31,7 @@ gearBody numTeeth = Try.do
   let hole = Curve2d.circle (#centerPoint Point2d.origin, #diameter holeDiameter)
   profile <- Region2d.boundedBy (hole : outerProfile)
   let width = Length.millimeters 8.0
-  let extrusionBounds = Bounds.symmetric (#width width)
-  Body3d.extruded world.frontPlane profile extrusionBounds
+  Body3d.extruded world.frontPlane profile (-0.5 * width) (0.5 * width)
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
