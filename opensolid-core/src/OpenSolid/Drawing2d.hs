@@ -200,11 +200,11 @@ circleWith ::
   List (Attribute space) ->
   ("centerPoint" ::: Point space, "diameter" ::: Length) ->
   Drawing2d space
-circleWith attributes (Field centerPoint, Field diameter) = do
-  let Point2d cx cy = centerPoint
+circleWith attributes args = do
+  let Point2d cx cy = args.centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
-  let rAttribute = Attribute "r" (lengthText (0.5 * diameter))
+  let rAttribute = Attribute "r" (lengthText (0.5 * args.diameter))
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 -- | Create a circle with the given center point and diameter.

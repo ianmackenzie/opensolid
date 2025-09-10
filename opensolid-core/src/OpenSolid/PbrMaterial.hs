@@ -77,4 +77,4 @@ nonmetal baseColor (Field roughness) = PbrMaterial{baseColor, roughness, metalli
 
 -- | Create a material with the given base color, metallic factor and roughness.
 custom :: Color -> ("metallic" ::: Float, "roughness" ::: Float) -> PbrMaterial
-custom baseColor (Field metallic, Field roughness) = PbrMaterial{baseColor, metallic, roughness}
+custom baseColor args = PbrMaterial{baseColor, metallic = args.metallic, roughness = args.roughness}

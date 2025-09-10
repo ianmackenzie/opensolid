@@ -388,8 +388,13 @@ polarArc ::
   , "endAngle" ::: Angle
   ) ->
   Curve2d (space @ units)
-polarArc (Field centerPoint, Field radius, Field startAngle, Field endAngle) =
-  customArc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle
+polarArc args =
+  customArc
+    args.centerPoint
+    (Vector2d.x args.radius)
+    (Vector2d.y args.radius)
+    args.startAngle
+    args.endAngle
 
 {-| Create an arc with the given center point, start point and swept angle.
 
@@ -414,15 +419,15 @@ cornerArc ::
   , "radius" ::: Qty units
   ) ->
   Curve2d (space @ units)
-cornerArc cornerPoint (Field incoming, Field outgoing, Field givenRadius) = do
-  let radius = Qty.abs givenRadius
-  let sweptAngle = Direction2d.angleFrom incoming outgoing
+cornerArc cornerPoint args = do
+  let radius = Qty.abs args.radius
+  let sweptAngle = Direction2d.angleFrom args.incoming args.outgoing
   if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
     then line cornerPoint cornerPoint
     else do
       let offset = radius * Qty.abs (Angle.tan (0.5 * sweptAngle))
-      let computedStartPoint = cornerPoint - offset * incoming
-      let computedEndPoint = cornerPoint + offset * outgoing
+      let computedStartPoint = cornerPoint - offset * args.incoming
+      let computedEndPoint = cornerPoint + offset * args.outgoing
       arc computedStartPoint computedEndPoint sweptAngle
 
 data WhichArc
@@ -492,10 +497,10 @@ customArc p0 v1 v2 a b = do
 circle ::
   ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
   Curve2d (space @ units)
-circle (Field centerPoint, Field diameter) =
+circle args =
   polarArc do
-    #centerPoint centerPoint
-    #radius (0.5 * diameter)
+    #centerPoint args.centerPoint
+    #radius (0.5 * args.diameter)
     #startAngle Angle.zero
     #endAngle Angle.twoPi
 

@@ -41,7 +41,9 @@ predicate ::
   Resolution units ->
   a ->
   Bool
-predicate (Field size, Field error) resolution value = do
-  let acceptableSize = Qty.isInfinite resolution.maxSize || size value <= resolution.maxSize
-  let acceptableError = Qty.isInfinite resolution.maxError || error value <= resolution.maxError
+predicate args resolution value = do
+  let acceptableSize =
+        Qty.isInfinite resolution.maxSize || args.size value <= resolution.maxSize
+  let acceptableError =
+        Qty.isInfinite resolution.maxError || args.error value <= resolution.maxError
   acceptableSize && acceptableError

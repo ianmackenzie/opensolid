@@ -240,13 +240,13 @@ sphere ::
   Tolerance units =>
   ("centerPoint" ::: Point3d (space @ units), "diameter" ::: Qty units) ->
   Result EmptyBody (Body3d (space @ units))
-sphere (Field centerPoint, Field diameter) =
-  if diameter ~= Qty.zero
+sphere args =
+  if args.diameter ~= Qty.zero
     then Failure EmptyBody
     else do
       let world = Frame3d.world
-      let sketchPlane = Plane3d centerPoint world.frontPlane.orientation
-      let radius = 0.5 * diameter
+      let sketchPlane = Plane3d args.centerPoint world.frontPlane.orientation
+      let radius = 0.5 * args.diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius
       let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]

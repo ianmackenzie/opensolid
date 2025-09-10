@@ -166,12 +166,10 @@ circle ::
   Tolerance units =>
   ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
   Result EmptyRegion (Region2d (space @ units))
-circle (Field centerPoint, Field diameter) =
-  if diameter ~= Qty.zero
+circle args =
+  if args.diameter ~= Qty.zero
     then Failure EmptyRegion
-    else Success do
-      let boundaryCurve = Curve2d.circle (#centerPoint centerPoint, #diameter diameter)
-      Region2d (NonEmpty.one boundaryCurve) []
+    else Success (Region2d (NonEmpty.one (Curve2d.circle args)) [])
 
 {-| Create a hexagon with the given center point and height.
 
@@ -181,8 +179,8 @@ hexagon ::
   Tolerance units =>
   ("centerPoint" ::: Point2d (space @ units), "height" ::: Qty units) ->
   Result EmptyRegion (Region2d (space @ units))
-hexagon (Field centerPoint, Field height) =
-  circumscribedPolygon 6 (#centerPoint centerPoint, #diameter height)
+hexagon args =
+  circumscribedPolygon 6 (#centerPoint args.centerPoint, #diameter args.height)
 
 {-| Create a regular polygon with the given number of sides.
 
@@ -195,13 +193,13 @@ inscribedPolygon ::
   Int ->
   ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
   Result EmptyRegion (Region2d (space @ units))
-inscribedPolygon n (Field centerPoint, Field diameter) = do
-  if diameter < Qty.zero || diameter ~= Qty.zero || n < 3
+inscribedPolygon n args = do
+  if args.diameter < Qty.zero || args.diameter ~= Qty.zero || n < 3
     then Failure EmptyRegion
     else Success do
-      let radius = 0.5 * diameter
+      let radius = 0.5 * args.diameter
       let vertexAngles = Qty.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
-      let vertex angle = centerPoint + Vector2d.polar radius angle
+      let vertex angle = args.centerPoint + Vector2d.polar radius angle
       let vertices = List.map vertex vertexAngles
       case polygon vertices of
         Success region -> region
@@ -222,10 +220,10 @@ circumscribedPolygon ::
   Int ->
   ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
   Result EmptyRegion (Region2d (space @ units))
-circumscribedPolygon n (Field centerPoint, Field diameter) =
+circumscribedPolygon n args =
   inscribedPolygon n do
-    #centerPoint centerPoint
-    #diameter (diameter / Angle.cos (Angle.pi / Float.int n))
+    #centerPoint args.centerPoint
+    #diameter (args.diameter / Angle.cos (Angle.pi / Float.int n))
 
 {-| Create a polygonal region from the given vertices.
 
