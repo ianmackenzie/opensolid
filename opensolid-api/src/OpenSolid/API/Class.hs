@@ -994,15 +994,15 @@ buildClass members built = case members of
     ToParent toParent ->
       built{toParent = Just toParent}
     Const name const ->
-      built{constants = constants built <> [(name, const)]}
+      built{constants = built.constants <> [(name, const)]}
     Constructor constructor ->
       built{constructor = Just constructor}
     Static name staticFunction ->
-      built{staticFunctions = staticFunctions built <> [(name, staticFunction)]}
+      built{staticFunctions = built.staticFunctions <> [(name, staticFunction)]}
     Prop name prop ->
-      built{properties = properties built <> [(name, prop)]}
+      built{properties = built.properties <> [(name, prop)]}
     Member name memberFunction ->
-      built{memberFunctions = memberFunctions built <> [(name, memberFunction)]}
+      built{memberFunctions = built.memberFunctions <> [(name, memberFunction)]}
     EqualityAndHash functionPair ->
       built{equalityAndHashFunctions = Just functionPair}
     Comparison comparisonFunction ->
@@ -1012,11 +1012,11 @@ buildClass members built = case members of
     Abs absFunction ->
       built{absFunction = Just absFunction}
     PreOverload operatorId overload ->
-      built{preOperators = addPreOverload operatorId overload (preOperators built)}
+      built{preOperators = built.preOperators |> addPreOverload operatorId overload}
     PostOverload operatorId overload ->
-      built{postOperators = addPostOverload operatorId overload (postOperators built)}
+      built{postOperators = built.postOperators |> addPostOverload operatorId overload}
     Nested nestedDocstring nestedMembers ->
-      built{nestedClasses = nestedClasses built <> [new nestedDocstring nestedMembers]}
+      built{nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers]}
 
 ----- FUNCTION COLLECTION -----
 
