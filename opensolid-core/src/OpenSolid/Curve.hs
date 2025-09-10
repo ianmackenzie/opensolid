@@ -36,7 +36,7 @@ module OpenSolid.Curve
   , cubed
   , sin
   , cos
-  , ZeroEverywhere (ZeroEverywhere)
+  , IsZero (IsZero)
   , zeros
   , CrossesZero (CrossesZero)
   , sign
@@ -138,7 +138,7 @@ instance
     case zeros (curve - value) of
       Success [] -> False
       Success List.OneOrMore -> True
-      Failure ZeroEverywhere -> True
+      Failure IsZero -> True
 
 instance
   units1 ~ units2 =>
@@ -576,7 +576,7 @@ instance Estimate.Interface (Integral units) units where
 
 ----- ZERO FINDING -----
 
-data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
 {-| Find all points at which the given curve is zero.
 
@@ -614,9 +614,9 @@ we consider 0.0001 as just roundoff error,
 so we would end up reporting a single order-1 zero at x=0
 (the point at which the *first derivative* is zero).
 -}
-zeros :: Tolerance units => Curve units -> Result ZeroEverywhere (List Zero)
+zeros :: Tolerance units => Curve units -> Result IsZero (List Zero)
 zeros curve
-  | curve ~= Qty.zero = Failure ZeroEverywhere
+  | curve ~= Qty.zero = Failure IsZero
   | otherwise = Result.do
       let derivatives = Stream.iterate (.derivative) curve
       let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
@@ -723,7 +723,7 @@ If the curve is zero everywhere, then returns positive.
 -}
 sign :: Tolerance units => Curve units -> Result CrossesZero Sign
 sign curve = case zeros curve of
-  Failure ZeroEverywhere -> Success Positive
+  Failure IsZero -> Success Positive
   Success curveZeros ->
     case List.filter isInnerZero curveZeros of
       [] -> Success (Qty.sign (evaluate curve 0.5)) -- No inner zeros, so check sign at t=0.5

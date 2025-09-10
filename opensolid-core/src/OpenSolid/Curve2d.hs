@@ -653,7 +653,7 @@ tangentDirection ::
 tangentDirection curve =
   case VectorCurve2d.direction curve.derivative of
     Success directionCurve -> Success directionCurve
-    Failure VectorCurve2d.ZeroEverywhere -> Failure IsPoint
+    Failure VectorCurve2d.IsZero -> Failure IsPoint
 
 offsetLeftwardBy ::
   Tolerance units =>
@@ -724,7 +724,7 @@ findPoint ::
   Result IsCoincidentWithPoint (List Float)
 findPoint point curve =
   case VectorCurve2d.zeros (point - curve) of
-    Failure VectorCurve2d.ZeroEverywhere -> Failure IsCoincidentWithPoint
+    Failure VectorCurve2d.IsZero -> Failure IsCoincidentWithPoint
     Success parameterValues -> Success parameterValues
 
 overlappingSegments ::
@@ -1044,7 +1044,7 @@ medialAxis curve1 curve2 = do
   let target = v2 `cross'` (2.0 * (v1 `dot'` d) .*. d - VectorSurfaceFunction2d.squaredMagnitude' d .*. v1)
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
-    Failure SurfaceFunction.ZeroEverywhere -> TODO -- curves are identical arcs?
+    Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
     Success zeros -> Result.do
       Debug.assert (List.isEmpty zeros.crossingLoops)
       Debug.assert (List.isEmpty zeros.tangentPoints)

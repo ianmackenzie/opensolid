@@ -13,7 +13,7 @@ module OpenSolid.SurfaceFunction
   , v
   , parameter
   , Zeros
-  , ZeroEverywhere (ZeroEverywhere)
+  , IsZero (IsZero)
   , zeros
   , new
   , quotient
@@ -135,7 +135,7 @@ instance
     case zeros (function - value) of
       Success (Zeros [] [] [] []) -> False
       Success (Zeros{}) -> True
-      Failure ZeroEverywhere -> True
+      Failure IsZero -> True
 
 instance
   units1 ~ units2 =>
@@ -557,11 +557,11 @@ cos function =
     @ CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled
     @ \p -> negate (sin function) * (derivative p function / Angle.radian)
 
-data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
-zeros :: Tolerance units => SurfaceFunction units -> Result ZeroEverywhere Zeros
+zeros :: Tolerance units => SurfaceFunction units -> Result IsZero Zeros
 zeros function
-  | function ~= Qty.zero = Failure ZeroEverywhere
+  | function ~= Qty.zero = Failure IsZero
   | otherwise = Result.do
       let fu = function.du
       let fv = function.dv

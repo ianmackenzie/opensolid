@@ -28,7 +28,7 @@ module OpenSolid.VectorCurve3d
   , squaredMagnitude
   , squaredMagnitude'
   , reverse
-  , ZeroEverywhere (ZeroEverywhere)
+  , IsZero (IsZero)
   , zeros
   , HasZero (HasZero)
   , direction
@@ -686,20 +686,20 @@ data HasZero = HasZero deriving (Eq, Show, Error.Message)
 magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Curve units
 magnitude curve = Curve.sqrt' (squaredMagnitude' curve)
 
-data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
-zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result ZeroEverywhere (List Float)
+zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result IsZero (List Float)
 zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
     Success zeros1d -> Success (List.map (.location) zeros1d)
-    Failure Curve.ZeroEverywhere -> Failure ZeroEverywhere
+    Failure Curve.IsZero -> Failure IsZero
 
 direction ::
   Tolerance units =>
   VectorCurve3d (space @ units) ->
-  Result ZeroEverywhere (DirectionCurve3d space)
+  Result IsZero (DirectionCurve3d space)
 direction curve = case quotient curve (magnitude curve) of
-  Failure DivisionByZero -> Failure ZeroEverywhere
+  Failure DivisionByZero -> Failure IsZero
   Success normalizedCurve -> Success (DirectionCurve3d.unsafe normalizedCurve)
 
 placeIn ::
