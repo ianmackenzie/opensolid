@@ -574,45 +574,41 @@ synthetic ::
 synthetic curve derivatives =
   new curve.compiled (VectorCurve2d.synthetic (Stream.head derivatives) (Stream.tail derivatives))
 
-syntheticStart ::
-  Point2d (space @ units) ->
-  List (Vector2d (space @ units)) ->
-  Curve2d (space @ units) ->
-  Curve2d (space @ units)
-syntheticStart value0 derivatives0 curve = do
-  let curveDerivatives = Stream.iterate VectorCurve2d.derivative curve.derivative
-  let valueT0 = evaluateAt Desingularization.t0 curve
-  let derivativesT0 = Stream.map (VectorCurve2d.evaluateAt Desingularization.t0) curveDerivatives
-  let (baseControlPoints, derivativeControlPoints) =
-        Bezier.syntheticStart value0 derivatives0 valueT0 derivativesT0
-  synthetic (bezier baseControlPoints) (Stream.map VectorCurve2d.bezier derivativeControlPoints)
-
-syntheticEnd ::
-  Point2d (space @ units) ->
-  List (Vector2d (space @ units)) ->
-  Curve2d (space @ units) ->
-  Curve2d (space @ units)
-syntheticEnd value1 derivatives1 curve = do
-  let curveDerivatives = Stream.iterate VectorCurve2d.derivative curve.derivative
-  let valueT1 = evaluateAt Desingularization.t1 curve
-  let derivativesT1 = Stream.map (VectorCurve2d.evaluateAt Desingularization.t1) curveDerivatives
-  let (baseControlPoints, derivativeControlPoints) =
-        Bezier.syntheticEnd valueT1 derivativesT1 value1 derivatives1
-  synthetic (bezier baseControlPoints) (Stream.map VectorCurve2d.bezier derivativeControlPoints)
-
 desingularize ::
-  Maybe (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Maybe (Point2d (space @ units), Vector2d (space @ units)) ->
   Curve2d (space @ units) ->
-  Maybe (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Maybe (Point2d (space @ units), Vector2d (space @ units)) ->
   Curve2d (space @ units)
 desingularize Nothing curve Nothing = curve
 desingularize startSingularity curve endSingularity = do
   let startCurve = case startSingularity of
         Nothing -> curve
-        Just (value0, derivatives0) -> syntheticStart value0 derivatives0 curve
+        Just (value0, firstDerivative0) -> do
+          let t0 = Desingularization.t0
+          let valueT0 = evaluate curve t0
+          let firstDerivativeT0 = VectorCurve2d.evaluate curve.derivative t0
+          let secondDerivativeT0 = VectorCurve2d.evaluate curve.derivative.derivative t0
+          bezier $
+            Bezier.syntheticStart
+              value0
+              firstDerivative0
+              valueT0
+              firstDerivativeT0
+              secondDerivativeT0
   let endCurve = case endSingularity of
         Nothing -> curve
-        Just (value1, derivatives1) -> syntheticEnd value1 derivatives1 curve
+        Just (value1, firstDerivative1) -> do
+          let t1 = Desingularization.t1
+          let valueT1 = evaluate curve t1
+          let firstDerivativeT1 = VectorCurve2d.evaluate curve.derivative t1
+          let secondDerivativeT1 = VectorCurve2d.evaluate curve.derivative.derivative t1
+          bezier $
+            Bezier.syntheticEnd
+              valueT1
+              firstDerivativeT1
+              secondDerivativeT1
+              value1
+              firstDerivative1
   desingularized startCurve curve endCurve
 
 desingularized ::

@@ -140,12 +140,12 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
           let dudt = uP - uC
           let endDerivative = Vector2d dudt (dudt * (dv / du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uC uP implicitBounds frame boundingAxes
-          Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, [endDerivative]))
+          Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
         Outgoing _ -> do
           let dudt = uC - uP
           let startDerivative = Vector2d dudt (dudt * (dv / du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
-          Curve2d.desingularize (Just (saddlePoint, [startDerivative])) implicitCurve Nothing
+          Curve2d.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
     else do
       let implicitBounds = NonEmpty.one (Bounds2d uBounds (Bounds vP vC))
       case joiningCurve of
@@ -153,9 +153,9 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
           let dvdt = vP - vC
           let endDerivative = Vector2d (dvdt * (du / dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vC vP implicitBounds frame boundingAxes
-          Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, [endDerivative]))
+          Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
         Outgoing _ -> do
           let dvdt = vC - vP
           let startDerivative = Vector2d (dvdt * (du / dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vP vC implicitBounds frame boundingAxes
-          Curve2d.desingularize (Just (saddlePoint, [startDerivative])) implicitCurve Nothing
+          Curve2d.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing

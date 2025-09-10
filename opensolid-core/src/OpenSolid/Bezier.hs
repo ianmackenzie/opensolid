@@ -15,8 +15,6 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Stream (Stream)
-import OpenSolid.Stream qualified as Stream
 
 type Vector vector =
   ( HasZero vector
@@ -98,44 +96,31 @@ deCasteljau first rest t = case rest of
 lerp :: Constraints point vector => point -> point -> Float -> point
 lerp p1 p2 t = p1 + t * (p2 - p1)
 
-syntheticDerivativeScales :: Stream Float
-syntheticDerivativeScales = Stream.iterate (* Desingularization.t0) Desingularization.t0
-
 syntheticStart ::
   Constraints point vector =>
   point ->
-  List vector ->
+  vector ->
   point ->
-  Stream vector ->
-  (NonEmpty point, Stream (NonEmpty vector))
-syntheticStart point0 derivatives0 pointT0 derivativesT0 = do
-  let segmentDerivatives0 =
-        List.map2 (*) derivatives0 (Stream.toList syntheticDerivativeScales)
-  let segmentDerivatives1 = Stream.map2 (*) derivativesT0 syntheticDerivativeScales
-  let baseCurve endDegree =
-        hermite point0 segmentDerivatives0 pointT0 (Stream.take endDegree segmentDerivatives1)
-          |> segment 0.0 (1.0 / Desingularization.t0)
-  let derivativeCurve n = nthDerivative n (baseCurve (Desingularization.continuity + n))
-  (baseCurve Desingularization.continuity, Stream.map derivativeCurve (Stream.from 1))
+  vector ->
+  vector ->
+  NonEmpty point
+syntheticStart point0 firstDerivative0 pointT0 firstDerivativeT0 secondDerivativeT0 = do
+  let t0 = Desingularization.t0
+  let segmentDerivatives0 = [t0 * firstDerivative0]
+  let segmentDerivativesT0 = [t0 * firstDerivativeT0, t0 * t0 * secondDerivativeT0]
+  hermite point0 segmentDerivatives0 pointT0 segmentDerivativesT0 |> segment 0.0 (1.0 / t0)
 
 syntheticEnd ::
   Constraints point vector =>
   point ->
-  Stream vector ->
+  vector ->
+  vector ->
   point ->
-  List vector ->
-  (NonEmpty point, Stream (NonEmpty vector))
-syntheticEnd pointT1 derivativesT1 point1 derivatives1 = do
-  let segmentDerivatives0 = Stream.map2 (*) derivativesT1 syntheticDerivativeScales
-  let segmentDerivatives1 =
-        List.map2 (*) derivatives1 (Stream.toList syntheticDerivativeScales)
-  let baseCurve startDegree =
-        hermite pointT1 (Stream.take startDegree segmentDerivatives0) point1 segmentDerivatives1
-          |> segment -(Desingularization.t1 / Desingularization.t0) 1.0
-  let derivativeCurve n = nthDerivative n (baseCurve (Desingularization.continuity + n))
-  (baseCurve Desingularization.continuity, Stream.map derivativeCurve (Stream.from 1))
-
-nthDerivative :: Constraints point vector => Int -> NonEmpty point -> NonEmpty vector
-nthDerivative 0 _ = internalError "nthDerivative should always be called with n >= 1"
-nthDerivative 1 controlPoints = derivative controlPoints
-nthDerivative n controlPoints = derivative (nthDerivative (n - 1) controlPoints)
+  vector ->
+  NonEmpty point
+syntheticEnd pointT1 firstDerivativeT1 secondDerivativeT1 point1 firstDerivative1 = do
+  let t0 = Desingularization.t0
+  let t1 = Desingularization.t1
+  let segmentDerivativesT1 = [t0 * firstDerivativeT1, t0 * t0 * secondDerivativeT1]
+  let segmentDerivatives1 = [t0 * firstDerivative1]
+  hermite pointT1 segmentDerivativesT1 point1 segmentDerivatives1 |> segment -(t1 / t0) 1.0

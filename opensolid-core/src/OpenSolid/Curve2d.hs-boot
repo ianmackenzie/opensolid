@@ -91,9 +91,9 @@ hermite ::
   List (Vector2d (space @ units)) ->
   Curve2d (space @ units)
 desingularize ::
-  Maybe (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Maybe (Point2d (space @ units), Vector2d (space @ units)) ->
   Curve2d (space @ units) ->
-  Maybe (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Maybe (Point2d (space @ units), Vector2d (space @ units)) ->
   Curve2d (space @ units)
 transformBy ::
   Transform2d tag (space @ units) ->

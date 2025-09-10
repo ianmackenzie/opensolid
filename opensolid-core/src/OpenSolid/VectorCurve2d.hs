@@ -604,45 +604,41 @@ startValue curve = evaluate curve 0.0
 endValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
 endValue curve = evaluate curve 1.0
 
-syntheticStart ::
-  Vector2d (space @ units) ->
-  List (Vector2d (space @ units)) ->
-  VectorCurve2d (space @ units) ->
-  VectorCurve2d (space @ units)
-syntheticStart value0 derivatives0 curve = do
-  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
-  let valueT0 = evaluateAt Desingularization.t0 curve
-  let derivativesT0 = Stream.map (evaluateAt Desingularization.t0) curveDerivatives
-  let (baseControlPoints, derivativeControlPoints) =
-        Bezier.syntheticStart value0 derivatives0 valueT0 derivativesT0
-  synthetic (bezier baseControlPoints) (Stream.map bezier derivativeControlPoints)
-
-syntheticEnd ::
-  Vector2d (space @ units) ->
-  List (Vector2d (space @ units)) ->
-  VectorCurve2d (space @ units) ->
-  VectorCurve2d (space @ units)
-syntheticEnd value1 derivatives1 curve = do
-  let curveDerivatives = Stream.iterate (.derivative) curve.derivative
-  let valueT1 = evaluateAt Desingularization.t1 curve
-  let derivativesT1 = Stream.map (evaluateAt Desingularization.t1) curveDerivatives
-  let (baseControlPoints, derivativeControlPoints) =
-        Bezier.syntheticEnd valueT1 derivativesT1 value1 derivatives1
-  synthetic (bezier baseControlPoints) (Stream.map bezier derivativeControlPoints)
-
 desingularize ::
-  Maybe (Vector2d (space @ units), List (Vector2d (space @ units))) ->
+  Maybe (Vector2d (space @ units), Vector2d (space @ units)) ->
   VectorCurve2d (space @ units) ->
-  Maybe (Vector2d (space @ units), List (Vector2d (space @ units))) ->
+  Maybe (Vector2d (space @ units), Vector2d (space @ units)) ->
   VectorCurve2d (space @ units)
 desingularize Nothing curve Nothing = curve
 desingularize startSingularity curve endSingularity = do
   let startCurve = case startSingularity of
         Nothing -> curve
-        Just (value0, derivatives0) -> syntheticStart value0 derivatives0 curve
+        Just (value0, firstDerivative0) -> do
+          let t0 = Desingularization.t0
+          let valueT0 = evaluate curve t0
+          let firstDerivativeT0 = evaluate curve.derivative t0
+          let secondDerivativeT0 = evaluate curve.derivative.derivative t0
+          bezier $
+            Bezier.syntheticStart
+              value0
+              firstDerivative0
+              valueT0
+              firstDerivativeT0
+              secondDerivativeT0
   let endCurve = case endSingularity of
         Nothing -> curve
-        Just (value1, derivatives1) -> syntheticEnd value1 derivatives1 curve
+        Just (value1, firstDerivative1) -> do
+          let t1 = Desingularization.t1
+          let valueT1 = evaluate curve t1
+          let firstDerivativeT1 = evaluate curve.derivative t1
+          let secondDerivativeT1 = evaluate curve.derivative.derivative t1
+          bezier $
+            Bezier.syntheticEnd
+              valueT1
+              firstDerivativeT1
+              secondDerivativeT1
+              value1
+              firstDerivative1
   desingularized startCurve curve endCurve
 
 desingularized ::
@@ -709,35 +705,37 @@ quotient' ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve2d (space @ (units1 :/: units2)))
-quotient' numerator denominator = do
+quotient' numerator denominator =
   if denominator ~= Qty.zero
     then Failure DivisionByZero
     else Success do
       let singularity0 =
             if Curve.evaluate denominator 0.0 ~= Qty.zero
-              then Just (lhopital' numerator.derivative denominator.derivative 0.0 1, [])
+              then Just (lhopital numerator denominator 0.0)
               else Nothing
       let singularity1 =
             if Curve.evaluate denominator 1.0 ~= Qty.zero
-              then Just (lhopital' numerator.derivative denominator.derivative 1.0 1, [])
+              then Just (lhopital numerator denominator 1.0)
               else Nothing
       desingularize singularity0 (unsafeQuotient' numerator denominator) singularity1
 
-lhopital' ::
+lhopital ::
   Tolerance units2 =>
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   Float ->
-  Int ->
-  Vector2d (space @ (units1 :/: units2))
-lhopital' numerator denominator tValue n =
-  if n > 4
-    then exception "Higher-order zero detected"
-    else do
-      let denominatorValue = Curve.evaluate denominator tValue
-      if denominatorValue ~= Qty.zero
-        then lhopital' numerator.derivative denominator.derivative tValue (n + 1)
-        else evaluate numerator tValue ./. denominatorValue
+  (Vector2d (space @ (units1 :/: units2)), Vector2d (space @ (units1 :/: units2)))
+lhopital numerator denominator tValue = do
+  let numerator' = evaluate numerator.derivative tValue
+  let numerator'' = evaluate numerator.derivative.derivative tValue
+  let denominator' = Curve.evaluate denominator.derivative tValue
+  let denominator'' = Curve.evaluate denominator.derivative.derivative tValue
+  let value = numerator' ./. denominator'
+  let firstDerivative =
+        Units.simplify $
+          (numerator'' .*. denominator' - numerator' .*. denominator'')
+            ./. (2.0 * Qty.squared' denominator')
+  (value, firstDerivative)
 
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
