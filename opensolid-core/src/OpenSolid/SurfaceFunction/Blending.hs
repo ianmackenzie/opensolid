@@ -23,29 +23,52 @@ type Blendable function =
 desingularize ::
   Blendable function =>
   (SurfaceFunction Unitless -> function -> function -> function -> function) ->
-  ( "function" ::: function
-  , "singularityU0" ::: Maybe (function, function)
+  function ->
+  ( "singularityU0" ::: Maybe (function, function)
   , "singularityU1" ::: Maybe (function, function)
   , "singularityV0" ::: Maybe (function, function)
   , "singularityV1" ::: Maybe (function, function)
   ) ->
   function
-desingularize desingularized args = do
-  let f = args.function
+desingularize desingularized function args =
   case (args.singularityU0, args.singularityU1, args.singularityV0, args.singularityV1) of
-    (Nothing, Nothing, Nothing, Nothing) -> args.function
+    (Nothing, Nothing, Nothing, Nothing) -> function
     (Just singularityU0, Nothing, Nothing, Nothing) ->
-      desingularized SurfaceFunction.u (blendU0 singularityU0 f) f f
+      desingularized
+        SurfaceFunction.u
+        (blendU0 singularityU0 function)
+        function
+        function
     (Nothing, Just singularityU1, Nothing, Nothing) ->
-      desingularized SurfaceFunction.u f f (blendU1 f singularityU1)
+      desingularized
+        SurfaceFunction.u
+        function
+        function
+        (blendU1 function singularityU1)
     (Just singularityU0, Just singularityU1, Nothing, Nothing) ->
-      desingularized SurfaceFunction.u (blendU0 singularityU0 f) f (blendU1 f singularityU1)
+      desingularized
+        SurfaceFunction.u
+        (blendU0 singularityU0 function)
+        function
+        (blendU1 function singularityU1)
     (Nothing, Nothing, Just singularityV0, Nothing) ->
-      desingularized SurfaceFunction.v (blendV0 singularityV0 f) f f
+      desingularized
+        SurfaceFunction.v
+        (blendV0 singularityV0 function)
+        function
+        function
     (Nothing, Nothing, Nothing, Just singularityV1) ->
-      desingularized SurfaceFunction.v f f (blendV1 f singularityV1)
+      desingularized
+        SurfaceFunction.v
+        function
+        function
+        (blendV1 function singularityV1)
     (Nothing, Nothing, Just singularityV0, Just singularityV1) ->
-      desingularized SurfaceFunction.v (blendV0 singularityV0 f) f (blendV1 f singularityV1)
+      desingularized
+        SurfaceFunction.v
+        (blendV0 singularityV0 function)
+        function
+        (blendV1 function singularityV1)
     _ -> exception "Unsupported combination of singularities for surface function: singularities may only be in U or V direction, not both"
 
 blendU0 ::

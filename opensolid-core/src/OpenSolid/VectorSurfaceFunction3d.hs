@@ -458,8 +458,8 @@ recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
 desingularize ::
-  ( "function" ::: VectorSurfaceFunction3d (space @ units)
-  , "singularityU0" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))
+  VectorSurfaceFunction3d (space @ units) ->
+  ( "singularityU0" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))
   , "singularityU1" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))
   , "singularityV0" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))
   , "singularityV1" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units))

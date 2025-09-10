@@ -422,8 +422,8 @@ recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
 desingularize ::
-  ( "function" ::: SurfaceFunction units
-  , "singularityU0" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
+  SurfaceFunction units ->
+  ( "singularityU0" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
   , "singularityU1" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
   , "singularityV0" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
   , "singularityV1" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
@@ -524,8 +524,7 @@ sqrt' function =
             if functionIsZero && firstDerivativeIsZero
               then Just (zero, sign * unsafeSqrt' (0.5 * secondDerivative))
               else Nothing
-      desingularize do
-        #function (unsafeSqrt' function)
+      desingularize (unsafeSqrt' function) do
         #singularityU0 (maybeSingularity U 0.0 Positive)
         #singularityU1 (maybeSingularity U 1.0 Negative)
         #singularityV0 (maybeSingularity V 0.0 Positive)
