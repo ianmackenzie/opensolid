@@ -26,6 +26,10 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.DirectionSurfaceFunction2d (DirectionSurfaceFunction2d)
+import OpenSolid.DirectionSurfaceFunction2d qualified as DirectionSurfaceFunction2d
+import OpenSolid.DirectionSurfaceFunction3d (DirectionSurfaceFunction3d)
+import OpenSolid.DirectionSurfaceFunction3d qualified as DirectionSurfaceFunction3d
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Surface2d qualified as Expression.Surface2d
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -301,6 +305,24 @@ instance
       @ \p -> do
         let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
         dfdu * dudp + dfdv * dvdp
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (DirectionSurfaceFunction2d space)
+    (DirectionSurfaceFunction2d space)
+  where
+  f . g = DirectionSurfaceFunction2d.unsafe (DirectionSurfaceFunction2d.unwrap f . g)
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (DirectionSurfaceFunction3d space)
+    (DirectionSurfaceFunction3d space)
+  where
+  f . g = DirectionSurfaceFunction3d.unsafe (DirectionSurfaceFunction3d.unwrap f . g)
 
 distanceAlong ::
   Axis2d (space @ units) ->
