@@ -22,7 +22,6 @@ module OpenSolid.Curve2d
   , quadraticBezier
   , cubicBezier
   , hermite
-  , synthetic
   , desingularize
   , desingularized
   , evaluate
@@ -125,8 +124,6 @@ import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
-import OpenSolid.Stream (Stream)
-import OpenSolid.Stream qualified as Stream
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
@@ -566,13 +563,6 @@ hermite ::
   Curve2d (space @ units)
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
-
-synthetic ::
-  Curve2d (space @ units) ->
-  Stream (VectorCurve2d (space @ units)) ->
-  Curve2d (space @ units)
-synthetic curve derivatives =
-  new curve.compiled (VectorCurve2d.synthetic (Stream.head derivatives) (Stream.tail derivatives))
 
 desingularize ::
   Maybe (Point2d (space @ units), Vector2d (space @ units)) ->

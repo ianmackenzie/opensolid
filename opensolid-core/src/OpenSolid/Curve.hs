@@ -12,7 +12,6 @@ module OpenSolid.Curve
   , recursive
   , zero
   , constant
-  , synthetic
   , desingularize
   , desingularized
   , t
@@ -302,10 +301,6 @@ instance Composition (Curve Unitless) (Curve units) (Curve units) where
 
 reverse :: Curve units -> Curve units
 reverse curve = curve . (1.0 - t)
-
-synthetic :: Curve units -> Stream (Curve units) -> Curve units
-synthetic curve derivatives =
-  new curve.compiled (synthetic (Stream.head derivatives) (Stream.tail derivatives))
 
 bezier :: NonEmpty (Qty units) -> Curve units
 bezier controlPoints =

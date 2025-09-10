@@ -22,7 +22,6 @@ module OpenSolid.VectorCurve2d
   , quadraticBezier
   , cubicBezier
   , bezier
-  , synthetic
   , desingularize
   , desingularized
   , quotient
@@ -79,8 +78,6 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Stream (Stream)
-import OpenSolid.Stream qualified as Stream
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
@@ -590,13 +587,6 @@ bezier controlPoints =
   new
     @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
     @ bezier (Bezier.derivative controlPoints)
-
-synthetic ::
-  VectorCurve2d (space @ units) ->
-  Stream (VectorCurve2d (space @ units)) ->
-  VectorCurve2d (space @ units)
-synthetic curve derivatives =
-  new curve.compiled (synthetic (Stream.head derivatives) (Stream.tail derivatives))
 
 startValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
 startValue curve = evaluate curve 0.0

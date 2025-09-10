@@ -18,7 +18,6 @@ module OpenSolid.VectorCurve3d
   , quadraticBezier
   , cubicBezier
   , bezier
-  , synthetic
   , desingularize
   , desingularized
   , quotient
@@ -66,8 +65,6 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Stream (Stream)
-import OpenSolid.Stream qualified as Stream
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
@@ -540,13 +537,6 @@ bezier controlPoints =
   new
     (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
     (bezier (Bezier.derivative controlPoints))
-
-synthetic ::
-  VectorCurve3d (space @ units) ->
-  Stream (VectorCurve3d (space @ units)) ->
-  VectorCurve3d (space @ units)
-synthetic curve derivatives =
-  new curve.compiled (synthetic (Stream.head derivatives) (Stream.tail derivatives))
 
 startValue :: VectorCurve3d (space @ units) -> Vector3d (space @ units)
 startValue curve = evaluate curve 0.0
