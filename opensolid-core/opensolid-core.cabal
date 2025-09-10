@@ -210,13 +210,6 @@ library
     OpenSolid.Surface3d
     OpenSolid.Surface3d.Revolved
     OpenSolid.SurfaceFunction
-    OpenSolid.SurfaceFunction.Blending
-    OpenSolid.SurfaceFunction.Desingularization
-    OpenSolid.SurfaceFunction.HorizontalCurve
-    OpenSolid.SurfaceFunction.ImplicitCurveBounds
-    OpenSolid.SurfaceFunction.Quotient
-    OpenSolid.SurfaceFunction.Subproblem
-    OpenSolid.SurfaceFunction.VerticalCurve
     OpenSolid.SurfaceFunction.Zeros
     OpenSolid.SurfaceFunction2d
     OpenSolid.SurfaceFunction3d
@@ -260,9 +253,16 @@ library
     OpenSolid.Lobatto
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
+    OpenSolid.SurfaceFunction.Blending
+    OpenSolid.SurfaceFunction.Desingularization
+    OpenSolid.SurfaceFunction.HorizontalCurve
+    OpenSolid.SurfaceFunction.ImplicitCurveBounds
     OpenSolid.SurfaceFunction.Internal
     OpenSolid.SurfaceFunction.PartialZeros
+    OpenSolid.SurfaceFunction.Quotient
     OpenSolid.SurfaceFunction.SaddleRegion
+    OpenSolid.SurfaceFunction.Subproblem
+    OpenSolid.SurfaceFunction.VerticalCurve
     OpenSolid.SurfaceLinearization
     OpenSolid.Text.Parse
 
