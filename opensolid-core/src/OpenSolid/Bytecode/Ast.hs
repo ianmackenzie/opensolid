@@ -37,26 +37,11 @@ module OpenSolid.Bytecode.Ast
   , projectPoint3dInto
   , surfaceParameters
   , xy
-  , line1d
-  , quadraticSpline1d
-  , cubicSpline1d
-  , quarticSpline1d
-  , quinticSpline1d
   , bezierCurve1d
   , blend1d
   , blend2d
   , blend3d
-  , line2d
-  , quadraticSpline2d
-  , cubicSpline2d
-  , quarticSpline2d
-  , quinticSpline2d
   , bezierCurve2d
-  , line3d
-  , quadraticSpline3d
-  , cubicSpline3d
-  , quarticSpline3d
-  , quinticSpline3d
   , bezierCurve3d
   , desingularizedCurve1d
   , desingularizedCurve2d
@@ -1084,36 +1069,6 @@ xy (Constant1d x) (Variable1d y) = Variable2d (CY x y)
 xy (Variable1d x) (Constant1d y) = Variable2d (XC x y)
 xy (Variable1d x) (Variable1d y) = Variable2d (XY x y)
 
-line1d :: Qty units -> Qty units -> Ast1d input -> Ast1d input
-line1d p1 p2 param = bezierCurve1d (NonEmpty.two p1 p2) param
-
-quadraticSpline1d :: Qty units -> Qty units -> Qty units -> Ast1d input -> Ast1d input
-quadraticSpline1d p1 p2 p3 param = bezierCurve1d (NonEmpty.three p1 p2 p3) param
-
-cubicSpline1d :: Qty units -> Qty units -> Qty units -> Qty units -> Ast1d input -> Ast1d input
-cubicSpline1d p1 p2 p3 p4 param = bezierCurve1d (NonEmpty.four p1 p2 p3 p4) param
-
-quarticSpline1d ::
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Ast1d input ->
-  Ast1d input
-quarticSpline1d p1 p2 p3 p4 p5 param = bezierCurve1d (NonEmpty.five p1 p2 p3 p4 p5) param
-
-quinticSpline1d ::
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Ast1d input ->
-  Ast1d input
-quinticSpline1d p1 p2 p3 p4 p5 p6 param = bezierCurve1d (NonEmpty.six p1 p2 p3 p4 p5 p6) param
-
 bezierCurve1d :: NonEmpty (Qty units) -> Ast1d input -> Ast1d input
 bezierCurve1d (NonEmpty.One value) _ = constant1d value
 bezierCurve1d controlPoints param =
@@ -1129,47 +1084,6 @@ blend1d ::
 blend1d startValue startDerivatives endValue endDerivatives param =
   Variable1d (Blend1d startValue startDerivatives endValue endDerivatives param)
 
-line2d :: Vector2d (space @ units) -> Vector2d (space @ units) -> Ast1d input -> Ast2d input
-line2d p1 p2 param = bezierCurve2d (NonEmpty.two p1 p2) param
-
-quadraticSpline2d ::
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Ast1d input ->
-  Ast2d input
-quadraticSpline2d p1 p2 p3 param = bezierCurve2d (NonEmpty.three p1 p2 p3) param
-
-cubicSpline2d ::
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Ast1d input ->
-  Ast2d input
-cubicSpline2d p1 p2 p3 p4 param = bezierCurve2d (NonEmpty.four p1 p2 p3 p4) param
-
-quarticSpline2d ::
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Ast1d input ->
-  Ast2d input
-quarticSpline2d p1 p2 p3 p4 p5 param = bezierCurve2d (NonEmpty.five p1 p2 p3 p4 p5) param
-
-quinticSpline2d ::
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
-  Ast1d input ->
-  Ast2d input
-quinticSpline2d p1 p2 p3 p4 p5 p6 param = bezierCurve2d (NonEmpty.six p1 p2 p3 p4 p5 p6) param
-
 bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast1d input -> Ast2d input
 bezierCurve2d (NonEmpty.One value) _ = constant2d value
 bezierCurve2d controlPoints param =
@@ -1184,47 +1098,6 @@ blend2d ::
   Ast2d input
 blend2d startValue startDerivatives endValue endDerivatives param =
   Variable2d (Blend2d startValue startDerivatives endValue endDerivatives param)
-
-line3d :: Vector3d (space @ units) -> Vector3d (space @ units) -> Ast1d input -> Ast3d input
-line3d p1 p2 param = bezierCurve3d (NonEmpty.two p1 p2) param
-
-quadraticSpline3d ::
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Ast1d input ->
-  Ast3d input
-quadraticSpline3d p1 p2 p3 param = bezierCurve3d (NonEmpty.three p1 p2 p3) param
-
-cubicSpline3d ::
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Ast1d input ->
-  Ast3d input
-cubicSpline3d p1 p2 p3 p4 param = bezierCurve3d (NonEmpty.four p1 p2 p3 p4) param
-
-quarticSpline3d ::
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Ast1d input ->
-  Ast3d input
-quarticSpline3d p1 p2 p3 p4 p5 param = bezierCurve3d (NonEmpty.five p1 p2 p3 p4 p5) param
-
-quinticSpline3d ::
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
-  Ast1d input ->
-  Ast3d input
-quinticSpline3d p1 p2 p3 p4 p5 p6 param = bezierCurve3d (NonEmpty.six p1 p2 p3 p4 p5 p6) param
 
 bezierCurve3d :: NonEmpty (Vector3d (space @ units)) -> Ast1d input -> Ast3d input
 bezierCurve3d (NonEmpty.One value) _ = constant3d value
