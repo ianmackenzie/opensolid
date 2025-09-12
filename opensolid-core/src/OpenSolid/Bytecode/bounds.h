@@ -122,6 +122,19 @@ struct Bounds {
   }
 
   inline Bounds
+  fourthPower() const {
+    double l4 = lower * lower * lower * lower;
+    double u4 = upper * upper * upper * upper;
+    if (lower >= 0) {
+      return Bounds(l4, u4);
+    } else if (upper <= 0) {
+      return Bounds(u4, l4);
+    } else {
+      return Bounds(0.0, std::max(l4, u4));
+    }
+  }
+
+  inline Bounds
   sin() {
     double sinLower = std::sin(lower);
     double sinUpper = std::sin(upper);
