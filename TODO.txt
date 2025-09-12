@@ -6,10 +6,6 @@ Optimize Bounds.hypot2
 Add way to represent arc length parameterization in bytecode?
 -> pack tree structure into opcodes, then Bezier curve control points into constants?
 
-Remove Expression.blend
-
-Remove funky polymorphic 'value' type from Instruction and bytecode
-
 Combine computeValue and computeBounds into single templated function?
 -> call out to generic or overloaded helper functions as needed
 
