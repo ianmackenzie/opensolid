@@ -1,9 +1,17 @@
-Try making Qty a primitive (unboxed) type?
+Try making Bounds use Double# fields
 
-Add simplified/optimized versions of blending function derivatives
+Optimize Bounds.hypot2
+-> should hopefully be able to pattern match on unboxed integers (results of unboxed comparison operations) as alternative to using multi-way 'if'
 
-Add dedicated bytecode instructions for blending functions (and their derivatives)
--> they'll get evaluated every time a desingularized function is evaluated, regardless of whether or not the result is used...
+Add way to represent arc length parameterization in bytecode?
+-> pack tree structure into opcodes, then Bezier curve control points into constants?
+
+Remove Expression.blend
+
+Remove funky polymorphic 'value' type from Instruction and bytecode
+
+Combine computeValue and computeBounds into single templated function?
+-> call out to generic or overloaded helper functions as needed
 
 Merge e.g. 'Subdomain' and 'Domain1d'?
 - just base on Float values instead of Int
