@@ -43,6 +43,11 @@ module OpenSolid.Curve
   , sign
   , reverse
   , integrate
+  , b00
+  , b01
+  , b02
+  , b10
+  , b11
   )
 where
 
@@ -752,3 +757,43 @@ isCrossingZero curveZero =
   -- Curve order 2 is cubic (crossing) zero
   -- Curve order 3 is quartic (non-crossing) zero, etc.
   Int.isEven curveZero.order
+
+b00 :: Curve Unitless
+b00 =
+  concrete Expression.b00 $
+    concrete Expression.b00d1 $
+      concrete Expression.b00d2 $
+        concrete Expression.b00d3 $
+          constant 72.0
+
+b01 :: Curve Unitless
+b01 =
+  concrete Expression.b01 $
+    concrete Expression.b01d1 $
+      concrete Expression.b01d2 $
+        concrete Expression.b01d3 $
+          constant 48.0
+
+b02 :: Curve Unitless
+b02 =
+  concrete Expression.b02 $
+    concrete Expression.b02d1 $
+      concrete Expression.b02d2 $
+        concrete Expression.b02d3 $
+          constant 12.0
+
+b10 :: Curve Unitless
+b10 =
+  concrete Expression.b10 $
+    concrete Expression.b10d1 $
+      concrete Expression.b10d2 $
+        concrete Expression.b10d3 $
+          constant -72.0
+
+b11 :: Curve Unitless
+b11 =
+  concrete Expression.b11 $
+    concrete Expression.b11d1 $
+      concrete Expression.b11d2 $
+        concrete Expression.b11d3 $
+          constant 24.0
