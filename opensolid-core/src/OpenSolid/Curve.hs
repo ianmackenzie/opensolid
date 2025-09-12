@@ -9,6 +9,7 @@ module OpenSolid.Curve
   , startValue
   , endValue
   , new
+  , concrete
   , recursive
   , zero
   , constant
@@ -61,6 +62,7 @@ import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
+import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -151,6 +153,9 @@ isEndpoint tValue = tValue == 0.0 || tValue == 1.0
 
 new :: Compiled units -> Curve units -> Curve units
 new = Curve
+
+concrete :: Expression Float (Qty units) -> Curve units -> Curve units
+concrete givenExpression givenDerivative = new (CompiledFunction.concrete givenExpression) givenDerivative
 
 recursive :: Compiled units -> (Curve units -> Curve units) -> Curve units
 recursive givenCompiled derivativeFunction =
