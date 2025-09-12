@@ -48,6 +48,8 @@
               # only needed if you add/remove/rename .cabal files,
               # e.g. when adding a whole new sub-project
               pkgs.haskellPackages.implicit-hie
+              # For visualizing Haskell profiling (.prof) files
+              pkgs.haskellPackages.profiteur
               # For formatting this file =)
               pkgs.nixfmt-classic
               # Language servers for Nix files
