@@ -19,6 +19,7 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (SurfaceParameter)
@@ -38,6 +39,8 @@ instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units)
 type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
 
 instance HasField "compiled" (SurfaceFunction units) (Compiled units)
+
+instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units)
 
 instance units1 ~ units2 => ApproximateEquality (SurfaceFunction units1) (SurfaceFunction units2) units1
 

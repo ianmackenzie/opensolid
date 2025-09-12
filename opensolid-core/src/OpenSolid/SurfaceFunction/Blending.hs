@@ -4,6 +4,7 @@ module OpenSolid.SurfaceFunction.Blending
   )
 where
 
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -135,23 +136,13 @@ blend ::
   (function, function) ->
   SurfaceFunction Unitless ->
   function
-blend (f00, f01, f02) (f10, f11) t =
-  b00 t * f00 + b01 t * f01 + b02 t * f02 + b10 t * f10 + b11 t * f11
-
-b00 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
-b00 t = 1.0 - SurfaceFunction.cubed t * (4.0 - 3.0 * t)
-
-b01 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
-b01 t = t * (1.0 + SurfaceFunction.squared t * (2.0 * t - 3.0))
-
-b02 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
-b02 t = SurfaceFunction.squared t * (0.5 + t * (0.5 * t - 1.0))
-
-b10 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
-b10 t = SurfaceFunction.cubed t * (4.0 - 3.0 * t)
-
-b11 :: SurfaceFunction Unitless -> SurfaceFunction Unitless
-b11 t = SurfaceFunction.cubed t * (t - 1.0)
+blend (f00, f01, f02) (f10, f11) t = do
+  let b00 = Curve.b00 . t
+  let b01 = Curve.b01 . t
+  let b02 = Curve.b02 . t
+  let b10 = Curve.b10 . t
+  let b11 = Curve.b11 . t
+  b00 * f00 + b01 * f01 + b02 * f02 + b10 * f10 + b11 * f11
 
 uParameterization :: Float -> SurfaceFunction2d UvCoordinates
 uParameterization vValue = SurfaceFunction2d.xy SurfaceFunction.u (SurfaceFunction.constant vValue)
