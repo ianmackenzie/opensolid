@@ -16,6 +16,36 @@
 #define T0 0.00390625 // 1/256
 #define T1 0.99609375 // 1 minus 1/256
 
+inline double
+squared(double x) {
+  return x * x;
+}
+
+inline Bounds
+squared(Bounds x) {
+  return x.squared();
+}
+
+inline double
+cubed(double x) {
+  return x * x * x;
+}
+
+inline Bounds
+cubed(Bounds x) {
+  return x.cubed();
+}
+
+inline double
+fourthPower(double x) {
+  return x * x * x * x;
+}
+
+inline Bounds
+fourthPower(Bounds x) {
+  return x.fourthPower();
+}
+
 template <class V>
 inline V
 lerp(V a, V b, double t) {
