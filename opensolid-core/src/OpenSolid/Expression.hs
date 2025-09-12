@@ -36,6 +36,26 @@ module OpenSolid.Expression
   , ProjectInto (projectInto)
   , bezierCurve
   , Blend (blend)
+  , b00
+  , b00d1
+  , b00d2
+  , b00d3
+  , b01
+  , b01d1
+  , b01d2
+  , b01d3
+  , b02
+  , b02d1
+  , b02d2
+  , b02d3
+  , b10
+  , b10d1
+  , b10d2
+  , b10d3
+  , b11
+  , b11d1
+  , b11d2
+  , b11d3
   , desingularized
   , Evaluation (evaluate, evaluateBounds)
   , solveMonotonicSurfaceU
@@ -1639,6 +1659,66 @@ instance
     let startDerivativeAsts = List.map derivativeAst3d startDerivatives
     let endDerivativeAsts = List.map derivativeAst3d endDerivatives
     surface3d (Ast.blend3d startValue startDerivativeAsts endValue endDerivativeAsts parameter)
+
+b00 :: Expression Float Float
+b00 = curve1d Ast.b00
+
+b00d1 :: Expression Float Float
+b00d1 = curve1d Ast.b00d1
+
+b00d2 :: Expression Float Float
+b00d2 = curve1d Ast.b00d2
+
+b00d3 :: Expression Float Float
+b00d3 = curve1d Ast.b00d3
+
+b01 :: Expression Float Float
+b01 = curve1d Ast.b01
+
+b01d1 :: Expression Float Float
+b01d1 = curve1d Ast.b01d1
+
+b01d2 :: Expression Float Float
+b01d2 = curve1d Ast.b01d2
+
+b01d3 :: Expression Float Float
+b01d3 = curve1d Ast.b01d3
+
+b02 :: Expression Float Float
+b02 = curve1d Ast.b02
+
+b02d1 :: Expression Float Float
+b02d1 = curve1d Ast.b02d1
+
+b02d2 :: Expression Float Float
+b02d2 = curve1d Ast.b02d2
+
+b02d3 :: Expression Float Float
+b02d3 = curve1d Ast.b02d3
+
+b10 :: Expression Float Float
+b10 = curve1d Ast.b10
+
+b10d1 :: Expression Float Float
+b10d1 = curve1d Ast.b10d1
+
+b10d2 :: Expression Float Float
+b10d2 = curve1d Ast.b10d2
+
+b10d3 :: Expression Float Float
+b10d3 = curve1d Ast.b10d3
+
+b11 :: Expression Float Float
+b11 = curve1d Ast.b11
+
+b11d1 :: Expression Float Float
+b11d1 = curve1d Ast.b11d1
+
+b11d2 :: Expression Float Float
+b11d2 = curve1d Ast.b11d2
+
+b11d3 :: Expression Float Float
+b11d3 = curve1d Ast.b11d3
 
 desingularized ::
   Expression input Float ->

@@ -61,6 +61,26 @@ module OpenSolid.Bytecode.Ast
   , debugSurface1d
   , debugSurface2d
   , debugSurface3d
+  , b00
+  , b00d1
+  , b00d2
+  , b00d3
+  , b01
+  , b01d1
+  , b01d2
+  , b01d3
+  , b02
+  , b02d1
+  , b02d2
+  , b02d3
+  , b10
+  , b10d1
+  , b10d2
+  , b10d3
+  , b11
+  , b11d1
+  , b11d2
+  , b11d3
   )
 where
 
@@ -166,6 +186,26 @@ data Variable1d input where
     List (Ast1d input) ->
     Ast1d input ->
     Variable1d input
+  B00 :: Variable1d input -> Variable1d input
+  B00d1 :: Variable1d input -> Variable1d input
+  B00d2 :: Variable1d input -> Variable1d input
+  B00d3 :: Variable1d input -> Variable1d input
+  B01 :: Variable1d input -> Variable1d input
+  B01d1 :: Variable1d input -> Variable1d input
+  B01d2 :: Variable1d input -> Variable1d input
+  B01d3 :: Variable1d input -> Variable1d input
+  B02 :: Variable1d input -> Variable1d input
+  B02d1 :: Variable1d input -> Variable1d input
+  B02d2 :: Variable1d input -> Variable1d input
+  B02d3 :: Variable1d input -> Variable1d input
+  B10 :: Variable1d input -> Variable1d input
+  B10d1 :: Variable1d input -> Variable1d input
+  B10d2 :: Variable1d input -> Variable1d input
+  B10d3 :: Variable1d input -> Variable1d input
+  B11 :: Variable1d input -> Variable1d input
+  B11d1 :: Variable1d input -> Variable1d input
+  B11d2 :: Variable1d input -> Variable1d input
+  B11d3 :: Variable1d input -> Variable1d input
 
 deriving instance Eq (Variable1d input)
 
@@ -322,6 +362,26 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
       (endValue . inputAst)
       (List.map (. inputAst) endDerivatives)
       (parameter . inputAst)
+  B00 arg . input = B00 (arg . input)
+  B00d1 arg . input = B00d1 (arg . input)
+  B00d2 arg . input = B00d2 (arg . input)
+  B00d3 arg . input = B00d3 (arg . input)
+  B01 arg . input = B01 (arg . input)
+  B01d1 arg . input = B01d1 (arg . input)
+  B01d2 arg . input = B01d2 (arg . input)
+  B01d3 arg . input = B01d3 (arg . input)
+  B02 arg . input = B02 (arg . input)
+  B02d1 arg . input = B02d1 (arg . input)
+  B02d2 arg . input = B02d2 (arg . input)
+  B02d3 arg . input = B02d3 (arg . input)
+  B10 arg . input = B10 (arg . input)
+  B10d1 arg . input = B10d1 (arg . input)
+  B10d2 arg . input = B10d2 (arg . input)
+  B10d3 arg . input = B10d3 (arg . input)
+  B11 arg . input = B11 (arg . input)
+  B11d1 arg . input = B11d1 (arg . input)
+  B11d2 arg . input = B11d2 (arg . input)
+  B11d3 arg . input = B11d3 (arg . input)
 
 instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
@@ -443,6 +503,26 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) 
       (endValue . inputAst)
       (List.map (. inputAst) endDerivatives)
       (parameter . inputAst)
+  B00 arg . input = B00 (arg . input)
+  B00d1 arg . input = B00d1 (arg . input)
+  B00d2 arg . input = B00d2 (arg . input)
+  B00d3 arg . input = B00d3 (arg . input)
+  B01 arg . input = B01 (arg . input)
+  B01d1 arg . input = B01d1 (arg . input)
+  B01d2 arg . input = B01d2 (arg . input)
+  B01d3 arg . input = B01d3 (arg . input)
+  B02 arg . input = B02 (arg . input)
+  B02d1 arg . input = B02d1 (arg . input)
+  B02d2 arg . input = B02d2 (arg . input)
+  B02d3 arg . input = B02d3 (arg . input)
+  B10 arg . input = B10 (arg . input)
+  B10d1 arg . input = B10d1 (arg . input)
+  B10d2 arg . input = B10d2 (arg . input)
+  B10d3 arg . input = B10d3 (arg . input)
+  B11 arg . input = B11 (arg . input)
+  B11d1 arg . input = B11d1 (arg . input)
+  B11d2 arg . input = B11d2 (arg . input)
+  B11d3 arg . input = B11d3 (arg . input)
 
 instance Composition (Ast2d input) (Ast2d UvPoint) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
@@ -1114,6 +1194,66 @@ blend3d ::
 blend3d startValue startDerivatives endValue endDerivatives param =
   Variable3d (Blend3d startValue startDerivatives endValue endDerivatives param)
 
+b00 :: Ast1d Float
+b00 = Variable1d (B00 CurveParameter)
+
+b00d1 :: Ast1d Float
+b00d1 = Variable1d (B00d1 CurveParameter)
+
+b00d2 :: Ast1d Float
+b00d2 = Variable1d (B00d2 CurveParameter)
+
+b00d3 :: Ast1d Float
+b00d3 = Variable1d (B00d3 CurveParameter)
+
+b01 :: Ast1d Float
+b01 = Variable1d (B01 CurveParameter)
+
+b01d1 :: Ast1d Float
+b01d1 = Variable1d (B01d1 CurveParameter)
+
+b01d2 :: Ast1d Float
+b01d2 = Variable1d (B01d2 CurveParameter)
+
+b01d3 :: Ast1d Float
+b01d3 = Variable1d (B01d3 CurveParameter)
+
+b02 :: Ast1d Float
+b02 = Variable1d (B02 CurveParameter)
+
+b02d1 :: Ast1d Float
+b02d1 = Variable1d (B02d1 CurveParameter)
+
+b02d2 :: Ast1d Float
+b02d2 = Variable1d (B02d2 CurveParameter)
+
+b02d3 :: Ast1d Float
+b02d3 = Variable1d (B02d3 CurveParameter)
+
+b10 :: Ast1d Float
+b10 = Variable1d (B10 CurveParameter)
+
+b10d1 :: Ast1d Float
+b10d1 = Variable1d (B10d1 CurveParameter)
+
+b10d2 :: Ast1d Float
+b10d2 = Variable1d (B10d2 CurveParameter)
+
+b10d3 :: Ast1d Float
+b10d3 = Variable1d (B10d3 CurveParameter)
+
+b11 :: Ast1d Float
+b11 = Variable1d (B11 CurveParameter)
+
+b11d1 :: Ast1d Float
+b11d1 = Variable1d (B11d1 CurveParameter)
+
+b11d2 :: Ast1d Float
+b11d2 = Variable1d (B11d2 CurveParameter)
+
+b11d3 :: Ast1d Float
+b11d3 = Variable1d (B11d3 CurveParameter)
+
 desingularizedCurve1d :: Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float
 desingularizedCurve1d (Constant1d parameter) left middle right =
   Desingularization.value parameter left middle right
@@ -1350,6 +1490,66 @@ compileVariable1d variable = case variable of
             endDerivativeIndices
             parameterIndex
     Compile.addVariable1d instruction
+  B00 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B00 argIndex)
+  B00d1 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B00d1 argIndex)
+  B00d2 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B00d2 argIndex)
+  B00d3 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B00d3 argIndex)
+  B01 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B01 argIndex)
+  B01d1 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B01d1 argIndex)
+  B01d2 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B01d2 argIndex)
+  B01d3 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B01d3 argIndex)
+  B02 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B02 argIndex)
+  B02d1 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B02d1 argIndex)
+  B02d2 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B02d2 argIndex)
+  B02d3 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B02d3 argIndex)
+  B10 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B10 argIndex)
+  B10d1 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B10d1 argIndex)
+  B10d2 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B10d2 argIndex)
+  B10d3 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B10d3 argIndex)
+  B11 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B11 argIndex)
+  B11d1 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B11d1 argIndex)
+  B11d2 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B11d2 argIndex)
+  B11d3 arg -> Compile.do
+    argIndex <- compileVariable1d arg
+    Compile.addVariable1d (Instruction.B11d3 argIndex)
 
 compileValue1d :: Ast1d input -> Compile.Step ValueIndex
 compileValue1d (Constant1d value) = Compile.do

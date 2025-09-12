@@ -107,6 +107,26 @@ data Instruction
   | Blend2d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
   | Blend3d ValueIndex (List ValueIndex) ValueIndex (List ValueIndex) ValueIndex
   | Cube1d VariableIndex
+  | B00 VariableIndex
+  | B00d1 VariableIndex
+  | B00d2 VariableIndex
+  | B00d3 VariableIndex
+  | B01 VariableIndex
+  | B01d1 VariableIndex
+  | B01d2 VariableIndex
+  | B01d3 VariableIndex
+  | B02 VariableIndex
+  | B02d1 VariableIndex
+  | B02d2 VariableIndex
+  | B02d3 VariableIndex
+  | B10 VariableIndex
+  | B10d1 VariableIndex
+  | B10d2 VariableIndex
+  | B10d3 VariableIndex
+  | B11 VariableIndex
+  | B11d1 VariableIndex
+  | B11d2 VariableIndex
+  | B11d3 VariableIndex
   deriving (Eq, Ord, Show)
 
 maxValues :: Int
@@ -515,6 +535,66 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeValueIndex parameterValue
   Cube1d arg ->
     Encode.int 91
+      <> encodeVariableIndex arg
+  B00 arg ->
+    Encode.int 92
+      <> encodeVariableIndex arg
+  B00d1 arg ->
+    Encode.int 93
+      <> encodeVariableIndex arg
+  B00d2 arg ->
+    Encode.int 94
+      <> encodeVariableIndex arg
+  B00d3 arg ->
+    Encode.int 95
+      <> encodeVariableIndex arg
+  B01 arg ->
+    Encode.int 96
+      <> encodeVariableIndex arg
+  B01d1 arg ->
+    Encode.int 97
+      <> encodeVariableIndex arg
+  B01d2 arg ->
+    Encode.int 98
+      <> encodeVariableIndex arg
+  B01d3 arg ->
+    Encode.int 99
+      <> encodeVariableIndex arg
+  B02 arg ->
+    Encode.int 100
+      <> encodeVariableIndex arg
+  B02d1 arg ->
+    Encode.int 101
+      <> encodeVariableIndex arg
+  B02d2 arg ->
+    Encode.int 102
+      <> encodeVariableIndex arg
+  B02d3 arg ->
+    Encode.int 103
+      <> encodeVariableIndex arg
+  B10 arg ->
+    Encode.int 104
+      <> encodeVariableIndex arg
+  B10d1 arg ->
+    Encode.int 105
+      <> encodeVariableIndex arg
+  B10d2 arg ->
+    Encode.int 106
+      <> encodeVariableIndex arg
+  B10d3 arg ->
+    Encode.int 107
+      <> encodeVariableIndex arg
+  B11 arg ->
+    Encode.int 108
+      <> encodeVariableIndex arg
+  B11d1 arg ->
+    Encode.int 109
+      <> encodeVariableIndex arg
+  B11d2 arg ->
+    Encode.int 110
+      <> encodeVariableIndex arg
+  B11d3 arg ->
+    Encode.int 111
       <> encodeVariableIndex arg
 
 return :: Int -> VariableIndex -> Builder

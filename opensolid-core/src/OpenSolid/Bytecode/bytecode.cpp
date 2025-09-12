@@ -255,6 +255,126 @@ blend(
   return bezierValue(numControlPoints, controlPoints, t);
 }
 
+template <class S>
+S
+b00(S t) {
+  return 3.0 * fourthPower(t) - 4.0 * cubed(t) + 1.0;
+}
+
+template <class S>
+S
+b00d1(S t) {
+  return 12.0 * (cubed(t) - squared(t));
+}
+
+template <class S>
+S
+b00d2(S t) {
+  return 36.0 * squared(t) - 24.0 * t;
+}
+
+template <class S>
+S
+b00d3(S t) {
+  return 72.0 * t - 24.0;
+}
+
+template <class S>
+S
+b01(S t) {
+  return 2.0 * fourthPower(t) - 3.0 * cubed(t) + t;
+}
+
+template <class S>
+S
+b01d1(S t) {
+  return 8.0 * cubed(t) - 9.0 * squared(t) + 1.0;
+}
+
+template <class S>
+S
+b01d2(S t) {
+  return 24.0 * squared(t) - 18.0 * t;
+}
+
+template <class S>
+S
+b01d3(S t) {
+  return 48.0 * t - 18.0;
+}
+
+template <class S>
+S
+b02(S t) {
+  return 0.5 * fourthPower(t) - cubed(t) + 0.5 * squared(t);
+}
+
+template <class S>
+S
+b02d1(S t) {
+  return 2.0 * cubed(t) - 3.0 * squared(t) + t;
+}
+
+template <class S>
+S
+b02d2(S t) {
+  return 6.0 * squared(t) - 6.0 * t + 1.0;
+}
+
+template <class S>
+S
+b02d3(S t) {
+  return 12.0 * t - 6.0;
+}
+
+template <class S>
+S
+b10(S t) {
+  return -3.0 * fourthPower(t) + 4.0 * cubed(t);
+}
+
+template <class S>
+S
+b10d1(S t) {
+  return 12.0 * (squared(t) - cubed(t));
+}
+
+template <class S>
+S
+b10d2(S t) {
+  return -36.0 * squared(t) + 24.0 * t;
+}
+
+template <class S>
+S
+b10d3(S t) {
+  return -72.0 * t + 24.0;
+}
+
+template <class S>
+S
+b11(S t) {
+  return fourthPower(t) - cubed(t);
+}
+
+template <class S>
+S
+b11d1(S t) {
+  return 4.0 * cubed(t) - 3.0 * squared(t);
+}
+
+template <class S>
+S
+b11d2(S t) {
+  return 12.0 * squared(t) - 6.0 * t;
+}
+
+template <class S>
+S
+b11d3(S t) {
+  return 24.0 * t - 6.0;
+}
+
 double
 opensolid_blend_values_1d(
   double startValue,
@@ -1123,6 +1243,126 @@ computeValue(
         double input = getScalar();
         double* output = getScalarPointer();
         *output = input * input * input;
+        break;
+      }
+      case Blend00: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b00(input);
+        break;
+      }
+      case Blend00d1: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b00d1(input);
+        break;
+      }
+      case Blend00d2: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b00d2(input);
+        break;
+      }
+      case Blend00d3: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b00d3(input);
+        break;
+      }
+      case Blend01: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b01(input);
+        break;
+      }
+      case Blend01d1: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b01d1(input);
+        break;
+      }
+      case Blend01d2: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b01d2(input);
+        break;
+      }
+      case Blend01d3: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b01d3(input);
+        break;
+      }
+      case Blend02: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b02(input);
+        break;
+      }
+      case Blend02d1: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b02d1(input);
+        break;
+      }
+      case Blend02d2: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b02d2(input);
+        break;
+      }
+      case Blend02d3: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b02d3(input);
+        break;
+      }
+      case Blend10: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b10(input);
+        break;
+      }
+      case Blend10d1: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b10d1(input);
+        break;
+      }
+      case Blend10d2: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b10d2(input);
+        break;
+      }
+      case Blend10d3: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b10d3(input);
+        break;
+      }
+      case Blend11: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b11(input);
+        break;
+      }
+      case Blend11d1: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b11d1(input);
+        break;
+      }
+      case Blend11d2: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b11d2(input);
+        break;
+      }
+      case Blend11d3: {
+        double input = getScalar();
+        double* output = getScalarPointer();
+        *output = b11d3(input);
         break;
       }
       case OPCODE_END: {
@@ -2160,6 +2400,126 @@ computeBounds(
         Bounds input = getScalar();
         Bounds* output = getScalarPointer();
         *output = input.cubed();
+        break;
+      }
+      case Blend00: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b00(input);
+        break;
+      }
+      case Blend00d1: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b00d1(input);
+        break;
+      }
+      case Blend00d2: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b00d2(input);
+        break;
+      }
+      case Blend00d3: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b00d3(input);
+        break;
+      }
+      case Blend01: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b01(input);
+        break;
+      }
+      case Blend01d1: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b01d1(input);
+        break;
+      }
+      case Blend01d2: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b01d2(input);
+        break;
+      }
+      case Blend01d3: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b01d3(input);
+        break;
+      }
+      case Blend02: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b02(input);
+        break;
+      }
+      case Blend02d1: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b02d1(input);
+        break;
+      }
+      case Blend02d2: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b02d2(input);
+        break;
+      }
+      case Blend02d3: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b02d3(input);
+        break;
+      }
+      case Blend10: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b10(input);
+        break;
+      }
+      case Blend10d1: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b10d1(input);
+        break;
+      }
+      case Blend10d2: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b10d2(input);
+        break;
+      }
+      case Blend10d3: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b10d3(input);
+        break;
+      }
+      case Blend11: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b11(input);
+        break;
+      }
+      case Blend11d1: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b11d1(input);
+        break;
+      }
+      case Blend11d2: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b11d2(input);
+        break;
+      }
+      case Blend11d3: {
+        Bounds input = getScalar();
+        Bounds* output = getScalarPointer();
+        *output = b11d3(input);
         break;
       }
       case OPCODE_END: {
