@@ -3,3 +3,5 @@
 set -euo pipefail
 
 cabal run --enable-profiling --profiling-detail=all-functions $1 -- +RTS -p -RTS
+profiteur $1.prof
+open $1.prof.html
