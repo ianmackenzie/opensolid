@@ -183,78 +183,6 @@ bezierValue(int numControlPoints, const V* controlPoints, S t) {
   return bezierBlossom(numControlPoints, controlPoints, t, t, 0);
 }
 
-template <class V>
-V
-hermiteControlPointOffset(int controlPointIndex, const V* scaledDerivatives) {
-  V result{};
-  for (int derivativeOrder = 1; derivativeOrder <= controlPointIndex; ++derivativeOrder) {
-    int coefficient = choose(controlPointIndex - 1, derivativeOrder - 1);
-    result = result + coefficient * scaledDerivatives[derivativeOrder - 1];
-  }
-  return result;
-}
-
-template <class V>
-void
-hermiteToBezier(
-  V startValue,
-  int numStartDerivatives,
-  V* startDerivatives,
-  V endValue,
-  int numEndDerivatives,
-  V* endDerivatives,
-  V* controlPoints
-) {
-  int curveDegree = numStartDerivatives + numEndDerivatives + 1;
-  double scale;
-  scale = 1.0;
-  for (int i = 0; i < numStartDerivatives; ++i) {
-    scale /= (curveDegree - i);
-    startDerivatives[i] = startDerivatives[i] * scale;
-  }
-  scale = 1.0;
-  for (int i = 0; i < numEndDerivatives; ++i) {
-    scale /= -(curveDegree - i);
-    endDerivatives[i] = endDerivatives[i] * scale;
-  }
-  controlPoints[0] = startValue;
-  controlPoints[curveDegree] = endValue;
-  for (int forwardIndex = 1; forwardIndex <= numStartDerivatives; ++forwardIndex) {
-    V offset = hermiteControlPointOffset(forwardIndex, startDerivatives);
-    controlPoints[forwardIndex] = controlPoints[forwardIndex - 1] + offset;
-  }
-  for (int reverseIndex = 1; reverseIndex <= numEndDerivatives; ++reverseIndex) {
-    V offset = hermiteControlPointOffset(reverseIndex, endDerivatives);
-    int forwardIndex = curveDegree - reverseIndex;
-    controlPoints[forwardIndex] = controlPoints[forwardIndex + 1] + offset;
-  }
-}
-
-template <class V, class S>
-V
-blend(
-  V startValue,
-  int numStartDerivatives,
-  V* startDerivatives,
-  V endValue,
-  int numEndDerivatives,
-  V* endDerivatives,
-  S t
-) {
-  int numControlPoints = numStartDerivatives + numEndDerivatives + 2;
-  V* controlPoints = (V*)alloca(sizeof(V) * numControlPoints);
-  hermiteToBezier(
-    startValue,
-    numStartDerivatives,
-    startDerivatives,
-    endValue,
-    numEndDerivatives,
-    endDerivatives,
-    controlPoints
-  );
-  return bezierValue(numControlPoints, controlPoints, t);
-}
-
 template <class S>
 S
 b00(S t) {
@@ -375,54 +303,6 @@ b11d3(S t) {
   return 24.0 * t - 6.0;
 }
 
-double
-opensolid_blend_values_1d(
-  double startValue,
-  int numStartDerivatives,
-  double* startDerivatives,
-  double endValue,
-  int numEndDerivatives,
-  double* endDerivatives,
-  double t
-) {
-  return blend(
-    startValue,
-    numStartDerivatives,
-    startDerivatives,
-    endValue,
-    numEndDerivatives,
-    endDerivatives,
-    t
-  );
-}
-
-void
-opensolid_blend_bounds_1d(
-  double startValueLower,
-  double startValueUpper,
-  int numStartDerivatives,
-  double* startDerivatives,
-  double endValueLower,
-  double endValueUpper,
-  int numEndDerivatives,
-  double* endDerivatives,
-  double tLower,
-  double tUpper,
-  double* returnValuesPointer
-) {
-  Bounds result = blend(
-    Bounds(startValueLower, startValueUpper),
-    numStartDerivatives,
-    (Bounds*)startDerivatives,
-    Bounds(endValueLower, endValueUpper),
-    numEndDerivatives,
-    (Bounds*)endDerivatives,
-    Bounds(tLower, tUpper)
-  );
-  returnValuesPointer[0] = result.lower;
-  returnValuesPointer[1] = result.upper;
-}
-
 void
 computeValue(
   const uint16_t* wordsPointer,
@@ -470,22 +350,6 @@ computeValue(
   };
   auto getVector3d = [&]() -> Vector3d<double> {
     return *getVector3dPointer();
-  };
-  auto getScalarValuePointer = [&]() -> const double* {
-    int taggedIndex = getInt();
-    bool isConstant = taggedIndex >= 32768;
-    const double* basePointer = isConstant ? constantsPointer : variablesPointer;
-    int index = isConstant ? taggedIndex - 32768 : taggedIndex;
-    return basePointer + index;
-  };
-  auto getScalarValue = [&]() -> double {
-    return *getScalarValuePointer();
-  };
-  auto getVector2dValue = [&]() -> Vector2d<double> {
-    return *(Vector2d<double>*)getScalarValuePointer();
-  };
-  auto getVector3dValue = [&]() -> Vector3d<double> {
-    return *(Vector3d<double>*)getScalarValuePointer();
   };
   while (true) {
     int opcode = getInt();
@@ -1157,88 +1021,6 @@ computeValue(
         }
         break;
       }
-      case Blend1d: {
-        double startValue = getScalarValue();
-        int numStartDerivatives = getInt();
-        double* startDerivatives = (double*)alloca(sizeof(double) * numStartDerivatives);
-        for (int i = 0; i < numStartDerivatives; ++i) {
-          startDerivatives[i] = getScalarValue();
-        }
-        double endValue = getScalarValue();
-        int numEndDerivatives = getInt();
-        double* endDerivatives = (double*)alloca(sizeof(double) * numEndDerivatives);
-        for (int i = 0; i < numEndDerivatives; ++i) {
-          endDerivatives[i] = getScalarValue();
-        }
-        double t = getScalar();
-        double* output = getScalarPointer();
-        *output = blend(
-          startValue,
-          numStartDerivatives,
-          startDerivatives,
-          endValue,
-          numEndDerivatives,
-          endDerivatives,
-          t
-        );
-        break;
-      }
-      case Blend2d: {
-        Vector2d<double> startValue = getVector2dValue();
-        int numStartDerivatives = getInt();
-        Vector2d<double>* startDerivatives =
-          (Vector2d<double>*)alloca(sizeof(Vector2d<double>) * numStartDerivatives);
-        for (int i = 0; i < numStartDerivatives; ++i) {
-          startDerivatives[i] = getVector2dValue();
-        }
-        Vector2d<double> endValue = getVector2dValue();
-        int numEndDerivatives = getInt();
-        Vector2d<double>* endDerivatives =
-          (Vector2d<double>*)alloca(sizeof(Vector2d<double>) * numEndDerivatives);
-        for (int i = 0; i < numEndDerivatives; ++i) {
-          endDerivatives[i] = getVector2dValue();
-        }
-        double t = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = blend(
-          startValue,
-          numStartDerivatives,
-          startDerivatives,
-          endValue,
-          numEndDerivatives,
-          endDerivatives,
-          t
-        );
-        break;
-      }
-      case Blend3d: {
-        Vector3d<double> startValue = getVector3dValue();
-        int numStartDerivatives = getInt();
-        Vector3d<double>* startDerivatives =
-          (Vector3d<double>*)alloca(sizeof(Vector3d<double>) * numStartDerivatives);
-        for (int i = 0; i < numStartDerivatives; ++i) {
-          startDerivatives[i] = getVector3dValue();
-        }
-        Vector3d<double> endValue = getVector3dValue();
-        int numEndDerivatives = getInt();
-        Vector3d<double>* endDerivatives =
-          (Vector3d<double>*)alloca(sizeof(Vector3d<double>) * numEndDerivatives);
-        for (int i = 0; i < numEndDerivatives; ++i) {
-          endDerivatives[i] = getVector3dValue();
-        }
-        double t = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = blend(
-          startValue,
-          numStartDerivatives,
-          startDerivatives,
-          endValue,
-          numEndDerivatives,
-          endDerivatives,
-          t
-        );
-        break;
-      }
       case Cube1d: {
         double input = getScalar();
         double* output = getScalarPointer();
@@ -1616,33 +1398,6 @@ computeBounds(
   auto getVector3d = [&]() -> Vector3d<Bounds> {
     return *getVector3dPointer();
   };
-  auto getScalarValue = [&]() -> Bounds {
-    int taggedIndex = getInt();
-    if (taggedIndex >= 32768) {
-      return Bounds(constantsPointer[taggedIndex - 32768]);
-    } else {
-      return variablesPointer[taggedIndex];
-    }
-  };
-  auto getVector2dValue = [&]() -> Vector2d<Bounds> {
-    int taggedIndex = getInt();
-    if (taggedIndex >= 32768) {
-      const double* components = constantsPointer + (taggedIndex - 32768);
-      return Vector2d<Bounds>(components[0], components[1]);
-    } else {
-      return *(Vector2d<Bounds>*)(variablesPointer + taggedIndex);
-    }
-  };
-  auto getVector3dValue = [&]() -> Vector3d<Bounds> {
-    int taggedIndex = getInt();
-    if (taggedIndex >= 32768) {
-      const double* components = constantsPointer + (taggedIndex - 32768);
-      return Vector3d<Bounds>(components[0], components[1], components[2]);
-    } else {
-      return *(Vector3d<Bounds>*)(variablesPointer + taggedIndex);
-    }
-  };
-
   while (true) {
     int opcode = getInt();
     assert(opcode < OPCODE_END && "Unrecognized opcode");
@@ -2311,89 +2066,6 @@ computeBounds(
         } else {
           *output = middle;
         }
-        break;
-      }
-      case Blend1d: {
-        Bounds startValue = getScalarValue();
-        int numStartDerivatives = getInt();
-        Bounds* startDerivatives = (Bounds*)alloca(sizeof(Bounds) * numStartDerivatives);
-        for (int i = 0; i < numStartDerivatives; ++i) {
-          startDerivatives[i] = getScalarValue();
-        }
-        Bounds endValue = getScalarValue();
-        int numEndDerivatives = getInt();
-        Bounds* endDerivatives = (Bounds*)alloca(sizeof(Bounds) * numEndDerivatives);
-        for (int i = 0; i < numEndDerivatives; ++i) {
-          endDerivatives[i] = getScalarValue();
-        }
-        Bounds t = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = blend(
-          startValue,
-          numStartDerivatives,
-          startDerivatives,
-          endValue,
-          numEndDerivatives,
-          endDerivatives,
-          t
-        );
-        break;
-      }
-
-      case Blend2d: {
-        Vector2d<Bounds> startValue = getVector2dValue();
-        int numStartDerivatives = getInt();
-        Vector2d<Bounds>* startDerivatives =
-          (Vector2d<Bounds>*)alloca(sizeof(Vector2d<Bounds>) * numStartDerivatives);
-        for (int i = 0; i < numStartDerivatives; ++i) {
-          startDerivatives[i] = getVector2dValue();
-        }
-        Vector2d<Bounds> endValue = getVector2dValue();
-        int numEndDerivatives = getInt();
-        Vector2d<Bounds>* endDerivatives =
-          (Vector2d<Bounds>*)alloca(sizeof(Vector2d<Bounds>) * numEndDerivatives);
-        for (int i = 0; i < numEndDerivatives; ++i) {
-          endDerivatives[i] = getVector2dValue();
-        }
-        Bounds t = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = blend(
-          startValue,
-          numStartDerivatives,
-          startDerivatives,
-          endValue,
-          numEndDerivatives,
-          endDerivatives,
-          t
-        );
-        break;
-      }
-      case Blend3d: {
-        Vector3d<Bounds> startValue = getVector3dValue();
-        int numStartDerivatives = getInt();
-        Vector3d<Bounds>* startDerivatives =
-          (Vector3d<Bounds>*)alloca(sizeof(Vector3d<Bounds>) * numStartDerivatives);
-        for (int i = 0; i < numStartDerivatives; ++i) {
-          startDerivatives[i] = getVector3dValue();
-        }
-        Vector3d<Bounds> endValue = getVector3dValue();
-        int numEndDerivatives = getInt();
-        Vector3d<Bounds>* endDerivatives =
-          (Vector3d<Bounds>*)alloca(sizeof(Vector3d<Bounds>) * numEndDerivatives);
-        for (int i = 0; i < numEndDerivatives; ++i) {
-          endDerivatives[i] = getVector3dValue();
-        }
-        Bounds t = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = blend(
-          startValue,
-          numStartDerivatives,
-          startDerivatives,
-          endValue,
-          numEndDerivatives,
-          endDerivatives,
-          t
-        );
         break;
       }
       case Cube1d: {

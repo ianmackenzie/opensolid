@@ -38,9 +38,6 @@ module OpenSolid.Bytecode.Ast
   , surfaceParameters
   , xy
   , bezierCurve1d
-  , blend1d
-  , blend2d
-  , blend3d
   , bezierCurve2d
   , bezierCurve3d
   , desingularizedCurve1d
@@ -87,11 +84,7 @@ where
 import OpenSolid.Bytecode.Compile qualified as Compile
 import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
-import OpenSolid.Bytecode.Instruction
-  ( ConstantIndex
-  , ValueIndex (ConstantValue, VariableValue)
-  , VariableIndex (VariableIndex)
-  )
+import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
 import OpenSolid.Bytecode.Instruction qualified as Instruction
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Float qualified as Float
@@ -99,7 +92,6 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
@@ -179,13 +171,6 @@ data Variable1d input where
     Variable1d input ->
     Variable1d input ->
     Variable1d input
-  Blend1d ::
-    Ast1d input ->
-    List (Ast1d input) ->
-    Ast1d input ->
-    List (Ast1d input) ->
-    Ast1d input ->
-    Variable1d input
   B00 :: Variable1d input -> Variable1d input
   B00d1 :: Variable1d input -> Variable1d input
   B00d2 :: Variable1d input -> Variable1d input
@@ -249,13 +234,6 @@ data Variable2d input where
     Variable2d input ->
     Variable2d input ->
     Variable2d input
-  Blend2d ::
-    Ast2d input ->
-    List (Ast2d input) ->
-    Ast2d input ->
-    List (Ast2d input) ->
-    Ast1d input ->
-    Variable2d input
 
 deriving instance Eq (Variable2d input)
 
@@ -296,13 +274,6 @@ data Variable3d input where
     Variable3d input ->
     Variable3d input ->
     Variable3d input ->
-    Variable3d input
-  Blend3d ::
-    Ast3d input ->
-    List (Ast3d input) ->
-    Ast3d input ->
-    List (Ast3d input) ->
-    Ast1d input ->
     Variable3d input
 
 deriving instance Eq (Variable3d input)
@@ -354,14 +325,6 @@ instance Composition (Variable1d input) (Variable1d Float) (Variable1d input) wh
   DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
   Desingularized1d parameter left middle right . input =
     Desingularized1d (parameter . input) (left . input) (middle . input) (right . input)
-  Blend1d startValue startDerivatives endValue endDerivatives parameter . input = do
-    let inputAst = Variable1d input
-    Blend1d
-      (startValue . inputAst)
-      (List.map (. inputAst) startDerivatives)
-      (endValue . inputAst)
-      (List.map (. inputAst) endDerivatives)
-      (parameter . inputAst)
   B00 arg . input = B00 (arg . input)
   B00d1 arg . input = B00d1 (arg . input)
   B00d2 arg . input = B00d2 (arg . input)
@@ -410,14 +373,6 @@ instance Composition (Variable1d input) (Variable2d Float) (Variable2d input) wh
   ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
   Desingularized2d parameter left middle right . input =
     Desingularized2d (parameter . input) (left . input) (middle . input) (right . input)
-  Blend2d startValue startDerivatives endValue endDerivatives parameter . input = do
-    let inputAst = Variable1d input
-    Blend2d
-      (startValue . inputAst)
-      (List.map (. inputAst) startDerivatives)
-      (endValue . inputAst)
-      (List.map (. inputAst) endDerivatives)
-      (parameter . inputAst)
 
 instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
   Constant3d outer . _ = Constant3d outer
@@ -445,14 +400,6 @@ instance Composition (Variable1d input) (Variable3d Float) (Variable3d input) wh
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
   Desingularized3d parameter left middle right . input =
     Desingularized3d (parameter . input) (left . input) (middle . input) (right . input)
-  Blend3d startValue startDerivatives endValue endDerivatives parameter . input = do
-    let inputAst = Variable1d input
-    Blend3d
-      (startValue . inputAst)
-      (List.map (. inputAst) startDerivatives)
-      (endValue . inputAst)
-      (List.map (. inputAst) endDerivatives)
-      (parameter . inputAst)
 
 instance Composition (Ast2d input) (Ast1d UvPoint) (Ast1d input) where
   Constant1d outer . _ = Constant1d outer
@@ -495,14 +442,6 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Variable1d input) 
   DotVariableConstant3d lhs rhs . input = DotVariableConstant3d (lhs . input) rhs
   Desingularized1d parameter left middle right . input =
     Desingularized1d (parameter . input) (left . input) (middle . input) (right . input)
-  Blend1d startValue startDerivatives endValue endDerivatives parameter . input = do
-    let inputAst = Variable2d input
-    Blend1d
-      (startValue . inputAst)
-      (List.map (. inputAst) startDerivatives)
-      (endValue . inputAst)
-      (List.map (. inputAst) endDerivatives)
-      (parameter . inputAst)
   B00 arg . input = B00 (arg . input)
   B00d1 arg . input = B00d1 (arg . input)
   B00d2 arg . input = B00d2 (arg . input)
@@ -552,14 +491,6 @@ instance Composition (Variable2d input) (Variable2d UvPoint) (Variable2d input) 
   ProjectPoint3d plane point . input = ProjectPoint3d plane (point . input)
   Desingularized2d parameter left middle right . input =
     Desingularized2d (parameter . input) (left . input) (middle . input) (right . input)
-  Blend2d startValue startDerivatives endValue endDerivatives parameter . input = do
-    let inputAst = Variable2d input
-    Blend2d
-      (startValue . inputAst)
-      (List.map (. inputAst) startDerivatives)
-      (endValue . inputAst)
-      (List.map (. inputAst) endDerivatives)
-      (parameter . inputAst)
 
 instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
   Constant3d outer . _ = Constant3d outer
@@ -587,14 +518,6 @@ instance Composition (Variable2d input) (Variable3d UvPoint) (Variable3d input) 
   PlacePoint2d plane point . input = PlacePoint2d plane (point . input)
   Desingularized3d parameter left middle right . input =
     Desingularized3d (parameter . input) (left . input) (middle . input) (right . input)
-  Blend3d startValue startDerivatives endValue endDerivatives parameter . input = do
-    let inputAst = Variable2d input
-    Blend3d
-      (startValue . inputAst)
-      (List.map (. inputAst) startDerivatives)
-      (endValue . inputAst)
-      (List.map (. inputAst) endDerivatives)
-      (parameter . inputAst)
 
 constant1d :: Qty units -> Ast1d input
 constant1d value = Constant1d (Qty.coerce value)
@@ -1154,45 +1077,15 @@ bezierCurve1d (NonEmpty.One value) = constant1d value
 bezierCurve1d controlPoints =
   Variable1d (BezierCurve1d (NonEmpty.map Qty.coerce controlPoints) CurveParameter)
 
-blend1d ::
-  Ast1d input ->
-  List (Ast1d input) ->
-  Ast1d input ->
-  List (Ast1d input) ->
-  Ast1d input ->
-  Ast1d input
-blend1d startValue startDerivatives endValue endDerivatives param =
-  Variable1d (Blend1d startValue startDerivatives endValue endDerivatives param)
-
 bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast2d Float
 bezierCurve2d (NonEmpty.One value) = constant2d value
 bezierCurve2d controlPoints =
   Variable2d (BezierCurve2d (NonEmpty.map Vector2d.coerce controlPoints) CurveParameter)
 
-blend2d ::
-  Ast2d input ->
-  List (Ast2d input) ->
-  Ast2d input ->
-  List (Ast2d input) ->
-  Ast1d input ->
-  Ast2d input
-blend2d startValue startDerivatives endValue endDerivatives param =
-  Variable2d (Blend2d startValue startDerivatives endValue endDerivatives param)
-
 bezierCurve3d :: NonEmpty (Vector3d (space @ units)) -> Ast3d Float
 bezierCurve3d (NonEmpty.One value) = constant3d value
 bezierCurve3d controlPoints =
   Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter)
-
-blend3d ::
-  Ast3d input ->
-  List (Ast3d input) ->
-  Ast3d input ->
-  List (Ast3d input) ->
-  Ast1d input ->
-  Ast3d input
-blend3d startValue startDerivatives endValue endDerivatives param =
-  Variable3d (Blend3d startValue startDerivatives endValue endDerivatives param)
 
 b00 :: Ast1d Float
 b00 = Variable1d (B00 CurveParameter)
@@ -1476,20 +1369,6 @@ compileVariable1d variable = case variable of
     rightIndex <- compileVariable1d right
     let instruction = Instruction.Desingularized1d parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable1d instruction
-  Blend1d startValue startDerivatives endValue endDerivatives parameter -> Compile.do
-    startValueIndex <- compileValue1d startValue
-    startDerivativeIndices <- Compile.collect compileValue1d startDerivatives
-    endValueIndex <- compileValue1d endValue
-    endDerivativeIndices <- Compile.collect compileValue1d endDerivatives
-    parameterIndex <- compileValue1d parameter
-    let instruction =
-          Instruction.Blend1d
-            startValueIndex
-            startDerivativeIndices
-            endValueIndex
-            endDerivativeIndices
-            parameterIndex
-    Compile.addVariable1d instruction
   B00 arg -> Compile.do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B00 argIndex)
@@ -1550,14 +1429,6 @@ compileVariable1d variable = case variable of
   B11d3 arg -> Compile.do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B11d3 argIndex)
-
-compileValue1d :: Ast1d input -> Compile.Step ValueIndex
-compileValue1d (Constant1d value) = Compile.do
-  constantIndex <- Compile.addConstant1d value
-  Compile.return (ConstantValue constantIndex)
-compileValue1d (Variable1d variable) = Compile.do
-  variableIndex <- compileVariable1d variable
-  Compile.return (VariableValue variableIndex)
 
 coordinates2d :: Vector2d Coordinates -> NonEmpty Float
 coordinates2d (Vector2d x y) = NonEmpty.two x y
@@ -1648,28 +1519,6 @@ compileVariable2d variable = case variable of
     rightIndex <- compileVariable2d right
     let instruction = Instruction.Desingularized2d parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable2d instruction
-  Blend2d startValue startDerivatives endValue endDerivatives parameter -> Compile.do
-    startValueIndex <- compileValue2d startValue
-    startDerivativeIndices <- Compile.collect compileValue2d startDerivatives
-    endValueIndex <- compileValue2d endValue
-    endDerivativeIndices <- Compile.collect compileValue2d endDerivatives
-    parameterIndex <- compileValue1d parameter
-    let instruction =
-          Instruction.Blend2d
-            startValueIndex
-            startDerivativeIndices
-            endValueIndex
-            endDerivativeIndices
-            parameterIndex
-    Compile.addVariable2d instruction
-
-compileValue2d :: Ast2d input -> Compile.Step ValueIndex
-compileValue2d (Constant2d value) = Compile.do
-  constantIndex <- Compile.addConstant2d value
-  Compile.return (ConstantValue constantIndex)
-compileValue2d (Variable2d variable) = Compile.do
-  variableIndex <- compileVariable2d variable
-  Compile.return (VariableValue variableIndex)
 
 compileVariable3d :: Variable3d input -> Compile.Step VariableIndex
 compileVariable3d variable = case variable of
@@ -1749,28 +1598,6 @@ compileVariable3d variable = case variable of
     rightIndex <- compileVariable3d right
     let instruction = Instruction.Desingularized3d parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable3d instruction
-  Blend3d startValue startDerivatives endValue endDerivatives parameter -> Compile.do
-    startValueIndex <- compileValue3d startValue
-    startDerivativeIndices <- Compile.collect compileValue3d startDerivatives
-    endValueIndex <- compileValue3d endValue
-    endDerivativeIndices <- Compile.collect compileValue3d endDerivatives
-    parameterIndex <- compileValue1d parameter
-    let instruction =
-          Instruction.Blend3d
-            startValueIndex
-            startDerivativeIndices
-            endValueIndex
-            endDerivativeIndices
-            parameterIndex
-    Compile.addVariable3d instruction
-
-compileValue3d :: Ast3d input -> Compile.Step ValueIndex
-compileValue3d (Constant3d value) = Compile.do
-  constantIndex <- Compile.addConstant3d value
-  Compile.return (ConstantValue constantIndex)
-compileValue3d (Variable3d variable) = Compile.do
-  variableIndex <- compileVariable3d variable
-  Compile.return (VariableValue variableIndex)
 
 compileCurve1d :: Ast1d Float -> Compiled Float Float
 compileCurve1d (Constant1d val) = Evaluate.Constant val
