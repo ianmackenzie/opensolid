@@ -1599,21 +1599,19 @@ class BezierCurve output where
   bezierCurve :: NonEmpty output -> Expression Float output
 
 instance BezierCurve (Qty units) where
-  bezierCurve controlPoints = curve1d (Ast.bezierCurve1d controlPoints Ast.curveParameter)
+  bezierCurve controlPoints = curve1d (Ast.bezierCurve1d controlPoints)
 
 instance BezierCurve (Vector2d (space @ units)) where
-  bezierCurve controlPoints = vectorCurve2d (Ast.bezierCurve2d controlPoints Ast.curveParameter)
+  bezierCurve controlPoints = vectorCurve2d (Ast.bezierCurve2d controlPoints)
 
 instance BezierCurve (Point2d (space @ units)) where
-  bezierCurve controlPoints =
-    curve2d (Ast.bezierCurve2d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
+  bezierCurve controlPoints = curve2d (Ast.bezierCurve2d (Data.Coerce.coerce controlPoints))
 
 instance BezierCurve (Vector3d (space @ units)) where
-  bezierCurve controlPoints = vectorCurve3d (Ast.bezierCurve3d controlPoints Ast.curveParameter)
+  bezierCurve controlPoints = vectorCurve3d (Ast.bezierCurve3d controlPoints)
 
 instance BezierCurve (Point3d (space @ units)) where
-  bezierCurve controlPoints =
-    curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints) Ast.curveParameter)
+  bezierCurve controlPoints = curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints))
 
 class Blend input value derivative where
   blend ::

@@ -1149,10 +1149,10 @@ xy (Constant1d x) (Variable1d y) = Variable2d (CY x y)
 xy (Variable1d x) (Constant1d y) = Variable2d (XC x y)
 xy (Variable1d x) (Variable1d y) = Variable2d (XY x y)
 
-bezierCurve1d :: NonEmpty (Qty units) -> Ast1d input -> Ast1d input
-bezierCurve1d (NonEmpty.One value) _ = constant1d value
-bezierCurve1d controlPoints param =
-  Variable1d (BezierCurve1d (NonEmpty.map Qty.coerce controlPoints) CurveParameter) . param
+bezierCurve1d :: NonEmpty (Qty units) -> Ast1d Float
+bezierCurve1d (NonEmpty.One value) = constant1d value
+bezierCurve1d controlPoints =
+  Variable1d (BezierCurve1d (NonEmpty.map Qty.coerce controlPoints) CurveParameter)
 
 blend1d ::
   Ast1d input ->
@@ -1164,10 +1164,10 @@ blend1d ::
 blend1d startValue startDerivatives endValue endDerivatives param =
   Variable1d (Blend1d startValue startDerivatives endValue endDerivatives param)
 
-bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast1d input -> Ast2d input
-bezierCurve2d (NonEmpty.One value) _ = constant2d value
-bezierCurve2d controlPoints param =
-  Variable2d (BezierCurve2d (NonEmpty.map Vector2d.coerce controlPoints) CurveParameter) . param
+bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast2d Float
+bezierCurve2d (NonEmpty.One value) = constant2d value
+bezierCurve2d controlPoints =
+  Variable2d (BezierCurve2d (NonEmpty.map Vector2d.coerce controlPoints) CurveParameter)
 
 blend2d ::
   Ast2d input ->
@@ -1179,10 +1179,10 @@ blend2d ::
 blend2d startValue startDerivatives endValue endDerivatives param =
   Variable2d (Blend2d startValue startDerivatives endValue endDerivatives param)
 
-bezierCurve3d :: NonEmpty (Vector3d (space @ units)) -> Ast1d input -> Ast3d input
-bezierCurve3d (NonEmpty.One value) _ = constant3d value
-bezierCurve3d controlPoints param =
-  Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter) . param
+bezierCurve3d :: NonEmpty (Vector3d (space @ units)) -> Ast3d Float
+bezierCurve3d (NonEmpty.One value) = constant3d value
+bezierCurve3d controlPoints =
+  Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter)
 
 blend3d ::
   Ast3d input ->
