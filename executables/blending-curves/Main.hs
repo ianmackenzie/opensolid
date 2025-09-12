@@ -29,6 +29,7 @@ main = do
           , Plot.curveWith [Drawing2d.strokeColor Color.grey] (yScale * (a0' + a1'))
           ]
   let curvesDrawing = drawing 1.0 a0 b0 c0 a1 b1
+  let curvesDrawing2 = drawing 1.0 Curve.b00 Curve.b01 Curve.b02 Curve.b10 Curve.b11
   let derivativesDrawing =
         drawing
           0.5
@@ -37,6 +38,14 @@ main = do
           c0.derivative
           a1.derivative
           b1.derivative
+  let derivativesDrawing2 =
+        drawing
+          0.5
+          Curve.b00.derivative
+          Curve.b01.derivative
+          Curve.b02.derivative
+          Curve.b10.derivative
+          Curve.b11.derivative
   let secondDerivativesDrawing =
         drawing
           0.1
@@ -45,6 +54,14 @@ main = do
           c0.derivative.derivative
           a1.derivative.derivative
           b1.derivative.derivative
+  let secondDerivativesDrawing2 =
+        drawing
+          0.1
+          Curve.b00.derivative.derivative
+          Curve.b01.derivative.derivative
+          Curve.b02.derivative.derivative
+          Curve.b10.derivative.derivative
+          Curve.b11.derivative.derivative
   let thirdDerivativesDrawing =
         drawing
           0.04
@@ -53,6 +70,14 @@ main = do
           c0.derivative.derivative.derivative
           a1.derivative.derivative.derivative
           b1.derivative.derivative.derivative
+  let thirdDerivativesDrawing2 =
+        drawing
+          0.04
+          Curve.b00.derivative.derivative.derivative
+          Curve.b01.derivative.derivative.derivative
+          Curve.b02.derivative.derivative.derivative
+          Curve.b10.derivative.derivative.derivative
+          Curve.b11.derivative.derivative.derivative
   let fourthDerivativesDrawing =
         drawing
           0.02
@@ -61,14 +86,32 @@ main = do
           c0.derivative.derivative.derivative.derivative
           a1.derivative.derivative.derivative.derivative
           b1.derivative.derivative.derivative.derivative
+  let fourthDerivativesDrawing2 =
+        drawing
+          0.02
+          Curve.b00.derivative.derivative.derivative.derivative
+          Curve.b01.derivative.derivative.derivative.derivative
+          Curve.b02.derivative.derivative.derivative.derivative
+          Curve.b10.derivative.derivative.derivative.derivative
+          Curve.b11.derivative.derivative.derivative.derivative
   let viewBox y1 y2 = Plot.viewBox (Point2d -0.1 y1) (Point2d 1.1 y2)
   Drawing2d.writeSvg "executables/blending-curves/curves.svg" (viewBox -0.5 1.5) curvesDrawing
+  Drawing2d.writeSvg "executables/blending-curves/curves2.svg" (viewBox -0.5 1.5) curvesDrawing2
   Drawing2d.writeSvg "executables/blending-curves/derivatives.svg" (viewBox -1.5 1.5) derivativesDrawing
+  Drawing2d.writeSvg "executables/blending-curves/derivatives2.svg" (viewBox -1.5 1.5) derivativesDrawing2
   Drawing2d.writeSvg "executables/blending-curves/second-derivatives.svg" (viewBox -1.5 1.5) secondDerivativesDrawing
+  Drawing2d.writeSvg "executables/blending-curves/second-derivatives2.svg" (viewBox -1.5 1.5) secondDerivativesDrawing2
   Drawing2d.writeSvg "executables/blending-curves/third-derivatives.svg" (viewBox -1.5 1.5) thirdDerivativesDrawing
+  Drawing2d.writeSvg "executables/blending-curves/third-derivatives2.svg" (viewBox -1.5 1.5) thirdDerivativesDrawing2
   Drawing2d.writeSvg "executables/blending-curves/fourth-derivatives.svg" (viewBox -1.5 1.5) fourthDerivativesDrawing
+  Drawing2d.writeSvg "executables/blending-curves/fourth-derivatives2.svg" (viewBox -1.5 1.5) fourthDerivativesDrawing2
   IO.printLine ("a0 fourth derivative: " <> Text.float (Curve.evaluate a0.derivative.derivative.derivative.derivative 0.0))
   IO.printLine ("b0 fourth derivative: " <> Text.float (Curve.evaluate b0.derivative.derivative.derivative.derivative 0.0))
   IO.printLine ("c0 fourth derivative: " <> Text.float (Curve.evaluate c0.derivative.derivative.derivative.derivative 0.0))
   IO.printLine ("a1 fourth derivative: " <> Text.float (Curve.evaluate a1.derivative.derivative.derivative.derivative 0.0))
   IO.printLine ("b1 fourth derivative: " <> Text.float (Curve.evaluate b1.derivative.derivative.derivative.derivative 0.0))
+  IO.printLine ("Curve.b00 fourth derivative: " <> Text.float (Curve.evaluate Curve.b00.derivative.derivative.derivative.derivative 0.0))
+  IO.printLine ("Curve.b01 fourth derivative: " <> Text.float (Curve.evaluate Curve.b01.derivative.derivative.derivative.derivative 0.0))
+  IO.printLine ("Curve.b02 fourth derivative: " <> Text.float (Curve.evaluate Curve.b02.derivative.derivative.derivative.derivative 0.0))
+  IO.printLine ("Curve.b10 fourth derivative: " <> Text.float (Curve.evaluate Curve.b10.derivative.derivative.derivative.derivative 0.0))
+  IO.printLine ("Curve.b11 fourth derivative: " <> Text.float (Curve.evaluate Curve.b11.derivative.derivative.derivative.derivative 0.0))
