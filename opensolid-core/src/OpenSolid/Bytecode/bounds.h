@@ -100,14 +100,14 @@ struct Bounds {
 
   inline Bounds
   squared() const {
-    double ll = lower * lower;
-    double uu = upper * upper;
+    double l2 = lower * lower;
+    double u2 = upper * upper;
     if (lower >= 0) {
-      return Bounds(ll, uu);
+      return Bounds(l2, u2);
     } else if (upper <= 0) {
-      return Bounds(uu, ll);
+      return Bounds(u2, l2);
     } else {
-      return Bounds(0.0, std::max(ll, uu));
+      return Bounds(0.0, std::max(l2, u2));
     }
   }
 
