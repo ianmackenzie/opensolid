@@ -255,14 +255,12 @@ vertexBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => vertex -> Builder
 vertexBuilder vertex = do
   let (px, py, pz) = Point3d.coordinates convention (Vertex3d.position vertex)
   let (nx, ny, nz) = Vector3d.components convention (Vertex3d.normal vertex)
-  Binary.concat
-    [ Binary.float32LE (Length.inMeters px)
-    , Binary.float32LE (Length.inMeters py)
-    , Binary.float32LE (Length.inMeters pz)
-    , Binary.float32LE nx
-    , Binary.float32LE ny
-    , Binary.float32LE nz
-    ]
+  Binary.float32LE (Length.inMeters px)
+    <> Binary.float32LE (Length.inMeters py)
+    <> Binary.float32LE (Length.inMeters pz)
+    <> Binary.float32LE nx
+    <> Binary.float32LE ny
+    <> Binary.float32LE nz
 
 paddedByteLength :: Int -> Int
 paddedByteLength unpaddedLength = do
