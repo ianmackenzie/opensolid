@@ -14,12 +14,16 @@ module OpenSolid.Bounds2d
   , aggregate2
   , aggregateN
   , exclusion
+  , exclusion#
   , inclusion
+  , inclusion#
   , includes
   , contains
   , isContainedIn
   , overlap
+  , overlap#
   , separation
+  , separation#
   , intersection
   , lowerLeftCorner
   , lowerRightCorner
@@ -62,8 +66,10 @@ import OpenSolid.Primitives
   , Point2d (Position2d)
   , Point3d (Point3d)
   )
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform2d (Transform2d (Transform2d))
+import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
@@ -107,8 +113,16 @@ aggregateN list = PositionBounds2d (VectorBounds2d.aggregateN (Data.Coerce.coerc
 exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 exclusion (Position2d p) (PositionBounds2d pb) = VectorBounds2d.exclusion p pb
 
+{-# INLINE exclusion# #-}
+exclusion# :: Point2d (space @ units) -> Bounds2d (space @ units) -> Double#
+exclusion# (Position2d p) (PositionBounds2d pb) = VectorBounds2d.exclusion# p pb
+
 inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 inclusion (Position2d p) (PositionBounds2d pb) = VectorBounds2d.inclusion p pb
+
+{-# INLINE inclusion# #-}
+inclusion# :: Point2d (space @ units) -> Bounds2d (space @ units) -> Double#
+inclusion# (Position2d p) (PositionBounds2d pb) = VectorBounds2d.inclusion# p pb
 
 includes :: Point2d (space @ units) -> Bounds2d (space @ units) -> Bool
 includes (Position2d p) (PositionBounds2d pb) = VectorBounds2d.includes p pb
@@ -119,11 +133,21 @@ contains (PositionBounds2d pb2) (PositionBounds2d pb1) = VectorBounds2d.contains
 isContainedIn :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
+{-# INLINE separation #-}
 separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 separation (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.separation pb1 pb2
 
+{-# INLINE separation# #-}
+separation# :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Double#
+separation# (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.separation# pb1 pb2
+
+{-# INLINE overlap #-}
 overlap :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 overlap (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.overlap pb1 pb2
+
+{-# INLINE overlap# #-}
+overlap# :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Double#
+overlap# (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.overlap# pb1 pb2
 
 intersection ::
   Bounds2d (space @ units) ->

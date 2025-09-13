@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.VectorBounds2d
   ( VectorBounds2d (VectorBounds2d)
   , constant
@@ -21,12 +23,16 @@ module OpenSolid.VectorBounds2d
   , maxSquaredMagnitude'
   , normalize
   , exclusion
+  , exclusion#
   , inclusion
+  , inclusion#
   , includes
   , contains
   , isContainedIn
   , separation
+  , separation#
   , overlap
+  , overlap#
   , intersection
   , interpolate
   , relativeTo
@@ -52,8 +58,10 @@ import OpenSolid.Primitives
   , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d
   )
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform2d (Transform2d (Transform2d))
+import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
@@ -190,19 +198,27 @@ clampNormalized (Bounds low high) =
   Bounds (Qty.clampTo normalizedBounds low) (Qty.clampTo normalizedBounds high)
 
 exclusion :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Qty units
-exclusion (Vector2d vx vy) (VectorBounds2d bx by) = do
-  let exclusionX = Bounds.exclusion vx bx
-  let exclusionY = Bounds.exclusion vy by
-  let positiveX = exclusionX >= Qty.zero
-  let positiveY = exclusionY >= Qty.zero
-  if
-    | positiveX && positiveY -> Qty.hypot2 exclusionX exclusionY
-    | positiveX -> exclusionX
-    | positiveY -> exclusionY
-    | otherwise -> Qty.max exclusionX exclusionY
+exclusion vector bounds = Qty# (exclusion# vector bounds)
+
+{-# INLINEABLE exclusion# #-}
+exclusion# :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Double#
+exclusion# (Vector2d (Qty# vx#) (Qty# vy#)) (VectorBounds2d bx by) = do
+  let exclusionX# = Bounds.exclusion# vx# bx
+  let exclusionY# = Bounds.exclusion# vy# by
+  let positiveX# = exclusionX# >=# 0.0##
+  let positiveY# = exclusionY# >=# 0.0##
+  case (# positiveX#, positiveY# #) of
+    (# 1#, 1# #) -> hypot2# exclusionX# exclusionY#
+    (# 1#, _ #) -> exclusionX#
+    (# _, 1# #) -> exclusionY#
+    (# _, _ #) -> max# exclusionX# exclusionY#
 
 inclusion :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Qty units
-inclusion vector box = -(exclusion vector box)
+inclusion vector box = Qty# (inclusion# vector box)
+
+{-# INLINE inclusion# #-}
+inclusion# :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Double#
+inclusion# vector box = negate# (exclusion# vector box)
 
 includes :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
 includes (Vector2d vx vy) (VectorBounds2d x y) = Bounds.includes vx x && Bounds.includes vy y
@@ -215,19 +231,27 @@ isContainedIn :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 separation :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Qty units
-separation (VectorBounds2d x1 y1) (VectorBounds2d x2 y2) = do
-  let separationX = Bounds.separation x1 x2
-  let separationY = Bounds.separation y1 y2
-  let positiveX = separationX >= Qty.zero
-  let positiveY = separationY >= Qty.zero
-  if
-    | positiveX && positiveY -> Qty.hypot2 separationX separationY
-    | positiveX -> separationX
-    | positiveY -> separationY
-    | otherwise -> Qty.max separationX separationY
+separation bounds1 bounds2 = Qty# (separation# bounds1 bounds2)
+
+{-# INLINEABLE separation# #-}
+separation# :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Double#
+separation# (VectorBounds2d x1 y1) (VectorBounds2d x2 y2) = do
+  let separationX# = Bounds.separation# x1 x2
+  let separationY# = Bounds.separation# y1 y2
+  let positiveX# = separationX# >=# 0.0##
+  let positiveY# = separationY# >=# 0.0##
+  case (# positiveX#, positiveY# #) of
+    (# 1#, 1# #) -> hypot2# separationX# separationY#
+    (# 1#, _ #) -> separationX#
+    (# _, 1# #) -> separationY#
+    (# _, _ #) -> max# separationX# separationY#
 
 overlap :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Qty units
-overlap first second = -(separation first second)
+overlap first second = Qty# (overlap# first second)
+
+{-# INLINE overlap# #-}
+overlap# :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Double#
+overlap# first second = negate# (separation# first second)
 
 intersection ::
   VectorBounds2d (space @ units) ->
