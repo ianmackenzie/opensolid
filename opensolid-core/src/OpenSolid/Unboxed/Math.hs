@@ -15,6 +15,7 @@ module OpenSolid.Unboxed.Math
   , (<#)
   , (>=#)
   , (<=#)
+  , squared#
   , sqrt#
   , max#
   , min#
@@ -92,6 +93,10 @@ infix 4 >=#
 (<=#) = (GHC.Exts.<=##)
 
 infix 4 <=#
+
+{-# INLINE squared# #-}
+squared# :: Double# -> Double#
+squared# value# = value# *# value#
 
 {-# INLINE sqrt# #-}
 sqrt# :: Double# -> Double#
