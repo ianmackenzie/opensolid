@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Gltf
   ( convention
   , builder
@@ -5,8 +7,11 @@ module OpenSolid.Gltf
   )
 where
 
+import Data.Array.Byte (ByteArray (ByteArray))
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder qualified as Builder
+import Data.ByteString.Short (ShortByteString (ShortByteString))
+import GHC.Exts qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Binary (Builder)
@@ -240,15 +245,18 @@ verticesBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => Array vertex ->
 verticesBuilder = Binary.collect vertexBuilder
 
 vertexBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => vertex -> Builder
-vertexBuilder vertex = do
-  let (px, py, pz) = Point3d.coordinates convention (Vertex3d.position vertex)
-  let (nx, ny, nz) = Vector3d.components convention (Vertex3d.normal vertex)
-  Binary.float32LE (Length.inMeters px)
-    <> Binary.float32LE (Length.inMeters py)
-    <> Binary.float32LE (Length.inMeters pz)
-    <> Binary.float32LE nx
-    <> Binary.float32LE ny
-    <> Binary.float32LE nz
+vertexBuilder vertex = GHC.Exts.runRW# \state0# -> do
+  let !(# state1#, mutableByteArray# #) = GHC.Exts.newByteArray# 24# state0#
+  let !(# px#, py#, pz# #) = Point3d.yUpCoordinates# (Vertex3d.position vertex)
+  let !(# nx#, ny#, nz# #) = Vector3d.yUpComponents# (Vertex3d.normal vertex)
+  let state2# = GHC.Exts.writeFloatArray# mutableByteArray# 0# (GHC.Exts.double2Float# px#) state1#
+  let state3# = GHC.Exts.writeFloatArray# mutableByteArray# 1# (GHC.Exts.double2Float# py#) state2#
+  let state4# = GHC.Exts.writeFloatArray# mutableByteArray# 2# (GHC.Exts.double2Float# pz#) state3#
+  let state5# = GHC.Exts.writeFloatArray# mutableByteArray# 3# (GHC.Exts.double2Float# nx#) state4#
+  let state6# = GHC.Exts.writeFloatArray# mutableByteArray# 4# (GHC.Exts.double2Float# ny#) state5#
+  let state7# = GHC.Exts.writeFloatArray# mutableByteArray# 5# (GHC.Exts.double2Float# nz#) state6#
+  let !(# _, byteArray# #) = GHC.Exts.unsafeFreezeByteArray# mutableByteArray# state7#
+  Builder.shortByteString (ShortByteString (ByteArray byteArray#))
 
 paddedByteLength :: Int -> Int
 paddedByteLength unpaddedLength = do
