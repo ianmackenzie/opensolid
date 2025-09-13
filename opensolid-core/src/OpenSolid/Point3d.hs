@@ -1,12 +1,18 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Point3d
   ( Point3d
   , coordinates
+  , zUpCoordinates
+  , zUpCoordinates#
+  , yUpCoordinates
+  , yUpCoordinates#
   , dummy
   , on
   , along
   , coerce
   , erase
-  , fromCoordinates
+  , xyz
   , zUp
   , yUp
   , midpoint
@@ -59,6 +65,30 @@ import OpenSolid.Vector3d qualified as Vector3d
 coordinates :: Convention3d -> Point3d (space @ units) -> (Qty units, Qty units, Qty units)
 coordinates convention (Position3d vector) = Vector3d.components convention vector
 
+{-| Get the XYZ coordinates of a point using a Z-up coordinate convention.
+
+This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
+-}
+{-# INLINE zUpCoordinates #-}
+zUpCoordinates :: Point3d (space @ units) -> (Qty units, Qty units, Qty units)
+zUpCoordinates (Position3d vector) = Vector3d.zUpComponents vector
+
+{-# INLINE zUpCoordinates# #-}
+zUpCoordinates# :: Point3d (space @ units) -> (# Double#, Double#, Double# #)
+zUpCoordinates# (Position3d vector) = Vector3d.zUpComponents# vector
+
+{-| Get the XYZ coordinates of a point using a Y-up coordinate convention.
+
+This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
+-}
+{-# INLINE yUpCoordinates #-}
+yUpCoordinates :: Point3d (space @ units) -> (Qty units, Qty units, Qty units)
+yUpCoordinates (Position3d vector) = Vector3d.yUpComponents vector
+
+{-# INLINE yUpCoordinates# #-}
+yUpCoordinates# :: Point3d (space @ units) -> (# Double#, Double#, Double# #)
+yUpCoordinates# (Position3d vector) = Vector3d.yUpComponents# vector
+
 dummy :: Point3d (space @ Void)
 dummy = Point3d Qty.zero Qty.zero Qty.zero
 
@@ -91,10 +121,9 @@ erase :: Point3d (space @ units) -> Point3d (space @ Unitless)
 erase = coerce
 
 -- | Construct a point from its XYZ coordinates, given the coordinate convention to use.
-{-# INLINE fromCoordinates #-}
-fromCoordinates :: Convention3d -> (Qty units, Qty units, Qty units) -> Point3d (space @ units)
-fromCoordinates convention givenCoordinates =
-  Position3d (Vector3d.fromComponents convention givenCoordinates)
+{-# INLINE xyz #-}
+xyz :: Convention3d -> (Qty units, Qty units, Qty units) -> Point3d (space @ units)
+xyz convention givenCoordinates = Position3d (Vector3d.xyz convention givenCoordinates)
 
 {-| Construct a point from its XYZ coordinates, using a Z-up convention
 where positive X is rightward, positive Y is forward and positive Z is upward.

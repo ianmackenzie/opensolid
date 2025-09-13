@@ -1,10 +1,12 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Vector3d
   ( Vector3d
   , zero
   , coerce
   , unit
   , on
-  , fromComponents
+  , xyz
   , zUp
   , yUp
   , componentIn
@@ -16,6 +18,10 @@ module OpenSolid.Vector3d
   , upwardComponent
   , downwardComponent
   , components
+  , zUpComponents
+  , zUpComponents#
+  , yUpComponents
+  , yUpComponents#
   , midpoint
   , interpolateFrom
   , magnitude
@@ -57,11 +63,12 @@ import OpenSolid.Primitives
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   , Vector2d (Vector2d)
-  , Vector3d (Vector3d)
+  , Vector3d (Vector3d, Vector3d#)
   )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 
 -- | The zero vector.
@@ -91,8 +98,8 @@ on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vX vY) = do
   Vector3d vR vF vU
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
-fromComponents :: Convention3d -> (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
-fromComponents Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (vx, vy, vz) = do
+xyz :: Convention3d -> (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
+xyz Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (vx, vy, vz) =
   Vector3d
     (vx * xr + vy * yr + vz * zr)
     (vx * xf + vy * yf + vz * zf)
@@ -141,6 +148,30 @@ components Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (Vector3d vr vf vu) 
   , vr * yr + vf * yf + vu * yu
   , vr * zr + vf * zf + vu * zu
   )
+
+{-| Get the XYZ components of a vector using a Z-up coordinate convention.
+
+This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
+-}
+{-# INLINE zUpComponents #-}
+zUpComponents :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
+zUpComponents (Vector3d r f u) = (r, f, u)
+
+{-# INLINE zUpComponents# #-}
+zUpComponents# :: Vector3d (space @ units) -> (# Double#, Double#, Double# #)
+zUpComponents# (Vector3d# r# f# u#) = (# r#, f#, u# #)
+
+{-| Get the XYZ components of a vector using a Y-up coordinate convention.
+
+This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
+-}
+{-# INLINE yUpComponents #-}
+yUpComponents :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
+yUpComponents (Vector3d r f u) = (-r, u, f)
+
+{-# INLINE yUpComponents# #-}
+yUpComponents# :: Vector3d (space @ units) -> (# Double#, Double#, Double# #)
+yUpComponents# (Vector3d# r# f# u#) = (# negate# r#, u#, f# #)
 
 interpolateFrom ::
   Vector3d (space @ units) ->

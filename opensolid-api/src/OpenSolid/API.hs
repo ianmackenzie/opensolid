@@ -828,10 +828,12 @@ vector3d =
   Class.new @(Vector3d (Space @ Unitless)) "A unitless vector in 3D." $
     [ Class.constant "Zero" (Vector3d.zero @Space @Unitless) $(docs 'Vector3d.zero)
     , Class.factory1 "Unit" "Direction" Vector3d.unit $(docs 'Vector3d.unit)
-    , Class.factory2 "From Components" "Convention" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , Class.factory2 "XYZ" "Convention" "Components" Vector3d.xyz $(docs 'Vector3d.xyz)
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
     , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
     , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
+    , Class.member0 "Z Up Components" Vector3d.zUpComponents $(docs 'Vector3d.zUpComponents)
+    , Class.member0 "Y Up Components" Vector3d.yUpComponents $(docs 'Vector3d.yUpComponents)
     , Class.memberU0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , Class.memberU0 "Is Zero" (~= Vector3d.zero) "Check if a vector is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
@@ -862,10 +864,12 @@ displacement3d :: Class
 displacement3d =
   Class.new @(Vector3d (Space @ Meters)) "A displacement vector in 3D." $
     [ Class.constant "Zero" (Vector3d.zero @Space @Meters) $(docs 'Vector3d.zero)
-    , Class.factory2 "From Components" "Convention" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , Class.factory2 "XYZ" "Convention" "Components" Vector3d.xyz $(docs 'Vector3d.xyz)
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
     , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
     , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
+    , Class.member0 "Z Up Components" Vector3d.zUpComponents $(docs 'Vector3d.zUpComponents)
+    , Class.member0 "Y Up Components" Vector3d.yUpComponents $(docs 'Vector3d.yUpComponents)
     , Class.memberM0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , Class.memberM0 "Is Zero" (~= Vector3d.zero) "Check if a displacement is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
@@ -894,10 +898,12 @@ areaVector3d :: Class
 areaVector3d =
   Class.new @(Vector3d (Space @ SquareMeters)) "A vector in 3D with units of area." $
     [ Class.constant "Zero" (Vector3d.zero @Space @SquareMeters) $(docs 'Vector3d.zero)
-    , Class.factory2 "From Components" "Convention" "Components" Vector3d.fromComponents $(docs 'Vector3d.fromComponents)
+    , Class.factory2 "XYZ" "Convention" "Components" Vector3d.xyz $(docs 'Vector3d.xyz)
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
     , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
     , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
+    , Class.member0 "Z Up Components" Vector3d.zUpComponents $(docs 'Vector3d.zUpComponents)
+    , Class.member0 "Y Up Components" Vector3d.yUpComponents $(docs 'Vector3d.yUpComponents)
     , Class.memberS0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
     , Class.memberS0 "Is Zero" (~= Vector3d.zero) "Check if an area vector is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
@@ -940,10 +946,12 @@ point3d =
   Class.new @(Point3d (Space @ Meters)) "A point in 3D." $
     [ Class.factory2 "Along" "Axis" "Distance" Point3d.along $(docs 'Point3d.along)
     , Class.factory2 "On" "Plane" "Position" Point3d.on $(docs 'Point3d.on)
-    , Class.factory2 "From Coordinates" "Convention" "Coordinates" Point3d.fromCoordinates $(docs 'Point3d.fromCoordinates)
+    , Class.factory2 "XYZ" "Convention" "Coordinates" Point3d.xyz $(docs 'Point3d.xyz)
     , Class.factory3 "Z Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.zUp $(docs 'Point3d.zUp)
     , Class.factory3 "Y Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.yUp $(docs 'Point3d.yUp)
     , Class.member1 "Coordinates" "Convention" Point3d.coordinates $(docs 'Point3d.coordinates)
+    , Class.member0 "Z Up Coordinates" Point3d.zUpCoordinates $(docs 'Point3d.zUpCoordinates)
+    , Class.member0 "Y Up Coordinates" Point3d.yUpCoordinates $(docs 'Point3d.yUpCoordinates)
     , Class.member1 "Distance To" "Other" Point3d.distanceFrom $(docs 'Point3d.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point3d.midpoint $(docs 'Point3d.midpoint)
     , Class.member1 "Project Onto" "Plane" Point3d.projectOnto $(docs 'Point3d.projectOnto)
