@@ -7,14 +7,8 @@ module OpenSolid.Expression
   , XY (xy)
   , xComponent
   , yComponent
-  , rightwardComponent
-  , forwardComponent
-  , upwardComponent
   , xCoordinate
   , yCoordinate
-  , rightwardCoordinate
-  , forwardCoordinate
-  , upwardCoordinate
   , t
   , u
   , v
@@ -1265,30 +1259,6 @@ xCoordinate (Surface2d ast _) = surface1d (Ast.xComponent ast)
 yCoordinate :: Expression input (Point2d (space @ units)) -> Expression input (Qty units)
 yCoordinate (Curve2d ast _) = curve1d (Ast.yComponent ast)
 yCoordinate (Surface2d ast _) = surface1d (Ast.yComponent ast)
-
-rightwardComponent :: Expression input (Vector3d (space @ units)) -> Expression input (Qty units)
-rightwardComponent (VectorCurve3d ast _) = curve1d (Ast.rightwardComponent ast)
-rightwardComponent (VectorSurface3d ast _) = surface1d (Ast.rightwardComponent ast)
-
-forwardComponent :: Expression input (Vector3d (space @ units)) -> Expression input (Qty units)
-forwardComponent (VectorCurve3d ast _) = curve1d (Ast.forwardComponent ast)
-forwardComponent (VectorSurface3d ast _) = surface1d (Ast.forwardComponent ast)
-
-upwardComponent :: Expression input (Vector3d (space @ units)) -> Expression input (Qty units)
-upwardComponent (VectorCurve3d ast _) = curve1d (Ast.upwardComponent ast)
-upwardComponent (VectorSurface3d ast _) = surface1d (Ast.upwardComponent ast)
-
-rightwardCoordinate :: Expression input (Point3d (space @ units)) -> Expression input (Qty units)
-rightwardCoordinate (Curve3d ast _) = curve1d (Ast.rightwardComponent ast)
-rightwardCoordinate (Surface3d ast _) = surface1d (Ast.rightwardComponent ast)
-
-forwardCoordinate :: Expression input (Point3d (space @ units)) -> Expression input (Qty units)
-forwardCoordinate (Curve3d ast _) = curve1d (Ast.forwardComponent ast)
-forwardCoordinate (Surface3d ast _) = surface1d (Ast.forwardComponent ast)
-
-upwardCoordinate :: Expression input (Point3d (space @ units)) -> Expression input (Qty units)
-upwardCoordinate (Curve3d ast _) = curve1d (Ast.upwardComponent ast)
-upwardCoordinate (Surface3d ast _) = surface1d (Ast.upwardComponent ast)
 
 t :: Expression Float Float
 t = curve1d Ast.curveParameter
