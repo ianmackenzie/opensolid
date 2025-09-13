@@ -17,7 +17,6 @@ import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
-import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
 import OpenSolid.Json (Json)
@@ -26,8 +25,6 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Model3d (Model3d)
 import OpenSolid.Model3d qualified as Model3d
-import OpenSolid.Orientation3d (Orientation3d)
-import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point3d qualified as Point3d
@@ -36,17 +33,8 @@ import OpenSolid.Resolution (Resolution)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vertex3d qualified as Vertex3d
 
-xDirection :: Orientation3d space -> Direction3d space
-xDirection = Orientation3d.leftwardDirection
-
-yDirection :: Orientation3d space -> Direction3d space
-yDirection = Orientation3d.upwardDirection
-
-zDirection :: Orientation3d space -> Direction3d space
-zDirection = Orientation3d.forwardDirection
-
 convention :: Convention3d
-convention = Convention3d.custom xDirection yDirection zDirection
+convention = Convention3d.yUp
 
 builder :: Resolution Meters -> Model3d space -> Builder
 builder resolution model = do
