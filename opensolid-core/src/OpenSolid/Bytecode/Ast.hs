@@ -539,10 +539,16 @@ surfaceParameters = Variable2d SurfaceParameters
 
 xComponent :: Ast2d input -> Ast1d input
 xComponent (Constant2d val) = Constant1d (Vector2d.xComponent val)
+xComponent (Variable2d (XY xVar _)) = Variable1d xVar
+xComponent (Variable2d (XC xVar _)) = Variable1d xVar
+xComponent (Variable2d (CY xVal _)) = Constant1d xVal
 xComponent (Variable2d var) = Variable1d (XComponent var)
 
 yComponent :: Ast2d input -> Ast1d input
 yComponent (Constant2d val) = Constant1d (Vector2d.yComponent val)
+yComponent (Variable2d (XY _ yVar)) = Variable1d yVar
+yComponent (Variable2d (XC _ yVal)) = Constant1d yVal
+yComponent (Variable2d (CY _ yVar)) = Variable1d yVar
 yComponent (Variable2d var) = Variable1d (YComponent var)
 
 rightwardComponent :: Ast3d input -> Ast1d input
