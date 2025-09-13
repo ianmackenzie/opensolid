@@ -19,6 +19,7 @@ module OpenSolid.Point2d
   , midpoint
   , interpolateFrom
   , distanceFrom
+  , distanceFrom#
   , angleFrom
   , distanceAlong
   , distanceLeftOf
@@ -53,8 +54,10 @@ import OpenSolid.Primitives
   , Point3d
   , Transform2d (Transform2d)
   )
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Unboxed.Math
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 
@@ -147,7 +150,12 @@ midpoint (Position2d p1) (Position2d p2) = Position2d (Vector2d.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
 distanceFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Qty units
-distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
+distanceFrom p1 p2 = Qty# (distanceFrom# p1 p2)
+
+{-# INLINE distanceFrom# #-}
+distanceFrom# :: Point2d (space @ units) -> Point2d (space @ units) -> Double#
+distanceFrom# (Point2d (Qty# x1#) (Qty# y1#)) (Point2d (Qty# x2#) (Qty# y2#)) =
+  hypot2# (x2# -# x1#) (y2# -# y1#)
 
 angleFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Angle
 angleFrom p1 p2 = Vector2d.angle (p2 - p1)
