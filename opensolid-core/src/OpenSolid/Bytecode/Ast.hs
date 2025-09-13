@@ -623,6 +623,8 @@ instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast1d input2) (Ast1d 
   Constant1d 1.0 * rhs = rhs
   lhs * Constant1d -1.0 = -lhs
   Constant1d -1.0 * rhs = -rhs
+  Variable1d (ProductVariableConstant1d a b) * Constant1d c = Variable1d a * Constant1d (b * c)
+  Constant1d a * Variable1d (ProductVariableConstant1d b c) = Constant1d (a * c) * Variable1d b
   Variable1d lhs * Constant1d rhs = Variable1d (ProductVariableConstant1d lhs rhs)
   Constant1d lhs * Variable1d rhs = Variable1d (ProductVariableConstant1d rhs lhs)
   Variable1d lhs * Variable1d rhs =
@@ -726,6 +728,8 @@ instance input1 ~ input2 => Multiplication (Ast2d input1) (Ast1d input2) (Ast2d 
   Constant2d lhs * _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
   lhs * Constant1d 1.0 = lhs
   lhs * Constant1d -1.0 = -lhs
+  Variable2d (ProductVariableConstant2d a b) * Constant1d c = Variable2d a * Constant1d (b * c)
+  Constant2d a * Variable1d (ProductVariableConstant1d b c) = Constant2d (a * c) * Variable1d b
   Variable2d lhs * Constant1d rhs = Variable2d (ProductVariableConstant2d lhs rhs)
   Constant2d lhs * Variable1d rhs = Variable2d (ProductConstantVariable2d lhs rhs)
   Variable2d lhs * Variable1d rhs = Variable2d (Product2d lhs rhs)
@@ -825,6 +829,8 @@ instance input1 ~ input2 => Multiplication (Ast3d input1) (Ast1d input2) (Ast3d 
   Constant3d lhs * _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
   lhs * Constant1d 1.0 = lhs
   lhs * Constant1d -1.0 = -lhs
+  Variable3d (ProductVariableConstant3d a b) * Constant1d c = Variable3d a * Constant1d (b * c)
+  Constant3d a * Variable1d (ProductVariableConstant1d b c) = Constant3d (a * c) * Variable1d b
   Variable3d lhs * Constant1d rhs = Variable3d (ProductVariableConstant3d lhs rhs)
   Constant3d lhs * Variable1d rhs = Variable3d (ProductConstantVariable3d lhs rhs)
   Variable3d lhs * Variable1d rhs = Variable3d (Product3d lhs rhs)
