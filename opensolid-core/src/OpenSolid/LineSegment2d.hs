@@ -61,17 +61,21 @@ instance
   where
   bounds = bounds
 
+{-# INLINE startVertex #-}
 startVertex :: LineSegment2d vertex -> vertex
 startVertex (LineSegment2d v1 _) = v1
 
+{-# INLINE endVertex #-}
 endVertex :: LineSegment2d vertex -> vertex
 endVertex (LineSegment2d _ v2) = v2
 
+{-# INLINE startPoint #-}
 startPoint :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Point2d (space @ units)
-startPoint = Vertex2d.position . startVertex
+startPoint (LineSegment2d v1 _) = Vertex2d.position v1
 
+{-# INLINE endPoint #-}
 endPoint :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Point2d (space @ units)
-endPoint = Vertex2d.position . endVertex
+endPoint (LineSegment2d _ v2) = Vertex2d.position v2
 
 length :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Qty units
 length segment = Point2d.distanceFrom segment.startPoint segment.endPoint
