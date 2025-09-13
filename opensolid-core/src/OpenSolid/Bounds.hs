@@ -108,8 +108,6 @@ instance HasField "width" (Bounds units) (Qty units) where
 
 deriving instance Show (Qty units) => Show (Bounds units)
 
-{-# COMPLETE Bounds #-}
-
 {-| Construct a bounding range from two given values (endpoints).
 
 The order of the two arguments does not matter;
@@ -121,11 +119,15 @@ If either argument is NaN, then the result will be open/infinite
 -}
 {-# INLINE Bounds #-}
 pattern Bounds :: Qty units -> Qty units -> Bounds units
-pattern Bounds low high <- (endpoints# -> (# low, high #))
+pattern Bounds low high <- (viewBounds# -> (# low, high #))
   where
     Bounds (Qty# a#) (Qty# b#) = Bounds# a# b#
 
-{-# COMPLETE Bounds# #-}
+{-# INLINE viewBounds# #-}
+viewBounds# :: Bounds units -> (# Qty units, Qty units #)
+viewBounds# (Ordered# low high) = (# Qty# low, Qty# high #)
+
+{-# COMPLETE Bounds #-}
 
 {-# INLINE Bounds# #-}
 pattern Bounds# :: Double# -> Double# -> Bounds units
@@ -135,11 +137,9 @@ pattern Bounds# low# high# <- Ordered# low# high#
       case (# a# <=# b#, b# <=# a# #) of
         (# 1#, _ #) -> Ordered# a# b#
         (# _, 1# #) -> Ordered# b# a#
-        _ -> infinite
+        (# _, _ #) -> infinite
 
-{-# INLINE endpoints# #-}
-endpoints# :: Bounds units -> (# Qty units, Qty units #)
-endpoints# (Ordered# low high) = (# Qty# low, Qty# high #)
+{-# COMPLETE Bounds# #-}
 
 instance FFI (Bounds Unitless) where
   representation = FFI.classRepresentation "Bounds"
