@@ -396,24 +396,24 @@ sqrt :: Units.Squared units1 units2 => Bounds units2 -> Bounds units1
 sqrt = sqrt' . Units.unspecialize
 
 hypot2 :: Bounds units -> Bounds units -> Bounds units
-hypot2 (Bounds xMin xMax) (Bounds yMin yMax) = do
-  let positiveX = xMin >= Qty.zero
-  let negativeX = xMax <= Qty.zero
-  let positiveY = yMin >= Qty.zero
-  let negativeY = yMax <= Qty.zero
-  let xMagnitude = Qty.max (Qty.abs xMin) (Qty.abs xMax)
-  let yMagnitude = Qty.max (Qty.abs yMin) (Qty.abs yMax)
-  let maxMagnitude = Qty.hypot2 xMagnitude yMagnitude
-  if
-    | positiveX && positiveY -> Bounds (Qty.hypot2 xMin yMin) maxMagnitude
-    | positiveX && negativeY -> Bounds (Qty.hypot2 xMin yMax) maxMagnitude
-    | negativeX && positiveY -> Bounds (Qty.hypot2 xMax yMin) maxMagnitude
-    | negativeX && negativeY -> Bounds (Qty.hypot2 xMax yMax) maxMagnitude
-    | positiveX -> Bounds xMin maxMagnitude
-    | negativeX -> Bounds -xMax maxMagnitude
-    | positiveY -> Bounds yMin maxMagnitude
-    | negativeY -> Bounds -yMax maxMagnitude
-    | otherwise -> Bounds Qty.zero maxMagnitude
+hypot2 (Bounds# xMin# xMax#) (Bounds# yMin# yMax#) = do
+  let positiveX# = xMin# >=# 0.0##
+  let negativeX# = xMax# <=# 0.0##
+  let positiveY# = yMin# >=# 0.0##
+  let negativeY# = yMax# <=# 0.0##
+  let xMagnitude# = max# (abs# xMin#) (abs# xMax#)
+  let yMagnitude# = max# (abs# yMin#) (abs# yMax#)
+  let maxMagnitude# = hypot2# xMagnitude# yMagnitude#
+  case (# positiveX#, negativeX#, positiveY#, negativeY# #) of
+    (# 1#, _, 1#, _ #) -> Bounds# (hypot2# xMin# yMin#) maxMagnitude#
+    (# 1#, _, _, 1# #) -> Bounds# (hypot2# xMin# yMax#) maxMagnitude#
+    (# _, 1#, 1#, _ #) -> Bounds# (hypot2# xMax# yMin#) maxMagnitude#
+    (# _, 1#, _, 1# #) -> Bounds# (hypot2# xMax# yMax#) maxMagnitude#
+    (# 1#, _, _, _ #) -> Bounds# xMin# maxMagnitude#
+    (# _, 1#, _, _ #) -> Bounds# (negate# xMax#) maxMagnitude#
+    (# _, _, 1#, _ #) -> Bounds# yMin# maxMagnitude#
+    (# _, _, _, 1# #) -> Bounds# (negate# yMax#) maxMagnitude#
+    (# _, _, _, _ #) -> Bounds# 0.0## maxMagnitude#
 
 hypot3 :: Bounds units -> Bounds units -> Bounds units -> Bounds units
 hypot3 (Bounds xMin xMax) (Bounds yMin yMax) (Bounds zMin zMax) = do
