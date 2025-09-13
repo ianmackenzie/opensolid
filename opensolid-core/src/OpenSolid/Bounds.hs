@@ -133,11 +133,9 @@ viewBounds# (Ordered# low high) = (# Qty# low, Qty# high #)
 pattern Bounds# :: Double# -> Double# -> Bounds units
 pattern Bounds# low# high# <- Ordered# low# high#
   where
-    Bounds# a# b# =
-      case (# a# <=# b#, b# <=# a# #) of
-        (# 1#, _ #) -> Ordered# a# b#
-        (# _, 1# #) -> Ordered# b# a#
-        (# _, _ #) -> infinite
+    Bounds# a# b# = do
+      let !(# low#, high# #) = hull2# a# b#
+      Ordered# low# high#
 
 {-# COMPLETE Bounds# #-}
 
@@ -221,60 +219,56 @@ instance
   Bounds# low# high# * Qty# value# = Bounds# (low# *# value#) (high# *# value#)
 
 instance Multiplication' (Bounds units1) (Bounds units2) (Bounds (units1 :*: units2)) where
-  Bounds# low1# high1# .*. Bounds# low2# high2# =
-    hull4# (low1# *# low2#) (low1# *# high2#) (high1# *# low2#) (high1# *# high2#)
+  Bounds# low1# high1# .*. Bounds# low2# high2# = do
+    let !(# low#, high# #) = boundsTimesBounds# low1# high1# low2# high2#
+    Ordered# low# high#
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Bounds units1) (Bounds units2) (Bounds units3)
   where
-  Bounds# low1# high1# * Bounds# low2# high2# =
-    hull4# (low1# *# low2#) (low1# *# high2#) (high1# *# low2#) (high1# *# high2#)
+  Bounds# low1# high1# * Bounds# low2# high2# = do
+    let !(# low#, high# #) = boundsTimesBounds# low1# high1# low2# high2#
+    Ordered# low# high#
 
 instance Division' (Qty units1) (Bounds units2) (Bounds (units1 :/: units2)) where
-  n ./. Bounds dl dh =
-    if dl > Qty.zero || dh < Qty.zero
-      then Bounds (n ./. dl) (n ./. dh)
-      else infinite
+  Qty# n# ./. Bounds# dl# dh# = do
+    let !(# low#, high# #) = doubleOverBounds# n# dl# dh#
+    Ordered# low# high#
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Qty units1) (Bounds units2) (Bounds units3)
   where
-  n / Bounds dl dh =
-    if dl > Qty.zero || dh < Qty.zero
-      then Bounds (n / dl) (n / dh)
-      else infinite
+  Qty# n# / Bounds# dl# dh# = do
+    let !(# low#, high# #) = doubleOverBounds# n# dl# dh#
+    Ordered# low# high#
 
 instance Division' (Bounds units1) (Qty units2) (Bounds (units1 :/: units2)) where
-  Bounds nl nh ./. d =
-    if d /= Qty.zero
-      then Bounds (nl ./. d) (nh ./. d)
-      else infinite
+  Bounds# nl# nh# ./. Qty# d# = do
+    let !(# low#, high# #) = boundsOverDouble# nl# nh# d#
+    Ordered# low# high#
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Bounds units1) (Qty units2) (Bounds units3)
   where
-  Bounds nl nh / d =
-    if d /= Qty.zero
-      then Bounds (nl / d) (nh / d)
-      else infinite
+  Bounds# nl# nh# / Qty# d# = do
+    let !(# low#, high# #) = boundsOverDouble# nl# nh# d#
+    Ordered# low# high#
 
 instance Division' (Bounds units1) (Bounds units2) (Bounds (units1 :/: units2)) where
-  Bounds nl nh ./. Bounds dl dh =
-    if dl > Qty.zero || dh < Qty.zero
-      then hull4 (nl ./. dl) (nl ./. dh) (nh ./. dl) (nh ./. dh)
-      else infinite
+  Bounds# nl# nh# ./. Bounds# dl# dh# = do
+    let !(# low#, high# #) = boundsOverBounds# nl# nh# dl# dh#
+    Ordered# low# high#
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Bounds units1) (Bounds units2) (Bounds units3)
   where
-  Bounds nl nh / Bounds dl dh =
-    if dl > Qty.zero || dh < Qty.zero
-      then hull4 (nl / dl) (nl / dh) (nh / dl) (nh / dh)
-      else infinite
+  Bounds# nl# nh# / Bounds# dl# dh# = do
+    let !(# low#, high# #) = boundsOverBounds# nl# nh# dl# dh#
+    Ordered# low# high#
 
 -- | Construct a zero-width bounding range containing a single value.
 {-# INLINE constant #-}
@@ -332,11 +326,9 @@ hull3 a b c = Bounds (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 
 {-# INLINE hull4 #-}
 hull4 :: Qty units -> Qty units -> Qty units -> Qty units -> Bounds units
-hull4 (Qty# a#) (Qty# b#) (Qty# c#) (Qty# d#) = hull4# a# b# c# d#
-
-{-# INLINE hull4# #-}
-hull4# :: Double# -> Double# -> Double# -> Double# -> Bounds units
-hull4# a# b# c# d# = Bounds# (min# a# (min# b# (min# c# d#))) (max# a# (max# b# (max# c# d#)))
+hull4 (Qty# a#) (Qty# b#) (Qty# c#) (Qty# d#) = do
+  let !(# low#, high# #) = hull4# a# b# c# d#
+  Ordered# low# high#
 
 -- | Build a bounding range containing all values in the given non-empty list.
 hullN :: NonEmpty (Qty units) -> Bounds units
