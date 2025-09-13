@@ -1,7 +1,7 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Bounds
-  ( Bounds (Bounds)
+  ( Bounds (Bounds, Bounds#)
   , constant
   , unitInterval
   , coerce
