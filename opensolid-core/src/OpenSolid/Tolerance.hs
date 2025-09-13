@@ -11,6 +11,7 @@ module OpenSolid.Tolerance
   , times
   , times'
   , coerced
+  , (~=#)
   )
 where
 
@@ -19,8 +20,9 @@ import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import OpenSolid.Float (Float, fromRational)
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
-import OpenSolid.Qty (Qty)
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Unboxed.Math
 import OpenSolid.Units ((:*:))
 import OpenSolid.Units qualified as Units
 
@@ -114,3 +116,7 @@ times = Units.specialize . times'
 
 coerced :: Tolerance units1 => Qty units2
 coerced = Qty.coerce ?tolerance
+
+{-# INLINE (~=#) #-}
+(~=#) :: Tolerance units => Double# -> Double# -> Int#
+(~=#) x# y# = let !(Qty# tolerance#) = ?tolerance in abs# (x# -# y#) <=# tolerance#
