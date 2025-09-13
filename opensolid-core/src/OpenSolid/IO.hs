@@ -49,6 +49,7 @@ import Prelude qualified
 fail :: Error.Message x => x -> IO a
 fail error = Prelude.fail (Text.unpack (Error.message error))
 
+{-# INLINE succeed #-}
 succeed :: a -> IO a
 succeed = Prelude.return
 
