@@ -662,9 +662,14 @@ boundarySurfaceSegmentSet ::
   SurfaceFunction3d (space @ units) ->
   UvBounds ->
   Set2d UvBounds UvCoordinates
-boundarySurfaceSegmentSet resolution surfaceFunction uvBounds =
-  if surfaceSize surfaceFunction uvBounds <= resolution.maxSize
-    && surfaceError surfaceFunction uvBounds <= resolution.maxError
+boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
+  let acceptableSize =
+        Qty.isInfinite resolution.maxSize
+          || surfaceSize surfaceFunction uvBounds <= resolution.maxSize
+  let acceptableError =
+        Qty.isInfinite resolution.maxError
+          || surfaceError surfaceFunction uvBounds <= resolution.maxError
+  if acceptableSize && acceptableError
     then Set2d.Leaf uvBounds uvBounds
     else do
       let Bounds2d uBounds vBounds = uvBounds
