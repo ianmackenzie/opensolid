@@ -479,7 +479,6 @@ vector2d =
     , Class.factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , Class.factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
-    , Class.factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
     , Class.property "Components" (.components) $(docs 'Vector2d.components)
     , Class.property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
     , Class.property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
@@ -518,7 +517,6 @@ displacement2d =
     , Class.factory2 "Millimeters" "X Component" "Y Component" Vector2d.millimeters $(docs 'Vector2d.millimeters)
     , Class.factory2 "Mm" "X Component" "Y Component" Vector2d.mm $(docs 'Vector2d.mm)
     , Class.factory2 "Inches" "X Component" "Y Component" Vector2d.inches $(docs 'Vector2d.inches)
-    , Class.factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
     , Class.property "Components" (.components) $(docs 'Vector2d.components)
     , Class.property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
     , Class.property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
@@ -550,7 +548,6 @@ areaVector2d =
     , Class.factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
     , Class.factory2 "Square Meters" "X Component" "Y Component" Vector2d.squareMeters $(docs 'Vector2d.squareMeters)
-    , Class.factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
     , Class.property "Components" (.components) $(docs 'Vector2d.components)
     , Class.property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
     , Class.property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
@@ -602,7 +599,6 @@ point2d =
     , Class.factory2 "Millimeters" "X Coordinate" "Y Coordinate" Point2d.millimeters $(docs 'Point2d.millimeters)
     , Class.factory2 "Mm" "X Coordinate" "Y Coordinate" Point2d.mm $(docs 'Point2d.mm)
     , Class.factory2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches $(docs 'Point2d.inches)
-    , Class.factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates $(docs 'Point2d.fromCoordinates)
     , Class.property "Coordinates" (.coordinates) $(docs 'Point2d.coordinates)
     , Class.property "X Coordinate" (.xCoordinate) $(docs 'Point2d.xCoordinate)
     , Class.property "Y Coordinate" (.yCoordinate) $(docs 'Point2d.yCoordinate)
@@ -621,7 +617,6 @@ uvPoint =
   Class.new @(Point2d (Space @ Unitless)) "A point in UV parameter space." $
     [ Class.constant "Origin" (Point2d.origin @Space @Unitless) "The point with coordinates (0,0)."
     , Class.constructor2 "U Coordinate" "V Coordinate" Point2d "Construct a point from its U and V coordinates."
-    , Class.factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates "Construct a point from a pair of U and V coordinates."
     , Class.property "Coordinates" (.coordinates) "Get the U and V coordinates of a point."
     , Class.property "U Coordinate" (.xCoordinate) "Get the U coordinate of a point."
     , Class.property "V Coordinate" (.yCoordinate) "Get the V coordinate of a point."

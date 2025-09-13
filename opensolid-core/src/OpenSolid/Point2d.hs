@@ -6,7 +6,6 @@ module OpenSolid.Point2d
   , y
   , along
   , polar
-  , fromCoordinates
   , meters
   , centimeters
   , cm
@@ -86,10 +85,6 @@ The angle is measured counterclockwise from the positive X axis.
 -}
 polar :: Qty units -> Angle -> Point2d (space @ units)
 polar r theta = Position2d (Vector2d.polar r theta)
-
--- | Construct a point from a pair of X and Y coordinates.
-fromCoordinates :: (Qty units, Qty units) -> Point2d (space @ units)
-fromCoordinates = Position2d . Vector2d.fromComponents
 
 apply :: (Float -> Qty units) -> Float -> Float -> Point2d (space @ units)
 apply units fx fy = Point2d (units fx) (units fy)
