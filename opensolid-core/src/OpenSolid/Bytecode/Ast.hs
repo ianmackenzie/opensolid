@@ -11,9 +11,6 @@ module OpenSolid.Bytecode.Ast
   , surfaceParameter
   , xComponent
   , yComponent
-  , rightwardComponent
-  , forwardComponent
-  , upwardComponent
   , squared
   , sqrt
   , cubed
@@ -547,18 +544,6 @@ yComponent (Variable2d (XY _ yVar)) = Variable1d yVar
 yComponent (Variable2d (XC _ yVal)) = Constant1d yVal
 yComponent (Variable2d (CY _ yVar)) = Variable1d yVar
 yComponent (Variable2d var) = Variable1d (YComponent var)
-
-rightwardComponent :: Ast3d input -> Ast1d input
-rightwardComponent (Constant3d val) = Constant1d (Vector3d.rightwardComponent val)
-rightwardComponent (Variable3d var) = Variable1d (RightwardComponent var)
-
-forwardComponent :: Ast3d input -> Ast1d input
-forwardComponent (Constant3d val) = Constant1d (Vector3d.forwardComponent val)
-forwardComponent (Variable3d var) = Variable1d (ForwardComponent var)
-
-upwardComponent :: Ast3d input -> Ast1d input
-upwardComponent (Constant3d val) = Constant1d (Vector3d.upwardComponent val)
-upwardComponent (Variable3d var) = Variable1d (UpwardComponent var)
 
 instance Negation (Ast1d input) where
   negate (Constant1d val) = Constant1d -val
