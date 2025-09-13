@@ -17,6 +17,7 @@ module OpenSolid.VectorBounds3d
   , squaredMagnitude'
   , magnitude
   , maxMagnitude
+  , maxMagnitude#
   , maxSquaredMagnitude
   , maxSquaredMagnitude'
   , normalize
@@ -39,7 +40,7 @@ module OpenSolid.VectorBounds3d
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Bounds (Bounds (Bounds, Bounds#))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
 import OpenSolid.Maybe qualified as Maybe
@@ -56,9 +57,11 @@ import OpenSolid.Primitives
   , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d (VectorBounds3d)
   )
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d qualified as Vector3d
 
@@ -179,11 +182,14 @@ magnitude :: VectorBounds3d (space @ units) -> Bounds units
 magnitude (VectorBounds3d x y z) = Bounds.hypot3 x y z
 
 maxMagnitude :: VectorBounds3d (space @ units) -> Qty units
-maxMagnitude (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)) = do
-  let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
-  let yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
-  let zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
-  Qty.hypot3 xMagnitude yMagnitude zMagnitude
+maxMagnitude bounds = Qty# (maxMagnitude# bounds)
+
+maxMagnitude# :: VectorBounds3d (space @ units) -> Double#
+maxMagnitude# (VectorBounds3d (Bounds# minX# maxX#) (Bounds# minY# maxY#) (Bounds# minZ# maxZ#)) = do
+  let xMagnitude# = max# (abs# minX#) (abs# maxX#)
+  let yMagnitude# = max# (abs# minY#) (abs# maxY#)
+  let zMagnitude# = max# (abs# minZ#) (abs# maxZ#)
+  hypot3# xMagnitude# yMagnitude# zMagnitude#
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Qty units2
 maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude'
