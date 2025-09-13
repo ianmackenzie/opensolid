@@ -36,7 +36,7 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d (Vector2d (Vector2d#))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
@@ -73,7 +73,7 @@ curve2dValue (Constant value) _ = Vector2d.coerce value
 curve2dValue (Bytecode bytecode) (Qty# t#) =
   callFunction bytecode \f# -> do
     let !(# x#, y# #) = opensolid_cmm_curve2d_value f# t#
-    IO.succeed (Vector2d (Qty# x#) (Qty# y#))
+    IO.succeed (Vector2d# x# y#)
 
 curve2dBounds ::
   Compiled Float (Vector2d (space1 @ units1)) ->
@@ -125,7 +125,7 @@ surface2dValue (Constant value) _ = Vector2d.coerce value
 surface2dValue (Bytecode bytecode) (Point2d (Qty# u#) (Qty# v#)) =
   callFunction bytecode \f# -> do
     let !(# x#, y# #) = opensolid_cmm_surface2d_value f# u# v#
-    IO.succeed (Vector2d (Qty# x#) (Qty# y#))
+    IO.succeed (Vector2d# x# y#)
 
 surface2dBounds ::
   Compiled UvPoint (Vector2d (space1 @ units1)) ->

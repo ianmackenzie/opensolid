@@ -1,5 +1,7 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Primitives
-  ( Vector2d (Vector2d)
+  ( Vector2d (Vector2d, Vector2d#)
   , Direction2d (Unit2d, Direction2d)
   , Orientation2d (Orientation2d)
   , Point2d (Point2d, Position2d)
@@ -22,6 +24,7 @@ module OpenSolid.Primitives
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds)
@@ -30,14 +33,29 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.Prelude
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Tolerance ((~=#))
+import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 
 ----- Vector2d -----
 
-data Vector2d (coordinateSystem :: CoordinateSystem) where
-  -- | Construct a vector from its X and Y components.
-  Vector2d :: Qty units -> Qty units -> Vector2d (space @ units)
+data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d# Double# Double#
+  deriving (Eq, Ord, Show)
+
+-- | Construct a vector from its X and Y components.
+{-# INLINE Vector2d #-}
+pattern Vector2d :: Qty units -> Qty units -> Vector2d (space @ units)
+pattern Vector2d vx vy <- (viewVector2d# -> (# vx, vy #))
+  where
+    Vector2d (Qty# vx#) (Qty# vy#) = Vector2d# vx# vy#
+
+{-# INLINE viewVector2d# #-}
+viewVector2d# :: Vector2d (space @ units) -> (# Qty units, Qty units #)
+viewVector2d# (Vector2d# vx# vy#) = (# Qty# vx#, Qty# vy# #)
+
+{-# COMPLETE Vector2d #-}
 
 instance HasField "xComponent" (Vector2d (space @ units)) (Qty units) where
   getField (Vector2d vx _) = vx
@@ -50,12 +68,6 @@ instance HasField "components" (Vector2d (space @ units)) (Qty units, Qty units)
 
 instance HasField "angle" (Vector2d (space @ units)) Angle where
   getField (Vector2d vx vy) = Angle.atan2 vy vx
-
-deriving instance Eq (Vector2d (space @ units))
-
-deriving instance Ord (Vector2d (space @ units))
-
-deriving instance Show (Qty units) => Show (Vector2d (space @ units))
 
 instance FFI (Vector2d (space @ Unitless)) where
   representation = FFI.classRepresentation "Vector2d"
@@ -74,19 +86,20 @@ instance
     (Vector2d (space1 @ unitsA))
     (Vector2d (space2 @ unitsB))
   where
-  coerce (Vector2d vx vy) = Vector2d (Qty.coerce vx) (Qty.coerce vy)
+  coerce = Data.Coerce.coerce
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Vector2d (space1 @ units1)) (Vector2d (space2 @ units2)) units1
   where
-  Vector2d x1 y1 ~= Vector2d x2 y2 = Qty.hypot2 (x2 - x1) (y2 - y1) ~= Qty.zero
+  Vector2d# x1# y1# ~= Vector2d# x2# y2# =
+    case hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0## of 1# -> True; _ -> False
 
 instance HasZero (Vector2d (space @ units)) where
-  zero = Vector2d Qty.zero Qty.zero
+  zero = Vector2d# 0.0## 0.0##
 
 instance Negation (Vector2d (space @ units)) where
-  negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
+  negate (Vector2d# vx# vy#) = Vector2d# (negate# vx#) (negate# vy#)
 
 instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units)) where
   Positive * vector = vector
@@ -103,7 +116,7 @@ instance
     (Vector2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Vector2d x1 y1 + Vector2d x2 y2 = Vector2d (x1 + x2) (y1 + y2)
+  Vector2d# x1# y1# + Vector2d# x2# y2# = Vector2d# (x1# +# x2#) (y1# +# y2#)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -112,7 +125,7 @@ instance
     (Vector2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
+  Vector2d# x1# y1# - Vector2d# x2# y2# = Vector2d# (x1# -# x2#) (y1# -# y2#)
 
 instance
   Multiplication'
@@ -120,13 +133,13 @@ instance
     (Vector2d (space @ units2))
     (Vector2d (space @ (units1 :*: units2)))
   where
-  scale .*. Vector2d vx vy = Vector2d (scale .*. vx) (scale .*. vy)
+  Qty# scale# .*. Vector2d# vx# vy# = Vector2d# (scale# *# vx#) (scale# *# vy#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Vector2d (space @ units2)) (Vector2d (space @ units3))
   where
-  scale * Vector2d vx vy = Vector2d (scale * vx) (scale * vy)
+  Qty# scale# * Vector2d# vx# vy# = Vector2d# (scale# *# vx#) (scale# *# vy#)
 
 instance
   Multiplication'
@@ -134,13 +147,13 @@ instance
     (Qty units2)
     (Vector2d (space @ (units1 :*: units2)))
   where
-  Vector2d vx vy .*. scale = Vector2d (vx .*. scale) (vy .*. scale)
+  Vector2d# vx# vy# .*. Qty# scale# = Vector2d# (vx# *# scale#) (vy# *# scale#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
   where
-  Vector2d vx vy * scale = Vector2d (vx * scale) (vy * scale)
+  Vector2d# vx# vy# * Qty# scale# = Vector2d# (vx# *# scale#) (vy# *# scale#)
 
 instance
   Multiplication'
