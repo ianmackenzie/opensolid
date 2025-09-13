@@ -2,13 +2,11 @@
 
 module OpenSolid.CDT (unsafe) where
 
-import Data.Word (Word32)
 import Foreign qualified
 import Foreign.Marshal qualified
 import Foreign.Marshal.Array qualified
 import OpenSolid.Array qualified as Array
 import OpenSolid.IO qualified as IO
-import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
@@ -40,19 +38,19 @@ unsafe boundaryLoops steinerVertices = do
         Foreign.Marshal.alloca $ \numOutputTrianglesPtr ->
           Foreign.Marshal.Array.allocaArray (3 * maxNumOutputFaces) $ \triangleData -> IO.do
             opensolid_cdt
-              (Int.toWord32 numInputVertices)
+              numInputVertices
               inputPointData
-              (Int.toWord32 numBoundaryEdges)
+              numBoundaryEdges
               inputEdgeData
               numOutputTrianglesPtr
               triangleData
-            numOutputFaces <- IO.map Int.fromWord32 (Foreign.peek numOutputTrianglesPtr)
+            numOutputFaces <- Foreign.peek numOutputTrianglesPtr
             outputFaceIndices <- Foreign.Marshal.peekArray (3 * numOutputFaces) triangleData
-            let faceIndices = collectFaceIndices (List.map Int.fromWord32 outputFaceIndices)
+            let faceIndices = collectFaceIndices outputFaceIndices
             let meshVertices = Array.fromNonEmpty inputVertices
             IO.succeed (Mesh.indexed meshVertices faceIndices)
 
-collectEdgeIndices :: List (NonEmpty vertex) -> Int -> List Word32 -> List Word32
+collectEdgeIndices :: List (NonEmpty vertex) -> Int -> List Int -> List Int
 collectEdgeIndices loops startIndex accumulated = case loops of
   [] -> accumulated
   first : rest -> do
@@ -60,22 +58,22 @@ collectEdgeIndices loops startIndex accumulated = case loops of
     collectLoopEdgeIndices startIndex firstLength accumulated
       |> collectEdgeIndices rest (startIndex + firstLength)
 
-collectLoopEdgeIndices :: Int -> Int -> List Word32 -> List Word32
+collectLoopEdgeIndices :: Int -> Int -> List Int -> List Int
 collectLoopEdgeIndices startIndex loopLength accumulated = do
   let addEdge i acc = do
         let edgeStart = startIndex + i
         let edgeEnd = startIndex + (i + 1) % loopLength
-        Int.toWord32 edgeStart : Int.toWord32 edgeEnd : acc
+        edgeStart : edgeEnd : acc
   List.foldr addEdge accumulated [0 .. loopLength - 1]
 
 foreign import ccall safe "opensolid_cdt"
   opensolid_cdt ::
-    Word32 -> -- input_point_count
+    Int -> -- input_point_count
     Foreign.Ptr (Qty units) -> -- input_point_data
-    Word32 -> -- input_edge_count
-    Foreign.Ptr Word32 -> -- input_edge_data
-    Foreign.Ptr Word32 -> -- output_triangle_count
-    Foreign.Ptr Word32 -> -- output_triangle_data
+    Int -> -- input_edge_count
+    Foreign.Ptr Int -> -- input_edge_data
+    Foreign.Ptr Int -> -- output_triangle_count
+    Foreign.Ptr Int -> -- output_triangle_data
     IO ()
 
 collectFaceIndices :: List Int -> List (Int, Int, Int)

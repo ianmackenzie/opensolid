@@ -1,6 +1,7 @@
+#include "HsFFI.h"
+
 #include "CDT/CDTUtils.h"
 #include "CDT/Triangulation.h"
-#include <cstdint>
 
 struct Point {
   double x;
@@ -10,19 +11,19 @@ struct Point {
 static_assert(sizeof(CDT::VertInd) == 4);
 
 struct Edge {
-  std::uint32_t start;
-  std::uint32_t end;
+  HsInt start;
+  HsInt end;
 };
 
 extern "C" {
   void
   opensolid_cdt(
-    std::uint32_t inputPointCount,
+    HsInt inputPointCount,
     const Point* inputPointData,
-    std::uint32_t inputEdgeCount,
+    HsInt inputEdgeCount,
     const Edge* inputEdgeData,
-    std::uint32_t* outputTriangleCount,
-    std::array<std::uint32_t, 3>* outputTriangleData
+    HsInt* outputTriangleCount,
+    std::array<HsInt, 3>* outputTriangleData
   ) {
     CDT::Triangulation<double> cdt;
     cdt.insertVertices(
@@ -46,10 +47,13 @@ extern "C" {
       }
     );
     cdt.eraseOuterTrianglesAndHoles();
-    std::uint32_t triangleCount = cdt.triangles.size();
+    HsInt triangleCount = cdt.triangles.size();
     *outputTriangleCount = triangleCount;
-    for (std::uint32_t i = 0; i < triangleCount; ++i) {
-      outputTriangleData[i] = cdt.triangles[i].vertices;
+    for (HsInt i = 0; i < triangleCount; ++i) {
+      auto vertices = cdt.triangles[i].vertices;
+      outputTriangleData[i][0] = vertices[0];
+      outputTriangleData[i][1] = vertices[1];
+      outputTriangleData[i][2] = vertices[2];
     }
   }
 }
