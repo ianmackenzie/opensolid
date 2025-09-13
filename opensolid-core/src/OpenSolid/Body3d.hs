@@ -90,10 +90,10 @@ import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
@@ -921,11 +921,14 @@ isValidSteinerPoint ::
   UvPoint ->
   Bool
 isValidSteinerPoint edgeSet uvPoint = case edgeSet of
-  Set2d.Node nodeBounds left right -> do
-    let distance = VectorBounds2d.magnitude (uvPoint - nodeBounds)
-    Bounds.lower distance >= 0.5 * Bounds2d.diameter nodeBounds
-      || (isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint)
-  Set2d.Leaf _ edge -> LineSegment2d.distanceTo uvPoint edge >= 0.5 * edge.length
+  Set2d.Node nodeBounds left right ->
+    case Bounds2d.exclusion# uvPoint nodeBounds >=# half# (Bounds2d.diameter# nodeBounds) of
+      1# -> True
+      _ -> isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint
+  Set2d.Leaf _ edge ->
+    case LineSegment2d.distanceTo# uvPoint edge >=# half# (LineSegment2d.length# edge) of
+      1# -> True
+      _ -> False
 
 surfaces :: Body3d (space @ units) -> NonEmpty (Surface3d (space @ units))
 surfaces (Body3d boundarySurfaces) =
