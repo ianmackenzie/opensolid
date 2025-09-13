@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.LineSegment2d
   ( LineSegment2d (LineSegment2d)
   , startVertex
@@ -5,8 +7,10 @@ module OpenSolid.LineSegment2d
   , startPoint
   , endPoint
   , length
+  , length#
   , bounds
   , distanceTo
+  , distanceTo#
   )
 where
 
@@ -14,12 +18,11 @@ import OpenSolid.Bounded2d (Bounded2d)
 import OpenSolid.Bounded2d qualified as Bounded2d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
-import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Qty (Qty (Qty#))
+import OpenSolid.Unboxed.Math
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 
@@ -78,7 +81,11 @@ endPoint :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Point2d (
 endPoint (LineSegment2d _ v2) = Vertex2d.position v2
 
 length :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Qty units
-length segment = Point2d.distanceFrom segment.startPoint segment.endPoint
+length segment = Qty# (length# segment)
+
+{-# INLINE length# #-}
+length# :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Double#
+length# segment = Point2d.distanceFrom# (startPoint segment) (endPoint segment)
 
 bounds :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Bounds2d (space @ units)
 bounds segment = Bounds2d.hull2 (startPoint segment) (endPoint segment)
@@ -88,14 +95,25 @@ distanceTo ::
   Point2d (space @ units) ->
   LineSegment2d vertex ->
   Qty units
-distanceTo p0 segment = do
-  let p1 = segment.startPoint
-  let p2 = segment.endPoint
-  let u = p0 - p1
-  let v = p2 - p1
-  let dSquared' = Vector2d.squaredMagnitude' v
-  let dotProduct' = u `dot'` v
-  if
-    | dotProduct' <= Qty.zero -> Point2d.distanceFrom p1 p0
-    | dotProduct' >= dSquared' -> Point2d.distanceFrom p2 p0
-    | otherwise -> Qty.abs (Units.simplify (u `cross'` v ./. Qty.sqrt' dSquared'))
+distanceTo p0 segment = Qty# (distanceTo# p0 segment)
+
+{-# INLINEABLE distanceTo# #-}
+distanceTo# ::
+  Vertex2d vertex (space @ units) =>
+  Point2d (space @ units) ->
+  LineSegment2d vertex ->
+  Double#
+distanceTo# p0 (LineSegment2d p1 p2) = do
+  let !(Point2d (Qty# x0#) (Qty# y0#)) = p0
+  let !(Point2d (Qty# x1#) (Qty# y1#)) = Vertex2d.position p1
+  let !(Point2d (Qty# x2#) (Qty# y2#)) = Vertex2d.position p2
+  let ux# = x0# -# x1#
+  let uy# = y0# -# y1#
+  let vx# = x2# -# x1#
+  let vy# = y2# -# y1#
+  let lengthSquared# = vx# *# vx# +# vy# *# vy#
+  let dotProduct# = ux# *# vx# +# uy# *# vy#
+  case (# dotProduct# <=# 0.0##, dotProduct# >=# lengthSquared# #) of
+    (# 1#, _ #) -> hypot2# ux# uy#
+    (# _, 1# #) -> hypot2# (x0# -# x2#) (y0# -# y2#)
+    (# _, _ #) -> abs# (vx# *# uy# -# vy# *# ux#) /# sqrt# lengthSquared#
