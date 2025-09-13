@@ -1636,25 +1636,25 @@ desingularized ::
   Expression input output ->
   Expression input output
 desingularized (Curve1d parameter _) (Curve1d left _) (Curve1d middle _) (Curve1d right _) =
-  curve1d (Ast.desingularizedCurve1d parameter left middle right)
+  curve1d (Ast.desingularized1d parameter left middle right)
 desingularized (Surface1d parameter _) (Surface1d left _) (Surface1d middle _) (Surface1d right _) =
-  surface1d (Ast.desingularizedSurface1d parameter left middle right)
+  surface1d (Ast.desingularized1d parameter left middle right)
 desingularized (Curve1d parameter _) (Curve2d left _) (Curve2d middle _) (Curve2d right _) =
-  curve2d (Ast.desingularizedCurve2d parameter left middle right)
+  curve2d (Ast.desingularized2d parameter left middle right)
 desingularized (Surface1d parameter _) (Surface2d left _) (Surface2d middle _) (Surface2d right _) =
-  surface2d (Ast.desingularizedSurface2d parameter left middle right)
+  surface2d (Ast.desingularized2d parameter left middle right)
 desingularized (Curve1d parameter _) (VectorCurve2d left _) (VectorCurve2d middle _) (VectorCurve2d right _) =
-  vectorCurve2d (Ast.desingularizedCurve2d parameter left middle right)
+  vectorCurve2d (Ast.desingularized2d parameter left middle right)
 desingularized (Surface1d parameter _) (VectorSurface2d left _) (VectorSurface2d middle _) (VectorSurface2d right _) =
-  vectorSurface2d (Ast.desingularizedSurface2d parameter left middle right)
+  vectorSurface2d (Ast.desingularized2d parameter left middle right)
 desingularized (Curve1d parameter _) (Curve3d left _) (Curve3d middle _) (Curve3d right _) =
-  curve3d (Ast.desingularizedCurve3d parameter left middle right)
+  curve3d (Ast.desingularized3d parameter left middle right)
 desingularized (Surface1d parameter _) (Surface3d left _) (Surface3d middle _) (Surface3d right _) =
-  surface3d (Ast.desingularizedSurface3d parameter left middle right)
+  surface3d (Ast.desingularized3d parameter left middle right)
 desingularized (Curve1d parameter _) (VectorCurve3d left _) (VectorCurve3d middle _) (VectorCurve3d right _) =
-  vectorCurve3d (Ast.desingularizedCurve3d parameter left middle right)
+  vectorCurve3d (Ast.desingularized3d parameter left middle right)
 desingularized (Surface1d parameter _) (VectorSurface3d left _) (VectorSurface3d middle _) (VectorSurface3d right _) =
-  vectorSurface3d (Ast.desingularizedSurface3d parameter left middle right)
+  vectorSurface3d (Ast.desingularized3d parameter left middle right)
 
 -----------------
 --- COMPILING ---

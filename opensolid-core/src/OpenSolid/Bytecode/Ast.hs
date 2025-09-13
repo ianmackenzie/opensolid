@@ -40,12 +40,9 @@ module OpenSolid.Bytecode.Ast
   , bezierCurve1d
   , bezierCurve2d
   , bezierCurve3d
-  , desingularizedCurve1d
-  , desingularizedCurve2d
-  , desingularizedCurve3d
-  , desingularizedSurface1d
-  , desingularizedSurface2d
-  , desingularizedSurface3d
+  , desingularized1d
+  , desingularized2d
+  , desingularized3d
   , compileCurve1d
   , compileCurve2d
   , compileCurve3d
@@ -1153,86 +1150,32 @@ b11d2 = Variable1d (B11d2 CurveParameter)
 b11d3 :: Ast1d Float
 b11d3 = Variable1d (B11d3 CurveParameter)
 
-desingularizedCurve1d :: Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float -> Ast1d Float
-desingularizedCurve1d (Constant1d parameter) left middle right =
+desingularized1d :: Ast1d input -> Ast1d input -> Ast1d input -> Ast1d input -> Ast1d input
+desingularized1d (Constant1d parameter) left middle right =
   Desingularization.value parameter left middle right
-desingularizedCurve1d _ (Constant1d left) _ _ = Constant1d left
-desingularizedCurve1d _ _ (Constant1d middle) _ = Constant1d middle
-desingularizedCurve1d _ _ _ (Constant1d right) = Constant1d right
-desingularizedCurve1d (Variable1d parameter) (Variable1d left) (Variable1d middle) (Variable1d right) =
+desingularized1d _ (Constant1d left) _ _ = Constant1d left
+desingularized1d _ _ (Constant1d middle) _ = Constant1d middle
+desingularized1d _ _ _ (Constant1d right) = Constant1d right
+desingularized1d (Variable1d parameter) (Variable1d left) (Variable1d middle) (Variable1d right) =
   Variable1d (Desingularized1d parameter left middle right)
 
-desingularizedCurve2d :: Ast1d Float -> Ast2d Float -> Ast2d Float -> Ast2d Float -> Ast2d Float
-desingularizedCurve2d (Constant1d parameter) left middle right =
+desingularized2d :: Ast1d input -> Ast2d input -> Ast2d input -> Ast2d input -> Ast2d input
+desingularized2d (Constant1d parameter) left middle right =
   Desingularization.value parameter left middle right
-desingularizedCurve2d _ (Constant2d left) _ _ = Constant2d left
-desingularizedCurve2d _ _ (Constant2d middle) _ = Constant2d middle
-desingularizedCurve2d _ _ _ (Constant2d right) = Constant2d right
-desingularizedCurve2d (Variable1d parameter) (Variable2d left) (Variable2d middle) (Variable2d right) =
+desingularized2d _ (Constant2d left) _ _ = Constant2d left
+desingularized2d _ _ (Constant2d middle) _ = Constant2d middle
+desingularized2d _ _ _ (Constant2d right) = Constant2d right
+desingularized2d (Variable1d parameter) (Variable2d left) (Variable2d middle) (Variable2d right) =
   Variable2d (Desingularized2d parameter left middle right)
 
-desingularizedCurve3d :: Ast1d Float -> Ast3d Float -> Ast3d Float -> Ast3d Float -> Ast3d Float
-desingularizedCurve3d (Constant1d parameter) left middle right =
+desingularized3d :: Ast1d input -> Ast3d input -> Ast3d input -> Ast3d input -> Ast3d input
+desingularized3d (Constant1d parameter) left middle right =
   Desingularization.value parameter left middle right
-desingularizedCurve3d _ (Constant3d left) _ _ = Constant3d left
-desingularizedCurve3d _ _ (Constant3d middle) _ = Constant3d middle
-desingularizedCurve3d _ _ _ (Constant3d right) = Constant3d right
-desingularizedCurve3d (Variable1d parameter) (Variable3d left) (Variable3d middle) (Variable3d right) =
+desingularized3d _ (Constant3d left) _ _ = Constant3d left
+desingularized3d _ _ (Constant3d middle) _ = Constant3d middle
+desingularized3d _ _ _ (Constant3d right) = Constant3d right
+desingularized3d (Variable1d parameter) (Variable3d left) (Variable3d middle) (Variable3d right) =
   Variable3d (Desingularized3d parameter left middle right)
-
-desingularizedSurface1d ::
-  Ast1d UvPoint ->
-  Ast1d UvPoint ->
-  Ast1d UvPoint ->
-  Ast1d UvPoint ->
-  Ast1d UvPoint
-desingularizedSurface1d (Constant1d parameter) left middle right =
-  Desingularization.value parameter left middle right
-desingularizedSurface1d _ (Constant1d left) _ _ = Constant1d left
-desingularizedSurface1d _ _ (Constant1d middle) _ = Constant1d middle
-desingularizedSurface1d _ _ _ (Constant1d right) = Constant1d right
-desingularizedSurface1d
-  (Variable1d parameter)
-  (Variable1d left)
-  (Variable1d middle)
-  (Variable1d right) =
-    Variable1d (Desingularized1d parameter left middle right)
-
-desingularizedSurface2d ::
-  Ast1d UvPoint ->
-  Ast2d UvPoint ->
-  Ast2d UvPoint ->
-  Ast2d UvPoint ->
-  Ast2d UvPoint
-desingularizedSurface2d (Constant1d parameter) left middle right =
-  Desingularization.value parameter left middle right
-desingularizedSurface2d _ (Constant2d left) _ _ = Constant2d left
-desingularizedSurface2d _ _ (Constant2d middle) _ = Constant2d middle
-desingularizedSurface2d _ _ _ (Constant2d right) = Constant2d right
-desingularizedSurface2d
-  (Variable1d parameter)
-  (Variable2d left)
-  (Variable2d middle)
-  (Variable2d right) =
-    Variable2d (Desingularized2d parameter left middle right)
-
-desingularizedSurface3d ::
-  Ast1d UvPoint ->
-  Ast3d UvPoint ->
-  Ast3d UvPoint ->
-  Ast3d UvPoint ->
-  Ast3d UvPoint
-desingularizedSurface3d (Constant1d parameter) left middle right =
-  Desingularization.value parameter left middle right
-desingularizedSurface3d _ (Constant3d left) _ _ = Constant3d left
-desingularizedSurface3d _ _ (Constant3d middle) _ = Constant3d middle
-desingularizedSurface3d _ _ _ (Constant3d right) = Constant3d right
-desingularizedSurface3d
-  (Variable1d parameter)
-  (Variable3d left)
-  (Variable3d middle)
-  (Variable3d right) =
-    Variable3d (Desingularized3d parameter left middle right)
 
 addTransform2d :: Transform2d.Affine Coordinates -> Compile.Step ConstantIndex
 addTransform2d (Transform2d origin i j) = do
