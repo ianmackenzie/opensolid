@@ -557,6 +557,17 @@ instance Negation (Ast1d input) where
 instance Negation (Variable1d input) where
   negate (Negated1d arg) = arg
   negate (Difference1d lhs rhs) = Difference1d rhs lhs
+  negate (SumVariableConstant1d lhs rhs) = DifferenceConstantVariable1d -rhs lhs
+  negate (DifferenceConstantVariable1d lhs rhs) = SumVariableConstant1d rhs -lhs
+  negate (ProductVariableConstant1d lhs rhs) = ProductVariableConstant1d lhs -rhs
+  negate (QuotientConstantVariable1d lhs rhs) = QuotientConstantVariable1d -lhs rhs
+  negate (Cubed1d arg) = Cubed1d -arg
+  negate (Sin1d arg) = Sin1d -arg
+  negate (BezierCurve1d controlPoints param) =
+    BezierCurve1d (NonEmpty.map negate controlPoints) param
+  negate (DotVariableConstant2d lhs rhs) = DotVariableConstant2d lhs -rhs
+  negate (CrossVariableConstant2d lhs rhs) = CrossVariableConstant2d lhs -rhs
+  negate (DotVariableConstant3d lhs rhs) = DotVariableConstant3d lhs -rhs
   negate var = Negated1d var
 
 instance Multiplication Sign (Ast1d input) (Ast1d input) where
