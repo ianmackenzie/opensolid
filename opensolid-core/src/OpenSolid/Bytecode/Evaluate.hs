@@ -30,7 +30,7 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Vector3d (Vector3d), VectorBounds3d (VectorBounds3d))
+import OpenSolid.Primitives (Vector3d (Vector3d#), VectorBounds3d (VectorBounds3d#))
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Unboxed.Math
@@ -90,7 +90,7 @@ curve3dValue (Constant value) _ = Vector3d.coerce value
 curve3dValue (Bytecode bytecode) (Qty# t#) =
   callFunction bytecode \f# -> do
     let !(# x#, y#, z# #) = opensolid_cmm_curve3d_value f# t#
-    IO.succeed (Vector3d (Qty# x#) (Qty# y#) (Qty# z#))
+    IO.succeed (Vector3d# x# y# z#)
 
 curve3dBounds ::
   Compiled Float (Vector3d (space1 @ units1)) ->
@@ -101,7 +101,7 @@ curve3dBounds (Bytecode bytecode) (Bounds# tLow# tHigh#) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh#, zLow#, zHigh# #) =
           opensolid_cmm_curve3d_bounds f# tLow# tHigh#
-    IO.succeed (VectorBounds3d (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#) (Bounds# zLow# zHigh#))
+    IO.succeed (VectorBounds3d# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
 
 surface1dValue :: Compiled UvPoint (Qty units1) -> UvPoint -> Qty units2
 surface1dValue (Constant value) _ = Qty.coerce value
@@ -146,7 +146,7 @@ surface3dValue (Constant value) _ = Vector3d.coerce value
 surface3dValue (Bytecode bytecode) (Point2d (Qty# u#) (Qty# v#)) =
   callFunction bytecode \f# -> do
     let !(# x#, y#, z# #) = opensolid_cmm_surface3d_value f# u# v#
-    IO.succeed (Vector3d (Qty# x#) (Qty# y#) (Qty# z#))
+    IO.succeed (Vector3d# x# y# z#)
 
 surface3dBounds ::
   Compiled UvPoint (Vector3d (space1 @ units1)) ->
@@ -157,7 +157,7 @@ surface3dBounds (Bytecode bytecode) (Bounds2d (Bounds# uLow# uHigh#) (Bounds# vL
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh#, zLow#, zHigh# #) =
           opensolid_cmm_surface3d_bounds f# uLow# uHigh# vLow# vHigh#
-    IO.succeed (VectorBounds3d (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#) (Bounds# zLow# zHigh#))
+    IO.succeed (VectorBounds3d# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
 
 callSolver :: ByteString -> ByteString -> (CString -> CString -> IO a) -> a
 callSolver functionBytes derivativeBytes callback =

@@ -37,7 +37,6 @@ module OpenSolid.Bounds
   , sqrt
   , sqrt'
   , hypot2
-  , hypot3
   , cubed
   , aggregate2
   , aggregate3
@@ -414,47 +413,6 @@ hypot2 (Bounds# xMin# xMax#) (Bounds# yMin# yMax#) = do
     (# _, _, 1#, _ #) -> Bounds# yMin# maxMagnitude#
     (# _, _, _, 1# #) -> Bounds# (negate# yMax#) maxMagnitude#
     (# _, _, _, _ #) -> Bounds# 0.0## maxMagnitude#
-
-hypot3 :: Bounds units -> Bounds units -> Bounds units -> Bounds units
-hypot3 (Bounds# xMin# xMax#) (Bounds# yMin# yMax#) (Bounds# zMin# zMax#) = do
-  let positiveX# = xMin# >=# 0.0##
-  let negativeX# = xMax# <=# 0.0##
-  let positiveY# = yMin# >=# 0.0##
-  let negativeY# = yMax# <=# 0.0##
-  let positiveZ# = zMin# >=# 0.0##
-  let negativeZ# = zMax# <=# 0.0##
-  let xMagnitude# = max# (abs# xMin#) (abs# xMax#)
-  let yMagnitude# = max# (abs# yMin#) (abs# yMax#)
-  let zMagnitude# = max# (abs# zMin#) (abs# zMax#)
-  let maxMagnitude# = hypot3# xMagnitude# yMagnitude# zMagnitude#
-  case (# positiveX#, negativeX#, positiveY#, negativeY#, positiveZ#, negativeZ# #) of
-    (# 1#, _, 1#, _, 1#, _ #) -> Bounds# (hypot3# xMin# yMin# zMin#) maxMagnitude#
-    (# 1#, _, 1#, _, _, 1# #) -> Bounds# (hypot3# xMin# yMin# zMax#) maxMagnitude#
-    (# 1#, _, _, 1#, 1#, _ #) -> Bounds# (hypot3# xMin# yMax# zMin#) maxMagnitude#
-    (# 1#, _, _, 1#, _, 1# #) -> Bounds# (hypot3# xMin# yMax# zMax#) maxMagnitude#
-    (# _, 1#, 1#, _, 1#, _ #) -> Bounds# (hypot3# xMax# yMin# zMin#) maxMagnitude#
-    (# _, 1#, 1#, _, _, 1# #) -> Bounds# (hypot3# xMax# yMin# zMax#) maxMagnitude#
-    (# _, 1#, _, 1#, 1#, _ #) -> Bounds# (hypot3# xMax# yMax# zMin#) maxMagnitude#
-    (# _, 1#, _, 1#, _, 1# #) -> Bounds# (hypot3# xMax# yMax# zMax#) maxMagnitude#
-    (# _, _, 1#, _, 1#, _ #) -> Bounds# (hypot2# yMin# zMin#) maxMagnitude#
-    (# _, _, 1#, _, _, 1# #) -> Bounds# (hypot2# yMin# zMax#) maxMagnitude#
-    (# _, _, _, 1#, 1#, _ #) -> Bounds# (hypot2# yMax# zMin#) maxMagnitude#
-    (# _, _, _, 1#, _, 1# #) -> Bounds# (hypot2# yMax# zMax#) maxMagnitude#
-    (# 1#, _, _, _, 1#, _ #) -> Bounds# (hypot2# xMin# zMin#) maxMagnitude#
-    (# 1#, _, _, _, _, 1# #) -> Bounds# (hypot2# xMin# zMax#) maxMagnitude#
-    (# _, 1#, _, _, 1#, _ #) -> Bounds# (hypot2# xMax# zMin#) maxMagnitude#
-    (# _, 1#, _, _, _, 1# #) -> Bounds# (hypot2# xMax# zMax#) maxMagnitude#
-    (# 1#, _, 1#, _, _, _ #) -> Bounds# (hypot2# xMin# yMin#) maxMagnitude#
-    (# 1#, _, _, 1#, _, _ #) -> Bounds# (hypot2# xMin# yMax#) maxMagnitude#
-    (# _, 1#, 1#, _, _, _ #) -> Bounds# (hypot2# xMax# yMin#) maxMagnitude#
-    (# _, 1#, _, 1#, _, _ #) -> Bounds# (hypot2# xMax# yMax#) maxMagnitude#
-    (# 1#, _, _, _, _, _ #) -> Bounds# xMin# maxMagnitude#
-    (# _, 1#, _, _, _, _ #) -> Bounds# (negate# xMax#) maxMagnitude#
-    (# _, _, 1#, _, _, _ #) -> Bounds# yMin# maxMagnitude#
-    (# _, _, _, 1#, _, _ #) -> Bounds# (negate# yMax#) maxMagnitude#
-    (# _, _, _, _, 1#, _ #) -> Bounds# zMin# maxMagnitude#
-    (# _, _, _, _, _, 1# #) -> Bounds# (negate# zMax#) maxMagnitude#
-    (# _, _, _, _, _, _ #) -> Bounds# 0.0## maxMagnitude#
 
 cubed :: Bounds Unitless -> Bounds Unitless
 cubed (Bounds low high) = Bounds (low * low * low) (high * high * high)

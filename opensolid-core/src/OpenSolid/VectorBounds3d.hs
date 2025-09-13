@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.VectorBounds3d
   ( VectorBounds3d
   , constant
@@ -39,6 +41,7 @@ module OpenSolid.VectorBounds3d
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds (Bounds, Bounds#))
 import OpenSolid.Bounds qualified as Bounds
@@ -55,7 +58,7 @@ import OpenSolid.Primitives
   , Vector2d (Vector2d)
   , Vector3d (Vector3d)
   , VectorBounds2d (VectorBounds2d)
-  , VectorBounds3d (VectorBounds3d)
+  , VectorBounds3d (VectorBounds3d, VectorBounds3d#)
   )
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
@@ -71,7 +74,7 @@ constant (Vector3d x y z) =
 
 {-# INLINE coerce #-}
 coerce :: VectorBounds3d (space1 @ units1) -> VectorBounds3d (space2 @ units2)
-coerce (VectorBounds3d x y z) = VectorBounds3d (Bounds.coerce x) (Bounds.coerce y) (Bounds.coerce z)
+coerce = Data.Coerce.coerce
 
 hull2 :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorBounds3d (space @ units)
 hull2 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
@@ -179,13 +182,50 @@ squaredMagnitude' :: VectorBounds3d (space @ units) -> Bounds (units :*: units)
 squaredMagnitude' (VectorBounds3d x y z) = Bounds.squared' x + Bounds.squared' y + Bounds.squared' z
 
 magnitude :: VectorBounds3d (space @ units) -> Bounds units
-magnitude (VectorBounds3d x y z) = Bounds.hypot3 x y z
+magnitude bounds = do
+  let !(VectorBounds3d# xMin# xMax# yMin# yMax# zMin# zMax#) = bounds
+  let positiveX# = xMin# >=# 0.0##
+  let negativeX# = xMax# <=# 0.0##
+  let positiveY# = yMin# >=# 0.0##
+  let negativeY# = yMax# <=# 0.0##
+  let positiveZ# = zMin# >=# 0.0##
+  let negativeZ# = zMax# <=# 0.0##
+  let minMagnitude# =
+        case (# positiveX#, negativeX#, positiveY#, negativeY#, positiveZ#, negativeZ# #) of
+          (# 1#, _, 1#, _, 1#, _ #) -> hypot3# xMin# yMin# zMin#
+          (# 1#, _, 1#, _, _, 1# #) -> hypot3# xMin# yMin# zMax#
+          (# 1#, _, _, 1#, 1#, _ #) -> hypot3# xMin# yMax# zMin#
+          (# 1#, _, _, 1#, _, 1# #) -> hypot3# xMin# yMax# zMax#
+          (# _, 1#, 1#, _, 1#, _ #) -> hypot3# xMax# yMin# zMin#
+          (# _, 1#, 1#, _, _, 1# #) -> hypot3# xMax# yMin# zMax#
+          (# _, 1#, _, 1#, 1#, _ #) -> hypot3# xMax# yMax# zMin#
+          (# _, 1#, _, 1#, _, 1# #) -> hypot3# xMax# yMax# zMax#
+          (# _, _, 1#, _, 1#, _ #) -> hypot2# yMin# zMin#
+          (# _, _, 1#, _, _, 1# #) -> hypot2# yMin# zMax#
+          (# _, _, _, 1#, 1#, _ #) -> hypot2# yMax# zMin#
+          (# _, _, _, 1#, _, 1# #) -> hypot2# yMax# zMax#
+          (# 1#, _, _, _, 1#, _ #) -> hypot2# xMin# zMin#
+          (# 1#, _, _, _, _, 1# #) -> hypot2# xMin# zMax#
+          (# _, 1#, _, _, 1#, _ #) -> hypot2# xMax# zMin#
+          (# _, 1#, _, _, _, 1# #) -> hypot2# xMax# zMax#
+          (# 1#, _, 1#, _, _, _ #) -> hypot2# xMin# yMin#
+          (# 1#, _, _, 1#, _, _ #) -> hypot2# xMin# yMax#
+          (# _, 1#, 1#, _, _, _ #) -> hypot2# xMax# yMin#
+          (# _, 1#, _, 1#, _, _ #) -> hypot2# xMax# yMax#
+          (# 1#, _, _, _, _, _ #) -> xMin#
+          (# _, 1#, _, _, _, _ #) -> negate# xMax#
+          (# _, _, 1#, _, _, _ #) -> yMin#
+          (# _, _, _, 1#, _, _ #) -> negate# yMax#
+          (# _, _, _, _, 1#, _ #) -> zMin#
+          (# _, _, _, _, _, 1# #) -> negate# zMax#
+          (# _, _, _, _, _, _ #) -> 0.0##
+  Bounds# minMagnitude# (maxMagnitude# bounds)
 
 maxMagnitude :: VectorBounds3d (space @ units) -> Qty units
 maxMagnitude bounds = Qty# (maxMagnitude# bounds)
 
 maxMagnitude# :: VectorBounds3d (space @ units) -> Double#
-maxMagnitude# (VectorBounds3d (Bounds# minX# maxX#) (Bounds# minY# maxY#) (Bounds# minZ# maxZ#)) = do
+maxMagnitude# (VectorBounds3d# minX# maxX# minY# maxY# minZ# maxZ#) = do
   let xMagnitude# = max# (abs# minX#) (abs# maxX#)
   let yMagnitude# = max# (abs# minY#) (abs# maxY#)
   let zMagnitude# = max# (abs# minZ#) (abs# maxZ#)
