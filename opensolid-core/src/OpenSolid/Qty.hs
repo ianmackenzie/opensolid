@@ -1,5 +1,5 @@
 module OpenSolid.Qty
-  ( Qty (Qty)
+  ( Qty (Qty, Qty#)
   , zero
   , unit
   , infinity
@@ -58,6 +58,7 @@ import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
 import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
+import OpenSolid.Unboxed.Math
 import OpenSolid.Unitless (Unitless)
 import OpenSolid.Units (CubicMeters, Meters, Radians, SquareMeters, (:*:), (:/:))
 import OpenSolid.Units qualified as Units
@@ -68,6 +69,12 @@ type role Qty phantom
 
 type Qty :: Type -> Type
 newtype Qty units = Qty Prelude.Double deriving (Eq, Ord)
+
+{-# COMPLETE Qty# #-}
+
+{-# INLINE Qty# #-}
+pattern Qty# :: Double# -> Qty units
+pattern Qty# x# = Qty (D# x#)
 
 instance Show (Qty Unitless) where
   show (Qty x) = Prelude.show x
