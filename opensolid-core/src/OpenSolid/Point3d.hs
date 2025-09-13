@@ -12,6 +12,7 @@ module OpenSolid.Point3d
   , midpoint
   , interpolateFrom
   , distanceFrom
+  , distanceFrom#
   , distanceAlong
   , placeIn
   , relativeTo
@@ -47,8 +48,10 @@ import OpenSolid.Primitives
   , Transform3d (Transform3d)
   , Vector3d
   )
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.Unboxed.Math
 import OpenSolid.Vector3d qualified as Vector3d
 
 -- | Get the XYZ coordinates of a point, given an XYZ coordinate convention to use.
@@ -117,8 +120,14 @@ midpoint :: Point3d (space @ units) -> Point3d (space @ units) -> Point3d (space
 midpoint (Position3d p1) (Position3d p2) = Position3d (Vector3d.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
+{-# INLINE distanceFrom #-}
 distanceFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Qty units
-distanceFrom p1 p2 = Vector3d.magnitude (p2 - p1)
+distanceFrom p1 p2 = Qty# (distanceFrom# p1 p2)
+
+{-# INLINE distanceFrom# #-}
+distanceFrom# :: Point3d (space @ units) -> Point3d (space @ units) -> Double#
+distanceFrom# (Point3d (Qty# x1#) (Qty# y1#) (Qty# z1#)) (Point3d (Qty# x2#) (Qty# y2#) (Qty# z2#)) =
+  hypot3# (x2# -# x1#) (y2# -# y1#) (z2# -# z1#)
 
 {-| Compute the (signed) distance of a point along an axis.
 
