@@ -62,10 +62,10 @@ instance
   bounds = bounds
 
 startVertex :: LineSegment2d vertex -> vertex
-startVertex (LineSegment2d s _) = s
+startVertex (LineSegment2d v1 _) = v1
 
 endVertex :: LineSegment2d vertex -> vertex
-endVertex (LineSegment2d _ e) = e
+endVertex (LineSegment2d _ v2) = v2
 
 startPoint :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Point2d (space @ units)
 startPoint = Vertex2d.position . startVertex
