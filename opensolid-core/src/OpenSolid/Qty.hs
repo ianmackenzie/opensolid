@@ -210,10 +210,10 @@ sqrt' x | x <= zero = zero
 sqrt' (Qty x) = Qty (Prelude.sqrt x)
 
 hypot2 :: Qty units -> Qty units -> Qty units
-hypot2 x y = sqrt' (squared' x + squared' y)
+hypot2 (Qty# x#) (Qty# y#) = Qty# (hypot2# x# y#)
 
 hypot3 :: Qty units -> Qty units -> Qty units -> Qty units
-hypot3 x y z = sqrt' (squared' x + squared' y + squared' z)
+hypot3 (Qty# x#) (Qty# y#) (Qty# z#) = Qty# (hypot3# x# y# z#)
 
 {-# INLINE abs #-}
 abs :: Qty units -> Qty units
