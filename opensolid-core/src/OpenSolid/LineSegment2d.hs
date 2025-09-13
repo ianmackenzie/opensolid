@@ -81,7 +81,7 @@ length :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Qty units
 length segment = Point2d.distanceFrom segment.startPoint segment.endPoint
 
 bounds :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Bounds2d (space @ units)
-bounds segment = Bounds2d.hull2 segment.startPoint segment.endPoint
+bounds segment = Bounds2d.hull2 (startPoint segment) (endPoint segment)
 
 distanceTo ::
   Vertex2d vertex (space @ units) =>
