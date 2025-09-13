@@ -57,6 +57,7 @@ common config
     -fwrite-ide-info
     -hiedir=.hie
     -haddock
+    -dcmm-lint
 
   default-extensions:
     BlockArguments
@@ -68,6 +69,7 @@ common config
     ExplicitNamespaces
     FunctionalDependencies
     GADTs
+    GHCForeignImportPrim
     ImplicitParams
     LambdaCase
     LexicalNegation
@@ -278,6 +280,9 @@ library
     -Werror
     -fPIC
     -std=c++17
+
+  cmm-sources:
+    src/OpenSolid/Bytecode/primops.cmm
 
   build-depends:
     system-cxx-std-lib

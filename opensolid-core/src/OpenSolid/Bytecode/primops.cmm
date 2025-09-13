@@ -1,0 +1,151 @@
+#include "Cmm.h"
+
+import opensolid_curve_value;
+import opensolid_curve_bounds;
+
+#define RESERVE_DOUBLES(n) STK_CHK_GEN_N(8 * n); reserve BYTES_TO_WDS(8 * n)
+#define RET(i) D_[ret + 8 * i]
+
+opensolid_cmm_curve1d_value(W_ f, D_ t) {
+    D_ x;
+    W_ ret;
+    RESERVE_DOUBLES(1) = ret {
+        ccall opensolid_curve_value(f "ptr", t, ret "ptr");
+        x = RET(0);
+    }
+    return (x);
+}
+
+opensolid_cmm_curve1d_bounds(W_ f, D_ tLow, D_ tHigh) {
+    D_ xLow, xHigh;
+    W_ ret;
+    RESERVE_DOUBLES(2) = ret {
+        ccall opensolid_curve_bounds(f "ptr", tLow, tHigh, ret "ptr");
+        xLow = RET(0);
+        xHigh = RET(1);
+    }
+    return (xLow, xHigh);
+}
+
+opensolid_cmm_curve2d_value(W_ f, D_ t) {
+    D_ x, y;
+    W_ ret;
+    RESERVE_DOUBLES(2) = ret {
+        ccall opensolid_curve_value(f "ptr", t, ret "ptr");
+        x = RET(0);
+        y = RET(1);
+    }
+    return (x, y);
+}
+
+opensolid_cmm_curve2d_bounds(W_ f, D_ tLow, D_ tHigh) {
+    D_ xLow, xHigh, yLow, yHigh;
+    W_ ret;
+    RESERVE_DOUBLES(4) = ret {
+        ccall opensolid_curve_bounds(f "ptr", tLow, tHigh, ret "ptr");
+        xLow = RET(0);
+        xHigh = RET(1);
+        yLow = RET(2);
+        yHigh = RET(3);
+    }
+    return (xLow, xHigh, yLow, yHigh);
+}
+
+opensolid_cmm_curve3d_value(W_ f, D_ t) {
+    D_ x, y, z;
+    W_ ret;
+    RESERVE_DOUBLES(3) = ret {
+        ccall opensolid_curve_value(f "ptr", t, ret "ptr");
+        x = RET(0);
+        y = RET(1);
+        z = RET(2);
+    }
+    return (x, y, z);
+}
+
+opensolid_cmm_curve3d_bounds(W_ f, D_ tLow, D_ tHigh) {
+    D_ xLow, xHigh, yLow, yHigh, zLow, zHigh;
+    W_ ret;
+    RESERVE_DOUBLES(6) = ret {
+        ccall opensolid_curve_bounds(f "ptr", tLow, tHigh, ret "ptr");
+        xLow = RET(0);
+        xHigh = RET(1);
+        yLow = RET(2);
+        yHigh = RET(3);
+        zLow = RET(4);
+        zHigh = RET(5);
+    }
+    return (xLow, xHigh, yLow, yHigh, zLow, zHigh);
+}
+
+opensolid_cmm_surface1d_value(W_ f, D_ u, D_ v) {
+    D_ x;
+    W_ ret;
+    RESERVE_DOUBLES(1) = ret {
+        ccall opensolid_surface_value(f "ptr", u, v, ret "ptr");
+        x = RET(0);
+    }
+    return (x);
+}
+
+opensolid_cmm_surface1d_bounds(W_ f, D_ uLow, D_ uHigh, D_ vLow, D_ vHigh) {
+    D_ xLow, xHigh;
+    W_ ret;
+    RESERVE_DOUBLES(2) = ret {
+        ccall opensolid_surface_bounds(f "ptr", uLow, uHigh, vLow, vHigh, ret "ptr");
+        xLow = RET(0);
+        xHigh = RET(1);
+    }
+    return (xLow, xHigh);
+}
+
+opensolid_cmm_surface2d_value(W_ f, D_ u, D_ v) {
+    D_ x, y;
+    W_ ret;
+    RESERVE_DOUBLES(2) = ret {
+        ccall opensolid_surface_value(f "ptr", u, v, ret "ptr");
+        x = RET(0);
+        y = RET(1);
+    }
+    return (x, y);
+}
+
+opensolid_cmm_surface2d_bounds(W_ f, D_ uLow, D_ uHigh, D_ vLow, D_ vHigh) {
+    D_ xLow, xHigh, yLow, yHigh;
+    W_ ret;
+    RESERVE_DOUBLES(4) = ret {
+        ccall opensolid_surface_bounds(f "ptr", uLow, uHigh, vLow, vHigh, ret "ptr");
+        xLow = RET(0);
+        xHigh = RET(1);
+        yLow = RET(2);
+        yHigh = RET(3);
+    }
+    return (xLow, xHigh, yLow, yHigh);
+}
+
+opensolid_cmm_surface3d_value(W_ f, D_ u, D_ v) {
+    D_ x, y, z;
+    W_ ret;
+    RESERVE_DOUBLES(3) = ret {
+        ccall opensolid_surface_value(f "ptr", u, v, ret "ptr");
+        x = RET(0);
+        y = RET(1);
+        z = RET(2);
+    }
+    return (x, y, z);
+}
+
+opensolid_cmm_surface3d_bounds(W_ f, D_ uLow, D_ uHigh, D_ vLow, D_ vHigh) {
+    D_ xLow, xHigh, yLow, yHigh, zLow, zHigh;
+    W_ ret;
+    RESERVE_DOUBLES(6) = ret {
+        ccall opensolid_surface_bounds(f "ptr", uLow, uHigh, vLow, vHigh, ret "ptr");
+        xLow = RET(0);
+        xHigh = RET(1);
+        yLow = RET(2);
+        yHigh = RET(3);
+        zLow = RET(4);
+        zHigh = RET(5);
+    }
+    return (xLow, xHigh, yLow, yHigh, zLow, zHigh);
+}
