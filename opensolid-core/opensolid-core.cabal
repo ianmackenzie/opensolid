@@ -265,6 +265,7 @@ library
     OpenSolid.SurfaceFunction.VerticalCurve
     OpenSolid.SurfaceLinearization
     OpenSolid.Text.Parse
+    OpenSolid.Unboxed.Math
 
   hs-source-dirs: src
   cxx-sources:
