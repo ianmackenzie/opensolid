@@ -170,7 +170,7 @@ instance units1 ~ units2 => Intersects (Bounds units1) (Bounds units2) units1 wh
   first ^ second = separation first second <= ?tolerance
 
 instance Negation (Bounds units) where
-  negate (Bounds low high) = Bounds (negate high) (negate low)
+  negate (Bounds# low# high#) = Bounds# (negate# high#) (negate# low#)
 
 instance Multiplication Sign (Bounds units) (Bounds units) where
   Positive * bounds = bounds
@@ -181,51 +181,51 @@ instance Multiplication (Bounds units) Sign (Bounds units) where
   bounds * Negative = -bounds
 
 instance units1 ~ units2 => Addition (Bounds units1) (Bounds units2) (Bounds units1) where
-  Bounds low1 high1 + Bounds low2 high2 = Bounds (low1 + low2) (high1 + high2)
+  Bounds# low1# high1# + Bounds# low2# high2# = Bounds# (low1# +# low2#) (high1# +# high2#)
 
 instance units1 ~ units2 => Addition (Bounds units1) (Qty units2) (Bounds units1) where
-  Bounds low high + value = Bounds (low + value) (high + value)
+  Bounds# low# high# + Qty# value# = Bounds# (low# +# value#) (high# +# value#)
 
 instance units1 ~ units2 => Addition (Qty units1) (Bounds units2) (Bounds units1) where
-  value + Bounds low high = Bounds (value + low) (value + high)
+  Qty# value# + Bounds# low# high# = Bounds# (value# +# low#) (value# +# high#)
 
 instance units1 ~ units2 => Subtraction (Bounds units1) (Bounds units2) (Bounds units1) where
-  Bounds low1 high1 - Bounds low2 high2 = Bounds (low1 - high2) (high1 - low2)
+  Bounds# low1# high1# - Bounds# low2# high2# = Bounds# (low1# -# high2#) (high1# -# low2#)
 
 instance units1 ~ units2 => Subtraction (Bounds units1) (Qty units2) (Bounds units1) where
-  Bounds low high - value = Bounds (low - value) (high - value)
+  Bounds# low# high# - Qty# value# = Bounds# (low# -# value#) (high# -# value#)
 
 instance units1 ~ units2 => Subtraction (Qty units1) (Bounds units2) (Bounds units1) where
-  value - Bounds low high = Bounds (value - high) (value - low)
+  Qty# value# - Bounds# low# high# = Bounds# (value# -# high#) (value# -# low#)
 
 instance Multiplication' (Qty units1) (Bounds units2) (Bounds (units1 :*: units2)) where
-  value .*. Bounds low high = from (value .*. low) (value .*. high)
+  Qty# value# .*. Bounds# low# high# = Bounds# (value# *# low#) (value# *# high#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Bounds units2) (Bounds units3)
   where
-  value * Bounds low high = from (value * low) (value * high)
+  Qty# value# * Bounds# low# high# = Bounds# (value# *# low#) (value# *# high#)
 
 instance Multiplication' (Bounds units1) (Qty units2) (Bounds (units1 :*: units2)) where
-  Bounds low high .*. value = from (low .*. value) (high .*. value)
+  Bounds# low# high# .*. Qty# value# = Bounds# (low# *# value#) (high# *# value#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Bounds units1) (Qty units2) (Bounds units3)
   where
-  Bounds low high * value = from (low * value) (high * value)
+  Bounds# low# high# * Qty# value# = Bounds# (low# *# value#) (high# *# value#)
 
 instance Multiplication' (Bounds units1) (Bounds units2) (Bounds (units1 :*: units2)) where
-  Bounds low1 high1 .*. Bounds low2 high2 =
-    hull4 (low1 .*. low2) (low1 .*. high2) (high1 .*. low2) (high1 .*. high2)
+  Bounds# low1# high1# .*. Bounds# low2# high2# =
+    hull4# (low1# *# low2#) (low1# *# high2#) (high1# *# low2#) (high1# *# high2#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Bounds units1) (Bounds units2) (Bounds units3)
   where
-  Bounds low1 high1 * Bounds low2 high2 =
-    hull4 (low1 * low2) (low1 * high2) (high1 * low2) (high1 * high2)
+  Bounds# low1# high1# * Bounds# low2# high2# =
+    hull4# (low1# *# low2#) (low1# *# high2#) (high1# *# low2#) (high1# *# high2#)
 
 instance Division' (Qty units1) (Bounds units2) (Bounds (units1 :/: units2)) where
   n ./. Bounds dl dh =
@@ -338,7 +338,11 @@ hull3 a b c = Bounds (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 
 {-# INLINE hull4 #-}
 hull4 :: Qty units -> Qty units -> Qty units -> Qty units -> Bounds units
-hull4 a b c d = Bounds (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
+hull4 (Qty# a#) (Qty# b#) (Qty# c#) (Qty# d#) = hull4# a# b# c# d#
+
+{-# INLINE hull4# #-}
+hull4# :: Double# -> Double# -> Double# -> Double# -> Bounds units
+hull4# a# b# c# d# = Bounds# (min# a# (min# b# (min# c# d#))) (max# a# (max# b# (max# c# d#)))
 
 -- | Build a bounding range containing all values in the given non-empty list.
 hullN :: NonEmpty (Qty units) -> Bounds units
