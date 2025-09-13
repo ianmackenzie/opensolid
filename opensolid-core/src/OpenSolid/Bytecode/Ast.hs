@@ -75,6 +75,7 @@ module OpenSolid.Bytecode.Ast
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Bytecode.Compile qualified as Compile
 import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
@@ -536,6 +537,8 @@ xComponent (Constant2d val) = Constant1d (Vector2d.xComponent val)
 xComponent (Variable2d (XY xVar _)) = Variable1d xVar
 xComponent (Variable2d (XC xVar _)) = Variable1d xVar
 xComponent (Variable2d (CY xVal _)) = Constant1d xVal
+xComponent (Variable2d (BezierCurve2d controlPoints param)) =
+  Variable1d (BezierCurve1d (NonEmpty.map Vector2d.xComponent controlPoints) param)
 xComponent (Variable2d var) = Variable1d (XComponent var)
 
 yComponent :: Ast2d input -> Ast1d input
@@ -543,6 +546,8 @@ yComponent (Constant2d val) = Constant1d (Vector2d.yComponent val)
 yComponent (Variable2d (XY _ yVar)) = Variable1d yVar
 yComponent (Variable2d (XC _ yVal)) = Constant1d yVal
 yComponent (Variable2d (CY _ yVar)) = Variable1d yVar
+yComponent (Variable2d (BezierCurve2d controlPoints param)) =
+  Variable1d (BezierCurve1d (NonEmpty.map Vector2d.yComponent controlPoints) param)
 yComponent (Variable2d var) = Variable1d (YComponent var)
 
 instance Negation (Ast1d input) where
@@ -970,6 +975,10 @@ transformVector2d transform ast = do
     Constant2d val -> Constant2d (Vector2d.transformBy erasedTransform val)
     Variable2d (TransformVector2d existing var) ->
       Variable2d (TransformVector2d (erasedTransform . existing) var)
+    Variable2d (BezierCurve2d controlPoints param) -> do
+      let transformedControlPoints =
+            NonEmpty.map (Vector2d.transformBy erasedTransform) controlPoints
+      Variable2d (BezierCurve2d transformedControlPoints param)
     Variable2d var -> Variable2d (TransformVector2d erasedTransform var)
 
 transformVector3d :: Transform3d tag (space @ units) -> Ast3d input -> Ast3d input
@@ -979,6 +988,10 @@ transformVector3d transform ast = do
     Constant3d val -> Constant3d (Vector3d.transformBy erasedTransform val)
     Variable3d (TransformVector3d existing var) ->
       Variable3d (TransformVector3d (erasedTransform . existing) var)
+    Variable3d (BezierCurve3d controlPoints param) -> do
+      let transformedControlPoints =
+            NonEmpty.map (Vector3d.transformBy erasedTransform) controlPoints
+      Variable3d (BezierCurve3d transformedControlPoints param)
     Variable3d var -> Variable3d (TransformVector3d erasedTransform var)
 
 transformPoint2d :: Transform2d tag (space @ units) -> Ast2d input -> Ast2d input
@@ -990,6 +1003,13 @@ transformPoint2d transform ast = do
       Constant2d transformed
     Variable2d (TransformPoint2d existing var) ->
       Variable2d (TransformPoint2d (erasedTransform . existing) var)
+    Variable2d (BezierCurve2d controlPoints param) -> do
+      let transformedControlPoints =
+            controlPoints
+              |> Data.Coerce.coerce -- convert list of Vector2d to list of Point2d
+              |> NonEmpty.map (Point2d.transformBy erasedTransform)
+              |> Data.Coerce.coerce -- convert list of Point2d back to list of Vector2d
+      Variable2d (BezierCurve2d transformedControlPoints param)
     Variable2d var -> Variable2d (TransformPoint2d erasedTransform var)
 
 transformPoint3d :: Transform3d tag (space @ units) -> Ast3d input -> Ast3d input
@@ -1001,6 +1021,13 @@ transformPoint3d transform ast = do
       Constant3d transformed
     Variable3d (TransformPoint3d existing var) ->
       Variable3d (TransformPoint3d (erasedTransform . existing) var)
+    Variable3d (BezierCurve3d controlPoints param) -> do
+      let transformedControlPoints =
+            controlPoints
+              |> Data.Coerce.coerce -- convert list of Vector3d to list of Point3d
+              |> NonEmpty.map (Point3d.transformBy erasedTransform)
+              |> Data.Coerce.coerce -- convert list of Point3d back to list of Vector3d
+      Variable3d (BezierCurve3d transformedControlPoints param)
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
 
 placementTransform2d :: Frame2d (global @ units) (Defines local) -> Transform2d.Affine Coordinates
