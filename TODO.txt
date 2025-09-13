@@ -1,10 +1,47 @@
-Try making Bounds use Double# fields
+Switch to specifying 'scale' instead of 'tolerance'
+-> then use tolerance of 1e-9 times scale for general positional tolerance
+-> can also figure out e.g. good tolerance for the magnitude of a cross product of two partial derivatives: 1e-9 * scale * scale
+-> should be more intuitive! "just pick an SI order of magnitude":
+  -> 1cm: earring, pacemaker
+  -> 10cm: mug, sunglasses
+  -> 1m: chair, bike
+  -> 10m: train, house
+  -> 100m: apartment building, subway station
+  -> 1km: neighbourhood
+  -> 10km: city
 
-Optimize Bounds.hypot2
--> should hopefully be able to pattern match on unboxed integers (results of unboxed comparison operations) as alternative to using multi-way 'if'
+Add indentation to debug output of Ast values for easier inspection
+
+Optimization: check when e.g. VectorCurve#d or VectorSurface#d (squared) magnitude is a constant (within current tolerance)
+-> avoid expensive square root (or even squared magnitude calculation!)
+
+Add dedicated 'blend' expression
+-> will still explode out to large derivative...
+-> maybe even dedicated first derivative expression?
+-> could then share computation of t^2, t^3, t^4 between coefficients...
+
+Optimize dot and cross products of constants with Bezier curves in Ast module
+
+Try to figure out good way of computing surface normal direction without normalizing partial derivatives
+
+Optimize VectorBounds3d.hullN
+
+Optimize general face indices operations...
+
+Replace 'Point2d (Qty# x#) (Qty# y#)' with 'Point2d# x# y#' once Point2d is migrated to use Double# values internally
+-> or just create Point2d# as a *pattern* first, then eventually it will be the actual constructor...
+
+To optimize:
+- Have Vector#d use unboxed fields
+- 'Flatten' VectorBounds#d?
+- Point3d - Point3d
+
+Try adding -fexcess-precision as an optimization
+-> in general, try: https://wiki.haskell.org/Performance/GHC#Crank_up_the_gcc_flags
 
 Add way to represent arc length parameterization in bytecode?
 -> pack tree structure into opcodes, then Bezier curve control points into constants?
+-> or if curves move into C++, then have C++ function that takes list of segments (with endpoint values/derivatives) and constructs a piecewise curve directly in C++...
 
 Combine computeValue and computeBounds into single templated function?
 -> call out to generic or overloaded helper functions as needed
@@ -15,6 +52,10 @@ Merge e.g. 'Subdomain' and 'Domain1d'?
 
 Add hasZero functions that do simple check to see if a zero exists (plain bisection until bounds less than tolerance)
 -> then use to check validity of L'Hopital desingularization (see if derivative or denominator has *any* zero)
+
+Try switching back to plain let-in instead of abusing 'do' notation?
+
+Try using normal 'do' notation for monads? Possibly with Try.do
 
 Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
 
@@ -50,3 +91,11 @@ Refactor tolerance handling in Python?
 - also generic ones like 'Tolerance.length(Length.micrometers(10))' etc.
 - have default tolerances pre-configured? 1e-9 meters, radians, and unitless...
   -> middle ground: 'Tolerance.defaults()' to set up default tolerances for everything
+
+Go through and (very carefully) replace Bounds# with Ordered# where possible
+-> especially in basic arithmetic operations...
+-> note that even addition could result in a NaN, via +infinity + -infinity
+
+STL export: check at top level whether given convention is Convention3d.zUp or Convention3d.yUp
+-> if so, can use specialized implementations that extract point coordinates using Point3d.zUpCoordinates# or Point3d.yUpCoordinates#
+-> otherwise, fall back to generic implementation using Point3d.coordinates and passing the Convention3d value
