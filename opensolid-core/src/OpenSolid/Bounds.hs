@@ -230,7 +230,7 @@ instance
 instance Division' (Qty units1) (Bounds units2) (Bounds (units1 :/: units2)) where
   n ./. Bounds dl dh =
     if dl > Qty.zero || dh < Qty.zero
-      then from (n ./. dl) (n ./. dh)
+      then Bounds (n ./. dl) (n ./. dh)
       else infinite
 
 instance
@@ -239,13 +239,13 @@ instance
   where
   n / Bounds dl dh =
     if dl > Qty.zero || dh < Qty.zero
-      then from (n / dl) (n / dh)
+      then Bounds (n / dl) (n / dh)
       else infinite
 
 instance Division' (Bounds units1) (Qty units2) (Bounds (units1 :/: units2)) where
   Bounds nl nh ./. d =
     if d /= Qty.zero
-      then from (nl ./. d) (nh ./. d)
+      then Bounds (nl ./. d) (nh ./. d)
       else infinite
 
 instance
@@ -254,7 +254,7 @@ instance
   where
   Bounds nl nh / d =
     if d /= Qty.zero
-      then from (nl / d) (nh / d)
+      then Bounds (nl / d) (nh / d)
       else infinite
 
 instance Division' (Bounds units1) (Bounds units2) (Bounds (units1 :/: units2)) where
@@ -284,16 +284,6 @@ unitInterval = Bounds 0.0 1.0
 {-# INLINE coerce #-}
 coerce :: Bounds units1 -> Bounds units2
 coerce = Data.Coerce.coerce
-
-{-| Construct a range from its lower and upper bounds.
-
-The order of the two arguments does not matter;
-the minimum of the two will be used as the lower bound of the range
-and the maximum will be used as the upper bound.
--}
-{-# INLINE from #-}
-from :: Qty units -> Qty units -> Bounds units
-from = Bounds
 
 -- | Create a bounding range with zero as one of its endpoints and the given value as the other.
 zeroTo :: Qty units -> Bounds units
@@ -682,7 +672,7 @@ random :: Random.Generator (Qty units) -> Random.Generator (Bounds units)
 random randomQty = Random.do
   a <- randomQty
   b <- randomQty
-  Random.return (from a b)
+  Random.return (Bounds a b)
 
 sampleValues :: Bounds units -> List (Qty units)
 sampleValues bounds = List.map (interpolate bounds) Parameter.samples
