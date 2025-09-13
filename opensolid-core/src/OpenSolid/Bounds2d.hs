@@ -31,6 +31,7 @@ module OpenSolid.Bounds2d
   , upperRightCorner
   , corners
   , diameter
+  , diameter#
   , area'
   , area
   , interpolate
@@ -218,8 +219,13 @@ corners box =
   , upperLeftCorner box
   ]
 
+{-# INLINE diameter #-}
 diameter :: Bounds2d (space @ units) -> Qty units
-diameter (Bounds2d x y) = Qty.hypot2 (Bounds.width x) (Bounds.width y)
+diameter bounds = Qty# (diameter# bounds)
+
+{-# INLINE diameter# #-}
+diameter# :: Bounds2d (space @ units) -> Double#
+diameter# (Bounds2d x y) = hypot2# (Bounds.width# x) (Bounds.width# y)
 
 area' :: Bounds2d (space @ units) -> Qty (units :*: units)
 area' (Bounds2d x y) = Bounds.width x .*. Bounds.width y
