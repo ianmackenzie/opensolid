@@ -16,15 +16,19 @@ module OpenSolid.Bounds
   , midpoint
   , endpoints
   , width
+  , width#
   , maxAbs
   , squared
   , squared'
   , includes
   , inclusion
+  , inclusion#
   , exclusion
+  , exclusion#
   , contains
   , overlap
   , separation
+  , separation#
   , isContainedIn
   , bisect
   , isAtomic
@@ -361,7 +365,11 @@ endpoints (Bounds low high) = (low, high)
 
 {-# INLINE width #-}
 width :: Bounds units -> Qty units
-width (Bounds low high) = high - low
+width bounds = Qty# (width# bounds)
+
+{-# INLINE width# #-}
+width# :: Bounds units -> Double#
+width# (Bounds# low# high#) = high# -# low#
 
 {-# INLINE maxAbs #-}
 maxAbs :: Bounds units -> Qty units
@@ -467,10 +475,18 @@ includes :: Qty units -> Bounds units -> Bool
 includes value (Bounds low high) = low <= value && value <= high
 
 exclusion :: Qty units -> Bounds units -> Qty units
-exclusion value (Bounds low high) = Qty.max (low - value) (value - high)
+exclusion (Qty# value#) bounds = Qty# (exclusion# value# bounds)
+
+{-# INLINE exclusion# #-}
+exclusion# :: Double# -> Bounds units -> Double#
+exclusion# value# (Bounds# low# high#) = max# (low# -# value#) (value# -# high#)
 
 inclusion :: Qty units -> Bounds units -> Qty units
-inclusion value bounds = -(exclusion value bounds)
+inclusion (Qty# value#) bounds = Qty# (inclusion# value# bounds)
+
+{-# INLINE inclusion# #-}
+inclusion# :: Double# -> Bounds units -> Double#
+inclusion# value# bounds = negate# (exclusion# value# bounds)
 
 {-| Check if one bounding range contains another.
 
@@ -485,7 +501,11 @@ isContainedIn :: Bounds units -> Bounds units -> Bool
 isContainedIn bounds value = contains value bounds
 
 separation :: Bounds units -> Bounds units -> Qty units
-separation (Bounds low1 high1) (Bounds low2 high2) = Qty.max (low1 - high2) (low2 - high1)
+separation bounds1 bounds2 = Qty# (separation# bounds1 bounds2)
+
+{-# INLINE separation# #-}
+separation# :: Bounds units -> Bounds units -> Double#
+separation# (Bounds# low1# high1#) (Bounds# low2# high2#) = max# (low1# -# high2#) (low2# -# high1#)
 
 overlap :: Bounds units -> Bounds units -> Qty units
 overlap first second = -(separation first second)
