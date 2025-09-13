@@ -73,6 +73,7 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
@@ -683,12 +684,13 @@ surfaceSize f uvBounds = do
   let p10 = SurfaceFunction3d.evaluate f (Bounds2d.lowerRightCorner uvBounds)
   let p01 = SurfaceFunction3d.evaluate f (Bounds2d.upperLeftCorner uvBounds)
   let p11 = SurfaceFunction3d.evaluate f (Bounds2d.upperRightCorner uvBounds)
-  Point3d.distanceFrom p00 p10
-    |> Qty.max (Point3d.distanceFrom p10 p11)
-    |> Qty.max (Point3d.distanceFrom p11 p01)
-    |> Qty.max (Point3d.distanceFrom p01 p00)
-    |> Qty.max (Point3d.distanceFrom p00 p11)
-    |> Qty.max (Point3d.distanceFrom p10 p01)
+  let d1# = Point3d.distanceFrom# p00 p10
+  let d2# = Point3d.distanceFrom# p10 p11
+  let d3# = Point3d.distanceFrom# p11 p01
+  let d4# = Point3d.distanceFrom# p01 p00
+  let d5# = Point3d.distanceFrom# p00 p11
+  let d6# = Point3d.distanceFrom# p10 p01
+  Qty# (max# (max# (max# (max# (max# d1# d2#) d3#) d4#) d5#) d6#)
 
 surfaceError :: SurfaceFunction3d (space @ units) -> UvBounds -> Qty units
 surfaceError f uvBounds = do
