@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Bounds
   ( Bounds (Bounds)
   , constant
@@ -74,8 +76,10 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
+import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random
+import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 
 type role Bounds phantom
@@ -83,7 +87,7 @@ type role Bounds phantom
 type Bounds :: Type -> Type
 
 -- | A range of possible values, with a lower bound and upper bound.
-data Bounds units = Ordered (Qty units) (Qty units)
+data Bounds units = Ordered# Double# Double#
   deriving (Eq)
 
 instance HasField "endpoints" (Bounds units) (Qty units, Qty units) where
@@ -113,12 +117,25 @@ If either argument is NaN, then the result will be open/infinite
 -}
 {-# INLINE Bounds #-}
 pattern Bounds :: Qty units -> Qty units -> Bounds units
-pattern Bounds low high <- Ordered low high
+pattern Bounds low high <- (endpoints# -> (# low, high #))
   where
-    Bounds a b
-      | a <= b = Ordered a b
-      | b <= a = Ordered b a
-      | otherwise = infinite
+    Bounds (Qty# a#) (Qty# b#) = Bounds# a# b#
+
+{-# COMPLETE Bounds# #-}
+
+{-# INLINE Bounds# #-}
+pattern Bounds# :: Double# -> Double# -> Bounds units
+pattern Bounds# low# high# <- Ordered# low# high#
+  where
+    Bounds# a# b# =
+      case (# a# <=# b#, b# <=# a# #) of
+        (# 1#, _ #) -> Ordered# a# b#
+        (# _, 1# #) -> Ordered# b# a#
+        _ -> infinite
+
+{-# INLINE endpoints# #-}
+endpoints# :: Bounds units -> (# Qty units, Qty units #)
+endpoints# (Ordered# low high) = (# Qty# low, Qty# high #)
 
 instance FFI (Bounds Unitless) where
   representation = FFI.classRepresentation "Bounds"
