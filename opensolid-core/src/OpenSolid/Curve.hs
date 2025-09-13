@@ -438,11 +438,11 @@ quotient' numerator denominator =
     else Success do
       let singularity0 =
             if evaluate denominator 0.0 ~= Qty.zero
-              then Just (lhopital numerator.derivative denominator.derivative 0.0)
+              then Just (lhopital numerator denominator 0.0)
               else Nothing
       let singularity1 =
             if evaluate denominator 1.0 ~= Qty.zero
-              then Just (lhopital numerator.derivative denominator.derivative 1.0)
+              then Just (lhopital numerator denominator 1.0)
               else Nothing
       desingularize singularity0 (unsafeQuotient' numerator denominator) singularity1
 
