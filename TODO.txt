@@ -1,5 +1,6 @@
-Convert remaining API types to have local types defined in API module
--> Bounds, Curve, Drawing2d, Camera3d, Resolution
+Update to newer GitHub Actions images?
+-> in particular macos-13 is deprecated
+-> but seems maybe a bit better for backwards compatibility to build on older OS versions...
 
 Add vectorTransformations3d helper list in API module
 
