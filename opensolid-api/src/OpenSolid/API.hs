@@ -700,7 +700,6 @@ uvPoint =
     , Class.minusSelf
     , Class.minus @UvVector Self
     , Class.plus @UvVector Self
-    -- TODO add transformations
     ]
 
 type Bounds2d = Bounds2d.Bounds2d FFI.Coordinates
@@ -734,7 +733,6 @@ uvBounds =
     , Class.property "V Coordinate" (.yCoordinate) "Get the V coordinate bounds of a bounding box."
     , Class.plus @UvVector Self
     , Class.minus @UvVector Self
-    -- TODO add transformations
     ]
 
 type Curve = Curve.Curve Unitless
@@ -1414,7 +1412,6 @@ uvCurve =
     , Class.minus @UvVectorCurve Self
     , Class.minusSelf
     , Class.minus @UvPoint Self
-    -- TODO add transformations
     ]
 
 region2dOuterLoopDocs :: Text
@@ -1469,7 +1466,6 @@ uvRegion =
     , Class.property "Outer Loop" (.outerLoop) region2dOuterLoopDocs
     , Class.property "Inner Loops" (.innerLoops) region2dInnerLoopsDocs
     , Class.property "Boundary Curves" (.boundaryCurves) region2dBoundaryCurvesDocs
-    -- TODO add transformations
     ]
 
 type Body3d = Body3d.Body3d FFI.Coordinates
