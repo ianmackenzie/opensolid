@@ -5,7 +5,6 @@ from opensolid import (
     Curve2d,
     Direction2d,
     Length,
-    LengthBounds,
     Resolution,
     PbrMaterial,
     Point2d,
@@ -58,8 +57,7 @@ with Tolerance(Length.meters(1e-9)):
     profile = Region2d.bounded_by(curves)
 
     # Extrude the profile to create a solid body
-    extrusion_limits = LengthBounds.symmetric(width=length)
-    body = Body3d.extruded(world.front_plane, profile, extrusion_limits)
+    body = Body3d.extruded(world.front_plane, profile, -length / 2, length / 2)
 
     # Create a 3D model containing the body and write to GLB file
     material = PbrMaterial.metal(Color.rgb_float(0.913, 0.921, 0.925), roughness=0.3)

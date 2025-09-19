@@ -47,8 +47,12 @@ with Tolerance(Length.nanometers(1)):
     filleted_region = base_region.fillet(fillet_points, radius=Length.millimeters(4))
 
     thickness = Length.centimeters(2)
-    extrusion_bounds = LengthBounds.symmetric(width=thickness)
-    body = Body3d.extruded(world.front_plane, filleted_region, extrusion_bounds)
+    body = Body3d.extruded(
+        world.front_plane,
+        filleted_region,
+        -thickness / 2,
+        thickness / 2,
+    )
 
     material = PbrMaterial.nonmetal(Color.blue, roughness=0.3)
     model = Model3d.body(body).with_pbr_material(material).with_name("Body")
@@ -56,7 +60,8 @@ with Tolerance(Length.nanometers(1)):
     ground_body = Body3d.extruded(
         world.bottom_plane,
         Region2d.rectangle(Bounds2d(ground_limits, ground_limits)),
-        LengthBounds(Length.millimeters(2), Length.centimeters(1)),
+        Length.millimeters(2),
+        Length.centimeters(1),
     )
     ground_material = PbrMaterial.nonmetal(Color.dark_charcoal, roughness=0.5)
     ground_model = (
