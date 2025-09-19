@@ -97,7 +97,6 @@ classes =
   , drawing2d
   , axis2d
   , uvAxis
-  , world3d
   , convention3d
   , vector3d
   , displacement3d
@@ -110,6 +109,7 @@ classes =
   , plane3d
   , orientation3d
   , frame3d
+  , world3d
   , vectorCurve2d
   , displacementCurve2d
   , uvVectorCurve
