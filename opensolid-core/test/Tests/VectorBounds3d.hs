@@ -1,9 +1,11 @@
 module Tests.VectorBounds3d (tests) where
 
+import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
@@ -18,6 +20,7 @@ tests =
   , placeIn
   , relativeTo
   , transformBy
+  , tripleProduct
   ]
 
 magnitude :: Tolerance Meters => Test
@@ -63,3 +66,13 @@ transformBy = Test.check 100 "transformBy" Test.do
   let transformedBounds = VectorBounds3d.transformBy transform originalBounds
   let transformedVector = Vector3d.transformBy transform originalVector
   Test.expect (transformedVector ^ transformedBounds)
+
+tripleProduct :: Test
+tripleProduct = Test.check 1000 "tripleProduct" Test.do
+  (bounds1, vector1) <- boundsAndContainedVector
+  (bounds2, vector2) <- boundsAndContainedVector
+  (bounds3, vector3) <- boundsAndContainedVector
+  let boundsTripleProduct = VectorBounds3d.tripleProduct bounds1 bounds2 bounds3
+  let vectorTripleProduct = (vector1 `cross'` vector2) `dot'` vector3
+  Tolerance.using (1e-9 * (Length.meter .*. Length.meter .*. Length.meter)) $
+    Test.expect (vectorTripleProduct ^ boundsTripleProduct)

@@ -38,6 +38,7 @@ module OpenSolid.VectorBounds3d
   , transformBy
   , rotateIn
   , rotateAround
+  , tripleProduct
   )
 where
 
@@ -428,3 +429,34 @@ rotateAround ::
   VectorBounds3d (space @ units) ->
   VectorBounds3d (space @ units)
 rotateAround = Transform3d.rotateAroundImpl transformBy
+
+tripleProduct ::
+  VectorBounds3d (space @ units) ->
+  VectorBounds3d (space @ units) ->
+  VectorBounds3d (space @ units) ->
+  Bounds ((units :*: units) :*: units)
+tripleProduct bounds1 bounds2 bounds3 = do
+  let !(VectorBounds3d# xMin1# xMax1# yMin1# yMax1# zMin1# zMax1#) = bounds1
+  let !(VectorBounds3d# xMin2# xMax2# yMin2# yMax2# zMin2# zMax2#) = bounds2
+  let !(VectorBounds3d# xMin3# xMax3# yMin3# yMax3# zMin3# zMax3#) = bounds3
+  let !(# low#, high# #) =
+        determinantBounds3d#
+          xMin1#
+          xMax1#
+          yMin1#
+          yMax1#
+          zMin1#
+          zMax1#
+          xMin2#
+          xMax2#
+          yMin2#
+          yMax2#
+          zMin2#
+          zMax2#
+          xMin3#
+          xMax3#
+          yMin3#
+          yMax3#
+          zMin3#
+          zMax3#
+  Bounds# low# high#
