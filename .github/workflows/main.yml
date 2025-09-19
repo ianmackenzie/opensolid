@@ -41,6 +41,7 @@ jobs:
         run: |
           pipx install uv==0.7.13
           pipx install ruff==0.12.3
+          pipx install pyright==1.1.402
           pipx install delvewheel==1.9.0
       - name: Update Cabal package index
         run: |
@@ -107,6 +108,7 @@ jobs:
         run: |
           pipx install uv==0.7.13
           pipx install ruff==0.12.3
+          pipx install pyright==1.1.402
           pipx install auditwheel==6.1.0
       - name: Update Cabal index
         run: |
@@ -168,6 +170,7 @@ jobs:
         run: |
           pipx install uv==0.7.13
           pipx install ruff==0.12.3
+          pipx install pyright==1.1.402
           pipx install delocate==0.12.0
       - name: Update Cabal index
         run: |
@@ -227,6 +230,7 @@ jobs:
         run: |
           pipx install uv==0.7.13
           pipx install ruff==0.12.3
+          pipx install pyright==1.1.402
           pipx install delocate==0.12.0
       - name: Update Cabal index
         run: |
