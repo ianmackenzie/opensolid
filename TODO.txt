@@ -1,15 +1,3 @@
-Switch to specifying 'scale' instead of 'tolerance'
--> then use tolerance of 1e-9 times scale for general positional tolerance
--> can also figure out e.g. good tolerance for the magnitude of a cross product of two partial derivatives: 1e-9 * scale * scale
--> should be more intuitive! "just pick an SI order of magnitude":
-  -> 1cm: earring, pacemaker
-  -> 10cm: mug, sunglasses
-  -> 1m: chair, bike
-  -> 10m: train, house
-  -> 100m: apartment building, subway station
-  -> 1km: neighbourhood
-  -> 10km: city
-
 Add indentation to debug output of Ast values for easier inspection
 
 Optimization: check when e.g. VectorCurve#d or VectorSurface#d (squared) magnitude is a constant (within current tolerance)
@@ -21,8 +9,6 @@ Add dedicated 'blend' expression
 -> could then share computation of t^2, t^3, t^4 between coefficients...
 
 Optimize dot and cross products of constants with Bezier curves in Ast module
-
-Try to figure out good way of computing surface normal direction without normalizing partial derivatives
 
 Optimize VectorBounds3d.hullN
 
@@ -63,11 +49,6 @@ Ensure all fields are also available as normal functions
 -> and those functions are the *primary* implementation
 -> probably means we can avoid HasField instances in all .hs-boot files, expose functions instead
 
-Use FFI struct syntax for calling into C++ as well as for target languages calling into Haskell?
--> avoid custom pokeElemOff etc. stuff when calling into C++
--> a bit less efficient in some cases though since e.g. allocating space for a list of values uses callocBytes (maybe should be mallocBytes?) instead of allocaBytes
-  -> maybe have a way to indicate to FFI.store whether to use mallocBytes or allocaBytes?
-
 Split bytecode.h/bytecode.cpp into a few more files
 -> e.g. helper functions for Bezier/Hermite evaluation
 -> allow calling non-bytecode-specific functions from Haskell without having to use 'bytecode.h'...
@@ -84,18 +65,3 @@ Normalize HasField instances:
 Support optional named arguments in target languages
 - maybe via wrapper functions where one argument is something like an 'Options a' value,
   wrapping a list of options/attributes in Haskell
-
-Refactor tolerance handling in Python?
-- set tolerances for different units separately/independently
-- convenience functions like 'Tolerance.meters(1e-9)', 'Tolerance.degrees(1e-3)', 'Tolerance.unitless(1e-12)' etc.?
-- also generic ones like 'Tolerance.length(Length.micrometers(10))' etc.
-- have default tolerances pre-configured? 1e-9 meters, radians, and unitless...
-  -> middle ground: 'Tolerance.defaults()' to set up default tolerances for everything
-
-Go through and (very carefully) replace Bounds# with Ordered# where possible
--> especially in basic arithmetic operations...
--> note that even addition could result in a NaN, via +infinity + -infinity
-
-STL export: check at top level whether given convention is Convention3d.zUp or Convention3d.yUp
--> if so, can use specialized implementations that extract point coordinates using Point3d.zUpCoordinates# or Point3d.yUpCoordinates#
--> otherwise, fall back to generic implementation using Point3d.coordinates and passing the Convention3d value
