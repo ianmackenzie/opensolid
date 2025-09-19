@@ -12,7 +12,6 @@ import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Body3d.BoundedBy qualified as Body3d.BoundedBy
-import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
@@ -163,15 +162,15 @@ length =
     , Class.absSelf Qty.abs
     , Class.floatTimes
     , Class.plusSelf
-    , Class.plus @(Bounds Meters) Self
+    , Class.plus @LengthBounds Self
     , Class.plus @(Curve Meters) Self
     , Class.minusSelf
-    , Class.minus @(Bounds Meters) Self
+    , Class.minus @LengthBounds Self
     , Class.minus @(Curve Meters) Self
     , Class.timesFloat
     , Class.timesSelf
-    , Class.times @(Bounds Unitless) Self
-    , Class.times @(Bounds Meters) Self
+    , Class.times @Bounds Self
+    , Class.times @LengthBounds Self
     , Class.times @(Curve Unitless) Self
     , Class.times @(Curve Meters) Self
     , Class.times @Direction2d Self
@@ -179,8 +178,8 @@ length =
     , Class.times @Displacement2d Self
     , Class.divByFloat
     , Class.divBySelf
-    , Class.divBy @(Bounds Unitless) Self
-    , Class.divBy @(Bounds Meters) Self
+    , Class.divBy @Bounds Self
+    , Class.divBy @LengthBounds Self
     , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.divByM (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.floorDivBySelf
@@ -208,22 +207,22 @@ area =
     , Class.absSelf Qty.abs
     , Class.floatTimes
     , Class.plusSelf
-    , Class.plus @(Bounds SquareMeters) Self
+    , Class.plus @AreaBounds Self
     , Class.plus @(Curve SquareMeters) Self
     , Class.minusSelf
-    , Class.minus @(Bounds SquareMeters) Self
+    , Class.minus @AreaBounds Self
     , Class.minus @(Curve SquareMeters) Self
     , Class.timesFloat
-    , Class.times @(Bounds Unitless) Self
+    , Class.times @Bounds Self
     , Class.times @(Curve Unitless) Self
     , Class.times @Direction2d Self
     , Class.times @Vector2d Self
     , Class.divByFloat
     , Class.divBySelf
     , Class.divBy @Length Self
-    , Class.divBy @(Bounds Unitless) Self
-    , Class.divBy @(Bounds Meters) Self
-    , Class.divBy @(Bounds SquareMeters) Self
+    , Class.divBy @Bounds Self
+    , Class.divBy @LengthBounds Self
+    , Class.divBy @AreaBounds Self
     , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.divByM (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.divByS (\val crv -> Curve.quotient (Curve.constant val) crv)
@@ -267,29 +266,31 @@ angle =
     , Class.absSelf Qty.abs
     , Class.floatTimes
     , Class.plusSelf
-    , Class.plus @(Bounds Radians) Self
+    , Class.plus @AngleBounds Self
     , Class.plus @(Curve Radians) Self
     , Class.minusSelf
-    , Class.minus @(Bounds Radians) Self
+    , Class.minus @AngleBounds Self
     , Class.minus @(Curve Radians) Self
     , Class.timesFloat
-    , Class.times @(Bounds Unitless) Self
+    , Class.times @Bounds Self
     , Class.times @(Curve Unitless) Self
     , Class.divByFloat
     , Class.divBySelf
-    , Class.divBy @(Bounds Unitless) Self
-    , Class.divBy @(Bounds Radians) Self
+    , Class.divBy @Bounds Self
+    , Class.divBy @AngleBounds Self
     , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.divByR (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
 
+type Bounds = Bounds.Bounds Unitless
+
 bounds :: Class
 bounds =
-  Class.new @(Bounds Unitless) "A range of unitless values, with a lower bound and upper bound." $
+  Class.new @Bounds "A range of unitless values, with a lower bound and upper bound." $
     [ Class.constant "Unit Interval" Bounds.unitInterval $(docs 'Bounds.unitInterval)
-    , Class.constructor2 "First Value" "Second Value" Bounds $(docs 'Bounds)
+    , Class.constructor2 "First Value" "Second Value" Bounds.Bounds $(docs 'Bounds.Bounds)
     , Class.factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
     , Class.factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
     , Class.factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
@@ -316,17 +317,19 @@ bounds =
     , Class.times @Length Self
     , Class.times @Area Self
     , Class.times @Angle Self
-    , Class.times @(Bounds Meters) Self
-    , Class.times @(Bounds SquareMeters) Self
-    , Class.times @(Bounds Radians) Self
+    , Class.times @LengthBounds Self
+    , Class.times @AreaBounds Self
+    , Class.times @AngleBounds Self
     , Class.divByFloat
     , Class.divBySelf
     ]
 
+type LengthBounds = Bounds.Bounds Meters
+
 lengthBounds :: Class
 lengthBounds =
-  Class.new @(Bounds Meters) "A range of length values, with a lower bound and upper bound." $
-    [ Class.constructor2 "First Value" "Second Value" Bounds $(docs 'Bounds)
+  Class.new @LengthBounds "A range of length values, with a lower bound and upper bound." $
+    [ Class.constructor2 "First Value" "Second Value" Bounds.Bounds $(docs 'Bounds.Bounds)
     , Class.factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
     , Class.factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
     , Class.factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
@@ -348,17 +351,19 @@ lengthBounds =
     , Class.timesFloat
     , Class.timesSelf
     , Class.times @Length Self
-    , Class.times @(Bounds Unitless) Self
+    , Class.times @Bounds Self
     , Class.divByFloat
     , Class.divBySelf
     , Class.divBy @Length Self
-    , Class.divBy @(Bounds Unitless) Self
+    , Class.divBy @Bounds Self
     ]
+
+type AreaBounds = Bounds.Bounds SquareMeters
 
 areaBounds :: Class
 areaBounds =
-  Class.new @(Bounds SquareMeters) "A range of area values, with a lower bound and upper bound." $
-    [ Class.constructor2 "First Value" "Second Value" Bounds $(docs 'Bounds)
+  Class.new @AreaBounds "A range of area values, with a lower bound and upper bound." $
+    [ Class.constructor2 "First Value" "Second Value" Bounds.Bounds $(docs 'Bounds.Bounds)
     , Class.factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
     , Class.factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
     , Class.factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
@@ -378,19 +383,21 @@ areaBounds =
     , Class.minusSelf
     , Class.minus @Area Self
     , Class.timesFloat
-    , Class.times @(Bounds Unitless) Self
+    , Class.times @Bounds Self
     , Class.divByFloat
     , Class.divBySelf
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.divBy @(Bounds Unitless) Self
-    , Class.divBy @(Bounds Meters) Self
+    , Class.divBy @Bounds Self
+    , Class.divBy @LengthBounds Self
     ]
+
+type AngleBounds = Bounds.Bounds Radians
 
 angleBounds :: Class
 angleBounds =
-  Class.new @(Bounds Radians) "A range of angle values, with a lower bound and upper bound." $
-    [ Class.constructor2 "First Value" "Second Value" Bounds $(docs 'Bounds)
+  Class.new @AngleBounds "A range of angle values, with a lower bound and upper bound." $
+    [ Class.constructor2 "First Value" "Second Value" Bounds.Bounds $(docs 'Bounds.Bounds)
     , Class.factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
     , Class.factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
     , Class.factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
@@ -410,11 +417,11 @@ angleBounds =
     , Class.minusSelf
     , Class.minus @Angle Self
     , Class.timesFloat
-    , Class.times @(Bounds Unitless) Self
+    , Class.times @Bounds Self
     , Class.divByFloat
     , Class.divBySelf
     , Class.divBy @Angle Self
-    , Class.divBy @(Bounds Unitless) Self
+    , Class.divBy @Bounds Self
     ]
 
 color :: Class
