@@ -1953,6 +1953,7 @@ instance
 
 ----- Bounds3d -----
 
+-- | A bounding box in 3D.
 newtype Bounds3d (coordinateSystem :: CoordinateSystem)
   = PositionBounds3d (VectorBounds3d coordinateSystem)
 

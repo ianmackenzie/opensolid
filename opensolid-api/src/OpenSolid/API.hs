@@ -13,23 +13,18 @@ import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Body3d.BoundedBy qualified as Body3d.BoundedBy
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
-import OpenSolid.Camera3d (Camera3d)
 import OpenSolid.Camera3d qualified as Camera3d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
-import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Drawing2d (Drawing2d)
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -50,7 +45,6 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d qualified as Region2d
-import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
@@ -163,16 +157,16 @@ length =
     , Class.floatTimes
     , Class.plusSelf
     , Class.plus @LengthBounds Self
-    , Class.plus @(Curve Meters) Self
+    , Class.plus @LengthCurve Self
     , Class.minusSelf
     , Class.minus @LengthBounds Self
-    , Class.minus @(Curve Meters) Self
+    , Class.minus @LengthCurve Self
     , Class.timesFloat
     , Class.timesSelf
     , Class.times @Bounds Self
     , Class.times @LengthBounds Self
-    , Class.times @(Curve Unitless) Self
-    , Class.times @(Curve Meters) Self
+    , Class.times @Curve Self
+    , Class.times @LengthCurve Self
     , Class.times @Direction2d Self
     , Class.times @Vector2d Self
     , Class.times @Displacement2d Self
@@ -208,13 +202,13 @@ area =
     , Class.floatTimes
     , Class.plusSelf
     , Class.plus @AreaBounds Self
-    , Class.plus @(Curve SquareMeters) Self
+    , Class.plus @AreaCurve Self
     , Class.minusSelf
     , Class.minus @AreaBounds Self
-    , Class.minus @(Curve SquareMeters) Self
+    , Class.minus @AreaCurve Self
     , Class.timesFloat
     , Class.times @Bounds Self
-    , Class.times @(Curve Unitless) Self
+    , Class.times @Curve Self
     , Class.times @Direction2d Self
     , Class.times @Vector2d Self
     , Class.divByFloat
@@ -267,13 +261,13 @@ angle =
     , Class.floatTimes
     , Class.plusSelf
     , Class.plus @AngleBounds Self
-    , Class.plus @(Curve Radians) Self
+    , Class.plus @AngleCurve Self
     , Class.minusSelf
     , Class.minus @AngleBounds Self
-    , Class.minus @(Curve Radians) Self
+    , Class.minus @AngleCurve Self
     , Class.timesFloat
     , Class.times @Bounds Self
-    , Class.times @(Curve Unitless) Self
+    , Class.times @Curve Self
     , Class.divByFloat
     , Class.divBySelf
     , Class.divBy @Bounds Self
@@ -709,10 +703,12 @@ uvPoint =
     -- TODO add transformations
     ]
 
+type Bounds2d = Bounds2d.Bounds2d FFI.Coordinates
+
 bounds2d :: Class
 bounds2d =
-  Class.new @(Bounds2d FFI.Coordinates) "A bounding box in 2D." $
-    [ Class.constructor2 "X Coordinate" "Y Coordinate" Bounds2d $(docs 'Bounds2d)
+  Class.new @Bounds2d "A bounding box in 2D." $
+    [ Class.constructor2 "X Coordinate" "Y Coordinate" Bounds2d.Bounds2d $(docs 'Bounds2d.Bounds2d)
     , Class.factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , Class.factory1 "Hull" "Points" (Bounds2d.hullN @Point2d) $(docs 'Bounds2d.hullN)
@@ -728,7 +724,7 @@ bounds2d =
 uvBounds :: Class
 uvBounds =
   Class.new @UvBounds "A bounding box in UV parameter space." $
-    [ Class.constructor2 "U Coordinate" "V Coordinate" Bounds2d "Construct a bounding box from its U and V coordinate bounds."
+    [ Class.constructor2 "U Coordinate" "V Coordinate" Bounds2d.Bounds2d "Construct a bounding box from its U and V coordinate bounds."
     , Class.factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , Class.factory1 "Hull" "Points" (Bounds2d.hullN @UvPoint) $(docs 'Bounds2d.hullN)
@@ -741,9 +737,11 @@ uvBounds =
     -- TODO add transformations
     ]
 
+type Curve = Curve.Curve Unitless
+
 curve :: Class
 curve =
-  Class.new @(Curve Unitless) "A parametric curve definining a unitless value in terms of a parameter value." $
+  Class.new @Curve "A parametric curve definining a unitless value in terms of a parameter value." $
     [ Class.constant "Zero" (Curve.zero @Unitless) $(docs 'Curve.zero)
     , Class.constant "T" Curve.t $(docs 'Curve.t)
     , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
@@ -767,9 +765,9 @@ curve =
     , Class.times @Length Self
     , Class.times @Area Self
     , Class.times @Angle Self
-    , Class.times @(Curve Meters) Self
-    , Class.times @(Curve SquareMeters) Self
-    , Class.times @(Curve Radians) Self
+    , Class.times @LengthCurve Self
+    , Class.times @AreaCurve Self
+    , Class.times @AngleCurve Self
     , Class.divByFloat
     , Class.divByU Curve.quotient
     , Class.nested @Curve.Zero "A point where a given curve is equal to zero." $
@@ -779,9 +777,11 @@ curve =
         ]
     ]
 
+type AngleCurve = Curve.Curve Radians
+
 angleCurve :: Class
 angleCurve =
-  Class.new @(Curve Radians) "A parametric curve definining an angle in terms of a parameter value." $
+  Class.new @AngleCurve "A parametric curve definining an angle in terms of a parameter value." $
     [ Class.constant "Zero" (Curve.zero @Radians) $(docs 'Curve.zero)
     , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , Class.factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
@@ -797,16 +797,18 @@ angleCurve =
     , Class.minusSelf
     , Class.minus @Angle Self
     , Class.timesFloat
-    , Class.times @(Curve Unitless) Self
+    , Class.times @Curve Self
     , Class.divByFloat
     , Class.divByR Curve.quotient
     , Class.divBy @Angle Self
     , Class.divByU Curve.quotient
     ]
 
+type LengthCurve = Curve.Curve Meters
+
 lengthCurve :: Class
 lengthCurve =
-  Class.new @(Curve Meters) "A parametric curve definining a length in terms of a parameter value." $
+  Class.new @LengthCurve "A parametric curve definining a length in terms of a parameter value." $
     [ Class.constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
     , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , Class.factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
@@ -823,16 +825,18 @@ lengthCurve =
     , Class.timesFloat
     , Class.timesSelf
     , Class.times @Length Self
-    , Class.times @(Curve Unitless) Self
+    , Class.times @Curve Self
     , Class.divByFloat
     , Class.divByM Curve.quotient
     , Class.divBy @Length Self
     , Class.divByU Curve.quotient
     ]
 
+type AreaCurve = Curve.Curve SquareMeters
+
 areaCurve :: Class
 areaCurve =
-  Class.new @(Curve SquareMeters) "A parametric curve definining an area in terms of a parameter value." $
+  Class.new @AreaCurve "A parametric curve definining an area in terms of a parameter value." $
     [ Class.constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
     , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , Class.factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
@@ -847,7 +851,7 @@ areaCurve =
     , Class.minusSelf
     , Class.minus @Area Self
     , Class.timesFloat
-    , Class.times @(Curve Unitless) Self
+    , Class.times @Curve Self
     , Class.divByFloat
     , Class.divByS Curve.quotient
     , Class.divBy @Length Self
@@ -856,9 +860,11 @@ areaCurve =
     , Class.divByM Curve.quotient
     ]
 
+type Drawing2d = Drawing2d.Drawing2d FFI.Space
+
 drawing2d :: Class
 drawing2d =
-  Class.new @(Drawing2d FFI.Space) $(docs ''Drawing2d) $
+  Class.new @Drawing2d $(docs ''Drawing2d.Drawing2d) $
     [ Class.member1 "To SVG" "View Box" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
     , Class.member2 "Write SVG" "Path" "View Box" Drawing2d.writeSvg $(docs 'Drawing2d.writeSvg)
     , Class.factory1 "Group" "Drawings" Drawing2d.group $(docs 'Drawing2d.group)
@@ -1090,9 +1096,11 @@ point3d =
     ]
       <> affineTransformations3d Point3d.transformBy
 
+type Bounds3d = Bounds3d.Bounds3d FFI.Coordinates
+
 bounds3d :: Class
 bounds3d =
-  Class.new @(Bounds3d FFI.Coordinates) "A bounding box in 3D." $
+  Class.new @Bounds3d $(docs ''Bounds3d.Bounds3d) $
     [ Class.factory1 "Constant" "Point" Bounds3d.constant $(docs 'Bounds3d.constant)
     , Class.factory2 "From Corners" "First Point" "Second Point" Bounds3d.hull2 $(docs 'Bounds3d.hull2)
     , Class.factory1 @(NonEmpty Point3d) "Hull" "Points" Bounds3d.hullN $(docs 'Bounds3d.hullN)
@@ -1485,9 +1493,11 @@ body3d = do
     , Class.memberM2 "Write Mitsuba" "Path" "Resolution" writeMitsuba "Write a body to Mitsuba 'serialized' file."
     ]
 
+type Resolution = Resolution.Resolution Meters
+
 resolution :: Class
 resolution =
-  Class.new @(Resolution Meters) $(docs ''Resolution) $
+  Class.new @Resolution $(docs ''Resolution.Resolution) $
     [ Class.factory1 "Max Error" "Error" (Resolution.maxError @Meters) $(docs 'Resolution.maxError)
     , Class.factory1 "Max Size" "Size" (Resolution.maxSize @Meters) $(docs 'Resolution.maxSize)
     , Class.constructor2 "Max Error" "Max Size" (Class.curryT2 Resolution.custom) $(docs 'Resolution.custom)
@@ -1546,9 +1556,11 @@ gltf = do
     , Class.member2 "Write Binary" "Path" "Resolution" writeBinary $(docs 'Gltf.writeBinary)
     ]
 
+type Camera3d = Camera3d.Camera3d FFI.Coordinates
+
 camera3d :: Class
 camera3d =
-  Class.new @(Camera3d FFI.Coordinates) $(docs ''Camera3d) $
+  Class.new @Camera3d $(docs ''Camera3d.Camera3d) $
     [ Class.factory3 "Look At" "Eye Point" "Focal Point" "Projection" (Class.curryT3 Camera3d.lookAt) $(docs 'Camera3d.lookAt)
     , Class.factory5 "Orbit" "Focal Point" "Azimuth" "Elevation" "Distance" "Projection" (Class.curryT5 Camera3d.orbit) $(docs 'Camera3d.orbit)
     , Class.nested @(Camera3d.Projection Meters) $(docs ''Camera3d.Projection) []
@@ -1556,14 +1568,14 @@ camera3d =
     , Class.static1 "Orthographic" "Viewport Height" (Camera3d.orthographic @Meters) $(docs 'Camera3d.orthographic)
     ]
 
-data Mitsuba = Mitsuba Model3d (Camera3d FFI.Coordinates) (Mitsuba.Lighting FFI.Space)
+data Mitsuba = Mitsuba Model3d Camera3d (Mitsuba.Lighting FFI.Space)
 
 instance FFI Mitsuba where
   representation = FFI.classRepresentation "Mitsuba"
 
 mitsuba :: Class
 mitsuba = do
-  let writeFiles :: Text -> Resolution Meters -> Mitsuba -> IO ()
+  let writeFiles :: Text -> Resolution -> Mitsuba -> IO ()
       writeFiles path res (Mitsuba model camera lighting) =
         Mitsuba.writeFiles do
           #path path
