@@ -105,14 +105,16 @@ xyz Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (vx, vy, vz) =
     (vx * xf + vy * yf + vz * zf)
     (vx * xu + vy * yu + vz * zu)
 
-{-| Construct a vector from its XYZ components, using a Z-up convention
-where positive X is rightward, positive Y is forward and positive Z is upward.
+{-| Construct a vector from its XYZ components, using a Z-up convention.
+
+This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
 -}
 zUp :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 zUp vX vY vZ = Vector3d vX vY vZ
 
-{-| Construct a vector from its XYZ components, using a Y-up convention
-where positive X is leftward, positive Y is upward, and positive Z is forward.
+{-| Construct a vector from its XYZ components, using a Y-up convention.
+
+This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
 yUp :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 yUp vX vY vZ = Vector3d -vX vZ vY

@@ -21,8 +21,9 @@ import OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Primitives (Axis3d (Axis3d), Direction3d (Direction3d, Unit3d), Frame3d (Frame3d), Orientation3d (Orientation3d))
 
-{-| A coordinate convention in 3D space,
-defining which of X, Y and Z mean 'forward' or 'upward' or 'rightward'.
+{-| A coordinate convention in 3D space.
+
+This defines which of X, Y and Z mean 'forward' or 'upward' or 'rightward'.
 -}
 data Convention3d where
   Convention3d ::

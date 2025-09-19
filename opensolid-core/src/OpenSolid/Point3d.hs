@@ -125,14 +125,16 @@ erase = coerce
 xyz :: Convention3d -> (Qty units, Qty units, Qty units) -> Point3d (space @ units)
 xyz convention givenCoordinates = Position3d (Vector3d.xyz convention givenCoordinates)
 
-{-| Construct a point from its XYZ coordinates, using a Z-up convention
-where positive X is rightward, positive Y is forward and positive Z is upward.
+{-| Construct a point from its XYZ coordinates, using a Z-up convention.
+
+This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
 -}
 zUp :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 zUp pX pY pZ = Point3d pX pY pZ
 
-{-| Construct a point from its XYZ coordinates, using a Y-up convention
-where positive X is leftward, positive Y is upward, and positive Z is forward.
+{-| Construct a point from its XYZ coordinates, using a Y-up convention.
+
+This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
 yUp :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 yUp pX pY pZ = Point3d -pX pZ pY
