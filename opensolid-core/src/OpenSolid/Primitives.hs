@@ -2072,6 +2072,7 @@ instance
 
 -- | An axis in 3D, defined by an origin point and direction.
 data Axis3d (coordinateSystem :: CoordinateSystem) where
+  -- | Construct an axis from its origin point and direction.
   Axis3d ::
     Point3d (space @ units) ->
     Direction3d space ->

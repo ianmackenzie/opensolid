@@ -11,7 +11,7 @@ import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d (Axis2d (Axis2d))
 import OpenSolid.Axis2d qualified as Axis2d
-import OpenSolid.Axis3d (Axis3d)
+import OpenSolid.Axis3d (Axis3d (Axis3d))
 import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
@@ -985,7 +985,8 @@ bounds3d =
 axis3d :: Class
 axis3d =
   Class.new @(Axis3d (Space @ Meters)) $(docs ''Axis3d) $
-    [ Class.property "Origin Point" (.originPoint) $(docs 'Axis3d.originPoint)
+    [ Class.constructor2 "Origin Point" "Direction" Axis3d $(docs 'Axis3d)
+    , Class.property "Origin Point" (.originPoint) $(docs 'Axis3d.originPoint)
     , Class.property "Direction" (.direction) $(docs 'Axis3d.direction)
     , Class.member0 "Normal Plane" Axis3d.normalPlane $(docs 'Axis3d.normalPlane)
     , Class.member1 "Move To" "Point" Axis3d.moveTo $(docs 'Axis3d.moveTo)
