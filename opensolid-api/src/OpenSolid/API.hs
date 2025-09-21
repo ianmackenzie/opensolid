@@ -950,7 +950,6 @@ point3d :: Class
 point3d =
   Class.new @(Point3d (Space @ Meters)) "A point in 3D." $
     [ Class.factory2 "Along" "Axis" "Distance" Point3d.along $(docs 'Point3d.along)
-    , Class.factory2 "On" "Plane" "Position" Point3d.on $(docs 'Point3d.on)
     , Class.factory2 "XYZ" "Convention" "Coordinates" Point3d.xyz $(docs 'Point3d.xyz)
     , Class.factory3 "Z Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.zUp $(docs 'Point3d.zUp)
     , Class.factory3 "Y Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.yUp $(docs 'Point3d.yUp)
