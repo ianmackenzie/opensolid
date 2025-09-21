@@ -487,6 +487,7 @@ vector2d =
     , Class.property "Angle" (.angle) $(docs 'Vector2d.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , Class.memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
+    , Class.member1 "Place On" "Plane" (Vector2d.placeOn @Space @Unitless @Space @Meters) $(docs 'Vector2d.placeOn)
     , Class.negateSelf
     , Class.floatTimes
     , Class.plusSelf
@@ -525,6 +526,7 @@ displacement2d =
     , Class.property "Angle" (.angle) $(docs 'Vector2d.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , Class.memberM0 "Is Zero" (~= Vector2d.zero) "Check if a displacement is zero, within the current tolerance."
+    , Class.member1 "Place On" "Plane" (Vector2d.placeOn @Space @Meters @Space @Meters) $(docs 'Vector2d.placeOn)
     , Class.negateSelf
     , Class.floatTimes
     , Class.plusSelf
@@ -556,6 +558,7 @@ areaVector2d =
     , Class.property "Angle" (.angle) $(docs 'Vector2d.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , Class.memberS0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
+    , Class.member1 "Place On" "Plane" (Vector2d.placeOn @Space @SquareMeters @Space @Meters) $(docs 'Vector2d.placeOn)
     , Class.negateSelf
     , Class.floatTimes
     , Class.plusSelf
@@ -582,6 +585,7 @@ direction2d =
     , Class.property "Y Component" (.yComponent) $(docs 'Direction2d.yComponent)
     , Class.member0 "Rotate Left" Direction2d.rotateLeft $(docs 'Direction2d.rotateLeft)
     , Class.member0 "Rotate Right" Direction2d.rotateRight $(docs 'Direction2d.rotateRight)
+    , Class.member1 "Place On" "Plane" (Direction2d.placeOn @Space @Space @Meters) $(docs 'Direction2d.placeOn)
     , Class.negateSelf
     ]
 
@@ -803,6 +807,7 @@ axis2d =
     , Class.property "Direction" (.direction) $(docs 'Axis2d.direction)
     , Class.constant "X" (Axis2d.x @Space @Meters) $(docs 'Axis2d.x)
     , Class.constant "Y" (Axis2d.y @Space @Meters) $(docs 'Axis2d.y)
+    , Class.member1 "Place On" "Plane" Axis2d.placeOn $(docs 'Axis2d.placeOn)
     ]
       <> orthonormalTransformations2d Axis2d.transformBy
 
