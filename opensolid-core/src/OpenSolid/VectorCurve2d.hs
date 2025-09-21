@@ -38,7 +38,7 @@ module OpenSolid.VectorCurve2d
   , direction
   , placeIn
   , relativeTo
-  , on
+  , placeOn
   , transformBy
   , rotateBy
   , convert
@@ -799,11 +799,11 @@ relativeTo ::
   VectorCurve2d (local @ units)
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
-on ::
+placeOn ::
   Plane3d (space @ planeUnits) (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve3d (space @ units)
-on plane curve = VectorCurve3d.on plane curve
+placeOn plane curve = VectorCurve3d.on plane curve
 
 convert ::
   Qty (units2 :/: units1) ->

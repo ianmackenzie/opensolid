@@ -4,7 +4,7 @@ module OpenSolid.Expression.Surface2d
   , placeIn
   , relativeTo
   , transformBy
-  , on
+  , placeOn
   )
 where
 
@@ -39,11 +39,11 @@ relativeTo ::
   Expression UvPoint (Point2d (local @ units))
 relativeTo = Expression.relativeTo
 
-on ::
+placeOn ::
   Plane3d (global @ units) (Defines local) ->
   Expression UvPoint (Point2d (local @ units)) ->
   Expression UvPoint (Point3d (global @ units))
-on = Expression.on
+placeOn = Expression.on
 
 transformBy ::
   Transform2d tag (space @ units) ->

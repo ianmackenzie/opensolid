@@ -19,7 +19,7 @@ module OpenSolid.Direction2d
   , rotateRight
   , placeIn
   , relativeTo
-  , on
+  , placeOn
   , random
   , transformBy
   , rotateBy
@@ -173,8 +173,17 @@ relativeTo ::
   Direction2d local
 relativeTo frame = lift (Vector2d.relativeTo frame)
 
-on :: Plane3d (space @ planeUnits) (Defines local) -> Direction2d local -> Direction3d space
-on plane (Unit2d vector) = Unit3d (Vector2d.on plane vector)
+{-| Convert a 2D direction to 3D direction by placing it on a plane.
+
+Given a 2D direction defined within a plane's coordinate system,
+this returns the corresponding 3D direction.
+-}
+placeOn ::
+  forall local space planeUnits.
+  Plane3d (space @ planeUnits) (Defines local) ->
+  Direction2d local ->
+  Direction3d space
+placeOn plane (Unit2d vector) = Unit3d (Vector2d.placeOn plane vector)
 
 random :: Random.Generator (Direction2d space)
 random = Random.map polar (Qty.random -Angle.pi Angle.pi)

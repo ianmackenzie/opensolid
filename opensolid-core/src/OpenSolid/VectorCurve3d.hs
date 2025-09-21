@@ -495,9 +495,9 @@ on ::
 on plane vectorCurve2d = do
   let compiledPlanar =
         CompiledFunction.map
-          (Expression.VectorCurve2d.on plane)
-          (Vector2d.on plane)
-          (VectorBounds2d.on plane)
+          (Expression.VectorCurve2d.placeOn plane)
+          (Vector2d.placeOn plane)
+          (VectorBounds2d.placeOn plane)
           vectorCurve2d.compiled
   new compiledPlanar (on plane vectorCurve2d.derivative)
 

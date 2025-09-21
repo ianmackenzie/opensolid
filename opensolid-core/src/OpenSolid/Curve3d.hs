@@ -169,9 +169,9 @@ on ::
 on plane curve2d = do
   new
     @ CompiledFunction.map
-      (Expression.Curve2d.on plane)
-      (Point2d.on plane)
-      (Bounds2d.on plane)
+      (Expression.Curve2d.placeOn plane)
+      (Point2d.placeOn plane)
+      (Bounds2d.placeOn plane)
       curve2d.compiled
     @ VectorCurve3d.on plane curve2d.derivative
 

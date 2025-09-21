@@ -604,7 +604,7 @@ point2d =
     , Class.property "Y Coordinate" (.yCoordinate) $(docs 'Point2d.yCoordinate)
     , Class.member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
-    , Class.member1 "On" "Plane" Point2d.on $(docs 'Point2d.on)
+    , Class.member1 "Place On" "Plane" Point2d.placeOn $(docs 'Point2d.placeOn)
     , Class.minusSelf
     , Class.minus @(Vector2d (Space @ Meters)) Self
     , Class.plus @(Vector2d (Space @ Meters)) Self

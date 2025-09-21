@@ -46,7 +46,7 @@ module OpenSolid.Curve2d
   , yCoordinate
   , placeIn
   , relativeTo
-  , on
+  , placeOn
   , transformBy
   , translateBy
   , translateIn
@@ -912,11 +912,11 @@ relativeTo ::
   Curve2d (local @ units)
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
-on ::
+placeOn ::
   Plane3d (space @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve3d (space @ units)
-on plane curve = Curve3d.on plane curve
+placeOn plane curve = Curve3d.on plane curve
 
 transformBy ::
   Transform2d tag (space @ units) ->

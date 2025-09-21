@@ -25,7 +25,7 @@ module OpenSolid.Point2d
   , distanceRightOf
   , placeIn
   , relativeTo
-  , on
+  , placeOn
   , convert
   , unconvert
   , transformBy
@@ -181,11 +181,12 @@ relativeTo (Frame2d p0 (Orientation2d i j)) p = let d = p - p0 in Point2d (d `do
 Given a 2D point defined within a plane's coordinate system,
 this returns the corresponding 3D point.
 -}
-on ::
+placeOn ::
   Plane3d (space @ units) (Defines localSpace) ->
   Point2d (localSpace @ units) ->
   Point3d (space @ units)
-on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d px py) = originPoint + px * i + py * j
+placeOn (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d px py) =
+  originPoint + px * i + py * j
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert factor (Position2d p) = Position2d (Vector2d.convert factor p)

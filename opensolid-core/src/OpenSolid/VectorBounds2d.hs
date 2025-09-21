@@ -37,7 +37,7 @@ module OpenSolid.VectorBounds2d
   , interpolate
   , relativeTo
   , placeIn
-  , on
+  , placeOn
   , convert
   , unconvert
   , transformBy
@@ -297,11 +297,11 @@ relativeTo frame (VectorBounds2d x y) = do
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
-on ::
+placeOn ::
   Plane3d (space @ planeUnits) (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds3d (space @ units)
-on (Plane3d _ (PlaneOrientation3d i j)) (VectorBounds2d x y) = x * i + y * j
+placeOn (Plane3d _ (PlaneOrientation3d i j)) (VectorBounds2d x y) = x * i + y * j
 
 convert ::
   Qty (units2 :/: units1) ->

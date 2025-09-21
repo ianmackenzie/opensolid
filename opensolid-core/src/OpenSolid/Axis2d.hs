@@ -9,7 +9,7 @@ module OpenSolid.Axis2d
   , through
   , moveTo
   , reverse
-  , on
+  , placeOn
   , transformBy
   , translateBy
   , translateIn
@@ -63,8 +63,16 @@ moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
 reverse :: Axis2d (space @ units) -> Axis2d (space @ units)
 reverse (Axis2d p0 d) = Axis2d p0 -d
 
-on :: Plane3d (space @ units) (Defines local) -> Axis2d (local @ units) -> Axis3d (space @ units)
-on plane (Axis2d p0 d) = Axis3d (Point2d.on plane p0) (Direction2d.on plane d)
+{-| Convert a 2D axis to 3D axis by placing it on a plane.
+
+Given a 2D axis defined within a plane's coordinate system,
+this returns the corresponding 3D axis.
+-}
+placeOn ::
+  Plane3d (space @ units) (Defines local) ->
+  Axis2d (local @ units) ->
+  Axis3d (space @ units)
+placeOn plane (Axis2d p0 d) = Axis3d (Point2d.placeOn plane p0) (Direction2d.placeOn plane d)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

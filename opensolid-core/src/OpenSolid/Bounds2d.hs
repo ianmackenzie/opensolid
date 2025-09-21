@@ -37,7 +37,7 @@ module OpenSolid.Bounds2d
   , interpolate
   , placeIn
   , relativeTo
-  , on
+  , placeOn
   , transformBy
   , distanceAlong
   , convert
@@ -268,11 +268,11 @@ relativeTo frame (Bounds2d x y) = do
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
-on ::
+placeOn ::
   Plane3d (space @ units) (Defines local) ->
   Bounds2d (local @ units) ->
   Bounds3d (space @ units)
-on plane (Bounds2d x y) = do
+placeOn plane (Bounds2d x y) = do
   let Plane3d _ (PlaneOrientation3d i j) = plane
   let Direction3d ix iy iz = i
   let Direction3d jx jy jz = j

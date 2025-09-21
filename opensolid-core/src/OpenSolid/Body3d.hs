@@ -329,7 +329,7 @@ translational sketchPlane profile displacement = do
   let endPlane = Plane3d.translateBy v1 sketchPlane
   let startCap = Surface3d.on startPlane profile
   let endCap = Surface3d.on endPlane profile
-  let sideSurface curve = Surface3d.translational (Curve2d.on sketchPlane curve) displacement
+  let sideSurface curve = Surface3d.translational (Curve2d.placeOn sketchPlane curve) displacement
   let sideSurfaces = List.map sideSurface (NonEmpty.toList profile.boundaryCurves)
   let initialDerivative = VectorCurve3d.startValue displacement.derivative
   case Qty.sign (initialDerivative `dot` Plane3d.normalDirection sketchPlane) of
@@ -352,7 +352,7 @@ revolved ::
   Angle ->
   Result BoundedBy.Error (Body3d (space @ units))
 revolved startPlane profile axis2d angle = Result.do
-  let axis3d = Axis2d.on startPlane axis2d
+  let axis3d = Axis2d.placeOn startPlane axis2d
   let profileCurves = profile.boundaryCurves
   let offAxisCurves = NonEmpty.filter (not . Curve2d.isOnAxis axis2d) profileCurves
   let signedDistanceCurves = List.map (Curve2d.distanceRightOf axis2d) offAxisCurves

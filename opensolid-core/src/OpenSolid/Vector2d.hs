@@ -34,7 +34,7 @@ module OpenSolid.Vector2d
   , rotateLeft
   , placeIn
   , relativeTo
-  , on
+  , placeOn
   , convert
   , unconvert
   , sum
@@ -255,11 +255,17 @@ relativeTo ::
   Vector2d (local @ units)
 relativeTo (Frame2d _ (Orientation2d i j)) vector = Vector2d (vector `dot` i) (vector `dot` j)
 
-on ::
+{-| Convert a 2D vector to 3D vector by placing it on a plane.
+
+Given a 2D vector defined within a plane's coordinate system,
+this returns the corresponding 3D vector.
+-}
+placeOn ::
+  forall local units space planeUnits.
   Plane3d (space @ planeUnits) (Defines local) ->
   Vector2d (local @ units) ->
   Vector3d (space @ units)
-on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vx vy) = vx * i + vy * j
+placeOn (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vx vy) = vx * i + vy * j
 
 convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
 convert factor vector = Units.simplify (vector .*. factor)
