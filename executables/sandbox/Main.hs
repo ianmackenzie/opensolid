@@ -26,7 +26,6 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
 import OpenSolid.Float qualified as Float
-import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Int qualified as Int
@@ -58,6 +57,7 @@ import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.Volume qualified as Volume
+import OpenSolid.World3d qualified as World3d
 
 data Global deriving (Eq, Show)
 
@@ -195,18 +195,17 @@ testNonEmpty = IO.do
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = IO.do
-  let world = Frame3d.world
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let crossSection =
         Curve2d.circle do
           #centerPoint (Point2d.x majorRadius)
           #diameter (2.0 * minorRadius)
-  surface <- Surface3d.revolved world.frontPlane crossSection Axis2d.y Angle.twoPi
+  surface <- Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  let planeNormal = Direction3d.polar world.frontPlane (alpha + Angle.halfPi)
-  let f = planeNormal `dot` (surface.function - world.originPoint)
+  let planeNormal = Direction3d.polar World3d.frontPlane (alpha + Angle.halfPi)
+  let f = planeNormal `dot` (surface.function - World3d.originPoint)
   zeros <- SurfaceFunction.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"

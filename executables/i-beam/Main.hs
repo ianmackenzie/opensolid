@@ -5,7 +5,6 @@ import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
@@ -18,10 +17,10 @@ import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
 main = Tolerance.using Length.nanometer IO.do
-  let world = Frame3d.world
   let length = Length.centimeters 30.0
   let width = Length.centimeters 10.0
   let height = Length.centimeters 15.0
@@ -47,7 +46,7 @@ main = Tolerance.using Length.nanometer IO.do
   let topCurves = topRightCurves <> List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- Region2d.boundedBy allCurves
-  body <- Body3d.extruded world.frontPlane profile (-0.5 * length) (0.5 * length)
+  body <- Body3d.extruded World3d.frontPlane profile (-0.5 * length) (0.5 * length)
   let material = PbrMaterial.metal (Color.rgbFloat 0.913 0.921 0.925) (#roughness 0.3)
   let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
   let resolution = Resolution.maxError (Length.millimeters 1.0)
