@@ -237,9 +237,11 @@ normalize vector = do
   let vm = magnitude vector
   if vm == Qty.zero then zero else vector / vm
 
+-- | Rotate a vector left (counterclockwise) by 90 degrees.
 rotateLeft :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateLeft (Vector2d vx vy) = Vector2d (negate vy) vx
 
+-- | Rotate a vector right (clockwise) by 90 degrees.
 rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateRight (Vector2d vx vy) = Vector2d vy (negate vx)
 
@@ -285,16 +287,35 @@ transformBy transform vector = do
   let Vector2d vx vy = vector
   vx * i + vy * j
 
+{-| Rotate a vector by a given angle.
+
+A positive angle corresponds to a counterclockwise rotation.
+-}
 rotateBy :: Angle -> Vector2d (space @ units) -> Vector2d (space @ units)
 rotateBy theta (Vector2d vx vy) = do
   let cosTheta = Angle.cos theta
   let sinTheta = Angle.sin theta
   Vector2d (cosTheta * vx - sinTheta * vy) (sinTheta * vx + cosTheta * vy)
 
+{-| Mirror a vector in/along a given direction.
+
+For example, mirroring in the X direction
+will negate the vector's X component and leave its Y component unchanged.
+-}
 mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
 mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
 
-mirrorAcross :: Axis2d (space @ originUnits) -> Vector2d (space @ units) -> Vector2d (space @ units)
+{-| Mirror a vector across a given axis.
+
+The origin point of the axis is not used, only its direction, since vectors have no position.
+For example, mirroring a vector across *any* axis parallel to the X axis
+will negate the vector's Y component while leaving its X component unchanged.
+-}
+mirrorAcross ::
+  forall space units originUnits.
+  Axis2d (space @ originUnits) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units)
 mirrorAcross (Axis2d _ axisDirection) = mirrorIn (Direction2d.rotateLeft axisDirection)
 
 scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)

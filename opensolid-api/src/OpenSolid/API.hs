@@ -470,6 +470,18 @@ color =
     , Class.constant "Dark Charcoal" Color.darkCharcoal $(docs 'Color.darkCharcoal)
     ]
 
+vectorTransformations2d ::
+  forall units.
+  FFI (Vector2d (Space @ units)) =>
+  List (Class.Member (Vector2d (Space @ units)))
+vectorTransformations2d =
+  [ Class.member0 "Rotate Left" Vector2d.rotateLeft $(docs 'Vector2d.rotateLeft)
+  , Class.member0 "Rotate Right" Vector2d.rotateRight $(docs 'Vector2d.rotateRight)
+  , Class.member1 "Rotate By" "Angle" Vector2d.rotateBy $(docs 'Vector2d.rotateBy)
+  , Class.member1 "Mirror In" "Direction" Vector2d.mirrorIn $(docs 'Vector2d.mirrorIn)
+  , Class.member1 "Mirror Across" "Axis" (Vector2d.mirrorAcross @Space @units @Meters) $(docs 'Vector2d.mirrorAcross)
+  ]
+
 vector2d :: Class
 vector2d =
   Class.new @(Vector2d (Space @ Unitless)) "A unitless vector in 2D." $
@@ -503,6 +515,7 @@ vector2d =
     , Class.crossProduct @(Vector2d (Space @ Meters)) Self
     , Class.crossProduct @(Vector2d (Space @ SquareMeters)) Self
     ]
+      <> vectorTransformations2d
 
 displacement2d :: Class
 displacement2d =
@@ -540,6 +553,7 @@ displacement2d =
     , Class.crossSelf
     , Class.crossProduct @(Vector2d (Space @ Unitless)) Self
     ]
+      <> vectorTransformations2d
 
 areaVector2d :: Class
 areaVector2d =
@@ -570,6 +584,7 @@ areaVector2d =
     , Class.dotProduct @(Vector2d (Space @ Unitless)) Self
     , Class.crossProduct @(Vector2d (Space @ Unitless)) Self
     ]
+      <> vectorTransformations2d
 
 direction2d :: Class
 direction2d =
@@ -585,6 +600,9 @@ direction2d =
     , Class.property "Y Component" (.yComponent) $(docs 'Direction2d.yComponent)
     , Class.member0 "Rotate Left" Direction2d.rotateLeft $(docs 'Direction2d.rotateLeft)
     , Class.member0 "Rotate Right" Direction2d.rotateRight $(docs 'Direction2d.rotateRight)
+    , Class.member1 "Rotate By" "Angle" Direction2d.rotateBy $(docs 'Direction2d.rotateBy)
+    , Class.member1 "Mirror In" "Direction" Direction2d.mirrorIn $(docs 'Direction2d.mirrorIn)
+    , Class.member1 "Mirror Across" "Axis" (Direction2d.mirrorAcross @Space @Meters) $(docs 'Direction2d.mirrorAcross)
     , Class.member1 "Place On" "Plane" (Direction2d.placeOn @Space @Space @Meters) $(docs 'Direction2d.placeOn)
     , Class.negateSelf
     ]

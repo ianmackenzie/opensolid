@@ -195,11 +195,30 @@ transformBy ::
   Direction2d space
 transformBy transform = lift (Vector2d.transformBy transform)
 
+{-| Rotate a direction by a given angle.
+
+A positive angle corresponds to a counterclockwise rotation.
+-}
 rotateBy :: Angle -> Direction2d space -> Direction2d space
 rotateBy theta = lift (Vector2d.rotateBy theta)
 
+{-| Mirror a direction in/along a given other direction.
+
+For example, mirroring in the X direction
+will negate the original direction's X component and leave its Y component unchanged.
+-}
 mirrorIn :: Direction2d space -> Direction2d space -> Direction2d space
 mirrorIn mirrorDirection = lift (Vector2d.mirrorIn mirrorDirection)
 
-mirrorAcross :: Axis2d (space @ originUnits) -> Direction2d space -> Direction2d space
+{-| Mirror a direction across a given axis.
+
+The origin point of the axis is not used, only its direction, since directions have no position.
+For example, mirroring a direction across *any* axis parallel to the X axis
+will negate the direction's Y component while leaving its X component unchanged.
+-}
+mirrorAcross ::
+  forall space originUnits.
+  Axis2d (space @ originUnits) ->
+  Direction2d space ->
+  Direction2d space
 mirrorAcross axis = lift (Vector2d.mirrorAcross axis)
