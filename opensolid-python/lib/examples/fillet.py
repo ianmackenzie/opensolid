@@ -2,27 +2,26 @@ from opensolid import (
     Angle,
     Axis2d,
     Body3d,
+    Bounds2d,
+    Camera3d,
     Color,
     Curve2d,
+    Gltf,
     Length,
     LengthBounds,
-    Frame3d,
-    Resolution,
-    Bounds2d,
+    Mitsuba,
+    Model3d,
     PbrMaterial,
     Point2d,
+    Point3d,
     Region2d,
-    Model3d,
-    Gltf,
+    Resolution,
     Tolerance,
-    Camera3d,
-    Mitsuba,
+    World3d,
 )
 from pathlib import Path
 
 with Tolerance(Length.nanometers(1)):
-    world = Frame3d.world
-
     p1 = Point2d.centimeters(0, 1)
     p2 = Point2d.centimeters(1, 1)
     p3 = Point2d.centimeters(1, 0)
@@ -48,7 +47,7 @@ with Tolerance(Length.nanometers(1)):
 
     thickness = Length.centimeters(2)
     body = Body3d.extruded(
-        world.front_plane,
+        World3d.front_plane,
         filleted_region,
         -thickness / 2,
         thickness / 2,
@@ -58,7 +57,7 @@ with Tolerance(Length.nanometers(1)):
     model = Model3d.body(body).with_pbr_material(material).with_name("Body")
     ground_limits = LengthBounds.symmetric(width=Length.meters(2))
     ground_body = Body3d.extruded(
-        world.bottom_plane,
+        World3d.bottom_plane,
         Region2d.rectangle(Bounds2d(ground_limits, ground_limits)),
         Length.millimeters(2),
         Length.centimeters(1),
@@ -68,14 +67,11 @@ with Tolerance(Length.nanometers(1)):
         Model3d.body(ground_body).with_pbr_material(ground_material).with_name("Ground")
     )
     resolution = Resolution.max_error(Length.millimeters(0.01))
-    Gltf(Model3d.group([model, ground_model])).write_binary("fillet.glb", resolution)
+    gltf = Gltf(Model3d.group([model, ground_model]))
+    gltf.write_binary("fillet.glb", resolution)
 
-    focal_point = world.origin_point.translate_in(
-        world.upward_direction,
-        Length.centimeters(1),
-    )
     camera = Camera3d.orbit(
-        focal_point=focal_point,
+        focal_point=Point3d.z_up(Length.zero, Length.zero, Length.centimeters(1)),
         azimuth=Angle.degrees(30),
         elevation=Angle.degrees(30),
         distance=Length.centimeters(12),
@@ -84,6 +80,6 @@ with Tolerance(Length.nanometers(1)):
     hdris_path = Path("/home/ian/Downloads/HDRIs")
     lighting_image = "kloppenheim_07_puresky_4k.exr"
 
-    lighting = Mitsuba.environment_map(world, str(hdris_path / lighting_image))
+    lighting = Mitsuba.environment_map(World3d.frame, str(hdris_path / lighting_image))
     scene = Mitsuba(Model3d.group([model, ground_model]), camera, lighting)
     scene.write_files("fillet", resolution)

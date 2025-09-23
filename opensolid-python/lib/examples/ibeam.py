@@ -4,20 +4,18 @@ from opensolid import (
     Color,
     Curve2d,
     Direction2d,
+    Gltf,
     Length,
-    Resolution,
+    Model3d,
     PbrMaterial,
     Point2d,
     Region2d,
-    Frame3d,
-    Model3d,
-    Gltf,
+    Resolution,
     Tolerance,
+    World3d,
 )
 
 with Tolerance(Length.meters(1e-9)):
-    world = Frame3d.world
-
     # Define dimensions
     length = Length.centimeters(30)
     width = Length.centimeters(10)
@@ -57,7 +55,7 @@ with Tolerance(Length.meters(1e-9)):
     profile = Region2d.bounded_by(curves)
 
     # Extrude the profile to create a solid body
-    body = Body3d.extruded(world.front_plane, profile, -length / 2, length / 2)
+    body = Body3d.extruded(World3d.front_plane, profile, -length / 2, length / 2)
 
     # Create a 3D model containing the body and write to GLB file
     material = PbrMaterial.metal(Color.rgb_float(0.913, 0.921, 0.925), roughness=0.3)
