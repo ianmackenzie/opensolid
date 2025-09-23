@@ -42,7 +42,6 @@ import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d (Frame3d)
-import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -64,6 +63,7 @@ import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
+import OpenSolid.World3d qualified as World3d
 
 -- | Get the bounds on the rightward coordinate of a bounding box.
 rightwardCoordinate :: Bounds3d (space @ units) -> Bounds units
@@ -83,9 +83,9 @@ coordinates ::
   Bounds3d (space @ units) ->
   (Bounds units, Bounds units, Bounds units)
 coordinates convention bounds =
-  ( distanceAlong (Convention3d.xAxis Frame3d.world convention) bounds
-  , distanceAlong (Convention3d.yAxis Frame3d.world convention) bounds
-  , distanceAlong (Convention3d.zAxis Frame3d.world convention) bounds
+  ( distanceAlong (Convention3d.xAxis World3d.frame convention) bounds
+  , distanceAlong (Convention3d.yAxis World3d.frame convention) bounds
+  , distanceAlong (Convention3d.zAxis World3d.frame convention) bounds
   )
 
 -- | Construct a zero-size bounding box containing a single point.

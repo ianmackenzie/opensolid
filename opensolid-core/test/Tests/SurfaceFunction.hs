@@ -4,7 +4,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Error qualified as Error
-import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -17,6 +16,7 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
+import OpenSolid.World3d qualified as World3d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Curve2d qualified
@@ -92,18 +92,17 @@ intersectionCurveSecondDerivativeBoundsConsistency =
 
 planeTorusSurface :: SurfaceFunction Meters
 planeTorusSurface = do
-  let world = Frame3d.world
   let theta = Angle.twoPi * SurfaceFunction.u
   let phi = Angle.twoPi * SurfaceFunction.v
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let r = majorRadius + minorRadius * SurfaceFunction.cos phi
   let alpha = Angle.asin (minorRadius / majorRadius)
-  let normalDirection = Direction3d.polar world.frontPlane (alpha + Angle.halfPi)
+  let normalDirection = Direction3d.polar World3d.frontPlane (alpha + Angle.halfPi)
   let surfaceFunction =
-        r * SurfaceFunction.cos theta * world.rightwardDirection
-          + r * SurfaceFunction.sin theta * world.forwardDirection
-          + minorRadius * SurfaceFunction.sin phi * world.upwardDirection
+        r * SurfaceFunction.cos theta * World3d.rightwardDirection
+          + r * SurfaceFunction.sin theta * World3d.forwardDirection
+          + minorRadius * SurfaceFunction.sin phi * World3d.upwardDirection
   normalDirection `dot` surfaceFunction
 
 samplingRadius :: Float

@@ -41,6 +41,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.World3d qualified as World3d
 
 data CameraSpace
 
@@ -130,25 +131,24 @@ lookAt ::
   ) ->
   Camera3d (space @ units)
 lookAt args = do
-  let world = Frame3d.world
   let computedFocalDistance = Point3d.distanceFrom args.eyePoint args.focalPoint
   let computedFrame =
         case Tolerance.using Qty.zero (Vector3d.direction (args.focalPoint - args.eyePoint)) of
           Success computedForwardDirection -> do
             let viewVector = Vector3d.unit computedForwardDirection
-            let upVector = Vector3d.unit world.upwardDirection
+            let upVector = Vector3d.unit World3d.upwardDirection
             case Tolerance.using 1e-9 (PlaneOrientation3d.fromVectors viewVector upVector) of
               Just rightPlaneOrientation ->
                 Frame3d.fromRightPlane (Plane3d args.eyePoint rightPlaneOrientation)
               Nothing -- View direction is either straight up or straight down
                 | Direction3d.upwardComponent computedForwardDirection > 0.0 ->
-                    Frame3d args.eyePoint world.upwardOrientation
+                    Frame3d args.eyePoint World3d.upwardOrientation
                 | otherwise ->
-                    Frame3d args.eyePoint world.downwardOrientation
+                    Frame3d args.eyePoint World3d.downwardOrientation
           Failure Vector3d.IsZero ->
             -- Given eye and focal points are coincident,
             -- so just look straight forward
-            Frame3d args.eyePoint world.orientation
+            Frame3d args.eyePoint World3d.forwardOrientation
   new computedFrame computedFocalDistance args.projection
 
 {-| Construct a camera orbiting around a given focal point, a given distance away.
@@ -167,9 +167,8 @@ orbit ::
   ) ->
   Camera3d (space @ units)
 orbit args = do
-  let world = Frame3d.world
   let computedFrame =
-        Frame3d args.focalPoint world.backwardOrientation
+        Frame3d args.focalPoint World3d.backwardOrientation
           |> Frame3d.turnRightBy args.azimuth
           |> Frame3d.tiltDownBy args.elevation
           |> Frame3d.offsetBackwardBy args.distance

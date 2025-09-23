@@ -137,7 +137,7 @@ collectMeshes resolution model = case model of
 {-| Specify an environment map to be used as lighting.
 
 You should pass a frame that defines the orientation of the environment map
-(which can often just be 'Frame3d.world')
+(which can often just be 'World3d.frame')
 and the path to the environment map image itself.
 
 The environment map image will typically be in OpenEXR format;

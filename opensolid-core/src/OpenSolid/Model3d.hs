@@ -34,6 +34,7 @@ import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Prelude
 import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.World3d qualified as World3d
 
 {-| A generic hierarchical 3D model for visualization/archival purposes.
 
@@ -163,7 +164,7 @@ nothing :: Model3d space
 nothing = group []
 
 transformBy :: Transform3d.Rigid (space @ Meters) -> Model3d space -> Model3d space
-transformBy transform model = placeIn (Frame3d.transformBy transform Frame3d.world) model
+transformBy transform model = placeIn (Frame3d.transformBy transform World3d.frame) model
 
 -- | Convert a model defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3d (global @ Meters) (Defines local) -> Model3d local -> Model3d global
