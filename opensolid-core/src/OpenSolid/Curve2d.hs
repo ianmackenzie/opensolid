@@ -177,10 +177,10 @@ instance HasField "yCoordinate" (Curve2d (space @ units)) (Curve units) where
 instance HasField "coordinates" (Curve2d (space @ units)) (Curve units, Curve units) where
   getField = coordinates
 
-instance FFI (Curve2d (space @ Meters)) where
+instance FFI (Curve2d FFI.Coordinates) where
   representation = FFI.classRepresentation "Curve2d"
 
-instance FFI (Curve2d (space @ Unitless)) where
+instance FFI (Curve2d UvCoordinates) where
   representation = FFI.classRepresentation "UvCurve"
 
 instance HasUnits (Curve2d (space @ units)) units

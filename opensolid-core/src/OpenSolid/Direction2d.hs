@@ -9,7 +9,7 @@ module OpenSolid.Direction2d
   , y
   , PointsAreCoincident (PointsAreCoincident)
   , from
-  , polar
+  , fromAngle
   , angle
   , degrees
   , radians
@@ -109,22 +109,22 @@ The angle is measured counterclockwise from the positive X direction, so:
   * An angle of 90 degrees corresponds to the positive Y direction
   * An angle of 180 degrees (or -180 degrees) corresponds to the negative X direction
 -}
-polar :: Angle -> Direction2d space
-polar theta = Unit2d (Vector2d (Angle.cos theta) (Angle.sin theta))
+fromAngle :: Angle -> Direction2d space
+fromAngle theta = Unit2d (Vector2d (Angle.cos theta) (Angle.sin theta))
 
 {-| Construct a direction from an angle given in degrees.
 
-See 'polar' for details.
+See 'fromAngle' for details.
 -}
 degrees :: Float -> Direction2d space
-degrees value = polar (Angle.degrees value)
+degrees value = fromAngle (Angle.degrees value)
 
 {-| Construct a direction from an angle given in radians.
 
-See 'polar' for details.
+See 'fromAngle' for details.
 -}
 radians :: Float -> Direction2d space
-radians value = polar (Angle.radians value)
+radians value = fromAngle (Angle.radians value)
 
 {-| Get the angle of a direction.
 
@@ -186,7 +186,7 @@ placeOn ::
 placeOn plane (Unit2d vector) = Unit3d (Vector2d.placeOn plane vector)
 
 random :: Random.Generator (Direction2d space)
-random = Random.map polar (Qty.random -Angle.pi Angle.pi)
+random = Random.map fromAngle (Qty.random -Angle.pi Angle.pi)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

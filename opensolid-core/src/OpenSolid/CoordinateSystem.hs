@@ -7,12 +7,6 @@ module OpenSolid.CoordinateSystem
   , Units
   , UvSpace
   , UvCoordinates
-  , RightPlane
-  , LeftPlane
-  , FrontPlane
-  , BackPlane
-  , TopPlane
-  , BottomPlane
   )
 where
 
@@ -40,15 +34,3 @@ type family Units coordinateSystem where
 data UvSpace deriving (Eq, Show)
 
 type UvCoordinates = UvSpace @ Unitless
-
-data RightPlane space
-
-data LeftPlane space
-
-data FrontPlane space
-
-data BackPlane space
-
-data TopPlane space
-
-data BottomPlane space

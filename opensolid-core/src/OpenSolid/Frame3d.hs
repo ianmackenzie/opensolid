@@ -2,7 +2,6 @@ module OpenSolid.Frame3d
   ( Frame3d (Frame3d)
   , coerce
   , erase
-  , world
   , forward
   , backward
   , leftward
@@ -76,14 +75,10 @@ import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
-import OpenSolid.Primitives (Frame3d (Frame3d), Plane3d (Plane3d), Point3d (Position3d))
+import OpenSolid.Primitives (Frame3d (Frame3d), Plane3d (Plane3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
-import OpenSolid.Vector3d qualified as Vector3d
-
--- | A frame of reference defining a new coordinate system.
-world :: Frame3d (space @ units) (Defines space)
-world = Frame3d (Position3d Vector3d.zero) Orientation3d.world
+import OpenSolid.World3d qualified as World3d
 
 -- | Get the origin point of a frame.
 originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)
@@ -154,10 +149,8 @@ its normal direction will be the frame's forward direction,
 its X direction will be the frame's leftward direction
 and its Y direction will be frame's upward direction.
 -}
-frontPlane ::
-  Frame3d (space @ units) (Defines local) ->
-  Plane3d (space @ units) (Defines (FrontPlane local))
-frontPlane = (.frontPlane)
+frontPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+frontPlane frame = Plane3d frame.originPoint frame.orientation.frontPlaneOrientation
 
 {-| Construct a locally backward-facing plane from a frame.
 
@@ -166,10 +159,8 @@ its normal direction will be the frame's backward direction,
 its X direction will be the frame's rightward direction
 and its Y direction will be frame's upward direction.
 -}
-backPlane ::
-  Frame3d (space @ units) (Defines local) ->
-  Plane3d (space @ units) (Defines (BackPlane local))
-backPlane = (.backPlane)
+backPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+backPlane frame = Plane3d frame.originPoint frame.orientation.backPlaneOrientation
 
 {-| Construct a locally leftward-facing plane from a frame.
 
@@ -178,10 +169,8 @@ its normal direction will be the frame's leftward direction,
 its X direction will be the frame's backward direction
 and its Y direction will be frame's upward direction.
 -}
-leftPlane ::
-  Frame3d (space @ units) (Defines local) ->
-  Plane3d (space @ units) (Defines (LeftPlane local))
-leftPlane = (.leftPlane)
+leftPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+leftPlane frame = Plane3d frame.originPoint frame.orientation.leftPlaneOrientation
 
 {-| Construct a locally rightward-facing plane from a frame.
 
@@ -190,10 +179,8 @@ its normal direction will be the frame's rightward direction,
 its X direction will be the frame's forward direction
 and its Y direction will be frame's upward direction.
 -}
-rightPlane ::
-  Frame3d (space @ units) (Defines local) ->
-  Plane3d (space @ units) (Defines (RightPlane local))
-rightPlane = (.rightPlane)
+rightPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+rightPlane frame = Plane3d frame.originPoint frame.orientation.rightPlaneOrientation
 
 {-| Construct a locally upward-facing plane from a frame.
 
@@ -202,10 +189,8 @@ its normal direction will be the frame's upward direction,
 its X direction will be the frame's rightward direction
 and its Y direction will be frame's forward direction.
 -}
-topPlane ::
-  Frame3d (space @ units) (Defines local) ->
-  Plane3d (space @ units) (Defines (TopPlane local))
-topPlane = (.topPlane)
+topPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+topPlane frame = Plane3d frame.originPoint frame.orientation.topPlaneOrientation
 
 {-| Construct a locally downward-facing plane from a frame.
 
@@ -214,10 +199,8 @@ its normal direction will be the frame's downward direction,
 its X direction will be the frame's leftward direction
 and its Y direction will be frame's forward direction.
 -}
-bottomPlane ::
-  Frame3d (space @ units) (Defines local) ->
-  Plane3d (space @ units) (Defines (BottomPlane local))
-bottomPlane = (.bottomPlane)
+bottomPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+bottomPlane frame = Plane3d frame.originPoint frame.orientation.bottomPlaneOrientation
 
 -- | Construct a plane from its front plane.
 fromFrontPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
@@ -460,7 +443,7 @@ in terms of the frame's local coordinate system,
 instead of the other way around.
 -}
 inverse :: Frame3d (global @ units) (Defines local) -> Frame3d (local @ units) (Defines global)
-inverse frame = world |> relativeTo frame
+inverse frame = World3d.frame |> relativeTo frame
 
 -- | Move a frame to a new origin point.
 moveTo ::

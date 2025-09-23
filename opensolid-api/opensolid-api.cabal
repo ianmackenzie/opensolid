@@ -45,7 +45,6 @@ library
     OpenSolid.API.PostOperatorOverload
     OpenSolid.API.PreOperatorOverload
     OpenSolid.API.Property
-    OpenSolid.API.Space
     OpenSolid.API.StaticFunction
     OpenSolid.API.Upcast
 

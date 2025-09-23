@@ -69,14 +69,17 @@ instance HasField "components" (Vector2d (space @ units)) (Qty units, Qty units)
 instance HasField "angle" (Vector2d (space @ units)) Angle where
   getField (Vector2d vx vy) = Angle.atan2 vy vx
 
-instance FFI (Vector2d (space @ Unitless)) where
+instance FFI (Vector2d (FFI.Space @ Unitless)) where
   representation = FFI.classRepresentation "Vector2d"
 
-instance FFI (Vector2d (space @ Meters)) where
+instance FFI (Vector2d (FFI.Space @ Meters)) where
   representation = FFI.classRepresentation "Displacement2d"
 
-instance FFI (Vector2d (space @ SquareMeters)) where
+instance FFI (Vector2d (FFI.Space @ SquareMeters)) where
   representation = FFI.classRepresentation "AreaVector2d"
+
+instance FFI (Vector2d UvCoordinates) where
+  representation = FFI.classRepresentation "UvVector"
 
 instance HasUnits (Vector2d (space @ units)) units
 
@@ -266,8 +269,11 @@ newtype Direction2d (space :: Type) = Unit2d (Vector2d (space @ Unitless))
 pattern Direction2d :: Float -> Float -> Direction2d space
 pattern Direction2d dX dY = Unit2d (Vector2d dX dY)
 
-instance FFI (Direction2d space) where
+instance FFI (Direction2d FFI.Space) where
   representation = FFI.classRepresentation "Direction2d"
+
+instance FFI (Direction2d UvSpace) where
+  representation = FFI.classRepresentation "UvDirection"
 
 instance
   space1 ~ space2 =>
@@ -368,10 +374,10 @@ deriving instance Ord (Point2d (space @ units))
 
 deriving instance Show (Qty units) => Show (Point2d (space @ units))
 
-instance FFI (Point2d (space @ Meters)) where
+instance FFI (Point2d FFI.Coordinates) where
   representation = FFI.classRepresentation "Point2d"
 
-instance FFI (Point2d (space @ Unitless)) where
+instance FFI (Point2d UvCoordinates) where
   representation = FFI.classRepresentation "UvPoint"
 
 instance HasUnits (Point2d (space @ units)) units
@@ -809,10 +815,10 @@ instance
   where
   coerce (PositionBounds2d pb) = PositionBounds2d (Units.coerce pb)
 
-instance FFI (Bounds2d (space @ Meters)) where
+instance FFI (Bounds2d FFI.Coordinates) where
   representation = FFI.classRepresentation "Bounds2d"
 
-instance FFI (Bounds2d (space @ Unitless)) where
+instance FFI (Bounds2d UvCoordinates) where
   representation = FFI.classRepresentation "UvBounds"
 
 instance
@@ -942,10 +948,10 @@ deriving instance Show (Qty units) => Show (Axis2d (space @ units))
 
 instance HasUnits (Axis2d (space @ units)) units
 
-instance FFI (Axis2d (space @ Meters)) where
+instance FFI (Axis2d FFI.Coordinates) where
   representation = FFI.classRepresentation "Axis2d"
 
-instance FFI (Axis2d (space @ Unitless)) where
+instance FFI (Axis2d UvCoordinates) where
   representation = FFI.classRepresentation "UvAxis"
 
 ----- Frame2d -----
@@ -969,6 +975,12 @@ instance HasField "yDirection" (Frame2d (space @ units) defines) (Direction2d sp
 deriving instance Eq (Frame2d (space @ units) defines)
 
 deriving instance Show (Qty units) => Show (Frame2d (space @ units) defines)
+
+instance FFI (Frame2d FFI.Coordinates defines) where
+  representation = FFI.classRepresentation "Frame2d"
+
+instance FFI (Frame2d UvCoordinates defines) where
+  representation = FFI.classRepresentation "UvFrame"
 
 ----- Transform2d -----
 
@@ -1065,13 +1077,13 @@ viewVector3d# (Vector3d# vx# vy# vz#) = (# Qty# vx#, Qty# vy#, Qty# vz# #)
 
 {-# COMPLETE Vector3d #-}
 
-instance FFI (Vector3d (space @ Unitless)) where
+instance FFI (Vector3d (FFI.Space @ Unitless)) where
   representation = FFI.classRepresentation "Vector3d"
 
-instance FFI (Vector3d (space @ Meters)) where
+instance FFI (Vector3d (FFI.Space @ Meters)) where
   representation = FFI.classRepresentation "Displacement3d"
 
-instance FFI (Vector3d (space @ SquareMeters)) where
+instance FFI (Vector3d (FFI.Space @ SquareMeters)) where
   representation = FFI.classRepresentation "AreaVector3d"
 
 instance HasUnits (Vector3d (space @ units)) units
@@ -1272,7 +1284,7 @@ newtype Direction3d (space :: Type) = Unit3d (Vector3d (space @ Unitless))
 pattern Direction3d :: Float -> Float -> Float -> Direction3d space
 pattern Direction3d dR dF dU = Unit3d (Vector3d dR dF dU)
 
-instance FFI (Direction3d space) where
+instance FFI (Direction3d FFI.Space) where
   representation = FFI.classRepresentation "Direction3d"
 
 instance
@@ -1338,7 +1350,7 @@ deriving instance Ord (PlaneOrientation3d space)
 
 deriving instance Show (PlaneOrientation3d space)
 
-instance FFI (PlaneOrientation3d space) where
+instance FFI (PlaneOrientation3d FFI.Space) where
   representation = FFI.classRepresentation "PlaneOrientation3d"
 
 instance HasField "xDirection" (PlaneOrientation3d space) (Direction3d space) where
@@ -1365,7 +1377,7 @@ deriving instance Eq (Orientation3d space)
 
 deriving instance Show (Orientation3d space)
 
-instance FFI (Orientation3d space) where
+instance FFI (Orientation3d FFI.Space) where
   representation = FFI.classRepresentation "Orientation3d"
 
 instance HasField "rightwardDirection" (Orientation3d space) (Direction3d space) where
@@ -1465,7 +1477,7 @@ deriving instance Ord (Point3d (space @ units))
 
 deriving instance Show (Qty units) => Show (Point3d (space @ units))
 
-instance FFI (Point3d (space @ Meters)) where
+instance FFI (Point3d FFI.Coordinates) where
   representation = FFI.classRepresentation "Point3d"
 
 instance HasUnits (Point3d (space @ units)) units
@@ -1956,7 +1968,7 @@ pattern Bounds3d bx by bz <- PositionBounds3d (VectorBounds3d bx by bz)
 
 deriving instance Show (Qty units) => Show (Bounds3d (space @ units))
 
-instance FFI (Bounds3d (space @ Meters)) where
+instance FFI (Bounds3d FFI.Coordinates) where
   representation = FFI.classRepresentation "Bounds3d"
 
 instance HasUnits (Bounds3d (space @ units)) units
@@ -2088,7 +2100,7 @@ deriving instance Eq (Axis3d (space @ units))
 
 deriving instance Show (Qty units) => Show (Axis3d (space @ units))
 
-instance FFI (Axis3d (space @ Meters)) where
+instance FFI (Axis3d FFI.Coordinates) where
   representation = FFI.classRepresentation "Axis3d"
 
 ----- Plane3d -----
@@ -2111,7 +2123,7 @@ deriving instance Ord (Plane3d (space @ units) defines)
 
 deriving instance Show (Qty units) => Show (Plane3d (space @ units) defines)
 
-instance FFI (Plane3d (space @ Meters) defines) where
+instance FFI (Plane3d FFI.Coordinates defines) where
   representation = FFI.classRepresentation "Plane3d"
 
 instance
@@ -2259,54 +2271,6 @@ instance
 
 instance
   HasField
-    "rightPlane"
-    (Frame3d (space @ units) (Defines local))
-    (Plane3d (space @ units) (Defines (RightPlane local)))
-  where
-  getField frame = Plane3d frame.originPoint frame.orientation.rightPlaneOrientation
-
-instance
-  HasField
-    "leftPlane"
-    (Frame3d (space @ units) (Defines local))
-    (Plane3d (space @ units) (Defines (LeftPlane local)))
-  where
-  getField frame = Plane3d frame.originPoint frame.orientation.leftPlaneOrientation
-
-instance
-  HasField
-    "frontPlane"
-    (Frame3d (space @ units) (Defines local))
-    (Plane3d (space @ units) (Defines (FrontPlane local)))
-  where
-  getField frame = Plane3d frame.originPoint frame.orientation.frontPlaneOrientation
-
-instance
-  HasField
-    "backPlane"
-    (Frame3d (space @ units) (Defines local))
-    (Plane3d (space @ units) (Defines (BackPlane local)))
-  where
-  getField frame = Plane3d frame.originPoint frame.orientation.backPlaneOrientation
-
-instance
-  HasField
-    "topPlane"
-    (Frame3d (space @ units) (Defines local))
-    (Plane3d (space @ units) (Defines (TopPlane local)))
-  where
-  getField frame = Plane3d frame.originPoint frame.orientation.topPlaneOrientation
-
-instance
-  HasField
-    "bottomPlane"
-    (Frame3d (space @ units) (Defines local))
-    (Plane3d (space @ units) (Defines (BottomPlane local)))
-  where
-  getField frame = Plane3d frame.originPoint frame.orientation.bottomPlaneOrientation
-
-instance
-  HasField
     "backwardOrientation"
     (Frame3d (space @ units) defines)
     (Orientation3d space)
@@ -2349,7 +2313,7 @@ deriving instance Eq (Frame3d (space @ units) defines)
 
 deriving instance Show (Qty units) => Show (Frame3d (space @ units) defines)
 
-instance FFI (Frame3d (space @ Meters) defines) where
+instance FFI (Frame3d FFI.Coordinates defines) where
   representation = FFI.classRepresentation "Frame3d"
 
 instance

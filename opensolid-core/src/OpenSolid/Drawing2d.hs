@@ -77,10 +77,10 @@ data Attribute space = Attribute Text Text deriving (Show)
 
 type Point space = Point2d (space @ Meters)
 
-instance FFI (Drawing2d space) where
+instance FFI (Drawing2d FFI.Space) where
   representation = FFI.classRepresentation "Drawing2d"
 
-instance FFI (Attribute space) where
+instance FFI (Attribute FFI.Space) where
   representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute"
 
 instance Composition (Drawing2d space) (Drawing2d space) (Drawing2d space) where

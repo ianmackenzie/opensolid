@@ -88,10 +88,10 @@ data Region2d (coordinateSystem :: CoordinateSystem)
 type Loop (coordinateSystem :: CoordinateSystem) =
   NonEmpty (Curve2d coordinateSystem)
 
-instance FFI (Region2d (space @ Meters)) where
+instance FFI (Region2d FFI.Coordinates) where
   representation = FFI.classRepresentation "Region2d"
 
-instance FFI (Region2d (space @ Unitless)) where
+instance FFI (Region2d UvCoordinates) where
   representation = FFI.classRepresentation "UvRegion"
 
 instance HasUnits (Region2d (space @ units)) units

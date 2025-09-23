@@ -109,7 +109,7 @@ import OpenSolid.World3d qualified as World3d
 newtype Body3d (coordinateSystem :: CoordinateSystem)
   = Body3d (NonEmpty (BoundarySurface coordinateSystem))
 
-instance FFI (Body3d (space @ Meters)) where
+instance FFI (Body3d FFI.Coordinates) where
   representation = FFI.classRepresentation "Body3d"
 
 data BoundarySurface (coordinateSystem :: CoordinateSystem) where

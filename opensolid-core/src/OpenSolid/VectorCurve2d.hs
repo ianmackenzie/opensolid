@@ -132,11 +132,14 @@ instance
   where
   getField = squaredMagnitude'
 
-instance FFI (VectorCurve2d (space @ Unitless)) where
+instance FFI (VectorCurve2d (FFI.Space @ Unitless)) where
   representation = FFI.classRepresentation "VectorCurve2d"
 
-instance FFI (VectorCurve2d (space @ Meters)) where
+instance FFI (VectorCurve2d (FFI.Space @ Meters)) where
   representation = FFI.classRepresentation "DisplacementCurve2d"
+
+instance FFI (VectorCurve2d UvCoordinates) where
+  representation = FFI.classRepresentation "UvVectorCurve"
 
 instance HasUnits (VectorCurve2d (space @ units)) units
 

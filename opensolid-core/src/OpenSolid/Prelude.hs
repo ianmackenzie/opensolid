@@ -28,15 +28,9 @@ import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Composition (Composition ((>>)), (.))
 import OpenSolid.CoordinateSystem
-  ( BackPlane
-  , BottomPlane
-  , CoordinateSystem
+  ( CoordinateSystem
   , Defines
-  , FrontPlane
-  , LeftPlane
   , LocalSpace
-  , RightPlane
-  , TopPlane
   , UvCoordinates
   , UvSpace
   , type (@)

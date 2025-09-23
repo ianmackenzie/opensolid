@@ -45,7 +45,7 @@ import OpenSolid.World3d qualified as World3d
 
 data CameraSpace
 
-type ScreenSpace = BackPlane CameraSpace
+data ScreenSpace
 
 -- | A perspective or orthographic camera in 3D.
 data Camera3d (coordinateSystem :: CoordinateSystem) where
@@ -86,9 +86,9 @@ instance
     (Camera3d (space @ units))
     (Plane3d (space @ units) (Defines ScreenSpace))
   where
-  getField camera = camera.frame.backPlane
+  getField camera = Frame3d.backPlane camera.frame
 
-instance FFI (Camera3d (space @ units)) where
+instance FFI (Camera3d FFI.Coordinates) where
   representation = FFI.classRepresentation "Camera3d"
 
 -- | What kind of projection (perspective or orthographic) a camera should use.
@@ -96,7 +96,7 @@ data Projection units where
   Perspective :: Angle -> Projection units
   Orthographic :: Qty units -> Projection units
 
-instance FFI (Projection units) where
+instance FFI (Projection Meters) where
   representation = FFI.nestedClassRepresentation "Camera3d" "Projection"
 
 -- | Define a perspective projection with a given vertical field of view.

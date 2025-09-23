@@ -2,6 +2,8 @@
 
 module OpenSolid.FFI
   ( FFI (representation)
+  , Space
+  , Coordinates
   , Name
   , ClassName
   , name
@@ -58,6 +60,10 @@ import OpenSolid.Text qualified as Text
 
 class FFI a where
   representation :: Proxy a -> Representation a
+
+data Space deriving (Eq, Show)
+
+type Coordinates = Space @ Meters
 
 newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 

@@ -45,7 +45,7 @@ import OpenSolid.Text qualified as Text
 data Lighting space where
   EnvironmentMap :: Frame3d (space @ Meters) defines -> Text -> Lighting space
 
-instance FFI (Lighting space) where
+instance FFI (Lighting FFI.Space) where
   representation = FFI.nestedClassRepresentation "Mitsuba" "Lighting"
 
 {-| The Mitsuba world coordinate convention (Y up, Z backward).
