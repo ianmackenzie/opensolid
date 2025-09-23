@@ -103,6 +103,7 @@ import OpenSolid.Vertex2d as Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
+import OpenSolid.World3d qualified as World3d
 
 -- | A solid body in 3D, defined by a set of boundary surfaces.
 newtype Body3d (coordinateSystem :: CoordinateSystem)
@@ -222,15 +223,14 @@ Fails if the given bounds are empty
 (the length, width, or height is zero).
 -}
 block :: Tolerance units => Bounds3d (space @ units) -> Result EmptyBody (Body3d (space @ units))
-block bounds = do
-  let world = Frame3d.world
-  case Region2d.rectangle (Bounds3d.projectInto world.topPlane bounds) of
+block bounds =
+  case Region2d.rectangle (Bounds3d.projectInto World3d.topPlane bounds) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile -> do
       let Bounds h1 h2 = Bounds3d.upwardCoordinate bounds
       if h1 ~= h2
         then Failure EmptyBody
-        else case extruded world.topPlane profile h1 h2 of
+        else case extruded World3d.topPlane profile h1 h2 of
           Success body -> Success body
           Failure _ -> internalError "Constructing block body from non-empty bounds should not fail"
 
@@ -246,8 +246,7 @@ sphere args =
   if args.diameter ~= Qty.zero
     then Failure EmptyBody
     else do
-      let world = Frame3d.world
-      let sketchPlane = Plane3d args.centerPoint world.frontPlane.orientation
+      let sketchPlane = Plane3d args.centerPoint World3d.frontPlane.orientation
       let radius = 0.5 * args.diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius
