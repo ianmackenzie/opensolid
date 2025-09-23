@@ -184,10 +184,11 @@ relativeTo (Frame3d p0 (Orientation3d i j k)) p =
 
 -- | Project a point onto a plane.
 projectOnto ::
-  Plane3d (space @ units) (Defines localSpace) ->
+  Plane3d (space @ units) defines ->
   Point3d (space @ units) ->
   Point3d (space @ units)
-projectOnto plane point = on plane (projectInto plane point)
+projectOnto plane point =
+  point - Vector3d.projectionIn plane.normalDirection (point - plane.originPoint)
 
 {-| Project a point *into* a plane.
 
