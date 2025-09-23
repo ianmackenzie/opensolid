@@ -2,11 +2,13 @@
 
 set -euo pipefail
 
+INIT_PY=opensolid-python/lib/src/opensolid/__init__.py
+
 # Run the Python code generator executable to create __init__.py
 cabal run opensolid-python
 # Format __init__.py for readability
-ruff format opensolid-python/lib/src/opensolid/__init__.py
-# Check __init__.py for errors
+ruff format $INIT_PY
+# Check __init__.py for linter errors
 # Disabled errors:
 #   D203: conflicts with D211, have to choose one
 #   D213: conflicts with D212, have to choose one
@@ -18,7 +20,9 @@ ruff format opensolid-python/lib/src/opensolid/__init__.py
 #   D107: constructors are not meant for public use
 #   S101: 'assert' is only used here for debug checks like in C/C++
 #   PLR0913: there are some functions with many arguments but they're named-only
-ruff check --config "line-length = 120" --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore PLR0911 --ignore SLF001 --ignore N801 --ignore D107 --ignore S101 --ignore PLR0913 opensolid-python/lib/src/opensolid/__init__.py
+ruff check --config "line-length = 120" --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore PLR0911 --ignore SLF001 --ignore N801 --ignore D107 --ignore S101 --ignore PLR0913 $INIT_PY
+# Check __init__.py for type errors
+pyright $INIT_PY
 # Generate the opensolid-ffi.def file with all API functions listed
 # (necessary for Windows builds)
 # Use zero verbosity to disable "Configuration is affected by..." lines, already printed above
