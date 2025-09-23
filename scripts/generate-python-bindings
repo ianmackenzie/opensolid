@@ -21,10 +21,12 @@ ruff format opensolid-python/lib/src/opensolid/__init__.py
 ruff check --config "line-length = 120" --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore PLR0911 --ignore SLF001 --ignore N801 --ignore D107 --ignore S101 --ignore PLR0913 opensolid-python/lib/src/opensolid/__init__.py
 # Generate the opensolid-ffi.def file with all API functions listed
 # (necessary for Windows builds)
-cabal run generate-def-file
+# Use zero verbosity to disable "Configuration is affected by..." lines, already printed above
+cabal run --verbose=0 generate-def-file
 # Build the native shared library
 # (on Windows, this uses the opensolid-ffi.def file generated above)
-cabal build opensolid-ffi
+# Use zero verbosity to disable "Configuration is affected by..." lines, already printed above
+cabal build --verbose=0 opensolid-ffi
 # Copy the native shared library to beside __init__.py
 # so that it can be loaded properly
 cp $(find dist-newstyle -name "libopensolid-ffi.*") opensolid-python/lib/src/opensolid
