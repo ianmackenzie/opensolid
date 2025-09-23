@@ -1,3 +1,13 @@
+Convert remaining API types to have local types defined in API module
+-> Bounds, Curve, Drawing2d, Camera3d, Resolution
+
+Add vectorTransformations3d helper list in API module
+
+Only support Meters units for 3D positional values?
+-> still support e.g. unitless or area-valued vectors
+-> then 3D transformation functions don't need frameUnits, axisUnits etc. hack
+-> some types e.g. Model3d already assume meters-only...
+
 Add indentation to debug output of Ast values for easier inspection
 
 Optimization: check when e.g. VectorCurve#d or VectorSurface#d (squared) magnitude is a constant (within current tolerance)
