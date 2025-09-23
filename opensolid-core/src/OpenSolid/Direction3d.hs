@@ -177,10 +177,7 @@ rotateAround ::
 rotateAround axis angle = lift (Vector3d.rotateAround axis angle)
 
 -- | Mirror across the given plane.
-mirrorAcross ::
-  Plane3d (space @ planeUnits) defines ->
-  Direction3d space ->
-  Direction3d space
+mirrorAcross :: Plane3d (space @ planeUnits) defines -> Direction3d space -> Direction3d space
 mirrorAcross plane = lift (Vector3d.mirrorAcross plane)
 
 -- | Generate a random direction.
