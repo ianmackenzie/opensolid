@@ -8,6 +8,7 @@ module OpenSolid.Curve
   , evaluateBounds
   , startValue
   , endValue
+  , derivative
   , new
   , concrete
   , recursive
@@ -102,7 +103,7 @@ instance HasField "compiled" (Curve units) (Compiled units) where
   getField (Curve c _) = c
 
 instance HasField "derivative" (Curve units) (Curve units) where
-  getField (Curve _ d) = d
+  getField = derivative
 
 instance FFI (Curve Unitless) where
   representation = FFI.classRepresentation "Curve"
@@ -186,6 +187,10 @@ t = new (CompiledFunction.concrete Expression.t) (constant 1.0)
 -- | Create a curve that linearly interpolates from the first value to the second.
 line :: Qty units -> Qty units -> Curve units
 line a b = a + t * (b - a)
+
+-- | Get the derivative of a curve.
+derivative :: Curve units -> Curve units
+derivative (Curve _ d) = d
 
 instance Negation (Curve units) where
   negate curve = new (negate curve.compiled) (negate curve.derivative)
