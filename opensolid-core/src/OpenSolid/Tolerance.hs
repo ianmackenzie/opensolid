@@ -6,6 +6,7 @@ module OpenSolid.Tolerance
   , unitless
   , squared
   , squared'
+  , forEndpointDerivative
   , (~=#)
   )
 where
@@ -13,6 +14,8 @@ where
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Float (Float, fromRational)
+import {-# SOURCE #-} OpenSolid.Float qualified as Float
+import {-# SOURCE #-} OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
@@ -95,6 +98,9 @@ squared = Qty.squared ?tolerance
 
 squared' :: Tolerance units => Qty (units :*: units)
 squared' = Qty.squared' ?tolerance
+
+forEndpointDerivative :: Tolerance units => Int -> Qty units
+forEndpointDerivative n = ?tolerance / Float.int (Int.factorial n * 2 ** (2 * n))
 
 {-# INLINE (~=#) #-}
 (~=#) :: Tolerance units => Double# -> Double# -> Int#
