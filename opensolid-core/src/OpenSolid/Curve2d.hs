@@ -25,6 +25,8 @@ module OpenSolid.Curve2d
   , desingularized
   , evaluate
   , evaluateAt
+  , startPoint
+  , endPoint
   , evaluateBounds
   , tangentDirection
   , offsetLeftwardBy
@@ -629,6 +631,14 @@ evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt tValue curve = evaluate curve tValue
 
+-- | Get the start point of a curve.
+startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
+startPoint curve = evaluate curve 0.0
+
+-- | Get the end point of a curve.
+endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
+endPoint curve = evaluate curve 1.0
+
 evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
@@ -1015,9 +1025,9 @@ toPolyline resolution curve =
 samplingPoints :: Resolution units -> Curve2d (space @ units) -> NonEmpty Float
 samplingPoints resolution curve = do
   let size subdomain = do
-        let startPoint = evaluate curve subdomain.lower
-        let endPoint = evaluate curve subdomain.upper
-        Point2d.distanceFrom startPoint endPoint
+        let start = evaluate curve subdomain.lower
+        let end = evaluate curve subdomain.upper
+        Point2d.distanceFrom start end
   let error subdomain = do
         let secondDerivativeBounds = VectorCurve2d.evaluateBounds curve.secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
