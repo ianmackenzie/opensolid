@@ -1,3 +1,6 @@
+Add Component3d class to Python library?
+-> 'front_plane', 'upward_direction', 'rightward_axis' etc. convenience accessors in addition to 'frame'
+
 Update to newer GitHub Actions images?
 -> in particular macos-13 is deprecated
 -> but seems maybe a bit better for backwards compatibility to build on older OS versions...
