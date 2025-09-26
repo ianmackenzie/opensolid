@@ -1,6 +1,5 @@
 module OpenSolid.Curve2d
   ( Curve2d
-  , pattern Point
   , IsPoint (IsPoint)
   , Compiled
   , new
@@ -214,9 +213,6 @@ instance
   ApproximateEquality (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
   curve ~= point = List.allSatisfy (~= point) (samplePoints curve)
-
-pattern Point :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units)
-pattern Point point <- (asPoint -> Just point)
 
 data IsPoint = IsPoint deriving (Eq, Show, Error.Message)
 
@@ -645,11 +641,6 @@ reverse curve = curve . (1.0 - Curve.t)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds curve = evaluateBounds curve Bounds.unitInterval
-
-asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @ units))
-asPoint curve = do
-  let testPoint = evaluate curve 0.5
-  if List.allSatisfy (~= testPoint) (samplePoints curve) then Just testPoint else Nothing
 
 tangentDirection ::
   Tolerance units =>
