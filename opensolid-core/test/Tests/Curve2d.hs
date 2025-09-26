@@ -184,11 +184,9 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
 solving :: Tolerance Meters => Test
 solving = Test.verify "solving" Test.do
   let arc = Curve2d.arc (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
-  let squaredDistanceFromOrigin = (arc - Point2d.origin).squaredMagnitude
+  let distanceFromOrigin = VectorCurve2d.magnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
-  zeros <-
-    Tolerance.using (Tolerance.ofSquared desiredDistance) do
-      Curve.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance)
+  zeros <- Curve.zeros (distanceFromOrigin - desiredDistance)
   let distances =
         zeros
           |> List.map (.location)
