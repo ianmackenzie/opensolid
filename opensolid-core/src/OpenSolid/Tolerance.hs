@@ -6,18 +6,12 @@ module OpenSolid.Tolerance
   , unitless
   , squared
   , squared'
-  , ofSquared
-  , ofSquared'
-  , times
-  , times'
-  , coerced
   , (~=#)
   )
 where
 
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
-import OpenSolid.Composition
 import OpenSolid.Float (Float, fromRational)
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import OpenSolid.Qty (Qty (Qty#))
@@ -101,21 +95,6 @@ squared = Qty.squared ?tolerance
 
 squared' :: Tolerance units => Qty (units :*: units)
 squared' = Qty.squared' ?tolerance
-
-ofSquared' :: Tolerance units => Qty units -> Qty (units :*: units)
-ofSquared' value = ?tolerance .*. ?tolerance + 2.0 * Qty.abs value .*. ?tolerance
-
-ofSquared :: (Tolerance units, Units.Squared units squaredUnits) => Qty units -> Qty squaredUnits
-ofSquared = Units.specialize . ofSquared'
-
-times' :: Tolerance units1 => Qty units2 -> Qty (units1 :*: units2)
-times' value = ?tolerance .*. value
-
-times :: (Tolerance units1, Units.Product units1 units2 units3) => Qty units2 -> Qty units3
-times = Units.specialize . times'
-
-coerced :: Tolerance units1 => Qty units2
-coerced = Qty.coerce ?tolerance
 
 {-# INLINE (~=#) #-}
 (~=#) :: Tolerance units => Double# -> Double# -> Int#
