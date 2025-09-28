@@ -14,6 +14,7 @@ module OpenSolid.Bisection
   , map2
   , map3
   , map4
+  , isInterior
   )
 where
 
@@ -143,3 +144,8 @@ map4 function domain1 domain2 domain3 domain4 = do
     , child3 <- children3
     , child4 <- children4
     ]
+
+isInterior :: Float -> Bounds Unitless -> Bool
+isInterior value (Bounds tLow tHigh) = do
+  let margin = (tHigh - tLow) / 8.0
+  value >= tLow + margin && value <= tHigh - margin
