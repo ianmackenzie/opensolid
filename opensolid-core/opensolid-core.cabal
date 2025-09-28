@@ -250,6 +250,7 @@ library
     OpenSolid.Bytecode.Evaluate
     OpenSolid.Bytecode.Instruction
     OpenSolid.CDT
+    OpenSolid.Curve.Bisection
     OpenSolid.Exception
     OpenSolid.HasZero
     OpenSolid.Json.FieldSchema
