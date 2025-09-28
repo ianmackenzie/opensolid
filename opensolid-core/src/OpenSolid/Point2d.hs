@@ -120,10 +120,12 @@ inches :: Float -> Float -> Point2d (space @ Meters)
 inches = apply Length.inches
 
 -- | Get the X coordinate of a point.
+{-# INLINE xCoordinate #-}
 xCoordinate :: Point2d (space @ units) -> Qty units
 xCoordinate (Position2d p) = Vector2d.xComponent p
 
 -- | Get the Y coordinate of a point.
+{-# INLINE yCoordinate #-}
 yCoordinate :: Point2d (space @ units) -> Qty units
 yCoordinate (Position2d p) = Vector2d.yComponent p
 
