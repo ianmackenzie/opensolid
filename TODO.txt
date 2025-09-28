@@ -36,6 +36,8 @@ To optimize:
 - 'Flatten' VectorBounds#d?
 - Point3d - Point3d
 
+Ensure target language bindings gracefully handle exceptions such as higher-order zeros
+
 Try adding -fexcess-precision as an optimization
 -> in general, try: https://wiki.haskell.org/Performance/GHC#Crank_up_the_gcc_flags
 
