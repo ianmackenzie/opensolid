@@ -68,6 +68,7 @@ import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
+import OpenSolid.Exception qualified as Exception
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
@@ -638,7 +639,7 @@ zeros curve
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
         Success foundZeros -> Success (List.sortBy (.location) foundZeros)
-        Failure Solve1d.InfiniteRecursion -> exception "Higher-order zero detected"
+        Failure Solve1d.InfiniteRecursion -> Exception.higherOrderZero
 
 findZeros ::
   Tolerance units =>

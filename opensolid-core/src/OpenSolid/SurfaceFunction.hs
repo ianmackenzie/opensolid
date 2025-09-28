@@ -49,6 +49,7 @@ import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
+import OpenSolid.Exception qualified as Exception
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
@@ -574,7 +575,7 @@ zeros function
         Success solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions
           Success (PartialZeros.finalize function dvdu dudv partialZeros)
-        Failure Solve2d.InfiniteRecursion -> exception "Higher-order zero detected"
+        Failure Solve2d.InfiniteRecursion -> Exception.higherOrderZero
 
 addSolution :: PartialZeros units -> Solution units -> PartialZeros units
 addSolution partialZeros solution = case solution of

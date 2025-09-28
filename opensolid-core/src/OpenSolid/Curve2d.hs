@@ -103,6 +103,7 @@ import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
+import OpenSolid.Exception qualified as Exception
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.FFI (FFI)
@@ -819,7 +820,7 @@ intersections curve1 curve2 = Result.do
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
             Success (NonEmpty points) -> Success (Just (IntersectionPoints points))
             Success [] -> Success Nothing
-            Failure Solve2d.InfiniteRecursion -> exception "Higher-order intersection detected"
+            Failure Solve2d.InfiniteRecursion -> Exception.higherOrderZero
     NonEmpty segments -> Success (Just (OverlappingSegments segments))
 
 endpointIntersection :: List UvPoint -> UvBounds -> Maybe UvPoint
