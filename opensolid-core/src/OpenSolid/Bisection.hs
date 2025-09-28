@@ -1,5 +1,6 @@
 module OpenSolid.Bisection
   ( Action
+  , InfiniteRecursion (InfiniteRecursion)
   , return
   , recurse
   , Domain (Domain)
