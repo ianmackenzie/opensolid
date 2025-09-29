@@ -7,7 +7,8 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 
 deduplicate :: List (Bounds Unitless, Float) -> List Float
-deduplicate solutions = List.map Pair.second (deduplicateImpl solutions [])
+deduplicate solutions =
+  deduplicateImpl solutions [] |> List.map Pair.second |> List.sort
 
 deduplicateImpl ::
   List (Bounds Unitless, Float) ->
