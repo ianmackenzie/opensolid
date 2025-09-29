@@ -48,6 +48,7 @@ curveGenerators =
 tests :: Tolerance Meters => List Test
 tests =
   [ findPoint
+  , findOwnPoint
   , curveOverlap1
   , curveOverlap2
   , crossingIntersection
@@ -85,6 +86,20 @@ findPoint = Test.verify "findPoint" Test.do
       , Test.expect (offCurveParameterValues == [])
           |> Test.output "offCurveParameterValues" offCurveParameterValues
       ]
+
+findOwnPoint :: Tolerance Meters => Test
+findOwnPoint = Test.check 500 "findOwnPoint" Test.do
+  let p1 = Point2d.meters 0.0 0.0
+  let p2 = Point2d.meters 1.0 2.0
+  let p3 = Point2d.meters 2.0 0.0
+  let testSpline = Curve2d.quadraticBezier p1 p2 p3
+  t <- Parameter.random
+  let p = Curve2d.evaluate testSpline t
+  solutions <- Curve2d.findPoint p testSpline
+  Tolerance.using 1e-12 do
+    Test.expect (solutions ~= [t])
+      |> Test.output "t" t
+      |> Test.output "solutions" solutions
 
 overlappingSegments ::
   Tolerance units =>
