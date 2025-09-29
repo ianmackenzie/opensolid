@@ -77,9 +77,13 @@ findPoint = Test.verify "findPoint" Test.do
   Tolerance.using 1e-12 do
     Test.all
       [ Test.expect (startParameterValues ~= [0.0])
+          |> Test.output "startParameterValues" startParameterValues
       , Test.expect (endParameterValues ~= [1.0])
+          |> Test.output "endParameterValues" endParameterValues
       , Test.expect (midParameterValues ~= [0.5])
+          |> Test.output "midParameterValues" midParameterValues
       , Test.expect (offCurveParameterValues == [])
+          |> Test.output "offCurveParameterValues" offCurveParameterValues
       ]
 
 overlappingSegments ::
