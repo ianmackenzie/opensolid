@@ -76,7 +76,6 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2d (Axis2d (Axis2d))
 import OpenSolid.Bezier qualified as Bezier
-import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -86,7 +85,6 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.Bisection qualified as Curve.Bisection
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.Intersections qualified as Intersections
@@ -127,7 +125,6 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
-import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -143,7 +140,7 @@ import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import OpenSolid.VectorBounds2d (VectorBounds2d)
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -732,67 +729,10 @@ findPoint ::
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
   Result IsCoincidentWithPoint (List Float)
-findPoint point curve = do
-  let testPoints = List.map (evaluate curve) Parameter.samples
-  if List.allSatisfy (~= point) testPoints
-    then Failure IsCoincidentWithPoint
-    else case Bisection.search Bisection.curveDomain (findPointInSubdomain point curve) of
-      Success solutions -> Success (Curve.Bisection.deduplicate solutions)
-      Failure Bisection.InfiniteRecursion -> Exception.higherOrderZero
-
-findPointInSubdomain ::
-  Tolerance units =>
-  Point2d (space @ units) ->
-  Curve2d (space @ units) ->
-  Bounds Unitless ->
-  Bisection.Action (Bounds Unitless, Float)
-findPointInSubdomain point curve subdomain = do
-  if not (evaluateBounds curve subdomain ^ point)
-    then Bisection.return Nothing
-    else do
-      let Bounds tLow tHigh = subdomain
-      let derivativeBounds = VectorCurve2d.evaluateBounds curve.derivative subdomain
-      let VectorBounds2d dxdt dydt = derivativeBounds
-      let resolvedX = Bounds.isResolved dxdt
-      let resolvedY = Bounds.isResolved dydt
-      let monotonic = resolvedX || resolvedY
-      if
-        | monotonic && tLow == 0.0 && startPoint curve ~= point ->
-            Bisection.return (Just (subdomain, 0.0))
-        | monotonic && tHigh == 1.0 && endPoint curve ~= point ->
-            Bisection.return (Just (subdomain, 1.0))
-        | resolvedX && Bounds.maxAbs (dydt / dxdt) < 2.0 ->
-            Bisection.return $
-              findPointMonotonic point curve subdomain Point2d.xCoordinate Vector2d.xComponent
-        | resolvedY && Bounds.maxAbs (dxdt / dydt) < 2.0 ->
-            Bisection.return $
-              findPointMonotonic point curve subdomain Point2d.yCoordinate Vector2d.yComponent
-        | otherwise -> Bisection.recurse
-
-findPointMonotonic ::
-  Tolerance units =>
-  Point2d (space @ units) ->
-  Curve2d (space @ units) ->
-  Bounds Unitless ->
-  (Point2d (space @ units) -> Qty units) ->
-  (Vector2d (space @ units) -> Qty units) ->
-  Maybe (Bounds Unitless, Float)
-findPointMonotonic point curve subdomain getCoordinate getComponent = do
-  let coordinateDelta t = getCoordinate (evaluate curve t) - getCoordinate point
-  let derivativeComponent t = getComponent (VectorCurve2d.evaluate curve.derivative t)
-  let candidateSolution = Solve1d.monotonic coordinateDelta derivativeComponent subdomain
-  case candidateSolution of
-    Solve1d.Exact t0 -> do
-      let p0 = evaluate curve t0
-      if p0 ~= point
-        then do
-          let d0 = VectorCurve2d.evaluate curve.derivative t0
-          let t = t0 + (point - p0) `dot'` d0 / Vector2d.squaredMagnitude' d0
-          if Bisection.isInterior t subdomain
-            then Just (subdomain, t)
-            else Nothing
-        else Nothing
-    Solve1d.Closest _ -> Nothing
+findPoint point curve =
+  case VectorCurve2d.zeros (point - curve) of
+    Failure VectorCurve2d.IsZero -> Failure IsCoincidentWithPoint
+    Success parameterValues -> Success parameterValues
 
 overlappingSegments ::
   Tolerance units =>
