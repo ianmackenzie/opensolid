@@ -15,6 +15,7 @@ module OpenSolid.Bisection
   , map3
   , map4
   , isInterior
+  , includesEndpoint
   )
 where
 
@@ -149,3 +150,6 @@ isInterior :: Float -> Bounds Unitless -> Bool
 isInterior value (Bounds tLow tHigh) = do
   let margin = (tHigh - tLow) / 8.0
   value >= tLow + margin && value <= tHigh - margin
+
+includesEndpoint :: Bounds Unitless -> Bool
+includesEndpoint (Bounds tLow tHigh) = tLow == 0.0 || tHigh == 1.0
