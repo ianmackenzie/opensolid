@@ -63,6 +63,7 @@ tests =
   , reversalConsistency
   , arcConstruction
   , arcDeformation
+  , g2
   ]
 
 findPoint :: Tolerance Meters => Test
@@ -414,3 +415,21 @@ arcDeformation = Test.check 100 "deformation" Test.do
     , Test.expect (transformedArc.endPoint ~= transformOfEnd)
     , Test.expect (pointOnTransformed ~= transformOfPoint)
     ]
+
+g2 :: Tolerance Meters => Test
+g2 = Test.check 100 "G2 continuity" Test.do
+  p1 <- Random.point2d
+  p2 <- Random.point2d
+  p3 <- Random.point2d
+  p4 <- Random.point2d
+  let spline = Curve2d.cubicBezier p1 p2 p3 p4
+  t <- Parameter.random
+  let point = Curve2d.evaluate spline t
+  tangentCurve <- Curve2d.tangentDirection spline
+  curvatureCurve <- Curve2d.curvature spline
+  let tangentDirection = DirectionCurve2d.evaluate tangentCurve t
+  let signedRadius = 1.0 / Curve.evaluate curvatureCurve t
+  let normalDirection = Direction2d.rotateLeft tangentDirection
+  let arcCenter = point + signedRadius * normalDirection
+  let arc = Curve2d.sweptArc arcCenter point (Angle.degrees 30.0)
+  Test.expect (Curve2d.g2 (spline, t) (arc, 0.0) Length.meter)

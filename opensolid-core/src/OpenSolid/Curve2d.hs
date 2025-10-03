@@ -33,6 +33,7 @@ module OpenSolid.Curve2d
   , offsetRightwardBy
   , reverse
   , bounds
+  , g2
   , Intersections (IntersectionPoints, OverlappingSegments)
   , IntersectionPoint
   , OverlappingSegment
@@ -138,7 +139,7 @@ import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
@@ -734,6 +735,54 @@ findPoint point curve =
   case VectorCurve2d.zeros (point - curve) of
     Failure VectorCurve2d.IsZero -> Failure IsPoint
     Success parameterValues -> Success parameterValues
+
+g2 ::
+  Tolerance units =>
+  (Curve2d (space @ units), Float) ->
+  (Curve2d (space @ units), Float) ->
+  Qty units ->
+  Bool
+g2 (curve1, t1) (curve2, t2) radius =
+  evaluate curve1 t1 ~= evaluate curve2 t2 && do
+    let first1 = VectorCurve2d.evaluate curve1.derivative t1
+    let first2 = VectorCurve2d.evaluate curve2.derivative t2
+    let second1 = VectorCurve2d.evaluate curve1.derivative.derivative t1
+    let second2 = VectorCurve2d.evaluate curve2.derivative.derivative t2
+    let Vector2d dxdt1 dydt1 = first1
+    let Vector2d dxdt2 dydt2 = first2
+    let dxdtMin = Qty.min (Qty.abs dxdt1) (Qty.abs dxdt2)
+    let dydtMin = Qty.min (Qty.abs dydt1) (Qty.abs dydt2)
+    if dxdtMin >= dydtMin
+      then fxSignature first1 second1 radius ~= fxSignature first2 second2 radius
+      else fySignature first1 second1 radius ~= fySignature first2 second2 radius
+
+fxSignature ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Qty units ->
+  (Qty units, Qty units)
+fxSignature firstDerivative secondDerivative radius = do
+  let Vector2d dxdt dydt = firstDerivative
+  let Vector2d d2xdt2 d2ydt2 = secondDerivative
+  let dydx = dydt / dxdt
+  let firstOrder = dydx * radius
+  let d2ydx2 = (d2ydt2 .*. dxdt - dydt .*. d2xdt2) ./. (dxdt .*. dxdt .*. dxdt)
+  let secondOrder = Units.simplify (0.5 * d2ydx2 .*. Qty.squared' radius)
+  (firstOrder, secondOrder)
+
+fySignature ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Qty units ->
+  (Qty units, Qty units)
+fySignature firstDerivative secondDerivative radius = do
+  let Vector2d dxdt dydt = firstDerivative
+  let Vector2d d2xdt2 d2ydt2 = secondDerivative
+  let dxdy = dxdt / dydt
+  let firstOrder = dxdy * radius
+  let d2xdy2 = (d2xdt2 .*. dydt - dxdt .*. d2ydt2) ./. (dydt .*. dydt .*. dydt)
+  let secondOrder = Units.simplify (0.5 * d2xdy2 .*. Qty.squared' radius)
+  (firstOrder, secondOrder)
 
 candidateOverlappingSegment :: UvPoint -> UvPoint -> OverlappingSegment
 candidateOverlappingSegment (Point2d t1Start t2Start) (Point2d t1End t2End) =
