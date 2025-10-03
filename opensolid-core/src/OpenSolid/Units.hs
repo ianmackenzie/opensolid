@@ -208,6 +208,8 @@ data CubicMeters deriving (Eq, Show)
 
 data MetersToTheFourthPower deriving (Eq, Show)
 
+data InverseMeters deriving (Eq, Show)
+
 type family a .*. b where
   Unitless .*. Unitless = Unitless
   Unitless .*. units = units
@@ -222,6 +224,14 @@ type family a .*. b where
   MetersPerSecond .*. Seconds = Meters
   Seconds .*. MetersPerSecondSquared = MetersPerSecond
   MetersPerSecondSquared .*. Seconds = MetersPerSecond
+  Meters .*. InverseMeters = Unitless
+  InverseMeters .*. Meters = Unitless
+  SquareMeters .*. InverseMeters = Meters
+  InverseMeters .*. SquareMeters = Meters
+  CubicMeters .*. InverseMeters = SquareMeters
+  InverseMeters .*. CubicMeters = SquareMeters
+  MetersToTheFourthPower .*. InverseMeters = CubicMeters
+  InverseMeters .*. MetersToTheFourthPower = CubicMeters
 
 infixl 7 .*.
 
@@ -239,6 +249,11 @@ type family a ./. b where
   Meters ./. MetersPerSecond = Seconds
   MetersPerSecond ./. Seconds = MetersPerSecondSquared
   MetersPerSecond ./. MetersPerSecondSquared = Seconds
+  Unitless ./. InverseMeters = Meters
+  Unitless ./. Meters = InverseMeters
+  Meters ./. InverseMeters = SquareMeters
+  SquareMeters ./. InverseMeters = CubicMeters
+  CubicMeters ./. InverseMeters = MetersToTheFourthPower
 
 infixl 7 ./.
 
