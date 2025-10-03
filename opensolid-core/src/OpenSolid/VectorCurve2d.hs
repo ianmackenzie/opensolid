@@ -32,6 +32,7 @@ module OpenSolid.VectorCurve2d
   , squaredMagnitude
   , squaredMagnitude'
   , reverse
+  , isZero
   , IsZero (IsZero)
   , zeros
   , HasZero (HasZero)
@@ -766,6 +767,12 @@ data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
 magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Curve units
 magnitude curve = Curve.sqrt' (squaredMagnitude' curve)
+
+sampleValues :: VectorCurve2d (space @ units) -> List (Vector2d (space @ units))
+sampleValues curve = List.map (evaluate curve) Parameter.samples
+
+isZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
+isZero curve = List.allSatisfy (~= Vector2d.zero) (sampleValues curve)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
