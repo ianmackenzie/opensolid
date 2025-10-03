@@ -162,6 +162,12 @@ simplify = coerce
 
 class Simplification units1 units2
 
+instance Simplification (Unitless :*: units) units
+
+instance Simplification (units :*: Unitless) units
+
+instance Simplification (units :/: Unitless) units
+
 instance Simplification ((units1 :/: units2) :*: units2) units1
 
 instance Simplification (units2 :*: (units1 :/: units2)) units1
@@ -179,6 +185,12 @@ instance Simplification ((units1 :*: units2) :/: units2) units1
 instance Simplification (units1 :/: (units1 :/: units2)) units2
 
 instance Simplification (units :/: (units :*: units)) (Unitless :/: units)
+
+instance Simplification ((units :*: units) :/: (units :*: units :*: units)) (Unitless :/: units)
+
+instance Simplification (((units :*: units) :/: (units :*: units :*: units)) :*: units) Unitless
+
+instance Simplification (((units :*: units) :/: (units :*: units :*: units)) :*: (units :*: units)) units
 
 data Radians deriving (Eq, Show)
 
