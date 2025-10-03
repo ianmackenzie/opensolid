@@ -37,7 +37,6 @@ module OpenSolid.Curve2d
   , IntersectionPoint
   , OverlappingSegment
   , intersections
-  , IsCoincidentWithPoint (IsCoincidentWithPoint)
   , findPoint
   , distanceAlong
   , distanceLeftOf
@@ -726,16 +725,14 @@ yCoordinate curve =
 coordinates :: Curve2d (space @ units) -> (Curve units, Curve units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
 
-data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, Error.Message)
-
 findPoint ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result IsCoincidentWithPoint (List Float)
+  Result IsPoint (List Float)
 findPoint point curve =
   case VectorCurve2d.zeros (point - curve) of
-    Failure VectorCurve2d.IsZero -> Failure IsCoincidentWithPoint
+    Failure VectorCurve2d.IsZero -> Failure IsPoint
     Success parameterValues -> Success parameterValues
 
 overlappingSegments ::
@@ -775,7 +772,7 @@ findEndpointZeros ::
 findEndpointZeros endpoint curve curveIsPointError =
   case findPoint endpoint curve of
     Success parameterValues -> Success parameterValues
-    Failure IsCoincidentWithPoint -> Failure curveIsPointError
+    Failure IsPoint -> Failure curveIsPointError
 
 findEndpointIntersections ::
   Tolerance units =>
