@@ -735,6 +735,14 @@ findPoint point curve =
     Failure VectorCurve2d.IsZero -> Failure IsPoint
     Success parameterValues -> Success parameterValues
 
+candidateOverlappingSegment :: UvPoint -> UvPoint -> OverlappingSegment
+candidateOverlappingSegment (Point2d t1Start t2Start) (Point2d t1End t2End) =
+  OverlappingSegment
+    { t1 = Bounds t1Start t1End
+    , t2 = Bounds t2Start t2End
+    , sign = if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative
+    }
+
 overlappingSegments ::
   Tolerance units =>
   Curve2d (space @ units) ->
@@ -743,11 +751,7 @@ overlappingSegments ::
   List OverlappingSegment
 overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
-    |> List.successive
-      ( \(Point2d t1Start t2Start) (Point2d t1End t2End) ->
-          OverlappingSegment (Bounds t1Start t1End) (Bounds t2Start t2End) $
-            if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative
-      )
+    |> List.successive candidateOverlappingSegment
     |> List.filter (isOverlappingSegment curve1 curve2)
 
 isOverlappingSegment ::
