@@ -1018,6 +1018,15 @@ curvature' curve = Result.do
     Success quotient' -> Success (Units.simplify quotient')
     Failure DivisionByZero -> Failure IsPoint
 
+{-| Get the curvature of a 2D curve.
+
+This is the inverse of the radius of curvature, but is in general a better-defined quantity
+since the radius of curvature can go to infinity if the curve has zero curvature anywhere,
+and can in fact go through a singularity where it flips from positive to negative infinity
+if the curve has an inflection point where curvature goes from positive to zero to negative.
+
+Positive curvature is defined as curving to the left (relative to the curve's tangent direction).
+-}
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2d (space @ units1) ->
