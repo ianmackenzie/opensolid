@@ -545,6 +545,7 @@ unsafeSqrt' curve =
     @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' curve.compiled
     @ \self -> Units.coerce (unsafeQuotient' curve.derivative (2.0 * self))
 
+-- | Compute the cube of a curve.
 cubed :: Curve Unitless -> Curve Unitless
 cubed curve =
   new

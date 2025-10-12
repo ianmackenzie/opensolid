@@ -747,6 +747,9 @@ curve =
     , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
     , Class.member0 "Squared" Curve.squared $(docs 'Curve.squared)
     , Class.memberU0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
+    , Class.member0 "Cubed" Curve.cubed $(docs 'Curve.cubed)
+    , Class.member0 "Sin" (Curve.sin . (Angle.radian *)) $(docs 'Curve.sin)
+    , Class.member0 "Cos" (Curve.cos . (Angle.radian *)) $(docs 'Curve.cos)
     , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , Class.memberU0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , Class.memberU0 "Is Zero" (~= 0.0) "Check if a curve is zero everywhere, within the current tolerance."
