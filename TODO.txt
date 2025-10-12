@@ -52,6 +52,9 @@ Merge e.g. 'Subdomain' and 'Domain1d'?
 - just base on Float values instead of Int
 - store recursion type (even though that could be inferred from endpoints...)
 
+Try pdoc for Python documentation generation?
+-> or possibly Material for MkDocs + mkdocstrings
+
 Add hasZero functions that do simple check to see if a zero exists (plain bisection until bounds less than tolerance)
 -> then use to check validity of L'Hopital desingularization (see if derivative or denominator has *any* zero)
 
@@ -81,3 +84,6 @@ Normalize HasField instances:
 Support optional named arguments in target languages
 - maybe via wrapper functions where one argument is something like an 'Options a' value,
   wrapping a list of options/attributes in Haskell
+
+Add support for exponentiation operator in Python
+-> possibly special-case it to only accept the literals 2 and possibly 3 as arguments
