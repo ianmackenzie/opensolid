@@ -148,9 +148,9 @@ jobs:
           path: opensolid-python/lib/wheelhouse/*.whl
 
   macos-x86:
-    runs-on: macos-13
+    runs-on: macos-14-large
     env:
-      _PYTHON_HOST_PLATFORM: macosx-13.0-x86_64
+      _PYTHON_HOST_PLATFORM: macosx-14.0-x86_64
       ARCHFLAGS: -arch x86_64
     steps:
       - name: Clone repository
