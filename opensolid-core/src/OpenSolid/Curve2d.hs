@@ -36,7 +36,7 @@ module OpenSolid.Curve2d
   , g2
   , Intersections (IntersectionPoints, OverlappingSegments)
   , IntersectionPoint
-  , OverlappingSegment
+  , OverlappingSegment (OverlappingSegment)
   , intersections
   , findPoint
   , distanceAlong
@@ -91,7 +91,6 @@ import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve2d.MedialAxis qualified as MedialAxis
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
-import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
 import {-# SOURCE #-} OpenSolid.Curve3d (Curve3d)
 import {-# SOURCE #-} OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Debug qualified as Debug
@@ -801,12 +800,11 @@ fySignature curve tValue radius = do
   (firstOrder, secondOrder)
 
 candidateOverlappingSegment :: UvPoint -> UvPoint -> OverlappingSegment
-candidateOverlappingSegment (Point2d t1Start t2Start) (Point2d t1End t2End) =
-  OverlappingSegment
-    { t1 = Bounds t1Start t1End
-    , t2 = Bounds t2Start t2End
-    , sign = if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative
-    }
+candidateOverlappingSegment (Point2d t1Start t2Start) (Point2d t1End t2End) = do
+  let tBounds1 = Bounds t1Start t1End
+  let tBounds2 = Bounds t2Start t2End
+  let sign = if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative
+  OverlappingSegment tBounds1 tBounds2 sign
 
 overlappingSegments ::
   Tolerance units =>
@@ -825,9 +823,9 @@ isOverlappingSegment ::
   Curve2d (space @ units) ->
   OverlappingSegment ->
   Bool
-isOverlappingSegment curve1 curve2 (OverlappingSegment{t1}) = do
-  let segmentStartPoint = evaluate curve1 (Bounds.lower t1)
-  let curve1TestPoints = List.map (evaluate curve1) (Bounds.sampleValues t1)
+isOverlappingSegment curve1 curve2 (OverlappingSegment tBounds1 _ _) = do
+  let segmentStartPoint = evaluate curve1 (Bounds.lower tBounds1)
+  let curve1TestPoints = List.map (evaluate curve1) (Bounds.sampleValues tBounds1)
   let segment1IsNondegenerate = List.anySatisfy (!= segmentStartPoint) curve1TestPoints
   let segment1LiesOnSegment2 = List.allSatisfy (^ curve2) curve1TestPoints
   segment1IsNondegenerate && segment1LiesOnSegment2
