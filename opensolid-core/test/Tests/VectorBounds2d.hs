@@ -16,6 +16,7 @@ tests :: Tolerance Meters => List Test
 tests =
   [ placeIn
   , relativeTo
+  , placeOn
   , transformBy
   ]
 
@@ -42,6 +43,14 @@ relativeTo = Test.check 100 "relativeTo" Test.do
   let localBounds = VectorBounds2d.relativeTo frame globalBounds
   let localVector = Vector2d.relativeTo frame globalVector
   Test.expect (localVector ^ localBounds)
+
+placeOn :: Tolerance Meters => Test
+placeOn = Test.check 100 "placeOn" Test.do
+  (bounds2d, vector2d) <- boundsAndContainedVector
+  plane <- Random.plane3d
+  let bounds3d = VectorBounds2d.placeOn plane bounds2d
+  let vector3d = Vector2d.placeOn plane vector2d
+  Test.expect (vector3d ^ bounds3d)
 
 transformBy :: Tolerance Meters => Test
 transformBy = Test.check 100 "transformBy" Test.do

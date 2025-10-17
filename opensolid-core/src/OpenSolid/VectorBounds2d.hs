@@ -36,8 +36,11 @@ module OpenSolid.VectorBounds2d
   , intersection
   , interpolate
   , relativeTo
+  , relativeToOrientation
   , placeIn
+  , placeInOrientation
   , placeOn
+  , placeOnOrientation
   , convert
   , unconvert
   , transformBy
@@ -51,12 +54,14 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction2d (Direction2d)
+  , Direction3d (Direction3d)
   , Frame2d
   , Orientation2d (Orientation2d)
-  , Plane3d (Plane3d)
+  , Plane3d
   , PlaneOrientation3d (PlaneOrientation3d)
+  , Vector3d (Vector3d)
   , VectorBounds2d (VectorBounds2d)
-  , VectorBounds3d
+  , VectorBounds3d (VectorBounds3d)
   )
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
@@ -267,13 +272,19 @@ placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds2d (global @ units)
-placeIn frame (VectorBounds2d x y) = do
+placeIn frame = placeInOrientation frame.orientation
+
+placeInOrientation ::
+  Orientation2d global ->
+  VectorBounds2d (local @ units) ->
+  VectorBounds2d (global @ units)
+placeInOrientation orientation (VectorBounds2d x y) = do
   let xMid = Bounds.midpoint x
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector2d x0 y0 = Vector2d.placeIn frame (Vector2d xMid yMid)
-  let Orientation2d i j = frame.orientation
+  let Vector2d x0 y0 = Vector2d.placeInOrientation orientation (Vector2d xMid yMid)
+  let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
@@ -284,13 +295,19 @@ relativeTo ::
   Frame2d (global @ frameUnits) (Defines local) ->
   VectorBounds2d (global @ units) ->
   VectorBounds2d (local @ units)
-relativeTo frame (VectorBounds2d x y) = do
+relativeTo frame = relativeToOrientation frame.orientation
+
+relativeToOrientation ::
+  Orientation2d global ->
+  VectorBounds2d (global @ units) ->
+  VectorBounds2d (local @ units)
+relativeToOrientation orientation (VectorBounds2d x y) = do
   let xMid = Bounds.midpoint x
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector2d x0 y0 = Vector2d.relativeTo frame (Vector2d xMid yMid)
-  let Orientation2d i j = frame.orientation
+  let Vector2d x0 y0 = Vector2d.relativeToOrientation orientation (Vector2d xMid yMid)
+  let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
@@ -298,10 +315,31 @@ relativeTo frame (VectorBounds2d x y) = do
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 placeOn ::
-  Plane3d (space @ planeUnits) (Defines local) ->
+  Plane3d (global @ frameUnits) (Defines local) ->
   VectorBounds2d (local @ units) ->
-  VectorBounds3d (space @ units)
-placeOn (Plane3d _ (PlaneOrientation3d i j)) (VectorBounds2d x y) = x * i + y * j
+  VectorBounds3d (global @ units)
+placeOn plane = placeOnOrientation plane.orientation
+
+placeOnOrientation ::
+  PlaneOrientation3d global ->
+  VectorBounds2d (local @ units) ->
+  VectorBounds3d (global @ units)
+placeOnOrientation orientation (VectorBounds2d x y) = do
+  let xMid = Bounds.midpoint x
+  let yMid = Bounds.midpoint y
+  let xWidth = Bounds.width x
+  let yWidth = Bounds.width y
+  let Vector3d x0 y0 z0 = Vector2d.placeOnOrientation orientation (Vector2d xMid yMid)
+  let PlaneOrientation3d i j = orientation
+  let Direction3d ix iy iz = i
+  let Direction3d jx jy jz = j
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
+  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz
+  VectorBounds3d
+    (Bounds (x0 - rx) (x0 + rx))
+    (Bounds (y0 - ry) (y0 + ry))
+    (Bounds (z0 - rz) (z0 + rz))
 
 convert ::
   Qty (units2 :/: units1) ->
