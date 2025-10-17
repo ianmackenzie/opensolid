@@ -33,8 +33,11 @@ module OpenSolid.Vector2d
   , rotateRight
   , rotateLeft
   , placeIn
+  , placeInOrientation
   , relativeTo
+  , relativeToOrientation
   , placeOn
+  , placeOnOrientation
   , convert
   , unconvert
   , sum
@@ -57,9 +60,9 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Direction2d (Unit2d)
-  , Frame2d (Frame2d)
+  , Frame2d
   , Orientation2d (Orientation2d)
-  , Plane3d (Plane3d)
+  , Plane3d
   , PlaneOrientation3d (PlaneOrientation3d)
   , Point2d
   , Transform2d (Transform2d)
@@ -245,29 +248,50 @@ rotateLeft (Vector2d vx vy) = Vector2d (negate vy) vx
 rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateRight (Vector2d vx vy) = Vector2d vy (negate vx)
 
+{-# INLINE placeIn #-}
 placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
-placeIn (Frame2d _ (Orientation2d i j)) (Vector2d vx vy) = vx * i + vy * j
+placeIn frame = placeInOrientation frame.orientation
 
+placeInOrientation ::
+  Orientation2d global ->
+  Vector2d (local @ units) ->
+  Vector2d (global @ units)
+placeInOrientation (Orientation2d i j) (Vector2d vx vy) = vx * i + vy * j
+
+{-# INLINE relativeTo #-}
 relativeTo ::
   Frame2d (global @ frameUnits) (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeTo (Frame2d _ (Orientation2d i j)) vector = Vector2d (vector `dot` i) (vector `dot` j)
+relativeTo frame = relativeToOrientation frame.orientation
+
+relativeToOrientation ::
+  Orientation2d global ->
+  Vector2d (global @ units) ->
+  Vector2d (local @ units)
+relativeToOrientation (Orientation2d i j) vector = Vector2d (vector `dot` i) (vector `dot` j)
 
 {-| Convert a 2D vector to 3D vector by placing it on a plane.
 
 Given a 2D vector defined within a plane's coordinate system,
 this returns the corresponding 3D vector.
 -}
+{-# INLINE placeOn #-}
 placeOn ::
   forall local units space planeUnits.
   Plane3d (space @ planeUnits) (Defines local) ->
   Vector2d (local @ units) ->
   Vector3d (space @ units)
-placeOn (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vx vy) = vx * i + vy * j
+placeOn plane = placeOnOrientation plane.orientation
+
+placeOnOrientation ::
+  PlaneOrientation3d global ->
+  Vector2d (local @ units) ->
+  Vector3d (global @ units)
+placeOnOrientation (PlaneOrientation3d i j) (Vector2d vx vy) = vx * i + vy * j
 
 convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
 convert factor vector = Units.simplify (vector .*. factor)
