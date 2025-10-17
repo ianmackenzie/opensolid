@@ -179,6 +179,7 @@ library
     OpenSolid.Mitsuba
     OpenSolid.Model3d
     OpenSolid.Named
+    OpenSolid.NewtonRaphson
     OpenSolid.NonEmpty
     OpenSolid.Orientation2d
     OpenSolid.Orientation3d
@@ -317,6 +318,7 @@ test-suite opensolid-core-test
     Tests.Float
     Tests.List
     Tests.Map
+    Tests.NewtonRaphson
     Tests.NonEmpty
     Tests.Parameter
     Tests.Qty

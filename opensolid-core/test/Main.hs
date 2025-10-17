@@ -17,6 +17,7 @@ import Tests.Estimate qualified
 import Tests.Float qualified
 import Tests.List qualified
 import Tests.Map qualified
+import Tests.NewtonRaphson qualified
 import Tests.NonEmpty qualified
 import Tests.Parameter qualified
 import Tests.Qty qualified
@@ -53,6 +54,7 @@ tests =
     , Test.group "Tests.Array" Tests.Array.tests
     , Test.group "Tests.Set2d" Tests.Set2d.tests
     , Test.group "Tests.SurfaceFunction" Tests.SurfaceFunction.tests
+    , Test.group "Tests.NewtonRaphson" Tests.NewtonRaphson.tests
     ]
 
 main :: IO ()
