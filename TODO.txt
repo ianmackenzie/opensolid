@@ -19,6 +19,18 @@ Remove e.g. Orientation3d.world in favour of World3d.forwardOrientation?
 
 Rework Curve2d.medialAxis to use tangent directions instead of derivative vectors
 
+Remove 'unconvert' functions
+
+Clean up division by 'Curve units' or 'SurfaceFunction units' that is (approximately) identically zero by replacing with division by actual constant zero
+-> or just *multiplication* by infinity...
+-> Faster to evaluate, gives actual infinities instead of just extremely large values (more correct!)
+-> Maybe also for division by e.g. 'Qty units', so division by *approximately* zero gives actual infinity?
+
+Tolerance-less desingularization?
+-> detect degenerate endpoints by heuristic like 'endpoint value is less than 1e-9 times max of values at 3-point Gaussian quadrature points
+  -> or maybe use golden ratio to provide random sampling points...
+  -> still need to detect if denominator is zero *everywhere* though, and for that we still need a tolerance...
+
 Add Component3d class to Python library?
 -> 'front_plane', 'upward_direction', 'rightward_axis' etc. convenience accessors in addition to 'frame'
 
