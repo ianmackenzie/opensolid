@@ -4,6 +4,9 @@ module OpenSolid.Orientation2d
   , xy
   , fromXDirection
   , fromYDirection
+  , rotateLeft
+  , rotateRight
+  , rotateBy
   , xDirection
   , yDirection
   , placeIn
@@ -12,6 +15,7 @@ module OpenSolid.Orientation2d
   )
 where
 
+import OpenSolid.Angle (Angle)
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Prelude
@@ -35,6 +39,18 @@ fromXDirection i = Orientation2d i (Direction2d.rotateLeft i)
 
 fromYDirection :: Direction2d space -> Orientation2d space
 fromYDirection j = Orientation2d (Direction2d.rotateRight j) j
+
+rotateLeft :: Orientation2d space -> Orientation2d space
+rotateLeft (Orientation2d i j) =
+  Orientation2d (Direction2d.rotateLeft i) (Direction2d.rotateLeft j)
+
+rotateRight :: Orientation2d space -> Orientation2d space
+rotateRight (Orientation2d i j) =
+  Orientation2d (Direction2d.rotateRight i) (Direction2d.rotateRight j)
+
+rotateBy :: Angle -> Orientation2d space -> Orientation2d space
+rotateBy angle (Orientation2d i j) =
+  Orientation2d (Direction2d.rotateBy angle i) (Direction2d.rotateBy angle j)
 
 placeIn ::
   Frame2d (global @ frameUnits) (Defines space) ->
