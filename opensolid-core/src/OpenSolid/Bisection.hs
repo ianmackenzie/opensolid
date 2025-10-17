@@ -1,8 +1,5 @@
 module OpenSolid.Bisection
-  ( Action
-  , InfiniteRecursion (InfiniteRecursion)
-  , return
-  , recurse
+  ( InfiniteRecursion (InfiniteRecursion)
   , Domain (Domain)
   , parameterDomain
   , curveDomain
@@ -24,21 +21,12 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Error qualified as Error
 import OpenSolid.Float qualified as Float
+import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
-
-data Action solution where
-  Return :: Maybe solution -> Action solution
-  Recurse :: Action solution
-
-return :: Maybe solution -> Action solution
-return = Return
-
-recurse :: Action solution
-recurse = Recurse
 
 data Domain bounds = Domain bounds ~(List (Domain bounds))
 
@@ -78,20 +66,20 @@ curveSurfaceDomain = map2 (,) curveDomain surfaceDomain
 surfacePairDomain :: Domain (UvBounds, UvBounds)
 surfacePairDomain = map2 (,) surfaceDomain surfaceDomain
 
-search :: Domain bounds -> (bounds -> Action solution) -> Result InfiniteRecursion (List solution)
+search :: Domain bounds -> (bounds -> Fuzzy (Maybe solution)) -> Result InfiniteRecursion (List (bounds, solution))
 search domain callback = searchImpl callback [domain] []
 
 searchImpl ::
-  (bounds -> Action solution) ->
+  (bounds -> Fuzzy (Maybe solution)) ->
   List (Domain bounds) ->
-  List solution ->
-  Result InfiniteRecursion (List solution)
+  List (bounds, solution) ->
+  Result InfiniteRecursion (List (bounds, solution))
 searchImpl _ [] accumulated = Success accumulated
 searchImpl callback (Domain bounds children : rest) accumulated =
   case callback bounds of
-    Return Nothing -> searchImpl callback rest accumulated
-    Return (Just solution) -> searchImpl callback rest (solution : accumulated)
-    Recurse -> case children of
+    Resolved Nothing -> searchImpl callback rest accumulated
+    Resolved (Just solution) -> searchImpl callback rest ((bounds, solution) : accumulated)
+    Unresolved -> case children of
       [] -> Failure InfiniteRecursion
       _ -> accumulated |> searchImpl callback children |> Result.andThen (searchImpl callback rest)
 
