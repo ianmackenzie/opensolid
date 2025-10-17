@@ -194,7 +194,7 @@ solveUnique localBounds fBounds f fu fv globalBounds =
   -- First check if it's *possible* that there's a solution within localBounds
   if fBounds localBounds ^ Vector2d.zero
     then do
-      let (uBounds, vBounds) = Bounds2d.coordinates localBounds
+      let Bounds2d uBounds vBounds = localBounds
       let uMid = Bounds.midpoint uBounds
       let vMid = Bounds.midpoint vBounds
       let pMid = Point2d uMid vMid
