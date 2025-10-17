@@ -18,6 +18,7 @@ module OpenSolid.Bounds
   , width
   , width#
   , maxAbs
+  , minAbs
   , squared
   , squared'
   , includes
