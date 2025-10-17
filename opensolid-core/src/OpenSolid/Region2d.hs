@@ -42,9 +42,6 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
--- import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint)
--- import OpenSolid.Curve2d.IntersectionPoint qualified as Curve2d.IntersectionPoint
--- import OpenSolid.Curve2d.Intersections qualified as Curve2d.Intersections
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
