@@ -746,41 +746,57 @@ g2 (curve1, t1) (curve2, t2) radius =
   evaluate curve1 t1 ~= evaluate curve2 t2 && do
     let first1 = VectorCurve2d.evaluate curve1.derivative t1
     let first2 = VectorCurve2d.evaluate curve2.derivative t2
-    let second1 = VectorCurve2d.evaluate curve1.derivative.derivative t1
-    let second2 = VectorCurve2d.evaluate curve2.derivative.derivative t2
     let Vector2d dxdt1 dydt1 = first1
     let Vector2d dxdt2 dydt2 = first2
     let dxdtMin = Qty.min (Qty.abs dxdt1) (Qty.abs dxdt2)
     let dydtMin = Qty.min (Qty.abs dydt1) (Qty.abs dydt2)
     if dxdtMin >= dydtMin
-      then fxSignature first1 second1 radius ~= fxSignature first2 second2 radius
-      else fySignature first1 second1 radius ~= fySignature first2 second2 radius
+      then fxSignature curve1 t1 radius ~= fxSignature curve2 t2 radius
+      else fySignature curve1 t1 radius ~= fySignature curve2 t2 radius
 
 fxSignature ::
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Float ->
   Qty units ->
   (Qty units, Qty units)
-fxSignature firstDerivative secondDerivative radius = do
-  let Vector2d dxdt dydt = firstDerivative
-  let Vector2d d2xdt2 d2ydt2 = secondDerivative
-  let dydx = dydt / dxdt
+fxSignature curve tValue radius = do
+  let firstDerivative = curve.derivative
+  let secondDerivative = firstDerivative.derivative
+  let Vector2d x' y' = VectorCurve2d.evaluate firstDerivative tValue
+  let Vector2d x'' y'' = VectorCurve2d.evaluate secondDerivative tValue
+  let dydx = if x' != Qty.zero then y' / x' else y'' / x''
   let firstOrder = dydx * radius
-  let d2ydx2 = (d2ydt2 .*. dxdt - dydt .*. d2xdt2) ./. (dxdt .*. dxdt .*. dxdt)
+  let d2ydx2 =
+        if x' != Qty.zero
+          then (y'' .*. x' - y' .*. x'') ./. (x' .*. x' .*. x')
+          else do
+            let fourthDerivative = secondDerivative.derivative.derivative
+            let Vector2d x'''' y'''' = VectorCurve2d.evaluate fourthDerivative tValue
+            (y'''' .*. x'' - y'' .*. x'''') ./. (x'' .*. x'' .*. x'')
   let secondOrder = Units.simplify (0.5 * d2ydx2 .*. Qty.squared' radius)
   (firstOrder, secondOrder)
 
 fySignature ::
-  Vector2d (space @ units) ->
-  Vector2d (space @ units) ->
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Float ->
   Qty units ->
   (Qty units, Qty units)
-fySignature firstDerivative secondDerivative radius = do
-  let Vector2d dxdt dydt = firstDerivative
-  let Vector2d d2xdt2 d2ydt2 = secondDerivative
-  let dxdy = dxdt / dydt
+fySignature curve tValue radius = do
+  let firstDerivative = curve.derivative
+  let secondDerivative = firstDerivative.derivative
+  let Vector2d x' y' = VectorCurve2d.evaluate firstDerivative tValue
+  let Vector2d x'' y'' = VectorCurve2d.evaluate secondDerivative tValue
+  let dxdy = if y' != Qty.zero then x' / y' else x'' / y''
   let firstOrder = dxdy * radius
-  let d2xdy2 = (d2xdt2 .*. dydt - dxdt .*. d2ydt2) ./. (dydt .*. dydt .*. dydt)
+  let d2xdy2 =
+        if y' != Qty.zero
+          then (x'' .*. y' - x' .*. y'') ./. (y' .*. y' .*. y')
+          else do
+            let fourthDerivative = secondDerivative.derivative.derivative
+            let Vector2d x'''' y'''' = VectorCurve2d.evaluate fourthDerivative tValue
+            (x'''' .*. y'' - x'' .*. y'''') ./. (y'' .*. y'' .*. y'')
   let secondOrder = Units.simplify (0.5 * d2xdy2 .*. Qty.squared' radius)
   (firstOrder, secondOrder)
 
