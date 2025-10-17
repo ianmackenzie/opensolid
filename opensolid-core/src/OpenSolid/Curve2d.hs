@@ -115,6 +115,8 @@ import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Orientation2d (Orientation2d)
+import OpenSolid.Orientation2d qualified as Orientation2d
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -749,54 +751,40 @@ g2 (curve1, t1) (curve2, t2) radius =
     let Vector2d dxdt2 dydt2 = first2
     let dxdtMin = Qty.min (Qty.abs dxdt1) (Qty.abs dxdt2)
     let dydtMin = Qty.min (Qty.abs dydt1) (Qty.abs dydt2)
-    if dxdtMin >= dydtMin
-      then fxSignature curve1 t1 radius ~= fxSignature curve2 t2 radius
-      else fySignature curve1 t1 radius ~= fySignature curve2 t2 radius
+    let orientation =
+          if dxdtMin >= dydtMin
+            then Orientation2d.horizontal
+            else Orientation2d.vertical
+    let signature1 = signature orientation curve1 t1 radius
+    let signature2 = signature orientation curve2 t2 radius
+    signature1 ~= signature2
 
-fxSignature ::
+signature ::
   Tolerance units =>
+  Orientation2d space ->
   Curve2d (space @ units) ->
   Float ->
   Qty units ->
   (Qty units, Qty units)
-fxSignature curve tValue radius = do
-  let firstDerivative = curve.derivative
-  let secondDerivative = firstDerivative.derivative
-  let Vector2d x' y' = VectorCurve2d.evaluate firstDerivative tValue
-  let Vector2d x'' y'' = VectorCurve2d.evaluate secondDerivative tValue
+signature orientation curve tValue radius = do
+  let local vector = Vector2d.relativeToOrientation orientation vector
+  let firstDerivativeCurve = curve.derivative
+  let secondDerivativeCurve = firstDerivativeCurve.derivative
+  let firstDerivativeValue = VectorCurve2d.evaluate firstDerivativeCurve tValue
+  let secondDerivativeValue = VectorCurve2d.evaluate secondDerivativeCurve tValue
+  let Vector2d x' y' = local firstDerivativeValue
+  let Vector2d x'' y'' = local secondDerivativeValue
   let dydx = if x' != Qty.zero then y' / x' else y'' / x''
   let firstOrder = dydx * radius
   let d2ydx2 =
         if x' != Qty.zero
           then (y'' .*. x' - y' .*. x'') ./. (x' .*. x' .*. x')
           else do
-            let fourthDerivative = secondDerivative.derivative.derivative
-            let Vector2d x'''' y'''' = VectorCurve2d.evaluate fourthDerivative tValue
+            let fourthDerivativeCurve = secondDerivativeCurve.derivative.derivative
+            let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivativeCurve tValue
+            let Vector2d x'''' y'''' = local fourthDerivativeValue
             (y'''' .*. x'' - y'' .*. x'''') ./. (x'' .*. x'' .*. x'')
   let secondOrder = Units.simplify (0.5 * d2ydx2 .*. Qty.squared' radius)
-  (firstOrder, secondOrder)
-
-fySignature ::
-  Tolerance units =>
-  Curve2d (space @ units) ->
-  Float ->
-  Qty units ->
-  (Qty units, Qty units)
-fySignature curve tValue radius = do
-  let firstDerivative = curve.derivative
-  let secondDerivative = firstDerivative.derivative
-  let Vector2d x' y' = VectorCurve2d.evaluate firstDerivative tValue
-  let Vector2d x'' y'' = VectorCurve2d.evaluate secondDerivative tValue
-  let dxdy = if y' != Qty.zero then x' / y' else x'' / y''
-  let firstOrder = dxdy * radius
-  let d2xdy2 =
-        if y' != Qty.zero
-          then (x'' .*. y' - x' .*. y'') ./. (y' .*. y' .*. y')
-          else do
-            let fourthDerivative = secondDerivative.derivative.derivative
-            let Vector2d x'''' y'''' = VectorCurve2d.evaluate fourthDerivative tValue
-            (x'''' .*. y'' - x'' .*. y'''') ./. (y'' .*. y'' .*. y'')
-  let secondOrder = Units.simplify (0.5 * d2xdy2 .*. Qty.squared' radius)
   (firstOrder, secondOrder)
 
 candidateOverlappingSegment :: UvPoint -> UvPoint -> OverlappingSegment
