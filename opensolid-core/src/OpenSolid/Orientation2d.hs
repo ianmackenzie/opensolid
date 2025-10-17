@@ -1,7 +1,8 @@
 module OpenSolid.Orientation2d
   ( Orientation2d
   , coerce
-  , xy
+  , horizontal
+  , vertical
   , fromXDirection
   , fromYDirection
   , rotateLeft
@@ -31,8 +32,11 @@ yDirection (Orientation2d _ j) = j
 coerce :: Orientation2d space1 -> Orientation2d space2
 coerce (Orientation2d i j) = Orientation2d (Direction2d.coerce i) (Direction2d.coerce j)
 
-xy :: Orientation2d space
-xy = Orientation2d Direction2d.x Direction2d.y
+horizontal :: Orientation2d space
+horizontal = Orientation2d Direction2d.x Direction2d.y
+
+vertical :: Orientation2d space
+vertical = Orientation2d Direction2d.y -Direction2d.x
 
 fromXDirection :: Direction2d space -> Orientation2d space
 fromXDirection i = Orientation2d i (Direction2d.rotateLeft i)

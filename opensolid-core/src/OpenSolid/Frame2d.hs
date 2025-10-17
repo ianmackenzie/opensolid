@@ -57,7 +57,7 @@ xy :: Frame2d (space @ units) defines
 xy = atPoint Point2d.origin
 
 atPoint :: Point2d (space @ units) -> Frame2d (space @ units) defines
-atPoint p0 = Frame2d p0 Orientation2d.xy
+atPoint p0 = Frame2d p0 Orientation2d.horizontal
 
 fromXAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
 fromXAxis axis = Frame2d (Axis2d.originPoint axis) (Orientation2d.fromXDirection (Axis2d.direction axis))
