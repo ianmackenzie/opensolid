@@ -36,10 +36,10 @@ testSplineAndArc :: Tolerance Meters => IO ()
 testSplineAndArc = do
   let spline =
         Curve2d.cubicBezier
-          (Point2d.centimeters @Global 0.0 10.0)
-          (Point2d.centimeters @Global 5.0 6.0)
-          (Point2d.centimeters @Global 10.0 9.0)
-          (Point2d.centimeters @Global 15.0 7.0)
+          (Point2d.centimeters 0.0 10.0)
+          (Point2d.centimeters 5.0 6.0)
+          (Point2d.centimeters 10.0 9.0)
+          (Point2d.centimeters 15.0 7.0)
   let arc = Curve2d.arc (Point2d.centimeters 15.0 0.0) Point2d.origin (Angle.degrees 20.0)
   testCurveMedialAxis "testSplineAndArc" spline arc
 
