@@ -45,9 +45,11 @@ main = Tolerance.using Length.nanometer IO.do
         Drawing2d.circleWith [Drawing2d.whiteFill]
           @ #centerPoint point
           @ #diameter (Length.millimeters 4.0)
-  let drawCurve n curve = do
-        Drawing2d.curve (Resolution.maxError Length.micrometer) curve
-        Drawing2d.collect (drawDot . Curve2d.evaluate curve) (Parameter.steps n)
+  let drawCurve n curve =
+        Drawing2d.group
+          [ Drawing2d.curve (Resolution.maxError Length.micrometer) curve
+          , Drawing2d.collect (drawDot . Curve2d.evaluate curve) (Parameter.steps n)
+          ]
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -12.0 -12.0) (Point2d.centimeters 12.0 12.0)
   Drawing2d.writeSvg "executables/piecewise-curve/circle.svg" drawingBounds (drawCurve 40 circle)
   Drawing2d.writeSvg "executables/piecewise-curve/arcs.svg" drawingBounds do

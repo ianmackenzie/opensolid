@@ -2,7 +2,6 @@ module OpenSolid.Drawing2d
   ( Drawing2d
   , Attribute
   , Point
-  , (>>)
   , toSvg
   , writeSvg
   , nothing
@@ -82,10 +81,6 @@ instance FFI (Drawing2d FFI.Space) where
 
 instance FFI (Attribute FFI.Space) where
   representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute"
-
-instance Composition (Drawing2d space) (Drawing2d space) (Drawing2d space) where
-  drawing >> Node "g" [] drawings = Node "g" [] (drawing : drawings)
-  drawing1 >> drawing2 = Node "g" [] [drawing1, drawing2]
 
 drawingText :: Text -> Drawing2d space -> Maybe Text
 drawingText _ Empty = Nothing

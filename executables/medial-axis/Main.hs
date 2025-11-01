@@ -82,10 +82,12 @@ testCurveMedialAxis label curve1 curve2 = IO.do
   let drawSegment segment = drawCurve segment.curve
   let drawingBounds =
         Bounds2d.hull2 (Point2d.centimeters -10.0 -10.0) (Point2d.centimeters 30.0 20.0)
-  Drawing2d.writeSvg ("executables/medial-axis/" <> label <> ".svg") drawingBounds do
-    Drawing2d.groupWith tangentCircleAttributes tangentCircles
-    Drawing2d.collect drawSegment segments
-    drawCurve curve1
-    drawCurve curve2
+  Drawing2d.writeSvg ("executables/medial-axis/" <> label <> ".svg") drawingBounds $
+    Drawing2d.group
+      [ Drawing2d.groupWith tangentCircleAttributes tangentCircles
+      , Drawing2d.collect drawSegment segments
+      , drawCurve curve1
+      , drawCurve curve2
+      ]
   elapsed <- Timer.elapsed timer
   IO.printLine (label <> ": " <> Text.int (Float.round (Duration.inMilliseconds elapsed)) <> " ms")
