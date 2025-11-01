@@ -161,12 +161,15 @@ Fails if the given dimeter is zero.
 -}
 circle ::
   Tolerance units =>
-  ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
+  "centerPoint" ::: Point2d (space @ units) ->
+  "diameter" ::: Qty units ->
   Result EmptyRegion (Region2d (space @ units))
-circle args =
-  if args.diameter ~= Qty.zero
+circle (Named centerPoint) (Named diameter) =
+  if diameter ~= Qty.zero
     then Failure EmptyRegion
-    else Success (Region2d (NonEmpty.one (Curve2d.circle args)) [])
+    else do
+      let curve = Curve2d.circle (#centerPoint centerPoint) (#diameter diameter)
+      Success (Region2d (NonEmpty.one curve) [])
 
 {-| Create a hexagon with the given center point and height.
 
@@ -174,10 +177,11 @@ The hexagon will be oriented such that its top and bottom edges are horizontal.
 -}
 hexagon ::
   Tolerance units =>
-  ("centerPoint" ::: Point2d (space @ units), "height" ::: Qty units) ->
+  "centerPoint" ::: Point2d (space @ units) ->
+  "height" ::: Qty units ->
   Result EmptyRegion (Region2d (space @ units))
-hexagon args =
-  circumscribedPolygon 6 (#centerPoint args.centerPoint, #diameter args.height)
+hexagon (Named centerPoint) (Named height) =
+  circumscribedPolygon 6 (#centerPoint centerPoint) (#diameter height)
 
 {-| Create a regular polygon with the given number of sides.
 
@@ -188,15 +192,16 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 inscribedPolygon ::
   Tolerance units =>
   Int ->
-  ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
+  "centerPoint" ::: Point2d (space @ units) ->
+  "diameter" ::: Qty units ->
   Result EmptyRegion (Region2d (space @ units))
-inscribedPolygon n args = do
-  if args.diameter < Qty.zero || args.diameter ~= Qty.zero || n < 3
+inscribedPolygon n (Named centerPoint) (Named diameter) = do
+  if diameter < Qty.zero || diameter ~= Qty.zero || n < 3
     then Failure EmptyRegion
     else Success do
-      let radius = 0.5 * args.diameter
+      let radius = 0.5 * diameter
       let vertexAngles = Qty.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
-      let vertex angle = args.centerPoint + Vector2d.polar radius angle
+      let vertex angle = centerPoint + Vector2d.polar radius angle
       let vertices = List.map vertex vertexAngles
       case polygon vertices of
         Success region -> region
@@ -215,12 +220,13 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 circumscribedPolygon ::
   Tolerance units =>
   Int ->
-  ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
+  "centerPoint" ::: Point2d (space @ units) ->
+  "diameter" ::: Qty units ->
   Result EmptyRegion (Region2d (space @ units))
-circumscribedPolygon n args =
-  inscribedPolygon n do
-    #centerPoint args.centerPoint
-    #diameter (args.diameter / Angle.cos (Angle.pi / Float.int n))
+circumscribedPolygon n (Named centerPoint) (Named diameter) =
+  inscribedPolygon n
+    @ #centerPoint centerPoint
+    @ #diameter (diameter / Angle.cos (Angle.pi / Float.int n))
 
 {-| Create a polygonal region from the given vertices.
 

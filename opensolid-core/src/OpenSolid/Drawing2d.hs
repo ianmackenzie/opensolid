@@ -198,17 +198,18 @@ polygon = polygonWith []
 -- | Create a circle with the given attributes, center point and diameter.
 circleWith ::
   List (Attribute space) ->
-  ("centerPoint" ::: Point space, "diameter" ::: Length) ->
+  "centerPoint" ::: Point space ->
+  "diameter" ::: Length ->
   Drawing2d space
-circleWith attributes args = do
-  let Point2d cx cy = args.centerPoint
+circleWith attributes (Named centerPoint) (Named diameter) = do
+  let Point2d cx cy = centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
-  let rAttribute = Attribute "r" (lengthText (0.5 * args.diameter))
+  let rAttribute = Attribute "r" (lengthText (0.5 * diameter))
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 -- | Create a circle with the given center point and diameter.
-circle :: ("centerPoint" ::: Point space, "diameter" ::: Length) -> Drawing2d space
+circle :: "centerPoint" ::: Point space -> "diameter" ::: Length -> Drawing2d space
 circle = circleWith []
 
 -- | Draw a curve with the given attributes and resolution.
@@ -222,35 +223,33 @@ curve :: Resolution Meters -> Curve2d (space @ Meters) -> Drawing2d space
 curve = curveWith []
 
 arrow ::
-  ( "start" ::: Point2d (space @ Meters)
-  , "end" ::: Point2d (space @ Meters)
-  , "headLength" ::: Length
-  , "headWidth" ::: Length
-  ) ->
+  "start" ::: Point2d (space @ Meters) ->
+  "end" ::: Point2d (space @ Meters) ->
+  "headLength" ::: Length ->
+  "headWidth" ::: Length ->
   Drawing2d space
-arrow args = arrowWith [] args
+arrow = arrowWith []
 
 arrowWith ::
   List (Attribute space) ->
-  ( "start" ::: Point2d (space @ Meters)
-  , "end" ::: Point2d (space @ Meters)
-  , "headLength" ::: Length
-  , "headWidth" ::: Length
-  ) ->
+  "start" ::: Point2d (space @ Meters) ->
+  "end" ::: Point2d (space @ Meters) ->
+  "headLength" ::: Length ->
+  "headWidth" ::: Length ->
   Drawing2d space
-arrowWith attributes args =
-  case Tolerance.using Qty.zero (Direction2d.from args.start args.end) of
+arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWidth) =
+  case Tolerance.using Qty.zero (Direction2d.from start end) of
     Failure Direction2d.PointsAreCoincident -> nothing
     Success direction -> do
-      let length = Point2d.distanceFrom args.start args.end
-      let axis = Axis2d args.start direction
+      let length = Point2d.distanceFrom start end
+      let axis = Axis2d start direction
       let frame = Frame2d.fromXAxis axis
-      let stemLength = length - args.headLength
+      let stemLength = length - headLength
       let stemEndPoint = Point2d.along axis stemLength
-      let leftPoint = Point2d.placeIn frame (Point2d stemLength (0.5 * args.headWidth))
+      let leftPoint = Point2d.placeIn frame (Point2d stemLength (0.5 * headWidth))
       let rightPoint = Point2d.mirrorAcross axis leftPoint
-      let stem = line args.start stemEndPoint
-      let tip = polygon [leftPoint, rightPoint, args.end]
+      let stem = line start stemEndPoint
+      let tip = polygon [leftPoint, rightPoint, end]
       groupWith attributes [stem, tip]
 
 pointsAttribute :: List (Point space) -> Attribute space

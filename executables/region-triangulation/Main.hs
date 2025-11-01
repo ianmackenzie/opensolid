@@ -34,7 +34,7 @@ main = Tolerance.using Length.nanometer IO.do
       , Curve2d.arc p2 p3 Angle.quarterTurn
       , Curve2d.line p3 p4
       , Curve2d.line p4 p0
-      , Curve2d.circle (#centerPoint holeCenter, #diameter holeDiameter)
+      , Curve2d.circle (#centerPoint holeCenter) (#diameter holeDiameter)
       ]
   let resolution = Resolution.maxError (Length.millimeters 1.0)
   let mesh = Region2d.toMesh resolution region

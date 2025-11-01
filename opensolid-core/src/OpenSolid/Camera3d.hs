@@ -125,31 +125,30 @@ The camera will be oriented such that its local up direction
 will be as close as possible to the global up direction.
 -}
 lookAt ::
-  ( "eyePoint" ::: Point3d (space @ units)
-  , "focalPoint" ::: Point3d (space @ units)
-  , "projection" ::: Projection units
-  ) ->
+  "eyePoint" ::: Point3d (space @ units) ->
+  "focalPoint" ::: Point3d (space @ units) ->
+  "projection" ::: Projection units ->
   Camera3d (space @ units)
-lookAt args = do
-  let computedFocalDistance = Point3d.distanceFrom args.eyePoint args.focalPoint
+lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
+  let computedFocalDistance = Point3d.distanceFrom eyePoint focalPoint
   let computedFrame =
-        case Tolerance.using Qty.zero (Vector3d.direction (args.focalPoint - args.eyePoint)) of
+        case Tolerance.using Qty.zero (Vector3d.direction (focalPoint - eyePoint)) of
           Success computedForwardDirection -> do
             let viewVector = Vector3d.unit computedForwardDirection
             let upVector = Vector3d.unit World3d.upwardDirection
             case Tolerance.using 1e-9 (PlaneOrientation3d.fromVectors viewVector upVector) of
               Just rightPlaneOrientation ->
-                Frame3d.fromRightPlane (Plane3d args.eyePoint rightPlaneOrientation)
+                Frame3d.fromRightPlane (Plane3d eyePoint rightPlaneOrientation)
               Nothing -- View direction is either straight up or straight down
                 | Direction3d.upwardComponent computedForwardDirection > 0.0 ->
-                    Frame3d args.eyePoint World3d.upwardOrientation
+                    Frame3d eyePoint World3d.upwardOrientation
                 | otherwise ->
-                    Frame3d args.eyePoint World3d.downwardOrientation
+                    Frame3d eyePoint World3d.downwardOrientation
           Failure Vector3d.IsZero ->
             -- Given eye and focal points are coincident,
             -- so just look straight forward
-            Frame3d args.eyePoint World3d.forwardOrientation
-  new computedFrame computedFocalDistance args.projection
+            Frame3d eyePoint World3d.forwardOrientation
+  new computedFrame computedFocalDistance projection
 
 {-| Construct a camera orbiting around a given focal point, a given distance away.
 
@@ -159,20 +158,19 @@ The elevation is the vertical angle towards the camera from the focal point,
 measure upwards from the global top plane.
 -}
 orbit ::
-  ( "focalPoint" ::: Point3d (space @ units)
-  , "azimuth" ::: Angle
-  , "elevation" ::: Angle
-  , "distance" ::: Qty units
-  , "projection" ::: Projection units
-  ) ->
+  "focalPoint" ::: Point3d (space @ units) ->
+  "azimuth" ::: Angle ->
+  "elevation" ::: Angle ->
+  "distance" ::: Qty units ->
+  "projection" ::: Projection units ->
   Camera3d (space @ units)
-orbit args = do
+orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Named projection) = do
   let computedFrame =
-        Frame3d args.focalPoint World3d.backwardOrientation
-          |> Frame3d.turnRightBy args.azimuth
-          |> Frame3d.tiltDownBy args.elevation
-          |> Frame3d.offsetBackwardBy args.distance
-  new computedFrame args.distance args.projection
+        Frame3d focalPoint World3d.backwardOrientation
+          |> Frame3d.turnRightBy azimuth
+          |> Frame3d.tiltDownBy elevation
+          |> Frame3d.offsetBackwardBy distance
+  new computedFrame distance projection
 
 isometricElevation :: Angle
 isometricElevation = Angle.atan2 1.0 (Float.sqrt 2.0)
@@ -183,12 +181,12 @@ isometric ::
   Projection units ->
   Camera3d (space @ units)
 isometric givenFocalPoint distance givenProjection =
-  orbit do
-    #focalPoint givenFocalPoint
-    #azimuth (Angle.degrees 45.0)
-    #elevation isometricElevation
-    #distance distance
-    #projection givenProjection
+  orbit
+    @ #focalPoint givenFocalPoint
+    @ #azimuth (Angle.degrees 45.0)
+    @ #elevation isometricElevation
+    @ #distance distance
+    @ #projection givenProjection
 
 moveTo ::
   Point3d (space @ units) ->

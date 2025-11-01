@@ -74,7 +74,7 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let centerPoint = Point2d (0.5 * width) (0.5 * width)
   let holeDiameter = 0.5 * width
   let holeRadius = 0.5 * holeDiameter
-  let hole = Curve2d.circle (#centerPoint centerPoint, #diameter holeDiameter)
+  let hole = Curve2d.circle (#centerPoint centerPoint) (#diameter holeDiameter)
   region <- Region2d.boundedBy [line1, line3, line2, line4, hole]
   let expectedArea = width * width - Float.pi * holeRadius * holeRadius
   Test.expect (areaIsApproximately expectedArea region)
@@ -115,13 +115,13 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
 twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
   let circle1 =
-        Curve2d.circle do
-          #centerPoint (Point2d.meters -2.0 0.0)
-          #diameter (Length.meters 2.0)
+        Curve2d.circle
+          @ #centerPoint (Point2d.meters -2.0 0.0)
+          @ #diameter (Length.meters 2.0)
   let circle2 =
-        Curve2d.circle do
-          #centerPoint (Point2d.meters 1.0 0.0)
-          #diameter (Length.meters 1.0)
+        Curve2d.circle
+          @ #centerPoint (Point2d.meters 1.0 0.0)
+          @ #diameter (Length.meters 1.0)
   case Region2d.boundedBy [circle1, circle2] of
     Success _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
     Failure error -> Test.expect (error == Region2d.BoundedBy.MultipleDisjointRegions)

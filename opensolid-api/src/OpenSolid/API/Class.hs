@@ -6,13 +6,6 @@ module OpenSolid.API.Class
   , Member
   , Self (Self)
   , new
-  , curryT2
-  , curry1T2
-  , curryT3
-  , curry1T3
-  , curryT4
-  , curryT5
-  , curryT6
   , static
   , upcast
   , constant
@@ -167,27 +160,6 @@ data Member value where
   PreOverload :: BinaryOperator.Id -> PreOperatorOverload -> Member value
   PostOverload :: BinaryOperator.Id -> PostOperatorOverload -> Member value
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
-
-curryT2 :: ((a, b) -> c) -> a -> b -> c
-curryT2 function a b = function (a, b)
-
-curry1T2 :: (a -> (b, c) -> d) -> a -> b -> c -> d
-curry1T2 function a b c = function a (b, c)
-
-curryT3 :: ((a, b, c) -> d) -> a -> b -> c -> d
-curryT3 function a b c = function (a, b, c)
-
-curry1T3 :: (a -> (b, c, d) -> e) -> a -> b -> c -> d -> e
-curry1T3 function a b c d = function a (b, c, d)
-
-curryT4 :: ((a, b, c, d) -> e) -> a -> b -> c -> d -> e
-curryT4 function a b c d = function (a, b, c, d)
-
-curryT5 :: ((a, b, c, d, e) -> f) -> a -> b -> c -> d -> e -> f
-curryT5 function a b c d e = function (a, b, c, d, e)
-
-curryT6 :: ((a, b, c, d, e, f) -> g) -> a -> b -> c -> d -> e -> f -> g
-curryT6 function a b c d e f = function (a, b, c, d, e, f)
 
 new :: forall value. FFI value => Text -> List (Member value) -> Class
 new givenDocumentation members =

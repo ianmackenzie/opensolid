@@ -141,17 +141,17 @@ curveOverlap1 = Test.verify "curveOverlap1" Test.do
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "curveOverlap2" Test.do
   let arc1 =
-        Curve2d.polarArc do
-          #centerPoint Point2d.origin
-          #radius Length.meter
-          #startAngle Angle.zero
-          #endAngle -Angle.pi
+        Curve2d.polarArc
+          @ #centerPoint Point2d.origin
+          @ #radius Length.meter
+          @ #startAngle Angle.zero
+          @ #endAngle -Angle.pi
   let arc2 =
-        Curve2d.polarArc do
-          #centerPoint Point2d.origin
-          #radius Length.meter
-          #startAngle (Angle.degrees -45.0)
-          #endAngle (Angle.degrees 225.0)
+        Curve2d.polarArc
+          @ #centerPoint Point2d.origin
+          @ #radius Length.meter
+          @ #startAngle (Angle.degrees -45.0)
+          @ #endAngle (Angle.degrees 225.0)
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
@@ -178,17 +178,17 @@ crossingIntersection = Test.verify "crossingIntersection" Test.do
 tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "tangentIntersection" Test.do
   let arc1 =
-        Curve2d.polarArc do
-          #centerPoint Point2d.origin
-          #radius Length.meter
-          #startAngle Angle.zero
-          #endAngle Angle.pi
+        Curve2d.polarArc
+          @ #centerPoint Point2d.origin
+          @ #radius Length.meter
+          @ #startAngle Angle.zero
+          @ #endAngle Angle.pi
   let arc2 =
-        Curve2d.polarArc do
-          #centerPoint (Point2d.meters 0.0 1.5)
-          #radius (Length.meters 0.5)
-          #startAngle -Angle.pi
-          #endAngle Angle.zero
+        Curve2d.polarArc
+          @ #centerPoint (Point2d.meters 0.0 1.5)
+          @ #radius (Length.meters 0.5)
+          @ #startAngle -Angle.pi
+          @ #endAngle Angle.zero
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5 Positive)
   case intersections of

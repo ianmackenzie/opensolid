@@ -19,11 +19,11 @@ main = Tolerance.using Length.nanometer IO.do
   let radius = Length.meters 1.0
   let length = Length.meters 4.0
   let arc =
-        Curve2d.polarArc do
-          #centerPoint Point2d.origin
-          #radius radius
-          #startAngle (Angle.degrees -45.0)
-          #endAngle (Angle.degrees 225.0)
+        Curve2d.polarArc
+          @ #centerPoint Point2d.origin
+          @ #radius radius
+          @ #startAngle (Angle.degrees -45.0)
+          @ #endAngle (Angle.degrees 225.0)
   let line = Curve2d.line arc.endPoint arc.startPoint
   profile <- Region2d.boundedBy [arc, line]
   body <- Body3d.extruded World3d.frontPlane profile (-0.5 * length) (0.5 * length)

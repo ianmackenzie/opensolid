@@ -85,24 +85,24 @@ However, these can be configured by setting the 'spp', 'width' and 'height' para
 for example with 'mitsuba.load_file(path_to_xml_file, spp=256, width=1920, height=1080)'.
 -}
 writeFiles ::
-  ( "path" ::: Text
-  , "model" ::: Model3d space
-  , "resolution" ::: Resolution Meters
-  , "camera" ::: Camera3d (space @ Meters)
-  , "lighting" ::: Lighting space
-  ) ->
+  "path" ::: Text ->
+  "model" ::: Model3d space ->
+  "resolution" ::: Resolution Meters ->
+  "camera" ::: Camera3d (space @ Meters) ->
+  "lighting" ::: Lighting space ->
   IO ()
-writeFiles args = IO.do
-  let collectedMeshes = Model3d.traverse (collectMeshes args.resolution) args.model
+writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named lighting) = IO.do
+  let collectedMeshes = Model3d.traverse (collectMeshes resolution) model
   let (meshes, properties) = List.unzip2 collectedMeshes
-  let meshFileName = args.path <> ".serialized"
+  let meshFileName = path <> ".serialized"
   writeMeshes meshFileName meshes
-  let sceneXml = sceneDocument do
-        #camera args.camera
-        #lighting args.lighting
-        #meshProperties properties
-        #meshFileName meshFileName
-  let sceneFileName = args.path <> ".xml"
+  let sceneXml =
+        sceneDocument
+          @ #camera camera
+          @ #lighting lighting
+          @ #meshProperties properties
+          @ #meshFileName meshFileName
+  let sceneFileName = path <> ".xml"
   IO.writeUtf8 sceneFileName sceneXml
 
 type Vertex space = (Point3d (space @ Meters), Direction3d space)
@@ -242,21 +242,20 @@ attributeText :: (Text, Text) -> Text
 attributeText (name, value) = name <> "=\"" <> value <> "\""
 
 sceneDocument ::
-  ( "camera" ::: Camera3d (space @ Meters)
-  , "lighting" ::: Lighting space
-  , "meshProperties" ::: List Properties
-  , "meshFileName" ::: Text
-  ) ->
+  "camera" ::: Camera3d (space @ Meters) ->
+  "lighting" ::: Lighting space ->
+  "meshProperties" ::: List Properties ->
+  "meshFileName" ::: Text ->
   Text
-sceneDocument args = do
-  let shapeNodes = List.mapWithIndex (shapeNode args.meshFileName) args.meshProperties
+sceneDocument (Named camera) (Named lighting) (Named meshProperties) (Named meshFileName) = do
+  let shapeNodes = List.mapWithIndex (shapeNode meshFileName) meshProperties
   let integratorNode = XmlNode "integrator" [("type", "path")] []
   let documentNodes =
         defaultNode "spp" "16"
           : defaultNode "width" "800"
           : defaultNode "height" "600"
-          : cameraNode args.camera
-          : lightingNode args.lighting
+          : cameraNode camera
+          : lightingNode lighting
           : integratorNode
           : shapeNodes
   let rootNode = XmlNode "scene" [("version", "3.0.0")] documentNodes

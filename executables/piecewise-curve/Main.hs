@@ -42,9 +42,9 @@ main = Tolerance.using Length.nanometer IO.do
   arc4 <- arc vS vSE vE
   let circle = Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point =
-        Drawing2d.circleWith [Drawing2d.whiteFill] do
-          #centerPoint point
-          #diameter (Length.millimeters 4.0)
+        Drawing2d.circleWith [Drawing2d.whiteFill]
+          @ #centerPoint point
+          @ #diameter (Length.millimeters 4.0)
   let drawCurve n curve = do
         Drawing2d.curve (Resolution.maxError Length.micrometer) curve
         Drawing2d.collect (drawDot . Curve2d.evaluate curve) (Parameter.steps n)

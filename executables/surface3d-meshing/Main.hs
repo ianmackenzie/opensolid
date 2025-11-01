@@ -28,7 +28,7 @@ main = IO.do
           + h * SurfaceFunction.v * World3d.upwardDirection
   let domainCenter = Point2d 0.5 0.5
   let domainDiameter = 2 / 3
-  let domainCircle = Curve2d.circle (#centerPoint domainCenter, #diameter domainDiameter)
+  let domainCircle = Curve2d.circle (#centerPoint domainCenter) (#diameter domainDiameter)
   domain <- Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle])
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2.0) surface

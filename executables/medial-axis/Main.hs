@@ -69,7 +69,7 @@ testCurveMedialAxis label curve1 curve2 = IO.do
               let t = Curve.evaluate parameterization u
               let centerPoint = Curve2d.evaluate segment.curve t
               let diameter = 2.0 * Qty.abs (Curve.evaluate segment.radius t)
-              Drawing2d.circle (#centerPoint centerPoint, #diameter diameter)
+              Drawing2d.circle (#centerPoint centerPoint) (#diameter diameter)
         let parameterValues = Parameter.steps 50
         List.map drawTangentCircle parameterValues
   let tangentCircles = List.collect drawTangentCircles segments

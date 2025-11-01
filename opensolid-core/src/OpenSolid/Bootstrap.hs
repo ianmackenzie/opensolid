@@ -11,6 +11,7 @@ module OpenSolid.Bootstrap
   , ifThenElse
   , fromString
   , fromInteger
+  , fromLabel
   , otherwise
   , Int
   , Eq ((==), (/=))
@@ -57,6 +58,7 @@ import Data.Text (Text)
 import Data.Text qualified
 import Data.Traversable.WithIndex (TraversableWithIndex)
 import Data.Type.Equality (type (~))
+import GHC.OverloadedLabels (fromLabel)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude

@@ -198,9 +198,9 @@ testPlaneTorusIntersection = IO.do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let crossSection =
-        Curve2d.circle do
-          #centerPoint (Point2d.x majorRadius)
-          #diameter (2.0 * minorRadius)
+        Curve2d.circle
+          @ #centerPoint (Point2d.x majorRadius)
+          @ #diameter (2.0 * minorRadius)
   surface <- Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
@@ -259,9 +259,9 @@ drawUvCurve attributes curve = do
 
 drawDot :: Color -> UvPoint -> Drawing2d UvSpace
 drawDot color point =
-  Drawing2d.circleWith [Drawing2d.fillColor color] do
-    #centerPoint (Point2d.convert toDrawing point)
-    #diameter (Length.millimeters 1.0)
+  Drawing2d.circleWith [Drawing2d.fillColor color]
+    @ #centerPoint (Point2d.convert toDrawing point)
+    @ #diameter (Length.millimeters 1.0)
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint number delay = IO.do
@@ -306,7 +306,8 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let curve = Curve2d.bezier drawingControlPoints
   let drawSegmentBounds tBounds = drawBounds (Curve2d.evaluateBounds curve tBounds)
   let controlPointDiameter = Length.millimeters 10.0
-  let drawControlPoint point = Drawing2d.circle (#centerPoint point, #diameter controlPointDiameter)
+  let drawControlPoint point =
+        Drawing2d.circle (#centerPoint point) (#diameter controlPointDiameter)
   let resolution = Resolution.maxError Length.millimeter
   Drawing2d.groupWith
     [ Drawing2d.strokeColor color

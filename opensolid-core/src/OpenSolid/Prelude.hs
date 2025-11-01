@@ -37,7 +37,7 @@ import OpenSolid.CoordinateSystem
   )
 import OpenSolid.Float (Float, fromRational)
 import OpenSolid.Intersects (Intersects ((^)))
-import OpenSolid.Named
+import OpenSolid.Named ((:::) (Named))
 import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import OpenSolid.Qty (Qty)
 import OpenSolid.Result (Result (Failure, Success))

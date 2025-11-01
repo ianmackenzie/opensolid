@@ -240,14 +240,15 @@ Fails if the diameter is zero.
 -}
 sphere ::
   Tolerance units =>
-  ("centerPoint" ::: Point3d (space @ units), "diameter" ::: Qty units) ->
+  "centerPoint" ::: Point3d (space @ units) ->
+  "diameter" ::: Qty units ->
   Result EmptyBody (Body3d (space @ units))
-sphere args =
-  if args.diameter ~= Qty.zero
+sphere (Named centerPoint) (Named diameter) =
+  if diameter ~= Qty.zero
     then Failure EmptyBody
     else do
-      let sketchPlane = Plane3d args.centerPoint World3d.frontPlane.orientation
-      let radius = 0.5 * args.diameter
+      let sketchPlane = Plane3d centerPoint World3d.frontPlane.orientation
+      let radius = 0.5 * diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius
       let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
@@ -292,7 +293,7 @@ cylinderAlong ::
   "diameter" ::: Qty units ->
   Result EmptyBody (Body3d (space @ units))
 cylinderAlong axis d1 d2 (Named diameter) = do
-  case Region2d.circle (#centerPoint Point2d.origin, #diameter diameter) of
+  case Region2d.circle (#centerPoint Point2d.origin) (#diameter diameter) of
     Failure Region2d.EmptyRegion -> Failure EmptyBody
     Success profile ->
       if d1 ~= d2

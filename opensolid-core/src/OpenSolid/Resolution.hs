@@ -30,17 +30,17 @@ maxSize :: Qty units -> Resolution units
 maxSize size = Resolution{maxError = Qty.infinity, maxSize = size}
 
 -- | Specify both the maximum error and maximum element size in the approximation.
-custom :: ("maxError" ::: Qty units, "maxSize" ::: Qty units) -> Resolution units
-custom args = Resolution{maxError = args.maxError, maxSize = args.maxSize}
+custom :: "maxError" ::: Qty units -> "maxSize" ::: Qty units -> Resolution units
+custom (Named givenMaxError) (Named givenMaxSize) =
+  Resolution{maxError = givenMaxError, maxSize = givenMaxSize}
 
 predicate ::
-  ("size" ::: (a -> Qty units), "error" ::: (a -> Qty units)) ->
+  "size" ::: (a -> Qty units) ->
+  "error" ::: (a -> Qty units) ->
   Resolution units ->
   a ->
   Bool
-predicate args resolution value = do
-  let acceptableSize =
-        Qty.isInfinite resolution.maxSize || args.size value <= resolution.maxSize
-  let acceptableError =
-        Qty.isInfinite resolution.maxError || args.error value <= resolution.maxError
+predicate (Named size) (Named error) resolution value = do
+  let acceptableSize = Qty.isInfinite resolution.maxSize || size value <= resolution.maxSize
+  let acceptableError = Qty.isInfinite resolution.maxError || error value <= resolution.maxError
   acceptableSize && acceptableError

@@ -42,19 +42,19 @@ viewBox p1 p2 = Bounds2d.hull2 (Point2d.convert scale p1) (Point2d.convert scale
 
 xAxis :: Float -> Float -> Drawing2d Space
 xAxis x1 x2 =
-  Drawing2d.arrow do
-    #start (Point2d.x (Qty.convert scale x1))
-    #end (Point2d.x (Qty.convert scale x2 + axisHeadLength))
-    #headLength axisHeadLength
-    #headWidth axisHeadWidth
+  Drawing2d.arrow
+    @ #start (Point2d.x (Qty.convert scale x1))
+    @ #end (Point2d.x (Qty.convert scale x2 + axisHeadLength))
+    @ #headLength axisHeadLength
+    @ #headWidth axisHeadWidth
 
 yAxis :: Float -> Float -> Drawing2d Space
 yAxis y1 y2 =
-  Drawing2d.arrow do
-    #start (Point2d.y (Qty.convert scale y1))
-    #end (Point2d.y (Qty.convert scale y2 + axisHeadLength))
-    #headLength axisHeadLength
-    #headWidth axisHeadWidth
+  Drawing2d.arrow
+    @ #start (Point2d.y (Qty.convert scale y1))
+    @ #end (Point2d.y (Qty.convert scale y2 + axisHeadLength))
+    @ #headLength axisHeadLength
+    @ #headWidth axisHeadWidth
 
 curve :: Curve Unitless -> Drawing2d Space
 curve = curveWith []

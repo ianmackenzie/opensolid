@@ -424,11 +424,10 @@ recursive givenCompiled derivativeFunction =
 
 desingularize ::
   SurfaceFunction units ->
-  ( "singularityU0" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
-  , "singularityU1" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
-  , "singularityV0" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
-  , "singularityV1" ::: Maybe (SurfaceFunction units, SurfaceFunction units)
-  ) ->
+  "singularityU0" ::: Maybe (SurfaceFunction units, SurfaceFunction units) ->
+  "singularityU1" ::: Maybe (SurfaceFunction units, SurfaceFunction units) ->
+  "singularityV0" ::: Maybe (SurfaceFunction units, SurfaceFunction units) ->
+  "singularityV1" ::: Maybe (SurfaceFunction units, SurfaceFunction units) ->
   SurfaceFunction units
 desingularize = SurfaceFunction.Blending.desingularize desingularized
 
@@ -525,11 +524,11 @@ sqrt' function =
             if functionIsZero && firstDerivativeIsZero
               then Just (zero, sign * unsafeSqrt' (0.5 * secondDerivative))
               else Nothing
-      desingularize (unsafeSqrt' function) do
-        #singularityU0 (maybeSingularity U 0.0 Positive)
-        #singularityU1 (maybeSingularity U 1.0 Negative)
-        #singularityV0 (maybeSingularity V 0.0 Positive)
-        #singularityV1 (maybeSingularity V 1.0 Negative)
+      desingularize (unsafeSqrt' function)
+        @ #singularityU0 (maybeSingularity U 0.0 Positive)
+        @ #singularityU1 (maybeSingularity U 1.0 Negative)
+        @ #singularityV0 (maybeSingularity V 0.0 Positive)
+        @ #singularityV1 (maybeSingularity V 1.0 Negative)
 
 unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction units2 -> SurfaceFunction units1
 unsafeSqrt function = unsafeSqrt' (Units.unspecialize function)

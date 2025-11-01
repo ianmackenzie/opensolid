@@ -25,9 +25,9 @@ gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))
 gearBody numTeeth = Try.do
   let gearModule = Length.millimeters 1.0
   let holeDiameter = Length.millimeters 8.0
-  let spurGear = SpurGear.metric (#numTeeth numTeeth, #module gearModule)
+  let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
   let outerProfile = SpurGear.profile spurGear
-  let hole = Curve2d.circle (#centerPoint Point2d.origin, #diameter holeDiameter)
+  let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
   profile <- Region2d.boundedBy (hole : outerProfile)
   let width = Length.millimeters 8.0
   Body3d.extruded World3d.frontPlane profile (-0.5 * width) (0.5 * width)

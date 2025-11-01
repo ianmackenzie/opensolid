@@ -117,11 +117,11 @@ resolvesTo value estimate
 area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
   let curve =
-        Curve2d.polarArc do
-          #centerPoint Point2d.origin
-          #radius Length.meter
-          #startAngle Angle.pi
-          #endAngle Angle.zero
+        Curve2d.polarArc
+          @ #centerPoint Point2d.origin
+          @ #radius Length.meter
+          @ #startAngle Angle.pi
+          @ #endAngle Angle.zero
   let dAdt = Curve2d.yCoordinate curve * curve.derivative.xComponent
   let areaEstimate = Curve.integrate dAdt
   let expectedArea = Area.squareMeters (Float.pi / 2.0)

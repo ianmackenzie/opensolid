@@ -89,7 +89,7 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.Intersections qualified as Intersections
-import {-# SOURCE #-} OpenSolid.Curve2d.MedialAxis qualified as MedialAxis
+import OpenSolid.Curve2d.MedialAxis qualified as MedialAxis
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import {-# SOURCE #-} OpenSolid.Curve3d (Curve3d)
 import {-# SOURCE #-} OpenSolid.Curve3d qualified as Curve3d
@@ -383,19 +383,13 @@ arc givenStartPoint givenEndPoint sweptAngle =
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
-  ( "centerPoint" ::: Point2d (space @ units)
-  , "radius" ::: Qty units
-  , "startAngle" ::: Angle
-  , "endAngle" ::: Angle
-  ) ->
+  "centerPoint" ::: Point2d (space @ units) ->
+  "radius" ::: Qty units ->
+  "startAngle" ::: Angle ->
+  "endAngle" ::: Angle ->
   Curve2d (space @ units)
-polarArc args =
-  customArc
-    args.centerPoint
-    (Vector2d.x args.radius)
-    (Vector2d.y args.radius)
-    args.startAngle
-    args.endAngle
+polarArc (Named centerPoint) (Named radius) (Named startAngle) (Named endAngle) =
+  customArc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle
 
 {-| Create an arc with the given center point, start point and swept angle.
 
@@ -405,30 +399,29 @@ sweptArc :: Point2d (space @ units) -> Point2d (space @ units) -> Angle -> Curve
 sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2d.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2d.angleFrom centerPoint givenStartPoint
-  polarArc do
-    #centerPoint centerPoint
-    #radius radius
-    #startAngle startAngle
-    #endAngle (startAngle + sweptAngle)
+  polarArc
+    @ #centerPoint centerPoint
+    @ #radius radius
+    @ #startAngle startAngle
+    @ #endAngle (startAngle + sweptAngle)
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
   Tolerance units =>
   Point2d (space @ units) ->
-  ( "incoming" ::: Direction2d space
-  , "outgoing" ::: Direction2d space
-  , "radius" ::: Qty units
-  ) ->
+  "incoming" ::: Direction2d space ->
+  "outgoing" ::: Direction2d space ->
+  "radius" ::: Qty units ->
   Curve2d (space @ units)
-cornerArc cornerPoint args = do
-  let radius = Qty.abs args.radius
-  let sweptAngle = Direction2d.angleFrom args.incoming args.outgoing
+cornerArc cornerPoint (Named incomingDirection) (Named outgoingDirection) (Named givenRadius) = do
+  let radius = Qty.abs givenRadius
+  let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
   if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
     then line cornerPoint cornerPoint
     else do
       let offset = radius * Qty.abs (Angle.tan (0.5 * sweptAngle))
-      let computedStartPoint = cornerPoint - offset * args.incoming
-      let computedEndPoint = cornerPoint + offset * args.outgoing
+      let computedStartPoint = cornerPoint - offset * incomingDirection
+      let computedEndPoint = cornerPoint + offset * outgoingDirection
       arc computedStartPoint computedEndPoint sweptAngle
 
 data WhichArc
@@ -496,14 +489,15 @@ customArc p0 v1 v2 a b = do
 
 -- | Create a circle with the given center point and diameter.
 circle ::
-  ("centerPoint" ::: Point2d (space @ units), "diameter" ::: Qty units) ->
+  "centerPoint" ::: Point2d (space @ units) ->
+  "diameter" ::: Qty units ->
   Curve2d (space @ units)
-circle args =
-  polarArc do
-    #centerPoint args.centerPoint
-    #radius (0.5 * args.diameter)
-    #startAngle Angle.zero
-    #endAngle Angle.twoPi
+circle (Named centerPoint) (Named diameter) =
+  polarArc
+    @ #centerPoint centerPoint
+    @ #radius (0.5 * diameter)
+    @ #startAngle Angle.zero
+    @ #endAngle Angle.twoPi
 
 {-| Create an ellipes with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,
@@ -1098,7 +1092,7 @@ samplingPoints resolution curve = do
         let secondDerivativeBounds = VectorCurve2d.evaluateBounds curve.secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
         Linearization.error secondDerivativeMagnitude subdomain
-  let predicate = Resolution.predicate (#size size, #error error) resolution
+  let predicate = Resolution.predicate (#size size) (#error error) resolution
   Domain1d.samplingPoints predicate
 
 medialAxis ::
@@ -1131,12 +1125,13 @@ medialAxis curve1 curve2 = do
       let curve :: SurfaceFunction2d (space @ units) =
             (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
       let toSegment solutionCurve =
-            MedialAxis.Segment do
-              #t1 solutionCurve.xCoordinate
-              #t2 solutionCurve.yCoordinate
-              #t12 solutionCurve
-              #curve (curve . solutionCurve)
-              #radius (radius . solutionCurve)
+            MedialAxis.Segment
+              { t1 = solutionCurve.xCoordinate
+              , t2 = solutionCurve.yCoordinate
+              , t12 = solutionCurve
+              , curve = curve . solutionCurve
+              , radius = radius . solutionCurve
+              }
       Success (List.map toSegment zeros.crossingCurves)
 
 arcLengthParameterization ::

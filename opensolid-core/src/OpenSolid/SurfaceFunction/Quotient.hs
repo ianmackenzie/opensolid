@@ -11,11 +11,10 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 
 type Desingularize function =
   function ->
-  ( "singularityU0" ::: Maybe (function, function)
-  , "singularityU1" ::: Maybe (function, function)
-  , "singularityV0" ::: Maybe (function, function)
-  , "singularityV1" ::: Maybe (function, function)
-  ) ->
+  "singularityU0" ::: Maybe (function, function) ->
+  "singularityU1" ::: Maybe (function, function) ->
+  "singularityV0" ::: Maybe (function, function) ->
+  "singularityV1" ::: Maybe (function, function) ->
   function
 
 impl ::
@@ -40,8 +39,9 @@ impl unsafeQuotient lhopital desingularize numerator denominator
       maybeSingularityU1 <- maybeSingularity U 1.0
       maybeSingularityV0 <- maybeSingularity V 0.0
       maybeSingularityV1 <- maybeSingularity V 1.0
-      Success $ desingularize (unsafeQuotient numerator denominator) do
-        #singularityU0 maybeSingularityU0
-        #singularityU1 maybeSingularityU1
-        #singularityV0 maybeSingularityV0
-        #singularityV1 maybeSingularityV1
+      Success $
+        desingularize (unsafeQuotient numerator denominator)
+          @ #singularityU0 maybeSingularityU0
+          @ #singularityU1 maybeSingularityU1
+          @ #singularityV0 maybeSingularityV0
+          @ #singularityV1 maybeSingularityV1
