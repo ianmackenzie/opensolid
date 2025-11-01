@@ -52,5 +52,5 @@ main = Tolerance.using Length.nanometer IO.do
           ]
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -12.0 -12.0) (Point2d.centimeters 12.0 12.0)
   Drawing2d.writeSvg "executables/piecewise-curve/circle.svg" drawingBounds (drawCurve 40 circle)
-  Drawing2d.writeSvg "executables/piecewise-curve/arcs.svg" drawingBounds do
+  Drawing2d.writeSvg "executables/piecewise-curve/arcs.svg" drawingBounds $
     Drawing2d.collect (drawCurve 10) [arc1, arc2, arc3, arc4]
