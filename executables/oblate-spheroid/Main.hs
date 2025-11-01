@@ -9,7 +9,6 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Tolerance qualified as Tolerance

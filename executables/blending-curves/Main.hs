@@ -6,27 +6,27 @@ import OpenSolid.Debug.Plot qualified as Plot
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Prelude
+import OpenSolid.Syntax (float, half, twice, (.*), (.+), (.-))
 import OpenSolid.Text qualified as Text
 
 main :: IO ()
 main = do
   let t = Curve.t
-  let a0 = 1.0 - Curve.cubed t * (4.0 - 3.0 * t)
-  let b0 = t * (1.0 + Curve.squared t * (2.0 * t - 3.0))
-  let c0 = Curve.squared t * (0.5 + t * (0.5 * t - 1.0))
-  let a1 = Curve.cubed t * (4.0 - 3.0 * t)
-  let b1 = Curve.cubed t * (t - 1.0)
+  let a0 = float 1.0 .- Curve.cubed t .* (float 4.0 .- float 3.0 .* t)
+  let b0 = t .* (float 1.0 .+ Curve.squared t .* (twice t .- float 3.0))
+  let c0 = Curve.squared t .* (float 0.5 .+ t .* (half t .- float 1.0))
+  let a1 = Curve.cubed t .* (float 4.0 .- float 3.0 .* t)
+  let b1 = Curve.cubed t .* (t .- float 1.0)
   let drawing yScale a0' b0' c0' a1' b1' =
         Drawing2d.group
           [ Plot.xAxis 0.0 1.0
           , Plot.yAxis 0.0 yScale
-          , Plot.curveWith [Drawing2d.strokeColor Color.red] (yScale * a0')
-          , Plot.curveWith [Drawing2d.strokeColor Color.orange] (yScale * b0')
-          , Plot.curveWith [Drawing2d.strokeColor Color.yellow] (yScale * c0')
-          , Plot.curveWith [Drawing2d.strokeColor Color.green] (yScale * a1')
-          , Plot.curveWith [Drawing2d.strokeColor Color.blue] (yScale * b1')
-          , Plot.curveWith [Drawing2d.strokeColor Color.grey] (yScale * (a0' + a1'))
+          , Plot.curveWith [Drawing2d.strokeColor Color.red] (yScale .* a0')
+          , Plot.curveWith [Drawing2d.strokeColor Color.orange] (yScale .* b0')
+          , Plot.curveWith [Drawing2d.strokeColor Color.yellow] (yScale .* c0')
+          , Plot.curveWith [Drawing2d.strokeColor Color.green] (yScale .* a1')
+          , Plot.curveWith [Drawing2d.strokeColor Color.blue] (yScale .* b1')
+          , Plot.curveWith [Drawing2d.strokeColor Color.grey] (yScale .* (a0' .+ a1'))
           ]
   let curvesDrawing = drawing 1.0 a0 b0 c0 a1 b1
   let curvesDrawing2 = drawing 1.0 Curve.b00 Curve.b01 Curve.b02 Curve.b10 Curve.b11

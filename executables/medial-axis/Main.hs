@@ -1,5 +1,6 @@
 module Main (main) where
 
+import Data.Text (Text)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color qualified as Color
@@ -9,19 +10,20 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.MedialAxis qualified as Curve2d.MedialAxis
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration qualified as Duration
-import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Syntax (twice, type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
+import OpenSolid.Tolerance (Tolerance)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (Meters)
 
 data Global
 
@@ -30,7 +32,7 @@ main = Tolerance.using Length.micrometer IO.do
   timer <- Timer.start
   IO.Parallel.run [testSplineAndArc, testSplineAndLine]
   elapsed <- Timer.elapsed timer
-  IO.printLine ("Overall" <> ": " <> Text.int (Float.round (Duration.inMilliseconds elapsed)) <> " ms")
+  IO.printLine ("Overall" <> ": " <> Text.int (round (Duration.inMilliseconds elapsed)) <> " ms")
 
 testSplineAndArc :: Tolerance Meters => IO ()
 testSplineAndArc = do
@@ -68,7 +70,7 @@ testCurveMedialAxis label curve1 curve2 = IO.do
         let drawTangentCircle u = do
               let t = Curve.evaluate parameterization u
               let centerPoint = Curve2d.evaluate segment.curve t
-              let diameter = 2.0 * Qty.abs (Curve.evaluate segment.radius t)
+              let diameter = twice (Qty.abs (Curve.evaluate segment.radius t))
               Drawing2d.circle (#centerPoint centerPoint) (#diameter diameter)
         let parameterValues = Parameter.steps 50
         List.map drawTangentCircle parameterValues
@@ -90,4 +92,4 @@ testCurveMedialAxis label curve1 curve2 = IO.do
       , drawCurve curve2
       ]
   elapsed <- Timer.elapsed timer
-  IO.printLine (label <> ": " <> Text.int (Float.round (Duration.inMilliseconds elapsed)) <> " ms")
+  IO.printLine (label <> ": " <> Text.int (round (Duration.inMilliseconds elapsed)) <> " ms")

@@ -7,12 +7,13 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
+import OpenSolid.Syntax (half, negative, (@))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
+import Prelude hiding (length)
 
 main :: IO ()
 main = Tolerance.using Length.nanometer IO.do
@@ -26,7 +27,7 @@ main = Tolerance.using Length.nanometer IO.do
           @ #endAngle (Angle.degrees 225.0)
   let line = Curve2d.line arc.endPoint arc.startPoint
   profile <- Region2d.boundedBy [arc, line]
-  body <- Body3d.extruded World3d.frontPlane profile (-0.5 * length) (0.5 * length)
+  body <- Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length)
   let resolution = Resolution.maxSize (Length.centimeters 30.0)
   let mesh = Body3d.toMesh resolution body
   let outputPath = "executables/body3d-meshing/mesh.stl"

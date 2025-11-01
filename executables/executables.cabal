@@ -40,6 +40,7 @@ common config
     BlockArguments
     DataKinds
     DisambiguateRecordFields
+    ExplicitNamespaces
     GADTs
     LexicalNegation
     OverloadedLabels
@@ -47,7 +48,6 @@ common config
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
-    RebindableSyntax
     TypeApplications
 
 executable sandbox
@@ -60,6 +60,7 @@ executable sandbox
     containers,
     opensolid-core,
     random,
+    text,
 
 executable test-server
   import: config
@@ -78,21 +79,26 @@ executable arc-length
   main-is: Main.hs
   hs-source-dirs: arc-length
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
+    text,
 
 executable piecewise-curve
   import: config
   main-is: Main.hs
   hs-source-dirs: piecewise-curve
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable medial-axis
   import: config
   main-is: Main.hs
   hs-source-dirs: medial-axis
   build-depends:
+    base,
     opensolid-core,
+    text,
     time,
 
 executable region-triangulation
@@ -100,64 +106,74 @@ executable region-triangulation
   main-is: Main.hs
   hs-source-dirs: region-triangulation
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable surface3d-meshing
   import: config
   main-is: Main.hs
   hs-source-dirs: surface3d-meshing
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable body3d-meshing
   import: config
   main-is: Main.hs
   hs-source-dirs: body3d-meshing
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable raindrop
   import: config
   main-is: Main.hs
   hs-source-dirs: raindrop
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable croissant
   import: config
   main-is: Main.hs
   hs-source-dirs: croissant
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable funky-moulding
   import: config
   main-is: Main.hs
   hs-source-dirs: funky-moulding
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable i-beam
   import: config
   main-is: Main.hs
   hs-source-dirs: i-beam
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable expression-evaluation
   import: config
   main-is: Main.hs
   hs-source-dirs: expression-evaluation
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable gear-generation
   import: config
   main-is: Main.hs
   hs-source-dirs: gear-generation
   build-depends:
+    base,
     opensolid-components,
     opensolid-core,
+    text,
     time,
 
 executable blended-surface
@@ -165,18 +181,21 @@ executable blended-surface
   main-is: Main.hs
   hs-source-dirs: blended-surface
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable blending-curves
   import: config
   main-is: Main.hs
   hs-source-dirs: blending-curves
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,
 
 executable oblate-spheroid
   import: config
   main-is: Main.hs
   hs-source-dirs: oblate-spheroid
   build-depends:
-    opensolid-core
+    base,
+    opensolid-core,

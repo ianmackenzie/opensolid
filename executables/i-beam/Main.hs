@@ -13,11 +13,12 @@ import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Syntax (half, negative, (.-), (@))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
+import Prelude hiding (length)
 
 main :: IO ()
 main = Tolerance.using Length.nanometer IO.do
@@ -26,11 +27,11 @@ main = Tolerance.using Length.nanometer IO.do
   let height = Length.centimeters 15.0
   let thickness = Length.centimeters 2.0
   let filletRadius = Length.millimeters 5.0
-  let p1 = Point2d.x (0.5 * thickness)
-  let p2 = Point2d (0.5 * thickness) (0.5 * height - thickness)
-  let p3 = Point2d (0.5 * width) (0.5 * height - thickness)
-  let p4 = Point2d (0.5 * width) (0.5 * height)
-  let p5 = Point2d.y (0.5 * height)
+  let p1 = Point2d.x (half thickness)
+  let p2 = Point2d (half thickness) (half height .- thickness)
+  let p3 = Point2d (half width) (half height .- thickness)
+  let p4 = Point2d (half width) (half height)
+  let p5 = Point2d.y (half height)
   let fillet =
         Curve2d.cornerArc p2
           @ #incoming Direction2d.y
@@ -46,7 +47,7 @@ main = Tolerance.using Length.nanometer IO.do
   let topCurves = topRightCurves <> List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- Region2d.boundedBy allCurves
-  body <- Body3d.extruded World3d.frontPlane profile (-0.5 * length) (0.5 * length)
+  body <- Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length)
   let material = PbrMaterial.metal (Color.rgbFloat 0.913 0.921 0.925) (#roughness 0.3)
   let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
   let resolution = Resolution.maxError (Length.millimeters 1.0)
