@@ -47,7 +47,7 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text qualified
 import Foreign.Storable (Storable)
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (max, min)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Composition
@@ -79,22 +79,21 @@ pattern Qty# x# = Qty (D# x#)
 instance Show (Qty Unitless) where
   show (Qty x) = Prelude.show x
 
-showsPrec :: Text -> Int -> Qty units -> Prelude.ShowS
-showsPrec constructor prec (Qty x) =
-  Prelude.showParen (prec > 10) $
-    Prelude.showString (Data.Text.unpack (constructor <> " ")) . Prelude.showsPrec 11 x
+showsPrecImpl :: Text -> Int -> Qty units -> ShowS
+showsPrecImpl constructor prec (Qty x) =
+  showParen (prec > 10) (showString (Data.Text.unpack (constructor <> " ")) . showsPrec 11 x)
 
 instance Show (Qty Meters) where
-  showsPrec = showsPrec "Length.meters"
+  showsPrec = showsPrecImpl "Length.meters"
 
 instance Show (Qty Radians) where
-  showsPrec = showsPrec "Angle.radians"
+  showsPrec = showsPrecImpl "Angle.radians"
 
 instance Show (Qty SquareMeters) where
-  showsPrec = showsPrec "Area.squareMeters"
+  showsPrec = showsPrecImpl "Area.squareMeters"
 
 instance Show (Qty CubicMeters) where
-  showsPrec = showsPrec "Area.cubicMeters"
+  showsPrec = showsPrecImpl "Area.cubicMeters"
 
 deriving newtype instance Prelude.Num Float
 
@@ -309,26 +308,26 @@ For example, for one step the returned values will just be the given start and e
 for two steps the returned values will be the start value, the midpoint and then the end value.
 -}
 steps :: Qty units -> Qty units -> Int -> List (Qty units)
-steps start end n = if n > 0 then sequence start end n [0 .. n] else []
+steps start end n = if n > 0 then range start end n [0 .. n] else []
 
 -- | Interpolate between two values like 'steps', but skip the first value.
 leading :: Qty units -> Qty units -> Int -> List (Qty units)
-leading start end n = sequence start end n [0 .. n - 1]
+leading start end n = range start end n [0 .. n - 1]
 
 -- | Interpolate between two values like 'steps', but skip the last value.
 trailing :: Qty units -> Qty units -> Int -> List (Qty units)
-trailing start end n = sequence start end n [1 .. n]
+trailing start end n = range start end n [1 .. n]
 
 -- | Interpolate between two values like 'steps', but skip the first and last values.
 inBetween :: Qty units -> Qty units -> Int -> List (Qty units)
-inBetween start end n = sequence start end n [1 .. n - 1]
+inBetween start end n = range start end n [1 .. n - 1]
 
 {-| Subdivide a given range into the given number of steps, and return the midpoint of each step.
 
 This can be useful if you want to sample a curve or other function at the midpoint of several intervals.
 -}
 midpoints :: Qty units -> Qty units -> Int -> List (Qty units)
-midpoints start end n = sequence start end (2 * n) [1, 3 .. 2 * n - 1]
+midpoints start end n = range start end (2 * n) [1, 3 .. 2 * n - 1]
 
-sequence :: Qty units -> Qty units -> Int -> List Int -> List (Qty units)
-sequence start end n indices = let delta = end - start in [start + (i / n) * delta | i <- indices]
+range :: Qty units -> Qty units -> Int -> List Int -> List (Qty units)
+range start end n indices = let delta = end - start in [start + (i / n) * delta | i <- indices]

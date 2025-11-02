@@ -3,7 +3,7 @@ module OpenSolid.Model3d
   , Attribute
   , Context (..)
   , traversal
-  , traverse
+  , inspect
   , Traversal
   , body
   , bodyWith
@@ -71,8 +71,8 @@ type Traversal = ?context :: Context
 traversal :: Traversal => Context
 traversal = ?context
 
-traverse :: (Traversal => Model3d space -> a) -> Model3d space -> a
-traverse function model = let ?context = rootContext in function model
+inspect :: (Traversal => Model3d space -> a) -> Model3d space -> a
+inspect function model = let ?context = rootContext in function model
 
 applyAttribute :: Context -> Attribute -> Context
 applyAttribute ctx attr = case attr of

@@ -43,7 +43,7 @@ convention = Convention3d.yUp
 
 builder :: Resolution Meters -> Model3d space -> Builder
 builder resolution model = do
-  let meshes = Model3d.traverse (gltfMeshes resolution) model
+  let meshes = Model3d.inspect (gltfMeshes resolution) model
   let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. meshes.length - 1]]
   let unpaddedBufferBuilder = Binary.combine meshBuilder meshes
   let unpaddedBufferByteLength = Int.sumOf meshByteLength meshes
@@ -266,5 +266,5 @@ paddedByteLength unpaddedLength = do
 padWith :: Char -> Builder -> Int -> (Builder, Int)
 padWith char unpaddedBuilder unpaddedLength = do
   let paddedLength = paddedByteLength unpaddedLength
-  let padding = Builder.string7 (List.repeat (paddedLength - unpaddedLength) char)
+  let padding = Builder.string7 (List.replicate (paddedLength - unpaddedLength) char)
   (unpaddedBuilder <> padding, paddedLength)

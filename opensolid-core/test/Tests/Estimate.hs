@@ -60,7 +60,7 @@ duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 duplicatedDummyEstimates = Random.do
   pair <- dummyEstimate
   numPairs <- Int.random 1 3
-  Random.return (pair :| List.repeat (numPairs - 1) pair)
+  Random.return (pair :| List.replicate (numPairs - 1) pair)
 
 dummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 dummyEstimates = Random.do

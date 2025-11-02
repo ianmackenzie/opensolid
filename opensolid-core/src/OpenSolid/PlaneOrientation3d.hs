@@ -20,7 +20,7 @@ where
 
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (flip)
 import OpenSolid.Primitives
   ( Direction3d (Unit3d)
   , Frame3d

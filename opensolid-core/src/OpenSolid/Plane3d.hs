@@ -33,7 +33,7 @@ import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (flip)
 import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d, Plane3d (Plane3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)

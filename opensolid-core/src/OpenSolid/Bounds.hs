@@ -77,7 +77,7 @@ import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (max, min)
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random

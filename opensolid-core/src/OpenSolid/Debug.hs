@@ -13,7 +13,7 @@ import Control.Exception qualified
 import Data.Text qualified
 import Debug.Trace qualified
 import GHC.Stack qualified
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (print)
 import OpenSolid.Composition
 import OpenSolid.Text qualified as Text
 import Prelude qualified

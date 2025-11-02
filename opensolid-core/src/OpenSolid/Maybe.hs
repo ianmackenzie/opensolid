@@ -38,7 +38,7 @@ Just value >>= function = function value
 Nothing >>= _ = Nothing
 
 andThen :: (a -> Maybe b) -> Maybe a -> Maybe b
-andThen function maybe = maybe >>= function
+andThen function = (>>= function)
 
 infixl 1 >>=
 

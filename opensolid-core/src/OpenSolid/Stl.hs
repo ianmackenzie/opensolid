@@ -45,7 +45,7 @@ toBinary ::
   Mesh vertex ->
   Builder
 toBinary convention units mesh = do
-  let emptyHeaderBytes = List.repeat 80 (Binary.uint8 0)
+  let emptyHeaderBytes = List.replicate 80 (Binary.uint8 0)
   let header = Binary.concat emptyHeaderBytes
   let triangleCount = Binary.uint32LE mesh.numFaces
   let triangles = Binary.combine (triangleBuilder convention units) (Mesh.faceVertices mesh)

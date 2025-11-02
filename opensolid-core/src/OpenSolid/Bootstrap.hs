@@ -6,42 +6,27 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module OpenSolid.Bootstrap
-  ( List
+  ( module Prelude
+  , List
   , Text
   , ifThenElse
   , fromString
   , fromInteger
   , fromLabel
-  , otherwise
-  , Int
   , Eq ((==), (/=))
   , Ord ((<), (<=), (>=), (>), compare)
   , Ordering (EQ, GT, LT)
-  , Show
-  , Foldable
   , FoldableWithIndex
-  , Traversable
   , TraversableWithIndex
   , Bool (True, False)
-  , Char
-  , not
-  , (&&)
-  , (||)
-  , (<>)
-  , IO
   , Async
   , Maybe (Just, Nothing)
   , Type
-  , id
-  , const
   , (@)
-  , fromIntegral
   , internalError
   , exception
   , pattern TODO
   , (|>)
-  , ($)
-  , type (~)
   , HasCallStack
   , withFrozenCallStack
   , HasField (getField)
@@ -57,31 +42,52 @@ import Data.List.NonEmpty qualified
 import Data.Text (Text)
 import Data.Text qualified
 import Data.Traversable.WithIndex (TraversableWithIndex)
-import Data.Type.Equality (type (~))
 import GHC.OverloadedLabels (fromLabel)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
-import Prelude
-  ( Bool (False, True)
-  , Char
-  , Eq ((/=), (==))
-  , Foldable
-  , IO
-  , Int
-  , Maybe (Just, Nothing)
-  , Ord (compare, (<), (<=), (>), (>=))
-  , Ordering (EQ, GT, LT)
-  , Show
-  , Traversable
-  , const
-  , fromIntegral
-  , id
-  , not
-  , otherwise
-  , ($)
-  , (&&)
-  , (<>)
-  , (||)
+import Prelude hiding
+  ( Float
+  , Floating (..)
+  , Fractional (..)
+  , Integral (..)
+  , Num (..)
+  , Rational
+  , Real (..)
+  , RealFloat (..)
+  , RealFrac (..)
+  , drop
+  , error
+  , fail
+  , filter
+  , head
+  , init
+  , last
+  , length
+  , lines
+  , map
+  , maximum
+  , minimum
+  , read
+  , replicate
+  , return
+  , reverse
+  , show
+  , splitAt
+  , subtract
+  , sum
+  , tail
+  , take
+  , unzip
+  , unzip3
+  , zip
+  , zip3
+  , zipWith
+  , zipWith3
+  , (.)
+  , (>>)
+  , (>>=)
+  , (^)
+  , (^^)
   )
 import Prelude qualified
 

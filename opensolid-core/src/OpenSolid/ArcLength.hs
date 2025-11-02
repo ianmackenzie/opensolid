@@ -35,7 +35,7 @@ parameterization derivativeMagnitude = do
     | otherwise -> do
         let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
         let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
-        let evaluate uValue = lookup tree (uValue * length)
+        let evaluate uValue = evaluateIn tree (uValue * length)
         let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
         let compiled = CompiledFunction.abstract evaluate evaluateBounds
         case Curve.quotient (Curve.constant length) derivativeMagnitude of
@@ -48,11 +48,11 @@ isConstant y1 y2 y3 y4 = y1 ~= y2 && y1 ~= y3 && y1 ~= y4
 isLinear :: Tolerance units => Qty units -> Qty units -> Qty units -> Qty units -> Bool
 isLinear y1 y2 y3 y4 = let dy = y4 - y1 in y2 ~= y1 + dy * Lobatto.p2 && y3 ~= y1 + dy * Lobatto.p3
 
-lookup :: Tree units -> Qty units -> Float
-lookup tree length = case tree of
+evaluateIn :: Tree units -> Qty units -> Float
+evaluateIn tree length = case tree of
   Node leftTree leftLength rightTree
-    | length < leftLength -> lookup leftTree length
-    | otherwise -> lookup rightTree (length - leftLength)
+    | length < leftLength -> evaluateIn leftTree length
+    | otherwise -> evaluateIn rightTree (length - leftLength)
   Leaf segmentLength curve -> Curve.evaluate curve (length / segmentLength)
 
 buildTree ::

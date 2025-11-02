@@ -8,7 +8,6 @@ import OpenSolid.Binary qualified as Binary
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import Prelude (Double)
 
 word :: Word16 -> Builder
 word = case GHC.ByteOrder.targetByteOrder of

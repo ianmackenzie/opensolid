@@ -33,7 +33,7 @@ where
 
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (foldl, foldr)
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import Prelude qualified

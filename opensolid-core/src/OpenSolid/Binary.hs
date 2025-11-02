@@ -22,10 +22,9 @@ import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
 import GHC.Float qualified
-import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import OpenSolid.Int qualified as Int
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (concat)
 import OpenSolid.Qty (Qty (Qty))
 import Prelude qualified
 

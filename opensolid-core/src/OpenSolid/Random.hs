@@ -22,7 +22,7 @@ where
 import Data.List.NonEmpty (NonEmpty)
 import OpenSolid.Arithmetic
 import OpenSolid.Array qualified as Array
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (sequence)
 import OpenSolid.Composition
 import OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty qualified as NonEmpty

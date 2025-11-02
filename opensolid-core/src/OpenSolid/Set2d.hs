@@ -81,17 +81,18 @@ build boundsCoordinate buildSubset n boundedItems
       let sorted = NonEmpty.sortBy (Bounds.midpoint . boundsCoordinate . Pair.first) boundedItems
       let leftN = n // 2
       let rightN = n - leftN
-      let (leftBoundedItems, rightBoundedItems) = splitAt leftN sorted
+      let (leftBoundedItems, rightBoundedItems) = splitAtIndex leftN sorted
       let leftChild = buildSubset leftN leftBoundedItems
       let rightChild = buildSubset rightN rightBoundedItems
       let nodeBounds = Bounds2d.aggregate2 (bounds leftChild) (bounds rightChild)
       Node nodeBounds leftChild rightChild
 
-splitAt :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
-splitAt 0 _ = internalError "Bad split index in Set2d.new"
-splitAt _ (_ :| []) = internalError "Bad split index in Set2d.new"
-splitAt 1 (first :| NonEmpty rest) = (NonEmpty.one first, rest)
-splitAt n (first :| NonEmpty rest) = Pair.mapFirst (NonEmpty.push first) (splitAt (n - 1) rest)
+splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
+splitAtIndex 0 _ = internalError "Bad split index in Set2d.new"
+splitAtIndex _ (_ :| []) = internalError "Bad split index in Set2d.new"
+splitAtIndex 1 (first :| NonEmpty rest) = (NonEmpty.one first, rest)
+splitAtIndex n (first :| NonEmpty rest) =
+  Pair.mapFirst (NonEmpty.push first) (splitAtIndex (n - 1) rest)
 
 toNonEmpty :: Set2d a (space @ units) -> NonEmpty a
 toNonEmpty (Node _ leftChild rightChild) = gather leftChild (toNonEmpty rightChild)

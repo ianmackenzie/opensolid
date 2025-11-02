@@ -15,7 +15,6 @@ import Control.Concurrent.Async qualified as Async
 import Data.Foldable.WithIndex qualified
 import Data.Traversable.WithIndex qualified
 import OpenSolid.Prelude
-import Prelude ((<$>), (<*>))
 
 map2 :: (a -> b -> c) -> IO a -> IO b -> IO c
 map2 function taskA taskB =

@@ -17,11 +17,10 @@ module OpenSolid.Result
   )
 where
 
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (foldl, foldr, sequence)
 import OpenSolid.Composition
 import OpenSolid.Error qualified as Error
 import {-# SOURCE #-} OpenSolid.Text qualified as Text
-import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
 data Result x a where

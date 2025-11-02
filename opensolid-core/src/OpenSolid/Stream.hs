@@ -16,8 +16,7 @@ module OpenSolid.Stream
   )
 where
 
-import OpenSolid.Prelude
-import Prelude (Enum)
+import OpenSolid.Prelude hiding (iterate, repeat)
 import Prelude qualified
 
 data Stream a = Stream a ~(Stream a)

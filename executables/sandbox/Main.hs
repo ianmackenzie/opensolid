@@ -391,9 +391,9 @@ testExplicitRandomStep = IO.do
 
 testDebugPrint :: IO ()
 testDebugPrint = IO.do
-  let xs = Text.repeat 2 "x"
+  let xs = Text.replicate 2 "x"
   Debug.log "xs" xs
-  let ys = Text.repeat 3 "y"
+  let ys = Text.replicate 3 "y"
   Debug.log "ys" ys
   IO.printLine (xs <> ys)
 

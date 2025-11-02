@@ -18,7 +18,7 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (concat)
 import OpenSolid.UvPoint (UvPoint)
 
 data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))

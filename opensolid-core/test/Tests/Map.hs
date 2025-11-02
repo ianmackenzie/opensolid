@@ -2,7 +2,7 @@ module Tests.Map (tests) where
 
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (foldl, foldr)
 import Test (Test)
 import Test qualified
 

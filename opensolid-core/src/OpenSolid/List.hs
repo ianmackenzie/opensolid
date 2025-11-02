@@ -56,7 +56,7 @@ module OpenSolid.List
   , count
   , intersperse
   , partition
-  , repeat
+  , replicate
   , random
   , shuffle
   )
@@ -65,7 +65,7 @@ where
 import Data.List qualified
 import Data.Maybe qualified
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (concat, foldl, foldr, maybe)
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
@@ -270,8 +270,8 @@ intersperse = Data.List.intersperse
 partition :: (a -> Bool) -> List a -> (List a, List a)
 partition = Data.List.partition
 
-repeat :: Int -> a -> List a
-repeat = Data.List.replicate
+replicate :: Int -> a -> List a
+replicate = Data.List.replicate
 
 random :: Int -> Random.Generator a -> Random.Generator (List a)
 random n randomItem

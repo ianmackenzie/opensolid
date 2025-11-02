@@ -4,7 +4,6 @@ import OpenSolid.Bootstrap
 import OpenSolid.Composition
 import OpenSolid.Pair qualified as Pair
 import System.Random (StdGen)
-import Prelude (Applicative, Functor, Monad)
 import Prelude qualified
 
 newtype Generator a = Generator (StdGen -> (a, StdGen))

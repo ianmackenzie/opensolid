@@ -14,7 +14,7 @@ module OpenSolid.Text
   , lines
   , multiline
   , indent
-  , repeat
+  , replicate
   , contains
   , startsWith
   , endsWith
@@ -34,7 +34,7 @@ import Data.Char qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import OpenSolid.Binary (Builder, ByteString)
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (concat)
 import OpenSolid.Composition
 import OpenSolid.Error qualified as Error
 import OpenSolid.Float (Float)
@@ -89,8 +89,8 @@ indent indentation paragraph =
     |> List.map (indentation <>)
     |> multiline
 
-repeat :: Int -> Text -> Text
-repeat = Data.Text.replicate
+replicate :: Int -> Text -> Text
+replicate = Data.Text.replicate
 
 contains :: Text -> Text -> Bool
 contains = Data.Text.isInfixOf

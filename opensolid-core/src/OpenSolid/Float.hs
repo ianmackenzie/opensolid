@@ -44,7 +44,7 @@ where
 
 import Data.Coerce qualified
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (max, min, product)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import OpenSolid.NonEmpty (NonEmpty)
 import OpenSolid.NonEmpty qualified as NonEmpty
