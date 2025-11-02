@@ -207,8 +207,8 @@ singleField :: (child -> parent) -> Field parent child () -> Format parent
 singleField constructor field = object constructor (lastField field)
 
 data Field parent child dummy = Field
-  { write :: parent -> Map Text Json -> Map Text Json
-  , read :: Map Text Json -> Result Text child
+  { writeField :: parent -> Map Text Json -> Map Text Json
+  , readField :: Map Text Json -> Result Text child
   , fieldSchema :: FieldSchema
   }
 
@@ -227,12 +227,12 @@ instance
     (Fields (child -> constructor) parent ())
   where
   field >> fields = do
-    let (Field write read fieldSchema) = field
+    let (Field writeField readField fieldSchema) = field
     let (Fields decompose compose properties required) = fields
     Fields
-      { decompose = \parent -> decompose parent |> write parent
+      { decompose = \parent -> decompose parent |> writeField parent
       , compose = \fieldValues constructor ->
-          read fieldValues
+          readField fieldValues
             |> Result.map constructor
             |> Result.andThen (compose fieldValues)
       , properties = properties |> Map.set fieldSchema.name fieldSchema.schema
@@ -249,9 +249,9 @@ instance
   field1 >> field2 = field1 >> lastField field2
 
 lastField :: Field parent child () -> Fields (child -> parent) parent ()
-lastField (Field write read fieldSchema) = do
-  let decompose parent = write parent Map.empty
-  let compose fields constructor = Result.map constructor (read fields)
+lastField (Field writeField readField fieldSchema) = do
+  let decompose parent = writeField parent Map.empty
+  let compose fields constructor = Result.map constructor (readField fields)
   let properties = Map.singleton fieldSchema.name fieldSchema.schema
   let required = [fieldSchema.name | fieldSchema.required]
   Fields{decompose, compose, properties, required}
@@ -262,13 +262,13 @@ withinField fieldName = Result.addContext ("In field \"" <> fieldName <> "\"")
 requiredField :: Text -> (parent -> child) -> Format child -> Field parent child ()
 requiredField fieldName getParentField fieldFormat = do
   let Format{encodeFunction = encodeField, decodeFunction = decodeField, schema} = fieldFormat
-  let write parent fields = Map.set fieldName (encodeField (getParentField parent)) fields
-  let read fields =
+  let writeField parent fields = Map.set fieldName (encodeField (getParentField parent)) fields
+  let readField fields =
         case Map.get fieldName fields of
           Just fieldValue -> withinField fieldName (decodeField fieldValue)
           Nothing -> Failure ("Expected a field named \"" <> fieldName <> "\"")
   let fieldSchema = FieldSchema{name = fieldName, required = True, schema}
-  Field{write, read, fieldSchema}
+  Field{writeField, readField, fieldSchema}
 
 optionalField ::
   Text ->
@@ -277,17 +277,17 @@ optionalField ::
   Field parent (Maybe child) ()
 optionalField fieldName getParentField fieldFormat = do
   let Format{encodeFunction = encodeField, decodeFunction = decodeField, schema} = fieldFormat
-  let write parent fields =
+  let writeField parent fields =
         case getParentField parent of
           Just fieldValue -> Map.set fieldName (encodeField fieldValue) fields
           Nothing -> fields
-  let read fields =
+  let readField fields =
         case Map.get fieldName fields of
           Just Json.Null -> Success Nothing
           Just fieldJson -> withinField fieldName (Result.map Just (decodeField fieldJson))
           Nothing -> Success Nothing
   let fieldSchema = FieldSchema{name = fieldName, required = False, schema}
-  Field{write, read, fieldSchema}
+  Field{writeField, readField, fieldSchema}
 
 angle :: Json.Format Angle
 angle =
