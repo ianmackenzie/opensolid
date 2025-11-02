@@ -5,7 +5,6 @@ module OpenSolid.Fuzzy
   , (>>=)
   , (>>)
   , map
-  , return
   , fromMaybe
   )
 where
@@ -35,9 +34,6 @@ infixl 1 >>=
 (>>=) :: Fuzzy a -> (a -> Fuzzy b) -> Fuzzy b
 Resolved value >>= function = function value
 Unresolved >>= _ = Unresolved
-
-return :: a -> Fuzzy a
-return = Resolved
 
 fromMaybe :: Maybe a -> Fuzzy a
 fromMaybe (Just value) = Resolved value
