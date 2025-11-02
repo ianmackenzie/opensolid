@@ -27,7 +27,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (DirectionBounds2d space1) (DirectionBounds2d space2)
   where
-  coerce = identity
+  coerce = id
 
 instance Negation (DirectionBounds2d space) where
   negate (DirectionBounds2d vectorBounds) = DirectionBounds2d (negate vectorBounds)

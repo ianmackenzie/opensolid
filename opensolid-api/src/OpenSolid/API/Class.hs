@@ -965,8 +965,8 @@ buildClass members built = case members of
   first : rest -> buildClass rest $ case first of
     ToParent toParent ->
       built{toParent = Just toParent}
-    Const name const ->
-      built{constants = built.constants <> [(name, const)]}
+    Const name value ->
+      built{constants = built.constants <> [(name, value)]}
     Constructor constructor ->
       built{constructor = Just constructor}
     Static name staticFunction ->
@@ -1041,13 +1041,13 @@ upcastInfo className maybeToParent = case maybeToParent of
         }
 
 constantFunctionInfo :: FFI.ClassName -> (FFI.Name, Constant) -> Function
-constantFunctionInfo className (constantName, const@(Constant value _)) =
+constantFunctionInfo className (constantName, constantFunction@(Constant value _)) =
   Function
     { ffiName = Constant.ffiName className constantName
     , implicitArgument = Nothing
     , argumentTypes = []
     , returnType = Constant.valueType value
-    , invoke = Constant.invoke const
+    , invoke = Constant.invoke constantFunction
     }
 
 constructorInfo :: FFI.ClassName -> Maybe Constructor -> List Function

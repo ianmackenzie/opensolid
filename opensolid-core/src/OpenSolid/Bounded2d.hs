@@ -11,4 +11,4 @@ instance Bounded2d (Point2d (space @ units)) (space @ units) where
   bounds = Bounds2d.constant
 
 instance Bounded2d (Bounds2d (space @ units)) (space @ units) where
-  bounds = identity
+  bounds = id

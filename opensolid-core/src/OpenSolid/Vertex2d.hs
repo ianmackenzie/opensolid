@@ -15,7 +15,7 @@ class
   position :: vertex -> Point2d coordinateSystem
 
 instance Vertex2d (Point2d (space @ units)) (space @ units) where
-  position = identity
+  position = id
 
 {-# COMPLETE Vertex2d #-}
 

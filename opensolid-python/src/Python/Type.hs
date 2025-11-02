@@ -22,4 +22,4 @@ qualifiedName ffiType = case ffiType of
     "tuple[" <> Text.join "," itemTypeNames <> "]"
   FFI.Maybe valueType -> qualifiedName valueType <> " | None"
   FFI.Result valueType -> qualifiedName valueType
-  FFI.Class id -> Python.Class.qualifiedName id
+  FFI.Class classId -> Python.Class.qualifiedName classId

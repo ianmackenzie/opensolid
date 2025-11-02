@@ -35,7 +35,7 @@ where
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
-import OpenSolid.Prelude hiding (identity)
+import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction3d (Direction3d, Unit3d)
   , Frame3d

@@ -32,8 +32,8 @@ module OpenSolid.Bootstrap
   , Async
   , Maybe (Just, Nothing)
   , Type
-  , identity
-  , always
+  , id
+  , const
   , (@)
   , fromIntegral
   , internalError
@@ -73,7 +73,9 @@ import Prelude
   , Ordering (EQ, GT, LT)
   , Show
   , Traversable
+  , const
   , fromIntegral
+  , id
   , not
   , otherwise
   , ($)
@@ -122,14 +124,6 @@ abort message = Prelude.error (Data.Text.unpack message)
 value |> function = function value
 
 infixl 0 |>
-
-{-# INLINE identity #-}
-identity :: a -> a
-identity value = value
-
-{-# INLINE always #-}
-always :: a -> b -> a
-always value _ = value
 
 {-# INLINE (@) #-}
 (@) :: (a -> b) -> a -> b

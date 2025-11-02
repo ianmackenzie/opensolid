@@ -194,7 +194,7 @@ new c derivativeFunction = do
   SurfaceFunction3d c du dv'
 
 constant :: Point3d (space @ units) -> SurfaceFunction3d (space @ units)
-constant value = new (CompiledFunction.constant value) (always VectorSurfaceFunction3d.zero)
+constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3d.zero)
 
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint

@@ -74,7 +74,7 @@ import OpenSolid.Orientation3d (Orientation3d)
 import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude hiding (identity)
+import OpenSolid.Prelude
 import OpenSolid.Primitives (Frame3d (Frame3d), Plane3d (Plane3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)

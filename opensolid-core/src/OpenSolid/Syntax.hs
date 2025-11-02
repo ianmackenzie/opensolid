@@ -27,11 +27,11 @@ import OpenSolid.Prelude
 
 {-# INLINE int #-}
 int :: Int -> Int
-int = identity
+int = id
 
 {-# INLINE float #-}
 float :: Float -> Float
-float = identity
+float = id
 
 {-# INLINE negative #-}
 negative :: Negation a => a -> a

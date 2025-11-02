@@ -59,7 +59,7 @@ class Coercion b a => Coercion a b where
 
 instance Coercion Int Int where
   {-# INLINE coerce #-}
-  coerce = identity
+  coerce = id
 
 instance Coercion (Qty units1) (Qty units2) where
   {-# INLINE coerce #-}
@@ -67,7 +67,7 @@ instance Coercion (Qty units1) (Qty units2) where
 
 instance Coercion Sign Sign where
   {-# INLINE coerce #-}
-  coerce = identity
+  coerce = id
 
 instance Coercion a b => Coercion (Maybe a) (Maybe b) where
   coerce (Just value) = Just (coerce value)

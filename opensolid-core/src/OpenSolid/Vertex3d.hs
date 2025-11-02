@@ -23,7 +23,7 @@ class
   position :: vertex -> Point3d coordinateSystem
 
 instance Vertex3d (Point3d (space @ units)) (space @ units) where
-  position = identity
+  position = id
 
 instance
   (space1 ~ space2, units2 ~ Unitless) =>

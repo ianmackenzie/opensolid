@@ -99,7 +99,7 @@ outputValue ffiType varName = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
-  FFI.Class id -> Python.Class.qualifiedName id <> "._new(" <> varName <> ")"
+  FFI.Class classId -> Python.Class.qualifiedName classId <> "._new(" <> varName <> ")"
 
 fieldOutputValue :: FFI.Type -> Text -> Text
 fieldOutputValue ffiType varName = case ffiType of
@@ -115,7 +115,7 @@ fieldOutputValue ffiType varName = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
-  FFI.Class id -> Python.Class.qualifiedName id <> "._new(c_void_p(" <> varName <> "))"
+  FFI.Class classId -> Python.Class.qualifiedName classId <> "._new(c_void_p(" <> varName <> "))"
 
 listOutputValue :: FFI.Type -> Text -> Text
 listOutputValue itemType varName =
@@ -161,7 +161,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
-  FFI.Class id -> varName <> "." <> Python.Class.pointerFieldName id
+  FFI.Class classId -> varName <> "." <> Python.Class.pointerFieldName classId
 
 fieldArgumentValue :: Text -> FFI.Type -> Text
 fieldArgumentValue varName ffiType = case ffiType of
@@ -177,7 +177,7 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
-  FFI.Class id -> varName <> "." <> Python.Class.pointerFieldName id
+  FFI.Class classId -> varName <> "." <> Python.Class.pointerFieldName classId
 
 listArgumentValue :: FFI.Type -> FFI.Type -> Text -> Text
 listArgumentValue listType itemType varName = do

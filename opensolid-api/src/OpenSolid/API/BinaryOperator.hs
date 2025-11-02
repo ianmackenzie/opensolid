@@ -28,7 +28,7 @@ ffiName className operatorId (lhsType, rhsType, _) =
     ]
 
 functionName :: Id -> Text
-functionName id = case id of
+functionName operatorId = case operatorId of
   Add -> "add"
   Sub -> "sub"
   Mul -> "mul"

@@ -42,7 +42,7 @@ map4 function taskA taskB taskC taskD =
       <*> Concurrently taskD
 
 run :: Foldable list => list (IO ()) -> IO ()
-run = Async.mapConcurrently_ identity
+run = Async.mapConcurrently_ id
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Async.mapConcurrently

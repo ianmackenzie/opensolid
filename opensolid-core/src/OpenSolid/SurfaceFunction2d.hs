@@ -197,7 +197,7 @@ recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
 constant :: Point2d (space @ units) -> SurfaceFunction2d (space @ units)
-constant value = new (CompiledFunction.constant value) (always VectorSurfaceFunction2d.zero)
+constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction2d.zero)
 
 uv :: SurfaceFunction2d UvCoordinates
 uv = xy SurfaceFunction.u SurfaceFunction.v

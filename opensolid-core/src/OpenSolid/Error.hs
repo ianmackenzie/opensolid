@@ -15,7 +15,7 @@ instance Message (List Char) where
   message = Text.pack
 
 instance Message Text where
-  message = identity
+  message = id
 
 addContext :: Text -> Text -> Text
 addContext context "" = context

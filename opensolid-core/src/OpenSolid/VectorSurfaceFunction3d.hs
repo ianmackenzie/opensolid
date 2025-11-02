@@ -481,7 +481,7 @@ zero :: VectorSurfaceFunction3d (space @ units)
 zero = constant Vector3d.zero
 
 constant :: Vector3d (space @ units) -> VectorSurfaceFunction3d (space @ units)
-constant value = new (CompiledFunction.constant value) (always zero)
+constant value = new (CompiledFunction.constant value) (const zero)
 
 evaluate :: VectorSurfaceFunction3d (space @ units) -> UvPoint -> Vector3d (space @ units)
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint

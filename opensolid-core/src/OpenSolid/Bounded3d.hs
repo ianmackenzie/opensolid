@@ -11,4 +11,4 @@ instance Bounded3d (Point3d (space @ units)) (space @ units) where
   bounds = Bounds3d.constant
 
 instance Bounded3d (Bounds3d (space @ units)) (space @ units) where
-  bounds = identity
+  bounds = id

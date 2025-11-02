@@ -505,7 +505,7 @@ zero :: VectorSurfaceFunction2d (space @ units)
 zero = constant Vector2d.zero
 
 constant :: Vector2d (space @ units) -> VectorSurfaceFunction2d (space @ units)
-constant value = new (CompiledFunction.constant value) (always zero)
+constant value = new (CompiledFunction.constant value) (const zero)
 
 xy ::
   SurfaceFunction units ->

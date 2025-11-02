@@ -397,7 +397,7 @@ one :: SurfaceFunction Unitless
 one = constant 1.0
 
 constant :: Qty units -> SurfaceFunction units
-constant value = new (CompiledFunction.constant value) (always zero)
+constant value = new (CompiledFunction.constant value) (const zero)
 
 u :: SurfaceFunction Unitless
 u = new (CompiledFunction.concrete Expression.u) (\case U -> one; V -> zero)
