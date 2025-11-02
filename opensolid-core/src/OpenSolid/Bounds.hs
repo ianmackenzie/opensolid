@@ -54,8 +54,6 @@ module OpenSolid.Bounds
   , cos
   , interpolate
   , interpolationParameter
-  , any
-  , all
   , resolve
   , resolution
   , isResolved
@@ -608,26 +606,6 @@ resolvedSign bounds = do
   if Float.abs boundsResolution >= resolutionThreshold
     then Resolved (Float.sign boundsResolution)
     else Unresolved
-
-any :: (Bounds units -> Fuzzy Bool) -> Bounds units -> Bool
-any assess bounds =
-  case assess bounds of
-    Resolved assessment -> assessment
-    Unresolved
-      | isAtomic bounds -> False
-      | otherwise -> do
-          let (left, right) = bisect bounds
-          any assess left || any assess right
-
-all :: (Bounds units -> Fuzzy Bool) -> Bounds units -> Bool
-all assess bounds =
-  case assess bounds of
-    Resolved assessment -> assessment
-    Unresolved
-      | isAtomic bounds -> True
-      | otherwise -> do
-          let (left, right) = bisect bounds
-          all assess left && all assess right
 
 resolve :: Eq a => (Bounds units -> Fuzzy a) -> Bounds units -> Fuzzy a
 resolve assess bounds =
