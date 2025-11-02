@@ -86,6 +86,7 @@ where
 import Data.Foldable qualified
 import Data.Foldable1 (Foldable1)
 import Data.Foldable1 qualified as Foldable1
+import Data.Functor qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
@@ -255,7 +256,7 @@ zip4 (a :| as) (b :| bs) (c :| cs) (d :| ds) =
   (a, b, c, d) :| List.zip4 as bs cs ds
 
 unzip2 :: NonEmpty (a, b) -> (NonEmpty a, NonEmpty b)
-unzip2 = Data.List.NonEmpty.unzip
+unzip2 = Data.Functor.unzip
 
 unzip3 :: NonEmpty (a, b, c) -> (NonEmpty a, NonEmpty b, NonEmpty c)
 unzip3 nonEmpty = do
