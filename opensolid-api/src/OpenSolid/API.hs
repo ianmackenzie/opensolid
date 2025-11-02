@@ -121,7 +121,7 @@ classes =
   ]
 
 functions :: List Function
-functions = List.collect Class.functions classes
+functions = List.combine Class.functions classes
 
 length :: Class
 length =

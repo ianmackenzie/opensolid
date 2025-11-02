@@ -114,7 +114,7 @@ addConstant components = Step \initialState ->
             initialState
               { constantsBuilder =
                   initialState.constantsBuilder
-                    <> Binary.collect Encode.float components
+                    <> Binary.combine Encode.float components
               , constants =
                   initialState.constants
                     |> Map.set components constantIndex

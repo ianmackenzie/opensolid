@@ -30,4 +30,4 @@ float :: Float -> Builder
 float = double . Float.toDouble
 
 list :: (a -> Builder) -> List a -> Builder
-list encodeItem items = int items.length <> Binary.collect encodeItem items
+list encodeItem items = int items.length <> Binary.combine encodeItem items

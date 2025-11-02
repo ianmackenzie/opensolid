@@ -4,7 +4,7 @@ module OpenSolid.Binary
   , bytes
   , empty
   , concat
-  , collect
+  , combine
   , uint8
   , uint16LE
   , uint32LE
@@ -38,8 +38,8 @@ empty = Prelude.mempty
 concat :: List Builder -> Builder
 concat = Prelude.mconcat
 
-collect :: Foldable list => (a -> Builder) -> list a -> Builder
-collect = Prelude.foldMap
+combine :: Foldable list => (a -> Builder) -> list a -> Builder
+combine = Prelude.foldMap
 
 {-# INLINE uint8 #-}
 uint8 :: Int -> Builder

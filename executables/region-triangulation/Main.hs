@@ -49,4 +49,4 @@ main = Tolerance.using Length.nanometer IO.do
           ]
           [a, b, c]
   Drawing2d.writeSvg "executables/region-triangulation/triangulated.svg" drawingBounds do
-    Drawing2d.collect drawTriangle triangles
+    Drawing2d.combine drawTriangle triangles

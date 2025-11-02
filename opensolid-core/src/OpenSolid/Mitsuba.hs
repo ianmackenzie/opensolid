@@ -121,7 +121,7 @@ collectMeshes ::
   Model3d space ->
   List ((Mesh space, "name" ::: Text), Properties)
 collectMeshes resolution model = case model of
-  Model3d.Group children -> List.collect (collectMeshes resolution) children
+  Model3d.Group children -> List.combine (collectMeshes resolution) children
   Model3d.Body body -> do
     let mesh = Body3d.toMesh resolution body
     let material = Model3d.traversal.currentPbrMaterial
@@ -194,9 +194,9 @@ meshDataBuilder mesh name =
     , Text.toUtf8 name <> Binary.uint8 0 -- Null-terminated, UTF-8 encoded name
     , Binary.uint64LE mesh.numVertices
     , Binary.uint64LE mesh.numFaces
-    , Binary.collect pointBuilder mesh.vertices
-    , Binary.collect normalBuilder mesh.vertices
-    , Binary.collect faceIndicesBuilder mesh.faceIndices
+    , Binary.combine pointBuilder mesh.vertices
+    , Binary.combine normalBuilder mesh.vertices
+    , Binary.combine faceIndicesBuilder mesh.faceIndices
     ]
 
 pointBuilder :: Vertex space -> Builder

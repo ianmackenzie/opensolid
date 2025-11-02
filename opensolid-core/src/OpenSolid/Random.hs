@@ -13,7 +13,7 @@ module OpenSolid.Random
   , merge
   , retry
   , filter
-  , combine
+  , sequence
   , (>>=)
   , return
   )
@@ -32,6 +32,7 @@ import OpenSolid.Random.Internal qualified as Internal
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
+import Prelude qualified
 
 newtype Seed = Seed StdGen
 
@@ -99,9 +100,5 @@ filter predicate generator = OpenSolid.Random.do
     then return result
     else filter predicate generator
 
-combine :: List (Generator a) -> Generator (List a)
-combine [] = return []
-combine (first : rest) = OpenSolid.Random.do
-  firstValue <- first
-  restValues <- combine rest
-  return (firstValue : restValues)
+sequence :: Traversable list => list (Generator a) -> Generator (list a)
+sequence = Prelude.sequence

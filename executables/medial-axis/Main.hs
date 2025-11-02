@@ -13,7 +13,6 @@ import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
-import OpenSolid.List qualified as List
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Qty qualified as Qty
@@ -71,14 +70,11 @@ testCurveMedialAxis label curve1 curve2 = IO.do
               let t = Curve.evaluate parameterization u
               let centerPoint = Curve2d.evaluate segment.curve t
               let diameter = twice (Qty.abs (Curve.evaluate segment.radius t))
-              Drawing2d.circle (#centerPoint centerPoint) (#diameter diameter)
-        let parameterValues = Parameter.steps 50
-        List.map drawTangentCircle parameterValues
-  let tangentCircles = List.collect drawTangentCircles segments
-  let tangentCircleAttributes =
-        [ Drawing2d.strokeColor Color.gray
-        , Drawing2d.strokeWidth (Length.millimeters 0.2)
-        ]
+              Drawing2d.circleWith
+                [Drawing2d.strokeColor Color.gray, Drawing2d.strokeWidth (Length.millimeters 0.2)]
+                (#centerPoint centerPoint)
+                (#diameter diameter)
+        Drawing2d.combine drawTangentCircle (Parameter.steps 50)
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   let drawCurve = Drawing2d.curve resolution
   let drawSegment segment = drawCurve segment.curve
@@ -86,8 +82,8 @@ testCurveMedialAxis label curve1 curve2 = IO.do
         Bounds2d.hull2 (Point2d.centimeters -10.0 -10.0) (Point2d.centimeters 30.0 20.0)
   Drawing2d.writeSvg ("executables/medial-axis/" <> label <> ".svg") drawingBounds $
     Drawing2d.group
-      [ Drawing2d.groupWith tangentCircleAttributes tangentCircles
-      , Drawing2d.collect drawSegment segments
+      [ Drawing2d.combine drawTangentCircles segments
+      , Drawing2d.combine drawSegment segments
       , drawCurve curve1
       , drawCurve curve2
       ]

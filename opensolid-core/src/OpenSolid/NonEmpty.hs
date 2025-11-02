@@ -48,7 +48,7 @@ module OpenSolid.NonEmpty
   , filter
   , find
   , concat
-  , collect
+  , combine
   , foldl
   , foldr
   , reduce
@@ -279,8 +279,8 @@ find = Data.Foldable.find
 concat :: NonEmpty (NonEmpty a) -> NonEmpty a
 concat = Data.Semigroup.sconcat
 
-collect :: Foldable1 list => (a -> NonEmpty b) -> list a -> NonEmpty b
-collect f list = Foldable1.foldrMap1 f (prepend . f) list
+combine :: Foldable1 list => (a -> NonEmpty b) -> list a -> NonEmpty b
+combine f list = Foldable1.foldrMap1 f (prepend . f) list
 
 foldl :: (b -> a -> b) -> b -> NonEmpty a -> b
 foldl = Prelude.foldl'

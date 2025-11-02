@@ -4,7 +4,6 @@ module OpenSolid.Maybe
   , map2
   , withDefault
   , find
-  , collect
   , values
   , any
   , all
@@ -52,9 +51,6 @@ withDefault value Nothing = value
 find :: (a -> Maybe b) -> List a -> Maybe b
 find _ [] = Nothing
 find f (first : rest) = f first |> orElse (find f rest)
-
-collect :: Foldable list => (a -> Maybe b) -> list a -> List b
-collect f list = Prelude.foldr (List.prepend . f) [] list
 
 values :: Foldable list => list (Maybe a) -> List a
 values maybes = Prelude.foldr List.prepend [] maybes

@@ -260,7 +260,7 @@ drawZeros path zeros = IO.do
     Drawing2d.groupWith [Drawing2d.strokeWidth strokeWidth] $
       [ drawBounds (Bounds2d.convert toDrawing UvBounds.unitSquare)
       , Drawing2d.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
-      , Drawing2d.collect (drawDot Color.orange) zeros.saddlePoints
+      , Drawing2d.combine (drawDot Color.orange) zeros.saddlePoints
       ]
 
 drawBounds :: Bounds2d (space @ Meters) -> Drawing2d space
@@ -341,8 +341,8 @@ drawBezier color startPoint innerControlPoints endPoint = do
     ]
     [ Drawing2d.groupWith [Drawing2d.opacity 0.3] $
         [ Drawing2d.polyline (Polyline2d drawingControlPoints)
-        , Drawing2d.collectWith [Drawing2d.fillColor color] drawControlPoint drawingControlPoints
-        , Drawing2d.collect drawSegmentBounds (Parameter.intervals 10)
+        , Drawing2d.combineWith [Drawing2d.fillColor color] drawControlPoint drawingControlPoints
+        , Drawing2d.combine drawSegmentBounds (Parameter.intervals 10)
         ]
     , Drawing2d.curve resolution curve
     ]

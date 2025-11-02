@@ -85,7 +85,7 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
         Drawing2d.writeSvg fileName drawingBounds $
           Drawing2d.group
             [ Drawing2d.curve resolution curve
-            , Drawing2d.collect drawPoint pointLocations
+            , Drawing2d.combine drawPoint pointLocations
             ]
   drawCurve "executables/arc-length/cubic-spline.svg" spline
   drawCurve "executables/arc-length/parameterized-spline.svg" parameterized

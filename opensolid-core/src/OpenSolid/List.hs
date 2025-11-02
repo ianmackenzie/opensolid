@@ -16,6 +16,7 @@ module OpenSolid.List
   , mapWithIndex
   , indexed
   , reverseMap
+  , filterMap
   , forEach
   , map2
   , map3
@@ -31,7 +32,7 @@ module OpenSolid.List
   , contains
   , indexOf
   , prepend
-  , collect
+  , combine
   , concat
   , foldl
   , foldr
@@ -62,6 +63,7 @@ module OpenSolid.List
 where
 
 import Data.List qualified
+import Data.Maybe qualified
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Pair qualified as Pair
@@ -165,6 +167,9 @@ map4 = Data.List.zipWith4
 filter :: (a -> Bool) -> List a -> List a
 filter = Data.List.filter
 
+filterMap :: (a -> Maybe b) -> List a -> List b
+filterMap = Data.Maybe.mapMaybe
+
 find :: (a -> Bool) -> List a -> Maybe a
 find = Data.List.find
 
@@ -177,8 +182,8 @@ indexOf = Data.List.elemIndex
 prepend :: Foldable list => list a -> List a -> List a
 prepend items list = Prelude.foldr (:) list items
 
-collect :: Foldable list => (a -> List b) -> list a -> List b
-collect = Prelude.foldMap
+combine :: Foldable list => (a -> List b) -> list a -> List b
+combine = Prelude.foldMap
 
 concat :: List (List a) -> List a
 concat = Data.List.concat

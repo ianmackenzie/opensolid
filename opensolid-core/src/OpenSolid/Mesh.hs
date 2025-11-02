@@ -5,7 +5,7 @@ module OpenSolid.Mesh
   , faceVertices
   , map
   , concat
-  , collect
+  , combine
   , grid
   , indexedGrid
   )
@@ -55,12 +55,12 @@ concat meshes = do
   let vertexArrays = NonEmpty.map (.vertices) meshes
   let faceIndexLists = NonEmpty.toList (NonEmpty.map (.faceIndices) meshes)
   let arrayLengths = NonEmpty.toList (NonEmpty.map (.length) vertexArrays)
-  let combinedVertices = Array.fromList (List.collect Array.toList vertexArrays)
+  let combinedVertices = Array.fromList (List.combine Array.toList vertexArrays)
   let combinedFaceIndices = List.concat (offsetFaceIndices 0 arrayLengths faceIndexLists)
   Mesh combinedVertices combinedFaceIndices
 
-collect :: Foldable1 list => (a -> Mesh b) -> list a -> Mesh b
-collect toMesh values = concat (NonEmpty.map toMesh (Data.Foldable1.toNonEmpty values))
+combine :: Foldable1 list => (a -> Mesh b) -> list a -> Mesh b
+combine toMesh values = concat (NonEmpty.map toMesh (Data.Foldable1.toNonEmpty values))
 
 offsetFaceIndices :: Int -> List Int -> List (List (Int, Int, Int)) -> List (List (Int, Int, Int))
 offsetFaceIndices _ [] _ = []

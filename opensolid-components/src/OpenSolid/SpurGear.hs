@@ -98,8 +98,8 @@ profile gear = do
   let connector
         | rd > rb = Curve2d.line leftStart nextToothStart
         | otherwise = Curve2d.arc leftStart nextToothStart -Angle.pi
-  let toothProfile = [leftApproximation, rightApproximation, tip, connector]
-  let rotatedProfile i = do
+  let toothProfileCurves = [leftApproximation, rightApproximation, tip, connector]
+  let rotatedProfileCurves i = do
         let angle = Float.int i * angularSpacing
-        List.map (Curve2d.rotateAround Point2d.origin angle) toothProfile
-  List.collect rotatedProfile [0 .. n - 1]
+        List.map (Curve2d.rotateAround Point2d.origin angle) toothProfileCurves
+  List.combine rotatedProfileCurves [0 .. n - 1]

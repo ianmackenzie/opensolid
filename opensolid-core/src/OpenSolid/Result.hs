@@ -9,7 +9,7 @@ module OpenSolid.Result
   , collect
   , foldl
   , foldr
-  , combine
+  , sequence
   , (>>=)
   , (>>)
   , toIO
@@ -112,8 +112,8 @@ applyBackward _ _ failure = failure
 foldr :: Foldable list => (a -> b -> Result x b) -> b -> list a -> Result x b
 foldr function init list = Prelude.foldr (applyBackward function) (Success init) list
 
-combine :: List (Result x a) -> Result x (List a)
-combine = Prelude.sequence
+sequence :: List (Result x a) -> Result x (List a)
+sequence = Prelude.sequence
 
 toIO :: Result x a -> IO a
 toIO (Success value) = Prelude.return value

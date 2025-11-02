@@ -1544,7 +1544,7 @@ compileVariable2d variable = case variable of
     Compile.addVariable2d (Instruction.DivideConstantVariable2d lhsIndex rhsIndex)
   BezierCurve2d controlPoints parameter -> Compile.do
     let numControlPoints = NonEmpty.length controlPoints
-    controlPointsIndex <- Compile.addConstant (NonEmpty.collect coordinates2d controlPoints)
+    controlPointsIndex <- Compile.addConstant (NonEmpty.combine coordinates2d controlPoints)
     parameterIndex <- compileVariable1d parameter
     let instruction = Instruction.Bezier2d numControlPoints controlPointsIndex parameterIndex
     Compile.addVariable2d instruction
@@ -1615,7 +1615,7 @@ compileVariable3d variable = case variable of
     Compile.addVariable3d (Instruction.DivideConstantVariable3d lhsIndex rhsIndex)
   BezierCurve3d controlPoints parameter -> Compile.do
     let numControlPoints = NonEmpty.length controlPoints
-    controlPointsIndex <- Compile.addConstant (NonEmpty.collect coordinates3d controlPoints)
+    controlPointsIndex <- Compile.addConstant (NonEmpty.combine coordinates3d controlPoints)
     parameterIndex <- compileVariable1d parameter
     let instruction = Instruction.Bezier3d numControlPoints controlPointsIndex parameterIndex
     Compile.addVariable3d instruction

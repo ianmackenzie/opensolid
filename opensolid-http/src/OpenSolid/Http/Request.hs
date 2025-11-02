@@ -37,7 +37,7 @@ header (nameCI, valueBytes) =
 headerValues :: Text -> Request -> List Text
 headerValues name request = do
   let nameCI = Data.CaseInsensitive.mk (Binary.bytes (Text.toUtf8 name))
-  Network.Wai.requestHeaders request |> Maybe.collect (headerValue nameCI)
+  Network.Wai.requestHeaders request |> List.filterMap (headerValue nameCI)
 
 headerValue :: Data.CaseInsensitive.CI ByteString -> Network.HTTP.Types.Header -> Maybe Text
 headerValue givenName (name, valueBytes) =
@@ -54,7 +54,7 @@ parameter (nameBytes, maybeValueBytes) =
 parameterValues :: Text -> Request -> List Text
 parameterValues name request = do
   let nameBytes = Binary.bytes (Text.toUtf8 name)
-  Network.Wai.queryString request |> Maybe.collect (parameterValue nameBytes)
+  Network.Wai.queryString request |> List.filterMap (parameterValue nameBytes)
 
 parameterValue :: ByteString -> Network.HTTP.Types.QueryItem -> Maybe Text
 parameterValue givenName (name, valueBytes) =

@@ -1022,9 +1022,9 @@ functions
       , comparisonFunctionInfo className comparisonFunction
       , negationFunctionInfo className negationFunction
       , absFunctionInfo className absFunction
-      , List.collect (preOperatorOverloads className) preOperators
-      , List.collect (postOperatorOverloads className) postOperators
-      , List.collect functions nestedClasses
+      , List.combine (preOperatorOverloads className) preOperators
+      , List.combine (postOperatorOverloads className) postOperators
+      , List.combine functions nestedClasses
       ]
 
 upcastInfo :: FFI.ClassName -> Maybe Upcast -> List Function

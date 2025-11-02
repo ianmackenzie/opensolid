@@ -45,7 +45,7 @@ builder :: Resolution Meters -> Model3d space -> Builder
 builder resolution model = do
   let meshes = Model3d.traverse (gltfMeshes resolution) model
   let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. meshes.length - 1]]
-  let unpaddedBufferBuilder = Binary.collect meshBuilder meshes
+  let unpaddedBufferBuilder = Binary.combine meshBuilder meshes
   let unpaddedBufferByteLength = Int.sumOf meshByteLength meshes
   let encodedMeshes = encodeMeshes 0 0 meshes
   let bufferObject = Json.object [Json.field "byteLength" $ Json.int unpaddedBufferByteLength]
@@ -61,8 +61,8 @@ builder resolution model = do
           , Json.field "scenes" $ Json.list [sceneObject]
           , Json.field "nodes" $ Json.listOf (.meshNode) encodedMeshes
           , Json.field "meshes" $ Json.listOf (.meshObject) encodedMeshes
-          , Json.field "bufferViews" $ Json.list (List.collect (.bufferViews) encodedMeshes)
-          , Json.field "accessors" $ Json.list (List.collect (.accessors) encodedMeshes)
+          , Json.field "bufferViews" $ Json.list (List.combine (.bufferViews) encodedMeshes)
+          , Json.field "accessors" $ Json.list (List.combine (.accessors) encodedMeshes)
           , Json.field "materials" $ Json.listOf (.materialObject) encodedMeshes
           , Json.field "buffers" $ Json.list [bufferObject]
           ]
@@ -143,7 +143,7 @@ gltfMeshes resolution model = case model of
             , maxPosition = Json.listOf (Json.float . Length.inMeters) [xHigh, yHigh, zHigh]
             }
       [] -> []
-  Model3d.Group children -> List.collect (gltfMeshes resolution) children
+  Model3d.Group children -> List.combine (gltfMeshes resolution) children
 
 encodeMeshes :: Int -> Int -> List GltfMesh -> List EncodedMesh
 encodeMeshes index offset meshes = case meshes of
@@ -238,11 +238,11 @@ encodeMaterial material = do
     ]
 
 faceIndicesBuilder :: List (Int, Int, Int) -> Builder
-faceIndicesBuilder = Binary.collect do
+faceIndicesBuilder = Binary.combine do
   \(i, j, k) -> Binary.uint32LE i <> Binary.uint32LE j <> Binary.uint32LE k
 
 verticesBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => Array vertex -> Builder
-verticesBuilder = Binary.collect vertexBuilder
+verticesBuilder = Binary.combine vertexBuilder
 
 vertexBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => vertex -> Builder
 vertexBuilder vertex = GHC.Exts.runRW# \state0# -> do

@@ -276,7 +276,7 @@ addFillet radius curves point = Try.do
   let curveIncidences = List.map (curveIncidence point) curves
   let incidentCurves =
         curveIncidences
-          |> Maybe.collect incidentCurve
+          |> List.filterMap incidentCurve
           -- By this point we should have exactly two curves
           -- (one 'incoming' and one 'outgoing');
           -- sort them by the negation of the incident parameter value
@@ -284,7 +284,7 @@ addFillet radius curves point = Try.do
           -- is and the curve with parameter value 0 (the outgoing curve) is second
           |> List.sortBy (negate . Pair.second)
           |> List.map Pair.first
-  let otherCurves = Maybe.collect nonIncidentCurve curveIncidences
+  let otherCurves = List.filterMap nonIncidentCurve curveIncidences
   case incidentCurves of
     [] -> couldNotFindPointToFillet
     List.One{} -> couldNotFindPointToFillet
@@ -689,7 +689,7 @@ toVertexLoop ::
   NonEmpty (Point2d (space @ units))
 toVertexLoop resolution loop = do
   let trailingVertices curve = (Curve2d.toPolyline resolution curve).vertices.rest
-  let allVertices = List.collect trailingVertices loop
+  let allVertices = List.combine trailingVertices loop
   case allVertices of
     NonEmpty vertices -> vertices
     [] -> internalError "Should always have at least one vertex"

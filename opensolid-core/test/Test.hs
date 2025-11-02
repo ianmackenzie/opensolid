@@ -170,7 +170,7 @@ combineTestResults (Failed messages : rest) = case combineTestResults rest of
 
 all :: List Expectation -> Expectation
 all expectations =
-  Expectation (Random.map combineTestResults (Random.combine (List.map unwrap expectations)))
+  Expectation (Random.map combineTestResults (Random.sequence (List.map unwrap expectations)))
 
 output :: Show a => Text -> a -> Expectation -> Expectation
 output label value (Expectation generator) =

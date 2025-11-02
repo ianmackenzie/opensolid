@@ -7,8 +7,8 @@ module OpenSolid.Drawing2d
   , nothing
   , group
   , groupWith
-  , collect
-  , collectWith
+  , combine
+  , combineWith
   , line
   , lineWith
   , polyline
@@ -87,7 +87,7 @@ drawingText _ Empty = Nothing
 drawingText indent (Node name attributes children) = do
   let attributeLines = List.map (attributeText ("\n" <> indent <> "   ")) attributes
   let openingTag = indent <> "<" <> name <> Text.concat attributeLines <> ">"
-  let childLines = Maybe.collect (drawingText (indent <> "  ")) children
+  let childLines = List.filterMap (drawingText (indent <> "  ")) children
   let closingTag = indent <> "</" <> name <> ">"
   Just (Text.multiline (openingTag : childLines) <> "\n" <> closingTag)
 
@@ -146,16 +146,16 @@ groupWith = Node "g"
 group :: List (Drawing2d space) -> Drawing2d space
 group = groupWith []
 
-collect :: Foldable list => (a -> Drawing2d space) -> list a -> Drawing2d space
-collect = collectWith []
+combine :: Foldable list => (a -> Drawing2d space) -> list a -> Drawing2d space
+combine = combineWith []
 
-collectWith ::
+combineWith ::
   Foldable list =>
   List (Attribute space) ->
   (a -> Drawing2d space) ->
   list a ->
   Drawing2d space
-collectWith attributes function list =
+combineWith attributes function list =
   groupWith attributes (List.map function (Data.Foldable.toList list))
 
 lineWith :: List (Attribute space) -> Point space -> Point space -> Drawing2d space
