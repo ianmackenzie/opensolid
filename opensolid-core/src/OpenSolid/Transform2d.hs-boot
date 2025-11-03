@@ -45,12 +45,12 @@ mirrorAcrossImpl ::
 scaleAboutImpl ::
   (Transform2d Uniform (space @ units) -> a -> b) ->
   Point2d (space @ units) ->
-  Float ->
+  Number ->
   a ->
   b
 scaleAlongImpl ::
   (Transform2d Affine (space @ units) -> a -> b) ->
   Axis2d (space @ units) ->
-  Float ->
+  Number ->
   a ->
   b

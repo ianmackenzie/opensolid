@@ -15,7 +15,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 
 data ImplicitCurveBounds
-  = Node ImplicitCurveBounds Float ImplicitCurveBounds
+  = Node ImplicitCurveBounds Number ImplicitCurveBounds
   | Leaf (Bounds Unitless)
 
 build :: NonEmpty (Bounds Unitless, Bounds Unitless) -> ImplicitCurveBounds
@@ -33,7 +33,7 @@ subtree boxes begin end = case end - begin of
     let split = Bounds.lower (Pair.first (Array.get mid boxes))
     Node left split right
 
-evaluate :: ImplicitCurveBounds -> Float -> Bounds Unitless
+evaluate :: ImplicitCurveBounds -> Number -> Bounds Unitless
 evaluate implicitCurveBounds x = case implicitCurveBounds of
   Node left split right -> if x < split then evaluate left x else evaluate right x
   Leaf bounds -> bounds

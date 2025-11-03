@@ -33,7 +33,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -69,7 +69,7 @@ coerce (Transform2d p0 i j) =
   Transform2d (Point2d.coerce p0) (Vector2d.coerce i) (Vector2d.coerce j)
 
 handedness :: Transform2d tag (space @ units) -> Sign
-handedness (Transform2d _ vx vy) = Float.sign (vx `cross` vy)
+handedness (Transform2d _ vx vy) = Number.sign (vx `cross` vy)
 
 withFixedPoint ::
   Point2d (space @ units) ->
@@ -104,13 +104,13 @@ mirrorAcross (Axis2d originPoint direction) = do
   let vy = Vector2d (2.0 * dx * dy) (1.0 - 2.0 * dx * dx)
   withFixedPoint originPoint vx vy
 
-scaleAbout :: Point2d (space @ units) -> Float -> Uniform (space @ units)
+scaleAbout :: Point2d (space @ units) -> Number -> Uniform (space @ units)
 scaleAbout point scale = do
   let vx = Vector2d scale 0.0
   let vy = Vector2d 0.0 scale
   withFixedPoint point vx vy
 
-scaleAlong :: Axis2d (space @ units) -> Float -> Affine (space @ units)
+scaleAlong :: Axis2d (space @ units) -> Number -> Affine (space @ units)
 scaleAlong (Axis2d originPoint direction) scale = do
   let Direction2d dx dy = direction
   let dx2 = dx * dx
@@ -222,7 +222,7 @@ mirrorAcrossImpl transformBy axis = transformBy (mirrorAcross axis)
 scaleAboutImpl ::
   (Uniform (space @ units) -> a -> b) ->
   Point2d (space @ units) ->
-  Float ->
+  Number ->
   a ->
   b
 scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
@@ -230,7 +230,7 @@ scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoi
 scaleAlongImpl ::
   (Affine (space @ units) -> a -> b) ->
   Axis2d (space @ units) ->
-  Float ->
+  Number ->
   a ->
   b
 scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)

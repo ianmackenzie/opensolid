@@ -181,7 +181,7 @@ yUpComponents# (Vector3d# r# f# u#) = (# negate# r#, u#, f# #)
 interpolateFrom ::
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
-  Float ->
+  Number ->
   Vector3d (space @ units)
 interpolateFrom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) t =
   Vector3d
@@ -277,7 +277,7 @@ rotateIn axisDirection = rotateAround (Axis3d Point3d.dummy axisDirection)
 
 This is equivalent to scaling along an axis with the given direction.
 -}
-scaleIn :: Direction3d space -> Float -> Vector3d (space @ units) -> Vector3d (space @ units)
+scaleIn :: Direction3d space -> Number -> Vector3d (space @ units) -> Vector3d (space @ units)
 scaleIn axisDirection = scaleAlong (Axis3d Point3d.dummy axisDirection)
 
 {-| Mirror in a particular direction.
@@ -298,7 +298,7 @@ rotateAround = Transform3d.rotateAroundImpl transformBy
 -- | Scale (stretch) along the given axis by the given scaling factor.
 scaleAlong ::
   Axis3d (space @ axisUnits) ->
-  Float ->
+  Number ->
   Vector3d (space @ units) ->
   Vector3d (space @ units)
 scaleAlong = Transform3d.scaleAlongImpl transformBy

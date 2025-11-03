@@ -51,11 +51,11 @@ import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Exception qualified as Exception
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -542,7 +542,7 @@ unsafeSqrt' function =
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 cubed function =
   new
-    (CompiledFunction.map Expression.cubed Float.cubed Bounds.cubed function.compiled)
+    (CompiledFunction.map Expression.cubed Number.cubed Bounds.cubed function.compiled)
     (\p -> 3.0 * squared function * derivative p function)
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless

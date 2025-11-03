@@ -40,7 +40,7 @@ axisHeadWidth = Length.millimeters 2.0
 viewBox :: Point2d (Space @ Unitless) -> Point2d (Space @ Unitless) -> Bounds2d (Space @ Meters)
 viewBox p1 p2 = Bounds2d.hull2 (Point2d.convert scale p1) (Point2d.convert scale p2)
 
-xAxis :: Float -> Float -> Drawing2d Space
+xAxis :: Number -> Number -> Drawing2d Space
 xAxis x1 x2 =
   Drawing2d.arrow
     @ #start (Point2d.x (Quantity.convert scale x1))
@@ -48,7 +48,7 @@ xAxis x1 x2 =
     @ #headLength axisHeadLength
     @ #headWidth axisHeadWidth
 
-yAxis :: Float -> Float -> Drawing2d Space
+yAxis :: Number -> Number -> Drawing2d Space
 yAxis y1 y2 =
   Drawing2d.arrow
     @ #start (Point2d.y (Quantity.convert scale y1))

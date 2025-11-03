@@ -145,7 +145,7 @@ yUp pX pY pZ = Point3d -pX pZ pY
 interpolateFrom ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
-  Float ->
+  Number ->
   Point3d (space @ units)
 interpolateFrom (Position3d p1) (Position3d p2) t = Position3d (Vector3d.interpolateFrom p1 p2 t)
 
@@ -253,14 +253,14 @@ mirrorAcross = Transform3d.mirrorAcrossImpl transformBy
 
 scaleAbout ::
   Point3d (space @ units) ->
-  Float ->
+  Number ->
   Point3d (space @ units) ->
   Point3d (space @ units)
 scaleAbout = Transform3d.scaleAboutImpl transformBy
 
 scaleAlong ::
   Axis3d (space @ units) ->
-  Float ->
+  Number ->
   Point3d (space @ units) ->
   Point3d (space @ units)
 scaleAlong = Transform3d.scaleAlongImpl transformBy

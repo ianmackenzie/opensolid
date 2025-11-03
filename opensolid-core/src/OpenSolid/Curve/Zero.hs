@@ -6,7 +6,7 @@ import OpenSolid.Prelude
 
 -- | Contains details about a single point where a curve is zero.
 data Zero = Zero
-  { location :: Float
+  { location :: Number
   -- ^ Get the parameter value at which the curve is zero.
   , order :: Int
   -- ^ Check whether the zero is a crossing zero, a tangent zero etc.

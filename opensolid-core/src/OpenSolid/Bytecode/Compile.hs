@@ -60,7 +60,7 @@ newtype InputComponents = InputComponents Int deriving (Eq, Ord, Show)
 
 data State = State
   { constantsBuilder :: Builder
-  , constants :: Map (NonEmpty Float) ConstantIndex
+  , constants :: Map (NonEmpty Number) ConstantIndex
   , constantComponents :: NumComponents
   , variablesBuilder :: Builder
   , variables :: Map Instruction VariableIndex
@@ -96,7 +96,7 @@ map f step = Step $ \state0 -> do
 collect :: Traversable list => (a -> Step b) -> list a -> Step (list b)
 collect = mapM
 
-addConstant :: NonEmpty Float -> Step ConstantIndex
+addConstant :: NonEmpty Number -> Step ConstantIndex
 addConstant components = Step \initialState ->
   case Map.get components initialState.constants of
     Just constantIndex -> (# initialState, constantIndex #)
@@ -106,7 +106,7 @@ addConstant components = Step \initialState ->
             initialState
               { constantsBuilder =
                   initialState.constantsBuilder
-                    <> Binary.combine Encode.float components
+                    <> Binary.combine Encode.number components
               , constants =
                   initialState.constants
                     |> Map.set components constantIndex
@@ -116,7 +116,7 @@ addConstant components = Step \initialState ->
               }
       (# updatedCompilation, constantIndex #)
 
-addConstant1d :: Float -> Step ConstantIndex
+addConstant1d :: Number -> Step ConstantIndex
 addConstant1d value = addConstant (NonEmpty.one value)
 
 addConstant2d :: Vector2d (space @ Unitless) -> Step ConstantIndex

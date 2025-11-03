@@ -9,18 +9,18 @@ module OpenSolid.Bezier
 where
 
 import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Float qualified as Float
 import OpenSolid.HasZero (HasZero (zero))
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 
 type Vector vector =
   ( HasZero vector
   , Addition vector vector vector
   , Subtraction vector vector vector
-  , Multiplication vector Float vector
+  , Multiplication vector Number vector
   )
 
 type Constraints point vector =
@@ -31,7 +31,7 @@ type Constraints point vector =
 
 derivative :: Constraints point vector => NonEmpty point -> NonEmpty vector
 derivative controlPoints = do
-  let scale = Float.int (NonEmpty.length controlPoints - 1)
+  let scale = Number.fromInt (NonEmpty.length controlPoints - 1)
   let scaledDifference p1 p2 = (p2 - p1) * scale
   let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
   case scaledDifferences of
@@ -48,7 +48,7 @@ hermite ::
 hermite startPoint startDerivatives endPoint endDerivatives = do
   let numStartDerivatives = startDerivatives.length
   let numEndDerivatives = endDerivatives.length
-  let curveDegree = Float.int (1 + numStartDerivatives + numEndDerivatives)
+  let curveDegree = Number.fromInt (1 + numStartDerivatives + numEndDerivatives)
   let scaledStartDerivatives = scaleDerivatives Positive 1.0 curveDegree startDerivatives
   let scaledEndDerivatives = scaleDerivatives Negative 1.0 curveDegree endDerivatives
   let startControlPoints =
@@ -58,7 +58,7 @@ hermite startPoint startDerivatives endPoint endDerivatives = do
           |> List.reverse
   startPoint :| List.concat [startControlPoints, endControlPoints, [endPoint]]
 
-scaleDerivatives :: Vector vector => Sign -> Float -> Float -> List vector -> List vector
+scaleDerivatives :: Vector vector => Sign -> Number -> Number -> List vector -> List vector
 scaleDerivatives _ _ _ [] = []
 scaleDerivatives sign scale n (first : rest) = do
   let updatedScale = sign * scale / n
@@ -74,26 +74,26 @@ derivedControlPoints previousPoint i n qs
 offset :: Vector vector => Int -> List vector -> vector
 offset i scaledDerivatives =
   List.take i scaledDerivatives
-    |> List.mapWithIndex (\j q -> q * Float.int (Int.choose (i - 1) j))
+    |> List.mapWithIndex (\j q -> q * Number.fromInt (Int.choose (i - 1) j))
     |> List.foldl (+) zero
 
-segment :: Constraints point vector => Float -> Float -> NonEmpty point -> NonEmpty point
+segment :: Constraints point vector => Number -> Number -> NonEmpty point -> NonEmpty point
 segment t1 t2 controlPoints = do
   let newControlPoint index _ = blossom controlPoints t1 t2 index
   NonEmpty.mapWithIndex newControlPoint controlPoints
 
-blossom :: Constraints point vector => NonEmpty point -> Float -> Float -> Int -> point
+blossom :: Constraints point vector => NonEmpty point -> Number -> Number -> Int -> point
 blossom (point :| []) _ _ _ = point
 blossom (first :| NonEmpty rest) t1 t2 n2 = do
   let t = if n2 > 0 then t2 else t1
   blossom (deCasteljau first rest t) t1 t2 (n2 - 1)
 
-deCasteljau :: Constraints point vector => point -> NonEmpty point -> Float -> NonEmpty point
+deCasteljau :: Constraints point vector => point -> NonEmpty point -> Number -> NonEmpty point
 deCasteljau first rest t = case rest of
   second :| [] -> NonEmpty.one (lerp first second t)
   next :| NonEmpty remaining -> NonEmpty.push (lerp first next t) (deCasteljau next remaining t)
 
-lerp :: Constraints point vector => point -> point -> Float -> point
+lerp :: Constraints point vector => point -> point -> Number -> point
 lerp p1 p2 t = p1 + t * (p2 - p1)
 
 syntheticStart ::

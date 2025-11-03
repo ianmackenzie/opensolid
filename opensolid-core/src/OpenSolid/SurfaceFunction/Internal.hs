@@ -20,8 +20,8 @@ solveForU ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   Bounds Unitless ->
-  Float ->
-  Float
+  Number ->
+  Number
 solveForU f fu uBounds vValue = do
   let uvPoint uValue = Point2d uValue vValue
   let fValue uValue = SurfaceFunction.evaluate f (uvPoint uValue)
@@ -34,9 +34,9 @@ solveForV ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction units ->
-  Float ->
+  Number ->
   Bounds Unitless ->
-  Float
+  Number
 solveForV f fv uValue vBounds = do
   let uvPoint vValue = Point2d uValue vValue
   let fValue vValue = SurfaceFunction.evaluate f (uvPoint vValue)
@@ -45,7 +45,7 @@ solveForV f fv uValue vBounds = do
     Solve1d.Exact vValue -> vValue
     Solve1d.Closest vValue -> vValue
 
-curveBoundsAt :: Float -> Float -> Quantity units -> Quantity units -> Bounds units -> Bounds units
+curveBoundsAt :: Number -> Number -> Quantity units -> Quantity units -> Bounds units -> Bounds units
 curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)
   | mLow >= Quantity.zero || mHigh <= Quantity.zero = Bounds y1 y2 -- Monotonic case
   | otherwise = do
@@ -57,7 +57,7 @@ curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)
       let yPeak = if Quantity.isInfinite mHigh then Quantity.infinity else y1 + mHigh * dXPeak
       Bounds yValley yPeak
 
-curveBoundsOver :: Float -> Float -> Bounds units -> Bounds units -> Bounds units -> Bounds units
+curveBoundsOver :: Number -> Number -> Bounds units -> Bounds units -> Bounds units -> Bounds units
 curveBoundsOver x1 x2 y1 y2 (Bounds mLow mHigh)
   | mLow >= Quantity.zero || mHigh <= Quantity.zero = Bounds.aggregate2 y1 y2 -- Monotonic case
   | otherwise = do

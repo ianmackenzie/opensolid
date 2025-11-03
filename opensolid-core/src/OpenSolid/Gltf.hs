@@ -139,8 +139,8 @@ gltfMeshes resolution model = case model of
             , numVertices
             , vertices = verticesBuilder mesh.vertices
             , verticesByteLength = 6 * 4 * numVertices
-            , minPosition = Json.listOf (Json.float . Length.inMeters) [xLow, yLow, zLow]
-            , maxPosition = Json.listOf (Json.float . Length.inMeters) [xHigh, yHigh, zHigh]
+            , minPosition = Json.listOf (Json.number . Length.inMeters) [xLow, yLow, zLow]
+            , maxPosition = Json.listOf (Json.number . Length.inMeters) [xHigh, yHigh, zHigh]
             }
       [] -> []
   Model3d.Group children -> List.combine (gltfMeshes resolution) children
@@ -227,13 +227,13 @@ meshByteLength mesh = mesh.indicesByteLength + mesh.verticesByteLength
 
 encodeMaterial :: PbrMaterial -> Json
 encodeMaterial material = do
-  let (r, g, b) = Color.rgbFloatComponents material.baseColor
+  let (r, g, b) = Color.toRgb1 material.baseColor
   Json.object
     [ Json.field "pbrMetallicRoughness" do
         Json.object
-          [ Json.field "baseColorFactor" $ Json.listOf Json.float [r, g, b, 1.0]
-          , Json.field "metallicFactor" $ Json.float material.metallic
-          , Json.field "roughnessFactor" $ Json.float material.roughness
+          [ Json.field "baseColorFactor" $ Json.listOf Json.number [r, g, b, 1.0]
+          , Json.field "metallicFactor" $ Json.number material.metallic
+          , Json.field "roughnessFactor" $ Json.number material.roughness
           ]
     ]
 

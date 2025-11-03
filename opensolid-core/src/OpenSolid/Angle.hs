@@ -27,8 +27,8 @@ module OpenSolid.Angle
 where
 
 import OpenSolid.Arithmetic
-import OpenSolid.Float (Float, fromRational)
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number (Number, fromRational)
+import OpenSolid.Number qualified as Number
 import OpenSolid.Quantity (Quantity (Quantity))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (Radians)
@@ -46,30 +46,30 @@ zero = Quantity.zero
 
 -- | The [golden angle](https://en.wikipedia.org/wiki/Golden_angle).
 goldenAngle :: Angle
-goldenAngle = radians (Float.pi * (3.0 - Float.sqrt 5.0))
+goldenAngle = radians (Number.pi * (3.0 - Number.sqrt 5.0))
 
 -- | Compute the sine of an angle.
-sin :: Angle -> Float
+sin :: Angle -> Number
 sin (Quantity x) = Quantity (Prelude.sin x)
 
 -- | Compute the cosine of an angle.
-cos :: Angle -> Float
+cos :: Angle -> Number
 cos (Quantity x) = Quantity (Prelude.cos x)
 
 -- | Compute the tangent of an angle.
-tan :: Angle -> Float
+tan :: Angle -> Number
 tan (Quantity x) = Quantity (Prelude.tan x)
 
 -- | Compute the inverse sine of a value.
-asin :: Float -> Angle
+asin :: Number -> Angle
 asin (Quantity x) = Quantity (Prelude.asin x)
 
 -- | Compute the inverse cosine of a value.
-acos :: Float -> Angle
+acos :: Number -> Angle
 acos (Quantity x) = Quantity (Prelude.acos x)
 
 -- | Compute the inverse tangent of a value.
-atan :: Float -> Angle
+atan :: Number -> Angle
 atan (Quantity x) = Quantity (Prelude.atan x)
 
 {-| Compute an angle from Y and X values.
@@ -87,59 +87,59 @@ radian :: Angle
 radian = radians 1.0
 
 -- | Construct an angle from a number of radians.
-radians :: Float -> Angle
+radians :: Number -> Angle
 radians = Quantity.coerce
 
 -- | Convert an angle to a number of radians.
-inRadians :: Angle -> Float
+inRadians :: Angle -> Number
 inRadians = Quantity.coerce
 
 -- | π radians, or 180 degrees.
 pi :: Angle
-pi = radians Float.pi
+pi = radians Number.pi
 
 -- | π/2 radians, or 90 degrees.
 halfPi :: Angle
-halfPi = radians Float.halfPi
+halfPi = radians Number.halfPi
 
 -- | 2π radians, or 360 degrees.
 twoPi :: Angle
-twoPi = radians Float.twoPi
+twoPi = radians Number.twoPi
 
 -- | One degree.
 degree :: Angle
 degree = fullTurn / 360.0
 
 -- | Construct an angle from a number of degrees.
-degrees :: Float -> Angle
+degrees :: Number -> Angle
 degrees = (* degree)
 
 -- | Convert an angle to a number of degrees.
-inDegrees :: Angle -> Float
+inDegrees :: Angle -> Number
 inDegrees = (/ degree)
 
 -- | One full turn, or 360 degrees.
 fullTurn :: Angle
-fullTurn = radians Float.twoPi
+fullTurn = radians Number.twoPi
 
 -- | One half turn, or 180 degrees.
 halfTurn :: Angle
-halfTurn = radians Float.pi
+halfTurn = radians Number.pi
 
 -- | One quarter turn, or 90 degrees.
 quarterTurn :: Angle
-quarterTurn = radians (0.5 * Float.pi)
+quarterTurn = radians (0.5 * Number.pi)
 
 {-| Construct an angle from a number of turns.
 
 One turn is equal to 360 degrees.
 -}
-turns :: Float -> Angle
+turns :: Number -> Angle
 turns = (* fullTurn)
 
 {-| Convert an angle to a number of turns.
 
 One turn is equal to 360 degrees.
 -}
-inTurns :: Angle -> Float
+inTurns :: Angle -> Number
 inTurns = (/ fullTurn)

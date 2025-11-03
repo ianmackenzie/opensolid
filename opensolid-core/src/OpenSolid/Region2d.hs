@@ -50,7 +50,6 @@ import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
@@ -58,6 +57,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
@@ -225,7 +225,7 @@ circumscribedPolygon ::
 circumscribedPolygon n (Named centerPoint) (Named diameter) =
   inscribedPolygon n
     @ #centerPoint centerPoint
-    @ #diameter (diameter / Angle.cos (Angle.pi / Float.int n))
+    @ #diameter (diameter / Angle.cos (Angle.pi / Number.fromInt n))
 
 {-| Create a polygonal region from the given vertices.
 
@@ -329,16 +329,16 @@ curveIncidence ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  (Curve2d (space @ units), Maybe Float)
+  (Curve2d (space @ units), Maybe Number)
 curveIncidence point curve
   | point ~= curve.startPoint = (curve, Just 0.0)
   | point ~= curve.endPoint = (curve, Just 1.0)
   | otherwise = (curve, Nothing)
 
-incidentCurve :: (Curve2d (space @ units), Maybe Float) -> Maybe (Curve2d (space @ units), Float)
+incidentCurve :: (Curve2d (space @ units), Maybe Number) -> Maybe (Curve2d (space @ units), Number)
 incidentCurve (curve, maybeIncidence) = Maybe.map (curve,) maybeIncidence
 
-nonIncidentCurve :: (Curve2d (space @ units), Maybe Float) -> Maybe (Curve2d (space @ units))
+nonIncidentCurve :: (Curve2d (space @ units), Maybe Number) -> Maybe (Curve2d (space @ units))
 nonIncidentCurve (curve, Nothing) = Just curve
 nonIncidentCurve (_, Just _) = Nothing
 
@@ -530,14 +530,14 @@ mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
 scaleAbout ::
   Point2d (space @ units) ->
-  Float ->
+  Number ->
   Region2d (space @ units) ->
   Region2d (space @ units)
 scaleAbout = Transform2d.scaleAboutImpl transformBy
 
 scaleAlong ::
   Axis2d (space @ units) ->
-  Float ->
+  Number ->
   Region2d (space @ units) ->
   Region2d (space @ units)
 scaleAlong = Transform2d.scaleAlongImpl transformBy
@@ -602,7 +602,7 @@ classifyNonBoundary point loop = do
   if Bounds.includes Quantity.zero flux then Negative else Positive
 
 bothPossibleFluxValues :: Bounds Unitless
-bothPossibleFluxValues = Bounds 0.0 Float.twoPi
+bothPossibleFluxValues = Bounds 0.0 Number.twoPi
 
 containmentIsDeterminate :: Bounds Unitless -> Bool
 containmentIsDeterminate flux = not (Bounds.contains bothPossibleFluxValues flux)

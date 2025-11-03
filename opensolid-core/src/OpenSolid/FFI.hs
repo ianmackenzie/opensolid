@@ -49,12 +49,12 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Color (Color)
 import OpenSolid.Error qualified as Error
-import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
 import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude hiding (Type, pattern NonEmpty)
 import OpenSolid.Text qualified as Text
 
@@ -96,7 +96,7 @@ data Representation a where
   -- A 64-bit integer
   IntRep :: Representation Int
   -- A 64-bit float
-  FloatRep :: Representation Float
+  NumberRep :: Representation Number
   -- A Boolean value
   BoolRep :: Representation Bool
   -- A Sign value
@@ -150,7 +150,7 @@ staticClassName givenName = ClassName (NonEmpty.one givenName)
 data Type where
   Unit :: Type
   Int :: Type
-  Float :: Type
+  Number :: Type
   Bool :: Type
   Sign :: Type
   Text :: Type
@@ -171,7 +171,7 @@ typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
   UnitRep -> Unit
   IntRep -> Int
-  FloatRep -> Float
+  NumberRep -> Number
   BoolRep -> Bool
   SignRep -> Sign
   TextRep -> Text
@@ -284,7 +284,7 @@ typeName :: Type -> Text
 typeName ffiType = case ffiType of
   Unit -> "Unit"
   Int -> "Int"
-  Float -> "Float"
+  Number -> "Number"
   Bool -> "Bool"
   Sign -> "Sign"
   Text -> "Text"
@@ -312,7 +312,7 @@ size :: Type -> Int
 size ffiType = case ffiType of
   Unit -> 8
   Int -> 8
-  Float -> 8
+  Number -> 8
   Bool -> 8
   Sign -> 8
   Text -> 8
@@ -327,8 +327,8 @@ size ffiType = case ffiType of
 instance FFI () where
   representation _ = UnitRep
 
-instance FFI Float where
-  representation _ = FloatRep
+instance FFI Number where
+  representation _ = NumberRep
 
 instance FFI Int where
   representation _ = IntRep
@@ -416,7 +416,7 @@ store ptr offset value = do
   case representation proxy of
     UnitRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 0)
     IntRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 value)
-    FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
+    NumberRep -> Foreign.pokeByteOff ptr offset (Number.toDouble value)
     BoolRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 (if value then 1 else 0))
     SignRep -> store ptr offset (1 * value)
     TextRep -> do
@@ -555,7 +555,7 @@ load ptr offset = do
   case representation proxy of
     UnitRep -> return ()
     IntRep -> IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
-    FloatRep -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
+    NumberRep -> IO.map Number.fromDouble (Foreign.peekByteOff ptr offset)
     BoolRep -> IO.map ((/=) 0 . Int.fromInt64) (Foreign.peekByteOff ptr offset)
     SignRep -> IO.map Int.sign (load ptr offset)
     TextRep -> do

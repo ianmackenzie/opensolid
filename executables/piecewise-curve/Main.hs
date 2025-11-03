@@ -10,22 +10,22 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax (float, (.*), (.+), (./), (@))
+import OpenSolid.Syntax (number, (.*), (.+), (./), (@))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let weightCurve = Curve.quadraticSpline 1.0 (float 1.0 ./ sqrt (float 2.0)) 1.0
+  let weightCurve = Curve.quadraticSpline 1.0 (number 1.0 ./ sqrt (number 2.0)) 1.0
   let vE = Vector2d 1.0 0.0
-  let vNE = Vector2d 1.0 1.0 ./ sqrt (float 2.0)
+  let vNE = Vector2d 1.0 1.0 ./ sqrt (number 2.0)
   let vN = Vector2d 0.0 1.0
-  let vNW = Vector2d -1.0 1.0 ./ sqrt (float 2.0)
+  let vNW = Vector2d -1.0 1.0 ./ sqrt (number 2.0)
   let vW = Vector2d -1.0 0.0
-  let vSW = Vector2d -1.0 -1.0 ./ sqrt (float 2.0)
+  let vSW = Vector2d -1.0 -1.0 ./ sqrt (number 2.0)
   let vS = Vector2d 0.0 -1.0
-  let vSE = Vector2d 1.0 -1.0 ./ sqrt (float 2.0)
+  let vSE = Vector2d 1.0 -1.0 ./ sqrt (number 2.0)
   let radius = Length.centimeters 10.0
   let arc v1 v2 v3 = do
         radialUnitVector <- IO.try do

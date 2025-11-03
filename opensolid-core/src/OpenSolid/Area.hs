@@ -33,17 +33,17 @@ squareInch :: Area
 squareInch = Length.inch * Length.inch
 
 -- | Construct an area from a number of square meters.
-squareMeters :: Float -> Area
+squareMeters :: Number -> Area
 squareMeters = Quantity.coerce
 
 -- | Convert an area to a number of square meters.
-inSquareMeters :: Area -> Float
+inSquareMeters :: Area -> Number
 inSquareMeters = Quantity.coerce
 
 -- | Construct an area from a number of square inches.
-squareInches :: Float -> Area
+squareInches :: Number -> Area
 squareInches = (* squareInch)
 
 -- | Convert an area to a number of square inches.
-inSquareInches :: Area -> Float
+inSquareInches :: Area -> Number
 inSquareInches = (/ squareInch)

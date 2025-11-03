@@ -15,7 +15,7 @@ tests =
   , midpoints
   ]
 
-check :: (Int -> List Float) -> Int -> List Float -> Test
+check :: (Int -> List Number) -> Int -> List Number -> Test
 check function n expected =
   Test.verify (Text.int n) Test.do
     Test.expect (function n == expected)

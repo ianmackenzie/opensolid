@@ -259,7 +259,7 @@ coordinatesText :: Point space -> Text
 coordinatesText (Point2d x y) = lengthText x <> "," <> lengthText -y
 
 lengthText :: Length -> Text
-lengthText givenLength = Text.float (Length.inMillimeters givenLength)
+lengthText givenLength = Text.number (Length.inMillimeters givenLength)
 
 -- | Black stroke for curves and borders.
 blackStroke :: Attribute space
@@ -284,8 +284,8 @@ whiteFill = Attribute "fill" "white"
 fillColor :: Color -> Attribute space
 fillColor color = Attribute "fill" (Color.toHex color)
 
-opacity :: Float -> Attribute space
-opacity value = Attribute "opacity" (Text.float value)
+opacity :: Number -> Attribute space
+opacity value = Attribute "opacity" (Text.number value)
 
 miterStrokeJoins :: Attribute space
 miterStrokeJoins = Attribute "stroke-linejoin" "miter"

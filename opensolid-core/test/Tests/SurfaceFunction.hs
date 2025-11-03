@@ -105,7 +105,7 @@ planeTorusSurface = do
           + minorRadius * SurfaceFunction.sin phi * World3d.upwardDirection
   normalDirection `dot` surfaceFunction
 
-samplingRadius :: Float
+samplingRadius :: Number
 samplingRadius = 1e-6
 
 firstDerivativeIsConsistent :: SurfaceFunction Meters -> UvPoint -> SurfaceParameter -> Expectation

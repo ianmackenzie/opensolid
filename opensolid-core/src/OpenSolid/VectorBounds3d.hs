@@ -46,7 +46,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds (Bounds, Bounds#))
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -344,9 +344,9 @@ intersection (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = do
 
 interpolate ::
   VectorBounds3d (space @ units) ->
-  Float ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
+  Number ->
   Vector3d (space @ units)
 interpolate (VectorBounds3d x y z) u v w =
   Vector3d (Bounds.interpolate x u) (Bounds.interpolate y v) (Bounds.interpolate z w)
@@ -365,9 +365,9 @@ on plane bounds2d = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   let Vector3d cR cF cU = Vector3d.on plane (Vector2d cX cY)
-  let rR = rX * Float.abs iR + rY * Float.abs jR
-  let rF = rX * Float.abs iF + rY * Float.abs jF
-  let rU = rX * Float.abs iU + rY * Float.abs jU
+  let rR = rX * Number.abs iR + rY * Number.abs jR
+  let rF = rX * Number.abs iF + rY * Number.abs jF
+  let rU = rX * Number.abs iU + rY * Number.abs jU
   let bR = Bounds (cR - rR) (cR + rR)
   let bF = Bounds (cF - rF) (cF + rF)
   let bU = Bounds (cU - rU) (cU + rU)
@@ -388,9 +388,9 @@ placeIn frame (VectorBounds3d vR vF vU) = do
   let Direction3d iR iF iU = frame.rightwardDirection
   let Direction3d jR jF jU = frame.forwardDirection
   let Direction3d kR kF kU = frame.upwardDirection
-  let rR' = rR * Float.abs iR + rF * Float.abs jR + rU * Float.abs kR
-  let rF' = rR * Float.abs iF + rF * Float.abs jF + rU * Float.abs kF
-  let rU' = rR * Float.abs iU + rF * Float.abs jU + rU * Float.abs kU
+  let rR' = rR * Number.abs iR + rF * Number.abs jR + rU * Number.abs kR
+  let rF' = rR * Number.abs iF + rF * Number.abs jF + rU * Number.abs kF
+  let rU' = rR * Number.abs iU + rF * Number.abs jU + rU * Number.abs kU
   VectorBounds3d
     @ Bounds (cR' - rR') (cR' + rR')
     @ Bounds (cF' - rF') (cF' + rF')
@@ -411,9 +411,9 @@ relativeTo frame (VectorBounds3d vR vF vU) = do
   let Direction3d iR iF iU = frame.rightwardDirection
   let Direction3d jR jF jU = frame.forwardDirection
   let Direction3d kR kF kU = frame.upwardDirection
-  let rR' = rR * Float.abs iR + rF * Float.abs iF + rU * Float.abs iU
-  let rF' = rR * Float.abs jR + rF * Float.abs jF + rU * Float.abs jU
-  let rU' = rR * Float.abs kR + rF * Float.abs kF + rU * Float.abs kU
+  let rR' = rR * Number.abs iR + rF * Number.abs iF + rU * Number.abs iU
+  let rF' = rR * Number.abs jR + rF * Number.abs jF + rU * Number.abs jU
+  let rU' = rR * Number.abs kR + rF * Number.abs kF + rU * Number.abs kU
   VectorBounds3d
     @ Bounds (cR' - rR') (cR' + rR')
     @ Bounds (cF' - rF') (cF' + rF')
@@ -435,9 +435,9 @@ transformBy transform (VectorBounds3d vR vF vU) = do
   let Vector3d iR iF iU = i
   let Vector3d jR jF jU = j
   let Vector3d kR kF kU = k
-  let rR' = Float.abs iR * rR + Float.abs jR * rF + Float.abs kR * rU
-  let rF' = Float.abs iF * rR + Float.abs jF * rF + Float.abs kF * rU
-  let rU' = Float.abs iU * rR + Float.abs jU * rF + Float.abs kU * rU
+  let rR' = Number.abs iR * rR + Number.abs jR * rF + Number.abs kR * rU
+  let rF' = Number.abs iF * rR + Number.abs jF * rF + Number.abs kF * rU
+  let rU' = Number.abs iU * rR + Number.abs jU * rF + Number.abs kU * rU
   VectorBounds3d
     @ Bounds (cR' - rR') (cR' + rR')
     @ Bounds (cF' - rF') (cF' + rF')

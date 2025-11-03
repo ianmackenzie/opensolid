@@ -116,14 +116,14 @@ rotateAround axis angle = do
   let vz = Vector3d (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))
   withFixedPoint axis.originPoint vx vy vz
 
-scaleAbout :: Point3d (space @ units) -> Float -> Uniform (space @ units)
+scaleAbout :: Point3d (space @ units) -> Number -> Uniform (space @ units)
 scaleAbout point scale = do
   let vx = Vector3d scale 0.0 0.0
   let vy = Vector3d 0.0 scale 0.0
   let vz = Vector3d 0.0 0.0 scale
   withFixedPoint point vx vy vz
 
-scaleAlong :: Axis3d (space @ units) -> Float -> Affine (space @ units)
+scaleAlong :: Axis3d (space @ units) -> Number -> Affine (space @ units)
 scaleAlong axis scale = do
   let d = axis.direction
   let Direction3d dx dy dz = d
@@ -260,7 +260,7 @@ mirrorAcrossImpl transformBy plane = transformBy (mirrorAcross plane)
 scaleAboutImpl ::
   (Uniform (space @ units) -> a -> b) ->
   Point3d (space @ units) ->
-  Float ->
+  Number ->
   a ->
   b
 scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
@@ -268,7 +268,7 @@ scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoi
 scaleAlongImpl ::
   (Affine (space @ units) -> a -> b) ->
   Axis3d (space @ units) ->
-  Float ->
+  Number ->
   a ->
   b
 scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)

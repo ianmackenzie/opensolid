@@ -16,24 +16,24 @@ new ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction Unitless ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
   NonEmpty UvBounds ->
   Curve2d UvCoordinates
 monotonic ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction Unitless ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
   NonEmpty UvBounds ->
   Curve2d UvCoordinates
 bounded ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction Unitless ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
   NonEmpty UvBounds ->
   Frame2d UvCoordinates defines ->
   List (Axis2d UvCoordinates) ->

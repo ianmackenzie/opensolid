@@ -266,7 +266,7 @@ newtype Direction2d (space :: Type) = Unit2d (Vector2d (space @ Unitless))
 {-# COMPLETE Direction2d #-}
 
 {-# INLINE Direction2d #-}
-pattern Direction2d :: Float -> Float -> Direction2d space
+pattern Direction2d :: Number -> Number -> Direction2d space
 pattern Direction2d dX dY = Unit2d (Vector2d dX dY)
 
 instance FFI (Direction2d FFI.Space) where
@@ -306,22 +306,22 @@ instance Multiplication (Quantity units) (Direction2d space) (Vector2d (space @ 
 instance Multiplication (Direction2d space) (Quantity units) (Vector2d (space @ units)) where
   Unit2d v * scale = v * scale
 
-instance space1 ~ space2 => DotMultiplication (Direction2d space1) (Direction2d space2) Float where
+instance space1 ~ space2 => DotMultiplication (Direction2d space1) (Direction2d space2) Number where
   Unit2d v1 `dot` Unit2d v2 = v1 `dot` v2
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Direction2d space1) (Direction2d space2) Float
+  CrossMultiplication (Direction2d space1) (Direction2d space2) Number
   where
   Unit2d v1 `cross` Unit2d v2 = v1 `cross` v2
 
-instance HasField "xComponent" (Direction2d space) Float where
+instance HasField "xComponent" (Direction2d space) Number where
   getField (Unit2d v) = v.xComponent
 
-instance HasField "yComponent" (Direction2d space) Float where
+instance HasField "yComponent" (Direction2d space) Number where
   getField (Unit2d v) = v.yComponent
 
-instance HasField "components" (Direction2d space) (Float, Float) where
+instance HasField "components" (Direction2d space) (Number, Number) where
   getField (Unit2d v) = v.components
 
 instance HasField "angle" (Direction2d space) Angle where
@@ -1297,7 +1297,7 @@ newtype Direction3d (space :: Type) = Unit3d (Vector3d (space @ Unitless))
 {-# COMPLETE Direction3d #-}
 
 {-# INLINE Direction3d #-}
-pattern Direction3d :: Float -> Float -> Float -> Direction3d space
+pattern Direction3d :: Number -> Number -> Number -> Direction3d space
 pattern Direction3d dR dF dU = Unit3d (Vector3d dR dF dU)
 
 instance FFI (Direction3d FFI.Space) where
@@ -1344,7 +1344,7 @@ instance Multiplication (Bounds units) (Direction3d space) (VectorBounds3d (spac
 instance Multiplication (Direction3d space) (Bounds units) (VectorBounds3d (space @ units)) where
   Unit3d vector * bounds = vector * bounds
 
-instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Float where
+instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Number where
   Unit3d vector1 `dot` Unit3d vector2 = vector1 `dot` vector2
 
 instance

@@ -30,44 +30,44 @@ zero = Quantity.zero
 second :: Duration
 second = seconds 1.0
 
-seconds :: Float -> Duration
+seconds :: Number -> Duration
 seconds = Quantity.coerce
 
-inSeconds :: Duration -> Float
+inSeconds :: Duration -> Number
 inSeconds = Quantity.coerce
 
 microsecond :: Duration
 microsecond = seconds 1e-6
 
-microseconds :: Float -> Duration
+microseconds :: Number -> Duration
 microseconds = (* microsecond)
 
-inMicroseconds :: Duration -> Float
+inMicroseconds :: Duration -> Number
 inMicroseconds = (/ microsecond)
 
 millisecond :: Duration
 millisecond = seconds 1e-3
 
-milliseconds :: Float -> Duration
+milliseconds :: Number -> Duration
 milliseconds = (* millisecond)
 
-inMilliseconds :: Duration -> Float
+inMilliseconds :: Duration -> Number
 inMilliseconds = (/ millisecond)
 
 minute :: Duration
 minute = seconds 60.0
 
-minutes :: Float -> Duration
+minutes :: Number -> Duration
 minutes = (* minute)
 
-inMinutes :: Duration -> Float
+inMinutes :: Duration -> Number
 inMinutes = (/ minute)
 
 hour :: Duration
 hour = minutes 60.0
 
-hours :: Float -> Duration
+hours :: Number -> Duration
 hours = (* hour)
 
-inHours :: Duration -> Float
+inHours :: Duration -> Number
 inHours = (/ hour)

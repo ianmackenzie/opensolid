@@ -10,7 +10,7 @@ qualifiedName :: FFI.Type -> Text
 qualifiedName ffiType = case ffiType of
   FFI.Unit -> "None"
   FFI.Int -> "int"
-  FFI.Float -> "float"
+  FFI.Number -> "float"
   FFI.Bool -> "bool"
   FFI.Sign -> "int"
   FFI.Text -> "str"

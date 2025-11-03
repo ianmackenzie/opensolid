@@ -82,12 +82,12 @@ import OpenSolid.Bytecode.Evaluate qualified as Evaluate
 import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
 import OpenSolid.Bytecode.Instruction qualified as Instruction
 import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
@@ -118,7 +118,7 @@ type Coordinates = Space @ Unitless
 type Plane = Plane3d Coordinates (Defines Space)
 
 data Ast1d input where
-  Constant1d :: Float -> Ast1d input
+  Constant1d :: Number -> Ast1d input
   Variable1d :: Variable1d input -> Ast1d input
 
 deriving instance Eq (Ast1d input)
@@ -128,25 +128,25 @@ deriving instance Ord (Ast1d input)
 deriving instance Show (Ast1d input)
 
 data Variable1d input where
-  CurveParameter :: Variable1d Float
+  CurveParameter :: Variable1d Number
   SurfaceParameter :: SurfaceParameter -> Variable1d UvPoint
   XComponent :: Variable2d input -> Variable1d input
   YComponent :: Variable2d input -> Variable1d input
   Negated1d :: Variable1d input -> Variable1d input
   Sum1d :: Variable1d input -> Variable1d input -> Variable1d input
-  SumVariableConstant1d :: Variable1d input -> Float -> Variable1d input
+  SumVariableConstant1d :: Variable1d input -> Number -> Variable1d input
   Difference1d :: Variable1d input -> Variable1d input -> Variable1d input
-  DifferenceConstantVariable1d :: Float -> Variable1d input -> Variable1d input
+  DifferenceConstantVariable1d :: Number -> Variable1d input -> Variable1d input
   Product1d :: Variable1d input -> Variable1d input -> Variable1d input
-  ProductVariableConstant1d :: Variable1d input -> Float -> Variable1d input
+  ProductVariableConstant1d :: Variable1d input -> Number -> Variable1d input
   Quotient1d :: Variable1d input -> Variable1d input -> Variable1d input
-  QuotientConstantVariable1d :: Float -> Variable1d input -> Variable1d input
+  QuotientConstantVariable1d :: Number -> Variable1d input -> Variable1d input
   Squared1d :: Variable1d input -> Variable1d input
   Sqrt1d :: Variable1d input -> Variable1d input
   Cubed1d :: Variable1d input -> Variable1d input
   Sin1d :: Variable1d input -> Variable1d input
   Cos1d :: Variable1d input -> Variable1d input
-  BezierCurve1d :: NonEmpty Float -> Variable1d input -> Variable1d input
+  BezierCurve1d :: NonEmpty Number -> Variable1d input -> Variable1d input
   SquaredMagnitude2d :: Variable2d input -> Variable1d input
   SquaredMagnitude3d :: Variable3d input -> Variable1d input
   Magnitude2d :: Variable2d input -> Variable1d input
@@ -203,15 +203,15 @@ deriving instance Show (Ast2d input)
 data Variable2d input where
   SurfaceParameters :: Variable2d UvPoint
   XY :: Variable1d input -> Variable1d input -> Variable2d input
-  XC :: Variable1d input -> Float -> Variable2d input
-  CY :: Float -> Variable1d input -> Variable2d input
+  XC :: Variable1d input -> Number -> Variable2d input
+  CY :: Number -> Variable1d input -> Variable2d input
   Negated2d :: Variable2d input -> Variable2d input
   Sum2d :: Variable2d input -> Variable2d input -> Variable2d input
   SumVariableConstant2d :: Variable2d input -> Vector2d Coordinates -> Variable2d input
   Difference2d :: Variable2d input -> Variable2d input -> Variable2d input
   DifferenceConstantVariable2d :: Vector2d Coordinates -> Variable2d input -> Variable2d input
   Product2d :: Variable2d input -> Variable1d input -> Variable2d input
-  ProductVariableConstant2d :: Variable2d input -> Float -> Variable2d input
+  ProductVariableConstant2d :: Variable2d input -> Number -> Variable2d input
   ProductConstantVariable2d :: Vector2d Coordinates -> Variable1d input -> Variable2d input
   Quotient2d :: Variable2d input -> Variable1d input -> Variable2d input
   QuotientConstantVariable2d :: Vector2d Coordinates -> Variable1d input -> Variable2d input
@@ -250,7 +250,7 @@ data Variable3d input where
   Difference3d :: Variable3d input -> Variable3d input -> Variable3d input
   DifferenceConstantVariable3d :: Vector3d Coordinates -> Variable3d input -> Variable3d input
   Product3d :: Variable3d input -> Variable1d input -> Variable3d input
-  ProductVariableConstant3d :: Variable3d input -> Float -> Variable3d input
+  ProductVariableConstant3d :: Variable3d input -> Number -> Variable3d input
   ProductConstantVariable3d :: Vector3d Coordinates -> Variable1d input -> Variable3d input
   Quotient3d :: Variable3d input -> Variable1d input -> Variable3d input
   QuotientConstantVariable3d :: Vector3d Coordinates -> Variable1d input -> Variable3d input
@@ -277,12 +277,12 @@ deriving instance Show (Variable3d input)
 uvPoint :: Vector2d Coordinates -> UvPoint
 uvPoint position = Point2d.coerce (Position2d position)
 
-instance Composition (Ast1d input) (Ast1d Float) (Ast1d input) where
+instance Composition (Ast1d input) (Ast1d Number) (Ast1d input) where
   Constant1d outer . _ = Constant1d outer
   Variable1d outer . Variable1d inner = outer . inner
   outer . Constant1d inner = Constant1d (evaluateCurve1d outer inner)
 
-instance Composition (Variable1d input) (Variable1d Float) (Ast1d input) where
+instance Composition (Variable1d input) (Variable1d Number) (Ast1d input) where
   input . CurveParameter = Variable1d input
   CurveParameter . input = Variable1d input
   XComponent arg . input = xComponent (arg . input)
@@ -377,12 +377,12 @@ instance Composition (Variable1d input) (Variable1d Float) (Ast1d input) where
     Constant1d paramVal -> Constant1d (evaluateCurve1d b11d3 paramVal)
     Variable1d paramVar -> Variable1d (B11d3 paramVar)
 
-instance Composition (Ast1d input) (Ast2d Float) (Ast2d input) where
+instance Composition (Ast1d input) (Ast2d Number) (Ast2d input) where
   Constant2d outer . _ = Constant2d outer
   Variable2d outer . Variable1d inner = outer . inner
   outer . Constant1d inner = Constant2d (evaluateCurve2d outer inner)
 
-instance Composition (Variable1d input) (Variable2d Float) (Ast2d input) where
+instance Composition (Variable1d input) (Variable2d Number) (Ast2d input) where
   input . CurveParameter = Variable2d input
   XY x y . input = xy (x . input) (y . input)
   XC x y . input = xy (x . input) (Constant1d y)
@@ -407,12 +407,12 @@ instance Composition (Variable1d input) (Variable2d Float) (Ast2d input) where
   Desingularized2d parameter left middle right . input =
     desingularized2d (parameter . input) (left . input) (middle . input) (right . input)
 
-instance Composition (Ast1d input) (Ast3d Float) (Ast3d input) where
+instance Composition (Ast1d input) (Ast3d Number) (Ast3d input) where
   Constant3d outer . _ = Constant3d outer
   Variable3d outer . Variable1d inner = outer . inner
   outer . Constant1d inner = Constant3d (evaluateCurve3d outer inner)
 
-instance Composition (Variable1d input) (Variable3d Float) (Ast3d input) where
+instance Composition (Variable1d input) (Variable3d Number) (Ast3d input) where
   input . CurveParameter = Variable3d input
   Negated3d arg . input = negate (arg . input)
   Sum3d lhs rhs . input = lhs . input + rhs . input
@@ -606,7 +606,7 @@ constant2d = Constant2d . Vector2d.coerce
 constant3d :: Vector3d (space @ units) -> Ast3d input
 constant3d = Constant3d . Vector3d.coerce
 
-curveParameter :: Ast1d Float
+curveParameter :: Ast1d Number
 curveParameter = Variable1d CurveParameter
 
 surfaceParameter :: SurfaceParameter -> Ast1d UvPoint
@@ -1023,25 +1023,25 @@ instance CrossMultiplication (Ast3d input) (Vector3d (space @ units)) (Ast3d inp
 
 squared :: Ast1d input -> Ast1d input
 squared ast = case ast of
-  Constant1d val -> Constant1d (Float.squared val)
+  Constant1d val -> Constant1d (Number.squared val)
   Variable1d (Negated1d arg) -> Variable1d (Squared1d arg)
   Variable1d (Sqrt1d arg) -> Variable1d arg
   Variable1d var -> Variable1d (Squared1d var)
 
 sqrt :: Ast1d input -> Ast1d input
-sqrt (Constant1d value) = Constant1d (Float.sqrt value)
+sqrt (Constant1d value) = Constant1d (Number.sqrt value)
 sqrt (Variable1d var) = Variable1d (Sqrt1d var)
 
 cubed :: Ast1d input -> Ast1d input
-cubed (Constant1d value) = Constant1d (Float.cubed value)
+cubed (Constant1d value) = Constant1d (Number.cubed value)
 cubed (Variable1d var) = Variable1d (Cubed1d var)
 
 sin :: Ast1d input -> Ast1d input
-sin (Constant1d val) = Constant1d (Float.sin val)
+sin (Constant1d val) = Constant1d (Number.sin val)
 sin (Variable1d var) = Variable1d (Sin1d var)
 
 cos :: Ast1d input -> Ast1d input
-cos (Constant1d value) = constant1d (Float.cos value)
+cos (Constant1d value) = constant1d (Number.cos value)
 cos (Variable1d var) = Variable1d (Cos1d var)
 
 squaredMagnitude2d :: Ast2d input -> Ast1d input
@@ -1187,79 +1187,79 @@ xy (Constant1d x) (Variable1d y) = Variable2d (CY x y)
 xy (Variable1d x) (Constant1d y) = Variable2d (XC x y)
 xy (Variable1d x) (Variable1d y) = Variable2d (XY x y)
 
-bezierCurve1d :: NonEmpty (Quantity units) -> Ast1d Float
+bezierCurve1d :: NonEmpty (Quantity units) -> Ast1d Number
 bezierCurve1d (NonEmpty.One value) = constant1d value
 bezierCurve1d controlPoints =
   Variable1d (BezierCurve1d (NonEmpty.map Quantity.coerce controlPoints) CurveParameter)
 
-bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast2d Float
+bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast2d Number
 bezierCurve2d (NonEmpty.One value) = constant2d value
 bezierCurve2d controlPoints =
   Variable2d (BezierCurve2d (NonEmpty.map Vector2d.coerce controlPoints) CurveParameter)
 
-bezierCurve3d :: NonEmpty (Vector3d (space @ units)) -> Ast3d Float
+bezierCurve3d :: NonEmpty (Vector3d (space @ units)) -> Ast3d Number
 bezierCurve3d (NonEmpty.One value) = constant3d value
 bezierCurve3d controlPoints =
   Variable3d (BezierCurve3d (NonEmpty.map Vector3d.coerce controlPoints) CurveParameter)
 
-b00 :: Ast1d Float
+b00 :: Ast1d Number
 b00 = Variable1d (B00 CurveParameter)
 
-b00d1 :: Ast1d Float
+b00d1 :: Ast1d Number
 b00d1 = Variable1d (B00d1 CurveParameter)
 
-b00d2 :: Ast1d Float
+b00d2 :: Ast1d Number
 b00d2 = Variable1d (B00d2 CurveParameter)
 
-b00d3 :: Ast1d Float
+b00d3 :: Ast1d Number
 b00d3 = Variable1d (B00d3 CurveParameter)
 
-b01 :: Ast1d Float
+b01 :: Ast1d Number
 b01 = Variable1d (B01 CurveParameter)
 
-b01d1 :: Ast1d Float
+b01d1 :: Ast1d Number
 b01d1 = Variable1d (B01d1 CurveParameter)
 
-b01d2 :: Ast1d Float
+b01d2 :: Ast1d Number
 b01d2 = Variable1d (B01d2 CurveParameter)
 
-b01d3 :: Ast1d Float
+b01d3 :: Ast1d Number
 b01d3 = Variable1d (B01d3 CurveParameter)
 
-b02 :: Ast1d Float
+b02 :: Ast1d Number
 b02 = Variable1d (B02 CurveParameter)
 
-b02d1 :: Ast1d Float
+b02d1 :: Ast1d Number
 b02d1 = Variable1d (B02d1 CurveParameter)
 
-b02d2 :: Ast1d Float
+b02d2 :: Ast1d Number
 b02d2 = Variable1d (B02d2 CurveParameter)
 
-b02d3 :: Ast1d Float
+b02d3 :: Ast1d Number
 b02d3 = Variable1d (B02d3 CurveParameter)
 
-b10 :: Ast1d Float
+b10 :: Ast1d Number
 b10 = Variable1d (B10 CurveParameter)
 
-b10d1 :: Ast1d Float
+b10d1 :: Ast1d Number
 b10d1 = Variable1d (B10d1 CurveParameter)
 
-b10d2 :: Ast1d Float
+b10d2 :: Ast1d Number
 b10d2 = Variable1d (B10d2 CurveParameter)
 
-b10d3 :: Ast1d Float
+b10d3 :: Ast1d Number
 b10d3 = Variable1d (B10d3 CurveParameter)
 
-b11 :: Ast1d Float
+b11 :: Ast1d Number
 b11 = Variable1d (B11 CurveParameter)
 
-b11d1 :: Ast1d Float
+b11d1 :: Ast1d Number
 b11d1 = Variable1d (B11d1 CurveParameter)
 
-b11d2 :: Ast1d Float
+b11d2 :: Ast1d Number
 b11d2 = Variable1d (B11d2 CurveParameter)
 
-b11d3 :: Ast1d Float
+b11d3 :: Ast1d Number
 b11d3 = Variable1d (B11d3 CurveParameter)
 
 desingularized1d :: Ast1d input -> Ast1d input -> Ast1d input -> Ast1d input -> Ast1d input
@@ -1482,10 +1482,10 @@ compileVariable1d variable = case variable of
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B11d3 argIndex)
 
-coordinates2d :: Vector2d Coordinates -> NonEmpty Float
+coordinates2d :: Vector2d Coordinates -> NonEmpty Number
 coordinates2d (Vector2d x y) = NonEmpty.two x y
 
-coordinates3d :: Vector3d Coordinates -> NonEmpty Float
+coordinates3d :: Vector3d Coordinates -> NonEmpty Number
 coordinates3d (Vector3d r f u) = NonEmpty.three r f u
 
 compileVariable2d :: Variable2d input -> Compile.Step VariableIndex
@@ -1651,19 +1651,19 @@ compileVariable3d variable = case variable of
     let instruction = Instruction.Desingularized3d parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable3d instruction
 
-compileCurve1d :: Ast1d Float -> Compiled Float Float
+compileCurve1d :: Ast1d Number -> Compiled Number Number
 compileCurve1d (Constant1d val) = Evaluate.Constant val
 compileCurve1d (Variable1d var) = Evaluate.Bytecode (Compile.curve1d (compileVariable1d var))
 
-compileCurve2d :: Ast2d Float -> Compiled Float (Vector2d Coordinates)
+compileCurve2d :: Ast2d Number -> Compiled Number (Vector2d Coordinates)
 compileCurve2d (Constant2d val) = Evaluate.Constant val
 compileCurve2d (Variable2d var) = Evaluate.Bytecode (Compile.curve2d (compileVariable2d var))
 
-compileCurve3d :: Ast3d Float -> Compiled Float (Vector3d Coordinates)
+compileCurve3d :: Ast3d Number -> Compiled Number (Vector3d Coordinates)
 compileCurve3d (Constant3d val) = Evaluate.Constant val
 compileCurve3d (Variable3d var) = Evaluate.Bytecode (Compile.curve3d (compileVariable3d var))
 
-compileSurface1d :: Ast1d UvPoint -> Compiled UvPoint Float
+compileSurface1d :: Ast1d UvPoint -> Compiled UvPoint Number
 compileSurface1d (Constant1d val) = Evaluate.Constant val
 compileSurface1d (Variable1d var) = Evaluate.Bytecode (Compile.surface1d (compileVariable1d var))
 
@@ -1675,16 +1675,16 @@ compileSurface3d :: Ast3d UvPoint -> Compiled UvPoint (Vector3d Coordinates)
 compileSurface3d (Constant3d val) = Evaluate.Constant val
 compileSurface3d (Variable3d var) = Evaluate.Bytecode (Compile.surface3d (compileVariable3d var))
 
-evaluateCurve1d :: Ast1d Float -> Float -> Float
+evaluateCurve1d :: Ast1d Number -> Number -> Number
 evaluateCurve1d ast input = Evaluate.curve1dValue (compileCurve1d ast) input
 
-evaluateCurve2d :: Ast2d Float -> Float -> Vector2d Coordinates
+evaluateCurve2d :: Ast2d Number -> Number -> Vector2d Coordinates
 evaluateCurve2d ast input = Evaluate.curve2dValue (compileCurve2d ast) input
 
-evaluateCurve3d :: Ast3d Float -> Float -> Vector3d Coordinates
+evaluateCurve3d :: Ast3d Number -> Number -> Vector3d Coordinates
 evaluateCurve3d ast input = Evaluate.curve3dValue (compileCurve3d ast) input
 
-evaluateSurface1d :: Ast1d UvPoint -> UvPoint -> Float
+evaluateSurface1d :: Ast1d UvPoint -> UvPoint -> Number
 evaluateSurface1d ast input = Evaluate.surface1dValue (compileSurface1d ast) input
 
 evaluateSurface2d :: Ast2d UvPoint -> UvPoint -> Vector2d Coordinates
@@ -1693,15 +1693,15 @@ evaluateSurface2d ast input = Evaluate.surface2dValue (compileSurface2d ast) inp
 evaluateSurface3d :: Ast3d UvPoint -> UvPoint -> Vector3d Coordinates
 evaluateSurface3d ast input = Evaluate.surface3dValue (compileSurface3d ast) input
 
-debugCurve1d :: Ast1d Float -> Text
-debugCurve1d (Constant1d value) = "Constant: " <> Text.float value
+debugCurve1d :: Ast1d Number -> Text
+debugCurve1d (Constant1d value) = "Constant: " <> Text.number value
 debugCurve1d (Variable1d variable) =
   Text.multiline
     [ "Bytecode:"
     , Text.indent " " (Compile.debugCurve (compileVariable1d variable))
     ]
 
-debugCurve2d :: Ast2d Float -> Text
+debugCurve2d :: Ast2d Number -> Text
 debugCurve2d (Constant2d value) = "Constant: " <> Text.show value
 debugCurve2d (Variable2d variable) =
   Text.multiline
@@ -1709,7 +1709,7 @@ debugCurve2d (Variable2d variable) =
     , Text.indent " " (Compile.debugCurve (compileVariable2d variable))
     ]
 
-debugCurve3d :: Ast3d Float -> Text
+debugCurve3d :: Ast3d Number -> Text
 debugCurve3d (Constant3d value) = "Constant: " <> Text.show value
 debugCurve3d (Variable3d variable) =
   Text.multiline
@@ -1718,7 +1718,7 @@ debugCurve3d (Variable3d variable) =
     ]
 
 debugSurface1d :: Ast1d UvPoint -> Text
-debugSurface1d (Constant1d value) = "Constant: " <> Text.float value
+debugSurface1d (Constant1d value) = "Constant: " <> Text.number value
 debugSurface1d (Variable1d variable) =
   Text.multiline
     [ "Bytecode:"

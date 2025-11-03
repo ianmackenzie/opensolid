@@ -6,8 +6,8 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Float qualified as Float
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -36,7 +36,7 @@ tests =
 
 quadratic1d :: Tolerance Unitless => Test
 quadratic1d =
-  curve1d "Quadratic" (Curve.squared Curve.t - 2.0) 1.0 (Float.sqrt 2.0)
+  curve1d "Quadratic" (Curve.squared Curve.t - 2.0) 1.0 (Number.sqrt 2.0)
 
 quadraticDivergence1d :: Tolerance Unitless => Test
 quadraticDivergence1d =
@@ -50,7 +50,7 @@ arc2d = do
           @ #radius 1.0
           @ #startAngle Angle.zero
           @ #endAngle Angle.pi
-  let point = Point2d (Float.sqrt 2.0 / 2.0) (Float.sqrt 2.0 / 2.0)
+  let point = Point2d (Number.sqrt 2.0 / 2.0) (Number.sqrt 2.0 / 2.0)
   curve2d "Arc" (arc - point) 0.5 0.25
 
 simpleSurface2d :: Tolerance Unitless => Test
@@ -60,7 +60,7 @@ simpleSurface2d = do
   let x = SurfaceFunction.squared u - 2.0
   let y = v - 1.0
   let surface = VectorSurfaceFunction2d.xy x y
-  surface2d "Simple 2D surface" surface (Point2d 1.0 0.0) (Point2d (Float.sqrt 2.0) 1.0)
+  surface2d "Simple 2D surface" surface (Point2d 1.0 0.0) (Point2d (Number.sqrt 2.0) 1.0)
 
 expectedConvergence :: Expectation
 expectedConvergence = Test.fail "Expected Newton-Raphson to converge but it did not"
@@ -68,7 +68,7 @@ expectedConvergence = Test.fail "Expected Newton-Raphson to converge but it did 
 expectedDivergence :: Expectation
 expectedDivergence = Test.fail "Expected Newton-Raphson not to converge but it did"
 
-curve1d :: Tolerance Unitless => Text -> Curve Unitless -> Float -> Float -> Test
+curve1d :: Tolerance Unitless => Text -> Curve Unitless -> Number -> Number -> Test
 curve1d name curve t0 tExpected =
   Test.group name $
     [ Test.verify "Boxed" $
@@ -90,7 +90,7 @@ curve1d name curve t0 tExpected =
               |> Test.output "Actual solution" tSolution
     ]
 
-curveDivergence1d :: Tolerance Unitless => Text -> Curve Unitless -> Float -> Test
+curveDivergence1d :: Tolerance Unitless => Text -> Curve Unitless -> Number -> Test
 curveDivergence1d name curve t0 =
   Test.group name $
     [ Test.verify "Boxed" $
@@ -106,7 +106,7 @@ curveDivergence1d name curve t0 =
           Success tSolution -> expectedDivergence |> Test.output "Solution" tSolution
     ]
 
-curve2d :: Tolerance Unitless => Text -> VectorCurve2d (Space @ Unitless) -> Float -> Float -> Test
+curve2d :: Tolerance Unitless => Text -> VectorCurve2d (Space @ Unitless) -> Number -> Number -> Test
 curve2d name curve t0 tExpected =
   Test.group name $
     [ Test.verify "Boxed" $

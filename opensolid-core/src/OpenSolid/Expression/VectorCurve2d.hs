@@ -21,49 +21,49 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)
 
-constant :: Vector2d (space @ units) -> Expression Float (Vector2d (space @ units))
+constant :: Vector2d (space @ units) -> Expression Number (Vector2d (space @ units))
 constant = Expression.constant
 
 xy ::
-  Expression Float (Quantity units) ->
-  Expression Float (Quantity units) ->
-  Expression Float (Vector2d (space @ units))
+  Expression Number (Quantity units) ->
+  Expression Number (Quantity units) ->
+  Expression Number (Vector2d (space @ units))
 xy = Expression.xy
 
 squaredMagnitude' ::
-  Expression Float (Vector2d (space @ units)) ->
-  Expression Float (Quantity (units :*: units))
+  Expression Number (Vector2d (space @ units)) ->
+  Expression Number (Quantity (units :*: units))
 squaredMagnitude' = Expression.squaredMagnitude'
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
-  Expression Float (Vector2d (space @ units1)) ->
-  Expression Float (Quantity units2)
+  Expression Number (Vector2d (space @ units1)) ->
+  Expression Number (Quantity units2)
 squaredMagnitude = Expression.squaredMagnitude
 
-magnitude :: Expression Float (Vector2d (space @ units)) -> Expression Float (Quantity units)
+magnitude :: Expression Number (Vector2d (space @ units)) -> Expression Number (Quantity units)
 magnitude = Expression.magnitude
 
 placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->
-  Expression Float (Vector2d (local @ units)) ->
-  Expression Float (Vector2d (global @ units))
+  Expression Number (Vector2d (local @ units)) ->
+  Expression Number (Vector2d (global @ units))
 placeIn = Expression.placeIn
 
 relativeTo ::
   Frame2d (global @ frameUnits) (Defines local) ->
-  Expression Float (Vector2d (global @ units)) ->
-  Expression Float (Vector2d (local @ units))
+  Expression Number (Vector2d (global @ units)) ->
+  Expression Number (Vector2d (local @ units))
 relativeTo = Expression.relativeTo
 
 transformBy ::
   Transform2d a (space @ translationUnits) ->
-  Expression Float (Vector2d (space @ units)) ->
-  Expression Float (Vector2d (space @ units))
+  Expression Number (Vector2d (space @ units)) ->
+  Expression Number (Vector2d (space @ units))
 transformBy = Expression.transformBy
 
 placeOn ::
   Plane3d (space @ planeUnits) (Defines local) ->
-  Expression Float (Vector2d (local @ units)) ->
-  Expression Float (Vector3d (space @ units))
+  Expression Number (Vector2d (local @ units)) ->
+  Expression Number (Vector3d (space @ units))
 placeOn = Expression.on

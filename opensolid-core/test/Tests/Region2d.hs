@@ -6,8 +6,8 @@ import OpenSolid.Area qualified as Area
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Estimate qualified as Estimate
-import OpenSolid.Float qualified as Float
 import OpenSolid.Length qualified as Length
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -57,7 +57,7 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   let line2 = Curve2d.line p1 p3
   let arc = Curve2d.arc p2 p3 Angle.quarterTurn
   region <- Region2d.boundedBy [line1, line2, arc]
-  let expectedArea = 0.25 * Float.pi * radius * radius
+  let expectedArea = 0.25 * Number.pi * radius * radius
   Test.expect (areaIsApproximately expectedArea region)
 
 squareWithHole :: Tolerance Meters => Test
@@ -76,7 +76,7 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let holeRadius = 0.5 * holeDiameter
   let hole = Curve2d.circle (#centerPoint centerPoint) (#diameter holeDiameter)
   region <- Region2d.boundedBy [line1, line3, line2, line4, hole]
-  let expectedArea = width * width - Float.pi * holeRadius * holeRadius
+  let expectedArea = width * width - Number.pi * holeRadius * holeRadius
   Test.expect (areaIsApproximately expectedArea region)
 
 incompleteSquare :: Tolerance Meters => Test

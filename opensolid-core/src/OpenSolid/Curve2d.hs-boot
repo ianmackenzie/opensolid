@@ -36,7 +36,7 @@ data Curve2d (coordinateSystem :: CoordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
-    Float
+    Number
     (Point2d coordinateSystem)
     (Bounds Unitless)
     (Bounds2d coordinateSystem)
@@ -74,7 +74,7 @@ instance
 
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
-evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+evaluate :: Curve2d (space @ units) -> Number -> Point2d (space @ units)
 evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 tangentDirection ::

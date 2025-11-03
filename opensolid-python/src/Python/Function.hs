@@ -64,7 +64,7 @@ typePattern :: FFI.Type -> Text
 typePattern ffiType = case ffiType of
   FFI.Unit -> "None"
   FFI.Int -> "int()"
-  FFI.Float -> "float() | int()"
+  FFI.Number -> "float() | int()"
   FFI.Bool -> "bool()"
   FFI.Sign -> "1 | -1"
   FFI.Text -> "str()"

@@ -99,7 +99,7 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
-    Float
+    Number
     (Vector2d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds2d coordinateSystem)
@@ -649,11 +649,11 @@ desingularized start middle end =
 
 The parameter value should be between 0 and 1.
 -}
-evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
+evaluate :: VectorCurve2d (space @ units) -> Number -> Vector2d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 {-# INLINE evaluateAt #-}
-evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
+evaluateAt :: Number -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
 evaluateAt tValue curve = evaluate curve tValue
 
 evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
@@ -717,7 +717,7 @@ lhopital ::
   Tolerance units2 =>
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
-  Float ->
+  Number ->
   (Vector2d (space @ (units1 :/: units2)), Vector2d (space @ (units1 :/: units2)))
 lhopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
@@ -776,7 +776,7 @@ isZero curve = List.allSatisfy (~= Vector2d.zero) (sampleValues curve)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
-zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result IsZero (List Float)
+zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result IsZero (List Number)
 zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros curve.squaredMagnitude') of
     Success zeros1d -> Success (List.map (.location) zeros1d)

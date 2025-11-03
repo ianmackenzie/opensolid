@@ -1,9 +1,9 @@
-module OpenSolid.Float
-  ( Float
+module OpenSolid.Number
+  ( Number
   , fromRational
   , fromDouble
   , toDouble
-  , int
+  , fromInt
   )
 where
 
@@ -12,9 +12,9 @@ import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
 import OpenSolid.Unitless (Unitless)
 import Prelude qualified
 
-type Float = Quantity Unitless
+type Number = Quantity Unitless
 
-fromDouble :: Double -> Float
-toDouble :: Float -> Double
+fromDouble :: Double -> Number
+toDouble :: Number -> Double
 fromRational :: Prelude.Rational -> Quantity Unitless
-int :: Int -> Float
+fromInt :: Int -> Number

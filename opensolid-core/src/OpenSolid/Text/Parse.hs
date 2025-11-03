@@ -1,12 +1,12 @@
-module OpenSolid.Text.Parse (int, float) where
+module OpenSolid.Text.Parse (int, number) where
 
 import Data.Text qualified
 import Data.Text.Read (Reader)
 import Data.Text.Read qualified
 import OpenSolid.Bootstrap
 import OpenSolid.Composition
-import {-# SOURCE #-} OpenSolid.Float (Float)
-import {-# SOURCE #-} OpenSolid.Float qualified as Float
+import {-# SOURCE #-} OpenSolid.Number (Number)
+import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Result qualified as Result
 import Prelude qualified
@@ -29,5 +29,5 @@ num reader text =
 int :: Text -> Result Text Int
 int = num Data.Text.Read.decimal
 
-float :: Text -> Result Text Float
-float = Result.map Float.fromDouble . num Data.Text.Read.double
+number :: Text -> Result Text Number
+number = Result.map Number.fromDouble . num Data.Text.Read.double

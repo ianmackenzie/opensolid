@@ -49,8 +49,8 @@ where
 
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Float qualified as Float
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction2d (Direction2d)
@@ -279,7 +279,7 @@ intersection ::
 intersection (VectorBounds2d x1 y1) (VectorBounds2d x2 y2) =
   Maybe.map2 VectorBounds2d (Bounds.intersection x1 x2) (Bounds.intersection y1 y2)
 
-interpolate :: VectorBounds2d (space @ units) -> Float -> Float -> Vector2d (space @ units)
+interpolate :: VectorBounds2d (space @ units) -> Number -> Number -> Vector2d (space @ units)
 interpolate (VectorBounds2d x y) u v = Vector2d (Bounds.interpolate x u) (Bounds.interpolate y v)
 
 placeIn ::
@@ -301,8 +301,8 @@ placeInOrientation orientation (VectorBounds2d x y) = do
   let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
-  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 relativeTo ::
@@ -324,8 +324,8 @@ relativeToOrientation orientation (VectorBounds2d x y) = do
   let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
-  let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs iy
+  let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 placeOn ::
@@ -347,9 +347,9 @@ placeOnOrientation orientation (VectorBounds2d x y) = do
   let PlaneOrientation3d i j = orientation
   let Direction3d ix iy iz = i
   let Direction3d jx jy jz = j
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
-  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
+  let rz = 0.5 * xWidth * Number.abs iz + 0.5 * yWidth * Number.abs jz
   VectorBounds3d
     (Bounds (x0 - rx) (x0 + rx))
     (Bounds (y0 - ry) (y0 + ry))
@@ -380,6 +380,6 @@ transformBy transform (VectorBounds2d x y) = do
   let Transform2d _ i j = transform
   let Vector2d ix iy = i
   let Vector2d jx jy = j
-  let rx = 0.5 * Float.abs ix * xWidth + 0.5 * Float.abs jx * yWidth
-  let ry = 0.5 * Float.abs iy * xWidth + 0.5 * Float.abs jy * yWidth
+  let rx = 0.5 * Number.abs ix * xWidth + 0.5 * Number.abs jx * yWidth
+  let ry = 0.5 * Number.abs iy * xWidth + 0.5 * Number.abs jy * yWidth
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))

@@ -49,8 +49,7 @@ import GHC.OverloadedLabels (fromLabel)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude hiding
-  ( Float
-  , Floating (..)
+  ( Floating (..)
   , Fractional (..)
   , Integral (..)
   , Num (..)

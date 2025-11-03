@@ -5,7 +5,7 @@ module OpenSolid.Json.Format
   , coerce
   , convert
   , lift
-  , float
+  , number
   , int
   , bool
   , text
@@ -126,15 +126,15 @@ decodeText :: Json -> Result Text Text
 decodeText (Json.Text value) = Success value
 decodeText _ = Failure "Expected text"
 
-float :: Format Float
-float =
-  Format{encodeFunction = Json.float, decodeFunction = decodeFloat, schema = Json.Schema.number}
-    |> title "Float"
+number :: Format Number
+number =
+  Format{encodeFunction = Json.number, decodeFunction = decodeNumber, schema = Json.Schema.number}
+    |> title "Number"
     |> description "A unitless floating-point number"
 
-decodeFloat :: Json -> Result Text Float
-decodeFloat (Json.Float value) = Success value
-decodeFloat _ = Failure "Expected a number"
+decodeNumber :: Json -> Result Text Number
+decodeNumber (Json.Number value) = Success value
+decodeNumber _ = Failure "Expected a number"
 
 int :: Format Int
 int =
@@ -296,13 +296,13 @@ angle :: Json.Format Angle
 angle =
   title "Angle" $
     description "Units: radians" $
-      convert Angle.radians Angle.inRadians float
+      convert Angle.radians Angle.inRadians number
 
 length :: Json.Format Length
 length =
   title "Length" $
     description "Units: meters" $
-      convert Length.meters Length.inMeters float
+      convert Length.meters Length.inMeters number
 
 direction2d :: Json.Format (Direction2d space)
 direction2d =
@@ -312,8 +312,8 @@ direction2d =
         Tolerance.using Quantity.zero $
           lift Vector2d.direction Vector2d.unit $
             object Vector2d do
-              requiredField "x" Vector2d.xComponent float
-              requiredField "y" Vector2d.yComponent float
+              requiredField "x" Vector2d.xComponent number
+              requiredField "y" Vector2d.yComponent number
 
 vector2d :: Json.Format (Vector2d (space @ Meters))
 vector2d =

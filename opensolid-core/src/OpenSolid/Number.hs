@@ -1,9 +1,9 @@
-module OpenSolid.Float
-  ( Float
+module OpenSolid.Number
+  ( Number
   , fromRational
   , fromDouble
   , toDouble
-  , int
+  , fromInt
   , parse
   , ceiling
   , round
@@ -42,7 +42,6 @@ module OpenSolid.Float
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap hiding (max, min, product)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
@@ -57,128 +56,128 @@ import OpenSolid.Text.Parse qualified as Text.Parse
 import OpenSolid.Units (Unitless)
 import Prelude qualified
 
-type Float = Quantity Unitless
+type Number = Quantity Unitless
 
 {-# INLINE fromRational #-}
-fromRational :: Prelude.Rational -> Float
+fromRational :: Prelude.Rational -> Number
 fromRational = Prelude.fromRational
 
 {-# INLINE fromDouble #-}
-fromDouble :: Prelude.Double -> Float
-fromDouble = Data.Coerce.coerce
+fromDouble :: Prelude.Double -> Number
+fromDouble = Quantity
 
 {-# INLINE toDouble #-}
-toDouble :: Float -> Prelude.Double
-toDouble = Data.Coerce.coerce
+toDouble :: Number -> Prelude.Double
+toDouble (Quantity x) = x
 
-{-# INLINE int #-}
-int :: Int -> Float
-int = fromIntegral
+{-# INLINE fromInt #-}
+fromInt :: Int -> Number
+fromInt = fromIntegral
 
-parse :: Text -> Result Text Float
-parse = Text.Parse.float
+parse :: Text -> Result Text Number
+parse = Text.Parse.number
 
 {-# INLINE floor #-}
-floor :: Float -> Int
+floor :: Number -> Int
 floor (Quantity x) = Prelude.floor x
 
 {-# INLINE ceiling #-}
-ceiling :: Float -> Int
+ceiling :: Number -> Int
 ceiling (Quantity x) = Prelude.ceiling x
 
 {-# INLINE round #-}
-round :: Float -> Int
+round :: Number -> Int
 round (Quantity x) = Prelude.round x
 
-infinity :: Float
+infinity :: Number
 infinity = Quantity.infinity
 
-sign :: Float -> Sign
+sign :: Number -> Sign
 sign = Quantity.sign
 
-isNaN :: Float -> Bool
+isNaN :: Number -> Bool
 isNaN = Quantity.isNaN
 
-squared :: Float -> Float
+squared :: Number -> Number
 squared = Quantity.squared
 
-cubed :: Float -> Float
+cubed :: Number -> Number
 cubed value = value * value * value
 
-abs :: Float -> Float
+abs :: Number -> Number
 abs = Quantity.abs
 
-clampTo :: Bounds Unitless -> Float -> Float
+clampTo :: Bounds Unitless -> Number -> Number
 clampTo = Quantity.clampTo
 
-interpolateFrom :: Float -> Float -> Float -> Float
+interpolateFrom :: Number -> Number -> Number -> Number
 interpolateFrom = Quantity.interpolateFrom
 
-midpoint :: Float -> Float -> Float
+midpoint :: Number -> Number -> Number
 midpoint = Quantity.midpoint
 
-min :: Float -> Float -> Float
+min :: Number -> Number -> Number
 min = Quantity.min
 
-max :: Float -> Float -> Float
+max :: Number -> Number -> Number
 max = Quantity.max
 
-pi :: Float
+pi :: Number
 pi = Prelude.pi
 
-halfPi :: Float
+halfPi :: Number
 halfPi = 0.5 * pi
 
-twoPi :: Float
+twoPi :: Number
 twoPi = 2.0 * pi
 
-goldenRatio :: Float
+goldenRatio :: Number
 goldenRatio = 0.5 * (1.0 + sqrt 5.0)
 
-sqrt :: Float -> Float
+sqrt :: Number -> Number
 sqrt = Quantity.sqrt
 
-hypot2 :: Float -> Float -> Float
+hypot2 :: Number -> Number -> Number
 hypot2 = Quantity.hypot2
 
-hypot3 :: Float -> Float -> Float -> Float
+hypot3 :: Number -> Number -> Number -> Number
 hypot3 = Quantity.hypot3
 
-sin :: Float -> Float
+sin :: Number -> Number
 sin (Quantity x) = Quantity (Prelude.sin x)
 
-cos :: Float -> Float
+cos :: Number -> Number
 cos (Quantity x) = Quantity (Prelude.cos x)
 
-tan :: Float -> Float
+tan :: Number -> Number
 tan (Quantity x) = Quantity (Prelude.tan x)
 
-asin :: Float -> Float
+asin :: Number -> Number
 asin (Quantity x) = Quantity (Prelude.asin x)
 
-acos :: Float -> Float
+acos :: Number -> Number
 acos (Quantity x) = Quantity (Prelude.acos x)
 
-atan :: Float -> Float
+atan :: Number -> Number
 atan (Quantity x) = Quantity (Prelude.atan x)
 
-atan2 :: Quantity units -> Quantity units -> Float
+atan2 :: Quantity units -> Quantity units -> Number
 atan2 (Quantity y) (Quantity x) = Quantity (Prelude.atan2 y x)
 
-log :: Float -> Float
+log :: Number -> Number
 log (Quantity x) = Quantity (Prelude.log x)
 
-logBase :: Float -> Float -> Float
+logBase :: Number -> Number -> Number
 logBase (Quantity base) (Quantity x) = Quantity (Prelude.logBase base x)
 
-sum :: List Float -> Float
+sum :: List Number -> Number
 sum = Quantity.sum
 
-product :: NonEmpty Float -> Float
+product :: NonEmpty Number -> Number
 product = NonEmpty.reduce (*)
 
-random :: Float -> Float -> Random.Generator Float
+random :: Number -> Number -> Random.Generator Number
 random = Quantity.random
 
-epsilon :: Float
+epsilon :: Number
 epsilon = 2.2204460492503131e-16

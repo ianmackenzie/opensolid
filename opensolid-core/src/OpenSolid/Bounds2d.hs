@@ -51,9 +51,9 @@ import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction2d (Direction2d (Direction2d))
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
@@ -238,7 +238,7 @@ area' (Bounds2d x y) = Bounds.width x .*. Bounds.width y
 area :: Units.Squared units1 units2 => Bounds2d (space @ units1) -> Quantity units2
 area (Bounds2d x y) = Bounds.width x * Bounds.width y
 
-interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
+interpolate :: Bounds2d (space @ units) -> Number -> Number -> Point2d (space @ units)
 interpolate (PositionBounds2d pb) u v = Position2d (VectorBounds2d.interpolate pb u v)
 
 placeIn ::
@@ -253,8 +253,8 @@ placeIn frame (Bounds2d x y) = do
   let Point2d x0 y0 = Point2d.placeIn frame (Point2d xMid yMid)
   let Direction2d ix iy = frame.xDirection
   let Direction2d jx jy = frame.yDirection
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
-  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
   Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 relativeTo ::
@@ -269,8 +269,8 @@ relativeTo frame (Bounds2d x y) = do
   let Point2d x0 y0 = Point2d.relativeTo frame (Point2d xMid yMid)
   let Direction2d ix iy = frame.xDirection
   let Direction2d jx jy = frame.yDirection
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
-  let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs iy
+  let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
   Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 placeOn ::
@@ -286,9 +286,9 @@ placeOn plane (Bounds2d x y) = do
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
   let Point3d x0 y0 z0 = Point3d.on plane (Point2d xMid yMid)
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
-  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
+  let rz = 0.5 * xWidth * Number.abs iz + 0.5 * yWidth * Number.abs jz
   let bx = Bounds (x0 - rx) (x0 + rx)
   let by = Bounds (y0 - ry) (y0 + ry)
   let bz = Bounds (z0 - rz) (z0 + rz)
@@ -307,8 +307,8 @@ transformBy transform (Bounds2d x y) = do
   let Transform2d _ i j = transform
   let Vector2d ix iy = i
   let Vector2d jx jy = j
-  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
-  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
   Bounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 distanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Bounds units
@@ -319,7 +319,7 @@ distanceAlong axis (Bounds2d x y) = do
   let yWidth = Bounds.width y
   let d0 = Point2d.distanceAlong axis (Point2d xMid yMid)
   let Direction2d ax ay = Axis2d.direction axis
-  let r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
+  let r = 0.5 * xWidth * Number.abs ax + 0.5 * yWidth * Number.abs ay
   Bounds (d0 - r) (d0 + r)
 
 convert :: Quantity (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)

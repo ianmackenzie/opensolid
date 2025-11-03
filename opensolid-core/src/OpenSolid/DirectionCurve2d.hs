@@ -44,7 +44,7 @@ startValue curve = evaluate curve 0.0
 endValue :: DirectionCurve2d space -> Direction2d space
 endValue curve = evaluate curve 1.0
 
-evaluate :: DirectionCurve2d space -> Float -> Direction2d space
+evaluate :: DirectionCurve2d space -> Number -> Direction2d space
 evaluate (DirectionCurve2d vectorCurve) tValue =
   Direction2d.unsafe (VectorCurve2d.evaluate vectorCurve tValue)
 

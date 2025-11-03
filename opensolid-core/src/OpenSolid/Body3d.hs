@@ -50,7 +50,6 @@ import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.LineSegment2d (LineSegment2d)
@@ -62,6 +61,7 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d (Plane3d))
 import OpenSolid.Plane3d qualified as Plane3d
@@ -830,7 +830,7 @@ degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
   let edgeSize = Point2d.distanceFrom uvStart uvEnd
   validEdge uvBounds edgeSize surfaceSegments
 
-validEdge :: UvBounds -> Float -> Set2d UvBounds UvCoordinates -> Bool
+validEdge :: UvBounds -> Number -> Set2d UvBounds UvCoordinates -> Bool
 validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero do
   case surfaceSegments of
     Set2d.Node nodeBounds left right ->
@@ -838,7 +838,7 @@ validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero 
         || (validEdge edgeBounds edgeLength left && validEdge edgeBounds edgeLength right)
     Set2d.Leaf leafBounds _ ->
       not (edgeBounds ^ leafBounds)
-        || edgeLength <= Float.sqrt 2.0 * Bounds2d.diameter leafBounds
+        || edgeLength <= Number.sqrt 2.0 * Bounds2d.diameter leafBounds
 
 boundarySurfaceMesh ::
   Tolerance units =>

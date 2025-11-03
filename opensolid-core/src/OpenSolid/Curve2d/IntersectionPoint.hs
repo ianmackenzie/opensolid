@@ -10,9 +10,9 @@ where
 import OpenSolid.Prelude
 
 data IntersectionPoint
-  = Crossing Float Float Sign
-  | Tangent Float Float Sign
-  | Corner Float Float
+  = Crossing Number Number Sign
+  | Tangent Number Number Sign
+  | Corner Number Number
   deriving (Eq, Ord, Show)
 
 instance ApproximateEquality IntersectionPoint IntersectionPoint Unitless where
@@ -23,16 +23,16 @@ instance ApproximateEquality IntersectionPoint IntersectionPoint Unitless where
   Corner u1 v1 ~= Corner u2 v2 = u1 ~= u2 && v1 ~= v2
   Corner{} ~= _ = False
 
-crossing :: Float -> Float -> Sign -> IntersectionPoint
+crossing :: Number -> Number -> Sign -> IntersectionPoint
 crossing = Crossing
 
-tangent :: Float -> Float -> Sign -> IntersectionPoint
+tangent :: Number -> Number -> Sign -> IntersectionPoint
 tangent = Tangent
 
-corner :: Float -> Float -> IntersectionPoint
+corner :: Number -> Number -> IntersectionPoint
 corner = Corner
 
-parameterValues :: IntersectionPoint -> (Float, Float)
+parameterValues :: IntersectionPoint -> (Number, Number)
 parameterValues (Crossing t1 t2 _) = (t1, t2)
 parameterValues (Tangent t1 t2 _) = (t1, t2)
 parameterValues (Corner t1 t2) = (t1, t2)

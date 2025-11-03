@@ -1,6 +1,6 @@
 module Tests.Stream (tests) where
 
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
@@ -18,7 +18,7 @@ mapWithIndex = Test.verify "mapWithIndex" Test.do
         Stream.repeat 1
           |> Stream.mapWithIndex (\i n -> n / (2 ** i))
           |> Stream.take 11
-          |> Float.sum
+          |> Number.sum
   Tolerance.using 1e-3 do
     Test.expect (sum ~= 2.0)
       |> Test.output "sum" sum

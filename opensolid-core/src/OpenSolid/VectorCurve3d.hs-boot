@@ -37,7 +37,7 @@ instance HasField "derivative" (VectorCurve3d (space @ units)) (VectorCurve3d (s
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
-    Float
+    Number
     (Vector3d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds3d coordinateSystem)
@@ -94,7 +94,7 @@ on ::
   Plane3d (space @ planeUnits) (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve3d (space @ units)
-evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
+evaluate :: VectorCurve3d (space @ units) -> Number -> Vector3d (space @ units)
 evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

@@ -2,4 +2,4 @@ module OpenSolid.Parameter (samples) where
 
 import OpenSolid.Prelude
 
-samples :: List Float
+samples :: List Number

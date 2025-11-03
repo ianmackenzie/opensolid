@@ -20,9 +20,9 @@ where
 import Data.Foldable qualified
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Error qualified as Error
-import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude hiding (all, fail, (>>=))
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
@@ -136,10 +136,10 @@ runImpl args context test = case test of
     successesAndFailuresPerGroup <- IO.collect (runImpl args (appendTo context label)) tests
     return (sum successesAndFailuresPerGroup)
 
-fixed :: Int -> Float -> Text
+fixed :: Int -> Number -> Text
 fixed decimalPlaces value = do
   let formatString = "%." <> Text.int decimalPlaces <> "f"
-  Text.pack (Text.Printf.printf (Text.unpack formatString) (Float.toDouble value))
+  Text.pack (Text.Printf.printf (Text.unpack formatString) (Number.toDouble value))
 
 appendTo :: Text -> Text -> Text
 appendTo "" name = name

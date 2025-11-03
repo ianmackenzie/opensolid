@@ -25,7 +25,7 @@ data Curve3d (coordinateSystem :: CoordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
-    Float
+    Number
     (Point3d coordinateSystem)
     (Bounds Unitless)
     (Bounds3d coordinateSystem)
@@ -54,6 +54,6 @@ on ::
   Plane3d (space @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve3d (space @ units)
-evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
+evaluate :: Curve3d (space @ units) -> Number -> Point3d (space @ units)
 evaluateBounds :: Curve3d (space @ units) -> Bounds Unitless -> Bounds3d (space @ units)
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)

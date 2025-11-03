@@ -34,7 +34,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Direction2d (Direction2d (Direction2d))
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -53,7 +53,7 @@ import OpenSolid.Vector3d qualified as Vector3d
 
 -- | Get the XYZ components of a direction, given an XYZ coordinate convention to use.
 {-# INLINE components #-}
-components :: Convention3d -> Direction3d space -> (Float, Float, Float)
+components :: Convention3d -> Direction3d space -> (Number, Number, Number)
 components convention (Unit3d vector) = Vector3d.components convention vector
 
 unsafe :: Vector3d (space @ Unitless) -> Direction3d space
@@ -98,36 +98,36 @@ polar (Plane3d _ (PlaneOrientation3d i j)) angle =
 -- | Generate an arbitrary direction perpendicular to the given one.
 perpendicularDirection :: Direction3d space -> Direction3d space
 perpendicularDirection (Direction3d dx dy dz) = do
-  let absX = Float.abs dx
-  let absY = Float.abs dy
-  let absZ = Float.abs dz
+  let absX = Number.abs dx
+  let absY = Number.abs dy
+  let absZ = Number.abs dz
   if
     | absX <= absY && absX <= absZ -> do
-        let scale = Float.hypot2 dy dz
+        let scale = Number.hypot2 dy dz
         Direction3d 0.0 (-dz / scale) (dy / scale)
     | absY <= absX && absY <= absZ -> do
-        let scale = Float.hypot2 dx dz
+        let scale = Number.hypot2 dx dz
         Direction3d (dz / scale) 0.0 (-dx / scale)
     | otherwise -> do
-        let scale = Float.hypot2 dx dy
+        let scale = Number.hypot2 dx dy
         Direction3d (-dy / scale) (dx / scale) 0.0
 
-forwardComponent :: Direction3d space -> Float
+forwardComponent :: Direction3d space -> Number
 forwardComponent (Unit3d vector) = Vector3d.forwardComponent vector
 
-backwardComponent :: Direction3d space -> Float
+backwardComponent :: Direction3d space -> Number
 backwardComponent (Unit3d vector) = Vector3d.backwardComponent vector
 
-leftwardComponent :: Direction3d space -> Float
+leftwardComponent :: Direction3d space -> Number
 leftwardComponent (Unit3d vector) = Vector3d.leftwardComponent vector
 
-rightwardComponent :: Direction3d space -> Float
+rightwardComponent :: Direction3d space -> Number
 rightwardComponent (Unit3d vector) = Vector3d.rightwardComponent vector
 
-upwardComponent :: Direction3d space -> Float
+upwardComponent :: Direction3d space -> Number
 upwardComponent (Unit3d vector) = Vector3d.upwardComponent vector
 
-downwardComponent :: Direction3d space -> Float
+downwardComponent :: Direction3d space -> Number
 downwardComponent (Unit3d vector) = Vector3d.downwardComponent vector
 
 {-| Measure the angle from one direction to another.
@@ -197,5 +197,5 @@ random = do
 
 randomVector :: Random.Generator (Vector3d (space @ Unitless))
 randomVector = do
-  let randomComponent = Float.random -1.0 1.0
+  let randomComponent = Number.random -1.0 1.0
   Random.map3 Vector3d randomComponent randomComponent randomComponent

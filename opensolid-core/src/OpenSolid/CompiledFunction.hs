@@ -317,7 +317,7 @@ expression Abstract{} = Failure IsAbstract
 
 desingularized ::
   Expression.Evaluation inputValue outputValue inputBounds outputBounds =>
-  CompiledFunction inputValue Float inputBounds (Bounds Unitless) ->
+  CompiledFunction inputValue Number inputBounds (Bounds Unitless) ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->

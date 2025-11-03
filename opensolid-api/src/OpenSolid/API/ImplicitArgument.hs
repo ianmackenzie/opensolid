@@ -19,7 +19,7 @@ data ImplicitArgument
 
 ffiType :: ImplicitArgument -> FFI.Type
 ffiType constraint = case constraint of
-  ToleranceUnitless -> FFI.typeOf @Float Proxy
+  ToleranceUnitless -> FFI.typeOf @Number Proxy
   ToleranceRadians -> FFI.typeOf @Angle Proxy
   ToleranceMeters -> FFI.typeOf @Length Proxy
   ToleranceSquareMeters -> FFI.typeOf @Area Proxy

@@ -85,7 +85,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem)
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
-    Float
+    Number
     (Vector3d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds3d coordinateSystem)
@@ -591,11 +591,11 @@ desingularized start middle end =
     @ CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled
     @ desingularized start.derivative middle.derivative end.derivative
 
-evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
+evaluate :: VectorCurve3d (space @ units) -> Number -> Vector3d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 {-# INLINE evaluateAt #-}
-evaluateAt :: Float -> VectorCurve3d (space @ units) -> Vector3d (space @ units)
+evaluateAt :: Number -> VectorCurve3d (space @ units) -> Vector3d (space @ units)
 evaluateAt tValue curve = evaluate curve tValue
 
 evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBounds3d (space @ units)
@@ -634,7 +634,7 @@ lhopital ::
   Tolerance units2 =>
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
-  Float ->
+  Number ->
   (Vector3d (space @ (units1 :/: units2)), Vector3d (space @ (units1 :/: units2)))
 lhopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
@@ -688,7 +688,7 @@ magnitude curve = Curve.sqrt' (squaredMagnitude' curve)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
-zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result IsZero (List Float)
+zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result IsZero (List Number)
 zeros curve =
   case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
     Success zeros1d -> Success (List.map (.location) zeros1d)

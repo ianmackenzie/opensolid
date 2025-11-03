@@ -68,9 +68,9 @@ int64LE :: Int -> Builder
 int64LE = Builder.int64LE . Int.toInt64
 
 {-# INLINE float32LE #-}
-float32LE :: Float -> Builder
+float32LE :: Number -> Builder
 float32LE (Quantity double) = Builder.floatLE (GHC.Float.double2Float double)
 
 {-# INLINE float64LE #-}
-float64LE :: Float -> Builder
+float64LE :: Number -> Builder
 float64LE (Quantity double) = Builder.doubleLE double

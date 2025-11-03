@@ -1,6 +1,6 @@
 module OpenSolid.Syntax
   ( int
-  , float
+  , number
   , negative
   , (.+)
   , (.-)
@@ -29,20 +29,20 @@ import OpenSolid.Prelude
 int :: Int -> Int
 int = id
 
-{-# INLINE float #-}
-float :: Float -> Float
-float = id
+{-# INLINE number #-}
+number :: Number -> Number
+number = id
 
 {-# INLINE negative #-}
 negative :: Negation a => a -> a
 negative = negate
 
 {-# INLINE half #-}
-half :: Multiplication Float a b => a -> b
+half :: Multiplication Number a b => a -> b
 half value = 0.5 * value
 
 {-# INLINE twice #-}
-twice :: Multiplication Float a b => a -> b
+twice :: Multiplication Number a b => a -> b
 twice value = 2.0 * value
 
 {-# INLINE (.+) #-}

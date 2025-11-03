@@ -1,24 +1,24 @@
 module OpenSolid.Lobatto (p2, p3, w1, w2, w3, w4, estimate) where
 
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 
-p2 :: Float
-p2 = 0.5 - 1.0 / (2.0 * Float.sqrt 5.0)
+p2 :: Number
+p2 = 0.5 - 1.0 / (2.0 * Number.sqrt 5.0)
 
-p3 :: Float
-p3 = 0.5 + 1.0 / (2.0 * Float.sqrt 5.0)
+p3 :: Number
+p3 = 0.5 + 1.0 / (2.0 * Number.sqrt 5.0)
 
-w1 :: Float
+w1 :: Number
 w1 = 1.0 / 12.0
 
-w2 :: Float
+w2 :: Number
 w2 = 5.0 / 12.0
 
-w3 :: Float
+w3 :: Number
 w3 = 5.0 / 12.0
 
-w4 :: Float
+w4 :: Number
 w4 = 1.0 / 12.0
 
 estimate :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> Quantity units

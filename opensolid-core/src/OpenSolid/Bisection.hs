@@ -20,8 +20,8 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Error qualified as Error
-import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
@@ -33,9 +33,9 @@ data Domain bounds = Domain bounds ~(List (Domain bounds))
 split :: Bounds Unitless -> Domain (Bounds Unitless)
 split bounds = Domain bounds do
   let Bounds low high = bounds
-  let mid = Float.midpoint low high
-  let lowMid = Float.midpoint low mid
-  let highMid = Float.midpoint mid high
+  let mid = Number.midpoint low high
+  let lowMid = Number.midpoint low mid
+  let highMid = Number.midpoint mid high
   if mid > low && mid < high
     then [split (Bounds low mid), shrink (Bounds lowMid highMid), split (Bounds mid high)]
     else []
@@ -43,9 +43,9 @@ split bounds = Domain bounds do
 shrink :: Bounds Unitless -> Domain (Bounds Unitless)
 shrink bounds = Domain bounds do
   let Bounds low high = bounds
-  let mid = Float.midpoint low high
-  let lowMid = Float.midpoint low mid
-  let highMid = Float.midpoint mid high
+  let mid = Number.midpoint low high
+  let lowMid = Number.midpoint low mid
+  let highMid = Number.midpoint mid high
   [shrink (Bounds lowMid highMid) | lowMid > low && highMid < high]
 
 parameterDomain :: Domain (Bounds Unitless)
@@ -137,7 +137,7 @@ map4 function domain1 domain2 domain3 domain4 = do
     , child4 <- children4
     ]
 
-isInterior :: Float -> Bounds Unitless -> Bool
+isInterior :: Number -> Bounds Unitless -> Bool
 isInterior value (Bounds tLow tHigh) = do
   let margin = (tHigh - tLow) / 8.0
   value >= tLow + margin && value <= tHigh - margin

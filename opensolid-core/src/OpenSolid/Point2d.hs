@@ -86,37 +86,37 @@ The angle is measured counterclockwise from the positive X axis.
 polar :: Quantity units -> Angle -> Point2d (space @ units)
 polar r theta = Position2d (Vector2d.polar r theta)
 
-apply :: (Float -> Quantity units) -> Float -> Float -> Point2d (space @ units)
+apply :: (Number -> Quantity units) -> Number -> Number -> Point2d (space @ units)
 apply units fx fy = Point2d (units fx) (units fy)
 
 -- | Construct a point from its X and Y coordinates given in meters.
-meters :: Float -> Float -> Point2d (space @ Meters)
+meters :: Number -> Number -> Point2d (space @ Meters)
 meters = apply Length.meters
 
 -- | Construct a point from its X and Y coordinates given in centimeters.
-centimeters :: Float -> Float -> Point2d (space @ Meters)
+centimeters :: Number -> Number -> Point2d (space @ Meters)
 centimeters = apply Length.centimeters
 
 -- | Construct a point from its X and Y coordinates given in millimeters.
-millimeters :: Float -> Float -> Point2d (space @ Meters)
+millimeters :: Number -> Number -> Point2d (space @ Meters)
 millimeters = apply Length.millimeters
 
 {-| Construct a point from its X and Y coordinates given in centimeters.
 
 Short form alias for 'centimeters'.
 -}
-cm :: Float -> Float -> Point2d (space @ Meters)
+cm :: Number -> Number -> Point2d (space @ Meters)
 cm = centimeters
 
 {-| Construct a point from its X and Y coordinates given in millimeters.
 
 Short form alias for 'millimeters'.
 -}
-mm :: Float -> Float -> Point2d (space @ Meters)
+mm :: Number -> Number -> Point2d (space @ Meters)
 mm = millimeters
 
 -- | Construct a point from its X and Y coordinates given in inches.
-inches :: Float -> Float -> Point2d (space @ Meters)
+inches :: Number -> Number -> Point2d (space @ Meters)
 inches = apply Length.inches
 
 -- | Get the X coordinate of a point.
@@ -137,7 +137,7 @@ coordinates (Position2d p) = Vector2d.components p
 interpolateFrom ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
-  Float ->
+  Number ->
   Point2d (space @ units)
 interpolateFrom (Position2d p1) (Position2d p2) t = Position2d (Vector2d.interpolateFrom p1 p2 t)
 
@@ -237,14 +237,14 @@ mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
 scaleAbout ::
   Point2d (space @ units) ->
-  Float ->
+  Number ->
   Point2d (space @ units) ->
   Point2d (space @ units)
 scaleAbout = Transform2d.scaleAboutImpl transformBy
 
 scaleAlong ::
   Axis2d (space @ units) ->
-  Float ->
+  Number ->
   Point2d (space @ units) ->
   Point2d (space @ units)
 scaleAlong = Transform2d.scaleAlongImpl transformBy

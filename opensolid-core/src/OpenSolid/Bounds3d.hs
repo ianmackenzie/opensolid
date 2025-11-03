@@ -40,10 +40,10 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Convention3d qualified as Convention3d
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -170,7 +170,7 @@ hullN vertices = do
 diameter :: Bounds3d (space @ units) -> Quantity units
 diameter (Bounds3d x y z) = Quantity.hypot3 (Bounds.width x) (Bounds.width y) (Bounds.width z)
 
-interpolate :: Bounds3d (space @ units) -> Float -> Float -> Float -> Point3d (space @ units)
+interpolate :: Bounds3d (space @ units) -> Number -> Number -> Number -> Point3d (space @ units)
 interpolate (PositionBounds3d pb) u v w = Position3d (VectorBounds3d.interpolate pb u v w)
 
 on ::
@@ -185,9 +185,9 @@ on plane bounds2d = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   let Point3d cR cF cU = Point3d.on plane (Bounds2d.centerPoint bounds2d)
-  let rR = rX * Float.abs iR + rY * Float.abs jR
-  let rF = rX * Float.abs iF + rY * Float.abs jF
-  let rU = rX * Float.abs iU + rY * Float.abs jU
+  let rR = rX * Number.abs iR + rY * Number.abs jR
+  let rF = rX * Number.abs iF + rY * Number.abs jF
+  let rU = rX * Number.abs iU + rY * Number.abs jU
   let bR = Bounds (cR - rR) (cR + rR)
   let bF = Bounds (cF - rF) (cF + rF)
   let bU = Bounds (cU - rU) (cU + rU)
@@ -209,9 +209,9 @@ placeIn frame (Bounds3d pR pF pU) = do
   let rF = 0.5 * Bounds.width pF
   let rU = 0.5 * Bounds.width pU
   let Point3d cR' cF' cU' = Point3d.placeIn frame (Point3d cR cF cU)
-  let rR' = rR * Float.abs iR + rF * Float.abs jR + rU * Float.abs kR
-  let rF' = rR * Float.abs iF + rF * Float.abs jF + rU * Float.abs kF
-  let rU' = rR * Float.abs iU + rF * Float.abs jU + rU * Float.abs kU
+  let rR' = rR * Number.abs iR + rF * Number.abs jR + rU * Number.abs kR
+  let rF' = rR * Number.abs iF + rF * Number.abs jF + rU * Number.abs kF
+  let rU' = rR * Number.abs iU + rF * Number.abs jU + rU * Number.abs kU
   Bounds3d
     @ Bounds (cR' - rR') (cR' + rR')
     @ Bounds (cF' - rF') (cF' + rF')
@@ -233,9 +233,9 @@ relativeTo frame (Bounds3d pR pF pU) = do
   let rF = 0.5 * Bounds.width pF
   let rU = 0.5 * Bounds.width pU
   let Point3d cR' cF' cU' = Point3d.relativeTo frame (Point3d cR cF cU)
-  let rR' = rR * Float.abs iR + rF * Float.abs iF + rU * Float.abs iU
-  let rF' = rR * Float.abs jR + rF * Float.abs jF + rU * Float.abs jU
-  let rU' = rR * Float.abs kR + rF * Float.abs kF + rU * Float.abs kU
+  let rR' = rR * Number.abs iR + rF * Number.abs iF + rU * Number.abs iU
+  let rF' = rR * Number.abs jR + rF * Number.abs jF + rU * Number.abs jU
+  let rU' = rR * Number.abs kR + rF * Number.abs kF + rU * Number.abs kU
   Bounds3d
     @ Bounds (cR' - rR') (cR' + rR')
     @ Bounds (cF' - rF') (cF' + rF')
@@ -256,8 +256,8 @@ projectInto plane (Bounds3d pR pF pU) = do
   let rF = 0.5 * Bounds.width pF
   let rU = 0.5 * Bounds.width pU
   let Point2d cX cY = Point3d.projectInto plane (Point3d cR cF cU)
-  let rX = rR * Float.abs iR + rF * Float.abs iF + rU * Float.abs iU
-  let rY = rR * Float.abs jR + rF * Float.abs jF + rU * Float.abs jU
+  let rX = rR * Number.abs iR + rF * Number.abs iF + rU * Number.abs iU
+  let rY = rR * Number.abs jR + rF * Number.abs jF + rU * Number.abs jU
   Bounds2d
     @ Bounds (cX - rX) (cX + rX)
     @ Bounds (cY - rY) (cY + rY)
@@ -269,7 +269,7 @@ distanceAlong axis bounds = do
   let rR = 0.5 * width bounds
   let rF = 0.5 * length bounds
   let rU = 0.5 * height bounds
-  let radius = rR * Float.abs dR + rF * Float.abs dF + rU * Float.abs dU
+  let radius = rR * Number.abs dR + rF * Number.abs dF + rU * Number.abs dU
   Bounds (mid - radius) (mid + radius)
 
 transformBy ::
@@ -288,9 +288,9 @@ transformBy transform (Bounds3d pR pF pU) = do
   let Vector3d iR iF iU = i
   let Vector3d jR jF jU = j
   let Vector3d kR kF kU = k
-  let rR' = rR * Float.abs iR + rF * Float.abs jR + rU * Float.abs kR
-  let rF' = rR * Float.abs iF + rF * Float.abs jF + rU * Float.abs kF
-  let rU' = rR * Float.abs iU + rF * Float.abs jU + rU * Float.abs kU
+  let rR' = rR * Number.abs iR + rF * Number.abs jR + rU * Number.abs kR
+  let rF' = rR * Number.abs iF + rF * Number.abs jF + rU * Number.abs kF
+  let rU' = rR * Number.abs iU + rF * Number.abs jU + rU * Number.abs kU
   Bounds3d
     @ Bounds (cR' - rR') (cR' + rR')
     @ Bounds (cF' - rF') (cF' + rF')

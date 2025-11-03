@@ -44,7 +44,6 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
@@ -52,6 +51,7 @@ import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Orientation2d qualified as Orientation2d
 import OpenSolid.Orientation3d (Orientation3d)
@@ -181,8 +181,8 @@ orthonormalTransform2d =
       @ Random.map Transform2d.toOrthonormal rotation2d
       @ mirror2d
 
-scalingFactor :: Generator Float
-scalingFactor = Float.random 0.5 2.0
+scalingFactor :: Generator Number
+scalingFactor = Number.random 0.5 2.0
 
 uniformScaling2d :: Generator (Transform2d.Uniform (space @ Meters))
 uniformScaling2d = Random.map2 Transform2d.scaleAbout point2d scalingFactor

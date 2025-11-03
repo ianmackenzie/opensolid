@@ -14,11 +14,11 @@ import Tests.Curve2d qualified
 import Tests.Direction2d qualified
 import Tests.DivMod qualified
 import Tests.Estimate qualified
-import Tests.Float qualified
 import Tests.List qualified
 import Tests.Map qualified
 import Tests.NewtonRaphson qualified
 import Tests.NonEmpty qualified
+import Tests.Number qualified
 import Tests.Parameter qualified
 import Tests.Quantity qualified
 import Tests.Region2d qualified
@@ -45,7 +45,7 @@ tests =
     , Test.group "Tests.Direction2d" Tests.Direction2d.tests
     , Test.group "Tests.Map" Tests.Map.tests
     , Test.group "Tests.DivMod" Tests.DivMod.tests
-    , Test.group "Tests.Float" Tests.Float.tests
+    , Test.group "Tests.Number" Tests.Number.tests
     , Test.group "Tests.Stream" Tests.Stream.tests
     , Test.group "Tests.Text" Tests.Text.tests
     , Test.group "Tests.Bounds2d" Tests.Bounds2d.tests

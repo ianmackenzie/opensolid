@@ -1,12 +1,13 @@
 module OpenSolid.Color
   ( Color
-  , rgbInt
-  , rgbFloat
-  , hsl
-  , fromHex
+  , rgb1
+  , rgb255
+  , hsl1
+  , hex
+  , toRgb1
+  , toRgb255
+  , toHsl1
   , toHex
-  , rgbIntComponents
-  , rgbFloatComponents
   , lightRed
   , red
   , darkRed
@@ -48,166 +49,184 @@ import Data.Colour.RGBSpace.HSL qualified
 import Data.Colour.SRGB qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 -- | An RGB color value.
-type Color = Data.Colour.Colour Float
+type Color = Data.Colour.Colour Number
 
 -- | Construct a color from its RGB components, in the range [0,1].
-rgbFloat :: Float -> Float -> Float -> Color
-rgbFloat = Data.Colour.SRGB.sRGB
+rgb1 :: Number -> Number -> Number -> Color
+rgb1 = Data.Colour.SRGB.sRGB
 
 -- | Construct a color from its RGB components, in the range [0,255].
-rgbInt :: Int -> Int -> Int -> Color
-rgbInt r g b = rgbFloat (r / 255) (g / 255) (b / 255)
+rgb255 :: Int -> Int -> Int -> Color
+rgb255 r g b = rgb1 (r / 255) (g / 255) (b / 255)
 
--- | Construct a color from its hue, saturation and lightness values.
-hsl :: Angle -> Float -> Float -> Color
-hsl hue saturation lightness =
+{-| Construct a color from its hue, saturation and lightness values.
+
+Saturation and lightness should be in the range [0,1].
+-}
+hsl1 :: Angle -> Number -> Number -> Color
+hsl1 hue saturation lightness =
   Data.Colour.RGBSpace.HSL.hsl (Angle.inDegrees hue) saturation lightness
-    |> Data.Colour.RGBSpace.uncurryRGB rgbFloat
+    |> Data.Colour.RGBSpace.uncurryRGB rgb1
 
 -- | Construct a color from a hex string such as '#f3f3f3' or 'f3f3f3'.
-fromHex :: Text -> Color
-fromHex text = Data.Colour.SRGB.sRGB24read (Text.unpack text)
+hex :: Text -> Color
+hex text = Data.Colour.SRGB.sRGB24read (Text.unpack text)
+
+-- | Get the RGB components of a color as values in the range [0,1].
+toRgb1 :: Color -> (Number, Number, Number)
+toRgb1 color = do
+  let Data.Colour.SRGB.RGB r g b = Data.Colour.SRGB.toSRGB color
+  (r, g, b)
+
+-- | Get the RGB components of a color as values in the range [0,255].
+toRgb255 :: Color -> (Int, Int, Int)
+toRgb255 color = do
+  let (r, g, b) = toRgb1 color
+  let toInt component = Number.round (component * 255.0)
+  (toInt r, toInt g, toInt b)
+
+{-| Get the hue, saturation and lightness of a color.
+
+The returned saturation and lightness will be in the range [0,1].
+-}
+toHsl1 :: Color -> (Angle, Number, Number)
+toHsl1 color = do
+  let (h, s, l) = Data.Colour.RGBSpace.HSL.hslView (Data.Colour.SRGB.toSRGB color)
+  (Angle.degrees h, s, l)
 
 -- | Convert a color to a hex string such as '#f3f3f3'.
 toHex :: Color -> Text
 toHex color = Text.pack (Data.Colour.SRGB.sRGB24show color)
 
--- | Get the RGB components of a color as values in the range [0,1].
-rgbFloatComponents :: Color -> (Float, Float, Float)
-rgbFloatComponents = (.rgbFloatComponents)
-
--- | Get the RGB components of a color as values in the range [0,255].
-rgbIntComponents :: Color -> (Int, Int, Int)
-rgbIntComponents = (.rgbIntComponents)
-
 -- | Light Scarlet Red from the Tango icon theme.
 lightRed :: Color
-lightRed = rgbInt 239 41 41
+lightRed = rgb255 239 41 41
 
 -- | Scarlet Red from the Tango icon theme.
 red :: Color
-red = rgbInt 204 0 0
+red = rgb255 204 0 0
 
 -- | Dark Scarlet Red from the Tango icon theme.
 darkRed :: Color
-darkRed = rgbInt 164 0 0
+darkRed = rgb255 164 0 0
 
 -- | Light Orange from the Tango icon theme.
 lightOrange :: Color
-lightOrange = rgbInt 252 175 62
+lightOrange = rgb255 252 175 62
 
 -- | Orange from the Tango icon theme.
 orange :: Color
-orange = rgbInt 245 121 0
+orange = rgb255 245 121 0
 
 -- | Dark Orange from the Tango icon theme.
 darkOrange :: Color
-darkOrange = rgbInt 206 92 0
+darkOrange = rgb255 206 92 0
 
 -- | Light Butter from the Tango icon theme.
 lightYellow :: Color
-lightYellow = rgbInt 255 233 79
+lightYellow = rgb255 255 233 79
 
 -- | Butter from the Tango icon theme.
 yellow :: Color
-yellow = rgbInt 237 212 0
+yellow = rgb255 237 212 0
 
 -- | Dark Butter from the Tango icon theme.
 darkYellow :: Color
-darkYellow = rgbInt 196 160 0
+darkYellow = rgb255 196 160 0
 
 -- | Light Chameleon from the Tango icon theme.
 lightGreen :: Color
-lightGreen = rgbInt 138 226 52
+lightGreen = rgb255 138 226 52
 
 -- | Chameleon from the Tango icon theme.
 green :: Color
-green = rgbInt 115 210 22
+green = rgb255 115 210 22
 
 -- | Dark Chameleon from the Tango icon theme.
 darkGreen :: Color
-darkGreen = rgbInt 78 154 6
+darkGreen = rgb255 78 154 6
 
 -- | Light Sky Blue from the Tango icon theme.
 lightBlue :: Color
-lightBlue = rgbInt 114 159 207
+lightBlue = rgb255 114 159 207
 
 -- | Sky Blue from the Tango icon theme.
 blue :: Color
-blue = rgbInt 52 101 164
+blue = rgb255 52 101 164
 
 -- | Dark Sky Blue from the Tango icon theme.
 darkBlue :: Color
-darkBlue = rgbInt 32 74 135
+darkBlue = rgb255 32 74 135
 
 -- | Light Plum from the Tango icon theme.
 lightPurple :: Color
-lightPurple = rgbInt 173 127 168
+lightPurple = rgb255 173 127 168
 
 -- | Plum from the Tango icon theme.
 purple :: Color
-purple = rgbInt 117 80 123
+purple = rgb255 117 80 123
 
 -- | Dark Plum from the Tango icon theme.
 darkPurple :: Color
-darkPurple = rgbInt 92 53 102
+darkPurple = rgb255 92 53 102
 
 -- | Light Chocolate from the Tango icon theme.
 lightBrown :: Color
-lightBrown = rgbInt 233 185 110
+lightBrown = rgb255 233 185 110
 
 -- | Chocolate from the Tango icon theme.
 brown :: Color
-brown = rgbInt 193 125 17
+brown = rgb255 193 125 17
 
 -- | Dark Chocolate from the Tango icon theme.
 darkBrown :: Color
-darkBrown = rgbInt 143 89 2
+darkBrown = rgb255 143 89 2
 
 -- | Black.
 black :: Color
-black = rgbInt 0 0 0
+black = rgb255 0 0 0
 
 -- | White.
 white :: Color
-white = rgbInt 255 255 255
+white = rgb255 255 255 255
 
 -- | Aluminium 1/6 from the Tango icon theme.
 lightGrey :: Color
-lightGrey = rgbInt 238 238 236
+lightGrey = rgb255 238 238 236
 
 -- | Aluminium 2/6 from the Tango icon theme.
 grey :: Color
-grey = rgbInt 211 215 207
+grey = rgb255 211 215 207
 
 -- | Aluminium 3/6 from the Tango icon theme.
 darkGrey :: Color
-darkGrey = rgbInt 186 189 182
+darkGrey = rgb255 186 189 182
 
 -- | Aluminium 1/6 from the Tango icon theme.
 lightGray :: Color
-lightGray = rgbInt 238 238 236
+lightGray = rgb255 238 238 236
 
 -- | Aluminium 2/6 from the Tango icon theme.
 gray :: Color
-gray = rgbInt 211 215 207
+gray = rgb255 211 215 207
 
 -- | Aluminium 3/6 from the Tango icon theme.
 darkGray :: Color
-darkGray = rgbInt 186 189 182
+darkGray = rgb255 186 189 182
 
 -- | Aluminium 4/6 from the Tango icon theme.
 lightCharcoal :: Color
-lightCharcoal = rgbInt 136 138 133
+lightCharcoal = rgb255 136 138 133
 
 -- | Aluminium 5/6 from the Tango icon theme.
 charcoal :: Color
-charcoal = rgbInt 85 87 83
+charcoal = rgb255 85 87 83
 
 -- | Aluminium 6/6 from the Tango icon theme.
 darkCharcoal :: Color
-darkCharcoal = rgbInt 46 52 54
+darkCharcoal = rgb255 46 52 54

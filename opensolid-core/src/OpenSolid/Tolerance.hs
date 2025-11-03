@@ -13,10 +13,10 @@ where
 
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
-import OpenSolid.Float (Float, fromRational)
-import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import {-# SOURCE #-} OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
+import OpenSolid.Number (Number, fromRational)
+import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
@@ -87,7 +87,7 @@ instance
 infix 4 !=
 
 -- | A default tolerance (1e-9) for comparing unitless values with expected magnitude near 1.
-unitless :: Float
+unitless :: Number
 unitless = 1e-9
 
 using :: Quantity units -> (Tolerance units => a) -> a
@@ -100,7 +100,7 @@ squared' :: Tolerance units => Quantity (units :*: units)
 squared' = Quantity.squared' ?tolerance
 
 forEndpointDerivative :: Tolerance units => Int -> Quantity units
-forEndpointDerivative n = ?tolerance / Float.int (Int.factorial n * 2 ** (2 * n))
+forEndpointDerivative n = ?tolerance / Number.fromInt (Int.factorial n * 2 ** (2 * n))
 
 {-# INLINE (~=#) #-}
 (~=#) :: Tolerance units => Double# -> Double# -> Int#

@@ -22,7 +22,7 @@ typeName :: FFI.Type -> Text
 typeName ffiType = case ffiType of
   FFI.Unit -> "c_int64"
   FFI.Int -> "c_int64"
-  FFI.Float -> "c_double"
+  FFI.Number -> "c_double"
   FFI.Bool -> "c_int64"
   FFI.Sign -> "c_int64"
   FFI.Text -> "_Text"
@@ -38,7 +38,7 @@ typeNameComponent :: FFI.Type -> Text
 typeNameComponent ffiType = case ffiType of
   FFI.Unit -> "c_int64"
   FFI.Int -> "c_int64"
-  FFI.Float -> "c_double"
+  FFI.Number -> "c_double"
   FFI.Bool -> "c_int64"
   FFI.Sign -> "c_int64"
   FFI.Text -> "Text"
@@ -61,7 +61,7 @@ dummyFieldValue :: FFI.Type -> Text
 dummyFieldValue ffiType = case ffiType of
   FFI.Unit -> "0"
   FFI.Int -> "0"
-  FFI.Float -> "0.0"
+  FFI.Number -> "0.0"
   FFI.Bool -> "0"
   FFI.Sign -> "0"
   FFI.Text -> dummyValue ffiType
@@ -89,7 +89,7 @@ outputValue :: FFI.Type -> Text -> Text
 outputValue ffiType varName = case ffiType of
   FFI.Unit -> "None"
   FFI.Int -> varName <> ".value"
-  FFI.Float -> varName <> ".value"
+  FFI.Number -> varName <> ".value"
   FFI.Bool -> "bool(" <> varName <> ".value)"
   FFI.Sign -> varName <> ".value"
   FFI.Text -> "_text_to_str(" <> varName <> ")"
@@ -105,7 +105,7 @@ fieldOutputValue :: FFI.Type -> Text -> Text
 fieldOutputValue ffiType varName = case ffiType of
   FFI.Unit -> "None"
   FFI.Int -> varName
-  FFI.Float -> varName
+  FFI.Number -> varName
   FFI.Bool -> "bool(" <> varName <> ")"
   FFI.Sign -> varName
   FFI.Text -> "_text_to_str(" <> varName <> ")"
@@ -151,7 +151,7 @@ singleArgument :: Text -> FFI.Type -> Text
 singleArgument varName ffiType = case ffiType of
   FFI.Unit -> "c_int64()"
   FFI.Int -> "c_int64(" <> varName <> ")"
-  FFI.Float -> "c_double(" <> varName <> ")"
+  FFI.Number -> "c_double(" <> varName <> ")"
   FFI.Bool -> "c_int64(" <> varName <> ")"
   FFI.Sign -> "c_int64(_sign_argument(" <> varName <> "))"
   FFI.Text -> "_str_to_text(" <> varName <> ")"
@@ -167,7 +167,7 @@ fieldArgumentValue :: Text -> FFI.Type -> Text
 fieldArgumentValue varName ffiType = case ffiType of
   FFI.Unit -> "0"
   FFI.Int -> varName
-  FFI.Float -> varName
+  FFI.Number -> varName
   FFI.Bool -> varName
   FFI.Sign -> "_sign_argument(" <> varName <> ")"
   FFI.Text -> "_str_to_text(" <> varName <> ")"
@@ -213,7 +213,7 @@ registerType ffiType registry = do
     else case ffiType of
       FFI.Unit -> registry
       FFI.Int -> registry
-      FFI.Float -> registry
+      FFI.Number -> registry
       FFI.Bool -> registry
       FFI.Sign -> registry
       FFI.Text -> registry

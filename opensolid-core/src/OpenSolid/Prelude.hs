@@ -10,7 +10,7 @@ module OpenSolid.Prelude
   , module OpenSolid.Bootstrap
   , module OpenSolid.Composition
   , module OpenSolid.CoordinateSystem
-  , module OpenSolid.Float
+  , module OpenSolid.Number
   , module OpenSolid.Intersects
   , module OpenSolid.Named
   , module OpenSolid.NonEmpty
@@ -23,8 +23,6 @@ module OpenSolid.Prelude
   )
 where
 
-import Data.Colour (Colour)
-import Data.Colour.SRGB qualified
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Composition (Composition ((.)))
@@ -36,10 +34,10 @@ import OpenSolid.CoordinateSystem
   , UvSpace
   , type (@)
   )
-import OpenSolid.Float (Float, fromRational)
 import OpenSolid.Intersects (Intersects ((^)))
 import OpenSolid.Named ((:::) (Named))
 import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
+import OpenSolid.Number (Number, fromRational)
 import OpenSolid.Quantity (Quantity)
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Sign (Sign (Negative, Positive))
@@ -56,12 +54,3 @@ import OpenSolid.Units
   , (:/:)
   )
 import Prelude qualified
-
-instance HasField "rgbFloatComponents" (Colour Float) (Float, Float, Float) where
-  getField colour = let Data.Colour.SRGB.RGB r g b = Data.Colour.SRGB.toSRGB colour in (r, g, b)
-
-instance HasField "rgbIntComponents" (Colour Float) (Int, Int, Int) where
-  getField colour = do
-    let (r, g, b) = colour.rgbFloatComponents
-    let toInt component = Prelude.round (component * 255.0)
-    (toInt r, toInt g, toInt b)

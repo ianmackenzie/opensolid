@@ -8,12 +8,12 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
-import OpenSolid.Float qualified as Float
 import OpenSolid.Int qualified as Int
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
@@ -124,7 +124,7 @@ area = Test.verify "area" Test.do
           @ #endAngle Angle.zero
   let dAdt = Curve2d.yCoordinate curve * curve.derivative.xComponent
   let areaEstimate = Curve.integrate dAdt
-  let expectedArea = Area.squareMeters (Float.pi / 2.0)
+  let expectedArea = Area.squareMeters (Number.pi / 2.0)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect
 

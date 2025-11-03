@@ -4,5 +4,5 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Prelude
 
-constant :: Quantity units -> Expression Float (Quantity units)
+constant :: Quantity units -> Expression Number (Quantity units)
 constant = Expression.constant

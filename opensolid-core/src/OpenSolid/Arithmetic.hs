@@ -17,7 +17,7 @@ module OpenSolid.Arithmetic
 where
 
 import OpenSolid.Bootstrap
-import {-# SOURCE #-} OpenSolid.Float (Float)
+import {-# SOURCE #-} OpenSolid.Number (Number)
 import {-# SOURCE #-} OpenSolid.Quantity (Quantity (Quantity))
 import {-# SOURCE #-} OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Units (Unitless)
@@ -127,10 +127,10 @@ instance Multiplication' Int Int Int where
 instance Multiplication Int Int Int where
   (*) = (Prelude.*)
 
-instance Division' Int Int Float where
+instance Division' Int Int Number where
   n ./. m = Quantity (fromIntegral n Prelude./ fromIntegral m)
 
-instance Division Int Int Float where
+instance Division Int Int Number where
   n / m = Quantity (fromIntegral n Prelude./ fromIntegral m)
 
 class Exponentiation a b where

@@ -28,10 +28,10 @@ import OpenSolid.Curve.Zero (Zero (Zero))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
-import OpenSolid.Float qualified as Float
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (return)
 import OpenSolid.Quantity qualified as Quantity
@@ -43,7 +43,7 @@ data Neighborhood units = Neighborhood
   { n :: Int
   , sign :: Sign
   , magnitude :: Quantity units
-  , radius :: Float
+  , radius :: Number
   }
 
 deriving instance Show (Quantity units) => Show (Neighborhood units)
@@ -52,14 +52,14 @@ neighborhood :: Tolerance units => Int -> Quantity units -> Neighborhood units
 neighborhood n value = do
   let sign = Quantity.sign value
   let magnitude = Quantity.abs value
-  let radius = (Float.int (Int.factorial n) * ?tolerance / magnitude) ** (1 / n)
+  let radius = (Number.fromInt (Int.factorial n) * ?tolerance / magnitude) ** (1 / n)
   Neighborhood{n, sign, magnitude, radius}
 
 derivativeTolerance :: Neighborhood units -> Int -> Quantity units
 derivativeTolerance (Neighborhood{n, magnitude, radius}) k = do
-  magnitude * radius ** (n - k) / Float.int (Int.factorial (n - k))
+  magnitude * radius ** (n - k) / Number.fromInt (Int.factorial (n - k))
 
-zero :: Float -> Neighborhood units -> Zero
+zero :: Number -> Neighborhood units -> Zero
 zero location (Neighborhood{n, sign}) = Zero location (n - 1) sign
 
 data Cache cached
@@ -145,7 +145,7 @@ process callback queue solutions exclusions =
 
 containedBy :: List Domain1d -> Domain1d -> Bool
 containedBy exclusions subdomain =
-  Float.sum (List.map (Domain1d.intersectionWidth subdomain) exclusions) == Domain1d.width subdomain
+  Number.sum (List.map (Domain1d.intersectionWidth subdomain) exclusions) == Domain1d.width subdomain
 
 {-# INLINE recurseIntoChildrenOf #-}
 recurseIntoChildrenOf ::
@@ -177,12 +177,12 @@ recurse = Recurse
 pass :: Action exclusions solution
 pass = Pass
 
-data Root = Exact Float | Closest Float
+data Root = Exact Number | Closest Number
 
 monotonic ::
   Tolerance units =>
-  (Float -> Quantity units) ->
-  (Float -> Quantity units) ->
+  (Number -> Quantity units) ->
+  (Number -> Quantity units) ->
   Bounds Unitless ->
   Root
 monotonic function derivative bounds = do
@@ -198,12 +198,12 @@ monotonic function derivative bounds = do
 
 solveMonotonic ::
   Tolerance units =>
-  (Float -> Quantity units) ->
-  (Float -> Quantity units) ->
+  (Number -> Quantity units) ->
+  (Number -> Quantity units) ->
   Bounds Unitless ->
   Sign ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
   Root
 solveMonotonic function derivative bounds sign1 x1 x2 = do
   -- First, try applying Newton-Raphson within [x1,x2]
@@ -227,13 +227,13 @@ data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
 newtonRaphson ::
   Tolerance units =>
-  (Float -> Quantity units) ->
-  (Float -> Quantity units) ->
+  (Number -> Quantity units) ->
+  (Number -> Quantity units) ->
   Bounds Unitless ->
-  Float ->
+  Number ->
   Quantity units ->
   Int ->
-  Result Divergence Float
+  Result Divergence Number
 newtonRaphson function derivative bounds x y iterations =
   if iterations > 10 -- Check if we've entered an infinite loop
     then Failure Divergence

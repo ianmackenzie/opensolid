@@ -33,7 +33,7 @@ instance HasField "derivative" (VectorCurve2d (space @ units)) (VectorCurve2d (s
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
-    Float
+    Number
     (Vector2d coordinateSystem)
     (Bounds Unitless)
     (VectorBounds2d coordinateSystem)
@@ -86,7 +86,7 @@ instance
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
+evaluate :: VectorCurve2d (space @ units) -> Number -> Vector2d (space @ units)
 evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

@@ -5,17 +5,17 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
-import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax (float, twice, (.*), (.+), (.-), (./), (@), type (@))
+import OpenSolid.Syntax (number, twice, (.*), (.+), (.-), (./), (@), type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
@@ -25,7 +25,7 @@ data Space
 
 formatLength :: Length -> Text
 formatLength length =
-  Text.float (Length.inMeters length) <> "m"
+  Text.number (Length.inMeters length) <> "m"
 
 testCurve :: Text -> Curve2d (Space @ Meters) -> IO ()
 testCurve label curve = Tolerance.using (Length.meters 1e-12) do
@@ -55,15 +55,15 @@ analyticalLength (Point2d x0 y0) (Point2d x1 y1) (Point2d x2 y2) = do
   let ay = y0 .- twice y1 .+ y2
   let bx = twice x1 .- twice x0
   let by = twice y1 .- twice y0
-  let a = float 4.0 .* (ax .* ax .+ ay .* ay)
-  let b = float 4.0 .* (ax .* bx .+ ay .* by)
+  let a = number 4.0 .* (ax .* ax .+ ay .* ay)
+  let b = number 4.0 .* (ax .* bx .+ ay .* by)
   let c = bx .* bx .+ by .* by
   let s_abc = twice (Quantity.sqrt (a .+ b .+ c))
   let a_2 = Quantity.sqrt a
   let a_32 = twice a .* a_2
   let c_2 = twice (Quantity.sqrt c)
   let ba = b ./ a_2
-  (a_32 .* s_abc .+ a_2 .* b .* (s_abc .- c_2) .+ (float 4.0 .* c .* a .- b .* b) .* Float.log ((twice a_2 .+ ba .+ s_abc) ./ (ba .+ c_2))) ./ (float 4.0 .* a_32)
+  (a_32 .* s_abc .+ a_2 .* b .* (s_abc .- c_2) .+ (number 4.0 .* c .* a .- b .* b) .* Number.log ((twice a_2 .+ ba .+ s_abc) ./ (ba .+ c_2))) ./ (number 4.0 .* a_32)
 
 testCubicSplineParameterization :: IO ()
 testCubicSplineParameterization = Tolerance.using Length.nanometer do

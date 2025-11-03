@@ -34,7 +34,7 @@ import OpenSolid.Composition
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Error qualified as Error
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Text qualified as Text
 import System.Directory
@@ -65,7 +65,7 @@ collectWithIndex :: TraversableWithIndex Int list => (Int -> a -> IO b) -> list 
 collectWithIndex = Data.Traversable.WithIndex.imapM
 
 sleep :: Duration -> IO ()
-sleep duration = Control.Concurrent.threadDelay (Float.round (Duration.inMicroseconds duration))
+sleep duration = Control.Concurrent.threadDelay (Number.round (Duration.inMicroseconds duration))
 
 onError :: (Text -> IO a) -> IO a -> IO a
 onError callback io = System.IO.Error.catchIOError io do

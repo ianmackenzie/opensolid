@@ -73,11 +73,11 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
@@ -97,7 +97,7 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 data Curve units where
   Curve :: Compiled units -> ~(Curve units) -> Curve units
 
-type Compiled units = CompiledFunction Float (Quantity units) (Bounds Unitless) (Bounds units)
+type Compiled units = CompiledFunction Number (Quantity units) (Bounds Unitless) (Bounds units)
 
 instance HasField "compiled" (Curve units) (Compiled units) where
   getField (Curve c _) = c
@@ -154,13 +154,13 @@ instance
   where
   value ^ curve = curve ^ value
 
-isEndpoint :: Float -> Bool
+isEndpoint :: Number -> Bool
 isEndpoint tValue = tValue == 0.0 || tValue == 1.0
 
 new :: Compiled units -> Curve units -> Curve units
 new = Curve
 
-concrete :: Expression Float (Quantity units) -> Curve units -> Curve units
+concrete :: Expression Number (Quantity units) -> Curve units -> Curve units
 concrete givenExpression givenDerivative =
   new (CompiledFunction.concrete givenExpression) givenDerivative
 
@@ -341,7 +341,7 @@ cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
 rationalBezier ::
   Tolerance Unitless =>
-  NonEmpty (Quantity units, Float) ->
+  NonEmpty (Quantity units, Number) ->
   Result DivisionByZero (Curve units)
 rationalBezier pointsAndWeights = do
   let scaledPoint (point, weight) = point * weight
@@ -351,18 +351,18 @@ rationalBezier pointsAndWeights = do
 
 rationalQuadraticSpline ::
   Tolerance Unitless =>
-  (Quantity units, Float) ->
-  (Quantity units, Float) ->
-  (Quantity units, Float) ->
+  (Quantity units, Number) ->
+  (Quantity units, Number) ->
+  (Quantity units, Number) ->
   Result DivisionByZero (Curve units)
 rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.three pw1 pw2 pw3)
 
 rationalCubicSpline ::
   Tolerance Unitless =>
-  (Quantity units, Float) ->
-  (Quantity units, Float) ->
-  (Quantity units, Float) ->
-  (Quantity units, Float) ->
+  (Quantity units, Number) ->
+  (Quantity units, Number) ->
+  (Quantity units, Number) ->
+  (Quantity units, Number) ->
   Result DivisionByZero (Curve units)
 rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 pw4)
 
@@ -371,11 +371,11 @@ rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 
 The parameter value should be between 0 and 1.
 -}
 {-# INLINE evaluate #-}
-evaluate :: Curve units -> Float -> Quantity units
+evaluate :: Curve units -> Number -> Quantity units
 evaluate curve = CompiledFunction.evaluate curve.compiled
 
 {-# INLINE evaluateAt #-}
-evaluateAt :: Float -> Curve units -> Quantity units
+evaluateAt :: Number -> Curve units -> Quantity units
 evaluateAt tValue curve = evaluate curve tValue
 
 {-# INLINE evaluateBounds #-}
@@ -461,7 +461,7 @@ lhopital ::
   Tolerance units2 =>
   Curve units1 ->
   Curve units2 ->
-  Float ->
+  Number ->
   (Quantity (units1 :/: units2), Quantity (units1 :/: units2))
 lhopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
@@ -554,7 +554,7 @@ unsafeSqrt' curve =
 cubed :: Curve Unitless -> Curve Unitless
 cubed curve =
   new
-    (CompiledFunction.map Expression.cubed Float.cubed Bounds.cubed curve.compiled)
+    (CompiledFunction.map Expression.cubed Number.cubed Bounds.cubed curve.compiled)
     (3.0 * squared curve * curve.derivative)
 
 -- | Compute the sine of a curve.
@@ -674,7 +674,7 @@ findZeros derivatives subdomain derivativeBounds exclusions
               then Solve1d.return (NonEmpty.map toZero subdomainZeros)
               else Solve1d.recurse
 
-toZero :: (Float, Solve1d.Neighborhood units) -> Zero
+toZero :: (Number, Solve1d.Neighborhood units) -> Zero
 toZero (t0, neighborhood) = Solve1d.zero t0 neighborhood
 
 maxZeroOrder :: Int
@@ -686,7 +686,7 @@ findZerosOrder ::
   Stream (Curve units) ->
   Domain1d ->
   Stream (Bounds units) ->
-  Fuzzy (List (Float, Solve1d.Neighborhood units))
+  Fuzzy (List (Number, Solve1d.Neighborhood units))
 findZerosOrder k derivatives subdomain derivativeBounds
   -- A derivative is resolved, so it has no zeros
   -- (note that if k == 0, we already checked for the curve being non-zero in findZeros above)
@@ -721,7 +721,7 @@ solveMonotonic ::
   Curve units ->
   Curve units ->
   Bounds Unitless ->
-  Fuzzy (List (Float, Solve1d.Neighborhood units))
+  Fuzzy (List (Number, Solve1d.Neighborhood units))
 solveMonotonic m fm fn tBounds = do
   let n = m + 1
   let Bounds tLow tHigh = tBounds

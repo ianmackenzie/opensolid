@@ -50,20 +50,20 @@ import OpenSolid.Vector2d qualified as Vector2d
 {-# COMPLETE Direction2d #-}
 
 {-# INLINE Direction2d #-}
-pattern Direction2d :: Float -> Float -> Direction2d space
+pattern Direction2d :: Number -> Number -> Direction2d space
 pattern Direction2d dx dy <- Unit2d (Vector2d dx dy)
 
 -- | Get the X component of a direction.
-xComponent :: Direction2d space -> Float
+xComponent :: Direction2d space -> Number
 xComponent (Direction2d dx _) = dx
 
 -- | Get the Y component of a direction.
-yComponent :: Direction2d space -> Float
+yComponent :: Direction2d space -> Number
 yComponent (Direction2d _ dy) = dy
 
 -- | Get the XY components of a direction as a tuple.
 {-# INLINE components #-}
-components :: Direction2d space -> (Float, Float)
+components :: Direction2d space -> (Number, Number)
 components (Direction2d dx dy) = (dx, dy)
 
 {-# INLINE unsafe #-}
@@ -116,14 +116,14 @@ fromAngle theta = Unit2d (Vector2d (Angle.cos theta) (Angle.sin theta))
 
 See 'fromAngle' for details.
 -}
-degrees :: Float -> Direction2d space
+degrees :: Number -> Direction2d space
 degrees value = fromAngle (Angle.degrees value)
 
 {-| Construct a direction from an angle given in radians.
 
 See 'fromAngle' for details.
 -}
-radians :: Float -> Direction2d space
+radians :: Number -> Direction2d space
 radians value = fromAngle (Angle.radians value)
 
 {-| Get the angle of a direction.

@@ -53,29 +53,29 @@ module OpenSolid.API.Class
   , comparison
   , negateSelf
   , absSelf
-  , floatPlus
-  , floatMinus
-  , floatTimes
-  , floatDivBy
-  , floatDivByU
-  , floatDivByR
-  , floatDivByM
-  , floatDivByS
+  , numberPlus
+  , numberMinus
+  , numberTimes
+  , numberDivBy
+  , numberDivByU
+  , numberDivByR
+  , numberDivByM
+  , numberDivByS
   , plus
-  , plusFloat
+  , plusNumber
   , plusSelf
   , minus
-  , minusFloat
+  , minusNumber
   , minusSelf
   , times
-  , timesFloat
+  , timesNumber
   , timesSelf
   , divBy
   , divByU
   , divByR
   , divByM
   , divByS
-  , divByFloat
+  , divByNumber
   , divBySelf
   , floorDivBySelf
   , modBySelf
@@ -723,61 +723,61 @@ negateSelf = Negate (NegationFunction (negate @value))
 absSelf :: FFI value => (value -> value) -> Member value
 absSelf = Abs . AbsFunction
 
-floatPlus ::
+numberPlus ::
   forall value result.
-  (Addition Float value result, FFI value, FFI result) =>
+  (Addition Number value result, FFI value, FFI result) =>
   Member value
-floatPlus =
+numberPlus =
   PreOverload BinaryOperator.Add $
-    PreOperatorOverload ((+) :: Float -> value -> result)
+    PreOperatorOverload ((+) :: Number -> value -> result)
 
-floatMinus ::
+numberMinus ::
   forall value result.
-  (Subtraction Float value result, FFI value, FFI result) =>
+  (Subtraction Number value result, FFI value, FFI result) =>
   Member value
-floatMinus =
+numberMinus =
   PreOverload BinaryOperator.Sub $
-    PreOperatorOverload ((-) :: Float -> value -> result)
+    PreOperatorOverload ((-) :: Number -> value -> result)
 
-floatTimes ::
+numberTimes ::
   forall value result.
-  (Multiplication Float value result, FFI value, FFI result) =>
+  (Multiplication Number value result, FFI value, FFI result) =>
   Member value
-floatTimes =
+numberTimes =
   PreOverload BinaryOperator.Mul $
-    PreOperatorOverload ((*) :: Float -> value -> result)
+    PreOperatorOverload ((*) :: Number -> value -> result)
 
-floatDivBy ::
+numberDivBy ::
   forall value result.
-  (Division Float value result, FFI value, FFI result) =>
+  (Division Number value result, FFI value, FFI result) =>
   Member value
-floatDivBy =
+numberDivBy =
   PreOverload BinaryOperator.Div $
-    PreOperatorOverload ((/) :: Float -> value -> result)
+    PreOperatorOverload ((/) :: Number -> value -> result)
 
-floatDivByU ::
+numberDivByU ::
   (FFI value, FFI result) =>
-  (Tolerance Unitless => Float -> value -> result) ->
+  (Tolerance Unitless => Number -> value -> result) ->
   Member value
-floatDivByU f = PreOverload BinaryOperator.Div (PreOperatorOverloadU f)
+numberDivByU f = PreOverload BinaryOperator.Div (PreOperatorOverloadU f)
 
-floatDivByR ::
+numberDivByR ::
   (FFI value, FFI result) =>
-  (Tolerance Radians => Float -> value -> result) ->
+  (Tolerance Radians => Number -> value -> result) ->
   Member value
-floatDivByR f = PreOverload BinaryOperator.Div (PreOperatorOverloadR f)
+numberDivByR f = PreOverload BinaryOperator.Div (PreOperatorOverloadR f)
 
-floatDivByM ::
+numberDivByM ::
   (FFI value, FFI result) =>
-  (Tolerance Meters => Float -> value -> result) ->
+  (Tolerance Meters => Number -> value -> result) ->
   Member value
-floatDivByM f = PreOverload BinaryOperator.Div (PreOperatorOverloadM f)
+numberDivByM f = PreOverload BinaryOperator.Div (PreOperatorOverloadM f)
 
-floatDivByS ::
+numberDivByS ::
   (FFI value, FFI result) =>
-  (Tolerance SquareMeters => Float -> value -> result) ->
+  (Tolerance SquareMeters => Number -> value -> result) ->
   Member value
-floatDivByS f = PreOverload BinaryOperator.Div (PreOperatorOverloadS f)
+numberDivByS f = PreOverload BinaryOperator.Div (PreOperatorOverloadS f)
 
 plus ::
   forall rhs value result.
@@ -788,11 +788,11 @@ plus _ =
   PostOverload BinaryOperator.Add $
     PostOperatorOverload ((+) :: value -> rhs -> result)
 
-plusFloat ::
+plusNumber ::
   forall value result.
-  (Addition value Float result, FFI value, FFI result) =>
+  (Addition value Number result, FFI value, FFI result) =>
   Member value
-plusFloat = plus @Float Self
+plusNumber = plus @Number Self
 
 plusSelf ::
   forall value result.
@@ -809,11 +809,11 @@ minus _ =
   PostOverload BinaryOperator.Sub $
     PostOperatorOverload ((-) :: value -> rhs -> result)
 
-minusFloat ::
+minusNumber ::
   forall value result.
-  (Subtraction value Float result, FFI value, FFI result) =>
+  (Subtraction value Number result, FFI value, FFI result) =>
   Member value
-minusFloat = minus @Float Self
+minusNumber = minus @Number Self
 
 minusSelf ::
   forall value result.
@@ -830,11 +830,11 @@ times _ =
   PostOverload BinaryOperator.Mul $
     PostOperatorOverload ((*) :: value -> rhs -> result)
 
-timesFloat ::
+timesNumber ::
   forall value result.
-  (Multiplication value Float result, FFI value, FFI result) =>
+  (Multiplication value Number result, FFI value, FFI result) =>
   Member value
-timesFloat = times @Float Self
+timesNumber = times @Number Self
 
 timesSelf ::
   forall value result.
@@ -875,11 +875,11 @@ divByS ::
   Member value
 divByS f = PostOverload BinaryOperator.Div (PostOperatorOverloadS f)
 
-divByFloat ::
+divByNumber ::
   forall value result.
-  (Division value Float result, FFI value, FFI result) =>
+  (Division value Number result, FFI value, FFI result) =>
   Member value
-divByFloat = divBy @Float Self
+divByNumber = divBy @Number Self
 
 divBySelf ::
   forall value result.

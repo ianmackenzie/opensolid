@@ -8,7 +8,7 @@ module OpenSolid.Json
   , object
   , text
   , int
-  , float
+  , number
   , bool
   , list
   , listOf
@@ -24,20 +24,20 @@ import Data.Scientific
 import Data.Vector qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Composition
-import OpenSolid.Float qualified as Float
 import {-# SOURCE #-} OpenSolid.Json.Format (Format)
 import {-# SOURCE #-} OpenSolid.Json.Schema (Schema)
 import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 data Json
   = Null
   | Bool Bool
-  | Float Float
+  | Number Number
   | Text Text
   | List (List Json)
   | Map (Map Text Json)
@@ -49,9 +49,9 @@ pattern Int :: Int -> Json
 pattern Int n <- (toInt -> Just n)
 
 toInt :: Json -> Maybe Int
-toInt (Float value) = do
-  let rounded = Float.round value
-  if Float.int rounded == value then Just rounded else Nothing
+toInt (Number value) = do
+  let rounded = Number.round value
+  if Number.fromInt rounded == value then Just rounded else Nothing
 toInt _ = Nothing
 
 pattern Object :: List (Text, Json) -> Json
@@ -62,10 +62,10 @@ getFields (Map fields) = Just (Map.toList fields)
 getFields _ = Nothing
 
 int :: Int -> Json
-int = Float . Float.int
+int = Number . Number.fromInt
 
-float :: Float -> Json
-float = Float
+number :: Number -> Json
+number = Number
 
 bool :: Bool -> Json
 bool = Bool
@@ -98,7 +98,7 @@ instance Data.Aeson.ToJSON Json where
   toJSON json = case json of
     Null -> Data.Aeson.Null
     Bool value -> Data.Aeson.toJSON value
-    Float value -> Data.Aeson.toJSON (Float.toDouble value)
+    Number value -> Data.Aeson.toJSON (Number.toDouble value)
     Text value -> Data.Aeson.toJSON value
     List values -> Data.Aeson.toJSON values
     Map fields -> Data.Aeson.toJSON fields
@@ -110,7 +110,7 @@ fromAeson :: Data.Aeson.Value -> Json
 fromAeson aesonValue = case aesonValue of
   Data.Aeson.Null -> Null
   Data.Aeson.Bool value -> Bool value
-  Data.Aeson.Number value -> Float (Data.Scientific.toRealFloat value)
+  Data.Aeson.Number value -> Number (Data.Scientific.toRealFloat value)
   Data.Aeson.String value -> Text value
   Data.Aeson.Array values -> List (List.map fromAeson (Data.Vector.toList values))
   Data.Aeson.Object values -> Map (Map.map fromAeson (Data.Aeson.KeyMap.toMapText values))

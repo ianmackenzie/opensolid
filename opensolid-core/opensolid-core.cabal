@@ -158,7 +158,6 @@ library
     OpenSolid.Expression.VectorSurface2d
     OpenSolid.Expression.VectorSurface3d
     OpenSolid.FFI
-    OpenSolid.Float
     OpenSolid.Frame2d
     OpenSolid.Frame3d
     OpenSolid.Fuzzy
@@ -181,6 +180,7 @@ library
     OpenSolid.Named
     OpenSolid.NewtonRaphson
     OpenSolid.NonEmpty
+    OpenSolid.Number
     OpenSolid.Orientation2d
     OpenSolid.Orientation3d
     OpenSolid.Pair
@@ -315,11 +315,11 @@ test-suite opensolid-core-test
     Tests.Direction2d
     Tests.DivMod
     Tests.Estimate
-    Tests.Float
     Tests.List
     Tests.Map
     Tests.NewtonRaphson
     Tests.NonEmpty
+    Tests.Number
     Tests.Parameter
     Tests.Quantity
     Tests.Random

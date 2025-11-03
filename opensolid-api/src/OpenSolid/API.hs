@@ -153,14 +153,14 @@ length =
     , Class.comparison
     , Class.negateSelf
     , Class.absSelf Quantity.abs
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @LengthBounds Self
     , Class.plus @LengthCurve Self
     , Class.minusSelf
     , Class.minus @LengthBounds Self
     , Class.minus @LengthCurve Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.timesSelf
     , Class.times @Bounds Self
     , Class.times @LengthBounds Self
@@ -169,7 +169,7 @@ length =
     , Class.times @Direction2d Self
     , Class.times @Vector2d Self
     , Class.times @Displacement2d Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Bounds Self
     , Class.divBy @LengthBounds Self
@@ -198,19 +198,19 @@ area =
     , Class.comparison
     , Class.negateSelf
     , Class.absSelf Quantity.abs
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @AreaBounds Self
     , Class.plus @AreaCurve Self
     , Class.minusSelf
     , Class.minus @AreaBounds Self
     , Class.minus @AreaCurve Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Bounds Self
     , Class.times @Curve Self
     , Class.times @Direction2d Self
     , Class.times @Vector2d Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
     , Class.divBy @Bounds Self
@@ -257,17 +257,17 @@ angle =
     , Class.comparison
     , Class.negateSelf
     , Class.absSelf Quantity.abs
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @AngleBounds Self
     , Class.plus @AngleCurve Self
     , Class.minusSelf
     , Class.minus @AngleBounds Self
     , Class.minus @AngleCurve Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Bounds Self
     , Class.times @Curve Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Bounds Self
     , Class.divBy @AngleBounds Self
@@ -297,15 +297,15 @@ bounds =
     , Class.member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
     , Class.negateSelf
     , Class.absSelf Bounds.abs
-    , Class.floatPlus
-    , Class.floatMinus
-    , Class.floatTimes
-    , Class.floatDivBy
-    , Class.plusFloat
+    , Class.numberPlus
+    , Class.numberMinus
+    , Class.numberTimes
+    , Class.numberDivBy
+    , Class.plusNumber
     , Class.plusSelf
-    , Class.minusFloat
+    , Class.minusNumber
     , Class.minusSelf
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.timesSelf
     , Class.times @Length Self
     , Class.times @Area Self
@@ -313,7 +313,7 @@ bounds =
     , Class.times @LengthBounds Self
     , Class.times @AreaBounds Self
     , Class.times @AngleBounds Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBySelf
     ]
 
@@ -336,16 +336,16 @@ lengthBounds =
     , Class.member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
     , Class.negateSelf
     , Class.absSelf Bounds.abs
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Length Self
     , Class.minusSelf
     , Class.minus @Length Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.timesSelf
     , Class.times @Length Self
     , Class.times @Bounds Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
     , Class.divBy @Bounds Self
@@ -370,14 +370,14 @@ areaBounds =
     , Class.member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
     , Class.negateSelf
     , Class.absSelf Bounds.abs
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Area Self
     , Class.minusSelf
     , Class.minus @Area Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Bounds Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
     , Class.divBy @Area Self
@@ -404,14 +404,14 @@ angleBounds =
     , Class.member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
     , Class.negateSelf
     , Class.absSelf Bounds.abs
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Angle Self
     , Class.minusSelf
     , Class.minus @Angle Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Bounds Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Angle Self
     , Class.divBy @Bounds Self
@@ -420,13 +420,14 @@ angleBounds =
 color :: Class
 color =
   Class.new @Color $(docs ''Color) $
-    [ Class.factory3 "RGB Float" "Red" "Green" "Blue" Color.rgbFloat $(docs 'Color.rgbFloat)
-    , Class.factory3 "RGB Int" "Red" "Green" "Blue" Color.rgbInt $(docs 'Color.rgbInt)
-    , Class.factory3 "HSL" "Hue" "Saturation" "Lightness" Color.hsl $(docs 'Color.hsl)
-    , Class.factory1 "From Hex" "Hex String" Color.fromHex $(docs 'Color.fromHex)
+    [ Class.factory3 "RGB1" "Red" "Green" "Blue" Color.rgb1 $(docs 'Color.rgb1)
+    , Class.factory3 "RGB255" "Red" "Green" "Blue" Color.rgb255 $(docs 'Color.rgb255)
+    , Class.factory3 "HSL1" "Hue" "Saturation" "Lightness" Color.hsl1 $(docs 'Color.hsl1)
+    , Class.factory1 "Hex" "Hex String" Color.hex $(docs 'Color.hex)
+    , Class.member0 "To RGB1" Color.toRgb1 $(docs 'Color.toRgb1)
+    , Class.member0 "To RGB255" Color.toRgb255 $(docs 'Color.toRgb255)
+    , Class.member0 "To HSL1" Color.toHsl1 $(docs 'Color.toHsl1)
     , Class.member0 "To Hex" Color.toHex $(docs 'Color.toHex)
-    , Class.property "RGB Float Components" (.rgbFloatComponents) $(docs 'Color.rgbFloatComponents)
-    , Class.property "RGB Int Components" (.rgbIntComponents) $(docs 'Color.rgbIntComponents)
     , Class.constant "Red" Color.red $(docs 'Color.red)
     , Class.constant "Dark Red" Color.darkRed $(docs 'Color.darkRed)
     , Class.constant "Light Orange" Color.lightOrange $(docs 'Color.lightOrange)
@@ -497,13 +498,13 @@ vector2d =
     , Class.memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> Vector2d -> Vector3d) $(docs 'Vector2d.placeOn)
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.minusSelf
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Length Self
     , Class.times @Area Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.dotSelf
     , Class.dotProduct @Displacement2d Self
     , Class.dotProduct @AreaVector2d Self
@@ -539,12 +540,12 @@ displacement2d =
     , Class.memberM0 "Is Zero" (~= Vector2d.zero) "Check if a displacement is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> Displacement2d -> Displacement3d) $(docs 'Vector2d.placeOn)
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.minusSelf
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Length Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBy @Length Self
     , Class.dotSelf
     , Class.dotProduct @Vector2d Self
@@ -574,11 +575,11 @@ areaVector2d =
     , Class.memberS0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> AreaVector2d -> AreaVector3d) $(docs 'Vector2d.placeOn)
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.minusSelf
-    , Class.timesFloat
-    , Class.divByFloat
+    , Class.timesNumber
+    , Class.divByNumber
     , Class.divBy @Length Self
     , Class.divBy @Area Self
     , Class.dotProduct @Vector2d Self
@@ -609,11 +610,11 @@ uvVector =
     , Class.member1 "Mirror In" "Direction" Vector2d.mirrorIn $(docs 'Vector2d.mirrorIn)
     , Class.member1 "Mirror Across" "Axis" (Vector2d.mirrorAcross :: UvAxis -> UvVector -> UvVector) $(docs 'Vector2d.mirrorAcross)
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.minusSelf
-    , Class.timesFloat
-    , Class.divByFloat
+    , Class.timesNumber
+    , Class.divByNumber
     , Class.dotSelf
     , Class.crossSelf
     ]
@@ -753,15 +754,15 @@ curve =
     , Class.memberU0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , Class.memberU0 "Is Zero" (~= 0.0) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
-    , Class.floatPlus
-    , Class.floatMinus
-    , Class.floatTimes
-    , Class.floatDivByU (\val crv -> Curve.quotient (Curve.constant val) crv)
-    , Class.plusFloat
+    , Class.numberPlus
+    , Class.numberMinus
+    , Class.numberTimes
+    , Class.numberDivByU (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.plusNumber
     , Class.plusSelf
-    , Class.minusFloat
+    , Class.minusNumber
     , Class.minusSelf
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.timesSelf
     , Class.times @Length Self
     , Class.times @Area Self
@@ -769,7 +770,7 @@ curve =
     , Class.times @LengthCurve Self
     , Class.times @AreaCurve Self
     , Class.times @AngleCurve Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divByU Curve.quotient
     , Class.nested @Curve.Zero "A point where a given curve is equal to zero." $
         [ Class.property "Location" (.location) "The parameter value at which the curve is zero."
@@ -793,14 +794,14 @@ angleCurve =
     , Class.memberR0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , Class.memberR0 "Is Zero" (~= Angle.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Angle Self
     , Class.minusSelf
     , Class.minus @Angle Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Curve Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divByR Curve.quotient
     , Class.divBy @Angle Self
     , Class.divByU Curve.quotient
@@ -820,16 +821,16 @@ lengthCurve =
     , Class.memberM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , Class.memberM0 "Is Zero" (~= Length.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Length Self
     , Class.minusSelf
     , Class.minus @Length Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.timesSelf
     , Class.times @Length Self
     , Class.times @Curve Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divByM Curve.quotient
     , Class.divBy @Length Self
     , Class.divByU Curve.quotient
@@ -849,14 +850,14 @@ areaCurve =
     , Class.memberS0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , Class.memberS0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Area Self
     , Class.minusSelf
     , Class.minus @Area Self
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Curve Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divByS Curve.quotient
     , Class.divBy @Length Self
     , Class.divBy @Area Self
@@ -970,17 +971,17 @@ vector3d =
     , Class.member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
     , Class.member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross :: Plane3d -> Vector3d -> Vector3d) $(docs 'Vector3d.mirrorAcross)
     , Class.member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
-    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Float -> Vector3d -> Vector3d) $(docs 'Vector3d.scaleAlong)
+    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Number -> Vector3d -> Vector3d) $(docs 'Vector3d.scaleAlong)
     , Class.member1 "Place In" "Frame" (Vector3d.placeIn :: Frame3d -> Vector3d -> Vector3d) $(docs 'Vector3d.placeIn)
     , Class.member1 "Relative To" "Frame" (Vector3d.relativeTo :: Frame3d -> Vector3d -> Vector3d) $(docs 'Vector3d.relativeTo)
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.minusSelf
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Length Self
     , Class.times @Area Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.dotSelf
     , Class.dotProduct @Displacement3d Self
     , Class.dotProduct @AreaVector3d Self
@@ -1008,16 +1009,16 @@ displacement3d =
     , Class.member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
     , Class.member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross :: Plane3d -> Displacement3d -> Displacement3d) $(docs 'Vector3d.mirrorAcross)
     , Class.member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
-    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Float -> Displacement3d -> Displacement3d) $(docs 'Vector3d.scaleAlong)
+    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Number -> Displacement3d -> Displacement3d) $(docs 'Vector3d.scaleAlong)
     , Class.member1 "Place In" "Frame" (Vector3d.placeIn :: Frame3d -> Displacement3d -> Displacement3d) $(docs 'Vector3d.placeIn)
     , Class.member1 "Relative To" "Frame" (Vector3d.relativeTo :: Frame3d -> Displacement3d -> Displacement3d) $(docs 'Vector3d.relativeTo)
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.minusSelf
-    , Class.timesFloat
+    , Class.timesNumber
     , Class.times @Length Self
-    , Class.divByFloat
+    , Class.divByNumber
     , Class.divBy @Length Self
     , Class.dotSelf
     , Class.dotProduct @Vector3d Self
@@ -1044,15 +1045,15 @@ areaVector3d =
     , Class.member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
     , Class.member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross :: Plane3d -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.mirrorAcross)
     , Class.member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
-    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Float -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.scaleAlong)
+    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Number -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.scaleAlong)
     , Class.member1 "Place In" "Frame" (Vector3d.placeIn :: Frame3d -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.placeIn)
     , Class.member1 "Relative To" "Frame" (Vector3d.relativeTo :: Frame3d -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.relativeTo)
     , Class.negateSelf
-    , Class.floatTimes
+    , Class.numberTimes
     , Class.plusSelf
     , Class.minusSelf
-    , Class.timesFloat
-    , Class.divByFloat
+    , Class.timesNumber
+    , Class.divByNumber
     , Class.divBy @Length Self
     , Class.divBy @Area Self
     , Class.dotProduct @Vector3d Self

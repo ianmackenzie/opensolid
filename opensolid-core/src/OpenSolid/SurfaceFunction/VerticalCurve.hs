@@ -17,11 +17,11 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -50,8 +50,8 @@ new ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction Unitless ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
   NonEmpty UvBounds ->
   Curve2d UvCoordinates
 new derivatives dudv vStart vEnd boxes =
@@ -61,8 +61,8 @@ monotonic ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction Unitless ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
   NonEmpty UvBounds ->
   Curve2d UvCoordinates
 monotonic derivatives dudv vStart vEnd boxes =
@@ -72,8 +72,8 @@ bounded ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction Unitless ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
   NonEmpty UvBounds ->
   Frame2d UvCoordinates defines ->
   List (Axis2d UvCoordinates) ->
@@ -86,8 +86,8 @@ verticalCurve ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction Unitless ->
-  Float ->
-  Float ->
+  Number ->
+  Number ->
   NonEmpty UvBounds ->
   Monotonicity ->
   List (Axis2d UvCoordinates) ->
@@ -102,13 +102,13 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
             \vValue -> Expression.solveMonotonicSurfaceU fExpr fuExpr (clampedUBounds vValue) vValue
           _ -> \vValue -> Internal.solveForU f f.du (clampedUBounds vValue) vValue
   let evaluate tValue = do
-        let vValue = Float.interpolateFrom vStart vEnd tValue
+        let vValue = Number.interpolateFrom vStart vEnd tValue
         let uValue = solveForU vValue
         Point2d uValue vValue
   let evaluateBounds tBounds = do
         let Bounds t1 t2 = tBounds
-        let v1 = Float.interpolateFrom vStart vEnd t1
-        let v2 = Float.interpolateFrom vStart vEnd t2
+        let v1 = Number.interpolateFrom vStart vEnd t1
+        let v2 = Number.interpolateFrom vStart vEnd t2
         let u1 = solveForU v1
         let u2 = solveForU v2
         case monotonicity of
@@ -130,7 +130,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
         VectorCurve2d.xy dudt dvdt
   Curve2d.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
 
-clamp :: Float -> Bounds Unitless -> Axis2d UvCoordinates -> Bounds Unitless
+clamp :: Number -> Bounds Unitless -> Axis2d UvCoordinates -> Bounds Unitless
 clamp v (Bounds uLow uHigh) axis = do
   let Point2d u0 v0 = Axis2d.originPoint axis
   let Direction2d du dv = Axis2d.direction axis

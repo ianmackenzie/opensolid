@@ -17,7 +17,7 @@ import OpenSolid.Bootstrap
 import OpenSolid.CoordinateSystem
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Float (Float, fromRational)
+import OpenSolid.Number (Number, fromRational)
 import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
@@ -32,15 +32,15 @@ This defines which of X, Y and Z mean 'forward' or 'upward' or 'rightward'.
 -}
 data Convention3d where
   Convention3d ::
-    { xr :: Float
-    , xf :: Float
-    , xu :: Float
-    , yr :: Float
-    , yf :: Float
-    , yu :: Float
-    , zr :: Float
-    , zf :: Float
-    , zu :: Float
+    { xr :: Number
+    , xf :: Number
+    , xu :: Number
+    , yr :: Number
+    , yf :: Number
+    , yu :: Number
+    , zr :: Number
+    , zf :: Number
+    , zu :: Number
     } ->
     Convention3d
 

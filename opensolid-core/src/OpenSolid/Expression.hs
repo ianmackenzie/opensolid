@@ -96,71 +96,71 @@ type role Expression nominal nominal
 
 data Expression input output where
   Curve1d ::
-    Ast1d Float ->
-    ~(Compiled Float Float) ->
-    Expression Float (Quantity units)
+    Ast1d Number ->
+    ~(Compiled Number Number) ->
+    Expression Number (Quantity units)
   Surface1d ::
     Ast1d UvPoint ->
-    ~(Compiled UvPoint Float) ->
+    ~(Compiled UvPoint Number) ->
     Expression UvPoint (Quantity units)
   Curve2d ::
-    Ast2d Float ->
-    ~(Compiled Float (Vector2d Ast.Coordinates)) ->
-    Expression Float (Point2d (space @ units))
+    Ast2d Number ->
+    ~(Compiled Number (Vector2d Ast.Coordinates)) ->
+    Expression Number (Point2d (space @ units))
   Surface2d ::
     Ast2d UvPoint ->
     ~(Compiled UvPoint (Vector2d Ast.Coordinates)) ->
     Expression UvPoint (Point2d (space @ units))
   VectorCurve2d ::
-    Ast2d Float ->
-    ~(Compiled Float (Vector2d Ast.Coordinates)) ->
-    Expression Float (Vector2d (space @ units))
+    Ast2d Number ->
+    ~(Compiled Number (Vector2d Ast.Coordinates)) ->
+    Expression Number (Vector2d (space @ units))
   VectorSurface2d ::
     Ast2d UvPoint ->
     ~(Compiled UvPoint (Vector2d Ast.Coordinates)) ->
     Expression UvPoint (Vector2d (space @ units))
   Curve3d ::
-    Ast3d Float ->
-    ~(Compiled Float (Vector3d Ast.Coordinates)) ->
-    Expression Float (Point3d (space @ units))
+    Ast3d Number ->
+    ~(Compiled Number (Vector3d Ast.Coordinates)) ->
+    Expression Number (Point3d (space @ units))
   Surface3d ::
     Ast3d UvPoint ->
     ~(Compiled UvPoint (Vector3d Ast.Coordinates)) ->
     Expression UvPoint (Point3d (space @ units))
   VectorCurve3d ::
-    Ast3d Float ->
-    ~(Compiled Float (Vector3d Ast.Coordinates)) ->
-    Expression Float (Vector3d (space @ units))
+    Ast3d Number ->
+    ~(Compiled Number (Vector3d Ast.Coordinates)) ->
+    Expression Number (Vector3d (space @ units))
   VectorSurface3d ::
     Ast3d UvPoint ->
     ~(Compiled UvPoint (Vector3d Ast.Coordinates)) ->
     Expression UvPoint (Vector3d (space @ units))
 
-curve1d :: Ast1d Float -> Expression Float (Quantity units)
+curve1d :: Ast1d Number -> Expression Number (Quantity units)
 curve1d ast = Curve1d ast (Ast.compileCurve1d ast)
 
 surface1d :: Ast1d UvPoint -> Expression UvPoint (Quantity units)
 surface1d ast = Surface1d ast (Ast.compileSurface1d ast)
 
-curve2d :: Ast2d Float -> Expression Float (Point2d (space @ units))
+curve2d :: Ast2d Number -> Expression Number (Point2d (space @ units))
 curve2d ast = Curve2d ast (Ast.compileCurve2d ast)
 
 surface2d :: Ast2d UvPoint -> Expression UvPoint (Point2d (space @ units))
 surface2d ast = Surface2d ast (Ast.compileSurface2d ast)
 
-vectorCurve2d :: Ast2d Float -> Expression Float (Vector2d (space @ units))
+vectorCurve2d :: Ast2d Number -> Expression Number (Vector2d (space @ units))
 vectorCurve2d ast = VectorCurve2d ast (Ast.compileCurve2d ast)
 
 vectorSurface2d :: Ast2d UvPoint -> Expression UvPoint (Vector2d (space @ units))
 vectorSurface2d ast = VectorSurface2d ast (Ast.compileSurface2d ast)
 
-curve3d :: Ast3d Float -> Expression Float (Point3d (space @ units))
+curve3d :: Ast3d Number -> Expression Number (Point3d (space @ units))
 curve3d ast = Curve3d ast (Ast.compileCurve3d ast)
 
 surface3d :: Ast3d UvPoint -> Expression UvPoint (Point3d (space @ units))
 surface3d ast = Surface3d ast (Ast.compileSurface3d ast)
 
-vectorCurve3d :: Ast3d Float -> Expression Float (Vector3d (space @ units))
+vectorCurve3d :: Ast3d Number -> Expression Number (Vector3d (space @ units))
 vectorCurve3d ast = VectorCurve3d ast (Ast.compileCurve3d ast)
 
 vectorSurface3d :: Ast3d UvPoint -> Expression UvPoint (Vector3d (space @ units))
@@ -242,19 +242,19 @@ instance
 --- NEGATION ---
 ----------------
 
-instance Negation (Expression Float (Quantity units)) where
+instance Negation (Expression Number (Quantity units)) where
   negate (Curve1d ast _) = curve1d -ast
 
 instance Negation (Expression UvPoint (Quantity units)) where
   negate (Surface1d ast _) = surface1d -ast
 
-instance Negation (Expression Float (Vector2d (space @ units))) where
+instance Negation (Expression Number (Vector2d (space @ units))) where
   negate (VectorCurve2d ast _) = vectorCurve2d -ast
 
 instance Negation (Expression UvPoint (Vector2d (space @ units))) where
   negate (VectorSurface2d ast _) = vectorSurface2d -ast
 
-instance Negation (Expression Float (Vector3d (space @ units))) where
+instance Negation (Expression Number (Vector3d (space @ units))) where
   negate (VectorCurve3d ast _) = vectorCurve3d -ast
 
 instance Negation (Expression UvPoint (Vector3d (space @ units))) where
@@ -263,8 +263,8 @@ instance Negation (Expression UvPoint (Vector3d (space @ units))) where
 instance
   Multiplication
     Sign
-    (Expression Float (Quantity units))
-    (Expression Float (Quantity units))
+    (Expression Number (Quantity units))
+    (Expression Number (Quantity units))
   where
   Positive * expression = expression
   Negative * expression = -expression
@@ -280,9 +280,9 @@ instance
 
 instance
   Multiplication
-    (Expression Float (Quantity units))
+    (Expression Number (Quantity units))
     Sign
-    (Expression Float (Quantity units))
+    (Expression Number (Quantity units))
   where
   expression * Positive = expression
   expression * Negative = -expression
@@ -299,8 +299,8 @@ instance
 instance
   Multiplication
     Sign
-    (Expression Float (Vector2d (space @ units)))
-    (Expression Float (Vector2d (space @ units)))
+    (Expression Number (Vector2d (space @ units)))
+    (Expression Number (Vector2d (space @ units)))
   where
   Positive * expression = expression
   Negative * expression = -expression
@@ -316,9 +316,9 @@ instance
 
 instance
   Multiplication
-    (Expression Float (Vector2d (space @ units)))
+    (Expression Number (Vector2d (space @ units)))
     Sign
-    (Expression Float (Vector2d (space @ units)))
+    (Expression Number (Vector2d (space @ units)))
   where
   expression * Positive = expression
   expression * Negative = -expression
@@ -335,8 +335,8 @@ instance
 instance
   Multiplication
     Sign
-    (Expression Float (Vector3d (space @ units)))
-    (Expression Float (Vector3d (space @ units)))
+    (Expression Number (Vector3d (space @ units)))
+    (Expression Number (Vector3d (space @ units)))
   where
   Positive * expression = expression
   Negative * expression = -expression
@@ -352,9 +352,9 @@ instance
 
 instance
   Multiplication
-    (Expression Float (Vector3d (space @ units)))
+    (Expression Number (Vector3d (space @ units)))
     Sign
-    (Expression Float (Vector3d (space @ units)))
+    (Expression Number (Vector3d (space @ units)))
   where
   expression * Positive = expression
   expression * Negative = -expression
@@ -375,9 +375,9 @@ instance
 instance
   units1 ~ units2 =>
   Addition
-    (Expression Float (Quantity units1))
-    (Expression Float (Quantity units2))
-    (Expression Float (Quantity units1))
+    (Expression Number (Quantity units1))
+    (Expression Number (Quantity units2))
+    (Expression Number (Quantity units1))
   where
   Curve1d lhs _ + Curve1d rhs _ = curve1d (lhs + rhs)
 
@@ -393,9 +393,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Expression Float (Vector2d (space1 @ units1)))
-    (Expression Float (Vector2d (space2 @ units2)))
-    (Expression Float (Vector2d (space1 @ units1)))
+    (Expression Number (Vector2d (space1 @ units1)))
+    (Expression Number (Vector2d (space2 @ units2)))
+    (Expression Number (Vector2d (space1 @ units1)))
   where
   VectorCurve2d lhs _ + VectorCurve2d rhs _ = vectorCurve2d (lhs + rhs)
 
@@ -411,9 +411,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Expression Float (Vector3d (space1 @ units1)))
-    (Expression Float (Vector3d (space2 @ units2)))
-    (Expression Float (Vector3d (space1 @ units1)))
+    (Expression Number (Vector3d (space1 @ units1)))
+    (Expression Number (Vector3d (space2 @ units2)))
+    (Expression Number (Vector3d (space1 @ units1)))
   where
   VectorCurve3d lhs _ + VectorCurve3d rhs _ = vectorCurve3d (lhs + rhs)
 
@@ -429,9 +429,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Expression Float (Point2d (space1 @ units1)))
-    (Expression Float (Vector2d (space2 @ units2)))
-    (Expression Float (Point2d (space1 @ units1)))
+    (Expression Number (Point2d (space1 @ units1)))
+    (Expression Number (Vector2d (space2 @ units2)))
+    (Expression Number (Point2d (space1 @ units1)))
   where
   Curve2d lhs _ + VectorCurve2d rhs _ = curve2d (lhs + rhs)
 
@@ -447,9 +447,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Expression Float (Point3d (space1 @ units1)))
-    (Expression Float (Vector3d (space2 @ units2)))
-    (Expression Float (Point3d (space1 @ units1)))
+    (Expression Number (Point3d (space1 @ units1)))
+    (Expression Number (Vector3d (space2 @ units2)))
+    (Expression Number (Point3d (space1 @ units1)))
   where
   Curve3d lhs _ + VectorCurve3d rhs _ = curve3d (lhs + rhs)
 
@@ -469,9 +469,9 @@ instance
 instance
   units1 ~ units2 =>
   Subtraction
-    (Expression Float (Quantity units1))
-    (Expression Float (Quantity units2))
-    (Expression Float (Quantity units1))
+    (Expression Number (Quantity units1))
+    (Expression Number (Quantity units2))
+    (Expression Number (Quantity units1))
   where
   Curve1d lhs _ - Curve1d rhs _ = curve1d (lhs - rhs)
 
@@ -487,9 +487,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Float (Vector2d (space1 @ units1)))
-    (Expression Float (Vector2d (space2 @ units2)))
-    (Expression Float (Vector2d (space1 @ units1)))
+    (Expression Number (Vector2d (space1 @ units1)))
+    (Expression Number (Vector2d (space2 @ units2)))
+    (Expression Number (Vector2d (space1 @ units1)))
   where
   VectorCurve2d lhs _ - VectorCurve2d rhs _ = vectorCurve2d (lhs - rhs)
 
@@ -505,9 +505,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Float (Vector3d (space1 @ units1)))
-    (Expression Float (Vector3d (space2 @ units2)))
-    (Expression Float (Vector3d (space1 @ units1)))
+    (Expression Number (Vector3d (space1 @ units1)))
+    (Expression Number (Vector3d (space2 @ units2)))
+    (Expression Number (Vector3d (space1 @ units1)))
   where
   VectorCurve3d lhs _ - VectorCurve3d rhs _ = vectorCurve3d (lhs - rhs)
 
@@ -523,9 +523,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Float (Point2d (space1 @ units1)))
-    (Expression Float (Vector2d (space2 @ units2)))
-    (Expression Float (Point2d (space1 @ units1)))
+    (Expression Number (Point2d (space1 @ units1)))
+    (Expression Number (Vector2d (space2 @ units2)))
+    (Expression Number (Point2d (space1 @ units1)))
   where
   Curve2d lhs _ - VectorCurve2d rhs _ = curve2d (lhs - rhs)
 
@@ -541,9 +541,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Float (Point2d (space1 @ units1)))
-    (Expression Float (Point2d (space2 @ units2)))
-    (Expression Float (Vector2d (space1 @ units1)))
+    (Expression Number (Point2d (space1 @ units1)))
+    (Expression Number (Point2d (space2 @ units2)))
+    (Expression Number (Vector2d (space1 @ units1)))
   where
   Curve2d lhs _ - Curve2d rhs _ = vectorCurve2d (lhs - rhs)
 
@@ -559,9 +559,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Float (Point3d (space1 @ units1)))
-    (Expression Float (Vector3d (space2 @ units2)))
-    (Expression Float (Point3d (space1 @ units1)))
+    (Expression Number (Point3d (space1 @ units1)))
+    (Expression Number (Vector3d (space2 @ units2)))
+    (Expression Number (Point3d (space1 @ units1)))
   where
   Curve3d lhs _ - VectorCurve3d rhs _ = curve3d (lhs - rhs)
 
@@ -577,9 +577,9 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Float (Point3d (space1 @ units1)))
-    (Expression Float (Point3d (space2 @ units2)))
-    (Expression Float (Vector3d (space1 @ units1)))
+    (Expression Number (Point3d (space1 @ units1)))
+    (Expression Number (Point3d (space2 @ units2)))
+    (Expression Number (Vector3d (space1 @ units1)))
   where
   Curve3d lhs _ - Curve3d rhs _ = vectorCurve3d (lhs - rhs)
 
@@ -606,9 +606,9 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Expression Float (Quantity units1))
-    (Expression Float (Quantity units2))
-    (Expression Float (Quantity units3))
+    (Expression Number (Quantity units1))
+    (Expression Number (Quantity units2))
+    (Expression Number (Quantity units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
@@ -627,9 +627,9 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Expression Float (Quantity units1))
-    (Expression Float (Vector2d (space @ units2)))
-    (Expression Float (Vector2d (space @ units3)))
+    (Expression Number (Quantity units1))
+    (Expression Number (Vector2d (space @ units2)))
+    (Expression Number (Vector2d (space @ units3)))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
@@ -648,9 +648,9 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Expression Float (Vector2d (space @ units1)))
-    (Expression Float (Quantity units2))
-    (Expression Float (Vector2d (space @ units3)))
+    (Expression Number (Vector2d (space @ units1)))
+    (Expression Number (Quantity units2))
+    (Expression Number (Vector2d (space @ units3)))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
@@ -669,9 +669,9 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Expression Float (Quantity units1))
-    (Expression Float (Vector3d (space @ units2)))
-    (Expression Float (Vector3d (space @ units3)))
+    (Expression Number (Quantity units1))
+    (Expression Number (Vector3d (space @ units2)))
+    (Expression Number (Vector3d (space @ units3)))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
@@ -690,9 +690,9 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Expression Float (Vector3d (space @ units1)))
-    (Expression Float (Quantity units2))
-    (Expression Float (Vector3d (space @ units3)))
+    (Expression Number (Vector3d (space @ units1)))
+    (Expression Number (Quantity units2))
+    (Expression Number (Vector3d (space @ units3)))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
@@ -714,9 +714,9 @@ instance
 
 instance
   Multiplication'
-    (Expression Float (Quantity units1))
-    (Expression Float (Quantity units2))
-    (Expression Float (Quantity (units1 :*: units2)))
+    (Expression Number (Quantity units1))
+    (Expression Number (Quantity units2))
+    (Expression Number (Quantity (units1 :*: units2)))
   where
   Curve1d lhs _ .*. Curve1d rhs _ = curve1d (lhs * rhs)
 
@@ -733,9 +733,9 @@ instance
 
 instance
   Multiplication'
-    (Expression Float (Quantity units1))
-    (Expression Float (Vector2d (space @ units2)))
-    (Expression Float (Vector2d (space @ (units1 :*: units2))))
+    (Expression Number (Quantity units1))
+    (Expression Number (Vector2d (space @ units2)))
+    (Expression Number (Vector2d (space @ (units1 :*: units2))))
   where
   Curve1d lhs _ .*. VectorCurve2d rhs _ = vectorCurve2d (lhs * rhs)
 
@@ -752,9 +752,9 @@ instance
 
 instance
   Multiplication'
-    (Expression Float (Vector2d (space @ units1)))
-    (Expression Float (Quantity units2))
-    (Expression Float (Vector2d (space @ (units1 :*: units2))))
+    (Expression Number (Vector2d (space @ units1)))
+    (Expression Number (Quantity units2))
+    (Expression Number (Vector2d (space @ (units1 :*: units2))))
   where
   VectorCurve2d lhs _ .*. Curve1d rhs _ = vectorCurve2d (lhs * rhs)
 
@@ -771,9 +771,9 @@ instance
 
 instance
   Multiplication'
-    (Expression Float (Quantity units1))
-    (Expression Float (Vector3d (space @ units2)))
-    (Expression Float (Vector3d (space @ (units1 :*: units2))))
+    (Expression Number (Quantity units1))
+    (Expression Number (Vector3d (space @ units2)))
+    (Expression Number (Vector3d (space @ (units1 :*: units2))))
   where
   Curve1d lhs _ .*. VectorCurve3d rhs _ = vectorCurve3d (lhs * rhs)
 
@@ -790,9 +790,9 @@ instance
 
 instance
   Multiplication'
-    (Expression Float (Vector3d (space @ units1)))
-    (Expression Float (Quantity units2))
-    (Expression Float (Vector3d (space @ (units1 :*: units2))))
+    (Expression Number (Vector3d (space @ units1)))
+    (Expression Number (Quantity units2))
+    (Expression Number (Vector3d (space @ (units1 :*: units2))))
   where
   VectorCurve3d lhs _ .*. Curve1d rhs _ = vectorCurve3d (lhs * rhs)
 
@@ -817,9 +817,9 @@ instance
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (Expression Float (Quantity units1))
-    (Expression Float (Quantity units2))
-    (Expression Float (Quantity units3))
+    (Expression Number (Quantity units1))
+    (Expression Number (Quantity units2))
+    (Expression Number (Quantity units3))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
@@ -838,9 +838,9 @@ instance
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (Expression Float (Vector2d (space @ units1)))
-    (Expression Float (Quantity units2))
-    (Expression Float (Vector2d (space @ units3)))
+    (Expression Number (Vector2d (space @ units1)))
+    (Expression Number (Quantity units2))
+    (Expression Number (Vector2d (space @ units3)))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
@@ -859,9 +859,9 @@ instance
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (Expression Float (Vector3d (space @ units1)))
-    (Expression Float (Quantity units2))
-    (Expression Float (Vector3d (space @ units3)))
+    (Expression Number (Vector3d (space @ units1)))
+    (Expression Number (Quantity units2))
+    (Expression Number (Vector3d (space @ units3)))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
@@ -883,9 +883,9 @@ instance
 
 instance
   Division'
-    (Expression Float (Quantity units1))
-    (Expression Float (Quantity units2))
-    (Expression Float (Quantity (units1 :/: units2)))
+    (Expression Number (Quantity units1))
+    (Expression Number (Quantity units2))
+    (Expression Number (Quantity (units1 :/: units2)))
   where
   Curve1d lhs _ ./. Curve1d rhs _ = curve1d (lhs / rhs)
 
@@ -902,9 +902,9 @@ instance
 
 instance
   Division'
-    (Expression Float (Vector2d (space @ units1)))
-    (Expression Float (Quantity units2))
-    (Expression Float (Vector2d (space @ (units1 :/: units2))))
+    (Expression Number (Vector2d (space @ units1)))
+    (Expression Number (Quantity units2))
+    (Expression Number (Vector2d (space @ (units1 :/: units2))))
   where
   VectorCurve2d lhs _ ./. Curve1d rhs _ = vectorCurve2d (lhs / rhs)
 
@@ -921,9 +921,9 @@ instance
 
 instance
   Division'
-    (Expression Float (Vector3d (space @ units1)))
-    (Expression Float (Quantity units2))
-    (Expression Float (Vector3d (space @ (units1 :/: units2))))
+    (Expression Number (Vector3d (space @ units1)))
+    (Expression Number (Quantity units2))
+    (Expression Number (Vector3d (space @ (units1 :/: units2))))
   where
   VectorCurve3d lhs _ ./. Curve1d rhs _ = vectorCurve3d (lhs / rhs)
 
@@ -945,9 +945,9 @@ instance
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   DotMultiplication
-    (Expression Float (Vector2d (space1 @ units1)))
-    (Expression Float (Vector2d (space2 @ units2)))
-    (Expression Float (Quantity units3))
+    (Expression Number (Vector2d (space1 @ units1)))
+    (Expression Number (Vector2d (space2 @ units2)))
+    (Expression Number (Quantity units3))
   where
   lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
@@ -963,9 +963,9 @@ instance
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   DotMultiplication
-    (Expression Float (Vector3d (space1 @ units1)))
-    (Expression Float (Vector3d (space2 @ units2)))
-    (Expression Float (Quantity units3))
+    (Expression Number (Vector3d (space1 @ units1)))
+    (Expression Number (Vector3d (space2 @ units2)))
+    (Expression Number (Quantity units3))
   where
   lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
 
@@ -984,9 +984,9 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication'
-    (Expression Float (Vector2d (space1 @ units1)))
-    (Expression Float (Vector2d (space2 @ units2)))
-    (Expression Float (Quantity (units1 :*: units2)))
+    (Expression Number (Vector2d (space1 @ units1)))
+    (Expression Number (Vector2d (space2 @ units2)))
+    (Expression Number (Quantity (units1 :*: units2)))
   where
   VectorCurve2d lhs _ `dot'` VectorCurve2d rhs _ = curve1d (lhs `dot` rhs)
 
@@ -1002,9 +1002,9 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication'
-    (Expression Float (Vector3d (space1 @ units1)))
-    (Expression Float (Vector3d (space2 @ units2)))
-    (Expression Float (Quantity (units1 :*: units2)))
+    (Expression Number (Vector3d (space1 @ units1)))
+    (Expression Number (Vector3d (space2 @ units2)))
+    (Expression Number (Quantity (units1 :*: units2)))
   where
   VectorCurve3d lhs _ `dot'` VectorCurve3d rhs _ = curve1d (lhs `dot` rhs)
 
@@ -1027,9 +1027,9 @@ instance
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   CrossMultiplication
-    (Expression Float (Vector2d (space1 @ units1)))
-    (Expression Float (Vector2d (space2 @ units2)))
-    (Expression Float (Quantity units3))
+    (Expression Number (Vector2d (space1 @ units1)))
+    (Expression Number (Vector2d (space2 @ units2)))
+    (Expression Number (Quantity units3))
   where
   lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
@@ -1045,9 +1045,9 @@ instance
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   CrossMultiplication
-    (Expression Float (Vector3d (space1 @ units1)))
-    (Expression Float (Vector3d (space2 @ units2)))
-    (Expression Float (Vector3d (space1 @ units3)))
+    (Expression Number (Vector3d (space1 @ units1)))
+    (Expression Number (Vector3d (space2 @ units2)))
+    (Expression Number (Vector3d (space1 @ units3)))
   where
   lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
 
@@ -1066,9 +1066,9 @@ instance
 instance
   space1 ~ space2 =>
   CrossMultiplication'
-    (Expression Float (Vector2d (space1 @ units1)))
-    (Expression Float (Vector2d (space2 @ units2)))
-    (Expression Float (Quantity (units1 :*: units2)))
+    (Expression Number (Vector2d (space1 @ units1)))
+    (Expression Number (Vector2d (space2 @ units2)))
+    (Expression Number (Quantity (units1 :*: units2)))
   where
   VectorCurve2d lhs _ `cross'` VectorCurve2d rhs _ = curve1d (lhs `cross` rhs)
 
@@ -1084,9 +1084,9 @@ instance
 instance
   space1 ~ space2 =>
   CrossMultiplication'
-    (Expression Float (Vector3d (space1 @ units1)))
-    (Expression Float (Vector3d (space2 @ units2)))
-    (Expression Float (Vector3d (space1 @ (units1 :*: units2))))
+    (Expression Number (Vector3d (space1 @ units1)))
+    (Expression Number (Vector3d (space2 @ units2)))
+    (Expression Number (Vector3d (space1 @ (units1 :*: units2))))
   where
   VectorCurve3d lhs _ `cross'` VectorCurve3d rhs _ = vectorCurve3d (lhs `cross` rhs)
 
@@ -1105,9 +1105,9 @@ instance
 
 instance
   Composition
-    (Expression Float Float)
-    (Expression Float output)
-    (Expression Float output)
+    (Expression Number Number)
+    (Expression Number output)
+    (Expression Number output)
   where
   curve . Curve1d inner _ =
     case curve of
@@ -1119,8 +1119,8 @@ instance
 
 instance
   Composition
-    (Expression UvPoint Float)
-    (Expression Float output)
+    (Expression UvPoint Number)
+    (Expression Number output)
     (Expression UvPoint output)
   where
   curve . Surface1d inner _ =
@@ -1133,9 +1133,9 @@ instance
 
 instance
   Composition
-    (Expression Float UvPoint)
+    (Expression Number UvPoint)
     (Expression UvPoint output)
-    (Expression Float output)
+    (Expression Number output)
   where
   surface . Curve2d inner _ =
     case surface of
@@ -1166,19 +1166,19 @@ instance
 class Zero input output where
   zero :: Expression input output
 
-instance Zero Float (Quantity units) where
+instance Zero Number (Quantity units) where
   zero = constant Quantity.zero
 
 instance Zero UvPoint (Quantity units) where
   zero = constant Quantity.zero
 
-instance Zero Float (Vector2d (space @ units)) where
+instance Zero Number (Vector2d (space @ units)) where
   zero = constant Vector2d.zero
 
 instance Zero UvPoint (Vector2d (space @ units)) where
   zero = constant Vector2d.zero
 
-instance Zero Float (Vector3d (space @ units)) where
+instance Zero Number (Vector3d (space @ units)) where
   zero = constant Vector3d.zero
 
 instance Zero UvPoint (Vector3d (space @ units)) where
@@ -1187,7 +1187,7 @@ instance Zero UvPoint (Vector3d (space @ units)) where
 class Origin input output where
   origin :: Expression input output
 
-instance Origin Float (Point2d (space @ units)) where
+instance Origin Number (Point2d (space @ units)) where
   origin = constant Point2d.origin
 
 instance Origin UvPoint (Point2d (space @ units)) where
@@ -1196,31 +1196,31 @@ instance Origin UvPoint (Point2d (space @ units)) where
 class Constant input output where
   constant :: output -> Expression input output
 
-instance Constant Float (Quantity units) where
+instance Constant Number (Quantity units) where
   constant value = curve1d (Ast.constant1d value)
 
 instance Constant UvPoint (Quantity units) where
   constant value = surface1d (Ast.constant1d value)
 
-instance Constant Float (Vector2d (space @ units)) where
+instance Constant Number (Vector2d (space @ units)) where
   constant value = vectorCurve2d (Ast.constant2d value)
 
 instance Constant UvPoint (Vector2d (space @ units)) where
   constant value = vectorSurface2d (Ast.constant2d value)
 
-instance Constant Float (Vector3d (space @ units)) where
+instance Constant Number (Vector3d (space @ units)) where
   constant value = vectorCurve3d (Ast.constant3d value)
 
 instance Constant UvPoint (Vector3d (space @ units)) where
   constant value = vectorSurface3d (Ast.constant3d value)
 
-instance Constant Float (Point2d (space @ units)) where
+instance Constant Number (Point2d (space @ units)) where
   constant (Position2d p) = curve2d (Ast.constant2d p)
 
 instance Constant UvPoint (Point2d (space @ units)) where
   constant (Position2d p) = surface2d (Ast.constant2d p)
 
-instance Constant Float (Point3d (space @ units)) where
+instance Constant Number (Point3d (space @ units)) where
   constant (Position3d p) = curve3d (Ast.constant3d p)
 
 instance Constant UvPoint (Point3d (space @ units)) where
@@ -1232,13 +1232,13 @@ class XY input output units | output -> units where
     Expression input (Quantity units) ->
     Expression input output
 
-instance XY Float (Vector2d (space @ units)) units where
+instance XY Number (Vector2d (space @ units)) units where
   xy (Curve1d x _) (Curve1d y _) = vectorCurve2d (Ast.xy x y)
 
 instance XY UvPoint (Vector2d (space @ units)) units where
   xy (Surface1d x _) (Surface1d y _) = vectorSurface2d (Ast.xy x y)
 
-instance XY Float (Point2d (space @ units)) units where
+instance XY Number (Point2d (space @ units)) units where
   xy (Curve1d x _) (Curve1d y _) = curve2d (Ast.xy x y)
 
 instance XY UvPoint (Point2d (space @ units)) units where
@@ -1260,13 +1260,13 @@ yCoordinate :: Expression input (Point2d (space @ units)) -> Expression input (Q
 yCoordinate (Curve2d ast _) = curve1d (Ast.yComponent ast)
 yCoordinate (Surface2d ast _) = surface1d (Ast.yComponent ast)
 
-t :: Expression Float Float
+t :: Expression Number Number
 t = curve1d Ast.curveParameter
 
-u :: Expression UvPoint Float
+u :: Expression UvPoint Number
 u = surface1d (Ast.surfaceParameter SurfaceParameter.U)
 
-v :: Expression UvPoint Float
+v :: Expression UvPoint Number
 v = surface1d (Ast.surfaceParameter SurfaceParameter.V)
 
 uv :: Expression UvPoint UvPoint
@@ -1292,15 +1292,15 @@ sqrt ::
   Expression input (Quantity units1)
 sqrt = sqrt' . Units.unspecialize
 
-cubed :: Expression input Float -> Expression input Float
+cubed :: Expression input Number -> Expression input Number
 cubed (Curve1d ast _) = curve1d (Ast.cubed ast)
 cubed (Surface1d ast _) = surface1d (Ast.cubed ast)
 
-sin :: Expression input Angle -> Expression input Float
+sin :: Expression input Angle -> Expression input Number
 sin (Curve1d ast _) = curve1d (Ast.sin ast)
 sin (Surface1d ast _) = surface1d (Ast.sin ast)
 
-cos :: Expression input Angle -> Expression input Float
+cos :: Expression input Angle -> Expression input Number
 cos (Curve1d ast _) = curve1d (Ast.cos ast)
 cos (Surface1d ast _) = surface1d (Ast.cos ast)
 
@@ -1552,7 +1552,7 @@ instance
   projectInto plane (Surface3d ast _) = surface2d (Ast.projectPoint3dInto plane ast)
 
 class BezierCurve output where
-  bezierCurve :: NonEmpty output -> Expression Float output
+  bezierCurve :: NonEmpty output -> Expression Number output
 
 instance BezierCurve (Quantity units) where
   bezierCurve controlPoints = curve1d (Ast.bezierCurve1d controlPoints)
@@ -1569,68 +1569,68 @@ instance BezierCurve (Vector3d (space @ units)) where
 instance BezierCurve (Point3d (space @ units)) where
   bezierCurve controlPoints = curve3d (Ast.bezierCurve3d (Data.Coerce.coerce controlPoints))
 
-b00 :: Expression Float Float
+b00 :: Expression Number Number
 b00 = curve1d Ast.b00
 
-b00d1 :: Expression Float Float
+b00d1 :: Expression Number Number
 b00d1 = curve1d Ast.b00d1
 
-b00d2 :: Expression Float Float
+b00d2 :: Expression Number Number
 b00d2 = curve1d Ast.b00d2
 
-b00d3 :: Expression Float Float
+b00d3 :: Expression Number Number
 b00d3 = curve1d Ast.b00d3
 
-b01 :: Expression Float Float
+b01 :: Expression Number Number
 b01 = curve1d Ast.b01
 
-b01d1 :: Expression Float Float
+b01d1 :: Expression Number Number
 b01d1 = curve1d Ast.b01d1
 
-b01d2 :: Expression Float Float
+b01d2 :: Expression Number Number
 b01d2 = curve1d Ast.b01d2
 
-b01d3 :: Expression Float Float
+b01d3 :: Expression Number Number
 b01d3 = curve1d Ast.b01d3
 
-b02 :: Expression Float Float
+b02 :: Expression Number Number
 b02 = curve1d Ast.b02
 
-b02d1 :: Expression Float Float
+b02d1 :: Expression Number Number
 b02d1 = curve1d Ast.b02d1
 
-b02d2 :: Expression Float Float
+b02d2 :: Expression Number Number
 b02d2 = curve1d Ast.b02d2
 
-b02d3 :: Expression Float Float
+b02d3 :: Expression Number Number
 b02d3 = curve1d Ast.b02d3
 
-b10 :: Expression Float Float
+b10 :: Expression Number Number
 b10 = curve1d Ast.b10
 
-b10d1 :: Expression Float Float
+b10d1 :: Expression Number Number
 b10d1 = curve1d Ast.b10d1
 
-b10d2 :: Expression Float Float
+b10d2 :: Expression Number Number
 b10d2 = curve1d Ast.b10d2
 
-b10d3 :: Expression Float Float
+b10d3 :: Expression Number Number
 b10d3 = curve1d Ast.b10d3
 
-b11 :: Expression Float Float
+b11 :: Expression Number Number
 b11 = curve1d Ast.b11
 
-b11d1 :: Expression Float Float
+b11d1 :: Expression Number Number
 b11d1 = curve1d Ast.b11d1
 
-b11d2 :: Expression Float Float
+b11d2 :: Expression Number Number
 b11d2 = curve1d Ast.b11d2
 
-b11d3 :: Expression Float Float
+b11d3 :: Expression Number Number
 b11d3 = curve1d Ast.b11d3
 
 desingularized ::
-  Expression input Float ->
+  Expression input Number ->
   Expression input output ->
   Expression input output ->
   Expression input output ->
@@ -1710,7 +1710,7 @@ class
 
 instance
   Evaluation
-    Float
+    Number
     (Quantity units)
     (Bounds Unitless)
     (Bounds units)
@@ -1730,7 +1730,7 @@ instance
 
 instance
   Evaluation
-    Float
+    Number
     (Point2d (space @ units))
     (Bounds Unitless)
     (Bounds2d (space @ units))
@@ -1756,7 +1756,7 @@ instance
 
 instance
   Evaluation
-    Float
+    Number
     (Vector2d (space @ units))
     (Bounds Unitless)
     (VectorBounds2d (space @ units))
@@ -1776,7 +1776,7 @@ instance
 
 instance
   Evaluation
-    Float
+    Number
     (Point3d (space @ units))
     (Bounds Unitless)
     (Bounds3d (space @ units))
@@ -1802,7 +1802,7 @@ instance
 
 instance
   Evaluation
-    Float
+    Number
     (Vector3d (space @ units))
     (Bounds Unitless)
     (VectorBounds3d (space @ units))
@@ -1825,8 +1825,8 @@ solveMonotonicSurfaceU ::
   Expression UvPoint (Quantity units) ->
   Expression UvPoint (Quantity units) ->
   Bounds Unitless ->
-  Float ->
-  Float
+  Number ->
+  Number
 solveMonotonicSurfaceU (Surface1d _ function) (Surface1d _ derivative) uBounds vValue =
   Evaluate.solveMonotonicSurfaceU function derivative uBounds vValue
 
@@ -1834,8 +1834,8 @@ solveMonotonicSurfaceV ::
   Tolerance units =>
   Expression UvPoint (Quantity units) ->
   Expression UvPoint (Quantity units) ->
-  Float ->
+  Number ->
   Bounds Unitless ->
-  Float
+  Number
 solveMonotonicSurfaceV (Surface1d _ function) (Surface1d _ derivative) uValue vBounds =
   Evaluate.solveMonotonicSurfaceV function derivative uValue vBounds

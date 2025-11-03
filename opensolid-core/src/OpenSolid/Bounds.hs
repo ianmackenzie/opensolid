@@ -70,10 +70,10 @@ import Data.Coerce qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude hiding (max, min)
 import OpenSolid.Quantity (Quantity (Quantity#))
@@ -578,36 +578,36 @@ cosIncludesMinMax bounds = (cosIncludesMax (bounds + Angle.pi), cosIncludesMax b
 cosIncludesMax :: Bounds Radians -> Bool
 cosIncludesMax (Bounds low high) =
   (Quantity.isInfinite low || Quantity.isInfinite high)
-    || Float.floor (low / Angle.twoPi) /= Float.floor (high / Angle.twoPi)
+    || Number.floor (low / Angle.twoPi) /= Number.floor (high / Angle.twoPi)
 
-interpolate :: Bounds units -> Float -> Quantity units
+interpolate :: Bounds units -> Number -> Quantity units
 interpolate (Bounds low high) t =
   Quantity.interpolateFrom low high t
 
-interpolationParameter :: Bounds units -> Quantity units -> Float
+interpolationParameter :: Bounds units -> Quantity units -> Number
 interpolationParameter (Bounds low high) value
   | low < high = (value - low) / (high - low)
   | value < low = -Quantity.infinity
   | value > high = Quantity.infinity
   | otherwise = 0.0
 
-resolution :: Bounds units -> Float
+resolution :: Bounds units -> Number
 resolution (Bounds low high)
   | low > Quantity.zero = low / high
   | high < Quantity.zero = -high / low
   | otherwise = 0.0
 
-resolutionThreshold :: Float
+resolutionThreshold :: Number
 resolutionThreshold = 0.5
 
 isResolved :: Bounds units -> Bool
-isResolved bounds = Float.abs (resolution bounds) >= resolutionThreshold
+isResolved bounds = Number.abs (resolution bounds) >= resolutionThreshold
 
 resolvedSign :: Bounds units -> Fuzzy Sign
 resolvedSign bounds = do
   let boundsResolution = resolution bounds
-  if Float.abs boundsResolution >= resolutionThreshold
-    then Resolved (Float.sign boundsResolution)
+  if Number.abs boundsResolution >= resolutionThreshold
+    then Resolved (Number.sign boundsResolution)
     else Unresolved
 
 resolve :: Eq a => (Bounds units -> Fuzzy a) -> Bounds units -> Fuzzy a

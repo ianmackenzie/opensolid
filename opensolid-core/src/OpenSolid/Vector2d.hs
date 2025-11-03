@@ -102,41 +102,41 @@ y vy = Vector2d Quantity.zero vy
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)
 from p1 p2 = p2 - p1
 
-apply :: (Float -> Quantity units) -> Float -> Float -> Vector2d (space @ units)
+apply :: (Number -> Quantity units) -> Number -> Number -> Vector2d (space @ units)
 apply units px py = Vector2d (units px) (units py)
 
 -- | Construct a vector from its X and Y components given in meters.
-meters :: Float -> Float -> Vector2d (space @ Meters)
+meters :: Number -> Number -> Vector2d (space @ Meters)
 meters = apply Length.meters
 
 -- | Construct a vector from its X and Y components given in centimeters.
-centimeters :: Float -> Float -> Vector2d (space @ Meters)
+centimeters :: Number -> Number -> Vector2d (space @ Meters)
 centimeters = apply Length.centimeters
 
 {-| Construct a vector from its X and Y components given in centimeters.
 
 Short form alias for 'centimeters'.
 -}
-cm :: Float -> Float -> Vector2d (space @ Meters)
+cm :: Number -> Number -> Vector2d (space @ Meters)
 cm = centimeters
 
 -- | Construct a vector from its X and Y components given in millimeters.
-millimeters :: Float -> Float -> Vector2d (space @ Meters)
+millimeters :: Number -> Number -> Vector2d (space @ Meters)
 millimeters = apply Length.millimeters
 
 {-| Construct a vector from its X and Y components given in millimeters.
 
 Short form alias for 'millimeters'.
 -}
-mm :: Float -> Float -> Vector2d (space @ Meters)
+mm :: Number -> Number -> Vector2d (space @ Meters)
 mm = millimeters
 
 -- | Construct a vector from its X and Y components given in inches.
-inches :: Float -> Float -> Vector2d (space @ Meters)
+inches :: Number -> Number -> Vector2d (space @ Meters)
 inches = apply Length.inches
 
 -- | Construct a vector from its X and Y components given in square meters.
-squareMeters :: Float -> Float -> Vector2d (space @ SquareMeters)
+squareMeters :: Number -> Number -> Vector2d (space @ SquareMeters)
 squareMeters = apply Area.squareMeters
 
 -- | Construct a vector from its magnitude (length) and angle.
@@ -165,7 +165,7 @@ components (Vector2d vx vy) = (vx, vy)
 interpolateFrom ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
-  Float ->
+  Number ->
   Vector2d (space @ units)
 interpolateFrom (Vector2d x1 y1) (Vector2d x2 y2) t =
   Vector2d (x1 + t * (x2 - x1)) (y1 + t * (y2 - y1))
@@ -342,5 +342,5 @@ mirrorAcross ::
   Vector2d (space @ units)
 mirrorAcross (Axis2d _ axisDirection) = mirrorIn (Direction2d.rotateLeft axisDirection)
 
-scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)
+scaleIn :: Direction2d space -> Number -> Vector2d (space @ units) -> Vector2d (space @ units)
 scaleIn scaleDirection scale vector = vector + (scale - 1.0) * projectionIn scaleDirection vector

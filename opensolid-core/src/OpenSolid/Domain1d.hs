@@ -30,13 +30,13 @@ where
 
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 
 data Domain1d = Domain1d
-  { n :: Float
-  , i :: Float
-  , j :: Float
+  { n :: Number
+  , i :: Number
+  , j :: Number
   }
   deriving (Show)
 
@@ -48,8 +48,8 @@ instance Eq Domain1d where
     i1 * n2 == i2 * n1 && j1 * n2 == j2 * n1
 
 data Boundary = Boundary
-  { n :: Float
-  , i :: Float
+  { n :: Number
+  , i :: Number
   }
   deriving (Show)
 
@@ -68,7 +68,7 @@ constant :: Boundary -> Domain1d
 constant Boundary{n, i} = Domain1d{n, i, j = i}
 
 isAtomic :: Domain1d -> Bool
-isAtomic (Domain1d{n, i, j}) = (j - i) / n <= Float.epsilon
+isAtomic (Domain1d{n, i, j}) = (j - i) / n <= Number.epsilon
 
 endpoints :: Domain1d -> (Boundary, Boundary)
 endpoints (Domain1d{n, i, j}) = (Boundary{n, i}, Boundary{n, i = j})
@@ -82,7 +82,7 @@ upperBoundary (Domain1d{n, j}) = Boundary{n, i = j}
 midpoint :: Domain1d -> Boundary
 midpoint (Domain1d n i j) = Boundary (n * 2.0) (i + j)
 
-width :: Domain1d -> Float
+width :: Domain1d -> Number
 width (Domain1d n i j) = (j - i) / n
 
 bisect :: Domain1d -> (Domain1d, Domain1d)
@@ -125,28 +125,28 @@ adjacent :: Domain1d -> Domain1d -> Bool
 adjacent (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) =
   i1 * n2 == j2 * n1 || j1 * n2 == i2 * n1
 
-intersectionWidth :: Domain1d -> Domain1d -> Float
+intersectionWidth :: Domain1d -> Domain1d -> Number
 intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do
-  let low = Float.max (i1 / n1) (i2 / n2)
-  let high = Float.min (j1 / n1) (j2 / n2)
-  Float.max (high - low) 0.0
+  let low = Number.max (i1 / n1) (i2 / n2)
+  let high = Number.min (j1 / n1) (j2 / n2)
+  Number.max (high - low) 0.0
 
-samplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Float
+samplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
 samplingPoints predicate = 0.0 :| collectSamplingPoints predicate Bounds.unitInterval [1.0]
 
-innerSamplingPoints :: (Bounds Unitless -> Bool) -> List Float
+innerSamplingPoints :: (Bounds Unitless -> Bool) -> List Number
 innerSamplingPoints predicate = collectSamplingPoints predicate Bounds.unitInterval []
 
-leadingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Float
+leadingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
 leadingSamplingPoints predicate = 0.0 :| innerSamplingPoints predicate
 
-trailingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Float
+trailingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
 trailingSamplingPoints predicate =
   case collectSamplingPoints predicate Bounds.unitInterval [1.0] of
     NonEmpty points -> points
     [] -> internalError "collectSamplingPoints should always return at least the point it was given"
 
-collectSamplingPoints :: (Bounds Unitless -> Bool) -> Bounds Unitless -> List Float -> List Float
+collectSamplingPoints :: (Bounds Unitless -> Bool) -> Bounds Unitless -> List Number -> List Number
 collectSamplingPoints predicate subdomain accumulated
   | predicate subdomain = accumulated
   | Bounds.isAtomic subdomain = internalError "Infinite recursion in Domain1d.samplingPoints"

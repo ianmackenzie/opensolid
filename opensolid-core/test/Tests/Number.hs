@@ -1,4 +1,4 @@
-module Tests.Float (tests) where
+module Tests.Number (tests) where
 
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance

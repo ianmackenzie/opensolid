@@ -5,8 +5,8 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Float qualified as Float
 import OpenSolid.Lobatto qualified as Lobatto
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
@@ -60,7 +60,7 @@ isLinear ::
   Bool
 isLinear y1 y2 y3 y4 = let dy = y4 - y1 in y2 ~= y1 + dy * Lobatto.p2 && y3 ~= y1 + dy * Lobatto.p3
 
-evaluateIn :: Tree units -> Quantity units -> Float
+evaluateIn :: Tree units -> Quantity units -> Number
 evaluateIn tree length = case tree of
   Node leftTree leftLength rightTree
     | length < leftLength -> evaluateIn leftTree length
@@ -69,21 +69,21 @@ evaluateIn tree length = case tree of
 
 buildTree ::
   Int ->
-  (Float -> Quantity units) ->
-  (Float -> Quantity units) ->
-  Float ->
-  Float ->
+  (Number -> Quantity units) ->
+  (Number -> Quantity units) ->
+  Number ->
+  Number ->
   Quantity units ->
   Quantity units ->
   Quantity units ->
   (Tree units, Quantity units)
 buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
-  let tMid = Float.midpoint tStart tEnd
+  let tMid = Number.midpoint tStart tEnd
   let dsdtMid = dsdt tMid
-  let dsdtLeft2 = dsdt (Float.interpolateFrom tStart tMid Lobatto.p2)
-  let dsdtLeft3 = dsdt (Float.interpolateFrom tStart tMid Lobatto.p3)
-  let dsdtRight2 = dsdt (Float.interpolateFrom tMid tEnd Lobatto.p2)
-  let dsdtRight3 = dsdt (Float.interpolateFrom tMid tEnd Lobatto.p3)
+  let dsdtLeft2 = dsdt (Number.interpolateFrom tStart tMid Lobatto.p2)
+  let dsdtLeft3 = dsdt (Number.interpolateFrom tStart tMid Lobatto.p3)
+  let dsdtRight2 = dsdt (Number.interpolateFrom tMid tEnd Lobatto.p2)
+  let dsdtRight3 = dsdt (Number.interpolateFrom tMid tEnd Lobatto.p3)
   let halfWidth = 0.5 * (tEnd - tStart)
   let leftEstimate = halfWidth * Lobatto.estimate dsdtStart dsdtLeft2 dsdtLeft3 dsdtMid
   let rightEstimate = halfWidth * Lobatto.estimate dsdtMid dsdtRight2 dsdtRight3 dsdtEnd

@@ -5,5 +5,5 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint)
 
-constant :: Float -> Expression UvPoint Float
+constant :: Number -> Expression UvPoint Number
 constant = Expression.constant

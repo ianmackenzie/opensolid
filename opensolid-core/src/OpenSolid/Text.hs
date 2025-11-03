@@ -5,7 +5,7 @@ module OpenSolid.Text
   , concat
   , join
   , int
-  , float
+  , number
   , char
   , show
   , isEmpty
@@ -36,8 +36,8 @@ import Data.Text.Encoding qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Bootstrap hiding (concat, show)
 import OpenSolid.Error qualified as Error
-import OpenSolid.Float (Float)
 import OpenSolid.List qualified as List
+import OpenSolid.Number (Number)
 import OpenSolid.Result (Result (Failure, Success))
 import Prelude qualified
 
@@ -56,8 +56,8 @@ unpack = Data.Text.unpack
 int :: Int -> Text
 int = show
 
-float :: Float -> Text
-float = show
+number :: Number -> Text
+number = show
 
 char :: Char -> Text
 char c = pack [c]

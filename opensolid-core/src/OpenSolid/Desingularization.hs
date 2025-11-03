@@ -10,15 +10,15 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Prelude
 
-t0 :: Float
+t0 :: Number
 -- Should be kept in sync with T0 in bytecode.cpp
 t0 = 0.00390625 -- 1/256
 
-t1 :: Float
+t1 :: Number
 -- Should be kept in sync with CUTOFF_1 in bytecode.cpp
 t1 = 0.99609375 -- 1 minus 1/256
 
-value :: Float -> a -> a -> a -> a
+value :: Number -> a -> a -> a -> a
 value t start middle end
   | t <= t0 = start
   | t >= t1 = end

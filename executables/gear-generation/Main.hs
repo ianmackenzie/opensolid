@@ -47,11 +47,11 @@ main = Tolerance.using (Length.meters 1e-9) do
         let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
         Gltf.writeBinary glbPath model resolution
         elapsed <- Timer.elapsed timer
-        let elapsedText = Text.float (Duration.inSeconds elapsed) <> "s"
+        let elapsedText = Text.number (Duration.inSeconds elapsed) <> "s"
         IO.printLine ("Elapsed for " <> Text.int numTeeth <> " teeth: " <> elapsedText)
   overallTimer <- Timer.start
   let toothCounts = [32, 48, 80, 64, 96, 112, 128]
   -- IO.forEach toothCounts writeGlb
   IO.Parallel.forEach toothCounts writeGlb
   overallElapsed <- Timer.elapsed overallTimer
-  IO.printLine ("Overall elapsed time: " <> Text.float (Duration.inSeconds overallElapsed) <> "s")
+  IO.printLine ("Overall elapsed time: " <> Text.number (Duration.inSeconds overallElapsed) <> "s")

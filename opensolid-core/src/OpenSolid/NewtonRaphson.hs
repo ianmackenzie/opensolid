@@ -23,21 +23,21 @@ data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
 curve1d ::
   Tolerance units =>
-  (Float -> Quantity units) ->
-  (Float -> Quantity units) ->
-  Float ->
-  Result Divergence Float
+  (Number -> Quantity units) ->
+  (Number -> Quantity units) ->
+  Number ->
+  Result Divergence Number
 curve1d function derivative x1 =
   curve1dImpl function derivative x1 (function x1) 0
 
 curve1dImpl ::
   Tolerance units =>
-  (Float -> Quantity units) ->
-  (Float -> Quantity units) ->
-  Float ->
+  (Number -> Quantity units) ->
+  (Number -> Quantity units) ->
+  Number ->
   Quantity units ->
   Int ->
-  Result Divergence Float
+  Result Divergence Number
 curve1dImpl function derivative x1 y1 iterations =
   if iterations <= 10
     then do
@@ -53,8 +53,8 @@ curve1d# ::
   Tolerance units =>
   (Double# -> Double#) ->
   (Double# -> Double#) ->
-  Float ->
-  Result Divergence Float
+  Number ->
+  Result Divergence Number
 curve1d# function derivative (Quantity# x1#) = do
   let !(Quantity# tolerance#) = ?tolerance
   curve1dImpl# tolerance# function derivative x1# (function x1#) 0#
@@ -66,7 +66,7 @@ curve1dImpl# ::
   Double# ->
   Double# ->
   Int# ->
-  Result Divergence Float
+  Result Divergence Number
 curve1dImpl# tolerance# function derivative x1# y1# iterations1# =
   case iterations1# GHC.Exts.<=# 10# of
     1# -> do
@@ -84,21 +84,21 @@ curve1dImpl# tolerance# function derivative x1# y1# iterations1# =
 
 curve2d ::
   Tolerance units =>
-  (Float -> Vector2d (space @ units)) ->
-  (Float -> Vector2d (space @ units)) ->
-  Float ->
-  Result Divergence Float
+  (Number -> Vector2d (space @ units)) ->
+  (Number -> Vector2d (space @ units)) ->
+  Number ->
+  Result Divergence Number
 curve2d function derivative t1 =
   curve2dImpl function derivative t1 (function t1) 0
 
 curve2dImpl ::
   Tolerance units =>
-  (Float -> Vector2d (space @ units)) ->
-  (Float -> Vector2d (space @ units)) ->
-  Float ->
+  (Number -> Vector2d (space @ units)) ->
+  (Number -> Vector2d (space @ units)) ->
+  Number ->
   Vector2d (space @ units) ->
   Int ->
-  Result Divergence Float
+  Result Divergence Number
 curve2dImpl function derivative t1 v1 iterations =
   if iterations <= 10
     then do
@@ -114,8 +114,8 @@ curve2d# ::
   Tolerance units =>
   (Double# -> (# Double#, Double# #)) ->
   (Double# -> (# Double#, Double# #)) ->
-  Float ->
-  Result Divergence Float
+  Number ->
+  Result Divergence Number
 curve2d# function derivative (Quantity# t1#) = do
   let !(Quantity# tolerance#) = ?tolerance
   let !(# x1#, y1# #) = function t1#
@@ -131,7 +131,7 @@ curve2dImpl# ::
   Double# ->
   Double# ->
   Int# ->
-  Result Divergence Float
+  Result Divergence Number
 curve2dImpl# tolerance# function derivative t1# x1# y1# squaredMagnitude1# iterations1# =
   case iterations1# GHC.Exts.<=# 10# of
     1# -> do

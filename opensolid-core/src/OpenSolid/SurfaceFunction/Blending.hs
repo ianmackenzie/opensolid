@@ -149,7 +149,7 @@ blend (f00, f01, f02) (f10, f11) t = do
   let b11 = Curve.b11 . t
   b00 * f00 + b01 * f01 + b02 * f02 + b10 * f10 + b11 * f11
 
-uParameterization :: Float -> SurfaceFunction2d UvCoordinates
+uParameterization :: Number -> SurfaceFunction2d UvCoordinates
 uParameterization vValue = SurfaceFunction2d.xy SurfaceFunction.u (SurfaceFunction.constant vValue)
 
 uParameterizationV0 :: SurfaceFunction2d UvCoordinates
@@ -164,7 +164,7 @@ uParameterizationVT1 = uParameterization Desingularization.t1
 uParameterizationV1 :: SurfaceFunction2d UvCoordinates
 uParameterizationV1 = uParameterization 1.0
 
-vParameterization :: Float -> SurfaceFunction2d UvCoordinates
+vParameterization :: Number -> SurfaceFunction2d UvCoordinates
 vParameterization uValue = SurfaceFunction2d.xy (SurfaceFunction.constant uValue) SurfaceFunction.v
 
 vParameterizationU0 :: SurfaceFunction2d UvCoordinates

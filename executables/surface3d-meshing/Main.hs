@@ -3,7 +3,7 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -19,7 +19,7 @@ import OpenSolid.World3d qualified as World3d
 main :: IO ()
 main = do
   let r = Length.meters 1.0
-  let h = Float.twoPi .* r
+  let h = Number.twoPi .* r
   let theta = Angle.twoPi .* SurfaceFunction.u
   let surfaceFunction =
         World3d.originPoint

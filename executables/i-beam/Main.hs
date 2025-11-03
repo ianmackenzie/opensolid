@@ -48,7 +48,7 @@ main = Tolerance.using Length.nanometer do
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
   profile <- IO.try (Region2d.boundedBy allCurves)
   body <- IO.try (Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length))
-  let material = PbrMaterial.metal (Color.rgbFloat 0.913 0.921 0.925) (#roughness 0.3)
+  let material = PbrMaterial.metal (Color.rgb1 0.913 0.921 0.925) (#roughness 0.3)
   let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
   let resolution = Resolution.maxError (Length.millimeters 1.0)
   Gltf.writeBinary "executables/i-beam/mesh.glb" model resolution

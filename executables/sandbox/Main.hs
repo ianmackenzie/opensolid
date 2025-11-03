@@ -53,9 +53,9 @@ import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Syntax
   ( cross
   , dot
-  , float
   , half
   , int
+  , number
   , twice
   , (%)
   , (.*)
@@ -96,7 +96,7 @@ testScalarArithmetic = do
   let volume = area .* length
   let volumeInCubicCentimeters = Volume.inCubicCentimeters volume
   log "Volume in cubic centimeters" volumeInCubicCentimeters
-  log "sqrt 2.0" (sqrt (float 2.0))
+  log "sqrt 2.0" (sqrt (number 2.0))
 
 testVectorArithmetic :: IO ()
 testVectorArithmetic = do
@@ -160,7 +160,7 @@ testCustomFunction = do
 testListOperations :: IO ()
 testListOperations = do
   let deltas = List.successive subtract [int 0, 1, 4, 9, 16, 25]
-  let intervals = List.successive Bounds [float 1.0, 2.0, 3.0, 4.0]
+  let intervals = List.successive Bounds [number 1.0, 2.0, 3.0, 4.0]
   log "Successive deltas" deltas
   log "Successive intervals" intervals
 
@@ -240,7 +240,7 @@ testPlaneParaboloidIntersection :: IO ()
 testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- float 0.5
+  let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- number 0.5
   zeros <- IO.try (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
@@ -268,12 +268,12 @@ drawBounds bounds = do
 
 drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawCrossingCurve index curve = do
-  let hue = (float (fromIntegral index) .* Angle.goldenAngle) % Angle.twoPi
-  let color = Color.hsl hue 0.5 0.5
+  let hue = (number (fromIntegral index) .* Angle.goldenAngle) % Angle.twoPi
+  let color = Color.hsl1 hue 0.5 0.5
   drawUvCurve [Drawing2d.strokeColor color] curve
 
 toDrawing :: Quantity (Meters :/: Unitless)
-toDrawing = Length.centimeters 10.0 ./. float 1.0
+toDrawing = Length.centimeters 10.0 ./. number 1.0
 
 drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawUvCurve attributes curve = do
@@ -288,9 +288,9 @@ drawDot color point =
     @ #diameter (Length.millimeters 1.0)
 
 delayedPrint :: Int -> Duration -> IO ()
-delayedPrint number delay = do
+delayedPrint n delay = do
   IO.sleep delay
-  IO.printLine (Text.int number)
+  IO.printLine (Text.int n)
 
 testConcurrency :: IO ()
 testConcurrency = do
@@ -406,7 +406,7 @@ testNewtonRaphson2d :: IO ()
 testNewtonRaphson2d = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- float 4.0
+  let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- number 4.0
   let g = u .- v
   let bounds = Bounds2d (Bounds 0.0 2.0) (Bounds 0.0 2.0)
   let function = VectorSurfaceFunction2d.xy f g
@@ -439,7 +439,7 @@ testCurve2dExpression = do
 testQuotientDesingularization :: IO ()
 testQuotientDesingularization = Tolerance.using 1e-9 do
   let numerator = Curve.sin (Angle.pi .* Curve.t)
-  let denominator = Curve.t .* (float 1.0 .- Curve.t)
+  let denominator = Curve.t .* (number 1.0 .- Curve.t)
   quotient <- IO.try (Curve.quotient numerator denominator)
   let tValues = Quantity.steps 0.0 1.0 10
   IO.forEach tValues \tValue -> do
@@ -454,7 +454,7 @@ testQuotientDesingularization = Tolerance.using 1e-9 do
 testCurveSqrt :: IO ()
 testCurveSqrt = Tolerance.using 1e-6 do
   let t = Curve.t
-  let curve = Curve.sqrt (half (float 1.0 .- Curve.cos (Angle.twoPi .* t)))
+  let curve = Curve.sqrt (half (number 1.0 .- Curve.cos (Angle.twoPi .* t)))
   Drawing2d.writeSvg
     "executables/sandbox/cos-sqrt.svg"
     (Debug.Plot.viewBox (Point2d -0.1 -4.1) (Point2d 1.1 4.1))

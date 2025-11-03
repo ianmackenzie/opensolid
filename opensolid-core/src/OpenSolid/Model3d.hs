@@ -52,7 +52,7 @@ instance FFI (Model3d FFI.Space) where
 data Attribute
   = Name Text
   | PbrMaterial PbrMaterial
-  | Opacity Float
+  | Opacity Number
 
 instance FFI Attribute where
   representation = FFI.nestedClassRepresentation "Model3d" "Attribute"
@@ -62,8 +62,8 @@ data Context = Context
   , parentNames :: List Text
   , ownPbrMaterial :: Maybe PbrMaterial
   , currentPbrMaterial :: PbrMaterial
-  , ownOpacity :: Float
-  , currentMultipliedOpacity :: Float
+  , ownOpacity :: Number
+  , currentMultipliedOpacity :: Number
   }
 
 type Traversal = ?context :: Context
@@ -210,9 +210,9 @@ withPbrMaterial :: PbrMaterial -> Model3d space -> Model3d space
 withPbrMaterial value = with (pbrMaterial value)
 
 -- | Create an opacity attribute, where 0 is fully transparent and 1 is fully opaque.
-opacity :: Float -> Attribute
+opacity :: Number -> Attribute
 opacity = Opacity
 
 -- | Set the opacity of a model, where 0 is fully transparent and 1 is fully opaque.
-withOpacity :: Float -> Model3d space -> Model3d space
+withOpacity :: Number -> Model3d space -> Model3d space
 withOpacity value = with (opacity value)

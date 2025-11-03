@@ -9,8 +9,8 @@ tests :: List Test
 tests =
   [ intDiv
   , intMod
-  , floatDiv
-  , floatMod
+  , numberDiv
+  , numberMod
   ]
 
 intDiv :: Test
@@ -27,17 +27,17 @@ intMod =
     , Test.verify "-10 % 3" (Test.expect (-10 % 3 == 2))
     ]
 
-floatDiv :: Test
-floatDiv =
-  Test.group "Float //" $
+numberDiv :: Test
+numberDiv =
+  Test.group "Number //" $
     [ Test.verify "1.7 // 0.5" (Test.expect (1.7 // 0.5 == 3))
     , Test.verify "-1.7 // 0.5" (Test.expect (-1.7 // 0.5 == -4))
     ]
 
-floatMod :: Test
-floatMod =
+numberMod :: Test
+numberMod =
   Tolerance.using 1e-12 do
-    Test.group "Float %" $
+    Test.group "Number %" $
       [ Test.verify "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
       , Test.verify "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))
       ]

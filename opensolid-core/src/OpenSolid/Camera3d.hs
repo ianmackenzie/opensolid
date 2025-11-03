@@ -28,9 +28,9 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d (Frame3d (Frame3d))
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Number qualified as Number
 import OpenSolid.Plane3d (Plane3d (Plane3d))
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point3d (Point3d)
@@ -173,7 +173,7 @@ orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Nam
   new computedFrame distance projection
 
 isometricElevation :: Angle
-isometricElevation = Angle.atan2 1.0 (Float.sqrt 2.0)
+isometricElevation = Angle.atan2 1.0 (Number.sqrt 2.0)
 
 isometric ::
   Point3d (space @ units) ->

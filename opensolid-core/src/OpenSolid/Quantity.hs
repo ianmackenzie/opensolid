@@ -51,11 +51,11 @@ import OpenSolid.Bootstrap hiding (max, min)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Composition
-import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
-import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
+import {-# SOURCE #-} OpenSolid.Number (Number, fromRational)
+import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Unboxed.Math
@@ -95,19 +95,19 @@ instance Show (Quantity SquareMeters) where
 instance Show (Quantity CubicMeters) where
   showsPrec = showsPrecImpl "Area.cubicMeters"
 
-deriving newtype instance Prelude.Num Float
+deriving newtype instance Prelude.Num Number
 
-deriving newtype instance Prelude.Real Float
+deriving newtype instance Prelude.Real Number
 
-deriving newtype instance Prelude.Fractional Float
+deriving newtype instance Prelude.Fractional Number
 
-deriving newtype instance Prelude.RealFrac Float
+deriving newtype instance Prelude.RealFrac Number
 
-deriving newtype instance Prelude.Floating Float
+deriving newtype instance Prelude.Floating Number
 
-deriving newtype instance Prelude.RealFloat Float
+deriving newtype instance Prelude.RealFloat Number
 
-deriving newtype instance Prelude.Read Float
+deriving newtype instance Prelude.Read Number
 
 deriving newtype instance Storable (Quantity units)
 
@@ -164,7 +164,7 @@ instance DivMod (Quantity units) where
   {-# INLINE (//) #-}
   x // y = Prelude.floor (x / y)
   {-# INLINE (%) #-}
-  x % y = x - y * Float.int (x // y)
+  x % y = x - y * Number.fromInt (x // y)
 
 {-# INLINE zero #-}
 zero :: Quantity units
@@ -277,7 +277,7 @@ largestBy function (x :| xs) = go x (abs (function x)) xs
 
 -- | Interpolate from one value to another, based on a parameter that ranges from 0 to 1.
 {-# INLINE interpolateFrom #-}
-interpolateFrom :: Quantity units -> Quantity units -> Float -> Quantity units
+interpolateFrom :: Quantity units -> Quantity units -> Number -> Quantity units
 interpolateFrom a b t = a + (b - a) * t
 
 {-# INLINE midpoint #-}

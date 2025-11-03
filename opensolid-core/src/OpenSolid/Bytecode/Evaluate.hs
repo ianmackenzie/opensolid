@@ -26,7 +26,7 @@ import OpenSolid.Binary (ByteString)
 import OpenSolid.Bounds (Bounds (Bounds, Bounds#))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
-import OpenSolid.Float qualified as Float
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3d (Vector3d#), VectorBounds3d (VectorBounds3d#))
@@ -53,21 +53,21 @@ callFunction bytecode callback =
   System.IO.Unsafe.unsafeDupablePerformIO $
     Data.ByteString.Unsafe.unsafeUseAsCString bytecode \(Ptr f#) -> callback f#
 
-curve1dValue :: Compiled Float (Quantity units1) -> Float -> Quantity units2
+curve1dValue :: Compiled Number (Quantity units1) -> Number -> Quantity units2
 curve1dValue (Constant value) _ = Quantity.coerce value
 curve1dValue (Bytecode bytecode) (Quantity# t#) =
   callFunction bytecode \f# -> do
     let x# = opensolid_cmm_curve1d_value f# t#
     return (Quantity# x#)
 
-curve1dBounds :: Compiled Float (Quantity units1) -> Bounds Unitless -> Bounds units2
+curve1dBounds :: Compiled Number (Quantity units1) -> Bounds Unitless -> Bounds units2
 curve1dBounds (Constant value) _ = Bounds.constant (Quantity.coerce value)
 curve1dBounds (Bytecode bytecode) (Bounds# tLow# tHigh#) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh# #) = opensolid_cmm_curve1d_bounds f# tLow# tHigh#
     return (Bounds# xLow# xHigh#)
 
-curve2dValue :: Compiled Float (Vector2d (space1 @ units1)) -> Float -> Vector2d (space2 @ units2)
+curve2dValue :: Compiled Number (Vector2d (space1 @ units1)) -> Number -> Vector2d (space2 @ units2)
 curve2dValue (Constant value) _ = Vector2d.coerce value
 curve2dValue (Bytecode bytecode) (Quantity# t#) =
   callFunction bytecode \f# -> do
@@ -75,7 +75,7 @@ curve2dValue (Bytecode bytecode) (Quantity# t#) =
     return (Vector2d# x# y#)
 
 curve2dBounds ::
-  Compiled Float (Vector2d (space1 @ units1)) ->
+  Compiled Number (Vector2d (space1 @ units1)) ->
   Bounds Unitless ->
   VectorBounds2d (space2 @ units2)
 curve2dBounds (Constant value) _ = VectorBounds2d.constant (Vector2d.coerce value)
@@ -84,7 +84,7 @@ curve2dBounds (Bytecode bytecode) (Bounds# tLow# tHigh#) =
     let !(# xLow#, xHigh#, yLow#, yHigh# #) = opensolid_cmm_curve2d_bounds f# tLow# tHigh#
     return (VectorBounds2d (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#))
 
-curve3dValue :: Compiled Float (Vector3d (space1 @ units1)) -> Float -> Vector3d (space2 @ units2)
+curve3dValue :: Compiled Number (Vector3d (space1 @ units1)) -> Number -> Vector3d (space2 @ units2)
 curve3dValue (Constant value) _ = Vector3d.coerce value
 curve3dValue (Bytecode bytecode) (Quantity# t#) =
   callFunction bytecode \f# -> do
@@ -92,7 +92,7 @@ curve3dValue (Bytecode bytecode) (Quantity# t#) =
     return (Vector3d# x# y# z#)
 
 curve3dBounds ::
-  Compiled Float (Vector3d (space1 @ units1)) ->
+  Compiled Number (Vector3d (space1 @ units1)) ->
   Bounds Unitless ->
   VectorBounds3d (space2 @ units2)
 curve3dBounds (Constant value) _ = VectorBounds3d.constant (Vector3d.coerce value)
@@ -167,11 +167,11 @@ callSolver functionBytes derivativeBytes callback =
 
 solveMonotonicSurfaceU ::
   Tolerance units =>
-  Compiled UvPoint Float ->
-  Compiled UvPoint Float ->
+  Compiled UvPoint Number ->
+  Compiled UvPoint Number ->
   Bounds Unitless ->
-  Float ->
-  Float
+  Number ->
+  Number
 solveMonotonicSurfaceU (Constant _) _ (Bounds u1 _) _ = u1
 solveMonotonicSurfaceU linearFunction (Constant slope) (Bounds u1 _) vValue =
   if slope == 0.0 then u1 else u1 - surface1dValue linearFunction (Point2d u1 vValue) / slope
@@ -179,22 +179,22 @@ solveMonotonicSurfaceU (Bytecode functionBytecode) (Bytecode derivativeBytecode)
   callSolver functionBytecode derivativeBytecode $
     \functionPointer derivativePointer ->
       return $
-        Float.fromDouble $
+        Number.fromDouble $
           opensolid_solve_monotonic_surface_u
-            (Float.toDouble (Quantity.coerce ?tolerance))
+            (Number.toDouble (Quantity.coerce ?tolerance))
             functionPointer
             derivativePointer
-            (Float.toDouble (Bounds.lower uBounds))
-            (Float.toDouble (Bounds.upper uBounds))
-            (Float.toDouble vValue)
+            (Number.toDouble (Bounds.lower uBounds))
+            (Number.toDouble (Bounds.upper uBounds))
+            (Number.toDouble vValue)
 
 solveMonotonicSurfaceV ::
   Tolerance units =>
-  Compiled UvPoint Float ->
-  Compiled UvPoint Float ->
-  Float ->
+  Compiled UvPoint Number ->
+  Compiled UvPoint Number ->
+  Number ->
   Bounds Unitless ->
-  Float
+  Number
 solveMonotonicSurfaceV (Constant _) _ _ (Bounds v1 _) = v1
 solveMonotonicSurfaceV linearFunction (Constant slope) uValue (Bounds v1 _) =
   if slope == 0.0 then v1 else v1 - surface1dValue linearFunction (Point2d uValue v1) / slope
@@ -202,14 +202,14 @@ solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode)
   callSolver functionBytecode derivativeBytecode $
     \functionPointer derivativePointer ->
       return $
-        Float.fromDouble $
+        Number.fromDouble $
           opensolid_solve_monotonic_surface_v
-            (Float.toDouble (Quantity.coerce ?tolerance))
+            (Number.toDouble (Quantity.coerce ?tolerance))
             functionPointer
             derivativePointer
-            (Float.toDouble uValue)
-            (Float.toDouble (Bounds.lower vBounds))
-            (Float.toDouble (Bounds.upper vBounds))
+            (Number.toDouble uValue)
+            (Number.toDouble (Bounds.lower vBounds))
+            (Number.toDouble (Bounds.upper vBounds))
 
 foreign import prim "opensolid_cmm_curve1d_value"
   opensolid_cmm_curve1d_value :: Addr# -> Double# -> Double#

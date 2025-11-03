@@ -113,7 +113,7 @@ type Mesh space = Mesh.Mesh (Vertex space)
 
 data Properties = Properties
   { material :: PbrMaterial
-  , opacity :: Float
+  , opacity :: Number
   , qualifiedName :: Text
   }
 
@@ -277,7 +277,7 @@ lightingNode lighting = case lighting of
     let (jx, jy, jz) = Direction3d.components convention (yDirection frame)
     let (kx, ky, kz) = Direction3d.components convention (zDirection frame)
     let transformValues = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0.0, 0.0, 0.0, 1.0]
-    let transformString = Text.join " " (List.map Text.float transformValues)
+    let transformString = Text.join " " (List.map Text.number transformValues)
     let matrixNode = XmlNode "matrix" [("value", transformString)] []
     XmlNode "emitter" [("type", "envmap")] $
       [ stringNode "filename" path
@@ -296,10 +296,10 @@ shapeNode fileName index properties = do
     , bsdfNode properties.material properties.opacity
     ]
 
-bsdfNode :: PbrMaterial -> Float -> XmlNode
+bsdfNode :: PbrMaterial -> Number -> XmlNode
 bsdfNode material opacity = do
-  let (r, g, b) = Color.rgbFloatComponents material.baseColor
-  let rgbString = Text.join "," (List.map Text.float [r, g, b])
+  let (r, g, b) = Color.toRgb1 material.baseColor
+  let rgbString = Text.join "," (List.map Text.number [r, g, b])
   let principledNode =
         XmlNode "bsdf" [("type", "principled")] $
           [ typedNode "rgb" "base_color" rgbString
@@ -310,7 +310,7 @@ bsdfNode material opacity = do
     then principledNode
     else
       XmlNode "bsdf" [("type", "mask")] $
-        [ typedNode "rgb" "opacity" (Text.float opacity)
+        [ typedNode "rgb" "opacity" (Text.number opacity)
         , XmlNode "bsdf" [("type", "twosided")] [principledNode]
         ]
 
@@ -329,7 +329,7 @@ cameraNode camera = do
       let scale = Length.inMeters fovHeight / 2.0
       XmlNode "sensor" [("type", "orthographic")] $
         [ XmlNode "transform" [("name", "to_world")] $
-            [ XmlNode "scale" [("value", Text.float scale)] []
+            [ XmlNode "scale" [("value", Text.number scale)] []
             , cameraTransformationNode camera
             ]
         , filmNode
@@ -350,8 +350,8 @@ typedNode valueType name value = XmlNode valueType [("name", name), ("value", va
 integerNode :: Text -> Int -> XmlNode
 integerNode name value = typedNode "integer" name (Text.int value)
 
-floatNode :: Text -> Float -> XmlNode
-floatNode name value = typedNode "float" name (Text.float value)
+floatNode :: Text -> Number -> XmlNode
+floatNode name value = typedNode "float" name (Text.number value)
 
 stringNode :: Text -> Text -> XmlNode
 stringNode name value = typedNode "string" name value
@@ -365,5 +365,5 @@ cameraTransformationNode camera = do
   let (ix, iy, iz) = Direction3d.components convention camera.leftwardDirection
   let (jx, jy, jz) = Direction3d.components convention camera.upwardDirection
   let (kx, ky, kz) = Direction3d.components convention camera.forwardDirection
-  let floatValues = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0.0, 0.0, 0.0, 1.0]
-  XmlNode "matrix" [("value", Text.join " " (List.map Text.float floatValues))] []
+  let matrixComponents = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0.0, 0.0, 0.0, 1.0]
+  XmlNode "matrix" [("value", Text.join " " (List.map Text.number matrixComponents))] []

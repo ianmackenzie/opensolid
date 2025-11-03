@@ -42,7 +42,7 @@ startValue curve = evaluate curve 0.0
 endValue :: DirectionCurve3d space -> Direction3d space
 endValue curve = evaluate curve 1.0
 
-evaluate :: DirectionCurve3d space -> Float -> Direction3d space
+evaluate :: DirectionCurve3d space -> Number -> Direction3d space
 evaluate (DirectionCurve3d vectorCurve) tValue =
   Direction3d.unsafe (VectorCurve3d.evaluate vectorCurve tValue)
 

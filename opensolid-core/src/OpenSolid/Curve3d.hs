@@ -69,7 +69,7 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
-    Float
+    Number
     (Point3d coordinateSystem)
     (Bounds Unitless)
     (Bounds3d coordinateSystem)
@@ -239,7 +239,7 @@ startPoint curve = evaluate curve 0.0
 endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
 endPoint curve = evaluate curve 1.0
 
-evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
+evaluate :: Curve3d (space @ units) -> Number -> Point3d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 evaluateBounds :: Curve3d (space @ units) -> Bounds Unitless -> Bounds3d (space @ units)

@@ -107,13 +107,13 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Orientation2d qualified as Orientation2d
 import OpenSolid.Parameter qualified as Parameter
@@ -157,7 +157,7 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
 
 type Compiled (coordinateSystem :: CoordinateSystem) =
   CompiledFunction
-    Float
+    Number
     (Point2d coordinateSystem)
     (Bounds Unitless)
     (Bounds2d coordinateSystem)
@@ -415,7 +415,7 @@ cornerArc ::
 cornerArc cornerPoint (Named incomingDirection) (Named outgoingDirection) (Named givenRadius) = do
   let radius = Quantity.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
-  if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Quantity.zero
+  if radius * Number.squared (Angle.inRadians sweptAngle) / 4.0 ~= Quantity.zero
     then line cornerPoint cornerPoint
     else do
       let offset = radius * Quantity.abs (Angle.tan (0.5 * sweptAngle))
@@ -625,11 +625,11 @@ instance HasField "endPoint" (Curve2d (space @ units)) (Point2d (space @ units))
 
 The parameter value should be between 0 and 1.
 -}
-evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+evaluate :: Curve2d (space @ units) -> Number -> Point2d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 {-# INLINE evaluateAt #-}
-evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
+evaluateAt :: Number -> Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt tValue curve = evaluate curve tValue
 
 -- | Get the start point of a curve.
@@ -729,7 +729,7 @@ findPoint ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result IsPoint (List Float)
+  Result IsPoint (List Number)
 findPoint point curve =
   case VectorCurve2d.zeros (point - curve) of
     Failure VectorCurve2d.IsZero -> Failure IsPoint
@@ -737,8 +737,8 @@ findPoint point curve =
 
 g2 ::
   Tolerance units =>
-  (Curve2d (space @ units), Float) ->
-  (Curve2d (space @ units), Float) ->
+  (Curve2d (space @ units), Number) ->
+  (Curve2d (space @ units), Number) ->
   Quantity units ->
   Bool
 g2 (curve1, t1) (curve2, t2) radius =
@@ -761,7 +761,7 @@ signature ::
   Tolerance units =>
   Orientation2d space ->
   Curve2d (space @ units) ->
-  Float ->
+  Number ->
   Quantity units ->
   (Quantity units, Quantity units)
 signature orientation curve tValue radius = do
@@ -821,7 +821,7 @@ findEndpointZeros ::
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
   Intersections.Error ->
-  Result Intersections.Error (List Float)
+  Result Intersections.Error (List Number)
 findEndpointZeros endpoint curve curveIsPointError =
   case findPoint endpoint curve of
     Success parameterValues -> Success parameterValues
@@ -1028,7 +1028,7 @@ mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 -- | Scale uniformly about the given point by the given scaling factor.
 scaleAbout ::
   Point2d (space @ units) ->
-  Float ->
+  Number ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 scaleAbout = Transform2d.scaleAboutImpl transformBy
@@ -1036,7 +1036,7 @@ scaleAbout = Transform2d.scaleAboutImpl transformBy
 -- | Scale (stretch) along the given axis by the given scaling factor.
 scaleAlong ::
   Axis2d (space @ units) ->
-  Float ->
+  Number ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 scaleAlong = Transform2d.scaleAlongImpl transformBy
@@ -1086,7 +1086,7 @@ toPolyline :: Resolution units -> Curve2d (space @ units) -> Polyline2d (Point2d
 toPolyline resolution curve =
   Polyline2d (NonEmpty.map (evaluate curve) (samplingPoints resolution curve))
 
-samplingPoints :: Resolution units -> Curve2d (space @ units) -> NonEmpty Float
+samplingPoints :: Resolution units -> Curve2d (space @ units) -> NonEmpty Number
 samplingPoints resolution curve = do
   let size subdomain = do
         let start = evaluate curve subdomain.lower

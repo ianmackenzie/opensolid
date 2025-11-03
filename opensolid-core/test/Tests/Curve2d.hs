@@ -19,10 +19,10 @@ import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegm
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Error qualified as Error
-import OpenSolid.Float qualified as Float
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -304,14 +304,14 @@ degenerateEndPointTangentDerivative =
       |> Test.output "differences" differences
       |> Test.output "endTangentDerivative" endTangentDerivative
 
-firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
+firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Number -> Expectation
 firstDerivativeIsConsistent = firstDerivativeIsConsistentWithin (Length.meters 1e-6)
 
 firstDerivativeIsConsistentWithin ::
   Show (Quantity units) =>
   Quantity units ->
   Curve2d (space @ units) ->
-  Float ->
+  Number ->
   Expectation
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let dt = 1e-6
@@ -330,7 +330,7 @@ firstDerivativeConsistency curveGenerator = Test.check 100 "firstDerivativeConsi
   t <- Parameter.random
   firstDerivativeIsConsistent curve t
 
-secondDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
+secondDerivativeIsConsistent :: Curve2d (space @ Meters) -> Number -> Expectation
 secondDerivativeIsConsistent curve tValue = do
   let dt = 1e-6
   let v1 = VectorCurve2d.evaluate curve.derivative (tValue - dt)
@@ -389,12 +389,12 @@ arcConstruction :: Tolerance Meters => Test
 arcConstruction = do
   let testArcMidpoint numDegrees (expectedX, expectedY) = do
         let label = Text.int numDegrees <> " degrees"
-        let sweptAngle = Angle.degrees (Float.int numDegrees)
+        let sweptAngle = Angle.degrees (Number.fromInt numDegrees)
         let expectedPoint = Point2d.meters expectedX expectedY
         Test.verify label Test.do
           let arc = Curve2d.arc Point2d.origin (Point2d.meters 1.0 1.0) sweptAngle
           Test.expect (Curve2d.evaluate arc 0.5 ~= expectedPoint)
-  let invSqrt2 = 1.0 / Float.sqrt 2.0
+  let invSqrt2 = 1.0 / Number.sqrt 2.0
   Test.group "from" $
     [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
     , testArcMidpoint -90 (1.0 - invSqrt2, invSqrt2)
