@@ -29,8 +29,8 @@ where
 import OpenSolid.Arithmetic
 import OpenSolid.Float (Float, fromRational)
 import OpenSolid.Float qualified as Float
-import OpenSolid.Qty (Qty (Qty))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity (Quantity))
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (Radians)
 import Prelude qualified
 
@@ -38,11 +38,11 @@ import Prelude qualified
 
 Represented internally as a value in radians.
 -}
-type Angle = Qty Radians
+type Angle = Quantity Radians
 
 -- | The zero value.
 zero :: Angle
-zero = Qty.zero
+zero = Quantity.zero
 
 -- | The [golden angle](https://en.wikipedia.org/wiki/Golden_angle).
 goldenAngle :: Angle
@@ -50,27 +50,27 @@ goldenAngle = radians (Float.pi * (3.0 - Float.sqrt 5.0))
 
 -- | Compute the sine of an angle.
 sin :: Angle -> Float
-sin (Qty x) = Qty (Prelude.sin x)
+sin (Quantity x) = Quantity (Prelude.sin x)
 
 -- | Compute the cosine of an angle.
 cos :: Angle -> Float
-cos (Qty x) = Qty (Prelude.cos x)
+cos (Quantity x) = Quantity (Prelude.cos x)
 
 -- | Compute the tangent of an angle.
 tan :: Angle -> Float
-tan (Qty x) = Qty (Prelude.tan x)
+tan (Quantity x) = Quantity (Prelude.tan x)
 
 -- | Compute the inverse sine of a value.
 asin :: Float -> Angle
-asin (Qty x) = Qty (Prelude.asin x)
+asin (Quantity x) = Quantity (Prelude.asin x)
 
 -- | Compute the inverse cosine of a value.
 acos :: Float -> Angle
-acos (Qty x) = Qty (Prelude.acos x)
+acos (Quantity x) = Quantity (Prelude.acos x)
 
 -- | Compute the inverse tangent of a value.
 atan :: Float -> Angle
-atan (Qty x) = Qty (Prelude.atan x)
+atan (Quantity x) = Quantity (Prelude.atan x)
 
 {-| Compute an angle from Y and X values.
 
@@ -79,8 +79,8 @@ or equivalently the angle of the vector with components (X,Y).
 
 Note the argument order - by convention, Y is given first and X second.
 -}
-atan2 :: Qty units -> Qty units -> Angle
-atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
+atan2 :: Quantity units -> Quantity units -> Angle
+atan2 (Quantity y) (Quantity x) = Quantity (Prelude.atan2 y x)
 
 -- | One radian.
 radian :: Angle
@@ -88,11 +88,11 @@ radian = radians 1.0
 
 -- | Construct an angle from a number of radians.
 radians :: Float -> Angle
-radians = Qty.coerce
+radians = Quantity.coerce
 
 -- | Convert an angle to a number of radians.
 inRadians :: Angle -> Float
-inRadians = Qty.coerce
+inRadians = Quantity.coerce
 
 -- | π radians, or 180 degrees.
 pi :: Angle

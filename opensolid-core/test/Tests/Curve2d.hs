@@ -26,7 +26,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
@@ -224,7 +224,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.
   tangentDirection <- Curve2d.tangentDirection curve
   let startTangent = DirectionCurve2d.startValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) decreasingTValues
-  let angleDifference otherTangent = Qty.abs (Direction2d.angleFrom startTangent otherTangent)
+  let angleDifference otherTangent = Quantity.abs (Direction2d.angleFrom startTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
 
@@ -238,7 +238,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
   tangentDirection <- Curve2d.tangentDirection curve
   let endTangent = DirectionCurve2d.endValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) increasingTValues
-  let angleDifference otherTangent = Qty.abs (Direction2d.angleFrom endTangent otherTangent)
+  let angleDifference otherTangent = Quantity.abs (Direction2d.angleFrom endTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
 
@@ -307,8 +307,8 @@ firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
 firstDerivativeIsConsistent = firstDerivativeIsConsistentWithin (Length.meters 1e-6)
 
 firstDerivativeIsConsistentWithin ::
-  Show (Qty units) =>
-  Qty units ->
+  Show (Quantity units) =>
+  Quantity units ->
   Curve2d (space @ units) ->
   Float ->
   Expectation
@@ -369,7 +369,7 @@ reversalConsistency =
           t <- Parameter.random
           Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1.0 - t))
 
-boundsConsistency :: (Tolerance units, Show (Qty units)) => Curve2d (space @ units) -> Expectation
+boundsConsistency :: (Tolerance units, Show (Quantity units)) => Curve2d (space @ units) -> Expectation
 boundsConsistency curve = Test.do
   tBounds <- Bounds.random Parameter.random
   tValue <- Random.map (Bounds.interpolate tBounds) Parameter.random

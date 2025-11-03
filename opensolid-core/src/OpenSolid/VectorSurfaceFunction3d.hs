@@ -222,13 +222,13 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (VectorSurfaceFunction3d (space @ units2)) (VectorSurfaceFunction3d (space @ units3))
+  Multiplication (Quantity units1) (VectorSurfaceFunction3d (space @ units2)) (VectorSurfaceFunction3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
-    (Qty units1)
+    (Quantity units1)
     (VectorSurfaceFunction3d (space @ units2))
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
@@ -253,28 +253,28 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorSurfaceFunction3d (space @ units1)) (Qty units2) (VectorSurfaceFunction3d (space @ units3))
+  Multiplication (VectorSurfaceFunction3d (space @ units1)) (Quantity units2) (VectorSurfaceFunction3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
     (VectorSurfaceFunction3d (space @ units1))
-    (Qty units2)
+    (Quantity units2)
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
   function .*. value = function .*. SurfaceFunction.constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorSurfaceFunction3d (space @ units1)) (Qty units2) (VectorSurfaceFunction3d (space @ units3))
+  Division (VectorSurfaceFunction3d (space @ units1)) (Quantity units2) (VectorSurfaceFunction3d (space @ units3))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Division'
     (VectorSurfaceFunction3d (space @ units1))
-    (Qty units2)
+    (Quantity units2)
     (VectorSurfaceFunction3d (space @ (units1 :/: units2)))
   where
   function ./. value = Units.simplify (function .*. (1.0 ./. value))

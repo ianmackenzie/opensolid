@@ -26,7 +26,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding (return)
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Result qualified as Result
@@ -251,7 +251,7 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
       let Vector2d xu1 yu1 = fu p1
       let Vector2d xv1 yv1 = fv p1
       let determinant = xu1 .*. yv1 - xv1 .*. yu1
-      if determinant == Qty.zero
+      if determinant == Quantity.zero
         then Failure Divergence
         else do
           let deltaU = (xv1 .*. y1 - yv1 .*. x1) / determinant
@@ -273,13 +273,13 @@ boundedStep uvBounds p1 p2 =
       let Bounds2d uBounds vBounds = uvBounds
       let Point2d u1 v1 = p1
       let Point2d u2 v2 = p2
-      let clampedU = Qty.clampTo uBounds u2
-      let clampedV = Qty.clampTo vBounds v2
+      let clampedU = Quantity.clampTo uBounds u2
+      let clampedV = Quantity.clampTo vBounds v2
       let uScale = if u1 == u2 then 1.0 else (clampedU - u1) / (u2 - u1)
       let vScale = if v1 == v2 then 1.0 else (clampedV - v1) / (v2 - v1)
-      let scale = Qty.min uScale vScale
+      let scale = Quantity.min uScale vScale
       let Point2d u v = Point2d.interpolateFrom p1 p2 scale
       -- Perform a final clamping step
       -- in case numerical roundoff during interpolation
       -- left the point *slightly* outside uvBounds
-      Point2d (Qty.clampTo uBounds u) (Qty.clampTo vBounds v)
+      Point2d (Quantity.clampTo uBounds u) (Quantity.clampTo vBounds v)

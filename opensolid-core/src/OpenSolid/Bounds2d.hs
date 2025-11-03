@@ -67,8 +67,8 @@ import OpenSolid.Primitives
   , Point2d (Position2d)
   , Point3d (Point3d)
   )
-import OpenSolid.Qty (Qty (Qty#))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
@@ -93,7 +93,7 @@ yCoordinate (PositionBounds2d pb) = VectorBounds2d.yComponent pb
 coordinates :: Bounds2d (space @ units) -> (Bounds units, Bounds units)
 coordinates (PositionBounds2d pb) = VectorBounds2d.components pb
 
-dimensions :: Bounds2d (space @ units) -> (Qty units, Qty units)
+dimensions :: Bounds2d (space @ units) -> (Quantity units, Quantity units)
 dimensions (Bounds2d x y) = (Bounds.width x, Bounds.width y)
 
 centerPoint :: Bounds2d (space @ units) -> Point2d (space @ units)
@@ -111,14 +111,14 @@ aggregate2 (PositionBounds2d pb1) (PositionBounds2d pb2) =
 aggregateN :: NonEmpty (Bounds2d (space @ units)) -> Bounds2d (space @ units)
 aggregateN list = PositionBounds2d (VectorBounds2d.aggregateN (Data.Coerce.coerce list))
 
-exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
+exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Quantity units
 exclusion (Position2d p) (PositionBounds2d pb) = VectorBounds2d.exclusion p pb
 
 {-# INLINE exclusion# #-}
 exclusion# :: Point2d (space @ units) -> Bounds2d (space @ units) -> Double#
 exclusion# (Position2d p) (PositionBounds2d pb) = VectorBounds2d.exclusion# p pb
 
-inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
+inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Quantity units
 inclusion (Position2d p) (PositionBounds2d pb) = VectorBounds2d.inclusion p pb
 
 {-# INLINE inclusion# #-}
@@ -135,7 +135,7 @@ isContainedIn :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 {-# INLINE separation #-}
-separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
+separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Quantity units
 separation (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.separation pb1 pb2
 
 {-# INLINE separation# #-}
@@ -143,7 +143,7 @@ separation# :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Double#
 separation# (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.separation# pb1 pb2
 
 {-# INLINE overlap #-}
-overlap :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
+overlap :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Quantity units
 overlap (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.overlap pb1 pb2
 
 {-# INLINE overlap# #-}
@@ -170,10 +170,10 @@ hull3 ::
   Point2d (space @ units) ->
   Bounds2d (space @ units)
 hull3 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) = do
-  let minX = Qty.min (Qty.min x1 x2) x3
-  let maxX = Qty.max (Qty.max x1 x2) x3
-  let minY = Qty.min (Qty.min y1 y2) y3
-  let maxY = Qty.max (Qty.max y1 y2) y3
+  let minX = Quantity.min (Quantity.min x1 x2) x3
+  let maxX = Quantity.max (Quantity.max x1 x2) x3
+  let minY = Quantity.min (Quantity.min y1 y2) y3
+  let maxY = Quantity.max (Quantity.max y1 y2) y3
   Bounds2d (Bounds minX maxX) (Bounds minY maxY)
 
 hull4 ::
@@ -183,10 +183,10 @@ hull4 ::
   Point2d (space @ units) ->
   Bounds2d (space @ units)
 hull4 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) = do
-  let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
-  let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
-  let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
-  let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
+  let minX = Quantity.min (Quantity.min (Quantity.min x1 x2) x3) x4
+  let maxX = Quantity.max (Quantity.max (Quantity.max x1 x2) x3) x4
+  let minY = Quantity.min (Quantity.min (Quantity.min y1 y2) y3) y4
+  let maxY = Quantity.max (Quantity.max (Quantity.max y1 y2) y3) y4
   Bounds2d (Bounds minX maxX) (Bounds minY maxY)
 
 -- | Construct a bounding box containing all vertices in the given non-empty list.
@@ -196,7 +196,7 @@ hullN (v0 :| rest) = do
   let go xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
       go xLow xHigh yLow yHigh (vertex : remaining) = do
         let (x, y) = Point2d.coordinates (Vertex2d.position vertex)
-        go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
+        go (Quantity.min xLow x) (Quantity.max xHigh x) (Quantity.min yLow y) (Quantity.max yHigh y) remaining
   go x0 x0 y0 y0 rest
 
 lowerLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
@@ -220,17 +220,17 @@ corners box =
   ]
 
 {-# INLINE diameter #-}
-diameter :: Bounds2d (space @ units) -> Qty units
-diameter bounds = Qty# (diameter# bounds)
+diameter :: Bounds2d (space @ units) -> Quantity units
+diameter bounds = Quantity# (diameter# bounds)
 
 {-# INLINE diameter# #-}
 diameter# :: Bounds2d (space @ units) -> Double#
 diameter# (Bounds2d x y) = hypot2# (Bounds.width# x) (Bounds.width# y)
 
-area' :: Bounds2d (space @ units) -> Qty (units :*: units)
+area' :: Bounds2d (space @ units) -> Quantity (units :*: units)
 area' (Bounds2d x y) = Bounds.width x .*. Bounds.width y
 
-area :: Units.Squared units1 units2 => Bounds2d (space @ units1) -> Qty units2
+area :: Units.Squared units1 units2 => Bounds2d (space @ units1) -> Quantity units2
 area (Bounds2d x y) = Bounds.width x * Bounds.width y
 
 interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
@@ -317,8 +317,8 @@ distanceAlong axis (Bounds2d x y) = do
   let r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
   Bounds (d0 - r) (d0 + r)
 
-convert :: Qty (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
+convert :: Quantity (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
 convert factor (PositionBounds2d pb) = PositionBounds2d (VectorBounds2d.convert factor pb)
 
-unconvert :: Qty (units2 :/: units1) -> Bounds2d (space @ units2) -> Bounds2d (space @ units1)
+unconvert :: Quantity (units2 :/: units1) -> Bounds2d (space @ units2) -> Bounds2d (space @ units1)
 unconvert factor (PositionBounds2d pb) = PositionBounds2d (VectorBounds2d.unconvert factor pb)

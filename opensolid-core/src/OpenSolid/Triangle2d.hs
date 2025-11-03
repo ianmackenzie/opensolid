@@ -19,7 +19,7 @@ vertices (Triangle2d v1 v2 v3) = (v1, v2, v3)
 signedArea' ::
   Vertex2d vertex (space @ units) =>
   Triangle2d vertex ->
-  Qty (units :*: units)
+  Quantity (units :*: units)
 signedArea' (Triangle2d v1 v2 v3) = do
   let p1 = Vertex2d.position v1
   let p2 = Vertex2d.position v2
@@ -31,5 +31,5 @@ signedArea ::
   , Units.Product units1 units1 units2
   ) =>
   Triangle2d vertex ->
-  Qty units2
+  Quantity units2
 signedArea = Units.specialize . signedArea'

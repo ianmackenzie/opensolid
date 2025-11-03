@@ -12,21 +12,21 @@ where
 
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 
-type Volume = Qty CubicMeters
+type Volume = Quantity CubicMeters
 
 zero :: Volume
-zero = Qty.zero
+zero = Quantity.zero
 
 cubicMeter :: Volume
 cubicMeter = cubicMeters 1.0
 
 cubicMeters :: Float -> Volume
-cubicMeters = Qty.coerce
+cubicMeters = Quantity.coerce
 
 inCubicMeters :: Volume -> Float
-inCubicMeters = Qty.coerce
+inCubicMeters = Quantity.coerce
 
 cubicCentimeter :: Volume
 cubicCentimeter = Length.centimeter * Length.centimeter * Length.centimeter

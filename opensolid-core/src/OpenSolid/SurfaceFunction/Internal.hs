@@ -10,7 +10,7 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1d qualified as Solve1d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -45,29 +45,29 @@ solveForV f fv uValue vBounds = do
     Solve1d.Exact vValue -> vValue
     Solve1d.Closest vValue -> vValue
 
-curveBoundsAt :: Float -> Float -> Qty units -> Qty units -> Bounds units -> Bounds units
+curveBoundsAt :: Float -> Float -> Quantity units -> Quantity units -> Bounds units -> Bounds units
 curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)
-  | mLow >= Qty.zero || mHigh <= Qty.zero = Bounds y1 y2 -- Monotonic case
+  | mLow >= Quantity.zero || mHigh <= Quantity.zero = Bounds y1 y2 -- Monotonic case
   | otherwise = do
       let dX = x2 - x1
       let dY = y2 - y1
-      let dXValley = Qty.clampTo (Bounds 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
-      let dXPeak = Qty.clampTo (Bounds 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
-      let yValley = if Qty.isInfinite mLow then -Qty.infinity else y1 + mLow * dXValley
-      let yPeak = if Qty.isInfinite mHigh then Qty.infinity else y1 + mHigh * dXPeak
+      let dXValley = Quantity.clampTo (Bounds 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
+      let dXPeak = Quantity.clampTo (Bounds 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
+      let yValley = if Quantity.isInfinite mLow then -Quantity.infinity else y1 + mLow * dXValley
+      let yPeak = if Quantity.isInfinite mHigh then Quantity.infinity else y1 + mHigh * dXPeak
       Bounds yValley yPeak
 
 curveBoundsOver :: Float -> Float -> Bounds units -> Bounds units -> Bounds units -> Bounds units
 curveBoundsOver x1 x2 y1 y2 (Bounds mLow mHigh)
-  | mLow >= Qty.zero || mHigh <= Qty.zero = Bounds.aggregate2 y1 y2 -- Monotonic case
+  | mLow >= Quantity.zero || mHigh <= Quantity.zero = Bounds.aggregate2 y1 y2 -- Monotonic case
   | otherwise = do
       let dX = x2 - x1
       let Bounds low1 high1 = y1
       let Bounds low2 high2 = y2
       let dYLow = low2 - low1
       let dYHigh = high2 - high1
-      let dXValley = Qty.clampTo (Bounds 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
-      let dXPeak = Qty.clampTo (Bounds 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
-      let yValley = if Qty.isInfinite mLow then -Qty.infinity else low1 + mLow * dXValley
-      let yPeak = if Qty.isInfinite mHigh then Qty.infinity else high1 + mHigh * dXPeak
+      let dXValley = Quantity.clampTo (Bounds 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
+      let dXPeak = Quantity.clampTo (Bounds 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
+      let yValley = if Quantity.isInfinite mLow then -Quantity.infinity else low1 + mLow * dXValley
+      let yPeak = if Quantity.isInfinite mHigh then Quantity.infinity else high1 + mHigh * dXPeak
       Bounds yValley yPeak

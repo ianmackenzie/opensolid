@@ -26,23 +26,23 @@ constant :: Vector2d (space @ units) -> Expression UvPoint (Vector2d (space @ un
 constant = Expression.constant
 
 xy ::
-  Expression UvPoint (Qty units) ->
-  Expression UvPoint (Qty units) ->
+  Expression UvPoint (Quantity units) ->
+  Expression UvPoint (Quantity units) ->
   Expression UvPoint (Vector2d (space @ units))
 xy = Expression.xy
 
 squaredMagnitude' ::
   Expression UvPoint (Vector2d (space @ units)) ->
-  Expression UvPoint (Qty (units :*: units))
+  Expression UvPoint (Quantity (units :*: units))
 squaredMagnitude' = Expression.squaredMagnitude'
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
   Expression UvPoint (Vector2d (space @ units1)) ->
-  Expression UvPoint (Qty units2)
+  Expression UvPoint (Quantity units2)
 squaredMagnitude = Expression.squaredMagnitude
 
-magnitude :: Expression UvPoint (Vector2d (space @ units)) -> Expression UvPoint (Qty units)
+magnitude :: Expression UvPoint (Vector2d (space @ units)) -> Expression UvPoint (Quantity units)
 magnitude = Expression.magnitude
 
 placeIn ::

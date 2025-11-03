@@ -21,8 +21,8 @@ constant :: Point2d (space @ units) -> Expression Float (Point2d (space @ units)
 constant = Expression.constant
 
 xy ::
-  Expression Float (Qty units) ->
-  Expression Float (Qty units) ->
+  Expression Float (Quantity units) ->
+  Expression Float (Quantity units) ->
   Expression Float (Point2d (space @ units))
 xy = Expression.xy
 

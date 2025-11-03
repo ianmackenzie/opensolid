@@ -45,7 +45,7 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude hiding (flip)
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Set2d (Set2d)
@@ -97,7 +97,7 @@ on plane region = do
   let (width, height) = Bounds2d.dimensions regionBounds
   let centerPoint = Bounds2d.centerPoint regionBounds
   let centerFrame = Frame2d.atPoint centerPoint
-  let regionSize = Qty.max width height
+  let regionSize = Quantity.max width height
   let centeredRegion = Region2d.relativeTo centerFrame region
   let normalizedRegion = Region2d.convert (1.0 ./. regionSize) centeredRegion
   let p0 = Point2d.placeOn plane centerPoint
@@ -134,7 +134,7 @@ revolved sketchPlane curve axis angle = do
   let frame2d = Frame2d.fromYAxis axis
   let localCurve = Curve2d.relativeTo frame2d curve
   let xCoordinate = localCurve.xCoordinate
-  if xCoordinate ~= Qty.zero
+  if xCoordinate ~= Quantity.zero
     then Failure Revolved.ProfileIsOnAxis
     else case Curve.sign xCoordinate of
       Failure Curve.CrossesZero -> Failure Revolved.ProfileCrossesAxis
@@ -178,7 +178,7 @@ relativeTo ::
 relativeTo frame surface =
   parametric (SurfaceFunction3d.relativeTo frame surface.function) surface.domain
 
-toMesh :: Qty units -> Surface3d (space @ units) -> Mesh (Point3d (space @ units))
+toMesh :: Quantity units -> Surface3d (space @ units) -> Mesh (Point3d (space @ units))
 toMesh accuracy surface = do
   let f = surface.function
   let fuu = f.du.du
@@ -195,7 +195,7 @@ toMesh accuracy surface = do
   Mesh.map (SurfaceFunction3d.evaluate surface.function) uvMesh
 
 toPolygon ::
-  Qty units ->
+  Quantity units ->
   SurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
@@ -206,7 +206,7 @@ toPolygon accuracy f fuu fuv fvv loop =
   Polygon2d (NonEmpty.combine (boundaryPoints accuracy f fuu fuv fvv) loop)
 
 boundaryPoints ::
-  Qty units ->
+  Quantity units ->
   SurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
@@ -225,7 +225,7 @@ surfaceError ::
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
   UvBounds ->
-  Qty units
+  Quantity units
 surfaceError fuu fuv fvv uvBounds = do
   let fuuBounds = VectorSurfaceFunction3d.evaluateBounds fuu uvBounds
   let fuvBounds = VectorSurfaceFunction3d.evaluateBounds fuv uvBounds
@@ -233,7 +233,7 @@ surfaceError fuu fuv fvv uvBounds = do
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 linearizationPredicate ::
-  Qty units ->
+  Quantity units ->
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
@@ -249,7 +249,7 @@ linearizationPredicate accuracy fuu fuv fvv curve2d secondDerivative3d subdomain
     && surfaceError fuu fuv fvv uvBounds <= accuracy
 
 generateSteinerPoints ::
-  Qty units ->
+  Quantity units ->
   UvBounds ->
   Set2d (LineSegment2d UvPoint) UvCoordinates ->
   VectorSurfaceFunction3d (space @ units) ->
@@ -280,7 +280,7 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
         else recurse
 
 includeSubdomain :: UvBounds -> Set2d (LineSegment2d UvPoint) UvCoordinates -> Fuzzy Bool
-includeSubdomain subdomain edgeSet = Tolerance.using Qty.zero $
+includeSubdomain subdomain edgeSet = Tolerance.using Quantity.zero $
   case edgeSet of
     Set2d.Node nodeBounds leftChild rightChild
       | not (subdomain ^ nodeBounds) -> Resolved True

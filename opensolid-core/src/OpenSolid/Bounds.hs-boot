@@ -7,7 +7,7 @@ module OpenSolid.Bounds
 where
 
 import OpenSolid.Bootstrap
-import {-# SOURCE #-} OpenSolid.Qty (Qty)
+import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
 import OpenSolid.Unitless (Unitless)
 
 type role Bounds phantom
@@ -16,5 +16,5 @@ type Bounds :: Type -> Type
 data Bounds units
 
 unitInterval :: Bounds Unitless
-lower :: Bounds units -> Qty units
-upper :: Bounds units -> Qty units
+lower :: Bounds units -> Quantity units
+upper :: Bounds units -> Quantity units

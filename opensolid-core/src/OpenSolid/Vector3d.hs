@@ -65,7 +65,7 @@ import OpenSolid.Primitives
   , Vector2d (Vector2d)
   , Vector3d (Vector3d, Vector3d#)
   )
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Unboxed.Math
@@ -73,11 +73,11 @@ import OpenSolid.Units qualified as Units
 
 -- | The zero vector.
 zero :: Vector3d (space @ units)
-zero = Vector3d Qty.zero Qty.zero Qty.zero
+zero = Vector3d Quantity.zero Quantity.zero Quantity.zero
 
 {-# INLINE coerce #-}
 coerce :: Vector3d (space1 @ units1) -> Vector3d (space2 @ units2)
-coerce (Vector3d vx vy vz) = Vector3d (Qty.coerce vx) (Qty.coerce vy) (Qty.coerce vz)
+coerce (Vector3d vx vy vz) = Vector3d (Quantity.coerce vx) (Quantity.coerce vy) (Quantity.coerce vz)
 
 -- | Construct a unit vector in the given direction.
 {-# INLINE unit #-}
@@ -98,7 +98,7 @@ on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vX vY) = do
   Vector3d vR vF vU
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
-xyz :: Convention3d -> (Qty units, Qty units, Qty units) -> Vector3d (space @ units)
+xyz :: Convention3d -> (Quantity units, Quantity units, Quantity units) -> Vector3d (space @ units)
 xyz Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (vx, vy, vz) =
   Vector3d
     (vx * xr + vy * yr + vz * zr)
@@ -109,42 +109,42 @@ xyz Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (vx, vy, vz) =
 
 This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
 -}
-zUp :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
+zUp :: Quantity units -> Quantity units -> Quantity units -> Vector3d (space @ units)
 zUp vX vY vZ = Vector3d vX vY vZ
 
 {-| Construct a vector from its XYZ components, using a Y-up convention.
 
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
-yUp :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
+yUp :: Quantity units -> Quantity units -> Quantity units -> Vector3d (space @ units)
 yUp vX vY vZ = Vector3d -vX vZ vY
 
-componentIn :: Direction3d space -> Vector3d (space @ units) -> Qty units
+componentIn :: Direction3d space -> Vector3d (space @ units) -> Quantity units
 componentIn = dot
 
 projectionIn :: Direction3d space -> Vector3d (space @ units) -> Vector3d (space @ units)
 projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
 
-forwardComponent :: Vector3d (space @ units) -> Qty units
+forwardComponent :: Vector3d (space @ units) -> Quantity units
 forwardComponent (Vector3d _ f _) = f
 
-backwardComponent :: Vector3d (space @ units) -> Qty units
+backwardComponent :: Vector3d (space @ units) -> Quantity units
 backwardComponent (Vector3d _ f _) = -f
 
-leftwardComponent :: Vector3d (space @ units) -> Qty units
+leftwardComponent :: Vector3d (space @ units) -> Quantity units
 leftwardComponent (Vector3d r _ _) = -r
 
-rightwardComponent :: Vector3d (space @ units) -> Qty units
+rightwardComponent :: Vector3d (space @ units) -> Quantity units
 rightwardComponent (Vector3d r _ _) = r
 
-upwardComponent :: Vector3d (space @ units) -> Qty units
+upwardComponent :: Vector3d (space @ units) -> Quantity units
 upwardComponent (Vector3d _ _ u) = u
 
-downwardComponent :: Vector3d (space @ units) -> Qty units
+downwardComponent :: Vector3d (space @ units) -> Quantity units
 downwardComponent (Vector3d _ _ u) = -u
 
 -- | Get the XYZ components of a vector, given an XYZ coordinate convention to use.
-components :: Convention3d -> Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
+components :: Convention3d -> Vector3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 components Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (Vector3d vr vf vu) =
   ( vr * xr + vf * xf + vu * xu
   , vr * yr + vf * yf + vu * yu
@@ -156,7 +156,7 @@ components Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (Vector3d vr vf vu) 
 This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
 -}
 {-# INLINE zUpComponents #-}
-zUpComponents :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
+zUpComponents :: Vector3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 zUpComponents (Vector3d r f u) = (r, f, u)
 
 {-# INLINE zUpComponents# #-}
@@ -168,7 +168,7 @@ zUpComponents# (Vector3d# r# f# u#) = (# r#, f#, u# #)
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
 {-# INLINE yUpComponents #-}
-yUpComponents :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
+yUpComponents :: Vector3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 yUpComponents (Vector3d r f u) = (-r, u, f)
 
 {-# INLINE yUpComponents# #-}
@@ -190,13 +190,13 @@ midpoint :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (sp
 midpoint (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
   Vector3d (0.5 * (x1 + x2)) (0.5 * (y1 + y2)) (0.5 * (z1 + z2))
 
-magnitude :: Vector3d (space @ units) -> Qty units
-magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
+magnitude :: Vector3d (space @ units) -> Quantity units
+magnitude (Vector3d vx vy vz) = Quantity.hypot3 vx vy vz
 
-squaredMagnitude :: Units.Squared units1 units2 => Vector3d (space @ units1) -> Qty units2
+squaredMagnitude :: Units.Squared units1 units2 => Vector3d (space @ units1) -> Quantity units2
 squaredMagnitude = Units.specialize . squaredMagnitude'
 
-squaredMagnitude' :: Vector3d (space @ units) -> Qty (units :*: units)
+squaredMagnitude' :: Vector3d (space @ units) -> Quantity (units :*: units)
 squaredMagnitude' (Vector3d vx vy vz) = vx .*. vx + vy .*. vy + vz .*. vz
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
@@ -209,20 +209,20 @@ The current tolerance will be used to check if the vector is zero
 direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
   let vm = magnitude vector
-  if vm ~= Qty.zero then Failure IsZero else Success (Unit3d (vector / vm))
+  if vm ~= Quantity.zero then Failure IsZero else Success (Unit3d (vector / vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
   Vector3d (space @ units) ->
-  Result IsZero (Qty units, Direction3d space)
+  Result IsZero (Quantity units, Direction3d space)
 magnitudeAndDirection vector = do
   let vm = magnitude vector
-  if vm ~= Qty.zero then Failure IsZero else Success (vm, Unit3d (vector / vm))
+  if vm ~= Quantity.zero then Failure IsZero else Success (vm, Unit3d (vector / vm))
 
 normalize :: Vector3d (space @ units) -> Vector3d (space @ Unitless)
 normalize vector = do
   let vm = magnitude vector
-  if vm == Qty.zero then zero else vector / vm
+  if vm == Quantity.zero then zero else vector / vm
 
 -- | Convert a vectr defined in local coordinates to one defined in global coordinates.
 placeIn ::
@@ -248,10 +248,10 @@ projectInto (Plane3d _ (PlaneOrientation3d i j)) v = Vector2d (v `dot` i) (v `do
 sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
 sum = List.foldl (+) zero
 
-convert :: Qty (units2 :/: units1) -> Vector3d (space @ units1) -> Vector3d (space @ units2)
+convert :: Quantity (units2 :/: units1) -> Vector3d (space @ units1) -> Vector3d (space @ units2)
 convert factor vector = Units.simplify (vector .*. factor)
 
-unconvert :: Qty (units2 :/: units1) -> Vector3d (space @ units2) -> Vector3d (space @ units1)
+unconvert :: Quantity (units2 :/: units1) -> Vector3d (space @ units2) -> Vector3d (space @ units1)
 unconvert factor vector = Units.simplify (vector ./. factor)
 
 transformBy ::

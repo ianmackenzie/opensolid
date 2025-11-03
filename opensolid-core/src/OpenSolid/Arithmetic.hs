@@ -18,7 +18,7 @@ where
 
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float)
-import {-# SOURCE #-} OpenSolid.Qty (Qty (Qty))
+import {-# SOURCE #-} OpenSolid.Quantity (Quantity (Quantity))
 import {-# SOURCE #-} OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Units (Unitless)
 import Prelude qualified
@@ -128,10 +128,10 @@ instance Multiplication Int Int Int where
   (*) = (Prelude.*)
 
 instance Division' Int Int Float where
-  n ./. m = Qty (fromIntegral n Prelude./ fromIntegral m)
+  n ./. m = Quantity (fromIntegral n Prelude./ fromIntegral m)
 
 instance Division Int Int Float where
-  n / m = Qty (fromIntegral n Prelude./ fromIntegral m)
+  n / m = Quantity (fromIntegral n Prelude./ fromIntegral m)
 
 class Exponentiation a b where
   (**) :: a -> b -> a
@@ -141,11 +141,11 @@ infixr 8 **
 instance Exponentiation Int Int where
   (**) = (Prelude.^)
 
-instance units ~ Unitless => Exponentiation (Qty units) Int where
-  x ** n = x ** (fromIntegral n :: Qty Unitless)
+instance units ~ Unitless => Exponentiation (Quantity units) Int where
+  x ** n = x ** (fromIntegral n :: Quantity Unitless)
 
 instance
   (baseUnits ~ Unitless, exponentUnits ~ Unitless) =>
-  Exponentiation (Qty baseUnits) (Qty exponentUnits)
+  Exponentiation (Quantity baseUnits) (Quantity exponentUnits)
   where
   (**) = (Prelude.**)

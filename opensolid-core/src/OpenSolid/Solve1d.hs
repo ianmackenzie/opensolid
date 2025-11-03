@@ -34,7 +34,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (return)
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Result qualified as Result
@@ -42,20 +42,20 @@ import OpenSolid.Result qualified as Result
 data Neighborhood units = Neighborhood
   { n :: Int
   , sign :: Sign
-  , magnitude :: Qty units
+  , magnitude :: Quantity units
   , radius :: Float
   }
 
-deriving instance Show (Qty units) => Show (Neighborhood units)
+deriving instance Show (Quantity units) => Show (Neighborhood units)
 
-neighborhood :: Tolerance units => Int -> Qty units -> Neighborhood units
+neighborhood :: Tolerance units => Int -> Quantity units -> Neighborhood units
 neighborhood n value = do
-  let sign = Qty.sign value
-  let magnitude = Qty.abs value
+  let sign = Quantity.sign value
+  let magnitude = Quantity.abs value
   let radius = (Float.int (Int.factorial n) * ?tolerance / magnitude) ** (1 / n)
   Neighborhood{n, sign, magnitude, radius}
 
-derivativeTolerance :: Neighborhood units -> Int -> Qty units
+derivativeTolerance :: Neighborhood units -> Int -> Quantity units
 derivativeTolerance (Neighborhood{n, magnitude, radius}) k = do
   magnitude * radius ** (n - k) / Float.int (Int.factorial (n - k))
 
@@ -181,8 +181,8 @@ data Root = Exact Float | Closest Float
 
 monotonic ::
   Tolerance units =>
-  (Float -> Qty units) ->
-  (Float -> Qty units) ->
+  (Float -> Quantity units) ->
+  (Float -> Quantity units) ->
   Bounds Unitless ->
   Root
 monotonic function derivative bounds = do
@@ -190,15 +190,15 @@ monotonic function derivative bounds = do
   let y1 = function x1
   let y2 = function x2
   if
-    | y1 == Qty.zero -> Exact x1
-    | y2 == Qty.zero -> Exact x2
-    | Qty.sign y1 == Qty.sign y2 -> if Qty.abs y1 <= Qty.abs y2 then Closest x1 else Closest x2
-    | otherwise -> solveMonotonic function derivative bounds (Qty.sign y1) x1 x2
+    | y1 == Quantity.zero -> Exact x1
+    | y2 == Quantity.zero -> Exact x2
+    | Quantity.sign y1 == Quantity.sign y2 -> if Quantity.abs y1 <= Quantity.abs y2 then Closest x1 else Closest x2
+    | otherwise -> solveMonotonic function derivative bounds (Quantity.sign y1) x1 x2
 
 solveMonotonic ::
   Tolerance units =>
-  (Float -> Qty units) ->
-  (Float -> Qty units) ->
+  (Float -> Quantity units) ->
+  (Float -> Quantity units) ->
   Bounds Unitless ->
   Sign ->
   Float ->
@@ -207,9 +207,9 @@ solveMonotonic ::
 solveMonotonic function derivative bounds sign1 x1 x2 = do
   -- First, try applying Newton-Raphson within [x1,x2]
   -- to see if that converges to a zero
-  let xMid = Qty.midpoint x1 x2
+  let xMid = Quantity.midpoint x1 x2
   let yMid = function xMid
-  if yMid == Qty.zero
+  if yMid == Quantity.zero
     then Exact xMid
     else case newtonRaphson function derivative bounds xMid yMid 0 of
       Success root -> Exact root -- Newton-Raphson converged to a zero, return it
@@ -217,7 +217,7 @@ solveMonotonic function derivative bounds sign1 x1 x2 = do
         | x1 < xMid && xMid < x2 ->
             -- It's possible to bisect further,
             -- so recurse into whichever subdomain brackets the zero
-            if Qty.sign yMid == sign1
+            if Quantity.sign yMid == sign1
               then solveMonotonic function derivative bounds sign1 xMid x2
               else solveMonotonic function derivative bounds sign1 x1 xMid
         | otherwise -> Exact xMid -- We've converged to a zero by bisection
@@ -226,11 +226,11 @@ data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
 newtonRaphson ::
   Tolerance units =>
-  (Float -> Qty units) ->
-  (Float -> Qty units) ->
+  (Float -> Quantity units) ->
+  (Float -> Quantity units) ->
   Bounds Unitless ->
   Float ->
-  Qty units ->
+  Quantity units ->
   Int ->
   Result Divergence Float
 newtonRaphson function derivative bounds x y iterations =
@@ -238,7 +238,7 @@ newtonRaphson function derivative bounds x y iterations =
     then Failure Divergence
     else do
       let dy = derivative x
-      if dy == Qty.zero -- Can't take Newton step if derivative is zero
+      if dy == Quantity.zero -- Can't take Newton step if derivative is zero
         then Failure Divergence
         else do
           let xStepped = x - y / dy
@@ -249,10 +249,10 @@ newtonRaphson function derivative bounds x y iterations =
                 -- Newton step went outside bounds,
                 -- attempt to recover by making another step
                 -- starting at the boundary
-                let xClamped = Qty.clampTo bounds xStepped
+                let xClamped = Quantity.clampTo bounds xStepped
                 let yClamped = function xClamped
                 let dyClamped = derivative xClamped
-                if dyClamped == Qty.zero
+                if dyClamped == Quantity.zero
                   then Failure Divergence
                   else do
                     let xStepped2 = xClamped - yClamped / dyClamped
@@ -260,8 +260,8 @@ newtonRaphson function derivative bounds x y iterations =
                       then Success xStepped2
                       else Failure Divergence
           let y2 = function x2
-          if Qty.abs y2 >= Qty.abs y
+          if Quantity.abs y2 >= Quantity.abs y
             then -- We've stopped converging, check if we're actually at a root
-              if y ~= Qty.zero then Success x else Failure Divergence
+              if y ~= Quantity.zero then Success x else Failure Divergence
             else -- We're still converging, so take another iteration
               newtonRaphson function derivative bounds x2 y2 (iterations + 1)

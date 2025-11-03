@@ -6,7 +6,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import Test (Test)
@@ -19,8 +19,8 @@ tests =
   , larger
   , smallest
   , largest
-  , qtyBoundsDivision
-  , boundsQtyDivision
+  , quantityBoundsDivision
+  , boundsQuantityDivision
   , boundsBoundsDivision
   ]
 
@@ -32,7 +32,7 @@ smaller = Test.check 100 "smaller" Test.do
   t2 <- Parameter.random
   let x1 = Bounds.interpolate bounds1 t1
   let x2 = Bounds.interpolate bounds2 t2
-  let smallerValue = Qty.smaller x1 x2
+  let smallerValue = Quantity.smaller x1 x2
   let smallerBounds = Bounds.smaller bounds1 bounds2
   Test.expect (Bounds.includes smallerValue smallerBounds)
     |> Test.output "bounds1" bounds1
@@ -50,7 +50,7 @@ larger = Test.check 100 "larger" Test.do
   t2 <- Parameter.random
   let x1 = Bounds.interpolate bounds1 t1
   let x2 = Bounds.interpolate bounds2 t2
-  let largerValue = Qty.larger x1 x2
+  let largerValue = Quantity.larger x1 x2
   let largerBounds = Bounds.larger bounds1 bounds2
   Test.expect (Bounds.includes largerValue largerBounds)
     |> Test.output "bounds1" bounds1
@@ -71,7 +71,7 @@ smallest :: Test
 smallest = Test.check 1000 "smallest" Test.do
   valuesAndBounds <- NonEmpty.random 5 valueInBounds
   let (values, bounds) = NonEmpty.unzip2 valuesAndBounds
-  let smallestValue = Qty.smallest values
+  let smallestValue = Quantity.smallest values
   let smallestBounds = Bounds.smallest bounds
   Test.expect (Bounds.includes smallestValue smallestBounds)
 
@@ -79,7 +79,7 @@ largest :: Test
 largest = Test.check 1000 "largest" Test.do
   valuesAndBounds <- NonEmpty.random 5 valueInBounds
   let (values, bounds) = NonEmpty.unzip2 valuesAndBounds
-  let largestValue = Qty.largest values
+  let largestValue = Quantity.largest values
   let largestBounds = Bounds.largest bounds
   Test.expect (Bounds.includes largestValue largestBounds)
     |> Test.output "values" (Test.lines values)
@@ -87,8 +87,8 @@ largest = Test.check 1000 "largest" Test.do
     |> Test.output "largestValue" largestValue
     |> Test.output "largestBounds" largestBounds
 
-qtyBoundsDivision :: Test
-qtyBoundsDivision = Test.check 1000 "qtyBoundsDivision" Test.do
+quantityBoundsDivision :: Test
+quantityBoundsDivision = Test.check 1000 "quantityBoundsDivision" Test.do
   x <- Random.length
   bounds <- Bounds.random Random.length
   t <- Parameter.random
@@ -102,8 +102,8 @@ qtyBoundsDivision = Test.check 1000 "qtyBoundsDivision" Test.do
     |> Test.output "quotient" quotient
     |> Test.output "boundsQuotient" boundsQuotient
 
-boundsQtyDivision :: Test
-boundsQtyDivision = Test.check 1000 "boundsQtyDivision" Test.do
+boundsQuantityDivision :: Test
+boundsQuantityDivision = Test.check 1000 "boundsQuantityDivision" Test.do
   bounds <- Bounds.random Random.length
   t <- Parameter.random
   let x = Bounds.interpolate bounds t
@@ -118,7 +118,7 @@ boundsQtyDivision = Test.check 1000 "boundsQtyDivision" Test.do
     |> Test.output "boundsQuotient" boundsQuotient
 
 {-| TODO: have test helper for generally testing compatibility of
-Bounds function with corresponding Qty function
+Bounds function with corresponding Quantity function
 -}
 boundsBoundsDivision :: Test
 boundsBoundsDivision = Test.check 1000 "boundsBoundsDivision" Test.do

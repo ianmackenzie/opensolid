@@ -72,8 +72,8 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
-import OpenSolid.Qty (Qty (Qty#))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution (Resolution)
@@ -175,7 +175,7 @@ data HalfEdge (coordinateSystem :: CoordinateSystem) where
     { halfEdgeId :: HalfEdgeId
     , uvCurve :: Curve2d UvCoordinates -- UV curve parameterized by 3D arc length
     , curve3d :: Curve3d (space @ units) -- Arc length parameterized 3D curve
-    , length :: Qty units -- Arc length of 3D curve
+    , length :: Quantity units -- Arc length of 3D curve
     , bounds :: Bounds3d (space @ units) -- Bounds on 3D curve
     } ->
     HalfEdge (space @ units)
@@ -240,10 +240,10 @@ Fails if the diameter is zero.
 sphere ::
   Tolerance units =>
   "centerPoint" ::: Point3d (space @ units) ->
-  "diameter" ::: Qty units ->
+  "diameter" ::: Quantity units ->
   Result EmptyBody (Body3d (space @ units))
 sphere (Named centerPoint) (Named diameter) =
-  if diameter ~= Qty.zero
+  if diameter ~= Quantity.zero
     then Failure EmptyBody
     else do
       let sketchPlane = Plane3d centerPoint World3d.frontPlane.orientation
@@ -266,13 +266,13 @@ cylinder ::
   Tolerance units =>
   Point3d (space @ units) ->
   Point3d (space @ units) ->
-  "diameter" ::: Qty units ->
+  "diameter" ::: Quantity units ->
   Result EmptyBody (Body3d (space @ units))
 cylinder startPoint endPoint (Named diameter) =
   case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
     Failure Vector3d.IsZero -> Failure EmptyBody
     Success (length, direction) ->
-      cylinderAlong (Axis3d startPoint direction) Qty.zero length (#diameter diameter)
+      cylinderAlong (Axis3d startPoint direction) Quantity.zero length (#diameter diameter)
 
 {-| Create a cylindrical body along a given axis.
 
@@ -287,9 +287,9 @@ Failes if the cylinder length or diameter is zero.
 cylinderAlong ::
   Tolerance units =>
   Axis3d (space @ units) ->
-  Qty units ->
-  Qty units ->
-  "diameter" ::: Qty units ->
+  Quantity units ->
+  Quantity units ->
+  "diameter" ::: Quantity units ->
   Result EmptyBody (Body3d (space @ units))
 cylinderAlong axis d1 d2 (Named diameter) = do
   case Region2d.circle (#centerPoint Point2d.origin) (#diameter diameter) of
@@ -306,8 +306,8 @@ extruded ::
   Tolerance units =>
   Plane3d (space @ units) (Defines local) ->
   Region2d (local @ units) ->
-  Qty units ->
-  Qty units ->
+  Quantity units ->
+  Quantity units ->
   Result BoundedBy.Error (Body3d (space @ units))
 extruded sketchPlane profile d1 d2 = do
   let normal = Plane3d.normalDirection sketchPlane
@@ -331,7 +331,7 @@ translational sketchPlane profile displacement = do
   let sideSurface curve = Surface3d.translational (Curve2d.placeOn sketchPlane curve) displacement
   let sideSurfaces = List.map sideSurface (NonEmpty.toList profile.boundaryCurves)
   let initialDerivative = VectorCurve3d.startValue displacement.derivative
-  case Qty.sign (initialDerivative `dot` Plane3d.normalDirection sketchPlane) of
+  case Quantity.sign (initialDerivative `dot` Plane3d.normalDirection sketchPlane) of
     Positive -> boundedBy (endCap : startCap : sideSurfaces)
     Negative -> boundedBy (startCap : endCap : sideSurfaces)
 
@@ -464,7 +464,7 @@ toHalfEdge surfaceId loopId surfaceFunction curveIndex uvCurve = do
   let curveId = CurveId curveIndex
   let halfEdgeId = HalfEdgeId{surfaceId, loopId, curveId}
   let (parameterization, length) = Curve3d.arcLengthParameterization curve3d
-  if length == Qty.zero
+  if length == Quantity.zero
     then DegenerateHalfEdge{halfEdgeId, uvCurve, point = Curve3d.startPoint curve3d}
     else
       HalfEdge
@@ -665,10 +665,10 @@ boundarySurfaceSegmentSet ::
   Set2d UvBounds UvCoordinates
 boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
   let acceptableSize =
-        Qty.isInfinite resolution.maxSize
+        Quantity.isInfinite resolution.maxSize
           || surfaceSize surfaceFunction uvBounds <= resolution.maxSize
   let acceptableError =
-        Qty.isInfinite resolution.maxError
+        Quantity.isInfinite resolution.maxError
           || surfaceError surfaceFunction uvBounds <= resolution.maxError
   if acceptableSize && acceptableError
     then Set2d.Leaf uvBounds uvBounds
@@ -684,7 +684,7 @@ boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
       let set2 = Set2d.Node (Bounds2d u2 vBounds) set21 set22
       Set2d.Node uvBounds set1 set2
 
-surfaceSize :: SurfaceFunction3d (space @ units) -> UvBounds -> Qty units
+surfaceSize :: SurfaceFunction3d (space @ units) -> UvBounds -> Quantity units
 surfaceSize f uvBounds = do
   let p00 = SurfaceFunction3d.evaluate f (Bounds2d.lowerLeftCorner uvBounds)
   let p10 = SurfaceFunction3d.evaluate f (Bounds2d.lowerRightCorner uvBounds)
@@ -696,9 +696,9 @@ surfaceSize f uvBounds = do
   let d4# = Point3d.distanceFrom# p01 p00
   let d5# = Point3d.distanceFrom# p00 p11
   let d6# = Point3d.distanceFrom# p10 p01
-  Qty# (max# (max# (max# (max# (max# d1# d2#) d3#) d4#) d5#) d6#)
+  Quantity# (max# (max# (max# (max# (max# d1# d2#) d3#) d4#) d5#) d6#)
 
-surfaceError :: SurfaceFunction3d (space @ units) -> UvBounds -> Qty units
+surfaceError :: SurfaceFunction3d (space @ units) -> UvBounds -> Quantity units
 surfaceError f uvBounds = do
   let fuuBounds = VectorSurfaceFunction3d.evaluateBounds f.du.du uvBounds
   let fuvBounds = VectorSurfaceFunction3d.evaluateBounds f.du.dv uvBounds
@@ -827,7 +827,7 @@ degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
   validEdge uvBounds edgeSize surfaceSegments
 
 validEdge :: UvBounds -> Float -> Set2d UvBounds UvCoordinates -> Bool
-validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Qty.zero do
+validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero do
   case surfaceSegments of
     Set2d.Node nodeBounds left right ->
       not (edgeBounds ^ nodeBounds)

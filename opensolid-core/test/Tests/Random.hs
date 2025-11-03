@@ -67,7 +67,7 @@ import OpenSolid.Primitives
   , Vector3d (Vector3d)
   , VectorBounds3d (VectorBounds3d)
   )
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Sign qualified as Sign
@@ -79,7 +79,7 @@ import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 length :: Generator Length
-length = Qty.random (Length.meters -10.0) (Length.meters 10.0)
+length = Quantity.random (Length.meters -10.0) (Length.meters 10.0)
 
 lengthBounds :: Generator (Bounds Meters)
 lengthBounds = Bounds.random length
@@ -148,7 +148,7 @@ arc2d = do
   startPoint <- point2d
   endPoint <- point2d
   angleSign <- Sign.random
-  angleMagnitude <- Qty.random (Angle.degrees 5.0) (Angle.degrees 355.0)
+  angleMagnitude <- Quantity.random (Angle.degrees 5.0) (Angle.degrees 355.0)
   let sweptAngle = angleSign * angleMagnitude
   Random.return (Curve2d.arc startPoint endPoint sweptAngle)
 
@@ -164,7 +164,7 @@ translation2d = Random.map Transform2d.translateBy vector2d
 rotation2d :: Generator (Transform2d.Rigid (space @ Meters))
 rotation2d = do
   centerPoint <- point2d
-  angle <- Qty.random (Angle.degrees -360.0) (Angle.degrees 360.0)
+  angle <- Quantity.random (Angle.degrees -360.0) (Angle.degrees 360.0)
   Random.return (Transform2d.rotateAround centerPoint angle)
 
 mirror2d :: Generator (Transform2d.Orthonormal (space @ Meters))
@@ -218,7 +218,7 @@ translation3d = Random.map Transform3d.translateBy vector3d
 rotation3d :: Generator (Transform3d.Rigid (space @ Meters))
 rotation3d = do
   axis <- axis3d
-  angle <- Qty.random (Angle.degrees -360.0) (Angle.degrees 360.0)
+  angle <- Quantity.random (Angle.degrees -360.0) (Angle.degrees 360.0)
   Random.return (Transform3d.rotateAround axis angle)
 
 mirror3d :: Generator (Transform3d.Orthonormal (space @ Meters))

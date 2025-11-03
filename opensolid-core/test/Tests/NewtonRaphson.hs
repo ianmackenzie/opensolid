@@ -11,7 +11,7 @@ import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty (Qty (Qty#))
+import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint)
@@ -79,9 +79,9 @@ curve1d name curve t0 tExpected =
               |> Test.output "Expected solution" tExpected
               |> Test.output "Actual solution" tSolution
     , Test.verify "Unboxed" do
-        let evaluate# t# = let !(Qty# x#) = Curve.evaluate curve (Qty# t#) in x#
+        let evaluate# t# = let !(Quantity# x#) = Curve.evaluate curve (Quantity# t#) in x#
         let evaluateDerivative# t# =
-              let !(Qty# y'#) = Curve.evaluate curve.derivative (Qty# t#) in y'#
+              let !(Quantity# y'#) = Curve.evaluate curve.derivative (Quantity# t#) in y'#
         case NewtonRaphson.curve1d# evaluate# evaluateDerivative# t0 of
           Failure NewtonRaphson.Divergence -> expectedConvergence
           Success tSolution ->
@@ -98,9 +98,9 @@ curveDivergence1d name curve t0 =
           Failure NewtonRaphson.Divergence -> Test.pass
           Success tSolution -> expectedDivergence |> Test.output "Solution" tSolution
     , Test.verify "Unboxed" do
-        let evaluate# t# = let !(Qty# x#) = Curve.evaluate curve (Qty# t#) in x#
+        let evaluate# t# = let !(Quantity# x#) = Curve.evaluate curve (Quantity# t#) in x#
         let evaluateDerivative# t# =
-              let !(Qty# y'#) = Curve.evaluate curve.derivative (Qty# t#) in y'#
+              let !(Quantity# y'#) = Curve.evaluate curve.derivative (Quantity# t#) in y'#
         case NewtonRaphson.curve1d# evaluate# evaluateDerivative# t0 of
           Failure NewtonRaphson.Divergence -> Test.pass
           Success tSolution -> expectedDivergence |> Test.output "Solution" tSolution
@@ -121,12 +121,12 @@ curve2d name curve t0 tExpected =
               |> Test.output "Actual solution" tSolution
     , Test.verify "Unboxed" do
         let evaluate# t# = do
-              let vector = VectorCurve2d.evaluate curve (Qty# t#)
-              let !(Vector2d (Qty# x#) (Qty# y#)) = vector
+              let vector = VectorCurve2d.evaluate curve (Quantity# t#)
+              let !(Vector2d (Quantity# x#) (Quantity# y#)) = vector
               (# x#, y# #)
         let evaluateDerivative# t# = do
-              let vector = VectorCurve2d.evaluate curve.derivative (Qty# t#)
-              let !(Vector2d (Qty# x#) (Qty# y#)) = vector
+              let vector = VectorCurve2d.evaluate curve.derivative (Quantity# t#)
+              let !(Vector2d (Quantity# x#) (Quantity# y#)) = vector
               (# x#, y# #)
         case NewtonRaphson.curve2d# evaluate# evaluateDerivative# t0 of
           Failure NewtonRaphson.Divergence -> expectedConvergence

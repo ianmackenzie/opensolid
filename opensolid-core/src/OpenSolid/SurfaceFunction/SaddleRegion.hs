@@ -23,7 +23,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))
@@ -70,7 +70,7 @@ quadratic subproblem saddlePoint = do
   let fvv = SurfaceFunction.evaluate f.dv.dv saddlePoint
   let bDirectionCandidates = NonEmpty.three Direction2d.x Direction2d.y (Direction2d.degrees 45.0)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
-  let dB = NonEmpty.maximumBy (Qty.abs . directionalSecondDerivative) bDirectionCandidates
+  let dB = NonEmpty.maximumBy (Quantity.abs . directionalSecondDerivative) bDirectionCandidates
   let dA = Direction2d.rotateRight dB
   let vA = Vector2d.unit dA
   let vB = Vector2d.unit dB
@@ -80,8 +80,8 @@ quadratic subproblem saddlePoint = do
   let fab = ua * ub * fuu + (ua * vb + ub * va) * fuv + va * vb * fvv
   let fbb = ub * ub * fuu + 2.0 * ub * vb * fuv + vb * vb * fvv
   let determinant = fab .*. fab - faa .*. fbb
-  let sqrtD = Qty.sqrt' determinant
-  let (m1, m2) = Qty.minmax ((-fab + sqrtD) / fbb, (-fab - sqrtD) / fbb)
+  let sqrtD = Quantity.sqrt' determinant
+  let (m1, m2) = Quantity.minmax ((-fab + sqrtD) / fbb, (-fab - sqrtD) / fbb)
   let v1 = Vector2d.normalize (vA + m1 * vB)
   let v2 = Vector2d.normalize (vA + m2 * vB)
   let d1 = Direction2d.unsafe v1
@@ -91,7 +91,7 @@ quadratic subproblem saddlePoint = do
   let frame = Frame2d.fromXAxis (Axis2d.through saddlePoint dX)
   SaddleRegion{subproblem, frame, d1, d2}
 
-secondDerivative :: Qty units -> Qty units -> Qty units -> Direction2d UvSpace -> Qty units
+secondDerivative :: Quantity units -> Quantity units -> Quantity units -> Direction2d UvSpace -> Quantity units
 secondDerivative fuu fuv fvv direction = do
   let Direction2d du dv = direction
   du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
@@ -107,7 +107,7 @@ connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let dx = Frame2d.xDirection frame
   let dy = Frame2d.yDirection frame
   let boundingAxis direction = Axis2d.through saddlePoint direction
-  case (Qty.sign x, Qty.sign y) of
+  case (Quantity.sign x, Quantity.sign y) of
     (Positive, Positive) ->
       connect subproblem frame d2 joiningCurve [boundingAxis dx, boundingAxis -dy]
     (Positive, Negative) ->
@@ -132,7 +132,7 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let Point2d uP vP = saddlePoint
   let Point2d uC vC = joiningPoint joiningCurve
   let Direction2d du dv = outgoingDirection
-  if Qty.abs du >= Qty.abs dv
+  if Quantity.abs du >= Quantity.abs dv
     then do
       let implicitBounds = NonEmpty.one (Bounds2d (Bounds uP uC) vBounds)
       case joiningCurve of

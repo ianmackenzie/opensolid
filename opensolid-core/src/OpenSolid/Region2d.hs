@@ -62,7 +62,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Result qualified as Result
@@ -121,7 +121,7 @@ boundedBy curves = do
 -- | The unit square in UV space.
 unitSquare :: Region2d UvCoordinates
 unitSquare =
-  case Tolerance.using Qty.zero (rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval)) of
+  case Tolerance.using Quantity.zero (rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval)) of
     Success region -> region
     Failure EmptyRegion -> internalError "Constructing unit square region should not fail"
 
@@ -137,7 +137,7 @@ rectangle ::
   Bounds2d (space @ units) ->
   Result EmptyRegion (Region2d (space @ units))
 rectangle (Bounds2d xBounds yBounds) =
-  if Bounds.width xBounds ~= Qty.zero || Bounds.width yBounds ~= Qty.zero
+  if Bounds.width xBounds ~= Quantity.zero || Bounds.width yBounds ~= Quantity.zero
     then Failure EmptyRegion
     else Success do
       let Bounds x1 x2 = xBounds
@@ -161,10 +161,10 @@ Fails if the given dimeter is zero.
 circle ::
   Tolerance units =>
   "centerPoint" ::: Point2d (space @ units) ->
-  "diameter" ::: Qty units ->
+  "diameter" ::: Quantity units ->
   Result EmptyRegion (Region2d (space @ units))
 circle (Named centerPoint) (Named diameter) =
-  if diameter ~= Qty.zero
+  if diameter ~= Quantity.zero
     then Failure EmptyRegion
     else do
       let curve = Curve2d.circle (#centerPoint centerPoint) (#diameter diameter)
@@ -177,7 +177,7 @@ The hexagon will be oriented such that its top and bottom edges are horizontal.
 hexagon ::
   Tolerance units =>
   "centerPoint" ::: Point2d (space @ units) ->
-  "height" ::: Qty units ->
+  "height" ::: Quantity units ->
   Result EmptyRegion (Region2d (space @ units))
 hexagon (Named centerPoint) (Named height) =
   circumscribedPolygon 6 (#centerPoint centerPoint) (#diameter height)
@@ -192,14 +192,14 @@ inscribedPolygon ::
   Tolerance units =>
   Int ->
   "centerPoint" ::: Point2d (space @ units) ->
-  "diameter" ::: Qty units ->
+  "diameter" ::: Quantity units ->
   Result EmptyRegion (Region2d (space @ units))
 inscribedPolygon n (Named centerPoint) (Named diameter) = do
-  if diameter < Qty.zero || diameter ~= Qty.zero || n < 3
+  if diameter < Quantity.zero || diameter ~= Quantity.zero || n < 3
     then Failure EmptyRegion
     else Success do
       let radius = 0.5 * diameter
-      let vertexAngles = Qty.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
+      let vertexAngles = Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
       let vertex angle = centerPoint + Vector2d.polar radius angle
       let vertices = List.map vertex vertexAngles
       case polygon vertices of
@@ -220,7 +220,7 @@ circumscribedPolygon ::
   Tolerance units =>
   Int ->
   "centerPoint" ::: Point2d (space @ units) ->
-  "diameter" ::: Qty units ->
+  "diameter" ::: Quantity units ->
   Result EmptyRegion (Region2d (space @ units))
 circumscribedPolygon n (Named centerPoint) (Named diameter) =
   inscribedPolygon n
@@ -241,7 +241,7 @@ polygon vertexList = case vertexList of
   NonEmpty vertices -> do
     let closedLoop = NonEmpty.push vertices.last vertices
     let segments = NonEmpty.successive LineSegment2d closedLoop
-    let nonZeroLengthSegments = List.filter (\segment -> segment.length != Qty.zero) segments
+    let nonZeroLengthSegments = List.filter (\segment -> segment.length != Quantity.zero) segments
     let toCurve segment = Curve2d.line segment.startPoint segment.endPoint
     boundedBy (List.map toCurve nonZeroLengthSegments)
 
@@ -255,7 +255,7 @@ or if it is not possible to solve for a given fillet
 fillet ::
   Tolerance units =>
   List (Point2d (space @ units)) ->
-  "radius" ::: Qty units ->
+  "radius" ::: Quantity units ->
   Region2d (space @ units) ->
   Result Text (Region2d (space @ units))
 fillet points (Named radius) region = do
@@ -265,7 +265,7 @@ fillet points (Named radius) region = do
 
 addFillet ::
   Tolerance units =>
-  Qty units ->
+  Quantity units ->
   List (Curve2d (space @ units)) ->
   Point2d (space @ units) ->
   Result Text (List (Curve2d (space @ units)))
@@ -294,7 +294,7 @@ addFillet radius curves point = do
       let firstEndDirection = DirectionCurve2d.endValue firstTangent
       let secondStartDirection = DirectionCurve2d.startValue secondTangent
       let cornerAngle = Direction2d.angleFrom firstEndDirection secondStartDirection
-      let offset = Qty.sign cornerAngle * Qty.abs radius
+      let offset = Quantity.sign cornerAngle * Quantity.abs radius
       let firstOffsetDisplacement =
             VectorCurve2d.rotateBy Angle.quarterTurn (offset * firstTangent)
       let secondOffsetDisplacement =
@@ -503,14 +503,14 @@ translateBy = Transform2d.translateByImpl transformBy
 
 translateIn ::
   Direction2d space ->
-  Qty units ->
+  Quantity units ->
   Region2d (space @ units) ->
   Region2d (space @ units)
 translateIn = Transform2d.translateInImpl transformBy
 
 translateAlong ::
   Axis2d (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Region2d (space @ units) ->
   Region2d (space @ units)
 translateAlong = Transform2d.translateAlongImpl transformBy
@@ -543,18 +543,18 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 convert ::
-  Qty (units2 :/: units1) ->
+  Quantity (units2 :/: units1) ->
   Region2d (space @ units1) ->
   Region2d (space @ units2)
 convert factor (Region2d outer inners) = do
   let transform =
-        case Qty.sign factor of
+        case Quantity.sign factor of
           Positive -> NonEmpty.map (Curve2d.convert factor)
           Negative -> NonEmpty.reverseMap (Curve2d.reverse . Curve2d.convert factor)
   Region2d (transform outer) (List.map transform inners)
 
 unconvert ::
-  Qty (units2 :/: units1) ->
+  Quantity (units2 :/: units1) ->
   Region2d (space @ units2) ->
   Region2d (space @ units1)
 unconvert factor region = convert (Units.simplify (1.0 ./. factor)) region
@@ -599,7 +599,7 @@ totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
 classifyNonBoundary :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Sign
 classifyNonBoundary point loop = do
   let flux = Estimate.satisfy containmentIsDeterminate (totalFlux point loop)
-  if Bounds.includes Qty.zero flux then Negative else Positive
+  if Bounds.includes Quantity.zero flux then Negative else Positive
 
 bothPossibleFluxValues :: Bounds Unitless
 bothPossibleFluxValues = Bounds 0.0 Float.twoPi

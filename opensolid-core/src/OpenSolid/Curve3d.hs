@@ -254,14 +254,14 @@ reverse curve = curve . (1.0 - Curve.t)
 arcLengthParameterization ::
   Tolerance units =>
   Curve3d (space @ units) ->
-  (Curve Unitless, Qty units)
+  (Curve Unitless, Quantity units)
 arcLengthParameterization curve =
   ArcLength.parameterization (VectorCurve3d.magnitude curve.derivative)
 
 parameterizeByArcLength ::
   Tolerance units =>
   Curve3d (space @ units) ->
-  (Curve3d (space @ units), Qty units)
+  (Curve3d (space @ units), Quantity units)
 parameterizeByArcLength curve = do
   let (parameterization, length) = arcLengthParameterization curve
   (curve . parameterization, length)

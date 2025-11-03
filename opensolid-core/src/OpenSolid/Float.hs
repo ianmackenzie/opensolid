@@ -48,8 +48,8 @@ import OpenSolid.Bootstrap hiding (max, min, product)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import OpenSolid.NonEmpty (NonEmpty)
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Qty (Qty (Qty))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity (Quantity))
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random.Internal qualified as Random
 import {-# SOURCE #-} OpenSolid.Result (Result)
 import OpenSolid.Sign (Sign)
@@ -57,7 +57,7 @@ import OpenSolid.Text.Parse qualified as Text.Parse
 import OpenSolid.Units (Unitless)
 import Prelude qualified
 
-type Float = Qty Unitless
+type Float = Quantity Unitless
 
 {-# INLINE fromRational #-}
 fromRational :: Prelude.Rational -> Float
@@ -80,48 +80,48 @@ parse = Text.Parse.float
 
 {-# INLINE floor #-}
 floor :: Float -> Int
-floor (Qty x) = Prelude.floor x
+floor (Quantity x) = Prelude.floor x
 
 {-# INLINE ceiling #-}
 ceiling :: Float -> Int
-ceiling (Qty x) = Prelude.ceiling x
+ceiling (Quantity x) = Prelude.ceiling x
 
 {-# INLINE round #-}
 round :: Float -> Int
-round (Qty x) = Prelude.round x
+round (Quantity x) = Prelude.round x
 
 infinity :: Float
-infinity = Qty.infinity
+infinity = Quantity.infinity
 
 sign :: Float -> Sign
-sign = Qty.sign
+sign = Quantity.sign
 
 isNaN :: Float -> Bool
-isNaN = Qty.isNaN
+isNaN = Quantity.isNaN
 
 squared :: Float -> Float
-squared = Qty.squared
+squared = Quantity.squared
 
 cubed :: Float -> Float
 cubed value = value * value * value
 
 abs :: Float -> Float
-abs = Qty.abs
+abs = Quantity.abs
 
 clampTo :: Bounds Unitless -> Float -> Float
-clampTo = Qty.clampTo
+clampTo = Quantity.clampTo
 
 interpolateFrom :: Float -> Float -> Float -> Float
-interpolateFrom = Qty.interpolateFrom
+interpolateFrom = Quantity.interpolateFrom
 
 midpoint :: Float -> Float -> Float
-midpoint = Qty.midpoint
+midpoint = Quantity.midpoint
 
 min :: Float -> Float -> Float
-min = Qty.min
+min = Quantity.min
 
 max :: Float -> Float -> Float
-max = Qty.max
+max = Quantity.max
 
 pi :: Float
 pi = Prelude.pi
@@ -136,49 +136,49 @@ goldenRatio :: Float
 goldenRatio = 0.5 * (1.0 + sqrt 5.0)
 
 sqrt :: Float -> Float
-sqrt = Qty.sqrt
+sqrt = Quantity.sqrt
 
 hypot2 :: Float -> Float -> Float
-hypot2 = Qty.hypot2
+hypot2 = Quantity.hypot2
 
 hypot3 :: Float -> Float -> Float -> Float
-hypot3 = Qty.hypot3
+hypot3 = Quantity.hypot3
 
 sin :: Float -> Float
-sin (Qty x) = Qty (Prelude.sin x)
+sin (Quantity x) = Quantity (Prelude.sin x)
 
 cos :: Float -> Float
-cos (Qty x) = Qty (Prelude.cos x)
+cos (Quantity x) = Quantity (Prelude.cos x)
 
 tan :: Float -> Float
-tan (Qty x) = Qty (Prelude.tan x)
+tan (Quantity x) = Quantity (Prelude.tan x)
 
 asin :: Float -> Float
-asin (Qty x) = Qty (Prelude.asin x)
+asin (Quantity x) = Quantity (Prelude.asin x)
 
 acos :: Float -> Float
-acos (Qty x) = Qty (Prelude.acos x)
+acos (Quantity x) = Quantity (Prelude.acos x)
 
 atan :: Float -> Float
-atan (Qty x) = Qty (Prelude.atan x)
+atan (Quantity x) = Quantity (Prelude.atan x)
 
-atan2 :: Qty units -> Qty units -> Float
-atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
+atan2 :: Quantity units -> Quantity units -> Float
+atan2 (Quantity y) (Quantity x) = Quantity (Prelude.atan2 y x)
 
 log :: Float -> Float
-log (Qty x) = Qty (Prelude.log x)
+log (Quantity x) = Quantity (Prelude.log x)
 
 logBase :: Float -> Float -> Float
-logBase (Qty base) (Qty x) = Qty (Prelude.logBase base x)
+logBase (Quantity base) (Quantity x) = Quantity (Prelude.logBase base x)
 
 sum :: List Float -> Float
-sum = Qty.sum
+sum = Quantity.sum
 
 product :: NonEmpty Float -> Float
 product = NonEmpty.reduce (*)
 
 random :: Float -> Float -> Random.Generator Float
-random = Qty.random
+random = Quantity.random
 
 epsilon :: Float
 epsilon = 2.2204460492503131e-16

@@ -32,7 +32,7 @@ import Data.Coerce qualified
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
 import OpenSolid.Bootstrap
-import {-# SOURCE #-} OpenSolid.Qty (Qty)
+import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
 import {-# SOURCE #-} OpenSolid.Result (Result (Failure, Success))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)
 import OpenSolid.Unitless (Unitless)
@@ -41,7 +41,7 @@ class HasUnits (a :: k) units | a -> units
 
 instance HasUnits Int Unitless
 
-instance HasUnits (Qty units) units
+instance HasUnits (Quantity units) units
 
 instance HasUnits Sign Unitless
 
@@ -61,7 +61,7 @@ instance Coercion Int Int where
   {-# INLINE coerce #-}
   coerce = id
 
-instance Coercion (Qty units1) (Qty units2) where
+instance Coercion (Quantity units1) (Quantity units2) where
   {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 

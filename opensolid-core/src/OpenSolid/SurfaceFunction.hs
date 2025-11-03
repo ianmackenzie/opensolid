@@ -59,7 +59,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
 import OpenSolid.SurfaceFunction.Desingularization qualified as SurfaceFunction.Desingularization
@@ -102,7 +102,7 @@ instance HasField "du" (SurfaceFunction units) (SurfaceFunction units) where
 instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units) where
   getField (SurfaceFunction _ _ dv) = dv
 
-type Compiled units = CompiledFunction UvPoint (Qty units) UvBounds (Bounds units)
+type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Bounds units)
 
 instance HasUnits (SurfaceFunction units) units
 
@@ -120,14 +120,14 @@ instance
 
 instance
   units1 ~ units2 =>
-  ApproximateEquality (SurfaceFunction units1) (Qty units2) units1
+  ApproximateEquality (SurfaceFunction units1) (Quantity units2) units1
   where
   function ~= value =
     List.allTrue [evaluate function uvPoint ~= value | uvPoint <- UvPoint.samples]
 
 instance
   units1 ~ units2 =>
-  Intersects (SurfaceFunction units1) (Qty units2) units1
+  Intersects (SurfaceFunction units1) (Quantity units2) units1
   where
   function ^ value =
     -- TODO optimize this to use a special Solve2d.find or similar
@@ -140,7 +140,7 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (Qty units1) (SurfaceFunction units2) units1
+  Intersects (Quantity units1) (SurfaceFunction units2) units1
   where
   value ^ function = function ^ value
 
@@ -168,7 +168,7 @@ instance
   units1 ~ units2 =>
   Addition
     (SurfaceFunction units1)
-    (Qty units2)
+    (Quantity units2)
     (SurfaceFunction units1)
   where
   function + value = function + constant value
@@ -176,7 +176,7 @@ instance
 instance
   units1 ~ units2 =>
   Addition
-    (Qty units1)
+    (Quantity units1)
     (SurfaceFunction units2)
     (SurfaceFunction units1)
   where
@@ -190,13 +190,13 @@ instance
 
 instance
   units1 ~ units2 =>
-  Subtraction (SurfaceFunction units1) (Qty units2) (SurfaceFunction units1)
+  Subtraction (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units1)
   where
   function - value = function - constant value
 
 instance
   units1 ~ units2 =>
-  Subtraction (Qty units1) (SurfaceFunction units2) (SurfaceFunction units1)
+  Subtraction (Quantity units1) (SurfaceFunction units2) (SurfaceFunction units1)
   where
   value - function = constant value - function
 
@@ -219,27 +219,27 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (SurfaceFunction units1) (Qty units2) (SurfaceFunction units3)
+  Multiplication (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
     (SurfaceFunction units1)
-    (Qty units2)
+    (Quantity units2)
     (SurfaceFunction (units1 :*: units2))
   where
   function .*. value = function .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (SurfaceFunction units2) (SurfaceFunction units3)
+  Multiplication (Quantity units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
-    (Qty units1)
+    (Quantity units1)
     (SurfaceFunction units2)
     (SurfaceFunction (units1 :*: units2))
   where
@@ -347,14 +347,14 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (SurfaceFunction units1) (Qty units2) (SurfaceFunction units3)
+  Division (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Division'
     (SurfaceFunction units1)
-    (Qty units2)
+    (Quantity units2)
     (SurfaceFunction (units1 :/: units2))
   where
   function ./. value = Units.simplify (function .*. (1.0 ./. value))
@@ -365,11 +365,11 @@ instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction u
       @ curve.compiled . function.compiled
       @ \p -> curve.derivative . function * derivative p function
 
-evaluate :: SurfaceFunction units -> UvPoint -> Qty units
+evaluate :: SurfaceFunction units -> UvPoint -> Quantity units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 {-# INLINE evaluateAt #-}
-evaluateAt :: UvPoint -> SurfaceFunction units -> Qty units
+evaluateAt :: UvPoint -> SurfaceFunction units -> Quantity units
 evaluateAt uvPoint function = evaluate function uvPoint
 
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
@@ -391,12 +391,12 @@ derivativeIn direction function =
   direction.xComponent * function.du + direction.yComponent * function.dv
 
 zero :: SurfaceFunction units
-zero = constant Qty.zero
+zero = constant Quantity.zero
 
 one :: SurfaceFunction Unitless
 one = constant 1.0
 
-constant :: Qty units -> SurfaceFunction units
+constant :: Quantity units -> SurfaceFunction units
 constant value = new (CompiledFunction.constant value) (const zero)
 
 u :: SurfaceFunction Unitless
@@ -492,7 +492,7 @@ squared function = Units.specialize (squared' function)
 squared' :: SurfaceFunction units -> SurfaceFunction (units :*: units)
 squared' function =
   new
-    @ CompiledFunction.map Expression.squared' Qty.squared' Bounds.squared' function.compiled
+    @ CompiledFunction.map Expression.squared' Quantity.squared' Bounds.squared' function.compiled
     @ \p -> 2.0 * function .*. derivative p function
 
 sqrt ::
@@ -503,7 +503,7 @@ sqrt function = sqrt' (Units.unspecialize function)
 
 sqrt' :: Tolerance units => SurfaceFunction (units :*: units) -> SurfaceFunction units
 sqrt' function =
-  if Tolerance.using Tolerance.squared' (function ~= Qty.zero)
+  if Tolerance.using Tolerance.squared' (function ~= Quantity.zero)
     then zero
     else do
       let maybeSingularity param value sign = do
@@ -512,14 +512,14 @@ sqrt' function =
             let testPoints = SurfaceFunction.Desingularization.testPoints param value
             let functionIsZeroAt testPoint =
                   Tolerance.using Tolerance.squared' $
-                    evaluate function testPoint ~= Qty.zero
+                    evaluate function testPoint ~= Quantity.zero
             let functionIsZero = List.allSatisfy functionIsZeroAt testPoints
             let firstDerivativeIsZeroAt testPoint = do
                   let secondDerivativeValue = evaluate secondDerivative testPoint
                   let firstDerivativeTolerance =
-                        ?tolerance .*. Qty.sqrt' (2.0 * secondDerivativeValue)
+                        ?tolerance .*. Quantity.sqrt' (2.0 * secondDerivativeValue)
                   Tolerance.using firstDerivativeTolerance $
-                    evaluate firstDerivative testPoint ~= Qty.zero
+                    evaluate firstDerivative testPoint ~= Quantity.zero
             let firstDerivativeIsZero = List.allSatisfy firstDerivativeIsZeroAt testPoints
             if functionIsZero && firstDerivativeIsZero
               then Just (zero, sign * unsafeSqrt' (0.5 * secondDerivative))
@@ -536,7 +536,7 @@ unsafeSqrt function = unsafeSqrt' (Units.unspecialize function)
 unsafeSqrt' :: SurfaceFunction (units :*: units) -> SurfaceFunction units
 unsafeSqrt' function =
   recursive
-    @ CompiledFunction.map Expression.sqrt' Qty.sqrt' Bounds.sqrt' function.compiled
+    @ CompiledFunction.map Expression.sqrt' Quantity.sqrt' Bounds.sqrt' function.compiled
     @ \self p -> Units.coerce (unsafeQuotient' (derivative p function) (2.0 * self))
 
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
@@ -561,7 +561,7 @@ data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
 zeros :: Tolerance units => SurfaceFunction units -> Result IsZero Zeros
 zeros function
-  | function ~= Qty.zero = Failure IsZero
+  | function ~= Quantity.zero = Failure IsZero
   | otherwise = do
       let fu = function.du
       let fv = function.dv
@@ -643,14 +643,14 @@ findTangentSolutions subproblem = do
       case maybePoint of
         Nothing -> Solve2d.recurse CrossingCurvesOnly
         Just point ->
-          if Bounds2d.includes point (Domain2d.interior subdomain) && evaluate f point ~= Qty.zero
+          if Bounds2d.includes point (Domain2d.interior subdomain) && evaluate f point ~= Quantity.zero
             then case determinantSign of
               Positive -> do
                 -- Non-saddle tangent point
                 -- Note that fuu and fvv must be either both positive or both negative
                 -- to reach this code path, so we can take the sign of either one
                 -- to determine the sign of the tangent point
-                let sign = Qty.sign (Bounds.lower fuuBounds)
+                let sign = Quantity.sign (Bounds.lower fuuBounds)
                 Solve2d.return (TangentPointSolution (point, sign))
               Negative -> do
                 -- Saddle region
@@ -702,14 +702,14 @@ southeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZe
 southeastCrossingCurve subproblem = do
   let Subproblem{fValues} = subproblem
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
-  if f11 <= Qty.zero || f22 >= Qty.zero
+  if f11 <= Quantity.zero || f22 >= Quantity.zero
     then Nothing
     else do
-      let start = case compare f12 Qty.zero of
+      let start = case compare f12 Quantity.zero of
             LT -> Subproblem.leftEdgePoint subproblem
             EQ -> Subproblem.topLeftPoint subproblem
             GT -> Subproblem.topEdgePoint subproblem
-      let end = case compare f21 Qty.zero of
+      let end = case compare f21 Quantity.zero of
             LT -> Subproblem.bottomEdgePoint subproblem
             EQ -> Subproblem.bottomRightPoint subproblem
             GT -> Subproblem.rightEdgePoint subproblem
@@ -719,14 +719,14 @@ southwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZe
 southwestCrossingCurve subproblem = do
   let Subproblem{fValues} = subproblem
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
-  if f12 <= Qty.zero || f21 >= Qty.zero
+  if f12 <= Quantity.zero || f21 >= Quantity.zero
     then Nothing
     else do
-      let start = case compare f22 Qty.zero of
+      let start = case compare f22 Quantity.zero of
             LT -> Subproblem.topEdgePoint subproblem
             EQ -> Subproblem.topRightPoint subproblem
             GT -> Subproblem.rightEdgePoint subproblem
-      let end = case compare f11 Qty.zero of
+      let end = case compare f11 Quantity.zero of
             LT -> Subproblem.leftEdgePoint subproblem
             EQ -> Subproblem.bottomLeftPoint subproblem
             GT -> Subproblem.bottomEdgePoint subproblem
@@ -736,14 +736,14 @@ northeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZe
 northeastCrossingCurve subproblem = do
   let Subproblem{fValues} = subproblem
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
-  if f21 <= Qty.zero || f12 >= Qty.zero
+  if f21 <= Quantity.zero || f12 >= Quantity.zero
     then Nothing
     else do
-      let start = case compare f11 Qty.zero of
+      let start = case compare f11 Quantity.zero of
             LT -> Subproblem.bottomEdgePoint subproblem
             EQ -> Subproblem.bottomLeftPoint subproblem
             GT -> Subproblem.leftEdgePoint subproblem
-      let end = case compare f22 Qty.zero of
+      let end = case compare f22 Quantity.zero of
             LT -> Subproblem.rightEdgePoint subproblem
             EQ -> Subproblem.topRightPoint subproblem
             GT -> Subproblem.topEdgePoint subproblem
@@ -753,14 +753,14 @@ northwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZe
 northwestCrossingCurve subproblem = do
   let Subproblem{fValues} = subproblem
   let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
-  if f22 <= Qty.zero || f11 >= Qty.zero
+  if f22 <= Quantity.zero || f11 >= Quantity.zero
     then Nothing
     else do
-      let start = case compare f21 Qty.zero of
+      let start = case compare f21 Quantity.zero of
             LT -> Subproblem.rightEdgePoint subproblem
             EQ -> Subproblem.bottomRightPoint subproblem
             GT -> Subproblem.bottomEdgePoint subproblem
-      let end = case compare f12 Qty.zero of
+      let end = case compare f12 Quantity.zero of
             LT -> Subproblem.topEdgePoint subproblem
             EQ -> Subproblem.topLeftPoint subproblem
             GT -> Subproblem.leftEdgePoint subproblem

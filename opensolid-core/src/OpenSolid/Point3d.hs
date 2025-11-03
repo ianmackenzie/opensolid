@@ -54,15 +54,15 @@ import OpenSolid.Primitives
   , Transform3d (Transform3d)
   , Vector3d
   )
-import OpenSolid.Qty (Qty (Qty#))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Unboxed.Math
 import OpenSolid.Vector3d qualified as Vector3d
 
 -- | Get the XYZ coordinates of a point, given an XYZ coordinate convention to use.
 {-# INLINE coordinates #-}
-coordinates :: Convention3d -> Point3d (space @ units) -> (Qty units, Qty units, Qty units)
+coordinates :: Convention3d -> Point3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 coordinates convention (Position3d vector) = Vector3d.components convention vector
 
 {-| Get the XYZ coordinates of a point using a Z-up coordinate convention.
@@ -70,7 +70,7 @@ coordinates convention (Position3d vector) = Vector3d.components convention vect
 This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
 -}
 {-# INLINE zUpCoordinates #-}
-zUpCoordinates :: Point3d (space @ units) -> (Qty units, Qty units, Qty units)
+zUpCoordinates :: Point3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 zUpCoordinates (Position3d vector) = Vector3d.zUpComponents vector
 
 {-# INLINE zUpCoordinates# #-}
@@ -82,7 +82,7 @@ zUpCoordinates# (Position3d vector) = Vector3d.zUpComponents# vector
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
 {-# INLINE yUpCoordinates #-}
-yUpCoordinates :: Point3d (space @ units) -> (Qty units, Qty units, Qty units)
+yUpCoordinates :: Point3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 yUpCoordinates (Position3d vector) = Vector3d.yUpComponents vector
 
 {-# INLINE yUpCoordinates# #-}
@@ -90,10 +90,10 @@ yUpCoordinates# :: Point3d (space @ units) -> (# Double#, Double#, Double# #)
 yUpCoordinates# (Position3d vector) = Vector3d.yUpComponents# vector
 
 dummy :: Point3d (space @ Void)
-dummy = Point3d Qty.zero Qty.zero Qty.zero
+dummy = Point3d Quantity.zero Quantity.zero Quantity.zero
 
 -- | Construct a point the given distance along the given axis.
-along :: Axis3d (space @ units) -> Qty units -> Point3d (space @ units)
+along :: Axis3d (space @ units) -> Quantity units -> Point3d (space @ units)
 along (Axis3d originPoint direction) distance = do
   let Point3d oR oF oU = originPoint
   let Direction3d dR dF dU = direction
@@ -122,21 +122,21 @@ erase = coerce
 
 -- | Construct a point from its XYZ coordinates, given the coordinate convention to use.
 {-# INLINE xyz #-}
-xyz :: Convention3d -> (Qty units, Qty units, Qty units) -> Point3d (space @ units)
+xyz :: Convention3d -> (Quantity units, Quantity units, Quantity units) -> Point3d (space @ units)
 xyz convention givenCoordinates = Position3d (Vector3d.xyz convention givenCoordinates)
 
 {-| Construct a point from its XYZ coordinates, using a Z-up convention.
 
 This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
 -}
-zUp :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
+zUp :: Quantity units -> Quantity units -> Quantity units -> Point3d (space @ units)
 zUp pX pY pZ = Point3d pX pY pZ
 
 {-| Construct a point from its XYZ coordinates, using a Y-up convention.
 
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
-yUp :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
+yUp :: Quantity units -> Quantity units -> Quantity units -> Point3d (space @ units)
 yUp pX pY pZ = Point3d -pX pZ pY
 
 interpolateFrom ::
@@ -152,19 +152,19 @@ midpoint (Position3d p1) (Position3d p2) = Position3d (Vector3d.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
 {-# INLINE distanceFrom #-}
-distanceFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Qty units
-distanceFrom p1 p2 = Qty# (distanceFrom# p1 p2)
+distanceFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Quantity units
+distanceFrom p1 p2 = Quantity# (distanceFrom# p1 p2)
 
 {-# INLINE distanceFrom# #-}
 distanceFrom# :: Point3d (space @ units) -> Point3d (space @ units) -> Double#
-distanceFrom# (Point3d (Qty# x1#) (Qty# y1#) (Qty# z1#)) (Point3d (Qty# x2#) (Qty# y2#) (Qty# z2#)) =
+distanceFrom# (Point3d (Quantity# x1#) (Quantity# y1#) (Quantity# z1#)) (Point3d (Quantity# x2#) (Quantity# y2#) (Quantity# z2#)) =
   hypot3# (x2# -# x1#) (y2# -# y1#) (z2# -# z1#)
 
 {-| Compute the (signed) distance of a point along an axis.
 
 This is the position along the axis of the given point projected onto the axis.
 -}
-distanceAlong :: Axis3d (space @ units) -> Point3d (space @ units) -> Qty units
+distanceAlong :: Axis3d (space @ units) -> Point3d (space @ units) -> Quantity units
 distanceAlong (Axis3d p0 d) p = (p - p0) `dot` d
 
 -- | Convert a point defined in local coordinates to one defined in global coordinates.
@@ -202,10 +202,10 @@ projectInto ::
 projectInto (Plane3d p0 (PlaneOrientation3d i j)) p =
   let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
 
-convert :: Qty (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
+convert :: Quantity (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
 convert factor (Position3d p) = Position3d (Vector3d.convert factor p)
 
-unconvert :: Qty (units2 :/: units1) -> Point3d (space @ units2) -> Point3d (space @ units1)
+unconvert :: Quantity (units2 :/: units1) -> Point3d (space @ units2) -> Point3d (space @ units1)
 unconvert factor (Position3d p) = Position3d (Vector3d.unconvert factor p)
 
 transformBy :: Transform3d tag (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
@@ -216,10 +216,10 @@ transformBy transform (Point3d px py pz) = do
 translateBy :: Vector3d (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
 translateBy = Transform3d.translateByImpl transformBy
 
-translateIn :: Direction3d space -> Qty units -> Point3d (space @ units) -> Point3d (space @ units)
+translateIn :: Direction3d space -> Quantity units -> Point3d (space @ units) -> Point3d (space @ units)
 translateIn = Transform3d.translateInImpl transformBy
 
-translateAlong :: Axis3d (space @ units) -> Qty units -> Point3d (space @ units) -> Point3d (space @ units)
+translateAlong :: Axis3d (space @ units) -> Quantity units -> Point3d (space @ units) -> Point3d (space @ units)
 translateAlong = Transform3d.translateAlongImpl transformBy
 
 rotateAround :: Axis3d (space @ units) -> Angle -> Point3d (space @ units) -> Point3d (space @ units)

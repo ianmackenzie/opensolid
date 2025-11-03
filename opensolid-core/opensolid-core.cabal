@@ -194,7 +194,7 @@ library
     OpenSolid.Polyline2d
     OpenSolid.Prelude
     OpenSolid.Primitives
-    OpenSolid.Qty
+    OpenSolid.Quantity
     OpenSolid.Queue
     OpenSolid.Random
     OpenSolid.Region2d
@@ -321,7 +321,7 @@ test-suite opensolid-core-test
     Tests.NewtonRaphson
     Tests.NonEmpty
     Tests.Parameter
-    Tests.Qty
+    Tests.Quantity
     Tests.Random
     Tests.Region2d
     Tests.Set2d

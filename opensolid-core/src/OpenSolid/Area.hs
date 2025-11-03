@@ -12,17 +12,17 @@ where
 
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 
 {-| An area in square meters, square inches etc.
 
 Represented internally as a value in square meters.
 -}
-type Area = Qty SquareMeters
+type Area = Quantity SquareMeters
 
 -- | The zero value.
 zero :: Area
-zero = Qty.zero
+zero = Quantity.zero
 
 -- | One square meter.
 squareMeter :: Area
@@ -34,11 +34,11 @@ squareInch = Length.inch * Length.inch
 
 -- | Construct an area from a number of square meters.
 squareMeters :: Float -> Area
-squareMeters = Qty.coerce
+squareMeters = Quantity.coerce
 
 -- | Convert an area to a number of square meters.
 inSquareMeters :: Area -> Float
-inSquareMeters = Qty.coerce
+inSquareMeters = Quantity.coerce
 
 -- | Construct an area from a number of square inches.
 squareInches :: Float -> Area

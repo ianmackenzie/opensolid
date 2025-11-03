@@ -11,8 +11,8 @@ import Test (Expectation)
 import Test qualified
 
 derivativeConsistency ::
-  Show (Qty units) =>
-  Qty units ->
+  Show (Quantity units) =>
+  Quantity units ->
   VectorCurve2d (space @ units) ->
   Expectation
 derivativeConsistency givenTolerance curve = Test.do
@@ -28,7 +28,7 @@ derivativeConsistency givenTolerance curve = Test.do
       |> Test.output "analyticFirstDerivative" analyticFirstDerivative
 
 boundsConsistency ::
-  (Tolerance units, Show (Qty units)) =>
+  (Tolerance units, Show (Quantity units)) =>
   VectorCurve2d (space @ units) ->
   Expectation
 boundsConsistency vectorCurve = Test.do

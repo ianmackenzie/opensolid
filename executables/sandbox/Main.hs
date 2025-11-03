@@ -39,8 +39,8 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
-import OpenSolid.Qty (Qty)
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity)
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result (Result (Failure, Success))
@@ -106,7 +106,7 @@ testVectorArithmetic = do
   let dotProduct = v1 `dot` v2
   log "Dot product" dotProduct
   log "2D cross product" (v1 `cross` v2)
-  let squareRoot = Qty.sqrt dotProduct
+  let squareRoot = Quantity.sqrt dotProduct
   log "Square root" squareRoot
   let translatedPoint = Point2d.meters 2.0 3.0 .+ Vector2d.meters 4.0 5.0
   log "Translated point" translatedPoint
@@ -143,7 +143,7 @@ offsetPoint ::
   Tolerance units =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Point2d (space @ units)
 offsetPoint startPoint endPoint distance =
   case Direction2d.from startPoint endPoint of
@@ -164,7 +164,7 @@ testListOperations = do
   log "Successive deltas" deltas
   log "Successive intervals" intervals
 
-getCrossProduct :: Tolerance Meters => Result Text (Qty Unitless)
+getCrossProduct :: Tolerance Meters => Result Text (Quantity Unitless)
 getCrossProduct = Result.addContext "In getCrossProduct" do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2.0 3.0)
@@ -272,7 +272,7 @@ drawCrossingCurve index curve = do
   let color = Color.hsl hue 0.5 0.5
   drawUvCurve [Drawing2d.strokeColor color] curve
 
-toDrawing :: Qty (Meters :/: Unitless)
+toDrawing :: Quantity (Meters :/: Unitless)
 toDrawing = Length.centimeters 10.0 ./. float 1.0
 
 drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvCoordinates -> Drawing2d UvSpace
@@ -305,7 +305,7 @@ testConcurrency = do
     ]
   IO.printLine "Concurrency test complete!"
 
-computeSquareRoot :: Qty Unitless -> IO (Qty Unitless)
+computeSquareRoot :: Quantity Unitless -> IO (Quantity Unitless)
 computeSquareRoot value = do
   IO.sleep (Duration.milliseconds 100.0)
   return (sqrt value)
@@ -431,7 +431,7 @@ testCurve2dExpression :: IO ()
 testCurve2dExpression = do
   let x = Expression.Curve1d.constant 10.0 .* Expression.t
   let y = Expression.sqrt Expression.t
-  let curve = Expression.xy x y :: Expression (Qty Unitless) (Point2d (Global @ Unitless))
+  let curve = Expression.xy x y :: Expression (Quantity Unitless) (Point2d (Global @ Unitless))
   log "Evaluated 2D curve" (Expression.evaluate curve 3.0)
 
 testQuotientDesingularization :: IO ()
@@ -439,7 +439,7 @@ testQuotientDesingularization = Tolerance.using 1e-9 do
   let numerator = Curve.sin (Angle.pi .* Curve.t)
   let denominator = Curve.t .* (float 1.0 .- Curve.t)
   quotient <- IO.try (Curve.quotient numerator denominator)
-  let tValues = Qty.steps 0.0 1.0 10
+  let tValues = Quantity.steps 0.0 1.0 10
   IO.forEach tValues \tValue -> do
     log "quotient" (Curve.evaluate quotient tValue)
   IO.forEach tValues \tValue -> do

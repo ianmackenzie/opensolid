@@ -32,16 +32,16 @@ on = Expression.on
 
 squaredMagnitude' ::
   Expression Float (Vector3d (space @ units)) ->
-  Expression Float (Qty (units :*: units))
+  Expression Float (Quantity (units :*: units))
 squaredMagnitude' = Expression.squaredMagnitude'
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
   Expression Float (Vector3d (space @ units1)) ->
-  Expression Float (Qty units2)
+  Expression Float (Quantity units2)
 squaredMagnitude = Expression.squaredMagnitude
 
-magnitude :: Expression Float (Vector3d (space @ units)) -> Expression Float (Qty units)
+magnitude :: Expression Float (Vector3d (space @ units)) -> Expression Float (Quantity units)
 magnitude = Expression.magnitude
 
 placeIn ::

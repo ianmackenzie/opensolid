@@ -25,7 +25,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
@@ -136,6 +136,6 @@ clamp u (Bounds vLow vHigh) axis = do
   let Direction2d du dv = Axis2d.direction axis
   let v = v0 + (u - u0) * dv / du
   if
-    | du > 0.0 -> Bounds (Qty.max vLow v) vHigh
-    | du < 0.0 -> Bounds vLow (Qty.min vHigh v)
+    | du > 0.0 -> Bounds (Quantity.max vLow v) vHigh
+    | du < 0.0 -> Bounds vLow (Quantity.min vHigh v)
     | otherwise -> Bounds vLow vHigh

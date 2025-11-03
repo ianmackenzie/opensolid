@@ -122,7 +122,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
@@ -368,7 +368,7 @@ arc givenStartPoint givenEndPoint sweptAngle =
       let halfDistance = 0.5 * distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 * sweptAngle)
       let linearDeviation = halfDistance * tanHalfAngle
-      if linearDeviation ~= Qty.zero
+      if linearDeviation ~= Quantity.zero
         then line givenStartPoint givenEndPoint
         else do
           let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
@@ -383,7 +383,7 @@ arc givenStartPoint givenEndPoint sweptAngle =
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
   "centerPoint" ::: Point2d (space @ units) ->
-  "radius" ::: Qty units ->
+  "radius" ::: Quantity units ->
   "startAngle" ::: Angle ->
   "endAngle" ::: Angle ->
   Curve2d (space @ units)
@@ -410,15 +410,15 @@ cornerArc ::
   Point2d (space @ units) ->
   "incoming" ::: Direction2d space ->
   "outgoing" ::: Direction2d space ->
-  "radius" ::: Qty units ->
+  "radius" ::: Quantity units ->
   Curve2d (space @ units)
 cornerArc cornerPoint (Named incomingDirection) (Named outgoingDirection) (Named givenRadius) = do
-  let radius = Qty.abs givenRadius
+  let radius = Quantity.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
-  if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
+  if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Quantity.zero
     then line cornerPoint cornerPoint
     else do
-      let offset = radius * Qty.abs (Angle.tan (0.5 * sweptAngle))
+      let offset = radius * Quantity.abs (Angle.tan (0.5 * sweptAngle))
       let computedStartPoint = cornerPoint - offset * incomingDirection
       let computedEndPoint = cornerPoint + offset * outgoingDirection
       arc computedStartPoint computedEndPoint sweptAngle
@@ -431,7 +431,7 @@ data WhichArc
 
 radiusArc ::
   Tolerance units =>
-  Qty units ->
+  Quantity units ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   WhichArc ->
@@ -440,8 +440,8 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
   case Direction2d.from givenStartPoint givenEndPoint of
     Success chordDirection -> do
       let halfDistance = 0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint
-      let radius = Qty.max (Qty.abs givenRadius) halfDistance
-      let offsetMagnitude = Qty.sqrt' (Qty.squared' radius - Qty.squared' halfDistance)
+      let radius = Quantity.max (Quantity.abs givenRadius) halfDistance
+      let offsetMagnitude = Quantity.sqrt' (Quantity.squared' radius - Quantity.squared' halfDistance)
       let offsetDirection = Direction2d.rotateLeft chordDirection
       let offsetDistance =
             case whichArc of
@@ -464,8 +464,8 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
 
 ellipticalArc ::
   Frame2d (space @ units) defines ->
-  Qty units ->
-  Qty units ->
+  Quantity units ->
+  Quantity units ->
   Angle ->
   Angle ->
   Curve2d (space @ units)
@@ -489,7 +489,7 @@ customArc p0 v1 v2 a b = do
 -- | Create a circle with the given center point and diameter.
 circle ::
   "centerPoint" ::: Point2d (space @ units) ->
-  "diameter" ::: Qty units ->
+  "diameter" ::: Quantity units ->
   Curve2d (space @ units)
 circle (Named centerPoint) (Named diameter) =
   polarArc
@@ -502,7 +502,7 @@ circle (Named centerPoint) (Named diameter) =
 The first radius given will be the radius along the X axis,
 and the second radius will be the radius along the Y axis.
 -}
-ellipse :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Curve2d (space @ units)
+ellipse :: Frame2d (space @ units) defines -> Quantity units -> Quantity units -> Curve2d (space @ units)
 ellipse axes xRadius yRadius = ellipticalArc axes xRadius yRadius Angle.zero Angle.twoPi
 
 {-| Construct a Bezier curve from its control points.
@@ -659,7 +659,7 @@ tangentDirection curve =
 
 offsetLeftwardBy ::
   Tolerance units =>
-  Qty units ->
+  Quantity units ->
   Curve2d (space @ units) ->
   Result IsPoint (Curve2d (space @ units))
 offsetLeftwardBy offset curve = do
@@ -669,7 +669,7 @@ offsetLeftwardBy offset curve = do
 
 offsetRightwardBy ::
   Tolerance units =>
-  Qty units ->
+  Quantity units ->
   Curve2d (space @ units) ->
   Result IsPoint (Curve2d (space @ units))
 offsetRightwardBy distance = offsetLeftwardBy -distance
@@ -734,7 +734,7 @@ g2 ::
   Tolerance units =>
   (Curve2d (space @ units), Float) ->
   (Curve2d (space @ units), Float) ->
-  Qty units ->
+  Quantity units ->
   Bool
 g2 (curve1, t1) (curve2, t2) radius =
   evaluate curve1 t1 ~= evaluate curve2 t2 && do
@@ -742,8 +742,8 @@ g2 (curve1, t1) (curve2, t2) radius =
     let first2 = VectorCurve2d.evaluate curve2.derivative t2
     let Vector2d dxdt1 dydt1 = first1
     let Vector2d dxdt2 dydt2 = first2
-    let dxdtMin = Qty.min (Qty.abs dxdt1) (Qty.abs dxdt2)
-    let dydtMin = Qty.min (Qty.abs dydt1) (Qty.abs dydt2)
+    let dxdtMin = Quantity.min (Quantity.abs dxdt1) (Quantity.abs dxdt2)
+    let dydtMin = Quantity.min (Quantity.abs dydt1) (Quantity.abs dydt2)
     let orientation =
           if dxdtMin >= dydtMin
             then Orientation2d.horizontal
@@ -757,8 +757,8 @@ signature ::
   Orientation2d space ->
   Curve2d (space @ units) ->
   Float ->
-  Qty units ->
-  (Qty units, Qty units)
+  Quantity units ->
+  (Quantity units, Quantity units)
 signature orientation curve tValue radius = do
   let local vector = Vector2d.relativeToOrientation orientation vector
   let firstDerivativeCurve = curve.derivative
@@ -767,17 +767,17 @@ signature orientation curve tValue radius = do
   let secondDerivativeValue = VectorCurve2d.evaluate secondDerivativeCurve tValue
   let Vector2d x' y' = local firstDerivativeValue
   let Vector2d x'' y'' = local secondDerivativeValue
-  let dydx = if x' != Qty.zero then y' / x' else y'' / x''
+  let dydx = if x' != Quantity.zero then y' / x' else y'' / x''
   let firstOrder = dydx * radius
   let d2ydx2 =
-        if x' != Qty.zero
+        if x' != Quantity.zero
           then (y'' .*. x' - y' .*. x'') ./. (x' .*. x' .*. x')
           else do
             let fourthDerivativeCurve = secondDerivativeCurve.derivative.derivative
             let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivativeCurve tValue
             let Vector2d x'''' y'''' = local fourthDerivativeValue
             (y'''' .*. x'' - y'' .*. x'''') ./. (x'' .*. x'' .*. x'')
-  let secondOrder = Units.simplify (0.5 * d2ydx2 .*. Qty.squared' radius)
+  let secondOrder = Units.simplify (0.5 * d2ydx2 .*. Quantity.squared' radius)
   (firstOrder, secondOrder)
 
 candidateOverlappingSegment :: UvPoint -> UvPoint -> OverlappingSegment
@@ -992,7 +992,7 @@ translateBy = Transform2d.translateByImpl transformBy
 -- | Translate in the given direction by the given distance.
 translateIn ::
   Direction2d space ->
-  Qty units ->
+  Quantity units ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 translateIn = Transform2d.translateInImpl transformBy
@@ -1000,7 +1000,7 @@ translateIn = Transform2d.translateInImpl transformBy
 -- | Translate along the given axis by the given distance.
 translateAlong ::
   Axis2d (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 translateAlong = Transform2d.translateAlongImpl transformBy
@@ -1037,13 +1037,13 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 convert ::
-  Qty (units2 :/: units1) ->
+  Quantity (units2 :/: units1) ->
   Curve2d (space @ units1) ->
   Curve2d (space @ units2)
 convert factor curve = Units.coerce (scaleAbout Point2d.origin (Units.erase factor) curve)
 
 unconvert ::
-  Qty (units2 :/: units1) ->
+  Quantity (units2 :/: units1) ->
   Curve2d (space @ units2) ->
   Curve2d (space @ units1)
 unconvert factor curve = convert (Units.simplify (1.0 ./. factor)) curve
@@ -1135,19 +1135,19 @@ medialAxis curve1 curve2 = do
 arcLengthParameterization ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  (Curve Unitless, Qty units)
+  (Curve Unitless, Quantity units)
 arcLengthParameterization curve =
   ArcLength.parameterization (VectorCurve2d.magnitude curve.derivative)
 
 parameterizeByArcLength ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  (Curve2d (space @ units), Qty units)
+  (Curve2d (space @ units), Quantity units)
 parameterizeByArcLength curve = do
   let (parameterization, length) = arcLengthParameterization curve
   (curve . parameterization, length)
 
-makePiecewise :: NonEmpty (Curve2d (space @ units), Qty units) -> Curve2d (space @ units)
+makePiecewise :: NonEmpty (Curve2d (space @ units), Quantity units) -> Curve2d (space @ units)
 makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 segmentArray.length
@@ -1161,10 +1161,10 @@ piecewise :: Tolerance units => NonEmpty (Curve2d (space @ units)) -> Curve2d (s
 piecewise segments = makePiecewise (NonEmpty.map parameterizeByArcLength segments)
 
 buildPiecewiseTree ::
-  Array (Curve2d (space @ units), Qty units) ->
+  Array (Curve2d (space @ units), Quantity units) ->
   Int ->
   Int ->
-  (PiecewiseTree (space @ units), Qty units)
+  (PiecewiseTree (space @ units), Quantity units)
 buildPiecewiseTree segmentArray begin end = case end - begin of
   1 -> do
     let (segment, length) = Array.get begin segmentArray
@@ -1178,15 +1178,15 @@ buildPiecewiseTree segmentArray begin end = case end - begin of
 data PiecewiseTree (coordinateSystem :: CoordinateSystem) where
   PiecewiseNode ::
     PiecewiseTree (space @ units) ->
-    Qty units ->
+    Quantity units ->
     PiecewiseTree (space @ units) ->
     PiecewiseTree (space @ units)
   PiecewiseLeaf ::
     Curve2d (space @ units) ->
-    Qty units ->
+    Quantity units ->
     PiecewiseTree (space @ units)
 
-piecewiseValue :: PiecewiseTree (space @ units) -> Qty units -> Point2d (space @ units)
+piecewiseValue :: PiecewiseTree (space @ units) -> Quantity units -> Point2d (space @ units)
 piecewiseValue tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree
     | length < leftLength -> piecewiseValue leftTree length
@@ -1195,8 +1195,8 @@ piecewiseValue tree length = case tree of
 
 piecewiseBounds ::
   PiecewiseTree (space @ units) ->
-  Qty units ->
-  Qty units ->
+  Quantity units ->
+  Quantity units ->
   Bounds2d (space @ units)
 piecewiseBounds tree startLength endLength = case tree of
   PiecewiseNode leftTree leftLength rightTree
@@ -1207,13 +1207,13 @@ piecewiseBounds tree startLength endLength = case tree of
     | otherwise ->
         Bounds2d.aggregate2
           (piecewiseBounds leftTree startLength leftLength)
-          (piecewiseBounds rightTree Qty.zero (endLength - leftLength))
+          (piecewiseBounds rightTree Quantity.zero (endLength - leftLength))
   PiecewiseLeaf curve segmentLength ->
     evaluateBounds curve (Bounds (startLength / segmentLength) (endLength / segmentLength))
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree (space @ units) ->
-  Qty units ->
+  Quantity units ->
   VectorCurve2d (space @ units)
 piecewiseDerivative tree length = do
   let evaluateImpl t = piecewiseDerivativeValue tree (length * t)
@@ -1225,17 +1225,17 @@ piecewiseDerivative tree length = do
 data PiecewiseDerivativeTree (coordinateSystem :: CoordinateSystem) where
   PiecewiseDerivativeNode ::
     PiecewiseDerivativeTree (space @ units) ->
-    Qty units ->
+    Quantity units ->
     PiecewiseDerivativeTree (space @ units) ->
     PiecewiseDerivativeTree (space @ units)
   PiecewiseDerivativeLeaf ::
     VectorCurve2d (space @ units) ->
-    Qty units ->
+    Quantity units ->
     PiecewiseDerivativeTree (space @ units)
 
 piecewiseTreeDerivative ::
   PiecewiseTree (space @ units) ->
-  Qty units ->
+  Quantity units ->
   PiecewiseDerivativeTree (space @ units)
 piecewiseTreeDerivative tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree ->
@@ -1248,7 +1248,7 @@ piecewiseTreeDerivative tree length = case tree of
 
 piecewiseDerivativeTreeDerivative ::
   PiecewiseDerivativeTree (space @ units) ->
-  Qty units ->
+  Quantity units ->
   PiecewiseDerivativeTree (space @ units)
 piecewiseDerivativeTreeDerivative tree length = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree ->
@@ -1263,7 +1263,7 @@ piecewiseDerivativeTreeDerivative tree length = case tree of
 
 piecewiseDerivativeValue ::
   PiecewiseDerivativeTree (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Vector2d (space @ units)
 piecewiseDerivativeValue tree length = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
@@ -1274,8 +1274,8 @@ piecewiseDerivativeValue tree length = case tree of
 
 piecewiseDerivativeBounds ::
   PiecewiseDerivativeTree (space @ units) ->
-  Qty units ->
-  Qty units ->
+  Quantity units ->
+  Quantity units ->
   VectorBounds2d (space @ units)
 piecewiseDerivativeBounds tree startLength endLength = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
@@ -1289,7 +1289,7 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
     | otherwise ->
         VectorBounds2d.aggregate2
           (piecewiseDerivativeBounds leftTree startLength leftLength)
-          (piecewiseDerivativeBounds rightTree Qty.zero (endLength - leftLength))
+          (piecewiseDerivativeBounds rightTree Quantity.zero (endLength - leftLength))
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2d.evaluateBounds curve $
       Bounds (startLength / segmentLength) (endLength / segmentLength)

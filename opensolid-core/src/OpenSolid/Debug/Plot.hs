@@ -19,7 +19,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 
@@ -28,7 +28,7 @@ data Space
 resolution :: Resolution Meters
 resolution = Resolution.maxError (Length.millimeters 0.1)
 
-scale :: Qty (Meters :/: Unitless)
+scale :: Quantity (Meters :/: Unitless)
 scale = Length.centimeters 10.0 ./. 1.0
 
 axisHeadLength :: Length
@@ -43,16 +43,16 @@ viewBox p1 p2 = Bounds2d.hull2 (Point2d.convert scale p1) (Point2d.convert scale
 xAxis :: Float -> Float -> Drawing2d Space
 xAxis x1 x2 =
   Drawing2d.arrow
-    @ #start (Point2d.x (Qty.convert scale x1))
-    @ #end (Point2d.x (Qty.convert scale x2 + axisHeadLength))
+    @ #start (Point2d.x (Quantity.convert scale x1))
+    @ #end (Point2d.x (Quantity.convert scale x2 + axisHeadLength))
     @ #headLength axisHeadLength
     @ #headWidth axisHeadWidth
 
 yAxis :: Float -> Float -> Drawing2d Space
 yAxis y1 y2 =
   Drawing2d.arrow
-    @ #start (Point2d.y (Qty.convert scale y1))
-    @ #end (Point2d.y (Qty.convert scale y2 + axisHeadLength))
+    @ #start (Point2d.y (Quantity.convert scale y1))
+    @ #end (Point2d.y (Quantity.convert scale y2 + axisHeadLength))
     @ #headLength axisHeadLength
     @ #headWidth axisHeadWidth
 

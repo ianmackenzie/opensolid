@@ -21,7 +21,7 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty (Qty (Qty#))
+import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
@@ -48,7 +48,7 @@ instance
 
 instance
   Vertex2d vertex (space @ units) =>
-  HasField "length" (LineSegment2d vertex) (Qty units)
+  HasField "length" (LineSegment2d vertex) (Quantity units)
   where
   getField = length
 
@@ -80,8 +80,8 @@ startPoint (LineSegment2d v1 _) = Vertex2d.position v1
 endPoint :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Point2d (space @ units)
 endPoint (LineSegment2d _ v2) = Vertex2d.position v2
 
-length :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Qty units
-length segment = Qty# (length# segment)
+length :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Quantity units
+length segment = Quantity# (length# segment)
 
 {-# INLINE length# #-}
 length# :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Double#
@@ -94,8 +94,8 @@ distanceTo ::
   Vertex2d vertex (space @ units) =>
   Point2d (space @ units) ->
   LineSegment2d vertex ->
-  Qty units
-distanceTo p0 segment = Qty# (distanceTo# p0 segment)
+  Quantity units
+distanceTo p0 segment = Quantity# (distanceTo# p0 segment)
 
 {-# INLINEABLE distanceTo# #-}
 distanceTo# ::
@@ -104,9 +104,9 @@ distanceTo# ::
   LineSegment2d vertex ->
   Double#
 distanceTo# p0 (LineSegment2d p1 p2) = do
-  let !(Point2d (Qty# x0#) (Qty# y0#)) = p0
-  let !(Point2d (Qty# x1#) (Qty# y1#)) = Vertex2d.position p1
-  let !(Point2d (Qty# x2#) (Qty# y2#)) = Vertex2d.position p2
+  let !(Point2d (Quantity# x0#) (Quantity# y0#)) = p0
+  let !(Point2d (Quantity# x1#) (Quantity# y1#)) = Vertex2d.position p1
+  let !(Point2d (Quantity# x2#) (Quantity# y2#)) = Vertex2d.position p2
   let ux# = x0# -# x1#
   let uy# = y0# -# y1#
   let vx# = x2# -# x1#

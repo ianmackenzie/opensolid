@@ -8,13 +8,13 @@ module OpenSolid.Float
 where
 
 import OpenSolid.Bootstrap
-import {-# SOURCE #-} OpenSolid.Qty (Qty)
+import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
 import OpenSolid.Unitless (Unitless)
 import Prelude qualified
 
-type Float = Qty Unitless
+type Float = Quantity Unitless
 
 fromDouble :: Double -> Float
 toDouble :: Float -> Double
-fromRational :: Prelude.Rational -> Qty Unitless
+fromRational :: Prelude.Rational -> Quantity Unitless
 int :: Int -> Float

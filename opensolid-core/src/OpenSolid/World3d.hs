@@ -38,11 +38,11 @@ import OpenSolid.Primitives
   , PlaneOrientation3d (PlaneOrientation3d)
   , Point3d (Point3d)
   )
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 
 -- | The global origin point of a coordinate system.
 originPoint :: Point3d (space @ units)
-originPoint = Point3d Qty.zero Qty.zero Qty.zero
+originPoint = Point3d Quantity.zero Quantity.zero Quantity.zero
 
 -- | The global rightward direction of a coordinate system.
 rightwardDirection :: Direction3d space

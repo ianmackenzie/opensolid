@@ -84,10 +84,10 @@ transformBy transform axis = do
   let transformedDirection = Direction2d.transformBy transform (direction axis)
   Axis2d transformedOriginPoint transformedDirection
 
-offsetLeftwardBy :: Qty units -> Axis2d (space @ units) -> Axis2d (space @ units)
+offsetLeftwardBy :: Quantity units -> Axis2d (space @ units) -> Axis2d (space @ units)
 offsetLeftwardBy distance axis = axis |> translateIn (leftwardDirection axis) distance
 
-offsetRightwardBy :: Qty units -> Axis2d (space @ units) -> Axis2d (space @ units)
+offsetRightwardBy :: Quantity units -> Axis2d (space @ units) -> Axis2d (space @ units)
 offsetRightwardBy distance axis = axis |> translateIn (rightwardDirection axis) distance
 
 translateBy ::
@@ -98,14 +98,14 @@ translateBy = Transform2d.translateByImpl transformBy
 
 translateIn ::
   Direction2d space ->
-  Qty units ->
+  Quantity units ->
   Axis2d (space @ units) ->
   Axis2d (space @ units)
 translateIn = Transform2d.translateInImpl transformBy
 
 translateAlong ::
   Axis2d (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Axis2d (space @ units) ->
   Axis2d (space @ units)
 translateAlong = Transform2d.translateAlongImpl transformBy

@@ -5,7 +5,7 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.IO qualified as IO
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Qty (Qty)
+import OpenSolid.Quantity (Quantity)
 import OpenSolid.Syntax (float, int, (.+), (./))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Units (Unitless)
@@ -16,7 +16,7 @@ main = do
 
   IO.printLine "t^2 / (1 + t^2)"
   let tSquared = Expression.squared t
-  let one :: Expression (Qty Unitless) (Qty Unitless) = Expression.constant 1.0
+  let one :: Expression (Quantity Unitless) (Quantity Unitless) = Expression.constant 1.0
   let fraction = tSquared ./ (one .+ tSquared)
   IO.forEach [int 0 .. 5] \i -> do
     let evaluated = Expression.evaluate fraction (float (fromIntegral i))

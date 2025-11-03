@@ -69,16 +69,16 @@ import OpenSolid.Primitives
   , Vector2d (Vector2d, Vector2d#)
   , Vector3d
   )
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units qualified as Units
 
 -- | The zero vector.
 zero :: Vector2d (space @ units)
-zero = Vector2d Qty.zero Qty.zero
+zero = Vector2d Quantity.zero Quantity.zero
 
 {-# INLINE coerce #-}
 coerce :: Vector2d (space1 @ units1) -> Vector2d (space2 @ units2)
-coerce (Vector2d vx vy) = Vector2d (Qty.coerce vx) (Qty.coerce vy)
+coerce (Vector2d vx vy) = Vector2d (Quantity.coerce vx) (Quantity.coerce vy)
 
 -- | Construct a unit vector in the given direction.
 {-# INLINE unit #-}
@@ -89,20 +89,20 @@ unit (Unit2d vector) = vector
 
 The Y component will be set to zero.
 -}
-x :: Qty units -> Vector2d (space @ units)
-x vx = Vector2d vx Qty.zero
+x :: Quantity units -> Vector2d (space @ units)
+x vx = Vector2d vx Quantity.zero
 
 {-| Construct a vector from just a Y component.
 
 The X component will be set to zero.
 -}
-y :: Qty units -> Vector2d (space @ units)
-y vy = Vector2d Qty.zero vy
+y :: Quantity units -> Vector2d (space @ units)
+y vy = Vector2d Quantity.zero vy
 
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)
 from p1 p2 = p2 - p1
 
-apply :: (Float -> Qty units) -> Float -> Float -> Vector2d (space @ units)
+apply :: (Float -> Quantity units) -> Float -> Float -> Vector2d (space @ units)
 apply units px py = Vector2d (units px) (units py)
 
 -- | Construct a vector from its X and Y components given in meters.
@@ -140,18 +140,18 @@ squareMeters :: Float -> Float -> Vector2d (space @ SquareMeters)
 squareMeters = apply Area.squareMeters
 
 -- | Construct a vector from its magnitude (length) and angle.
-polar :: Qty units -> Angle -> Vector2d (space @ units)
+polar :: Quantity units -> Angle -> Vector2d (space @ units)
 polar r theta = Vector2d (r * Angle.cos theta) (r * Angle.sin theta)
 
 -- | Get the X component of a vector.
-xComponent :: Vector2d (space @ units) -> Qty units
+xComponent :: Vector2d (space @ units) -> Quantity units
 xComponent (Vector2d vx _) = vx
 
 -- | Get the Y component of a vector.
-yComponent :: Vector2d (space @ units) -> Qty units
+yComponent :: Vector2d (space @ units) -> Quantity units
 yComponent (Vector2d _ vy) = vy
 
-componentIn :: Direction2d space -> Vector2d (space @ units) -> Qty units
+componentIn :: Direction2d space -> Vector2d (space @ units) -> Quantity units
 componentIn = dot
 
 projectionIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
@@ -159,7 +159,7 @@ projectionIn givenDirection vector = givenDirection * componentIn givenDirection
 
 -- | Get the X and Y components of a vector as a tuple.
 {-# INLINE components #-}
-components :: Vector2d (space @ units) -> (Qty units, Qty units)
+components :: Vector2d (space @ units) -> (Quantity units, Quantity units)
 components (Vector2d vx vy) = (vx, vy)
 
 interpolateFrom ::
@@ -174,13 +174,13 @@ midpoint :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (sp
 midpoint (Vector2d x1 y1) (Vector2d x2 y2) =
   Vector2d (0.5 * (x1 + x2)) (0.5 * (y1 + y2))
 
-magnitude :: Vector2d (space @ units) -> Qty units
-magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
+magnitude :: Vector2d (space @ units) -> Quantity units
+magnitude (Vector2d vx vy) = Quantity.hypot2 vx vy
 
-squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> Qty units2
+squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> Quantity units2
 squaredMagnitude = Units.specialize . squaredMagnitude'
 
-squaredMagnitude' :: Vector2d (space @ units) -> Qty (units :*: units)
+squaredMagnitude' :: Vector2d (space @ units) -> Quantity (units :*: units)
 squaredMagnitude' (Vector2d vx vy) = vx .*. vx + vy .*. vy
 
 {-| Get the angle of a vector.
@@ -220,15 +220,15 @@ The current tolerance will be used to check if the vector is zero
 direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)
 direction vector = do
   let vm = magnitude vector
-  if vm ~= Qty.zero then Failure IsZero else Success (Unit2d (vector / vm))
+  if vm ~= Quantity.zero then Failure IsZero else Success (Unit2d (vector / vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
   Vector2d (space @ units) ->
-  Result IsZero (Qty units, Direction2d space)
+  Result IsZero (Quantity units, Direction2d space)
 magnitudeAndDirection vector = do
   let vm = magnitude vector
-  if vm ~= Qty.zero then Failure IsZero else Success (vm, Unit2d (vector / vm))
+  if vm ~= Quantity.zero then Failure IsZero else Success (vm, Unit2d (vector / vm))
 
 {-| Normalize a vector.
 
@@ -238,7 +238,7 @@ Otherwise, the result will be a unit vector.
 normalize :: Vector2d (space @ units) -> Vector2d (space @ Unitless)
 normalize vector = do
   let vm = magnitude vector
-  if vm == Qty.zero then zero else vector / vm
+  if vm == Quantity.zero then zero else vector / vm
 
 -- | Rotate a vector left (counterclockwise) by 90 degrees.
 rotateLeft :: Vector2d (space @ units) -> Vector2d (space @ units)
@@ -293,10 +293,10 @@ placeOnOrientation ::
   Vector3d (global @ units)
 placeOnOrientation (PlaneOrientation3d i j) (Vector2d vx vy) = vx * i + vy * j
 
-convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
+convert :: Quantity (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
 convert factor vector = Units.simplify (vector .*. factor)
 
-unconvert :: Qty (units2 :/: units1) -> Vector2d (space @ units2) -> Vector2d (space @ units1)
+unconvert :: Quantity (units2 :/: units1) -> Vector2d (space @ units2) -> Vector2d (space @ units1)
 unconvert factor vector = Units.simplify (vector ./. factor)
 
 sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)

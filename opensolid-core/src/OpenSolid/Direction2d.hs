@@ -42,7 +42,7 @@ import OpenSolid.Primitives
   , Transform2d
   , Vector2d (Vector2d)
   )
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector2d qualified as Vector2d
@@ -186,7 +186,7 @@ placeOn ::
 placeOn plane (Unit2d vector) = Unit3d (Vector2d.placeOn plane vector)
 
 random :: Random.Generator (Direction2d space)
-random = Random.map fromAngle (Qty.random -Angle.pi Angle.pi)
+random = Random.map fromAngle (Quantity.random -Angle.pi Angle.pi)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

@@ -14,7 +14,7 @@ module OpenSolid.Prelude
   , module OpenSolid.Intersects
   , module OpenSolid.Named
   , module OpenSolid.NonEmpty
-  , module OpenSolid.Qty
+  , module OpenSolid.Quantity
   , module OpenSolid.Result
   , module OpenSolid.Sign
   , module OpenSolid.Tolerance
@@ -40,7 +40,7 @@ import OpenSolid.Float (Float, fromRational)
 import OpenSolid.Intersects (Intersects ((^)))
 import OpenSolid.Named ((:::) (Named))
 import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
-import OpenSolid.Qty (Qty)
+import OpenSolid.Quantity (Quantity)
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))

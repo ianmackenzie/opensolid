@@ -7,7 +7,7 @@ where
 import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Vertex2d (Vertex2d)
 
 newtype Polyline2d vertex = Polyline2d {vertices :: NonEmpty vertex}
@@ -27,5 +27,5 @@ instance HasField "end" (Polyline2d vertex) vertex where
 instance HasField "segments" (Polyline2d vertex) (List (LineSegment2d vertex)) where
   getField polyline = NonEmpty.successive LineSegment2d polyline.vertices
 
-instance Vertex2d vertex (space @ units) => HasField "length" (Polyline2d vertex) (Qty units) where
-  getField polyline = Qty.sumOf (.length) polyline.segments
+instance Vertex2d vertex (space @ units) => HasField "length" (Polyline2d vertex) (Quantity units) where
+  getField polyline = Quantity.sumOf (.length) polyline.segments

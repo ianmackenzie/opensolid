@@ -99,7 +99,7 @@ import OpenSolid.Primitives
   , Point3d (Point3d, Position3d)
   , Vector3d (Vector3d)
   )
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Transform2d (Transform2d (Transform2d))
@@ -597,8 +597,8 @@ instance Composition (Variable2d input) (Variable3d UvPoint) (Ast3d input) where
   Desingularized3d parameter left middle right . input =
     desingularized3d (parameter . input) (left . input) (middle . input) (right . input)
 
-constant1d :: Qty units -> Ast1d input
-constant1d value = Constant1d (Qty.coerce value)
+constant1d :: Quantity units -> Ast1d input
+constant1d value = Constant1d (Quantity.coerce value)
 
 constant2d :: Vector2d (space @ units) -> Ast2d input
 constant2d = Constant2d . Vector2d.coerce
@@ -683,10 +683,10 @@ instance
   where
   lhs + rhs = if lhs <= rhs then Sum1d lhs rhs else Sum1d rhs lhs
 
-instance Addition (Qty units) (Ast1d input) (Ast1d input) where
+instance Addition (Quantity units) (Ast1d input) (Ast1d input) where
   lhs + rhs = constant1d lhs + rhs
 
-instance Addition (Ast1d input1) (Qty units) (Ast1d input1) where
+instance Addition (Ast1d input1) (Quantity units) (Ast1d input1) where
   lhs + rhs = lhs + constant1d rhs
 
 instance input1 ~ input2 => Subtraction (Ast1d input1) (Ast1d input2) (Ast1d input1) where
@@ -703,10 +703,10 @@ instance
   where
   lhs - rhs = Difference1d lhs rhs
 
-instance Subtraction (Qty units) (Ast1d input) (Ast1d input) where
+instance Subtraction (Quantity units) (Ast1d input) (Ast1d input) where
   lhs - rhs = constant1d lhs - rhs
 
-instance Subtraction (Ast1d input1) (Qty units) (Ast1d input1) where
+instance Subtraction (Ast1d input1) (Quantity units) (Ast1d input1) where
   lhs - rhs = lhs - constant1d rhs
 
 instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast1d input2) (Ast1d input1) where
@@ -724,10 +724,10 @@ instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast1d input2) (Ast1d 
   Variable1d lhs * Variable1d rhs =
     Variable1d (if lhs <= rhs then Product1d lhs rhs else Product1d rhs lhs)
 
-instance Multiplication (Qty units) (Ast1d input) (Ast1d input) where
+instance Multiplication (Quantity units) (Ast1d input) (Ast1d input) where
   lhs * rhs = constant1d lhs * rhs
 
-instance Multiplication (Ast1d input1) (Qty units) (Ast1d input1) where
+instance Multiplication (Ast1d input1) (Quantity units) (Ast1d input1) where
   lhs * rhs = lhs * constant1d rhs
 
 instance input1 ~ input2 => Division (Ast1d input1) (Ast1d input2) (Ast1d input1) where
@@ -745,10 +745,10 @@ instance
   where
   lhs / rhs = Quotient1d lhs rhs
 
-instance Division (Qty units) (Ast1d input) (Ast1d input) where
+instance Division (Quantity units) (Ast1d input) (Ast1d input) where
   lhs / rhs = constant1d lhs / rhs
 
-instance Division (Ast1d input) (Qty units) (Ast1d input) where
+instance Division (Ast1d input) (Quantity units) (Ast1d input) where
   lhs / rhs = lhs / constant1d rhs
 
 instance Negation (Ast2d input) where
@@ -831,10 +831,10 @@ instance input1 ~ input2 => Multiplication (Ast2d input1) (Ast1d input2) (Ast2d 
 instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast2d input2) (Ast2d input1) where
   lhs * rhs = rhs * lhs
 
-instance Multiplication (Ast2d input1) (Qty units) (Ast2d input1) where
+instance Multiplication (Ast2d input1) (Quantity units) (Ast2d input1) where
   lhs * rhs = lhs * constant1d rhs
 
-instance Multiplication (Qty units) (Ast2d input) (Ast2d input) where
+instance Multiplication (Quantity units) (Ast2d input) (Ast2d input) where
   lhs * rhs = constant1d lhs * rhs
 
 instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1) where
@@ -849,7 +849,7 @@ instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1
 instance Division (Vector2d (space @ units)) (Ast1d input) (Ast2d input) where
   lhs / rhs = constant2d lhs / rhs
 
-instance Division (Ast2d input) (Qty units) (Ast2d input) where
+instance Division (Ast2d input) (Quantity units) (Ast2d input) where
   lhs / rhs = lhs / constant1d rhs
 
 instance Negation (Ast3d input) where
@@ -932,10 +932,10 @@ instance input1 ~ input2 => Multiplication (Ast3d input1) (Ast1d input2) (Ast3d 
 instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast3d input2) (Ast3d input1) where
   lhs * rhs = rhs * lhs
 
-instance Multiplication (Ast3d input1) (Qty units) (Ast3d input1) where
+instance Multiplication (Ast3d input1) (Quantity units) (Ast3d input1) where
   lhs * rhs = lhs * constant1d rhs
 
-instance Multiplication (Qty units) (Ast3d input) (Ast3d input) where
+instance Multiplication (Quantity units) (Ast3d input) (Ast3d input) where
   lhs * rhs = constant1d lhs * rhs
 
 instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1) where
@@ -950,7 +950,7 @@ instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1
 instance Division (Vector3d (space @ units)) (Ast1d input) (Ast3d input) where
   lhs / rhs = constant3d lhs / rhs
 
-instance Division (Ast3d input) (Qty units) (Ast3d input) where
+instance Division (Ast3d input) (Quantity units) (Ast3d input) where
   lhs / rhs = lhs / constant1d rhs
 
 instance input1 ~ input2 => DotMultiplication (Ast2d input1) (Ast2d input2) (Ast1d input1) where
@@ -1187,10 +1187,10 @@ xy (Constant1d x) (Variable1d y) = Variable2d (CY x y)
 xy (Variable1d x) (Constant1d y) = Variable2d (XC x y)
 xy (Variable1d x) (Variable1d y) = Variable2d (XY x y)
 
-bezierCurve1d :: NonEmpty (Qty units) -> Ast1d Float
+bezierCurve1d :: NonEmpty (Quantity units) -> Ast1d Float
 bezierCurve1d (NonEmpty.One value) = constant1d value
 bezierCurve1d controlPoints =
-  Variable1d (BezierCurve1d (NonEmpty.map Qty.coerce controlPoints) CurveParameter)
+  Variable1d (BezierCurve1d (NonEmpty.map Quantity.coerce controlPoints) CurveParameter)
 
 bezierCurve2d :: NonEmpty (Vector2d (space @ units)) -> Ast2d Float
 bezierCurve2d (NonEmpty.One value) = constant2d value

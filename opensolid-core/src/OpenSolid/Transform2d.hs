@@ -83,10 +83,10 @@ withFixedPoint fixedPoint vx vy = do
 translateBy :: Vector2d (space @ units) -> Rigid (space @ units)
 translateBy vector = Transform2d (Point2d.origin + vector) unitX unitY
 
-translateIn :: Direction2d space -> Qty units -> Rigid (space @ units)
+translateIn :: Direction2d space -> Quantity units -> Rigid (space @ units)
 translateIn direction distance = translateBy (direction * distance)
 
-translateAlong :: Axis2d (space @ units) -> Qty units -> Rigid (space @ units)
+translateAlong :: Axis2d (space @ units) -> Quantity units -> Rigid (space @ units)
 translateAlong (Axis2d _ direction) distance = translateIn direction distance
 
 rotateAround :: Point2d (space @ units) -> Angle -> Rigid (space @ units)
@@ -154,10 +154,10 @@ toAffine = Data.Coerce.coerce
 translateByImpl :: (Rigid (space @ units) -> a -> b) -> Vector2d (space @ units) -> a -> b
 translateByImpl transformBy vector = transformBy (translateBy vector)
 
-translateInImpl :: (Rigid (space @ units) -> a -> b) -> Direction2d space -> Qty units -> a -> b
+translateInImpl :: (Rigid (space @ units) -> a -> b) -> Direction2d space -> Quantity units -> a -> b
 translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
 
-translateAlongImpl :: (Rigid (space @ units) -> a -> b) -> Axis2d (space @ units) -> Qty units -> a -> b
+translateAlongImpl :: (Rigid (space @ units) -> a -> b) -> Axis2d (space @ units) -> Quantity units -> a -> b
 translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
 
 rotateAroundImpl :: (Rigid (space @ units) -> a -> b) -> Point2d (space @ units) -> Angle -> a -> b

@@ -25,7 +25,7 @@ import GHC.Float qualified
 import OpenSolid.Composition
 import OpenSolid.Int qualified as Int
 import OpenSolid.Prelude hiding (concat)
-import OpenSolid.Qty (Qty (Qty))
+import OpenSolid.Quantity (Quantity (Quantity))
 
 bytes :: Builder -> ByteString
 bytes builder = ByteString.toStrict (Builder.toLazyByteString builder)
@@ -69,8 +69,8 @@ int64LE = Builder.int64LE . Int.toInt64
 
 {-# INLINE float32LE #-}
 float32LE :: Float -> Builder
-float32LE (Qty double) = Builder.floatLE (GHC.Float.double2Float double)
+float32LE (Quantity double) = Builder.floatLE (GHC.Float.double2Float double)
 
 {-# INLINE float64LE #-}
 float64LE :: Float -> Builder
-float64LE (Qty double) = Builder.doubleLE double
+float64LE (Quantity double) = Builder.doubleLE double

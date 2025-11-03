@@ -132,7 +132,7 @@ relativeTo frame (Plane3d p o) =
   Plane3d (Point3d.relativeTo frame p) (PlaneOrientation3d.relativeTo frame o)
 
 -- | Offset a plane in its normal direction by the given distance.
-offsetBy :: Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+offsetBy :: Quantity units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
 offsetBy distance plane = plane |> translateIn (normalDirection plane) distance
 
 {-| Flip a plane such that its normal and X directions are reversed.
@@ -157,14 +157,14 @@ translateBy = Transform3d.translateByImpl transformBy
 
 translateIn ::
   Direction3d space ->
-  Qty units ->
+  Quantity units ->
   Plane3d (space @ units) defines ->
   Plane3d (space @ units) defines
 translateIn = Transform3d.translateInImpl transformBy
 
 translateAlong ::
   Axis3d (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Plane3d (space @ units) defines ->
   Plane3d (space @ units) defines
 translateAlong = Transform3d.translateAlongImpl transformBy

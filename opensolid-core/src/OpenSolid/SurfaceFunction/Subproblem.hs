@@ -25,7 +25,7 @@ import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
@@ -48,10 +48,10 @@ data Subproblem units = Subproblem
   }
 
 data CornerValues units = CornerValues
-  { bottomLeft :: Qty units
-  , bottomRight :: Qty units
-  , topLeft :: Qty units
-  , topRight :: Qty units
+  { bottomLeft :: Quantity units
+  , bottomRight :: Quantity units
+  , topLeft :: Quantity units
+  , topRight :: Quantity units
   }
 
 new ::
@@ -137,14 +137,14 @@ tightBounds Subproblem{uvBounds, fValues, fBounds, fuBounds, fvBounds} = do
   let Bounds low0 high0 = fBounds
   let Bounds lowUV highUV = Internal.curveBoundsOver v1 v2 v1Bounds v2Bounds fvBounds
   let Bounds lowVU highVU = Internal.curveBoundsOver u1 u2 u1Bounds u2Bounds fuBounds
-  let low = Qty.max low0 (Qty.max lowUV lowVU)
-  let high = Qty.min high0 (Qty.min highUV highVU)
+  let low = Quantity.max low0 (Quantity.max lowUV lowVU)
+  let high = Quantity.min high0 (Quantity.min highUV highVU)
   assert (low <= high) (Bounds low high)
 
 isZeroCandidate :: Tolerance units => Subproblem units -> Bool
 isZeroCandidate subproblem = do
   let Subproblem{fBounds} = subproblem
-  fBounds ^ Qty.zero && tightBounds subproblem ^ Qty.zero
+  fBounds ^ Quantity.zero && tightBounds subproblem ^ Quantity.zero
 
 leftEdgeBounds :: Subproblem units -> Bounds units
 leftEdgeBounds Subproblem{uvBounds, fvBounds, fValues} = do

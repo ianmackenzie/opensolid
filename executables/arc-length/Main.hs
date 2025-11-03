@@ -13,7 +13,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Syntax (float, twice, (.*), (.+), (.-), (./), (@), type (@))
 import OpenSolid.Text qualified as Text
@@ -58,10 +58,10 @@ analyticalLength (Point2d x0 y0) (Point2d x1 y1) (Point2d x2 y2) = do
   let a = float 4.0 .* (ax .* ax .+ ay .* ay)
   let b = float 4.0 .* (ax .* bx .+ ay .* by)
   let c = bx .* bx .+ by .* by
-  let s_abc = twice (Qty.sqrt (a .+ b .+ c))
-  let a_2 = Qty.sqrt a
+  let s_abc = twice (Quantity.sqrt (a .+ b .+ c))
+  let a_2 = Quantity.sqrt a
   let a_32 = twice a .* a_2
-  let c_2 = twice (Qty.sqrt c)
+  let c_2 = twice (Quantity.sqrt c)
   let ba = b ./ a_2
   (a_32 .* s_abc .+ a_2 .* b .* (s_abc .- c_2) .+ (float 4.0 .* c .* a .- b .* b) .* Float.log ((twice a_2 .+ ba .+ s_abc) ./ (ba .+ c_2))) ./ (float 4.0 .* a_32)
 

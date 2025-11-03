@@ -60,8 +60,8 @@ import OpenSolid.Primitives
   , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d (VectorBounds3d, VectorBounds3d#)
   )
-import OpenSolid.Qty (Qty (Qty#))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Unboxed.Math
@@ -86,12 +86,12 @@ hull3 ::
   Vector3d (space @ units) ->
   VectorBounds3d (space @ units)
 hull3 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) = do
-  let minX = Qty.min (Qty.min x1 x2) x3
-  let maxX = Qty.max (Qty.max x1 x2) x3
-  let minY = Qty.min (Qty.min y1 y2) y3
-  let maxY = Qty.max (Qty.max y1 y2) y3
-  let minZ = Qty.min (Qty.min z1 z2) z3
-  let maxZ = Qty.max (Qty.max z1 z2) z3
+  let minX = Quantity.min (Quantity.min x1 x2) x3
+  let maxX = Quantity.max (Quantity.max x1 x2) x3
+  let minY = Quantity.min (Quantity.min y1 y2) y3
+  let maxY = Quantity.max (Quantity.max y1 y2) y3
+  let minZ = Quantity.min (Quantity.min z1 z2) z3
+  let maxZ = Quantity.max (Quantity.max z1 z2) z3
   VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)
 
 hull4 ::
@@ -101,21 +101,21 @@ hull4 ::
   Vector3d (space @ units) ->
   VectorBounds3d (space @ units)
 hull4 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) = do
-  let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
-  let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
-  let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
-  let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
-  let minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
-  let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
+  let minX = Quantity.min (Quantity.min (Quantity.min x1 x2) x3) x4
+  let maxX = Quantity.max (Quantity.max (Quantity.max x1 x2) x3) x4
+  let minY = Quantity.min (Quantity.min (Quantity.min y1 y2) y3) y4
+  let maxY = Quantity.max (Quantity.max (Quantity.max y1 y2) y3) y4
+  let minZ = Quantity.min (Quantity.min (Quantity.min z1 z2) z3) z4
+  let maxZ = Quantity.max (Quantity.max (Quantity.max z1 z2) z3) z4
   VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)
 
 hullN :: NonEmpty (Vector3d (space @ units)) -> VectorBounds3d (space @ units)
 hullN (Vector3d x0 y0 z0 :| rest) = go x0 x0 y0 y0 z0 z0 rest
  where
-  go :: Qty units -> Qty units -> Qty units -> Qty units -> Qty units -> Qty units -> List (Vector3d (space @ units)) -> VectorBounds3d (space @ units)
+  go :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> Quantity units -> Quantity units -> List (Vector3d (space @ units)) -> VectorBounds3d (space @ units)
   go xLow xHigh yLow yHigh zLow zHigh [] = VectorBounds3d (Bounds xLow xHigh) (Bounds yLow yHigh) (Bounds zLow zHigh)
   go xLow xHigh yLow yHigh zLow zHigh (Vector3d x y z : remaining) =
-    go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) (Qty.min zLow z) (Qty.max zHigh z) remaining
+    go (Quantity.min xLow x) (Quantity.max xHigh x) (Quantity.min yLow y) (Quantity.max yHigh y) (Quantity.min zLow z) (Quantity.max zHigh z) remaining
 
 aggregate2 ::
   VectorBounds3d (space @ units) ->
@@ -139,12 +139,12 @@ aggregateN (first :| rest) = do
   aggregateImpl xLow0 xHigh0 yLow0 yHigh0 zLow0 zHigh0 rest
 
 aggregateImpl ::
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
   List (VectorBounds3d (space @ units)) ->
   VectorBounds3d (space @ units)
 aggregateImpl xLow xHigh yLow yHigh zLow zHigh rest = case rest of
@@ -155,12 +155,12 @@ aggregateImpl xLow xHigh yLow yHigh zLow zHigh rest = case rest of
     let Bounds yLowNext yHighNext = yNext
     let Bounds zLowNext zHighNext = zNext
     aggregateImpl
-      (Qty.min xLow xLowNext)
-      (Qty.max xHigh xHighNext)
-      (Qty.min yLow yLowNext)
-      (Qty.max yHigh yHighNext)
-      (Qty.min zLow zLowNext)
-      (Qty.max zHigh zHighNext)
+      (Quantity.min xLow xLowNext)
+      (Quantity.max xHigh xHighNext)
+      (Quantity.min yLow yLowNext)
+      (Quantity.max yHigh yHighNext)
+      (Quantity.min zLow zLowNext)
+      (Quantity.max zHigh zHighNext)
       remaining
 
 xComponent :: VectorBounds3d (space @ units) -> Bounds units
@@ -221,8 +221,8 @@ magnitude bounds = do
           (# _, _, _, _, _, _ #) -> 0.0##
   Bounds# minMagnitude# (maxMagnitude# bounds)
 
-maxMagnitude :: VectorBounds3d (space @ units) -> Qty units
-maxMagnitude bounds = Qty# (maxMagnitude# bounds)
+maxMagnitude :: VectorBounds3d (space @ units) -> Quantity units
+maxMagnitude bounds = Quantity# (maxMagnitude# bounds)
 
 maxMagnitude# :: VectorBounds3d (space @ units) -> Double#
 maxMagnitude# (VectorBounds3d# minX# maxX# minY# maxY# minZ# maxZ#) = do
@@ -231,15 +231,15 @@ maxMagnitude# (VectorBounds3d# minX# maxX# minY# maxY# minZ# maxZ#) = do
   let zMagnitude# = max# (abs# minZ#) (abs# maxZ#)
   hypot3# xMagnitude# yMagnitude# zMagnitude#
 
-maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Qty units2
+maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Quantity units2
 maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude'
 
-maxSquaredMagnitude' :: VectorBounds3d (space @ units) -> Qty (units :*: units)
+maxSquaredMagnitude' :: VectorBounds3d (space @ units) -> Quantity (units :*: units)
 maxSquaredMagnitude' (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)) = do
-  let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
-  let yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
-  let zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
-  Qty.squared' xMagnitude + Qty.squared' yMagnitude + Qty.squared' zMagnitude
+  let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
+  let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
+  let zMagnitude = Quantity.max (Quantity.abs minZ) (Quantity.abs maxZ)
+  Quantity.squared' xMagnitude + Quantity.squared' yMagnitude + Quantity.squared' zMagnitude
 
 normalize :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ Unitless)
 normalize vectorBounds = do
@@ -254,27 +254,27 @@ normalizedBounds = Bounds -1.0 1.0
 
 clampNormalized :: Bounds Unitless -> Bounds Unitless
 clampNormalized (Bounds low high) =
-  Bounds (Qty.clampTo normalizedBounds low) (Qty.clampTo normalizedBounds high)
+  Bounds (Quantity.clampTo normalizedBounds low) (Quantity.clampTo normalizedBounds high)
 
-exclusion :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Qty units
+exclusion :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Quantity units
 exclusion (Vector3d x y z) (VectorBounds3d bx by bz) = do
   let exclusionX = Bounds.exclusion x bx
   let exclusionY = Bounds.exclusion y by
   let exclusionZ = Bounds.exclusion z bz
-  let positiveX = exclusionX >= Qty.zero
-  let positiveY = exclusionY >= Qty.zero
-  let positiveZ = exclusionZ >= Qty.zero
+  let positiveX = exclusionX >= Quantity.zero
+  let positiveY = exclusionY >= Quantity.zero
+  let positiveZ = exclusionZ >= Quantity.zero
   if
-    | positiveX && positiveY && positiveZ -> Qty.hypot3 exclusionX exclusionY exclusionZ
-    | positiveX && positiveY -> Qty.hypot2 exclusionX exclusionY
-    | positiveX && positiveZ -> Qty.hypot2 exclusionX exclusionZ
-    | positiveY && positiveZ -> Qty.hypot2 exclusionY exclusionZ
+    | positiveX && positiveY && positiveZ -> Quantity.hypot3 exclusionX exclusionY exclusionZ
+    | positiveX && positiveY -> Quantity.hypot2 exclusionX exclusionY
+    | positiveX && positiveZ -> Quantity.hypot2 exclusionX exclusionZ
+    | positiveY && positiveZ -> Quantity.hypot2 exclusionY exclusionZ
     | positiveX -> exclusionX
     | positiveY -> exclusionY
     | positiveZ -> exclusionZ
-    | otherwise -> Qty.max (Qty.max exclusionX exclusionY) exclusionZ
+    | otherwise -> Quantity.max (Quantity.max exclusionX exclusionY) exclusionZ
 
-inclusion :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Qty units
+inclusion :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Quantity units
 inclusion point box = -(exclusion point box)
 
 includes :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Bool
@@ -288,25 +288,25 @@ contains (VectorBounds3d x2 y2 z2) (VectorBounds3d x1 y1 z1) =
 isContainedIn :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
-separation :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Qty units
+separation :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Quantity units
 separation (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = do
   let separationX = Bounds.separation x1 x2
   let separationY = Bounds.separation y1 y2
   let separationZ = Bounds.separation z1 z2
-  let positiveX = separationX >= Qty.zero
-  let positiveY = separationY >= Qty.zero
-  let positiveZ = separationZ >= Qty.zero
+  let positiveX = separationX >= Quantity.zero
+  let positiveY = separationY >= Quantity.zero
+  let positiveZ = separationZ >= Quantity.zero
   if
-    | positiveX && positiveY && positiveZ -> Qty.hypot3 separationX separationY separationZ
-    | positiveX && positiveY -> Qty.hypot2 separationX separationY
-    | positiveX && positiveZ -> Qty.hypot2 separationX separationZ
-    | positiveY && positiveZ -> Qty.hypot2 separationY separationZ
+    | positiveX && positiveY && positiveZ -> Quantity.hypot3 separationX separationY separationZ
+    | positiveX && positiveY -> Quantity.hypot2 separationX separationY
+    | positiveX && positiveZ -> Quantity.hypot2 separationX separationZ
+    | positiveY && positiveZ -> Quantity.hypot2 separationY separationZ
     | positiveX -> separationX
     | positiveY -> separationY
     | positiveZ -> separationZ
-    | otherwise -> Qty.max (Qty.max separationX separationY) separationZ
+    | otherwise -> Quantity.max (Quantity.max separationX separationY) separationZ
 
-overlap :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Qty units
+overlap :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Quantity units
 overlap first second = -(separation first second)
 
 intersection ::

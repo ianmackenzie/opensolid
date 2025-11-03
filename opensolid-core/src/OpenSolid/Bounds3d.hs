@@ -58,7 +58,7 @@ import OpenSolid.Primitives
   , Point3d (Point3d, Position3d)
   , Vector3d (Vector3d)
   )
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.Vertex3d (Vertex3d)
@@ -103,19 +103,19 @@ aggregateN list = PositionBounds3d (VectorBounds3d.aggregateN (Data.Coerce.coerc
 centerPoint :: Bounds3d (space @ units) -> Point3d (space @ units)
 centerPoint (Bounds3d r f u) = Point3d (Bounds.midpoint r) (Bounds.midpoint f) (Bounds.midpoint u)
 
-length :: Bounds3d (space @ units) -> Qty units
+length :: Bounds3d (space @ units) -> Quantity units
 length (Bounds3d _ f _) = Bounds.width f
 
-width :: Bounds3d (space @ units) -> Qty units
+width :: Bounds3d (space @ units) -> Quantity units
 width (Bounds3d r _ _) = Bounds.width r
 
-height :: Bounds3d (space @ units) -> Qty units
+height :: Bounds3d (space @ units) -> Quantity units
 height (Bounds3d _ _ u) = Bounds.width u
 
-exclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
+exclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Quantity units
 exclusion (Position3d p) (PositionBounds3d pb) = VectorBounds3d.exclusion p pb
 
-inclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
+inclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Quantity units
 inclusion (Position3d p) (PositionBounds3d pb) = VectorBounds3d.inclusion p pb
 
 contains :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bool
@@ -124,10 +124,10 @@ contains (PositionBounds3d pb2) (PositionBounds3d pb1) = VectorBounds3d.contains
 isContainedIn :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bool
 isContainedIn (PositionBounds3d pb1) (PositionBounds3d pb2) = VectorBounds3d.isContainedIn pb1 pb2
 
-separation :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Qty units
+separation :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Quantity units
 separation (PositionBounds3d pb1) (PositionBounds3d pb2) = VectorBounds3d.separation pb1 pb2
 
-overlap :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Qty units
+overlap :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Quantity units
 overlap (PositionBounds3d pb1) (PositionBounds3d pb2) = VectorBounds3d.overlap pb1 pb2
 
 intersection :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Maybe (Bounds3d (space @ units))
@@ -164,8 +164,8 @@ hullN vertices = do
   let positionVectors = Data.Coerce.coerce (NonEmpty.map Vertex3d.position vertices)
   PositionBounds3d (VectorBounds3d.hullN positionVectors)
 
-diameter :: Bounds3d (space @ units) -> Qty units
-diameter (Bounds3d x y z) = Qty.hypot3 (Bounds.width x) (Bounds.width y) (Bounds.width z)
+diameter :: Bounds3d (space @ units) -> Quantity units
+diameter (Bounds3d x y z) = Quantity.hypot3 (Bounds.width x) (Bounds.width y) (Bounds.width z)
 
 interpolate :: Bounds3d (space @ units) -> Float -> Float -> Float -> Point3d (space @ units)
 interpolate (PositionBounds3d pb) u v w = Position3d (VectorBounds3d.interpolate pb u v w)

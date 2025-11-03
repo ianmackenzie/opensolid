@@ -1,5 +1,5 @@
-module OpenSolid.Qty
-  ( Qty (Qty, Qty#)
+module OpenSolid.Quantity
+  ( Quantity (Quantity, Quantity#)
   , zero
   , unit
   , infinity
@@ -65,34 +65,34 @@ import OpenSolid.Units qualified as Units
 import System.Random qualified
 import Prelude qualified
 
-type role Qty phantom
+type role Quantity phantom
 
-type Qty :: Type -> Type
-newtype Qty units = Qty Double deriving (Eq, Ord)
+type Quantity :: Type -> Type
+newtype Quantity units = Quantity Double deriving (Eq, Ord)
 
-{-# COMPLETE Qty# #-}
+{-# COMPLETE Quantity# #-}
 
-{-# INLINE Qty# #-}
-pattern Qty# :: Double# -> Qty units
-pattern Qty# x# = Qty (D# x#)
+{-# INLINE Quantity# #-}
+pattern Quantity# :: Double# -> Quantity units
+pattern Quantity# x# = Quantity (D# x#)
 
-instance Show (Qty Unitless) where
-  show (Qty x) = show x
+instance Show (Quantity Unitless) where
+  show (Quantity x) = show x
 
-showsPrecImpl :: Text -> Int -> Qty units -> ShowS
-showsPrecImpl constructor prec (Qty x) =
+showsPrecImpl :: Text -> Int -> Quantity units -> ShowS
+showsPrecImpl constructor prec (Quantity x) =
   showParen (prec > 10) (showString (Data.Text.unpack (constructor <> " ")) . showsPrec 11 x)
 
-instance Show (Qty Meters) where
+instance Show (Quantity Meters) where
   showsPrec = showsPrecImpl "Length.meters"
 
-instance Show (Qty Radians) where
+instance Show (Quantity Radians) where
   showsPrec = showsPrecImpl "Angle.radians"
 
-instance Show (Qty SquareMeters) where
+instance Show (Quantity SquareMeters) where
   showsPrec = showsPrecImpl "Area.squareMeters"
 
-instance Show (Qty CubicMeters) where
+instance Show (Quantity CubicMeters) where
   showsPrec = showsPrecImpl "Area.cubicMeters"
 
 deriving newtype instance Prelude.Num Float
@@ -109,151 +109,151 @@ deriving newtype instance Prelude.RealFloat Float
 
 deriving newtype instance Prelude.Read Float
 
-deriving newtype instance Storable (Qty units)
+deriving newtype instance Storable (Quantity units)
 
-deriving newtype instance Hashable (Qty units)
+deriving newtype instance Hashable (Quantity units)
 
-instance HasZero (Qty units) where
+instance HasZero (Quantity units) where
   zero = zero
 
-instance Negation (Qty units) where
+instance Negation (Quantity units) where
   {-# INLINE negate #-}
-  negate (Qty x) = Qty (Prelude.negate x)
+  negate (Quantity x) = Quantity (Prelude.negate x)
 
-instance Multiplication Sign (Qty units) (Qty units) where
+instance Multiplication Sign (Quantity units) (Quantity units) where
   {-# INLINEABLE (*) #-}
   Positive * value = value
   Negative * value = -value
 
-instance Multiplication (Qty units) Sign (Qty units) where
+instance Multiplication (Quantity units) Sign (Quantity units) where
   {-# INLINEABLE (*) #-}
   value * Positive = value
   value * Negative = -value
 
-instance units1 ~ units2 => Addition (Qty units1) (Qty units2) (Qty units1) where
+instance units1 ~ units2 => Addition (Quantity units1) (Quantity units2) (Quantity units1) where
   {-# INLINE (+) #-}
-  Qty x + Qty y = Qty (x Prelude.+ y)
+  Quantity x + Quantity y = Quantity (x Prelude.+ y)
 
-instance units1 ~ units2 => Subtraction (Qty units1) (Qty units2) (Qty units1) where
+instance units1 ~ units2 => Subtraction (Quantity units1) (Quantity units2) (Quantity units1) where
   {-# INLINE (-) #-}
-  Qty x - Qty y = Qty (x Prelude.- y)
+  Quantity x - Quantity y = Quantity (x Prelude.- y)
 
-instance Multiplication' (Qty units1) (Qty units2) (Qty (units1 :*: units2)) where
+instance Multiplication' (Quantity units1) (Quantity units2) (Quantity (units1 :*: units2)) where
   {-# INLINE (.*.) #-}
-  Qty x .*. Qty y = Qty (x Prelude.* y)
+  Quantity x .*. Quantity y = Quantity (x Prelude.* y)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (Qty units2) (Qty units3)
+  Multiplication (Quantity units1) (Quantity units2) (Quantity units3)
   where
   {-# INLINEABLE (*) #-}
-  Qty x * Qty y = Qty (x Prelude.* y)
+  Quantity x * Quantity y = Quantity (x Prelude.* y)
 
-instance Division' (Qty units1) (Qty units2) (Qty (units1 :/: units2)) where
+instance Division' (Quantity units1) (Quantity units2) (Quantity (units1 :/: units2)) where
   {-# INLINE (./.) #-}
-  Qty x ./. Qty y = Qty (x Prelude./ y)
+  Quantity x ./. Quantity y = Quantity (x Prelude./ y)
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Qty units1) (Qty units2) (Qty units3)
+  Division (Quantity units1) (Quantity units2) (Quantity units3)
   where
   {-# INLINEABLE (/) #-}
-  Qty x / Qty y = Qty (x Prelude./ y)
+  Quantity x / Quantity y = Quantity (x Prelude./ y)
 
-instance DivMod (Qty units) where
+instance DivMod (Quantity units) where
   {-# INLINE (//) #-}
   x // y = Prelude.floor (x / y)
   {-# INLINE (%) #-}
   x % y = x - y * Float.int (x // y)
 
 {-# INLINE zero #-}
-zero :: Qty units
+zero :: Quantity units
 zero = Data.Coerce.coerce 0.0
 
 {-# INLINE unit #-}
-unit :: Qty units
+unit :: Quantity units
 unit = Data.Coerce.coerce 1.0
 
-infinity :: Qty units
+infinity :: Quantity units
 infinity = Data.Coerce.coerce (1.0 / 0.0)
 
 {-# INLINE coerce #-}
-coerce :: Qty units1 -> Qty units2
+coerce :: Quantity units1 -> Quantity units2
 coerce = Data.Coerce.coerce
 
-sign :: Qty units -> Sign
+sign :: Quantity units -> Sign
 sign value = if value >= zero then Positive else Negative
 
 {-# INLINE isNaN #-}
-isNaN :: Qty units -> Bool
-isNaN (Qty x) = Prelude.isNaN x
+isNaN :: Quantity units -> Bool
+isNaN (Quantity x) = Prelude.isNaN x
 
 {-# INLINE isInfinite #-}
-isInfinite :: Qty units -> Bool
-isInfinite (Qty x) = Prelude.isInfinite x
+isInfinite :: Quantity units -> Bool
+isInfinite (Quantity x) = Prelude.isInfinite x
 
 {-# INLINE squared #-}
-squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
+squared :: Units.Squared units1 units2 => Quantity units1 -> Quantity units2
 squared x = x * x
 
 {-# INLINE squared' #-}
-squared' :: Qty units -> Qty (units :*: units)
+squared' :: Quantity units -> Quantity (units :*: units)
 squared' x = x .*. x
 
-sqrt :: Units.Squared units1 units2 => Qty units2 -> Qty units1
+sqrt :: Units.Squared units1 units2 => Quantity units2 -> Quantity units1
 sqrt x | x <= zero = zero
-sqrt (Qty x) = Qty (Prelude.sqrt x)
+sqrt (Quantity x) = Quantity (Prelude.sqrt x)
 
-sqrt' :: Qty (units :*: units) -> Qty units
+sqrt' :: Quantity (units :*: units) -> Quantity units
 sqrt' x | x <= zero = zero
-sqrt' (Qty x) = Qty (Prelude.sqrt x)
+sqrt' (Quantity x) = Quantity (Prelude.sqrt x)
 
-hypot2 :: Qty units -> Qty units -> Qty units
-hypot2 (Qty# x#) (Qty# y#) = Qty# (hypot2# x# y#)
+hypot2 :: Quantity units -> Quantity units -> Quantity units
+hypot2 (Quantity# x#) (Quantity# y#) = Quantity# (hypot2# x# y#)
 
-hypot3 :: Qty units -> Qty units -> Qty units -> Qty units
-hypot3 (Qty# x#) (Qty# y#) (Qty# z#) = Qty# (hypot3# x# y# z#)
+hypot3 :: Quantity units -> Quantity units -> Quantity units -> Quantity units
+hypot3 (Quantity# x#) (Quantity# y#) (Quantity# z#) = Quantity# (hypot3# x# y# z#)
 
 {-# INLINE abs #-}
-abs :: Qty units -> Qty units
-abs (Qty x) = Qty (Prelude.abs x)
+abs :: Quantity units -> Quantity units
+abs (Quantity x) = Quantity (Prelude.abs x)
 
-clampTo :: Bounds units -> Qty units -> Qty units
+clampTo :: Bounds units -> Quantity units -> Quantity units
 clampTo bounds value = min (max (Bounds.lower bounds) value) (Bounds.upper bounds)
 
 {-# INLINE min #-}
-min :: Qty units -> Qty units -> Qty units
+min :: Quantity units -> Quantity units -> Quantity units
 min = Prelude.min
 
 {-# INLINE max #-}
-max :: Qty units -> Qty units -> Qty units
+max :: Quantity units -> Quantity units -> Quantity units
 max = Prelude.max
 
 {-# INLINE minmax #-}
-minmax :: (Qty units, Qty units) -> (Qty units, Qty units)
+minmax :: (Quantity units, Quantity units) -> (Quantity units, Quantity units)
 minmax (a, b) = if a <= b then (a, b) else (b, a)
 
-smaller :: Qty units -> Qty units -> Qty units
+smaller :: Quantity units -> Quantity units -> Quantity units
 smaller x y = if abs x <= abs y then x else y
 
-larger :: Qty units -> Qty units -> Qty units
+larger :: Quantity units -> Quantity units -> Quantity units
 larger x y = if abs x >= abs y then x else y
 
-smallerBy :: (a -> Qty units) -> a -> a -> a
+smallerBy :: (a -> Quantity units) -> a -> a -> a
 smallerBy function first second =
   if abs (function first) <= abs (function second) then first else second
 
-largerBy :: (a -> Qty units) -> a -> a -> a
+largerBy :: (a -> Quantity units) -> a -> a -> a
 largerBy function first second =
   if abs (function first) >= abs (function second) then first else second
 
-smallest :: NonEmpty (Qty units) -> Qty units
+smallest :: NonEmpty (Quantity units) -> Quantity units
 smallest (x :| xs) = List.foldl smaller x xs
 
-largest :: NonEmpty (Qty units) -> Qty units
+largest :: NonEmpty (Quantity units) -> Quantity units
 largest (x :| xs) = List.foldl larger x xs
 
-smallestBy :: (a -> Qty units) -> NonEmpty a -> a
+smallestBy :: (a -> Quantity units) -> NonEmpty a -> a
 smallestBy _ (x :| []) = x
 smallestBy function (x :| xs) = go x (abs (function x)) xs
  where
@@ -264,7 +264,7 @@ smallestBy function (x :| xs) = go x (abs (function x)) xs
       then go next nextAbsValue remaining
       else go current currentAbsValue remaining
 
-largestBy :: (a -> Qty units) -> NonEmpty a -> a
+largestBy :: (a -> Quantity units) -> NonEmpty a -> a
 largestBy _ (x :| []) = x
 largestBy function (x :| xs) = go x (abs (function x)) xs
  where
@@ -277,28 +277,28 @@ largestBy function (x :| xs) = go x (abs (function x)) xs
 
 -- | Interpolate from one value to another, based on a parameter that ranges from 0 to 1.
 {-# INLINE interpolateFrom #-}
-interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
+interpolateFrom :: Quantity units -> Quantity units -> Float -> Quantity units
 interpolateFrom a b t = a + (b - a) * t
 
 {-# INLINE midpoint #-}
-midpoint :: Qty units -> Qty units -> Qty units
+midpoint :: Quantity units -> Quantity units -> Quantity units
 midpoint a b = 0.5 * (a + b)
 
-sum :: List (Qty units) -> Qty units
+sum :: List (Quantity units) -> Quantity units
 sum = List.foldl (+) zero
 
-sumOf :: (a -> Qty units) -> List a -> Qty units
+sumOf :: (a -> Quantity units) -> List a -> Quantity units
 sumOf f list = sum (List.map f list)
 
-convert :: Qty (units2 :/: units1) -> Qty units1 -> Qty units2
+convert :: Quantity (units2 :/: units1) -> Quantity units1 -> Quantity units2
 convert factor value = Units.simplify (value .*. factor)
 
-unconvert :: Qty (units2 :/: units1) -> Qty units2 -> Qty units1
+unconvert :: Quantity (units2 :/: units1) -> Quantity units2 -> Quantity units1
 unconvert factor value = Units.simplify (value ./. factor)
 
-random :: Qty units -> Qty units -> Random.Generator (Qty units)
-random (Qty low) (Qty high) =
-  Random.map Qty (Random.Generator (System.Random.uniformR (low, high)))
+random :: Quantity units -> Quantity units -> Random.Generator (Quantity units)
+random (Quantity low) (Quantity high) =
+  Random.map Quantity (Random.Generator (System.Random.uniformR (low, high)))
 
 {-| Interpolate between two values by subdividing into the given number of steps.
 
@@ -307,27 +307,27 @@ Otherwise, the number of values in the resulting list will be equal to one plus 
 For example, for one step the returned values will just be the given start and end values;
 for two steps the returned values will be the start value, the midpoint and then the end value.
 -}
-steps :: Qty units -> Qty units -> Int -> List (Qty units)
+steps :: Quantity units -> Quantity units -> Int -> List (Quantity units)
 steps start end n = if n > 0 then range start end n [0 .. n] else []
 
 -- | Interpolate between two values like 'steps', but skip the first value.
-leading :: Qty units -> Qty units -> Int -> List (Qty units)
+leading :: Quantity units -> Quantity units -> Int -> List (Quantity units)
 leading start end n = range start end n [0 .. n - 1]
 
 -- | Interpolate between two values like 'steps', but skip the last value.
-trailing :: Qty units -> Qty units -> Int -> List (Qty units)
+trailing :: Quantity units -> Quantity units -> Int -> List (Quantity units)
 trailing start end n = range start end n [1 .. n]
 
 -- | Interpolate between two values like 'steps', but skip the first and last values.
-inBetween :: Qty units -> Qty units -> Int -> List (Qty units)
+inBetween :: Quantity units -> Quantity units -> Int -> List (Quantity units)
 inBetween start end n = range start end n [1 .. n - 1]
 
 {-| Subdivide a given range into the given number of steps, and return the midpoint of each step.
 
 This can be useful if you want to sample a curve or other function at the midpoint of several intervals.
 -}
-midpoints :: Qty units -> Qty units -> Int -> List (Qty units)
+midpoints :: Quantity units -> Quantity units -> Int -> List (Quantity units)
 midpoints start end n = range start end (2 * n) [1, 3 .. 2 * n - 1]
 
-range :: Qty units -> Qty units -> Int -> List Int -> List (Qty units)
+range :: Quantity units -> Quantity units -> Int -> List Int -> List (Quantity units)
 range start end n indices = let delta = end - start in [start + (i / n) * delta | i <- indices]

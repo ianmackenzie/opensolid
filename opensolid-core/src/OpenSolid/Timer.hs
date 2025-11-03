@@ -5,12 +5,12 @@ import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
-import OpenSolid.Qty (Qty (Qty))
+import OpenSolid.Quantity (Quantity (Quantity))
 
 newtype Timer = Timer Float
 
 getMonotonicTime :: IO Float
-getMonotonicTime = IO.map Qty GHC.Clock.getMonotonicTime
+getMonotonicTime = IO.map Quantity GHC.Clock.getMonotonicTime
 
 start :: IO Timer
 start = IO.map Timer getMonotonicTime

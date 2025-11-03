@@ -97,7 +97,7 @@ instance
 
 instance
   Multiplication
-    (Qty units)
+    (Quantity units)
     (DirectionSurfaceFunction3d space)
     (VectorSurfaceFunction3d (space @ units))
   where
@@ -106,7 +106,7 @@ instance
 instance
   Multiplication
     (DirectionSurfaceFunction3d space)
-    (Qty units)
+    (Quantity units)
     (VectorSurfaceFunction3d (space @ units))
   where
   DirectionSurfaceFunction3d vectorSurfaceFunction * value = vectorSurfaceFunction * value

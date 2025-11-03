@@ -5,7 +5,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
@@ -30,6 +30,6 @@ will check if the given function is zero everywhere along U=0.
 isZero :: Tolerance units => SurfaceParameter -> Float -> SurfaceFunction units -> Bool
 isZero parameter value function =
   List.allTrue
-    [ SurfaceFunction.evaluate function testPoint ~= Qty.zero
+    [ SurfaceFunction.evaluate function testPoint ~= Quantity.zero
     | testPoint <- testPoints parameter value
     ]

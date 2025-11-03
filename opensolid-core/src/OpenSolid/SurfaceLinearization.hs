@@ -3,7 +3,7 @@ module OpenSolid.SurfaceLinearization (error) where
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Prelude
-import OpenSolid.Qty (Qty (Qty#))
+import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.VectorBounds3d (VectorBounds3d)
@@ -14,8 +14,8 @@ error ::
   VectorBounds3d (space @ units) ->
   VectorBounds3d (space @ units) ->
   UvBounds ->
-  Qty units
-error fuu fuv fvv subdomain = Qty# (error# fuu fuv fvv subdomain)
+  Quantity units
+error fuu fuv fvv subdomain = Quantity# (error# fuu fuv fvv subdomain)
 
 error# ::
   VectorBounds3d (space @ units) ->

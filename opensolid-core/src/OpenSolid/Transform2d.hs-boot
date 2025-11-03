@@ -17,9 +17,9 @@ import OpenSolid.Transform (Affine, Orthonormal, Rigid, Uniform)
 translateByImpl ::
   (Transform2d Rigid (space @ units) -> a -> b) -> Vector2d (space @ units) -> a -> b
 translateInImpl ::
-  (Transform2d Rigid (space @ units) -> a -> b) -> Direction2d space -> Qty units -> a -> b
+  (Transform2d Rigid (space @ units) -> a -> b) -> Direction2d space -> Quantity units -> a -> b
 translateAlongImpl ::
-  (Transform2d Rigid (space @ units) -> a -> b) -> Axis2d (space @ units) -> Qty units -> a -> b
+  (Transform2d Rigid (space @ units) -> a -> b) -> Axis2d (space @ units) -> Quantity units -> a -> b
 rotateAroundImpl ::
   (Transform2d Rigid (space @ units) -> a -> b) -> Point2d (space @ units) -> Angle -> a -> b
 mirrorAcrossImpl ::

@@ -28,17 +28,17 @@ module OpenSolid.Length
 where
 
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 
 {-| A length in millimeters, meters, inches etc.
 
 Represented internally as a value in meters.
 -}
-type Length = Qty Meters
+type Length = Quantity Meters
 
 -- | The zero value.
 zero :: Length
-zero = Qty.zero
+zero = Quantity.zero
 
 -- | One meter.
 meter :: Length
@@ -46,11 +46,11 @@ meter = meters 1.0
 
 -- | Construct a length from a number of meters.
 meters :: Float -> Length
-meters = Qty.coerce
+meters = Quantity.coerce
 
 -- | Convert a length to a number of meters.
 inMeters :: Length -> Float
-inMeters = Qty.coerce
+inMeters = Quantity.coerce
 
 -- | One millimeter.
 millimeter :: Length

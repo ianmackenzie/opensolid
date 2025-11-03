@@ -35,14 +35,14 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (max, min)
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units qualified as Units
 
 class Interface a units | a -> units where
   boundsImpl :: a -> Bounds units
   refineImpl :: a -> Estimate units
 
-instance Interface (Qty units) units where
+instance Interface (Quantity units) units where
   boundsImpl = Bounds.constant
   refineImpl = exact
 
@@ -62,7 +62,7 @@ instance Units.Coercion (Estimate unitsA) (Estimate unitsB) where
 new :: Interface a units => a -> Estimate units
 new implementation = Estimate implementation (boundsImpl implementation)
 
-exact :: Qty units -> Estimate units
+exact :: Quantity units -> Estimate units
 exact value = new value
 
 bounds :: Estimate units -> Bounds units
@@ -87,7 +87,7 @@ satisfy predicate estimate = do
   let current = bounds estimate
   if predicate current then current else satisfy predicate (refine estimate)
 
-within :: Qty units -> Estimate units -> Bounds units
+within :: Quantity units -> Estimate units -> Bounds units
 within tolerance = satisfy (\current -> current.width <= tolerance)
 
 resolve :: (Bounds units -> Fuzzy a) -> Estimate units -> a
@@ -128,10 +128,10 @@ instance Interface (Add units) units where
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
   first + second = new (Add first second)
 
-instance Addition (Estimate units) (Qty units) (Estimate units) where
+instance Addition (Estimate units) (Quantity units) (Estimate units) where
   estimate + value = estimate + exact value
 
-instance Addition (Qty units) (Estimate units) (Estimate units) where
+instance Addition (Quantity units) (Estimate units) (Estimate units) where
   value + estimate = exact value + estimate
 
 data Subtract units = Subtract (Estimate units) (Estimate units)
@@ -149,10 +149,10 @@ instance Interface (Subtract units) units where
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
   first - second = new (Subtract first second)
 
-instance Subtraction (Estimate units) (Qty units) (Estimate units) where
+instance Subtraction (Estimate units) (Quantity units) (Estimate units) where
   estimate - value = estimate - exact value
 
-instance Subtraction (Qty units) (Estimate units) (Estimate units) where
+instance Subtraction (Quantity units) (Estimate units) (Estimate units) where
   value - estimate = exact value - estimate
 
 data Product units1 units2 = Product (Estimate units1) (Estimate units2)
@@ -176,10 +176,10 @@ instance Interface (Product units1 units2) (units1 :*: units2) where
 instance Multiplication' (Estimate units1) (Estimate units2) (Estimate (units1 :*: units2)) where
   first .*. second = new (Product first second)
 
-instance Multiplication' (Estimate units1) (Qty units2) (Estimate (units1 :*: units2)) where
+instance Multiplication' (Estimate units1) (Quantity units2) (Estimate (units1 :*: units2)) where
   estimate .*. value = new (Product estimate (exact value))
 
-instance Multiplication' (Qty units1) (Estimate units2) (Estimate (units1 :*: units2)) where
+instance Multiplication' (Quantity units1) (Estimate units2) (Estimate (units1 :*: units2)) where
   value .*. estimate = new (Product (exact value) estimate)
 
 instance
@@ -195,7 +195,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Estimate units1)
-    (Qty units2)
+    (Quantity units2)
     (Estimate units3)
   where
   estimate * value = estimate * exact value
@@ -203,20 +203,20 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Qty units1)
+    (Quantity units1)
     (Estimate units2)
     (Estimate units3)
   where
   value * estimate = exact value * estimate
 
-instance Division' (Estimate units1) (Qty units2) (Estimate (units1 :/: units2)) where
+instance Division' (Estimate units1) (Quantity units2) (Estimate (units1 :/: units2)) where
   estimate ./. value = Units.simplify (estimate .*. (1.0 ./. value))
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division
     (Estimate units1)
-    (Qty units2)
+    (Quantity units2)
     (Estimate units3)
   where
   estimate / value = Units.specialize (estimate ./. value)
@@ -239,9 +239,9 @@ instance Interface (Abs units) units where
 abs :: Estimate units -> Estimate units
 abs estimate = new (Abs estimate)
 
-refineWiderThan :: Qty units -> Estimate units -> Estimate units
+refineWiderThan :: Quantity units -> Estimate units -> Estimate units
 refineWiderThan maxWidth estimate
-  | Qty.isInfinite (boundsWidth estimate) = refine estimate
+  | Quantity.isInfinite (boundsWidth estimate) = refine estimate
   | boundsWidth estimate > maxWidth = refine estimate
   | otherwise = estimate
 
@@ -312,11 +312,11 @@ internalErrorFilteredListIsEmpty :: a
 internalErrorFilteredListIsEmpty =
   internalError "Filtered list should be non-empty by construction"
 
-boundsWidth :: Estimate units -> Qty units
+boundsWidth :: Estimate units -> Quantity units
 boundsWidth estimate = Bounds.width (bounds estimate)
 
 overlaps :: Bounds units -> Estimate units -> Bool
-overlaps givenBounds estimate = Bounds.overlap givenBounds (bounds estimate) > Qty.zero
+overlaps givenBounds estimate = Bounds.overlap givenBounds (bounds estimate) > Quantity.zero
 
 data Smallest units = Smallest (NonEmpty (Estimate units)) (Bounds units)
 
@@ -352,19 +352,19 @@ largest :: NonEmpty (Estimate units) -> Estimate units
 largest estimates =
   new (Largest estimates (Bounds.largest (NonEmpty.map bounds estimates)))
 
-estimateUpperBound :: (a, Estimate units) -> Qty units
+estimateUpperBound :: (a, Estimate units) -> Quantity units
 estimateUpperBound (_, estimate) = Bounds.upper (bounds estimate)
 
-estimateUpperBoundAtLeast :: Qty units -> (a, Estimate units) -> Bool
+estimateUpperBoundAtLeast :: Quantity units -> (a, Estimate units) -> Bool
 estimateUpperBoundAtLeast cutoff pair = estimateUpperBound pair >= cutoff
 
-estimateLowerBound :: (a, Estimate units) -> Qty units
+estimateLowerBound :: (a, Estimate units) -> Quantity units
 estimateLowerBound (_, estimate) = Bounds.lower (bounds estimate)
 
-estimateLowerBoundAtMost :: Qty units -> (a, Estimate units) -> Bool
+estimateLowerBoundAtMost :: Quantity units -> (a, Estimate units) -> Bool
 estimateLowerBoundAtMost cutoff pair = estimateLowerBound pair <= cutoff
 
-itemBoundsWidth :: (a, Estimate units) -> Qty units
+itemBoundsWidth :: (a, Estimate units) -> Quantity units
 itemBoundsWidth (_, estimate) = Bounds.width (bounds estimate)
 
 refinePairs :: NonEmpty (a, Estimate units) -> NonEmpty (a, Estimate units)
@@ -377,7 +377,7 @@ prependItems pairs items =
   List.foldr (\(item, _) acc -> item : acc) items pairs
 
 isResolved :: Tolerance units => Estimate units -> Bool
-isResolved estimate = boundsWidth estimate ~= Qty.zero
+isResolved estimate = boundsWidth estimate ~= Quantity.zero
 
 allResolved :: Tolerance units => List (a, Estimate units) -> Bool
 allResolved pairs = List.allSatisfy (isResolved . Pair.second) pairs
@@ -444,5 +444,5 @@ sign :: Tolerance units => Estimate units -> Sign
 sign estimate
   | Bounds.lower (bounds estimate) > ?tolerance = Positive
   | Bounds.upper (bounds estimate) < negate ?tolerance = Negative
-  | Bounds.width (bounds estimate) ~= Qty.zero = Positive
+  | Bounds.width (bounds estimate) ~= Quantity.zero = Positive
   | otherwise = sign (refine estimate)

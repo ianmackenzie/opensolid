@@ -17,21 +17,21 @@ import OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import {-# SOURCE #-} OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
-import OpenSolid.Qty (Qty (Qty#))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units ((:*:))
 import OpenSolid.Units qualified as Units
 
-type Tolerance units = ?tolerance :: Qty units
+type Tolerance units = ?tolerance :: Quantity units
 
 class ApproximateEquality a b units | a b -> units where
   (~=) :: Tolerance units => a -> b -> Bool
 
 infix 4 ~=
 
-instance units1 ~ units2 => ApproximateEquality (Qty units1) (Qty units2) units1 where
-  x ~= y = Qty.abs (x - y) <= ?tolerance
+instance units1 ~ units2 => ApproximateEquality (Quantity units1) (Quantity units2) units1 where
+  x ~= y = Quantity.abs (x - y) <= ?tolerance
 
 instance ApproximateEquality a b units => ApproximateEquality (List a) (List b) units where
   x : xs ~= y : ys = x ~= y && xs ~= ys
@@ -90,18 +90,18 @@ infix 4 !=
 unitless :: Float
 unitless = 1e-9
 
-using :: Qty units -> (Tolerance units => a) -> a
+using :: Quantity units -> (Tolerance units => a) -> a
 using tolerance expression = let ?tolerance = tolerance in expression
 
-squared :: (Tolerance units, Units.Squared units squaredUnits) => Qty squaredUnits
-squared = Qty.squared ?tolerance
+squared :: (Tolerance units, Units.Squared units squaredUnits) => Quantity squaredUnits
+squared = Quantity.squared ?tolerance
 
-squared' :: Tolerance units => Qty (units :*: units)
-squared' = Qty.squared' ?tolerance
+squared' :: Tolerance units => Quantity (units :*: units)
+squared' = Quantity.squared' ?tolerance
 
-forEndpointDerivative :: Tolerance units => Int -> Qty units
+forEndpointDerivative :: Tolerance units => Int -> Quantity units
 forEndpointDerivative n = ?tolerance / Float.int (Int.factorial n * 2 ** (2 * n))
 
 {-# INLINE (~=#) #-}
 (~=#) :: Tolerance units => Double# -> Double# -> Int#
-(~=#) x# y# = let !(Qty# tolerance#) = ?tolerance in abs# (x# -# y#) <=# tolerance#
+(~=#) x# y# = let !(Quantity# tolerance#) = ?tolerance in abs# (x# -# y#) <=# tolerance#

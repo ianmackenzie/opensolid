@@ -43,7 +43,7 @@ import OpenSolid.Primitives
   , Transform3d (Transform3d)
   , Vector3d (Vector3d)
   )
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform qualified as Transform
 import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d
 
@@ -56,7 +56,7 @@ type Uniform coordinateSystem = Transform3d Transform.Uniform coordinateSystem
 type Affine coordinateSystem = Transform3d Transform.Affine coordinateSystem
 
 originPoint :: Point3d (space @ units)
-originPoint = Point3d Qty.zero Qty.zero Qty.zero
+originPoint = Point3d Quantity.zero Quantity.zero Quantity.zero
 
 unitX :: Vector3d (space @ Unitless)
 unitX = Vector3d 1.0 0.0 0.0
@@ -87,10 +87,10 @@ withFixedPoint fixedPoint vx vy vz = do
 translateBy :: Vector3d (space @ units) -> Rigid (space @ units)
 translateBy vector = Transform3d (Position3d vector) unitX unitY unitZ
 
-translateIn :: Direction3d space -> Qty units -> Rigid (space @ units)
+translateIn :: Direction3d space -> Quantity units -> Rigid (space @ units)
 translateIn direction distance = translateBy (direction * distance)
 
-translateAlong :: Axis3d (space @ units) -> Qty units -> Rigid (space @ units)
+translateAlong :: Axis3d (space @ units) -> Quantity units -> Rigid (space @ units)
 translateAlong (Axis3d _ direction) distance = translateIn direction distance
 
 rotateAround :: Axis3d (space @ units) -> Angle -> Rigid (space @ units)
@@ -184,10 +184,10 @@ toAffine = Data.Coerce.coerce
 translateByImpl :: (Rigid (space @ units) -> a -> b) -> Vector3d (space @ units) -> a -> b
 translateByImpl transformBy vector = transformBy (translateBy vector)
 
-translateInImpl :: (Rigid (space @ units) -> a -> b) -> Direction3d space -> Qty units -> a -> b
+translateInImpl :: (Rigid (space @ units) -> a -> b) -> Direction3d space -> Quantity units -> a -> b
 translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
 
-translateAlongImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Qty units -> a -> b
+translateAlongImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Quantity units -> a -> b
 translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
 
 rotateAroundImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Angle -> a -> b

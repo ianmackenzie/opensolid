@@ -11,7 +11,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty (zero)
+import OpenSolid.Quantity (zero)
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Region2d.BoundedBy qualified as Region2d.BoundedBy

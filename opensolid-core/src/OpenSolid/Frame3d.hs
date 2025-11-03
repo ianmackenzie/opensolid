@@ -286,42 +286,42 @@ downward frame = Frame3d frame.originPoint frame.downwardOrientation
 
 -- | Move a frame in its own forward direction by the given distance.
 offsetForwardBy ::
-  Qty units ->
+  Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 offsetForwardBy distance frame = frame |> translateIn (forwardDirection frame) distance
 
 -- | Move a frame in its own backward direction by the given distance.
 offsetBackwardBy ::
-  Qty units ->
+  Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 offsetBackwardBy distance frame = frame |> translateIn (backwardDirection frame) distance
 
 -- | Move a frame in its own rightward direction by the given distance.
 offsetRightwardBy ::
-  Qty units ->
+  Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 offsetRightwardBy distance frame = frame |> translateIn (rightwardDirection frame) distance
 
 -- | Move a frame in its own leftward direction by the given distance.
 offsetLeftwardBy ::
-  Qty units ->
+  Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 offsetLeftwardBy distance frame = frame |> translateIn (leftwardDirection frame) distance
 
 -- | Move a frame in its own upward direction by the given distance.
 offsetUpwardBy ::
-  Qty units ->
+  Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 offsetUpwardBy distance frame = frame |> translateIn (upwardDirection frame) distance
 
 -- | Move a frame in its own downward direction by the given distance.
 offsetDownwardBy ::
-  Qty units ->
+  Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 offsetDownwardBy distance frame = frame |> translateIn (downwardDirection frame) distance
@@ -468,14 +468,14 @@ translateBy = Transform3d.translateByImpl transformBy
 
 translateIn ::
   Direction3d space ->
-  Qty units ->
+  Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 translateIn = Transform3d.translateInImpl transformBy
 
 translateAlong ::
   Axis3d (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
 translateAlong = Transform3d.translateAlongImpl transformBy

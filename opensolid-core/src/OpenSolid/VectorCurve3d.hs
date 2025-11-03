@@ -64,7 +64,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
@@ -144,7 +144,7 @@ instance
     units1
   where
   curve ^ vector = Tolerance.using Tolerance.squared' do
-    (curve - vector).squaredMagnitude' ^ Qty.zero
+    (curve - vector).squaredMagnitude' ^ Quantity.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -239,13 +239,13 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
+  Multiplication (Quantity units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
-    (Qty units1)
+    (Quantity units1)
     (VectorCurve3d (space @ units2))
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
@@ -270,28 +270,28 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve3d (space @ units1)) (Qty units2) (VectorCurve3d (space @ units3))
+  Multiplication (VectorCurve3d (space @ units1)) (Quantity units2) (VectorCurve3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
     (VectorCurve3d (space @ units1))
-    (Qty units2)
+    (Quantity units2)
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
   curve .*. value = curve .*. Curve.constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve3d (space @ units1)) (Qty units2) (VectorCurve3d (space @ units3))
+  Division (VectorCurve3d (space @ units1)) (Quantity units2) (VectorCurve3d (space @ units3))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Division'
     (VectorCurve3d (space @ units1))
-    (Qty units2)
+    (Quantity units2)
     (VectorCurve3d (space @ (units1 :/: units2)))
   where
   curve ./. value = Units.simplify (curve .*. (1.0 ./. value))
@@ -617,15 +617,15 @@ quotient' ::
   Curve units2 ->
   Result DivisionByZero (VectorCurve3d (space @ (units1 :/: units2)))
 quotient' numerator denominator =
-  if denominator ~= Qty.zero
+  if denominator ~= Quantity.zero
     then Failure DivisionByZero
     else Success do
       let singularity0 =
-            if Curve.evaluate denominator 0.0 ~= Qty.zero
+            if Curve.evaluate denominator 0.0 ~= Quantity.zero
               then Just (lhopital numerator denominator 0.0)
               else Nothing
       let singularity1 =
-            if Curve.evaluate denominator 1.0 ~= Qty.zero
+            if Curve.evaluate denominator 1.0 ~= Quantity.zero
               then Just (lhopital numerator denominator 1.0)
               else Nothing
       desingularize singularity0 (unsafeQuotient' numerator denominator) singularity1
@@ -645,7 +645,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' .*. denominator' - numerator' .*. denominator'')
-            ./. (2.0 * Qty.squared' denominator')
+            ./. (2.0 * Quantity.squared' denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::

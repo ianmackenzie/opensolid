@@ -36,7 +36,7 @@ import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
@@ -51,7 +51,7 @@ data ScreenSpace
 data Camera3d (coordinateSystem :: CoordinateSystem) where
   Camera3d ::
     { frame :: Frame3d (space @ units) (Defines CameraSpace)
-    , focalDistance :: Qty units
+    , focalDistance :: Quantity units
     , projection :: Projection units
     } ->
     Camera3d (space @ units)
@@ -94,7 +94,7 @@ instance FFI (Camera3d FFI.Coordinates) where
 -- | What kind of projection (perspective or orthographic) a camera should use.
 data Projection units where
   Perspective :: Angle -> Projection units
-  Orthographic :: Qty units -> Projection units
+  Orthographic :: Quantity units -> Projection units
 
 instance FFI (Projection Meters) where
   representation = FFI.nestedClassRepresentation "Camera3d" "Projection"
@@ -104,12 +104,12 @@ perspective :: "verticalFov" ::: Angle -> Projection units
 perspective (Named verticalFov) = Perspective verticalFov
 
 -- | Define an orthographic projection with a given viewport height.
-orthographic :: "viewportHeight" ::: Qty units -> Projection units
+orthographic :: "viewportHeight" ::: Quantity units -> Projection units
 orthographic (Named viewportHeight) = Orthographic viewportHeight
 
 new ::
   Frame3d (space @ units) (Defines CameraSpace) ->
-  Qty units ->
+  Quantity units ->
   Projection units ->
   Camera3d (space @ units)
 new givenFrame givenFocalDistance projection =
@@ -132,7 +132,7 @@ lookAt ::
 lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
   let computedFocalDistance = Point3d.distanceFrom eyePoint focalPoint
   let computedFrame =
-        case Tolerance.using Qty.zero (Vector3d.direction (focalPoint - eyePoint)) of
+        case Tolerance.using Quantity.zero (Vector3d.direction (focalPoint - eyePoint)) of
           Success computedForwardDirection -> do
             let viewVector = Vector3d.unit computedForwardDirection
             let upVector = Vector3d.unit World3d.upwardDirection
@@ -161,7 +161,7 @@ orbit ::
   "focalPoint" ::: Point3d (space @ units) ->
   "azimuth" ::: Angle ->
   "elevation" ::: Angle ->
-  "distance" ::: Qty units ->
+  "distance" ::: Quantity units ->
   "projection" ::: Projection units ->
   Camera3d (space @ units)
 orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Named projection) = do
@@ -177,7 +177,7 @@ isometricElevation = Angle.atan2 1.0 (Float.sqrt 2.0)
 
 isometric ::
   Point3d (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Projection units ->
   Camera3d (space @ units)
 isometric givenFocalPoint distance givenProjection =
@@ -223,14 +223,14 @@ translateBy = Transform3d.translateByImpl transformBy
 
 translateIn ::
   Direction3d space ->
-  Qty units ->
+  Quantity units ->
   Camera3d (space @ units) ->
   Camera3d (space @ units)
 translateIn = Transform3d.translateInImpl transformBy
 
 translateAlong ::
   Axis3d (space @ units) ->
-  Qty units ->
+  Quantity units ->
   Camera3d (space @ units) ->
   Camera3d (space @ units)
 translateAlong = Transform3d.translateAlongImpl transformBy

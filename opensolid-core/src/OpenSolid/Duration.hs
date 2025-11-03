@@ -20,21 +20,21 @@ module OpenSolid.Duration
 where
 
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 
-type Duration = Qty Seconds
+type Duration = Quantity Seconds
 
 zero :: Duration
-zero = Qty.zero
+zero = Quantity.zero
 
 second :: Duration
 second = seconds 1.0
 
 seconds :: Float -> Duration
-seconds = Qty.coerce
+seconds = Quantity.coerce
 
 inSeconds :: Duration -> Float
-inSeconds = Qty.coerce
+inSeconds = Quantity.coerce
 
 microsecond :: Duration
 microsecond = seconds 1e-6

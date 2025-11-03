@@ -53,8 +53,8 @@ import OpenSolid.Primitives
   , Point3d
   , Transform2d (Transform2d)
   )
-import OpenSolid.Qty (Qty (Qty#))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Unboxed.Math
 import OpenSolid.Vector2d (Vector2d)
@@ -69,24 +69,24 @@ coerce :: Point2d (space1 @ units1) -> Point2d (space2 @ units2)
 coerce (Position2d p) = Position2d (Vector2d.coerce p)
 
 -- | Construct a point along the X axis, with the given X coordinate.
-x :: Qty units -> Point2d (space @ units)
-x px = Point2d px Qty.zero
+x :: Quantity units -> Point2d (space @ units)
+x px = Point2d px Quantity.zero
 
 -- | Construct a point along the Y axis, with the given Y coordinate.
-y :: Qty units -> Point2d (space @ units)
-y py = Point2d Qty.zero py
+y :: Quantity units -> Point2d (space @ units)
+y py = Point2d Quantity.zero py
 
-along :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units)
+along :: Axis2d (space @ units) -> Quantity units -> Point2d (space @ units)
 along (Axis2d originPoint direction) distance = originPoint + distance * direction
 
 {-| Construct a point from polar coordinates (radius and angle).
 
 The angle is measured counterclockwise from the positive X axis.
 -}
-polar :: Qty units -> Angle -> Point2d (space @ units)
+polar :: Quantity units -> Angle -> Point2d (space @ units)
 polar r theta = Position2d (Vector2d.polar r theta)
 
-apply :: (Float -> Qty units) -> Float -> Float -> Point2d (space @ units)
+apply :: (Float -> Quantity units) -> Float -> Float -> Point2d (space @ units)
 apply units fx fy = Point2d (units fx) (units fy)
 
 -- | Construct a point from its X and Y coordinates given in meters.
@@ -121,17 +121,17 @@ inches = apply Length.inches
 
 -- | Get the X coordinate of a point.
 {-# INLINE xCoordinate #-}
-xCoordinate :: Point2d (space @ units) -> Qty units
+xCoordinate :: Point2d (space @ units) -> Quantity units
 xCoordinate (Position2d p) = Vector2d.xComponent p
 
 -- | Get the Y coordinate of a point.
 {-# INLINE yCoordinate #-}
-yCoordinate :: Point2d (space @ units) -> Qty units
+yCoordinate :: Point2d (space @ units) -> Quantity units
 yCoordinate (Position2d p) = Vector2d.yComponent p
 
 -- | Get the X and Y coordinates of a point.
 {-# INLINE coordinates #-}
-coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
+coordinates :: Point2d (space @ units) -> (Quantity units, Quantity units)
 coordinates (Position2d p) = Vector2d.components p
 
 interpolateFrom ::
@@ -146,24 +146,24 @@ midpoint :: Point2d (space @ units) -> Point2d (space @ units) -> Point2d (space
 midpoint (Position2d p1) (Position2d p2) = Position2d (Vector2d.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
-distanceFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Qty units
-distanceFrom p1 p2 = Qty# (distanceFrom# p1 p2)
+distanceFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Quantity units
+distanceFrom p1 p2 = Quantity# (distanceFrom# p1 p2)
 
 {-# INLINE distanceFrom# #-}
 distanceFrom# :: Point2d (space @ units) -> Point2d (space @ units) -> Double#
-distanceFrom# (Point2d (Qty# x1#) (Qty# y1#)) (Point2d (Qty# x2#) (Qty# y2#)) =
+distanceFrom# (Point2d (Quantity# x1#) (Quantity# y1#)) (Point2d (Quantity# x2#) (Quantity# y2#)) =
   hypot2# (x2# -# x1#) (y2# -# y1#)
 
 angleFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Angle
 angleFrom p1 p2 = Vector2d.angle (p2 - p1)
 
-distanceAlong :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
+distanceAlong :: Axis2d (space @ units) -> Point2d (space @ units) -> Quantity units
 distanceAlong (Axis2d originPoint direction) point = direction `dot` (point - originPoint)
 
-distanceLeftOf :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
+distanceLeftOf :: Axis2d (space @ units) -> Point2d (space @ units) -> Quantity units
 distanceLeftOf (Axis2d originPoint direction) point = direction `cross` (point - originPoint)
 
-distanceRightOf :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
+distanceRightOf :: Axis2d (space @ units) -> Point2d (space @ units) -> Quantity units
 distanceRightOf (Axis2d originPoint direction) point = direction `cross` (originPoint - point)
 
 placeIn ::
@@ -190,10 +190,10 @@ placeOn ::
 placeOn (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d px py) =
   originPoint + px * i + py * j
 
-convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
+convert :: Quantity (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert factor (Position2d p) = Position2d (Vector2d.convert factor p)
 
-unconvert :: Qty (units2 :/: units1) -> Point2d (space @ units2) -> Point2d (space @ units1)
+unconvert :: Quantity (units2 :/: units1) -> Point2d (space @ units2) -> Point2d (space @ units1)
 unconvert factor (Position2d p) = Position2d (Vector2d.unconvert factor p)
 
 transformBy :: Transform2d tag (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
@@ -205,10 +205,10 @@ transformBy transform point = do
 translateBy :: Vector2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
 translateBy = Transform2d.translateByImpl transformBy
 
-translateIn :: Direction2d space -> Qty units -> Point2d (space @ units) -> Point2d (space @ units)
+translateIn :: Direction2d space -> Quantity units -> Point2d (space @ units) -> Point2d (space @ units)
 translateIn = Transform2d.translateInImpl transformBy
 
-translateAlong :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units) -> Point2d (space @ units)
+translateAlong :: Axis2d (space @ units) -> Quantity units -> Point2d (space @ units) -> Point2d (space @ units)
 translateAlong = Transform2d.translateAlongImpl transformBy
 
 rotateAround :: Point2d (space @ units) -> Angle -> Point2d (space @ units) -> Point2d (space @ units)

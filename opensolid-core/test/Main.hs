@@ -20,7 +20,7 @@ import Tests.Map qualified
 import Tests.NewtonRaphson qualified
 import Tests.NonEmpty qualified
 import Tests.Parameter qualified
-import Tests.Qty qualified
+import Tests.Quantity qualified
 import Tests.Region2d qualified
 import Tests.Set2d qualified
 import Tests.Stream qualified
@@ -33,7 +33,7 @@ tests :: List Test
 tests =
   Tolerance.using (Length.meters 1e-9) $
     [ Test.group "Tests.Parameter" Tests.Parameter.tests
-    , Test.group "Tests.Qty" Tests.Qty.tests
+    , Test.group "Tests.Quantity" Tests.Quantity.tests
     , Test.group "Tests.Bounds" Tests.Bounds.tests
     , Test.group "Tests.VectorBounds3d" Tests.VectorBounds3d.tests
     , Test.group "Tests.Curve" Tests.Curve.tests

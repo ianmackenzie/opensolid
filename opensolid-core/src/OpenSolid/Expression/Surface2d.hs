@@ -22,8 +22,8 @@ constant :: Point2d (space @ units) -> Expression UvPoint (Point2d (space @ unit
 constant = Expression.constant
 
 xy ::
-  Expression UvPoint (Qty units) ->
-  Expression UvPoint (Qty units) ->
+  Expression UvPoint (Quantity units) ->
+  Expression UvPoint (Quantity units) ->
   Expression UvPoint (Point2d (space @ units))
 xy = Expression.xy
 

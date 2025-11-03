@@ -43,7 +43,7 @@ import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.SpurGear (SpurGear)
@@ -126,12 +126,12 @@ length :: Class
 length =
   Class.new @Length $(docs ''Length) $
     [ Class.constant "Zero" Length.zero $(docs 'Length.zero)
-    , Class.factory3 "Interpolate" "Start" "End" "Parameter Value" Qty.interpolateFrom $(docs 'Qty.interpolateFrom)
-    , Class.static3 "Steps" "Start" "End" "N" (Qty.steps @Meters) $(docs 'Qty.steps)
-    , Class.static3 "Leading" "Start" "End" "N" (Qty.leading @Meters) $(docs 'Qty.leading)
-    , Class.static3 "Trailing" "Start" "End" "N" (Qty.trailing @Meters) $(docs 'Qty.trailing)
-    , Class.static3 "In Between" "Start" "End" "N" (Qty.inBetween @Meters) $(docs 'Qty.inBetween)
-    , Class.static3 "Midpoints" "Start" "End" "N" (Qty.midpoints @Meters) $(docs 'Qty.midpoints)
+    , Class.factory3 "Interpolate" "Start" "End" "Parameter Value" Quantity.interpolateFrom $(docs 'Quantity.interpolateFrom)
+    , Class.static3 "Steps" "Start" "End" "N" (Quantity.steps @Meters) $(docs 'Quantity.steps)
+    , Class.static3 "Leading" "Start" "End" "N" (Quantity.leading @Meters) $(docs 'Quantity.leading)
+    , Class.static3 "Trailing" "Start" "End" "N" (Quantity.trailing @Meters) $(docs 'Quantity.trailing)
+    , Class.static3 "In Between" "Start" "End" "N" (Quantity.inBetween @Meters) $(docs 'Quantity.inBetween)
+    , Class.static3 "Midpoints" "Start" "End" "N" (Quantity.midpoints @Meters) $(docs 'Quantity.midpoints)
     , Class.factory1 "Meters" "Value" Length.meters $(docs 'Length.meters)
     , Class.factory1 "Centimeters" "Value" Length.centimeters $(docs 'Length.centimeters)
     , Class.factory1 "Cm" "Value" Length.cm $(docs 'Length.cm)
@@ -152,7 +152,7 @@ length =
     , Class.equalityAndHash
     , Class.comparison
     , Class.negateSelf
-    , Class.absSelf Qty.abs
+    , Class.absSelf Quantity.abs
     , Class.floatTimes
     , Class.plusSelf
     , Class.plus @LengthBounds Self
@@ -183,12 +183,12 @@ area :: Class
 area =
   Class.new @Area $(docs ''Area) $
     [ Class.constant "Zero" Area.zero $(docs 'Area.zero)
-    , Class.factory3 "Interpolate" "Start" "End" "Parameter Value" Qty.interpolateFrom $(docs 'Qty.interpolateFrom)
-    , Class.static3 "Steps" "Start" "End" "N" (Qty.steps @SquareMeters) $(docs 'Qty.steps)
-    , Class.static3 "Leading" "Start" "End" "N" (Qty.leading @SquareMeters) $(docs 'Qty.leading)
-    , Class.static3 "Trailing" "Start" "End" "N" (Qty.trailing @SquareMeters) $(docs 'Qty.trailing)
-    , Class.static3 "In Between" "Start" "End" "N" (Qty.inBetween @SquareMeters) $(docs 'Qty.inBetween)
-    , Class.static3 "Midpoints" "Start" "End" "N" (Qty.midpoints @SquareMeters) $(docs 'Qty.midpoints)
+    , Class.factory3 "Interpolate" "Start" "End" "Parameter Value" Quantity.interpolateFrom $(docs 'Quantity.interpolateFrom)
+    , Class.static3 "Steps" "Start" "End" "N" (Quantity.steps @SquareMeters) $(docs 'Quantity.steps)
+    , Class.static3 "Leading" "Start" "End" "N" (Quantity.leading @SquareMeters) $(docs 'Quantity.leading)
+    , Class.static3 "Trailing" "Start" "End" "N" (Quantity.trailing @SquareMeters) $(docs 'Quantity.trailing)
+    , Class.static3 "In Between" "Start" "End" "N" (Quantity.inBetween @SquareMeters) $(docs 'Quantity.inBetween)
+    , Class.static3 "Midpoints" "Start" "End" "N" (Quantity.midpoints @SquareMeters) $(docs 'Quantity.midpoints)
     , Class.factory1 "Square Meters" "Value" Area.squareMeters $(docs 'Area.squareMeters)
     , Class.factory1 "Square Inches" "Value" Area.squareInches $(docs 'Area.squareInches)
     , Class.member0 "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
@@ -197,7 +197,7 @@ area =
     , Class.equalityAndHash
     , Class.comparison
     , Class.negateSelf
-    , Class.absSelf Qty.abs
+    , Class.absSelf Quantity.abs
     , Class.floatTimes
     , Class.plusSelf
     , Class.plus @AreaBounds Self
@@ -227,12 +227,12 @@ angle :: Class
 angle =
   Class.new @Angle $(docs ''Angle) $
     [ Class.constant "Zero" Angle.zero $(docs 'Angle.zero)
-    , Class.factory3 "Interpolate" "Start" "End" "Parameter Value" Qty.interpolateFrom $(docs 'Qty.interpolateFrom)
-    , Class.static3 "Steps" "Start" "End" "N" (Qty.steps @Radians) $(docs 'Qty.steps)
-    , Class.static3 "Leading" "Start" "End" "N" (Qty.leading @Radians) $(docs 'Qty.leading)
-    , Class.static3 "Trailing" "Start" "End" "N" (Qty.trailing @Radians) $(docs 'Qty.trailing)
-    , Class.static3 "In Between" "Start" "End" "N" (Qty.inBetween @Radians) $(docs 'Qty.inBetween)
-    , Class.static3 "Midpoints" "Start" "End" "N" (Qty.midpoints @Radians) $(docs 'Qty.midpoints)
+    , Class.factory3 "Interpolate" "Start" "End" "Parameter Value" Quantity.interpolateFrom $(docs 'Quantity.interpolateFrom)
+    , Class.static3 "Steps" "Start" "End" "N" (Quantity.steps @Radians) $(docs 'Quantity.steps)
+    , Class.static3 "Leading" "Start" "End" "N" (Quantity.leading @Radians) $(docs 'Quantity.leading)
+    , Class.static3 "Trailing" "Start" "End" "N" (Quantity.trailing @Radians) $(docs 'Quantity.trailing)
+    , Class.static3 "In Between" "Start" "End" "N" (Quantity.inBetween @Radians) $(docs 'Quantity.inBetween)
+    , Class.static3 "Midpoints" "Start" "End" "N" (Quantity.midpoints @Radians) $(docs 'Quantity.midpoints)
     , Class.constant "Golden Angle" Angle.goldenAngle $(docs 'Angle.goldenAngle)
     , Class.constant "Radian" Angle.radian $(docs 'Angle.radian)
     , Class.constant "Full Turn" Angle.fullTurn $(docs 'Angle.fullTurn)
@@ -256,7 +256,7 @@ angle =
     , Class.equalityAndHash
     , Class.comparison
     , Class.negateSelf
-    , Class.absSelf Qty.abs
+    , Class.absSelf Quantity.abs
     , Class.floatTimes
     , Class.plusSelf
     , Class.plus @AngleBounds Self

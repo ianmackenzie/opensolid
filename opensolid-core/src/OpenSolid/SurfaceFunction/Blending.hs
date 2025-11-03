@@ -14,7 +14,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 
 type Blendable function =
   ( Multiplication (SurfaceFunction Unitless) function function
-  , Multiplication (Qty Unitless) function function
+  , Multiplication (Quantity Unitless) function function
   , Addition function function function
   , Composition (SurfaceFunction2d UvCoordinates) function function
   , HasField "du" function function

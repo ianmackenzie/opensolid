@@ -78,10 +78,10 @@ instance Multiplication' (DirectionCurve3d space) Sign (DirectionCurve3d space) 
   curve .*. Positive = curve
   curve .*. Negative = -curve
 
-instance Multiplication (Qty units) (DirectionCurve3d space) (VectorCurve3d (space @ units)) where
+instance Multiplication (Quantity units) (DirectionCurve3d space) (VectorCurve3d (space @ units)) where
   value * DirectionCurve3d vectorCurve = value * vectorCurve
 
-instance Multiplication (DirectionCurve3d space) (Qty units) (VectorCurve3d (space @ units)) where
+instance Multiplication (DirectionCurve3d space) (Quantity units) (VectorCurve3d (space @ units)) where
   DirectionCurve3d vectorCurve * value = vectorCurve * value
 
 instance

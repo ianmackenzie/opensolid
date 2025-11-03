@@ -25,23 +25,23 @@ constant :: Vector2d (space @ units) -> Expression Float (Vector2d (space @ unit
 constant = Expression.constant
 
 xy ::
-  Expression Float (Qty units) ->
-  Expression Float (Qty units) ->
+  Expression Float (Quantity units) ->
+  Expression Float (Quantity units) ->
   Expression Float (Vector2d (space @ units))
 xy = Expression.xy
 
 squaredMagnitude' ::
   Expression Float (Vector2d (space @ units)) ->
-  Expression Float (Qty (units :*: units))
+  Expression Float (Quantity (units :*: units))
 squaredMagnitude' = Expression.squaredMagnitude'
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
   Expression Float (Vector2d (space @ units1)) ->
-  Expression Float (Qty units2)
+  Expression Float (Quantity units2)
 squaredMagnitude = Expression.squaredMagnitude
 
-magnitude :: Expression Float (Vector2d (space @ units)) -> Expression Float (Qty units)
+magnitude :: Expression Float (Vector2d (space @ units)) -> Expression Float (Quantity units)
 magnitude = Expression.magnitude
 
 placeIn ::

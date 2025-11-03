@@ -21,5 +21,5 @@ w3 = 5.0 / 12.0
 w4 :: Float
 w4 = 1.0 / 12.0
 
-estimate :: Qty units -> Qty units -> Qty units -> Qty units -> Qty units
+estimate :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> Quantity units
 estimate y1 y2 y3 y4 = w1 * y1 + w2 * y2 + w3 * y3 + w4 * y4

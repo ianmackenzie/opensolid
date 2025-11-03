@@ -48,7 +48,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding ((>>))
-import OpenSolid.Qty qualified as Qty
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
@@ -309,7 +309,7 @@ direction2d =
   title "Direction2d" $
     description "A direction (unit vector) in 2D space, given by its X and Y components" $
       examples [Direction2d.x] $
-        Tolerance.using Qty.zero $
+        Tolerance.using Quantity.zero $
           lift Vector2d.direction Vector2d.unit $
             object Vector2d do
               requiredField "x" Vector2d.xComponent float

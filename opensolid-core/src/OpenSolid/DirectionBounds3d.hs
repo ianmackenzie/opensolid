@@ -51,7 +51,7 @@ instance Multiplication' (DirectionBounds3d space) Sign (DirectionBounds3d space
 
 instance
   Multiplication
-    (Qty units)
+    (Quantity units)
     (DirectionBounds3d space)
     (VectorBounds3d (space @ units))
   where
@@ -60,7 +60,7 @@ instance
 instance
   Multiplication
     (DirectionBounds3d space)
-    (Qty units)
+    (Quantity units)
     (VectorBounds3d (space @ units))
   where
   DirectionBounds3d vectorBounds * value = vectorBounds * value

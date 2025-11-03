@@ -68,7 +68,7 @@ collectLoopEdgeIndices startIndex loopLength accumulated = do
 foreign import ccall safe "opensolid_cdt"
   opensolid_cdt ::
     Int -> -- input_point_count
-    Foreign.Ptr (Qty units) -> -- input_point_data
+    Foreign.Ptr (Quantity units) -> -- input_point_data
     Int -> -- input_edge_count
     Foreign.Ptr Int -> -- input_edge_data
     Foreign.Ptr Int -> -- output_triangle_count
