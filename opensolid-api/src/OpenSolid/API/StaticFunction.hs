@@ -644,7 +644,14 @@ signature6 ::
   Signature
 signature6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
   ( Nothing
-  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy, arg @f arg6 Proxy]
+  ,
+    [ arg @a arg1 Proxy
+    , arg @b arg2 Proxy
+    , arg @c arg3 Proxy
+    , arg @d arg4 Proxy
+    , arg @e arg5 Proxy
+    , arg @f arg6 Proxy
+    ]
   , FFI.typeOf @g Proxy
   )
 
@@ -661,7 +668,14 @@ signatureU6 ::
   Signature
 signatureU6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
   ( Just ToleranceUnitless
-  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy, arg @f arg6 Proxy]
+  ,
+    [ arg @a arg1 Proxy
+    , arg @b arg2 Proxy
+    , arg @c arg3 Proxy
+    , arg @d arg4 Proxy
+    , arg @e arg5 Proxy
+    , arg @f arg6 Proxy
+    ]
   , FFI.typeOf @g Proxy
   )
 
@@ -678,7 +692,14 @@ signatureR6 ::
   Signature
 signatureR6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
   ( Just ToleranceRadians
-  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy, arg @f arg6 Proxy]
+  ,
+    [ arg @a arg1 Proxy
+    , arg @b arg2 Proxy
+    , arg @c arg3 Proxy
+    , arg @d arg4 Proxy
+    , arg @e arg5 Proxy
+    , arg @f arg6 Proxy
+    ]
   , FFI.typeOf @g Proxy
   )
 
@@ -695,7 +716,14 @@ signatureM6 ::
   Signature
 signatureM6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
   ( Just ToleranceMeters
-  , [arg @a arg1 Proxy, arg @b arg2 Proxy, arg @c arg3 Proxy, arg @d arg4 Proxy, arg @e arg5 Proxy, arg @f arg6 Proxy]
+  ,
+    [ arg @a arg1 Proxy
+    , arg @b arg2 Proxy
+    , arg @c arg3 Proxy
+    , arg @d arg4 Proxy
+    , arg @e arg5 Proxy
+    , arg @f arg6 Proxy
+    ]
   , FFI.typeOf @g Proxy
   )
 

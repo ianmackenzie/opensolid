@@ -153,10 +153,26 @@ placeIn ::
   Transform3d tag (local @ units) ->
   Transform3d tag (global @ units)
 placeIn frame transform = do
-  let p0 = originPoint |> Point3d.relativeTo frame |> Point3d.transformBy transform |> Point3d.placeIn frame
-  let vx = unitX |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
-  let vy = unitY |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
-  let vz = unitZ |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
+  let p0 =
+        originPoint
+          |> Point3d.relativeTo frame
+          |> Point3d.transformBy transform
+          |> Point3d.placeIn frame
+  let vx =
+        unitX
+          |> Vector3d.relativeTo frame
+          |> Vector3d.transformBy transform
+          |> Vector3d.placeIn frame
+  let vy =
+        unitY
+          |> Vector3d.relativeTo frame
+          |> Vector3d.transformBy transform
+          |> Vector3d.placeIn frame
+  let vz =
+        unitZ
+          |> Vector3d.relativeTo frame
+          |> Vector3d.transformBy transform
+          |> Vector3d.placeIn frame
   Transform3d p0 vx vy vz
 
 relativeTo ::
@@ -164,16 +180,38 @@ relativeTo ::
   Transform3d tag (global @ units) ->
   Transform3d tag (local @ units)
 relativeTo frame transform = do
-  let p0 = originPoint |> Point3d.placeIn frame |> Point3d.transformBy transform |> Point3d.relativeTo frame
-  let vx = unitX |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
-  let vy = unitY |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
-  let vz = unitZ |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
+  let p0 =
+        originPoint
+          |> Point3d.placeIn frame
+          |> Point3d.transformBy transform
+          |> Point3d.relativeTo frame
+  let vx =
+        unitX
+          |> Vector3d.placeIn frame
+          |> Vector3d.transformBy transform
+          |> Vector3d.relativeTo frame
+  let vy =
+        unitY
+          |> Vector3d.placeIn frame
+          |> Vector3d.transformBy transform
+          |> Vector3d.relativeTo frame
+  let vz =
+        unitZ
+          |> Vector3d.placeIn frame
+          |> Vector3d.transformBy transform
+          |> Vector3d.relativeTo frame
   Transform3d p0 vx vy vz
 
-toOrthonormal :: Transform.IsOrthonormal tag => Transform3d tag (space @ units) -> Orthonormal (space @ units)
+toOrthonormal ::
+  Transform.IsOrthonormal tag =>
+  Transform3d tag (space @ units) ->
+  Orthonormal (space @ units)
 toOrthonormal = Data.Coerce.coerce
 
-toUniform :: Transform.IsUniform tag => Transform3d tag (space @ units) -> Uniform (space @ units)
+toUniform ::
+  Transform.IsUniform tag =>
+  Transform3d tag (space @ units) ->
+  Uniform (space @ units)
 toUniform = Data.Coerce.coerce
 
 toAffine :: Transform3d tag (space @ units) -> Affine (space @ units)
@@ -181,23 +219,56 @@ toAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 
-translateByImpl :: (Rigid (space @ units) -> a -> b) -> Vector3d (space @ units) -> a -> b
+translateByImpl ::
+  (Rigid (space @ units) -> a -> b) ->
+  Vector3d (space @ units) ->
+  a ->
+  b
 translateByImpl transformBy vector = transformBy (translateBy vector)
 
-translateInImpl :: (Rigid (space @ units) -> a -> b) -> Direction3d space -> Quantity units -> a -> b
+translateInImpl ::
+  (Rigid (space @ units) -> a -> b) ->
+  Direction3d space ->
+  Quantity units ->
+  a ->
+  b
 translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
 
-translateAlongImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Quantity units -> a -> b
+translateAlongImpl ::
+  (Rigid (space @ units) -> a -> b) ->
+  Axis3d (space @ units) ->
+  Quantity units ->
+  a ->
+  b
 translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
 
-rotateAroundImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Angle -> a -> b
+rotateAroundImpl ::
+  (Rigid (space @ units) -> a -> b) ->
+  Axis3d (space @ units) ->
+  Angle ->
+  a ->
+  b
 rotateAroundImpl transformBy axis angle = transformBy (rotateAround axis angle)
 
-mirrorAcrossImpl :: (Orthonormal (space @ units) -> a -> b) -> Plane3d (space @ units) defines -> a -> b
+mirrorAcrossImpl ::
+  (Orthonormal (space @ units) -> a -> b) ->
+  Plane3d (space @ units) defines ->
+  a ->
+  b
 mirrorAcrossImpl transformBy plane = transformBy (mirrorAcross plane)
 
-scaleAboutImpl :: (Uniform (space @ units) -> a -> b) -> Point3d (space @ units) -> Float -> a -> b
+scaleAboutImpl ::
+  (Uniform (space @ units) -> a -> b) ->
+  Point3d (space @ units) ->
+  Float ->
+  a ->
+  b
 scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
 
-scaleAlongImpl :: (Affine (space @ units) -> a -> b) -> Axis3d (space @ units) -> Float -> a -> b
+scaleAlongImpl ::
+  (Affine (space @ units) -> a -> b) ->
+  Axis3d (space @ units) ->
+  Float ->
+  a ->
+  b
 scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)

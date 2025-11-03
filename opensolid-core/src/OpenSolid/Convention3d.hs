@@ -19,7 +19,12 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
-import OpenSolid.Primitives (Axis3d (Axis3d), Direction3d (Direction3d, Unit3d), Frame3d (Frame3d), Orientation3d (Orientation3d))
+import OpenSolid.Primitives
+  ( Axis3d (Axis3d)
+  , Direction3d (Direction3d, Unit3d)
+  , Frame3d (Frame3d)
+  , Orientation3d (Orientation3d)
+  )
 
 {-| A coordinate convention in 3D space.
 

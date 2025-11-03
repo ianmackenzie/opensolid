@@ -92,7 +92,8 @@ on :: Plane3d (space @ planeUnits) (Defines local) -> Direction2d local -> Direc
 on (Plane3d _ (PlaneOrientation3d i j)) (Direction2d x y) = Unit3d (x * i + y * j)
 
 polar :: Plane3d (space @ planeUnits) defines -> Angle -> Direction3d space
-polar (Plane3d _ (PlaneOrientation3d i j)) angle = Unit3d (Angle.cos angle * i + Angle.sin angle * j)
+polar (Plane3d _ (PlaneOrientation3d i j)) angle =
+  Unit3d (Angle.cos angle * i + Angle.sin angle * j)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
 perpendicularDirection :: Direction3d space -> Direction3d space

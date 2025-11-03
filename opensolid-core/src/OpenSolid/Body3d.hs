@@ -480,8 +480,10 @@ getAllHalfEdges SurfaceWithHalfEdges{halfEdgeLoops} = NonEmpty.concat halfEdgeLo
 
 halfEdgeStartPoint :: HalfEdge (space @ units) -> Corner (space @ units)
 halfEdgeStartPoint halfEdge = case halfEdge of
-  HalfEdge{halfEdgeId = HalfEdgeId{surfaceId}, curve3d} -> Corner surfaceId (Curve3d.startPoint curve3d)
-  DegenerateHalfEdge{halfEdgeId = HalfEdgeId{surfaceId}, point} -> Corner surfaceId point
+  HalfEdge{halfEdgeId = HalfEdgeId{surfaceId}, curve3d} ->
+    Corner surfaceId (Curve3d.startPoint curve3d)
+  DegenerateHalfEdge{halfEdgeId = HalfEdgeId{surfaceId}, point} ->
+    Corner surfaceId point
 
 registerSurfaceWithHalfEdges ::
   Tolerance units =>
@@ -765,9 +767,11 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
                 let matingUvPoint = Curve2d.evaluate matingUvCurve matingTValue
                 (Vertex uvPoint point, Vertex matingUvPoint point)
           let (vertices, matingVertices) = List.unzip2 (List.map vertexPair tValues)
+          let alignedMatingVertices =
+                if correctlyAligned then List.reverse matingVertices else matingVertices
           accumulated
             |> Map.set halfEdgeId vertices
-            |> Map.set matingId (if correctlyAligned then List.reverse matingVertices else matingVertices)
+            |> Map.set matingId alignedMatingVertices
         _ -> internalError "Should always be able to look up surface segments for a given edge"
     SecondaryEdge{} -> accumulated
 
@@ -977,16 +981,24 @@ placeEdgeIn ::
   Edge (local @ units) ->
   Edge (global @ units)
 placeEdgeIn frame edge = case edge of
-  PrimaryEdge{halfEdgeId, startPoint, uvCurve, curve3d, matingId, matingUvCurve, correctlyAligned} ->
-    PrimaryEdge
-      { halfEdgeId
-      , startPoint = Point3d.placeIn frame startPoint
-      , uvCurve
-      , curve3d = Curve3d.placeIn frame curve3d
-      , matingId
-      , matingUvCurve
-      , correctlyAligned
-      }
+  PrimaryEdge
+    { halfEdgeId
+    , startPoint
+    , uvCurve
+    , curve3d
+    , matingId
+    , matingUvCurve
+    , correctlyAligned
+    } ->
+      PrimaryEdge
+        { halfEdgeId
+        , startPoint = Point3d.placeIn frame startPoint
+        , uvCurve
+        , curve3d = Curve3d.placeIn frame curve3d
+        , matingId
+        , matingUvCurve
+        , correctlyAligned
+        }
   SecondaryEdge{halfEdgeId, startPoint, uvStartPoint} ->
     SecondaryEdge{halfEdgeId, startPoint = Point3d.placeIn frame startPoint, uvStartPoint}
   DegenerateEdge{halfEdgeId, point, uvCurve} ->

@@ -42,9 +42,13 @@ instance HasField "compiled" (SurfaceFunction units) (Compiled units)
 
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units)
 
-instance units1 ~ units2 => ApproximateEquality (SurfaceFunction units1) (SurfaceFunction units2) units1
+instance
+  units1 ~ units2 =>
+  ApproximateEquality (SurfaceFunction units1) (SurfaceFunction units2) units1
 
-instance units1 ~ units2 => ApproximateEquality (SurfaceFunction units1) (Quantity units2) units1
+instance
+  units1 ~ units2 =>
+  ApproximateEquality (SurfaceFunction units1) (Quantity units2) units1
 
 instance Negation (SurfaceFunction units)
 

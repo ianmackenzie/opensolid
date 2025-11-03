@@ -194,7 +194,8 @@ nonEmptyArgumentValue itemType varName = do
 tupleArgumentValue :: FFI.Type -> FFI.Type -> FFI.Type -> List FFI.Type -> Text -> Text
 tupleArgumentValue tupleType type1 type2 rest varName = do
   let itemTypes = type1 : type2 : rest
-  let itemValue index itemType = fieldArgumentValue (varName <> "[" <> Text.int index <> "]") itemType
+  let itemValue index itemType =
+        fieldArgumentValue (varName <> "[" <> Text.int index <> "]") itemType
   Python.call (typeName tupleType) (List.mapWithIndex itemValue itemTypes)
 
 maybeArgumentValue :: FFI.Type -> FFI.Type -> Text -> Text

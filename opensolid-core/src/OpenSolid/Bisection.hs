@@ -66,7 +66,10 @@ curveSurfaceDomain = map2 (,) curveDomain surfaceDomain
 surfacePairDomain :: Domain (UvBounds, UvBounds)
 surfacePairDomain = map2 (,) surfaceDomain surfaceDomain
 
-search :: Domain bounds -> (bounds -> Fuzzy (Maybe solution)) -> Result InfiniteRecursion (List (bounds, solution))
+search ::
+  Domain bounds ->
+  (bounds -> Fuzzy (Maybe solution)) ->
+  Result InfiniteRecursion (List (bounds, solution))
 search domain callback = searchImpl callback [domain] []
 
 searchImpl ::

@@ -161,7 +161,8 @@ new :: Compiled units -> Curve units -> Curve units
 new = Curve
 
 concrete :: Expression Float (Quantity units) -> Curve units -> Curve units
-concrete givenExpression givenDerivative = new (CompiledFunction.concrete givenExpression) givenDerivative
+concrete givenExpression givenDerivative =
+  new (CompiledFunction.concrete givenExpression) givenDerivative
 
 recursive :: Compiled units -> (Curve units -> Curve units) -> Curve units
 recursive givenCompiled derivativeFunction =
@@ -323,7 +324,12 @@ bezier controlPoints =
     @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
     @ bezier (Bezier.derivative controlPoints)
 
-hermite :: Quantity units -> List (Quantity units) -> Quantity units -> List (Quantity units) -> Curve units
+hermite ::
+  Quantity units ->
+  List (Quantity units) ->
+  Quantity units ->
+  List (Quantity units) ->
+  Curve units
 hermite value0 derivatives0 value1 derivatives1 =
   bezier (Bezier.hermite value0 derivatives0 value1 derivatives1)
 
@@ -663,7 +669,8 @@ findZeros derivatives subdomain derivativeBounds exclusions
           Resolved [] -> Solve1d.pass
           Resolved (NonEmpty subdomainZeros) -> do
             let subdomainInterior = Domain1d.interior subdomain
-            if NonEmpty.allSatisfy (\(t0, _) -> Bounds.includes t0 subdomainInterior) subdomainZeros
+            let isInterior (t0, _) = Bounds.includes t0 subdomainInterior
+            if NonEmpty.allSatisfy isInterior subdomainZeros
               then Solve1d.return (NonEmpty.map toZero subdomainZeros)
               else Solve1d.recurse
 
@@ -697,7 +704,8 @@ findZerosOrder k derivatives subdomain derivativeBounds
       case higherOrderZeros of
         [] -> solveMonotonic k currentDerivative nextDerivative tBounds
         List.One (t0, neighborhood) -> do
-          if Quantity.abs (evaluate currentDerivative t0) <= Solve1d.derivativeTolerance neighborhood k
+          if Quantity.abs (evaluate currentDerivative t0)
+            <= Solve1d.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
             else do
               let leftBounds = Bounds (Bounds.lower tBounds) t0

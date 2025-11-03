@@ -185,7 +185,8 @@ toMesh accuracy surface = do
   let fuv = f.du.dv
   let fvv = f.dv.dv
   let boundaryLoops = surface.domain.outerLoop :| surface.domain.innerLoops
-  let boundaryPolygons = NonEmpty.map (toPolygon accuracy surface.function fuu fuv fvv) boundaryLoops
+  let boundaryPolygons =
+        NonEmpty.map (toPolygon accuracy surface.function fuu fuv fvv) boundaryLoops
   let boundaryEdges = NonEmpty.combine Polygon2d.edges boundaryPolygons
   let edgeSet = Set2d.fromNonEmpty boundaryEdges
   let domainBounds = Region2d.bounds surface.domain

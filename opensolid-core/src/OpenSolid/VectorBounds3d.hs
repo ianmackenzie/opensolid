@@ -112,10 +112,26 @@ hull4 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y
 hullN :: NonEmpty (Vector3d (space @ units)) -> VectorBounds3d (space @ units)
 hullN (Vector3d x0 y0 z0 :| rest) = go x0 x0 y0 y0 z0 z0 rest
  where
-  go :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> Quantity units -> Quantity units -> List (Vector3d (space @ units)) -> VectorBounds3d (space @ units)
-  go xLow xHigh yLow yHigh zLow zHigh [] = VectorBounds3d (Bounds xLow xHigh) (Bounds yLow yHigh) (Bounds zLow zHigh)
+  go ::
+    Quantity units ->
+    Quantity units ->
+    Quantity units ->
+    Quantity units ->
+    Quantity units ->
+    Quantity units ->
+    List (Vector3d (space @ units)) ->
+    VectorBounds3d (space @ units)
+  go xLow xHigh yLow yHigh zLow zHigh [] =
+    VectorBounds3d (Bounds xLow xHigh) (Bounds yLow yHigh) (Bounds zLow zHigh)
   go xLow xHigh yLow yHigh zLow zHigh (Vector3d x y z : remaining) =
-    go (Quantity.min xLow x) (Quantity.max xHigh x) (Quantity.min yLow y) (Quantity.max yHigh y) (Quantity.min zLow z) (Quantity.max zHigh z) remaining
+    go
+      (Quantity.min xLow x)
+      (Quantity.max xHigh x)
+      (Quantity.min yLow y)
+      (Quantity.max yHigh y)
+      (Quantity.min zLow z)
+      (Quantity.max zHigh z)
+      remaining
 
 aggregate2 ::
   VectorBounds3d (space @ units) ->
@@ -130,7 +146,10 @@ aggregate3 ::
   VectorBounds3d (space @ units) ->
   VectorBounds3d (space @ units)
 aggregate3 (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) (VectorBounds3d x3 y3 z3) =
-  VectorBounds3d (Bounds.aggregate3 x1 x2 x3) (Bounds.aggregate3 y1 y2 y3) (Bounds.aggregate3 z1 z2 z3)
+  VectorBounds3d
+    (Bounds.aggregate3 x1 x2 x3)
+    (Bounds.aggregate3 y1 y2 y3)
+    (Bounds.aggregate3 z1 z2 z3)
 
 -- | Construct a vector bounding box containing all vector bounding boxes in the given list.
 aggregateN :: NonEmpty (VectorBounds3d (space @ units)) -> VectorBounds3d (space @ units)
@@ -179,7 +198,8 @@ squaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units
 squaredMagnitude = Units.specialize . squaredMagnitude'
 
 squaredMagnitude' :: VectorBounds3d (space @ units) -> Bounds (units :*: units)
-squaredMagnitude' (VectorBounds3d x y z) = Bounds.squared' x + Bounds.squared' y + Bounds.squared' z
+squaredMagnitude' (VectorBounds3d x y z) =
+  Bounds.squared' x + Bounds.squared' y + Bounds.squared' z
 
 magnitude :: VectorBounds3d (space @ units) -> Bounds units
 magnitude bounds = do
@@ -231,7 +251,10 @@ maxMagnitude# (VectorBounds3d# minX# maxX# minY# maxY# minZ# maxZ#) = do
   let zMagnitude# = max# (abs# minZ#) (abs# maxZ#)
   hypot3# xMagnitude# yMagnitude# zMagnitude#
 
-maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Quantity units2
+maxSquaredMagnitude ::
+  Units.Squared units1 units2 =>
+  VectorBounds3d (space @ units1) ->
+  Quantity units2
 maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude'
 
 maxSquaredMagnitude' :: VectorBounds3d (space @ units) -> Quantity (units :*: units)
@@ -319,7 +342,12 @@ intersection (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = do
   z <- Bounds.intersection z1 z2
   Just (VectorBounds3d x y z)
 
-interpolate :: VectorBounds3d (space @ units) -> Float -> Float -> Float -> Vector3d (space @ units)
+interpolate ::
+  VectorBounds3d (space @ units) ->
+  Float ->
+  Float ->
+  Float ->
+  Vector3d (space @ units)
 interpolate (VectorBounds3d x y z) u v w =
   Vector3d (Bounds.interpolate x u) (Bounds.interpolate y v) (Bounds.interpolate z w)
 

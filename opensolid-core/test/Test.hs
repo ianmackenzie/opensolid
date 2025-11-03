@@ -86,14 +86,24 @@ run tests = Prelude.do
   let (successes, failures) = sum results
   if failures == 0
     then Prelude.do
-      System.Console.ANSI.setSGR [System.Console.ANSI.SetColor System.Console.ANSI.Foreground System.Console.ANSI.Vivid System.Console.ANSI.Green]
+      System.Console.ANSI.setSGR
+        [ System.Console.ANSI.SetColor
+            System.Console.ANSI.Foreground
+            System.Console.ANSI.Vivid
+            System.Console.ANSI.Green
+        ]
       IO.printLine (testCount successes "passed")
       System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
     else Prelude.fail (Text.unpack (testCount failures "failed"))
 
 reportError :: Text -> List Text -> IO (Int, Int)
 reportError context messages = do
-  System.Console.ANSI.setSGR [System.Console.ANSI.SetColor System.Console.ANSI.Foreground System.Console.ANSI.Vivid System.Console.ANSI.Red]
+  System.Console.ANSI.setSGR
+    [ System.Console.ANSI.SetColor
+        System.Console.ANSI.Foreground
+        System.Console.ANSI.Vivid
+        System.Console.ANSI.Red
+    ]
   IO.printLine (context <> " failed:")
   System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
   IO.forEach messages (Text.indent "   " >> IO.printLine)

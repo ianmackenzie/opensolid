@@ -196,7 +196,12 @@ hullN (v0 :| rest) = do
   let go xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
       go xLow xHigh yLow yHigh (vertex : remaining) = do
         let (x, y) = Point2d.coordinates (Vertex2d.position vertex)
-        go (Quantity.min xLow x) (Quantity.max xHigh x) (Quantity.min yLow y) (Quantity.max yHigh y) remaining
+        go
+          (Quantity.min xLow x)
+          (Quantity.max xHigh x)
+          (Quantity.min yLow y)
+          (Quantity.max yHigh y)
+          remaining
   go x0 x0 y0 y0 rest
 
 lowerLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)

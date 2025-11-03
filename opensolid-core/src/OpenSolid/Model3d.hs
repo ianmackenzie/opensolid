@@ -137,10 +137,18 @@ visitGroup (GroupNode attrs kids) = inChildContext attrs (Just (GroupWithContext
 
 {-# COMPLETE Body, Group #-}
 
-pattern Body :: Traversal => (Traversal, Tolerance Meters) => Body3d (space @ Meters) -> Model3d space
+pattern Body ::
+  Traversal =>
+  (Traversal, Tolerance Meters) =>
+  Body3d (space @ Meters) ->
+  Model3d space
 pattern Body bod <- (visitBody -> Just (BodyWithContext bod))
 
-pattern Group :: Traversal => Traversal => List (Model3d space) -> Model3d space
+pattern Group ::
+  Traversal =>
+  Traversal =>
+  List (Model3d space) ->
+  Model3d space
 pattern Group kids <- (visitGroup -> Just (GroupWithContext kids))
 
 -- | Create a model from a single solid body (a part).

@@ -441,7 +441,8 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
     Success chordDirection -> do
       let halfDistance = 0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint
       let radius = Quantity.max (Quantity.abs givenRadius) halfDistance
-      let offsetMagnitude = Quantity.sqrt' (Quantity.squared' radius - Quantity.squared' halfDistance)
+      let offsetMagnitude =
+            Quantity.sqrt' (Quantity.squared' radius - Quantity.squared' halfDistance)
       let offsetDirection = Direction2d.rotateLeft chordDirection
       let offsetDistance =
             case whichArc of
@@ -502,7 +503,11 @@ circle (Named centerPoint) (Named diameter) =
 The first radius given will be the radius along the X axis,
 and the second radius will be the radius along the Y axis.
 -}
-ellipse :: Frame2d (space @ units) defines -> Quantity units -> Quantity units -> Curve2d (space @ units)
+ellipse ::
+  Frame2d (space @ units) defines ->
+  Quantity units ->
+  Quantity units ->
+  Curve2d (space @ units)
 ellipse axes xRadius yRadius = ellipticalArc axes xRadius yRadius Angle.zero Angle.twoPi
 
 {-| Construct a Bezier curve from its control points.
@@ -1106,7 +1111,8 @@ medialAxis curve1 curve2 = do
   let v1 = curve1.derivative . SurfaceFunction.u
   let v2 = curve2.derivative . SurfaceFunction.v
   let d = p2 - p1
-  let target = v2 `cross'` (2.0 * (v1 `dot'` d) .*. d - VectorSurfaceFunction2d.squaredMagnitude' d .*. v1)
+  let target =
+        v2 `cross'` (2.0 * (v1 `dot'` d) .*. d - VectorSurfaceFunction2d.squaredMagnitude' d .*. v1)
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?

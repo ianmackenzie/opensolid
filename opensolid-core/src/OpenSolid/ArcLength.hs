@@ -42,10 +42,22 @@ parameterization derivativeMagnitude = do
           Success quotient -> (Curve.recursive compiled (quotient .), length)
           Failure DivisionByZero -> (Curve.t, Quantity.zero)
 
-isConstant :: Tolerance units => Quantity units -> Quantity units -> Quantity units -> Quantity units -> Bool
+isConstant ::
+  Tolerance units =>
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
+  Bool
 isConstant y1 y2 y3 y4 = y1 ~= y2 && y1 ~= y3 && y1 ~= y4
 
-isLinear :: Tolerance units => Quantity units -> Quantity units -> Quantity units -> Quantity units -> Bool
+isLinear ::
+  Tolerance units =>
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
+  Bool
 isLinear y1 y2 y3 y4 = let dy = y4 - y1 in y2 ~= y1 + dy * Lobatto.p2 && y3 ~= y1 + dy * Lobatto.p3
 
 evaluateIn :: Tree units -> Quantity units -> Float

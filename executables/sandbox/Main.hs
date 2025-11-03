@@ -410,12 +410,14 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
   let g = u .- v
   let bounds = Bounds2d (Bounds 0.0 2.0) (Bounds 0.0 2.0)
   let function = VectorSurfaceFunction2d.xy f g
+  let uDerivative = VectorSurfaceFunction2d.derivative SurfaceParameter.U function
+  let vDerivative = VectorSurfaceFunction2d.derivative SurfaceParameter.V function
   let solution =
         Solve2d.unique
           (VectorSurfaceFunction2d.evaluateBounds function)
           (VectorSurfaceFunction2d.evaluate function)
-          (VectorSurfaceFunction2d.evaluate (VectorSurfaceFunction2d.derivative SurfaceParameter.U function))
-          (VectorSurfaceFunction2d.evaluate (VectorSurfaceFunction2d.derivative SurfaceParameter.V function))
+          (VectorSurfaceFunction2d.evaluate uDerivative)
+          (VectorSurfaceFunction2d.evaluate vDerivative)
           bounds
   log "Solve2d.unique solution" solution
 

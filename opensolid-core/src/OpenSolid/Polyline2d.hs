@@ -27,5 +27,8 @@ instance HasField "end" (Polyline2d vertex) vertex where
 instance HasField "segments" (Polyline2d vertex) (List (LineSegment2d vertex)) where
   getField polyline = NonEmpty.successive LineSegment2d polyline.vertices
 
-instance Vertex2d vertex (space @ units) => HasField "length" (Polyline2d vertex) (Quantity units) where
+instance
+  Vertex2d vertex (space @ units) =>
+  HasField "length" (Polyline2d vertex) (Quantity units)
+  where
   getField polyline = Quantity.sumOf (.length) polyline.segments

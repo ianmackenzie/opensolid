@@ -192,7 +192,8 @@ monotonic function derivative bounds = do
   if
     | y1 == Quantity.zero -> Exact x1
     | y2 == Quantity.zero -> Exact x2
-    | Quantity.sign y1 == Quantity.sign y2 -> if Quantity.abs y1 <= Quantity.abs y2 then Closest x1 else Closest x2
+    | Quantity.sign y1 == Quantity.sign y2 ->
+        if Quantity.abs y1 <= Quantity.abs y2 then Closest x1 else Closest x2
     | otherwise -> solveMonotonic function derivative bounds (Quantity.sign y1) x1 x2
 
 solveMonotonic ::

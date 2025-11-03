@@ -168,9 +168,12 @@ instance Interface (Product units1 units2) (units1 :*: units2) where
     let secondMetric = Bounds.midpoint firstBounds .*. secondWidth
     let combinedMetric = firstWidth .*. secondWidth
     let refinedProduct
-          | firstMetric > secondMetric && firstMetric > combinedMetric = Product (refine first) second
-          | secondMetric > firstMetric && secondMetric > combinedMetric = Product first (refine second)
-          | otherwise = Product (refine first) (refine second)
+          | firstMetric > secondMetric && firstMetric > combinedMetric =
+              Product (refine first) second
+          | secondMetric > firstMetric && secondMetric > combinedMetric =
+              Product first (refine second)
+          | otherwise =
+              Product (refine first) (refine second)
     new refinedProduct
 
 instance Multiplication' (Estimate units1) (Estimate units2) (Estimate (units1 :*: units2)) where

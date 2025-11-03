@@ -299,7 +299,9 @@ aggregate2 (Bounds low1 high1) (Bounds low2 high2) =
 
 aggregate3 :: Bounds units -> Bounds units -> Bounds units -> Bounds units
 aggregate3 (Bounds low1 high1) (Bounds low2 high2) (Bounds low3 high3) =
-  Bounds (Quantity.min (Quantity.min low1 low2) low3) (Quantity.max (Quantity.max high1 high2) high3)
+  Bounds
+    (Quantity.min (Quantity.min low1 low2) low3)
+    (Quantity.max (Quantity.max high1 high2) high3)
 
 -- | Build a bounding range containing all ranges in the given non-empty list.
 aggregateN :: NonEmpty (Bounds units) -> Bounds units
@@ -330,7 +332,8 @@ hull4 (Quantity# a#) (Quantity# b#) (Quantity# c#) (Quantity# d#) = do
 hullN :: NonEmpty (Quantity units) -> Bounds units
 hullN (first :| rest) = do
   let go low high [] = Bounds low high
-      go low high (next : remaining) = go (Quantity.min low next) (Quantity.max high next) remaining
+      go low high (next : remaining) =
+        go (Quantity.min low next) (Quantity.max high next) remaining
   go first first rest
 
 -- | Get the lower bound of a range.
@@ -454,7 +457,8 @@ separation bounds1 bounds2 = Quantity# (separation# bounds1 bounds2)
 
 {-# INLINE separation# #-}
 separation# :: Bounds units -> Bounds units -> Double#
-separation# (Bounds# low1# high1#) (Bounds# low2# high2#) = max# (low1# -# high2#) (low2# -# high1#)
+separation# (Bounds# low1# high1#) (Bounds# low2# high2#) =
+  max# (low1# -# high2#) (low2# -# high1#)
 
 overlap :: Bounds units -> Bounds units -> Quantity units
 overlap first second = -(separation first second)
@@ -536,7 +540,8 @@ smallest list = do
   let conditionalAggregate current (Bounds low high)
         | low > clipRadius || high < -clipRadius = current
         | otherwise =
-            aggregate2 current (Bounds (Quantity.max low -clipRadius) (Quantity.min high clipRadius))
+            aggregate2 current $
+              Bounds (Quantity.max low -clipRadius) (Quantity.min high clipRadius)
   NonEmpty.foldl conditionalAggregate initial list
 
 largest :: NonEmpty (Bounds units) -> Bounds units

@@ -130,7 +130,10 @@ separation (PositionBounds3d pb1) (PositionBounds3d pb2) = VectorBounds3d.separa
 overlap :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Quantity units
 overlap (PositionBounds3d pb1) (PositionBounds3d pb2) = VectorBounds3d.overlap pb1 pb2
 
-intersection :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Maybe (Bounds3d (space @ units))
+intersection ::
+  Bounds3d (space @ units) ->
+  Bounds3d (space @ units) ->
+  Maybe (Bounds3d (space @ units))
 intersection (PositionBounds3d pb1) (PositionBounds3d pb2) =
   Maybe.map PositionBounds3d (VectorBounds3d.intersection pb1 pb2)
 

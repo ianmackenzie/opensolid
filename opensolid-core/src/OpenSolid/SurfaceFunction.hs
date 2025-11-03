@@ -643,7 +643,8 @@ findTangentSolutions subproblem = do
       case maybePoint of
         Nothing -> Solve2d.recurse CrossingCurvesOnly
         Just point ->
-          if Bounds2d.includes point (Domain2d.interior subdomain) && evaluate f point ~= Quantity.zero
+          if Bounds2d.includes point (Domain2d.interior subdomain)
+            && evaluate f point ~= Quantity.zero
             then case determinantSign of
               Positive -> do
                 -- Non-saddle tangent point

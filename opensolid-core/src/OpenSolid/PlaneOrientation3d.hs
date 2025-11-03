@@ -116,7 +116,9 @@ transformBy ::
   PlaneOrientation3d space ->
   PlaneOrientation3d space
 transformBy transform (PlaneOrientation3d i j) =
-  PlaneOrientation3d (Direction3d.transformBy transform i) (Direction3d.transformBy transform j)
+  PlaneOrientation3d
+    (Direction3d.transformBy transform i)
+    (Direction3d.transformBy transform j)
 
 -- | Convert a orientation defined in local coordinates to one defined in global coordinates.
 placeIn ::
@@ -124,7 +126,9 @@ placeIn ::
   PlaneOrientation3d local ->
   PlaneOrientation3d global
 placeIn globalOrientation (PlaneOrientation3d i j) =
-  PlaneOrientation3d (Direction3d.placeIn globalOrientation i) (Direction3d.placeIn globalOrientation j)
+  PlaneOrientation3d
+    (Direction3d.placeIn globalOrientation i)
+    (Direction3d.placeIn globalOrientation j)
 
 -- | Convert a orientation defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -132,7 +136,9 @@ relativeTo ::
   PlaneOrientation3d global ->
   PlaneOrientation3d local
 relativeTo globalOrientation (PlaneOrientation3d i j) =
-  PlaneOrientation3d (Direction3d.relativeTo globalOrientation i) (Direction3d.relativeTo globalOrientation j)
+  PlaneOrientation3d
+    (Direction3d.relativeTo globalOrientation i)
+    (Direction3d.relativeTo globalOrientation j)
 
 -- | Generate a random plane orientation.
 random :: Random.Generator (PlaneOrientation3d global)

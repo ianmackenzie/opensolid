@@ -144,7 +144,10 @@ downwardComponent :: Vector3d (space @ units) -> Quantity units
 downwardComponent (Vector3d _ _ u) = -u
 
 -- | Get the XYZ components of a vector, given an XYZ coordinate convention to use.
-components :: Convention3d -> Vector3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
+components ::
+  Convention3d ->
+  Vector3d (space @ units) ->
+  (Quantity units, Quantity units, Quantity units)
 components Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (Vector3d vr vf vu) =
   ( vr * xr + vf * xf + vu * xu
   , vr * yr + vf * yf + vu * yu

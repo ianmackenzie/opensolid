@@ -57,7 +57,13 @@ map3 function generatorA generatorB generatorC = do
   valueC <- generatorC
   return (function valueA valueB valueC)
 
-map4 :: (a -> b -> c -> d -> e) -> Generator a -> Generator b -> Generator c -> Generator d -> Generator e
+map4 ::
+  (a -> b -> c -> d -> e) ->
+  Generator a ->
+  Generator b ->
+  Generator c ->
+  Generator d ->
+  Generator e
 map4 function generatorA generatorB generatorC generatorD = do
   valueA <- generatorA
   valueB <- generatorB

@@ -554,7 +554,14 @@ static5 ::
   Member value
 static5 name arg1 arg2 arg3 arg4 arg5 f docs =
   Static (FFI.name name) $
-    StaticFunction5 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) (FFI.name arg5) f docs
+    StaticFunction5
+      (FFI.name arg1)
+      (FFI.name arg2)
+      (FFI.name arg3)
+      (FFI.name arg4)
+      (FFI.name arg5)
+      f
+      docs
 
 static6 ::
   (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI result) =>
@@ -570,7 +577,15 @@ static6 ::
   Member value
 static6 name arg1 arg2 arg3 arg4 arg5 arg6 f docs =
   Static (FFI.name name) $
-    StaticFunction6 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) (FFI.name arg5) (FFI.name arg6) f docs
+    StaticFunction6
+      (FFI.name arg1)
+      (FFI.name arg2)
+      (FFI.name arg3)
+      (FFI.name arg4)
+      (FFI.name arg5)
+      (FFI.name arg6)
+      f
+      docs
 
 property :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
 property name f docs = Prop (FFI.name name) (Property f docs)
@@ -1130,7 +1145,10 @@ absFunctionInfo className maybeAbsFunction = case maybeAbsFunction of
         , invoke = AbsFunction.invoke absFunction
         }
 
-equalityAndHashFunctionInfo :: FFI.ClassName -> Maybe (EqualityFunction, HashFunction) -> List Function
+equalityAndHashFunctionInfo ::
+  FFI.ClassName ->
+  Maybe (EqualityFunction, HashFunction) ->
+  List Function
 equalityAndHashFunctionInfo className maybeFunctions = case maybeFunctions of
   Nothing -> []
   Just (equalityFunction, hashFunction) -> do

@@ -110,6 +110,8 @@ gridFaceIndices uSteps uVertices vVertices uIndex0 vIndex0 accumulatedIndices = 
   let upperFaceIndices = (index00, index11, index01)
   let updatedIndices = lowerFaceIndices : upperFaceIndices : accumulatedIndices
   if
-    | uIndex0 > 0 -> gridFaceIndices uSteps uVertices vVertices (uIndex0 - 1) vIndex0 updatedIndices
-    | vIndex0 > 0 -> gridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vIndex0 - 1) updatedIndices
+    | uIndex0 > 0 ->
+        gridFaceIndices uSteps uVertices vVertices (uIndex0 - 1) vIndex0 updatedIndices
+    | vIndex0 > 0 ->
+        gridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vIndex0 - 1) updatedIndices
     | otherwise -> updatedIndices

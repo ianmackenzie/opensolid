@@ -208,7 +208,11 @@ circle :: "centerPoint" ::: Point space -> "diameter" ::: Length -> Drawing2d sp
 circle = circleWith []
 
 -- | Draw a curve with the given attributes and resolution.
-curveWith :: List (Attribute space) -> Resolution Meters -> Curve2d (space @ Meters) -> Drawing2d space
+curveWith ::
+  List (Attribute space) ->
+  Resolution Meters ->
+  Curve2d (space @ Meters) ->
+  Drawing2d space
 curveWith attributes resolution givenCurve = do
   let approximation = Curve2d.toPolyline resolution givenCurve
   polylineWith attributes approximation

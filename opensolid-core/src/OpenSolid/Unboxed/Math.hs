@@ -278,11 +278,18 @@ determinantBounds3d#
   y3Max#
   z3Min#
   z3Max# = do
-    let !(# x1DetMin#, x1DetMax# #) = determinantBounds2d# y2Min# y2Max# z2Min# z2Max# y3Min# y3Max# z3Min# z3Max#
-    let !(# y1DetMin#, y1DetMax# #) = determinantBounds2d# x2Min# x2Max# z2Min# z2Max# x3Min# x3Max# z3Min# z3Max#
-    let !(# z1DetMin#, z1DetMax# #) = determinantBounds2d# x2Min# x2Max# y2Min# y2Max# x3Min# x3Max# y3Min# y3Max#
-    let !(# x1ProdMin#, x1ProdMax# #) = boundsTimesBounds# x1Min# x1Max# x1DetMin# x1DetMax#
-    let !(# y1ProdMin#, y1ProdMax# #) = boundsTimesBounds# y1Min# y1Max# y1DetMin# y1DetMax#
-    let !(# z1ProdMin#, z1ProdMax# #) = boundsTimesBounds# z1Min# z1Max# z1DetMin# z1DetMax#
-    let !(# dxyMin#, dxyMax# #) = boundsMinusBounds# x1ProdMin# x1ProdMax# y1ProdMin# y1ProdMax#
+    let !(# x1DetMin#, x1DetMax# #) =
+          determinantBounds2d# y2Min# y2Max# z2Min# z2Max# y3Min# y3Max# z3Min# z3Max#
+    let !(# y1DetMin#, y1DetMax# #) =
+          determinantBounds2d# x2Min# x2Max# z2Min# z2Max# x3Min# x3Max# z3Min# z3Max#
+    let !(# z1DetMin#, z1DetMax# #) =
+          determinantBounds2d# x2Min# x2Max# y2Min# y2Max# x3Min# x3Max# y3Min# y3Max#
+    let !(# x1ProdMin#, x1ProdMax# #) =
+          boundsTimesBounds# x1Min# x1Max# x1DetMin# x1DetMax#
+    let !(# y1ProdMin#, y1ProdMax# #) =
+          boundsTimesBounds# y1Min# y1Max# y1DetMin# y1DetMax#
+    let !(# z1ProdMin#, z1ProdMax# #) =
+          boundsTimesBounds# z1Min# z1Max# z1DetMin# z1DetMax#
+    let !(# dxyMin#, dxyMax# #) =
+          boundsMinusBounds# x1ProdMin# x1ProdMax# y1ProdMin# y1ProdMax#
     boundsPlusBounds# dxyMin# dxyMax# z1ProdMin# z1ProdMax#

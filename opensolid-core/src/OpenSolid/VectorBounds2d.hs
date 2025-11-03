@@ -110,10 +110,21 @@ hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) = do
 hullN :: NonEmpty (Vector2d (space @ units)) -> VectorBounds2d (space @ units)
 hullN (Vector2d x0 y0 :| rest) = go x0 x0 y0 y0 rest
  where
-  go :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> List (Vector2d (space @ units)) -> VectorBounds2d (space @ units)
+  go ::
+    Quantity units ->
+    Quantity units ->
+    Quantity units ->
+    Quantity units ->
+    List (Vector2d (space @ units)) ->
+    VectorBounds2d (space @ units)
   go xLow xHigh yLow yHigh [] = VectorBounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
   go xLow xHigh yLow yHigh (Vector2d x y : remaining) =
-    go (Quantity.min xLow x) (Quantity.max xHigh x) (Quantity.min yLow y) (Quantity.max yHigh y) remaining
+    go
+      (Quantity.min xLow x)
+      (Quantity.max xHigh x)
+      (Quantity.min yLow y)
+      (Quantity.max yHigh y)
+      remaining
 
 aggregate2 ::
   VectorBounds2d (space @ units) ->
@@ -179,7 +190,10 @@ maxMagnitude (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
   Quantity.hypot2 xMagnitude yMagnitude
 
-maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Quantity units2
+maxSquaredMagnitude ::
+  Units.Squared units1 units2 =>
+  VectorBounds2d (space @ units1) ->
+  Quantity units2
 maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude'
 
 maxSquaredMagnitude' :: VectorBounds2d (space @ units) -> Quantity (units :*: units)

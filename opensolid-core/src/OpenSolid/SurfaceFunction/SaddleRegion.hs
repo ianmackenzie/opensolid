@@ -91,7 +91,12 @@ quadratic subproblem saddlePoint = do
   let frame = Frame2d.fromXAxis (Axis2d.through saddlePoint dX)
   SaddleRegion{subproblem, frame, d1, d2}
 
-secondDerivative :: Quantity units -> Quantity units -> Quantity units -> Direction2d UvSpace -> Quantity units
+secondDerivative ::
+  Quantity units ->
+  Quantity units ->
+  Quantity units ->
+  Direction2d UvSpace ->
+  Quantity units
 secondDerivative fuu fuv fvv direction = do
   let Direction2d du dv = direction
   du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv

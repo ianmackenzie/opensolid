@@ -584,7 +584,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (VectorBounds2d (space @ units2)) (VectorBounds2d (space @ units3))
+  Multiplication
+    (Quantity units1)
+    (VectorBounds2d (space @ units2))
+    (VectorBounds2d (space @ units3))
   where
   value * VectorBounds2d x y = VectorBounds2d (value * x) (value * y)
 
@@ -598,7 +601,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorBounds2d (space @ units1)) (Quantity units2) (VectorBounds2d (space @ units3))
+  Multiplication
+    (VectorBounds2d (space @ units1))
+    (Quantity units2)
+    (VectorBounds2d (space @ units3))
   where
   VectorBounds2d x y * value = VectorBounds2d (x * value) (y * value)
 
@@ -612,7 +618,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Bounds units1) (VectorBounds2d (space @ units2)) (VectorBounds2d (space @ units3))
+  Multiplication
+    (Bounds units1)
+    (VectorBounds2d (space @ units2))
+    (VectorBounds2d (space @ units3))
   where
   bounds * VectorBounds2d x y = VectorBounds2d (bounds * x) (bounds * y)
 
@@ -626,7 +635,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorBounds2d (space @ units1)) (Bounds units2) (VectorBounds2d (space @ units3))
+  Multiplication
+    (VectorBounds2d (space @ units1))
+    (Bounds units2)
+    (VectorBounds2d (space @ units3))
   where
   VectorBounds2d x y * bounds = VectorBounds2d (x * bounds) (y * bounds)
 
@@ -720,7 +732,10 @@ instance
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
-  CrossMultiplication (Vector2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) (Bounds units3)
+  CrossMultiplication
+    (Vector2d (space1 @ units1))
+    (VectorBounds2d (space2 @ units2))
+    (Bounds units3)
   where
   Vector2d x1 y1 `cross` VectorBounds2d x2 y2 = x1 * y2 - y1 * x2
 
@@ -1100,7 +1115,8 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Vector3d (space1 @ units1)) (Vector3d (space2 @ units2)) units1
   where
-  Vector3d x1 y1 z1 ~= Vector3d x2 y2 z2 = Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Quantity.zero
+  Vector3d x1 y1 z1 ~= Vector3d x2 y2 z2 =
+    Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Quantity.zero
 
 instance HasZero (Vector3d (space @ units)) where
   zero = Vector3d Quantity.zero Quantity.zero Quantity.zero
@@ -1613,11 +1629,21 @@ instance Negation (VectorBounds3d (space @ units)) where
       (negate# zh#)
       (negate# zl#)
 
-instance Multiplication Sign (VectorBounds3d (space @ units)) (VectorBounds3d (space @ units)) where
+instance
+  Multiplication
+    Sign
+    (VectorBounds3d (space @ units))
+    (VectorBounds3d (space @ units))
+  where
   Positive * vectorBounds = vectorBounds
   Negative * vectorBounds = -vectorBounds
 
-instance Multiplication (VectorBounds3d (space @ units)) Sign (VectorBounds3d (space @ units)) where
+instance
+  Multiplication
+    (VectorBounds3d (space @ units))
+    Sign
+    (VectorBounds3d (space @ units))
+  where
   vectorBounds * Positive = vectorBounds
   vectorBounds * Negative = -vectorBounds
 
@@ -1630,11 +1656,12 @@ instance
     (VectorBounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  VectorBounds3d# xl1# xh1# yl1# yh1# zl1# zh1# + VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2# = do
-    let !(# xl#, xh# #) = boundsPlusBounds# xl1# xh1# xl2# xh2#
-    let !(# yl#, yh# #) = boundsPlusBounds# yl1# yh1# yl2# yh2#
-    let !(# zl#, zh# #) = boundsPlusBounds# zl1# zh1# zl2# zh2#
-    VectorBounds3d# xl# xh# yl# yh# zl# zh#
+  VectorBounds3d# xl1# xh1# yl1# yh1# zl1# zh1#
+    + VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2# = do
+      let !(# xl#, xh# #) = boundsPlusBounds# xl1# xh1# xl2# xh2#
+      let !(# yl#, yh# #) = boundsPlusBounds# yl1# yh1# yl2# yh2#
+      let !(# zl#, zh# #) = boundsPlusBounds# zl1# zh1# zl2# zh2#
+      VectorBounds3d# xl# xh# yl# yh# zl# zh#
 
 instance
   ( space1 ~ space2
@@ -1667,11 +1694,12 @@ instance
     (VectorBounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  VectorBounds3d# xl1# xh1# yl1# yh1# zl1# zh1# - VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2# = do
-    let !(# xl#, xh# #) = boundsMinusBounds# xl1# xh1# xl2# xh2#
-    let !(# yl#, yh# #) = boundsMinusBounds# yl1# yh1# yl2# yh2#
-    let !(# zl#, zh# #) = boundsMinusBounds# zl1# zh1# zl2# zh2#
-    VectorBounds3d# xl# xh# yl# yh# zl# zh#
+  VectorBounds3d# xl1# xh1# yl1# yh1# zl1# zh1#
+    - VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2# = do
+      let !(# xl#, xh# #) = boundsMinusBounds# xl1# xh1# xl2# xh2#
+      let !(# yl#, yh# #) = boundsMinusBounds# yl1# yh1# yl2# yh2#
+      let !(# zl#, zh# #) = boundsMinusBounds# zl1# zh1# zl2# zh2#
+      VectorBounds3d# xl# xh# yl# yh# zl# zh#
 
 instance
   ( space1 ~ space2
@@ -1696,7 +1724,10 @@ instance
   Vector3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 {-# INLINE quantityTimesVectorBounds3d #-}
-quantityTimesVectorBounds3d :: Quantity units1 -> VectorBounds3d (space @ units2) -> VectorBounds3d (space @ units3)
+quantityTimesVectorBounds3d ::
+  Quantity units1 ->
+  VectorBounds3d (space @ units2) ->
+  VectorBounds3d (space @ units3)
 quantityTimesVectorBounds3d (Quantity# v1#) (VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2#) = do
   let !(# xl#, xh# #) = doubleTimesBounds# v1# xl2# xh2#
   let !(# yl#, yh# #) = doubleTimesBounds# v1# yl2# yh2#
@@ -1713,7 +1744,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (VectorBounds3d (space @ units2)) (VectorBounds3d (space @ units3))
+  Multiplication
+    (Quantity units1)
+    (VectorBounds3d (space @ units2))
+    (VectorBounds3d (space @ units3))
   where
   lhs * rhs = quantityTimesVectorBounds3d lhs rhs
 
@@ -1727,17 +1761,25 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorBounds3d (space @ units1)) (Quantity units2) (VectorBounds3d (space @ units3))
+  Multiplication
+    (VectorBounds3d (space @ units1))
+    (Quantity units2)
+    (VectorBounds3d (space @ units3))
   where
   lhs * rhs = quantityTimesVectorBounds3d rhs lhs
 
 {-# INLINE boundsTimesVectorBounds3d #-}
-boundsTimesVectorBounds3d :: Bounds units1 -> VectorBounds3d (space @ units2) -> VectorBounds3d (space @ units3)
-boundsTimesVectorBounds3d (Bounds# vl1# vh1#) (VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2#) = do
-  let !(# xl#, xh# #) = boundsTimesBounds# vl1# vh1# xl2# xh2#
-  let !(# yl#, yh# #) = boundsTimesBounds# vl1# vh1# yl2# yh2#
-  let !(# zl#, zh# #) = boundsTimesBounds# vl1# vh1# zl2# zh2#
-  VectorBounds3d# xl# xh# yl# yh# zl# zh#
+boundsTimesVectorBounds3d ::
+  Bounds units1 ->
+  VectorBounds3d (space @ units2) ->
+  VectorBounds3d (space @ units3)
+boundsTimesVectorBounds3d
+  (Bounds# vl1# vh1#)
+  (VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2#) = do
+    let !(# xl#, xh# #) = boundsTimesBounds# vl1# vh1# xl2# xh2#
+    let !(# yl#, yh# #) = boundsTimesBounds# vl1# vh1# yl2# yh2#
+    let !(# zl#, zh# #) = boundsTimesBounds# vl1# vh1# zl2# zh2#
+    VectorBounds3d# xl# xh# yl# yh# zl# zh#
 
 instance
   Multiplication'
@@ -1749,7 +1791,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Bounds units1) (VectorBounds3d (space @ units2)) (VectorBounds3d (space @ units3))
+  Multiplication
+    (Bounds units1)
+    (VectorBounds3d (space @ units2))
+    (VectorBounds3d (space @ units3))
   where
   lhs * rhs = boundsTimesVectorBounds3d lhs rhs
 
@@ -1763,7 +1808,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorBounds3d (space @ units1)) (Bounds units2) (VectorBounds3d (space @ units3))
+  Multiplication
+    (VectorBounds3d (space @ units1))
+    (Bounds units2)
+    (VectorBounds3d (space @ units3))
   where
   lhs * rhs = boundsTimesVectorBounds3d rhs lhs
 

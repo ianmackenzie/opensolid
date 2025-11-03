@@ -60,10 +60,12 @@ atPoint :: Point2d (space @ units) -> Frame2d (space @ units) defines
 atPoint p0 = Frame2d p0 Orientation2d.horizontal
 
 fromXAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
-fromXAxis axis = Frame2d (Axis2d.originPoint axis) (Orientation2d.fromXDirection (Axis2d.direction axis))
+fromXAxis axis =
+  Frame2d (Axis2d.originPoint axis) (Orientation2d.fromXDirection (Axis2d.direction axis))
 
 fromYAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
-fromYAxis axis = Frame2d (Axis2d.originPoint axis) (Orientation2d.fromYDirection (Axis2d.direction axis))
+fromYAxis axis =
+  Frame2d (Axis2d.originPoint axis) (Orientation2d.fromYDirection (Axis2d.direction axis))
 
 xAxis :: Frame2d (space @ units) defines -> Axis2d (space @ units)
 xAxis frame = Axis2d.through (originPoint frame) (xDirection frame)

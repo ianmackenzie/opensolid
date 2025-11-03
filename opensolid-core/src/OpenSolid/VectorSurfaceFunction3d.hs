@@ -222,7 +222,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (VectorSurfaceFunction3d (space @ units2)) (VectorSurfaceFunction3d (space @ units3))
+  Multiplication
+    (Quantity units1)
+    (VectorSurfaceFunction3d (space @ units2))
+    (VectorSurfaceFunction3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
@@ -236,7 +239,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorSurfaceFunction3d (space @ units1)) (SurfaceFunction units2) (VectorSurfaceFunction3d (space @ units3))
+  Multiplication
+    (VectorSurfaceFunction3d (space @ units1))
+    (SurfaceFunction units2)
+    (VectorSurfaceFunction3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
@@ -253,7 +259,10 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorSurfaceFunction3d (space @ units1)) (Quantity units2) (VectorSurfaceFunction3d (space @ units3))
+  Multiplication
+    (VectorSurfaceFunction3d (space @ units1))
+    (Quantity units2)
+    (VectorSurfaceFunction3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
@@ -267,7 +276,10 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorSurfaceFunction3d (space @ units1)) (Quantity units2) (VectorSurfaceFunction3d (space @ units3))
+  Division
+    (VectorSurfaceFunction3d (space @ units1))
+    (Quantity units2)
+    (VectorSurfaceFunction3d (space @ units3))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
@@ -459,10 +471,14 @@ recursive givenCompiled derivativeFunction =
 
 desingularize ::
   VectorSurfaceFunction3d (space @ units) ->
-  "singularityU0" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units)) ->
-  "singularityU1" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units)) ->
-  "singularityV0" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units)) ->
-  "singularityV1" ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units)) ->
+  "singularityU0"
+    ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units)) ->
+  "singularityU1"
+    ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units)) ->
+  "singularityV0"
+    ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units)) ->
+  "singularityV1"
+    ::: Maybe (VectorSurfaceFunction3d (space @ units), VectorSurfaceFunction3d (space @ units)) ->
   VectorSurfaceFunction3d (space @ units)
 desingularize = SurfaceFunction.Blending.desingularize desingularized
 

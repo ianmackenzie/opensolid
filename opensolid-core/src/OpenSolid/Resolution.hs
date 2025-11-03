@@ -40,7 +40,6 @@ predicate ::
   Resolution units ->
   a ->
   Bool
-predicate (Named size) (Named error) resolution value = do
-  let acceptableSize = Quantity.isInfinite resolution.maxSize || size value <= resolution.maxSize
-  let acceptableError = Quantity.isInfinite resolution.maxError || error value <= resolution.maxError
-  acceptableSize && acceptableError
+predicate (Named size) (Named error) resolution value =
+  (Quantity.isInfinite resolution.maxSize || size value <= resolution.maxSize)
+    && (Quantity.isInfinite resolution.maxError || error value <= resolution.maxError)

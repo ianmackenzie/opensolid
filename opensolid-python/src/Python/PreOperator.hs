@@ -67,7 +67,11 @@ functionName operatorId = case operatorId of
   BinaryOperator.Dot -> internalError "Dot product should never be a pre-operator"
   BinaryOperator.Cross -> internalError "Cross product should never be a pre-operator"
 
-overloadComponents :: FFI.ClassName -> BinaryOperator.Id -> PreOperatorOverload -> (Text, Text, Text)
+overloadComponents ::
+  FFI.ClassName ->
+  BinaryOperator.Id ->
+  PreOperatorOverload ->
+  (Text, Text, Text)
 overloadComponents className operatorId overload = do
   let ffiFunctionName = PreOperatorOverload.ffiName className operatorId overload
   let selfType = FFI.Class className

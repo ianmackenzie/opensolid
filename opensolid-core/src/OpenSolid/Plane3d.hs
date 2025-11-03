@@ -112,7 +112,10 @@ yAxis = (.yAxis)
 
 The orientation of the plane will remain unchanged.
 -}
-moveTo :: Point3d (space @ units) -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+moveTo ::
+  Point3d (space @ units) ->
+  Plane3d (space @ units) defines ->
+  Plane3d (space @ units) defines
 moveTo p0 plane = Plane3d p0 (orientation plane)
 
 -- | Convert a plane defined in local coordinates to one defined in global coordinates.

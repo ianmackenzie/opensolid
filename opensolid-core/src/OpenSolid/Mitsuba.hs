@@ -80,8 +80,10 @@ To actually render the generated scene, you'll need to use the Mitsuba Python pa
 (https://mitsuba.readthedocs.io/en/stable/),
 calling 'mitsuba.load_file' with the path to the generated XML file.
 
-The generated scene will by default use 16 samples per pixel, and render an image with resolution 800x600.
-However, these can be configured by setting the 'spp', 'width' and 'height' parameters when loading the scene,
+The generated scene will by default use 16 samples per pixel,
+and render an image with resolution 800x600.
+However, these can be configured by
+setting the 'spp', 'width' and 'height' parameters when loading the scene,
 for example with 'mitsuba.load_file(path_to_xml_file, spp=256, width=1920, height=1080)'.
 -}
 writeFiles ::

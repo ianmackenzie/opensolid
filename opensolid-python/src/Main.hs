@@ -206,7 +206,8 @@ classDefinition
       postOperators
       nestedClasses
     ) = do
-    let (nestedClassDefinitions, nestedClassConstants) = List.unzip2 (List.map classDefinition nestedClasses)
+    let (nestedClassDefinitions, nestedClassConstants) =
+          List.unzip2 (List.map classDefinition nestedClasses)
     let pointerFieldName = Python.Class.pointerFieldName className
     let definition =
           Python.lines

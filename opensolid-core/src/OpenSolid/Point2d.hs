@@ -202,23 +202,49 @@ transformBy transform point = do
   let (px, py) = coordinates point
   p0 + px * vx + py * vy
 
-translateBy :: Vector2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
+translateBy ::
+  Vector2d (space @ units) ->
+  Point2d (space @ units) ->
+  Point2d (space @ units)
 translateBy = Transform2d.translateByImpl transformBy
 
-translateIn :: Direction2d space -> Quantity units -> Point2d (space @ units) -> Point2d (space @ units)
+translateIn ::
+  Direction2d space ->
+  Quantity units ->
+  Point2d (space @ units) ->
+  Point2d (space @ units)
 translateIn = Transform2d.translateInImpl transformBy
 
-translateAlong :: Axis2d (space @ units) -> Quantity units -> Point2d (space @ units) -> Point2d (space @ units)
+translateAlong ::
+  Axis2d (space @ units) ->
+  Quantity units ->
+  Point2d (space @ units) ->
+  Point2d (space @ units)
 translateAlong = Transform2d.translateAlongImpl transformBy
 
-rotateAround :: Point2d (space @ units) -> Angle -> Point2d (space @ units) -> Point2d (space @ units)
+rotateAround ::
+  Point2d (space @ units) ->
+  Angle ->
+  Point2d (space @ units) ->
+  Point2d (space @ units)
 rotateAround = Transform2d.rotateAroundImpl transformBy
 
-mirrorAcross :: Axis2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
+mirrorAcross ::
+  Axis2d (space @ units) ->
+  Point2d (space @ units) ->
+  Point2d (space @ units)
 mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
-scaleAbout :: Point2d (space @ units) -> Float -> Point2d (space @ units) -> Point2d (space @ units)
+scaleAbout ::
+  Point2d (space @ units) ->
+  Float ->
+  Point2d (space @ units) ->
+  Point2d (space @ units)
 scaleAbout = Transform2d.scaleAboutImpl transformBy
 
-scaleAlong :: Axis2d (space @ units) -> Float -> Point2d (space @ units) -> Point2d (space @ units)
+scaleAlong ::
+  Axis2d (space @ units) ->
+  Float ->
+  Point2d (space @ units) ->
+  Point2d (space @ units)
 scaleAlong = Transform2d.scaleAlongImpl transformBy

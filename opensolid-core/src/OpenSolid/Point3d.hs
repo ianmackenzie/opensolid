@@ -62,7 +62,10 @@ import OpenSolid.Vector3d qualified as Vector3d
 
 -- | Get the XYZ coordinates of a point, given an XYZ coordinate convention to use.
 {-# INLINE coordinates #-}
-coordinates :: Convention3d -> Point3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
+coordinates ::
+  Convention3d ->
+  Point3d (space @ units) ->
+  (Quantity units, Quantity units, Quantity units)
 coordinates convention (Position3d vector) = Vector3d.components convention vector
 
 {-| Get the XYZ coordinates of a point using a Z-up coordinate convention.
@@ -157,8 +160,10 @@ distanceFrom p1 p2 = Quantity# (distanceFrom# p1 p2)
 
 {-# INLINE distanceFrom# #-}
 distanceFrom# :: Point3d (space @ units) -> Point3d (space @ units) -> Double#
-distanceFrom# (Point3d (Quantity# x1#) (Quantity# y1#) (Quantity# z1#)) (Point3d (Quantity# x2#) (Quantity# y2#) (Quantity# z2#)) =
-  hypot3# (x2# -# x1#) (y2# -# y1#) (z2# -# z1#)
+distanceFrom#
+  (Point3d (Quantity# x1#) (Quantity# y1#) (Quantity# z1#))
+  (Point3d (Quantity# x2#) (Quantity# y2#) (Quantity# z2#)) =
+    hypot3# (x2# -# x1#) (y2# -# y1#) (z2# -# z1#)
 
 {-| Compute the (signed) distance of a point along an axis.
 
@@ -213,23 +218,49 @@ transformBy transform (Point3d px py pz) = do
   let (Transform3d p0 vx vy vz) = transform
   p0 + px * vx + py * vy + pz * vz
 
-translateBy :: Vector3d (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
+translateBy ::
+  Vector3d (space @ units) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units)
 translateBy = Transform3d.translateByImpl transformBy
 
-translateIn :: Direction3d space -> Quantity units -> Point3d (space @ units) -> Point3d (space @ units)
+translateIn ::
+  Direction3d space ->
+  Quantity units ->
+  Point3d (space @ units) ->
+  Point3d (space @ units)
 translateIn = Transform3d.translateInImpl transformBy
 
-translateAlong :: Axis3d (space @ units) -> Quantity units -> Point3d (space @ units) -> Point3d (space @ units)
+translateAlong ::
+  Axis3d (space @ units) ->
+  Quantity units ->
+  Point3d (space @ units) ->
+  Point3d (space @ units)
 translateAlong = Transform3d.translateAlongImpl transformBy
 
-rotateAround :: Axis3d (space @ units) -> Angle -> Point3d (space @ units) -> Point3d (space @ units)
+rotateAround ::
+  Axis3d (space @ units) ->
+  Angle ->
+  Point3d (space @ units) ->
+  Point3d (space @ units)
 rotateAround = Transform3d.rotateAroundImpl transformBy
 
-mirrorAcross :: Plane3d (space @ units) defines -> Point3d (space @ units) -> Point3d (space @ units)
+mirrorAcross ::
+  Plane3d (space @ units) defines ->
+  Point3d (space @ units) ->
+  Point3d (space @ units)
 mirrorAcross = Transform3d.mirrorAcrossImpl transformBy
 
-scaleAbout :: Point3d (space @ units) -> Float -> Point3d (space @ units) -> Point3d (space @ units)
+scaleAbout ::
+  Point3d (space @ units) ->
+  Float ->
+  Point3d (space @ units) ->
+  Point3d (space @ units)
 scaleAbout = Transform3d.scaleAboutImpl transformBy
 
-scaleAlong :: Axis3d (space @ units) -> Float -> Point3d (space @ units) -> Point3d (space @ units)
+scaleAlong ::
+  Axis3d (space @ units) ->
+  Float ->
+  Point3d (space @ units) ->
+  Point3d (space @ units)
 scaleAlong = Transform3d.scaleAlongImpl transformBy

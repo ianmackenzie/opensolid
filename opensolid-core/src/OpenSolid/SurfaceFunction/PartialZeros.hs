@@ -202,9 +202,12 @@ finalize function dvdu dudv partialZeros = do
         List.map (\(PiecewiseCurve _ _ segments) -> segments) extendedPiecewiseCurves
   Zeros
     { tangentPoints
-    , saddlePoints = List.map SaddleRegion.point saddleRegions
-    , crossingCurves = List.map (Tolerance.using Quantity.zero Curve2d.piecewise) crossingCurveSegments
-    , crossingLoops = List.map (Tolerance.using Quantity.zero Curve2d.piecewise) crossingLoopSegments
+    , saddlePoints =
+        List.map SaddleRegion.point saddleRegions
+    , crossingCurves =
+        List.map (Tolerance.using Quantity.zero Curve2d.piecewise) crossingCurveSegments
+    , crossingLoops =
+        List.map (Tolerance.using Quantity.zero Curve2d.piecewise) crossingLoopSegments
     }
 
 extend :: Tolerance units => PiecewiseCurve -> SaddleRegion units -> PiecewiseCurve

@@ -135,7 +135,8 @@ curveOverlap1 = Test.verify "curveOverlap1" Test.do
   let arc1 = Curve2d.arc (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
   let arc2 = Curve2d.arc (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   actualSegments <- overlappingSegments arc1 arc2
-  let expectedSegments = NonEmpty.one (OverlappingSegment (Bounds 0.0 0.5) (Bounds 0.5 1.0) Positive)
+  let expectedSegments =
+        NonEmpty.one (OverlappingSegment (Bounds 0.0 0.5) (Bounds 0.5 1.0) Positive)
   Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
@@ -369,7 +370,10 @@ reversalConsistency =
           t <- Parameter.random
           Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1.0 - t))
 
-boundsConsistency :: (Tolerance units, Show (Quantity units)) => Curve2d (space @ units) -> Expectation
+boundsConsistency ::
+  (Tolerance units, Show (Quantity units)) =>
+  Curve2d (space @ units) ->
+  Expectation
 boundsConsistency curve = Test.do
   tBounds <- Bounds.random Parameter.random
   tValue <- Random.map (Bounds.interpolate tBounds) Parameter.random

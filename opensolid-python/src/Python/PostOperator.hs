@@ -67,7 +67,11 @@ functionName operatorId = case operatorId of
   BinaryOperator.Dot -> "dot"
   BinaryOperator.Cross -> "cross"
 
-overloadComponents :: FFI.ClassName -> BinaryOperator.Id -> PostOperatorOverload -> (Text, Text, Text)
+overloadComponents ::
+  FFI.ClassName ->
+  BinaryOperator.Id ->
+  PostOperatorOverload ->
+  (Text, Text, Text)
 overloadComponents className operatorId memberFunction = do
   let ffiFunctionName = PostOperatorOverload.ffiName className operatorId memberFunction
   let selfType = FFI.Class className
