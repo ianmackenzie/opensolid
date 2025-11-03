@@ -62,7 +62,7 @@ get :: Int -> Array a -> a
 get index (Array array) = array ! index
 
 map :: (a -> b) -> Array a -> Array b
-map f (Array array) = Array (Prelude.fmap f array)
+map f (Array array) = Array (fmap f array)
 
 map2 :: (a -> b -> c) -> Array a -> Array b -> Array c
 map2 f array1 array2 =

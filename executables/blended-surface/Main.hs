@@ -16,11 +16,11 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
-main = Tolerance.using 1e-9 IO.do
+main = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  f <- SurfaceFunction.quotient (u .* (float 5.0 .- twice v)) (u .* (float 1.0 .+ v))
-  expression <- CompiledFunction.expression f.compiled
+  f <- IO.try (SurfaceFunction.quotient (u .* (float 5.0 .- twice v)) (u .* (float 1.0 .+ v)))
+  expression <- IO.try (CompiledFunction.expression f.compiled)
   IO.printLine (Expression.debug expression)
   let meshPoint uvPoint = do
         let Point2d uValue vValue = uvPoint

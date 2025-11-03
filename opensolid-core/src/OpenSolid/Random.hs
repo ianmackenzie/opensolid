@@ -14,7 +14,6 @@ module OpenSolid.Random
   , retry
   , filter
   , sequence
-  , (>>=)
   , return
   )
 where
@@ -27,19 +26,13 @@ import OpenSolid.Composition
 import OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Random.Internal hiding ((>>=))
-import OpenSolid.Random.Internal qualified as Internal
+import OpenSolid.Random.Internal
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
 import Prelude qualified
 
 newtype Seed = Seed StdGen
-
-(>>=) :: Generator a -> (a -> Generator b) -> Generator b
-(>>=) = (Internal.>>=)
-
-infixl 1 >>=
 
 init :: Int -> Seed
 init givenSeed = Seed (System.Random.mkStdGen givenSeed)
@@ -52,20 +45,20 @@ generate generator =
   System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
 
 map2 :: (a -> b -> c) -> Generator a -> Generator b -> Generator c
-map2 function generatorA generatorB = OpenSolid.Random.do
+map2 function generatorA generatorB = do
   valueA <- generatorA
   valueB <- generatorB
   return (function valueA valueB)
 
 map3 :: (a -> b -> c -> d) -> Generator a -> Generator b -> Generator c -> Generator d
-map3 function generatorA generatorB generatorC = OpenSolid.Random.do
+map3 function generatorA generatorB generatorC = do
   valueA <- generatorA
   valueB <- generatorB
   valueC <- generatorC
   return (function valueA valueB valueC)
 
 map4 :: (a -> b -> c -> d -> e) -> Generator a -> Generator b -> Generator c -> Generator d -> Generator e
-map4 function generatorA generatorB generatorC generatorD = OpenSolid.Random.do
+map4 function generatorA generatorB generatorC generatorD = do
   valueA <- generatorA
   valueB <- generatorB
   valueC <- generatorC
@@ -73,7 +66,7 @@ map4 function generatorA generatorB generatorC generatorD = OpenSolid.Random.do
   return (function valueA valueB valueC valueD)
 
 seed :: Generator Seed
-seed = Generator (System.Random.splitGen >> Pair.mapFirst Seed)
+seed = Generator (Pair.mapFirst Seed . System.Random.splitGen)
 
 oneOf :: NonEmpty a -> Generator a
 oneOf values = merge (NonEmpty.map return values)
@@ -82,19 +75,18 @@ merge :: NonEmpty (Generator a) -> Generator a
 merge generators = do
   let generatorArray = Array.fromNonEmpty generators
   let indexGenerator = Int.random 0 (generatorArray.length - 1)
-  OpenSolid.Random.do
-    index <- indexGenerator
-    Array.get index generatorArray
+  index <- indexGenerator
+  Array.get index generatorArray
 
 retry :: Generator (Maybe a) -> Generator a
-retry fallibleGenerator = OpenSolid.Random.do
+retry fallibleGenerator = do
   result <- fallibleGenerator
   case result of
     Just value -> return value
     Nothing -> retry fallibleGenerator
 
 filter :: (a -> Bool) -> Generator a -> Generator a
-filter predicate generator = OpenSolid.Random.do
+filter predicate generator = do
   result <- generator
   if predicate result
     then return result

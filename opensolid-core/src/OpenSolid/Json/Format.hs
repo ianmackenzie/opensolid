@@ -47,7 +47,7 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((>>))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
@@ -95,14 +95,14 @@ coerce :: Coercible a b => Format a -> Format b
 coerce = convert Data.Coerce.coerce Data.Coerce.coerce
 
 convert :: (a -> b) -> (b -> a) -> Format a -> Format b
-convert up down format = lift (up >> Success) down format
+convert up down format = lift (Success . up) down format
 
 lift :: (a -> Result x b) -> (b -> a) -> Format a -> Format b
 lift up down format = do
   let Format{encodeFunction, decodeFunction, schema} = format
   Format
-    { encodeFunction = down >> encodeFunction
-    , decodeFunction = decodeFunction >> Result.andThen (Result.try . up)
+    { encodeFunction = encodeFunction . down
+    , decodeFunction = Result.andThen (Result.try . up) . decodeFunction
     , schema = removeMetadata schema
     }
 
@@ -166,8 +166,8 @@ toNonEmpty [] = Failure "List is empty"
 nonEmpty :: Format item -> Format (NonEmpty item)
 nonEmpty (Format encodeItem decodeItem itemSchema) =
   Format
-    { encodeFunction = NonEmpty.toList >> Json.listOf encodeItem
-    , decodeFunction = decodeList decodeItem >> Result.andThen toNonEmpty
+    { encodeFunction = Json.listOf encodeItem . NonEmpty.toList
+    , decodeFunction = Result.andThen toNonEmpty . decodeList decodeItem
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema, Json.Schema.minItems = Just 1}
     }
 
@@ -185,7 +185,7 @@ decodeMapField decodeItem (name, json) = Result.map (name,) (decodeItem json)
 map :: Format item -> Format (Map Text item)
 map (Format encodeItem decodeItem itemSchema) =
   Format
-    { encodeFunction = Map.map encodeItem >> Json.map
+    { encodeFunction = Json.map . Map.map encodeItem
     , decodeFunction = decodeMap decodeItem
     , schema = Json.Schema.object{Json.Schema.items = Just itemSchema}
     }
@@ -198,7 +198,7 @@ decodeObject fromFields json = case json of
 object :: constructor -> Fields constructor parent () -> Format parent
 object constructor (Fields decompose compose properties required) =
   Format
-    { encodeFunction = decompose >> Json.map
+    { encodeFunction = Json.map . decompose
     , decodeFunction = decodeObject (\fieldValues -> compose fieldValues constructor)
     , schema = Json.Schema.object{Json.Schema.required, Json.Schema.properties}
     }
@@ -219,9 +219,12 @@ data Fields constructor parent dummy = Fields
   , required :: List Text
   }
 
+class FieldComposition a b c | a b -> c where
+  (>>) :: a -> b -> c
+
 instance
   parent ~ parent' =>
-  Composition
+  FieldComposition
     (Field parent child ())
     (Fields constructor parent' ())
     (Fields (child -> constructor) parent ())
@@ -241,7 +244,7 @@ instance
 
 instance
   parent ~ parent' =>
-  Composition
+  FieldComposition
     (Field parent child1 ())
     (Field parent' child2 ())
     (Fields (child1 -> child2 -> parent) parent ())

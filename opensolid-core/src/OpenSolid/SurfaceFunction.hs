@@ -562,7 +562,7 @@ data IsZero = IsZero deriving (Eq, Show, Error.Message)
 zeros :: Tolerance units => SurfaceFunction units -> Result IsZero Zeros
 zeros function
   | function ~= Qty.zero = Failure IsZero
-  | otherwise = Result.do
+  | otherwise = do
       let fu = function.du
       let fv = function.dv
       -- Using unsafeQuotient should be OK here
@@ -687,7 +687,7 @@ diagonalCrossingCurve ::
   Tolerance units =>
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
-diagonalCrossingCurve subproblem = Fuzzy.do
+diagonalCrossingCurve subproblem = do
   let Subproblem{fuBounds, fvBounds} = subproblem
   fuSign <- Bounds.resolvedSign fuBounds
   fvSign <- Bounds.resolvedSign fvBounds
@@ -780,10 +780,10 @@ horizontalCrossingCurve ::
   Tolerance units =>
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
-horizontalCrossingCurve subproblem = Fuzzy.do
+horizontalCrossingCurve subproblem = do
   let Subproblem{fvBounds} = subproblem
   if Bounds.isResolved fvBounds
-    then Fuzzy.do
+    then do
       let bottomEdgeBounds = Subproblem.bottomEdgeBounds subproblem
       let topEdgeBounds = Subproblem.topEdgeBounds subproblem
       bottomEdgeSign <- Bounds.resolvedSign bottomEdgeBounds
@@ -829,10 +829,10 @@ verticalCrossingCurve ::
   Tolerance units =>
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
-verticalCrossingCurve subproblem = Fuzzy.do
+verticalCrossingCurve subproblem = do
   let Subproblem{fuBounds} = subproblem
   if Bounds.isResolved fuBounds
-    then Fuzzy.do
+    then do
       let leftEdgeBounds = Subproblem.leftEdgeBounds subproblem
       let rightEdgeBounds = Subproblem.rightEdgeBounds subproblem
       leftEdgeSign <- Bounds.resolvedSign leftEdgeBounds
@@ -845,13 +845,13 @@ verticalCrossingCurve subproblem = Fuzzy.do
     else Unresolved
 
 southCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingSegment
-southCrossingCurve subproblem = Fuzzy.do
+southCrossingCurve subproblem = do
   let start = Subproblem.topEdgePoint subproblem
   let end = Subproblem.bottomEdgePoint subproblem
   verticalCurve subproblem start end
 
 northCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingSegment
-northCrossingCurve subproblem = Fuzzy.do
+northCrossingCurve subproblem = do
   let start = Subproblem.bottomEdgePoint subproblem
   let end = Subproblem.topEdgePoint subproblem
   verticalCurve subproblem start end

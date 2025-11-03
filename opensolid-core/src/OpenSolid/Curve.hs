@@ -75,7 +75,6 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -634,7 +633,7 @@ so we would end up reporting a single order-1 zero at x=0
 zeros :: Tolerance units => Curve units -> Result IsZero (List Zero)
 zeros curve
   | curve ~= Qty.zero = Failure IsZero
-  | otherwise = Result.do
+  | otherwise = do
       let derivatives = Stream.iterate (.derivative) curve
       let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
       let cache = Solve1d.init derivativeBounds
@@ -688,7 +687,7 @@ findZerosOrder k derivatives subdomain derivativeBounds
   -- We've exceeded the maximum zero order without finding a non-zero derivative
   | k > maxZeroOrder = Unresolved
   -- Otherwise, find higher-order zeros and then search in between them
-  | otherwise = Fuzzy.do
+  | otherwise = do
       let higherDerivatives = Stream.tail derivatives
       let higherDerivativeBounds = Stream.tail derivativeBounds
       let currentDerivative = Stream.head derivatives
@@ -700,7 +699,7 @@ findZerosOrder k derivatives subdomain derivativeBounds
         List.One (t0, neighborhood) -> do
           if Qty.abs (evaluate currentDerivative t0) <= Solve1d.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
-            else Fuzzy.do
+            else do
               let leftBounds = Bounds (Bounds.lower tBounds) t0
               let rightBounds = Bounds t0 (Bounds.upper tBounds)
               leftZeros <- solveMonotonic k currentDerivative nextDerivative leftBounds

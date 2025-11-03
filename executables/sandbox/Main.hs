@@ -17,7 +17,6 @@ import OpenSolid.CoordinateSystem (UvCoordinates, UvSpace)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Debug qualified as Debug
 import OpenSolid.Debug.Plot qualified as Debug.Plot
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d qualified as Direction3d
@@ -72,7 +71,6 @@ import OpenSolid.Syntax
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance (Tolerance, (~=))
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Meters, Unitless, (:/:))
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
@@ -89,7 +87,7 @@ log :: Show a => Text -> a -> IO ()
 log label value = IO.printLine (label <> ": " <> Text.show value)
 
 testScalarArithmetic :: IO ()
-testScalarArithmetic = IO.do
+testScalarArithmetic = do
   log "Integer product" (int 3 .* int 4)
   log "Integer division" (int 10 // int 4)
   log "True division" (int 10 ./ int 4)
@@ -101,7 +99,7 @@ testScalarArithmetic = IO.do
   log "sqrt 2.0" (sqrt (float 2.0))
 
 testVectorArithmetic :: IO ()
-testVectorArithmetic = IO.do
+testVectorArithmetic = do
   let vector x y z = Vector3d.zUp (Length.meters x) (Length.meters y) (Length.meters z)
   let v1 = Vector2d.meters 1.0 2.0
   let v2 = half (Vector2d.meters 3.0 4.0)
@@ -120,7 +118,7 @@ testVectorArithmetic = IO.do
   log "Scaled vector" scaledVector
 
 testBoundsArithmetic :: IO ()
-testBoundsArithmetic = IO.do
+testBoundsArithmetic = do
   let boundsDifference =
         Bounds (Length.meters 2.0) (Length.meters 3.0) .- Length.centimeters 50.0
   log "Bounds difference" boundsDifference
@@ -133,7 +131,7 @@ testEquality = Tolerance.using Length.centimeter do
   log "Equality test" (Length.meters 1.0 ~= Length.meters 1.005)
 
 testTransformation :: IO ()
-testTransformation = IO.do
+testTransformation = do
   let rotatedAxis = Axis2d.x |> Axis2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn
   log "Rotated axis" rotatedAxis
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
@@ -155,19 +153,19 @@ offsetPoint startPoint endPoint distance =
       Point2d.midpoint startPoint endPoint .+ displacement
 
 testCustomFunction :: Tolerance Meters => IO ()
-testCustomFunction = IO.do
+testCustomFunction = do
   let point = offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
   log "Offset point" point
 
 testListOperations :: IO ()
-testListOperations = IO.do
+testListOperations = do
   let deltas = List.successive subtract [int 0, 1, 4, 9, 16, 25]
   let intervals = List.successive Bounds [float 1.0, 2.0, 3.0, 4.0]
   log "Successive deltas" deltas
   log "Successive intervals" intervals
 
 getCrossProduct :: Tolerance Meters => Result Text (Qty Unitless)
-getCrossProduct = Result.addContext "In getCrossProduct" Try.do
+getCrossProduct = Result.addContext "In getCrossProduct" do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2.0 3.0)
       |> Result.addContext "When getting vector direction"
@@ -179,29 +177,29 @@ getCrossProduct = Result.addContext "In getCrossProduct" Try.do
 testTry :: Tolerance Meters => IO ()
 testTry =
   IO.onError IO.printLine do
-    IO.addContext "In testTry" IO.do
-      crossProduct <- getCrossProduct
+    IO.addContext "In testTry" do
+      crossProduct <- IO.try getCrossProduct
       log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
 testIOIteration = IO.forEach [int 1 .. 3] (log "Looping")
 
 doublingIO :: Text -> IO Int
-doublingIO input = IO.do
-  value <- Int.parse input
+doublingIO input = do
+  value <- IO.try (Int.parse input)
   let doubled = int 2 .* value
-  IO.succeed doubled
+  return doubled
 
 doubleManyIO :: IO [Int]
 doubleManyIO = IO.collect doublingIO ["1", "-2", "3"]
 
 testIOSequencing :: IO ()
-testIOSequencing = IO.do
+testIOSequencing = do
   doubledValues <- doubleManyIO
   IO.forEach doubledValues (log "Doubled value")
 
 testParameter1dGeneration :: IO ()
-testParameter1dGeneration = IO.do
+testParameter1dGeneration = do
   t1 <- Random.generate Parameter.random
   t2 <- Random.generate Parameter.random
   t3 <- Random.generate Parameter.random
@@ -215,35 +213,35 @@ testEmptyCheck (first : rest) =
   IO.printLine ("List is non-empty, maximum is " <> Text.int (NonEmpty.maximum (first :| rest)))
 
 testNonEmpty :: IO ()
-testNonEmpty = IO.do
+testNonEmpty = do
   testEmptyCheck []
   testEmptyCheck [2, 3, 1]
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
-testPlaneTorusIntersection = IO.do
+testPlaneTorusIntersection = do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let crossSection =
         Curve2d.circle
           @ #centerPoint (Point2d.x majorRadius)
           @ #diameter (twice minorRadius)
-  surface <- Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi
+  surface <- IO.try (Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi)
   let alpha = Angle.asin (minorRadius ./ majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
   let planeNormal = Direction3d.polar World3d.frontPlane (alpha .+ Angle.halfPi)
   let f = planeNormal `dot` (surface.function .- World3d.originPoint)
-  zeros <- SurfaceFunction.zeros f
+  zeros <- IO.try (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" zeros.crossingCurves.length
   log "  Saddle points" zeros.saddlePoints.length
 
 testPlaneParaboloidIntersection :: IO ()
-testPlaneParaboloidIntersection = Tolerance.using 1e-9 IO.do
+testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
   let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- float 0.5
-  zeros <- SurfaceFunction.zeros f
+  zeros <- IO.try (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
   log "  Crossing curves" zeros.crossingCurves.length
@@ -253,7 +251,7 @@ strokeWidth :: Length
 strokeWidth = Length.millimeters 0.1
 
 drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
-drawZeros path zeros = IO.do
+drawZeros path zeros = do
   let uvBounds = Bounds.convert toDrawing (Bounds -0.05 1.05)
   let viewBox = Bounds2d uvBounds uvBounds
   Drawing2d.writeSvg path viewBox $
@@ -290,12 +288,12 @@ drawDot color point =
     @ #diameter (Length.millimeters 1.0)
 
 delayedPrint :: Int -> Duration -> IO ()
-delayedPrint number delay = IO.do
+delayedPrint number delay = do
   IO.sleep delay
   IO.printLine (Text.int number)
 
 testConcurrency :: IO ()
-testConcurrency = IO.do
+testConcurrency = do
   IO.printLine "Starting concurrency test..."
   IO.printLine "0"
   IO.Parallel.run
@@ -308,12 +306,12 @@ testConcurrency = IO.do
   IO.printLine "Concurrency test complete!"
 
 computeSquareRoot :: Qty Unitless -> IO (Qty Unitless)
-computeSquareRoot value = IO.do
+computeSquareRoot value = do
   IO.sleep (Duration.milliseconds 100.0)
-  Success (sqrt value)
+  return (sqrt value)
 
 testIOParallel :: IO ()
-testIOParallel = IO.do
+testIOParallel = do
   squareRoots <- IO.Parallel.collect computeSquareRoot [1.0, 4.0, 9.0, 16.0, 25.0]
   log "Square roots" squareRoots
 
@@ -348,7 +346,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
     ]
 
 testBezierSegment :: Tolerance Meters => IO ()
-testBezierSegment = IO.do
+testBezierSegment = do
   let p1 = Point2d.origin @Global
   let p2 = Point2d 0.0 5.0
   let p3 = Point2d 2.5 10.0
@@ -361,7 +359,7 @@ testBezierSegment = IO.do
   Drawing2d.writeSvg "executables/sandbox/test-bezier-segment.svg" drawingBounds curveEntity
 
 testHermiteBezier :: IO ()
-testHermiteBezier = IO.do
+testHermiteBezier = do
   let startPoint = Point2d.origin @Global
   let startDerivatives = [Vector2d.centimeters 10.0 10.0]
   let endDerivatives = [Vector2d.centimeters 0.0 -10.0, Vector2d.zero]
@@ -378,7 +376,7 @@ testHermiteBezier = IO.do
   Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity
 
 testExplicitRandomStep :: IO ()
-testExplicitRandomStep = IO.do
+testExplicitRandomStep = do
   let seed0 = Random.init 1234
   let list0 = [int 5 .. 10]
   let generator = List.shuffle list0
@@ -389,29 +387,19 @@ testExplicitRandomStep = IO.do
   let (list3, _) = Random.step generator seed2
   log "list3" list3
 
-testDebugPrint :: IO ()
-testDebugPrint = IO.do
-  let xs = Text.replicate 2 "x"
-  Debug.log "xs" xs
-  let ys = Text.replicate 3 "y"
-  Debug.log "ys" ys
-  IO.printLine (xs <> ys)
-
 textSum :: Text -> Text -> Result Text Int
-textSum t1 t2 = Try.do
-  n1 <- Int.parse t1
-  Debug.log "n1" n1
-  n2 <- Int.parse t2
-  Debug.log "n2" n2
+textSum t1 t2 = do
+  n1 <- Result.try (Int.parse t1)
+  n2 <- Result.try (Int.parse t2)
   Success (n1 + n2)
 
 testTextSum :: IO ()
-testTextSum = IO.do
-  IO.onError IO.printLine IO.do
-    sum <- textSum "5" "abc"
+testTextSum = do
+  IO.onError IO.printLine do
+    sum <- IO.try (textSum "5" "abc")
     log "sum" sum
-  IO.onError IO.printLine IO.do
-    sum <- textSum "2" "3"
+  IO.onError IO.printLine do
+    sum <- IO.try (textSum "2" "3")
     log "sum" sum
 
 testNewtonRaphson2d :: IO ()
@@ -432,7 +420,7 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
   log "Solve2d.unique solution" solution
 
 testExpression :: IO ()
-testExpression = IO.do
+testExpression = do
   let x = Expression.t
   let xSquared = Expression.squared x
   let expression = xSquared ./ (xSquared .+ Expression.Curve1d.constant 1.0)
@@ -440,29 +428,29 @@ testExpression = IO.do
   log "Expression bounds" (Expression.evaluateBounds expression (Bounds 1.0 3.0))
 
 testCurve2dExpression :: IO ()
-testCurve2dExpression = IO.do
+testCurve2dExpression = do
   let x = Expression.Curve1d.constant 10.0 .* Expression.t
   let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression (Qty Unitless) (Point2d (Global @ Unitless))
   log "Evaluated 2D curve" (Expression.evaluate curve 3.0)
 
 testQuotientDesingularization :: IO ()
-testQuotientDesingularization = Tolerance.using 1e-9 IO.do
+testQuotientDesingularization = Tolerance.using 1e-9 do
   let numerator = Curve.sin (Angle.pi .* Curve.t)
   let denominator = Curve.t .* (float 1.0 .- Curve.t)
-  quotient <- Curve.quotient numerator denominator
+  quotient <- IO.try (Curve.quotient numerator denominator)
   let tValues = Qty.steps 0.0 1.0 10
-  IO.forEach tValues \tValue -> IO.do
+  IO.forEach tValues \tValue -> do
     log "quotient" (Curve.evaluate quotient tValue)
-  IO.forEach tValues \tValue -> IO.do
+  IO.forEach tValues \tValue -> do
     log "derivative" (Curve.evaluate quotient.derivative tValue)
-  IO.forEach tValues \tValue -> IO.do
+  IO.forEach tValues \tValue -> do
     log "second derivative" (Curve.evaluate quotient.derivative.derivative tValue)
-  IO.forEach tValues \tValue -> IO.do
+  IO.forEach tValues \tValue -> do
     log "third derivative" (Curve.evaluate quotient.derivative.derivative.derivative tValue)
 
 testCurveSqrt :: IO ()
-testCurveSqrt = Tolerance.using 1e-6 IO.do
+testCurveSqrt = Tolerance.using 1e-6 do
   let t = Curve.t
   let curve = Curve.sqrt (half (float 1.0 .- Curve.cos (Angle.twoPi .* t)))
   Drawing2d.writeSvg
@@ -477,7 +465,7 @@ testCurveSqrt = Tolerance.using 1e-6 IO.do
     )
 
 main :: IO ()
-main = Tolerance.using (Length.meters 1e-9) IO.do
+main = Tolerance.using (Length.meters 1e-9) do
   testScalarArithmetic
   testVectorArithmetic
   testBoundsArithmetic
@@ -499,7 +487,6 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testExplicitRandomStep
   testConcurrency
   testIOParallel
-  testDebugPrint
   testTextSum
   testNewtonRaphson2d
   testQuotientDesingularization

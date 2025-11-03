@@ -1,5 +1,5 @@
 module OpenSolid.IO
-  ( fail
+  ( try
   , map
   , run
   , forEach
@@ -7,9 +7,6 @@ module OpenSolid.IO
   , collect
   , collectWithIndex
   , sleep
-  , (>>)
-  , Bind ((>>=))
-  , succeed
   , onError
   , attempt
   , mapError
@@ -39,35 +36,18 @@ import OpenSolid.Duration qualified as Duration
 import OpenSolid.Error qualified as Error
 import OpenSolid.Float qualified as Float
 import OpenSolid.Result (Result (Failure, Success))
-import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import System.Directory
 import System.FilePath qualified
 import System.IO.Error qualified
 import Prelude qualified
 
-fail :: Error.Message x => x -> IO a
-fail error = Prelude.fail (Text.unpack (Error.message error))
-
-{-# INLINE succeed #-}
-succeed :: a -> IO a
-succeed = Prelude.return
-
-class Bind m1 m2 where
-  (>>=) :: m1 a -> (a -> m2 b) -> IO b
-
-instance Bind IO (Result x) where
-  io >>= function = io >>= (function >> Result.toIO)
-
-instance Bind IO IO where
-  (>>=) = (Prelude.>>=)
-
-instance Bind (Result x) IO where
-  Success value >>= function = function value
-  Failure error >>= _ = fail error
+try :: Result x a -> IO a
+try (Success value) = return value
+try (Failure error) = fail (Text.unpack (Error.message error))
 
 map :: (a -> b) -> IO a -> IO b
-map = Prelude.fmap
+map = fmap
 
 run :: Foldable list => list (IO ()) -> IO ()
 run = Data.Foldable.fold
@@ -88,14 +68,14 @@ sleep :: Duration -> IO ()
 sleep duration = Control.Concurrent.threadDelay (Float.round (Duration.inMicroseconds duration))
 
 onError :: (Text -> IO a) -> IO a -> IO a
-onError callback io =
-  System.IO.Error.catchIOError io (System.IO.Error.ioeGetErrorString >> Text.pack >> callback)
+onError callback io = System.IO.Error.catchIOError io do
+  \error -> callback (Text.pack (System.IO.Error.ioeGetErrorString error))
 
 attempt :: IO a -> IO (Result Text a)
-attempt io = map Success io |> onError (succeed . Failure)
+attempt io = map Success io |> onError (return . Failure)
 
 mapError :: (Text -> Text) -> IO a -> IO a
-mapError function = onError (function >> fail)
+mapError function = onError (fail . Text.unpack . function)
 
 addContext :: Text -> IO a -> IO a
 addContext text = mapError (Error.addContext text)
@@ -110,10 +90,14 @@ writeBinary :: Text -> Builder -> IO ()
 writeBinary path builder = Builder.writeFile (Text.unpack path) builder
 
 readUtf8 :: Text -> IO Text
-readUtf8 path = readBinary path >>= Text.decodeUtf8
+readUtf8 path = do
+  bytes <- readBinary path
+  try (Text.decodeUtf8 bytes)
 
 writeUtf8 :: Text -> Text -> IO ()
-writeUtf8 path text = writeBinary path (Text.toUtf8 text)
+writeUtf8 path text = do
+  let bytes = Text.toUtf8 text
+  writeBinary path bytes
 
 deleteFile :: Text -> IO ()
 deleteFile path = System.Directory.removeFile (Text.unpack path)

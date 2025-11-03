@@ -33,7 +33,6 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import Prelude qualified
 
 data Json
   = Null
@@ -63,7 +62,7 @@ getFields (Map fields) = Just (Map.toList fields)
 getFields _ = Nothing
 
 int :: Int -> Json
-int = Float.int >> Float
+int = Float . Float.int
 
 float :: Float -> Json
 float = Float
@@ -105,7 +104,7 @@ instance Data.Aeson.ToJSON Json where
     Map fields -> Data.Aeson.toJSON fields
 
 instance Data.Aeson.FromJSON Json where
-  parseJSON = fromAeson >> Prelude.return
+  parseJSON = return . fromAeson
 
 fromAeson :: Data.Aeson.Value -> Json
 fromAeson aesonValue = case aesonValue of
@@ -122,5 +121,5 @@ toBinary json = Data.Aeson.fromEncoding (Data.Aeson.toEncoding json)
 decode :: ByteString -> Result Text Json
 decode byteString =
   case Data.Aeson.eitherDecodeStrict byteString of
-    Prelude.Right json -> Success json
-    Prelude.Left error -> Failure (Text.pack error)
+    Right json -> Success json
+    Left error -> Failure (Text.pack error)

@@ -23,7 +23,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude hiding (all)
+import OpenSolid.Prelude hiding (all, fail, (>>=))
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
@@ -47,7 +47,7 @@ class Bind m where
 
 instance Bind Generator where
   valueGenerator >>= toExpectation =
-    Expectation Random.do
+    Expectation Prelude.do
       value <- valueGenerator
       unwrap (toExpectation value)
 
@@ -78,26 +78,26 @@ testCount count description = do
   Text.join " " [Text.int count, pluralized, description]
 
 run :: List Test -> IO ()
-run tests = IO.do
+run tests = Prelude.do
   IO.printLine "Running tests..."
   argStrings <- System.Environment.getArgs
   let args = List.map Text.pack argStrings
   results <- IO.collect (runImpl args "") tests
   let (successes, failures) = sum results
   if failures == 0
-    then IO.do
+    then Prelude.do
       System.Console.ANSI.setSGR [System.Console.ANSI.SetColor System.Console.ANSI.Foreground System.Console.ANSI.Vivid System.Console.ANSI.Green]
       IO.printLine (testCount successes "passed")
       System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
-    else IO.fail (testCount failures "failed")
+    else Prelude.fail (Text.unpack (testCount failures "failed"))
 
 reportError :: Text -> List Text -> IO (Int, Int)
-reportError context messages = IO.do
+reportError context messages = do
   System.Console.ANSI.setSGR [System.Console.ANSI.SetColor System.Console.ANSI.Foreground System.Console.ANSI.Vivid System.Console.ANSI.Red]
   IO.printLine (context <> " failed:")
   System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
   IO.forEach messages (Text.indent "   " >> IO.printLine)
-  IO.succeed (0, 1)
+  return (0, 1)
 
 runImpl :: List Text -> Text -> Test -> IO (Int, Int)
 runImpl args context test = case test of
@@ -109,7 +109,7 @@ runImpl args context test = case test of
       | List.isEmpty args ->
           -- No test filter specified, silently run all tests
           fuzzImpl fullName count initialSeed generator
-      | List.anySatisfy (\arg -> Text.contains arg fullName) args -> IO.do
+      | List.anySatisfy (\arg -> Text.contains arg fullName) args -> Prelude.do
           -- Test filter specified, so print out which tests we're running
           -- and how long they took (with an extra emoji to flag slow tests)
           timer <- Timer.start
@@ -118,13 +118,13 @@ runImpl args context test = case test of
           let elapsedText = fixed 3 (Duration.inSeconds elapsed) <> "s"
           let elapsedSuffix = if elapsed > Duration.seconds 0.1 then " ⏲️" else ""
           IO.printLine (fullName <> ": " <> elapsedText <> elapsedSuffix)
-          IO.succeed results
+          return results
       | otherwise ->
           -- Current test didn't match filter, so return 0 successes and 0 failures
-          IO.succeed (0, 0)
-  Group label tests -> IO.do
+          return (0, 0)
+  Group label tests -> Prelude.do
     successesAndFailuresPerGroup <- IO.collect (runImpl args (appendTo context label)) tests
-    IO.succeed (sum successesAndFailuresPerGroup)
+    return (sum successesAndFailuresPerGroup)
 
 fixed :: Int -> Float -> Text
 fixed decimalPlaces value = do
@@ -143,8 +143,8 @@ sum ((successes, failures) : rest) = do
 
 fuzzImpl :: Text -> Int -> Random.Seed -> Expectation -> IO (Int, Int)
 fuzzImpl context n seed expectation = case n of
-  0 -> IO.succeed (1, 0) -- We've finished fuzzing, report 1 successful test
-  _ -> IO.do
+  0 -> return (1, 0) -- We've finished fuzzing, report 1 successful test
+  _ -> do
     let Expectation generator = expectation
     let (testResult, updatedSeed) = Random.step generator seed
     case testResult of

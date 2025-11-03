@@ -13,7 +13,6 @@ import OpenSolid.API.ImplicitArgument (ImplicitArgument)
 import OpenSolid.API.ImplicitArgument qualified as ImplicitArgument
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
 
@@ -75,18 +74,18 @@ lhsName = FFI.name "Lhs"
 
 invoke :: PreOperatorOverload -> Ptr () -> Ptr () -> IO ()
 invoke overload inputPtr outputPtr = case overload of
-  PreOperatorOverload f -> IO.do
+  PreOperatorOverload f -> do
     (other, value) <- FFI.load inputPtr 0
     FFI.store outputPtr 0 (f other value)
-  PreOperatorOverloadU f -> IO.do
+  PreOperatorOverloadU f -> do
     (tolerance, other, value) <- FFI.load inputPtr 0
     FFI.store outputPtr 0 (Tolerance.using tolerance (f other value))
-  PreOperatorOverloadR f -> IO.do
+  PreOperatorOverloadR f -> do
     (tolerance, other, value) <- FFI.load inputPtr 0
     FFI.store outputPtr 0 (Tolerance.using tolerance (f other value))
-  PreOperatorOverloadM f -> IO.do
+  PreOperatorOverloadM f -> do
     (tolerance, other, value) <- FFI.load inputPtr 0
     FFI.store outputPtr 0 (Tolerance.using tolerance (f other value))
-  PreOperatorOverloadS f -> IO.do
+  PreOperatorOverloadS f -> do
     (tolerance, other, value) <- FFI.load inputPtr 0
     FFI.store outputPtr 0 (Tolerance.using tolerance (f other value))

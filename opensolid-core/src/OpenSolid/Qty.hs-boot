@@ -2,12 +2,13 @@ module OpenSolid.Qty (Qty (Qty)) where
 
 import Data.Kind (Type)
 import OpenSolid.Unitless (Unitless)
+import Prelude (Double)
 import Prelude qualified
 
 type role Qty phantom
 
 type Qty :: Type -> Type
-newtype Qty units = Qty Prelude.Double
+newtype Qty units = Qty Double
 
 instance Prelude.Num (Qty Unitless)
 

@@ -334,7 +334,7 @@ map ::
   CompiledFunction inputValue outputValue2 inputBounds outputBounds2
 map mapExpression _ _ (Concrete expr) = Concrete (mapExpression expr)
 map _ mapValue mapBounds (Abstract value bounds) =
-  Abstract (value >> mapValue) (bounds >> mapBounds)
+  Abstract (mapValue . value) (mapBounds . bounds)
 
 evaluate ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->

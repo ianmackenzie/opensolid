@@ -11,7 +11,6 @@ import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -62,19 +61,19 @@ ffiName className constructor = do
 invoke :: Constructor -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
   Constructor1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       arg1 <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1)
   Constructor2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2)
   Constructor3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, arg3) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3)
   Constructor4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4)
 

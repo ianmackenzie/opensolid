@@ -26,19 +26,18 @@ import OpenSolid.Composition
 import OpenSolid.Int qualified as Int
 import OpenSolid.Prelude hiding (concat)
 import OpenSolid.Qty (Qty (Qty))
-import Prelude qualified
 
 bytes :: Builder -> ByteString
-bytes = Builder.toLazyByteString >> ByteString.toStrict
+bytes builder = ByteString.toStrict (Builder.toLazyByteString builder)
 
 empty :: Builder
-empty = Prelude.mempty
+empty = mempty
 
 concat :: List Builder -> Builder
-concat = Prelude.mconcat
+concat = mconcat
 
 combine :: Foldable list => (a -> Builder) -> list a -> Builder
-combine = Prelude.foldMap
+combine = foldMap
 
 {-# INLINE uint8 #-}
 uint8 :: Int -> Builder

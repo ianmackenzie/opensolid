@@ -10,7 +10,6 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Debug qualified as Debug
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -27,8 +26,7 @@ build boxes = do
 subtree :: Array (Bounds Unitless, Bounds Unitless) -> Int -> Int -> ImplicitCurveBounds
 subtree boxes begin end = case end - begin of
   1 -> Leaf (Pair.second (Array.get begin boxes))
-  n -> do
-    Debug.assert (n >= 2)
+  n -> assert (n >= 2) do
     let mid = begin + n // 2
     let left = subtree boxes begin mid
     let right = subtree boxes mid end

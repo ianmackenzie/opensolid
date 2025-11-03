@@ -35,7 +35,7 @@ magnitude = Test.check 100 "magnitude" Test.do
   Test.expect (vectorMagnitude ^ magnitudeBounds)
 
 boundsAndContainedVector :: Generator (VectorBounds3d (space @ Meters), Vector3d (space @ Meters))
-boundsAndContainedVector = Random.do
+boundsAndContainedVector = do
   bounds <- Tests.Random.vectorBounds3d
   u <- Parameter.random
   v <- Parameter.random

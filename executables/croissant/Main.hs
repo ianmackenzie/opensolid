@@ -16,7 +16,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
-main = Tolerance.using Length.nanometer IO.do
+main = Tolerance.using Length.nanometer do
   let majorRadius = Length.meter
   let k = Length.meters 2.0
   let minorRadius = Curve.hermite Length.zero [k] Length.zero [negative k] `compose` SurfaceFunction.u
@@ -29,7 +29,7 @@ main = Tolerance.using Length.nanometer IO.do
           .+ r .* SurfaceFunction.sin theta .* World3d.forwardDirection
           .+ minorRadius .* SurfaceFunction.sin phi .* World3d.upwardDirection
   let surface = Surface3d.parametric surfaceFunction Region2d.unitSquare
-  body <- Body3d.boundedBy [surface]
+  body <- IO.try (Body3d.boundedBy [surface])
   let resolution = Resolution.maxSize (Length.centimeters 20.0)
   let mesh = Body3d.toMesh resolution body
   Stl.writeBinary "executables/croissant/mesh.stl" Convention3d.yUp Length.inMillimeters mesh

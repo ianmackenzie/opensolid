@@ -88,7 +88,7 @@ satisfy predicate estimate = do
   if predicate current then current else satisfy predicate (refine estimate)
 
 within :: Qty units -> Estimate units -> Bounds units
-within tolerance = satisfy ((.width) >> (<= tolerance))
+within tolerance = satisfy (\current -> current.width <= tolerance)
 
 resolve :: (Bounds units -> Fuzzy a) -> Estimate units -> a
 resolve function estimate =
@@ -380,7 +380,7 @@ isResolved :: Tolerance units => Estimate units -> Bool
 isResolved estimate = boundsWidth estimate ~= Qty.zero
 
 allResolved :: Tolerance units => List (a, Estimate units) -> Bool
-allResolved pairs = List.allSatisfy (Pair.second >> isResolved) pairs
+allResolved pairs = List.allSatisfy (isResolved . Pair.second) pairs
 
 minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 minimumBy function items = go (NonEmpty.map (Pair.decorate function) items)

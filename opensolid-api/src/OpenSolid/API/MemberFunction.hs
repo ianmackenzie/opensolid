@@ -13,7 +13,6 @@ import OpenSolid.API.Argument qualified as Argument
 import OpenSolid.API.ImplicitArgument (ImplicitArgument (..))
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -211,103 +210,103 @@ ffiName className functionName memberFunction = do
 invoke :: MemberFunction -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
   MemberFunction0 f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       self <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f self)
   MemberFunctionU0 f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
   MemberFunctionR0 f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
   MemberFunctionM0 f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
   MemberFunctionS0 f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
   MemberFunction1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 self)
   MemberFunctionU1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
   MemberFunctionR1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
   MemberFunctionM1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
   MemberFunctionS1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
   MemberFunction2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 self)
   MemberFunctionU2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
   MemberFunctionR2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
   MemberFunctionM2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
   MemberFunctionS2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
   MemberFunction3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 self)
   MemberFunctionU3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
   MemberFunctionR3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
   MemberFunctionM3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
   MemberFunctionS3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
   MemberFunction4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 self)
   MemberFunctionU4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
   MemberFunctionR4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
   MemberFunctionM4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
   MemberFunctionS4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
 

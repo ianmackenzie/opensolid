@@ -5,8 +5,6 @@ module OpenSolid.Bytecode.Compile
   , NumComponents (NumComponents)
   , OutputComponents (OutputComponents)
   , InputComponents (InputComponents)
-  , (>>=)
-  , return
   , map
   , collect
   , addConstant
@@ -47,7 +45,6 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3d (Vector3d))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vector2d (Vector2d (Vector2d))
-import Prelude qualified
 
 newtype NumComponents = NumComponents Int deriving (Eq, Ord, Show)
 
@@ -76,32 +73,28 @@ instance Functor Step where
   fmap = map
 
 instance Applicative Step where
-  pure = return
-  step1 <*> step2 = step1 >>= (\f -> step2 >>= (\value -> return (f value)))
+  pure value = Step (# ,value #)
+  step1 <*> step2 = step1 >>= (\f -> map f step2)
 
 instance Monad Step where
-  (>>=) = (>>=)
+  step1 >>= f = Step $ \state0 -> do
+    let (# state1, output1 #) = apply step1 state0
+    let step2 = f output1
+    apply step2 state1
 
 apply :: Step a -> State -> (# State, a #)
 apply (Step step) state = step state
 
-(>>=) :: Step a -> (a -> Step b) -> Step b
-step1 >>= f = Step $ \state0 -> do
-  let (# state1, output1 #) = apply step1 state0
-  let step2 = f output1
-  apply step2 state1
-
 nextConstantIndex :: State -> ConstantIndex
 nextConstantIndex State{constantComponents = NumComponents n} = ConstantIndex n
 
-return :: a -> Step a
-return value = Step (# ,value #)
-
 map :: (a -> b) -> Step a -> Step b
-map f step = step >>= (f >> return)
+map f step = Step $ \state0 -> do
+  let (# state1, output1 #) = apply step state0
+  (# state1, f output1 #)
 
 collect :: Traversable list => (a -> Step b) -> list a -> Step (list b)
-collect = Prelude.mapM
+collect = mapM
 
 addConstant :: NonEmpty Float -> Step ConstantIndex
 addConstant components = Step \initialState ->

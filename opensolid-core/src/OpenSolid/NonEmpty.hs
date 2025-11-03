@@ -328,16 +328,16 @@ dedup current (next : remaining)
   | otherwise = push current (dedup next remaining)
 
 allSatisfy :: (a -> Bool) -> NonEmpty a -> Bool
-allSatisfy = Prelude.all
+allSatisfy = all
 
 allTrue :: NonEmpty Bool -> Bool
-allTrue = Prelude.and
+allTrue = and
 
 anySatisfy :: (a -> Bool) -> NonEmpty a -> Bool
-anySatisfy = Prelude.any
+anySatisfy = any
 
 anyTrue :: NonEmpty Bool -> Bool
-anyTrue = Prelude.or
+anyTrue = or
 
 successive :: (a -> a -> b) -> NonEmpty a -> List b
 successive function nonEmpty = List.successive function (toList nonEmpty)
@@ -405,13 +405,13 @@ pick better (x :| xs) = go [x] [] x xs xs
           else go updatedPrevious currentPrevious currentItem currentFollowing remaining
 
 random :: Int -> Random.Generator a -> Random.Generator (NonEmpty a)
-random n randomItem = Random.do
+random n randomItem = do
   firstItem <- randomItem
   restItems <- List.random (n - 1) randomItem
-  Random.return (firstItem :| restItems)
+  return (firstItem :| restItems)
 
 shuffle :: NonEmpty a -> Random.Generator (NonEmpty a)
-shuffle original = Random.do
+shuffle original = do
   keys <- random (length original) (Random.Generator System.Random.genWord64)
   let shuffledPairs = sortBy Pair.second (zip2 original keys)
-  Random.return (map Pair.first shuffledPairs)
+  return (map Pair.first shuffledPairs)

@@ -11,7 +11,6 @@ import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
@@ -23,7 +22,7 @@ ffiName className propertyName =
   Text.join "_" ["opensolid", FFI.concatenatedName className, FFI.camelCase propertyName]
 
 invoke :: Property -> Ptr () -> Ptr () -> IO ()
-invoke (Property f _) inputPtr outputPtr = IO.do
+invoke (Property f _) inputPtr outputPtr = do
   self <- FFI.load inputPtr 0
   FFI.store outputPtr 0 (f self)
 

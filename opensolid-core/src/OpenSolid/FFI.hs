@@ -419,13 +419,13 @@ store ptr offset value = do
     FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
     BoolRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 (if value then 1 else 0))
     SignRep -> store ptr offset (1 * value)
-    TextRep -> IO.do
+    TextRep -> do
       let numBytes = Data.Text.Foreign.lengthWord8 value
       contentsPtr <- Foreign.Marshal.Alloc.mallocBytes (numBytes + 1)
       Data.Text.Foreign.unsafeCopyToPtr value contentsPtr
       Foreign.pokeByteOff contentsPtr numBytes (fromIntegral 0 :: Word8)
       Foreign.pokeByteOff ptr offset contentsPtr
-    ListRep -> IO.do
+    ListRep -> do
       let numItems = value.length
       let itemSize = listItemSize proxy
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
@@ -435,14 +435,14 @@ store ptr offset value = do
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
     NonEmptyRep -> store ptr offset (NonEmpty.toList value)
     ArrayRep -> store ptr offset (Array.toList value)
-    Tuple2Rep -> IO.do
+    Tuple2Rep -> do
       let (value1, value2) = value
       let (size1, _) = tuple2ItemSizes proxy
       let offset1 = offset
       let offset2 = offset1 + size1
       store ptr offset1 value1
       store ptr offset2 value2
-    Tuple3Rep -> IO.do
+    Tuple3Rep -> do
       let (value1, value2, value3) = value
       let (size1, size2, _) = tuple3ItemSizes proxy
       let offset1 = offset
@@ -451,7 +451,7 @@ store ptr offset value = do
       store ptr offset1 value1
       store ptr offset2 value2
       store ptr offset3 value3
-    Tuple4Rep -> IO.do
+    Tuple4Rep -> do
       let (value1, value2, value3, value4) = value
       let (size1, size2, size3, _) = tuple4ItemSizes proxy
       let offset1 = offset
@@ -462,7 +462,7 @@ store ptr offset value = do
       store ptr offset2 value2
       store ptr offset3 value3
       store ptr offset4 value4
-    Tuple5Rep -> IO.do
+    Tuple5Rep -> do
       let (value1, value2, value3, value4, value5) = value
       let (size1, size2, size3, size4, _) = tuple5ItemSizes proxy
       let offset1 = offset
@@ -475,7 +475,7 @@ store ptr offset value = do
       store ptr offset3 value3
       store ptr offset4 value4
       store ptr offset5 value5
-    Tuple6Rep -> IO.do
+    Tuple6Rep -> do
       let (value1, value2, value3, value4, value5, value6) = value
       let (size1, size2, size3, size4, size5, _) = tuple6ItemSizes proxy
       let offset1 = offset
@@ -490,7 +490,7 @@ store ptr offset value = do
       store ptr offset4 value4
       store ptr offset5 value5
       store ptr offset6 value6
-    Tuple7Rep -> IO.do
+    Tuple7Rep -> do
       let (value1, value2, value3, value4, value5, value6, value7) = value
       let (size1, size2, size3, size4, size5, size6, _) = tuple7ItemSizes proxy
       let offset1 = offset
@@ -507,7 +507,7 @@ store ptr offset value = do
       store ptr offset5 value5
       store ptr offset6 value6
       store ptr offset7 value7
-    Tuple8Rep -> IO.do
+    Tuple8Rep -> do
       let (value1, value2, value3, value4, value5, value6, value7, value8) = value
       let (size1, size2, size3, size4, size5, size6, size7, _) = tuple8ItemSizes proxy
       let offset1 = offset
@@ -526,24 +526,24 @@ store ptr offset value = do
       store ptr offset6 value6
       store ptr offset7 value7
       store ptr offset8 value8
-    MaybeRep -> IO.do
+    MaybeRep -> do
       let tag = case value of Just _ -> 0; Nothing -> 1
       Foreign.pokeByteOff ptr offset (Int.toInt64 tag)
       case value of
         Just actualValue -> store ptr (offset + 8) actualValue
-        Nothing -> IO.succeed ()
+        Nothing -> return ()
     ResultRep ->
       case value of
-        Success successfulValue -> IO.do
+        Success successfulValue -> do
           Foreign.pokeByteOff ptr offset (Int.toInt64 0)
           store ptr (offset + 16) successfulValue
-        Failure errorValue -> IO.do
+        Failure errorValue -> do
           Foreign.pokeByteOff ptr offset (Int.toInt64 1)
           store ptr (offset + 8) (Error.message errorValue)
-    ClassRep _ -> IO.do
+    ClassRep _ -> do
       stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
-    IORep -> IO.do
+    IORep -> do
       result <- IO.attempt value
       store ptr offset result
     NamedArgumentRep{} ->
@@ -553,35 +553,35 @@ load :: forall parent value. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
   let proxy = Proxy @value
   case representation proxy of
-    UnitRep -> IO.succeed ()
+    UnitRep -> return ()
     IntRep -> IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
     FloatRep -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
     BoolRep -> IO.map ((/=) 0 . Int.fromInt64) (Foreign.peekByteOff ptr offset)
     SignRep -> IO.map Int.sign (load ptr offset)
-    TextRep -> IO.do
+    TextRep -> do
       dataPtr <- Foreign.peekByteOff ptr offset
       byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr
-      IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
-    ListRep -> IO.do
+      return (Data.Text.Encoding.decodeUtf8 byteString)
+    ListRep -> do
       let itemSize = listItemSize proxy
       numItems <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
       IO.collect loadItem [0 .. numItems - 1]
-    NonEmptyRep -> IO.do
+    NonEmptyRep -> do
       list <- load ptr offset
       case list of
         [] -> internalError "Empty list passed to FFI function expecting a non-empty list"
-        first : rest -> IO.succeed (first :| rest)
+        first : rest -> return (first :| rest)
     ArrayRep -> IO.map Array.fromList (load ptr offset)
-    Tuple2Rep -> IO.do
+    Tuple2Rep -> do
       let (size1, _) = tuple2ItemSizes proxy
       let offset1 = offset
       let offset2 = offset1 + size1
       value1 <- load ptr offset1
       value2 <- load ptr offset2
-      IO.succeed (value1, value2)
-    Tuple3Rep -> IO.do
+      return (value1, value2)
+    Tuple3Rep -> do
       let (size1, size2, _) = tuple3ItemSizes proxy
       let offset1 = offset
       let offset2 = offset1 + size1
@@ -589,8 +589,8 @@ load ptr offset = do
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       value3 <- load ptr offset3
-      IO.succeed (value1, value2, value3)
-    Tuple4Rep -> IO.do
+      return (value1, value2, value3)
+    Tuple4Rep -> do
       let (size1, size2, size3, _) = tuple4ItemSizes proxy
       let offset1 = offset
       let offset2 = offset1 + size1
@@ -600,8 +600,8 @@ load ptr offset = do
       value2 <- load ptr offset2
       value3 <- load ptr offset3
       value4 <- load ptr offset4
-      IO.succeed (value1, value2, value3, value4)
-    Tuple5Rep -> IO.do
+      return (value1, value2, value3, value4)
+    Tuple5Rep -> do
       let (size1, size2, size3, size4, _) = tuple5ItemSizes proxy
       let offset1 = offset
       let offset2 = offset1 + size1
@@ -613,8 +613,8 @@ load ptr offset = do
       value3 <- load ptr offset3
       value4 <- load ptr offset4
       value5 <- load ptr offset5
-      IO.succeed (value1, value2, value3, value4, value5)
-    Tuple6Rep -> IO.do
+      return (value1, value2, value3, value4, value5)
+    Tuple6Rep -> do
       let (size1, size2, size3, size4, size5, _) = tuple6ItemSizes proxy
       let offset1 = offset
       let offset2 = offset1 + size1
@@ -628,8 +628,8 @@ load ptr offset = do
       value4 <- load ptr offset4
       value5 <- load ptr offset5
       value6 <- load ptr offset6
-      IO.succeed (value1, value2, value3, value4, value5, value6)
-    Tuple7Rep -> IO.do
+      return (value1, value2, value3, value4, value5, value6)
+    Tuple7Rep -> do
       let (size1, size2, size3, size4, size5, size6, _) = tuple7ItemSizes proxy
       let offset1 = offset
       let offset2 = offset1 + size1
@@ -645,8 +645,8 @@ load ptr offset = do
       value5 <- load ptr offset5
       value6 <- load ptr offset6
       value7 <- load ptr offset7
-      IO.succeed (value1, value2, value3, value4, value5, value6, value7)
-    Tuple8Rep -> IO.do
+      return (value1, value2, value3, value4, value5, value6, value7)
+    Tuple8Rep -> do
       let (size1, size2, size3, size4, size5, size6, size7, _) = tuple8ItemSizes proxy
       let offset1 = offset
       let offset2 = offset1 + size1
@@ -664,14 +664,14 @@ load ptr offset = do
       value6 <- load ptr offset6
       value7 <- load ptr offset7
       value8 <- load ptr offset8
-      IO.succeed (value1, value2, value3, value4, value5, value6, value7, value8)
-    MaybeRep -> IO.do
+      return (value1, value2, value3, value4, value5, value6, value7, value8)
+    MaybeRep -> do
       tag <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
       if tag == 0
         then IO.map Just (load ptr (offset + 8))
-        else IO.succeed Nothing
+        else return Nothing
     ResultRep{} -> internalError "Passing Result values as FFI arguments is not supported"
-    ClassRep _ -> IO.do
+    ClassRep _ -> do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
     IORep -> internalError "Passing IO values as FFI arguments is not supported"

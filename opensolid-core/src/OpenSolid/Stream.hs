@@ -17,11 +17,10 @@ module OpenSolid.Stream
 where
 
 import OpenSolid.Prelude hiding (iterate, repeat)
-import Prelude qualified
 
 data Stream a = Stream a ~(Stream a)
 
-instance Prelude.Functor Stream where fmap = map
+instance Functor Stream where fmap = map
 
 repeat :: a -> Stream a
 repeat value = Stream value (repeat value)
@@ -35,7 +34,7 @@ unfold initialState function = do
   Stream initialValue (unfold updatedState function)
 
 from :: Enum a => a -> Stream a
-from value = Stream value (from (Prelude.succ value))
+from value = Stream value (from (succ value))
 
 {-# INLINE head #-}
 head :: Stream a -> a

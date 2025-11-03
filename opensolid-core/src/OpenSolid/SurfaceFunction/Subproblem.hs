@@ -21,7 +21,6 @@ where
 
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
-import OpenSolid.Debug qualified as Debug
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -140,8 +139,7 @@ tightBounds Subproblem{uvBounds, fValues, fBounds, fuBounds, fvBounds} = do
   let Bounds lowVU highVU = Internal.curveBoundsOver u1 u2 u1Bounds u2Bounds fuBounds
   let low = Qty.max low0 (Qty.max lowUV lowVU)
   let high = Qty.min high0 (Qty.min highUV highVU)
-  Debug.assert (low <= high)
-  Bounds low high
+  assert (low <= high) (Bounds low high)
 
 isZeroCandidate :: Tolerance units => Subproblem units -> Bool
 isZeroCandidate subproblem = do

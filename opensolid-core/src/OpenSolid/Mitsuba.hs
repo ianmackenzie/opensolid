@@ -91,7 +91,7 @@ writeFiles ::
   "camera" ::: Camera3d (space @ Meters) ->
   "lighting" ::: Lighting space ->
   IO ()
-writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named lighting) = IO.do
+writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named lighting) = do
   let collectedMeshes = Model3d.inspect (collectMeshes resolution) model
   let (meshes, properties) = List.unzip2 collectedMeshes
   let meshFileName = path <> ".serialized"

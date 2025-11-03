@@ -28,7 +28,6 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Region2d (Region2d)
-import OpenSolid.Result qualified as Result
 import {-# SOURCE #-} OpenSolid.Surface3d (Surface3d)
 import {-# SOURCE #-} OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
@@ -223,7 +222,7 @@ normalDirection ::
   Tolerance units =>
   SurfaceFunction3d (space @ units) ->
   Result IsDegenerate (DirectionSurfaceFunction3d space)
-normalDirection function = Result.do
+normalDirection function = do
   duDirection <- derivativeDirection function.du
   dvDirection <- derivativeDirection function.dv
   let crossProduct = duDirection `cross` dvDirection

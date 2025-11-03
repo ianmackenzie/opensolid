@@ -34,11 +34,9 @@ import Data.Char qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import OpenSolid.Binary (Builder, ByteString)
-import OpenSolid.Bootstrap hiding (concat)
-import OpenSolid.Composition
+import OpenSolid.Bootstrap hiding (concat, show)
 import OpenSolid.Error qualified as Error
 import OpenSolid.Float (Float)
-import OpenSolid.Float qualified as Float
 import OpenSolid.List qualified as List
 import OpenSolid.Result (Result (Failure, Success))
 import Prelude qualified
@@ -56,16 +54,16 @@ unpack :: Text -> List Char
 unpack = Data.Text.unpack
 
 int :: Int -> Text
-int n = pack (Prelude.show n)
+int = show
 
 float :: Float -> Text
-float x = pack (Prelude.show (Float.toDouble x))
+float = show
 
 char :: Char -> Text
 char c = pack [c]
 
 show :: Show a => a -> Text
-show = Prelude.show >> pack
+show value = pack (Prelude.show value)
 
 isEmpty :: Text -> Bool
 isEmpty = Data.Text.null
@@ -77,7 +75,7 @@ split :: Text -> Text -> List Text
 split = Data.Text.splitOn
 
 lines :: Text -> List Text
-lines = replace "\r\n" "\n" >> split "\n"
+lines text = split "\n" (replace "\r\n" "\n" text)
 
 multiline :: List Text -> Text
 multiline = join "\n"
@@ -127,8 +125,8 @@ data InvalidUtf8 = InvalidUtf8 deriving (Eq, Show, Error.Message)
 decodeUtf8 :: ByteString -> Result InvalidUtf8 Text
 decodeUtf8 byteString =
   case Data.Text.Encoding.decodeUtf8' byteString of
-    Prelude.Right text -> Success text
-    Prelude.Left _ -> Failure InvalidUtf8
+    Right text -> Success text
+    Left _ -> Failure InvalidUtf8
 
 assumeUtf8 :: ByteString -> Text
 assumeUtf8 = Data.Text.Encoding.decodeUtf8Lenient

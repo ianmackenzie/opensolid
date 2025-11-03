@@ -3,15 +3,12 @@ module OpenSolid.Fuzzy
   , collect
   , oneOf
   , (>>=)
-  , (>>)
   , map
   , fromMaybe
   )
 where
 
 import OpenSolid.Bootstrap
-import OpenSolid.Composition
-import Prelude qualified
 
 data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
 
@@ -26,13 +23,8 @@ instance Applicative Fuzzy where
   Resolved _ <*> Unresolved = Unresolved
 
 instance Monad Fuzzy where
-  (>>=) = (>>=)
-
-infixl 1 >>=
-
-(>>=) :: Fuzzy a -> (a -> Fuzzy b) -> Fuzzy b
-Resolved value >>= function = function value
-Unresolved >>= _ = Unresolved
+  Resolved value >>= function = function value
+  Unresolved >>= _ = Unresolved
 
 fromMaybe :: Maybe a -> Fuzzy a
 fromMaybe (Just value) = Resolved value

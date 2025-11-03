@@ -1313,172 +1313,172 @@ addPlane plane = do
 
 compileVariable1d :: Variable1d input -> Compile.Step VariableIndex
 compileVariable1d variable = case variable of
-  CurveParameter -> Compile.return (VariableIndex 0)
-  SurfaceParameter U -> Compile.return (VariableIndex 0)
-  SurfaceParameter V -> Compile.return (VariableIndex 1)
-  XComponent arg -> Compile.do
+  CurveParameter -> return (VariableIndex 0)
+  SurfaceParameter U -> return (VariableIndex 0)
+  SurfaceParameter V -> return (VariableIndex 1)
+  XComponent arg -> do
     argIndex <- compileVariable2d arg
     Compile.addVariable1d (Instruction.Component0 argIndex)
-  YComponent arg -> Compile.do
+  YComponent arg -> do
     argIndex <- compileVariable2d arg
     Compile.addVariable1d (Instruction.Component1 argIndex)
-  Negated1d arg -> Compile.do
+  Negated1d arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Negate1d argIndex)
-  Sum1d lhs rhs -> Compile.do
+  Sum1d lhs rhs -> do
     lhsIndex <- compileVariable1d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable1d (Instruction.Add1d lhsIndex rhsIndex)
-  SumVariableConstant1d lhs rhs -> Compile.do
+  SumVariableConstant1d lhs rhs -> do
     lhsIndex <- compileVariable1d lhs
     rhsIndex <- Compile.addConstant1d rhs
     Compile.addVariable1d (Instruction.AddVariableConstant1d lhsIndex rhsIndex)
-  Difference1d lhs rhs -> Compile.do
+  Difference1d lhs rhs -> do
     lhsIndex <- compileVariable1d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable1d (Instruction.Subtract1d lhsIndex rhsIndex)
-  DifferenceConstantVariable1d lhs rhs -> Compile.do
+  DifferenceConstantVariable1d lhs rhs -> do
     lhsIndex <- Compile.addConstant1d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable1d (Instruction.SubtractConstantVariable1d lhsIndex rhsIndex)
-  Product1d lhs rhs -> Compile.do
+  Product1d lhs rhs -> do
     lhsIndex <- compileVariable1d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable1d (Instruction.Multiply1d lhsIndex rhsIndex)
-  ProductVariableConstant1d lhs rhs -> Compile.do
+  ProductVariableConstant1d lhs rhs -> do
     lhsIndex <- compileVariable1d lhs
     rhsIndex <- Compile.addConstant1d rhs
     Compile.addVariable1d (Instruction.MultiplyVariableConstant1d lhsIndex rhsIndex)
-  Quotient1d lhs rhs -> Compile.do
+  Quotient1d lhs rhs -> do
     lhsIndex <- compileVariable1d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable1d (Instruction.Divide1d lhsIndex rhsIndex)
-  QuotientConstantVariable1d lhs rhs -> Compile.do
+  QuotientConstantVariable1d lhs rhs -> do
     lhsIndex <- Compile.addConstant1d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable1d (Instruction.DivideConstantVariable1d lhsIndex rhsIndex)
-  Squared1d arg -> Compile.do
+  Squared1d arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Square1d argIndex)
-  Cubed1d arg -> Compile.do
+  Cubed1d arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Cube1d argIndex)
-  Sqrt1d arg -> Compile.do
+  Sqrt1d arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Sqrt1d argIndex)
-  Sin1d arg -> Compile.do
+  Sin1d arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Sin1d argIndex)
-  Cos1d arg -> Compile.do
+  Cos1d arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.Cos1d argIndex)
-  BezierCurve1d controlPoints parameter -> Compile.do
+  BezierCurve1d controlPoints parameter -> do
     controlPointsIndex <- Compile.addConstant controlPoints
     parameterIndex <- compileVariable1d parameter
     let numControlPoints = NonEmpty.length controlPoints
     let instruction = Instruction.Bezier1d numControlPoints controlPointsIndex parameterIndex
     Compile.addVariable1d instruction
-  SquaredMagnitude2d arg -> Compile.do
+  SquaredMagnitude2d arg -> do
     argIndex <- compileVariable2d arg
     Compile.addVariable1d (Instruction.SquaredMagnitude2d argIndex)
-  SquaredMagnitude3d arg -> Compile.do
+  SquaredMagnitude3d arg -> do
     argIndex <- compileVariable3d arg
     Compile.addVariable1d (Instruction.SquaredMagnitude3d argIndex)
-  Magnitude2d arg -> Compile.do
+  Magnitude2d arg -> do
     argIndex <- compileVariable2d arg
     Compile.addVariable1d (Instruction.Magnitude2d argIndex)
-  Magnitude3d arg -> Compile.do
+  Magnitude3d arg -> do
     argIndex <- compileVariable3d arg
     Compile.addVariable1d (Instruction.Magnitude3d argIndex)
-  Dot2d lhs rhs -> Compile.do
+  Dot2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- compileVariable2d rhs
     Compile.addVariable1d (Instruction.Dot2d lhsIndex rhsIndex)
-  DotVariableConstant2d lhs rhs -> Compile.do
+  DotVariableConstant2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- Compile.addConstant2d rhs
     Compile.addVariable1d (Instruction.DotVariableConstant2d lhsIndex rhsIndex)
-  Cross2d lhs rhs -> Compile.do
+  Cross2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- compileVariable2d rhs
     Compile.addVariable1d (Instruction.Cross2d lhsIndex rhsIndex)
-  CrossVariableConstant2d lhs rhs -> Compile.do
+  CrossVariableConstant2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- Compile.addConstant2d rhs
     Compile.addVariable1d (Instruction.CrossVariableConstant2d lhsIndex rhsIndex)
-  Dot3d lhs rhs -> Compile.do
+  Dot3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- compileVariable3d rhs
     Compile.addVariable1d (Instruction.Dot3d lhsIndex rhsIndex)
-  DotVariableConstant3d lhs rhs -> Compile.do
+  DotVariableConstant3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- Compile.addConstant3d rhs
     Compile.addVariable1d (Instruction.DotVariableConstant3d lhsIndex rhsIndex)
-  Desingularized1d parameter left middle right -> Compile.do
+  Desingularized1d parameter left middle right -> do
     parameterIndex <- compileVariable1d parameter
     leftIndex <- compileVariable1d left
     middleIndex <- compileVariable1d middle
     rightIndex <- compileVariable1d right
     let instruction = Instruction.Desingularized1d parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable1d instruction
-  B00 arg -> Compile.do
+  B00 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B00 argIndex)
-  B00d1 arg -> Compile.do
+  B00d1 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B00d1 argIndex)
-  B00d2 arg -> Compile.do
+  B00d2 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B00d2 argIndex)
-  B00d3 arg -> Compile.do
+  B00d3 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B00d3 argIndex)
-  B01 arg -> Compile.do
+  B01 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B01 argIndex)
-  B01d1 arg -> Compile.do
+  B01d1 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B01d1 argIndex)
-  B01d2 arg -> Compile.do
+  B01d2 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B01d2 argIndex)
-  B01d3 arg -> Compile.do
+  B01d3 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B01d3 argIndex)
-  B02 arg -> Compile.do
+  B02 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B02 argIndex)
-  B02d1 arg -> Compile.do
+  B02d1 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B02d1 argIndex)
-  B02d2 arg -> Compile.do
+  B02d2 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B02d2 argIndex)
-  B02d3 arg -> Compile.do
+  B02d3 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B02d3 argIndex)
-  B10 arg -> Compile.do
+  B10 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B10 argIndex)
-  B10d1 arg -> Compile.do
+  B10d1 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B10d1 argIndex)
-  B10d2 arg -> Compile.do
+  B10d2 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B10d2 argIndex)
-  B10d3 arg -> Compile.do
+  B10d3 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B10d3 argIndex)
-  B11 arg -> Compile.do
+  B11 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B11 argIndex)
-  B11d1 arg -> Compile.do
+  B11d1 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B11d1 argIndex)
-  B11d2 arg -> Compile.do
+  B11d2 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B11d2 argIndex)
-  B11d3 arg -> Compile.do
+  B11d3 arg -> do
     argIndex <- compileVariable1d arg
     Compile.addVariable1d (Instruction.B11d3 argIndex)
 
@@ -1490,81 +1490,81 @@ coordinates3d (Vector3d r f u) = NonEmpty.three r f u
 
 compileVariable2d :: Variable2d input -> Compile.Step VariableIndex
 compileVariable2d variable = case variable of
-  SurfaceParameters -> Compile.return (VariableIndex 0)
-  XY x y -> Compile.do
+  SurfaceParameters -> return (VariableIndex 0)
+  XY x y -> do
     xIndex <- compileVariable1d x
     yIndex <- compileVariable1d y
     Compile.addVariable2d (Instruction.XY xIndex yIndex)
-  XC x y -> Compile.do
+  XC x y -> do
     xIndex <- compileVariable1d x
     yIndex <- Compile.addConstant1d y
     Compile.addVariable2d (Instruction.XC xIndex yIndex)
-  CY x y -> Compile.do
+  CY x y -> do
     xIndex <- Compile.addConstant1d x
     yIndex <- compileVariable1d y
     Compile.addVariable2d (Instruction.CY xIndex yIndex)
-  Negated2d arg -> Compile.do
+  Negated2d arg -> do
     argIndex <- compileVariable2d arg
     Compile.addVariable2d (Instruction.Negate2d argIndex)
-  Sum2d lhs rhs -> Compile.do
+  Sum2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- compileVariable2d rhs
     Compile.addVariable2d (Instruction.Add2d lhsIndex rhsIndex)
-  SumVariableConstant2d lhs rhs -> Compile.do
+  SumVariableConstant2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- Compile.addConstant2d rhs
     Compile.addVariable2d (Instruction.AddVariableConstant2d lhsIndex rhsIndex)
-  Difference2d lhs rhs -> Compile.do
+  Difference2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- compileVariable2d rhs
     Compile.addVariable2d (Instruction.Subtract2d lhsIndex rhsIndex)
-  DifferenceConstantVariable2d lhs rhs -> Compile.do
+  DifferenceConstantVariable2d lhs rhs -> do
     lhsIndex <- Compile.addConstant2d lhs
     rhsIndex <- compileVariable2d rhs
     Compile.addVariable2d (Instruction.SubtractConstantVariable2d lhsIndex rhsIndex)
-  Product2d lhs rhs -> Compile.do
+  Product2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable2d (Instruction.Multiply2d lhsIndex rhsIndex)
-  ProductVariableConstant2d lhs rhs -> Compile.do
+  ProductVariableConstant2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- Compile.addConstant1d rhs
     Compile.addVariable2d (Instruction.MultiplyVariableConstant2d lhsIndex rhsIndex)
-  ProductConstantVariable2d lhs rhs -> Compile.do
+  ProductConstantVariable2d lhs rhs -> do
     lhsIndex <- Compile.addConstant2d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable2d (Instruction.MultiplyConstantVariable2d lhsIndex rhsIndex)
-  Quotient2d lhs rhs -> Compile.do
+  Quotient2d lhs rhs -> do
     lhsIndex <- compileVariable2d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable2d (Instruction.Divide2d lhsIndex rhsIndex)
-  QuotientConstantVariable2d lhs rhs -> Compile.do
+  QuotientConstantVariable2d lhs rhs -> do
     lhsIndex <- Compile.addConstant2d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable2d (Instruction.DivideConstantVariable2d lhsIndex rhsIndex)
-  BezierCurve2d controlPoints parameter -> Compile.do
+  BezierCurve2d controlPoints parameter -> do
     let numControlPoints = NonEmpty.length controlPoints
     controlPointsIndex <- Compile.addConstant (NonEmpty.combine coordinates2d controlPoints)
     parameterIndex <- compileVariable1d parameter
     let instruction = Instruction.Bezier2d numControlPoints controlPointsIndex parameterIndex
     Compile.addVariable2d instruction
-  TransformVector2d transform vector -> Compile.do
+  TransformVector2d transform vector -> do
     matrixIndex <- addTransform2d transform
     vectorIndex <- compileVariable2d vector
     Compile.addVariable2d (Instruction.TransformVector2d matrixIndex vectorIndex)
-  TransformPoint2d transform point -> Compile.do
+  TransformPoint2d transform point -> do
     matrixIndex <- addTransform2d transform
     pointIndex <- compileVariable2d point
     Compile.addVariable2d (Instruction.TransformPoint2d matrixIndex pointIndex)
-  ProjectVector3d plane vector -> Compile.do
+  ProjectVector3d plane vector -> do
     planeIndex <- addPlane plane
     vectorIndex <- compileVariable3d vector
     Compile.addVariable2d (Instruction.ProjectVector3d planeIndex vectorIndex)
-  ProjectPoint3d plane point -> Compile.do
+  ProjectPoint3d plane point -> do
     planeIndex <- addPlane plane
     pointIndex <- compileVariable3d point
     Compile.addVariable2d (Instruction.ProjectPoint3d planeIndex pointIndex)
-  Desingularized2d parameter left middle right -> Compile.do
+  Desingularized2d parameter left middle right -> do
     parameterIndex <- compileVariable1d parameter
     leftIndex <- compileVariable2d left
     middleIndex <- compileVariable2d middle
@@ -1574,76 +1574,76 @@ compileVariable2d variable = case variable of
 
 compileVariable3d :: Variable3d input -> Compile.Step VariableIndex
 compileVariable3d variable = case variable of
-  Negated3d arg -> Compile.do
+  Negated3d arg -> do
     argIndex <- compileVariable3d arg
     Compile.addVariable3d (Instruction.Negate3d argIndex)
-  Sum3d lhs rhs -> Compile.do
+  Sum3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- compileVariable3d rhs
     Compile.addVariable3d (Instruction.Add3d lhsIndex rhsIndex)
-  SumVariableConstant3d lhs rhs -> Compile.do
+  SumVariableConstant3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- Compile.addConstant3d rhs
     Compile.addVariable3d (Instruction.AddVariableConstant3d lhsIndex rhsIndex)
-  Difference3d lhs rhs -> Compile.do
+  Difference3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- compileVariable3d rhs
     Compile.addVariable3d (Instruction.Subtract3d lhsIndex rhsIndex)
-  DifferenceConstantVariable3d lhs rhs -> Compile.do
+  DifferenceConstantVariable3d lhs rhs -> do
     lhsIndex <- Compile.addConstant3d lhs
     rhsIndex <- compileVariable3d rhs
     Compile.addVariable3d (Instruction.SubtractConstantVariable3d lhsIndex rhsIndex)
-  Product3d lhs rhs -> Compile.do
+  Product3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable3d (Instruction.Multiply3d lhsIndex rhsIndex)
-  ProductVariableConstant3d lhs rhs -> Compile.do
+  ProductVariableConstant3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- Compile.addConstant1d rhs
     Compile.addVariable3d (Instruction.MultiplyVariableConstant3d lhsIndex rhsIndex)
-  ProductConstantVariable3d lhs rhs -> Compile.do
+  ProductConstantVariable3d lhs rhs -> do
     lhsIndex <- Compile.addConstant3d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable3d (Instruction.MultiplyConstantVariable3d lhsIndex rhsIndex)
-  Quotient3d lhs rhs -> Compile.do
+  Quotient3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable3d (Instruction.Divide3d lhsIndex rhsIndex)
-  QuotientConstantVariable3d lhs rhs -> Compile.do
+  QuotientConstantVariable3d lhs rhs -> do
     lhsIndex <- Compile.addConstant3d lhs
     rhsIndex <- compileVariable1d rhs
     Compile.addVariable3d (Instruction.DivideConstantVariable3d lhsIndex rhsIndex)
-  BezierCurve3d controlPoints parameter -> Compile.do
+  BezierCurve3d controlPoints parameter -> do
     let numControlPoints = NonEmpty.length controlPoints
     controlPointsIndex <- Compile.addConstant (NonEmpty.combine coordinates3d controlPoints)
     parameterIndex <- compileVariable1d parameter
     let instruction = Instruction.Bezier3d numControlPoints controlPointsIndex parameterIndex
     Compile.addVariable3d instruction
-  Cross3d lhs rhs -> Compile.do
+  Cross3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- compileVariable3d rhs
     Compile.addVariable3d (Instruction.Cross3d lhsIndex rhsIndex)
-  CrossVariableConstant3d lhs rhs -> Compile.do
+  CrossVariableConstant3d lhs rhs -> do
     lhsIndex <- compileVariable3d lhs
     rhsIndex <- Compile.addConstant3d rhs
     Compile.addVariable3d (Instruction.CrossVariableConstant3d lhsIndex rhsIndex)
-  TransformVector3d transform vector -> Compile.do
+  TransformVector3d transform vector -> do
     matrixIndex <- addTransform3d transform
     vectorIndex <- compileVariable3d vector
     Compile.addVariable3d (Instruction.TransformVector3d matrixIndex vectorIndex)
-  TransformPoint3d transform point -> Compile.do
+  TransformPoint3d transform point -> do
     matrixIndex <- addTransform3d transform
     pointIndex <- compileVariable3d point
     Compile.addVariable3d (Instruction.TransformPoint3d matrixIndex pointIndex)
-  PlaceVector2d plane vector -> Compile.do
+  PlaceVector2d plane vector -> do
     planeIndex <- addPlane plane
     vectorIndex <- compileVariable2d vector
     Compile.addVariable3d (Instruction.PlaceVector2d planeIndex vectorIndex)
-  PlacePoint2d plane point -> Compile.do
+  PlacePoint2d plane point -> do
     planeIndex <- addPlane plane
     pointIndex <- compileVariable2d point
     Compile.addVariable3d (Instruction.PlacePoint2d planeIndex pointIndex)
-  Desingularized3d parameter left middle right -> Compile.do
+  Desingularized3d parameter left middle right -> do
     parameterIndex <- compileVariable1d parameter
     leftIndex <- compileVariable3d left
     middleIndex <- compileVariable3d middle

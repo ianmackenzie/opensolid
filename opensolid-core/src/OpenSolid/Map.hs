@@ -36,7 +36,6 @@ import Data.Map.Strict qualified
 import OpenSolid.Bootstrap hiding (foldl, foldr)
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
-import Prelude qualified
 
 empty :: Map k v
 empty = Data.Map.Strict.empty
@@ -87,7 +86,7 @@ filterWithKey :: (k -> v -> Bool) -> Map k v -> Map k v
 filterWithKey = Data.Map.Strict.filterWithKey
 
 map :: (v -> w) -> Map k v -> Map k w
-map = Prelude.fmap
+map = fmap
 
 mapWithKey :: (k -> v -> w) -> Map k v -> Map k w
 mapWithKey = Data.Map.Strict.mapWithKey

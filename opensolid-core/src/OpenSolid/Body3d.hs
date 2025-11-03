@@ -350,7 +350,7 @@ revolved ::
   Axis2d (local @ units) ->
   Angle ->
   Result BoundedBy.Error (Body3d (space @ units))
-revolved startPlane profile axis2d angle = Result.do
+revolved startPlane profile axis2d angle = do
   let axis3d = Axis2d.placeOn startPlane axis2d
   let profileCurves = profile.boundaryCurves
   let offAxisCurves = NonEmpty.filter (not . Curve2d.isOnAxis axis2d) profileCurves
@@ -395,7 +395,7 @@ boundedBy ::
   List (Surface3d (space @ units)) ->
   Result BoundedBy.Error (Body3d (space @ units))
 boundedBy [] = Failure BoundedBy.EmptyBody
-boundedBy (NonEmpty givenSurfaces) = Result.do
+boundedBy (NonEmpty givenSurfaces) = do
   let surfacesWithHalfEdges = NonEmpty.mapWithIndex toSurfaceWithHalfEdges givenSurfaces
   let firstSurfaceWithHalfEdges = surfacesWithHalfEdges.first
   let halfEdges = NonEmpty.combine getAllHalfEdges surfacesWithHalfEdges
@@ -513,7 +513,7 @@ registerHalfEdge ::
 registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge = do
   let SurfaceRegistry{unprocessed, processed, edges} = surfaceRegistry
   case halfEdge of
-    DegenerateHalfEdge{halfEdgeId, uvCurve, point} -> Result.do
+    DegenerateHalfEdge{halfEdgeId, uvCurve, point} -> do
       canonicalPoint <- getCornerPoint point cornerSet
       let edge = DegenerateEdge{halfEdgeId, uvCurve, point = canonicalPoint}
       Success SurfaceRegistry{unprocessed, processed, edges = Map.set halfEdgeId edge edges}
@@ -522,7 +522,7 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
       case List.filterMap (toMatingEdge halfEdgeId curve3d) matingEdgeCandidates of
         [] -> Failure BoundedBy.BoundaryHasGaps
         List.TwoOrMore -> Failure BoundedBy.BoundaryIntersectsItself
-        List.One MatingEdge{halfEdgeId = matingId, uvCurve = matingUvCurve, correctlyAligned} -> Result.do
+        List.One MatingEdge{halfEdgeId = matingId, uvCurve = matingUvCurve, correctlyAligned} -> do
           let HalfEdgeId{surfaceId = matingSurfaceId} = matingId
           startPoint <- getCornerPoint (Curve3d.startPoint curve3d) cornerSet
           let edge =

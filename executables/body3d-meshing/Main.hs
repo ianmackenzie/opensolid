@@ -16,7 +16,7 @@ import OpenSolid.World3d qualified as World3d
 import Prelude hiding (length)
 
 main :: IO ()
-main = Tolerance.using Length.nanometer IO.do
+main = Tolerance.using Length.nanometer do
   let radius = Length.meters 1.0
   let length = Length.meters 4.0
   let arc =
@@ -26,8 +26,8 @@ main = Tolerance.using Length.nanometer IO.do
           @ #startAngle (Angle.degrees -45.0)
           @ #endAngle (Angle.degrees 225.0)
   let line = Curve2d.line arc.endPoint arc.startPoint
-  profile <- Region2d.boundedBy [arc, line]
-  body <- Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length)
+  profile <- IO.try (Region2d.boundedBy [arc, line])
+  body <- IO.try (Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length))
   let resolution = Resolution.maxSize (Length.centimeters 30.0)
   let mesh = Body3d.toMesh resolution body
   let outputPath = "executables/body3d-meshing/mesh.stl"

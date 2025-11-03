@@ -50,20 +50,20 @@ instance Estimate.Interface DummyEstimate Meters where
     Estimate.new (DummyEstimate value refinedBounds)
 
 dummyEstimate :: Generator (Length, Estimate Meters)
-dummyEstimate = Random.do
+dummyEstimate = do
   bounds <- Bounds.random Random.length
   t <- Parameter.random
   let value = Bounds.interpolate bounds t
   Random.return (value, Estimate.new (DummyEstimate value bounds))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
-duplicatedDummyEstimates = Random.do
+duplicatedDummyEstimates = do
   pair <- dummyEstimate
   numPairs <- Int.random 1 3
   Random.return (pair :| List.replicate (numPairs - 1) pair)
 
 dummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
-dummyEstimates = Random.do
+dummyEstimates = do
   nested <- NonEmpty.random 10 duplicatedDummyEstimates
   let flattened = NonEmpty.concat nested
   NonEmpty.shuffle flattened

@@ -61,7 +61,7 @@ larger = Test.check 100 "larger" Test.do
     |> Test.output "largerBounds" largerBounds
 
 valueInBounds :: Generator (Length, Bounds Meters)
-valueInBounds = Random.do
+valueInBounds = do
   bounds <- Bounds.random Random.length
   t <- Parameter.random
   let value = Bounds.interpolate bounds t

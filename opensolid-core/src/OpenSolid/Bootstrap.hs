@@ -23,6 +23,7 @@ module OpenSolid.Bootstrap
   , Maybe (Just, Nothing)
   , Type
   , (@)
+  , assert
   , internalError
   , exception
   , pattern TODO
@@ -34,6 +35,7 @@ module OpenSolid.Bootstrap
 where
 
 import Control.Concurrent.Async (Async)
+import Control.Exception (assert)
 import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Kind (Type)
 import Data.List qualified
@@ -57,7 +59,6 @@ import Prelude hiding
   , RealFrac (..)
   , drop
   , error
-  , fail
   , filter
   , head
   , init
@@ -69,9 +70,7 @@ import Prelude hiding
   , minimum
   , read
   , replicate
-  , return
   , reverse
-  , show
   , splitAt
   , subtract
   , sum
@@ -84,8 +83,6 @@ import Prelude hiding
   , zipWith
   , zipWith3
   , (.)
-  , (>>)
-  , (>>=)
   , (^)
   , (^^)
   )

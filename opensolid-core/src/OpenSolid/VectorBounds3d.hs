@@ -47,7 +47,6 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds (Bounds, Bounds#))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Float qualified as Float
-import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -314,7 +313,7 @@ intersection ::
   VectorBounds3d (space @ units) ->
   VectorBounds3d (space @ units) ->
   Maybe (VectorBounds3d (space @ units))
-intersection (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = Maybe.do
+intersection (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = do
   x <- Bounds.intersection x1 x2
   y <- Bounds.intersection y1 y2
   z <- Bounds.intersection z1 z2

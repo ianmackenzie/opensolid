@@ -14,7 +14,7 @@ import Prelude qualified
 
 type Float = Qty Unitless
 
-fromDouble :: Prelude.Double -> Float
-toDouble :: Float -> Prelude.Double
+fromDouble :: Double -> Float
+toDouble :: Float -> Double
 fromRational :: Prelude.Rational -> Qty Unitless
 int :: Int -> Float

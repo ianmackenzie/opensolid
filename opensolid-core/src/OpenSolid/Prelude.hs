@@ -27,7 +27,7 @@ import Data.Colour (Colour)
 import Data.Colour.SRGB qualified
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
-import OpenSolid.Composition (Composition ((>>)), (.))
+import OpenSolid.Composition (Composition ((.)))
 import OpenSolid.CoordinateSystem
   ( CoordinateSystem
   , Defines

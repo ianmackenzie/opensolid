@@ -68,7 +68,7 @@ import Prelude qualified
 type role Qty phantom
 
 type Qty :: Type -> Type
-newtype Qty units = Qty Prelude.Double deriving (Eq, Ord)
+newtype Qty units = Qty Double deriving (Eq, Ord)
 
 {-# COMPLETE Qty# #-}
 
@@ -77,7 +77,7 @@ pattern Qty# :: Double# -> Qty units
 pattern Qty# x# = Qty (D# x#)
 
 instance Show (Qty Unitless) where
-  show (Qty x) = Prelude.show x
+  show (Qty x) = show x
 
 showsPrecImpl :: Text -> Int -> Qty units -> ShowS
 showsPrecImpl constructor prec (Qty x) =

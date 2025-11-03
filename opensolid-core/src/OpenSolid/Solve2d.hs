@@ -25,7 +25,7 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (return)
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
@@ -87,7 +87,7 @@ process callback queue solutions exclusions =
           case filteredExclusions of
             [] -> case callback context subdomain NoExclusions of
               Pass -> process callback remaining solutions exclusions
-              Recurse updatedContext -> Result.do
+              Recurse updatedContext -> do
                 children <- recurseInto subdomain updatedContext recursionType
                 process callback (remaining + children) solutions exclusions
               Return newSolution -> do
@@ -96,7 +96,7 @@ process callback queue solutions exclusions =
                 process callback remaining updatedSolutions updatedExclusions
             List.OneOrMore -> case callback context subdomain SomeExclusions of
               Pass -> process callback remaining solutions exclusions
-              Recurse updatedContext -> Result.do
+              Recurse updatedContext -> do
                 children <- recurseInto subdomain updatedContext recursionType
                 process callback (remaining + children) solutions exclusions
 

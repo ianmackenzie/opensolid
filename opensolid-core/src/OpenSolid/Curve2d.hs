@@ -93,7 +93,6 @@ import OpenSolid.Curve2d.MedialAxis qualified as MedialAxis
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import {-# SOURCE #-} OpenSolid.Curve3d (Curve3d)
 import {-# SOURCE #-} OpenSolid.Curve3d qualified as Curve3d
-import OpenSolid.Debug qualified as Debug
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
@@ -663,7 +662,7 @@ offsetLeftwardBy ::
   Qty units ->
   Curve2d (space @ units) ->
   Result IsPoint (Curve2d (space @ units))
-offsetLeftwardBy offset curve = Result.do
+offsetLeftwardBy offset curve = do
   tangentCurve <- tangentDirection curve
   let offsetCurve = VectorCurve2d.rotateBy Angle.quarterTurn (offset * tangentCurve)
   Success (curve + offsetCurve)
@@ -828,7 +827,7 @@ findEndpointIntersections ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result Intersections.Error (List UvPoint)
-findEndpointIntersections curve1 curve2 = Result.do
+findEndpointIntersections curve1 curve2 = do
   start1Zeros <- findEndpointZeros curve1.startPoint curve2 Intersections.SecondCurveIsPoint
   end1Zeros <- findEndpointZeros curve1.endPoint curve2 Intersections.SecondCurveIsPoint
   start2Zeros <- findEndpointZeros curve2.startPoint curve1 Intersections.FirstCurveIsPoint
@@ -852,7 +851,7 @@ intersections ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result Intersections.Error (Maybe Intersections)
-intersections curve1 curve2 = Result.do
+intersections curve1 curve2 = do
   endpointIntersections <- findEndpointIntersections curve1 curve2
   case overlappingSegments curve1 curve2 endpointIntersections of
     [] ->
@@ -1053,7 +1052,7 @@ curvature' ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Result IsPoint (Curve (Unitless :/: units))
-curvature' curve = Result.do
+curvature' curve = do
   let firstDerivative = curve.derivative
   let secondDerivative = firstDerivative.derivative
   tangent <- tangentDirection curve
@@ -1111,28 +1110,27 @@ medialAxis curve1 curve2 = do
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
-    Success zeros -> Result.do
-      Debug.assert (List.isEmpty zeros.crossingLoops)
-      Debug.assert (List.isEmpty zeros.tangentPoints)
-      tangentDirection1 <- tangentDirection curve1
-      let tangentVector1 = VectorCurve2d.unit tangentDirection1
-      let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangentVector1
-      let radius :: SurfaceFunction units =
-            Units.coerce $
-              SurfaceFunction.unsafeQuotient'
-                @ d `dot'` d
-                @ 2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d
-      let curve :: SurfaceFunction2d (space @ units) =
-            (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
-      let toSegment solutionCurve =
-            MedialAxis.Segment
-              { t1 = solutionCurve.xCoordinate
-              , t2 = solutionCurve.yCoordinate
-              , t12 = solutionCurve
-              , curve = curve . solutionCurve
-              , radius = radius . solutionCurve
-              }
-      Success (List.map toSegment zeros.crossingCurves)
+    Success zeros ->
+      assert (List.isEmpty zeros.crossingLoops && List.isEmpty zeros.tangentPoints) do
+        tangentDirection1 <- tangentDirection curve1
+        let tangentVector1 = VectorCurve2d.unit tangentDirection1
+        let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangentVector1
+        let radius :: SurfaceFunction units =
+              Units.coerce $
+                SurfaceFunction.unsafeQuotient'
+                  @ d `dot'` d
+                  @ 2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d
+        let curve :: SurfaceFunction2d (space @ units) =
+              (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
+        let toSegment solutionCurve =
+              MedialAxis.Segment
+                { t1 = solutionCurve.xCoordinate
+                , t2 = solutionCurve.yCoordinate
+                , t12 = solutionCurve
+                , curve = curve . solutionCurve
+                , radius = radius . solutionCurve
+                }
+        Success (List.map toSegment zeros.crossingCurves)
 
 arcLengthParameterization ::
   Tolerance units =>
@@ -1171,8 +1169,7 @@ buildPiecewiseTree segmentArray begin end = case end - begin of
   1 -> do
     let (segment, length) = Array.get begin segmentArray
     (PiecewiseLeaf segment length, length)
-  n -> do
-    Debug.assert (n >= 2)
+  n -> assert (n >= 2) do
     let mid = begin + n // 2
     let (leftTree, leftLength) = buildPiecewiseTree segmentArray begin mid
     let (rightTree, rightLength) = buildPiecewiseTree segmentArray mid end

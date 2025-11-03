@@ -5,10 +5,6 @@ module OpenSolid.Maybe
   , withDefault
   , find
   , values
-  , (>>=)
-  , andThen
-  , (>>)
-  , return
   , random
   , orElse
   , oneOf
@@ -17,30 +13,16 @@ where
 
 import OpenSolid.Bool qualified as Bool
 import OpenSolid.Bootstrap
-import OpenSolid.Composition
 import OpenSolid.List qualified as List
 import OpenSolid.Random qualified as Random
 import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
-map function (Just value) = Just (function value)
-map _ Nothing = Nothing
+map = fmap
 
 map2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
 map2 function (Just first) second = map (function first) second
 map2 _ Nothing _ = Nothing
-
-return :: a -> Maybe a
-return = Just
-
-(>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
-Just value >>= function = function value
-Nothing >>= _ = Nothing
-
-andThen :: (a -> Maybe b) -> Maybe a -> Maybe b
-andThen function = (>>= function)
-
-infixl 1 >>=
 
 withDefault :: a -> Maybe a -> a
 withDefault _ (Just value) = value
@@ -54,7 +36,7 @@ values :: Foldable list => list (Maybe a) -> List a
 values maybes = Prelude.foldr List.prepend [] maybes
 
 random :: Random.Generator a -> Random.Generator (Maybe a)
-random randomValue = Random.do
+random randomValue = do
   generateJust <- Bool.random
   if generateJust
     then Random.map Just randomValue

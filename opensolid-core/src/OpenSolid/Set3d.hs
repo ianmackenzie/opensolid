@@ -17,7 +17,6 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
-import OpenSolid.Debug qualified as Debug
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
@@ -73,13 +72,10 @@ build ::
   NonEmpty (Bounds3d (space @ units), a) ->
   Set3d a (space @ units)
 build boundsCoordinate buildSubset n boundedItems
-  | n == 1 = do
-      Debug.assert (NonEmpty.length boundedItems == 1)
+  | n == 1 = assert (boundedItems.length == 1) do
       let (itemBounds, item) = boundedItems.first
       Leaf itemBounds item
-  | otherwise = do
-      Debug.assert (n >= 2)
-      Debug.assert (NonEmpty.length boundedItems == n)
+  | otherwise = assert (n >= 2 && boundedItems.length == n) do
       let sorted = NonEmpty.sortBy (Bounds.midpoint . boundsCoordinate . Pair.first) boundedItems
       let leftN = n // 2
       let rightN = n - leftN
@@ -101,7 +97,7 @@ toNonEmpty (Node _ leftChild rightChild) = gather leftChild (toNonEmpty rightChi
 toNonEmpty (Leaf _ item) = NonEmpty.one item
 
 toList :: Set3d a (space @ units) -> List a
-toList = toNonEmpty >> NonEmpty.toList
+toList = NonEmpty.toList . toNonEmpty
 
 gather :: Set3d a (space @ units) -> NonEmpty a -> NonEmpty a
 gather set accumulated = case set of

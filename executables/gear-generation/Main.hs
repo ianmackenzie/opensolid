@@ -15,33 +15,33 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result (Result)
+import OpenSolid.Result qualified as Result
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Syntax (half, negative, type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance (Tolerance)
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Meters)
 import OpenSolid.World3d qualified as World3d
 
 gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))
-gearBody numTeeth = Try.do
+gearBody numTeeth = do
   let gearModule = Length.millimeters 1.0
   let holeDiameter = Length.millimeters 8.0
   let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
   let outerProfile = SpurGear.profile spurGear
   let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
-  profile <- Region2d.boundedBy (hole : outerProfile)
+  profile <- Result.try (Region2d.boundedBy (hole : outerProfile))
   let width = Length.millimeters 8.0
-  Body3d.extruded World3d.frontPlane profile (negative (half width)) (half width)
+  Result.try (Body3d.extruded World3d.frontPlane profile (negative (half width)) (half width))
 
 main :: IO ()
-main = Tolerance.using (Length.meters 1e-9) IO.do
+main = Tolerance.using (Length.meters 1e-9) do
   let resolution = Resolution.maxError (Length.millimeters 0.1)
-  let writeGlb numTeeth = IO.do
+  let writeGlb numTeeth = do
         timer <- Timer.start
-        body <- gearBody numTeeth
+        body <- IO.try (gearBody numTeeth)
         let glbPath = "executables/gear-generation/gear" <> Text.int numTeeth <> ".glb"
         let material = PbrMaterial.iron (#roughness 0.3)
         let model = Model3d.bodyWith [Model3d.pbrMaterial material] body

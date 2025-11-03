@@ -17,7 +17,6 @@ import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.List qualified as List
-import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -99,7 +98,7 @@ insertCrossingSegment newCrossingSegment crossingSegments =
           firstCrossingSegment : insertCrossingSegment newCrossingSegment remainingCrossingSegments
 
 joinCrossingSegments :: CrossingSegment -> CrossingSegment -> Maybe CrossingSegment
-joinCrossingSegments segment1 segment2 = Maybe.do
+joinCrossingSegments segment1 segment2 = do
   let CrossingSegment parameterization1 start1 end1 boxes1 = segment1
   let (_, startBoundary1) = start1
   let (_, endBoundary1) = end1

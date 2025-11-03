@@ -13,7 +13,6 @@ import OpenSolid.API.Argument qualified as Argument
 import OpenSolid.API.ImplicitArgument (ImplicitArgument (..))
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -240,99 +239,99 @@ ffiName className functionName staticFunction = do
 invoke :: StaticFunction -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
   StaticFunction1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       arg1 <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1)
   StaticFunctionU1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1))
   StaticFunctionR1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1))
   StaticFunctionM1 _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1))
   StaticFunction2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2)
   StaticFunctionU2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2))
   StaticFunctionR2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2))
   StaticFunctionM2 _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2))
   StaticFunction3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, arg3) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3)
   StaticFunctionU3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3))
   StaticFunctionR3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3))
   StaticFunctionM3 _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3))
   StaticFunction4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4)
   StaticFunctionU4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4))
   StaticFunctionR4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4))
   StaticFunctionM4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4))
   StaticFunction5 _ _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 arg5)
   StaticFunctionU5 _ _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5))
   StaticFunctionR5 _ _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5))
   StaticFunctionM5 _ _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5))
   StaticFunction6 _ _ _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 arg5 arg6)
   StaticFunctionU6 _ _ _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5 arg6))
   StaticFunctionR6 _ _ _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5 arg6))
   StaticFunctionM6 _ _ _ _ _ _ f _ ->
-    \inputPtr outputPtr -> IO.do
+    \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5 arg6))
 

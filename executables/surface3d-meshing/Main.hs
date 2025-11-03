@@ -17,7 +17,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
-main = IO.do
+main = do
   let r = Length.meters 1.0
   let h = Float.twoPi .* r
   let theta = Angle.twoPi .* SurfaceFunction.u
@@ -29,7 +29,7 @@ main = IO.do
   let domainCenter = Point2d 0.5 0.5
   let domainDiameter = int 2 ./ int 3
   let domainCircle = Curve2d.circle (#centerPoint domainCenter) (#diameter domainDiameter)
-  domain <- Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle])
+  domain <- IO.try (Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle]))
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2.0) surface
   IO.printLine ("Num faces: " <> Text.int mesh.numFaces)

@@ -68,12 +68,10 @@ where
 
 import Data.Coerce qualified
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Debug qualified as Debug
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
@@ -464,15 +462,15 @@ overlap first second = -(separation first second)
 bisect :: Bounds units -> (Bounds units, Bounds units)
 bisect (Bounds low high) = do
   let mid
-        | low > -Qty.infinity && high < Qty.infinity = Qty.midpoint low high
+        | low > -Qty.infinity && high < Qty.infinity = do
+            let value = Qty.midpoint low high
+            assert (low < value && value < high) value
         | low < Qty.zero && high > Qty.zero = Qty.zero
         | low == Qty.zero = Qty.coerce 1.0
         | high == Qty.zero = Qty.coerce -1.0
         | low > Qty.zero = 2.0 * low
         | high < Qty.zero = 2.0 * high
         | otherwise = internalError "'Impossible' case hit in Bounds.bisect"
-  Debug.assert (low < mid)
-  Debug.assert (mid < high)
   (Bounds low mid, Bounds mid high)
 
 {-# INLINE isAtomic #-}
@@ -613,17 +611,17 @@ resolve assess bounds =
     Resolved value -> Resolved value
     Unresolved
       | isAtomic bounds -> Unresolved
-      | otherwise -> Fuzzy.do
+      | otherwise -> do
           let (left, right) = bisect bounds
           leftValue <- resolve assess left
           rightValue <- resolve assess right
           if leftValue == rightValue then Resolved leftValue else Unresolved
 
 random :: Random.Generator (Qty units) -> Random.Generator (Bounds units)
-random randomQty = Random.do
+random randomQty = do
   a <- randomQty
   b <- randomQty
-  Random.return (Bounds a b)
+  return (Bounds a b)
 
 sampleValues :: Bounds units -> List (Qty units)
 sampleValues bounds = List.map (interpolate bounds) Parameter.samples

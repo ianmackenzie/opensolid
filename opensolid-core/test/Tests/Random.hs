@@ -144,7 +144,7 @@ line2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
 line2d = Random.map2 Curve2d.line point2d point2d
 
 arc2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-arc2d = Random.do
+arc2d = do
   startPoint <- point2d
   endPoint <- point2d
   angleSign <- Sign.random
@@ -162,7 +162,7 @@ translation2d :: Generator (Transform2d.Rigid (space @ Meters))
 translation2d = Random.map Transform2d.translateBy vector2d
 
 rotation2d :: Generator (Transform2d.Rigid (space @ Meters))
-rotation2d = Random.do
+rotation2d = do
   centerPoint <- point2d
   angle <- Qty.random (Angle.degrees -360.0) (Angle.degrees 360.0)
   Random.return (Transform2d.rotateAround centerPoint angle)
@@ -216,7 +216,7 @@ translation3d :: Generator (Transform3d.Rigid (space @ Meters))
 translation3d = Random.map Transform3d.translateBy vector3d
 
 rotation3d :: Generator (Transform3d.Rigid (space @ Meters))
-rotation3d = Random.do
+rotation3d = do
   axis <- axis3d
   angle <- Qty.random (Angle.degrees -360.0) (Angle.degrees 360.0)
   Random.return (Transform3d.rotateAround axis angle)

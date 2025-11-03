@@ -13,7 +13,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import Prelude qualified
 
 type Function = Ptr () -> Ptr () -> IO ()
 
@@ -27,21 +26,21 @@ invoke functionIndex = Array.get functionIndex functionArray
 
 generateExports :: TH.Q (List TH.Dec)
 generateExports =
-  Prelude.fmap List.concat $
-    Prelude.traverse generateExport (List.indexed (List.map Function.ffiName API.functions))
+  fmap List.concat $
+    traverse generateExport (List.indexed (List.map Function.ffiName API.functions))
 
 generateExport :: (Int, Text) -> TH.Q (List TH.Dec)
-generateExport (index, name) = Prelude.do
+generateExport (index, name) = do
   let nameString = Text.unpack name
   let thName = TH.mkName nameString
   functionTypeAliasInfo <- TH.reify ''Function
   foreignFunctionType <-
     case functionTypeAliasInfo of
-      TH.TyConI (TH.TySynD _ _ typ) -> Prelude.return typ
-      _ -> Prelude.fail (Text.unpack "Function type alias has unexpected Template Haskell representation")
+      TH.TyConI (TH.TySynD _ _ typ) -> return typ
+      _ -> fail (Text.unpack "Function type alias has unexpected Template Haskell representation")
   let indexLiteral = TH.IntegerL (fromIntegral index)
   let functionBody = TH.NormalB (TH.AppE (TH.VarE 'invoke) (TH.LitE indexLiteral))
-  Prelude.return
+  return
     [ TH.ForeignD (TH.ExportF TH.CCall nameString thName foreignFunctionType)
     , TH.SigD thName foreignFunctionType
     , TH.FunD thName [TH.Clause [] functionBody []]

@@ -1053,7 +1053,7 @@ instance
     (Transform2d tag2 (space2 @ units2))
     (Transform2d tag3 (space1 @ units1))
   where
-  transform1 >> transform2 =
+  transform2 . transform1 =
     Transform2d
       @ Point2d Qty.zero Qty.zero * transform1 * transform2
       @ Vector2d 1.0 0.0 * transform1 * transform2
@@ -2396,7 +2396,7 @@ instance
     (Transform3d tag2 (space2 @ units2))
     (Transform3d tag3 (space1 @ units1))
   where
-  transform1 >> transform2 =
+  transform2 . transform1 =
     Transform3d
       (Point3d Qty.zero Qty.zero Qty.zero * transform1 * transform2)
       (Vector3d 1.0 0.0 0.0 * transform1 * transform2)

@@ -16,7 +16,6 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
-import Prelude qualified
 
 data Array2d a = Array2d (Int, Int) (Data.Array.Array (Int, Int) a) deriving (Show)
 
@@ -39,7 +38,7 @@ get :: (Int, Int) -> Array2d a -> a
 get indices (Array2d _ array) = array ! indices
 
 map :: (a -> b) -> Array2d a -> Array2d b
-map f (Array2d dims array) = Array2d dims (Prelude.fmap f array)
+map f (Array2d dims array) = Array2d dims (fmap f array)
 
 map2 :: (a -> b -> c) -> Array2d a -> Array2d b -> Array2d c
 map2 f (Array2d (n1, m1) array1) (Array2d (n2, m2) array2) = do

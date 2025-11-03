@@ -14,7 +14,7 @@ import Prelude qualified
 num :: Prelude.Num a => Reader a -> Text -> Result Text a
 num reader text =
   case Data.Text.Read.signed reader text of
-    Prelude.Right (value, suffix)
+    Right (value, suffix)
       | Data.Text.null suffix -> Success value
       | otherwise -> do
           let message =
@@ -24,10 +24,10 @@ num reader text =
                   <> suffix
                   <> "'"
           Failure message
-    Prelude.Left message -> Failure (Data.Text.pack message)
+    Left message -> Failure (Data.Text.pack message)
 
 int :: Text -> Result Text Int
 int = num Data.Text.Read.decimal
 
 float :: Text -> Result Text Float
-float = num Data.Text.Read.double >> Result.map Float.fromDouble
+float = Result.map Float.fromDouble . num Data.Text.Read.double

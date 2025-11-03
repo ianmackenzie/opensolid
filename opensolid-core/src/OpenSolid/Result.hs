@@ -11,14 +11,11 @@ module OpenSolid.Result
   , foldr
   , sequence
   , (>>=)
-  , (>>)
-  , toIO
   , fail
   )
 where
 
 import OpenSolid.Bootstrap hiding (foldl, foldr, sequence)
-import OpenSolid.Composition
 import OpenSolid.Error qualified as Error
 import {-# SOURCE #-} OpenSolid.Text qualified as Text
 import Prelude qualified
@@ -44,26 +41,11 @@ instance Applicative (Result x) where
   _ <*> Failure error = Failure error
 
 instance Monad (Result x) where
-  (>>=) = (>>=)
+  Success value >>= function = function value
+  Failure error >>= _ = Failure error
 
 instance MonadFail (Result Text) where
-  fail = fail
-
-instance Composition (Result x ()) (Result x a) (Result x a) where
-  Success () >> result = result
-  Failure error >> _ = Failure error
-
-instance Composition (IO ()) (Result x a) (IO a) where
-  io >> result = io >> toIO result
-
-instance Composition (Result x ()) (IO a) (IO a) where
-  result >> io = toIO result >> io
-
-(>>=) :: Result x a -> (a -> Result x b) -> Result x b
-Success value >>= function = function value
-Failure error >>= _ = Failure error
-
-infixl 1 >>=
+  fail message = Failure (Text.pack message)
 
 andThen :: (a -> Result x b) -> Result x a -> Result x b
 andThen function result = result >>= function
@@ -79,7 +61,7 @@ addContext context result = case result of
   Failure error -> Failure (Error.addContext context (Error.message error))
 
 map2 :: (a -> b -> c) -> Result x a -> Result x b -> Result x c
-map2 function result1 result = OpenSolid.Result.do
+map2 function result1 result = do
   value1 <- result1
   value2 <- result
   Success (function value1 value2)
@@ -95,7 +77,7 @@ try result = case result of
   Failure error -> Failure (Error.message error)
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
-collect = Prelude.mapM
+collect = mapM
 
 applyForward :: (b -> a -> Result x b) -> Result x b -> a -> Result x b
 applyForward f (Success acc) item = f acc item
@@ -113,10 +95,3 @@ foldr function init list = Prelude.foldr (applyBackward function) (Success init)
 
 sequence :: List (Result x a) -> Result x (List a)
 sequence = Prelude.sequence
-
-toIO :: Result x a -> IO a
-toIO (Success value) = Prelude.return value
-toIO (Failure error) = Prelude.fail (Text.unpack (Error.message error))
-
-fail :: List Char -> Result Text a
-fail = Text.pack >> Failure

@@ -16,7 +16,7 @@ import OpenSolid.Syntax ((.-))
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
-main = Tolerance.using Length.nanometer IO.do
+main = Tolerance.using Length.nanometer do
   let width = Length.centimeters 18.0
   let height = Length.centimeters 12.0
   let cornerRadius = Length.centimeters 5.0
@@ -27,7 +27,7 @@ main = Tolerance.using Length.nanometer IO.do
   let p3 = Point2d (width .- cornerRadius) height
   let p4 = Point2d.y height
   let holeCenter = Point2d (width .- cornerRadius) (height .- cornerRadius)
-  region <-
+  region <- IO.try do
     Region2d.boundedBy
       [ Curve2d.line p0 p1
       , Curve2d.line p1 p2

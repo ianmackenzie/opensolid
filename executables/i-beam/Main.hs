@@ -21,7 +21,7 @@ import OpenSolid.World3d qualified as World3d
 import Prelude hiding (length)
 
 main :: IO ()
-main = Tolerance.using Length.nanometer IO.do
+main = Tolerance.using Length.nanometer do
   let length = Length.centimeters 30.0
   let width = Length.centimeters 10.0
   let height = Length.centimeters 15.0
@@ -46,8 +46,8 @@ main = Tolerance.using Length.nanometer IO.do
         ]
   let topCurves = topRightCurves <> List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves
-  profile <- Region2d.boundedBy allCurves
-  body <- Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length)
+  profile <- IO.try (Region2d.boundedBy allCurves)
+  body <- IO.try (Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length))
   let material = PbrMaterial.metal (Color.rgbFloat 0.913 0.921 0.925) (#roughness 0.3)
   let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
   let resolution = Resolution.maxError (Length.millimeters 1.0)

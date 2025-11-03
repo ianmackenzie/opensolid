@@ -69,7 +69,6 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
-import OpenSolid.Try qualified as Try
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -114,7 +113,7 @@ boundedBy ::
   Tolerance units =>
   List (Curve2d (space @ units)) ->
   Result BoundedBy.Error (Region2d (space @ units))
-boundedBy curves = Result.do
+boundedBy curves = do
   -- checkForInnerIntersection curves
   loops <- connect curves
   classifyLoops loops
@@ -242,7 +241,7 @@ polygon vertexList = case vertexList of
   NonEmpty vertices -> do
     let closedLoop = NonEmpty.push vertices.last vertices
     let segments = NonEmpty.successive LineSegment2d closedLoop
-    let nonZeroLengthSegments = List.filter ((.length) >> (!= Qty.zero)) segments
+    let nonZeroLengthSegments = List.filter (\segment -> segment.length != Qty.zero) segments
     let toCurve segment = Curve2d.line segment.startPoint segment.endPoint
     boundedBy (List.map toCurve nonZeroLengthSegments)
 
@@ -259,10 +258,10 @@ fillet ::
   "radius" ::: Qty units ->
   Region2d (space @ units) ->
   Result Text (Region2d (space @ units))
-fillet points (Named radius) region = Try.do
+fillet points (Named radius) region = do
   let initialCurves = NonEmpty.toList region.boundaryCurves
-  filletedCurves <- Result.foldl (addFillet radius) initialCurves points
-  boundedBy filletedCurves
+  filletedCurves <- Result.try (Result.foldl (addFillet radius) initialCurves points)
+  Result.try (boundedBy filletedCurves)
 
 addFillet ::
   Tolerance units =>
@@ -270,7 +269,7 @@ addFillet ::
   List (Curve2d (space @ units)) ->
   Point2d (space @ units) ->
   Result Text (List (Curve2d (space @ units)))
-addFillet radius curves point = Try.do
+addFillet radius curves point = do
   let couldNotFindPointToFillet = Failure "Could not find point to fillet"
   let couldNotSolveForFilletLocation = Failure "Could not solve for fillet location"
   let curveIncidences = List.map (curveIncidence point) curves
@@ -289,9 +288,9 @@ addFillet radius curves point = Try.do
     [] -> couldNotFindPointToFillet
     List.One{} -> couldNotFindPointToFillet
     List.ThreeOrMore{} -> couldNotFindPointToFillet
-    List.Two firstCurve secondCurve -> Try.do
-      firstTangent <- Curve2d.tangentDirection firstCurve
-      secondTangent <- Curve2d.tangentDirection secondCurve
+    List.Two firstCurve secondCurve -> do
+      firstTangent <- Result.try (Curve2d.tangentDirection firstCurve)
+      secondTangent <- Result.try (Curve2d.tangentDirection secondCurve)
       let firstEndDirection = DirectionCurve2d.endValue firstTangent
       let secondStartDirection = DirectionCurve2d.startValue secondTangent
       let cornerAngle = Direction2d.angleFrom firstEndDirection secondStartDirection
@@ -302,7 +301,7 @@ addFillet radius curves point = Try.do
             VectorCurve2d.rotateBy Angle.quarterTurn (offset * secondTangent)
       let firstOffsetCurve = firstCurve + firstOffsetDisplacement
       let secondOffsetCurve = secondCurve + secondOffsetDisplacement
-      maybeIntersections <- Curve2d.intersections firstOffsetCurve secondOffsetCurve
+      maybeIntersections <- Result.try (Curve2d.intersections firstOffsetCurve secondOffsetCurve)
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
         Just Curve2d.OverlappingSegments{} -> couldNotSolveForFilletLocation
@@ -348,7 +347,7 @@ nonIncidentCurve (_, Just _) = Nothing
 --   List (Curve2d (space @ units)) ->
 --   Result BoundedBy.Error ()
 -- checkForInnerIntersection [] = Success ()
--- checkForInnerIntersection (first : rest) = Result.do
+-- checkForInnerIntersection (first : rest) = do
 --   checkCurveForInnerIntersection first rest
 --   checkForInnerIntersection rest
 
@@ -358,7 +357,7 @@ nonIncidentCurve (_, Just _) = Nothing
 --   List (Curve2d (space @ units)) ->
 --   Result BoundedBy.Error ()
 -- checkCurveForInnerIntersection _ [] = Success ()
--- checkCurveForInnerIntersection curve (first : rest) = Result.do
+-- checkCurveForInnerIntersection curve (first : rest) = do
 --   checkCurvesForInnerIntersection curve first
 --   checkCurveForInnerIntersection curve rest
 
@@ -397,7 +396,7 @@ connect ::
   List (Curve2d (space @ units)) ->
   Result BoundedBy.Error (List (Loop (space @ units)))
 connect [] = Success []
-connect (first : rest) = Result.do
+connect (first : rest) = do
   (loop, remainingCurves) <- buildLoop (startLoop first) rest
   remainingLoops <- connect remainingCurves
   Success (loop : remainingLoops)
@@ -415,7 +414,7 @@ buildLoop ::
   Result BoundedBy.Error (Loop (space @ units), List (Curve2d (space @ units)))
 buildLoop partialLoop@(PartialLoop currentStart currentCurves loopEnd) remainingCurves
   | currentStart ~= loopEnd = Success (currentCurves, remainingCurves)
-  | otherwise = Result.do
+  | otherwise = do
       (updatedPartialLoop, updatedRemainingCurves) <- extendPartialLoop partialLoop remainingCurves
       buildLoop updatedPartialLoop updatedRemainingCurves
 
@@ -493,7 +492,7 @@ transformBy transform (Region2d outer inners) = do
   let transformLoop =
         case Transform2d.handedness transform of
           Positive -> NonEmpty.map (Curve2d.transformBy transform)
-          Negative -> NonEmpty.reverseMap (Curve2d.transformBy transform >> Curve2d.reverse)
+          Negative -> NonEmpty.reverseMap (Curve2d.reverse . Curve2d.transformBy transform)
   Region2d (transformLoop outer) (List.map transformLoop inners)
 
 translateBy ::
@@ -613,7 +612,7 @@ classifyLoops ::
   List (Loop (space @ units)) ->
   Result BoundedBy.Error (Region2d (space @ units))
 classifyLoops [] = Failure BoundedBy.EmptyRegion
-classifyLoops (NonEmpty loops) = Result.do
+classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerLoopCandidate = fixSign Positive largestLoop
   let innerLoopCandidates = List.map (fixSign Negative) smallerLoops

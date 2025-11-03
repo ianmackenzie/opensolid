@@ -79,7 +79,7 @@ maybe (Just value) = [value]
 maybe Nothing = []
 
 isEmpty :: List a -> Bool
-isEmpty = Prelude.null
+isEmpty = null
 
 {-# COMPLETE [], OneOrMore #-}
 
@@ -246,16 +246,16 @@ isDescending :: Ord a => List a -> Bool
 isDescending = isOrdered (>)
 
 allSatisfy :: (a -> Bool) -> List a -> Bool
-allSatisfy = Prelude.all
+allSatisfy = all
 
 allTrue :: List Bool -> Bool
-allTrue = Prelude.and
+allTrue = and
 
 anySatisfy :: (a -> Bool) -> List a -> Bool
-anySatisfy = Prelude.any
+anySatisfy = any
 
 anyTrue :: List Bool -> Bool
-anyTrue = Prelude.or
+anyTrue = or
 
 successive :: (a -> a -> b) -> List a -> List b
 successive function list = map2 function list (drop 1 list)
@@ -275,14 +275,14 @@ replicate = Data.List.replicate
 
 random :: Int -> Random.Generator a -> Random.Generator (List a)
 random n randomItem
-  | n <= 0 = Random.return []
-  | otherwise = Random.do
+  | n <= 0 = return []
+  | otherwise = do
       item <- randomItem
       rest <- random (n - 1) randomItem
-      Random.return (item : rest)
+      return (item : rest)
 
 shuffle :: List a -> Random.Generator (List a)
-shuffle original = Random.do
+shuffle original = do
   keys <- random original.length (Random.Generator System.Random.genWord64)
   let shuffledPairs = sortBy Pair.second (zip2 original keys)
-  Random.return (map Pair.first shuffledPairs)
+  return (map Pair.first shuffledPairs)

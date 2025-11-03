@@ -28,16 +28,16 @@ formatLength length =
   Text.float (Length.inMeters length) <> "m"
 
 testCurve :: Text -> Curve2d (Space @ Meters) -> IO ()
-testCurve label curve = Tolerance.using (Length.meters 1e-12) IO.do
+testCurve label curve = Tolerance.using (Length.meters 1e-12) do
   let (_, length) = Curve2d.arcLengthParameterization curve
   IO.printLine (label <> ": " <> formatLength length)
 
 testLineLength :: IO ()
-testLineLength = Tolerance.using (Length.meters 1e-6) IO.do
+testLineLength = Tolerance.using (Length.meters 1e-6) do
   testCurve "Line" (Curve2d.line Point2d.origin (Point2d.centimeters 30.0 40.0))
 
 testQuadraticSplineLength :: IO ()
-testQuadraticSplineLength = IO.do
+testQuadraticSplineLength = do
   let p1 = Point2d.origin
   let p2 = Point2d.centimeters 20.0 30.0
   let p3 = Point2d.centimeters 40.0 0.0
@@ -66,7 +66,7 @@ analyticalLength (Point2d x0 y0) (Point2d x1 y1) (Point2d x2 y2) = do
   (a_32 .* s_abc .+ a_2 .* b .* (s_abc .- c_2) .+ (float 4.0 .* c .* a .- b .* b) .* Float.log ((twice a_2 .+ ba .+ s_abc) ./ (ba .+ c_2))) ./ (float 4.0 .* a_32)
 
 testCubicSplineParameterization :: IO ()
-testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
+testCubicSplineParameterization = Tolerance.using Length.nanometer do
   let p1 = Point2d.centimeters 5.0 5.0
   let p2 = Point2d.centimeters 14.0 15.0
   let p3 = Point2d.centimeters 16.0 15.0
@@ -74,7 +74,7 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
   let spline = Curve2d.cubicBezier p1 p2 p3 p4
   let (parameterized, length) = Curve2d.parameterizeByArcLength spline
   IO.printLine ("Cubic spline: " <> formatLength length)
-  let drawCurve fileName curve = IO.do
+  let drawCurve fileName curve = do
         let pointLocations = List.map (Curve2d.evaluate curve) (Parameter.steps 30)
         let drawPoint point =
               Drawing2d.circleWith [Drawing2d.whiteFill]
@@ -91,7 +91,7 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
   drawCurve "executables/arc-length/parameterized-spline.svg" parameterized
 
 main :: IO ()
-main = IO.do
+main = do
   testLineLength
   testQuadraticSplineLength
   testCubicSplineParameterization

@@ -13,9 +13,7 @@ where
 import Deque.Strict (Deque)
 import Deque.Strict qualified as Deque
 import OpenSolid.List qualified as List
-import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
-import Prelude qualified
 
 data Queue a = Queue Int (Deque a) deriving (Eq, Show)
 
@@ -41,9 +39,9 @@ push :: a -> Queue a -> Queue a
 push value (Queue n deque) = Queue (n + 1) (Deque.snoc value deque)
 
 pop :: Queue a -> Maybe (a, Queue a)
-pop (Queue n deque) = Maybe.do
+pop (Queue n deque) = do
   (first, rest) <- Deque.uncons deque
   Just (first, Queue (n - 1) rest)
 
 map :: (a -> b) -> Queue a -> Queue b
-map function (Queue n deque) = Queue n (Prelude.fmap function deque)
+map function (Queue n deque) = Queue n (fmap function deque)

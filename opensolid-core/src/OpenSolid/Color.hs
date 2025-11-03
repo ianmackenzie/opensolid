@@ -70,11 +70,11 @@ hsl hue saturation lightness =
 
 -- | Construct a color from a hex string such as '#f3f3f3' or 'f3f3f3'.
 fromHex :: Text -> Color
-fromHex = Text.unpack >> Data.Colour.SRGB.sRGB24read
+fromHex text = Data.Colour.SRGB.sRGB24read (Text.unpack text)
 
 -- | Convert a color to a hex string such as '#f3f3f3'.
 toHex :: Color -> Text
-toHex = Data.Colour.SRGB.sRGB24show >> Text.pack
+toHex color = Text.pack (Data.Colour.SRGB.sRGB24show color)
 
 -- | Get the RGB components of a color as values in the range [0,1].
 rgbFloatComponents :: Color -> (Float, Float, Float)

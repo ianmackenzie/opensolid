@@ -31,7 +31,6 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.LineSegment2d (LineSegment2d)
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
@@ -285,7 +284,7 @@ includeSubdomain subdomain edgeSet = Tolerance.using Qty.zero $
   case edgeSet of
     Set2d.Node nodeBounds leftChild rightChild
       | not (subdomain ^ nodeBounds) -> Resolved True
-      | smallerThan nodeBounds subdomain -> Fuzzy.do
+      | smallerThan nodeBounds subdomain -> do
           includeLeft <- includeSubdomain subdomain leftChild
           includeRight <- includeSubdomain subdomain rightChild
           Resolved (includeLeft && includeRight)

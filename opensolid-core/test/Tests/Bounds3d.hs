@@ -22,7 +22,7 @@ tests =
   ]
 
 boundsAndContainedPoint :: Generator (Bounds3d (space @ Meters), Point3d (space @ Meters))
-boundsAndContainedPoint = Random.do
+boundsAndContainedPoint = do
   bounds <- Tests.Random.bounds3d
   u <- Parameter.random
   v <- Parameter.random

@@ -27,7 +27,7 @@ import OpenSolid.Units (Meters)
 data Global
 
 main :: IO ()
-main = Tolerance.using Length.micrometer IO.do
+main = Tolerance.using Length.micrometer do
   timer <- Timer.start
   IO.Parallel.run [testSplineAndArc, testSplineAndLine]
   elapsed <- Timer.elapsed timer
@@ -61,9 +61,9 @@ testCurveMedialAxis ::
   Curve2d (Global @ Meters) ->
   Curve2d (Global @ Meters) ->
   IO ()
-testCurveMedialAxis label curve1 curve2 = IO.do
+testCurveMedialAxis label curve1 curve2 = do
   timer <- Timer.start
-  segments <- Curve2d.medialAxis curve1 curve2
+  segments <- IO.try (Curve2d.medialAxis curve1 curve2)
   let drawTangentCircles (segment :: Curve2d.MedialAxis.Segment (Global @ Meters)) = do
         let (parameterization, _) = Curve2d.arcLengthParameterization segment.curve
         let drawTangentCircle u = do

@@ -33,7 +33,7 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (return)
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
@@ -240,7 +240,7 @@ newtonRaphson function derivative bounds x y iterations =
       let dy = derivative x
       if dy == Qty.zero -- Can't take Newton step if derivative is zero
         then Failure Divergence
-        else Result.do
+        else do
           let xStepped = x - y / dy
           x2 <-
             if Bounds.includes xStepped bounds

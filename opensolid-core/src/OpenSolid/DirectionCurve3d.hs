@@ -206,7 +206,7 @@ instance
   lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
 instance Composition (Curve Unitless) (DirectionCurve3d space) (DirectionCurve3d space) where
-  curve1d >> DirectionCurve3d curve = DirectionCurve3d (curve1d >> curve)
+  DirectionCurve3d curve . curve1d = DirectionCurve3d (curve . curve1d)
 
 placeIn ::
   Frame3d (global @ frameUnits) (Defines local) ->

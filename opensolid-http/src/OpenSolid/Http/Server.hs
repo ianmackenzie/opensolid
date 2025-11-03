@@ -22,12 +22,12 @@ handle ::
   (ByteString -> (Response -> IO ResponseReceived) -> IO ResponseReceived) ->
   (Response -> IO ResponseReceived) ->
   IO ResponseReceived
-handle request callback respond = IO.do
+handle request callback respond = do
   bytes <- Network.Wai.consumeRequestBodyStrict request
   callback (Data.ByteString.toStrict bytes) respond
 
 runOnPort :: Int -> Application -> IO ()
-runOnPort portNumber application = IO.do
+runOnPort portNumber application = do
   let settings =
         Warp.defaultSettings
           |> Warp.setPort portNumber

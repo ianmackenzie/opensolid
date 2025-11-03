@@ -6,7 +6,6 @@ import Foreign qualified
 import Foreign.Marshal qualified
 import Foreign.Marshal.Array qualified
 import OpenSolid.Array qualified as Array
-import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
@@ -32,11 +31,11 @@ unsafe boundaryLoops steinerVertices = do
   let numInputVertices = NonEmpty.length inputVertices
   let maxNumOutputVertices = numInputVertices
   let maxNumOutputFaces = 2 * maxNumOutputVertices - numBoundaryEdges + 2 * numHoles - 2
-  System.IO.Unsafe.unsafePerformIO IO.do
+  System.IO.Unsafe.unsafePerformIO do
     Foreign.Marshal.Array.withArray inputPointCoordinates $ \inputPointData ->
       Foreign.Marshal.Array.withArray inputEdgeIndices $ \inputEdgeData ->
         Foreign.Marshal.alloca $ \numOutputTrianglesPtr ->
-          Foreign.Marshal.Array.allocaArray (3 * maxNumOutputFaces) $ \triangleData -> IO.do
+          Foreign.Marshal.Array.allocaArray (3 * maxNumOutputFaces) $ \triangleData -> do
             opensolid_cdt
               numInputVertices
               inputPointData
@@ -48,7 +47,7 @@ unsafe boundaryLoops steinerVertices = do
             outputFaceIndices <- Foreign.Marshal.peekArray (3 * numOutputFaces) triangleData
             let faceIndices = collectFaceIndices outputFaceIndices
             let meshVertices = Array.fromNonEmpty inputVertices
-            IO.succeed (Mesh.indexed meshVertices faceIndices)
+            return (Mesh.indexed meshVertices faceIndices)
 
 collectEdgeIndices :: List (NonEmpty vertex) -> Int -> List Int -> List Int
 collectEdgeIndices loops startIndex accumulated = case loops of

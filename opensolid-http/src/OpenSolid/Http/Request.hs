@@ -21,7 +21,7 @@ import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 method :: Request -> Text
-method = Network.Wai.requestMethod >> Text.assumeUtf8 >> Text.toUpper
+method request = Text.toUpper (Text.assumeUtf8 (Network.Wai.requestMethod request))
 
 path :: Request -> List Text
 path = Network.Wai.pathInfo

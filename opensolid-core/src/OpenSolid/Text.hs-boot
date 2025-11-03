@@ -1,6 +1,6 @@
 module OpenSolid.Text (pack, unpack, show, multiline, indent) where
 
-import OpenSolid.Bootstrap
+import OpenSolid.Bootstrap hiding (show)
 
 pack :: List Char -> Text
 unpack :: Text -> List Char

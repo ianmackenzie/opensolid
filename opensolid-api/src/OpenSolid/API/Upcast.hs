@@ -4,7 +4,6 @@ import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
@@ -16,7 +15,7 @@ ffiName className =
   Text.join "_" ["opensolid", FFI.concatenatedName className, "upcast"]
 
 invoke :: Upcast -> Ptr () -> Ptr () -> IO ()
-invoke (Upcast f) inputPtr outputPtr = IO.do
+invoke (Upcast f) inputPtr outputPtr = do
   value <- FFI.load inputPtr 0
   FFI.store outputPtr 0 (f value)
 
