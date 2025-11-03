@@ -10,7 +10,7 @@ module OpenSolid.Bootstrap
   , List
   , Text
   , ifThenElse
-  , fromString
+  , IsString (fromString)
   , fromInteger
   , fromLabel
   , Eq ((==), (/=))
@@ -41,6 +41,7 @@ import Data.Kind (Type)
 import Data.List qualified
 import Data.List.NonEmpty (NonEmpty)
 import Data.List.NonEmpty qualified
+import Data.String (IsString (fromString))
 import Data.Text (Text)
 import Data.Text qualified
 import Data.Traversable.WithIndex (TraversableWithIndex)
@@ -94,10 +95,6 @@ type List a = [a]
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse True ifBranch _ = ifBranch
 ifThenElse False _ elseBranch = elseBranch
-
-{-# INLINE fromString #-}
-fromString :: List Char -> Text
-fromString = Data.Text.pack
 
 {-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int

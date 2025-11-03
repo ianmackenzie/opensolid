@@ -37,7 +37,7 @@ generateExport (index, name) = do
   foreignFunctionType <-
     case functionTypeAliasInfo of
       TH.TyConI (TH.TySynD _ _ typ) -> return typ
-      _ -> fail (Text.unpack "Function type alias has unexpected Template Haskell representation")
+      _ -> fail "Function type alias has unexpected Template Haskell representation"
   let indexLiteral = TH.IntegerL (fromIntegral index)
   let functionBody = TH.NormalB (TH.AppE (TH.VarE 'invoke) (TH.LitE indexLiteral))
   return

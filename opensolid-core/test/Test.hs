@@ -53,7 +53,7 @@ instance Bind Generator where
 
 instance Bind (Result x) where
   Success value >>= f = f value
-  Failure error >>= _ = fail error
+  Failure error >>= _ = fail (Error.message error)
 
 data Test
   = Abort Text
@@ -154,8 +154,8 @@ fuzzImpl context n seed expectation = case n of
 pass :: Expectation
 pass = Expectation (Random.return Passed)
 
-fail :: Error.Message x => x -> Expectation
-fail error = Expectation (Random.return (Failed [Error.message error]))
+fail :: Text -> Expectation
+fail message = Expectation (Random.return (Failed [message]))
 
 expect :: Bool -> Expectation
 expect True = pass
