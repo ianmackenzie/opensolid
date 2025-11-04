@@ -557,7 +557,7 @@ unconvert ::
   Quantity (units2 :/: units1) ->
   Region2d (space @ units2) ->
   Region2d (space @ units1)
-unconvert factor region = convert (Units.simplify (1.0 ./. factor)) region
+unconvert factor region = convert (Units.simplify (1.0 ~/~ factor)) region
 
 contains :: Tolerance units => Point2d (space @ units) -> Region2d (space @ units) -> Bool
 contains point region =
@@ -655,7 +655,7 @@ areaIntegral' referencePoint curve = do
   let displacement = curve - referencePoint
   let y = displacement.yComponent
   let dx = displacement.xComponent.derivative
-  -(Curve.integrate (y .*. dx))
+  -(Curve.integrate (y ~*~ dx))
 
 loopIsInside :: Tolerance units => Loop (space @ units) -> Loop (space @ units) -> Bool
 loopIsInside outer inner = do

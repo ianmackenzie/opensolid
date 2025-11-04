@@ -224,7 +224,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -232,16 +232,16 @@ instance
     (VectorCurve3d (space @ units2))
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
-  lhs .*. rhs =
+  lhs ~*~ rhs =
     new
-      @ lhs.compiled .*. rhs.compiled
-      @ lhs.derivative .*. rhs + lhs .*. rhs.derivative
+      @ lhs.compiled ~*~ rhs.compiled
+      @ lhs.derivative ~*~ rhs + lhs ~*~ rhs.derivative
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -249,13 +249,13 @@ instance
     (VectorCurve3d (space @ units2))
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
-  c1 .*. c2 = Curve.constant c1 .*. c2
+  c1 ~*~ c2 = Curve.constant c1 ~*~ c2
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -263,16 +263,16 @@ instance
     (Curve units2)
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
-  lhs .*. rhs =
+  lhs ~*~ rhs =
     new
-      (lhs.compiled .*. rhs.compiled)
-      (lhs.derivative .*. rhs + lhs .*. rhs.derivative)
+      (lhs.compiled ~*~ rhs.compiled)
+      (lhs.derivative ~*~ rhs + lhs ~*~ rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve3d (space @ units1)) (Quantity units2) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -280,13 +280,13 @@ instance
     (Quantity units2)
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
-  curve .*. value = curve .*. Curve.constant value
+  curve ~*~ value = curve ~*~ Curve.constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorCurve3d (space @ units1)) (Quantity units2) (VectorCurve3d (space @ units3))
   where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
+  lhs / rhs = Units.specialize (lhs ~/~ rhs)
 
 instance
   Division'
@@ -294,7 +294,7 @@ instance
     (Quantity units2)
     (VectorCurve3d (space @ (units1 :/: units2)))
   where
-  curve ./. value = Units.simplify (curve .*. (1.0 ./. value))
+  curve ~/~ value = Units.simplify (curve ~*~ (1.0 ~/~ value))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -641,11 +641,11 @@ lhopital numerator denominator tValue = do
   let numerator'' = evaluate numerator.derivative.derivative tValue
   let denominator' = Curve.evaluate denominator.derivative tValue
   let denominator'' = Curve.evaluate denominator.derivative.derivative tValue
-  let value = numerator' ./. denominator'
+  let value = numerator' ~/~ denominator'
   let firstDerivative =
         Units.simplify $
-          (numerator'' .*. denominator' - numerator' .*. denominator'')
-            ./. (2.0 * Quantity.squared' denominator')
+          (numerator'' ~*~ denominator' - numerator' ~*~ denominator'')
+            ~/~ (2.0 * Quantity.squared' denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -661,10 +661,10 @@ unsafeQuotient' ::
   VectorCurve3d (space @ (units1 :/: units2))
 unsafeQuotient' numerator denominator = do
   new
-    @ numerator.compiled ./. denominator.compiled
+    @ numerator.compiled ~/~ denominator.compiled
     @ Units.simplify do
       unsafeQuotient'
-        (numerator.derivative .*. denominator - numerator .*. denominator.derivative)
+        (numerator.derivative ~*~ denominator - numerator ~*~ denominator.derivative)
         (Curve.squared' denominator)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve units2

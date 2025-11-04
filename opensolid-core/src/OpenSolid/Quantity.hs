@@ -139,8 +139,8 @@ instance units1 ~ units2 => Subtraction (Quantity units1) (Quantity units2) (Qua
   Quantity x - Quantity y = Quantity (x Prelude.- y)
 
 instance Multiplication' (Quantity units1) (Quantity units2) (Quantity (units1 :*: units2)) where
-  {-# INLINE (.*.) #-}
-  Quantity x .*. Quantity y = Quantity (x Prelude.* y)
+  {-# INLINE (~*~) #-}
+  Quantity x ~*~ Quantity y = Quantity (x Prelude.* y)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -150,8 +150,8 @@ instance
   Quantity x * Quantity y = Quantity (x Prelude.* y)
 
 instance Division' (Quantity units1) (Quantity units2) (Quantity (units1 :/: units2)) where
-  {-# INLINE (./.) #-}
-  Quantity x ./. Quantity y = Quantity (x Prelude./ y)
+  {-# INLINE (~/~) #-}
+  Quantity x ~/~ Quantity y = Quantity (x Prelude./ y)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -198,7 +198,7 @@ squared x = x * x
 
 {-# INLINE squared' #-}
 squared' :: Quantity units -> Quantity (units :*: units)
-squared' x = x .*. x
+squared' x = x ~*~ x
 
 sqrt :: Units.Squared units1 units2 => Quantity units2 -> Quantity units1
 sqrt x | x <= zero = zero
@@ -291,10 +291,10 @@ sumOf :: (a -> Quantity units) -> List a -> Quantity units
 sumOf f list = sum (List.map f list)
 
 convert :: Quantity (units2 :/: units1) -> Quantity units1 -> Quantity units2
-convert factor value = Units.simplify (value .*. factor)
+convert factor value = Units.simplify (value ~*~ factor)
 
 unconvert :: Quantity (units2 :/: units1) -> Quantity units2 -> Quantity units1
-unconvert factor value = Units.simplify (value ./. factor)
+unconvert factor value = Units.simplify (value ~/~ factor)
 
 random :: Quantity units -> Quantity units -> Random.Generator (Quantity units)
 random (Quantity low) (Quantity high) =

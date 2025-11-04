@@ -204,7 +204,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -212,16 +212,16 @@ instance
     (SurfaceFunction units2)
     (SurfaceFunction (units1 :*: units2))
   where
-  lhs .*. rhs =
+  lhs ~*~ rhs =
     new
-      @ lhs.compiled .*. rhs.compiled
-      @ \p -> derivative p lhs .*. rhs + lhs .*. derivative p rhs
+      @ lhs.compiled ~*~ rhs.compiled
+      @ \p -> derivative p lhs ~*~ rhs + lhs ~*~ derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -229,13 +229,13 @@ instance
     (Quantity units2)
     (SurfaceFunction (units1 :*: units2))
   where
-  function .*. value = function .*. constant value
+  function ~*~ value = function ~*~ constant value
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -243,7 +243,7 @@ instance
     (SurfaceFunction units2)
     (SurfaceFunction (units1 :*: units2))
   where
-  value .*. function = constant value .*. function
+  value ~*~ function = constant value ~*~ function
 
 instance
   Units.Product units1 units2 units3 =>
@@ -252,7 +252,7 @@ instance
     (Vector2d (space @ units2))
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -260,7 +260,7 @@ instance
     (Vector2d (space @ units2))
     (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
   where
-  function .*. vector = function .*. VectorSurfaceFunction2d.constant vector
+  function ~*~ vector = function ~*~ VectorSurfaceFunction2d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
@@ -269,7 +269,7 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -277,7 +277,7 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
   where
-  vector .*. function = VectorSurfaceFunction2d.constant vector .*. function
+  vector ~*~ function = VectorSurfaceFunction2d.constant vector ~*~ function
 
 instance
   Multiplication
@@ -302,7 +302,7 @@ instance
     (Vector3d (space @ units2))
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -310,7 +310,7 @@ instance
     (Vector3d (space @ units2))
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  function .*. vector = function .*. VectorSurfaceFunction3d.constant vector
+  function ~*~ vector = function ~*~ VectorSurfaceFunction3d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
@@ -319,7 +319,7 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
+  lhs * rhs = Units.specialize (lhs ~*~ rhs)
 
 instance
   Multiplication'
@@ -327,7 +327,7 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  vector .*. function = VectorSurfaceFunction3d.constant vector .*. function
+  vector ~*~ function = VectorSurfaceFunction3d.constant vector ~*~ function
 
 instance
   Multiplication
@@ -349,7 +349,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
   where
-  lhs / rhs = Units.specialize (lhs ./. rhs)
+  lhs / rhs = Units.specialize (lhs ~/~ rhs)
 
 instance
   Division'
@@ -357,7 +357,7 @@ instance
     (Quantity units2)
     (SurfaceFunction (units1 :/: units2))
   where
-  function ./. value = Units.simplify (function .*. (1.0 ./. value))
+  function ~/~ value = Units.simplify (function ~*~ (1.0 ~/~ value))
 
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
   curve . function =
@@ -464,7 +464,7 @@ quotient' numerator denominator = do
         let firstDerivative =
               Units.simplify $
                 unsafeQuotient'
-                  (numerator'' .*. denominator' - numerator' .*. denominator'')
+                  (numerator'' ~*~ denominator' - numerator' ~*~ denominator'')
                   (2.0 * squared' denominator')
         (value, firstDerivative)
   SurfaceFunction.Quotient.impl unsafeQuotient' lhopital desingularize numerator denominator
@@ -482,7 +482,7 @@ unsafeQuotient' ::
   SurfaceFunction (units1 :/: units2)
 unsafeQuotient' lhs rhs =
   recursive
-    @ CompiledFunction.map2 (./.) (./.) (./.) lhs.compiled rhs.compiled
+    @ CompiledFunction.map2 (~/~) (~/~) (~/~) lhs.compiled rhs.compiled
     @ \self p ->
       unsafeQuotient' (derivative p lhs) rhs - self * unsafeQuotient (derivative p rhs) rhs
 
@@ -493,7 +493,7 @@ squared' :: SurfaceFunction units -> SurfaceFunction (units :*: units)
 squared' function =
   new
     @ CompiledFunction.map Expression.squared' Quantity.squared' Bounds.squared' function.compiled
-    @ \p -> 2.0 * function .*. derivative p function
+    @ \p -> 2.0 * function ~*~ derivative p function
 
 sqrt ::
   (Tolerance units1, Units.Squared units1 units2) =>
@@ -517,7 +517,7 @@ sqrt' function =
             let firstDerivativeIsZeroAt testPoint = do
                   let secondDerivativeValue = evaluate secondDerivative testPoint
                   let firstDerivativeTolerance =
-                        ?tolerance .*. Quantity.sqrt' (2.0 * secondDerivativeValue)
+                        ?tolerance ~*~ Quantity.sqrt' (2.0 * secondDerivativeValue)
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative testPoint ~= Quantity.zero
             let firstDerivativeIsZero = List.allSatisfy firstDerivativeIsZeroAt testPoints
@@ -625,7 +625,7 @@ findTangentSolutions ::
   Solve2d.Action Solve2d.NoExclusions FindZerosContext (Solution units)
 findTangentSolutions subproblem = do
   let Subproblem{f, subdomain, uvBounds, fuuBounds, fuvBounds, fvvBounds} = subproblem
-  let determinant = fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds
+  let determinant = fuuBounds ~*~ fvvBounds - fuvBounds ~*~ fuvBounds
   case Bounds.resolvedSign determinant of
     Resolved determinantSign -> do
       let fu = f.du

@@ -5,9 +5,9 @@ module OpenSolid.Syntax
   , (.+)
   , (.-)
   , (.*)
-  , (.*.)
+  , (~*~)
   , (./)
-  , (./.)
+  , (~/~)
   , half
   , twice
   , dot

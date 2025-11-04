@@ -3,9 +3,9 @@ module OpenSolid.Arithmetic
   , Addition ((+))
   , Subtraction ((-))
   , subtract
-  , Multiplication' ((.*.))
+  , Multiplication' ((~*~))
   , Multiplication ((*))
-  , Division' ((./.))
+  , Division' ((~/~))
   , Division ((/))
   , DivMod ((//), (%))
   , DotMultiplication' (dot')
@@ -40,9 +40,9 @@ subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
 
 class Multiplication' a b c | a b -> c where
-  (.*.) :: a -> b -> c
+  (~*~) :: a -> b -> c
 
-infixl 7 .*.
+infixl 7 ~*~
 
 class Multiplication b a c => Multiplication a b c | a b -> c where
   (*) :: a -> b -> c
@@ -50,9 +50,9 @@ class Multiplication b a c => Multiplication a b c | a b -> c where
 infixl 7 *
 
 class Division' a b c | a b -> c where
-  (./.) :: a -> b -> c
+  (~/~) :: a -> b -> c
 
-infixl 7 ./.
+infixl 7 ~/~
 
 class Division a b c | a b -> c where
   (/) :: a -> b -> c
@@ -95,9 +95,9 @@ instance Negation Int where
   negate = Prelude.negate
 
 instance Multiplication' Sign Int Int where
-  {-# INLINEABLE (.*.) #-}
-  Positive .*. n = n
-  Negative .*. n = -n
+  {-# INLINEABLE (~*~) #-}
+  Positive ~*~ n = n
+  Negative ~*~ n = -n
 
 instance Multiplication Sign Int Int where
   {-# INLINEABLE (*) #-}
@@ -105,9 +105,9 @@ instance Multiplication Sign Int Int where
   Negative * n = -n
 
 instance Multiplication' Int Sign Int where
-  {-# INLINEABLE (.*.) #-}
-  n .*. Positive = n
-  n .*. Negative = -n
+  {-# INLINEABLE (~*~) #-}
+  n ~*~ Positive = n
+  n ~*~ Negative = -n
 
 instance Multiplication Int Sign Int where
   {-# INLINEABLE (*) #-}
@@ -122,13 +122,13 @@ instance Subtraction Int Int Int where
   (-) = (Prelude.-)
 
 instance Multiplication' Int Int Int where
-  (.*.) = (Prelude.*)
+  (~*~) = (Prelude.*)
 
 instance Multiplication Int Int Int where
   (*) = (Prelude.*)
 
 instance Division' Int Int Number where
-  n ./. m = Quantity (fromIntegral n Prelude./ fromIntegral m)
+  n ~/~ m = Quantity (fromIntegral n Prelude./ fromIntegral m)
 
 instance Division Int Int Number where
   n / m = Quantity (fromIntegral n Prelude./ fromIntegral m)
