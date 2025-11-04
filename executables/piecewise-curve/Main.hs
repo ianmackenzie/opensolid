@@ -7,25 +7,26 @@ import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax (number, (.*), (.+), (./), (@))
+import OpenSolid.Syntax ((.*.), (.+.), (./.), (/.), (@))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let weightCurve = Curve.quadraticSpline 1 (number 1 ./ sqrt (number 2)) 1
+  let weightCurve = Curve.quadraticSpline 1 (1 /. Number.sqrt 2) 1
   let vE = Vector2d 1 0
-  let vNE = Vector2d 1 1 ./ sqrt (number 2)
+  let vNE = Vector2d 1 1 ./. Number.sqrt 2
   let vN = Vector2d 0 1
-  let vNW = Vector2d -1 1 ./ sqrt (number 2)
+  let vNW = Vector2d -1 1 ./. Number.sqrt 2
   let vW = Vector2d -1 0
-  let vSW = Vector2d -1 -1 ./ sqrt (number 2)
+  let vSW = Vector2d -1 -1 ./. Number.sqrt 2
   let vS = Vector2d 0 -1
-  let vSE = Vector2d 1 -1 ./ sqrt (number 2)
+  let vSE = Vector2d 1 -1 ./. Number.sqrt 2
   let radius = Length.centimeters 10
   let arc v1 v2 v3 = do
         radialUnitVector <- IO.try do
@@ -33,7 +34,7 @@ main = Tolerance.using Length.nanometer do
             VectorCurve2d.quotient
               @ VectorCurve2d.quadraticBezier v1 v2 v3
               @ weightCurve
-        return (Point2d.origin .+ radius .* radialUnitVector)
+        return (Point2d.origin .+. radius .*. radialUnitVector)
   arc1 <- arc vE vNE vN
   arc2 <- arc vN vNW vW
   arc3 <- arc vW vSW vS

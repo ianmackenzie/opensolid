@@ -12,7 +12,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
-import OpenSolid.Syntax (negative, (.+))
+import OpenSolid.Syntax (negative, (.+.))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 
@@ -20,12 +20,12 @@ main :: IO ()
 main = Tolerance.using Length.nanometer do
   let innerRadius = Length.centimeters 10
   let width = Length.centimeters 3
-  let outerRadius = innerRadius .+ width
+  let outerRadius = innerRadius .+. width
   let thickness = Length.millimeters 10
   let p0 = Point2d.x innerRadius
   let p1 = Point2d.x outerRadius
   let p2 = Point2d outerRadius thickness
-  let p3 = Point2d (innerRadius .+ thickness) width
+  let p3 = Point2d (innerRadius .+. thickness) width
   let p4 = Point2d innerRadius width
   profile <- IO.try do
     Region2d.boundedBy

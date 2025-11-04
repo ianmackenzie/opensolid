@@ -12,7 +12,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax ((.-))
+import OpenSolid.Syntax ((.-.))
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
@@ -23,10 +23,10 @@ main = Tolerance.using Length.nanometer do
   let holeDiameter = Length.centimeters 8
   let p0 = Point2d.origin
   let p1 = Point2d.x width
-  let p2 = Point2d width (height .- cornerRadius)
-  let p3 = Point2d (width .- cornerRadius) height
+  let p2 = Point2d width (height .-. cornerRadius)
+  let p3 = Point2d (width .-. cornerRadius) height
   let p4 = Point2d.y height
-  let holeCenter = Point2d (width .- cornerRadius) (height .- cornerRadius)
+  let holeCenter = Point2d (width .-. cornerRadius) (height .-. cornerRadius)
   region <- IO.try do
     Region2d.boundedBy
       [ Curve2d.line p0 p1

@@ -17,7 +17,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax (twice, type (@))
+import OpenSolid.Syntax ((*.), type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance (Tolerance)
@@ -69,7 +69,7 @@ testCurveMedialAxis label curve1 curve2 = do
         let drawTangentCircle u = do
               let t = Curve.evaluate parameterization u
               let centerPoint = Curve2d.evaluate segment.curve t
-              let diameter = twice (Quantity.abs (Curve.evaluate segment.radius t))
+              let diameter = 2 *. Quantity.abs (Curve.evaluate segment.radius t)
               Drawing2d.circleWith
                 [Drawing2d.strokeColor Color.gray, Drawing2d.strokeWidth (Length.millimeters 0.2)]
                 (#centerPoint centerPoint)

@@ -1,15 +1,23 @@
 module OpenSolid.Syntax
-  ( int
-  , number
-  , negative
+  ( negative
+  , (.+.)
+  , (.-.)
+  , (.*.)
+  , (./.)
+  , (+.)
+  , (-.)
+  , (*.)
+  , (/.)
   , (.+)
   , (.-)
   , (.*)
-  , (*#)
   , (./)
+  , (#*#)
+  , (#/#)
+  , (*#)
   , (/#)
-  , half
-  , twice
+  , (#*)
+  , (#/)
   , dot
   , dot#
   , cross
@@ -23,51 +31,120 @@ module OpenSolid.Syntax
   )
 where
 
-import OpenSolid.Prelude
-
-{-# INLINE int #-}
-int :: Int -> Int
-int = id
-
-{-# INLINE number #-}
-number :: Number -> Number
-number = id
+import OpenSolid.Prelude hiding ((*#), (/#))
+import OpenSolid.Prelude qualified
 
 {-# INLINE negative #-}
 negative :: Negation a => a -> a
 negative = negate
 
-{-# INLINE half #-}
-half :: Multiplication Number a b => a -> b
-half value = 0.5 * value
+{-# INLINE (.+.) #-}
+(.+.) :: Addition a b c => a -> b -> c
+(.+.) = (+)
 
-{-# INLINE twice #-}
-twice :: Multiplication Number a b => a -> b
-twice value = 2.0 * value
+infixl 6 .+.
+
+{-# INLINE (.-.) #-}
+(.-.) :: Subtraction a b c => a -> b -> c
+(.-.) = (-)
+
+infixl 6 .-.
+
+{-# INLINE (.*.) #-}
+(.*.) :: Multiplication a b c => a -> b -> c
+(.*.) = (*)
+
+infixl 7 .*.
+
+{-# INLINE (./.) #-}
+(./.) :: Division a b c => a -> b -> c
+(./.) = (/)
+
+infixl 7 ./.
+
+{-# INLINE (+.) #-}
+(+.) :: Addition Number a b => Number -> a -> b
+(+.) = (+)
+
+infixl 6 +.
+
+{-# INLINE (-.) #-}
+(-.) :: Subtraction Number a b => Number -> a -> b
+(-.) = (-)
+
+infixl 6 -.
+
+{-# INLINE (*.) #-}
+(*.) :: Multiplication Number a b => Number -> a -> b
+(*.) = (*)
+
+infixl 7 *.
+
+{-# INLINE (/.) #-}
+(/.) :: Division Number a b => Number -> a -> b
+(/.) = (/)
+
+infixl 7 /.
 
 {-# INLINE (.+) #-}
-(.+) :: Addition a b c => a -> b -> c
+(.+) :: Addition a Number b => a -> Number -> b
 (.+) = (+)
 
 infixl 6 .+
 
 {-# INLINE (.-) #-}
-(.-) :: Subtraction a b c => a -> b -> c
+(.-) :: Subtraction a Number b => a -> Number -> b
 (.-) = (-)
 
 infixl 6 .-
 
 {-# INLINE (.*) #-}
-(.*) :: Multiplication a b c => a -> b -> c
+(.*) :: Multiplication a Number b => a -> Number -> b
 (.*) = (*)
 
 infixl 7 .*
 
 {-# INLINE (./) #-}
-(./) :: Division a b c => a -> b -> c
+(./) :: Division a Number b => a -> Number -> b
 (./) = (/)
 
 infixl 7 ./
+
+{-# INLINE (#*#) #-}
+(#*#) :: Multiplication# a b c => a -> b -> c
+(#*#) = (OpenSolid.Prelude.*#)
+
+infixl 7 #*#
+
+{-# INLINE (#/#) #-}
+(#/#) :: Division# a b c => a -> b -> c
+(#/#) = (OpenSolid.Prelude./#)
+
+infixl 7 #/#
+
+{-# INLINE (*#) #-}
+(*#) :: Multiplication# Number a b => Number -> a -> b
+(*#) = (OpenSolid.Prelude.*#)
+
+infixl 7 *#
+
+{-# INLINE (/#) #-}
+(/#) :: Division# Number a b => Number -> a -> b
+(/#) = (OpenSolid.Prelude./#)
+
+infixl 7 /#
+
+{-# INLINE (#*) #-}
+(#*) :: Multiplication# a Number b => a -> Number -> b
+(#*) = (OpenSolid.Prelude.*#)
+
+infixl 7 #*
+
+{-# INLINE (#/) #-}
+(#/) :: Division# a Number b => a -> Number -> b
+(#/) = (OpenSolid.Prelude./#)
+
+infixl 7 #/
 
 {-# INLINE compose #-}
 compose :: Composition a b c => b -> a -> c

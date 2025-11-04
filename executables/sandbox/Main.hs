@@ -34,6 +34,8 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number (Number)
+import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
@@ -53,16 +55,15 @@ import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Syntax
   ( cross
   , dot
-  , half
-  , int
-  , number
-  , twice
+  , (#/)
   , (%)
-  , (.*)
-  , (.+)
+  , (*.)
+  , (-.)
+  , (.*.)
+  , (.+.)
   , (.-)
-  , (./)
-  , (/#)
+  , (.-.)
+  , (./.)
   , (//)
   , (@)
   , (|>)
@@ -88,42 +89,42 @@ log label value = IO.printLine (label <> ": " <> Text.show value)
 
 testScalarArithmetic :: IO ()
 testScalarArithmetic = do
-  log "Integer product" (int 3 .* int 4)
-  log "Integer division" (int 10 // int 4)
-  log "True division" (int 10 ./ int 4)
+  log "Integer product" ((3 :: Int) .*. (4 :: Int))
+  log "Integer division" ((10 :: Int) // (4 :: Int))
+  log "True division" ((10 :: Int) ./. (10 :: Int))
   let area = Area.squareMeters 3
   let length = Length.centimeters 3
-  let volume = area .* length
+  let volume = area .*. length
   let volumeInCubicCentimeters = Volume.inCubicCentimeters volume
   log "Volume in cubic centimeters" volumeInCubicCentimeters
-  log "sqrt 2" (sqrt (number 2))
+  log "sqrt 2" (Number.sqrt 2)
 
 testVectorArithmetic :: IO ()
 testVectorArithmetic = do
   let vector x y z = Vector3d.zUp (Length.meters x) (Length.meters y) (Length.meters z)
   let v1 = Vector2d.meters 1 2
-  let v2 = half (Vector2d.meters 3 4)
+  let v2 = 0.5 *. Vector2d.meters 3 4
   let dotProduct = v1 `dot` v2
   log "Dot product" dotProduct
   log "2D cross product" (v1 `cross` v2)
   let squareRoot = Quantity.sqrt dotProduct
   log "Square root" squareRoot
-  let translatedPoint = Point2d.meters 2 3 .+ Vector2d.meters 4 5
+  let translatedPoint = Point2d.meters 2 3 .+. Vector2d.meters 4 5
   log "Translated point" translatedPoint
-  let vectorSum = Vector2d.meters 1 2 .+ Vector2d.meters 2 3
+  let vectorSum = Vector2d.meters 1 2 .+. Vector2d.meters 2 3
   log "Vector sum" vectorSum
   let crossProduct = vector 1 2 3 `cross` vector 4 5 6
   log "Cross product" crossProduct
-  let scaledVector = Length.meters 2 .* Vector2d.meters 3 4
+  let scaledVector = Length.meters 2 .*. Vector2d.meters 3 4
   log "Scaled vector" scaledVector
 
 testBoundsArithmetic :: IO ()
 testBoundsArithmetic = do
   let boundsDifference =
-        Bounds (Length.meters 2) (Length.meters 3) .- Length.centimeters 50
+        Bounds (Length.meters 2) (Length.meters 3) .-. Length.centimeters 50
   log "Bounds difference" boundsDifference
   let boundsProduct =
-        Length.centimeters 20 .* Bounds (Length.meters 2) (Length.meters 3)
+        Length.centimeters 20 .*. Bounds (Length.meters 2) (Length.meters 3)
   log "Bounds product" boundsProduct
 
 testEquality :: IO ()
@@ -149,8 +150,8 @@ offsetPoint startPoint endPoint distance =
   case Direction2d.from startPoint endPoint of
     Failure Direction2d.PointsAreCoincident -> startPoint
     Success direction -> do
-      let displacement = distance .* Direction2d.perpendicularTo direction
-      Point2d.midpoint startPoint endPoint .+ displacement
+      let displacement = distance .*. Direction2d.perpendicularTo direction
+      Point2d.midpoint startPoint endPoint .+. displacement
 
 testCustomFunction :: Tolerance Meters => IO ()
 testCustomFunction = do
@@ -159,8 +160,8 @@ testCustomFunction = do
 
 testListOperations :: IO ()
 testListOperations = do
-  let deltas = List.successive subtract [int 0, 1, 4, 9, 16, 25]
-  let intervals = List.successive Bounds [number 1, 2, 3, 4]
+  let deltas :: [Int] = List.successive subtract [0, 1, 4, 9, 16, 25]
+  let intervals :: [Bounds Unitless] = List.successive Bounds [1, 2, 3, 4]
   log "Successive deltas" deltas
   log "Successive intervals" intervals
 
@@ -182,12 +183,12 @@ testTry =
       log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
-testIOIteration = IO.forEach [int 1 .. 3] (log "Looping")
+testIOIteration = IO.forEach [1 :: Int .. 3] (log "Looping")
 
 doublingIO :: Text -> IO Int
 doublingIO input = do
   value <- IO.try (Int.parse input)
-  let doubled = int 2 .* value
+  let doubled = 2 * value
   return doubled
 
 doubleManyIO :: IO [Int]
@@ -224,12 +225,12 @@ testPlaneTorusIntersection = do
   let crossSection =
         Curve2d.circle
           @ #centerPoint (Point2d.x majorRadius)
-          @ #diameter (twice minorRadius)
+          @ #diameter (2 *. minorRadius)
   surface <- IO.try (Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi)
-  let alpha = Angle.asin (minorRadius ./ majorRadius)
+  let alpha = Angle.asin (minorRadius ./. majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  let planeNormal = Direction3d.polar World3d.frontPlane (alpha .+ Angle.halfPi)
-  let f = planeNormal `dot` (surface.function .- World3d.originPoint)
+  let planeNormal = Direction3d.polar World3d.frontPlane (alpha .+. Angle.halfPi)
+  let f = planeNormal `dot` (surface.function .-. World3d.originPoint)
   zeros <- IO.try (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
@@ -240,7 +241,7 @@ testPlaneParaboloidIntersection :: IO ()
 testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- number 0.5
+  let f = SurfaceFunction.squared u .+. SurfaceFunction.squared v .- 0.5
   zeros <- IO.try (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
@@ -268,12 +269,12 @@ drawBounds bounds = do
 
 drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawCrossingCurve index curve = do
-  let hue = (number (fromIntegral index) .* Angle.goldenAngle) % Angle.twoPi
+  let hue = (fromIntegral index *. Angle.goldenAngle) % Angle.twoPi
   let color = Color.hsl1 hue 0.5 0.5
   drawUvCurve [Drawing2d.strokeColor color] curve
 
 toDrawing :: Quantity (Meters /# Unitless)
-toDrawing = Length.centimeters 10 /# number 1
+toDrawing = Length.centimeters 10 #/ 1
 
 drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawUvCurve attributes curve = do
@@ -378,7 +379,7 @@ testHermiteBezier = do
 testExplicitRandomStep :: IO ()
 testExplicitRandomStep = do
   let seed0 = Random.init 1234
-  let list0 = [int 5 .. 10]
+  let list0 :: [Int] = [5 .. 10]
   let generator = List.shuffle list0
   let (list1, seed1) = Random.step generator seed0
   log "list1" list1
@@ -406,8 +407,8 @@ testNewtonRaphson2d :: IO ()
 testNewtonRaphson2d = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- number 4
-  let g = u .- v
+  let f = SurfaceFunction.squared u .+. SurfaceFunction.squared v .- 4
+  let g = u .-. v
   let bounds = Bounds2d (Bounds 0 2) (Bounds 0 2)
   let function = VectorSurfaceFunction2d.xy f g
   let uDerivative = VectorSurfaceFunction2d.derivative SurfaceParameter.U function
@@ -425,21 +426,21 @@ testExpression :: IO ()
 testExpression = do
   let x = Expression.t
   let xSquared = Expression.squared x
-  let expression = xSquared ./ (xSquared .+ Expression.Curve1d.constant 1)
+  let expression = xSquared ./. (xSquared .+. Expression.Curve1d.constant 1)
   log "Expression value" (Expression.evaluate expression 2)
   log "Expression bounds" (Expression.evaluateBounds expression (Bounds 1 3))
 
 testCurve2dExpression :: IO ()
 testCurve2dExpression = do
-  let x = Expression.Curve1d.constant 10 .* Expression.t
+  let x = Expression.Curve1d.constant 10 .*. Expression.t
   let y = Expression.sqrt Expression.t
-  let curve = Expression.xy x y :: Expression (Quantity Unitless) (Point2d (Global @ Unitless))
+  let curve = Expression.xy x y :: Expression Number (Point2d (Global @ Unitless))
   log "Evaluated 2D curve" (Expression.evaluate curve 3)
 
 testQuotientDesingularization :: IO ()
 testQuotientDesingularization = Tolerance.using 1e-9 do
-  let numerator = Curve.sin (Angle.pi .* Curve.t)
-  let denominator = Curve.t .* (number 1 .- Curve.t)
+  let numerator = Curve.sin (Angle.pi .*. Curve.t)
+  let denominator = Curve.t .*. (1 -. Curve.t)
   quotient <- IO.try (Curve.quotient numerator denominator)
   let tValues = Quantity.steps 0 1 10
   IO.forEach tValues \tValue -> do
@@ -454,7 +455,7 @@ testQuotientDesingularization = Tolerance.using 1e-9 do
 testCurveSqrt :: IO ()
 testCurveSqrt = Tolerance.using 1e-6 do
   let t = Curve.t
-  let curve = Curve.sqrt (half (number 1 .- Curve.cos (Angle.twoPi .* t)))
+  let curve = Curve.sqrt (0.5 *. (1 -. Curve.cos (Angle.twoPi .*. t)))
   Drawing2d.writeSvg
     "executables/sandbox/cos-sqrt.svg"
     (Debug.Plot.viewBox (Point2d -0.1 -4.1) (Point2d 1.1 4.1))

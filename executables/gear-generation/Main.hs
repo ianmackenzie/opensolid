@@ -17,7 +17,7 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result (Result)
 import OpenSolid.Result qualified as Result
 import OpenSolid.SpurGear qualified as SpurGear
-import OpenSolid.Syntax (half, negative, type (@))
+import OpenSolid.Syntax ((*.), type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance (Tolerance)
@@ -34,7 +34,7 @@ gearBody numTeeth = do
   let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
   profile <- Result.try (Region2d.boundedBy (hole : outerProfile))
   let width = Length.millimeters 8
-  Result.try (Body3d.extruded World3d.frontPlane profile (negative (half width)) (half width))
+  Result.try (Body3d.extruded World3d.frontPlane profile (-0.5 *. width) (0.5 *. width))
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) do

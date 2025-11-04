@@ -40,10 +40,18 @@ fixities:
   - "infixl 9 >>"
   - "infixr 8 **"
   - "infixr 9 ."
+  - "infixl 6 .+."
+  - "infixl 6 .-."
+  - "infixl 7 .*."
+  - "infixl 7 ./."
   - "infixl 6 .+"
   - "infixl 6 .-"
   - "infixl 7 .*"
   - "infixl 7 ./"
+  - "infixl 6 +."
+  - "infixl 6 -."
+  - "infixl 7 *."
+  - "infixl 7 /."
   - "infixr 9 `compose`"
 
 let-style: inline

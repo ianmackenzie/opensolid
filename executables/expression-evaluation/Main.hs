@@ -4,11 +4,10 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.IO qualified as IO
+import OpenSolid.Number (Number)
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Quantity (Quantity)
-import OpenSolid.Syntax (int, number, (.+), (./))
+import OpenSolid.Syntax ((.+.), (./.))
 import OpenSolid.Text qualified as Text
-import OpenSolid.Units (Unitless)
 
 main :: IO ()
 main = do
@@ -16,10 +15,10 @@ main = do
 
   IO.printLine "t^2 / (1 + t^2)"
   let tSquared = Expression.squared t
-  let one :: Expression (Quantity Unitless) (Quantity Unitless) = Expression.constant 1
-  let fraction = tSquared ./ (one .+ tSquared)
-  IO.forEach [int 0 .. 5] \i -> do
-    let evaluated = Expression.evaluate fraction (number (fromIntegral i))
+  let one :: Expression Number Number = Expression.constant 1
+  let fraction = tSquared ./. (one .+. tSquared)
+  IO.forEach [0 :: Int .. 5] \i -> do
+    let evaluated = Expression.evaluate fraction (fromIntegral i)
     IO.printLine (Text.number evaluated)
 
   IO.printLine "Bezier curve"
