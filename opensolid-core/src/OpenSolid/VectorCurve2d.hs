@@ -334,49 +334,49 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve units3)
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 *# units2))
   where
-  lhs `dot'` rhs =
+  lhs `dot#` rhs =
     Curve.new
-      @ lhs.compiled `dot'` rhs.compiled
-      @ lhs.derivative `dot'` rhs + lhs `dot'` rhs.derivative
+      @ lhs.compiled `dot#` rhs.compiled
+      @ lhs.derivative `dot#` rhs + lhs `dot#` rhs.derivative
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (VectorCurve2d (space1 @ units1)) (Vector2d (space2 @ units2)) (Curve units3)
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (VectorCurve2d (space1 @ units1))
     (Vector2d (space2 @ units2))
     (Curve (units1 *# units2))
   where
-  curve `dot'` vector = curve `dot'` constant vector
+  curve `dot#` vector = curve `dot#` constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (Vector2d (space1 @ units1)) (VectorCurve2d (space2 @ units2)) (Curve units3)
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (Vector2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 *# units2))
   where
-  vector `dot'` curve = constant vector `dot'` curve
+  vector `dot#` curve = constant vector `dot#` curve
 
 instance
   space1 ~ space2 =>
@@ -397,19 +397,19 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve units3)
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 *# units2))
   where
-  lhs `cross'` rhs =
+  lhs `cross#` rhs =
     Curve.new
-      @ lhs.compiled `cross'` rhs.compiled
-      @ lhs.derivative `cross'` rhs + lhs `cross'` rhs.derivative
+      @ lhs.compiled `cross#` rhs.compiled
+      @ lhs.derivative `cross#` rhs + lhs `cross#` rhs.derivative
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -418,16 +418,16 @@ instance
     (Vector2d (space2 @ units2))
     (Curve units3)
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (VectorCurve2d (space1 @ units1))
     (Vector2d (space2 @ units2))
     (Curve (units1 *# units2))
   where
-  curve `cross'` vector = curve `cross'` constant vector
+  curve `cross#` vector = curve `cross#` constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -436,16 +436,16 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve units3)
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (Vector2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 *# units2))
   where
-  vector `cross'` curve = constant vector `cross'` curve
+  vector `cross#` curve = constant vector `cross#` curve
 
 instance
   space1 ~ space2 =>
@@ -761,7 +761,7 @@ squaredMagnitude' curve =
       Vector2d.squaredMagnitude'
       VectorBounds2d.squaredMagnitude'
       curve.compiled
-    @ 2.0 * curve `dot'` curve.derivative
+    @ 2.0 * curve `dot#` curve.derivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

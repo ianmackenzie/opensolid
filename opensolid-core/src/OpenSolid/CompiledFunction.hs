@@ -213,19 +213,19 @@ instance
   , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
   , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
   , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
-  , DotMultiplication'
+  , DotMultiplication#
       (Expression inputValue1 outputValue1)
       (Expression inputValue2 outputValue2)
       (Expression inputValue1 outputValue3)
-  , DotMultiplication' outputValue1 outputValue2 outputValue3
-  , DotMultiplication' outputBounds1 outputBounds2 outputBounds3
+  , DotMultiplication# outputValue1 outputValue2 outputValue3
+  , DotMultiplication# outputBounds1 outputBounds2 outputBounds3
   ) =>
-  DotMultiplication'
+  DotMultiplication#
     (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  dot' = map2 dot' dot' dot'
+  dot# = map2 dot# dot# dot#
 
 instance
   ( inputValue1 ~ inputValue2
@@ -253,19 +253,19 @@ instance
   , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
   , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
   , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
-  , CrossMultiplication'
+  , CrossMultiplication#
       (Expression inputValue1 outputValue1)
       (Expression inputValue2 outputValue2)
       (Expression inputValue1 outputValue3)
-  , CrossMultiplication' outputValue1 outputValue2 outputValue3
-  , CrossMultiplication' outputBounds1 outputBounds2 outputBounds3
+  , CrossMultiplication# outputValue1 outputValue2 outputValue3
+  , CrossMultiplication# outputBounds1 outputBounds2 outputBounds3
   ) =>
-  CrossMultiplication'
+  CrossMultiplication#
     (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  cross' = map2 cross' cross' cross'
+  cross# = map2 cross# cross# cross#
 
 instance
   ( inputValue1 ~ inputValue2

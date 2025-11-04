@@ -949,7 +949,7 @@ instance
     (Expression Number (Vector2d (space2 @ units2)))
     (Expression Number (Quantity units3))
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -958,7 +958,7 @@ instance
     (Expression UvPoint (Vector2d (space2 @ units2)))
     (Expression UvPoint (Quantity units3))
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -967,7 +967,7 @@ instance
     (Expression Number (Vector3d (space2 @ units2)))
     (Expression Number (Quantity units3))
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -976,46 +976,46 @@ instance
     (Expression UvPoint (Vector3d (space2 @ units2)))
     (Expression UvPoint (Quantity units3))
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
---- DotMultiplication' instances ---
+--- DotMultiplication# instances ---
 ------------------------------------
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (Expression Number (Vector2d (space1 @ units1)))
     (Expression Number (Vector2d (space2 @ units2)))
     (Expression Number (Quantity (units1 *# units2)))
   where
-  VectorCurve2d lhs _ `dot'` VectorCurve2d rhs _ = curve1d (lhs `dot` rhs)
+  VectorCurve2d lhs _ `dot#` VectorCurve2d rhs _ = curve1d (lhs `dot` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (Expression UvPoint (Vector2d (space1 @ units1)))
     (Expression UvPoint (Vector2d (space2 @ units2)))
     (Expression UvPoint (Quantity (units1 *# units2)))
   where
-  VectorSurface2d lhs _ `dot'` VectorSurface2d rhs _ = surface1d (lhs `dot` rhs)
+  VectorSurface2d lhs _ `dot#` VectorSurface2d rhs _ = surface1d (lhs `dot` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (Expression Number (Vector3d (space1 @ units1)))
     (Expression Number (Vector3d (space2 @ units2)))
     (Expression Number (Quantity (units1 *# units2)))
   where
-  VectorCurve3d lhs _ `dot'` VectorCurve3d rhs _ = curve1d (lhs `dot` rhs)
+  VectorCurve3d lhs _ `dot#` VectorCurve3d rhs _ = curve1d (lhs `dot` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (Expression UvPoint (Vector3d (space1 @ units1)))
     (Expression UvPoint (Vector3d (space2 @ units2)))
     (Expression UvPoint (Quantity (units1 *# units2)))
   where
-  VectorSurface3d lhs _ `dot'` VectorSurface3d rhs _ = surface1d (lhs `dot` rhs)
+  VectorSurface3d lhs _ `dot#` VectorSurface3d rhs _ = surface1d (lhs `dot` rhs)
 
 ---------------------
 --- CROSS PRODUCT ---
@@ -1031,7 +1031,7 @@ instance
     (Expression Number (Vector2d (space2 @ units2)))
     (Expression Number (Quantity units3))
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1040,7 +1040,7 @@ instance
     (Expression UvPoint (Vector2d (space2 @ units2)))
     (Expression UvPoint (Quantity units3))
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1049,7 +1049,7 @@ instance
     (Expression Number (Vector3d (space2 @ units2)))
     (Expression Number (Vector3d (space1 @ units3)))
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -1058,46 +1058,46 @@ instance
     (Expression UvPoint (Vector3d (space2 @ units2)))
     (Expression UvPoint (Vector3d (space1 @ units3)))
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
---- CrossMultiplication' instances ---
+--- CrossMultiplication# instances ---
 --------------------------------------
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (Expression Number (Vector2d (space1 @ units1)))
     (Expression Number (Vector2d (space2 @ units2)))
     (Expression Number (Quantity (units1 *# units2)))
   where
-  VectorCurve2d lhs _ `cross'` VectorCurve2d rhs _ = curve1d (lhs `cross` rhs)
+  VectorCurve2d lhs _ `cross#` VectorCurve2d rhs _ = curve1d (lhs `cross` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (Expression UvPoint (Vector2d (space1 @ units1)))
     (Expression UvPoint (Vector2d (space2 @ units2)))
     (Expression UvPoint (Quantity (units1 *# units2)))
   where
-  VectorSurface2d lhs _ `cross'` VectorSurface2d rhs _ = surface1d (lhs `cross` rhs)
+  VectorSurface2d lhs _ `cross#` VectorSurface2d rhs _ = surface1d (lhs `cross` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (Expression Number (Vector3d (space1 @ units1)))
     (Expression Number (Vector3d (space2 @ units2)))
     (Expression Number (Vector3d (space1 @ (units1 *# units2))))
   where
-  VectorCurve3d lhs _ `cross'` VectorCurve3d rhs _ = vectorCurve3d (lhs `cross` rhs)
+  VectorCurve3d lhs _ `cross#` VectorCurve3d rhs _ = vectorCurve3d (lhs `cross` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (Expression UvPoint (Vector3d (space1 @ units1)))
     (Expression UvPoint (Vector3d (space2 @ units2)))
     (Expression UvPoint (Vector3d (space1 @ (units1 *# units2))))
   where
-  VectorSurface3d lhs _ `cross'` VectorSurface3d rhs _ = vectorSurface3d (lhs `cross` rhs)
+  VectorSurface3d lhs _ `cross#` VectorSurface3d rhs _ = vectorSurface3d (lhs `cross` rhs)
 
 -------------------
 --- COMPOSITION ---

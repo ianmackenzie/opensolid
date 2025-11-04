@@ -72,7 +72,7 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve (units1 *# units2))

@@ -297,19 +297,19 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (VectorSurfaceFunction2d (space1 @ units1))
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 *# units2))
   where
-  lhs `cross'` rhs =
+  lhs `cross#` rhs =
     SurfaceFunction.new
-      (lhs.compiled `cross'` rhs.compiled)
-      (\p -> derivative p lhs `cross'` rhs + lhs `cross'` derivative p rhs)
+      (lhs.compiled `cross#` rhs.compiled)
+      (\p -> derivative p lhs `cross#` rhs + lhs `cross#` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -318,16 +318,16 @@ instance
     (Vector2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (VectorSurfaceFunction2d (space1 @ units1))
     (Vector2d (space2 @ units2))
     (SurfaceFunction (units1 *# units2))
   where
-  function `cross'` vector = function `cross'` constant vector
+  function `cross#` vector = function `cross#` constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -336,16 +336,16 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs `cross` rhs = Units.specialize (lhs `cross'` rhs)
+  lhs `cross` rhs = Units.specialize (lhs `cross#` rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (Vector2d (space1 @ units1))
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 *# units2))
   where
-  vector `cross'` function = constant vector `cross'` function
+  vector `cross#` function = constant vector `cross#` function
 
 instance
   space1 ~ space2 =>
@@ -372,19 +372,19 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (VectorSurfaceFunction2d (space1 @ units1))
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 *# units2))
   where
-  lhs `dot'` rhs =
+  lhs `dot#` rhs =
     SurfaceFunction.new
-      (lhs.compiled `dot'` rhs.compiled)
-      (\p -> derivative p lhs `dot'` rhs + lhs `dot'` derivative p rhs)
+      (lhs.compiled `dot#` rhs.compiled)
+      (\p -> derivative p lhs `dot#` rhs + lhs `dot#` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -393,16 +393,16 @@ instance
     (Vector2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (VectorSurfaceFunction2d (space1 @ units1))
     (Vector2d (space2 @ units2))
     (SurfaceFunction (units1 *# units2))
   where
-  function `dot'` vector = function `dot'` constant vector
+  function `dot#` vector = function `dot#` constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -411,16 +411,16 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction units3)
   where
-  lhs `dot` rhs = Units.specialize (lhs `dot'` rhs)
+  lhs `dot` rhs = Units.specialize (lhs `dot#` rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (Vector2d (space1 @ units1))
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 *# units2))
   where
-  vector `dot'` function = constant vector `dot'` function
+  vector `dot#` function = constant vector `dot#` function
 
 instance
   space1 ~ space2 =>
@@ -651,7 +651,7 @@ squaredMagnitude' function =
       Vector2d.squaredMagnitude'
       VectorBounds2d.squaredMagnitude'
       function.compiled
-    @ \p -> 2.0 * function `dot'` derivative p function
+    @ \p -> 2.0 * function `dot#` derivative p function
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

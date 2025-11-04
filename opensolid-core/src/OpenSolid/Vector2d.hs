@@ -205,7 +205,7 @@ The angle will be measured counterclockwise from the first vector to the
 second, and will always be between -180 and +180 degrees.
 -}
 angleFrom :: Vector2d (space @ units) -> Vector2d (space @ units) -> Angle
-angleFrom v1 v2 = Angle.atan2 (v1 `cross'` v2) (v1 `dot'` v2)
+angleFrom v1 v2 = Angle.atan2 (v1 `cross#` v2) (v1 `dot#` v2)
 
 data IsZero = IsZero deriving (Eq, Show)
 

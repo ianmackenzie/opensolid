@@ -75,14 +75,14 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
+  DotMultiplication#
     (VectorSurfaceFunction2d (space1 @ units1))
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 *# units2))
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
+  CrossMultiplication#
     (VectorSurfaceFunction2d (space1 @ units1))
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction (units1 *# units2))

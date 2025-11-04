@@ -868,7 +868,7 @@ intersections curve1 curve2 = do
           let f = curve1 . u - curve2 . v
           let fu = f.du
           let fv = f.dv
-          let g = VectorSurfaceFunction2d.xy (fu `cross'` fv) ((curve1.derivative . u) `dot'` f)
+          let g = VectorSurfaceFunction2d.xy (fu `cross#` fv) ((curve1.derivative . u) `dot#` f)
           let gu = g.du
           let gv = g.dv
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
@@ -910,7 +910,7 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
                   let Point2d t1 t2 = point
                   Solve2d.return (constructor t1 t2 sign)
                 else Solve2d.recurse ()
-        case Bounds.resolvedSign (fvBounds `cross'` fuBounds) of
+        case Bounds.resolvedSign (fvBounds `cross#` fuBounds) of
           Resolved sign -> do
             case endpointIntersection endpointIntersections uvBounds of
               Just point -> validate point IntersectionPoint.crossing sign
@@ -928,7 +928,7 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
           Unresolved -> do
             let guBounds = VectorSurfaceFunction2d.evaluateBounds gu uvBounds
             let gvBounds = VectorSurfaceFunction2d.evaluateBounds gv uvBounds
-            case Bounds.resolvedSign (gvBounds `cross'` guBounds) of
+            case Bounds.resolvedSign (gvBounds `cross#` guBounds) of
               Resolved sign -> do
                 case endpointIntersection endpointIntersections uvBounds of
                   Just point -> validate point IntersectionPoint.tangent sign
@@ -1112,7 +1112,7 @@ medialAxis curve1 curve2 = do
   let v2 = curve2.derivative . SurfaceFunction.v
   let d = p2 - p1
   let target =
-        v2 `cross'` (2.0 * (v1 `dot'` d) *# d - VectorSurfaceFunction2d.squaredMagnitude' d *# v1)
+        v2 `cross#` (2.0 * (v1 `dot#` d) *# d - VectorSurfaceFunction2d.squaredMagnitude' d *# v1)
   let targetTolerance = ?tolerance *# ((?tolerance *# ?tolerance) *# ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
@@ -1124,7 +1124,7 @@ medialAxis curve1 curve2 = do
         let radius :: SurfaceFunction units =
               Units.coerce $
                 SurfaceFunction.unsafeQuotient'
-                  @ d `dot'` d
+                  @ d `dot#` d
                   @ 2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d
         let curve :: SurfaceFunction2d (space @ units) =
               (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)

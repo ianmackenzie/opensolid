@@ -11,9 +11,9 @@ module OpenSolid.Syntax
   , half
   , twice
   , dot
-  , dot'
+  , dot#
   , cross
-  , cross'
+  , cross#
   , compose
   , (%)
   , (//)
