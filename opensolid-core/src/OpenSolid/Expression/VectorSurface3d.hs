@@ -2,7 +2,7 @@ module OpenSolid.Expression.VectorSurface3d
   ( constant
   , on
   , squaredMagnitude
-  , squaredMagnitude'
+  , squaredMagnitude#
   , magnitude
   , placeIn
   , relativeTo
@@ -31,10 +31,10 @@ on ::
   Expression UvPoint (Vector3d (space @ units))
 on = Expression.on
 
-squaredMagnitude' ::
+squaredMagnitude# ::
   Expression UvPoint (Vector3d (space @ units)) ->
   Expression UvPoint (Quantity (units *# units))
-squaredMagnitude' = Expression.squaredMagnitude'
+squaredMagnitude# = Expression.squaredMagnitude#
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

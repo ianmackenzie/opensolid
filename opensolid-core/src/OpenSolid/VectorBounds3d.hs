@@ -16,12 +16,12 @@ module OpenSolid.VectorBounds3d
   , zComponent
   , components
   , squaredMagnitude
-  , squaredMagnitude'
+  , squaredMagnitude#
   , magnitude
   , maxMagnitude
   , maxMagnitude##
   , maxSquaredMagnitude
-  , maxSquaredMagnitude'
+  , maxSquaredMagnitude#
   , normalize
   , exclusion
   , inclusion
@@ -195,11 +195,11 @@ components :: VectorBounds3d (space @ units) -> (Bounds units, Bounds units, Bou
 components (VectorBounds3d vx vy vz) = (vx, vy, vz)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Bounds units2
-squaredMagnitude = Units.specialize . squaredMagnitude'
+squaredMagnitude = Units.specialize . squaredMagnitude#
 
-squaredMagnitude' :: VectorBounds3d (space @ units) -> Bounds (units *# units)
-squaredMagnitude' (VectorBounds3d x y z) =
-  Bounds.squared' x + Bounds.squared' y + Bounds.squared' z
+squaredMagnitude# :: VectorBounds3d (space @ units) -> Bounds (units *# units)
+squaredMagnitude# (VectorBounds3d x y z) =
+  Bounds.squared# x + Bounds.squared# y + Bounds.squared# z
 
 magnitude :: VectorBounds3d (space @ units) -> Bounds units
 magnitude bounds = do
@@ -255,14 +255,14 @@ maxSquaredMagnitude ::
   Units.Squared units1 units2 =>
   VectorBounds3d (space @ units1) ->
   Quantity units2
-maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude'
+maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude#
 
-maxSquaredMagnitude' :: VectorBounds3d (space @ units) -> Quantity (units *# units)
-maxSquaredMagnitude' (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)) = do
+maxSquaredMagnitude# :: VectorBounds3d (space @ units) -> Quantity (units *# units)
+maxSquaredMagnitude# (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)) = do
   let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
   let zMagnitude = Quantity.max (Quantity.abs minZ) (Quantity.abs maxZ)
-  Quantity.squared' xMagnitude + Quantity.squared' yMagnitude + Quantity.squared' zMagnitude
+  Quantity.squared# xMagnitude + Quantity.squared# yMagnitude + Quantity.squared# zMagnitude
 
 normalize :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ Unitless)
 normalize vectorBounds = do

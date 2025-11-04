@@ -16,11 +16,11 @@ module OpenSolid.VectorBounds2d
   , yComponent
   , components
   , squaredMagnitude
-  , squaredMagnitude'
+  , squaredMagnitude#
   , magnitude
   , maxMagnitude
   , maxSquaredMagnitude
-  , maxSquaredMagnitude'
+  , maxSquaredMagnitude#
   , normalize
   , exclusion
   , exclusion##
@@ -176,10 +176,10 @@ components :: VectorBounds2d (space @ units) -> (Bounds units, Bounds units)
 components (VectorBounds2d vx vy) = (vx, vy)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Bounds units2
-squaredMagnitude = Units.specialize . squaredMagnitude'
+squaredMagnitude = Units.specialize . squaredMagnitude#
 
-squaredMagnitude' :: VectorBounds2d (space @ units) -> Bounds (units *# units)
-squaredMagnitude' (VectorBounds2d x y) = Bounds.squared' x + Bounds.squared' y
+squaredMagnitude# :: VectorBounds2d (space @ units) -> Bounds (units *# units)
+squaredMagnitude# (VectorBounds2d x y) = Bounds.squared# x + Bounds.squared# y
 
 magnitude :: VectorBounds2d (space @ units) -> Bounds units
 magnitude (VectorBounds2d x y) = Bounds.hypot2 x y
@@ -194,13 +194,13 @@ maxSquaredMagnitude ::
   Units.Squared units1 units2 =>
   VectorBounds2d (space @ units1) ->
   Quantity units2
-maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude'
+maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude#
 
-maxSquaredMagnitude' :: VectorBounds2d (space @ units) -> Quantity (units *# units)
-maxSquaredMagnitude' (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
+maxSquaredMagnitude# :: VectorBounds2d (space @ units) -> Quantity (units *# units)
+maxSquaredMagnitude# (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
   let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
-  Quantity.squared' xMagnitude + Quantity.squared' yMagnitude
+  Quantity.squared# xMagnitude + Quantity.squared# yMagnitude
 
 normalize :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ Unitless)
 normalize vectorBounds = do

@@ -17,15 +17,15 @@ module OpenSolid.SurfaceFunction
   , zeros
   , new
   , quotient
-  , quotient'
+  , quotient#
   , unsafeQuotient
-  , unsafeQuotient'
+  , unsafeQuotient#
   , squared
-  , squared'
+  , squared#
   , sqrt
-  , sqrt'
+  , sqrt#
   , unsafeSqrt
-  , unsafeSqrt'
+  , unsafeSqrt#
   , cubed
   , sin
   , cos
@@ -447,63 +447,63 @@ quotient ::
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   Result DivisionByZero (SurfaceFunction units3)
-quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+quotient lhs rhs = Units.specialize (quotient# lhs rhs)
 
-quotient' ::
+quotient# ::
   Tolerance units2 =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   Result DivisionByZero (SurfaceFunction (units1 /# units2))
-quotient' numerator denominator = do
+quotient# numerator denominator = do
   let lhopital p = do
         let numerator' = derivative p numerator
         let numerator'' = derivative p numerator'
         let denominator' = derivative p denominator
         let denominator'' = derivative p denominator'
-        let value = unsafeQuotient' numerator' denominator'
+        let value = unsafeQuotient# numerator' denominator'
         let firstDerivative =
               Units.simplify $
-                unsafeQuotient'
+                unsafeQuotient#
                   (numerator'' *# denominator' - numerator' *# denominator'')
-                  (2.0 * squared' denominator')
+                  (2.0 * squared# denominator')
         (value, firstDerivative)
-  SurfaceFunction.Quotient.impl unsafeQuotient' lhopital desingularize numerator denominator
+  SurfaceFunction.Quotient.impl unsafeQuotient# lhopital desingularize numerator denominator
 
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   SurfaceFunction units3
-unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerator denominator)
+unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient# numerator denominator)
 
-unsafeQuotient' ::
+unsafeQuotient# ::
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   SurfaceFunction (units1 /# units2)
-unsafeQuotient' lhs rhs =
+unsafeQuotient# lhs rhs =
   recursive
     @ CompiledFunction.map2 (/#) (/#) (/#) lhs.compiled rhs.compiled
     @ \self p ->
-      unsafeQuotient' (derivative p lhs) rhs - self * unsafeQuotient (derivative p rhs) rhs
+      unsafeQuotient# (derivative p lhs) rhs - self * unsafeQuotient (derivative p rhs) rhs
 
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
-squared function = Units.specialize (squared' function)
+squared function = Units.specialize (squared# function)
 
-squared' :: SurfaceFunction units -> SurfaceFunction (units *# units)
-squared' function =
+squared# :: SurfaceFunction units -> SurfaceFunction (units *# units)
+squared# function =
   new
-    @ CompiledFunction.map Expression.squared' Quantity.squared' Bounds.squared' function.compiled
+    @ CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# function.compiled
     @ \p -> 2.0 * function *# derivative p function
 
 sqrt ::
   (Tolerance units1, Units.Squared units1 units2) =>
   SurfaceFunction units2 ->
   SurfaceFunction units1
-sqrt function = sqrt' (Units.unspecialize function)
+sqrt function = sqrt# (Units.unspecialize function)
 
-sqrt' :: Tolerance units => SurfaceFunction (units *# units) -> SurfaceFunction units
-sqrt' function =
-  if Tolerance.using Tolerance.squared' (function ~= Quantity.zero)
+sqrt# :: Tolerance units => SurfaceFunction (units *# units) -> SurfaceFunction units
+sqrt# function =
+  if Tolerance.using Tolerance.squared# (function ~= Quantity.zero)
     then zero
     else do
       let maybeSingularity param value sign = do
@@ -511,33 +511,33 @@ sqrt' function =
             let secondDerivative = derivative param firstDerivative
             let testPoints = SurfaceFunction.Desingularization.testPoints param value
             let functionIsZeroAt testPoint =
-                  Tolerance.using Tolerance.squared' $
+                  Tolerance.using Tolerance.squared# $
                     evaluate function testPoint ~= Quantity.zero
             let functionIsZero = List.allSatisfy functionIsZeroAt testPoints
             let firstDerivativeIsZeroAt testPoint = do
                   let secondDerivativeValue = evaluate secondDerivative testPoint
                   let firstDerivativeTolerance =
-                        ?tolerance *# Quantity.sqrt' (2.0 * secondDerivativeValue)
+                        ?tolerance *# Quantity.sqrt# (2.0 * secondDerivativeValue)
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative testPoint ~= Quantity.zero
             let firstDerivativeIsZero = List.allSatisfy firstDerivativeIsZeroAt testPoints
             if functionIsZero && firstDerivativeIsZero
-              then Just (zero, sign * unsafeSqrt' (0.5 * secondDerivative))
+              then Just (zero, sign * unsafeSqrt# (0.5 * secondDerivative))
               else Nothing
-      desingularize (unsafeSqrt' function)
+      desingularize (unsafeSqrt# function)
         @ #singularityU0 (maybeSingularity U 0.0 Positive)
         @ #singularityU1 (maybeSingularity U 1.0 Negative)
         @ #singularityV0 (maybeSingularity V 0.0 Positive)
         @ #singularityV1 (maybeSingularity V 1.0 Negative)
 
 unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction units2 -> SurfaceFunction units1
-unsafeSqrt function = unsafeSqrt' (Units.unspecialize function)
+unsafeSqrt function = unsafeSqrt# (Units.unspecialize function)
 
-unsafeSqrt' :: SurfaceFunction (units *# units) -> SurfaceFunction units
-unsafeSqrt' function =
+unsafeSqrt# :: SurfaceFunction (units *# units) -> SurfaceFunction units
+unsafeSqrt# function =
   recursive
-    @ CompiledFunction.map Expression.sqrt' Quantity.sqrt' Bounds.sqrt' function.compiled
-    @ \self p -> Units.coerce (unsafeQuotient' (derivative p function) (2.0 * self))
+    @ CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# function.compiled
+    @ \self p -> Units.coerce (unsafeQuotient# (derivative p function) (2.0 * self))
 
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 cubed function =

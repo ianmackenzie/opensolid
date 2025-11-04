@@ -7,9 +7,9 @@ module OpenSolid.VectorCurve3d
   , evaluate
   , evaluateBounds
   , quotient
-  , quotient'
+  , quotient#
   , unsafeQuotient
-  , unsafeQuotient'
+  , unsafeQuotient#
   , magnitude
   , transformBy
   )
@@ -101,7 +101,7 @@ quotient ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve3d (space @ units3))
-quotient' ::
+quotient# ::
   Tolerance units2 =>
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
@@ -111,7 +111,7 @@ unsafeQuotient ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   VectorCurve3d (space @ units3)
-unsafeQuotient' ::
+unsafeQuotient# ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   VectorCurve3d (space @ (units1 /# units2))

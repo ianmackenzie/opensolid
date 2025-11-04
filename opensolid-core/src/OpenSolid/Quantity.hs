@@ -10,9 +10,9 @@ module OpenSolid.Quantity
   , interpolateFrom
   , midpoint
   , squared
-  , squared'
+  , squared#
   , sqrt
-  , sqrt'
+  , sqrt#
   , hypot2
   , hypot3
   , abs
@@ -196,17 +196,17 @@ isInfinite (Quantity x) = Prelude.isInfinite x
 squared :: Units.Squared units1 units2 => Quantity units1 -> Quantity units2
 squared x = x * x
 
-{-# INLINE squared' #-}
-squared' :: Quantity units -> Quantity (units *# units)
-squared' x = x *# x
+{-# INLINE squared# #-}
+squared# :: Quantity units -> Quantity (units *# units)
+squared# x = x *# x
 
 sqrt :: Units.Squared units1 units2 => Quantity units2 -> Quantity units1
 sqrt x | x <= zero = zero
 sqrt (Quantity x) = Quantity (Prelude.sqrt x)
 
-sqrt' :: Quantity (units *# units) -> Quantity units
-sqrt' x | x <= zero = zero
-sqrt' (Quantity x) = Quantity (Prelude.sqrt x)
+sqrt# :: Quantity (units *# units) -> Quantity units
+sqrt# x | x <= zero = zero
+sqrt# (Quantity x) = Quantity (Prelude.sqrt x)
 
 hypot2 :: Quantity units -> Quantity units -> Quantity units
 hypot2 (Quantity## x##) (Quantity## y##) = Quantity## (hypot2## x## y##)

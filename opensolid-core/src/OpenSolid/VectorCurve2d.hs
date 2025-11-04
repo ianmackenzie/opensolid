@@ -25,12 +25,12 @@ module OpenSolid.VectorCurve2d
   , desingularize
   , desingularized
   , quotient
-  , quotient'
+  , quotient#
   , unsafeQuotient
-  , unsafeQuotient'
+  , unsafeQuotient#
   , magnitude
   , squaredMagnitude
-  , squaredMagnitude'
+  , squaredMagnitude#
   , reverse
   , isZero
   , IsZero (IsZero)
@@ -127,11 +127,11 @@ instance
 
 instance
   HasField
-    "squaredMagnitude'"
+    "squaredMagnitude#"
     (VectorCurve2d (space @ units))
     (Curve (units *# units))
   where
-  getField = squaredMagnitude'
+  getField = squaredMagnitude#
 
 instance FFI (VectorCurve2d (FFI.Space @ Unitless)) where
   representation = FFI.classRepresentation "VectorCurve2d"
@@ -175,8 +175,8 @@ instance
     (Vector2d (space2 @ units2))
     units1
   where
-  curve ^ vector = Tolerance.using Tolerance.squared' do
-    (curve - vector).squaredMagnitude' ^ Quantity.zero
+  curve ^ vector = Tolerance.using Tolerance.squared# do
+    (curve - vector).squaredMagnitude# ^ Quantity.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -692,14 +692,14 @@ quotient ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve2d (space @ units3))
-quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+quotient lhs rhs = Units.specialize (quotient# lhs rhs)
 
-quotient' ::
+quotient# ::
   Tolerance units2 =>
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve2d (space @ (units1 /# units2)))
-quotient' numerator denominator =
+quotient# numerator denominator =
   if denominator ~= Quantity.zero
     then Failure DivisionByZero
     else Success do
@@ -711,7 +711,7 @@ quotient' numerator denominator =
             if Curve.evaluate denominator 1.0 ~= Quantity.zero
               then Just (lhopital numerator denominator 1.0)
               else Nothing
-      desingularize singularity0 (unsafeQuotient' numerator denominator) singularity1
+      desingularize singularity0 (unsafeQuotient# numerator denominator) singularity1
 
 lhopital ::
   Tolerance units2 =>
@@ -728,7 +728,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' *# denominator' - numerator' *# denominator'')
-            /# (2.0 * Quantity.squared' denominator')
+            /# (2.0 * Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -736,37 +736,37 @@ unsafeQuotient ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   VectorCurve2d (space @ units3)
-unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerator denominator)
+unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient# numerator denominator)
 
-unsafeQuotient' ::
+unsafeQuotient# ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   VectorCurve2d (space @ (units1 /# units2))
-unsafeQuotient' numerator denominator = do
+unsafeQuotient# numerator denominator = do
   new
     @ numerator.compiled /# denominator.compiled
     @ Units.simplify do
-      unsafeQuotient'
+      unsafeQuotient#
         (numerator.derivative *# denominator - numerator *# denominator.derivative)
-        (Curve.squared' denominator)
+        (Curve.squared# denominator)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
-squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
+squaredMagnitude curve = Units.specialize (squaredMagnitude# curve)
 
-squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve (units *# units)
-squaredMagnitude' curve =
+squaredMagnitude# :: VectorCurve2d (space @ units) -> Curve (units *# units)
+squaredMagnitude# curve =
   Curve.new
     @ CompiledFunction.map
-      Expression.VectorCurve2d.squaredMagnitude'
-      Vector2d.squaredMagnitude'
-      VectorBounds2d.squaredMagnitude'
+      Expression.VectorCurve2d.squaredMagnitude#
+      Vector2d.squaredMagnitude#
+      VectorBounds2d.squaredMagnitude#
       curve.compiled
     @ 2.0 * curve `dot#` curve.derivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
 magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Curve units
-magnitude curve = Curve.sqrt' (squaredMagnitude' curve)
+magnitude curve = Curve.sqrt# (squaredMagnitude# curve)
 
 sampleValues :: VectorCurve2d (space @ units) -> List (Vector2d (space @ units))
 sampleValues curve = List.map (evaluate curve) Parameter.samples
@@ -778,7 +778,7 @@ data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result IsZero (List Number)
 zeros curve =
-  case Tolerance.using Tolerance.squared' (Curve.zeros curve.squaredMagnitude') of
+  case Tolerance.using Tolerance.squared# (Curve.zeros curve.squaredMagnitude#) of
     Success zeros1d -> Success (List.map (.location) zeros1d)
     Failure Curve.IsZero -> Failure IsZero
 

@@ -6,9 +6,9 @@ module OpenSolid.VectorCurve2d
   , evaluate
   , evaluateBounds
   , quotient
-  , quotient'
+  , quotient#
   , unsafeQuotient
-  , unsafeQuotient'
+  , unsafeQuotient#
   , transformBy
   )
 where
@@ -93,7 +93,7 @@ quotient ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve2d (space @ units3))
-quotient' ::
+quotient# ::
   Tolerance units2 =>
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
@@ -103,7 +103,7 @@ unsafeQuotient ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   VectorCurve2d (space @ units3)
-unsafeQuotient' ::
+unsafeQuotient# ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   VectorCurve2d (space @ (units1 /# units2))

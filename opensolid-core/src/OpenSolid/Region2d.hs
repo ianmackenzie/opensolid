@@ -587,10 +587,10 @@ fluxIntegral point curve = do
   -- so the Curve.unsafeQuotient call should be OK
   -- (if the point is not on the curve, then the displacement will always be non-zero)
   let integrand =
-        Tolerance.using Tolerance.squared' $
+        Tolerance.using Tolerance.squared# $
           Curve.unsafeQuotient
             @ curve.derivative `cross#` displacement
-            @ VectorCurve2d.squaredMagnitude' displacement
+            @ VectorCurve2d.squaredMagnitude# displacement
   Curve.integrate integrand
 
 totalFlux :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
@@ -622,8 +622,8 @@ classifyLoops (NonEmpty loops) = do
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
 fixSign desiredSign loop =
-  Tolerance.using Tolerance.squared' do
-    if Estimate.sign (loopSignedArea' loop) == desiredSign then loop else reverseLoop loop
+  Tolerance.using Tolerance.squared# do
+    if Estimate.sign (loopSignedArea# loop) == desiredSign then loop else reverseLoop loop
 
 reverseLoop :: Loop (space @ units) -> Loop (space @ units)
 reverseLoop loop = NonEmpty.reverseMap Curve2d.reverse loop
@@ -633,13 +633,13 @@ pickLargestLoop ::
   NonEmpty (Loop (space @ units)) ->
   (Loop (space @ units), List (Loop (space @ units)))
 pickLargestLoop loops =
-  Tolerance.using Tolerance.squared' do
-    Estimate.pickLargestBy loopSignedArea' loops
+  Tolerance.using Tolerance.squared# do
+    Estimate.pickLargestBy loopSignedArea# loops
 
-loopSignedArea' :: Loop (space @ units) -> Estimate (units *# units)
-loopSignedArea' loop = do
+loopSignedArea# :: Loop (space @ units) -> Estimate (units *# units)
+loopSignedArea# loop = do
   let referencePoint = loop.first.startPoint
-  let edgeIntegrals = NonEmpty.map (areaIntegral' referencePoint) loop
+  let edgeIntegrals = NonEmpty.map (areaIntegral# referencePoint) loop
   Estimate.sum edgeIntegrals
 
 areaIntegral ::
@@ -648,10 +648,10 @@ areaIntegral ::
   Curve2d (space @ units1) ->
   Estimate units2
 areaIntegral referencePoint curve =
-  Units.specialize (areaIntegral' referencePoint curve)
+  Units.specialize (areaIntegral# referencePoint curve)
 
-areaIntegral' :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate (units *# units)
-areaIntegral' referencePoint curve = do
+areaIntegral# :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate (units *# units)
+areaIntegral# referencePoint curve = do
   let displacement = curve - referencePoint
   let y = displacement.yComponent
   let dx = displacement.xComponent.derivative

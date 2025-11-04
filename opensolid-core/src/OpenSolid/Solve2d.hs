@@ -258,7 +258,7 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
           let deltaV = (yu1 *# x1 - xu1 *# y1) / determinant
           let p2 = boundedStep uvBounds p1 (p1 + Vector2d deltaU deltaV)
           let f2 = f p2
-          if Vector2d.squaredMagnitude' f2 >= Vector2d.squaredMagnitude' f1
+          if Vector2d.squaredMagnitude# f2 >= Vector2d.squaredMagnitude# f1
             then -- We've stopped converging, check if we've actually found a root
               if f1 ~= Vector2d.zero then Success p1 else Failure Divergence
             else -- We're still converging, so take another iteration

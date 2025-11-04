@@ -105,7 +105,7 @@ curve2dImpl function derivative t1 v1 iterations =
       let d1 = derivative t1
       let t2 = t1 - (v1 `dot#` d1) / (d1 `dot#` d1)
       let v2 = function t2
-      if Vector2d.squaredMagnitude' v2 < Vector2d.squaredMagnitude' v1
+      if Vector2d.squaredMagnitude# v2 < Vector2d.squaredMagnitude# v1
         then curve2dImpl function derivative t2 v2 (iterations + 1)
         else if v1 ~= Vector2d.zero then Success t1 else Failure Divergence
     else Failure Divergence
@@ -181,7 +181,7 @@ surface2dImpl function uDerivative vDerivative uvPoint1 value1 iterations =
       let vStep = (dydu1 *# x1 - dxdu1 *# y1) / determinant
       let uvPoint2 = uvPoint1 + Vector2d uStep vStep
       let value2 = function uvPoint2
-      if Vector2d.squaredMagnitude' value2 < Vector2d.squaredMagnitude' value1
+      if Vector2d.squaredMagnitude# value2 < Vector2d.squaredMagnitude# value1
         then surface2dImpl function uDerivative vDerivative uvPoint2 value2 (iterations + 1)
         else if value1 ~= Vector2d.zero then Success uvPoint1 else Failure Divergence
     else Failure Divergence

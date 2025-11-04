@@ -60,7 +60,7 @@ module OpenSolid.Curve2d
   , convert
   , unconvert
   , curvature
-  , curvature'
+  , curvature#
   , toPolyline
   , samplingPoints
   , medialAxis
@@ -442,7 +442,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       let halfDistance = 0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint
       let radius = Quantity.max (Quantity.abs givenRadius) halfDistance
       let offsetMagnitude =
-            Quantity.sqrt' (Quantity.squared' radius - Quantity.squared' halfDistance)
+            Quantity.sqrt# (Quantity.squared# radius - Quantity.squared# halfDistance)
       let offsetDirection = Direction2d.rotateLeft chordDirection
       let offsetDistance =
             case whichArc of
@@ -782,7 +782,7 @@ signature orientation curve tValue radius = do
             let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivativeCurve tValue
             let Vector2d x'''' y'''' = local fourthDerivativeValue
             (y'''' *# x'' - y'' *# x'''') /# (x'' *# x'' *# x'')
-  let secondOrder = Units.simplify (0.5 * d2ydx2 *# Quantity.squared' radius)
+  let secondOrder = Units.simplify (0.5 * d2ydx2 *# Quantity.squared# radius)
   (firstOrder, secondOrder)
 
 candidateOverlappingSegment :: UvPoint -> UvPoint -> OverlappingSegment
@@ -1053,18 +1053,18 @@ unconvert ::
   Curve2d (space @ units1)
 unconvert factor curve = convert (Units.simplify (1.0 /# factor)) curve
 
-curvature' ::
+curvature# ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Result IsPoint (Curve (Unitless /# units))
-curvature' curve = do
+curvature# curve = do
   let firstDerivative = curve.derivative
   let secondDerivative = firstDerivative.derivative
   tangent <- tangentDirection curve
   let numerator = tangent `cross` secondDerivative
-  let denominator = VectorCurve2d.squaredMagnitude' firstDerivative
-  case Tolerance.using Tolerance.squared' (Curve.quotient' numerator denominator) of
-    Success quotient' -> Success (Units.simplify quotient')
+  let denominator = VectorCurve2d.squaredMagnitude# firstDerivative
+  case Tolerance.using Tolerance.squared# (Curve.quotient# numerator denominator) of
+    Success quotient# -> Success (Units.simplify quotient#)
     Failure DivisionByZero -> Failure IsPoint
 
 {-| Get the curvature of a 2D curve.
@@ -1080,7 +1080,7 @@ curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2d (space @ units1) ->
   Result IsPoint (Curve units2)
-curvature curve = Result.map Units.specialize (curvature' curve)
+curvature curve = Result.map Units.specialize (curvature# curve)
 
 toPolyline :: Resolution units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
 toPolyline resolution curve =
@@ -1112,7 +1112,7 @@ medialAxis curve1 curve2 = do
   let v2 = curve2.derivative . SurfaceFunction.v
   let d = p2 - p1
   let target =
-        v2 `cross#` (2.0 * (v1 `dot#` d) *# d - VectorSurfaceFunction2d.squaredMagnitude' d *# v1)
+        v2 `cross#` (2.0 * (v1 `dot#` d) *# d - VectorSurfaceFunction2d.squaredMagnitude# d *# v1)
   let targetTolerance = ?tolerance *# ((?tolerance *# ?tolerance) *# ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
@@ -1123,7 +1123,7 @@ medialAxis curve1 curve2 = do
         let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangentVector1
         let radius :: SurfaceFunction units =
               Units.coerce $
-                SurfaceFunction.unsafeQuotient'
+                SurfaceFunction.unsafeQuotient#
                   @ d `dot#` d
                   @ 2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d
         let curve :: SurfaceFunction2d (space @ units) =

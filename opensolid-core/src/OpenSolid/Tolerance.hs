@@ -5,7 +5,7 @@ module OpenSolid.Tolerance
   , using
   , unitless
   , squared
-  , squared'
+  , squared#
   , forEndpointDerivative
   , (~=##)
   )
@@ -96,8 +96,8 @@ using tolerance expression = let ?tolerance = tolerance in expression
 squared :: (Tolerance units, Units.Squared units squaredUnits) => Quantity squaredUnits
 squared = Quantity.squared ?tolerance
 
-squared' :: Tolerance units => Quantity (units *# units)
-squared' = Quantity.squared' ?tolerance
+squared# :: Tolerance units => Quantity (units *# units)
+squared# = Quantity.squared# ?tolerance
 
 forEndpointDerivative :: Tolerance units => Int -> Quantity units
 forEndpointDerivative n = ?tolerance / Number.fromInt (Int.factorial n * 2 ** (2 * n))

@@ -26,15 +26,15 @@ module OpenSolid.Curve
   , rationalQuadraticSpline
   , rationalCubicSpline
   , quotient
-  , quotient'
+  , quotient#
   , unsafeQuotient
-  , unsafeQuotient'
+  , unsafeQuotient#
   , squared
-  , squared'
+  , squared#
   , sqrt
-  , sqrt'
+  , sqrt#
   , unsafeSqrt
-  , unsafeSqrt'
+  , unsafeSqrt#
   , cubed
   , sin
   , cos
@@ -436,14 +436,14 @@ quotient ::
   Curve units1 ->
   Curve units2 ->
   Result DivisionByZero (Curve units3)
-quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+quotient lhs rhs = Units.specialize (quotient# lhs rhs)
 
-quotient' ::
+quotient# ::
   Tolerance units2 =>
   Curve units1 ->
   Curve units2 ->
   Result DivisionByZero (Curve (units1 /# units2))
-quotient' numerator denominator =
+quotient# numerator denominator =
   if denominator ~= Quantity.zero
     then Failure DivisionByZero
     else Success do
@@ -455,7 +455,7 @@ quotient' numerator denominator =
             if evaluate denominator 1.0 ~= Quantity.zero
               then Just (lhopital numerator denominator 1.0)
               else Nothing
-      desingularize singularity0 (unsafeQuotient' numerator denominator) singularity1
+      desingularize singularity0 (unsafeQuotient# numerator denominator) singularity1
 
 lhopital ::
   Tolerance units2 =>
@@ -472,7 +472,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' *# denominator' - numerator' *# denominator'')
-            /# (2.0 * Quantity.squared' denominator')
+            /# (2.0 * Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -480,15 +480,15 @@ unsafeQuotient ::
   Curve units1 ->
   Curve units2 ->
   Curve units3
-unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerator denominator)
+unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient# numerator denominator)
 
-unsafeQuotient' :: Curve units1 -> Curve units2 -> Curve (units1 /# units2)
-unsafeQuotient' numerator denominator = do
+unsafeQuotient# :: Curve units1 -> Curve units2 -> Curve (units1 /# units2)
+unsafeQuotient# numerator denominator = do
   let quotientCompiled = numerator.compiled /# denominator.compiled
   let quotientDerivative = Units.simplify do
-        unsafeQuotient'
+        unsafeQuotient#
           (numerator.derivative *# denominator - numerator *# denominator.derivative)
-          (squared' denominator)
+          (squared# denominator)
   new quotientCompiled quotientDerivative
 
 instance
@@ -502,53 +502,53 @@ instance Division# (Curve units1) (Quantity units2) (Curve (units1 /# units2)) w
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
-squared curve = Units.specialize (squared' curve)
+squared curve = Units.specialize (squared# curve)
 
-squared' :: Curve units -> Curve (units *# units)
-squared' curve =
+squared# :: Curve units -> Curve (units *# units)
+squared# curve =
   new
-    (CompiledFunction.map Expression.squared' Quantity.squared' Bounds.squared' curve.compiled)
+    (CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# curve.compiled)
     (2.0 * curve *# curve.derivative)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve units1
-sqrt curve = sqrt' (Units.unspecialize curve)
+sqrt curve = sqrt# (Units.unspecialize curve)
 
-sqrt' :: Tolerance units => Curve (units *# units) -> Curve units
-sqrt' curve
-  | Tolerance.using Tolerance.squared' (curve ~= Quantity.zero) = zero
+sqrt# :: Tolerance units => Curve (units *# units) -> Curve units
+sqrt# curve
+  | Tolerance.using Tolerance.squared# (curve ~= Quantity.zero) = zero
   | otherwise = do
       let firstDerivative = curve.derivative
       let secondDerivative = firstDerivative.derivative
       let isSingularity tValue = do
             let curveIsZero =
-                  Tolerance.using Tolerance.squared' $
+                  Tolerance.using Tolerance.squared# $
                     evaluate curve tValue ~= Quantity.zero
             let secondDerivativeValue = evaluate secondDerivative tValue
             let firstDerivativeTolerance =
-                  ?tolerance *# Quantity.sqrt' (2.0 * secondDerivativeValue)
+                  ?tolerance *# Quantity.sqrt# (2.0 * secondDerivativeValue)
             let firstDerivativeIsZero =
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative tValue ~= Quantity.zero
             curveIsZero && firstDerivativeIsZero
       let singularity0 =
             if isSingularity 0.0
-              then Just (Quantity.zero, Quantity.sqrt' (evaluate secondDerivative 0.0 / 2.0))
+              then Just (Quantity.zero, Quantity.sqrt# (evaluate secondDerivative 0.0 / 2.0))
               else Nothing
       let singularity1 =
             if isSingularity 1.0
-              then Just (Quantity.zero, -(Quantity.sqrt' (evaluate secondDerivative 1.0 / 2.0)))
+              then Just (Quantity.zero, -(Quantity.sqrt# (evaluate secondDerivative 1.0 / 2.0)))
               else Nothing
-      desingularize singularity0 (unsafeSqrt' curve) singularity1
+      desingularize singularity0 (unsafeSqrt# curve) singularity1
 
 unsafeSqrt :: Units.Squared units1 units2 => Curve units2 -> Curve units1
-unsafeSqrt curve = unsafeSqrt' (Units.unspecialize curve)
+unsafeSqrt curve = unsafeSqrt# (Units.unspecialize curve)
 
-unsafeSqrt' :: Curve (units *# units) -> Curve units
-unsafeSqrt' curve =
+unsafeSqrt# :: Curve (units *# units) -> Curve units
+unsafeSqrt# curve =
   recursive
-    @ CompiledFunction.map Expression.sqrt' Quantity.sqrt' Bounds.sqrt' curve.compiled
-    @ \self -> Units.coerce (unsafeQuotient' curve.derivative (2.0 * self))
+    @ CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# curve.compiled
+    @ \self -> Units.coerce (unsafeQuotient# curve.derivative (2.0 * self))
 
 -- | Compute the cube of a curve.
 cubed :: Curve Unitless -> Curve Unitless

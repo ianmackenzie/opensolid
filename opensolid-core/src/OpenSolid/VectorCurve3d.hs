@@ -21,12 +21,12 @@ module OpenSolid.VectorCurve3d
   , desingularize
   , desingularized
   , quotient
-  , quotient'
+  , quotient#
   , unsafeQuotient
-  , unsafeQuotient'
+  , unsafeQuotient#
   , magnitude
   , squaredMagnitude
-  , squaredMagnitude'
+  , squaredMagnitude#
   , reverse
   , IsZero (IsZero)
   , zeros
@@ -104,11 +104,11 @@ instance
 
 instance
   HasField
-    "squaredMagnitude'"
+    "squaredMagnitude#"
     (VectorCurve3d (space @ units))
     (Curve (units *# units))
   where
-  getField = squaredMagnitude'
+  getField = squaredMagnitude#
 
 instance HasUnits (VectorCurve3d (space @ units)) units
 
@@ -143,8 +143,8 @@ instance
     (Vector3d (space2 @ units2))
     units1
   where
-  curve ^ vector = Tolerance.using Tolerance.squared' do
-    (curve - vector).squaredMagnitude' ^ Quantity.zero
+  curve ^ vector = Tolerance.using Tolerance.squared# do
+    (curve - vector).squaredMagnitude# ^ Quantity.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -609,14 +609,14 @@ quotient ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve3d (space @ units3))
-quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+quotient lhs rhs = Units.specialize (quotient# lhs rhs)
 
-quotient' ::
+quotient# ::
   Tolerance units2 =>
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve3d (space @ (units1 /# units2)))
-quotient' numerator denominator =
+quotient# numerator denominator =
   if denominator ~= Quantity.zero
     then Failure DivisionByZero
     else Success do
@@ -628,7 +628,7 @@ quotient' numerator denominator =
             if Curve.evaluate denominator 1.0 ~= Quantity.zero
               then Just (lhopital numerator denominator 1.0)
               else Nothing
-      desingularize singularity0 (unsafeQuotient' numerator denominator) singularity1
+      desingularize singularity0 (unsafeQuotient# numerator denominator) singularity1
 
 lhopital ::
   Tolerance units2 =>
@@ -645,7 +645,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' *# denominator' - numerator' *# denominator'')
-            /# (2.0 * Quantity.squared' denominator')
+            /# (2.0 * Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -653,30 +653,30 @@ unsafeQuotient ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   VectorCurve3d (space @ units3)
-unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerator denominator)
+unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient# numerator denominator)
 
-unsafeQuotient' ::
+unsafeQuotient# ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   VectorCurve3d (space @ (units1 /# units2))
-unsafeQuotient' numerator denominator = do
+unsafeQuotient# numerator denominator = do
   new
     @ numerator.compiled /# denominator.compiled
     @ Units.simplify do
-      unsafeQuotient'
+      unsafeQuotient#
         (numerator.derivative *# denominator - numerator *# denominator.derivative)
-        (Curve.squared' denominator)
+        (Curve.squared# denominator)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve units2
-squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
+squaredMagnitude curve = Units.specialize (squaredMagnitude# curve)
 
-squaredMagnitude' :: VectorCurve3d (space @ units) -> Curve (units *# units)
-squaredMagnitude' curve = do
+squaredMagnitude# :: VectorCurve3d (space @ units) -> Curve (units *# units)
+squaredMagnitude# curve = do
   let compiledSquaredMagnitude =
         CompiledFunction.map
-          Expression.VectorCurve3d.squaredMagnitude'
-          Vector3d.squaredMagnitude'
-          VectorBounds3d.squaredMagnitude'
+          Expression.VectorCurve3d.squaredMagnitude#
+          Vector3d.squaredMagnitude#
+          VectorBounds3d.squaredMagnitude#
           curve.compiled
   let squaredMagnitudeDerivative = 2.0 * curve `dot#` curve.derivative
   Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
@@ -684,13 +684,13 @@ squaredMagnitude' curve = do
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
 magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Curve units
-magnitude curve = Curve.sqrt' (squaredMagnitude' curve)
+magnitude curve = Curve.sqrt# (squaredMagnitude# curve)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
 zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result IsZero (List Number)
 zeros curve =
-  case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
+  case Tolerance.using Tolerance.squared# (Curve.zeros (squaredMagnitude# curve)) of
     Success zeros1d -> Success (List.map (.location) zeros1d)
     Failure Curve.IsZero -> Failure IsZero
 

@@ -7,7 +7,7 @@ module OpenSolid.VectorSurfaceFunction2d
   , xComponent
   , yComponent
   , components
-  , squaredMagnitude'
+  , squaredMagnitude#
   )
 where
 
@@ -101,4 +101,4 @@ yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
 components ::
   VectorSurfaceFunction2d (space @ units) ->
   (SurfaceFunction units, SurfaceFunction units)
-squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units *# units)
+squaredMagnitude# :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units *# units)

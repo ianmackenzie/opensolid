@@ -23,7 +23,7 @@ module OpenSolid.Vector2d
   , interpolateFrom
   , magnitude
   , squaredMagnitude
-  , squaredMagnitude'
+  , squaredMagnitude#
   , angle
   , angleFrom
   , IsZero (IsZero)
@@ -178,10 +178,10 @@ magnitude :: Vector2d (space @ units) -> Quantity units
 magnitude (Vector2d vx vy) = Quantity.hypot2 vx vy
 
 squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> Quantity units2
-squaredMagnitude = Units.specialize . squaredMagnitude'
+squaredMagnitude = Units.specialize . squaredMagnitude#
 
-squaredMagnitude' :: Vector2d (space @ units) -> Quantity (units *# units)
-squaredMagnitude' (Vector2d vx vy) = vx *# vx + vy *# vy
+squaredMagnitude# :: Vector2d (space @ units) -> Quantity (units *# units)
+squaredMagnitude# (Vector2d vx vy) = vx *# vx + vy *# vy
 
 {-| Get the angle of a vector.
 

@@ -18,10 +18,10 @@ module OpenSolid.VectorSurfaceFunction2d
   , relativeTo
   , transformBy
   , quotient
-  , quotient'
+  , quotient#
   , unsafeQuotient
-  , unsafeQuotient'
-  , squaredMagnitude'
+  , unsafeQuotient#
+  , squaredMagnitude#
   , squaredMagnitude
   , magnitude
   , IsZero (IsZero)
@@ -603,53 +603,53 @@ quotient ::
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   Result DivisionByZero (VectorSurfaceFunction2d (space @ units3))
-quotient lhs rhs = Units.specialize (quotient' lhs rhs)
+quotient lhs rhs = Units.specialize (quotient# lhs rhs)
 
-quotient' ::
+quotient# ::
   Tolerance units2 =>
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   Result DivisionByZero (VectorSurfaceFunction2d (space @ (units1 /# units2)))
-quotient' numerator denominator = do
+quotient# numerator denominator = do
   let lhopital p = do
         let numerator' = derivative p numerator
         let numerator'' = derivative p numerator'
         let denominator' = SurfaceFunction.derivative p denominator
         let denominator'' = SurfaceFunction.derivative p denominator'
-        let value = unsafeQuotient' numerator' denominator'
+        let value = unsafeQuotient# numerator' denominator'
         let firstDerivative =
               Units.simplify $
-                unsafeQuotient'
+                unsafeQuotient#
                   (numerator'' *# denominator' - numerator' *# denominator'')
-                  (2.0 * SurfaceFunction.squared' denominator')
+                  (2.0 * SurfaceFunction.squared# denominator')
         (value, firstDerivative)
-  SurfaceFunction.Quotient.impl unsafeQuotient' lhopital desingularize numerator denominator
+  SurfaceFunction.Quotient.impl unsafeQuotient# lhopital desingularize numerator denominator
 
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction2d (space @ units3)
-unsafeQuotient lhs rhs = Units.specialize (unsafeQuotient' lhs rhs)
+unsafeQuotient lhs rhs = Units.specialize (unsafeQuotient# lhs rhs)
 
-unsafeQuotient' ::
+unsafeQuotient# ::
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction2d (space @ (units1 /# units2))
-unsafeQuotient' lhs rhs =
+unsafeQuotient# lhs rhs =
   recursive
     @ CompiledFunction.map2 (/#) (/#) (/#) lhs.compiled rhs.compiled
     @ \self p ->
-      unsafeQuotient' (derivative p lhs) rhs
+      unsafeQuotient# (derivative p lhs) rhs
         - self * SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
 
-squaredMagnitude' :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units *# units)
-squaredMagnitude' function =
+squaredMagnitude# :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units *# units)
+squaredMagnitude# function =
   SurfaceFunction.new
     @ CompiledFunction.map
-      Expression.squaredMagnitude'
-      Vector2d.squaredMagnitude'
-      VectorBounds2d.squaredMagnitude'
+      Expression.squaredMagnitude#
+      Vector2d.squaredMagnitude#
+      VectorBounds2d.squaredMagnitude#
       function.compiled
     @ \p -> 2.0 * function `dot#` derivative p function
 
@@ -657,10 +657,10 @@ squaredMagnitude ::
   Units.Squared units1 units2 =>
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2
-squaredMagnitude = Units.specialize . squaredMagnitude'
+squaredMagnitude = Units.specialize . squaredMagnitude#
 
 magnitude :: Tolerance units => VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-magnitude function = SurfaceFunction.sqrt' (squaredMagnitude' function)
+magnitude function = SurfaceFunction.sqrt# (squaredMagnitude# function)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 

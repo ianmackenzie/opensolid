@@ -14,13 +14,13 @@ module OpenSolid.Expression
   , v
   , uv
   , sqrt
-  , sqrt'
+  , sqrt#
   , squared
-  , squared'
+  , squared#
   , cubed
   , sin
   , cos
-  , SquaredMagnitude' (squaredMagnitude')
+  , SquaredMagnitude' (squaredMagnitude#)
   , SquaredMagnitude (squaredMagnitude)
   , Magnitude (magnitude)
   , TransformBy (transformBy)
@@ -1272,25 +1272,25 @@ v = surface1d (Ast.surfaceParameter SurfaceParameter.V)
 uv :: Expression UvPoint UvPoint
 uv = surface2d Ast.surfaceParameters
 
-squared' :: Expression input (Quantity units) -> Expression input (Quantity (units *# units))
-squared' (Curve1d ast _) = curve1d (Ast.squared ast)
-squared' (Surface1d ast _) = surface1d (Ast.squared ast)
+squared# :: Expression input (Quantity units) -> Expression input (Quantity (units *# units))
+squared# (Curve1d ast _) = curve1d (Ast.squared ast)
+squared# (Surface1d ast _) = surface1d (Ast.squared ast)
 
 squared ::
   Units.Squared units1 units2 =>
   Expression input (Quantity units1) ->
   Expression input (Quantity units2)
-squared = Units.specialize . squared'
+squared = Units.specialize . squared#
 
-sqrt' :: Expression input (Quantity (units *# units)) -> Expression input (Quantity units)
-sqrt' (Curve1d ast _) = curve1d (Ast.sqrt ast)
-sqrt' (Surface1d ast _) = surface1d (Ast.sqrt ast)
+sqrt# :: Expression input (Quantity (units *# units)) -> Expression input (Quantity units)
+sqrt# (Curve1d ast _) = curve1d (Ast.sqrt ast)
+sqrt# (Surface1d ast _) = surface1d (Ast.sqrt ast)
 
 sqrt ::
   Units.Squared units1 units2 =>
   Expression input (Quantity units2) ->
   Expression input (Quantity units1)
-sqrt = sqrt' . Units.unspecialize
+sqrt = sqrt# . Units.unspecialize
 
 cubed :: Expression input Number -> Expression input Number
 cubed (Curve1d ast _) = curve1d (Ast.cubed ast)
@@ -1305,23 +1305,23 @@ cos (Curve1d ast _) = curve1d (Ast.cos ast)
 cos (Surface1d ast _) = surface1d (Ast.cos ast)
 
 class SquaredMagnitude' expression1 expression2 | expression1 -> expression2 where
-  squaredMagnitude' :: expression1 -> expression2
+  squaredMagnitude# :: expression1 -> expression2
 
 instance
   SquaredMagnitude'
     (Expression input (Vector2d (space @ units)))
     (Expression input (Quantity (units *# units)))
   where
-  squaredMagnitude' (VectorCurve2d ast _) = curve1d (Ast.squaredMagnitude2d ast)
-  squaredMagnitude' (VectorSurface2d ast _) = surface1d (Ast.squaredMagnitude2d ast)
+  squaredMagnitude# (VectorCurve2d ast _) = curve1d (Ast.squaredMagnitude2d ast)
+  squaredMagnitude# (VectorSurface2d ast _) = surface1d (Ast.squaredMagnitude2d ast)
 
 instance
   SquaredMagnitude'
     (Expression input (Vector3d (space @ units)))
     (Expression input (Quantity (units *# units)))
   where
-  squaredMagnitude' (VectorCurve3d ast _) = curve1d (Ast.squaredMagnitude3d ast)
-  squaredMagnitude' (VectorSurface3d ast _) = surface1d (Ast.squaredMagnitude3d ast)
+  squaredMagnitude# (VectorCurve3d ast _) = curve1d (Ast.squaredMagnitude3d ast)
+  squaredMagnitude# (VectorSurface3d ast _) = surface1d (Ast.squaredMagnitude3d ast)
 
 class SquaredMagnitude expression1 expression2 | expression1 -> expression2 where
   squaredMagnitude :: expression1 -> expression2
@@ -1332,7 +1332,7 @@ instance
     (Expression input (Vector2d (space @ units1)))
     (Expression input (Quantity units2))
   where
-  squaredMagnitude = Units.specialize . squaredMagnitude'
+  squaredMagnitude = Units.specialize . squaredMagnitude#
 
 instance
   Units.Squared units1 units2 =>
@@ -1340,7 +1340,7 @@ instance
     (Expression input (Vector3d (space @ units1)))
     (Expression input (Quantity units2))
   where
-  squaredMagnitude = Units.specialize . squaredMagnitude'
+  squaredMagnitude = Units.specialize . squaredMagnitude#
 
 class Magnitude expression1 expression2 | expression1 -> expression2 where
   magnitude :: expression1 -> expression2

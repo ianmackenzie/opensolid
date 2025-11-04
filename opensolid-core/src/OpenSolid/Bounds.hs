@@ -20,7 +20,7 @@ module OpenSolid.Bounds
   , maxAbs
   , minAbs
   , squared
-  , squared'
+  , squared#
   , includes
   , inclusion
   , inclusion##
@@ -36,7 +36,7 @@ module OpenSolid.Bounds
   , isFinite
   , abs
   , sqrt
-  , sqrt'
+  , sqrt#
   , hypot2
   , cubed
   , aggregate2
@@ -381,10 +381,10 @@ minAbs (Bounds low high)
   | otherwise = Quantity.zero
 
 squared :: Units.Squared units1 units2 => Bounds units1 -> Bounds units2
-squared = Units.specialize . squared'
+squared = Units.specialize . squared#
 
-squared' :: Bounds units -> Bounds (units *# units)
-squared' (Bounds low high) = do
+squared# :: Bounds units -> Bounds (units *# units)
+squared# (Bounds low high) = do
   let ll = low *# low
   let hh = high *# high
   if
@@ -392,14 +392,14 @@ squared' (Bounds low high) = do
     | high <= Quantity.zero -> Bounds hh ll
     | otherwise -> Bounds Quantity.zero (Quantity.max ll hh)
 
-sqrt' :: Bounds (units *# units) -> Bounds units
-sqrt' (Bounds low high) =
+sqrt# :: Bounds (units *# units) -> Bounds units
+sqrt# (Bounds low high) =
   Bounds
-    (Quantity.sqrt' (Quantity.max low Quantity.zero))
-    (Quantity.sqrt' (Quantity.max high Quantity.zero))
+    (Quantity.sqrt# (Quantity.max low Quantity.zero))
+    (Quantity.sqrt# (Quantity.max high Quantity.zero))
 
 sqrt :: Units.Squared units1 units2 => Bounds units2 -> Bounds units1
-sqrt = sqrt' . Units.unspecialize
+sqrt = sqrt# . Units.unspecialize
 
 hypot2 :: Bounds units -> Bounds units -> Bounds units
 hypot2 (Bounds## xMin## xMax##) (Bounds## yMin## yMax##) = do
