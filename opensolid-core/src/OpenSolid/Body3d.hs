@@ -72,7 +72,7 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
@@ -692,13 +692,13 @@ surfaceSize f uvBounds = do
   let p10 = SurfaceFunction3d.evaluate f (Bounds2d.lowerRightCorner uvBounds)
   let p01 = SurfaceFunction3d.evaluate f (Bounds2d.upperLeftCorner uvBounds)
   let p11 = SurfaceFunction3d.evaluate f (Bounds2d.upperRightCorner uvBounds)
-  let d1# = Point3d.distanceFrom# p00 p10
-  let d2# = Point3d.distanceFrom# p10 p11
-  let d3# = Point3d.distanceFrom# p11 p01
-  let d4# = Point3d.distanceFrom# p01 p00
-  let d5# = Point3d.distanceFrom# p00 p11
-  let d6# = Point3d.distanceFrom# p10 p01
-  Quantity# (max# (max# (max# (max# (max# d1# d2#) d3#) d4#) d5#) d6#)
+  let d1## = Point3d.distanceFrom## p00 p10
+  let d2## = Point3d.distanceFrom## p10 p11
+  let d3## = Point3d.distanceFrom## p11 p01
+  let d4## = Point3d.distanceFrom## p01 p00
+  let d5## = Point3d.distanceFrom## p00 p11
+  let d6## = Point3d.distanceFrom## p10 p01
+  Quantity## (max## (max## (max## (max## (max## d1## d2##) d3##) d4##) d5##) d6##)
 
 surfaceError :: SurfaceFunction3d (space @ units) -> UvBounds -> Quantity units
 surfaceError f uvBounds = do
@@ -934,11 +934,11 @@ isValidSteinerPoint ::
   Bool
 isValidSteinerPoint edgeSet uvPoint = case edgeSet of
   Set2d.Node nodeBounds left right ->
-    case Bounds2d.exclusion# uvPoint nodeBounds >=# half# (Bounds2d.diameter# nodeBounds) of
+    case Bounds2d.exclusion## uvPoint nodeBounds >=## 0.5## *## Bounds2d.diameter## nodeBounds of
       1# -> True
       _ -> isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint
   Set2d.Leaf _ edge ->
-    case LineSegment2d.distanceTo# uvPoint edge >=# half# (LineSegment2d.length# edge) of
+    case LineSegment2d.distanceTo## uvPoint edge >=## 0.5## *## LineSegment2d.length## edge of
       1# -> True
       _ -> False
 

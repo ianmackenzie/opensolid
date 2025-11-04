@@ -19,9 +19,9 @@ module OpenSolid.Vector3d
   , downwardComponent
   , components
   , zUpComponents
-  , zUpComponents#
+  , zUpComponents##
   , yUpComponents
-  , yUpComponents#
+  , yUpComponents##
   , midpoint
   , interpolateFrom
   , magnitude
@@ -63,7 +63,7 @@ import OpenSolid.Primitives
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   , Vector2d (Vector2d)
-  , Vector3d (Vector3d, Vector3d#)
+  , Vector3d (Vector3d, Vector3d##)
   )
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3d (Transform3d (Transform3d))
@@ -162,9 +162,9 @@ This is a convention where positive X is rightward, positive Y is forward and po
 zUpComponents :: Vector3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 zUpComponents (Vector3d r f u) = (r, f, u)
 
-{-# INLINE zUpComponents# #-}
-zUpComponents# :: Vector3d (space @ units) -> (# Double#, Double#, Double# #)
-zUpComponents# (Vector3d# r# f# u#) = (# r#, f#, u# #)
+{-# INLINE zUpComponents## #-}
+zUpComponents## :: Vector3d (space @ units) -> (# Double#, Double#, Double# #)
+zUpComponents## (Vector3d## r## f## u##) = (# r##, f##, u## #)
 
 {-| Get the XYZ components of a vector using a Y-up coordinate convention.
 
@@ -174,9 +174,9 @@ This is a convention where positive X is leftward, positive Y is upward, and pos
 yUpComponents :: Vector3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 yUpComponents (Vector3d r f u) = (-r, u, f)
 
-{-# INLINE yUpComponents# #-}
-yUpComponents# :: Vector3d (space @ units) -> (# Double#, Double#, Double# #)
-yUpComponents# (Vector3d# r# f# u#) = (# negate# r#, u#, f# #)
+{-# INLINE yUpComponents## #-}
+yUpComponents## :: Vector3d (space @ units) -> (# Double#, Double#, Double# #)
+yUpComponents## (Vector3d## r## f## u##) = (# negate## r##, u##, f## #)
 
 interpolateFrom ::
   Vector3d (space @ units) ->

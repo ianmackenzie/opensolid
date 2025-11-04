@@ -14,16 +14,16 @@ module OpenSolid.Bounds2d
   , aggregate2
   , aggregateN
   , exclusion
-  , exclusion#
+  , exclusion##
   , inclusion
-  , inclusion#
+  , inclusion##
   , includes
   , contains
   , isContainedIn
   , overlap
-  , overlap#
+  , overlap##
   , separation
-  , separation#
+  , separation##
   , intersection
   , lowerLeftCorner
   , lowerRightCorner
@@ -31,7 +31,7 @@ module OpenSolid.Bounds2d
   , upperRightCorner
   , corners
   , diameter
-  , diameter#
+  , diameter##
   , area'
   , area
   , interpolate
@@ -67,7 +67,7 @@ import OpenSolid.Primitives
   , Point2d (Position2d)
   , Point3d (Point3d)
   )
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Unboxed.Math
@@ -114,16 +114,16 @@ aggregateN list = PositionBounds2d (VectorBounds2d.aggregateN (Data.Coerce.coerc
 exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Quantity units
 exclusion (Position2d p) (PositionBounds2d pb) = VectorBounds2d.exclusion p pb
 
-{-# INLINE exclusion# #-}
-exclusion# :: Point2d (space @ units) -> Bounds2d (space @ units) -> Double#
-exclusion# (Position2d p) (PositionBounds2d pb) = VectorBounds2d.exclusion# p pb
+{-# INLINE exclusion## #-}
+exclusion## :: Point2d (space @ units) -> Bounds2d (space @ units) -> Double#
+exclusion## (Position2d p) (PositionBounds2d pb) = VectorBounds2d.exclusion## p pb
 
 inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Quantity units
 inclusion (Position2d p) (PositionBounds2d pb) = VectorBounds2d.inclusion p pb
 
-{-# INLINE inclusion# #-}
-inclusion# :: Point2d (space @ units) -> Bounds2d (space @ units) -> Double#
-inclusion# (Position2d p) (PositionBounds2d pb) = VectorBounds2d.inclusion# p pb
+{-# INLINE inclusion## #-}
+inclusion## :: Point2d (space @ units) -> Bounds2d (space @ units) -> Double#
+inclusion## (Position2d p) (PositionBounds2d pb) = VectorBounds2d.inclusion## p pb
 
 includes :: Point2d (space @ units) -> Bounds2d (space @ units) -> Bool
 includes (Position2d p) (PositionBounds2d pb) = VectorBounds2d.includes p pb
@@ -138,17 +138,17 @@ isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Quantity units
 separation (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.separation pb1 pb2
 
-{-# INLINE separation# #-}
-separation# :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Double#
-separation# (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.separation# pb1 pb2
+{-# INLINE separation## #-}
+separation## :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Double#
+separation## (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.separation## pb1 pb2
 
 {-# INLINE overlap #-}
 overlap :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Quantity units
 overlap (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.overlap pb1 pb2
 
-{-# INLINE overlap# #-}
-overlap# :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Double#
-overlap# (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.overlap# pb1 pb2
+{-# INLINE overlap## #-}
+overlap## :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Double#
+overlap## (PositionBounds2d pb1) (PositionBounds2d pb2) = VectorBounds2d.overlap## pb1 pb2
 
 intersection ::
   Bounds2d (space @ units) ->
@@ -226,11 +226,11 @@ corners box =
 
 {-# INLINE diameter #-}
 diameter :: Bounds2d (space @ units) -> Quantity units
-diameter bounds = Quantity# (diameter# bounds)
+diameter bounds = Quantity## (diameter## bounds)
 
-{-# INLINE diameter# #-}
-diameter# :: Bounds2d (space @ units) -> Double#
-diameter# (Bounds2d x y) = hypot2# (Bounds.width# x) (Bounds.width# y)
+{-# INLINE diameter## #-}
+diameter## :: Bounds2d (space @ units) -> Double#
+diameter## (Bounds2d x y) = hypot2## (Bounds.width## x) (Bounds.width## y)
 
 area' :: Bounds2d (space @ units) -> Quantity (units :*: units)
 area' (Bounds2d x y) = Bounds.width x ~*~ Bounds.width y

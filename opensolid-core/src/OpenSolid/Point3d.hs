@@ -4,9 +4,9 @@ module OpenSolid.Point3d
   ( Point3d
   , coordinates
   , zUpCoordinates
-  , zUpCoordinates#
+  , zUpCoordinates##
   , yUpCoordinates
-  , yUpCoordinates#
+  , yUpCoordinates##
   , dummy
   , on
   , along
@@ -18,7 +18,7 @@ module OpenSolid.Point3d
   , midpoint
   , interpolateFrom
   , distanceFrom
-  , distanceFrom#
+  , distanceFrom##
   , distanceAlong
   , placeIn
   , relativeTo
@@ -54,7 +54,7 @@ import OpenSolid.Primitives
   , Transform3d (Transform3d)
   , Vector3d
   )
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Unboxed.Math
@@ -76,9 +76,9 @@ This is a convention where positive X is rightward, positive Y is forward and po
 zUpCoordinates :: Point3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 zUpCoordinates (Position3d vector) = Vector3d.zUpComponents vector
 
-{-# INLINE zUpCoordinates# #-}
-zUpCoordinates# :: Point3d (space @ units) -> (# Double#, Double#, Double# #)
-zUpCoordinates# (Position3d vector) = Vector3d.zUpComponents# vector
+{-# INLINE zUpCoordinates## #-}
+zUpCoordinates## :: Point3d (space @ units) -> (# Double#, Double#, Double# #)
+zUpCoordinates## (Position3d vector) = Vector3d.zUpComponents## vector
 
 {-| Get the XYZ coordinates of a point using a Y-up coordinate convention.
 
@@ -88,9 +88,9 @@ This is a convention where positive X is leftward, positive Y is upward, and pos
 yUpCoordinates :: Point3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
 yUpCoordinates (Position3d vector) = Vector3d.yUpComponents vector
 
-{-# INLINE yUpCoordinates# #-}
-yUpCoordinates# :: Point3d (space @ units) -> (# Double#, Double#, Double# #)
-yUpCoordinates# (Position3d vector) = Vector3d.yUpComponents# vector
+{-# INLINE yUpCoordinates## #-}
+yUpCoordinates## :: Point3d (space @ units) -> (# Double#, Double#, Double# #)
+yUpCoordinates## (Position3d vector) = Vector3d.yUpComponents## vector
 
 dummy :: Point3d (space @ Void)
 dummy = Point3d Quantity.zero Quantity.zero Quantity.zero
@@ -156,14 +156,14 @@ midpoint (Position3d p1) (Position3d p2) = Position3d (Vector3d.midpoint p1 p2)
 -- | Compute the distance from one point to another.
 {-# INLINE distanceFrom #-}
 distanceFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Quantity units
-distanceFrom p1 p2 = Quantity# (distanceFrom# p1 p2)
+distanceFrom p1 p2 = Quantity## (distanceFrom## p1 p2)
 
-{-# INLINE distanceFrom# #-}
-distanceFrom# :: Point3d (space @ units) -> Point3d (space @ units) -> Double#
-distanceFrom#
-  (Point3d (Quantity# x1#) (Quantity# y1#) (Quantity# z1#))
-  (Point3d (Quantity# x2#) (Quantity# y2#) (Quantity# z2#)) =
-    hypot3# (x2# -# x1#) (y2# -# y1#) (z2# -# z1#)
+{-# INLINE distanceFrom## #-}
+distanceFrom## :: Point3d (space @ units) -> Point3d (space @ units) -> Double#
+distanceFrom##
+  (Point3d (Quantity## x1##) (Quantity## y1##) (Quantity## z1##))
+  (Point3d (Quantity## x2##) (Quantity## y2##) (Quantity## z2##)) =
+    hypot3## (x2## -## x1##) (y2## -## y1##) (z2## -## z1##)
 
 {-| Compute the (signed) distance of a point along an axis.
 

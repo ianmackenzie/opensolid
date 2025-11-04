@@ -1,7 +1,7 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Primitives
-  ( Vector2d (Vector2d, Vector2d#)
+  ( Vector2d (Vector2d, Vector2d##)
   , Direction2d (Unit2d, Direction2d)
   , Orientation2d (Orientation2d)
   , Point2d (Point2d, Position2d)
@@ -10,12 +10,12 @@ module OpenSolid.Primitives
   , Axis2d (Axis2d)
   , Frame2d (Frame2d)
   , Transform2d (Transform2d)
-  , Vector3d (Vector3d, Vector3d#)
+  , Vector3d (Vector3d, Vector3d##)
   , Direction3d (Unit3d, Direction3d)
   , PlaneOrientation3d (PlaneOrientation3d)
   , Orientation3d (Orientation3d)
   , Point3d (Point3d, Position3d)
-  , VectorBounds3d (VectorBounds3d, VectorBounds3d#)
+  , VectorBounds3d (VectorBounds3d, VectorBounds3d##)
   , Bounds3d (Bounds3d, PositionBounds3d)
   , Axis3d (Axis3d)
   , Plane3d (Plane3d)
@@ -27,33 +27,33 @@ where
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Bounds (Bounds (Bounds#))
+import OpenSolid.Bounds (Bounds (Bounds##))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Tolerance ((~=#))
+import OpenSolid.Tolerance ((~=##))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 
 ----- Vector2d -----
 
-data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d# Double# Double#
+data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d## Double# Double#
   deriving (Eq, Ord, Show)
 
 -- | Construct a vector from its X and Y components.
 {-# INLINE Vector2d #-}
 pattern Vector2d :: Quantity units -> Quantity units -> Vector2d (space @ units)
-pattern Vector2d vx vy <- (viewVector2d# -> (# vx, vy #))
+pattern Vector2d vx vy <- (viewVector2d -> (# vx, vy #))
   where
-    Vector2d (Quantity# vx#) (Quantity# vy#) = Vector2d# vx# vy#
+    Vector2d (Quantity## vx##) (Quantity## vy##) = Vector2d## vx## vy##
 
-{-# INLINE viewVector2d# #-}
-viewVector2d# :: Vector2d (space @ units) -> (# Quantity units, Quantity units #)
-viewVector2d# (Vector2d# vx# vy#) = (# Quantity# vx#, Quantity# vy# #)
+{-# INLINE viewVector2d #-}
+viewVector2d :: Vector2d (space @ units) -> (# Quantity units, Quantity units #)
+viewVector2d (Vector2d## vx## vy##) = (# Quantity## vx##, Quantity## vy## #)
 
 {-# COMPLETE Vector2d #-}
 
@@ -95,14 +95,14 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Vector2d (space1 @ units1)) (Vector2d (space2 @ units2)) units1
   where
-  Vector2d# x1# y1# ~= Vector2d# x2# y2# =
-    case hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0## of 1# -> True; _ -> False
+  Vector2d## x1## y1## ~= Vector2d## x2## y2## =
+    case hypot2## (x2## -## x1##) (y2## -## y1##) ~=## 0.0## of 1# -> True; _ -> False
 
 instance HasZero (Vector2d (space @ units)) where
-  zero = Vector2d# 0.0## 0.0##
+  zero = Vector2d## 0.0## 0.0##
 
 instance Negation (Vector2d (space @ units)) where
-  negate (Vector2d# vx# vy#) = Vector2d# (negate# vx#) (negate# vy#)
+  negate (Vector2d## vx## vy##) = Vector2d## (negate## vx##) (negate## vy##)
 
 instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units)) where
   Positive * vector = vector
@@ -119,7 +119,7 @@ instance
     (Vector2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Vector2d# x1# y1# + Vector2d# x2# y2# = Vector2d# (x1# +# x2#) (y1# +# y2#)
+  Vector2d## x1## y1## + Vector2d## x2## y2## = Vector2d## (x1## +## x2##) (y1## +## y2##)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -128,7 +128,7 @@ instance
     (Vector2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Vector2d# x1# y1# - Vector2d# x2# y2# = Vector2d# (x1# -# x2#) (y1# -# y2#)
+  Vector2d## x1## y1## - Vector2d## x2## y2## = Vector2d## (x1## -## x2##) (y1## -## y2##)
 
 instance
   Multiplication'
@@ -136,13 +136,13 @@ instance
     (Vector2d (space @ units2))
     (Vector2d (space @ (units1 :*: units2)))
   where
-  Quantity# scale# ~*~ Vector2d# vx# vy# = Vector2d# (scale# *# vx#) (scale# *# vy#)
+  Quantity## scale## ~*~ Vector2d## vx## vy## = Vector2d## (scale## *## vx##) (scale## *## vy##)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Vector2d (space @ units2)) (Vector2d (space @ units3))
   where
-  Quantity# scale# * Vector2d# vx# vy# = Vector2d# (scale# *# vx#) (scale# *# vy#)
+  Quantity## scale## * Vector2d## vx## vy## = Vector2d## (scale## *## vx##) (scale## *## vy##)
 
 instance
   Multiplication'
@@ -150,13 +150,13 @@ instance
     (Quantity units2)
     (Vector2d (space @ (units1 :*: units2)))
   where
-  Vector2d# vx# vy# ~*~ Quantity# scale# = Vector2d# (vx# *# scale#) (vy# *# scale#)
+  Vector2d## vx## vy## ~*~ Quantity## scale## = Vector2d## (vx## *## scale##) (vy## *## scale##)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2d (space @ units1)) (Quantity units2) (Vector2d (space @ units3))
   where
-  Vector2d# vx# vy# * Quantity# scale# = Vector2d# (vx# *# scale#) (vy# *# scale#)
+  Vector2d## vx## vy## * Quantity## scale## = Vector2d## (vx## *## scale##) (vy## *## scale##)
 
 instance
   Multiplication'
@@ -1076,19 +1076,19 @@ instance
 
 ----- Vector3d -----
 
-data Vector3d (coordinateSystem :: CoordinateSystem) = Vector3d# Double# Double# Double#
+data Vector3d (coordinateSystem :: CoordinateSystem) = Vector3d## Double# Double# Double#
   deriving (Eq, Ord, Show)
 
 -- | Construct a vector from its X and Y components.
 {-# INLINE Vector3d #-}
 pattern Vector3d :: Quantity units -> Quantity units -> Quantity units -> Vector3d (space @ units)
-pattern Vector3d vx vy vz <- (viewVector3d# -> (# vx, vy, vz #))
+pattern Vector3d vx vy vz <- (viewVector3d -> (# vx, vy, vz #))
   where
-    Vector3d (Quantity# vx#) (Quantity# vy#) (Quantity# vz#) = Vector3d# vx# vy# vz#
+    Vector3d (Quantity## vx##) (Quantity## vy##) (Quantity## vz##) = Vector3d## vx## vy## vz##
 
-{-# INLINE viewVector3d# #-}
-viewVector3d# :: Vector3d (space @ units) -> (# Quantity units, Quantity units, Quantity units #)
-viewVector3d# (Vector3d# vx# vy# vz#) = (# Quantity# vx#, Quantity# vy#, Quantity# vz# #)
+{-# INLINE viewVector3d #-}
+viewVector3d :: Vector3d (space @ units) -> (# Quantity units, Quantity units, Quantity units #)
+viewVector3d (Vector3d## vx## vy## vz##) = (# Quantity## vx##, Quantity## vy##, Quantity## vz## #)
 
 {-# COMPLETE Vector3d #-}
 
@@ -1570,7 +1570,7 @@ instance
 ----- VectorBounds3d -----
 
 data VectorBounds3d (coordinateSystem :: CoordinateSystem)
-  = VectorBounds3d# Double# Double# Double# Double# Double# Double#
+  = VectorBounds3d## Double# Double# Double# Double# Double# Double#
   deriving (Show)
 
 -- | Construct a vector bounds from its rightward, forward and upward components.
@@ -1580,16 +1580,16 @@ pattern VectorBounds3d ::
   Bounds units ->
   Bounds units ->
   VectorBounds3d (space @ units)
-pattern VectorBounds3d x y z <- (viewVectorBounds3d# -> (# x, y, z #))
+pattern VectorBounds3d x y z <- (viewVectorBounds3d -> (# x, y, z #))
   where
-    VectorBounds3d (Bounds# xl# xh#) (Bounds# yl# yh#) (Bounds# zl# zh#) =
-      VectorBounds3d# xl# xh# yl# yh# zl# zh#
+    VectorBounds3d (Bounds## xl## xh##) (Bounds## yl## yh##) (Bounds## zl## zh##) =
+      VectorBounds3d## xl## xh## yl## yh## zl## zh##
 
-viewVectorBounds3d# ::
+viewVectorBounds3d ::
   VectorBounds3d (space @ units) ->
   (# Bounds units, Bounds units, Bounds units #)
-viewVectorBounds3d# (VectorBounds3d# xl# xh# yl# yh# zl# zh#) =
-  (# Bounds# xl# xh#, Bounds# yl# yh#, Bounds# zl# zh# #)
+viewVectorBounds3d (VectorBounds3d## xl## xh## yl## yh## zl## zh##) =
+  (# Bounds## xl## xh##, Bounds## yl## yh##, Bounds## zl## zh## #)
 
 {-# COMPLETE VectorBounds3d #-}
 
@@ -1620,14 +1620,14 @@ instance
   VectorBounds3d r1 f1 u1 ^ VectorBounds3d r2 f2 u2 = r1 ^ r2 && f1 ^ f2 && u1 ^ u2
 
 instance Negation (VectorBounds3d (space @ units)) where
-  negate (VectorBounds3d# xl# xh# yl# yh# zl# zh#) = do
-    VectorBounds3d#
-      (negate# xh#)
-      (negate# xl#)
-      (negate# yh#)
-      (negate# yl#)
-      (negate# zh#)
-      (negate# zl#)
+  negate (VectorBounds3d## xl## xh## yl## yh## zl## zh##) = do
+    VectorBounds3d##
+      (negate## xh##)
+      (negate## xl##)
+      (negate## yh##)
+      (negate## yl##)
+      (negate## zh##)
+      (negate## zl##)
 
 instance
   Multiplication
@@ -1656,12 +1656,12 @@ instance
     (VectorBounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  VectorBounds3d# xl1# xh1# yl1# yh1# zl1# zh1#
-    + VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2# = do
-      let !(# xl#, xh# #) = boundsPlusBounds# xl1# xh1# xl2# xh2#
-      let !(# yl#, yh# #) = boundsPlusBounds# yl1# yh1# yl2# yh2#
-      let !(# zl#, zh# #) = boundsPlusBounds# zl1# zh1# zl2# zh2#
-      VectorBounds3d# xl# xh# yl# yh# zl# zh#
+  VectorBounds3d## xl1## xh1## yl1## yh1## zl1## zh1##
+    + VectorBounds3d## xl2## xh2## yl2## yh2## zl2## zh2## = do
+      let !(# xl##, xh## #) = boundsPlusBounds## xl1## xh1## xl2## xh2##
+      let !(# yl##, yh## #) = boundsPlusBounds## yl1## yh1## yl2## yh2##
+      let !(# zl##, zh## #) = boundsPlusBounds## zl1## zh1## zl2## zh2##
+      VectorBounds3d## xl## xh## yl## yh## zl## zh##
 
 instance
   ( space1 ~ space2
@@ -1694,12 +1694,12 @@ instance
     (VectorBounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  VectorBounds3d# xl1# xh1# yl1# yh1# zl1# zh1#
-    - VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2# = do
-      let !(# xl#, xh# #) = boundsMinusBounds# xl1# xh1# xl2# xh2#
-      let !(# yl#, yh# #) = boundsMinusBounds# yl1# yh1# yl2# yh2#
-      let !(# zl#, zh# #) = boundsMinusBounds# zl1# zh1# zl2# zh2#
-      VectorBounds3d# xl# xh# yl# yh# zl# zh#
+  VectorBounds3d## xl1## xh1## yl1## yh1## zl1## zh1##
+    - VectorBounds3d## xl2## xh2## yl2## yh2## zl2## zh2## = do
+      let !(# xl##, xh## #) = boundsMinusBounds## xl1## xh1## xl2## xh2##
+      let !(# yl##, yh## #) = boundsMinusBounds## yl1## yh1## yl2## yh2##
+      let !(# zl##, zh## #) = boundsMinusBounds## zl1## zh1## zl2## zh2##
+      VectorBounds3d## xl## xh## yl## yh## zl## zh##
 
 instance
   ( space1 ~ space2
@@ -1728,11 +1728,13 @@ quantityTimesVectorBounds3d ::
   Quantity units1 ->
   VectorBounds3d (space @ units2) ->
   VectorBounds3d (space @ units3)
-quantityTimesVectorBounds3d (Quantity# v1#) (VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2#) = do
-  let !(# xl#, xh# #) = doubleTimesBounds# v1# xl2# xh2#
-  let !(# yl#, yh# #) = doubleTimesBounds# v1# yl2# yh2#
-  let !(# zl#, zh# #) = doubleTimesBounds# v1# zl2# zh2#
-  VectorBounds3d# xl# xh# yl# yh# zl# zh#
+quantityTimesVectorBounds3d
+  (Quantity## v1##)
+  (VectorBounds3d## xl2## xh2## yl2## yh2## zl2## zh2##) = do
+    let !(# xl##, xh## #) = doubleTimesBounds## v1## xl2## xh2##
+    let !(# yl##, yh## #) = doubleTimesBounds## v1## yl2## yh2##
+    let !(# zl##, zh## #) = doubleTimesBounds## v1## zl2## zh2##
+    VectorBounds3d## xl## xh## yl## yh## zl## zh##
 
 instance
   Multiplication'
@@ -1774,12 +1776,12 @@ boundsTimesVectorBounds3d ::
   VectorBounds3d (space @ units2) ->
   VectorBounds3d (space @ units3)
 boundsTimesVectorBounds3d
-  (Bounds# vl1# vh1#)
-  (VectorBounds3d# xl2# xh2# yl2# yh2# zl2# zh2#) = do
-    let !(# xl#, xh# #) = boundsTimesBounds# vl1# vh1# xl2# xh2#
-    let !(# yl#, yh# #) = boundsTimesBounds# vl1# vh1# yl2# yh2#
-    let !(# zl#, zh# #) = boundsTimesBounds# vl1# vh1# zl2# zh2#
-    VectorBounds3d# xl# xh# yl# yh# zl# zh#
+  (Bounds## vl1## vh1##)
+  (VectorBounds3d## xl2## xh2## yl2## yh2## zl2## zh2##) = do
+    let !(# xl##, xh## #) = boundsTimesBounds## vl1## vh1## xl2## xh2##
+    let !(# yl##, yh## #) = boundsTimesBounds## vl1## vh1## yl2## yh2##
+    let !(# zl##, zh## #) = boundsTimesBounds## vl1## vh1## zl2## zh2##
+    VectorBounds3d## xl## xh## yl## yh## zl## zh##
 
 instance
   Multiplication'
