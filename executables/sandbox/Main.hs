@@ -62,8 +62,8 @@ import OpenSolid.Syntax
   , (.+)
   , (.-)
   , (./)
+  , (/#)
   , (//)
-  , (~/~)
   , (@)
   , (|>)
   , type (@)
@@ -273,7 +273,7 @@ drawCrossingCurve index curve = do
   drawUvCurve [Drawing2d.strokeColor color] curve
 
 toDrawing :: Quantity (Meters :/: Unitless)
-toDrawing = Length.centimeters 10 ~/~ number 1
+toDrawing = Length.centimeters 10 /# number 1
 
 drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawUvCurve attributes curve = do

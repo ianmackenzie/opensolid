@@ -74,8 +74,8 @@ instance
     (DirectionSurfaceFunction3d space)
     (DirectionSurfaceFunction3d space)
   where
-  Positive ~*~ function = function
-  Negative ~*~ function = -function
+  Positive *# function = function
+  Negative *# function = -function
 
 instance
   Multiplication
@@ -92,8 +92,8 @@ instance
     Sign
     (DirectionSurfaceFunction3d space)
   where
-  function ~*~ Positive = function
-  function ~*~ Negative = -function
+  function *# Positive = function
+  function *# Negative = -function
 
 instance
   Multiplication

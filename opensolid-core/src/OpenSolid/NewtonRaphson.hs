@@ -176,9 +176,9 @@ surface2dImpl function uDerivative vDerivative uvPoint1 value1 iterations =
       let Vector2d x1 y1 = value1
       let Vector2d dxdu1 dydu1 = uDerivative uvPoint1
       let Vector2d dxdv1 dydv1 = vDerivative uvPoint1
-      let determinant = dxdu1 ~*~ dydv1 - dxdv1 ~*~ dydu1
-      let uStep = (dxdv1 ~*~ y1 - dydv1 ~*~ x1) / determinant
-      let vStep = (dydu1 ~*~ x1 - dxdu1 ~*~ y1) / determinant
+      let determinant = dxdu1 *# dydv1 - dxdv1 *# dydu1
+      let uStep = (dxdv1 *# y1 - dydv1 *# x1) / determinant
+      let vStep = (dydu1 *# x1 - dxdu1 *# y1) / determinant
       let uvPoint2 = uvPoint1 + Vector2d uStep vStep
       let value2 = function uvPoint2
       if Vector2d.squaredMagnitude' value2 < Vector2d.squaredMagnitude' value1

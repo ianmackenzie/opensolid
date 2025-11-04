@@ -359,13 +359,13 @@ convert ::
   Quantity (units2 :/: units1) ->
   VectorBounds2d (space @ units1) ->
   VectorBounds2d (space @ units2)
-convert factor vectorBounds = Units.simplify (vectorBounds ~*~ factor)
+convert factor vectorBounds = Units.simplify (vectorBounds *# factor)
 
 unconvert ::
   Quantity (units2 :/: units1) ->
   VectorBounds2d (space @ units2) ->
   VectorBounds2d (space @ units1)
-unconvert factor vectorBounds = Units.simplify (vectorBounds ~/~ factor)
+unconvert factor vectorBounds = Units.simplify (vectorBounds /# factor)
 
 transformBy ::
   Transform2d tag (space @ units1) ->

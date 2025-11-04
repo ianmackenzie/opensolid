@@ -38,16 +38,16 @@ instance Multiplication Sign (DirectionBounds3d space) (DirectionBounds3d space)
   Negative * directionBounds = -directionBounds
 
 instance Multiplication' Sign (DirectionBounds3d space) (DirectionBounds3d space) where
-  Positive ~*~ directionBounds = directionBounds
-  Negative ~*~ directionBounds = -directionBounds
+  Positive *# directionBounds = directionBounds
+  Negative *# directionBounds = -directionBounds
 
 instance Multiplication (DirectionBounds3d space) Sign (DirectionBounds3d space) where
   directionBounds * Positive = directionBounds
   directionBounds * Negative = -directionBounds
 
 instance Multiplication' (DirectionBounds3d space) Sign (DirectionBounds3d space) where
-  directionBounds ~*~ Positive = directionBounds
-  directionBounds ~*~ Negative = -directionBounds
+  directionBounds *# Positive = directionBounds
+  directionBounds *# Negative = -directionBounds
 
 instance
   Multiplication

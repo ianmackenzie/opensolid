@@ -233,7 +233,7 @@ diameter## :: Bounds2d (space @ units) -> Double#
 diameter## (Bounds2d x y) = hypot2## (Bounds.width## x) (Bounds.width## y)
 
 area' :: Bounds2d (space @ units) -> Quantity (units :*: units)
-area' (Bounds2d x y) = Bounds.width x ~*~ Bounds.width y
+area' (Bounds2d x y) = Bounds.width x *# Bounds.width y
 
 area :: Units.Squared units1 units2 => Bounds2d (space @ units1) -> Quantity units2
 area (Bounds2d x y) = Bounds.width x * Bounds.width y

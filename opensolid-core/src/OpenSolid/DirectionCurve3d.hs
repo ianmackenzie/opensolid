@@ -67,16 +67,16 @@ instance Multiplication Sign (DirectionCurve3d space) (DirectionCurve3d space) w
   Negative * curve = -curve
 
 instance Multiplication' Sign (DirectionCurve3d space) (DirectionCurve3d space) where
-  Positive ~*~ curve = curve
-  Negative ~*~ curve = -curve
+  Positive *# curve = curve
+  Negative *# curve = -curve
 
 instance Multiplication (DirectionCurve3d space) Sign (DirectionCurve3d space) where
   curve * Positive = curve
   curve * Negative = -curve
 
 instance Multiplication' (DirectionCurve3d space) Sign (DirectionCurve3d space) where
-  curve ~*~ Positive = curve
-  curve ~*~ Negative = -curve
+  curve *# Positive = curve
+  curve *# Negative = -curve
 
 instance
   Multiplication
