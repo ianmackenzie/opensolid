@@ -65,7 +65,6 @@ import OpenSolid.Syntax
   , (.-.)
   , (./.)
   , (//)
-  , (@)
   , (|>)
   , type (@)
   )
@@ -224,8 +223,8 @@ testPlaneTorusIntersection = do
   let majorRadius = Length.centimeters 2
   let crossSection =
         Curve2d.circle
-          @ #centerPoint (Point2d.x majorRadius)
-          @ #diameter (2 *. minorRadius)
+          (#centerPoint (Point2d.x majorRadius))
+          (#diameter (2 *. minorRadius))
   surface <- IO.try (Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi)
   let alpha = Angle.asin (minorRadius ./. majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
@@ -284,9 +283,10 @@ drawUvCurve attributes curve = do
 
 drawDot :: Color -> UvPoint -> Drawing2d UvSpace
 drawDot color point =
-  Drawing2d.circleWith [Drawing2d.fillColor color]
-    @ #centerPoint (Point2d.convert toDrawing point)
-    @ #diameter (Length.millimeters 1)
+  Drawing2d.circleWith
+    [Drawing2d.fillColor color]
+    (#centerPoint (Point2d.convert toDrawing point))
+    (#diameter (Length.millimeters 1))
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint n delay = do

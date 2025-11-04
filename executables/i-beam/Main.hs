@@ -15,7 +15,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax ((*.), (.-.), (@))
+import OpenSolid.Syntax ((*.), (.-.))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 import Prelude hiding (length)
@@ -33,10 +33,11 @@ main = Tolerance.using Length.nanometer do
   let p4 = Point2d (0.5 *. width) (0.5 *. height)
   let p5 = Point2d.y (0.5 *. height)
   let fillet =
-        Curve2d.cornerArc p2
-          @ #incoming Direction2d.y
-          @ #outgoing Direction2d.x
-          @ #radius filletRadius
+        Curve2d.cornerArc
+          p2
+          (#incoming Direction2d.y)
+          (#outgoing Direction2d.x)
+          (#radius filletRadius)
   let topRightCurves =
         [ Curve2d.line p1 fillet.startPoint
         , fillet

@@ -11,7 +11,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax ((.*.), (.+.), (./.), (/.), (@))
+import OpenSolid.Syntax ((.*.), (.+.), (./.), (/.))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -32,8 +32,8 @@ main = Tolerance.using Length.nanometer do
         radialUnitVector <- IO.try do
           Tolerance.using 1e-9 $
             VectorCurve2d.quotient
-              @ VectorCurve2d.quadraticBezier v1 v2 v3
-              @ weightCurve
+              (VectorCurve2d.quadraticBezier v1 v2 v3)
+              weightCurve
         return (Point2d.origin .+. radius .*. radialUnitVector)
   arc1 <- arc vE vNE vN
   arc2 <- arc vN vNW vW
@@ -41,9 +41,10 @@ main = Tolerance.using Length.nanometer do
   arc4 <- arc vS vSE vE
   let circle = Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point =
-        Drawing2d.circleWith [Drawing2d.whiteFill]
-          @ #centerPoint point
-          @ #diameter (Length.millimeters 4)
+        Drawing2d.circleWith
+          [Drawing2d.whiteFill]
+          (#centerPoint point)
+          (#diameter (Length.millimeters 4))
   let drawCurve n curve =
         Drawing2d.group
           [ Drawing2d.curve (Resolution.maxError Length.micrometer) curve

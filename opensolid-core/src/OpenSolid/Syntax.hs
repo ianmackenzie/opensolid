@@ -26,7 +26,6 @@ module OpenSolid.Syntax
   , (%)
   , (//)
   , (|>)
-  , (@)
   , type (@)
   )
 where

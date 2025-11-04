@@ -10,7 +10,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
-import OpenSolid.Syntax ((*.), (@))
+import OpenSolid.Syntax ((*.))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 import Prelude hiding (length)
@@ -21,10 +21,10 @@ main = Tolerance.using Length.nanometer do
   let length = Length.meters 4
   let arc =
         Curve2d.polarArc
-          @ #centerPoint Point2d.origin
-          @ #radius radius
-          @ #startAngle (Angle.degrees -45)
-          @ #endAngle (Angle.degrees 225)
+          (#centerPoint Point2d.origin)
+          (#radius radius)
+          (#startAngle (Angle.degrees -45))
+          (#endAngle (Angle.degrees 225))
   let line = Curve2d.line arc.endPoint arc.startPoint
   profile <- IO.try (Region2d.boundedBy [arc, line])
   body <- IO.try (Body3d.extruded World3d.frontPlane profile (-0.5 *. length) (0.5 *. length))

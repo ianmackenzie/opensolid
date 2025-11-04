@@ -15,7 +15,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax ((*.), (.*.), (.+.), (.-.), (./.), (@), type (@))
+import OpenSolid.Syntax ((*.), (.*.), (.+.), (.-.), (./.), type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
@@ -77,9 +77,10 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer do
   let drawCurve fileName curve = do
         let pointLocations = List.map (Curve2d.evaluate curve) (Parameter.steps 30)
         let drawPoint point =
-              Drawing2d.circleWith [Drawing2d.whiteFill]
-                @ #centerPoint point
-                @ #diameter (Length.millimeters 3)
+              Drawing2d.circleWith
+                [Drawing2d.whiteFill]
+                (#centerPoint point)
+                (#diameter (Length.millimeters 3))
         let drawingBounds = Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30 15)
         let resolution = Resolution.maxError Length.micrometer
         Drawing2d.writeSvg fileName drawingBounds $
