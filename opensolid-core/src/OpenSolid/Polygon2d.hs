@@ -24,8 +24,8 @@ map function polygon = Polygon2d (NonEmpty.map function polygon.vertices)
 
 signedArea# :: Vertex2d vertex (space @ units) => Polygon2d vertex -> Quantity (units *# units)
 signedArea# (Polygon2d (v0 :| vs)) = do
-  let triangleSignedArea' v1 v2 = Triangle2d.signedArea# (Triangle2d v0 v1 v2)
-  Quantity.sum (List.successive triangleSignedArea' vs)
+  let triangleSignedArea# v1 v2 = Triangle2d.signedArea# (Triangle2d v0 v1 v2)
+  Quantity.sum (List.successive triangleSignedArea# vs)
 
 signedArea ::
   (Vertex2d vertex (space @ units), Units.Squared units squaredUnits) =>
