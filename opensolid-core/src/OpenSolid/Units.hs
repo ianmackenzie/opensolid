@@ -255,52 +255,48 @@ data MetersToTheFourthPower deriving (Eq, Show)
 
 data InverseMeters deriving (Eq, Show)
 
-type family a .*. b where
-  Unitless .*. Unitless = Unitless
-  Unitless .*. units = units
-  units .*. Unitless = units
-  Meters .*. Meters = SquareMeters
-  Meters .*. SquareMeters = CubicMeters
-  SquareMeters .*. Meters = CubicMeters
-  Meters .*. CubicMeters = MetersToTheFourthPower
-  CubicMeters .*. Meters = MetersToTheFourthPower
-  SquareMeters .*. SquareMeters = MetersToTheFourthPower
-  Seconds .*. MetersPerSecond = Meters
-  MetersPerSecond .*. Seconds = Meters
-  Seconds .*. MetersPerSecondSquared = MetersPerSecond
-  MetersPerSecondSquared .*. Seconds = MetersPerSecond
-  Meters .*. InverseMeters = Unitless
-  InverseMeters .*. Meters = Unitless
-  SquareMeters .*. InverseMeters = Meters
-  InverseMeters .*. SquareMeters = Meters
-  CubicMeters .*. InverseMeters = SquareMeters
-  InverseMeters .*. CubicMeters = SquareMeters
-  MetersToTheFourthPower .*. InverseMeters = CubicMeters
-  InverseMeters .*. MetersToTheFourthPower = CubicMeters
+type family Prod a b where
+  Prod Unitless Unitless = Unitless
+  Prod Unitless units = units
+  Prod units Unitless = units
+  Prod Meters Meters = SquareMeters
+  Prod Meters SquareMeters = CubicMeters
+  Prod SquareMeters Meters = CubicMeters
+  Prod Meters CubicMeters = MetersToTheFourthPower
+  Prod CubicMeters Meters = MetersToTheFourthPower
+  Prod SquareMeters SquareMeters = MetersToTheFourthPower
+  Prod Seconds MetersPerSecond = Meters
+  Prod MetersPerSecond Seconds = Meters
+  Prod Seconds MetersPerSecondSquared = MetersPerSecond
+  Prod MetersPerSecondSquared Seconds = MetersPerSecond
+  Prod Meters InverseMeters = Unitless
+  Prod InverseMeters Meters = Unitless
+  Prod SquareMeters InverseMeters = Meters
+  Prod InverseMeters SquareMeters = Meters
+  Prod CubicMeters InverseMeters = SquareMeters
+  Prod InverseMeters CubicMeters = SquareMeters
+  Prod MetersToTheFourthPower InverseMeters = CubicMeters
+  Prod InverseMeters MetersToTheFourthPower = CubicMeters
 
-infixl 7 .*.
-
-type family a ./. b where
-  Unitless ./. Unitless = Unitless
-  units ./. Unitless = units
-  units ./. units = Unitless
-  SquareMeters ./. Meters = Meters
-  CubicMeters ./. Meters = SquareMeters
-  CubicMeters ./. SquareMeters = Meters
-  MetersToTheFourthPower ./. Meters = CubicMeters
-  MetersToTheFourthPower ./. SquareMeters = SquareMeters
-  MetersToTheFourthPower ./. CubicMeters = Meters
-  Meters ./. Seconds = MetersPerSecond
-  Meters ./. MetersPerSecond = Seconds
-  MetersPerSecond ./. Seconds = MetersPerSecondSquared
-  MetersPerSecond ./. MetersPerSecondSquared = Seconds
-  Unitless ./. InverseMeters = Meters
-  Unitless ./. Meters = InverseMeters
-  Meters ./. InverseMeters = SquareMeters
-  SquareMeters ./. InverseMeters = CubicMeters
-  CubicMeters ./. InverseMeters = MetersToTheFourthPower
-
-infixl 7 ./.
+type family Quot a b where
+  Quot Unitless Unitless = Unitless
+  Quot units Unitless = units
+  Quot units units = Unitless
+  Quot SquareMeters Meters = Meters
+  Quot CubicMeters Meters = SquareMeters
+  Quot CubicMeters SquareMeters = Meters
+  Quot MetersToTheFourthPower Meters = CubicMeters
+  Quot MetersToTheFourthPower SquareMeters = SquareMeters
+  Quot MetersToTheFourthPower CubicMeters = Meters
+  Quot Meters Seconds = MetersPerSecond
+  Quot Meters MetersPerSecond = Seconds
+  Quot MetersPerSecond Seconds = MetersPerSecondSquared
+  Quot MetersPerSecond MetersPerSecondSquared = Seconds
+  Quot Unitless InverseMeters = Meters
+  Quot Unitless Meters = InverseMeters
+  Quot Meters InverseMeters = SquareMeters
+  Quot SquareMeters InverseMeters = CubicMeters
+  Quot CubicMeters InverseMeters = MetersToTheFourthPower
 
 type family Square units = squaredUnits | squaredUnits -> units where
   Square Unitless = Unitless
@@ -308,17 +304,17 @@ type family Square units = squaredUnits | squaredUnits -> units where
   Square SquareMeters = MetersToTheFourthPower
 
 type Product units1 units2 units3 =
-  ( units1 .*. units2 ~ units3
-  , units2 .*. units1 ~ units3
-  , units3 ./. units1 ~ units2
-  , units3 ./. units2 ~ units1
+  ( Prod units1 units2 ~ units3
+  , Prod units2 units1 ~ units3
+  , Quot units3 units1 ~ units2
+  , Quot units3 units2 ~ units1
   )
 
 type Quotient units1 units2 units3 =
-  ( units1 ./. units2 ~ units3
-  , units2 .*. units3 ~ units1
-  , units3 .*. units2 ~ units1
-  , units1 ./. units3 ~ units2
+  ( Quot units1 units2 ~ units3
+  , Prod units2 units3 ~ units1
+  , Prod units3 units2 ~ units1
+  , Quot units1 units3 ~ units2
   )
 
 type Squared units1 units2 =
