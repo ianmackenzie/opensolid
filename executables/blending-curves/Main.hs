@@ -12,15 +12,15 @@ import OpenSolid.Text qualified as Text
 main :: IO ()
 main = do
   let t = Curve.t
-  let a0 = number 1.0 .- Curve.cubed t .* (number 4.0 .- number 3.0 .* t)
-  let b0 = t .* (number 1.0 .+ Curve.squared t .* (twice t .- number 3.0))
-  let c0 = Curve.squared t .* (number 0.5 .+ t .* (half t .- number 1.0))
-  let a1 = Curve.cubed t .* (number 4.0 .- number 3.0 .* t)
-  let b1 = Curve.cubed t .* (t .- number 1.0)
+  let a0 = number 1 .- Curve.cubed t .* (number 4 .- number 3 .* t)
+  let b0 = t .* (number 1 .+ Curve.squared t .* (twice t .- number 3))
+  let c0 = Curve.squared t .* (number 0.5 .+ t .* (half t .- number 1))
+  let a1 = Curve.cubed t .* (number 4 .- number 3 .* t)
+  let b1 = Curve.cubed t .* (t .- number 1)
   let drawing yScale a0' b0' c0' a1' b1' =
         Drawing2d.group
-          [ Plot.xAxis 0.0 1.0
-          , Plot.yAxis 0.0 yScale
+          [ Plot.xAxis 0 1
+          , Plot.yAxis 0 yScale
           , Plot.curveWith [Drawing2d.strokeColor Color.red] (yScale .* a0')
           , Plot.curveWith [Drawing2d.strokeColor Color.orange] (yScale .* b0')
           , Plot.curveWith [Drawing2d.strokeColor Color.yellow] (yScale .* c0')
@@ -28,8 +28,8 @@ main = do
           , Plot.curveWith [Drawing2d.strokeColor Color.blue] (yScale .* b1')
           , Plot.curveWith [Drawing2d.strokeColor Color.grey] (yScale .* (a0' .+ a1'))
           ]
-  let curvesDrawing = drawing 1.0 a0 b0 c0 a1 b1
-  let curvesDrawing2 = drawing 1.0 Curve.b00 Curve.b01 Curve.b02 Curve.b10 Curve.b11
+  let curvesDrawing = drawing 1 a0 b0 c0 a1 b1
+  let curvesDrawing2 = drawing 1 Curve.b00 Curve.b01 Curve.b02 Curve.b10 Curve.b11
   let derivativesDrawing =
         drawing
           0.5
@@ -105,13 +105,13 @@ main = do
   Drawing2d.writeSvg "executables/blending-curves/third-derivatives2.svg" (viewBox -1.5 1.5) thirdDerivativesDrawing2
   Drawing2d.writeSvg "executables/blending-curves/fourth-derivatives.svg" (viewBox -1.5 1.5) fourthDerivativesDrawing
   Drawing2d.writeSvg "executables/blending-curves/fourth-derivatives2.svg" (viewBox -1.5 1.5) fourthDerivativesDrawing2
-  IO.printLine ("a0 fourth derivative: " <> Text.number (Curve.evaluate a0.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("b0 fourth derivative: " <> Text.number (Curve.evaluate b0.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("c0 fourth derivative: " <> Text.number (Curve.evaluate c0.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("a1 fourth derivative: " <> Text.number (Curve.evaluate a1.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("b1 fourth derivative: " <> Text.number (Curve.evaluate b1.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("Curve.b00 fourth derivative: " <> Text.number (Curve.evaluate Curve.b00.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("Curve.b01 fourth derivative: " <> Text.number (Curve.evaluate Curve.b01.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("Curve.b02 fourth derivative: " <> Text.number (Curve.evaluate Curve.b02.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("Curve.b10 fourth derivative: " <> Text.number (Curve.evaluate Curve.b10.derivative.derivative.derivative.derivative 0.0))
-  IO.printLine ("Curve.b11 fourth derivative: " <> Text.number (Curve.evaluate Curve.b11.derivative.derivative.derivative.derivative 0.0))
+  IO.printLine ("a0 fourth derivative: " <> Text.number (Curve.evaluate a0.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("b0 fourth derivative: " <> Text.number (Curve.evaluate b0.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("c0 fourth derivative: " <> Text.number (Curve.evaluate c0.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("a1 fourth derivative: " <> Text.number (Curve.evaluate a1.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("b1 fourth derivative: " <> Text.number (Curve.evaluate b1.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("Curve.b00 fourth derivative: " <> Text.number (Curve.evaluate Curve.b00.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("Curve.b01 fourth derivative: " <> Text.number (Curve.evaluate Curve.b01.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("Curve.b02 fourth derivative: " <> Text.number (Curve.evaluate Curve.b02.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("Curve.b10 fourth derivative: " <> Text.number (Curve.evaluate Curve.b10.derivative.derivative.derivative.derivative 0))
+  IO.printLine ("Curve.b11 fourth derivative: " <> Text.number (Curve.evaluate Curve.b11.derivative.derivative.derivative.derivative 0))

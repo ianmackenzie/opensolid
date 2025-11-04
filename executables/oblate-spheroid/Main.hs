@@ -17,9 +17,9 @@ import OpenSolid.World3d qualified as World3d
 main :: IO ()
 main = Tolerance.using Length.nanometer do
   let p1 = Point2d.origin
-  let p2 = Point2d.centimeters 20.0 0.0
-  let p3 = Point2d.centimeters 20.0 10.0
-  let p4 = Point2d.centimeters 0.0 10.0
+  let p2 = Point2d.centimeters 20 0
+  let p3 = Point2d.centimeters 20 10
+  let p4 = Point2d.centimeters 0 10
   let spline = Curve2d.cubicBezier p1 p2 p3 p4
   profile <- IO.try (Region2d.boundedBy [spline, Curve2d.line p4 p1])
   body <- IO.try (Body3d.revolved World3d.rightPlane profile Axis2d.y Angle.twoPi)

@@ -37,22 +37,22 @@ testSplineAndArc :: Tolerance Meters => IO ()
 testSplineAndArc = do
   let spline =
         Curve2d.cubicBezier
-          (Point2d.centimeters 0.0 10.0)
-          (Point2d.centimeters 5.0 6.0)
-          (Point2d.centimeters 10.0 9.0)
-          (Point2d.centimeters 15.0 7.0)
-  let arc = Curve2d.arc (Point2d.centimeters 15.0 0.0) Point2d.origin (Angle.degrees 20.0)
+          (Point2d.centimeters 0 10)
+          (Point2d.centimeters 5 6)
+          (Point2d.centimeters 10 9)
+          (Point2d.centimeters 15 7)
+  let arc = Curve2d.arc (Point2d.centimeters 15 0) Point2d.origin (Angle.degrees 20)
   testCurveMedialAxis "testSplineAndArc" spline arc
 
 testSplineAndLine :: Tolerance Meters => IO ()
 testSplineAndLine = do
   let spline =
         Curve2d.cubicBezier
-          (Point2d.centimeters 15.0 15.0)
-          (Point2d.centimeters 10.0 10.0)
-          (Point2d.centimeters 10.0 10.0)
-          (Point2d.centimeters 5.0 15.0)
-  let line = Curve2d.line Point2d.origin (Point2d.centimeters 20.0 0.0)
+          (Point2d.centimeters 15 15)
+          (Point2d.centimeters 10 10)
+          (Point2d.centimeters 10 10)
+          (Point2d.centimeters 5 15)
+  let line = Curve2d.line Point2d.origin (Point2d.centimeters 20 0)
   testCurveMedialAxis "testSplineAndLine" spline line
 
 testCurveMedialAxis ::
@@ -79,7 +79,7 @@ testCurveMedialAxis label curve1 curve2 = do
   let drawCurve = Drawing2d.curve resolution
   let drawSegment segment = drawCurve segment.curve
   let drawingBounds =
-        Bounds2d.hull2 (Point2d.centimeters -10.0 -10.0) (Point2d.centimeters 30.0 20.0)
+        Bounds2d.hull2 (Point2d.centimeters -10 -10) (Point2d.centimeters 30 20)
   Drawing2d.writeSvg ("executables/medial-axis/" <> label <> ".svg") drawingBounds $
     Drawing2d.group
       [ Drawing2d.combine drawTangentCircles segments

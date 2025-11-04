@@ -17,16 +17,16 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let weightCurve = Curve.quadraticSpline 1.0 (number 1.0 ./ sqrt (number 2.0)) 1.0
-  let vE = Vector2d 1.0 0.0
-  let vNE = Vector2d 1.0 1.0 ./ sqrt (number 2.0)
-  let vN = Vector2d 0.0 1.0
-  let vNW = Vector2d -1.0 1.0 ./ sqrt (number 2.0)
-  let vW = Vector2d -1.0 0.0
-  let vSW = Vector2d -1.0 -1.0 ./ sqrt (number 2.0)
-  let vS = Vector2d 0.0 -1.0
-  let vSE = Vector2d 1.0 -1.0 ./ sqrt (number 2.0)
-  let radius = Length.centimeters 10.0
+  let weightCurve = Curve.quadraticSpline 1 (number 1 ./ sqrt (number 2)) 1
+  let vE = Vector2d 1 0
+  let vNE = Vector2d 1 1 ./ sqrt (number 2)
+  let vN = Vector2d 0 1
+  let vNW = Vector2d -1 1 ./ sqrt (number 2)
+  let vW = Vector2d -1 0
+  let vSW = Vector2d -1 -1 ./ sqrt (number 2)
+  let vS = Vector2d 0 -1
+  let vSE = Vector2d 1 -1 ./ sqrt (number 2)
+  let radius = Length.centimeters 10
   let arc v1 v2 v3 = do
         radialUnitVector <- IO.try do
           Tolerance.using 1e-9 $
@@ -42,14 +42,14 @@ main = Tolerance.using Length.nanometer do
   let drawDot point =
         Drawing2d.circleWith [Drawing2d.whiteFill]
           @ #centerPoint point
-          @ #diameter (Length.millimeters 4.0)
+          @ #diameter (Length.millimeters 4)
   let drawCurve n curve =
         Drawing2d.group
           [ Drawing2d.curve (Resolution.maxError Length.micrometer) curve
           , Drawing2d.combine (drawDot . Curve2d.evaluate curve) (Parameter.steps n)
           ]
   let drawingBounds =
-        Bounds2d.hull2 (Point2d.centimeters -12.0 -12.0) (Point2d.centimeters 12.0 12.0)
+        Bounds2d.hull2 (Point2d.centimeters -12 -12) (Point2d.centimeters 12 12)
   Drawing2d.writeSvg "executables/piecewise-curve/circle.svg" drawingBounds (drawCurve 40 circle)
   Drawing2d.writeSvg "executables/piecewise-curve/arcs.svg" drawingBounds $
     Drawing2d.combine (drawCurve 10) [arc1, arc2, arc3, arc4]

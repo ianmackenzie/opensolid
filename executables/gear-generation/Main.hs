@@ -27,13 +27,13 @@ import OpenSolid.World3d qualified as World3d
 
 gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))
 gearBody numTeeth = do
-  let gearModule = Length.millimeters 1.0
-  let holeDiameter = Length.millimeters 8.0
+  let gearModule = Length.millimeters 1
+  let holeDiameter = Length.millimeters 8
   let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
   let outerProfile = SpurGear.profile spurGear
   let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
   profile <- Result.try (Region2d.boundedBy (hole : outerProfile))
-  let width = Length.millimeters 8.0
+  let width = Length.millimeters 8
   Result.try (Body3d.extruded World3d.frontPlane profile (negative (half width)) (half width))
 
 main :: IO ()

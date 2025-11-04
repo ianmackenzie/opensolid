@@ -18,10 +18,10 @@ import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let innerRadius = Length.centimeters 10.0
-  let width = Length.centimeters 3.0
+  let innerRadius = Length.centimeters 10
+  let width = Length.centimeters 3
   let outerRadius = innerRadius .+ width
-  let thickness = Length.millimeters 10.0
+  let thickness = Length.millimeters 10
   let p0 = Point2d.x innerRadius
   let p1 = Point2d.x outerRadius
   let p2 = Point2d outerRadius thickness
@@ -35,7 +35,7 @@ main = Tolerance.using Length.nanometer do
       , Curve2d.line p3 p4
       , Curve2d.line p4 p0
       ]
-  body <- IO.try (Body3d.revolved World3d.rightPlane profile Axis2d.y (Angle.degrees 270.0))
+  body <- IO.try (Body3d.revolved World3d.rightPlane profile Axis2d.y (Angle.degrees 270))
   let resolution = Resolution.maxError (Length.millimeters 0.2)
   let mesh = Body3d.toMesh resolution body
   Stl.writeBinary "executables/funky-moulding/mesh.stl" Convention3d.yUp Length.inMillimeters mesh

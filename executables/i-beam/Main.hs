@@ -22,11 +22,11 @@ import Prelude hiding (length)
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let length = Length.centimeters 30.0
-  let width = Length.centimeters 10.0
-  let height = Length.centimeters 15.0
-  let thickness = Length.centimeters 2.0
-  let filletRadius = Length.millimeters 5.0
+  let length = Length.centimeters 30
+  let width = Length.centimeters 10
+  let height = Length.centimeters 15
+  let thickness = Length.centimeters 2
+  let filletRadius = Length.millimeters 5
   let p1 = Point2d.x (half thickness)
   let p2 = Point2d (half thickness) (half height .- thickness)
   let p3 = Point2d (half width) (half height .- thickness)
@@ -50,5 +50,5 @@ main = Tolerance.using Length.nanometer do
   body <- IO.try (Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length))
   let material = PbrMaterial.metal (Color.rgb1 0.913 0.921 0.925) (#roughness 0.3)
   let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
-  let resolution = Resolution.maxError (Length.millimeters 1.0)
+  let resolution = Resolution.maxError (Length.millimeters 1)
   Gltf.writeBinary "executables/i-beam/mesh.glb" model resolution

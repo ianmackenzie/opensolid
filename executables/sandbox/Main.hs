@@ -91,50 +91,50 @@ testScalarArithmetic = do
   log "Integer product" (int 3 .* int 4)
   log "Integer division" (int 10 // int 4)
   log "True division" (int 10 ./ int 4)
-  let area = Area.squareMeters 3.0
-  let length = Length.centimeters 3.0
+  let area = Area.squareMeters 3
+  let length = Length.centimeters 3
   let volume = area .* length
   let volumeInCubicCentimeters = Volume.inCubicCentimeters volume
   log "Volume in cubic centimeters" volumeInCubicCentimeters
-  log "sqrt 2.0" (sqrt (number 2.0))
+  log "sqrt 2" (sqrt (number 2))
 
 testVectorArithmetic :: IO ()
 testVectorArithmetic = do
   let vector x y z = Vector3d.zUp (Length.meters x) (Length.meters y) (Length.meters z)
-  let v1 = Vector2d.meters 1.0 2.0
-  let v2 = half (Vector2d.meters 3.0 4.0)
+  let v1 = Vector2d.meters 1 2
+  let v2 = half (Vector2d.meters 3 4)
   let dotProduct = v1 `dot` v2
   log "Dot product" dotProduct
   log "2D cross product" (v1 `cross` v2)
   let squareRoot = Quantity.sqrt dotProduct
   log "Square root" squareRoot
-  let translatedPoint = Point2d.meters 2.0 3.0 .+ Vector2d.meters 4.0 5.0
+  let translatedPoint = Point2d.meters 2 3 .+ Vector2d.meters 4 5
   log "Translated point" translatedPoint
-  let vectorSum = Vector2d.meters 1.0 2.0 .+ Vector2d.meters 2.0 3.0
+  let vectorSum = Vector2d.meters 1 2 .+ Vector2d.meters 2 3
   log "Vector sum" vectorSum
-  let crossProduct = vector 1.0 2.0 3.0 `cross` vector 4.0 5.0 6.0
+  let crossProduct = vector 1 2 3 `cross` vector 4 5 6
   log "Cross product" crossProduct
-  let scaledVector = Length.meters 2.0 .* Vector2d.meters 3.0 4.0
+  let scaledVector = Length.meters 2 .* Vector2d.meters 3 4
   log "Scaled vector" scaledVector
 
 testBoundsArithmetic :: IO ()
 testBoundsArithmetic = do
   let boundsDifference =
-        Bounds (Length.meters 2.0) (Length.meters 3.0) .- Length.centimeters 50.0
+        Bounds (Length.meters 2) (Length.meters 3) .- Length.centimeters 50
   log "Bounds difference" boundsDifference
   let boundsProduct =
-        Length.centimeters 20.0 .* Bounds (Length.meters 2.0) (Length.meters 3.0)
+        Length.centimeters 20 .* Bounds (Length.meters 2) (Length.meters 3)
   log "Bounds product" boundsProduct
 
 testEquality :: IO ()
 testEquality = Tolerance.using Length.centimeter do
-  log "Equality test" (Length.meters 1.0 ~= Length.meters 1.005)
+  log "Equality test" (Length.meters 1 ~= Length.meters 1.005)
 
 testTransformation :: IO ()
 testTransformation = do
-  let rotatedAxis = Axis2d.x |> Axis2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn
+  let rotatedAxis = Axis2d.x |> Axis2d.rotateAround (Point2d.meters 1 0) Angle.quarterTurn
   log "Rotated axis" rotatedAxis
-  let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
+  let originalPoints = [Point2d.meters 1 0, Point2d.meters 2 0, Point2d.meters 3 0]
   let rotationFunction = Point2d.rotateAround Point2d.origin Angle.quarterTurn
   let rotatedPoints = List.map rotationFunction originalPoints
   log "Rotated points" rotatedPoints
@@ -154,20 +154,20 @@ offsetPoint startPoint endPoint distance =
 
 testCustomFunction :: Tolerance Meters => IO ()
 testCustomFunction = do
-  let point = offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
+  let point = offsetPoint (Point2d.meters 1 0) (Point2d.meters 3 0) (Length.meters 1)
   log "Offset point" point
 
 testListOperations :: IO ()
 testListOperations = do
   let deltas = List.successive subtract [int 0, 1, 4, 9, 16, 25]
-  let intervals = List.successive Bounds [number 1.0, 2.0, 3.0, 4.0]
+  let intervals = List.successive Bounds [number 1, 2, 3, 4]
   log "Successive deltas" deltas
   log "Successive intervals" intervals
 
 getCrossProduct :: Tolerance Meters => Result Text (Quantity Unitless)
 getCrossProduct = Result.addContext "In getCrossProduct" do
   vectorDirection <-
-    Vector2d.direction (Vector2d.meters 2.0 3.0)
+    Vector2d.direction (Vector2d.meters 2 3)
       |> Result.addContext "When getting vector direction"
   lineDirection <-
     Direction2d.from Point2d.origin Point2d.origin
@@ -219,8 +219,8 @@ testNonEmpty = do
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = do
-  let minorRadius = Length.centimeters 1.0
-  let majorRadius = Length.centimeters 2.0
+  let minorRadius = Length.centimeters 1
+  let majorRadius = Length.centimeters 2
   let crossSection =
         Curve2d.circle
           @ #centerPoint (Point2d.x majorRadius)
@@ -264,7 +264,7 @@ drawZeros path zeros = do
 drawBounds :: Bounds2d (space @ Meters) -> Drawing2d space
 drawBounds bounds = do
   let corner x y = Bounds2d.interpolate bounds x y
-  Drawing2d.polygon [corner 0.0 0.0, corner 1.0 0.0, corner 1.0 1.0, corner 0.0 1.0]
+  Drawing2d.polygon [corner 0 0, corner 1 0, corner 1 1, corner 0 1]
 
 drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawCrossingCurve index curve = do
@@ -273,7 +273,7 @@ drawCrossingCurve index curve = do
   drawUvCurve [Drawing2d.strokeColor color] curve
 
 toDrawing :: Quantity (Meters :/: Unitless)
-toDrawing = Length.centimeters 10.0 ./. number 1.0
+toDrawing = Length.centimeters 10 ./. number 1
 
 drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawUvCurve attributes curve = do
@@ -285,7 +285,7 @@ drawDot :: Color -> UvPoint -> Drawing2d UvSpace
 drawDot color point =
   Drawing2d.circleWith [Drawing2d.fillColor color]
     @ #centerPoint (Point2d.convert toDrawing point)
-    @ #diameter (Length.millimeters 1.0)
+    @ #diameter (Length.millimeters 1)
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint n delay = do
@@ -297,22 +297,22 @@ testConcurrency = do
   IO.printLine "Starting concurrency test..."
   IO.printLine "0"
   IO.Parallel.run
-    [ delayedPrint 5 (Duration.milliseconds 250.0)
-    , delayedPrint 2 (Duration.milliseconds 100.0)
-    , delayedPrint 3 (Duration.milliseconds 150.0)
-    , delayedPrint 4 (Duration.milliseconds 200.0)
-    , delayedPrint 1 (Duration.milliseconds 50.0)
+    [ delayedPrint 5 (Duration.milliseconds 250)
+    , delayedPrint 2 (Duration.milliseconds 100)
+    , delayedPrint 3 (Duration.milliseconds 150)
+    , delayedPrint 4 (Duration.milliseconds 200)
+    , delayedPrint 1 (Duration.milliseconds 50)
     ]
   IO.printLine "Concurrency test complete!"
 
 computeSquareRoot :: Quantity Unitless -> IO (Quantity Unitless)
 computeSquareRoot value = do
-  IO.sleep (Duration.milliseconds 100.0)
+  IO.sleep (Duration.milliseconds 100)
   return (sqrt value)
 
 testIOParallel :: IO ()
 testIOParallel = do
-  squareRoots <- IO.Parallel.collect computeSquareRoot [1.0, 4.0, 9.0, 16.0, 25.0]
+  squareRoots <- IO.Parallel.collect computeSquareRoot [1, 4, 9, 16, 25]
   log "Square roots" squareRoots
 
 drawBezier ::
@@ -329,13 +329,13 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
   let curve = Curve2d.bezier drawingControlPoints
   let drawSegmentBounds tBounds = drawBounds (Curve2d.evaluateBounds curve tBounds)
-  let controlPointDiameter = Length.millimeters 10.0
+  let controlPointDiameter = Length.millimeters 10
   let drawControlPoint point =
         Drawing2d.circle (#centerPoint point) (#diameter controlPointDiameter)
   let resolution = Resolution.maxError Length.millimeter
   Drawing2d.groupWith
     [ Drawing2d.strokeColor color
-    , Drawing2d.strokeWidth (Length.millimeters 1.0)
+    , Drawing2d.strokeWidth (Length.millimeters 1)
     ]
     [ Drawing2d.groupWith [Drawing2d.opacity 0.3] $
         [ Drawing2d.polyline (Polyline2d drawingControlPoints)
@@ -348,12 +348,12 @@ drawBezier color startPoint innerControlPoints endPoint = do
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = do
   let p1 = Point2d.origin @Global
-  let p2 = Point2d 0.0 5.0
-  let p3 = Point2d 2.5 10.0
-  let p4 = Point2d 5.0 0.0
-  let p5 = Point2d 10.0 5.0
-  let p6 = Point2d 10.0 10.0
-  let coordinateBounds = Bounds.convert toDrawing (Bounds -1.0 11.0)
+  let p2 = Point2d 0 5
+  let p3 = Point2d 2.5 10
+  let p4 = Point2d 5 0
+  let p5 = Point2d 10 5
+  let p6 = Point2d 10 10
+  let coordinateBounds = Bounds.convert toDrawing (Bounds -1 11)
   let drawingBounds = Bounds2d coordinateBounds coordinateBounds
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
   Drawing2d.writeSvg "executables/sandbox/test-bezier-segment.svg" drawingBounds curveEntity
@@ -361,17 +361,17 @@ testBezierSegment = do
 testHermiteBezier :: IO ()
 testHermiteBezier = do
   let startPoint = Point2d.origin @Global
-  let startDerivatives = [Vector2d.centimeters 10.0 10.0]
-  let endDerivatives = [Vector2d.centimeters 0.0 -10.0, Vector2d.zero]
-  let endPoint = Point2d.centimeters 10.0 0.0
+  let startDerivatives = [Vector2d.centimeters 10 10]
+  let endDerivatives = [Vector2d.centimeters 0 -10, Vector2d.zero]
+  let endPoint = Point2d.centimeters 10 0
   let curve = Curve2d.hermite startPoint startDerivatives endPoint endDerivatives
   let curveAttributes =
         [ Drawing2d.strokeColor Color.blue
-        , Drawing2d.strokeWidth (Length.millimeters 1.0)
+        , Drawing2d.strokeWidth (Length.millimeters 1)
         ]
   let curveResolution = Resolution.maxError (Length.millimeters 0.1)
   let curveEntity = Drawing2d.curveWith curveAttributes curveResolution curve
-  let coordinateBounds = Bounds (Length.centimeters -1.0) (Length.centimeters 11.0)
+  let coordinateBounds = Bounds (Length.centimeters -1) (Length.centimeters 11)
   let drawingBounds = Bounds2d coordinateBounds coordinateBounds
   Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity
 
@@ -406,9 +406,9 @@ testNewtonRaphson2d :: IO ()
 testNewtonRaphson2d = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- number 4.0
+  let f = SurfaceFunction.squared u .+ SurfaceFunction.squared v .- number 4
   let g = u .- v
-  let bounds = Bounds2d (Bounds 0.0 2.0) (Bounds 0.0 2.0)
+  let bounds = Bounds2d (Bounds 0 2) (Bounds 0 2)
   let function = VectorSurfaceFunction2d.xy f g
   let uDerivative = VectorSurfaceFunction2d.derivative SurfaceParameter.U function
   let vDerivative = VectorSurfaceFunction2d.derivative SurfaceParameter.V function
@@ -425,23 +425,23 @@ testExpression :: IO ()
 testExpression = do
   let x = Expression.t
   let xSquared = Expression.squared x
-  let expression = xSquared ./ (xSquared .+ Expression.Curve1d.constant 1.0)
-  log "Expression value" (Expression.evaluate expression 2.0)
-  log "Expression bounds" (Expression.evaluateBounds expression (Bounds 1.0 3.0))
+  let expression = xSquared ./ (xSquared .+ Expression.Curve1d.constant 1)
+  log "Expression value" (Expression.evaluate expression 2)
+  log "Expression bounds" (Expression.evaluateBounds expression (Bounds 1 3))
 
 testCurve2dExpression :: IO ()
 testCurve2dExpression = do
-  let x = Expression.Curve1d.constant 10.0 .* Expression.t
+  let x = Expression.Curve1d.constant 10 .* Expression.t
   let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression (Quantity Unitless) (Point2d (Global @ Unitless))
-  log "Evaluated 2D curve" (Expression.evaluate curve 3.0)
+  log "Evaluated 2D curve" (Expression.evaluate curve 3)
 
 testQuotientDesingularization :: IO ()
 testQuotientDesingularization = Tolerance.using 1e-9 do
   let numerator = Curve.sin (Angle.pi .* Curve.t)
-  let denominator = Curve.t .* (number 1.0 .- Curve.t)
+  let denominator = Curve.t .* (number 1 .- Curve.t)
   quotient <- IO.try (Curve.quotient numerator denominator)
-  let tValues = Quantity.steps 0.0 1.0 10
+  let tValues = Quantity.steps 0 1 10
   IO.forEach tValues \tValue -> do
     log "quotient" (Curve.evaluate quotient tValue)
   IO.forEach tValues \tValue -> do
@@ -454,13 +454,13 @@ testQuotientDesingularization = Tolerance.using 1e-9 do
 testCurveSqrt :: IO ()
 testCurveSqrt = Tolerance.using 1e-6 do
   let t = Curve.t
-  let curve = Curve.sqrt (half (number 1.0 .- Curve.cos (Angle.twoPi .* t)))
+  let curve = Curve.sqrt (half (number 1 .- Curve.cos (Angle.twoPi .* t)))
   Drawing2d.writeSvg
     "executables/sandbox/cos-sqrt.svg"
     (Debug.Plot.viewBox (Point2d -0.1 -4.1) (Point2d 1.1 4.1))
     ( Drawing2d.group
-        [ Debug.Plot.xAxis 0.0 1.0
-        , Debug.Plot.yAxis 0.0 1.0
+        [ Debug.Plot.xAxis 0 1
+        , Debug.Plot.yAxis 0 1
         , Debug.Plot.curve curve
         , Debug.Plot.curve curve.derivative
         ]

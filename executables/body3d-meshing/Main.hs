@@ -17,18 +17,18 @@ import Prelude hiding (length)
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let radius = Length.meters 1.0
-  let length = Length.meters 4.0
+  let radius = Length.meters 1
+  let length = Length.meters 4
   let arc =
         Curve2d.polarArc
           @ #centerPoint Point2d.origin
           @ #radius radius
-          @ #startAngle (Angle.degrees -45.0)
-          @ #endAngle (Angle.degrees 225.0)
+          @ #startAngle (Angle.degrees -45)
+          @ #endAngle (Angle.degrees 225)
   let line = Curve2d.line arc.endPoint arc.startPoint
   profile <- IO.try (Region2d.boundedBy [arc, line])
   body <- IO.try (Body3d.extruded World3d.frontPlane profile (negative (half length)) (half length))
-  let resolution = Resolution.maxSize (Length.centimeters 30.0)
+  let resolution = Resolution.maxSize (Length.centimeters 30)
   let mesh = Body3d.toMesh resolution body
   let outputPath = "executables/body3d-meshing/mesh.stl"
   Stl.writeBinary outputPath Convention3d.yUp Length.inMillimeters mesh

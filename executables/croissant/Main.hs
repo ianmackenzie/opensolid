@@ -18,10 +18,10 @@ import OpenSolid.World3d qualified as World3d
 main :: IO ()
 main = Tolerance.using Length.nanometer do
   let majorRadius = Length.meter
-  let k = Length.meters 2.0
+  let k = Length.meters 2
   let minorRadius =
         Curve.hermite Length.zero [k] Length.zero [negative k] `compose` SurfaceFunction.u
-  let theta = Curve.line (Angle.degrees 45.0) (Angle.degrees 315.0) `compose` SurfaceFunction.u
+  let theta = Curve.line (Angle.degrees 45) (Angle.degrees 315) `compose` SurfaceFunction.u
   let phi = Angle.twoPi .* SurfaceFunction.v
   let r = majorRadius .+ minorRadius .* SurfaceFunction.cos phi
   let surfaceFunction =
@@ -31,6 +31,6 @@ main = Tolerance.using Length.nanometer do
           .+ minorRadius .* SurfaceFunction.sin phi .* World3d.upwardDirection
   let surface = Surface3d.parametric surfaceFunction Region2d.unitSquare
   body <- IO.try (Body3d.boundedBy [surface])
-  let resolution = Resolution.maxSize (Length.centimeters 20.0)
+  let resolution = Resolution.maxSize (Length.centimeters 20)
   let mesh = Body3d.toMesh resolution body
   Stl.writeBinary "executables/croissant/mesh.stl" Convention3d.yUp Length.inMillimeters mesh
