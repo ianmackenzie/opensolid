@@ -51,7 +51,7 @@ instance
   Units.Coercion (VectorCurve2d (space1 @ unitsA)) (VectorCurve2d (space2 @ unitsB))
 
 instance
-  Multiplication'
+  Multiplication#
     (Curve units1)
     (VectorCurve2d (space @ units2))
     (VectorCurve2d (space @ (units1 *# units2)))
@@ -61,7 +61,7 @@ instance
   Multiplication (Curve units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
 
 instance
-  Multiplication'
+  Multiplication#
     (VectorCurve2d (space @ units1))
     (Curve units2)
     (VectorCurve2d (space @ (units1 *# units2)))

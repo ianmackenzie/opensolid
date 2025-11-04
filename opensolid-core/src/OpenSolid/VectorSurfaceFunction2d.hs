@@ -209,7 +209,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (SurfaceFunction units1)
     (VectorSurfaceFunction2d (space @ units2))
     (VectorSurfaceFunction2d (space @ (units1 *# units2)))
@@ -229,7 +229,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Quantity units1)
     (VectorSurfaceFunction2d (space @ units2))
     (VectorSurfaceFunction2d (space @ (units1 *# units2)))
@@ -246,7 +246,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (VectorSurfaceFunction2d (space @ units1))
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ (units1 *# units2)))
@@ -266,7 +266,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (VectorSurfaceFunction2d (space @ units1))
     (Quantity units2)
     (VectorSurfaceFunction2d (space @ (units1 *# units2)))
@@ -283,7 +283,7 @@ instance
   lhs / rhs = Units.specialize (lhs /# rhs)
 
 instance
-  Division'
+  Division#
     (VectorSurfaceFunction2d (space @ units1))
     (Quantity units2)
     (VectorSurfaceFunction2d (space @ (units1 /# units2)))

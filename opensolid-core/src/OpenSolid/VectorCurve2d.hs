@@ -262,7 +262,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Curve units1)
     (VectorCurve2d (space @ units2))
     (VectorCurve2d (space @ (units1 *# units2)))
@@ -277,7 +277,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Quantity units1)
     (VectorCurve2d (space @ units2))
     (VectorCurve2d (space @ (units1 *# units2)))
@@ -291,7 +291,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (VectorCurve2d (space @ units1))
     (Curve units2)
     (VectorCurve2d (space @ (units1 *# units2)))
@@ -312,7 +312,7 @@ instance
   lhs / rhs = Units.specialize (lhs /# rhs)
 
 instance
-  Division'
+  Division#
     (VectorCurve2d (space @ units1))
     (Quantity units2)
     (VectorCurve2d (space @ (units1 /# units2)))
@@ -320,7 +320,7 @@ instance
   curve /# value = Units.simplify (curve *# (1.0 /# value))
 
 instance
-  Multiplication'
+  Multiplication#
     (VectorCurve2d (space @ units1))
     (Quantity units2)
     (VectorCurve2d (space @ (units1 *# units2)))

@@ -3,9 +3,9 @@ module OpenSolid.Arithmetic
   , Addition ((+))
   , Subtraction ((-))
   , subtract
-  , Multiplication' ((*#))
+  , Multiplication# ((*#))
   , Multiplication ((*))
-  , Division' ((/#))
+  , Division# ((/#))
   , Division ((/))
   , DivMod ((//), (%))
   , DotMultiplication' (dot')
@@ -39,7 +39,7 @@ infixl 6 -
 subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
 
-class Multiplication' a b c | a b -> c where
+class Multiplication# a b c | a b -> c where
   (*#) :: a -> b -> c
 
 infixl 7 *#
@@ -49,7 +49,7 @@ class Multiplication b a c => Multiplication a b c | a b -> c where
 
 infixl 7 *
 
-class Division' a b c | a b -> c where
+class Division# a b c | a b -> c where
   (/#) :: a -> b -> c
 
 infixl 7 /#
@@ -94,7 +94,7 @@ instance DivMod Int where
 instance Negation Int where
   negate = Prelude.negate
 
-instance Multiplication' Sign Int Int where
+instance Multiplication# Sign Int Int where
   {-# INLINEABLE (*#) #-}
   Positive *# n = n
   Negative *# n = -n
@@ -104,7 +104,7 @@ instance Multiplication Sign Int Int where
   Positive * n = n
   Negative * n = -n
 
-instance Multiplication' Int Sign Int where
+instance Multiplication# Int Sign Int where
   {-# INLINEABLE (*#) #-}
   n *# Positive = n
   n *# Negative = -n
@@ -121,13 +121,13 @@ instance Addition Int Int Int where
 instance Subtraction Int Int Int where
   (-) = (Prelude.-)
 
-instance Multiplication' Int Int Int where
+instance Multiplication# Int Int Int where
   (*#) = (Prelude.*)
 
 instance Multiplication Int Int Int where
   (*) = (Prelude.*)
 
-instance Division' Int Int Number where
+instance Division# Int Int Number where
   n /# m = Quantity (fromIntegral n Prelude./ fromIntegral m)
 
 instance Division Int Int Number where

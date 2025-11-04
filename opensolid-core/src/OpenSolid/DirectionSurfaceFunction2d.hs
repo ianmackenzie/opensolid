@@ -69,7 +69,7 @@ instance
   Negative * function = -function
 
 instance
-  Multiplication'
+  Multiplication#
     Sign
     (DirectionSurfaceFunction2d space)
     (DirectionSurfaceFunction2d space)
@@ -87,7 +87,7 @@ instance
   function * Negative = -function
 
 instance
-  Multiplication'
+  Multiplication#
     (DirectionSurfaceFunction2d space)
     Sign
     (DirectionSurfaceFunction2d space)

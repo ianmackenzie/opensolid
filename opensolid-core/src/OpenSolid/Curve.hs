@@ -234,7 +234,7 @@ instance
   where
   lhs * rhs = Units.specialize (lhs *# rhs)
 
-instance Multiplication' (Curve units1) (Curve units2) (Curve (units1 *# units2)) where
+instance Multiplication# (Curve units1) (Curve units2) (Curve (units1 *# units2)) where
   lhs *# rhs =
     new (lhs.compiled *# rhs.compiled) (lhs.derivative *# rhs + lhs *# rhs.derivative)
 
@@ -244,7 +244,7 @@ instance
   where
   lhs * rhs = Units.specialize (lhs *# rhs)
 
-instance Multiplication' (Curve units1) (Quantity units2) (Curve (units1 *# units2)) where
+instance Multiplication# (Curve units1) (Quantity units2) (Curve (units1 *# units2)) where
   curve *# value = curve *# constant value
 
 instance
@@ -253,7 +253,7 @@ instance
   where
   lhs * rhs = Units.specialize (lhs *# rhs)
 
-instance Multiplication' (Quantity units1) (Curve units2) (Curve (units1 *# units2)) where
+instance Multiplication# (Quantity units1) (Curve units2) (Curve (units1 *# units2)) where
   value *# curve = constant value *# curve
 
 instance
@@ -263,7 +263,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Curve units1)
     (Vector2d (space @ units2))
     (VectorCurve2d (space @ (units1 *# units2)))
@@ -277,7 +277,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Vector2d (space @ units1))
     (Curve units2)
     (VectorCurve2d (space @ (units1 *# units2)))
@@ -291,7 +291,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Curve units1)
     (Vector3d (space @ units2))
     (VectorCurve3d (space @ (units1 *# units2)))
@@ -305,7 +305,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Vector3d (space @ units1))
     (Curve units2)
     (VectorCurve3d (space @ (units1 *# units2)))
@@ -497,7 +497,7 @@ instance
   where
   lhs / rhs = Units.specialize (lhs /# rhs)
 
-instance Division' (Curve units1) (Quantity units2) (Curve (units1 /# units2)) where
+instance Division# (Curve units1) (Quantity units2) (Curve (units1 /# units2)) where
   curve /# value = Units.simplify (curve *# (1.0 /# value))
 
 -- | Compute the square of a curve.

@@ -176,13 +176,13 @@ instance Interface (Product units1 units2) (units1 *# units2) where
               Product (refine first) (refine second)
     new refinedProduct
 
-instance Multiplication' (Estimate units1) (Estimate units2) (Estimate (units1 *# units2)) where
+instance Multiplication# (Estimate units1) (Estimate units2) (Estimate (units1 *# units2)) where
   first *# second = new (Product first second)
 
-instance Multiplication' (Estimate units1) (Quantity units2) (Estimate (units1 *# units2)) where
+instance Multiplication# (Estimate units1) (Quantity units2) (Estimate (units1 *# units2)) where
   estimate *# value = new (Product estimate (exact value))
 
-instance Multiplication' (Quantity units1) (Estimate units2) (Estimate (units1 *# units2)) where
+instance Multiplication# (Quantity units1) (Estimate units2) (Estimate (units1 *# units2)) where
   value *# estimate = new (Product (exact value) estimate)
 
 instance
@@ -212,7 +212,7 @@ instance
   where
   value * estimate = exact value * estimate
 
-instance Division' (Estimate units1) (Quantity units2) (Estimate (units1 /# units2)) where
+instance Division# (Estimate units1) (Quantity units2) (Estimate (units1 /# units2)) where
   estimate /# value = Units.simplify (estimate *# (1.0 /# value))
 
 instance

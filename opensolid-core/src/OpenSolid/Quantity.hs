@@ -138,7 +138,7 @@ instance units1 ~ units2 => Subtraction (Quantity units1) (Quantity units2) (Qua
   {-# INLINE (-) #-}
   Quantity x - Quantity y = Quantity (x Prelude.- y)
 
-instance Multiplication' (Quantity units1) (Quantity units2) (Quantity (units1 *# units2)) where
+instance Multiplication# (Quantity units1) (Quantity units2) (Quantity (units1 *# units2)) where
   {-# INLINE (*#) #-}
   Quantity x *# Quantity y = Quantity (x Prelude.* y)
 
@@ -149,7 +149,7 @@ instance
   {-# INLINEABLE (*) #-}
   Quantity x * Quantity y = Quantity (x Prelude.* y)
 
-instance Division' (Quantity units1) (Quantity units2) (Quantity (units1 /# units2)) where
+instance Division# (Quantity units1) (Quantity units2) (Quantity (units1 /# units2)) where
   {-# INLINE (/#) #-}
   Quantity x /# Quantity y = Quantity (x Prelude./ y)
 

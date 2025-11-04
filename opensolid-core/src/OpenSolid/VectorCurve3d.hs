@@ -227,7 +227,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Curve units1)
     (VectorCurve3d (space @ units2))
     (VectorCurve3d (space @ (units1 *# units2)))
@@ -244,7 +244,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (Quantity units1)
     (VectorCurve3d (space @ units2))
     (VectorCurve3d (space @ (units1 *# units2)))
@@ -258,7 +258,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (VectorCurve3d (space @ units1))
     (Curve units2)
     (VectorCurve3d (space @ (units1 *# units2)))
@@ -275,7 +275,7 @@ instance
   lhs * rhs = Units.specialize (lhs *# rhs)
 
 instance
-  Multiplication'
+  Multiplication#
     (VectorCurve3d (space @ units1))
     (Quantity units2)
     (VectorCurve3d (space @ (units1 *# units2)))
@@ -289,7 +289,7 @@ instance
   lhs / rhs = Units.specialize (lhs /# rhs)
 
 instance
-  Division'
+  Division#
     (VectorCurve3d (space @ units1))
     (Quantity units2)
     (VectorCurve3d (space @ (units1 /# units2)))

@@ -133,14 +133,14 @@ instance
   , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
   , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
   , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
-  , Multiplication'
+  , Multiplication#
       (Expression inputValue1 outputValue1)
       (Expression inputValue2 outputValue2)
       (Expression inputValue1 outputValue3)
-  , Multiplication' outputValue1 outputValue2 outputValue3
-  , Multiplication' outputBounds1 outputBounds2 outputBounds3
+  , Multiplication# outputValue1 outputValue2 outputValue3
+  , Multiplication# outputBounds1 outputBounds2 outputBounds3
   ) =>
-  Multiplication'
+  Multiplication#
     (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
@@ -153,14 +153,14 @@ instance
   , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
   , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
   , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
-  , Division'
+  , Division#
       (Expression inputValue1 outputValue1)
       (Expression inputValue2 outputValue2)
       (Expression inputValue1 outputValue3)
-  , Division' outputValue1 outputValue2 outputValue3
-  , Division' outputBounds1 outputBounds2 outputBounds3
+  , Division# outputValue1 outputValue2 outputValue3
+  , Division# outputBounds1 outputBounds2 outputBounds3
   ) =>
-  Division'
+  Division#
     (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
