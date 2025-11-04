@@ -28,7 +28,7 @@ data Space
 resolution :: Resolution Meters
 resolution = Resolution.maxError (Length.millimeters 0.1)
 
-scale :: Quantity (Meters :/: Unitless)
+scale :: Quantity (Meters /# Unitless)
 scale = Length.centimeters 10.0 /# 1.0
 
 axisHeadLength :: Length

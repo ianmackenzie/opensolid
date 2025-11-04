@@ -197,7 +197,7 @@ components (VectorBounds3d vx vy vz) = (vx, vy, vz)
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Bounds units2
 squaredMagnitude = Units.specialize . squaredMagnitude'
 
-squaredMagnitude' :: VectorBounds3d (space @ units) -> Bounds (units :*: units)
+squaredMagnitude' :: VectorBounds3d (space @ units) -> Bounds (units *# units)
 squaredMagnitude' (VectorBounds3d x y z) =
   Bounds.squared' x + Bounds.squared' y + Bounds.squared' z
 
@@ -257,7 +257,7 @@ maxSquaredMagnitude ::
   Quantity units2
 maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude'
 
-maxSquaredMagnitude' :: VectorBounds3d (space @ units) -> Quantity (units :*: units)
+maxSquaredMagnitude' :: VectorBounds3d (space @ units) -> Quantity (units *# units)
 maxSquaredMagnitude' (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)) = do
   let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
@@ -461,7 +461,7 @@ tripleProduct ::
   VectorBounds3d (space @ units) ->
   VectorBounds3d (space @ units) ->
   VectorBounds3d (space @ units) ->
-  Bounds ((units :*: units) :*: units)
+  Bounds ((units *# units) *# units)
 tripleProduct bounds1 bounds2 bounds3 = do
   let !(VectorBounds3d## xMin1## xMax1## yMin1## yMax1## zMin1## zMax1##) = bounds1
   let !(VectorBounds3d## xMin2## xMax2## yMin2## yMax2## zMin2## zMax2##) = bounds2

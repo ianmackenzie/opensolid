@@ -32,7 +32,7 @@ xy = Expression.xy
 
 squaredMagnitude' ::
   Expression Number (Vector2d (space @ units)) ->
-  Expression Number (Quantity (units :*: units))
+  Expression Number (Quantity (units *# units))
 squaredMagnitude' = Expression.squaredMagnitude'
 
 squaredMagnitude ::

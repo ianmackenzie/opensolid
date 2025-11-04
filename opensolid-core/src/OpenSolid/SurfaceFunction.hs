@@ -210,7 +210,7 @@ instance
   Multiplication'
     (SurfaceFunction units1)
     (SurfaceFunction units2)
-    (SurfaceFunction (units1 :*: units2))
+    (SurfaceFunction (units1 *# units2))
   where
   lhs *# rhs =
     new
@@ -227,7 +227,7 @@ instance
   Multiplication'
     (SurfaceFunction units1)
     (Quantity units2)
-    (SurfaceFunction (units1 :*: units2))
+    (SurfaceFunction (units1 *# units2))
   where
   function *# value = function *# constant value
 
@@ -241,7 +241,7 @@ instance
   Multiplication'
     (Quantity units1)
     (SurfaceFunction units2)
-    (SurfaceFunction (units1 :*: units2))
+    (SurfaceFunction (units1 *# units2))
   where
   value *# function = constant value *# function
 
@@ -258,7 +258,7 @@ instance
   Multiplication'
     (SurfaceFunction units1)
     (Vector2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
+    (VectorSurfaceFunction2d (space @ (units1 *# units2)))
   where
   function *# vector = function *# VectorSurfaceFunction2d.constant vector
 
@@ -275,7 +275,7 @@ instance
   Multiplication'
     (Vector2d (space @ units1))
     (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
+    (VectorSurfaceFunction2d (space @ (units1 *# units2)))
   where
   vector *# function = VectorSurfaceFunction2d.constant vector *# function
 
@@ -308,7 +308,7 @@ instance
   Multiplication'
     (SurfaceFunction units1)
     (Vector3d (space @ units2))
-    (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
+    (VectorSurfaceFunction3d (space @ (units1 *# units2)))
   where
   function *# vector = function *# VectorSurfaceFunction3d.constant vector
 
@@ -325,7 +325,7 @@ instance
   Multiplication'
     (Vector3d (space @ units1))
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
+    (VectorSurfaceFunction3d (space @ (units1 *# units2)))
   where
   vector *# function = VectorSurfaceFunction3d.constant vector *# function
 
@@ -355,7 +355,7 @@ instance
   Division'
     (SurfaceFunction units1)
     (Quantity units2)
-    (SurfaceFunction (units1 :/: units2))
+    (SurfaceFunction (units1 /# units2))
   where
   function /# value = Units.simplify (function *# (1.0 /# value))
 
@@ -453,7 +453,7 @@ quotient' ::
   Tolerance units2 =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
-  Result DivisionByZero (SurfaceFunction (units1 :/: units2))
+  Result DivisionByZero (SurfaceFunction (units1 /# units2))
 quotient' numerator denominator = do
   let lhopital p = do
         let numerator' = derivative p numerator
@@ -479,7 +479,7 @@ unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerat
 unsafeQuotient' ::
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
-  SurfaceFunction (units1 :/: units2)
+  SurfaceFunction (units1 /# units2)
 unsafeQuotient' lhs rhs =
   recursive
     @ CompiledFunction.map2 (/#) (/#) (/#) lhs.compiled rhs.compiled
@@ -489,7 +489,7 @@ unsafeQuotient' lhs rhs =
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared function = Units.specialize (squared' function)
 
-squared' :: SurfaceFunction units -> SurfaceFunction (units :*: units)
+squared' :: SurfaceFunction units -> SurfaceFunction (units *# units)
 squared' function =
   new
     @ CompiledFunction.map Expression.squared' Quantity.squared' Bounds.squared' function.compiled
@@ -501,7 +501,7 @@ sqrt ::
   SurfaceFunction units1
 sqrt function = sqrt' (Units.unspecialize function)
 
-sqrt' :: Tolerance units => SurfaceFunction (units :*: units) -> SurfaceFunction units
+sqrt' :: Tolerance units => SurfaceFunction (units *# units) -> SurfaceFunction units
 sqrt' function =
   if Tolerance.using Tolerance.squared' (function ~= Quantity.zero)
     then zero
@@ -533,7 +533,7 @@ sqrt' function =
 unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction units2 -> SurfaceFunction units1
 unsafeSqrt function = unsafeSqrt' (Units.unspecialize function)
 
-unsafeSqrt' :: SurfaceFunction (units :*: units) -> SurfaceFunction units
+unsafeSqrt' :: SurfaceFunction (units *# units) -> SurfaceFunction units
 unsafeSqrt' function =
   recursive
     @ CompiledFunction.map Expression.sqrt' Quantity.sqrt' Bounds.sqrt' function.compiled

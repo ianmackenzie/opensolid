@@ -71,7 +71,7 @@ import OpenSolid.Syntax
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance (Tolerance, (~=))
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters, Unitless, (:/:))
+import OpenSolid.Units (Meters, Unitless, type (/#))
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -272,7 +272,7 @@ drawCrossingCurve index curve = do
   let color = Color.hsl1 hue 0.5 0.5
   drawUvCurve [Drawing2d.strokeColor color] curve
 
-toDrawing :: Quantity (Meters :/: Unitless)
+toDrawing :: Quantity (Meters /# Unitless)
 toDrawing = Length.centimeters 10 /# number 1
 
 drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvCoordinates -> Drawing2d UvSpace

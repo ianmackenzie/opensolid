@@ -50,7 +50,7 @@ import OpenSolid.Units
   , Seconds
   , SquareMeters
   , Unitless
-  , (:*:)
-  , (:/:)
+  , type (*#)
+  , type (/#)
   )
 import Prelude qualified

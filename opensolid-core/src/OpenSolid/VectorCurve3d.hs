@@ -106,7 +106,7 @@ instance
   HasField
     "squaredMagnitude'"
     (VectorCurve3d (space @ units))
-    (Curve (units :*: units))
+    (Curve (units *# units))
   where
   getField = squaredMagnitude'
 
@@ -230,7 +230,7 @@ instance
   Multiplication'
     (Curve units1)
     (VectorCurve3d (space @ units2))
-    (VectorCurve3d (space @ (units1 :*: units2)))
+    (VectorCurve3d (space @ (units1 *# units2)))
   where
   lhs *# rhs =
     new
@@ -247,7 +247,7 @@ instance
   Multiplication'
     (Quantity units1)
     (VectorCurve3d (space @ units2))
-    (VectorCurve3d (space @ (units1 :*: units2)))
+    (VectorCurve3d (space @ (units1 *# units2)))
   where
   c1 *# c2 = Curve.constant c1 *# c2
 
@@ -261,7 +261,7 @@ instance
   Multiplication'
     (VectorCurve3d (space @ units1))
     (Curve units2)
-    (VectorCurve3d (space @ (units1 :*: units2)))
+    (VectorCurve3d (space @ (units1 *# units2)))
   where
   lhs *# rhs =
     new
@@ -278,7 +278,7 @@ instance
   Multiplication'
     (VectorCurve3d (space @ units1))
     (Quantity units2)
-    (VectorCurve3d (space @ (units1 :*: units2)))
+    (VectorCurve3d (space @ (units1 *# units2)))
   where
   curve *# value = curve *# Curve.constant value
 
@@ -292,7 +292,7 @@ instance
   Division'
     (VectorCurve3d (space @ units1))
     (Quantity units2)
-    (VectorCurve3d (space @ (units1 :/: units2)))
+    (VectorCurve3d (space @ (units1 /# units2)))
   where
   curve /# value = Units.simplify (curve *# (1.0 /# value))
 
@@ -310,7 +310,7 @@ instance
   DotMultiplication'
     (VectorCurve3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
-    (Curve (units1 :*: units2))
+    (Curve (units1 *# units2))
   where
   lhs `dot'` rhs =
     Curve.new
@@ -328,7 +328,7 @@ instance
   DotMultiplication'
     (VectorCurve3d (space1 @ units1))
     (Vector3d (space2 @ units2))
-    (Curve (units1 :*: units2))
+    (Curve (units1 *# units2))
   where
   curve `dot'` vector = curve `dot'` constant vector
 
@@ -343,7 +343,7 @@ instance
   DotMultiplication'
     (Vector3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
-    (Curve (units1 :*: units2))
+    (Curve (units1 *# units2))
   where
   vector `dot'` curve = constant vector `dot'` curve
 
@@ -373,7 +373,7 @@ instance
   CrossMultiplication'
     (VectorCurve3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
-    (VectorCurve3d (space1 @ (units1 :*: units2)))
+    (VectorCurve3d (space1 @ (units1 *# units2)))
   where
   lhs `cross'` rhs =
     new
@@ -394,7 +394,7 @@ instance
   CrossMultiplication'
     (VectorCurve3d (space1 @ units1))
     (Vector3d (space2 @ units2))
-    (VectorCurve3d (space1 @ (units1 :*: units2)))
+    (VectorCurve3d (space1 @ (units1 *# units2)))
   where
   curve `cross'` vector = curve `cross'` constant vector
 
@@ -412,7 +412,7 @@ instance
   CrossMultiplication'
     (Vector3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
-    (VectorCurve3d (space1 @ (units1 :*: units2)))
+    (VectorCurve3d (space1 @ (units1 *# units2)))
   where
   vector `cross'` curve = constant vector `cross'` curve
 
@@ -615,7 +615,7 @@ quotient' ::
   Tolerance units2 =>
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
-  Result DivisionByZero (VectorCurve3d (space @ (units1 :/: units2)))
+  Result DivisionByZero (VectorCurve3d (space @ (units1 /# units2)))
 quotient' numerator denominator =
   if denominator ~= Quantity.zero
     then Failure DivisionByZero
@@ -635,7 +635,7 @@ lhopital ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
   Number ->
-  (Vector3d (space @ (units1 :/: units2)), Vector3d (space @ (units1 :/: units2)))
+  (Vector3d (space @ (units1 /# units2)), Vector3d (space @ (units1 /# units2)))
 lhopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
   let numerator'' = evaluate numerator.derivative.derivative tValue
@@ -658,7 +658,7 @@ unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient' numerat
 unsafeQuotient' ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
-  VectorCurve3d (space @ (units1 :/: units2))
+  VectorCurve3d (space @ (units1 /# units2))
 unsafeQuotient' numerator denominator = do
   new
     @ numerator.compiled /# denominator.compiled
@@ -670,7 +670,7 @@ unsafeQuotient' numerator denominator = do
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
-squaredMagnitude' :: VectorCurve3d (space @ units) -> Curve (units :*: units)
+squaredMagnitude' :: VectorCurve3d (space @ units) -> Curve (units *# units)
 squaredMagnitude' curve = do
   let compiledSquaredMagnitude =
         CompiledFunction.map

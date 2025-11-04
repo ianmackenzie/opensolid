@@ -202,7 +202,7 @@ instance units1 ~ units2 => Subtraction (Quantity units1) (Bounds units2) (Bound
   Quantity## value## - Bounds## low## high## =
     Bounds## (value## -## high##) (value## -## low##)
 
-instance Multiplication' (Quantity units1) (Bounds units2) (Bounds (units1 :*: units2)) where
+instance Multiplication' (Quantity units1) (Bounds units2) (Bounds (units1 *# units2)) where
   Quantity## value## *# Bounds## low## high## =
     Bounds## (value## *## low##) (value## *## high##)
 
@@ -212,7 +212,7 @@ instance
   where
   Quantity## value## * Bounds## low## high## = Bounds## (value## *## low##) (value## *## high##)
 
-instance Multiplication' (Bounds units1) (Quantity units2) (Bounds (units1 :*: units2)) where
+instance Multiplication' (Bounds units1) (Quantity units2) (Bounds (units1 *# units2)) where
   Bounds## low## high## *# Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
 
 instance
@@ -221,7 +221,7 @@ instance
   where
   Bounds## low## high## * Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
 
-instance Multiplication' (Bounds units1) (Bounds units2) (Bounds (units1 :*: units2)) where
+instance Multiplication' (Bounds units1) (Bounds units2) (Bounds (units1 *# units2)) where
   Bounds## low1## high1## *# Bounds## low2## high2## = do
     let !(# low##, high## #) = boundsTimesBounds## low1## high1## low2## high2##
     Ordered## low## high##
@@ -234,7 +234,7 @@ instance
     let !(# low##, high## #) = boundsTimesBounds## low1## high1## low2## high2##
     Ordered## low## high##
 
-instance Division' (Quantity units1) (Bounds units2) (Bounds (units1 :/: units2)) where
+instance Division' (Quantity units1) (Bounds units2) (Bounds (units1 /# units2)) where
   Quantity## n## /# Bounds## dl## dh## = do
     let !(# low##, high## #) = doubleOverBounds## n## dl## dh##
     Ordered## low## high##
@@ -247,7 +247,7 @@ instance
     let !(# low##, high## #) = doubleOverBounds## n## dl## dh##
     Ordered## low## high##
 
-instance Division' (Bounds units1) (Quantity units2) (Bounds (units1 :/: units2)) where
+instance Division' (Bounds units1) (Quantity units2) (Bounds (units1 /# units2)) where
   Bounds## nl## nh## /# Quantity## d## = do
     let !(# low##, high## #) = boundsOverDouble## nl## nh## d##
     Ordered## low## high##
@@ -260,7 +260,7 @@ instance
     let !(# low##, high## #) = boundsOverDouble## nl## nh## d##
     Ordered## low## high##
 
-instance Division' (Bounds units1) (Bounds units2) (Bounds (units1 :/: units2)) where
+instance Division' (Bounds units1) (Bounds units2) (Bounds (units1 /# units2)) where
   Bounds## nl## nh## /# Bounds## dl## dh## = do
     let !(# low##, high## #) = boundsOverBounds## nl## nh## dl## dh##
     Ordered## low## high##
@@ -383,7 +383,7 @@ minAbs (Bounds low high)
 squared :: Units.Squared units1 units2 => Bounds units1 -> Bounds units2
 squared = Units.specialize . squared'
 
-squared' :: Bounds units -> Bounds (units :*: units)
+squared' :: Bounds units -> Bounds (units *# units)
 squared' (Bounds low high) = do
   let ll = low *# low
   let hh = high *# high
@@ -392,7 +392,7 @@ squared' (Bounds low high) = do
     | high <= Quantity.zero -> Bounds hh ll
     | otherwise -> Bounds Quantity.zero (Quantity.max ll hh)
 
-sqrt' :: Bounds (units :*: units) -> Bounds units
+sqrt' :: Bounds (units *# units) -> Bounds units
 sqrt' (Bounds low high) =
   Bounds
     (Quantity.sqrt' (Quantity.max low Quantity.zero))
@@ -638,8 +638,8 @@ random randomQuantity = do
 sampleValues :: Bounds units -> List (Quantity units)
 sampleValues bounds = List.map (interpolate bounds) Parameter.samples
 
-convert :: Quantity (units2 :/: units1) -> Bounds units1 -> Bounds units2
+convert :: Quantity (units2 /# units1) -> Bounds units1 -> Bounds units2
 convert factor bounds = Units.simplify (bounds *# factor)
 
-unconvert :: Quantity (units2 :/: units1) -> Bounds units2 -> Bounds units1
+unconvert :: Quantity (units2 /# units1) -> Bounds units2 -> Bounds units1
 unconvert factor bounds = Units.simplify (bounds /# factor)

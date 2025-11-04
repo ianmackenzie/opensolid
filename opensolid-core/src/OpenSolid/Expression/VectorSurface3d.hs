@@ -33,7 +33,7 @@ on = Expression.on
 
 squaredMagnitude' ::
   Expression UvPoint (Vector3d (space @ units)) ->
-  Expression UvPoint (Quantity (units :*: units))
+  Expression UvPoint (Quantity (units *# units))
 squaredMagnitude' = Expression.squaredMagnitude'
 
 squaredMagnitude ::

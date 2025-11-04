@@ -886,9 +886,9 @@ findIntersectionPoints ::
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units) ->
-  VectorSurfaceFunction2d (space @ (units :*: units)) ->
-  VectorSurfaceFunction2d (space @ (units :*: units)) ->
-  VectorSurfaceFunction2d (space @ (units :*: units)) ->
+  VectorSurfaceFunction2d (space @ (units *# units)) ->
+  VectorSurfaceFunction2d (space @ (units *# units)) ->
+  VectorSurfaceFunction2d (space @ (units *# units)) ->
   List UvPoint ->
   () ->
   Domain2d ->
@@ -1042,13 +1042,13 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 convert ::
-  Quantity (units2 :/: units1) ->
+  Quantity (units2 /# units1) ->
   Curve2d (space @ units1) ->
   Curve2d (space @ units2)
 convert factor curve = Units.coerce (scaleAbout Point2d.origin (Units.erase factor) curve)
 
 unconvert ::
-  Quantity (units2 :/: units1) ->
+  Quantity (units2 /# units1) ->
   Curve2d (space @ units2) ->
   Curve2d (space @ units1)
 unconvert factor curve = convert (Units.simplify (1.0 /# factor)) curve
@@ -1056,7 +1056,7 @@ unconvert factor curve = convert (Units.simplify (1.0 /# factor)) curve
 curvature' ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result IsPoint (Curve (Unitless :/: units))
+  Result IsPoint (Curve (Unitless /# units))
 curvature' curve = do
   let firstDerivative = curve.derivative
   let secondDerivative = firstDerivative.derivative

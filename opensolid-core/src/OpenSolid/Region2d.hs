@@ -543,7 +543,7 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 convert ::
-  Quantity (units2 :/: units1) ->
+  Quantity (units2 /# units1) ->
   Region2d (space @ units1) ->
   Region2d (space @ units2)
 convert factor (Region2d outer inners) = do
@@ -554,7 +554,7 @@ convert factor (Region2d outer inners) = do
   Region2d (transform outer) (List.map transform inners)
 
 unconvert ::
-  Quantity (units2 :/: units1) ->
+  Quantity (units2 /# units1) ->
   Region2d (space @ units2) ->
   Region2d (space @ units1)
 unconvert factor region = convert (Units.simplify (1.0 /# factor)) region
@@ -636,7 +636,7 @@ pickLargestLoop loops =
   Tolerance.using Tolerance.squared' do
     Estimate.pickLargestBy loopSignedArea' loops
 
-loopSignedArea' :: Loop (space @ units) -> Estimate (units :*: units)
+loopSignedArea' :: Loop (space @ units) -> Estimate (units *# units)
 loopSignedArea' loop = do
   let referencePoint = loop.first.startPoint
   let edgeIntegrals = NonEmpty.map (areaIntegral' referencePoint) loop
@@ -650,7 +650,7 @@ areaIntegral ::
 areaIntegral referencePoint curve =
   Units.specialize (areaIntegral' referencePoint curve)
 
-areaIntegral' :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate (units :*: units)
+areaIntegral' :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate (units *# units)
 areaIntegral' referencePoint curve = do
   let displacement = curve - referencePoint
   let y = displacement.yComponent

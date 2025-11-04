@@ -20,7 +20,7 @@ import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
-import OpenSolid.Units ((:*:))
+import OpenSolid.Units (type (*#))
 import OpenSolid.Units qualified as Units
 
 type Tolerance units = ?tolerance :: Quantity units
@@ -96,7 +96,7 @@ using tolerance expression = let ?tolerance = tolerance in expression
 squared :: (Tolerance units, Units.Squared units squaredUnits) => Quantity squaredUnits
 squared = Quantity.squared ?tolerance
 
-squared' :: Tolerance units => Quantity (units :*: units)
+squared' :: Tolerance units => Quantity (units *# units)
 squared' = Quantity.squared' ?tolerance
 
 forEndpointDerivative :: Tolerance units => Int -> Quantity units
