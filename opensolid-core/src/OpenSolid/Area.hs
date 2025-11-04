@@ -1,5 +1,6 @@
 module OpenSolid.Area
   ( Area
+  , sqrt
   , zero
   , squareMeters
   , inSquareMeters
@@ -10,6 +11,7 @@ module OpenSolid.Area
   )
 where
 
+import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -19,6 +21,9 @@ import OpenSolid.Quantity qualified as Quantity
 Represented internally as a value in square meters.
 -}
 type Area = Quantity SquareMeters
+
+sqrt :: Area -> Length
+sqrt = Quantity.sqrt
 
 -- | The zero value.
 zero :: Area
