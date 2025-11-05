@@ -1,10 +1,3 @@
--- Needed for Colour HasField instances
--- (should hopefully be safe having those instances here,
--- since pretty much *any* modules that use OpenSolid
--- will indirectly import this module, even if e.g.
--- they don't import OpenSolid.Color)
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.Prelude
   ( module OpenSolid.Arithmetic
   , module OpenSolid.Bootstrap
