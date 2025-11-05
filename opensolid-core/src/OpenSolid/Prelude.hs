@@ -12,7 +12,6 @@ module OpenSolid.Prelude
   , module OpenSolid.Sign
   , module OpenSolid.Tolerance
   , module OpenSolid.Units
-  , module Prelude
   )
 where
 
@@ -46,4 +45,3 @@ import OpenSolid.Units
   , type (*#)
   , type (/#)
   )
-import Prelude qualified
