@@ -164,7 +164,7 @@ testListOperations = do
   log "Successive deltas" deltas
   log "Successive intervals" intervals
 
-getCrossProduct :: Tolerance Meters => Result Text (Quantity Unitless)
+getCrossProduct :: Tolerance Meters => Result Text Number
 getCrossProduct = Result.addContext "In getCrossProduct" do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2 3)
@@ -306,7 +306,7 @@ testConcurrency = do
     ]
   IO.printLine "Concurrency test complete!"
 
-computeSquareRoot :: Quantity Unitless -> IO (Quantity Unitless)
+computeSquareRoot :: Number -> IO Number
 computeSquareRoot value = do
   IO.sleep (Duration.milliseconds 100)
   return (sqrt value)
