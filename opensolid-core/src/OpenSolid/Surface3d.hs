@@ -134,7 +134,7 @@ revolved sketchPlane curve axis angle = do
   let frame2d = Frame2d.fromYAxis axis
   let localCurve = Curve2d.relativeTo frame2d curve
   let xCoordinate = localCurve.xCoordinate
-  if xCoordinate ~= Quantity.zero
+  if xCoordinate ~= Curve.zero
     then Failure Revolved.ProfileIsOnAxis
     else case Curve.sign xCoordinate of
       Failure Curve.CrossesZero -> Failure Revolved.ProfileCrossesAxis

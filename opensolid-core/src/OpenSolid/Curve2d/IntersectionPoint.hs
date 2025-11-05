@@ -15,7 +15,7 @@ data IntersectionPoint
   | Corner Number Number
   deriving (Eq, Ord, Show)
 
-instance ApproximateEquality IntersectionPoint IntersectionPoint Unitless where
+instance ApproximateEquality IntersectionPoint Unitless where
   Crossing u1 v1 sign1 ~= Crossing u2 v2 sign2 = u1 ~= u2 && v1 ~= v2 && sign1 == sign2
   Crossing{} ~= _ = False
   Tangent u1 v1 sign1 ~= Tangent u2 v2 sign2 = u1 ~= u2 && v1 ~= v2 && sign1 == sign2

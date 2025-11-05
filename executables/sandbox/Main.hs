@@ -53,7 +53,6 @@ import OpenSolid.Prelude
   , (.-)
   , (.-.)
   , (./.)
-  , (//)
   , (|>)
   , type (@)
   )
@@ -89,7 +88,7 @@ log label value = IO.printLine (label <> ": " <> Text.show value)
 testScalarArithmetic :: IO ()
 testScalarArithmetic = do
   log "Integer product" ((3 :: Int) .*. (4 :: Int))
-  log "Integer division" ((10 :: Int) // (4 :: Int))
+  log "Integer division" ((10 :: Int) `div` (4 :: Int))
   log "True division" ((10 :: Int) ./. (10 :: Int))
   let area = Area.squareMeters 3
   let length = Length.centimeters 3

@@ -76,7 +76,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude hiding (max, min)
-import OpenSolid.Quantity (Quantity (Quantity##))
+import OpenSolid.Quantity (Quantity (Quantity, Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Unboxed.Math
@@ -151,12 +151,6 @@ instance HasUnits (Bounds units) units
 
 instance Units.Coercion (Bounds unitsA) (Bounds unitsB) where
   coerce = Data.Coerce.coerce
-
-instance units1 ~ units2 => ApproximateEquality (Bounds units1) (Quantity units2) units1 where
-  Bounds low high ~= value = low >= value - ?tolerance && high <= value + ?tolerance
-
-instance units1 ~ units2 => ApproximateEquality (Quantity units1) (Bounds units2) units1 where
-  value ~= bounds = bounds ~= value
 
 instance units1 ~ units2 => Intersects (Quantity units1) (Bounds units2) units1 where
   value ^ bounds = exclusion value bounds <= ?tolerance
@@ -295,7 +289,7 @@ zeroTo value = Bounds Quantity.zero value
 The lower bound of the range will be -w/2 and the upper bound will be w/2.
 -}
 symmetric :: "width" ::: Quantity units -> Bounds units
-symmetric (Named width_) = let r = 0.5 * width_ in Bounds -r r
+symmetric (Named width_) = let r = 0.5 *. width_ in Bounds -r r
 
 infinite :: Bounds units
 infinite = Bounds -Quantity.infinity Quantity.infinity
@@ -477,10 +471,10 @@ bisect (Bounds low high) = do
             let value = Quantity.midpoint low high
             assert (low < value && value < high) value
         | low < Quantity.zero && high > Quantity.zero = Quantity.zero
-        | low == Quantity.zero = Quantity.coerce 1.0
-        | high == Quantity.zero = Quantity.coerce -1.0
-        | low > Quantity.zero = 2.0 * low
-        | high < Quantity.zero = 2.0 * high
+        | low == Quantity.zero = Quantity 1.0
+        | high == Quantity.zero = Quantity -1.0
+        | low > Quantity.zero = 2.0 *. low
+        | high < Quantity.zero = 2.0 *. high
         | otherwise = internalError "'Impossible' case hit in Bounds.bisect"
   (Bounds low mid, Bounds mid high)
 

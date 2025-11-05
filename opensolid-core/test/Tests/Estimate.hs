@@ -107,7 +107,7 @@ largest = Test.check 100 "largest" Test.do
 resolvesTo :: Tolerance units => Quantity units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
   | not (value ^ Estimate.bounds estimate) = Success False
-  | Estimate.bounds estimate ~= value = Success True
+  | Bounds.width (Estimate.bounds estimate) ~= Quantity.zero = Success True
   | otherwise = do
       let refinedEstimate = Estimate.refine estimate
       if Bounds.width (Estimate.bounds refinedEstimate) < Bounds.width (Estimate.bounds estimate)
@@ -124,7 +124,7 @@ area = Test.verify "area" Test.do
           @ #endAngle Angle.zero
   let dAdt = Curve2d.yCoordinate curve * curve.derivative.xComponent
   let areaEstimate = Curve.integrate dAdt
-  let expectedArea = Area.squareMeters (Number.pi / 2.0)
+  let expectedArea = Area.squareMeters (Number.pi ./ 2.0)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect
 

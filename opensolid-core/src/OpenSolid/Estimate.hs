@@ -121,8 +121,8 @@ instance Interface (Add units) units where
     let width1 = Bounds.width (bounds first)
     let width2 = Bounds.width (bounds second)
     if
-      | width1 >= 2.0 * width2 -> refine first + second
-      | width2 >= 2.0 * width1 -> first + refine second
+      | width1 >= 2.0 *. width2 -> refine first + second
+      | width2 >= 2.0 *. width1 -> first + refine second
       | otherwise -> refine first + refine second
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
@@ -142,8 +142,8 @@ instance Interface (Subtract units) units where
     let width1 = Bounds.width (bounds first)
     let width2 = Bounds.width (bounds second)
     if
-      | width1 >= 2.0 * width2 -> refine first - second
-      | width2 >= 2.0 * width1 -> first - refine second
+      | width1 >= 2.0 *. width2 -> refine first - second
+      | width2 >= 2.0 *. width1 -> first - refine second
       | otherwise -> refine first - refine second
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
@@ -230,7 +230,7 @@ instance Interface (Sum units) units where
   boundsImpl (Sum estimates) = NonEmpty.sum (NonEmpty.map bounds estimates)
   refineImpl (Sum estimates) = do
     let maxWidth = NonEmpty.maximumOf boundsWidth estimates
-    let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates
+    let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 *. maxWidth)) estimates
     new (Sum refinedEstimates)
 
 newtype Abs units = Abs (Estimate units)
@@ -330,7 +330,7 @@ instance Interface (Smallest units) units where
       [singleEstimate] -> refine singleEstimate
       NonEmpty filteredEstimates -> do
         let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
-        let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
+        let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 *. maxWidth)) filteredEstimates
         smallest refinedEstimates
       [] -> internalErrorFilteredListIsEmpty
 
@@ -347,7 +347,7 @@ instance Interface (Largest units) units where
       [singleEstimate] -> refine singleEstimate
       NonEmpty filteredEstimates -> do
         let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
-        let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
+        let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 *. maxWidth)) filteredEstimates
         largest refinedEstimates
       [] -> internalErrorFilteredListIsEmpty
 
@@ -372,7 +372,7 @@ itemBoundsWidth (_, estimate) = Bounds.width (bounds estimate)
 
 refinePairs :: NonEmpty (a, Estimate units) -> NonEmpty (a, Estimate units)
 refinePairs pairs = do
-  let widthCutoff = 0.5 * NonEmpty.maximumOf itemBoundsWidth pairs
+  let widthCutoff = 0.5 *. NonEmpty.maximumOf itemBoundsWidth pairs
   NonEmpty.map (Pair.mapSecond (refineWiderThan widthCutoff)) pairs
 
 prependItems :: List (a, Estimate units) -> List a -> List a

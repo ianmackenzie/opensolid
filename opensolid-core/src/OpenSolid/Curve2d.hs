@@ -206,17 +206,8 @@ instance
   where
   point ^ curve = curve ^ point
 
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)) units1
-  where
+instance ApproximateEquality (Curve2d (space @ units)) units where
   curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
-  where
-  curve ~= point = List.allSatisfy (~= point) (samplePoints curve)
 
 data IsPoint = IsPoint deriving (Eq, Show, Error.Message)
 
@@ -365,8 +356,8 @@ arc givenStartPoint givenEndPoint sweptAngle =
   case Vector2d.magnitudeAndDirection (givenEndPoint - givenStartPoint) of
     Failure Vector2d.IsZero -> line givenStartPoint givenEndPoint
     Success (distanceBetweenPoints, directionBetweenPoints) -> do
-      let halfDistance = 0.5 * distanceBetweenPoints
-      let tanHalfAngle = Angle.tan (0.5 * sweptAngle)
+      let halfDistance = 0.5 *. distanceBetweenPoints
+      let tanHalfAngle = Angle.tan (0.5 *. sweptAngle)
       let linearDeviation = halfDistance * tanHalfAngle
       if linearDeviation ~= Quantity.zero
         then line givenStartPoint givenEndPoint
@@ -415,10 +406,10 @@ cornerArc ::
 cornerArc cornerPoint (Named incomingDirection) (Named outgoingDirection) (Named givenRadius) = do
   let radius = Quantity.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
-  if radius * Number.squared (Angle.inRadians sweptAngle) / 4.0 ~= Quantity.zero
+  if 0.25 *. radius * Number.squared (Angle.inRadians sweptAngle) ~= Quantity.zero
     then line cornerPoint cornerPoint
     else do
-      let offset = radius * Quantity.abs (Angle.tan (0.5 * sweptAngle))
+      let offset = radius * Quantity.abs (Angle.tan (0.5 *. sweptAngle))
       let computedStartPoint = cornerPoint - offset * incomingDirection
       let computedEndPoint = cornerPoint + offset * outgoingDirection
       arc computedStartPoint computedEndPoint sweptAngle
@@ -439,7 +430,7 @@ radiusArc ::
 radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
   case Direction2d.from givenStartPoint givenEndPoint of
     Success chordDirection -> do
-      let halfDistance = 0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint
+      let halfDistance = 0.5 *. Point2d.distanceFrom givenStartPoint givenEndPoint
       let radius = Quantity.max (Quantity.abs givenRadius) halfDistance
       let offsetMagnitude =
             Quantity.sqrt# (Quantity.squared# radius - Quantity.squared# halfDistance)
@@ -452,7 +443,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
               LargeCounterclockwise -> -offsetMagnitude
       let offset = offsetDirection * offsetDistance
       let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
-      let shortAngle = 2.0 * Angle.asin (halfDistance / givenRadius)
+      let shortAngle = 2.0 *. Angle.asin (halfDistance / givenRadius)
       let sweptAngle =
             case whichArc of
               SmallCounterclockwise -> shortAngle
@@ -495,7 +486,7 @@ circle ::
 circle (Named centerPoint) (Named diameter) =
   polarArc
     @ #centerPoint centerPoint
-    @ #radius (0.5 * diameter)
+    @ #radius (0.5 *. diameter)
     @ #startAngle Angle.zero
     @ #endAngle Angle.twoPi
 
@@ -648,7 +639,7 @@ samplePoints curve = List.map (evaluate curve) Parameter.samples
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse curve = curve . (1.0 - Curve.t)
+reverse curve = curve . (1.0 -. Curve.t)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds curve = evaluateBounds curve Bounds.unitInterval
@@ -782,7 +773,7 @@ signature orientation curve tValue radius = do
             let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivativeCurve tValue
             let Vector2d x'''' y'''' = local fourthDerivativeValue
             (y'''' #*# x'' - y'' #*# x'''') #/# (x'' #*# x'' #*# x'')
-  let secondOrder = Units.simplify (0.5 * d2ydx2 #*# Quantity.squared# radius)
+  let secondOrder = Units.simplify (0.5 *. d2ydx2 #*# Quantity.squared# radius)
   (firstOrder, secondOrder)
 
 candidateOverlappingSegment :: UvPoint -> UvPoint -> OverlappingSegment
@@ -935,7 +926,7 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
                   Nothing -> do
                     let gBounds = VectorSurfaceFunction2d.evaluateBounds g uvBounds
                     let convergenceTolerance =
-                          1e-9 * Bounds.upper (VectorBounds2d.magnitude gBounds)
+                          1e-9 *. Bounds.upper (VectorBounds2d.magnitude gBounds)
                     let solution =
                           Tolerance.using convergenceTolerance $
                             Solve2d.unique
@@ -1112,7 +1103,7 @@ medialAxis curve1 curve2 = do
   let v2 = curve2.derivative . SurfaceFunction.v
   let d = p2 - p1
   let target =
-        v2 `cross#` (2.0 * (v1 `dot#` d) #*# d - VectorSurfaceFunction2d.squaredMagnitude# d #*# v1)
+        v2 `cross#` (2.0 *. (v1 `dot#` d) #*# d - VectorSurfaceFunction2d.squaredMagnitude# d #*# v1)
   let targetTolerance = ?tolerance #*# ((?tolerance #*# ?tolerance) #*# ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
@@ -1125,7 +1116,7 @@ medialAxis curve1 curve2 = do
               Units.coerce $
                 SurfaceFunction.unsafeQuotient#
                   @ d `dot#` d
-                  @ 2.0 * (tangentVector1 . SurfaceFunction.u) `cross` d
+                  @ 2.0 *. (tangentVector1 . SurfaceFunction.u) `cross` d
         let curve :: SurfaceFunction2d (space @ units) =
               (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
         let toSegment solutionCurve =
@@ -1176,7 +1167,7 @@ buildPiecewiseTree segmentArray begin end = case end - begin of
     let (segment, length) = Array.get begin segmentArray
     (PiecewiseLeaf segment length, length)
   n -> assert (n >= 2) do
-    let mid = begin + n // 2
+    let mid = begin + n `div` 2
     let (leftTree, leftLength) = buildPiecewiseTree segmentArray begin mid
     let (rightTree, rightLength) = buildPiecewiseTree segmentArray mid end
     (PiecewiseNode leftTree leftLength rightTree, leftLength + rightLength)

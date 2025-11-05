@@ -752,7 +752,7 @@ curve =
     , Class.member0 "Cos" (Curve.cos . (Angle.radian *)) $(docs 'Curve.cos)
     , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , Class.memberU0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , Class.memberU0 "Is Zero" (~= 0.0) "Check if a curve is zero everywhere, within the current tolerance."
+    , Class.memberU0 "Is Zero" (~= Curve.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
     , Class.numberPlus
     , Class.numberMinus
@@ -792,7 +792,7 @@ angleCurve =
     , Class.member0 "Cos" Curve.cos $(docs 'Curve.cos)
     , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , Class.memberR0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , Class.memberR0 "Is Zero" (~= Angle.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , Class.memberR0 "Is Zero" (~= Curve.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -819,7 +819,7 @@ lengthCurve =
     , Class.member0 "Squared" Curve.squared $(docs 'Curve.squared)
     , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , Class.memberM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , Class.memberM0 "Is Zero" (~= Length.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , Class.memberM0 "Is Zero" (~= Curve.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -848,7 +848,7 @@ areaCurve =
     , Class.memberM0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
     , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , Class.memberS0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , Class.memberS0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , Class.memberS0 "Is Zero" (~= Curve.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf

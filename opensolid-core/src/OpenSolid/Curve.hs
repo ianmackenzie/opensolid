@@ -122,18 +122,9 @@ instance HasUnits (Curve units) units
 instance Units.Coercion (Curve units1) (Curve units2) where
   coerce curve = Curve (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
-instance
-  units1 ~ units2 =>
-  ApproximateEquality (Curve units1) (Curve units2) units1
-  where
+instance ApproximateEquality (Curve units) units where
   curve1 ~= curve2 =
     List.allTrue [evaluate curve1 tValue ~= evaluate curve2 tValue | tValue <- Parameter.samples]
-
-instance
-  units1 ~ units2 =>
-  ApproximateEquality (Curve units1) (Quantity units2) units1
-  where
-  curve ~= value = List.allTrue [evaluate curve tValue ~= value | tValue <- Parameter.samples]
 
 instance
   units1 ~ units2 =>
@@ -316,7 +307,7 @@ instance Composition (Curve Unitless) (Curve units) (Curve units) where
   f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 reverse :: Curve units -> Curve units
-reverse curve = curve . (1.0 - t)
+reverse curve = curve . (1.0 -. t)
 
 bezier :: NonEmpty (Quantity units) -> Curve units
 bezier controlPoints =
@@ -444,7 +435,7 @@ quotient# ::
   Curve units2 ->
   Result DivisionByZero (Curve (units1 #/# units2))
 quotient# numerator denominator =
-  if denominator ~= Quantity.zero
+  if denominator ~= zero
     then Failure DivisionByZero
     else Success do
       let singularity0 =
@@ -472,7 +463,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' #*# denominator' - numerator' #*# denominator'')
-            #/# (2.0 * Quantity.squared# denominator')
+            #/# (2.0 *. Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -508,7 +499,7 @@ squared# :: Curve units -> Curve (units #*# units)
 squared# curve =
   new
     (CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# curve.compiled)
-    (2.0 * curve #*# curve.derivative)
+    (2.0 *. curve #*# curve.derivative)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve units1
@@ -516,7 +507,7 @@ sqrt curve = sqrt# (Units.unspecialize curve)
 
 sqrt# :: Tolerance units => Curve (units #*# units) -> Curve units
 sqrt# curve
-  | Tolerance.using Tolerance.squared# (curve ~= Quantity.zero) = zero
+  | Tolerance.using Tolerance.squared# (curve ~= zero) = zero
   | otherwise = do
       let firstDerivative = curve.derivative
       let secondDerivative = firstDerivative.derivative
@@ -526,18 +517,18 @@ sqrt# curve
                     evaluate curve tValue ~= Quantity.zero
             let secondDerivativeValue = evaluate secondDerivative tValue
             let firstDerivativeTolerance =
-                  ?tolerance #*# Quantity.sqrt# (2.0 * secondDerivativeValue)
+                  ?tolerance #*# Quantity.sqrt# (2.0 *. secondDerivativeValue)
             let firstDerivativeIsZero =
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative tValue ~= Quantity.zero
             curveIsZero && firstDerivativeIsZero
       let singularity0 =
             if isSingularity 0.0
-              then Just (Quantity.zero, Quantity.sqrt# (evaluate secondDerivative 0.0 / 2.0))
+              then Just (Quantity.zero, Quantity.sqrt# (0.5 *. evaluate secondDerivative 0.0))
               else Nothing
       let singularity1 =
             if isSingularity 1.0
-              then Just (Quantity.zero, -(Quantity.sqrt# (evaluate secondDerivative 1.0 / 2.0)))
+              then Just (Quantity.zero, -(Quantity.sqrt# (0.5 *. evaluate secondDerivative 1.0)))
               else Nothing
       desingularize singularity0 (unsafeSqrt# curve) singularity1
 
@@ -548,14 +539,14 @@ unsafeSqrt# :: Curve (units #*# units) -> Curve units
 unsafeSqrt# curve =
   recursive
     @ CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# curve.compiled
-    @ \self -> Units.coerce (unsafeQuotient# curve.derivative (2.0 * self))
+    @ \self -> Units.coerce (unsafeQuotient# curve.derivative (2.0 *. self))
 
 -- | Compute the cube of a curve.
 cubed :: Curve Unitless -> Curve Unitless
 cubed curve =
   new
     (CompiledFunction.map Expression.cubed Number.cubed Bounds.cubed curve.compiled)
-    (3.0 * squared curve * curve.derivative)
+    (3.0 *. squared curve * curve.derivative)
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless
@@ -584,7 +575,7 @@ instance Estimate.Interface (Integral units) units where
     let y1 = evaluate curve (Bounds.lower domain)
     let y2 = evaluate curve (Bounds.upper domain)
     let m = Bounds.width derivativeBounds
-    let error1 = 0.125 * m * dx * dx
+    let error1 = 0.125 *. m * dx * dx
     let estimate1 = dx * Quantity.midpoint y1 y2 + Bounds -error1 error1
     case Bounds.intersection estimate0 estimate1 of
       Just intersection -> intersection
@@ -638,7 +629,7 @@ so we would end up reporting a single order-1 zero at x=0
 -}
 zeros :: Tolerance units => Curve units -> Result IsZero (List Zero)
 zeros curve
-  | curve ~= Quantity.zero = Failure IsZero
+  | curve ~= zero = Failure IsZero
   | otherwise = do
       let derivatives = Stream.iterate (.derivative) curve
       let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
@@ -758,7 +749,7 @@ sign curve = case zeros curve of
             -- All inner zeros are non-crossing (e.g. quadratic) ones,
             -- so we can safely test the curve
             -- halfway between t=0 and the first inner zero
-            let testPoint = 0.5 * innerZeros.first.location
+            let testPoint = 0.5 *. innerZeros.first.location
             Success (Quantity.sign (evaluate curve testPoint))
 
 isInnerZero :: Zero -> Bool

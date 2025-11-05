@@ -57,7 +57,7 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   let line2 = Curve2d.line p1 p3
   let arc = Curve2d.arc p2 p3 Angle.quarterTurn
   region <- Region2d.boundedBy [line1, line2, arc]
-  let expectedArea = 0.25 * Number.pi * radius * radius
+  let expectedArea = 0.25 *. Number.pi * radius * radius
   Test.expect (areaIsApproximately expectedArea region)
 
 squareWithHole :: Tolerance Meters => Test
@@ -71,9 +71,9 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let line2 = Curve2d.line p2 p3
   let line3 = Curve2d.line p4 p3
   let line4 = Curve2d.line p4 p1
-  let centerPoint = Point2d (0.5 * width) (0.5 * width)
-  let holeDiameter = 0.5 * width
-  let holeRadius = 0.5 * holeDiameter
+  let centerPoint = Point2d (0.5 *. width) (0.5 *. width)
+  let holeDiameter = 0.5 *. width
+  let holeRadius = 0.5 *. holeDiameter
   let hole = Curve2d.circle (#centerPoint centerPoint) (#diameter holeDiameter)
   region <- Region2d.boundedBy [line1, line3, line2, line4, hole]
   let expectedArea = width * width - Number.pi * holeRadius * holeRadius

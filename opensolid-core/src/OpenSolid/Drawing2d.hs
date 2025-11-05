@@ -200,7 +200,7 @@ circleWith attributes (Named centerPoint) (Named diameter) = do
   let Point2d cx cy = centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
-  let rAttribute = Attribute "r" (lengthText (0.5 * diameter))
+  let rAttribute = Attribute "r" (lengthText (0.5 *. diameter))
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 -- | Create a circle with the given center point and diameter.
@@ -245,7 +245,7 @@ arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWid
       let frame = Frame2d.fromXAxis axis
       let stemLength = length - headLength
       let stemEndPoint = Point2d.along axis stemLength
-      let leftPoint = Point2d.placeIn frame (Point2d stemLength (0.5 * headWidth))
+      let leftPoint = Point2d.placeIn frame (Point2d stemLength (0.5 *. headWidth))
       let rightPoint = Point2d.mirrorAcross axis leftPoint
       let stem = line start stemEndPoint
       let tip = polygon [leftPoint, rightPoint, end]

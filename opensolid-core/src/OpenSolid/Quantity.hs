@@ -1,5 +1,7 @@
 module OpenSolid.Quantity
   ( Quantity (Quantity, Quantity##)
+  , (//)
+  , (%)
   , zero
   , unit
   , infinity
@@ -54,7 +56,7 @@ import OpenSolid.Composition
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
-import {-# SOURCE #-} OpenSolid.Number (Number, fromRational)
+import {-# SOURCE #-} OpenSolid.Number (Number)
 import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Unboxed.Math
@@ -159,22 +161,28 @@ instance
   {-# INLINEABLE (/) #-}
   Quantity x / Quantity y = Quantity (x Prelude./ y)
 
-instance DivMod (Quantity units) where
-  {-# INLINE (//) #-}
-  x // y = Prelude.floor (x / y)
-  {-# INLINE (%) #-}
-  x % y = x - y .* fromIntegral (x // y)
+{-# INLINE (//) #-}
+(//) :: Quantity units -> Quantity units -> Int
+x // y = Prelude.floor (x / y)
+
+infixl 7 //
+
+{-# INLINE (%) #-}
+(%) :: Quantity units -> Quantity units -> Quantity units
+x % y = x - y .* fromIntegral (x // y)
+
+infixl 7 %
 
 {-# INLINE zero #-}
 zero :: Quantity units
-zero = Data.Coerce.coerce 0.0
+zero = Quantity 0.0
 
 {-# INLINE unit #-}
 unit :: Quantity units
-unit = Data.Coerce.coerce 1.0
+unit = Quantity 1.0
 
 infinity :: Quantity units
-infinity = Data.Coerce.coerce (1.0 / 0.0)
+infinity = unit / (zero :: Number)
 
 {-# INLINE coerce #-}
 coerce :: Quantity units1 -> Quantity units2
@@ -281,7 +289,7 @@ interpolateFrom a b t = a + (b - a) * t
 
 {-# INLINE midpoint #-}
 midpoint :: Quantity units -> Quantity units -> Quantity units
-midpoint a b = 0.5 * (a + b)
+midpoint a b = 0.5 *. (a + b)
 
 sum :: List (Quantity units) -> Quantity units
 sum = List.foldl (+) zero

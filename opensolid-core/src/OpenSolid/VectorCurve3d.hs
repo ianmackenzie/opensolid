@@ -118,23 +118,8 @@ instance
   where
   coerce curve = VectorCurve3d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality
-    (VectorCurve3d (space1 @ units1))
-    (VectorCurve3d (space2 @ units2))
-    units1
-  where
+instance ApproximateEquality (VectorCurve3d (space @ units)) units where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality
-    (VectorCurve3d (space1 @ units1))
-    (Vector3d (space2 @ units2))
-    units1
-  where
-  curve ~= vector = List.allTrue [evaluate curve t ~= vector | t <- Parameter.samples]
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -294,7 +279,7 @@ instance
     (Quantity units2)
     (VectorCurve3d (space @ (units1 #/# units2)))
   where
-  curve #/# value = Units.simplify (curve #*# (1.0 #/# value))
+  curve #/# value = Units.simplify (curve #*# (1.0 /# value))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -602,7 +587,7 @@ evaluateBounds :: VectorCurve3d (space @ units) -> Bounds Unitless -> VectorBoun
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 reverse :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
-reverse curve = curve . (1.0 - Curve.t)
+reverse curve = curve . (1.0 -. Curve.t)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
@@ -617,7 +602,7 @@ quotient# ::
   Curve units2 ->
   Result DivisionByZero (VectorCurve3d (space @ (units1 #/# units2)))
 quotient# numerator denominator =
-  if denominator ~= Quantity.zero
+  if denominator ~= Curve.zero
     then Failure DivisionByZero
     else Success do
       let singularity0 =
@@ -645,7 +630,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' #*# denominator' - numerator' #*# denominator'')
-            #/# (2.0 * Quantity.squared# denominator')
+            #/# (2.0 *. Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -678,7 +663,7 @@ squaredMagnitude# curve = do
           Vector3d.squaredMagnitude#
           VectorBounds3d.squaredMagnitude#
           curve.compiled
-  let squaredMagnitudeDerivative = 2.0 * curve `dot#` curve.derivative
+  let squaredMagnitudeDerivative = 2.0 *. curve `dot#` curve.derivative
   Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)

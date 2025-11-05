@@ -54,7 +54,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d, Unit3d)
@@ -92,18 +92,18 @@ on ::
 on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vX vY) = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
-  let vR = vX * iR + vY * jR
-  let vF = vX * iF + vY * jF
-  let vU = vX * iU + vY * jU
+  let vR = vX .*. iR .+. vY .*. jR
+  let vF = vX .*. iF .+. vY .*. jF
+  let vU = vX .*. iU .+. vY .*. jU
   Vector3d vR vF vU
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
 xyz :: Convention3d -> (Quantity units, Quantity units, Quantity units) -> Vector3d (space @ units)
 xyz Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (vx, vy, vz) =
   Vector3d
-    (vx * xr + vy * yr + vz * zr)
-    (vx * xf + vy * yf + vz * zf)
-    (vx * xu + vy * yu + vz * zu)
+    (vx .*. xr .+. vy .*. yr .+. vz .*. zr)
+    (vx .*. xf .+. vy .*. yf .+. vz .*. zf)
+    (vx .*. xu .+. vy .*. yu .+. vz .*. zu)
 
 {-| Construct a vector from its XYZ components, using a Z-up convention.
 
@@ -123,7 +123,7 @@ componentIn :: Direction3d space -> Vector3d (space @ units) -> Quantity units
 componentIn = dot
 
 projectionIn :: Direction3d space -> Vector3d (space @ units) -> Vector3d (space @ units)
-projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
+projectionIn givenDirection vector = givenDirection .*. componentIn givenDirection vector
 
 forwardComponent :: Vector3d (space @ units) -> Quantity units
 forwardComponent (Vector3d _ f _) = f
@@ -149,9 +149,9 @@ components ::
   Vector3d (space @ units) ->
   (Quantity units, Quantity units, Quantity units)
 components Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu} (Vector3d vr vf vu) =
-  ( vr * xr + vf * xf + vu * xu
-  , vr * yr + vf * yf + vu * yu
-  , vr * zr + vf * zf + vu * zu
+  ( vr .*. xr .+. vf .*. xf .+. vu .*. xu
+  , vr .*. yr .+. vf .*. yf .+. vu .*. yu
+  , vr .*. zr .+. vf .*. zf .+. vu .*. zu
   )
 
 {-| Get the XYZ components of a vector using a Z-up coordinate convention.
@@ -185,13 +185,13 @@ interpolateFrom ::
   Vector3d (space @ units)
 interpolateFrom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) t =
   Vector3d
-    (x1 + t * (x2 - x1))
-    (y1 + t * (y2 - y1))
-    (z1 + t * (z2 - z1))
+    (x1 .+. t .*. (x2 .-. x1))
+    (y1 .+. t .*. (y2 .-. y1))
+    (z1 .+. t .*. (z2 .-. z1))
 
 midpoint :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units)
 midpoint (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
-  Vector3d (0.5 * (x1 + x2)) (0.5 * (y1 + y2)) (0.5 * (z1 + z2))
+  Vector3d (0.5 *. (x1 .+. x2)) (0.5 *. (y1 .+. y2)) (0.5 *. (z1 .+. z2))
 
 magnitude :: Vector3d (space @ units) -> Quantity units
 magnitude (Vector3d vx vy vz) = Quantity.hypot3 vx vy vz
@@ -200,7 +200,7 @@ squaredMagnitude :: Units.Squared units1 units2 => Vector3d (space @ units1) -> 
 squaredMagnitude = Units.specialize . squaredMagnitude#
 
 squaredMagnitude# :: Vector3d (space @ units) -> Quantity (units #*# units)
-squaredMagnitude# (Vector3d vx vy vz) = vx #*# vx + vy #*# vy + vz #*# vz
+squaredMagnitude# (Vector3d vx vy vz) = vx #*# vx .+. vy #*# vy .+. vz #*# vz
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
@@ -212,7 +212,7 @@ The current tolerance will be used to check if the vector is zero
 direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
   let vm = magnitude vector
-  if vm ~= Quantity.zero then Failure IsZero else Success (Unit3d (vector / vm))
+  if vm ~= Quantity.zero then Failure IsZero else Success (Unit3d (vector ./. vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
@@ -220,19 +220,19 @@ magnitudeAndDirection ::
   Result IsZero (Quantity units, Direction3d space)
 magnitudeAndDirection vector = do
   let vm = magnitude vector
-  if vm ~= Quantity.zero then Failure IsZero else Success (vm, Unit3d (vector / vm))
+  if vm ~= Quantity.zero then Failure IsZero else Success (vm, Unit3d (vector ./. vm))
 
 normalize :: Vector3d (space @ units) -> Vector3d (space @ Unitless)
 normalize vector = do
   let vm = magnitude vector
-  if vm == Quantity.zero then zero else vector / vm
+  if vm == Quantity.zero then zero else vector ./. vm
 
 -- | Convert a vectr defined in local coordinates to one defined in global coordinates.
 placeIn ::
   Frame3d (global @ frameUnits) (Defines local) ->
   Vector3d (local @ units) ->
   Vector3d (global @ units)
-placeIn (Frame3d _ (Orientation3d i j k)) (Vector3d vx vy vz) = vx * i + vy * j + vz * k
+placeIn (Frame3d _ (Orientation3d i j k)) (Vector3d vx vy vz) = vx .*. i .+. vy .*. j .+. vz .*. k
 
 -- | Convert a vector defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -249,7 +249,7 @@ projectInto ::
 projectInto (Plane3d _ (PlaneOrientation3d i j)) v = Vector2d (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
-sum = List.foldl (+) zero
+sum = List.foldl (.+.) zero
 
 convert :: Quantity (units2 #/# units1) -> Vector3d (space @ units1) -> Vector3d (space @ units2)
 convert factor vector = Units.simplify (vector #*# factor)
@@ -264,7 +264,7 @@ transformBy ::
 transformBy transform vector = do
   let Transform3d _ i j k = transform
   let Vector3d vx vy vz = vector
-  vx * i + vy * j + vz * k
+  vx .*. i .+. vy .*. j .+. vz .*. k
 
 {-| Rotate a vector in a given direction.
 
@@ -285,7 +285,7 @@ scaleIn axisDirection = scaleAlong (Axis3d Point3d.dummy axisDirection)
 This is equivalent to mirroring across a plane with the given normal direction.
 -}
 mirrorIn :: Direction3d space -> Vector3d (space @ units) -> Vector3d (space @ units)
-mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
+mirrorIn mirrorDirection vector = vector .-. 2.0 *. projectionIn mirrorDirection vector
 
 -- | Rotate around the given axis by the given angle.
 rotateAround ::

@@ -91,10 +91,7 @@ instance
   where
   coerce = Data.Coerce.coerce
 
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Vector2d (space1 @ units1)) (Vector2d (space2 @ units2)) units1
-  where
+instance ApproximateEquality (Vector2d (space @ units)) units where
   Vector2d## x1## y1## ~= Vector2d## x2## y2## =
     case hypot2## (x2## -## x1##) (y2## -## y1##) ~=## 0.0## of 1# -> True; _ -> False
 
@@ -275,10 +272,7 @@ instance FFI (Direction2d FFI.Space) where
 instance FFI (Direction2d UvSpace) where
   representation = FFI.classRepresentation "UvDirection"
 
-instance
-  space1 ~ space2 =>
-  ApproximateEquality (Direction2d space1) (Direction2d space2) Radians
-  where
+instance ApproximateEquality (Direction2d space) Radians where
   d1 ~= d2 = Angle.atan2 (d1 `cross` d2) (d1 `dot` d2) ~= Angle.zero
 
 instance Negation (Direction2d space) where
@@ -443,12 +437,7 @@ instance
   where
   Position2d p - vb = PositionBounds2d (p - vb)
 
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  ApproximateEquality (Point2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
-  where
+instance ApproximateEquality (Point2d (space @ units)) units where
   Position2d p1 ~= Position2d p2 = p1 ~= p2
 
 ----- VectorBounds2d -----
@@ -466,12 +455,6 @@ instance
   Units.Coercion (VectorBounds2d (space1 @ unitsA)) (VectorBounds2d (space2 @ unitsB))
   where
   coerce (VectorBounds2d x y) = VectorBounds2d (Units.coerce x) (Units.coerce y)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Vector2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) units1
-  where
-  Vector2d vx vy ~= VectorBounds2d bx by = vx ~= bx && vy ~= by
 
 instance
   ( space1 ~ space2
@@ -900,18 +883,6 @@ instance
   PositionBounds2d pb - vb = PositionBounds2d (pb - vb)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
-  where
-  Position2d p ~= PositionBounds2d pb = p ~= pb
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Bounds2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
-  where
-  box ~= point = point ~= box
-
-instance
   (units1 ~ units2, space1 ~ space2) =>
   Intersects (Point2d (space1 @ units1)) (Axis2d (space2 @ units2)) units1
   where
@@ -1111,10 +1082,7 @@ instance
   where
   coerce = Data.Coerce.coerce
 
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Vector3d (space1 @ units1)) (Vector3d (space2 @ units2)) units1
-  where
+instance ApproximateEquality (Vector3d (space @ units)) units where
   Vector3d x1 y1 z1 ~= Vector3d x2 y2 z2 =
     Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Quantity.zero
 
@@ -1303,10 +1271,7 @@ pattern Direction3d dR dF dU = Unit3d (Vector3d dR dF dU)
 instance FFI (Direction3d FFI.Space) where
   representation = FFI.classRepresentation "Direction3d"
 
-instance
-  space1 ~ space2 =>
-  ApproximateEquality (Direction3d space1) (Direction3d space2) Radians
-  where
+instance ApproximateEquality (Direction3d space) Radians where
   d1 ~= d2 = do
     let parallel = d1 `dot` d2
     let Vector3d cx cy cz = d1 `cross` d2
@@ -1559,12 +1524,7 @@ instance
   where
   Position3d p - vb = PositionBounds3d (p - vb)
 
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  ApproximateEquality (Point3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
-  where
+instance ApproximateEquality (Point3d (space @ units)) units where
   Position3d p1 ~= Position3d p2 = p1 ~= p2
 
 ----- VectorBounds3d -----

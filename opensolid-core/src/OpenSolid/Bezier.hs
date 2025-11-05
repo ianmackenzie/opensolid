@@ -61,7 +61,7 @@ scaleDerivatives :: Vector vector => Sign -> Number -> Number -> List vector -> 
 scaleDerivatives _ _ _ [] = []
 scaleDerivatives sign scale n (first : rest) = do
   let updatedScale = sign * scale / n
-  first * updatedScale : scaleDerivatives sign updatedScale (n - 1.0) rest
+  first * updatedScale : scaleDerivatives sign updatedScale (n .- 1.0) rest
 
 derivedControlPoints :: Constraints point vector => point -> Int -> Int -> List vector -> List point
 derivedControlPoints previousPoint i n qs
@@ -107,7 +107,7 @@ syntheticStart point0 firstDerivative0 pointT0 firstDerivativeT0 secondDerivativ
   let t0 = Desingularization.t0
   let segmentDerivatives0 = [t0 * firstDerivative0]
   let segmentDerivativesT0 = [t0 * firstDerivativeT0, t0 * t0 * secondDerivativeT0]
-  hermite point0 segmentDerivatives0 pointT0 segmentDerivativesT0 |> segment 0.0 (1.0 / t0)
+  hermite point0 segmentDerivatives0 pointT0 segmentDerivativesT0 |> segment 0.0 (1.0 /. t0)
 
 syntheticEnd ::
   Constraints point vector =>

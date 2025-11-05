@@ -24,7 +24,7 @@ signedArea# (Triangle2d v1 v2 v3) = do
   let p1 = Vertex2d.position v1
   let p2 = Vertex2d.position v2
   let p3 = Vertex2d.position v3
-  0.5 * (p2 - p1) `cross#` (p3 - p1)
+  0.5 *. (p2 - p1) `cross#` (p3 - p1)
 
 signedArea ::
   ( Vertex2d vertex (space @ units1)

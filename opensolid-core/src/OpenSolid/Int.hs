@@ -42,7 +42,7 @@ import Data.Word (Word16, Word32, Word64, Word8)
 import Foreign.C.Types (CSize)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude hiding (gcd, lcm, max, min, product)
+import OpenSolid.Prelude hiding (gcd, lcm, max, min, product, (/))
 import OpenSolid.Random.Internal (Generator (Generator))
 import OpenSolid.Text.Parse qualified as Text.Parse
 import System.Random qualified
@@ -93,7 +93,7 @@ choose n k = do
     | k > n -> 0
     | d == 0 -> 1
     | d == 1 -> n
-    | otherwise -> prod (n - d + 1) (n - d + 2) n // prod 2 3 d
+    | otherwise -> prod (n - d + 1) (n - d + 2) n `div` prod 2 3 d
 
 prod :: Int -> Int -> Int -> Int
 prod !acc a b = case compare a b of

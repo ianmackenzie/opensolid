@@ -17,7 +17,7 @@ import OpenSolid.Bootstrap
 import OpenSolid.CoordinateSystem
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Number (Number, fromRational)
+import OpenSolid.Number (Number)
 import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)

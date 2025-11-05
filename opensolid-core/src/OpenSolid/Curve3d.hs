@@ -137,17 +137,8 @@ instance
       @ curve.compiled . function.compiled
       @ \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
 
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Curve3d (space1 @ units1)) (Curve3d (space2 @ units2)) units1
-  where
+instance ApproximateEquality (Curve3d (space @ units)) units where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality (Curve3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
-  where
-  curve ~= point = List.allTrue [evaluate curve t ~= point | t <- Parameter.samples]
 
 new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> Curve3d (space @ units)
 new = Curve3d
@@ -249,7 +240,7 @@ bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
 bounds curve = evaluateBounds curve Bounds.unitInterval
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
-reverse curve = curve . (1.0 - Curve.t)
+reverse curve = curve . (1.0 -. Curve.t)
 
 arcLengthParameterization ::
   Tolerance units =>

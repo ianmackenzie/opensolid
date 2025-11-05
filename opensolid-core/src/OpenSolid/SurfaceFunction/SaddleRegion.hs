@@ -76,9 +76,9 @@ quadratic subproblem saddlePoint = do
   let vB = Vector2d.unit dB
   let Vector2d ua va = vA
   let Vector2d ub vb = vB
-  let faa = ua * ua * fuu + 2.0 * ua * va * fuv + va * va * fvv
+  let faa = ua * ua * fuu + 2.0 *. ua * va * fuv + va * va * fvv
   let fab = ua * ub * fuu + (ua * vb + ub * va) * fuv + va * vb * fvv
-  let fbb = ub * ub * fuu + 2.0 * ub * vb * fuv + vb * vb * fvv
+  let fbb = ub * ub * fuu + 2.0 *. ub * vb * fuv + vb * vb * fvv
   let determinant = fab #*# fab - faa #*# fbb
   let sqrtD = Quantity.sqrt# determinant
   let (m1, m2) = Quantity.minmax ((-fab + sqrtD) / fbb, (-fab - sqrtD) / fbb)
@@ -99,7 +99,7 @@ secondDerivative ::
   Quantity units
 secondDerivative fuu fuv fvv direction = do
   let Direction2d du dv = direction
-  du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
+  du * du * fuu + 2.0 *. du * dv * fuv + dv * dv * fvv
 
 connectingCurve ::
   Tolerance units =>

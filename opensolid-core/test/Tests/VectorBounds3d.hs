@@ -74,5 +74,5 @@ tripleProduct = Test.check 1000 "tripleProduct" Test.do
   (bounds3, vector3) <- boundsAndContainedVector
   let boundsTripleProduct = VectorBounds3d.tripleProduct bounds1 bounds2 bounds3
   let vectorTripleProduct = (vector1 `cross#` vector2) `dot#` vector3
-  Tolerance.using (1e-9 * (Length.meter #*# Length.meter #*# Length.meter)) $
+  Tolerance.using (1e-9 *. (Length.meter #*# Length.meter #*# Length.meter)) $
     Test.expect (vectorTripleProduct ^ boundsTripleProduct)

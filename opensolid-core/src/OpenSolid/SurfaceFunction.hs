@@ -110,20 +110,10 @@ instance Units.Coercion (SurfaceFunction unitsA) (SurfaceFunction unitsB) where
   coerce (SurfaceFunction c du dv) =
     SurfaceFunction (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
-instance
-  units1 ~ units2 =>
-  ApproximateEquality (SurfaceFunction units1) (SurfaceFunction units2) units1
-  where
+instance ApproximateEquality (SurfaceFunction units) units where
   function1 ~= function2 =
     List.allTrue
       [evaluate function1 uvPoint ~= evaluate function2 uvPoint | uvPoint <- UvPoint.samples]
-
-instance
-  units1 ~ units2 =>
-  ApproximateEquality (SurfaceFunction units1) (Quantity units2) units1
-  where
-  function ~= value =
-    List.allTrue [evaluate function uvPoint ~= value | uvPoint <- UvPoint.samples]
 
 instance
   units1 ~ units2 =>
@@ -465,7 +455,7 @@ quotient# numerator denominator = do
               Units.simplify $
                 unsafeQuotient#
                   (numerator'' #*# denominator' - numerator' #*# denominator'')
-                  (2.0 * squared# denominator')
+                  (2.0 *. squared# denominator')
         (value, firstDerivative)
   SurfaceFunction.Quotient.impl unsafeQuotient# lhopital desingularize numerator denominator
 
@@ -493,7 +483,7 @@ squared# :: SurfaceFunction units -> SurfaceFunction (units #*# units)
 squared# function =
   new
     @ CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# function.compiled
-    @ \p -> 2.0 * function #*# derivative p function
+    @ \p -> 2.0 *. function #*# derivative p function
 
 sqrt ::
   (Tolerance units1, Units.Squared units1 units2) =>
@@ -503,7 +493,7 @@ sqrt function = sqrt# (Units.unspecialize function)
 
 sqrt# :: Tolerance units => SurfaceFunction (units #*# units) -> SurfaceFunction units
 sqrt# function =
-  if Tolerance.using Tolerance.squared# (function ~= Quantity.zero)
+  if Tolerance.using Tolerance.squared# (function ~= zero)
     then zero
     else do
       let maybeSingularity param value sign = do
@@ -517,12 +507,12 @@ sqrt# function =
             let firstDerivativeIsZeroAt testPoint = do
                   let secondDerivativeValue = evaluate secondDerivative testPoint
                   let firstDerivativeTolerance =
-                        ?tolerance #*# Quantity.sqrt# (2.0 * secondDerivativeValue)
+                        ?tolerance #*# Quantity.sqrt# (2.0 *. secondDerivativeValue)
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative testPoint ~= Quantity.zero
             let firstDerivativeIsZero = List.allSatisfy firstDerivativeIsZeroAt testPoints
             if functionIsZero && firstDerivativeIsZero
-              then Just (zero, sign * unsafeSqrt# (0.5 * secondDerivative))
+              then Just (zero, sign * unsafeSqrt# (0.5 *. secondDerivative))
               else Nothing
       desingularize (unsafeSqrt# function)
         @ #singularityU0 (maybeSingularity U 0.0 Positive)
@@ -537,13 +527,13 @@ unsafeSqrt# :: SurfaceFunction (units #*# units) -> SurfaceFunction units
 unsafeSqrt# function =
   recursive
     @ CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# function.compiled
-    @ \self p -> Units.coerce (unsafeQuotient# (derivative p function) (2.0 * self))
+    @ \self p -> Units.coerce (unsafeQuotient# (derivative p function) (2.0 *. self))
 
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 cubed function =
   new
     (CompiledFunction.map Expression.cubed Number.cubed Bounds.cubed function.compiled)
-    (\p -> 3.0 * squared function * derivative p function)
+    (\p -> 3.0 *. squared function * derivative p function)
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =
@@ -561,7 +551,7 @@ data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
 zeros :: Tolerance units => SurfaceFunction units -> Result IsZero Zeros
 zeros function
-  | function ~= Quantity.zero = Failure IsZero
+  | function ~= zero = Failure IsZero
   | otherwise = do
       let fu = function.du
       let fv = function.dv

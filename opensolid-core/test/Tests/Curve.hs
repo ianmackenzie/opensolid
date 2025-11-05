@@ -18,8 +18,8 @@ tests =
 
 crossingZeros :: Tolerance Unitless => Test
 crossingZeros = Test.verify "crossingZeros" Test.do
-  let x = 3.0 * Curve.t
-  let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
+  let x = 3.0 *. Curve.t
+  let y = (x .- 1.0) * (x .- 1.0) * (x .- 1.0) - (x .- 1.0)
   let expectedZeros = [Zero 0.0 0 Positive, Zero (1 / 3) 0 Negative, Zero (2 / 3) 0 Positive]
   zeros <- Curve.zeros y
   Test.expect (zeros ~= expectedZeros)
@@ -45,6 +45,6 @@ approximateEquality = Test.verify "approximateEquality" Test.do
   Test.all
     [ Test.expect (sinTheta != cosTheta)
     , Test.expect (sinTheta ~= Curve.cos (Angle.degrees 90.0 - theta))
-    , Test.expect (sumOfSquares ~= 1.0)
-    , Test.expect (sumOfSquares != 2.0)
+    , Test.expect (sumOfSquares ~= Curve.constant 1.0)
+    , Test.expect (sumOfSquares != Curve.constant 2.0)
     ]

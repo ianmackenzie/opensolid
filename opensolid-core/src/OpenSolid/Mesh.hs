@@ -93,15 +93,17 @@ gridImpl uSteps vSteps uVertices vVertices function =
     then empty
     else do
       let numVertices = uVertices * vVertices
-      let vertices = Array.initialize numVertices (\i -> function (i % uVertices) (i // uVertices))
+      let vertices =
+            Array.initialize numVertices $
+              \i -> function (i `mod` uVertices) (i `div` uVertices)
       let faceIndices = gridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vSteps - 1) []
       Mesh vertices faceIndices
 
 gridFaceIndices :: Int -> Int -> Int -> Int -> Int -> List (Int, Int, Int) -> List (Int, Int, Int)
 gridFaceIndices uSteps uVertices vVertices uIndex0 vIndex0 accumulatedIndices = do
   let rowStart0 = uVertices * vIndex0
-  let rowStart1 = uVertices * ((vIndex0 + 1) % vVertices)
-  let uIndex1 = (uIndex0 + 1) % uVertices
+  let rowStart1 = uVertices * ((vIndex0 + 1) `mod` vVertices)
+  let uIndex1 = (uIndex0 + 1) `mod` uVertices
   let index00 = rowStart0 + uIndex0
   let index10 = rowStart0 + uIndex1
   let index01 = rowStart1 + uIndex0

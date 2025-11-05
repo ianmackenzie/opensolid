@@ -77,7 +77,7 @@ build boundsCoordinate buildSubset n boundedItems
       Leaf itemBounds item
   | otherwise = assert (n >= 2 && boundedItems.length == n) do
       let sorted = NonEmpty.sortBy (Bounds.midpoint . boundsCoordinate . Pair.first) boundedItems
-      let leftN = n // 2
+      let leftN = n `div` 2
       let rightN = n - leftN
       let (leftBoundedItems, rightBoundedItems) = splitAtIndex leftN sorted
       let leftChild = buildSubset leftN leftBoundedItems

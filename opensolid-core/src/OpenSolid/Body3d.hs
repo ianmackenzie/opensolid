@@ -71,7 +71,7 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d (Region2d)
@@ -247,7 +247,7 @@ sphere (Named centerPoint) (Named diameter) =
     then Failure EmptyBody
     else do
       let sketchPlane = Plane3d centerPoint World3d.frontPlane.orientation
-      let radius = 0.5 * diameter
+      let radius = 0.5 *. diameter
       let p1 = Point2d.y -radius
       let p2 = Point2d.y radius
       let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
@@ -269,7 +269,7 @@ cylinder ::
   "diameter" ::: Quantity units ->
   Result EmptyBody (Body3d (space @ units))
 cylinder startPoint endPoint (Named diameter) =
-  case Vector3d.magnitudeAndDirection (endPoint - startPoint) of
+  case Vector3d.magnitudeAndDirection (endPoint .-. startPoint) of
     Failure Vector3d.IsZero -> Failure EmptyBody
     Success (length, direction) ->
       cylinderAlong (Axis3d startPoint direction) Quantity.zero length (#diameter diameter)
@@ -311,8 +311,8 @@ extruded ::
   Result BoundedBy.Error (Body3d (space @ units))
 extruded sketchPlane profile d1 d2 = do
   let normal = Plane3d.normalDirection sketchPlane
-  let v1 = d1 * normal
-  let v2 = d2 * normal
+  let v1 = d1 .*. normal
+  let v2 = d2 .*. normal
   translational sketchPlane profile (VectorCurve3d.line v1 v2)
 
 translational ::
@@ -763,7 +763,7 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
           let vertexPair tValue = do
                 let point = Curve3d.evaluate curve3d tValue
                 let uvPoint = Curve2d.evaluate uvCurve tValue
-                let matingTValue = if correctlyAligned then 1.0 - tValue else tValue
+                let matingTValue = if correctlyAligned then 1.0 -. tValue else tValue
                 let matingUvPoint = Curve2d.evaluate matingUvCurve matingTValue
                 (Vertex uvPoint point, Vertex matingUvPoint point)
           let (vertices, matingVertices) = List.unzip2 (List.map vertexPair tValues)
@@ -799,8 +799,8 @@ edgeLinearizationPredicate
     let Bounds tStart tEnd = tBounds
     let uvStart = Curve2d.evaluate uvCurve tStart
     let uvEnd = Curve2d.evaluate uvCurve tEnd
-    let matingTStart = if correctlyAligned then 1.0 - tStart else tStart
-    let matingTEnd = if correctlyAligned then 1.0 - tEnd else tEnd
+    let matingTStart = if correctlyAligned then 1.0 -. tStart else tStart
+    let matingTEnd = if correctlyAligned then 1.0 -. tEnd else tEnd
     let matingUvStart = Curve2d.evaluate matingUvCurve matingTStart
     let matingUvEnd = Curve2d.evaluate matingUvCurve matingTEnd
     let uvBounds = Bounds2d.hull2 uvStart uvEnd
@@ -838,7 +838,7 @@ validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero 
         || (validEdge edgeBounds edgeLength left && validEdge edgeBounds edgeLength right)
     Set2d.Leaf leafBounds _ ->
       not (edgeBounds ^ leafBounds)
-        || edgeLength <= Number.sqrt 2.0 * Bounds2d.diameter leafBounds
+        || edgeLength <= Number.sqrt 2.0 *. Bounds2d.diameter leafBounds
 
 boundarySurfaceMesh ::
   Tolerance units =>
@@ -887,7 +887,7 @@ pointAndNormal ::
   Vertex (space @ units) ->
   (Point3d (space @ units), Direction3d space)
 pointAndNormal n handedness (Vertex uvPoint point) =
-  (point, handedness * DirectionSurfaceFunction3d.evaluate n uvPoint)
+  (point, handedness .*. DirectionSurfaceFunction3d.evaluate n uvPoint)
 
 toPolygon ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->

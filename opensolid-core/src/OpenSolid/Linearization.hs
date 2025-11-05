@@ -8,4 +8,4 @@ import OpenSolid.Prelude
 error :: Bounds units -> Bounds Unitless -> Quantity units
 error secondDerivativeMagnitude subdomain = do
   let maxSecondDerivativeMagnitude = Bounds.maxAbs secondDerivativeMagnitude
-  0.125 * maxSecondDerivativeMagnitude * Number.squared (Bounds.width subdomain)
+  0.125 *. maxSecondDerivativeMagnitude * Number.squared (Bounds.width subdomain)

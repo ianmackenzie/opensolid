@@ -56,7 +56,7 @@ import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Direction2d (Unit2d)
@@ -100,7 +100,7 @@ y :: Quantity units -> Vector2d (space @ units)
 y vy = Vector2d Quantity.zero vy
 
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)
-from p1 p2 = p2 - p1
+from p1 p2 = p2 .-. p1
 
 apply :: (Number -> Quantity units) -> Number -> Number -> Vector2d (space @ units)
 apply units px py = Vector2d (units px) (units py)
@@ -141,7 +141,7 @@ squareMeters = apply Area.squareMeters
 
 -- | Construct a vector from its magnitude (length) and angle.
 polar :: Quantity units -> Angle -> Vector2d (space @ units)
-polar r theta = Vector2d (r * Angle.cos theta) (r * Angle.sin theta)
+polar r theta = Vector2d (r .*. Angle.cos theta) (r .*. Angle.sin theta)
 
 -- | Get the X component of a vector.
 xComponent :: Vector2d (space @ units) -> Quantity units
@@ -155,7 +155,7 @@ componentIn :: Direction2d space -> Vector2d (space @ units) -> Quantity units
 componentIn = dot
 
 projectionIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
-projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
+projectionIn givenDirection vector = givenDirection .*. componentIn givenDirection vector
 
 -- | Get the X and Y components of a vector as a tuple.
 {-# INLINE components #-}
@@ -168,11 +168,11 @@ interpolateFrom ::
   Number ->
   Vector2d (space @ units)
 interpolateFrom (Vector2d x1 y1) (Vector2d x2 y2) t =
-  Vector2d (x1 + t * (x2 - x1)) (y1 + t * (y2 - y1))
+  Vector2d (x1 .+. t .*. (x2 .-. x1)) (y1 .+. t .*. (y2 .-. y1))
 
 midpoint :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units)
 midpoint (Vector2d x1 y1) (Vector2d x2 y2) =
-  Vector2d (0.5 * (x1 + x2)) (0.5 * (y1 + y2))
+  Vector2d (0.5 *. (x1 .+. x2)) (0.5 *. (y1 .+. y2))
 
 magnitude :: Vector2d (space @ units) -> Quantity units
 magnitude (Vector2d vx vy) = Quantity.hypot2 vx vy
@@ -181,7 +181,7 @@ squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> 
 squaredMagnitude = Units.specialize . squaredMagnitude#
 
 squaredMagnitude# :: Vector2d (space @ units) -> Quantity (units #*# units)
-squaredMagnitude# (Vector2d vx vy) = vx #*# vx + vy #*# vy
+squaredMagnitude# (Vector2d vx vy) = vx #*# vx .+. vy #*# vy
 
 {-| Get the angle of a vector.
 
@@ -220,7 +220,7 @@ The current tolerance will be used to check if the vector is zero
 direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)
 direction vector = do
   let vm = magnitude vector
-  if vm ~= Quantity.zero then Failure IsZero else Success (Unit2d (vector / vm))
+  if vm ~= Quantity.zero then Failure IsZero else Success (Unit2d (vector ./. vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
@@ -228,7 +228,7 @@ magnitudeAndDirection ::
   Result IsZero (Quantity units, Direction2d space)
 magnitudeAndDirection vector = do
   let vm = magnitude vector
-  if vm ~= Quantity.zero then Failure IsZero else Success (vm, Unit2d (vector / vm))
+  if vm ~= Quantity.zero then Failure IsZero else Success (vm, Unit2d (vector ./. vm))
 
 {-| Normalize a vector.
 
@@ -238,7 +238,7 @@ Otherwise, the result will be a unit vector.
 normalize :: Vector2d (space @ units) -> Vector2d (space @ Unitless)
 normalize vector = do
   let vm = magnitude vector
-  if vm == Quantity.zero then zero else vector / vm
+  if vm == Quantity.zero then zero else vector ./. vm
 
 -- | Rotate a vector left (counterclockwise) by 90 degrees.
 rotateLeft :: Vector2d (space @ units) -> Vector2d (space @ units)
@@ -259,7 +259,7 @@ placeInOrientation ::
   Orientation2d global ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
-placeInOrientation (Orientation2d i j) (Vector2d vx vy) = vx * i + vy * j
+placeInOrientation (Orientation2d i j) (Vector2d vx vy) = vx .*. i .+. vy .*. j
 
 {-# INLINE relativeTo #-}
 relativeTo ::
@@ -291,7 +291,7 @@ placeOnOrientation ::
   PlaneOrientation3d global ->
   Vector2d (local @ units) ->
   Vector3d (global @ units)
-placeOnOrientation (PlaneOrientation3d i j) (Vector2d vx vy) = vx * i + vy * j
+placeOnOrientation (PlaneOrientation3d i j) (Vector2d vx vy) = vx .*. i .+. vy .*. j
 
 convert :: Quantity (units2 #/# units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
 convert factor vector = Units.simplify (vector #*# factor)
@@ -300,7 +300,7 @@ unconvert :: Quantity (units2 #/# units1) -> Vector2d (space @ units2) -> Vector
 unconvert factor vector = Units.simplify (vector #/# factor)
 
 sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)
-sum = List.foldl (+) zero
+sum = List.foldl (.+.) zero
 
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
@@ -309,7 +309,7 @@ transformBy ::
 transformBy transform vector = do
   let Transform2d _ i j = transform
   let Vector2d vx vy = vector
-  vx * i + vy * j
+  vx .*. i .+. vy .*. j
 
 {-| Rotate a vector by a given angle.
 
@@ -319,7 +319,7 @@ rotateBy :: Angle -> Vector2d (space @ units) -> Vector2d (space @ units)
 rotateBy theta (Vector2d vx vy) = do
   let cosTheta = Angle.cos theta
   let sinTheta = Angle.sin theta
-  Vector2d (cosTheta * vx - sinTheta * vy) (sinTheta * vx + cosTheta * vy)
+  Vector2d (cosTheta .*. vx .-. sinTheta .*. vy) (sinTheta .*. vx .+. cosTheta .*. vy)
 
 {-| Mirror a vector in/along a given direction.
 
@@ -327,7 +327,7 @@ For example, mirroring in the X direction
 will negate the vector's X component and leave its Y component unchanged.
 -}
 mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
-mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
+mirrorIn mirrorDirection vector = vector .-. 2.0 *. projectionIn mirrorDirection vector
 
 {-| Mirror a vector across a given axis.
 
@@ -343,4 +343,5 @@ mirrorAcross ::
 mirrorAcross (Axis2d _ axisDirection) = mirrorIn (Direction2d.rotateLeft axisDirection)
 
 scaleIn :: Direction2d space -> Number -> Vector2d (space @ units) -> Vector2d (space @ units)
-scaleIn scaleDirection scale vector = vector + (scale - 1.0) * projectionIn scaleDirection vector
+scaleIn scaleDirection scale vector =
+  vector .+. (scale .- 1.0) .*. projectionIn scaleDirection vector

@@ -198,7 +198,7 @@ inscribedPolygon n (Named centerPoint) (Named diameter) = do
   if diameter < Quantity.zero || diameter ~= Quantity.zero || n < 3
     then Failure EmptyRegion
     else Success do
-      let radius = 0.5 * diameter
+      let radius = 0.5 *. diameter
       let vertexAngles = Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
       let vertex angle = centerPoint + Vector2d.polar radius angle
       let vertices = List.map vertex vertexAngles

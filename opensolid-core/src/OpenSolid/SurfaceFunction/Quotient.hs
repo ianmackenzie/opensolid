@@ -2,7 +2,6 @@ module OpenSolid.SurfaceFunction.Quotient (impl) where
 
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Desingularization qualified as SurfaceFunction.Desingularization
@@ -25,12 +24,12 @@ impl ::
   SurfaceFunction units ->
   Result DivisionByZero quotient
 impl unsafeQuotient lhopital desingularize numerator denominator
-  | denominator ~= Quantity.zero = Failure DivisionByZero
+  | denominator ~= SurfaceFunction.zero = Failure DivisionByZero
   | otherwise = do
       let maybeSingularity parameter value
             | SurfaceFunction.Desingularization.isZero parameter value denominator = do
                 let denominator' = SurfaceFunction.derivative parameter denominator
-                if denominator' ~= Quantity.zero -- TODO switch to "if SurfaceFunction.hasZero denominator'"
+                if denominator' ~= SurfaceFunction.zero -- TODO switch to "if SurfaceFunction.hasZero denominator'"
                   then Failure DivisionByZero
                   else Success (Just (lhopital parameter))
             | otherwise = Success Nothing

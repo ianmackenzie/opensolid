@@ -36,7 +36,7 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Direction2d (Direction2d)
@@ -46,6 +46,8 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector2d qualified as Vector2d
+
+-- import Prelude ((*), (+), (-))
 
 type Rigid coordinateSystem = Transform2d Transform.Rigid coordinateSystem
 
@@ -78,13 +80,14 @@ withFixedPoint ::
   Transform2d tag (space @ units)
 withFixedPoint fixedPoint vx vy = do
   let Point2d fixedX fixedY = fixedPoint
-  Transform2d (fixedPoint - fixedX * vx - fixedY * vy) vx vy
+  let originPoint = fixedPoint .-. fixedX .*. vx .-. fixedY .*. vy
+  Transform2d originPoint vx vy
 
 translateBy :: Vector2d (space @ units) -> Rigid (space @ units)
-translateBy vector = Transform2d (Point2d.origin + vector) unitX unitY
+translateBy vector = Transform2d (Point2d.origin .+. vector) unitX unitY
 
 translateIn :: Direction2d space -> Quantity units -> Rigid (space @ units)
-translateIn direction distance = translateBy (direction * distance)
+translateIn direction distance = translateBy (direction .*. distance)
 
 translateAlong :: Axis2d (space @ units) -> Quantity units -> Rigid (space @ units)
 translateAlong (Axis2d _ direction) distance = translateIn direction distance
@@ -100,8 +103,8 @@ rotateAround centerPoint angle = do
 mirrorAcross :: Axis2d (space @ units) -> Orthonormal (space @ units)
 mirrorAcross (Axis2d originPoint direction) = do
   let Direction2d dx dy = direction
-  let vx = Vector2d (1.0 - 2.0 * dy * dy) (2.0 * dx * dy)
-  let vy = Vector2d (2.0 * dx * dy) (1.0 - 2.0 * dx * dx)
+  let vx = Vector2d (1.0 -. 2.0 *. dy *. dy) (2.0 *. dx *. dy)
+  let vy = Vector2d (2.0 *. dx *. dy) (1.0 -. 2.0 *. dx *. dx)
   withFixedPoint originPoint vx vy
 
 scaleAbout :: Point2d (space @ units) -> Number -> Uniform (space @ units)
@@ -113,11 +116,11 @@ scaleAbout point scale = do
 scaleAlong :: Axis2d (space @ units) -> Number -> Affine (space @ units)
 scaleAlong (Axis2d originPoint direction) scale = do
   let Direction2d dx dy = direction
-  let dx2 = dx * dx
-  let dy2 = dy * dy
-  let xy = (scale - 1.0) * dx * dy
-  let vx = Vector2d (scale * dx2 + dy2) xy
-  let vy = Vector2d xy (scale * dy2 + dx2)
+  let dx2 = dx .*. dx
+  let dy2 = dy .*. dy
+  let xy = (scale .- 1.0) .*. dx .*. dy
+  let vx = Vector2d (scale .*. dx2 .+. dy2) xy
+  let vy = Vector2d xy (scale .*. dy2 .+. dx2)
   withFixedPoint originPoint vx vy
 
 placeIn ::

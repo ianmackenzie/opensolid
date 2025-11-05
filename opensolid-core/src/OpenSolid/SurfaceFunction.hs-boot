@@ -2,6 +2,7 @@ module OpenSolid.SurfaceFunction
   ( SurfaceFunction
   , Compiled
   , constant
+  , zero
   , u
   , v
   , evaluate
@@ -42,13 +43,7 @@ instance HasField "compiled" (SurfaceFunction units) (Compiled units)
 
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units)
 
-instance
-  units1 ~ units2 =>
-  ApproximateEquality (SurfaceFunction units1) (SurfaceFunction units2) units1
-
-instance
-  units1 ~ units2 =>
-  ApproximateEquality (SurfaceFunction units1) (Quantity units2) units1
+instance ApproximateEquality (SurfaceFunction units) units
 
 instance Negation (SurfaceFunction units)
 
@@ -111,6 +106,7 @@ instance
   Division (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
 
 constant :: Quantity units -> SurfaceFunction units
+zero :: SurfaceFunction units
 u :: SurfaceFunction Unitless
 v :: SurfaceFunction Unitless
 evaluate :: SurfaceFunction units -> UvPoint -> Quantity units

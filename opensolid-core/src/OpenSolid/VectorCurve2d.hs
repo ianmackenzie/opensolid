@@ -150,23 +150,8 @@ instance
   where
   coerce curve = VectorCurve2d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality
-    (VectorCurve2d (space1 @ units1))
-    (VectorCurve2d (space2 @ units2))
-    units1
-  where
+instance ApproximateEquality (VectorCurve2d (space @ units)) units where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  ApproximateEquality
-    (VectorCurve2d (space1 @ units1))
-    (Vector2d (space2 @ units2))
-    units1
-  where
-  curve ~= vector = List.allTrue [evaluate curve t ~= vector | t <- Parameter.samples]
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -685,7 +670,7 @@ components :: VectorCurve2d (space @ units) -> (Curve units, Curve units)
 components curve = (xComponent curve, yComponent curve)
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-reverse curve = curve . (1.0 - Curve.t)
+reverse curve = curve . (1.0 -. Curve.t)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
@@ -700,7 +685,7 @@ quotient# ::
   Curve units2 ->
   Result DivisionByZero (VectorCurve2d (space @ (units1 #/# units2)))
 quotient# numerator denominator =
-  if denominator ~= Quantity.zero
+  if denominator ~= Curve.zero
     then Failure DivisionByZero
     else Success do
       let singularity0 =
@@ -728,7 +713,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' #*# denominator' - numerator' #*# denominator'')
-            #/# (2.0 * Quantity.squared# denominator')
+            #/# (2.0 *. Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -761,7 +746,7 @@ squaredMagnitude# curve =
       Vector2d.squaredMagnitude#
       VectorBounds2d.squaredMagnitude#
       curve.compiled
-    @ 2.0 * curve `dot#` curve.derivative
+    @ 2.0 *. curve `dot#` curve.derivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

@@ -326,7 +326,7 @@ cameraNode camera = do
           [typedNode "integer" "sample_count" "$spp"]
   case camera.projection of
     Camera3d.Orthographic fovHeight -> do
-      let scale = Length.inMeters fovHeight / 2.0
+      let scale = Length.inMeters fovHeight ./ 2.0
       XmlNode "sensor" [("type", "orthographic")] $
         [ XmlNode "transform" [("name", "to_world")] $
             [ XmlNode "scale" [("value", Text.number scale)] []

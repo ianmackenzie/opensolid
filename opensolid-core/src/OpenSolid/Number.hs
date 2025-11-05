@@ -1,6 +1,5 @@
 module OpenSolid.Number
   ( Number
-  , fromRational
   , fromDouble
   , toDouble
   , parse
@@ -24,6 +23,7 @@ module OpenSolid.Number
   , atan2
   , log
   , logBase
+  , pow
   , infinity
   , sign
   , isNaN
@@ -56,10 +56,6 @@ import OpenSolid.Units (Unitless)
 import Prelude qualified
 
 type Number = Quantity Unitless
-
-{-# INLINE fromRational #-}
-fromRational :: Prelude.Rational -> Number
-fromRational = Prelude.fromRational
 
 {-# INLINE fromDouble #-}
 fromDouble :: Prelude.Double -> Number
@@ -121,13 +117,13 @@ pi :: Number
 pi = Prelude.pi
 
 halfPi :: Number
-halfPi = 0.5 * pi
+halfPi = 0.5 *. pi
 
 twoPi :: Number
-twoPi = 2.0 * pi
+twoPi = 2.0 *. pi
 
 goldenRatio :: Number
-goldenRatio = 0.5 * (1.0 + sqrt 5.0)
+goldenRatio = 0.5 *. (1.0 +. sqrt 5.0)
 
 sqrt :: Number -> Number
 sqrt = Quantity.sqrt
@@ -160,10 +156,13 @@ atan2 :: Quantity units -> Quantity units -> Number
 atan2 (Quantity y) (Quantity x) = Quantity (Prelude.atan2 y x)
 
 log :: Number -> Number
-log (Quantity x) = Quantity (Prelude.log x)
+log = Prelude.log
 
 logBase :: Number -> Number -> Number
-logBase (Quantity base) (Quantity x) = Quantity (Prelude.logBase base x)
+logBase = Prelude.logBase
+
+pow :: Number -> Number -> Number
+pow = (Prelude.**)
 
 sum :: List Number -> Number
 sum = Quantity.sum

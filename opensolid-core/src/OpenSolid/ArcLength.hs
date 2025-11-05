@@ -28,9 +28,9 @@ parameterization derivativeMagnitude = do
     | isLinear dsdt1 dsdt2 dsdt3 dsdt4 -> do
         let delta = dsdt4 - dsdt1
         let t0 = -dsdt1 / delta
-        let sqrt = Tolerance.using Quantity.zero (Curve.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * Curve.t))
+        let sqrt = Tolerance.using Quantity.zero (Curve.sqrt (t0 * t0 + (1.0 -. 2.0 *. t0) * Curve.t))
         let curve = if delta > Quantity.zero then t0 + sqrt else t0 - sqrt
-        let length = 0.5 * (dsdt1 + dsdt4)
+        let length = 0.5 *. (dsdt1 + dsdt4)
         (curve, length)
     | otherwise -> do
         let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
@@ -84,11 +84,11 @@ buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
   let dsdtLeft3 = dsdt (Number.interpolateFrom tStart tMid Lobatto.p3)
   let dsdtRight2 = dsdt (Number.interpolateFrom tMid tEnd Lobatto.p2)
   let dsdtRight3 = dsdt (Number.interpolateFrom tMid tEnd Lobatto.p3)
-  let halfWidth = 0.5 * (tEnd - tStart)
+  let halfWidth = 0.5 *. (tEnd - tStart)
   let leftEstimate = halfWidth * Lobatto.estimate dsdtStart dsdtLeft2 dsdtLeft3 dsdtMid
   let rightEstimate = halfWidth * Lobatto.estimate dsdtMid dsdtRight2 dsdtRight3 dsdtEnd
   let fineEstimate = leftEstimate + rightEstimate
-  if level >= 10 || Quantity.abs (fineEstimate - coarseEstimate) <= 1e-12 * fineEstimate
+  if level >= 10 || Quantity.abs (fineEstimate - coarseEstimate) <= 1e-12 *. fineEstimate
     then do
       let deltaS = fineEstimate
       let dtduStart = deltaS / dsdtStart

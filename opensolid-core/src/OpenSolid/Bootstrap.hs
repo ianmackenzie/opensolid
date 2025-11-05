@@ -48,6 +48,7 @@ import Data.Traversable.WithIndex (TraversableWithIndex)
 import GHC.OverloadedLabels (fromLabel)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
+import Prelude (div, fromRational, mod)
 import Prelude hiding
   ( Floating (..)
   , Fractional (..)

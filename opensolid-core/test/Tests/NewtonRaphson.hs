@@ -10,7 +10,7 @@ import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((/))
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
@@ -22,6 +22,7 @@ import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import Test (Expectation, Test)
 import Test qualified
+import Prelude ((/))
 
 data Space
 
@@ -36,11 +37,11 @@ tests =
 
 quadratic1d :: Tolerance Unitless => Test
 quadratic1d =
-  curve1d "Quadratic" (Curve.squared Curve.t - 2.0) 1.0 (Number.sqrt 2.0)
+  curve1d "Quadratic" (Curve.squared Curve.t .- 2.0) 1.0 (Number.sqrt 2.0)
 
 quadraticDivergence1d :: Tolerance Unitless => Test
 quadraticDivergence1d =
-  curveDivergence1d "Quadratic divergence" (Curve.squared Curve.t + 2.0) 1.0
+  curveDivergence1d "Quadratic divergence" (Curve.squared Curve.t .+ 2.0) 1.0
 
 arc2d :: Tolerance Unitless => Test
 arc2d = do
@@ -57,8 +58,8 @@ simpleSurface2d :: Tolerance Unitless => Test
 simpleSurface2d = do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  let x = SurfaceFunction.squared u - 2.0
-  let y = v - 1.0
+  let x = SurfaceFunction.squared u .- 2.0
+  let y = v .- 1.0
   let surface = VectorSurfaceFunction2d.xy x y
   surface2d "Simple 2D surface" surface (Point2d 1.0 0.0) (Point2d (Number.sqrt 2.0) 1.0)
 

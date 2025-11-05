@@ -29,7 +29,7 @@ data Zero = Zero
   }
   deriving (Eq, Show)
 
-instance ApproximateEquality Zero Zero Unitless where
+instance ApproximateEquality Zero Unitless where
   Zero location1 order1 sign1 ~= Zero location2 order2 sign2 =
     location1 ~= location2 && order1 == order2 && sign1 == sign2
 

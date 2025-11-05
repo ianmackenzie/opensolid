@@ -32,7 +32,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d)
@@ -43,9 +43,10 @@ import OpenSolid.Primitives
   , Transform3d (Transform3d)
   , Vector3d (Vector3d)
   )
-import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform qualified as Transform
 import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.World3d qualified as World3d
+import Prelude ((*), (+), (-))
 
 type Rigid coordinateSystem = Transform3d Transform.Rigid coordinateSystem
 
@@ -54,9 +55,6 @@ type Orthonormal coordinateSystem = Transform3d Transform.Orthonormal coordinate
 type Uniform coordinateSystem = Transform3d Transform.Uniform coordinateSystem
 
 type Affine coordinateSystem = Transform3d Transform.Affine coordinateSystem
-
-originPoint :: Point3d (space @ units)
-originPoint = Point3d Quantity.zero Quantity.zero Quantity.zero
 
 unitX :: Vector3d (space @ Unitless)
 unitX = Vector3d 1.0 0.0 0.0
@@ -68,7 +66,7 @@ unitZ :: Vector3d (space @ Unitless)
 unitZ = Vector3d 0.0 0.0 1.0
 
 identity :: Rigid (space @ units)
-identity = Transform3d originPoint unitX unitY unitZ
+identity = Transform3d World3d.originPoint unitX unitY unitZ
 
 coerce :: Transform3d tag1 (space1 @ units1) -> Transform3d tag2 (space2 @ units2)
 coerce (Transform3d p0 i j k) =
@@ -82,13 +80,14 @@ withFixedPoint ::
   Transform3d tag (space @ units)
 withFixedPoint fixedPoint vx vy vz = do
   let Point3d x0 y0 z0 = fixedPoint
-  Transform3d (fixedPoint - x0 * vx - y0 * vy - z0 * vz) vx vy vz
+  let originPoint = fixedPoint .-. x0 .*. vx .-. y0 .*. vy .-. z0 .*. vz
+  Transform3d originPoint vx vy vz
 
 translateBy :: Vector3d (space @ units) -> Rigid (space @ units)
 translateBy vector = Transform3d (Position3d vector) unitX unitY unitZ
 
 translateIn :: Direction3d space -> Quantity units -> Rigid (space @ units)
-translateIn direction distance = translateBy (direction * distance)
+translateIn direction distance = translateBy (direction .*. distance)
 
 translateAlong :: Axis3d (space @ units) -> Quantity units -> Rigid (space @ units)
 translateAlong (Axis3d _ direction) distance = translateIn direction distance
@@ -96,7 +95,7 @@ translateAlong (Axis3d _ direction) distance = translateIn direction distance
 rotateAround :: Axis3d (space @ units) -> Angle -> Rigid (space @ units)
 rotateAround axis angle = do
   let Direction3d dx dy dz = axis.direction
-  let halfAngle = 0.5 * angle
+  let halfAngle = 0.5 *. angle
   let sinHalfAngle = Angle.sin halfAngle
   let qx = dx * sinHalfAngle
   let qy = dy * sinHalfAngle
@@ -128,9 +127,9 @@ scaleAlong axis scale = do
   let d = axis.direction
   let Direction3d dx dy dz = d
   -- TODO refactor to use Vector3d.scaleIn?
-  let vx = unitX + (scale - 1.0) * dx * d
-  let vy = unitY + (scale - 1.0) * dy * d
-  let vz = unitZ + (scale - 1.0) * dz * d
+  let vx = unitX .+. (scale - 1.0) * dx *. d
+  let vy = unitY .+. (scale - 1.0) * dy *. d
+  let vz = unitZ .+. (scale - 1.0) * dz *. d
   withFixedPoint axis.originPoint vx vy vz
 
 mirrorAcross :: Plane3d (space @ units) defines -> Orthonormal (space @ units)
@@ -154,7 +153,7 @@ placeIn ::
   Transform3d tag (global @ units)
 placeIn frame transform = do
   let p0 =
-        originPoint
+        World3d.originPoint
           |> Point3d.relativeTo frame
           |> Point3d.transformBy transform
           |> Point3d.placeIn frame
@@ -181,7 +180,7 @@ relativeTo ::
   Transform3d tag (local @ units)
 relativeTo frame transform = do
   let p0 =
-        originPoint
+        World3d.originPoint
           |> Point3d.placeIn frame
           |> Point3d.transformBy transform
           |> Point3d.relativeTo frame

@@ -260,7 +260,7 @@ vertexBuilder vertex = GHC.Exts.runRW# \state0# -> do
 
 paddedByteLength :: Int -> Int
 paddedByteLength unpaddedLength = do
-  let excess = unpaddedLength % 4
+  let excess = unpaddedLength `mod` 4
   if excess == 0 then unpaddedLength else unpaddedLength + (4 - excess)
 
 padWith :: Char -> Builder -> Int -> (Builder, Int)

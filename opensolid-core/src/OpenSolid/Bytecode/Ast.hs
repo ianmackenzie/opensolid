@@ -735,7 +735,7 @@ instance input1 ~ input2 => Division (Ast1d input1) (Ast1d input2) (Ast1d input1
   Constant1d 0.0 / _ = Constant1d 0.0
   lhs / Constant1d 1.0 = lhs
   lhs / Constant1d -1.0 = -lhs
-  Variable1d lhs / Constant1d rhs = Variable1d (ProductVariableConstant1d lhs (1.0 / rhs))
+  Variable1d lhs / Constant1d rhs = Variable1d (ProductVariableConstant1d lhs (1.0 /. rhs))
   Constant1d lhs / Variable1d rhs = Variable1d (QuotientConstantVariable1d lhs rhs)
   Variable1d lhs / Variable1d rhs = Variable1d (lhs / rhs)
 
@@ -842,7 +842,7 @@ instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1
   Constant2d lhs / _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
   lhs / Constant1d 1.0 = lhs
   lhs / Constant1d -1.0 = -lhs
-  Variable2d lhs / Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1.0 / rhs))
+  Variable2d lhs / Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1.0 /. rhs))
   Constant2d lhs / Variable1d rhs = Variable2d (QuotientConstantVariable2d lhs rhs)
   Variable2d lhs / Variable1d rhs = Variable2d (Quotient2d lhs rhs)
 
@@ -943,7 +943,7 @@ instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1
   Constant3d lhs / _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
   lhs / Constant1d 1.0 = lhs
   lhs / Constant1d -1.0 = -lhs
-  Variable3d lhs / Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1.0 / rhs))
+  Variable3d lhs / Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1.0 /. rhs))
   Constant3d lhs / Variable1d rhs = Variable3d (QuotientConstantVariable3d lhs rhs)
   Variable3d lhs / Variable1d rhs = Variable3d (Quotient3d lhs rhs)
 

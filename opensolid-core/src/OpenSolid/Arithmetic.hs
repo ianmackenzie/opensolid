@@ -18,7 +18,6 @@ module OpenSolid.Arithmetic
   , Division ((/), (./.))
   , (/.)
   , (./)
-  , DivMod ((//), (%))
   , DotMultiplication# (dot#)
   , DotMultiplication (dot)
   , CrossMultiplication# (cross#)
@@ -196,18 +195,6 @@ class CrossMultiplication b a c => CrossMultiplication a b c | a b -> c where
   cross :: a -> b -> c
 
 infixl 7 `cross`
-
-class DivMod a where
-  (//) :: a -> a -> Int
-  (%) :: a -> a -> a
-
-infixl 7 //
-
-infixl 7 %
-
-instance DivMod Int where
-  (//) = Prelude.div
-  (%) = Prelude.mod
 
 instance Negation Int where
   negate = Prelude.negate

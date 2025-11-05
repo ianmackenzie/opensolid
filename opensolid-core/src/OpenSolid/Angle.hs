@@ -27,7 +27,8 @@ module OpenSolid.Angle
 where
 
 import OpenSolid.Arithmetic
-import OpenSolid.Number (Number, fromRational)
+import OpenSolid.Bootstrap
+import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Quantity (Quantity (Quantity))
 import OpenSolid.Quantity qualified as Quantity
@@ -46,7 +47,7 @@ zero = Quantity.zero
 
 -- | The [golden angle](https://en.wikipedia.org/wiki/Golden_angle).
 goldenAngle :: Angle
-goldenAngle = radians (Number.pi * (3.0 - Number.sqrt 5.0))
+goldenAngle = radians (Number.pi * (3.0 -. Number.sqrt 5.0))
 
 -- | Compute the sine of an angle.
 sin :: Angle -> Number
@@ -108,7 +109,7 @@ twoPi = radians Number.twoPi
 
 -- | One degree.
 degree :: Angle
-degree = fullTurn / 360.0
+degree = fullTurn ./ 360.0
 
 -- | Construct an angle from a number of degrees.
 degrees :: Number -> Angle
@@ -128,7 +129,7 @@ halfTurn = radians Number.pi
 
 -- | One quarter turn, or 90 degrees.
 quarterTurn :: Angle
-quarterTurn = radians (0.5 * Number.pi)
+quarterTurn = radians (0.5 *. Number.pi)
 
 {-| Construct an angle from a number of turns.
 

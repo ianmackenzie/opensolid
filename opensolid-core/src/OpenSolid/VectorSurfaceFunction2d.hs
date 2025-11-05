@@ -621,7 +621,7 @@ quotient# numerator denominator = do
               Units.simplify $
                 unsafeQuotient#
                   (numerator'' #*# denominator' - numerator' #*# denominator'')
-                  (2.0 * SurfaceFunction.squared# denominator')
+                  (2.0 *. SurfaceFunction.squared# denominator')
         (value, firstDerivative)
   SurfaceFunction.Quotient.impl unsafeQuotient# lhopital desingularize numerator denominator
 
@@ -651,7 +651,7 @@ squaredMagnitude# function =
       Vector2d.squaredMagnitude#
       VectorBounds2d.squaredMagnitude#
       function.compiled
-    @ \p -> 2.0 * function `dot#` derivative p function
+    @ \p -> 2.0 *. function `dot#` derivative p function
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
