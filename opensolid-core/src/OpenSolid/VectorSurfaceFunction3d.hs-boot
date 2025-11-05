@@ -47,13 +47,13 @@ instance
   Multiplication#
     (SurfaceFunction units1)
     (VectorSurfaceFunction3d (space @ units2))
-    (VectorSurfaceFunction3d (space @ (units1 *# units2)))
+    (VectorSurfaceFunction3d (space @ (units1 #*# units2)))
 
 instance
   Multiplication#
     (VectorSurfaceFunction3d (space @ units1))
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d (space @ (units1 *# units2)))
+    (VectorSurfaceFunction3d (space @ (units1 #*# units2)))
 
 instance
   Units.Product units1 units2 units3 =>

@@ -207,10 +207,10 @@ projectInto ::
 projectInto (Plane3d p0 (PlaneOrientation3d i j)) p =
   let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
 
-convert :: Quantity (units2 /# units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
+convert :: Quantity (units2 #/# units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
 convert factor (Position3d p) = Position3d (Vector3d.convert factor p)
 
-unconvert :: Quantity (units2 /# units1) -> Point3d (space @ units2) -> Point3d (space @ units1)
+unconvert :: Quantity (units2 #/# units1) -> Point3d (space @ units2) -> Point3d (space @ units1)
 unconvert factor (Position3d p) = Position3d (Vector3d.unconvert factor p)
 
 transformBy :: Transform3d tag (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)

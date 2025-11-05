@@ -47,7 +47,7 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding ((>>))
+import OpenSolid.Prelude hiding (compose, (>>))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance

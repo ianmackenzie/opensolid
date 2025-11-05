@@ -6,7 +6,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.IO qualified as IO
 import OpenSolid.Number (Number)
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Syntax ((.+.), (./.))
+import OpenSolid.Prelude ((.+.), (./.))
 import OpenSolid.Text qualified as Text
 
 main :: IO ()

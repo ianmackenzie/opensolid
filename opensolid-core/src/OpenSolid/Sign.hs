@@ -21,8 +21,8 @@ instance Negation Sign where
   negate Negative = Positive
 
 instance Multiplication# Sign Sign Sign where
-  Positive *# sign = sign
-  Negative *# sign = -sign
+  Positive #*# sign = sign
+  Negative #*# sign = -sign
 
 instance Multiplication Sign Sign Sign where
   Positive * sign = sign

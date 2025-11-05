@@ -178,7 +178,7 @@ components (VectorBounds2d vx vy) = (vx, vy)
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Bounds units2
 squaredMagnitude = Units.specialize . squaredMagnitude#
 
-squaredMagnitude# :: VectorBounds2d (space @ units) -> Bounds (units *# units)
+squaredMagnitude# :: VectorBounds2d (space @ units) -> Bounds (units #*# units)
 squaredMagnitude# (VectorBounds2d x y) = Bounds.squared# x + Bounds.squared# y
 
 magnitude :: VectorBounds2d (space @ units) -> Bounds units
@@ -196,7 +196,7 @@ maxSquaredMagnitude ::
   Quantity units2
 maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude#
 
-maxSquaredMagnitude# :: VectorBounds2d (space @ units) -> Quantity (units *# units)
+maxSquaredMagnitude# :: VectorBounds2d (space @ units) -> Quantity (units #*# units)
 maxSquaredMagnitude# (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
   let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
@@ -356,16 +356,16 @@ placeOnOrientation orientation (VectorBounds2d x y) = do
     (Bounds (z0 - rz) (z0 + rz))
 
 convert ::
-  Quantity (units2 /# units1) ->
+  Quantity (units2 #/# units1) ->
   VectorBounds2d (space @ units1) ->
   VectorBounds2d (space @ units2)
-convert factor vectorBounds = Units.simplify (vectorBounds *# factor)
+convert factor vectorBounds = Units.simplify (vectorBounds #*# factor)
 
 unconvert ::
-  Quantity (units2 /# units1) ->
+  Quantity (units2 #/# units1) ->
   VectorBounds2d (space @ units2) ->
   VectorBounds2d (space @ units1)
-unconvert factor vectorBounds = Units.simplify (vectorBounds /# factor)
+unconvert factor vectorBounds = Units.simplify (vectorBounds #/# factor)
 
 transformBy ::
   Transform2d tag (space @ units1) ->

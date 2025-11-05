@@ -129,7 +129,7 @@ instance
   HasField
     "squaredMagnitude#"
     (VectorCurve2d (space @ units))
-    (Curve (units *# units))
+    (Curve (units #*# units))
   where
   getField = squaredMagnitude#
 
@@ -259,73 +259,73 @@ instance
     (VectorCurve2d (space @ units2))
     (VectorCurve2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (Curve units1)
     (VectorCurve2d (space @ units2))
-    (VectorCurve2d (space @ (units1 *# units2)))
+    (VectorCurve2d (space @ (units1 #*# units2)))
   where
-  lhs *# rhs =
-    new (lhs.compiled *# rhs.compiled) (lhs.derivative *# rhs + lhs *# rhs.derivative)
+  lhs #*# rhs =
+    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs + lhs #*# rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (Quantity units1)
     (VectorCurve2d (space @ units2))
-    (VectorCurve2d (space @ (units1 *# units2)))
+    (VectorCurve2d (space @ (units1 #*# units2)))
   where
-  c1 *# c2 = Curve.constant c1 *# c2
+  c1 #*# c2 = Curve.constant c1 #*# c2
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (VectorCurve2d (space @ units1))
     (Curve units2)
-    (VectorCurve2d (space @ (units1 *# units2)))
+    (VectorCurve2d (space @ (units1 #*# units2)))
   where
-  lhs *# rhs =
-    new (lhs.compiled *# rhs.compiled) (lhs.derivative *# rhs + lhs *# rhs.derivative)
+  lhs #*# rhs =
+    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs + lhs #*# rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve2d (space @ units1)) (Quantity units2) (VectorCurve2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorCurve2d (space @ units1)) (Quantity units2) (VectorCurve2d (space @ units3))
   where
-  lhs / rhs = Units.specialize (lhs /# rhs)
+  lhs / rhs = Units.specialize (lhs #/# rhs)
 
 instance
   Division#
     (VectorCurve2d (space @ units1))
     (Quantity units2)
-    (VectorCurve2d (space @ (units1 /# units2)))
+    (VectorCurve2d (space @ (units1 #/# units2)))
   where
-  curve /# value = Units.simplify (curve *# (1.0 /# value))
+  curve #/# value = Units.simplify (curve #*# (1.0 /# value))
 
 instance
   Multiplication#
     (VectorCurve2d (space @ units1))
     (Quantity units2)
-    (VectorCurve2d (space @ (units1 *# units2)))
+    (VectorCurve2d (space @ (units1 #*# units2)))
   where
-  curve *# value = curve *# Curve.constant value
+  curve #*# value = curve #*# Curve.constant value
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -341,7 +341,7 @@ instance
   DotMultiplication#
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
-    (Curve (units1 *# units2))
+    (Curve (units1 #*# units2))
   where
   lhs `dot#` rhs =
     Curve.new
@@ -359,7 +359,7 @@ instance
   DotMultiplication#
     (VectorCurve2d (space1 @ units1))
     (Vector2d (space2 @ units2))
-    (Curve (units1 *# units2))
+    (Curve (units1 #*# units2))
   where
   curve `dot#` vector = curve `dot#` constant vector
 
@@ -374,7 +374,7 @@ instance
   DotMultiplication#
     (Vector2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
-    (Curve (units1 *# units2))
+    (Curve (units1 #*# units2))
   where
   vector `dot#` curve = constant vector `dot#` curve
 
@@ -404,7 +404,7 @@ instance
   CrossMultiplication#
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
-    (Curve (units1 *# units2))
+    (Curve (units1 #*# units2))
   where
   lhs `cross#` rhs =
     Curve.new
@@ -425,7 +425,7 @@ instance
   CrossMultiplication#
     (VectorCurve2d (space1 @ units1))
     (Vector2d (space2 @ units2))
-    (Curve (units1 *# units2))
+    (Curve (units1 #*# units2))
   where
   curve `cross#` vector = curve `cross#` constant vector
 
@@ -443,7 +443,7 @@ instance
   CrossMultiplication#
     (Vector2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
-    (Curve (units1 *# units2))
+    (Curve (units1 #*# units2))
   where
   vector `cross#` curve = constant vector `cross#` curve
 
@@ -698,7 +698,7 @@ quotient# ::
   Tolerance units2 =>
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
-  Result DivisionByZero (VectorCurve2d (space @ (units1 /# units2)))
+  Result DivisionByZero (VectorCurve2d (space @ (units1 #/# units2)))
 quotient# numerator denominator =
   if denominator ~= Quantity.zero
     then Failure DivisionByZero
@@ -718,17 +718,17 @@ lhopital ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
   Number ->
-  (Vector2d (space @ (units1 /# units2)), Vector2d (space @ (units1 /# units2)))
+  (Vector2d (space @ (units1 #/# units2)), Vector2d (space @ (units1 #/# units2)))
 lhopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
   let numerator'' = evaluate numerator.derivative.derivative tValue
   let denominator' = Curve.evaluate denominator.derivative tValue
   let denominator'' = Curve.evaluate denominator.derivative.derivative tValue
-  let value = numerator' /# denominator'
+  let value = numerator' #/# denominator'
   let firstDerivative =
         Units.simplify $
-          (numerator'' *# denominator' - numerator' *# denominator'')
-            /# (2.0 * Quantity.squared# denominator')
+          (numerator'' #*# denominator' - numerator' #*# denominator'')
+            #/# (2.0 * Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -741,19 +741,19 @@ unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient# numerat
 unsafeQuotient# ::
   VectorCurve2d (space @ units1) ->
   Curve units2 ->
-  VectorCurve2d (space @ (units1 /# units2))
+  VectorCurve2d (space @ (units1 #/# units2))
 unsafeQuotient# numerator denominator = do
   new
-    @ numerator.compiled /# denominator.compiled
+    @ numerator.compiled #/# denominator.compiled
     @ Units.simplify do
       unsafeQuotient#
-        (numerator.derivative *# denominator - numerator *# denominator.derivative)
+        (numerator.derivative #*# denominator - numerator #*# denominator.derivative)
         (Curve.squared# denominator)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude# curve)
 
-squaredMagnitude# :: VectorCurve2d (space @ units) -> Curve (units *# units)
+squaredMagnitude# :: VectorCurve2d (space @ units) -> Curve (units #*# units)
 squaredMagnitude# curve =
   Curve.new
     @ CompiledFunction.map
@@ -816,13 +816,13 @@ placeOn ::
 placeOn plane curve = VectorCurve3d.on plane curve
 
 convert ::
-  Quantity (units2 /# units1) ->
+  Quantity (units2 #/# units1) ->
   VectorCurve2d (space @ units1) ->
   VectorCurve2d (space @ units2)
-convert factor curve = Units.simplify (curve *# factor)
+convert factor curve = Units.simplify (curve #*# factor)
 
 unconvert ::
-  Quantity (units2 /# units1) ->
+  Quantity (units2 #/# units1) ->
   VectorCurve2d (space @ units2) ->
   VectorCurve2d (space @ units1)
-unconvert factor curve = Units.simplify (curve /# factor)
+unconvert factor curve = Units.simplify (curve #/# factor)

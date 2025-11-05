@@ -8,11 +8,11 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Prelude ((.*.), (.+.))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.Syntax ((.*.), (.+.))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d

@@ -15,9 +15,9 @@ import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude ((*.), type (@))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax ((*.), type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance (Tolerance)

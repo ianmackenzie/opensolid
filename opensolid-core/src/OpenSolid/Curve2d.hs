@@ -776,13 +776,13 @@ signature orientation curve tValue radius = do
   let firstOrder = dydx * radius
   let d2ydx2 =
         if x' != Quantity.zero
-          then (y'' *# x' - y' *# x'') /# (x' *# x' *# x')
+          then (y'' #*# x' - y' #*# x'') #/# (x' #*# x' #*# x')
           else do
             let fourthDerivativeCurve = secondDerivativeCurve.derivative.derivative
             let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivativeCurve tValue
             let Vector2d x'''' y'''' = local fourthDerivativeValue
-            (y'''' *# x'' - y'' *# x'''') /# (x'' *# x'' *# x'')
-  let secondOrder = Units.simplify (0.5 * d2ydx2 *# Quantity.squared# radius)
+            (y'''' #*# x'' - y'' #*# x'''') #/# (x'' #*# x'' #*# x'')
+  let secondOrder = Units.simplify (0.5 * d2ydx2 #*# Quantity.squared# radius)
   (firstOrder, secondOrder)
 
 candidateOverlappingSegment :: UvPoint -> UvPoint -> OverlappingSegment
@@ -886,9 +886,9 @@ findIntersectionPoints ::
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units) ->
-  VectorSurfaceFunction2d (space @ (units *# units)) ->
-  VectorSurfaceFunction2d (space @ (units *# units)) ->
-  VectorSurfaceFunction2d (space @ (units *# units)) ->
+  VectorSurfaceFunction2d (space @ (units #*# units)) ->
+  VectorSurfaceFunction2d (space @ (units #*# units)) ->
+  VectorSurfaceFunction2d (space @ (units #*# units)) ->
   List UvPoint ->
   () ->
   Domain2d ->
@@ -1042,13 +1042,13 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 convert ::
-  Quantity (units2 /# units1) ->
+  Quantity (units2 #/# units1) ->
   Curve2d (space @ units1) ->
   Curve2d (space @ units2)
 convert factor curve = Units.coerce (scaleAbout Point2d.origin (Units.erase factor) curve)
 
 unconvert ::
-  Quantity (units2 /# units1) ->
+  Quantity (units2 #/# units1) ->
   Curve2d (space @ units2) ->
   Curve2d (space @ units1)
 unconvert factor curve = convert (Units.simplify (1.0 /# factor)) curve
@@ -1056,7 +1056,7 @@ unconvert factor curve = convert (Units.simplify (1.0 /# factor)) curve
 curvature# ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result IsPoint (Curve (Unitless /# units))
+  Result IsPoint (Curve (Unitless #/# units))
 curvature# curve = do
   let firstDerivative = curve.derivative
   let secondDerivative = firstDerivative.derivative
@@ -1112,8 +1112,8 @@ medialAxis curve1 curve2 = do
   let v2 = curve2.derivative . SurfaceFunction.v
   let d = p2 - p1
   let target =
-        v2 `cross#` (2.0 * (v1 `dot#` d) *# d - VectorSurfaceFunction2d.squaredMagnitude# d *# v1)
-  let targetTolerance = ?tolerance *# ((?tolerance *# ?tolerance) *# ?tolerance)
+        v2 `cross#` (2.0 * (v1 `dot#` d) #*# d - VectorSurfaceFunction2d.squaredMagnitude# d #*# v1)
+  let targetTolerance = ?tolerance #*# ((?tolerance #*# ?tolerance) #*# ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
     Success zeros ->

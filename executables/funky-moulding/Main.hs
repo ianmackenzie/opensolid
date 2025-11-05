@@ -9,10 +9,10 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude (negative, (.+.))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
-import OpenSolid.Syntax (negative, (.+.))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 

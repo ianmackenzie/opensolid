@@ -14,8 +14,8 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude ((*.), (.*.), (.+.), (.-.), (./.), type (@))
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax ((*.), (.*.), (.+.), (.-.), (./.), type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)

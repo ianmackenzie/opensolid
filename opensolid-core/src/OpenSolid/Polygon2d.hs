@@ -22,7 +22,7 @@ newtype Polygon2d vertex = Polygon2d {vertices :: NonEmpty vertex}
 map :: (a -> b) -> Polygon2d a -> Polygon2d b
 map function polygon = Polygon2d (NonEmpty.map function polygon.vertices)
 
-signedArea# :: Vertex2d vertex (space @ units) => Polygon2d vertex -> Quantity (units *# units)
+signedArea# :: Vertex2d vertex (space @ units) => Polygon2d vertex -> Quantity (units #*# units)
 signedArea# (Polygon2d (v0 :| vs)) = do
   let triangleSignedArea# v1 v2 = Triangle2d.signedArea# (Triangle2d v0 v1 v2)
   Quantity.sum (List.successive triangleSignedArea# vs)

@@ -199,8 +199,8 @@ magnitude (Vector3d vx vy vz) = Quantity.hypot3 vx vy vz
 squaredMagnitude :: Units.Squared units1 units2 => Vector3d (space @ units1) -> Quantity units2
 squaredMagnitude = Units.specialize . squaredMagnitude#
 
-squaredMagnitude# :: Vector3d (space @ units) -> Quantity (units *# units)
-squaredMagnitude# (Vector3d vx vy vz) = vx *# vx + vy *# vy + vz *# vz
+squaredMagnitude# :: Vector3d (space @ units) -> Quantity (units #*# units)
+squaredMagnitude# (Vector3d vx vy vz) = vx #*# vx + vy #*# vy + vz #*# vz
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
@@ -251,11 +251,11 @@ projectInto (Plane3d _ (PlaneOrientation3d i j)) v = Vector2d (v `dot` i) (v `do
 sum :: List (Vector3d (space @ units)) -> Vector3d (space @ units)
 sum = List.foldl (+) zero
 
-convert :: Quantity (units2 /# units1) -> Vector3d (space @ units1) -> Vector3d (space @ units2)
-convert factor vector = Units.simplify (vector *# factor)
+convert :: Quantity (units2 #/# units1) -> Vector3d (space @ units1) -> Vector3d (space @ units2)
+convert factor vector = Units.simplify (vector #*# factor)
 
-unconvert :: Quantity (units2 /# units1) -> Vector3d (space @ units2) -> Vector3d (space @ units1)
-unconvert factor vector = Units.simplify (vector /# factor)
+unconvert :: Quantity (units2 #/# units1) -> Vector3d (space @ units2) -> Vector3d (space @ units1)
+unconvert factor vector = Units.simplify (vector #/# factor)
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

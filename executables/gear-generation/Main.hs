@@ -12,12 +12,12 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude ((*.), type (@))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result (Result)
 import OpenSolid.Result qualified as Result
 import OpenSolid.SpurGear qualified as SpurGear
-import OpenSolid.Syntax ((*.), type (@))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance (Tolerance)

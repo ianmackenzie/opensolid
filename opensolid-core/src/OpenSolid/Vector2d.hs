@@ -180,8 +180,8 @@ magnitude (Vector2d vx vy) = Quantity.hypot2 vx vy
 squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> Quantity units2
 squaredMagnitude = Units.specialize . squaredMagnitude#
 
-squaredMagnitude# :: Vector2d (space @ units) -> Quantity (units *# units)
-squaredMagnitude# (Vector2d vx vy) = vx *# vx + vy *# vy
+squaredMagnitude# :: Vector2d (space @ units) -> Quantity (units #*# units)
+squaredMagnitude# (Vector2d vx vy) = vx #*# vx + vy #*# vy
 
 {-| Get the angle of a vector.
 
@@ -293,11 +293,11 @@ placeOnOrientation ::
   Vector3d (global @ units)
 placeOnOrientation (PlaneOrientation3d i j) (Vector2d vx vy) = vx * i + vy * j
 
-convert :: Quantity (units2 /# units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
-convert factor vector = Units.simplify (vector *# factor)
+convert :: Quantity (units2 #/# units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
+convert factor vector = Units.simplify (vector #*# factor)
 
-unconvert :: Quantity (units2 /# units1) -> Vector2d (space @ units2) -> Vector2d (space @ units1)
-unconvert factor vector = Units.simplify (vector /# factor)
+unconvert :: Quantity (units2 #/# units1) -> Vector2d (space @ units2) -> Vector2d (space @ units1)
+unconvert factor vector = Units.simplify (vector #/# factor)
 
 sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)
 sum = List.foldl (+) zero

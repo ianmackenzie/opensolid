@@ -17,7 +17,7 @@ where
 
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
-import OpenSolid.Composition (Composition ((.)))
+import OpenSolid.Composition (Composition (compose, (.)))
 import OpenSolid.CoordinateSystem
   ( CoordinateSystem
   , Defines
@@ -42,6 +42,6 @@ import OpenSolid.Units
   , Seconds
   , SquareMeters
   , Unitless
-  , type (*#)
-  , type (/#)
+  , type (#*#)
+  , type (#/#)
   )

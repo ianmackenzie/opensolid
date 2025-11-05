@@ -6,7 +6,7 @@ import OpenSolid.Debug.Plot qualified as Plot
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Syntax ((*.), (+.), (-.), (.*.), (.+.), (.-))
+import OpenSolid.Prelude ((*.), (+.), (-.), (.*.), (.+.), (.-))
 import OpenSolid.Text qualified as Text
 
 main :: IO ()

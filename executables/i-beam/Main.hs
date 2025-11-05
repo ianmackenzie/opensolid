@@ -13,9 +13,9 @@ import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude ((*.), (.-.))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax ((*.), (.-.))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 import Prelude hiding (length)

@@ -217,7 +217,6 @@ library
     OpenSolid.SurfaceFunction2d
     OpenSolid.SurfaceFunction3d
     OpenSolid.SurfaceParameter
-    OpenSolid.Syntax
     OpenSolid.Text
     OpenSolid.Timer
     OpenSolid.Tolerance

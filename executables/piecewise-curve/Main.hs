@@ -10,8 +10,8 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude ((.*.), (.+.), (./.), (/.))
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Syntax ((.*.), (.+.), (./.), (/.))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d

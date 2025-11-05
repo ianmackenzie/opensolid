@@ -7,10 +7,10 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude ((*.))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
-import OpenSolid.Syntax ((*.))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 import Prelude hiding (length)

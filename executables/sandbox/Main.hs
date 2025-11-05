@@ -41,18 +41,7 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
-import OpenSolid.Quantity (Quantity)
-import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Random qualified as Random
-import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result (Result (Failure, Success))
-import OpenSolid.Result qualified as Result
-import OpenSolid.Solve2d qualified as Solve2d
-import OpenSolid.Surface3d qualified as Surface3d
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
-import OpenSolid.SurfaceParameter qualified as SurfaceParameter
-import OpenSolid.Syntax
+import OpenSolid.Prelude
   ( cross
   , dot
   , (#/)
@@ -68,10 +57,21 @@ import OpenSolid.Syntax
   , (|>)
   , type (@)
   )
+import OpenSolid.Quantity (Quantity)
+import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Random qualified as Random
+import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Result (Result (Failure, Success))
+import OpenSolid.Result qualified as Result
+import OpenSolid.Solve2d qualified as Solve2d
+import OpenSolid.Surface3d qualified as Surface3d
+import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
+import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance (Tolerance, (~=))
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters, Unitless, type (/#))
+import OpenSolid.Units (Meters, Unitless, type (#/#))
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -272,7 +272,7 @@ drawCrossingCurve index curve = do
   let color = Color.hsl1 hue 0.5 0.5
   drawUvCurve [Drawing2d.strokeColor color] curve
 
-toDrawing :: Quantity (Meters /# Unitless)
+toDrawing :: Quantity (Meters #/# Unitless)
 toDrawing = Length.centimeters 10 #/ 1
 
 drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvCoordinates -> Drawing2d UvSpace

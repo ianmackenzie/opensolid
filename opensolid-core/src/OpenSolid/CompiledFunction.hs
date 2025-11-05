@@ -145,7 +145,7 @@ instance
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (*#) = map2 (*#) (*#) (*#)
+  (#*#) = map2 (#*#) (#*#) (#*#)
 
 instance
   ( inputValue1 ~ inputValue2
@@ -165,7 +165,7 @@ instance
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (/#) = map2 (/#) (/#) (/#)
+  (#/#) = map2 (#/#) (#/#) (#/#)
 
 instance
   ( inputValue1 ~ inputValue2

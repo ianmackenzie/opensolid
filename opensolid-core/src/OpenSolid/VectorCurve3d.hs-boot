@@ -58,7 +58,7 @@ instance
   Multiplication#
     (Curve units1)
     (VectorCurve3d (space @ units2))
-    (VectorCurve3d (space @ (units1 *# units2)))
+    (VectorCurve3d (space @ (units1 #*# units2)))
 
 instance
   Units.Product units1 units2 units3 =>
@@ -68,7 +68,7 @@ instance
   Multiplication#
     (VectorCurve3d (space @ units1))
     (Curve units2)
-    (VectorCurve3d (space @ (units1 *# units2)))
+    (VectorCurve3d (space @ (units1 #*# units2)))
 
 instance
   Units.Product units1 units2 units3 =>
@@ -79,7 +79,7 @@ instance
   DotMultiplication#
     (VectorCurve3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
-    (Curve (units1 *# units2))
+    (Curve (units1 #*# units2))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -105,7 +105,7 @@ quotient# ::
   Tolerance units2 =>
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
-  Result DivisionByZero (VectorCurve3d (space @ (units1 /# units2)))
+  Result DivisionByZero (VectorCurve3d (space @ (units1 #/# units2)))
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
   VectorCurve3d (space @ units1) ->
@@ -114,7 +114,7 @@ unsafeQuotient ::
 unsafeQuotient# ::
   VectorCurve3d (space @ units1) ->
   Curve units2 ->
-  VectorCurve3d (space @ (units1 /# units2))
+  VectorCurve3d (space @ (units1 #/# units2))
 magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Curve units
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

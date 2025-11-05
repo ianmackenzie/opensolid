@@ -8,9 +8,9 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Prelude ((*.), (+.), (-.), (.*.))
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.Syntax ((*.), (+.), (-.), (.*.))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d

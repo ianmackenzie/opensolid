@@ -2,8 +2,8 @@ module OpenSolid.Units
   ( HasUnits
   , Coercion (coerce)
   , erase
-  , type (*#)
-  , type (/#)
+  , type (#*#)
+  , type (#/#)
   , Specialize
   , specialize
   , unspecialize
@@ -87,9 +87,9 @@ instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (Non
 erase :: forall b a units. (Coercion a b, HasUnits a units, HasUnits b Unitless) => a -> b
 erase = coerce
 
-data a *# b
+data a #*# b
 
-data a /# b
+data a #/# b
 
 {-# INLINE specialize #-}
 specialize ::
@@ -118,8 +118,8 @@ commute ::
   ( Coercion a b
   , HasUnits a unitsA
   , HasUnits b unitsB
-  , unitsA ~ units1 *# units2
-  , unitsB ~ units2 *# units1
+  , unitsA ~ units1 #*# units2
+  , unitsB ~ units2 #*# units1
   ) =>
   a ->
   b
@@ -130,8 +130,8 @@ leftAssociate ::
   ( Coercion a b
   , HasUnits a unitsA
   , HasUnits b unitsB
-  , unitsA ~ units1 *# (units2 *# units3)
-  , unitsB ~ (units1 *# units2) *# units3
+  , unitsA ~ units1 #*# (units2 #*# units3)
+  , unitsB ~ (units1 #*# units2) #*# units3
   ) =>
   a ->
   b
@@ -142,8 +142,8 @@ rightAssociate ::
   ( Coercion a b
   , HasUnits a unitsA
   , HasUnits b unitsB
-  , unitsA ~ (units1 *# units2) *# units3
-  , unitsB ~ units1 *# (units2 *# units3)
+  , unitsA ~ (units1 #*# units2) #*# units3
+  , unitsB ~ units1 #*# (units2 #*# units3)
   ) =>
   a ->
   b
@@ -164,77 +164,77 @@ class Simplification units1 units2
 
 instance
   Simplification
-    (Unitless *# units)
+    (Unitless #*# units)
     units
 
 instance
   Simplification
-    (units *# Unitless)
+    (units #*# Unitless)
     units
 
 instance
   Simplification
-    (units /# Unitless)
+    (units #/# Unitless)
     units
 
 instance
   Simplification
-    ((units1 /# units2) *# units2)
+    ((units1 #/# units2) #*# units2)
     units1
 
 instance
   Simplification
-    (units2 *# (units1 /# units2))
+    (units2 #*# (units1 #/# units2))
     units1
 
 instance
   Simplification
-    ((units1 *# units3) /# (units2 *# units3))
-    (units1 /# units2)
+    ((units1 #*# units3) #/# (units2 #*# units3))
+    (units1 #/# units2)
 
 instance
   Simplification
-    (units1 *# (Unitless /# units2))
-    (units1 /# units2)
+    (units1 #*# (Unitless #/# units2))
+    (units1 #/# units2)
 
 instance
   Simplification
-    ((Unitless /# units2) *# units1)
-    (units1 /# units2)
+    ((Unitless #/# units2) #*# units1)
+    (units1 #/# units2)
 
 instance
   Simplification
-    (Unitless /# (units1 /# units2))
-    (units2 /# units1)
+    (Unitless #/# (units1 #/# units2))
+    (units2 #/# units1)
 
 instance
   Simplification
-    ((units1 *# units2) /# units2)
+    ((units1 #*# units2) #/# units2)
     units1
 
 instance
   Simplification
-    (units1 /# (units1 /# units2))
+    (units1 #/# (units1 #/# units2))
     units2
 
 instance
   Simplification
-    (units /# (units *# units))
-    (Unitless /# units)
+    (units #/# (units #*# units))
+    (Unitless #/# units)
 
 instance
   Simplification
-    ((units *# units) /# (units *# units *# units))
-    (Unitless /# units)
+    ((units #*# units) #/# (units #*# units #*# units))
+    (Unitless #/# units)
 
 instance
   Simplification
-    (((units *# units) /# (units *# units *# units)) *# units)
+    (((units #*# units) #/# (units #*# units #*# units)) #*# units)
     Unitless
 
 instance
   Simplification
-    (((units *# units) /# (units *# units *# units)) *# (units *# units))
+    (((units #*# units) #/# (units #*# units #*# units)) #*# (units #*# units))
     units
 
 data Radians deriving (Eq, Show)
@@ -329,8 +329,8 @@ type Inverse units1 units2 =
 
 class Specialize genericUnits specificUnits | genericUnits -> specificUnits
 
-instance Product units1 units2 units3 => Specialize (units1 *# units2) units3
+instance Product units1 units2 units3 => Specialize (units1 #*# units2) units3
 
-instance Quotient units1 units2 units3 => Specialize (units1 /# units2) units3
+instance Quotient units1 units2 units3 => Specialize (units1 #/# units2) units3
 
 instance Specialize Unitless Unitless

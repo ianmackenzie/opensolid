@@ -232,85 +232,85 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Curve units2) (Curve units3)
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
-instance Multiplication# (Curve units1) (Curve units2) (Curve (units1 *# units2)) where
-  lhs *# rhs =
-    new (lhs.compiled *# rhs.compiled) (lhs.derivative *# rhs + lhs *# rhs.derivative)
+instance Multiplication# (Curve units1) (Curve units2) (Curve (units1 #*# units2)) where
+  lhs #*# rhs =
+    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs + lhs #*# rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Quantity units2) (Curve units3)
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
-instance Multiplication# (Curve units1) (Quantity units2) (Curve (units1 *# units2)) where
-  curve *# value = curve *# constant value
+instance Multiplication# (Curve units1) (Quantity units2) (Curve (units1 #*# units2)) where
+  curve #*# value = curve #*# constant value
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Curve units2) (Curve units3)
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
-instance Multiplication# (Quantity units1) (Curve units2) (Curve (units1 *# units2)) where
-  value *# curve = constant value *# curve
+instance Multiplication# (Quantity units1) (Curve units2) (Curve (units1 #*# units2)) where
+  value #*# curve = constant value #*# curve
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (Curve units1)
     (Vector2d (space @ units2))
-    (VectorCurve2d (space @ (units1 *# units2)))
+    (VectorCurve2d (space @ (units1 #*# units2)))
   where
-  curve *# vector = curve *# VectorCurve2d.constant vector
+  curve #*# vector = curve #*# VectorCurve2d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (Vector2d (space @ units1))
     (Curve units2)
-    (VectorCurve2d (space @ (units1 *# units2)))
+    (VectorCurve2d (space @ (units1 #*# units2)))
   where
-  vector *# curve = VectorCurve2d.constant vector *# curve
+  vector #*# curve = VectorCurve2d.constant vector #*# curve
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Vector3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (Curve units1)
     (Vector3d (space @ units2))
-    (VectorCurve3d (space @ (units1 *# units2)))
+    (VectorCurve3d (space @ (units1 #*# units2)))
   where
-  curve *# vector = curve *# VectorCurve3d.constant vector
+  curve #*# vector = curve #*# VectorCurve3d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs *# rhs)
+  lhs * rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (Vector3d (space @ units1))
     (Curve units2)
-    (VectorCurve3d (space @ (units1 *# units2)))
+    (VectorCurve3d (space @ (units1 #*# units2)))
   where
-  vector *# curve = VectorCurve3d.constant vector *# curve
+  vector #*# curve = VectorCurve3d.constant vector #*# curve
 
 instance Composition (Curve Unitless) (Curve units) (Curve units) where
   f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
@@ -442,7 +442,7 @@ quotient# ::
   Tolerance units2 =>
   Curve units1 ->
   Curve units2 ->
-  Result DivisionByZero (Curve (units1 /# units2))
+  Result DivisionByZero (Curve (units1 #/# units2))
 quotient# numerator denominator =
   if denominator ~= Quantity.zero
     then Failure DivisionByZero
@@ -462,17 +462,17 @@ lhopital ::
   Curve units1 ->
   Curve units2 ->
   Number ->
-  (Quantity (units1 /# units2), Quantity (units1 /# units2))
+  (Quantity (units1 #/# units2), Quantity (units1 #/# units2))
 lhopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
   let numerator'' = evaluate numerator.derivative.derivative tValue
   let denominator' = evaluate denominator.derivative tValue
   let denominator'' = evaluate denominator.derivative.derivative tValue
-  let value = numerator' /# denominator'
+  let value = numerator' #/# denominator'
   let firstDerivative =
         Units.simplify $
-          (numerator'' *# denominator' - numerator' *# denominator'')
-            /# (2.0 * Quantity.squared# denominator')
+          (numerator'' #*# denominator' - numerator' #*# denominator'')
+            #/# (2.0 * Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -482,12 +482,12 @@ unsafeQuotient ::
   Curve units3
 unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient# numerator denominator)
 
-unsafeQuotient# :: Curve units1 -> Curve units2 -> Curve (units1 /# units2)
+unsafeQuotient# :: Curve units1 -> Curve units2 -> Curve (units1 #/# units2)
 unsafeQuotient# numerator denominator = do
-  let quotientCompiled = numerator.compiled /# denominator.compiled
+  let quotientCompiled = numerator.compiled #/# denominator.compiled
   let quotientDerivative = Units.simplify do
         unsafeQuotient#
-          (numerator.derivative *# denominator - numerator *# denominator.derivative)
+          (numerator.derivative #*# denominator - numerator #*# denominator.derivative)
           (squared# denominator)
   new quotientCompiled quotientDerivative
 
@@ -495,26 +495,26 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve units1) (Quantity units2) (Curve units3)
   where
-  lhs / rhs = Units.specialize (lhs /# rhs)
+  lhs / rhs = Units.specialize (lhs #/# rhs)
 
-instance Division# (Curve units1) (Quantity units2) (Curve (units1 /# units2)) where
-  curve /# value = Units.simplify (curve *# (1.0 /# value))
+instance Division# (Curve units1) (Quantity units2) (Curve (units1 #/# units2)) where
+  curve #/# value = Units.simplify (curve #*# (1.0 /# value))
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
 squared curve = Units.specialize (squared# curve)
 
-squared# :: Curve units -> Curve (units *# units)
+squared# :: Curve units -> Curve (units #*# units)
 squared# curve =
   new
     (CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# curve.compiled)
-    (2.0 * curve *# curve.derivative)
+    (2.0 * curve #*# curve.derivative)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve units1
 sqrt curve = sqrt# (Units.unspecialize curve)
 
-sqrt# :: Tolerance units => Curve (units *# units) -> Curve units
+sqrt# :: Tolerance units => Curve (units #*# units) -> Curve units
 sqrt# curve
   | Tolerance.using Tolerance.squared# (curve ~= Quantity.zero) = zero
   | otherwise = do
@@ -526,7 +526,7 @@ sqrt# curve
                     evaluate curve tValue ~= Quantity.zero
             let secondDerivativeValue = evaluate secondDerivative tValue
             let firstDerivativeTolerance =
-                  ?tolerance *# Quantity.sqrt# (2.0 * secondDerivativeValue)
+                  ?tolerance #*# Quantity.sqrt# (2.0 * secondDerivativeValue)
             let firstDerivativeIsZero =
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative tValue ~= Quantity.zero
@@ -544,7 +544,7 @@ sqrt# curve
 unsafeSqrt :: Units.Squared units1 units2 => Curve units2 -> Curve units1
 unsafeSqrt curve = unsafeSqrt# (Units.unspecialize curve)
 
-unsafeSqrt# :: Curve (units *# units) -> Curve units
+unsafeSqrt# :: Curve (units #*# units) -> Curve units
 unsafeSqrt# curve =
   recursive
     @ CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# curve.compiled
