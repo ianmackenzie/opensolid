@@ -37,7 +37,7 @@ metric (Named numTeeth) (Named module_) = Metric{numTeeth, module_}
 
 -- | The pitch diameter of a gear.
 instance HasField "pitchDiameter" SpurGear Length where
-  getField gear = gear.module_ * Number.fromInt gear.numTeeth
+  getField gear = gear.module_ .* fromIntegral gear.numTeeth
 
 {-| The outer diameter of a gear.
 
@@ -62,7 +62,7 @@ profile gear = do
   let n = gear.numTeeth
   let m = gear.module_
   let phi = Angle.degrees 20.0 -- pressure angle
-  let r0 = m * Number.fromInt n / 2.0 -- pitch radius
+  let r0 = m .* fromIntegral n ./ 2.0 -- pitch radius
   let rb = r0 * Angle.cos phi -- involute tooth profile base radius
   let rd = r0 - 1.25 * m -- dedendum radius
   let ra = r0 + m -- addendum radius
@@ -71,7 +71,7 @@ profile gear = do
         | otherwise = Angle.zero
   let theta2 = Angle.radians (Number.sqrt (Number.squared (ra / rb) - 1.0))
   let theta = Curve.line theta1 theta2
-  let alpha = Angle.radians (Angle.tan phi - Angle.inRadians phi + Number.pi / (2.0 * Number.fromInt n))
+  let alpha = Angle.radians (Angle.tan phi - Angle.inRadians phi + Number.pi ./ fromIntegral (2 * n))
   let x = rb * (Curve.sin (theta - alpha) - theta / Angle.radian * Curve.cos (theta - alpha))
   let y = rb * (Curve.cos (theta - alpha) + theta / Angle.radian * Curve.sin (theta - alpha))
   let involuteLeft = Curve2d.xy x y
@@ -91,7 +91,7 @@ profile gear = do
           [leftDerivativeMagnitude * leftEndTangent]
   let rightApproximation = Curve2d.mirrorAcross Axis2d.y leftApproximation
   let tip = Curve2d.line leftApproximation.endPoint rightApproximation.endPoint
-  let angularSpacing = Angle.twoPi / Number.fromInt n
+  let angularSpacing = Angle.twoPi ./ fromIntegral n
   let nextToothStart =
         rightApproximation.startPoint
           |> Point2d.rotateAround Point2d.origin angularSpacing
@@ -100,6 +100,6 @@ profile gear = do
         | otherwise = Curve2d.arc leftStart nextToothStart -Angle.pi
   let toothProfileCurves = [leftApproximation, rightApproximation, tip, connector]
   let rotatedProfileCurves i = do
-        let angle = Number.fromInt i * angularSpacing
+        let angle = fromIntegral i *. angularSpacing
         List.map (Curve2d.rotateAround Point2d.origin angle) toothProfileCurves
   List.combine rotatedProfileCurves [0 .. n - 1]

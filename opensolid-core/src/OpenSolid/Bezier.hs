@@ -13,7 +13,6 @@ import OpenSolid.HasZero (HasZero (zero))
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 
 type Vector vector =
@@ -31,8 +30,8 @@ type Constraints point vector =
 
 derivative :: Constraints point vector => NonEmpty point -> NonEmpty vector
 derivative controlPoints = do
-  let scale = Number.fromInt (NonEmpty.length controlPoints - 1)
-  let scaledDifference p1 p2 = (p2 - p1) * scale
+  let scale = fromIntegral (NonEmpty.length controlPoints - 1)
+  let scaledDifference p1 p2 = (p2 - p1) .* scale
   let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
   case scaledDifferences of
     [] -> NonEmpty.one zero
@@ -48,7 +47,7 @@ hermite ::
 hermite startPoint startDerivatives endPoint endDerivatives = do
   let numStartDerivatives = startDerivatives.length
   let numEndDerivatives = endDerivatives.length
-  let curveDegree = Number.fromInt (1 + numStartDerivatives + numEndDerivatives)
+  let curveDegree = fromIntegral (1 + numStartDerivatives + numEndDerivatives)
   let scaledStartDerivatives = scaleDerivatives Positive 1.0 curveDegree startDerivatives
   let scaledEndDerivatives = scaleDerivatives Negative 1.0 curveDegree endDerivatives
   let startControlPoints =
@@ -74,7 +73,7 @@ derivedControlPoints previousPoint i n qs
 offset :: Vector vector => Int -> List vector -> vector
 offset i scaledDerivatives =
   List.take i scaledDerivatives
-    |> List.mapWithIndex (\j q -> q * Number.fromInt (Int.choose (i - 1) j))
+    |> List.mapWithIndex (\j q -> q .* fromIntegral (Int.choose (i - 1) j))
     |> List.foldl (+) zero
 
 segment :: Constraints point vector => Number -> Number -> NonEmpty point -> NonEmpty point

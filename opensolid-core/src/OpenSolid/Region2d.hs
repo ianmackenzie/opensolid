@@ -225,7 +225,7 @@ circumscribedPolygon ::
 circumscribedPolygon n (Named centerPoint) (Named diameter) =
   inscribedPolygon n
     @ #centerPoint centerPoint
-    @ #diameter (diameter / Angle.cos (Angle.pi / Number.fromInt n))
+    @ #diameter (diameter / Angle.cos (Angle.pi ./ fromIntegral n))
 
 {-| Create a polygonal region from the given vertices.
 

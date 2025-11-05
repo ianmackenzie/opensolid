@@ -51,7 +51,7 @@ pattern Int n <- (toInt -> Just n)
 toInt :: Json -> Maybe Int
 toInt (Number value) = do
   let rounded = Number.round value
-  if Number.fromInt rounded == value then Just rounded else Nothing
+  if fromIntegral rounded == value then Just rounded else Nothing
 toInt _ = Nothing
 
 pattern Object :: List (Text, Json) -> Json
@@ -62,7 +62,7 @@ getFields (Map fields) = Just (Map.toList fields)
 getFields _ = Nothing
 
 int :: Int -> Json
-int = Number . Number.fromInt
+int = Number . fromIntegral
 
 number :: Number -> Json
 number = Number

@@ -4,7 +4,6 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -20,7 +19,7 @@ tests =
   ]
 
 point :: Int -> Int -> Point2d (space @ Meters)
-point x y = Point2d.centimeters (Number.fromInt x) (Number.fromInt y)
+point x y = Point2d.centimeters (fromIntegral x) (fromIntegral y)
 
 testSet :: Set2d (Point2d (space @ Meters)) (space @ Meters)
 testSet =

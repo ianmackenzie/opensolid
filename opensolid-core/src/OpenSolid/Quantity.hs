@@ -55,7 +55,6 @@ import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Number (Number, fromRational)
-import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Unboxed.Math
@@ -164,7 +163,7 @@ instance DivMod (Quantity units) where
   {-# INLINE (//) #-}
   x // y = Prelude.floor (x / y)
   {-# INLINE (%) #-}
-  x % y = x - y * Number.fromInt (x // y)
+  x % y = x - y .* fromIntegral (x // y)
 
 {-# INLINE zero #-}
 zero :: Quantity units

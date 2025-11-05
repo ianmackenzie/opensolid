@@ -52,12 +52,12 @@ neighborhood :: Tolerance units => Int -> Quantity units -> Neighborhood units
 neighborhood n value = do
   let sign = Quantity.sign value
   let magnitude = Quantity.abs value
-  let radius = (Number.fromInt (Int.factorial n) * ?tolerance / magnitude) ** (1 / n)
+  let radius = (fromIntegral (Int.factorial n) *. ?tolerance / magnitude) ** (1 / n)
   Neighborhood{n, sign, magnitude, radius}
 
 derivativeTolerance :: Neighborhood units -> Int -> Quantity units
 derivativeTolerance (Neighborhood{n, magnitude, radius}) k = do
-  magnitude * radius ** (n - k) / Number.fromInt (Int.factorial (n - k))
+  magnitude * radius ** (n - k) ./ fromIntegral (Int.factorial (n - k))
 
 zero :: Number -> Neighborhood units -> Zero
 zero location (Neighborhood{n, sign}) = Zero location (n - 1) sign

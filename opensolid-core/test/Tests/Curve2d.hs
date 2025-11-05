@@ -389,7 +389,7 @@ arcConstruction :: Tolerance Meters => Test
 arcConstruction = do
   let testArcMidpoint numDegrees (expectedX, expectedY) = do
         let label = Text.int numDegrees <> " degrees"
-        let sweptAngle = Angle.degrees (Number.fromInt numDegrees)
+        let sweptAngle = Angle.degrees (fromIntegral numDegrees)
         let expectedPoint = Point2d.meters expectedX expectedY
         Test.verify label Test.do
           let arc = Curve2d.arc Point2d.origin (Point2d.meters 1.0 1.0) sweptAngle

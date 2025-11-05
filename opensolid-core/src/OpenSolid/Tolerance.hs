@@ -16,7 +16,6 @@ import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import OpenSolid.Number (Number, fromRational)
-import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
@@ -100,7 +99,7 @@ squared# :: Tolerance units => Quantity (units #*# units)
 squared# = Quantity.squared# ?tolerance
 
 forEndpointDerivative :: Tolerance units => Int -> Quantity units
-forEndpointDerivative n = ?tolerance / Number.fromInt (Int.factorial n * 2 ** (2 * n))
+forEndpointDerivative n = ?tolerance ./ fromIntegral (Int.factorial n * 2 ** (2 * n))
 
 {-# INLINE (~=##) #-}
 (~=##) :: Tolerance units => Double# -> Double# -> Int#

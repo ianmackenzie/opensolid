@@ -3,7 +3,6 @@ module OpenSolid.Number
   , fromRational
   , fromDouble
   , toDouble
-  , fromInt
   )
 where
 
@@ -17,4 +16,3 @@ type Number = Quantity Unitless
 fromDouble :: Double -> Number
 toDouble :: Number -> Double
 fromRational :: Prelude.Rational -> Quantity Unitless
-fromInt :: Int -> Number
