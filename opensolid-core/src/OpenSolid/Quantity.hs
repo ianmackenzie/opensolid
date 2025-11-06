@@ -65,7 +65,7 @@ import OpenSolid.Unitless (Unitless)
 import OpenSolid.Units (CubicMeters, Meters, Radians, SquareMeters, type (#*#), type (#/#))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
-import Prelude (floor, (*), (+), (-), (/))
+import Prelude ((*), (+), (-), (/))
 import Prelude qualified
 
 type role Quantity phantom
@@ -165,7 +165,7 @@ instance
 
 {-# INLINE (//) #-}
 (//) :: Quantity units -> Quantity units -> Int
-x // y = floor (x ./. y)
+x // y = Prelude.floor (x ./. y)
 
 infixl 7 //
 
