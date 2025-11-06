@@ -943,8 +943,7 @@ isValidSteinerPoint edgeSet uvPoint = case edgeSet of
       _ -> False
 
 surfaces :: Body3d (space @ units) -> NonEmpty (Surface3d (space @ units))
-surfaces (Body3d boundarySurfaces) =
-  NonEmpty.forEach boundarySurfaces do \BoundarySurface{orientedSurface} -> orientedSurface
+surfaces (Body3d boundarySurfaces) = NonEmpty.map (.orientedSurface) boundarySurfaces
 
 -- | Convert a body defined in local coordinates to one defined in global coordinates.
 placeIn ::
