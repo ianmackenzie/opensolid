@@ -1,5 +1,28 @@
+Remove Bootstrap module
+
+Move internalError to Exception module
+
+Juse use Aeson directly for JSON encoding/decoding?
+
+Remove e.g. Int.fromInt64 where possible
+
+Remove @ operator?
+
+Remove custom HasField instances
+
+Remove Random.Internal module?
+
+Flip argument order in Composition typeclass
+-> rename to Composition2 temporarily to ensure all instances are updated
+
+Remove e.g. Orientation3d.world in favour of World3d.forwardOrientation?
+
+Rework Curve2d.medialAxis to use tangent directions instead of derivative vectors
+
 Add Component3d class to Python library?
 -> 'front_plane', 'upward_direction', 'rightward_axis' etc. convenience accessors in addition to 'frame'
+
+Rationalize use of forEach
 
 Update to newer GitHub Actions images?
 -> in particular macos-13 is deprecated
