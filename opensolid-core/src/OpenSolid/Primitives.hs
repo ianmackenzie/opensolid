@@ -195,7 +195,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Vector2d (space @ units1)) (Quantity units2) (Vector2d (space @ units3))
   where
-  Vector2d vx vy / scale = Vector2d (vx / scale) (vy / scale)
+  Vector2d vx vy ./. scale = Vector2d (vx ./. scale) (vy ./. scale)
 
 instance
   space1 ~ space2 =>
@@ -637,7 +637,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds2d (space @ units1)) (Quantity units2) (VectorBounds2d (space @ units3))
   where
-  VectorBounds2d x y / value = VectorBounds2d (x / value) (y / value)
+  VectorBounds2d x y ./. value = VectorBounds2d (x ./. value) (y ./. value)
 
 instance
   Division#
@@ -651,7 +651,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds2d (space @ units1)) (Bounds units2) (VectorBounds2d (space @ units3))
   where
-  VectorBounds2d x y / bounds = VectorBounds2d (x / bounds) (y / bounds)
+  VectorBounds2d x y ./. bounds = VectorBounds2d (x ./. bounds) (y ./. bounds)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -1186,7 +1186,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Vector3d (space @ units1)) (Quantity units2) (Vector3d (space @ units3))
   where
-  Vector3d vx vy vz / scale = Vector3d (vx / scale) (vy / scale) (vz / scale)
+  Vector3d vx vy vz ./. scale = Vector3d (vx ./. scale) (vy ./. scale) (vz ./. scale)
 
 instance
   space1 ~ space2 =>
@@ -1789,7 +1789,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds3d (space @ units1)) (Quantity units2) (VectorBounds3d (space @ units3))
   where
-  VectorBounds3d x y z / value = VectorBounds3d (x / value) (y / value) (z / value)
+  VectorBounds3d x y z ./. value = VectorBounds3d (x ./. value) (y ./. value) (z ./. value)
 
 instance
   Division#
@@ -1803,7 +1803,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds3d (space @ units1)) (Bounds units2) (VectorBounds3d (space @ units3))
   where
-  VectorBounds3d x y z / bounds = VectorBounds3d (x / bounds) (y / bounds) (z / bounds)
+  VectorBounds3d x y z ./. bounds = VectorBounds3d (x ./. bounds) (y ./. bounds) (z ./. bounds)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>

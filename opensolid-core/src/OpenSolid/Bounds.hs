@@ -237,7 +237,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Bounds units2) (Bounds units3)
   where
-  Quantity## n## / Bounds## dl## dh## = do
+  Quantity## n## ./. Bounds## dl## dh## = do
     let !(# low##, high## #) = doubleOverBounds## n## dl## dh##
     Ordered## low## high##
 
@@ -250,7 +250,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Bounds units1) (Quantity units2) (Bounds units3)
   where
-  Bounds## nl## nh## / Quantity## d## = do
+  Bounds## nl## nh## ./. Quantity## d## = do
     let !(# low##, high## #) = boundsOverDouble## nl## nh## d##
     Ordered## low## high##
 
@@ -263,7 +263,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Bounds units1) (Bounds units2) (Bounds units3)
   where
-  Bounds## nl## nh## / Bounds## dl## dh## = do
+  Bounds## nl## nh## ./. Bounds## dl## dh## = do
     let !(# low##, high## #) = boundsOverBounds## nl## nh## dl## dh##
     Ordered## low## high##
 
@@ -587,15 +587,15 @@ interpolate (Bounds low high) t =
 
 interpolationParameter :: Bounds units -> Quantity units -> Number
 interpolationParameter (Bounds low high) value
-  | low < high = (value - low) / (high - low)
+  | low < high = (value - low) ./. (high - low)
   | value < low = negative Quantity.infinity
   | value > high = Quantity.infinity
   | otherwise = 0.0
 
 resolution :: Bounds units -> Number
 resolution (Bounds low high)
-  | low > Quantity.zero = low / high
-  | high < Quantity.zero = negative high / low
+  | low > Quantity.zero = low ./. high
+  | high < Quantity.zero = negative high ./. low
   | otherwise = 0.0
 
 resolutionThreshold :: Number

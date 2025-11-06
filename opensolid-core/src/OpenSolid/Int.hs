@@ -44,7 +44,7 @@ import Data.Word (Word16, Word32, Word64, Word8)
 import Foreign.C.Types (CSize)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude hiding (gcd, lcm, max, min, product, (*), (+), (-), (/))
+import OpenSolid.Prelude hiding (gcd, lcm, max, min, product, (*), (+), (-))
 import OpenSolid.Random.Internal (Generator (Generator))
 import OpenSolid.Text.Parse qualified as Text.Parse
 import System.Random qualified

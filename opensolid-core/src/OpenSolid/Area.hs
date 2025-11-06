@@ -51,4 +51,4 @@ squareInches = (* squareInch)
 
 -- | Convert an area to a number of square inches.
 inSquareInches :: Area -> Number
-inSquareInches = (/ squareInch)
+inSquareInches = (./. squareInch)

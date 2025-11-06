@@ -10,7 +10,7 @@ import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding ((/))
+import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance

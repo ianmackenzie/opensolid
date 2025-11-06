@@ -753,7 +753,7 @@ numberDivBy ::
   Member value
 numberDivBy =
   PreOverload BinaryOperator.Div $
-    PreOperatorOverload ((/) :: Number -> value -> result)
+    PreOperatorOverload ((./.) :: Number -> value -> result)
 
 numberDivByU ::
   (FFI value, FFI result) =>
@@ -849,7 +849,7 @@ divBy ::
   Member value
 divBy _ =
   PostOverload BinaryOperator.Div $
-    PostOperatorOverload ((/) :: value -> rhs -> result)
+    PostOperatorOverload ((./.) :: value -> rhs -> result)
 
 divByU ::
   (FFI value, FFI rhs, FFI result) =>

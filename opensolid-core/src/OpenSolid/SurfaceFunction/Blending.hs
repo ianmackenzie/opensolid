@@ -89,7 +89,7 @@ blendU0 (f0, dfdu0) f = do
   blend
     (f . uT0, negative t0 * f.du . uT0, t0 * t0 * f.du.du . uT0)
     (f0 . u0, negative t0 * dfdu0 . u0)
-    ((t0 - SurfaceFunction.u) / t0)
+    ((t0 - SurfaceFunction.u) ./. t0)
 
 blendU1 ::
   Blendable function =>
@@ -104,7 +104,7 @@ blendU1 f (f1, dfdu1) = do
   blend
     (f . uT1, t0 * f.du . uT1, t0 * t0 * f.du.du . uT1)
     (f1 . u1, t0 * dfdu1 . u1)
-    ((SurfaceFunction.u - t1) / t0)
+    ((SurfaceFunction.u - t1) ./. t0)
 
 blendV0 ::
   Blendable function =>
@@ -118,7 +118,7 @@ blendV0 (f0, dfdv0) f = do
   blend
     (f . vT0, negative t0 * f.dv . vT0, t0 * t0 * f.dv.dv . vT0)
     (f0 . v0, negative t0 * dfdv0 . v0)
-    ((t0 - SurfaceFunction.v) / t0)
+    ((t0 - SurfaceFunction.v) ./. t0)
 
 blendV1 ::
   Blendable function =>
@@ -133,7 +133,7 @@ blendV1 f (f1, dfdv1) = do
   blend
     (f . uT1, t0 * f.dv . uT1, t0 * t0 * f.dv.dv . uT1)
     (f1 . u1, t0 * dfdv1 . u1)
-    ((SurfaceFunction.v - t1) / t0)
+    ((SurfaceFunction.v - t1) ./. t0)
 
 blend ::
   Blendable function =>

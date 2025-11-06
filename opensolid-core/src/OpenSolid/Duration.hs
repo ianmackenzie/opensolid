@@ -43,7 +43,7 @@ microseconds :: Number -> Duration
 microseconds = (* microsecond)
 
 inMicroseconds :: Duration -> Number
-inMicroseconds = (/ microsecond)
+inMicroseconds = (./. microsecond)
 
 millisecond :: Duration
 millisecond = seconds 1e-3
@@ -52,7 +52,7 @@ milliseconds :: Number -> Duration
 milliseconds = (* millisecond)
 
 inMilliseconds :: Duration -> Number
-inMilliseconds = (/ millisecond)
+inMilliseconds = (./. millisecond)
 
 minute :: Duration
 minute = seconds 60.0
@@ -61,7 +61,7 @@ minutes :: Number -> Duration
 minutes = (* minute)
 
 inMinutes :: Duration -> Number
-inMinutes = (/ minute)
+inMinutes = (./. minute)
 
 hour :: Duration
 hour = minutes 60.0
@@ -70,4 +70,4 @@ hours :: Number -> Duration
 hours = (* hour)
 
 inHours :: Duration -> Number
-inHours = (/ hour)
+inHours = (./. hour)

@@ -93,8 +93,8 @@ quantityBoundsDivision = Test.check 1000 "quantityBoundsDivision" Test.do
   bounds <- Bounds.random Random.length
   t <- Parameter.random
   let y = Bounds.interpolate bounds t
-  let quotient = x / y
-  let boundsQuotient = x / bounds
+  let quotient = x ./. y
+  let boundsQuotient = x ./. bounds
   Test.expect (boundsQuotient |> Bounds.includes quotient)
     |> Test.output "x" x
     |> Test.output "bounds" bounds
@@ -108,8 +108,8 @@ boundsQuantityDivision = Test.check 1000 "boundsQuantityDivision" Test.do
   t <- Parameter.random
   let x = Bounds.interpolate bounds t
   y <- Random.length
-  let quotient = x / y
-  let boundsQuotient = bounds / y
+  let quotient = x ./. y
+  let boundsQuotient = bounds ./. y
   Test.expect (boundsQuotient |> Bounds.includes quotient)
     |> Test.output "bounds" bounds
     |> Test.output "x" x
@@ -128,8 +128,8 @@ boundsBoundsDivision = Test.check 1000 "boundsBoundsDivision" Test.do
   t2 <- Parameter.random
   let x1 = Bounds.interpolate bounds1 t1
   let x2 = Bounds.interpolate bounds2 t2
-  let quotient = x1 / x2
-  let boundsQuotient = bounds1 / bounds2
+  let quotient = x1 ./. x2
+  let boundsQuotient = bounds1 ./. bounds2
   Test.expect (boundsQuotient |> Bounds.includes quotient)
     |> Test.output "bounds1" bounds1
     |> Test.output "bounds2" bounds2

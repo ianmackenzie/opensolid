@@ -339,7 +339,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
   where
-  lhs / rhs = Units.specialize (lhs #/# rhs)
+  lhs ./. rhs = Units.specialize (lhs #/# rhs)
 
 instance
   Division#
@@ -539,13 +539,13 @@ sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =
   new
     @ CompiledFunction.map Expression.sin Angle.sin Bounds.sin function.compiled
-    @ \p -> cos function * (derivative p function / Angle.radian)
+    @ \p -> cos function * (derivative p function ./. Angle.radian)
 
 cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
 cos function =
   new
     @ CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled
-    @ \p -> negative (sin function) * (derivative p function / Angle.radian)
+    @ \p -> negative (sin function) * (derivative p function ./. Angle.radian)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 

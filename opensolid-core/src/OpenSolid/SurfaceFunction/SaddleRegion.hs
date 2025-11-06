@@ -81,7 +81,7 @@ quadratic subproblem saddlePoint = do
   let fbb = ub * ub * fuu + 2.0 *. ub * vb * fuv + vb * vb * fvv
   let determinant = fab #*# fab - faa #*# fbb
   let sqrtD = Quantity.sqrt# determinant
-  let (m1, m2) = Quantity.minmax ((negative fab + sqrtD) / fbb, (negative fab - sqrtD) / fbb)
+  let (m1, m2) = Quantity.minmax ((negative fab + sqrtD) ./. fbb, (negative fab - sqrtD) ./. fbb)
   let v1 = Vector2d.normalize (vA + m1 * vB)
   let v2 = Vector2d.normalize (vA + m2 * vB)
   let d1 = Direction2d.unsafe v1
@@ -143,12 +143,12 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
       case joiningCurve of
         Incoming _ -> do
           let dudt = uP - uC
-          let endDerivative = Vector2d dudt (dudt * (dv / du))
+          let endDerivative = Vector2d dudt (dudt * (dv ./. du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uC uP implicitBounds frame boundingAxes
           Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
         Outgoing _ -> do
           let dudt = uC - uP
-          let startDerivative = Vector2d dudt (dudt * (dv / du))
+          let startDerivative = Vector2d dudt (dudt * (dv ./. du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
           Curve2d.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
     else do
@@ -156,11 +156,11 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
       case joiningCurve of
         Incoming _ -> do
           let dvdt = vP - vC
-          let endDerivative = Vector2d (dvdt * (du / dv)) dvdt
+          let endDerivative = Vector2d (dvdt * (du ./. dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vC vP implicitBounds frame boundingAxes
           Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
         Outgoing _ -> do
           let dvdt = vC - vP
-          let startDerivative = Vector2d (dvdt * (du / dv)) dvdt
+          let startDerivative = Vector2d (dvdt * (du ./. dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vP vC implicitBounds frame boundingAxes
           Curve2d.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing

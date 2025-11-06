@@ -1,7 +1,7 @@
 module Tests.Number (tests) where
 
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding ((/))
+import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified

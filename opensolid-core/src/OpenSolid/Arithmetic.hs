@@ -15,7 +15,7 @@ module OpenSolid.Arithmetic
   , Division# ((#/#))
   , (/#)
   , (#/)
-  , Division ((/), (./.))
+  , Division ((./.))
   , (/.)
   , (./)
   , DotMultiplication# (dot#)
@@ -141,27 +141,19 @@ infixl 7 /#
 infixl 7 #/
 
 class Division a b c | a b -> c where
-  (/) :: a -> b -> c
   (./.) :: a -> b -> c
-
-  (/) = (./.)
-  (./.) = (/)
-
-  {-# MINIMAL (/) | (./.) #-}
-
-infixl 7 /
 
 infixl 7 ./.
 
 {-# INLINE (/.) #-}
 (/.) :: Division Number a b => Number -> a -> b
-(/.) = (/)
+(/.) = (./.)
 
 infixl 7 /.
 
 {-# INLINE (./) #-}
 (./) :: Division a Number b => a -> Number -> b
-(./) = (/)
+(./) = (./.)
 
 infixl 7 ./
 

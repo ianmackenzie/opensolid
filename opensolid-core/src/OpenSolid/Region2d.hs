@@ -61,7 +61,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
-import OpenSolid.Prelude hiding ((*), (+), (-), (/))
+import OpenSolid.Prelude hiding ((*), (+), (-))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Resolution (Resolution)

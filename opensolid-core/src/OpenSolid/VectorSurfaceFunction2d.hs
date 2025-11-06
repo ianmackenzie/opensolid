@@ -280,7 +280,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs / rhs = Units.specialize (lhs #/# rhs)
+  lhs ./. rhs = Units.specialize (lhs #/# rhs)
 
 instance
   Division#

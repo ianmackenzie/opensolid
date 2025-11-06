@@ -104,13 +104,13 @@ perpendicularDirection (Direction3d dx dy dz) = do
   if
     | absX <= absY && absX <= absZ -> do
         let scale = Number.hypot2 dy dz
-        Direction3d 0.0 (-dz / scale) (dy / scale)
+        Direction3d 0.0 (-dz ./. scale) (dy ./. scale)
     | absY <= absX && absY <= absZ -> do
         let scale = Number.hypot2 dx dz
-        Direction3d (dz / scale) 0.0 (-dx / scale)
+        Direction3d (dz ./. scale) 0.0 (-dx ./. scale)
     | otherwise -> do
         let scale = Number.hypot2 dx dy
-        Direction3d (-dy / scale) (dx / scale) 0.0
+        Direction3d (-dy ./. scale) (dx ./. scale) 0.0
 
 forwardComponent :: Direction3d space -> Number
 forwardComponent (Unit3d vector) = Vector3d.forwardComponent vector
@@ -192,7 +192,7 @@ random = do
   -- and only accept vectors inside the unit sphere
   -- (otherwise we'll get a non-uniform distribution)
   if magnitude > 0.1 && magnitude <= 1.0
-    then return (Unit3d (vector / magnitude))
+    then return (Unit3d (vector ./. magnitude))
     else random -- Generated a 'bad' vector, try again
 
 randomVector :: Random.Generator (Vector3d (space @ Unitless))

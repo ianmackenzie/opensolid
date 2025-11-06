@@ -266,7 +266,7 @@ maxSquaredMagnitude# (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Boun
 
 normalize :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ Unitless)
 normalize vectorBounds = do
-  let VectorBounds3d x y z = vectorBounds / magnitude vectorBounds
+  let VectorBounds3d x y z = vectorBounds ./. magnitude vectorBounds
   let nx = clampNormalized x
   let ny = clampNormalized y
   let nz = clampNormalized z

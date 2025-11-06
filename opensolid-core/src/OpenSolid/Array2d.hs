@@ -15,7 +15,7 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude hiding ((*), (+), (-), (/))
+import OpenSolid.Prelude hiding ((*), (+), (-))
 import Prelude ((*), (-))
 
 data Array2d a = Array2d (Int, Int) (Data.Array.Array (Int, Int) a) deriving (Show)

@@ -35,4 +35,4 @@ cubicCentimeters :: Number -> Volume
 cubicCentimeters = (* cubicCentimeter)
 
 inCubicCentimeters :: Volume -> Number
-inCubicCentimeters = (/ cubicCentimeter)
+inCubicCentimeters = (./. cubicCentimeter)

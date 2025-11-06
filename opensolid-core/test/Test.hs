@@ -23,7 +23,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding (all, fail, (*), (+), (-), (/), (>>=))
+import OpenSolid.Prelude hiding (all, fail, (*), (+), (-), (>>=))
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text

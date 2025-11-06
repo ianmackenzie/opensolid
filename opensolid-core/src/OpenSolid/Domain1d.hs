@@ -68,7 +68,7 @@ constant :: Boundary -> Domain1d
 constant Boundary{n, i} = Domain1d{n, i, j = i}
 
 isAtomic :: Domain1d -> Bool
-isAtomic (Domain1d{n, i, j}) = (j - i) / n <= Number.epsilon
+isAtomic (Domain1d{n, i, j}) = (j - i) ./. n <= Number.epsilon
 
 endpoints :: Domain1d -> (Boundary, Boundary)
 endpoints (Domain1d{n, i, j}) = (Boundary{n, i}, Boundary{n, i = j})
@@ -83,7 +83,7 @@ midpoint :: Domain1d -> Boundary
 midpoint (Domain1d n i j) = Boundary (2.0 *. n) (i + j)
 
 width :: Domain1d -> Number
-width (Domain1d n i j) = (j - i) / n
+width (Domain1d n i j) = (j - i) ./. n
 
 bisect :: Domain1d -> (Domain1d, Domain1d)
 bisect (Domain1d{n, i, j}) = do
@@ -99,14 +99,14 @@ half (Domain1d{n, i, j}) = do
   Domain1d (4.0 *. n) (4.0 *. i + delta) (4.0 *. j - delta)
 
 bounds :: Domain1d -> Bounds Unitless
-bounds (Domain1d{n, i, j}) = Bounds (i / n) (j / n)
+bounds (Domain1d{n, i, j}) = Bounds (i ./. n) (j ./. n)
 
 interior :: Domain1d -> Bounds Unitless
 interior (Domain1d{n, i, j}) = do
   let n8 = 8.0 *. n
   let delta = j - i
-  let low = if i == 0.0 then 0.0 else (8.0 *. i + delta) / n8
-  let high = if j == n then 1.0 else (8.0 *. j - delta) / n8
+  let low = if i == 0.0 then 0.0 else (8.0 *. i + delta) ./. n8
+  let high = if j == n then 1.0 else (8.0 *. j - delta) ./. n8
   Bounds low high
 
 overlaps :: Domain1d -> Domain1d -> Bool
@@ -127,8 +127,8 @@ adjacent (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) =
 
 intersectionWidth :: Domain1d -> Domain1d -> Number
 intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do
-  let low = Number.max (i1 / n1) (i2 / n2)
-  let high = Number.min (j1 / n1) (j2 / n2)
+  let low = Number.max (i1 ./. n1) (i2 ./. n2)
+  let high = Number.min (j1 ./. n1) (j2 ./. n2)
   Number.max (high - low) 0.0
 
 samplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number

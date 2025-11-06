@@ -51,7 +51,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Int qualified as Int
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding ((/))
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 -- | An RGB color value.

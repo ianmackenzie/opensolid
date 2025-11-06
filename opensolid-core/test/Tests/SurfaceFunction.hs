@@ -97,7 +97,7 @@ planeTorusSurface = do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let r = majorRadius + minorRadius * SurfaceFunction.cos phi
-  let alpha = Angle.asin (minorRadius / majorRadius)
+  let alpha = Angle.asin (minorRadius ./. majorRadius)
   let normalDirection = Direction3d.polar World3d.frontPlane (alpha + Angle.halfPi)
   let surfaceFunction =
         r * SurfaceFunction.cos theta * World3d.rightwardDirection
@@ -114,7 +114,7 @@ firstDerivativeIsConsistent surfaceFunction p0 parameter = do
   let (p1, p2) = samplingPoints p0 parameter
   let value1 = SurfaceFunction.evaluate surfaceFunction p1
   let value2 = SurfaceFunction.evaluate surfaceFunction p2
-  let numericalDerivative = (value2 - value1) / (2.0 *. samplingRadius)
+  let numericalDerivative = (value2 - value1) ./. (2.0 *. samplingRadius)
   let analyticalDerivative = SurfaceFunction.evaluate partialDerivative p0
   Tolerance.using (Length.meters 1e-6) do
     Test.expect (numericalDerivative ~= analyticalDerivative)

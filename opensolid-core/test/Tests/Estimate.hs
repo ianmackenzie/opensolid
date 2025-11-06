@@ -17,7 +17,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding ((*), (+), (-), (/))
+import OpenSolid.Prelude hiding ((*), (+), (-))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random

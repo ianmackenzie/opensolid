@@ -4,7 +4,7 @@ import Data.List qualified
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude hiding ((*), (+), (-), (/))
+import OpenSolid.Prelude hiding ((*), (+), (-))
 import Test (Test)
 import Test qualified
 import Prelude ((*))

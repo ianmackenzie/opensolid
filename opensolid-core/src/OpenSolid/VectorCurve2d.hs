@@ -294,7 +294,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorCurve2d (space @ units1)) (Quantity units2) (VectorCurve2d (space @ units3))
   where
-  lhs / rhs = Units.specialize (lhs #/# rhs)
+  lhs ./. rhs = Units.specialize (lhs #/# rhs)
 
 instance
   Division#

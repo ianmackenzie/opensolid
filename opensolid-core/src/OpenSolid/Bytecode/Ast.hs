@@ -294,8 +294,8 @@ instance Composition (Variable1d input) (Variable1d Number) (Ast1d input) where
   DifferenceConstantVariable1d lhs rhs . input = lhs - rhs . input
   Product1d lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant1d lhs rhs . input = lhs . input * rhs
-  Quotient1d lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable1d lhs rhs . input = lhs / rhs . input
+  Quotient1d lhs rhs . input = lhs . input ./. rhs . input
+  QuotientConstantVariable1d lhs rhs . input = lhs ./. rhs . input
   Squared1d arg . input = squared (arg . input)
   Cubed1d arg . input = cubed (arg . input)
   Sqrt1d arg . input = sqrt (arg . input)
@@ -395,8 +395,8 @@ instance Composition (Variable1d input) (Variable2d Number) (Ast2d input) where
   Product2d lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant2d lhs rhs . input = lhs . input * rhs
   ProductConstantVariable2d lhs rhs . input = Constant2d lhs * rhs . input
-  Quotient2d lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable2d lhs rhs . input = lhs / rhs . input
+  Quotient2d lhs rhs . input = lhs . input ./. rhs . input
+  QuotientConstantVariable2d lhs rhs . input = lhs ./. rhs . input
   BezierCurve2d controlPoints param . input = case param . input of
     Constant1d paramVal -> Constant2d (evaluateCurve2d (bezierCurve2d controlPoints) paramVal)
     Variable1d paramVar -> Variable2d (BezierCurve2d controlPoints paramVar)
@@ -422,8 +422,8 @@ instance Composition (Variable1d input) (Variable3d Number) (Ast3d input) where
   Product3d lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant3d lhs rhs . input = lhs . input * rhs
   ProductConstantVariable3d lhs rhs . input = Constant3d lhs * rhs . input
-  Quotient3d lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable3d lhs rhs . input = Constant3d lhs / rhs . input
+  Quotient3d lhs rhs . input = lhs . input ./. rhs . input
+  QuotientConstantVariable3d lhs rhs . input = Constant3d lhs ./. rhs . input
   BezierCurve3d controlPoints param . input = case param . input of
     Constant1d paramVal -> Constant3d (evaluateCurve3d (bezierCurve3d controlPoints) paramVal)
     Variable1d paramVar -> Variable3d (BezierCurve3d controlPoints paramVar)
@@ -454,8 +454,8 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Ast1d input) where
   DifferenceConstantVariable1d lhs rhs . input = lhs - rhs . input
   Product1d lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant1d lhs rhs . input = lhs . input * rhs
-  Quotient1d lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable1d lhs rhs . input = lhs / rhs . input
+  Quotient1d lhs rhs . input = lhs . input ./. rhs . input
+  QuotientConstantVariable1d lhs rhs . input = lhs ./. rhs . input
   Squared1d arg . input = squared (arg . input)
   Cubed1d arg . input = cubed (arg . input)
   Sqrt1d arg . input = sqrt (arg . input)
@@ -556,8 +556,8 @@ instance Composition (Variable2d input) (Variable2d UvPoint) (Ast2d input) where
   Product2d lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant2d lhs rhs . input = lhs . input * rhs
   ProductConstantVariable2d lhs rhs . input = Constant2d lhs * rhs . input
-  Quotient2d lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable2d lhs rhs . input = lhs / rhs . input
+  Quotient2d lhs rhs . input = lhs . input ./. rhs . input
+  QuotientConstantVariable2d lhs rhs . input = lhs ./. rhs . input
   BezierCurve2d controlPoints param . input = case param . input of
     Constant1d paramVal -> Constant2d (evaluateCurve2d (bezierCurve2d controlPoints) paramVal)
     Variable1d paramVar -> Variable2d (BezierCurve2d controlPoints paramVar)
@@ -583,8 +583,8 @@ instance Composition (Variable2d input) (Variable3d UvPoint) (Ast3d input) where
   Product3d lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant3d lhs rhs . input = lhs . input * rhs
   ProductConstantVariable3d lhs rhs . input = Constant3d lhs * rhs . input
-  Quotient3d lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable3d lhs rhs . input = lhs / rhs . input
+  Quotient3d lhs rhs . input = lhs . input ./. rhs . input
+  QuotientConstantVariable3d lhs rhs . input = lhs ./. rhs . input
   BezierCurve3d controlPoints param . input = case param . input of
     Constant1d paramVal -> Constant3d (evaluateCurve3d (bezierCurve3d controlPoints) paramVal)
     Variable1d paramVar -> Variable3d (BezierCurve3d controlPoints paramVar)
@@ -731,25 +731,25 @@ instance Multiplication (Ast1d input1) (Quantity units) (Ast1d input1) where
   lhs * rhs = lhs * constant1d rhs
 
 instance input1 ~ input2 => Division (Ast1d input1) (Ast1d input2) (Ast1d input1) where
-  Constant1d lhs / Constant1d rhs = Constant1d (lhs / rhs)
-  Constant1d 0.0 / _ = Constant1d 0.0
-  lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = negative lhs
-  Variable1d lhs / Constant1d rhs = Variable1d (ProductVariableConstant1d lhs (1.0 /. rhs))
-  Constant1d lhs / Variable1d rhs = Variable1d (QuotientConstantVariable1d lhs rhs)
-  Variable1d lhs / Variable1d rhs = Variable1d (lhs / rhs)
+  Constant1d lhs ./. Constant1d rhs = Constant1d (lhs ./. rhs)
+  Constant1d 0.0 ./. _ = Constant1d 0.0
+  lhs ./. Constant1d 1.0 = lhs
+  lhs ./. Constant1d -1.0 = negative lhs
+  Variable1d lhs ./. Constant1d rhs = Variable1d (ProductVariableConstant1d lhs (1.0 /. rhs))
+  Constant1d lhs ./. Variable1d rhs = Variable1d (QuotientConstantVariable1d lhs rhs)
+  Variable1d lhs ./. Variable1d rhs = Variable1d (lhs ./. rhs)
 
 instance
   input1 ~ input2 =>
   Division (Variable1d input1) (Variable1d input2) (Variable1d input1)
   where
-  lhs / rhs = Quotient1d lhs rhs
+  lhs ./. rhs = Quotient1d lhs rhs
 
 instance Division (Quantity units) (Ast1d input) (Ast1d input) where
-  lhs / rhs = constant1d lhs / rhs
+  lhs ./. rhs = constant1d lhs ./. rhs
 
 instance Division (Ast1d input) (Quantity units) (Ast1d input) where
-  lhs / rhs = lhs / constant1d rhs
+  lhs ./. rhs = lhs ./. constant1d rhs
 
 instance Negation (Ast2d input) where
   negative (Constant2d val) = Constant2d (negative val)
@@ -838,19 +838,19 @@ instance Multiplication (Quantity units) (Ast2d input) (Ast2d input) where
   lhs * rhs = constant1d lhs * rhs
 
 instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1) where
-  Constant2d lhs / Constant1d rhs = Constant2d (lhs / rhs)
-  Constant2d lhs / _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
-  lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = negative lhs
-  Variable2d lhs / Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1.0 /. rhs))
-  Constant2d lhs / Variable1d rhs = Variable2d (QuotientConstantVariable2d lhs rhs)
-  Variable2d lhs / Variable1d rhs = Variable2d (Quotient2d lhs rhs)
+  Constant2d lhs ./. Constant1d rhs = Constant2d (lhs ./. rhs)
+  Constant2d lhs ./. _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
+  lhs ./. Constant1d 1.0 = lhs
+  lhs ./. Constant1d -1.0 = negative lhs
+  Variable2d lhs ./. Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1.0 /. rhs))
+  Constant2d lhs ./. Variable1d rhs = Variable2d (QuotientConstantVariable2d lhs rhs)
+  Variable2d lhs ./. Variable1d rhs = Variable2d (Quotient2d lhs rhs)
 
 instance Division (Vector2d (space @ units)) (Ast1d input) (Ast2d input) where
-  lhs / rhs = constant2d lhs / rhs
+  lhs ./. rhs = constant2d lhs ./. rhs
 
 instance Division (Ast2d input) (Quantity units) (Ast2d input) where
-  lhs / rhs = lhs / constant1d rhs
+  lhs ./. rhs = lhs ./. constant1d rhs
 
 instance Negation (Ast3d input) where
   negative (Constant3d val) = Constant3d (negative val)
@@ -939,19 +939,19 @@ instance Multiplication (Quantity units) (Ast3d input) (Ast3d input) where
   lhs * rhs = constant1d lhs * rhs
 
 instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1) where
-  Constant3d lhs / Constant1d rhs = Constant3d (lhs / rhs)
-  Constant3d lhs / _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
-  lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = negative lhs
-  Variable3d lhs / Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1.0 /. rhs))
-  Constant3d lhs / Variable1d rhs = Variable3d (QuotientConstantVariable3d lhs rhs)
-  Variable3d lhs / Variable1d rhs = Variable3d (Quotient3d lhs rhs)
+  Constant3d lhs ./. Constant1d rhs = Constant3d (lhs ./. rhs)
+  Constant3d lhs ./. _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
+  lhs ./. Constant1d 1.0 = lhs
+  lhs ./. Constant1d -1.0 = negative lhs
+  Variable3d lhs ./. Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1.0 /. rhs))
+  Constant3d lhs ./. Variable1d rhs = Variable3d (QuotientConstantVariable3d lhs rhs)
+  Variable3d lhs ./. Variable1d rhs = Variable3d (Quotient3d lhs rhs)
 
 instance Division (Vector3d (space @ units)) (Ast1d input) (Ast3d input) where
-  lhs / rhs = constant3d lhs / rhs
+  lhs ./. rhs = constant3d lhs ./. rhs
 
 instance Division (Ast3d input) (Quantity units) (Ast3d input) where
-  lhs / rhs = lhs / constant1d rhs
+  lhs ./. rhs = lhs ./. constant1d rhs
 
 instance input1 ~ input2 => DotMultiplication (Ast2d input1) (Ast2d input2) (Ast1d input1) where
   Constant2d lhs `dot` Constant2d rhs = Constant1d (lhs `dot` rhs)

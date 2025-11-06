@@ -121,7 +121,7 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
-import OpenSolid.Prelude hiding ((*), (+), (-), (/))
+import OpenSolid.Prelude hiding ((*), (+), (-))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
