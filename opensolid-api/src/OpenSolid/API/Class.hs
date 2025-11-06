@@ -890,12 +890,12 @@ divBySelf = divBy @value Self
 floorDivBySelf :: forall units. FFI (Quantity units) => Member (Quantity units)
 floorDivBySelf =
   PostOverload BinaryOperator.FloorDiv $
-    PostOperatorOverload ((//) :: Quantity units -> Quantity units -> Int)
+    PostOperatorOverload ((.//.) :: Quantity units -> Quantity units -> Int)
 
 modBySelf :: forall units. FFI (Quantity units) => Member (Quantity units)
 modBySelf =
   PostOverload BinaryOperator.Mod $
-    PostOperatorOverload ((%) :: Quantity units -> Quantity units -> Quantity units)
+    PostOperatorOverload ((.%.) :: Quantity units -> Quantity units -> Quantity units)
 
 dotProduct ::
   forall rhs value result.

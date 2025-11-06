@@ -1,7 +1,7 @@
 module OpenSolid.Quantity
   ( Quantity (Quantity, Quantity##)
-  , (//)
-  , (%)
+  , (.//.)
+  , (.%.)
   , zero
   , unit
   , infinity
@@ -162,17 +162,17 @@ instance
   {-# INLINEABLE (./.) #-}
   Quantity x ./. Quantity y = Quantity (x / y)
 
-{-# INLINE (//) #-}
-(//) :: Quantity units -> Quantity units -> Int
-x // y = Prelude.floor (x ./. y)
+{-# INLINE (.//.) #-}
+(.//.) :: Quantity units -> Quantity units -> Int
+x .//. y = Prelude.floor (x ./. y)
 
-infixl 7 //
+infixl 7 .//.
 
-{-# INLINE (%) #-}
-(%) :: Quantity units -> Quantity units -> Quantity units
-x % y = x .-. y .* fromIntegral (x // y)
+{-# INLINE (.%.) #-}
+(.%.) :: Quantity units -> Quantity units -> Quantity units
+x .%. y = x .-. y .* fromIntegral (x .//. y)
 
-infixl 7 %
+infixl 7 .%.
 
 {-# INLINE zero #-}
 zero :: Quantity units

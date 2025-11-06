@@ -30,14 +30,14 @@ intMod =
 numberDiv :: Test
 numberDiv =
   Test.group "Number //" $
-    [ Test.verify "1.7 // 0.5" (Test.expect ((1.7 :: Number) // 0.5 == 3))
-    , Test.verify "-1.7 // 0.5" (Test.expect ((-1.7 :: Number) // 0.5 == -4))
+    [ Test.verify "1.7 // 0.5" (Test.expect (1.7 .//. 0.5 == 3))
+    , Test.verify "-1.7 // 0.5" (Test.expect (-1.7 .//. 0.5 == -4))
     ]
 
 numberMod :: Test
 numberMod =
   Tolerance.using (1e-12 :: Number) do
     Test.group "Number %" $
-      [ Test.verify "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
-      , Test.verify "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))
+      [ Test.verify "1.7 % 0.5" (Test.expect (1.7 .%. 0.5 ~= 0.2))
+      , Test.verify "-1.7 % 0.5" (Test.expect (-1.7 .%. 0.5 ~= 0.3))
       ]
