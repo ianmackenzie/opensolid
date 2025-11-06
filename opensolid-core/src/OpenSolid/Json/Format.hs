@@ -311,7 +311,7 @@ direction2d =
       examples [Direction2d.x] $
         Tolerance.using Quantity.zero $
           lift Vector2d.direction Vector2d.unit $
-            object Vector2d do
+            object Vector2d OpenSolid.Json.Format.do
               requiredField "x" Vector2d.xComponent number
               requiredField "y" Vector2d.yComponent number
 
@@ -320,7 +320,7 @@ vector2d =
   title "Vector2d" $
     description "A displacement vector in 2D space, given by its X and Y components" $
       examples [Vector2d.zero] $
-        object Vector2d do
+        object Vector2d OpenSolid.Json.Format.do
           requiredField "x" Vector2d.xComponent length
           requiredField "y" Vector2d.yComponent length
 
@@ -329,6 +329,6 @@ point2d =
   title "Point2d" $
     description "A position in 2D space, given by its X and Y coordinates" $
       examples [Point2d.origin] $
-        object Point2d do
+        object Point2d OpenSolid.Json.Format.do
           requiredField "x" Point2d.xCoordinate length
           requiredField "y" Point2d.yCoordinate length

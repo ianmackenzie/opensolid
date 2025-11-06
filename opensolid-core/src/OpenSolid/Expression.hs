@@ -243,22 +243,22 @@ instance
 ----------------
 
 instance Negation (Expression Number (Quantity units)) where
-  negate (Curve1d ast _) = curve1d -ast
+  negative (Curve1d ast _) = curve1d (negative ast)
 
 instance Negation (Expression UvPoint (Quantity units)) where
-  negate (Surface1d ast _) = surface1d -ast
+  negative (Surface1d ast _) = surface1d (negative ast)
 
 instance Negation (Expression Number (Vector2d (space @ units))) where
-  negate (VectorCurve2d ast _) = vectorCurve2d -ast
+  negative (VectorCurve2d ast _) = vectorCurve2d (negative ast)
 
 instance Negation (Expression UvPoint (Vector2d (space @ units))) where
-  negate (VectorSurface2d ast _) = vectorSurface2d -ast
+  negative (VectorSurface2d ast _) = vectorSurface2d (negative ast)
 
 instance Negation (Expression Number (Vector3d (space @ units))) where
-  negate (VectorCurve3d ast _) = vectorCurve3d -ast
+  negative (VectorCurve3d ast _) = vectorCurve3d (negative ast)
 
 instance Negation (Expression UvPoint (Vector3d (space @ units))) where
-  negate (VectorSurface3d ast _) = vectorSurface3d -ast
+  negative (VectorSurface3d ast _) = vectorSurface3d (negative ast)
 
 instance
   Multiplication
@@ -267,7 +267,7 @@ instance
     (Expression Number (Quantity units))
   where
   Positive * expression = expression
-  Negative * expression = -expression
+  Negative * expression = negative expression
 
 instance
   Multiplication
@@ -276,7 +276,7 @@ instance
     (Expression UvPoint (Quantity units))
   where
   Positive * expression = expression
-  Negative * expression = -expression
+  Negative * expression = negative expression
 
 instance
   Multiplication
@@ -285,7 +285,7 @@ instance
     (Expression Number (Quantity units))
   where
   expression * Positive = expression
-  expression * Negative = -expression
+  expression * Negative = negative expression
 
 instance
   Multiplication
@@ -294,7 +294,7 @@ instance
     (Expression UvPoint (Quantity units))
   where
   expression * Positive = expression
-  expression * Negative = -expression
+  expression * Negative = negative expression
 
 instance
   Multiplication
@@ -303,7 +303,7 @@ instance
     (Expression Number (Vector2d (space @ units)))
   where
   Positive * expression = expression
-  Negative * expression = -expression
+  Negative * expression = negative expression
 
 instance
   Multiplication
@@ -312,7 +312,7 @@ instance
     (Expression UvPoint (Vector2d (space @ units)))
   where
   Positive * expression = expression
-  Negative * expression = -expression
+  Negative * expression = negative expression
 
 instance
   Multiplication
@@ -321,7 +321,7 @@ instance
     (Expression Number (Vector2d (space @ units)))
   where
   expression * Positive = expression
-  expression * Negative = -expression
+  expression * Negative = negative expression
 
 instance
   Multiplication
@@ -330,7 +330,7 @@ instance
     (Expression UvPoint (Vector2d (space @ units)))
   where
   expression * Positive = expression
-  expression * Negative = -expression
+  expression * Negative = negative expression
 
 instance
   Multiplication
@@ -339,7 +339,7 @@ instance
     (Expression Number (Vector3d (space @ units)))
   where
   Positive * expression = expression
-  Negative * expression = -expression
+  Negative * expression = negative expression
 
 instance
   Multiplication
@@ -348,7 +348,7 @@ instance
     (Expression UvPoint (Vector3d (space @ units)))
   where
   Positive * expression = expression
-  Negative * expression = -expression
+  Negative * expression = negative expression
 
 instance
   Multiplication
@@ -357,7 +357,7 @@ instance
     (Expression Number (Vector3d (space @ units)))
   where
   expression * Positive = expression
-  expression * Negative = -expression
+  expression * Negative = negative expression
 
 instance
   Multiplication
@@ -366,7 +366,7 @@ instance
     (Expression UvPoint (Vector3d (space @ units)))
   where
   expression * Positive = expression
-  expression * Negative = -expression
+  expression * Negative = negative expression
 
 ----------------
 --- ADDITION ---

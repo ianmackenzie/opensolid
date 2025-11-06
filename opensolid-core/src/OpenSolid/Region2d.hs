@@ -281,7 +281,7 @@ addFillet radius curves point = do
           -- sort them by the negation of the incident parameter value
           -- so that the curve with parameter value 1 (the incoming curve) is first
           -- is and the curve with parameter value 0 (the outgoing curve) is second
-          |> List.sortBy (negate . Pair.second)
+          |> List.sortBy (negative . Pair.second)
           |> List.map Pair.first
   let otherCurves = List.filterMap nonIncidentCurve curveIncidences
   case incidentCurves of
@@ -655,7 +655,7 @@ areaIntegral# referencePoint curve = do
   let displacement = curve - referencePoint
   let y = displacement.yComponent
   let dx = displacement.xComponent.derivative
-  -(Curve.integrate (y #*# dx))
+  negative (Curve.integrate (y #*# dx))
 
 loopIsInside :: Tolerance units => Loop (space @ units) -> Loop (space @ units) -> Bool
 loopIsInside outer inner = do

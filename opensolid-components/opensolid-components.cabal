@@ -54,12 +54,12 @@ common config
     ImplicitParams
     LexicalNegation
     MultiWayIf
+    NoImplicitPrelude
     OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
-    RebindableSyntax
     RoleAnnotations
     StrictData
     TypeFamilies

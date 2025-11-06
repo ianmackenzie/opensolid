@@ -61,12 +61,12 @@ common config
     LexicalNegation
     MagicHash
     MultiWayIf
+    NoImplicitPrelude
     OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
-    RebindableSyntax
     RoleAnnotations
     StrictData
     TypeFamilies

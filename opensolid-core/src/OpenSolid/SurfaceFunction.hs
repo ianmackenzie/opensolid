@@ -135,15 +135,15 @@ instance
   value ^ function = function ^ value
 
 instance Negation (SurfaceFunction units) where
-  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
+  negative function = new (negative function.compiled) (\p -> negative (derivative p function))
 
 instance Multiplication Sign (SurfaceFunction units) (SurfaceFunction units) where
   Positive * function = function
-  Negative * function = -function
+  Negative * function = negative function
 
 instance Multiplication (SurfaceFunction units) Sign (SurfaceFunction units) where
   function * Positive = function
-  function * Negative = -function
+  function * Negative = negative function
 
 instance
   units1 ~ units2 =>
@@ -545,7 +545,7 @@ cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
 cos function =
   new
     @ CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled
-    @ \p -> negate (sin function) * (derivative p function / Angle.radian)
+    @ \p -> negative (sin function) * (derivative p function / Angle.radian)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
@@ -558,8 +558,8 @@ zeros function
       -- Using unsafeQuotient should be OK here
       -- since we only actually use dudv and dvdu
       -- in subdomains where we know the denominator is non-zero
-      let dudv = unsafeQuotient -fv fu
-      let dvdu = unsafeQuotient -fu fv
+      let dudv = unsafeQuotient (negative fv) fu
+      let dvdu = unsafeQuotient (negative fu) fv
       case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
         Success solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions

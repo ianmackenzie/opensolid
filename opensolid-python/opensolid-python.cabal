@@ -68,10 +68,10 @@ executable opensolid-python
   default-extensions:
     DataKinds
     GADTs
+    NoImplicitPrelude
     OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
-    RebindableSyntax
     ViewPatterns

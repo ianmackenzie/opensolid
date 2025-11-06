@@ -1,5 +1,5 @@
 module OpenSolid.Arithmetic
-  ( Negation (negate, negative)
+  ( Negation (negative)
   , Addition ((+), (.+.))
   , (+.)
   , (.+)
@@ -34,13 +34,7 @@ import OpenSolid.Units (Unitless)
 import Prelude qualified
 
 class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
-  negate :: a -> a
   negative :: a -> a
-
-  negate = negative
-  negative = negate
-
-  {-# MINIMAL negate | negative #-}
 
 class Addition a b c | a b -> c where
   (+) :: a -> b -> c
@@ -197,7 +191,7 @@ class CrossMultiplication b a c => CrossMultiplication a b c | a b -> c where
 infixl 7 `cross`
 
 instance Negation Int where
-  negate = Prelude.negate
+  negative = Prelude.negate
 
 instance Multiplication# Sign Int Int where
   {-# INLINEABLE (#*#) #-}

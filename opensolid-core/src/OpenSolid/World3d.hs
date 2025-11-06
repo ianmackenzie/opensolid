@@ -50,7 +50,7 @@ rightwardDirection = Direction3d 1.0 0.0 0.0
 
 -- | The global leftward direction of a coordinate system.
 leftwardDirection :: Direction3d space
-leftwardDirection = -rightwardDirection
+leftwardDirection = negative rightwardDirection
 
 -- | The global forward direction of a coordinate system.
 forwardDirection :: Direction3d space
@@ -58,7 +58,7 @@ forwardDirection = Direction3d 0.0 1.0 0.0
 
 -- | The global backward direction of a coordinate system.
 backwardDirection :: Direction3d space
-backwardDirection = -forwardDirection
+backwardDirection = negative forwardDirection
 
 -- | The global upward direction of a coordinate system.
 upwardDirection :: Direction3d space
@@ -66,7 +66,7 @@ upwardDirection = Direction3d 0.0 0.0 1.0
 
 -- | The global downward direction of a coordinate system.
 downwardDirection :: Direction3d space
-downwardDirection = -upwardDirection
+downwardDirection = negative upwardDirection
 
 {-| The forward-facing or 'default' orientation of the global coordinate system.
 

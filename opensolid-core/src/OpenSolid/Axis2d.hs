@@ -61,7 +61,7 @@ moveTo :: Point2d (space @ units) -> Axis2d (space @ units) -> Axis2d (space @ u
 moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
 
 reverse :: Axis2d (space @ units) -> Axis2d (space @ units)
-reverse (Axis2d p0 d) = Axis2d p0 -d
+reverse (Axis2d p0 d) = Axis2d p0 (negative d)
 
 {-| Convert a 2D axis to 3D axis by placing it on a plane.
 

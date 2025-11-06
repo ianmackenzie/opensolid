@@ -48,7 +48,6 @@ foreign-library opensolid-ffi
     OverloadedRecordDot
     OverloadedStrings
     QualifiedDo
-    RebindableSyntax
     TemplateHaskell
 
 executable generate-def-file
@@ -72,4 +71,3 @@ executable generate-def-file
     OverloadedRecordDot
     OverloadedStrings
     QualifiedDo
-    RebindableSyntax

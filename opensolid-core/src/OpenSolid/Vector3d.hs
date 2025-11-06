@@ -117,7 +117,7 @@ zUp vX vY vZ = Vector3d vX vY vZ
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
 yUp :: Quantity units -> Quantity units -> Quantity units -> Vector3d (space @ units)
-yUp vX vY vZ = Vector3d -vX vZ vY
+yUp vX vY vZ = Vector3d (negative vX) vZ vY
 
 componentIn :: Direction3d space -> Vector3d (space @ units) -> Quantity units
 componentIn = dot
@@ -129,10 +129,10 @@ forwardComponent :: Vector3d (space @ units) -> Quantity units
 forwardComponent (Vector3d _ f _) = f
 
 backwardComponent :: Vector3d (space @ units) -> Quantity units
-backwardComponent (Vector3d _ f _) = -f
+backwardComponent (Vector3d _ f _) = negative f
 
 leftwardComponent :: Vector3d (space @ units) -> Quantity units
-leftwardComponent (Vector3d r _ _) = -r
+leftwardComponent (Vector3d r _ _) = negative r
 
 rightwardComponent :: Vector3d (space @ units) -> Quantity units
 rightwardComponent (Vector3d r _ _) = r
@@ -141,7 +141,7 @@ upwardComponent :: Vector3d (space @ units) -> Quantity units
 upwardComponent (Vector3d _ _ u) = u
 
 downwardComponent :: Vector3d (space @ units) -> Quantity units
-downwardComponent (Vector3d _ _ u) = -u
+downwardComponent (Vector3d _ _ u) = negative u
 
 -- | Get the XYZ components of a vector, given an XYZ coordinate convention to use.
 components ::
@@ -172,7 +172,7 @@ This is a convention where positive X is leftward, positive Y is upward, and pos
 -}
 {-# INLINE yUpComponents #-}
 yUpComponents :: Vector3d (space @ units) -> (Quantity units, Quantity units, Quantity units)
-yUpComponents (Vector3d r f u) = (-r, u, f)
+yUpComponents (Vector3d r f u) = (negative r, u, f)
 
 {-# INLINE yUpComponents## #-}
 yUpComponents## :: Vector3d (space @ units) -> (# Double#, Double#, Double# #)

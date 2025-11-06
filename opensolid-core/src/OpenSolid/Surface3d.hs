@@ -159,7 +159,7 @@ boundaryCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoop
 flip :: Surface3d (space @ units) -> Surface3d (space @ units)
 flip surface =
   parametric
-    @ surface.function . SurfaceFunction2d.xy -SurfaceFunction.u SurfaceFunction.v
+    @ surface.function . SurfaceFunction2d.xy (negative SurfaceFunction.u) SurfaceFunction.v
     @ Region2d.mirrorAcross Axis2d.y surface.domain
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.

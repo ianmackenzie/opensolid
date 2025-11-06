@@ -298,7 +298,7 @@ exclusion (Vector3d x y z) (VectorBounds3d bx by bz) = do
     | otherwise -> Quantity.max (Quantity.max exclusionX exclusionY) exclusionZ
 
 inclusion :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Quantity units
-inclusion point box = -(exclusion point box)
+inclusion point box = negative (exclusion point box)
 
 includes :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Bool
 includes (Vector3d vx vy vz) (VectorBounds3d x y z) =
@@ -330,7 +330,7 @@ separation (VectorBounds3d x1 y1 z1) (VectorBounds3d x2 y2 z2) = do
     | otherwise -> Quantity.max (Quantity.max separationX separationY) separationZ
 
 overlap :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ units) -> Quantity units
-overlap first second = -(separation first second)
+overlap first second = negative (separation first second)
 
 intersection ::
   VectorBounds3d (space @ units) ->

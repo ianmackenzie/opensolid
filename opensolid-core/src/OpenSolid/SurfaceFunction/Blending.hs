@@ -87,8 +87,8 @@ blendU0 (f0, dfdu0) f = do
   let u0 = vParameterizationU0
   let uT0 = vParameterizationUT0
   blend
-    (f . uT0, -t0 * f.du . uT0, t0 * t0 * f.du.du . uT0)
-    (f0 . u0, -t0 * dfdu0 . u0)
+    (f . uT0, negative t0 * f.du . uT0, t0 * t0 * f.du.du . uT0)
+    (f0 . u0, negative t0 * dfdu0 . u0)
     ((t0 - SurfaceFunction.u) / t0)
 
 blendU1 ::
@@ -116,8 +116,8 @@ blendV0 (f0, dfdv0) f = do
   let v0 = uParameterizationV0
   let vT0 = uParameterizationVT0
   blend
-    (f . vT0, -t0 * f.dv . vT0, t0 * t0 * f.dv.dv . vT0)
-    (f0 . v0, -t0 * dfdv0 . v0)
+    (f . vT0, negative t0 * f.dv . vT0, t0 * t0 * f.dv.dv . vT0)
+    (f0 . v0, negative t0 * dfdv0 . v0)
     ((t0 - SurfaceFunction.v) / t0)
 
 blendV1 ::

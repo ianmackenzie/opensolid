@@ -287,7 +287,7 @@ instance Composition (Variable1d input) (Variable1d Number) (Ast1d input) where
   CurveParameter . input = Variable1d input
   XComponent arg . input = xComponent (arg . input)
   YComponent arg . input = yComponent (arg . input)
-  Negated1d arg . input = negate (arg . input)
+  Negated1d arg . input = negative (arg . input)
   Sum1d lhs rhs . input = lhs . input + rhs . input
   SumVariableConstant1d lhs rhs . input = lhs . input + rhs
   Difference1d lhs rhs . input = lhs . input - rhs . input
@@ -387,7 +387,7 @@ instance Composition (Variable1d input) (Variable2d Number) (Ast2d input) where
   XY x y . input = xy (x . input) (y . input)
   XC x y . input = xy (x . input) (Constant1d y)
   CY x y . input = xy (Constant1d x) (y . input)
-  Negated2d arg . input = negate (arg . input)
+  Negated2d arg . input = negative (arg . input)
   Sum2d lhs rhs . input = lhs . input + rhs . input
   SumVariableConstant2d lhs rhs . input = lhs . input + rhs
   Difference2d lhs rhs . input = lhs . input - rhs . input
@@ -414,7 +414,7 @@ instance Composition (Ast1d input) (Ast3d Number) (Ast3d input) where
 
 instance Composition (Variable1d input) (Variable3d Number) (Ast3d input) where
   input . CurveParameter = Variable3d input
-  Negated3d arg . input = negate (arg . input)
+  Negated3d arg . input = negative (arg . input)
   Sum3d lhs rhs . input = lhs . input + rhs . input
   SumVariableConstant3d lhs rhs . input = lhs . input + rhs
   Difference3d lhs rhs . input = lhs . input - rhs . input
@@ -447,7 +447,7 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Ast1d input) where
   SurfaceParameter V . input = yComponent (Variable2d input)
   XComponent arg . input = xComponent (arg . input)
   YComponent arg . input = yComponent (arg . input)
-  Negated1d arg . input = negate (arg . input)
+  Negated1d arg . input = negative (arg . input)
   Sum1d lhs rhs . input = lhs . input + rhs . input
   SumVariableConstant1d lhs rhs . input = lhs . input + rhs
   Difference1d lhs rhs . input = lhs . input - rhs . input
@@ -548,7 +548,7 @@ instance Composition (Variable2d input) (Variable2d UvPoint) (Ast2d input) where
   XY x y . input = xy (x . input) (y . input)
   XC x y . input = xy (x . input) (Constant1d y)
   CY x y . input = xy (Constant1d x) (y . input)
-  Negated2d arg . input = negate (arg . input)
+  Negated2d arg . input = negative (arg . input)
   Sum2d lhs rhs . input = lhs . input + rhs . input
   SumVariableConstant2d lhs rhs . input = lhs . input + rhs
   Difference2d lhs rhs . input = lhs . input - rhs . input
@@ -575,7 +575,7 @@ instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
 
 instance Composition (Variable2d input) (Variable3d UvPoint) (Ast3d input) where
   input . SurfaceParameters = Variable3d input
-  Negated3d arg . input = negate (arg . input)
+  Negated3d arg . input = negative (arg . input)
   Sum3d lhs rhs . input = lhs . input + rhs . input
   SumVariableConstant3d lhs rhs . input = lhs . input + rhs
   Difference3d lhs rhs . input = lhs . input - rhs . input
@@ -634,40 +634,40 @@ yComponent (Variable2d (BezierCurve2d controlPoints param)) =
 yComponent (Variable2d var) = Variable1d (YComponent var)
 
 instance Negation (Ast1d input) where
-  negate (Constant1d val) = Constant1d -val
-  negate (Variable1d var) = Variable1d -var
+  negative (Constant1d val) = Constant1d (negative val)
+  negative (Variable1d var) = Variable1d (negative var)
 
 instance Negation (Variable1d input) where
-  negate (Negated1d arg) = arg
-  negate (Difference1d lhs rhs) = Difference1d rhs lhs
-  negate (SumVariableConstant1d lhs rhs) = DifferenceConstantVariable1d -rhs lhs
-  negate (DifferenceConstantVariable1d lhs rhs) = SumVariableConstant1d rhs -lhs
-  negate (ProductVariableConstant1d lhs rhs) = ProductVariableConstant1d lhs -rhs
-  negate (QuotientConstantVariable1d lhs rhs) = QuotientConstantVariable1d -lhs rhs
-  negate (Cubed1d arg) = Cubed1d -arg
-  negate (Sin1d arg) = Sin1d -arg
-  negate (BezierCurve1d controlPoints param) =
-    BezierCurve1d (NonEmpty.map negate controlPoints) param
-  negate (DotVariableConstant2d lhs rhs) = DotVariableConstant2d lhs -rhs
-  negate (CrossVariableConstant2d lhs rhs) = CrossVariableConstant2d lhs -rhs
-  negate (DotVariableConstant3d lhs rhs) = DotVariableConstant3d lhs -rhs
-  negate var = Negated1d var
+  negative (Negated1d arg) = arg
+  negative (Difference1d lhs rhs) = Difference1d rhs lhs
+  negative (SumVariableConstant1d lhs rhs) = DifferenceConstantVariable1d (negative rhs) lhs
+  negative (DifferenceConstantVariable1d lhs rhs) = SumVariableConstant1d rhs (negative lhs)
+  negative (ProductVariableConstant1d lhs rhs) = ProductVariableConstant1d lhs (negative rhs)
+  negative (QuotientConstantVariable1d lhs rhs) = QuotientConstantVariable1d (negative lhs) rhs
+  negative (Cubed1d arg) = Cubed1d (negative arg)
+  negative (Sin1d arg) = Sin1d (negative arg)
+  negative (BezierCurve1d controlPoints param) =
+    BezierCurve1d (NonEmpty.map negative controlPoints) param
+  negative (DotVariableConstant2d lhs rhs) = DotVariableConstant2d lhs (negative rhs)
+  negative (CrossVariableConstant2d lhs rhs) = CrossVariableConstant2d lhs (negative rhs)
+  negative (DotVariableConstant3d lhs rhs) = DotVariableConstant3d lhs (negative rhs)
+  negative var = Negated1d var
 
 instance Multiplication Sign (Ast1d input) (Ast1d input) where
   Positive * ast = ast
-  Negative * ast = -ast
+  Negative * ast = negative ast
 
 instance Multiplication (Ast1d input) Sign (Ast1d input) where
   ast * Positive = ast
-  ast * Negative = -ast
+  ast * Negative = negative ast
 
 instance Multiplication Sign (Variable1d input) (Variable1d input) where
   Positive * var = var
-  Negative * var = -var
+  Negative * var = negative var
 
 instance Multiplication (Variable1d input) Sign (Variable1d input) where
   var * Positive = var
-  var * Negative = -var
+  var * Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast1d input1) (Ast1d input2) (Ast1d input1) where
   Constant1d 0.0 + rhs = rhs
@@ -691,10 +691,10 @@ instance Addition (Ast1d input1) (Quantity units) (Ast1d input1) where
 
 instance input1 ~ input2 => Subtraction (Ast1d input1) (Ast1d input2) (Ast1d input1) where
   lhs - Constant1d 0.0 = lhs
-  Constant1d 0.0 - rhs = -rhs
+  Constant1d 0.0 - rhs = negative rhs
   Constant1d lhs - Constant1d rhs = Constant1d (lhs - rhs)
   Constant1d lhs - Variable1d rhs = Variable1d (DifferenceConstantVariable1d lhs rhs)
-  Variable1d lhs - Constant1d rhs = Variable1d (SumVariableConstant1d lhs -rhs)
+  Variable1d lhs - Constant1d rhs = Variable1d (SumVariableConstant1d lhs (negative rhs))
   Variable1d lhs - Variable1d rhs = Variable1d (lhs - rhs)
 
 instance
@@ -715,8 +715,8 @@ instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast1d input2) (Ast1d 
   Constant1d 0.0 * _ = Constant1d 0.0
   lhs * Constant1d 1.0 = lhs
   Constant1d 1.0 * rhs = rhs
-  lhs * Constant1d -1.0 = -lhs
-  Constant1d -1.0 * rhs = -rhs
+  lhs * Constant1d -1.0 = negative lhs
+  Constant1d -1.0 * rhs = negative rhs
   Variable1d (ProductVariableConstant1d a b) * Constant1d c = Variable1d a * Constant1d (b * c)
   Constant1d a * Variable1d (ProductVariableConstant1d b c) = Constant1d (a * c) * Variable1d b
   Variable1d lhs * Constant1d rhs = Variable1d (ProductVariableConstant1d lhs rhs)
@@ -734,7 +734,7 @@ instance input1 ~ input2 => Division (Ast1d input1) (Ast1d input2) (Ast1d input1
   Constant1d lhs / Constant1d rhs = Constant1d (lhs / rhs)
   Constant1d 0.0 / _ = Constant1d 0.0
   lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = -lhs
+  lhs / Constant1d -1.0 = negative lhs
   Variable1d lhs / Constant1d rhs = Variable1d (ProductVariableConstant1d lhs (1.0 /. rhs))
   Constant1d lhs / Variable1d rhs = Variable1d (QuotientConstantVariable1d lhs rhs)
   Variable1d lhs / Variable1d rhs = Variable1d (lhs / rhs)
@@ -752,29 +752,29 @@ instance Division (Ast1d input) (Quantity units) (Ast1d input) where
   lhs / rhs = lhs / constant1d rhs
 
 instance Negation (Ast2d input) where
-  negate (Constant2d val) = Constant2d -val
-  negate (Variable2d var) = Variable2d -var
+  negative (Constant2d val) = Constant2d (negative val)
+  negative (Variable2d var) = Variable2d (negative var)
 
 instance Negation (Variable2d input) where
-  negate (Negated2d arg) = arg
-  negate (Difference2d lhs rhs) = Difference2d rhs lhs
-  negate var = Negated2d var
+  negative (Negated2d arg) = arg
+  negative (Difference2d lhs rhs) = Difference2d rhs lhs
+  negative var = Negated2d var
 
 instance Multiplication Sign (Ast2d input) (Ast2d input) where
   Positive * ast = ast
-  Negative * ast = -ast
+  Negative * ast = negative ast
 
 instance Multiplication (Ast2d input) Sign (Ast2d input) where
   ast * Positive = ast
-  ast * Negative = -ast
+  ast * Negative = negative ast
 
 instance Multiplication Sign (Variable2d input) (Variable2d input) where
   Positive * var = var
-  Negative * var = -var
+  Negative * var = negative var
 
 instance Multiplication (Variable2d input) Sign (Variable2d input) where
   var * Positive = var
-  var * Negative = -var
+  var * Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast2d input1) (Ast2d input2) (Ast2d input1) where
   Constant2d lhs + rhs | lhs == Vector2d.zero = rhs
@@ -798,10 +798,10 @@ instance Addition (Ast2d input1) (Vector2d (space @ units)) (Ast2d input1) where
 
 instance input1 ~ input2 => Subtraction (Ast2d input1) (Ast2d input2) (Ast2d input1) where
   lhs - Constant2d rhs | rhs == Vector2d.zero = lhs
-  Constant2d lhs - rhs | lhs == Vector2d.zero = -rhs
+  Constant2d lhs - rhs | lhs == Vector2d.zero = negative rhs
   Constant2d lhs - Constant2d rhs = Constant2d (lhs - rhs)
   Constant2d lhs - Variable2d rhs = Variable2d (DifferenceConstantVariable2d lhs rhs)
-  Variable2d lhs - Constant2d rhs = Variable2d (SumVariableConstant2d lhs -rhs)
+  Variable2d lhs - Constant2d rhs = Variable2d (SumVariableConstant2d lhs (negative rhs))
   Variable2d lhs - Variable2d rhs = Variable2d (lhs - rhs)
 
 instance
@@ -821,7 +821,7 @@ instance input1 ~ input2 => Multiplication (Ast2d input1) (Ast1d input2) (Ast2d 
   _ * Constant1d 0.0 = Constant2d Vector2d.zero
   Constant2d lhs * _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
   lhs * Constant1d 1.0 = lhs
-  lhs * Constant1d -1.0 = -lhs
+  lhs * Constant1d -1.0 = negative lhs
   Variable2d (ProductVariableConstant2d a b) * Constant1d c = Variable2d a * Constant1d (b * c)
   Constant2d a * Variable1d (ProductVariableConstant1d b c) = Constant2d (a * c) * Variable1d b
   Variable2d lhs * Constant1d rhs = Variable2d (ProductVariableConstant2d lhs rhs)
@@ -841,7 +841,7 @@ instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1
   Constant2d lhs / Constant1d rhs = Constant2d (lhs / rhs)
   Constant2d lhs / _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
   lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = -lhs
+  lhs / Constant1d -1.0 = negative lhs
   Variable2d lhs / Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1.0 /. rhs))
   Constant2d lhs / Variable1d rhs = Variable2d (QuotientConstantVariable2d lhs rhs)
   Variable2d lhs / Variable1d rhs = Variable2d (Quotient2d lhs rhs)
@@ -853,29 +853,29 @@ instance Division (Ast2d input) (Quantity units) (Ast2d input) where
   lhs / rhs = lhs / constant1d rhs
 
 instance Negation (Ast3d input) where
-  negate (Constant3d val) = Constant3d -val
-  negate (Variable3d var) = Variable3d -var
+  negative (Constant3d val) = Constant3d (negative val)
+  negative (Variable3d var) = Variable3d (negative var)
 
 instance Negation (Variable3d input) where
-  negate (Negated3d arg) = arg
-  negate (Difference3d lhs rhs) = Difference3d rhs lhs
-  negate var = Negated3d var
+  negative (Negated3d arg) = arg
+  negative (Difference3d lhs rhs) = Difference3d rhs lhs
+  negative var = Negated3d var
 
 instance Multiplication Sign (Ast3d input) (Ast3d input) where
   Positive * ast = ast
-  Negative * ast = -ast
+  Negative * ast = negative ast
 
 instance Multiplication (Ast3d input) Sign (Ast3d input) where
   ast * Positive = ast
-  ast * Negative = -ast
+  ast * Negative = negative ast
 
 instance Multiplication Sign (Variable3d input) (Variable3d input) where
   Positive * var = var
-  Negative * var = -var
+  Negative * var = negative var
 
 instance Multiplication (Variable3d input) Sign (Variable3d input) where
   var * Positive = var
-  var * Negative = -var
+  var * Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast3d input1) (Ast3d input2) (Ast3d input1) where
   Constant3d lhs + rhs | lhs == Vector3d.zero = rhs
@@ -899,10 +899,10 @@ instance Addition (Ast3d input1) (Vector3d (space @ units)) (Ast3d input1) where
 
 instance input1 ~ input2 => Subtraction (Ast3d input1) (Ast3d input2) (Ast3d input1) where
   lhs - Constant3d rhs | rhs == Vector3d.zero = lhs
-  Constant3d lhs - rhs | lhs == Vector3d.zero = -rhs
+  Constant3d lhs - rhs | lhs == Vector3d.zero = negative rhs
   Constant3d lhs - Constant3d rhs = Constant3d (lhs - rhs)
   Constant3d lhs - Variable3d rhs = Variable3d (DifferenceConstantVariable3d lhs rhs)
-  Variable3d lhs - Constant3d rhs = Variable3d (SumVariableConstant3d lhs -rhs)
+  Variable3d lhs - Constant3d rhs = Variable3d (SumVariableConstant3d lhs (negative rhs))
   Variable3d lhs - Variable3d rhs = Variable3d (lhs - rhs)
 
 instance
@@ -922,7 +922,7 @@ instance input1 ~ input2 => Multiplication (Ast3d input1) (Ast1d input2) (Ast3d 
   _ * Constant1d 0.0 = Constant3d Vector3d.zero
   Constant3d lhs * _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
   lhs * Constant1d 1.0 = lhs
-  lhs * Constant1d -1.0 = -lhs
+  lhs * Constant1d -1.0 = negative lhs
   Variable3d (ProductVariableConstant3d a b) * Constant1d c = Variable3d a * Constant1d (b * c)
   Constant3d a * Variable1d (ProductVariableConstant1d b c) = Constant3d (a * c) * Variable1d b
   Variable3d lhs * Constant1d rhs = Variable3d (ProductVariableConstant3d lhs rhs)
@@ -942,7 +942,7 @@ instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1
   Constant3d lhs / Constant1d rhs = Constant3d (lhs / rhs)
   Constant3d lhs / _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
   lhs / Constant1d 1.0 = lhs
-  lhs / Constant1d -1.0 = -lhs
+  lhs / Constant1d -1.0 = negative lhs
   Variable3d lhs / Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1.0 /. rhs))
   Constant3d lhs / Variable1d rhs = Variable3d (QuotientConstantVariable3d lhs rhs)
   Variable3d lhs / Variable1d rhs = Variable3d (Quotient3d lhs rhs)
@@ -978,7 +978,7 @@ instance input1 ~ input2 => CrossMultiplication (Ast2d input1) (Ast2d input2) (A
   Constant2d lhs `cross` _ | lhs == Vector2d.zero = Constant1d 0.0
   _ `cross` Constant2d rhs | rhs == Vector2d.zero = Constant1d 0.0
   Variable2d lhs `cross` Constant2d rhs = Variable1d (CrossVariableConstant2d lhs rhs)
-  Constant2d lhs `cross` Variable2d rhs = Variable1d (CrossVariableConstant2d rhs -lhs)
+  Constant2d lhs `cross` Variable2d rhs = Variable1d (CrossVariableConstant2d rhs (negative lhs))
   Variable2d lhs `cross` Variable2d rhs = Variable1d (Cross2d lhs rhs)
 
 instance CrossMultiplication (Vector2d (space @ units)) (Ast2d input) (Ast1d input) where
@@ -1012,7 +1012,7 @@ instance input1 ~ input2 => CrossMultiplication (Ast3d input1) (Ast3d input2) (A
   Constant3d lhs `cross` _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
   _ `cross` Constant3d rhs | rhs == Vector3d.zero = Constant3d Vector3d.zero
   Variable3d lhs `cross` Constant3d rhs = Variable3d (CrossVariableConstant3d lhs rhs)
-  Constant3d lhs `cross` Variable3d rhs = Variable3d (CrossVariableConstant3d rhs -lhs)
+  Constant3d lhs `cross` Variable3d rhs = Variable3d (CrossVariableConstant3d rhs (negative lhs))
   Variable3d lhs `cross` Variable3d rhs = Variable3d (Cross3d lhs rhs)
 
 instance CrossMultiplication (Vector3d (space @ units)) (Ast3d input) (Ast3d input) where

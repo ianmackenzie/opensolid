@@ -31,23 +31,23 @@ instance
   coerce = id
 
 instance Negation (DirectionBounds3d space) where
-  negate (DirectionBounds3d vectorBounds) = DirectionBounds3d (negate vectorBounds)
+  negative (DirectionBounds3d vectorBounds) = DirectionBounds3d (negative vectorBounds)
 
 instance Multiplication Sign (DirectionBounds3d space) (DirectionBounds3d space) where
   Positive * directionBounds = directionBounds
-  Negative * directionBounds = -directionBounds
+  Negative * directionBounds = negative directionBounds
 
 instance Multiplication# Sign (DirectionBounds3d space) (DirectionBounds3d space) where
   Positive #*# directionBounds = directionBounds
-  Negative #*# directionBounds = -directionBounds
+  Negative #*# directionBounds = negative directionBounds
 
 instance Multiplication (DirectionBounds3d space) Sign (DirectionBounds3d space) where
   directionBounds * Positive = directionBounds
-  directionBounds * Negative = -directionBounds
+  directionBounds * Negative = negative directionBounds
 
 instance Multiplication# (DirectionBounds3d space) Sign (DirectionBounds3d space) where
   directionBounds #*# Positive = directionBounds
-  directionBounds #*# Negative = -directionBounds
+  directionBounds #*# Negative = negative directionBounds
 
 instance
   Multiplication

@@ -119,18 +119,18 @@ instance HasZero (Quantity units) where
   zero = zero
 
 instance Negation (Quantity units) where
-  {-# INLINE negate #-}
-  negate (Quantity x) = Quantity (Prelude.negate x)
+  {-# INLINE negative #-}
+  negative (Quantity x) = Quantity (Prelude.negate x)
 
 instance Multiplication Sign (Quantity units) (Quantity units) where
   {-# INLINEABLE (.*.) #-}
   Positive .*. value = value
-  Negative .*. value = -value
+  Negative .*. value = negative value
 
 instance Multiplication (Quantity units) Sign (Quantity units) where
   {-# INLINEABLE (.*.) #-}
   value .*. Positive = value
-  value .*. Negative = -value
+  value .*. Negative = negative value
 
 instance units1 ~ units2 => Addition (Quantity units1) (Quantity units2) (Quantity units1) where
   {-# INLINE (.+.) #-}

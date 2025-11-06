@@ -81,7 +81,7 @@ common config
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
-    RebindableSyntax
+    NoImplicitPrelude
     RoleAnnotations
     StrictData
     TypeFamilies

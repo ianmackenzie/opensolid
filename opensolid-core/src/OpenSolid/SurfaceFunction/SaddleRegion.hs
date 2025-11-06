@@ -81,7 +81,7 @@ quadratic subproblem saddlePoint = do
   let fbb = ub * ub * fuu + 2.0 *. ub * vb * fuv + vb * vb * fvv
   let determinant = fab #*# fab - faa #*# fbb
   let sqrtD = Quantity.sqrt# determinant
-  let (m1, m2) = Quantity.minmax ((-fab + sqrtD) / fbb, (-fab - sqrtD) / fbb)
+  let (m1, m2) = Quantity.minmax ((negative fab + sqrtD) / fbb, (negative fab - sqrtD) / fbb)
   let v1 = Vector2d.normalize (vA + m1 * vB)
   let v2 = Vector2d.normalize (vA + m2 * vB)
   let d1 = Direction2d.unsafe v1
@@ -114,13 +114,13 @@ connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let boundingAxis direction = Axis2d.through saddlePoint direction
   case (Quantity.sign x, Quantity.sign y) of
     (Positive, Positive) ->
-      connect subproblem frame d2 joiningCurve [boundingAxis dx, boundingAxis -dy]
+      connect subproblem frame d2 joiningCurve [boundingAxis dx, boundingAxis (negative dy)]
     (Positive, Negative) ->
-      connect subproblem frame d1 joiningCurve [boundingAxis -dx, boundingAxis -dy]
+      connect subproblem frame d1 joiningCurve [boundingAxis (negative dx), boundingAxis (negative dy)]
     (Negative, Positive) ->
-      connect subproblem frame -d1 joiningCurve [boundingAxis dx, boundingAxis dy]
+      connect subproblem frame (negative d1) joiningCurve [boundingAxis dx, boundingAxis dy]
     (Negative, Negative) ->
-      connect subproblem frame -d2 joiningCurve [boundingAxis -dx, boundingAxis dy]
+      connect subproblem frame (negative d2) joiningCurve [boundingAxis (negative dx), boundingAxis dy]
 
 connect ::
   Tolerance units =>

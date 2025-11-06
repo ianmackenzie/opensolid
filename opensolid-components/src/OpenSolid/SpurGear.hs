@@ -98,7 +98,7 @@ profile gear = do
           |> Point2d.rotateAround Point2d.origin angularSpacing
   let connector
         | rd > rb = Curve2d.line leftStart nextToothStart
-        | otherwise = Curve2d.arc leftStart nextToothStart -Angle.pi
+        | otherwise = Curve2d.arc leftStart nextToothStart (negative Angle.pi)
   let toothProfileCurves = [leftApproximation, rightApproximation, tip, connector]
   let rotatedProfileCurves i = do
         let angle = fromIntegral i *. angularSpacing

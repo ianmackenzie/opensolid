@@ -248,7 +248,7 @@ sphere (Named centerPoint) (Named diameter) =
     else do
       let sketchPlane = Plane3d centerPoint World3d.frontPlane.orientation
       let radius = 0.5 *. diameter
-      let p1 = Point2d.y -radius
+      let p1 = Point2d.y (negative radius)
       let p2 = Point2d.y radius
       let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
       case Region2d.boundedBy profileCurves of
@@ -542,7 +542,7 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
                   else SecondaryEdge{halfEdgeId, startPoint, uvStartPoint = uvCurve.startPoint}
           let updatedRegistry =
                 SurfaceRegistry{unprocessed, processed, edges = edges |> Map.set halfEdgeId edge}
-          let matingHandedness = if correctlyAligned then parentHandedness else -parentHandedness
+          let matingHandedness = if correctlyAligned then parentHandedness else negative parentHandedness
           case (Map.get matingSurfaceId unprocessed, Map.get matingSurfaceId processed) of
             (Nothing, Nothing) -> internalError "No surface found for half-edge"
             (Just _, Just _) -> internalError "Multiple surfaces found for half-edge"

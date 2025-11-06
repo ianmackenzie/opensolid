@@ -60,23 +60,23 @@ reverse :: DirectionCurve3d space -> DirectionCurve3d space
 reverse (DirectionCurve3d vectorCurve) = DirectionCurve3d (VectorCurve3d.reverse vectorCurve)
 
 instance Negation (DirectionCurve3d space) where
-  negate (DirectionCurve3d vectorCurve) = DirectionCurve3d (negate vectorCurve)
+  negative (DirectionCurve3d vectorCurve) = DirectionCurve3d (negative vectorCurve)
 
 instance Multiplication Sign (DirectionCurve3d space) (DirectionCurve3d space) where
   Positive * curve = curve
-  Negative * curve = -curve
+  Negative * curve = negative curve
 
 instance Multiplication# Sign (DirectionCurve3d space) (DirectionCurve3d space) where
   Positive #*# curve = curve
-  Negative #*# curve = -curve
+  Negative #*# curve = negative curve
 
 instance Multiplication (DirectionCurve3d space) Sign (DirectionCurve3d space) where
   curve * Positive = curve
-  curve * Negative = -curve
+  curve * Negative = negative curve
 
 instance Multiplication# (DirectionCurve3d space) Sign (DirectionCurve3d space) where
   curve #*# Positive = curve
-  curve #*# Negative = -curve
+  curve #*# Negative = negative curve
 
 instance
   Multiplication

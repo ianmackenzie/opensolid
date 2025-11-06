@@ -27,7 +27,6 @@ module OpenSolid.Angle
 where
 
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap
 import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Quantity (Quantity (Quantity))

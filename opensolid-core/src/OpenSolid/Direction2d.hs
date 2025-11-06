@@ -186,7 +186,7 @@ placeOn ::
 placeOn plane (Unit2d vector) = Unit3d (Vector2d.placeOn plane vector)
 
 random :: Random.Generator (Direction2d space)
-random = Random.map fromAngle (Quantity.random -Angle.pi Angle.pi)
+random = Random.map fromAngle (Quantity.random (negative Angle.pi) Angle.pi)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

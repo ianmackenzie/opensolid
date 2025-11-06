@@ -147,27 +147,33 @@ bottomPlaneOrientation = (.bottomPlaneOrientation)
 
 -- | Construct an orientation from its front plane orientation.
 fromFrontPlaneOrientation :: PlaneOrientation3d space -> Orientation3d space
-fromFrontPlaneOrientation (PlaneOrientation3d l u) = Orientation3d -l (Unit3d (l `cross` u)) u
+fromFrontPlaneOrientation (PlaneOrientation3d l u) =
+  Orientation3d (negative l) (Unit3d (l `cross` u)) u
 
 -- | Construct an orientation from its back plane orientation.
 fromBackPlaneOrientation :: PlaneOrientation3d space -> Orientation3d space
-fromBackPlaneOrientation (PlaneOrientation3d r u) = Orientation3d r (Unit3d (u `cross` r)) u
+fromBackPlaneOrientation (PlaneOrientation3d r u) =
+  Orientation3d r (Unit3d (u `cross` r)) u
 
 -- | Construct an orientation from its left plane orientation.
 fromLeftPlaneOrientation :: PlaneOrientation3d space -> Orientation3d space
-fromLeftPlaneOrientation (PlaneOrientation3d b u) = Orientation3d (Unit3d (u `cross` b)) -b u
+fromLeftPlaneOrientation (PlaneOrientation3d b u) =
+  Orientation3d (Unit3d (u `cross` b)) (negative b) u
 
 -- | Construct an orientation from its right plane orientation.
 fromRightPlaneOrientation :: PlaneOrientation3d space -> Orientation3d space
-fromRightPlaneOrientation (PlaneOrientation3d f u) = Orientation3d (Unit3d (f `cross` u)) f u
+fromRightPlaneOrientation (PlaneOrientation3d f u) =
+  Orientation3d (Unit3d (f `cross` u)) f u
 
 -- | Construct an orientation from its top plane orientation.
 fromTopPlaneOrientation :: PlaneOrientation3d space -> Orientation3d space
-fromTopPlaneOrientation (PlaneOrientation3d r f) = Orientation3d r f (Unit3d (r `cross` f))
+fromTopPlaneOrientation (PlaneOrientation3d r f) =
+  Orientation3d r f (Unit3d (r `cross` f))
 
 -- | Construct an orientation from its bottom plane orientation.
 fromBottomPlaneOrientation :: PlaneOrientation3d space -> Orientation3d space
-fromBottomPlaneOrientation (PlaneOrientation3d l f) = Orientation3d -l f (Unit3d (f `cross` l))
+fromBottomPlaneOrientation (PlaneOrientation3d l f) =
+  Orientation3d (negative l) f (Unit3d (f `cross` l))
 
 {-| Construct a backward facing orientation relative to a parent/reference orientation.
 

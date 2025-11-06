@@ -100,19 +100,19 @@ resolve function estimate =
 newtype Negate units = Negate (Estimate units)
 
 instance Interface (Negate units) units where
-  boundsImpl (Negate estimate) = negate (bounds estimate)
-  refineImpl (Negate estimate) = negate (refine estimate)
+  boundsImpl (Negate estimate) = negative (bounds estimate)
+  refineImpl (Negate estimate) = negative (refine estimate)
 
 instance Negation (Estimate units) where
-  negate estimate = new (Negate estimate)
+  negative estimate = new (Negate estimate)
 
 instance Multiplication Sign (Estimate units) (Estimate units) where
   Positive .*. estimate = estimate
-  Negative .*. estimate = -estimate
+  Negative .*. estimate = negative estimate
 
 instance Multiplication (Estimate units) Sign (Estimate units) where
   estimate .*. Positive = estimate
-  estimate .*. Negative = -estimate
+  estimate .*. Negative = negative estimate
 
 data Add units = Add (Estimate units) (Estimate units)
 
@@ -447,6 +447,6 @@ pickLargestBy function items = pickMaximumBy (abs . function) items
 sign :: Tolerance units => Estimate units -> Sign
 sign estimate
   | Bounds.lower (bounds estimate) > ?tolerance = Positive
-  | Bounds.upper (bounds estimate) < negate ?tolerance = Negative
+  | Bounds.upper (bounds estimate) < negative ?tolerance = Negative
   | Bounds.width (bounds estimate) ~= Quantity.zero = Positive
   | otherwise = sign (refine estimate)

@@ -125,7 +125,7 @@ instance
     VectorSurfaceFunction2d (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
 instance Negation (VectorSurfaceFunction2d (space @ units)) where
-  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
+  negative function = new (negative function.compiled) (\p -> negative (derivative p function))
 
 instance
   Multiplication
@@ -134,7 +134,7 @@ instance
     (VectorSurfaceFunction2d (space @ units))
   where
   Positive * function = function
-  Negative * function = -function
+  Negative * function = negative function
 
 instance
   Multiplication
@@ -143,7 +143,7 @@ instance
     (VectorSurfaceFunction2d (space @ units))
   where
   function * Positive = function
-  function * Negative = -function
+  function * Negative = negative function
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

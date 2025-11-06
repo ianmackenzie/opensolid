@@ -53,8 +53,14 @@ curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)
       let dY = y2 - y1
       let dXValley = Quantity.clampTo (Bounds 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
       let dXPeak = Quantity.clampTo (Bounds 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
-      let yValley = if Quantity.isInfinite mLow then -Quantity.infinity else y1 + mLow * dXValley
-      let yPeak = if Quantity.isInfinite mHigh then Quantity.infinity else y1 + mHigh * dXPeak
+      let yValley =
+            if Quantity.isInfinite mLow
+              then negative Quantity.infinity
+              else y1 + mLow * dXValley
+      let yPeak =
+            if Quantity.isInfinite mHigh
+              then Quantity.infinity
+              else y1 + mHigh * dXPeak
       Bounds yValley yPeak
 
 curveBoundsOver :: Number -> Number -> Bounds units -> Bounds units -> Bounds units -> Bounds units
@@ -68,6 +74,12 @@ curveBoundsOver x1 x2 y1 y2 (Bounds mLow mHigh)
       let dYHigh = high2 - high1
       let dXValley = Quantity.clampTo (Bounds 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
       let dXPeak = Quantity.clampTo (Bounds 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
-      let yValley = if Quantity.isInfinite mLow then -Quantity.infinity else low1 + mLow * dXValley
-      let yPeak = if Quantity.isInfinite mHigh then Quantity.infinity else high1 + mHigh * dXPeak
+      let yValley =
+            if Quantity.isInfinite mLow
+              then negative Quantity.infinity
+              else low1 + mLow * dXValley
+      let yPeak =
+            if Quantity.isInfinite mHigh
+              then Quantity.infinity
+              else high1 + mHigh * dXPeak
       Bounds yValley yPeak

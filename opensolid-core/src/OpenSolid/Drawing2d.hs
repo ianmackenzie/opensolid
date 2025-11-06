@@ -114,7 +114,7 @@ toSvg viewBox drawing = do
         , Attribute "viewBox" $
             Text.join " " $
               [ lengthText x1
-              , lengthText -y2
+              , lengthText (negative y2)
               , lengthText width
               , lengthText height
               ]
@@ -161,9 +161,9 @@ combineWith attributes function list =
 lineWith :: List (Attribute space) -> Point space -> Point space -> Drawing2d space
 lineWith attributes (Point2d x1 y1) (Point2d x2 y2) = do
   let x1Attribute = Attribute "x1" (lengthText x1)
-  let y1Attribute = Attribute "y1" (lengthText -y1)
+  let y1Attribute = Attribute "y1" (lengthText (negative y1))
   let x2Attribute = Attribute "x2" (lengthText x2)
-  let y2Attribute = Attribute "y2" (lengthText -y2)
+  let y2Attribute = Attribute "y2" (lengthText (negative y2))
   Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
 
 line :: Point space -> Point space -> Drawing2d space
@@ -199,7 +199,7 @@ circleWith ::
 circleWith attributes (Named centerPoint) (Named diameter) = do
   let Point2d cx cy = centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
-  let cyAttribute = Attribute "cy" (lengthText -cy)
+  let cyAttribute = Attribute "cy" (lengthText (negative cy))
   let rAttribute = Attribute "r" (lengthText (0.5 *. diameter))
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
@@ -256,7 +256,7 @@ pointsAttribute givenPoints =
   Attribute "points" (Text.join " " (List.map coordinatesText givenPoints))
 
 coordinatesText :: Point space -> Text
-coordinatesText (Point2d x y) = lengthText x <> "," <> lengthText -y
+coordinatesText (Point2d x y) = lengthText x <> "," <> lengthText (negative y)
 
 lengthText :: Length -> Text
 lengthText givenLength = Text.number (Length.inMillimeters givenLength)

@@ -438,16 +438,16 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       let offsetDistance =
             case whichArc of
               SmallCounterclockwise -> offsetMagnitude
-              SmallClockwise -> -offsetMagnitude
+              SmallClockwise -> negative offsetMagnitude
               LargeClockwise -> offsetMagnitude
-              LargeCounterclockwise -> -offsetMagnitude
+              LargeCounterclockwise -> negative offsetMagnitude
       let offset = offsetDirection * offsetDistance
       let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
       let shortAngle = 2.0 *. Angle.asin (halfDistance / givenRadius)
       let sweptAngle =
             case whichArc of
               SmallCounterclockwise -> shortAngle
-              SmallClockwise -> -shortAngle
+              SmallClockwise -> negative shortAngle
               LargeClockwise -> shortAngle - Angle.twoPi
               LargeCounterclockwise -> Angle.twoPi - shortAngle
       sweptArc centerPoint givenStartPoint sweptAngle
@@ -668,7 +668,7 @@ offsetRightwardBy ::
   Quantity units ->
   Curve2d (space @ units) ->
   Result IsPoint (Curve2d (space @ units))
-offsetRightwardBy distance = offsetLeftwardBy -distance
+offsetRightwardBy distance = offsetLeftwardBy (negative distance)
 
 distanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
 distanceAlong (Axis2d p0 d) curve = (curve - p0) `dot` d

@@ -718,7 +718,7 @@ comparisonImpl :: Ord a => a -> a -> Int
 comparisonImpl lhs rhs = case compare lhs rhs of LT -> -1; EQ -> 0; GT -> 1
 
 negateSelf :: forall value. (FFI value, Negation value) => Member value
-negateSelf = Negate (NegationFunction (negate @value))
+negateSelf = Negate (NegationFunction (negative @value))
 
 absSelf :: FFI value => (value -> value) -> Member value
 absSelf = Abs . AbsFunction

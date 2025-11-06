@@ -59,12 +59,12 @@ library
     ImplicitParams
     LambdaCase
     LexicalNegation
+    NoImplicitPrelude
     OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
-    RebindableSyntax
     TemplateHaskell
     ViewPatterns
 

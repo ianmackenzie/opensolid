@@ -17,16 +17,16 @@ instance System.Random.Stateful.Uniform Sign where
   uniformM = System.Random.Stateful.uniformEnumM
 
 instance Negation Sign where
-  negate Positive = Negative
-  negate Negative = Positive
+  negative Positive = Negative
+  negative Negative = Positive
 
 instance Multiplication# Sign Sign Sign where
   Positive #*# sign = sign
-  Negative #*# sign = -sign
+  Negative #*# sign = negative sign
 
 instance Multiplication Sign Sign Sign where
   Positive * sign = sign
-  Negative * sign = -sign
+  Negative * sign = negative sign
 
 instance Exponentiation Sign Int where
   Positive ** _ = Positive

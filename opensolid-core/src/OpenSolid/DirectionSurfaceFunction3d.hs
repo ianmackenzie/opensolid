@@ -56,8 +56,8 @@ constant direction =
   DirectionSurfaceFunction3d (VectorSurfaceFunction3d.constant (Vector3d.unit direction))
 
 instance Negation (DirectionSurfaceFunction3d space) where
-  negate (DirectionSurfaceFunction3d vectorSurfaceFunction) =
-    DirectionSurfaceFunction3d (negate vectorSurfaceFunction)
+  negative (DirectionSurfaceFunction3d vectorSurfaceFunction) =
+    DirectionSurfaceFunction3d (negative vectorSurfaceFunction)
 
 instance
   Multiplication
@@ -66,7 +66,7 @@ instance
     (DirectionSurfaceFunction3d space)
   where
   Positive * function = function
-  Negative * function = -function
+  Negative * function = negative function
 
 instance
   Multiplication#
@@ -75,7 +75,7 @@ instance
     (DirectionSurfaceFunction3d space)
   where
   Positive #*# function = function
-  Negative #*# function = -function
+  Negative #*# function = negative function
 
 instance
   Multiplication
@@ -84,7 +84,7 @@ instance
     (DirectionSurfaceFunction3d space)
   where
   function * Positive = function
-  function * Negative = -function
+  function * Negative = negative function
 
 instance
   Multiplication#
@@ -93,7 +93,7 @@ instance
     (DirectionSurfaceFunction3d space)
   where
   function #*# Positive = function
-  function #*# Negative = -function
+  function #*# Negative = negative function
 
 instance
   Multiplication

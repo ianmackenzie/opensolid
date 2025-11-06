@@ -57,7 +57,7 @@ instance
   ) =>
   Negation (CompiledFunction inputValue outputValue inputBounds outputBounds)
   where
-  negate = map negate negate negate
+  negative = map negative negative negative
 
 instance
   ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
@@ -71,7 +71,7 @@ instance
     (CompiledFunction inputValue outputValue inputBounds outputBounds)
   where
   Positive * compiled = compiled
-  Negative * compiled = -compiled
+  Negative * compiled = negative compiled
 
 instance
   ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
@@ -85,7 +85,7 @@ instance
     (CompiledFunction inputValue outputValue inputBounds outputBounds)
   where
   compiled * Positive = compiled
-  compiled * Negative = -compiled
+  compiled * Negative = negative compiled
 
 instance
   ( inputValue1 ~ inputValue2

@@ -162,15 +162,15 @@ instance units1 ~ units2 => Intersects (Bounds units1) (Bounds units2) units1 wh
   first ^ second = separation first second <= ?tolerance
 
 instance Negation (Bounds units) where
-  negate (Bounds## low## high##) = Bounds## (negate## high##) (negate## low##)
+  negative (Bounds## low## high##) = Bounds## (negate## high##) (negate## low##)
 
 instance Multiplication Sign (Bounds units) (Bounds units) where
   Positive * bounds = bounds
-  Negative * bounds = -bounds
+  Negative * bounds = negative bounds
 
 instance Multiplication (Bounds units) Sign (Bounds units) where
   bounds * Positive = bounds
-  bounds * Negative = -bounds
+  bounds * Negative = negative bounds
 
 instance units1 ~ units2 => Addition (Bounds units1) (Bounds units2) (Bounds units1) where
   Bounds## low1## high1## + Bounds## low2## high2## =
@@ -289,10 +289,10 @@ zeroTo value = Bounds Quantity.zero value
 The lower bound of the range will be -w/2 and the upper bound will be w/2.
 -}
 symmetric :: "width" ::: Quantity units -> Bounds units
-symmetric (Named width_) = let r = 0.5 *. width_ in Bounds -r r
+symmetric (Named width_) = let r = 0.5 *. width_ in Bounds (negative r) r
 
 infinite :: Bounds units
-infinite = Bounds -Quantity.infinity Quantity.infinity
+infinite = Bounds (negative Quantity.infinity) Quantity.infinity
 
 aggregate2 :: Bounds units -> Bounds units -> Bounds units
 aggregate2 (Bounds low1 high1) (Bounds low2 high2) =
@@ -371,7 +371,7 @@ maxAbs (Bounds low high) = Quantity.max (Quantity.abs low) (Quantity.abs high)
 minAbs :: Bounds units -> Quantity units
 minAbs (Bounds low high)
   | low >= Quantity.zero = low
-  | high <= Quantity.zero = -high
+  | high <= Quantity.zero = negative high
   | otherwise = Quantity.zero
 
 squared :: Units.Squared units1 units2 => Bounds units1 -> Bounds units2
@@ -462,12 +462,12 @@ separation## (Bounds## low1## high1##) (Bounds## low2## high2##) =
   max## (low1## -## high2##) (low2## -## high1##)
 
 overlap :: Bounds units -> Bounds units -> Quantity units
-overlap first second = -(separation first second)
+overlap first second = negative (separation first second)
 
 bisect :: Bounds units -> (Bounds units, Bounds units)
 bisect (Bounds low high) = do
   let mid
-        | low > -Quantity.infinity && high < Quantity.infinity = do
+        | low > negative Quantity.infinity && high < Quantity.infinity = do
             let value = Quantity.midpoint low high
             assert (low < value && value < high) value
         | low < Quantity.zero && high > Quantity.zero = Quantity.zero
@@ -486,13 +486,13 @@ isAtomic (Bounds low high) = do
 
 {-# INLINE isFinite #-}
 isFinite :: Bounds units -> Bool
-isFinite (Bounds low high) = -Quantity.infinity < low && high < Quantity.infinity
+isFinite (Bounds low high) = negative Quantity.infinity < low && high < Quantity.infinity
 
 abs :: Bounds units -> Bounds units
 abs bounds@(Bounds low high)
   | low >= Quantity.zero = bounds
-  | high <= Quantity.zero = -bounds
-  | otherwise = Bounds Quantity.zero (Quantity.max high -low)
+  | high <= Quantity.zero = negative bounds
+  | otherwise = Bounds Quantity.zero (Quantity.max high (negative low))
 
 min :: Bounds units -> Bounds units -> Bounds units
 min (Bounds low1 high1) (Bounds low2 high2) =
@@ -512,7 +512,7 @@ smaller first second = do
     | otherwise -> do
         let Bounds aggregateMin aggregateMax = aggregate2 first second
         let high = Quantity.min high1 high2
-        Bounds (Quantity.max -high aggregateMin) (Quantity.min aggregateMax high)
+        Bounds (Quantity.max (negative high) aggregateMin) (Quantity.min aggregateMax high)
 
 larger :: Bounds units -> Bounds units -> Bounds units
 larger first second = do
@@ -524,8 +524,8 @@ larger first second = do
   if
     | low1 > high2 -> first
     | low2 > high1 -> second
-    | aggregateMin > -low -> Bounds (Quantity.max aggregateMin low) aggregateMax
-    | aggregateMax < low -> Bounds aggregateMin (Quantity.min aggregateMax -low)
+    | aggregateMin > negative low -> Bounds (Quantity.max aggregateMin low) aggregateMax
+    | aggregateMax < low -> Bounds aggregateMin (Quantity.min aggregateMax (negative low))
     | otherwise -> aggregate
 
 minimum :: NonEmpty (Bounds units) -> Bounds units
@@ -539,10 +539,10 @@ smallest list = do
   let initial = NonEmpty.minimumBy maxAbs list
   let clipRadius = maxAbs initial
   let conditionalAggregate current (Bounds low high)
-        | low > clipRadius || high < -clipRadius = current
+        | low > clipRadius || high < negative clipRadius = current
         | otherwise =
             aggregate2 current $
-              Bounds (Quantity.max low -clipRadius) (Quantity.min high clipRadius)
+              Bounds (Quantity.max low (negative clipRadius)) (Quantity.min high clipRadius)
   NonEmpty.foldl conditionalAggregate initial list
 
 largest :: NonEmpty (Bounds units) -> Bounds units
@@ -550,9 +550,9 @@ largest list = do
   let initial = NonEmpty.maximumBy minAbs list
   let clipRadius = minAbs initial
   let conditionalAggregate current bounds@(Bounds low high)
-        | low > -clipRadius && high < clipRadius = current
-        | low > -clipRadius = aggregate2 current (Bounds clipRadius high)
-        | high < clipRadius = aggregate2 current (Bounds low -clipRadius)
+        | low > negative clipRadius && high < clipRadius = current
+        | low > negative clipRadius = aggregate2 current (Bounds clipRadius high)
+        | high < clipRadius = aggregate2 current (Bounds low (negative clipRadius))
         | otherwise = aggregate2 current bounds
   NonEmpty.foldl conditionalAggregate initial list
 
@@ -588,14 +588,14 @@ interpolate (Bounds low high) t =
 interpolationParameter :: Bounds units -> Quantity units -> Number
 interpolationParameter (Bounds low high) value
   | low < high = (value - low) / (high - low)
-  | value < low = -Quantity.infinity
+  | value < low = negative Quantity.infinity
   | value > high = Quantity.infinity
   | otherwise = 0.0
 
 resolution :: Bounds units -> Number
 resolution (Bounds low high)
   | low > Quantity.zero = low / high
-  | high < Quantity.zero = -high / low
+  | high < Quantity.zero = negative high / low
   | otherwise = 0.0
 
 resolutionThreshold :: Number

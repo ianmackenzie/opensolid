@@ -140,7 +140,7 @@ zUp pX pY pZ = Point3d pX pY pZ
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
 yUp :: Quantity units -> Quantity units -> Quantity units -> Point3d (space @ units)
-yUp pX pY pZ = Point3d -pX pZ pY
+yUp pX pY pZ = Point3d (negative pX) pZ pY
 
 interpolateFrom ::
   Point3d (space @ units) ->

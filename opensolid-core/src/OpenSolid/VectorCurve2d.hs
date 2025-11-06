@@ -173,15 +173,15 @@ instance
   vector ^ curve = curve ^ vector
 
 instance Negation (VectorCurve2d (space @ units)) where
-  negate curve = new (negate curve.compiled) (negate curve.derivative)
+  negative curve = new (negative curve.compiled) (negative curve.derivative)
 
 instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
   Positive * curve = curve
-  Negative * curve = -curve
+  Negative * curve = negative curve
 
 instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units)) where
   curve * Positive = curve
-  curve * Negative = -curve
+  curve * Negative = negative curve
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

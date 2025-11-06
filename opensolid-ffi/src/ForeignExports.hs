@@ -7,7 +7,6 @@ module ForeignExports () where
 import FFI qualified
 import Foreign (StablePtr)
 import Foreign qualified
-import OpenSolid.Prelude
 
 foreign export ccall opensolid_release :: StablePtr a -> IO ()
 

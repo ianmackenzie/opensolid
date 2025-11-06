@@ -13,7 +13,6 @@ module OpenSolid.Convention3d
 where
 
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap
 import OpenSolid.CoordinateSystem
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI

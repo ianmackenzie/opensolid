@@ -186,15 +186,15 @@ derivative :: Curve units -> Curve units
 derivative (Curve _ d) = d
 
 instance Negation (Curve units) where
-  negate curve = new (negate curve.compiled) (negate curve.derivative)
+  negative curve = new (negative curve.compiled) (negative curve.derivative)
 
 instance Multiplication Sign (Curve units) (Curve units) where
   Positive .*. curve = curve
-  Negative .*. curve = -curve
+  Negative .*. curve = negative curve
 
 instance Multiplication (Curve units) Sign (Curve units) where
   curve .*. Positive = curve
-  curve .*. Negative = -curve
+  curve .*. Negative = negative curve
 
 instance units1 ~ units2 => Addition (Curve units1) (Curve units2) (Curve units1) where
   lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
@@ -529,7 +529,7 @@ sqrt# curve
               else Nothing
       let singularity1 =
             if isSingularity 1.0
-              then Just (Quantity.zero, -(Quantity.sqrt# (0.5 *. evaluate secondDerivative 1.0)))
+              then Just (Quantity.zero, negative (Quantity.sqrt# (0.5 *. evaluate secondDerivative 1.0)))
               else Nothing
       desingularize singularity0 (unsafeSqrt# curve) singularity1
 
@@ -561,7 +561,7 @@ cos :: Curve Radians -> Curve Unitless
 cos curve =
   new
     (CompiledFunction.map Expression.cos Angle.cos Bounds.cos curve.compiled)
-    (negate (sin curve) .*. (curve.derivative ./. Angle.radian))
+    (negative (sin curve) .*. (curve.derivative ./. Angle.radian))
 
 integrate :: Curve units -> Estimate units
 integrate curve = Estimate.new (Integral curve curve.derivative Bounds.unitInterval)
@@ -577,7 +577,7 @@ instance Estimate.Interface (Integral units) units where
     let y2 = evaluate curve (Bounds.upper domain)
     let m = Bounds.width derivativeBounds
     let error1 = 0.125 *. m .*. dx .*. dx
-    let estimate1 = dx .*. Quantity.midpoint y1 y2 .+. Bounds -error1 error1
+    let estimate1 = dx .*. Quantity.midpoint y1 y2 .+. Bounds (negative error1) error1
     case Bounds.intersection estimate0 estimate1 of
       Just intersection -> intersection
       Nothing -> estimate0 -- Shouldn't happen if bounds are correct

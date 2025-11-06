@@ -99,15 +99,15 @@ instance HasZero (Vector2d (space @ units)) where
   zero = Vector2d## 0.0## 0.0##
 
 instance Negation (Vector2d (space @ units)) where
-  negate (Vector2d## vx## vy##) = Vector2d## (negate## vx##) (negate## vy##)
+  negative (Vector2d## vx## vy##) = Vector2d## (negate## vx##) (negate## vy##)
 
 instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units)) where
   Positive * vector = vector
-  Negative * vector = -vector
+  Negative * vector = negative vector
 
 instance Multiplication (Vector2d (space @ units)) Sign (Vector2d (space @ units)) where
   vector * Positive = vector
-  vector * Negative = -vector
+  vector * Negative = negative vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -276,23 +276,23 @@ instance ApproximateEquality (Direction2d space) Radians where
   d1 ~= d2 = Angle.atan2 (d1 `cross` d2) (d1 `dot` d2) ~= Angle.zero
 
 instance Negation (Direction2d space) where
-  negate (Unit2d v) = Unit2d -v
+  negative (Unit2d v) = Unit2d (negative v)
 
 instance Multiplication# Sign (Direction2d space) (Direction2d space) where
   Positive #*# direction = direction
-  Negative #*# direction = -direction
+  Negative #*# direction = negative direction
 
 instance Multiplication Sign (Direction2d space) (Direction2d space) where
   Positive * direction = direction
-  Negative * direction = -direction
+  Negative * direction = negative direction
 
 instance Multiplication# (Direction2d space) Sign (Direction2d space) where
   direction #*# Positive = direction
-  direction #*# Negative = -direction
+  direction #*# Negative = negative direction
 
 instance Multiplication (Direction2d space) Sign (Direction2d space) where
   direction * Positive = direction
-  direction * Negative = -direction
+  direction * Negative = negative direction
 
 instance Multiplication (Quantity units) (Direction2d space) (Vector2d (space @ units)) where
   scale * Unit2d v = scale * v
@@ -481,15 +481,15 @@ instance
   VectorBounds2d x1 y1 ^ VectorBounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
 
 instance Negation (VectorBounds2d (space @ units)) where
-  negate (VectorBounds2d x y) = VectorBounds2d (negate x) (negate y)
+  negative (VectorBounds2d x y) = VectorBounds2d (negative x) (negative y)
 
 instance Multiplication Sign (VectorBounds2d (space @ units)) (VectorBounds2d (space @ units)) where
   Positive * vectorBounds = vectorBounds
-  Negative * vectorBounds = -vectorBounds
+  Negative * vectorBounds = negative vectorBounds
 
 instance Multiplication (VectorBounds2d (space @ units)) Sign (VectorBounds2d (space @ units)) where
   vectorBounds * Positive = vectorBounds
-  vectorBounds * Negative = -vectorBounds
+  vectorBounds * Negative = negative vectorBounds
 
 instance
   ( space1 ~ space2
@@ -1090,15 +1090,15 @@ instance HasZero (Vector3d (space @ units)) where
   zero = Vector3d Quantity.zero Quantity.zero Quantity.zero
 
 instance Negation (Vector3d (space @ units)) where
-  negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
+  negative (Vector3d vx vy vz) = Vector3d (negative vx) (negative vy) (negative vz)
 
 instance Multiplication Sign (Vector3d (space @ units)) (Vector3d (space @ units)) where
   Positive * vector = vector
-  Negative * vector = -vector
+  Negative * vector = negative vector
 
 instance Multiplication (Vector3d (space @ units)) Sign (Vector3d (space @ units)) where
   vector * Positive = vector
-  vector * Negative = -vector
+  vector * Negative = negative vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -1279,23 +1279,23 @@ instance ApproximateEquality (Direction3d space) Radians where
     Angle.atan2 perpendicular parallel ~= Quantity.zero
 
 instance Negation (Direction3d space) where
-  negate (Unit3d vector) = Unit3d (negate vector)
+  negative (Unit3d vector) = Unit3d (negative vector)
 
 instance Multiplication Sign (Direction3d space) (Direction3d space) where
   Positive * direction = direction
-  Negative * direction = -direction
+  Negative * direction = negative direction
 
 instance Multiplication# Sign (Direction3d space) (Direction3d space) where
   Positive #*# direction = direction
-  Negative #*# direction = -direction
+  Negative #*# direction = negative direction
 
 instance Multiplication (Direction3d space) Sign (Direction3d space) where
   direction * Positive = direction
-  direction * Negative = -direction
+  direction * Negative = negative direction
 
 instance Multiplication# (Direction3d space) Sign (Direction3d space) where
   direction #*# Positive = direction
-  direction #*# Negative = -direction
+  direction #*# Negative = negative direction
 
 instance Multiplication (Quantity units) (Direction3d space) (Vector3d (space @ units)) where
   scale * Unit3d vector = scale * vector
@@ -1365,19 +1365,19 @@ instance HasField "rightwardDirection" (Orientation3d space) (Direction3d space)
   getField (Orientation3d r _ _) = r
 
 instance HasField "leftwardDirection" (Orientation3d space) (Direction3d space) where
-  getField orientation = negate orientation.rightwardDirection
+  getField orientation = negative orientation.rightwardDirection
 
 instance HasField "forwardDirection" (Orientation3d space) (Direction3d space) where
   getField (Orientation3d _ f _) = f
 
 instance HasField "backwardDirection" (Orientation3d space) (Direction3d space) where
-  getField orientation = negate orientation.forwardDirection
+  getField orientation = negative orientation.forwardDirection
 
 instance HasField "upwardDirection" (Orientation3d space) (Direction3d space) where
   getField (Orientation3d _ _ u) = u
 
 instance HasField "downwardDirection" (Orientation3d space) (Direction3d space) where
-  getField orientation = negate orientation.upwardDirection
+  getField orientation = negative orientation.upwardDirection
 
 instance HasField "rightPlaneOrientation" (Orientation3d space) (PlaneOrientation3d space) where
   getField orientation =
@@ -1580,7 +1580,7 @@ instance
   VectorBounds3d r1 f1 u1 ^ VectorBounds3d r2 f2 u2 = r1 ^ r2 && f1 ^ f2 && u1 ^ u2
 
 instance Negation (VectorBounds3d (space @ units)) where
-  negate (VectorBounds3d## xl## xh## yl## yh## zl## zh##) = do
+  negative (VectorBounds3d## xl## xh## yl## yh## zl## zh##) = do
     VectorBounds3d##
       (negate## xh##)
       (negate## xl##)
@@ -1596,7 +1596,7 @@ instance
     (VectorBounds3d (space @ units))
   where
   Positive * vectorBounds = vectorBounds
-  Negative * vectorBounds = -vectorBounds
+  Negative * vectorBounds = negative vectorBounds
 
 instance
   Multiplication
@@ -1605,7 +1605,7 @@ instance
     (VectorBounds3d (space @ units))
   where
   vectorBounds * Positive = vectorBounds
-  vectorBounds * Negative = -vectorBounds
+  vectorBounds * Negative = negative vectorBounds
 
 instance
   ( space1 ~ space2

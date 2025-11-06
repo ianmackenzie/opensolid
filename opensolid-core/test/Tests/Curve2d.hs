@@ -147,7 +147,7 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
           @ #centerPoint Point2d.origin
           @ #radius Length.meter
           @ #startAngle Angle.zero
-          @ #endAngle -Angle.pi
+          @ #endAngle (negative Angle.pi)
   let arc2 =
         Curve2d.polarArc
           @ #centerPoint Point2d.origin
@@ -164,7 +164,7 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "crossingIntersection" Test.do
   let arc1 = Curve2d.arc Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
-  let arc2 = Curve2d.arc Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
+  let arc2 = Curve2d.arc Point2d.origin (Point2d.meters 1.0 0.0) (negative Angle.halfTurn)
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
@@ -189,7 +189,7 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
         Curve2d.polarArc
           @ #centerPoint (Point2d.meters 0.0 1.5)
           @ #radius (Length.meters 0.5)
-          @ #startAngle -Angle.pi
+          @ #startAngle (negative Angle.pi)
           @ #endAngle Angle.zero
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5 Positive)

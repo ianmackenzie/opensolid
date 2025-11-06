@@ -242,11 +242,11 @@ normalize vector = do
 
 -- | Rotate a vector left (counterclockwise) by 90 degrees.
 rotateLeft :: Vector2d (space @ units) -> Vector2d (space @ units)
-rotateLeft (Vector2d vx vy) = Vector2d (negate vy) vx
+rotateLeft (Vector2d vx vy) = Vector2d (negative vy) vx
 
 -- | Rotate a vector right (clockwise) by 90 degrees.
 rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
-rotateRight (Vector2d vx vy) = Vector2d vy (negate vx)
+rotateRight (Vector2d vx vy) = Vector2d vy (negative vx)
 
 {-# INLINE placeIn #-}
 placeIn ::

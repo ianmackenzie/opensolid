@@ -338,7 +338,7 @@ turnLeftBy angle frame = frame |> rotateAround (upwardAxis frame) angle
 This rotates the frame's forward direction toward its rightward direction.
 -}
 turnRightBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-turnRightBy angle frame = frame |> rotateAround (upwardAxis frame) -angle
+turnRightBy angle frame = frame |> rotateAround (upwardAxis frame) (negative angle)
 
 {-| Rotate a frame counterclockwise around its own forward axis by the given angle.
 
@@ -352,7 +352,7 @@ rollRightBy angle frame = frame |> rotateAround (forwardAxis frame) angle
 This rotates the frame's upward direction toward its leftward direction.
 -}
 rollLeftBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rollLeftBy angle frame = frame |> rotateAround (forwardAxis frame) -angle
+rollLeftBy angle frame = frame |> rotateAround (forwardAxis frame) (negative angle)
 
 {-| Rotate a frame counterclockwise around its own rightward axis by the given angle.
 
@@ -366,7 +366,7 @@ tiltUpBy angle frame = frame |> rotateAround (rightwardAxis frame) angle
 This rotates the frame's forward direction toward its downward direction.
 -}
 tiltDownBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-tiltDownBy angle frame = frame |> rotateAround (rightwardAxis frame) -angle
+tiltDownBy angle frame = frame |> rotateAround (rightwardAxis frame) (negative angle)
 
 {-| Turn a frame left by 90 degrees.
 

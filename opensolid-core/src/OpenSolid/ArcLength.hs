@@ -28,7 +28,7 @@ parameterization derivativeMagnitude = do
     | isConstant dsdt1 dsdt2 dsdt3 dsdt4 -> (Curve.t, dsdt1)
     | isLinear dsdt1 dsdt2 dsdt3 dsdt4 -> do
         let delta = dsdt4 .-. dsdt1
-        let t0 = -dsdt1 ./. delta
+        let t0 = negative dsdt1 ./. delta
         let sqrt = Tolerance.using Quantity.zero do
               Curve.sqrt (t0 .*. t0 .+. (1.0 -. 2.0 *. t0) .*. Curve.t)
         let curve = if delta > Quantity.zero then t0 .+. sqrt else t0 .-. sqrt
@@ -98,8 +98,8 @@ buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
       let deltaS = fineEstimate
       let dtduStart = deltaS ./. dsdtStart
       let dtduEnd = deltaS ./. dsdtEnd
-      let d2tdu2Start = -deltaS #*# d2sdt2 tStart .*. dtduStart ./. Quantity.squared# dsdtStart
-      let d2tdu2End = -deltaS #*# d2sdt2 tEnd .*. dtduEnd ./. Quantity.squared# dsdtEnd
+      let d2tdu2Start = negative deltaS #*# d2sdt2 tStart .*. dtduStart ./. Quantity.squared# dsdtStart
+      let d2tdu2End = negative deltaS #*# d2sdt2 tEnd .*. dtduEnd ./. Quantity.squared# dsdtEnd
       let tCurve = Curve.hermite tStart [dtduStart, d2tdu2Start] tEnd [dtduEnd, d2tdu2End]
       (Leaf deltaS tCurve, fineEstimate)
     else do

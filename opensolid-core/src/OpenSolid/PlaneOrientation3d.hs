@@ -96,7 +96,7 @@ gramSchmidt dx vxy = do
     Success dy -> Just (PlaneOrientation3d dx dy)
 
 flip :: PlaneOrientation3d space -> PlaneOrientation3d space
-flip (PlaneOrientation3d i j) = PlaneOrientation3d -i j
+flip (PlaneOrientation3d i j) = PlaneOrientation3d (negative i) j
 
 -- | Get the X direction of a plane orientation.
 xDirection :: PlaneOrientation3d space -> Direction3d space
