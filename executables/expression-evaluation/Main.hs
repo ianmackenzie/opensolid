@@ -5,6 +5,7 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.IO qualified as IO
 import OpenSolid.Number (Number)
+import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude ((.+.), (./.))
 import OpenSolid.Text qualified as Text
@@ -18,7 +19,7 @@ main = do
   let one :: Expression Number Number = Expression.constant 1
   let fraction = tSquared ./. (one .+. tSquared)
   IO.forEach [0 :: Int .. 5] \i -> do
-    let evaluated = Expression.evaluate fraction (fromIntegral i)
+    let evaluated = Expression.evaluate fraction (Number.fromInt i)
     IO.printLine (Text.number evaluated)
 
   IO.printLine "Bezier curve"

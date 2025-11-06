@@ -57,6 +57,7 @@ import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Number (Number)
+import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Unboxed.Math
@@ -170,7 +171,7 @@ infixl 7 //
 
 {-# INLINE (%) #-}
 (%) :: Quantity units -> Quantity units -> Quantity units
-x % y = x .-. y .* fromIntegral (x // y)
+x % y = x .-. y .*. Number.fromInt (x // y)
 
 infixl 7 %
 
@@ -340,4 +341,4 @@ midpoints start end n = range start end (2 * n) [1, 3 .. 2 * n - 1]
 range :: Quantity units -> Quantity units -> Int -> List Int -> List (Quantity units)
 range start end n indices = do
   let delta = end .-. start
-  [start .+. (fromIntegral i / fromIntegral n) *. delta | i <- indices]
+  [start .+. (Number.fromInt i ./. Number.fromInt n) *. delta | i <- indices]

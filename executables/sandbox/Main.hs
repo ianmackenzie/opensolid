@@ -267,7 +267,7 @@ drawBounds bounds = do
 
 drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d UvSpace
 drawCrossingCurve index curve = do
-  let hue = (fromIntegral index *. Angle.goldenAngle) % Angle.twoPi
+  let hue = (Number.fromInt index .*. Angle.goldenAngle) % Angle.twoPi
   let color = Color.hsl1 hue 0.5 0.5
   drawUvCurve [Drawing2d.strokeColor color] curve
 

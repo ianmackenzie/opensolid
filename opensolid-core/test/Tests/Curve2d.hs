@@ -222,7 +222,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.
   p1 <- Random.point2d
   p2 <- Random.point2d
   let curve = Curve2d.cubicBezier p0 p0 p1 p2
-  let decreasingTValues = [Number.pow 2.0 (fromIntegral -n) | n <- [8 :: Int .. 16]]
+  let decreasingTValues = [Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let startTangent = DirectionCurve2d.startValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) decreasingTValues
@@ -236,7 +236,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
   p1 <- Random.point2d
   p2 <- Random.point2d
   let curve = Curve2d.cubicBezier p0 p1 p2 p2
-  let increasingTValues = [1.0 - Number.pow 2.0 (fromIntegral -n) | n <- [8 :: Int .. 16]]
+  let increasingTValues = [1.0 - Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let endTangent = DirectionCurve2d.endValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) increasingTValues
@@ -270,7 +270,7 @@ degenerateStartPointTangentDerivative =
     p1 <- Random.point2d
     p2 <- Random.point2d
     let curve = Curve2d.cubicBezier p0 p0 p1 p2
-    let decreasingTValues = [Number.pow 2.0 (fromIntegral -n) | n <- [8 :: Int .. 16]]
+    let decreasingTValues = [Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let startTangentDerivative = VectorCurve2d.startValue tangentDerivative
@@ -291,7 +291,7 @@ degenerateEndPointTangentDerivative =
     p1 <- Random.point2d
     p2 <- Random.point2d
     let curve = Curve2d.cubicBezier p0 p1 p2 p2
-    let increasingTValues = [1.0 - Number.pow 2.0 (fromIntegral -n) | n <- [8 :: Int .. 16]]
+    let increasingTValues = [1.0 - Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let endTangentDerivative = VectorCurve2d.endValue tangentDerivative
@@ -390,7 +390,7 @@ arcConstruction :: Tolerance Meters => Test
 arcConstruction = do
   let testArcMidpoint numDegrees (expectedX, expectedY) = do
         let label = Text.int numDegrees <> " degrees"
-        let sweptAngle = Angle.degrees (fromIntegral numDegrees)
+        let sweptAngle = Angle.degrees (Number.fromInt numDegrees)
         let expectedPoint = Point2d.meters expectedX expectedY
         Test.verify label Test.do
           let arc = Curve2d.arc Point2d.origin (Point2d.meters 1.0 1.0) sweptAngle

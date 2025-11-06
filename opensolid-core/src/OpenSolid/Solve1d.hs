@@ -55,8 +55,8 @@ neighborhood n value = do
   let magnitude = Quantity.abs value
   let radius =
         Number.pow
-          (fromIntegral (Int.factorial n) *. ?tolerance ./. magnitude)
-          (1.0 / fromIntegral n)
+          (Number.fromInt (Int.factorial n) .*. ?tolerance ./. magnitude)
+          (1 /. Number.fromInt n)
   Neighborhood{n, sign, magnitude, radius}
 
 derivativeTolerance :: Neighborhood units -> Int -> Quantity units

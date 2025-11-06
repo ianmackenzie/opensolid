@@ -65,9 +65,9 @@ rgb1 = Data.Colour.SRGB.sRGB
 rgb255 :: Int -> Int -> Int -> Color
 rgb255 r g b =
   rgb1
-    (fromIntegral r / 255.0)
-    (fromIntegral g / 255.0)
-    (fromIntegral b / 255.0)
+    (Number.fromInt r ./ 255.0)
+    (Number.fromInt g ./ 255.0)
+    (Number.fromInt b ./ 255.0)
 
 {-| Construct a color from its hue, saturation and lightness values.
 
