@@ -1,14 +1,14 @@
 module OpenSolid.Lobatto (p2, p3, w1, w2, w3, w4, estimate) where
 
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding (fromInteger)
-import Prelude ((*), (+), (-), (/))
+import OpenSolid.Prelude
+import Prelude ((/))
 
 p2 :: Number
-p2 = 0.5 - 1 / (2 * Number.sqrt 5)
+p2 = 0.5 -. 1 /. (2 *. Number.sqrt 5)
 
 p3 :: Number
-p3 = 0.5 + 1 / (2 * Number.sqrt 5)
+p3 = 0.5 +. 1 /. (2 *. Number.sqrt 5)
 
 w1 :: Number
 w1 = 1 / 12

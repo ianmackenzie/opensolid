@@ -46,7 +46,6 @@ import OpenSolid.Primitives
 import OpenSolid.Transform qualified as Transform
 import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.World3d qualified as World3d
-import Prelude ((*), (+), (-))
 
 type Rigid coordinateSystem = Transform3d Transform.Rigid coordinateSystem
 
@@ -57,13 +56,13 @@ type Uniform coordinateSystem = Transform3d Transform.Uniform coordinateSystem
 type Affine coordinateSystem = Transform3d Transform.Affine coordinateSystem
 
 unitX :: Vector3d (space @ Unitless)
-unitX = Vector3d 1.0 0.0 0.0
+unitX = Vector3d 1 0 0
 
 unitY :: Vector3d (space @ Unitless)
-unitY = Vector3d 0.0 1.0 0.0
+unitY = Vector3d 0 1 0
 
 unitZ :: Vector3d (space @ Unitless)
-unitZ = Vector3d 0.0 0.0 1.0
+unitZ = Vector3d 0 0 1
 
 identity :: Rigid (space @ units)
 identity = Transform3d World3d.originPoint unitX unitY unitZ
@@ -110,9 +109,9 @@ rotateAround axis angle = do
   let yy = qy .*. qy
   let yz = qy .*. qz
   let zz = qz .*. qz
-  let vx = Vector3d (1.0 - 2.0 * (yy + zz)) (2.0 * (xy + wz)) (2.0 * (xz - wy))
-  let vy = Vector3d (2.0 * (xy - wz)) (1.0 - 2.0 * (xx + zz)) (2.0 * (yz + wx))
-  let vz = Vector3d (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))
+  let vx = Vector3d (1 -. 2 *. (yy .+. zz)) (2 *. (xy .+. wz)) (2 *. (xz .-. wy))
+  let vy = Vector3d (2 *. (xy .-. wz)) (1 -. 2 *. (xx .+. zz)) (2 *. (yz .+. wx))
+  let vz = Vector3d (2 *. (xz .+. wy)) (2 *. (yz .-. wx)) (1 -. 2 *. (xx .+. yy))
   withFixedPoint axis.originPoint vx vy vz
 
 scaleAbout :: Point3d (space @ units) -> Number -> Uniform (space @ units)
@@ -127,21 +126,21 @@ scaleAlong axis scale = do
   let d = axis.direction
   let Direction3d dx dy dz = d
   -- TODO refactor to use Vector3d.scaleIn?
-  let vx = unitX .+. (scale .- 1.0) .*. dx .*. d
-  let vy = unitY .+. (scale .- 1.0) .*. dy .*. d
-  let vz = unitZ .+. (scale .- 1.0) .*. dz .*. d
+  let vx = unitX .+. (scale .- 1) .*. dx .*. d
+  let vy = unitY .+. (scale .- 1) .*. dy .*. d
+  let vz = unitZ .+. (scale .- 1) .*. dz .*. d
   withFixedPoint axis.originPoint vx vy vz
 
 mirrorAcross :: Plane3d (space @ units) defines -> Orthonormal (space @ units)
 mirrorAcross plane = do
   let PlaneOrientation3d i j = plane.orientation
   let Vector3d nx ny nz = i `cross` j
-  let axx = 1.0 -. 2.0 *. nx .*. nx
-  let ayy = 1.0 -. 2.0 *. ny .*. ny
-  let azz = 1.0 -. 2.0 *. nz .*. nz
-  let ayz = -2.0 *. ny .*. nz
-  let axz = -2.0 *. nx .*. nz
-  let axy = -2.0 *. nx .*. ny
+  let axx = 1 -. 2 *. nx .*. nx
+  let ayy = 1 -. 2 *. ny .*. ny
+  let azz = 1 -. 2 *. nz .*. nz
+  let ayz = -2 *. ny .*. nz
+  let axz = -2 *. nx .*. nz
+  let axy = -2 *. nx .*. ny
   let vx = Vector3d axx axy axz
   let vy = Vector3d axy ayy ayz
   let vz = Vector3d axz ayz azz

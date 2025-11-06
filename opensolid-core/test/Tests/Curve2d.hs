@@ -157,8 +157,8 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
-          (OverlappingSegment (Bounds 0.0 (1.0 / 4.0)) (Bounds 0.0 (1 / 6)) Negative)
-          (OverlappingSegment (Bounds (3 / 4) 1.0) (Bounds (5 / 6) 1.0) Negative)
+          (OverlappingSegment (Bounds 0 (1 / 4)) (Bounds 0 (1 / 6)) Negative)
+          (OverlappingSegment (Bounds (3 / 4) 1) (Bounds (5 / 6) 1) Negative)
   Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
 crossingIntersection :: Tolerance Meters => Test

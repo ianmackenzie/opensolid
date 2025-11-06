@@ -652,7 +652,7 @@ findZeros derivatives subdomain derivativeBounds exclusions
   -- Optimization heuristic: bisect down to small subdomains first,
   -- to quickly eliminate most of the curve based on simple value bounds
   -- before attempting more complex/sophisticated solving
-  | Bounds.width (Domain1d.bounds subdomain) > 1.0 / 1024.0 = Solve1d.recurse
+  | Bounds.width (Domain1d.bounds subdomain) > 1 / 1024 = Solve1d.recurse
   | otherwise = case exclusions of
       Solve1d.SomeExclusions -> Solve1d.recurse
       Solve1d.NoExclusions ->

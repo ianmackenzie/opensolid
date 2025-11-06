@@ -19,9 +19,9 @@ tests =
 
 crossingZeros :: Tolerance Unitless => Test
 crossingZeros = Test.verify "crossingZeros" Test.do
-  let x = 3.0 *. Curve.t
-  let y = (x .- 1.0) .*. (x .- 1.0) .*. (x .- 1.0) .-. (x .- 1.0)
-  let expectedZeros = [Zero 0.0 0 Positive, Zero (1.0 / 3.0) 0 Negative, Zero (2 / 3) 0 Positive]
+  let x = 3 *. Curve.t
+  let y = (x .- 1) .*. (x .- 1) .*. (x .- 1) .-. (x .- 1)
+  let expectedZeros = [Zero 0 0 Positive, Zero (1 / 3) 0 Negative, Zero (2 / 3) 0 Positive]
   zeros <- Curve.zeros y
   Test.expect (zeros ~= expectedZeros)
     |> Test.output "zeros" zeros
@@ -31,7 +31,7 @@ tangentZeros :: Tolerance Unitless => Test
 tangentZeros = Test.verify "tangentZeros" Test.do
   let theta = Angle.twoPi .*. Curve.t
   let expression = Curve.squared (Curve.sin theta)
-  let expectedZeros = [Zero t 1 Positive | t <- [0.0, 0.5, 1.0]]
+  let expectedZeros = [Zero t 1 Positive | t <- [0, 0.5, 1]]
   zeros <- Curve.zeros expression
   Test.expect (zeros ~= expectedZeros)
     |> Test.output "zeros" zeros
@@ -45,7 +45,7 @@ approximateEquality = Test.verify "approximateEquality" Test.do
   let sumOfSquares = Curve.squared sinTheta .+. Curve.squared cosTheta
   Test.all
     [ Test.expect (sinTheta != cosTheta)
-    , Test.expect (sinTheta ~= Curve.cos (Angle.degrees 90.0 .-. theta))
-    , Test.expect (sumOfSquares ~= Curve.constant 1.0)
-    , Test.expect (sumOfSquares != Curve.constant 2.0)
+    , Test.expect (sinTheta ~= Curve.cos (Angle.degrees 90 .-. theta))
+    , Test.expect (sumOfSquares ~= Curve.constant 1)
+    , Test.expect (sumOfSquares != Curve.constant 2)
     ]

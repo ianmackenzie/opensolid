@@ -22,7 +22,6 @@ import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import Test (Expectation, Test)
 import Test qualified
-import Prelude ((/))
 
 data Space
 
@@ -51,7 +50,7 @@ arc2d = do
           @ #radius 1.0
           @ #startAngle Angle.zero
           @ #endAngle Angle.pi
-  let point = Point2d (Number.sqrt 2.0 / 2.0) (Number.sqrt 2.0 / 2.0)
+  let point = Point2d (Number.sqrt 2 ./ 2) (Number.sqrt 2 ./ 2)
   curve2d "Arc" (arc .-. point) 0.5 0.25
 
 simpleSurface2d :: Tolerance Unitless => Test
