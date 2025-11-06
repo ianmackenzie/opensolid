@@ -1029,11 +1029,11 @@ squared ast = case ast of
   Variable1d var -> Variable1d (Squared1d var)
 
 sqrt :: Ast1d input -> Ast1d input
-sqrt (Constant1d value) = Constant1d (Number.sqrt value)
+sqrt (Constant1d val) = Constant1d (Number.sqrt val)
 sqrt (Variable1d var) = Variable1d (Sqrt1d var)
 
 cubed :: Ast1d input -> Ast1d input
-cubed (Constant1d value) = Constant1d (Number.cubed value)
+cubed (Constant1d val) = Constant1d (Number.cubed val)
 cubed (Variable1d var) = Variable1d (Cubed1d var)
 
 sin :: Ast1d input -> Ast1d input
@@ -1041,7 +1041,7 @@ sin (Constant1d val) = Constant1d (Number.sin val)
 sin (Variable1d var) = Variable1d (Sin1d var)
 
 cos :: Ast1d input -> Ast1d input
-cos (Constant1d value) = constant1d (Number.cos value)
+cos (Constant1d val) = constant1d (Number.cos val)
 cos (Variable1d var) = Variable1d (Cos1d var)
 
 squaredMagnitude2d :: Ast2d input -> Ast1d input
