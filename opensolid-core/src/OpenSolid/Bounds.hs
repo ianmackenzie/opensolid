@@ -578,8 +578,7 @@ cosIncludesMinMax bounds = (cosIncludesMax (bounds + Angle.pi), cosIncludesMax b
 
 cosIncludesMax :: Bounds Radians -> Bool
 cosIncludesMax (Bounds low high) =
-  (Quantity.isInfinite low || Quantity.isInfinite high)
-    || Number.floor (low / Angle.twoPi) /= Number.floor (high / Angle.twoPi)
+  Quantity.isInfinite low || Quantity.isInfinite high || low // Angle.twoPi /= high // Angle.twoPi
 
 interpolate :: Bounds units -> Number -> Quantity units
 interpolate (Bounds low high) t =
