@@ -97,19 +97,19 @@ instance Show (Quantity SquareMeters) where
 instance Show (Quantity CubicMeters) where
   showsPrec = showsPrecImpl "Area.cubicMeters"
 
-deriving newtype instance Prelude.Num Number
+deriving newtype instance units ~ Unitless => Prelude.Num (Quantity units)
 
-deriving newtype instance Prelude.Real Number
+deriving newtype instance units ~ Unitless => Prelude.Real (Quantity units)
 
-deriving newtype instance Prelude.Fractional Number
+deriving newtype instance units ~ Unitless => Prelude.Fractional (Quantity units)
 
-deriving newtype instance Prelude.RealFrac Number
+deriving newtype instance units ~ Unitless => Prelude.RealFrac (Quantity units)
 
-deriving newtype instance Prelude.Floating Number
+deriving newtype instance units ~ Unitless => Prelude.Floating (Quantity units)
 
-deriving newtype instance Prelude.RealFloat Number
+deriving newtype instance units ~ Unitless => Prelude.RealFloat (Quantity units)
 
-deriving newtype instance Prelude.Read Number
+deriving newtype instance units ~ Unitless => Prelude.Read (Quantity units)
 
 deriving newtype instance Storable (Quantity units)
 
