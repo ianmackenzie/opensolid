@@ -53,10 +53,10 @@ run :: Foldable list => list (IO ()) -> IO ()
 run = Data.Foldable.fold
 
 forEach :: Foldable list => list a -> (a -> IO ()) -> IO ()
-forEach list function = Data.Foldable.foldMap function list
+forEach = Data.Foldable.forM_
 
 forEachWithIndex :: FoldableWithIndex Int list => list a -> (Int -> a -> IO ()) -> IO ()
-forEachWithIndex list function = Data.Foldable.WithIndex.ifoldMap function list
+forEachWithIndex = Data.Foldable.WithIndex.iforM_
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Prelude.mapM
