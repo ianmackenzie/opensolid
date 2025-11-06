@@ -50,8 +50,9 @@ import Data.Colour.SRGB qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((/))
 import OpenSolid.Text qualified as Text
+import Prelude ((/))
 
 -- | An RGB color value.
 type Color = Data.Colour.Colour Number
@@ -62,7 +63,11 @@ rgb1 = Data.Colour.SRGB.sRGB
 
 -- | Construct a color from its RGB components, in the range [0,255].
 rgb255 :: Int -> Int -> Int -> Color
-rgb255 r g b = rgb1 (r / 255) (g / 255) (b / 255)
+rgb255 r g b =
+  rgb1
+    (fromIntegral r / 255.0)
+    (fromIntegral g / 255.0)
+    (fromIntegral b / 255.0)
 
 {-| Construct a color from its hue, saturation and lightness values.
 

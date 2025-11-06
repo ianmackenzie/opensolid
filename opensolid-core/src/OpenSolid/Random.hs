@@ -19,7 +19,6 @@ module OpenSolid.Random
 where
 
 import Data.List.NonEmpty (NonEmpty)
-import OpenSolid.Arithmetic
 import OpenSolid.Array qualified as Array
 import OpenSolid.Bootstrap hiding (sequence)
 import OpenSolid.Composition
@@ -30,6 +29,7 @@ import OpenSolid.Random.Internal
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
+import Prelude ((-))
 import Prelude qualified
 
 newtype Seed = Seed StdGen

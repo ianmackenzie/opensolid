@@ -16,15 +16,15 @@ tests =
 intDiv :: Test
 intDiv =
   Test.group "Int //" $
-    [ Test.verify "10 // 3" (Test.expect (10 `div` 3 == 3))
-    , Test.verify "-10 // 3" (Test.expect (-10 `div` 3 == -4))
+    [ Test.verify "10 // 3" (Test.expect (10 `div` 3 == (3 :: Int)))
+    , Test.verify "-10 // 3" (Test.expect (-10 `div` 3 == (-4 :: Int)))
     ]
 
 intMod :: Test
 intMod =
   Test.group "Int %" $
-    [ Test.verify "10 % 3" (Test.expect (10 `mod` 3 == 1))
-    , Test.verify "-10 % 3" (Test.expect (-10 `mod` 3 == 2))
+    [ Test.verify "10 % 3" (Test.expect (10 `mod` 3 == (1 :: Int)))
+    , Test.verify "-10 % 3" (Test.expect (-10 `mod` 3 == (2 :: Int)))
     ]
 
 numberDiv :: Test

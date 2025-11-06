@@ -55,8 +55,9 @@ import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding (Type, pattern NonEmpty)
+import OpenSolid.Prelude hiding (Type, (*), (+), (-), pattern NonEmpty)
 import OpenSolid.Text qualified as Text
+import Prelude ((*), (+), (-))
 
 class FFI a where
   representation :: Proxy a -> Representation a
@@ -418,12 +419,12 @@ store ptr offset value = do
     IntRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 value)
     NumberRep -> Foreign.pokeByteOff ptr offset (Number.toDouble value)
     BoolRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 (if value then 1 else 0))
-    SignRep -> store ptr offset (1 * value)
+    SignRep -> store ptr offset ((1 :: Int) .*. value)
     TextRep -> do
       let numBytes = Data.Text.Foreign.lengthWord8 value
       contentsPtr <- Foreign.Marshal.Alloc.mallocBytes (numBytes + 1)
       Data.Text.Foreign.unsafeCopyToPtr value contentsPtr
-      Foreign.pokeByteOff contentsPtr numBytes (fromIntegral 0 :: Word8)
+      Foreign.pokeByteOff contentsPtr numBytes (0 :: Word8)
       Foreign.pokeByteOff ptr offset contentsPtr
     ListRep -> do
       let numItems = value.length

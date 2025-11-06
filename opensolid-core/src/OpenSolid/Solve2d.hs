@@ -25,7 +25,7 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding (return)
+import OpenSolid.Prelude hiding (return, (*), (+), (-), (/))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
@@ -35,6 +35,7 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
+import Prelude ((+), (-), (/))
 
 data RecursionType
   = Central
@@ -89,7 +90,7 @@ process callback queue solutions exclusions =
               Pass -> process callback remaining solutions exclusions
               Recurse updatedContext -> do
                 children <- recurseInto subdomain updatedContext recursionType
-                process callback (remaining + children) solutions exclusions
+                process callback (remaining .+. children) solutions exclusions
               Return newSolution -> do
                 let updatedSolutions = newSolution : solutions
                 let updatedExclusions = subdomain : exclusions
@@ -98,7 +99,7 @@ process callback queue solutions exclusions =
               Pass -> process callback remaining solutions exclusions
               Recurse updatedContext -> do
                 children <- recurseInto subdomain updatedContext recursionType
-                process callback (remaining + children) solutions exclusions
+                process callback (remaining .+. children) solutions exclusions
 
 convergenceDomain :: Domain2d -> RecursionType -> Domain2d
 convergenceDomain subdomain recursionType = do
@@ -250,13 +251,13 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
       let Vector2d x1 y1 = f1
       let Vector2d xu1 yu1 = fu p1
       let Vector2d xv1 yv1 = fv p1
-      let determinant = xu1 #*# yv1 - xv1 #*# yu1
+      let determinant = xu1 #*# yv1 .-. xv1 #*# yu1
       if determinant == Quantity.zero
         then Failure Divergence
         else do
-          let deltaU = (xv1 #*# y1 - yv1 #*# x1) / determinant
-          let deltaV = (yu1 #*# x1 - xu1 #*# y1) / determinant
-          let p2 = boundedStep uvBounds p1 (p1 + Vector2d deltaU deltaV)
+          let deltaU = (xv1 #*# y1 .-. yv1 #*# x1) ./. determinant
+          let deltaV = (yu1 #*# x1 .-. xu1 #*# y1) ./. determinant
+          let p2 = boundedStep uvBounds p1 (p1 .+. Vector2d deltaU deltaV)
           let f2 = f p2
           if Vector2d.squaredMagnitude# f2 >= Vector2d.squaredMagnitude# f1
             then -- We've stopped converging, check if we've actually found a root

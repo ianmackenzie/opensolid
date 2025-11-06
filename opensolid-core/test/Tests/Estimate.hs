@@ -17,7 +17,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
@@ -25,6 +25,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import Prelude ((-))
 
 tests :: Tolerance Meters => List Test
 tests =
@@ -122,7 +123,7 @@ area = Test.verify "area" Test.do
           @ #radius Length.meter
           @ #startAngle Angle.pi
           @ #endAngle Angle.zero
-  let dAdt = Curve2d.yCoordinate curve * curve.derivative.xComponent
+  let dAdt = Curve2d.yCoordinate curve .*. curve.derivative.xComponent
   let areaEstimate = Curve.integrate dAdt
   let expectedArea = Area.squareMeters (Number.pi ./ 2.0)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)

@@ -98,7 +98,7 @@ triangleBuilder convention units (v0, v1, v2) = do
     , pointBuilder convention units p0
     , pointBuilder convention units p1
     , pointBuilder convention units p2
-    , Builder.word16LE (fromIntegral 0)
+    , Builder.word16LE 0
     ]
 
 triangleText ::

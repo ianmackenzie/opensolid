@@ -13,9 +13,10 @@ where
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-))
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random qualified as Random
+import Prelude ((*), (+), (-))
 
 steps :: Int -> List Number
 steps n = if n > 0 then List.map (/ n) [0 .. n] else []

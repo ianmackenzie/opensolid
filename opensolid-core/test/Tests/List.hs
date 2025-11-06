@@ -2,9 +2,10 @@ module Tests.List (tests) where
 
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import Test (Test)
 import Test qualified
+import Prelude ((*))
 
 tests :: List Test
 tests =

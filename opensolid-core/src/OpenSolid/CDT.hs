@@ -11,9 +11,10 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Vertex2d (Vertex2d, pattern Vertex2d)
 import System.IO.Unsafe qualified
+import Prelude ((*), (+), (-))
 
 unsafe ::
   Vertex2d vertex (space @ units) =>

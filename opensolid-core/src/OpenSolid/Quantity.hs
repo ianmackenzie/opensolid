@@ -48,7 +48,7 @@ import Data.Hashable (Hashable)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text qualified
 import Foreign.Storable (Storable)
-import OpenSolid.Arithmetic
+import OpenSolid.Arithmetic hiding ((*), (+), (-), (/))
 import OpenSolid.Bootstrap hiding (max, min)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
@@ -64,6 +64,7 @@ import OpenSolid.Unitless (Unitless)
 import OpenSolid.Units (CubicMeters, Meters, Radians, SquareMeters, type (#*#), type (#/#))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
+import Prelude (floor, (*), (+), (-), (/))
 import Prelude qualified
 
 type role Quantity phantom
@@ -122,54 +123,54 @@ instance Negation (Quantity units) where
   negate (Quantity x) = Quantity (Prelude.negate x)
 
 instance Multiplication Sign (Quantity units) (Quantity units) where
-  {-# INLINEABLE (*) #-}
-  Positive * value = value
-  Negative * value = -value
+  {-# INLINEABLE (.*.) #-}
+  Positive .*. value = value
+  Negative .*. value = -value
 
 instance Multiplication (Quantity units) Sign (Quantity units) where
-  {-# INLINEABLE (*) #-}
-  value * Positive = value
-  value * Negative = -value
+  {-# INLINEABLE (.*.) #-}
+  value .*. Positive = value
+  value .*. Negative = -value
 
 instance units1 ~ units2 => Addition (Quantity units1) (Quantity units2) (Quantity units1) where
-  {-# INLINE (+) #-}
-  Quantity x + Quantity y = Quantity (x Prelude.+ y)
+  {-# INLINE (.+.) #-}
+  Quantity x .+. Quantity y = Quantity (x + y)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Quantity units2) (Quantity units1) where
-  {-# INLINE (-) #-}
-  Quantity x - Quantity y = Quantity (x Prelude.- y)
+  {-# INLINE (.-.) #-}
+  Quantity x .-. Quantity y = Quantity (x - y)
 
 instance Multiplication# (Quantity units1) (Quantity units2) (Quantity (units1 #*# units2)) where
   {-# INLINE (#*#) #-}
-  Quantity x #*# Quantity y = Quantity (x Prelude.* y)
+  Quantity x #*# Quantity y = Quantity (x * y)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Quantity units2) (Quantity units3)
   where
-  {-# INLINEABLE (*) #-}
-  Quantity x * Quantity y = Quantity (x Prelude.* y)
+  {-# INLINEABLE (.*.) #-}
+  Quantity x .*. Quantity y = Quantity (x * y)
 
 instance Division# (Quantity units1) (Quantity units2) (Quantity (units1 #/# units2)) where
   {-# INLINE (#/#) #-}
-  Quantity x #/# Quantity y = Quantity (x Prelude./ y)
+  Quantity x #/# Quantity y = Quantity (x / y)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Quantity units2) (Quantity units3)
   where
-  {-# INLINEABLE (/) #-}
-  Quantity x / Quantity y = Quantity (x Prelude./ y)
+  {-# INLINEABLE (./.) #-}
+  Quantity x ./. Quantity y = Quantity (x / y)
 
 {-# INLINE (//) #-}
 (//) :: Quantity units -> Quantity units -> Int
-x // y = Prelude.floor (x / y)
+x // y = floor (x ./. y)
 
 infixl 7 //
 
 {-# INLINE (%) #-}
 (%) :: Quantity units -> Quantity units -> Quantity units
-x % y = x - y .* fromIntegral (x // y)
+x % y = x .-. y .* fromIntegral (x // y)
 
 infixl 7 %
 
@@ -182,7 +183,7 @@ unit :: Quantity units
 unit = Quantity 1.0
 
 infinity :: Quantity units
-infinity = unit / (zero :: Number)
+infinity = unit ./. (zero :: Number)
 
 {-# INLINE coerce #-}
 coerce :: Quantity units1 -> Quantity units2
@@ -201,7 +202,7 @@ isInfinite (Quantity x) = Prelude.isInfinite x
 
 {-# INLINE squared #-}
 squared :: Units.Squared units1 units2 => Quantity units1 -> Quantity units2
-squared x = x * x
+squared x = x .*. x
 
 {-# INLINE squared# #-}
 squared# :: Quantity units -> Quantity (units #*# units)
@@ -285,14 +286,14 @@ largestBy function (x :| xs) = go x (abs (function x)) xs
 -- | Interpolate from one value to another, based on a parameter that ranges from 0 to 1.
 {-# INLINE interpolateFrom #-}
 interpolateFrom :: Quantity units -> Quantity units -> Number -> Quantity units
-interpolateFrom a b t = a + (b - a) * t
+interpolateFrom a b t = a .+. (b .-. a) .*. t
 
 {-# INLINE midpoint #-}
 midpoint :: Quantity units -> Quantity units -> Quantity units
-midpoint a b = 0.5 *. (a + b)
+midpoint a b = 0.5 *. (a .+. b)
 
 sum :: List (Quantity units) -> Quantity units
-sum = List.foldl (+) zero
+sum = List.foldl (.+.) zero
 
 sumOf :: (a -> Quantity units) -> List a -> Quantity units
 sumOf f list = sum (List.map f list)
@@ -337,4 +338,6 @@ midpoints :: Quantity units -> Quantity units -> Int -> List (Quantity units)
 midpoints start end n = range start end (2 * n) [1, 3 .. 2 * n - 1]
 
 range :: Quantity units -> Quantity units -> Int -> List Int -> List (Quantity units)
-range start end n indices = let delta = end - start in [start + (i / n) * delta | i <- indices]
+range start end n indices = do
+  let delta = end .-. start
+  [start .+. (fromIntegral i / fromIntegral n) *. delta | i <- indices]

@@ -34,9 +34,10 @@ import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude hiding (max, min)
+import OpenSolid.Prelude hiding (max, min, (*), (+), (-), (/))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units qualified as Units
+import Prelude ((+))
 
 class Interface a units | a -> units where
   boundsImpl :: a -> Bounds units
@@ -106,54 +107,54 @@ instance Negation (Estimate units) where
   negate estimate = new (Negate estimate)
 
 instance Multiplication Sign (Estimate units) (Estimate units) where
-  Positive * estimate = estimate
-  Negative * estimate = -estimate
+  Positive .*. estimate = estimate
+  Negative .*. estimate = -estimate
 
 instance Multiplication (Estimate units) Sign (Estimate units) where
-  estimate * Positive = estimate
-  estimate * Negative = -estimate
+  estimate .*. Positive = estimate
+  estimate .*. Negative = -estimate
 
 data Add units = Add (Estimate units) (Estimate units)
 
 instance Interface (Add units) units where
-  boundsImpl (Add first second) = bounds first + bounds second
+  boundsImpl (Add first second) = bounds first .+. bounds second
   refineImpl (Add first second) = do
     let width1 = Bounds.width (bounds first)
     let width2 = Bounds.width (bounds second)
     if
-      | width1 >= 2.0 *. width2 -> refine first + second
-      | width2 >= 2.0 *. width1 -> first + refine second
-      | otherwise -> refine first + refine second
+      | width1 >= 2.0 *. width2 -> refine first .+. second
+      | width2 >= 2.0 *. width1 -> first .+. refine second
+      | otherwise -> refine first .+. refine second
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
-  first + second = new (Add first second)
+  first .+. second = new (Add first second)
 
 instance Addition (Estimate units) (Quantity units) (Estimate units) where
-  estimate + value = estimate + exact value
+  estimate .+. value = estimate .+. exact value
 
 instance Addition (Quantity units) (Estimate units) (Estimate units) where
-  value + estimate = exact value + estimate
+  value .+. estimate = exact value .+. estimate
 
 data Subtract units = Subtract (Estimate units) (Estimate units)
 
 instance Interface (Subtract units) units where
-  boundsImpl (Subtract first second) = bounds first - bounds second
+  boundsImpl (Subtract first second) = bounds first .-. bounds second
   refineImpl (Subtract first second) = do
     let width1 = Bounds.width (bounds first)
     let width2 = Bounds.width (bounds second)
     if
-      | width1 >= 2.0 *. width2 -> refine first - second
-      | width2 >= 2.0 *. width1 -> first - refine second
-      | otherwise -> refine first - refine second
+      | width1 >= 2.0 *. width2 -> refine first .-. second
+      | width2 >= 2.0 *. width1 -> first .-. refine second
+      | otherwise -> refine first .-. refine second
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
-  first - second = new (Subtract first second)
+  first .-. second = new (Subtract first second)
 
 instance Subtraction (Estimate units) (Quantity units) (Estimate units) where
-  estimate - value = estimate - exact value
+  estimate .-. value = estimate .-. exact value
 
 instance Subtraction (Quantity units) (Estimate units) (Estimate units) where
-  value - estimate = exact value - estimate
+  value .-. estimate = exact value .-. estimate
 
 data Product units1 units2 = Product (Estimate units1) (Estimate units2)
 
@@ -192,7 +193,7 @@ instance
     (Estimate units2)
     (Estimate units3)
   where
-  first * second = Units.specialize (first #*# second)
+  first .*. second = Units.specialize (first #*# second)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -201,7 +202,7 @@ instance
     (Quantity units2)
     (Estimate units3)
   where
-  estimate * value = estimate * exact value
+  estimate .*. value = estimate .*. exact value
 
 instance
   Units.Product units1 units2 units3 =>
@@ -210,7 +211,7 @@ instance
     (Estimate units2)
     (Estimate units3)
   where
-  value * estimate = exact value * estimate
+  value .*. estimate = exact value .*. estimate
 
 instance Division# (Estimate units1) (Quantity units2) (Estimate (units1 #/# units2)) where
   estimate #/# value = Units.simplify (estimate #*# (1.0 /# value))
@@ -222,7 +223,7 @@ instance
     (Quantity units2)
     (Estimate units3)
   where
-  estimate / value = Units.specialize (estimate #/# value)
+  estimate ./. value = Units.specialize (estimate #/# value)
 
 newtype Sum units = Sum (NonEmpty (Estimate units))
 

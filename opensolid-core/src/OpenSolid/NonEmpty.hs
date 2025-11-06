@@ -90,13 +90,14 @@ import Data.Functor qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
-import OpenSolid.Arithmetic
+import OpenSolid.Arithmetic hiding ((*), (+), (-), (/))
 import OpenSolid.Bootstrap hiding (concat, foldl, foldr)
 import OpenSolid.Composition
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
+import Prelude ((-))
 import Prelude qualified
 
 {-# COMPLETE [], NonEmpty #-}
@@ -301,7 +302,7 @@ drop :: Int -> NonEmpty a -> List a
 drop = Data.List.NonEmpty.drop
 
 sum :: Addition a a a => NonEmpty a -> a
-sum = reduce (+)
+sum = reduce (.+.)
 
 sumOf :: Addition b b b => (a -> b) -> NonEmpty a -> b
 sumOf function nonEmpty = sum (map function nonEmpty)

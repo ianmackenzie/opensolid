@@ -64,11 +64,11 @@ where
 
 import Data.List qualified
 import Data.Maybe qualified
-import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap hiding (concat, foldl, foldr, maybe)
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
+import Prelude ((+), (-))
 import Prelude qualified
 
 singleton :: a -> List a

@@ -20,7 +20,8 @@ import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((-))
+import Prelude ((-))
 
 data Set3d a (coordinateSystem :: CoordinateSystem) where
   Node ::

@@ -11,7 +11,7 @@ module OpenSolid.Tolerance
   )
 where
 
-import OpenSolid.Arithmetic
+import OpenSolid.Arithmetic hiding ((*), (+), (-), (/))
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
@@ -21,6 +21,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (type (#*#))
 import OpenSolid.Units qualified as Units
+import Prelude ((*))
 
 type Tolerance units = ?tolerance :: Quantity units
 
@@ -30,7 +31,7 @@ class ApproximateEquality a units | a -> units where
 infix 4 ~=
 
 instance ApproximateEquality (Quantity units) units where
-  x ~= y = Quantity.abs (x - y) <= ?tolerance
+  x ~= y = Quantity.abs (x .-. y) <= ?tolerance
 
 instance ApproximateEquality a units => ApproximateEquality (List a) units where
   x : xs ~= y : ys = x ~= y && xs ~= ys

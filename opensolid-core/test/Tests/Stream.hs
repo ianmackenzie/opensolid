@@ -1,12 +1,12 @@
 module Tests.Stream (tests) where
 
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude hiding ((**), (-), (/), (^))
 import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
-import Prelude ((-))
+import Prelude ((-), (/), (^))
 
 tests :: List Test
 tests =
@@ -16,8 +16,8 @@ tests =
 mapWithIndex :: Test
 mapWithIndex = Test.verify "mapWithIndex" Test.do
   let sum =
-        Stream.repeat 1
-          |> Stream.mapWithIndex (\i n -> n / (2 ** i))
+        Stream.repeat (1 :: Int)
+          |> Stream.mapWithIndex (\i n -> fromIntegral n / fromIntegral ((2 :: Int) ^ i))
           |> Stream.take 11
           |> Number.sum
   let expected :: Number = 2.0

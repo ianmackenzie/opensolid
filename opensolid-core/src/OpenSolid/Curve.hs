@@ -80,7 +80,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)
@@ -93,6 +93,7 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
+import Prelude ((+), (/))
 
 data Curve units where
   Curve :: Compiled units -> ~(Curve units) -> Curve units
@@ -134,7 +135,7 @@ instance
     -- TODO optimize this to use a special Solve1d.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and their exact locations)
-    case zeros (curve - value) of
+    case zeros (curve .-. value) of
       Success [] -> False
       Success List.OneOrMore -> True
       Failure IsZero -> True
@@ -178,7 +179,7 @@ t = new (CompiledFunction.concrete Expression.t) (constant 1.0)
 
 -- | Create a curve that linearly interpolates from the first value to the second.
 line :: Quantity units -> Quantity units -> Curve units
-line a b = a + t * (b - a)
+line a b = a .+. t .*. (b .-. a)
 
 -- | Get the derivative of a curve.
 derivative :: Curve units -> Curve units
@@ -188,52 +189,52 @@ instance Negation (Curve units) where
   negate curve = new (negate curve.compiled) (negate curve.derivative)
 
 instance Multiplication Sign (Curve units) (Curve units) where
-  Positive * curve = curve
-  Negative * curve = -curve
+  Positive .*. curve = curve
+  Negative .*. curve = -curve
 
 instance Multiplication (Curve units) Sign (Curve units) where
-  curve * Positive = curve
-  curve * Negative = -curve
+  curve .*. Positive = curve
+  curve .*. Negative = -curve
 
 instance units1 ~ units2 => Addition (Curve units1) (Curve units2) (Curve units1) where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
+  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
 
 instance units1 ~ units2 => Addition (Curve units1) (Quantity units2) (Curve units1) where
-  curve + value = curve + constant value
+  curve .+. value = curve .+. constant value
 
 instance units1 ~ units2 => Addition (Quantity units1) (Curve units2) (Curve units1) where
-  value + curve = constant value + curve
+  value .+. curve = constant value .+. curve
 
 instance units1 ~ units2 => Subtraction (Curve units1) (Curve units2) (Curve units1) where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
+  lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
 instance
   units1 ~ units2 =>
   Subtraction (Curve units1) (Quantity units2) (Curve units1)
   where
-  curve - value = curve - constant value
+  curve .-. value = curve .-. constant value
 
 instance
   units1 ~ units2 =>
   Subtraction (Quantity units1) (Curve units2) (Curve units1)
   where
-  value - curve = constant value - curve
+  value .-. curve = constant value .-. curve
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Curve units2) (Curve units3)
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance Multiplication# (Curve units1) (Curve units2) (Curve (units1 #*# units2)) where
   lhs #*# rhs =
-    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs + lhs #*# rhs.derivative)
+    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs .+. lhs #*# rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Quantity units2) (Curve units3)
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance Multiplication# (Curve units1) (Quantity units2) (Curve (units1 #*# units2)) where
   curve #*# value = curve #*# constant value
@@ -242,7 +243,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Curve units2) (Curve units3)
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance Multiplication# (Quantity units1) (Curve units2) (Curve (units1 #*# units2)) where
   value #*# curve = constant value #*# curve
@@ -251,7 +252,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -265,7 +266,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -279,7 +280,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Vector3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -293,7 +294,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -304,7 +305,7 @@ instance
   vector #*# curve = VectorCurve3d.constant vector #*# curve
 
 instance Composition (Curve Unitless) (Curve units) (Curve units) where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
+  f . g = new (f.compiled . g.compiled) ((f.derivative . g) .*. g.derivative)
 
 reverse :: Curve units -> Curve units
 reverse curve = curve . (1.0 -. t)
@@ -335,7 +336,7 @@ rationalBezier ::
   NonEmpty (Quantity units, Number) ->
   Result DivisionByZero (Curve units)
 rationalBezier pointsAndWeights = do
-  let scaledPoint (point, weight) = point * weight
+  let scaledPoint (point, weight) = point .*. weight
   quotient
     @ bezier (NonEmpty.map scaledPoint pointsAndWeights)
     @ bezier (NonEmpty.map Pair.second pointsAndWeights)
@@ -462,7 +463,7 @@ lhopital numerator denominator tValue = do
   let value = numerator' #/# denominator'
   let firstDerivative =
         Units.simplify $
-          (numerator'' #*# denominator' - numerator' #*# denominator'')
+          (numerator'' #*# denominator' .-. numerator' #*# denominator'')
             #/# (2.0 *. Quantity.squared# denominator')
   (value, firstDerivative)
 
@@ -478,7 +479,7 @@ unsafeQuotient# numerator denominator = do
   let quotientCompiled = numerator.compiled #/# denominator.compiled
   let quotientDerivative = Units.simplify do
         unsafeQuotient#
-          (numerator.derivative #*# denominator - numerator #*# denominator.derivative)
+          (numerator.derivative #*# denominator .-. numerator #*# denominator.derivative)
           (squared# denominator)
   new quotientCompiled quotientDerivative
 
@@ -486,7 +487,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve units1) (Quantity units2) (Curve units3)
   where
-  lhs / rhs = Units.specialize (lhs #/# rhs)
+  lhs ./. rhs = Units.specialize (lhs #/# rhs)
 
 instance Division# (Curve units1) (Quantity units2) (Curve (units1 #/# units2)) where
   curve #/# value = Units.simplify (curve #*# (1.0 /# value))
@@ -546,21 +547,21 @@ cubed :: Curve Unitless -> Curve Unitless
 cubed curve =
   new
     (CompiledFunction.map Expression.cubed Number.cubed Bounds.cubed curve.compiled)
-    (3.0 *. squared curve * curve.derivative)
+    (3.0 *. squared curve .*. curve.derivative)
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless
 sin curve =
   new
     (CompiledFunction.map Expression.sin Angle.sin Bounds.sin curve.compiled)
-    (cos curve * (curve.derivative / Angle.radian))
+    (cos curve .*. (curve.derivative ./. Angle.radian))
 
 -- | Compute the cosine of a curve.
 cos :: Curve Radians -> Curve Unitless
 cos curve =
   new
     (CompiledFunction.map Expression.cos Angle.cos Bounds.cos curve.compiled)
-    (negate (sin curve) * (curve.derivative / Angle.radian))
+    (negate (sin curve) .*. (curve.derivative ./. Angle.radian))
 
 integrate :: Curve units -> Estimate units
 integrate curve = Estimate.new (Integral curve curve.derivative Bounds.unitInterval)
@@ -571,12 +572,12 @@ instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve curveDerivative domain) = do
     let dx = Bounds.width domain
     let derivativeBounds = evaluateBounds curveDerivative domain
-    let estimate0 = dx * evaluateBounds curve domain
+    let estimate0 = dx .*. evaluateBounds curve domain
     let y1 = evaluate curve (Bounds.lower domain)
     let y2 = evaluate curve (Bounds.upper domain)
     let m = Bounds.width derivativeBounds
-    let error1 = 0.125 *. m * dx * dx
-    let estimate1 = dx * Quantity.midpoint y1 y2 + Bounds -error1 error1
+    let error1 = 0.125 *. m .*. dx .*. dx
+    let estimate1 = dx .*. Quantity.midpoint y1 y2 .+. Bounds -error1 error1
     case Bounds.intersection estimate0 estimate1 of
       Just intersection -> intersection
       Nothing -> estimate0 -- Shouldn't happen if bounds are correct
@@ -585,7 +586,7 @@ instance Estimate.Interface (Integral units) units where
     let (leftDomain, rightDomain) = Bounds.bisect domain
     let leftIntegral = Integral curve curveDerivative leftDomain
     let rightIntegral = Integral curve curveDerivative rightDomain
-    Estimate.new leftIntegral + Estimate.new rightIntegral
+    Estimate.new leftIntegral .+. Estimate.new rightIntegral
 
 ----- ZERO FINDING -----
 
@@ -651,7 +652,7 @@ findZeros derivatives subdomain derivativeBounds exclusions
   -- Optimization heuristic: bisect down to small subdomains first,
   -- to quickly eliminate most of the curve based on simple value bounds
   -- before attempting more complex/sophisticated solving
-  | Bounds.width (Domain1d.bounds subdomain) > 1 / 1024 = Solve1d.recurse
+  | Bounds.width (Domain1d.bounds subdomain) > 1.0 / 1024.0 = Solve1d.recurse
   | otherwise = case exclusions of
       Solve1d.SomeExclusions -> Solve1d.recurse
       Solve1d.NoExclusions ->

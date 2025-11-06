@@ -25,7 +25,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding ((*), (-))
+import OpenSolid.Prelude hiding ((*), (-), (/))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
@@ -36,7 +36,7 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Prelude ((*), (-))
+import Prelude ((*), (-), (/))
 
 curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
 curveGenerators =
@@ -157,7 +157,7 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
-          (OverlappingSegment (Bounds 0.0 (1 / 4)) (Bounds 0.0 (1 / 6)) Negative)
+          (OverlappingSegment (Bounds 0.0 (1.0 / 4.0)) (Bounds 0.0 (1 / 6)) Negative)
           (OverlappingSegment (Bounds (3 / 4) 1.0) (Bounds (5 / 6) 1.0) Negative)
   Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
@@ -222,7 +222,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.
   p1 <- Random.point2d
   p2 <- Random.point2d
   let curve = Curve2d.cubicBezier p0 p0 p1 p2
-  let decreasingTValues = [Number.pow 2.0 (fromIntegral -n) | n <- [8 .. 16]]
+  let decreasingTValues = [Number.pow 2.0 (fromIntegral -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let startTangent = DirectionCurve2d.startValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) decreasingTValues
@@ -236,7 +236,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
   p1 <- Random.point2d
   p2 <- Random.point2d
   let curve = Curve2d.cubicBezier p0 p1 p2 p2
-  let increasingTValues = [1.0 - Number.pow 2.0 (fromIntegral -n) | n <- [8 .. 16]]
+  let increasingTValues = [1.0 - Number.pow 2.0 (fromIntegral -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let endTangent = DirectionCurve2d.endValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) increasingTValues
@@ -270,7 +270,7 @@ degenerateStartPointTangentDerivative =
     p1 <- Random.point2d
     p2 <- Random.point2d
     let curve = Curve2d.cubicBezier p0 p0 p1 p2
-    let decreasingTValues = [Number.pow 2.0 (fromIntegral -n) | n <- [8 .. 16]]
+    let decreasingTValues = [Number.pow 2.0 (fromIntegral -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let startTangentDerivative = VectorCurve2d.startValue tangentDerivative
@@ -291,7 +291,7 @@ degenerateEndPointTangentDerivative =
     p1 <- Random.point2d
     p2 <- Random.point2d
     let curve = Curve2d.cubicBezier p0 p1 p2 p2
-    let increasingTValues = [1.0 - Number.pow 2.0 (fromIntegral -n) | n <- [8 .. 16]]
+    let increasingTValues = [1.0 - Number.pow 2.0 (fromIntegral -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let endTangentDerivative = VectorCurve2d.endValue tangentDerivative

@@ -12,12 +12,13 @@ where
 
 import GHC.Exts qualified
 import OpenSolid.Error as Error
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Quantity as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
+import Prelude ((+))
 
 data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
@@ -42,7 +43,7 @@ curve1dImpl function derivative x1 y1 iterations =
   if iterations <= 10
     then do
       let dy1 = derivative x1
-      let x2 = x1 - y1 / dy1
+      let x2 = x1 .-. y1 ./. dy1
       let y2 = function x2
       if Quantity.abs y2 < Quantity.abs y1
         then curve1dImpl function derivative x2 y2 (iterations + 1)
@@ -103,7 +104,7 @@ curve2dImpl function derivative t1 v1 iterations =
   if iterations <= 10
     then do
       let d1 = derivative t1
-      let t2 = t1 - (v1 `dot#` d1) / (d1 `dot#` d1)
+      let t2 = t1 .-. (v1 `dot#` d1) ./. (d1 `dot#` d1)
       let v2 = function t2
       if Vector2d.squaredMagnitude# v2 < Vector2d.squaredMagnitude# v1
         then curve2dImpl function derivative t2 v2 (iterations + 1)
@@ -176,10 +177,10 @@ surface2dImpl function uDerivative vDerivative uvPoint1 value1 iterations =
       let Vector2d x1 y1 = value1
       let Vector2d dxdu1 dydu1 = uDerivative uvPoint1
       let Vector2d dxdv1 dydv1 = vDerivative uvPoint1
-      let determinant = dxdu1 #*# dydv1 - dxdv1 #*# dydu1
-      let uStep = (dxdv1 #*# y1 - dydv1 #*# x1) / determinant
-      let vStep = (dydu1 #*# x1 - dxdu1 #*# y1) / determinant
-      let uvPoint2 = uvPoint1 + Vector2d uStep vStep
+      let determinant = dxdu1 #*# dydv1 .-. dxdv1 #*# dydu1
+      let uStep = (dxdv1 #*# y1 .-. dydv1 #*# x1) ./. determinant
+      let vStep = (dydu1 #*# x1 .-. dxdu1 #*# y1) ./. determinant
+      let uvPoint2 = uvPoint1 .+. Vector2d uStep vStep
       let value2 = function uvPoint2
       if Vector2d.squaredMagnitude# value2 < Vector2d.squaredMagnitude# value1
         then surface2dImpl function uDerivative vDerivative uvPoint2 value2 (iterations + 1)

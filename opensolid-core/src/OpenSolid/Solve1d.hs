@@ -33,11 +33,12 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude hiding (return)
+import OpenSolid.Prelude hiding (return, (*), (+), (-), (/))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Result qualified as Result
+import Prelude ((+), (-), (/))
 
 data Neighborhood units = Neighborhood
   { n :: Int
@@ -52,15 +53,18 @@ neighborhood :: Tolerance units => Int -> Quantity units -> Neighborhood units
 neighborhood n value = do
   let sign = Quantity.sign value
   let magnitude = Quantity.abs value
-  let radius = (fromIntegral (Int.factorial n) *. ?tolerance / magnitude) ** (1 / n)
+  let radius =
+        Number.pow
+          (fromIntegral (Int.factorial n) *. ?tolerance ./. magnitude)
+          (1.0 / fromIntegral n)
   Neighborhood{n, sign, magnitude, radius}
 
 derivativeTolerance :: Neighborhood units -> Int -> Quantity units
-derivativeTolerance (Neighborhood{n, magnitude, radius}) k = do
-  magnitude * radius ** (n - k) ./ fromIntegral (Int.factorial (n - k))
+derivativeTolerance Neighborhood{n, magnitude, radius} k = do
+  magnitude .*. Number.pow radius (fromIntegral (n - k)) ./ fromIntegral (Int.factorial (n - k))
 
 zero :: Number -> Neighborhood units -> Zero
-zero location (Neighborhood{n, sign}) = Zero location (n - 1) sign
+zero location Neighborhood{n, sign} = Zero location (n - 1) sign
 
 data Cache cached
   = Tree Domain1d cached (Node cached)
@@ -159,9 +163,9 @@ recurseIntoChildrenOf node callback queue solutions exclusions = do
   let continueWith updatedQueue = process callback updatedQueue solutions exclusions
   case node of
     Atomic -> Failure InfiniteRecursion
-    Shrinkable child -> continueWith (queue + child)
+    Shrinkable child -> continueWith (queue .+. child)
     Splittable middleChild leftChild rightChild ->
-      continueWith (queue + middleChild + leftChild + rightChild)
+      continueWith (queue .+. middleChild .+. leftChild .+. rightChild)
 
 data Action exclusions solution where
   Return :: NonEmpty solution -> Action NoExclusions solution
@@ -242,7 +246,7 @@ newtonRaphson function derivative bounds x y iterations =
       if dy == Quantity.zero -- Can't take Newton step if derivative is zero
         then Failure Divergence
         else do
-          let xStepped = x - y / dy
+          let xStepped = x .-. y ./. dy
           x2 <-
             if Bounds.includes xStepped bounds
               then Success xStepped -- Newton step stayed within bounds
@@ -256,7 +260,7 @@ newtonRaphson function derivative bounds x y iterations =
                 if dyClamped == Quantity.zero
                   then Failure Divergence
                   else do
-                    let xStepped2 = xClamped - yClamped / dyClamped
+                    let xStepped2 = xClamped .-. yClamped ./. dyClamped
                     if Bounds.includes xStepped2 bounds
                       then Success xStepped2
                       else Failure Divergence

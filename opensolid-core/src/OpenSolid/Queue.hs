@@ -13,15 +13,16 @@ where
 import Deque.Strict (Deque)
 import Deque.Strict qualified as Deque
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((+), (-))
+import Prelude ((+), (-))
 
 data Queue a = Queue Int (Deque a) deriving (Eq, Show)
 
 instance Addition (Queue a) a (Queue a) where
-  queue + item = push item queue
+  queue .+. item = push item queue
 
 instance Addition (Queue a) (List a) (Queue a) where
-  queue + items = List.foldl (+) queue items
+  queue .+. items = List.foldl (.+.) queue items
 
 empty :: Queue a
 empty = Queue 0 (Deque.fromConsAndSnocLists [] [])

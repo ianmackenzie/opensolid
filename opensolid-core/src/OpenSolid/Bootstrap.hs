@@ -11,7 +11,6 @@ module OpenSolid.Bootstrap
   , Text
   , ifThenElse
   , IsString (fromString)
-  , fromInteger
   , fromLabel
   , Eq ((==), (/=))
   , Ord ((<), (<=), (>=), (>), compare)
@@ -48,7 +47,7 @@ import Data.Traversable.WithIndex (TraversableWithIndex)
 import GHC.OverloadedLabels (fromLabel)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
-import Prelude (div, fromRational, mod)
+import Prelude (div, fromInteger, fromRational, mod)
 import Prelude hiding
   ( Floating (..)
   , Fractional (..)
@@ -95,10 +94,6 @@ type List a = [a]
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse True ifBranch _ = ifBranch
 ifThenElse False _ elseBranch = elseBranch
-
-{-# INLINE fromInteger #-}
-fromInteger :: Prelude.Integer -> Int
-fromInteger = Prelude.fromInteger
 
 internalError :: HasCallStack => Text -> a
 internalError message = withFrozenCallStack $ abort ("Internal error: " <> message)
