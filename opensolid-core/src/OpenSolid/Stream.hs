@@ -16,7 +16,7 @@ module OpenSolid.Stream
   )
 where
 
-import OpenSolid.Prelude hiding (iterate, repeat, (-))
+import OpenSolid.Prelude hiding (iterate, repeat)
 import Prelude ((+), (-))
 
 data Stream a = Stream a ~(Stream a)

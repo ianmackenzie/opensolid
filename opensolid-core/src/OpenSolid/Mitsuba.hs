@@ -37,7 +37,7 @@ import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
 import Prelude ((+))

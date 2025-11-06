@@ -161,7 +161,7 @@ instance
     units1
   where
   curve ^ vector = Tolerance.using Tolerance.squared# do
-    (curve - vector).squaredMagnitude# ^ Quantity.zero
+    (curve .-. vector).squaredMagnitude# ^ Quantity.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -217,7 +217,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
+  lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -226,7 +226,7 @@ instance
     (Vector2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  curve - vector = curve - constant vector
+  curve .-. vector = curve .-. constant vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -235,7 +235,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  vector - curve = constant vector - curve
+  vector .-. curve = constant vector .-. curve
 
 instance
   Units.Product units1 units2 units3 =>
@@ -460,7 +460,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
   where
-  point - curve = Curve2d.constant point - curve
+  point .-. curve = Curve2d.constant point .-. curve
 
 instance
   Composition
@@ -712,7 +712,7 @@ lhopital numerator denominator tValue = do
   let value = numerator' #/# denominator'
   let firstDerivative =
         Units.simplify $
-          (numerator'' #*# denominator' - numerator' #*# denominator'')
+          (numerator'' #*# denominator' .-. numerator' #*# denominator'')
             #/# (2.0 *. Quantity.squared# denominator')
   (value, firstDerivative)
 
@@ -732,7 +732,7 @@ unsafeQuotient# numerator denominator = do
     @ numerator.compiled #/# denominator.compiled
     @ Units.simplify do
       unsafeQuotient#
-        (numerator.derivative #*# denominator - numerator #*# denominator.derivative)
+        (numerator.derivative #*# denominator .-. numerator #*# denominator.derivative)
         (Curve.squared# denominator)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2

@@ -76,7 +76,7 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let holeRadius = 0.5 *. holeDiameter
   let hole = Curve2d.circle (#centerPoint centerPoint) (#diameter holeDiameter)
   region <- Region2d.boundedBy [line1, line3, line2, line4, hole]
-  let expectedArea = width .*. width - Number.pi .*. holeRadius .*. holeRadius
+  let expectedArea = width .*. width .-. Number.pi .*. holeRadius .*. holeRadius
   Test.expect (areaIsApproximately expectedArea region)
 
 incompleteSquare :: Tolerance Meters => Test

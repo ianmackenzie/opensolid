@@ -32,7 +32,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d)

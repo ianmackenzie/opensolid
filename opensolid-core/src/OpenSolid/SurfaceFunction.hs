@@ -123,7 +123,7 @@ instance
     -- TODO optimize this to use a special Solve2d.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and the full geometry of each)
-    case zeros (function - value) of
+    case zeros (function .-. value) of
       Success (Zeros [] [] [] []) -> False
       Success (Zeros{}) -> True
       Failure IsZero -> True
@@ -176,19 +176,19 @@ instance
   units1 ~ units2 =>
   Subtraction (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units1)
   where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
+  lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (\p -> derivative p lhs .-. derivative p rhs)
 
 instance
   units1 ~ units2 =>
   Subtraction (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units1)
   where
-  function - value = function - constant value
+  function .-. value = function .-. constant value
 
 instance
   units1 ~ units2 =>
   Subtraction (Quantity units1) (SurfaceFunction units2) (SurfaceFunction units1)
   where
-  value - function = constant value - function
+  value .-. function = constant value .-. function
 
 instance
   Units.Product units1 units2 units3 =>
@@ -454,7 +454,7 @@ quotient# numerator denominator = do
         let firstDerivative =
               Units.simplify $
                 unsafeQuotient#
-                  (numerator'' #*# denominator' - numerator' #*# denominator'')
+                  (numerator'' #*# denominator' .-. numerator' #*# denominator'')
                   (2.0 *. squared# denominator')
         (value, firstDerivative)
   SurfaceFunction.Quotient.impl unsafeQuotient# lhopital desingularize numerator denominator
@@ -474,7 +474,7 @@ unsafeQuotient# lhs rhs =
   recursive
     @ CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled
     @ \self p ->
-      unsafeQuotient# (derivative p lhs) rhs - self .*. unsafeQuotient (derivative p rhs) rhs
+      unsafeQuotient# (derivative p lhs) rhs .-. self .*. unsafeQuotient (derivative p rhs) rhs
 
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared function = Units.specialize (squared# function)
@@ -615,7 +615,7 @@ findTangentSolutions ::
   Solve2d.Action Solve2d.NoExclusions FindZerosContext (Solution units)
 findTangentSolutions subproblem = do
   let Subproblem{f, subdomain, uvBounds, fuuBounds, fuvBounds, fvvBounds} = subproblem
-  let determinant = fuuBounds #*# fvvBounds - fuvBounds #*# fuvBounds
+  let determinant = fuuBounds #*# fvvBounds .-. fuvBounds #*# fuvBounds
   case Bounds.resolvedSign determinant of
     Resolved determinantSign -> do
       let fu = f.du

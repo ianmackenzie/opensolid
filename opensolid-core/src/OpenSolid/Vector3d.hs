@@ -54,7 +54,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d, Unit3d)

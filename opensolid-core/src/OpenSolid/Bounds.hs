@@ -185,15 +185,15 @@ instance units1 ~ units2 => Addition (Quantity units1) (Bounds units2) (Bounds u
     Bounds## (value## +## low##) (value## +## high##)
 
 instance units1 ~ units2 => Subtraction (Bounds units1) (Bounds units2) (Bounds units1) where
-  Bounds## low1## high1## - Bounds## low2## high2## =
+  Bounds## low1## high1## .-. Bounds## low2## high2## =
     Bounds## (low1## -## high2##) (high1## -## low2##)
 
 instance units1 ~ units2 => Subtraction (Bounds units1) (Quantity units2) (Bounds units1) where
-  Bounds## low## high## - Quantity## value## =
+  Bounds## low## high## .-. Quantity## value## =
     Bounds## (low## -## value##) (high## -## value##)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Bounds units2) (Bounds units1) where
-  Quantity## value## - Bounds## low## high## =
+  Quantity## value## .-. Bounds## low## high## =
     Bounds## (value## -## high##) (value## -## low##)
 
 instance Multiplication# (Quantity units1) (Bounds units2) (Bounds (units1 #*# units2)) where
@@ -571,7 +571,7 @@ cos bounds@(Bounds low high) = do
   Bounds newLow newHigh
 
 sinIncludesMinMax :: Bounds Radians -> (Bool, Bool)
-sinIncludesMinMax bounds = cosIncludesMinMax (bounds - Angle.halfPi)
+sinIncludesMinMax bounds = cosIncludesMinMax (bounds .-. Angle.halfPi)
 
 cosIncludesMinMax :: Bounds Radians -> (Bool, Bool)
 cosIncludesMinMax bounds = (cosIncludesMax (bounds .+. Angle.pi), cosIncludesMax bounds)
@@ -587,7 +587,7 @@ interpolate (Bounds low high) t =
 
 interpolationParameter :: Bounds units -> Quantity units -> Number
 interpolationParameter (Bounds low high) value
-  | low < high = (value - low) ./. (high - low)
+  | low < high = (value .-. low) ./. (high .-. low)
   | value < low = negative Quantity.infinity
   | value > high = Quantity.infinity
   | otherwise = 0.0

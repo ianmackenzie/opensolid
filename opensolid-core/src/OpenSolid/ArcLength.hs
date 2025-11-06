@@ -7,7 +7,7 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import Prelude ((+))

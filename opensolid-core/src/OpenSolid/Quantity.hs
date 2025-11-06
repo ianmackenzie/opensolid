@@ -48,7 +48,7 @@ import Data.Hashable (Hashable)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text qualified
 import Foreign.Storable (Storable)
-import OpenSolid.Arithmetic hiding ((-))
+import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap hiding (max, min)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds

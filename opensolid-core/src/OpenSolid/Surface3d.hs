@@ -121,7 +121,7 @@ ruled :: Curve3d (space @ units) -> Curve3d (space @ units) -> Surface3d (space 
 ruled bottom top = do
   let f1 = bottom . SurfaceFunction.u
   let f2 = top . SurfaceFunction.u
-  parametric (f1 .+. SurfaceFunction.v .*. (f2 - f1)) Region2d.unitSquare
+  parametric (f1 .+. SurfaceFunction.v .*. (f2 .-. f1)) Region2d.unitSquare
 
 revolved ::
   Tolerance units =>

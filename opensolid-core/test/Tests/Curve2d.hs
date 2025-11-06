@@ -25,7 +25,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
@@ -36,7 +36,7 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Prelude ((-), (/))
+import Prelude ((/))
 
 curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
 curveGenerators =
@@ -236,7 +236,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
   p1 <- Random.point2d
   p2 <- Random.point2d
   let curve = Curve2d.cubicBezier p0 p1 p2 p2
-  let increasingTValues = [1.0 - Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
+  let increasingTValues = [1.0 -. Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let endTangent = DirectionCurve2d.endValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) increasingTValues
@@ -291,7 +291,7 @@ degenerateEndPointTangentDerivative =
     p1 <- Random.point2d
     p2 <- Random.point2d
     let curve = Curve2d.cubicBezier p0 p1 p2 p2
-    let increasingTValues = [1.0 - Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
+    let increasingTValues = [1.0 -. Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let endTangentDerivative = VectorCurve2d.endValue tangentDerivative
@@ -315,8 +315,8 @@ firstDerivativeIsConsistentWithin ::
   Number ->
   Expectation
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
-  let dt = 1e-6
-  let p1 = Curve2d.evaluate curve (tValue - dt)
+  let dt :: Number = 1e-6
+  let p1 = Curve2d.evaluate curve (tValue .-. dt)
   let p2 = Curve2d.evaluate curve (tValue .+. dt)
   let numericalFirstDerivative = (p2 .-. p1) ./ (2.0 *. dt)
   let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
@@ -333,8 +333,8 @@ firstDerivativeConsistency curveGenerator = Test.check 100 "firstDerivativeConsi
 
 secondDerivativeIsConsistent :: Curve2d (space @ Meters) -> Number -> Expectation
 secondDerivativeIsConsistent curve tValue = do
-  let dt = 1e-6
-  let v1 = VectorCurve2d.evaluate curve.derivative (tValue - dt)
+  let dt :: Number = 1e-6
+  let v1 = VectorCurve2d.evaluate curve.derivative (tValue .-. dt)
   let v2 = VectorCurve2d.evaluate curve.derivative (tValue .+. dt)
   let numericalSecondDerivative = (v2 .-. v1) ./. (2.0 *. dt)
   let secondDerivative = curve.derivative.derivative
@@ -369,7 +369,7 @@ reversalConsistency =
           curve <- generator
           let reversedCurve = Curve2d.reverse curve
           t <- Parameter.random
-          Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1.0 - t))
+          Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1 -. t))
 
 boundsConsistency ::
   (Tolerance units, Show (Quantity units)) =>
@@ -395,12 +395,12 @@ arcConstruction = do
         Test.verify label Test.do
           let arc = Curve2d.arc Point2d.origin (Point2d.meters 1.0 1.0) sweptAngle
           Test.expect (Curve2d.evaluate arc 0.5 ~= expectedPoint)
-  let invSqrt2 = 1.0 /. Number.sqrt 2.0
+  let invSqrt2 = 1 /. Number.sqrt 2
   Test.group "from" $
-    [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
-    , testArcMidpoint -90 (1.0 - invSqrt2, invSqrt2)
-    , testArcMidpoint 180 (1.0, 0.0)
-    , testArcMidpoint -180 (0.0, 1.0)
+    [ testArcMidpoint 90 (invSqrt2, 1 -. invSqrt2)
+    , testArcMidpoint -90 (1 -. invSqrt2, invSqrt2)
+    , testArcMidpoint 180 (1, 0)
+    , testArcMidpoint -180 (0, 1)
     ]
 
 arcDeformation :: Tolerance Meters => Test

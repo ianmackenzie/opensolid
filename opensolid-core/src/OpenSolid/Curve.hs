@@ -80,7 +80,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)

@@ -49,10 +49,10 @@ curveBoundsAt :: Number -> Number -> Quantity units -> Quantity units -> Bounds 
 curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)
   | mLow >= Quantity.zero || mHigh <= Quantity.zero = Bounds y1 y2 -- Monotonic case
   | otherwise = do
-      let dX = x2 - x1
-      let dY = y2 - y1
-      let dXValley = Quantity.clampTo (Bounds 0.0 dX) ((mHigh .*. dX - dY) ./. (mHigh - mLow))
-      let dXPeak = Quantity.clampTo (Bounds 0.0 dX) ((dY - mLow .*. dX) ./. (mHigh - mLow))
+      let dX = x2 .-. x1
+      let dY = y2 .-. y1
+      let dXValley = Quantity.clampTo (Bounds 0.0 dX) ((mHigh .*. dX .-. dY) ./. (mHigh .-. mLow))
+      let dXPeak = Quantity.clampTo (Bounds 0.0 dX) ((dY .-. mLow .*. dX) ./. (mHigh .-. mLow))
       let yValley =
             if Quantity.isInfinite mLow
               then negative Quantity.infinity
@@ -67,13 +67,13 @@ curveBoundsOver :: Number -> Number -> Bounds units -> Bounds units -> Bounds un
 curveBoundsOver x1 x2 y1 y2 (Bounds mLow mHigh)
   | mLow >= Quantity.zero || mHigh <= Quantity.zero = Bounds.aggregate2 y1 y2 -- Monotonic case
   | otherwise = do
-      let dX = x2 - x1
+      let dX = x2 .-. x1
       let Bounds low1 high1 = y1
       let Bounds low2 high2 = y2
-      let dYLow = low2 - low1
-      let dYHigh = high2 - high1
-      let dXValley = Quantity.clampTo (Bounds 0.0 dX) ((mHigh .*. dX - dYLow) ./. (mHigh - mLow))
-      let dXPeak = Quantity.clampTo (Bounds 0.0 dX) ((dYHigh - mLow .*. dX) ./. (mHigh - mLow))
+      let dYLow = low2 .-. low1
+      let dYHigh = high2 .-. high1
+      let dXValley = Quantity.clampTo (Bounds 0.0 dX) ((mHigh .*. dX .-. dYLow) ./. (mHigh .-. mLow))
+      let dXPeak = Quantity.clampTo (Bounds 0.0 dX) ((dYHigh .-. mLow .*. dX) ./. (mHigh .-. mLow))
       let yValley =
             if Quantity.isInfinite mLow
               then negative Quantity.infinity

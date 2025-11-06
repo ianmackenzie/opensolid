@@ -23,7 +23,7 @@ import Data.Array qualified
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude hiding (foldl, foldr, (-))
+import OpenSolid.Prelude hiding (foldl, foldr)
 import Prelude ((-))
 import Prelude qualified
 

@@ -158,7 +158,7 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
+  lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (\p -> derivative p lhs .-. derivative p rhs)
 
 instance
   ( space1 ~ space2
@@ -169,7 +169,7 @@ instance
     (Vector3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  f - v = f - constant v
+  f .-. v = f .-. constant v
 
 instance
   ( space1 ~ space2
@@ -180,7 +180,7 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  v - f = constant v - f
+  v .-. f = constant v .-. f
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -198,7 +198,7 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
   where
-  point - function = SurfaceFunction3d.constant point - function
+  point .-. function = SurfaceFunction3d.constant point .-. function
 
 instance
   Units.Product units1 units2 units3 =>
@@ -569,7 +569,7 @@ quotient# numerator denominator = do
         let firstDerivative =
               Units.simplify $
                 unsafeQuotient#
-                  (numerator'' #*# denominator' - numerator' #*# denominator'')
+                  (numerator'' #*# denominator' .-. numerator' #*# denominator'')
                   (2.0 *. SurfaceFunction.squared# denominator')
         (value, firstDerivative)
   SurfaceFunction.Quotient.impl unsafeQuotient# lhopital desingularize numerator denominator
@@ -590,7 +590,7 @@ unsafeQuotient# lhs rhs =
     @ CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled
     @ \self p ->
       unsafeQuotient# (derivative p lhs) rhs
-        - self .*. SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
+        .-. self .*. SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
 
 squaredMagnitude# :: VectorSurfaceFunction3d (space @ units) -> SurfaceFunction (units #*# units)
 squaredMagnitude# function =

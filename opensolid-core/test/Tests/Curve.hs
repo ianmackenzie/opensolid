@@ -3,7 +3,7 @@ module Tests.Curve (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero (Zero (Zero))
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified

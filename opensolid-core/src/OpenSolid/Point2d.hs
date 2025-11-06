@@ -155,16 +155,16 @@ distanceFrom## (Point2d (Quantity## x1##) (Quantity## y1##)) (Point2d (Quantity#
   hypot2## (x2## -## x1##) (y2## -## y1##)
 
 angleFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Angle
-angleFrom p1 p2 = Vector2d.angle (p2 - p1)
+angleFrom p1 p2 = Vector2d.angle (p2 .-. p1)
 
 distanceAlong :: Axis2d (space @ units) -> Point2d (space @ units) -> Quantity units
-distanceAlong (Axis2d originPoint direction) point = direction `dot` (point - originPoint)
+distanceAlong (Axis2d originPoint direction) point = direction `dot` (point .-. originPoint)
 
 distanceLeftOf :: Axis2d (space @ units) -> Point2d (space @ units) -> Quantity units
-distanceLeftOf (Axis2d originPoint direction) point = direction `cross` (point - originPoint)
+distanceLeftOf (Axis2d originPoint direction) point = direction `cross` (point .-. originPoint)
 
 distanceRightOf :: Axis2d (space @ units) -> Point2d (space @ units) -> Quantity units
-distanceRightOf (Axis2d originPoint direction) point = direction `cross` (originPoint - point)
+distanceRightOf (Axis2d originPoint direction) point = direction `cross` (originPoint .-. point)
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->
@@ -176,7 +176,7 @@ relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (global @ units) ->
   Point2d (local @ units)
-relativeTo (Frame2d p0 (Orientation2d i j)) p = let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
+relativeTo (Frame2d p0 (Orientation2d i j)) p = let d = p .-. p0 in Point2d (d `dot` i) (d `dot` j)
 
 {-| Convert a 2D point to 3D point by placing it on a plane.
 

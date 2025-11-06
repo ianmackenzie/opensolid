@@ -104,8 +104,8 @@ toSvg viewBox drawing = do
   let Bounds2d xBounds yBounds = viewBox
   let Bounds x1 x2 = xBounds
   let Bounds y1 y2 = yBounds
-  let width = x2 - x1
-  let height = y2 - y1
+  let width = x2 .-. x1
+  let height = y2 .-. y1
   let attributes =
         [ Attribute "xmlns" "http://www.w3.org/2000/svg"
         , Attribute "version" "1.1"
@@ -243,7 +243,7 @@ arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWid
       let length = Point2d.distanceFrom start end
       let axis = Axis2d start direction
       let frame = Frame2d.fromXAxis axis
-      let stemLength = length - headLength
+      let stemLength = length .-. headLength
       let stemEndPoint = Point2d.along axis stemLength
       let leftPoint = Point2d.placeIn frame (Point2d stemLength (0.5 *. headWidth))
       let rightPoint = Point2d.mirrorAcross axis leftPoint

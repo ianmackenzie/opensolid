@@ -56,7 +56,7 @@ import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Direction2d (Unit2d)

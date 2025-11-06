@@ -36,7 +36,7 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Direction2d (Direction2d)

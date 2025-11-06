@@ -14,7 +14,7 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import Prelude ((+), (-))
 
 type Vector vector =

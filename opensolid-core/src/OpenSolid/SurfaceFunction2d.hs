@@ -145,10 +145,10 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction2d (space1 @ units1))
   where
-  lhs - rhs =
+  lhs .-. rhs =
     new
-      @ lhs.compiled - rhs.compiled
-      @ \p -> derivative p lhs - VectorSurfaceFunction2d.derivative p rhs
+      @ lhs.compiled .-. rhs.compiled
+      @ \p -> derivative p lhs .-. VectorSurfaceFunction2d.derivative p rhs
 
 instance
   ( space1 ~ space2
@@ -159,7 +159,7 @@ instance
     (Vector2d (space2 @ units2))
     (SurfaceFunction2d (space1 @ units1))
   where
-  f - v = f - VectorSurfaceFunction2d.constant v
+  f .-. v = f .-. VectorSurfaceFunction2d.constant v
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -168,10 +168,10 @@ instance
     (SurfaceFunction2d (space2 @ units2))
     (VectorSurfaceFunction2d (space1 @ units1))
   where
-  lhs - rhs =
+  lhs .-. rhs =
     VectorSurfaceFunction2d.new
-      @ lhs.compiled - rhs.compiled
-      @ \p -> derivative p lhs - derivative p rhs
+      @ lhs.compiled .-. rhs.compiled
+      @ \p -> derivative p lhs .-. derivative p rhs
 
 instance HasField "compiled" (SurfaceFunction2d (space @ units)) (Compiled (space @ units)) where
   getField (SurfaceFunction2d c _ _) = c
@@ -329,7 +329,7 @@ distanceAlong ::
   SurfaceFunction2d (space @ units) ->
   SurfaceFunction units
 distanceAlong axis function =
-  (function - constant (Axis2d.originPoint axis)) `dot` Axis2d.direction axis
+  (function .-. constant (Axis2d.originPoint axis)) `dot` Axis2d.direction axis
 
 xCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units
 xCoordinate function =

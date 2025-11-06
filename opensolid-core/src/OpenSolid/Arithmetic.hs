@@ -3,7 +3,7 @@ module OpenSolid.Arithmetic
   , Addition ((.+.))
   , (+.)
   , (.+)
-  , Subtraction ((-), (.-.))
+  , Subtraction ((.-.))
   , (-.)
   , (.-)
   , Multiplication# ((#*#))

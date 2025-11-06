@@ -139,8 +139,8 @@ map4 function domain1 domain2 domain3 domain4 = do
 
 isInterior :: Number -> Bounds Unitless -> Bool
 isInterior value (Bounds tLow tHigh) = do
-  let margin = (tHigh - tLow) ./ 8.0
-  value >= tLow .+. margin && value <= tHigh - margin
+  let margin = (tHigh .-. tLow) ./ 8.0
+  value >= tLow .+. margin && value <= tHigh .-. margin
 
 includesEndpoint :: Bounds Unitless -> Bool
 includesEndpoint (Bounds tLow tHigh) = tLow == 0.0 || tHigh == 1.0

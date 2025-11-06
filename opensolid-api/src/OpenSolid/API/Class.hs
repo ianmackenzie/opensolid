@@ -737,7 +737,7 @@ numberMinus ::
   Member value
 numberMinus =
   PreOverload BinaryOperator.Sub $
-    PreOperatorOverload ((-) :: Number -> value -> result)
+    PreOperatorOverload ((.-.) :: Number -> value -> result)
 
 numberTimes ::
   forall value result.
@@ -807,7 +807,7 @@ minus ::
   Member value
 minus _ =
   PostOverload BinaryOperator.Sub $
-    PostOperatorOverload ((-) :: value -> rhs -> result)
+    PostOperatorOverload ((.-.) :: value -> rhs -> result)
 
 minusNumber ::
   forall value result.

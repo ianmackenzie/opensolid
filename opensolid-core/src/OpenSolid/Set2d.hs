@@ -21,7 +21,7 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import Prelude ((-))
 
 data Set2d a (coordinateSystem :: CoordinateSystem) where

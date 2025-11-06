@@ -52,7 +52,7 @@ arc2d = do
           @ #startAngle Angle.zero
           @ #endAngle Angle.pi
   let point = Point2d (Number.sqrt 2.0 / 2.0) (Number.sqrt 2.0 / 2.0)
-  curve2d "Arc" (arc - point) 0.5 0.25
+  curve2d "Arc" (arc .-. point) 0.5 0.25
 
 simpleSurface2d :: Tolerance Unitless => Test
 simpleSurface2d = do

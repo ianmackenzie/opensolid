@@ -12,7 +12,7 @@ where
 
 import GHC.Exts qualified
 import OpenSolid.Error as Error
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Quantity as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)

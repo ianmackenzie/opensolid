@@ -2,7 +2,7 @@ module Tests.Stream (tests) where
 
 import OpenSolid.Int qualified as Int
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding ((-), (^))
+import OpenSolid.Prelude hiding ((^))
 import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)

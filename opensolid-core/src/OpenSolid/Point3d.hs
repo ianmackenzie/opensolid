@@ -170,7 +170,7 @@ distanceFrom##
 This is the position along the axis of the given point projected onto the axis.
 -}
 distanceAlong :: Axis3d (space @ units) -> Point3d (space @ units) -> Quantity units
-distanceAlong (Axis3d p0 d) p = (p - p0) `dot` d
+distanceAlong (Axis3d p0 d) p = (p .-. p0) `dot` d
 
 -- | Convert a point defined in local coordinates to one defined in global coordinates.
 placeIn ::
@@ -185,7 +185,7 @@ relativeTo ::
   Point3d (global @ units) ->
   Point3d (local @ units)
 relativeTo (Frame3d p0 (Orientation3d i j k)) p =
-  let d = p - p0 in Point3d (d `dot` i) (d `dot` j) (d `dot` k)
+  let d = p .-. p0 in Point3d (d `dot` i) (d `dot` j) (d `dot` k)
 
 -- | Project a point onto a plane.
 projectOnto ::
@@ -193,7 +193,7 @@ projectOnto ::
   Point3d (space @ units) ->
   Point3d (space @ units)
 projectOnto plane point =
-  point - Vector3d.projectionIn plane.normalDirection (point - plane.originPoint)
+  point .-. Vector3d.projectionIn plane.normalDirection (point .-. plane.originPoint)
 
 {-| Project a point *into* a plane.
 
@@ -205,7 +205,7 @@ projectInto ::
   Point3d (space @ units) ->
   Point2d (localSpace @ units)
 projectInto (Plane3d p0 (PlaneOrientation3d i j)) p =
-  let d = p - p0 in Point2d (d `dot` i) (d `dot` j)
+  let d = p .-. p0 in Point2d (d `dot` i) (d `dot` j)
 
 convert :: Quantity (units2 #/# units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
 convert factor (Position3d p) = Position3d (Vector3d.convert factor p)

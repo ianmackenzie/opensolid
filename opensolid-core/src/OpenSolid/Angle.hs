@@ -26,7 +26,7 @@ module OpenSolid.Angle
   )
 where
 
-import OpenSolid.Arithmetic hiding ((-))
+import OpenSolid.Arithmetic
 import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Quantity (Quantity (Quantity))

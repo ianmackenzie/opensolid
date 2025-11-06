@@ -14,7 +14,7 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding ((-))
+import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random qualified as Random
 import Prelude ((*), (+), (-))

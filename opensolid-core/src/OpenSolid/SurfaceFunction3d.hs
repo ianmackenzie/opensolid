@@ -109,10 +109,10 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
   where
-  lhs - rhs =
+  lhs .-. rhs =
     new
-      @ lhs.compiled - rhs.compiled
-      @ \parameter -> derivative parameter lhs - VectorSurfaceFunction3d.derivative parameter rhs
+      @ lhs.compiled .-. rhs.compiled
+      @ \parameter -> derivative parameter lhs .-. VectorSurfaceFunction3d.derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -121,7 +121,7 @@ instance
     (Vector3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
   where
-  f - v = f - VectorSurfaceFunction3d.constant v
+  f .-. v = f .-. VectorSurfaceFunction3d.constant v
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -130,10 +130,10 @@ instance
     (SurfaceFunction3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  lhs - rhs =
+  lhs .-. rhs =
     VectorSurfaceFunction3d.new
-      @ lhs.compiled - rhs.compiled
-      @ \parameter -> derivative parameter lhs - derivative parameter rhs
+      @ lhs.compiled .-. rhs.compiled
+      @ \parameter -> derivative parameter lhs .-. derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -142,7 +142,7 @@ instance
     (Point3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  function - point = function - constant point
+  function .-. point = function .-. constant point
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -151,7 +151,7 @@ instance
     (SurfaceFunction3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  point - function = constant point - function
+  point .-. function = constant point .-. function
 
 instance
   uvCoordinates ~ UvCoordinates =>

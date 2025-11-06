@@ -125,7 +125,7 @@ instance
     (Vector2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Vector2d## x1## y1## - Vector2d## x2## y2## = Vector2d## (x1## -## x2##) (y1## -## y2##)
+  Vector2d## x1## y1## .-. Vector2d## x2## y2## = Vector2d## (x1## -## x2##) (y1## -## y2##)
 
 instance
   Multiplication#
@@ -231,13 +231,13 @@ instance
     (Vector2d (space2 @ units2))
     (Quantity (units1 #*# units2))
   where
-  Vector2d x1 y1 `cross#` Vector2d x2 y2 = x1 #*# y2 - y1 #*# x2
+  Vector2d x1 y1 `cross#` Vector2d x2 y2 = x1 #*# y2 .-. y1 #*# x2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication (Vector2d (space1 @ units1)) (Vector2d (space2 @ units2)) (Quantity units3)
   where
-  Vector2d x1 y1 `cross` Vector2d x2 y2 = x1 .*. y2 - y1 .*. x2
+  Vector2d x1 y1 `cross` Vector2d x2 y2 = x1 .*. y2 .-. y1 .*. x2
 
 instance
   space1 ~ space2 =>
@@ -402,7 +402,7 @@ instance
     (Vector2d (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Position2d p - v = Position2d (p - v)
+  Position2d p .-. v = Position2d (p .-. v)
 
 instance
   ( space1 ~ space2
@@ -413,7 +413,7 @@ instance
     (Point2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Position2d p1 - Position2d p2 = p1 - p2
+  Position2d p1 .-. Position2d p2 = p1 .-. p2
 
 instance
   ( space1 ~ space2
@@ -435,7 +435,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Position2d p - vb = PositionBounds2d (p - vb)
+  Position2d p .-. vb = PositionBounds2d (p .-. vb)
 
 instance ApproximateEquality (Point2d (space @ units)) units where
   Position2d p1 ~= Position2d p2 = p1 ~= p2
@@ -533,7 +533,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  VectorBounds2d x1 y1 - VectorBounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
+  VectorBounds2d x1 y1 .-. VectorBounds2d x2 y2 = VectorBounds2d (x1 .-. x2) (y1 .-. y2)
 
 instance
   ( space1 ~ space2
@@ -544,7 +544,7 @@ instance
     (Vector2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  VectorBounds2d x1 y1 - Vector2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
+  VectorBounds2d x1 y1 .-. Vector2d x2 y2 = VectorBounds2d (x1 .-. x2) (y1 .-. y2)
 
 instance
   ( space1 ~ space2
@@ -555,7 +555,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  Vector2d x1 y1 - VectorBounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
+  Vector2d x1 y1 .-. VectorBounds2d x2 y2 = VectorBounds2d (x1 .-. x2) (y1 .-. y2)
 
 instance
   Multiplication#
@@ -720,7 +720,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds units3)
   where
-  Vector2d x1 y1 `cross` VectorBounds2d x2 y2 = x1 .*. y2 - y1 .*. x2
+  Vector2d x1 y1 `cross` VectorBounds2d x2 y2 = x1 .*. y2 .-. y1 .*. x2
 
 instance
   space1 ~ space2 =>
@@ -729,7 +729,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  Vector2d x1 y1 `cross#` VectorBounds2d x2 y2 = x1 #*# y2 - y1 #*# x2
+  Vector2d x1 y1 `cross#` VectorBounds2d x2 y2 = x1 #*# y2 .-. y1 #*# x2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -738,7 +738,7 @@ instance
     (Vector2d (space2 @ units2))
     (Bounds units3)
   where
-  VectorBounds2d x1 y1 `cross` Vector2d x2 y2 = x1 .*. y2 - y1 .*. x2
+  VectorBounds2d x1 y1 `cross` Vector2d x2 y2 = x1 .*. y2 .-. y1 .*. x2
 
 instance
   space1 ~ space2 =>
@@ -747,7 +747,7 @@ instance
     (Vector2d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  VectorBounds2d x1 y1 `cross#` Vector2d x2 y2 = x1 #*# y2 - y1 #*# x2
+  VectorBounds2d x1 y1 `cross#` Vector2d x2 y2 = x1 #*# y2 .-. y1 #*# x2
 
 instance
   space1 ~ space2 =>
@@ -768,7 +768,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds units3)
   where
-  VectorBounds2d x1 y1 `cross` VectorBounds2d x2 y2 = x1 .*. y2 - y1 .*. x2
+  VectorBounds2d x1 y1 `cross` VectorBounds2d x2 y2 = x1 .*. y2 .-. y1 .*. x2
 
 instance
   space1 ~ space2 =>
@@ -777,7 +777,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  VectorBounds2d x1 y1 `cross#` VectorBounds2d x2 y2 = x1 #*# y2 - y1 #*# x2
+  VectorBounds2d x1 y1 `cross#` VectorBounds2d x2 y2 = x1 #*# y2 .-. y1 #*# x2
 
 ----- Bounds2d -----
 
@@ -826,7 +826,7 @@ instance
     (Bounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  Position2d p - PositionBounds2d pb = p - pb
+  Position2d p .-. PositionBounds2d pb = p .-. pb
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -835,7 +835,7 @@ instance
     (Point2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  PositionBounds2d pb - Position2d p = pb - p
+  PositionBounds2d pb .-. Position2d p = pb .-. p
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -844,7 +844,7 @@ instance
     (Bounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  PositionBounds2d pb1 - PositionBounds2d pb2 = pb1 - pb2
+  PositionBounds2d pb1 .-. PositionBounds2d pb2 = pb1 .-. pb2
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -871,7 +871,7 @@ instance
     (Vector2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  PositionBounds2d pb - v = PositionBounds2d (pb - v)
+  PositionBounds2d pb .-. v = PositionBounds2d (pb .-. v)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -880,13 +880,13 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  PositionBounds2d pb - vb = PositionBounds2d (pb - vb)
+  PositionBounds2d pb .-. vb = PositionBounds2d (pb .-. vb)
 
 instance
   (units1 ~ units2, space1 ~ space2) =>
   Intersects (Point2d (space1 @ units1)) (Axis2d (space2 @ units2)) units1
   where
-  p ^ (Axis2d p0 d) = (p - p0) `cross` d ~= Quantity.zero
+  p ^ (Axis2d p0 d) = (p .-. p0) `cross` d ~= Quantity.zero
 
 instance
   (units1 ~ units2, space1 ~ space2) =>
@@ -1084,7 +1084,7 @@ instance
 
 instance ApproximateEquality (Vector3d (space @ units)) units where
   Vector3d x1 y1 z1 ~= Vector3d x2 y2 z2 =
-    Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Quantity.zero
+    Quantity.hypot3 (x2 .-. x1) (y2 .-. y1) (z2 .-. z1) ~= Quantity.zero
 
 instance HasZero (Vector3d (space @ units)) where
   zero = Vector3d Quantity.zero Quantity.zero Quantity.zero
@@ -1116,7 +1116,7 @@ instance
     (Vector3d (space2 @ units2))
     (Vector3d (space1 @ units1))
   where
-  Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
+  Vector3d x1 y1 z1 .-. Vector3d x2 y2 z2 = Vector3d (x1 .-. x2) (y1 .-. y2) (z1 .-. z2)
 
 instance
   Multiplication#
@@ -1224,9 +1224,9 @@ instance
   where
   Vector3d x1 y1 z1 `cross#` Vector3d x2 y2 z2 =
     Vector3d
-      (y1 #*# z2 - z1 #*# y2)
-      (z1 #*# x2 - x1 #*# z2)
-      (x1 #*# y2 - y1 #*# x2)
+      (y1 #*# z2 .-. z1 #*# y2)
+      (z1 #*# x2 .-. x1 #*# z2)
+      (x1 #*# y2 .-. y1 #*# x2)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -1237,9 +1237,9 @@ instance
   where
   Vector3d x1 y1 z1 `cross` Vector3d x2 y2 z2 =
     Vector3d
-      (y1 .*. z2 - z1 .*. y2)
-      (z1 .*. x2 - x1 .*. z2)
-      (x1 .*. y2 - y1 .*. x2)
+      (y1 .*. z2 .-. z1 .*. y2)
+      (z1 .*. x2 .-. x1 .*. z2)
+      (x1 .*. y2 .-. y1 .*. x2)
 
 instance
   space1 ~ space2 =>
@@ -1489,7 +1489,7 @@ instance
     (Vector3d (space2 @ units2))
     (Point3d (space1 @ units1))
   where
-  Position3d p - v = Position3d (p - v)
+  Position3d p .-. v = Position3d (p .-. v)
 
 instance
   ( space1 ~ space2
@@ -1500,7 +1500,7 @@ instance
     (Point3d (space2 @ units2))
     (Vector3d (space1 @ units1))
   where
-  Position3d p1 - Position3d p2 = p1 - p2
+  Position3d p1 .-. Position3d p2 = p1 .-. p2
 
 instance
   ( space1 ~ space2
@@ -1522,7 +1522,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  Position3d p - vb = PositionBounds3d (p - vb)
+  Position3d p .-. vb = PositionBounds3d (p .-. vb)
 
 instance ApproximateEquality (Point3d (space @ units)) units where
   Position3d p1 ~= Position3d p2 = p1 ~= p2
@@ -1655,7 +1655,7 @@ instance
     (VectorBounds3d (space1 @ units1))
   where
   VectorBounds3d## xl1## xh1## yl1## yh1## zl1## zh1##
-    - VectorBounds3d## xl2## xh2## yl2## yh2## zl2## zh2## = do
+    .-. VectorBounds3d## xl2## xh2## yl2## yh2## zl2## zh2## = do
       let !(# xl##, xh## #) = boundsMinusBounds## xl1## xh1## xl2## xh2##
       let !(# yl##, yh## #) = boundsMinusBounds## yl1## yh1## yl2## yh2##
       let !(# zl##, zh## #) = boundsMinusBounds## zl1## zh1## zl2## zh2##
@@ -1670,7 +1670,7 @@ instance
     (Vector3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  VectorBounds3d x1 y1 z1 - Vector3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+  VectorBounds3d x1 y1 z1 .-. Vector3d x2 y2 z2 = VectorBounds3d (x1 .-. x2) (y1 .-. y2) (z1 .-. z2)
 
 instance
   ( space1 ~ space2
@@ -1681,7 +1681,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  Vector3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+  Vector3d x1 y1 z1 .-. VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 .-. x2) (y1 .-. y2) (z1 .-. z2)
 
 {-# INLINE quantityTimesVectorBounds3d #-}
 quantityTimesVectorBounds3d ::
@@ -1874,9 +1874,9 @@ instance
   where
   Vector3d x1 y1 z1 `cross` VectorBounds3d x2 y2 z2 =
     VectorBounds3d
-      (y1 .*. z2 - z1 .*. y2)
-      (z1 .*. x2 - x1 .*. z2)
-      (x1 .*. y2 - y1 .*. x2)
+      (y1 .*. z2 .-. z1 .*. y2)
+      (z1 .*. x2 .-. x1 .*. z2)
+      (x1 .*. y2 .-. y1 .*. x2)
 
 instance
   space1 ~ space2 =>
@@ -1887,9 +1887,9 @@ instance
   where
   Vector3d x1 y1 z1 `cross#` VectorBounds3d x2 y2 z2 =
     VectorBounds3d
-      (y1 #*# z2 - z1 #*# y2)
-      (z1 #*# x2 - x1 #*# z2)
-      (x1 #*# y2 - y1 #*# x2)
+      (y1 #*# z2 .-. z1 #*# y2)
+      (z1 #*# x2 .-. x1 #*# z2)
+      (x1 #*# y2 .-. y1 #*# x2)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -1900,9 +1900,9 @@ instance
   where
   VectorBounds3d x1 y1 z1 `cross` Vector3d x2 y2 z2 =
     VectorBounds3d
-      (y1 .*. z2 - z1 .*. y2)
-      (z1 .*. x2 - x1 .*. z2)
-      (x1 .*. y2 - y1 .*. x2)
+      (y1 .*. z2 .-. z1 .*. y2)
+      (z1 .*. x2 .-. x1 .*. z2)
+      (x1 .*. y2 .-. y1 .*. x2)
 
 instance
   space1 ~ space2 =>
@@ -1913,9 +1913,9 @@ instance
   where
   VectorBounds3d x1 y1 z1 `cross#` Vector3d x2 y2 z2 =
     VectorBounds3d
-      (y1 #*# z2 - z1 #*# y2)
-      (z1 #*# x2 - x1 #*# z2)
-      (x1 #*# y2 - y1 #*# x2)
+      (y1 #*# z2 .-. z1 #*# y2)
+      (z1 #*# x2 .-. x1 #*# z2)
+      (x1 #*# y2 .-. y1 #*# x2)
 
 instance
   space1 ~ space2 =>
@@ -1944,9 +1944,9 @@ instance
   where
   VectorBounds3d x1 y1 z1 `cross` VectorBounds3d x2 y2 z2 =
     VectorBounds3d
-      (y1 .*. z2 - z1 .*. y2)
-      (z1 .*. x2 - x1 .*. z2)
-      (x1 .*. y2 - y1 .*. x2)
+      (y1 .*. z2 .-. z1 .*. y2)
+      (z1 .*. x2 .-. x1 .*. z2)
+      (x1 .*. y2 .-. y1 .*. x2)
 
 instance
   space1 ~ space2 =>
@@ -1957,9 +1957,9 @@ instance
   where
   VectorBounds3d x1 y1 z1 `cross#` VectorBounds3d x2 y2 z2 =
     VectorBounds3d
-      (y1 #*# z2 - z1 #*# y2)
-      (z1 #*# x2 - x1 #*# z2)
-      (x1 #*# y2 - y1 #*# x2)
+      (y1 #*# z2 .-. z1 #*# y2)
+      (z1 #*# x2 .-. x1 #*# z2)
+      (x1 #*# y2 .-. y1 #*# x2)
 
 ----- Bounds3d -----
 
@@ -2021,7 +2021,7 @@ instance
     (Vector3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  PositionBounds3d pb - v = PositionBounds3d (pb - v)
+  PositionBounds3d pb .-. v = PositionBounds3d (pb .-. v)
 
 instance
   ( space1 ~ space2
@@ -2032,7 +2032,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  PositionBounds3d pb - vb = PositionBounds3d (pb - vb)
+  PositionBounds3d pb .-. vb = PositionBounds3d (pb .-. vb)
 
 instance
   ( space1 ~ space2
@@ -2043,7 +2043,7 @@ instance
     (Bounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  Position3d p - PositionBounds3d pb = p - pb
+  Position3d p .-. PositionBounds3d pb = p .-. pb
 
 instance
   ( space1 ~ space2
@@ -2054,7 +2054,7 @@ instance
     (Point3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  PositionBounds3d pb - Position3d p = pb - p
+  PositionBounds3d pb .-. Position3d p = pb .-. p
 
 instance
   ( space1 ~ space2
@@ -2065,7 +2065,7 @@ instance
     (Bounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  PositionBounds3d pb1 - PositionBounds3d pb2 = pb1 - pb2
+  PositionBounds3d pb1 .-. PositionBounds3d pb2 = pb1 .-. pb2
 
 instance
   ( space1 ~ space2

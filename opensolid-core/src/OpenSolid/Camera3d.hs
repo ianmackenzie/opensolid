@@ -132,7 +132,7 @@ lookAt ::
 lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
   let computedFocalDistance = Point3d.distanceFrom eyePoint focalPoint
   let computedFrame =
-        case Tolerance.using Quantity.zero (Vector3d.direction (focalPoint - eyePoint)) of
+        case Tolerance.using Quantity.zero (Vector3d.direction (focalPoint .-. eyePoint)) of
           Success computedForwardDirection -> do
             let viewVector = Vector3d.unit computedForwardDirection
             let upVector = Vector3d.unit World3d.upwardDirection

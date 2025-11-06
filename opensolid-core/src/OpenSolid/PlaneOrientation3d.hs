@@ -90,7 +90,7 @@ gramSchmidt ::
   Vector3d (space @ units) ->
   Maybe (PlaneOrientation3d space)
 gramSchmidt dx vxy = do
-  let vy = vxy - Vector3d.projectionIn dx vxy
+  let vy = vxy .-. Vector3d.projectionIn dx vxy
   case Vector3d.direction vy of
     Failure Vector3d.IsZero -> Nothing
     Success dy -> Just (PlaneOrientation3d dx dy)
