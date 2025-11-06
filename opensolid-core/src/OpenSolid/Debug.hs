@@ -9,16 +9,19 @@ module OpenSolid.Debug
   )
 where
 
+import Data.Text (Text)
 import Data.Text qualified
 import Debug.Trace qualified
+import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
-import OpenSolid.Bootstrap hiding (print, (>>))
 import OpenSolid.Text qualified as Text
+import Prelude (Show, (<>))
+import Prelude qualified
 
 newtype Debug = Debug (() -> ())
 
 (>>) :: Debug -> a -> a
-Debug action >> value = seq (action ()) value
+Debug action >> value = Prelude.seq (action ()) value
 
 labelled :: Show a => Text -> a -> Text
 labelled label value = label <> ": " <> Text.show value

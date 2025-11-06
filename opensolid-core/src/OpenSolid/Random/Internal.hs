@@ -1,8 +1,9 @@
 module OpenSolid.Random.Internal where
 
-import OpenSolid.Bootstrap
 import OpenSolid.Pair qualified as Pair
 import System.Random (StdGen)
+import Prelude (Applicative, Functor, Monad, (.))
+import Prelude qualified
 
 newtype Generator a = Generator (StdGen -> (a, StdGen))
 
@@ -24,6 +25,9 @@ instance Monad Generator where
       let (value, stdGen2) = run valueGenerator stdGen1
       let newGenerator = function value
       run newGenerator stdGen2
+
+return :: a -> Generator a
+return value = Generator (value,)
 
 run :: Generator a -> StdGen -> (a, StdGen)
 run (Generator generator) stdgen = generator stdgen

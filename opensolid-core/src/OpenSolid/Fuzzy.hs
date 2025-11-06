@@ -2,13 +2,22 @@ module OpenSolid.Fuzzy
   ( Fuzzy (Resolved, Unresolved)
   , collect
   , oneOf
-  , (>>=)
   , map
   , fromMaybe
   )
 where
 
-import OpenSolid.Bootstrap
+import OpenSolid.List (List)
+import Prelude
+  ( Applicative
+  , Eq
+  , Functor
+  , Maybe (Just, Nothing)
+  , Monad
+  , Show
+  , Traversable
+  )
+import Prelude qualified
 
 data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
 
@@ -35,7 +44,7 @@ map f (Resolved value) = Resolved (f value)
 map _ Unresolved = Unresolved
 
 collect :: Traversable list => (a -> Fuzzy b) -> list a -> Fuzzy (list b)
-collect = mapM
+collect = Prelude.mapM
 
 oneOf :: List (Fuzzy a) -> Fuzzy a
 oneOf fuzzies = case fuzzies of

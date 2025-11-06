@@ -5,13 +5,12 @@ module OpenSolid.Sign
 where
 
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap
 import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
 import System.Random.Stateful qualified
-import Prelude qualified
+import Prelude (Bounded, Enum, Eq, Ord, Show)
 
-data Sign = Negative | Positive deriving (Eq, Ord, Show, Prelude.Enum, Prelude.Bounded)
+data Sign = Negative | Positive deriving (Eq, Ord, Show, Enum, Bounded)
 
 instance System.Random.Stateful.Uniform Sign where
   uniformM = System.Random.Stateful.uniformEnumM

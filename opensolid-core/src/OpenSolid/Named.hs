@@ -1,8 +1,9 @@
 module OpenSolid.Named ((:::) (Named)) where
 
+import Data.Kind (Type)
 import GHC.OverloadedLabels qualified
 import GHC.TypeLits (Symbol)
-import OpenSolid.Bootstrap
+import Prelude (type (~))
 
 type (:::) :: Symbol -> Type -> Type
 newtype name ::: a = Named a

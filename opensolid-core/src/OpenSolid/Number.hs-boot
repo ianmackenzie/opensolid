@@ -6,9 +6,9 @@ module OpenSolid.Number
   )
 where
 
-import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
 import OpenSolid.Unitless (Unitless)
+import Prelude (Double, Int)
 
 type Number = Quantity Unitless
 

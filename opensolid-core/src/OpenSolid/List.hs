@@ -12,6 +12,7 @@ module OpenSolid.List
   , singleton
   , maybe
   , isEmpty
+  , length
   , map
   , mapWithIndex
   , indexed
@@ -64,12 +65,30 @@ where
 
 import Data.List qualified
 import Data.Maybe qualified
-import OpenSolid.Bootstrap hiding (concat, foldl, foldr, maybe)
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
-import Prelude ((+), (-))
+import Prelude
+  ( Bool (True)
+  , Eq
+  , Foldable
+  , Int
+  , Maybe (Just, Nothing)
+  , Ord
+  , Ordering
+  , otherwise
+  , (&&)
+  , (+)
+  , (-)
+  , (<)
+  , (<=)
+  , (==)
+  , (>)
+  , (>=)
+  )
 import Prelude qualified
+
+type List a = [a]
 
 singleton :: a -> List a
 singleton = Data.List.singleton
@@ -79,7 +98,10 @@ maybe (Just value) = [value]
 maybe Nothing = []
 
 isEmpty :: List a -> Bool
-isEmpty = null
+isEmpty = Prelude.null
+
+length :: List a -> Int
+length = Prelude.length
 
 {-# COMPLETE [], OneOrMore #-}
 
@@ -246,16 +268,16 @@ isDescending :: Ord a => List a -> Bool
 isDescending = isOrdered (>)
 
 allSatisfy :: (a -> Bool) -> List a -> Bool
-allSatisfy = all
+allSatisfy = Prelude.all
 
 allTrue :: List Bool -> Bool
-allTrue = and
+allTrue = Prelude.and
 
 anySatisfy :: (a -> Bool) -> List a -> Bool
-anySatisfy = any
+anySatisfy = Prelude.any
 
 anyTrue :: List Bool -> Bool
-anyTrue = or
+anyTrue = Prelude.or
 
 successive :: (a -> a -> b) -> List a -> List b
 successive function list = map2 function list (drop 1 list)
@@ -275,14 +297,14 @@ replicate = Data.List.replicate
 
 random :: Int -> Random.Generator a -> Random.Generator (List a)
 random n randomItem
-  | n <= 0 = return []
+  | n <= 0 = Random.return []
   | otherwise = do
       item <- randomItem
       rest <- random (n - 1) randomItem
-      return (item : rest)
+      Random.return (item : rest)
 
 shuffle :: List a -> Random.Generator (List a)
 shuffle original = do
-  keys <- random original.length (Random.Generator System.Random.genWord64)
+  keys <- random (length original) (Random.Generator System.Random.genWord64)
   let shuffledPairs = sortBy Pair.second (zip2 original keys)
-  return (map Pair.first shuffledPairs)
+  Random.return (map Pair.first shuffledPairs)

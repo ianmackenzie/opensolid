@@ -73,10 +73,10 @@ build ::
   NonEmpty (Bounds3d (space @ units), a) ->
   Set3d a (space @ units)
 build boundsCoordinate buildSubset n boundedItems
-  | n == 1 = assert (boundedItems.length == 1) do
-      let (itemBounds, item) = boundedItems.first
+  | n == 1 = assert (NonEmpty.length boundedItems == 1) do
+      let (itemBounds, item) = NonEmpty.first boundedItems
       Leaf itemBounds item
-  | otherwise = assert (n >= 2 && boundedItems.length == n) do
+  | otherwise = assert (n >= 2 && NonEmpty.length boundedItems == n) do
       let sorted = NonEmpty.sortBy (Bounds.midpoint . boundsCoordinate . Pair.first) boundedItems
       let leftN = n `div` 2
       let rightN = n - leftN

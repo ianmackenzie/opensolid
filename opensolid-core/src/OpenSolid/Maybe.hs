@@ -12,13 +12,14 @@ module OpenSolid.Maybe
 where
 
 import OpenSolid.Bool qualified as Bool
-import OpenSolid.Bootstrap
+import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import OpenSolid.Random qualified as Random
+import Prelude (Foldable, Maybe (Just, Nothing))
 import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
-map = fmap
+map = Prelude.fmap
 
 map2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
 map2 function (Just first) second = map (function first) second
@@ -30,7 +31,7 @@ withDefault value Nothing = value
 
 find :: (a -> Maybe b) -> List a -> Maybe b
 find _ [] = Nothing
-find f (first : rest) = f first |> orElse (find f rest)
+find f (first : rest) = orElse (find f rest) (f first)
 
 values :: Foldable list => list (Maybe a) -> List a
 values maybes = Prelude.foldr List.prepend [] maybes

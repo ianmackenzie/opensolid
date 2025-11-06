@@ -6,7 +6,7 @@ module OpenSolid.Bounds
   )
 where
 
-import OpenSolid.Bootstrap
+import Data.Kind (Type)
 import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
 import OpenSolid.Unitless (Unitless)
 

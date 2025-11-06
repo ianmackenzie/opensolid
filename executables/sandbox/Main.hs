@@ -232,8 +232,8 @@ testPlaneTorusIntersection = do
   zeros <- IO.try (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
-  log "  Crossing curves" zeros.crossingCurves.length
-  log "  Saddle points" zeros.saddlePoints.length
+  log "  Crossing curves" (List.length zeros.crossingCurves)
+  log "  Saddle points" (List.length zeros.saddlePoints)
 
 testPlaneParaboloidIntersection :: IO ()
 testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
@@ -243,8 +243,8 @@ testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
   zeros <- IO.try (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
-  log "  Crossing curves" zeros.crossingCurves.length
-  log "  Saddle points" zeros.saddlePoints.length
+  log "  Crossing curves" (List.length zeros.crossingCurves)
+  log "  Saddle points" (List.length zeros.saddlePoints)
 
 strokeWidth :: Length
 strokeWidth = Length.millimeters 0.1

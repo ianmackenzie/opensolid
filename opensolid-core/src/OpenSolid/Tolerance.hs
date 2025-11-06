@@ -11,7 +11,7 @@ module OpenSolid.Tolerance
 where
 
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap
+import OpenSolid.List (List)
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import OpenSolid.Number (Number)
 import OpenSolid.Quantity (Quantity (Quantity##))
@@ -19,6 +19,14 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (type (#*#))
 import OpenSolid.Units qualified as Units
+import Prelude
+  ( Bool (False, True)
+  , Maybe (Just, Nothing)
+  , not
+  , (&&)
+  , (<=)
+  , type (~)
+  )
 
 type Tolerance units = ?tolerance :: Quantity units
 

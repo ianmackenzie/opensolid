@@ -5,6 +5,7 @@ import Data.Word (Word16)
 import GHC.ByteOrder qualified
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity))
 import OpenSolid.Text qualified as Text
@@ -29,4 +30,4 @@ number :: Number -> Builder
 number (Quantity value) = double value
 
 list :: (a -> Builder) -> List a -> Builder
-list encodeItem items = int items.length <> Binary.combine encodeItem items
+list encodeItem items = int (List.length items) <> Binary.combine encodeItem items

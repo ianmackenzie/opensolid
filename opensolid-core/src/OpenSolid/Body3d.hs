@@ -397,7 +397,7 @@ boundedBy ::
 boundedBy [] = Failure BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = do
   let surfacesWithHalfEdges = NonEmpty.mapWithIndex toSurfaceWithHalfEdges givenSurfaces
-  let firstSurfaceWithHalfEdges = surfacesWithHalfEdges.first
+  let firstSurfaceWithHalfEdges = NonEmpty.first surfacesWithHalfEdges
   let halfEdges = NonEmpty.combine getAllHalfEdges surfacesWithHalfEdges
   let halfEdgeSet = Set3d.fromNonEmpty halfEdges
   let corners = NonEmpty.map halfEdgeStartPoint halfEdges

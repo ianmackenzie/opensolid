@@ -751,7 +751,8 @@ sign curve = case zeros curve of
             -- All inner zeros are non-crossing (e.g. quadratic) ones,
             -- so we can safely test the curve
             -- halfway between t=0 and the first inner zero
-            let testPoint = 0.5 *. innerZeros.first.location
+            let firstInnerZero = NonEmpty.first innerZeros
+            let testPoint = 0.5 *. firstInnerZero.location
             Success (Quantity.sign (evaluate curve testPoint))
 
 isInnerZero :: Zero -> Bool

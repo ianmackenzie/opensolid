@@ -31,6 +31,9 @@ module OpenSolid.NonEmpty
   , prepend
   , extend
   , length
+  , first
+  , rest
+  , last
   , map
   , mapWithIndex
   , indexed
@@ -91,12 +94,28 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap hiding (concat, foldl, foldr)
+import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
-import Prelude ((-))
+import Prelude
+  ( Bool
+  , Eq
+  , Foldable
+  , Int
+  , Maybe (Just)
+  , Ord
+  , Ordering
+  , compare
+  , otherwise
+  , (-)
+  , (.)
+  , (<)
+  , (<>)
+  , (==)
+  , (>)
+  )
 import Prelude qualified
 
 {-# COMPLETE [], NonEmpty #-}
@@ -215,6 +234,15 @@ extend = Data.List.NonEmpty.appendList
 length :: NonEmpty a -> Int
 length = Data.List.NonEmpty.length
 
+first :: NonEmpty a -> a
+first = Data.List.NonEmpty.head
+
+rest :: NonEmpty a -> List a
+rest = Data.List.NonEmpty.tail
+
+last :: NonEmpty a -> a
+last = Data.List.NonEmpty.last
+
 map :: (a -> b) -> NonEmpty a -> NonEmpty b
 map = Data.List.NonEmpty.map
 
@@ -260,14 +288,14 @@ unzip2 = Data.Functor.unzip
 
 unzip3 :: NonEmpty (a, b, c) -> (NonEmpty a, NonEmpty b, NonEmpty c)
 unzip3 nonEmpty = do
-  let (a, b, c) = nonEmpty.first
-  let (as, bs, cs) = List.unzip3 nonEmpty.rest
+  let (a, b, c) = first nonEmpty
+  let (as, bs, cs) = List.unzip3 (rest nonEmpty)
   (a :| as, b :| bs, c :| cs)
 
 unzip4 :: NonEmpty (a, b, c, d) -> (NonEmpty a, NonEmpty b, NonEmpty c, NonEmpty d)
 unzip4 nonEmpty = do
-  let (a, b, c, d) = nonEmpty.first
-  let (as, bs, cs, ds) = List.unzip4 nonEmpty.rest
+  let (a, b, c, d) = first nonEmpty
+  let (as, bs, cs, ds) = List.unzip4 (rest nonEmpty)
   (a :| as, b :| bs, c :| cs, d :| ds)
 
 filter :: (a -> Bool) -> NonEmpty a -> List a
@@ -319,7 +347,7 @@ sortAndDeduplicate :: Ord a => NonEmpty a -> NonEmpty a
 sortAndDeduplicate nonEmpty = deduplicate (sort nonEmpty)
 
 deduplicate :: Eq a => NonEmpty a -> NonEmpty a
-deduplicate nonEmpty = dedup nonEmpty.first nonEmpty.rest
+deduplicate nonEmpty = dedup (first nonEmpty) (rest nonEmpty)
 
 dedup :: Eq a => a -> List a -> NonEmpty a
 dedup current [] = current :| []
@@ -328,16 +356,16 @@ dedup current (next : remaining)
   | otherwise = push current (dedup next remaining)
 
 allSatisfy :: (a -> Bool) -> NonEmpty a -> Bool
-allSatisfy = all
+allSatisfy = Prelude.all
 
 allTrue :: NonEmpty Bool -> Bool
-allTrue = and
+allTrue = Prelude.and
 
 anySatisfy :: (a -> Bool) -> NonEmpty a -> Bool
-anySatisfy = any
+anySatisfy = Prelude.any
 
 anyTrue :: NonEmpty Bool -> Bool
-anyTrue = or
+anyTrue = Prelude.or
 
 successive :: (a -> a -> b) -> NonEmpty a -> List b
 successive function nonEmpty = List.successive function (toList nonEmpty)
@@ -408,10 +436,10 @@ random :: Int -> Random.Generator a -> Random.Generator (NonEmpty a)
 random n randomItem = do
   firstItem <- randomItem
   restItems <- List.random (n - 1) randomItem
-  return (firstItem :| restItems)
+  Random.return (firstItem :| restItems)
 
 shuffle :: NonEmpty a -> Random.Generator (NonEmpty a)
 shuffle original = do
   keys <- random (length original) (Random.Generator System.Random.genWord64)
   let shuffledPairs = sortBy Pair.second (zip2 original keys)
-  return (map Pair.first shuffledPairs)
+  Random.return (map Pair.first shuffledPairs)

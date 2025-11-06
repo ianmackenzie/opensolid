@@ -31,14 +31,25 @@ module OpenSolid.Text
 where
 
 import Data.Char qualified
+import Data.Text (Text)
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import OpenSolid.Binary (Builder, ByteString)
-import OpenSolid.Bootstrap hiding (concat, show)
 import OpenSolid.Error qualified as Error
+import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import OpenSolid.Number (Number)
 import OpenSolid.Result (Result (Failure, Success))
+import Prelude
+  ( Bool
+  , Char
+  , Either (Left, Right)
+  , Eq
+  , Int
+  , Maybe (Just, Nothing)
+  , Show
+  , (<>)
+  )
 import Prelude qualified
 
 concat :: List Text -> Text
@@ -82,10 +93,7 @@ multiline = join "\n"
 
 indent :: Text -> Text -> Text
 indent indentation paragraph =
-  paragraph
-    |> lines
-    |> List.map (indentation <>)
-    |> multiline
+  multiline (List.map (indentation <>) (lines paragraph))
 
 replicate :: Int -> Text -> Text
 replicate = Data.Text.replicate

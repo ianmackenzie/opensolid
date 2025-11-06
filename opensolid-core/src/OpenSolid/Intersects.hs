@@ -1,7 +1,7 @@
 module OpenSolid.Intersects (Intersects (intersects)) where
 
-import OpenSolid.Bootstrap
 import OpenSolid.Tolerance (Tolerance)
+import Prelude (Bool)
 
 class Intersects b a units => Intersects a b units | a b -> units where
   intersects :: Tolerance units => a -> b -> Bool

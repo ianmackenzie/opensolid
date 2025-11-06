@@ -1,6 +1,6 @@
 module OpenSolid.Int (factorial, pow) where
 
-import OpenSolid.Bootstrap (Int)
+import Prelude (Int)
 
 factorial :: Int -> Int
 pow :: Int -> Int -> Int

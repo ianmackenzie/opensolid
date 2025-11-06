@@ -239,7 +239,7 @@ polygon ::
 polygon vertexList = case vertexList of
   [] -> Failure BoundedBy.EmptyRegion
   NonEmpty vertices -> do
-    let closedLoop = NonEmpty.push vertices.last vertices
+    let closedLoop = NonEmpty.push (NonEmpty.last vertices) vertices
     let segments = NonEmpty.successive LineSegment2d closedLoop
     let nonZeroLengthSegments = List.filter (\segment -> segment.length != Quantity.zero) segments
     let toCurve segment = Curve2d.line segment.startPoint segment.endPoint
@@ -638,7 +638,7 @@ pickLargestLoop loops =
 
 loopSignedArea# :: Loop (space @ units) -> Estimate (units #*# units)
 loopSignedArea# loop = do
-  let referencePoint = loop.first.startPoint
+  let referencePoint = Curve2d.startPoint (NonEmpty.first loop)
   let edgeIntegrals = NonEmpty.map (areaIntegral# referencePoint) loop
   Estimate.sum edgeIntegrals
 
@@ -659,7 +659,7 @@ areaIntegral# referencePoint curve = do
 
 loopIsInside :: Tolerance units => Loop (space @ units) -> Loop (space @ units) -> Bool
 loopIsInside outer inner = do
-  let testPoint = inner.first.startPoint
+  let testPoint = Curve2d.startPoint (NonEmpty.first inner)
   case classify testPoint outer of
     Nothing -> True -- Shouldn't happen, loops should be guaranteed not to be touching by this point
     Just Positive -> True
@@ -672,7 +672,7 @@ bounds region = do
 
 area :: Units.Squared units1 units2 => Region2d (space @ units1) -> Estimate units2
 area region = do
-  let referencePoint = region.outerLoop.first.startPoint
+  let referencePoint = Curve2d.startPoint (NonEmpty.first region.outerLoop)
   let edgeIntegrals = NonEmpty.map (areaIntegral referencePoint) region.boundaryCurves
   Estimate.sum edgeIntegrals
 
@@ -687,7 +687,9 @@ toVertexLoop ::
   NonEmpty (Curve2d (space @ units)) ->
   NonEmpty (Point2d (space @ units))
 toVertexLoop resolution loop = do
-  let trailingVertices curve = (Curve2d.toPolyline resolution curve).vertices.rest
+  let trailingVertices curve = do
+        let polyline = Curve2d.toPolyline resolution curve
+        NonEmpty.rest polyline.vertices
   let allVertices = List.combine trailingVertices loop
   case allVertices of
     NonEmpty vertices -> vertices

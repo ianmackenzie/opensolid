@@ -47,7 +47,7 @@ typeNameComponent ffiType = case ffiType of
   FFI.Array itemType -> "List_" <> typeNameComponent itemType
   FFI.Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
-    let numItems = itemTypes.length
+    let numItems = List.length itemTypes
     let prefix = "Tuple" <> Text.int numItems
     Text.join "_" (prefix : List.map typeNameComponent itemTypes)
   FFI.Maybe valueType -> "Maybe_" <> typeNameComponent valueType

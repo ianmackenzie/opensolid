@@ -10,8 +10,9 @@ module OpenSolid.CoordinateSystem
   )
 where
 
-import OpenSolid.Bootstrap
+import Data.Kind (Type)
 import OpenSolid.Units (HasUnits, Unitless)
+import Prelude (Eq, Show)
 
 data CoordinateSystem = CoordinateSystem Type Type
 

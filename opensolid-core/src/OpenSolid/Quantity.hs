@@ -45,15 +45,17 @@ where
 
 import Data.Coerce qualified
 import Data.Hashable (Hashable)
+import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.Text (Text)
 import Data.Text qualified
 import Foreign.Storable (Storable)
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap hiding (max, min)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
+import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Number (Number)
 import OpenSolid.Random.Internal qualified as Random
@@ -63,7 +65,25 @@ import OpenSolid.Unitless (Unitless)
 import OpenSolid.Units (CubicMeters, Meters, Radians, SquareMeters, type (#*#), type (#/#))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
-import Prelude ((*), (+), (-), (/))
+import Prelude
+  ( Bool
+  , Eq
+  , Ord
+  , Show
+  , ShowS
+  , ($)
+  , (*)
+  , (+)
+  , (-)
+  , (.)
+  , (/)
+  , (<)
+  , (<=)
+  , (<>)
+  , (>)
+  , (>=)
+  , type (~)
+  )
 import Prelude qualified
 
 type role Quantity phantom
@@ -78,11 +98,12 @@ pattern Quantity## :: Double# -> Quantity units
 pattern Quantity## x## = Quantity (D# x##)
 
 instance Show (Quantity Unitless) where
-  show (Quantity x) = show x
+  show (Quantity x) = Prelude.show x
 
 showsPrecImpl :: Text -> Int -> Quantity units -> ShowS
 showsPrecImpl constructor prec (Quantity x) =
-  showParen (prec > 10) (showString (Data.Text.unpack (constructor <> " ")) . showsPrec 11 x)
+  Prelude.showParen (prec > 10) $
+    Prelude.showString (Data.Text.unpack (constructor <> " ")) . Prelude.showsPrec 11 x
 
 instance Show (Quantity Meters) where
   showsPrec = showsPrecImpl "Length.meters"
@@ -169,7 +190,7 @@ infixl 7 .//.
 
 {-# INLINE (.%.) #-}
 (.%.) :: Quantity units -> Quantity units -> Quantity units
-x .%. y = x .-. y .* fromIntegral (x .//. y)
+x .%. y = x .-. y .* Prelude.fromIntegral (x .//. y)
 
 infixl 7 .%.
 
@@ -339,4 +360,4 @@ midpoints start end n = range start end (2 * n) [1, 3 .. 2 * n - 1]
 range :: Quantity units -> Quantity units -> Int -> List Int -> List (Quantity units)
 range start end n indices = do
   let delta = end .-. start
-  [start .+. (fromIntegral i / fromIntegral n) *. delta | i <- indices]
+  [start .+. (Prelude.fromIntegral i / Prelude.fromIntegral n) *. delta | i <- indices]

@@ -4,8 +4,10 @@ module OpenSolid.Error
   )
 where
 
-import OpenSolid.Bootstrap
+import Data.Text (Text)
+import OpenSolid.List (List)
 import {-# SOURCE #-} OpenSolid.Text qualified as Text
+import Prelude (Char, Show, id, (<>))
 
 class Show error => Message error where
   message :: error -> Text

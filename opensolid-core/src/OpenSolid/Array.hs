@@ -6,6 +6,7 @@ module OpenSolid.Array
   , fromNonEmpty
   , toList
   , initialize
+  , length
   , get
   , map
   , map2
@@ -42,7 +43,7 @@ singleton :: a -> Array a
 singleton value = fromList [value]
 
 fromList :: List a -> Array a
-fromList list = Array (Data.Array.listArray (0, list.length - 1) list)
+fromList list = Array (Data.Array.listArray (0, List.length list - 1) list)
 
 fromNonEmpty :: NonEmpty a -> Array a
 fromNonEmpty = fromList . NonEmpty.toList
@@ -56,7 +57,10 @@ initialize n function
   | otherwise = Array (Data.Array.listArray (0, n - 1) (List.map function [0 .. n - 1]))
 
 instance HasField "length" (Array a) Int where
-  getField (Array array) = Prelude.length array
+  getField = length
+
+length :: Array a -> Int
+length (Array array) = Prelude.length array
 
 {-# INLINE get #-}
 get :: Int -> Array a -> a

@@ -45,7 +45,8 @@ convention = Convention3d.yUp
 builder :: Resolution Meters -> Model3d space -> Builder
 builder resolution model = do
   let meshes = Model3d.inspect (gltfMeshes resolution) model
-  let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. meshes.length - 1]]
+  let sceneObject =
+        Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
   let unpaddedBufferBuilder = Binary.combine meshBuilder meshes
   let unpaddedBufferByteLength = Int.sumOf meshByteLength meshes
   let encodedMeshes = encodeMeshes 0 0 meshes
@@ -124,7 +125,7 @@ gltfMeshes resolution model = case model of
       NonEmpty meshVertices -> do
         let numVertices = mesh.vertices.length
         let meshFaceIndices = mesh.faceIndices
-        let numFaces = meshFaceIndices.length
+        let numFaces = List.length meshFaceIndices
         let meshBounds = Bounds3d.hullN meshVertices
         let (xBounds, yBounds, zBounds) = Bounds3d.coordinates convention meshBounds
         let Bounds xLow xHigh = xBounds

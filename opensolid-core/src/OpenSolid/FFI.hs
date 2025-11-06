@@ -295,7 +295,7 @@ typeName ffiType = case ffiType of
   Array itemType -> "Array" <> typeName itemType
   Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
-    let tupleSize = itemTypes.length
+    let tupleSize = List.length itemTypes
     "Tuple" <> Text.int tupleSize <> Text.concat (List.map typeName itemTypes)
   Maybe valueType -> "Maybe" <> typeName valueType
   Result valueType -> "Result" <> typeName valueType
@@ -308,7 +308,7 @@ qualifiedName :: Text -> ClassName -> Text
 qualifiedName separator (ClassName components) = Text.join separator (NonEmpty.toList components)
 
 unqualifiedName :: ClassName -> Text
-unqualifiedName (ClassName components) = components.last
+unqualifiedName (ClassName components) = NonEmpty.last components
 
 size :: Type -> Int
 size ffiType = case ffiType of
@@ -428,7 +428,7 @@ store ptr offset value = do
       Foreign.pokeByteOff contentsPtr numBytes (0 :: Word8)
       Foreign.pokeByteOff ptr offset contentsPtr
     ListRep -> do
-      let numItems = value.length
+      let numItems = List.length value
       let itemSize = listItemSize proxy
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
       let storeItem index item = store itemsPtr (index * itemSize) item

@@ -20,7 +20,6 @@ where
 
 import Data.List.NonEmpty (NonEmpty)
 import OpenSolid.Array qualified as Array
-import OpenSolid.Bootstrap hiding (sequence)
 import OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
@@ -28,7 +27,7 @@ import OpenSolid.Random.Internal
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
-import Prelude ((-))
+import Prelude (Bool, IO, Int, Maybe (Just, Nothing), Traversable, (-), (.))
 import Prelude qualified
 
 newtype Seed = Seed StdGen

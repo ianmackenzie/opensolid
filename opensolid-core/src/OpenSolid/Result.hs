@@ -10,14 +10,23 @@ module OpenSolid.Result
   , foldl
   , foldr
   , sequence
-  , (>>=)
-  , fail
   )
 where
 
-import OpenSolid.Bootstrap hiding (foldl, foldr, sequence)
+import Data.Text (Text)
 import OpenSolid.Error qualified as Error
+import OpenSolid.List (List)
 import {-# SOURCE #-} OpenSolid.Text qualified as Text
+import Prelude
+  ( Applicative
+  , Eq
+  , Foldable
+  , Functor
+  , Monad
+  , MonadFail
+  , Show
+  , Traversable
+  )
 import Prelude qualified
 
 data Result x a where
@@ -48,7 +57,7 @@ instance MonadFail (Result Text) where
   fail message = Failure (Text.pack message)
 
 andThen :: (a -> Result x b) -> Result x a -> Result x b
-andThen function result = result >>= function
+andThen function result = result Prelude.>>= function
 
 map :: (a -> b) -> Result x a -> Result x b
 map function result = case result of
@@ -77,7 +86,7 @@ try result = case result of
   Failure error -> Failure (Error.message error)
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
-collect = mapM
+collect = Prelude.mapM
 
 applyForward :: (b -> a -> Result x b) -> Result x b -> a -> Result x b
 applyForward f (Success acc) item = f acc item

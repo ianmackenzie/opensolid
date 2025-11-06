@@ -42,9 +42,10 @@ module OpenSolid.Number
   )
 where
 
+import Data.Text (Text)
 import OpenSolid.Arithmetic
-import OpenSolid.Bootstrap hiding (max, min, product)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
+import OpenSolid.List (List)
 import OpenSolid.NonEmpty (NonEmpty)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Quantity (Quantity (Quantity))
@@ -54,6 +55,7 @@ import {-# SOURCE #-} OpenSolid.Result (Result)
 import OpenSolid.Sign (Sign)
 import OpenSolid.Text.Parse qualified as Text.Parse
 import OpenSolid.Units (Unitless)
+import Prelude (Bool, Double, Int)
 import Prelude qualified
 
 type Number = Quantity Unitless
@@ -68,7 +70,7 @@ toDouble (Quantity x) = x
 
 {-# INLINE fromInt #-}
 fromInt :: Int -> Number
-fromInt = fromIntegral
+fromInt = Prelude.fromIntegral
 
 parse :: Text -> Result Text Number
 parse = Text.Parse.number

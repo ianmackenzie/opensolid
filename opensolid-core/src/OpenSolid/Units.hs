@@ -29,13 +29,14 @@ module OpenSolid.Units
 where
 
 import Data.Coerce qualified
-import Data.Kind (Constraint)
+import Data.Kind (Constraint, Type)
 import Data.List.NonEmpty (NonEmpty)
-import OpenSolid.Bootstrap
+import OpenSolid.List (List)
 import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
 import {-# SOURCE #-} OpenSolid.Result (Result (Failure, Success))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)
 import OpenSolid.Unitless (Unitless)
+import Prelude (Eq, Int, Maybe (Just, Nothing), Show, id, type (~))
 
 class HasUnits (a :: k) units | a -> units
 

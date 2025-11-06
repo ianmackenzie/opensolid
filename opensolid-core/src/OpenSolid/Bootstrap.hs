@@ -34,9 +34,6 @@ import Control.Concurrent.Async (Async)
 import Control.Exception (assert)
 import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Kind (Type)
-import Data.List qualified
-import Data.List.NonEmpty (NonEmpty)
-import Data.List.NonEmpty qualified
 import Data.Text (Text)
 import Data.Text qualified
 import Data.Traversable.WithIndex (TraversableWithIndex)
@@ -114,18 +111,3 @@ infixl 0 |>
 function @ value = function value
 
 infixl 1 @
-
-instance HasField "length" (List a) Int where
-  getField = Data.List.length
-
-instance HasField "first" (NonEmpty a) a where
-  getField = Data.List.NonEmpty.head
-
-instance HasField "rest" (NonEmpty a) [a] where
-  getField = Data.List.NonEmpty.tail
-
-instance HasField "last" (NonEmpty a) a where
-  getField = Data.List.NonEmpty.last
-
-instance HasField "length" (NonEmpty a) Int where
-  getField = Data.List.NonEmpty.length

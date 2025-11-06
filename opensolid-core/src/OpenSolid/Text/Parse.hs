@@ -1,13 +1,14 @@
 module OpenSolid.Text.Parse (int, number) where
 
+import Data.Text (Text)
 import Data.Text qualified
 import Data.Text.Read (Reader)
 import Data.Text.Read qualified
-import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Number (Number)
 import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Result qualified as Result
+import Prelude (Either (Left, Right), Int, otherwise, (.), (<>))
 import Prelude qualified
 
 num :: Prelude.Num a => Reader a -> Text -> Result Text a

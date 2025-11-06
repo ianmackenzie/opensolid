@@ -1,5 +1,7 @@
 module OpenSolid.IO
-  ( try
+  ( succeed
+  , fail
+  , try
   , map
   , run
   , forEach
@@ -25,28 +27,37 @@ import Control.Concurrent qualified
 import Data.ByteString qualified
 import Data.ByteString.Builder qualified as Builder
 import Data.Foldable qualified
+import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Foldable.WithIndex qualified
 import Data.Text.IO.Utf8 qualified
+import Data.Traversable.WithIndex (TraversableWithIndex)
 import Data.Traversable.WithIndex qualified
 import OpenSolid.Binary (Builder, ByteString)
-import OpenSolid.Bootstrap
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Error qualified as Error
 import OpenSolid.Number qualified as Number
 import OpenSolid.Result (Result (Failure, Success))
+import OpenSolid.Text (Text)
 import OpenSolid.Text qualified as Text
 import System.Directory
 import System.FilePath qualified
 import System.IO.Error qualified
+import Prelude (Foldable, IO, Int, Traversable, (.))
 import Prelude qualified
 
+succeed :: a -> IO a
+succeed = Prelude.return
+
+fail :: Text -> IO a
+fail message = Prelude.fail (Text.unpack message)
+
 try :: Result x a -> IO a
-try (Success value) = return value
-try (Failure error) = fail (Text.unpack (Error.message error))
+try (Success value) = succeed value
+try (Failure error) = fail (Error.message error)
 
 map :: (a -> b) -> IO a -> IO b
-map = fmap
+map = Prelude.fmap
 
 run :: Foldable list => list (IO ()) -> IO ()
 run = Data.Foldable.fold
@@ -71,10 +82,10 @@ onError callback io = System.IO.Error.catchIOError io do
   \error -> callback (Text.pack (System.IO.Error.ioeGetErrorString error))
 
 attempt :: IO a -> IO (Result Text a)
-attempt io = map Success io |> onError (return . Failure)
+attempt io = onError (succeed . Failure) (map Success io)
 
 mapError :: (Text -> Text) -> IO a -> IO a
-mapError function = onError (fail . Text.unpack . function)
+mapError function = onError (fail . function)
 
 addContext :: Text -> IO a -> IO a
 addContext text = mapError (Error.addContext text)

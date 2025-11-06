@@ -16,13 +16,13 @@ map :: (a -> b) -> Polyline2d a -> Polyline2d b
 map function (Polyline2d vertices) = Polyline2d (NonEmpty.map function vertices)
 
 instance HasField "numVertices" (Polyline2d vertex) Int where
-  getField = (.vertices.length)
+  getField polyline = NonEmpty.length polyline.vertices
 
 instance HasField "start" (Polyline2d vertex) vertex where
-  getField = (.vertices.first)
+  getField polyline = NonEmpty.first polyline.vertices
 
 instance HasField "end" (Polyline2d vertex) vertex where
-  getField = (.vertices.last)
+  getField polyline = NonEmpty.last polyline.vertices
 
 instance HasField "segments" (Polyline2d vertex) (List (LineSegment2d vertex)) where
   getField polyline = NonEmpty.successive LineSegment2d polyline.vertices

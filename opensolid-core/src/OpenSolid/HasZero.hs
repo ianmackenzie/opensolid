@@ -1,6 +1,6 @@
 module OpenSolid.HasZero (HasZero (zero)) where
 
-import OpenSolid.Bootstrap
+import Prelude (Int)
 
 class HasZero a where
   zero :: a

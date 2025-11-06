@@ -163,7 +163,7 @@ meshesBuilder meshes = do
   Binary.concat
     [ Binary.concat meshBuilders -- Individual meshes
     , meshOffsets 0 meshSizes -- Byte offsets of individual meshes
-    , Binary.uint32LE meshes.length -- Total number of meshes
+    , Binary.uint32LE (List.length meshes) -- Total number of meshes
     ]
 
 meshOffsets :: Int -> List Int -> Builder

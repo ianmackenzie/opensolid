@@ -36,10 +36,10 @@ instance HasField "faceIndices" (Mesh vertex) (List (Int, Int, Int)) where
   getField (Mesh _ faceIndices) = faceIndices
 
 instance HasField "numVertices" (Mesh vertex) Int where
-  getField = (.vertices.length)
+  getField mesh = Array.length mesh.vertices
 
 instance HasField "numFaces" (Mesh vertex) Int where
-  getField = (.faceIndices.length)
+  getField mesh = List.length mesh.faceIndices
 
 empty :: Mesh vertex
 empty = Mesh Array.empty []
@@ -68,11 +68,11 @@ offsetFaceIndices :: Int -> List Int -> List (List (Int, Int, Int)) -> List (Lis
 offsetFaceIndices _ [] _ = []
 offsetFaceIndices _ _ [] = []
 offsetFaceIndices offset (NonEmpty vertexArraySizes) (NonEmpty faceIndicesLists) =
-  List.map (addOffset offset) faceIndicesLists.first
+  List.map (addOffset offset) (NonEmpty.first faceIndicesLists)
     : offsetFaceIndices
-      (offset + vertexArraySizes.first)
-      vertexArraySizes.rest
-      faceIndicesLists.rest
+      (offset + NonEmpty.first vertexArraySizes)
+      (NonEmpty.rest vertexArraySizes)
+      (NonEmpty.rest faceIndicesLists)
 
 addOffset :: Int -> (Int, Int, Int) -> (Int, Int, Int)
 addOffset offset (i, j, k) = (i + offset, j + offset, k + offset)

@@ -47,8 +47,8 @@ hermite ::
   List vector ->
   NonEmpty point
 hermite startPoint startDerivatives endPoint endDerivatives = do
-  let numStartDerivatives = startDerivatives.length
-  let numEndDerivatives = endDerivatives.length
+  let numStartDerivatives = List.length startDerivatives
+  let numEndDerivatives = List.length endDerivatives
   let curveDegree = Number.fromInt (1 + numStartDerivatives + numEndDerivatives)
   let scaledStartDerivatives = scaleDerivatives Positive 1 curveDegree startDerivatives
   let scaledEndDerivatives = scaleDerivatives Negative 1 curveDegree endDerivatives

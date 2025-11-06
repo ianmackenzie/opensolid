@@ -1,6 +1,7 @@
 module OpenSolid.Exception (higherOrderZero) where
 
-import OpenSolid.Bootstrap
+import GHC.Stack (HasCallStack)
+import Prelude (error)
 
 higherOrderZero :: HasCallStack => a
-higherOrderZero = exception "Higher-order zero detected"
+higherOrderZero = error "Higher-order zero detected"

@@ -215,12 +215,10 @@ extend curve saddleRegion = do
   let (PiecewiseCurve start end segments) = curve
   let extendStart = Domain2d.contacts saddleRegion.subdomain start
   let extendEnd = Domain2d.contacts saddleRegion.subdomain end
-  let startExtension =
-        NonEmpty.one $
-          SaddleRegion.connectingCurve (SaddleRegion.Outgoing segments.first) saddleRegion
-  let endExtension =
-        NonEmpty.one $
-          SaddleRegion.connectingCurve (SaddleRegion.Incoming segments.last) saddleRegion
+  let outgoingSegment = SaddleRegion.Outgoing (NonEmpty.first segments)
+  let incomingSegment = SaddleRegion.Incoming (NonEmpty.last segments)
+  let startExtension = NonEmpty.one (SaddleRegion.connectingCurve outgoingSegment saddleRegion)
+  let endExtension = NonEmpty.one (SaddleRegion.connectingCurve incomingSegment saddleRegion)
   case (extendStart, extendEnd) of
     (False, False) -> curve
     (True, False) -> PiecewiseCurve start end (startExtension <> segments)
