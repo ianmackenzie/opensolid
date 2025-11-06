@@ -5,10 +5,9 @@ import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Prelude ((.*.), (.+.))
+import OpenSolid.Prelude ((*.), (.*.), (.+.))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d qualified as Surface3d
@@ -20,15 +19,15 @@ import OpenSolid.World3d qualified as World3d
 main :: IO ()
 main = do
   let r = Length.meters 1
-  let h = Number.twoPi .*. r
-  let theta = Angle.twoPi .*. SurfaceFunction.u
+  let h = 2 *. Number.pi .*. r
+  let theta = 2 *. Angle.pi .*. SurfaceFunction.u
   let surfaceFunction =
         World3d.originPoint
           .+. r .*. SurfaceFunction.cos theta .*. World3d.rightwardDirection
           .+. r .*. SurfaceFunction.sin theta .*. World3d.forwardDirection
           .+. h .*. SurfaceFunction.v .*. World3d.upwardDirection
   let domainCenter = Point2d 0.5 0.5
-  let domainDiameter :: Number = 2 / 3
+  let domainDiameter = 2 / 3
   let domainCircle = Curve2d.circle (#centerPoint domainCenter) (#diameter domainDiameter)
   domain <- IO.try (Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle]))
   let surface = Surface3d.parametric surfaceFunction domain
