@@ -127,21 +127,21 @@ scaleAlong axis scale = do
   let d = axis.direction
   let Direction3d dx dy dz = d
   -- TODO refactor to use Vector3d.scaleIn?
-  let vx = unitX .+. (scale - 1.0) * dx *. d
-  let vy = unitY .+. (scale - 1.0) * dy *. d
-  let vz = unitZ .+. (scale - 1.0) * dz *. d
+  let vx = unitX .+. (scale .- 1.0) .*. dx .*. d
+  let vy = unitY .+. (scale .- 1.0) .*. dy .*. d
+  let vz = unitZ .+. (scale .- 1.0) .*. dz .*. d
   withFixedPoint axis.originPoint vx vy vz
 
 mirrorAcross :: Plane3d (space @ units) defines -> Orthonormal (space @ units)
 mirrorAcross plane = do
   let PlaneOrientation3d i j = plane.orientation
   let Vector3d nx ny nz = i `cross` j
-  let axx = 1.0 - 2.0 * nx * nx
-  let ayy = 1.0 - 2.0 * ny * ny
-  let azz = 1.0 - 2.0 * nz * nz
-  let ayz = -2.0 * ny * nz
-  let axz = -2.0 * nx * nz
-  let axy = -2.0 * nx * ny
+  let axx = 1.0 -. 2.0 *. nx .*. nx
+  let ayy = 1.0 -. 2.0 *. ny .*. ny
+  let azz = 1.0 -. 2.0 *. nz .*. nz
+  let ayz = -2.0 *. ny .*. nz
+  let axz = -2.0 *. nx .*. nz
+  let axy = -2.0 *. nx .*. ny
   let vx = Vector3d axx axy axz
   let vy = Vector3d axy ayy ayz
   let vz = Vector3d axz ayz azz
