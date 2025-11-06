@@ -164,7 +164,7 @@ aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
     remaining
 
 polar :: Bounds units -> Bounds Radians -> VectorBounds2d (space @ units)
-polar r theta = VectorBounds2d (r * Bounds.cos theta) (r * Bounds.sin theta)
+polar r theta = VectorBounds2d (r .*. Bounds.cos theta) (r .*. Bounds.sin theta)
 
 xComponent :: VectorBounds2d (space @ units) -> Bounds units
 xComponent (VectorBounds2d vx _) = vx
@@ -301,8 +301,8 @@ placeInOrientation orientation (VectorBounds2d x y) = do
   let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
-  let rx = 0.5 *. xWidth * Number.abs ix + 0.5 *. yWidth * Number.abs jx
-  let ry = 0.5 *. xWidth * Number.abs iy + 0.5 *. yWidth * Number.abs jy
+  let rx = 0.5 *. xWidth .*. Number.abs ix + 0.5 *. yWidth .*. Number.abs jx
+  let ry = 0.5 *. xWidth .*. Number.abs iy + 0.5 *. yWidth .*. Number.abs jy
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 relativeTo ::
@@ -324,8 +324,8 @@ relativeToOrientation orientation (VectorBounds2d x y) = do
   let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
-  let rx = 0.5 *. xWidth * Number.abs ix + 0.5 *. yWidth * Number.abs iy
-  let ry = 0.5 *. xWidth * Number.abs jx + 0.5 *. yWidth * Number.abs jy
+  let rx = 0.5 *. xWidth .*. Number.abs ix + 0.5 *. yWidth .*. Number.abs iy
+  let ry = 0.5 *. xWidth .*. Number.abs jx + 0.5 *. yWidth .*. Number.abs jy
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
 
 placeOn ::
@@ -347,9 +347,9 @@ placeOnOrientation orientation (VectorBounds2d x y) = do
   let PlaneOrientation3d i j = orientation
   let Direction3d ix iy iz = i
   let Direction3d jx jy jz = j
-  let rx = 0.5 *. xWidth * Number.abs ix + 0.5 *. yWidth * Number.abs jx
-  let ry = 0.5 *. xWidth * Number.abs iy + 0.5 *. yWidth * Number.abs jy
-  let rz = 0.5 *. xWidth * Number.abs iz + 0.5 *. yWidth * Number.abs jz
+  let rx = 0.5 *. xWidth .*. Number.abs ix + 0.5 *. yWidth .*. Number.abs jx
+  let ry = 0.5 *. xWidth .*. Number.abs iy + 0.5 *. yWidth .*. Number.abs jy
+  let rz = 0.5 *. xWidth .*. Number.abs iz + 0.5 *. yWidth .*. Number.abs jz
   VectorBounds3d
     (Bounds (x0 - rx) (x0 + rx))
     (Bounds (y0 - ry) (y0 + ry))
@@ -380,6 +380,6 @@ transformBy transform (VectorBounds2d x y) = do
   let Transform2d _ i j = transform
   let Vector2d ix iy = i
   let Vector2d jx jy = j
-  let rx = 0.5 *. Number.abs ix * xWidth + 0.5 *. Number.abs jx * yWidth
-  let ry = 0.5 *. Number.abs iy * xWidth + 0.5 *. Number.abs jy * yWidth
+  let rx = 0.5 *. Number.abs ix .*. xWidth + 0.5 *. Number.abs jx .*. yWidth
+  let ry = 0.5 *. Number.abs iy .*. xWidth + 0.5 *. Number.abs jy .*. yWidth
   VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))

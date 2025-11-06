@@ -103,7 +103,7 @@ inChildContext childAttributes callback = do
   let updatedContext =
         appliedContext
           { currentMultipliedOpacity =
-              appliedContext.currentMultipliedOpacity * appliedContext.ownOpacity
+              appliedContext.currentMultipliedOpacity .*. appliedContext.ownOpacity
           }
   let ?context = updatedContext in callback
 

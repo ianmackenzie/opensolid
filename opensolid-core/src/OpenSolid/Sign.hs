@@ -25,8 +25,8 @@ instance Multiplication# Sign Sign Sign where
   Negative #*# sign = negative sign
 
 instance Multiplication Sign Sign Sign where
-  Positive * sign = sign
-  Negative * sign = negative sign
+  Positive .*. sign = sign
+  Negative .*. sign = negative sign
 
 random :: Random.Generator Sign
 random = Random.Generator System.Random.uniform

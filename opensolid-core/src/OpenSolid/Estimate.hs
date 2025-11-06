@@ -34,7 +34,7 @@ import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude hiding (max, min, (*), (+), (-))
+import OpenSolid.Prelude hiding (max, min, (+), (-))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units qualified as Units
 import Prelude ((+))

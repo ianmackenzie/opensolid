@@ -126,7 +126,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
   let derivative self = do
         let deltaV = vEnd - vStart
         let dvdt = Curve.constant deltaV
-        let dudt = dvdt * dudv . self
+        let dudt = dvdt .*. dudv . self
         VectorCurve2d.xy dudt dvdt
   Curve2d.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
 
@@ -134,7 +134,7 @@ clamp :: Number -> Bounds Unitless -> Axis2d UvCoordinates -> Bounds Unitless
 clamp v (Bounds uLow uHigh) axis = do
   let Point2d u0 v0 = Axis2d.originPoint axis
   let Direction2d du dv = Axis2d.direction axis
-  let u = u0 + (v - v0) * du ./. dv
+  let u = u0 + (v - v0) .*. du ./. dv
   if
     | dv > 0.0 -> Bounds uLow (Quantity.min uHigh u)
     | dv < 0.0 -> Bounds (Quantity.max uLow u) uHigh

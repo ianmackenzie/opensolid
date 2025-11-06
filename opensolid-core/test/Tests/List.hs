@@ -2,7 +2,7 @@ module Tests.List (tests) where
 
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude hiding ((*), (+), (-))
+import OpenSolid.Prelude hiding ((+), (-))
 import Test (Test)
 import Test qualified
 import Prelude ((*))
@@ -15,5 +15,4 @@ tests =
 reverseMap :: Test
 reverseMap = Test.check 100 "reverseMap" Test.do
   ints <- List.random 10 (Int.random 1 10)
-  let twice n = 2 * n
-  Test.expect (List.reverseMap twice ints == List.reverse (List.map twice ints))
+  Test.expect (List.reverseMap (2 *) ints == List.reverse (List.map (2 *) ints))

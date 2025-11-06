@@ -101,9 +101,9 @@ along (Axis3d originPoint direction) distance = do
   let Point3d oR oF oU = originPoint
   let Direction3d dR dF dU = direction
   Point3d
-    @ oR + dR * distance
-    @ oF + dF * distance
-    @ oU + dU * distance
+    @ oR + dR .*. distance
+    @ oF + dF .*. distance
+    @ oU + dU .*. distance
 
 -- | Construct a point on the given plane, at the given position within the plane.
 on :: Plane3d (space @ units) (Defines local) -> Point2d (local @ units) -> Point3d (space @ units)
@@ -112,9 +112,9 @@ on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d pX pY) = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   Point3d
-    @ oR + pX * iR + pY * jR
-    @ oF + pX * iF + pY * jF
-    @ oU + pX * iU + pY * jU
+    @ oR + pX .*. iR + pY .*. jR
+    @ oF + pX .*. iF + pY .*. jF
+    @ oU + pX .*. iU + pY .*. jU
 
 {-# INLINE coerce #-}
 coerce :: Point3d (space1 @ units1) -> Point3d (space2 @ units2)
@@ -177,7 +177,7 @@ placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Point3d (local @ units) ->
   Point3d (global @ units)
-placeIn (Frame3d p0 (Orientation3d i j k)) (Point3d px py pz) = p0 + px * i + py * j + pz * k
+placeIn (Frame3d p0 (Orientation3d i j k)) (Point3d px py pz) = p0 + px .*. i + py .*. j + pz .*. k
 
 -- | Convert a point defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -216,7 +216,7 @@ unconvert factor (Position3d p) = Position3d (Vector3d.unconvert factor p)
 transformBy :: Transform3d tag (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
 transformBy transform (Point3d px py pz) = do
   let (Transform3d p0 vx vy vz) = transform
-  p0 + px * vx + py * vy + pz * vz
+  p0 + px .*. vx + py .*. vy + pz .*. vz
 
 translateBy ::
   Vector3d (space @ units) ->

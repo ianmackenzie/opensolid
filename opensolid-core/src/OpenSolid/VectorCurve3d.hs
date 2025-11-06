@@ -144,12 +144,12 @@ instance Negation (VectorCurve3d (space @ units)) where
   negative curve = new (negative curve.compiled) (negative curve.derivative)
 
 instance Multiplication Sign (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units)) where
-  Positive * curve = curve
-  Negative * curve = negative curve
+  Positive .*. curve = curve
+  Negative .*. curve = negative curve
 
 instance Multiplication (VectorCurve3d (space @ units)) Sign (VectorCurve3d (space @ units)) where
-  curve * Positive = curve
-  curve * Negative = negative curve
+  curve .*. Positive = curve
+  curve .*. Negative = negative curve
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -209,7 +209,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -226,7 +226,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -240,7 +240,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -257,7 +257,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve3d (space @ units1)) (Quantity units2) (VectorCurve3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -425,7 +425,7 @@ instance
     (VectorCurve3d (space @ units))
     (VectorCurve3d (space @ units))
   where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
+  f . g = new (f.compiled . g.compiled) ((f.derivative . g) .*. g.derivative)
 
 instance
   Composition
@@ -436,7 +436,7 @@ instance
   curve . function =
     VectorSurfaceFunction3d.new
       @ curve.compiled . function.compiled
-      @ \p -> curve.derivative . function * SurfaceFunction.derivative p function
+      @ \p -> curve.derivative . function .*. SurfaceFunction.derivative p function
 
 compiled :: VectorCurve3d (space @ units) -> Compiled (space @ units)
 compiled (VectorCurve3d c _) = c
@@ -497,10 +497,10 @@ arc ::
   VectorCurve3d (space @ units)
 arc v1 v2 a b
   | v1 == Vector3d.zero && v2 == Vector3d.zero = zero
-  | a == b = constant (Angle.cos a * v1 + Angle.sin a * v2)
+  | a == b = constant (Angle.cos a .*. v1 + Angle.sin a .*. v2)
   | otherwise = do
       let angle = Curve.line a b
-      v1 * Curve.cos angle + v2 * Curve.sin angle
+      v1 .*. Curve.cos angle + v2 .*. Curve.sin angle
 
 quadraticBezier ::
   Vector3d (space @ units) ->

@@ -29,10 +29,10 @@ inCubicMeters :: Volume -> Number
 inCubicMeters = Quantity.coerce
 
 cubicCentimeter :: Volume
-cubicCentimeter = Length.centimeter * Length.centimeter * Length.centimeter
+cubicCentimeter = Length.centimeter .*. Length.centimeter .*. Length.centimeter
 
 cubicCentimeters :: Number -> Volume
-cubicCentimeters = (* cubicCentimeter)
+cubicCentimeters = (.*. cubicCentimeter)
 
 inCubicCentimeters :: Volume -> Number
 inCubicCentimeters = (./. cubicCentimeter)

@@ -45,7 +45,7 @@ instance HasField "bounds" Domain1d (Bounds Unitless) where
 
 instance Eq Domain1d where
   Domain1d n1 i1 j1 == Domain1d n2 i2 j2 =
-    i1 * n2 == i2 * n1 && j1 * n2 == j2 * n1
+    i1 .*. n2 == i2 .*. n1 && j1 .*. n2 == j2 .*. n1
 
 data Boundary = Boundary
   { n :: Number
@@ -55,11 +55,11 @@ data Boundary = Boundary
 
 instance Eq Boundary where
   Boundary n1 i1 == Boundary n2 i2 =
-    i1 * n2 == i2 * n1
+    i1 .*. n2 == i2 .*. n1
 
 instance Ord Boundary where
   compare (Boundary n1 i1) (Boundary n2 i2) =
-    compare (i1 * n2) (i2 * n1)
+    compare (i1 .*. n2) (i2 .*. n1)
 
 unit :: Domain1d
 unit = Domain1d{n = 1.0, i = 0.0, j = 1.0}
@@ -111,19 +111,19 @@ interior (Domain1d{n, i, j}) = do
 
 overlaps :: Domain1d -> Domain1d -> Bool
 overlaps (Domain1d n2 i2 j2) (Domain1d n1 i1 j1) =
-  i1 * n2 < j2 * n1 && j1 * n2 > i2 * n1
+  i1 .*. n2 < j2 .*. n1 && j1 .*. n2 > i2 .*. n1
 
 includes :: Boundary -> Domain1d -> Bool
 includes (Boundary{n = pn, i = pi}) (Domain1d{n, i, j}) = do
-  pi * n >= i * pn && pi * n <= j * pn
+  pi .*. n >= i .*. pn && pi .*. n <= j .*. pn
 
 contains :: Domain1d -> Domain1d -> Bool
 contains (Domain1d n2 i2 j2) (Domain1d n1 i1 j1) =
-  i1 * n2 <= i2 * n1 && j1 * n2 >= j2 * n1
+  i1 .*. n2 <= i2 .*. n1 && j1 .*. n2 >= j2 .*. n1
 
 adjacent :: Domain1d -> Domain1d -> Bool
 adjacent (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) =
-  i1 * n2 == j2 * n1 || j1 * n2 == i2 * n1
+  i1 .*. n2 == j2 .*. n1 || j1 .*. n2 == i2 .*. n1
 
 intersectionWidth :: Domain1d -> Domain1d -> Number
 intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do

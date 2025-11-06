@@ -25,7 +25,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding ((*), (-))
+import OpenSolid.Prelude hiding ((-))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
@@ -36,7 +36,7 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Prelude ((*), (-), (/))
+import Prelude ((-), (/))
 
 curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
 curveGenerators =
@@ -318,7 +318,7 @@ firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let dt = 1e-6
   let p1 = Curve2d.evaluate curve (tValue - dt)
   let p2 = Curve2d.evaluate curve (tValue + dt)
-  let numericalFirstDerivative = (p2 .-. p1) ./ (2.0 * dt)
+  let numericalFirstDerivative = (p2 .-. p1) ./ (2.0 *. dt)
   let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
@@ -336,7 +336,7 @@ secondDerivativeIsConsistent curve tValue = do
   let dt = 1e-6
   let v1 = VectorCurve2d.evaluate curve.derivative (tValue - dt)
   let v2 = VectorCurve2d.evaluate curve.derivative (tValue + dt)
-  let numericalSecondDerivative = (v2 .-. v1) ./. (2.0 * dt)
+  let numericalSecondDerivative = (v2 .-. v1) ./. (2.0 *. dt)
   let secondDerivative = curve.derivative.derivative
   let analyticSecondDerivative = VectorCurve2d.evaluate secondDerivative tValue
   Tolerance.using (Length.meters 1e-6) do

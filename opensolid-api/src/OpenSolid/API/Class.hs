@@ -745,7 +745,7 @@ numberTimes ::
   Member value
 numberTimes =
   PreOverload BinaryOperator.Mul $
-    PreOperatorOverload ((*) :: Number -> value -> result)
+    PreOperatorOverload ((.*.) :: Number -> value -> result)
 
 numberDivBy ::
   forall value result.
@@ -828,7 +828,7 @@ times ::
   Member value
 times _ =
   PostOverload BinaryOperator.Mul $
-    PostOperatorOverload ((*) :: value -> rhs -> result)
+    PostOperatorOverload ((.*.) :: value -> rhs -> result)
 
 timesNumber ::
   forall value result.

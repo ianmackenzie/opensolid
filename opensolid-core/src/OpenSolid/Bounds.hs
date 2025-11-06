@@ -165,12 +165,12 @@ instance Negation (Bounds units) where
   negative (Bounds## low## high##) = Bounds## (negate## high##) (negate## low##)
 
 instance Multiplication Sign (Bounds units) (Bounds units) where
-  Positive * bounds = bounds
-  Negative * bounds = negative bounds
+  Positive .*. bounds = bounds
+  Negative .*. bounds = negative bounds
 
 instance Multiplication (Bounds units) Sign (Bounds units) where
-  bounds * Positive = bounds
-  bounds * Negative = negative bounds
+  bounds .*. Positive = bounds
+  bounds .*. Negative = negative bounds
 
 instance units1 ~ units2 => Addition (Bounds units1) (Bounds units2) (Bounds units1) where
   Bounds## low1## high1## + Bounds## low2## high2## =
@@ -204,7 +204,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Bounds units2) (Bounds units3)
   where
-  Quantity## value## * Bounds## low## high## = Bounds## (value## *## low##) (value## *## high##)
+  Quantity## value## .*. Bounds## low## high## = Bounds## (value## *## low##) (value## *## high##)
 
 instance Multiplication# (Bounds units1) (Quantity units2) (Bounds (units1 #*# units2)) where
   Bounds## low## high## #*# Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
@@ -213,7 +213,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Bounds units1) (Quantity units2) (Bounds units3)
   where
-  Bounds## low## high## * Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
+  Bounds## low## high## .*. Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
 
 instance Multiplication# (Bounds units1) (Bounds units2) (Bounds (units1 #*# units2)) where
   Bounds## low1## high1## #*# Bounds## low2## high2## = do
@@ -224,7 +224,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Bounds units1) (Bounds units2) (Bounds units3)
   where
-  Bounds## low1## high1## * Bounds## low2## high2## = do
+  Bounds## low1## high1## .*. Bounds## low2## high2## = do
     let !(# low##, high## #) = boundsTimesBounds## low1## high1## low2## high2##
     Ordered## low## high##
 
@@ -416,7 +416,7 @@ hypot2 (Bounds## xMin## xMax##) (Bounds## yMin## yMax##) = do
     (# _, _, _, _ #) -> Bounds## 0.0## maxMagnitude##
 
 cubed :: Bounds Unitless -> Bounds Unitless
-cubed (Bounds low high) = Bounds (low * low * low) (high * high * high)
+cubed (Bounds low high) = Bounds (low .*. low .*. low) (high .*. high .*. high)
 
 {-| Check if a given value is included in a bounding range.
 

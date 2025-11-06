@@ -104,8 +104,8 @@ instance
     (VectorSurfaceFunction3d (space @ units))
     (VectorSurfaceFunction3d (space @ units))
   where
-  Positive * function = function
-  Negative * function = negative function
+  Positive .*. function = function
+  Negative .*. function = negative function
 
 instance
   Multiplication
@@ -113,8 +113,8 @@ instance
     Sign
     (VectorSurfaceFunction3d (space @ units))
   where
-  function * Positive = function
-  function * Negative = negative function
+  function .*. Positive = function
+  function .*. Negative = negative function
 
 instance
   ( space1 ~ space2
@@ -207,7 +207,7 @@ instance
     (VectorSurfaceFunction3d (space @ units2))
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -227,7 +227,7 @@ instance
     (VectorSurfaceFunction3d (space @ units2))
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -244,7 +244,7 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -264,7 +264,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -590,7 +590,7 @@ unsafeQuotient# lhs rhs =
     @ CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled
     @ \self p ->
       unsafeQuotient# (derivative p lhs) rhs
-        - self * SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
+        - self .*. SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
 
 squaredMagnitude# :: VectorSurfaceFunction3d (space @ units) -> SurfaceFunction (units #*# units)
 squaredMagnitude# function =

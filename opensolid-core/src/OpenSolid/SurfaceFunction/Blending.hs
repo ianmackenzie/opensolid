@@ -87,8 +87,8 @@ blendU0 (f0, dfdu0) f = do
   let u0 = vParameterizationU0
   let uT0 = vParameterizationUT0
   blend
-    (f . uT0, negative t0 * f.du . uT0, t0 * t0 * f.du.du . uT0)
-    (f0 . u0, negative t0 * dfdu0 . u0)
+    (f . uT0, negative t0 .*. f.du . uT0, t0 .*. t0 .*. f.du.du . uT0)
+    (f0 . u0, negative t0 .*. dfdu0 . u0)
     ((t0 - SurfaceFunction.u) ./. t0)
 
 blendU1 ::
@@ -102,8 +102,8 @@ blendU1 f (f1, dfdu1) = do
   let uT1 = vParameterizationUT1
   let u1 = vParameterizationU1
   blend
-    (f . uT1, t0 * f.du . uT1, t0 * t0 * f.du.du . uT1)
-    (f1 . u1, t0 * dfdu1 . u1)
+    (f . uT1, t0 .*. f.du . uT1, t0 .*. t0 .*. f.du.du . uT1)
+    (f1 . u1, t0 .*. dfdu1 . u1)
     ((SurfaceFunction.u - t1) ./. t0)
 
 blendV0 ::
@@ -116,8 +116,8 @@ blendV0 (f0, dfdv0) f = do
   let v0 = uParameterizationV0
   let vT0 = uParameterizationVT0
   blend
-    (f . vT0, negative t0 * f.dv . vT0, t0 * t0 * f.dv.dv . vT0)
-    (f0 . v0, negative t0 * dfdv0 . v0)
+    (f . vT0, negative t0 .*. f.dv . vT0, t0 .*. t0 .*. f.dv.dv . vT0)
+    (f0 . v0, negative t0 .*. dfdv0 . v0)
     ((t0 - SurfaceFunction.v) ./. t0)
 
 blendV1 ::
@@ -131,8 +131,8 @@ blendV1 f (f1, dfdv1) = do
   let uT1 = uParameterizationVT1
   let u1 = uParameterizationV1
   blend
-    (f . uT1, t0 * f.dv . uT1, t0 * t0 * f.dv.dv . uT1)
-    (f1 . u1, t0 * dfdv1 . u1)
+    (f . uT1, t0 .*. f.dv . uT1, t0 .*. t0 .*. f.dv.dv . uT1)
+    (f1 . u1, t0 .*. dfdv1 . u1)
     ((SurfaceFunction.v - t1) ./. t0)
 
 blend ::
@@ -147,7 +147,7 @@ blend (f00, f01, f02) (f10, f11) t = do
   let b02 = Curve.b02 . t
   let b10 = Curve.b10 . t
   let b11 = Curve.b11 . t
-  b00 * f00 + b01 * f01 + b02 * f02 + b10 * f10 + b11 * f11
+  b00 .*. f00 + b01 .*. f01 + b02 .*. f02 + b10 .*. f10 + b11 .*. f11
 
 uParameterization :: Number -> SurfaceFunction2d UvCoordinates
 uParameterization vValue = SurfaceFunction2d.xy SurfaceFunction.u (SurfaceFunction.constant vValue)

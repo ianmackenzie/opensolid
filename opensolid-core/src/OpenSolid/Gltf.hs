@@ -33,7 +33,7 @@ import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude hiding ((*), (+), (-))
+import OpenSolid.Prelude hiding ((+), (-))
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vertex3d qualified as Vertex3d

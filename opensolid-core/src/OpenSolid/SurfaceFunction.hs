@@ -138,12 +138,12 @@ instance Negation (SurfaceFunction units) where
   negative function = new (negative function.compiled) (\p -> negative (derivative p function))
 
 instance Multiplication Sign (SurfaceFunction units) (SurfaceFunction units) where
-  Positive * function = function
-  Negative * function = negative function
+  Positive .*. function = function
+  Negative .*. function = negative function
 
 instance Multiplication (SurfaceFunction units) Sign (SurfaceFunction units) where
-  function * Positive = function
-  function * Negative = negative function
+  function .*. Positive = function
+  function .*. Negative = negative function
 
 instance
   units1 ~ units2 =>
@@ -194,7 +194,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -211,7 +211,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -225,7 +225,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -242,7 +242,7 @@ instance
     (Vector2d (space @ units2))
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -259,7 +259,7 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -275,7 +275,7 @@ instance
     (Direction2d space)
     (VectorSurfaceFunction2d (space @ units))
   where
-  lhs * rhs = lhs * Vector2d.unit rhs
+  lhs .*. rhs = lhs .*. Vector2d.unit rhs
 
 instance
   Multiplication
@@ -283,7 +283,7 @@ instance
     (SurfaceFunction units)
     (VectorSurfaceFunction2d (space @ units))
   where
-  lhs * rhs = Vector2d.unit lhs * rhs
+  lhs .*. rhs = Vector2d.unit lhs .*. rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -292,7 +292,7 @@ instance
     (Vector3d (space @ units2))
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -309,7 +309,7 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction3d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -325,7 +325,7 @@ instance
     (Direction3d space)
     (VectorSurfaceFunction3d (space @ units))
   where
-  lhs * rhs = lhs * Vector3d.unit rhs
+  lhs .*. rhs = lhs .*. Vector3d.unit rhs
 
 instance
   Multiplication
@@ -333,7 +333,7 @@ instance
     (SurfaceFunction units)
     (VectorSurfaceFunction3d (space @ units))
   where
-  lhs * rhs = Vector3d.unit lhs * rhs
+  lhs .*. rhs = Vector3d.unit lhs .*. rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -353,7 +353,7 @@ instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction u
   curve . function =
     new
       @ curve.compiled . function.compiled
-      @ \p -> curve.derivative . function * derivative p function
+      @ \p -> curve.derivative . function .*. derivative p function
 
 evaluate :: SurfaceFunction units -> UvPoint -> Quantity units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
@@ -378,7 +378,7 @@ derivative V = (.dv)
 
 derivativeIn :: Direction2d UvSpace -> SurfaceFunction units -> SurfaceFunction units
 derivativeIn direction function =
-  direction.xComponent * function.du + direction.yComponent * function.dv
+  direction.xComponent .*. function.du + direction.yComponent .*. function.dv
 
 zero :: SurfaceFunction units
 zero = constant Quantity.zero
@@ -474,7 +474,7 @@ unsafeQuotient# lhs rhs =
   recursive
     @ CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled
     @ \self p ->
-      unsafeQuotient# (derivative p lhs) rhs - self * unsafeQuotient (derivative p rhs) rhs
+      unsafeQuotient# (derivative p lhs) rhs - self .*. unsafeQuotient (derivative p rhs) rhs
 
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared function = Units.specialize (squared# function)
@@ -512,7 +512,7 @@ sqrt# function =
                     evaluate firstDerivative testPoint ~= Quantity.zero
             let firstDerivativeIsZero = List.allSatisfy firstDerivativeIsZeroAt testPoints
             if functionIsZero && firstDerivativeIsZero
-              then Just (zero, sign * unsafeSqrt# (0.5 *. secondDerivative))
+              then Just (zero, sign .*. unsafeSqrt# (0.5 *. secondDerivative))
               else Nothing
       desingularize (unsafeSqrt# function)
         @ #singularityU0 (maybeSingularity U 0.0 Positive)
@@ -533,19 +533,19 @@ cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 cubed function =
   new
     (CompiledFunction.map Expression.cubed Number.cubed Bounds.cubed function.compiled)
-    (\p -> 3.0 *. squared function * derivative p function)
+    (\p -> 3.0 *. squared function .*. derivative p function)
 
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =
   new
     @ CompiledFunction.map Expression.sin Angle.sin Bounds.sin function.compiled
-    @ \p -> cos function * (derivative p function ./. Angle.radian)
+    @ \p -> cos function .*. (derivative p function ./. Angle.radian)
 
 cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
 cos function =
   new
     @ CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled
-    @ \p -> negative (sin function) * (derivative p function ./. Angle.radian)
+    @ \p -> negative (sin function) .*. (derivative p function ./. Angle.radian)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 

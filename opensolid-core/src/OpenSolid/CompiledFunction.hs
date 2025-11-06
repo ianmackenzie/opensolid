@@ -70,8 +70,8 @@ instance
     (CompiledFunction inputValue outputValue inputBounds outputBounds)
     (CompiledFunction inputValue outputValue inputBounds outputBounds)
   where
-  Positive * compiled = compiled
-  Negative * compiled = negative compiled
+  Positive .*. compiled = compiled
+  Negative .*. compiled = negative compiled
 
 instance
   ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
@@ -84,8 +84,8 @@ instance
     Sign
     (CompiledFunction inputValue outputValue inputBounds outputBounds)
   where
-  compiled * Positive = compiled
-  compiled * Negative = negative compiled
+  compiled .*. Positive = compiled
+  compiled .*. Negative = negative compiled
 
 instance
   ( inputValue1 ~ inputValue2
@@ -185,7 +185,7 @@ instance
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (*) = map2 (*) (*) (*)
+  (.*.) = map2 (.*.) (.*.) (.*.)
 
 instance
   ( inputValue1 ~ inputValue2

@@ -32,7 +32,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Prelude hiding ((*), (+), (-))
+import OpenSolid.Prelude hiding ((+), (-))
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d)
@@ -97,19 +97,19 @@ rotateAround axis angle = do
   let Direction3d dx dy dz = axis.direction
   let halfAngle = 0.5 *. angle
   let sinHalfAngle = Angle.sin halfAngle
-  let qx = dx * sinHalfAngle
-  let qy = dy * sinHalfAngle
-  let qz = dz * sinHalfAngle
+  let qx = dx .*. sinHalfAngle
+  let qy = dy .*. sinHalfAngle
+  let qz = dz .*. sinHalfAngle
   let qw = Angle.cos halfAngle
-  let wx = qw * qx
-  let wy = qw * qy
-  let wz = qw * qz
-  let xx = qx * qx
-  let xy = qx * qy
-  let xz = qx * qz
-  let yy = qy * qy
-  let yz = qy * qz
-  let zz = qz * qz
+  let wx = qw .*. qx
+  let wy = qw .*. qy
+  let wz = qw .*. qz
+  let xx = qx .*. qx
+  let xy = qx .*. qy
+  let xz = qx .*. qz
+  let yy = qy .*. qy
+  let yz = qy .*. qz
+  let zz = qz .*. qz
   let vx = Vector3d (1.0 - 2.0 * (yy + zz)) (2.0 * (xy + wz)) (2.0 * (xz - wy))
   let vy = Vector3d (2.0 * (xy - wz)) (1.0 - 2.0 * (xx + zz)) (2.0 * (yz + wx))
   let vz = Vector3d (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))

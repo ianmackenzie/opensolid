@@ -78,7 +78,7 @@ instance HasField "downwardDirection" (Camera3d (space @ units)) (Direction3d sp
   getField camera = camera.frame.downwardDirection
 
 instance HasField "focalPoint" (Camera3d (space @ units)) (Point3d (space @ units)) where
-  getField camera = camera.eyePoint + camera.focalDistance * camera.forwardDirection
+  getField camera = camera.eyePoint + camera.focalDistance .*. camera.forwardDirection
 
 instance
   HasField

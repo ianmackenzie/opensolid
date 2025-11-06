@@ -149,7 +149,7 @@ arc2d = do
   endPoint <- point2d
   angleSign <- Sign.random
   angleMagnitude <- Quantity.random (Angle.degrees 5.0) (Angle.degrees 355.0)
-  let sweptAngle = angleSign * angleMagnitude
+  let sweptAngle = angleSign .*. angleMagnitude
   Random.return (Curve2d.arc startPoint endPoint sweptAngle)
 
 quadraticSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))

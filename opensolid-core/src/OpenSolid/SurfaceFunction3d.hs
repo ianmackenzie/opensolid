@@ -177,7 +177,7 @@ instance
       @ \parameter -> do
         let innerDerivative = SurfaceFunction2d.derivative parameter inner
         let (dU, dV) = innerDerivative.components
-        duOuter * dU + dvOuter * dV
+        duOuter .*. dU + dvOuter .*. dV
 
 instance HasField "compiled" (SurfaceFunction3d (space @ units)) (Compiled (space @ units)) where
   getField (SurfaceFunction3d c _ _) = c

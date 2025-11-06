@@ -124,7 +124,7 @@ instance Composition (Curve Unitless) (Curve3d (space @ units)) (Curve3d (space 
   outer . inner =
     new
       @ outer.compiled . inner.compiled
-      @ (outer.derivative . inner) * inner.derivative
+      @ (outer.derivative . inner) .*. inner.derivative
 
 instance
   Composition
@@ -135,7 +135,7 @@ instance
   curve . function =
     SurfaceFunction3d.new
       @ curve.compiled . function.compiled
-      @ \p -> (curve.derivative . function) * SurfaceFunction.derivative p function
+      @ \p -> (curve.derivative . function) .*. SurfaceFunction.derivative p function
 
 instance ApproximateEquality (Curve3d (space @ units)) units where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
@@ -167,7 +167,7 @@ on plane curve2d = do
     @ VectorCurve3d.on plane curve2d.derivative
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
-line p1 p2 = constant p1 + Curve.t * (p2 - p1)
+line p1 p2 = constant p1 + Curve.t .*. (p2 - p1)
 
 {-| Construct a Bezier curve from its control points. For example,
 

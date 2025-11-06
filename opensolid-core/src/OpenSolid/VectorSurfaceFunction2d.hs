@@ -133,8 +133,8 @@ instance
     (VectorSurfaceFunction2d (space @ units))
     (VectorSurfaceFunction2d (space @ units))
   where
-  Positive * function = function
-  Negative * function = negative function
+  Positive .*. function = function
+  Negative .*. function = negative function
 
 instance
   Multiplication
@@ -142,8 +142,8 @@ instance
     Sign
     (VectorSurfaceFunction2d (space @ units))
   where
-  function * Positive = function
-  function * Negative = negative function
+  function .*. Positive = function
+  function .*. Negative = negative function
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -206,7 +206,7 @@ instance
     (VectorSurfaceFunction2d (space @ units2))
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -226,7 +226,7 @@ instance
     (VectorSurfaceFunction2d (space @ units2))
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -243,7 +243,7 @@ instance
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -263,7 +263,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction2d (space @ units3))
   where
-  lhs * rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
@@ -451,7 +451,7 @@ instance
     let (dudt, dvdt) = curve.derivative.components
     VectorCurve2d.new
       @ function.compiled . curve.compiled
-      @ (function.du . curve) * dudt + (function.dv . curve) * dvdt
+      @ (function.du . curve) .*. dudt + (function.dv . curve) .*. dvdt
 
 instance
   HasField
@@ -641,7 +641,7 @@ unsafeQuotient# lhs rhs =
     @ CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled
     @ \self p ->
       unsafeQuotient# (derivative p lhs) rhs
-        - self * SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
+        - self .*. SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
 
 squaredMagnitude# :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units #*# units)
 squaredMagnitude# function =

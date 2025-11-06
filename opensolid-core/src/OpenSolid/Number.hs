@@ -98,7 +98,7 @@ squared :: Number -> Number
 squared = Quantity.squared
 
 cubed :: Number -> Number
-cubed value = value * value * value
+cubed value = value .*. value .*. value
 
 abs :: Number -> Number
 abs = Quantity.abs
@@ -173,7 +173,7 @@ sum :: List Number -> Number
 sum = Quantity.sum
 
 product :: NonEmpty Number -> Number
-product = NonEmpty.reduce (*)
+product = NonEmpty.reduce (.*.)
 
 random :: Number -> Number -> Random.Generator Number
 random = Quantity.random

@@ -101,14 +101,14 @@ on plane region = do
   let centeredRegion = Region2d.relativeTo centerFrame region
   let normalizedRegion = Region2d.convert (1.0 /# regionSize) centeredRegion
   let p0 = Point2d.placeOn plane centerPoint
-  let vx = regionSize * Plane3d.xDirection plane
-  let vy = regionSize * Plane3d.yDirection plane
-  let planeFunction = p0 + SurfaceFunction.u * vx + SurfaceFunction.v * vy
+  let vx = regionSize .*. Plane3d.xDirection plane
+  let vy = regionSize .*. Plane3d.yDirection plane
+  let planeFunction = p0 + SurfaceFunction.u .*. vx + SurfaceFunction.v .*. vy
   parametric planeFunction normalizedRegion
 
 extruded :: Curve3d (space @ units) -> Vector3d (space @ units) -> Surface3d (space @ units)
 extruded curve displacement =
-  parametric (curve . SurfaceFunction.u + SurfaceFunction.v * displacement) Region2d.unitSquare
+  parametric (curve . SurfaceFunction.u + SurfaceFunction.v .*. displacement) Region2d.unitSquare
 
 translational ::
   Curve3d (space @ units) ->
@@ -121,7 +121,7 @@ ruled :: Curve3d (space @ units) -> Curve3d (space @ units) -> Surface3d (space 
 ruled bottom top = do
   let f1 = bottom . SurfaceFunction.u
   let f2 = top . SurfaceFunction.u
-  parametric (f1 + SurfaceFunction.v * (f2 - f1)) Region2d.unitSquare
+  parametric (f1 + SurfaceFunction.v .*. (f2 - f1)) Region2d.unitSquare
 
 revolved ::
   Tolerance units =>
@@ -143,14 +143,14 @@ revolved sketchPlane curve axis angle = do
         let (revolutionParameter, curveParameter) = case profileSign of
               Positive -> (SurfaceFunction.u, SurfaceFunction.v)
               Negative -> (SurfaceFunction.v, SurfaceFunction.u)
-        let theta = angle * revolutionParameter
+        let theta = angle .*. revolutionParameter
         let radius = xCoordinate . curveParameter
         let height = localCurve.yCoordinate . curveParameter
         let function =
               frame3d.originPoint
-                + radius * SurfaceFunction.cos theta * frame3d.rightwardDirection
-                + radius * SurfaceFunction.sin theta * frame3d.forwardDirection
-                + height * frame3d.upwardDirection
+                + radius .*. SurfaceFunction.cos theta .*. frame3d.rightwardDirection
+                + radius .*. SurfaceFunction.sin theta .*. frame3d.forwardDirection
+                + height .*. frame3d.upwardDirection
         Success (parametric function Region2d.unitSquare)
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))

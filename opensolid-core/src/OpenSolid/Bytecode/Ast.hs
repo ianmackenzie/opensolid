@@ -292,8 +292,8 @@ instance Composition (Variable1d input) (Variable1d Number) (Ast1d input) where
   SumVariableConstant1d lhs rhs . input = lhs . input + rhs
   Difference1d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable1d lhs rhs . input = lhs - rhs . input
-  Product1d lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant1d lhs rhs . input = lhs . input * rhs
+  Product1d lhs rhs . input = lhs . input .*. rhs . input
+  ProductVariableConstant1d lhs rhs . input = lhs . input .*. rhs
   Quotient1d lhs rhs . input = lhs . input ./. rhs . input
   QuotientConstantVariable1d lhs rhs . input = lhs ./. rhs . input
   Squared1d arg . input = squared (arg . input)
@@ -392,9 +392,9 @@ instance Composition (Variable1d input) (Variable2d Number) (Ast2d input) where
   SumVariableConstant2d lhs rhs . input = lhs . input + rhs
   Difference2d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable2d lhs rhs . input = lhs - rhs . input
-  Product2d lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant2d lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable2d lhs rhs . input = Constant2d lhs * rhs . input
+  Product2d lhs rhs . input = lhs . input .*. rhs . input
+  ProductVariableConstant2d lhs rhs . input = lhs . input .*. rhs
+  ProductConstantVariable2d lhs rhs . input = Constant2d lhs .*. rhs . input
   Quotient2d lhs rhs . input = lhs . input ./. rhs . input
   QuotientConstantVariable2d lhs rhs . input = lhs ./. rhs . input
   BezierCurve2d controlPoints param . input = case param . input of
@@ -419,9 +419,9 @@ instance Composition (Variable1d input) (Variable3d Number) (Ast3d input) where
   SumVariableConstant3d lhs rhs . input = lhs . input + rhs
   Difference3d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable3d lhs rhs . input = lhs - rhs . input
-  Product3d lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant3d lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable3d lhs rhs . input = Constant3d lhs * rhs . input
+  Product3d lhs rhs . input = lhs . input .*. rhs . input
+  ProductVariableConstant3d lhs rhs . input = lhs . input .*. rhs
+  ProductConstantVariable3d lhs rhs . input = Constant3d lhs .*. rhs . input
   Quotient3d lhs rhs . input = lhs . input ./. rhs . input
   QuotientConstantVariable3d lhs rhs . input = Constant3d lhs ./. rhs . input
   BezierCurve3d controlPoints param . input = case param . input of
@@ -452,8 +452,8 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Ast1d input) where
   SumVariableConstant1d lhs rhs . input = lhs . input + rhs
   Difference1d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable1d lhs rhs . input = lhs - rhs . input
-  Product1d lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant1d lhs rhs . input = lhs . input * rhs
+  Product1d lhs rhs . input = lhs . input .*. rhs . input
+  ProductVariableConstant1d lhs rhs . input = lhs . input .*. rhs
   Quotient1d lhs rhs . input = lhs . input ./. rhs . input
   QuotientConstantVariable1d lhs rhs . input = lhs ./. rhs . input
   Squared1d arg . input = squared (arg . input)
@@ -553,9 +553,9 @@ instance Composition (Variable2d input) (Variable2d UvPoint) (Ast2d input) where
   SumVariableConstant2d lhs rhs . input = lhs . input + rhs
   Difference2d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable2d lhs rhs . input = lhs - rhs . input
-  Product2d lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant2d lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable2d lhs rhs . input = Constant2d lhs * rhs . input
+  Product2d lhs rhs . input = lhs . input .*. rhs . input
+  ProductVariableConstant2d lhs rhs . input = lhs . input .*. rhs
+  ProductConstantVariable2d lhs rhs . input = Constant2d lhs .*. rhs . input
   Quotient2d lhs rhs . input = lhs . input ./. rhs . input
   QuotientConstantVariable2d lhs rhs . input = lhs ./. rhs . input
   BezierCurve2d controlPoints param . input = case param . input of
@@ -580,9 +580,9 @@ instance Composition (Variable2d input) (Variable3d UvPoint) (Ast3d input) where
   SumVariableConstant3d lhs rhs . input = lhs . input + rhs
   Difference3d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable3d lhs rhs . input = lhs - rhs . input
-  Product3d lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant3d lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable3d lhs rhs . input = Constant3d lhs * rhs . input
+  Product3d lhs rhs . input = lhs . input .*. rhs . input
+  ProductVariableConstant3d lhs rhs . input = lhs . input .*. rhs
+  ProductConstantVariable3d lhs rhs . input = Constant3d lhs .*. rhs . input
   Quotient3d lhs rhs . input = lhs . input ./. rhs . input
   QuotientConstantVariable3d lhs rhs . input = lhs ./. rhs . input
   BezierCurve3d controlPoints param . input = case param . input of
@@ -654,20 +654,20 @@ instance Negation (Variable1d input) where
   negative var = Negated1d var
 
 instance Multiplication Sign (Ast1d input) (Ast1d input) where
-  Positive * ast = ast
-  Negative * ast = negative ast
+  Positive .*. ast = ast
+  Negative .*. ast = negative ast
 
 instance Multiplication (Ast1d input) Sign (Ast1d input) where
-  ast * Positive = ast
-  ast * Negative = negative ast
+  ast .*. Positive = ast
+  ast .*. Negative = negative ast
 
 instance Multiplication Sign (Variable1d input) (Variable1d input) where
-  Positive * var = var
-  Negative * var = negative var
+  Positive .*. var = var
+  Negative .*. var = negative var
 
 instance Multiplication (Variable1d input) Sign (Variable1d input) where
-  var * Positive = var
-  var * Negative = negative var
+  var .*. Positive = var
+  var .*. Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast1d input1) (Ast1d input2) (Ast1d input1) where
   Constant1d 0.0 + rhs = rhs
@@ -710,25 +710,27 @@ instance Subtraction (Ast1d input1) (Quantity units) (Ast1d input1) where
   lhs - rhs = lhs - constant1d rhs
 
 instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast1d input2) (Ast1d input1) where
-  Constant1d lhs * Constant1d rhs = Constant1d (lhs * rhs)
-  _ * Constant1d 0.0 = Constant1d 0.0
-  Constant1d 0.0 * _ = Constant1d 0.0
-  lhs * Constant1d 1.0 = lhs
-  Constant1d 1.0 * rhs = rhs
-  lhs * Constant1d -1.0 = negative lhs
-  Constant1d -1.0 * rhs = negative rhs
-  Variable1d (ProductVariableConstant1d a b) * Constant1d c = Variable1d a * Constant1d (b * c)
-  Constant1d a * Variable1d (ProductVariableConstant1d b c) = Constant1d (a * c) * Variable1d b
-  Variable1d lhs * Constant1d rhs = Variable1d (ProductVariableConstant1d lhs rhs)
-  Constant1d lhs * Variable1d rhs = Variable1d (ProductVariableConstant1d rhs lhs)
-  Variable1d lhs * Variable1d rhs =
+  Constant1d lhs .*. Constant1d rhs = Constant1d (lhs .*. rhs)
+  _ .*. Constant1d 0.0 = Constant1d 0.0
+  Constant1d 0.0 .*. _ = Constant1d 0.0
+  lhs .*. Constant1d 1.0 = lhs
+  Constant1d 1.0 .*. rhs = rhs
+  lhs .*. Constant1d -1.0 = negative lhs
+  Constant1d -1.0 .*. rhs = negative rhs
+  Variable1d (ProductVariableConstant1d a b) .*. Constant1d c =
+    Variable1d a .*. Constant1d (b .*. c)
+  Constant1d a .*. Variable1d (ProductVariableConstant1d b c) =
+    Constant1d (a .*. c) .*. Variable1d b
+  Variable1d lhs .*. Constant1d rhs = Variable1d (ProductVariableConstant1d lhs rhs)
+  Constant1d lhs .*. Variable1d rhs = Variable1d (ProductVariableConstant1d rhs lhs)
+  Variable1d lhs .*. Variable1d rhs =
     Variable1d (if lhs <= rhs then Product1d lhs rhs else Product1d rhs lhs)
 
 instance Multiplication (Quantity units) (Ast1d input) (Ast1d input) where
-  lhs * rhs = constant1d lhs * rhs
+  lhs .*. rhs = constant1d lhs .*. rhs
 
 instance Multiplication (Ast1d input1) (Quantity units) (Ast1d input1) where
-  lhs * rhs = lhs * constant1d rhs
+  lhs .*. rhs = lhs .*. constant1d rhs
 
 instance input1 ~ input2 => Division (Ast1d input1) (Ast1d input2) (Ast1d input1) where
   Constant1d lhs ./. Constant1d rhs = Constant1d (lhs ./. rhs)
@@ -761,20 +763,20 @@ instance Negation (Variable2d input) where
   negative var = Negated2d var
 
 instance Multiplication Sign (Ast2d input) (Ast2d input) where
-  Positive * ast = ast
-  Negative * ast = negative ast
+  Positive .*. ast = ast
+  Negative .*. ast = negative ast
 
 instance Multiplication (Ast2d input) Sign (Ast2d input) where
-  ast * Positive = ast
-  ast * Negative = negative ast
+  ast .*. Positive = ast
+  ast .*. Negative = negative ast
 
 instance Multiplication Sign (Variable2d input) (Variable2d input) where
-  Positive * var = var
-  Negative * var = negative var
+  Positive .*. var = var
+  Negative .*. var = negative var
 
 instance Multiplication (Variable2d input) Sign (Variable2d input) where
-  var * Positive = var
-  var * Negative = negative var
+  var .*. Positive = var
+  var .*. Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast2d input1) (Ast2d input2) (Ast2d input1) where
   Constant2d lhs + rhs | lhs == Vector2d.zero = rhs
@@ -817,25 +819,27 @@ instance Subtraction (Ast2d input1) (Vector2d (space @ units)) (Ast2d input1) wh
   lhs - rhs = lhs - constant2d rhs
 
 instance input1 ~ input2 => Multiplication (Ast2d input1) (Ast1d input2) (Ast2d input1) where
-  Constant2d lhs * Constant1d rhs = Constant2d (lhs * rhs)
-  _ * Constant1d 0.0 = Constant2d Vector2d.zero
-  Constant2d lhs * _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
-  lhs * Constant1d 1.0 = lhs
-  lhs * Constant1d -1.0 = negative lhs
-  Variable2d (ProductVariableConstant2d a b) * Constant1d c = Variable2d a * Constant1d (b * c)
-  Constant2d a * Variable1d (ProductVariableConstant1d b c) = Constant2d (a * c) * Variable1d b
-  Variable2d lhs * Constant1d rhs = Variable2d (ProductVariableConstant2d lhs rhs)
-  Constant2d lhs * Variable1d rhs = Variable2d (ProductConstantVariable2d lhs rhs)
-  Variable2d lhs * Variable1d rhs = Variable2d (Product2d lhs rhs)
+  Constant2d lhs .*. Constant1d rhs = Constant2d (lhs .*. rhs)
+  _ .*. Constant1d 0.0 = Constant2d Vector2d.zero
+  Constant2d lhs .*. _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
+  lhs .*. Constant1d 1.0 = lhs
+  lhs .*. Constant1d -1.0 = negative lhs
+  Variable2d (ProductVariableConstant2d a b) .*. Constant1d c =
+    Variable2d a .*. Constant1d (b .*. c)
+  Constant2d a .*. Variable1d (ProductVariableConstant1d b c) =
+    Constant2d (a .*. c) .*. Variable1d b
+  Variable2d lhs .*. Constant1d rhs = Variable2d (ProductVariableConstant2d lhs rhs)
+  Constant2d lhs .*. Variable1d rhs = Variable2d (ProductConstantVariable2d lhs rhs)
+  Variable2d lhs .*. Variable1d rhs = Variable2d (Product2d lhs rhs)
 
 instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast2d input2) (Ast2d input1) where
-  lhs * rhs = rhs * lhs
+  lhs .*. rhs = rhs .*. lhs
 
 instance Multiplication (Ast2d input1) (Quantity units) (Ast2d input1) where
-  lhs * rhs = lhs * constant1d rhs
+  lhs .*. rhs = lhs .*. constant1d rhs
 
 instance Multiplication (Quantity units) (Ast2d input) (Ast2d input) where
-  lhs * rhs = constant1d lhs * rhs
+  lhs .*. rhs = constant1d lhs .*. rhs
 
 instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1) where
   Constant2d lhs ./. Constant1d rhs = Constant2d (lhs ./. rhs)
@@ -862,20 +866,20 @@ instance Negation (Variable3d input) where
   negative var = Negated3d var
 
 instance Multiplication Sign (Ast3d input) (Ast3d input) where
-  Positive * ast = ast
-  Negative * ast = negative ast
+  Positive .*. ast = ast
+  Negative .*. ast = negative ast
 
 instance Multiplication (Ast3d input) Sign (Ast3d input) where
-  ast * Positive = ast
-  ast * Negative = negative ast
+  ast .*. Positive = ast
+  ast .*. Negative = negative ast
 
 instance Multiplication Sign (Variable3d input) (Variable3d input) where
-  Positive * var = var
-  Negative * var = negative var
+  Positive .*. var = var
+  Negative .*. var = negative var
 
 instance Multiplication (Variable3d input) Sign (Variable3d input) where
-  var * Positive = var
-  var * Negative = negative var
+  var .*. Positive = var
+  var .*. Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast3d input1) (Ast3d input2) (Ast3d input1) where
   Constant3d lhs + rhs | lhs == Vector3d.zero = rhs
@@ -918,25 +922,25 @@ instance Subtraction (Ast3d input1) (Vector3d (space @ units)) (Ast3d input1) wh
   lhs - rhs = lhs - constant3d rhs
 
 instance input1 ~ input2 => Multiplication (Ast3d input1) (Ast1d input2) (Ast3d input1) where
-  Constant3d lhs * Constant1d rhs = Constant3d (lhs * rhs)
-  _ * Constant1d 0.0 = Constant3d Vector3d.zero
-  Constant3d lhs * _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
-  lhs * Constant1d 1.0 = lhs
-  lhs * Constant1d -1.0 = negative lhs
-  Variable3d (ProductVariableConstant3d a b) * Constant1d c = Variable3d a * Constant1d (b * c)
-  Constant3d a * Variable1d (ProductVariableConstant1d b c) = Constant3d (a * c) * Variable1d b
-  Variable3d lhs * Constant1d rhs = Variable3d (ProductVariableConstant3d lhs rhs)
-  Constant3d lhs * Variable1d rhs = Variable3d (ProductConstantVariable3d lhs rhs)
-  Variable3d lhs * Variable1d rhs = Variable3d (Product3d lhs rhs)
+  Constant3d lhs .*. Constant1d rhs = Constant3d (lhs .*. rhs)
+  _ .*. Constant1d 0.0 = Constant3d Vector3d.zero
+  Constant3d lhs .*. _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
+  lhs .*. Constant1d 1.0 = lhs
+  lhs .*. Constant1d -1.0 = negative lhs
+  Variable3d (ProductVariableConstant3d a b) .*. Constant1d c = Variable3d a .*. Constant1d (b .*. c)
+  Constant3d a .*. Variable1d (ProductVariableConstant1d b c) = Constant3d (a .*. c) .*. Variable1d b
+  Variable3d lhs .*. Constant1d rhs = Variable3d (ProductVariableConstant3d lhs rhs)
+  Constant3d lhs .*. Variable1d rhs = Variable3d (ProductConstantVariable3d lhs rhs)
+  Variable3d lhs .*. Variable1d rhs = Variable3d (Product3d lhs rhs)
 
 instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast3d input2) (Ast3d input1) where
-  lhs * rhs = rhs * lhs
+  lhs .*. rhs = rhs .*. lhs
 
 instance Multiplication (Ast3d input1) (Quantity units) (Ast3d input1) where
-  lhs * rhs = lhs * constant1d rhs
+  lhs .*. rhs = lhs .*. constant1d rhs
 
 instance Multiplication (Quantity units) (Ast3d input) (Ast3d input) where
-  lhs * rhs = constant1d lhs * rhs
+  lhs .*. rhs = constant1d lhs .*. rhs
 
 instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1) where
   Constant3d lhs ./. Constant1d rhs = Constant3d (lhs ./. rhs)

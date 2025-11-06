@@ -34,16 +34,16 @@ instance Negation (DirectionBounds3d space) where
   negative (DirectionBounds3d vectorBounds) = DirectionBounds3d (negative vectorBounds)
 
 instance Multiplication Sign (DirectionBounds3d space) (DirectionBounds3d space) where
-  Positive * directionBounds = directionBounds
-  Negative * directionBounds = negative directionBounds
+  Positive .*. directionBounds = directionBounds
+  Negative .*. directionBounds = negative directionBounds
 
 instance Multiplication# Sign (DirectionBounds3d space) (DirectionBounds3d space) where
   Positive #*# directionBounds = directionBounds
   Negative #*# directionBounds = negative directionBounds
 
 instance Multiplication (DirectionBounds3d space) Sign (DirectionBounds3d space) where
-  directionBounds * Positive = directionBounds
-  directionBounds * Negative = negative directionBounds
+  directionBounds .*. Positive = directionBounds
+  directionBounds .*. Negative = negative directionBounds
 
 instance Multiplication# (DirectionBounds3d space) Sign (DirectionBounds3d space) where
   directionBounds #*# Positive = directionBounds
@@ -55,7 +55,7 @@ instance
     (DirectionBounds3d space)
     (VectorBounds3d (space @ units))
   where
-  value * DirectionBounds3d vectorBounds = value * vectorBounds
+  value .*. DirectionBounds3d vectorBounds = value .*. vectorBounds
 
 instance
   Multiplication
@@ -63,7 +63,7 @@ instance
     (Quantity units)
     (VectorBounds3d (space @ units))
   where
-  DirectionBounds3d vectorBounds * value = vectorBounds * value
+  DirectionBounds3d vectorBounds .*. value = vectorBounds .*. value
 
 instance
   Multiplication
@@ -71,7 +71,7 @@ instance
     (DirectionBounds3d space)
     (VectorBounds3d (space @ units))
   where
-  bounds * DirectionBounds3d vectorBounds = bounds * vectorBounds
+  bounds .*. DirectionBounds3d vectorBounds = bounds .*. vectorBounds
 
 instance
   Multiplication
@@ -79,7 +79,7 @@ instance
     (Bounds units)
     (VectorBounds3d (space @ units))
   where
-  DirectionBounds3d vectorBounds * bounds = vectorBounds * bounds
+  DirectionBounds3d vectorBounds .*. bounds = vectorBounds .*. bounds
 
 instance
   space1 ~ space2 =>

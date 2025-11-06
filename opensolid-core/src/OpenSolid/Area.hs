@@ -35,7 +35,7 @@ squareMeter = squareMeters 1.0
 
 -- | One square inch.
 squareInch :: Area
-squareInch = Length.inch * Length.inch
+squareInch = Length.inch .*. Length.inch
 
 -- | Construct an area from a number of square meters.
 squareMeters :: Number -> Area
@@ -47,7 +47,7 @@ inSquareMeters = Quantity.coerce
 
 -- | Construct an area from a number of square inches.
 squareInches :: Number -> Area
-squareInches = (* squareInch)
+squareInches = (.*. squareInch)
 
 -- | Convert an area to a number of square inches.
 inSquareInches :: Area -> Number

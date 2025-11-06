@@ -77,7 +77,7 @@ y :: Quantity units -> Point2d (space @ units)
 y py = Point2d Quantity.zero py
 
 along :: Axis2d (space @ units) -> Quantity units -> Point2d (space @ units)
-along (Axis2d originPoint direction) distance = originPoint + distance * direction
+along (Axis2d originPoint direction) distance = originPoint + distance .*. direction
 
 {-| Construct a point from polar coordinates (radius and angle).
 
@@ -170,7 +170,7 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (local @ units) ->
   Point2d (global @ units)
-placeIn (Frame2d p0 (Orientation2d i j)) (Point2d px py) = p0 + px * i + py * j
+placeIn (Frame2d p0 (Orientation2d i j)) (Point2d px py) = p0 + px .*. i + py .*. j
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
@@ -188,7 +188,7 @@ placeOn ::
   Point2d (localSpace @ units) ->
   Point3d (space @ units)
 placeOn (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d px py) =
-  originPoint + px * i + py * j
+  originPoint + px .*. i + py .*. j
 
 convert :: Quantity (units2 #/# units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert factor (Position2d p) = Position2d (Vector2d.convert factor p)
@@ -200,7 +200,7 @@ transformBy :: Transform2d tag (space @ units) -> Point2d (space @ units) -> Poi
 transformBy transform point = do
   let (Transform2d p0 vx vy) = transform
   let (px, py) = coordinates point
-  p0 + px * vx + py * vy
+  p0 + px .*. vx + py .*. vy
 
 translateBy ::
   Vector2d (space @ units) ->

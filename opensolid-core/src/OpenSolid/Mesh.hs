@@ -19,7 +19,7 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Prelude hiding (concat, (*), (+), (-))
+import OpenSolid.Prelude hiding (concat, (+), (-))
 import OpenSolid.UvPoint (UvPoint)
 import Prelude ((*), (+), (-))
 

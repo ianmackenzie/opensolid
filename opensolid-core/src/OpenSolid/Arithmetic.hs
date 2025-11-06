@@ -9,7 +9,7 @@ module OpenSolid.Arithmetic
   , Multiplication# ((#*#))
   , (*#)
   , (#*)
-  , Multiplication ((*), (.*.))
+  , Multiplication ((.*.))
   , (*.)
   , (.*)
   , Division# ((#/#))
@@ -99,27 +99,19 @@ infixl 7 *#
 infixl 7 #*
 
 class Multiplication b a c => Multiplication a b c | a b -> c where
-  (*) :: a -> b -> c
   (.*.) :: a -> b -> c
-
-  (*) = (.*.)
-  (.*.) = (*)
-
-  {-# MINIMAL (*) | (.*.) #-}
-
-infixl 7 *
 
 infixl 7 .*.
 
 {-# INLINE (*.) #-}
 (*.) :: Multiplication Number a b => Number -> a -> b
-(*.) = (*)
+(*.) = (.*.)
 
 infixl 7 *.
 
 {-# INLINE (.*) #-}
 (.*) :: Multiplication a Number b => a -> Number -> b
-(.*) = (*)
+(.*) = (.*.)
 
 infixl 7 .*
 

@@ -65,8 +65,8 @@ instance
     (DirectionSurfaceFunction2d space)
     (DirectionSurfaceFunction2d space)
   where
-  Positive * function = function
-  Negative * function = negative function
+  Positive .*. function = function
+  Negative .*. function = negative function
 
 instance
   Multiplication#
@@ -83,8 +83,8 @@ instance
     Sign
     (DirectionSurfaceFunction2d space)
   where
-  function * Positive = function
-  function * Negative = negative function
+  function .*. Positive = function
+  function .*. Negative = negative function
 
 instance
   Multiplication#
@@ -101,7 +101,7 @@ instance
     (DirectionSurfaceFunction2d space)
     (VectorSurfaceFunction2d (space @ units))
   where
-  value * DirectionSurfaceFunction2d vectorSurfaceFunction = value * vectorSurfaceFunction
+  value .*. DirectionSurfaceFunction2d vectorSurfaceFunction = value .*. vectorSurfaceFunction
 
 instance
   Multiplication
@@ -109,7 +109,7 @@ instance
     (Quantity units)
     (VectorSurfaceFunction2d (space @ units))
   where
-  DirectionSurfaceFunction2d vectorSurfaceFunction * value = vectorSurfaceFunction * value
+  DirectionSurfaceFunction2d vectorSurfaceFunction .*. value = vectorSurfaceFunction .*. value
 
 instance
   Multiplication
@@ -117,8 +117,8 @@ instance
     (DirectionSurfaceFunction2d space)
     (VectorSurfaceFunction2d (space @ units))
   where
-  scalarSurfaceFunction * DirectionSurfaceFunction2d vectorSurfaceFunction =
-    scalarSurfaceFunction * vectorSurfaceFunction
+  scalarSurfaceFunction .*. DirectionSurfaceFunction2d vectorSurfaceFunction =
+    scalarSurfaceFunction .*. vectorSurfaceFunction
 
 instance
   Multiplication
@@ -126,8 +126,8 @@ instance
     (SurfaceFunction units)
     (VectorSurfaceFunction2d (space @ units))
   where
-  DirectionSurfaceFunction2d vectorSurfaceFunction * scalarSurfaceFunction =
-    vectorSurfaceFunction * scalarSurfaceFunction
+  DirectionSurfaceFunction2d vectorSurfaceFunction .*. scalarSurfaceFunction =
+    vectorSurfaceFunction .*. scalarSurfaceFunction
 
 instance
   space1 ~ space2 =>
