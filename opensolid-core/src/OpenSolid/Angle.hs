@@ -120,15 +120,15 @@ inDegrees = (/ degree)
 
 -- | One full turn, or 360 degrees.
 fullTurn :: Angle
-fullTurn = radians Number.twoPi
+fullTurn = twoPi
 
 -- | One half turn, or 180 degrees.
 halfTurn :: Angle
-halfTurn = radians Number.pi
+halfTurn = pi
 
 -- | One quarter turn, or 90 degrees.
 quarterTurn :: Angle
-quarterTurn = radians (0.5 *. Number.pi)
+quarterTurn = halfPi
 
 {-| Construct an angle from a number of turns.
 
