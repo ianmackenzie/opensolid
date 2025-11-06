@@ -10,7 +10,7 @@ module OpenSolid.Tolerance
   )
 where
 
-import OpenSolid.Arithmetic hiding ((+), (-))
+import OpenSolid.Arithmetic hiding ((-))
 import OpenSolid.Bootstrap
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import OpenSolid.Number (Number)

@@ -33,7 +33,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude hiding (return, (+), (-))
+import OpenSolid.Prelude hiding (return, (-))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue

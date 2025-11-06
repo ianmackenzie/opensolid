@@ -729,7 +729,7 @@ numberPlus ::
   Member value
 numberPlus =
   PreOverload BinaryOperator.Add $
-    PreOperatorOverload ((+) :: Number -> value -> result)
+    PreOperatorOverload ((.+.) :: Number -> value -> result)
 
 numberMinus ::
   forall value result.
@@ -786,7 +786,7 @@ plus ::
   Member value
 plus _ =
   PostOverload BinaryOperator.Add $
-    PostOperatorOverload ((+) :: value -> rhs -> result)
+    PostOperatorOverload ((.+.) :: value -> rhs -> result)
 
 plusNumber ::
   forall value result.

@@ -179,7 +179,7 @@ squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units
 squaredMagnitude = Units.specialize . squaredMagnitude#
 
 squaredMagnitude# :: VectorBounds2d (space @ units) -> Bounds (units #*# units)
-squaredMagnitude# (VectorBounds2d x y) = Bounds.squared# x + Bounds.squared# y
+squaredMagnitude# (VectorBounds2d x y) = Bounds.squared# x .+. Bounds.squared# y
 
 magnitude :: VectorBounds2d (space @ units) -> Bounds units
 magnitude (VectorBounds2d x y) = Bounds.hypot2 x y
@@ -200,7 +200,7 @@ maxSquaredMagnitude# :: VectorBounds2d (space @ units) -> Quantity (units #*# un
 maxSquaredMagnitude# (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
   let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
-  Quantity.squared# xMagnitude + Quantity.squared# yMagnitude
+  Quantity.squared# xMagnitude .+. Quantity.squared# yMagnitude
 
 normalize :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ Unitless)
 normalize vectorBounds = do
@@ -301,9 +301,9 @@ placeInOrientation orientation (VectorBounds2d x y) = do
   let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
-  let rx = 0.5 *. xWidth .*. Number.abs ix + 0.5 *. yWidth .*. Number.abs jx
-  let ry = 0.5 *. xWidth .*. Number.abs iy + 0.5 *. yWidth .*. Number.abs jy
-  VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
+  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs jx
+  let ry = 0.5 *. xWidth .*. Number.abs iy .+. 0.5 *. yWidth .*. Number.abs jy
+  VectorBounds2d (Bounds (x0 - rx) (x0 .+. rx)) (Bounds (y0 - ry) (y0 .+. ry))
 
 relativeTo ::
   Frame2d (global @ frameUnits) (Defines local) ->
@@ -324,9 +324,9 @@ relativeToOrientation orientation (VectorBounds2d x y) = do
   let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
-  let rx = 0.5 *. xWidth .*. Number.abs ix + 0.5 *. yWidth .*. Number.abs iy
-  let ry = 0.5 *. xWidth .*. Number.abs jx + 0.5 *. yWidth .*. Number.abs jy
-  VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
+  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs iy
+  let ry = 0.5 *. xWidth .*. Number.abs jx .+. 0.5 *. yWidth .*. Number.abs jy
+  VectorBounds2d (Bounds (x0 - rx) (x0 .+. rx)) (Bounds (y0 - ry) (y0 .+. ry))
 
 placeOn ::
   Plane3d (global @ frameUnits) (Defines local) ->
@@ -347,13 +347,13 @@ placeOnOrientation orientation (VectorBounds2d x y) = do
   let PlaneOrientation3d i j = orientation
   let Direction3d ix iy iz = i
   let Direction3d jx jy jz = j
-  let rx = 0.5 *. xWidth .*. Number.abs ix + 0.5 *. yWidth .*. Number.abs jx
-  let ry = 0.5 *. xWidth .*. Number.abs iy + 0.5 *. yWidth .*. Number.abs jy
-  let rz = 0.5 *. xWidth .*. Number.abs iz + 0.5 *. yWidth .*. Number.abs jz
+  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs jx
+  let ry = 0.5 *. xWidth .*. Number.abs iy .+. 0.5 *. yWidth .*. Number.abs jy
+  let rz = 0.5 *. xWidth .*. Number.abs iz .+. 0.5 *. yWidth .*. Number.abs jz
   VectorBounds3d
-    (Bounds (x0 - rx) (x0 + rx))
-    (Bounds (y0 - ry) (y0 + ry))
-    (Bounds (z0 - rz) (z0 + rz))
+    (Bounds (x0 - rx) (x0 .+. rx))
+    (Bounds (y0 - ry) (y0 .+. ry))
+    (Bounds (z0 - rz) (z0 .+. rz))
 
 convert ::
   Quantity (units2 #/# units1) ->
@@ -380,6 +380,6 @@ transformBy transform (VectorBounds2d x y) = do
   let Transform2d _ i j = transform
   let Vector2d ix iy = i
   let Vector2d jx jy = j
-  let rx = 0.5 *. Number.abs ix .*. xWidth + 0.5 *. Number.abs jx .*. yWidth
-  let ry = 0.5 *. Number.abs iy .*. xWidth + 0.5 *. Number.abs jy .*. yWidth
-  VectorBounds2d (Bounds (x0 - rx) (x0 + rx)) (Bounds (y0 - ry) (y0 + ry))
+  let rx = 0.5 *. Number.abs ix .*. xWidth .+. 0.5 *. Number.abs jx .*. yWidth
+  let ry = 0.5 *. Number.abs iy .*. xWidth .+. 0.5 *. Number.abs jy .*. yWidth
+  VectorBounds2d (Bounds (x0 - rx) (x0 .+. rx)) (Bounds (y0 - ry) (y0 .+. ry))

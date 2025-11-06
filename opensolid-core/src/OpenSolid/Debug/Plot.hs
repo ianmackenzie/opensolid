@@ -44,7 +44,7 @@ xAxis :: Number -> Number -> Drawing2d Space
 xAxis x1 x2 =
   Drawing2d.arrow
     @ #start (Point2d.x (Quantity.convert scale x1))
-    @ #end (Point2d.x (Quantity.convert scale x2 + axisHeadLength))
+    @ #end (Point2d.x (Quantity.convert scale x2 .+. axisHeadLength))
     @ #headLength axisHeadLength
     @ #headWidth axisHeadWidth
 
@@ -52,7 +52,7 @@ yAxis :: Number -> Number -> Drawing2d Space
 yAxis y1 y2 =
   Drawing2d.arrow
     @ #start (Point2d.y (Quantity.convert scale y1))
-    @ #end (Point2d.y (Quantity.convert scale y2 + axisHeadLength))
+    @ #end (Point2d.y (Quantity.convert scale y2 .+. axisHeadLength))
     @ #headLength axisHeadLength
     @ #headWidth axisHeadWidth
 

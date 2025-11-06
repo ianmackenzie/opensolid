@@ -125,7 +125,7 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
+  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (\p -> derivative p lhs .+. derivative p rhs)
 
 instance
   ( space1 ~ space2
@@ -136,7 +136,7 @@ instance
     (Vector3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  f + v = f + constant v
+  f .+. v = f .+. constant v
 
 instance
   ( space1 ~ space2
@@ -147,7 +147,7 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (VectorSurfaceFunction3d (space1 @ units1))
   where
-  v + f = constant v + f
+  v .+. f = constant v .+. f
 
 instance
   ( space1 ~ space2
@@ -189,7 +189,7 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
   where
-  point + function = SurfaceFunction3d.constant point + function
+  point .+. function = SurfaceFunction3d.constant point .+. function
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -218,7 +218,7 @@ instance
   lhs #*# rhs =
     new
       @ lhs.compiled #*# rhs.compiled
-      @ \p -> SurfaceFunction.derivative p lhs #*# rhs + lhs #*# derivative p rhs
+      @ \p -> SurfaceFunction.derivative p lhs #*# rhs .+. lhs #*# derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -255,7 +255,7 @@ instance
   lhs #*# rhs =
     new
       @ lhs.compiled #*# rhs.compiled
-      @ \p -> derivative p lhs #*# rhs + lhs #*# SurfaceFunction.derivative p rhs
+      @ \p -> derivative p lhs #*# rhs .+. lhs #*# SurfaceFunction.derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -310,7 +310,7 @@ instance
   lhs `cross#` rhs =
     new
       (lhs.compiled `cross#` rhs.compiled)
-      (\p -> derivative p lhs `cross#` rhs + lhs `cross#` derivative p rhs)
+      (\p -> derivative p lhs `cross#` rhs .+. lhs `cross#` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -385,7 +385,7 @@ instance
   lhs `dot#` rhs =
     SurfaceFunction.new
       (lhs.compiled `dot#` rhs.compiled)
-      (\p -> derivative p lhs `dot#` rhs + lhs `dot#` derivative p rhs)
+      (\p -> derivative p lhs `dot#` rhs .+. lhs `dot#` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>

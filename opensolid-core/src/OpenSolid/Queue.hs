@@ -13,7 +13,7 @@ where
 import Deque.Strict (Deque)
 import Deque.Strict qualified as Deque
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude hiding ((+), (-))
+import OpenSolid.Prelude hiding ((-))
 import Prelude ((+), (-))
 
 data Queue a = Queue Int (Deque a) deriving (Eq, Show)

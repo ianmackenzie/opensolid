@@ -76,17 +76,17 @@ quadratic subproblem saddlePoint = do
   let vB = Vector2d.unit dB
   let Vector2d ua va = vA
   let Vector2d ub vb = vB
-  let faa = ua .*. ua .*. fuu + 2.0 *. ua .*. va .*. fuv + va .*. va .*. fvv
-  let fab = ua .*. ub .*. fuu + (ua .*. vb + ub .*. va) .*. fuv + va .*. vb .*. fvv
-  let fbb = ub .*. ub .*. fuu + 2.0 *. ub .*. vb .*. fuv + vb .*. vb .*. fvv
+  let faa = ua .*. ua .*. fuu .+. 2.0 *. ua .*. va .*. fuv .+. va .*. va .*. fvv
+  let fab = ua .*. ub .*. fuu .+. (ua .*. vb .+. ub .*. va) .*. fuv .+. va .*. vb .*. fvv
+  let fbb = ub .*. ub .*. fuu .+. 2.0 *. ub .*. vb .*. fuv .+. vb .*. vb .*. fvv
   let determinant = fab #*# fab - faa #*# fbb
   let sqrtD = Quantity.sqrt# determinant
-  let (m1, m2) = Quantity.minmax ((negative fab + sqrtD) ./. fbb, (negative fab - sqrtD) ./. fbb)
-  let v1 = Vector2d.normalize (vA + m1 .*. vB)
-  let v2 = Vector2d.normalize (vA + m2 .*. vB)
+  let (m1, m2) = Quantity.minmax ((negative fab .+. sqrtD) ./. fbb, (negative fab - sqrtD) ./. fbb)
+  let v1 = Vector2d.normalize (vA .+. m1 .*. vB)
+  let v2 = Vector2d.normalize (vA .+. m2 .*. vB)
   let d1 = Direction2d.unsafe v1
   let d2 = Direction2d.unsafe v2
-  let vX = Vector2d.normalize (v1 + v2)
+  let vX = Vector2d.normalize (v1 .+. v2)
   let dX = Direction2d.unsafe vX
   let frame = Frame2d.fromXAxis (Axis2d.through saddlePoint dX)
   SaddleRegion{subproblem, frame, d1, d2}
@@ -99,7 +99,7 @@ secondDerivative ::
   Quantity units
 secondDerivative fuu fuv fvv direction = do
   let Direction2d du dv = direction
-  du .*. du .*. fuu + 2.0 *. du .*. dv .*. fuv + dv .*. dv .*. fvv
+  du .*. du .*. fuu .+. 2.0 *. du .*. dv .*. fuv .+. dv .*. dv .*. fvv
 
 connectingCurve ::
   Tolerance units =>

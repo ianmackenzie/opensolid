@@ -88,10 +88,10 @@ instance
     (VectorSurfaceFunction3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
   where
-  lhs + rhs =
+  lhs .+. rhs =
     new
-      @ lhs.compiled + rhs.compiled
-      @ \parameter -> derivative parameter lhs + VectorSurfaceFunction3d.derivative parameter rhs
+      @ lhs.compiled .+. rhs.compiled
+      @ \parameter -> derivative parameter lhs .+. VectorSurfaceFunction3d.derivative parameter rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -100,7 +100,7 @@ instance
     (Vector3d (space2 @ units2))
     (SurfaceFunction3d (space1 @ units1))
   where
-  f + v = f + VectorSurfaceFunction3d.constant v
+  f .+. v = f .+. VectorSurfaceFunction3d.constant v
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -177,7 +177,7 @@ instance
       @ \parameter -> do
         let innerDerivative = SurfaceFunction2d.derivative parameter inner
         let (dU, dV) = innerDerivative.components
-        duOuter .*. dU + dvOuter .*. dV
+        duOuter .*. dU .+. dvOuter .*. dV
 
 instance HasField "compiled" (SurfaceFunction3d (space @ units)) (Compiled (space @ units)) where
   getField (SurfaceFunction3d c _ _) = c

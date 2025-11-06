@@ -100,7 +100,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     (Curve3d (space1 @ units1))
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
+  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -167,7 +167,7 @@ on plane curve2d = do
     @ VectorCurve3d.on plane curve2d.derivative
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
-line p1 p2 = constant p1 + Curve.t .*. (p2 - p1)
+line p1 p2 = constant p1 .+. Curve.t .*. (p2 - p1)
 
 {-| Construct a Bezier curve from its control points. For example,
 

@@ -152,7 +152,7 @@ instance
     (SurfaceFunction units2)
     (SurfaceFunction units1)
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
+  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (\p -> derivative p lhs .+. derivative p rhs)
 
 instance
   units1 ~ units2 =>
@@ -161,7 +161,7 @@ instance
     (Quantity units2)
     (SurfaceFunction units1)
   where
-  function + value = function + constant value
+  function .+. value = function .+. constant value
 
 instance
   units1 ~ units2 =>
@@ -170,7 +170,7 @@ instance
     (SurfaceFunction units2)
     (SurfaceFunction units1)
   where
-  value + function = constant value + function
+  value .+. function = constant value .+. function
 
 instance
   units1 ~ units2 =>
@@ -205,7 +205,7 @@ instance
   lhs #*# rhs =
     new
       @ lhs.compiled #*# rhs.compiled
-      @ \p -> derivative p lhs #*# rhs + lhs #*# derivative p rhs
+      @ \p -> derivative p lhs #*# rhs .+. lhs #*# derivative p rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -378,7 +378,7 @@ derivative V = (.dv)
 
 derivativeIn :: Direction2d UvSpace -> SurfaceFunction units -> SurfaceFunction units
 derivativeIn direction function =
-  direction.xComponent .*. function.du + direction.yComponent .*. function.dv
+  direction.xComponent .*. function.du .+. direction.yComponent .*. function.dv
 
 zero :: SurfaceFunction units
 zero = constant Quantity.zero

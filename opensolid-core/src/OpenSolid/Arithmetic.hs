@@ -1,6 +1,6 @@
 module OpenSolid.Arithmetic
   ( Negation (negative)
-  , Addition ((+), (.+.))
+  , Addition ((.+.))
   , (+.)
   , (.+)
   , Subtraction ((-), (.-.))
@@ -32,27 +32,19 @@ class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
   negative :: a -> a
 
 class Addition a b c | a b -> c where
-  (+) :: a -> b -> c
   (.+.) :: a -> b -> c
-
-  (+) = (.+.)
-  (.+.) = (+)
-
-  {-# MINIMAL (+) | (.+.) #-}
-
-infixl 6 +
 
 infixl 6 .+.
 
 {-# INLINE (+.) #-}
 (+.) :: Addition Number a b => Number -> a -> b
-(+.) = (+)
+(+.) = (.+.)
 
 infixl 6 +.
 
 {-# INLINE (.+) #-}
 (.+) :: Addition a Number b => a -> Number -> b
-(.+) = (+)
+(.+) = (.+.)
 
 infixl 6 .+
 

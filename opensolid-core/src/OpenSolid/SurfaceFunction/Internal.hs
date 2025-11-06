@@ -56,11 +56,11 @@ curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)
       let yValley =
             if Quantity.isInfinite mLow
               then negative Quantity.infinity
-              else y1 + mLow .*. dXValley
+              else y1 .+. mLow .*. dXValley
       let yPeak =
             if Quantity.isInfinite mHigh
               then Quantity.infinity
-              else y1 + mHigh .*. dXPeak
+              else y1 .+. mHigh .*. dXPeak
       Bounds yValley yPeak
 
 curveBoundsOver :: Number -> Number -> Bounds units -> Bounds units -> Bounds units -> Bounds units
@@ -77,9 +77,9 @@ curveBoundsOver x1 x2 y1 y2 (Bounds mLow mHigh)
       let yValley =
             if Quantity.isInfinite mLow
               then negative Quantity.infinity
-              else low1 + mLow .*. dXValley
+              else low1 .+. mLow .*. dXValley
       let yPeak =
             if Quantity.isInfinite mHigh
               then Quantity.infinity
-              else high1 + mHigh .*. dXPeak
+              else high1 .+. mHigh .*. dXPeak
       Bounds yValley yPeak

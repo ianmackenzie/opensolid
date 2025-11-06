@@ -103,25 +103,25 @@ on plane region = do
   let p0 = Point2d.placeOn plane centerPoint
   let vx = regionSize .*. Plane3d.xDirection plane
   let vy = regionSize .*. Plane3d.yDirection plane
-  let planeFunction = p0 + SurfaceFunction.u .*. vx + SurfaceFunction.v .*. vy
+  let planeFunction = p0 .+. SurfaceFunction.u .*. vx .+. SurfaceFunction.v .*. vy
   parametric planeFunction normalizedRegion
 
 extruded :: Curve3d (space @ units) -> Vector3d (space @ units) -> Surface3d (space @ units)
 extruded curve displacement =
-  parametric (curve . SurfaceFunction.u + SurfaceFunction.v .*. displacement) Region2d.unitSquare
+  parametric (curve . SurfaceFunction.u .+. SurfaceFunction.v .*. displacement) Region2d.unitSquare
 
 translational ::
   Curve3d (space @ units) ->
   VectorCurve3d (space @ units) ->
   Surface3d (space @ units)
 translational uCurve vCurve =
-  parametric (uCurve . SurfaceFunction.u + vCurve . SurfaceFunction.v) Region2d.unitSquare
+  parametric (uCurve . SurfaceFunction.u .+. vCurve . SurfaceFunction.v) Region2d.unitSquare
 
 ruled :: Curve3d (space @ units) -> Curve3d (space @ units) -> Surface3d (space @ units)
 ruled bottom top = do
   let f1 = bottom . SurfaceFunction.u
   let f2 = top . SurfaceFunction.u
-  parametric (f1 + SurfaceFunction.v .*. (f2 - f1)) Region2d.unitSquare
+  parametric (f1 .+. SurfaceFunction.v .*. (f2 - f1)) Region2d.unitSquare
 
 revolved ::
   Tolerance units =>
@@ -148,9 +148,9 @@ revolved sketchPlane curve axis angle = do
         let height = localCurve.yCoordinate . curveParameter
         let function =
               frame3d.originPoint
-                + radius .*. SurfaceFunction.cos theta .*. frame3d.rightwardDirection
-                + radius .*. SurfaceFunction.sin theta .*. frame3d.forwardDirection
-                + height .*. frame3d.upwardDirection
+                .+. radius .*. SurfaceFunction.cos theta .*. frame3d.rightwardDirection
+                .+. radius .*. SurfaceFunction.sin theta .*. frame3d.forwardDirection
+                .+. height .*. frame3d.upwardDirection
         Success (parametric function Region2d.unitSquare)
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))

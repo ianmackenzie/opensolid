@@ -173,15 +173,15 @@ instance Multiplication (Bounds units) Sign (Bounds units) where
   bounds .*. Negative = negative bounds
 
 instance units1 ~ units2 => Addition (Bounds units1) (Bounds units2) (Bounds units1) where
-  Bounds## low1## high1## + Bounds## low2## high2## =
+  Bounds## low1## high1## .+. Bounds## low2## high2## =
     Bounds## (low1## +## low2##) (high1## +## high2##)
 
 instance units1 ~ units2 => Addition (Bounds units1) (Quantity units2) (Bounds units1) where
-  Bounds## low## high## + Quantity## value## =
+  Bounds## low## high## .+. Quantity## value## =
     Bounds## (low## +## value##) (high## +## value##)
 
 instance units1 ~ units2 => Addition (Quantity units1) (Bounds units2) (Bounds units1) where
-  Quantity## value## + Bounds## low## high## =
+  Quantity## value## .+. Bounds## low## high## =
     Bounds## (value## +## low##) (value## +## high##)
 
 instance units1 ~ units2 => Subtraction (Bounds units1) (Bounds units2) (Bounds units1) where
@@ -574,7 +574,7 @@ sinIncludesMinMax :: Bounds Radians -> (Bool, Bool)
 sinIncludesMinMax bounds = cosIncludesMinMax (bounds - Angle.halfPi)
 
 cosIncludesMinMax :: Bounds Radians -> (Bool, Bool)
-cosIncludesMinMax bounds = (cosIncludesMax (bounds + Angle.pi), cosIncludesMax bounds)
+cosIncludesMinMax bounds = (cosIncludesMax (bounds .+. Angle.pi), cosIncludesMax bounds)
 
 cosIncludesMax :: Bounds Radians -> Bool
 cosIncludesMax (Bounds low high) =

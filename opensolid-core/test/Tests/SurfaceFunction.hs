@@ -96,13 +96,13 @@ planeTorusSurface = do
   let phi = Angle.twoPi .*. SurfaceFunction.v
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
-  let r = majorRadius + minorRadius .*. SurfaceFunction.cos phi
+  let r = majorRadius .+. minorRadius .*. SurfaceFunction.cos phi
   let alpha = Angle.asin (minorRadius ./. majorRadius)
-  let normalDirection = Direction3d.polar World3d.frontPlane (alpha + Angle.halfPi)
+  let normalDirection = Direction3d.polar World3d.frontPlane (alpha .+. Angle.halfPi)
   let surfaceFunction =
         r .*. SurfaceFunction.cos theta .*. World3d.rightwardDirection
-          + r .*. SurfaceFunction.sin theta .*. World3d.forwardDirection
-          + minorRadius .*. SurfaceFunction.sin phi .*. World3d.upwardDirection
+          .+. r .*. SurfaceFunction.sin theta .*. World3d.forwardDirection
+          .+. minorRadius .*. SurfaceFunction.sin phi .*. World3d.upwardDirection
   normalDirection `dot` surfaceFunction
 
 samplingRadius :: Number
@@ -124,5 +124,5 @@ firstDerivativeIsConsistent surfaceFunction p0 parameter = do
 samplingPoints :: UvPoint -> SurfaceParameter -> (UvPoint, UvPoint)
 samplingPoints (Point2d u0 v0) parameter =
   case parameter of
-    U -> (Point2d (u0 - samplingRadius) v0, Point2d (u0 + samplingRadius) v0)
-    V -> (Point2d u0 (v0 - samplingRadius), Point2d u0 (v0 + samplingRadius))
+    U -> (Point2d (u0 - samplingRadius) v0, Point2d (u0 .+. samplingRadius) v0)
+    V -> (Point2d u0 (v0 - samplingRadius), Point2d u0 (v0 .+. samplingRadius))

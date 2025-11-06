@@ -270,7 +270,7 @@ distanceAlong axis bounds = do
   let rF = 0.5 *. length bounds
   let rU = 0.5 *. height bounds
   let radius = rR .*. Number.abs dR .+. rF .*. Number.abs dF .+. rU .*. Number.abs dU
-  Bounds (mid - radius) (mid + radius)
+  Bounds (mid - radius) (mid .+. radius)
 
 transformBy ::
   Transform3d tag (space @ units) ->
@@ -292,6 +292,6 @@ transformBy transform (Bounds3d pR pF pU) = do
   let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
   let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   Bounds3d
-    @ Bounds (cR' - rR') (cR' + rR')
-    @ Bounds (cF' - rF') (cF' + rF')
-    @ Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' - rR') (cR' .+. rR')
+    @ Bounds (cF' - rF') (cF' .+. rF')
+    @ Bounds (cU' - rU') (cU' .+. rU')

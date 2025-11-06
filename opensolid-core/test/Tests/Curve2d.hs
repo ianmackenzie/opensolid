@@ -317,7 +317,7 @@ firstDerivativeIsConsistentWithin ::
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let dt = 1e-6
   let p1 = Curve2d.evaluate curve (tValue - dt)
-  let p2 = Curve2d.evaluate curve (tValue + dt)
+  let p2 = Curve2d.evaluate curve (tValue .+. dt)
   let numericalFirstDerivative = (p2 .-. p1) ./ (2.0 *. dt)
   let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
   Tolerance.using givenTolerance do
@@ -335,7 +335,7 @@ secondDerivativeIsConsistent :: Curve2d (space @ Meters) -> Number -> Expectatio
 secondDerivativeIsConsistent curve tValue = do
   let dt = 1e-6
   let v1 = VectorCurve2d.evaluate curve.derivative (tValue - dt)
-  let v2 = VectorCurve2d.evaluate curve.derivative (tValue + dt)
+  let v2 = VectorCurve2d.evaluate curve.derivative (tValue .+. dt)
   let numericalSecondDerivative = (v2 .-. v1) ./. (2.0 *. dt)
   let secondDerivative = curve.derivative.derivative
   let analyticSecondDerivative = VectorCurve2d.evaluate secondDerivative tValue
@@ -435,6 +435,6 @@ g2 = Test.check 100 "G2 continuity" Test.do
   let tangentDirection = DirectionCurve2d.evaluate tangentCurve t
   let signedRadius = 1.0 /. Curve.evaluate curvatureCurve t
   let normalDirection = Direction2d.rotateLeft tangentDirection
-  let arcCenter = point + signedRadius .*. normalDirection
+  let arcCenter = point .+. signedRadius .*. normalDirection
   let arc = Curve2d.sweptArc arcCenter point (Angle.degrees 30.0)
   Test.expect (Curve2d.g2 (spline, t) (arc, 0.0) Length.meter)

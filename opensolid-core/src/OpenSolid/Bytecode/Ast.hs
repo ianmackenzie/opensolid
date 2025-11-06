@@ -288,8 +288,8 @@ instance Composition (Variable1d input) (Variable1d Number) (Ast1d input) where
   XComponent arg . input = xComponent (arg . input)
   YComponent arg . input = yComponent (arg . input)
   Negated1d arg . input = negative (arg . input)
-  Sum1d lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant1d lhs rhs . input = lhs . input + rhs
+  Sum1d lhs rhs . input = lhs . input .+. rhs . input
+  SumVariableConstant1d lhs rhs . input = lhs . input .+. rhs
   Difference1d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable1d lhs rhs . input = lhs - rhs . input
   Product1d lhs rhs . input = lhs . input .*. rhs . input
@@ -388,8 +388,8 @@ instance Composition (Variable1d input) (Variable2d Number) (Ast2d input) where
   XC x y . input = xy (x . input) (Constant1d y)
   CY x y . input = xy (Constant1d x) (y . input)
   Negated2d arg . input = negative (arg . input)
-  Sum2d lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant2d lhs rhs . input = lhs . input + rhs
+  Sum2d lhs rhs . input = lhs . input .+. rhs . input
+  SumVariableConstant2d lhs rhs . input = lhs . input .+. rhs
   Difference2d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable2d lhs rhs . input = lhs - rhs . input
   Product2d lhs rhs . input = lhs . input .*. rhs . input
@@ -415,8 +415,8 @@ instance Composition (Ast1d input) (Ast3d Number) (Ast3d input) where
 instance Composition (Variable1d input) (Variable3d Number) (Ast3d input) where
   input . CurveParameter = Variable3d input
   Negated3d arg . input = negative (arg . input)
-  Sum3d lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant3d lhs rhs . input = lhs . input + rhs
+  Sum3d lhs rhs . input = lhs . input .+. rhs . input
+  SumVariableConstant3d lhs rhs . input = lhs . input .+. rhs
   Difference3d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable3d lhs rhs . input = lhs - rhs . input
   Product3d lhs rhs . input = lhs . input .*. rhs . input
@@ -448,8 +448,8 @@ instance Composition (Variable2d input) (Variable1d UvPoint) (Ast1d input) where
   XComponent arg . input = xComponent (arg . input)
   YComponent arg . input = yComponent (arg . input)
   Negated1d arg . input = negative (arg . input)
-  Sum1d lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant1d lhs rhs . input = lhs . input + rhs
+  Sum1d lhs rhs . input = lhs . input .+. rhs . input
+  SumVariableConstant1d lhs rhs . input = lhs . input .+. rhs
   Difference1d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable1d lhs rhs . input = lhs - rhs . input
   Product1d lhs rhs . input = lhs . input .*. rhs . input
@@ -549,8 +549,8 @@ instance Composition (Variable2d input) (Variable2d UvPoint) (Ast2d input) where
   XC x y . input = xy (x . input) (Constant1d y)
   CY x y . input = xy (Constant1d x) (y . input)
   Negated2d arg . input = negative (arg . input)
-  Sum2d lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant2d lhs rhs . input = lhs . input + rhs
+  Sum2d lhs rhs . input = lhs . input .+. rhs . input
+  SumVariableConstant2d lhs rhs . input = lhs . input .+. rhs
   Difference2d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable2d lhs rhs . input = lhs - rhs . input
   Product2d lhs rhs . input = lhs . input .*. rhs . input
@@ -576,8 +576,8 @@ instance Composition (Ast2d input) (Ast3d UvPoint) (Ast3d input) where
 instance Composition (Variable2d input) (Variable3d UvPoint) (Ast3d input) where
   input . SurfaceParameters = Variable3d input
   Negated3d arg . input = negative (arg . input)
-  Sum3d lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant3d lhs rhs . input = lhs . input + rhs
+  Sum3d lhs rhs . input = lhs . input .+. rhs . input
+  SumVariableConstant3d lhs rhs . input = lhs . input .+. rhs
   Difference3d lhs rhs . input = lhs . input - rhs . input
   DifferenceConstantVariable3d lhs rhs . input = lhs - rhs . input
   Product3d lhs rhs . input = lhs . input .*. rhs . input
@@ -670,24 +670,24 @@ instance Multiplication (Variable1d input) Sign (Variable1d input) where
   var .*. Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast1d input1) (Ast1d input2) (Ast1d input1) where
-  Constant1d 0.0 + rhs = rhs
-  lhs + Constant1d 0.0 = lhs
-  Constant1d lhs + Constant1d rhs = Constant1d (lhs + rhs)
-  Constant1d lhs + Variable1d rhs = Variable1d (SumVariableConstant1d rhs lhs)
-  Variable1d lhs + Constant1d rhs = Variable1d (SumVariableConstant1d lhs rhs)
-  Variable1d lhs + Variable1d rhs = Variable1d (lhs + rhs)
+  Constant1d 0.0 .+. rhs = rhs
+  lhs .+. Constant1d 0.0 = lhs
+  Constant1d lhs .+. Constant1d rhs = Constant1d (lhs .+. rhs)
+  Constant1d lhs .+. Variable1d rhs = Variable1d (SumVariableConstant1d rhs lhs)
+  Variable1d lhs .+. Constant1d rhs = Variable1d (SumVariableConstant1d lhs rhs)
+  Variable1d lhs .+. Variable1d rhs = Variable1d (lhs .+. rhs)
 
 instance
   input1 ~ input2 =>
   Addition (Variable1d input1) (Variable1d input2) (Variable1d input1)
   where
-  lhs + rhs = if lhs <= rhs then Sum1d lhs rhs else Sum1d rhs lhs
+  lhs .+. rhs = if lhs <= rhs then Sum1d lhs rhs else Sum1d rhs lhs
 
 instance Addition (Quantity units) (Ast1d input) (Ast1d input) where
-  lhs + rhs = constant1d lhs + rhs
+  lhs .+. rhs = constant1d lhs .+. rhs
 
 instance Addition (Ast1d input1) (Quantity units) (Ast1d input1) where
-  lhs + rhs = lhs + constant1d rhs
+  lhs .+. rhs = lhs .+. constant1d rhs
 
 instance input1 ~ input2 => Subtraction (Ast1d input1) (Ast1d input2) (Ast1d input1) where
   lhs - Constant1d 0.0 = lhs
@@ -779,24 +779,24 @@ instance Multiplication (Variable2d input) Sign (Variable2d input) where
   var .*. Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast2d input1) (Ast2d input2) (Ast2d input1) where
-  Constant2d lhs + rhs | lhs == Vector2d.zero = rhs
-  lhs + Constant2d rhs | rhs == Vector2d.zero = lhs
-  Constant2d lhs + Constant2d rhs = Constant2d (lhs + rhs)
-  Constant2d lhs + Variable2d rhs = Variable2d (SumVariableConstant2d rhs lhs)
-  Variable2d lhs + Constant2d rhs = Variable2d (SumVariableConstant2d lhs rhs)
-  Variable2d lhs + Variable2d rhs = Variable2d (lhs + rhs)
+  Constant2d lhs .+. rhs | lhs == Vector2d.zero = rhs
+  lhs .+. Constant2d rhs | rhs == Vector2d.zero = lhs
+  Constant2d lhs .+. Constant2d rhs = Constant2d (lhs .+. rhs)
+  Constant2d lhs .+. Variable2d rhs = Variable2d (SumVariableConstant2d rhs lhs)
+  Variable2d lhs .+. Constant2d rhs = Variable2d (SumVariableConstant2d lhs rhs)
+  Variable2d lhs .+. Variable2d rhs = Variable2d (lhs .+. rhs)
 
 instance
   input1 ~ input2 =>
   Addition (Variable2d input1) (Variable2d input2) (Variable2d input1)
   where
-  lhs + rhs = if lhs <= rhs then Sum2d lhs rhs else Sum2d rhs lhs
+  lhs .+. rhs = if lhs <= rhs then Sum2d lhs rhs else Sum2d rhs lhs
 
 instance Addition (Vector2d (space @ units)) (Ast2d input) (Ast2d input) where
-  lhs + rhs = constant2d lhs + rhs
+  lhs .+. rhs = constant2d lhs .+. rhs
 
 instance Addition (Ast2d input1) (Vector2d (space @ units)) (Ast2d input1) where
-  lhs + rhs = lhs + constant2d rhs
+  lhs .+. rhs = lhs .+. constant2d rhs
 
 instance input1 ~ input2 => Subtraction (Ast2d input1) (Ast2d input2) (Ast2d input1) where
   lhs - Constant2d rhs | rhs == Vector2d.zero = lhs
@@ -882,24 +882,24 @@ instance Multiplication (Variable3d input) Sign (Variable3d input) where
   var .*. Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast3d input1) (Ast3d input2) (Ast3d input1) where
-  Constant3d lhs + rhs | lhs == Vector3d.zero = rhs
-  lhs + Constant3d rhs | rhs == Vector3d.zero = lhs
-  Constant3d lhs + Constant3d rhs = Constant3d (lhs + rhs)
-  Constant3d lhs + Variable3d rhs = Variable3d (SumVariableConstant3d rhs lhs)
-  Variable3d lhs + Constant3d rhs = Variable3d (SumVariableConstant3d lhs rhs)
-  Variable3d lhs + Variable3d rhs = Variable3d (lhs + rhs)
+  Constant3d lhs .+. rhs | lhs == Vector3d.zero = rhs
+  lhs .+. Constant3d rhs | rhs == Vector3d.zero = lhs
+  Constant3d lhs .+. Constant3d rhs = Constant3d (lhs .+. rhs)
+  Constant3d lhs .+. Variable3d rhs = Variable3d (SumVariableConstant3d rhs lhs)
+  Variable3d lhs .+. Constant3d rhs = Variable3d (SumVariableConstant3d lhs rhs)
+  Variable3d lhs .+. Variable3d rhs = Variable3d (lhs .+. rhs)
 
 instance
   input1 ~ input2 =>
   Addition (Variable3d input1) (Variable3d input2) (Variable3d input1)
   where
-  lhs + rhs = if lhs <= rhs then Sum3d lhs rhs else Sum3d rhs lhs
+  lhs .+. rhs = if lhs <= rhs then Sum3d lhs rhs else Sum3d rhs lhs
 
 instance Addition (Vector3d (space @ units)) (Ast3d input) (Ast3d input) where
-  lhs + rhs = constant3d lhs + rhs
+  lhs .+. rhs = constant3d lhs .+. rhs
 
 instance Addition (Ast3d input1) (Vector3d (space @ units)) (Ast3d input1) where
-  lhs + rhs = lhs + constant3d rhs
+  lhs .+. rhs = lhs .+. constant3d rhs
 
 instance input1 ~ input2 => Subtraction (Ast3d input1) (Ast3d input2) (Ast3d input1) where
   lhs - Constant3d rhs | rhs == Vector3d.zero = lhs

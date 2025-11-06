@@ -190,7 +190,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
+  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -199,7 +199,7 @@ instance
     (Vector2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  curve + vector = curve + constant vector
+  curve .+. vector = curve .+. constant vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -208,7 +208,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  vector + curve = constant vector + curve
+  vector .+. curve = constant vector .+. curve
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -253,7 +253,7 @@ instance
     (VectorCurve2d (space @ (units1 #*# units2)))
   where
   lhs #*# rhs =
-    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs + lhs #*# rhs.derivative)
+    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs .+. lhs #*# rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -282,7 +282,7 @@ instance
     (VectorCurve2d (space @ (units1 #*# units2)))
   where
   lhs #*# rhs =
-    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs + lhs #*# rhs.derivative)
+    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs .+. lhs #*# rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -331,7 +331,7 @@ instance
   lhs `dot#` rhs =
     Curve.new
       @ lhs.compiled `dot#` rhs.compiled
-      @ lhs.derivative `dot#` rhs + lhs `dot#` rhs.derivative
+      @ lhs.derivative `dot#` rhs .+. lhs `dot#` rhs.derivative
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -394,7 +394,7 @@ instance
   lhs `cross#` rhs =
     Curve.new
       @ lhs.compiled `cross#` rhs.compiled
-      @ lhs.derivative `cross#` rhs + lhs `cross#` rhs.derivative
+      @ lhs.derivative `cross#` rhs .+. lhs `cross#` rhs.derivative
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -451,7 +451,7 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
   where
-  point + curve = Curve2d.constant point + curve
+  point .+. curve = Curve2d.constant point .+. curve
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -551,10 +551,10 @@ arc ::
   VectorCurve2d (space @ units)
 arc v1 v2 a b
   | v1 == Vector2d.zero && v2 == Vector2d.zero = zero
-  | a == b = constant (Angle.cos a .*. v1 + Angle.sin a .*. v2)
+  | a == b = constant (Angle.cos a .*. v1 .+. Angle.sin a .*. v2)
   | otherwise = do
       let angle = Curve.line a b
-      v1 .*. Curve.cos angle + v2 .*. Curve.sin angle
+      v1 .*. Curve.cos angle .+. v2 .*. Curve.sin angle
 
 quadraticBezier ::
   Vector2d (space @ units) ->

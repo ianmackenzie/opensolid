@@ -199,7 +199,7 @@ squaredMagnitude = Units.specialize . squaredMagnitude#
 
 squaredMagnitude# :: VectorBounds3d (space @ units) -> Bounds (units #*# units)
 squaredMagnitude# (VectorBounds3d x y z) =
-  Bounds.squared# x + Bounds.squared# y + Bounds.squared# z
+  Bounds.squared# x .+. Bounds.squared# y .+. Bounds.squared# z
 
 magnitude :: VectorBounds3d (space @ units) -> Bounds units
 magnitude bounds = do
@@ -262,7 +262,7 @@ maxSquaredMagnitude# (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Boun
   let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
   let zMagnitude = Quantity.max (Quantity.abs minZ) (Quantity.abs maxZ)
-  Quantity.squared# xMagnitude + Quantity.squared# yMagnitude + Quantity.squared# zMagnitude
+  Quantity.squared# xMagnitude .+. Quantity.squared# yMagnitude .+. Quantity.squared# zMagnitude
 
 normalize :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ Unitless)
 normalize vectorBounds = do
@@ -365,12 +365,12 @@ on plane bounds2d = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   let Vector3d cR cF cU = Vector3d.on plane (Vector2d cX cY)
-  let rR = rX .*. Number.abs iR + rY .*. Number.abs jR
-  let rF = rX .*. Number.abs iF + rY .*. Number.abs jF
-  let rU = rX .*. Number.abs iU + rY .*. Number.abs jU
-  let bR = Bounds (cR - rR) (cR + rR)
-  let bF = Bounds (cF - rF) (cF + rF)
-  let bU = Bounds (cU - rU) (cU + rU)
+  let rR = rX .*. Number.abs iR .+. rY .*. Number.abs jR
+  let rF = rX .*. Number.abs iF .+. rY .*. Number.abs jF
+  let rU = rX .*. Number.abs iU .+. rY .*. Number.abs jU
+  let bR = Bounds (cR - rR) (cR .+. rR)
+  let bF = Bounds (cF - rF) (cF .+. rF)
+  let bU = Bounds (cU - rU) (cU .+. rU)
   VectorBounds3d bR bF bU
 
 placeIn ::
@@ -388,13 +388,13 @@ placeIn frame (VectorBounds3d vR vF vU) = do
   let Direction3d iR iF iU = frame.rightwardDirection
   let Direction3d jR jF jU = frame.forwardDirection
   let Direction3d kR kF kU = frame.upwardDirection
-  let rR' = rR .*. Number.abs iR + rF .*. Number.abs jR + rU .*. Number.abs kR
-  let rF' = rR .*. Number.abs iF + rF .*. Number.abs jF + rU .*. Number.abs kF
-  let rU' = rR .*. Number.abs iU + rF .*. Number.abs jU + rU .*. Number.abs kU
+  let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs jR .+. rU .*. Number.abs kR
+  let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
+  let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   VectorBounds3d
-    @ Bounds (cR' - rR') (cR' + rR')
-    @ Bounds (cF' - rF') (cF' + rF')
-    @ Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' - rR') (cR' .+. rR')
+    @ Bounds (cF' - rF') (cF' .+. rF')
+    @ Bounds (cU' - rU') (cU' .+. rU')
 
 relativeTo ::
   Frame3d (global @ frameUnits) (Defines local) ->
@@ -411,13 +411,13 @@ relativeTo frame (VectorBounds3d vR vF vU) = do
   let Direction3d iR iF iU = frame.rightwardDirection
   let Direction3d jR jF jU = frame.forwardDirection
   let Direction3d kR kF kU = frame.upwardDirection
-  let rR' = rR .*. Number.abs iR + rF .*. Number.abs iF + rU .*. Number.abs iU
-  let rF' = rR .*. Number.abs jR + rF .*. Number.abs jF + rU .*. Number.abs jU
-  let rU' = rR .*. Number.abs kR + rF .*. Number.abs kF + rU .*. Number.abs kU
+  let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs iF .+. rU .*. Number.abs iU
+  let rF' = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
+  let rU' = rR .*. Number.abs kR .+. rF .*. Number.abs kF .+. rU .*. Number.abs kU
   VectorBounds3d
-    @ Bounds (cR' - rR') (cR' + rR')
-    @ Bounds (cF' - rF') (cF' + rF')
-    @ Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' - rR') (cR' .+. rR')
+    @ Bounds (cF' - rF') (cF' .+. rF')
+    @ Bounds (cU' - rU') (cU' .+. rU')
 
 transformBy ::
   Transform3d tag (space @ units1) ->
@@ -435,13 +435,13 @@ transformBy transform (VectorBounds3d vR vF vU) = do
   let Vector3d iR iF iU = i
   let Vector3d jR jF jU = j
   let Vector3d kR kF kU = k
-  let rR' = Number.abs iR .*. rR + Number.abs jR .*. rF + Number.abs kR .*. rU
-  let rF' = Number.abs iF .*. rR + Number.abs jF .*. rF + Number.abs kF .*. rU
-  let rU' = Number.abs iU .*. rR + Number.abs jU .*. rF + Number.abs kU .*. rU
+  let rR' = Number.abs iR .*. rR .+. Number.abs jR .*. rF .+. Number.abs kR .*. rU
+  let rF' = Number.abs iF .*. rR .+. Number.abs jF .*. rF .+. Number.abs kF .*. rU
+  let rU' = Number.abs iU .*. rR .+. Number.abs jU .*. rF .+. Number.abs kU .*. rU
   VectorBounds3d
-    @ Bounds (cR' - rR') (cR' + rR')
-    @ Bounds (cF' - rF') (cF' + rF')
-    @ Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' - rR') (cR' .+. rR')
+    @ Bounds (cF' - rF') (cF' .+. rF')
+    @ Bounds (cU' - rU') (cU' .+. rU')
 
 rotateIn ::
   Direction3d space ->

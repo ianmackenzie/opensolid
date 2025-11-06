@@ -152,7 +152,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (VectorSurfaceFunction2d (space1 @ units1))
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
+  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (\p -> derivative p lhs .+. derivative p rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -161,7 +161,7 @@ instance
     (Vector2d (space2 @ units2))
     (VectorSurfaceFunction2d (space1 @ units1))
   where
-  f + v = f + constant v
+  f .+. v = f .+. constant v
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -170,7 +170,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (VectorSurfaceFunction2d (space1 @ units1))
   where
-  v + f = constant v + f
+  v .+. f = constant v .+. f
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -217,7 +217,7 @@ instance
   lhs #*# rhs =
     new
       @ lhs.compiled #*# rhs.compiled
-      @ \p -> SurfaceFunction.derivative p lhs #*# rhs + lhs #*# derivative p rhs
+      @ \p -> SurfaceFunction.derivative p lhs #*# rhs .+. lhs #*# derivative p rhs
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -254,7 +254,7 @@ instance
   lhs #*# rhs =
     new
       @ lhs.compiled #*# rhs.compiled
-      @ \p -> derivative p lhs #*# rhs + lhs #*# SurfaceFunction.derivative p rhs
+      @ \p -> derivative p lhs #*# rhs .+. lhs #*# SurfaceFunction.derivative p rhs
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -309,7 +309,7 @@ instance
   lhs `cross#` rhs =
     SurfaceFunction.new
       (lhs.compiled `cross#` rhs.compiled)
-      (\p -> derivative p lhs `cross#` rhs + lhs `cross#` derivative p rhs)
+      (\p -> derivative p lhs `cross#` rhs .+. lhs `cross#` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -384,7 +384,7 @@ instance
   lhs `dot#` rhs =
     SurfaceFunction.new
       (lhs.compiled `dot#` rhs.compiled)
-      (\p -> derivative p lhs `dot#` rhs + lhs `dot#` derivative p rhs)
+      (\p -> derivative p lhs `dot#` rhs .+. lhs `dot#` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -451,7 +451,7 @@ instance
     let (dudt, dvdt) = curve.derivative.components
     VectorCurve2d.new
       @ function.compiled . curve.compiled
-      @ (function.du . curve) .*. dudt + (function.dv . curve) .*. dvdt
+      @ (function.du . curve) .*. dudt .+. (function.dv . curve) .*. dvdt
 
 instance
   HasField

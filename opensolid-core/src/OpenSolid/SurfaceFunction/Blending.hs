@@ -147,7 +147,7 @@ blend (f00, f01, f02) (f10, f11) t = do
   let b02 = Curve.b02 . t
   let b10 = Curve.b10 . t
   let b11 = Curve.b11 . t
-  b00 .*. f00 + b01 .*. f01 + b02 .*. f02 + b10 .*. f10 + b11 .*. f11
+  b00 .*. f00 .+. b01 .*. f01 .+. b02 .*. f02 .+. b10 .*. f10 .+. b11 .*. f11
 
 uParameterization :: Number -> SurfaceFunction2d UvCoordinates
 uParameterization vValue = SurfaceFunction2d.xy SurfaceFunction.u (SurfaceFunction.constant vValue)

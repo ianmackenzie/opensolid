@@ -116,7 +116,7 @@ instance
     (Vector2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Vector2d## x1## y1## + Vector2d## x2## y2## = Vector2d## (x1## +## x2##) (y1## +## y2##)
+  Vector2d## x1## y1## .+. Vector2d## x2## y2## = Vector2d## (x1## +## x2##) (y1## +## y2##)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -204,13 +204,13 @@ instance
     (Vector2d (space2 @ units2))
     (Quantity (units1 #*# units2))
   where
-  Vector2d x1 y1 `dot#` Vector2d x2 y2 = x1 #*# x2 + y1 #*# y2
+  Vector2d x1 y1 `dot#` Vector2d x2 y2 = x1 #*# x2 .+. y1 #*# y2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (Vector2d (space1 @ units1)) (Vector2d (space2 @ units2)) (Quantity units3)
   where
-  Vector2d x1 y1 `dot` Vector2d x2 y2 = x1 .*. x2 + y1 .*. y2
+  Vector2d x1 y1 `dot` Vector2d x2 y2 = x1 .*. x2 .+. y1 .*. y2
 
 instance
   space1 ~ space2 =>
@@ -391,7 +391,7 @@ instance
     (Vector2d (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Position2d p + v = Position2d (p + v)
+  Position2d p .+. v = Position2d (p .+. v)
 
 instance
   ( space1 ~ space2
@@ -424,7 +424,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Position2d p + vb = PositionBounds2d (p + vb)
+  Position2d p .+. vb = PositionBounds2d (p .+. vb)
 
 instance
   ( space1 ~ space2
@@ -500,7 +500,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  VectorBounds2d x1 y1 + VectorBounds2d x2 y2 = VectorBounds2d (x1 + x2) (y1 + y2)
+  VectorBounds2d x1 y1 .+. VectorBounds2d x2 y2 = VectorBounds2d (x1 .+. x2) (y1 .+. y2)
 
 instance
   ( space1 ~ space2
@@ -511,7 +511,7 @@ instance
     (Vector2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  VectorBounds2d x1 y1 + Vector2d x2 y2 = VectorBounds2d (x1 + x2) (y1 + y2)
+  VectorBounds2d x1 y1 .+. Vector2d x2 y2 = VectorBounds2d (x1 .+. x2) (y1 .+. y2)
 
 instance
   ( space1 ~ space2
@@ -522,7 +522,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  Vector2d x1 y1 + VectorBounds2d x2 y2 = VectorBounds2d (x1 + x2) (y1 + y2)
+  Vector2d x1 y1 .+. VectorBounds2d x2 y2 = VectorBounds2d (x1 .+. x2) (y1 .+. y2)
 
 instance
   ( space1 ~ space2
@@ -657,7 +657,7 @@ instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (Vector2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) (Bounds units3)
   where
-  Vector2d x1 y1 `dot` VectorBounds2d x2 y2 = x1 .*. x2 + y1 .*. y2
+  Vector2d x1 y1 `dot` VectorBounds2d x2 y2 = x1 .*. x2 .+. y1 .*. y2
 
 instance
   space1 ~ space2 =>
@@ -666,13 +666,13 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  Vector2d x1 y1 `dot#` VectorBounds2d x2 y2 = x1 #*# x2 + y1 #*# y2
+  Vector2d x1 y1 `dot#` VectorBounds2d x2 y2 = x1 #*# x2 .+. y1 #*# y2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (VectorBounds2d (space1 @ units1)) (Vector2d (space2 @ units2)) (Bounds units3)
   where
-  VectorBounds2d x1 y1 `dot` Vector2d x2 y2 = x1 .*. x2 + y1 .*. y2
+  VectorBounds2d x1 y1 `dot` Vector2d x2 y2 = x1 .*. x2 .+. y1 .*. y2
 
 instance
   space1 ~ space2 =>
@@ -681,7 +681,7 @@ instance
     (Vector2d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  VectorBounds2d x1 y1 `dot#` Vector2d x2 y2 = x1 #*# x2 + y1 #*# y2
+  VectorBounds2d x1 y1 `dot#` Vector2d x2 y2 = x1 #*# x2 .+. y1 #*# y2
 
 instance
   space1 ~ space2 =>
@@ -702,7 +702,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds units3)
   where
-  VectorBounds2d x1 y1 `dot` VectorBounds2d x2 y2 = x1 .*. x2 + y1 .*. y2
+  VectorBounds2d x1 y1 `dot` VectorBounds2d x2 y2 = x1 .*. x2 .+. y1 .*. y2
 
 instance
   space1 ~ space2 =>
@@ -711,7 +711,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  VectorBounds2d x1 y1 `dot#` VectorBounds2d x2 y2 = x1 #*# x2 + y1 #*# y2
+  VectorBounds2d x1 y1 `dot#` VectorBounds2d x2 y2 = x1 #*# x2 .+. y1 #*# y2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -853,7 +853,7 @@ instance
     (Vector2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  PositionBounds2d pb + v = PositionBounds2d (pb + v)
+  PositionBounds2d pb .+. v = PositionBounds2d (pb .+. v)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -862,7 +862,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  PositionBounds2d pb + vb = PositionBounds2d (pb + vb)
+  PositionBounds2d pb .+. vb = PositionBounds2d (pb .+. vb)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -1012,7 +1012,7 @@ instance
     (Transform2d tag (space2 @ translationUnits))
     (Vector2d (space1 @ units))
   where
-  Vector2d vx vy .*. Transform2d _ i j = vx .*. i + vy .*. j
+  Vector2d vx vy .*. Transform2d _ i j = vx .*. i .+. vy .*. j
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -1021,7 +1021,7 @@ instance
     (Transform2d tag (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Point2d px py .*. Transform2d p0 i j = p0 + px .*. i + py .*. j
+  Point2d px py .*. Transform2d p0 i j = p0 .+. px .*. i .+. py .*. j
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -1107,7 +1107,7 @@ instance
     (Vector3d (space2 @ units2))
     (Vector3d (space1 @ units1))
   where
-  Vector3d x1 y1 z1 + Vector3d x2 y2 z2 = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
+  Vector3d x1 y1 z1 .+. Vector3d x2 y2 z2 = Vector3d (x1 .+. x2) (y1 .+. y2) (z1 .+. z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -1195,13 +1195,13 @@ instance
     (Vector3d (space2 @ units2))
     (Quantity (units1 #*# units2))
   where
-  Vector3d x1 y1 z1 `dot#` Vector3d x2 y2 z2 = x1 #*# x2 + y1 #*# y2 + z1 #*# z2
+  Vector3d x1 y1 z1 `dot#` Vector3d x2 y2 z2 = x1 #*# x2 .+. y1 #*# y2 .+. z1 #*# z2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (Vector3d (space1 @ units1)) (Vector3d (space2 @ units2)) (Quantity units3)
   where
-  Vector3d x1 y1 z1 `dot` Vector3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
+  Vector3d x1 y1 z1 `dot` Vector3d x2 y2 z2 = x1 .*. x2 .+. y1 .*. y2 .+. z1 .*. z2
 
 instance
   space1 ~ space2 =>
@@ -1478,7 +1478,7 @@ instance
     (Vector3d (space2 @ units2))
     (Point3d (space1 @ units1))
   where
-  Position3d p + v = Position3d (p + v)
+  Position3d p .+. v = Position3d (p .+. v)
 
 instance
   ( space1 ~ space2
@@ -1511,7 +1511,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  Position3d p + vb = PositionBounds3d (p + vb)
+  Position3d p .+. vb = PositionBounds3d (p .+. vb)
 
 instance
   ( space1 ~ space2
@@ -1617,7 +1617,7 @@ instance
     (VectorBounds3d (space1 @ units1))
   where
   VectorBounds3d## xl1## xh1## yl1## yh1## zl1## zh1##
-    + VectorBounds3d## xl2## xh2## yl2## yh2## zl2## zh2## = do
+    .+. VectorBounds3d## xl2## xh2## yl2## yh2## zl2## zh2## = do
       let !(# xl##, xh## #) = boundsPlusBounds## xl1## xh1## xl2## xh2##
       let !(# yl##, yh## #) = boundsPlusBounds## yl1## yh1## yl2## yh2##
       let !(# zl##, zh## #) = boundsPlusBounds## zl1## zh1## zl2## zh2##
@@ -1632,7 +1632,7 @@ instance
     (Vector3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  VectorBounds3d x1 y1 z1 + Vector3d x2 y2 z2 = VectorBounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+  VectorBounds3d x1 y1 z1 .+. Vector3d x2 y2 z2 = VectorBounds3d (x1 .+. x2) (y1 .+. y2) (z1 .+. z2)
 
 instance
   ( space1 ~ space2
@@ -1643,7 +1643,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (VectorBounds3d (space1 @ units1))
   where
-  Vector3d x1 y1 z1 + VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+  Vector3d x1 y1 z1 .+. VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 .+. x2) (y1 .+. y2) (z1 .+. z2)
 
 instance
   ( space1 ~ space2
@@ -1809,7 +1809,7 @@ instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (Vector3d (space1 @ units1)) (VectorBounds3d (space2 @ units2)) (Bounds units3)
   where
-  Vector3d x1 y1 z1 `dot` VectorBounds3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
+  Vector3d x1 y1 z1 `dot` VectorBounds3d x2 y2 z2 = x1 .*. x2 .+. y1 .*. y2 .+. z1 .*. z2
 
 instance
   space1 ~ space2 =>
@@ -1818,13 +1818,13 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  Vector3d x1 y1 z1 `dot#` VectorBounds3d x2 y2 z2 = x1 #*# x2 + y1 #*# y2 + z1 #*# z2
+  Vector3d x1 y1 z1 `dot#` VectorBounds3d x2 y2 z2 = x1 #*# x2 .+. y1 #*# y2 .+. z1 #*# z2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (VectorBounds3d (space1 @ units1)) (Vector3d (space2 @ units2)) (Bounds units3)
   where
-  VectorBounds3d x1 y1 z1 `dot` Vector3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
+  VectorBounds3d x1 y1 z1 `dot` Vector3d x2 y2 z2 = x1 .*. x2 .+. y1 .*. y2 .+. z1 .*. z2
 
 instance
   space1 ~ space2 =>
@@ -1833,7 +1833,7 @@ instance
     (Vector3d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  VectorBounds3d x1 y1 z1 `dot#` Vector3d x2 y2 z2 = x1 #*# x2 + y1 #*# y2 + z1 #*# z2
+  VectorBounds3d x1 y1 z1 `dot#` Vector3d x2 y2 z2 = x1 #*# x2 .+. y1 #*# y2 .+. z1 #*# z2
 
 instance
   space1 ~ space2 =>
@@ -1854,7 +1854,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds units3)
   where
-  VectorBounds3d x1 y1 z1 `dot` VectorBounds3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
+  VectorBounds3d x1 y1 z1 `dot` VectorBounds3d x2 y2 z2 = x1 .*. x2 .+. y1 .*. y2 .+. z1 .*. z2
 
 instance
   space1 ~ space2 =>
@@ -1863,7 +1863,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds (units1 #*# units2))
   where
-  VectorBounds3d x1 y1 z1 `dot#` VectorBounds3d x2 y2 z2 = x1 #*# x2 + y1 #*# y2 + z1 #*# z2
+  VectorBounds3d x1 y1 z1 `dot#` VectorBounds3d x2 y2 z2 = x1 #*# x2 .+. y1 #*# y2 .+. z1 #*# z2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -1999,7 +1999,7 @@ instance
     (Vector3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  PositionBounds3d pb + v = PositionBounds3d (pb + v)
+  PositionBounds3d pb .+. v = PositionBounds3d (pb .+. v)
 
 instance
   ( space1 ~ space2
@@ -2010,7 +2010,7 @@ instance
     (VectorBounds3d (space2 @ units2))
     (Bounds3d (space1 @ units1))
   where
-  PositionBounds3d pb + vb = PositionBounds3d (pb + vb)
+  PositionBounds3d pb .+. vb = PositionBounds3d (pb .+. vb)
 
 instance
   ( space1 ~ space2
@@ -2376,7 +2376,7 @@ instance
     (Transform3d tag (space2 @ translationUnits))
     (Vector3d (space1 @ units))
   where
-  Vector3d vx vy vz .*. Transform3d _ i j k = vx .*. i + vy .*. j + vz .*. k
+  Vector3d vx vy vz .*. Transform3d _ i j k = vx .*. i .+. vy .*. j .+. vz .*. k
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -2385,7 +2385,7 @@ instance
     (Transform3d tag (space2 @ units2))
     (Point3d (space1 @ units1))
   where
-  Point3d px py pz .*. Transform3d p0 i j k = p0 + px .*. i + py .*. j + pz .*. k
+  Point3d px py pz .*. Transform3d p0 i j k = p0 .+. px .*. i .+. py .*. j .+. pz .*. k
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

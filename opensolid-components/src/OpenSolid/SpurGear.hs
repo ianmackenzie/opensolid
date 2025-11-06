@@ -16,7 +16,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude hiding ((+), (-))
+import OpenSolid.Prelude hiding ((-))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Prelude ((*), (-))

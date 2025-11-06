@@ -120,10 +120,10 @@ instance
     (VectorSurfaceFunction2d (space2 @ units2))
     (SurfaceFunction2d (space1 @ units1))
   where
-  lhs + rhs =
+  lhs .+. rhs =
     new
-      @ lhs.compiled + rhs.compiled
-      @ \p -> derivative p lhs + VectorSurfaceFunction2d.derivative p rhs
+      @ lhs.compiled .+. rhs.compiled
+      @ \p -> derivative p lhs .+. VectorSurfaceFunction2d.derivative p rhs
 
 instance
   ( space1 ~ space2
@@ -134,7 +134,7 @@ instance
     (Vector2d (space2 @ units2))
     (SurfaceFunction2d (space1 @ units1))
   where
-  f + v = f + VectorSurfaceFunction2d.constant v
+  f .+. v = f .+. VectorSurfaceFunction2d.constant v
 
 instance
   ( space1 ~ space2
@@ -256,7 +256,7 @@ instance
     let (dudt, dvdt) = curve.derivative.components
     Curve2d.new
       @ function.compiled . curve.compiled
-      @ (function.du . curve) .*. dudt + (function.dv . curve) .*. dvdt
+      @ (function.du . curve) .*. dudt .+. (function.dv . curve) .*. dvdt
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -272,7 +272,7 @@ instance
       @ f.compiled . g.compiled
       @ \p -> do
         let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
-        dfdu .*. dudp + dfdv .*. dvdp
+        dfdu .*. dudp .+. dfdv .*. dvdp
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -288,7 +288,7 @@ instance
       @ f.compiled . g.compiled
       @ \p -> do
         let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
-        dfdu .*. dudp + dfdv .*. dvdp
+        dfdu .*. dudp .+. dfdv .*. dvdp
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -304,7 +304,7 @@ instance
       @ f.compiled . g.compiled
       @ \p -> do
         let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
-        dfdu .*. dudp + dfdv .*. dvdp
+        dfdu .*. dudp .+. dfdv .*. dvdp
 
 instance
   uvCoordinates ~ UvCoordinates =>
