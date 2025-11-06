@@ -28,9 +28,5 @@ instance Multiplication Sign Sign Sign where
   Positive * sign = sign
   Negative * sign = negative sign
 
-instance Exponentiation Sign Int where
-  Positive ** _ = Positive
-  Negative ** n = if Prelude.even n then Positive else Negative
-
 random :: Random.Generator Sign
 random = Random.Generator System.Random.uniform

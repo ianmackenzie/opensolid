@@ -185,12 +185,12 @@ on plane bounds2d = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   let Point3d cR cF cU = Point3d.on plane (Bounds2d.centerPoint bounds2d)
-  let rR = rX * Number.abs iR + rY * Number.abs jR
-  let rF = rX * Number.abs iF + rY * Number.abs jF
-  let rU = rX * Number.abs iU + rY * Number.abs jU
-  let bR = Bounds (cR - rR) (cR + rR)
-  let bF = Bounds (cF - rF) (cF + rF)
-  let bU = Bounds (cU - rU) (cU + rU)
+  let rR = rX .*. Number.abs iR .+. rY .*. Number.abs jR
+  let rF = rX .*. Number.abs iF .+. rY .*. Number.abs jF
+  let rU = rX .*. Number.abs iU .+. rY .*. Number.abs jU
+  let bR = Bounds (cR .-. rR) (cR .+. rR)
+  let bF = Bounds (cF .-. rF) (cF .+. rF)
+  let bU = Bounds (cU .-. rU) (cU .+. rU)
   Bounds3d bR bF bU
 
 placeIn ::
@@ -209,13 +209,13 @@ placeIn frame (Bounds3d pR pF pU) = do
   let rF = 0.5 *. Bounds.width pF
   let rU = 0.5 *. Bounds.width pU
   let Point3d cR' cF' cU' = Point3d.placeIn frame (Point3d cR cF cU)
-  let rR' = rR * Number.abs iR + rF * Number.abs jR + rU * Number.abs kR
-  let rF' = rR * Number.abs iF + rF * Number.abs jF + rU * Number.abs kF
-  let rU' = rR * Number.abs iU + rF * Number.abs jU + rU * Number.abs kU
+  let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs jR .+. rU .*. Number.abs kR
+  let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
+  let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   Bounds3d
-    @ Bounds (cR' - rR') (cR' + rR')
-    @ Bounds (cF' - rF') (cF' + rF')
-    @ Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' .-. rR') (cR' .+. rR')
+    @ Bounds (cF' .-. rF') (cF' .+. rF')
+    @ Bounds (cU' .-. rU') (cU' .+. rU')
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
@@ -233,13 +233,13 @@ relativeTo frame (Bounds3d pR pF pU) = do
   let rF = 0.5 *. Bounds.width pF
   let rU = 0.5 *. Bounds.width pU
   let Point3d cR' cF' cU' = Point3d.relativeTo frame (Point3d cR cF cU)
-  let rR' = rR * Number.abs iR + rF * Number.abs iF + rU * Number.abs iU
-  let rF' = rR * Number.abs jR + rF * Number.abs jF + rU * Number.abs jU
-  let rU' = rR * Number.abs kR + rF * Number.abs kF + rU * Number.abs kU
+  let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs iF .+. rU .*. Number.abs iU
+  let rF' = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
+  let rU' = rR .*. Number.abs kR .+. rF .*. Number.abs kF .+. rU .*. Number.abs kU
   Bounds3d
-    @ Bounds (cR' - rR') (cR' + rR')
-    @ Bounds (cF' - rF') (cF' + rF')
-    @ Bounds (cU' - rU') (cU' + rU')
+    @ Bounds (cR' .-. rR') (cR' .+. rR')
+    @ Bounds (cF' .-. rF') (cF' .+. rF')
+    @ Bounds (cU' .-. rU') (cU' .+. rU')
 
 projectInto ::
   Plane3d (global @ units) (Defines local) ->
@@ -256,11 +256,11 @@ projectInto plane (Bounds3d pR pF pU) = do
   let rF = 0.5 *. Bounds.width pF
   let rU = 0.5 *. Bounds.width pU
   let Point2d cX cY = Point3d.projectInto plane (Point3d cR cF cU)
-  let rX = rR * Number.abs iR + rF * Number.abs iF + rU * Number.abs iU
-  let rY = rR * Number.abs jR + rF * Number.abs jF + rU * Number.abs jU
+  let rX = rR .*. Number.abs iR .+. rF .*. Number.abs iF .+. rU .*. Number.abs iU
+  let rY = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
   Bounds2d
-    @ Bounds (cX - rX) (cX + rX)
-    @ Bounds (cY - rY) (cY + rY)
+    @ Bounds (cX .-. rX) (cX .+. rX)
+    @ Bounds (cY .-. rY) (cY .+. rY)
 
 distanceAlong :: Axis3d (space @ units) -> Bounds3d (space @ units) -> Bounds units
 distanceAlong axis bounds = do
@@ -269,7 +269,7 @@ distanceAlong axis bounds = do
   let rR = 0.5 *. width bounds
   let rF = 0.5 *. length bounds
   let rU = 0.5 *. height bounds
-  let radius = rR * Number.abs dR + rF * Number.abs dF + rU * Number.abs dU
+  let radius = rR .*. Number.abs dR .+. rF .*. Number.abs dF .+. rU .*. Number.abs dU
   Bounds (mid - radius) (mid + radius)
 
 transformBy ::
@@ -288,9 +288,9 @@ transformBy transform (Bounds3d pR pF pU) = do
   let Vector3d iR iF iU = i
   let Vector3d jR jF jU = j
   let Vector3d kR kF kU = k
-  let rR' = rR * Number.abs iR + rF * Number.abs jR + rU * Number.abs kR
-  let rF' = rR * Number.abs iF + rF * Number.abs jF + rU * Number.abs kF
-  let rU' = rR * Number.abs iU + rF * Number.abs jU + rU * Number.abs kU
+  let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs jR .+. rU .*. Number.abs kR
+  let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
+  let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   Bounds3d
     @ Bounds (cR' - rR') (cR' + rR')
     @ Bounds (cF' - rF') (cF' + rF')

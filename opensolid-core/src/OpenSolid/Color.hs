@@ -49,10 +49,10 @@ import Data.Colour.RGBSpace.HSL qualified
 import Data.Colour.SRGB qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Int qualified as Int
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude hiding ((/))
 import OpenSolid.Text qualified as Text
-import Prelude ((/))
 
 -- | An RGB color value.
 type Color = Data.Colour.Colour Number
@@ -63,11 +63,7 @@ rgb1 = Data.Colour.SRGB.sRGB
 
 -- | Construct a color from its RGB components, in the range [0,255].
 rgb255 :: Int -> Int -> Int -> Color
-rgb255 r g b =
-  rgb1
-    (Number.fromInt r ./ 255.0)
-    (Number.fromInt g ./ 255.0)
-    (Number.fromInt b ./ 255.0)
+rgb255 r g b = rgb1 (Int.ratio r 255) (Int.ratio g 255) (Int.ratio b 255)
 
 {-| Construct a color from its hue, saturation and lightness values.
 
@@ -92,7 +88,7 @@ toRgb1 color = do
 toRgb255 :: Color -> (Int, Int, Int)
 toRgb255 color = do
   let (r, g, b) = toRgb1 color
-  let toInt component = Number.round (component .* 255.0)
+  let toInt component = Number.round (component .* 255)
   (toInt r, toInt g, toInt b)
 
 {-| Get the hue, saturation and lightness of a color.

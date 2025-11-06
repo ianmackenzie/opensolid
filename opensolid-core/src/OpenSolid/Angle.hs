@@ -26,7 +26,7 @@ module OpenSolid.Angle
   )
 where
 
-import OpenSolid.Arithmetic
+import OpenSolid.Arithmetic hiding ((*), (-), (/))
 import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Quantity (Quantity (Quantity))
@@ -46,7 +46,7 @@ zero = Quantity.zero
 
 -- | The [golden angle](https://en.wikipedia.org/wiki/Golden_angle).
 goldenAngle :: Angle
-goldenAngle = radians (Number.pi * (3.0 -. Number.sqrt 5.0))
+goldenAngle = radians (Number.pi .*. (3 -. Number.sqrt 5))
 
 -- | Compute the sine of an angle.
 sin :: Angle -> Number
@@ -112,11 +112,11 @@ degree = fullTurn ./ 360.0
 
 -- | Construct an angle from a number of degrees.
 degrees :: Number -> Angle
-degrees = (* degree)
+degrees = (.*. degree)
 
 -- | Convert an angle to a number of degrees.
 inDegrees :: Angle -> Number
-inDegrees = (/ degree)
+inDegrees = (./. degree)
 
 -- | One full turn, or 360 degrees.
 fullTurn :: Angle
@@ -135,11 +135,11 @@ quarterTurn = halfPi
 One turn is equal to 360 degrees.
 -}
 turns :: Number -> Angle
-turns = (* fullTurn)
+turns = (.*. fullTurn)
 
 {-| Convert an angle to a number of turns.
 
 One turn is equal to 360 degrees.
 -}
 inTurns :: Angle -> Number
-inTurns = (/ fullTurn)
+inTurns = (./. fullTurn)

@@ -61,7 +61,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Resolution (Resolution)
@@ -200,7 +200,7 @@ inscribedPolygon n (Named centerPoint) (Named diameter) = do
     else Success do
       let radius = 0.5 *. diameter
       let vertexAngles = Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
-      let vertex angle = centerPoint + Vector2d.polar radius angle
+      let vertex angle = centerPoint .+. Vector2d.polar radius angle
       let vertices = List.map vertex vertexAngles
       case polygon vertices of
         Success region -> region
@@ -225,7 +225,7 @@ circumscribedPolygon ::
 circumscribedPolygon n (Named centerPoint) (Named diameter) =
   inscribedPolygon n
     @ #centerPoint centerPoint
-    @ #diameter (diameter / Angle.cos (Angle.pi ./ fromIntegral n))
+    @ #diameter (diameter ./. Angle.cos (Angle.pi ./. Number.fromInt n))
 
 {-| Create a polygonal region from the given vertices.
 
@@ -294,13 +294,13 @@ addFillet radius curves point = do
       let firstEndDirection = DirectionCurve2d.endValue firstTangent
       let secondStartDirection = DirectionCurve2d.startValue secondTangent
       let cornerAngle = Direction2d.angleFrom firstEndDirection secondStartDirection
-      let offset = Quantity.sign cornerAngle * Quantity.abs radius
+      let offset = Quantity.sign cornerAngle .*. Quantity.abs radius
       let firstOffsetDisplacement =
-            VectorCurve2d.rotateBy Angle.quarterTurn (offset * firstTangent)
+            VectorCurve2d.rotateBy Angle.quarterTurn (offset .*. firstTangent)
       let secondOffsetDisplacement =
-            VectorCurve2d.rotateBy Angle.quarterTurn (offset * secondTangent)
-      let firstOffsetCurve = firstCurve + firstOffsetDisplacement
-      let secondOffsetCurve = secondCurve + secondOffsetDisplacement
+            VectorCurve2d.rotateBy Angle.quarterTurn (offset .*. secondTangent)
+      let firstOffsetCurve = firstCurve .+. firstOffsetDisplacement
+      let secondOffsetCurve = secondCurve .+. secondOffsetDisplacement
       maybeIntersections <- Result.try (Curve2d.intersections firstOffsetCurve secondOffsetCurve)
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
@@ -582,7 +582,7 @@ fluxIntegral ::
   Curve2d (space @ units) ->
   Estimate Unitless
 fluxIntegral point curve = do
-  let displacement = point - curve
+  let displacement = point .-. curve
   -- By this point we've already checked whether the poing is *on* the curve,
   -- so the Curve.unsafeQuotient call should be OK
   -- (if the point is not on the curve, then the displacement will always be non-zero)
@@ -652,7 +652,7 @@ areaIntegral referencePoint curve =
 
 areaIntegral# :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate (units #*# units)
 areaIntegral# referencePoint curve = do
-  let displacement = curve - referencePoint
+  let displacement = curve .-. referencePoint
   let y = displacement.yComponent
   let dx = displacement.xComponent.derivative
   negative (Curve.integrate (y #*# dx))

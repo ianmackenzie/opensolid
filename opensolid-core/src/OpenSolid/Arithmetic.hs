@@ -22,16 +22,11 @@ module OpenSolid.Arithmetic
   , DotMultiplication (dot)
   , CrossMultiplication# (cross#)
   , CrossMultiplication (cross)
-  , Exponentiation ((**))
   )
 where
 
-import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Number (Number)
-import {-# SOURCE #-} OpenSolid.Quantity (Quantity (Quantity))
-import {-# SOURCE #-} OpenSolid.Sign (Sign (Negative, Positive))
-import OpenSolid.Units (Unitless)
-import Prelude qualified
+import {-# SOURCE #-} OpenSolid.Sign (Sign)
 
 class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
   negative :: a -> a
@@ -189,62 +184,3 @@ class CrossMultiplication b a c => CrossMultiplication a b c | a b -> c where
   cross :: a -> b -> c
 
 infixl 7 `cross`
-
-instance Negation Int where
-  negative = Prelude.negate
-
-instance Multiplication# Sign Int Int where
-  {-# INLINEABLE (#*#) #-}
-  Positive #*# n = n
-  Negative #*# n = -n
-
-instance Multiplication Sign Int Int where
-  {-# INLINEABLE (*) #-}
-  Positive * n = n
-  Negative * n = -n
-
-instance Multiplication# Int Sign Int where
-  {-# INLINEABLE (#*#) #-}
-  n #*# Positive = n
-  n #*# Negative = -n
-
-instance Multiplication Int Sign Int where
-  {-# INLINEABLE (*) #-}
-  n * Positive = n
-  n * Negative = -n
-
-instance Addition Int Int Int where
-  {-# INLINEABLE (+) #-}
-  (+) = (Prelude.+)
-
-instance Subtraction Int Int Int where
-  (-) = (Prelude.-)
-
-instance Multiplication# Int Int Int where
-  (#*#) = (Prelude.*)
-
-instance Multiplication Int Int Int where
-  (*) = (Prelude.*)
-
-instance Division# Int Int Number where
-  n #/# m = Quantity (fromIntegral n Prelude./ fromIntegral m)
-
-instance Division Int Int Number where
-  n / m = Quantity (fromIntegral n Prelude./ fromIntegral m)
-
-class Exponentiation a b where
-  (**) :: a -> b -> a
-
-infixr 8 **
-
-instance Exponentiation Int Int where
-  (**) = (Prelude.^)
-
-instance units ~ Unitless => Exponentiation (Quantity units) Int where
-  x ** n = x ** (fromIntegral n :: Quantity Unitless)
-
-instance
-  (baseUnits ~ Unitless, exponentUnits ~ Unitless) =>
-  Exponentiation (Quantity baseUnits) (Quantity exponentUnits)
-  where
-  (**) = (Prelude.**)

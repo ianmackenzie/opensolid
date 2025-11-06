@@ -38,7 +38,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Result qualified as Result
-import Prelude ((+), (-), (/))
+import Prelude ((+), (-))
 
 data Neighborhood units = Neighborhood
   { n :: Int
@@ -61,7 +61,8 @@ neighborhood n value = do
 
 derivativeTolerance :: Neighborhood units -> Int -> Quantity units
 derivativeTolerance Neighborhood{n, magnitude, radius} k = do
-  magnitude .*. Number.pow radius (fromIntegral (n - k)) ./ fromIntegral (Int.factorial (n - k))
+  (magnitude .*. Number.pow radius (Number.fromInt (n - k)))
+    ./. Number.fromInt (Int.factorial (n - k))
 
 zero :: Number -> Neighborhood units -> Zero
 zero location Neighborhood{n, sign} = Zero location (n - 1) sign

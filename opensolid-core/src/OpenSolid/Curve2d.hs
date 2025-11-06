@@ -121,7 +121,7 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((*), (+), (-), (/))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
@@ -150,6 +150,7 @@ import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
+import Prelude ((+), (-))
 
 -- | A parametric curve in 2D space.
 data Curve2d (coordinateSystem :: CoordinateSystem) where
@@ -198,7 +199,7 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  curve ^ point = (curve - point) ^ Vector2d.zero
+  curve ^ point = (curve .-. point) ^ Vector2d.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -218,8 +219,8 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
   where
-  lhs + rhs =
-    new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
+  lhs .+. rhs =
+    new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -228,8 +229,8 @@ instance
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
   where
-  lhs - rhs =
-    new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
+  lhs .-. rhs =
+    new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -238,7 +239,8 @@ instance
     (Curve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  lhs - rhs = VectorCurve2d.new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
+  lhs .-. rhs =
+    VectorCurve2d.new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -247,7 +249,7 @@ instance
     (Point2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  curve - point = curve - constant point
+  curve .-. point = curve .-. constant point
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -256,10 +258,10 @@ instance
     (Curve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  point - curve = constant point - curve
+  point .-. curve = constant point .-. curve
 
 instance Composition (Curve Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
+  f . g = new (f.compiled . g.compiled) ((f.derivative . g) .*. g.derivative)
 
 instance
   Composition
@@ -270,7 +272,7 @@ instance
   curve . function =
     SurfaceFunction2d.new
       @ curve.compiled . function.compiled
-      @ \p -> curve.derivative . function * SurfaceFunction.derivative p function
+      @ \p -> curve.derivative . function .*. SurfaceFunction.derivative p function
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -281,7 +283,7 @@ instance
   where
   f . g = do
     let (dudt, dvdt) = g.derivative.components
-    Curve.new (f.compiled . g.compiled) (f.du . g * dudt + f.dv . g * dvdt)
+    Curve.new (f.compiled . g.compiled) (f.du . g .*. dudt .+. f.dv . g .*. dvdt)
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -294,7 +296,7 @@ instance
     let (dudt, dvdt) = uvCurve.derivative.components
     VectorCurve3d.new
       @ function.compiled . uvCurve.compiled
-      @ function.du . uvCurve * dudt + function.dv . uvCurve * dvdt
+      @ function.du . uvCurve .*. dudt .+. function.dv . uvCurve .*. dvdt
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -307,7 +309,7 @@ instance
     let (dudt, dvdt) = uvCurve.derivative.components
     Curve3d.new
       @ function.compiled . uvCurve.compiled
-      @ function.du . uvCurve * dudt + function.dv . uvCurve * dvdt
+      @ function.du . uvCurve .*. dudt .+. function.dv . uvCurve .*. dvdt
 
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 new = Curve2d
@@ -353,22 +355,22 @@ arc ::
   Angle ->
   Curve2d (space @ units)
 arc givenStartPoint givenEndPoint sweptAngle =
-  case Vector2d.magnitudeAndDirection (givenEndPoint - givenStartPoint) of
+  case Vector2d.magnitudeAndDirection (givenEndPoint .-. givenStartPoint) of
     Failure Vector2d.IsZero -> line givenStartPoint givenEndPoint
     Success (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 *. distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 *. sweptAngle)
-      let linearDeviation = halfDistance * tanHalfAngle
+      let linearDeviation = halfDistance .*. tanHalfAngle
       if linearDeviation ~= Quantity.zero
         then line givenStartPoint givenEndPoint
         else do
-          let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
-          let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
+          let offset = (halfDistance ./. tanHalfAngle) .*. Direction2d.rotateLeft directionBetweenPoints
+          let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint .+. offset
           let radius = Point2d.distanceFrom centerPoint givenStartPoint
           let xVector = Vector2d.x radius
           let yVector = Vector2d.y radius
           let startAngle = Point2d.angleFrom centerPoint givenStartPoint
-          let endAngle = startAngle + sweptAngle
+          let endAngle = startAngle .+. sweptAngle
           customArc centerPoint xVector yVector startAngle endAngle
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
@@ -393,7 +395,7 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
     @ #centerPoint centerPoint
     @ #radius radius
     @ #startAngle startAngle
-    @ #endAngle (startAngle + sweptAngle)
+    @ #endAngle (startAngle .+. sweptAngle)
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
@@ -406,12 +408,12 @@ cornerArc ::
 cornerArc cornerPoint (Named incomingDirection) (Named outgoingDirection) (Named givenRadius) = do
   let radius = Quantity.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
-  if 0.25 *. radius * Number.squared (Angle.inRadians sweptAngle) ~= Quantity.zero
+  if 0.25 *. radius .*. Number.squared (Angle.inRadians sweptAngle) ~= Quantity.zero
     then line cornerPoint cornerPoint
     else do
-      let offset = radius * Quantity.abs (Angle.tan (0.5 *. sweptAngle))
-      let computedStartPoint = cornerPoint - offset * incomingDirection
-      let computedEndPoint = cornerPoint + offset * outgoingDirection
+      let offset = radius .*. Number.abs (Angle.tan (0.5 *. sweptAngle))
+      let computedStartPoint = cornerPoint .-. offset .*. incomingDirection
+      let computedEndPoint = cornerPoint .+. offset .*. outgoingDirection
       arc computedStartPoint computedEndPoint sweptAngle
 
 data WhichArc
@@ -433,7 +435,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       let halfDistance = 0.5 *. Point2d.distanceFrom givenStartPoint givenEndPoint
       let radius = Quantity.max (Quantity.abs givenRadius) halfDistance
       let offsetMagnitude =
-            Quantity.sqrt# (Quantity.squared# radius - Quantity.squared# halfDistance)
+            Quantity.sqrt# (Quantity.squared# radius .-. Quantity.squared# halfDistance)
       let offsetDirection = Direction2d.rotateLeft chordDirection
       let offsetDistance =
             case whichArc of
@@ -441,15 +443,15 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
               SmallClockwise -> negative offsetMagnitude
               LargeClockwise -> offsetMagnitude
               LargeCounterclockwise -> negative offsetMagnitude
-      let offset = offsetDirection * offsetDistance
-      let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
-      let shortAngle = 2.0 *. Angle.asin (halfDistance / givenRadius)
+      let offset = offsetDirection .*. offsetDistance
+      let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint .+. offset
+      let shortAngle = 2 *. Angle.asin (halfDistance ./. givenRadius)
       let sweptAngle =
             case whichArc of
               SmallCounterclockwise -> shortAngle
               SmallClockwise -> negative shortAngle
-              LargeClockwise -> shortAngle - Angle.twoPi
-              LargeCounterclockwise -> Angle.twoPi - shortAngle
+              LargeClockwise -> shortAngle .-. Angle.twoPi
+              LargeCounterclockwise -> Angle.twoPi .-. shortAngle
       sweptArc centerPoint givenStartPoint sweptAngle
     Failure Direction2d.PointsAreCoincident ->
       line givenStartPoint givenEndPoint
@@ -463,8 +465,8 @@ ellipticalArc ::
   Curve2d (space @ units)
 ellipticalArc axes xRadius yRadius startAngle endAngle = do
   let centerPoint = Frame2d.originPoint axes
-  let xVector = xRadius * Frame2d.xDirection axes
-  let yVector = yRadius * Frame2d.yDirection axes
+  let xVector = xRadius .*. Frame2d.xDirection axes
+  let yVector = yRadius .*. Frame2d.yDirection axes
   customArc centerPoint xVector yVector startAngle endAngle
 
 customArc ::
@@ -476,7 +478,7 @@ customArc ::
   Curve2d (space @ units)
 customArc p0 v1 v2 a b = do
   let angle = Curve.line a b
-  p0 + v1 * Curve.cos angle + v2 * Curve.sin angle
+  p0 .+. v1 .*. Curve.cos angle .+. v2 .*. Curve.sin angle
 
 -- | Create a circle with the given center point and diameter.
 circle ::
@@ -660,8 +662,8 @@ offsetLeftwardBy ::
   Result IsPoint (Curve2d (space @ units))
 offsetLeftwardBy offset curve = do
   tangentCurve <- tangentDirection curve
-  let offsetCurve = VectorCurve2d.rotateBy Angle.quarterTurn (offset * tangentCurve)
-  Success (curve + offsetCurve)
+  let offsetCurve = VectorCurve2d.rotateBy Angle.quarterTurn (offset .*. tangentCurve)
+  Success (curve .+. offsetCurve)
 
 offsetRightwardBy ::
   Tolerance units =>
@@ -671,13 +673,13 @@ offsetRightwardBy ::
 offsetRightwardBy distance = offsetLeftwardBy (negative distance)
 
 distanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-distanceAlong (Axis2d p0 d) curve = (curve - p0) `dot` d
+distanceAlong (Axis2d p0 d) curve = (curve .-. p0) `dot` d
 
 distanceLeftOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-distanceLeftOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateLeft d
+distanceLeftOf (Axis2d p0 d) curve = (curve .-. p0) `dot` Direction2d.rotateLeft d
 
 distanceRightOf :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
-distanceRightOf (Axis2d p0 d) curve = (curve - p0) `dot` Direction2d.rotateRight d
+distanceRightOf (Axis2d p0 d) curve = (curve .-. p0) `dot` Direction2d.rotateRight d
 
 isPoint :: Tolerance units => Curve2d (space @ units) -> Bool
 isPoint curve = VectorCurve2d.isZero curve.derivative
@@ -722,7 +724,7 @@ findPoint ::
   Curve2d (space @ units) ->
   Result IsPoint (List Number)
 findPoint point curve =
-  case VectorCurve2d.zeros (point - curve) of
+  case VectorCurve2d.zeros (point .-. curve) of
     Failure VectorCurve2d.IsZero -> Failure IsPoint
     Success parameterValues -> Success parameterValues
 
@@ -763,16 +765,16 @@ signature orientation curve tValue radius = do
   let secondDerivativeValue = VectorCurve2d.evaluate secondDerivativeCurve tValue
   let Vector2d x' y' = local firstDerivativeValue
   let Vector2d x'' y'' = local secondDerivativeValue
-  let dydx = if x' != Quantity.zero then y' / x' else y'' / x''
-  let firstOrder = dydx * radius
+  let dydx = if x' != Quantity.zero then y' ./. x' else y'' ./. x''
+  let firstOrder = dydx .*. radius
   let d2ydx2 =
         if x' != Quantity.zero
-          then (y'' #*# x' - y' #*# x'') #/# (x' #*# x' #*# x')
+          then (y'' #*# x' .-. y' #*# x'') #/# (x' #*# x' #*# x')
           else do
             let fourthDerivativeCurve = secondDerivativeCurve.derivative.derivative
             let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivativeCurve tValue
             let Vector2d x'''' y'''' = local fourthDerivativeValue
-            (y'''' #*# x'' - y'' #*# x'''') #/# (x'' #*# x'' #*# x'')
+            (y'''' #*# x'' .-. y'' #*# x'''') #/# (x'' #*# x'' #*# x'')
   let secondOrder = Units.simplify (0.5 *. d2ydx2 #*# Quantity.squared# radius)
   (firstOrder, secondOrder)
 
@@ -856,7 +858,7 @@ intersections curve1 curve2 = do
         else do
           let u = SurfaceFunction.u
           let v = SurfaceFunction.v
-          let f = curve1 . u - curve2 . v
+          let f = curve1 . u .-. curve2 . v
           let fu = f.du
           let fv = f.dv
           let g = VectorSurfaceFunction2d.xy (fu `cross#` fv) ((curve1.derivative . u) `dot#` f)
@@ -1101,9 +1103,9 @@ medialAxis curve1 curve2 = do
   let p2 = curve2 . SurfaceFunction.v
   let v1 = curve1.derivative . SurfaceFunction.u
   let v2 = curve2.derivative . SurfaceFunction.v
-  let d = p2 - p1
+  let d = p2 .-. p1
   let target =
-        v2 `cross#` (2.0 *. (v1 `dot#` d) #*# d - VectorSurfaceFunction2d.squaredMagnitude# d #*# v1)
+        v2 `cross#` (2 *. (v1 `dot#` d) #*# d .-. VectorSurfaceFunction2d.squaredMagnitude# d #*# v1)
   let targetTolerance = ?tolerance #*# ((?tolerance #*# ?tolerance) #*# ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
@@ -1118,7 +1120,7 @@ medialAxis curve1 curve2 = do
                   @ d `dot#` d
                   @ 2.0 *. (tangentVector1 . SurfaceFunction.u) `cross` d
         let curve :: SurfaceFunction2d (space @ units) =
-              (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
+              (curve1 . SurfaceFunction.u) .+. radius .*. (normal1 . SurfaceFunction.u)
         let toSegment solutionCurve =
               MedialAxis.Segment
                 { t1 = solutionCurve.xCoordinate
@@ -1148,8 +1150,9 @@ makePiecewise :: NonEmpty (Curve2d (space @ units), Quantity units) -> Curve2d (
 makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 segmentArray.length
-  let evaluateImpl t = piecewiseValue tree (arcLength * t)
-  let evaluateBoundsImpl (Bounds t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
+  let evaluateImpl t = piecewiseValue tree (arcLength .*. t)
+  let evaluateBoundsImpl (Bounds t1 t2) =
+        piecewiseBounds tree (arcLength .*. t1) (arcLength .*. t2)
   new
     @ CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
     @ piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
@@ -1170,7 +1173,7 @@ buildPiecewiseTree segmentArray begin end = case end - begin of
     let mid = begin + n `div` 2
     let (leftTree, leftLength) = buildPiecewiseTree segmentArray begin mid
     let (rightTree, rightLength) = buildPiecewiseTree segmentArray mid end
-    (PiecewiseNode leftTree leftLength rightTree, leftLength + rightLength)
+    (PiecewiseNode leftTree leftLength rightTree, leftLength .+. rightLength)
 
 data PiecewiseTree (coordinateSystem :: CoordinateSystem) where
   PiecewiseNode ::
@@ -1187,8 +1190,8 @@ piecewiseValue :: PiecewiseTree (space @ units) -> Quantity units -> Point2d (sp
 piecewiseValue tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree
     | length < leftLength -> piecewiseValue leftTree length
-    | otherwise -> piecewiseValue rightTree (length - leftLength)
-  PiecewiseLeaf curve segmentLength -> evaluate curve (length / segmentLength)
+    | otherwise -> piecewiseValue rightTree (length .-. leftLength)
+  PiecewiseLeaf curve segmentLength -> evaluate curve (length ./. segmentLength)
 
 piecewiseBounds ::
   PiecewiseTree (space @ units) ->
@@ -1200,21 +1203,22 @@ piecewiseBounds tree startLength endLength = case tree of
     | endLength <= leftLength ->
         piecewiseBounds leftTree startLength endLength
     | startLength >= leftLength ->
-        piecewiseBounds rightTree (startLength - leftLength) (endLength - leftLength)
+        piecewiseBounds rightTree (startLength .-. leftLength) (endLength .-. leftLength)
     | otherwise ->
         Bounds2d.aggregate2
           (piecewiseBounds leftTree startLength leftLength)
-          (piecewiseBounds rightTree Quantity.zero (endLength - leftLength))
+          (piecewiseBounds rightTree Quantity.zero (endLength .-. leftLength))
   PiecewiseLeaf curve segmentLength ->
-    evaluateBounds curve (Bounds (startLength / segmentLength) (endLength / segmentLength))
+    evaluateBounds curve (Bounds (startLength ./. segmentLength) (endLength ./. segmentLength))
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree (space @ units) ->
   Quantity units ->
   VectorCurve2d (space @ units)
 piecewiseDerivative tree length = do
-  let evaluateImpl t = piecewiseDerivativeValue tree (length * t)
-  let evaluateBoundsImpl (Bounds t1 t2) = piecewiseDerivativeBounds tree (length * t1) (length * t2)
+  let evaluateImpl t = piecewiseDerivativeValue tree (length .*. t)
+  let evaluateBoundsImpl (Bounds t1 t2) =
+        piecewiseDerivativeBounds tree (length .*. t1) (length .*. t2)
   VectorCurve2d.new
     (CompiledFunction.abstract evaluateImpl evaluateBoundsImpl)
     (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
@@ -1241,7 +1245,7 @@ piecewiseTreeDerivative tree length = case tree of
       leftLength
       (piecewiseTreeDerivative rightTree length)
   PiecewiseLeaf curve segmentLength ->
-    PiecewiseDerivativeLeaf ((length / segmentLength) * curve.derivative) segmentLength
+    PiecewiseDerivativeLeaf ((length ./. segmentLength) .*. curve.derivative) segmentLength
 
 piecewiseDerivativeTreeDerivative ::
   PiecewiseDerivativeTree (space @ units) ->
@@ -1255,7 +1259,7 @@ piecewiseDerivativeTreeDerivative tree length = case tree of
       (piecewiseDerivativeTreeDerivative rightTree length)
   PiecewiseDerivativeLeaf curve segmentLength ->
     PiecewiseDerivativeLeaf
-      ((length / segmentLength) * curve.derivative)
+      ((length ./. segmentLength) .*. curve.derivative)
       segmentLength
 
 piecewiseDerivativeValue ::
@@ -1265,9 +1269,9 @@ piecewiseDerivativeValue ::
 piecewiseDerivativeValue tree length = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
     | length < leftLength -> piecewiseDerivativeValue leftTree length
-    | otherwise -> piecewiseDerivativeValue rightTree (length - leftLength)
+    | otherwise -> piecewiseDerivativeValue rightTree (length .-. leftLength)
   PiecewiseDerivativeLeaf curve segmentLength ->
-    VectorCurve2d.evaluate curve (length / segmentLength)
+    VectorCurve2d.evaluate curve (length ./. segmentLength)
 
 piecewiseDerivativeBounds ::
   PiecewiseDerivativeTree (space @ units) ->
@@ -1281,12 +1285,12 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
     | startLength >= leftLength ->
         piecewiseDerivativeBounds
           rightTree
-          (startLength - leftLength)
-          (endLength - leftLength)
+          (startLength .-. leftLength)
+          (endLength .-. leftLength)
     | otherwise ->
         VectorBounds2d.aggregate2
           (piecewiseDerivativeBounds leftTree startLength leftLength)
-          (piecewiseDerivativeBounds rightTree Quantity.zero (endLength - leftLength))
+          (piecewiseDerivativeBounds rightTree Quantity.zero (endLength .-. leftLength))
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2d.evaluateBounds curve $
-      Bounds (startLength / segmentLength) (endLength / segmentLength)
+      Bounds (startLength ./. segmentLength) (endLength ./. segmentLength)

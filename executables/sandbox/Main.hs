@@ -89,7 +89,7 @@ testScalarArithmetic :: IO ()
 testScalarArithmetic = do
   log @Int "Integer product" (3 * 4)
   log @Int "Integer division" (10 `div` 4)
-  log "True division" (Number.fromInt 10 ./. Number.fromInt 4)
+  log "True division" (Int.ratio 10 4)
   let area = Area.squareMeters 3
   let length = Length.centimeters 3
   let volume = area .*. length

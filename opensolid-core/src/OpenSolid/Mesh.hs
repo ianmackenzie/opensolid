@@ -15,12 +15,13 @@ import Data.Foldable1 (Foldable1)
 import Data.Foldable1 qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
+import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude hiding (concat, (*), (+), (-), (/))
 import OpenSolid.UvPoint (UvPoint)
-import Prelude ((*), (+), (-), (/))
+import Prelude ((*), (+), (-))
 
 data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
   deriving (Eq, Show)
@@ -81,10 +82,8 @@ grid uSteps vSteps function =
   indexedGrid uSteps vSteps (toIndexedFunction uSteps vSteps function)
 
 toIndexedFunction :: Int -> Int -> (UvPoint -> vertex) -> Int -> Int -> vertex
-toIndexedFunction uSteps vSteps function uIndex vIndex = do
-  let u = fromIntegral uIndex / fromIntegral uSteps
-  let v = fromIntegral vIndex / fromIntegral vSteps
-  function (Point2d u v)
+toIndexedFunction uSteps vSteps function uIndex vIndex =
+  function (Point2d (Int.ratio uIndex uSteps) (Int.ratio vIndex vSteps))
 
 indexedGrid :: Int -> Int -> (Int -> Int -> vertex) -> Mesh vertex
 indexedGrid uSteps vSteps function =

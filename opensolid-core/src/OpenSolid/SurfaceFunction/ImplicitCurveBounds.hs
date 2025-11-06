@@ -12,7 +12,8 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((+), (-))
+import Prelude ((+), (-))
 
 data ImplicitCurveBounds
   = Node ImplicitCurveBounds Number ImplicitCurveBounds

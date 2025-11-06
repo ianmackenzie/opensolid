@@ -173,7 +173,7 @@ orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Nam
   new computedFrame distance projection
 
 isometricElevation :: Angle
-isometricElevation = Angle.atan2 1.0 (Number.sqrt 2.0)
+isometricElevation = Angle.atan2 1 (Number.sqrt 2)
 
 isometric ::
   Point3d (space @ units) ->

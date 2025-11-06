@@ -41,18 +41,19 @@ import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding ((+))
 import OpenSolid.Primitives (Vector3d (Vector3d))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vector2d (Vector2d (Vector2d))
+import Prelude ((+))
 
 newtype NumComponents = NumComponents Int deriving (Eq, Ord, Show)
 
 instance Addition NumComponents NumComponents NumComponents where
-  NumComponents a + NumComponents b = NumComponents (a + b)
+  NumComponents a .+. NumComponents b = NumComponents (a + b)
 
 instance Addition NumComponents Int NumComponents where
-  NumComponents a + b = NumComponents (a + b)
+  NumComponents a .+. b = NumComponents (a + b)
 
 newtype OutputComponents = OutputComponents Int deriving (Eq, Ord, Show)
 
@@ -112,7 +113,7 @@ addConstant components = Step \initialState ->
                     |> Map.set components constantIndex
               , constantComponents =
                   initialState.constantComponents
-                    + NonEmpty.length components
+                    .+. NonEmpty.length components
               }
       (# updatedCompilation, constantIndex #)
 
@@ -144,7 +145,7 @@ addVariable instruction (OutputComponents outputComponents) = Step \initialState
                     |> Map.set instruction resultIndex
               , variableComponents =
                   initialState.variableComponents
-                    + outputComponents
+                    .+. outputComponents
               }
       (# updatedState, resultIndex #)
 

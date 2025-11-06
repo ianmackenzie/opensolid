@@ -838,7 +838,7 @@ validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero 
         || (validEdge edgeBounds edgeLength left && validEdge edgeBounds edgeLength right)
     Set2d.Leaf leafBounds _ ->
       not (edgeBounds ^ leafBounds)
-        || edgeLength <= Number.sqrt 2.0 *. Bounds2d.diameter leafBounds
+        || edgeLength <= Number.sqrt 2 .*. Bounds2d.diameter leafBounds
 
 boundarySurfaceMesh ::
   Tolerance units =>
