@@ -556,7 +556,7 @@ load ptr offset = do
     UnitRep -> return ()
     IntRep -> IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
     NumberRep -> IO.map Number.fromDouble (Foreign.peekByteOff ptr offset)
-    BoolRep -> IO.map ((/=) 0 . Int.fromInt64) (Foreign.peekByteOff ptr offset)
+    BoolRep -> IO.map (/= 0) (Foreign.peekByteOff @Int64 ptr offset)
     SignRep -> IO.map Int.sign (load ptr offset)
     TextRep -> do
       dataPtr <- Foreign.peekByteOff ptr offset
