@@ -56,10 +56,10 @@ type Uniform coordinateSystem = Transform2d Transform.Uniform coordinateSystem
 type Affine coordinateSystem = Transform2d Transform.Affine coordinateSystem
 
 unitX :: Vector2d (space @ Unitless)
-unitX = Vector2d 1.0 0.0
+unitX = Vector2d 1 0
 
 unitY :: Vector2d (space @ Unitless)
-unitY = Vector2d 0.0 1.0
+unitY = Vector2d 0 1
 
 identity :: Rigid (space @ units)
 identity = Transform2d Point2d.origin unitX unitY
@@ -101,14 +101,14 @@ rotateAround centerPoint angle = do
 mirrorAcross :: Axis2d (space @ units) -> Orthonormal (space @ units)
 mirrorAcross (Axis2d originPoint direction) = do
   let Direction2d dx dy = direction
-  let vx = Vector2d (1.0 -. 2.0 *. dy *. dy) (2.0 *. dx *. dy)
-  let vy = Vector2d (2.0 *. dx *. dy) (1.0 -. 2.0 *. dx *. dx)
+  let vx = Vector2d (1 -. 2 *. dy *. dy) (2 *. dx *. dy)
+  let vy = Vector2d (2 *. dx *. dy) (1 -. 2 *. dx *. dx)
   withFixedPoint originPoint vx vy
 
 scaleAbout :: Point2d (space @ units) -> Number -> Uniform (space @ units)
 scaleAbout point scale = do
-  let vx = Vector2d scale 0.0
-  let vy = Vector2d 0.0 scale
+  let vx = Vector2d scale 0
+  let vy = Vector2d 0 scale
   withFixedPoint point vx vy
 
 scaleAlong :: Axis2d (space @ units) -> Number -> Affine (space @ units)
@@ -116,7 +116,7 @@ scaleAlong (Axis2d originPoint direction) scale = do
   let Direction2d dx dy = direction
   let dx2 = dx .*. dx
   let dy2 = dy .*. dy
-  let xy = (scale .- 1.0) .*. dx .*. dy
+  let xy = (scale .- 1) .*. dx .*. dy
   let vx = Vector2d (scale .*. dx2 .+. dy2) xy
   let vy = Vector2d xy (scale .*. dy2 .+. dx2)
   withFixedPoint originPoint vx vy

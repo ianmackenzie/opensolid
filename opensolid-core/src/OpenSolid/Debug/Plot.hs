@@ -29,13 +29,13 @@ resolution :: Resolution Meters
 resolution = Resolution.maxError (Length.millimeters 0.1)
 
 scale :: Quantity (Meters #/# Unitless)
-scale = Length.centimeters 10.0 #/ 1.0
+scale = Length.centimeters 10 #/ 1
 
 axisHeadLength :: Length
-axisHeadLength = Length.millimeters 3.0
+axisHeadLength = Length.millimeters 3
 
 axisHeadWidth :: Length
-axisHeadWidth = Length.millimeters 2.0
+axisHeadWidth = Length.millimeters 2
 
 viewBox :: Point2d (Space @ Unitless) -> Point2d (Space @ Unitless) -> Bounds2d (Space @ Meters)
 viewBox p1 p2 = Bounds2d.hull2 (Point2d.convert scale p1) (Point2d.convert scale p2)

@@ -609,10 +609,10 @@ desingularized start middle end =
     @ VectorCurve2d.desingularized start.derivative middle.derivative end.derivative
 
 instance HasField "startPoint" (Curve2d (space @ units)) (Point2d (space @ units)) where
-  getField curve = evaluate curve 0.0
+  getField curve = evaluate curve 0
 
 instance HasField "endPoint" (Curve2d (space @ units)) (Point2d (space @ units)) where
-  getField curve = evaluate curve 1.0
+  getField curve = evaluate curve 1
 
 {-| Evaluate a curve at a given parameter value.
 
@@ -627,11 +627,11 @@ evaluateAt tValue curve = evaluate curve tValue
 
 -- | Get the start point of a curve.
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-startPoint curve = evaluate curve 0.0
+startPoint curve = evaluate curve 0
 
 -- | Get the end point of a curve.
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-endPoint curve = evaluate curve 1.0
+endPoint curve = evaluate curve 1
 
 evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
@@ -641,7 +641,7 @@ samplePoints curve = List.map (evaluate curve) Parameter.samples
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse curve = curve . (1.0 -. Curve.t)
+reverse curve = curve . (1 -. Curve.t)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds curve = evaluateBounds curve Bounds.unitInterval
@@ -833,10 +833,10 @@ findEndpointIntersections curve1 curve2 = do
   Success $
     List.sortAndDeduplicate $
       List.concat $
-        [ List.map (\t2 -> Point2d 0.0 t2) start1Zeros
-        , List.map (\t2 -> Point2d 1.0 t2) end1Zeros
-        , List.map (\t1 -> Point2d t1 0.0) start2Zeros
-        , List.map (\t1 -> Point2d t1 1.0) end2Zeros
+        [ List.map (\t2 -> Point2d 0 t2) start1Zeros
+        , List.map (\t2 -> Point2d 1 t2) end1Zeros
+        , List.map (\t1 -> Point2d t1 0) start2Zeros
+        , List.map (\t1 -> Point2d t1 1) end2Zeros
         ]
 
 data Intersections
@@ -1044,7 +1044,7 @@ unconvert ::
   Quantity (units2 #/# units1) ->
   Curve2d (space @ units2) ->
   Curve2d (space @ units1)
-unconvert factor curve = convert (Units.simplify (1.0 /# factor)) curve
+unconvert factor curve = convert (Units.simplify (1 /# factor)) curve
 
 curvature# ::
   Tolerance units =>
@@ -1118,7 +1118,7 @@ medialAxis curve1 curve2 = do
               Units.coerce $
                 SurfaceFunction.unsafeQuotient#
                   @ d `dot#` d
-                  @ 2.0 *. (tangentVector1 . SurfaceFunction.u) `cross` d
+                  @ 2 *. (tangentVector1 . SurfaceFunction.u) `cross` d
         let curve :: SurfaceFunction2d (space @ units) =
               (curve1 . SurfaceFunction.u) .+. radius .*. (normal1 . SurfaceFunction.u)
         let toSegment solutionCurve =

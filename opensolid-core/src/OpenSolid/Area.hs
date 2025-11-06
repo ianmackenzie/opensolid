@@ -31,7 +31,7 @@ zero = Quantity.zero
 
 -- | One square meter.
 squareMeter :: Area
-squareMeter = squareMeters 1.0
+squareMeter = squareMeters 1
 
 -- | One square inch.
 squareInch :: Area

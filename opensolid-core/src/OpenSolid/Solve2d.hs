@@ -277,8 +277,8 @@ boundedStep uvBounds p1 p2 =
       let Point2d u2 v2 = p2
       let clampedU = Quantity.clampTo uBounds u2
       let clampedV = Quantity.clampTo vBounds v2
-      let uScale = if u1 == u2 then 1.0 else (clampedU .-. u1) ./. (u2 .-. u1)
-      let vScale = if v1 == v2 then 1.0 else (clampedV .-. v1) ./. (v2 .-. v1)
+      let uScale = if u1 == u2 then 1 else (clampedU .-. u1) ./. (u2 .-. u1)
+      let vScale = if v1 == v2 then 1 else (clampedV .-. v1) ./. (v2 .-. v1)
       let scale = Quantity.min uScale vScale
       let Point2d u v = Point2d.interpolateFrom p1 p2 scale
       -- Perform a final clamping step

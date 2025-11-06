@@ -670,8 +670,8 @@ instance Multiplication (Variable1d input) Sign (Variable1d input) where
   var .*. Negative = negative var
 
 instance input1 ~ input2 => Addition (Ast1d input1) (Ast1d input2) (Ast1d input1) where
-  Constant1d 0.0 .+. rhs = rhs
-  lhs .+. Constant1d 0.0 = lhs
+  Constant1d 0 .+. rhs = rhs
+  lhs .+. Constant1d 0 = lhs
   Constant1d lhs .+. Constant1d rhs = Constant1d (lhs .+. rhs)
   Constant1d lhs .+. Variable1d rhs = Variable1d (SumVariableConstant1d rhs lhs)
   Variable1d lhs .+. Constant1d rhs = Variable1d (SumVariableConstant1d lhs rhs)
@@ -690,8 +690,8 @@ instance Addition (Ast1d input1) (Quantity units) (Ast1d input1) where
   lhs .+. rhs = lhs .+. constant1d rhs
 
 instance input1 ~ input2 => Subtraction (Ast1d input1) (Ast1d input2) (Ast1d input1) where
-  lhs .-. Constant1d 0.0 = lhs
-  Constant1d 0.0 .-. rhs = negative rhs
+  lhs .-. Constant1d 0 = lhs
+  Constant1d 0 .-. rhs = negative rhs
   Constant1d lhs .-. Constant1d rhs = Constant1d (lhs .-. rhs)
   Constant1d lhs .-. Variable1d rhs = Variable1d (DifferenceConstantVariable1d lhs rhs)
   Variable1d lhs .-. Constant1d rhs = Variable1d (SumVariableConstant1d lhs (negative rhs))
@@ -711,12 +711,12 @@ instance Subtraction (Ast1d input1) (Quantity units) (Ast1d input1) where
 
 instance input1 ~ input2 => Multiplication (Ast1d input1) (Ast1d input2) (Ast1d input1) where
   Constant1d lhs .*. Constant1d rhs = Constant1d (lhs .*. rhs)
-  _ .*. Constant1d 0.0 = Constant1d 0.0
-  Constant1d 0.0 .*. _ = Constant1d 0.0
-  lhs .*. Constant1d 1.0 = lhs
-  Constant1d 1.0 .*. rhs = rhs
-  lhs .*. Constant1d -1.0 = negative lhs
-  Constant1d -1.0 .*. rhs = negative rhs
+  _ .*. Constant1d 0 = Constant1d 0
+  Constant1d 0 .*. _ = Constant1d 0
+  lhs .*. Constant1d 1 = lhs
+  Constant1d 1 .*. rhs = rhs
+  lhs .*. Constant1d -1 = negative lhs
+  Constant1d -1 .*. rhs = negative rhs
   Variable1d (ProductVariableConstant1d a b) .*. Constant1d c =
     Variable1d a .*. Constant1d (b .*. c)
   Constant1d a .*. Variable1d (ProductVariableConstant1d b c) =
@@ -734,10 +734,10 @@ instance Multiplication (Ast1d input1) (Quantity units) (Ast1d input1) where
 
 instance input1 ~ input2 => Division (Ast1d input1) (Ast1d input2) (Ast1d input1) where
   Constant1d lhs ./. Constant1d rhs = Constant1d (lhs ./. rhs)
-  Constant1d 0.0 ./. _ = Constant1d 0.0
-  lhs ./. Constant1d 1.0 = lhs
-  lhs ./. Constant1d -1.0 = negative lhs
-  Variable1d lhs ./. Constant1d rhs = Variable1d (ProductVariableConstant1d lhs (1.0 /. rhs))
+  Constant1d 0 ./. _ = Constant1d 0
+  lhs ./. Constant1d 1 = lhs
+  lhs ./. Constant1d -1 = negative lhs
+  Variable1d lhs ./. Constant1d rhs = Variable1d (ProductVariableConstant1d lhs (1 /. rhs))
   Constant1d lhs ./. Variable1d rhs = Variable1d (QuotientConstantVariable1d lhs rhs)
   Variable1d lhs ./. Variable1d rhs = Variable1d (lhs ./. rhs)
 
@@ -820,10 +820,10 @@ instance Subtraction (Ast2d input1) (Vector2d (space @ units)) (Ast2d input1) wh
 
 instance input1 ~ input2 => Multiplication (Ast2d input1) (Ast1d input2) (Ast2d input1) where
   Constant2d lhs .*. Constant1d rhs = Constant2d (lhs .*. rhs)
-  _ .*. Constant1d 0.0 = Constant2d Vector2d.zero
+  _ .*. Constant1d 0 = Constant2d Vector2d.zero
   Constant2d lhs .*. _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
-  lhs .*. Constant1d 1.0 = lhs
-  lhs .*. Constant1d -1.0 = negative lhs
+  lhs .*. Constant1d 1 = lhs
+  lhs .*. Constant1d -1 = negative lhs
   Variable2d (ProductVariableConstant2d a b) .*. Constant1d c =
     Variable2d a .*. Constant1d (b .*. c)
   Constant2d a .*. Variable1d (ProductVariableConstant1d b c) =
@@ -844,9 +844,9 @@ instance Multiplication (Quantity units) (Ast2d input) (Ast2d input) where
 instance input1 ~ input2 => Division (Ast2d input1) (Ast1d input2) (Ast2d input1) where
   Constant2d lhs ./. Constant1d rhs = Constant2d (lhs ./. rhs)
   Constant2d lhs ./. _ | lhs == Vector2d.zero = Constant2d Vector2d.zero
-  lhs ./. Constant1d 1.0 = lhs
-  lhs ./. Constant1d -1.0 = negative lhs
-  Variable2d lhs ./. Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1.0 /. rhs))
+  lhs ./. Constant1d 1 = lhs
+  lhs ./. Constant1d -1 = negative lhs
+  Variable2d lhs ./. Constant1d rhs = Variable2d (ProductVariableConstant2d lhs (1 /. rhs))
   Constant2d lhs ./. Variable1d rhs = Variable2d (QuotientConstantVariable2d lhs rhs)
   Variable2d lhs ./. Variable1d rhs = Variable2d (Quotient2d lhs rhs)
 
@@ -923,10 +923,10 @@ instance Subtraction (Ast3d input1) (Vector3d (space @ units)) (Ast3d input1) wh
 
 instance input1 ~ input2 => Multiplication (Ast3d input1) (Ast1d input2) (Ast3d input1) where
   Constant3d lhs .*. Constant1d rhs = Constant3d (lhs .*. rhs)
-  _ .*. Constant1d 0.0 = Constant3d Vector3d.zero
+  _ .*. Constant1d 0 = Constant3d Vector3d.zero
   Constant3d lhs .*. _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
-  lhs .*. Constant1d 1.0 = lhs
-  lhs .*. Constant1d -1.0 = negative lhs
+  lhs .*. Constant1d 1 = lhs
+  lhs .*. Constant1d -1 = negative lhs
   Variable3d (ProductVariableConstant3d a b) .*. Constant1d c = Variable3d a .*. Constant1d (b .*. c)
   Constant3d a .*. Variable1d (ProductVariableConstant1d b c) = Constant3d (a .*. c) .*. Variable1d b
   Variable3d lhs .*. Constant1d rhs = Variable3d (ProductVariableConstant3d lhs rhs)
@@ -945,9 +945,9 @@ instance Multiplication (Quantity units) (Ast3d input) (Ast3d input) where
 instance input1 ~ input2 => Division (Ast3d input1) (Ast1d input2) (Ast3d input1) where
   Constant3d lhs ./. Constant1d rhs = Constant3d (lhs ./. rhs)
   Constant3d lhs ./. _ | lhs == Vector3d.zero = Constant3d Vector3d.zero
-  lhs ./. Constant1d 1.0 = lhs
-  lhs ./. Constant1d -1.0 = negative lhs
-  Variable3d lhs ./. Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1.0 /. rhs))
+  lhs ./. Constant1d 1 = lhs
+  lhs ./. Constant1d -1 = negative lhs
+  Variable3d lhs ./. Constant1d rhs = Variable3d (ProductVariableConstant3d lhs (1 /. rhs))
   Constant3d lhs ./. Variable1d rhs = Variable3d (QuotientConstantVariable3d lhs rhs)
   Variable3d lhs ./. Variable1d rhs = Variable3d (Quotient3d lhs rhs)
 
@@ -959,8 +959,8 @@ instance Division (Ast3d input) (Quantity units) (Ast3d input) where
 
 instance input1 ~ input2 => DotMultiplication (Ast2d input1) (Ast2d input2) (Ast1d input1) where
   Constant2d lhs `dot` Constant2d rhs = Constant1d (lhs `dot` rhs)
-  Constant2d lhs `dot` _ | lhs == Vector2d.zero = Constant1d 0.0
-  _ `dot` Constant2d rhs | rhs == Vector2d.zero = Constant1d 0.0
+  Constant2d lhs `dot` _ | lhs == Vector2d.zero = Constant1d 0
+  _ `dot` Constant2d rhs | rhs == Vector2d.zero = Constant1d 0
   Variable2d lhs `dot` Constant2d rhs = Variable1d (DotVariableConstant2d lhs rhs)
   Constant2d lhs `dot` Variable2d rhs = Variable1d (DotVariableConstant2d rhs lhs)
   Variable2d lhs `dot` Variable2d rhs = Variable1d (lhs `dot` rhs)
@@ -979,8 +979,8 @@ instance DotMultiplication (Ast2d input) (Vector2d (space @ units)) (Ast1d input
 
 instance input1 ~ input2 => CrossMultiplication (Ast2d input1) (Ast2d input2) (Ast1d input1) where
   Constant2d lhs `cross` Constant2d rhs = Constant1d (lhs `cross` rhs)
-  Constant2d lhs `cross` _ | lhs == Vector2d.zero = Constant1d 0.0
-  _ `cross` Constant2d rhs | rhs == Vector2d.zero = Constant1d 0.0
+  Constant2d lhs `cross` _ | lhs == Vector2d.zero = Constant1d 0
+  _ `cross` Constant2d rhs | rhs == Vector2d.zero = Constant1d 0
   Variable2d lhs `cross` Constant2d rhs = Variable1d (CrossVariableConstant2d lhs rhs)
   Constant2d lhs `cross` Variable2d rhs = Variable1d (CrossVariableConstant2d rhs (negative lhs))
   Variable2d lhs `cross` Variable2d rhs = Variable1d (Cross2d lhs rhs)
@@ -993,8 +993,8 @@ instance CrossMultiplication (Ast2d input) (Vector2d (space @ units)) (Ast1d inp
 
 instance input1 ~ input2 => DotMultiplication (Ast3d input1) (Ast3d input2) (Ast1d input1) where
   Constant3d lhs `dot` Constant3d rhs = Constant1d (lhs `dot` rhs)
-  Constant3d lhs `dot` _ | lhs == Vector3d.zero = Constant1d 0.0
-  _ `dot` Constant3d rhs | rhs == Vector3d.zero = Constant1d 0.0
+  Constant3d lhs `dot` _ | lhs == Vector3d.zero = Constant1d 0
+  _ `dot` Constant3d rhs | rhs == Vector3d.zero = Constant1d 0
   Variable3d lhs `dot` Constant3d rhs = Variable1d (DotVariableConstant3d lhs rhs)
   Constant3d lhs `dot` Variable3d rhs = Variable1d (DotVariableConstant3d rhs lhs)
   Variable3d lhs `dot` Variable3d rhs = Variable1d (lhs `dot` rhs)

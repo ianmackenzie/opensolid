@@ -302,7 +302,7 @@ instance
     (Quantity units2)
     (VectorCurve2d (space @ (units1 #/# units2)))
   where
-  curve #/# value = Units.simplify (curve #*# (1.0 /# value))
+  curve #/# value = Units.simplify (curve #*# (1 /# value))
 
 instance
   Multiplication#
@@ -578,10 +578,10 @@ bezier controlPoints =
     @ bezier (Bezier.derivative controlPoints)
 
 startValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
-startValue curve = evaluate curve 0.0
+startValue curve = evaluate curve 0
 
 endValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
-endValue curve = evaluate curve 1.0
+endValue curve = evaluate curve 1
 
 desingularize ::
   Maybe (Vector2d (space @ units), Vector2d (space @ units)) ->
@@ -670,7 +670,7 @@ components :: VectorCurve2d (space @ units) -> (Curve units, Curve units)
 components curve = (xComponent curve, yComponent curve)
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-reverse curve = curve . (1.0 -. Curve.t)
+reverse curve = curve . (1 -. Curve.t)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
@@ -689,12 +689,12 @@ quotient# numerator denominator =
     then Failure DivisionByZero
     else Success do
       let singularity0 =
-            if Curve.evaluate denominator 0.0 ~= Quantity.zero
-              then Just (lhopital numerator denominator 0.0)
+            if Curve.evaluate denominator 0 ~= Quantity.zero
+              then Just (lhopital numerator denominator 0)
               else Nothing
       let singularity1 =
-            if Curve.evaluate denominator 1.0 ~= Quantity.zero
-              then Just (lhopital numerator denominator 1.0)
+            if Curve.evaluate denominator 1 ~= Quantity.zero
+              then Just (lhopital numerator denominator 1)
               else Nothing
       desingularize singularity0 (unsafeQuotient# numerator denominator) singularity1
 
@@ -713,7 +713,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' #*# denominator' .-. numerator' #*# denominator'')
-            #/# (2.0 *. Quantity.squared# denominator')
+            #/# (2 *. Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -746,7 +746,7 @@ squaredMagnitude# curve =
       Vector2d.squaredMagnitude#
       VectorBounds2d.squaredMagnitude#
       curve.compiled
-    @ 2.0 *. curve `dot#` curve.derivative
+    @ 2 *. curve `dot#` curve.derivative
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

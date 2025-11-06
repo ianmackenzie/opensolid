@@ -69,19 +69,19 @@ tests =
 
 findPoint :: Tolerance Meters => Test
 findPoint = Test.verify "findPoint" Test.do
-  let p1 = Point2d.meters 0.0 0.0
-  let p2 = Point2d.meters 1.0 2.0
-  let p3 = Point2d.meters 2.0 0.0
+  let p1 = Point2d.meters 0 0
+  let p2 = Point2d.meters 1 2
+  let p3 = Point2d.meters 2 0
   let testSpline = Curve2d.quadraticBezier p1 p2 p3
   startParameterValues <- Curve2d.findPoint Point2d.origin testSpline
-  endParameterValues <- Curve2d.findPoint (Point2d.meters 2.0 0.0) testSpline
-  midParameterValues <- Curve2d.findPoint (Point2d.meters 1.0 1.0) testSpline
-  offCurveParameterValues <- Curve2d.findPoint (Point2d.meters 1.0 1.1) testSpline
+  endParameterValues <- Curve2d.findPoint (Point2d.meters 2 0) testSpline
+  midParameterValues <- Curve2d.findPoint (Point2d.meters 1 1) testSpline
+  offCurveParameterValues <- Curve2d.findPoint (Point2d.meters 1 1.1) testSpline
   Tolerance.using 1e-12 do
     Test.all
-      [ Test.expect (startParameterValues ~= [0.0])
+      [ Test.expect (startParameterValues ~= [0])
           |> Test.output "startParameterValues" startParameterValues
-      , Test.expect (endParameterValues ~= [1.0])
+      , Test.expect (endParameterValues ~= [1])
           |> Test.output "endParameterValues" endParameterValues
       , Test.expect (midParameterValues ~= [0.5])
           |> Test.output "midParameterValues" midParameterValues
@@ -91,9 +91,9 @@ findPoint = Test.verify "findPoint" Test.do
 
 findOwnPoint :: Tolerance Meters => Test
 findOwnPoint = Test.check 500 "findOwnPoint" Test.do
-  let p1 = Point2d.meters 0.0 0.0
-  let p2 = Point2d.meters 1.0 2.0
-  let p3 = Point2d.meters 2.0 0.0
+  let p1 = Point2d.meters 0 0
+  let p2 = Point2d.meters 1 2
+  let p3 = Point2d.meters 2 0
   let testSpline = Curve2d.quadraticBezier p1 p2 p3
   t <- Parameter.random
   let p = Curve2d.evaluate testSpline t
@@ -133,11 +133,11 @@ equalOverlapSegmentLists actualSegments expectedSegments =
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "curveOverlap1" Test.do
-  let arc1 = Curve2d.arc (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
-  let arc2 = Curve2d.arc (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
+  let arc1 = Curve2d.arc (Point2d.meters 1 0) (Point2d.meters -1 0) Angle.halfTurn
+  let arc2 = Curve2d.arc (Point2d.meters 0 -1) (Point2d.meters 0 1) Angle.halfTurn
   actualSegments <- overlappingSegments arc1 arc2
   let expectedSegments =
-        NonEmpty.one (OverlappingSegment (Bounds 0.0 0.5) (Bounds 0.5 1.0) Positive)
+        NonEmpty.one (OverlappingSegment (Bounds 0 0.5) (Bounds 0.5 1) Positive)
   Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
@@ -152,8 +152,8 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
         Curve2d.polarArc
           @ #centerPoint Point2d.origin
           @ #radius Length.meter
-          @ #startAngle (Angle.degrees -45.0)
-          @ #endAngle (Angle.degrees 225.0)
+          @ #startAngle (Angle.degrees -45)
+          @ #endAngle (Angle.degrees 225)
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
@@ -163,12 +163,12 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "crossingIntersection" Test.do
-  let arc1 = Curve2d.arc Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
-  let arc2 = Curve2d.arc Point2d.origin (Point2d.meters 1.0 0.0) (negative Angle.halfTurn)
+  let arc1 = Curve2d.arc Point2d.origin (Point2d.meters 0 1) Angle.halfTurn
+  let arc2 = Curve2d.arc Point2d.origin (Point2d.meters 1 0) (negative Angle.halfTurn)
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
-          (IntersectionPoint.crossing 0.0 0.0 Positive)
+          (IntersectionPoint.crossing 0 0 Positive)
           (IntersectionPoint.crossing 0.5 0.5 Negative)
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
@@ -187,7 +187,7 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
           @ #endAngle Angle.pi
   let arc2 =
         Curve2d.polarArc
-          @ #centerPoint (Point2d.meters 0.0 1.5)
+          @ #centerPoint (Point2d.meters 0 1.5)
           @ #radius (Length.meters 0.5)
           @ #startAngle (negative Angle.pi)
           @ #endAngle Angle.zero
@@ -205,7 +205,7 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "solving" Test.do
-  let arc = Curve2d.arc (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
+  let arc = Curve2d.arc (Point2d.meters 0 1) (Point2d.meters 1 0) Angle.quarterTurn
   let distanceFromOrigin = VectorCurve2d.magnitude (arc .-. Point2d.origin)
   let desiredDistance = Length.meters 0.5
   zeros <- Curve.zeros (distanceFromOrigin .-. desiredDistance)
@@ -222,7 +222,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.
   p1 <- Random.point2d
   p2 <- Random.point2d
   let curve = Curve2d.cubicBezier p0 p0 p1 p2
-  let decreasingTValues = [Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
+  let decreasingTValues = [Number.pow 2 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let startTangent = DirectionCurve2d.startValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) decreasingTValues
@@ -236,7 +236,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
   p1 <- Random.point2d
   p2 <- Random.point2d
   let curve = Curve2d.cubicBezier p0 p1 p2 p2
-  let increasingTValues = [1.0 -. Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
+  let increasingTValues = [1 -. Number.pow 2 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let endTangent = DirectionCurve2d.endValue tangentDirection
   let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) increasingTValues
@@ -257,7 +257,7 @@ tangentDerivativeIsPerpendicularToTangent =
     tValue <- Parameter.random
     let tangent = DirectionCurve2d.evaluate tangentDirection tValue
     let derivative = VectorCurve2d.evaluate tangentDerivative tValue
-    Test.expect (Tolerance.using 1e-12 (derivative `dot` tangent ~= 0.0))
+    Test.expect (Tolerance.using 1e-12 (derivative `dot` tangent ~= 0))
       |> Test.output "tValue" tValue
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
@@ -270,7 +270,7 @@ degenerateStartPointTangentDerivative =
     p1 <- Random.point2d
     p2 <- Random.point2d
     let curve = Curve2d.cubicBezier p0 p0 p1 p2
-    let decreasingTValues = [Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
+    let decreasingTValues = [Number.pow 2 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let startTangentDerivative = VectorCurve2d.startValue tangentDerivative
@@ -291,7 +291,7 @@ degenerateEndPointTangentDerivative =
     p1 <- Random.point2d
     p2 <- Random.point2d
     let curve = Curve2d.cubicBezier p0 p1 p2 p2
-    let increasingTValues = [1.0 -. Number.pow 2.0 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
+    let increasingTValues = [1 -. Number.pow 2 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let endTangentDerivative = VectorCurve2d.endValue tangentDerivative
@@ -318,7 +318,7 @@ firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let dt :: Number = 1e-6
   let p1 = Curve2d.evaluate curve (tValue .-. dt)
   let p2 = Curve2d.evaluate curve (tValue .+. dt)
-  let numericalFirstDerivative = (p2 .-. p1) ./ (2.0 *. dt)
+  let numericalFirstDerivative = (p2 .-. p1) ./ (2 *. dt)
   let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
@@ -336,7 +336,7 @@ secondDerivativeIsConsistent curve tValue = do
   let dt :: Number = 1e-6
   let v1 = VectorCurve2d.evaluate curve.derivative (tValue .-. dt)
   let v2 = VectorCurve2d.evaluate curve.derivative (tValue .+. dt)
-  let numericalSecondDerivative = (v2 .-. v1) ./. (2.0 *. dt)
+  let numericalSecondDerivative = (v2 .-. v1) ./. (2 *. dt)
   let secondDerivative = curve.derivative.derivative
   let analyticSecondDerivative = VectorCurve2d.evaluate secondDerivative tValue
   Tolerance.using (Length.meters 1e-6) do
@@ -393,7 +393,7 @@ arcConstruction = do
         let sweptAngle = Angle.degrees (Number.fromInt numDegrees)
         let expectedPoint = Point2d.meters expectedX expectedY
         Test.verify label Test.do
-          let arc = Curve2d.arc Point2d.origin (Point2d.meters 1.0 1.0) sweptAngle
+          let arc = Curve2d.arc Point2d.origin (Point2d.meters 1 1) sweptAngle
           Test.expect (Curve2d.evaluate arc 0.5 ~= expectedPoint)
   let invSqrt2 = 1 /. Number.sqrt 2
   Test.group "from" $
@@ -433,8 +433,8 @@ g2 = Test.check 100 "G2 continuity" Test.do
   tangentCurve <- Curve2d.tangentDirection spline
   curvatureCurve <- Curve2d.curvature spline
   let tangentDirection = DirectionCurve2d.evaluate tangentCurve t
-  let signedRadius = 1.0 /. Curve.evaluate curvatureCurve t
+  let signedRadius = 1 /. Curve.evaluate curvatureCurve t
   let normalDirection = Direction2d.rotateLeft tangentDirection
   let arcCenter = point .+. signedRadius .*. normalDirection
-  let arc = Curve2d.sweptArc arcCenter point (Angle.degrees 30.0)
-  Test.expect (Curve2d.g2 (spline, t) (arc, 0.0) Length.meter)
+  let arc = Curve2d.sweptArc arcCenter point (Angle.degrees 30)
+  Test.expect (Curve2d.g2 (spline, t) (arc, 0) Length.meter)

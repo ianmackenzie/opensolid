@@ -35,7 +35,7 @@ areaIsApproximately expectedArea region =
 
 square :: Tolerance Meters => Test
 square = Test.verify "square" Test.do
-  let width = Length.meters 2.0
+  let width = Length.meters 2
   let p1 = Point2d.origin
   let p2 = Point2d width zero
   let p3 = Point2d width width
@@ -49,7 +49,7 @@ square = Test.verify "square" Test.do
 
 quarterCircle :: Tolerance Meters => Test
 quarterCircle = Test.verify "quarterCircle" Test.do
-  let radius = Length.meters 1.0
+  let radius = Length.meters 1
   let p1 = Point2d.origin
   let p2 = Point2d radius zero
   let p3 = Point2d zero radius
@@ -62,7 +62,7 @@ quarterCircle = Test.verify "quarterCircle" Test.do
 
 squareWithHole :: Tolerance Meters => Test
 squareWithHole = Test.verify "squareWithHole" Test.do
-  let width = Length.meters 2.0
+  let width = Length.meters 2
   let p1 = Point2d.origin
   let p2 = Point2d width zero
   let p3 = Point2d width width
@@ -81,7 +81,7 @@ squareWithHole = Test.verify "squareWithHole" Test.do
 
 incompleteSquare :: Tolerance Meters => Test
 incompleteSquare = Test.verify "incompleteSquare" Test.do
-  let width = Length.meters 2.0
+  let width = Length.meters 2
   let p1 = Point2d.origin
   let p2 = Point2d width zero
   let p3 = Point2d width width
@@ -96,7 +96,7 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
 -- Disabled while self-intersection checks in Region2d.boundedBy are disabled
 -- squareWithTangentHole :: Tolerance Meters => Test
 -- squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
---   let width = Length.meters 2.0
+--   let width = Length.meters 2
 --   let p1 = Point2d.origin
 --   let p2 = Point2d width zero
 --   let p3 = Point2d width width
@@ -116,12 +116,12 @@ twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
   let circle1 =
         Curve2d.circle
-          @ #centerPoint (Point2d.meters -2.0 0.0)
-          @ #diameter (Length.meters 2.0)
+          @ #centerPoint (Point2d.meters -2 0)
+          @ #diameter (Length.meters 2)
   let circle2 =
         Curve2d.circle
-          @ #centerPoint (Point2d.meters 1.0 0.0)
-          @ #diameter (Length.meters 1.0)
+          @ #centerPoint (Point2d.meters 1 0)
+          @ #diameter (Length.meters 1)
   case Region2d.boundedBy [circle1, circle2] of
     Success _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
     Failure error -> Test.expect (error == Region2d.BoundedBy.MultipleDisjointRegions)

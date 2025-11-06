@@ -20,7 +20,7 @@ zero :: Volume
 zero = Quantity.zero
 
 cubicMeter :: Volume
-cubicMeter = cubicMeters 1.0
+cubicMeter = cubicMeters 1
 
 cubicMeters :: Number -> Volume
 cubicMeters = Quantity.coerce

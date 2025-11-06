@@ -37,10 +37,10 @@ unwrap :: DirectionCurve3d space -> VectorCurve3d (space @ Unitless)
 unwrap (DirectionCurve3d vectorCurve) = vectorCurve
 
 startValue :: DirectionCurve3d space -> Direction3d space
-startValue curve = evaluate curve 0.0
+startValue curve = evaluate curve 0
 
 endValue :: DirectionCurve3d space -> Direction3d space
-endValue curve = evaluate curve 1.0
+endValue curve = evaluate curve 1
 
 evaluate :: DirectionCurve3d space -> Number -> Direction3d space
 evaluate (DirectionCurve3d vectorCurve) tValue =

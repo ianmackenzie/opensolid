@@ -1042,8 +1042,8 @@ instance
   transform2 . transform1 =
     Transform2d
       @ Point2d Quantity.zero Quantity.zero .*. transform1 .*. transform2
-      @ Vector2d 1.0 0.0 .*. transform1 .*. transform2
-      @ Vector2d 0.0 1.0 .*. transform1 .*. transform2
+      @ Vector2d 1 0 .*. transform1 .*. transform2
+      @ Vector2d 0 1 .*. transform1 .*. transform2
 
 ----- Vector3d -----
 
@@ -2409,6 +2409,6 @@ instance
   transform2 . transform1 =
     Transform3d
       (Point3d Quantity.zero Quantity.zero Quantity.zero .*. transform1 .*. transform2)
-      (Vector3d 1.0 0.0 0.0 .*. transform1 .*. transform2)
-      (Vector3d 0.0 1.0 0.0 .*. transform1 .*. transform2)
-      (Vector3d 0.0 0.0 1.0 .*. transform1 .*. transform2)
+      (Vector3d 1 0 0 .*. transform1 .*. transform2)
+      (Vector3d 0 1 0 .*. transform1 .*. transform2)
+      (Vector3d 0 0 1 .*. transform1 .*. transform2)

@@ -273,7 +273,7 @@ normalize vectorBounds = do
   VectorBounds3d nx ny nz
 
 normalizedBounds :: Bounds Unitless
-normalizedBounds = Bounds -1.0 1.0
+normalizedBounds = Bounds -1 1
 
 clampNormalized :: Bounds Unitless -> Bounds Unitless
 clampNormalized (Bounds low high) =

@@ -125,10 +125,10 @@ halfPi :: Number
 halfPi = 0.5 *. pi
 
 twoPi :: Number
-twoPi = 2.0 *. pi
+twoPi = 2 *. pi
 
 goldenRatio :: Number
-goldenRatio = 0.5 *. (1.0 +. sqrt 5.0)
+goldenRatio = 0.5 *. (1 +. sqrt 5)
 
 sqrt :: Number -> Number
 sqrt = Quantity.sqrt

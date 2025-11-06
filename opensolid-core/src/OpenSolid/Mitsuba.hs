@@ -277,7 +277,7 @@ lightingNode lighting = case lighting of
     let (ix, iy, iz) = Direction3d.components convention (xDirection frame)
     let (jx, jy, jz) = Direction3d.components convention (yDirection frame)
     let (kx, ky, kz) = Direction3d.components convention (zDirection frame)
-    let transformValues = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0.0, 0.0, 0.0, 1.0]
+    let transformValues = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0, 0, 0, 1]
     let transformString = Text.join " " (List.map Text.number transformValues)
     let matrixNode = XmlNode "matrix" [("value", transformString)] []
     XmlNode "emitter" [("type", "envmap")] $
@@ -307,7 +307,7 @@ bsdfNode material opacity = do
           , floatNode "metallic" material.metallic
           , floatNode "roughness" material.roughness
           ]
-  if opacity == 1.0
+  if opacity == 1
     then principledNode
     else
       XmlNode "bsdf" [("type", "mask")] $
@@ -327,7 +327,7 @@ cameraNode camera = do
           [typedNode "integer" "sample_count" "$spp"]
   case camera.projection of
     Camera3d.Orthographic fovHeight -> do
-      let scale = Length.inMeters fovHeight ./ 2.0
+      let scale = Length.inMeters fovHeight ./ 2
       XmlNode "sensor" [("type", "orthographic")] $
         [ XmlNode "transform" [("name", "to_world")] $
             [ XmlNode "scale" [("value", Text.number scale)] []
@@ -366,5 +366,5 @@ cameraTransformationNode camera = do
   let (ix, iy, iz) = Direction3d.components convention camera.leftwardDirection
   let (jx, jy, jz) = Direction3d.components convention camera.upwardDirection
   let (kx, ky, kz) = Direction3d.components convention camera.forwardDirection
-  let matrixComponents = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0.0, 0.0, 0.0, 1.0]
+  let matrixComponents = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0, 0, 0, 1]
   XmlNode "matrix" [("value", Text.join " " (List.map Text.number matrixComponents))] []

@@ -51,11 +51,7 @@ That is, the forward direction of this orientation is the global forward directi
 the upward direction of this orientation is the global upward direction, etc.
 -}
 world :: Orientation3d space
-world =
-  Orientation3d
-    @ Direction3d 1.0 0.0 0.0
-    @ Direction3d 0.0 1.0 0.0
-    @ Direction3d 0.0 0.0 1.0
+world = Orientation3d (Direction3d 1 0 0) (Direction3d 0 1 0) (Direction3d 0 0 1)
 
 coerce :: Orientation3d space1 -> Orientation3d space2
 coerce (Orientation3d r f u) =

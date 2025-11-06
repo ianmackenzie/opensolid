@@ -116,9 +116,9 @@ rotateAround axis angle = do
 
 scaleAbout :: Point3d (space @ units) -> Number -> Uniform (space @ units)
 scaleAbout point scale = do
-  let vx = Vector3d scale 0.0 0.0
-  let vy = Vector3d 0.0 scale 0.0
-  let vz = Vector3d 0.0 0.0 scale
+  let vx = Vector3d scale 0 0
+  let vy = Vector3d 0 scale 0
+  let vz = Vector3d 0 0 scale
   withFixedPoint point vx vy vz
 
 scaleAlong :: Axis3d (space @ units) -> Number -> Affine (space @ units)

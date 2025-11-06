@@ -50,8 +50,8 @@ hermite startPoint startDerivatives endPoint endDerivatives = do
   let numStartDerivatives = startDerivatives.length
   let numEndDerivatives = endDerivatives.length
   let curveDegree = Number.fromInt (1 + numStartDerivatives + numEndDerivatives)
-  let scaledStartDerivatives = scaleDerivatives Positive 1.0 curveDegree startDerivatives
-  let scaledEndDerivatives = scaleDerivatives Negative 1.0 curveDegree endDerivatives
+  let scaledStartDerivatives = scaleDerivatives Positive 1 curveDegree startDerivatives
+  let scaledEndDerivatives = scaleDerivatives Negative 1 curveDegree endDerivatives
   let startControlPoints =
         derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
   let endControlPoints =
@@ -63,7 +63,7 @@ scaleDerivatives :: Vector vector => Sign -> Number -> Number -> List vector -> 
 scaleDerivatives _ _ _ [] = []
 scaleDerivatives sign scale n (first : rest) = do
   let updatedScale = sign .*. scale ./. n
-  first .*. updatedScale : scaleDerivatives sign updatedScale (n .- 1.0) rest
+  first .*. updatedScale : scaleDerivatives sign updatedScale (n .- 1) rest
 
 derivedControlPoints :: Constraints point vector => point -> Int -> Int -> List vector -> List point
 derivedControlPoints previousPoint i n qs
@@ -109,7 +109,7 @@ syntheticStart point0 firstDerivative0 pointT0 firstDerivativeT0 secondDerivativ
   let t0 = Desingularization.t0
   let segmentDerivatives0 = [t0 .*. firstDerivative0]
   let segmentDerivativesT0 = [t0 .*. firstDerivativeT0, t0 .*. t0 .*. secondDerivativeT0]
-  hermite point0 segmentDerivatives0 pointT0 segmentDerivativesT0 |> segment 0.0 (1.0 /. t0)
+  hermite point0 segmentDerivatives0 pointT0 segmentDerivativesT0 |> segment 0 (1 /. t0)
 
 syntheticEnd ::
   Constraints point vector =>
@@ -124,4 +124,4 @@ syntheticEnd pointT1 firstDerivativeT1 secondDerivativeT1 point1 firstDerivative
   let t1 = Desingularization.t1
   let segmentDerivativesT1 = [t0 .*. firstDerivativeT1, t0 .*. t0 .*. secondDerivativeT1]
   let segmentDerivatives1 = [t0 .*. firstDerivative1]
-  hermite pointT1 segmentDerivativesT1 point1 segmentDerivatives1 |> segment -(t1 ./. t0) 1.0
+  hermite pointT1 segmentDerivativesT1 point1 segmentDerivatives1 |> segment -(t1 ./. t0) 1

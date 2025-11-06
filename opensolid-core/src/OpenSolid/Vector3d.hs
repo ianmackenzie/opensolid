@@ -285,7 +285,7 @@ scaleIn axisDirection = scaleAlong (Axis3d Point3d.dummy axisDirection)
 This is equivalent to mirroring across a plane with the given normal direction.
 -}
 mirrorIn :: Direction3d space -> Vector3d (space @ units) -> Vector3d (space @ units)
-mirrorIn mirrorDirection vector = vector .-. 2.0 *. projectionIn mirrorDirection vector
+mirrorIn mirrorDirection vector = vector .-. 2 *. projectionIn mirrorDirection vector
 
 -- | Rotate around the given axis by the given angle.
 rotateAround ::

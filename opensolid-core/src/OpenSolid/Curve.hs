@@ -147,7 +147,7 @@ instance
   value ^ curve = curve ^ value
 
 isEndpoint :: Number -> Bool
-isEndpoint tValue = tValue == 0.0 || tValue == 1.0
+isEndpoint tValue = tValue == 0 || tValue == 1
 
 new :: Compiled units -> Curve units -> Curve units
 new = Curve
@@ -175,7 +175,7 @@ When defining parametric curves, you will typically start with 'Curve.t'
 and then use arithmetic operators etc. to build up more complex curves.
 -}
 t :: Curve Unitless
-t = new (CompiledFunction.concrete Expression.t) (constant 1.0)
+t = new (CompiledFunction.concrete Expression.t) (constant 1)
 
 -- | Create a curve that linearly interpolates from the first value to the second.
 line :: Quantity units -> Quantity units -> Curve units
@@ -308,7 +308,7 @@ instance Composition (Curve Unitless) (Curve units) (Curve units) where
   f . g = new (f.compiled . g.compiled) ((f.derivative . g) .*. g.derivative)
 
 reverse :: Curve units -> Curve units
-reverse curve = curve . (1.0 -. t)
+reverse curve = curve . (1 -. t)
 
 bezier :: NonEmpty (Quantity units) -> Curve units
 bezier controlPoints =
@@ -375,10 +375,10 @@ evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units
 evaluateBounds curve = CompiledFunction.evaluateBounds curve.compiled
 
 startValue :: Curve units -> Quantity units
-startValue curve = evaluate curve 0.0
+startValue curve = evaluate curve 0
 
 endValue :: Curve units -> Quantity units
-endValue curve = evaluate curve 1.0
+endValue curve = evaluate curve 1
 
 desingularize ::
   Maybe (Quantity units, Quantity units) ->
@@ -440,12 +440,12 @@ quotient# numerator denominator =
     then Failure DivisionByZero
     else Success do
       let singularity0 =
-            if evaluate denominator 0.0 ~= Quantity.zero
-              then Just (lhopital numerator denominator 0.0)
+            if evaluate denominator 0 ~= Quantity.zero
+              then Just (lhopital numerator denominator 0)
               else Nothing
       let singularity1 =
-            if evaluate denominator 1.0 ~= Quantity.zero
-              then Just (lhopital numerator denominator 1.0)
+            if evaluate denominator 1 ~= Quantity.zero
+              then Just (lhopital numerator denominator 1)
               else Nothing
       desingularize singularity0 (unsafeQuotient# numerator denominator) singularity1
 
@@ -464,7 +464,7 @@ lhopital numerator denominator tValue = do
   let firstDerivative =
         Units.simplify $
           (numerator'' #*# denominator' .-. numerator' #*# denominator'')
-            #/# (2.0 *. Quantity.squared# denominator')
+            #/# (2 *. Quantity.squared# denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -490,7 +490,7 @@ instance
   lhs ./. rhs = Units.specialize (lhs #/# rhs)
 
 instance Division# (Curve units1) (Quantity units2) (Curve (units1 #/# units2)) where
-  curve #/# value = Units.simplify (curve #*# (1.0 /# value))
+  curve #/# value = Units.simplify (curve #*# (1 /# value))
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
@@ -500,7 +500,7 @@ squared# :: Curve units -> Curve (units #*# units)
 squared# curve =
   new
     (CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# curve.compiled)
-    (2.0 *. curve #*# curve.derivative)
+    (2 *. curve #*# curve.derivative)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve units1
@@ -518,18 +518,18 @@ sqrt# curve
                     evaluate curve tValue ~= Quantity.zero
             let secondDerivativeValue = evaluate secondDerivative tValue
             let firstDerivativeTolerance =
-                  ?tolerance #*# Quantity.sqrt# (2.0 *. secondDerivativeValue)
+                  ?tolerance #*# Quantity.sqrt# (2 *. secondDerivativeValue)
             let firstDerivativeIsZero =
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative tValue ~= Quantity.zero
             curveIsZero && firstDerivativeIsZero
       let singularity0 =
-            if isSingularity 0.0
-              then Just (Quantity.zero, Quantity.sqrt# (0.5 *. evaluate secondDerivative 0.0))
+            if isSingularity 0
+              then Just (Quantity.zero, Quantity.sqrt# (0.5 *. evaluate secondDerivative 0))
               else Nothing
       let singularity1 =
-            if isSingularity 1.0
-              then Just (Quantity.zero, negative (Quantity.sqrt# (0.5 *. evaluate secondDerivative 1.0)))
+            if isSingularity 1
+              then Just (Quantity.zero, negative (Quantity.sqrt# (0.5 *. evaluate secondDerivative 1)))
               else Nothing
       desingularize singularity0 (unsafeSqrt# curve) singularity1
 
@@ -540,14 +540,14 @@ unsafeSqrt# :: Curve (units #*# units) -> Curve units
 unsafeSqrt# curve =
   recursive
     @ CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# curve.compiled
-    @ \self -> Units.coerce (unsafeQuotient# curve.derivative (2.0 *. self))
+    @ \self -> Units.coerce (unsafeQuotient# curve.derivative (2 *. self))
 
 -- | Compute the cube of a curve.
 cubed :: Curve Unitless -> Curve Unitless
 cubed curve =
   new
     (CompiledFunction.map Expression.cubed Number.cubed Bounds.cubed curve.compiled)
-    (3.0 *. squared curve .*. curve.derivative)
+    (3 *. squared curve .*. curve.derivative)
 
 -- | Compute the sine of a curve.
 sin :: Curve Radians -> Curve Unitless
@@ -719,11 +719,11 @@ solveMonotonic m fm fn tBounds = do
   let Bounds tLow tHigh = tBounds
   let startNeighborhood = Solve1d.neighborhood n (evaluate fn tLow)
   if Quantity.abs (evaluate fm tLow) <= Solve1d.derivativeTolerance startNeighborhood m
-    then if tLow == 0.0 then Resolved [(0.0, startNeighborhood)] else Unresolved
+    then if tLow == 0 then Resolved [(0, startNeighborhood)] else Unresolved
     else do
       let endNeighborhood = Solve1d.neighborhood n (evaluate fn tHigh)
       if Quantity.abs (evaluate fm tHigh) <= Solve1d.derivativeTolerance endNeighborhood m
-        then if tHigh == 1.0 then Resolved [(1.0, endNeighborhood)] else Unresolved
+        then if tHigh == 1 then Resolved [(1, endNeighborhood)] else Unresolved
         else do
           case Solve1d.monotonic (evaluate fm) (evaluate fn) tBounds of
             Solve1d.Exact t0 -> Resolved [(t0, Solve1d.neighborhood n (evaluate fn t0))]
@@ -770,7 +770,7 @@ b00 =
     concrete Expression.b00d1 $
       concrete Expression.b00d2 $
         concrete Expression.b00d3 $
-          constant 72.0
+          constant 72
 
 b01 :: Curve Unitless
 b01 =
@@ -778,7 +778,7 @@ b01 =
     concrete Expression.b01d1 $
       concrete Expression.b01d2 $
         concrete Expression.b01d3 $
-          constant 48.0
+          constant 48
 
 b02 :: Curve Unitless
 b02 =
@@ -786,7 +786,7 @@ b02 =
     concrete Expression.b02d1 $
       concrete Expression.b02d2 $
         concrete Expression.b02d3 $
-          constant 12.0
+          constant 12
 
 b10 :: Curve Unitless
 b10 =
@@ -794,7 +794,7 @@ b10 =
     concrete Expression.b10d1 $
       concrete Expression.b10d2 $
         concrete Expression.b10d3 $
-          constant -72.0
+          constant -72
 
 b11 :: Curve Unitless
 b11 =
@@ -802,4 +802,4 @@ b11 =
     concrete Expression.b11d1 $
       concrete Expression.b11d2 $
         concrete Expression.b11d3 $
-          constant 24.0
+          constant 24

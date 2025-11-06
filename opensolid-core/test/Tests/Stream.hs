@@ -20,7 +20,7 @@ mapWithIndex = Test.verify "mapWithIndex" Test.do
           |> Stream.mapWithIndex (\i n -> Int.ratio n (Int.pow 2 i))
           |> Stream.take 11
           |> Number.sum
-  let expected = 2.0
+  let expected = 2
   Tolerance.using 1e-3 do
     Test.expect (sum ~= expected)
       |> Test.output "sum" sum

@@ -232,7 +232,7 @@ encodeMaterial material = do
   Json.object
     [ Json.field "pbrMetallicRoughness" do
         Json.object
-          [ Json.field "baseColorFactor" $ Json.listOf Json.number [r, g, b, 1.0]
+          [ Json.field "baseColorFactor" $ Json.listOf Json.number [r, g, b, 1]
           , Json.field "metallicFactor" $ Json.number material.metallic
           , Json.field "roughnessFactor" $ Json.number material.roughness
           ]

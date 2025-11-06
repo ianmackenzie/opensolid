@@ -327,7 +327,7 @@ For example, mirroring in the X direction
 will negate the vector's X component and leave its Y component unchanged.
 -}
 mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
-mirrorIn mirrorDirection vector = vector .-. 2.0 *. projectionIn mirrorDirection vector
+mirrorIn mirrorDirection vector = vector .-. 2 *. projectionIn mirrorDirection vector
 
 {-| Mirror a vector across a given axis.
 
@@ -344,4 +344,4 @@ mirrorAcross (Axis2d _ axisDirection) = mirrorIn (Direction2d.rotateLeft axisDir
 
 scaleIn :: Direction2d space -> Number -> Vector2d (space @ units) -> Vector2d (space @ units)
 scaleIn scaleDirection scale vector =
-  vector .+. (scale .- 1.0) .*. projectionIn scaleDirection vector
+  vector .+. (scale .- 1) .*. projectionIn scaleDirection vector

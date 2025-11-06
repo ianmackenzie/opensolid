@@ -763,7 +763,7 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
           let vertexPair tValue = do
                 let point = Curve3d.evaluate curve3d tValue
                 let uvPoint = Curve2d.evaluate uvCurve tValue
-                let matingTValue = if correctlyAligned then 1.0 -. tValue else tValue
+                let matingTValue = if correctlyAligned then 1 -. tValue else tValue
                 let matingUvPoint = Curve2d.evaluate matingUvCurve matingTValue
                 (Vertex uvPoint point, Vertex matingUvPoint point)
           let (vertices, matingVertices) = List.unzip2 (List.map vertexPair tValues)
@@ -799,8 +799,8 @@ edgeLinearizationPredicate
     let Bounds tStart tEnd = tBounds
     let uvStart = Curve2d.evaluate uvCurve tStart
     let uvEnd = Curve2d.evaluate uvCurve tEnd
-    let matingTStart = if correctlyAligned then 1.0 -. tStart else tStart
-    let matingTEnd = if correctlyAligned then 1.0 -. tEnd else tEnd
+    let matingTStart = if correctlyAligned then 1 -. tStart else tStart
+    let matingTEnd = if correctlyAligned then 1 -. tEnd else tEnd
     let matingUvStart = Curve2d.evaluate matingUvCurve matingTStart
     let matingUvEnd = Curve2d.evaluate matingUvCurve matingTEnd
     let uvBounds = Bounds2d.hull2 uvStart uvEnd

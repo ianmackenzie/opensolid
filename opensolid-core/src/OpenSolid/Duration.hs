@@ -28,7 +28,7 @@ zero :: Duration
 zero = Quantity.zero
 
 second :: Duration
-second = seconds 1.0
+second = seconds 1
 
 seconds :: Number -> Duration
 seconds = Quantity.coerce
@@ -55,7 +55,7 @@ inMilliseconds :: Duration -> Number
 inMilliseconds = (./. millisecond)
 
 minute :: Duration
-minute = seconds 60.0
+minute = seconds 60
 
 minutes :: Number -> Duration
 minutes = (.*. minute)
@@ -64,7 +64,7 @@ inMinutes :: Duration -> Number
 inMinutes = (./. minute)
 
 hour :: Duration
-hour = minutes 60.0
+hour = minutes 60
 
 hours :: Number -> Duration
 hours = (.*. hour)

@@ -199,7 +199,7 @@ inscribedPolygon n (Named centerPoint) (Named diameter) = do
     then Failure EmptyRegion
     else Success do
       let radius = 0.5 *. diameter
-      let vertexAngles = Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n
+      let vertexAngles = Quantity.midpoints (Angle.degrees -90) (Angle.degrees 270) n
       let vertex angle = centerPoint .+. Vector2d.polar radius angle
       let vertices = List.map vertex vertexAngles
       case polygon vertices of
@@ -321,8 +321,8 @@ addFillet radius curves point = do
                       (DirectionCurve2d.evaluate firstTangent t1)
                       (DirectionCurve2d.evaluate secondTangent t2)
               let filletArc = Curve2d.sweptArc centerPoint startPoint sweptAngle
-              let trimmedFirstCurve = firstCurve . Curve.line 0.0 t1
-              let trimmedSecondCurve = secondCurve . Curve.line t2 1.0
+              let trimmedFirstCurve = firstCurve . Curve.line 0 t1
+              let trimmedSecondCurve = secondCurve . Curve.line t2 1
               Success (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence ::
@@ -331,8 +331,8 @@ curveIncidence ::
   Curve2d (space @ units) ->
   (Curve2d (space @ units), Maybe Number)
 curveIncidence point curve
-  | point ~= curve.startPoint = (curve, Just 0.0)
-  | point ~= curve.endPoint = (curve, Just 1.0)
+  | point ~= curve.startPoint = (curve, Just 0)
+  | point ~= curve.endPoint = (curve, Just 1)
   | otherwise = (curve, Nothing)
 
 incidentCurve :: (Curve2d (space @ units), Maybe Number) -> Maybe (Curve2d (space @ units), Number)
@@ -557,7 +557,7 @@ unconvert ::
   Quantity (units2 #/# units1) ->
   Region2d (space @ units2) ->
   Region2d (space @ units1)
-unconvert factor region = convert (Units.simplify (1.0 /# factor)) region
+unconvert factor region = convert (Units.simplify (1 /# factor)) region
 
 contains :: Tolerance units => Point2d (space @ units) -> Region2d (space @ units) -> Bool
 contains point region =
@@ -602,7 +602,7 @@ classifyNonBoundary point loop = do
   if Bounds.includes Quantity.zero flux then Negative else Positive
 
 bothPossibleFluxValues :: Bounds Unitless
-bothPossibleFluxValues = Bounds 0.0 Number.twoPi
+bothPossibleFluxValues = Bounds 0 Number.twoPi
 
 containmentIsDeterminate :: Bounds Unitless -> Bool
 containmentIsDeterminate flux = not (Bounds.contains bothPossibleFluxValues flux)

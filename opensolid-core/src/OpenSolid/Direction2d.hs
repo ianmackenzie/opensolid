@@ -83,11 +83,11 @@ lift function (Unit2d vector) = Unit2d (function vector)
 
 -- | The X direction.
 x :: Direction2d space
-x = Unit2d (Vector2d 1.0 0.0)
+x = Unit2d (Vector2d 1 0)
 
 -- | The Y direction.
 y :: Direction2d space
-y = Unit2d (Vector2d 0.0 1.0)
+y = Unit2d (Vector2d 0 1)
 
 data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, Error.Message)
 

@@ -140,7 +140,7 @@ lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
               Just rightPlaneOrientation ->
                 Frame3d.fromRightPlane (Plane3d eyePoint rightPlaneOrientation)
               Nothing -- View direction is either straight up or straight down
-                | Direction3d.upwardComponent computedForwardDirection > 0.0 ->
+                | Direction3d.upwardComponent computedForwardDirection > 0 ->
                     Frame3d eyePoint World3d.upwardOrientation
                 | otherwise ->
                     Frame3d eyePoint World3d.downwardOrientation
@@ -183,7 +183,7 @@ isometric ::
 isometric givenFocalPoint distance givenProjection =
   orbit
     @ #focalPoint givenFocalPoint
-    @ #azimuth (Angle.degrees 45.0)
+    @ #azimuth (Angle.degrees 45)
     @ #elevation isometricElevation
     @ #distance distance
     @ #projection givenProjection

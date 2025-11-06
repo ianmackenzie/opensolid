@@ -225,10 +225,10 @@ hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
 startPoint :: Curve3d (space @ units) -> Point3d (space @ units)
-startPoint curve = evaluate curve 0.0
+startPoint curve = evaluate curve 0
 
 endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
-endPoint curve = evaluate curve 1.0
+endPoint curve = evaluate curve 1
 
 evaluate :: Curve3d (space @ units) -> Number -> Point3d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
@@ -240,7 +240,7 @@ bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
 bounds curve = evaluateBounds curve Bounds.unitInterval
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
-reverse curve = curve . (1.0 -. Curve.t)
+reverse curve = curve . (1 -. Curve.t)
 
 arcLengthParameterization ::
   Tolerance units =>

@@ -119,7 +119,7 @@ toSvg viewBox drawing = do
               , lengthText height
               ]
         , blackStroke
-        , strokeWidth (Length.pixels 1.0)
+        , strokeWidth (Length.pixels 1)
         , noFill
         ]
   Text.multiline

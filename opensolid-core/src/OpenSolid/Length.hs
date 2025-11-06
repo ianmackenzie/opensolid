@@ -42,7 +42,7 @@ zero = Quantity.zero
 
 -- | One meter.
 meter :: Length
-meter = meters 1.0
+meter = meters 1
 
 -- | Construct a length from a number of meters.
 meters :: Number -> Length
@@ -128,7 +128,7 @@ inInches = (./. inch)
 
 -- | One CSS pixel, equal to 1/96 of an inch.
 pixel :: Length
-pixel = inch ./ 96.0
+pixel = inch ./ 96
 
 -- | Construct a length from a number of CSS pixels.
 pixels :: Number -> Length

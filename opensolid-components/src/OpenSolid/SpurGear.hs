@@ -45,7 +45,7 @@ instance HasField "pitchDiameter" SpurGear Length where
 This is equal to the pitch diameter plus twice the module.
 -}
 instance HasField "outerDiameter" SpurGear Length where
-  getField gear = gear.pitchDiameter .+. 2.0 *. gear.module_
+  getField gear = gear.pitchDiameter .+. 2 *. gear.module_
 
 {-| Get the outer profile of a gear as a list of curves, centered at the origin.
 
@@ -62,15 +62,15 @@ profile :: Tolerance Meters => SpurGear -> List (Curve2d (space @ Meters))
 profile gear = do
   let n = gear.numTeeth
   let m = gear.module_
-  let phi = Angle.degrees 20.0 -- pressure angle
+  let phi = Angle.degrees 20 -- pressure angle
   let r0 = m .*. Number.fromInt n ./ 2 -- pitch radius
   let rb = r0 .*. Angle.cos phi -- involute tooth profile base radius
   let rd = r0 .-. 1.25 *. m -- dedendum radius
   let ra = r0 .+. m -- addendum radius
   let theta1
-        | rd > rb = Angle.radians (Number.sqrt (Number.squared (rd ./. rb) .- 1.0))
+        | rd > rb = Angle.radians (Number.sqrt (Number.squared (rd ./. rb) .- 1))
         | otherwise = Angle.zero
-  let theta2 = Angle.radians (Number.sqrt (Number.squared (ra ./. rb) .- 1.0))
+  let theta2 = Angle.radians (Number.sqrt (Number.squared (ra ./. rb) .- 1))
   let theta = Curve.line theta1 theta2
   let alpha = Angle.radians (Angle.tan phi .-. Angle.inRadians phi .+. Number.pi ./. Number.fromInt (2 * n))
   let x = rb .*. (Curve.sin (theta .-. alpha) .-. theta ./. Angle.radian .*. Curve.cos (theta .-. alpha))
@@ -81,7 +81,7 @@ profile gear = do
   let involuteLeftDerivative = involuteLeft.derivative
   let leftStartTangent
         | rd > rb = Vector2d.normalize (VectorCurve2d.startValue involuteLeftDerivative)
-        | otherwise = Vector2d.polar 1.0 (Angle.halfPi .+. alpha)
+        | otherwise = Vector2d.polar 1 (Angle.halfPi .+. alpha)
   let leftEndTangent = Vector2d.normalize (VectorCurve2d.endValue involuteLeftDerivative)
   let leftDerivativeMagnitude = Point2d.distanceFrom leftStart leftEnd
   let leftApproximation =

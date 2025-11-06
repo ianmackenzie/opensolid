@@ -176,11 +176,11 @@ infixl 7 .%.
 
 {-# INLINE zero #-}
 zero :: Quantity units
-zero = Quantity 0.0
+zero = Quantity 0
 
 {-# INLINE unit #-}
 unit :: Quantity units
-unit = Quantity 1.0
+unit = Quantity 1
 
 infinity :: Quantity units
 infinity = unit ./. (zero :: Number)

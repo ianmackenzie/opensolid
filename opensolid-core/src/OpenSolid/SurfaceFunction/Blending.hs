@@ -153,7 +153,7 @@ uParameterization :: Number -> SurfaceFunction2d UvCoordinates
 uParameterization vValue = SurfaceFunction2d.xy SurfaceFunction.u (SurfaceFunction.constant vValue)
 
 uParameterizationV0 :: SurfaceFunction2d UvCoordinates
-uParameterizationV0 = uParameterization 0.0
+uParameterizationV0 = uParameterization 0
 
 uParameterizationVT0 :: SurfaceFunction2d UvCoordinates
 uParameterizationVT0 = uParameterization Desingularization.t0
@@ -162,13 +162,13 @@ uParameterizationVT1 :: SurfaceFunction2d UvCoordinates
 uParameterizationVT1 = uParameterization Desingularization.t1
 
 uParameterizationV1 :: SurfaceFunction2d UvCoordinates
-uParameterizationV1 = uParameterization 1.0
+uParameterizationV1 = uParameterization 1
 
 vParameterization :: Number -> SurfaceFunction2d UvCoordinates
 vParameterization uValue = SurfaceFunction2d.xy (SurfaceFunction.constant uValue) SurfaceFunction.v
 
 vParameterizationU0 :: SurfaceFunction2d UvCoordinates
-vParameterizationU0 = vParameterization 0.0
+vParameterizationU0 = vParameterization 0
 
 vParameterizationUT0 :: SurfaceFunction2d UvCoordinates
 vParameterizationUT0 = vParameterization Desingularization.t0
@@ -177,4 +177,4 @@ vParameterizationUT1 :: SurfaceFunction2d UvCoordinates
 vParameterizationUT1 = vParameterization Desingularization.t1
 
 vParameterizationU1 :: SurfaceFunction2d UvCoordinates
-vParameterizationU1 = vParameterization 1.0
+vParameterizationU1 = vParameterization 1

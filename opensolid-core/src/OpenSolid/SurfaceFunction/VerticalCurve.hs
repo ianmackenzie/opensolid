@@ -136,6 +136,6 @@ clamp v (Bounds uLow uHigh) axis = do
   let Direction2d du dv = Axis2d.direction axis
   let u = u0 .+. (v .-. v0) .*. du ./. dv
   if
-    | dv > 0.0 -> Bounds uLow (Quantity.min uHigh u)
-    | dv < 0.0 -> Bounds (Quantity.max uLow u) uHigh
+    | dv > 0 -> Bounds uLow (Quantity.min uHigh u)
+    | dv < 0 -> Bounds (Quantity.max uLow u) uHigh
     | otherwise -> Bounds uLow uHigh

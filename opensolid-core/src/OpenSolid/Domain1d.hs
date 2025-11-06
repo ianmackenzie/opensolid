@@ -62,7 +62,7 @@ instance Ord Boundary where
     compare (i1 .*. n2) (i2 .*. n1)
 
 unit :: Domain1d
-unit = Domain1d{n = 1.0, i = 0.0, j = 1.0}
+unit = Domain1d{n = 1, i = 0, j = 1}
 
 constant :: Boundary -> Domain1d
 constant Boundary{n, i} = Domain1d{n, i, j = i}
@@ -80,33 +80,33 @@ upperBoundary :: Domain1d -> Boundary
 upperBoundary (Domain1d{n, j}) = Boundary{n, i = j}
 
 midpoint :: Domain1d -> Boundary
-midpoint (Domain1d n i j) = Boundary (2.0 *. n) (i .+. j)
+midpoint (Domain1d n i j) = Boundary (2 *. n) (i .+. j)
 
 width :: Domain1d -> Number
 width (Domain1d n i j) = (j .-. i) ./. n
 
 bisect :: Domain1d -> (Domain1d, Domain1d)
 bisect (Domain1d{n, i, j}) = do
-  let n2 = 2.0 *. n
-  let i2 = 2.0 *. i
-  let j2 = 2.0 *. j
+  let n2 = 2 *. n
+  let i2 = 2 *. i
+  let j2 = 2 *. j
   let mid = i2 .+. (j .-. i)
   (Domain1d n2 i2 mid, Domain1d n2 mid j2)
 
 half :: Domain1d -> Domain1d
 half (Domain1d{n, i, j}) = do
   let delta = j .-. i
-  Domain1d (4.0 *. n) (4.0 *. i .+. delta) (4.0 *. j .-. delta)
+  Domain1d (4 *. n) (4 *. i .+. delta) (4 *. j .-. delta)
 
 bounds :: Domain1d -> Bounds Unitless
 bounds (Domain1d{n, i, j}) = Bounds (i ./. n) (j ./. n)
 
 interior :: Domain1d -> Bounds Unitless
 interior (Domain1d{n, i, j}) = do
-  let n8 = 8.0 *. n
+  let n8 = 8 *. n
   let delta = j .-. i
-  let low = if i == 0.0 then 0.0 else (8.0 *. i .+. delta) ./. n8
-  let high = if j == n then 1.0 else (8.0 *. j .-. delta) ./. n8
+  let low = if i == 0 then 0 else (8 *. i .+. delta) ./. n8
+  let high = if j == n then 1 else (8 *. j .-. delta) ./. n8
   Bounds low high
 
 overlaps :: Domain1d -> Domain1d -> Bool
@@ -129,20 +129,20 @@ intersectionWidth :: Domain1d -> Domain1d -> Number
 intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do
   let low = Number.max (i1 ./. n1) (i2 ./. n2)
   let high = Number.min (j1 ./. n1) (j2 ./. n2)
-  Number.max (high .-. low) 0.0
+  Number.max (high .-. low) 0
 
 samplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
-samplingPoints predicate = 0.0 :| collectSamplingPoints predicate Bounds.unitInterval [1.0]
+samplingPoints predicate = 0 :| collectSamplingPoints predicate Bounds.unitInterval [1]
 
 innerSamplingPoints :: (Bounds Unitless -> Bool) -> List Number
 innerSamplingPoints predicate = collectSamplingPoints predicate Bounds.unitInterval []
 
 leadingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
-leadingSamplingPoints predicate = 0.0 :| innerSamplingPoints predicate
+leadingSamplingPoints predicate = 0 :| innerSamplingPoints predicate
 
 trailingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
 trailingSamplingPoints predicate =
-  case collectSamplingPoints predicate Bounds.unitInterval [1.0] of
+  case collectSamplingPoints predicate Bounds.unitInterval [1] of
     NonEmpty points -> points
     [] -> internalError "collectSamplingPoints should always return at least the point it was given"
 

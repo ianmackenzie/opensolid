@@ -39,10 +39,10 @@ unwrap :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 unwrap (DirectionCurve2d vectorCurve) = vectorCurve
 
 startValue :: DirectionCurve2d space -> Direction2d space
-startValue curve = evaluate curve 0.0
+startValue curve = evaluate curve 0
 
 endValue :: DirectionCurve2d space -> Direction2d space
-endValue curve = evaluate curve 1.0
+endValue curve = evaluate curve 1
 
 evaluate :: DirectionCurve2d space -> Number -> Direction2d space
 evaluate (DirectionCurve2d vectorCurve) tValue =
@@ -59,7 +59,7 @@ constant :: Direction2d space -> DirectionCurve2d space
 constant direction = DirectionCurve2d (VectorCurve2d.constant (Vector2d.unit direction))
 
 arc :: Angle -> Angle -> DirectionCurve2d space
-arc a b = DirectionCurve2d (VectorCurve2d.arc (Vector2d 1.0 0.0) (Vector2d 0.0 1.0) a b)
+arc a b = DirectionCurve2d (VectorCurve2d.arc (Vector2d 1 0) (Vector2d 0 1) a b)
 
 reverse :: DirectionCurve2d space -> DirectionCurve2d space
 reverse (DirectionCurve2d vectorCurve) = DirectionCurve2d (VectorCurve2d.reverse vectorCurve)

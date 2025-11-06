@@ -20,23 +20,23 @@ parameterization :: Tolerance units => Curve units -> (Curve Unitless, Quantity 
 parameterization derivativeMagnitude = do
   let dsdt = Curve.evaluate derivativeMagnitude
   let d2sdt2 = Curve.evaluate derivativeMagnitude.derivative
-  let dsdt1 = dsdt 0.0
+  let dsdt1 = dsdt 0
   let dsdt2 = dsdt Lobatto.p2
   let dsdt3 = dsdt Lobatto.p3
-  let dsdt4 = dsdt 1.0
+  let dsdt4 = dsdt 1
   if
     | isConstant dsdt1 dsdt2 dsdt3 dsdt4 -> (Curve.t, dsdt1)
     | isLinear dsdt1 dsdt2 dsdt3 dsdt4 -> do
         let delta = dsdt4 .-. dsdt1
         let t0 = negative dsdt1 ./. delta
         let sqrt = Tolerance.using Quantity.zero do
-              Curve.sqrt (t0 .*. t0 .+. (1.0 -. 2.0 *. t0) .*. Curve.t)
+              Curve.sqrt (t0 .*. t0 .+. (1 -. 2 *. t0) .*. Curve.t)
         let curve = if delta > Quantity.zero then t0 .+. sqrt else t0 .-. sqrt
         let length = 0.5 *. (dsdt1 .+. dsdt4)
         (curve, length)
     | otherwise -> do
         let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
-        let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
+        let (tree, length) = buildTree 1 dsdt d2sdt2 0 1 dsdt1 dsdt4 coarseEstimate
         let evaluate uValue = evaluateIn tree (uValue .*. length)
         let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
         let compiled = CompiledFunction.abstract evaluate evaluateBounds

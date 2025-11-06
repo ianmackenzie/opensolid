@@ -36,18 +36,18 @@ tests =
 
 quadratic1d :: Tolerance Unitless => Test
 quadratic1d =
-  curve1d "Quadratic" (Curve.squared Curve.t .- 2.0) 1.0 (Number.sqrt 2.0)
+  curve1d "Quadratic" (Curve.squared Curve.t .- 2) 1 (Number.sqrt 2)
 
 quadraticDivergence1d :: Tolerance Unitless => Test
 quadraticDivergence1d =
-  curveDivergence1d "Quadratic divergence" (Curve.squared Curve.t .+ 2.0) 1.0
+  curveDivergence1d "Quadratic divergence" (Curve.squared Curve.t .+ 2) 1
 
 arc2d :: Tolerance Unitless => Test
 arc2d = do
   let arc =
         Curve2d.polarArc
           @ #centerPoint Point2d.origin
-          @ #radius 1.0
+          @ #radius 1
           @ #startAngle Angle.zero
           @ #endAngle Angle.pi
   let point = Point2d (Number.sqrt 2 ./ 2) (Number.sqrt 2 ./ 2)
@@ -57,10 +57,10 @@ simpleSurface2d :: Tolerance Unitless => Test
 simpleSurface2d = do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  let x = SurfaceFunction.squared u .- 2.0
-  let y = v .- 1.0
+  let x = SurfaceFunction.squared u .- 2
+  let y = v .- 1
   let surface = VectorSurfaceFunction2d.xy x y
-  surface2d "Simple 2D surface" surface (Point2d 1.0 0.0) (Point2d (Number.sqrt 2.0) 1.0)
+  surface2d "Simple 2D surface" surface (Point2d 1 0) (Point2d (Number.sqrt 2) 1)
 
 expectedConvergence :: Expectation
 expectedConvergence = Test.fail "Expected Newton-Raphson to converge but it did not"

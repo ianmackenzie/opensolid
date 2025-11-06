@@ -274,7 +274,7 @@ constant value = Bounds value value
 
 -- | The bounding range with endoints [0,1].
 unitInterval :: Bounds Unitless
-unitInterval = Bounds 0.0 1.0
+unitInterval = Bounds 0 1
 
 {-# INLINE coerce #-}
 coerce :: Bounds units1 -> Bounds units2
@@ -471,10 +471,10 @@ bisect (Bounds low high) = do
             let value = Quantity.midpoint low high
             assert (low < value && value < high) value
         | low < Quantity.zero && high > Quantity.zero = Quantity.zero
-        | low == Quantity.zero = Quantity 1.0
-        | high == Quantity.zero = Quantity -1.0
-        | low > Quantity.zero = 2.0 *. low
-        | high < Quantity.zero = 2.0 *. high
+        | low == Quantity.zero = Quantity 1
+        | high == Quantity.zero = Quantity -1
+        | low > Quantity.zero = 2 *. low
+        | high < Quantity.zero = 2 *. high
         | otherwise = internalError "'Impossible' case hit in Bounds.bisect"
   (Bounds low mid, Bounds mid high)
 
@@ -559,15 +559,15 @@ largest list = do
 sin :: Bounds Radians -> Bounds Unitless
 sin bounds@(Bounds low high) = do
   let (includesMin, includesMax) = sinIncludesMinMax bounds
-  let newLow = if includesMin then -1.0 else Quantity.min (Angle.sin low) (Angle.sin high)
-  let newHigh = if includesMax then 1.0 else Quantity.max (Angle.sin low) (Angle.sin high)
+  let newLow = if includesMin then -1 else Quantity.min (Angle.sin low) (Angle.sin high)
+  let newHigh = if includesMax then 1 else Quantity.max (Angle.sin low) (Angle.sin high)
   Bounds newLow newHigh
 
 cos :: Bounds Radians -> Bounds Unitless
 cos bounds@(Bounds low high) = do
   let (includesMin, includesMax) = cosIncludesMinMax bounds
-  let newLow = if includesMin then -1.0 else Quantity.min (Angle.cos low) (Angle.cos high)
-  let newHigh = if includesMax then 1.0 else Quantity.max (Angle.cos low) (Angle.cos high)
+  let newLow = if includesMin then -1 else Quantity.min (Angle.cos low) (Angle.cos high)
+  let newHigh = if includesMax then 1 else Quantity.max (Angle.cos low) (Angle.cos high)
   Bounds newLow newHigh
 
 sinIncludesMinMax :: Bounds Radians -> (Bool, Bool)
@@ -590,13 +590,13 @@ interpolationParameter (Bounds low high) value
   | low < high = (value .-. low) ./. (high .-. low)
   | value < low = negative Quantity.infinity
   | value > high = Quantity.infinity
-  | otherwise = 0.0
+  | otherwise = 0
 
 resolution :: Bounds units -> Number
 resolution (Bounds low high)
   | low > Quantity.zero = low ./. high
   | high < Quantity.zero = negative high ./. low
-  | otherwise = 0.0
+  | otherwise = 0
 
 resolutionThreshold :: Number
 resolutionThreshold = 0.5

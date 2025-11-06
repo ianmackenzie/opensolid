@@ -288,7 +288,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction2d (space @ (units1 #/# units2)))
   where
-  function #/# value = Units.simplify (function #*# (1.0 /# value))
+  function #/# value = Units.simplify (function #*# (1 /# value))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -621,7 +621,7 @@ quotient# numerator denominator = do
               Units.simplify $
                 unsafeQuotient#
                   (numerator'' #*# denominator' .-. numerator' #*# denominator'')
-                  (2.0 *. SurfaceFunction.squared# denominator')
+                  (2 *. SurfaceFunction.squared# denominator')
         (value, firstDerivative)
   SurfaceFunction.Quotient.impl unsafeQuotient# lhopital desingularize numerator denominator
 
@@ -651,7 +651,7 @@ squaredMagnitude# function =
       Vector2d.squaredMagnitude#
       VectorBounds2d.squaredMagnitude#
       function.compiled
-    @ \p -> 2.0 *. function `dot#` derivative p function
+    @ \p -> 2 *. function `dot#` derivative p function
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

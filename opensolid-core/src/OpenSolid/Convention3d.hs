@@ -51,36 +51,14 @@ instance FFI Convention3d where
 This is the convention used by (among other things) the glTF file format.
 -}
 yUp :: Convention3d
-yUp =
-  Convention3d
-    { xr = -1.0
-    , xf = 0.0
-    , xu = 0.0
-    , yr = 0.0
-    , yf = 0.0
-    , yu = 1.0
-    , zr = 0.0
-    , zf = 1.0
-    , zu = 0.0
-    }
+yUp = Convention3d{xr = -1, xf = 0, xu = 0, yr = 0, yf = 0, yu = 1, zr = 0, zf = 1, zu = 0}
 
 {-| A convention where positive X is rightward, positive Y is forward and positive Z is upward.
 
 This is the convention used by (among other things) the Blender animation package.
 -}
 zUp :: Convention3d
-zUp =
-  Convention3d
-    { xr = 1.0
-    , xf = 0.0
-    , xu = 0.0
-    , yr = 0.0
-    , yf = 1.0
-    , yu = 0.0
-    , zr = 0.0
-    , zf = 0.0
-    , zu = 1.0
-    }
+zUp = Convention3d{xr = 1, xf = 0, xu = 0, yr = 0, yf = 1, yu = 0, zr = 0, zf = 0, zu = 1}
 
 custom ::
   (forall space. Orientation3d space -> Direction3d space) ->

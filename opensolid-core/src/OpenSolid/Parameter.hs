@@ -43,7 +43,7 @@ samples = do
   [p1, p2, p3, p4, p5]
 
 random :: Random.Generator Number
-random = Number.random 0.0 1.0
+random = Number.random 0 1
 
 {-# INLINE divideBy #-}
 divideBy :: Int -> Int -> Number

@@ -122,8 +122,8 @@ instance Interface (Add units) units where
     let width1 = Bounds.width (bounds first)
     let width2 = Bounds.width (bounds second)
     if
-      | width1 >= 2.0 *. width2 -> refine first .+. second
-      | width2 >= 2.0 *. width1 -> first .+. refine second
+      | width1 >= 2 *. width2 -> refine first .+. second
+      | width2 >= 2 *. width1 -> first .+. refine second
       | otherwise -> refine first .+. refine second
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
@@ -143,8 +143,8 @@ instance Interface (Subtract units) units where
     let width1 = Bounds.width (bounds first)
     let width2 = Bounds.width (bounds second)
     if
-      | width1 >= 2.0 *. width2 -> refine first .-. second
-      | width2 >= 2.0 *. width1 -> first .-. refine second
+      | width1 >= 2 *. width2 -> refine first .-. second
+      | width2 >= 2 *. width1 -> first .-. refine second
       | otherwise -> refine first .-. refine second
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
@@ -214,7 +214,7 @@ instance
   value .*. estimate = exact value .*. estimate
 
 instance Division# (Estimate units1) (Quantity units2) (Estimate (units1 #/# units2)) where
-  estimate #/# value = Units.simplify (estimate #*# (1.0 /# value))
+  estimate #/# value = Units.simplify (estimate #*# (1 /# value))
 
 instance
   Units.Quotient units1 units2 units3 =>

@@ -79,7 +79,7 @@ import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 length :: Generator Length
-length = Quantity.random (Length.meters -10.0) (Length.meters 10.0)
+length = Quantity.random (Length.meters -10) (Length.meters 10)
 
 lengthBounds :: Generator (Bounds Meters)
 lengthBounds = Bounds.random length
@@ -148,7 +148,7 @@ arc2d = do
   startPoint <- point2d
   endPoint <- point2d
   angleSign <- Sign.random
-  angleMagnitude <- Quantity.random (Angle.degrees 5.0) (Angle.degrees 355.0)
+  angleMagnitude <- Quantity.random (Angle.degrees 5) (Angle.degrees 355)
   let sweptAngle = angleSign .*. angleMagnitude
   Random.return (Curve2d.arc startPoint endPoint sweptAngle)
 
@@ -164,7 +164,7 @@ translation2d = Random.map Transform2d.translateBy vector2d
 rotation2d :: Generator (Transform2d.Rigid (space @ Meters))
 rotation2d = do
   centerPoint <- point2d
-  angle <- Quantity.random (Angle.degrees -360.0) (Angle.degrees 360.0)
+  angle <- Quantity.random (Angle.degrees -360) (Angle.degrees 360)
   Random.return (Transform2d.rotateAround centerPoint angle)
 
 mirror2d :: Generator (Transform2d.Orthonormal (space @ Meters))
@@ -182,7 +182,7 @@ orthonormalTransform2d =
       @ mirror2d
 
 scalingFactor :: Generator Number
-scalingFactor = Number.random 0.5 2.0
+scalingFactor = Number.random 0.5 2
 
 uniformScaling2d :: Generator (Transform2d.Uniform (space @ Meters))
 uniformScaling2d = Random.map2 Transform2d.scaleAbout point2d scalingFactor
@@ -218,7 +218,7 @@ translation3d = Random.map Transform3d.translateBy vector3d
 rotation3d :: Generator (Transform3d.Rigid (space @ Meters))
 rotation3d = do
   axis <- axis3d
-  angle <- Quantity.random (Angle.degrees -360.0) (Angle.degrees 360.0)
+  angle <- Quantity.random (Angle.degrees -360) (Angle.degrees 360)
   Random.return (Transform3d.rotateAround axis angle)
 
 mirror3d :: Generator (Transform3d.Orthonormal (space @ Meters))
