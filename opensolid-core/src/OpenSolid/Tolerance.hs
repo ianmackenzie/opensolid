@@ -6,14 +6,12 @@ module OpenSolid.Tolerance
   , unitless
   , squared
   , squared#
-  , forEndpointDerivative
   , (~=##)
   )
 where
 
 import OpenSolid.Arithmetic hiding ((*), (+), (-), (/))
 import OpenSolid.Bootstrap
-import {-# SOURCE #-} OpenSolid.Int qualified as Int
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import OpenSolid.Number (Number)
 import OpenSolid.Quantity (Quantity (Quantity##))
@@ -21,7 +19,6 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (type (#*#))
 import OpenSolid.Units qualified as Units
-import Prelude ((*))
 
 type Tolerance units = ?tolerance :: Quantity units
 
@@ -98,9 +95,6 @@ squared = Quantity.squared ?tolerance
 
 squared# :: Tolerance units => Quantity (units #*# units)
 squared# = Quantity.squared# ?tolerance
-
-forEndpointDerivative :: Tolerance units => Int -> Quantity units
-forEndpointDerivative n = ?tolerance ./ fromIntegral (Int.factorial n * 2 ** (2 * n))
 
 {-# INLINE (~=##) #-}
 (~=##) :: Tolerance units => Double# -> Double# -> Int#
