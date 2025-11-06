@@ -59,11 +59,11 @@ import Prelude qualified
 type Number = Quantity Unitless
 
 {-# INLINE fromDouble #-}
-fromDouble :: Prelude.Double -> Number
+fromDouble :: Double -> Number
 fromDouble = Quantity
 
 {-# INLINE toDouble #-}
-toDouble :: Number -> Prelude.Double
+toDouble :: Number -> Double
 toDouble (Quantity x) = x
 
 {-# INLINE fromInt #-}
