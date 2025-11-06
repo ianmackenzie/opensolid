@@ -7,7 +7,7 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Prelude ((*.), (.*.), (.+.))
+import OpenSolid.Prelude ((.*.), (.+.))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d qualified as Surface3d
@@ -19,8 +19,8 @@ import OpenSolid.World3d qualified as World3d
 main :: IO ()
 main = do
   let r = Length.meters 1
-  let h = 2 *. Number.pi .*. r
-  let theta = 2 *. Angle.pi .*. SurfaceFunction.u
+  let h = Number.twoPi .*. r
+  let theta = Angle.twoPi .*. SurfaceFunction.u
   let surfaceFunction =
         World3d.originPoint
           .+. r .*. SurfaceFunction.cos theta .*. World3d.rightwardDirection
