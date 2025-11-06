@@ -350,10 +350,10 @@ instance
   function #/# value = Units.simplify (function #*# (1 /# value))
 
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
-  curve . function =
+  curve `compose` function =
     new
-      @ curve.compiled . function.compiled
-      @ \p -> curve.derivative . function .*. derivative p function
+      @ curve.compiled `compose` function.compiled
+      @ \p -> curve.derivative `compose` function .*. derivative p function
 
 evaluate :: SurfaceFunction units -> UvPoint -> Quantity units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint

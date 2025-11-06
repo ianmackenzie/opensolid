@@ -200,7 +200,7 @@ instance
   lhs `cross` DirectionCurve2d rhs = lhs `cross` rhs
 
 instance Composition (Curve Unitless) (DirectionCurve2d space) (DirectionCurve2d space) where
-  DirectionCurve2d curve . curve1d = DirectionCurve2d (curve . curve1d)
+  DirectionCurve2d curve `compose` curve1d = DirectionCurve2d (curve `compose` curve1d)
 
 instance HasField "xComponent" (DirectionCurve2d space) (Curve Unitless) where
   getField (DirectionCurve2d curve) = curve.xComponent

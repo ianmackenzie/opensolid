@@ -4,7 +4,6 @@ import Data.Text qualified
 import Data.Text.Read (Reader)
 import Data.Text.Read qualified
 import OpenSolid.Bootstrap
-import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Number (Number)
 import {-# SOURCE #-} OpenSolid.Number qualified as Number
 import OpenSolid.Result (Result (Failure, Success))

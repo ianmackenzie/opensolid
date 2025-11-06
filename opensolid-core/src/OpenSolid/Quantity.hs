@@ -52,7 +52,6 @@ import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap hiding (max, min)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Composition
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List

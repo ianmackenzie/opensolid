@@ -126,7 +126,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
   let derivative self = do
         let deltaU = uEnd .-. uStart
         let dudt = Curve.constant deltaU
-        let dvdt = dudt .*. dvdu . self
+        let dvdt = dudt .*. dvdu `compose` self
         VectorCurve2d.xy dudt dvdt
   Curve2d.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
 

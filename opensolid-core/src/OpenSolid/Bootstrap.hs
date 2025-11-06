@@ -77,7 +77,6 @@ import Prelude hiding
   , zip3
   , zipWith
   , zipWith3
-  , (.)
   , (^)
   , (^^)
   )

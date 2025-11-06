@@ -80,7 +80,7 @@ parametric ::
   Region2d UvCoordinates ->
   Surface3d (space @ units)
 parametric givenFunction givenDomain = do
-  let boundaryLoop domainLoop = NonEmpty.map (givenFunction .) domainLoop
+  let boundaryLoop domainLoop = NonEmpty.map (givenFunction `compose`) domainLoop
   Surface3d
     { function = givenFunction
     , domain = givenDomain
@@ -108,19 +108,23 @@ on plane region = do
 
 extruded :: Curve3d (space @ units) -> Vector3d (space @ units) -> Surface3d (space @ units)
 extruded curve displacement =
-  parametric (curve . SurfaceFunction.u .+. SurfaceFunction.v .*. displacement) Region2d.unitSquare
+  parametric
+    (curve `compose` SurfaceFunction.u .+. SurfaceFunction.v .*. displacement)
+    Region2d.unitSquare
 
 translational ::
   Curve3d (space @ units) ->
   VectorCurve3d (space @ units) ->
   Surface3d (space @ units)
 translational uCurve vCurve =
-  parametric (uCurve . SurfaceFunction.u .+. vCurve . SurfaceFunction.v) Region2d.unitSquare
+  parametric
+    (uCurve `compose` SurfaceFunction.u .+. vCurve `compose` SurfaceFunction.v)
+    Region2d.unitSquare
 
 ruled :: Curve3d (space @ units) -> Curve3d (space @ units) -> Surface3d (space @ units)
 ruled bottom top = do
-  let f1 = bottom . SurfaceFunction.u
-  let f2 = top . SurfaceFunction.u
+  let f1 = bottom `compose` SurfaceFunction.u
+  let f2 = top `compose` SurfaceFunction.u
   parametric (f1 .+. SurfaceFunction.v .*. (f2 .-. f1)) Region2d.unitSquare
 
 revolved ::
@@ -144,8 +148,8 @@ revolved sketchPlane curve axis angle = do
               Positive -> (SurfaceFunction.u, SurfaceFunction.v)
               Negative -> (SurfaceFunction.v, SurfaceFunction.u)
         let theta = angle .*. revolutionParameter
-        let radius = xCoordinate . curveParameter
-        let height = localCurve.yCoordinate . curveParameter
+        let radius = xCoordinate `compose` curveParameter
+        let height = localCurve.yCoordinate `compose` curveParameter
         let function =
               frame3d.originPoint
                 .+. radius .*. SurfaceFunction.cos theta .*. frame3d.rightwardDirection
@@ -159,7 +163,7 @@ boundaryCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoop
 flip :: Surface3d (space @ units) -> Surface3d (space @ units)
 flip surface =
   parametric
-    @ surface.function . SurfaceFunction2d.xy (negative SurfaceFunction.u) SurfaceFunction.v
+    @ surface.function `compose` SurfaceFunction2d.xy (negative SurfaceFunction.u) SurfaceFunction.v
     @ Region2d.mirrorAcross Axis2d.y surface.domain
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.
@@ -215,7 +219,7 @@ boundaryPoints ::
   Curve2d UvCoordinates ->
   NonEmpty UvPoint
 boundaryPoints accuracy surfaceFunction fuu fuv fvv uvCurve = do
-  let curve3d = surfaceFunction . uvCurve
+  let curve3d = surfaceFunction `compose` uvCurve
   let secondDerivative3d = curve3d.derivative.derivative
   let predicate = linearizationPredicate accuracy fuu fuv fvv uvCurve secondDerivative3d
   let parameterValues = Domain1d.leadingSamplingPoints predicate

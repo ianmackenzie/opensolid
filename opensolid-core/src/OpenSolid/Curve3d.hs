@@ -121,10 +121,10 @@ instance
   lhs .-. rhs = VectorCurve3d.new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
 instance Composition (Curve Unitless) (Curve3d (space @ units)) (Curve3d (space @ units)) where
-  outer . inner =
+  outer `compose` inner =
     new
-      @ outer.compiled . inner.compiled
-      @ (outer.derivative . inner) .*. inner.derivative
+      @ outer.compiled `compose` inner.compiled
+      @ (outer.derivative `compose` inner) .*. inner.derivative
 
 instance
   Composition
@@ -132,10 +132,10 @@ instance
     (Curve3d (space @ units))
     (SurfaceFunction3d (space @ units))
   where
-  curve . function =
+  curve `compose` function =
     SurfaceFunction3d.new
-      @ curve.compiled . function.compiled
-      @ \p -> (curve.derivative . function) .*. SurfaceFunction.derivative p function
+      @ curve.compiled `compose` function.compiled
+      @ \p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function
 
 instance ApproximateEquality (Curve3d (space @ units)) units where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
@@ -240,7 +240,7 @@ bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
 bounds curve = evaluateBounds curve Bounds.unitInterval
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
-reverse curve = curve . (1 -. Curve.t)
+reverse curve = curve `compose` (1 -. Curve.t)
 
 arcLengthParameterization ::
   Tolerance units =>
@@ -255,7 +255,7 @@ parameterizeByArcLength ::
   (Curve3d (space @ units), Quantity units)
 parameterizeByArcLength curve = do
   let (parameterization, length) = arcLengthParameterization curve
-  (curve . parameterization, length)
+  (curve `compose` parameterization, length)
 
 transformBy ::
   Transform3d tag (space @ units) ->

@@ -30,7 +30,6 @@ import Data.Text.IO.Utf8 qualified
 import Data.Traversable.WithIndex qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Bootstrap
-import OpenSolid.Composition
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Error qualified as Error

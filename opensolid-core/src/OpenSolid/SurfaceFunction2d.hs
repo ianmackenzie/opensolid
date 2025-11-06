@@ -252,11 +252,11 @@ instance
     (SurfaceFunction2d (space @ units))
     (Curve2d (space @ units))
   where
-  function . curve = do
+  function `compose` curve = do
     let (dudt, dvdt) = curve.derivative.components
     Curve2d.new
-      @ function.compiled . curve.compiled
-      @ (function.du . curve) .*. dudt .+. (function.dv . curve) .*. dvdt
+      @ function.compiled `compose` curve.compiled
+      @ (function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -265,11 +265,11 @@ instance
     (SurfaceFunction units)
     (SurfaceFunction units)
   where
-  f . g = do
-    let dfdu = f.du . g
-    let dfdv = f.dv . g
+  f `compose` g = do
+    let dfdu = f.du `compose` g
+    let dfdv = f.dv `compose` g
     SurfaceFunction.new
-      @ f.compiled . g.compiled
+      @ f.compiled `compose` g.compiled
       @ \p -> do
         let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
         dfdu .*. dudp .+. dfdv .*. dvdp
@@ -281,11 +281,11 @@ instance
     (VectorSurfaceFunction2d (space @ units))
     (VectorSurfaceFunction2d (space @ units))
   where
-  f . g = do
-    let dfdu = f.du . g
-    let dfdv = f.dv . g
+  f `compose` g = do
+    let dfdu = f.du `compose` g
+    let dfdv = f.dv `compose` g
     VectorSurfaceFunction2d.new
-      @ f.compiled . g.compiled
+      @ f.compiled `compose` g.compiled
       @ \p -> do
         let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
         dfdu .*. dudp .+. dfdv .*. dvdp
@@ -297,11 +297,11 @@ instance
     (VectorSurfaceFunction3d (space @ units))
     (VectorSurfaceFunction3d (space @ units))
   where
-  f . g = do
-    let dfdu = f.du . g
-    let dfdv = f.dv . g
+  f `compose` g = do
+    let dfdu = f.du `compose` g
+    let dfdv = f.dv `compose` g
     VectorSurfaceFunction3d.new
-      @ f.compiled . g.compiled
+      @ f.compiled `compose` g.compiled
       @ \p -> do
         let (dudp, dvdp) = VectorSurfaceFunction2d.components (derivative p g)
         dfdu .*. dudp .+. dfdv .*. dvdp
@@ -313,7 +313,8 @@ instance
     (DirectionSurfaceFunction2d space)
     (DirectionSurfaceFunction2d space)
   where
-  f . g = DirectionSurfaceFunction2d.unsafe (DirectionSurfaceFunction2d.unwrap f . g)
+  f `compose` g =
+    DirectionSurfaceFunction2d.unsafe (DirectionSurfaceFunction2d.unwrap f `compose` g)
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -322,7 +323,8 @@ instance
     (DirectionSurfaceFunction3d space)
     (DirectionSurfaceFunction3d space)
   where
-  f . g = DirectionSurfaceFunction3d.unsafe (DirectionSurfaceFunction3d.unwrap f . g)
+  f `compose` g =
+    DirectionSurfaceFunction3d.unsafe (DirectionSurfaceFunction3d.unwrap f `compose` g)
 
 distanceAlong ::
   Axis2d (space @ units) ->

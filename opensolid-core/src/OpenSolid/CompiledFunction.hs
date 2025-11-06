@@ -442,8 +442,8 @@ instance
     (CompiledFunction outerInputValue outerOutputValue outerInputBounds outerOutputBounds)
     (CompiledFunction innerInputValue outerOutputValue innerInputBounds outerOutputBounds)
   where
-  Concrete outer . Concrete inner = Concrete (outer . inner)
-  outer . inner = do
+  Concrete outer `compose` Concrete inner = Concrete (outer `compose` inner)
+  outer `compose` inner = do
     let (outerValue, outerBounds) = evaluators outer
     let (innerValue, innerBounds) = evaluators inner
     Abstract (outerValue . innerValue) (outerBounds . innerBounds)

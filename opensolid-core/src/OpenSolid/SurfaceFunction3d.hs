@@ -160,7 +160,7 @@ instance
     (SurfaceFunction3d (space @ units))
     (Surface3d (space @ units))
   where
-  function . domain = Surface3d.parametric function domain
+  function `compose` domain = Surface3d.parametric function domain
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -169,11 +169,11 @@ instance
     (SurfaceFunction3d (space @ units))
     (SurfaceFunction3d (space @ units))
   where
-  outer . inner = do
-    let duOuter = outer.du . inner
-    let dvOuter = outer.dv . inner
+  outer `compose` inner = do
+    let duOuter = outer.du `compose` inner
+    let dvOuter = outer.dv `compose` inner
     new
-      @ outer.compiled . inner.compiled
+      @ outer.compiled `compose` inner.compiled
       @ \parameter -> do
         let innerDerivative = SurfaceFunction2d.derivative parameter inner
         let (dU, dV) = innerDerivative.components

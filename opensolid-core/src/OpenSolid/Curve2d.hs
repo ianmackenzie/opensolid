@@ -261,7 +261,8 @@ instance
   point .-. curve = constant point .-. curve
 
 instance Composition (Curve Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) .*. g.derivative)
+  f `compose` g =
+    new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) .*. g.derivative)
 
 instance
   Composition
@@ -269,10 +270,10 @@ instance
     (Curve2d (space @ units))
     (SurfaceFunction2d (space @ units))
   where
-  curve . function =
+  curve `compose` function =
     SurfaceFunction2d.new
-      @ curve.compiled . function.compiled
-      @ \p -> curve.derivative . function .*. SurfaceFunction.derivative p function
+      @ curve.compiled `compose` function.compiled
+      @ \p -> curve.derivative `compose` function .*. SurfaceFunction.derivative p function
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -281,9 +282,11 @@ instance
     (SurfaceFunction units)
     (Curve units)
   where
-  f . g = do
+  f `compose` g = do
     let (dudt, dvdt) = g.derivative.components
-    Curve.new (f.compiled . g.compiled) (f.du . g .*. dudt .+. f.dv . g .*. dvdt)
+    Curve.new
+      (f.compiled `compose` g.compiled)
+      (f.du `compose` g .*. dudt .+. f.dv `compose` g .*. dvdt)
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -292,11 +295,11 @@ instance
     (VectorSurfaceFunction3d (space @ units))
     (VectorCurve3d (space @ units))
   where
-  function . uvCurve = do
+  function `compose` uvCurve = do
     let (dudt, dvdt) = uvCurve.derivative.components
     VectorCurve3d.new
-      @ function.compiled . uvCurve.compiled
-      @ function.du . uvCurve .*. dudt .+. function.dv . uvCurve .*. dvdt
+      @ function.compiled `compose` uvCurve.compiled
+      @ function.du `compose` uvCurve .*. dudt .+. function.dv `compose` uvCurve .*. dvdt
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -305,11 +308,11 @@ instance
     (SurfaceFunction3d (space @ units))
     (Curve3d (space @ units))
   where
-  function . uvCurve = do
+  function `compose` uvCurve = do
     let (dudt, dvdt) = uvCurve.derivative.components
     Curve3d.new
-      @ function.compiled . uvCurve.compiled
-      @ function.du . uvCurve .*. dudt .+. function.dv . uvCurve .*. dvdt
+      @ function.compiled `compose` uvCurve.compiled
+      @ function.du `compose` uvCurve .*. dudt .+. function.dv `compose` uvCurve .*. dvdt
 
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 new = Curve2d
@@ -641,7 +644,7 @@ samplePoints curve = List.map (evaluate curve) Parameter.samples
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse curve = curve . (1 -. Curve.t)
+reverse curve = curve `compose` (1 -. Curve.t)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds curve = evaluateBounds curve Bounds.unitInterval
@@ -859,10 +862,13 @@ intersections curve1 curve2 = do
         else do
           let u = SurfaceFunction.u
           let v = SurfaceFunction.v
-          let f = curve1 . u .-. curve2 . v
+          let f = curve1 `compose` u .-. curve2 `compose` v
           let fu = f.du
           let fv = f.dv
-          let g = VectorSurfaceFunction2d.xy (fu `cross#` fv) ((curve1.derivative . u) `dot#` f)
+          let g =
+                VectorSurfaceFunction2d.xy
+                  (fu `cross#` fv)
+                  ((curve1.derivative `compose` u) `dot#` f)
           let gu = g.du
           let gv = g.dv
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
@@ -1100,10 +1106,10 @@ medialAxis ::
   Curve2d (space @ units) ->
   Result IsPoint (List (MedialAxis.Segment (space @ units)))
 medialAxis curve1 curve2 = do
-  let p1 = curve1 . SurfaceFunction.u
-  let p2 = curve2 . SurfaceFunction.v
-  let v1 = curve1.derivative . SurfaceFunction.u
-  let v2 = curve2.derivative . SurfaceFunction.v
+  let p1 = curve1 `compose` SurfaceFunction.u
+  let p2 = curve2 `compose` SurfaceFunction.v
+  let v1 = curve1.derivative `compose` SurfaceFunction.u
+  let v2 = curve2.derivative `compose` SurfaceFunction.v
   let d = p2 .-. p1
   let target =
         v2 `cross#` (2 *. (v1 `dot#` d) #*# d .-. VectorSurfaceFunction2d.squaredMagnitude# d #*# v1)
@@ -1119,16 +1125,16 @@ medialAxis curve1 curve2 = do
               Units.coerce $
                 SurfaceFunction.unsafeQuotient#
                   @ d `dot#` d
-                  @ 2 *. (tangentVector1 . SurfaceFunction.u) `cross` d
+                  @ 2 *. (tangentVector1 `compose` SurfaceFunction.u) `cross` d
         let curve :: SurfaceFunction2d (space @ units) =
-              (curve1 . SurfaceFunction.u) .+. radius .*. (normal1 . SurfaceFunction.u)
+              (curve1 `compose` SurfaceFunction.u) .+. radius .*. (normal1 `compose` SurfaceFunction.u)
         let toSegment solutionCurve =
               MedialAxis.Segment
                 { t1 = solutionCurve.xCoordinate
                 , t2 = solutionCurve.yCoordinate
                 , t12 = solutionCurve
-                , curve = curve . solutionCurve
-                , radius = radius . solutionCurve
+                , curve = curve `compose` solutionCurve
+                , radius = radius `compose` solutionCurve
                 }
         Success (List.map toSegment zeros.crossingCurves)
 
@@ -1145,7 +1151,7 @@ parameterizeByArcLength ::
   (Curve2d (space @ units), Quantity units)
 parameterizeByArcLength curve = do
   let (parameterization, length) = arcLengthParameterization curve
-  (curve . parameterization, length)
+  (curve `compose` parameterization, length)
 
 makePiecewise :: NonEmpty (Curve2d (space @ units), Quantity units) -> Curve2d (space @ units)
 makePiecewise parameterizedSegments = do

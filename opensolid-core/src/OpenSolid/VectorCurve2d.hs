@@ -468,7 +468,8 @@ instance
     (VectorCurve2d (space @ units))
     (VectorCurve2d (space @ units))
   where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) .*. g.derivative)
+  f `compose` g =
+    new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) .*. g.derivative)
 
 instance
   Composition
@@ -476,10 +477,10 @@ instance
     (VectorCurve2d (space @ units))
     (VectorSurfaceFunction2d (space @ units))
   where
-  curve . function =
+  curve `compose` function =
     VectorSurfaceFunction2d.new
-      @ curve.compiled . function.compiled
-      @ \p -> (curve.derivative . function) .*. SurfaceFunction.derivative p function
+      @ curve.compiled `compose` function.compiled
+      @ \p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function
 
 compiled :: VectorCurve2d (space @ units) -> Compiled (space @ units)
 compiled (VectorCurve2d c _) = c
@@ -670,7 +671,7 @@ components :: VectorCurve2d (space @ units) -> (Curve units, Curve units)
 components curve = (xComponent curve, yComponent curve)
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-reverse curve = curve . (1 -. Curve.t)
+reverse curve = curve `compose` (1 -. Curve.t)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

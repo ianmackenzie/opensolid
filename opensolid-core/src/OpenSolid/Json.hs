@@ -23,7 +23,6 @@ import Data.Aeson.KeyMap qualified
 import Data.Scientific
 import Data.Vector qualified
 import OpenSolid.Binary (Builder, ByteString)
-import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Json.Format (Format)
 import {-# SOURCE #-} OpenSolid.Json.Schema (Schema)
 import OpenSolid.List qualified as List

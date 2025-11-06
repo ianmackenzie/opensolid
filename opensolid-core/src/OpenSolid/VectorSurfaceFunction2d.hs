@@ -447,11 +447,11 @@ instance
     (VectorSurfaceFunction2d (space @ units))
     (VectorCurve2d (space @ units))
   where
-  function . curve = do
+  function `compose` curve = do
     let (dudt, dvdt) = curve.derivative.components
     VectorCurve2d.new
-      @ function.compiled . curve.compiled
-      @ (function.du . curve) .*. dudt .+. (function.dv . curve) .*. dvdt
+      @ function.compiled `compose` curve.compiled
+      @ (function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt
 
 instance
   HasField

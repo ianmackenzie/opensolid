@@ -41,7 +41,7 @@ parameterization derivativeMagnitude = do
         let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
         let compiled = CompiledFunction.abstract evaluate evaluateBounds
         case Curve.quotient (Curve.constant length) derivativeMagnitude of
-          Success quotient -> (Curve.recursive compiled (quotient .), length)
+          Success quotient -> (Curve.recursive compiled (quotient `compose`), length)
           Failure DivisionByZero -> (Curve.t, Quantity.zero)
 
 isConstant ::

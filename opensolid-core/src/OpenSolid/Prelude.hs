@@ -17,7 +17,7 @@ where
 
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
-import OpenSolid.Composition (Composition (compose, (.)))
+import OpenSolid.Composition (Composition (compose))
 import OpenSolid.CoordinateSystem
   ( CoordinateSystem
   , Defines

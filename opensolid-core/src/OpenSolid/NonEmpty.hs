@@ -92,7 +92,6 @@ import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap hiding (concat, foldl, foldr)
-import OpenSolid.Composition
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Random.Internal qualified as Random

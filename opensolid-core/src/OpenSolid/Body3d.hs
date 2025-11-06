@@ -460,7 +460,7 @@ toHalfEdge ::
   Curve2d UvCoordinates ->
   HalfEdge (space @ units)
 toHalfEdge surfaceId loopId surfaceFunction curveIndex uvCurve = do
-  let curve3d = surfaceFunction . uvCurve
+  let curve3d = surfaceFunction `compose` uvCurve
   let curveId = CurveId curveIndex
   let halfEdgeId = HalfEdgeId{surfaceId, loopId, curveId}
   let (parameterization, length) = Curve3d.arcLengthParameterization curve3d
@@ -469,8 +469,8 @@ toHalfEdge surfaceId loopId surfaceFunction curveIndex uvCurve = do
     else
       HalfEdge
         { halfEdgeId
-        , uvCurve = uvCurve . parameterization
-        , curve3d = curve3d . parameterization
+        , uvCurve = uvCurve `compose` parameterization
+        , curve3d = curve3d `compose` parameterization
         , length
         , bounds = Curve3d.bounds curve3d
         }
