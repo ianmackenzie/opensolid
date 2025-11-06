@@ -33,6 +33,7 @@ import Data.ByteString.Unsafe qualified
 import Data.Char qualified
 import Data.Coerce (Coercible)
 import Data.Coerce qualified
+import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
 import Data.Text.Encoding qualified
@@ -415,11 +416,11 @@ store :: forall parent value. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
   let proxy = Proxy @value
   case representation proxy of
-    UnitRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 0)
+    UnitRep -> Foreign.pokeByteOff @Int64 ptr offset 0
     IntRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 value)
     NumberRep -> Foreign.pokeByteOff ptr offset (Number.toDouble value)
-    BoolRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 (if value then 1 else 0))
-    SignRep -> store ptr offset ((1 :: Int) .*. value)
+    BoolRep -> Foreign.pokeByteOff @Int64 ptr offset (if value then 1 else 0)
+    SignRep -> Foreign.pokeByteOff @Int64 ptr offset (case value of Positive -> 1; Negative -> -1)
     TextRep -> do
       let numBytes = Data.Text.Foreign.lengthWord8 value
       contentsPtr <- Foreign.Marshal.Alloc.mallocBytes (numBytes + 1)
@@ -528,11 +529,9 @@ store ptr offset value = do
       store ptr offset7 value7
       store ptr offset8 value8
     MaybeRep -> do
-      let tag = case value of Just _ -> 0; Nothing -> 1
-      Foreign.pokeByteOff ptr offset (Int.toInt64 tag)
-      case value of
-        Just actualValue -> store ptr (offset + 8) actualValue
-        Nothing -> return ()
+      let tag = case value of Just{} -> 0; Nothing -> 1
+      Foreign.pokeByteOff @Int64 ptr offset tag
+      IO.forEach value (store ptr (offset + 8))
     ResultRep ->
       case value of
         Success successfulValue -> do
