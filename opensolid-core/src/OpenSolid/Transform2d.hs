@@ -47,8 +47,6 @@ import OpenSolid.Primitives
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector2d qualified as Vector2d
 
--- import Prelude ((*), (+), (-))
-
 type Rigid coordinateSystem = Transform2d Transform.Rigid coordinateSystem
 
 type Orthonormal coordinateSystem = Transform2d Transform.Orthonormal coordinateSystem
