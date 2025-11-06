@@ -87,9 +87,9 @@ log label value = IO.printLine (label <> ": " <> Text.show value)
 
 testScalarArithmetic :: IO ()
 testScalarArithmetic = do
-  log "Integer product" ((3 :: Int) .*. (4 :: Int))
-  log "Integer division" ((10 :: Int) `div` (4 :: Int))
-  log "True division" ((10 :: Int) ./. (10 :: Int))
+  log @Int "Integer product" (3 * 4)
+  log @Int "Integer division" (10 `div` 4)
+  log "True division" (Number.fromInt 10 ./. Number.fromInt 4)
   let area = Area.squareMeters 3
   let length = Length.centimeters 3
   let volume = area .*. length
