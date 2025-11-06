@@ -119,7 +119,7 @@ instance
   units1 ~ units2 =>
   Intersects (SurfaceFunction units1) (Quantity units2) units1
   where
-  function ^ value =
+  function `intersects` value =
     -- TODO optimize this to use a special Solve2d.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and the full geometry of each)
@@ -132,7 +132,7 @@ instance
   units1 ~ units2 =>
   Intersects (Quantity units1) (SurfaceFunction units2) units1
   where
-  value ^ function = function ^ value
+  value `intersects` function = function `intersects` value
 
 instance Negation (SurfaceFunction units) where
   negative function = new (negative function.compiled) (\p -> negative (derivative p function))

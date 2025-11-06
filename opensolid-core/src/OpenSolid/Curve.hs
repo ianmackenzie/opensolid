@@ -131,7 +131,7 @@ instance
   units1 ~ units2 =>
   Intersects (Curve units1) (Quantity units2) units1
   where
-  curve ^ value =
+  curve `intersects` value =
     -- TODO optimize this to use a special Solve1d.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and their exact locations)
@@ -144,7 +144,7 @@ instance
   units1 ~ units2 =>
   Intersects (Quantity units1) (Curve units2) units1
   where
-  value ^ curve = curve ^ value
+  value `intersects` curve = curve `intersects` value
 
 isEndpoint :: Number -> Bool
 isEndpoint tValue = tValue == 0 || tValue == 1
@@ -648,7 +648,7 @@ findZeros ::
   Solve1d.Action exclusions Zero
 findZeros derivatives subdomain derivativeBounds exclusions
   -- Skip the subdomain entirely if the curve itself is non-zero everywhere
-  | not (Stream.head derivativeBounds ^ Quantity.zero) = Solve1d.pass
+  | not (Stream.head derivativeBounds `intersects` Quantity.zero) = Solve1d.pass
   -- Optimization heuristic: bisect down to small subdomains first,
   -- to quickly eliminate most of the curve based on simple value bounds
   -- before attempting more complex/sophisticated solving

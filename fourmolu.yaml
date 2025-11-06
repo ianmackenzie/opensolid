@@ -17,7 +17,7 @@ fixities:
   # Custom operators
   - "infix 0 :::"
   - "infixl 1 @"
-  - "infix 4 ^"
+  - "infix 4 `intersects`"
   - "infix 4 ~="
   - "infix 4 !="
   - "infixl 0 |>"

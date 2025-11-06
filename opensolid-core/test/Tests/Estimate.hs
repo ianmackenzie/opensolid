@@ -107,7 +107,7 @@ largest = Test.check 100 "largest" Test.do
 
 resolvesTo :: Tolerance units => Quantity units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
-  | not (value ^ Estimate.bounds estimate) = Success False
+  | not (value `intersects` Estimate.bounds estimate) = Success False
   | Bounds.width (Estimate.bounds estimate) ~= Quantity.zero = Success True
   | otherwise = do
       let refinedEstimate = Estimate.refine estimate

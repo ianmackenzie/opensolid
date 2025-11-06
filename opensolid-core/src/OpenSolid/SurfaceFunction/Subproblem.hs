@@ -144,7 +144,7 @@ tightBounds Subproblem{uvBounds, fValues, fBounds, fuBounds, fvBounds} = do
 isZeroCandidate :: Tolerance units => Subproblem units -> Bool
 isZeroCandidate subproblem = do
   let Subproblem{fBounds} = subproblem
-  fBounds ^ Quantity.zero && tightBounds subproblem ^ Quantity.zero
+  fBounds `intersects` Quantity.zero && tightBounds subproblem `intersects` Quantity.zero
 
 leftEdgeBounds :: Subproblem units -> Bounds units
 leftEdgeBounds Subproblem{uvBounds, fvBounds, fValues} = do

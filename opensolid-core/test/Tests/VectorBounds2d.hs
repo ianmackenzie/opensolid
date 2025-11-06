@@ -34,7 +34,7 @@ placeIn = Test.check 100 "placeIn" Test.do
   frame <- Random.frame2d
   let globalBounds = VectorBounds2d.placeIn frame localBounds
   let globalVector = Vector2d.placeIn frame localVector
-  Test.expect (globalVector ^ globalBounds)
+  Test.expect (globalVector `intersects` globalBounds)
 
 relativeTo :: Tolerance Meters => Test
 relativeTo = Test.check 100 "relativeTo" Test.do
@@ -42,7 +42,7 @@ relativeTo = Test.check 100 "relativeTo" Test.do
   frame <- Random.frame2d
   let localBounds = VectorBounds2d.relativeTo frame globalBounds
   let localVector = Vector2d.relativeTo frame globalVector
-  Test.expect (localVector ^ localBounds)
+  Test.expect (localVector `intersects` localBounds)
 
 placeOn :: Tolerance Meters => Test
 placeOn = Test.check 100 "placeOn" Test.do
@@ -50,7 +50,7 @@ placeOn = Test.check 100 "placeOn" Test.do
   plane <- Random.plane3d
   let bounds3d = VectorBounds2d.placeOn plane bounds2d
   let vector3d = Vector2d.placeOn plane vector2d
-  Test.expect (vector3d ^ bounds3d)
+  Test.expect (vector3d `intersects` bounds3d)
 
 transformBy :: Tolerance Meters => Test
 transformBy = Test.check 100 "transformBy" Test.do
@@ -58,4 +58,4 @@ transformBy = Test.check 100 "transformBy" Test.do
   transform <- Random.affineTransform2d
   let transformedBounds = VectorBounds2d.transformBy transform originalBounds
   let transformedVector = Vector2d.transformBy transform originalVector
-  Test.expect (transformedVector ^ transformedBounds)
+  Test.expect (transformedVector `intersects` transformedBounds)

@@ -834,10 +834,10 @@ validEdge :: UvBounds -> Number -> Set2d UvBounds UvCoordinates -> Bool
 validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero do
   case surfaceSegments of
     Set2d.Node nodeBounds left right ->
-      not (edgeBounds ^ nodeBounds)
+      not (edgeBounds `intersects` nodeBounds)
         || (validEdge edgeBounds edgeLength left && validEdge edgeBounds edgeLength right)
     Set2d.Leaf leafBounds _ ->
-      not (edgeBounds ^ leafBounds)
+      not (edgeBounds `intersects` leafBounds)
         || edgeLength <= Number.sqrt 2 .*. Bounds2d.diameter leafBounds
 
 boundarySurfaceMesh ::

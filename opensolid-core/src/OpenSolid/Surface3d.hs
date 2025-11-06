@@ -284,14 +284,14 @@ includeSubdomain :: UvBounds -> Set2d (LineSegment2d UvPoint) UvCoordinates -> F
 includeSubdomain subdomain edgeSet = Tolerance.using Quantity.zero $
   case edgeSet of
     Set2d.Node nodeBounds leftChild rightChild
-      | not (subdomain ^ nodeBounds) -> Resolved True
+      | not (subdomain `intersects` nodeBounds) -> Resolved True
       | smallerThan nodeBounds subdomain -> do
           includeLeft <- includeSubdomain subdomain leftChild
           includeRight <- includeSubdomain subdomain rightChild
           Resolved (includeLeft && includeRight)
       | otherwise -> Unresolved
     Set2d.Leaf edgeBounds _
-      | not (subdomain ^ edgeBounds) -> Resolved True
+      | not (subdomain `intersects` edgeBounds) -> Resolved True
       | smallerThan edgeBounds subdomain -> Resolved False
       | otherwise -> Unresolved
 

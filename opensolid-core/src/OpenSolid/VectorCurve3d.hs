@@ -128,8 +128,8 @@ instance
     (Vector3d (space2 @ units2))
     units1
   where
-  curve ^ vector = Tolerance.using Tolerance.squared# do
-    (curve .-. vector).squaredMagnitude# ^ Quantity.zero
+  curve `intersects` vector = Tolerance.using Tolerance.squared# do
+    (curve .-. vector).squaredMagnitude# `intersects` Quantity.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -138,7 +138,7 @@ instance
     (VectorCurve3d (space2 @ units2))
     units1
   where
-  vector ^ curve = curve ^ vector
+  vector `intersects` curve = curve `intersects` vector
 
 instance Negation (VectorCurve3d (space @ units)) where
   negative curve = new (negative curve.compiled) (negative curve.derivative)

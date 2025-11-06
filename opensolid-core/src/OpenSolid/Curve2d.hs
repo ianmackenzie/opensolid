@@ -199,13 +199,13 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  curve ^ point = (curve .-. point) ^ Vector2d.zero
+  curve `intersects` point = (curve .-. point) `intersects` Vector2d.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Point2d (space1 @ units1)) (Curve2d (space2 @ units2)) units1
   where
-  point ^ curve = curve ^ point
+  point `intersects` curve = curve `intersects` point
 
 instance ApproximateEquality (Curve2d (space @ units)) units where
   curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
@@ -691,7 +691,7 @@ then it is not considered to lie on the axis;
 it is only considered to lie on the axis if every point on the curve is also on the axis.
 -}
 isOnAxis :: Tolerance units => Axis2d (space @ units) -> Curve2d (space @ units) -> Bool
-isOnAxis axis curve = List.allSatisfy (^ axis) (samplePoints curve)
+isOnAxis axis curve = List.allSatisfy (intersects axis) (samplePoints curve)
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
@@ -806,7 +806,7 @@ isOverlappingSegment curve1 curve2 (OverlappingSegment tBounds1 _ _) = do
   let segmentStartPoint = evaluate curve1 (Bounds.lower tBounds1)
   let curve1TestPoints = List.map (evaluate curve1) (Bounds.sampleValues tBounds1)
   let segment1IsNondegenerate = List.anySatisfy (!= segmentStartPoint) curve1TestPoints
-  let segment1LiesOnSegment2 = List.allSatisfy (^ curve2) curve1TestPoints
+  let segment1LiesOnSegment2 = List.allSatisfy (intersects curve2) curve1TestPoints
   segment1IsNondegenerate && segment1LiesOnSegment2
 
 findEndpointZeros ::
@@ -853,7 +853,8 @@ intersections curve1 curve2 = do
   endpointIntersections <- findEndpointIntersections curve1 curve2
   case overlappingSegments curve1 curve2 endpointIntersections of
     [] ->
-      if curve1.derivative ^ Vector2d.zero || curve2.derivative ^ Vector2d.zero
+      if curve1.derivative `intersects` Vector2d.zero
+        || curve2.derivative `intersects` Vector2d.zero
         then Failure Intersections.CurveHasDegeneracy
         else do
           let u = SurfaceFunction.u
@@ -889,7 +890,7 @@ findIntersectionPoints ::
   Solve2d.Action exclusions () IntersectionPoint
 findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclusions = do
   let uvBounds = Domain2d.bounds subdomain
-  if not (VectorSurfaceFunction2d.evaluateBounds f uvBounds ^ Vector2d.zero)
+  if not (VectorSurfaceFunction2d.evaluateBounds f uvBounds `intersects` Vector2d.zero)
     then Solve2d.pass
     else case exclusions of
       Solve2d.SomeExclusions -> Solve2d.recurse ()

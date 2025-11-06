@@ -572,7 +572,7 @@ classify ::
   NonEmpty (Curve2d (space @ units)) ->
   Maybe Sign
 classify point curves =
-  if NonEmpty.anySatisfy (^ point) curves
+  if NonEmpty.anySatisfy (intersects point) curves
     then Nothing
     else Just (classifyNonBoundary point curves)
 

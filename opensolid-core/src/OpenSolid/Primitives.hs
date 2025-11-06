@@ -462,7 +462,7 @@ instance
   ) =>
   Intersects (Vector2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) units1
   where
-  Vector2d vx vy ^ VectorBounds2d bx by = vx ^ bx && vy ^ by
+  Vector2d vx vy `intersects` VectorBounds2d bx by = vx `intersects` bx && vy `intersects` by
 
 instance
   ( space1 ~ space2
@@ -470,7 +470,7 @@ instance
   ) =>
   Intersects (VectorBounds2d (space1 @ units1)) (Vector2d (space2 @ units2)) units1
   where
-  box ^ point = point ^ box
+  box `intersects` point = point `intersects` box
 
 instance
   ( space1 ~ space2
@@ -478,7 +478,8 @@ instance
   ) =>
   Intersects (VectorBounds2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) units1
   where
-  VectorBounds2d x1 y1 ^ VectorBounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
+  VectorBounds2d x1 y1 `intersects` VectorBounds2d x2 y2 =
+    x1 `intersects` x2 && y1 `intersects` y2
 
 instance Negation (VectorBounds2d (space @ units)) where
   negative (VectorBounds2d x y) = VectorBounds2d (negative x) (negative y)
@@ -886,31 +887,31 @@ instance
   (units1 ~ units2, space1 ~ space2) =>
   Intersects (Point2d (space1 @ units1)) (Axis2d (space2 @ units2)) units1
   where
-  p ^ (Axis2d p0 d) = (p .-. p0) `cross` d ~= Quantity.zero
+  p `intersects` (Axis2d p0 d) = (p .-. p0) `cross` d ~= Quantity.zero
 
 instance
   (units1 ~ units2, space1 ~ space2) =>
   Intersects (Axis2d (space2 @ units2)) (Point2d (space1 @ units1)) units1
   where
-  axis ^ point = point ^ axis
+  axis `intersects` point = point `intersects` axis
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
-  Position2d p ^ PositionBounds2d pb = p ^ pb
+  Position2d p `intersects` PositionBounds2d pb = p `intersects` pb
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Bounds2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  box ^ point = point ^ box
+  box `intersects` point = point `intersects` box
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Bounds2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
-  PositionBounds2d pb1 ^ PositionBounds2d pb2 = pb1 ^ pb2
+  PositionBounds2d pb1 `intersects` PositionBounds2d pb2 = pb1 `intersects` pb2
 
 ----- Axis2d -----
 
@@ -1565,19 +1566,21 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Vector3d (space1 @ units1)) (VectorBounds3d (space2 @ units2)) units1
   where
-  Vector3d vR vF vU ^ VectorBounds3d bR bF bU = vR ^ bR && vF ^ bF && vU ^ bU
+  Vector3d vR vF vU `intersects` VectorBounds3d bR bF bU =
+    vR `intersects` bR && vF `intersects` bF && vU `intersects` bU
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (VectorBounds3d (space1 @ units1)) (Vector3d (space2 @ units2)) units1
   where
-  box ^ point = point ^ box
+  box `intersects` point = point `intersects` box
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (VectorBounds3d (space1 @ units1)) (VectorBounds3d (space2 @ units2)) units1
   where
-  VectorBounds3d r1 f1 u1 ^ VectorBounds3d r2 f2 u2 = r1 ^ r2 && f1 ^ f2 && u1 ^ u2
+  VectorBounds3d r1 f1 u1 `intersects` VectorBounds3d r2 f2 u2 =
+    r1 `intersects` r2 && f1 `intersects` f2 && u1 `intersects` u2
 
 instance Negation (VectorBounds3d (space @ units)) where
   negative (VectorBounds3d## xl## xh## yl## yh## zl## zh##) = do
@@ -2073,7 +2076,7 @@ instance
   ) =>
   Intersects (Point3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
   where
-  Position3d p ^ PositionBounds3d pb = p ^ pb
+  Position3d p `intersects` PositionBounds3d pb = p `intersects` pb
 
 instance
   ( space1 ~ space2
@@ -2081,7 +2084,7 @@ instance
   ) =>
   Intersects (Bounds3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
   where
-  box ^ point = point ^ box
+  box `intersects` point = point `intersects` box
 
 instance
   ( space1 ~ space2
@@ -2089,7 +2092,7 @@ instance
   ) =>
   Intersects (Bounds3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
   where
-  PositionBounds3d pb1 ^ PositionBounds3d pb2 = pb1 ^ pb2
+  PositionBounds3d pb1 `intersects` PositionBounds3d pb2 = pb1 `intersects` pb2
 
 ----- Axis3d -----
 

@@ -153,13 +153,13 @@ instance Units.Coercion (Bounds unitsA) (Bounds unitsB) where
   coerce = Data.Coerce.coerce
 
 instance units1 ~ units2 => Intersects (Quantity units1) (Bounds units2) units1 where
-  value ^ bounds = exclusion value bounds <= ?tolerance
+  value `intersects` bounds = exclusion value bounds <= ?tolerance
 
 instance units1 ~ units2 => Intersects (Bounds units1) (Quantity units2) units1 where
-  bounds ^ value = value ^ bounds
+  bounds `intersects` value = value `intersects` bounds
 
 instance units1 ~ units2 => Intersects (Bounds units1) (Bounds units2) units1 where
-  first ^ second = separation first second <= ?tolerance
+  first `intersects` second = separation first second <= ?tolerance
 
 instance Negation (Bounds units) where
   negative (Bounds## low## high##) = Bounds## (negate## high##) (negate## low##)

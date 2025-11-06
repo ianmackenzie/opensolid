@@ -32,7 +32,7 @@ magnitude = Test.check 100 "magnitude" Test.do
   let vector = VectorBounds3d.interpolate vectorBounds tx ty tz
   let vectorMagnitude = Vector3d.magnitude vector
   let magnitudeBounds = VectorBounds3d.magnitude vectorBounds
-  Test.expect (vectorMagnitude ^ magnitudeBounds)
+  Test.expect (vectorMagnitude `intersects` magnitudeBounds)
 
 boundsAndContainedVector :: Generator (VectorBounds3d (space @ Meters), Vector3d (space @ Meters))
 boundsAndContainedVector = do
@@ -49,7 +49,7 @@ placeIn = Test.check 100 "placeIn" Test.do
   frame <- Tests.Random.frame3d
   let globalBounds = VectorBounds3d.placeIn frame localBounds
   let globalVector = Vector3d.placeIn frame localVector
-  Test.expect (globalVector ^ globalBounds)
+  Test.expect (globalVector `intersects` globalBounds)
 
 relativeTo :: Tolerance Meters => Test
 relativeTo = Test.check 100 "relativeTo" Test.do
@@ -57,7 +57,7 @@ relativeTo = Test.check 100 "relativeTo" Test.do
   frame <- Tests.Random.frame3d
   let localBounds = VectorBounds3d.relativeTo frame globalBounds
   let localVector = Vector3d.relativeTo frame globalVector
-  Test.expect (localVector ^ localBounds)
+  Test.expect (localVector `intersects` localBounds)
 
 transformBy :: Tolerance Meters => Test
 transformBy = Test.check 100 "transformBy" Test.do
@@ -65,7 +65,7 @@ transformBy = Test.check 100 "transformBy" Test.do
   transform <- Tests.Random.affineTransform3d
   let transformedBounds = VectorBounds3d.transformBy transform originalBounds
   let transformedVector = Vector3d.transformBy transform originalVector
-  Test.expect (transformedVector ^ transformedBounds)
+  Test.expect (transformedVector `intersects` transformedBounds)
 
 tripleProduct :: Test
 tripleProduct = Test.check 1000 "tripleProduct" Test.do
@@ -75,4 +75,4 @@ tripleProduct = Test.check 1000 "tripleProduct" Test.do
   let boundsTripleProduct = VectorBounds3d.tripleProduct bounds1 bounds2 bounds3
   let vectorTripleProduct = (vector1 `cross#` vector2) `dot#` vector3
   Tolerance.using (1e-9 *. (Length.meter #*# Length.meter #*# Length.meter)) $
-    Test.expect (vectorTripleProduct ^ boundsTripleProduct)
+    Test.expect (vectorTripleProduct `intersects` boundsTripleProduct)

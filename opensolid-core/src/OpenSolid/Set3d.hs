@@ -113,7 +113,7 @@ union left right = do
 find :: Tolerance units => Bounds3d (space @ units) -> Set3d a (space @ units) -> Fuzzy (Maybe a)
 find searchBounds set = case set of
   Node nodeBounds leftChild rightChild
-    | not (nodeBounds ^ searchBounds) -> Resolved Nothing -- No overlapping items
+    | not (nodeBounds `intersects` searchBounds) -> Resolved Nothing -- No overlapping items
     | Bounds3d.contains nodeBounds searchBounds -> Unresolved -- More than one overlapping item
     | otherwise -> case (find searchBounds leftChild, find searchBounds rightChild) of
         (Unresolved, _) -> Unresolved -- More than one item found just in the left
@@ -121,7 +121,8 @@ find searchBounds set = case set of
         (Resolved Nothing, rightResult) -> rightResult -- If nothing found in the left, use the right result
         (leftResult, Resolved Nothing) -> leftResult -- If nothing found in the right, use the left result
         (Resolved (Just _), Resolved (Just _)) -> Unresolved -- Found exactly one item in each side
-  Leaf itemBounds item -> Resolved (if searchBounds ^ itemBounds then Just item else Nothing)
+  Leaf itemBounds item ->
+    Resolved (if searchBounds `intersects` itemBounds then Just item else Nothing)
 
 filter :: Tolerance units => Bounds3d (space @ units) -> Set3d a (space @ units) -> List a
 filter searchBounds set = search searchBounds set []
@@ -129,10 +130,11 @@ filter searchBounds set = search searchBounds set []
 search :: Tolerance units => Bounds3d (space @ units) -> Set3d a (space @ units) -> List a -> List a
 search searchBounds set accumulated = case set of
   Node nodeBounds leftChild rightChild
-    | not (nodeBounds ^ searchBounds) -> accumulated
+    | not (nodeBounds `intersects` searchBounds) -> accumulated
     | Bounds3d.contains nodeBounds searchBounds -> returnAll set accumulated
     | otherwise -> search searchBounds leftChild (search searchBounds rightChild accumulated)
-  Leaf itemBounds item -> if searchBounds ^ itemBounds then item : accumulated else accumulated
+  Leaf itemBounds item ->
+    if searchBounds `intersects` itemBounds then item : accumulated else accumulated
 
 returnAll :: Set3d a (space @ units) -> List a -> List a
 returnAll set accumulated = case set of

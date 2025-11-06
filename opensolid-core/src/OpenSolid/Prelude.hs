@@ -26,7 +26,7 @@ import OpenSolid.CoordinateSystem
   , UvSpace
   , type (@)
   )
-import OpenSolid.Intersects (Intersects ((^)))
+import OpenSolid.Intersects (Intersects (intersects))
 import OpenSolid.Named ((:::) (Named))
 import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import OpenSolid.Number (Number)
