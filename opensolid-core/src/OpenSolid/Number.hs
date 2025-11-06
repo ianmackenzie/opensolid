@@ -2,6 +2,7 @@ module OpenSolid.Number
   ( Number
   , fromDouble
   , toDouble
+  , fromInt
   , parse
   , ceiling
   , round
@@ -64,6 +65,10 @@ fromDouble = Quantity
 {-# INLINE toDouble #-}
 toDouble :: Number -> Prelude.Double
 toDouble (Quantity x) = x
+
+{-# INLINE fromInt #-}
+fromInt :: Int -> Number
+fromInt = fromIntegral
 
 parse :: Text -> Result Text Number
 parse = Text.Parse.number
