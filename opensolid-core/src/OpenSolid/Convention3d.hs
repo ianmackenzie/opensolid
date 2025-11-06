@@ -95,15 +95,18 @@ custom givenXDirection givenYDirection givenZDirection = do
 
 -- | Get the X direction of a given orientation for a particular coordinate convention.
 xDirection :: Orientation3d space -> Convention3d -> Direction3d space
-xDirection (Orientation3d dr df du) Convention3d{xr, xf, xu} = Unit3d (dr .*. xr .+. df .*. xf .+. du .*. xu)
+xDirection (Orientation3d dr df du) Convention3d{xr, xf, xu} =
+  Unit3d (dr .*. xr .+. df .*. xf .+. du .*. xu)
 
 -- | Get the Y direction of a given orientation for a particular coordinate convention.
 yDirection :: Orientation3d space -> Convention3d -> Direction3d space
-yDirection (Orientation3d dr df du) Convention3d{yr, yf, yu} = Unit3d (dr .*. yr .+. df .*. yf .+. du .*. yu)
+yDirection (Orientation3d dr df du) Convention3d{yr, yf, yu} =
+  Unit3d (dr .*. yr .+. df .*. yf .+. du .*. yu)
 
 -- | Get the Z direction of a given orientation for a particular coordinate convention.
 zDirection :: Orientation3d space -> Convention3d -> Direction3d space
-zDirection (Orientation3d dr df du) Convention3d{zr, zf, zu} = Unit3d (dr .*. zr .+. df .*. zf .+. du .*. zu)
+zDirection (Orientation3d dr df du) Convention3d{zr, zf, zu} =
+  Unit3d (dr .*. zr .+. df .*. zf .+. du .*. zu)
 
 -- | Get the X axis of a given frame for a particular coordinate convention.
 xAxis :: Frame3d (space @ units) defines -> Convention3d -> Axis3d (space @ units)
