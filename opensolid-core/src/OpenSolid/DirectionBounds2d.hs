@@ -5,11 +5,23 @@ module OpenSolid.DirectionBounds2d
   , constant
   , xComponent
   , yComponent
+  , relativeTo
+  , relativeToOrientation
+  , placeIn
+  , placeInOrientation
+  , placeOn
+  , placeOnOrientation
   )
 where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.DirectionBounds3d (DirectionBounds3d)
+import OpenSolid.DirectionBounds3d qualified as DirectionBounds3d
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Orientation2d (Orientation2d)
+import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
@@ -177,6 +189,13 @@ unsafe = UnitBounds2d
 unwrap :: DirectionBounds2d space -> VectorBounds2d (space @ Unitless)
 unwrap (UnitBounds2d vectorBounds) = vectorBounds
 
+{-# INLINE lift #-}
+lift ::
+  (VectorBounds2d (space1 @ Unitless) -> VectorBounds2d (space2 @ Unitless)) ->
+  DirectionBounds2d space1 ->
+  DirectionBounds2d space2
+lift function (UnitBounds2d vectorBounds) = UnitBounds2d (function vectorBounds)
+
 constant :: Direction2d space -> DirectionBounds2d space
 constant direction = UnitBounds2d (VectorBounds2d.constant (Vector2d.unit direction))
 
@@ -185,3 +204,39 @@ xComponent (UnitBounds2d vectorBounds) = VectorBounds2d.xComponent vectorBounds
 
 yComponent :: DirectionBounds2d space -> Bounds Unitless
 yComponent (UnitBounds2d vectorBounds) = VectorBounds2d.yComponent vectorBounds
+
+placeIn ::
+  Frame2d (global @ frameUnits) (Defines local) ->
+  DirectionBounds2d local ->
+  DirectionBounds2d global
+placeIn frame = placeInOrientation frame.orientation
+
+placeInOrientation :: Orientation2d global -> DirectionBounds2d local -> DirectionBounds2d global
+placeInOrientation orientation = lift (VectorBounds2d.placeInOrientation orientation)
+
+relativeTo ::
+  Frame2d (global @ frameUnits) (Defines local) ->
+  DirectionBounds2d global ->
+  DirectionBounds2d local
+relativeTo frame = relativeToOrientation frame.orientation
+
+relativeToOrientation :: Orientation2d global -> DirectionBounds2d global -> DirectionBounds2d local
+relativeToOrientation orientation = lift (VectorBounds2d.relativeToOrientation orientation)
+
+{-| Convert a 2D direction to 3D direction by placing it on a plane.
+
+Given a 2D direction defined within a plane's coordinate system,
+this returns the corresponding 3D direction.
+-}
+placeOn ::
+  Plane3d (global @ planeUnits) (Defines local) ->
+  DirectionBounds2d local ->
+  DirectionBounds3d global
+placeOn plane = placeOnOrientation plane.orientation
+
+placeOnOrientation ::
+  PlaneOrientation3d global ->
+  DirectionBounds2d local ->
+  DirectionBounds3d global
+placeOnOrientation orientation (UnitBounds2d vector) =
+  DirectionBounds3d.unsafe (VectorBounds2d.placeOnOrientation orientation vector)
