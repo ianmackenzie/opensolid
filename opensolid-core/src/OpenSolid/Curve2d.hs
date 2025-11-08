@@ -27,6 +27,7 @@ module OpenSolid.Curve2d
   , evaluateAt
   , startPoint
   , endPoint
+  , endpoints
   , evaluateBounds
   , tangentDirection
   , offsetLeftwardBy
@@ -635,6 +636,10 @@ startPoint curve = evaluate curve 0
 -- | Get the end point of a curve.
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint curve = evaluate curve 1
+
+-- | Get the start and end points of a curve.
+endpoints :: Curve2d (space @ units) -> (Point2d (space @ units), Point2d (space @ units))
+endpoints curve = (startPoint curve, endPoint curve)
 
 evaluateBounds :: Curve2d (space @ units) -> Bounds Unitless -> Bounds2d (space @ units)
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
