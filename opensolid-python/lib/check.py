@@ -1,14 +1,14 @@
 from opensolid import (
     Angle,
-    Curve,
-    Point2d,
-    LengthBounds,
-    Tolerance,
-    Vector2d,
-    Color,
     Bounds2d,
+    Color,
+    Curve,
     Drawing2d,
     Length,
+    LengthBounds,
+    Point2d,
+    Tolerance,
+    Vector2d,
 )
 
 p1 = Point2d.meters(1, 2)
@@ -37,9 +37,9 @@ with Tolerance(1e-9):
     roots = [zero.location for zero in c.zeros()]
     print(roots)
 
-color1 = Color.from_hex("#555555")
-print(color1.rgb_float_components)
-color2 = Color.rgb_int(225, 225, 225)
+color1 = Color.hex("#555555")
+print(color1.to_rgb1())
+color2 = Color.rgb255(225, 225, 225)
 print(color2.to_hex())
 
 bounds = Bounds2d.from_corners(Point2d.origin, Point2d.centimeters(30, 20))
