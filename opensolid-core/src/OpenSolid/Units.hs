@@ -225,6 +225,11 @@ instance
 
 instance
   Simplification
+    ((Unitless #/# units2) #*# (units1 #*# units2))
+    units1
+
+instance
+  Simplification
     ((units #*# units) #/# (units #*# units #*# units))
     (Unitless #/# units)
 
