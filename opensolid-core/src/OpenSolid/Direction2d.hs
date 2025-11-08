@@ -18,8 +18,11 @@ module OpenSolid.Direction2d
   , rotateLeft
   , rotateRight
   , placeIn
+  , placeInOrientation
   , relativeTo
+  , relativeToOrientation
   , placeOn
+  , placeOnOrientation
   , random
   , transformBy
   , rotateBy
@@ -37,7 +40,9 @@ import OpenSolid.Primitives
   , Direction2d (Unit2d)
   , Direction3d (Unit3d)
   , Frame2d
+  , Orientation2d
   , Plane3d
+  , PlaneOrientation3d
   , Point2d
   , Transform2d
   , Vector2d (Vector2d)
@@ -165,13 +170,19 @@ placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->
   Direction2d local ->
   Direction2d global
-placeIn frame = lift (Vector2d.placeIn frame)
+placeIn frame = placeInOrientation frame.orientation
+
+placeInOrientation :: Orientation2d global -> Direction2d local -> Direction2d global
+placeInOrientation orientation = lift (Vector2d.placeInOrientation orientation)
 
 relativeTo ::
   Frame2d (global @ frameUnits) (Defines local) ->
   Direction2d global ->
   Direction2d local
-relativeTo frame = lift (Vector2d.relativeTo frame)
+relativeTo frame = relativeToOrientation frame.orientation
+
+relativeToOrientation :: Orientation2d global -> Direction2d global -> Direction2d local
+relativeToOrientation orientation = lift (Vector2d.relativeToOrientation orientation)
 
 {-| Convert a 2D direction to 3D direction by placing it on a plane.
 
@@ -179,11 +190,16 @@ Given a 2D direction defined within a plane's coordinate system,
 this returns the corresponding 3D direction.
 -}
 placeOn ::
-  forall local space planeUnits.
-  Plane3d (space @ planeUnits) (Defines local) ->
+  Plane3d (global @ planeUnits) (Defines local) ->
   Direction2d local ->
-  Direction3d space
-placeOn plane (Unit2d vector) = Unit3d (Vector2d.placeOn plane vector)
+  Direction3d global
+placeOn plane = placeOnOrientation plane.orientation
+
+placeOnOrientation ::
+  PlaneOrientation3d global ->
+  Direction2d local ->
+  Direction3d global
+placeOnOrientation orientation (Unit2d vector) = Unit3d (Vector2d.placeOnOrientation orientation vector)
 
 random :: Random.Generator (Direction2d space)
 random = Random.map fromAngle (Quantity.random (negative Angle.pi) Angle.pi)
