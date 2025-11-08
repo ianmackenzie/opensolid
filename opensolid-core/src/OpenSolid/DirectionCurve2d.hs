@@ -32,6 +32,9 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitless))
 
+instance HasField "derivative" (DirectionCurve2d space) (VectorCurve2d (space @ Unitless)) where
+  getField = derivative
+
 unsafe :: VectorCurve2d (space @ Unitless) -> DirectionCurve2d space
 unsafe = DirectionCurve2d
 
