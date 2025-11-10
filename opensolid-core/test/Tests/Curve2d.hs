@@ -36,7 +36,6 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Prelude ((/))
 
 curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
 curveGenerators =
@@ -144,16 +143,16 @@ curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "curveOverlap2" Test.do
   let arc1 =
         Curve2d.polarArc
-          @ #centerPoint Point2d.origin
-          @ #radius Length.meter
-          @ #startAngle Angle.zero
-          @ #endAngle (negative Angle.pi)
+          (#centerPoint Point2d.origin)
+          (#radius Length.meter)
+          (#startAngle Angle.zero)
+          (#endAngle (negative Angle.pi))
   let arc2 =
         Curve2d.polarArc
-          @ #centerPoint Point2d.origin
-          @ #radius Length.meter
-          @ #startAngle (Angle.degrees -45)
-          @ #endAngle (Angle.degrees 225)
+          (#centerPoint Point2d.origin)
+          (#radius Length.meter)
+          (#startAngle (Angle.degrees -45))
+          (#endAngle (Angle.degrees 225))
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
@@ -181,16 +180,16 @@ tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "tangentIntersection" Test.do
   let arc1 =
         Curve2d.polarArc
-          @ #centerPoint Point2d.origin
-          @ #radius Length.meter
-          @ #startAngle Angle.zero
-          @ #endAngle Angle.pi
+          (#centerPoint Point2d.origin)
+          (#radius Length.meter)
+          (#startAngle Angle.zero)
+          (#endAngle Angle.pi)
   let arc2 =
         Curve2d.polarArc
-          @ #centerPoint (Point2d.meters 0 1.5)
-          @ #radius (Length.meters 0.5)
-          @ #startAngle (negative Angle.pi)
-          @ #endAngle Angle.zero
+          (#centerPoint (Point2d.meters 0 1.5))
+          (#radius (Length.meters 0.5))
+          (#startAngle (negative Angle.pi))
+          (#endAngle Angle.zero)
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5 Positive)
   case intersections of

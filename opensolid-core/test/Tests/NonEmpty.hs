@@ -7,7 +7,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
-import Prelude ((*))
 
 tests :: List Test
 tests =

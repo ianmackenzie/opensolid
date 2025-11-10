@@ -17,7 +17,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random qualified as Random
-import Prelude ((*), (+), (-))
 
 steps :: Int -> List Number
 steps n = if n > 0 then List.map (divideBy n) [0 .. n] else []

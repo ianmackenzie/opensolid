@@ -15,7 +15,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
-import Prelude ((+), (-))
 
 type Vector vector =
   ( HasZero vector

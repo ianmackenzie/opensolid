@@ -26,14 +26,14 @@ testSet :: Set2d (Point2d (space @ Meters)) (space @ Meters)
 testSet =
   Set2d.fromNonEmpty $
     NonEmpty.eight
-      @ point 1 1
-      @ point 3 5
-      @ point 7 2
-      @ point 3 8
-      @ point 8 3
-      @ point 5 5
-      @ point 2 9
-      @ point 7 3
+      (point 1 1)
+      (point 3 5)
+      (point 7 2)
+      (point 3 8)
+      (point 8 3)
+      (point 5 5)
+      (point 2 9)
+      (point 7 3)
 
 find :: Tolerance Meters => Test
 find =

@@ -14,6 +14,7 @@ module OpenSolid.SurfaceFunction3d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -35,6 +36,7 @@ import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -90,8 +92,8 @@ instance
   where
   lhs .+. rhs =
     new
-      @ lhs.compiled .+. rhs.compiled
-      @ \parameter -> derivative parameter lhs .+. VectorSurfaceFunction3d.derivative parameter rhs
+      (lhs.compiled .+. rhs.compiled)
+      (\parameter -> derivative parameter lhs .+. VectorSurfaceFunction3d.derivative parameter rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -111,8 +113,8 @@ instance
   where
   lhs .-. rhs =
     new
-      @ lhs.compiled .-. rhs.compiled
-      @ \parameter -> derivative parameter lhs .-. VectorSurfaceFunction3d.derivative parameter rhs
+      (lhs.compiled .-. rhs.compiled)
+      (\parameter -> derivative parameter lhs .-. VectorSurfaceFunction3d.derivative parameter rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -132,8 +134,8 @@ instance
   where
   lhs .-. rhs =
     VectorSurfaceFunction3d.new
-      @ lhs.compiled .-. rhs.compiled
-      @ \parameter -> derivative parameter lhs .-. derivative parameter rhs
+      (lhs.compiled .-. rhs.compiled)
+      (\parameter -> derivative parameter lhs .-. derivative parameter rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -172,12 +174,11 @@ instance
   outer `compose` inner = do
     let duOuter = outer.du `compose` inner
     let dvOuter = outer.dv `compose` inner
-    new
-      @ outer.compiled `compose` inner.compiled
-      @ \parameter -> do
-        let innerDerivative = SurfaceFunction2d.derivative parameter inner
-        let (dU, dV) = innerDerivative.components
-        duOuter .*. dU .+. dvOuter .*. dV
+    let composedDerivative parameter = do
+          let innerDerivative = SurfaceFunction2d.derivative parameter inner
+          let (dU, dV) = innerDerivative.components
+          duOuter .*. dU .+. dvOuter .*. dV
+    new (outer.compiled `compose` inner.compiled) composedDerivative
 
 instance HasField "compiled" (SurfaceFunction3d (space @ units)) (Compiled (space @ units)) where
   getField (SurfaceFunction3d c _ _) = c
@@ -234,27 +235,31 @@ transformBy ::
   Transform3d tag (space @ units) ->
   SurfaceFunction3d (space @ units) ->
   SurfaceFunction3d (space @ units)
-transformBy transform function =
-  new
-    @ CompiledFunction.map
-      (Expression.Surface3d.transformBy transform)
-      (Point3d.transformBy transform)
-      (Bounds3d.transformBy transform)
-      function.compiled
-    @ \parameter -> VectorSurfaceFunction3d.transformBy transform (derivative parameter function)
+transformBy transform function = do
+  let compiledTransformed =
+        CompiledFunction.map
+          (Expression.Surface3d.transformBy transform)
+          (Point3d.transformBy transform)
+          (Bounds3d.transformBy transform)
+          function.compiled
+  let transformedDerivative parameter =
+        VectorSurfaceFunction3d.transformBy transform (derivative parameter function)
+  new compiledTransformed transformedDerivative
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
   SurfaceFunction3d (local @ units) ->
   SurfaceFunction3d (global @ units)
-placeIn frame function =
-  new
-    @ CompiledFunction.map
-      (Expression.Surface3d.placeIn frame)
-      (Point3d.placeIn frame)
-      (Bounds3d.placeIn frame)
-      function.compiled
-    @ \parameter -> VectorSurfaceFunction3d.placeIn frame (derivative parameter function)
+placeIn frame function = do
+  let compiledPlaced =
+        CompiledFunction.map
+          (Expression.Surface3d.placeIn frame)
+          (Point3d.placeIn frame)
+          (Bounds3d.placeIn frame)
+          function.compiled
+  let placedDerivative parameter =
+        VectorSurfaceFunction3d.placeIn frame (derivative parameter function)
+  new compiledPlaced placedDerivative
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->

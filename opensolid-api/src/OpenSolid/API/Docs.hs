@@ -2,6 +2,7 @@ module OpenSolid.API.Docs (docs) where
 
 import Language.Haskell.TH qualified as TH
 import OpenSolid.Prelude
+import Prelude
 
 docs :: TH.Name -> TH.Q TH.Exp
 docs name = do

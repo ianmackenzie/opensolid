@@ -20,4 +20,4 @@ kind name proxy =
         then Named
         else do
           let message = "Argument name mismatch: " <> Text.show name <> " /= " <> Text.show argName
-          internalError message
+          abort message

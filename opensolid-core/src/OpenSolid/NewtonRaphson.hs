@@ -18,7 +18,6 @@ import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
-import Prelude ((+))
 
 data Divergence = Divergence deriving (Eq, Show, Error.Message)
 

@@ -76,12 +76,12 @@ common config
     MagicHash
     MultiWayIf
     NoFieldSelectors
+    NoImplicitPrelude
     OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
-    NoImplicitPrelude
     RoleAnnotations
     StrictData
     TypeFamilies
@@ -162,6 +162,7 @@ library
     OpenSolid.Frame3d
     OpenSolid.Fuzzy
     OpenSolid.Gltf
+    OpenSolid.HigherOrderZero
     OpenSolid.IO
     OpenSolid.IO.Parallel
     OpenSolid.Int
@@ -244,14 +245,12 @@ library
     OpenSolid.World3d
 
   other-modules:
-    OpenSolid.Bootstrap
     OpenSolid.Bytecode.Compile
     OpenSolid.Bytecode.Encode
     OpenSolid.Bytecode.Evaluate
     OpenSolid.Bytecode.Instruction
     OpenSolid.CDT
     OpenSolid.Curve.Bisection
-    OpenSolid.Exception
     OpenSolid.HasZero
     OpenSolid.Json.FieldSchema
     OpenSolid.Linearization

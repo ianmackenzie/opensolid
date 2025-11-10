@@ -1173,17 +1173,17 @@ transformPoint3d transform ast = do
 placementTransform2d :: Frame2d (global @ units) (Defines local) -> Transform2d.Affine Coordinates
 placementTransform2d frame =
   Transform2d
-    @ Point2d.coerce (Frame2d.originPoint frame)
-    @ Vector2d.coerce (Vector2d.unit (Frame2d.xDirection frame))
-    @ Vector2d.coerce (Vector2d.unit (Frame2d.yDirection frame))
+    (Point2d.coerce (Frame2d.originPoint frame))
+    (Vector2d.coerce (Vector2d.unit (Frame2d.xDirection frame)))
+    (Vector2d.coerce (Vector2d.unit (Frame2d.yDirection frame)))
 
 placementTransform3d :: Frame3d (global @ units) (Defines local) -> Transform3d.Affine Coordinates
 placementTransform3d frame =
   Transform3d
-    @ Point3d.coerce (Frame3d.originPoint frame)
-    @ Vector3d.coerce (Vector3d.unit (Frame3d.rightwardDirection frame))
-    @ Vector3d.coerce (Vector3d.unit (Frame3d.forwardDirection frame))
-    @ Vector3d.coerce (Vector3d.unit (Frame3d.upwardDirection frame))
+    (Point3d.coerce (Frame3d.originPoint frame))
+    (Vector3d.coerce (Vector3d.unit (Frame3d.rightwardDirection frame)))
+    (Vector3d.coerce (Vector3d.unit (Frame3d.forwardDirection frame)))
+    (Vector3d.coerce (Vector3d.unit (Frame3d.upwardDirection frame)))
 
 placeVector2dIn :: Frame2d (global @ frameUnits) (Defines local) -> Ast2d input -> Ast2d input
 placeVector2dIn frame ast = transformVector2d (placementTransform2d frame) ast
@@ -1353,9 +1353,9 @@ addPlane plane = do
 
 compileVariable1d :: Variable1d input -> Compile.Step VariableIndex
 compileVariable1d variable = case variable of
-  CurveParameter -> return (VariableIndex 0)
-  SurfaceParameter U -> return (VariableIndex 0)
-  SurfaceParameter V -> return (VariableIndex 1)
+  CurveParameter -> Compile.return (VariableIndex 0)
+  SurfaceParameter U -> Compile.return (VariableIndex 0)
+  SurfaceParameter V -> Compile.return (VariableIndex 1)
   XComponent arg -> do
     argIndex <- compileVariable2d arg
     Compile.addVariable1d (Instruction.Component0 argIndex)
@@ -1530,7 +1530,7 @@ coordinates3d (Vector3d r f u) = NonEmpty.three r f u
 
 compileVariable2d :: Variable2d input -> Compile.Step VariableIndex
 compileVariable2d variable = case variable of
-  SurfaceParameters -> return (VariableIndex 0)
+  SurfaceParameters -> Compile.return (VariableIndex 0)
   XY x y -> do
     xIndex <- compileVariable1d x
     yIndex <- compileVariable1d y

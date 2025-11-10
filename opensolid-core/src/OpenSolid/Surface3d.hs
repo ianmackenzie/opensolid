@@ -44,7 +44,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
-import OpenSolid.Prelude hiding (flip)
+import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
@@ -84,8 +84,8 @@ parametric givenFunction givenDomain = do
   Surface3d
     { function = givenFunction
     , domain = givenDomain
-    , outerLoop = boundaryLoop givenDomain.outerLoop
-    , innerLoops = List.map boundaryLoop givenDomain.innerLoops
+    , outerLoop = boundaryLoop (Region2d.outerLoop givenDomain)
+    , innerLoops = List.map boundaryLoop (Region2d.innerLoops givenDomain)
     }
 
 on ::
@@ -163,8 +163,8 @@ boundaryCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoop
 flip :: Surface3d (space @ units) -> Surface3d (space @ units)
 flip surface =
   parametric
-    @ surface.function `compose` SurfaceFunction2d.xy (negative SurfaceFunction.u) SurfaceFunction.v
-    @ Region2d.mirrorAcross Axis2d.y surface.domain
+    (surface.function `compose` SurfaceFunction2d.xy (negative SurfaceFunction.u) SurfaceFunction.v)
+    (Region2d.mirrorAcross Axis2d.y surface.domain)
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.
 placeIn ::
@@ -188,7 +188,7 @@ toMesh accuracy surface = do
   let fuu = f.du.du
   let fuv = f.du.dv
   let fvv = f.dv.dv
-  let boundaryLoops = surface.domain.outerLoop :| surface.domain.innerLoops
+  let boundaryLoops = Region2d.boundaryLoops surface.domain
   let boundaryPolygons =
         NonEmpty.map (toPolygon accuracy surface.function fuu fuv fvv) boundaryLoops
   let boundaryEdges = NonEmpty.combine Polygon2d.edges boundaryPolygons

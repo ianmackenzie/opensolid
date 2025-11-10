@@ -71,6 +71,7 @@ module OpenSolid.Curve2d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.ArcLength qualified as ArcLength
@@ -103,7 +104,6 @@ import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
-import OpenSolid.Exception qualified as Exception
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.FFI (FFI)
@@ -111,6 +111,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -137,6 +138,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -151,7 +153,6 @@ import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
-import Prelude ((+), (-))
 
 -- | A parametric curve in 2D space.
 data Curve2d (coordinateSystem :: CoordinateSystem) where
@@ -273,8 +274,8 @@ instance
   where
   curve `compose` function =
     SurfaceFunction2d.new
-      @ curve.compiled `compose` function.compiled
-      @ \p -> curve.derivative `compose` function .*. SurfaceFunction.derivative p function
+      (curve.compiled `compose` function.compiled)
+      (\p -> curve.derivative `compose` function .*. SurfaceFunction.derivative p function)
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -299,8 +300,8 @@ instance
   function `compose` uvCurve = do
     let (dudt, dvdt) = uvCurve.derivative.components
     VectorCurve3d.new
-      @ function.compiled `compose` uvCurve.compiled
-      @ function.du `compose` uvCurve .*. dudt .+. function.dv `compose` uvCurve .*. dvdt
+      (function.compiled `compose` uvCurve.compiled)
+      (function.du `compose` uvCurve .*. dudt .+. function.dv `compose` uvCurve .*. dvdt)
 
 instance
   uvCoordinates ~ UvCoordinates =>
@@ -312,8 +313,8 @@ instance
   function `compose` uvCurve = do
     let (dudt, dvdt) = uvCurve.derivative.components
     Curve3d.new
-      @ function.compiled `compose` uvCurve.compiled
-      @ function.du `compose` uvCurve .*. dudt .+. function.dv `compose` uvCurve .*. dvdt
+      (function.compiled `compose` uvCurve.compiled)
+      (function.du `compose` uvCurve .*. dudt .+. function.dv `compose` uvCurve .*. dvdt)
 
 new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> Curve2d (space @ units)
 new = Curve2d
@@ -331,15 +332,15 @@ constant point = new (CompiledFunction.constant point) VectorCurve2d.zero
 
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve units -> Curve units -> Curve2d (space @ units)
-xy x y =
-  new
-    @ CompiledFunction.map2
-      Expression.xy
-      Point2d
-      Bounds2d
-      x.compiled
-      y.compiled
-    @ VectorCurve2d.xy x.derivative y.derivative
+xy x y = do
+  let compiledXY =
+        CompiledFunction.map2
+          Expression.xy
+          Point2d
+          Bounds2d
+          x.compiled
+          y.compiled
+  new compiledXY (VectorCurve2d.xy x.derivative y.derivative)
 
 -- | Create a line between two points.
 line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
@@ -396,10 +397,10 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2d.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2d.angleFrom centerPoint givenStartPoint
   polarArc
-    @ #centerPoint centerPoint
-    @ #radius radius
-    @ #startAngle startAngle
-    @ #endAngle (startAngle .+. sweptAngle)
+    (#centerPoint centerPoint)
+    (#radius radius)
+    (#startAngle startAngle)
+    (#endAngle (startAngle .+. sweptAngle))
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
@@ -491,10 +492,10 @@ circle ::
   Curve2d (space @ units)
 circle (Named centerPoint) (Named diameter) =
   polarArc
-    @ #centerPoint centerPoint
-    @ #radius (0.5 *. diameter)
-    @ #startAngle Angle.zero
-    @ #endAngle Angle.twoPi
+    (#centerPoint centerPoint)
+    (#radius (0.5 *. diameter))
+    (#startAngle Angle.zero)
+    (#endAngle Angle.twoPi)
 
 {-| Create an ellipes with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,
@@ -518,8 +519,8 @@ will return a cubic Bezier curve with the given four control points.
 bezier :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
 bezier controlPoints =
   new
-    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    @ VectorCurve2d.bezier (Bezier.derivative controlPoints)
+    (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
+    (VectorCurve2d.bezier (Bezier.derivative controlPoints))
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
@@ -609,8 +610,8 @@ desingularized ::
   Curve2d (space @ units)
 desingularized start middle end =
   new
-    @ CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled
-    @ VectorCurve2d.desingularized start.derivative middle.derivative end.derivative
+    (CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled)
+    (VectorCurve2d.desingularized start.derivative middle.derivative end.derivative)
 
 instance HasField "startPoint" (Curve2d (space @ units)) (Point2d (space @ units)) where
   getField curve = evaluate curve 0
@@ -703,25 +704,25 @@ isOnAxis axis curve = List.allSatisfy (intersects axis) (samplePoints curve)
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d (space @ units) -> Curve units
-xCoordinate curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.xCoordinate
-      Point2d.xCoordinate
-      Bounds2d.xCoordinate
-      curve.compiled
-    @ curve.derivative.xComponent
+xCoordinate curve = do
+  let compiledXCoordinate =
+        CompiledFunction.map
+          Expression.xCoordinate
+          Point2d.xCoordinate
+          Bounds2d.xCoordinate
+          curve.compiled
+  Curve.new compiledXCoordinate (VectorCurve2d.xComponent curve.derivative)
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yCoordinate :: Curve2d (space @ units) -> Curve units
-yCoordinate curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.yCoordinate
-      Point2d.yCoordinate
-      Bounds2d.yCoordinate
-      curve.compiled
-    @ curve.derivative.yComponent
+yCoordinate curve = do
+  let compiledYCoordinate =
+        CompiledFunction.map
+          Expression.yCoordinate
+          Point2d.yCoordinate
+          Bounds2d.yCoordinate
+          curve.compiled
+  Curve.new compiledYCoordinate (VectorCurve2d.yComponent curve.derivative)
 
 coordinates :: Curve2d (space @ units) -> (Curve units, Curve units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
@@ -879,7 +880,7 @@ intersections curve1 curve2 = do
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
             Success (NonEmpty points) -> Success (Just (IntersectionPoints points))
             Success [] -> Success Nothing
-            Failure Solve2d.InfiniteRecursion -> Exception.higherOrderZero
+            Failure Solve2d.InfiniteRecursion -> throw HigherOrderZero
     NonEmpty segments -> Success (Just (OverlappingSegments segments))
 
 endpointIntersection :: List UvPoint -> UvBounds -> Maybe UvPoint
@@ -958,14 +959,14 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve2d (global @ units)
-placeIn frame curve =
-  new
-    @ CompiledFunction.map
-      (Expression.Curve2d.placeIn frame)
-      (Point2d.placeIn frame)
-      (Bounds2d.placeIn frame)
-      curve.compiled
-    @ VectorCurve2d.placeIn frame curve.derivative
+placeIn frame curve = do
+  let compiledPlaced =
+        CompiledFunction.map
+          (Expression.Curve2d.placeIn frame)
+          (Point2d.placeIn frame)
+          (Bounds2d.placeIn frame)
+          curve.compiled
+  new compiledPlaced (VectorCurve2d.placeIn frame curve.derivative)
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
@@ -983,14 +984,14 @@ transformBy ::
   Transform2d tag (space @ units) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
-transformBy transform curve =
-  new
-    @ CompiledFunction.map
-      (Expression.Curve2d.transformBy transform)
-      (Point2d.transformBy transform)
-      (Bounds2d.transformBy transform)
-      curve.compiled
-    @ VectorCurve2d.transformBy transform curve.derivative
+transformBy transform curve = do
+  let compiledTransformed =
+        CompiledFunction.map
+          (Expression.Curve2d.transformBy transform)
+          (Point2d.transformBy transform)
+          (Bounds2d.transformBy transform)
+          curve.compiled
+  new compiledTransformed (VectorCurve2d.transformBy transform curve.derivative)
 
 -- | Translate by the given displacement.
 translateBy ::
@@ -1129,8 +1130,8 @@ medialAxis curve1 curve2 = do
         let radius :: SurfaceFunction units =
               Units.coerce $
                 SurfaceFunction.unsafeQuotient#
-                  @ d `dot#` d
-                  @ 2 *. (tangentVector1 `compose` SurfaceFunction.u) `cross` d
+                  (d `dot#` d)
+                  (2 *. (tangentVector1 `compose` SurfaceFunction.u) `cross` d)
         let curve :: SurfaceFunction2d (space @ units) =
               (curve1 `compose` SurfaceFunction.u) .+. radius .*. (normal1 `compose` SurfaceFunction.u)
         let toSegment solutionCurve =
@@ -1161,13 +1162,13 @@ parameterizeByArcLength curve = do
 makePiecewise :: NonEmpty (Curve2d (space @ units), Quantity units) -> Curve2d (space @ units)
 makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
-  let (tree, arcLength) = buildPiecewiseTree segmentArray 0 segmentArray.length
+  let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   let evaluateImpl t = piecewiseValue tree (arcLength .*. t)
   let evaluateBoundsImpl (Bounds t1 t2) =
         piecewiseBounds tree (arcLength .*. t1) (arcLength .*. t2)
   new
-    @ CompiledFunction.abstract evaluateImpl evaluateBoundsImpl
-    @ piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength
+    (CompiledFunction.abstract evaluateImpl evaluateBoundsImpl)
+    (piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength)
 
 piecewise :: Tolerance units => NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
 piecewise segments = makePiecewise (NonEmpty.map parameterizeByArcLength segments)

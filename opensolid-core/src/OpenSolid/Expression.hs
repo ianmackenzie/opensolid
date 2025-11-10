@@ -84,6 +84,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)

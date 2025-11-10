@@ -10,7 +10,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
-import Prelude ((+))
 
 data Tree units
   = Node (Tree units) (Quantity units) (Tree units)

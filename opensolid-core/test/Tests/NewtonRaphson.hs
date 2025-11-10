@@ -46,10 +46,10 @@ arc2d :: Tolerance Unitless => Test
 arc2d = do
   let arc =
         Curve2d.polarArc
-          @ #centerPoint Point2d.origin
-          @ #radius 1
-          @ #startAngle Angle.zero
-          @ #endAngle Angle.pi
+          (Named @"centerPoint" Point2d.origin)
+          (Named @"radius" 1)
+          (Named @"startAngle" Angle.zero)
+          (Named @"endAngle" Angle.pi)
   let point = Point2d (Number.sqrt 2 ./ 2) (Number.sqrt 2 ./ 2)
   curve2d "Arc" (arc .-. point) 0.5 0.25
 

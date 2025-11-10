@@ -9,6 +9,10 @@ module OpenSolid.Region2d
   , inscribedPolygon
   , circumscribedPolygon
   , polygon
+  , outerLoop
+  , innerLoops
+  , boundaryLoops
+  , boundaryCurves
   , placeIn
   , relativeTo
   , transformBy
@@ -69,6 +73,7 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -123,7 +128,7 @@ unitSquare :: Region2d UvCoordinates
 unitSquare = Tolerance.using Quantity.zero do
   case rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval) of
     Success region -> region
-    Failure EmptyRegion -> internalError "Constructing unit square region should not fail"
+    Failure EmptyRegion -> abort "Constructing unit square region should not fail"
 
 data EmptyRegion = EmptyRegion deriving (Eq, Show, Error.Message)
 
@@ -204,8 +209,7 @@ inscribedPolygon n (Named centerPoint) (Named diameter) = do
       let vertices = List.map vertex vertexAngles
       case polygon vertices of
         Success region -> region
-        Failure _ ->
-          internalError "Regular polygon construction with non-zero diameter should not fail"
+        Failure _ -> abort "Regular polygon construction with non-zero diameter should not fail"
 
 {-| Create a regular polygon with the given number of sides.
 
@@ -222,10 +226,11 @@ circumscribedPolygon ::
   "centerPoint" ::: Point2d (space @ units) ->
   "diameter" ::: Quantity units ->
   Result EmptyRegion (Region2d (space @ units))
-circumscribedPolygon n (Named centerPoint) (Named diameter) =
-  inscribedPolygon n
-    @ #centerPoint centerPoint
-    @ #diameter (diameter ./. Angle.cos (Angle.pi ./. Number.fromInt n))
+circumscribedPolygon numSides (Named centerPoint) (Named diameter) =
+  inscribedPolygon
+    numSides
+    (#centerPoint centerPoint)
+    (#diameter (diameter ./. Angle.cos (Angle.pi ./. Number.fromInt numSides)))
 
 {-| Create a polygonal region from the given vertices.
 
@@ -259,7 +264,7 @@ fillet ::
   Region2d (space @ units) ->
   Result Text (Region2d (space @ units))
 fillet points (Named radius) region = do
-  let initialCurves = NonEmpty.toList region.boundaryCurves
+  let initialCurves = NonEmpty.toList (boundaryCurves region)
   filletedCurves <- Result.try (Result.foldl (addFillet radius) initialCurves points)
   Result.try (boundedBy filletedCurves)
 
@@ -438,37 +443,17 @@ hasEndpoint point curve = point ~= curve.startPoint || point ~= curve.endPoint
 startLoop :: Curve2d (space @ units) -> PartialLoop (space @ units)
 startLoop curve = PartialLoop curve.startPoint (NonEmpty.one curve) curve.endPoint
 
-instance
-  HasField
-    "outerLoop"
-    (Region2d (space @ units))
-    (NonEmpty (Curve2d (space @ units)))
-  where
-  getField (Region2d loop _) = loop
+outerLoop :: Region2d (space @ units) -> NonEmpty (Curve2d (space @ units))
+outerLoop (Region2d loop _) = loop
 
-instance
-  HasField
-    "innerLoops"
-    (Region2d (space @ units))
-    (List (NonEmpty (Curve2d (space @ units))))
-  where
-  getField (Region2d _ loops) = loops
+innerLoops :: Region2d (space @ units) -> List (NonEmpty (Curve2d (space @ units)))
+innerLoops (Region2d _ loops) = loops
 
-instance
-  HasField
-    "boundaryLoops"
-    (Region2d (space @ units))
-    (NonEmpty (NonEmpty (Curve2d (space @ units))))
-  where
-  getField region = region.outerLoop :| region.innerLoops
+boundaryLoops :: Region2d (space @ units) -> NonEmpty (NonEmpty (Curve2d (space @ units)))
+boundaryLoops region = outerLoop region :| innerLoops region
 
-instance
-  HasField
-    "boundaryCurves"
-    (Region2d (space @ units))
-    (NonEmpty (Curve2d (space @ units)))
-  where
-  getField region = NonEmpty.concat region.boundaryLoops
+boundaryCurves :: Region2d (space @ units) -> NonEmpty (Curve2d (space @ units))
+boundaryCurves region = NonEmpty.concat (boundaryLoops region)
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->
@@ -561,7 +546,7 @@ unconvert factor region = convert (Units.simplify (1 /# factor)) region
 
 contains :: Tolerance units => Point2d (space @ units) -> Region2d (space @ units) -> Bool
 contains point region =
-  case classify point region.boundaryCurves of
+  case classify point (boundaryCurves region) of
     Nothing -> True -- Point on boundary is considered contained
     Just Positive -> True
     Just Negative -> False
@@ -589,8 +574,8 @@ fluxIntegral point curve = do
   let integrand =
         Tolerance.using Tolerance.squared# $
           Curve.unsafeQuotient
-            @ curve.derivative `cross#` displacement
-            @ VectorCurve2d.squaredMagnitude# displacement
+            (curve.derivative `cross#` displacement)
+            (VectorCurve2d.squaredMagnitude# displacement)
   Curve.integrate integrand
 
 totalFlux :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
@@ -667,19 +652,18 @@ loopIsInside outer inner = do
 
 bounds :: Region2d (space @ units) -> Bounds2d (space @ units)
 bounds region = do
-  let outerEdgeBoundingBoxes = NonEmpty.map Curve2d.bounds region.outerLoop
+  let outerEdgeBoundingBoxes = NonEmpty.map Curve2d.bounds (outerLoop region)
   NonEmpty.reduce Bounds2d.aggregate2 outerEdgeBoundingBoxes
 
 area :: Units.Squared units1 units2 => Region2d (space @ units1) -> Estimate units2
 area region = do
-  let referencePoint = Curve2d.startPoint (NonEmpty.first region.outerLoop)
-  let edgeIntegrals = NonEmpty.map (areaIntegral referencePoint) region.boundaryCurves
+  let referencePoint = Curve2d.startPoint (NonEmpty.first (outerLoop region))
+  let edgeIntegrals = NonEmpty.map (areaIntegral referencePoint) (boundaryCurves region)
   Estimate.sum edgeIntegrals
 
 toMesh :: Resolution units -> Region2d (space @ units) -> Mesh (Point2d (space @ units))
 toMesh resolution region = do
-  let allLoops = region.outerLoop :| region.innerLoops
-  let vertexLoops = NonEmpty.map (toVertexLoop resolution) allLoops
+  let vertexLoops = NonEmpty.map (toVertexLoop resolution) (boundaryLoops region)
   CDT.unsafe vertexLoops []
 
 toVertexLoop ::
@@ -693,4 +677,4 @@ toVertexLoop resolution loop = do
   let allVertices = List.combine trailingVertices loop
   case allVertices of
     NonEmpty vertices -> vertices
-    [] -> internalError "Should always have at least one vertex"
+    [] -> abort "Should always have at least one vertex"

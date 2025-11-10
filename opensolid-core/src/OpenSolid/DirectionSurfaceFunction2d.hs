@@ -11,6 +11,7 @@ module OpenSolid.DirectionSurfaceFunction2d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionBounds2d (DirectionBounds2d)

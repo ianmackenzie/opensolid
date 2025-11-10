@@ -25,6 +25,7 @@ module OpenSolid.Curve3d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounded3d (Bounded3d)
@@ -59,6 +60,7 @@ import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorCurve3d (VectorCurve3d)
@@ -123,8 +125,8 @@ instance
 instance Composition (Curve Unitless) (Curve3d (space @ units)) (Curve3d (space @ units)) where
   outer `compose` inner =
     new
-      @ outer.compiled `compose` inner.compiled
-      @ (outer.derivative `compose` inner) .*. inner.derivative
+      (outer.compiled `compose` inner.compiled)
+      ((outer.derivative `compose` inner) .*. inner.derivative)
 
 instance
   Composition
@@ -134,8 +136,8 @@ instance
   where
   curve `compose` function =
     SurfaceFunction3d.new
-      @ curve.compiled `compose` function.compiled
-      @ \p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function
+      (curve.compiled `compose` function.compiled)
+      (\p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function)
 
 instance ApproximateEquality (Curve3d (space @ units)) units where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
@@ -158,13 +160,13 @@ on ::
   Curve2d (local @ units) ->
   Curve3d (space @ units)
 on plane curve2d = do
-  new
-    @ CompiledFunction.map
-      (Expression.Curve2d.placeOn plane)
-      (Point2d.placeOn plane)
-      (Bounds2d.placeOn plane)
-      curve2d.compiled
-    @ VectorCurve3d.on plane curve2d.derivative
+  let compiledPlaced =
+        CompiledFunction.map
+          (Expression.Curve2d.placeOn plane)
+          (Point2d.placeOn plane)
+          (Bounds2d.placeOn plane)
+          curve2d.compiled
+  new compiledPlaced (VectorCurve3d.on plane curve2d.derivative)
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 .+. Curve.t .*. (p2 .-. p1)
@@ -178,8 +180,8 @@ will return a cubic Bezier curve with the given four control points.
 bezier :: NonEmpty (Point3d (space @ units)) -> Curve3d (space @ units)
 bezier controlPoints =
   new
-    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    @ VectorCurve3d.bezier (Bezier.derivative controlPoints)
+    (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
+    (VectorCurve3d.bezier (Bezier.derivative controlPoints))
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
@@ -261,27 +263,27 @@ transformBy ::
   Transform3d tag (space @ units) ->
   Curve3d (space @ units) ->
   Curve3d (space @ units)
-transformBy transform curve =
-  new
-    @ CompiledFunction.map
-      (Expression.Curve3d.transformBy transform)
-      (Point3d.transformBy transform)
-      (Bounds3d.transformBy transform)
-      curve.compiled
-    @ VectorCurve3d.transformBy transform curve.derivative
+transformBy transform curve = do
+  let compiledTransformed =
+        CompiledFunction.map
+          (Expression.Curve3d.transformBy transform)
+          (Point3d.transformBy transform)
+          (Bounds3d.transformBy transform)
+          curve.compiled
+  new compiledTransformed (VectorCurve3d.transformBy transform curve.derivative)
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Curve3d (local @ units) ->
   Curve3d (global @ units)
-placeIn frame curve =
-  new
-    @ CompiledFunction.map
-      (Expression.Curve3d.placeIn frame)
-      (Point3d.placeIn frame)
-      (Bounds3d.placeIn frame)
-      curve.compiled
-    @ VectorCurve3d.placeIn frame curve.derivative
+placeIn frame curve = do
+  let compiledPlaced =
+        CompiledFunction.map
+          (Expression.Curve3d.placeIn frame)
+          (Point3d.placeIn frame)
+          (Bounds3d.placeIn frame)
+          curve.compiled
+  new compiledPlaced (VectorCurve3d.placeIn frame curve.derivative)
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->

@@ -15,6 +15,7 @@ module OpenSolid.DirectionCurve2d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Curve (Curve)

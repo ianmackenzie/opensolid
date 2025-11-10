@@ -47,6 +47,7 @@ module OpenSolid.VectorCurve2d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
@@ -84,6 +85,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
@@ -330,8 +332,8 @@ instance
   where
   lhs `dot#` rhs =
     Curve.new
-      @ lhs.compiled `dot#` rhs.compiled
-      @ lhs.derivative `dot#` rhs .+. lhs `dot#` rhs.derivative
+      (lhs.compiled `dot#` rhs.compiled)
+      (lhs.derivative `dot#` rhs .+. lhs `dot#` rhs.derivative)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -393,8 +395,8 @@ instance
   where
   lhs `cross#` rhs =
     Curve.new
-      @ lhs.compiled `cross#` rhs.compiled
-      @ lhs.derivative `cross#` rhs .+. lhs `cross#` rhs.derivative
+      (lhs.compiled `cross#` rhs.compiled)
+      (lhs.derivative `cross#` rhs .+. lhs `cross#` rhs.derivative)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -479,8 +481,8 @@ instance
   where
   curve `compose` function =
     VectorSurfaceFunction2d.new
-      @ curve.compiled `compose` function.compiled
-      @ \p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function
+      (curve.compiled `compose` function.compiled)
+      (\p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function)
 
 compiled :: VectorCurve2d (space @ units) -> Compiled (space @ units)
 compiled (VectorCurve2d c _) = c
@@ -492,14 +494,14 @@ transformBy ::
   Transform2d tag (space @ translationUnits) ->
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
-transformBy transform curve =
-  new
-    @ CompiledFunction.map
-      (Expression.VectorCurve2d.transformBy transform)
-      (Vector2d.transformBy transform)
-      (VectorBounds2d.transformBy transform)
-      curve.compiled
-    @ transformBy transform curve.derivative
+transformBy transform curve = do
+  let compiledTransformed =
+        CompiledFunction.map
+          (Expression.VectorCurve2d.transformBy transform)
+          (Vector2d.transformBy transform)
+          (VectorBounds2d.transformBy transform)
+          curve.compiled
+  new compiledTransformed (transformBy transform curve.derivative)
 
 rotateBy ::
   forall space units.
@@ -531,15 +533,15 @@ unit = DirectionCurve2d.unwrap
 
 -- | Create a curve from its X and Y component curves.
 xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
-xy x y =
-  new
-    @ CompiledFunction.map2
-      Expression.xy
-      Vector2d
-      VectorBounds2d
-      x.compiled
-      y.compiled
-    @ xy x.derivative y.derivative
+xy x y = do
+  let compiledXY =
+        CompiledFunction.map2
+          Expression.xy
+          Vector2d
+          VectorBounds2d
+          x.compiled
+          y.compiled
+  new compiledXY (xy x.derivative y.derivative)
 
 line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
 line v1 v2 = bezier (NonEmpty.two v1 v2)
@@ -575,8 +577,8 @@ cubicBezier v1 v2 v3 v4 = bezier (NonEmpty.four v1 v2 v3 v4)
 bezier :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
 bezier controlPoints =
   new
-    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    @ bezier (Bezier.derivative controlPoints)
+    (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
+    (bezier (Bezier.derivative controlPoints))
 
 startValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
 startValue curve = evaluate curve 0
@@ -647,25 +649,25 @@ evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tB
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xComponent :: VectorCurve2d (space @ units) -> Curve units
-xComponent curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.xComponent
-      Vector2d.xComponent
-      VectorBounds2d.xComponent
-      curve.compiled
-    @ curve.derivative.xComponent
+xComponent curve = do
+  let compiledXComponent =
+        CompiledFunction.map
+          Expression.xComponent
+          Vector2d.xComponent
+          VectorBounds2d.xComponent
+          curve.compiled
+  Curve.new compiledXComponent (xComponent curve.derivative)
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yComponent :: VectorCurve2d (space @ units) -> Curve units
-yComponent curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.yComponent
-      Vector2d.yComponent
-      VectorBounds2d.yComponent
-      curve.compiled
-    @ curve.derivative.yComponent
+yComponent curve = do
+  let compiledYComponent =
+        CompiledFunction.map
+          Expression.yComponent
+          Vector2d.yComponent
+          VectorBounds2d.yComponent
+          curve.compiled
+  Curve.new compiledYComponent (yComponent curve.derivative)
 
 components :: VectorCurve2d (space @ units) -> (Curve units, Curve units)
 components curve = (xComponent curve, yComponent curve)
@@ -729,25 +731,24 @@ unsafeQuotient# ::
   Curve units2 ->
   VectorCurve2d (space @ (units1 #/# units2))
 unsafeQuotient# numerator denominator = do
-  new
-    @ numerator.compiled #/# denominator.compiled
-    @ Units.simplify do
-      unsafeQuotient#
-        (numerator.derivative #*# denominator .-. numerator #*# denominator.derivative)
-        (Curve.squared# denominator)
+  let quotientDerivative = Units.simplify do
+        unsafeQuotient#
+          (numerator.derivative #*# denominator .-. numerator #*# denominator.derivative)
+          (Curve.squared# denominator)
+  new (numerator.compiled #/# denominator.compiled) quotientDerivative
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude# curve)
 
 squaredMagnitude# :: VectorCurve2d (space @ units) -> Curve (units #*# units)
-squaredMagnitude# curve =
-  Curve.new
-    @ CompiledFunction.map
-      Expression.VectorCurve2d.squaredMagnitude#
-      Vector2d.squaredMagnitude#
-      VectorBounds2d.squaredMagnitude#
-      curve.compiled
-    @ 2 *. curve `dot#` curve.derivative
+squaredMagnitude# curve = do
+  let compiledSquaredMagnitude =
+        CompiledFunction.map
+          Expression.VectorCurve2d.squaredMagnitude#
+          Vector2d.squaredMagnitude#
+          VectorBounds2d.squaredMagnitude#
+          curve.compiled
+  Curve.new compiledSquaredMagnitude (2 *. curve `dot#` curve.derivative)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 

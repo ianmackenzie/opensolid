@@ -392,9 +392,9 @@ placeIn frame (VectorBounds3d vR vF vU) = do
   let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
   let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   VectorBounds3d
-    @ Bounds (cR' .-. rR') (cR' .+. rR')
-    @ Bounds (cF' .-. rF') (cF' .+. rF')
-    @ Bounds (cU' .-. rU') (cU' .+. rU')
+    (Bounds (cR' .-. rR') (cR' .+. rR'))
+    (Bounds (cF' .-. rF') (cF' .+. rF'))
+    (Bounds (cU' .-. rU') (cU' .+. rU'))
 
 relativeTo ::
   Frame3d (global @ frameUnits) (Defines local) ->
@@ -415,9 +415,9 @@ relativeTo frame (VectorBounds3d vR vF vU) = do
   let rF' = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
   let rU' = rR .*. Number.abs kR .+. rF .*. Number.abs kF .+. rU .*. Number.abs kU
   VectorBounds3d
-    @ Bounds (cR' .-. rR') (cR' .+. rR')
-    @ Bounds (cF' .-. rF') (cF' .+. rF')
-    @ Bounds (cU' .-. rU') (cU' .+. rU')
+    (Bounds (cR' .-. rR') (cR' .+. rR'))
+    (Bounds (cF' .-. rF') (cF' .+. rF'))
+    (Bounds (cU' .-. rU') (cU' .+. rU'))
 
 transformBy ::
   Transform3d tag (space @ units1) ->
@@ -439,9 +439,9 @@ transformBy transform (VectorBounds3d vR vF vU) = do
   let rF' = Number.abs iF .*. rR .+. Number.abs jF .*. rF .+. Number.abs kF .*. rU
   let rU' = Number.abs iU .*. rR .+. Number.abs jU .*. rF .+. Number.abs kU .*. rU
   VectorBounds3d
-    @ Bounds (cR' .-. rR') (cR' .+. rR')
-    @ Bounds (cF' .-. rF') (cF' .+. rF')
-    @ Bounds (cU' .-. rU') (cU' .+. rU')
+    (Bounds (cR' .-. rR') (cR' .+. rR'))
+    (Bounds (cF' .-. rF') (cF' .+. rF'))
+    (Bounds (cU' .-. rU') (cU' .+. rU'))
 
 rotateIn ::
   Direction3d space ->

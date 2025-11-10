@@ -38,6 +38,7 @@ module OpenSolid.VectorCurve3d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
@@ -69,6 +70,7 @@ import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d)
@@ -219,8 +221,8 @@ instance
   where
   lhs #*# rhs =
     new
-      @ lhs.compiled #*# rhs.compiled
-      @ lhs.derivative #*# rhs .+. lhs #*# rhs.derivative
+      (lhs.compiled #*# rhs.compiled)
+      (lhs.derivative #*# rhs .+. lhs #*# rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -436,8 +438,8 @@ instance
   where
   curve `compose` function =
     VectorSurfaceFunction3d.new
-      @ curve.compiled `compose` function.compiled
-      @ \p -> curve.derivative `compose` function .*. SurfaceFunction.derivative p function
+      (curve.compiled `compose` function.compiled)
+      (\p -> curve.derivative `compose` function .*. SurfaceFunction.derivative p function)
 
 compiled :: VectorCurve3d (space @ units) -> Compiled (space @ units)
 compiled (VectorCurve3d c _) = c
@@ -574,8 +576,8 @@ desingularized ::
   VectorCurve3d (space @ units)
 desingularized start middle end =
   new
-    @ CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled
-    @ desingularized start.derivative middle.derivative end.derivative
+    (CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled)
+    (desingularized start.derivative middle.derivative end.derivative)
 
 evaluate :: VectorCurve3d (space @ units) -> Number -> Vector3d (space @ units)
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
@@ -646,12 +648,11 @@ unsafeQuotient# ::
   Curve units2 ->
   VectorCurve3d (space @ (units1 #/# units2))
 unsafeQuotient# numerator denominator = do
-  new
-    @ numerator.compiled #/# denominator.compiled
-    @ Units.simplify do
-      unsafeQuotient#
-        (numerator.derivative #*# denominator .-. numerator #*# denominator.derivative)
-        (Curve.squared# denominator)
+  let quotientDerivative = Units.simplify do
+        unsafeQuotient#
+          (numerator.derivative #*# denominator .-. numerator #*# denominator.derivative)
+          (Curve.squared# denominator)
+  new (numerator.compiled #/# denominator.compiled) quotientDerivative
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude# curve)

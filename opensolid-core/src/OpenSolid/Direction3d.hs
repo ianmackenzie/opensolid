@@ -192,7 +192,7 @@ random = do
   -- and only accept vectors inside the unit sphere
   -- (otherwise we'll get a non-uniform distribution)
   if magnitude > 0.1 && magnitude <= 1
-    then return (Unit3d (vector ./. magnitude))
+    then Random.return (Unit3d (vector ./. magnitude))
     else random -- Generated a 'bad' vector, try again
 
 randomVector :: Random.Generator (Vector3d (space @ Unitless))

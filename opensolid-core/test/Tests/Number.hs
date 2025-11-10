@@ -5,7 +5,6 @@ import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
-import Prelude ((/))
 
 tests :: List Test
 tests =

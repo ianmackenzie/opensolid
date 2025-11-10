@@ -6,6 +6,7 @@ import Foreign qualified
 import Foreign.Marshal qualified
 import Foreign.Marshal.Array qualified
 import OpenSolid.Array qualified as Array
+import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
@@ -14,7 +15,6 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Vertex2d (Vertex2d, pattern Vertex2d)
 import System.IO.Unsafe qualified
-import Prelude ((*), (+), (-))
 
 unsafe ::
   Vertex2d vertex (space @ units) =>
@@ -48,7 +48,7 @@ unsafe boundaryLoops steinerVertices = do
             outputFaceIndices <- Foreign.Marshal.peekArray (3 * numOutputFaces) triangleData
             let faceIndices = collectFaceIndices outputFaceIndices
             let meshVertices = Array.fromNonEmpty inputVertices
-            return (Mesh.indexed meshVertices faceIndices)
+            IO.succeed (Mesh.indexed meshVertices faceIndices)
 
 collectEdgeIndices :: List (NonEmpty vertex) -> Int -> List Int -> List Int
 collectEdgeIndices loops startIndex accumulated = case loops of

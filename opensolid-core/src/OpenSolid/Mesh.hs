@@ -1,6 +1,10 @@
 module OpenSolid.Mesh
   ( Mesh
   , empty
+  , vertices
+  , faceIndices
+  , numVertices
+  , numFaces
   , indexed
   , faceVertices
   , map
@@ -19,9 +23,8 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Prelude hiding (concat)
+import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint)
-import Prelude ((*), (+), (-))
 
 data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
   deriving (Eq, Show)
@@ -29,17 +32,17 @@ data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex
 indexed = Mesh
 
-instance HasField "vertices" (Mesh vertex) (Array vertex) where
-  getField (Mesh vertices _) = vertices
+vertices :: Mesh vertex -> (Array vertex)
+vertices (Mesh vs _) = vs
 
-instance HasField "faceIndices" (Mesh vertex) (List (Int, Int, Int)) where
-  getField (Mesh _ faceIndices) = faceIndices
+faceIndices :: Mesh vertex -> (List (Int, Int, Int))
+faceIndices (Mesh _ is) = is
 
-instance HasField "numVertices" (Mesh vertex) Int where
-  getField mesh = Array.length mesh.vertices
+numVertices :: Mesh vertex -> Int
+numVertices mesh = Array.length (vertices mesh)
 
-instance HasField "numFaces" (Mesh vertex) Int where
-  getField mesh = List.length mesh.faceIndices
+numFaces :: Mesh vertex -> Int
+numFaces mesh = List.length (faceIndices mesh)
 
 empty :: Mesh vertex
 empty = Mesh Array.empty []
@@ -54,9 +57,9 @@ map f (Mesh vs fs) = Mesh (Array.map f vs) fs
 
 concat :: NonEmpty (Mesh a) -> Mesh a
 concat meshes = do
-  let vertexArrays = NonEmpty.map (.vertices) meshes
-  let faceIndexLists = NonEmpty.toList (NonEmpty.map (.faceIndices) meshes)
-  let arrayLengths = NonEmpty.toList (NonEmpty.map (.length) vertexArrays)
+  let vertexArrays = NonEmpty.map vertices meshes
+  let faceIndexLists = NonEmpty.toList (NonEmpty.map faceIndices meshes)
+  let arrayLengths = NonEmpty.toList (NonEmpty.map Array.length vertexArrays)
   let combinedVertices = Array.fromList (List.combine Array.toList vertexArrays)
   let combinedFaceIndices = List.concat (offsetFaceIndices 0 arrayLengths faceIndexLists)
   Mesh combinedVertices combinedFaceIndices
@@ -94,15 +97,22 @@ gridImpl uSteps vSteps uVertices vVertices function =
   if uVertices <= 1 || vVertices <= 1
     then empty
     else do
-      let numVertices = uVertices * vVertices
-      let vertices =
-            Array.initialize numVertices $
+      let gridVertices =
+            Array.initialize (uVertices * vVertices) do
               \i -> function (i `mod` uVertices) (i `div` uVertices)
-      let faceIndices = gridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vSteps - 1) []
-      Mesh vertices faceIndices
+      let gridFaceIndices =
+            buildGridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vSteps - 1) []
+      Mesh gridVertices gridFaceIndices
 
-gridFaceIndices :: Int -> Int -> Int -> Int -> Int -> List (Int, Int, Int) -> List (Int, Int, Int)
-gridFaceIndices uSteps uVertices vVertices uIndex0 vIndex0 accumulatedIndices = do
+buildGridFaceIndices ::
+  Int ->
+  Int ->
+  Int ->
+  Int ->
+  Int ->
+  List (Int, Int, Int) ->
+  List (Int, Int, Int)
+buildGridFaceIndices uSteps uVertices vVertices uIndex0 vIndex0 accumulatedIndices = do
   let rowStart0 = uVertices * vIndex0
   let rowStart1 = uVertices * ((vIndex0 + 1) `mod` vVertices)
   let uIndex1 = (uIndex0 + 1) `mod` uVertices
@@ -115,7 +125,7 @@ gridFaceIndices uSteps uVertices vVertices uIndex0 vIndex0 accumulatedIndices = 
   let updatedIndices = lowerFaceIndices : upperFaceIndices : accumulatedIndices
   if
     | uIndex0 > 0 ->
-        gridFaceIndices uSteps uVertices vVertices (uIndex0 - 1) vIndex0 updatedIndices
+        buildGridFaceIndices uSteps uVertices vVertices (uIndex0 - 1) vIndex0 updatedIndices
     | vIndex0 > 0 ->
-        gridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vIndex0 - 1) updatedIndices
+        buildGridFaceIndices uSteps uVertices vVertices (uSteps - 1) (vIndex0 - 1) updatedIndices
     | otherwise -> updatedIndices

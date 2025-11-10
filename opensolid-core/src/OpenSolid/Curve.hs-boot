@@ -6,6 +6,7 @@ module OpenSolid.Curve
   )
 where
 
+import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.FFI (FFI)

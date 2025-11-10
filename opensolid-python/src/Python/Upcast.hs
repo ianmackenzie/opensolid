@@ -15,7 +15,8 @@ lines className target (Just upcast) = do
   let parentPointerFieldName = Python.Class.pointerFieldName (Upcast.parentClassName upcast)
   Python.lines
     [ target <> "." <> parentPointerFieldName <> " = c_void_p()"
-    , Python.FFI.invoke (Upcast.ffiName className)
-        @ "ctypes.byref(" <> target <> "." <> childPointerFieldName <> ")"
-        @ "ctypes.byref(" <> target <> "." <> parentPointerFieldName <> ")"
+    , Python.FFI.invoke
+        (Upcast.ffiName className)
+        ("ctypes.byref(" <> target <> "." <> childPointerFieldName <> ")")
+        ("ctypes.byref(" <> target <> "." <> parentPointerFieldName <> ")")
     ]

@@ -67,6 +67,7 @@ module OpenSolid.Bounds
 where
 
 import Data.Coerce qualified
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -75,11 +76,12 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Prelude hiding (max, min)
-import OpenSolid.Quantity (Quantity (Quantity, Quantity##))
+import OpenSolid.Prelude
+import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Unboxed.Math
+import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
 
 type role Bounds phantom
@@ -475,7 +477,7 @@ bisect (Bounds low high) = do
         | high == Quantity.zero = Quantity -1
         | low > Quantity.zero = 2 *. low
         | high < Quantity.zero = 2 *. high
-        | otherwise = internalError "'Impossible' case hit in Bounds.bisect"
+        | otherwise = abort "'Impossible' case hit in Bounds.bisect"
   (Bounds low mid, Bounds mid high)
 
 {-# INLINE isAtomic #-}
@@ -627,7 +629,7 @@ random :: Random.Generator (Quantity units) -> Random.Generator (Bounds units)
 random randomQuantity = do
   a <- randomQuantity
   b <- randomQuantity
-  return (Bounds a b)
+  Random.return (Bounds a b)
 
 sampleValues :: Bounds units -> List (Quantity units)
 sampleValues bounds = List.map (interpolate bounds) Parameter.samples

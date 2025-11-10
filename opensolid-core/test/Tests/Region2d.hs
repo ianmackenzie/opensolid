@@ -116,12 +116,12 @@ twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
   let circle1 =
         Curve2d.circle
-          @ #centerPoint (Point2d.meters -2 0)
-          @ #diameter (Length.meters 2)
+          (#centerPoint (Point2d.meters -2 0))
+          (#diameter (Length.meters 2))
   let circle2 =
         Curve2d.circle
-          @ #centerPoint (Point2d.meters 1 0)
-          @ #diameter (Length.meters 1)
+          (#centerPoint (Point2d.meters 1 0))
+          (#diameter (Length.meters 1))
   case Region2d.boundedBy [circle1, circle2] of
     Success _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
     Failure error -> Test.expect (error == Region2d.BoundedBy.MultipleDisjointRegions)

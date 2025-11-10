@@ -23,20 +23,20 @@ import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
 import GHC.Float qualified
 import OpenSolid.Int qualified as Int
-import OpenSolid.Prelude hiding (concat)
-import OpenSolid.Quantity (Quantity (Quantity))
+import OpenSolid.Prelude
+import Prelude qualified
 
 bytes :: Builder -> ByteString
 bytes builder = ByteString.toStrict (Builder.toLazyByteString builder)
 
 empty :: Builder
-empty = mempty
+empty = Prelude.mempty
 
 concat :: List Builder -> Builder
-concat = mconcat
+concat = Prelude.mconcat
 
 combine :: Foldable list => (a -> Builder) -> list a -> Builder
-combine = foldMap
+combine = Prelude.foldMap
 
 {-# INLINE uint8 #-}
 uint8 :: Int -> Builder

@@ -10,6 +10,7 @@ module OpenSolid.Curve3d
   )
 where
 
+import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.CompiledFunction (CompiledFunction)

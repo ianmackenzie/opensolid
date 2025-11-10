@@ -5,7 +5,6 @@ import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity))
 
 newtype Timer = Timer Number
 
@@ -18,4 +17,4 @@ start = IO.map Timer getMonotonicTime
 elapsed :: Timer -> IO Duration
 elapsed (Timer startTime) = do
   endTime <- getMonotonicTime
-  return (Duration.seconds (endTime .-. startTime))
+  IO.succeed (Duration.seconds (endTime .-. startTime))

@@ -14,7 +14,7 @@ import Deque.Strict (Deque)
 import Deque.Strict qualified as Deque
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
-import Prelude ((+), (-))
+import Prelude qualified
 
 data Queue a = Queue Int (Deque a) deriving (Eq, Show)
 
@@ -45,4 +45,4 @@ pop (Queue n deque) = do
   Just (first, Queue (n - 1) rest)
 
 map :: (a -> b) -> Queue a -> Queue b
-map function (Queue n deque) = Queue n (fmap function deque)
+map function (Queue n deque) = Queue n (Prelude.fmap function deque)

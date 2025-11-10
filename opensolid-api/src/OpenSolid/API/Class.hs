@@ -125,6 +125,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
+import OpenSolid.Units (SquareMeters)
 
 data Class where
   Class ::

@@ -29,6 +29,7 @@ module OpenSolid.VectorSurfaceFunction2d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
@@ -49,6 +50,7 @@ import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
 import OpenSolid.SurfaceFunction.Quotient qualified as SurfaceFunction.Quotient
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -216,8 +218,8 @@ instance
   where
   lhs #*# rhs =
     new
-      @ lhs.compiled #*# rhs.compiled
-      @ \p -> SurfaceFunction.derivative p lhs #*# rhs .+. lhs #*# derivative p rhs
+      (lhs.compiled #*# rhs.compiled)
+      (\p -> SurfaceFunction.derivative p lhs #*# rhs .+. lhs #*# derivative p rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -253,8 +255,8 @@ instance
   where
   lhs #*# rhs =
     new
-      @ lhs.compiled #*# rhs.compiled
-      @ \p -> derivative p lhs #*# rhs .+. lhs #*# SurfaceFunction.derivative p rhs
+      (lhs.compiled #*# rhs.compiled)
+      (\p -> derivative p lhs #*# rhs .+. lhs #*# SurfaceFunction.derivative p rhs)
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -450,8 +452,8 @@ instance
   function `compose` curve = do
     let (dudt, dvdt) = curve.derivative.components
     VectorCurve2d.new
-      @ function.compiled `compose` curve.compiled
-      @ (function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt
+      (function.compiled `compose` curve.compiled)
+      ((function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt)
 
 instance
   HasField
@@ -515,28 +517,28 @@ xy ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   VectorSurfaceFunction2d (space @ units)
-xy x y =
-  new
-    @ CompiledFunction.map2
-      Expression.xy
-      Vector2d
-      VectorBounds2d
-      x.compiled
-      y.compiled
-    @ \p -> xy (SurfaceFunction.derivative p x) (SurfaceFunction.derivative p y)
+xy x y = do
+  let compiledXY =
+        CompiledFunction.map2
+          Expression.xy
+          Vector2d
+          VectorBounds2d
+          x.compiled
+          y.compiled
+  new compiledXY (\p -> xy (SurfaceFunction.derivative p x) (SurfaceFunction.derivative p y))
 
 placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->
   VectorSurfaceFunction2d (local @ units) ->
   VectorSurfaceFunction2d (global @ units)
-placeIn frame function =
-  new
-    @ CompiledFunction.map
-      (Expression.VectorSurface2d.placeIn frame)
-      (Vector2d.placeIn frame)
-      (VectorBounds2d.placeIn frame)
-      function.compiled
-    @ \p -> placeIn frame (derivative p function)
+placeIn frame function = do
+  let compiledPlaced =
+        CompiledFunction.map
+          (Expression.VectorSurface2d.placeIn frame)
+          (Vector2d.placeIn frame)
+          (VectorBounds2d.placeIn frame)
+          function.compiled
+  new compiledPlaced (\p -> placeIn frame (derivative p function))
 
 relativeTo ::
   Frame2d (global @ frameUnits) (Defines local) ->
@@ -548,14 +550,14 @@ transformBy ::
   Transform2d tag (space @ translationUnits) ->
   VectorSurfaceFunction2d (space @ units) ->
   VectorSurfaceFunction2d (space @ units)
-transformBy transform function =
-  new
-    @ CompiledFunction.map
-      (Expression.VectorSurface2d.transformBy transform)
-      (Vector2d.transformBy transform)
-      (VectorBounds2d.transformBy transform)
-      function.compiled
-    @ \p -> transformBy transform (derivative p function)
+transformBy transform function = do
+  let compiledTransformed =
+        CompiledFunction.map
+          (Expression.VectorSurface2d.transformBy transform)
+          (Vector2d.transformBy transform)
+          (VectorBounds2d.transformBy transform)
+          function.compiled
+  new compiledTransformed (\p -> transformBy transform (derivative p function))
 
 evaluate :: VectorSurfaceFunction2d (space @ units) -> UvPoint -> Vector2d (space @ units)
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
@@ -574,24 +576,28 @@ derivative U = (.du)
 derivative V = (.dv)
 
 xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-xComponent function =
+xComponent function = do
+  let compiledXComponent =
+        CompiledFunction.map
+          Expression.xComponent
+          Vector2d.xComponent
+          VectorBounds2d.xComponent
+          function.compiled
   SurfaceFunction.new
-    @ CompiledFunction.map
-      Expression.xComponent
-      Vector2d.xComponent
-      VectorBounds2d.xComponent
-      function.compiled
-    @ \parameter -> (derivative parameter function).xComponent
+    compiledXComponent
+    (\parameter -> xComponent (derivative parameter function))
 
 yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-yComponent function =
+yComponent function = do
+  let compiledYComponent =
+        CompiledFunction.map
+          Expression.yComponent
+          Vector2d.yComponent
+          VectorBounds2d.yComponent
+          function.compiled
   SurfaceFunction.new
-    @ CompiledFunction.map
-      Expression.yComponent
-      Vector2d.yComponent
-      VectorBounds2d.yComponent
-      function.compiled
-    @ \parameter -> (derivative parameter function).yComponent
+    compiledYComponent
+    (\parameter -> (derivative parameter function).yComponent)
 
 components ::
   VectorSurfaceFunction2d (space @ units) ->
@@ -636,22 +642,25 @@ unsafeQuotient# ::
   VectorSurfaceFunction2d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction2d (space @ (units1 #/# units2))
-unsafeQuotient# lhs rhs =
+unsafeQuotient# lhs rhs = do
+  let quotientDerivative self p =
+        unsafeQuotient# (derivative p lhs) rhs
+          .-. self .*. SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
   recursive
-    @ CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled
-    @ \self p ->
-      unsafeQuotient# (derivative p lhs) rhs
-        .-. self .*. SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
+    (CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled)
+    quotientDerivative
 
 squaredMagnitude# :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units #*# units)
-squaredMagnitude# function =
+squaredMagnitude# function = do
+  let compiledSquaredMagnitude =
+        CompiledFunction.map
+          Expression.squaredMagnitude#
+          Vector2d.squaredMagnitude#
+          VectorBounds2d.squaredMagnitude#
+          function.compiled
   SurfaceFunction.new
-    @ CompiledFunction.map
-      Expression.squaredMagnitude#
-      Vector2d.squaredMagnitude#
-      VectorBounds2d.squaredMagnitude#
-      function.compiled
-    @ \p -> 2 *. function `dot#` derivative p function
+    compiledSquaredMagnitude
+    (\p -> 2 *. function `dot#` derivative p function)
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

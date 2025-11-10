@@ -14,6 +14,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
+import OpenSolid.Units (SquareMeters)
 
 data Id = Add | Sub | Mul | Div | FloorDiv | Mod | Dot | Cross deriving (Eq)
 

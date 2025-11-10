@@ -18,6 +18,7 @@ module OpenSolid.Curve2d
   )
 where
 
+import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.CompiledFunction (CompiledFunction)

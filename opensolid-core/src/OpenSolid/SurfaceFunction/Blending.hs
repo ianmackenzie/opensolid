@@ -4,6 +4,7 @@ module OpenSolid.SurfaceFunction.Blending
   )
 where
 
+import GHC.Records (HasField)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Prelude
@@ -11,6 +12,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
+import Prelude qualified
 
 type Blendable function =
   ( Multiplication (SurfaceFunction Unitless) function function
@@ -20,6 +22,14 @@ type Blendable function =
   , HasField "du" function function
   , HasField "dv" function function
   )
+
+data UnsupportedCombinationOfSingularities
+  = UnsupportedCombinationOfSingularities
+  deriving (Exception)
+
+instance Show UnsupportedCombinationOfSingularities where
+  show UnsupportedCombinationOfSingularities =
+    "Unsupported combination of singularities for surface function: singularities may only be in U or V direction, not both"
 
 desingularize ::
   Blendable function =>
@@ -75,7 +85,7 @@ desingularize
           (blendV0 singularityV0 function)
           function
           (blendV1 function singularityV1)
-      _ -> exception "Unsupported combination of singularities for surface function: singularities may only be in U or V direction, not both"
+      _ -> throw UnsupportedCombinationOfSingularities
 
 blendU0 ::
   Blendable function =>

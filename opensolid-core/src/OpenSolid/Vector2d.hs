@@ -70,6 +70,7 @@ import OpenSolid.Primitives
   , Vector3d
   )
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Units (SquareMeters)
 import OpenSolid.Units qualified as Units
 
 -- | The zero vector.
@@ -197,7 +198,7 @@ The angle is measured counterclockwise from the positive X axis, so:
 The returned angle will be between -180 and +180 degrees.
 -}
 angle :: Vector2d (space @ units) -> Angle
-angle = (.angle)
+angle (Vector2d vx vy) = Angle.atan2 vy vx
 
 {-| Measure the signed angle from one vector to another.
 

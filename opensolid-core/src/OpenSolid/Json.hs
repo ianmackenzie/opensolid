@@ -32,6 +32,7 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
+import Prelude qualified
 
 data Json
   = Null
@@ -103,7 +104,7 @@ instance Data.Aeson.ToJSON Json where
     Map fields -> Data.Aeson.toJSON fields
 
 instance Data.Aeson.FromJSON Json where
-  parseJSON = return . fromAeson
+  parseJSON = Prelude.return . fromAeson
 
 fromAeson :: Data.Aeson.Value -> Json
 fromAeson aesonValue = case aesonValue of

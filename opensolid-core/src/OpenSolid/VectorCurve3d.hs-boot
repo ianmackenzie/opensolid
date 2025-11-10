@@ -15,6 +15,7 @@ module OpenSolid.VectorCurve3d
   )
 where
 
+import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
@@ -22,6 +23,7 @@ import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds3d (VectorBounds3d)

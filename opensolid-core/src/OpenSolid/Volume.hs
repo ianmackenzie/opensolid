@@ -13,6 +13,7 @@ where
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Units (CubicMeters)
 
 type Volume = Quantity CubicMeters
 

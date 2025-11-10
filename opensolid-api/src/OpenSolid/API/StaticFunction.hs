@@ -342,7 +342,7 @@ normalizeSignature ::
   (Maybe ImplicitArgument, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 normalizeSignature (maybeImplicitArgument, arguments, returnType) =
   if not (List.isOrdered (\(_, _, kind1) (_, _, kind2) -> kind1 <= kind2) arguments)
-    then internalError "Named arguments should always come after positional arguments"
+    then abort "Named arguments should always come after positional arguments"
     else do
       let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
       (maybeImplicitArgument, args Argument.Positional, args Argument.Named, returnType)

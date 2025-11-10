@@ -18,6 +18,7 @@ module OpenSolid.SurfaceFunction
   )
 where
 
+import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)

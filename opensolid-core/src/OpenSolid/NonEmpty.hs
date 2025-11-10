@@ -17,7 +17,6 @@ module OpenSolid.NonEmpty
   , pattern SevenOrMore
   , pattern EightOrMore
   , pattern NineOrMore
-  , (|:)
   , one
   , two
   , three
@@ -112,7 +111,6 @@ import Prelude
   , (-)
   , (.)
   , (<)
-  , (<>)
   , (==)
   , (>)
   )
@@ -188,12 +186,6 @@ pattern EightOrMore <- _ :| (_ : _ : _ : _ : _ : _ : _ : _)
 
 pattern NineOrMore :: NonEmpty a
 pattern NineOrMore <- _ :| (_ : _ : _ : _ : _ : _ : _ : _ : _)
-
-(|:) :: List a -> a -> NonEmpty a
-[] |: item = item :| []
-(x : xs) |: item = x :| (xs <> [item])
-
-infixl 5 |:
 
 one :: a -> NonEmpty a
 one value = value :| []

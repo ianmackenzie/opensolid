@@ -20,7 +20,7 @@ where
 
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Prelude hiding (flip)
+import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction3d (Unit3d)
   , Frame3d
@@ -144,6 +144,7 @@ relativeTo globalOrientation (PlaneOrientation3d i j) =
 random :: Random.Generator (PlaneOrientation3d global)
 random =
   Random.retry do
-    Random.map2 (Tolerance.using 0.1 fromDirections)
-      @ Direction3d.random
-      @ Direction3d.random
+    Random.map2
+      (Tolerance.using 0.1 fromDirections)
+      Direction3d.random
+      Direction3d.random

@@ -23,6 +23,7 @@ import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Prelude
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d

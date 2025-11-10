@@ -18,7 +18,6 @@ import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
@@ -47,7 +46,7 @@ toBinary ::
 toBinary convention units mesh = do
   let emptyHeaderBytes = List.replicate 80 (Binary.uint8 0)
   let header = Binary.concat emptyHeaderBytes
-  let triangleCount = Binary.uint32LE mesh.numFaces
+  let triangleCount = Binary.uint32LE (Mesh.numFaces mesh)
   let triangles = Binary.combine (triangleBuilder convention units) (Mesh.faceVertices mesh)
   Binary.concat [header, triangleCount, triangles]
 

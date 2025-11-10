@@ -7,7 +7,6 @@ import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity))
 import OpenSolid.Text qualified as Text
 
 word :: Word16 -> Builder
@@ -18,8 +17,7 @@ word = case GHC.ByteOrder.targetByteOrder of
 int :: Int -> Builder
 int value
   | value >= 0 && value < 65536 = word (fromIntegral value)
-  | otherwise =
-      internalError ("Bytecode only supports integers in 0-65535 range, got " <> Text.int value)
+  | otherwise = abort ("Bytecode only supports integers in 0-65535 range, got " <> Text.int value)
 
 double :: Double -> Builder
 double = case GHC.ByteOrder.targetByteOrder of

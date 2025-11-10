@@ -15,6 +15,7 @@ import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (SquareMeters)
 
 data PreOperatorOverload where
   PreOperatorOverload ::

@@ -5,7 +5,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
-import Prelude ((*))
 
 tests :: List Test
 tests =

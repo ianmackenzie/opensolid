@@ -58,7 +58,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude hiding (Type, pattern NonEmpty)
 import OpenSolid.Text qualified as Text
-import Prelude ((*), (+), (-))
 
 class FFI a where
   representation :: Proxy a -> Representation a
@@ -77,8 +76,8 @@ name input =
     first : rest ->
       if NonEmpty.allSatisfy isCapitalized (first :| rest)
         then Name (first :| rest)
-        else internalError ("API name has non-capitalized component: " <> input)
-    _ -> internalError "Text.split should always return at least one component"
+        else abort ("API name has non-capitalized component: " <> input)
+    _ -> abort "Text.split should always return at least one component"
 
 isCapitalized :: Text -> Bool
 isCapitalized component = Text.capitalize component == component
@@ -167,7 +166,7 @@ data Type where
 className :: FFI a => Proxy a -> ClassName
 className proxy = case representation proxy of
   ClassRep className_ -> className_
-  _ -> internalError "Attempting to get the class name of a non-class type"
+  _ -> abort "Attempting to get the class name of a non-class type"
 
 typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
@@ -547,13 +546,13 @@ store ptr offset value = do
       result <- IO.attempt value
       store ptr offset result
     NamedArgumentRep{} ->
-      internalError "Should never have a named argument as a Haskell return type"
+      abort "Should never have a named argument as a Haskell return type"
 
 load :: forall parent value. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
   let proxy = Proxy @value
   case representation proxy of
-    UnitRep -> return ()
+    UnitRep -> IO.succeed ()
     IntRep -> IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
     NumberRep -> IO.map Number.fromDouble (Foreign.peekByteOff ptr offset)
     BoolRep -> IO.map (/= 0) (Foreign.peekByteOff @Int64 ptr offset)
@@ -561,7 +560,7 @@ load ptr offset = do
     TextRep -> do
       dataPtr <- Foreign.peekByteOff ptr offset
       byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr
-      return (Data.Text.Encoding.decodeUtf8 byteString)
+      IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
     ListRep -> do
       let itemSize = listItemSize proxy
       numItems <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
@@ -571,8 +570,8 @@ load ptr offset = do
     NonEmptyRep -> do
       list <- load ptr offset
       case list of
-        [] -> internalError "Empty list passed to FFI function expecting a non-empty list"
-        first : rest -> return (first :| rest)
+        [] -> IO.fail "Empty list passed to FFI function expecting a non-empty list"
+        first : rest -> IO.succeed (first :| rest)
     ArrayRep -> IO.map Array.fromList (load ptr offset)
     Tuple2Rep -> do
       let (size1, _) = tuple2ItemSizes proxy
@@ -580,7 +579,7 @@ load ptr offset = do
       let offset2 = offset1 + size1
       value1 <- load ptr offset1
       value2 <- load ptr offset2
-      return (value1, value2)
+      IO.succeed (value1, value2)
     Tuple3Rep -> do
       let (size1, size2, _) = tuple3ItemSizes proxy
       let offset1 = offset
@@ -589,7 +588,7 @@ load ptr offset = do
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       value3 <- load ptr offset3
-      return (value1, value2, value3)
+      IO.succeed (value1, value2, value3)
     Tuple4Rep -> do
       let (size1, size2, size3, _) = tuple4ItemSizes proxy
       let offset1 = offset
@@ -600,7 +599,7 @@ load ptr offset = do
       value2 <- load ptr offset2
       value3 <- load ptr offset3
       value4 <- load ptr offset4
-      return (value1, value2, value3, value4)
+      IO.succeed (value1, value2, value3, value4)
     Tuple5Rep -> do
       let (size1, size2, size3, size4, _) = tuple5ItemSizes proxy
       let offset1 = offset
@@ -613,7 +612,7 @@ load ptr offset = do
       value3 <- load ptr offset3
       value4 <- load ptr offset4
       value5 <- load ptr offset5
-      return (value1, value2, value3, value4, value5)
+      IO.succeed (value1, value2, value3, value4, value5)
     Tuple6Rep -> do
       let (size1, size2, size3, size4, size5, _) = tuple6ItemSizes proxy
       let offset1 = offset
@@ -628,7 +627,7 @@ load ptr offset = do
       value4 <- load ptr offset4
       value5 <- load ptr offset5
       value6 <- load ptr offset6
-      return (value1, value2, value3, value4, value5, value6)
+      IO.succeed (value1, value2, value3, value4, value5, value6)
     Tuple7Rep -> do
       let (size1, size2, size3, size4, size5, size6, _) = tuple7ItemSizes proxy
       let offset1 = offset
@@ -645,7 +644,7 @@ load ptr offset = do
       value5 <- load ptr offset5
       value6 <- load ptr offset6
       value7 <- load ptr offset7
-      return (value1, value2, value3, value4, value5, value6, value7)
+      IO.succeed (value1, value2, value3, value4, value5, value6, value7)
     Tuple8Rep -> do
       let (size1, size2, size3, size4, size5, size6, size7, _) = tuple8ItemSizes proxy
       let offset1 = offset
@@ -664,17 +663,17 @@ load ptr offset = do
       value6 <- load ptr offset6
       value7 <- load ptr offset7
       value8 <- load ptr offset8
-      return (value1, value2, value3, value4, value5, value6, value7, value8)
+      IO.succeed (value1, value2, value3, value4, value5, value6, value7, value8)
     MaybeRep -> do
       tag <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
       if tag == 0
         then IO.map Just (load ptr (offset + 8))
-        else return Nothing
-    ResultRep{} -> internalError "Passing Result values as FFI arguments is not supported"
+        else IO.succeed Nothing
+    ResultRep{} -> abort "Passing Result values as FFI arguments is not supported"
     ClassRep _ -> do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
-    IORep -> internalError "Passing IO values as FFI arguments is not supported"
+    IORep -> abort "Passing IO values as FFI arguments is not supported"
     NamedArgumentRep _ innerProxy -> IO.map (wrapNamedArgument innerProxy) (load ptr offset)
 
 wrapNamedArgument :: Coercible n a => Proxy a -> a -> n

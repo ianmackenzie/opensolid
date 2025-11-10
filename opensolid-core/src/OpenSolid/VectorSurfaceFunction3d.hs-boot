@@ -7,10 +7,12 @@ module OpenSolid.VectorSurfaceFunction3d
   )
 where
 
+import GHC.Records (HasField)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)

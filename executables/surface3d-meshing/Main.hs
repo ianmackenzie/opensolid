@@ -5,6 +5,7 @@ import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
+import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude ((.*.), (.+.))
@@ -32,6 +33,6 @@ main = do
   domain <- IO.try (Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle]))
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2) surface
-  IO.printLine ("Num faces: " <> Text.int mesh.numFaces)
+  IO.printLine ("Num faces: " <> Text.int (Mesh.numFaces mesh))
   let path = "executables/surface3d-meshing/mesh.stl"
   Stl.writeBinary path Convention3d.yUp Length.inMillimeters mesh

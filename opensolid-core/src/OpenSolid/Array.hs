@@ -24,8 +24,7 @@ import Data.Array qualified
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude hiding (foldl, foldr)
-import Prelude ((-))
+import OpenSolid.Prelude
 import Prelude qualified
 
 newtype Array a = Array (Data.Array.Array Int a) deriving (Eq, Ord, Show)
@@ -56,9 +55,6 @@ initialize n function
   | n <= 0 = empty
   | otherwise = Array (Data.Array.listArray (0, n - 1) (List.map function [0 .. n - 1]))
 
-instance HasField "length" (Array a) Int where
-  getField = length
-
 length :: Array a -> Int
 length (Array array) = Prelude.length array
 
@@ -67,11 +63,11 @@ get :: Int -> Array a -> a
 get index (Array array) = array ! index
 
 map :: (a -> b) -> Array a -> Array b
-map f (Array array) = Array (fmap f array)
+map = Prelude.fmap
 
 map2 :: (a -> b -> c) -> Array a -> Array b -> Array c
 map2 f array1 array2 =
-  initialize (Int.min array1.length array2.length) (\i -> f (get i array1) (get i array2))
+  initialize (Int.min (length array1) (length array2)) (\i -> f (get i array1) (get i array2))
 
 map3 :: (a -> b -> c -> d) -> Array a -> Array b -> Array c -> Array d
 map3 f (Array array1) (Array array2) (Array array3) = do
@@ -87,13 +83,13 @@ mapWithIndex f (Array array) = do
 
 reverse :: Array a -> Array a
 reverse array = do
-  let n = array.length
+  let n = length array
   let reversedItems = foldl (\acc item -> item : acc) [] array
   Array (Data.Array.listArray (0, n - 1) reversedItems)
 
 reverseMap :: (a -> b) -> Array a -> Array b
 reverseMap f array = do
-  let n = array.length
+  let n = length array
   let newItems = foldl (\acc item -> f item : acc) [] array
   Array (Data.Array.listArray (0, n - 1) newItems)
 

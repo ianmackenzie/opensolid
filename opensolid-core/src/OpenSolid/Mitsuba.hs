@@ -40,7 +40,6 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
-import Prelude ((+))
 
 -- | The lighting to use for a Mitsuba scene.
 data Lighting space where
@@ -101,10 +100,10 @@ writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named l
   writeMeshes meshFileName meshes
   let sceneXml =
         sceneDocument
-          @ #camera camera
-          @ #lighting lighting
-          @ #meshProperties properties
-          @ #meshFileName meshFileName
+          (#camera camera)
+          (#lighting lighting)
+          (#meshProperties properties)
+          (#meshFileName meshFileName)
   let sceneFileName = path <> ".xml"
   IO.writeUtf8 sceneFileName sceneXml
 
@@ -191,15 +190,17 @@ buildSingleMesh (mesh, Named name) = do
   (overallBuilder, overallSize)
 
 meshDataBuilder :: Mesh space -> Text -> Builder
-meshDataBuilder mesh name =
+meshDataBuilder mesh name = do
+  let meshVertices = Mesh.vertices mesh
+  let meshFaceIndices = Mesh.faceIndices mesh
   Binary.concat
     [ Binary.uint32LE 0x2001 -- Flags: per-vertex normals, double precision
     , Text.toUtf8 name <> Binary.uint8 0 -- Null-terminated, UTF-8 encoded name
-    , Binary.uint64LE mesh.numVertices
-    , Binary.uint64LE mesh.numFaces
-    , Binary.combine pointBuilder mesh.vertices
-    , Binary.combine normalBuilder mesh.vertices
-    , Binary.combine faceIndicesBuilder mesh.faceIndices
+    , Binary.uint64LE (Mesh.numVertices mesh)
+    , Binary.uint64LE (Mesh.numFaces mesh)
+    , Binary.combine pointBuilder meshVertices
+    , Binary.combine normalBuilder meshVertices
+    , Binary.combine faceIndicesBuilder meshFaceIndices
     ]
 
 pointBuilder :: Vertex space -> Builder

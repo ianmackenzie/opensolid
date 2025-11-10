@@ -55,12 +55,14 @@ import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.Units (SquareMeters)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.World3d qualified as World3d
+import Prelude (flip)
 
 classes :: List Class
 classes =
@@ -488,12 +490,12 @@ vector2d =
     , Class.factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , Class.factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
-    , Class.property "Components" (.components) $(docs 'Vector2d.components)
-    , Class.property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
-    , Class.property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
+    , Class.property "Components" Vector2d.components $(docs 'Vector2d.components)
+    , Class.property "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
+    , Class.property "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , Class.memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , Class.member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
-    , Class.property "Angle" (.angle) $(docs 'Vector2d.angle)
+    , Class.property "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , Class.memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> Vector2d -> Vector3d) $(docs 'Vector2d.placeOn)
@@ -530,12 +532,12 @@ displacement2d =
     , Class.factory2 "Millimeters" "X Component" "Y Component" Vector2d.millimeters $(docs 'Vector2d.millimeters)
     , Class.factory2 "Mm" "X Component" "Y Component" Vector2d.mm $(docs 'Vector2d.mm)
     , Class.factory2 "Inches" "X Component" "Y Component" Vector2d.inches $(docs 'Vector2d.inches)
-    , Class.property "Components" (.components) $(docs 'Vector2d.components)
-    , Class.property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
-    , Class.property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
+    , Class.property "Components" Vector2d.components $(docs 'Vector2d.components)
+    , Class.property "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
+    , Class.property "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , Class.memberM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , Class.member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
-    , Class.property "Angle" (.angle) $(docs 'Vector2d.angle)
+    , Class.property "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , Class.memberM0 "Is Zero" (~= Vector2d.zero) "Check if a displacement is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> Displacement2d -> Displacement3d) $(docs 'Vector2d.placeOn)
@@ -565,12 +567,12 @@ areaVector2d =
     , Class.factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
     , Class.factory2 "Square Meters" "X Component" "Y Component" Vector2d.squareMeters $(docs 'Vector2d.squareMeters)
-    , Class.property "Components" (.components) $(docs 'Vector2d.components)
-    , Class.property "X Component" (.xComponent) $(docs 'Vector2d.xComponent)
-    , Class.property "Y Component" (.yComponent) $(docs 'Vector2d.yComponent)
+    , Class.property "Components" Vector2d.components $(docs 'Vector2d.components)
+    , Class.property "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
+    , Class.property "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , Class.memberS0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , Class.member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
-    , Class.property "Angle" (.angle) $(docs 'Vector2d.angle)
+    , Class.property "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , Class.memberS0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> AreaVector2d -> AreaVector3d) $(docs 'Vector2d.placeOn)
@@ -596,12 +598,12 @@ uvVector =
     , Class.factory1 "Unit" "Direction" Vector2d.unit $(docs 'Vector2d.unit)
     , Class.constructor2 "U Component" "V Component" Vector2d.Vector2d "Construct a vector from its U and V components."
     , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
-    , Class.property "Components" (.components) $(docs 'Vector2d.components)
-    , Class.property "U Component" (.xComponent) "Get the U component of a vector."
-    , Class.property "V Component" (.yComponent) "Get the V component of a vector."
+    , Class.property "Components" Vector2d.components $(docs 'Vector2d.components)
+    , Class.property "U Component" Vector2d.xComponent "Get the U component of a vector."
+    , Class.property "V Component" Vector2d.yComponent "Get the V component of a vector."
     , Class.memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , Class.member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
-    , Class.property "Angle" (.angle) $(docs 'Vector2d.angle)
+    , Class.property "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
     , Class.memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
     , Class.member0 "Rotate Left" Vector2d.rotateLeft $(docs 'Vector2d.rotateLeft)
@@ -674,9 +676,9 @@ point2d =
     , Class.factory2 "Millimeters" "X Coordinate" "Y Coordinate" Point2d.millimeters $(docs 'Point2d.millimeters)
     , Class.factory2 "Mm" "X Coordinate" "Y Coordinate" Point2d.mm $(docs 'Point2d.mm)
     , Class.factory2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches $(docs 'Point2d.inches)
-    , Class.property "Coordinates" (.coordinates) $(docs 'Point2d.coordinates)
-    , Class.property "X Coordinate" (.xCoordinate) $(docs 'Point2d.xCoordinate)
-    , Class.property "Y Coordinate" (.yCoordinate) $(docs 'Point2d.yCoordinate)
+    , Class.property "Coordinates" Point2d.coordinates $(docs 'Point2d.coordinates)
+    , Class.property "X Coordinate" Point2d.xCoordinate $(docs 'Point2d.xCoordinate)
+    , Class.property "Y Coordinate" Point2d.yCoordinate $(docs 'Point2d.yCoordinate)
     , Class.member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
     , Class.member1 "Place On" "Plane" (Point2d.placeOn :: Plane3d -> Point2d -> Point3d) $(docs 'Point2d.placeOn)
@@ -692,9 +694,9 @@ uvPoint =
   Class.new @UvPoint "A point in UV parameter space." $
     [ Class.constant "Origin" (Point2d.origin :: UvPoint) "The point with coordinates (0,0)."
     , Class.constructor2 "U Coordinate" "V Coordinate" Point2d.Point2d "Construct a point from its U and V coordinates."
-    , Class.property "Coordinates" (.coordinates) "Get the U and V coordinates of a point."
-    , Class.property "U Coordinate" (.xCoordinate) "Get the U coordinate of a point."
-    , Class.property "V Coordinate" (.yCoordinate) "Get the V coordinate of a point."
+    , Class.property "Coordinates" Point2d.coordinates "Get the U and V coordinates of a point."
+    , Class.property "U Coordinate" Point2d.xCoordinate "Get the U coordinate of a point."
+    , Class.property "V Coordinate" Point2d.yCoordinate "Get the V coordinate of a point."
     , Class.member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
     , Class.minusSelf
@@ -712,9 +714,9 @@ bounds2d =
     , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , Class.factory1 "Hull" "Points" (Bounds2d.hullN @Point2d) $(docs 'Bounds2d.hullN)
     , Class.factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
-    , Class.property "Coordinates" (.coordinates) $(docs 'Bounds2d.coordinates)
-    , Class.property "X Coordinate" (.xCoordinate) $(docs 'Bounds2d.xCoordinate)
-    , Class.property "Y Coordinate" (.yCoordinate) $(docs 'Bounds2d.yCoordinate)
+    , Class.property "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
+    , Class.property "X Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
+    , Class.property "Y Coordinate" Bounds2d.yCoordinate $(docs 'Bounds2d.yCoordinate)
     , Class.plus @Displacement2d Self
     , Class.minus @Displacement2d Self
     ]
@@ -728,9 +730,9 @@ uvBounds =
     , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
     , Class.factory1 "Hull" "Points" (Bounds2d.hullN @UvPoint) $(docs 'Bounds2d.hullN)
     , Class.factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
-    , Class.property "Coordinates" (.coordinates) $(docs 'Bounds2d.coordinates)
-    , Class.property "U Coordinate" (.xCoordinate) "Get the U coordinate bounds of a bounding box."
-    , Class.property "V Coordinate" (.yCoordinate) "Get the V coordinate bounds of a bounding box."
+    , Class.property "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
+    , Class.property "U Coordinate" Bounds2d.xCoordinate "Get the U coordinate bounds of a bounding box."
+    , Class.property "V Coordinate" Bounds2d.yCoordinate "Get the V coordinate bounds of a bounding box."
     , Class.plus @UvVector Self
     , Class.minus @UvVector Self
     ]
@@ -1450,9 +1452,9 @@ region2d =
     [ Class.factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , Class.factoryM1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
     , Class.factoryM2R "Circle" "Center Point" "Diameter" Region2d.circle $(docs 'Region2d.circle)
-    , Class.property "Outer Loop" (.outerLoop) region2dOuterLoopDocs
-    , Class.property "Inner Loops" (.innerLoops) region2dInnerLoopsDocs
-    , Class.property "Boundary Curves" (.boundaryCurves) region2dBoundaryCurvesDocs
+    , Class.property "Outer Loop" Region2d.outerLoop region2dOuterLoopDocs
+    , Class.property "Inner Loops" Region2d.innerLoops region2dInnerLoopsDocs
+    , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
     , Class.factoryM1R "Polygon" "Points" (Region2d.polygon @Point2d) $(docs 'Region2d.polygon)
     , Class.factoryM2R "Hexagon" "Center Point" "Height" Region2d.hexagon $(docs 'Region2d.hexagon)
     , Class.factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.inscribedPolygon $(docs 'Region2d.inscribedPolygon)
@@ -1470,9 +1472,9 @@ uvRegion =
     , Class.factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , Class.factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
     , Class.factoryU2R "Circle" "Center Point" "Diameter" Region2d.circle $(docs 'Region2d.circle)
-    , Class.property "Outer Loop" (.outerLoop) region2dOuterLoopDocs
-    , Class.property "Inner Loops" (.innerLoops) region2dInnerLoopsDocs
-    , Class.property "Boundary Curves" (.boundaryCurves) region2dBoundaryCurvesDocs
+    , Class.property "Outer Loop" Region2d.outerLoop region2dOuterLoopDocs
+    , Class.property "Inner Loops" Region2d.innerLoops region2dInnerLoopsDocs
+    , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
     ]
 
 type Body3d = Body3d.Body3d FFI.Coordinates
@@ -1581,11 +1583,11 @@ mitsuba = do
   let writeFiles :: Text -> Resolution -> Mitsuba -> IO ()
       writeFiles path res (Mitsuba model camera lighting) =
         Mitsuba.writeFiles
-          @ #path path
-          @ #model model
-          @ #resolution res
-          @ #camera camera
-          @ #lighting lighting
+          (#path path)
+          (#model model)
+          (#resolution res)
+          (#camera camera)
+          (#lighting lighting)
   Class.new @Mitsuba "A Mitsuba scene that can be written out to a file." $
     [ Class.constructor3 "Model" "Camera" "Lighting" Mitsuba "Construct a Mitsuba scene from a 3D model, a camera and some lighting."
     , Class.member2 "Write Files" "Path" "Resolution" writeFiles $(docs 'Mitsuba.writeFiles)

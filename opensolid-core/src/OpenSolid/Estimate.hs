@@ -34,10 +34,10 @@ import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude hiding (max, min)
+import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import Prelude ((+))
 
 class Interface a units | a -> units where
   boundsImpl :: a -> Bounds units
@@ -50,9 +50,6 @@ instance Interface (Quantity units) units where
 data Estimate units where
   Estimate :: Interface a units => a -> Bounds units -> Estimate units
   Coerce :: Estimate units1 -> Estimate units2
-
-instance HasField "bounds" (Estimate units) (Bounds units) where
-  getField = bounds
 
 instance HasUnits (Estimate units) units
 
@@ -79,9 +76,9 @@ checkRefinement stepsWithoutProgress estimate = case estimate of
   Estimate implementation initialBounds -> do
     let refinedEstimate = refineImpl implementation
     if
-      | refinedEstimate.bounds.width < initialBounds.width -> refinedEstimate
+      | Bounds.width (bounds refinedEstimate) < initialBounds.width -> refinedEstimate
       | stepsWithoutProgress < 10 -> checkRefinement (stepsWithoutProgress + 1) refinedEstimate
-      | otherwise -> internalError "Estimate refinement stalled"
+      | otherwise -> abort "Estimate refinement stalled"
 
 satisfy :: (Bounds units -> Bool) -> Estimate units -> Bounds units
 satisfy predicate estimate = do
@@ -314,7 +311,7 @@ larger first second = new (Larger first second)
 
 internalErrorFilteredListIsEmpty :: a
 internalErrorFilteredListIsEmpty =
-  internalError "Filtered list should be non-empty by construction"
+  abort "Filtered list should be non-empty by construction"
 
 boundsWidth :: Estimate units -> Quantity units
 boundsWidth estimate = Bounds.width (bounds estimate)

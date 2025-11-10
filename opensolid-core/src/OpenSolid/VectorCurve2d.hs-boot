@@ -13,12 +13,14 @@ module OpenSolid.VectorCurve2d
   )
 where
 
+import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)

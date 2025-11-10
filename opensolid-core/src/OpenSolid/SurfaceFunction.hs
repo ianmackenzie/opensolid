@@ -32,6 +32,7 @@ module OpenSolid.SurfaceFunction
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
@@ -42,17 +43,17 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
-import OpenSolid.Exception qualified as Exception
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
@@ -75,6 +76,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as Verti
 import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -204,8 +206,8 @@ instance
   where
   lhs #*# rhs =
     new
-      @ lhs.compiled #*# rhs.compiled
-      @ \p -> derivative p lhs #*# rhs .+. lhs #*# derivative p rhs
+      (lhs.compiled #*# rhs.compiled)
+      (\p -> derivative p lhs #*# rhs .+. lhs #*# derivative p rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -352,8 +354,8 @@ instance
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
   curve `compose` function =
     new
-      @ curve.compiled `compose` function.compiled
-      @ \p -> curve.derivative `compose` function .*. derivative p function
+      (curve.compiled `compose` function.compiled)
+      (\p -> curve.derivative `compose` function .*. derivative p function)
 
 evaluate :: SurfaceFunction units -> UvPoint -> Quantity units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
@@ -377,8 +379,8 @@ derivative U = (.du)
 derivative V = (.dv)
 
 derivativeIn :: Direction2d UvSpace -> SurfaceFunction units -> SurfaceFunction units
-derivativeIn direction function =
-  direction.xComponent .*. function.du .+. direction.yComponent .*. function.dv
+derivativeIn (Direction2d dx dy) function =
+  dx .*. function.du .+. dy .*. function.dv
 
 zero :: SurfaceFunction units
 zero = constant Quantity.zero
@@ -470,11 +472,12 @@ unsafeQuotient# ::
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   SurfaceFunction (units1 #/# units2)
-unsafeQuotient# lhs rhs =
+unsafeQuotient# lhs rhs = do
+  let quotientDerivative self p =
+        unsafeQuotient# (derivative p lhs) rhs .-. self .*. unsafeQuotient (derivative p rhs) rhs
   recursive
-    @ CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled
-    @ \self p ->
-      unsafeQuotient# (derivative p lhs) rhs .-. self .*. unsafeQuotient (derivative p rhs) rhs
+    (CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled)
+    quotientDerivative
 
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared function = Units.specialize (squared# function)
@@ -482,8 +485,8 @@ squared function = Units.specialize (squared# function)
 squared# :: SurfaceFunction units -> SurfaceFunction (units #*# units)
 squared# function =
   new
-    @ CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# function.compiled
-    @ \p -> 2 *. function #*# derivative p function
+    (CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# function.compiled)
+    (\p -> 2 *. function #*# derivative p function)
 
 sqrt ::
   (Tolerance units1, Units.Squared units1 units2) =>
@@ -514,11 +517,12 @@ sqrt# function =
             if functionIsZero && firstDerivativeIsZero
               then Just (zero, sign .*. unsafeSqrt# (0.5 *. secondDerivative))
               else Nothing
-      desingularize (unsafeSqrt# function)
-        @ #singularityU0 (maybeSingularity U 0 Positive)
-        @ #singularityU1 (maybeSingularity U 1 Negative)
-        @ #singularityV0 (maybeSingularity V 0 Positive)
-        @ #singularityV1 (maybeSingularity V 1 Negative)
+      desingularize
+        (unsafeSqrt# function)
+        (#singularityU0 (maybeSingularity U 0 Positive))
+        (#singularityU1 (maybeSingularity U 1 Negative))
+        (#singularityV0 (maybeSingularity V 0 Positive))
+        (#singularityV1 (maybeSingularity V 1 Negative))
 
 unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction units2 -> SurfaceFunction units1
 unsafeSqrt function = unsafeSqrt# (Units.unspecialize function)
@@ -526,8 +530,8 @@ unsafeSqrt function = unsafeSqrt# (Units.unspecialize function)
 unsafeSqrt# :: SurfaceFunction (units #*# units) -> SurfaceFunction units
 unsafeSqrt# function =
   recursive
-    @ CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# function.compiled
-    @ \self p -> Units.coerce (unsafeQuotient# (derivative p function) (2 *. self))
+    (CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# function.compiled)
+    (\self p -> Units.coerce (unsafeQuotient# (derivative p function) (2 *. self)))
 
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 cubed function =
@@ -538,14 +542,14 @@ cubed function =
 sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin function =
   new
-    @ CompiledFunction.map Expression.sin Angle.sin Bounds.sin function.compiled
-    @ \p -> cos function .*. (derivative p function ./. Angle.radian)
+    (CompiledFunction.map Expression.sin Angle.sin Bounds.sin function.compiled)
+    (\p -> cos function .*. (derivative p function ./. Angle.radian))
 
 cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
 cos function =
   new
-    @ CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled
-    @ \p -> negative (sin function) .*. (derivative p function ./. Angle.radian)
+    (CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled)
+    (\p -> negative (sin function) .*. (derivative p function ./. Angle.radian))
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
@@ -564,7 +568,7 @@ zeros function
         Success solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions
           Success (PartialZeros.finalize function dvdu dudv partialZeros)
-        Failure Solve2d.InfiniteRecursion -> Exception.higherOrderZero
+        Failure Solve2d.InfiniteRecursion -> throw HigherOrderZero
 
 addSolution :: PartialZeros units -> Solution units -> PartialZeros units
 addSolution partialZeros solution = case solution of

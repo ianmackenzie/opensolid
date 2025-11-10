@@ -14,6 +14,7 @@ module OpenSolid.LineSegment2d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Bounded2d (Bounded2d)
 import OpenSolid.Bounded2d qualified as Bounded2d
 import OpenSolid.Bounds2d (Bounds2d)

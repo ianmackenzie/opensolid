@@ -52,6 +52,7 @@ module OpenSolid.Curve
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds (Bounds))
@@ -68,12 +69,12 @@ import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
-import OpenSolid.Exception qualified as Exception
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -86,6 +87,7 @@ import OpenSolid.Solve1d qualified as Solve1d
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)
@@ -93,7 +95,6 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
-import Prelude ((+), (/))
 
 data Curve units where
   Curve :: Compiled units -> ~(Curve units) -> Curve units
@@ -314,8 +315,8 @@ reverse curve = curve `compose` (1 -. t)
 bezier :: NonEmpty (Quantity units) -> Curve units
 bezier controlPoints =
   new
-    @ CompiledFunction.concrete (Expression.bezierCurve controlPoints)
-    @ bezier (Bezier.derivative controlPoints)
+    (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
+    (bezier (Bezier.derivative controlPoints))
 
 hermite ::
   Quantity units ->
@@ -339,8 +340,8 @@ rationalBezier ::
 rationalBezier pointsAndWeights = do
   let scaledPoint (point, weight) = point .*. weight
   quotient
-    @ bezier (NonEmpty.map scaledPoint pointsAndWeights)
-    @ bezier (NonEmpty.map Pair.second pointsAndWeights)
+    (bezier (NonEmpty.map scaledPoint pointsAndWeights))
+    (bezier (NonEmpty.map Pair.second pointsAndWeights))
 
 rationalQuadraticSpline ::
   Tolerance Unitless =>
@@ -540,8 +541,8 @@ unsafeSqrt curve = unsafeSqrt# (Units.unspecialize curve)
 unsafeSqrt# :: Curve (units #*# units) -> Curve units
 unsafeSqrt# curve =
   recursive
-    @ CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# curve.compiled
-    @ \self -> Units.coerce (unsafeQuotient# curve.derivative (2 *. self))
+    (CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# curve.compiled)
+    (\self -> Units.coerce (unsafeQuotient# curve.derivative (2 *. self)))
 
 -- | Compute the cube of a curve.
 cubed :: Curve Unitless -> Curve Unitless
@@ -638,7 +639,7 @@ zeros curve
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
         Success foundZeros -> Success (List.sortBy (.location) foundZeros)
-        Failure Solve1d.InfiniteRecursion -> Exception.higherOrderZero
+        Failure Solve1d.InfiniteRecursion -> throw HigherOrderZero
 
 findZeros ::
   Tolerance units =>

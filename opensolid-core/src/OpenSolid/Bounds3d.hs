@@ -213,9 +213,9 @@ placeIn frame (Bounds3d pR pF pU) = do
   let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
   let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   Bounds3d
-    @ Bounds (cR' .-. rR') (cR' .+. rR')
-    @ Bounds (cF' .-. rF') (cF' .+. rF')
-    @ Bounds (cU' .-. rU') (cU' .+. rU')
+    (Bounds (cR' .-. rR') (cR' .+. rR'))
+    (Bounds (cF' .-. rF') (cF' .+. rF'))
+    (Bounds (cU' .-. rU') (cU' .+. rU'))
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
@@ -237,9 +237,9 @@ relativeTo frame (Bounds3d pR pF pU) = do
   let rF' = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
   let rU' = rR .*. Number.abs kR .+. rF .*. Number.abs kF .+. rU .*. Number.abs kU
   Bounds3d
-    @ Bounds (cR' .-. rR') (cR' .+. rR')
-    @ Bounds (cF' .-. rF') (cF' .+. rF')
-    @ Bounds (cU' .-. rU') (cU' .+. rU')
+    (Bounds (cR' .-. rR') (cR' .+. rR'))
+    (Bounds (cF' .-. rF') (cF' .+. rF'))
+    (Bounds (cU' .-. rU') (cU' .+. rU'))
 
 projectInto ::
   Plane3d (global @ units) (Defines local) ->
@@ -259,8 +259,8 @@ projectInto plane (Bounds3d pR pF pU) = do
   let rX = rR .*. Number.abs iR .+. rF .*. Number.abs iF .+. rU .*. Number.abs iU
   let rY = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
   Bounds2d
-    @ Bounds (cX .-. rX) (cX .+. rX)
-    @ Bounds (cY .-. rY) (cY .+. rY)
+    (Bounds (cX .-. rX) (cX .+. rX))
+    (Bounds (cY .-. rY) (cY .+. rY))
 
 distanceAlong :: Axis3d (space @ units) -> Bounds3d (space @ units) -> Bounds units
 distanceAlong axis bounds = do
@@ -292,6 +292,6 @@ transformBy transform (Bounds3d pR pF pU) = do
   let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
   let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   Bounds3d
-    @ Bounds (cR' .-. rR') (cR' .+. rR')
-    @ Bounds (cF' .-. rF') (cF' .+. rF')
-    @ Bounds (cU' .-. rU') (cU' .+. rU')
+    (Bounds (cR' .-. rR') (cR' .+. rR'))
+    (Bounds (cF' .-. rF') (cF' .+. rF'))
+    (Bounds (cU' .-. rU') (cU' .+. rU'))

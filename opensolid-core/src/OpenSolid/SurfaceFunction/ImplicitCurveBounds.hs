@@ -13,7 +13,6 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import Prelude ((+), (-))
 
 data ImplicitCurveBounds
   = Node ImplicitCurveBounds Number ImplicitCurveBounds
@@ -22,7 +21,7 @@ data ImplicitCurveBounds
 build :: NonEmpty (Bounds Unitless, Bounds Unitless) -> ImplicitCurveBounds
 build boxes = do
   let array = Array.fromNonEmpty (NonEmpty.sortBy (Bounds.lower . Pair.first) boxes)
-  subtree array 0 array.length
+  subtree array 0 (Array.length array)
 
 subtree :: Array (Bounds Unitless, Bounds Unitless) -> Int -> Int -> ImplicitCurveBounds
 subtree boxes begin end = case end - begin of

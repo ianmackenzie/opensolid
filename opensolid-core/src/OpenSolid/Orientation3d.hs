@@ -238,9 +238,9 @@ placeIn ::
   Orientation3d global
 placeIn globalFrame (Orientation3d i j k) =
   Orientation3d
-    @ Direction3d.placeIn globalFrame i
-    @ Direction3d.placeIn globalFrame j
-    @ Direction3d.placeIn globalFrame k
+    (Direction3d.placeIn globalFrame i)
+    (Direction3d.placeIn globalFrame j)
+    (Direction3d.placeIn globalFrame k)
 
 -- | Convert a orientation defined in global coordinates to one defined in local coordinates.
 relativeTo ::
@@ -249,9 +249,9 @@ relativeTo ::
   Orientation3d local
 relativeTo globalFrame (Orientation3d i j k) =
   Orientation3d
-    @ Direction3d.relativeTo globalFrame i
-    @ Direction3d.relativeTo globalFrame j
-    @ Direction3d.relativeTo globalFrame k
+    (Direction3d.relativeTo globalFrame i)
+    (Direction3d.relativeTo globalFrame j)
+    (Direction3d.relativeTo globalFrame k)
 
 random :: Random.Generator (Orientation3d space)
 random = Random.map fromTopPlaneOrientation PlaneOrientation3d.random

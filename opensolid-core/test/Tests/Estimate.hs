@@ -25,7 +25,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Prelude ((-))
 
 tests :: Tolerance Meters => List Test
 tests =
@@ -119,10 +118,10 @@ area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
   let curve =
         Curve2d.polarArc
-          @ #centerPoint Point2d.origin
-          @ #radius Length.meter
-          @ #startAngle Angle.pi
-          @ #endAngle Angle.zero
+          (#centerPoint Point2d.origin)
+          (#radius Length.meter)
+          (#startAngle Angle.pi)
+          (#endAngle Angle.zero)
   let dAdt = Curve2d.yCoordinate curve .*. curve.derivative.xComponent
   let areaEstimate = Curve.integrate dAdt
   let expectedArea = Area.squareMeters (Number.pi ./ 2)

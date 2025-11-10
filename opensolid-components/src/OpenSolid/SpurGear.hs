@@ -5,6 +5,7 @@ module OpenSolid.SpurGear
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Curve qualified as Curve
@@ -19,7 +20,6 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import Prelude ((*), (-))
 
 -- | A metric spur gear.
 data SpurGear = Metric

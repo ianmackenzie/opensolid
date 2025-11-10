@@ -30,9 +30,10 @@ definition className maybeConstructor maybeUpcast = case maybeConstructor of
           [ Python.docstring (Constructor.documentation constructor)
           , "inputs = " <> Python.FFI.argumentValue ffiArguments
           , "self." <> pointerFieldName <> " = " <> Python.FFI.dummyValue selfType
-          , Python.FFI.invoke ffiFunctionName
-              @ "ctypes.byref(inputs)"
-              @ "ctypes.byref(self." <> pointerFieldName <> ")"
+          , Python.FFI.invoke
+              ffiFunctionName
+              "ctypes.byref(inputs)"
+              ("ctypes.byref(self." <> pointerFieldName <> ")")
           , Python.Upcast.lines className "self" maybeUpcast
           ]
       ]

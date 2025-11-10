@@ -25,7 +25,7 @@ module OpenSolid.Primitives
 where
 
 import Data.Coerce qualified
-import OpenSolid.Angle (Angle)
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds (Bounds##))
 import OpenSolid.FFI (FFI)
@@ -37,6 +37,7 @@ import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance ((~=##))
 import OpenSolid.Unboxed.Math
+import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
 
 ----- Vector2d -----
@@ -56,18 +57,6 @@ viewVector2d :: Vector2d (space @ units) -> (# Quantity units, Quantity units #)
 viewVector2d (Vector2d## vx## vy##) = (# Quantity## vx##, Quantity## vy## #)
 
 {-# COMPLETE Vector2d #-}
-
-instance HasField "xComponent" (Vector2d (space @ units)) (Quantity units) where
-  getField (Vector2d vx _) = vx
-
-instance HasField "yComponent" (Vector2d (space @ units)) (Quantity units) where
-  getField (Vector2d _ vy) = vy
-
-instance HasField "components" (Vector2d (space @ units)) (Quantity units, Quantity units) where
-  getField (Vector2d vx vy) = (vx, vy)
-
-instance HasField "angle" (Vector2d (space @ units)) Angle where
-  getField (Vector2d vx vy) = Angle.atan2 vy vx
 
 instance FFI (Vector2d (FFI.Space @ Unitless)) where
   representation = FFI.classRepresentation "Vector2d"
@@ -309,18 +298,6 @@ instance
   where
   Unit2d v1 `cross` Unit2d v2 = v1 `cross` v2
 
-instance HasField "xComponent" (Direction2d space) Number where
-  getField (Unit2d v) = v.xComponent
-
-instance HasField "yComponent" (Direction2d space) Number where
-  getField (Unit2d v) = v.yComponent
-
-instance HasField "components" (Direction2d space) (Number, Number) where
-  getField (Unit2d v) = v.components
-
-instance HasField "angle" (Direction2d space) Angle where
-  getField (Unit2d v) = v.angle
-
 ----- Orientation2d -----
 
 type role Orientation2d nominal
@@ -352,15 +329,6 @@ pattern Point2d :: Quantity units -> Quantity units -> Point2d (space @ units)
 pattern Point2d px py <- Position2d (Vector2d px py)
   where
     Point2d px py = Position2d (Vector2d px py)
-
-instance HasField "xCoordinate" (Point2d (space @ units)) (Quantity units) where
-  getField (Point2d px _) = px
-
-instance HasField "yCoordinate" (Point2d (space @ units)) (Quantity units) where
-  getField (Point2d _ py) = py
-
-instance HasField "coordinates" (Point2d (space @ units)) (Quantity units, Quantity units) where
-  getField (Point2d px py) = (px, py)
 
 deriving instance Eq (Point2d (space @ units))
 
@@ -795,15 +763,6 @@ pattern Bounds2d bx by <- PositionBounds2d (VectorBounds2d bx by)
   where
     Bounds2d bx by = PositionBounds2d (VectorBounds2d bx by)
 
-instance HasField "xCoordinate" (Bounds2d (space @ units)) (Bounds units) where
-  getField (Bounds2d bx _) = bx
-
-instance HasField "yCoordinate" (Bounds2d (space @ units)) (Bounds units) where
-  getField (Bounds2d _ by) = by
-
-instance HasField "coordinates" (Bounds2d (space @ units)) (Bounds units, Bounds units) where
-  getField (Bounds2d bx by) = (bx, by)
-
 deriving instance Show (Quantity units) => Show (Bounds2d (space @ units))
 
 instance HasUnits (Bounds2d (space @ units)) units
@@ -1042,9 +1001,9 @@ instance
   where
   transform2 `compose` transform1 =
     Transform2d
-      @ Point2d Quantity.zero Quantity.zero .*. transform1 .*. transform2
-      @ Vector2d 1 0 .*. transform1 .*. transform2
-      @ Vector2d 0 1 .*. transform1 .*. transform2
+      (Point2d Quantity.zero Quantity.zero .*. transform1 .*. transform2)
+      (Vector2d 1 0 .*. transform1 .*. transform2)
+      (Vector2d 0 1 .*. transform1 .*. transform2)
 
 ----- Vector3d -----
 

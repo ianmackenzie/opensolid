@@ -28,6 +28,7 @@ import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Model3d (Model3d)
 import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial (PbrMaterial)
@@ -37,7 +38,6 @@ import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vertex3d qualified as Vertex3d
-import Prelude ((*), (+), (-))
 
 convention :: Convention3d
 convention = Convention3d.yUp
@@ -121,10 +121,10 @@ gltfMeshes :: Model3d.Traversal => Resolution Meters -> Model3d space -> List Gl
 gltfMeshes resolution model = case model of
   Model3d.Body body -> do
     let mesh = Body3d.toMesh resolution body
-    case Array.toList mesh.vertices of
+    case Array.toList (Mesh.vertices mesh) of
       NonEmpty meshVertices -> do
-        let numVertices = mesh.vertices.length
-        let meshFaceIndices = mesh.faceIndices
+        let numVertices = Array.length (Mesh.vertices mesh)
+        let meshFaceIndices = Mesh.faceIndices mesh
         let numFaces = List.length meshFaceIndices
         let meshBounds = Bounds3d.hullN meshVertices
         let (xBounds, yBounds, zBounds) = Bounds3d.coordinates convention meshBounds
@@ -139,7 +139,7 @@ gltfMeshes resolution model = case model of
             , indices = faceIndicesBuilder meshFaceIndices
             , indicesByteLength = 3 * 4 * numFaces
             , numVertices
-            , vertices = verticesBuilder mesh.vertices
+            , vertices = verticesBuilder (Mesh.vertices mesh)
             , verticesByteLength = 6 * 4 * numVertices
             , minPosition = Json.listOf (Json.number . Length.inMeters) [xLow, yLow, zLow]
             , maxPosition = Json.listOf (Json.number . Length.inMeters) [xHigh, yHigh, zHigh]

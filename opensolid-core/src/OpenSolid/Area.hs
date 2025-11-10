@@ -15,6 +15,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Units (SquareMeters)
 
 {-| An area in square meters, square inches etc.
 

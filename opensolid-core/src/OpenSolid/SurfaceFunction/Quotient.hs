@@ -38,8 +38,9 @@ impl unsafeQuotient lhopital desingularize numerator denominator
       maybeSingularityV0 <- maybeSingularity V 0
       maybeSingularityV1 <- maybeSingularity V 1
       Success $
-        desingularize (unsafeQuotient numerator denominator)
-          @ #singularityU0 maybeSingularityU0
-          @ #singularityU1 maybeSingularityU1
-          @ #singularityV0 maybeSingularityV0
-          @ #singularityV1 maybeSingularityV1
+        desingularize
+          (unsafeQuotient numerator denominator)
+          (#singularityU0 maybeSingularityU0)
+          (#singularityU1 maybeSingularityU1)
+          (#singularityV0 maybeSingularityV0)
+          (#singularityV1 maybeSingularityV1)

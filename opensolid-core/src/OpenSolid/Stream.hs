@@ -3,7 +3,6 @@ module OpenSolid.Stream
   , repeat
   , iterate
   , unfold
-  , from
   , head
   , tail
   , toList
@@ -16,8 +15,8 @@ module OpenSolid.Stream
   )
 where
 
-import OpenSolid.Prelude hiding (iterate, repeat)
-import Prelude ((+), (-))
+import OpenSolid.Prelude
+import Prelude qualified
 
 data Stream a = Stream a ~(Stream a)
 
@@ -33,9 +32,6 @@ unfold :: b -> (b -> (a, b)) -> Stream a
 unfold initialState function = do
   let (initialValue, updatedState) = function initialState
   Stream initialValue (unfold updatedState function)
-
-from :: Enum a => a -> Stream a
-from value = Stream value (from (succ value))
 
 {-# INLINE head #-}
 head :: Stream a -> a

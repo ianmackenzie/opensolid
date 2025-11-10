@@ -21,6 +21,7 @@ module OpenSolid.Camera3d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3d (Axis3d)
@@ -182,11 +183,11 @@ isometric ::
   Camera3d (space @ units)
 isometric givenFocalPoint distance givenProjection =
   orbit
-    @ #focalPoint givenFocalPoint
-    @ #azimuth (Angle.degrees 45)
-    @ #elevation isometricElevation
-    @ #distance distance
-    @ #projection givenProjection
+    (#focalPoint givenFocalPoint)
+    (#azimuth (Angle.degrees 45))
+    (#elevation isometricElevation)
+    (#distance distance)
+    (#projection givenProjection)
 
 moveTo ::
   Point3d (space @ units) ->

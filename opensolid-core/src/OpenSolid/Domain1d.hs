@@ -28,6 +28,7 @@ module OpenSolid.Domain1d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Number qualified as Number
@@ -144,12 +145,12 @@ trailingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
 trailingSamplingPoints predicate =
   case collectSamplingPoints predicate Bounds.unitInterval [1] of
     NonEmpty points -> points
-    [] -> internalError "collectSamplingPoints should always return at least the point it was given"
+    [] -> abort "collectSamplingPoints should always return at least the point it was given"
 
 collectSamplingPoints :: (Bounds Unitless -> Bool) -> Bounds Unitless -> List Number -> List Number
 collectSamplingPoints predicate subdomain accumulated
   | predicate subdomain = accumulated
-  | Bounds.isAtomic subdomain = internalError "Infinite recursion in Domain1d.samplingPoints"
+  | Bounds.isAtomic subdomain = abort "Infinite recursion in Domain1d.samplingPoints"
   | otherwise = do
       let (left, right) = Bounds.bisect subdomain
       let subdomainMidpoint = Bounds.midpoint subdomain

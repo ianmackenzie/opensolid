@@ -8,6 +8,7 @@ module OpenSolid.SurfaceFunction.SaddleRegion
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds (Bounds (Bounds))

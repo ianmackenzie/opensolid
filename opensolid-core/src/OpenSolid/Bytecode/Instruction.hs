@@ -9,18 +9,11 @@ where
 
 import OpenSolid.Binary (Builder)
 import OpenSolid.Bytecode.Encode qualified as Encode
-import OpenSolid.Prelude hiding (return)
-import OpenSolid.Text qualified as Text
+import OpenSolid.Prelude
 
-newtype ConstantIndex = ConstantIndex Int deriving (Eq, Ord)
+newtype ConstantIndex = ConstantIndex Int deriving (Eq, Ord, Show)
 
-instance Show ConstantIndex where
-  show (ConstantIndex index) = Text.unpack ("C" <> Text.int index)
-
-newtype VariableIndex = VariableIndex Int deriving (Eq, Ord)
-
-instance Show VariableIndex where
-  show (VariableIndex index) = Text.unpack ("V" <> Text.int index)
+newtype VariableIndex = VariableIndex Int deriving (Eq, Ord, Show)
 
 data Instruction
   = Component0 VariableIndex
@@ -121,21 +114,23 @@ data Instruction
 maxValues :: Int
 maxValues = 32768
 
-tooManyVariables :: Text
-tooManyVariables = "More than " <> Text.int maxValues <> " variables in compiled bytecode"
+newtype TooManyVariables = TooManyVariables Int deriving (Show)
 
-tooManyConstants :: Text
-tooManyConstants = "More than " <> Text.int maxValues <> " constants in compiled bytecode"
+deriving anyclass instance Exception TooManyVariables
+
+newtype TooManyConstants = TooManyConstants Int deriving (Show)
+
+deriving anyclass instance Exception TooManyConstants
 
 encodeVariableIndex :: VariableIndex -> Builder
 encodeVariableIndex (VariableIndex index)
   | index < maxValues = Encode.int index
-  | otherwise = exception tooManyVariables
+  | otherwise = throw (TooManyVariables (index + 1))
 
 encodeConstantIndex :: ConstantIndex -> Builder
 encodeConstantIndex (ConstantIndex index)
   | index < maxValues = Encode.int index
-  | otherwise = exception tooManyConstants
+  | otherwise = throw (TooManyConstants (index + 1))
 
 encode :: Instruction -> VariableIndex -> Builder
 encode instruction outputIndex =

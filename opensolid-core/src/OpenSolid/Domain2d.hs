@@ -24,6 +24,7 @@ module OpenSolid.Domain2d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d

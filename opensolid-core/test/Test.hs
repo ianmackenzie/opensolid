@@ -23,7 +23,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding (all, fail, (>>=))
+import OpenSolid.Prelude hiding (abort, (>>=))
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
@@ -31,7 +31,6 @@ import OpenSolid.Timer qualified as Timer
 import System.Console.ANSI qualified
 import System.Environment
 import Text.Printf qualified
-import Prelude ((+), (-))
 import Prelude qualified
 
 data TestResult
@@ -108,7 +107,7 @@ reportError context messages = do
   IO.printLine (context <> " failed:")
   System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
   IO.forEach messages (Text.indent "   " >> IO.printLine)
-  return (0, 1)
+  IO.succeed (0, 1)
 
 runImpl :: List Text -> Text -> Test -> IO (Int, Int)
 runImpl args context test = case test of
@@ -129,13 +128,13 @@ runImpl args context test = case test of
           let elapsedText = fixed 3 (Duration.inSeconds elapsed) <> "s"
           let elapsedSuffix = if elapsed > Duration.seconds 0.1 then " ⏲️" else ""
           IO.printLine (fullName <> ": " <> elapsedText <> elapsedSuffix)
-          return results
+          IO.succeed results
       | otherwise ->
           -- Current test didn't match filter, so return 0 successes and 0 failures
-          return (0, 0)
+          IO.succeed (0, 0)
   Group label tests -> Prelude.do
     successesAndFailuresPerGroup <- IO.collect (runImpl args (appendTo context label)) tests
-    return (sum successesAndFailuresPerGroup)
+    IO.succeed (sum successesAndFailuresPerGroup)
 
 fixed :: Int -> Number -> Text
 fixed decimalPlaces value = do
@@ -154,7 +153,7 @@ sum ((successes, failures) : rest) = do
 
 fuzzImpl :: Text -> Int -> Random.Seed -> Expectation -> IO (Int, Int)
 fuzzImpl context n seed expectation = case n of
-  0 -> return (1, 0) -- We've finished fuzzing, report 1 successful test
+  0 -> IO.succeed (1, 0) -- We've finished fuzzing, report 1 successful test
   _ -> do
     let Expectation generator = expectation
     let (testResult, updatedSeed) = Random.step generator seed

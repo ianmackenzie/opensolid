@@ -25,6 +25,7 @@ module OpenSolid.VectorSurfaceFunction3d
   )
 where
 
+import GHC.Records (HasField (getField))
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Direction3d (Direction3d)
@@ -46,6 +47,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -217,8 +219,8 @@ instance
   where
   lhs #*# rhs =
     new
-      @ lhs.compiled #*# rhs.compiled
-      @ \p -> SurfaceFunction.derivative p lhs #*# rhs .+. lhs #*# derivative p rhs
+      (lhs.compiled #*# rhs.compiled)
+      (\p -> SurfaceFunction.derivative p lhs #*# rhs .+. lhs #*# derivative p rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -254,8 +256,8 @@ instance
   where
   lhs #*# rhs =
     new
-      @ lhs.compiled #*# rhs.compiled
-      @ \p -> derivative p lhs #*# rhs .+. lhs #*# SurfaceFunction.derivative p rhs
+      (lhs.compiled #*# rhs.compiled)
+      (\p -> derivative p lhs #*# rhs .+. lhs #*# SurfaceFunction.derivative p rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -519,14 +521,14 @@ placeIn ::
   Frame3d (global @ frameUnits) (Defines local) ->
   VectorSurfaceFunction3d (local @ units) ->
   VectorSurfaceFunction3d (global @ units)
-placeIn frame function =
-  new
-    @ CompiledFunction.map
-      (Expression.VectorSurface3d.placeIn frame)
-      (Vector3d.placeIn frame)
-      (VectorBounds3d.placeIn frame)
-      function.compiled
-    @ \p -> placeIn frame (derivative p function)
+placeIn frame function = do
+  let compiledPlaced =
+        CompiledFunction.map
+          (Expression.VectorSurface3d.placeIn frame)
+          (Vector3d.placeIn frame)
+          (VectorBounds3d.placeIn frame)
+          function.compiled
+  new compiledPlaced (\p -> placeIn frame (derivative p function))
 
 relativeTo ::
   Frame3d (global @ frameUnits) (Defines local) ->
@@ -538,14 +540,14 @@ transformBy ::
   Transform3d tag (space @ translationUnits) ->
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units)
-transformBy transform function =
-  new
-    @ CompiledFunction.map
-      (Expression.VectorSurface3d.transformBy transform)
-      (Vector3d.transformBy transform)
-      (VectorBounds3d.transformBy transform)
-      function.compiled
-    @ \p -> transformBy transform (derivative p function)
+transformBy transform function = do
+  let compiledTransformed =
+        CompiledFunction.map
+          (Expression.VectorSurface3d.transformBy transform)
+          (Vector3d.transformBy transform)
+          (VectorBounds3d.transformBy transform)
+          function.compiled
+  new compiledTransformed (\p -> transformBy transform (derivative p function))
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
@@ -585,22 +587,25 @@ unsafeQuotient# ::
   VectorSurfaceFunction3d (space @ units1) ->
   SurfaceFunction units2 ->
   VectorSurfaceFunction3d (space @ (units1 #/# units2))
-unsafeQuotient# lhs rhs =
+unsafeQuotient# lhs rhs = do
+  let quotientDerivative self p =
+        unsafeQuotient# (derivative p lhs) rhs
+          .-. self .*. SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
   recursive
-    @ CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled
-    @ \self p ->
-      unsafeQuotient# (derivative p lhs) rhs
-        .-. self .*. SurfaceFunction.unsafeQuotient (SurfaceFunction.derivative p rhs) rhs
+    (CompiledFunction.map2 (#/#) (#/#) (#/#) lhs.compiled rhs.compiled)
+    quotientDerivative
 
 squaredMagnitude# :: VectorSurfaceFunction3d (space @ units) -> SurfaceFunction (units #*# units)
-squaredMagnitude# function =
+squaredMagnitude# function = do
+  let compiledSquaredMagnitude =
+        CompiledFunction.map
+          Expression.squaredMagnitude#
+          Vector3d.squaredMagnitude#
+          VectorBounds3d.squaredMagnitude#
+          function.compiled
   SurfaceFunction.new
-    @ CompiledFunction.map
-      Expression.squaredMagnitude#
-      Vector3d.squaredMagnitude#
-      VectorBounds3d.squaredMagnitude#
-      function.compiled
-    @ \p -> 2 *. function `dot#` derivative p function
+    compiledSquaredMagnitude
+    (\p -> 2 *. function `dot#` derivative p function)
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

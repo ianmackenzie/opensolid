@@ -5,6 +5,7 @@ module OpenSolid.Bytecode.Compile
   , NumComponents (NumComponents)
   , OutputComponents (OutputComponents)
   , InputComponents (InputComponents)
+  , return
   , map
   , collect
   , addConstant
@@ -45,7 +46,7 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3d (Vector3d))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vector2d (Vector2d (Vector2d))
-import Prelude ((+))
+import Prelude qualified
 
 newtype NumComponents = NumComponents Int deriving (Eq, Ord, Show)
 
@@ -89,13 +90,16 @@ apply (Step step) state = step state
 nextConstantIndex :: State -> ConstantIndex
 nextConstantIndex State{constantComponents = NumComponents n} = ConstantIndex n
 
+return :: a -> Step a
+return value = Step (# ,value #)
+
 map :: (a -> b) -> Step a -> Step b
 map f step = Step $ \state0 -> do
   let (# state1, output1 #) = apply step state0
   (# state1, f output1 #)
 
 collect :: Traversable list => (a -> Step b) -> list a -> Step (list b)
-collect = mapM
+collect = Prelude.mapM
 
 addConstant :: NonEmpty Number -> Step ConstantIndex
 addConstant components = Step \initialState ->

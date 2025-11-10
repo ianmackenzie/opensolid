@@ -78,7 +78,7 @@ typePattern ffiType = case ffiType of
   FFI.Array itemType -> "[" <> typePattern itemType <> ", *_]"
   FFI.Tuple type1 type2 rest -> tuplePattern type1 type2 rest
   FFI.Maybe valueType -> typePattern valueType <> " | None"
-  FFI.Result{} -> internalError "Should never have Result as input argument"
+  FFI.Result{} -> abort "Should never have Result as input argument"
   FFI.Class classId -> Python.Class.qualifiedName classId <> "()"
 
 tuplePattern :: FFI.Type -> FFI.Type -> List FFI.Type -> Text
