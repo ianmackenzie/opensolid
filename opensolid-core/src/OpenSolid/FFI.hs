@@ -417,7 +417,7 @@ store ptr offset value = do
   let proxy = Proxy @value
   case representation proxy of
     UnitRep -> Foreign.pokeByteOff @Int64 ptr offset 0
-    IntRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 value)
+    IntRep -> Foreign.pokeByteOff @Int64 ptr offset (fromIntegral value)
     NumberRep -> Foreign.pokeByteOff ptr offset (Number.toDouble value)
     BoolRep -> Foreign.pokeByteOff @Int64 ptr offset (if value then 1 else 0)
     SignRep -> Foreign.pokeByteOff @Int64 ptr offset (case value of Positive -> 1; Negative -> -1)
@@ -433,7 +433,7 @@ store ptr offset value = do
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
       let storeItem index item = store itemsPtr (index * itemSize) item
       IO.forEachWithIndex value storeItem
-      Foreign.pokeByteOff ptr offset (Int.toInt64 numItems)
+      Foreign.pokeByteOff @Int64 ptr offset (fromIntegral numItems)
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
     NonEmptyRep -> store ptr offset (NonEmpty.toList value)
     ArrayRep -> store ptr offset (Array.toList value)
@@ -535,10 +535,10 @@ store ptr offset value = do
     ResultRep ->
       case value of
         Success successfulValue -> do
-          Foreign.pokeByteOff ptr offset (Int.toInt64 0)
+          Foreign.pokeByteOff @Int64 ptr offset 0
           store ptr (offset + 16) successfulValue
         Failure errorValue -> do
-          Foreign.pokeByteOff ptr offset (Int.toInt64 1)
+          Foreign.pokeByteOff @Int64 ptr offset 1
           store ptr (offset + 8) (Error.message errorValue)
     ClassRep _ -> do
       stablePtr <- Foreign.newStablePtr value
@@ -554,7 +554,7 @@ load ptr offset = do
   let proxy = Proxy @value
   case representation proxy of
     UnitRep -> IO.succeed ()
-    IntRep -> IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
+    IntRep -> IO.map fromIntegral (Foreign.peekByteOff @Int64 ptr offset)
     NumberRep -> IO.map Number.fromDouble (Foreign.peekByteOff ptr offset)
     BoolRep -> IO.map (/= 0) (Foreign.peekByteOff @Int64 ptr offset)
     SignRep -> IO.map Int.sign (load ptr offset)
@@ -564,7 +564,7 @@ load ptr offset = do
       IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
     ListRep -> do
       let itemSize = listItemSize proxy
-      numItems <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
+      numItems <- IO.map fromIntegral (Foreign.peekByteOff @Int64 ptr offset)
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
       IO.collect loadItem [0 .. numItems - 1]
@@ -666,7 +666,7 @@ load ptr offset = do
       value8 <- load ptr offset8
       IO.succeed (value1, value2, value3, value4, value5, value6, value7, value8)
     MaybeRep -> do
-      tag <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
+      tag <- Foreign.peekByteOff @Int64 ptr offset
       if tag == 0
         then IO.map Just (load ptr (offset + 8))
         else IO.succeed Nothing
