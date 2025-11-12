@@ -13,7 +13,8 @@ where
 import GHC.Exts qualified
 import OpenSolid.Error as Error
 import OpenSolid.Prelude
-import OpenSolid.Quantity as Quantity
+import OpenSolid.Quantity (Quantity (Quantity##))
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
