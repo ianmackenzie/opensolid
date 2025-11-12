@@ -65,7 +65,6 @@ import OpenSolid.Direction2d (Direction2d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.FFI (FFI)
@@ -750,7 +749,7 @@ squaredMagnitude# curve = do
           curve.compiled
   Curve.new compiledSquaredMagnitude (2 *. curve `dot#` curve.derivative)
 
-data HasZero = HasZero deriving (Eq, Show, Error.Message)
+data HasZero = HasZero deriving (Eq, Show)
 
 magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Curve units
 magnitude curve = Curve.sqrt# (squaredMagnitude# curve)
@@ -761,7 +760,7 @@ sampleValues curve = List.map (evaluate curve) Parameter.samples
 isZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
 isZero curve = List.allSatisfy (~= Vector2d.zero) (sampleValues curve)
 
-data IsZero = IsZero deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result IsZero (List Number)
 zeros curve =

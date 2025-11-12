@@ -3,7 +3,6 @@ module Tests.SurfaceFunction (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Error qualified as Error
 import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -13,6 +12,7 @@ import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
@@ -48,7 +48,7 @@ firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" Test.do
 withIntersectionCurves :: Tolerance Meters => (NonEmpty (Curve2d UvCoordinates) -> Test) -> Test
 withIntersectionCurves callback =
   case SurfaceFunction.zeros planeTorusSurface of
-    Failure error -> Test.abort (Error.message error)
+    Failure error -> Test.abort (Text.show error)
     Success zeros -> case zeros.crossingCurves of
       [] -> Test.abort "No intersection curves found"
       NonEmpty crossingCurves -> callback crossingCurves

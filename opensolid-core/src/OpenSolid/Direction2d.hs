@@ -33,7 +33,6 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d
@@ -94,7 +93,7 @@ x = Unit2d (Vector2d 1 0)
 y :: Direction2d space
 y = Unit2d (Vector2d 0 1)
 
-data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, Error.Message)
+data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show)
 
 from ::
   Tolerance units =>

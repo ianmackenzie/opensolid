@@ -41,7 +41,6 @@ import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.Expression.Curve3d qualified as Expression.Curve3d
@@ -93,7 +92,7 @@ instance
 instance Bounded3d (Curve3d (space @ units)) (space @ units) where
   bounds = bounds
 
-data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Error.Message)
+data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

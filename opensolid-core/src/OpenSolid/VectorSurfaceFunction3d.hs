@@ -32,7 +32,6 @@ import OpenSolid.Direction3d (Direction3d)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3d (DirectionSurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3d qualified as DirectionSurfaceFunction3d
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
 import OpenSolid.Frame3d (Frame3d)
@@ -616,7 +615,7 @@ squaredMagnitude = Units.specialize . squaredMagnitude#
 magnitude :: Tolerance units => VectorSurfaceFunction3d (space @ units) -> SurfaceFunction units
 magnitude function = SurfaceFunction.sqrt# (squaredMagnitude# function)
 
-data IsZero = IsZero deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show)
 
 direction ::
   Tolerance units =>

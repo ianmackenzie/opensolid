@@ -49,7 +49,6 @@ import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
-import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.FFI (FFI)
@@ -131,7 +130,7 @@ unitSquare = Tolerance.using Quantity.zero do
     Success region -> region
     Failure EmptyRegion -> throw (InternalError "Constructing unit square region should not fail")
 
-data EmptyRegion = EmptyRegion deriving (Eq, Show, Error.Message)
+data EmptyRegion = EmptyRegion deriving (Eq, Show)
 
 {-| Create a rectangular region.
 

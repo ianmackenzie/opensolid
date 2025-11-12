@@ -47,7 +47,6 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.DirectionSurfaceFunction3d (DirectionSurfaceFunction3d)
 import OpenSolid.DirectionSurfaceFunction3d qualified as DirectionSurfaceFunction3d
 import OpenSolid.Domain1d qualified as Domain1d
-import OpenSolid.Error qualified as Error
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3d (Frame3d)
@@ -215,7 +214,7 @@ data Corner (coordinateSystem :: CoordinateSystem) where
 instance Bounded3d (Corner (space @ units)) (space @ units) where
   bounds Corner{point} = Bounds3d.constant point
 
-data EmptyBody = EmptyBody deriving (Eq, Show, Error.Message)
+data EmptyBody = EmptyBody deriving (Eq, Show)
 
 {-| Create a rectangular block body.
 

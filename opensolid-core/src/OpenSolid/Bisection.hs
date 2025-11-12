@@ -19,13 +19,12 @@ where
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
-import OpenSolid.Error qualified as Error
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds)
 
-data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
+data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show)
 
 data Domain bounds = Domain bounds ~(List (Domain bounds))
 

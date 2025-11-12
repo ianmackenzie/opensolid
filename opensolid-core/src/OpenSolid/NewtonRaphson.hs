@@ -11,7 +11,6 @@ module OpenSolid.NewtonRaphson
 where
 
 import GHC.Exts qualified
-import OpenSolid.Error as Error
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
@@ -20,7 +19,7 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 
-data Divergence = Divergence deriving (Eq, Show, Error.Message)
+data Divergence = Divergence deriving (Eq, Show)
 
 curve1d ::
   Tolerance units =>

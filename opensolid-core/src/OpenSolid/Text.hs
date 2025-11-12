@@ -35,7 +35,6 @@ import Data.Text (Text)
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import OpenSolid.Binary (Builder, ByteString)
-import OpenSolid.Error qualified as Error
 import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import OpenSolid.Number (Number)
@@ -128,7 +127,7 @@ strip = Data.Text.strip
 toUtf8 :: Text -> Builder
 toUtf8 = Data.Text.Encoding.encodeUtf8Builder
 
-data InvalidUtf8 = InvalidUtf8 deriving (Eq, Show, Error.Message)
+data InvalidUtf8 = InvalidUtf8 deriving (Eq, Show)
 
 decodeUtf8 :: ByteString -> Result InvalidUtf8 Text
 decodeUtf8 byteString =

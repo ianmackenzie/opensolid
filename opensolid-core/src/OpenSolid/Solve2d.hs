@@ -19,7 +19,6 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
-import OpenSolid.Error qualified as Error
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
@@ -52,7 +51,7 @@ data Exclusions exclusions where
 
 deriving instance Show (Exclusions exclusions)
 
-data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
+data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show)
 
 type Callback context solution =
   forall exclusions.
@@ -220,7 +219,7 @@ solveUnique localBounds fBounds f fu fv globalBounds =
                 & Maybe.orElse (solveRecursively (Bounds2d u2 v2))
     else Nothing
 
-data Divergence = Divergence deriving (Eq, Show, Error.Message)
+data Divergence = Divergence deriving (Eq, Show)
 
 newtonRaphson ::
   Tolerance units =>

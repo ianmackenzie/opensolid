@@ -19,7 +19,6 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Prelude
@@ -307,7 +306,7 @@ abstract ::
   CompiledFunction inputValue outputValue inputBounds outputBounds
 abstract = Abstract
 
-data IsAbstract = IsAbstract deriving (Eq, Show, Error.Message)
+data IsAbstract = IsAbstract deriving (Eq, Show)
 
 expression ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->

@@ -66,7 +66,6 @@ import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
-import OpenSolid.Error qualified as Error
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Expression (Expression)
@@ -592,7 +591,7 @@ instance Estimate.Interface (Integral units) units where
 
 ----- ZERO FINDING -----
 
-data IsZero = IsZero deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show)
 
 {-| Find all points at which the given curve is zero.
 
@@ -731,7 +730,7 @@ solveMonotonic m fm fn tBounds = do
             Solve1d.Exact t0 -> Resolved [(t0, Solve1d.neighborhood n (evaluate fn t0))]
             Solve1d.Closest _ -> Unresolved
 
-data CrossesZero = CrossesZero deriving (Eq, Show, Error.Message)
+data CrossesZero = CrossesZero deriving (Eq, Show)
 
 {-| Attempt to find the (consistent) sign of all values on the curve.
 

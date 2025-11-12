@@ -1,6 +1,5 @@
 module OpenSolid.Body3d.BoundedBy (Error (..)) where
 
-import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 
 data Error
@@ -8,4 +7,4 @@ data Error
   | BoundaryHasGaps
   | BoundaryIntersectsItself
   | BoundaryCurveHasDegeneracy
-  deriving (Eq, Show, Error.Message)
+  deriving (Eq, Show)

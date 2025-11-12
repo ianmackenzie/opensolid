@@ -50,7 +50,6 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3d (Convention3d (Convention3d))
 import OpenSolid.Convention3d qualified as Convention3d
-import OpenSolid.Error qualified as Error
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
@@ -202,7 +201,7 @@ squaredMagnitude = Units.specialize . squaredMagnitude#
 squaredMagnitude# :: Vector3d (space @ units) -> Quantity (units #*# units)
 squaredMagnitude# (Vector3d vx vy vz) = vx #*# vx .+. vy #*# vy .+. vz #*# vz
 
-data IsZero = IsZero deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show)
 
 {-| Attempt to get the direction of a vector.
 

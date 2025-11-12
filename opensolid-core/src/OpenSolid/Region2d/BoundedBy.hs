@@ -1,6 +1,5 @@
 module OpenSolid.Region2d.BoundedBy (Error (..)) where
 
-import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 
 data Error
@@ -9,4 +8,4 @@ data Error
   | BoundaryIntersectsItself
   | MultipleDisjointRegions
   | BoundaryCurveHasDegeneracy
-  deriving (Eq, Show, Error.Message)
+  deriving (Eq, Show)

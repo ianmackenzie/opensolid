@@ -53,7 +53,6 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Error qualified as Error
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
@@ -209,9 +208,6 @@ angleFrom :: Vector2d (space @ units) -> Vector2d (space @ units) -> Angle
 angleFrom v1 v2 = Angle.atan2 (v1 `cross#` v2) (v1 `dot#` v2)
 
 data IsZero = IsZero deriving (Eq, Show)
-
-instance Error.Message IsZero where
-  message IsZero = "Vector is zero"
 
 {-| Attempt to get the direction of a vector.
 

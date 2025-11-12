@@ -27,7 +27,6 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve.Zero (Zero (Zero))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
-import OpenSolid.Error qualified as Error
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -105,7 +104,7 @@ data Exclusions exclusions where
   NoExclusions :: Exclusions NoExclusions
   SomeExclusions :: Exclusions SomeExclusions
 
-data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
+data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show)
 
 type Callback cached solution =
   forall exclusions.
@@ -227,7 +226,7 @@ solveMonotonic function derivative bounds sign1 x1 x2 = do
               else solveMonotonic function derivative bounds sign1 x1 xMid
         | otherwise -> Exact xMid -- We've converged to a zero by bisection
 
-data Divergence = Divergence deriving (Eq, Show, Error.Message)
+data Divergence = Divergence deriving (Eq, Show)
 
 newtonRaphson ::
   Tolerance units =>

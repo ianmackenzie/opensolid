@@ -19,7 +19,6 @@ where
 
 import Data.Foldable qualified
 import OpenSolid.Duration qualified as Duration
-import OpenSolid.Error qualified as Error
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
@@ -53,7 +52,7 @@ instance Bind Generator where
 
 instance Bind (Result x) where
   Success value >>= f = f value
-  Failure error >>= _ = fail (Error.message error)
+  Failure error >>= _ = fail (Text.show error)
 
 data Test
   = Abort Text

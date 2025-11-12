@@ -49,7 +49,6 @@ import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d (Domain2d))
 import OpenSolid.Domain2d qualified as Domain2d
-import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
@@ -551,7 +550,7 @@ cos function =
     (CompiledFunction.map Expression.cos Angle.cos Bounds.cos function.compiled)
     (\p -> negative (sin function) .*. (derivative p function ./. Angle.radian))
 
-data IsZero = IsZero deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show)
 
 zeros :: Tolerance units => SurfaceFunction units -> Result IsZero Zeros
 zeros function

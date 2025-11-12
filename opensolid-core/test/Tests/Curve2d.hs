@@ -18,7 +18,6 @@ import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
-import OpenSolid.Error qualified as Error
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -113,7 +112,7 @@ overlappingSegments curve1 curve2 =
     Success (Just (Curve2d.IntersectionPoints _)) ->
       Failure "Should have found some overlapping segments, got intersection points instead"
     Success Nothing -> Failure "Should have found some overlapping segments"
-    Failure error -> Failure (Error.message error)
+    Failure error -> Failure (Text.show error)
 
 equalUBounds :: Bounds Unitless -> Bounds Unitless -> Bool
 equalUBounds (Bounds actualLow actualHigh) (Bounds expectedLow expectedHigh) =

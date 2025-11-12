@@ -103,7 +103,6 @@ import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
-import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.FFI (FFI)
@@ -212,7 +211,7 @@ instance
 instance ApproximateEquality (Curve2d (space @ units)) units where
   curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
 
-data IsPoint = IsPoint deriving (Eq, Show, Error.Message)
+data IsPoint = IsPoint deriving (Eq, Show)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

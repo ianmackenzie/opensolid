@@ -54,7 +54,6 @@ import OpenSolid.Direction3d (Direction3d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d qualified as DirectionCurve3d
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
@@ -668,12 +667,12 @@ squaredMagnitude# curve = do
   let squaredMagnitudeDerivative = 2 *. curve `dot#` curve.derivative
   Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
-data HasZero = HasZero deriving (Eq, Show, Error.Message)
+data HasZero = HasZero deriving (Eq, Show)
 
 magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Curve units
 magnitude curve = Curve.sqrt# (squaredMagnitude# curve)
 
-data IsZero = IsZero deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show)
 
 zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result IsZero (List Number)
 zeros curve =

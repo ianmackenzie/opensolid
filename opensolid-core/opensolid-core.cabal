@@ -144,7 +144,6 @@ library
     OpenSolid.Domain2d
     OpenSolid.Drawing2d
     OpenSolid.Duration
-    OpenSolid.Error
     OpenSolid.Estimate
     OpenSolid.Expression
     OpenSolid.Expression.Curve1d

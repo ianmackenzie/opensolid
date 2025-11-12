@@ -49,7 +49,6 @@ import OpenSolid.Area (Area)
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Color (Color)
-import OpenSolid.Error qualified as Error
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
 import OpenSolid.InternalError (InternalError (InternalError))
@@ -539,7 +538,7 @@ store ptr offset value = do
           store ptr (offset + 16) successfulValue
         Failure errorValue -> do
           Foreign.pokeByteOff @Int64 ptr offset 1
-          store ptr (offset + 8) (Error.message errorValue)
+          store ptr (offset + 8) (Text.show errorValue)
     ClassRep _ -> do
       stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr

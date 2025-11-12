@@ -12,7 +12,6 @@ where
 
 import Data.Foldable qualified
 import Data.Text (Text)
-import OpenSolid.Error qualified as Error
 import OpenSolid.List (List)
 import {-# SOURCE #-} OpenSolid.Text qualified as Text
 import Prelude
@@ -29,7 +28,7 @@ import Prelude qualified
 
 data Result x a where
   Success :: a -> Result x a
-  Failure :: Error.Message x => x -> Result x a
+  Failure :: Show x => x -> Result x a
 
 {-# COMPLETE Success, Failure #-}
 
@@ -67,7 +66,7 @@ map2 function result1 result = do
 
 orFail :: MonadFail m => Result x a -> m a
 orFail (Success value) = Prelude.return value
-orFail (Failure error) = Prelude.fail (Text.unpack (Error.message error))
+orFail (Failure error) = Prelude.fail (Prelude.show error)
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM

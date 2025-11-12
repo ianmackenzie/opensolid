@@ -21,7 +21,6 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.DirectionSurfaceFunction3d (DirectionSurfaceFunction3d)
-import OpenSolid.Error qualified as Error
 import OpenSolid.Expression.Surface3d qualified as Expression.Surface3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
@@ -209,7 +208,7 @@ derivative ::
 derivative U = (.du)
 derivative V = (.dv)
 
-data IsDegenerate = IsDegenerate deriving (Eq, Show, Error.Message)
+data IsDegenerate = IsDegenerate deriving (Eq, Show)
 
 derivativeDirection ::
   Tolerance units =>

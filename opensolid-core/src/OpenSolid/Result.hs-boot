@@ -1,7 +1,7 @@
 module OpenSolid.Result (Result (Success, Failure)) where
 
-import {-# SOURCE #-} OpenSolid.Error qualified as Error
+import Prelude (Show)
 
 data Result x a where
   Success :: a -> Result x a
-  Failure :: Error.Message x => x -> Result x a
+  Failure :: Show x => x -> Result x a
