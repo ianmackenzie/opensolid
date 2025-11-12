@@ -8,6 +8,7 @@ module OpenSolid.Bisection
   , curveSurfaceDomain
   , surfacePairDomain
   , search
+  , interior
   , isInterior
   , includesEndpoint
   )
@@ -122,6 +123,11 @@ map2 function domain1 domain2 = do
     | child1 <- children1
     , child2 <- children2
     ]
+
+interior :: Bounds Unitless -> Bounds Unitless
+interior (Bounds tLow tHigh) = do
+  let margin = (tHigh .-. tLow) ./ 8
+  Bounds (tLow + margin) (tHigh - margin)
 
 isInterior :: Number -> Bounds Unitless -> Bool
 isInterior value (Bounds tLow tHigh) = do
