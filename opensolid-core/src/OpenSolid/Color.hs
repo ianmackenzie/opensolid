@@ -71,8 +71,8 @@ Saturation and lightness should be in the range [0,1].
 -}
 hsl1 :: Angle -> Number -> Number -> Color
 hsl1 hue saturation lightness =
-  Data.Colour.RGBSpace.HSL.hsl (Angle.inDegrees hue) saturation lightness
-    |> Data.Colour.RGBSpace.uncurryRGB rgb1
+  Data.Colour.RGBSpace.uncurryRGB rgb1 $
+    Data.Colour.RGBSpace.HSL.hsl (Angle.inDegrees hue) saturation lightness
 
 -- | Construct a color from a hex string such as '#f3f3f3' or 'f3f3f3'.
 hex :: Text -> Color

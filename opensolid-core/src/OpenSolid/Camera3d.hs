@@ -168,9 +168,9 @@ orbit ::
 orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Named projection) = do
   let computedFrame =
         Frame3d focalPoint World3d.backwardOrientation
-          |> Frame3d.turnRightBy azimuth
-          |> Frame3d.tiltDownBy elevation
-          |> Frame3d.offsetBackwardBy distance
+          & Frame3d.turnRightBy azimuth
+          & Frame3d.tiltDownBy elevation
+          & Frame3d.offsetBackwardBy distance
   new computedFrame distance projection
 
 isometricElevation :: Angle

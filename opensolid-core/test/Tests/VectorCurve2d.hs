@@ -24,8 +24,8 @@ derivativeConsistency givenTolerance curve = Test.do
   let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
-      |> Test.output "numericalFirstDerivative" numericalFirstDerivative
-      |> Test.output "analyticFirstDerivative" analyticFirstDerivative
+      & Test.output "numericalFirstDerivative" numericalFirstDerivative
+      & Test.output "analyticFirstDerivative" analyticFirstDerivative
 
 boundsConsistency ::
   (Tolerance units, Show (Quantity units)) =>
@@ -37,7 +37,7 @@ boundsConsistency vectorCurve = Test.do
   let vectorCurveValue = VectorCurve2d.evaluate vectorCurve tValue
   let vectorCurveBounds = VectorCurve2d.evaluateBounds vectorCurve tBounds
   Test.expect (vectorCurveValue `intersects` vectorCurveBounds)
-    |> Test.output "tValue" tValue
-    |> Test.output "tBounds" tBounds
-    |> Test.output "vectorCurveValue" vectorCurveValue
-    |> Test.output "vectorCurveBounds" vectorCurveBounds
+    & Test.output "tValue" tValue
+    & Test.output "tBounds" tBounds
+    & Test.output "vectorCurveValue" vectorCurveValue
+    & Test.output "vectorCurveBounds" vectorCurveBounds

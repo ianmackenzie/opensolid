@@ -1000,9 +1000,9 @@ buildClass members built = case members of
     Abs absFunction ->
       built{absFunction = Just absFunction}
     PreOverload operatorId overload ->
-      built{preOperators = built.preOperators |> addPreOverload operatorId overload}
+      built{preOperators = addPreOverload operatorId overload built.preOperators}
     PostOverload operatorId overload ->
-      built{postOperators = built.postOperators |> addPostOverload operatorId overload}
+      built{postOperators = addPostOverload operatorId overload built.postOperators}
     Nested nestedDocstring nestedMembers ->
       built{nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers]}
 

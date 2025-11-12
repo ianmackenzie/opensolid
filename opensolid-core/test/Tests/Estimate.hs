@@ -85,10 +85,10 @@ smallest = Test.check 100 "smallest" Test.do
   let smallestEstimate = Estimate.smallest estimates
   let (valid, finalBounds) = check smallestEstimate smallestValue
   Test.expect valid
-    |> Test.output "values" (Test.lines values)
-    |> Test.output "smallestValue" smallestValue
-    |> Test.output "initial bounds list" (Test.lines bounds)
-    |> Test.output "finalBounds" finalBounds
+    & Test.output "values" (Test.lines values)
+    & Test.output "smallestValue" smallestValue
+    & Test.output "initial bounds list" (Test.lines bounds)
+    & Test.output "finalBounds" finalBounds
 
 largest :: Tolerance Meters => Test
 largest = Test.check 100 "largest" Test.do
@@ -99,10 +99,10 @@ largest = Test.check 100 "largest" Test.do
   let largestEstimate = Estimate.largest estimates
   let (valid, finalBounds) = check largestEstimate largestValue
   Test.expect valid
-    |> Test.output "values" (Test.lines values)
-    |> Test.output "largestValue" largestValue
-    |> Test.output "initial bounds list" (Test.lines bounds)
-    |> Test.output "finalBounds" finalBounds
+    & Test.output "values" (Test.lines values)
+    & Test.output "largestValue" largestValue
+    & Test.output "initial bounds list" (Test.lines bounds)
+    & Test.output "finalBounds" finalBounds
 
 resolvesTo :: Tolerance units => Quantity units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
@@ -192,10 +192,10 @@ pickSmallestBy = Test.check 100 "pickSmallestBy" Test.do
   let allValuesArePresent =
         NonEmpty.sort originalValues == NonEmpty.sort (smallestValue :| remainingValues)
   Test.expect (smallestValueIsCorrect && allValuesArePresent)
-    |> Test.output "smallestValueIsCorrect" smallestValueIsCorrect
-    |> Test.output "allValuesArePresent" allValuesArePresent
-    |> Test.output "smallestValue" smallestValue
-    |> Test.output "remainingValues" remainingValues
+    & Test.output "smallestValueIsCorrect" smallestValueIsCorrect
+    & Test.output "allValuesArePresent" allValuesArePresent
+    & Test.output "smallestValue" smallestValue
+    & Test.output "remainingValues" remainingValues
 
 pickLargestBy :: Tolerance Meters => Test
 pickLargestBy = Test.check 100 "pickLargestBy" Test.do

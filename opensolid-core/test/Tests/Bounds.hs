@@ -35,12 +35,12 @@ smaller = Test.check 100 "smaller" Test.do
   let smallerValue = Quantity.smaller x1 x2
   let smallerBounds = Bounds.smaller bounds1 bounds2
   Test.expect (Bounds.includes smallerValue smallerBounds)
-    |> Test.output "bounds1" bounds1
-    |> Test.output "bounds2" bounds2
-    |> Test.output "x1" x1
-    |> Test.output "x2" x2
-    |> Test.output "smallerValue" smallerValue
-    |> Test.output "smallerBounds" smallerBounds
+    & Test.output "bounds1" bounds1
+    & Test.output "bounds2" bounds2
+    & Test.output "x1" x1
+    & Test.output "x2" x2
+    & Test.output "smallerValue" smallerValue
+    & Test.output "smallerBounds" smallerBounds
 
 larger :: Test
 larger = Test.check 100 "larger" Test.do
@@ -53,12 +53,12 @@ larger = Test.check 100 "larger" Test.do
   let largerValue = Quantity.larger x1 x2
   let largerBounds = Bounds.larger bounds1 bounds2
   Test.expect (Bounds.includes largerValue largerBounds)
-    |> Test.output "bounds1" bounds1
-    |> Test.output "bounds2" bounds2
-    |> Test.output "x1" x1
-    |> Test.output "x2" x2
-    |> Test.output "largerValue" largerValue
-    |> Test.output "largerBounds" largerBounds
+    & Test.output "bounds1" bounds1
+    & Test.output "bounds2" bounds2
+    & Test.output "x1" x1
+    & Test.output "x2" x2
+    & Test.output "largerValue" largerValue
+    & Test.output "largerBounds" largerBounds
 
 valueInBounds :: Generator (Length, Bounds Meters)
 valueInBounds = do
@@ -82,10 +82,10 @@ largest = Test.check 1000 "largest" Test.do
   let largestValue = Quantity.largest values
   let largestBounds = Bounds.largest bounds
   Test.expect (Bounds.includes largestValue largestBounds)
-    |> Test.output "values" (Test.lines values)
-    |> Test.output "bounds" (Test.lines bounds)
-    |> Test.output "largestValue" largestValue
-    |> Test.output "largestBounds" largestBounds
+    & Test.output "values" (Test.lines values)
+    & Test.output "bounds" (Test.lines bounds)
+    & Test.output "largestValue" largestValue
+    & Test.output "largestBounds" largestBounds
 
 quantityBoundsDivision :: Test
 quantityBoundsDivision = Test.check 1000 "quantityBoundsDivision" Test.do
@@ -95,12 +95,12 @@ quantityBoundsDivision = Test.check 1000 "quantityBoundsDivision" Test.do
   let y = Bounds.interpolate bounds t
   let quotient = x ./. y
   let boundsQuotient = x ./. bounds
-  Test.expect (boundsQuotient |> Bounds.includes quotient)
-    |> Test.output "x" x
-    |> Test.output "bounds" bounds
-    |> Test.output "y" y
-    |> Test.output "quotient" quotient
-    |> Test.output "boundsQuotient" boundsQuotient
+  Test.expect (Bounds.includes quotient boundsQuotient)
+    & Test.output "x" x
+    & Test.output "bounds" bounds
+    & Test.output "y" y
+    & Test.output "quotient" quotient
+    & Test.output "boundsQuotient" boundsQuotient
 
 boundsQuantityDivision :: Test
 boundsQuantityDivision = Test.check 1000 "boundsQuantityDivision" Test.do
@@ -110,12 +110,12 @@ boundsQuantityDivision = Test.check 1000 "boundsQuantityDivision" Test.do
   y <- Random.length
   let quotient = x ./. y
   let boundsQuotient = bounds ./. y
-  Test.expect (boundsQuotient |> Bounds.includes quotient)
-    |> Test.output "bounds" bounds
-    |> Test.output "x" x
-    |> Test.output "y" y
-    |> Test.output "quotient" quotient
-    |> Test.output "boundsQuotient" boundsQuotient
+  Test.expect (Bounds.includes quotient boundsQuotient)
+    & Test.output "bounds" bounds
+    & Test.output "x" x
+    & Test.output "y" y
+    & Test.output "quotient" quotient
+    & Test.output "boundsQuotient" boundsQuotient
 
 {-| TODO: have test helper for generally testing compatibility of
 Bounds function with corresponding Quantity function
@@ -130,10 +130,10 @@ boundsBoundsDivision = Test.check 1000 "boundsBoundsDivision" Test.do
   let x2 = Bounds.interpolate bounds2 t2
   let quotient = x1 ./. x2
   let boundsQuotient = bounds1 ./. bounds2
-  Test.expect (boundsQuotient |> Bounds.includes quotient)
-    |> Test.output "bounds1" bounds1
-    |> Test.output "bounds2" bounds2
-    |> Test.output "x1" x1
-    |> Test.output "x2" x2
-    |> Test.output "quotient" quotient
-    |> Test.output "boundsQuotient" boundsQuotient
+  Test.expect (Bounds.includes quotient boundsQuotient)
+    & Test.output "bounds1" bounds1
+    & Test.output "bounds2" bounds2
+    & Test.output "x1" x1
+    & Test.output "x2" x2
+    & Test.output "quotient" quotient
+    & Test.output "boundsQuotient" boundsQuotient

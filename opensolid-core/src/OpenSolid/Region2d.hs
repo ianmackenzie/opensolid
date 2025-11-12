@@ -283,14 +283,14 @@ addFillet radius curves point = do
   let curveIncidences = List.map (curveIncidence point) curves
   let incidentCurves =
         curveIncidences
-          |> List.filterMap incidentCurve
+          & List.filterMap incidentCurve
           -- By this point we should have exactly two curves
           -- (one 'incoming' and one 'outgoing');
           -- sort them by the negation of the incident parameter value
           -- so that the curve with parameter value 1 (the incoming curve) is first
           -- is and the curve with parameter value 0 (the outgoing curve) is second
-          |> List.sortBy (negative . Pair.second)
-          |> List.map Pair.first
+          & List.sortBy (negative . Pair.second)
+          & List.map Pair.first
   let otherCurves = List.filterMap nonIncidentCurve curveIncidences
   case incidentCurves of
     [] -> couldNotFindPointToFillet

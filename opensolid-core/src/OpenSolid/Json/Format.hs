@@ -109,8 +109,8 @@ lift up down format = do
 bool :: Format Bool
 bool =
   Format{encodeFunction = Json.bool, decodeFunction = decodeBool, schema = Json.Schema.boolean}
-    |> title "Bool"
-    |> description "A boolean true or false"
+    & title "Bool"
+    & description "A boolean true or false"
 
 decodeBool :: Json -> Result Text Bool
 decodeBool (Json.Bool value) = Success value
@@ -119,8 +119,8 @@ decodeBool _ = Failure "Expected a boolean"
 text :: Format Text
 text =
   Format{encodeFunction = Json.text, decodeFunction = decodeText, schema = Json.Schema.string}
-    |> title "Text"
-    |> description "Arbitrary text"
+    & title "Text"
+    & description "Arbitrary text"
 
 decodeText :: Json -> Result Text Text
 decodeText (Json.Text value) = Success value
@@ -129,8 +129,8 @@ decodeText _ = Failure "Expected text"
 number :: Format Number
 number =
   Format{encodeFunction = Json.number, decodeFunction = decodeNumber, schema = Json.Schema.number}
-    |> title "Number"
-    |> description "A unitless floating-point number"
+    & title "Number"
+    & description "A unitless floating-point number"
 
 decodeNumber :: Json -> Result Text Number
 decodeNumber (Json.Number value) = Success value
@@ -139,8 +139,8 @@ decodeNumber _ = Failure "Expected a number"
 int :: Format Int
 int =
   Format{encodeFunction = Json.int, decodeFunction = decodeInt, schema = Json.Schema.integer}
-    |> title "Int"
-    |> description "An integer"
+    & title "Int"
+    & description "An integer"
 
 decodeInt :: Json -> Result Text Int
 decodeInt (Json.Int value) = Success value
@@ -175,8 +175,8 @@ decodeMap :: (Json -> Result Text a) -> Json -> Result Text (Map Text a)
 decodeMap decodeItem json = case json of
   Json.Map fields ->
     Map.toList fields
-      |> Result.collect (decodeMapField decodeItem)
-      |> Result.map Map.fromKeyValuePairs
+      & Result.collect (decodeMapField decodeItem)
+      & Result.map Map.fromKeyValuePairs
   _ -> Failure "Expected a map"
 
 decodeMapField :: (Json -> Result Text a) -> (Text, Json) -> Result Text (Text, a)
@@ -233,12 +233,12 @@ instance
     let (Field writeField readField fieldSchema) = field
     let (Fields decompose compose properties required) = fields
     Fields
-      { decompose = \parent -> decompose parent |> writeField parent
+      { decompose = \parent -> decompose parent & writeField parent
       , compose = \fieldValues constructor ->
           readField fieldValues
-            |> Result.map constructor
-            |> Result.andThen (compose fieldValues)
-      , properties = properties |> Map.set fieldSchema.name fieldSchema.schema
+            & Result.map constructor
+            & Result.andThen (compose fieldValues)
+      , properties = Map.set fieldSchema.name fieldSchema.schema properties
       , required = [fieldSchema.name | fieldSchema.required] <> required
       }
 

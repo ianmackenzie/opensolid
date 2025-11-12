@@ -27,8 +27,7 @@ path :: Request -> List Text
 path = Network.Wai.pathInfo
 
 headers :: Request -> List (Text, Text)
-headers request =
-  Network.Wai.requestHeaders request |> List.map header
+headers request = List.map header (Network.Wai.requestHeaders request)
 
 header :: Network.HTTP.Types.Header -> (Text, Text)
 header (nameCI, valueBytes) =
@@ -37,15 +36,14 @@ header (nameCI, valueBytes) =
 headerValues :: Text -> Request -> List Text
 headerValues name request = do
   let nameCI = Data.CaseInsensitive.mk (Binary.bytes (Text.toUtf8 name))
-  Network.Wai.requestHeaders request |> List.filterMap (headerValue nameCI)
+  List.filterMap (headerValue nameCI) (Network.Wai.requestHeaders request)
 
 headerValue :: Data.CaseInsensitive.CI ByteString -> Network.HTTP.Types.Header -> Maybe Text
 headerValue givenName (name, valueBytes) =
   if name == givenName then Just (Text.assumeUtf8 valueBytes) else Nothing
 
 parameters :: Request -> List (Text, Maybe Text)
-parameters request =
-  Network.Wai.queryString request |> List.map parameter
+parameters request = List.map parameter (Network.Wai.queryString request)
 
 parameter :: Network.HTTP.Types.QueryItem -> (Text, Maybe Text)
 parameter (nameBytes, maybeValueBytes) =
@@ -54,7 +52,7 @@ parameter (nameBytes, maybeValueBytes) =
 parameterValues :: Text -> Request -> List Text
 parameterValues name request = do
   let nameBytes = Binary.bytes (Text.toUtf8 name)
-  Network.Wai.queryString request |> List.filterMap (parameterValue nameBytes)
+  List.filterMap (parameterValue nameBytes) (Network.Wai.queryString request)
 
 parameterValue :: ByteString -> Network.HTTP.Types.QueryItem -> Maybe Text
 parameterValue givenName (name, valueBytes) =

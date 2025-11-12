@@ -84,7 +84,7 @@ searchImpl callback (Domain bounds children : rest) accumulated =
     Resolved (Just solution) -> searchImpl callback rest ((bounds, solution) : accumulated)
     Unresolved -> case children of
       [] -> Failure InfiniteRecursion
-      _ -> accumulated |> searchImpl callback children |> Result.andThen (searchImpl callback rest)
+      _ -> searchImpl callback children accumulated & Result.andThen (searchImpl callback rest)
 
 map2 ::
   (bounds1 -> bounds2 -> bounds3) ->

@@ -100,4 +100,4 @@ placeOn plane (Frame2d p0 (Orientation2d i j)) =
     PlaneOrientation3d (Direction2d.placeOn plane i) (Direction2d.placeOn plane j)
 
 inverse :: Frame2d (global @ units) (Defines local) -> Frame2d (local @ units) (Defines global)
-inverse frame = xy |> relativeTo frame
+inverse frame = relativeTo frame xy

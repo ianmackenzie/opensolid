@@ -128,19 +128,19 @@ placeIn ::
 placeIn frame transform = do
   let p0 =
         Point2d.origin
-          |> Point2d.relativeTo frame
-          |> Point2d.transformBy transform
-          |> Point2d.placeIn frame
+          & Point2d.relativeTo frame
+          & Point2d.transformBy transform
+          & Point2d.placeIn frame
   let vx =
         unitX
-          |> Vector2d.relativeTo frame
-          |> Vector2d.transformBy transform
-          |> Vector2d.placeIn frame
+          & Vector2d.relativeTo frame
+          & Vector2d.transformBy transform
+          & Vector2d.placeIn frame
   let vy =
         unitY
-          |> Vector2d.relativeTo frame
-          |> Vector2d.transformBy transform
-          |> Vector2d.placeIn frame
+          & Vector2d.relativeTo frame
+          & Vector2d.transformBy transform
+          & Vector2d.placeIn frame
   Transform2d p0 vx vy
 
 relativeTo ::
@@ -150,19 +150,19 @@ relativeTo ::
 relativeTo frame transform = do
   let p0 =
         Point2d.origin
-          |> Point2d.placeIn frame
-          |> Point2d.transformBy transform
-          |> Point2d.relativeTo frame
+          & Point2d.placeIn frame
+          & Point2d.transformBy transform
+          & Point2d.relativeTo frame
   let vx =
         unitX
-          |> Vector2d.placeIn frame
-          |> Vector2d.transformBy transform
-          |> Vector2d.relativeTo frame
+          & Vector2d.placeIn frame
+          & Vector2d.transformBy transform
+          & Vector2d.relativeTo frame
   let vy =
         unitY
-          |> Vector2d.placeIn frame
-          |> Vector2d.transformBy transform
-          |> Vector2d.relativeTo frame
+          & Vector2d.placeIn frame
+          & Vector2d.transformBy transform
+          & Vector2d.relativeTo frame
   Transform2d p0 vx vy
 
 toOrthonormal ::

@@ -8,7 +8,7 @@ import OpenSolid.Prelude
 
 deduplicate :: List (Bounds Unitless, Number) -> List Number
 deduplicate solutions =
-  deduplicateImpl solutions [] |> List.map Pair.second |> List.sort
+  deduplicateImpl solutions [] & List.map Pair.second & List.sort
 
 deduplicateImpl ::
   List (Bounds Unitless, Number) ->

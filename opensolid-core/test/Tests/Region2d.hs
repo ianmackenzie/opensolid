@@ -29,9 +29,9 @@ tests =
   ]
 
 areaIsApproximately :: Area -> Region2d (space @ Meters) -> Bool
-areaIsApproximately expectedArea region =
-  Estimate.within (Area.squareMeters 1e-4) (Region2d.area region)
-    |> Bounds.includes expectedArea
+areaIsApproximately expectedArea region = do
+  let measuredArea = Estimate.within (Area.squareMeters 1e-4) (Region2d.area region)
+  Bounds.includes expectedArea measuredArea
 
 square :: Tolerance Meters => Test
 square = Test.verify "square" Test.do

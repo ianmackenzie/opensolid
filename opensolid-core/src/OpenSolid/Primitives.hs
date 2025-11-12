@@ -28,6 +28,7 @@ import Data.Coerce qualified
 import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds (Bounds##))
+import OpenSolid.CoordinateSystem (LocalSpace)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)

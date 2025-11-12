@@ -289,84 +289,84 @@ offsetForwardBy ::
   Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
-offsetForwardBy distance frame = frame |> translateIn (forwardDirection frame) distance
+offsetForwardBy distance frame = translateIn (forwardDirection frame) distance frame
 
 -- | Move a frame in its own backward direction by the given distance.
 offsetBackwardBy ::
   Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
-offsetBackwardBy distance frame = frame |> translateIn (backwardDirection frame) distance
+offsetBackwardBy distance frame = translateIn (backwardDirection frame) distance frame
 
 -- | Move a frame in its own rightward direction by the given distance.
 offsetRightwardBy ::
   Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
-offsetRightwardBy distance frame = frame |> translateIn (rightwardDirection frame) distance
+offsetRightwardBy distance frame = translateIn (rightwardDirection frame) distance frame
 
 -- | Move a frame in its own leftward direction by the given distance.
 offsetLeftwardBy ::
   Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
-offsetLeftwardBy distance frame = frame |> translateIn (leftwardDirection frame) distance
+offsetLeftwardBy distance frame = translateIn (leftwardDirection frame) distance frame
 
 -- | Move a frame in its own upward direction by the given distance.
 offsetUpwardBy ::
   Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
-offsetUpwardBy distance frame = frame |> translateIn (upwardDirection frame) distance
+offsetUpwardBy distance frame = translateIn (upwardDirection frame) distance frame
 
 -- | Move a frame in its own downward direction by the given distance.
 offsetDownwardBy ::
   Quantity units ->
   Frame3d (space @ units) defines1 ->
   Frame3d (space @ units) defines2
-offsetDownwardBy distance frame = frame |> translateIn (downwardDirection frame) distance
+offsetDownwardBy distance frame = translateIn (downwardDirection frame) distance frame
 
 {-| Rotate a frame counterclockwise around its own upward axis by the given angle.
 
 This rotates the frame's forward direction toward its leftward direction.
 -}
 turnLeftBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-turnLeftBy angle frame = frame |> rotateAround (upwardAxis frame) angle
+turnLeftBy angle frame = rotateAround (upwardAxis frame) angle frame
 
 {-| Rotate a frame clockwise around its own upward axis by the given angle.
 
 This rotates the frame's forward direction toward its rightward direction.
 -}
 turnRightBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-turnRightBy angle frame = frame |> rotateAround (upwardAxis frame) (negative angle)
+turnRightBy angle frame = rotateAround (upwardAxis frame) (negative angle) frame
 
 {-| Rotate a frame counterclockwise around its own forward axis by the given angle.
 
 This rotates the frame's upward direction toward its rightward direction.
 -}
 rollRightBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rollRightBy angle frame = frame |> rotateAround (forwardAxis frame) angle
+rollRightBy angle frame = rotateAround (forwardAxis frame) angle frame
 
 {-| Rotate a frame clockwise around its own forward axis by the given angle.
 
 This rotates the frame's upward direction toward its leftward direction.
 -}
 rollLeftBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-rollLeftBy angle frame = frame |> rotateAround (forwardAxis frame) (negative angle)
+rollLeftBy angle frame = rotateAround (forwardAxis frame) (negative angle) frame
 
 {-| Rotate a frame counterclockwise around its own rightward axis by the given angle.
 
 This rotates the frame's forward direction toward its upward direction.
 -}
 tiltUpBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-tiltUpBy angle frame = frame |> rotateAround (rightwardAxis frame) angle
+tiltUpBy angle frame = rotateAround (rightwardAxis frame) angle frame
 
 {-| Rotate a frame clockwise around its own rightward axis by the given angle.
 
 This rotates the frame's forward direction toward its downward direction.
 -}
 tiltDownBy :: Angle -> Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-tiltDownBy angle frame = frame |> rotateAround (rightwardAxis frame) (negative angle)
+tiltDownBy angle frame = rotateAround (rightwardAxis frame) (negative angle) frame
 
 {-| Turn a frame left by 90 degrees.
 
@@ -443,7 +443,7 @@ in terms of the frame's local coordinate system,
 instead of the other way around.
 -}
 inverse :: Frame3d (global @ units) (Defines local) -> Frame3d (local @ units) (Defines global)
-inverse frame = World3d.frame |> relativeTo frame
+inverse frame = relativeTo frame World3d.frame
 
 -- | Move a frame to a new origin point.
 moveTo ::
@@ -502,7 +502,7 @@ align ::
   Frame3d (local @ units) (Defines space) ->
   Frame3d (global @ units) (Defines space) ->
   Frame3d (global @ units) (Defines local)
-align frame referenceFrame = inverse frame |> placeIn referenceFrame
+align frame referenceFrame = placeIn referenceFrame (inverse frame)
 
 {-| Compute the relative orientation of two parent frames in order to "mate" two child frames.
 

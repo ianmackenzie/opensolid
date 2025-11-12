@@ -801,9 +801,8 @@ overlappingSegments ::
   List UvPoint ->
   List OverlappingSegment
 overlappingSegments curve1 curve2 endpointParameterValues =
-  endpointParameterValues
-    |> List.successive candidateOverlappingSegment
-    |> List.filter (isOverlappingSegment curve1 curve2)
+  List.successive candidateOverlappingSegment endpointParameterValues
+    & List.filter (isOverlappingSegment curve1 curve2)
 
 isOverlappingSegment ::
   Tolerance units =>

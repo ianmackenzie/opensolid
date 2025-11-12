@@ -60,7 +60,7 @@ intersectionCurveFirstDerivativeConsistency =
       curve <- Random.oneOf curves
       tValue <- Parameter.random
       Tests.Curve2d.firstDerivativeIsConsistentWithin 1e-6 curve tValue
-        |> Test.output "tValue" tValue
+        & Test.output "tValue" tValue
 
 intersectionCurveBoundsConsistency :: Tolerance Meters => Test
 intersectionCurveBoundsConsistency =
@@ -118,8 +118,8 @@ firstDerivativeIsConsistent surfaceFunction p0 parameter = do
   let analyticalDerivative = SurfaceFunction.evaluate partialDerivative p0
   Tolerance.using (Length.meters 1e-6) do
     Test.expect (numericalDerivative ~= analyticalDerivative)
-      |> Test.output "numericalDerivative" numericalDerivative
-      |> Test.output "analyticalDerivative" analyticalDerivative
+      & Test.output "numericalDerivative" numericalDerivative
+      & Test.output "analyticalDerivative" analyticalDerivative
 
 samplingPoints :: UvPoint -> SurfaceParameter -> (UvPoint, UvPoint)
 samplingPoints (Point2d u0 v0) parameter =

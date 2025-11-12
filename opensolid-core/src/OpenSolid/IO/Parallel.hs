@@ -12,7 +12,9 @@ where
 
 import Control.Concurrent.Async (Concurrently (Concurrently))
 import Control.Concurrent.Async qualified as Async
+import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Foldable.WithIndex qualified
+import Data.Traversable.WithIndex (TraversableWithIndex)
 import Data.Traversable.WithIndex qualified
 import OpenSolid.Prelude
 

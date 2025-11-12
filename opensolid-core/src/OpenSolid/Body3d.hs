@@ -500,8 +500,8 @@ registerSurfaceWithHalfEdges cornerSet halfEdgeSet surfaceRegistry surfaceWithHa
   let SurfaceRegistry{unprocessed, processed, edges} = surfaceRegistry
   let updatedRegistry =
         SurfaceRegistry
-          { unprocessed = unprocessed |> Map.remove surfaceId
-          , processed = processed |> Map.set surfaceId surfaceWithHalfEdges
+          { unprocessed = Map.remove surfaceId unprocessed
+          , processed = Map.set surfaceId surfaceWithHalfEdges processed
           , edges
           }
   let halfEdges = getAllHalfEdges surfaceWithHalfEdges
@@ -544,7 +544,7 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
                       }
                   else SecondaryEdge{halfEdgeId, startPoint, uvStartPoint = uvCurve.startPoint}
           let updatedRegistry =
-                SurfaceRegistry{unprocessed, processed, edges = edges |> Map.set halfEdgeId edge}
+                SurfaceRegistry{unprocessed, processed, edges = Map.set halfEdgeId edge edges}
           let matingHandedness = if correctlyAligned then parentHandedness else negative parentHandedness
           case (Map.get matingSurfaceId unprocessed, Map.get matingSurfaceId processed) of
             (Nothing, Nothing) -> throw (InternalError "No surface found for half-edge")
@@ -773,8 +773,8 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
           let alignedMatingVertices =
                 if correctlyAligned then List.reverse matingVertices else matingVertices
           accumulated
-            |> Map.set halfEdgeId vertices
-            |> Map.set matingId alignedMatingVertices
+            & Map.set halfEdgeId vertices
+            & Map.set matingId alignedMatingVertices
         _ ->
           throw (InternalError "Should always be able to look up surface segments for a given edge")
     SecondaryEdge{} -> accumulated

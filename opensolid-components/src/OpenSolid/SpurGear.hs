@@ -94,8 +94,7 @@ profile gear = do
   let tip = Curve2d.line leftApproximation.endPoint rightApproximation.endPoint
   let angularSpacing = Angle.twoPi ./. Number.fromInt n
   let nextToothStart =
-        rightApproximation.startPoint
-          |> Point2d.rotateAround Point2d.origin angularSpacing
+        Point2d.rotateAround Point2d.origin angularSpacing rightApproximation.startPoint
   let connector
         | rd > rb = Curve2d.line leftStart nextToothStart
         | otherwise = Curve2d.arc leftStart nextToothStart (negative Angle.pi)

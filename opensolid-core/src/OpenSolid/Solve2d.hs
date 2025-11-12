@@ -215,9 +215,9 @@ solveUnique localBounds fBounds f fu fv globalBounds =
               let (v1, v2) = Bounds.bisect vBounds
               let solveRecursively uv = solveUnique uv fBounds f fu fv globalBounds
               solveRecursively (Bounds2d u1 v1)
-                |> Maybe.orElse (solveRecursively (Bounds2d u1 v2))
-                |> Maybe.orElse (solveRecursively (Bounds2d u2 v1))
-                |> Maybe.orElse (solveRecursively (Bounds2d u2 v2))
+                & Maybe.orElse (solveRecursively (Bounds2d u1 v2))
+                & Maybe.orElse (solveRecursively (Bounds2d u2 v1))
+                & Maybe.orElse (solveRecursively (Bounds2d u2 v2))
     else Nothing
 
 data Divergence = Divergence deriving (Eq, Show, Error.Message)

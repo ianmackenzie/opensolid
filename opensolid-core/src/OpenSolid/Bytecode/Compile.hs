@@ -110,14 +110,11 @@ addConstant components = Step \initialState ->
       let updatedCompilation =
             initialState
               { constantsBuilder =
-                  initialState.constantsBuilder
-                    <> Binary.combine Encode.number components
+                  initialState.constantsBuilder <> Binary.combine Encode.number components
               , constants =
-                  initialState.constants
-                    |> Map.set components constantIndex
+                  Map.set components constantIndex initialState.constants
               , constantComponents =
-                  initialState.constantComponents
-                    .+. NonEmpty.length components
+                  initialState.constantComponents .+. NonEmpty.length components
               }
       (# updatedCompilation, constantIndex #)
 
@@ -142,14 +139,11 @@ addVariable instruction (OutputComponents outputComponents) = Step \initialState
       let updatedState =
             initialState
               { variablesBuilder =
-                  initialState.variablesBuilder
-                    <> Instruction.encode instruction resultIndex
+                  initialState.variablesBuilder <> Instruction.encode instruction resultIndex
               , variables =
-                  initialState.variables
-                    |> Map.set instruction resultIndex
+                  Map.set instruction resultIndex initialState.variables
               , variableComponents =
-                  initialState.variableComponents
-                    .+. outputComponents
+                  initialState.variableComponents .+. outputComponents
               }
       (# updatedState, resultIndex #)
 
@@ -212,9 +206,9 @@ debug (InputComponents inputComponents) step = do
   let initialState = init (InputComponents inputComponents)
   let (# finalState, _ #) = apply step initialState
   Map.toList finalState.variables
-    |> List.sortBy Pair.second
-    |> List.map showInstruction
-    |> Text.multiline
+    & List.sortBy Pair.second
+    & List.map showInstruction
+    & Text.multiline
 
 showInstruction :: (Instruction, VariableIndex) -> Text
 showInstruction (instruction, variableIndex) =

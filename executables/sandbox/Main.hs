@@ -45,6 +45,7 @@ import OpenSolid.Prelude
   ( cross
   , dot
   , (#/)
+  , (&)
   , (*.)
   , (-.)
   , (.%.)
@@ -53,7 +54,6 @@ import OpenSolid.Prelude
   , (.-)
   , (.-.)
   , (./.)
-  , (|>)
   , type (@)
   )
 import OpenSolid.Quantity (Quantity)
@@ -131,7 +131,7 @@ testEquality = Tolerance.using Length.centimeter do
 
 testTransformation :: IO ()
 testTransformation = do
-  let rotatedAxis = Axis2d.x |> Axis2d.rotateAround (Point2d.meters 1 0) Angle.quarterTurn
+  let rotatedAxis = Axis2d.rotateAround (Point2d.meters 1 0) Angle.quarterTurn Axis2d.x
   log "Rotated axis" rotatedAxis
   let originalPoints = [Point2d.meters 1 0, Point2d.meters 2 0, Point2d.meters 3 0]
   let rotationFunction = Point2d.rotateAround Point2d.origin Angle.quarterTurn
@@ -167,10 +167,10 @@ getCrossProduct :: Tolerance Meters => Result Text Number
 getCrossProduct = Result.addContext "In getCrossProduct" do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2 3)
-      |> Result.addContext "When getting vector direction"
+      & Result.addContext "When getting vector direction"
   lineDirection <-
     Direction2d.from Point2d.origin Point2d.origin
-      |> Result.addContext "When getting line direction"
+      & Result.addContext "When getting line direction"
   Success (vectorDirection `cross` lineDirection)
 
 testTry :: Tolerance Meters => IO ()

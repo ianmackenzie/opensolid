@@ -1146,9 +1146,9 @@ transformPoint2d transform ast = do
     Variable2d (BezierCurve2d controlPoints param) -> do
       let transformedControlPoints =
             controlPoints
-              |> Data.Coerce.coerce -- convert list of Vector2d to list of Point2d
-              |> NonEmpty.map (Point2d.transformBy erasedTransform)
-              |> Data.Coerce.coerce -- convert list of Point2d back to list of Vector2d
+              & Data.Coerce.coerce -- convert list of Vector2d to list of Point2d
+              & NonEmpty.map (Point2d.transformBy erasedTransform)
+              & Data.Coerce.coerce -- convert list of Point2d back to list of Vector2d
       Variable2d (BezierCurve2d transformedControlPoints param)
     Variable2d var -> Variable2d (TransformPoint2d erasedTransform var)
 
@@ -1164,9 +1164,9 @@ transformPoint3d transform ast = do
     Variable3d (BezierCurve3d controlPoints param) -> do
       let transformedControlPoints =
             controlPoints
-              |> Data.Coerce.coerce -- convert list of Vector3d to list of Point3d
-              |> NonEmpty.map (Point3d.transformBy erasedTransform)
-              |> Data.Coerce.coerce -- convert list of Point3d back to list of Vector3d
+              & Data.Coerce.coerce -- convert list of Vector3d to list of Point3d
+              & NonEmpty.map (Point3d.transformBy erasedTransform)
+              & Data.Coerce.coerce -- convert list of Point3d back to list of Vector3d
       Variable3d (BezierCurve3d transformedControlPoints param)
     Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
 

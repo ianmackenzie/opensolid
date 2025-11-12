@@ -239,23 +239,21 @@ registerTuple tupleType type1 type2 rest registry = do
   let itemTypes = type1 : type2 : rest
   let declaration = structDeclaration tupleTypeName (List.map typeName itemTypes)
   List.foldr registerType registry itemTypes
-    |> Python.Type.Registry.add tupleTypeName declaration
+    & Python.Type.Registry.add tupleTypeName declaration
 
 registerMaybe :: FFI.Type -> FFI.Type -> Registry -> Registry
 registerMaybe maybeType valueType registry = do
   let maybeTypeName = typeName maybeType
   let declaration = structDeclaration maybeTypeName ["c_int64", typeName valueType]
-  registry
-    |> registerType valueType
-    |> Python.Type.Registry.add maybeTypeName declaration
+  registerType valueType registry
+    & Python.Type.Registry.add maybeTypeName declaration
 
 registerResult :: FFI.Type -> FFI.Type -> Registry -> Registry
 registerResult resultType valueType registry = do
   let resultTypeName = typeName resultType
   let declaration = structDeclaration resultTypeName ["c_int64", "_Text", typeName valueType]
-  registry
-    |> registerType valueType
-    |> Python.Type.Registry.add resultTypeName declaration
+  registerType valueType registry
+    & Python.Type.Registry.add resultTypeName declaration
 
 invoke :: Text -> Text -> Text -> Text
 invoke ffiFunctionName inputPtr outputPtr =

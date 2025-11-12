@@ -272,10 +272,10 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
         let bounds21 = Bounds2d u2 v1
         let bounds22 = Bounds2d u2 v2
         accumulated
-          |> generateSteinerPoints accuracy bounds11 edgeSet fuu fuv fvv
-          |> generateSteinerPoints accuracy bounds12 edgeSet fuu fuv fvv
-          |> generateSteinerPoints accuracy bounds21 edgeSet fuu fuv fvv
-          |> generateSteinerPoints accuracy bounds22 edgeSet fuu fuv fvv
+          & generateSteinerPoints accuracy bounds11 edgeSet fuu fuv fvv
+          & generateSteinerPoints accuracy bounds12 edgeSet fuu fuv fvv
+          & generateSteinerPoints accuracy bounds21 edgeSet fuu fuv fvv
+          & generateSteinerPoints accuracy bounds22 edgeSet fuu fuv fvv
   case includeSubdomain uvBounds edgeSet of
     Unresolved -> recurse
     Resolved False -> accumulated

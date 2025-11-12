@@ -21,11 +21,11 @@ pickMinimum = Test.check 100 "pickMinimum" Test.do
   let minValueIsMin = List.allSatisfy (>= minValue) remainingValues
   let orderIsUnchanged = remainingValues == Data.List.delete minValue (NonEmpty.toList values)
   Test.expect (minValueIsMin && orderIsUnchanged)
-    |> Test.output "minValueIsMin" minValueIsMin
-    |> Test.output "orderIsUnchanged" orderIsUnchanged
-    |> Test.output "values" values
-    |> Test.output "minValue" minValue
-    |> Test.output "remainingValues" remainingValues
+    & Test.output "minValueIsMin" minValueIsMin
+    & Test.output "orderIsUnchanged" orderIsUnchanged
+    & Test.output "values" values
+    & Test.output "minValue" minValue
+    & Test.output "remainingValues" remainingValues
 
 reverseMap :: Test
 reverseMap = Test.check 100 "reverseMap" Test.do

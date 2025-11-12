@@ -369,8 +369,8 @@ allExportsDefinition = do
 registerFunctionTypes :: Function -> Registry -> Registry
 registerFunctionTypes function registry =
   registry
-    |> registerArgumentTypes (Function.implicitArgument function) (Function.argumentTypes function)
-    |> Python.FFI.registerType (Function.returnType function)
+    & registerArgumentTypes (Function.implicitArgument function) (Function.argumentTypes function)
+    & Python.FFI.registerType (Function.returnType function)
 
 registerArgumentTypes :: Maybe ImplicitArgument -> List FFI.Type -> Registry -> Registry
 registerArgumentTypes maybeImplicitArgument argumentTypes registry = do

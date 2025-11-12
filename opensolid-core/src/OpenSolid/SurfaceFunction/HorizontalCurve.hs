@@ -117,7 +117,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
             let p1 = Point2d u1 v1
             let p2 = Point2d u2 v2
             Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
-              |> Bounds2d.placeIn frame
+              & Bounds2d.placeIn frame
           NotMonotonic -> do
             let vBounds = ImplicitCurveBounds.evaluateBounds bounds (Bounds u1 u2)
             let slopeBounds = SurfaceFunction.evaluateBounds dvdu (Bounds2d (Bounds u1 u2) vBounds)

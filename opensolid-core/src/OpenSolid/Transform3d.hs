@@ -153,24 +153,24 @@ placeIn ::
 placeIn frame transform = do
   let p0 =
         World3d.originPoint
-          |> Point3d.relativeTo frame
-          |> Point3d.transformBy transform
-          |> Point3d.placeIn frame
+          & Point3d.relativeTo frame
+          & Point3d.transformBy transform
+          & Point3d.placeIn frame
   let vx =
         unitX
-          |> Vector3d.relativeTo frame
-          |> Vector3d.transformBy transform
-          |> Vector3d.placeIn frame
+          & Vector3d.relativeTo frame
+          & Vector3d.transformBy transform
+          & Vector3d.placeIn frame
   let vy =
         unitY
-          |> Vector3d.relativeTo frame
-          |> Vector3d.transformBy transform
-          |> Vector3d.placeIn frame
+          & Vector3d.relativeTo frame
+          & Vector3d.transformBy transform
+          & Vector3d.placeIn frame
   let vz =
         unitZ
-          |> Vector3d.relativeTo frame
-          |> Vector3d.transformBy transform
-          |> Vector3d.placeIn frame
+          & Vector3d.relativeTo frame
+          & Vector3d.transformBy transform
+          & Vector3d.placeIn frame
   Transform3d p0 vx vy vz
 
 relativeTo ::
@@ -180,24 +180,24 @@ relativeTo ::
 relativeTo frame transform = do
   let p0 =
         World3d.originPoint
-          |> Point3d.placeIn frame
-          |> Point3d.transformBy transform
-          |> Point3d.relativeTo frame
+          & Point3d.placeIn frame
+          & Point3d.transformBy transform
+          & Point3d.relativeTo frame
   let vx =
         unitX
-          |> Vector3d.placeIn frame
-          |> Vector3d.transformBy transform
-          |> Vector3d.relativeTo frame
+          & Vector3d.placeIn frame
+          & Vector3d.transformBy transform
+          & Vector3d.relativeTo frame
   let vy =
         unitY
-          |> Vector3d.placeIn frame
-          |> Vector3d.transformBy transform
-          |> Vector3d.relativeTo frame
+          & Vector3d.placeIn frame
+          & Vector3d.transformBy transform
+          & Vector3d.relativeTo frame
   let vz =
         unitZ
-          |> Vector3d.placeIn frame
-          |> Vector3d.transformBy transform
-          |> Vector3d.relativeTo frame
+          & Vector3d.placeIn frame
+          & Vector3d.transformBy transform
+          & Vector3d.relativeTo frame
   Transform3d p0 vx vy vz
 
 toOrthonormal ::

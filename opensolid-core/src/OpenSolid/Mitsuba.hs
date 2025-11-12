@@ -182,9 +182,9 @@ buildSingleMesh (mesh, Named name) = do
   let headerSize = 4 -- 2x uint16
   let compressedData =
         meshDataBuilder mesh name
-          |> Builder.toLazyByteString
-          |> Zlib.compress
-          |> Data.ByteString.Lazy.toStrict
+          & Builder.toLazyByteString
+          & Zlib.compress
+          & Data.ByteString.Lazy.toStrict
   let overallBuilder = header <> Builder.byteString compressedData
   let overallSize = headerSize + Data.ByteString.length compressedData
   (overallBuilder, overallSize)

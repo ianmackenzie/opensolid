@@ -23,8 +23,8 @@ crossingZeros = Test.verify "crossingZeros" Test.do
   let expectedZeros = [Zero 0 0 Positive, Zero (1 / 3) 0 Negative, Zero (2 / 3) 0 Positive]
   zeros <- Curve.zeros y
   Test.expect (zeros ~= expectedZeros)
-    |> Test.output "zeros" zeros
-    |> Test.output "expectedZeros" expectedZeros
+    & Test.output "zeros" zeros
+    & Test.output "expectedZeros" expectedZeros
 
 tangentZeros :: Tolerance Unitless => Test
 tangentZeros = Test.verify "tangentZeros" Test.do
@@ -33,8 +33,8 @@ tangentZeros = Test.verify "tangentZeros" Test.do
   let expectedZeros = [Zero t 1 Positive | t <- [0, 0.5, 1]]
   zeros <- Curve.zeros expression
   Test.expect (zeros ~= expectedZeros)
-    |> Test.output "zeros" zeros
-    |> Test.output "expectedZeros" expectedZeros
+    & Test.output "zeros" zeros
+    & Test.output "expectedZeros" expectedZeros
 
 approximateEquality :: Tolerance Unitless => Test
 approximateEquality = Test.verify "approximateEquality" Test.do

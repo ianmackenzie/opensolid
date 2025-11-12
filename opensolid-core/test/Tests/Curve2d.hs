@@ -79,13 +79,13 @@ findPoint = Test.verify "findPoint" Test.do
   Tolerance.using 1e-12 do
     Test.all
       [ Test.expect (startParameterValues ~= [0])
-          |> Test.output "startParameterValues" startParameterValues
+          & Test.output "startParameterValues" startParameterValues
       , Test.expect (endParameterValues ~= [1])
-          |> Test.output "endParameterValues" endParameterValues
+          & Test.output "endParameterValues" endParameterValues
       , Test.expect (midParameterValues ~= [0.5])
-          |> Test.output "midParameterValues" midParameterValues
+          & Test.output "midParameterValues" midParameterValues
       , Test.expect (offCurveParameterValues == [])
-          |> Test.output "offCurveParameterValues" offCurveParameterValues
+          & Test.output "offCurveParameterValues" offCurveParameterValues
       ]
 
 findOwnPoint :: Tolerance Meters => Test
@@ -99,8 +99,8 @@ findOwnPoint = Test.check 500 "findOwnPoint" Test.do
   solutions <- Curve2d.findPoint p testSpline
   Tolerance.using 1e-12 do
     Test.expect (solutions ~= [t])
-      |> Test.output "t" t
-      |> Test.output "solutions" solutions
+      & Test.output "t" t
+      & Test.output "solutions" solutions
 
 overlappingSegments ::
   Tolerance units =>
@@ -197,8 +197,8 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
     Just (Curve2d.IntersectionPoints actualIntersectionPoints) ->
       Tolerance.using 1e-12 do
         Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints)
-          |> Test.output "expectedIntersectionPoints" expectedIntersectionPoints
-          |> Test.output "actualIntersectionPoints" actualIntersectionPoints
+          & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
+          & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just (Curve2d.OverlappingSegments _) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
@@ -208,12 +208,8 @@ solving = Test.verify "solving" Test.do
   let distanceFromOrigin = VectorCurve2d.magnitude (arc .-. Point2d.origin)
   let desiredDistance = Length.meters 0.5
   zeros <- Curve.zeros (distanceFromOrigin .-. desiredDistance)
-  let distances =
-        zeros
-          |> List.map (.location)
-          |> List.map (Curve2d.evaluate arc)
-          |> List.map (Point2d.distanceFrom Point2d.origin)
-  Test.expect (distances ~= [desiredDistance, desiredDistance])
+  let distanceAt zero = Point2d.distanceFrom Point2d.origin (Curve2d.evaluate arc zero.location)
+  Test.expect (List.map distanceAt zeros ~= [desiredDistance, desiredDistance])
 
 degenerateStartPointTangent :: Tolerance Meters => Test
 degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.do
@@ -257,10 +253,10 @@ tangentDerivativeIsPerpendicularToTangent =
     let tangent = DirectionCurve2d.evaluate tangentDirection tValue
     let derivative = VectorCurve2d.evaluate tangentDerivative tValue
     Test.expect (Tolerance.using 1e-12 (derivative `dot` tangent ~= 0))
-      |> Test.output "tValue" tValue
-      |> Test.output "tangent" tangent
-      |> Test.output "derivative" derivative
-      |> Test.output "dot product" (derivative `dot` tangent)
+      & Test.output "tValue" tValue
+      & Test.output "tangent" tangent
+      & Test.output "derivative" derivative
+      & Test.output "dot product" (derivative `dot` tangent)
 
 degenerateStartPointTangentDerivative :: Tolerance Meters => Test
 degenerateStartPointTangentDerivative =
@@ -276,12 +272,11 @@ degenerateStartPointTangentDerivative =
     let otherTangentDerivatives =
           List.map (VectorCurve2d.evaluate tangentDerivative) decreasingTValues
     let differences =
-          otherTangentDerivatives
-            |> List.map (.-. startTangentDerivative)
-            |> List.map Vector2d.magnitude
+          List.map Vector2d.magnitude $
+            List.map (.-. startTangentDerivative) otherTangentDerivatives
     Test.expect (List.isDescending differences)
-      |> Test.output "differences" differences
-      |> Test.output "startTangentDerivative" startTangentDerivative
+      & Test.output "differences" differences
+      & Test.output "startTangentDerivative" startTangentDerivative
 
 degenerateEndPointTangentDerivative :: Tolerance Meters => Test
 degenerateEndPointTangentDerivative =
@@ -297,12 +292,11 @@ degenerateEndPointTangentDerivative =
     let otherTangentDerivatives =
           List.map (VectorCurve2d.evaluate tangentDerivative) increasingTValues
     let differences =
-          otherTangentDerivatives
-            |> List.map (.-. endTangentDerivative)
-            |> List.map Vector2d.magnitude
+          List.map Vector2d.magnitude $
+            List.map (.-. endTangentDerivative) otherTangentDerivatives
     Test.expect (List.isDescending differences)
-      |> Test.output "differences" differences
-      |> Test.output "endTangentDerivative" endTangentDerivative
+      & Test.output "differences" differences
+      & Test.output "endTangentDerivative" endTangentDerivative
 
 firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Number -> Expectation
 firstDerivativeIsConsistent = firstDerivativeIsConsistentWithin (Length.meters 1e-6)
@@ -321,8 +315,8 @@ firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
-      |> Test.output "numericalFirstDerivative" numericalFirstDerivative
-      |> Test.output "analyticFirstDerivative" analyticFirstDerivative
+      & Test.output "numericalFirstDerivative" numericalFirstDerivative
+      & Test.output "analyticFirstDerivative" analyticFirstDerivative
 
 firstDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
 firstDerivativeConsistency curveGenerator = Test.check 100 "firstDerivativeConsistency" Test.do
@@ -340,8 +334,8 @@ secondDerivativeIsConsistent curve tValue = do
   let analyticSecondDerivative = VectorCurve2d.evaluate secondDerivative tValue
   Tolerance.using (Length.meters 1e-6) do
     Test.expect (numericalSecondDerivative ~= analyticSecondDerivative)
-      |> Test.output "numericalSecondDerivative" numericalSecondDerivative
-      |> Test.output "analyticSecondDerivative" analyticSecondDerivative
+      & Test.output "numericalSecondDerivative" numericalSecondDerivative
+      & Test.output "analyticSecondDerivative" analyticSecondDerivative
 
 secondDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
 secondDerivativeConsistency curveGenerator = Test.check 100 "secondDerivativeConsistency" Test.do
@@ -380,10 +374,10 @@ boundsConsistency curve = Test.do
   let curveValue = Curve2d.evaluate curve tValue
   let curveBounds = Curve2d.evaluateBounds curve tBounds
   Test.expect (curveValue `intersects` curveBounds)
-    |> Test.output "tValue" tValue
-    |> Test.output "tBounds" tBounds
-    |> Test.output "curveValue" curveValue
-    |> Test.output "curveBounds" curveBounds
+    & Test.output "tValue" tValue
+    & Test.output "tBounds" tBounds
+    & Test.output "curveValue" curveValue
+    & Test.output "curveBounds" curveBounds
 
 arcConstruction :: Tolerance Meters => Test
 arcConstruction = do
@@ -414,8 +408,8 @@ arcDeformation = Test.check 100 "deformation" Test.do
   let transformOfPoint = Point2d.transformBy transform (Curve2d.evaluate initialArc t)
   Test.all
     [ Test.expect (transformedArc.startPoint ~= transformOfStart)
-        |> Test.output "transformedArc.startPoint" transformedArc.startPoint
-        |> Test.output "transformOfStart" transformOfStart
+        & Test.output "transformedArc.startPoint" transformedArc.startPoint
+        & Test.output "transformOfStart" transformOfStart
     , Test.expect (transformedArc.endPoint ~= transformOfEnd)
     , Test.expect (pointOnTransformed ~= transformOfPoint)
     ]

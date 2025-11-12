@@ -136,7 +136,7 @@ relativeTo frame (Plane3d p o) =
 
 -- | Offset a plane in its normal direction by the given distance.
 offsetBy :: Quantity units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
-offsetBy distance plane = plane |> translateIn (normalDirection plane) distance
+offsetBy distance plane = translateIn (normalDirection plane) distance plane
 
 {-| Flip a plane such that its normal and X directions are reversed.
 

@@ -56,7 +56,7 @@ collectEdgeIndices loops startIndex accumulated = case loops of
   first : rest -> do
     let firstLength = NonEmpty.length first
     collectLoopEdgeIndices startIndex firstLength accumulated
-      |> collectEdgeIndices rest (startIndex + firstLength)
+      & collectEdgeIndices rest (startIndex + firstLength)
 
 collectLoopEdgeIndices :: Int -> Int -> List Int -> List Int
 collectLoopEdgeIndices startIndex loopLength accumulated = do

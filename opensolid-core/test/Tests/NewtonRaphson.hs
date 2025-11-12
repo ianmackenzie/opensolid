@@ -76,8 +76,8 @@ curve1d name curve t0 tExpected =
           Failure NewtonRaphson.Divergence -> expectedConvergence
           Success tSolution ->
             Test.expect (tSolution ~= tExpected)
-              |> Test.output "Expected solution" tExpected
-              |> Test.output "Actual solution" tSolution
+              & Test.output "Expected solution" tExpected
+              & Test.output "Actual solution" tSolution
     , Test.verify "Unboxed" do
         let evaluate## t## = let !(Quantity## x##) = Curve.evaluate curve (Quantity## t##) in x##
         let evaluateDerivative## t## =
@@ -86,8 +86,8 @@ curve1d name curve t0 tExpected =
           Failure NewtonRaphson.Divergence -> expectedConvergence
           Success tSolution ->
             Test.expect (tSolution ~= tExpected)
-              |> Test.output "Expected solution" tExpected
-              |> Test.output "Actual solution" tSolution
+              & Test.output "Expected solution" tExpected
+              & Test.output "Actual solution" tSolution
     ]
 
 curveDivergence1d :: Tolerance Unitless => Text -> Curve Unitless -> Number -> Test
@@ -96,14 +96,14 @@ curveDivergence1d name curve t0 =
     [ Test.verify "Boxed" $
         case NewtonRaphson.curve1d (Curve.evaluate curve) (Curve.evaluate curve.derivative) t0 of
           Failure NewtonRaphson.Divergence -> Test.pass
-          Success tSolution -> expectedDivergence |> Test.output "Solution" tSolution
+          Success tSolution -> expectedDivergence & Test.output "Solution" tSolution
     , Test.verify "Unboxed" do
         let evaluate## t## = let !(Quantity## x##) = Curve.evaluate curve (Quantity## t##) in x##
         let evaluateDerivative## t## =
               let !(Quantity## y'##) = Curve.evaluate curve.derivative (Quantity## t##) in y'##
         case NewtonRaphson.curve1d## evaluate## evaluateDerivative## t0 of
           Failure NewtonRaphson.Divergence -> Test.pass
-          Success tSolution -> expectedDivergence |> Test.output "Solution" tSolution
+          Success tSolution -> expectedDivergence & Test.output "Solution" tSolution
     ]
 
 curve2d :: Tolerance Unitless => Text -> VectorCurve2d (Space @ Unitless) -> Number -> Number -> Test
@@ -117,8 +117,8 @@ curve2d name curve t0 tExpected =
           Failure NewtonRaphson.Divergence -> expectedConvergence
           Success tSolution ->
             Test.expect (tSolution ~= tExpected)
-              |> Test.output "Expected solution" tExpected
-              |> Test.output "Actual solution" tSolution
+              & Test.output "Expected solution" tExpected
+              & Test.output "Actual solution" tSolution
     , Test.verify "Unboxed" do
         let evaluate## t## = do
               let vector = VectorCurve2d.evaluate curve (Quantity## t##)
@@ -132,8 +132,8 @@ curve2d name curve t0 tExpected =
           Failure NewtonRaphson.Divergence -> expectedConvergence
           Success tSolution ->
             Test.expect (tSolution ~= tExpected)
-              |> Test.output "Expected solution" tExpected
-              |> Test.output "Actual solution" tSolution
+              & Test.output "Expected solution" tExpected
+              & Test.output "Actual solution" tSolution
     ]
 
 surface2d ::
@@ -153,5 +153,5 @@ surface2d name surface uv0 uvExpected =
       Failure NewtonRaphson.Divergence -> expectedConvergence
       Success uvSolution ->
         Test.expect (uvSolution ~= uvExpected)
-          |> Test.output "Expected solution" uvExpected
-          |> Test.output "Actual solution" uvSolution
+          & Test.output "Expected solution" uvExpected
+          & Test.output "Actual solution" uvSolution

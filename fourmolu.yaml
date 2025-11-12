@@ -10,7 +10,7 @@ respectful: false
 fixities:
   # Built-in operators
   - "infixr 0 $"
-  - "infixl 1 >>="
+  - "infixl 1 >>=, &"
   - "infixr 2 ||"
   - "infixr 3 &&"
   - "infix 4 ==, /=, <, >, <=, >="
@@ -21,7 +21,6 @@ fixities:
   - "infixr 9 ."
   # Custom operators
   - "infix 0 :::"
-  - "infixl 0 |>"
   - "infixl 1 @"
   - "infix 4 ~=, !=, `intersects`"
   - "infixl 6 .+., .+, +., .-., .-, -."

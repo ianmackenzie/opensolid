@@ -55,7 +55,7 @@ hermite startPoint startDerivatives endPoint endDerivatives = do
         derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
   let endControlPoints =
         derivedControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives
-          |> List.reverse
+          & List.reverse
   startPoint :| List.concat [startControlPoints, endControlPoints, [endPoint]]
 
 scaleDerivatives :: Vector vector => Sign -> Number -> Number -> List vector -> List vector
@@ -74,8 +74,8 @@ derivedControlPoints previousPoint i n qs
 offset :: Vector vector => Int -> List vector -> vector
 offset i scaledDerivatives =
   List.take i scaledDerivatives
-    |> List.mapWithIndex (\j q -> q .*. Number.fromInt (Int.choose (i - 1) j))
-    |> List.foldl (.+.) zero
+    & List.mapWithIndex (\j q -> q .*. Number.fromInt (Int.choose (i - 1) j))
+    & List.foldl (.+.) zero
 
 segment :: Constraints point vector => Number -> Number -> NonEmpty point -> NonEmpty point
 segment t1 t2 controlPoints = do
@@ -108,7 +108,7 @@ syntheticStart point0 firstDerivative0 pointT0 firstDerivativeT0 secondDerivativ
   let t0 = Desingularization.t0
   let segmentDerivatives0 = [t0 .*. firstDerivative0]
   let segmentDerivativesT0 = [t0 .*. firstDerivativeT0, t0 .*. t0 .*. secondDerivativeT0]
-  hermite point0 segmentDerivatives0 pointT0 segmentDerivativesT0 |> segment 0 (1 /. t0)
+  hermite point0 segmentDerivatives0 pointT0 segmentDerivativesT0 & segment 0 (1 /. t0)
 
 syntheticEnd ::
   Constraints point vector =>
@@ -123,4 +123,4 @@ syntheticEnd pointT1 firstDerivativeT1 secondDerivativeT1 point1 firstDerivative
   let t1 = Desingularization.t1
   let segmentDerivativesT1 = [t0 .*. firstDerivativeT1, t0 .*. t0 .*. secondDerivativeT1]
   let segmentDerivatives1 = [t0 .*. firstDerivative1]
-  hermite pointT1 segmentDerivativesT1 point1 segmentDerivatives1 |> segment -(t1 ./. t0) 1
+  hermite pointT1 segmentDerivativesT1 point1 segmentDerivatives1 & segment -(t1 ./. t0) 1

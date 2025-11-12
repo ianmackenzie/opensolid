@@ -85,10 +85,10 @@ transformBy transform axis = do
   Axis2d transformedOriginPoint transformedDirection
 
 offsetLeftwardBy :: Quantity units -> Axis2d (space @ units) -> Axis2d (space @ units)
-offsetLeftwardBy distance axis = axis |> translateIn (leftwardDirection axis) distance
+offsetLeftwardBy distance axis = translateIn (leftwardDirection axis) distance axis
 
 offsetRightwardBy :: Quantity units -> Axis2d (space @ units) -> Axis2d (space @ units)
-offsetRightwardBy distance axis = axis |> translateIn (rightwardDirection axis) distance
+offsetRightwardBy distance axis = translateIn (rightwardDirection axis) distance axis
 
 translateBy ::
   Vector2d (space @ units) ->

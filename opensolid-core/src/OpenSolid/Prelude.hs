@@ -1,5 +1,8 @@
+{-| Re-exported functions and types from the base Prelude,
+a few other common Haskell modules, and several OpenSolid modules.
+-}
 module OpenSolid.Prelude
-  ( Int
+  ( Int -- base Prelude
   , Double
   , Bool (True, False)
   , Maybe (Just, Nothing)
@@ -7,9 +10,7 @@ module OpenSolid.Prelude
   , Ordering (EQ, GT, LT)
   , Char
   , IO
-  , Type
   , type (~)
-  , Exception
   , Eq ((==), (/=))
   , Ord ((<), (<=), (>=), (>), compare)
   , Show
@@ -21,8 +22,6 @@ module OpenSolid.Prelude
   , Semigroup ((<>))
   , Foldable
   , Traversable
-  , FoldableWithIndex
-  , TraversableWithIndex
   , (&&)
   , (||)
   , (+)
@@ -39,10 +38,15 @@ module OpenSolid.Prelude
   , (.)
   , fromIntegral
   , fromRational
+  , (&) -- Data.Function
+  , Type -- Data.Kind
+  , Exception -- Control.Exception
   , assert
   , throw
-  , Text
-  , List
+  , HasCallStack -- GHC.Stack
+  , Text -- Data.Text
+  , NonEmpty ((:|)) -- Data.List.NonEmpty
+  , List -- OpenSolid
   , Negation (negative)
   , Addition ((.+.))
   , (+.)
@@ -69,13 +73,11 @@ module OpenSolid.Prelude
   , Composition (compose)
   , CoordinateSystem
   , Defines
-  , LocalSpace
   , UvCoordinates
   , UvSpace
   , type (@)
   , Number
   , Intersects (intersects)
-  , NonEmpty ((:|))
   , Quantity (Quantity)
   , (.//.)
   , (.%.)
@@ -92,17 +94,17 @@ module OpenSolid.Prelude
   , Unitless
   , type (#*#)
   , type (#/#)
-  , (|>)
   , pattern TODO
   )
 where
 
-import Control.Exception (Exception, assert, throw)
-import Data.Foldable.WithIndex (FoldableWithIndex)
+import Control.Applicative
+import Control.Exception
+import Data.Function
 import Data.Kind (Type)
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text (Text)
-import Data.Traversable.WithIndex (TraversableWithIndex)
-import GHC.Stack (HasCallStack, withFrozenCallStack)
+import GHC.Stack (HasCallStack)
 import OpenSolid.Arithmetic
   ( Addition ((.+.))
   , CrossMultiplication (cross)
@@ -129,38 +131,16 @@ import OpenSolid.Arithmetic
   , (/.)
   )
 import OpenSolid.Composition (Composition (compose))
-import OpenSolid.CoordinateSystem
-  ( CoordinateSystem
-  , Defines
-  , LocalSpace
-  , UvCoordinates
-  , UvSpace
-  , type (@)
-  )
+import OpenSolid.CoordinateSystem (CoordinateSystem, Defines, UvCoordinates, UvSpace, type (@))
 import OpenSolid.Intersects (Intersects (intersects))
 import OpenSolid.List (List)
 import OpenSolid.Named ((:::) (Named))
-import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
+import OpenSolid.NonEmpty (pattern NonEmpty)
 import OpenSolid.Number (Number)
 import OpenSolid.Quantity (Quantity (Quantity), (.%.), (.//.))
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Sign (Sign (Negative, Positive))
+import OpenSolid.Todo (pattern TODO)
 import OpenSolid.Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
 import OpenSolid.Units (Meters, Radians, Seconds, Unitless, type (#*#), type (#/#))
 import Prelude
-
-{-# INLINE (|>) #-}
-(|>) :: a -> (a -> b) -> b
-value |> function = function value
-
-infixl 0 |>
-
-pattern TODO :: HasCallStack => a
-pattern TODO <- (withFrozenCallStack todo -> ())
-  where
-    TODO = withFrozenCallStack todo
-
-todo :: a
-todo = error "Not implemented"
-
-{-# COMPLETE TODO #-}
