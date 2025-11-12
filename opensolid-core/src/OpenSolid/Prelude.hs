@@ -100,6 +100,7 @@ where
 
 import Control.Applicative
 import Control.Exception
+import Control.Monad
 import Data.Function
 import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty ((:|)))
