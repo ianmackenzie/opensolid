@@ -11,6 +11,8 @@ module OpenSolid.NewtonRaphson
 where
 
 import GHC.Exts qualified
+import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
@@ -18,16 +20,17 @@ import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.VectorCurve2d (VectorCurve2d)
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
+import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
+import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
 data Divergence = Divergence deriving (Eq, Show)
 
-curve1d ::
-  Tolerance units =>
-  (Number -> Quantity units) ->
-  (Number -> Quantity units) ->
-  Number ->
-  Result Divergence Number
-curve1d function derivative x1 =
+curve1d :: Tolerance units => Curve units -> Number -> Result Divergence Number
+curve1d curve x1 = do
+  let function = Curve.evaluate curve
+  let derivative = Curve.evaluate curve.derivative
   curve1dImpl function derivative x1 (function x1) 0
 
 curve1dImpl ::
@@ -82,13 +85,10 @@ curve1dImpl## tolerance## function## derivative## x1## y1## iterations1# =
           _ -> Error Divergence
     _ -> Error Divergence
 
-curve2d ::
-  Tolerance units =>
-  (Number -> Vector2d (space @ units)) ->
-  (Number -> Vector2d (space @ units)) ->
-  Number ->
-  Result Divergence Number
-curve2d function derivative t1 =
+curve2d :: Tolerance units => VectorCurve2d (space @ units) -> Number -> Result Divergence Number
+curve2d curve t1 = do
+  let function = VectorCurve2d.evaluate curve
+  let derivative = VectorCurve2d.evaluate curve.derivative
   curve2dImpl function derivative t1 (function t1) 0
 
 curve2dImpl ::
@@ -153,12 +153,13 @@ curve2dImpl## tolerance## function## derivative## t1## x1## y1## squaredMagnitud
 
 surface2d ::
   Tolerance units =>
-  (UvPoint -> Vector2d (space @ units)) ->
-  (UvPoint -> Vector2d (space @ units)) ->
-  (UvPoint -> Vector2d (space @ units)) ->
+  VectorSurfaceFunction2d (space @ units) ->
   UvPoint ->
   Result Divergence UvPoint
-surface2d function uDerivative vDerivative uvPoint1 =
+surface2d surface uvPoint1 = do
+  let function = VectorSurfaceFunction2d.evaluate surface
+  let uDerivative = VectorSurfaceFunction2d.evaluate surface.du
+  let vDerivative = VectorSurfaceFunction2d.evaluate surface.dv
   surface2dImpl function uDerivative vDerivative uvPoint1 (function uvPoint1) 0
 
 surface2dImpl ::

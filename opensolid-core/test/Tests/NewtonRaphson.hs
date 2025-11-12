@@ -72,7 +72,7 @@ curve1d :: Tolerance Unitless => Text -> Curve Unitless -> Number -> Number -> T
 curve1d name curve t0 tExpected =
   Test.group name $
     [ Test.verify "Boxed" $
-        case NewtonRaphson.curve1d (Curve.evaluate curve) (Curve.evaluate curve.derivative) t0 of
+        case NewtonRaphson.curve1d curve t0 of
           Error NewtonRaphson.Divergence -> expectedConvergence
           Ok tSolution ->
             Test.expect (tSolution ~= tExpected)
@@ -94,7 +94,7 @@ curveDivergence1d :: Tolerance Unitless => Text -> Curve Unitless -> Number -> T
 curveDivergence1d name curve t0 =
   Test.group name $
     [ Test.verify "Boxed" $
-        case NewtonRaphson.curve1d (Curve.evaluate curve) (Curve.evaluate curve.derivative) t0 of
+        case NewtonRaphson.curve1d curve t0 of
           Error NewtonRaphson.Divergence -> Test.pass
           Ok tSolution -> expectedDivergence & Test.output "Solution" tSolution
     , Test.verify "Unboxed" do
@@ -110,10 +110,7 @@ curve2d :: Tolerance Unitless => Text -> VectorCurve2d (Space @ Unitless) -> Num
 curve2d name curve t0 tExpected =
   Test.group name $
     [ Test.verify "Boxed" $
-        case NewtonRaphson.curve2d
-          (VectorCurve2d.evaluate curve)
-          (VectorCurve2d.evaluate curve.derivative)
-          t0 of
+        case NewtonRaphson.curve2d curve t0 of
           Error NewtonRaphson.Divergence -> expectedConvergence
           Ok tSolution ->
             Test.expect (tSolution ~= tExpected)
@@ -145,11 +142,7 @@ surface2d ::
   Test
 surface2d name surface uv0 uvExpected =
   Test.verify name $
-    case NewtonRaphson.surface2d
-      (VectorSurfaceFunction2d.evaluate surface)
-      (VectorSurfaceFunction2d.evaluate surface.du)
-      (VectorSurfaceFunction2d.evaluate surface.dv)
-      uv0 of
+    case NewtonRaphson.surface2d surface uv0 of
       Error NewtonRaphson.Divergence -> expectedConvergence
       Ok uvSolution ->
         Test.expect (uvSolution ~= uvExpected)
