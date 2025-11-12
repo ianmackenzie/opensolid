@@ -96,7 +96,7 @@ coerce :: Coercible a b => Format a -> Format b
 coerce = convert Data.Coerce.coerce Data.Coerce.coerce
 
 convert :: (a -> b) -> (b -> a) -> Format a -> Format b
-convert up down format = lift (Success . up) down format
+convert up down format = lift (Ok . up) down format
 
 lift :: (a -> Result x b) -> (b -> a) -> Format a -> Format b
 lift up down format = do
@@ -116,8 +116,8 @@ bool =
     & description "A boolean true or false"
 
 decodeBool :: Json -> Result Text Bool
-decodeBool (Json.Bool value) = Success value
-decodeBool _ = Failure "Expected a boolean"
+decodeBool (Json.Bool value) = Ok value
+decodeBool _ = Error "Expected a boolean"
 
 text :: Format Text
 text =
@@ -126,8 +126,8 @@ text =
     & description "Arbitrary text"
 
 decodeText :: Json -> Result Text Text
-decodeText (Json.Text value) = Success value
-decodeText _ = Failure "Expected text"
+decodeText (Json.Text value) = Ok value
+decodeText _ = Error "Expected text"
 
 number :: Format Number
 number =
@@ -136,8 +136,8 @@ number =
     & description "A unitless floating-point number"
 
 decodeNumber :: Json -> Result Text Number
-decodeNumber (Json.Number value) = Success value
-decodeNumber _ = Failure "Expected a number"
+decodeNumber (Json.Number value) = Ok value
+decodeNumber _ = Error "Expected a number"
 
 int :: Format Int
 int =
@@ -146,13 +146,13 @@ int =
     & description "An integer"
 
 decodeInt :: Json -> Result Text Int
-decodeInt (Json.Int value) = Success value
-decodeInt _ = Failure "Expected an integer"
+decodeInt (Json.Int value) = Ok value
+decodeInt _ = Error "Expected an integer"
 
 decodeList :: (Json -> Result Text a) -> Json -> Result Text (List a)
 decodeList decodeItem json = case json of
   Json.List items -> Result.collect decodeItem items
-  _ -> Failure "Expected a list"
+  _ -> Error "Expected a list"
 
 list :: Format item -> Format (List item)
 list (Format encodeItem decodeItem itemSchema) =
@@ -163,8 +163,8 @@ list (Format encodeItem decodeItem itemSchema) =
     }
 
 toNonEmpty :: List item -> Result Text (NonEmpty item)
-toNonEmpty (NonEmpty items) = Success items
-toNonEmpty [] = Failure "List is empty"
+toNonEmpty (NonEmpty items) = Ok items
+toNonEmpty [] = Error "List is empty"
 
 nonEmpty :: Format item -> Format (NonEmpty item)
 nonEmpty (Format encodeItem decodeItem itemSchema) =
@@ -182,7 +182,7 @@ decodeMap decodeItem json = case json of
     Map.toList fields
       & Result.collect (decodeMapField decodeItem)
       & Result.map Map.fromKeyValuePairs
-  _ -> Failure "Expected a map"
+  _ -> Error "Expected a map"
 
 decodeMapField :: (Json -> Result Text a) -> (Text, Json) -> Result Text (Text, a)
 decodeMapField decodeItem (name, json) = Result.map (name,) (decodeItem json)
@@ -198,7 +198,7 @@ map (Format encodeItem decodeItem itemSchema) =
 decodeObject :: (Map Text Json -> Result Text a) -> Json -> Result Text a
 decodeObject fromFields json = case json of
   Json.Map fields -> fromFields fields
-  _ -> Failure "Expected an object"
+  _ -> Error "Expected an object"
 
 object :: constructor -> Fields constructor parent () -> Format parent
 object constructor (Fields decompose compose properties required) =
@@ -265,8 +265,8 @@ lastField (Field writeField readField fieldSchema) = do
 
 withinField :: Text -> Result Text a -> Result Text a
 withinField fieldName decodeResult = case decodeResult of
-  Success value -> Success value
-  Failure message -> Failure ("In field \"" <> fieldName <> "\":\n" <> Text.indent "  " message)
+  Ok value -> Ok value
+  Error message -> Error ("In field \"" <> fieldName <> "\":\n" <> Text.indent "  " message)
 
 requiredField :: Text -> (parent -> child) -> Format child -> Field parent child ()
 requiredField fieldName getParentField fieldFormat = do
@@ -275,7 +275,7 @@ requiredField fieldName getParentField fieldFormat = do
   let readField fields =
         case Map.get fieldName fields of
           Just fieldValue -> withinField fieldName (decodeField fieldValue)
-          Nothing -> Failure ("Expected a field named \"" <> fieldName <> "\"")
+          Nothing -> Error ("Expected a field named \"" <> fieldName <> "\"")
   let fieldSchema = FieldSchema{name = fieldName, required = True, schema}
   Field{writeField, readField, fieldSchema}
 
@@ -292,9 +292,9 @@ optionalField fieldName getParentField fieldFormat = do
           Nothing -> fields
   let readField fields =
         case Map.get fieldName fields of
-          Just Json.Null -> Success Nothing
+          Just Json.Null -> Ok Nothing
           Just fieldJson -> withinField fieldName (Result.map Just (decodeField fieldJson))
-          Nothing -> Success Nothing
+          Nothing -> Ok Nothing
   let fieldSchema = FieldSchema{name = fieldName, required = False, schema}
   Field{writeField, readField, fieldSchema}
 

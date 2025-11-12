@@ -51,8 +51,8 @@ instance Bind Generator where
       unwrap (toExpectation value)
 
 instance Bind (Result x) where
-  Success value >>= f = f value
-  Failure error >>= _ = fail (Text.show error)
+  Ok value >>= f = f value
+  Error error >>= _ = fail (Text.show error)
 
 data Test
   = Abort Text

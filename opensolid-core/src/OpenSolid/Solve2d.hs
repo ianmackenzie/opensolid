@@ -73,7 +73,7 @@ process ::
   Result InfiniteRecursion (List solution, List Domain2d)
 process callback queue solutions exclusions =
   case Queue.pop queue of
-    Nothing -> Success (solutions, exclusions) -- We're done! No more subdomains to process
+    Nothing -> Ok (solutions, exclusions) -- We're done! No more subdomains to process
     Just ((subdomain, context, recursionType), remaining) -> do
       -- TODO optimize to check for containment and overlapping subdomains in a single pass
       -- (maybe use the call stack to avoid even constructing the overlapping domain list
@@ -116,8 +116,8 @@ recurseInto ::
   RecursionType ->
   Result InfiniteRecursion (List (Domain2d, context, RecursionType))
 recurseInto subdomain context recursionType
-  | Domain2d.isAtomic subdomain = Failure InfiniteRecursion
-  | otherwise = Success $ case recursionType of
+  | Domain2d.isAtomic subdomain = Error InfiniteRecursion
+  | otherwise = Ok $ case recursionType of
       Central ->
         [(Domain2d.half subdomain, context, Central)]
       Row -> do
@@ -201,8 +201,8 @@ solveUnique localBounds fBounds f fu fv globalBounds =
       -- First, try applying Newton-Raphson starting at the center point of localBounds
       -- to see if that converges to a zero
       case newtonRaphson f fu fv globalBounds pMid fMid of
-        Success point -> Just point -- Newton-Raphson converged to a zero, return it
-        Failure Divergence -- Newton-Raphson did not converge starting from pMid
+        Ok point -> Just point -- Newton-Raphson converged to a zero, return it
+        Error Divergence -- Newton-Raphson did not converge starting from pMid
           | Bounds.isAtomic uBounds || Bounds.isAtomic vBounds ->
               -- We can't bisect any further
               -- (Newton-Raphson somehow never converged),
@@ -244,14 +244,14 @@ solveNewtonRaphson ::
   Result Divergence UvPoint
 solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
   if iterations > 10 -- Check if we've entered an infinite loop
-    then Failure Divergence
+    then Error Divergence
     else do
       let Vector2d x1 y1 = f1
       let Vector2d xu1 yu1 = fu p1
       let Vector2d xv1 yv1 = fv p1
       let determinant = xu1 #*# yv1 .-. xv1 #*# yu1
       if determinant == Quantity.zero
-        then Failure Divergence
+        then Error Divergence
         else do
           let deltaU = (xv1 #*# y1 .-. yv1 #*# x1) ./. determinant
           let deltaV = (yu1 #*# x1 .-. xu1 #*# y1) ./. determinant
@@ -259,7 +259,7 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
           let f2 = f p2
           if Vector2d.squaredMagnitude# f2 >= Vector2d.squaredMagnitude# f1
             then -- We've stopped converging, check if we've actually found a root
-              if f1 ~= Vector2d.zero then Success p1 else Failure Divergence
+              if f1 ~= Vector2d.zero then Ok p1 else Error Divergence
             else -- We're still converging, so take another iteration
               solveNewtonRaphson (iterations + 1) f fu fv uvBounds p2 f2
 

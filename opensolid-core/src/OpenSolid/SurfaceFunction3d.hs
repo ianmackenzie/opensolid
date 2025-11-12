@@ -215,8 +215,8 @@ derivativeDirection ::
   VectorSurfaceFunction3d (space @ units) ->
   Result IsDegenerate (DirectionSurfaceFunction3d space)
 derivativeDirection partialDerivative = case VectorSurfaceFunction3d.direction partialDerivative of
-  Success direction -> Success direction
-  Failure VectorSurfaceFunction3d.IsZero -> Failure IsDegenerate
+  Ok direction -> Ok direction
+  Error VectorSurfaceFunction3d.IsZero -> Error IsDegenerate
 
 normalDirection ::
   Tolerance units =>
@@ -227,8 +227,8 @@ normalDirection function = do
   dvDirection <- derivativeDirection function.dv
   let crossProduct = duDirection `cross` dvDirection
   case Tolerance.using Tolerance.unitless (VectorSurfaceFunction3d.direction crossProduct) of
-    Success directionFunction -> Success directionFunction
-    Failure VectorSurfaceFunction3d.IsZero -> Failure IsDegenerate
+    Ok directionFunction -> Ok directionFunction
+    Error VectorSurfaceFunction3d.IsZero -> Error IsDegenerate
 
 transformBy ::
   Transform3d tag (space @ units) ->

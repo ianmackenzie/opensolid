@@ -127,7 +127,7 @@ data Representation a where
   -- A struct with a 64-bit integer tag (0 = Just, 1 = Nothing)
   -- followed by the representation of the value
   MaybeRep :: FFI a => Representation (Maybe a)
-  -- A struct with a 64-bit signed integer tag (0 = Success, 1+ = Failure)
+  -- A struct with a 64-bit signed integer tag (0 = Ok, 1+ = Error)
   -- followed by the representation of the successful value or exception
   ResultRep :: FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
@@ -533,10 +533,10 @@ store ptr offset value = do
       IO.forEach value (store ptr (offset + 8))
     ResultRep ->
       case value of
-        Success successfulValue -> do
+        Ok successfulValue -> do
           Foreign.pokeByteOff @Int64 ptr offset 0
           store ptr (offset + 16) successfulValue
-        Failure errorValue -> do
+        Error errorValue -> do
           Foreign.pokeByteOff @Int64 ptr offset 1
           store ptr (offset + 8) (Text.show errorValue)
     ClassRep _ -> do

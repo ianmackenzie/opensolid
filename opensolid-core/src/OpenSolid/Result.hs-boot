@@ -1,7 +1,7 @@
-module OpenSolid.Result (Result (Success, Failure)) where
+module OpenSolid.Result (Result (Ok, Error)) where
 
 import Prelude (Show)
 
 data Result x a where
-  Success :: a -> Result x a
-  Failure :: Show x => x -> Result x a
+  Ok :: a -> Result x a
+  Error :: Show x => x -> Result x a

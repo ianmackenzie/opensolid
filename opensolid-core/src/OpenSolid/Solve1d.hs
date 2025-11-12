@@ -129,7 +129,7 @@ process ::
   Result InfiniteRecursion (List solution, List Domain1d)
 process callback queue solutions exclusions =
   case Queue.pop queue of
-    Nothing -> Success (solutions, exclusions) -- We're done! No more subdomains to process
+    Nothing -> Ok (solutions, exclusions) -- We're done! No more subdomains to process
     Just (Tree subdomain cached node, remaining) -> do
       let filteredExclusions = List.filter (Domain1d.overlaps subdomain) exclusions
       if containedBy filteredExclusions subdomain
@@ -161,7 +161,7 @@ recurseIntoChildrenOf ::
 recurseIntoChildrenOf node callback queue solutions exclusions = do
   let continueWith updatedQueue = process callback updatedQueue solutions exclusions
   case node of
-    Atomic -> Failure InfiniteRecursion
+    Atomic -> Error InfiniteRecursion
     Shrinkable child -> continueWith (queue .+. child)
     Splittable middleChild leftChild rightChild ->
       continueWith (queue .+. middleChild .+. leftChild .+. rightChild)
@@ -216,8 +216,8 @@ solveMonotonic function derivative bounds sign1 x1 x2 = do
   if yMid == Quantity.zero
     then Exact xMid
     else case newtonRaphson function derivative bounds xMid yMid 0 of
-      Success root -> Exact root -- Newton-Raphson converged to a zero, return it
-      Failure Divergence -- Newton-Raphson did not converge within [x1, x2]
+      Ok root -> Exact root -- Newton-Raphson converged to a zero, return it
+      Error Divergence -- Newton-Raphson did not converge within [x1, x2]
         | x1 < xMid && xMid < x2 ->
             -- It's possible to bisect further,
             -- so recurse into whichever subdomain brackets the zero
@@ -239,16 +239,16 @@ newtonRaphson ::
   Result Divergence Number
 newtonRaphson function derivative bounds x y iterations =
   if iterations > 10 -- Check if we've entered an infinite loop
-    then Failure Divergence
+    then Error Divergence
     else do
       let dy = derivative x
       if dy == Quantity.zero -- Can't take Newton step if derivative is zero
-        then Failure Divergence
+        then Error Divergence
         else do
           let xStepped = x .-. y ./. dy
           x2 <-
             if Bounds.includes xStepped bounds
-              then Success xStepped -- Newton step stayed within bounds
+              then Ok xStepped -- Newton step stayed within bounds
               else do
                 -- Newton step went outside bounds,
                 -- attempt to recover by making another step
@@ -257,15 +257,15 @@ newtonRaphson function derivative bounds x y iterations =
                 let yClamped = function xClamped
                 let dyClamped = derivative xClamped
                 if dyClamped == Quantity.zero
-                  then Failure Divergence
+                  then Error Divergence
                   else do
                     let xStepped2 = xClamped .-. yClamped ./. dyClamped
                     if Bounds.includes xStepped2 bounds
-                      then Success xStepped2
-                      else Failure Divergence
+                      then Ok xStepped2
+                      else Error Divergence
           let y2 = function x2
           if Quantity.abs y2 >= Quantity.abs y
             then -- We've stopped converging, check if we're actually at a root
-              if y ~= Quantity.zero then Success x else Failure Divergence
+              if y ~= Quantity.zero then Ok x else Error Divergence
             else -- We're still converging, so take another iteration
               newtonRaphson function derivative bounds x2 y2 (iterations + 1)

@@ -1,5 +1,5 @@
 module OpenSolid.Result
-  ( Result (Success, Failure)
+  ( Result (Ok, Error)
   , map
   , map2
   , orFail
@@ -27,10 +27,10 @@ import Prelude
 import Prelude qualified
 
 data Result x a where
-  Success :: a -> Result x a
-  Failure :: Show x => x -> Result x a
+  Ok :: a -> Result x a
+  Error :: Show x => x -> Result x a
 
-{-# COMPLETE Success, Failure #-}
+{-# COMPLETE Ok, Error #-}
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -40,33 +40,33 @@ instance Functor (Result x) where
   fmap = map
 
 instance Applicative (Result x) where
-  pure = Success
+  pure = Ok
 
-  Success function <*> Success value = Success (function value)
-  Failure error <*> _ = Failure error
-  _ <*> Failure error = Failure error
+  Ok function <*> Ok value = Ok (function value)
+  Error error <*> _ = Error error
+  _ <*> Error error = Error error
 
 instance Monad (Result x) where
-  Success value >>= function = function value
-  Failure error >>= _ = Failure error
+  Ok value >>= function = function value
+  Error error >>= _ = Error error
 
 instance MonadFail (Result Text) where
-  fail message = Failure (Text.pack message)
+  fail message = Error (Text.pack message)
 
 map :: (a -> b) -> Result x a -> Result x b
 map function result = case result of
-  Success value -> Success (function value)
-  Failure error -> Failure error
+  Ok value -> Ok (function value)
+  Error error -> Error error
 
 map2 :: (a -> b -> c) -> Result x a -> Result x b -> Result x c
 map2 function result1 result = do
   value1 <- result1
   value2 <- result
-  Success (function value1 value2)
+  Ok (function value1 value2)
 
 orFail :: MonadFail m => Result x a -> m a
-orFail (Success value) = Prelude.return value
-orFail (Failure error) = Prelude.fail (Prelude.show error)
+orFail (Ok value) = Prelude.return value
+orFail (Error error) = Prelude.fail (Prelude.show error)
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM

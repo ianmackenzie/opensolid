@@ -622,5 +622,5 @@ direction ::
   VectorSurfaceFunction3d (space @ units) ->
   Result IsZero (DirectionSurfaceFunction3d space)
 direction function = case quotient function (magnitude function) of
-  Failure DivisionByZero -> Failure IsZero
-  Success normalizedFunction -> Success (DirectionSurfaceFunction3d.unsafe normalizedFunction)
+  Error DivisionByZero -> Error IsZero
+  Ok normalizedFunction -> Ok (DirectionSurfaceFunction3d.unsafe normalizedFunction)

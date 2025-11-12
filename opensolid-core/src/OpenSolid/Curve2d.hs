@@ -360,8 +360,8 @@ arc ::
   Curve2d (space @ units)
 arc givenStartPoint givenEndPoint sweptAngle =
   case Vector2d.magnitudeAndDirection (givenEndPoint .-. givenStartPoint) of
-    Failure Vector2d.IsZero -> line givenStartPoint givenEndPoint
-    Success (distanceBetweenPoints, directionBetweenPoints) -> do
+    Error Vector2d.IsZero -> line givenStartPoint givenEndPoint
+    Ok (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 *. distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 *. sweptAngle)
       let linearDeviation = halfDistance .*. tanHalfAngle
@@ -435,7 +435,7 @@ radiusArc ::
   Curve2d (space @ units)
 radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
   case Direction2d.from givenStartPoint givenEndPoint of
-    Success chordDirection -> do
+    Ok chordDirection -> do
       let halfDistance = 0.5 *. Point2d.distanceFrom givenStartPoint givenEndPoint
       let radius = Quantity.max (Quantity.abs givenRadius) halfDistance
       let offsetMagnitude =
@@ -457,7 +457,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
               LargeClockwise -> shortAngle .-. Angle.twoPi
               LargeCounterclockwise -> Angle.twoPi .-. shortAngle
       sweptArc centerPoint givenStartPoint sweptAngle
-    Failure Direction2d.PointsAreCoincident ->
+    Error Direction2d.PointsAreCoincident ->
       line givenStartPoint givenEndPoint
 
 ellipticalArc ::
@@ -660,8 +660,8 @@ tangentDirection ::
   Result IsPoint (DirectionCurve2d space)
 tangentDirection curve =
   case VectorCurve2d.direction curve.derivative of
-    Success directionCurve -> Success directionCurve
-    Failure VectorCurve2d.IsZero -> Failure IsPoint
+    Ok directionCurve -> Ok directionCurve
+    Error VectorCurve2d.IsZero -> Error IsPoint
 
 offsetLeftwardBy ::
   Tolerance units =>
@@ -671,7 +671,7 @@ offsetLeftwardBy ::
 offsetLeftwardBy offset curve = do
   tangentCurve <- tangentDirection curve
   let offsetCurve = VectorCurve2d.rotateBy Angle.quarterTurn (offset .*. tangentCurve)
-  Success (curve .+. offsetCurve)
+  Ok (curve .+. offsetCurve)
 
 offsetRightwardBy ::
   Tolerance units =>
@@ -733,8 +733,8 @@ findPoint ::
   Result IsPoint (List Number)
 findPoint point curve =
   case VectorCurve2d.zeros (point .-. curve) of
-    Failure VectorCurve2d.IsZero -> Failure IsPoint
-    Success parameterValues -> Success parameterValues
+    Error VectorCurve2d.IsZero -> Error IsPoint
+    Ok parameterValues -> Ok parameterValues
 
 g2 ::
   Tolerance units =>
@@ -824,8 +824,8 @@ findEndpointZeros ::
   Result Intersections.Error (List Number)
 findEndpointZeros endpoint curve curveIsPointError =
   case findPoint endpoint curve of
-    Success parameterValues -> Success parameterValues
-    Failure IsPoint -> Failure curveIsPointError
+    Ok parameterValues -> Ok parameterValues
+    Error IsPoint -> Error curveIsPointError
 
 findEndpointIntersections ::
   Tolerance units =>
@@ -837,7 +837,7 @@ findEndpointIntersections curve1 curve2 = do
   end1Zeros <- findEndpointZeros curve1.endPoint curve2 Intersections.SecondCurveIsPoint
   start2Zeros <- findEndpointZeros curve2.startPoint curve1 Intersections.FirstCurveIsPoint
   end2Zeros <- findEndpointZeros curve2.endPoint curve1 Intersections.FirstCurveIsPoint
-  Success $
+  Ok $
     List.sortAndDeduplicate $
       List.concat $
         [ List.map (\t2 -> Point2d 0 t2) start1Zeros
@@ -862,7 +862,7 @@ intersections curve1 curve2 = do
     [] ->
       if curve1.derivative `intersects` Vector2d.zero
         || curve2.derivative `intersects` Vector2d.zero
-        then Failure Intersections.CurveHasDegeneracy
+        then Error Intersections.CurveHasDegeneracy
         else do
           let u = SurfaceFunction.u
           let v = SurfaceFunction.v
@@ -876,10 +876,10 @@ intersections curve1 curve2 = do
           let gu = g.du
           let gv = g.dv
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
-            Success (NonEmpty points) -> Success (Just (IntersectionPoints points))
-            Success [] -> Success Nothing
-            Failure Solve2d.InfiniteRecursion -> throw HigherOrderZero
-    NonEmpty segments -> Success (Just (OverlappingSegments segments))
+            Ok (NonEmpty points) -> Ok (Just (IntersectionPoints points))
+            Ok [] -> Ok Nothing
+            Error Solve2d.InfiniteRecursion -> throw HigherOrderZero
+    NonEmpty segments -> Ok (Just (OverlappingSegments segments))
 
 endpointIntersection :: List UvPoint -> UvBounds -> Maybe UvPoint
 endpointIntersection uvPoints uvBounds =
@@ -1068,8 +1068,8 @@ curvature# curve = do
   let numerator = tangent `cross` secondDerivative
   let denominator = VectorCurve2d.squaredMagnitude# firstDerivative
   case Tolerance.using Tolerance.squared# (Curve.quotient# numerator denominator) of
-    Success quotient# -> Success (Units.simplify quotient#)
-    Failure DivisionByZero -> Failure IsPoint
+    Ok quotient# -> Ok (Units.simplify quotient#)
+    Error DivisionByZero -> Error IsPoint
 
 {-| Get the curvature of a 2D curve.
 
@@ -1119,8 +1119,8 @@ medialAxis curve1 curve2 = do
         v2 `cross#` (2 *. (v1 `dot#` d) #*# d .-. VectorSurfaceFunction2d.squaredMagnitude# d #*# v1)
   let targetTolerance = ?tolerance #*# ((?tolerance #*# ?tolerance) #*# ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
-    Failure SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
-    Success zeros ->
+    Error SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
+    Ok zeros ->
       assert (List.isEmpty zeros.crossingLoops && List.isEmpty zeros.tangentPoints) do
         tangentDirection1 <- tangentDirection curve1
         let tangentVector1 = VectorCurve2d.unit tangentDirection1
@@ -1140,7 +1140,7 @@ medialAxis curve1 curve2 = do
                 , curve = curve `compose` solutionCurve
                 , radius = radius `compose` solutionCurve
                 }
-        Success (List.map toSegment zeros.crossingCurves)
+        Ok (List.map toSegment zeros.crossingCurves)
 
 arcLengthParameterization ::
   Tolerance units =>

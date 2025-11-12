@@ -139,10 +139,10 @@ revolved sketchPlane curve axis angle = do
   let localCurve = Curve2d.relativeTo frame2d curve
   let xCoordinate = localCurve.xCoordinate
   if xCoordinate ~= Curve.zero
-    then Failure Revolved.ProfileIsOnAxis
+    then Error Revolved.ProfileIsOnAxis
     else case Curve.sign xCoordinate of
-      Failure Curve.CrossesZero -> Failure Revolved.ProfileCrossesAxis
-      Success profileSign -> do
+      Error Curve.CrossesZero -> Error Revolved.ProfileCrossesAxis
+      Ok profileSign -> do
         let frame3d = Frame3d.fromBackPlane (Frame2d.placeOn sketchPlane frame2d)
         let (revolutionParameter, curveParameter) = case profileSign of
               Positive -> (SurfaceFunction.u, SurfaceFunction.v)
@@ -155,7 +155,7 @@ revolved sketchPlane curve axis angle = do
                 .+. radius .*. SurfaceFunction.cos theta .*. frame3d.rightwardDirection
                 .+. radius .*. SurfaceFunction.sin theta .*. frame3d.forwardDirection
                 .+. height .*. frame3d.upwardDirection
-        Success (parametric function Region2d.unitSquare)
+        Ok (parametric function Region2d.unitSquare)
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
 boundaryCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoops)

@@ -688,8 +688,8 @@ quotient# ::
   Result DivisionByZero (VectorCurve2d (space @ (units1 #/# units2)))
 quotient# numerator denominator =
   if denominator ~= Curve.zero
-    then Failure DivisionByZero
-    else Success do
+    then Error DivisionByZero
+    else Ok do
       let singularity0 =
             if Curve.evaluate denominator 0 ~= Quantity.zero
               then Just (lhopital numerator denominator 0)
@@ -765,16 +765,16 @@ data IsZero = IsZero deriving (Eq, Show)
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result IsZero (List Number)
 zeros curve =
   case Tolerance.using Tolerance.squared# (Curve.zeros curve.squaredMagnitude#) of
-    Success zeros1d -> Success (List.map (.location) zeros1d)
-    Failure Curve.IsZero -> Failure IsZero
+    Ok zeros1d -> Ok (List.map (.location) zeros1d)
+    Error Curve.IsZero -> Error IsZero
 
 direction ::
   Tolerance units =>
   VectorCurve2d (space @ units) ->
   Result IsZero (DirectionCurve2d space)
 direction curve = case quotient curve (magnitude curve) of
-  Failure DivisionByZero -> Failure IsZero
-  Success normalizedCurve -> Success (DirectionCurve2d.unsafe normalizedCurve)
+  Error DivisionByZero -> Error IsZero
+  Ok normalizedCurve -> Ok (DirectionCurve2d.unsafe normalizedCurve)
 
 placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->

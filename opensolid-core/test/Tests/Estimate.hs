@@ -106,13 +106,13 @@ largest = Test.check 100 "largest" Test.do
 
 resolvesTo :: Tolerance units => Quantity units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
-  | not (value `intersects` Estimate.bounds estimate) = Success False
-  | Bounds.width (Estimate.bounds estimate) ~= Quantity.zero = Success True
+  | not (value `intersects` Estimate.bounds estimate) = Ok False
+  | Bounds.width (Estimate.bounds estimate) ~= Quantity.zero = Ok True
   | otherwise = do
       let refinedEstimate = Estimate.refine estimate
       if Bounds.width (Estimate.bounds refinedEstimate) < Bounds.width (Estimate.bounds estimate)
         then resolvesTo value refinedEstimate
-        else Failure "Refined bounds are not narrower than original bounds"
+        else Error "Refined bounds are not narrower than original bounds"
 
 area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do

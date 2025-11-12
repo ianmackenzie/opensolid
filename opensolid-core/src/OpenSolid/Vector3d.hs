@@ -211,7 +211,7 @@ The current tolerance will be used to check if the vector is zero
 direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
   let vm = magnitude vector
-  if vm ~= Quantity.zero then Failure IsZero else Success (Unit3d (vector ./. vm))
+  if vm ~= Quantity.zero then Error IsZero else Ok (Unit3d (vector ./. vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
@@ -219,7 +219,7 @@ magnitudeAndDirection ::
   Result IsZero (Quantity units, Direction3d space)
 magnitudeAndDirection vector = do
   let vm = magnitude vector
-  if vm ~= Quantity.zero then Failure IsZero else Success (vm, Unit3d (vector ./. vm))
+  if vm ~= Quantity.zero then Error IsZero else Ok (vm, Unit3d (vector ./. vm))
 
 normalize :: Vector3d (space @ units) -> Vector3d (space @ Unitless)
 normalize vector = do

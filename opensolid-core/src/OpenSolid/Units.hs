@@ -33,7 +33,7 @@ import Data.Kind (Constraint, Type)
 import Data.List.NonEmpty (NonEmpty)
 import OpenSolid.List (List)
 import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
-import {-# SOURCE #-} OpenSolid.Result (Result (Failure, Success))
+import {-# SOURCE #-} OpenSolid.Result (Result (Error, Ok))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)
 import OpenSolid.Unitless (Unitless)
 import Prelude (Eq, Int, Maybe (Just, Nothing), Show, id, type (~))
@@ -75,8 +75,8 @@ instance Coercion a b => Coercion (Maybe a) (Maybe b) where
   coerce Nothing = Nothing
 
 instance Coercion a b => Coercion (Result x a) (Result x b) where
-  coerce (Success value) = Success (coerce value)
-  coerce (Failure error) = Failure error
+  coerce (Ok value) = Ok (coerce value)
+  coerce (Error error) = Error error
 
 instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (List a) (List b) where
   coerce = Data.Coerce.coerce

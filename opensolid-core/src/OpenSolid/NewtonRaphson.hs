@@ -46,8 +46,8 @@ curve1dImpl function derivative x1 y1 iterations =
       let y2 = function x2
       if Quantity.abs y2 < Quantity.abs y1
         then curve1dImpl function derivative x2 y2 (iterations + 1)
-        else if y1 ~= Quantity.zero then Success x1 else Failure Divergence
-    else Failure Divergence
+        else if y1 ~= Quantity.zero then Ok x1 else Error Divergence
+    else Error Divergence
 
 curve1d## ::
   Tolerance units =>
@@ -78,9 +78,9 @@ curve1dImpl## tolerance## function## derivative## x1## y1## iterations1# =
           let iterations2# = iterations1# GHC.Exts.+# 1#
           curve1dImpl## tolerance## function## derivative## x2## y2## iterations2#
         _ -> case abs## y1## <=## tolerance## of
-          1# -> Success (Quantity (D# x1##))
-          _ -> Failure Divergence
-    _ -> Failure Divergence
+          1# -> Ok (Quantity (D# x1##))
+          _ -> Error Divergence
+    _ -> Error Divergence
 
 curve2d ::
   Tolerance units =>
@@ -107,8 +107,8 @@ curve2dImpl function derivative t1 v1 iterations =
       let v2 = function t2
       if Vector2d.squaredMagnitude# v2 < Vector2d.squaredMagnitude# v1
         then curve2dImpl function derivative t2 v2 (iterations + 1)
-        else if v1 ~= Vector2d.zero then Success t1 else Failure Divergence
-    else Failure Divergence
+        else if v1 ~= Vector2d.zero then Ok t1 else Error Divergence
+    else Error Divergence
 
 curve2d## ::
   Tolerance units =>
@@ -147,9 +147,9 @@ curve2dImpl## tolerance## function## derivative## t1## x1## y1## squaredMagnitud
           let iterations2# = iterations1# GHC.Exts.+# 1#
           curve2dImpl## tolerance## function## derivative## t2## x2## y2## squaredMagnitude2## iterations2#
         _ -> case squaredMagnitude2## <=## tolerance## *## tolerance## of
-          1# -> Success (Quantity (D# t1##))
-          _ -> Failure Divergence
-    _ -> Failure Divergence
+          1# -> Ok (Quantity (D# t1##))
+          _ -> Error Divergence
+    _ -> Error Divergence
 
 surface2d ::
   Tolerance units =>
@@ -183,5 +183,5 @@ surface2dImpl function uDerivative vDerivative uvPoint1 value1 iterations =
       let value2 = function uvPoint2
       if Vector2d.squaredMagnitude# value2 < Vector2d.squaredMagnitude# value1
         then surface2dImpl function uDerivative vDerivative uvPoint2 value2 (iterations + 1)
-        else if value1 ~= Vector2d.zero then Success uvPoint1 else Failure Divergence
-    else Failure Divergence
+        else if value1 ~= Vector2d.zero then Ok uvPoint1 else Error Divergence
+    else Error Divergence

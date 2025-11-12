@@ -121,5 +121,5 @@ toBinary json = Data.Aeson.fromEncoding (Data.Aeson.toEncoding json)
 decode :: ByteString -> Result Text Json
 decode byteString =
   case Data.Aeson.eitherDecodeStrict byteString of
-    Right json -> Success json
-    Left error -> Failure (Text.pack error)
+    Right json -> Ok json
+    Left error -> Error (Text.pack error)

@@ -75,13 +75,13 @@ searchImpl ::
   List (Domain bounds) ->
   List (bounds, solution) ->
   Result InfiniteRecursion (List (bounds, solution))
-searchImpl _ [] accumulated = Success accumulated
+searchImpl _ [] accumulated = Ok accumulated
 searchImpl callback (Domain bounds children : rest) accumulated =
   case callback bounds of
     Resolved Nothing -> searchImpl callback rest accumulated
     Resolved (Just solution) -> searchImpl callback rest ((bounds, solution) : accumulated)
     Unresolved -> case children of
-      [] -> Failure InfiniteRecursion
+      [] -> Error InfiniteRecursion
       _ -> searchImpl callback children accumulated >>= searchImpl callback rest
 
 map2 ::

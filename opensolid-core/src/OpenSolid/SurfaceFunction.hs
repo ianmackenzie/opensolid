@@ -125,9 +125,9 @@ instance
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and the full geometry of each)
     case zeros (function .-. value) of
-      Success (Zeros [] [] [] []) -> False
-      Success (Zeros{}) -> True
-      Failure IsZero -> True
+      Ok (Zeros [] [] [] []) -> False
+      Ok (Zeros{}) -> True
+      Error IsZero -> True
 
 instance
   units1 ~ units2 =>
@@ -554,7 +554,7 @@ data IsZero = IsZero deriving (Eq, Show)
 
 zeros :: Tolerance units => SurfaceFunction units -> Result IsZero Zeros
 zeros function
-  | function ~= zero = Failure IsZero
+  | function ~= zero = Error IsZero
   | otherwise = do
       let fu = function.du
       let fv = function.dv
@@ -564,10 +564,10 @@ zeros function
       let dudv = unsafeQuotient (negative fv) fu
       let dvdu = unsafeQuotient (negative fu) fv
       case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
-        Success solutions -> do
+        Ok solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions
-          Success (PartialZeros.finalize function dvdu dudv partialZeros)
-        Failure Solve2d.InfiniteRecursion -> throw HigherOrderZero
+          Ok (PartialZeros.finalize function dvdu dudv partialZeros)
+        Error Solve2d.InfiniteRecursion -> throw HigherOrderZero
 
 addSolution :: PartialZeros units -> Solution units -> PartialZeros units
 addSolution partialZeros solution = case solution of

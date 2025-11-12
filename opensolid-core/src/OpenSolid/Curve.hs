@@ -136,9 +136,9 @@ instance
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and their exact locations)
     case zeros (curve .-. value) of
-      Success [] -> False
-      Success List.OneOrMore -> True
-      Failure IsZero -> True
+      Ok [] -> False
+      Ok List.OneOrMore -> True
+      Error IsZero -> True
 
 instance
   units1 ~ units2 =>
@@ -438,8 +438,8 @@ quotient# ::
   Result DivisionByZero (Curve (units1 #/# units2))
 quotient# numerator denominator =
   if denominator ~= zero
-    then Failure DivisionByZero
-    else Success do
+    then Error DivisionByZero
+    else Ok do
       let singularity0 =
             if evaluate denominator 0 ~= Quantity.zero
               then Just (lhopital numerator denominator 0)
@@ -631,14 +631,14 @@ so we would end up reporting a single order-1 zero at x=0
 -}
 zeros :: Tolerance units => Curve units -> Result IsZero (List Zero)
 zeros curve
-  | curve ~= zero = Failure IsZero
+  | curve ~= zero = Error IsZero
   | otherwise = do
       let derivatives = Stream.iterate (.derivative) curve
       let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
-        Success foundZeros -> Success (List.sortBy (.location) foundZeros)
-        Failure Solve1d.InfiniteRecursion -> throw HigherOrderZero
+        Ok foundZeros -> Ok (List.sortBy (.location) foundZeros)
+        Error Solve1d.InfiniteRecursion -> throw HigherOrderZero
 
 findZeros ::
   Tolerance units =>
@@ -740,20 +740,20 @@ If the curve is zero everywhere, then returns positive.
 -}
 sign :: Tolerance units => Curve units -> Result CrossesZero Sign
 sign curve = case zeros curve of
-  Failure IsZero -> Success Positive
-  Success curveZeros ->
+  Error IsZero -> Ok Positive
+  Ok curveZeros ->
     case List.filter isInnerZero curveZeros of
-      [] -> Success (Quantity.sign (evaluate curve 0.5)) -- No inner zeros, so check sign at t=0.5
+      [] -> Ok (Quantity.sign (evaluate curve 0.5)) -- No inner zeros, so check sign at t=0.5
       NonEmpty innerZeros ->
         case NonEmpty.filter isCrossingZero innerZeros of
-          List.OneOrMore -> Failure CrossesZero -- There exists at least one inner crossing zero
+          List.OneOrMore -> Error CrossesZero -- There exists at least one inner crossing zero
           [] -> do
             -- All inner zeros are non-crossing (e.g. quadratic) ones,
             -- so we can safely test the curve
             -- halfway between t=0 and the first inner zero
             let firstInnerZero = NonEmpty.first innerZeros
             let testPoint = 0.5 *. firstInnerZero.location
-            Success (Quantity.sign (evaluate curve testPoint))
+            Ok (Quantity.sign (evaluate curve testPoint))
 
 isInnerZero :: Zero -> Bool
 isInnerZero curveZero = not (isEndpoint curveZero.location)

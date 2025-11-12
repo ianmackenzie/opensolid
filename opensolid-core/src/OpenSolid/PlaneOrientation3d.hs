@@ -81,8 +81,8 @@ fromVectors ::
   Maybe (PlaneOrientation3d space)
 fromVectors vx vxy =
   case Vector3d.direction vx of
-    Failure Vector3d.IsZero -> Nothing
-    Success dx -> gramSchmidt dx vxy
+    Error Vector3d.IsZero -> Nothing
+    Ok dx -> gramSchmidt dx vxy
 
 gramSchmidt ::
   Tolerance units =>
@@ -92,8 +92,8 @@ gramSchmidt ::
 gramSchmidt dx vxy = do
   let vy = vxy .-. Vector3d.projectionIn dx vxy
   case Vector3d.direction vy of
-    Failure Vector3d.IsZero -> Nothing
-    Success dy -> Just (PlaneOrientation3d dx dy)
+    Error Vector3d.IsZero -> Nothing
+    Ok dy -> Just (PlaneOrientation3d dx dy)
 
 flip :: PlaneOrientation3d space -> PlaneOrientation3d space
 flip (PlaneOrientation3d i j) = PlaneOrientation3d (negative i) j

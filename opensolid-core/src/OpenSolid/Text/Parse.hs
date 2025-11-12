@@ -6,7 +6,7 @@ import Data.Text.Read (Reader)
 import Data.Text.Read qualified
 import {-# SOURCE #-} OpenSolid.Number (Number)
 import {-# SOURCE #-} OpenSolid.Number qualified as Number
-import OpenSolid.Result (Result (Failure, Success))
+import OpenSolid.Result (Result (Error, Ok))
 import OpenSolid.Result qualified as Result
 import Prelude (Either (Left, Right), Int, otherwise, (.), (<>))
 import Prelude qualified
@@ -15,7 +15,7 @@ num :: Prelude.Num a => Reader a -> Text -> Result Text a
 num reader text =
   case Data.Text.Read.signed reader text of
     Right (value, suffix)
-      | Data.Text.null suffix -> Success value
+      | Data.Text.null suffix -> Ok value
       | otherwise -> do
           let message =
                 "Could not parse '"
@@ -23,8 +23,8 @@ num reader text =
                   <> "' as a number - has extra trailing text '"
                   <> suffix
                   <> "'"
-          Failure message
-    Left message -> Failure (Data.Text.pack message)
+          Error message
+    Left message -> Error (Data.Text.pack message)
 
 int :: Text -> Result Text Int
 int = num Data.Text.Read.decimal

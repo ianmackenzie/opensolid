@@ -90,8 +90,8 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
   let line2 = Curve2d.line p2 p3
   let line3 = Curve2d.line p4 p3
   case Region2d.boundedBy [line1, line2, line3] of
-    Success _ -> Test.fail "Expected region construction to fail on incomplete boundary"
-    Failure error -> Test.expect (error == Region2d.BoundedBy.BoundaryHasGaps)
+    Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
+    Error error -> Test.expect (error == Region2d.BoundedBy.BoundaryHasGaps)
 
 -- Disabled while self-intersection checks in Region2d.boundedBy are disabled
 -- squareWithTangentHole :: Tolerance Meters => Test
@@ -109,8 +109,8 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
 --   let holeRadius = 0.5 *. width
 --   let hole = Curve2d.circle centerPoint holeRadius
 --   case Region2d.boundedBy [line1, line2, line3, line4, hole] of
---     Success _ -> Test.fail "Expected non-manifold region construction to fail"
---     Failure error -> Test.expect (error == Region2d.BoundedBy.BoundaryIntersectsItself)
+--     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
+--     Error error -> Test.expect (error == Region2d.BoundedBy.BoundaryIntersectsItself)
 
 twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
@@ -123,5 +123,5 @@ twoCircles = Test.verify "twoCircles" Test.do
           (#centerPoint (Point2d.meters 1 0))
           (#diameter (Length.meters 1))
   case Region2d.boundedBy [circle1, circle2] of
-    Success _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
-    Failure error -> Test.expect (error == Region2d.BoundedBy.MultipleDisjointRegions)
+    Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
+    Error error -> Test.expect (error == Region2d.BoundedBy.MultipleDisjointRegions)

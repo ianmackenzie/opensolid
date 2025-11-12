@@ -134,7 +134,7 @@ lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
   let computedFocalDistance = Point3d.distanceFrom eyePoint focalPoint
   let computedFrame =
         case Tolerance.using Quantity.zero (Vector3d.direction (focalPoint .-. eyePoint)) of
-          Success computedForwardDirection -> do
+          Ok computedForwardDirection -> do
             let viewVector = Vector3d.unit computedForwardDirection
             let upVector = Vector3d.unit World3d.upwardDirection
             case Tolerance.using 1e-9 (PlaneOrientation3d.fromVectors viewVector upVector) of
@@ -145,7 +145,7 @@ lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
                     Frame3d eyePoint World3d.upwardOrientation
                 | otherwise ->
                     Frame3d eyePoint World3d.downwardOrientation
-          Failure Vector3d.IsZero ->
+          Error Vector3d.IsZero ->
             -- Given eye and focal points are coincident,
             -- so just look straight forward
             Frame3d eyePoint World3d.forwardOrientation

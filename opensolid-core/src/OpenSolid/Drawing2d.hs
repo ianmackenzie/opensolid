@@ -238,8 +238,8 @@ arrowWith ::
   Drawing2d space
 arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWidth) =
   case Tolerance.using Quantity.zero (Direction2d.from start end) of
-    Failure Direction2d.PointsAreCoincident -> nothing
-    Success direction -> do
+    Error Direction2d.PointsAreCoincident -> nothing
+    Ok direction -> do
       let length = Point2d.distanceFrom start end
       let axis = Axis2d start direction
       let frame = Frame2d.fromXAxis axis

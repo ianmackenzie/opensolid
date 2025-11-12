@@ -311,8 +311,8 @@ data IsAbstract = IsAbstract deriving (Eq, Show)
 expression ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   Result IsAbstract (Expression inputValue outputValue)
-expression (Concrete expr) = Success expr
-expression Abstract{} = Failure IsAbstract
+expression (Concrete expr) = Ok expr
+expression Abstract{} = Error IsAbstract
 
 desingularized ::
   Expression.Evaluation inputValue outputValue inputBounds outputBounds =>

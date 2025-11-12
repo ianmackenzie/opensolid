@@ -108,11 +108,11 @@ overlappingSegments ::
   Result Text (NonEmpty OverlappingSegment)
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
-    Success (Just (Curve2d.OverlappingSegments segments)) -> Success segments
-    Success (Just (Curve2d.IntersectionPoints _)) ->
-      Failure "Should have found some overlapping segments, got intersection points instead"
-    Success Nothing -> Failure "Should have found some overlapping segments"
-    Failure error -> Failure (Text.show error)
+    Ok (Just (Curve2d.OverlappingSegments segments)) -> Ok segments
+    Ok (Just (Curve2d.IntersectionPoints _)) ->
+      Error "Should have found some overlapping segments, got intersection points instead"
+    Ok Nothing -> Error "Should have found some overlapping segments"
+    Error error -> Error (Text.show error)
 
 equalUBounds :: Bounds Unitless -> Bounds Unitless -> Bool
 equalUBounds (Bounds actualLow actualHigh) (Bounds expectedLow expectedHigh) =

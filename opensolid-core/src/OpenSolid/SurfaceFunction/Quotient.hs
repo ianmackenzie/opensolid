@@ -24,20 +24,20 @@ impl ::
   SurfaceFunction units ->
   Result DivisionByZero quotient
 impl unsafeQuotient lhopital desingularize numerator denominator
-  | denominator ~= SurfaceFunction.zero = Failure DivisionByZero
+  | denominator ~= SurfaceFunction.zero = Error DivisionByZero
   | otherwise = do
       let maybeSingularity parameter value
             | SurfaceFunction.Desingularization.isZero parameter value denominator = do
                 let denominator' = SurfaceFunction.derivative parameter denominator
                 if denominator' ~= SurfaceFunction.zero -- TODO switch to "if SurfaceFunction.hasZero denominator'"
-                  then Failure DivisionByZero
-                  else Success (Just (lhopital parameter))
-            | otherwise = Success Nothing
+                  then Error DivisionByZero
+                  else Ok (Just (lhopital parameter))
+            | otherwise = Ok Nothing
       maybeSingularityU0 <- maybeSingularity U 0
       maybeSingularityU1 <- maybeSingularity U 1
       maybeSingularityV0 <- maybeSingularity V 0
       maybeSingularityV1 <- maybeSingularity V 1
-      Success $
+      Ok $
         desingularize
           (unsafeQuotient numerator denominator)
           (#singularityU0 maybeSingularityU0)

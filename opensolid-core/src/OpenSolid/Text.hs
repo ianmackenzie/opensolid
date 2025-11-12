@@ -38,7 +38,7 @@ import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import OpenSolid.Number (Number)
-import OpenSolid.Result (Result (Failure, Success))
+import OpenSolid.Result (Result (Error, Ok))
 import Prelude
   ( Bool
   , Char
@@ -132,8 +132,8 @@ data InvalidUtf8 = InvalidUtf8 deriving (Eq, Show)
 decodeUtf8 :: ByteString -> Result InvalidUtf8 Text
 decodeUtf8 byteString =
   case Data.Text.Encoding.decodeUtf8' byteString of
-    Right text -> Success text
-    Left _ -> Failure InvalidUtf8
+    Right text -> Ok text
+    Left _ -> Error InvalidUtf8
 
 assumeUtf8 :: ByteString -> Text
 assumeUtf8 = Data.Text.Encoding.decodeUtf8Lenient

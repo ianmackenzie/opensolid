@@ -102,8 +102,8 @@ from ::
   Result PointsAreCoincident (Direction2d space)
 from p1 p2 = do
   case Vector2d.direction (p2 .-. p1) of
-    Success direction -> Success direction
-    Failure Vector2d.IsZero -> Failure PointsAreCoincident
+    Ok direction -> Ok direction
+    Error Vector2d.IsZero -> Error PointsAreCoincident
 
 {-| Construct a direction from an angle.
 

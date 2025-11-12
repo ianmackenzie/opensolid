@@ -34,7 +34,7 @@ import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Number qualified as Number
-import OpenSolid.Result (Result (Failure, Success))
+import OpenSolid.Result (Result (Error, Ok))
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text (Text)
 import OpenSolid.Text qualified as Text
@@ -76,7 +76,7 @@ onError callback io = System.IO.Error.catchIOError io do
   \error -> callback (Text.pack (System.IO.Error.ioeGetErrorString error))
 
 attempt :: IO a -> IO (Result Text a)
-attempt io = onError (succeed . Failure) (map Success io)
+attempt io = onError (succeed . Error) (map Ok io)
 
 mapError :: (Text -> Text) -> IO a -> IO a
 mapError function = onError (fail . function)

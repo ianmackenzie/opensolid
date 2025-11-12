@@ -124,8 +124,8 @@ offsetPoint ::
   Point2d (space @ units)
 offsetPoint startPoint endPoint distance =
   case Direction2d.from startPoint endPoint of
-    Failure Direction2d.PointsAreCoincident -> startPoint
-    Success direction -> do
+    Error Direction2d.PointsAreCoincident -> startPoint
+    Ok direction -> do
       let displacement = distance .*. Direction2d.perpendicularTo direction
       Point2d.midpoint startPoint endPoint .+. displacement
 
@@ -145,7 +145,7 @@ getCrossProduct :: Tolerance Meters => Result Text Number
 getCrossProduct = do
   vectorDirection <- Result.orFail (Vector2d.direction (Vector2d.meters 2 3))
   lineDirection <- Result.orFail (Direction2d.from Point2d.origin Point2d.origin)
-  Success (vectorDirection `cross` lineDirection)
+  Ok (vectorDirection `cross` lineDirection)
 
 testTry :: Tolerance Meters => IO ()
 testTry =
@@ -364,7 +364,7 @@ textSum :: Text -> Text -> Result Text Int
 textSum t1 t2 = do
   n1 <- Result.orFail (Int.parse t1)
   n2 <- Result.orFail (Int.parse t2)
-  Success (n1 + n2)
+  Ok (n1 + n2)
 
 testTextSum :: IO ()
 testTextSum = do

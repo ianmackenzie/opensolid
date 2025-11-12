@@ -224,14 +224,14 @@ Fails if the given bounds are empty
 block :: Tolerance units => Bounds3d (space @ units) -> Result EmptyBody (Body3d (space @ units))
 block bounds =
   case Region2d.rectangle (Bounds3d.projectInto World3d.topPlane bounds) of
-    Failure Region2d.EmptyRegion -> Failure EmptyBody
-    Success profile -> do
+    Error Region2d.EmptyRegion -> Error EmptyBody
+    Ok profile -> do
       let Bounds h1 h2 = Bounds3d.upwardCoordinate bounds
       if h1 ~= h2
-        then Failure EmptyBody
+        then Error EmptyBody
         else case extruded World3d.topPlane profile h1 h2 of
-          Success body -> Success body
-          Failure _ ->
+          Ok body -> Ok body
+          Error _ ->
             throw (InternalError "Constructing block body from non-empty bounds should not fail")
 
 {-| Create a sphere with the given center point and diameter.
@@ -245,7 +245,7 @@ sphere ::
   Result EmptyBody (Body3d (space @ units))
 sphere (Named centerPoint) (Named diameter) =
   if diameter ~= Quantity.zero
-    then Failure EmptyBody
+    then Error EmptyBody
     else do
       let sketchPlane = Plane3d centerPoint World3d.frontPlane.orientation
       let radius = 0.5 *. diameter
@@ -253,11 +253,11 @@ sphere (Named centerPoint) (Named diameter) =
       let p2 = Point2d.y radius
       let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
       case Region2d.boundedBy profileCurves of
-        Failure _ -> throw (InternalError "Semicircle profile construction should always succeed")
-        Success profile ->
+        Error _ -> throw (InternalError "Semicircle profile construction should always succeed")
+        Ok profile ->
           case revolved sketchPlane profile Axis2d.y Angle.twoPi of
-            Success body -> Success body
-            Failure _ ->
+            Ok body -> Ok body
+            Error _ ->
               throw (InternalError "Constructing sphere from non-zero radius should not fail")
 
 {-| Create a cylindrical body from a start point, end point and diameter.
@@ -272,8 +272,8 @@ cylinder ::
   Result EmptyBody (Body3d (space @ units))
 cylinder startPoint endPoint (Named diameter) =
   case Vector3d.magnitudeAndDirection (endPoint .-. startPoint) of
-    Failure Vector3d.IsZero -> Failure EmptyBody
-    Success (length, direction) ->
+    Error Vector3d.IsZero -> Error EmptyBody
+    Ok (length, direction) ->
       cylinderAlong (Axis3d startPoint direction) Quantity.zero length (#diameter diameter)
 
 {-| Create a cylindrical body along a given axis.
@@ -295,13 +295,13 @@ cylinderAlong ::
   Result EmptyBody (Body3d (space @ units))
 cylinderAlong axis d1 d2 (Named diameter) = do
   case Region2d.circle (#centerPoint Point2d.origin) (#diameter diameter) of
-    Failure Region2d.EmptyRegion -> Failure EmptyBody
-    Success profile ->
+    Error Region2d.EmptyRegion -> Error EmptyBody
+    Ok profile ->
       if d1 ~= d2
-        then Failure EmptyBody
+        then Error EmptyBody
         else case extruded (Axis3d.normalPlane axis) profile d1 d2 of
-          Success body -> Success body
-          Failure _ -> throw (InternalError "Constructing non-empty cylinder body should not fail")
+          Ok body -> Ok body
+          Error _ -> throw (InternalError "Constructing non-empty cylinder body should not fail")
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
@@ -359,11 +359,11 @@ revolved startPlane profile axis2d angle = do
   let signedDistanceCurves = List.map (Curve2d.distanceRightOf axis2d) offAxisCurves
   profileSign <-
     case Result.collect Curve.sign signedDistanceCurves of
-      Failure Curve.CrossesZero -> Failure BoundedBy.BoundaryIntersectsItself
-      Success curveSigns
-        | List.allSatisfy (== Positive) curveSigns -> Success Positive
-        | List.allSatisfy (== Negative) curveSigns -> Success Negative
-        | otherwise -> Failure BoundedBy.BoundaryIntersectsItself
+      Error Curve.CrossesZero -> Error BoundedBy.BoundaryIntersectsItself
+      Ok curveSigns
+        | List.allSatisfy (== Positive) curveSigns -> Ok Positive
+        | List.allSatisfy (== Negative) curveSigns -> Ok Negative
+        | otherwise -> Error BoundedBy.BoundaryIntersectsItself
 
   let endPlane = Plane3d.rotateAround axis3d angle startPlane
   let unflippedStartCap = Surface3d.on startPlane profile
@@ -371,11 +371,11 @@ revolved startPlane profile axis2d angle = do
   let sideSurface profileCurve = Surface3d.revolved startPlane profileCurve axis2d angle
   sideSurfaces <-
     case Result.collect sideSurface offAxisCurves of
-      Failure Surface3d.Revolved.ProfileIsOnAxis ->
+      Error Surface3d.Revolved.ProfileIsOnAxis ->
         throw (InternalError "Should have already filtered out all on-axis curves")
-      Failure Surface3d.Revolved.ProfileCrossesAxis ->
+      Error Surface3d.Revolved.ProfileCrossesAxis ->
         throw (InternalError "Should have already failed computing profileSign if any profile curve crosses the revolution axis")
-      Success surface -> Success surface
+      Ok surface -> Ok surface
   let startBoundaryCurves = Surface3d.boundaryCurves unflippedStartCap
   let endBoundaryCurves = Surface3d.boundaryCurves unflippedEndCap
   let isFullRevolution = startBoundaryCurves ~= endBoundaryCurves
@@ -396,7 +396,7 @@ boundedBy ::
   Tolerance units =>
   List (Surface3d (space @ units)) ->
   Result BoundedBy.Error (Body3d (space @ units))
-boundedBy [] = Failure BoundedBy.EmptyBody
+boundedBy [] = Error BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = do
   let surfacesWithHalfEdges = NonEmpty.mapWithIndex toSurfaceWithHalfEdges givenSurfaces
   let firstSurfaceWithHalfEdges = NonEmpty.first surfacesWithHalfEdges
@@ -420,10 +420,10 @@ boundedBy (NonEmpty givenSurfaces) = do
       firstSurfaceWithHalfEdges
   let SurfaceRegistry{unprocessed, processed, edges} = finalSurfaceRegistry
   case (Map.values unprocessed, Map.values processed) of
-    (NonEmpty _, _) -> Failure BoundedBy.BoundaryHasGaps
+    (NonEmpty _, _) -> Error BoundedBy.BoundaryHasGaps
     ([], []) -> throw (InternalError "Should always have at least one processed surface")
     ([], NonEmpty processedSurfaces) ->
-      Success (Body3d (NonEmpty.map (toBoundarySurface edges) processedSurfaces))
+      Ok (Body3d (NonEmpty.map (toBoundarySurface edges) processedSurfaces))
 
 surfaceWithHalfEdgesMapEntry ::
   SurfaceWithHalfEdges (space @ units) ->
@@ -520,12 +520,12 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
     DegenerateHalfEdge{halfEdgeId, uvCurve, point} -> do
       canonicalPoint <- getCornerPoint point cornerSet
       let edge = DegenerateEdge{halfEdgeId, uvCurve, point = canonicalPoint}
-      Success SurfaceRegistry{unprocessed, processed, edges = Map.set halfEdgeId edge edges}
+      Ok SurfaceRegistry{unprocessed, processed, edges = Map.set halfEdgeId edge edges}
     HalfEdge{halfEdgeId, uvCurve, curve3d} -> do
       let matingEdgeCandidates = Set3d.filter (Bounded3d.bounds halfEdge) halfEdgeSet
       case List.filterMap (toMatingEdge halfEdgeId curve3d) matingEdgeCandidates of
-        [] -> Failure BoundedBy.BoundaryHasGaps
-        List.TwoOrMore -> Failure BoundedBy.BoundaryIntersectsItself
+        [] -> Error BoundedBy.BoundaryHasGaps
+        List.TwoOrMore -> Error BoundedBy.BoundaryIntersectsItself
         List.One MatingEdge{halfEdgeId = matingId, uvCurve = matingUvCurve, correctlyAligned} -> do
           let HalfEdgeId{surfaceId = matingSurfaceId} = matingId
           startPoint <- getCornerPoint (Curve3d.startPoint curve3d) cornerSet
@@ -550,8 +550,8 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
             (Just _, Just _) -> throw (InternalError "Multiple surfaces found for half-edge")
             (Nothing, Just SurfaceWithHalfEdges{handedness}) ->
               if handedness == matingHandedness
-                then Success updatedRegistry
-                else Failure BoundedBy.BoundaryIntersectsItself
+                then Ok updatedRegistry
+                else Error BoundedBy.BoundaryIntersectsItself
             (Just unprocessedSurface, Nothing) -> do
               let processedSurface = setHandedness matingHandedness unprocessedSurface
               registerSurfaceWithHalfEdges cornerSet halfEdgeSet updatedRegistry processedSurface
@@ -603,7 +603,7 @@ getCornerPoint ::
 getCornerPoint searchPoint cornerSet =
   case Set3d.filter (Bounds3d.constant searchPoint) cornerSet of
     [] -> throw (InternalError "getCorner should always find at least one corner (the given point itself)")
-    NonEmpty candidates -> Success (cornerPoint (NonEmpty.minimumBy cornerSurfaceId candidates))
+    NonEmpty candidates -> Ok (cornerPoint (NonEmpty.minimumBy cornerSurfaceId candidates))
 
 toMatingEdge ::
   Tolerance units =>
@@ -852,8 +852,8 @@ boundarySurfaceMesh ::
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
   let BoundarySurface{surfaceId, surfaceFunction, handedness, edgeLoops} = boundarySurface
   case SurfaceFunction3d.normalDirection surfaceFunction of
-    Failure SurfaceFunction3d.IsDegenerate -> Mesh.empty
-    Success normalDirection -> do
+    Error SurfaceFunction3d.IsDegenerate -> Mesh.empty
+    Ok normalDirection -> do
       let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
       let boundarySegments = NonEmpty.combine Polygon2d.edges boundaryPolygons
       let boundarySegmentSet = Set2d.fromNonEmpty boundarySegments

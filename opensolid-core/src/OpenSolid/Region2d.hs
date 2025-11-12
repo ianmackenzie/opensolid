@@ -127,8 +127,8 @@ boundedBy curves = do
 unitSquare :: Region2d UvCoordinates
 unitSquare = Tolerance.using Quantity.zero do
   case rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval) of
-    Success region -> region
-    Failure EmptyRegion -> throw (InternalError "Constructing unit square region should not fail")
+    Ok region -> region
+    Error EmptyRegion -> throw (InternalError "Constructing unit square region should not fail")
 
 data EmptyRegion = EmptyRegion deriving (Eq, Show)
 
@@ -143,8 +143,8 @@ rectangle ::
   Result EmptyRegion (Region2d (space @ units))
 rectangle (Bounds2d xBounds yBounds) =
   if Bounds.width xBounds ~= Quantity.zero || Bounds.width yBounds ~= Quantity.zero
-    then Failure EmptyRegion
-    else Success do
+    then Error EmptyRegion
+    else Ok do
       let Bounds x1 x2 = xBounds
       let Bounds y1 y2 = yBounds
       let p11 = Point2d x1 y1
@@ -170,10 +170,10 @@ circle ::
   Result EmptyRegion (Region2d (space @ units))
 circle (Named centerPoint) (Named diameter) =
   if diameter ~= Quantity.zero
-    then Failure EmptyRegion
+    then Error EmptyRegion
     else do
       let curve = Curve2d.circle (#centerPoint centerPoint) (#diameter diameter)
-      Success (Region2d (NonEmpty.one curve) [])
+      Ok (Region2d (NonEmpty.one curve) [])
 
 {-| Create a hexagon with the given center point and height.
 
@@ -201,15 +201,15 @@ inscribedPolygon ::
   Result EmptyRegion (Region2d (space @ units))
 inscribedPolygon n (Named centerPoint) (Named diameter) = do
   if diameter < Quantity.zero || diameter ~= Quantity.zero || n < 3
-    then Failure EmptyRegion
-    else Success do
+    then Error EmptyRegion
+    else Ok do
       let radius = 0.5 *. diameter
       let vertexAngles = Quantity.midpoints (Angle.degrees -90) (Angle.degrees 270) n
       let vertex angle = centerPoint .+. Vector2d.polar radius angle
       let vertices = List.map vertex vertexAngles
       case polygon vertices of
-        Success region -> region
-        Failure _ -> do
+        Ok region -> region
+        Error _ -> do
           let message = "Regular polygon construction with non-zero diameter should not fail"
           throw (InternalError message)
 
@@ -244,7 +244,7 @@ polygon ::
   List vertex ->
   Result BoundedBy.Error (Region2d (space @ units))
 polygon vertexList = case vertexList of
-  [] -> Failure BoundedBy.EmptyRegion
+  [] -> Error BoundedBy.EmptyRegion
   NonEmpty vertices -> do
     let closedLoop = NonEmpty.push (NonEmpty.last vertices) vertices
     let segments = NonEmpty.successive LineSegment2d closedLoop
@@ -277,8 +277,8 @@ addFillet ::
   Point2d (space @ units) ->
   Result Text (List (Curve2d (space @ units)))
 addFillet radius curves point = do
-  let couldNotFindPointToFillet = Failure "Could not find point to fillet"
-  let couldNotSolveForFilletLocation = Failure "Could not solve for fillet location"
+  let couldNotFindPointToFillet = Error "Could not find point to fillet"
+  let couldNotSolveForFilletLocation = Error "Could not solve for fillet location"
   let curveIncidences = List.map (curveIncidence point) curves
   let incidentCurves =
         curveIncidences
@@ -330,7 +330,7 @@ addFillet radius curves point = do
               let filletArc = Curve2d.sweptArc centerPoint startPoint sweptAngle
               let trimmedFirstCurve = firstCurve `compose` Curve.line 0 t1
               let trimmedSecondCurve = secondCurve `compose` Curve.line t2 1
-              Success (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
+              Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence ::
   Tolerance units =>
@@ -353,7 +353,7 @@ nonIncidentCurve (_, Just _) = Nothing
 --   Tolerance units =>
 --   List (Curve2d (space @ units)) ->
 --   Result BoundedBy.Error ()
--- checkForInnerIntersection [] = Success ()
+-- checkForInnerIntersection [] = Ok ()
 -- checkForInnerIntersection (first : rest) = do
 --   checkCurveForInnerIntersection first rest
 --   checkForInnerIntersection rest
@@ -363,7 +363,7 @@ nonIncidentCurve (_, Just _) = Nothing
 --   Curve2d (space @ units) ->
 --   List (Curve2d (space @ units)) ->
 --   Result BoundedBy.Error ()
--- checkCurveForInnerIntersection _ [] = Success ()
+-- checkCurveForInnerIntersection _ [] = Ok ()
 -- checkCurveForInnerIntersection curve (first : rest) = do
 --   checkCurvesForInnerIntersection curve first
 --   checkCurveForInnerIntersection curve rest
@@ -375,23 +375,23 @@ nonIncidentCurve (_, Just _) = Nothing
 --   Result BoundedBy.Error ()
 -- checkCurvesForInnerIntersection curve1 curve2 =
 --   case Curve2d.intersections curve1 curve2 of
---     Failure Curve2d.Intersections.CurveHasDegeneracy ->
---       Failure BoundedBy.BoundaryCurveHasDegeneracy
+--     Error Curve2d.Intersections.CurveHasDegeneracy ->
+--       Error BoundedBy.BoundaryCurveHasDegeneracy
 --     -- We can ignore cases where either curve is actually a point,
 --     -- since we'll still find any inner intersections
 --     -- when we check with the *neighbours* of those degenerate curves
---     Failure Curve2d.Intersections.FirstCurveIsPoint -> Success ()
---     Failure Curve2d.Intersections.SecondCurveIsPoint -> Success ()
+--     Error Curve2d.Intersections.FirstCurveIsPoint -> Ok ()
+--     Error Curve2d.Intersections.SecondCurveIsPoint -> Ok ()
 --     -- Any overlap between boundary curves is bad
---     Success (Just (Curve2d.OverlappingSegments _)) ->
---       Failure BoundedBy.BoundaryIntersectsItself
+--     Ok (Just (Curve2d.OverlappingSegments _)) ->
+--       Error BoundedBy.BoundaryIntersectsItself
 --     -- If there are no intersections at all then we're good!
---     Success Nothing -> Success ()
+--     Ok Nothing -> Ok ()
 --     -- Otherwise, make sure curves only intersect (meet) at endpoints
---     Success (Just (Curve2d.IntersectionPoints intersectionPoints)) ->
+--     Ok (Just (Curve2d.IntersectionPoints intersectionPoints)) ->
 --       if NonEmpty.allSatisfy isEndpointIntersection intersectionPoints
---         then Success ()
---         else Failure BoundedBy.BoundaryIntersectsItself
+--         then Ok ()
+--         else Error BoundedBy.BoundaryIntersectsItself
 
 -- isEndpointIntersection :: IntersectionPoint -> Bool
 -- isEndpointIntersection intersectionPoint = do
@@ -402,11 +402,11 @@ connect ::
   Tolerance units =>
   List (Curve2d (space @ units)) ->
   Result BoundedBy.Error (List (Loop (space @ units)))
-connect [] = Success []
+connect [] = Ok []
 connect (first : rest) = do
   (loop, remainingCurves) <- buildLoop (startLoop first) rest
   remainingLoops <- connect remainingCurves
-  Success (loop : remainingLoops)
+  Ok (loop : remainingLoops)
 
 data PartialLoop coordinateSystem
   = PartialLoop
@@ -420,7 +420,7 @@ buildLoop ::
   List (Curve2d (space @ units)) ->
   Result BoundedBy.Error (Loop (space @ units), List (Curve2d (space @ units)))
 buildLoop partialLoop@(PartialLoop currentStart currentCurves loopEnd) remainingCurves
-  | currentStart ~= loopEnd = Success (currentCurves, remainingCurves)
+  | currentStart ~= loopEnd = Ok (currentCurves, remainingCurves)
   | otherwise = do
       (updatedPartialLoop, updatedRemainingCurves) <- extendPartialLoop partialLoop remainingCurves
       buildLoop updatedPartialLoop updatedRemainingCurves
@@ -432,12 +432,12 @@ extendPartialLoop ::
   Result BoundedBy.Error (PartialLoop (space @ units), List (Curve2d (space @ units)))
 extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
   case List.partition (hasEndpoint currentStart) curves of
-    ([], _) -> Failure BoundedBy.BoundaryHasGaps
+    ([], _) -> Error BoundedBy.BoundaryHasGaps
     (List.One curve, remaining) -> do
       let newCurve = if curve.endPoint ~= currentStart then curve else Curve2d.reverse curve
       let updatedCurves = NonEmpty.push newCurve currentCurves
-      Success (PartialLoop newCurve.startPoint updatedCurves loopEnd, remaining)
-    (List.TwoOrMore, _) -> Failure BoundedBy.BoundaryIntersectsItself
+      Ok (PartialLoop newCurve.startPoint updatedCurves loopEnd, remaining)
+    (List.TwoOrMore, _) -> Error BoundedBy.BoundaryIntersectsItself
 
 hasEndpoint :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 hasEndpoint point curve = point ~= curve.startPoint || point ~= curve.endPoint
@@ -598,14 +598,14 @@ classifyLoops ::
   Tolerance units =>
   List (Loop (space @ units)) ->
   Result BoundedBy.Error (Region2d (space @ units))
-classifyLoops [] = Failure BoundedBy.EmptyRegion
+classifyLoops [] = Error BoundedBy.EmptyRegion
 classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerLoopCandidate = fixSign Positive largestLoop
   let innerLoopCandidates = List.map (fixSign Negative) smallerLoops
   if List.allSatisfy (loopIsInside outerLoopCandidate) innerLoopCandidates
-    then Success (Region2d outerLoopCandidate innerLoopCandidates)
-    else Failure BoundedBy.MultipleDisjointRegions
+    then Ok (Region2d outerLoopCandidate innerLoopCandidates)
+    else Error BoundedBy.MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
 fixSign desiredSign loop =
