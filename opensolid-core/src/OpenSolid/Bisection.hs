@@ -128,12 +128,16 @@ map2 function domain1 domain2 = do
 interior :: Bounds Unitless -> Bounds Unitless
 interior (Bounds tLow tHigh) = do
   let margin = (tHigh .-. tLow) ./ 8
-  Bounds (tLow + margin) (tHigh - margin)
+  let lowMargin = if tLow == 0 then 0 else margin
+  let highMargin = if tHigh == 1 then 0 else margin
+  Bounds (tLow + lowMargin) (tHigh - highMargin)
 
 isInterior :: Number -> Bounds Unitless -> Bool
 isInterior value (Bounds tLow tHigh) = do
   let margin = (tHigh .-. tLow) ./ 8
-  value >= tLow .+. margin && value <= tHigh .-. margin
+  let lowMargin = if tLow == 0 then 0 else margin
+  let highMargin = if tHigh == 1 then 0 else margin
+  value >= tLow .+. lowMargin && value <= tHigh .-. highMargin
 
 includesEndpoint :: Bounds Unitless -> Bool
 includesEndpoint (Bounds tLow tHigh) = tLow == 0 || tHigh == 1
