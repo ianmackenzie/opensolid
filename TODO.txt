@@ -1,3 +1,18 @@
+Enable DuplicateRecordField and NoFieldSelectors everywhere
+-> also enable -Wincomplete-record-selectors and -Wincomplete-record-updates but -Wno-partial-fields,
+   to allow record fields in union cases but error if those are accessed in an unsafe way?
+
+Use 'min', 'max' from Prelude?
+-> general rule: expose the same functions that Elm does in Basics module, except for (purely) numeric ones
+  -> maybe also *do* use Prelude floor, ceiling, round?
+    -> only exclude numeric functions that deal solely with floating-point values (trig, exp, log etc.)
+-> 'min', 'max' from Prelude will then need to be hidden in Bounds, Estimate modules
+-> then won't need Prelude.min in Curve2d.Intersections
+
+Split opensolid-core into opensolid-core and opensolid-geometry?
+-> opensolid-core is basically an "alternative standard library", nothing about units or geometry
+-> which one has OpenSolid.Prelude though?
+
 Switch back to 'normal' (non-recursive) form of quotient derivatives
 -> e.g. VectorSurfaceFunction3d
 -> search for 'recursive' calls in general?
@@ -42,6 +57,31 @@ Only support Meters units for 3D positional values?
 -> still support e.g. unitless or area-valued vectors
 -> then 3D transformation functions don't need frameUnits, axisUnits etc. hack
 -> some types e.g. Model3d already assume meters-only...
+
+Switch to upper-case 2D and 3D suffixes instead of 2d and 3d?
+-> Point2D vs Point2d
+-> Curve3D vs Curve3d
+-> Body3D vs Body3d
+
+Remove CoordinateSystem type and just use separate 'space' and 'units' type parameters where needed
+  -> could allow removal of HasUnits in favour of assuming types always have units as the last type parameter...
+  -> type names:
+        Position2D space units (internal Position2D constructor)
+        UvPoint (public UvPoint pattern)
+        Point2D space (public Point2D pattern)
+        Point3D space
+
+        Vector2D space units (plus public constructor)
+        UvVector (plus public pattern)
+        UnitlessVector2D space (plus public pattern)
+        Displacement2D space (plus public pattern)
+        AreaVector2D space (plus public pattern)
+
+        Vector3D space units
+        UnitlessVector3D space
+        Displacement3D space
+        AreaVector3D space
+    -> can have internal Position2D constructor and public UvPoint and Point2D patterns with fixed units
 
 Add indentation to debug output of Ast values for easier inspection
 
