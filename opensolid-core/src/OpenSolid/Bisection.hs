@@ -90,6 +90,7 @@ searchImpl ::
   (bounds -> Fuzzy (Maybe solution)) ->
   List (bounds, solution) ->
   Result InfiniteRecursion (List (bounds, solution))
+searchImpl [] _ accumulated = Ok accumulated
 searchImpl domains callback accumulated = do
   solutionsAndChildren <- Result.collect (visit callback accumulated) domains
   let (solutions, children) = List.unzip2 solutionsAndChildren
