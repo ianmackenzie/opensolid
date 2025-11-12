@@ -2,7 +2,6 @@ module OpenSolid.Result
   ( Result (Success, Failure)
   , map
   , map2
-  , addContext
   , orFail
   , collect
   , foldl
@@ -59,11 +58,6 @@ map :: (a -> b) -> Result x a -> Result x b
 map function result = case result of
   Success value -> Success (function value)
   Failure error -> Failure error
-
-addContext :: Text -> Result x a -> Result Text a
-addContext context result = case result of
-  Success value -> Success value
-  Failure error -> Failure (Error.addContext context (Error.message error))
 
 map2 :: (a -> b -> c) -> Result x a -> Result x b -> Result x c
 map2 function result1 result = do

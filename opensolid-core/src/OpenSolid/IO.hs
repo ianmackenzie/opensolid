@@ -11,7 +11,6 @@ module OpenSolid.IO
   , onError
   , attempt
   , mapError
-  , addContext
   , printLine
   , readUtf8
   , writeUtf8
@@ -34,7 +33,6 @@ import Data.Traversable.WithIndex qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
-import OpenSolid.Error qualified as Error
 import OpenSolid.Number qualified as Number
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Result qualified as Result
@@ -82,9 +80,6 @@ attempt io = onError (succeed . Failure) (map Success io)
 
 mapError :: (Text -> Text) -> IO a -> IO a
 mapError function = onError (fail . function)
-
-addContext :: Text -> IO a -> IO a
-addContext text = mapError (Error.addContext text)
 
 printLine :: Text -> IO ()
 printLine = Data.Text.IO.Utf8.putStrLn

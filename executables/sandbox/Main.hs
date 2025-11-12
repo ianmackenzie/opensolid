@@ -142,21 +142,16 @@ testListOperations = do
   log "Successive intervals" intervals
 
 getCrossProduct :: Tolerance Meters => Result Text Number
-getCrossProduct = Result.addContext "In getCrossProduct" do
-  vectorDirection <-
-    Vector2d.direction (Vector2d.meters 2 3)
-      & Result.addContext "When getting vector direction"
-  lineDirection <-
-    Direction2d.from Point2d.origin Point2d.origin
-      & Result.addContext "When getting line direction"
+getCrossProduct = do
+  vectorDirection <- Result.orFail (Vector2d.direction (Vector2d.meters 2 3))
+  lineDirection <- Result.orFail (Direction2d.from Point2d.origin Point2d.origin)
   Success (vectorDirection `cross` lineDirection)
 
 testTry :: Tolerance Meters => IO ()
 testTry =
   IO.onError IO.printLine do
-    IO.addContext "In testTry" do
-      crossProduct <- Result.orFail getCrossProduct
-      log "Got cross product" crossProduct
+    crossProduct <- Result.orFail getCrossProduct
+    log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
 testIOIteration = IO.forEach [1 :: Int .. 3] (log "Looping")

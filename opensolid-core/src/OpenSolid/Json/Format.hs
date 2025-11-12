@@ -50,6 +50,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding (compose, (>>))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
+import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
@@ -263,7 +264,9 @@ lastField (Field writeField readField fieldSchema) = do
   Fields{decompose, compose, properties, required}
 
 withinField :: Text -> Result Text a -> Result Text a
-withinField fieldName = Result.addContext ("In field \"" <> fieldName <> "\"")
+withinField fieldName decodeResult = case decodeResult of
+  Success value -> Success value
+  Failure message -> Failure ("In field \"" <> fieldName <> "\":\n" <> Text.indent "  " message)
 
 requiredField :: Text -> (parent -> child) -> Format child -> Field parent child ()
 requiredField fieldName getParentField fieldFormat = do
