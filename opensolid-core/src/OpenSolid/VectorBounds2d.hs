@@ -21,6 +21,7 @@ module OpenSolid.VectorBounds2d
   , maxMagnitude
   , maxSquaredMagnitude
   , maxSquaredMagnitude#
+  , direction
   , normalize
   , exclusion
   , exclusion##
@@ -49,6 +50,8 @@ where
 
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
+import {-# SOURCE #-} OpenSolid.DirectionBounds2d (DirectionBounds2d)
+import {-# SOURCE #-} OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
@@ -201,6 +204,9 @@ maxSquaredMagnitude# (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
   let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
   Quantity.squared# xMagnitude .+. Quantity.squared# yMagnitude
+
+direction :: VectorBounds2d (space @ units) -> DirectionBounds2d space
+direction vectorBounds = DirectionBounds2d.unsafe (normalize vectorBounds)
 
 normalize :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ Unitless)
 normalize vectorBounds = do

@@ -22,6 +22,7 @@ module OpenSolid.VectorBounds3d
   , maxMagnitude##
   , maxSquaredMagnitude
   , maxSquaredMagnitude#
+  , direction
   , normalize
   , exclusion
   , inclusion
@@ -46,6 +47,8 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds (Bounds (Bounds, Bounds##))
 import OpenSolid.Bounds qualified as Bounds
+import {-# SOURCE #-} OpenSolid.DirectionBounds3d (DirectionBounds3d)
+import {-# SOURCE #-} OpenSolid.DirectionBounds3d qualified as DirectionBounds3d
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -263,6 +266,9 @@ maxSquaredMagnitude# (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Boun
   let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
   let zMagnitude = Quantity.max (Quantity.abs minZ) (Quantity.abs maxZ)
   Quantity.squared# xMagnitude .+. Quantity.squared# yMagnitude .+. Quantity.squared# zMagnitude
+
+direction :: VectorBounds3d (space @ units) -> DirectionBounds3d space
+direction vectorBounds = DirectionBounds3d.unsafe (normalize vectorBounds)
 
 normalize :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ Unitless)
 normalize vectorBounds = do
