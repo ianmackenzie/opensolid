@@ -3,6 +3,7 @@ module OpenSolid.API.Argument (Kind (Positional, Named), kind) where
 import Data.Proxy (Proxy)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Prelude hiding (Named)
 import OpenSolid.Text qualified as Text
 
@@ -20,4 +21,4 @@ kind name proxy =
         then Named
         else do
           let message = "Argument name mismatch: " <> Text.show name <> " /= " <> Text.show argName
-          abort message
+          throw (InternalError message)

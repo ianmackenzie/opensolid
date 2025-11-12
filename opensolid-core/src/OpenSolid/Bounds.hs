@@ -72,6 +72,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
@@ -477,7 +478,7 @@ bisect (Bounds low high) = do
         | high == Quantity.zero = Quantity -1
         | low > Quantity.zero = 2 *. low
         | high < Quantity.zero = 2 *. high
-        | otherwise = abort "'Impossible' case hit in Bounds.bisect"
+        | otherwise = throw (InternalError "'Impossible' case hit in Bounds.bisect")
   (Bounds low mid, Bounds mid high)
 
 {-# INLINE isAtomic #-}

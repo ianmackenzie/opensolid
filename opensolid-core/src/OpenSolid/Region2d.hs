@@ -56,6 +56,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
@@ -128,7 +129,7 @@ unitSquare :: Region2d UvCoordinates
 unitSquare = Tolerance.using Quantity.zero do
   case rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval) of
     Success region -> region
-    Failure EmptyRegion -> abort "Constructing unit square region should not fail"
+    Failure EmptyRegion -> throw (InternalError "Constructing unit square region should not fail")
 
 data EmptyRegion = EmptyRegion deriving (Eq, Show, Error.Message)
 
@@ -209,7 +210,9 @@ inscribedPolygon n (Named centerPoint) (Named diameter) = do
       let vertices = List.map vertex vertexAngles
       case polygon vertices of
         Success region -> region
-        Failure _ -> abort "Regular polygon construction with non-zero diameter should not fail"
+        Failure _ -> do
+          let message = "Regular polygon construction with non-zero diameter should not fail"
+          throw (InternalError message)
 
 {-| Create a regular polygon with the given number of sides.
 
@@ -677,4 +680,4 @@ toVertexLoop resolution loop = do
   let allVertices = List.combine trailingVertices loop
   case allVertices of
     NonEmpty vertices -> vertices
-    [] -> abort "Should always have at least one vertex"
+    [] -> throw (InternalError "Should always have at least one vertex")

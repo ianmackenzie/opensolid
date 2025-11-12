@@ -28,9 +28,11 @@ module OpenSolid.Estimate
   )
 where
 
+import Control.Exception qualified
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
@@ -70,6 +72,11 @@ bounds (Coerce estimate) = Bounds.coerce (bounds estimate)
 refine :: Estimate units -> Estimate units
 refine estimate = checkRefinement 0 estimate
 
+data RefinementStalled = RefinementStalled deriving (Show)
+
+instance Exception RefinementStalled where
+  displayException RefinementStalled = "Estimate refinement stalled"
+
 checkRefinement :: Int -> Estimate units -> Estimate units
 checkRefinement stepsWithoutProgress estimate = case estimate of
   Coerce inner -> Coerce (checkRefinement stepsWithoutProgress inner)
@@ -78,7 +85,7 @@ checkRefinement stepsWithoutProgress estimate = case estimate of
     if
       | Bounds.width (bounds refinedEstimate) < initialBounds.width -> refinedEstimate
       | stepsWithoutProgress < 10 -> checkRefinement (stepsWithoutProgress + 1) refinedEstimate
-      | otherwise -> abort "Estimate refinement stalled"
+      | otherwise -> throw RefinementStalled
 
 satisfy :: (Bounds units -> Bool) -> Estimate units -> Bounds units
 satisfy predicate estimate = do
@@ -311,7 +318,7 @@ larger first second = new (Larger first second)
 
 internalErrorFilteredListIsEmpty :: a
 internalErrorFilteredListIsEmpty =
-  abort "Filtered list should be non-empty by construction"
+  throw (InternalError "Filtered list should be non-empty by construction")
 
 boundsWidth :: Estimate units -> Quantity units
 boundsWidth estimate = Bounds.width (bounds estimate)

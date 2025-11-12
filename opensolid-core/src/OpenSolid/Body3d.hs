@@ -52,6 +52,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.LineSegment2d (LineSegment2d)
 import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.Linearization qualified as Linearization
@@ -231,7 +232,8 @@ block bounds =
         then Failure EmptyBody
         else case extruded World3d.topPlane profile h1 h2 of
           Success body -> Success body
-          Failure _ -> abort "Constructing block body from non-empty bounds should not fail"
+          Failure _ ->
+            throw (InternalError "Constructing block body from non-empty bounds should not fail")
 
 {-| Create a sphere with the given center point and diameter.
 
@@ -252,11 +254,12 @@ sphere (Named centerPoint) (Named diameter) =
       let p2 = Point2d.y radius
       let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
       case Region2d.boundedBy profileCurves of
-        Failure _ -> abort "Semicircle profile construction should always succeed"
+        Failure _ -> throw (InternalError "Semicircle profile construction should always succeed")
         Success profile ->
           case revolved sketchPlane profile Axis2d.y Angle.twoPi of
             Success body -> Success body
-            Failure _ -> abort "Constructing sphere from non-zero radius should not fail"
+            Failure _ ->
+              throw (InternalError "Constructing sphere from non-zero radius should not fail")
 
 {-| Create a cylindrical body from a start point, end point and diameter.
 
@@ -299,7 +302,7 @@ cylinderAlong axis d1 d2 (Named diameter) = do
         then Failure EmptyBody
         else case extruded (Axis3d.normalPlane axis) profile d1 d2 of
           Success body -> Success body
-          Failure _ -> abort "Constructing non-empty cylinder body should not fail"
+          Failure _ -> throw (InternalError "Constructing non-empty cylinder body should not fail")
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
@@ -370,9 +373,9 @@ revolved startPlane profile axis2d angle = do
   sideSurfaces <-
     case Result.collect sideSurface offAxisCurves of
       Failure Surface3d.Revolved.ProfileIsOnAxis ->
-        abort "Should have already filtered out all on-axis curves"
+        throw (InternalError "Should have already filtered out all on-axis curves")
       Failure Surface3d.Revolved.ProfileCrossesAxis ->
-        abort "Should have already failed computing profileSign if any profile curve crosses the revolution axis"
+        throw (InternalError "Should have already failed computing profileSign if any profile curve crosses the revolution axis")
       Success surface -> Success surface
   let startBoundaryCurves = Surface3d.boundaryCurves unflippedStartCap
   let endBoundaryCurves = Surface3d.boundaryCurves unflippedEndCap
@@ -419,7 +422,7 @@ boundedBy (NonEmpty givenSurfaces) = do
   let SurfaceRegistry{unprocessed, processed, edges} = finalSurfaceRegistry
   case (Map.values unprocessed, Map.values processed) of
     (NonEmpty _, _) -> Failure BoundedBy.BoundaryHasGaps
-    ([], []) -> abort "Should always have at least one processed surface"
+    ([], []) -> throw (InternalError "Should always have at least one processed surface")
     ([], NonEmpty processedSurfaces) ->
       Success (Body3d (NonEmpty.map (toBoundarySurface edges) processedSurfaces))
 
@@ -544,8 +547,8 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
                 SurfaceRegistry{unprocessed, processed, edges = edges |> Map.set halfEdgeId edge}
           let matingHandedness = if correctlyAligned then parentHandedness else negative parentHandedness
           case (Map.get matingSurfaceId unprocessed, Map.get matingSurfaceId processed) of
-            (Nothing, Nothing) -> abort "No surface found for half-edge"
-            (Just _, Just _) -> abort "Multiple surfaces found for half-edge"
+            (Nothing, Nothing) -> throw (InternalError "No surface found for half-edge")
+            (Just _, Just _) -> throw (InternalError "Multiple surfaces found for half-edge")
             (Nothing, Just SurfaceWithHalfEdges{handedness}) ->
               if handedness == matingHandedness
                 then Success updatedRegistry
@@ -581,7 +584,7 @@ toEdge :: Map HalfEdgeId (Edge (space @ units)) -> HalfEdge (space @ units) -> E
 toEdge edges halfEdge =
   case Map.get (getHalfEdgeId halfEdge) edges of
     Just edge -> edge
-    Nothing -> abort "Should always be able to find edge for processed half-edge"
+    Nothing -> throw (InternalError "Should always be able to find edge for processed half-edge")
 
 getHalfEdgeId :: HalfEdge (space @ units) -> HalfEdgeId
 getHalfEdgeId HalfEdge{halfEdgeId} = halfEdgeId
@@ -600,7 +603,7 @@ getCornerPoint ::
   Result BoundedBy.Error (Point3d (space @ units))
 getCornerPoint searchPoint cornerSet =
   case Set3d.filter (Bounds3d.constant searchPoint) cornerSet of
-    [] -> abort "getCorner should always find at least one corner (the given point itself)"
+    [] -> throw (InternalError "getCorner should always find at least one corner (the given point itself)")
     NonEmpty candidates -> Success (cornerPoint (NonEmpty.minimumBy cornerSurfaceId candidates))
 
 toMatingEdge ::
@@ -742,7 +745,8 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
           let tValues = Domain1d.innerSamplingPoints edgePredicate
           let vertex tValue = Vertex (Curve2d.evaluate uvCurve tValue) point
           Map.set halfEdgeId (List.map vertex tValues) accumulated
-        Nothing -> abort "Should always be able to look up surface segments for a given edge"
+        Nothing ->
+          throw (InternalError "Should always be able to look up surface segments for a given edge")
     PrimaryEdge{halfEdgeId, matingId, curve3d, uvCurve, matingUvCurve, correctlyAligned} -> do
       let HalfEdgeId{surfaceId} = halfEdgeId
       let HalfEdgeId{surfaceId = matingSurfaceId} = matingId
@@ -771,7 +775,8 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
           accumulated
             |> Map.set halfEdgeId vertices
             |> Map.set matingId alignedMatingVertices
-        _ -> abort "Should always be able to look up surface segments for a given edge"
+        _ ->
+          throw (InternalError "Should always be able to look up surface segments for a given edge")
     SecondaryEdge{} -> accumulated
 
 edgeLinearizationPredicate ::
@@ -854,7 +859,7 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
       let boundarySegments = NonEmpty.combine Polygon2d.edges boundaryPolygons
       let boundarySegmentSet = Set2d.fromNonEmpty boundarySegments
       case Map.get surfaceId surfaceSegmentsById of
-        Nothing -> abort "Should always be able to look up surface segments by ID"
+        Nothing -> throw (InternalError "Should always be able to look up surface segments by ID")
         Just surfaceSegments -> do
           let steinerPoints =
                 case surfaceSegments of
@@ -916,7 +921,7 @@ leadingEdgeVerticesImpl ::
 leadingEdgeVerticesImpl innerEdgeVerticesById edgeId startPoint uvStartPoint =
   case Map.get edgeId innerEdgeVerticesById of
     Just innerEdgeVertices -> Vertex uvStartPoint startPoint :| innerEdgeVertices
-    Nothing -> abort "Should always be able to look up internal edge vertices by ID"
+    Nothing -> throw (InternalError "Should always be able to look up internal edge vertices by ID")
 
 steinerPoint ::
   Set2d (LineSegment2d (Vertex (space @ units))) UvCoordinates ->

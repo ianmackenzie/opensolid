@@ -40,7 +40,6 @@ module OpenSolid.Prelude
   , fromIntegral
   , fromRational
   , assert
-  , abort
   , throw
   , Text
   , List
@@ -102,7 +101,6 @@ import Control.Exception (Exception, assert, throw)
 import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Kind (Type)
 import Data.Text (Text)
-import Data.Text qualified
 import Data.Traversable.WithIndex (TraversableWithIndex)
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import OpenSolid.Arithmetic
@@ -157,15 +155,12 @@ value |> function = function value
 
 infixl 0 |>
 
-abort :: Text -> a
-abort message = error (Data.Text.unpack message)
-
 pattern TODO :: HasCallStack => a
 pattern TODO <- (withFrozenCallStack todo -> ())
   where
     TODO = withFrozenCallStack todo
 
-todo :: HasCallStack => a
-todo = withFrozenCallStack $ abort "Not implemented"
+todo :: a
+todo = error "Not implemented"
 
 {-# COMPLETE TODO #-}

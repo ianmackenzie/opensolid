@@ -18,6 +18,7 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -86,8 +87,8 @@ build boundsCoordinate buildSubset n boundedItems
       Node nodeBounds leftChild rightChild
 
 splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
-splitAtIndex 0 _ = abort "Bad split index in Set3d.new"
-splitAtIndex _ (_ :| []) = abort "Bad split index in Set3d.new"
+splitAtIndex 0 _ = throw (InternalError "Bad split index in Set3d.new")
+splitAtIndex _ (_ :| []) = throw (InternalError "Bad split index in Set3d.new")
 splitAtIndex 1 (first :| NonEmpty rest) = (NonEmpty.one first, rest)
 splitAtIndex n (first :| NonEmpty rest) =
   Pair.mapFirst (NonEmpty.push first) (splitAtIndex (n - 1) rest)

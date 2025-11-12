@@ -52,6 +52,7 @@ import OpenSolid.Color (Color)
 import OpenSolid.Error qualified as Error
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -76,8 +77,8 @@ name input =
     first : rest ->
       if NonEmpty.allSatisfy isCapitalized (first :| rest)
         then Name (first :| rest)
-        else abort ("API name has non-capitalized component: " <> input)
-    _ -> abort "Text.split should always return at least one component"
+        else throw (InternalError ("API name has non-capitalized component: " <> input))
+    _ -> throw (InternalError "Text.split should always return at least one component")
 
 isCapitalized :: Text -> Bool
 isCapitalized component = Text.capitalize component == component
@@ -166,7 +167,7 @@ data Type where
 className :: FFI a => Proxy a -> ClassName
 className proxy = case representation proxy of
   ClassRep className_ -> className_
-  _ -> abort "Attempting to get the class name of a non-class type"
+  _ -> throw (InternalError "Attempting to get the class name of a non-class type")
 
 typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
@@ -546,7 +547,7 @@ store ptr offset value = do
       result <- IO.attempt value
       store ptr offset result
     NamedArgumentRep{} ->
-      abort "Should never have a named argument as a Haskell return type"
+      throw (InternalError "Should never have a named argument as a Haskell return type")
 
 load :: forall parent value. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
@@ -669,11 +670,11 @@ load ptr offset = do
       if tag == 0
         then IO.map Just (load ptr (offset + 8))
         else IO.succeed Nothing
-    ResultRep{} -> abort "Passing Result values as FFI arguments is not supported"
+    ResultRep{} -> throw (InternalError "Passing Result values as FFI arguments is not supported")
     ClassRep _ -> do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
-    IORep -> abort "Passing IO values as FFI arguments is not supported"
+    IORep -> throw (InternalError "Passing IO values as FFI arguments is not supported")
     NamedArgumentRep _ innerProxy -> IO.map (wrapNamedArgument innerProxy) (load ptr offset)
 
 wrapNamedArgument :: Coercible n a => Proxy a -> a -> n

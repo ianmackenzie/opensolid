@@ -166,6 +166,7 @@ library
     OpenSolid.IO
     OpenSolid.IO.Parallel
     OpenSolid.Int
+    OpenSolid.InternalError
     OpenSolid.Intersects
     OpenSolid.Json
     OpenSolid.Json.Format

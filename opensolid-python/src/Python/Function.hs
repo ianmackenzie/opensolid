@@ -14,6 +14,7 @@ import OpenSolid.API.ImplicitArgument (ImplicitArgument)
 import OpenSolid.API.ImplicitArgument qualified as ImplicitArgument
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (Type)
@@ -78,7 +79,7 @@ typePattern ffiType = case ffiType of
   FFI.Array itemType -> "[" <> typePattern itemType <> ", *_]"
   FFI.Tuple type1 type2 rest -> tuplePattern type1 type2 rest
   FFI.Maybe valueType -> typePattern valueType <> " | None"
-  FFI.Result{} -> abort "Should never have Result as input argument"
+  FFI.Result{} -> throw (InternalError "Should never have Result as input argument")
   FFI.Class classId -> Python.Class.qualifiedName classId <> "()"
 
 tuplePattern :: FFI.Type -> FFI.Type -> List FFI.Type -> Text
