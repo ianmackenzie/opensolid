@@ -1,6 +1,6 @@
 module OpenSolid.Bisection
   ( InfiniteRecursion (InfiniteRecursion)
-  , Domain (Domain)
+  , Domain
   , parameterDomain
   , curveDomain
   , curvePairDomain
@@ -8,9 +8,6 @@ module OpenSolid.Bisection
   , curveSurfaceDomain
   , surfacePairDomain
   , search
-  , map2
-  , map3
-  , map4
   , isInterior
   , includesEndpoint
   )
@@ -19,14 +16,31 @@ where
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
+import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show)
 
-data Domain bounds = Domain bounds ~(List (Domain bounds))
+class IsBounds bounds where
+  contains :: bounds -> bounds -> Bool
+
+instance IsBounds (Bounds units) where
+  contains = Bounds.contains
+
+instance IsBounds (Bounds2d (space @ units)) where
+  contains = Bounds2d.contains
+
+instance (IsBounds bounds1, IsBounds bounds2) => IsBounds (bounds1, bounds2) where
+  contains (b1, b2) (a1, a2) = contains b1 a1 && contains b2 a2
+
+data Domain bounds where
+  Domain :: IsBounds bounds => bounds -> ~(List (Domain bounds)) -> Domain bounds
 
 split :: Bounds Unitless -> Domain (Bounds Unitless)
 split bounds = Domain bounds do
@@ -68,23 +82,34 @@ search ::
   Domain bounds ->
   (bounds -> Fuzzy (Maybe solution)) ->
   Result InfiniteRecursion (List (bounds, solution))
-search domain callback = searchImpl callback [domain] []
+search domain callback = searchImpl [domain] callback []
 
 searchImpl ::
-  (bounds -> Fuzzy (Maybe solution)) ->
   List (Domain bounds) ->
+  (bounds -> Fuzzy (Maybe solution)) ->
   List (bounds, solution) ->
   Result InfiniteRecursion (List (bounds, solution))
-searchImpl _ [] accumulated = Ok accumulated
-searchImpl callback (Domain bounds children : rest) accumulated =
-  case callback bounds of
-    Resolved Nothing -> searchImpl callback rest accumulated
-    Resolved (Just solution) -> searchImpl callback rest ((bounds, solution) : accumulated)
-    Unresolved -> case children of
-      [] -> Error InfiniteRecursion
-      _ -> searchImpl callback children accumulated >>= searchImpl callback rest
+searchImpl domains callback accumulated = do
+  solutionsAndChildren <- Result.collect (visit callback accumulated) domains
+  let (solutions, children) = List.unzip2 solutionsAndChildren
+  searchImpl (List.concat children) callback (List.concat (accumulated : solutions))
+
+visit ::
+  (bounds -> Fuzzy (Maybe solution)) ->
+  List (bounds, solution) ->
+  Domain bounds ->
+  Result InfiniteRecursion (List (bounds, solution), List (Domain bounds))
+visit callback accumulated (Domain bounds children)
+  | List.anySatisfy (contains bounds . Pair.first) accumulated = Ok ([], [])
+  | otherwise = case callback bounds of
+      Resolved Nothing -> Ok ([], [])
+      Resolved (Just solution) -> Ok ([(bounds, solution)], [])
+      Unresolved -> case children of
+        [] -> Error InfiniteRecursion
+        _ -> Ok ([], children)
 
 map2 ::
+  IsBounds bounds3 =>
   (bounds1 -> bounds2 -> bounds3) ->
   Domain bounds1 ->
   Domain bounds2 ->
@@ -96,43 +121,6 @@ map2 function domain1 domain2 = do
     [ map2 function child1 child2
     | child1 <- children1
     , child2 <- children2
-    ]
-
-map3 ::
-  (bounds1 -> bounds2 -> bounds3 -> bounds4) ->
-  Domain bounds1 ->
-  Domain bounds2 ->
-  Domain bounds3 ->
-  Domain bounds4
-map3 function domain1 domain2 domain3 = do
-  let Domain bounds1 children1 = domain1
-  let Domain bounds2 children2 = domain2
-  let Domain bounds3 children3 = domain3
-  Domain (function bounds1 bounds2 bounds3) $
-    [ map3 function child1 child2 child3
-    | child1 <- children1
-    , child2 <- children2
-    , child3 <- children3
-    ]
-
-map4 ::
-  (bounds1 -> bounds2 -> bounds3 -> bounds4 -> bounds5) ->
-  Domain bounds1 ->
-  Domain bounds2 ->
-  Domain bounds3 ->
-  Domain bounds4 ->
-  Domain bounds5
-map4 function domain1 domain2 domain3 domain4 = do
-  let Domain bounds1 children1 = domain1
-  let Domain bounds2 children2 = domain2
-  let Domain bounds3 children3 = domain3
-  let Domain bounds4 children4 = domain4
-  Domain (function bounds1 bounds2 bounds3 bounds4) $
-    [ map4 function child1 child2 child3 child4
-    | child1 <- children1
-    , child2 <- children2
-    , child3 <- children3
-    , child4 <- children4
     ]
 
 isInterior :: Number -> Bounds Unitless -> Bool
