@@ -2,10 +2,8 @@ module OpenSolid.Result
   ( Result (Success, Failure)
   , map
   , map2
-  , andThen
   , addContext
-  , onError
-  , try
+  , orFail
   , collect
   , foldl
   , foldr
@@ -57,9 +55,6 @@ instance Monad (Result x) where
 instance MonadFail (Result Text) where
   fail message = Failure (Text.pack message)
 
-andThen :: (a -> Result x b) -> Result x a -> Result x b
-andThen function result = result Prelude.>>= function
-
 map :: (a -> b) -> Result x a -> Result x b
 map function result = case result of
   Success value -> Success (function value)
@@ -76,15 +71,9 @@ map2 function result1 result = do
   value2 <- result
   Success (function value1 value2)
 
-onError :: (x -> Result y a) -> Result x a -> Result y a
-onError function result = case result of
-  Success value -> Success value
-  Failure error -> function error
-
-try :: Result x a -> Result Text a
-try result = case result of
-  Success value -> Success value
-  Failure error -> Failure (Error.message error)
+orFail :: MonadFail m => Result x a -> m a
+orFail (Success value) = Prelude.return value
+orFail (Failure error) = Prelude.fail (Text.unpack (Error.message error))
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM

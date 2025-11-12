@@ -102,7 +102,9 @@ lift up down format = do
   let Format{encodeFunction, decodeFunction, schema} = format
   Format
     { encodeFunction = encodeFunction . down
-    , decodeFunction = Result.andThen (Result.try . up) . decodeFunction
+    , decodeFunction = \json -> do
+        unlifted <- decodeFunction json
+        Result.orFail (up unlifted)
     , schema = removeMetadata schema
     }
 
@@ -167,7 +169,9 @@ nonEmpty :: Format item -> Format (NonEmpty item)
 nonEmpty (Format encodeItem decodeItem itemSchema) =
   Format
     { encodeFunction = Json.listOf encodeItem . NonEmpty.toList
-    , decodeFunction = Result.andThen toNonEmpty . decodeList decodeItem
+    , decodeFunction = \json -> do
+        items <- decodeList decodeItem json
+        toNonEmpty items
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema, Json.Schema.minItems = Just 1}
     }
 
@@ -233,11 +237,10 @@ instance
     let (Field writeField readField fieldSchema) = field
     let (Fields decompose compose properties required) = fields
     Fields
-      { decompose = \parent -> decompose parent & writeField parent
-      , compose = \fieldValues constructor ->
-          readField fieldValues
-            & Result.map constructor
-            & Result.andThen (compose fieldValues)
+      { decompose = \parent -> writeField parent (decompose parent)
+      , compose = \fieldValues constructor -> do
+          childValue <- readField fieldValues
+          compose fieldValues (constructor childValue)
       , properties = Map.set fieldSchema.name fieldSchema.schema properties
       , required = [fieldSchema.name | fieldSchema.required] <> required
       }

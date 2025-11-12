@@ -4,7 +4,6 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
-import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
@@ -12,6 +11,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -29,7 +29,7 @@ main = Tolerance.using Length.nanometer do
   let vSE = Vector2d 1 -1 ./. Number.sqrt 2
   let radius = Length.centimeters 10
   let arc v1 v2 v3 = do
-        radialUnitVector <- IO.try do
+        radialUnitVector <- Result.orFail do
           Tolerance.using 1e-9 $
             VectorCurve2d.quotient
               (VectorCurve2d.quadraticBezier v1 v2 v3)

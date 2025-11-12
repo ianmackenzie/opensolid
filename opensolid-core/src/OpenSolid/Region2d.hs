@@ -268,8 +268,8 @@ fillet ::
   Result Text (Region2d (space @ units))
 fillet points (Named radius) region = do
   let initialCurves = NonEmpty.toList (boundaryCurves region)
-  filletedCurves <- Result.try (Result.foldl (addFillet radius) initialCurves points)
-  Result.try (boundedBy filletedCurves)
+  filletedCurves <- Result.orFail (Result.foldl (addFillet radius) initialCurves points)
+  Result.orFail (boundedBy filletedCurves)
 
 addFillet ::
   Tolerance units =>
@@ -297,8 +297,8 @@ addFillet radius curves point = do
     List.One{} -> couldNotFindPointToFillet
     List.ThreeOrMore{} -> couldNotFindPointToFillet
     List.Two firstCurve secondCurve -> do
-      firstTangent <- Result.try (Curve2d.tangentDirection firstCurve)
-      secondTangent <- Result.try (Curve2d.tangentDirection secondCurve)
+      firstTangent <- Result.orFail (Curve2d.tangentDirection firstCurve)
+      secondTangent <- Result.orFail (Curve2d.tangentDirection secondCurve)
       let firstEndDirection = DirectionCurve2d.endValue firstTangent
       let secondStartDirection = DirectionCurve2d.startValue secondTangent
       let cornerAngle = Direction2d.angleFrom firstEndDirection secondStartDirection
@@ -309,7 +309,7 @@ addFillet radius curves point = do
             VectorCurve2d.rotateBy Angle.quarterTurn (offset .*. secondTangent)
       let firstOffsetCurve = firstCurve .+. firstOffsetDisplacement
       let secondOffsetCurve = secondCurve .+. secondOffsetDisplacement
-      maybeIntersections <- Result.try (Curve2d.intersections firstOffsetCurve secondOffsetCurve)
+      maybeIntersections <- Result.orFail (Curve2d.intersections firstOffsetCurve secondOffsetCurve)
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
         Just Curve2d.OverlappingSegments{} -> couldNotSolveForFilletLocation

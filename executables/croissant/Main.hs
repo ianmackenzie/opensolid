@@ -4,11 +4,11 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -30,7 +30,7 @@ main = Tolerance.using Length.nanometer do
           .+. r .*. SurfaceFunction.sin theta .*. World3d.forwardDirection
           .+. minorRadius .*. SurfaceFunction.sin phi .*. World3d.upwardDirection
   let surface = Surface3d.parametric surfaceFunction Region2d.unitSquare
-  body <- IO.try (Body3d.boundedBy [surface])
+  body <- Result.orFail (Body3d.boundedBy [surface])
   let resolution = Resolution.maxSize (Length.centimeters 20)
   let mesh = Body3d.toMesh resolution body
   Stl.writeBinary "executables/croissant/mesh.stl" Convention3d.yUp Length.inMillimeters mesh

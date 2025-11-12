@@ -9,6 +9,7 @@ import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Text qualified as Text
@@ -19,8 +20,8 @@ main :: IO ()
 main = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
-  f <- IO.try (SurfaceFunction.quotient (u .*. (5 -. 2 *. v)) (u .*. (1 +. v)))
-  expression <- IO.try (CompiledFunction.expression f.compiled)
+  f <- Result.orFail (SurfaceFunction.quotient (u .*. (5 -. 2 *. v)) (u .*. (1 +. v)))
+  expression <- Result.orFail (CompiledFunction.expression f.compiled)
   IO.printLine (Expression.debug expression)
   let meshPoint uvPoint = do
         let Point2d uValue vValue = uvPoint

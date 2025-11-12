@@ -23,7 +23,6 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
@@ -84,7 +83,7 @@ searchImpl callback (Domain bounds children : rest) accumulated =
     Resolved (Just solution) -> searchImpl callback rest ((bounds, solution) : accumulated)
     Unresolved -> case children of
       [] -> Failure InfiniteRecursion
-      _ -> searchImpl callback children accumulated & Result.andThen (searchImpl callback rest)
+      _ -> searchImpl callback children accumulated >>= searchImpl callback rest
 
 map2 ::
   (bounds1 -> bounds2 -> bounds3) ->

@@ -10,6 +10,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude ((.*.), (.+.))
 import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -30,7 +31,7 @@ main = do
   let domainCenter = Point2d 0.5 0.5
   let domainDiameter = 2 / 3
   let domainCircle = Curve2d.circle (#centerPoint domainCenter) (#diameter domainDiameter)
-  domain <- IO.try (Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle]))
+  domain <- Result.orFail (Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle]))
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2) surface
   IO.printLine ("Num faces: " <> Text.int (Mesh.numFaces mesh))

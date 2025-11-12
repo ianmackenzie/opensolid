@@ -28,16 +28,16 @@ gearBody numTeeth = do
   let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
   let outerProfile = SpurGear.profile spurGear
   let hole = Curve2d.circle (#centerPoint Point2d.origin) (#diameter holeDiameter)
-  profile <- Result.try (Region2d.boundedBy (hole : outerProfile))
+  profile <- Result.orFail (Region2d.boundedBy (hole : outerProfile))
   let width = Length.millimeters 8
-  Result.try (Body3d.extruded World3d.frontPlane profile (-0.5 *. width) (0.5 *. width))
+  Result.orFail (Body3d.extruded World3d.frontPlane profile (-0.5 *. width) (0.5 *. width))
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) do
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   let writeGlb numTeeth = do
         timer <- Timer.start
-        body <- IO.try (gearBody numTeeth)
+        body <- Result.orFail (gearBody numTeeth)
         let glbPath = "executables/gear-generation/gear" <> Text.int numTeeth <> ".glb"
         let material = PbrMaterial.iron (#roughness 0.3)
         let model = Model3d.bodyWith [Model3d.pbrMaterial material] body

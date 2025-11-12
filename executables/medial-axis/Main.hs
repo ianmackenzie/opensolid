@@ -17,6 +17,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
@@ -60,7 +61,7 @@ testCurveMedialAxis ::
   IO ()
 testCurveMedialAxis label curve1 curve2 = do
   timer <- Timer.start
-  segments <- IO.try (Curve2d.medialAxis curve1 curve2)
+  segments <- Result.orFail (Curve2d.medialAxis curve1 curve2)
   let drawTangentCircles (segment :: Curve2d.MedialAxis.Segment (Global @ Meters)) = do
         let (parameterization, _) = Curve2d.arcLengthParameterization segment.curve
         let drawTangentCircle u = do

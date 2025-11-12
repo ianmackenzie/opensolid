@@ -1,7 +1,6 @@
 module OpenSolid.IO
   ( succeed
   , fail
-  , try
   , map
   , run
   , forEach
@@ -38,6 +37,7 @@ import OpenSolid.Duration qualified as Duration
 import OpenSolid.Error qualified as Error
 import OpenSolid.Number qualified as Number
 import OpenSolid.Result (Result (Failure, Success))
+import OpenSolid.Result qualified as Result
 import OpenSolid.Text (Text)
 import OpenSolid.Text qualified as Text
 import System.Directory
@@ -51,10 +51,6 @@ succeed = Prelude.return
 
 fail :: Text -> IO a
 fail message = Prelude.fail (Text.unpack message)
-
-try :: Result x a -> IO a
-try (Success value) = succeed value
-try (Failure error) = fail (Error.message error)
 
 map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap
@@ -102,7 +98,7 @@ writeBinary path builder = Builder.writeFile (Text.unpack path) builder
 readUtf8 :: Text -> IO Text
 readUtf8 path = do
   bytes <- readBinary path
-  try (Text.decodeUtf8 bytes)
+  Result.orFail (Text.decodeUtf8 bytes)
 
 writeUtf8 :: Text -> Text -> IO ()
 writeUtf8 path text = do

@@ -155,7 +155,7 @@ testTry :: Tolerance Meters => IO ()
 testTry =
   IO.onError IO.printLine do
     IO.addContext "In testTry" do
-      crossProduct <- IO.try getCrossProduct
+      crossProduct <- Result.orFail getCrossProduct
       log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
@@ -163,7 +163,7 @@ testIOIteration = IO.forEach [1 :: Int .. 3] (log "Looping")
 
 doublingIO :: Text -> IO Int
 doublingIO input = do
-  value <- IO.try (Int.parse input)
+  value <- Result.orFail (Int.parse input)
   let doubled = 2 * value
   return doubled
 
@@ -202,12 +202,12 @@ testPlaneTorusIntersection = do
         Curve2d.circle
           (#centerPoint (Point2d.x majorRadius))
           (#diameter (2 *. minorRadius))
-  surface <- IO.try (Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi)
+  surface <- Result.orFail (Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi)
   let alpha = Angle.asin (minorRadius ./. majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
   let planeNormal = Direction3d.polar World3d.frontPlane (alpha .+. Angle.halfPi)
   let f = planeNormal `dot` (surface.function .-. World3d.originPoint)
-  zeros <- IO.try (SurfaceFunction.zeros f)
+  zeros <- Result.orFail (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -218,7 +218,7 @@ testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
   let f = SurfaceFunction.squared u .+. SurfaceFunction.squared v .- 0.5
-  zeros <- IO.try (SurfaceFunction.zeros f)
+  zeros <- Result.orFail (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -367,17 +367,17 @@ testExplicitRandomStep = do
 
 textSum :: Text -> Text -> Result Text Int
 textSum t1 t2 = do
-  n1 <- Result.try (Int.parse t1)
-  n2 <- Result.try (Int.parse t2)
+  n1 <- Result.orFail (Int.parse t1)
+  n2 <- Result.orFail (Int.parse t2)
   Success (n1 + n2)
 
 testTextSum :: IO ()
 testTextSum = do
   IO.onError IO.printLine do
-    sum <- IO.try (textSum "5" "abc")
+    sum <- Result.orFail (textSum "5" "abc")
     log "sum" sum
   IO.onError IO.printLine do
-    sum <- IO.try (textSum "2" "3")
+    sum <- Result.orFail (textSum "2" "3")
     log "sum" sum
 
 testNewtonRaphson2d :: IO ()
@@ -418,7 +418,7 @@ testQuotientDesingularization :: IO ()
 testQuotientDesingularization = Tolerance.using 1e-9 do
   let numerator = Curve.sin (Angle.pi .*. Curve.t)
   let denominator = Curve.t .*. (1 -. Curve.t)
-  quotient <- IO.try (Curve.quotient numerator denominator)
+  quotient <- Result.orFail (Curve.quotient numerator denominator)
   let tValues = Quantity.steps 0 1 10
   IO.forEach tValues \tValue -> do
     log "quotient" (Curve.evaluate quotient tValue)

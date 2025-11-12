@@ -5,7 +5,6 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
-import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -13,6 +12,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
@@ -27,7 +27,7 @@ main = Tolerance.using Length.nanometer do
   let p3 = Point2d (width .-. cornerRadius) height
   let p4 = Point2d.y height
   let holeCenter = Point2d (width .-. cornerRadius) (height .-. cornerRadius)
-  region <- IO.try do
+  region <- Result.orFail do
     Region2d.boundedBy
       [ Curve2d.line p0 p1
       , Curve2d.line p1 p2
