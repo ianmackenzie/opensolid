@@ -220,6 +220,7 @@ library
     OpenSolid.SurfaceParameter
     OpenSolid.Text
     OpenSolid.Timer
+    OpenSolid.Todo
     OpenSolid.Tolerance
     OpenSolid.Transform
     OpenSolid.Transform2d
@@ -241,7 +242,6 @@ library
     OpenSolid.VectorSurfaceFunction3d
     OpenSolid.Vertex2d
     OpenSolid.Vertex3d
-    OpenSolid.Todo
     OpenSolid.Volume
     OpenSolid.World3d
 
