@@ -1,29 +1,14 @@
-Remove all uses of 'abort' with throwing an exception?
--> allows for even e.g. internal errors to be caught during FFI calls
-
-Search for 'import Prelude (' and remove
-
 Switch back to 'normal' (non-recursive) form of quotient derivatives
 -> e.g. VectorSurfaceFunction3d
--> search for 'recursive' calls in genera?
+-> search for 'recursive' calls in general?
 
 Switch axis, plane, frame types over to being records?
-
-Search for 'Prelude.' and review
-
-Remove Bootstrap module
-
-Move internalError to Exception module
 
 Juse use Aeson directly for JSON encoding/decoding?
 
 Remove e.g. Int.fromInt64 where possible
 
-Remove @ operator?
-
 Remove custom HasField instances
-
-Remove Random.Internal module?
 
 Flip argument order in Composition typeclass
 -> rename to Composition2 temporarily to ensure all instances are updated
