@@ -335,7 +335,7 @@ deriving instance Eq (Point2d (space @ units))
 
 deriving instance Ord (Point2d (space @ units))
 
-deriving instance Show (Quantity units) => Show (Point2d (space @ units))
+deriving instance Show (Point2d (space @ units))
 
 instance FFI (Point2d FFI.Coordinates) where
   representation = FFI.classRepresentation "Point2d"
@@ -415,7 +415,7 @@ data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
   -- | Construct a vector bounding box from its X and Y coordinate bounds.
   VectorBounds2d :: Bounds units -> Bounds units -> VectorBounds2d (space @ units)
 
-deriving instance Show (Quantity units) => Show (VectorBounds2d (space @ units))
+deriving instance Show (VectorBounds2d (space @ units))
 
 instance HasUnits (VectorBounds2d (space @ units)) units
 
@@ -764,7 +764,7 @@ pattern Bounds2d bx by <- PositionBounds2d (VectorBounds2d bx by)
   where
     Bounds2d bx by = PositionBounds2d (VectorBounds2d bx by)
 
-deriving instance Show (Quantity units) => Show (Bounds2d (space @ units))
+deriving instance Show (Bounds2d (space @ units))
 
 instance HasUnits (Bounds2d (space @ units)) units
 
@@ -891,7 +891,7 @@ instance HasField "direction" (Axis2d (space @ units)) (Direction2d space) where
 
 deriving instance Eq (Axis2d (space @ units))
 
-deriving instance Show (Quantity units) => Show (Axis2d (space @ units))
+deriving instance Show (Axis2d (space @ units))
 
 instance HasUnits (Axis2d (space @ units)) units
 
@@ -921,7 +921,7 @@ instance HasField "yDirection" (Frame2d (space @ units) defines) (Direction2d sp
 
 deriving instance Eq (Frame2d (space @ units) defines)
 
-deriving instance Show (Quantity units) => Show (Frame2d (space @ units) defines)
+deriving instance Show (Frame2d (space @ units) defines)
 
 instance FFI (Frame2d FFI.Coordinates defines) where
   representation = FFI.classRepresentation "Frame2d"
@@ -945,7 +945,7 @@ deriving instance Eq (Transform2d tag (space @ units))
 
 deriving instance Ord (Transform2d tag (space @ units))
 
-deriving instance Show (Quantity units) => Show (Transform2d tag (space @ units))
+deriving instance Show (Transform2d tag (space @ units))
 
 instance HasUnits (Transform2d tag (space @ units)) units
 
@@ -1417,7 +1417,7 @@ deriving instance Eq (Point3d (space @ units))
 
 deriving instance Ord (Point3d (space @ units))
 
-deriving instance Show (Quantity units) => Show (Point3d (space @ units))
+deriving instance Show (Point3d (space @ units))
 
 instance FFI (Point3d FFI.Coordinates) where
   representation = FFI.classRepresentation "Point3d"
@@ -1940,7 +1940,7 @@ pattern Bounds3d bx by bz <- PositionBounds3d (VectorBounds3d bx by bz)
   where
     Bounds3d bx by bz = PositionBounds3d (VectorBounds3d bx by bz)
 
-deriving instance Show (Quantity units) => Show (Bounds3d (space @ units))
+deriving instance Show (Bounds3d (space @ units))
 
 instance FFI (Bounds3d FFI.Coordinates) where
   representation = FFI.classRepresentation "Bounds3d"
@@ -2072,7 +2072,7 @@ instance HasField "direction" (Axis3d (space @ units)) (Direction3d space) where
 
 deriving instance Eq (Axis3d (space @ units))
 
-deriving instance Show (Quantity units) => Show (Axis3d (space @ units))
+deriving instance Show (Axis3d (space @ units))
 
 instance FFI (Axis3d FFI.Coordinates) where
   representation = FFI.classRepresentation "Axis3d"
@@ -2095,7 +2095,7 @@ deriving instance Eq (Plane3d (space @ units) defines)
 
 deriving instance Ord (Plane3d (space @ units) defines)
 
-deriving instance Show (Quantity units) => Show (Plane3d (space @ units) defines)
+deriving instance Show (Plane3d (space @ units) defines)
 
 instance FFI (Plane3d FFI.Coordinates defines) where
   representation = FFI.classRepresentation "Plane3d"
@@ -2285,7 +2285,7 @@ instance
 
 deriving instance Eq (Frame3d (space @ units) defines)
 
-deriving instance Show (Quantity units) => Show (Frame3d (space @ units) defines)
+deriving instance Show (Frame3d (space @ units) defines)
 
 instance FFI (Frame3d FFI.Coordinates defines) where
   representation = FFI.classRepresentation "Frame3d"
@@ -2311,7 +2311,7 @@ deriving instance Eq (Transform3d tag (space @ units))
 
 deriving instance Ord (Transform3d tag (space @ units))
 
-deriving instance Show (Quantity units) => Show (Transform3d tag (space @ units))
+deriving instance Show (Transform3d tag (space @ units))
 
 instance HasUnits (Transform3d tag (space @ units)) units
 

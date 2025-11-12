@@ -91,7 +91,7 @@ type Bounds :: Type -> Type
 
 -- | A range of possible values, with a lower bound and upper bound.
 data Bounds units = Ordered## Double# Double#
-  deriving (Eq)
+  deriving (Eq, Show)
 
 instance HasField "endpoints" (Bounds units) (Quantity units, Quantity units) where
   getField = endpoints
@@ -104,8 +104,6 @@ instance HasField "upper" (Bounds units) (Quantity units) where
 
 instance HasField "width" (Bounds units) (Quantity units) where
   getField = width
-
-deriving instance Show (Quantity units) => Show (Bounds units)
 
 {-| Construct a bounding range from two given values (endpoints).
 

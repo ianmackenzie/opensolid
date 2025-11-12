@@ -45,7 +45,7 @@ data Neighborhood units = Neighborhood
   , radius :: Number
   }
 
-deriving instance Show (Quantity units) => Show (Neighborhood units)
+deriving instance Show (Neighborhood units)
 
 neighborhood :: Tolerance units => Int -> Quantity units -> Neighborhood units
 neighborhood n value = do

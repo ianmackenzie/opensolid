@@ -47,8 +47,6 @@ import Data.Coerce qualified
 import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty ((:|)))
-import Data.Text (Text)
-import Data.Text qualified
 import Foreign.Storable (Storable)
 import OpenSolid.Arithmetic
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
@@ -62,7 +60,7 @@ import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Unitless (Unitless)
-import OpenSolid.Units (CubicMeters, Meters, Radians, SquareMeters, type (#*#), type (#/#))
+import OpenSolid.Units (type (#*#), type (#/#))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
 import Prelude
@@ -70,16 +68,12 @@ import Prelude
   , Eq
   , Ord
   , Show
-  , ShowS
-  , ($)
   , (*)
   , (+)
   , (-)
-  , (.)
   , (/)
   , (<)
   , (<=)
-  , (<>)
   , (>)
   , (>=)
   , type (~)
@@ -89,33 +83,13 @@ import Prelude qualified
 type role Quantity phantom
 
 type Quantity :: Type -> Type
-newtype Quantity units = Quantity Double deriving (Eq, Ord)
+newtype Quantity units = Quantity Double deriving (Eq, Ord, Show)
 
 {-# COMPLETE Quantity## #-}
 
 {-# INLINE Quantity## #-}
 pattern Quantity## :: Double# -> Quantity units
 pattern Quantity## x## = Quantity (D# x##)
-
-instance Show (Quantity Unitless) where
-  show (Quantity x) = Prelude.show x
-
-showsPrecImpl :: Text -> Int -> Quantity units -> ShowS
-showsPrecImpl constructor prec (Quantity x) =
-  Prelude.showParen (prec > 10) $
-    Prelude.showString (Data.Text.unpack (constructor <> " ")) . Prelude.showsPrec 11 x
-
-instance Show (Quantity Meters) where
-  showsPrec = showsPrecImpl "Length.meters"
-
-instance Show (Quantity Radians) where
-  showsPrec = showsPrecImpl "Angle.radians"
-
-instance Show (Quantity SquareMeters) where
-  showsPrec = showsPrecImpl "Area.squareMeters"
-
-instance Show (Quantity CubicMeters) where
-  showsPrec = showsPrecImpl "Area.cubicMeters"
 
 deriving newtype instance units ~ Unitless => Prelude.Num (Quantity units)
 
