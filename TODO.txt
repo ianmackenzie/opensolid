@@ -6,8 +6,6 @@ Switch axis, plane, frame types over to being records?
 
 Juse use Aeson directly for JSON encoding/decoding?
 
-Remove e.g. Int.fromInt64 where possible
-
 Remove custom HasField instances
 
 Flip argument order in Composition typeclass
