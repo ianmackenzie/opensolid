@@ -2,8 +2,6 @@
 
 module Main (main) where
 
-import Data.List.NonEmpty (NonEmpty ((:|)))
-import Data.Text (Text)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
@@ -13,7 +11,6 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.CoordinateSystem (UvCoordinates, UvSpace)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -34,7 +31,6 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -42,25 +38,9 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
-  ( cross
-  , dot
-  , (#/)
-  , (&)
-  , (*.)
-  , (-.)
-  , (.%.)
-  , (.*.)
-  , (.+.)
-  , (.-)
-  , (.-.)
-  , (./.)
-  , type (@)
-  )
-import OpenSolid.Quantity (Quantity)
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Surface3d qualified as Surface3d
@@ -68,9 +48,7 @@ import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
-import OpenSolid.Tolerance (Tolerance, (~=))
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters, Unitless, type (#/#))
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d qualified as Vector2d

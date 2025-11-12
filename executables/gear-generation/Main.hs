@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Data.Text (Text)
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Curve2d qualified as Curve2d
@@ -12,17 +11,14 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude ((*.), type (@))
+import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result (Result)
 import OpenSolid.Result qualified as Result
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
-import OpenSolid.Tolerance (Tolerance)
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters)
 import OpenSolid.World3d qualified as World3d
 
 gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))

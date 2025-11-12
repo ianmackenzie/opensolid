@@ -1,13 +1,11 @@
 module Main (main) where
 
-import Data.List.NonEmpty (NonEmpty ((:|)))
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.IO qualified as IO
-import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Prelude ((.+.), (./.))
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 main :: IO ()

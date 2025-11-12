@@ -6,7 +6,7 @@ import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.Prelude (compose, negative, (.*.), (.+.))
+import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl

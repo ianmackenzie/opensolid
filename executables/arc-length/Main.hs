@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Data.Text (Text)
 import OpenSolid.Area qualified as Area
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve2d (Curve2d)
@@ -14,11 +13,10 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude ((*.), (.*.), (.+.), (.-.), (./.), type (@))
+import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters)
 import Prelude hiding (length)
 
 data Space

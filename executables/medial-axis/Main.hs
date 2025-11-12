@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Data.Text (Text)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color qualified as Color
@@ -15,14 +14,12 @@ import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Prelude ((*.), type (@))
+import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
-import OpenSolid.Tolerance (Tolerance)
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters)
 
 data Global
 
