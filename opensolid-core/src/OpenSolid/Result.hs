@@ -13,6 +13,7 @@ module OpenSolid.Result
   )
 where
 
+import Data.Foldable qualified
 import Data.Text (Text)
 import OpenSolid.Error qualified as Error
 import OpenSolid.List (List)
@@ -88,19 +89,11 @@ try result = case result of
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM
 
-applyForward :: (b -> a -> Result x b) -> Result x b -> a -> Result x b
-applyForward f (Success acc) item = f acc item
-applyForward _ failure _ = failure
-
 foldl :: Foldable list => (b -> a -> Result x b) -> b -> list a -> Result x b
-foldl function init list = Prelude.foldl' (applyForward function) (Success init) list
-
-applyBackward :: (a -> b -> Result x b) -> a -> Result x b -> Result x b
-applyBackward f item (Success acc) = f item acc
-applyBackward _ _ failure = failure
+foldl = Data.Foldable.foldlM
 
 foldr :: Foldable list => (a -> b -> Result x b) -> b -> list a -> Result x b
-foldr function init list = Prelude.foldr (applyBackward function) (Success init) list
+foldr = Data.Foldable.foldrM
 
 sequence :: List (Result x a) -> Result x (List a)
 sequence = Prelude.sequence
