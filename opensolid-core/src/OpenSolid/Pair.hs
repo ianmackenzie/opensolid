@@ -20,11 +20,14 @@ second (_, b) = b
 map :: (a -> b) -> (a, a) -> (b, b)
 map f (a1, a2) = (f a1, f a2)
 
+{-# INLINE mapFirst #-}
 mapFirst :: (a1 -> a2) -> (a1, b) -> (a2, b)
 mapFirst f (a, b) = (f a, b)
 
+{-# INLINE mapSecond #-}
 mapSecond :: (b1 -> b2) -> (a, b1) -> (a, b2)
 mapSecond f (a, b) = (a, f b)
 
+{-# INLINE decorate #-}
 decorate :: (a -> b) -> a -> (a, b)
 decorate function item = (item, function item)
