@@ -35,6 +35,7 @@ module OpenSolid.List
   , prepend
   , combine
   , concat
+  , concatMap
   , foldl
   , foldr
   , reverse
@@ -209,6 +210,9 @@ combine = Prelude.foldMap
 
 concat :: List (List a) -> List a
 concat = Data.List.concat
+
+concatMap :: (a -> List b) -> List a -> List b
+concatMap = Prelude.concatMap
 
 foldl :: (b -> a -> b) -> b -> List a -> b
 foldl = Data.List.foldl'
