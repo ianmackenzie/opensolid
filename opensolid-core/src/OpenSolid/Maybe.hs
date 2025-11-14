@@ -2,7 +2,6 @@ module OpenSolid.Maybe
   ( Maybe (Just, Nothing)
   , map
   , map2
-  , withDefault
   , find
   , values
   , random
@@ -24,10 +23,6 @@ map = Prelude.fmap
 map2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
 map2 function (Just first) second = map (function first) second
 map2 _ Nothing _ = Nothing
-
-withDefault :: a -> Maybe a -> a
-withDefault _ (Just value) = value
-withDefault value Nothing = value
 
 find :: (a -> Maybe b) -> List a -> Maybe b
 find _ [] = Nothing
