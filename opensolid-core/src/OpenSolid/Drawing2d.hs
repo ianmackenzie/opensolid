@@ -53,7 +53,6 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
@@ -83,13 +82,17 @@ instance FFI (Attribute FFI.Space) where
   representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute"
 
 drawingText :: Text -> Drawing2d space -> Maybe Text
-drawingText _ Empty = Nothing
-drawingText indent (Node name attributes children) = do
+drawingText indent drawing = case drawing of
+  Node name attributes children -> Just (nodeText indent name attributes children)
+  Empty -> Nothing
+
+nodeText :: Text -> Text -> List (Attribute space) -> List (Drawing2d space) -> Text
+nodeText indent name attributes children = do
   let attributeLines = List.map (attributeText ("\n" <> indent <> "   ")) attributes
   let openingTag = indent <> "<" <> name <> Text.concat attributeLines <> ">"
   let childLines = List.filterMap (drawingText (indent <> "  ")) children
   let closingTag = indent <> "</" <> name <> ">"
-  Just (Text.multiline (openingTag : childLines) <> "\n" <> closingTag)
+  Text.multiline (openingTag : childLines) <> "\n" <> closingTag
 
 attributeText :: Text -> Attribute space -> Text
 attributeText indent (Attribute name value) = Text.concat [indent, name, "=\"", value, "\""]
@@ -124,7 +127,8 @@ toSvg viewBox drawing = do
         ]
   Text.multiline
     [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-    , Maybe.withDefault "" (drawingText "" (Node "svg" attributes [drawing])) <> "\n"
+    , nodeText "" "svg" attributes [drawing]
+    , "" -- Ensure file has trailing newline
     ]
 
 {-| Render SVG to a file.
