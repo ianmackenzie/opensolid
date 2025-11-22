@@ -58,7 +58,7 @@ with Tolerance(Length.meters(1e-9)):
     body = Body3d.extruded(World3d.front_plane, profile, -length / 2, length / 2)
 
     # Create a 3D model containing the body and write to GLB file
-    material = PbrMaterial.metal(Color.rgb_float(0.913, 0.921, 0.925), roughness=0.3)
+    material = PbrMaterial.metal(Color.rgb1(0.913, 0.921, 0.925), roughness=0.3)
     model = Model3d.body(body).with_pbr_material(material)
     resolution = Resolution.max_error(Length.millimeters(0.1))
     Gltf(model).write_binary("ibeam.glb", resolution)
