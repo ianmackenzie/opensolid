@@ -1,3 +1,15 @@
+Add Tolerance.zero as shorthand for 'Tolerance.using Quantity.zero'
+
+Use 'do' everywhere after 'Tolerance.using' or 'Tolerance.zero'
+
+Remove Tolerance.squared, Tolerance.squared# in favour of explicit e.g. 'Tolerance.using (Quantity.squared ?tolerance)'
+-> try to avoid use of squared tolerance in general, if possible
+  -> e.g. specialized implementation of Intersects for Curve2d and VectorCurve2d
+
+Rename List.concatMap to List.collect, replace List.filterMap with Maybe.collect?
+-> 'collect' means roughly 'collect all of the callback's results into a list',
+   where for Result and IO that means the resulting list itself has to be wrapped in an IO or Result
+
 Enable DuplicateRecordField and NoFieldSelectors everywhere
 -> also enable -Wincomplete-record-selectors and -Wincomplete-record-updates but -Wno-partial-fields,
    to allow record fields in union cases but error if those are accessed in an unsafe way?
