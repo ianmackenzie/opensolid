@@ -1,8 +1,11 @@
-Add Tolerance.zero as shorthand for 'Tolerance.using Quantity.zero'
+Refactor Tolerance:
+- Switch Tolerance functions to be 'context managers' (e.g. squared, squared#)
+- Add Tolerance.zero as shorthand for 'Tolerance.using Quantity.zero'
+- Add Tolerance.scale for convenience (search for gBounds and switch over to Tolerance.scale)
+- Use 'do' everywhere after 'Tolerance.using' or 'Tolerance.zero'
+- Use direct comparison with Quantity.abs in [Curve,SurfaceFunction].sqrt# functions?
 
-Use 'do' everywhere after 'Tolerance.using' or 'Tolerance.zero'
-
-Remove Tolerance.squared, Tolerance.squared# in favour of explicit e.g. 'Tolerance.using (Quantity.squared ?tolerance)'
+Remove Tolerance.squared, Tolerance.squared# in favour of explicit e.g. 'Tolerance.using (Quantity.squared ?tolerance)'?
 -> try to avoid use of squared tolerance in general, if possible
   -> e.g. specialized implementation of Intersects for Curve2d and VectorCurve2d
 
