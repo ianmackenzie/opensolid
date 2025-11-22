@@ -188,7 +188,7 @@ pickSmallestBy = Test.check 100 "pickSmallestBy" Test.do
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
   let smallestValueIsCorrect =
-        List.allSatisfy (\value -> Quantity.abs value >= Quantity.abs smallestValue) remainingValues
+        List.allTrue [Quantity.abs smallestValue <= Quantity.abs value | value <- remainingValues]
   let allValuesArePresent =
         NonEmpty.sort originalValues == NonEmpty.sort (smallestValue :| remainingValues)
   Test.expect (smallestValueIsCorrect && allValuesArePresent)
@@ -205,7 +205,7 @@ pickLargestBy = Test.check 100 "pickLargestBy" Test.do
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
   let largestValueIsCorrect =
-        List.allSatisfy (\value -> Quantity.abs value <= Quantity.abs largestValue) remainingValues
+        List.allTrue [Quantity.abs largestValue >= Quantity.abs value | value <- remainingValues]
   let allValuesArePresent =
         NonEmpty.sort originalValues == NonEmpty.sort (largestValue :| remainingValues)
   Test.expect (largestValueIsCorrect && allValuesArePresent)
