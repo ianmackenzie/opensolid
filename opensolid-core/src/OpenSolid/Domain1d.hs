@@ -1,6 +1,3 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE NoFieldSelectors #-}
-
 module OpenSolid.Domain1d
   ( Domain1d
   , Boundary

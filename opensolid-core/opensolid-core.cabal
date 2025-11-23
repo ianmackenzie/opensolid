@@ -45,12 +45,9 @@ common config
     -Werror
     -Wcompat
     -Widentities
-    -Wincomplete-record-updates
-    -Wincomplete-uni-patterns
     -Wmissing-signatures
     -Wmissing-exported-signatures
     -Wmissing-home-modules
-    -Wpartial-fields
     -Wsafe
     -Wno-missed-extra-shared-lib
     -Wno-x-data-list-nonempty-unzip
@@ -65,7 +62,7 @@ common config
     DataKinds
     DeriveAnyClass
     DerivingStrategies
-    DisambiguateRecordFields
+    DuplicateRecordFields
     ExplicitNamespaces
     FunctionalDependencies
     GADTs

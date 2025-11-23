@@ -1,6 +1,3 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE NoFieldSelectors #-}
-
 module OpenSolid.Solve1d
   ( Neighborhood
   , neighborhood
