@@ -1,3 +1,24 @@
+Update Bounded2d to assume the type has 'space' and 'units' type parameters?
+-> and Bounded3d, and similar classes...
+-> ApproximateEquality?
+-> search for '-> units' in class declarations
+-> search for all instances of HasUnits to see if HasUnits is still needed...
+  -> stuff like 'LineSegment2d vertex' does not have a trailing 'units' type parameter!
+
+Refactor CoordinateSystem module now that it no longer has a CoordinateSystem type
+
+Add modules for UvRegion, UvCurve etc.
+
+Switch more things over to 'nominal' type role and non-GADT style type definitions?
+
+Switch to Meters-default naming convention, e.g.:
+- data Point2D# space units
+- type Point2D space = Point2D# space Meters
+- type UvPoint = Point2D# UvSpace Unitless
+
+Search for 'UvSpace Unitless' and 'space Meters' to see where type aliases can be used
+-> or new ones introduced...
+
 Add more Curve2d intersection tests
 -> use cycloid as example of curve with singularity?
   -> make sure to test *end* singularity as well
