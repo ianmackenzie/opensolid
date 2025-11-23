@@ -18,7 +18,7 @@ import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
-main = Tolerance.using (Length.meters 1e-9) do
+main = Tolerance.using Length.nanometer do
   let p1 = Point2d.meters 0 -2
   let p2 = Point2d.meters 1 0
   let v2 = Vector2d.meters 0 2

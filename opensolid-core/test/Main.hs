@@ -31,7 +31,7 @@ import Tests.VectorBounds3d qualified
 
 tests :: List Test
 tests =
-  Tolerance.using (Length.meters 1e-9) $
+  Tolerance.using Length.nanometer $
     [ Test.group "Tests.Parameter" Tests.Parameter.tests
     , Test.group "Tests.Quantity" Tests.Quantity.tests
     , Test.group "Tests.Bounds" Tests.Bounds.tests

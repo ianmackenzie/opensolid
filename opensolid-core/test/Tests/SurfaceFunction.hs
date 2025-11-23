@@ -116,7 +116,7 @@ firstDerivativeIsConsistent surfaceFunction p0 parameter = do
   let value2 = SurfaceFunction.evaluate surfaceFunction p2
   let numericalDerivative = (value2 .-. value1) ./. (2 *. samplingRadius)
   let analyticalDerivative = SurfaceFunction.evaluate partialDerivative p0
-  Tolerance.using (Length.meters 1e-6) do
+  Tolerance.using Length.micrometer do
     Test.expect (numericalDerivative ~= analyticalDerivative)
       & Test.output "numericalDerivative" numericalDerivative
       & Test.output "analyticalDerivative" analyticalDerivative

@@ -333,7 +333,7 @@ secondDerivativeIsConsistent curve tValue = do
   let numericalSecondDerivative = (v2 .-. v1) ./. (2 *. dt)
   let secondDerivative = curve.derivative.derivative
   let analyticSecondDerivative = VectorCurve2d.evaluate secondDerivative tValue
-  Tolerance.using (Length.meters 1e-6) do
+  Tolerance.using Length.micrometer do
     Test.expect (numericalSecondDerivative ~= analyticSecondDerivative)
       & Test.output "numericalSecondDerivative" numericalSecondDerivative
       & Test.output "analyticSecondDerivative" analyticSecondDerivative

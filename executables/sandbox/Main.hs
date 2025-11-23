@@ -440,7 +440,7 @@ testCurveSqrt = Tolerance.using 1e-6 do
     )
 
 main :: IO ()
-main = Tolerance.using (Length.meters 1e-9) do
+main = Tolerance.using Length.nanometer do
   testScalarArithmetic
   testVectorArithmetic
   testBoundsArithmetic
