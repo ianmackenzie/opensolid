@@ -675,7 +675,7 @@ toVertexLoop resolution loop = do
   let trailingVertices curve = do
         let polyline = Curve2d.toPolyline resolution curve
         NonEmpty.rest polyline.vertices
-  let allVertices = List.combine trailingVertices loop
+  let allVertices = List.combine trailingVertices (NonEmpty.toList loop)
   case allVertices of
     NonEmpty vertices -> vertices
     [] -> throw (InternalError "Should always have at least one vertex")

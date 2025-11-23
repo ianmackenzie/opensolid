@@ -32,10 +32,8 @@ module OpenSolid.List
   , find
   , contains
   , indexOf
-  , prepend
   , combine
   , concat
-  , concatMap
   , foldl
   , foldr
   , reverse
@@ -72,7 +70,6 @@ import System.Random qualified
 import Prelude
   ( Bool (True)
   , Eq
-  , Foldable
   , Int
   , Maybe (Just, Nothing)
   , Ord
@@ -202,17 +199,11 @@ contains = Data.List.elem
 indexOf :: Eq a => a -> List a -> Maybe Int
 indexOf = Data.List.elemIndex
 
-prepend :: Foldable list => list a -> List a -> List a
-prepend items list = Prelude.foldr (:) list items
-
-combine :: Foldable list => (a -> List b) -> list a -> List b
+combine :: (a -> List b) -> List a -> List b
 combine = Prelude.foldMap
 
 concat :: List (List a) -> List a
-concat = Data.List.concat
-
-concatMap :: (a -> List b) -> List a -> List b
-concatMap = Prelude.concatMap
+concat = Prelude.concat
 
 foldl :: (b -> a -> b) -> b -> List a -> b
 foldl = Data.List.foldl'

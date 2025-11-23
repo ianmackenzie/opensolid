@@ -653,7 +653,7 @@ toMesh resolution (Body3d boundarySurfaces) = do
           (addBoundaryInnerEdgeVertices resolution surfaceSegmentsById)
           Map.empty
           boundarySurfaces
-  Mesh.combine (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById) boundarySurfaces
+  Mesh.combine (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById) boundarySurfaceList
 
 boundarySurfaceSegments ::
   Resolution units ->

@@ -262,7 +262,7 @@ overlappingSegments ::
   List EndpointIntersection ->
   Maybe (NonEmpty OverlappingSegment)
 overlappingSegments curve1 curve2 endpointIntersections =
-  case List.concatMap candidateOverlappingSegment (List.successive (,) endpointIntersections) of
+  case List.combine candidateOverlappingSegment (List.successive (,) endpointIntersections) of
     [] -> Nothing
     NonEmpty candidateOverlappingSegments -> do
       let boundsWidth1 segment = Bounds.width segment.tBounds1

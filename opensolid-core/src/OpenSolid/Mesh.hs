@@ -15,8 +15,6 @@ module OpenSolid.Mesh
   )
 where
 
-import Data.Foldable1 (Foldable1)
-import Data.Foldable1 qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Int qualified as Int
@@ -55,17 +53,17 @@ faceVertices (Mesh vs fs) = do
 map :: (a -> b) -> Mesh a -> Mesh b
 map f (Mesh vs fs) = Mesh (Array.map f vs) fs
 
-concat :: NonEmpty (Mesh a) -> Mesh a
+concat :: List (Mesh a) -> Mesh a
 concat meshes = do
-  let vertexArrays = NonEmpty.map vertices meshes
-  let faceIndexLists = NonEmpty.toList (NonEmpty.map faceIndices meshes)
-  let arrayLengths = NonEmpty.toList (NonEmpty.map Array.length vertexArrays)
+  let vertexArrays = List.map vertices meshes
+  let faceIndexLists = List.map faceIndices meshes
+  let arrayLengths = List.map Array.length vertexArrays
   let combinedVertices = Array.fromList (List.combine Array.toList vertexArrays)
   let combinedFaceIndices = List.concat (offsetFaceIndices 0 arrayLengths faceIndexLists)
   Mesh combinedVertices combinedFaceIndices
 
-combine :: Foldable1 list => (a -> Mesh b) -> list a -> Mesh b
-combine toMesh values = concat (NonEmpty.map toMesh (Data.Foldable1.toNonEmpty values))
+combine :: (a -> Mesh b) -> List a -> Mesh b
+combine toMesh values = concat (List.map toMesh values)
 
 offsetFaceIndices :: Int -> List Int -> List (List (Int, Int, Int)) -> List (List (Int, Int, Int))
 offsetFaceIndices _ [] _ = []
