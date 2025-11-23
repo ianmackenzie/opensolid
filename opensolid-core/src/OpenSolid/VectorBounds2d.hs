@@ -91,10 +91,10 @@ hull3 ::
   Vector2d (space @ units) ->
   VectorBounds2d (space @ units)
 hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) = do
-  let minX = Quantity.min (Quantity.min x1 x2) x3
-  let maxX = Quantity.max (Quantity.max x1 x2) x3
-  let minY = Quantity.min (Quantity.min y1 y2) y3
-  let maxY = Quantity.max (Quantity.max y1 y2) y3
+  let minX = min (min x1 x2) x3
+  let maxX = max (max x1 x2) x3
+  let minY = min (min y1 y2) y3
+  let maxY = max (max y1 y2) y3
   VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)
 
 hull4 ::
@@ -104,10 +104,10 @@ hull4 ::
   Vector2d (space @ units) ->
   VectorBounds2d (space @ units)
 hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) = do
-  let minX = Quantity.min (Quantity.min (Quantity.min x1 x2) x3) x4
-  let maxX = Quantity.max (Quantity.max (Quantity.max x1 x2) x3) x4
-  let minY = Quantity.min (Quantity.min (Quantity.min y1 y2) y3) y4
-  let maxY = Quantity.max (Quantity.max (Quantity.max y1 y2) y3) y4
+  let minX = min (min (min x1 x2) x3) x4
+  let maxX = max (max (max x1 x2) x3) x4
+  let minY = min (min (min y1 y2) y3) y4
+  let maxY = max (max (max y1 y2) y3) y4
   VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)
 
 hullN :: NonEmpty (Vector2d (space @ units)) -> VectorBounds2d (space @ units)
@@ -122,12 +122,7 @@ hullN (Vector2d x0 y0 :| rest) = go x0 x0 y0 y0 rest
     VectorBounds2d (space @ units)
   go xLow xHigh yLow yHigh [] = VectorBounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
   go xLow xHigh yLow yHigh (Vector2d x y : remaining) =
-    go
-      (Quantity.min xLow x)
-      (Quantity.max xHigh x)
-      (Quantity.min yLow y)
-      (Quantity.max yHigh y)
-      remaining
+    go (min xLow x) (max xHigh x) (min yLow y) (max yHigh y) remaining
 
 aggregate2 ::
   VectorBounds2d (space @ units) ->
@@ -160,10 +155,10 @@ aggregateImpl xLow xHigh yLow yHigh [] = VectorBounds2d (Bounds xLow xHigh) (Bou
 aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
   let VectorBounds2d (Bounds xLowNext xHighNext) (Bounds yLowNext yHighNext) = next
   aggregateImpl
-    (Quantity.min xLow xLowNext)
-    (Quantity.max xHigh xHighNext)
-    (Quantity.min yLow yLowNext)
-    (Quantity.max yHigh yHighNext)
+    (min xLow xLowNext)
+    (max xHigh xHighNext)
+    (min yLow yLowNext)
+    (max yHigh yHighNext)
     remaining
 
 polar :: Bounds units -> Bounds Radians -> VectorBounds2d (space @ units)
@@ -189,8 +184,8 @@ magnitude (VectorBounds2d x y) = Bounds.hypot2 x y
 
 maxMagnitude :: VectorBounds2d (space @ units) -> Quantity units
 maxMagnitude (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
-  let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
-  let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
+  let xMagnitude = max (Quantity.abs minX) (Quantity.abs maxX)
+  let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
   Quantity.hypot2 xMagnitude yMagnitude
 
 maxSquaredMagnitude ::
@@ -201,8 +196,8 @@ maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude#
 
 maxSquaredMagnitude# :: VectorBounds2d (space @ units) -> Quantity (units #*# units)
 maxSquaredMagnitude# (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
-  let xMagnitude = Quantity.max (Quantity.abs minX) (Quantity.abs maxX)
-  let yMagnitude = Quantity.max (Quantity.abs minY) (Quantity.abs maxY)
+  let xMagnitude = max (Quantity.abs minX) (Quantity.abs maxX)
+  let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
   Quantity.squared# xMagnitude .+. Quantity.squared# yMagnitude
 
 direction :: VectorBounds2d (space @ units) -> DirectionBounds2d space

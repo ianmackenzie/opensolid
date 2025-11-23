@@ -21,7 +21,6 @@ where
 
 import Data.Array ((!))
 import Data.Array qualified
-import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -67,12 +66,12 @@ map = Prelude.fmap
 
 map2 :: (a -> b -> c) -> Array a -> Array b -> Array c
 map2 f array1 array2 =
-  initialize (Int.min (length array1) (length array2)) (\i -> f (get i array1) (get i array2))
+  initialize (min (length array1) (length array2)) (\i -> f (get i array1) (get i array2))
 
 map3 :: (a -> b -> c -> d) -> Array a -> Array b -> Array c -> Array d
 map3 f (Array array1) (Array array2) (Array array3) = do
   let newItem i = f (array1 ! i) (array2 ! i) (array3 ! i)
-  let n = Int.min (Int.min (Prelude.length array1) (Prelude.length array2)) (Prelude.length array3)
+  let n = min (min (Prelude.length array1) (Prelude.length array2)) (Prelude.length array3)
   Array (Data.Array.listArray (0, n - 1) (List.map newItem [0 .. n - 1]))
 
 mapWithIndex :: (Int -> a -> b) -> Array a -> Array b

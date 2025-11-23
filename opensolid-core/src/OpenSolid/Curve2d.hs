@@ -431,7 +431,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
   case Direction2d.from givenStartPoint givenEndPoint of
     Ok chordDirection -> do
       let halfDistance = 0.5 *. Point2d.distanceFrom givenStartPoint givenEndPoint
-      let radius = Quantity.max (Quantity.abs givenRadius) halfDistance
+      let radius = max (Quantity.abs givenRadius) halfDistance
       let offsetMagnitude =
             Quantity.sqrt# (Quantity.squared# radius .-. Quantity.squared# halfDistance)
       let offsetDirection = Direction2d.rotateLeft chordDirection
@@ -742,8 +742,8 @@ g2 (curve1, t1) (curve2, t2) radius =
     let first2 = VectorCurve2d.evaluate curve2.derivative t2
     let Vector2d dxdt1 dydt1 = first1
     let Vector2d dxdt2 dydt2 = first2
-    let dxdtMin = Quantity.min (Quantity.abs dxdt1) (Quantity.abs dxdt2)
-    let dydtMin = Quantity.min (Quantity.abs dydt1) (Quantity.abs dydt2)
+    let dxdtMin = min (Quantity.abs dxdt1) (Quantity.abs dxdt2)
+    let dydtMin = min (Quantity.abs dydt1) (Quantity.abs dydt2)
     let orientation =
           if dxdtMin >= dydtMin
             then Orientation2d.horizontal

@@ -4,11 +4,6 @@ module OpenSolid.Number
   , toDouble
   , fromInt
   , parse
-  , ceiling
-  , round
-  , min
-  , max
-  , floor
   , pi
   , halfPi
   , twoPi
@@ -75,18 +70,6 @@ fromInt = Prelude.fromIntegral
 parse :: Text -> Result Text Number
 parse = Text.Parse.number
 
-{-# INLINE floor #-}
-floor :: Number -> Int
-floor (Quantity x) = Prelude.floor x
-
-{-# INLINE ceiling #-}
-ceiling :: Number -> Int
-ceiling (Quantity x) = Prelude.ceiling x
-
-{-# INLINE round #-}
-round :: Number -> Int
-round (Quantity x) = Prelude.round x
-
 infinity :: Number
 infinity = Quantity.infinity
 
@@ -113,12 +96,6 @@ interpolateFrom = Quantity.interpolateFrom
 
 midpoint :: Number -> Number -> Number
 midpoint = Quantity.midpoint
-
-min :: Number -> Number -> Number
-min = Quantity.min
-
-max :: Number -> Number -> Number
-max = Quantity.max
 
 pi :: Number
 pi = Prelude.pi

@@ -50,7 +50,6 @@ import Data.Colour.SRGB qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Int qualified as Int
-import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
@@ -88,7 +87,7 @@ toRgb1 color = do
 toRgb255 :: Color -> (Int, Int, Int)
 toRgb255 color = do
   let (r, g, b) = toRgb1 color
-  let toInt component = Number.round (component .* 255)
+  let toInt component = round (component .* 255)
   (toInt r, toInt g, toInt b)
 
 {-| Get the hue, saturation and lightness of a color.

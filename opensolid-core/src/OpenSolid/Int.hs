@@ -6,8 +6,6 @@ module OpenSolid.Int
   , isOdd
   , sign
   , abs
-  , min
-  , max
   , clampTo
   , factorial
   , choose
@@ -53,12 +51,6 @@ sign value = if value >= 0 then Positive else Negative
 
 abs :: Int -> Int
 abs = Prelude.abs
-
-min :: Int -> Int -> Int
-min = Prelude.min
-
-max :: Int -> Int -> Int
-max = Prelude.max
 
 {-# INLINE clampTo #-}
 clampTo :: (Int, Int) -> Int -> Int

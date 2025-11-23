@@ -28,6 +28,11 @@ module OpenSolid.Prelude
   , (-)
   , (/)
   , (*)
+  , min
+  , max
+  , floor
+  , ceiling
+  , round
   , div
   , mod
   , not

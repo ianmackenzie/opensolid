@@ -137,8 +137,8 @@ tightBounds Subproblem{uvBounds, fValues, fBounds, fuBounds, fvBounds} = do
   let Bounds low0 high0 = fBounds
   let Bounds lowUV highUV = Internal.curveBoundsOver v1 v2 v1Bounds v2Bounds fvBounds
   let Bounds lowVU highVU = Internal.curveBoundsOver u1 u2 u1Bounds u2Bounds fuBounds
-  let low = Quantity.max low0 (Quantity.max lowUV lowVU)
-  let high = Quantity.min high0 (Quantity.min highUV highVU)
+  let low = max low0 (max lowUV lowVU)
+  let high = min high0 (min highUV highVU)
   assert (low <= high) (Bounds low high)
 
 isZeroCandidate :: Tolerance units => Subproblem units -> Bool

@@ -36,7 +36,6 @@ import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-import Prelude (max)
 
 data Error
   = FirstCurveIsPoint
@@ -122,7 +121,7 @@ toEndpointIntersection curve1 curve2 (t1, t2) = do
   let (tangentVector1, scale1, singular1) = tangentSignature curve1 t1
   let (tangentVector2, scale2, singular2) = tangentSignature curve2 t2
   let crossProduct = tangentVector1 `cross` tangentVector2
-  let scale = Quantity.max scale1 scale2
+  let scale = max scale1 scale2
   let intersectionPoint =
         if scale .*. crossProduct ~= Quantity.zero
           then IntersectionPoint.tangent t1 t2

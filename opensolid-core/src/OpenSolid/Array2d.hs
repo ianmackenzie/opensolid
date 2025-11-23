@@ -13,7 +13,6 @@ import Data.Array ((!))
 import Data.Array qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
-import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import Prelude qualified
@@ -43,8 +42,8 @@ map = Prelude.fmap
 
 map2 :: (a -> b -> c) -> Array2d a -> Array2d b -> Array2d c
 map2 f (Array2d (n1, m1) array1) (Array2d (n2, m2) array2) = do
-  let n = Int.min n1 n2
-  let m = Int.min m1 m2
+  let n = min n1 n2
+  let m = min m1 m2
   let newItem index = do
         let i = index `div` m
         let j = index `mod` m

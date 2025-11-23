@@ -126,9 +126,9 @@ adjacent (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) =
 
 intersectionWidth :: Domain1d -> Domain1d -> Number
 intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do
-  let low = Number.max (i1 ./. n1) (i2 ./. n2)
-  let high = Number.min (j1 ./. n1) (j2 ./. n2)
-  Number.max (high .-. low) 0
+  let low = max (i1 ./. n1) (i2 ./. n2)
+  let high = min (j1 ./. n1) (j2 ./. n2)
+  max (high .-. low) 0
 
 samplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
 samplingPoints predicate = 0 :| collectSamplingPoints predicate Bounds.unitInterval [1]

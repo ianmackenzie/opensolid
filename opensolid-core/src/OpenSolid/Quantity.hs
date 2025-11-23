@@ -18,8 +18,6 @@ module OpenSolid.Quantity
   , hypot2
   , hypot3
   , abs
-  , min
-  , max
   , minmax
   , smaller
   , larger
@@ -68,6 +66,8 @@ import Prelude
   , Eq
   , Ord
   , Show
+  , max
+  , min
   , (*)
   , (+)
   , (-)
@@ -222,14 +222,6 @@ abs (Quantity x) = Quantity (Prelude.abs x)
 
 clampTo :: Bounds units -> Quantity units -> Quantity units
 clampTo bounds value = min (max (Bounds.lower bounds) value) (Bounds.upper bounds)
-
-{-# INLINE min #-}
-min :: Quantity units -> Quantity units -> Quantity units
-min = Prelude.min
-
-{-# INLINE max #-}
-max :: Quantity units -> Quantity units -> Quantity units
-max = Prelude.max
 
 {-# INLINE minmax #-}
 minmax :: (Quantity units, Quantity units) -> (Quantity units, Quantity units)

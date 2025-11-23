@@ -77,13 +77,14 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (max, min)
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
+import Prelude qualified
 
 type role Bounds phantom
 
@@ -297,20 +298,20 @@ infinite = Bounds (negative Quantity.infinity) Quantity.infinity
 
 aggregate2 :: Bounds units -> Bounds units -> Bounds units
 aggregate2 (Bounds low1 high1) (Bounds low2 high2) =
-  Bounds (Quantity.min low1 low2) (Quantity.max high1 high2)
+  Bounds (Prelude.min low1 low2) (Prelude.max high1 high2)
 
 aggregate3 :: Bounds units -> Bounds units -> Bounds units -> Bounds units
 aggregate3 (Bounds low1 high1) (Bounds low2 high2) (Bounds low3 high3) =
   Bounds
-    (Quantity.min (Quantity.min low1 low2) low3)
-    (Quantity.max (Quantity.max high1 high2) high3)
+    (Prelude.min (Prelude.min low1 low2) low3)
+    (Prelude.max (Prelude.max high1 high2) high3)
 
 -- | Build a bounding range containing all ranges in the given non-empty list.
 aggregateN :: NonEmpty (Bounds units) -> Bounds units
 aggregateN (Bounds low1 high1 :| rest) = do
   let go low high [] = Bounds low high
       go low high (Bounds nextLow nextHigh : remaining) =
-        go (Quantity.min low nextLow) (Quantity.max high nextHigh) remaining
+        go (Prelude.min low nextLow) (Prelude.max high nextHigh) remaining
   go low1 high1 rest
 
 -- | Attempt to find the intersection of two bounding ranges.
@@ -318,11 +319,11 @@ intersection :: Bounds units -> Bounds units -> Maybe (Bounds units)
 intersection (Bounds low1 high1) (Bounds low2 high2)
   | high1 < low2 = Nothing
   | low1 > high2 = Nothing
-  | otherwise = Just (Bounds (Quantity.max low1 low2) (Quantity.min high1 high2))
+  | otherwise = Just (Bounds (Prelude.max low1 low2) (Prelude.min high1 high2))
 
 {-# INLINE hull3 #-}
 hull3 :: Quantity units -> Quantity units -> Quantity units -> Bounds units
-hull3 a b c = Bounds (Quantity.min a (Quantity.min b c)) (Quantity.max a (Quantity.max b c))
+hull3 a b c = Bounds (Prelude.min a (Prelude.min b c)) (Prelude.max a (Prelude.max b c))
 
 {-# INLINE hull4 #-}
 hull4 :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> Bounds units
@@ -335,7 +336,7 @@ hullN :: NonEmpty (Quantity units) -> Bounds units
 hullN (first :| rest) = do
   let go low high [] = Bounds low high
       go low high (next : remaining) =
-        go (Quantity.min low next) (Quantity.max high next) remaining
+        go (Prelude.min low next) (Prelude.max high next) remaining
   go first first rest
 
 -- | Get the lower bound of a range.
@@ -366,7 +367,7 @@ width## (Bounds## low## high##) = high## -## low##
 
 {-# INLINE maxAbs #-}
 maxAbs :: Bounds units -> Quantity units
-maxAbs (Bounds low high) = Quantity.max (Quantity.abs low) (Quantity.abs high)
+maxAbs (Bounds low high) = Prelude.max (Quantity.abs low) (Quantity.abs high)
 
 {-# INLINE minAbs #-}
 minAbs :: Bounds units -> Quantity units
@@ -385,13 +386,13 @@ squared# (Bounds low high) = do
   if
     | low >= Quantity.zero -> Bounds ll hh
     | high <= Quantity.zero -> Bounds hh ll
-    | otherwise -> Bounds Quantity.zero (Quantity.max ll hh)
+    | otherwise -> Bounds Quantity.zero (Prelude.max ll hh)
 
 sqrt# :: Bounds (units #*# units) -> Bounds units
 sqrt# (Bounds low high) =
   Bounds
-    (Quantity.sqrt# (Quantity.max low Quantity.zero))
-    (Quantity.sqrt# (Quantity.max high Quantity.zero))
+    (Quantity.sqrt# (Prelude.max low Quantity.zero))
+    (Quantity.sqrt# (Prelude.max high Quantity.zero))
 
 sqrt :: Units.Squared units1 units2 => Bounds units2 -> Bounds units1
 sqrt = sqrt# . Units.unspecialize
@@ -493,15 +494,15 @@ abs :: Bounds units -> Bounds units
 abs bounds@(Bounds low high)
   | low >= Quantity.zero = bounds
   | high <= Quantity.zero = negative bounds
-  | otherwise = Bounds Quantity.zero (Quantity.max high (negative low))
+  | otherwise = Bounds Quantity.zero (Prelude.max high (negative low))
 
 min :: Bounds units -> Bounds units -> Bounds units
 min (Bounds low1 high1) (Bounds low2 high2) =
-  Bounds (Quantity.min low1 low2) (Quantity.min high1 high2)
+  Bounds (Prelude.min low1 low2) (Prelude.min high1 high2)
 
 max :: Bounds units -> Bounds units -> Bounds units
 max (Bounds low1 high1) (Bounds low2 high2) =
-  Bounds (Quantity.max low1 low2) (Quantity.max high1 high2)
+  Bounds (Prelude.max low1 low2) (Prelude.max high1 high2)
 
 smaller :: Bounds units -> Bounds units -> Bounds units
 smaller first second = do
@@ -512,21 +513,21 @@ smaller first second = do
     | high2 < low1 -> second
     | otherwise -> do
         let Bounds aggregateMin aggregateMax = aggregate2 first second
-        let high = Quantity.min high1 high2
-        Bounds (Quantity.max (negative high) aggregateMin) (Quantity.min aggregateMax high)
+        let high = Prelude.min high1 high2
+        Bounds (Prelude.max (negative high) aggregateMin) (Prelude.min aggregateMax high)
 
 larger :: Bounds units -> Bounds units -> Bounds units
 larger first second = do
   let Bounds low1 high1 = abs first
   let Bounds low2 high2 = abs second
-  let low = Quantity.max low1 low2
+  let low = Prelude.max low1 low2
   let aggregate = aggregate2 first second
   let Bounds aggregateMin aggregateMax = aggregate
   if
     | low1 > high2 -> first
     | low2 > high1 -> second
-    | aggregateMin > negative low -> Bounds (Quantity.max aggregateMin low) aggregateMax
-    | aggregateMax < low -> Bounds aggregateMin (Quantity.min aggregateMax (negative low))
+    | aggregateMin > negative low -> Bounds (Prelude.max aggregateMin low) aggregateMax
+    | aggregateMax < low -> Bounds aggregateMin (Prelude.min aggregateMax (negative low))
     | otherwise -> aggregate
 
 minimum :: NonEmpty (Bounds units) -> Bounds units
@@ -543,7 +544,7 @@ smallest list = do
         | low > clipRadius || high < negative clipRadius = current
         | otherwise =
             aggregate2 current $
-              Bounds (Quantity.max low (negative clipRadius)) (Quantity.min high clipRadius)
+              Bounds (Prelude.max low (negative clipRadius)) (Prelude.min high clipRadius)
   NonEmpty.foldl conditionalAggregate initial list
 
 largest :: NonEmpty (Bounds units) -> Bounds units
@@ -560,15 +561,15 @@ largest list = do
 sin :: Bounds Radians -> Bounds Unitless
 sin bounds@(Bounds low high) = do
   let (includesMin, includesMax) = sinIncludesMinMax bounds
-  let newLow = if includesMin then -1 else Quantity.min (Angle.sin low) (Angle.sin high)
-  let newHigh = if includesMax then 1 else Quantity.max (Angle.sin low) (Angle.sin high)
+  let newLow = if includesMin then -1 else Prelude.min (Angle.sin low) (Angle.sin high)
+  let newHigh = if includesMax then 1 else Prelude.max (Angle.sin low) (Angle.sin high)
   Bounds newLow newHigh
 
 cos :: Bounds Radians -> Bounds Unitless
 cos bounds@(Bounds low high) = do
   let (includesMin, includesMax) = cosIncludesMinMax bounds
-  let newLow = if includesMin then -1 else Quantity.min (Angle.cos low) (Angle.cos high)
-  let newHigh = if includesMax then 1 else Quantity.max (Angle.cos low) (Angle.cos high)
+  let newLow = if includesMin then -1 else Prelude.min (Angle.cos low) (Angle.cos high)
+  let newHigh = if includesMax then 1 else Prelude.max (Angle.cos low) (Angle.cos high)
   Bounds newLow newHigh
 
 sinIncludesMinMax :: Bounds Radians -> (Bool, Bool)

@@ -25,7 +25,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
@@ -136,6 +135,6 @@ clamp v (Bounds uLow uHigh) axis = do
   let Direction2d du dv = Axis2d.direction axis
   let u = u0 .+. (v .-. v0) .*. du ./. dv
   if
-    | dv > 0 -> Bounds uLow (Quantity.min uHigh u)
-    | dv < 0 -> Bounds (Quantity.max uLow u) uHigh
+    | dv > 0 -> Bounds uLow (min uHigh u)
+    | dv < 0 -> Bounds (max uLow u) uHigh
     | otherwise -> Bounds uLow uHigh
