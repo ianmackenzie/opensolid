@@ -168,7 +168,7 @@ jobs:
             ~/.cabal/store
             dist-newstyle
             opensolid-core/.hie
-          key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
+          key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('opensolid-core/opensolid-core.cabal') }}
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
@@ -232,7 +232,7 @@ jobs:
             ~/.cabal/store
             dist-newstyle
             opensolid-core/.hie
-          key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
+          key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('opensolid-core/opensolid-core.cabal') }}
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
