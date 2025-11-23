@@ -19,7 +19,7 @@ new ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2d UvCoordinates
+  Curve2d UvSpace Unitless
 monotonic ::
   Tolerance units =>
   SurfaceFunction units ->
@@ -27,7 +27,7 @@ monotonic ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2d UvCoordinates
+  Curve2d UvSpace Unitless
 bounded ::
   Tolerance units =>
   SurfaceFunction units ->
@@ -35,6 +35,6 @@ bounded ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Frame2d UvCoordinates defines ->
-  List (Axis2d UvCoordinates) ->
-  Curve2d UvCoordinates
+  Frame2d UvSpace Unitless defines ->
+  List (Axis2d UvSpace Unitless) ->
+  Curve2d UvSpace Unitless

@@ -85,7 +85,7 @@ curve1dImpl## tolerance## function## derivative## x1## y1## iterations1# =
           _ -> Error Divergence
     _ -> Error Divergence
 
-curve2d :: Tolerance units => VectorCurve2d (space @ units) -> Number -> Result Divergence Number
+curve2d :: Tolerance units => VectorCurve2d space units -> Number -> Result Divergence Number
 curve2d curve t1 = do
   let function = VectorCurve2d.evaluate curve
   let derivative = VectorCurve2d.evaluate curve.derivative
@@ -93,10 +93,10 @@ curve2d curve t1 = do
 
 curve2dImpl ::
   Tolerance units =>
-  (Number -> Vector2d (space @ units)) ->
-  (Number -> Vector2d (space @ units)) ->
+  (Number -> Vector2d space units) ->
+  (Number -> Vector2d space units) ->
   Number ->
-  Vector2d (space @ units) ->
+  Vector2d space units ->
   Int ->
   Result Divergence Number
 curve2dImpl function derivative t1 v1 iterations =
@@ -153,7 +153,7 @@ curve2dImpl## tolerance## function## derivative## t1## x1## y1## squaredMagnitud
 
 surface2d ::
   Tolerance units =>
-  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d space units ->
   UvPoint ->
   Result Divergence UvPoint
 surface2d surface uvPoint1 = do
@@ -164,11 +164,11 @@ surface2d surface uvPoint1 = do
 
 surface2dImpl ::
   Tolerance units =>
-  (UvPoint -> Vector2d (space @ units)) ->
-  (UvPoint -> Vector2d (space @ units)) ->
-  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d space units) ->
+  (UvPoint -> Vector2d space units) ->
+  (UvPoint -> Vector2d space units) ->
   UvPoint ->
-  Vector2d (space @ units) ->
+  Vector2d space units ->
   Int ->
   Result Divergence UvPoint
 surface2dImpl function uDerivative vDerivative uvPoint1 value1 iterations =

@@ -6,7 +6,7 @@ import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random qualified as Random
 
-type UvPoint = Point2d UvCoordinates
+type UvPoint = Point2d UvSpace Unitless
 
 samples :: List UvPoint
 samples = do

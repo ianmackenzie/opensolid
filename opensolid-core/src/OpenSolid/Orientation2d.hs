@@ -57,7 +57,7 @@ rotateBy angle (Orientation2d i j) =
   Orientation2d (Direction2d.rotateBy angle i) (Direction2d.rotateBy angle j)
 
 placeIn ::
-  Frame2d (global @ frameUnits) (Defines space) ->
+  Frame2d global frameUnits (Defines space) ->
   Orientation2d space ->
   Orientation2d global
 placeIn globalOrientation (Orientation2d i j) =
@@ -66,7 +66,7 @@ placeIn globalOrientation (Orientation2d i j) =
     (Direction2d.placeIn globalOrientation j)
 
 relativeTo ::
-  Frame2d (global @ frameUnits) (Defines space) ->
+  Frame2d global frameUnits (Defines space) ->
   Orientation2d global ->
   Orientation2d space
 relativeTo globalOrientation (Orientation2d i j) =

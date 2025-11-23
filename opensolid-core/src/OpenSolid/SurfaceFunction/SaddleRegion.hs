@@ -44,11 +44,11 @@ data SaddleRegion units = SaddleRegion
 
 data PrincipalAxisSpace
 
-type Frame = Frame2d UvCoordinates (Defines PrincipalAxisSpace)
+type Frame = Frame2d UvSpace Unitless (Defines PrincipalAxisSpace)
 
 data JoiningCurve
-  = Incoming (Curve2d UvCoordinates)
-  | Outgoing (Curve2d UvCoordinates)
+  = Incoming (Curve2d UvSpace Unitless)
+  | Outgoing (Curve2d UvSpace Unitless)
 
 joiningPoint :: JoiningCurve -> UvPoint
 joiningPoint (Incoming curve) = curve.endPoint
@@ -106,7 +106,7 @@ connectingCurve ::
   Tolerance units =>
   JoiningCurve ->
   SaddleRegion units ->
-  Curve2d UvCoordinates
+  Curve2d UvSpace Unitless
 connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let Point2d x y = Point2d.relativeTo frame (joiningPoint joiningCurve)
   let saddlePoint = Frame2d.originPoint frame
@@ -126,11 +126,11 @@ connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
 connect ::
   Tolerance units =>
   Subproblem units ->
-  Frame2d UvCoordinates (Defines PrincipalAxisSpace) ->
+  Frame2d UvSpace Unitless (Defines PrincipalAxisSpace) ->
   Direction2d UvSpace ->
   JoiningCurve ->
-  List (Axis2d UvCoordinates) ->
-  Curve2d UvCoordinates
+  List (Axis2d UvSpace Unitless) ->
+  Curve2d UvSpace Unitless
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2d.originPoint frame
   let Subproblem{f, dvdu, dudv, uvBounds} = subproblem

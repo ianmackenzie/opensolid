@@ -84,19 +84,19 @@ length = Quantity.random (Length.meters -10) (Length.meters 10)
 lengthBounds :: Generator (Bounds Meters)
 lengthBounds = Bounds.random length
 
-point2d :: Generator (Point2d (space @ Meters))
+point2d :: Generator (Point2d space Meters)
 point2d = Random.map2 Point2d length length
 
-point3d :: Generator (Point3d (space @ Meters))
+point3d :: Generator (Point3d space Meters)
 point3d = Random.map3 Point3d length length length
 
-vector2d :: Generator (Vector2d (space @ Meters))
+vector2d :: Generator (Vector2d space Meters)
 vector2d = Random.map2 Vector2d length length
 
-vector3d :: Generator (Vector3d (space @ Meters))
+vector3d :: Generator (Vector3d space Meters)
 vector3d = Random.map3 Vector3d length length length
 
-vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
+vectorBounds3d :: Generator (VectorBounds3d space Meters)
 vectorBounds3d =
   Random.map3
     VectorBounds3d
@@ -104,10 +104,10 @@ vectorBounds3d =
     lengthBounds
     lengthBounds
 
-axis2d :: Generator (Axis2d (space @ Meters))
+axis2d :: Generator (Axis2d space Meters)
 axis2d = Random.map2 Axis2d point2d Direction2d.random
 
-axis3d :: Generator (Axis3d (space @ Meters))
+axis3d :: Generator (Axis3d space Meters)
 axis3d = Random.map2 Axis3d point3d Direction3d.random
 
 orientation2d :: Generator (Orientation2d global)
@@ -124,28 +124,28 @@ planeOrientation3d =
 orientation3d :: Generator (Orientation3d global)
 orientation3d = Random.map Frame3d.orientation frame3d
 
-plane3d :: Generator (Plane3d (global @ Meters) (Defines local))
+plane3d :: Generator (Plane3d global Meters (Defines local))
 plane3d = Random.map2 Plane3d point3d planeOrientation3d
 
-frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
+frame2d :: Generator (Frame2d global Meters (Defines local))
 frame2d = Random.map Frame2d.fromXAxis axis2d
 
-frame3d :: Generator (Frame3d (global @ Meters) (Defines local))
+frame3d :: Generator (Frame3d global Meters (Defines local))
 frame3d = Random.map Frame3d.fromTopPlane plane3d
 
-bounds2d :: Generator (Bounds2d (space @ Meters))
+bounds2d :: Generator (Bounds2d space Meters)
 bounds2d = Random.map2 Bounds2d lengthBounds lengthBounds
 
-bounds3d :: Generator (Bounds3d (space @ Meters))
+bounds3d :: Generator (Bounds3d space Meters)
 bounds3d = Random.map3 Bounds3d lengthBounds lengthBounds lengthBounds
 
-vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
+vectorBounds2d :: Generator (VectorBounds2d space Meters)
 vectorBounds2d = Random.map2 VectorBounds2d lengthBounds lengthBounds
 
-line2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
+line2d :: Tolerance Meters => Generator (Curve2d space Meters)
 line2d = Random.map2 Curve2d.line point2d point2d
 
-arc2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
+arc2d :: Tolerance Meters => Generator (Curve2d space Meters)
 arc2d = do
   startPoint <- point2d
   endPoint <- point2d
@@ -154,28 +154,28 @@ arc2d = do
   let sweptAngle = angleSign .*. angleMagnitude
   Random.return (Curve2d.arc startPoint endPoint sweptAngle)
 
-quadraticSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
+quadraticSpline2d :: Tolerance Meters => Generator (Curve2d space Meters)
 quadraticSpline2d = Random.map3 Curve2d.quadraticBezier point2d point2d point2d
 
-cubicSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
+cubicSpline2d :: Tolerance Meters => Generator (Curve2d space Meters)
 cubicSpline2d = Random.map4 Curve2d.cubicBezier point2d point2d point2d point2d
 
-translation2d :: Generator (Transform2d.Rigid (space @ Meters))
+translation2d :: Generator (Transform2d.Rigid space Meters)
 translation2d = Random.map Transform2d.translateBy vector2d
 
-rotation2d :: Generator (Transform2d.Rigid (space @ Meters))
+rotation2d :: Generator (Transform2d.Rigid space Meters)
 rotation2d = do
   centerPoint <- point2d
   angle <- Quantity.random (Angle.degrees -360) (Angle.degrees 360)
   Random.return (Transform2d.rotateAround centerPoint angle)
 
-mirror2d :: Generator (Transform2d.Orthonormal (space @ Meters))
+mirror2d :: Generator (Transform2d.Orthonormal space Meters)
 mirror2d = Random.map Transform2d.mirrorAcross axis2d
 
-rigidTransform2d :: Generator (Transform2d.Rigid (space @ Meters))
+rigidTransform2d :: Generator (Transform2d.Rigid space Meters)
 rigidTransform2d = Random.merge (NonEmpty.two translation2d rotation2d)
 
-orthonormalTransform2d :: Generator (Transform2d.Orthonormal (space @ Meters))
+orthonormalTransform2d :: Generator (Transform2d.Orthonormal space Meters)
 orthonormalTransform2d =
   Random.merge $
     NonEmpty.three
@@ -186,10 +186,10 @@ orthonormalTransform2d =
 scalingFactor :: Generator Number
 scalingFactor = Number.random 0.5 2
 
-uniformScaling2d :: Generator (Transform2d.Uniform (space @ Meters))
+uniformScaling2d :: Generator (Transform2d.Uniform space Meters)
 uniformScaling2d = Random.map2 Transform2d.scaleAbout point2d scalingFactor
 
-uniformTransform2d :: Generator (Transform2d.Uniform (space @ Meters))
+uniformTransform2d :: Generator (Transform2d.Uniform space Meters)
 uniformTransform2d =
   Random.merge $
     NonEmpty.four
@@ -198,10 +198,10 @@ uniformTransform2d =
       (Random.map Transform2d.toUniform mirror2d)
       uniformScaling2d
 
-nonUniformScaling2d :: Generator (Transform2d.Affine (space @ Meters))
+nonUniformScaling2d :: Generator (Transform2d.Affine space Meters)
 nonUniformScaling2d = Random.map2 Transform2d.scaleAlong axis2d scalingFactor
 
-affineTransform2d :: Generator (Transform2d.Affine (space @ Meters))
+affineTransform2d :: Generator (Transform2d.Affine space Meters)
 affineTransform2d =
   Random.merge $
     NonEmpty.five
@@ -214,22 +214,22 @@ affineTransform2d =
 surfaceParameter :: Generator SurfaceParameter
 surfaceParameter = Random.oneOf (NonEmpty.two U V)
 
-translation3d :: Generator (Transform3d.Rigid (space @ Meters))
+translation3d :: Generator (Transform3d.Rigid space Meters)
 translation3d = Random.map Transform3d.translateBy vector3d
 
-rotation3d :: Generator (Transform3d.Rigid (space @ Meters))
+rotation3d :: Generator (Transform3d.Rigid space Meters)
 rotation3d = do
   axis <- axis3d
   angle <- Quantity.random (Angle.degrees -360) (Angle.degrees 360)
   Random.return (Transform3d.rotateAround axis angle)
 
-mirror3d :: Generator (Transform3d.Orthonormal (space @ Meters))
+mirror3d :: Generator (Transform3d.Orthonormal space Meters)
 mirror3d = Random.map Transform3d.mirrorAcross plane3d
 
-rigidTransform3d :: Generator (Transform3d.Rigid (space @ Meters))
+rigidTransform3d :: Generator (Transform3d.Rigid space Meters)
 rigidTransform3d = Random.merge (NonEmpty.two translation3d rotation3d)
 
-orthonormalTransform3d :: Generator (Transform3d.Orthonormal (space @ Meters))
+orthonormalTransform3d :: Generator (Transform3d.Orthonormal space Meters)
 orthonormalTransform3d =
   Random.merge $
     NonEmpty.three
@@ -237,10 +237,10 @@ orthonormalTransform3d =
       (Random.map Transform3d.toOrthonormal rotation3d)
       mirror3d
 
-uniformScaling3d :: Generator (Transform3d.Uniform (space @ Meters))
+uniformScaling3d :: Generator (Transform3d.Uniform space Meters)
 uniformScaling3d = Random.map2 Transform3d.scaleAbout point3d scalingFactor
 
-uniformTransform3d :: Generator (Transform3d.Uniform (space @ Meters))
+uniformTransform3d :: Generator (Transform3d.Uniform space Meters)
 uniformTransform3d =
   Random.merge $
     NonEmpty.four
@@ -249,10 +249,10 @@ uniformTransform3d =
       (Random.map Transform3d.toUniform mirror3d)
       uniformScaling3d
 
-nonUniformScaling3d :: Generator (Transform3d.Affine (space @ Meters))
+nonUniformScaling3d :: Generator (Transform3d.Affine space Meters)
 nonUniformScaling3d = Random.map2 Transform3d.scaleAlong axis3d scalingFactor
 
-affineTransform3d :: Generator (Transform3d.Affine (space @ Meters))
+affineTransform3d :: Generator (Transform3d.Affine space Meters)
 affineTransform3d =
   Random.merge $
     NonEmpty.five

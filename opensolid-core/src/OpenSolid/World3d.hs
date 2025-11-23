@@ -41,7 +41,7 @@ import OpenSolid.Primitives
 import OpenSolid.Quantity qualified as Quantity
 
 -- | The global origin point of a coordinate system.
-originPoint :: Point3d (space @ units)
+originPoint :: Point3d space units
 originPoint = Point3d Quantity.zero Quantity.zero Quantity.zero
 
 -- | The global rightward direction of a coordinate system.
@@ -124,7 +124,7 @@ downwardOrientation :: Orientation3d space
 downwardOrientation = Orientation3d rightwardDirection downwardDirection forwardDirection
 
 -- | A frame of reference defining a global coordinate system.
-frame :: Frame3d (space @ units) (Defines space)
+frame :: Frame3d space units (Defines space)
 frame = Frame3d originPoint forwardOrientation
 
 {-| A forward-facing plane through the global origin point.
@@ -132,7 +132,7 @@ frame = Frame3d originPoint forwardOrientation
 The X direction of the plane will be the global leftward direction,
 and the Y direction of the plane will be the global upward direction.
 -}
-frontPlane :: Plane3d (space @ units) defines
+frontPlane :: Plane3d space units defines
 frontPlane = Plane3d originPoint (PlaneOrientation3d leftwardDirection upwardDirection)
 
 {-| A backward-facing plane through the global origin point.
@@ -140,7 +140,7 @@ frontPlane = Plane3d originPoint (PlaneOrientation3d leftwardDirection upwardDir
 The X direction of the plane will be the global rightward direction,
 and the Y direction of the plane will be the global upward direction.
 -}
-backPlane :: Plane3d (space @ units) defines
+backPlane :: Plane3d space units defines
 backPlane = Plane3d originPoint (PlaneOrientation3d rightwardDirection upwardDirection)
 
 {-| An upward-facing plane through the global origin point.
@@ -148,7 +148,7 @@ backPlane = Plane3d originPoint (PlaneOrientation3d rightwardDirection upwardDir
 The X direction of the plane will be the global rightward direction,
 and the Y direction of the plane will be the global forward direction.
 -}
-topPlane :: Plane3d (space @ units) defines
+topPlane :: Plane3d space units defines
 topPlane = Plane3d originPoint (PlaneOrientation3d rightwardDirection forwardDirection)
 
 {-| An downward-facing plane through the global origin point.
@@ -156,7 +156,7 @@ topPlane = Plane3d originPoint (PlaneOrientation3d rightwardDirection forwardDir
 The X direction of the plane will be the global leftward direction,
 and the Y direction of the plane will be the global forward direction.
 -}
-bottomPlane :: Plane3d (space @ units) defines
+bottomPlane :: Plane3d space units defines
 bottomPlane = Plane3d originPoint (PlaneOrientation3d leftwardDirection forwardDirection)
 
 {-| A rightward-facing plane through the global origin point.
@@ -164,7 +164,7 @@ bottomPlane = Plane3d originPoint (PlaneOrientation3d leftwardDirection forwardD
 The X direction of the plane will be the global forward direction,
 and the Y direction of the plane will be the global upward direction.
 -}
-rightPlane :: Plane3d (space @ units) defines
+rightPlane :: Plane3d space units defines
 rightPlane = Plane3d originPoint (PlaneOrientation3d forwardDirection upwardDirection)
 
 {-| A leftward-facing plane through the global origin point.
@@ -172,29 +172,29 @@ rightPlane = Plane3d originPoint (PlaneOrientation3d forwardDirection upwardDire
 The X direction of the plane will be the global backward direction,
 and the Y direction of the plane will be the global upward direction.
 -}
-leftPlane :: Plane3d (space @ units) defines
+leftPlane :: Plane3d space units defines
 leftPlane = Plane3d originPoint (PlaneOrientation3d backwardDirection upwardDirection)
 
 -- | A forward-facing axis through the global origin point.
-forwardAxis :: Axis3d (space @ units)
+forwardAxis :: Axis3d space units
 forwardAxis = Axis3d originPoint forwardDirection
 
 -- | A backward-facing axis through the global origin point.
-backwardAxis :: Axis3d (space @ units)
+backwardAxis :: Axis3d space units
 backwardAxis = Axis3d originPoint backwardDirection
 
 -- | An upward-facing axis through the global origin point.
-upwardAxis :: Axis3d (space @ units)
+upwardAxis :: Axis3d space units
 upwardAxis = Axis3d originPoint upwardDirection
 
 -- | A downward-facing axis through the global origin point.
-downwardAxis :: Axis3d (space @ units)
+downwardAxis :: Axis3d space units
 downwardAxis = Axis3d originPoint downwardDirection
 
 -- | A leftward-facing axis through the global origin point.
-leftwardAxis :: Axis3d (space @ units)
+leftwardAxis :: Axis3d space units
 leftwardAxis = Axis3d originPoint leftwardDirection
 
 -- | A rightward-facing axis through the global origin point.
-rightwardAxis :: Axis3d (space @ units)
+rightwardAxis :: Axis3d space units
 rightwardAxis = Axis3d originPoint rightwardDirection

@@ -28,12 +28,12 @@ import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
-newtype DirectionCurve3d space = DirectionCurve3d (VectorCurve3d (space @ Unitless))
+newtype DirectionCurve3d space = DirectionCurve3d (VectorCurve3d space Unitless)
 
-unsafe :: VectorCurve3d (space @ Unitless) -> DirectionCurve3d space
+unsafe :: VectorCurve3d space Unitless -> DirectionCurve3d space
 unsafe = DirectionCurve3d
 
-unwrap :: DirectionCurve3d space -> VectorCurve3d (space @ Unitless)
+unwrap :: DirectionCurve3d space -> VectorCurve3d space Unitless
 unwrap (DirectionCurve3d vectorCurve) = vectorCurve
 
 startValue :: DirectionCurve3d space -> Direction3d space
@@ -50,7 +50,7 @@ evaluateBounds :: DirectionCurve3d space -> Bounds Unitless -> DirectionBounds3d
 evaluateBounds (DirectionCurve3d vectorCurve) tBounds =
   DirectionBounds3d.unsafe (VectorCurve3d.evaluateBounds vectorCurve tBounds)
 
-derivative :: DirectionCurve3d space -> VectorCurve3d (space @ Unitless)
+derivative :: DirectionCurve3d space -> VectorCurve3d space Unitless
 derivative (DirectionCurve3d vectorCurve) = vectorCurve.derivative
 
 constant :: Direction3d space -> DirectionCurve3d space
@@ -82,7 +82,7 @@ instance
   Multiplication
     (Quantity units)
     (DirectionCurve3d space)
-    (VectorCurve3d (space @ units))
+    (VectorCurve3d space units)
   where
   value .*. DirectionCurve3d vectorCurve = value .*. vectorCurve
 
@@ -90,7 +90,7 @@ instance
   Multiplication
     (DirectionCurve3d space)
     (Quantity units)
-    (VectorCurve3d (space @ units))
+    (VectorCurve3d space units)
   where
   DirectionCurve3d vectorCurve .*. value = vectorCurve .*. value
 
@@ -98,7 +98,7 @@ instance
   Multiplication
     (Curve units)
     (DirectionCurve3d space)
-    (VectorCurve3d (space @ units))
+    (VectorCurve3d space units)
   where
   scalarCurve .*. DirectionCurve3d vectorCurve = scalarCurve .*. vectorCurve
 
@@ -106,7 +106,7 @@ instance
   Multiplication
     (DirectionCurve3d space)
     (Curve units)
-    (VectorCurve3d (space @ units))
+    (VectorCurve3d space units)
   where
   DirectionCurve3d vectorCurve .*. scalarCurve = vectorCurve .*. scalarCurve
 
@@ -118,13 +118,13 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve3d space1) (VectorCurve3d (space2 @ units)) (Curve units)
+  DotMultiplication (DirectionCurve3d space1) (VectorCurve3d space2 units) (Curve units)
   where
   DirectionCurve3d lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (VectorCurve3d (space1 @ units)) (DirectionCurve3d space2) (Curve units)
+  DotMultiplication (VectorCurve3d space1 units) (DirectionCurve3d space2) (Curve units)
   where
   lhs `dot` DirectionCurve3d rhs = lhs `dot` rhs
 
@@ -142,13 +142,13 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve3d space1) (Vector3d (space2 @ units)) (Curve units)
+  DotMultiplication (DirectionCurve3d space1) (Vector3d space2 units) (Curve units)
   where
   DirectionCurve3d lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Vector3d (space1 @ units)) (DirectionCurve3d space2) (Curve units)
+  DotMultiplication (Vector3d space1 units) (DirectionCurve3d space2) (Curve units)
   where
   lhs `dot` DirectionCurve3d rhs = lhs `dot` rhs
 
@@ -157,7 +157,7 @@ instance
   CrossMultiplication
     (DirectionCurve3d space1)
     (DirectionCurve3d space2)
-    (VectorCurve3d (space1 @ Unitless))
+    (VectorCurve3d space1 Unitless)
   where
   DirectionCurve3d lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
@@ -165,17 +165,17 @@ instance
   space1 ~ space2 =>
   CrossMultiplication
     (DirectionCurve3d space1)
-    (VectorCurve3d (space2 @ units))
-    (VectorCurve3d (space1 @ units))
+    (VectorCurve3d space2 units)
+    (VectorCurve3d space1 units)
   where
   DirectionCurve3d lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
   CrossMultiplication
-    (VectorCurve3d (space1 @ units))
+    (VectorCurve3d space1 units)
     (DirectionCurve3d space2)
-    (VectorCurve3d (space1 @ units))
+    (VectorCurve3d space1 units)
   where
   lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
@@ -184,7 +184,7 @@ instance
   CrossMultiplication
     (DirectionCurve3d space1)
     (Direction3d space2)
-    (VectorCurve3d (space1 @ Unitless))
+    (VectorCurve3d space1 Unitless)
   where
   DirectionCurve3d lhs `cross` rhs = lhs `cross` rhs
 
@@ -193,7 +193,7 @@ instance
   CrossMultiplication
     (Direction3d space1)
     (DirectionCurve3d space2)
-    (VectorCurve3d (space1 @ Unitless))
+    (VectorCurve3d space1 Unitless)
   where
   lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
@@ -201,17 +201,17 @@ instance
   space1 ~ space2 =>
   CrossMultiplication
     (DirectionCurve3d space1)
-    (Vector3d (space2 @ units))
-    (VectorCurve3d (space1 @ units))
+    (Vector3d space2 units)
+    (VectorCurve3d space1 units)
   where
   DirectionCurve3d lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
   CrossMultiplication
-    (Vector3d (space1 @ units))
+    (Vector3d space1 units)
     (DirectionCurve3d space2)
-    (VectorCurve3d (space1 @ units))
+    (VectorCurve3d space1 units)
   where
   lhs `cross` DirectionCurve3d rhs = lhs `cross` rhs
 
@@ -219,14 +219,14 @@ instance Composition (Curve Unitless) (DirectionCurve3d space) (DirectionCurve3d
   DirectionCurve3d curve `compose` curve1d = DirectionCurve3d (curve `compose` curve1d)
 
 placeIn ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   DirectionCurve3d local ->
   DirectionCurve3d global
 placeIn frame (DirectionCurve3d curve) =
   DirectionCurve3d (VectorCurve3d.placeIn frame curve)
 
 relativeTo ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   DirectionCurve3d global ->
   DirectionCurve3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)

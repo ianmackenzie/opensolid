@@ -36,7 +36,7 @@ import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
 
-curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
+curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d space Meters))
 curveGenerators =
   [ ("Line2d", Random.line2d)
   , ("Arc2d", Random.arc2d)
@@ -103,8 +103,8 @@ findOwnPoint = Test.check 500 "findOwnPoint" Test.do
 
 overlappingSegments ::
   Tolerance units =>
-  Curve2d (space @ units) ->
-  Curve2d (space @ units) ->
+  Curve2d space units ->
+  Curve2d space units ->
   Result Text (NonEmpty OverlappingSegment)
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
@@ -299,13 +299,13 @@ degenerateEndPointTangentDerivative =
       & Test.output "differences" differences
       & Test.output "endTangentDerivative" endTangentDerivative
 
-firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Number -> Expectation
+firstDerivativeIsConsistent :: Curve2d space Meters -> Number -> Expectation
 firstDerivativeIsConsistent = firstDerivativeIsConsistentWithin (Length.meters 1e-6)
 
 firstDerivativeIsConsistentWithin ::
   Show (Quantity units) =>
   Quantity units ->
-  Curve2d (space @ units) ->
+  Curve2d space units ->
   Number ->
   Expectation
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
@@ -319,13 +319,13 @@ firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
       & Test.output "numericalFirstDerivative" numericalFirstDerivative
       & Test.output "analyticFirstDerivative" analyticFirstDerivative
 
-firstDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
+firstDerivativeConsistency :: Generator (Curve2d space Meters) -> Test
 firstDerivativeConsistency curveGenerator = Test.check 100 "firstDerivativeConsistency" Test.do
   curve <- curveGenerator
   t <- Parameter.random
   firstDerivativeIsConsistent curve t
 
-secondDerivativeIsConsistent :: Curve2d (space @ Meters) -> Number -> Expectation
+secondDerivativeIsConsistent :: Curve2d space Meters -> Number -> Expectation
 secondDerivativeIsConsistent curve tValue = do
   let dt :: Number = 1e-6
   let v1 = VectorCurve2d.evaluate curve.derivative (tValue .-. dt)
@@ -338,7 +338,7 @@ secondDerivativeIsConsistent curve tValue = do
       & Test.output "numericalSecondDerivative" numericalSecondDerivative
       & Test.output "analyticSecondDerivative" analyticSecondDerivative
 
-secondDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
+secondDerivativeConsistency :: Generator (Curve2d space Meters) -> Test
 secondDerivativeConsistency curveGenerator = Test.check 100 "secondDerivativeConsistency" Test.do
   curve <- curveGenerator
   t <- Parameter.random
@@ -367,7 +367,7 @@ reversalConsistency =
 
 boundsConsistency ::
   (Tolerance units, Show (Quantity units)) =>
-  Curve2d (space @ units) ->
+  Curve2d space units ->
   Expectation
 boundsConsistency curve = Test.do
   tBounds <- Bounds.random Parameter.random

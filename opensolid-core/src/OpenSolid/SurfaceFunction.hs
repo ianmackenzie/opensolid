@@ -240,33 +240,33 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
-    (Vector2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ units3))
+    (Vector2d space units2)
+    (VectorSurfaceFunction2d space units3)
   where
   lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (SurfaceFunction units1)
-    (Vector2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ (units1 #*# units2)))
+    (Vector2d space units2)
+    (VectorSurfaceFunction2d space (units1 #*# units2))
   where
   function #*# vector = function #*# VectorSurfaceFunction2d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Vector2d (space @ units1))
+    (Vector2d space units1)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ units3))
+    (VectorSurfaceFunction2d space units3)
   where
   lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
-    (Vector2d (space @ units1))
+    (Vector2d space units1)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ (units1 #*# units2)))
+    (VectorSurfaceFunction2d space (units1 #*# units2))
   where
   vector #*# function = VectorSurfaceFunction2d.constant vector #*# function
 
@@ -274,7 +274,7 @@ instance
   Multiplication
     (SurfaceFunction units)
     (Direction2d space)
-    (VectorSurfaceFunction2d (space @ units))
+    (VectorSurfaceFunction2d space units)
   where
   lhs .*. rhs = lhs .*. Vector2d.unit rhs
 
@@ -282,7 +282,7 @@ instance
   Multiplication
     (Direction2d space)
     (SurfaceFunction units)
-    (VectorSurfaceFunction2d (space @ units))
+    (VectorSurfaceFunction2d space units)
   where
   lhs .*. rhs = Vector2d.unit lhs .*. rhs
 
@@ -290,33 +290,33 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
-    (Vector3d (space @ units2))
-    (VectorSurfaceFunction3d (space @ units3))
+    (Vector3d space units2)
+    (VectorSurfaceFunction3d space units3)
   where
   lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
     (SurfaceFunction units1)
-    (Vector3d (space @ units2))
-    (VectorSurfaceFunction3d (space @ (units1 #*# units2)))
+    (Vector3d space units2)
+    (VectorSurfaceFunction3d space (units1 #*# units2))
   where
   function #*# vector = function #*# VectorSurfaceFunction3d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Vector3d (space @ units1))
+    (Vector3d space units1)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d (space @ units3))
+    (VectorSurfaceFunction3d space units3)
   where
   lhs .*. rhs = Units.specialize (lhs #*# rhs)
 
 instance
   Multiplication#
-    (Vector3d (space @ units1))
+    (Vector3d space units1)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d (space @ (units1 #*# units2)))
+    (VectorSurfaceFunction3d space (units1 #*# units2))
   where
   vector #*# function = VectorSurfaceFunction3d.constant vector #*# function
 
@@ -324,7 +324,7 @@ instance
   Multiplication
     (SurfaceFunction units)
     (Direction3d space)
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d space units)
   where
   lhs .*. rhs = lhs .*. Vector3d.unit rhs
 
@@ -332,7 +332,7 @@ instance
   Multiplication
     (Direction3d space)
     (SurfaceFunction units)
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d space units)
   where
   lhs .*. rhs = Vector3d.unit lhs .*. rhs
 

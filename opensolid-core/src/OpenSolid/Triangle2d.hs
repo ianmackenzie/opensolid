@@ -17,7 +17,7 @@ vertices :: Triangle2d vertex -> (vertex, vertex, vertex)
 vertices (Triangle2d v1 v2 v3) = (v1, v2, v3)
 
 signedArea# ::
-  Vertex2d vertex (space @ units) =>
+  Vertex2d vertex space units =>
   Triangle2d vertex ->
   Quantity (units #*# units)
 signedArea# (Triangle2d v1 v2 v3) = do
@@ -27,7 +27,7 @@ signedArea# (Triangle2d v1 v2 v3) = do
   0.5 *. (p2 .-. p1) `cross#` (p3 .-. p1)
 
 signedArea ::
-  ( Vertex2d vertex (space @ units1)
+  ( Vertex2d vertex space units1
   , Units.Product units1 units1 units2
   ) =>
   Triangle2d vertex ->

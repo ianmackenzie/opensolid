@@ -21,7 +21,7 @@ tests =
   , distanceAlong
   ]
 
-boundsAndContainedPoint :: Generator (Bounds3d (space @ Meters), Point3d (space @ Meters))
+boundsAndContainedPoint :: Generator (Bounds3d space Meters, Point3d space Meters)
 boundsAndContainedPoint = do
   bounds <- Tests.Random.bounds3d
   u <- Parameter.random

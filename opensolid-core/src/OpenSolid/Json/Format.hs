@@ -321,7 +321,7 @@ direction2d =
               requiredField "x" Vector2d.xComponent number
               requiredField "y" Vector2d.yComponent number
 
-vector2d :: Json.Format (Vector2d (space @ Meters))
+vector2d :: Json.Format (Vector2d space Meters)
 vector2d =
   title "Vector2d" $
     description "A displacement vector in 2D space, given by its X and Y components" $
@@ -330,7 +330,7 @@ vector2d =
           requiredField "x" Vector2d.xComponent length
           requiredField "y" Vector2d.yComponent length
 
-point2d :: Json.Format (Point2d (space @ Meters))
+point2d :: Json.Format (Point2d space Meters)
 point2d =
   title "Point2d" $
     description "A position in 2D space, given by its X and Y coordinates" $

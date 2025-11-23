@@ -10,17 +10,17 @@ import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
 error ::
-  VectorBounds3d (space @ units) ->
-  VectorBounds3d (space @ units) ->
-  VectorBounds3d (space @ units) ->
+  VectorBounds3d space units ->
+  VectorBounds3d space units ->
+  VectorBounds3d space units ->
   UvBounds ->
   Quantity units
 error fuu fuv fvv subdomain = Quantity## (error## fuu fuv fvv subdomain)
 
 error## ::
-  VectorBounds3d (space @ units) ->
-  VectorBounds3d (space @ units) ->
-  VectorBounds3d (space @ units) ->
+  VectorBounds3d space units ->
+  VectorBounds3d space units ->
+  VectorBounds3d space units ->
   UvBounds ->
   Double#
 error## fuu fuv fvv (Bounds2d uBounds vBounds) = do

@@ -118,10 +118,10 @@ testTransformation = do
 
 offsetPoint ::
   Tolerance units =>
-  Point2d (space @ units) ->
-  Point2d (space @ units) ->
+  Point2d space units ->
+  Point2d space units ->
   Quantity units ->
-  Point2d (space @ units)
+  Point2d space units
 offsetPoint startPoint endPoint distance =
   case Direction2d.from startPoint endPoint of
     Error Direction2d.PointsAreCoincident -> startPoint
@@ -233,12 +233,12 @@ drawZeros path zeros = do
       , Drawing2d.combine (drawDot Color.orange) zeros.saddlePoints
       ]
 
-drawBounds :: Bounds2d (space @ Meters) -> Drawing2d space
+drawBounds :: Bounds2d space Meters -> Drawing2d space
 drawBounds bounds = do
   let corner x y = Bounds2d.interpolate bounds x y
   Drawing2d.polygon [corner 0 0, corner 1 0, corner 1 1, corner 0 1]
 
-drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d UvSpace
+drawCrossingCurve :: Int -> Curve2d UvSpace Unitless -> Drawing2d UvSpace
 drawCrossingCurve index curve = do
   let hue = (Number.fromInt index .*. Angle.goldenAngle) .%. Angle.twoPi
   let color = Color.hsl1 hue 0.5 0.5
@@ -247,7 +247,7 @@ drawCrossingCurve index curve = do
 toDrawing :: Quantity (Meters #/# Unitless)
 toDrawing = Length.centimeters 10 #/ 1
 
-drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvCoordinates -> Drawing2d UvSpace
+drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvSpace Unitless -> Drawing2d UvSpace
 drawUvCurve attributes curve = do
   let resolution = Resolution.maxError 0.0002
   let polyline = Curve2d.toPolyline resolution curve
@@ -291,9 +291,9 @@ testIOParallel = do
 drawBezier ::
   Tolerance Meters =>
   Color ->
-  Point2d (space @ Unitless) ->
-  [Point2d (space @ Unitless)] ->
-  Point2d (space @ Unitless) ->
+  Point2d space Unitless ->
+  [Point2d space Unitless] ->
+  Point2d space Unitless ->
   Drawing2d space
 drawBezier color startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2d.convert toDrawing startPoint
@@ -406,7 +406,7 @@ testCurve2dExpression :: IO ()
 testCurve2dExpression = do
   let x = Expression.Curve1d.constant 10 .*. Expression.t
   let y = Expression.sqrt Expression.t
-  let curve = Expression.xy x y :: Expression Number (Point2d (Global @ Unitless))
+  let curve = Expression.xy x y :: Expression Number (Point2d Global Unitless)
   log "Evaluated 2D curve" (Expression.evaluate curve 3)
 
 testQuotientDesingularization :: IO ()

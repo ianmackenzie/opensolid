@@ -222,7 +222,7 @@ downwardOrientation :: Orientation3d space -> Orientation3d space
 downwardOrientation = (.downwardOrientation)
 
 transformBy ::
-  Transform3d.Rigid (space @ translationUnits) ->
+  Transform3d.Rigid space translationUnits ->
   Orientation3d space ->
   Orientation3d space
 transformBy transform (Orientation3d i j k) =
@@ -233,7 +233,7 @@ transformBy transform (Orientation3d i j k) =
 
 -- | Convert a orientation defined in local coordinates to one defined in global coordinates.
 placeIn ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   Orientation3d local ->
   Orientation3d global
 placeIn globalFrame (Orientation3d i j k) =
@@ -244,7 +244,7 @@ placeIn globalFrame (Orientation3d i j k) =
 
 -- | Convert a orientation defined in global coordinates to one defined in local coordinates.
 relativeTo ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   Orientation3d global ->
   Orientation3d local
 relativeTo globalFrame (Orientation3d i j k) =

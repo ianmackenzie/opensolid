@@ -73,7 +73,7 @@ data Drawing2d space = Empty | Node Text (List (Attribute space)) (List (Drawing
 
 data Attribute space = Attribute Text Text deriving (Show)
 
-type Point space = Point2d (space @ Meters)
+type Point space = Point2d space Meters
 
 instance FFI (Drawing2d FFI.Space) where
   representation = FFI.classRepresentation "Drawing2d"
@@ -102,7 +102,7 @@ attributeText indent (Attribute name value) = Text.concat [indent, name, "=\"", 
 The given bounding box defines the overall size of the drawing;
 anything outside of this will be cropped.
 -}
-toSvg :: Bounds2d (space @ Meters) -> Drawing2d space -> Text
+toSvg :: Bounds2d space Meters -> Drawing2d space -> Text
 toSvg viewBox drawing = do
   let Bounds2d xBounds yBounds = viewBox
   let Bounds x1 x2 = xBounds
@@ -136,7 +136,7 @@ toSvg viewBox drawing = do
 The given bounding box defines the overall size of the drawing;
 anything outside of this will be cropped.
 -}
-writeSvg :: Text -> Bounds2d (space @ Meters) -> Drawing2d space -> IO ()
+writeSvg :: Text -> Bounds2d space Meters -> Drawing2d space -> IO ()
 writeSvg path viewBox drawing = IO.writeUtf8 path (toSvg viewBox drawing)
 
 nothing :: Drawing2d space
@@ -174,7 +174,7 @@ line :: Point space -> Point space -> Drawing2d space
 line = lineWith []
 
 polylineWith ::
-  Vertex2d vertex (space @ Meters) =>
+  Vertex2d vertex space Meters =>
   List (Attribute space) ->
   Polyline2d vertex ->
   Drawing2d space
@@ -182,7 +182,7 @@ polylineWith attributes givenPolyline = do
   let vertices = List.map Vertex2d.position (NonEmpty.toList givenPolyline.vertices)
   Node "polyline" (noFill : pointsAttribute vertices : attributes) []
 
-polyline :: Vertex2d vertex (space @ Meters) => Polyline2d vertex -> Drawing2d space
+polyline :: Vertex2d vertex space Meters => Polyline2d vertex -> Drawing2d space
 polyline = polylineWith []
 
 -- | Create a polygon with the given attributes and vertices.
@@ -215,19 +215,19 @@ circle = circleWith []
 curveWith ::
   List (Attribute space) ->
   Resolution Meters ->
-  Curve2d (space @ Meters) ->
+  Curve2d space Meters ->
   Drawing2d space
 curveWith attributes resolution givenCurve = do
   let approximation = Curve2d.toPolyline resolution givenCurve
   polylineWith attributes approximation
 
 -- | Draw a curve with the given resolution.
-curve :: Resolution Meters -> Curve2d (space @ Meters) -> Drawing2d space
+curve :: Resolution Meters -> Curve2d space Meters -> Drawing2d space
 curve = curveWith []
 
 arrow ::
-  "start" ::: Point2d (space @ Meters) ->
-  "end" ::: Point2d (space @ Meters) ->
+  "start" ::: Point2d space Meters ->
+  "end" ::: Point2d space Meters ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
   Drawing2d space
@@ -235,8 +235,8 @@ arrow = arrowWith []
 
 arrowWith ::
   List (Attribute space) ->
-  "start" ::: Point2d (space @ Meters) ->
-  "end" ::: Point2d (space @ Meters) ->
+  "start" ::: Point2d space Meters ->
+  "end" ::: Point2d space Meters ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
   Drawing2d space

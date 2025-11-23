@@ -65,31 +65,31 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
-data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d :: Compiled (space @ units) -> ~(VectorCurve3d (space @ units)) -> Curve3d (space @ units)
+data Curve3d space units where
+  Curve3d :: Compiled space units -> ~(VectorCurve3d space units) -> Curve3d space units
 
-type Compiled (coordinateSystem :: CoordinateSystem) =
+type Compiled space units =
   CompiledFunction
     Number
-    (Point3d coordinateSystem)
+    (Point3d space units)
     (Bounds Unitless)
-    (Bounds3d coordinateSystem)
+    (Bounds3d space units)
 
-instance HasField "compiled" (Curve3d (space @ units)) (Compiled (space @ units)) where
+instance HasField "compiled" (Curve3d space units) (Compiled space units) where
   getField (Curve3d c _) = c
 
-instance HasField "derivative" (Curve3d (space @ units)) (VectorCurve3d (space @ units)) where
+instance HasField "derivative" (Curve3d space units) (VectorCurve3d space units) where
   getField (Curve3d _ d) = d
 
-instance HasUnits (Curve3d (space @ units)) units
+instance HasUnits (Curve3d space units) units
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (Curve3d (space1 @ unitsA)) (Curve3d (space2 @ unitsB))
+  Units.Coercion (Curve3d space1 unitsA) (Curve3d space2 unitsB)
   where
   coerce curve = Curve3d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
-instance Bounded3d (Curve3d (space @ units)) (space @ units) where
+instance Bounded3d (Curve3d space units) space units where
   bounds = bounds
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
@@ -97,31 +97,31 @@ data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Curve3d (space1 @ units1))
-    (VectorCurve3d (space2 @ units2))
-    (Curve3d (space1 @ units1))
+    (Curve3d space1 units1)
+    (VectorCurve3d space2 units2)
+    (Curve3d space1 units1)
   where
   lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Curve3d (space1 @ units1))
-    (VectorCurve3d (space2 @ units2))
-    (Curve3d (space1 @ units1))
+    (Curve3d space1 units1)
+    (VectorCurve3d space2 units2)
+    (Curve3d space1 units1)
   where
   lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Curve3d (space1 @ units1))
-    (Curve3d (space2 @ units2))
-    (VectorCurve3d (space1 @ units1))
+    (Curve3d space1 units1)
+    (Curve3d space2 units2)
+    (VectorCurve3d space1 units1)
   where
   lhs .-. rhs = VectorCurve3d.new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
-instance Composition (Curve Unitless) (Curve3d (space @ units)) (Curve3d (space @ units)) where
+instance Composition (Curve Unitless) (Curve3d space units) (Curve3d space units) where
   outer `compose` inner =
     new
       (outer.compiled `compose` inner.compiled)
@@ -130,34 +130,34 @@ instance Composition (Curve Unitless) (Curve3d (space @ units)) (Curve3d (space 
 instance
   Composition
     (SurfaceFunction Unitless)
-    (Curve3d (space @ units))
-    (SurfaceFunction3d (space @ units))
+    (Curve3d space units)
+    (SurfaceFunction3d space units)
   where
   curve `compose` function =
     SurfaceFunction3d.new
       (curve.compiled `compose` function.compiled)
       (\p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function)
 
-instance ApproximateEquality (Curve3d (space @ units)) units where
+instance ApproximateEquality (Curve3d space units) units where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
 
-new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> Curve3d (space @ units)
+new :: Compiled space units -> VectorCurve3d space units -> Curve3d space units
 new = Curve3d
 
 recursive ::
-  Compiled (space @ units) ->
-  (Curve3d (space @ units) -> VectorCurve3d (space @ units)) ->
-  Curve3d (space @ units)
+  Compiled space units ->
+  (Curve3d space units -> VectorCurve3d space units) ->
+  Curve3d space units
 recursive givenCompiled derivativeFunction =
   let result = new givenCompiled (derivativeFunction result) in result
 
-constant :: Point3d (space @ units) -> Curve3d (space @ units)
+constant :: Point3d space units -> Curve3d space units
 constant point = new (CompiledFunction.constant point) VectorCurve3d.zero
 
 on ::
-  Plane3d (space @ units) (Defines local) ->
-  Curve2d (local @ units) ->
-  Curve3d (space @ units)
+  Plane3d space units (Defines local) ->
+  Curve2d local units ->
+  Curve3d space units
 on plane curve2d = do
   let compiledPlaced =
         CompiledFunction.map
@@ -167,7 +167,7 @@ on plane curve2d = do
           curve2d.compiled
   new compiledPlaced (VectorCurve3d.on plane curve2d.derivative)
 
-line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
+line :: Point3d space units -> Point3d space units -> Curve3d space units
 line p1 p2 = constant p1 .+. Curve.t .*. (p2 .-. p1)
 
 {-| Construct a Bezier curve from its control points. For example,
@@ -176,7 +176,7 @@ line p1 p2 = constant p1 .+. Curve.t .*. (p2 .-. p1)
 
 will return a cubic Bezier curve with the given four control points.
 -}
-bezier :: NonEmpty (Point3d (space @ units)) -> Curve3d (space @ units)
+bezier :: NonEmpty (Point3d space units) -> Curve3d space units
 bezier controlPoints =
   new
     (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
@@ -184,19 +184,19 @@ bezier controlPoints =
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
-  Point3d (space @ units) ->
-  Point3d (space @ units) ->
-  Point3d (space @ units) ->
-  Curve3d (space @ units)
+  Point3d space units ->
+  Point3d space units ->
+  Point3d space units ->
+  Curve3d space units
 quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 
 -- | Construct a cubic Bezier curve from the given control points.
 cubicBezier ::
-  Point3d (space @ units) ->
-  Point3d (space @ units) ->
-  Point3d (space @ units) ->
-  Point3d (space @ units) ->
-  Curve3d (space @ units)
+  Point3d space units ->
+  Point3d space units ->
+  Point3d space units ->
+  Point3d space units ->
+  Curve3d space units
 cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
 {-| Construct a Bezier curve with the given start point, start derivatives, end point and end
@@ -217,51 +217,51 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
-  Point3d (space @ units) ->
-  List (Vector3d (space @ units)) ->
-  Point3d (space @ units) ->
-  List (Vector3d (space @ units)) ->
-  Curve3d (space @ units)
+  Point3d space units ->
+  List (Vector3d space units) ->
+  Point3d space units ->
+  List (Vector3d space units) ->
+  Curve3d space units
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
-startPoint :: Curve3d (space @ units) -> Point3d (space @ units)
+startPoint :: Curve3d space units -> Point3d space units
 startPoint curve = evaluate curve 0
 
-endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
+endPoint :: Curve3d space units -> Point3d space units
 endPoint curve = evaluate curve 1
 
-evaluate :: Curve3d (space @ units) -> Number -> Point3d (space @ units)
+evaluate :: Curve3d space units -> Number -> Point3d space units
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
-evaluateBounds :: Curve3d (space @ units) -> Bounds Unitless -> Bounds3d (space @ units)
+evaluateBounds :: Curve3d space units -> Bounds Unitless -> Bounds3d space units
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
-bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
+bounds :: Curve3d space units -> Bounds3d space units
 bounds curve = evaluateBounds curve Bounds.unitInterval
 
-reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
+reverse :: Curve3d space units -> Curve3d space units
 reverse curve = curve `compose` (1 -. Curve.t)
 
 arcLengthParameterization ::
   Tolerance units =>
-  Curve3d (space @ units) ->
+  Curve3d space units ->
   (Curve Unitless, Quantity units)
 arcLengthParameterization curve =
   ArcLength.parameterization (VectorCurve3d.magnitude curve.derivative)
 
 parameterizeByArcLength ::
   Tolerance units =>
-  Curve3d (space @ units) ->
-  (Curve3d (space @ units), Quantity units)
+  Curve3d space units ->
+  (Curve3d space units, Quantity units)
 parameterizeByArcLength curve = do
   let (parameterization, length) = arcLengthParameterization curve
   (curve `compose` parameterization, length)
 
 transformBy ::
-  Transform3d tag (space @ units) ->
-  Curve3d (space @ units) ->
-  Curve3d (space @ units)
+  Transform3d tag space units ->
+  Curve3d space units ->
+  Curve3d space units
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
@@ -272,9 +272,9 @@ transformBy transform curve = do
   new compiledTransformed (VectorCurve3d.transformBy transform curve.derivative)
 
 placeIn ::
-  Frame3d (global @ units) (Defines local) ->
-  Curve3d (local @ units) ->
-  Curve3d (global @ units)
+  Frame3d global units (Defines local) ->
+  Curve3d local units ->
+  Curve3d global units
 placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
@@ -285,7 +285,7 @@ placeIn frame curve = do
   new compiledPlaced (VectorCurve3d.placeIn frame curve.derivative)
 
 relativeTo ::
-  Frame3d (global @ units) (Defines local) ->
-  Curve3d (global @ units) ->
-  Curve3d (local @ units)
+  Frame3d global units (Defines local) ->
+  Curve3d global units ->
+  Curve3d local units
 relativeTo frame curve = placeIn (Frame3d.inverse frame) curve

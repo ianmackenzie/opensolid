@@ -23,84 +23,84 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
-type role VectorSurfaceFunction2d nominal
+type role VectorSurfaceFunction2d nominal nominal
 
-type VectorSurfaceFunction2d :: CoordinateSystem -> Type
-data VectorSurfaceFunction2d coordinateSystem
+type VectorSurfaceFunction2d :: Type -> Type -> Type
+data VectorSurfaceFunction2d space units
 
-type Compiled coordinateSystem =
+type Compiled space units =
   CompiledFunction
     UvPoint
-    (Vector2d coordinateSystem)
+    (Vector2d space units)
     UvBounds
-    (VectorBounds2d coordinateSystem)
+    (VectorBounds2d space units)
 
 instance
   HasField
     "compiled"
-    (VectorSurfaceFunction2d (space @ units))
-    (Compiled (space @ units))
+    (VectorSurfaceFunction2d space units)
+    (Compiled space units)
 
-instance HasUnits (VectorSurfaceFunction2d (space @ units)) units
+instance HasUnits (VectorSurfaceFunction2d space units) units
 
 instance
   space1 ~ space2 =>
   Units.Coercion
-    (VectorSurfaceFunction2d (space1 @ units1))
-    (VectorSurfaceFunction2d (space2 @ units2))
+    (VectorSurfaceFunction2d space1 units1)
+    (VectorSurfaceFunction2d space2 units2)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
-    (VectorSurfaceFunction2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ units3))
+    (VectorSurfaceFunction2d space units2)
+    (VectorSurfaceFunction2d space units3)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (VectorSurfaceFunction2d (space @ units1))
+    (VectorSurfaceFunction2d space units1)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ units3))
+    (VectorSurfaceFunction2d space units3)
 
 instance
   Multiplication#
     (SurfaceFunction units1)
-    (VectorSurfaceFunction2d (space @ units2))
-    (VectorSurfaceFunction2d (space @ (units1 #*# units2)))
+    (VectorSurfaceFunction2d space units2)
+    (VectorSurfaceFunction2d space (units1 #*# units2))
 
 instance
   Multiplication#
-    (VectorSurfaceFunction2d (space @ units1))
+    (VectorSurfaceFunction2d space units1)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (space @ (units1 #*# units2)))
+    (VectorSurfaceFunction2d space (units1 #*# units2))
 
 instance
   space1 ~ space2 =>
   DotMultiplication#
-    (VectorSurfaceFunction2d (space1 @ units1))
-    (VectorSurfaceFunction2d (space2 @ units2))
+    (VectorSurfaceFunction2d space1 units1)
+    (VectorSurfaceFunction2d space2 units2)
     (SurfaceFunction (units1 #*# units2))
 
 instance
   space1 ~ space2 =>
   CrossMultiplication#
-    (VectorSurfaceFunction2d (space1 @ units1))
-    (VectorSurfaceFunction2d (space2 @ units2))
+    (VectorSurfaceFunction2d space1 units1)
+    (VectorSurfaceFunction2d space2 units2)
     (SurfaceFunction (units1 #*# units2))
 
 new ::
-  Compiled (space @ units) ->
-  (SurfaceParameter -> VectorSurfaceFunction2d (space @ units)) ->
-  VectorSurfaceFunction2d (space @ units)
+  Compiled space units ->
+  (SurfaceParameter -> VectorSurfaceFunction2d space units) ->
+  VectorSurfaceFunction2d space units
 derivative ::
   SurfaceParameter ->
-  VectorSurfaceFunction2d (space @ units) ->
-  VectorSurfaceFunction2d (space @ units)
-constant :: Vector2d (space @ units) -> VectorSurfaceFunction2d (space @ units)
-xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
-yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
+  VectorSurfaceFunction2d space units ->
+  VectorSurfaceFunction2d space units
+constant :: Vector2d space units -> VectorSurfaceFunction2d space units
+xComponent :: VectorSurfaceFunction2d space units -> SurfaceFunction units
+yComponent :: VectorSurfaceFunction2d space units -> SurfaceFunction units
 components ::
-  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d space units ->
   (SurfaceFunction units, SurfaceFunction units)
-squaredMagnitude# :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction (units #*# units)
+squaredMagnitude# :: VectorSurfaceFunction2d space units -> SurfaceFunction (units #*# units)

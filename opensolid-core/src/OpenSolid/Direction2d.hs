@@ -71,7 +71,7 @@ components :: Direction2d space -> (Number, Number)
 components (Direction2d dx dy) = (dx, dy)
 
 {-# INLINE unsafe #-}
-unsafe :: Vector2d (space @ Unitless) -> Direction2d space
+unsafe :: Vector2d space Unitless -> Direction2d space
 unsafe = Unit2d
 
 {-# INLINE coerce #-}
@@ -80,7 +80,7 @@ coerce (Unit2d (Vector2d dx dy)) = Unit2d (Vector2d dx dy)
 
 {-# INLINE lift #-}
 lift ::
-  (Vector2d (space1 @ Unitless) -> Vector2d (space2 @ Unitless)) ->
+  (Vector2d space1 Unitless -> Vector2d space2 Unitless) ->
   Direction2d space1 ->
   Direction2d space2
 lift function (Unit2d vector) = Unit2d (function vector)
@@ -97,8 +97,8 @@ data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show)
 
 from ::
   Tolerance units =>
-  Point2d (space @ units) ->
-  Point2d (space @ units) ->
+  Point2d space units ->
+  Point2d space units ->
   Result PointsAreCoincident (Direction2d space)
 from p1 p2 = do
   case Vector2d.direction (p2 .-. p1) of
@@ -166,7 +166,7 @@ rotateRight :: Direction2d space -> Direction2d space
 rotateRight = lift Vector2d.rotateRight
 
 placeIn ::
-  Frame2d (global @ frameUnits) (Defines local) ->
+  Frame2d global frameUnits (Defines local) ->
   Direction2d local ->
   Direction2d global
 placeIn frame = placeInOrientation frame.orientation
@@ -175,7 +175,7 @@ placeInOrientation :: Orientation2d global -> Direction2d local -> Direction2d g
 placeInOrientation orientation = lift (Vector2d.placeInOrientation orientation)
 
 relativeTo ::
-  Frame2d (global @ frameUnits) (Defines local) ->
+  Frame2d global frameUnits (Defines local) ->
   Direction2d global ->
   Direction2d local
 relativeTo frame = relativeToOrientation frame.orientation
@@ -189,7 +189,7 @@ Given a 2D direction defined within a plane's coordinate system,
 this returns the corresponding 3D direction.
 -}
 placeOn ::
-  Plane3d (global @ planeUnits) (Defines local) ->
+  Plane3d global planeUnits (Defines local) ->
   Direction2d local ->
   Direction3d global
 placeOn plane = placeOnOrientation plane.orientation
@@ -205,7 +205,7 @@ random = Random.map fromAngle (Quantity.random (negative Angle.pi) Angle.pi)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
-  Transform2d tag (space @ translationUnits) ->
+  Transform2d tag space translationUnits ->
   Direction2d space ->
   Direction2d space
 transformBy transform = lift (Vector2d.transformBy transform)
@@ -233,7 +233,7 @@ will negate the direction's Y component while leaving its X component unchanged.
 -}
 mirrorAcross ::
   forall space originUnits.
-  Axis2d (space @ originUnits) ->
+  Axis2d space originUnits ->
   Direction2d space ->
   Direction2d space
 mirrorAcross axis = lift (Vector2d.mirrorAcross axis)

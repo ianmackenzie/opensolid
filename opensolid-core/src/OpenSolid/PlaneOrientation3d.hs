@@ -76,8 +76,8 @@ fromDirections dx dxy = gramSchmidt dx (Vector3d.unit dxy)
 
 fromVectors ::
   Tolerance units =>
-  Vector3d (space @ units) ->
-  Vector3d (space @ units) ->
+  Vector3d space units ->
+  Vector3d space units ->
   Maybe (PlaneOrientation3d space)
 fromVectors vx vxy =
   case Vector3d.direction vx of
@@ -87,7 +87,7 @@ fromVectors vx vxy =
 gramSchmidt ::
   Tolerance units =>
   Direction3d space ->
-  Vector3d (space @ units) ->
+  Vector3d space units ->
   Maybe (PlaneOrientation3d space)
 gramSchmidt dx vxy = do
   let vy = vxy .-. Vector3d.projectionIn dx vxy
@@ -112,7 +112,7 @@ normalDirection = (.normalDirection)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
-  Transform3d tag (space @ translationUnits) ->
+  Transform3d tag space translationUnits ->
   PlaneOrientation3d space ->
   PlaneOrientation3d space
 transformBy transform (PlaneOrientation3d i j) =
@@ -122,7 +122,7 @@ transformBy transform (PlaneOrientation3d i j) =
 
 -- | Convert a orientation defined in local coordinates to one defined in global coordinates.
 placeIn ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   PlaneOrientation3d local ->
   PlaneOrientation3d global
 placeIn globalOrientation (PlaneOrientation3d i j) =
@@ -132,7 +132,7 @@ placeIn globalOrientation (PlaneOrientation3d i j) =
 
 -- | Convert a orientation defined in global coordinates to one defined in local coordinates.
 relativeTo ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   PlaneOrientation3d global ->
   PlaneOrientation3d local
 relativeTo globalOrientation (PlaneOrientation3d i j) =

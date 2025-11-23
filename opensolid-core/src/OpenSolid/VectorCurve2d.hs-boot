@@ -25,91 +25,92 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
-type role VectorCurve2d nominal
+type role VectorCurve2d nominal nominal
 
-data VectorCurve2d (coordinateSystem :: CoordinateSystem)
+type VectorCurve2d :: Type -> Type -> Type
+data VectorCurve2d space units
 
-instance HasField "compiled" (VectorCurve2d (space @ units)) (Compiled (space @ units))
+instance HasField "compiled" (VectorCurve2d space units) (Compiled space units)
 
-instance HasField "derivative" (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
+instance HasField "derivative" (VectorCurve2d space units) (VectorCurve2d space units)
 
-type Compiled (coordinateSystem :: CoordinateSystem) =
+type Compiled space units =
   CompiledFunction
     Number
-    (Vector2d coordinateSystem)
+    (Vector2d space units)
     (Bounds Unitless)
-    (VectorBounds2d coordinateSystem)
+    (VectorBounds2d space units)
 
-instance HasUnits (VectorCurve2d (space @ units)) units
+instance HasUnits (VectorCurve2d space units) units
 
-instance Negation (VectorCurve2d (space @ units))
+instance Negation (VectorCurve2d space units)
 
-instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
+instance Multiplication Sign (VectorCurve2d space units) (VectorCurve2d space units)
 
-instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
+instance Multiplication (VectorCurve2d space units) Sign (VectorCurve2d space units)
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (VectorCurve2d (space1 @ unitsA)) (VectorCurve2d (space2 @ unitsB))
+  Units.Coercion (VectorCurve2d space1 unitsA) (VectorCurve2d space2 unitsB)
 
 instance
   Multiplication#
     (Curve units1)
-    (VectorCurve2d (space @ units2))
-    (VectorCurve2d (space @ (units1 #*# units2)))
+    (VectorCurve2d space units2)
+    (VectorCurve2d space (units1 #*# units2))
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
+  Multiplication (Curve units1) (VectorCurve2d space units2) (VectorCurve2d space units3)
 
 instance
   Multiplication#
-    (VectorCurve2d (space @ units1))
+    (VectorCurve2d space units1)
     (Curve units2)
-    (VectorCurve2d (space @ (units1 #*# units2)))
+    (VectorCurve2d space (units1 #*# units2))
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
+  Multiplication (VectorCurve2d space units1) (Curve units2) (VectorCurve2d space units3)
 
 instance
   space1 ~ space2 =>
   DotMultiplication#
-    (VectorCurve2d (space1 @ units1))
-    (VectorCurve2d (space2 @ units2))
+    (VectorCurve2d space1 units1)
+    (VectorCurve2d space2 units2)
     (Curve (units1 #*# units2))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
-    (VectorCurve2d (space1 @ units1))
-    (VectorCurve2d (space2 @ units2))
+    (VectorCurve2d space1 units1)
+    (VectorCurve2d space2 units2)
     (Curve units3)
 
-constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-new :: Compiled (space @ units) -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-evaluate :: VectorCurve2d (space @ units) -> Number -> Vector2d (space @ units)
-evaluateBounds :: VectorCurve2d (space @ units) -> Bounds Unitless -> VectorBounds2d (space @ units)
+constant :: Vector2d space units -> VectorCurve2d space units
+new :: Compiled space units -> VectorCurve2d space units -> VectorCurve2d space units
+evaluate :: VectorCurve2d space units -> Number -> Vector2d space units
+evaluateBounds :: VectorCurve2d space units -> Bounds Unitless -> VectorBounds2d space units
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
-  VectorCurve2d (space @ units1) ->
+  VectorCurve2d space units1 ->
   Curve units2 ->
-  Result DivisionByZero (VectorCurve2d (space @ units3))
+  Result DivisionByZero (VectorCurve2d space units3)
 quotient# ::
   Tolerance units2 =>
-  VectorCurve2d (space @ units1) ->
+  VectorCurve2d space units1 ->
   Curve units2 ->
-  Result DivisionByZero (VectorCurve2d (space @ (units1 #/# units2)))
+  Result DivisionByZero (VectorCurve2d space (units1 #/# units2))
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
-  VectorCurve2d (space @ units1) ->
+  VectorCurve2d space units1 ->
   Curve units2 ->
-  VectorCurve2d (space @ units3)
+  VectorCurve2d space units3
 unsafeQuotient# ::
-  VectorCurve2d (space @ units1) ->
+  VectorCurve2d space units1 ->
   Curve units2 ->
-  VectorCurve2d (space @ (units1 #/# units2))
+  VectorCurve2d space (units1 #/# units2)
 transformBy ::
-  Transform2d tag (space @ translationUnits) ->
-  VectorCurve2d (space @ units) ->
-  VectorCurve2d (space @ units)
+  Transform2d tag space translationUnits ->
+  VectorCurve2d space units ->
+  VectorCurve2d space units

@@ -20,41 +20,42 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 
-type role Curve3d nominal
+type role Curve3d nominal nominal
 
-data Curve3d (coordinateSystem :: CoordinateSystem)
+type Curve3d :: Type -> Type -> Type
+data Curve3d space units
 
-type Compiled (coordinateSystem :: CoordinateSystem) =
+type Compiled space units =
   CompiledFunction
     Number
-    (Point3d coordinateSystem)
+    (Point3d space units)
     (Bounds Unitless)
-    (Bounds3d coordinateSystem)
+    (Bounds3d space units)
 
-instance HasField "compiled" (Curve3d (space @ units)) (Compiled (space @ units))
+instance HasField "compiled" (Curve3d space units) (Compiled space units)
 
-instance HasField "derivative" (Curve3d (space @ units)) (VectorCurve3d (space @ units))
+instance HasField "derivative" (Curve3d space units) (VectorCurve3d space units)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Curve3d (space1 @ units1))
-    (VectorCurve3d (space2 @ units2))
-    (Curve3d (space1 @ units1))
+    (Curve3d space1 units1)
+    (VectorCurve3d space2 units2)
+    (Curve3d space1 units1)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Curve3d (space1 @ units1))
-    (VectorCurve3d (space2 @ units2))
-    (Curve3d (space1 @ units1))
+    (Curve3d space1 units1)
+    (VectorCurve3d space2 units2)
+    (Curve3d space1 units1)
 
-constant :: Point3d (space @ units) -> Curve3d (space @ units)
-new :: Compiled (space @ units) -> VectorCurve3d (space @ units) -> Curve3d (space @ units)
+constant :: Point3d space units -> Curve3d space units
+new :: Compiled space units -> VectorCurve3d space units -> Curve3d space units
 on ::
-  Plane3d (space @ units) (Defines local) ->
-  Curve2d (local @ units) ->
-  Curve3d (space @ units)
-evaluate :: Curve3d (space @ units) -> Number -> Point3d (space @ units)
-evaluateBounds :: Curve3d (space @ units) -> Bounds Unitless -> Bounds3d (space @ units)
-reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
+  Plane3d space units (Defines local) ->
+  Curve2d local units ->
+  Curve3d space units
+evaluate :: Curve3d space units -> Number -> Point3d space units
+evaluateBounds :: Curve3d space units -> Bounds Unitless -> Bounds3d space units
+reverse :: Curve3d space units -> Curve3d space units

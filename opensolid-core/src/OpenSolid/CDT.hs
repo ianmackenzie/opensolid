@@ -17,7 +17,7 @@ import OpenSolid.Vertex2d (Vertex2d, pattern Vertex2d)
 import System.IO.Unsafe qualified
 
 unsafe ::
-  Vertex2d vertex (space @ units) =>
+  Vertex2d vertex space units =>
   NonEmpty (NonEmpty vertex) ->
   List vertex ->
   Mesh vertex

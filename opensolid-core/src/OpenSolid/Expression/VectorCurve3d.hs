@@ -21,49 +21,49 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)
 
-constant :: Vector3d (space @ units) -> Expression Number (Vector3d (space @ units))
+constant :: Vector3d space units -> Expression Number (Vector3d space units)
 constant = Expression.constant
 
 on ::
-  Plane3d (space @ planeUnits) (Defines local) ->
-  Expression Number (Vector2d (local @ units)) ->
-  Expression Number (Vector3d (space @ units))
+  Plane3d space planeUnits (Defines local) ->
+  Expression Number (Vector2d local units) ->
+  Expression Number (Vector3d space units)
 on = Expression.on
 
 squaredMagnitude# ::
-  Expression Number (Vector3d (space @ units)) ->
+  Expression Number (Vector3d space units) ->
   Expression Number (Quantity (units #*# units))
 squaredMagnitude# = Expression.squaredMagnitude#
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
-  Expression Number (Vector3d (space @ units1)) ->
+  Expression Number (Vector3d space units1) ->
   Expression Number (Quantity units2)
 squaredMagnitude = Expression.squaredMagnitude
 
-magnitude :: Expression Number (Vector3d (space @ units)) -> Expression Number (Quantity units)
+magnitude :: Expression Number (Vector3d space units) -> Expression Number (Quantity units)
 magnitude = Expression.magnitude
 
 placeIn ::
-  Frame3d (global @ frameUnits) (Defines local) ->
-  Expression Number (Vector3d (local @ units)) ->
-  Expression Number (Vector3d (global @ units))
+  Frame3d global frameUnits (Defines local) ->
+  Expression Number (Vector3d local units) ->
+  Expression Number (Vector3d global units)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame3d (global @ frameUnits) (Defines local) ->
-  Expression Number (Vector3d (global @ units)) ->
-  Expression Number (Vector3d (local @ units))
+  Frame3d global frameUnits (Defines local) ->
+  Expression Number (Vector3d global units) ->
+  Expression Number (Vector3d local units)
 relativeTo = Expression.relativeTo
 
 projectInto ::
-  Plane3d (global @ planeUnits) (Defines local) ->
-  Expression Number (Vector3d (global @ units)) ->
-  Expression Number (Vector2d (local @ units))
+  Plane3d global planeUnits (Defines local) ->
+  Expression Number (Vector3d global units) ->
+  Expression Number (Vector2d local units)
 projectInto = Expression.projectInto
 
 transformBy ::
-  Transform3d a (space @ translationUnits) ->
-  Expression Number (Vector3d (space @ units)) ->
-  Expression Number (Vector3d (space @ units))
+  Transform3d a space translationUnits ->
+  Expression Number (Vector3d space units) ->
+  Expression Number (Vector3d space units)
 transformBy = Expression.transformBy

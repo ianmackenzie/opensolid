@@ -28,12 +28,12 @@ import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
 newtype DirectionSurfaceFunction3d space
-  = DirectionSurfaceFunction3d (VectorSurfaceFunction3d (space @ Unitless))
+  = DirectionSurfaceFunction3d (VectorSurfaceFunction3d space Unitless)
 
-unsafe :: VectorSurfaceFunction3d (space @ Unitless) -> DirectionSurfaceFunction3d space
+unsafe :: VectorSurfaceFunction3d space Unitless -> DirectionSurfaceFunction3d space
 unsafe = DirectionSurfaceFunction3d
 
-unwrap :: DirectionSurfaceFunction3d space -> VectorSurfaceFunction3d (space @ Unitless)
+unwrap :: DirectionSurfaceFunction3d space -> VectorSurfaceFunction3d space Unitless
 unwrap (DirectionSurfaceFunction3d vectorSurfaceFunction) = vectorSurfaceFunction
 
 evaluate :: DirectionSurfaceFunction3d space -> UvPoint -> Direction3d space
@@ -47,7 +47,7 @@ evaluateBounds (DirectionSurfaceFunction3d vectorSurfaceFunction) uvBounds =
 derivative ::
   SurfaceParameter ->
   DirectionSurfaceFunction3d space ->
-  VectorSurfaceFunction3d (space @ Unitless)
+  VectorSurfaceFunction3d space Unitless
 derivative parameter (DirectionSurfaceFunction3d vectorSurfaceFunction) =
   VectorSurfaceFunction3d.derivative parameter vectorSurfaceFunction
 
@@ -99,7 +99,7 @@ instance
   Multiplication
     (Quantity units)
     (DirectionSurfaceFunction3d space)
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d space units)
   where
   value .*. DirectionSurfaceFunction3d vectorSurfaceFunction = value .*. vectorSurfaceFunction
 
@@ -107,7 +107,7 @@ instance
   Multiplication
     (DirectionSurfaceFunction3d space)
     (Quantity units)
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d space units)
   where
   DirectionSurfaceFunction3d vectorSurfaceFunction .*. value = vectorSurfaceFunction .*. value
 
@@ -115,7 +115,7 @@ instance
   Multiplication
     (SurfaceFunction units)
     (DirectionSurfaceFunction3d space)
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d space units)
   where
   scalarSurfaceFunction .*. DirectionSurfaceFunction3d vectorSurfaceFunction =
     scalarSurfaceFunction .*. vectorSurfaceFunction
@@ -124,7 +124,7 @@ instance
   Multiplication
     (DirectionSurfaceFunction3d space)
     (SurfaceFunction units)
-    (VectorSurfaceFunction3d (space @ units))
+    (VectorSurfaceFunction3d space units)
   where
   DirectionSurfaceFunction3d vectorSurfaceFunction .*. scalarSurfaceFunction =
     vectorSurfaceFunction .*. scalarSurfaceFunction
@@ -142,7 +142,7 @@ instance
   space1 ~ space2 =>
   DotMultiplication
     (DirectionSurfaceFunction3d space1)
-    (VectorSurfaceFunction3d (space2 @ units))
+    (VectorSurfaceFunction3d space2 units)
     (SurfaceFunction units)
   where
   DirectionSurfaceFunction3d lhs `dot` rhs = lhs `dot` rhs
@@ -150,7 +150,7 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication
-    (VectorSurfaceFunction3d (space1 @ units))
+    (VectorSurfaceFunction3d space1 units)
     (DirectionSurfaceFunction3d space2)
     (SurfaceFunction units)
   where
@@ -178,7 +178,7 @@ instance
   space1 ~ space2 =>
   DotMultiplication
     (DirectionSurfaceFunction3d space1)
-    (Vector3d (space2 @ units))
+    (Vector3d space2 units)
     (SurfaceFunction units)
   where
   DirectionSurfaceFunction3d lhs `dot` rhs = lhs `dot` rhs
@@ -186,7 +186,7 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication
-    (Vector3d (space1 @ units))
+    (Vector3d space1 units)
     (DirectionSurfaceFunction3d space2)
     (SurfaceFunction units)
   where
@@ -197,7 +197,7 @@ instance
   CrossMultiplication
     (DirectionSurfaceFunction3d space1)
     (DirectionSurfaceFunction3d space2)
-    (VectorSurfaceFunction3d (space1 @ Unitless))
+    (VectorSurfaceFunction3d space1 Unitless)
   where
   DirectionSurfaceFunction3d lhs `cross` DirectionSurfaceFunction3d rhs = lhs `cross` rhs
 
@@ -205,17 +205,17 @@ instance
   space1 ~ space2 =>
   CrossMultiplication
     (DirectionSurfaceFunction3d space1)
-    (VectorSurfaceFunction3d (space2 @ units))
-    (VectorSurfaceFunction3d (space1 @ units))
+    (VectorSurfaceFunction3d space2 units)
+    (VectorSurfaceFunction3d space1 units)
   where
   DirectionSurfaceFunction3d lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
   CrossMultiplication
-    (VectorSurfaceFunction3d (space1 @ units))
+    (VectorSurfaceFunction3d space1 units)
     (DirectionSurfaceFunction3d space2)
-    (VectorSurfaceFunction3d (space1 @ units))
+    (VectorSurfaceFunction3d space1 units)
   where
   lhs `cross` DirectionSurfaceFunction3d rhs = lhs `cross` rhs
 
@@ -224,7 +224,7 @@ instance
   CrossMultiplication
     (DirectionSurfaceFunction3d space1)
     (Direction3d space2)
-    (VectorSurfaceFunction3d (space1 @ Unitless))
+    (VectorSurfaceFunction3d space1 Unitless)
   where
   DirectionSurfaceFunction3d lhs `cross` rhs = lhs `cross` rhs
 
@@ -233,7 +233,7 @@ instance
   CrossMultiplication
     (Direction3d space1)
     (DirectionSurfaceFunction3d space2)
-    (VectorSurfaceFunction3d (space1 @ Unitless))
+    (VectorSurfaceFunction3d space1 Unitless)
   where
   lhs `cross` DirectionSurfaceFunction3d rhs = lhs `cross` rhs
 
@@ -241,29 +241,29 @@ instance
   space1 ~ space2 =>
   CrossMultiplication
     (DirectionSurfaceFunction3d space1)
-    (Vector3d (space2 @ units))
-    (VectorSurfaceFunction3d (space1 @ units))
+    (Vector3d space2 units)
+    (VectorSurfaceFunction3d space1 units)
   where
   DirectionSurfaceFunction3d lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
   CrossMultiplication
-    (Vector3d (space1 @ units))
+    (Vector3d space1 units)
     (DirectionSurfaceFunction3d space2)
-    (VectorSurfaceFunction3d (space1 @ units))
+    (VectorSurfaceFunction3d space1 units)
   where
   lhs `cross` DirectionSurfaceFunction3d rhs = lhs `cross` rhs
 
 placeIn ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   DirectionSurfaceFunction3d local ->
   DirectionSurfaceFunction3d global
 placeIn frame (DirectionSurfaceFunction3d function) =
   DirectionSurfaceFunction3d (VectorSurfaceFunction3d.placeIn frame function)
 
 relativeTo ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   DirectionSurfaceFunction3d global ->
   DirectionSurfaceFunction3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)

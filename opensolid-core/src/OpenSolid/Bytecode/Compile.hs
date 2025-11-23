@@ -121,10 +121,10 @@ addConstant components = Step \initialState ->
 addConstant1d :: Number -> Step ConstantIndex
 addConstant1d value = addConstant (NonEmpty.one value)
 
-addConstant2d :: Vector2d (space @ Unitless) -> Step ConstantIndex
+addConstant2d :: Vector2d space Unitless -> Step ConstantIndex
 addConstant2d (Vector2d x y) = addConstant (NonEmpty.two x y)
 
-addConstant3d :: Vector3d (space @ Unitless) -> Step ConstantIndex
+addConstant3d :: Vector3d space Unitless -> Step ConstantIndex
 addConstant3d (Vector3d x y z) = addConstant (NonEmpty.three x y z)
 
 nextVariableIndex :: State -> VariableIndex

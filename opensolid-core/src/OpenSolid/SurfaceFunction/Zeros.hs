@@ -9,8 +9,8 @@ import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint)
 
 data Zeros = Zeros
-  { crossingCurves :: ~(List (Curve2d UvCoordinates))
-  , crossingLoops :: ~(List (Curve2d UvCoordinates))
+  { crossingCurves :: ~(List (Curve2d UvSpace Unitless))
+  , crossingLoops :: ~(List (Curve2d UvSpace Unitless))
   , tangentPoints :: List (UvPoint, Sign)
   , saddlePoints :: List UvPoint
   }

@@ -43,7 +43,7 @@ import OpenSolid.Text qualified as Text
 
 -- | The lighting to use for a Mitsuba scene.
 data Lighting space where
-  EnvironmentMap :: Frame3d (space @ Meters) defines -> Text -> Lighting space
+  EnvironmentMap :: Frame3d space Meters defines -> Text -> Lighting space
 
 instance FFI (Lighting FFI.Space) where
   representation = FFI.nestedClassRepresentation "Mitsuba" "Lighting"
@@ -59,13 +59,13 @@ convention =
     Orientation3d.upwardDirection
     Orientation3d.backwardDirection
 
-xDirection :: Frame3d (space @ units) defines -> Direction3d space
+xDirection :: Frame3d space units defines -> Direction3d space
 xDirection frame = Convention3d.xDirection frame.orientation convention
 
-yDirection :: Frame3d (space @ units) defines -> Direction3d space
+yDirection :: Frame3d space units defines -> Direction3d space
 yDirection frame = Convention3d.yDirection frame.orientation convention
 
-zDirection :: Frame3d (space @ units) defines -> Direction3d space
+zDirection :: Frame3d space units defines -> Direction3d space
 zDirection frame = Convention3d.zDirection frame.orientation convention
 
 {-| Write a Mitsuba scene out to an XML scene description and a file containing binary mesh data.
@@ -90,7 +90,7 @@ writeFiles ::
   "path" ::: Text ->
   "model" ::: Model3d space ->
   "resolution" ::: Resolution Meters ->
-  "camera" ::: Camera3d (space @ Meters) ->
+  "camera" ::: Camera3d space Meters ->
   "lighting" ::: Lighting space ->
   IO ()
 writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named lighting) = do
@@ -107,7 +107,7 @@ writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named l
   let sceneFileName = path <> ".xml"
   IO.writeUtf8 sceneFileName sceneXml
 
-type Vertex space = (Point3d (space @ Meters), Direction3d space)
+type Vertex space = (Point3d space Meters, Direction3d space)
 
 type Mesh space = Mesh.Mesh (Vertex space)
 
@@ -145,7 +145,7 @@ and the path to the environment map image itself.
 The environment map image will typically be in OpenEXR format;
 https://polyhaven.com is a good source for free ones.
 -}
-environmentMap :: Frame3d (space @ Meters) defines -> Text -> Lighting space
+environmentMap :: Frame3d space Meters defines -> Text -> Lighting space
 environmentMap = EnvironmentMap
 
 {-| Write a list of named meshes out to a single Mitsuba .serialized file.
@@ -246,7 +246,7 @@ attributeText :: (Text, Text) -> Text
 attributeText (name, value) = name <> "=\"" <> value <> "\""
 
 sceneDocument ::
-  "camera" ::: Camera3d (space @ Meters) ->
+  "camera" ::: Camera3d space Meters ->
   "lighting" ::: Lighting space ->
   "meshProperties" ::: List Properties ->
   "meshFileName" ::: Text ->
@@ -316,7 +316,7 @@ bsdfNode material opacity = do
         , XmlNode "bsdf" [("type", "twosided")] [principledNode]
         ]
 
-cameraNode :: Camera3d (space @ Meters) -> XmlNode
+cameraNode :: Camera3d space Meters -> XmlNode
 cameraNode camera = do
   let filmNode =
         XmlNode "film" [("type", "hdrfilm")] $
@@ -358,7 +358,7 @@ floatNode name value = typedNode "float" name (Text.number value)
 stringNode :: Text -> Text -> XmlNode
 stringNode name value = typedNode "string" name value
 
-cameraTransformationNode :: Camera3d (space @ Meters) -> XmlNode
+cameraTransformationNode :: Camera3d space Meters -> XmlNode
 cameraTransformationNode camera = do
   let (x0, y0, z0) = Point3d.coordinates convention camera.eyePoint
   let px = Length.inMeters x0

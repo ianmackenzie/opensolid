@@ -56,7 +56,7 @@ import OpenSolid.Vector3d qualified as Vector3d
 components :: Convention3d -> Direction3d space -> (Number, Number, Number)
 components convention (Unit3d vector) = Vector3d.components convention vector
 
-unsafe :: Vector3d (space @ Unitless) -> Direction3d space
+unsafe :: Vector3d space Unitless -> Direction3d space
 unsafe = Unit3d
 
 {-# INLINE coerce #-}
@@ -65,7 +65,7 @@ coerce (Direction3d dx dy dz) = Direction3d dx dy dz
 
 {-# INLINE lift #-}
 lift ::
-  (Vector3d (spaceA @ Unitless) -> Vector3d (spaceB @ Unitless)) ->
+  (Vector3d spaceA Unitless -> Vector3d spaceB Unitless) ->
   Direction3d spaceA ->
   Direction3d spaceB
 lift function (Unit3d vector) = Unit3d (function vector)
@@ -88,10 +88,10 @@ rightward = Orientation3d.rightwardDirection
 leftward :: Orientation3d space -> Direction3d space
 leftward = Orientation3d.leftwardDirection
 
-on :: Plane3d (space @ planeUnits) (Defines local) -> Direction2d local -> Direction3d space
+on :: Plane3d space planeUnits (Defines local) -> Direction2d local -> Direction3d space
 on (Plane3d _ (PlaneOrientation3d i j)) (Direction2d x y) = Unit3d (x .*. i .+. y .*. j)
 
-polar :: Plane3d (space @ planeUnits) defines -> Angle -> Direction3d space
+polar :: Plane3d space planeUnits defines -> Angle -> Direction3d space
 polar (Plane3d _ (PlaneOrientation3d i j)) angle =
   Unit3d (Angle.cos angle .*. i .+. Angle.sin angle .*. j)
 
@@ -138,19 +138,19 @@ angleFrom :: Direction3d space -> Direction3d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
 -- | Convert a direction defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d (global @ frameUnits) (Defines local) -> Direction3d local -> Direction3d global
+placeIn :: Frame3d global frameUnits (Defines local) -> Direction3d local -> Direction3d global
 placeIn frame = lift (Vector3d.placeIn frame)
 
 -- | Convert a direction defined in global coordinates to one defined in local coordinates.
 relativeTo ::
-  Frame3d (global @ frameUnits) (Defines local) ->
+  Frame3d global frameUnits (Defines local) ->
   Direction3d global ->
   Direction3d local
 relativeTo frame = lift (Vector3d.relativeTo frame)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
-  Transform3d tag (space @ translationUnits) ->
+  Transform3d tag space translationUnits ->
   Direction3d space ->
   Direction3d space
 transformBy transform = lift (Vector3d.transformBy transform)
@@ -171,14 +171,14 @@ mirrorIn mirrorDirection = lift (Vector3d.mirrorIn mirrorDirection)
 
 -- | Rotate around the given axis by the given angle.
 rotateAround ::
-  Axis3d (space @ axisUnits) ->
+  Axis3d space axisUnits ->
   Angle ->
   Direction3d space ->
   Direction3d space
 rotateAround axis angle = lift (Vector3d.rotateAround axis angle)
 
 -- | Mirror across the given plane.
-mirrorAcross :: Plane3d (space @ planeUnits) defines -> Direction3d space -> Direction3d space
+mirrorAcross :: Plane3d space planeUnits defines -> Direction3d space -> Direction3d space
 mirrorAcross plane = lift (Vector3d.mirrorAcross plane)
 
 -- | Generate a random direction.
@@ -195,7 +195,7 @@ random = do
     then Random.return (Unit3d (vector ./. magnitude))
     else random -- Generated a 'bad' vector, try again
 
-randomVector :: Random.Generator (Vector3d (space @ Unitless))
+randomVector :: Random.Generator (Vector3d space Unitless)
 randomVector = do
   let randomComponent = Number.random -1 1
   Random.map3 Vector3d randomComponent randomComponent randomComponent

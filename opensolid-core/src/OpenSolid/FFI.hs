@@ -3,7 +3,6 @@
 module OpenSolid.FFI
   ( FFI (representation)
   , Space
-  , Coordinates
   , Name
   , ClassName
   , name
@@ -63,8 +62,6 @@ class FFI a where
   representation :: Proxy a -> Representation a
 
 data Space deriving (Eq, Show)
-
-type Coordinates = Space @ Meters
 
 newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 

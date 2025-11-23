@@ -21,7 +21,7 @@ import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3d qualified as World3d
 
-gearBody :: Tolerance Meters => Int -> Result Text (Body3d (space @ Meters))
+gearBody :: Tolerance Meters => Int -> Result Text (Body3d space Meters)
 gearBody numTeeth = do
   let gearModule = Length.millimeters 1
   let holeDiameter = Length.millimeters 8

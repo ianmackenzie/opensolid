@@ -106,7 +106,7 @@ curveDivergence1d name curve t0 =
           Ok tSolution -> expectedDivergence & Test.output "Solution" tSolution
     ]
 
-curve2d :: Tolerance Unitless => Text -> VectorCurve2d (Space @ Unitless) -> Number -> Number -> Test
+curve2d :: Tolerance Unitless => Text -> VectorCurve2d Space Unitless -> Number -> Number -> Test
 curve2d name curve t0 tExpected =
   Test.group name $
     [ Test.verify "Boxed" $
@@ -136,7 +136,7 @@ curve2d name curve t0 tExpected =
 surface2d ::
   Tolerance Unitless =>
   Text ->
-  VectorSurfaceFunction2d (Space @ Unitless) ->
+  VectorSurfaceFunction2d Space Unitless ->
   UvPoint ->
   UvPoint ->
   Test

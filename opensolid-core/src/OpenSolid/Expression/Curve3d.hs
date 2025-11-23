@@ -17,35 +17,35 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
 
-constant :: Point3d (space @ units) -> Expression Number (Point3d (space @ units))
+constant :: Point3d space units -> Expression Number (Point3d space units)
 constant = Expression.constant
 
 on ::
-  Plane3d (space @ units) (Defines local) ->
-  Expression Number (Point2d (local @ units)) ->
-  Expression Number (Point3d (space @ units))
+  Plane3d space units (Defines local) ->
+  Expression Number (Point2d local units) ->
+  Expression Number (Point3d space units)
 on = Expression.on
 
 placeIn ::
-  Frame3d (global @ units) (Defines local) ->
-  Expression Number (Point3d (local @ units)) ->
-  Expression Number (Point3d (global @ units))
+  Frame3d global units (Defines local) ->
+  Expression Number (Point3d local units) ->
+  Expression Number (Point3d global units)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame3d (global @ units) (Defines local) ->
-  Expression Number (Point3d (global @ units)) ->
-  Expression Number (Point3d (local @ units))
+  Frame3d global units (Defines local) ->
+  Expression Number (Point3d global units) ->
+  Expression Number (Point3d local units)
 relativeTo = Expression.relativeTo
 
 projectInto ::
-  Plane3d (global @ units) (Defines local) ->
-  Expression Number (Point3d (global @ units)) ->
-  Expression Number (Point2d (local @ units))
+  Plane3d global units (Defines local) ->
+  Expression Number (Point3d global units) ->
+  Expression Number (Point2d local units)
 projectInto = Expression.projectInto
 
 transformBy ::
-  Transform3d tag (space @ units) ->
-  Expression Number (Point3d (space @ units)) ->
-  Expression Number (Point3d (space @ units))
+  Transform3d tag space units ->
+  Expression Number (Point3d space units) ->
+  Expression Number (Point3d space units)
 transformBy = Expression.transformBy

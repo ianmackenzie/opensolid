@@ -18,7 +18,7 @@ type Blendable function =
   ( Multiplication (SurfaceFunction Unitless) function function
   , Multiplication (Quantity Unitless) function function
   , Addition function function function
-  , Composition (SurfaceFunction2d UvCoordinates) function function
+  , Composition (SurfaceFunction2d UvSpace Unitless) function function
   , HasField "du" function function
   , HasField "dv" function function
   )
@@ -159,32 +159,32 @@ blend (f00, f01, f02) (f10, f11) t = do
   let b11 = Curve.b11 `compose` t
   b00 .*. f00 .+. b01 .*. f01 .+. b02 .*. f02 .+. b10 .*. f10 .+. b11 .*. f11
 
-uParameterization :: Number -> SurfaceFunction2d UvCoordinates
+uParameterization :: Number -> SurfaceFunction2d UvSpace Unitless
 uParameterization vValue = SurfaceFunction2d.xy SurfaceFunction.u (SurfaceFunction.constant vValue)
 
-uParameterizationV0 :: SurfaceFunction2d UvCoordinates
+uParameterizationV0 :: SurfaceFunction2d UvSpace Unitless
 uParameterizationV0 = uParameterization 0
 
-uParameterizationVT0 :: SurfaceFunction2d UvCoordinates
+uParameterizationVT0 :: SurfaceFunction2d UvSpace Unitless
 uParameterizationVT0 = uParameterization Desingularization.t0
 
-uParameterizationVT1 :: SurfaceFunction2d UvCoordinates
+uParameterizationVT1 :: SurfaceFunction2d UvSpace Unitless
 uParameterizationVT1 = uParameterization Desingularization.t1
 
-uParameterizationV1 :: SurfaceFunction2d UvCoordinates
+uParameterizationV1 :: SurfaceFunction2d UvSpace Unitless
 uParameterizationV1 = uParameterization 1
 
-vParameterization :: Number -> SurfaceFunction2d UvCoordinates
+vParameterization :: Number -> SurfaceFunction2d UvSpace Unitless
 vParameterization uValue = SurfaceFunction2d.xy (SurfaceFunction.constant uValue) SurfaceFunction.v
 
-vParameterizationU0 :: SurfaceFunction2d UvCoordinates
+vParameterizationU0 :: SurfaceFunction2d UvSpace Unitless
 vParameterizationU0 = vParameterization 0
 
-vParameterizationUT0 :: SurfaceFunction2d UvCoordinates
+vParameterizationUT0 :: SurfaceFunction2d UvSpace Unitless
 vParameterizationUT0 = vParameterization Desingularization.t0
 
-vParameterizationUT1 :: SurfaceFunction2d UvCoordinates
+vParameterizationUT1 :: SurfaceFunction2d UvSpace Unitless
 vParameterizationUT1 = vParameterization Desingularization.t1
 
-vParameterizationU1 :: SurfaceFunction2d UvCoordinates
+vParameterizationU1 :: SurfaceFunction2d UvSpace Unitless
 vParameterizationU1 = vParameterization 1

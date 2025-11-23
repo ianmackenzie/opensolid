@@ -8,11 +8,12 @@ import OpenSolid.Prelude
 import OpenSolid.Region2d (Region2d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 
-type role Surface3d nominal
+type role Surface3d nominal nominal
 
-data Surface3d (coordinateSystem :: CoordinateSystem)
+type Surface3d :: Type -> Type -> Type
+data Surface3d space units
 
 parametric ::
-  SurfaceFunction3d (space @ units) ->
-  Region2d UvCoordinates ->
-  Surface3d (space @ units)
+  SurfaceFunction3d space units ->
+  Region2d UvSpace Unitless ->
+  Surface3d space units

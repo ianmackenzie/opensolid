@@ -68,7 +68,7 @@ curve1dBounds (Bytecode bytecode) (Bounds## tLow## tHigh##) =
     let !(# xLow##, xHigh## #) = opensolid_cmm_curve1d_bounds f## tLow## tHigh##
     IO.succeed (Bounds## xLow## xHigh##)
 
-curve2dValue :: Compiled Number (Vector2d (space1 @ units1)) -> Number -> Vector2d (space2 @ units2)
+curve2dValue :: Compiled Number (Vector2d space1 units1) -> Number -> Vector2d space2 units2
 curve2dValue (Constant value) _ = Vector2d.coerce value
 curve2dValue (Bytecode bytecode) (Quantity## t##) =
   callFunction bytecode \f## -> do
@@ -76,16 +76,16 @@ curve2dValue (Bytecode bytecode) (Quantity## t##) =
     IO.succeed (Vector2d## x## y##)
 
 curve2dBounds ::
-  Compiled Number (Vector2d (space1 @ units1)) ->
+  Compiled Number (Vector2d space1 units1) ->
   Bounds Unitless ->
-  VectorBounds2d (space2 @ units2)
+  VectorBounds2d space2 units2
 curve2dBounds (Constant value) _ = VectorBounds2d.constant (Vector2d.coerce value)
 curve2dBounds (Bytecode bytecode) (Bounds## tLow## tHigh##) =
   callFunction bytecode \f## -> do
     let !(# xLow##, xHigh##, yLow##, yHigh## #) = opensolid_cmm_curve2d_bounds f## tLow## tHigh##
     IO.succeed (VectorBounds2d (Bounds## xLow## xHigh##) (Bounds## yLow## yHigh##))
 
-curve3dValue :: Compiled Number (Vector3d (space1 @ units1)) -> Number -> Vector3d (space2 @ units2)
+curve3dValue :: Compiled Number (Vector3d space1 units1) -> Number -> Vector3d space2 units2
 curve3dValue (Constant value) _ = Vector3d.coerce value
 curve3dValue (Bytecode bytecode) (Quantity## t##) =
   callFunction bytecode \f## -> do
@@ -93,9 +93,9 @@ curve3dValue (Bytecode bytecode) (Quantity## t##) =
     IO.succeed (Vector3d## x## y## z##)
 
 curve3dBounds ::
-  Compiled Number (Vector3d (space1 @ units1)) ->
+  Compiled Number (Vector3d space1 units1) ->
   Bounds Unitless ->
-  VectorBounds3d (space2 @ units2)
+  VectorBounds3d space2 units2
 curve3dBounds (Constant value) _ = VectorBounds3d.constant (Vector3d.coerce value)
 curve3dBounds (Bytecode bytecode) (Bounds## tLow## tHigh##) =
   callFunction bytecode \f## -> do
@@ -118,9 +118,9 @@ surface1dBounds (Bytecode bytecode) (Bounds2d (Bounds## uLow## uHigh##) (Bounds#
     IO.succeed (Bounds## xLow## xHigh##)
 
 surface2dValue ::
-  Compiled UvPoint (Vector2d (space1 @ units1)) ->
+  Compiled UvPoint (Vector2d space1 units1) ->
   UvPoint ->
-  Vector2d (space2 @ units2)
+  Vector2d space2 units2
 surface2dValue (Constant value) _ = Vector2d.coerce value
 surface2dValue (Bytecode bytecode) (Point2d (Quantity## u##) (Quantity## v##)) =
   callFunction bytecode \f## -> do
@@ -128,9 +128,9 @@ surface2dValue (Bytecode bytecode) (Point2d (Quantity## u##) (Quantity## v##)) =
     IO.succeed (Vector2d## x## y##)
 
 surface2dBounds ::
-  Compiled UvPoint (Vector2d (space1 @ units1)) ->
+  Compiled UvPoint (Vector2d space1 units1) ->
   UvBounds ->
-  VectorBounds2d (space2 @ units2)
+  VectorBounds2d space2 units2
 surface2dBounds (Constant value) _ = VectorBounds2d.constant (Vector2d.coerce value)
 surface2dBounds (Bytecode bytecode) (Bounds2d (Bounds## uLow## uHigh##) (Bounds## vLow## vHigh##)) =
   callFunction bytecode \f## -> do
@@ -139,9 +139,9 @@ surface2dBounds (Bytecode bytecode) (Bounds2d (Bounds## uLow## uHigh##) (Bounds#
     IO.succeed (VectorBounds2d (Bounds## xLow## xHigh##) (Bounds## yLow## yHigh##))
 
 surface3dValue ::
-  Compiled UvPoint (Vector3d (space1 @ units1)) ->
+  Compiled UvPoint (Vector3d space1 units1) ->
   UvPoint ->
-  Vector3d (space2 @ units2)
+  Vector3d space2 units2
 surface3dValue (Constant value) _ = Vector3d.coerce value
 surface3dValue (Bytecode bytecode) (Point2d (Quantity## u##) (Quantity## v##)) =
   callFunction bytecode \f## -> do
@@ -149,9 +149,9 @@ surface3dValue (Bytecode bytecode) (Point2d (Quantity## u##) (Quantity## v##)) =
     IO.succeed (Vector3d## x## y## z##)
 
 surface3dBounds ::
-  Compiled UvPoint (Vector3d (space1 @ units1)) ->
+  Compiled UvPoint (Vector3d space1 units1) ->
   UvBounds ->
-  VectorBounds3d (space2 @ units2)
+  VectorBounds3d space2 units2
 surface3dBounds (Constant value) _ = VectorBounds3d.constant (Vector3d.coerce value)
 surface3dBounds (Bytecode bytecode) (Bounds2d (Bounds## uLow## uHigh##) (Bounds## vLow## vHigh##)) =
   callFunction bytecode \f## -> do

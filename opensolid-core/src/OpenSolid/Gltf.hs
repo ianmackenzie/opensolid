@@ -243,10 +243,10 @@ faceIndicesBuilder :: List (Int, Int, Int) -> Builder
 faceIndicesBuilder = Binary.combine do
   \(i, j, k) -> Binary.uint32LE i <> Binary.uint32LE j <> Binary.uint32LE k
 
-verticesBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => Array vertex -> Builder
+verticesBuilder :: Vertex3d.HasNormal vertex space Meters => Array vertex -> Builder
 verticesBuilder = Binary.combine vertexBuilder
 
-vertexBuilder :: Vertex3d.HasNormal vertex (space @ Meters) => vertex -> Builder
+vertexBuilder :: Vertex3d.HasNormal vertex space Meters => vertex -> Builder
 vertexBuilder vertex = GHC.Exts.runRW# \state0# -> do
   let !(# state1#, mutableByteArray# #) = GHC.Exts.newByteArray# 24# state0#
   let !(# px##, py##, pz## #) = Point3d.yUpCoordinates## (Vertex3d.position vertex)

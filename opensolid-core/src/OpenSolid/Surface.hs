@@ -10,9 +10,9 @@ import OpenSolid.Region2d (Region2d)
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 
 data Surface units where
-  Parametric :: SurfaceFunction units -> Region2d UvCoordinates -> Surface units
+  Parametric :: SurfaceFunction units -> Region2d UvSpace Unitless -> Surface units
 
-parametric :: SurfaceFunction units -> Region2d UvCoordinates -> Surface units
+parametric :: SurfaceFunction units -> Region2d UvSpace Unitless -> Surface units
 parametric = Parametric
 
 function :: Surface units -> SurfaceFunction units

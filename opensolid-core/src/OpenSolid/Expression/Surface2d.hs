@@ -18,35 +18,35 @@ import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.UvPoint (UvPoint)
 
-constant :: Point2d (space @ units) -> Expression UvPoint (Point2d (space @ units))
+constant :: Point2d space units -> Expression UvPoint (Point2d space units)
 constant = Expression.constant
 
 xy ::
   Expression UvPoint (Quantity units) ->
   Expression UvPoint (Quantity units) ->
-  Expression UvPoint (Point2d (space @ units))
+  Expression UvPoint (Point2d space units)
 xy = Expression.xy
 
 placeIn ::
-  Frame2d (global @ units) (Defines local) ->
-  Expression UvPoint (Point2d (local @ units)) ->
-  Expression UvPoint (Point2d (global @ units))
+  Frame2d global units (Defines local) ->
+  Expression UvPoint (Point2d local units) ->
+  Expression UvPoint (Point2d global units)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame2d (global @ units) (Defines local) ->
-  Expression UvPoint (Point2d (global @ units)) ->
-  Expression UvPoint (Point2d (local @ units))
+  Frame2d global units (Defines local) ->
+  Expression UvPoint (Point2d global units) ->
+  Expression UvPoint (Point2d local units)
 relativeTo = Expression.relativeTo
 
 placeOn ::
-  Plane3d (global @ units) (Defines local) ->
-  Expression UvPoint (Point2d (local @ units)) ->
-  Expression UvPoint (Point3d (global @ units))
+  Plane3d global units (Defines local) ->
+  Expression UvPoint (Point2d local units) ->
+  Expression UvPoint (Point3d global units)
 placeOn = Expression.on
 
 transformBy ::
-  Transform2d tag (space @ units) ->
-  Expression UvPoint (Point2d (space @ units)) ->
-  Expression UvPoint (Point2d (space @ units))
+  Transform2d tag space units ->
+  Expression UvPoint (Point2d space units) ->
+  Expression UvPoint (Point2d space units)
 transformBy = Expression.transformBy
