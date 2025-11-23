@@ -1,3 +1,7 @@
+Add more Curve2d intersection tests
+-> use cycloid as example of curve with singularity?
+  -> make sure to test *end* singularity as well
+
 Refactor Tolerance:
 - Switch Tolerance functions to be 'context managers' (e.g. squared, squared#)
 - Add Tolerance.zero as shorthand for 'Tolerance.using Quantity.zero'
