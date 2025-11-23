@@ -45,6 +45,7 @@ import OpenSolid.CDT qualified as CDT
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
@@ -313,14 +314,12 @@ addFillet radius curves point = do
         Nothing -> couldNotSolveForFilletLocation
         Just Curve2d.OverlappingSegments{} -> couldNotSolveForFilletLocation
         Just (Curve2d.IntersectionPoints intersectionPoints) -> do
-          let firstParameterValue = Pair.first . IntersectionPoint.parameterValues
-          let secondParameterValue = Pair.second . IntersectionPoint.parameterValues
-          let intersection1 = NonEmpty.maximumBy firstParameterValue intersectionPoints
-          let intersection2 = NonEmpty.minimumBy secondParameterValue intersectionPoints
+          let intersection1 = NonEmpty.maximumBy (.t1) intersectionPoints
+          let intersection2 = NonEmpty.minimumBy (.t2) intersectionPoints
           if intersection1 /= intersection2
             then couldNotSolveForFilletLocation
             else do
-              let (t1, t2) = IntersectionPoint.parameterValues intersection1
+              let IntersectionPoint{t1, t2} = intersection1
               let centerPoint = Curve2d.evaluate firstOffsetCurve t1
               let startPoint = Curve2d.evaluate firstCurve t1
               let sweptAngle =

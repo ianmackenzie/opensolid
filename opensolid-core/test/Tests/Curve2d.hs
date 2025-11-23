@@ -192,7 +192,7 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
           (#startAngle (negative Angle.pi))
           (#endAngle Angle.zero)
   intersections <- Curve2d.intersections arc1 arc2
-  let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5 Positive)
+  let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5)
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve2d.IntersectionPoints actualIntersectionPoints) ->

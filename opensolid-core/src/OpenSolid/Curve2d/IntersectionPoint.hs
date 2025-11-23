@@ -1,38 +1,27 @@
 module OpenSolid.Curve2d.IntersectionPoint
-  ( IntersectionPoint (Crossing, Tangent, Corner)
+  ( Kind (Crossing, Tangent)
+  , IntersectionPoint (IntersectionPoint, kind, t1, t2)
   , crossing
   , tangent
-  , corner
-  , parameterValues
   )
 where
 
 import OpenSolid.Prelude
 
-data IntersectionPoint
-  = Crossing Number Number Sign
-  | Tangent Number Number Sign
-  | Corner Number Number
+data Kind = Crossing Sign | Tangent deriving (Eq, Ord, Show)
+
+data IntersectionPoint = IntersectionPoint
+  { t1 :: Number
+  , t2 :: Number
+  , kind :: Kind
+  }
   deriving (Eq, Ord, Show)
 
 instance ApproximateEquality IntersectionPoint Unitless where
-  Crossing u1 v1 sign1 ~= Crossing u2 v2 sign2 = u1 ~= u2 && v1 ~= v2 && sign1 == sign2
-  Crossing{} ~= _ = False
-  Tangent u1 v1 sign1 ~= Tangent u2 v2 sign2 = u1 ~= u2 && v1 ~= v2 && sign1 == sign2
-  Tangent{} ~= _ = False
-  Corner u1 v1 ~= Corner u2 v2 = u1 ~= u2 && v1 ~= v2
-  Corner{} ~= _ = False
+  first ~= second = first.kind == second.kind && first.t1 ~= second.t1 && first.t2 ~= second.t2
 
 crossing :: Number -> Number -> Sign -> IntersectionPoint
-crossing = Crossing
+crossing t1 t2 sign = IntersectionPoint{t1, t2, kind = Crossing sign}
 
-tangent :: Number -> Number -> Sign -> IntersectionPoint
-tangent = Tangent
-
-corner :: Number -> Number -> IntersectionPoint
-corner = Corner
-
-parameterValues :: IntersectionPoint -> (Number, Number)
-parameterValues (Crossing t1 t2 _) = (t1, t2)
-parameterValues (Tangent t1 t2 _) = (t1, t2)
-parameterValues (Corner t1 t2) = (t1, t2)
+tangent :: Number -> Number -> IntersectionPoint
+tangent t1 t2 = IntersectionPoint{t1, t2, kind = Tangent}
