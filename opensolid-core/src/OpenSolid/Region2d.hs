@@ -573,7 +573,7 @@ fluxIntegral point curve = do
   -- so the Curve.unsafeQuotient call should be OK
   -- (if the point is not on the curve, then the displacement will always be non-zero)
   let integrand =
-        Tolerance.using Tolerance.squared# $
+        Tolerance.using (Quantity.squared# ?tolerance) $
           Curve.unsafeQuotient
             (curve.derivative `cross#` displacement)
             (VectorCurve2d.squaredMagnitude# displacement)
@@ -608,7 +608,7 @@ classifyLoops (NonEmpty loops) = do
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
 fixSign desiredSign loop =
-  Tolerance.using Tolerance.squared# do
+  Tolerance.using (Quantity.squared# ?tolerance) do
     if Estimate.sign (loopSignedArea# loop) == desiredSign then loop else reverseLoop loop
 
 reverseLoop :: Loop (space @ units) -> Loop (space @ units)
@@ -619,7 +619,7 @@ pickLargestLoop ::
   NonEmpty (Loop (space @ units)) ->
   (Loop (space @ units), List (Loop (space @ units)))
 pickLargestLoop loops =
-  Tolerance.using Tolerance.squared# do
+  Tolerance.using (Quantity.squared# ?tolerance) do
     Estimate.pickLargestBy loopSignedArea# loops
 
 loopSignedArea# :: Loop (space @ units) -> Estimate (units #*# units)

@@ -495,7 +495,7 @@ sqrt function = sqrt# (Units.unspecialize function)
 
 sqrt# :: Tolerance units => SurfaceFunction (units #*# units) -> SurfaceFunction units
 sqrt# function =
-  if Tolerance.using Tolerance.squared# (function ~= zero)
+  if Tolerance.using (Quantity.squared# ?tolerance) (function ~= zero)
     then zero
     else do
       let maybeSingularity param value sign = do
@@ -503,7 +503,7 @@ sqrt# function =
             let secondDerivative = derivative param firstDerivative
             let testPoints = SurfaceFunction.Desingularization.testPoints param value
             let functionIsZeroAt testPoint =
-                  Tolerance.using Tolerance.squared# $
+                  Tolerance.using (Quantity.squared# ?tolerance) $
                     evaluate function testPoint ~= Quantity.zero
             let functionIsZero = List.allSatisfy functionIsZeroAt testPoints
             let firstDerivativeIsZeroAt testPoint = do

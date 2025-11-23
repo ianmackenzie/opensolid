@@ -894,7 +894,7 @@ curvature# curve = do
   tangent <- tangentDirection curve
   let numerator = tangent `cross` secondDerivative
   let denominator = VectorCurve2d.squaredMagnitude# firstDerivative
-  case Tolerance.using Tolerance.squared# (Curve.quotient# numerator denominator) of
+  case Tolerance.using (Quantity.squared# ?tolerance) (Curve.quotient# numerator denominator) of
     Ok quotient# -> Ok (Units.simplify quotient#)
     Error DivisionByZero -> Error IsPoint
 

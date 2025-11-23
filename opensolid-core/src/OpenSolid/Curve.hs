@@ -509,13 +509,13 @@ sqrt curve = sqrt# (Units.unspecialize curve)
 
 sqrt# :: Tolerance units => Curve (units #*# units) -> Curve units
 sqrt# curve
-  | Tolerance.using Tolerance.squared# (curve ~= zero) = zero
+  | Tolerance.using (Quantity.squared# ?tolerance) (curve ~= zero) = zero
   | otherwise = do
       let firstDerivative = curve.derivative
       let secondDerivative = firstDerivative.derivative
       let isSingularity tValue = do
             let curveIsZero =
-                  Tolerance.using Tolerance.squared# $
+                  Tolerance.using (Quantity.squared# ?tolerance) $
                     evaluate curve tValue ~= Quantity.zero
             let secondDerivativeValue = evaluate secondDerivative tValue
             let firstDerivativeTolerance =

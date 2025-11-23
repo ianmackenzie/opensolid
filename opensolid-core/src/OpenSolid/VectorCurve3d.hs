@@ -129,7 +129,7 @@ instance
     (Vector3d (space2 @ units2))
     units1
   where
-  curve `intersects` vector = Tolerance.using Tolerance.squared# do
+  curve `intersects` vector = Tolerance.using (Quantity.squared# ?tolerance) do
     (curve .-. vector).squaredMagnitude# `intersects` Quantity.zero
 
 instance
@@ -676,7 +676,7 @@ data IsZero = IsZero deriving (Eq, Show)
 
 zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result IsZero (List Number)
 zeros curve =
-  case Tolerance.using Tolerance.squared# (Curve.zeros (squaredMagnitude# curve)) of
+  case Tolerance.using (Quantity.squared# ?tolerance) (Curve.zeros (squaredMagnitude# curve)) of
     Ok zeros1d -> Ok (List.map (.location) zeros1d)
     Error Curve.IsZero -> Error IsZero
 

@@ -3,9 +3,6 @@ module OpenSolid.Tolerance
   , ApproximateEquality ((~=))
   , (!=)
   , using
-  , unitless
-  , squared
-  , squared#
   , (~=##)
   )
 where
@@ -13,12 +10,9 @@ where
 import OpenSolid.Arithmetic
 import OpenSolid.List (List)
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
-import OpenSolid.Number (Number)
 import OpenSolid.Quantity (Quantity (Quantity##))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
-import OpenSolid.Units (type (#*#))
-import OpenSolid.Units qualified as Units
 import Prelude
   ( Bool (False, True)
   , Maybe (Just, Nothing)
@@ -91,18 +85,8 @@ instance
 
 infix 4 !=
 
--- | A default tolerance (1e-9) for comparing unitless values with expected magnitude near 1.
-unitless :: Number
-unitless = 1e-9
-
 using :: Quantity units -> (Tolerance units => a) -> a
 using tolerance expression = let ?tolerance = tolerance in expression
-
-squared :: (Tolerance units, Units.Squared units squaredUnits) => Quantity squaredUnits
-squared = Quantity.squared ?tolerance
-
-squared# :: Tolerance units => Quantity (units #*# units)
-squared# = Quantity.squared# ?tolerance
 
 {-# INLINE (~=##) #-}
 (~=##) :: Tolerance units => Double# -> Double# -> Int#
