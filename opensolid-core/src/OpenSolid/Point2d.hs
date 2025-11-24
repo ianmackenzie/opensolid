@@ -18,7 +18,7 @@ module OpenSolid.Point2d
   , midpoint
   , interpolateFrom
   , distanceFrom
-  , distanceFrom##
+  , distanceFrom#
   , angleFrom
   , distanceAlong
   , distanceLeftOf
@@ -53,7 +53,7 @@ import OpenSolid.Primitives
   , Point3d
   , Transform2d (Transform2d)
   )
-import OpenSolid.Quantity (Quantity (Quantity##))
+import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Unboxed.Math
@@ -147,12 +147,12 @@ midpoint (Position2d p1) (Position2d p2) = Position2d (Vector2d.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
 distanceFrom :: Point2d space units -> Point2d space units -> Quantity units
-distanceFrom p1 p2 = Quantity## (distanceFrom## p1 p2)
+distanceFrom p1 p2 = Quantity# (distanceFrom# p1 p2)
 
-{-# INLINE distanceFrom## #-}
-distanceFrom## :: Point2d space units -> Point2d space units -> Double#
-distanceFrom## (Point2d (Quantity## x1##) (Quantity## y1##)) (Point2d (Quantity## x2##) (Quantity## y2##)) =
-  hypot2## (x2## -## x1##) (y2## -## y1##)
+{-# INLINE distanceFrom# #-}
+distanceFrom# :: Point2d space units -> Point2d space units -> Double#
+distanceFrom# (Point2d (Quantity# x1#) (Quantity# y1#)) (Point2d (Quantity# x2#) (Quantity# y2#)) =
+  hypot2# (x2# -# x1#) (y2# -# y1#)
 
 angleFrom :: Point2d space units -> Point2d space units -> Angle
 angleFrom p1 p2 = Vector2d.angle (p2 .-. p1)

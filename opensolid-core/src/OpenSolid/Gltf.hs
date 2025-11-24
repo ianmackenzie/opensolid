@@ -247,14 +247,14 @@ verticesBuilder = Binary.combine vertexBuilder
 vertexBuilder :: Vertex3d.HasNormal vertex space Meters => vertex -> Builder
 vertexBuilder vertex = GHC.Exts.runRW# \state0# -> do
   let !(# state1#, mutableByteArray# #) = GHC.Exts.newByteArray# 24# state0#
-  let !(# px##, py##, pz## #) = Point3d.yUpCoordinates## (Vertex3d.position vertex)
-  let !(# nx##, ny##, nz## #) = Vector3d.yUpComponents## (Vertex3d.normal vertex)
-  let state2# = GHC.Exts.writeFloatArray# mutableByteArray# 0# (GHC.Exts.double2Float# px##) state1#
-  let state3# = GHC.Exts.writeFloatArray# mutableByteArray# 1# (GHC.Exts.double2Float# py##) state2#
-  let state4# = GHC.Exts.writeFloatArray# mutableByteArray# 2# (GHC.Exts.double2Float# pz##) state3#
-  let state5# = GHC.Exts.writeFloatArray# mutableByteArray# 3# (GHC.Exts.double2Float# nx##) state4#
-  let state6# = GHC.Exts.writeFloatArray# mutableByteArray# 4# (GHC.Exts.double2Float# ny##) state5#
-  let state7# = GHC.Exts.writeFloatArray# mutableByteArray# 5# (GHC.Exts.double2Float# nz##) state6#
+  let !(# px#, py#, pz# #) = Point3d.yUpCoordinates# (Vertex3d.position vertex)
+  let !(# nx#, ny#, nz# #) = Vector3d.yUpComponents# (Vertex3d.normal vertex)
+  let state2# = GHC.Exts.writeFloatArray# mutableByteArray# 0# (GHC.Exts.double2Float# px#) state1#
+  let state3# = GHC.Exts.writeFloatArray# mutableByteArray# 1# (GHC.Exts.double2Float# py#) state2#
+  let state4# = GHC.Exts.writeFloatArray# mutableByteArray# 2# (GHC.Exts.double2Float# pz#) state3#
+  let state5# = GHC.Exts.writeFloatArray# mutableByteArray# 3# (GHC.Exts.double2Float# nx#) state4#
+  let state6# = GHC.Exts.writeFloatArray# mutableByteArray# 4# (GHC.Exts.double2Float# ny#) state5#
+  let state7# = GHC.Exts.writeFloatArray# mutableByteArray# 5# (GHC.Exts.double2Float# nz#) state6#
   let !(# _, byteArray# #) = GHC.Exts.unsafeFreezeByteArray# mutableByteArray# state7#
   Builder.shortByteString (ShortByteString (ByteArray byteArray#))
 

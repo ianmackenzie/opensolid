@@ -1,5 +1,5 @@
 module OpenSolid.Quantity
-  ( Quantity (Quantity, Quantity##)
+  ( Quantity (Quantity, Quantity#)
   , (.//.)
   , (.%.)
   , zero
@@ -85,11 +85,11 @@ type role Quantity phantom
 type Quantity :: Type -> Type
 newtype Quantity units = Quantity Double deriving (Eq, Ord, Show)
 
-{-# COMPLETE Quantity## #-}
+{-# COMPLETE Quantity# #-}
 
-{-# INLINE Quantity## #-}
-pattern Quantity## :: Double# -> Quantity units
-pattern Quantity## x## = Quantity (D# x##)
+{-# INLINE Quantity# #-}
+pattern Quantity# :: Double# -> Quantity units
+pattern Quantity# x# = Quantity (D# x#)
 
 deriving newtype instance units ~ Unitless => Prelude.Num (Quantity units)
 
@@ -211,10 +211,10 @@ sqrt_ x | x <= zero = zero
 sqrt_ (Quantity x) = Quantity (Prelude.sqrt x)
 
 hypot2 :: Quantity units -> Quantity units -> Quantity units
-hypot2 (Quantity## x##) (Quantity## y##) = Quantity## (hypot2## x## y##)
+hypot2 (Quantity# x#) (Quantity# y#) = Quantity# (hypot2# x# y#)
 
 hypot3 :: Quantity units -> Quantity units -> Quantity units -> Quantity units
-hypot3 (Quantity## x##) (Quantity## y##) (Quantity## z##) = Quantity## (hypot3## x## y## z##)
+hypot3 (Quantity# x#) (Quantity# y#) (Quantity# z#) = Quantity# (hypot3# x# y# z#)
 
 {-# INLINE abs #-}
 abs :: Quantity units -> Quantity units

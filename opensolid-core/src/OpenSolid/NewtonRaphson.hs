@@ -3,9 +3,9 @@
 module OpenSolid.NewtonRaphson
   ( Divergence (Divergence)
   , curve1d
-  , curve1d##
+  , curve1d#
   , curve2d
-  , curve2d##
+  , curve2d#
   , surface2d
   )
 where
@@ -14,7 +14,7 @@ import GHC.Exts qualified
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity##))
+import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)
@@ -52,17 +52,17 @@ curve1dImpl function derivative x1 y1 iterations =
         else if y1 ~= Quantity.zero then Ok x1 else Error Divergence
     else Error Divergence
 
-curve1d## ::
+curve1d# ::
   Tolerance units =>
   (Double# -> Double#) ->
   (Double# -> Double#) ->
   Number ->
   Result Divergence Number
-curve1d## function## derivative## (Quantity## x1##) = do
-  let !(Quantity## tolerance##) = ?tolerance
-  curve1dImpl## tolerance## function## derivative## x1## (function## x1##) 0#
+curve1d# function# derivative# (Quantity# x1#) = do
+  let !(Quantity# tolerance#) = ?tolerance
+  curve1dImpl# tolerance# function# derivative# x1# (function# x1#) 0#
 
-curve1dImpl## ::
+curve1dImpl# ::
   Double# ->
   (Double# -> Double#) ->
   (Double# -> Double#) ->
@@ -70,18 +70,18 @@ curve1dImpl## ::
   Double# ->
   Int# ->
   Result Divergence Number
-curve1dImpl## tolerance## function## derivative## x1## y1## iterations1# =
+curve1dImpl# tolerance# function# derivative# x1# y1# iterations1# =
   case iterations1# GHC.Exts.<=# 10# of
     1# -> do
-      let dy1## = derivative## x1##
-      let x2## = x1## -## y1## /## dy1##
-      let y2## = function## x2##
-      case abs## y2## <## abs## y1## of
+      let dy1# = derivative# x1#
+      let x2# = x1# -# y1# /# dy1#
+      let y2# = function# x2#
+      case abs# y2# <# abs# y1# of
         1# -> do
           let iterations2# = iterations1# GHC.Exts.+# 1#
-          curve1dImpl## tolerance## function## derivative## x2## y2## iterations2#
-        _ -> case abs## y1## <=## tolerance## of
-          1# -> Ok (Quantity (D# x1##))
+          curve1dImpl# tolerance# function# derivative# x2# y2# iterations2#
+        _ -> case abs# y1# <=# tolerance# of
+          1# -> Ok (Quantity (D# x1#))
           _ -> Error Divergence
     _ -> Error Divergence
 
@@ -110,19 +110,19 @@ curve2dImpl function derivative t1 v1 iterations =
         else if v1 ~= Vector2d.zero then Ok t1 else Error Divergence
     else Error Divergence
 
-curve2d## ::
+curve2d# ::
   Tolerance units =>
   (Double# -> (# Double#, Double# #)) ->
   (Double# -> (# Double#, Double# #)) ->
   Number ->
   Result Divergence Number
-curve2d## function## derivative## (Quantity## t1##) = do
-  let !(Quantity## tolerance##) = ?tolerance
-  let !(# x1##, y1## #) = function## t1##
-  let squaredMagnitude1## = x1## *## x1## +## y1## *## y1##
-  curve2dImpl## tolerance## function## derivative## t1## x1## y1## squaredMagnitude1## 0#
+curve2d# function# derivative# (Quantity# t1#) = do
+  let !(Quantity# tolerance#) = ?tolerance
+  let !(# x1#, y1# #) = function# t1#
+  let squaredMagnitude1# = x1# *# x1# +# y1# *# y1#
+  curve2dImpl# tolerance# function# derivative# t1# x1# y1# squaredMagnitude1# 0#
 
-curve2dImpl## ::
+curve2dImpl# ::
   Double# ->
   (Double# -> (# Double#, Double# #)) ->
   (Double# -> (# Double#, Double# #)) ->
@@ -132,22 +132,22 @@ curve2dImpl## ::
   Double# ->
   Int# ->
   Result Divergence Number
-curve2dImpl## tolerance## function## derivative## t1## x1## y1## squaredMagnitude1## iterations1# =
+curve2dImpl# tolerance# function# derivative# t1# x1# y1# squaredMagnitude1# iterations1# =
   case iterations1# GHC.Exts.<=# 10# of
     1# -> do
-      let !(# dx1##, dy1## #) = derivative## t1##
-      let t2## =
-            t1##
-              -## (x1## *## dx1## +## y1## *## dy1##)
-              /## (dx1## *## dx1## +## dy1## *## dy1##)
-      let !(# x2##, y2## #) = function## t2##
-      let squaredMagnitude2## = x2## *## x2## +## y2## *## y2##
-      case squaredMagnitude2## <## squaredMagnitude1## of
+      let !(# dx1#, dy1# #) = derivative# t1#
+      let t2# =
+            t1#
+              -# (x1# *# dx1# +# y1# *# dy1#)
+              /# (dx1# *# dx1# +# dy1# *# dy1#)
+      let !(# x2#, y2# #) = function# t2#
+      let squaredMagnitude2# = x2# *# x2# +# y2# *# y2#
+      case squaredMagnitude2# <# squaredMagnitude1# of
         1# -> do
           let iterations2# = iterations1# GHC.Exts.+# 1#
-          curve2dImpl## tolerance## function## derivative## t2## x2## y2## squaredMagnitude2## iterations2#
-        _ -> case squaredMagnitude2## <=## tolerance## *## tolerance## of
-          1# -> Ok (Quantity (D# t1##))
+          curve2dImpl# tolerance# function# derivative# t2# x2# y2# squaredMagnitude2# iterations2#
+        _ -> case squaredMagnitude2# <=# tolerance# *# tolerance# of
+          1# -> Ok (Quantity (D# t1#))
           _ -> Error Divergence
     _ -> Error Divergence
 

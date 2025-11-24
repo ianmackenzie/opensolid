@@ -1,7 +1,7 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Bounds
-  ( Bounds (Bounds, Bounds##)
+  ( Bounds (Bounds, Bounds#)
   , constant
   , unitInterval
   , coerce
@@ -16,20 +16,20 @@ module OpenSolid.Bounds
   , midpoint
   , endpoints
   , width
-  , width##
+  , width#
   , maxAbs
   , minAbs
   , squared
   , squared_
   , includes
   , inclusion
-  , inclusion##
+  , inclusion#
   , exclusion
-  , exclusion##
+  , exclusion#
   , contains
   , overlap
   , separation
-  , separation##
+  , separation#
   , isContainedIn
   , bisect
   , isAtomic
@@ -78,7 +78,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude hiding (max, min)
-import OpenSolid.Quantity (Quantity (Quantity##))
+import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Unboxed.Math
@@ -91,7 +91,7 @@ type role Bounds phantom
 type Bounds :: Type -> Type
 
 -- | A range of possible values, with a lower bound and upper bound.
-data Bounds units = Ordered## Double# Double#
+data Bounds units = Ordered# Double# Double#
   deriving (Eq, Show)
 
 instance HasField "endpoints" (Bounds units) (Quantity units, Quantity units) where
@@ -119,23 +119,23 @@ If either argument is NaN, then the result will be open/infinite
 pattern Bounds :: Quantity units -> Quantity units -> Bounds units
 pattern Bounds low high <- (viewBounds -> (# low, high #))
   where
-    Bounds (Quantity## a##) (Quantity## b##) = Bounds## a## b##
+    Bounds (Quantity# a#) (Quantity# b#) = Bounds# a# b#
 
 {-# INLINE viewBounds #-}
 viewBounds :: Bounds units -> (# Quantity units, Quantity units #)
-viewBounds (Ordered## low## high##) = (# Quantity## low##, Quantity## high## #)
+viewBounds (Ordered# low# high#) = (# Quantity# low#, Quantity# high# #)
 
 {-# COMPLETE Bounds #-}
 
-{-# INLINE Bounds## #-}
-pattern Bounds## :: Double# -> Double# -> Bounds units
-pattern Bounds## low## high## <- Ordered## low## high##
+{-# INLINE Bounds# #-}
+pattern Bounds# :: Double# -> Double# -> Bounds units
+pattern Bounds# low# high# <- Ordered# low# high#
   where
-    Bounds## a## b## = do
-      let !(# low##, high## #) = hull2## a## b##
-      Ordered## low## high##
+    Bounds# a# b# = do
+      let !(# low#, high# #) = hull2# a# b#
+      Ordered# low# high#
 
-{-# COMPLETE Bounds## #-}
+{-# COMPLETE Bounds# #-}
 
 instance FFI (Bounds Unitless) where
   representation = FFI.classRepresentation "Bounds"
@@ -164,7 +164,7 @@ instance units1 ~ units2 => Intersects (Bounds units1) (Bounds units2) units1 wh
   first `intersects` second = separation first second <= ?tolerance
 
 instance Negation (Bounds units) where
-  negative (Bounds## low## high##) = Bounds## (negate## high##) (negate## low##)
+  negative (Bounds# low# high#) = Bounds# (negate# high#) (negate# low#)
 
 instance Multiplication Sign (Bounds units) (Bounds units) where
   Positive .*. bounds = bounds
@@ -175,99 +175,99 @@ instance Multiplication (Bounds units) Sign (Bounds units) where
   bounds .*. Negative = negative bounds
 
 instance units1 ~ units2 => Addition (Bounds units1) (Bounds units2) (Bounds units1) where
-  Bounds## low1## high1## .+. Bounds## low2## high2## =
-    Bounds## (low1## +## low2##) (high1## +## high2##)
+  Bounds# low1# high1# .+. Bounds# low2# high2# =
+    Bounds# (low1# +# low2#) (high1# +# high2#)
 
 instance units1 ~ units2 => Addition (Bounds units1) (Quantity units2) (Bounds units1) where
-  Bounds## low## high## .+. Quantity## value## =
-    Bounds## (low## +## value##) (high## +## value##)
+  Bounds# low# high# .+. Quantity# value# =
+    Bounds# (low# +# value#) (high# +# value#)
 
 instance units1 ~ units2 => Addition (Quantity units1) (Bounds units2) (Bounds units1) where
-  Quantity## value## .+. Bounds## low## high## =
-    Bounds## (value## +## low##) (value## +## high##)
+  Quantity# value# .+. Bounds# low# high# =
+    Bounds# (value# +# low#) (value# +# high#)
 
 instance units1 ~ units2 => Subtraction (Bounds units1) (Bounds units2) (Bounds units1) where
-  Bounds## low1## high1## .-. Bounds## low2## high2## =
-    Bounds## (low1## -## high2##) (high1## -## low2##)
+  Bounds# low1# high1# .-. Bounds# low2# high2# =
+    Bounds# (low1# -# high2#) (high1# -# low2#)
 
 instance units1 ~ units2 => Subtraction (Bounds units1) (Quantity units2) (Bounds units1) where
-  Bounds## low## high## .-. Quantity## value## =
-    Bounds## (low## -## value##) (high## -## value##)
+  Bounds# low# high# .-. Quantity# value# =
+    Bounds# (low# -# value#) (high# -# value#)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Bounds units2) (Bounds units1) where
-  Quantity## value## .-. Bounds## low## high## =
-    Bounds## (value## -## high##) (value## -## low##)
+  Quantity# value# .-. Bounds# low# high# =
+    Bounds# (value# -# high#) (value# -# low#)
 
 instance Multiplication_ (Quantity units1) (Bounds units2) (Bounds (units1 ?*? units2)) where
-  Quantity## value## ?*? Bounds## low## high## =
-    Bounds## (value## *## low##) (value## *## high##)
+  Quantity# value# ?*? Bounds# low# high# =
+    Bounds# (value# *# low#) (value# *# high#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Bounds units2) (Bounds units3)
   where
-  Quantity## value## .*. Bounds## low## high## = Bounds## (value## *## low##) (value## *## high##)
+  Quantity# value# .*. Bounds# low# high# = Bounds# (value# *# low#) (value# *# high#)
 
 instance Multiplication_ (Bounds units1) (Quantity units2) (Bounds (units1 ?*? units2)) where
-  Bounds## low## high## ?*? Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
+  Bounds# low# high# ?*? Quantity# value# = Bounds# (low# *# value#) (high# *# value#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Bounds units1) (Quantity units2) (Bounds units3)
   where
-  Bounds## low## high## .*. Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
+  Bounds# low# high# .*. Quantity# value# = Bounds# (low# *# value#) (high# *# value#)
 
 instance Multiplication_ (Bounds units1) (Bounds units2) (Bounds (units1 ?*? units2)) where
-  Bounds## low1## high1## ?*? Bounds## low2## high2## = do
-    let !(# low##, high## #) = boundsTimesBounds## low1## high1## low2## high2##
-    Ordered## low## high##
+  Bounds# low1# high1# ?*? Bounds# low2# high2# = do
+    let !(# low#, high# #) = boundsTimesBounds# low1# high1# low2# high2#
+    Ordered# low# high#
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Bounds units1) (Bounds units2) (Bounds units3)
   where
-  Bounds## low1## high1## .*. Bounds## low2## high2## = do
-    let !(# low##, high## #) = boundsTimesBounds## low1## high1## low2## high2##
-    Ordered## low## high##
+  Bounds# low1# high1# .*. Bounds# low2# high2# = do
+    let !(# low#, high# #) = boundsTimesBounds# low1# high1# low2# high2#
+    Ordered# low# high#
 
 instance Division_ (Quantity units1) (Bounds units2) (Bounds (units1 ?/? units2)) where
-  Quantity## n## ?/? Bounds## dl## dh## = do
-    let !(# low##, high## #) = doubleOverBounds## n## dl## dh##
-    Ordered## low## high##
+  Quantity# n# ?/? Bounds# dl# dh# = do
+    let !(# low#, high# #) = doubleOverBounds# n# dl# dh#
+    Ordered# low# high#
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Bounds units2) (Bounds units3)
   where
-  Quantity## n## ./. Bounds## dl## dh## = do
-    let !(# low##, high## #) = doubleOverBounds## n## dl## dh##
-    Ordered## low## high##
+  Quantity# n# ./. Bounds# dl# dh# = do
+    let !(# low#, high# #) = doubleOverBounds# n# dl# dh#
+    Ordered# low# high#
 
 instance Division_ (Bounds units1) (Quantity units2) (Bounds (units1 ?/? units2)) where
-  Bounds## nl## nh## ?/? Quantity## d## = do
-    let !(# low##, high## #) = boundsOverDouble## nl## nh## d##
-    Ordered## low## high##
+  Bounds# nl# nh# ?/? Quantity# d# = do
+    let !(# low#, high# #) = boundsOverDouble# nl# nh# d#
+    Ordered# low# high#
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Bounds units1) (Quantity units2) (Bounds units3)
   where
-  Bounds## nl## nh## ./. Quantity## d## = do
-    let !(# low##, high## #) = boundsOverDouble## nl## nh## d##
-    Ordered## low## high##
+  Bounds# nl# nh# ./. Quantity# d# = do
+    let !(# low#, high# #) = boundsOverDouble# nl# nh# d#
+    Ordered# low# high#
 
 instance Division_ (Bounds units1) (Bounds units2) (Bounds (units1 ?/? units2)) where
-  Bounds## nl## nh## ?/? Bounds## dl## dh## = do
-    let !(# low##, high## #) = boundsOverBounds## nl## nh## dl## dh##
-    Ordered## low## high##
+  Bounds# nl# nh# ?/? Bounds# dl# dh# = do
+    let !(# low#, high# #) = boundsOverBounds# nl# nh# dl# dh#
+    Ordered# low# high#
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Bounds units1) (Bounds units2) (Bounds units3)
   where
-  Bounds## nl## nh## ./. Bounds## dl## dh## = do
-    let !(# low##, high## #) = boundsOverBounds## nl## nh## dl## dh##
-    Ordered## low## high##
+  Bounds# nl# nh# ./. Bounds# dl# dh# = do
+    let !(# low#, high# #) = boundsOverBounds# nl# nh# dl# dh#
+    Ordered# low# high#
 
 -- | Construct a zero-width bounding range containing a single value.
 {-# INLINE constant #-}
@@ -327,9 +327,9 @@ hull3 a b c = Bounds (Prelude.min a (Prelude.min b c)) (Prelude.max a (Prelude.m
 
 {-# INLINE hull4 #-}
 hull4 :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> Bounds units
-hull4 (Quantity## a##) (Quantity## b##) (Quantity## c##) (Quantity## d##) = do
-  let !(# low##, high## #) = hull4## a## b## c## d##
-  Ordered## low## high##
+hull4 (Quantity# a#) (Quantity# b#) (Quantity# c#) (Quantity# d#) = do
+  let !(# low#, high# #) = hull4# a# b# c# d#
+  Ordered# low# high#
 
 -- | Build a bounding range containing all values in the given non-empty list.
 hullN :: NonEmpty (Quantity units) -> Bounds units
@@ -359,11 +359,11 @@ endpoints (Bounds low high) = (low, high)
 
 {-# INLINE width #-}
 width :: Bounds units -> Quantity units
-width bounds = Quantity## (width## bounds)
+width bounds = Quantity# (width# bounds)
 
-{-# INLINE width## #-}
-width## :: Bounds units -> Double#
-width## (Bounds## low## high##) = high## -## low##
+{-# INLINE width# #-}
+width# :: Bounds units -> Double#
+width# (Bounds# low# high#) = high# -# low#
 
 {-# INLINE maxAbs #-}
 maxAbs :: Bounds units -> Quantity units
@@ -398,24 +398,24 @@ sqrt :: Units.Squared units1 units2 => Bounds units2 -> Bounds units1
 sqrt = sqrt_ . Units.unspecialize
 
 hypot2 :: Bounds units -> Bounds units -> Bounds units
-hypot2 (Bounds## xMin## xMax##) (Bounds## yMin## yMax##) = do
-  let positiveX## = xMin## >=## 0.0##
-  let negativeX## = xMax## <=## 0.0##
-  let positiveY## = yMin## >=## 0.0##
-  let negativeY## = yMax## <=## 0.0##
-  let xMagnitude## = max## (abs## xMin##) (abs## xMax##)
-  let yMagnitude## = max## (abs## yMin##) (abs## yMax##)
-  let maxMagnitude## = hypot2## xMagnitude## yMagnitude##
-  case (# positiveX##, negativeX##, positiveY##, negativeY## #) of
-    (# 1#, _, 1#, _ #) -> Bounds## (hypot2## xMin## yMin##) maxMagnitude##
-    (# 1#, _, _, 1# #) -> Bounds## (hypot2## xMin## yMax##) maxMagnitude##
-    (# _, 1#, 1#, _ #) -> Bounds## (hypot2## xMax## yMin##) maxMagnitude##
-    (# _, 1#, _, 1# #) -> Bounds## (hypot2## xMax## yMax##) maxMagnitude##
-    (# 1#, _, _, _ #) -> Bounds## xMin## maxMagnitude##
-    (# _, 1#, _, _ #) -> Bounds## (negate## xMax##) maxMagnitude##
-    (# _, _, 1#, _ #) -> Bounds## yMin## maxMagnitude##
-    (# _, _, _, 1# #) -> Bounds## (negate## yMax##) maxMagnitude##
-    (# _, _, _, _ #) -> Bounds## 0.0## maxMagnitude##
+hypot2 (Bounds# xMin# xMax#) (Bounds# yMin# yMax#) = do
+  let positiveX# = xMin# >=# 0.0##
+  let negativeX# = xMax# <=# 0.0##
+  let positiveY# = yMin# >=# 0.0##
+  let negativeY# = yMax# <=# 0.0##
+  let xMagnitude# = max# (abs# xMin#) (abs# xMax#)
+  let yMagnitude# = max# (abs# yMin#) (abs# yMax#)
+  let maxMagnitude# = hypot2# xMagnitude# yMagnitude#
+  case (# positiveX#, negativeX#, positiveY#, negativeY# #) of
+    (# 1#, _, 1#, _ #) -> Bounds# (hypot2# xMin# yMin#) maxMagnitude#
+    (# 1#, _, _, 1# #) -> Bounds# (hypot2# xMin# yMax#) maxMagnitude#
+    (# _, 1#, 1#, _ #) -> Bounds# (hypot2# xMax# yMin#) maxMagnitude#
+    (# _, 1#, _, 1# #) -> Bounds# (hypot2# xMax# yMax#) maxMagnitude#
+    (# 1#, _, _, _ #) -> Bounds# xMin# maxMagnitude#
+    (# _, 1#, _, _ #) -> Bounds# (negate# xMax#) maxMagnitude#
+    (# _, _, 1#, _ #) -> Bounds# yMin# maxMagnitude#
+    (# _, _, _, 1# #) -> Bounds# (negate# yMax#) maxMagnitude#
+    (# _, _, _, _ #) -> Bounds# 0.0## maxMagnitude#
 
 cubed :: Bounds Unitless -> Bounds Unitless
 cubed (Bounds low high) = Bounds (low .*. low .*. low) (high .*. high .*. high)
@@ -430,18 +430,18 @@ includes :: Quantity units -> Bounds units -> Bool
 includes value (Bounds low high) = low <= value && value <= high
 
 exclusion :: Quantity units -> Bounds units -> Quantity units
-exclusion (Quantity## value##) bounds = Quantity## (exclusion## value## bounds)
+exclusion (Quantity# value#) bounds = Quantity# (exclusion# value# bounds)
 
-{-# INLINE exclusion## #-}
-exclusion## :: Double# -> Bounds units -> Double#
-exclusion## value## (Bounds## low## high##) = max## (low## -## value##) (value## -## high##)
+{-# INLINE exclusion# #-}
+exclusion# :: Double# -> Bounds units -> Double#
+exclusion# value# (Bounds# low# high#) = max# (low# -# value#) (value# -# high#)
 
 inclusion :: Quantity units -> Bounds units -> Quantity units
-inclusion (Quantity## value##) bounds = Quantity## (inclusion## value## bounds)
+inclusion (Quantity# value#) bounds = Quantity# (inclusion# value# bounds)
 
-{-# INLINE inclusion## #-}
-inclusion## :: Double# -> Bounds units -> Double#
-inclusion## value## bounds = negate## (exclusion## value## bounds)
+{-# INLINE inclusion# #-}
+inclusion# :: Double# -> Bounds units -> Double#
+inclusion# value# bounds = negate# (exclusion# value# bounds)
 
 {-| Check if one bounding range contains another.
 
@@ -456,12 +456,12 @@ isContainedIn :: Bounds units -> Bounds units -> Bool
 isContainedIn bounds value = contains value bounds
 
 separation :: Bounds units -> Bounds units -> Quantity units
-separation bounds1 bounds2 = Quantity## (separation## bounds1 bounds2)
+separation bounds1 bounds2 = Quantity# (separation# bounds1 bounds2)
 
-{-# INLINE separation## #-}
-separation## :: Bounds units -> Bounds units -> Double#
-separation## (Bounds## low1## high1##) (Bounds## low2## high2##) =
-  max## (low1## -## high2##) (low2## -## high1##)
+{-# INLINE separation# #-}
+separation# :: Bounds units -> Bounds units -> Double#
+separation# (Bounds# low1# high1#) (Bounds# low2# high2#) =
+  max# (low1# -# high2#) (low2# -# high1#)
 
 overlap :: Bounds units -> Bounds units -> Quantity units
 overlap first second = negative (separation first second)

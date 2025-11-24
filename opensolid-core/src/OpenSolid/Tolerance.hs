@@ -3,14 +3,14 @@ module OpenSolid.Tolerance
   , ApproximateEquality ((~=))
   , (!=)
   , using
-  , (~=##)
+  , (~=#)
   )
 where
 
 import OpenSolid.Arithmetic
 import OpenSolid.List (List)
 import OpenSolid.NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
-import OpenSolid.Quantity (Quantity (Quantity##))
+import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import Prelude
@@ -88,6 +88,6 @@ infix 4 !=
 using :: Quantity units -> (Tolerance units => a) -> a
 using tolerance expression = let ?tolerance = tolerance in expression
 
-{-# INLINE (~=##) #-}
-(~=##) :: Tolerance units => Double# -> Double# -> Int#
-(~=##) x## y## = let !(Quantity## tolerance##) = ?tolerance in abs## (x## -## y##) <=## tolerance##
+{-# INLINE (~=#) #-}
+(~=#) :: Tolerance units => Double# -> Double# -> Int#
+(~=#) x# y# = let !(Quantity# tolerance#) = ?tolerance in abs# (x# -# y#) <=# tolerance#
