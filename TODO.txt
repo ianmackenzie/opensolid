@@ -1,15 +1,6 @@
-Update Bounded2d to assume the type has 'space' and 'units' type parameters?
--> and Bounded3d, and similar classes...
--> ApproximateEquality?
--> search for '-> units' in class declarations
--> search for all instances of HasUnits to see if HasUnits is still needed...
-  -> stuff like 'LineSegment2d vertex' does not have a trailing 'units' type parameter!
-
 Refactor CoordinateSystem module now that it no longer has a CoordinateSystem type
 
 Add modules for UvRegion, UvCurve etc.
-
-Switch more things over to 'nominal' type role and non-GADT style type definitions?
 
 Switch to Meters-default naming convention, e.g.:
 - data Point2D# space units
@@ -34,11 +25,10 @@ Switch back to 'normal' (non-recursive) form of quotient derivatives
 -> e.g. VectorSurfaceFunction3d
 -> search for 'recursive' calls in general?
 
-Switch axis, plane, frame types over to being records?
-
 Juse use Aeson directly for JSON encoding/decoding?
 
-Remove custom HasField instances
+Reduce use of HasField instances
+-> 'actual Haskell fields' only? (including nested?)
 
 Flip argument order in Composition typeclass
 -> rename to Composition2 temporarily to ensure all instances are updated
