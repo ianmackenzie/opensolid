@@ -95,19 +95,17 @@ builder resolution model = do
 writeBinary :: Text -> Model3d space -> Resolution Meters -> IO ()
 writeBinary path model resolution = IO.writeBinary path (builder resolution model)
 
-data GltfMesh where
-  GltfMesh ::
-    { gltfMaterial :: Json
-    , numFaces :: Int
-    , indices :: Builder
-    , indicesByteLength :: Int
-    , numVertices :: Int
-    , vertices :: Builder
-    , verticesByteLength :: Int
-    , minPosition :: Json
-    , maxPosition :: Json
-    } ->
-    GltfMesh
+data GltfMesh = GltfMesh
+  { gltfMaterial :: Json
+  , numFaces :: Int
+  , indices :: Builder
+  , indicesByteLength :: Int
+  , numVertices :: Int
+  , vertices :: Builder
+  , verticesByteLength :: Int
+  , minPosition :: Json
+  , maxPosition :: Json
+  }
 
 data EncodedMesh = EncodedMesh
   { bufferViews :: List Json

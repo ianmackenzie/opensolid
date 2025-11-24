@@ -43,6 +43,8 @@ import OpenSolid.Units qualified as Units
 
 ----- Vector2d -----
 
+type role Vector2d phantom phantom
+
 type Vector2d :: Type -> Type -> Type
 data Vector2d space units = Vector2d## Double# Double#
   deriving (Eq, Ord, Show)
@@ -244,11 +246,13 @@ instance
 
 ----- Direction2d -----
 
+type role Direction2d phantom
+
 {-| A direction in 2D.
 
 This is effectively a type-safe unit vector.
 -}
-newtype Direction2d (space :: Type) = Unit2d (Vector2d space Unitless)
+newtype Direction2d space = Unit2d (Vector2d space Unitless)
   deriving (Eq, Ord, Show)
 
 {-# COMPLETE Direction2d #-}
@@ -302,10 +306,10 @@ instance
 
 ----- Orientation2d -----
 
-type role Orientation2d nominal
+type role Orientation2d phantom
 
-data Orientation2d space where
-  Orientation2d :: Direction2d space -> Direction2d space -> Orientation2d space
+data Orientation2d space
+  = Orientation2d (Direction2d space) (Direction2d space)
 
 instance HasField "xDirection" (Orientation2d space) (Direction2d space) where
   getField (Orientation2d dx _) = dx
@@ -318,6 +322,8 @@ deriving instance Eq (Orientation2d space)
 deriving instance Show (Orientation2d space)
 
 ----- Point2d -----
+
+type role Point2d phantom phantom
 
 newtype Point2d space units = Position2d (Vector2d space units)
 
@@ -349,7 +355,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Point2d space1 unitsA) (Point2d space2 unitsB)
   where
-  coerce (Position2d vector) = Position2d (Units.coerce vector)
+  coerce = Data.Coerce.coerce
 
 instance
   ( space1 ~ space2
@@ -411,10 +417,12 @@ instance ApproximateEquality (Point2d space units) units where
 
 ----- VectorBounds2d -----
 
+type role VectorBounds2d phantom phantom
+
 type VectorBounds2d :: Type -> Type -> Type
-data VectorBounds2d space units where
-  -- | Construct a vector bounding box from its X and Y coordinate bounds.
-  VectorBounds2d :: Bounds units -> Bounds units -> VectorBounds2d space units
+data VectorBounds2d space units
+  = -- | Construct a vector bounding box from its X and Y coordinate bounds.
+    VectorBounds2d (Bounds units) (Bounds units)
 
 deriving instance Show (VectorBounds2d space units)
 
@@ -424,7 +432,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorBounds2d space1 unitsA) (VectorBounds2d space2 unitsB)
   where
-  coerce (VectorBounds2d x y) = VectorBounds2d (Units.coerce x) (Units.coerce y)
+  coerce = Data.Coerce.coerce
 
 instance
   ( space1 ~ space2
@@ -752,6 +760,8 @@ instance
 
 ----- Bounds2d -----
 
+type role Bounds2d phantom phantom
+
 newtype Bounds2d space units
   = PositionBounds2d (VectorBounds2d space units)
 
@@ -773,7 +783,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Bounds2d space1 unitsA) (Bounds2d space2 unitsB)
   where
-  coerce (PositionBounds2d pb) = PositionBounds2d (Units.coerce pb)
+  coerce = Data.Coerce.coerce
 
 instance FFI (Bounds2d FFI.Space Meters) where
   representation = FFI.classRepresentation "Bounds2d"
@@ -876,13 +886,12 @@ instance
 
 ----- Axis2d -----
 
+type role Axis2d phantom phantom
+
 -- | An axis in 2D, defined by an origin point and direction.
-data Axis2d space units where
-  -- | Construct an axis from its origin point and direction.
-  Axis2d ::
-    Point2d space units ->
-    Direction2d space ->
-    Axis2d space units
+data Axis2d space units
+  = -- | Construct an axis from its origin point and direction.
+    Axis2d (Point2d space units) (Direction2d space)
 
 instance HasField "originPoint" (Axis2d space units) (Point2d space units) where
   getField (Axis2d p _) = p
@@ -904,9 +913,10 @@ instance FFI (Axis2d UvSpace Unitless) where
 
 ----- Frame2d -----
 
+type role Frame2d phantom phantom phantom
+
 type Frame2d :: Type -> Type -> LocalSpace -> Type
-data Frame2d space units defines where
-  Frame2d :: Point2d space units -> Orientation2d space -> Frame2d space units defines
+data Frame2d space units defines = Frame2d (Point2d space units) (Orientation2d space)
 
 instance HasField "originPoint" (Frame2d space units defines) (Point2d space units) where
   getField (Frame2d p _) = p
@@ -932,15 +942,11 @@ instance FFI (Frame2d UvSpace Unitless defines) where
 
 ----- Transform2d -----
 
-type role Transform2d phantom nominal nominal
+type role Transform2d phantom phantom phantom
 
 type Transform2d :: Type -> Type -> Type -> Type
-data Transform2d tag space units where
-  Transform2d ::
-    Point2d space units ->
-    Vector2d space Unitless ->
-    Vector2d space Unitless ->
-    Transform2d tag space units
+data Transform2d tag space units
+  = Transform2d (Point2d space units) (Vector2d space Unitless) (Vector2d space Unitless)
 
 deriving instance Eq (Transform2d tag space units)
 
@@ -956,7 +962,7 @@ instance
     (Transform2d tag1 space1 unitsA)
     (Transform2d tag2 space2 unitsB)
   where
-  coerce (Transform2d p0 vx vy) = Transform2d (Units.coerce p0) vx vy
+  coerce = Data.Coerce.coerce
 
 instance
   space1 ~ space2 =>
@@ -1008,6 +1014,8 @@ instance
       (Vector2d 0 1 .*. transform1 .*. transform2)
 
 ----- Vector3d -----
+
+type role Vector3d phantom phantom
 
 type Vector3d :: Type -> Type -> Type
 data Vector3d space units = Vector3d## Double# Double# Double#
@@ -1218,11 +1226,13 @@ instance
 
 ----- Direction3d -----
 
+type role Direction3d phantom
+
 {-| A direction in 3D.
 
 This is effectively a type-safe unit vector.
 -}
-newtype Direction3d (space :: Type) = Unit3d (Vector3d space Unitless)
+newtype Direction3d space = Unit3d (Vector3d space Unitless)
   deriving (Eq, Ord, Show)
 
 {-# COMPLETE Direction3d #-}
@@ -1283,9 +1293,10 @@ instance
 
 ----- PlaneOrientation3d -----
 
+type role PlaneOrientation3d phantom
+
 -- | A pair of perpendicular X and Y directions defining the orientation of a plane in 3D.
-data PlaneOrientation3d space where
-  PlaneOrientation3d :: Direction3d space -> Direction3d space -> PlaneOrientation3d space
+data PlaneOrientation3d space = PlaneOrientation3d (Direction3d space) (Direction3d space)
 
 deriving instance Eq (PlaneOrientation3d space)
 
@@ -1307,13 +1318,11 @@ instance HasField "normalDirection" (PlaneOrientation3d space) (Direction3d spac
 
 ----- Orientation3d -----
 
+type role Orientation3d phantom
+
 -- | A set of cardinal directions (forward, upward etc.) defining a 3D orientation.
-data Orientation3d space where
-  Orientation3d ::
-    Direction3d space ->
-    Direction3d space ->
-    Direction3d space ->
-    Orientation3d space
+data Orientation3d space
+  = Orientation3d (Direction3d space) (Direction3d space) (Direction3d space)
 
 deriving instance Eq (Orientation3d space)
 
@@ -1401,6 +1410,8 @@ instance HasField "downwardOrientation" (Orientation3d space) (Orientation3d spa
 
 ----- Point3d -----
 
+type role Point3d phantom phantom
+
 newtype Point3d space units = Position3d (Vector3d space units)
 
 {-# COMPLETE Point3d #-}
@@ -1428,7 +1439,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Point3d space1 unitsA) (Point3d space2 unitsB)
   where
-  coerce (Position3d p) = Position3d (Units.coerce p)
+  coerce = Data.Coerce.coerce
 
 instance
   ( space1 ~ space2
@@ -1489,6 +1500,8 @@ instance ApproximateEquality (Point3d space units) units where
   Position3d p1 ~= Position3d p2 = p1 ~= p2
 
 ----- VectorBounds3d -----
+
+type role VectorBounds3d phantom phantom
 
 type VectorBounds3d :: Type -> Type -> Type
 data VectorBounds3d space units
@@ -1927,6 +1940,8 @@ instance
 
 ----- Bounds3d -----
 
+type role Bounds3d phantom phantom
+
 -- | A bounding box in 3D.
 newtype Bounds3d space units
   = PositionBounds3d (VectorBounds3d space units)
@@ -1952,7 +1967,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Bounds3d space1 unitsA) (Bounds3d space2 unitsB)
   where
-  coerce (PositionBounds3d pb) = PositionBounds3d (Units.coerce pb)
+  coerce = Data.Coerce.coerce
 
 instance
   ( space1 ~ space2
@@ -2057,13 +2072,12 @@ instance
 
 ----- Axis3d -----
 
+type role Axis3d phantom phantom
+
 -- | An axis in 3D, defined by an origin point and direction.
-data Axis3d space units where
-  -- | Construct an axis from its origin point and direction.
-  Axis3d ::
-    Point3d space units ->
-    Direction3d space ->
-    Axis3d space units
+data Axis3d space units
+  = -- | Construct an axis from its origin point and direction.
+    Axis3d (Point3d space units) (Direction3d space)
 
 instance HasField "originPoint" (Axis3d space units) (Point3d space units) where
   getField (Axis3d p _) = p
@@ -2080,7 +2094,7 @@ instance FFI (Axis3d FFI.Space Meters) where
 
 ----- Plane3d -----
 
-type role Plane3d nominal nominal nominal
+type role Plane3d phantom phantom phantom
 
 type Plane3d :: Type -> Type -> LocalSpace -> Type
 
@@ -2089,8 +2103,7 @@ type Plane3d :: Type -> Type -> LocalSpace -> Type
 The normal direction  of the plane is then defined as
 the cross product of its X and Y directions.
 -}
-data Plane3d space units defines where
-  Plane3d :: Point3d space units -> PlaneOrientation3d space -> Plane3d space units defines
+data Plane3d space units defines = Plane3d (Point3d space units) (PlaneOrientation3d space)
 
 deriving instance Eq (Plane3d space units defines)
 
@@ -2132,10 +2145,11 @@ instance HasField "normalAxis" (Plane3d space units defines) (Axis3d space units
 
 ----- Frame3d -----
 
+type role Frame3d phantom phantom phantom
+
 -- | A frame of reference in 3D, defined by an origin point and orientation.
 type Frame3d :: Type -> Type -> LocalSpace -> Type
-data Frame3d space units defines where
-  Frame3d :: Point3d space units -> Orientation3d space -> Frame3d space units defines
+data Frame3d space units defines = Frame3d (Point3d space units) (Orientation3d space)
 
 instance
   HasField
@@ -2295,18 +2309,19 @@ instance
   (space1 ~ space2, defines1 ~ defines2) =>
   Units.Coercion (Frame3d space1 units1 defines1) (Frame3d space2 units2 defines2)
   where
-  coerce (Frame3d p o) = Frame3d (Units.coerce p) o
+  coerce = Data.Coerce.coerce
 
 ----- Transform3d -----
 
+type role Transform3d phantom phantom phantom
+
 type Transform3d :: Type -> Type -> Type -> Type
-data Transform3d tag space units where
-  Transform3d ::
-    Point3d space units ->
-    Vector3d space Unitless ->
-    Vector3d space Unitless ->
-    Vector3d space Unitless ->
-    Transform3d tag space units
+data Transform3d tag space units
+  = Transform3d
+      (Point3d space units)
+      (Vector3d space Unitless)
+      (Vector3d space Unitless)
+      (Vector3d space Unitless)
 
 deriving instance Eq (Transform3d tag space units)
 
@@ -2322,7 +2337,7 @@ instance
     (Transform3d tag1 space1 unitsA)
     (Transform3d tag2 space2 unitsB)
   where
-  coerce (Transform3d p0 vx vy vz) = Transform3d (Units.coerce p0) vx vy vz
+  coerce = Data.Coerce.coerce
 
 instance
   space1 ~ space2 =>

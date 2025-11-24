@@ -43,12 +43,11 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
-data SurfaceFunction3d space units where
-  SurfaceFunction3d ::
-    Compiled space units ->
-    ~(VectorSurfaceFunction3d space units) ->
-    ~(VectorSurfaceFunction3d space units) ->
-    SurfaceFunction3d space units
+data SurfaceFunction3d space units
+  = SurfaceFunction3d
+      (Compiled space units)
+      ~(VectorSurfaceFunction3d space units)
+      ~(VectorSurfaceFunction3d space units)
 
 instance
   HasField

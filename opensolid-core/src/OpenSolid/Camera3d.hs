@@ -49,13 +49,11 @@ data CameraSpace
 data ScreenSpace
 
 -- | A perspective or orthographic camera in 3D.
-data Camera3d space units where
-  Camera3d ::
-    { frame :: Frame3d space units (Defines CameraSpace)
-    , focalDistance :: Quantity units
-    , projection :: Projection units
-    } ->
-    Camera3d space units
+data Camera3d space units = Camera3d
+  { frame :: Frame3d space units (Defines CameraSpace)
+  , focalDistance :: Quantity units
+  , projection :: Projection units
+  }
 
 instance HasField "eyePoint" (Camera3d space units) (Point3d space units) where
   getField camera = camera.frame.originPoint

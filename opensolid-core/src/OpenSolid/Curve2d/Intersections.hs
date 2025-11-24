@@ -50,15 +50,13 @@ data Intersections
 
 data TangentSolutionTargetSpace
 
-data Problem space units where
-  Problem ::
-    { curve1 :: Curve2d space units
-    , curve2 :: Curve2d space units
-    , endpointIntersections :: List EndpointIntersection
-    , crossingSolutionTarget :: VectorSurfaceFunction2d space units
-    , tangentSolutionTarget :: VectorSurfaceFunction2d TangentSolutionTargetSpace units
-    } ->
-    Problem space units
+data Problem space units = Problem
+  { curve1 :: Curve2d space units
+  , curve2 :: Curve2d space units
+  , endpointIntersections :: List EndpointIntersection
+  , crossingSolutionTarget :: VectorSurfaceFunction2d space units
+  , tangentSolutionTarget :: VectorSurfaceFunction2d TangentSolutionTargetSpace units
+  }
 
 data EndpointIntersection = EndpointIntersection
   { intersectionPoint :: IntersectionPoint

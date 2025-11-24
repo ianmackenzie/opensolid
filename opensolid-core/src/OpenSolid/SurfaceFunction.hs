@@ -90,12 +90,8 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfa
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
-data SurfaceFunction units where
-  SurfaceFunction ::
-    Compiled units ->
-    ~(SurfaceFunction units) ->
-    ~(SurfaceFunction units) ->
-    SurfaceFunction units
+data SurfaceFunction units
+  = SurfaceFunction (Compiled units) ~(SurfaceFunction units) ~(SurfaceFunction units)
 
 instance HasField "du" (SurfaceFunction units) (SurfaceFunction units) where
   getField (SurfaceFunction _ du _) = du

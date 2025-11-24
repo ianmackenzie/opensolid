@@ -28,19 +28,17 @@ import OpenSolid.Primitives
 
 This defines which of X, Y and Z mean 'forward' or 'upward' or 'rightward'.
 -}
-data Convention3d where
-  Convention3d ::
-    { xr :: Number
-    , xf :: Number
-    , xu :: Number
-    , yr :: Number
-    , yf :: Number
-    , yu :: Number
-    , zr :: Number
-    , zf :: Number
-    , zu :: Number
-    } ->
-    Convention3d
+data Convention3d = Convention3d
+  { xr :: Number
+  , xf :: Number
+  , xu :: Number
+  , yr :: Number
+  , yf :: Number
+  , yu :: Number
+  , zr :: Number
+  , zf :: Number
+  , zu :: Number
+  }
 
 instance FFI Convention3d where
   representation = FFI.classRepresentation "Convention3d"

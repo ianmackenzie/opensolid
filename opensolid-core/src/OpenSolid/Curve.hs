@@ -95,8 +95,7 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
-data Curve units where
-  Curve :: Compiled units -> ~(Curve units) -> Curve units
+data Curve units = Curve (Compiled units) ~(Curve units)
 
 type Compiled units = CompiledFunction Number (Quantity units) (Bounds Unitless) (Bounds units)
 

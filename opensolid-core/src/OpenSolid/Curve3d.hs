@@ -65,8 +65,7 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
-data Curve3d space units where
-  Curve3d :: Compiled space units -> ~(VectorCurve3d space units) -> Curve3d space units
+data Curve3d space units = Curve3d (Compiled space units) ~(VectorCurve3d space units)
 
 type Compiled space units =
   CompiledFunction

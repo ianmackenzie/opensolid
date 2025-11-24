@@ -148,8 +148,7 @@ import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 
 -- | A parametric curve in 2D space.
-data Curve2d space units where
-  Curve2d :: Compiled space units -> ~(VectorCurve2d space units) -> Curve2d space units
+data Curve2d space units = Curve2d (Compiled space units) ~(VectorCurve2d space units)
 
 type Compiled space units =
   CompiledFunction

@@ -107,16 +107,14 @@ newtype Body3d space units
 instance FFI (Body3d FFI.Space Meters) where
   representation = FFI.classRepresentation "Body3d"
 
-data BoundarySurface space units where
-  BoundarySurface ::
-    { surfaceId :: SurfaceId
-    , orientedSurface :: Surface3d space units
-    , surfaceFunction :: SurfaceFunction3d space units
-    , handedness :: Sign
-    , uvBounds :: UvBounds
-    , edgeLoops :: NonEmpty (NonEmpty (Edge space units))
-    } ->
-    BoundarySurface space units
+data BoundarySurface space units = BoundarySurface
+  { surfaceId :: SurfaceId
+  , orientedSurface :: Surface3d space units
+  , surfaceFunction :: SurfaceFunction3d space units
+  , handedness :: Sign
+  , uvBounds :: UvBounds
+  , edgeLoops :: NonEmpty (NonEmpty (Edge space units))
+  }
 
 newtype SurfaceId = SurfaceId Int deriving (Eq, Ord, Show)
 
@@ -157,14 +155,12 @@ newtype CurveId = CurveId Int deriving (Eq, Ord, Show)
 
 ----- CONSTRUCTION -----
 
-data SurfaceWithHalfEdges space units where
-  SurfaceWithHalfEdges ::
-    { surfaceId :: SurfaceId
-    , surface :: Surface3d space units
-    , handedness :: Sign
-    , halfEdgeLoops :: NonEmpty (NonEmpty (HalfEdge space units))
-    } ->
-    SurfaceWithHalfEdges space units
+data SurfaceWithHalfEdges space units = SurfaceWithHalfEdges
+  { surfaceId :: SurfaceId
+  , surface :: Surface3d space units
+  , handedness :: Sign
+  , halfEdgeLoops :: NonEmpty (NonEmpty (HalfEdge space units))
+  }
 
 data HalfEdge space units where
   HalfEdge ::
@@ -192,20 +188,16 @@ data MatingEdge = MatingEdge
   , correctlyAligned :: Bool
   }
 
-data SurfaceRegistry space units where
-  SurfaceRegistry ::
-    { unprocessed :: Map SurfaceId (SurfaceWithHalfEdges space units)
-    , processed :: Map SurfaceId (SurfaceWithHalfEdges space units)
-    , edges :: Map HalfEdgeId (Edge space units)
-    } ->
-    SurfaceRegistry space units
+data SurfaceRegistry space units = SurfaceRegistry
+  { unprocessed :: Map SurfaceId (SurfaceWithHalfEdges space units)
+  , processed :: Map SurfaceId (SurfaceWithHalfEdges space units)
+  , edges :: Map HalfEdgeId (Edge space units)
+  }
 
-data Corner space units where
-  Corner ::
-    { surfaceId :: SurfaceId
-    , point :: Point3d space units
-    } ->
-    Corner space units
+data Corner space units = Corner
+  { surfaceId :: SurfaceId
+  , point :: Point3d space units
+  }
 
 instance Bounded3d (Corner space units) space units where
   bounds Corner{point} = Bounds3d.constant point
@@ -622,8 +614,7 @@ toMatingEdge id1 curve1 HalfEdge{halfEdgeId = id2, curve3d = curve2, uvCurve}
 
 ----- MESHING -----
 
-data Vertex space units where
-  Vertex :: UvPoint -> Point3d space units -> Vertex space units
+data Vertex space units = Vertex UvPoint (Point3d space units)
 
 deriving instance Eq (Vertex space units)
 

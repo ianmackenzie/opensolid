@@ -55,12 +55,11 @@ import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
-data VectorSurfaceFunction3d space units where
-  VectorSurfaceFunction3d ::
-    Compiled space units ->
-    ~(VectorSurfaceFunction3d space units) ->
-    ~(VectorSurfaceFunction3d space units) ->
-    VectorSurfaceFunction3d space units
+data VectorSurfaceFunction3d space units
+  = VectorSurfaceFunction3d
+      (Compiled space units)
+      ~(VectorSurfaceFunction3d space units)
+      ~(VectorSurfaceFunction3d space units)
 
 instance
   HasField

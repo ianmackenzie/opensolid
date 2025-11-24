@@ -60,12 +60,11 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
-data VectorSurfaceFunction2d space units where
-  VectorSurfaceFunction2d ::
-    Compiled space units ->
-    ~(VectorSurfaceFunction2d space units) ->
-    ~(VectorSurfaceFunction2d space units) ->
-    VectorSurfaceFunction2d space units
+data VectorSurfaceFunction2d space units
+  = VectorSurfaceFunction2d
+      (Compiled space units)
+      ~(VectorSurfaceFunction2d space units)
+      ~(VectorSurfaceFunction2d space units)
 
 instance
   HasField
