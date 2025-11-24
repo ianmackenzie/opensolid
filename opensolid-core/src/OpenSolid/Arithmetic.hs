@@ -49,27 +49,19 @@ infixl 6 +.
 infixl 6 .+
 
 class Subtraction a b c | a b -> c where
-  (-) :: a -> b -> c
   (.-.) :: a -> b -> c
-
-  (-) = (.-.)
-  (.-.) = (-)
-
-  {-# MINIMAL (-) | (.-.) #-}
-
-infixl 6 -
 
 infixl 6 .-.
 
 {-# INLINE (-.) #-}
 (-.) :: Subtraction Number a b => Number -> a -> b
-(-.) = (-)
+(-.) = (.-.)
 
 infixl 6 -.
 
 {-# INLINE (.-) #-}
 (.-) :: Subtraction a Number b => a -> Number -> b
-(.-) = (-)
+(.-) = (.-.)
 
 infixl 6 .-
 
