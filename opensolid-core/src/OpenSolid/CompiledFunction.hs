@@ -132,19 +132,19 @@ instance
   , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
   , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
   , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
-  , Multiplication#
+  , Multiplication_
       (Expression inputValue1 outputValue1)
       (Expression inputValue2 outputValue2)
       (Expression inputValue1 outputValue3)
-  , Multiplication# outputValue1 outputValue2 outputValue3
-  , Multiplication# outputBounds1 outputBounds2 outputBounds3
+  , Multiplication_ outputValue1 outputValue2 outputValue3
+  , Multiplication_ outputBounds1 outputBounds2 outputBounds3
   ) =>
-  Multiplication#
+  Multiplication_
     (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (#*#) = map2 (#*#) (#*#) (#*#)
+  (?*?) = map2 (?*?) (?*?) (?*?)
 
 instance
   ( inputValue1 ~ inputValue2
@@ -152,19 +152,19 @@ instance
   , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
   , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
   , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
-  , Division#
+  , Division_
       (Expression inputValue1 outputValue1)
       (Expression inputValue2 outputValue2)
       (Expression inputValue1 outputValue3)
-  , Division# outputValue1 outputValue2 outputValue3
-  , Division# outputBounds1 outputBounds2 outputBounds3
+  , Division_ outputValue1 outputValue2 outputValue3
+  , Division_ outputBounds1 outputBounds2 outputBounds3
   ) =>
-  Division#
+  Division_
     (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (#/#) = map2 (#/#) (#/#) (#/#)
+  (?/?) = map2 (?/?) (?/?) (?/?)
 
 instance
   ( inputValue1 ~ inputValue2
@@ -212,19 +212,19 @@ instance
   , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
   , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
   , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
-  , DotMultiplication#
+  , DotMultiplication_
       (Expression inputValue1 outputValue1)
       (Expression inputValue2 outputValue2)
       (Expression inputValue1 outputValue3)
-  , DotMultiplication# outputValue1 outputValue2 outputValue3
-  , DotMultiplication# outputBounds1 outputBounds2 outputBounds3
+  , DotMultiplication_ outputValue1 outputValue2 outputValue3
+  , DotMultiplication_ outputBounds1 outputBounds2 outputBounds3
   ) =>
-  DotMultiplication#
+  DotMultiplication_
     (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  dot# = map2 dot# dot# dot#
+  dot_ = map2 dot_ dot_ dot_
 
 instance
   ( inputValue1 ~ inputValue2
@@ -252,19 +252,19 @@ instance
   , Expression.Evaluation inputValue1 outputValue1 inputBounds1 outputBounds1
   , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
   , Expression.Evaluation inputValue1 outputValue3 inputBounds1 outputBounds3
-  , CrossMultiplication#
+  , CrossMultiplication_
       (Expression inputValue1 outputValue1)
       (Expression inputValue2 outputValue2)
       (Expression inputValue1 outputValue3)
-  , CrossMultiplication# outputValue1 outputValue2 outputValue3
-  , CrossMultiplication# outputBounds1 outputBounds2 outputBounds3
+  , CrossMultiplication_ outputValue1 outputValue2 outputValue3
+  , CrossMultiplication_ outputBounds1 outputBounds2 outputBounds3
   ) =>
-  CrossMultiplication#
+  CrossMultiplication_
     (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  cross# = map2 cross# cross# cross#
+  cross_ = map2 cross_ cross_ cross_
 
 instance
   ( inputValue1 ~ inputValue2

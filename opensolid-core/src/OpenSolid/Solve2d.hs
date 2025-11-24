@@ -251,15 +251,15 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
       let Vector2d x1 y1 = f1
       let Vector2d xu1 yu1 = fu p1
       let Vector2d xv1 yv1 = fv p1
-      let determinant = xu1 #*# yv1 .-. xv1 #*# yu1
+      let determinant = xu1 ?*? yv1 .-. xv1 ?*? yu1
       if determinant == Quantity.zero
         then Error Divergence
         else do
-          let deltaU = (xv1 #*# y1 .-. yv1 #*# x1) ./. determinant
-          let deltaV = (yu1 #*# x1 .-. xu1 #*# y1) ./. determinant
+          let deltaU = (xv1 ?*? y1 .-. yv1 ?*? x1) ./. determinant
+          let deltaV = (yu1 ?*? x1 .-. xu1 ?*? y1) ./. determinant
           let p2 = boundedStep uvBounds p1 (p1 .+. Vector2d deltaU deltaV)
           let f2 = f p2
-          if Vector2d.squaredMagnitude# f2 >= Vector2d.squaredMagnitude# f1
+          if Vector2d.squaredMagnitude_ f2 >= Vector2d.squaredMagnitude_ f1
             then -- We've stopped converging, check if we've actually found a root
               if f1 ~= Vector2d.zero then Ok p1 else Error Divergence
             else -- We're still converging, so take another iteration

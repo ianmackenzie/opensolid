@@ -162,16 +162,16 @@ instance Subtraction (Quantity units) (Estimate units) (Estimate units) where
 
 data Product units1 units2 = Product (Estimate units1) (Estimate units2)
 
-instance Interface (Product units1 units2) (units1 #*# units2) where
-  boundsImpl (Product first second) = bounds first #*# bounds second
+instance Interface (Product units1 units2) (units1 ?*? units2) where
+  boundsImpl (Product first second) = bounds first ?*? bounds second
   refineImpl (Product first second) = do
     let firstBounds = bounds first
     let secondBounds = bounds second
     let firstWidth = Bounds.width firstBounds
     let secondWidth = Bounds.width secondBounds
-    let firstMetric = firstWidth #*# Bounds.midpoint secondBounds
-    let secondMetric = Bounds.midpoint firstBounds #*# secondWidth
-    let combinedMetric = firstWidth #*# secondWidth
+    let firstMetric = firstWidth ?*? Bounds.midpoint secondBounds
+    let secondMetric = Bounds.midpoint firstBounds ?*? secondWidth
+    let combinedMetric = firstWidth ?*? secondWidth
     let refinedProduct
           | firstMetric > secondMetric && firstMetric > combinedMetric =
               Product (refine first) second
@@ -181,14 +181,14 @@ instance Interface (Product units1 units2) (units1 #*# units2) where
               Product (refine first) (refine second)
     new refinedProduct
 
-instance Multiplication# (Estimate units1) (Estimate units2) (Estimate (units1 #*# units2)) where
-  first #*# second = new (Product first second)
+instance Multiplication_ (Estimate units1) (Estimate units2) (Estimate (units1 ?*? units2)) where
+  first ?*? second = new (Product first second)
 
-instance Multiplication# (Estimate units1) (Quantity units2) (Estimate (units1 #*# units2)) where
-  estimate #*# value = new (Product estimate (exact value))
+instance Multiplication_ (Estimate units1) (Quantity units2) (Estimate (units1 ?*? units2)) where
+  estimate ?*? value = new (Product estimate (exact value))
 
-instance Multiplication# (Quantity units1) (Estimate units2) (Estimate (units1 #*# units2)) where
-  value #*# estimate = new (Product (exact value) estimate)
+instance Multiplication_ (Quantity units1) (Estimate units2) (Estimate (units1 ?*? units2)) where
+  value ?*? estimate = new (Product (exact value) estimate)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -197,7 +197,7 @@ instance
     (Estimate units2)
     (Estimate units3)
   where
-  first .*. second = Units.specialize (first #*# second)
+  first .*. second = Units.specialize (first ?*? second)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -217,8 +217,8 @@ instance
   where
   value .*. estimate = exact value .*. estimate
 
-instance Division# (Estimate units1) (Quantity units2) (Estimate (units1 #/# units2)) where
-  estimate #/# value = Units.simplify (estimate #*# (1 /# value))
+instance Division_ (Estimate units1) (Quantity units2) (Estimate (units1 ?/? units2)) where
+  estimate ?/? value = Units.simplify (estimate ?*? (1 /? value))
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -227,7 +227,7 @@ instance
     (Quantity units2)
     (Estimate units3)
   where
-  estimate ./. value = Units.specialize (estimate #/# value)
+  estimate ./. value = Units.specialize (estimate ?/? value)
 
 newtype Sum units = Sum (NonEmpty (Estimate units))
 

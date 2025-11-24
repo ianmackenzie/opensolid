@@ -20,7 +20,7 @@ module OpenSolid.Bounds
   , maxAbs
   , minAbs
   , squared
-  , squared#
+  , squared_
   , includes
   , inclusion
   , inclusion##
@@ -36,7 +36,7 @@ module OpenSolid.Bounds
   , isFinite
   , abs
   , sqrt
-  , sqrt#
+  , sqrt_
   , hypot2
   , cubed
   , aggregate2
@@ -198,8 +198,8 @@ instance units1 ~ units2 => Subtraction (Quantity units1) (Bounds units2) (Bound
   Quantity## value## .-. Bounds## low## high## =
     Bounds## (value## -## high##) (value## -## low##)
 
-instance Multiplication# (Quantity units1) (Bounds units2) (Bounds (units1 #*# units2)) where
-  Quantity## value## #*# Bounds## low## high## =
+instance Multiplication_ (Quantity units1) (Bounds units2) (Bounds (units1 ?*? units2)) where
+  Quantity## value## ?*? Bounds## low## high## =
     Bounds## (value## *## low##) (value## *## high##)
 
 instance
@@ -208,8 +208,8 @@ instance
   where
   Quantity## value## .*. Bounds## low## high## = Bounds## (value## *## low##) (value## *## high##)
 
-instance Multiplication# (Bounds units1) (Quantity units2) (Bounds (units1 #*# units2)) where
-  Bounds## low## high## #*# Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
+instance Multiplication_ (Bounds units1) (Quantity units2) (Bounds (units1 ?*? units2)) where
+  Bounds## low## high## ?*? Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -217,8 +217,8 @@ instance
   where
   Bounds## low## high## .*. Quantity## value## = Bounds## (low## *## value##) (high## *## value##)
 
-instance Multiplication# (Bounds units1) (Bounds units2) (Bounds (units1 #*# units2)) where
-  Bounds## low1## high1## #*# Bounds## low2## high2## = do
+instance Multiplication_ (Bounds units1) (Bounds units2) (Bounds (units1 ?*? units2)) where
+  Bounds## low1## high1## ?*? Bounds## low2## high2## = do
     let !(# low##, high## #) = boundsTimesBounds## low1## high1## low2## high2##
     Ordered## low## high##
 
@@ -230,8 +230,8 @@ instance
     let !(# low##, high## #) = boundsTimesBounds## low1## high1## low2## high2##
     Ordered## low## high##
 
-instance Division# (Quantity units1) (Bounds units2) (Bounds (units1 #/# units2)) where
-  Quantity## n## #/# Bounds## dl## dh## = do
+instance Division_ (Quantity units1) (Bounds units2) (Bounds (units1 ?/? units2)) where
+  Quantity## n## ?/? Bounds## dl## dh## = do
     let !(# low##, high## #) = doubleOverBounds## n## dl## dh##
     Ordered## low## high##
 
@@ -243,8 +243,8 @@ instance
     let !(# low##, high## #) = doubleOverBounds## n## dl## dh##
     Ordered## low## high##
 
-instance Division# (Bounds units1) (Quantity units2) (Bounds (units1 #/# units2)) where
-  Bounds## nl## nh## #/# Quantity## d## = do
+instance Division_ (Bounds units1) (Quantity units2) (Bounds (units1 ?/? units2)) where
+  Bounds## nl## nh## ?/? Quantity## d## = do
     let !(# low##, high## #) = boundsOverDouble## nl## nh## d##
     Ordered## low## high##
 
@@ -256,8 +256,8 @@ instance
     let !(# low##, high## #) = boundsOverDouble## nl## nh## d##
     Ordered## low## high##
 
-instance Division# (Bounds units1) (Bounds units2) (Bounds (units1 #/# units2)) where
-  Bounds## nl## nh## #/# Bounds## dl## dh## = do
+instance Division_ (Bounds units1) (Bounds units2) (Bounds (units1 ?/? units2)) where
+  Bounds## nl## nh## ?/? Bounds## dl## dh## = do
     let !(# low##, high## #) = boundsOverBounds## nl## nh## dl## dh##
     Ordered## low## high##
 
@@ -377,25 +377,25 @@ minAbs (Bounds low high)
   | otherwise = Quantity.zero
 
 squared :: Units.Squared units1 units2 => Bounds units1 -> Bounds units2
-squared = Units.specialize . squared#
+squared = Units.specialize . squared_
 
-squared# :: Bounds units -> Bounds (units #*# units)
-squared# (Bounds low high) = do
-  let ll = low #*# low
-  let hh = high #*# high
+squared_ :: Bounds units -> Bounds (units ?*? units)
+squared_ (Bounds low high) = do
+  let ll = low ?*? low
+  let hh = high ?*? high
   if
     | low >= Quantity.zero -> Bounds ll hh
     | high <= Quantity.zero -> Bounds hh ll
     | otherwise -> Bounds Quantity.zero (Prelude.max ll hh)
 
-sqrt# :: Bounds (units #*# units) -> Bounds units
-sqrt# (Bounds low high) =
+sqrt_ :: Bounds (units ?*? units) -> Bounds units
+sqrt_ (Bounds low high) =
   Bounds
-    (Quantity.sqrt# (Prelude.max low Quantity.zero))
-    (Quantity.sqrt# (Prelude.max high Quantity.zero))
+    (Quantity.sqrt_ (Prelude.max low Quantity.zero))
+    (Quantity.sqrt_ (Prelude.max high Quantity.zero))
 
 sqrt :: Units.Squared units1 units2 => Bounds units2 -> Bounds units1
-sqrt = sqrt# . Units.unspecialize
+sqrt = sqrt_ . Units.unspecialize
 
 hypot2 :: Bounds units -> Bounds units -> Bounds units
 hypot2 (Bounds## xMin## xMax##) (Bounds## yMin## yMax##) = do
@@ -634,8 +634,8 @@ random randomQuantity = do
 sampleValues :: Bounds units -> List (Quantity units)
 sampleValues bounds = List.map (interpolate bounds) Parameter.samples
 
-convert :: Quantity (units2 #/# units1) -> Bounds units1 -> Bounds units2
-convert factor bounds = Units.simplify (bounds #*# factor)
+convert :: Quantity (units2 ?/? units1) -> Bounds units1 -> Bounds units2
+convert factor bounds = Units.simplify (bounds ?*? factor)
 
-unconvert :: Quantity (units2 #/# units1) -> Bounds units2 -> Bounds units1
-unconvert factor bounds = Units.simplify (bounds #/# factor)
+unconvert :: Quantity (units2 ?/? units1) -> Bounds units2 -> Bounds units1
+unconvert factor bounds = Units.simplify (bounds ?/? factor)

@@ -163,7 +163,7 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
       let firstBounds2 = VectorCurve2d.evaluateBounds curve2.derivative tBounds2
       let secondBounds1 = VectorCurve2d.evaluateBounds curve1.derivative.derivative tBounds1
       let secondBounds2 = VectorCurve2d.evaluateBounds curve2.derivative.derivative tBounds2
-      let firstCrossProductSign = Bounds.resolvedSign (firstBounds1 `cross#` firstBounds2)
+      let firstCrossProductSign = Bounds.resolvedSign (firstBounds1 `cross_` firstBounds2)
       let uniqueTangentSolution =
             secondDerivativesIndependent firstBounds1 firstBounds2 secondBounds1 secondBounds2
       let isInterior t1 t2 = Bisection.isInterior t1 tBounds1 && Bisection.isInterior t2 tBounds2
@@ -233,9 +233,9 @@ d2ydx2Bounds ::
   Bounds units ->
   Bounds units ->
   Bounds units ->
-  Bounds (Unitless #/# units)
+  Bounds (Unitless ?/? units)
 d2ydx2Bounds x' y' x'' y'' =
-  Units.simplify ((y'' #*# x' .-. y' #*# x'') #/# (x' #*# x' #*# x'))
+  Units.simplify ((y'' ?*? x' .-. y' ?*? x'') ?/? (x' ?*? x' ?*? x'))
 
 candidateOverlappingSegment ::
   (EndpointIntersection, EndpointIntersection) ->

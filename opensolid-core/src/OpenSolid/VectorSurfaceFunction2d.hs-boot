@@ -7,7 +7,7 @@ module OpenSolid.VectorSurfaceFunction2d
   , xComponent
   , yComponent
   , components
-  , squaredMagnitude#
+  , squaredMagnitude_
   )
 where
 
@@ -64,30 +64,30 @@ instance
     (VectorSurfaceFunction2d space units3)
 
 instance
-  Multiplication#
+  Multiplication_
     (SurfaceFunction units1)
     (VectorSurfaceFunction2d space units2)
-    (VectorSurfaceFunction2d space (units1 #*# units2))
+    (VectorSurfaceFunction2d space (units1 ?*? units2))
 
 instance
-  Multiplication#
+  Multiplication_
     (VectorSurfaceFunction2d space units1)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction2d space (units1 #*# units2))
+    (VectorSurfaceFunction2d space (units1 ?*? units2))
 
 instance
   space1 ~ space2 =>
-  DotMultiplication#
+  DotMultiplication_
     (VectorSurfaceFunction2d space1 units1)
     (VectorSurfaceFunction2d space2 units2)
-    (SurfaceFunction (units1 #*# units2))
+    (SurfaceFunction (units1 ?*? units2))
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication#
+  CrossMultiplication_
     (VectorSurfaceFunction2d space1 units1)
     (VectorSurfaceFunction2d space2 units2)
-    (SurfaceFunction (units1 #*# units2))
+    (SurfaceFunction (units1 ?*? units2))
 
 new ::
   Compiled space units ->
@@ -103,4 +103,4 @@ yComponent :: VectorSurfaceFunction2d space units -> SurfaceFunction units
 components ::
   VectorSurfaceFunction2d space units ->
   (SurfaceFunction units, SurfaceFunction units)
-squaredMagnitude# :: VectorSurfaceFunction2d space units -> SurfaceFunction (units #*# units)
+squaredMagnitude_ :: VectorSurfaceFunction2d space units -> SurfaceFunction (units ?*? units)

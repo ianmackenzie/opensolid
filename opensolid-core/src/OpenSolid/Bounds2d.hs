@@ -32,7 +32,7 @@ module OpenSolid.Bounds2d
   , corners
   , diameter
   , diameter##
-  , area#
+  , area_
   , area
   , interpolate
   , placeIn
@@ -226,8 +226,8 @@ diameter bounds = Quantity## (diameter## bounds)
 diameter## :: Bounds2d space units -> Double#
 diameter## (Bounds2d x y) = hypot2## (Bounds.width## x) (Bounds.width## y)
 
-area# :: Bounds2d space units -> Quantity (units #*# units)
-area# (Bounds2d x y) = Bounds.width x #*# Bounds.width y
+area_ :: Bounds2d space units -> Quantity (units ?*? units)
+area_ (Bounds2d x y) = Bounds.width x ?*? Bounds.width y
 
 area :: Units.Squared units1 units2 => Bounds2d space units1 -> Quantity units2
 area (Bounds2d x y) = Bounds.width x .*. Bounds.width y
@@ -316,8 +316,8 @@ distanceAlong axis (Bounds2d x y) = do
   let r = 0.5 *. xWidth .*. Number.abs ax .+. 0.5 *. yWidth .*. Number.abs ay
   Bounds (d0 .-. r) (d0 .+. r)
 
-convert :: Quantity (units2 #/# units1) -> Bounds2d space units1 -> Bounds2d space units2
+convert :: Quantity (units2 ?/? units1) -> Bounds2d space units1 -> Bounds2d space units2
 convert factor (PositionBounds2d pb) = PositionBounds2d (VectorBounds2d.convert factor pb)
 
-unconvert :: Quantity (units2 #/# units1) -> Bounds2d space units2 -> Bounds2d space units1
+unconvert :: Quantity (units2 ?/? units1) -> Bounds2d space units2 -> Bounds2d space units1
 unconvert factor (PositionBounds2d pb) = PositionBounds2d (VectorBounds2d.unconvert factor pb)

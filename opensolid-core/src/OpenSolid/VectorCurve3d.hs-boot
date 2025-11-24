@@ -7,9 +7,9 @@ module OpenSolid.VectorCurve3d
   , evaluate
   , evaluateBounds
   , quotient
-  , quotient#
+  , quotient_
   , unsafeQuotient
-  , unsafeQuotient#
+  , unsafeQuotient_
   , magnitude
   , transformBy
   )
@@ -58,20 +58,20 @@ instance
   Units.Coercion (VectorCurve3d space1 unitsA) (VectorCurve3d space2 unitsB)
 
 instance
-  Multiplication#
+  Multiplication_
     (Curve units1)
     (VectorCurve3d space units2)
-    (VectorCurve3d space (units1 #*# units2))
+    (VectorCurve3d space (units1 ?*? units2))
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (VectorCurve3d space units2) (VectorCurve3d space units3)
 
 instance
-  Multiplication#
+  Multiplication_
     (VectorCurve3d space units1)
     (Curve units2)
-    (VectorCurve3d space (units1 #*# units2))
+    (VectorCurve3d space (units1 ?*? units2))
 
 instance
   Units.Product units1 units2 units3 =>
@@ -79,10 +79,10 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication#
+  DotMultiplication_
     (VectorCurve3d space1 units1)
     (VectorCurve3d space2 units2)
-    (Curve (units1 #*# units2))
+    (Curve (units1 ?*? units2))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -104,20 +104,20 @@ quotient ::
   VectorCurve3d space units1 ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve3d space units3)
-quotient# ::
+quotient_ ::
   Tolerance units2 =>
   VectorCurve3d space units1 ->
   Curve units2 ->
-  Result DivisionByZero (VectorCurve3d space (units1 #/# units2))
+  Result DivisionByZero (VectorCurve3d space (units1 ?/? units2))
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
   VectorCurve3d space units1 ->
   Curve units2 ->
   VectorCurve3d space units3
-unsafeQuotient# ::
+unsafeQuotient_ ::
   VectorCurve3d space units1 ->
   Curve units2 ->
-  VectorCurve3d space (units1 #/# units2)
+  VectorCurve3d space (units1 ?/? units2)
 magnitude :: Tolerance units => VectorCurve3d space units -> Curve units
 transformBy ::
   Transform3d tag space translationUnits ->

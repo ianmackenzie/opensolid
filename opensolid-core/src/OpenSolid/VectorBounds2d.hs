@@ -16,11 +16,11 @@ module OpenSolid.VectorBounds2d
   , yComponent
   , components
   , squaredMagnitude
-  , squaredMagnitude#
+  , squaredMagnitude_
   , magnitude
   , maxMagnitude
   , maxSquaredMagnitude
-  , maxSquaredMagnitude#
+  , maxSquaredMagnitude_
   , direction
   , normalize
   , exclusion
@@ -174,10 +174,10 @@ components :: VectorBounds2d space units -> (Bounds units, Bounds units)
 components (VectorBounds2d vx vy) = (vx, vy)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d space units1 -> Bounds units2
-squaredMagnitude = Units.specialize . squaredMagnitude#
+squaredMagnitude = Units.specialize . squaredMagnitude_
 
-squaredMagnitude# :: VectorBounds2d space units -> Bounds (units #*# units)
-squaredMagnitude# (VectorBounds2d x y) = Bounds.squared# x .+. Bounds.squared# y
+squaredMagnitude_ :: VectorBounds2d space units -> Bounds (units ?*? units)
+squaredMagnitude_ (VectorBounds2d x y) = Bounds.squared_ x .+. Bounds.squared_ y
 
 magnitude :: VectorBounds2d space units -> Bounds units
 magnitude (VectorBounds2d x y) = Bounds.hypot2 x y
@@ -192,13 +192,13 @@ maxSquaredMagnitude ::
   Units.Squared units1 units2 =>
   VectorBounds2d space units1 ->
   Quantity units2
-maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude#
+maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude_
 
-maxSquaredMagnitude# :: VectorBounds2d space units -> Quantity (units #*# units)
-maxSquaredMagnitude# (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
+maxSquaredMagnitude_ :: VectorBounds2d space units -> Quantity (units ?*? units)
+maxSquaredMagnitude_ (VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)) = do
   let xMagnitude = max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
-  Quantity.squared# xMagnitude .+. Quantity.squared# yMagnitude
+  Quantity.squared_ xMagnitude .+. Quantity.squared_ yMagnitude
 
 direction :: VectorBounds2d space units -> DirectionBounds2d space
 direction vectorBounds = DirectionBounds2d.unsafe (normalize vectorBounds)
@@ -357,16 +357,16 @@ placeOnOrientation orientation (VectorBounds2d x y) = do
     (Bounds (z0 .-. rz) (z0 .+. rz))
 
 convert ::
-  Quantity (units2 #/# units1) ->
+  Quantity (units2 ?/? units1) ->
   VectorBounds2d space units1 ->
   VectorBounds2d space units2
-convert factor vectorBounds = Units.simplify (vectorBounds #*# factor)
+convert factor vectorBounds = Units.simplify (vectorBounds ?*? factor)
 
 unconvert ::
-  Quantity (units2 #/# units1) ->
+  Quantity (units2 ?/? units1) ->
   VectorBounds2d space units2 ->
   VectorBounds2d space units1
-unconvert factor vectorBounds = Units.simplify (vectorBounds #/# factor)
+unconvert factor vectorBounds = Units.simplify (vectorBounds ?/? factor)
 
 transformBy ::
   Transform2d tag space units1 ->

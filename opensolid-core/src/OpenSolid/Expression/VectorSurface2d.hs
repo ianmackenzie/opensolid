@@ -2,7 +2,7 @@ module OpenSolid.Expression.VectorSurface2d
   ( constant
   , xy
   , squaredMagnitude
-  , squaredMagnitude#
+  , squaredMagnitude_
   , magnitude
   , placeIn
   , relativeTo
@@ -31,10 +31,10 @@ xy ::
   Expression UvPoint (Vector2d space units)
 xy = Expression.xy
 
-squaredMagnitude# ::
+squaredMagnitude_ ::
   Expression UvPoint (Vector2d space units) ->
-  Expression UvPoint (Quantity (units #*# units))
-squaredMagnitude# = Expression.squaredMagnitude#
+  Expression UvPoint (Quantity (units ?*? units))
+squaredMagnitude_ = Expression.squaredMagnitude_
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

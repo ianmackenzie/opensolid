@@ -61,7 +61,7 @@ module OpenSolid.Curve2d
   , convert
   , unconvert
   , curvature
-  , curvature#
+  , curvature_
   , toPolyline
   , samplingPoints
   , medialAxis
@@ -432,7 +432,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       let halfDistance = 0.5 *. Point2d.distanceFrom givenStartPoint givenEndPoint
       let radius = max (Quantity.abs givenRadius) halfDistance
       let offsetMagnitude =
-            Quantity.sqrt# (Quantity.squared# radius .-. Quantity.squared# halfDistance)
+            Quantity.sqrt_ (Quantity.squared_ radius .-. Quantity.squared_ halfDistance)
       let offsetDirection = Direction2d.rotateLeft chordDirection
       let offsetDistance =
             case whichArc of
@@ -770,13 +770,13 @@ signature orientation curve tValue radius = do
   let firstOrder = dydx .*. radius
   let d2ydx2 =
         if x' != Quantity.zero
-          then (y'' #*# x' .-. y' #*# x'') #/# (x' #*# x' #*# x')
+          then (y'' ?*? x' .-. y' ?*? x'') ?/? (x' ?*? x' ?*? x')
           else do
             let fourthDerivativeCurve = secondDerivativeCurve.derivative.derivative
             let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivativeCurve tValue
             let Vector2d x'''' y'''' = local fourthDerivativeValue
-            (y'''' #*# x'' .-. y'' #*# x'''') #/# (x'' #*# x'' #*# x'')
-  let secondOrder = Units.simplify (0.5 *. d2ydx2 #*# Quantity.squared# radius)
+            (y'''' ?*? x'' .-. y'' ?*? x'''') ?/? (x'' ?*? x'' ?*? x'')
+  let secondOrder = Units.simplify (0.5 *. d2ydx2 ?*? Quantity.squared_ radius)
   (firstOrder, secondOrder)
 
 placeIn ::
@@ -872,29 +872,29 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 convert ::
-  Quantity (units2 #/# units1) ->
+  Quantity (units2 ?/? units1) ->
   Curve2d space units1 ->
   Curve2d space units2
 convert factor curve = Units.coerce (scaleAbout Point2d.origin (Units.erase factor) curve)
 
 unconvert ::
-  Quantity (units2 #/# units1) ->
+  Quantity (units2 ?/? units1) ->
   Curve2d space units2 ->
   Curve2d space units1
-unconvert factor curve = convert (Units.simplify (1 /# factor)) curve
+unconvert factor curve = convert (Units.simplify (1 /? factor)) curve
 
-curvature# ::
+curvature_ ::
   Tolerance units =>
   Curve2d space units ->
-  Result IsPoint (Curve (Unitless #/# units))
-curvature# curve = do
+  Result IsPoint (Curve (Unitless ?/? units))
+curvature_ curve = do
   let firstDerivative = curve.derivative
   let secondDerivative = firstDerivative.derivative
   tangent <- tangentDirection curve
   let numerator = tangent `cross` secondDerivative
-  let denominator = VectorCurve2d.squaredMagnitude# firstDerivative
-  case Tolerance.using (Quantity.squared# ?tolerance) (Curve.quotient# numerator denominator) of
-    Ok quotient# -> Ok (Units.simplify quotient#)
+  let denominator = VectorCurve2d.squaredMagnitude_ firstDerivative
+  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve.quotient_ numerator denominator) of
+    Ok quotient_ -> Ok (Units.simplify quotient_)
     Error DivisionByZero -> Error IsPoint
 
 {-| Get the curvature of a 2D curve.
@@ -910,7 +910,7 @@ curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2d space units1 ->
   Result IsPoint (Curve units2)
-curvature curve = Result.map Units.specialize (curvature# curve)
+curvature curve = Result.map Units.specialize (curvature_ curve)
 
 toPolyline :: Resolution units -> Curve2d space units -> Polyline2d (Point2d space units)
 toPolyline resolution curve =
@@ -942,8 +942,8 @@ medialAxis curve1 curve2 = do
   let v2 = curve2.derivative `compose` SurfaceFunction.v
   let d = p2 .-. p1
   let target =
-        v2 `cross#` (2 *. (v1 `dot#` d) #*# d .-. VectorSurfaceFunction2d.squaredMagnitude# d #*# v1)
-  let targetTolerance = ?tolerance #*# ((?tolerance #*# ?tolerance) #*# ?tolerance)
+        v2 `cross_` (2 *. (v1 `dot_` d) ?*? d .-. VectorSurfaceFunction2d.squaredMagnitude_ d ?*? v1)
+  let targetTolerance = ?tolerance ?*? ((?tolerance ?*? ?tolerance) ?*? ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
     Error SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
     Ok zeros ->
@@ -953,8 +953,8 @@ medialAxis curve1 curve2 = do
         let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangentVector1
         let radius :: SurfaceFunction units =
               Units.coerce $
-                SurfaceFunction.unsafeQuotient#
-                  (d `dot#` d)
+                SurfaceFunction.unsafeQuotient_
+                  (d `dot_` d)
                   (2 *. (tangentVector1 `compose` SurfaceFunction.u) `cross` d)
         let curve :: SurfaceFunction2d space units =
               (curve1 `compose` SurfaceFunction.u) .+. radius .*. (normal1 `compose` SurfaceFunction.u)

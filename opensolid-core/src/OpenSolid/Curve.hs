@@ -26,15 +26,15 @@ module OpenSolid.Curve
   , rationalQuadraticSpline
   , rationalCubicSpline
   , quotient
-  , quotient#
+  , quotient_
   , unsafeQuotient
-  , unsafeQuotient#
+  , unsafeQuotient_
   , squared
-  , squared#
+  , squared_
   , sqrt
-  , sqrt#
+  , sqrt_
   , unsafeSqrt
-  , unsafeSqrt#
+  , unsafeSqrt_
   , cubed
   , sin
   , cos
@@ -223,85 +223,85 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Curve units2) (Curve units3)
   where
-  lhs .*. rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
-instance Multiplication# (Curve units1) (Curve units2) (Curve (units1 #*# units2)) where
-  lhs #*# rhs =
-    new (lhs.compiled #*# rhs.compiled) (lhs.derivative #*# rhs .+. lhs #*# rhs.derivative)
+instance Multiplication_ (Curve units1) (Curve units2) (Curve (units1 ?*? units2)) where
+  lhs ?*? rhs =
+    new (lhs.compiled ?*? rhs.compiled) (lhs.derivative ?*? rhs .+. lhs ?*? rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Quantity units2) (Curve units3)
   where
-  lhs .*. rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
-instance Multiplication# (Curve units1) (Quantity units2) (Curve (units1 #*# units2)) where
-  curve #*# value = curve #*# constant value
+instance Multiplication_ (Curve units1) (Quantity units2) (Curve (units1 ?*? units2)) where
+  curve ?*? value = curve ?*? constant value
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Curve units2) (Curve units3)
   where
-  lhs .*. rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
-instance Multiplication# (Quantity units1) (Curve units2) (Curve (units1 #*# units2)) where
-  value #*# curve = constant value #*# curve
+instance Multiplication_ (Quantity units1) (Curve units2) (Curve (units1 ?*? units2)) where
+  value ?*? curve = constant value ?*? curve
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Vector2d space units2) (VectorCurve2d space units3)
   where
-  lhs .*. rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
-  Multiplication#
+  Multiplication_
     (Curve units1)
     (Vector2d space units2)
-    (VectorCurve2d space (units1 #*# units2))
+    (VectorCurve2d space (units1 ?*? units2))
   where
-  curve #*# vector = curve #*# VectorCurve2d.constant vector
+  curve ?*? vector = curve ?*? VectorCurve2d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2d space units1) (Curve units2) (VectorCurve2d space units3)
   where
-  lhs .*. rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
-  Multiplication#
+  Multiplication_
     (Vector2d space units1)
     (Curve units2)
-    (VectorCurve2d space (units1 #*# units2))
+    (VectorCurve2d space (units1 ?*? units2))
   where
-  vector #*# curve = VectorCurve2d.constant vector #*# curve
+  vector ?*? curve = VectorCurve2d.constant vector ?*? curve
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (Vector3d space units2) (VectorCurve3d space units3)
   where
-  lhs .*. rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
-  Multiplication#
+  Multiplication_
     (Curve units1)
     (Vector3d space units2)
-    (VectorCurve3d space (units1 #*# units2))
+    (VectorCurve3d space (units1 ?*? units2))
   where
-  curve #*# vector = curve #*# VectorCurve3d.constant vector
+  curve ?*? vector = curve ?*? VectorCurve3d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector3d space units1) (Curve units2) (VectorCurve3d space units3)
   where
-  lhs .*. rhs = Units.specialize (lhs #*# rhs)
+  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
-  Multiplication#
+  Multiplication_
     (Vector3d space units1)
     (Curve units2)
-    (VectorCurve3d space (units1 #*# units2))
+    (VectorCurve3d space (units1 ?*? units2))
   where
-  vector #*# curve = VectorCurve3d.constant vector #*# curve
+  vector ?*? curve = VectorCurve3d.constant vector ?*? curve
 
 instance Composition (Curve Unitless) (Curve units) (Curve units) where
   f `compose` g =
@@ -428,14 +428,14 @@ quotient ::
   Curve units1 ->
   Curve units2 ->
   Result DivisionByZero (Curve units3)
-quotient lhs rhs = Units.specialize (quotient# lhs rhs)
+quotient lhs rhs = Units.specialize (quotient_ lhs rhs)
 
-quotient# ::
+quotient_ ::
   Tolerance units2 =>
   Curve units1 ->
   Curve units2 ->
-  Result DivisionByZero (Curve (units1 #/# units2))
-quotient# numerator denominator =
+  Result DivisionByZero (Curve (units1 ?/? units2))
+quotient_ numerator denominator =
   if denominator ~= zero
     then Error DivisionByZero
     else Ok do
@@ -447,24 +447,24 @@ quotient# numerator denominator =
             if evaluate denominator 1 ~= Quantity.zero
               then Just (lhopital numerator denominator 1)
               else Nothing
-      desingularize singularity0 (unsafeQuotient# numerator denominator) singularity1
+      desingularize singularity0 (unsafeQuotient_ numerator denominator) singularity1
 
 lhopital ::
   Tolerance units2 =>
   Curve units1 ->
   Curve units2 ->
   Number ->
-  (Quantity (units1 #/# units2), Quantity (units1 #/# units2))
+  (Quantity (units1 ?/? units2), Quantity (units1 ?/? units2))
 lhopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
   let numerator'' = evaluate numerator.derivative.derivative tValue
   let denominator' = evaluate denominator.derivative tValue
   let denominator'' = evaluate denominator.derivative.derivative tValue
-  let value = numerator' #/# denominator'
+  let value = numerator' ?/? denominator'
   let firstDerivative =
         Units.simplify $
-          (numerator'' #*# denominator' .-. numerator' #*# denominator'')
-            #/# (2 *. Quantity.squared# denominator')
+          (numerator'' ?*? denominator' .-. numerator' ?*? denominator'')
+            ?/? (2 *. Quantity.squared_ denominator')
   (value, firstDerivative)
 
 unsafeQuotient ::
@@ -472,75 +472,75 @@ unsafeQuotient ::
   Curve units1 ->
   Curve units2 ->
   Curve units3
-unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient# numerator denominator)
+unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient_ numerator denominator)
 
-unsafeQuotient# :: Curve units1 -> Curve units2 -> Curve (units1 #/# units2)
-unsafeQuotient# numerator denominator = do
-  let quotientCompiled = numerator.compiled #/# denominator.compiled
+unsafeQuotient_ :: Curve units1 -> Curve units2 -> Curve (units1 ?/? units2)
+unsafeQuotient_ numerator denominator = do
+  let quotientCompiled = numerator.compiled ?/? denominator.compiled
   let quotientDerivative = Units.simplify do
-        unsafeQuotient#
-          (numerator.derivative #*# denominator .-. numerator #*# denominator.derivative)
-          (squared# denominator)
+        unsafeQuotient_
+          (numerator.derivative ?*? denominator .-. numerator ?*? denominator.derivative)
+          (squared_ denominator)
   new quotientCompiled quotientDerivative
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve units1) (Quantity units2) (Curve units3)
   where
-  lhs ./. rhs = Units.specialize (lhs #/# rhs)
+  lhs ./. rhs = Units.specialize (lhs ?/? rhs)
 
-instance Division# (Curve units1) (Quantity units2) (Curve (units1 #/# units2)) where
-  curve #/# value = Units.simplify (curve #*# (1 /# value))
+instance Division_ (Curve units1) (Quantity units2) (Curve (units1 ?/? units2)) where
+  curve ?/? value = Units.simplify (curve ?*? (1 /? value))
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
-squared curve = Units.specialize (squared# curve)
+squared curve = Units.specialize (squared_ curve)
 
-squared# :: Curve units -> Curve (units #*# units)
-squared# curve =
+squared_ :: Curve units -> Curve (units ?*? units)
+squared_ curve =
   new
-    (CompiledFunction.map Expression.squared# Quantity.squared# Bounds.squared# curve.compiled)
-    (2 *. curve #*# curve.derivative)
+    (CompiledFunction.map Expression.squared_ Quantity.squared_ Bounds.squared_ curve.compiled)
+    (2 *. curve ?*? curve.derivative)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve units2 -> Curve units1
-sqrt curve = sqrt# (Units.unspecialize curve)
+sqrt curve = sqrt_ (Units.unspecialize curve)
 
-sqrt# :: Tolerance units => Curve (units #*# units) -> Curve units
-sqrt# curve
-  | Tolerance.using (Quantity.squared# ?tolerance) (curve ~= zero) = zero
+sqrt_ :: Tolerance units => Curve (units ?*? units) -> Curve units
+sqrt_ curve
+  | Tolerance.using (Quantity.squared_ ?tolerance) (curve ~= zero) = zero
   | otherwise = do
       let firstDerivative = curve.derivative
       let secondDerivative = firstDerivative.derivative
       let isSingularity tValue = do
             let curveIsZero =
-                  Tolerance.using (Quantity.squared# ?tolerance) $
+                  Tolerance.using (Quantity.squared_ ?tolerance) $
                     evaluate curve tValue ~= Quantity.zero
             let secondDerivativeValue = evaluate secondDerivative tValue
             let firstDerivativeTolerance =
-                  ?tolerance #*# Quantity.sqrt# (2 *. secondDerivativeValue)
+                  ?tolerance ?*? Quantity.sqrt_ (2 *. secondDerivativeValue)
             let firstDerivativeIsZero =
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative tValue ~= Quantity.zero
             curveIsZero && firstDerivativeIsZero
       let singularity0 =
             if isSingularity 0
-              then Just (Quantity.zero, Quantity.sqrt# (0.5 *. evaluate secondDerivative 0))
+              then Just (Quantity.zero, Quantity.sqrt_ (0.5 *. evaluate secondDerivative 0))
               else Nothing
       let singularity1 =
             if isSingularity 1
-              then Just (Quantity.zero, negative (Quantity.sqrt# (0.5 *. evaluate secondDerivative 1)))
+              then Just (Quantity.zero, negative (Quantity.sqrt_ (0.5 *. evaluate secondDerivative 1)))
               else Nothing
-      desingularize singularity0 (unsafeSqrt# curve) singularity1
+      desingularize singularity0 (unsafeSqrt_ curve) singularity1
 
 unsafeSqrt :: Units.Squared units1 units2 => Curve units2 -> Curve units1
-unsafeSqrt curve = unsafeSqrt# (Units.unspecialize curve)
+unsafeSqrt curve = unsafeSqrt_ (Units.unspecialize curve)
 
-unsafeSqrt# :: Curve (units #*# units) -> Curve units
-unsafeSqrt# curve =
+unsafeSqrt_ :: Curve (units ?*? units) -> Curve units
+unsafeSqrt_ curve =
   recursive
-    (CompiledFunction.map Expression.sqrt# Quantity.sqrt# Bounds.sqrt# curve.compiled)
-    (\self -> Units.coerce (unsafeQuotient# curve.derivative (2 *. self)))
+    (CompiledFunction.map Expression.sqrt_ Quantity.sqrt_ Bounds.sqrt_ curve.compiled)
+    (\self -> Units.coerce (unsafeQuotient_ curve.derivative (2 *. self)))
 
 -- | Compute the cube of a curve.
 cubed :: Curve Unitless -> Curve Unitless

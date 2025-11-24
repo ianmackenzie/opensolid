@@ -6,21 +6,21 @@ module OpenSolid.Arithmetic
   , Subtraction ((.-.))
   , (-.)
   , (.-)
-  , Multiplication# ((#*#))
-  , (*#)
-  , (#*)
+  , Multiplication_ ((?*?))
+  , (*?)
+  , (?*)
   , Multiplication ((.*.))
   , (*.)
   , (.*)
-  , Division# ((#/#))
-  , (/#)
-  , (#/)
+  , Division_ ((?/?))
+  , (/?)
+  , (?/)
   , Division ((./.))
   , (/.)
   , (./)
-  , DotMultiplication# (dot#)
+  , DotMultiplication_ (dot_)
   , DotMultiplication (dot)
-  , CrossMultiplication# (cross#)
+  , CrossMultiplication_ (cross_)
   , CrossMultiplication (cross)
   )
 where
@@ -73,22 +73,22 @@ infixl 6 -.
 
 infixl 6 .-
 
-class Multiplication# a b c | a b -> c where
-  (#*#) :: a -> b -> c
+class Multiplication_ a b c | a b -> c where
+  (?*?) :: a -> b -> c
 
-infixl 7 #*#
+infixl 7 ?*?
 
-{-# INLINE (*#) #-}
-(*#) :: Multiplication# Number a b => Number -> a -> b
-(*#) = (#*#)
+{-# INLINE (*?) #-}
+(*?) :: Multiplication_ Number a b => Number -> a -> b
+(*?) = (?*?)
 
-infixl 7 *#
+infixl 7 *?
 
-{-# INLINE (#*) #-}
-(#*) :: Multiplication# a Number b => a -> Number -> b
-(#*) = (#*#)
+{-# INLINE (?*) #-}
+(?*) :: Multiplication_ a Number b => a -> Number -> b
+(?*) = (?*?)
 
-infixl 7 #*
+infixl 7 ?*
 
 class Multiplication b a c => Multiplication a b c | a b -> c where
   (.*.) :: a -> b -> c
@@ -107,22 +107,22 @@ infixl 7 *.
 
 infixl 7 .*
 
-class Division# a b c | a b -> c where
-  (#/#) :: a -> b -> c
+class Division_ a b c | a b -> c where
+  (?/?) :: a -> b -> c
 
-infixl 7 #/#
+infixl 7 ?/?
 
-{-# INLINE (/#) #-}
-(/#) :: Division# Number a b => Number -> a -> b
-(/#) = (#/#)
+{-# INLINE (/?) #-}
+(/?) :: Division_ Number a b => Number -> a -> b
+(/?) = (?/?)
 
-infixl 7 /#
+infixl 7 /?
 
-{-# INLINE (#/) #-}
-(#/) :: Division# a Number b => a -> Number -> b
-(#/) = (#/#)
+{-# INLINE (?/) #-}
+(?/) :: Division_ a Number b => a -> Number -> b
+(?/) = (?/?)
 
-infixl 7 #/
+infixl 7 ?/
 
 class Division a b c | a b -> c where
   (./.) :: a -> b -> c
@@ -141,20 +141,20 @@ infixl 7 /.
 
 infixl 7 ./
 
-class DotMultiplication# a b c | a b -> c where
-  dot# :: a -> b -> c
+class DotMultiplication_ a b c | a b -> c where
+  dot_ :: a -> b -> c
 
-infixl 7 `dot#`
+infixl 7 `dot_`
 
 class DotMultiplication b a c => DotMultiplication a b c | a b -> c where
   dot :: DotMultiplication a b c => a -> b -> c
 
 infixl 7 `dot`
 
-class CrossMultiplication# a b c | a b -> c where
-  cross# :: a -> b -> c
+class CrossMultiplication_ a b c | a b -> c where
+  cross_ :: a -> b -> c
 
-infixl 7 `cross#`
+infixl 7 `cross_`
 
 class CrossMultiplication b a c => CrossMultiplication a b c | a b -> c where
   cross :: a -> b -> c

@@ -91,7 +91,7 @@ triangleBuilder convention units (v0, v1, v2) = do
   let p0 = Vertex3d.position v0
   let p1 = Vertex3d.position v1
   let p2 = Vertex3d.position v2
-  let normal = Vector3d.normalize ((p1 .-. p0) `cross#` (p2 .-. p0))
+  let normal = Vector3d.normalize ((p1 .-. p0) `cross_` (p2 .-. p0))
   Binary.concat
     [ vectorBuilder convention normal
     , pointBuilder convention units p0
@@ -110,7 +110,7 @@ triangleText convention units (v0, v1, v2) = do
   let p0 = Vertex3d.position v0
   let p1 = Vertex3d.position v1
   let p2 = Vertex3d.position v2
-  let crossProduct = (p1 .-. p0) `cross#` (p2 .-. p0)
+  let crossProduct = (p1 .-. p0) `cross_` (p2 .-. p0)
   let (nx, ny, nz) = Vector3d.components convention (Vector3d.normalize crossProduct)
   Text.multiline
     [ "facet normal " <> Text.number nx <> " " <> Text.number ny <> " " <> Text.number nz

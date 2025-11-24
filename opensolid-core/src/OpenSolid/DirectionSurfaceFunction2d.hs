@@ -70,13 +70,13 @@ instance
   Negative .*. function = negative function
 
 instance
-  Multiplication#
+  Multiplication_
     Sign
     (DirectionSurfaceFunction2d space)
     (DirectionSurfaceFunction2d space)
   where
-  Positive #*# function = function
-  Negative #*# function = negative function
+  Positive ?*? function = function
+  Negative ?*? function = negative function
 
 instance
   Multiplication
@@ -88,13 +88,13 @@ instance
   function .*. Negative = negative function
 
 instance
-  Multiplication#
+  Multiplication_
     (DirectionSurfaceFunction2d space)
     Sign
     (DirectionSurfaceFunction2d space)
   where
-  function #*# Positive = function
-  function #*# Negative = negative function
+  function ?*? Positive = function
+  function ?*? Negative = negative function
 
 instance
   Multiplication

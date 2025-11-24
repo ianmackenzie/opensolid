@@ -9,12 +9,12 @@ module OpenSolid.SurfaceFunction
   , evaluateBounds
   , derivative
   , squared
-  , squared#
+  , squared_
   , cubed
   , quotient
-  , quotient#
+  , quotient_
   , unsafeQuotient
-  , unsafeQuotient#
+  , unsafeQuotient_
   )
 where
 
@@ -114,24 +114,24 @@ evaluate :: SurfaceFunction units -> UvPoint -> Quantity units
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
-squared# :: SurfaceFunction units1 -> SurfaceFunction (units1 #*# units1)
+squared_ :: SurfaceFunction units1 -> SurfaceFunction (units1 ?*? units1)
 cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   Result DivisionByZero (SurfaceFunction units3)
-quotient# ::
+quotient_ ::
   Tolerance units2 =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
-  Result DivisionByZero (SurfaceFunction (units1 #/# units2))
+  Result DivisionByZero (SurfaceFunction (units1 ?/? units2))
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
   SurfaceFunction units3
-unsafeQuotient# ::
+unsafeQuotient_ ::
   SurfaceFunction units1 ->
   SurfaceFunction units2 ->
-  SurfaceFunction (units1 #/# units2)
+  SurfaceFunction (units1 ?/? units2)

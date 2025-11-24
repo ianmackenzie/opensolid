@@ -6,9 +6,9 @@ module OpenSolid.VectorCurve2d
   , evaluate
   , evaluateBounds
   , quotient
-  , quotient#
+  , quotient_
   , unsafeQuotient
-  , unsafeQuotient#
+  , unsafeQuotient_
   , transformBy
   )
 where
@@ -54,20 +54,20 @@ instance
   Units.Coercion (VectorCurve2d space1 unitsA) (VectorCurve2d space2 unitsB)
 
 instance
-  Multiplication#
+  Multiplication_
     (Curve units1)
     (VectorCurve2d space units2)
-    (VectorCurve2d space (units1 #*# units2))
+    (VectorCurve2d space (units1 ?*? units2))
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve units1) (VectorCurve2d space units2) (VectorCurve2d space units3)
 
 instance
-  Multiplication#
+  Multiplication_
     (VectorCurve2d space units1)
     (Curve units2)
-    (VectorCurve2d space (units1 #*# units2))
+    (VectorCurve2d space (units1 ?*? units2))
 
 instance
   Units.Product units1 units2 units3 =>
@@ -75,10 +75,10 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication#
+  DotMultiplication_
     (VectorCurve2d space1 units1)
     (VectorCurve2d space2 units2)
-    (Curve (units1 #*# units2))
+    (Curve (units1 ?*? units2))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -96,20 +96,20 @@ quotient ::
   VectorCurve2d space units1 ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve2d space units3)
-quotient# ::
+quotient_ ::
   Tolerance units2 =>
   VectorCurve2d space units1 ->
   Curve units2 ->
-  Result DivisionByZero (VectorCurve2d space (units1 #/# units2))
+  Result DivisionByZero (VectorCurve2d space (units1 ?/? units2))
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
   VectorCurve2d space units1 ->
   Curve units2 ->
   VectorCurve2d space units3
-unsafeQuotient# ::
+unsafeQuotient_ ::
   VectorCurve2d space units1 ->
   Curve units2 ->
-  VectorCurve2d space (units1 #/# units2)
+  VectorCurve2d space (units1 ?/? units2)
 transformBy ::
   Transform2d tag space translationUnits ->
   VectorCurve2d space units ->

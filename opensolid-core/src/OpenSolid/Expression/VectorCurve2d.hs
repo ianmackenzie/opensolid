@@ -2,7 +2,7 @@ module OpenSolid.Expression.VectorCurve2d
   ( constant
   , xy
   , squaredMagnitude
-  , squaredMagnitude#
+  , squaredMagnitude_
   , magnitude
   , placeIn
   , relativeTo
@@ -30,10 +30,10 @@ xy ::
   Expression Number (Vector2d space units)
 xy = Expression.xy
 
-squaredMagnitude# ::
+squaredMagnitude_ ::
   Expression Number (Vector2d space units) ->
-  Expression Number (Quantity (units #*# units))
-squaredMagnitude# = Expression.squaredMagnitude#
+  Expression Number (Quantity (units ?*? units))
+squaredMagnitude_ = Expression.squaredMagnitude_
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

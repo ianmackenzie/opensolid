@@ -54,17 +54,17 @@ instance Multiplication Sign (DirectionBounds2d space) (DirectionBounds2d space)
   Positive .*. directionBounds = directionBounds
   Negative .*. directionBounds = negative directionBounds
 
-instance Multiplication# Sign (DirectionBounds2d space) (DirectionBounds2d space) where
-  Positive #*# directionBounds = directionBounds
-  Negative #*# directionBounds = negative directionBounds
+instance Multiplication_ Sign (DirectionBounds2d space) (DirectionBounds2d space) where
+  Positive ?*? directionBounds = directionBounds
+  Negative ?*? directionBounds = negative directionBounds
 
 instance Multiplication (DirectionBounds2d space) Sign (DirectionBounds2d space) where
   directionBounds .*. Positive = directionBounds
   directionBounds .*. Negative = negative directionBounds
 
-instance Multiplication# (DirectionBounds2d space) Sign (DirectionBounds2d space) where
-  directionBounds #*# Positive = directionBounds
-  directionBounds #*# Negative = negative directionBounds
+instance Multiplication_ (DirectionBounds2d space) Sign (DirectionBounds2d space) where
+  directionBounds ?*? Positive = directionBounds
+  directionBounds ?*? Negative = negative directionBounds
 
 instance
   Multiplication

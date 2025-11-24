@@ -23,7 +23,7 @@ module OpenSolid.Vector2d
   , interpolateFrom
   , magnitude
   , squaredMagnitude
-  , squaredMagnitude#
+  , squaredMagnitude_
   , angle
   , angleFrom
   , IsZero (IsZero)
@@ -178,10 +178,10 @@ magnitude :: Vector2d space units -> Quantity units
 magnitude (Vector2d vx vy) = Quantity.hypot2 vx vy
 
 squaredMagnitude :: Units.Squared units1 units2 => Vector2d space units1 -> Quantity units2
-squaredMagnitude = Units.specialize . squaredMagnitude#
+squaredMagnitude = Units.specialize . squaredMagnitude_
 
-squaredMagnitude# :: Vector2d space units -> Quantity (units #*# units)
-squaredMagnitude# (Vector2d vx vy) = vx #*# vx .+. vy #*# vy
+squaredMagnitude_ :: Vector2d space units -> Quantity (units ?*? units)
+squaredMagnitude_ (Vector2d vx vy) = vx ?*? vx .+. vy ?*? vy
 
 {-| Get the angle of a vector.
 
@@ -205,7 +205,7 @@ The angle will be measured counterclockwise from the first vector to the
 second, and will always be between -180 and +180 degrees.
 -}
 angleFrom :: Vector2d space units -> Vector2d space units -> Angle
-angleFrom v1 v2 = Angle.atan2 (v1 `cross#` v2) (v1 `dot#` v2)
+angleFrom v1 v2 = Angle.atan2 (v1 `cross_` v2) (v1 `dot_` v2)
 
 data IsZero = IsZero deriving (Eq, Show)
 
@@ -290,11 +290,11 @@ placeOnOrientation ::
   Vector3d global units
 placeOnOrientation (PlaneOrientation3d i j) (Vector2d vx vy) = vx .*. i .+. vy .*. j
 
-convert :: Quantity (units2 #/# units1) -> Vector2d space units1 -> Vector2d space units2
-convert factor vector = Units.simplify (vector #*# factor)
+convert :: Quantity (units2 ?/? units1) -> Vector2d space units1 -> Vector2d space units2
+convert factor vector = Units.simplify (vector ?*? factor)
 
-unconvert :: Quantity (units2 #/# units1) -> Vector2d space units2 -> Vector2d space units1
-unconvert factor vector = Units.simplify (vector #/# factor)
+unconvert :: Quantity (units2 ?/? units1) -> Vector2d space units2 -> Vector2d space units1
+unconvert factor vector = Units.simplify (vector ?/? factor)
 
 sum :: List (Vector2d space units) -> Vector2d space units
 sum = List.foldl (.+.) zero

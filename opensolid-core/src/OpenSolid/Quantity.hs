@@ -12,9 +12,9 @@ module OpenSolid.Quantity
   , interpolateFrom
   , midpoint
   , squared
-  , squared#
+  , squared_
   , sqrt
-  , sqrt#
+  , sqrt_
   , hypot2
   , hypot3
   , abs
@@ -58,7 +58,7 @@ import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Unitless (Unitless)
-import OpenSolid.Units (type (#*#), type (#/#))
+import OpenSolid.Units (type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
 import Prelude
@@ -134,9 +134,9 @@ instance units1 ~ units2 => Subtraction (Quantity units1) (Quantity units2) (Qua
   {-# INLINE (.-.) #-}
   Quantity x .-. Quantity y = Quantity (x - y)
 
-instance Multiplication# (Quantity units1) (Quantity units2) (Quantity (units1 #*# units2)) where
-  {-# INLINE (#*#) #-}
-  Quantity x #*# Quantity y = Quantity (x * y)
+instance Multiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?*? units2)) where
+  {-# INLINE (?*?) #-}
+  Quantity x ?*? Quantity y = Quantity (x * y)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -145,9 +145,9 @@ instance
   {-# INLINEABLE (.*.) #-}
   Quantity x .*. Quantity y = Quantity (x * y)
 
-instance Division# (Quantity units1) (Quantity units2) (Quantity (units1 #/# units2)) where
-  {-# INLINE (#/#) #-}
-  Quantity x #/# Quantity y = Quantity (x / y)
+instance Division_ (Quantity units1) (Quantity units2) (Quantity (units1 ?/? units2)) where
+  {-# INLINE (?/?) #-}
+  Quantity x ?/? Quantity y = Quantity (x / y)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -198,17 +198,17 @@ isInfinite (Quantity x) = Prelude.isInfinite x
 squared :: Units.Squared units1 units2 => Quantity units1 -> Quantity units2
 squared x = x .*. x
 
-{-# INLINE squared# #-}
-squared# :: Quantity units -> Quantity (units #*# units)
-squared# x = x #*# x
+{-# INLINE squared_ #-}
+squared_ :: Quantity units -> Quantity (units ?*? units)
+squared_ x = x ?*? x
 
 sqrt :: Units.Squared units1 units2 => Quantity units2 -> Quantity units1
 sqrt x | x <= zero = zero
 sqrt (Quantity x) = Quantity (Prelude.sqrt x)
 
-sqrt# :: Quantity (units #*# units) -> Quantity units
-sqrt# x | x <= zero = zero
-sqrt# (Quantity x) = Quantity (Prelude.sqrt x)
+sqrt_ :: Quantity (units ?*? units) -> Quantity units
+sqrt_ x | x <= zero = zero
+sqrt_ (Quantity x) = Quantity (Prelude.sqrt x)
 
 hypot2 :: Quantity units -> Quantity units -> Quantity units
 hypot2 (Quantity## x##) (Quantity## y##) = Quantity## (hypot2## x## y##)
@@ -284,11 +284,11 @@ sum = List.foldl (.+.) zero
 sumOf :: (a -> Quantity units) -> List a -> Quantity units
 sumOf f list = sum (List.map f list)
 
-convert :: Quantity (units2 #/# units1) -> Quantity units1 -> Quantity units2
-convert factor value = Units.simplify (value #*# factor)
+convert :: Quantity (units2 ?/? units1) -> Quantity units1 -> Quantity units2
+convert factor value = Units.simplify (value ?*? factor)
 
-unconvert :: Quantity (units2 #/# units1) -> Quantity units2 -> Quantity units1
-unconvert factor value = Units.simplify (value #/# factor)
+unconvert :: Quantity (units2 ?/? units1) -> Quantity units2 -> Quantity units1
+unconvert factor value = Units.simplify (value ?/? factor)
 
 random :: Quantity units -> Quantity units -> Random.Generator (Quantity units)
 random (Quantity low) (Quantity high) =

@@ -190,10 +190,10 @@ placeOn ::
 placeOn (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d px py) =
   originPoint .+. px .*. i .+. py .*. j
 
-convert :: Quantity (units2 #/# units1) -> Point2d space units1 -> Point2d space units2
+convert :: Quantity (units2 ?/? units1) -> Point2d space units1 -> Point2d space units2
 convert factor (Position2d p) = Position2d (Vector2d.convert factor p)
 
-unconvert :: Quantity (units2 #/# units1) -> Point2d space units2 -> Point2d space units1
+unconvert :: Quantity (units2 ?/? units1) -> Point2d space units2 -> Point2d space units1
 unconvert factor (Position2d p) = Position2d (Vector2d.unconvert factor p)
 
 transformBy :: Transform2d tag space units -> Point2d space units -> Point2d space units

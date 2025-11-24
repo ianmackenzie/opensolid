@@ -16,12 +16,12 @@ module OpenSolid.VectorBounds3d
   , zComponent
   , components
   , squaredMagnitude
-  , squaredMagnitude#
+  , squaredMagnitude_
   , magnitude
   , maxMagnitude
   , maxMagnitude##
   , maxSquaredMagnitude
-  , maxSquaredMagnitude#
+  , maxSquaredMagnitude_
   , direction
   , normalize
   , exclusion
@@ -191,11 +191,11 @@ components :: VectorBounds3d space units -> (Bounds units, Bounds units, Bounds 
 components (VectorBounds3d vx vy vz) = (vx, vy, vz)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d space units1 -> Bounds units2
-squaredMagnitude = Units.specialize . squaredMagnitude#
+squaredMagnitude = Units.specialize . squaredMagnitude_
 
-squaredMagnitude# :: VectorBounds3d space units -> Bounds (units #*# units)
-squaredMagnitude# (VectorBounds3d x y z) =
-  Bounds.squared# x .+. Bounds.squared# y .+. Bounds.squared# z
+squaredMagnitude_ :: VectorBounds3d space units -> Bounds (units ?*? units)
+squaredMagnitude_ (VectorBounds3d x y z) =
+  Bounds.squared_ x .+. Bounds.squared_ y .+. Bounds.squared_ z
 
 magnitude :: VectorBounds3d space units -> Bounds units
 magnitude bounds = do
@@ -251,14 +251,14 @@ maxSquaredMagnitude ::
   Units.Squared units1 units2 =>
   VectorBounds3d space units1 ->
   Quantity units2
-maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude#
+maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude_
 
-maxSquaredMagnitude# :: VectorBounds3d space units -> Quantity (units #*# units)
-maxSquaredMagnitude# (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)) = do
+maxSquaredMagnitude_ :: VectorBounds3d space units -> Quantity (units ?*? units)
+maxSquaredMagnitude_ (VectorBounds3d (Bounds minX maxX) (Bounds minY maxY) (Bounds minZ maxZ)) = do
   let xMagnitude = max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
   let zMagnitude = max (Quantity.abs minZ) (Quantity.abs maxZ)
-  Quantity.squared# xMagnitude .+. Quantity.squared# yMagnitude .+. Quantity.squared# zMagnitude
+  Quantity.squared_ xMagnitude .+. Quantity.squared_ yMagnitude .+. Quantity.squared_ zMagnitude
 
 direction :: VectorBounds3d space units -> DirectionBounds3d space
 direction vectorBounds = DirectionBounds3d.unsafe (normalize vectorBounds)
@@ -460,7 +460,7 @@ tripleProduct ::
   VectorBounds3d space units ->
   VectorBounds3d space units ->
   VectorBounds3d space units ->
-  Bounds ((units #*# units) #*# units)
+  Bounds ((units ?*? units) ?*? units)
 tripleProduct bounds1 bounds2 bounds3 = do
   let !(VectorBounds3d## xMin1## xMax1## yMin1## yMax1## zMin1## zMax1##) = bounds1
   let !(VectorBounds3d## xMin2## xMax2## yMin2## yMax2## zMin2## zMax2##) = bounds2

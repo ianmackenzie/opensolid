@@ -529,7 +529,7 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 convert ::
-  Quantity (units2 #/# units1) ->
+  Quantity (units2 ?/? units1) ->
   Region2d space units1 ->
   Region2d space units2
 convert factor (Region2d outer inners) = do
@@ -540,10 +540,10 @@ convert factor (Region2d outer inners) = do
   Region2d (transform outer) (List.map transform inners)
 
 unconvert ::
-  Quantity (units2 #/# units1) ->
+  Quantity (units2 ?/? units1) ->
   Region2d space units2 ->
   Region2d space units1
-unconvert factor region = convert (Units.simplify (1 /# factor)) region
+unconvert factor region = convert (Units.simplify (1 /? factor)) region
 
 contains :: Tolerance units => Point2d space units -> Region2d space units -> Bool
 contains point region =
@@ -573,10 +573,10 @@ fluxIntegral point curve = do
   -- so the Curve.unsafeQuotient call should be OK
   -- (if the point is not on the curve, then the displacement will always be non-zero)
   let integrand =
-        Tolerance.using (Quantity.squared# ?tolerance) $
+        Tolerance.using (Quantity.squared_ ?tolerance) $
           Curve.unsafeQuotient
-            (curve.derivative `cross#` displacement)
-            (VectorCurve2d.squaredMagnitude# displacement)
+            (curve.derivative `cross_` displacement)
+            (VectorCurve2d.squaredMagnitude_ displacement)
   Curve.integrate integrand
 
 totalFlux :: Tolerance units => Point2d space units -> Loop space units -> Estimate Unitless
@@ -608,8 +608,8 @@ classifyLoops (NonEmpty loops) = do
 
 fixSign :: Tolerance units => Sign -> Loop space units -> Loop space units
 fixSign desiredSign loop =
-  Tolerance.using (Quantity.squared# ?tolerance) do
-    if Estimate.sign (loopSignedArea# loop) == desiredSign then loop else reverseLoop loop
+  Tolerance.using (Quantity.squared_ ?tolerance) do
+    if Estimate.sign (loopSignedArea_ loop) == desiredSign then loop else reverseLoop loop
 
 reverseLoop :: Loop space units -> Loop space units
 reverseLoop loop = NonEmpty.reverseMap Curve2d.reverse loop
@@ -619,13 +619,13 @@ pickLargestLoop ::
   NonEmpty (Loop space units) ->
   (Loop space units, List (Loop space units))
 pickLargestLoop loops =
-  Tolerance.using (Quantity.squared# ?tolerance) do
-    Estimate.pickLargestBy loopSignedArea# loops
+  Tolerance.using (Quantity.squared_ ?tolerance) do
+    Estimate.pickLargestBy loopSignedArea_ loops
 
-loopSignedArea# :: Loop space units -> Estimate (units #*# units)
-loopSignedArea# loop = do
+loopSignedArea_ :: Loop space units -> Estimate (units ?*? units)
+loopSignedArea_ loop = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first loop)
-  let edgeIntegrals = NonEmpty.map (areaIntegral# referencePoint) loop
+  let edgeIntegrals = NonEmpty.map (areaIntegral_ referencePoint) loop
   Estimate.sum edgeIntegrals
 
 areaIntegral ::
@@ -634,14 +634,14 @@ areaIntegral ::
   Curve2d space units1 ->
   Estimate units2
 areaIntegral referencePoint curve =
-  Units.specialize (areaIntegral# referencePoint curve)
+  Units.specialize (areaIntegral_ referencePoint curve)
 
-areaIntegral# :: Point2d space units -> Curve2d space units -> Estimate (units #*# units)
-areaIntegral# referencePoint curve = do
+areaIntegral_ :: Point2d space units -> Curve2d space units -> Estimate (units ?*? units)
+areaIntegral_ referencePoint curve = do
   let displacement = curve .-. referencePoint
   let y = displacement.yComponent
   let dx = displacement.xComponent.derivative
-  negative (Curve.integrate (y #*# dx))
+  negative (Curve.integrate (y ?*? dx))
 
 loopIsInside :: Tolerance units => Loop space units -> Loop space units -> Bool
 loopIsInside outer inner = do

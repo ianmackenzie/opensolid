@@ -244,8 +244,8 @@ drawCrossingCurve index curve = do
   let color = Color.hsl1 hue 0.5 0.5
   drawUvCurve [Drawing2d.strokeColor color] curve
 
-toDrawing :: Quantity (Meters #/# Unitless)
-toDrawing = Length.centimeters 10 #/ 1
+toDrawing :: Quantity (Meters ?/? Unitless)
+toDrawing = Length.centimeters 10 ?/ 1
 
 drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvSpace Unitless -> Drawing2d UvSpace
 drawUvCurve attributes curve = do

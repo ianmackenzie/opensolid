@@ -97,8 +97,8 @@ buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
       let deltaS = fineEstimate
       let dtduStart = deltaS ./. dsdtStart
       let dtduEnd = deltaS ./. dsdtEnd
-      let d2tdu2Start = negative deltaS #*# d2sdt2 tStart .*. dtduStart ./. Quantity.squared# dsdtStart
-      let d2tdu2End = negative deltaS #*# d2sdt2 tEnd .*. dtduEnd ./. Quantity.squared# dsdtEnd
+      let d2tdu2Start = negative deltaS ?*? d2sdt2 tStart .*. dtduStart ./. Quantity.squared_ dsdtStart
+      let d2tdu2End = negative deltaS ?*? d2sdt2 tEnd .*. dtduEnd ./. Quantity.squared_ dsdtEnd
       let tCurve = Curve.hermite tStart [dtduStart, d2tdu2Start] tEnd [dtduEnd, d2tdu2End]
       (Leaf deltaS tCurve, fineEstimate)
     else do

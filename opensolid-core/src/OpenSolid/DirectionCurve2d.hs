@@ -75,17 +75,17 @@ instance Multiplication Sign (DirectionCurve2d space) (DirectionCurve2d space) w
   Positive .*. curve = curve
   Negative .*. curve = negative curve
 
-instance Multiplication# Sign (DirectionCurve2d space) (DirectionCurve2d space) where
-  Positive #*# curve = curve
-  Negative #*# curve = negative curve
+instance Multiplication_ Sign (DirectionCurve2d space) (DirectionCurve2d space) where
+  Positive ?*? curve = curve
+  Negative ?*? curve = negative curve
 
 instance Multiplication (DirectionCurve2d space) Sign (DirectionCurve2d space) where
   curve .*. Positive = curve
   curve .*. Negative = negative curve
 
-instance Multiplication# (DirectionCurve2d space) Sign (DirectionCurve2d space) where
-  curve #*# Positive = curve
-  curve #*# Negative = negative curve
+instance Multiplication_ (DirectionCurve2d space) Sign (DirectionCurve2d space) where
+  curve ?*? Positive = curve
+  curve ?*? Negative = negative curve
 
 instance
   Multiplication

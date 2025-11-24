@@ -1,7 +1,7 @@
 module OpenSolid.Triangle2d
   ( Triangle2d (Triangle2d)
   , vertices
-  , signedArea#
+  , signedArea_
   , signedArea
   )
 where
@@ -16,15 +16,15 @@ data Triangle2d vertex = Triangle2d vertex vertex vertex
 vertices :: Triangle2d vertex -> (vertex, vertex, vertex)
 vertices (Triangle2d v1 v2 v3) = (v1, v2, v3)
 
-signedArea# ::
+signedArea_ ::
   Vertex2d vertex space units =>
   Triangle2d vertex ->
-  Quantity (units #*# units)
-signedArea# (Triangle2d v1 v2 v3) = do
+  Quantity (units ?*? units)
+signedArea_ (Triangle2d v1 v2 v3) = do
   let p1 = Vertex2d.position v1
   let p2 = Vertex2d.position v2
   let p3 = Vertex2d.position v3
-  0.5 *. (p2 .-. p1) `cross#` (p3 .-. p1)
+  0.5 *. (p2 .-. p1) `cross_` (p3 .-. p1)
 
 signedArea ::
   ( Vertex2d vertex space units1
@@ -32,4 +32,4 @@ signedArea ::
   ) =>
   Triangle2d vertex ->
   Quantity units2
-signedArea = Units.specialize . signedArea#
+signedArea = Units.specialize . signedArea_
