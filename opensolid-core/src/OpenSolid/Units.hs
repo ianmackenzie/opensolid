@@ -36,7 +36,7 @@ import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
 import {-# SOURCE #-} OpenSolid.Result (Result (Error, Ok))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)
 import OpenSolid.Unitless (Unitless)
-import Prelude (Eq, Int, Maybe (Just, Nothing), Show, id, type (~))
+import Prelude (Eq, Int, Maybe (Just, Nothing), Show, type (~))
 
 class HasUnits (a :: k) units | a -> units
 
@@ -58,17 +58,9 @@ type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
   coerce :: a -> b
 
-instance Coercion Int Int where
-  {-# INLINE coerce #-}
-  coerce = id
-
 instance Coercion (Quantity units1) (Quantity units2) where
   {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
-
-instance Coercion Sign Sign where
-  {-# INLINE coerce #-}
-  coerce = id
 
 instance Coercion a b => Coercion (Maybe a) (Maybe b) where
   coerce (Just value) = Just (coerce value)
