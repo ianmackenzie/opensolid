@@ -1,21 +1,32 @@
-Refactor naming for symbolic units?
--> #*#, #/# -> ?*?, ?/? (at both type and operator level)
--> Multiplication# -> Multiplication_ etc.
--> dot#, cross# -> dot_, cross_
--> squared#, sqrt# -> squared_, sqrt_
--> then *might* be able to enable UnboxedTuples by default...
+Switch order of 'space' and 'units' type parameters...
+-> hopefully can mostly do it with a big regex
+-> manually replace instances involving symbolic units products/quotients
 
 Refactor CoordinateSystem module now that it no longer has a CoordinateSystem type
 -> OpenSolid.Uv module with 'Space' type?
+-> then rename CoordinateSystem to LocalCoordinates?
+-> or just have convention that Frame3d is 'Frame3d units global local' etc...or 'Frame3d units space defines'
 
 Add modules for UvRegion, UvCurve etc.
 
 Switch to Meters-default naming convention, e.g.:
-- data Point2D# space units
-- type Point2D space = Point2D# space Meters
-- type UvPoint = Point2D# UvSpace Unitless
+- data Point2D_ units space
+- type Point2D space = Point2D_ Meters space
+- type UvPoint = Point2D_ Unitless UvSpace
+- what about Vector2D, Vector3D?
+  -> data Vector2D_ units space
+  -> type Vector2D space = Vector2D_ Meters space
+  -> type UnitlessVector2D space = Vector2D_ Unitless space
+  -> type UvVector = UnitlessVector2D UvSpace
+  -> type AreaVector2D space = Vector2D_ Area space
+- should generic operations be in Point2D module or Point2D_ module?
+- maybe keep 'Point2d' etc. names in Haskell, 'Point2D' and 'UvPoint' in target languages?
+  -> still have 'Point3D' in Haskell? messy...
+  -> maybe just have 'Point2D' be units-generic in Haskell, specific to meters in target languages
+    -> also Region2D, Vector2D etc.
+    -> still have UvPoint, UvVector, UvDirection, UvAxis, UvCurve etc. type aliases in Haskell
 
-Search for 'UvSpace Unitless' and 'space Meters' to see where type aliases can be used
+Search for 'Unitless UvSpace' and 'Meters space' to see where type aliases can be used
 -> or new ones introduced...
 
 Add more Curve2d intersection tests
