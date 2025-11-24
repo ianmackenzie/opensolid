@@ -1,4 +1,12 @@
+Refactor naming for symbolic units?
+-> #*#, #/# -> ?*?, ?/? (at both type and operator level)
+-> Multiplication# -> Multiplication_ etc.
+-> dot#, cross# -> dot_, cross_
+-> squared#, sqrt# -> squared_, sqrt_
+-> then *might* be able to enable UnboxedTuples by default...
+
 Refactor CoordinateSystem module now that it no longer has a CoordinateSystem type
+-> OpenSolid.Uv module with 'Space' type?
 
 Add modules for UvRegion, UvCurve etc.
 
