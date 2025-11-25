@@ -1,5 +1,5 @@
 module OpenSolid.SurfaceFunction
-  ( SurfaceFunction
+  ( SurfaceFunction (compiled, du, dv)
   , Compiled
   , evaluate
   , evaluateAt
@@ -32,7 +32,6 @@ module OpenSolid.SurfaceFunction
   )
 where
 
-import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
@@ -42,6 +41,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Direction3d (Direction3d)
@@ -90,14 +90,11 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfa
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
-data SurfaceFunction units
-  = SurfaceFunction (Compiled units) ~(SurfaceFunction units) ~(SurfaceFunction units)
-
-instance HasField "du" (SurfaceFunction units) (SurfaceFunction units) where
-  getField (SurfaceFunction _ du _) = du
-
-instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units) where
-  getField (SurfaceFunction _ _ dv) = dv
+data SurfaceFunction units = SurfaceFunction
+  { compiled :: Compiled units
+  , du :: ~(SurfaceFunction units)
+  , dv :: ~(SurfaceFunction units)
+  }
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Bounds units)
 
@@ -365,9 +362,6 @@ evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.comp
 {-# INLINE evaluateBoundsWithin #-}
 evaluateBoundsWithin :: UvBounds -> SurfaceFunction units -> Bounds units
 evaluateBoundsWithin uvBounds function = evaluateBounds function uvBounds
-
-instance HasField "compiled" (SurfaceFunction units) (Compiled units) where
-  getField (SurfaceFunction c _ _) = c
 
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 derivative U = (.du)

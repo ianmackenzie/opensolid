@@ -1,5 +1,5 @@
 module OpenSolid.SurfaceFunction
-  ( SurfaceFunction
+  ( SurfaceFunction (compiled, du, dv)
   , Compiled
   , constant
   , zero
@@ -18,7 +18,6 @@ module OpenSolid.SurfaceFunction
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
@@ -31,16 +30,13 @@ import OpenSolid.UvPoint (UvPoint)
 
 type role SurfaceFunction nominal
 
-type SurfaceFunction :: Type -> Type
-data SurfaceFunction units
-
-instance HasField "du" (SurfaceFunction units) (SurfaceFunction units)
-
-instance HasField "dv" (SurfaceFunction units) (SurfaceFunction units)
+data SurfaceFunction units = SurfaceFunction
+  { compiled :: Compiled units
+  , du :: ~(SurfaceFunction units)
+  , dv :: ~(SurfaceFunction units)
+  }
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Bounds units)
-
-instance HasField "compiled" (SurfaceFunction units) (Compiled units)
 
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units)
 

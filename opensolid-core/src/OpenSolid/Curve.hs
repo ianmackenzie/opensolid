@@ -1,5 +1,5 @@
 module OpenSolid.Curve
-  ( Curve
+  ( Curve (compiled, derivative)
   , Compiled
   , Zero
   , isEndpoint
@@ -52,7 +52,6 @@ module OpenSolid.Curve
   )
 where
 
-import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds (Bounds))
@@ -95,15 +94,9 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
-data Curve units = Curve (Compiled units) ~(Curve units)
+data Curve units = Curve {compiled :: Compiled units, derivative :: ~(Curve units)}
 
 type Compiled units = CompiledFunction Number (Quantity units) (Bounds Unitless) (Bounds units)
-
-instance HasField "compiled" (Curve units) (Compiled units) where
-  getField (Curve c _) = c
-
-instance HasField "derivative" (Curve units) (Curve units) where
-  getField = derivative
 
 instance FFI (Curve Unitless) where
   representation = FFI.classRepresentation "Curve"

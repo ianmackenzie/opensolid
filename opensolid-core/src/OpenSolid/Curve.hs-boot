@@ -1,12 +1,11 @@
 module OpenSolid.Curve
-  ( Curve
+  ( Curve (compiled, derivative)
   , Compiled
   , evaluate
   , evaluateBounds
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.FFI (FFI)
@@ -15,13 +14,9 @@ import OpenSolid.Prelude
 type role Curve nominal
 
 type Curve :: Type -> Type
-data Curve units
+data Curve units = Curve {compiled :: Compiled units, derivative :: ~(Curve units)}
 
 type Compiled units = CompiledFunction Number (Quantity units) (Bounds Unitless) (Bounds units)
-
-instance HasField "compiled" (Curve units) (Compiled units)
-
-instance HasField "derivative" (Curve units) (Curve units)
 
 instance FFI (Curve Unitless)
 
