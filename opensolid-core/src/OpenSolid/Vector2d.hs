@@ -278,8 +278,8 @@ this returns the corresponding 3D vector.
 -}
 {-# INLINE placeOn #-}
 placeOn ::
-  forall local units space planeUnits.
-  Plane3d space planeUnits (Defines local) ->
+  forall local units space.
+  Plane3d space (Defines local) ->
   Vector2d local units ->
   Vector3d space units
 placeOn plane = placeOnOrientation plane.orientation

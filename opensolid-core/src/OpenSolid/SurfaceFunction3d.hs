@@ -65,7 +65,7 @@ instance
   getField (SurfaceFunction3d _ _ dv) = dv
 
 type Compiled space =
-  CompiledFunction UvPoint (Point3d space Meters) UvBounds (Bounds3d space)
+  CompiledFunction UvPoint (Point3d space) UvBounds (Bounds3d space)
 
 instance HasUnits (SurfaceFunction3d space) Meters
 
@@ -124,18 +124,18 @@ instance
       (\parameter -> derivative parameter lhs .-. derivative parameter rhs)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Subtraction
     (SurfaceFunction3d space1)
-    (Point3d space2 meters)
+    (Point3d space2)
     (VectorSurfaceFunction3d space1 Meters)
   where
   function .-. point = function .-. constant point
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Subtraction
-    (Point3d space1 meters)
+    (Point3d space1)
     (SurfaceFunction3d space2)
     (VectorSurfaceFunction3d space1 Meters)
   where
@@ -179,10 +179,10 @@ new c derivativeFunction = do
   let dv' = VectorSurfaceFunction3d.new dv.compiled (\case U -> du.dv; V -> dv.dv)
   SurfaceFunction3d c du dv'
 
-constant :: Point3d space Meters -> SurfaceFunction3d space
+constant :: Point3d space -> SurfaceFunction3d space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3d.zero)
 
-evaluate :: SurfaceFunction3d space -> UvPoint -> Point3d space Meters
+evaluate :: SurfaceFunction3d space -> UvPoint -> Point3d space
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 evaluateBounds :: SurfaceFunction3d space -> UvBounds -> Bounds3d space
@@ -217,7 +217,7 @@ normalDirection function = do
     Ok directionFunction -> Ok directionFunction
     Error VectorSurfaceFunction3d.IsZero -> Error IsDegenerate
 
-transformBy :: Transform3d tag space Meters -> SurfaceFunction3d space -> SurfaceFunction3d space
+transformBy :: Transform3d tag space -> SurfaceFunction3d space -> SurfaceFunction3d space
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
@@ -229,10 +229,7 @@ transformBy transform function = do
         VectorSurfaceFunction3d.transformBy transform (derivative parameter function)
   new compiledTransformed transformedDerivative
 
-placeIn ::
-  Frame3d global Meters (Defines local) ->
-  SurfaceFunction3d local ->
-  SurfaceFunction3d global
+placeIn :: Frame3d global (Defines local) -> SurfaceFunction3d local -> SurfaceFunction3d global
 placeIn frame function = do
   let compiledPlaced =
         CompiledFunction.map
@@ -244,8 +241,5 @@ placeIn frame function = do
         VectorSurfaceFunction3d.placeIn frame (derivative parameter function)
   new compiledPlaced placedDerivative
 
-relativeTo ::
-  Frame3d global Meters (Defines local) ->
-  SurfaceFunction3d global ->
-  SurfaceFunction3d local
+relativeTo :: Frame3d global (Defines local) -> SurfaceFunction3d global -> SurfaceFunction3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)

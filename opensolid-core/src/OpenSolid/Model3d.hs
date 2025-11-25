@@ -171,17 +171,17 @@ groupWith = GroupNode
 nothing :: Model3d space
 nothing = group []
 
-transformBy :: Transform3d.Rigid space Meters -> Model3d space -> Model3d space
+transformBy :: Transform3d.Rigid space -> Model3d space -> Model3d space
 transformBy transform model = placeIn (Frame3d.transformBy transform World3d.frame) model
 
 -- | Convert a model defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d global Meters (Defines local) -> Model3d local -> Model3d global
+placeIn :: Frame3d global (Defines local) -> Model3d local -> Model3d global
 placeIn frame model = case model of
   BodyNode attrs bod -> BodyNode attrs (Body3d.placeIn frame bod)
   GroupNode attrs kids -> GroupNode attrs (List.map (placeIn frame) kids)
 
 -- | Convert a model defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global Meters (Defines local) -> Model3d global -> Model3d local
+relativeTo :: Frame3d global (Defines local) -> Model3d global -> Model3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)
 
 -- | Add the given attributes to the given model.

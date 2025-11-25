@@ -84,16 +84,16 @@ zDirection (Orientation3d dr df du) Convention3d{zr, zf, zu} =
   Unit3d (dr .*. zr .+. df .*. zf .+. du .*. zu)
 
 -- | Get the X axis of a given frame for a particular coordinate convention.
-xAxis :: Frame3d space units defines -> Convention3d -> Axis3d space units
+xAxis :: Frame3d space defines -> Convention3d -> Axis3d space
 xAxis (Frame3d originPoint orientation) convention =
   Axis3d originPoint (xDirection orientation convention)
 
 -- | Get the Y axis of a given frame for a particular coordinate convention.
-yAxis :: Frame3d space units defines -> Convention3d -> Axis3d space units
+yAxis :: Frame3d space defines -> Convention3d -> Axis3d space
 yAxis (Frame3d originPoint orientation) convention =
   Axis3d originPoint (yDirection orientation convention)
 
 -- | Get the Z axis of a given frame for a particular coordinate convention.
-zAxis :: Frame3d space units defines -> Convention3d -> Axis3d space units
+zAxis :: Frame3d space defines -> Convention3d -> Axis3d space
 zAxis (Frame3d originPoint orientation) convention =
   Axis3d originPoint (zDirection orientation convention)

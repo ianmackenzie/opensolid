@@ -230,7 +230,7 @@ Given a 2D direction defined within a plane's coordinate system,
 this returns the corresponding 3D direction.
 -}
 placeOn ::
-  Plane3d global planeUnits (Defines local) ->
+  Plane3d global (Defines local) ->
   DirectionBounds2d local ->
   DirectionBounds3d global
 placeOn plane = placeOnOrientation plane.orientation

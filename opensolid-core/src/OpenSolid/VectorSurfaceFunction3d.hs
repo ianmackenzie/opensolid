@@ -183,19 +183,19 @@ instance
   v .-. f = constant v .-. f
 
 instance
-  (space1 ~ space2, meters1 ~ Meters, meters2 ~ Meters) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Addition
-    (Point3d space1 meters1)
-    (VectorSurfaceFunction3d space2 meters2)
+    (Point3d space1)
+    (VectorSurfaceFunction3d space2 meters)
     (SurfaceFunction3d space1)
   where
   point .+. function = SurfaceFunction3d.constant point .+. function
 
 instance
-  (space1 ~ space2, meters1 ~ Meters, meters2 ~ Meters) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Subtraction
-    (Point3d space1 meters1)
-    (VectorSurfaceFunction3d space2 meters2)
+    (Point3d space1)
+    (VectorSurfaceFunction3d space2 meters)
     (SurfaceFunction3d space1)
   where
   point .-. function = SurfaceFunction3d.constant point .-. function
@@ -516,7 +516,7 @@ derivative U = (.du)
 derivative V = (.dv)
 
 placeIn ::
-  Frame3d global frameUnits (Defines local) ->
+  Frame3d global (Defines local) ->
   VectorSurfaceFunction3d local units ->
   VectorSurfaceFunction3d global units
 placeIn frame function = do
@@ -529,13 +529,13 @@ placeIn frame function = do
   new compiledPlaced (\p -> placeIn frame (derivative p function))
 
 relativeTo ::
-  Frame3d global frameUnits (Defines local) ->
+  Frame3d global (Defines local) ->
   VectorSurfaceFunction3d global units ->
   VectorSurfaceFunction3d local units
 relativeTo frame function = placeIn (Frame3d.inverse frame) function
 
 transformBy ::
-  Transform3d tag space translationUnits ->
+  Transform3d tag space ->
   VectorSurfaceFunction3d space units ->
   VectorSurfaceFunction3d space units
 transformBy transform function = do

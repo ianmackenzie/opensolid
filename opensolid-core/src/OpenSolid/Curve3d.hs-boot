@@ -26,7 +26,7 @@ type Curve3d :: Type -> Type
 data Curve3d space
 
 type Compiled space =
-  CompiledFunction Number (Point3d space Meters) (Bounds Unitless) (Bounds3d space)
+  CompiledFunction Number (Point3d space) (Bounds Unitless) (Bounds3d space)
 
 instance HasField "compiled" (Curve3d space) (Compiled space)
 
@@ -46,12 +46,9 @@ instance
     (VectorCurve3d space2 meters)
     (Curve3d space1)
 
-constant :: Point3d space Meters -> Curve3d space
+constant :: Point3d space -> Curve3d space
 new :: Compiled space -> VectorCurve3d space Meters -> Curve3d space
-on ::
-  Plane3d space Meters (Defines local) ->
-  Curve2d local Meters ->
-  Curve3d space
-evaluate :: Curve3d space -> Number -> Point3d space Meters
+on :: Plane3d space (Defines local) -> Curve2d local Meters -> Curve3d space
+evaluate :: Curve3d space -> Number -> Point3d space
 evaluateBounds :: Curve3d space -> Bounds Unitless -> Bounds3d space
 reverse :: Curve3d space -> Curve3d space

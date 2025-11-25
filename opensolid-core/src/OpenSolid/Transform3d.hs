@@ -31,6 +31,7 @@ where
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Length (Length)
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -47,13 +48,13 @@ import OpenSolid.Transform qualified as Transform
 import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.World3d qualified as World3d
 
-type Rigid space units = Transform3d Transform.Rigid space units
+type Rigid space = Transform3d Transform.Rigid space
 
-type Orthonormal space units = Transform3d Transform.Orthonormal space units
+type Orthonormal space = Transform3d Transform.Orthonormal space
 
-type Uniform space units = Transform3d Transform.Uniform space units
+type Uniform space = Transform3d Transform.Uniform space
 
-type Affine space units = Transform3d Transform.Affine space units
+type Affine space = Transform3d Transform.Affine space
 
 unitX :: Vector3d space Unitless
 unitX = Vector3d 1 0 0
@@ -64,34 +65,34 @@ unitY = Vector3d 0 1 0
 unitZ :: Vector3d space Unitless
 unitZ = Vector3d 0 0 1
 
-identity :: Rigid space units
+identity :: Rigid space
 identity = Transform3d World3d.originPoint unitX unitY unitZ
 
-coerce :: Transform3d tag1 space1 units1 -> Transform3d tag2 space2 units2
+coerce :: Transform3d tag1 space1 -> Transform3d tag2 space2
 coerce (Transform3d p0 i j k) =
   Transform3d (Point3d.coerce p0) (Vector3d.coerce i) (Vector3d.coerce j) (Vector3d.coerce k)
 
 withFixedPoint ::
-  Point3d space units ->
+  Point3d space ->
   Vector3d space Unitless ->
   Vector3d space Unitless ->
   Vector3d space Unitless ->
-  Transform3d tag space units
+  Transform3d tag space
 withFixedPoint fixedPoint vx vy vz = do
   let Point3d x0 y0 z0 = fixedPoint
   let originPoint = fixedPoint .-. x0 .*. vx .-. y0 .*. vy .-. z0 .*. vz
   Transform3d originPoint vx vy vz
 
-translateBy :: Vector3d space units -> Rigid space units
+translateBy :: Vector3d space Meters -> Rigid space
 translateBy vector = Transform3d (Position3d vector) unitX unitY unitZ
 
-translateIn :: Direction3d space -> Quantity units -> Rigid space units
+translateIn :: Direction3d space -> Length -> Rigid space
 translateIn direction distance = translateBy (direction .*. distance)
 
-translateAlong :: Axis3d space units -> Quantity units -> Rigid space units
+translateAlong :: Axis3d space -> Length -> Rigid space
 translateAlong (Axis3d _ direction) distance = translateIn direction distance
 
-rotateAround :: Axis3d space units -> Angle -> Rigid space units
+rotateAround :: Axis3d space -> Angle -> Rigid space
 rotateAround axis angle = do
   let Direction3d dx dy dz = axis.direction
   let halfAngle = 0.5 *. angle
@@ -114,14 +115,14 @@ rotateAround axis angle = do
   let vz = Vector3d (2 *. (xz .+. wy)) (2 *. (yz .-. wx)) (1 -. 2 *. (xx .+. yy))
   withFixedPoint axis.originPoint vx vy vz
 
-scaleAbout :: Point3d space units -> Number -> Uniform space units
+scaleAbout :: Point3d space -> Number -> Uniform space
 scaleAbout point scale = do
   let vx = Vector3d scale 0 0
   let vy = Vector3d 0 scale 0
   let vz = Vector3d 0 0 scale
   withFixedPoint point vx vy vz
 
-scaleAlong :: Axis3d space units -> Number -> Affine space units
+scaleAlong :: Axis3d space -> Number -> Affine space
 scaleAlong axis scale = do
   let d = axis.direction
   let Direction3d dx dy dz = d
@@ -131,7 +132,7 @@ scaleAlong axis scale = do
   let vz = unitZ .+. (scale .- 1) .*. dz .*. d
   withFixedPoint axis.originPoint vx vy vz
 
-mirrorAcross :: Plane3d space units defines -> Orthonormal space units
+mirrorAcross :: Plane3d space defines -> Orthonormal space
 mirrorAcross plane = do
   let PlaneOrientation3d i j = plane.orientation
   let Vector3d nx ny nz = i `cross` j
@@ -146,10 +147,7 @@ mirrorAcross plane = do
   let vz = Vector3d axz ayz azz
   withFixedPoint plane.originPoint vx vy vz
 
-placeIn ::
-  Frame3d global units (Defines local) ->
-  Transform3d tag local units ->
-  Transform3d tag global units
+placeIn :: Frame3d global (Defines local) -> Transform3d tag local -> Transform3d tag global
 placeIn frame transform = do
   let p0 =
         World3d.originPoint
@@ -173,10 +171,7 @@ placeIn frame transform = do
           & Vector3d.placeIn frame
   Transform3d p0 vx vy vz
 
-relativeTo ::
-  Frame3d global units (Defines local) ->
-  Transform3d tag global units ->
-  Transform3d tag local units
+relativeTo :: Frame3d global (Defines local) -> Transform3d tag global -> Transform3d tag local
 relativeTo frame transform = do
   let p0 =
         World3d.originPoint
@@ -200,73 +195,34 @@ relativeTo frame transform = do
           & Vector3d.relativeTo frame
   Transform3d p0 vx vy vz
 
-toOrthonormal ::
-  Transform.IsOrthonormal tag =>
-  Transform3d tag space units ->
-  Orthonormal space units
+toOrthonormal :: Transform.IsOrthonormal tag => Transform3d tag space -> Orthonormal space
 toOrthonormal = Data.Coerce.coerce
 
-toUniform ::
-  Transform.IsUniform tag =>
-  Transform3d tag space units ->
-  Uniform space units
+toUniform :: Transform.IsUniform tag => Transform3d tag space -> Uniform space
 toUniform = Data.Coerce.coerce
 
-toAffine :: Transform3d tag space units -> Affine space units
+toAffine :: Transform3d tag space -> Affine space
 toAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 
-translateByImpl ::
-  (Rigid space units -> a -> b) ->
-  Vector3d space units ->
-  a ->
-  b
+translateByImpl :: (Rigid space -> a -> b) -> Vector3d space Meters -> a -> b
 translateByImpl transformBy vector = transformBy (translateBy vector)
 
-translateInImpl ::
-  (Rigid space units -> a -> b) ->
-  Direction3d space ->
-  Quantity units ->
-  a ->
-  b
+translateInImpl :: (Rigid space -> a -> b) -> Direction3d space -> Length -> a -> b
 translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
 
-translateAlongImpl ::
-  (Rigid space units -> a -> b) ->
-  Axis3d space units ->
-  Quantity units ->
-  a ->
-  b
+translateAlongImpl :: (Rigid space -> a -> b) -> Axis3d space -> Length -> a -> b
 translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
 
-rotateAroundImpl ::
-  (Rigid space units -> a -> b) ->
-  Axis3d space units ->
-  Angle ->
-  a ->
-  b
+rotateAroundImpl :: (Rigid space -> a -> b) -> Axis3d space -> Angle -> a -> b
 rotateAroundImpl transformBy axis angle = transformBy (rotateAround axis angle)
 
-mirrorAcrossImpl ::
-  (Orthonormal space units -> a -> b) ->
-  Plane3d space units defines ->
-  a ->
-  b
+mirrorAcrossImpl :: (Orthonormal space -> a -> b) -> Plane3d space defines -> a -> b
 mirrorAcrossImpl transformBy plane = transformBy (mirrorAcross plane)
 
-scaleAboutImpl ::
-  (Uniform space units -> a -> b) ->
-  Point3d space units ->
-  Number ->
-  a ->
-  b
+scaleAboutImpl :: (Uniform space -> a -> b) -> Point3d space -> Number -> a -> b
 scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
 
-scaleAlongImpl ::
-  (Affine space units -> a -> b) ->
-  Axis3d space units ->
-  Number ->
-  a ->
-  b
+scaleAlongImpl :: (Affine space -> a -> b) -> Axis3d space -> Number -> a -> b
 scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)

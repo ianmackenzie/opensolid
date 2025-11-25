@@ -268,7 +268,7 @@ relativeTo frame (Bounds2d x y) = do
   Bounds2d (Bounds (x0 .-. rx) (x0 .+. rx)) (Bounds (y0 .-. ry) (y0 .+. ry))
 
 placeOn ::
-  Plane3d space Meters (Defines local) ->
+  Plane3d space (Defines local) ->
   Bounds2d local Meters ->
   Bounds3d space
 placeOn plane (Bounds2d x y) = do

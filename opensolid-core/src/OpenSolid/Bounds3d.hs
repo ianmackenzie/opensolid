@@ -87,7 +87,7 @@ coordinates convention bounds =
   )
 
 -- | Construct a zero-size bounding box containing a single point.
-constant :: Point3d space Meters -> Bounds3d space
+constant :: Point3d space -> Bounds3d space
 constant (Position3d p) = PositionBounds3d (VectorBounds3d.constant p)
 
 aggregate2 :: Bounds3d space -> Bounds3d space -> Bounds3d space
@@ -98,7 +98,7 @@ aggregate2 (PositionBounds3d pb1) (PositionBounds3d pb2) =
 aggregateN :: NonEmpty (Bounds3d space) -> Bounds3d space
 aggregateN list = PositionBounds3d (VectorBounds3d.aggregateN (Data.Coerce.coerce list))
 
-centerPoint :: Bounds3d space -> Point3d space Meters
+centerPoint :: Bounds3d space -> Point3d space
 centerPoint (Bounds3d r f u) = Point3d (Bounds.midpoint r) (Bounds.midpoint f) (Bounds.midpoint u)
 
 length :: Bounds3d space -> Length
@@ -110,10 +110,10 @@ width (Bounds3d r _ _) = Bounds.width r
 height :: Bounds3d space -> Length
 height (Bounds3d _ _ u) = Bounds.width u
 
-exclusion :: Point3d space Meters -> Bounds3d space -> Length
+exclusion :: Point3d space -> Bounds3d space -> Length
 exclusion (Position3d p) (PositionBounds3d pb) = VectorBounds3d.exclusion p pb
 
-inclusion :: Point3d space Meters -> Bounds3d space -> Length
+inclusion :: Point3d space -> Bounds3d space -> Length
 inclusion (Position3d p) (PositionBounds3d pb) = VectorBounds3d.inclusion p pb
 
 contains :: Bounds3d space -> Bounds3d space -> Bool
@@ -133,19 +133,14 @@ intersection (PositionBounds3d pb1) (PositionBounds3d pb2) =
   Maybe.map PositionBounds3d (VectorBounds3d.intersection pb1 pb2)
 
 -- | Construct a bounding box from two corner points.
-hull2 :: Point3d space Meters -> Point3d space Meters -> Bounds3d space
+hull2 :: Point3d space -> Point3d space -> Bounds3d space
 hull2 (Position3d p1) (Position3d p2) = PositionBounds3d (VectorBounds3d.hull2 p1 p2)
 
-hull3 :: Point3d space Meters -> Point3d space Meters -> Point3d space Meters -> Bounds3d space
+hull3 :: Point3d space -> Point3d space -> Point3d space -> Bounds3d space
 hull3 (Position3d p1) (Position3d p2) (Position3d p3) =
   PositionBounds3d (VectorBounds3d.hull3 p1 p2 p3)
 
-hull4 ::
-  Point3d space Meters ->
-  Point3d space Meters ->
-  Point3d space Meters ->
-  Point3d space Meters ->
-  Bounds3d space
+hull4 :: Point3d space -> Point3d space -> Point3d space -> Point3d space -> Bounds3d space
 hull4 (Position3d p1) (Position3d p2) (Position3d p3) (Position3d p4) =
   PositionBounds3d (VectorBounds3d.hull4 p1 p2 p3 p4)
 
@@ -158,10 +153,10 @@ hullN vertices = do
 diameter :: Bounds3d space -> Length
 diameter (Bounds3d x y z) = Quantity.hypot3 (Bounds.width x) (Bounds.width y) (Bounds.width z)
 
-interpolate :: Bounds3d space -> Number -> Number -> Number -> Point3d space Meters
+interpolate :: Bounds3d space -> Number -> Number -> Number -> Point3d space
 interpolate (PositionBounds3d pb) u v w = Position3d (VectorBounds3d.interpolate pb u v w)
 
-on :: Plane3d space Meters (Defines local) -> Bounds2d local Meters -> Bounds3d space
+on :: Plane3d space (Defines local) -> Bounds2d local Meters -> Bounds3d space
 on plane bounds2d = do
   let Bounds2d bX bY = bounds2d
   let rX = 0.5 *. Bounds.width bX
@@ -178,7 +173,7 @@ on plane bounds2d = do
   let bU = Bounds (cU .-. rU) (cU .+. rU)
   Bounds3d bR bF bU
 
-placeIn :: Frame3d global Meters (Defines local) -> Bounds3d local -> Bounds3d global
+placeIn :: Frame3d global (Defines local) -> Bounds3d local -> Bounds3d global
 placeIn frame (Bounds3d pR pF pU) = do
   let Frame3d _ (Orientation3d i j k) = frame
   let Direction3d iR iF iU = i
@@ -199,7 +194,7 @@ placeIn frame (Bounds3d pR pF pU) = do
     (Bounds (cF' .-. rF') (cF' .+. rF'))
     (Bounds (cU' .-. rU') (cU' .+. rU'))
 
-relativeTo :: Frame3d global Meters (Defines local) -> Bounds3d global -> Bounds3d local
+relativeTo :: Frame3d global (Defines local) -> Bounds3d global -> Bounds3d local
 relativeTo frame (Bounds3d pR pF pU) = do
   let Frame3d _ (Orientation3d i j k) = frame
   let Direction3d iR iF iU = i
@@ -220,7 +215,7 @@ relativeTo frame (Bounds3d pR pF pU) = do
     (Bounds (cF' .-. rF') (cF' .+. rF'))
     (Bounds (cU' .-. rU') (cU' .+. rU'))
 
-projectInto :: Plane3d global Meters (Defines local) -> Bounds3d global -> Bounds2d local Meters
+projectInto :: Plane3d global (Defines local) -> Bounds3d global -> Bounds2d local Meters
 projectInto plane (Bounds3d pR pF pU) = do
   let Plane3d _ (PlaneOrientation3d i j) = plane
   let Direction3d iR iF iU = i
@@ -238,7 +233,7 @@ projectInto plane (Bounds3d pR pF pU) = do
     (Bounds (cX .-. rX) (cX .+. rX))
     (Bounds (cY .-. rY) (cY .+. rY))
 
-distanceAlong :: Axis3d space Meters -> Bounds3d space -> Bounds Meters
+distanceAlong :: Axis3d space -> Bounds3d space -> Bounds Meters
 distanceAlong axis bounds = do
   let Axis3d _ (Direction3d dR dF dU) = axis
   let mid = Point3d.distanceAlong axis (centerPoint bounds)
@@ -248,7 +243,7 @@ distanceAlong axis bounds = do
   let radius = rR .*. Number.abs dR .+. rF .*. Number.abs dF .+. rU .*. Number.abs dU
   Bounds (mid .-. radius) (mid .+. radius)
 
-transformBy :: Transform3d tag space Meters -> Bounds3d space -> Bounds3d space
+transformBy :: Transform3d tag space -> Bounds3d space -> Bounds3d space
 transformBy transform (Bounds3d pR pF pU) = do
   let cR = Bounds.midpoint pR
   let cF = Bounds.midpoint pF

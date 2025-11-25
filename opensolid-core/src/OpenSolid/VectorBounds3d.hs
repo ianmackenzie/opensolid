@@ -50,7 +50,6 @@ import OpenSolid.Bounds qualified as Bounds
 import {-# SOURCE #-} OpenSolid.DirectionBounds3d (DirectionBounds3d)
 import {-# SOURCE #-} OpenSolid.DirectionBounds3d qualified as DirectionBounds3d
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
@@ -70,6 +69,7 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.World3d qualified as World3d
 
 constant :: Vector3d space units -> VectorBounds3d space units
 constant (Vector3d x y z) =
@@ -350,10 +350,7 @@ interpolate ::
 interpolate (VectorBounds3d x y z) u v w =
   Vector3d (Bounds.interpolate x u) (Bounds.interpolate y v) (Bounds.interpolate z w)
 
-on ::
-  Plane3d space planeUnits (Defines local) ->
-  VectorBounds2d local units ->
-  VectorBounds3d space units
+on :: Plane3d space (Defines local) -> VectorBounds2d local units -> VectorBounds3d space units
 on plane bounds2d = do
   let VectorBounds2d bX bY = bounds2d
   let cX = Bounds.midpoint bX
@@ -373,7 +370,7 @@ on plane bounds2d = do
   VectorBounds3d bR bF bU
 
 placeIn ::
-  Frame3d global frameUnits (Defines local) ->
+  Frame3d global (Defines local) ->
   VectorBounds3d local units ->
   VectorBounds3d global units
 placeIn frame (VectorBounds3d vR vF vU) = do
@@ -396,7 +393,7 @@ placeIn frame (VectorBounds3d vR vF vU) = do
     (Bounds (cU' .-. rU') (cU' .+. rU'))
 
 relativeTo ::
-  Frame3d global frameUnits (Defines local) ->
+  Frame3d global (Defines local) ->
   VectorBounds3d global units ->
   VectorBounds3d local units
 relativeTo frame (VectorBounds3d vR vF vU) = do
@@ -418,10 +415,7 @@ relativeTo frame (VectorBounds3d vR vF vU) = do
     (Bounds (cF' .-. rF') (cF' .+. rF'))
     (Bounds (cU' .-. rU') (cU' .+. rU'))
 
-transformBy ::
-  Transform3d tag space units1 ->
-  VectorBounds3d space units2 ->
-  VectorBounds3d space units2
+transformBy :: Transform3d tag space -> VectorBounds3d space units -> VectorBounds3d space units
 transformBy transform (VectorBounds3d vR vF vU) = do
   let cR = Bounds.midpoint vR
   let cF = Bounds.midpoint vF
@@ -447,13 +441,9 @@ rotateIn ::
   Angle ->
   VectorBounds3d space units ->
   VectorBounds3d space units
-rotateIn axisDirection = rotateAround (Axis3d Point3d.dummy axisDirection)
+rotateIn axisDirection = rotateAround (Axis3d World3d.originPoint axisDirection)
 
-rotateAround ::
-  Axis3d space axisUnits ->
-  Angle ->
-  VectorBounds3d space units ->
-  VectorBounds3d space units
+rotateAround :: Axis3d space -> Angle -> VectorBounds3d space units -> VectorBounds3d space units
 rotateAround = Transform3d.rotateAroundImpl transformBy
 
 tripleProduct ::

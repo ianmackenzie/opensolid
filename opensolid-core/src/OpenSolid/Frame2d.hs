@@ -91,10 +91,7 @@ relativeTo globalFrame frame =
     (Point2d.relativeTo globalFrame (originPoint frame))
     (Orientation2d.relativeTo globalFrame (orientation frame))
 
-placeOn ::
-  Plane3d space units (Defines local) ->
-  Frame2d local units defines ->
-  Plane3d space units defines
+placeOn :: Plane3d space (Defines local) -> Frame2d local Meters defines -> Plane3d space defines
 placeOn plane (Frame2d p0 (Orientation2d i j)) =
   Plane3d (Point2d.placeOn plane p0) $
     PlaneOrientation3d (Direction2d.placeOn plane i) (Direction2d.placeOn plane j)

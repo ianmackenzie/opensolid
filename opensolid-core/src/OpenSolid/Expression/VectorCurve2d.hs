@@ -63,7 +63,7 @@ transformBy ::
 transformBy = Expression.transformBy
 
 placeOn ::
-  Plane3d space planeUnits (Defines local) ->
+  Plane3d space (Defines local) ->
   Expression Number (Vector2d local units) ->
   Expression Number (Vector3d space units)
 placeOn = Expression.on

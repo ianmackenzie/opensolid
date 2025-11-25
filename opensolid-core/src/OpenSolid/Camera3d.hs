@@ -51,12 +51,12 @@ data ScreenSpace
 
 -- | A perspective or orthographic camera in 3D.
 data Camera3d space = Camera3d
-  { frame :: Frame3d space Meters (Defines CameraSpace)
+  { frame :: Frame3d space (Defines CameraSpace)
   , focalDistance :: Length
   , projection :: Projection
   }
 
-instance HasField "eyePoint" (Camera3d space) (Point3d space Meters) where
+instance HasField "eyePoint" (Camera3d space) (Point3d space) where
   getField camera = camera.frame.originPoint
 
 instance HasField "forwardDirection" (Camera3d space) (Direction3d space) where
@@ -77,14 +77,14 @@ instance HasField "upwardDirection" (Camera3d space) (Direction3d space) where
 instance HasField "downwardDirection" (Camera3d space) (Direction3d space) where
   getField camera = camera.frame.downwardDirection
 
-instance HasField "focalPoint" (Camera3d space) (Point3d space Meters) where
+instance HasField "focalPoint" (Camera3d space) (Point3d space) where
   getField camera = camera.eyePoint .+. camera.focalDistance .*. camera.forwardDirection
 
 instance
   HasField
     "viewPlane"
     (Camera3d space)
-    (Plane3d space Meters (Defines ScreenSpace))
+    (Plane3d space (Defines ScreenSpace))
   where
   getField camera = Frame3d.backPlane camera.frame
 
@@ -107,7 +107,7 @@ perspective (Named verticalFov) = Perspective verticalFov
 orthographic :: "viewportHeight" ::: Length -> Projection
 orthographic (Named viewportHeight) = Orthographic viewportHeight
 
-new :: Frame3d space Meters (Defines CameraSpace) -> Length -> Projection -> Camera3d space
+new :: Frame3d space (Defines CameraSpace) -> Length -> Projection -> Camera3d space
 new givenFrame givenFocalDistance projection =
   Camera3d
     { frame = givenFrame
@@ -121,8 +121,8 @@ The camera will be oriented such that its local up direction
 will be as close as possible to the global up direction.
 -}
 lookAt ::
-  "eyePoint" ::: Point3d space Meters ->
-  "focalPoint" ::: Point3d space Meters ->
+  "eyePoint" ::: Point3d space ->
+  "focalPoint" ::: Point3d space ->
   "projection" ::: Projection ->
   Camera3d space
 lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
@@ -154,7 +154,7 @@ The elevation is the vertical angle towards the camera from the focal point,
 measure upwards from the global top plane.
 -}
 orbit ::
-  "focalPoint" ::: Point3d space Meters ->
+  "focalPoint" ::: Point3d space ->
   "azimuth" ::: Angle ->
   "elevation" ::: Angle ->
   "distance" ::: Length ->
@@ -171,7 +171,7 @@ orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Nam
 isometricElevation :: Angle
 isometricElevation = Angle.atan2 1 (Number.sqrt 2)
 
-isometric :: Point3d space Meters -> Length -> Projection -> Camera3d space
+isometric :: Point3d space -> Length -> Projection -> Camera3d space
 isometric givenFocalPoint distance givenProjection =
   orbit
     (#focalPoint givenFocalPoint)
@@ -180,18 +180,18 @@ isometric givenFocalPoint distance givenProjection =
     (#distance distance)
     (#projection givenProjection)
 
-moveTo :: Point3d space Meters -> Camera3d space -> Camera3d space
+moveTo :: Point3d space -> Camera3d space -> Camera3d space
 moveTo newEyePoint Camera3d{frame, focalDistance, projection} =
   Camera3d{frame = Frame3d.moveTo newEyePoint frame, focalDistance, projection}
 
-placeIn :: Frame3d global Meters (Defines local) -> Camera3d local -> Camera3d global
+placeIn :: Frame3d global (Defines local) -> Camera3d local -> Camera3d global
 placeIn givenFrame Camera3d{frame, focalDistance, projection} =
   Camera3d{frame = Frame3d.placeIn givenFrame frame, focalDistance, projection}
 
-relativeTo :: Frame3d global Meters (Defines local) -> Camera3d global -> Camera3d local
+relativeTo :: Frame3d global (Defines local) -> Camera3d global -> Camera3d local
 relativeTo givenFrame = placeIn (Frame3d.inverse givenFrame)
 
-transformBy :: Transform3d.Rigid space Meters -> Camera3d space -> Camera3d space
+transformBy :: Transform3d.Rigid space -> Camera3d space -> Camera3d space
 transformBy transform Camera3d{frame, focalDistance, projection} =
   Camera3d{frame = Frame3d.transformBy transform frame, focalDistance, projection}
 
@@ -201,8 +201,8 @@ translateBy = Transform3d.translateByImpl transformBy
 translateIn :: Direction3d space -> Length -> Camera3d space -> Camera3d space
 translateIn = Transform3d.translateInImpl transformBy
 
-translateAlong :: Axis3d space Meters -> Length -> Camera3d space -> Camera3d space
+translateAlong :: Axis3d space -> Length -> Camera3d space -> Camera3d space
 translateAlong = Transform3d.translateAlongImpl transformBy
 
-rotateAround :: Axis3d space Meters -> Angle -> Camera3d space -> Camera3d space
+rotateAround :: Axis3d space -> Angle -> Camera3d space -> Camera3d space
 rotateAround = Transform3d.rotateAroundImpl transformBy

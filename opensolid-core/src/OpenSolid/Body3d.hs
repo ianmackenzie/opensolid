@@ -122,7 +122,7 @@ newtype SurfaceId = SurfaceId Int deriving (Eq, Ord, Show)
 data Edge space where
   PrimaryEdge ::
     { halfEdgeId :: HalfEdgeId
-    , startPoint :: Point3d space Meters
+    , startPoint :: Point3d space
     , uvCurve :: Curve2d UvSpace Unitless
     , curve3d :: Curve3d space
     , matingId :: HalfEdgeId
@@ -132,13 +132,13 @@ data Edge space where
     Edge space
   SecondaryEdge ::
     { halfEdgeId :: HalfEdgeId
-    , startPoint :: Point3d space Meters
+    , startPoint :: Point3d space
     , uvStartPoint :: UvPoint
     } ->
     Edge space
   DegenerateEdge ::
     { halfEdgeId :: HalfEdgeId
-    , point :: Point3d space Meters
+    , point :: Point3d space
     , uvCurve :: Curve2d UvSpace Unitless
     } ->
     Edge space
@@ -175,7 +175,7 @@ data HalfEdge space where
   DegenerateHalfEdge ::
     { halfEdgeId :: HalfEdgeId
     , uvCurve :: Curve2d UvSpace Unitless
-    , point :: Point3d space Meters
+    , point :: Point3d space
     } ->
     HalfEdge space
 
@@ -197,7 +197,7 @@ data SurfaceRegistry space = SurfaceRegistry
 
 data Corner space = Corner
   { surfaceId :: SurfaceId
-  , point :: Point3d space Meters
+  , point :: Point3d space
   }
 
 instance Bounded3d (Corner space) space where
@@ -229,7 +229,7 @@ Fails if the diameter is zero.
 -}
 sphere ::
   Tolerance Meters =>
-  "centerPoint" ::: Point3d space Meters ->
+  "centerPoint" ::: Point3d space ->
   "diameter" ::: Length ->
   Result EmptyBody (Body3d space)
 sphere (Named centerPoint) (Named diameter) =
@@ -255,8 +255,8 @@ Fails if the cylinder length or diameter is zero.
 -}
 cylinder ::
   Tolerance Meters =>
-  Point3d space Meters ->
-  Point3d space Meters ->
+  Point3d space ->
+  Point3d space ->
   "diameter" ::: Length ->
   Result EmptyBody (Body3d space)
 cylinder startPoint endPoint (Named diameter) =
@@ -277,7 +277,7 @@ Failes if the cylinder length or diameter is zero.
 -}
 cylinderAlong ::
   Tolerance Meters =>
-  Axis3d space Meters ->
+  Axis3d space ->
   Length ->
   Length ->
   "diameter" ::: Length ->
@@ -295,7 +295,7 @@ cylinderAlong axis d1 d2 (Named diameter) = do
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
   Tolerance Meters =>
-  Plane3d space Meters (Defines local) ->
+  Plane3d space (Defines local) ->
   Region2d local Meters ->
   Length ->
   Length ->
@@ -308,7 +308,7 @@ extruded sketchPlane profile d1 d2 = do
 
 translational ::
   Tolerance Meters =>
-  Plane3d space Meters (Defines local) ->
+  Plane3d space (Defines local) ->
   Region2d local Meters ->
   VectorCurve3d space Meters ->
   Result BoundedBy.Error (Body3d space)
@@ -336,7 +336,7 @@ and a negative angle will result in a clockwise revolution.
 -}
 revolved ::
   Tolerance Meters =>
-  Plane3d space Meters (Defines local) ->
+  Plane3d space (Defines local) ->
   Region2d local Meters ->
   Axis2d local Meters ->
   Angle ->
@@ -574,14 +574,14 @@ getHalfEdgeId DegenerateHalfEdge{halfEdgeId} = halfEdgeId
 cornerSurfaceId :: Corner space -> SurfaceId
 cornerSurfaceId Corner{surfaceId} = surfaceId
 
-cornerPoint :: Corner space -> Point3d space Meters
+cornerPoint :: Corner space -> Point3d space
 cornerPoint Corner{point} = point
 
 getCornerPoint ::
   Tolerance Meters =>
-  Point3d space Meters ->
+  Point3d space ->
   Set3d (Corner space) space ->
-  Result BoundedBy.Error (Point3d space Meters)
+  Result BoundedBy.Error (Point3d space)
 getCornerPoint searchPoint cornerSet =
   case Set3d.filter (Bounds3d.constant searchPoint) cornerSet of
     [] -> throw (InternalError "getCorner should always find at least one corner (the given point itself)")
@@ -608,7 +608,7 @@ toMatingEdge id1 curve1 HalfEdge{halfEdgeId = id2, curve3d = curve2, uvCurve}
 
 ----- MESHING -----
 
-data Vertex space = Vertex UvPoint (Point3d space Meters)
+data Vertex space = Vertex UvPoint (Point3d space)
 
 deriving instance Eq (Vertex space)
 
@@ -625,7 +625,7 @@ toMesh ::
   Tolerance Meters =>
   Resolution Meters ->
   Body3d space ->
-  Mesh (Point3d space Meters, Direction3d space)
+  Mesh (Point3d space, Direction3d space)
 toMesh resolution (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
   let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments resolution) boundarySurfaceList
@@ -829,7 +829,7 @@ boundarySurfaceMesh ::
   Map SurfaceId (Set2d UvBounds UvSpace Unitless) ->
   Map HalfEdgeId (List (Vertex space)) ->
   BoundarySurface space ->
-  Mesh (Point3d space Meters, Direction3d space)
+  Mesh (Point3d space, Direction3d space)
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
   let BoundarySurface{surfaceId, surfaceFunction, handedness, edgeLoops} = boundarySurface
   case SurfaceFunction3d.normalDirection surfaceFunction of
@@ -869,7 +869,7 @@ pointAndNormal ::
   DirectionSurfaceFunction3d space ->
   Sign ->
   Vertex space ->
-  (Point3d space Meters, Direction3d space)
+  (Point3d space, Direction3d space)
 pointAndNormal n handedness (Vertex uvPoint point) =
   (point, handedness .*. DirectionSurfaceFunction3d.evaluate n uvPoint)
 
@@ -895,7 +895,7 @@ leadingEdgeVertices innerEdgeVerticesById edge = case edge of
 leadingEdgeVerticesImpl ::
   Map HalfEdgeId (List (Vertex space)) ->
   HalfEdgeId ->
-  Point3d space Meters ->
+  Point3d space ->
   UvPoint ->
   NonEmpty (Vertex space)
 leadingEdgeVerticesImpl innerEdgeVerticesById edgeId startPoint uvStartPoint =
@@ -924,15 +924,12 @@ surfaces :: Body3d space -> NonEmpty (Surface3d space)
 surfaces (Body3d boundarySurfaces) = NonEmpty.map (.orientedSurface) boundarySurfaces
 
 -- | Convert a body defined in local coordinates to one defined in global coordinates.
-placeIn ::
-  Frame3d global Meters (Defines local) ->
-  Body3d local ->
-  Body3d global
+placeIn :: Frame3d global (Defines local) -> Body3d local -> Body3d global
 placeIn frame (Body3d boundarySurfaces) =
   Body3d (NonEmpty.map (placeBoundarySurfaceIn frame) boundarySurfaces)
 
 placeBoundarySurfaceIn ::
-  Frame3d global Meters (Defines local) ->
+  Frame3d global (Defines local) ->
   BoundarySurface local ->
   BoundarySurface global
 placeBoundarySurfaceIn frame boundarySurface = do
@@ -953,7 +950,7 @@ placeBoundarySurfaceIn frame boundarySurface = do
     , edgeLoops = NonEmpty.map (NonEmpty.map (placeEdgeIn frame)) edgeLoops
     }
 
-placeEdgeIn :: Frame3d global Meters (Defines local) -> Edge local -> Edge global
+placeEdgeIn :: Frame3d global (Defines local) -> Edge local -> Edge global
 placeEdgeIn frame edge = case edge of
   PrimaryEdge
     { halfEdgeId
@@ -979,5 +976,5 @@ placeEdgeIn frame edge = case edge of
     DegenerateEdge{halfEdgeId, point = Point3d.placeIn frame point, uvCurve}
 
 -- | Convert a body defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global Meters (Defines local) -> Body3d global -> Body3d local
+relativeTo :: Frame3d global (Defines local) -> Body3d global -> Body3d local
 relativeTo frame body = placeIn (Frame3d.inverse frame) body

@@ -112,7 +112,7 @@ normalDirection = (.normalDirection)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
-  Transform3d tag space translationUnits ->
+  Transform3d tag space ->
   PlaneOrientation3d space ->
   PlaneOrientation3d space
 transformBy transform (PlaneOrientation3d i j) =
@@ -121,20 +121,14 @@ transformBy transform (PlaneOrientation3d i j) =
     (Direction3d.transformBy transform j)
 
 -- | Convert a orientation defined in local coordinates to one defined in global coordinates.
-placeIn ::
-  Frame3d global frameUnits (Defines local) ->
-  PlaneOrientation3d local ->
-  PlaneOrientation3d global
+placeIn :: Frame3d global (Defines local) -> PlaneOrientation3d local -> PlaneOrientation3d global
 placeIn globalOrientation (PlaneOrientation3d i j) =
   PlaneOrientation3d
     (Direction3d.placeIn globalOrientation i)
     (Direction3d.placeIn globalOrientation j)
 
 -- | Convert a orientation defined in global coordinates to one defined in local coordinates.
-relativeTo ::
-  Frame3d global frameUnits (Defines local) ->
-  PlaneOrientation3d global ->
-  PlaneOrientation3d local
+relativeTo :: Frame3d global (Defines local) -> PlaneOrientation3d global -> PlaneOrientation3d local
 relativeTo globalOrientation (PlaneOrientation3d i j) =
   PlaneOrientation3d
     (Direction3d.relativeTo globalOrientation i)

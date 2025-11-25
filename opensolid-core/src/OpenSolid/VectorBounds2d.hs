@@ -330,7 +330,7 @@ relativeToOrientation orientation (VectorBounds2d x y) = do
   VectorBounds2d (Bounds (x0 .-. rx) (x0 .+. rx)) (Bounds (y0 .-. ry) (y0 .+. ry))
 
 placeOn ::
-  Plane3d global frameUnits (Defines local) ->
+  Plane3d global (Defines local) ->
   VectorBounds2d local units ->
   VectorBounds3d global units
 placeOn plane = placeOnOrientation plane.orientation

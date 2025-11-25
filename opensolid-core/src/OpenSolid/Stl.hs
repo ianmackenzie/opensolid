@@ -67,7 +67,7 @@ vectorBuilder convention vector = do
   let (x, y, z) = Vector3d.components convention vector
   numberBuilder x <> numberBuilder y <> numberBuilder z
 
-pointBuilder :: Convention3d -> (Quantity units -> Number) -> Point3d space units -> Builder
+pointBuilder :: Convention3d -> (Length -> Number) -> Point3d space -> Builder
 pointBuilder convention units point = do
   let (x, y, z) = Point3d.coordinates convention point
   numberBuilder (units x) <> numberBuilder (units y) <> numberBuilder (units z)
@@ -113,7 +113,7 @@ triangleText convention units (v0, v1, v2) = do
     , "endfacet"
     ]
 
-pointText :: Convention3d -> (Quantity units -> Number) -> Point3d space units -> Text
+pointText :: Convention3d -> (Length -> Number) -> Point3d space -> Text
 pointText convention units point = do
   let (px, py, pz) = Point3d.coordinates convention point
   Text.join " " ["vertex", Text.number (units px), Text.number (units py), Text.number (units pz)]

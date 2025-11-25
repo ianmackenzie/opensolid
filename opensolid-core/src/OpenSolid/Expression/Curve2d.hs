@@ -39,9 +39,9 @@ relativeTo ::
 relativeTo = Expression.relativeTo
 
 placeOn ::
-  Plane3d global units (Defines local) ->
-  Expression Number (Point2d local units) ->
-  Expression Number (Point3d global units)
+  Plane3d global (Defines local) ->
+  Expression Number (Point2d local Meters) ->
+  Expression Number (Point3d global)
 placeOn = Expression.on
 
 transformBy ::

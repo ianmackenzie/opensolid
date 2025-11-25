@@ -93,10 +93,7 @@ instance
 
 constant :: Vector3d space units -> VectorCurve3d space units
 new :: Compiled space units -> VectorCurve3d space units -> VectorCurve3d space units
-on ::
-  Plane3d space planeUnits (Defines local) ->
-  VectorCurve2d local units ->
-  VectorCurve3d space units
+on :: Plane3d space (Defines local) -> VectorCurve2d local units -> VectorCurve3d space units
 evaluate :: VectorCurve3d space units -> Number -> Vector3d space units
 evaluateBounds :: VectorCurve3d space units -> Bounds Unitless -> VectorBounds3d space units
 quotient ::
@@ -119,7 +116,4 @@ unsafeQuotient_ ::
   Curve units2 ->
   VectorCurve3d space (units1 ?/? units2)
 magnitude :: Tolerance units => VectorCurve3d space units -> Curve units
-transformBy ::
-  Transform3d tag space translationUnits ->
-  VectorCurve3d space units ->
-  VectorCurve3d space units
+transformBy :: Transform3d tag space -> VectorCurve3d space units -> VectorCurve3d space units

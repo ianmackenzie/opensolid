@@ -798,10 +798,7 @@ relativeTo ::
   Curve2d local units
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
-placeOn ::
-  Plane3d space Meters (Defines local) ->
-  Curve2d local Meters ->
-  Curve3d space
+placeOn :: Plane3d space (Defines local) -> Curve2d local Meters -> Curve3d space
 placeOn plane curve = Curve3d.on plane curve
 
 transformBy ::

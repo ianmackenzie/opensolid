@@ -188,17 +188,12 @@ relativeToOrientation orientation = lift (Vector2d.relativeToOrientation orienta
 Given a 2D direction defined within a plane's coordinate system,
 this returns the corresponding 3D direction.
 -}
-placeOn ::
-  Plane3d global planeUnits (Defines local) ->
-  Direction2d local ->
-  Direction3d global
+placeOn :: Plane3d global (Defines local) -> Direction2d local -> Direction3d global
 placeOn plane = placeOnOrientation plane.orientation
 
-placeOnOrientation ::
-  PlaneOrientation3d global ->
-  Direction2d local ->
-  Direction3d global
-placeOnOrientation orientation (Unit2d vector) = Unit3d (Vector2d.placeOnOrientation orientation vector)
+placeOnOrientation :: PlaneOrientation3d global -> Direction2d local -> Direction3d global
+placeOnOrientation orientation (Unit2d vector) =
+  Unit3d (Vector2d.placeOnOrientation orientation vector)
 
 random :: Random.Generator (Direction2d space)
 random = Random.map fromAngle (Quantity.random (negative Angle.pi) Angle.pi)

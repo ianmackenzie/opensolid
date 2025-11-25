@@ -33,6 +33,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
+import OpenSolid.Length (Length)
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
@@ -1410,56 +1411,50 @@ instance HasField "downwardOrientation" (Orientation3d space) (Orientation3d spa
 
 ----- Point3d -----
 
-type role Point3d phantom phantom
+type role Point3d phantom
 
-newtype Point3d space units = Position3d (Vector3d space units)
+newtype Point3d space = Position3d (Vector3d space Meters)
 
 {-# COMPLETE Point3d #-}
 
 {-# INLINE Point3d #-}
 
 -- | Construct a point from its X and Y coordinates.
-pattern Point3d :: Quantity units -> Quantity units -> Quantity units -> Point3d space units
+pattern Point3d :: Length -> Length -> Length -> Point3d space
 pattern Point3d px py pz <- Position3d (Vector3d px py pz)
   where
     Point3d px py pz = Position3d (Vector3d px py pz)
 
-deriving instance Eq (Point3d space units)
+deriving instance Eq (Point3d space)
 
-deriving instance Ord (Point3d space units)
+deriving instance Ord (Point3d space)
 
-deriving instance Show (Point3d space units)
+deriving instance Show (Point3d space)
 
-instance FFI (Point3d FFI.Space Meters) where
+instance FFI (Point3d FFI.Space) where
   representation = FFI.classRepresentation "Point3d"
 
-instance HasUnits (Point3d space units) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (Point3d space1 unitsA) (Point3d space2 unitsB)
-  where
-  coerce = Data.Coerce.coerce
+instance HasUnits (Point3d space) Meters
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
   Addition
-    (Point3d space1 units1)
-    (Vector3d space2 units2)
-    (Point3d space1 units1)
+    (Point3d space1)
+    (Vector3d space2 meters)
+    (Point3d space1)
   where
   Position3d p .+. v = Position3d (p .+. v)
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
   Subtraction
-    (Point3d space1 units1)
-    (Vector3d space2 units2)
-    (Point3d space1 units1)
+    (Point3d space1)
+    (Vector3d space2 meters)
+    (Point3d space1)
   where
   Position3d p .-. v = Position3d (p .-. v)
 
@@ -1468,37 +1463,35 @@ instance
   , units1 ~ units2
   ) =>
   Subtraction
-    (Point3d space1 units1)
-    (Point3d space2 units2)
-    (Vector3d space1 units1)
+    (Point3d space1)
+    (Point3d space2)
+    (Vector3d space1 Meters)
   where
   Position3d p1 .-. Position3d p2 = p1 .-. p2
 
 instance
   ( space1 ~ space2
-  , meters1 ~ Meters
-  , meters2 ~ Meters
+  , meters ~ Meters
   ) =>
   Addition
-    (Point3d space1 meters1)
-    (VectorBounds3d space2 meters2)
+    (Point3d space1)
+    (VectorBounds3d space2 meters)
     (Bounds3d space1)
   where
   Position3d p .+. vb = PositionBounds3d (p .+. vb)
 
 instance
   ( space1 ~ space2
-  , meters1 ~ Meters
-  , meters2 ~ Meters
+  , meters ~ Meters
   ) =>
   Subtraction
-    (Point3d space1 meters1)
-    (VectorBounds3d space2 meters2)
+    (Point3d space1)
+    (VectorBounds3d space2 meters)
     (Bounds3d space1)
   where
   Position3d p .-. vb = PositionBounds3d (p .-. vb)
 
-instance ApproximateEquality (Point3d space units) units where
+instance ApproximateEquality (Point3d space) Meters where
   Position3d p1 ~= Position3d p2 = p1 ~= p2
 
 ----- VectorBounds3d -----
@@ -2010,23 +2003,19 @@ instance
   PositionBounds3d pb .-. vb = PositionBounds3d (pb .-. vb)
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Subtraction
-    (Point3d space1 meters)
+    (Point3d space1)
     (Bounds3d space2)
     (VectorBounds3d space1 Meters)
   where
   Position3d p .-. PositionBounds3d pb = p .-. pb
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Subtraction
     (Bounds3d space1)
-    (Point3d space2 meters)
+    (Point3d space2)
     (VectorBounds3d space1 Meters)
   where
   PositionBounds3d pb .-. Position3d p = pb .-. p
@@ -2041,18 +2030,14 @@ instance
   PositionBounds3d pb1 .-. PositionBounds3d pb2 = pb1 .-. pb2
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
-  Intersects (Point3d space1 meters) (Bounds3d space2) Meters
+  space1 ~ space2 =>
+  Intersects (Point3d space1) (Bounds3d space2) Meters
   where
   Position3d p `intersects` PositionBounds3d pb = p `intersects` pb
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
-  Intersects (Bounds3d space1) (Point3d space2 meters) Meters
+  space1 ~ space2 =>
+  Intersects (Bounds3d space1) (Point3d space2) Meters
   where
   box `intersects` point = point `intersects` box
 
@@ -2064,277 +2049,166 @@ instance
 
 ----- Axis3d -----
 
-type role Axis3d phantom phantom
+type role Axis3d phantom
 
 -- | An axis in 3D, defined by an origin point and direction.
-data Axis3d space units
+data Axis3d space
   = -- | Construct an axis from its origin point and direction.
-    Axis3d (Point3d space units) (Direction3d space)
+    Axis3d (Point3d space) (Direction3d space)
 
-instance HasField "originPoint" (Axis3d space units) (Point3d space units) where
+instance HasField "originPoint" (Axis3d space) (Point3d space) where
   getField (Axis3d p _) = p
 
-instance HasField "direction" (Axis3d space units) (Direction3d space) where
+instance HasField "direction" (Axis3d space) (Direction3d space) where
   getField (Axis3d _ d) = d
 
-deriving instance Eq (Axis3d space units)
+deriving instance Eq (Axis3d space)
 
-deriving instance Show (Axis3d space units)
+deriving instance Show (Axis3d space)
 
-instance FFI (Axis3d FFI.Space Meters) where
+instance FFI (Axis3d FFI.Space) where
   representation = FFI.classRepresentation "Axis3d"
 
 ----- Plane3d -----
 
-type role Plane3d phantom phantom phantom
+type role Plane3d phantom phantom
 
-type Plane3d :: Type -> Type -> LocalSpace -> Type
+type Plane3d :: Type -> LocalSpace -> Type
 
 {-| A plane in 3D, defined by an origin point and two perpendicular X and Y directions.
 
 The normal direction  of the plane is then defined as
 the cross product of its X and Y directions.
 -}
-data Plane3d space units defines = Plane3d (Point3d space units) (PlaneOrientation3d space)
+data Plane3d space defines = Plane3d (Point3d space) (PlaneOrientation3d space)
 
-deriving instance Eq (Plane3d space units defines)
+deriving instance Eq (Plane3d space defines)
 
-deriving instance Ord (Plane3d space units defines)
+deriving instance Ord (Plane3d space defines)
 
-deriving instance Show (Plane3d space units defines)
+deriving instance Show (Plane3d space defines)
 
-instance FFI (Plane3d FFI.Space Meters defines) where
+instance FFI (Plane3d FFI.Space defines) where
   representation = FFI.classRepresentation "Plane3d"
 
-instance
-  HasField
-    "originPoint"
-    (Plane3d space units defines)
-    (Point3d space units)
-  where
+instance HasField "originPoint" (Plane3d space defines) (Point3d space) where
   getField (Plane3d p _) = p
 
-instance HasField "orientation" (Plane3d space units defines) (PlaneOrientation3d space) where
+instance HasField "orientation" (Plane3d space defines) (PlaneOrientation3d space) where
   getField (Plane3d _ o) = o
 
-instance HasField "xDirection" (Plane3d space units defines) (Direction3d space) where
+instance HasField "xDirection" (Plane3d space defines) (Direction3d space) where
   getField = (.orientation.xDirection)
 
-instance HasField "yDirection" (Plane3d space units defines) (Direction3d space) where
+instance HasField "yDirection" (Plane3d space defines) (Direction3d space) where
   getField = (.orientation.yDirection)
 
-instance HasField "normalDirection" (Plane3d space units defines) (Direction3d space) where
+instance HasField "normalDirection" (Plane3d space defines) (Direction3d space) where
   getField = (.orientation.normalDirection)
 
-instance HasField "xAxis" (Plane3d space units defines) (Axis3d space units) where
+instance HasField "xAxis" (Plane3d space defines) (Axis3d space) where
   getField plane = Axis3d plane.originPoint plane.xDirection
 
-instance HasField "yAxis" (Plane3d space units defines) (Axis3d space units) where
+instance HasField "yAxis" (Plane3d space defines) (Axis3d space) where
   getField plane = Axis3d plane.originPoint plane.yDirection
 
-instance HasField "normalAxis" (Plane3d space units defines) (Axis3d space units) where
+instance HasField "normalAxis" (Plane3d space defines) (Axis3d space) where
   getField plane = Axis3d plane.originPoint plane.normalDirection
 
 ----- Frame3d -----
 
-type role Frame3d phantom phantom phantom
+type role Frame3d phantom phantom
 
 -- | A frame of reference in 3D, defined by an origin point and orientation.
-type Frame3d :: Type -> Type -> LocalSpace -> Type
-data Frame3d space units defines = Frame3d (Point3d space units) (Orientation3d space)
+type Frame3d :: Type -> LocalSpace -> Type
+data Frame3d space defines = Frame3d (Point3d space) (Orientation3d space)
 
-instance
-  HasField
-    "originPoint"
-    (Frame3d space units defines)
-    (Point3d space units)
-  where
+instance HasField "originPoint" (Frame3d space defines) (Point3d space) where
   getField (Frame3d p _) = p
 
-instance HasField "orientation" (Frame3d space units defines) (Orientation3d space) where
+instance HasField "orientation" (Frame3d space defines) (Orientation3d space) where
   getField (Frame3d _ o) = o
 
-instance
-  HasField
-    "rightwardDirection"
-    (Frame3d space units defines)
-    (Direction3d space)
-  where
+instance HasField "rightwardDirection" (Frame3d space defines) (Direction3d space) where
   getField = (.orientation.rightwardDirection)
 
-instance
-  HasField
-    "leftwardDirection"
-    (Frame3d space units defines)
-    (Direction3d space)
-  where
+instance HasField "leftwardDirection" (Frame3d space defines) (Direction3d space) where
   getField = (.orientation.leftwardDirection)
 
-instance
-  HasField
-    "forwardDirection"
-    (Frame3d space units defines)
-    (Direction3d space)
-  where
+instance HasField "forwardDirection" (Frame3d space defines) (Direction3d space) where
   getField = (.orientation.forwardDirection)
 
-instance
-  HasField
-    "backwardDirection"
-    (Frame3d space units defines)
-    (Direction3d space)
-  where
+instance HasField "backwardDirection" (Frame3d space defines) (Direction3d space) where
   getField = (.orientation.backwardDirection)
 
-instance
-  HasField
-    "upwardDirection"
-    (Frame3d space units defines)
-    (Direction3d space)
-  where
+instance HasField "upwardDirection" (Frame3d space defines) (Direction3d space) where
   getField = (.orientation.upwardDirection)
 
-instance
-  HasField
-    "downwardDirection"
-    (Frame3d space units defines)
-    (Direction3d space)
-  where
+instance HasField "downwardDirection" (Frame3d space defines) (Direction3d space) where
   getField = (.orientation.downwardDirection)
 
-instance
-  HasField
-    "rightwardAxis"
-    (Frame3d space units defines)
-    (Axis3d space units)
-  where
+instance HasField "rightwardAxis" (Frame3d space defines) (Axis3d space) where
   getField frame = Axis3d frame.originPoint frame.rightwardDirection
 
-instance
-  HasField
-    "leftwardAxis"
-    (Frame3d space units defines)
-    (Axis3d space units)
-  where
+instance HasField "leftwardAxis" (Frame3d space defines) (Axis3d space) where
   getField frame = Axis3d frame.originPoint frame.leftwardDirection
 
-instance
-  HasField
-    "forwardAxis"
-    (Frame3d space units defines)
-    (Axis3d space units)
-  where
+instance HasField "forwardAxis" (Frame3d space defines) (Axis3d space) where
   getField frame = Axis3d frame.originPoint frame.forwardDirection
 
-instance
-  HasField
-    "backwardAxis"
-    (Frame3d space units defines)
-    (Axis3d space units)
-  where
+instance HasField "backwardAxis" (Frame3d space defines) (Axis3d space) where
   getField frame = Axis3d frame.originPoint frame.backwardDirection
 
-instance
-  HasField
-    "upwardAxis"
-    (Frame3d space units defines)
-    (Axis3d space units)
-  where
+instance HasField "upwardAxis" (Frame3d space defines) (Axis3d space) where
   getField frame = Axis3d frame.originPoint frame.upwardDirection
 
-instance
-  HasField
-    "downwardAxis"
-    (Frame3d space units defines)
-    (Axis3d space units)
-  where
+instance HasField "downwardAxis" (Frame3d space defines) (Axis3d space) where
   getField frame = Axis3d frame.originPoint frame.downwardDirection
 
-instance
-  HasField
-    "backwardOrientation"
-    (Frame3d space units defines)
-    (Orientation3d space)
-  where
+instance HasField "backwardOrientation" (Frame3d space defines) (Orientation3d space) where
   getField = (.orientation.backwardOrientation)
 
-instance
-  HasField
-    "rightwardOrientation"
-    (Frame3d space units defines)
-    (Orientation3d space)
-  where
+instance HasField "rightwardOrientation" (Frame3d space defines) (Orientation3d space) where
   getField = (.orientation.rightwardOrientation)
 
-instance
-  HasField
-    "leftwardOrientation"
-    (Frame3d space units defines)
-    (Orientation3d space)
-  where
+instance HasField "leftwardOrientation" (Frame3d space defines) (Orientation3d space) where
   getField = (.orientation.leftwardOrientation)
 
-instance
-  HasField
-    "upwardOrientation"
-    (Frame3d space units defines)
-    (Orientation3d space)
-  where
+instance HasField "upwardOrientation" (Frame3d space defines) (Orientation3d space) where
   getField = (.orientation.upwardOrientation)
 
-instance
-  HasField
-    "downwardOrientation"
-    (Frame3d space units defines)
-    (Orientation3d space)
-  where
+instance HasField "downwardOrientation" (Frame3d space defines) (Orientation3d space) where
   getField = (.orientation.downwardOrientation)
 
-deriving instance Eq (Frame3d space units defines)
+deriving instance Eq (Frame3d space defines)
 
-deriving instance Show (Frame3d space units defines)
+deriving instance Show (Frame3d space defines)
 
-instance FFI (Frame3d FFI.Space Meters defines) where
+instance FFI (Frame3d FFI.Space defines) where
   representation = FFI.classRepresentation "Frame3d"
-
-instance
-  (space1 ~ space2, defines1 ~ defines2) =>
-  Units.Coercion (Frame3d space1 units1 defines1) (Frame3d space2 units2 defines2)
-  where
-  coerce = Data.Coerce.coerce
 
 ----- Transform3d -----
 
-type role Transform3d phantom phantom phantom
+type role Transform3d phantom phantom
 
-type Transform3d :: Type -> Type -> Type -> Type
-data Transform3d tag space units
+type Transform3d :: Type -> Type -> Type
+data Transform3d tag space
   = Transform3d
-      (Point3d space units)
+      (Point3d space)
       (Vector3d space Unitless)
       (Vector3d space Unitless)
       (Vector3d space Unitless)
 
-deriving instance Eq (Transform3d tag space units)
+deriving instance Eq (Transform3d tag space)
 
-deriving instance Ord (Transform3d tag space units)
+deriving instance Ord (Transform3d tag space)
 
-deriving instance Show (Transform3d tag space units)
-
-instance HasUnits (Transform3d tag space units) units
-
-instance
-  (tag1 ~ tag2, space1 ~ space2) =>
-  Units.Coercion
-    (Transform3d tag1 space1 unitsA)
-    (Transform3d tag2 space2 unitsB)
-  where
-  coerce = Data.Coerce.coerce
+deriving instance Show (Transform3d tag space)
 
 instance
   space1 ~ space2 =>
   Multiplication
-    (Transform3d tag space1 translationUnits)
+    (Transform3d tag space1)
     (Vector3d space2 units)
     (Vector3d space1 units)
   where
@@ -2344,38 +2218,37 @@ instance
   space1 ~ space2 =>
   Multiplication
     (Vector3d space1 units)
-    (Transform3d tag space2 translationUnits)
+    (Transform3d tag space2)
     (Vector3d space1 units)
   where
   Vector3d vx vy vz .*. Transform3d _ i j k = vx .*. i .+. vy .*. j .+. vz .*. k
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  space1 ~ space2 =>
   Multiplication
-    (Point3d space1 units1)
-    (Transform3d tag space2 units2)
-    (Point3d space1 units1)
+    (Point3d space1)
+    (Transform3d tag space2)
+    (Point3d space1)
   where
   Point3d px py pz .*. Transform3d p0 i j k = p0 .+. px .*. i .+. py .*. j .+. pz .*. k
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  space1 ~ space2 =>
   Multiplication
-    (Transform3d tag space1 units1)
-    (Point3d space2 units2)
-    (Point3d space1 units1)
+    (Transform3d tag space1)
+    (Point3d space2)
+    (Point3d space1)
   where
   transform .*. point = point .*. transform
 
 instance
   ( Composition tag1 tag2 tag3
   , space1 ~ space2
-  , units1 ~ units2
   ) =>
   Composition
-    (Transform3d tag1 space1 units1)
-    (Transform3d tag2 space2 units2)
-    (Transform3d tag3 space1 units1)
+    (Transform3d tag1 space1)
+    (Transform3d tag2 space2)
+    (Transform3d tag3 space1)
   where
   transform2 `compose` transform1 =
     Transform3d

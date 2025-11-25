@@ -52,7 +52,6 @@ import OpenSolid.Convention3d (Convention3d (Convention3d))
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Plane3d qualified as Plane3d
-import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
@@ -69,6 +68,7 @@ import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
+import OpenSolid.World3d qualified as World3d
 
 -- | The zero vector.
 zero :: Vector3d space units
@@ -85,7 +85,7 @@ unit (Unit3d vector) = vector
 
 -- | Construct a 3D vector on the given plane, given a 2D vector within the plane.
 on ::
-  Plane3d space planeUnits (Defines local) ->
+  Plane3d space (Defines local) ->
   Vector2d local units ->
   Vector3d space units
 on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vX vY) = do
@@ -227,24 +227,15 @@ normalize vector = do
   if vm == Quantity.zero then zero else vector ./. vm
 
 -- | Convert a vectr defined in local coordinates to one defined in global coordinates.
-placeIn ::
-  Frame3d global frameUnits (Defines local) ->
-  Vector3d local units ->
-  Vector3d global units
+placeIn :: Frame3d global (Defines local) -> Vector3d local units -> Vector3d global units
 placeIn (Frame3d _ (Orientation3d i j k)) (Vector3d vx vy vz) = vx .*. i .+. vy .*. j .+. vz .*. k
 
 -- | Convert a vector defined in global coordinates to one defined in local coordinates.
-relativeTo ::
-  Frame3d global frameUnits (Defines local) ->
-  Vector3d global units ->
-  Vector3d local units
+relativeTo :: Frame3d global (Defines local) -> Vector3d global units -> Vector3d local units
 relativeTo (Frame3d _ (Orientation3d i j k)) vector =
   Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
 
-projectInto ::
-  Plane3d global planeUnits (Defines local) ->
-  Vector3d global units ->
-  Vector2d local units
+projectInto :: Plane3d global (Defines local) -> Vector3d global units -> Vector2d local units
 projectInto (Plane3d _ (PlaneOrientation3d i j)) v = Vector2d (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3d space units) -> Vector3d space units
@@ -256,10 +247,7 @@ convert factor vector = Units.simplify (vector ?*? factor)
 unconvert :: Quantity (units2 ?/? units1) -> Vector3d space units2 -> Vector3d space units1
 unconvert factor vector = Units.simplify (vector ?/? factor)
 
-transformBy ::
-  Transform3d tag space translationUnits ->
-  Vector3d space units ->
-  Vector3d space units
+transformBy :: Transform3d tag space -> Vector3d space units -> Vector3d space units
 transformBy transform vector = do
   let Transform3d _ i j k = transform
   let Vector3d vx vy vz = vector
@@ -270,14 +258,14 @@ transformBy transform vector = do
 This is equivalent to rotating around an axis with the given direction.
 -}
 rotateIn :: Direction3d space -> Angle -> Vector3d space units -> Vector3d space units
-rotateIn axisDirection = rotateAround (Axis3d Point3d.dummy axisDirection)
+rotateIn axisDirection = rotateAround (Axis3d World3d.originPoint axisDirection)
 
 {-| Scale (stretch) in the given direction by the given scaling factor.
 
 This is equivalent to scaling along an axis with the given direction.
 -}
 scaleIn :: Direction3d space -> Number -> Vector3d space units -> Vector3d space units
-scaleIn axisDirection = scaleAlong (Axis3d Point3d.dummy axisDirection)
+scaleIn axisDirection = scaleAlong (Axis3d World3d.originPoint axisDirection)
 
 {-| Mirror in a particular direction.
 
@@ -287,24 +275,13 @@ mirrorIn :: Direction3d space -> Vector3d space units -> Vector3d space units
 mirrorIn mirrorDirection vector = vector .-. 2 *. projectionIn mirrorDirection vector
 
 -- | Rotate around the given axis by the given angle.
-rotateAround ::
-  Axis3d space axisUnits ->
-  Angle ->
-  Vector3d space units ->
-  Vector3d space units
+rotateAround :: Axis3d space -> Angle -> Vector3d space units -> Vector3d space units
 rotateAround = Transform3d.rotateAroundImpl transformBy
 
 -- | Scale (stretch) along the given axis by the given scaling factor.
-scaleAlong ::
-  Axis3d space axisUnits ->
-  Number ->
-  Vector3d space units ->
-  Vector3d space units
+scaleAlong :: Axis3d space -> Number -> Vector3d space units -> Vector3d space units
 scaleAlong = Transform3d.scaleAlongImpl transformBy
 
 -- | Mirror across the given plane.
-mirrorAcross ::
-  Plane3d space planeUnits defines ->
-  Vector3d space units ->
-  Vector3d space units
+mirrorAcross :: Plane3d space defines -> Vector3d space units -> Vector3d space units
 mirrorAcross plane vector = mirrorIn (Plane3d.normalDirection plane) vector

@@ -221,10 +221,7 @@ and the upward direction of the orientation will point forward.
 downwardOrientation :: Orientation3d space -> Orientation3d space
 downwardOrientation = (.downwardOrientation)
 
-transformBy ::
-  Transform3d.Rigid space translationUnits ->
-  Orientation3d space ->
-  Orientation3d space
+transformBy :: Transform3d.Rigid space -> Orientation3d space -> Orientation3d space
 transformBy transform (Orientation3d i j k) =
   Orientation3d
     (Direction3d.transformBy transform i)
@@ -232,10 +229,7 @@ transformBy transform (Orientation3d i j k) =
     (Direction3d.transformBy transform k)
 
 -- | Convert a orientation defined in local coordinates to one defined in global coordinates.
-placeIn ::
-  Frame3d global frameUnits (Defines local) ->
-  Orientation3d local ->
-  Orientation3d global
+placeIn :: Frame3d global (Defines local) -> Orientation3d local -> Orientation3d global
 placeIn globalFrame (Orientation3d i j k) =
   Orientation3d
     (Direction3d.placeIn globalFrame i)
@@ -243,10 +237,7 @@ placeIn globalFrame (Orientation3d i j k) =
     (Direction3d.placeIn globalFrame k)
 
 -- | Convert a orientation defined in global coordinates to one defined in local coordinates.
-relativeTo ::
-  Frame3d global frameUnits (Defines local) ->
-  Orientation3d global ->
-  Orientation3d local
+relativeTo :: Frame3d global (Defines local) -> Orientation3d global -> Orientation3d local
 relativeTo globalFrame (Orientation3d i j k) =
   Orientation3d
     (Direction3d.relativeTo globalFrame i)

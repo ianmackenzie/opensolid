@@ -43,7 +43,7 @@ import OpenSolid.Text qualified as Text
 
 -- | The lighting to use for a Mitsuba scene.
 data Lighting space where
-  EnvironmentMap :: Frame3d space Meters defines -> Text -> Lighting space
+  EnvironmentMap :: Frame3d space defines -> Text -> Lighting space
 
 instance FFI (Lighting FFI.Space) where
   representation = FFI.nestedClassRepresentation "Mitsuba" "Lighting"
@@ -59,13 +59,13 @@ convention =
     Orientation3d.upwardDirection
     Orientation3d.backwardDirection
 
-xDirection :: Frame3d space units defines -> Direction3d space
+xDirection :: Frame3d space defines -> Direction3d space
 xDirection frame = Convention3d.xDirection frame.orientation convention
 
-yDirection :: Frame3d space units defines -> Direction3d space
+yDirection :: Frame3d space defines -> Direction3d space
 yDirection frame = Convention3d.yDirection frame.orientation convention
 
-zDirection :: Frame3d space units defines -> Direction3d space
+zDirection :: Frame3d space defines -> Direction3d space
 zDirection frame = Convention3d.zDirection frame.orientation convention
 
 {-| Write a Mitsuba scene out to an XML scene description and a file containing binary mesh data.
@@ -107,7 +107,7 @@ writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named l
   let sceneFileName = path <> ".xml"
   IO.writeUtf8 sceneFileName sceneXml
 
-type Vertex space = (Point3d space Meters, Direction3d space)
+type Vertex space = (Point3d space, Direction3d space)
 
 type Mesh space = Mesh.Mesh (Vertex space)
 
@@ -145,7 +145,7 @@ and the path to the environment map image itself.
 The environment map image will typically be in OpenEXR format;
 https://polyhaven.com is a good source for free ones.
 -}
-environmentMap :: Frame3d space Meters defines -> Text -> Lighting space
+environmentMap :: Frame3d space defines -> Text -> Lighting space
 environmentMap = EnvironmentMap
 
 {-| Write a list of named meshes out to a single Mitsuba .serialized file.

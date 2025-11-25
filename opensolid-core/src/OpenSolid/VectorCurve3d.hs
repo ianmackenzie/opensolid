@@ -446,10 +446,7 @@ compiled (VectorCurve3d c _) = c
 derivative :: VectorCurve3d space units -> VectorCurve3d space units
 derivative (VectorCurve3d _ d) = d
 
-transformBy ::
-  Transform3d tag space translationUnits ->
-  VectorCurve3d space units ->
-  VectorCurve3d space units
+transformBy :: Transform3d tag space -> VectorCurve3d space units -> VectorCurve3d space units
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
@@ -475,10 +472,7 @@ zero = constant Vector3d.zero
 constant :: Vector3d space units -> VectorCurve3d space units
 constant value = new (CompiledFunction.constant value) zero
 
-on ::
-  Plane3d space planeUnits (Defines local) ->
-  VectorCurve2d local units ->
-  VectorCurve3d space units
+on :: Plane3d space (Defines local) -> VectorCurve2d local units -> VectorCurve3d space units
 on plane vectorCurve2d = do
   let compiledPlanar =
         CompiledFunction.map
@@ -689,7 +683,7 @@ direction curve = case quotient curve (magnitude curve) of
   Ok normalizedCurve -> Ok (DirectionCurve3d.unsafe normalizedCurve)
 
 placeIn ::
-  Frame3d global frameUnits (Defines local) ->
+  Frame3d global (Defines local) ->
   VectorCurve3d local units ->
   VectorCurve3d global units
 placeIn frame curve = do
@@ -702,7 +696,7 @@ placeIn frame curve = do
   new compiledPlaced (placeIn frame curve.derivative)
 
 relativeTo ::
-  Frame3d global frameUnits (Defines local) ->
+  Frame3d global (Defines local) ->
   VectorCurve3d global units ->
   VectorCurve3d local units
 relativeTo frame = placeIn (Frame3d.inverse frame)

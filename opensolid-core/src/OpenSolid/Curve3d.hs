@@ -68,7 +68,7 @@ import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 data Curve3d space = Curve3d (Compiled space) ~(VectorCurve3d space Meters)
 
 type Compiled space =
-  CompiledFunction Number (Point3d space Meters) (Bounds Unitless) (Bounds3d space)
+  CompiledFunction Number (Point3d space) (Bounds Unitless) (Bounds3d space)
 
 instance HasField "compiled" (Curve3d space) (Compiled space) where
   getField (Curve3d c _) = c
@@ -135,10 +135,10 @@ recursive :: Compiled space -> (Curve3d space -> VectorCurve3d space Meters) -> 
 recursive givenCompiled derivativeFunction =
   let result = new givenCompiled (derivativeFunction result) in result
 
-constant :: Point3d space Meters -> Curve3d space
+constant :: Point3d space -> Curve3d space
 constant point = new (CompiledFunction.constant point) VectorCurve3d.zero
 
-on :: Plane3d space Meters (Defines local) -> Curve2d local Meters -> Curve3d space
+on :: Plane3d space (Defines local) -> Curve2d local Meters -> Curve3d space
 on plane curve2d = do
   let compiledPlaced =
         CompiledFunction.map
@@ -148,7 +148,7 @@ on plane curve2d = do
           curve2d.compiled
   new compiledPlaced (VectorCurve3d.on plane curve2d.derivative)
 
-line :: Point3d space Meters -> Point3d space Meters -> Curve3d space
+line :: Point3d space -> Point3d space -> Curve3d space
 line p1 p2 = constant p1 .+. Curve.t .*. (p2 .-. p1)
 
 {-| Construct a Bezier curve from its control points. For example,
@@ -157,27 +157,18 @@ line p1 p2 = constant p1 .+. Curve.t .*. (p2 .-. p1)
 
 will return a cubic Bezier curve with the given four control points.
 -}
-bezier :: NonEmpty (Point3d space Meters) -> Curve3d space
+bezier :: NonEmpty (Point3d space) -> Curve3d space
 bezier controlPoints =
   new
     (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
     (VectorCurve3d.bezier (Bezier.derivative controlPoints))
 
 -- | Construct a quadratic Bezier curve from the given control points.
-quadraticBezier ::
-  Point3d space Meters ->
-  Point3d space Meters ->
-  Point3d space Meters ->
-  Curve3d space
+quadraticBezier :: Point3d space -> Point3d space -> Point3d space -> Curve3d space
 quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 
 -- | Construct a cubic Bezier curve from the given control points.
-cubicBezier ::
-  Point3d space Meters ->
-  Point3d space Meters ->
-  Point3d space Meters ->
-  Point3d space Meters ->
-  Curve3d space
+cubicBezier :: Point3d space -> Point3d space -> Point3d space -> Point3d space -> Curve3d space
 cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
 {-| Construct a Bezier curve with the given start point, start derivatives, end point and end
@@ -198,21 +189,21 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
-  Point3d space Meters ->
+  Point3d space ->
   List (Vector3d space Meters) ->
-  Point3d space Meters ->
+  Point3d space ->
   List (Vector3d space Meters) ->
   Curve3d space
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
-startPoint :: Curve3d space -> Point3d space Meters
+startPoint :: Curve3d space -> Point3d space
 startPoint curve = evaluate curve 0
 
-endPoint :: Curve3d space -> Point3d space Meters
+endPoint :: Curve3d space -> Point3d space
 endPoint curve = evaluate curve 1
 
-evaluate :: Curve3d space -> Number -> Point3d space Meters
+evaluate :: Curve3d space -> Number -> Point3d space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 evaluateBounds :: Curve3d space -> Bounds Unitless -> Bounds3d space
@@ -233,7 +224,7 @@ parameterizeByArcLength curve = do
   let (parameterization, length) = arcLengthParameterization curve
   (curve `compose` parameterization, length)
 
-transformBy :: Transform3d tag space Meters -> Curve3d space -> Curve3d space
+transformBy :: Transform3d tag space -> Curve3d space -> Curve3d space
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
@@ -243,7 +234,7 @@ transformBy transform curve = do
           curve.compiled
   new compiledTransformed (VectorCurve3d.transformBy transform curve.derivative)
 
-placeIn :: Frame3d global Meters (Defines local) -> Curve3d local -> Curve3d global
+placeIn :: Frame3d global (Defines local) -> Curve3d local -> Curve3d global
 placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
@@ -253,5 +244,5 @@ placeIn frame curve = do
           curve.compiled
   new compiledPlaced (VectorCurve3d.placeIn frame curve.derivative)
 
-relativeTo :: Frame3d global Meters (Defines local) -> Curve3d global -> Curve3d local
+relativeTo :: Frame3d global (Defines local) -> Curve3d global -> Curve3d local
 relativeTo frame curve = placeIn (Frame3d.inverse frame) curve

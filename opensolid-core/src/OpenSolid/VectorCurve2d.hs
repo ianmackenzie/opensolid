@@ -796,7 +796,7 @@ relativeTo ::
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
 placeOn ::
-  Plane3d space planeUnits (Defines local) ->
+  Plane3d space (Defines local) ->
   VectorCurve2d local units ->
   VectorCurve3d space units
 placeOn plane curve = VectorCurve3d.on plane curve

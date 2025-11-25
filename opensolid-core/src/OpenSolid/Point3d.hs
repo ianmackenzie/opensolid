@@ -7,11 +7,9 @@ module OpenSolid.Point3d
   , zUpCoordinates#
   , yUpCoordinates
   , yUpCoordinates#
-  , dummy
   , on
   , along
   , coerce
-  , erase
   , xyz
   , zUp
   , yUp
@@ -24,8 +22,6 @@ module OpenSolid.Point3d
   , relativeTo
   , projectOnto
   , projectInto
-  , convert
-  , unconvert
   , transformBy
   , translateBy
   , translateIn
@@ -37,10 +33,10 @@ module OpenSolid.Point3d
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Length (Length)
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -55,17 +51,13 @@ import OpenSolid.Primitives
   , Vector3d
   )
 import OpenSolid.Quantity (Quantity (Quantity#))
-import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Unboxed.Math
 import OpenSolid.Vector3d qualified as Vector3d
 
 -- | Get the XYZ coordinates of a point, given an XYZ coordinate convention to use.
 {-# INLINE coordinates #-}
-coordinates ::
-  Convention3d ->
-  Point3d space units ->
-  (Quantity units, Quantity units, Quantity units)
+coordinates :: Convention3d -> Point3d space -> (Length, Length, Length)
 coordinates convention (Position3d vector) = Vector3d.components convention vector
 
 {-| Get the XYZ coordinates of a point using a Z-up coordinate convention.
@@ -73,11 +65,11 @@ coordinates convention (Position3d vector) = Vector3d.components convention vect
 This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
 -}
 {-# INLINE zUpCoordinates #-}
-zUpCoordinates :: Point3d space units -> (Quantity units, Quantity units, Quantity units)
+zUpCoordinates :: Point3d space -> (Length, Length, Length)
 zUpCoordinates (Position3d vector) = Vector3d.zUpComponents vector
 
 {-# INLINE zUpCoordinates# #-}
-zUpCoordinates# :: Point3d space units -> (# Double#, Double#, Double# #)
+zUpCoordinates# :: Point3d space -> (# Double#, Double#, Double# #)
 zUpCoordinates# (Position3d vector) = Vector3d.zUpComponents# vector
 
 {-| Get the XYZ coordinates of a point using a Y-up coordinate convention.
@@ -85,18 +77,15 @@ zUpCoordinates# (Position3d vector) = Vector3d.zUpComponents# vector
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
 {-# INLINE yUpCoordinates #-}
-yUpCoordinates :: Point3d space units -> (Quantity units, Quantity units, Quantity units)
+yUpCoordinates :: Point3d space -> (Length, Length, Length)
 yUpCoordinates (Position3d vector) = Vector3d.yUpComponents vector
 
 {-# INLINE yUpCoordinates# #-}
-yUpCoordinates# :: Point3d space units -> (# Double#, Double#, Double# #)
+yUpCoordinates# :: Point3d space -> (# Double#, Double#, Double# #)
 yUpCoordinates# (Position3d vector) = Vector3d.yUpComponents# vector
 
-dummy :: Point3d space Void
-dummy = Point3d Quantity.zero Quantity.zero Quantity.zero
-
 -- | Construct a point the given distance along the given axis.
-along :: Axis3d space units -> Quantity units -> Point3d space units
+along :: Axis3d space -> Length -> Point3d space
 along (Axis3d originPoint direction) distance = do
   let Point3d oR oF oU = originPoint
   let Direction3d dR dF dU = direction
@@ -106,7 +95,7 @@ along (Axis3d originPoint direction) distance = do
     (oU .+. dU .*. distance)
 
 -- | Construct a point on the given plane, at the given position within the plane.
-on :: Plane3d space units (Defines local) -> Point2d local units -> Point3d space units
+on :: Plane3d space (Defines local) -> Point2d local Meters -> Point3d space
 on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d pX pY) = do
   let Point3d oR oF oU = originPoint
   let Direction3d iR iF iU = i
@@ -117,49 +106,42 @@ on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d pX pY) = do
     (oU .+. pX .*. iU .+. pY .*. jU)
 
 {-# INLINE coerce #-}
-coerce :: Point3d space1 units1 -> Point3d space2 units2
+coerce :: Point3d space1 -> Point3d space2
 coerce (Position3d p) = Position3d (Vector3d.coerce p)
-
-erase :: Point3d space units -> Point3d space Unitless
-erase = coerce
 
 -- | Construct a point from its XYZ coordinates, given the coordinate convention to use.
 {-# INLINE xyz #-}
-xyz :: Convention3d -> (Quantity units, Quantity units, Quantity units) -> Point3d space units
+xyz :: Convention3d -> (Length, Length, Length) -> Point3d space
 xyz convention givenCoordinates = Position3d (Vector3d.xyz convention givenCoordinates)
 
 {-| Construct a point from its XYZ coordinates, using a Z-up convention.
 
 This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
 -}
-zUp :: Quantity units -> Quantity units -> Quantity units -> Point3d space units
+zUp :: Length -> Length -> Length -> Point3d space
 zUp pX pY pZ = Point3d pX pY pZ
 
 {-| Construct a point from its XYZ coordinates, using a Y-up convention.
 
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
-yUp :: Quantity units -> Quantity units -> Quantity units -> Point3d space units
+yUp :: Length -> Length -> Length -> Point3d space
 yUp pX pY pZ = Point3d (negative pX) pZ pY
 
-interpolateFrom ::
-  Point3d space units ->
-  Point3d space units ->
-  Number ->
-  Point3d space units
+interpolateFrom :: Point3d space -> Point3d space -> Number -> Point3d space
 interpolateFrom (Position3d p1) (Position3d p2) t = Position3d (Vector3d.interpolateFrom p1 p2 t)
 
 -- | Find the midpoint between two points.
-midpoint :: Point3d space units -> Point3d space units -> Point3d space units
+midpoint :: Point3d space -> Point3d space -> Point3d space
 midpoint (Position3d p1) (Position3d p2) = Position3d (Vector3d.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
 {-# INLINE distanceFrom #-}
-distanceFrom :: Point3d space units -> Point3d space units -> Quantity units
+distanceFrom :: Point3d space -> Point3d space -> Length
 distanceFrom p1 p2 = Quantity# (distanceFrom# p1 p2)
 
 {-# INLINE distanceFrom# #-}
-distanceFrom# :: Point3d space units -> Point3d space units -> Double#
+distanceFrom# :: Point3d space -> Point3d space -> Double#
 distanceFrom#
   (Point3d (Quantity# x1#) (Quantity# y1#) (Quantity# z1#))
   (Point3d (Quantity# x2#) (Quantity# y2#) (Quantity# z2#)) =
@@ -169,29 +151,21 @@ distanceFrom#
 
 This is the position along the axis of the given point projected onto the axis.
 -}
-distanceAlong :: Axis3d space units -> Point3d space units -> Quantity units
+distanceAlong :: Axis3d space -> Point3d space -> Length
 distanceAlong (Axis3d p0 d) p = (p .-. p0) `dot` d
 
 -- | Convert a point defined in local coordinates to one defined in global coordinates.
-placeIn ::
-  Frame3d global units (Defines local) ->
-  Point3d local units ->
-  Point3d global units
-placeIn (Frame3d p0 (Orientation3d i j k)) (Point3d px py pz) = p0 .+. px .*. i .+. py .*. j .+. pz .*. k
+placeIn :: Frame3d global (Defines local) -> Point3d local -> Point3d global
+placeIn (Frame3d p0 (Orientation3d i j k)) (Point3d px py pz) =
+  p0 .+. px .*. i .+. py .*. j .+. pz .*. k
 
 -- | Convert a point defined in global coordinates to one defined in local coordinates.
-relativeTo ::
-  Frame3d global units (Defines local) ->
-  Point3d global units ->
-  Point3d local units
+relativeTo :: Frame3d global (Defines local) -> Point3d global -> Point3d local
 relativeTo (Frame3d p0 (Orientation3d i j k)) p =
   let d = p .-. p0 in Point3d (d `dot` i) (d `dot` j) (d `dot` k)
 
 -- | Project a point onto a plane.
-projectOnto ::
-  Plane3d space units defines ->
-  Point3d space units ->
-  Point3d space units
+projectOnto :: Plane3d space defines -> Point3d space -> Point3d space
 projectOnto plane point =
   point .-. Vector3d.projectionIn plane.normalDirection (point .-. plane.originPoint)
 
@@ -200,67 +174,32 @@ projectOnto plane point =
 Conceptualy, this projects the point onto the plane in 3D,
 then expresses the projected point in 2D planar XY coordinates.
 -}
-projectInto ::
-  Plane3d space units (Defines localSpace) ->
-  Point3d space units ->
-  Point2d localSpace units
+projectInto :: Plane3d space (Defines local) -> Point3d space -> Point2d local Meters
 projectInto (Plane3d p0 (PlaneOrientation3d i j)) p =
   let d = p .-. p0 in Point2d (d `dot` i) (d `dot` j)
 
-convert :: Quantity (units2 ?/? units1) -> Point3d space units1 -> Point3d space units2
-convert factor (Position3d p) = Position3d (Vector3d.convert factor p)
-
-unconvert :: Quantity (units2 ?/? units1) -> Point3d space units2 -> Point3d space units1
-unconvert factor (Position3d p) = Position3d (Vector3d.unconvert factor p)
-
-transformBy :: Transform3d tag space units -> Point3d space units -> Point3d space units
+transformBy :: Transform3d tag space -> Point3d space -> Point3d space
 transformBy transform (Point3d px py pz) = do
   let (Transform3d p0 vx vy vz) = transform
   p0 .+. px .*. vx .+. py .*. vy .+. pz .*. vz
 
-translateBy ::
-  Vector3d space units ->
-  Point3d space units ->
-  Point3d space units
+translateBy :: Vector3d space Meters -> Point3d space -> Point3d space
 translateBy = Transform3d.translateByImpl transformBy
 
-translateIn ::
-  Direction3d space ->
-  Quantity units ->
-  Point3d space units ->
-  Point3d space units
+translateIn :: Direction3d space -> Length -> Point3d space -> Point3d space
 translateIn = Transform3d.translateInImpl transformBy
 
-translateAlong ::
-  Axis3d space units ->
-  Quantity units ->
-  Point3d space units ->
-  Point3d space units
+translateAlong :: Axis3d space -> Length -> Point3d space -> Point3d space
 translateAlong = Transform3d.translateAlongImpl transformBy
 
-rotateAround ::
-  Axis3d space units ->
-  Angle ->
-  Point3d space units ->
-  Point3d space units
+rotateAround :: Axis3d space -> Angle -> Point3d space -> Point3d space
 rotateAround = Transform3d.rotateAroundImpl transformBy
 
-mirrorAcross ::
-  Plane3d space units defines ->
-  Point3d space units ->
-  Point3d space units
+mirrorAcross :: Plane3d space defines -> Point3d space -> Point3d space
 mirrorAcross = Transform3d.mirrorAcrossImpl transformBy
 
-scaleAbout ::
-  Point3d space units ->
-  Number ->
-  Point3d space units ->
-  Point3d space units
+scaleAbout :: Point3d space -> Number -> Point3d space -> Point3d space
 scaleAbout = Transform3d.scaleAboutImpl transformBy
 
-scaleAlong ::
-  Axis3d space units ->
-  Number ->
-  Point3d space units ->
-  Point3d space units
+scaleAlong :: Axis3d space -> Number -> Point3d space -> Point3d space
 scaleAlong = Transform3d.scaleAlongImpl transformBy

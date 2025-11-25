@@ -87,7 +87,7 @@ lengthBounds = Bounds.random length
 point2d :: Generator (Point2d space Meters)
 point2d = Random.map2 Point2d length length
 
-point3d :: Generator (Point3d space Meters)
+point3d :: Generator (Point3d space)
 point3d = Random.map3 Point3d length length length
 
 vector2d :: Generator (Vector2d space Meters)
@@ -107,7 +107,7 @@ vectorBounds3d =
 axis2d :: Generator (Axis2d space Meters)
 axis2d = Random.map2 Axis2d point2d Direction2d.random
 
-axis3d :: Generator (Axis3d space Meters)
+axis3d :: Generator (Axis3d space)
 axis3d = Random.map2 Axis3d point3d Direction3d.random
 
 orientation2d :: Generator (Orientation2d global)
@@ -124,13 +124,13 @@ planeOrientation3d =
 orientation3d :: Generator (Orientation3d global)
 orientation3d = Random.map Frame3d.orientation frame3d
 
-plane3d :: Generator (Plane3d global Meters (Defines local))
+plane3d :: Generator (Plane3d global (Defines local))
 plane3d = Random.map2 Plane3d point3d planeOrientation3d
 
 frame2d :: Generator (Frame2d global Meters (Defines local))
 frame2d = Random.map Frame2d.fromXAxis axis2d
 
-frame3d :: Generator (Frame3d global Meters (Defines local))
+frame3d :: Generator (Frame3d global (Defines local))
 frame3d = Random.map Frame3d.fromTopPlane plane3d
 
 bounds2d :: Generator (Bounds2d space Meters)
@@ -214,22 +214,22 @@ affineTransform2d =
 surfaceParameter :: Generator SurfaceParameter
 surfaceParameter = Random.oneOf (NonEmpty.two U V)
 
-translation3d :: Generator (Transform3d.Rigid space Meters)
+translation3d :: Generator (Transform3d.Rigid space)
 translation3d = Random.map Transform3d.translateBy vector3d
 
-rotation3d :: Generator (Transform3d.Rigid space Meters)
+rotation3d :: Generator (Transform3d.Rigid space)
 rotation3d = do
   axis <- axis3d
   angle <- Quantity.random (Angle.degrees -360) (Angle.degrees 360)
   Random.return (Transform3d.rotateAround axis angle)
 
-mirror3d :: Generator (Transform3d.Orthonormal space Meters)
+mirror3d :: Generator (Transform3d.Orthonormal space)
 mirror3d = Random.map Transform3d.mirrorAcross plane3d
 
-rigidTransform3d :: Generator (Transform3d.Rigid space Meters)
+rigidTransform3d :: Generator (Transform3d.Rigid space)
 rigidTransform3d = Random.merge (NonEmpty.two translation3d rotation3d)
 
-orthonormalTransform3d :: Generator (Transform3d.Orthonormal space Meters)
+orthonormalTransform3d :: Generator (Transform3d.Orthonormal space)
 orthonormalTransform3d =
   Random.merge $
     NonEmpty.three
@@ -237,10 +237,10 @@ orthonormalTransform3d =
       (Random.map Transform3d.toOrthonormal rotation3d)
       mirror3d
 
-uniformScaling3d :: Generator (Transform3d.Uniform space Meters)
+uniformScaling3d :: Generator (Transform3d.Uniform space)
 uniformScaling3d = Random.map2 Transform3d.scaleAbout point3d scalingFactor
 
-uniformTransform3d :: Generator (Transform3d.Uniform space Meters)
+uniformTransform3d :: Generator (Transform3d.Uniform space)
 uniformTransform3d =
   Random.merge $
     NonEmpty.four
@@ -249,10 +249,10 @@ uniformTransform3d =
       (Random.map Transform3d.toUniform mirror3d)
       uniformScaling3d
 
-nonUniformScaling3d :: Generator (Transform3d.Affine space Meters)
+nonUniformScaling3d :: Generator (Transform3d.Affine space)
 nonUniformScaling3d = Random.map2 Transform3d.scaleAlong axis3d scalingFactor
 
-affineTransform3d :: Generator (Transform3d.Affine space Meters)
+affineTransform3d :: Generator (Transform3d.Affine space)
 affineTransform3d =
   Random.merge $
     NonEmpty.five

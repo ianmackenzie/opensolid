@@ -86,6 +86,7 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Plane3d (Plane3d)
@@ -113,7 +114,7 @@ import OpenSolid.Vector3d qualified as Vector3d
 
 data Space
 
-type Plane = Plane3d Space Unitless (Defines Space)
+type Plane = Plane3d Space (Defines Space)
 
 data Ast1d input where
   Constant1d :: Number -> Ast1d input
@@ -255,8 +256,8 @@ data Variable3d input where
   Cross3d :: Variable3d input -> Variable3d input -> Variable3d input
   CrossVariableConstant3d :: Variable3d input -> Vector3d Space Unitless -> Variable3d input
   BezierCurve3d :: NonEmpty (Vector3d Space Unitless) -> Variable1d input -> Variable3d input
-  TransformVector3d :: Transform3d.Affine Space Unitless -> Variable3d input -> Variable3d input
-  TransformPoint3d :: Transform3d.Affine Space Unitless -> Variable3d input -> Variable3d input
+  TransformVector3d :: Transform3d.Affine Space -> Variable3d input -> Variable3d input
+  TransformPoint3d :: Transform3d.Affine Space -> Variable3d input -> Variable3d input
   PlaceVector2d :: Plane -> Variable2d input -> Variable3d input
   PlacePoint2d :: Plane -> Variable2d input -> Variable3d input
   Desingularized3d ::
@@ -1119,7 +1120,7 @@ transformVector2d transform ast = do
       Variable2d (BezierCurve2d transformedControlPoints param)
     Variable2d var -> Variable2d (TransformVector2d erasedTransform var)
 
-transformVector3d :: Transform3d tag space units -> Ast3d input -> Ast3d input
+transformVector3d :: Transform3d tag space -> Ast3d input -> Ast3d input
 transformVector3d transform ast = do
   let erasedTransform = Transform3d.coerce transform
   case ast of
@@ -1150,23 +1151,24 @@ transformPoint2d transform ast = do
       Variable2d (BezierCurve2d transformedControlPoints param)
     Variable2d var -> Variable2d (TransformPoint2d erasedTransform var)
 
-transformPoint3d :: Transform3d tag space units -> Ast3d input -> Ast3d input
+transformPoint3d :: Transform3d tag space -> Ast3d input -> Ast3d input
 transformPoint3d transform ast = do
-  let erasedTransform = Transform3d.coerce transform
+  let coercedTransform :: Transform3d.Affine Space = Transform3d.coerce transform
   case ast of
     Constant3d val -> do
-      let Position3d transformed = Point3d.transformBy erasedTransform (Position3d val)
-      Constant3d transformed
+      let point = Position3d (Vector3d.coerce val)
+      let Position3d transformed = Point3d.transformBy coercedTransform point
+      Constant3d (Vector3d.coerce transformed)
     Variable3d (TransformPoint3d existing var) ->
-      Variable3d (TransformPoint3d (erasedTransform `compose` existing) var)
+      Variable3d (TransformPoint3d (coercedTransform `compose` existing) var)
     Variable3d (BezierCurve3d controlPoints param) -> do
       let transformedControlPoints =
             controlPoints
               & Data.Coerce.coerce -- convert list of Vector3d to list of Point3d
-              & NonEmpty.map (Point3d.transformBy erasedTransform)
+              & NonEmpty.map (Point3d.transformBy coercedTransform)
               & Data.Coerce.coerce -- convert list of Point3d back to list of Vector3d
       Variable3d (BezierCurve3d transformedControlPoints param)
-    Variable3d var -> Variable3d (TransformPoint3d erasedTransform var)
+    Variable3d var -> Variable3d (TransformPoint3d coercedTransform var)
 
 placementTransform2d :: Frame2d global units (Defines local) -> Transform2d.Affine Space Unitless
 placementTransform2d frame =
@@ -1175,7 +1177,7 @@ placementTransform2d frame =
     (Vector2d.coerce (Vector2d.unit (Frame2d.xDirection frame)))
     (Vector2d.coerce (Vector2d.unit (Frame2d.yDirection frame)))
 
-placementTransform3d :: Frame3d global units (Defines local) -> Transform3d.Affine Space Unitless
+placementTransform3d :: Frame3d global (Defines local) -> Transform3d.Affine Space
 placementTransform3d frame =
   Transform3d
     (Point3d.coerce (Frame3d.originPoint frame))
@@ -1189,34 +1191,36 @@ placeVector2dIn frame ast = transformVector2d (placementTransform2d frame) ast
 placePoint2dIn :: Frame2d global units (Defines local) -> Ast2d input -> Ast2d input
 placePoint2dIn frame ast = transformPoint2d (placementTransform2d frame) ast
 
-placeVector3dIn :: Frame3d global frameUnits (Defines local) -> Ast3d input -> Ast3d input
+placeVector3dIn :: Frame3d global (Defines local) -> Ast3d input -> Ast3d input
 placeVector3dIn frame ast = transformVector3d (placementTransform3d frame) ast
 
-placePoint3dIn :: Frame3d global units (Defines local) -> Ast3d input -> Ast3d input
+placePoint3dIn :: Frame3d global (Defines local) -> Ast3d input -> Ast3d input
 placePoint3dIn frame ast = transformPoint3d (placementTransform3d frame) ast
 
-placeVector2dOn :: Plane3d global planeUnits (Defines local) -> Ast2d input -> Ast3d input
+placeVector2dOn :: Plane3d global (Defines local) -> Ast2d input -> Ast3d input
 placeVector2dOn plane ast = case ast of
   Constant2d val -> Constant3d (Vector2d.placeOn (Plane3d.coerce plane) val)
   Variable2d var -> Variable3d (PlaceVector2d (Plane3d.coerce plane) var)
 
-placePoint2dOn :: Plane3d global units (Defines local) -> Ast2d input -> Ast3d input
+placePoint2dOn :: Plane3d global (Defines local) -> Ast2d input -> Ast3d input
 placePoint2dOn plane ast = case ast of
   Constant2d val -> do
-    let Position3d placed = Point3d.on (Plane3d.coerce plane) (Position2d val)
-    Constant3d placed
+    let point = Position2d (Vector2d.coerce val)
+    let Position3d placed = Point3d.on (Plane3d.coerce plane) point
+    Constant3d (Vector3d.coerce placed)
   Variable2d var -> Variable3d (PlacePoint2d (Plane3d.coerce plane) var)
 
-projectVector3dInto :: Plane3d global planeUnits (Defines local) -> Ast3d input -> Ast2d input
+projectVector3dInto :: Plane3d global (Defines local) -> Ast3d input -> Ast2d input
 projectVector3dInto plane ast = case ast of
   Constant3d val -> Constant2d (Vector3d.projectInto (Plane3d.coerce plane) val)
   Variable3d var -> Variable2d (ProjectVector3d (Plane3d.coerce plane) var)
 
-projectPoint3dInto :: Plane3d global units (Defines local) -> Ast3d input -> Ast2d input
+projectPoint3dInto :: Plane3d global (Defines local) -> Ast3d input -> Ast2d input
 projectPoint3dInto plane ast = case ast of
   Constant3d val -> do
-    let Position2d projected = Point3d.projectInto (Plane3d.coerce plane) (Position3d val)
-    Constant2d projected
+    let point = Position3d (Vector3d.coerce val)
+    let Position2d projected = Point3d.projectInto (Plane3d.coerce plane) point
+    Constant2d (Vector2d.coerce projected)
   Variable3d var -> Variable2d (ProjectPoint3d (Plane3d.coerce plane) var)
 
 xy :: Ast1d input -> Ast1d input -> Ast2d input
@@ -1334,20 +1338,20 @@ addTransform2d (Transform2d origin i j) = do
   let Point2d oX oY = origin
   Compile.addConstant (iX :| [iY, jX, jY, oX, oY])
 
-addTransform3d :: Transform3d.Affine Space Unitless -> Compile.Step ConstantIndex
+addTransform3d :: Transform3d.Affine Space -> Compile.Step ConstantIndex
 addTransform3d (Transform3d origin i j k) = do
   let Vector3d iR iF iU = i
   let Vector3d jR jF jU = j
   let Vector3d kR kF kU = k
   let Point3d oR oF oU = origin
-  Compile.addConstant (iR :| [iF, iU, jR, jF, jU, kR, kF, kU, oR, oF, oU])
+  Compile.addConstant (iR :| [iF, iU, jR, jF, jU, kR, kF, kU, Length.inMeters oR, Length.inMeters oF, Length.inMeters oU])
 
 addPlane :: Plane -> Compile.Step ConstantIndex
 addPlane plane = do
   let Direction3d iR iF iU = Plane3d.xDirection plane
   let Direction3d jR jF jU = Plane3d.yDirection plane
   let Point3d oR oF oU = Plane3d.originPoint plane
-  Compile.addConstant (iR :| [iF, iU, jR, jF, jU, oR, oF, oU])
+  Compile.addConstant (iR :| [iF, iU, jR, jF, jU, Length.inMeters oR, Length.inMeters oF, Length.inMeters oU])
 
 compileVariable1d :: Variable1d input -> Compile.Step VariableIndex
 compileVariable1d variable = case variable of

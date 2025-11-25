@@ -1078,7 +1078,7 @@ direction3d =
     , Class.negateSelf
     ]
 
-type Point3d = Point3d.Point3d FFI.Space Meters
+type Point3d = Point3d.Point3d FFI.Space
 
 point3d :: Class
 point3d =
@@ -1117,7 +1117,7 @@ bounds3d =
     ]
       <> affineTransformations3d Bounds3d.transformBy
 
-type Axis3d = Axis3d.Axis3d FFI.Space Meters
+type Axis3d = Axis3d.Axis3d FFI.Space
 
 axis3d :: Class
 axis3d =
@@ -1148,7 +1148,7 @@ planeOrientation3d =
     , Class.member1 "Relative To" "Frame" (PlaneOrientation3d.relativeTo :: Frame3d -> PlaneOrientation3d -> PlaneOrientation3d) $(docs 'PlaneOrientation3d.relativeTo)
     ]
 
-type Plane3d = Plane3d.Plane3d FFI.Space Meters (Defines FFI.Space)
+type Plane3d = Plane3d.Plane3d FFI.Space (Defines FFI.Space)
 
 plane3d :: Class
 plane3d =
@@ -1198,7 +1198,7 @@ orientation3d =
     , Class.member1 "Relative To" "Frame" (Orientation3d.relativeTo :: Frame3d -> Orientation3d -> Orientation3d) $(docs 'Orientation3d.relativeTo)
     ]
 
-type Frame3d = Frame3d.Frame3d FFI.Space Meters (Defines FFI.Space)
+type Frame3d = Frame3d.Frame3d FFI.Space (Defines FFI.Space)
 
 frame3d :: Class
 frame3d =
@@ -1331,7 +1331,7 @@ affineTransformations2d transformBy =
 
 rigidTransformations3d ::
   FFI value =>
-  (Transform3d.Rigid FFI.Space Meters -> value -> value) ->
+  (Transform3d.Rigid FFI.Space -> value -> value) ->
   List (Class.Member value)
 rigidTransformations3d transformBy =
   [ Class.member1 "Translate By" "Displacement" (Transform3d.translateByImpl transformBy) "Translate by the given displacement."
@@ -1343,7 +1343,7 @@ rigidTransformations3d transformBy =
 orthonormalTransformations3d ::
   forall value.
   FFI value =>
-  (forall tag. Transform.IsOrthonormal tag => Transform3d tag FFI.Space Meters -> value -> value) ->
+  (forall tag. Transform.IsOrthonormal tag => Transform3d tag FFI.Space -> value -> value) ->
   List (Class.Member value)
 orthonormalTransformations3d transformBy =
   Class.member1 "Mirror Across" "Plane" (Transform3d.mirrorAcrossImpl transformBy :: Plane3d -> value -> value) "Mirror across the given plane."
@@ -1351,7 +1351,7 @@ orthonormalTransformations3d transformBy =
 
 uniformTransformations3d ::
   FFI value =>
-  (forall tag. Transform.IsUniform tag => Transform3d tag FFI.Space Meters -> value -> value) ->
+  (forall tag. Transform.IsUniform tag => Transform3d tag FFI.Space -> value -> value) ->
   List (Class.Member value)
 uniformTransformations3d transformBy =
   Class.member2 "Scale About" "Point" "Scale" (Transform3d.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
@@ -1359,7 +1359,7 @@ uniformTransformations3d transformBy =
 
 affineTransformations3d ::
   FFI value =>
-  (forall tag. Transform3d tag FFI.Space Meters -> value -> value) ->
+  (forall tag. Transform3d tag FFI.Space -> value -> value) ->
   List (Class.Member value)
 affineTransformations3d transformBy =
   Class.member2 "Scale Along" "Axis" "Scale" (Transform3d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."

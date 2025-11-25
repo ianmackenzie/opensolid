@@ -25,7 +25,7 @@ constant :: Vector3d space units -> Expression Number (Vector3d space units)
 constant = Expression.constant
 
 on ::
-  Plane3d space planeUnits (Defines local) ->
+  Plane3d space (Defines local) ->
   Expression Number (Vector2d local units) ->
   Expression Number (Vector3d space units)
 on = Expression.on
@@ -45,25 +45,25 @@ magnitude :: Expression Number (Vector3d space units) -> Expression Number (Quan
 magnitude = Expression.magnitude
 
 placeIn ::
-  Frame3d global frameUnits (Defines local) ->
+  Frame3d global (Defines local) ->
   Expression Number (Vector3d local units) ->
   Expression Number (Vector3d global units)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame3d global frameUnits (Defines local) ->
+  Frame3d global (Defines local) ->
   Expression Number (Vector3d global units) ->
   Expression Number (Vector3d local units)
 relativeTo = Expression.relativeTo
 
 projectInto ::
-  Plane3d global planeUnits (Defines local) ->
+  Plane3d global (Defines local) ->
   Expression Number (Vector3d global units) ->
   Expression Number (Vector2d local units)
 projectInto = Expression.projectInto
 
 transformBy ::
-  Transform3d a space translationUnits ->
+  Transform3d a space ->
   Expression Number (Vector3d space units) ->
   Expression Number (Vector3d space units)
 transformBy = Expression.transformBy
