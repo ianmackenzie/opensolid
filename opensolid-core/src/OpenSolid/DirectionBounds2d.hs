@@ -24,7 +24,6 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Prelude
 import OpenSolid.Primitives qualified as Primitives
-import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -34,8 +33,6 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 newtype DirectionBounds2d space
   = UnitBounds2d (VectorBounds2d space Unitless)
   deriving (Show)
-
-instance HasUnits (DirectionBounds2d space) Unitless
 
 instance
   space1 ~ space2 =>

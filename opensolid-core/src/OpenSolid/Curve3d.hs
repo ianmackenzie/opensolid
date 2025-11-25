@@ -60,7 +60,6 @@ import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.Transform3d (Transform3d)
-import OpenSolid.Units (HasUnits)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
@@ -75,8 +74,6 @@ instance HasField "compiled" (Curve3d space) (Compiled space) where
 
 instance HasField "derivative" (Curve3d space) (VectorCurve3d space Meters) where
   getField (Curve3d _ d) = d
-
-instance HasUnits (Curve3d space) Meters
 
 instance Bounded3d (Curve3d space) space where
   bounds = bounds

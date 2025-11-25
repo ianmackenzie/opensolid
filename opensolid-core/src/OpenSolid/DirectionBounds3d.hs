@@ -12,7 +12,6 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Prelude
-import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
@@ -22,8 +21,6 @@ import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 newtype DirectionBounds3d space
   = UnitBounds3d (VectorBounds3d space Unitless)
   deriving (Show)
-
-instance HasUnits (DirectionBounds3d space) Unitless
 
 instance
   space1 ~ space2 =>

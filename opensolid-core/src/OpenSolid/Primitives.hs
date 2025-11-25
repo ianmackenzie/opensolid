@@ -1429,8 +1429,6 @@ deriving instance Show (Point3d space)
 instance FFI (Point3d FFI.Space) where
   representation = FFI.classRepresentation "Point3d"
 
-instance HasUnits (Point3d space) Meters
-
 instance
   ( space1 ~ space2
   , meters ~ Meters
@@ -1950,8 +1948,6 @@ deriving instance Show (Bounds3d space)
 
 instance FFI (Bounds3d FFI.Space) where
   representation = FFI.classRepresentation "Bounds3d"
-
-instance HasUnits (Bounds3d space) Meters
 
 instance
   ( space1 ~ space2

@@ -35,7 +35,6 @@ import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
-import OpenSolid.Units (HasUnits)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3d (Vector3d)
@@ -66,8 +65,6 @@ instance
 
 type Compiled space =
   CompiledFunction UvPoint (Point3d space) UvBounds (Bounds3d space)
-
-instance HasUnits (SurfaceFunction3d space) Meters
 
 instance
   (space1 ~ space2, meters ~ Meters) =>

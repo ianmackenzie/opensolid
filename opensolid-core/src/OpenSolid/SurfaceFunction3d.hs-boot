@@ -16,7 +16,6 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Transform3d (Transform3d)
-import OpenSolid.Units (HasUnits)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
@@ -42,8 +41,6 @@ type Compiled space =
   CompiledFunction UvPoint (Point3d space) UvBounds (Bounds3d space)
 
 instance HasField "compiled" (SurfaceFunction3d space) (Compiled space)
-
-instance HasUnits (SurfaceFunction3d space) Meters
 
 instance
   (space1 ~ space2, meters ~ Meters) =>

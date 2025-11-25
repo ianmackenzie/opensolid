@@ -192,8 +192,6 @@ instance HasUnits (Expression input (Vector3d space units)) units
 
 instance HasUnits (Expression input (Point2d space units)) units
 
-instance HasUnits (Expression input (Point3d space)) Meters
-
 instance
   input1 ~ input2 =>
   Units.Coercion
