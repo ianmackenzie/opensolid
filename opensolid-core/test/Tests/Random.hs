@@ -136,7 +136,7 @@ frame3d = Random.map Frame3d.fromTopPlane plane3d
 bounds2d :: Generator (Bounds2d space Meters)
 bounds2d = Random.map2 Bounds2d lengthBounds lengthBounds
 
-bounds3d :: Generator (Bounds3d space Meters)
+bounds3d :: Generator (Bounds3d space)
 bounds3d = Random.map3 Bounds3d lengthBounds lengthBounds lengthBounds
 
 vectorBounds2d :: Generator (VectorBounds2d space Meters)

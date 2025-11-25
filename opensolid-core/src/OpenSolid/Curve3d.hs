@@ -68,7 +68,7 @@ import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 data Curve3d space = Curve3d (Compiled space) ~(VectorCurve3d space Meters)
 
 type Compiled space =
-  CompiledFunction Number (Point3d space Meters) (Bounds Unitless) (Bounds3d space Meters)
+  CompiledFunction Number (Point3d space Meters) (Bounds Unitless) (Bounds3d space)
 
 instance HasField "compiled" (Curve3d space) (Compiled space) where
   getField (Curve3d c _) = c
@@ -215,10 +215,10 @@ endPoint curve = evaluate curve 1
 evaluate :: Curve3d space -> Number -> Point3d space Meters
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
-evaluateBounds :: Curve3d space -> Bounds Unitless -> Bounds3d space Meters
+evaluateBounds :: Curve3d space -> Bounds Unitless -> Bounds3d space
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
-bounds :: Curve3d space -> Bounds3d space Meters
+bounds :: Curve3d space -> Bounds3d space
 bounds curve = evaluateBounds curve Bounds.unitInterval
 
 reverse :: Curve3d space -> Curve3d space

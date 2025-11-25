@@ -24,13 +24,13 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 
 data Set3d a space
-  = Node (Bounds3d space Meters) (Set3d a space) (Set3d a space)
-  | Leaf (Bounds3d space Meters) a
+  = Leaf (Bounds3d space) a
+  | Node (Bounds3d space) (Set3d a space) (Set3d a space)
 
 instance Bounded3d (Set3d a space) space where
   bounds = bounds
 
-bounds :: Set3d a space -> Bounds3d space Meters
+bounds :: Set3d a space -> Bounds3d space
 bounds (Node nodeBounds _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
@@ -50,20 +50,20 @@ fromNonEmpty givenItems = do
   let boundedItems = NonEmpty.map boundedItem givenItems
   buildRightward (NonEmpty.length boundedItems) boundedItems
 
-buildRightward :: Int -> NonEmpty (Bounds3d space Meters, a) -> Set3d a space
+buildRightward :: Int -> NonEmpty (Bounds3d space, a) -> Set3d a space
 buildRightward = build Bounds3d.rightwardCoordinate buildForward
 
-buildForward :: Int -> NonEmpty (Bounds3d space Meters, a) -> Set3d a space
+buildForward :: Int -> NonEmpty (Bounds3d space, a) -> Set3d a space
 buildForward = build Bounds3d.forwardCoordinate buildUpward
 
-buildUpward :: Int -> NonEmpty (Bounds3d space Meters, a) -> Set3d a space
+buildUpward :: Int -> NonEmpty (Bounds3d space, a) -> Set3d a space
 buildUpward = build Bounds3d.upwardCoordinate buildRightward
 
 build ::
-  (Bounds3d space Meters -> Bounds Meters) ->
-  (Int -> NonEmpty (Bounds3d space Meters, a) -> Set3d a space) ->
+  (Bounds3d space -> Bounds Meters) ->
+  (Int -> NonEmpty (Bounds3d space, a) -> Set3d a space) ->
   Int ->
-  NonEmpty (Bounds3d space Meters, a) ->
+  NonEmpty (Bounds3d space, a) ->
   Set3d a space
 build boundsCoordinate buildSubset n boundedItems
   | n == 1 = assert (NonEmpty.length boundedItems == 1) do
@@ -103,7 +103,7 @@ union left right = do
   let aggregateBounds = Bounds3d.aggregate2 (bounds left) (bounds right)
   Node aggregateBounds left right
 
-find :: Tolerance Meters => Bounds3d space Meters -> Set3d a space -> Fuzzy (Maybe a)
+find :: Tolerance Meters => Bounds3d space -> Set3d a space -> Fuzzy (Maybe a)
 find searchBounds set = case set of
   Node nodeBounds leftChild rightChild
     | not (nodeBounds `intersects` searchBounds) -> Resolved Nothing -- No overlapping items
@@ -117,10 +117,10 @@ find searchBounds set = case set of
   Leaf itemBounds item ->
     Resolved (if searchBounds `intersects` itemBounds then Just item else Nothing)
 
-filter :: Tolerance Meters => Bounds3d space Meters -> Set3d a space -> List a
+filter :: Tolerance Meters => Bounds3d space -> Set3d a space -> List a
 filter searchBounds set = search searchBounds set []
 
-search :: Tolerance Meters => Bounds3d space Meters -> Set3d a space -> List a -> List a
+search :: Tolerance Meters => Bounds3d space -> Set3d a space -> List a -> List a
 search searchBounds set accumulated = case set of
   Node nodeBounds leftChild rightChild
     | not (nodeBounds `intersects` searchBounds) -> accumulated

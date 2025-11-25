@@ -1476,23 +1476,25 @@ instance
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters1 ~ Meters
+  , meters2 ~ Meters
   ) =>
   Addition
-    (Point3d space1 units1)
-    (VectorBounds3d space2 units2)
-    (Bounds3d space1 units1)
+    (Point3d space1 meters1)
+    (VectorBounds3d space2 meters2)
+    (Bounds3d space1)
   where
   Position3d p .+. vb = PositionBounds3d (p .+. vb)
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters1 ~ Meters
+  , meters2 ~ Meters
   ) =>
   Subtraction
-    (Point3d space1 units1)
-    (VectorBounds3d space2 units2)
-    (Bounds3d space1 units1)
+    (Point3d space1 meters1)
+    (VectorBounds3d space2 meters2)
+    (Bounds3d space1)
   where
   Position3d p .-. vb = PositionBounds3d (p .-. vb)
 
@@ -1940,133 +1942,123 @@ instance
 
 ----- Bounds3d -----
 
-type role Bounds3d phantom phantom
+type role Bounds3d phantom
 
 -- | A bounding box in 3D.
-newtype Bounds3d space units
-  = PositionBounds3d (VectorBounds3d space units)
+newtype Bounds3d space
+  = PositionBounds3d (VectorBounds3d space Meters)
 
 {-# COMPLETE Bounds3d #-}
 
 {-# INLINE Bounds3d #-}
 
 -- | Construct a point from its X and Y coordinates.
-pattern Bounds3d :: Bounds units -> Bounds units -> Bounds units -> Bounds3d space units
+pattern Bounds3d :: Bounds Meters -> Bounds Meters -> Bounds Meters -> Bounds3d space
 pattern Bounds3d bx by bz <- PositionBounds3d (VectorBounds3d bx by bz)
   where
     Bounds3d bx by bz = PositionBounds3d (VectorBounds3d bx by bz)
 
-deriving instance Show (Bounds3d space units)
+deriving instance Show (Bounds3d space)
 
-instance FFI (Bounds3d FFI.Space Meters) where
+instance FFI (Bounds3d FFI.Space) where
   representation = FFI.classRepresentation "Bounds3d"
 
-instance HasUnits (Bounds3d space units) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (Bounds3d space1 unitsA) (Bounds3d space2 unitsB)
-  where
-  coerce = Data.Coerce.coerce
+instance HasUnits (Bounds3d space) Meters
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
   Addition
-    (Bounds3d space1 units1)
-    (Vector3d space2 units2)
-    (Bounds3d space1 units1)
+    (Bounds3d space1)
+    (Vector3d space2 meters)
+    (Bounds3d space1)
   where
   PositionBounds3d pb .+. v = PositionBounds3d (pb .+. v)
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
   Addition
-    (Bounds3d space1 units1)
-    (VectorBounds3d space2 units2)
-    (Bounds3d space1 units1)
+    (Bounds3d space1)
+    (VectorBounds3d space2 meters)
+    (Bounds3d space1)
   where
   PositionBounds3d pb .+. vb = PositionBounds3d (pb .+. vb)
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
   Subtraction
-    (Bounds3d space1 units1)
-    (Vector3d space2 units2)
-    (Bounds3d space1 units1)
+    (Bounds3d space1)
+    (Vector3d space2 meters)
+    (Bounds3d space1)
   where
   PositionBounds3d pb .-. v = PositionBounds3d (pb .-. v)
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
   Subtraction
-    (Bounds3d space1 units1)
-    (VectorBounds3d space2 units2)
-    (Bounds3d space1 units1)
+    (Bounds3d space1)
+    (VectorBounds3d space2 meters)
+    (Bounds3d space1)
   where
   PositionBounds3d pb .-. vb = PositionBounds3d (pb .-. vb)
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
   Subtraction
-    (Point3d space1 units1)
-    (Bounds3d space2 units2)
-    (VectorBounds3d space1 units1)
+    (Point3d space1 meters)
+    (Bounds3d space2)
+    (VectorBounds3d space1 Meters)
   where
   Position3d p .-. PositionBounds3d pb = p .-. pb
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
   Subtraction
-    (Bounds3d space1 units1)
-    (Point3d space2 units2)
-    (VectorBounds3d space1 units1)
+    (Bounds3d space1)
+    (Point3d space2 meters)
+    (VectorBounds3d space1 Meters)
   where
   PositionBounds3d pb .-. Position3d p = pb .-. p
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  space1 ~ space2 =>
   Subtraction
-    (Bounds3d space1 units1)
-    (Bounds3d space2 units2)
-    (VectorBounds3d space1 units1)
+    (Bounds3d space1)
+    (Bounds3d space2)
+    (VectorBounds3d space1 Meters)
   where
   PositionBounds3d pb1 .-. PositionBounds3d pb2 = pb1 .-. pb2
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
-  Intersects (Point3d space1 units1) (Bounds3d space2 units2) units1
+  Intersects (Point3d space1 meters) (Bounds3d space2) Meters
   where
   Position3d p `intersects` PositionBounds3d pb = p `intersects` pb
 
 instance
   ( space1 ~ space2
-  , units1 ~ units2
+  , meters ~ Meters
   ) =>
-  Intersects (Bounds3d space1 units1) (Point3d space2 units2) units1
+  Intersects (Bounds3d space1) (Point3d space2 meters) Meters
   where
   box `intersects` point = point `intersects` box
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Bounds3d space1 units1) (Bounds3d space2 units2) units1
+  space1 ~ space2 =>
+  Intersects (Bounds3d space1) (Bounds3d space2) Meters
   where
   PositionBounds3d pb1 `intersects` PositionBounds3d pb2 = pb1 `intersects` pb2
 

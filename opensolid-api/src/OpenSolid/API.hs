@@ -1102,7 +1102,7 @@ point3d =
     ]
       <> affineTransformations3d Point3d.transformBy
 
-type Bounds3d = Bounds3d.Bounds3d FFI.Space Meters
+type Bounds3d = Bounds3d.Bounds3d FFI.Space
 
 bounds3d :: Class
 bounds3d =

@@ -65,7 +65,7 @@ instance
   getField (SurfaceFunction3d _ _ dv) = dv
 
 type Compiled space =
-  CompiledFunction UvPoint (Point3d space Meters) UvBounds (Bounds3d space Meters)
+  CompiledFunction UvPoint (Point3d space Meters) UvBounds (Bounds3d space)
 
 instance HasUnits (SurfaceFunction3d space) Meters
 
@@ -185,7 +185,7 @@ constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunct
 evaluate :: SurfaceFunction3d space -> UvPoint -> Point3d space Meters
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
-evaluateBounds :: SurfaceFunction3d space -> UvBounds -> Bounds3d space Meters
+evaluateBounds :: SurfaceFunction3d space -> UvBounds -> Bounds3d space
 evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
 
 derivative ::

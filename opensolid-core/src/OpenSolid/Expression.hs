@@ -1776,11 +1776,12 @@ instance
   evaluateBounds (VectorSurface2d _ compiled) uvBounds = Evaluate.surface2dBounds compiled uvBounds
 
 instance
+  meters ~ Meters =>
   Evaluation
     Number
-    (Point3d space units)
+    (Point3d space meters)
     (Bounds Unitless)
-    (Bounds3d space units)
+    (Bounds3d space)
   where
   evaluate (Curve3d _ compiled) tValue =
     Position3d (Evaluate.curve3dValue compiled tValue)
@@ -1789,11 +1790,12 @@ instance
     PositionBounds3d (Evaluate.curve3dBounds compiled tBounds)
 
 instance
+  meters ~ Meters =>
   Evaluation
     UvPoint
-    (Point3d space units)
+    (Point3d space meters)
     UvBounds
-    (Bounds3d space units)
+    (Bounds3d space)
   where
   evaluate (Surface3d _ compiled) uvPoint =
     Position3d (Evaluate.surface3dValue compiled uvPoint)

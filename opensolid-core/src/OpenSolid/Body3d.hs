@@ -169,7 +169,7 @@ data HalfEdge space where
     , uvCurve :: Curve2d UvSpace Unitless -- UV curve parameterized by 3D arc length
     , curve3d :: Curve3d space -- Arc length parameterized 3D curve
     , length :: Length -- Arc length of 3D curve
-    , bounds :: Bounds3d space Meters -- Bounds on 3D curve
+    , bounds :: Bounds3d space -- Bounds on 3D curve
     } ->
     HalfEdge space
   DegenerateHalfEdge ::
@@ -210,7 +210,7 @@ data EmptyBody = EmptyBody deriving (Eq, Show)
 Fails if the given bounds are empty
 (the length, width, or height is zero).
 -}
-block :: Tolerance Meters => Bounds3d space Meters -> Result EmptyBody (Body3d space)
+block :: Tolerance Meters => Bounds3d space -> Result EmptyBody (Body3d space)
 block bounds =
   case Region2d.rectangle (Bounds3d.projectInto World3d.topPlane bounds) of
     Error Region2d.EmptyRegion -> Error EmptyBody

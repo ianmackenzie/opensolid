@@ -268,9 +268,9 @@ relativeTo frame (Bounds2d x y) = do
   Bounds2d (Bounds (x0 .-. rx) (x0 .+. rx)) (Bounds (y0 .-. ry) (y0 .+. ry))
 
 placeOn ::
-  Plane3d space units (Defines local) ->
-  Bounds2d local units ->
-  Bounds3d space units
+  Plane3d space Meters (Defines local) ->
+  Bounds2d local Meters ->
+  Bounds3d space
 placeOn plane (Bounds2d x y) = do
   let Plane3d _ (PlaneOrientation3d i j) = plane
   let Direction3d ix iy iz = i

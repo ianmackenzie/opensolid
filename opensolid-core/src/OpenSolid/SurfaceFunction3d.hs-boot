@@ -39,11 +39,7 @@ instance
     (VectorSurfaceFunction3d space Meters)
 
 type Compiled space =
-  CompiledFunction
-    UvPoint
-    (Point3d space Meters)
-    UvBounds
-    (Bounds3d space Meters)
+  CompiledFunction UvPoint (Point3d space Meters) UvBounds (Bounds3d space)
 
 instance HasField "compiled" (SurfaceFunction3d space) (Compiled space)
 
@@ -65,7 +61,7 @@ instance
 
 constant :: Point3d space Meters -> SurfaceFunction3d space
 evaluate :: SurfaceFunction3d space -> UvPoint -> Point3d space Meters
-evaluateBounds :: SurfaceFunction3d space -> UvBounds -> Bounds3d space Meters
+evaluateBounds :: SurfaceFunction3d space -> UvBounds -> Bounds3d space
 derivative ::
   SurfaceParameter ->
   SurfaceFunction3d space ->
