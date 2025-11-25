@@ -1560,16 +1560,16 @@ gltf = do
     , Class.member2 "Write Binary" "Path" "Resolution" writeBinary $(docs 'Gltf.writeBinary)
     ]
 
-type Camera3d = Camera3d.Camera3d FFI.Space Meters
+type Camera3d = Camera3d.Camera3d FFI.Space
 
 camera3d :: Class
 camera3d =
   Class.new @Camera3d $(docs ''Camera3d.Camera3d) $
     [ Class.factory3 "Look At" "Eye Point" "Focal Point" "Projection" Camera3d.lookAt $(docs 'Camera3d.lookAt)
     , Class.factory5 "Orbit" "Focal Point" "Azimuth" "Elevation" "Distance" "Projection" Camera3d.orbit $(docs 'Camera3d.orbit)
-    , Class.nested @(Camera3d.Projection Meters) $(docs ''Camera3d.Projection) []
-    , Class.static1 "Perspective" "Vertical FOV" (Camera3d.perspective @Meters) $(docs 'Camera3d.perspective)
-    , Class.static1 "Orthographic" "Viewport Height" (Camera3d.orthographic @Meters) $(docs 'Camera3d.orthographic)
+    , Class.nested @Camera3d.Projection $(docs ''Camera3d.Projection) []
+    , Class.static1 "Perspective" "Vertical FOV" Camera3d.perspective $(docs 'Camera3d.perspective)
+    , Class.static1 "Orthographic" "Viewport Height" Camera3d.orthographic $(docs 'Camera3d.orthographic)
     ]
 
 data Mitsuba = Mitsuba Model3d Camera3d (Mitsuba.Lighting FFI.Space)

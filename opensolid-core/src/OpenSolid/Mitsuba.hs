@@ -90,7 +90,7 @@ writeFiles ::
   "path" ::: Text ->
   "model" ::: Model3d space ->
   "resolution" ::: Resolution Meters ->
-  "camera" ::: Camera3d space Meters ->
+  "camera" ::: Camera3d space ->
   "lighting" ::: Lighting space ->
   IO ()
 writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named lighting) = do
@@ -246,7 +246,7 @@ attributeText :: (Text, Text) -> Text
 attributeText (name, value) = name <> "=\"" <> value <> "\""
 
 sceneDocument ::
-  "camera" ::: Camera3d space Meters ->
+  "camera" ::: Camera3d space ->
   "lighting" ::: Lighting space ->
   "meshProperties" ::: List Properties ->
   "meshFileName" ::: Text ->
@@ -316,7 +316,7 @@ bsdfNode material opacity = do
         , XmlNode "bsdf" [("type", "twosided")] [principledNode]
         ]
 
-cameraNode :: Camera3d space Meters -> XmlNode
+cameraNode :: Camera3d space -> XmlNode
 cameraNode camera = do
   let filmNode =
         XmlNode "film" [("type", "hdrfilm")] $
@@ -358,7 +358,7 @@ floatNode name value = typedNode "float" name (Text.number value)
 stringNode :: Text -> Text -> XmlNode
 stringNode name value = typedNode "string" name value
 
-cameraTransformationNode :: Camera3d space Meters -> XmlNode
+cameraTransformationNode :: Camera3d space -> XmlNode
 cameraTransformationNode camera = do
   let (x0, y0, z0) = Point3d.coordinates convention camera.eyePoint
   let px = Length.inMeters x0
