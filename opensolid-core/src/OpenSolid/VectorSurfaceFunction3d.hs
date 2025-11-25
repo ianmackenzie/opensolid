@@ -183,20 +183,20 @@ instance
   v .-. f = constant v .-. f
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters1 ~ Meters, meters2 ~ Meters) =>
   Addition
-    (Point3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (SurfaceFunction3d space1 units1)
+    (Point3d space1 meters1)
+    (VectorSurfaceFunction3d space2 meters2)
+    (SurfaceFunction3d space1)
   where
   point .+. function = SurfaceFunction3d.constant point .+. function
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters1 ~ Meters, meters2 ~ Meters) =>
   Subtraction
-    (Point3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (SurfaceFunction3d space1 units1)
+    (Point3d space1 meters1)
+    (VectorSurfaceFunction3d space2 meters2)
+    (SurfaceFunction3d space1)
   where
   point .-. function = SurfaceFunction3d.constant point .-. function
 

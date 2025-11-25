@@ -299,8 +299,8 @@ instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (Curve2d uvSpace unitless)
-    (SurfaceFunction3d space units)
-    (Curve3d space units)
+    (SurfaceFunction3d space)
+    (Curve3d space Meters)
   where
   function `compose` uvCurve = do
     let (dudt, dvdt) = uvCurve.derivative.components

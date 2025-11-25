@@ -111,7 +111,7 @@ instance FFI (Body3d FFI.Space) where
 data BoundarySurface space = BoundarySurface
   { surfaceId :: SurfaceId
   , orientedSurface :: Surface3d space
-  , surfaceFunction :: SurfaceFunction3d space Meters
+  , surfaceFunction :: SurfaceFunction3d space
   , handedness :: Sign
   , uvBounds :: UvBounds
   , edgeLoops :: NonEmpty (NonEmpty (Edge space))
@@ -428,7 +428,7 @@ toSurfaceWithHalfEdges surfaceIndex surface = do
 loopHalfEdges ::
   Tolerance Meters =>
   SurfaceId ->
-  SurfaceFunction3d space Meters ->
+  SurfaceFunction3d space ->
   Int ->
   NonEmpty (Curve2d UvSpace Unitless) ->
   NonEmpty (HalfEdge space)
@@ -439,7 +439,7 @@ toHalfEdge ::
   Tolerance Meters =>
   SurfaceId ->
   LoopId ->
-  SurfaceFunction3d space Meters ->
+  SurfaceFunction3d space ->
   Int ->
   Curve2d UvSpace Unitless ->
   HalfEdge space
@@ -645,7 +645,7 @@ boundarySurfaceSegments resolution BoundarySurface{surfaceId, surfaceFunction, u
 
 boundarySurfaceSegmentSet ::
   Resolution Meters ->
-  SurfaceFunction3d space Meters ->
+  SurfaceFunction3d space ->
   UvBounds ->
   Set2d UvBounds UvSpace Unitless
 boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
@@ -669,7 +669,7 @@ boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
       let set2 = Set2d.Node (Bounds2d u2 vBounds) set21 set22
       Set2d.Node uvBounds set1 set2
 
-surfaceSize :: SurfaceFunction3d space Meters -> UvBounds -> Length
+surfaceSize :: SurfaceFunction3d space -> UvBounds -> Length
 surfaceSize f uvBounds = do
   let p00 = SurfaceFunction3d.evaluate f (Bounds2d.lowerLeftCorner uvBounds)
   let p10 = SurfaceFunction3d.evaluate f (Bounds2d.lowerRightCorner uvBounds)
@@ -683,7 +683,7 @@ surfaceSize f uvBounds = do
   let d6# = Point3d.distanceFrom# p10 p01
   Quantity# (max# (max# (max# (max# (max# d1# d2#) d3#) d4#) d5#) d6#)
 
-surfaceError :: SurfaceFunction3d space Meters -> UvBounds -> Length
+surfaceError :: SurfaceFunction3d space -> UvBounds -> Length
 surfaceError f uvBounds = do
   let fuuBounds = VectorSurfaceFunction3d.evaluateBounds f.du.du uvBounds
   let fuvBounds = VectorSurfaceFunction3d.evaluateBounds f.du.dv uvBounds

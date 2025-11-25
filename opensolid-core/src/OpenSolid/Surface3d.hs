@@ -68,14 +68,14 @@ import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
 data Surface3d space = Surface3d
-  { function :: SurfaceFunction3d space Meters
+  { function :: SurfaceFunction3d space
   , domain :: Region2d UvSpace Unitless
   , outerLoop :: ~(NonEmpty (Curve3d space Meters))
   , innerLoops :: ~(List (NonEmpty (Curve3d space Meters)))
   }
 
 parametric ::
-  SurfaceFunction3d space Meters ->
+  SurfaceFunction3d space ->
   Region2d UvSpace Unitless ->
   Surface3d space
 parametric givenFunction givenDomain = do
@@ -188,7 +188,7 @@ toMesh accuracy surface = do
 
 toPolygon ::
   Length ->
-  SurfaceFunction3d space Meters ->
+  SurfaceFunction3d space ->
   VectorSurfaceFunction3d space Meters ->
   VectorSurfaceFunction3d space Meters ->
   VectorSurfaceFunction3d space Meters ->
@@ -199,7 +199,7 @@ toPolygon accuracy f fuu fuv fvv loop =
 
 boundaryPoints ::
   Length ->
-  SurfaceFunction3d space Meters ->
+  SurfaceFunction3d space ->
   VectorSurfaceFunction3d space Meters ->
   VectorSurfaceFunction3d space Meters ->
   VectorSurfaceFunction3d space Meters ->

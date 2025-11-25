@@ -17,65 +17,60 @@ import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units (HasUnits)
-import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 
-type role SurfaceFunction3d nominal nominal
+type role SurfaceFunction3d nominal
 
-type SurfaceFunction3d :: Type -> Type -> Type
-data SurfaceFunction3d space units
+type SurfaceFunction3d :: Type -> Type
+data SurfaceFunction3d space
 
 instance
   HasField
     "du"
-    (SurfaceFunction3d space units)
-    (VectorSurfaceFunction3d space units)
+    (SurfaceFunction3d space)
+    (VectorSurfaceFunction3d space Meters)
 
 instance
   HasField
     "dv"
-    (SurfaceFunction3d space units)
-    (VectorSurfaceFunction3d space units)
+    (SurfaceFunction3d space)
+    (VectorSurfaceFunction3d space Meters)
 
-type Compiled space units =
+type Compiled space =
   CompiledFunction
     UvPoint
-    (Point3d space units)
+    (Point3d space Meters)
     UvBounds
-    (Bounds3d space units)
+    (Bounds3d space Meters)
 
-instance HasField "compiled" (SurfaceFunction3d space units) (Compiled space units)
+instance HasField "compiled" (SurfaceFunction3d space) (Compiled space)
 
-instance HasUnits (SurfaceFunction3d space units) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (SurfaceFunction3d space1 unitsA) (SurfaceFunction3d space2 unitsB)
+instance HasUnits (SurfaceFunction3d space) Meters
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Addition
-    (SurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (SurfaceFunction3d space1 units1)
+    (SurfaceFunction3d space1)
+    (VectorSurfaceFunction3d space2 meters)
+    (SurfaceFunction3d space1)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Subtraction
-    (SurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (SurfaceFunction3d space1 units1)
+    (SurfaceFunction3d space1)
+    (VectorSurfaceFunction3d space2 meters)
+    (SurfaceFunction3d space1)
 
-constant :: Point3d space units -> SurfaceFunction3d space units
-evaluate :: SurfaceFunction3d space units -> UvPoint -> Point3d space units
-evaluateBounds :: SurfaceFunction3d space units -> UvBounds -> Bounds3d space units
+constant :: Point3d space Meters -> SurfaceFunction3d space
+evaluate :: SurfaceFunction3d space -> UvPoint -> Point3d space Meters
+evaluateBounds :: SurfaceFunction3d space -> UvBounds -> Bounds3d space Meters
 derivative ::
   SurfaceParameter ->
-  SurfaceFunction3d space units ->
-  VectorSurfaceFunction3d space units
+  SurfaceFunction3d space ->
+  VectorSurfaceFunction3d space Meters
 transformBy ::
-  Transform3d tag space units ->
-  SurfaceFunction3d space units ->
-  SurfaceFunction3d space units
+  Transform3d tag space Meters ->
+  SurfaceFunction3d space ->
+  SurfaceFunction3d space

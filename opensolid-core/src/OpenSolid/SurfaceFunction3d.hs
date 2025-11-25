@@ -36,57 +36,45 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units (HasUnits)
-import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
-data SurfaceFunction3d space units
+data SurfaceFunction3d space
   = SurfaceFunction3d
-      (Compiled space units)
-      ~(VectorSurfaceFunction3d space units)
-      ~(VectorSurfaceFunction3d space units)
+      (Compiled space)
+      ~(VectorSurfaceFunction3d space Meters)
+      ~(VectorSurfaceFunction3d space Meters)
 
 instance
   HasField
     "du"
-    (SurfaceFunction3d space units)
-    (VectorSurfaceFunction3d space units)
+    (SurfaceFunction3d space)
+    (VectorSurfaceFunction3d space Meters)
   where
   getField (SurfaceFunction3d _ du _) = du
 
 instance
   HasField
     "dv"
-    (SurfaceFunction3d space units)
-    (VectorSurfaceFunction3d space units)
+    (SurfaceFunction3d space)
+    (VectorSurfaceFunction3d space Meters)
   where
   getField (SurfaceFunction3d _ _ dv) = dv
 
-type Compiled space units =
-  CompiledFunction
-    UvPoint
-    (Point3d space units)
-    UvBounds
-    (Bounds3d space units)
+type Compiled space =
+  CompiledFunction UvPoint (Point3d space Meters) UvBounds (Bounds3d space Meters)
 
-instance HasUnits (SurfaceFunction3d space units) units
+instance HasUnits (SurfaceFunction3d space) Meters
 
 instance
-  space1 ~ space2 =>
-  Units.Coercion (SurfaceFunction3d space1 unitsA) (SurfaceFunction3d space2 unitsB)
-  where
-  coerce (SurfaceFunction3d c du dv) =
-    SurfaceFunction3d (Units.coerce c) (Units.coerce du) (Units.coerce dv)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Addition
-    (SurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (SurfaceFunction3d space1 units1)
+    (SurfaceFunction3d space1)
+    (VectorSurfaceFunction3d space2 meters)
+    (SurfaceFunction3d space1)
   where
   lhs .+. rhs =
     new
@@ -94,20 +82,20 @@ instance
       (\parameter -> derivative parameter lhs .+. VectorSurfaceFunction3d.derivative parameter rhs)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Addition
-    (SurfaceFunction3d space1 units1)
-    (Vector3d space2 units2)
-    (SurfaceFunction3d space1 units1)
+    (SurfaceFunction3d space1)
+    (Vector3d space2 meters)
+    (SurfaceFunction3d space1)
   where
   f .+. v = f .+. VectorSurfaceFunction3d.constant v
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Subtraction
-    (SurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (SurfaceFunction3d space1 units1)
+    (SurfaceFunction3d space1)
+    (VectorSurfaceFunction3d space2 meters)
+    (SurfaceFunction3d space1)
   where
   lhs .-. rhs =
     new
@@ -115,20 +103,20 @@ instance
       (\parameter -> derivative parameter lhs .-. VectorSurfaceFunction3d.derivative parameter rhs)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Subtraction
-    (SurfaceFunction3d space1 units1)
-    (Vector3d space2 units2)
-    (SurfaceFunction3d space1 units1)
+    (SurfaceFunction3d space1)
+    (Vector3d space2 meters)
+    (SurfaceFunction3d space1)
   where
   f .-. v = f .-. VectorSurfaceFunction3d.constant v
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  space1 ~ space2 =>
   Subtraction
-    (SurfaceFunction3d space1 units1)
-    (SurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (SurfaceFunction3d space1)
+    (SurfaceFunction3d space2)
+    (VectorSurfaceFunction3d space1 Meters)
   where
   lhs .-. rhs =
     VectorSurfaceFunction3d.new
@@ -136,20 +124,20 @@ instance
       (\parameter -> derivative parameter lhs .-. derivative parameter rhs)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Subtraction
-    (SurfaceFunction3d space1 units1)
-    (Point3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (SurfaceFunction3d space1)
+    (Point3d space2 meters)
+    (VectorSurfaceFunction3d space1 Meters)
   where
   function .-. point = function .-. constant point
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Subtraction
-    (Point3d space1 units1)
-    (SurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (Point3d space1 meters)
+    (SurfaceFunction3d space2)
+    (VectorSurfaceFunction3d space1 Meters)
   where
   point .-. function = constant point .-. function
 
@@ -157,7 +145,7 @@ instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (Region2d uvSpace unitless)
-    (SurfaceFunction3d space Meters)
+    (SurfaceFunction3d space)
     (Surface3d space)
   where
   function `compose` domain = Surface3d.parametric function domain
@@ -166,8 +154,8 @@ instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (SurfaceFunction2d uvSpace unitless)
-    (SurfaceFunction3d space units)
-    (SurfaceFunction3d space units)
+    (SurfaceFunction3d space)
+    (SurfaceFunction3d space)
   where
   outer `compose` inner = do
     let duOuter = outer.du `compose` inner
@@ -178,32 +166,32 @@ instance
           duOuter .*. dU .+. dvOuter .*. dV
     new (outer.compiled `compose` inner.compiled) composedDerivative
 
-instance HasField "compiled" (SurfaceFunction3d space units) (Compiled space units) where
+instance HasField "compiled" (SurfaceFunction3d space) (Compiled space) where
   getField (SurfaceFunction3d c _ _) = c
 
 new ::
-  Compiled space units ->
-  (SurfaceParameter -> VectorSurfaceFunction3d space units) ->
-  SurfaceFunction3d space units
+  Compiled space ->
+  (SurfaceParameter -> VectorSurfaceFunction3d space Meters) ->
+  SurfaceFunction3d space
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
   let dv' = VectorSurfaceFunction3d.new dv.compiled (\case U -> du.dv; V -> dv.dv)
   SurfaceFunction3d c du dv'
 
-constant :: Point3d space units -> SurfaceFunction3d space units
+constant :: Point3d space Meters -> SurfaceFunction3d space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3d.zero)
 
-evaluate :: SurfaceFunction3d space units -> UvPoint -> Point3d space units
+evaluate :: SurfaceFunction3d space -> UvPoint -> Point3d space Meters
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
-evaluateBounds :: SurfaceFunction3d space units -> UvBounds -> Bounds3d space units
+evaluateBounds :: SurfaceFunction3d space -> UvBounds -> Bounds3d space Meters
 evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->
-  SurfaceFunction3d space units ->
-  VectorSurfaceFunction3d space units
+  SurfaceFunction3d space ->
+  VectorSurfaceFunction3d space Meters
 derivative U = (.du)
 derivative V = (.dv)
 
@@ -218,8 +206,8 @@ derivativeDirection partialDerivative = case VectorSurfaceFunction3d.direction p
   Error VectorSurfaceFunction3d.IsZero -> Error IsDegenerate
 
 normalDirection ::
-  Tolerance units =>
-  SurfaceFunction3d space units ->
+  Tolerance Meters =>
+  SurfaceFunction3d space ->
   Result IsDegenerate (DirectionSurfaceFunction3d space)
 normalDirection function = do
   duDirection <- derivativeDirection function.du
@@ -229,10 +217,7 @@ normalDirection function = do
     Ok directionFunction -> Ok directionFunction
     Error VectorSurfaceFunction3d.IsZero -> Error IsDegenerate
 
-transformBy ::
-  Transform3d tag space units ->
-  SurfaceFunction3d space units ->
-  SurfaceFunction3d space units
+transformBy :: Transform3d tag space Meters -> SurfaceFunction3d space -> SurfaceFunction3d space
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
@@ -245,9 +230,9 @@ transformBy transform function = do
   new compiledTransformed transformedDerivative
 
 placeIn ::
-  Frame3d global units (Defines local) ->
-  SurfaceFunction3d local units ->
-  SurfaceFunction3d global units
+  Frame3d global Meters (Defines local) ->
+  SurfaceFunction3d local ->
+  SurfaceFunction3d global
 placeIn frame function = do
   let compiledPlaced =
         CompiledFunction.map
@@ -260,7 +245,7 @@ placeIn frame function = do
   new compiledPlaced placedDerivative
 
 relativeTo ::
-  Frame3d global units (Defines local) ->
-  SurfaceFunction3d global units ->
-  SurfaceFunction3d local units
+  Frame3d global Meters (Defines local) ->
+  SurfaceFunction3d global ->
+  SurfaceFunction3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)

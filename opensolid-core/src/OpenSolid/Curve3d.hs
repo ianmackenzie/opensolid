@@ -127,10 +127,8 @@ instance Composition (Curve Unitless) (Curve3d space units) (Curve3d space units
       ((outer.derivative `compose` inner) .*. inner.derivative)
 
 instance
-  Composition
-    (SurfaceFunction Unitless)
-    (Curve3d space units)
-    (SurfaceFunction3d space units)
+  (unitless ~ Unitless, meters ~ Meters) =>
+  Composition (SurfaceFunction unitless) (Curve3d space meters) (SurfaceFunction3d space)
   where
   curve `compose` function =
     SurfaceFunction3d.new
