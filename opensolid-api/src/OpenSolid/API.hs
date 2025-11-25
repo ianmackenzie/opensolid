@@ -11,7 +11,6 @@ import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Body3d.BoundedBy qualified as Body3d.BoundedBy
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d qualified as Bounds3d
@@ -1486,8 +1485,8 @@ body3d = do
   let writeMitsuba path givenResolution body =
         Mitsuba.writeMeshes path [(Body3d.toMesh givenResolution body, #name "")]
   Class.new @Body3d $(docs ''Body3d.Body3d) $
-    [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3d.extruded :: Plane3d -> Region2d -> Length -> Length -> Result Body3d.BoundedBy.Error Body3d) $(docs 'Body3d.extruded)
-    , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3d.revolved :: Plane3d -> Region2d -> Axis2d -> Angle -> Result Body3d.BoundedBy.Error Body3d) $(docs 'Body3d.revolved)
+    [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3d.extruded @FFI.Space @FFI.Space) $(docs 'Body3d.extruded)
+    , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3d.revolved @FFI.Space @FFI.Space) $(docs 'Body3d.revolved)
     , Class.factoryM1R "Block" "Bounding Box" Body3d.block $(docs 'Body3d.block)
     , Class.factoryM2R "Sphere" "Center Point" "Diameter" Body3d.sphere $(docs 'Body3d.sphere)
     , Class.factoryM3R "Cylinder" "Start Point" "End Point" "Diameter" Body3d.cylinder $(docs 'Body3d.cylinder)
