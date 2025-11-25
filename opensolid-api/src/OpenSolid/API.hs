@@ -1477,7 +1477,7 @@ uvRegion =
     , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
     ]
 
-type Body3d = Body3d.Body3d FFI.Space Meters
+type Body3d = Body3d.Body3d FFI.Space
 
 body3d :: Class
 body3d = do

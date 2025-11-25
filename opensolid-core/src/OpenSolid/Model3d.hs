@@ -42,7 +42,7 @@ A model is composed of bodies (parts) and groups of models (assemblies),
 each with optional attributes such as name or material.
 -}
 data Model3d space where
-  BodyNode :: Tolerance Meters => List Attribute -> Body3d space Meters -> Model3d space
+  BodyNode :: Tolerance Meters => List Attribute -> Body3d space -> Model3d space
   GroupNode :: List Attribute -> List (Model3d space) -> Model3d space
 
 instance FFI (Model3d FFI.Space) where
@@ -121,7 +121,7 @@ rootContext =
 data BodyWithContext space where
   BodyWithContext ::
     (Traversal, Tolerance Meters) =>
-    Body3d space Meters ->
+    Body3d space ->
     BodyWithContext space
 
 data GroupWithContext space where
@@ -140,7 +140,7 @@ visitGroup (GroupNode attrs kids) = inChildContext attrs (Just (GroupWithContext
 pattern Body ::
   Traversal =>
   (Traversal, Tolerance Meters) =>
-  Body3d space Meters ->
+  Body3d space ->
   Model3d space
 pattern Body bod <- (visitBody -> Just (BodyWithContext bod))
 
@@ -152,11 +152,11 @@ pattern Group ::
 pattern Group kids <- (visitGroup -> Just (GroupWithContext kids))
 
 -- | Create a model from a single solid body (a part).
-body :: Tolerance Meters => Body3d space Meters -> Model3d space
+body :: Tolerance Meters => Body3d space -> Model3d space
 body = bodyWith []
 
 -- | Create a model from a single solid body (a part), with the given attributes.
-bodyWith :: Tolerance Meters => List Attribute -> Body3d space Meters -> Model3d space
+bodyWith :: Tolerance Meters => List Attribute -> Body3d space -> Model3d space
 bodyWith = BodyNode
 
 -- | Create a model formed from a group of sub-models (an assembly).
