@@ -4,11 +4,11 @@ import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3d, Point3d)
 
-class Bounded3d a space units | a -> space, a -> units where
-  bounds :: a -> Bounds3d space units
+class Bounded3d a space | a -> space where
+  bounds :: a -> Bounds3d space Meters
 
-instance Bounded3d (Point3d space units) space units where
+instance meters ~ Meters => Bounded3d (Point3d space meters) space where
   bounds = Bounds3d.constant
 
-instance Bounded3d (Bounds3d space units) space units where
+instance meters ~ Meters => Bounded3d (Bounds3d space meters) space where
   bounds = id

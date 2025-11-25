@@ -78,7 +78,7 @@ instance HasField "derivative" (Curve3d space) (VectorCurve3d space Meters) wher
 
 instance HasUnits (Curve3d space) Meters
 
-instance Bounded3d (Curve3d space) space Meters where
+instance Bounded3d (Curve3d space) space where
   bounds = bounds
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show)

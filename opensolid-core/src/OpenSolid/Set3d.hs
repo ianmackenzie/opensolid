@@ -27,24 +27,24 @@ data Set3d a space
   = Node (Bounds3d space Meters) (Set3d a space) (Set3d a space)
   | Leaf (Bounds3d space Meters) a
 
-instance Bounded3d (Set3d a space) space Meters where
+instance Bounded3d (Set3d a space) space where
   bounds = bounds
 
 bounds :: Set3d a space -> Bounds3d space Meters
 bounds (Node nodeBounds _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
-one :: Bounded3d a space Meters => a -> Set3d a space
+one :: Bounded3d a space => a -> Set3d a space
 one item = Leaf (Bounded3d.bounds item) item
 
-two :: Bounded3d a space Meters => a -> a -> Set3d a space
+two :: Bounded3d a space => a -> a -> Set3d a space
 two firstItem secondItem = do
   let firstBounds = Bounded3d.bounds firstItem
   let secondBounds = Bounded3d.bounds secondItem
   let nodeBounds = Bounds3d.aggregate2 firstBounds secondBounds
   Node nodeBounds (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
 
-fromNonEmpty :: Bounded3d a space Meters => NonEmpty a -> Set3d a space
+fromNonEmpty :: Bounded3d a space => NonEmpty a -> Set3d a space
 fromNonEmpty givenItems = do
   let boundedItem item = (Bounded3d.bounds item, item)
   let boundedItems = NonEmpty.map boundedItem givenItems

@@ -179,7 +179,7 @@ data HalfEdge space where
     } ->
     HalfEdge space
 
-instance Bounded3d (HalfEdge space) space Meters where
+instance Bounded3d (HalfEdge space) space where
   bounds HalfEdge{bounds} = bounds
   bounds DegenerateHalfEdge{point} = Bounds3d.constant point
 
@@ -200,7 +200,7 @@ data Corner space = Corner
   , point :: Point3d space Meters
   }
 
-instance Bounded3d (Corner space) space Meters where
+instance Bounded3d (Corner space) space where
   bounds Corner{point} = Bounds3d.constant point
 
 data EmptyBody = EmptyBody deriving (Eq, Show)
