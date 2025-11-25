@@ -471,8 +471,8 @@ halfEdgeStartPoint halfEdge = case halfEdge of
 
 registerSurfaceWithHalfEdges ::
   Tolerance Meters =>
-  Set3d (Corner space) space Meters ->
-  Set3d (HalfEdge space) space Meters ->
+  Set3d (Corner space) space ->
+  Set3d (HalfEdge space) space ->
   SurfaceRegistry space ->
   SurfaceWithHalfEdges space ->
   Result BoundedBy.Error (SurfaceRegistry space)
@@ -491,8 +491,8 @@ registerSurfaceWithHalfEdges cornerSet halfEdgeSet surfaceRegistry surfaceWithHa
 registerHalfEdge ::
   Tolerance Meters =>
   Sign ->
-  Set3d (Corner space) space Meters ->
-  Set3d (HalfEdge space) space Meters ->
+  Set3d (Corner space) space ->
+  Set3d (HalfEdge space) space ->
   SurfaceRegistry space ->
   HalfEdge space ->
   Result BoundedBy.Error (SurfaceRegistry space)
@@ -580,7 +580,7 @@ cornerPoint Corner{point} = point
 getCornerPoint ::
   Tolerance Meters =>
   Point3d space Meters ->
-  Set3d (Corner space) space Meters ->
+  Set3d (Corner space) space ->
   Result BoundedBy.Error (Point3d space Meters)
 getCornerPoint searchPoint cornerSet =
   case Set3d.filter (Bounds3d.constant searchPoint) cornerSet of
