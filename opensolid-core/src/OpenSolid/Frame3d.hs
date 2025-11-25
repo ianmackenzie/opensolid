@@ -1,5 +1,5 @@
 module OpenSolid.Frame3d
-  ( Frame3d (Frame3d)
+  ( Frame3d (Frame3d, originPoint, orientation)
   , coerce
   , forward
   , backward
@@ -75,7 +75,7 @@ import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Frame3d (Frame3d), Plane3d (Plane3d))
+import OpenSolid.Primitives (Frame3d (Frame3d, orientation, originPoint), Plane3d (Plane3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.World3d qualified as World3d

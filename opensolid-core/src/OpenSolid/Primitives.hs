@@ -7,8 +7,8 @@ module OpenSolid.Primitives
   , Point2d (Point2d, Position2d)
   , VectorBounds2d (VectorBounds2d)
   , Bounds2d (Bounds2d, PositionBounds2d)
-  , Axis2d (Axis2d)
-  , Frame2d (Frame2d)
+  , Axis2d (Axis2d, originPoint, direction)
+  , Frame2d (Frame2d, originPoint, orientation)
   , Transform2d (Transform2d)
   , Vector3d (Vector3d, Vector3d#)
   , Direction3d (Unit3d, Direction3d)
@@ -17,9 +17,9 @@ module OpenSolid.Primitives
   , Point3d (Point3d, Position3d)
   , VectorBounds3d (VectorBounds3d, VectorBounds3d#)
   , Bounds3d (Bounds3d, PositionBounds3d)
-  , Axis3d (Axis3d)
-  , Plane3d (Plane3d)
-  , Frame3d (Frame3d)
+  , Axis3d (Axis3d, originPoint, direction)
+  , Plane3d (Plane3d, originPoint, orientation)
+  , Frame3d (Frame3d, originPoint, orientation)
   , Transform3d (Transform3d)
   )
 where
@@ -892,13 +892,10 @@ type role Axis2d phantom phantom
 -- | An axis in 2D, defined by an origin point and direction.
 data Axis2d space units
   = -- | Construct an axis from its origin point and direction.
-    Axis2d (Point2d space units) (Direction2d space)
-
-instance HasField "originPoint" (Axis2d space units) (Point2d space units) where
-  getField (Axis2d p _) = p
-
-instance HasField "direction" (Axis2d space units) (Direction2d space) where
-  getField (Axis2d _ d) = d
+    Axis2d
+    { originPoint :: Point2d space units
+    , direction :: Direction2d space
+    }
 
 deriving instance Eq (Axis2d space units)
 
@@ -917,13 +914,11 @@ instance FFI (Axis2d UvSpace Unitless) where
 type role Frame2d phantom phantom phantom
 
 type Frame2d :: Type -> Type -> LocalSpace -> Type
-data Frame2d space units defines = Frame2d (Point2d space units) (Orientation2d space)
-
-instance HasField "originPoint" (Frame2d space units defines) (Point2d space units) where
-  getField (Frame2d p _) = p
-
-instance HasField "orientation" (Frame2d space units defines) (Orientation2d space) where
-  getField (Frame2d _ o) = o
+data Frame2d space units defines
+  = Frame2d
+  { originPoint :: Point2d space units
+  , orientation :: Orientation2d space
+  }
 
 instance HasField "xDirection" (Frame2d space units defines) (Direction2d space) where
   getField = (.orientation.xDirection)
@@ -2054,13 +2049,10 @@ type role Axis3d phantom
 -- | An axis in 3D, defined by an origin point and direction.
 data Axis3d space
   = -- | Construct an axis from its origin point and direction.
-    Axis3d (Point3d space) (Direction3d space)
-
-instance HasField "originPoint" (Axis3d space) (Point3d space) where
-  getField (Axis3d p _) = p
-
-instance HasField "direction" (Axis3d space) (Direction3d space) where
-  getField (Axis3d _ d) = d
+    Axis3d
+    { originPoint :: Point3d space
+    , direction :: Direction3d space
+    }
 
 deriving instance Eq (Axis3d space)
 
@@ -2080,7 +2072,10 @@ type Plane3d :: Type -> LocalSpace -> Type
 The normal direction  of the plane is then defined as
 the cross product of its X and Y directions.
 -}
-data Plane3d space defines = Plane3d (Point3d space) (PlaneOrientation3d space)
+data Plane3d space defines = Plane3d
+  { originPoint :: Point3d space
+  , orientation :: PlaneOrientation3d space
+  }
 
 deriving instance Eq (Plane3d space defines)
 
@@ -2090,12 +2085,6 @@ deriving instance Show (Plane3d space defines)
 
 instance FFI (Plane3d FFI.Space defines) where
   representation = FFI.classRepresentation "Plane3d"
-
-instance HasField "originPoint" (Plane3d space defines) (Point3d space) where
-  getField (Plane3d p _) = p
-
-instance HasField "orientation" (Plane3d space defines) (PlaneOrientation3d space) where
-  getField (Plane3d _ o) = o
 
 instance HasField "xDirection" (Plane3d space defines) (Direction3d space) where
   getField = (.orientation.xDirection)
@@ -2121,13 +2110,10 @@ type role Frame3d phantom phantom
 
 -- | A frame of reference in 3D, defined by an origin point and orientation.
 type Frame3d :: Type -> LocalSpace -> Type
-data Frame3d space defines = Frame3d (Point3d space) (Orientation3d space)
-
-instance HasField "originPoint" (Frame3d space defines) (Point3d space) where
-  getField (Frame3d p _) = p
-
-instance HasField "orientation" (Frame3d space defines) (Orientation3d space) where
-  getField (Frame3d _ o) = o
+data Frame3d space defines = Frame3d
+  { originPoint :: Point3d space
+  , orientation :: Orientation3d space
+  }
 
 instance HasField "rightwardDirection" (Frame3d space defines) (Direction3d space) where
   getField = (.orientation.rightwardDirection)

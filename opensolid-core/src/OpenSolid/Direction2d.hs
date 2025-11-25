@@ -46,6 +46,7 @@ import OpenSolid.Primitives
   , Transform2d
   , Vector2d (Vector2d)
   )
+import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform

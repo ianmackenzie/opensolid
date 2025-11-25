@@ -26,6 +26,7 @@ import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List

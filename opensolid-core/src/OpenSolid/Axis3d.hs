@@ -1,5 +1,5 @@
 module OpenSolid.Axis3d
-  ( Axis3d (Axis3d)
+  ( Axis3d (Axis3d, originPoint, direction)
   , coerce
   , originPoint
   , direction
@@ -19,7 +19,7 @@ import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d, Plane3d (Plane3d))
+import OpenSolid.Primitives (Axis3d (Axis3d, direction, originPoint), Frame3d, Plane3d (Plane3d))
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d (Transform3d)
 

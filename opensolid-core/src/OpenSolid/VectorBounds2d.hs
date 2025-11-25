@@ -66,6 +66,7 @@ import OpenSolid.Primitives
   , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d (VectorBounds3d)
   )
+import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform2d (Transform2d (Transform2d))

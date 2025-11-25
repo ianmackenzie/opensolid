@@ -68,6 +68,7 @@ import OpenSolid.Primitives
   , Vector2d (Vector2d, Vector2d#)
   , Vector3d
   )
+import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.Units qualified as Units

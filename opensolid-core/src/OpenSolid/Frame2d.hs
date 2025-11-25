@@ -1,5 +1,5 @@
 module OpenSolid.Frame2d
-  ( Frame2d (Frame2d)
+  ( Frame2d (Frame2d, originPoint, orientation)
   , coerce
   , erase
   , xy
@@ -29,7 +29,7 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Frame2d (Frame2d)
+  ( Frame2d (Frame2d, orientation, originPoint)
   , Orientation2d (Orientation2d)
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
