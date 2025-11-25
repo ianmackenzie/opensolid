@@ -30,10 +30,10 @@ data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex
 indexed = Mesh
 
-vertices :: Mesh vertex -> (Array vertex)
+vertices :: Mesh vertex -> Array vertex
 vertices (Mesh vs _) = vs
 
-faceIndices :: Mesh vertex -> (List (Int, Int, Int))
+faceIndices :: Mesh vertex -> List (Int, Int, Int)
 faceIndices (Mesh _ is) = is
 
 numVertices :: Mesh vertex -> Int
