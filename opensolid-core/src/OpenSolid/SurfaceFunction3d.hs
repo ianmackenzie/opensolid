@@ -157,8 +157,8 @@ instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (Region2d uvSpace unitless)
-    (SurfaceFunction3d space units)
-    (Surface3d space units)
+    (SurfaceFunction3d space Meters)
+    (Surface3d space)
   where
   function `compose` domain = Surface3d.parametric function domain
 

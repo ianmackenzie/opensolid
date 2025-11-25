@@ -110,7 +110,7 @@ instance FFI (Body3d FFI.Space) where
 
 data BoundarySurface space = BoundarySurface
   { surfaceId :: SurfaceId
-  , orientedSurface :: Surface3d space Meters
+  , orientedSurface :: Surface3d space
   , surfaceFunction :: SurfaceFunction3d space Meters
   , handedness :: Sign
   , uvBounds :: UvBounds
@@ -158,7 +158,7 @@ newtype CurveId = CurveId Int deriving (Eq, Ord, Show)
 
 data SurfaceWithHalfEdges space = SurfaceWithHalfEdges
   { surfaceId :: SurfaceId
-  , surface :: Surface3d space Meters
+  , surface :: Surface3d space
   , handedness :: Sign
   , halfEdgeLoops :: NonEmpty (NonEmpty (HalfEdge space))
   }
@@ -381,10 +381,7 @@ The surfaces do not have to have consistent orientation,
 but currently the *first* surface must have the correct orientation
 since all others will be flipped if necessary to match it.
 -}
-boundedBy ::
-  Tolerance Meters =>
-  List (Surface3d space Meters) ->
-  Result BoundedBy.Error (Body3d space)
+boundedBy :: Tolerance Meters => List (Surface3d space) -> Result BoundedBy.Error (Body3d space)
 boundedBy [] = Error BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = do
   let surfacesWithHalfEdges = NonEmpty.mapWithIndex toSurfaceWithHalfEdges givenSurfaces
@@ -421,11 +418,7 @@ surfaceWithHalfEdgesMapEntry surfaceWithHalfEdges = do
   let SurfaceWithHalfEdges{surfaceId} = surfaceWithHalfEdges
   (surfaceId, surfaceWithHalfEdges)
 
-toSurfaceWithHalfEdges ::
-  Tolerance Meters =>
-  Int ->
-  Surface3d space Meters ->
-  SurfaceWithHalfEdges space
+toSurfaceWithHalfEdges :: Tolerance Meters => Int -> Surface3d space -> SurfaceWithHalfEdges space
 toSurfaceWithHalfEdges surfaceIndex surface = do
   let loops = Region2d.boundaryLoops surface.domain
   let surfaceId = SurfaceId surfaceIndex
@@ -927,7 +920,7 @@ isValidSteinerPoint edgeSet uvPoint = case edgeSet of
       1# -> True
       _ -> False
 
-surfaces :: Body3d space -> NonEmpty (Surface3d space Meters)
+surfaces :: Body3d space -> NonEmpty (Surface3d space)
 surfaces (Body3d boundarySurfaces) = NonEmpty.map (.orientedSurface) boundarySurfaces
 
 -- | Convert a body defined in local coordinates to one defined in global coordinates.
