@@ -70,8 +70,8 @@ import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 data Surface3d space = Surface3d
   { function :: SurfaceFunction3d space
   , domain :: Region2d UvSpace Unitless
-  , outerLoop :: ~(NonEmpty (Curve3d space Meters))
-  , innerLoops :: ~(List (NonEmpty (Curve3d space Meters)))
+  , outerLoop :: ~(NonEmpty (Curve3d space))
+  , innerLoops :: ~(List (NonEmpty (Curve3d space)))
   }
 
 parametric ::
@@ -102,19 +102,19 @@ on plane region = do
   let planeFunction = p0 .+. SurfaceFunction.u .*. vx .+. SurfaceFunction.v .*. vy
   parametric planeFunction normalizedRegion
 
-extruded :: Curve3d space Meters -> Vector3d space Meters -> Surface3d space
+extruded :: Curve3d space -> Vector3d space Meters -> Surface3d space
 extruded curve displacement =
   parametric
     (curve `compose` SurfaceFunction.u .+. SurfaceFunction.v .*. displacement)
     Region2d.unitSquare
 
-translational :: Curve3d space Meters -> VectorCurve3d space Meters -> Surface3d space
+translational :: Curve3d space -> VectorCurve3d space Meters -> Surface3d space
 translational uCurve vCurve =
   parametric
     (uCurve `compose` SurfaceFunction.u .+. vCurve `compose` SurfaceFunction.v)
     Region2d.unitSquare
 
-ruled :: Curve3d space Meters -> Curve3d space Meters -> Surface3d space
+ruled :: Curve3d space -> Curve3d space -> Surface3d space
 ruled bottom top = do
   let f1 = bottom `compose` SurfaceFunction.u
   let f2 = top `compose` SurfaceFunction.u
@@ -150,7 +150,7 @@ revolved sketchPlane curve axis angle = do
                 .+. height .*. frame3d.upwardDirection
         Ok (parametric function Region2d.unitSquare)
 
-boundaryCurves :: Surface3d space -> NonEmpty (Curve3d space Meters)
+boundaryCurves :: Surface3d space -> NonEmpty (Curve3d space)
 boundaryCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoops)
 
 flip :: Surface3d space -> Surface3d space

@@ -300,7 +300,7 @@ instance
   Composition
     (Curve2d uvSpace unitless)
     (SurfaceFunction3d space)
-    (Curve3d space Meters)
+    (Curve3d space)
   where
   function `compose` uvCurve = do
     let (dudt, dvdt) = uvCurve.derivative.components
@@ -799,9 +799,9 @@ relativeTo ::
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
 placeOn ::
-  Plane3d space units (Defines local) ->
-  Curve2d local units ->
-  Curve3d space units
+  Plane3d space Meters (Defines local) ->
+  Curve2d local Meters ->
+  Curve3d space
 placeOn plane curve = Curve3d.on plane curve
 
 transformBy ::

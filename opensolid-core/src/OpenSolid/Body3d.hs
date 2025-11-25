@@ -124,7 +124,7 @@ data Edge space where
     { halfEdgeId :: HalfEdgeId
     , startPoint :: Point3d space Meters
     , uvCurve :: Curve2d UvSpace Unitless
-    , curve3d :: Curve3d space Meters
+    , curve3d :: Curve3d space
     , matingId :: HalfEdgeId
     , matingUvCurve :: Curve2d UvSpace Unitless
     , correctlyAligned :: Bool
@@ -167,7 +167,7 @@ data HalfEdge space where
   HalfEdge ::
     { halfEdgeId :: HalfEdgeId
     , uvCurve :: Curve2d UvSpace Unitless -- UV curve parameterized by 3D arc length
-    , curve3d :: Curve3d space Meters -- Arc length parameterized 3D curve
+    , curve3d :: Curve3d space -- Arc length parameterized 3D curve
     , length :: Length -- Arc length of 3D curve
     , bounds :: Bounds3d space Meters -- Bounds on 3D curve
     } ->
@@ -590,7 +590,7 @@ getCornerPoint searchPoint cornerSet =
 toMatingEdge ::
   Tolerance Meters =>
   HalfEdgeId ->
-  Curve3d space Meters ->
+  Curve3d space ->
   HalfEdge space ->
   Maybe MatingEdge
 toMatingEdge _ _ DegenerateHalfEdge{} = Nothing
@@ -761,7 +761,7 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
 
 edgeLinearizationPredicate ::
   Resolution Meters ->
-  Curve3d space Meters ->
+  Curve3d space ->
   Curve2d UvSpace Unitless ->
   Curve2d UvSpace Unitless ->
   Bool ->

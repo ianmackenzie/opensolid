@@ -20,42 +20,38 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 
-type role Curve3d nominal nominal
+type role Curve3d nominal
 
-type Curve3d :: Type -> Type -> Type
-data Curve3d space units
+type Curve3d :: Type -> Type
+data Curve3d space
 
-type Compiled space units =
-  CompiledFunction
-    Number
-    (Point3d space units)
-    (Bounds Unitless)
-    (Bounds3d space units)
+type Compiled space =
+  CompiledFunction Number (Point3d space Meters) (Bounds Unitless) (Bounds3d space Meters)
 
-instance HasField "compiled" (Curve3d space units) (Compiled space units)
+instance HasField "compiled" (Curve3d space) (Compiled space)
 
-instance HasField "derivative" (Curve3d space units) (VectorCurve3d space units)
+instance HasField "derivative" (Curve3d space) (VectorCurve3d space Meters)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Addition
-    (Curve3d space1 units1)
-    (VectorCurve3d space2 units2)
-    (Curve3d space1 units1)
+    (Curve3d space1)
+    (VectorCurve3d space2 meters)
+    (Curve3d space1)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, meters ~ Meters) =>
   Subtraction
-    (Curve3d space1 units1)
-    (VectorCurve3d space2 units2)
-    (Curve3d space1 units1)
+    (Curve3d space1)
+    (VectorCurve3d space2 meters)
+    (Curve3d space1)
 
-constant :: Point3d space units -> Curve3d space units
-new :: Compiled space units -> VectorCurve3d space units -> Curve3d space units
+constant :: Point3d space Meters -> Curve3d space
+new :: Compiled space -> VectorCurve3d space Meters -> Curve3d space
 on ::
-  Plane3d space units (Defines local) ->
-  Curve2d local units ->
-  Curve3d space units
-evaluate :: Curve3d space units -> Number -> Point3d space units
-evaluateBounds :: Curve3d space units -> Bounds Unitless -> Bounds3d space units
-reverse :: Curve3d space units -> Curve3d space units
+  Plane3d space Meters (Defines local) ->
+  Curve2d local Meters ->
+  Curve3d space
+evaluate :: Curve3d space -> Number -> Point3d space Meters
+evaluateBounds :: Curve3d space -> Bounds Unitless -> Bounds3d space Meters
+reverse :: Curve3d space -> Curve3d space
