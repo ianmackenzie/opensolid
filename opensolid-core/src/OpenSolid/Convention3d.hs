@@ -16,13 +16,13 @@ import OpenSolid.Arithmetic
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Number (Number)
-import {-# SOURCE #-} OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
   , Direction3d (Direction3d, Unit3d)
   , Frame3d (Frame3d)
   , Orientation3d (Orientation3d)
   )
+import OpenSolid.World3d qualified as World3d
 
 {-| A coordinate convention in 3D space.
 
@@ -63,9 +63,9 @@ custom ::
   (forall space. Orientation3d space -> Direction3d space) ->
   Convention3d
 custom givenXDirection givenYDirection givenZDirection = do
-  let Direction3d xr xf xu = givenXDirection Orientation3d.world
-  let Direction3d yr yf yu = givenYDirection Orientation3d.world
-  let Direction3d zr zf zu = givenZDirection Orientation3d.world
+  let Direction3d xr xf xu = givenXDirection World3d.forwardOrientation
+  let Direction3d yr yf yu = givenYDirection World3d.forwardOrientation
+  let Direction3d zr zf zu = givenZDirection World3d.forwardOrientation
   Convention3d{xr, xf, xu, yr, yf, yu, zr, zf, zu}
 
 -- | Get the X direction of a given orientation for a particular coordinate convention.

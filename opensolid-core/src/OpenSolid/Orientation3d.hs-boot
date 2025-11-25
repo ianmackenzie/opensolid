@@ -1,6 +1,5 @@
 module OpenSolid.Orientation3d
   ( Orientation3d
-  , world
   , rightwardDirection
   , leftwardDirection
   , forwardDirection
@@ -18,7 +17,6 @@ where
 
 import OpenSolid.Primitives (Direction3d, Orientation3d, PlaneOrientation3d)
 
-world :: Orientation3d space
 rightwardDirection :: Orientation3d space -> Direction3d space
 leftwardDirection :: Orientation3d space -> Direction3d space
 forwardDirection :: Orientation3d space -> Direction3d space

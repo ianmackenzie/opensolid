@@ -1176,8 +1176,7 @@ type Orientation3d = Orientation3d.Orientation3d FFI.Space
 orientation3d :: Class
 orientation3d =
   Class.new @Orientation3d $(docs ''Orientation3d.Orientation3d) $
-    [ Class.constant "World" (Orientation3d.world :: Orientation3d) $(docs 'Orientation3d.world)
-    , Class.property "Forward Direction" (.forwardDirection) $(docs 'Orientation3d.forwardDirection)
+    [ Class.property "Forward Direction" (.forwardDirection) $(docs 'Orientation3d.forwardDirection)
     , Class.property "Backward Direction" (.backwardDirection) $(docs 'Orientation3d.backwardDirection)
     , Class.property "Leftward Direction" (.leftwardDirection) $(docs 'Orientation3d.leftwardDirection)
     , Class.property "Rightward Direction" (.rightwardDirection) $(docs 'Orientation3d.rightwardDirection)
@@ -1203,8 +1202,7 @@ type Frame3d = Frame3d.Frame3d FFI.Space (Defines FFI.Space)
 frame3d :: Class
 frame3d =
   Class.new @Frame3d $(docs ''Frame3d.Frame3d) $
-    [ Class.constant "World" (World3d.frame :: Frame3d) $(docs 'World3d.frame)
-    , Class.factory1 "From Front Plane" "Plane" (Frame3d.fromFrontPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromFrontPlane)
+    [ Class.factory1 "From Front Plane" "Plane" (Frame3d.fromFrontPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromFrontPlane)
     , Class.factory1 "From Back Plane" "Plane" (Frame3d.fromBackPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromBackPlane)
     , Class.factory1 "From Right Plane" "Plane" (Frame3d.fromRightPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromRightPlane)
     , Class.factory1 "From Left Plane" "Plane" (Frame3d.fromLeftPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromLeftPlane)
