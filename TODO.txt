@@ -1,26 +1,39 @@
+Go back to custom *, /, +, - operators, with e.g. .* used for expressions like "2 .* vector"?
+-> could make ".*." an alias for the built-in "*" operator...
 
-Only support Meters units for 3D positional values?
--> still support e.g. unitless or area-valued vectors
--> then 3D transformation functions don't need frameUnits, axisUnits etc. hack
--> some types e.g. Model3d already assume meters-only...
--> types to update:
-  -> Plane3d
-  -> Surface3d
-  -> SurfaceFunction3d
-  -> Set3d
-  -> Point3d
-  -> Bounds3d
-  -> Curve3d
-  -> Vertex3d
-  -> Transform3d
-  -> Frame3d
-  -> Bounded3d
-  -> Axis3d
--> do a check for 'Quantity Meters'...
+Replace use of e.g. curve.derivative with e.g. "let curve' = Curve2d.derivative curve"
+
+Reduce use of HasField instances
+-> 'actual Haskell fields' only? (including nested?)
+-> Switch types over to being records
+  -> curves and surface functions ('compiled' and derivatives)
+-> maybe even disable OverloadedRecordDot? still use records for nice construction/destructuring...
+
+Have e.g. Point2D and UvPoint be newtypes over internal units-generic Point2d type?
+-> Region2D/UvRegion, Curve2D/UvCurve, Direction2D/UvDirection, Axis2D/UvAxis, Frame2D/UvFrame
+-> Vector2D is still units-generic (can be used to implement Point2d!)
+-> some boilerplate with forwarding functions etc., but:
+  -> provides a nice place to put separate doc comments for e.g. UvPoint and Point2D
+  -> allows API to be slightly different between types, e.g. UvAxis.u vs. Axis2D.x
+-> OpenSolid.Point2D, OpenSolid.UvPoint, and OpenSolid.Polymorphic.Point2d
+
+Standardize on 'global' and 'local' as plane/frame type parameters everywhere and remove 'Defines'
+
+Make Transform2D Meters-only?
+-> *shouldn't* need to e.g. mirror UV points very often...
+-> maybe also Axis2d, Frame2d
+-> probably most consistent to just have all 2D types have units, though...
+-> Transform2D/UvTransform, Axis2D/UvAxis, Frame2D/UvFrame!
 
 Switch order of 'space' and 'units' type parameters...
 -> hopefully can mostly do it with a big regex
--> manually replace instances involving symbolic units products/quotients
+-> manually replace instances involving complex symbolic units products/quotients
+  -> include basic units products/quotients in regex
+
+New Uv module?
+-> Uv.Space
+-> Uv.Point, Uv.Direction, Uv.Curve etc. type aliases
+-> Uv.Parameter with U and V values?
 
 Refactor CoordinateSystem module now that it no longer has a CoordinateSystem type
 -> OpenSolid.Uv module with 'Space' type?
@@ -66,13 +79,9 @@ Switch back to 'normal' (non-recursive) form of quotient derivatives
 
 Juse use Aeson directly for JSON encoding/decoding?
 
-Reduce use of HasField instances
--> 'actual Haskell fields' only? (including nested?)
 
 Flip argument order in Composition typeclass
 -> rename to Composition2 temporarily to ensure all instances are updated
-
-Remove e.g. Orientation3d.world in favour of World3d.forwardOrientation?
 
 Rework Curve2d.medialAxis to use tangent directions instead of derivative vectors
 
