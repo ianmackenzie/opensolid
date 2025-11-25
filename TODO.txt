@@ -1,3 +1,23 @@
+
+Only support Meters units for 3D positional values?
+-> still support e.g. unitless or area-valued vectors
+-> then 3D transformation functions don't need frameUnits, axisUnits etc. hack
+-> some types e.g. Model3d already assume meters-only...
+-> types to update:
+  -> Plane3d
+  -> Surface3d
+  -> SurfaceFunction3d
+  -> Set3d
+  -> Point3d
+  -> Bounds3d
+  -> Curve3d
+  -> Vertex3d
+  -> Transform3d
+  -> Frame3d
+  -> Bounded3d
+  -> Axis3d
+-> do a check for 'Quantity Meters'...
+
 Switch order of 'space' and 'units' type parameters...
 -> hopefully can mostly do it with a big regex
 -> manually replace instances involving symbolic units products/quotients
@@ -74,11 +94,6 @@ Add Component3d class to Python library?
 Rationalize use of forEach
 
 Add vectorTransformations3d helper list in API module
-
-Only support Meters units for 3D positional values?
--> still support e.g. unitless or area-valued vectors
--> then 3D transformation functions don't need frameUnits, axisUnits etc. hack
--> some types e.g. Model3d already assume meters-only...
 
 Switch to upper-case 2D and 3D suffixes instead of 2d and 3d?
 -> Point2D vs Point2d
