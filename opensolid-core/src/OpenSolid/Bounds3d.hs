@@ -162,7 +162,7 @@ hull4 (Position3d p1) (Position3d p2) (Position3d p3) (Position3d p4) =
   PositionBounds3d (VectorBounds3d.hull4 p1 p2 p3 p4)
 
 -- | Construct a bounding box containing all vertices in the given non-empty list.
-hullN :: Vertex3d vertex space units => NonEmpty vertex -> Bounds3d space units
+hullN :: Vertex3d vertex space => NonEmpty vertex -> Bounds3d space Meters
 hullN vertices = do
   let positionVectors = Data.Coerce.coerce (NonEmpty.map Vertex3d.position vertices)
   PositionBounds3d (VectorBounds3d.hullN positionVectors)

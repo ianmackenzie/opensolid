@@ -12,6 +12,7 @@ import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Convention3d (Convention3d)
 import OpenSolid.IO qualified as IO
+import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
@@ -24,12 +25,7 @@ import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
 
-toText ::
-  Vertex3d vertex space units =>
-  Convention3d ->
-  (Quantity units -> Number) ->
-  Mesh vertex ->
-  Text
+toText :: Vertex3d vertex space => Convention3d -> (Length -> Number) -> Mesh vertex -> Text
 toText convention units mesh =
   Text.multiline
     [ "solid"
@@ -37,12 +33,7 @@ toText convention units mesh =
     , "endsolid"
     ]
 
-toBinary ::
-  Vertex3d vertex space units =>
-  Convention3d ->
-  (Quantity units -> Number) ->
-  Mesh vertex ->
-  Builder
+toBinary :: Vertex3d vertex space => Convention3d -> (Length -> Number) -> Mesh vertex -> Builder
 toBinary convention units mesh = do
   let emptyHeaderBytes = List.replicate 80 (Binary.uint8 0)
   let header = Binary.concat emptyHeaderBytes
@@ -51,19 +42,19 @@ toBinary convention units mesh = do
   Binary.concat [header, triangleCount, triangles]
 
 writeText ::
-  Vertex3d vertex space units =>
+  Vertex3d vertex space =>
   Text ->
   Convention3d ->
-  (Quantity units -> Number) ->
+  (Length -> Number) ->
   Mesh vertex ->
   IO ()
 writeText path convention units mesh = IO.writeUtf8 path (toText convention units mesh)
 
 writeBinary ::
-  Vertex3d vertex space units =>
+  Vertex3d vertex space =>
   Text ->
   Convention3d ->
-  (Quantity units -> Number) ->
+  (Length -> Number) ->
   Mesh vertex ->
   IO ()
 writeBinary path convention units mesh = IO.writeBinary path (toBinary convention units mesh)
@@ -82,9 +73,9 @@ pointBuilder convention units point = do
   numberBuilder (units x) <> numberBuilder (units y) <> numberBuilder (units z)
 
 triangleBuilder ::
-  Vertex3d vertex space units =>
+  Vertex3d vertex space =>
   Convention3d ->
-  (Quantity units -> Number) ->
+  (Length -> Number) ->
   (vertex, vertex, vertex) ->
   Builder
 triangleBuilder convention units (v0, v1, v2) = do
@@ -101,9 +92,9 @@ triangleBuilder convention units (v0, v1, v2) = do
     ]
 
 triangleText ::
-  Vertex3d vertex space units =>
+  Vertex3d vertex space =>
   Convention3d ->
-  (Quantity units -> Number) ->
+  (Length -> Number) ->
   (vertex, vertex, vertex) ->
   Text
 triangleText convention units (v0, v1, v2) = do

@@ -615,7 +615,7 @@ deriving instance Eq (Vertex space)
 instance Vertex2d (Vertex space) UvSpace Unitless where
   position (Vertex uvPoint _) = uvPoint
 
-instance Vertex3d (Vertex space) space Meters where
+instance Vertex3d (Vertex space) space where
   position (Vertex _ point) = point
 
 instance Bounded2d (Vertex space) UvSpace Unitless where
