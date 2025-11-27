@@ -1,3 +1,8 @@
+Add e.g. Point2D module and type alias, coexist with e.g. Point2d for now
+-> eventually, move Point2d under 'Polymorphic' namespace
+-> add monomorphic forwarding functions in Point2D module
+-> can move any Meters-specific functions like Point2d.meters into Point2D module
+
 Move SurfaceLinearization.error to SurfaceFunction3d.linearizationError
 -> or 'linearDeviation' or 'nonlinearity'
 
@@ -16,29 +21,20 @@ Have e.g. Point2D and UvPoint be newtypes over internal units-generic Point2d ty
   -> provides a nice place to put separate doc comments for e.g. UvPoint and Point2D
   -> allows API to be slightly different between types, e.g. UvAxis.u vs. Axis2D.x
 -> OpenSolid.Point2D, OpenSolid.UvPoint, and OpenSolid.Polymorphic.Point2d
+-> Maybe:
+  -> type Point2D space = Point2d Meters space
+  -> type PointR2 space = Point2d Unitless space OR type UnitlessPoint2D space = Point2D Unitless space
+  -> type UvPoint = PointR2 UvSpace = Point2d Unitless UvSpace
 
-Standardize on 'global' and 'local' as plane/frame type parameters everywhere and remove 'Defines'
+Move 't', 'u' and 'v' into Parameter module?
+-> then can rename e.g. 'Curve' to 'UnitlessCurve1D' (= Curve1d Unitless), 'Curve1D' can be 'Curve1d Meters' etc.
+-> Parameter.t is a UnitlessCurve1D, Parameter.u is a UnitlessSurfaceFunction1D
 
 Make Transform2D Meters-only?
 -> *shouldn't* need to e.g. mirror UV points very often...
 -> maybe also Axis2d, Frame2d
 -> probably most consistent to just have all 2D types have units, though...
 -> Transform2D/UvTransform, Axis2D/UvAxis, Frame2D/UvFrame!
-
-Switch order of 'space' and 'units' type parameters...
--> hopefully can mostly do it with a big regex
--> manually replace instances involving complex symbolic units products/quotients
-  -> include basic units products/quotients in regex
-
-New Uv module?
--> Uv.Space
--> Uv.Point, Uv.Direction, Uv.Curve etc. type aliases
--> Uv.Parameter with U and V values?
-
-Refactor CoordinateSystem module now that it no longer has a CoordinateSystem type
--> OpenSolid.Uv module with 'Space' type?
--> then rename CoordinateSystem to LocalCoordinates?
--> or just have convention that Frame3d is 'Frame3d units global local' etc...or 'Frame3d units space defines'
 
 Add modules for UvRegion, UvCurve etc.
 
