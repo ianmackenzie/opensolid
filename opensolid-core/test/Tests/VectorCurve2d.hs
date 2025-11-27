@@ -13,7 +13,7 @@ import Test qualified
 derivativeConsistency ::
   Show (Quantity units) =>
   Quantity units ->
-  VectorCurve2d space units ->
+  VectorCurve2d units space ->
   Expectation
 derivativeConsistency givenTolerance curve = Test.do
   tValue <- Parameter.random
@@ -29,7 +29,7 @@ derivativeConsistency givenTolerance curve = Test.do
 
 boundsConsistency ::
   (Tolerance units, Show (Quantity units)) =>
-  VectorCurve2d space units ->
+  VectorCurve2d units space ->
   Expectation
 boundsConsistency vectorCurve = Test.do
   tBounds <- Bounds.random Parameter.random

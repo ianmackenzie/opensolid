@@ -30,25 +30,25 @@ type Compiled space =
 
 instance HasField "compiled" (Curve3d space) (Compiled space)
 
-instance HasField "derivative" (Curve3d space) (VectorCurve3d space Meters)
+instance HasField "derivative" (Curve3d space) (VectorCurve3d Meters space)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
   Addition
     (Curve3d space1)
-    (VectorCurve3d space2 meters)
+    (VectorCurve3d meters space2)
     (Curve3d space1)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
   Subtraction
     (Curve3d space1)
-    (VectorCurve3d space2 meters)
+    (VectorCurve3d meters space2)
     (Curve3d space1)
 
 constant :: Point3d space -> Curve3d space
-new :: Compiled space -> VectorCurve3d space Meters -> Curve3d space
-on :: Plane3d global local -> Curve2d local Meters -> Curve3d global
+new :: Compiled space -> VectorCurve3d Meters space -> Curve3d space
+on :: Plane3d global local -> Curve2d Meters local -> Curve3d global
 evaluate :: Curve3d space -> Number -> Point3d space
 evaluateBounds :: Curve3d space -> Bounds Unitless -> Bounds3d space
 reverse :: Curve3d space -> Curve3d space

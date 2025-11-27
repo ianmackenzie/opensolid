@@ -22,61 +22,61 @@ import OpenSolid.VectorBounds3d (VectorBounds3d)
 type role VectorSurfaceFunction3d nominal nominal
 
 type VectorSurfaceFunction3d :: Type -> Type -> Type
-data VectorSurfaceFunction3d space units
+data VectorSurfaceFunction3d units space
 
-type Compiled space units =
+type Compiled units space =
   CompiledFunction
     UvPoint
-    (Vector3d space units)
+    (Vector3d units space)
     UvBounds
-    (VectorBounds3d space units)
+    (VectorBounds3d units space)
 
 instance
   HasField
     "compiled"
-    (VectorSurfaceFunction3d space units)
-    (Compiled space units)
+    (VectorSurfaceFunction3d units space)
+    (Compiled units space)
 
-instance HasUnits (VectorSurfaceFunction3d space units) units
+instance HasUnits (VectorSurfaceFunction3d units space) units
 
 instance
   space1 ~ space2 =>
   Units.Coercion
-    (VectorSurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
+    (VectorSurfaceFunction3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
 
 instance
   Multiplication_
     (SurfaceFunction units1)
-    (VectorSurfaceFunction3d space units2)
-    (VectorSurfaceFunction3d space (units1 ?*? units2))
+    (VectorSurfaceFunction3d units2 space)
+    (VectorSurfaceFunction3d (units1 ?*? units2) space)
 
 instance
   Multiplication_
-    (VectorSurfaceFunction3d space units1)
+    (VectorSurfaceFunction3d units1 space)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d space (units1 ?*? units2))
+    (VectorSurfaceFunction3d (units1 ?*? units2) space)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
-    (VectorSurfaceFunction3d space units2)
-    (VectorSurfaceFunction3d space units3)
+    (VectorSurfaceFunction3d units2 space)
+    (VectorSurfaceFunction3d units3 space)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (VectorSurfaceFunction3d space units1)
+    (VectorSurfaceFunction3d units1 space)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d space units3)
+    (VectorSurfaceFunction3d units3 space)
 
 new ::
-  Compiled space units ->
-  (SurfaceParameter -> VectorSurfaceFunction3d space units) ->
-  VectorSurfaceFunction3d space units
+  Compiled units space ->
+  (SurfaceParameter -> VectorSurfaceFunction3d units space) ->
+  VectorSurfaceFunction3d units space
 derivative ::
   SurfaceParameter ->
-  VectorSurfaceFunction3d space units ->
-  VectorSurfaceFunction3d space units
-constant :: Vector3d space units -> VectorSurfaceFunction3d space units
+  VectorSurfaceFunction3d units space ->
+  VectorSurfaceFunction3d units space
+constant :: Vector3d units space -> VectorSurfaceFunction3d units space

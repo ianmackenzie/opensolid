@@ -427,7 +427,7 @@ transformBy :: Transform3d.Rigid space -> Frame3d space defines1 -> Frame3d spac
 transformBy transform (Frame3d p o) =
   Frame3d (Point3d.transformBy transform p) (Orientation3d.transformBy transform o)
 
-translateBy :: Vector3d space Meters -> Frame3d space defines1 -> Frame3d space defines2
+translateBy :: Vector3d Meters space -> Frame3d space defines1 -> Frame3d space defines2
 translateBy = Transform3d.translateByImpl transformBy
 
 translateIn :: Direction3d space -> Length -> Frame3d space defines1 -> Frame3d space defines2

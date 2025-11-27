@@ -6,8 +6,8 @@ import OpenSolid.Prelude
 type role Region2d nominal nominal
 
 type Region2d :: Type -> Type -> Type
-data Region2d space units
+data Region2d units space
 
-outerLoop :: Region2d space units -> NonEmpty (Curve2d space units)
-innerLoops :: Region2d space units -> List (NonEmpty (Curve2d space units))
-boundaryCurves :: Region2d space units -> NonEmpty (Curve2d space units)
+outerLoop :: Region2d units space -> NonEmpty (Curve2d units space)
+innerLoops :: Region2d units space -> List (NonEmpty (Curve2d units space))
+boundaryCurves :: Region2d units space -> NonEmpty (Curve2d units space)

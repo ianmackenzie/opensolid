@@ -34,74 +34,74 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 type role Curve2d nominal nominal
 
 type Curve2d :: Type -> Type -> Type
-data Curve2d space units
+data Curve2d units space
 
-type Compiled space units =
+type Compiled units space =
   CompiledFunction
     Number
-    (Point2d space units)
+    (Point2d units space)
     (Bounds Unitless)
-    (Bounds2d space units)
+    (Bounds2d units space)
 
 data IsPoint = IsPoint
 
-instance HasField "compiled" (Curve2d space units) (Compiled space units)
+instance HasField "compiled" (Curve2d units space) (Compiled units space)
 
-instance HasField "derivative" (Curve2d space units) (VectorCurve2d space units)
+instance HasField "derivative" (Curve2d units space) (VectorCurve2d units space)
 
-instance HasField "startPoint" (Curve2d space units) (Point2d space units)
+instance HasField "startPoint" (Curve2d units space) (Point2d units space)
 
-instance HasField "endPoint" (Curve2d space units) (Point2d space units)
+instance HasField "endPoint" (Curve2d units space) (Point2d units space)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Curve2d space1 units1)
-    (VectorCurve2d space2 units2)
-    (Curve2d space1 units1)
+    (Curve2d units1 space1)
+    (VectorCurve2d units2 space2)
+    (Curve2d units1 space1)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Curve2d space1 units1)
-    (VectorCurve2d space2 units2)
-    (Curve2d space1 units1)
+    (Curve2d units1 space1)
+    (VectorCurve2d units2 space2)
+    (Curve2d units1 space1)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Curve2d uvSpace unitless)
+    (Curve2d unitless uvSpace)
     (SurfaceFunction units)
     (Curve units)
 
-constant :: Point2d space units -> Curve2d space units
-new :: Compiled space units -> VectorCurve2d space units -> Curve2d space units
-evaluate :: Curve2d space units -> Number -> Point2d space units
-evaluateBounds :: Curve2d space units -> Bounds Unitless -> Bounds2d space units
-bounds :: Curve2d space units -> Bounds2d space units
+constant :: Point2d units space -> Curve2d units space
+new :: Compiled units space -> VectorCurve2d units space -> Curve2d units space
+evaluate :: Curve2d units space -> Number -> Point2d units space
+evaluateBounds :: Curve2d units space -> Bounds Unitless -> Bounds2d units space
+bounds :: Curve2d units space -> Bounds2d units space
 tangentDirection ::
   Tolerance units =>
-  Curve2d space units ->
+  Curve2d units space ->
   Result IsPoint (DirectionCurve2d space)
-reverse :: Curve2d space units -> Curve2d space units
-xy :: Curve units -> Curve units -> Curve2d space units
-line :: Point2d space units -> Point2d space units -> Curve2d space units
+reverse :: Curve2d units space -> Curve2d units space
+xy :: Curve units -> Curve units -> Curve2d units space
+line :: Point2d units space -> Point2d units space -> Curve2d units space
 hermite ::
-  Point2d space units ->
-  List (Vector2d space units) ->
-  Point2d space units ->
-  List (Vector2d space units) ->
-  Curve2d space units
+  Point2d units space ->
+  List (Vector2d units space) ->
+  Point2d units space ->
+  List (Vector2d units space) ->
+  Curve2d units space
 desingularize ::
-  Maybe (Point2d space units, Vector2d space units) ->
-  Curve2d space units ->
-  Maybe (Point2d space units, Vector2d space units) ->
-  Curve2d space units
+  Maybe (Point2d units space, Vector2d units space) ->
+  Curve2d units space ->
+  Maybe (Point2d units space, Vector2d units space) ->
+  Curve2d units space
 transformBy ::
-  Transform2d tag space units ->
-  Curve2d space units ->
-  Curve2d space units
+  Transform2d tag units space ->
+  Curve2d units space ->
+  Curve2d units space
 piecewise ::
   Tolerance units =>
-  NonEmpty (Curve2d space units) ->
-  Curve2d space units
+  NonEmpty (Curve2d units space) ->
+  Curve2d units space

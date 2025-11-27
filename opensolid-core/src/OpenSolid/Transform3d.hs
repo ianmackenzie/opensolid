@@ -57,13 +57,13 @@ type Uniform space = Transform3d Transform.Uniform space
 
 type Affine space = Transform3d Transform.Affine space
 
-unitX :: Vector3d space Unitless
+unitX :: Vector3d Unitless space
 unitX = Vector3d 1 0 0
 
-unitY :: Vector3d space Unitless
+unitY :: Vector3d Unitless space
 unitY = Vector3d 0 1 0
 
-unitZ :: Vector3d space Unitless
+unitZ :: Vector3d Unitless space
 unitZ = Vector3d 0 0 1
 
 identity :: Rigid space
@@ -75,16 +75,16 @@ coerce (Transform3d p0 i j k) =
 
 withFixedPoint ::
   Point3d space ->
-  Vector3d space Unitless ->
-  Vector3d space Unitless ->
-  Vector3d space Unitless ->
+  Vector3d Unitless space ->
+  Vector3d Unitless space ->
+  Vector3d Unitless space ->
   Transform3d tag space
 withFixedPoint fixedPoint vx vy vz = do
   let Point3d x0 y0 z0 = fixedPoint
   let originPoint = fixedPoint .-. x0 .*. vx .-. y0 .*. vy .-. z0 .*. vz
   Transform3d originPoint vx vy vz
 
-translateBy :: Vector3d space Meters -> Rigid space
+translateBy :: Vector3d Meters space -> Rigid space
 translateBy vector = Transform3d (Position3d vector) unitX unitY unitZ
 
 translateIn :: Direction3d space -> Length -> Rigid space
@@ -207,7 +207,7 @@ toAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 
-translateByImpl :: (Rigid space -> a -> b) -> Vector3d space Meters -> a -> b
+translateByImpl :: (Rigid space -> a -> b) -> Vector3d Meters space -> a -> b
 translateByImpl transformBy vector = transformBy (translateBy vector)
 
 translateInImpl :: (Rigid space -> a -> b) -> Direction3d space -> Length -> a -> b

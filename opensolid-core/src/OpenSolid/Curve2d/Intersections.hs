@@ -50,12 +50,12 @@ data Intersections
 
 data TangentSolutionTargetSpace
 
-data Problem space units = Problem
-  { curve1 :: Curve2d space units
-  , curve2 :: Curve2d space units
+data Problem units space = Problem
+  { curve1 :: Curve2d units space
+  , curve2 :: Curve2d units space
   , endpointIntersections :: List EndpointIntersection
-  , crossingSolutionTarget :: VectorSurfaceFunction2d space units
-  , tangentSolutionTarget :: VectorSurfaceFunction2d TangentSolutionTargetSpace units
+  , crossingSolutionTarget :: VectorSurfaceFunction2d units space
+  , tangentSolutionTarget :: VectorSurfaceFunction2d units TangentSolutionTargetSpace
   }
 
 data EndpointIntersection = EndpointIntersection
@@ -82,8 +82,8 @@ classifySubdomain (Bounds tLow tHigh)
 
 findEndpointsOf ::
   Tolerance units =>
-  Curve2d space units ->
-  Curve2d space units ->
+  Curve2d units space ->
+  Curve2d units space ->
   Result Curve2d.IsPoint (List Number, List Number)
 findEndpointsOf curve1 curve2 = do
   let (start1, end1) = Curve2d.endpoints curve1
@@ -91,8 +91,8 @@ findEndpointsOf curve1 curve2 = do
 
 findEndpointIntersections ::
   Tolerance units =>
-  Curve2d space units ->
-  Curve2d space units ->
+  Curve2d units space ->
+  Curve2d units space ->
   Result Error (List EndpointIntersection)
 findEndpointIntersections curve1 curve2 =
   case (findEndpointsOf curve1 curve2, findEndpointsOf curve2 curve1) of
@@ -111,8 +111,8 @@ findEndpointIntersections curve1 curve2 =
 
 toEndpointIntersection ::
   Tolerance units =>
-  Curve2d space units ->
-  Curve2d space units ->
+  Curve2d units space ->
+  Curve2d units space ->
   (Number, Number) ->
   EndpointIntersection
 toEndpointIntersection curve1 curve2 (t1, t2) = do
@@ -130,9 +130,9 @@ toEndpointIntersection curve1 curve2 (t1, t2) = do
 
 tangentSignature ::
   Tolerance units =>
-  Curve2d space units ->
+  Curve2d units space ->
   Number ->
-  (Vector2d space Unitless, Quantity units, Bool)
+  (Vector2d Unitless space, Quantity units, Bool)
 tangentSignature curve tValue = do
   let firstDerivative = VectorCurve2d.evaluate curve.derivative tValue
   let secondDerivative = VectorCurve2d.evaluate curve.derivative.derivative tValue
@@ -147,7 +147,7 @@ tangentSignature curve tValue = do
 
 findIntersectionPoint ::
   Tolerance units =>
-  Problem space units ->
+  Problem units space ->
   (Bounds Unitless, Bounds Unitless) ->
   Fuzzy (Maybe IntersectionPoint)
 findIntersectionPoint problem (tBounds1, tBounds2) = do
@@ -215,10 +215,10 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
         (End size1, End size2) -> resolvedEndpointIntersection (max size1 size2) (Just Negative)
 
 secondDerivativesIndependent ::
-  VectorBounds2d space units ->
-  VectorBounds2d space units ->
-  VectorBounds2d space units ->
-  VectorBounds2d space units ->
+  VectorBounds2d units space ->
+  VectorBounds2d units space ->
+  VectorBounds2d units space ->
+  VectorBounds2d units space ->
   Bool
 secondDerivativesIndependent firstBounds1 firstBounds2 secondBounds1 secondBounds2 = do
   let VectorBounds2d x'1 y'1 = firstBounds1
@@ -254,8 +254,8 @@ candidateOverlappingSegment (first, second) = do
 
 overlappingSegments ::
   Tolerance units =>
-  Curve2d space units ->
-  Curve2d space units ->
+  Curve2d units space ->
+  Curve2d units space ->
   List EndpointIntersection ->
   Maybe (NonEmpty OverlappingSegment)
 overlappingSegments curve1 curve2 endpointIntersections =
@@ -272,8 +272,8 @@ overlappingSegments curve1 curve2 endpointIntersections =
 
 intersections ::
   Tolerance units =>
-  Curve2d space units ->
-  Curve2d space units ->
+  Curve2d units space ->
+  Curve2d units space ->
   Result Error (Maybe Intersections)
 intersections curve1 curve2 = do
   endpointIntersections <- findEndpointIntersections curve1 curve2

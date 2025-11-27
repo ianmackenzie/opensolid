@@ -76,8 +76,8 @@ fromDirections dx dxy = gramSchmidt dx (Vector3d.unit dxy)
 
 fromVectors ::
   Tolerance units =>
-  Vector3d space units ->
-  Vector3d space units ->
+  Vector3d units space ->
+  Vector3d units space ->
   Maybe (PlaneOrientation3d space)
 fromVectors vx vxy =
   case Vector3d.direction vx of
@@ -87,7 +87,7 @@ fromVectors vx vxy =
 gramSchmidt ::
   Tolerance units =>
   Direction3d space ->
-  Vector3d space units ->
+  Vector3d units space ->
   Maybe (PlaneOrientation3d space)
 gramSchmidt dx vxy = do
   let vy = vxy .-. Vector3d.projectionIn dx vxy

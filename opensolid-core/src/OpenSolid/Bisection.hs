@@ -34,7 +34,7 @@ class IsBounds bounds where
 instance IsBounds (Bounds units) where
   contains = Bounds.contains
 
-instance IsBounds (Bounds2d space units) where
+instance IsBounds (Bounds2d units space) where
   contains = Bounds2d.contains
 
 instance (IsBounds bounds1, IsBounds bounds2) => IsBounds (bounds1, bounds2) where

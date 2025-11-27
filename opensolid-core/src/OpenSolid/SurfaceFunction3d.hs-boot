@@ -29,13 +29,13 @@ instance
   HasField
     "du"
     (SurfaceFunction3d space)
-    (VectorSurfaceFunction3d space Meters)
+    (VectorSurfaceFunction3d Meters space)
 
 instance
   HasField
     "dv"
     (SurfaceFunction3d space)
-    (VectorSurfaceFunction3d space Meters)
+    (VectorSurfaceFunction3d Meters space)
 
 type Compiled space =
   CompiledFunction UvPoint (Point3d space) UvBounds (Bounds3d space)
@@ -46,14 +46,14 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Addition
     (SurfaceFunction3d space1)
-    (VectorSurfaceFunction3d space2 meters)
+    (VectorSurfaceFunction3d meters space2)
     (SurfaceFunction3d space1)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
   Subtraction
     (SurfaceFunction3d space1)
-    (VectorSurfaceFunction3d space2 meters)
+    (VectorSurfaceFunction3d meters space2)
     (SurfaceFunction3d space1)
 
 constant :: Point3d space -> SurfaceFunction3d space
@@ -62,5 +62,5 @@ evaluateBounds :: SurfaceFunction3d space -> UvBounds -> Bounds3d space
 derivative ::
   SurfaceParameter ->
   SurfaceFunction3d space ->
-  VectorSurfaceFunction3d space Meters
+  VectorSurfaceFunction3d Meters space
 transformBy :: Transform3d tag space -> SurfaceFunction3d space -> SurfaceFunction3d space

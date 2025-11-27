@@ -37,7 +37,7 @@ data MonotonicSpace
 
 data Monotonicity
   = Monotonic
-  | MonotonicIn (Frame2d UvSpace Unitless MonotonicSpace)
+  | MonotonicIn (Frame2d Unitless UvSpace MonotonicSpace)
   | NotMonotonic
   deriving (Eq, Show)
 
@@ -52,7 +52,7 @@ new ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2d UvSpace Unitless
+  Curve2d Unitless UvSpace
 new derivatives dvdu uStart uEnd boxes =
   horizontalCurve derivatives dvdu uStart uEnd boxes NotMonotonic []
 
@@ -63,7 +63,7 @@ monotonic ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2d UvSpace Unitless
+  Curve2d Unitless UvSpace
 monotonic derivatives dvdu uStart uEnd boxes =
   horizontalCurve derivatives dvdu uStart uEnd boxes Monotonic []
 
@@ -74,9 +74,9 @@ bounded ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Frame2d UvSpace Unitless defines ->
-  List (Axis2d UvSpace Unitless) ->
-  Curve2d UvSpace Unitless
+  Frame2d Unitless UvSpace defines ->
+  List (Axis2d Unitless UvSpace) ->
+  Curve2d Unitless UvSpace
 bounded derivatives dvdu uStart uEnd boxes monotonicFrame boundingAxes = do
   let monotonicity = MonotonicIn (Frame2d.coerce monotonicFrame)
   horizontalCurve derivatives dvdu uStart uEnd boxes monotonicity boundingAxes
@@ -89,8 +89,8 @@ horizontalCurve ::
   Number ->
   NonEmpty UvBounds ->
   Monotonicity ->
-  List (Axis2d UvSpace Unitless) ->
-  Curve2d UvSpace Unitless
+  List (Axis2d Unitless UvSpace) ->
+  Curve2d Unitless UvSpace
 horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
   let bounds = implicitCurveBounds boxes
   let clampedVBounds uValue =
@@ -129,7 +129,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
         VectorCurve2d.xy dudt dvdt
   Curve2d.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
 
-clamp :: Number -> Bounds Unitless -> Axis2d UvSpace Unitless -> Bounds Unitless
+clamp :: Number -> Bounds Unitless -> Axis2d Unitless UvSpace -> Bounds Unitless
 clamp u (Bounds vLow vHigh) axis = do
   let Point2d u0 v0 = Axis2d.originPoint axis
   let Direction2d du dv = Axis2d.direction axis

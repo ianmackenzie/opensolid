@@ -22,7 +22,7 @@ instance Vertex3d (Point3d space) space where
 
 instance
   (space1 ~ space2, unitless ~ Unitless) =>
-  Vertex3d (Point3d space1, Vector3d space2 unitless) space1
+  Vertex3d (Point3d space1, Vector3d unitless space2) space1
   where
   position (p, _) = p
 
@@ -34,7 +34,7 @@ instance
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
-  Vertex3d (Point3d space, Point2d uvSpace unitless) space
+  Vertex3d (Point3d space, Point2d unitless uvSpace) space
   where
   position (p, _) = p
 
@@ -44,13 +44,13 @@ instance
   , uvSpace ~ UvSpace
   , unitless2 ~ Unitless
   ) =>
-  Vertex3d (Point3d space1, Vector3d space2 unitless1, Point2d uvSpace unitless2) space1
+  Vertex3d (Point3d space1, Vector3d unitless1 space2, Point2d unitless2 uvSpace) space1
   where
   position (p, _, _) = p
 
 instance
   (space1 ~ space2, uvSpace ~ UvSpace, unitless ~ Unitless) =>
-  Vertex3d (Point3d space1, Direction3d space2, Point2d uvSpace unitless) space1
+  Vertex3d (Point3d space1, Direction3d space2, Point2d unitless uvSpace) space1
   where
   position (p, _, _) = p
 
@@ -60,11 +60,11 @@ pattern Vertex3d :: Vertex3d vertex space => Point3d space -> vertex
 pattern Vertex3d point <- (position -> point)
 
 class Vertex3d vertex space => HasNormal vertex space | vertex -> space where
-  normal :: vertex -> Vector3d space Unitless
+  normal :: vertex -> Vector3d Unitless space
 
 instance
   (space1 ~ space2, unitless ~ Unitless) =>
-  HasNormal (Point3d space1, Vector3d space2 unitless) space1
+  HasNormal (Point3d space1, Vector3d unitless space2) space1
   where
   normal (_, n) = n
 
@@ -80,7 +80,7 @@ instance
   , uvSpace ~ UvSpace
   , unitless2 ~ Unitless
   ) =>
-  HasNormal (Point3d space1, Vector3d space2 unitless1, Point2d uvSpace unitless2) space1
+  HasNormal (Point3d space1, Vector3d unitless1 space2, Point2d unitless2 uvSpace) space1
   where
   normal (_, n, _) = n
 
@@ -89,7 +89,7 @@ instance
   , uvSpace ~ UvSpace
   , unitless ~ Unitless
   ) =>
-  HasNormal (Point3d space1, Direction3d space2, Point2d uvSpace unitless) space1
+  HasNormal (Point3d space1, Direction3d space2, Point2d unitless uvSpace) space1
   where
   normal (_, d, _) = Vector3d.unit d
 
@@ -98,7 +98,7 @@ class Vertex3d vertex space => HasUv vertex space | vertex -> space where
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
-  HasUv (Point3d space, Point2d uvSpace unitless) space
+  HasUv (Point3d space, Point2d unitless uvSpace) space
   where
   uv (_, t) = t
 
@@ -108,12 +108,12 @@ instance
   , uvSpace ~ UvSpace
   , unitless2 ~ Unitless
   ) =>
-  HasUv (Point3d space1, Vector3d space2 unitless1, Point2d uvSpace unitless2) space1
+  HasUv (Point3d space1, Vector3d unitless1 space2, Point2d unitless2 uvSpace) space1
   where
   uv (_, _, t) = t
 
 instance
   (space1 ~ space2, uvSpace ~ UvSpace, unitless ~ Unitless) =>
-  HasUv (Point3d space1, Direction3d space2, Point2d uvSpace unitless) space1
+  HasUv (Point3d space1, Direction3d space2, Point2d unitless uvSpace) space1
   where
   uv (_, _, t) = t

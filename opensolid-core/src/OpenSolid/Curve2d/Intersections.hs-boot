@@ -18,6 +18,6 @@ data Intersections
 
 intersections ::
   Tolerance units =>
-  Curve2d space units ->
-  Curve2d space units ->
+  Curve2d units space ->
+  Curve2d units space ->
   Result Error (Maybe Intersections)

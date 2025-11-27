@@ -13,4 +13,4 @@ type role Surface3d nominal
 type Surface3d :: Type -> Type
 data Surface3d space
 
-parametric :: SurfaceFunction3d space -> Region2d UvSpace Unitless -> Surface3d space
+parametric :: SurfaceFunction3d space -> Region2d Unitless UvSpace -> Surface3d space

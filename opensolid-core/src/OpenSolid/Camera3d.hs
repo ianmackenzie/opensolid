@@ -195,7 +195,7 @@ transformBy :: Transform3d.Rigid space -> Camera3d space -> Camera3d space
 transformBy transform Camera3d{frame, focalDistance, projection} =
   Camera3d{frame = Frame3d.transformBy transform frame, focalDistance, projection}
 
-translateBy :: Vector3d space Meters -> Camera3d space -> Camera3d space
+translateBy :: Vector3d Meters space -> Camera3d space -> Camera3d space
 translateBy = Transform3d.translateByImpl transformBy
 
 translateIn :: Direction3d space -> Length -> Camera3d space -> Camera3d space

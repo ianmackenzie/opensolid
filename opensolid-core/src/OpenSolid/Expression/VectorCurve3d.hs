@@ -21,49 +21,49 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)
 
-constant :: Vector3d space units -> Expression Number (Vector3d space units)
+constant :: Vector3d units space -> Expression Number (Vector3d units space)
 constant = Expression.constant
 
 on ::
   Plane3d space local ->
-  Expression Number (Vector2d local units) ->
-  Expression Number (Vector3d space units)
+  Expression Number (Vector2d units local) ->
+  Expression Number (Vector3d units space)
 on = Expression.on
 
 squaredMagnitude_ ::
-  Expression Number (Vector3d space units) ->
+  Expression Number (Vector3d units space) ->
   Expression Number (Quantity (units ?*? units))
 squaredMagnitude_ = Expression.squaredMagnitude_
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
-  Expression Number (Vector3d space units1) ->
+  Expression Number (Vector3d units1 space) ->
   Expression Number (Quantity units2)
 squaredMagnitude = Expression.squaredMagnitude
 
-magnitude :: Expression Number (Vector3d space units) -> Expression Number (Quantity units)
+magnitude :: Expression Number (Vector3d units space) -> Expression Number (Quantity units)
 magnitude = Expression.magnitude
 
 placeIn ::
   Frame3d global local ->
-  Expression Number (Vector3d local units) ->
-  Expression Number (Vector3d global units)
+  Expression Number (Vector3d units local) ->
+  Expression Number (Vector3d units global)
 placeIn = Expression.placeIn
 
 relativeTo ::
   Frame3d global local ->
-  Expression Number (Vector3d global units) ->
-  Expression Number (Vector3d local units)
+  Expression Number (Vector3d units global) ->
+  Expression Number (Vector3d units local)
 relativeTo = Expression.relativeTo
 
 projectInto ::
   Plane3d global local ->
-  Expression Number (Vector3d global units) ->
-  Expression Number (Vector2d local units)
+  Expression Number (Vector3d units global) ->
+  Expression Number (Vector2d units local)
 projectInto = Expression.projectInto
 
 transformBy ::
   Transform3d a space ->
-  Expression Number (Vector3d space units) ->
-  Expression Number (Vector3d space units)
+  Expression Number (Vector3d units space) ->
+  Expression Number (Vector3d units space)
 transformBy = Expression.transformBy

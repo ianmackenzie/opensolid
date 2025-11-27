@@ -20,7 +20,7 @@ tests =
   , transformBy
   ]
 
-boundsAndContainedVector :: Generator (VectorBounds2d space Meters, Vector2d space Meters)
+boundsAndContainedVector :: Generator (VectorBounds2d Meters space, Vector2d Meters space)
 boundsAndContainedVector = do
   bounds <- Random.vectorBounds2d
   u <- Parameter.random

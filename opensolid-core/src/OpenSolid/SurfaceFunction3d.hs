@@ -44,14 +44,14 @@ import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 data SurfaceFunction3d space
   = SurfaceFunction3d
       (Compiled space)
-      ~(VectorSurfaceFunction3d space Meters)
-      ~(VectorSurfaceFunction3d space Meters)
+      ~(VectorSurfaceFunction3d Meters space)
+      ~(VectorSurfaceFunction3d Meters space)
 
 instance
   HasField
     "du"
     (SurfaceFunction3d space)
-    (VectorSurfaceFunction3d space Meters)
+    (VectorSurfaceFunction3d Meters space)
   where
   getField (SurfaceFunction3d _ du _) = du
 
@@ -59,7 +59,7 @@ instance
   HasField
     "dv"
     (SurfaceFunction3d space)
-    (VectorSurfaceFunction3d space Meters)
+    (VectorSurfaceFunction3d Meters space)
   where
   getField (SurfaceFunction3d _ _ dv) = dv
 
@@ -70,7 +70,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Addition
     (SurfaceFunction3d space1)
-    (VectorSurfaceFunction3d space2 meters)
+    (VectorSurfaceFunction3d meters space2)
     (SurfaceFunction3d space1)
   where
   lhs .+. rhs =
@@ -82,7 +82,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Addition
     (SurfaceFunction3d space1)
-    (Vector3d space2 meters)
+    (Vector3d meters space2)
     (SurfaceFunction3d space1)
   where
   f .+. v = f .+. VectorSurfaceFunction3d.constant v
@@ -91,7 +91,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Subtraction
     (SurfaceFunction3d space1)
-    (VectorSurfaceFunction3d space2 meters)
+    (VectorSurfaceFunction3d meters space2)
     (SurfaceFunction3d space1)
   where
   lhs .-. rhs =
@@ -103,7 +103,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Subtraction
     (SurfaceFunction3d space1)
-    (Vector3d space2 meters)
+    (Vector3d meters space2)
     (SurfaceFunction3d space1)
   where
   f .-. v = f .-. VectorSurfaceFunction3d.constant v
@@ -113,7 +113,7 @@ instance
   Subtraction
     (SurfaceFunction3d space1)
     (SurfaceFunction3d space2)
-    (VectorSurfaceFunction3d space1 Meters)
+    (VectorSurfaceFunction3d Meters space1)
   where
   lhs .-. rhs =
     VectorSurfaceFunction3d.new
@@ -125,7 +125,7 @@ instance
   Subtraction
     (SurfaceFunction3d space1)
     (Point3d space2)
-    (VectorSurfaceFunction3d space1 Meters)
+    (VectorSurfaceFunction3d Meters space1)
   where
   function .-. point = function .-. constant point
 
@@ -134,14 +134,14 @@ instance
   Subtraction
     (Point3d space1)
     (SurfaceFunction3d space2)
-    (VectorSurfaceFunction3d space1 Meters)
+    (VectorSurfaceFunction3d Meters space1)
   where
   point .-. function = constant point .-. function
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Region2d uvSpace unitless)
+    (Region2d unitless uvSpace)
     (SurfaceFunction3d space)
     (Surface3d space)
   where
@@ -150,7 +150,7 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2d uvSpace unitless)
+    (SurfaceFunction2d unitless uvSpace)
     (SurfaceFunction3d space)
     (SurfaceFunction3d space)
   where
@@ -168,7 +168,7 @@ instance HasField "compiled" (SurfaceFunction3d space) (Compiled space) where
 
 new ::
   Compiled space ->
-  (SurfaceParameter -> VectorSurfaceFunction3d space Meters) ->
+  (SurfaceParameter -> VectorSurfaceFunction3d Meters space) ->
   SurfaceFunction3d space
 new c derivativeFunction = do
   let du = derivativeFunction U
@@ -188,7 +188,7 @@ evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.comp
 derivative ::
   SurfaceParameter ->
   SurfaceFunction3d space ->
-  VectorSurfaceFunction3d space Meters
+  VectorSurfaceFunction3d Meters space
 derivative U = (.du)
 derivative V = (.dv)
 
@@ -196,7 +196,7 @@ data IsDegenerate = IsDegenerate deriving (Eq, Show)
 
 derivativeDirection ::
   Tolerance units =>
-  VectorSurfaceFunction3d space units ->
+  VectorSurfaceFunction3d units space ->
   Result IsDegenerate (DirectionSurfaceFunction3d space)
 derivativeDirection partialDerivative = case VectorSurfaceFunction3d.direction partialDerivative of
   Ok direction -> Ok direction

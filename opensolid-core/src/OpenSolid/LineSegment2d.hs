@@ -36,32 +36,32 @@ instance HasField "endVertex" (LineSegment2d vertex) vertex where
   getField = endVertex
 
 instance
-  Vertex2d vertex space units =>
-  HasField "startPoint" (LineSegment2d vertex) (Point2d space units)
+  Vertex2d vertex units space =>
+  HasField "startPoint" (LineSegment2d vertex) (Point2d units space)
   where
   getField = startPoint
 
 instance
-  Vertex2d vertex space units =>
-  HasField "endPoint" (LineSegment2d vertex) (Point2d space units)
+  Vertex2d vertex units space =>
+  HasField "endPoint" (LineSegment2d vertex) (Point2d units space)
   where
   getField = endPoint
 
 instance
-  Vertex2d vertex space units =>
+  Vertex2d vertex units space =>
   HasField "length" (LineSegment2d vertex) (Quantity units)
   where
   getField = length
 
 instance
-  Vertex2d vertex space units =>
-  HasField "bounds" (LineSegment2d vertex) (Bounds2d space units)
+  Vertex2d vertex units space =>
+  HasField "bounds" (LineSegment2d vertex) (Bounds2d units space)
   where
   getField = bounds
 
 instance
-  Vertex2d vertex space units =>
-  Bounded2d (LineSegment2d vertex) space units
+  Vertex2d vertex units space =>
+  Bounded2d (LineSegment2d vertex) units space
   where
   bounds = bounds
 
@@ -74,34 +74,34 @@ endVertex :: LineSegment2d vertex -> vertex
 endVertex (LineSegment2d _ v2) = v2
 
 {-# INLINE startPoint #-}
-startPoint :: Vertex2d vertex space units => LineSegment2d vertex -> Point2d space units
+startPoint :: Vertex2d vertex units space => LineSegment2d vertex -> Point2d units space
 startPoint (LineSegment2d v1 _) = Vertex2d.position v1
 
 {-# INLINE endPoint #-}
-endPoint :: Vertex2d vertex space units => LineSegment2d vertex -> Point2d space units
+endPoint :: Vertex2d vertex units space => LineSegment2d vertex -> Point2d units space
 endPoint (LineSegment2d _ v2) = Vertex2d.position v2
 
-length :: Vertex2d vertex space units => LineSegment2d vertex -> Quantity units
+length :: Vertex2d vertex units space => LineSegment2d vertex -> Quantity units
 length segment = Quantity# (length# segment)
 
 {-# INLINE length# #-}
-length# :: Vertex2d vertex space units => LineSegment2d vertex -> Double#
+length# :: Vertex2d vertex units space => LineSegment2d vertex -> Double#
 length# segment = Point2d.distanceFrom# (startPoint segment) (endPoint segment)
 
-bounds :: Vertex2d vertex space units => LineSegment2d vertex -> Bounds2d space units
+bounds :: Vertex2d vertex units space => LineSegment2d vertex -> Bounds2d units space
 bounds segment = Bounds2d.hull2 (startPoint segment) (endPoint segment)
 
 distanceTo ::
-  Vertex2d vertex space units =>
-  Point2d space units ->
+  Vertex2d vertex units space =>
+  Point2d units space ->
   LineSegment2d vertex ->
   Quantity units
 distanceTo p0 segment = Quantity# (distanceTo# p0 segment)
 
 {-# INLINEABLE distanceTo# #-}
 distanceTo# ::
-  Vertex2d vertex space units =>
-  Point2d space units ->
+  Vertex2d vertex units space =>
+  Point2d units space ->
   LineSegment2d vertex ->
   Double#
 distanceTo# p0 (LineSegment2d p1 p2) = do

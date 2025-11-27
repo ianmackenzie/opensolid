@@ -69,14 +69,14 @@ import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
 data Surface3d space = Surface3d
   { function :: SurfaceFunction3d space
-  , domain :: Region2d UvSpace Unitless
+  , domain :: Region2d Unitless UvSpace
   , outerLoop :: ~(NonEmpty (Curve3d space))
   , innerLoops :: ~(List (NonEmpty (Curve3d space)))
   }
 
 parametric ::
   SurfaceFunction3d space ->
-  Region2d UvSpace Unitless ->
+  Region2d Unitless UvSpace ->
   Surface3d space
 parametric givenFunction givenDomain = do
   let boundaryLoop domainLoop = NonEmpty.map (givenFunction `compose`) domainLoop
@@ -87,7 +87,7 @@ parametric givenFunction givenDomain = do
     , innerLoops = List.map boundaryLoop (Region2d.innerLoops givenDomain)
     }
 
-on :: Plane3d global local -> Region2d local Meters -> Surface3d global
+on :: Plane3d global local -> Region2d Meters local -> Surface3d global
 on plane region = do
   let regionBounds = Region2d.bounds region
   let (width, height) = Bounds2d.dimensions regionBounds
@@ -102,13 +102,13 @@ on plane region = do
   let planeFunction = p0 .+. SurfaceFunction.u .*. vx .+. SurfaceFunction.v .*. vy
   parametric planeFunction normalizedRegion
 
-extruded :: Curve3d space -> Vector3d space Meters -> Surface3d space
+extruded :: Curve3d space -> Vector3d Meters space -> Surface3d space
 extruded curve displacement =
   parametric
     (curve `compose` SurfaceFunction.u .+. SurfaceFunction.v .*. displacement)
     Region2d.unitSquare
 
-translational :: Curve3d space -> VectorCurve3d space Meters -> Surface3d space
+translational :: Curve3d space -> VectorCurve3d Meters space -> Surface3d space
 translational uCurve vCurve =
   parametric
     (uCurve `compose` SurfaceFunction.u .+. vCurve `compose` SurfaceFunction.v)
@@ -123,8 +123,8 @@ ruled bottom top = do
 revolved ::
   Tolerance Meters =>
   Plane3d global local ->
-  Curve2d local Meters ->
-  Axis2d local Meters ->
+  Curve2d Meters local ->
+  Axis2d Meters local ->
   Angle ->
   Result Revolved.Error (Surface3d global)
 revolved sketchPlane curve axis angle = do
@@ -189,10 +189,10 @@ toMesh accuracy surface = do
 toPolygon ::
   Length ->
   SurfaceFunction3d space ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
-  NonEmpty (Curve2d UvSpace Unitless) ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
+  NonEmpty (Curve2d Unitless UvSpace) ->
   Polygon2d UvPoint
 toPolygon accuracy f fuu fuv fvv loop =
   Polygon2d (NonEmpty.combine (boundaryPoints accuracy f fuu fuv fvv) loop)
@@ -200,10 +200,10 @@ toPolygon accuracy f fuu fuv fvv loop =
 boundaryPoints ::
   Length ->
   SurfaceFunction3d space ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
-  Curve2d UvSpace Unitless ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
+  Curve2d Unitless UvSpace ->
   NonEmpty UvPoint
 boundaryPoints accuracy surfaceFunction fuu fuv fvv uvCurve = do
   let curve3d = surfaceFunction `compose` uvCurve
@@ -213,9 +213,9 @@ boundaryPoints accuracy surfaceFunction fuu fuv fvv uvCurve = do
   NonEmpty.map (Curve2d.evaluate uvCurve) parameterValues
 
 surfaceError ::
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
   UvBounds ->
   Length
 surfaceError fuu fuv fvv uvBounds = do
@@ -226,11 +226,11 @@ surfaceError fuu fuv fvv uvBounds = do
 
 linearizationPredicate ::
   Length ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
-  Curve2d UvSpace Unitless ->
-  VectorCurve3d space Meters ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
+  Curve2d Unitless UvSpace ->
+  VectorCurve3d Meters space ->
   Bounds Unitless ->
   Bool
 linearizationPredicate accuracy fuu fuv fvv curve2d secondDerivative3d subdomain = do
@@ -243,10 +243,10 @@ linearizationPredicate accuracy fuu fuv fvv curve2d secondDerivative3d subdomain
 generateSteinerPoints ::
   Length ->
   UvBounds ->
-  Set2d (LineSegment2d UvPoint) UvSpace Unitless ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
-  VectorSurfaceFunction3d space Meters ->
+  Set2d (LineSegment2d UvPoint) Unitless UvSpace ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
+  VectorSurfaceFunction3d Meters space ->
   List UvPoint ->
   List UvPoint
 generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
@@ -271,7 +271,7 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
         then Point2d (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
         else recurse
 
-includeSubdomain :: UvBounds -> Set2d (LineSegment2d UvPoint) UvSpace Unitless -> Fuzzy Bool
+includeSubdomain :: UvBounds -> Set2d (LineSegment2d UvPoint) Unitless UvSpace -> Fuzzy Bool
 includeSubdomain subdomain edgeSet = Tolerance.using Quantity.zero $
   case edgeSet of
     Set2d.Node nodeBounds leftChild rightChild
@@ -286,5 +286,5 @@ includeSubdomain subdomain edgeSet = Tolerance.using Quantity.zero $
       | smallerThan edgeBounds subdomain -> Resolved False
       | otherwise -> Unresolved
 
-smallerThan :: Bounds2d space units -> Bounds2d space units -> Bool
+smallerThan :: Bounds2d units space -> Bounds2d units space -> Bool
 smallerThan bounds1 bounds2 = Bounds2d.diameter bounds2 <= Bounds2d.diameter bounds1

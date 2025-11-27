@@ -62,7 +62,7 @@ writeBinary path convention units mesh = IO.writeBinary path (toBinary conventio
 numberBuilder :: Number -> Builder
 numberBuilder (Quantity double) = Builder.floatLE (GHC.Float.double2Float double)
 
-vectorBuilder :: Convention3d -> Vector3d space Unitless -> Builder
+vectorBuilder :: Convention3d -> Vector3d Unitless space -> Builder
 vectorBuilder convention vector = do
   let (x, y, z) = Vector3d.components convention vector
   numberBuilder x <> numberBuilder y <> numberBuilder z

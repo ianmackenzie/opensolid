@@ -9,11 +9,11 @@ import OpenSolid.Prelude
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 
-data Surface2d space units where
-  Parametric :: SurfaceFunction2d space units -> Region2d UvSpace Unitless -> Surface2d space units
+data Surface2d units space where
+  Parametric :: SurfaceFunction2d units space -> Region2d Unitless UvSpace -> Surface2d units space
 
-parametric :: SurfaceFunction2d space units -> Region2d UvSpace Unitless -> Surface2d space units
+parametric :: SurfaceFunction2d units space -> Region2d Unitless UvSpace -> Surface2d units space
 parametric = Parametric
 
-function :: Surface2d space units -> SurfaceFunction2d space units
+function :: Surface2d units space -> SurfaceFunction2d units space
 function (Parametric f _) = f

@@ -464,8 +464,8 @@ color =
 
 vectorTransformations2d ::
   forall units.
-  FFI (Vector2d.Vector2d FFI.Space units) =>
-  List (Class.Member (Vector2d.Vector2d FFI.Space units))
+  FFI (Vector2d.Vector2d units FFI.Space) =>
+  List (Class.Member (Vector2d.Vector2d units FFI.Space))
 vectorTransformations2d =
   [ Class.member0 "Rotate Left" Vector2d.rotateLeft $(docs 'Vector2d.rotateLeft)
   , Class.member0 "Rotate Right" Vector2d.rotateRight $(docs 'Vector2d.rotateRight)
@@ -474,11 +474,11 @@ vectorTransformations2d =
   , Class.member1
       "Mirror Across"
       "Axis"
-      (Vector2d.mirrorAcross :: Axis2d -> Vector2d.Vector2d FFI.Space units -> Vector2d.Vector2d FFI.Space units)
+      (Vector2d.mirrorAcross :: Axis2d -> Vector2d.Vector2d units FFI.Space -> Vector2d.Vector2d units FFI.Space)
       $(docs 'Vector2d.mirrorAcross)
   ]
 
-type Vector2d = Vector2d.Vector2d FFI.Space Unitless
+type Vector2d = Vector2d.Vector2d Unitless FFI.Space
 
 vector2d :: Class
 vector2d =
@@ -515,7 +515,7 @@ vector2d =
     ]
       <> vectorTransformations2d
 
-type Displacement2d = Vector2d.Vector2d FFI.Space Meters
+type Displacement2d = Vector2d.Vector2d Meters FFI.Space
 
 displacement2d :: Class
 displacement2d =
@@ -555,7 +555,7 @@ displacement2d =
     ]
       <> vectorTransformations2d
 
-type AreaVector2d = Vector2d.Vector2d FFI.Space SquareMeters
+type AreaVector2d = Vector2d.Vector2d SquareMeters FFI.Space
 
 areaVector2d :: Class
 areaVector2d =
@@ -588,7 +588,7 @@ areaVector2d =
     ]
       <> vectorTransformations2d
 
-type UvVector = Vector2d.Vector2d UvSpace Unitless
+type UvVector = Vector2d.Vector2d Unitless UvSpace
 
 uvVector :: Class
 uvVector =
@@ -659,7 +659,7 @@ uvDirection =
     , Class.negateSelf
     ]
 
-type Point2d = Point2d.Point2d FFI.Space Meters
+type Point2d = Point2d.Point2d Meters FFI.Space
 
 point2d :: Class
 point2d =
@@ -703,7 +703,7 @@ uvPoint =
     , Class.plus @UvVector Self
     ]
 
-type Bounds2d = Bounds2d.Bounds2d FFI.Space Meters
+type Bounds2d = Bounds2d.Bounds2d Meters FFI.Space
 
 bounds2d :: Class
 bounds2d =
@@ -888,7 +888,7 @@ drawing2d =
     , Class.nested @(Drawing2d.Attribute FFI.Space) "A drawing attribute such as fill color or stroke width." []
     ]
 
-type Axis2d = Axis2d.Axis2d FFI.Space Meters
+type Axis2d = Axis2d.Axis2d Meters FFI.Space
 
 axis2d :: Class
 axis2d =
@@ -902,7 +902,7 @@ axis2d =
     ]
       <> orthonormalTransformations2d Axis2d.transformBy
 
-type UvAxis = Axis2d.Axis2d UvSpace Unitless
+type UvAxis = Axis2d.Axis2d Unitless UvSpace
 
 uvAxis :: Class
 uvAxis =
@@ -952,7 +952,7 @@ convention3d =
     , Class.constant "Z Up" Convention3d.zUp $(docs 'Convention3d.zUp)
     ]
 
-type Vector3d = Vector3d.Vector3d FFI.Space Unitless
+type Vector3d = Vector3d.Vector3d Unitless FFI.Space
 
 vector3d :: Class
 vector3d =
@@ -991,7 +991,7 @@ vector3d =
     , Class.crossProduct @AreaVector3d Self
     ]
 
-type Displacement3d = Vector3d.Vector3d FFI.Space Meters
+type Displacement3d = Vector3d.Vector3d Meters FFI.Space
 
 displacement3d :: Class
 displacement3d =
@@ -1027,7 +1027,7 @@ displacement3d =
     , Class.crossProduct @Vector3d Self
     ]
 
-type AreaVector3d = Vector3d.Vector3d FFI.Space SquareMeters
+type AreaVector3d = Vector3d.Vector3d SquareMeters FFI.Space
 
 areaVector3d :: Class
 areaVector3d =
@@ -1259,7 +1259,7 @@ frame3d =
     ]
       <> rigidTransformations3d Frame3d.transformBy
 
-type VectorCurve2d = VectorCurve2d.VectorCurve2d FFI.Space Unitless
+type VectorCurve2d = VectorCurve2d.VectorCurve2d Unitless FFI.Space
 
 vectorCurve2d :: Class
 vectorCurve2d =
@@ -1270,7 +1270,7 @@ vectorCurve2d =
     , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2d.evaluate) $(docs 'VectorCurve2d.evaluate)
     ]
 
-type DisplacementCurve2d = VectorCurve2d.VectorCurve2d FFI.Space Meters
+type DisplacementCurve2d = VectorCurve2d.VectorCurve2d Meters FFI.Space
 
 displacementCurve2d :: Class
 displacementCurve2d =
@@ -1281,7 +1281,7 @@ displacementCurve2d =
     , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2d.evaluate) $(docs 'VectorCurve2d.evaluate)
     ]
 
-type UvVectorCurve = VectorCurve2d.VectorCurve2d UvSpace Unitless
+type UvVectorCurve = VectorCurve2d.VectorCurve2d Unitless UvSpace
 
 uvVectorCurve :: Class
 uvVectorCurve =
@@ -1294,7 +1294,7 @@ uvVectorCurve =
 
 rigidTransformations2d ::
   FFI value =>
-  (Transform2d.Rigid FFI.Space Meters -> value -> value) ->
+  (Transform2d.Rigid Meters FFI.Space -> value -> value) ->
   List (Class.Member value)
 rigidTransformations2d transformBy =
   [ Class.member1 "Translate By" "Displacement" (Transform2d.translateByImpl transformBy) "Translate by the given displacement."
@@ -1305,7 +1305,7 @@ rigidTransformations2d transformBy =
 
 orthonormalTransformations2d ::
   FFI value =>
-  (forall tag. Transform.IsOrthonormal tag => Transform2d tag FFI.Space Meters -> value -> value) ->
+  (forall tag. Transform.IsOrthonormal tag => Transform2d tag Meters FFI.Space -> value -> value) ->
   List (Class.Member value)
 orthonormalTransformations2d transformBy =
   Class.member1 "Mirror Across" "Axis" (Transform2d.mirrorAcrossImpl transformBy) "Mirror across the given axis."
@@ -1313,7 +1313,7 @@ orthonormalTransformations2d transformBy =
 
 uniformTransformations2d ::
   FFI value =>
-  (forall tag. Transform.IsUniform tag => Transform2d tag FFI.Space Meters -> value -> value) ->
+  (forall tag. Transform.IsUniform tag => Transform2d tag Meters FFI.Space -> value -> value) ->
   List (Class.Member value)
 uniformTransformations2d transformBy =
   Class.member2 "Scale About" "Point" "Scale" (Transform2d.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
@@ -1321,7 +1321,7 @@ uniformTransformations2d transformBy =
 
 affineTransformations2d ::
   FFI value =>
-  (forall tag. Transform2d tag FFI.Space Meters -> value -> value) ->
+  (forall tag. Transform2d tag Meters FFI.Space -> value -> value) ->
   List (Class.Member value)
 affineTransformations2d transformBy =
   Class.member2 "Scale Along" "Axis" "Scale" (Transform2d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
@@ -1363,7 +1363,7 @@ affineTransformations3d transformBy =
   Class.member2 "Scale Along" "Axis" "Scale" (Transform3d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
     : uniformTransformations3d transformBy
 
-type Curve2d = Curve2d.Curve2d FFI.Space Meters
+type Curve2d = Curve2d.Curve2d Meters FFI.Space
 
 curve2d :: Class
 curve2d =
@@ -1392,7 +1392,7 @@ curve2d =
     ]
       <> affineTransformations2d Curve2d.transformBy
 
-type UvCurve = Curve2d.Curve2d UvSpace Unitless
+type UvCurve = Curve2d.Curve2d Unitless UvSpace
 
 uvCurve :: Class
 uvCurve =
@@ -1441,7 +1441,7 @@ region2dInnerLoopsDocs =
 region2dBoundaryCurvesDocs :: Text
 region2dBoundaryCurvesDocs = "The list of all (outer and inner) boundary curves of a region."
 
-type Region2d = Region2d.Region2d FFI.Space Meters
+type Region2d = Region2d.Region2d Meters FFI.Space
 
 region2d :: Class
 region2d =
@@ -1460,7 +1460,7 @@ region2d =
     ]
       <> affineTransformations2d Region2d.transformBy
 
-type UvRegion = Region2d.Region2d UvSpace Unitless
+type UvRegion = Region2d.Region2d Unitless UvSpace
 
 uvRegion :: Class
 uvRegion =

@@ -134,7 +134,7 @@ transformBy :: Transform3d.Rigid space -> Plane3d space defines -> Plane3d space
 transformBy transform (Plane3d p o) =
   Plane3d (Point3d.transformBy transform p) (PlaneOrientation3d.transformBy transform o)
 
-translateBy :: Vector3d space Meters -> Plane3d space defines -> Plane3d space defines
+translateBy :: Vector3d Meters space -> Plane3d space defines -> Plane3d space defines
 translateBy = Transform3d.translateByImpl transformBy
 
 translateIn :: Direction3d space -> Length -> Plane3d space defines -> Plane3d space defines

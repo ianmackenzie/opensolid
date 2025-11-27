@@ -34,7 +34,7 @@ magnitude = Test.check 100 "magnitude" Test.do
   let magnitudeBounds = VectorBounds3d.magnitude vectorBounds
   Test.expect (vectorMagnitude `intersects` magnitudeBounds)
 
-boundsAndContainedVector :: Generator (VectorBounds3d space Meters, Vector3d space Meters)
+boundsAndContainedVector :: Generator (VectorBounds3d Meters space, Vector3d Meters space)
 boundsAndContainedVector = do
   bounds <- Tests.Random.vectorBounds3d
   u <- Parameter.random

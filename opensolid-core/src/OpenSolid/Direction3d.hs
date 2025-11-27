@@ -56,7 +56,7 @@ import OpenSolid.Vector3d qualified as Vector3d
 components :: Convention3d -> Direction3d space -> (Number, Number, Number)
 components convention (Unit3d vector) = Vector3d.components convention vector
 
-unsafe :: Vector3d space Unitless -> Direction3d space
+unsafe :: Vector3d Unitless space -> Direction3d space
 unsafe = Unit3d
 
 {-# INLINE coerce #-}
@@ -65,7 +65,7 @@ coerce (Direction3d dx dy dz) = Direction3d dx dy dz
 
 {-# INLINE lift #-}
 lift ::
-  (Vector3d spaceA Unitless -> Vector3d spaceB Unitless) ->
+  (Vector3d Unitless spaceA -> Vector3d Unitless spaceB) ->
   Direction3d spaceA ->
   Direction3d spaceB
 lift function (Unit3d vector) = Unit3d (function vector)
@@ -188,7 +188,7 @@ random = do
     then Random.return (Unit3d (vector ./. magnitude))
     else random -- Generated a 'bad' vector, try again
 
-randomVector :: Random.Generator (Vector3d space Unitless)
+randomVector :: Random.Generator (Vector3d Unitless space)
 randomVector = do
   let randomComponent = Number.random -1 1
   Random.map3 Vector3d randomComponent randomComponent randomComponent

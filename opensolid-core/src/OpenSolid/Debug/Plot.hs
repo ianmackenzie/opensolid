@@ -37,7 +37,7 @@ axisHeadLength = Length.millimeters 3
 axisHeadWidth :: Length
 axisHeadWidth = Length.millimeters 2
 
-viewBox :: Point2d Space Unitless -> Point2d Space Unitless -> Bounds2d Space Meters
+viewBox :: Point2d Unitless Space -> Point2d Unitless Space -> Bounds2d Meters Space
 viewBox p1 p2 = Bounds2d.hull2 (Point2d.convert scale p1) (Point2d.convert scale p2)
 
 xAxis :: Number -> Number -> Drawing2d Space

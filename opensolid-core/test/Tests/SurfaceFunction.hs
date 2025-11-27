@@ -45,7 +45,7 @@ firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" Test.do
   parameter <- Random.surfaceParameter
   firstDerivativeIsConsistent planeTorusSurface uvPoint parameter
 
-withIntersectionCurves :: Tolerance Meters => (NonEmpty (Curve2d UvSpace Unitless) -> Test) -> Test
+withIntersectionCurves :: Tolerance Meters => (NonEmpty (Curve2d Unitless UvSpace) -> Test) -> Test
 withIntersectionCurves callback =
   case SurfaceFunction.zeros planeTorusSurface of
     Error error -> Test.abort (Text.show error)

@@ -11,9 +11,9 @@ where
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Frame2d, Transform2d, Vector2d)
 
-zero :: Vector2d space units
-coerce :: Vector2d space1 units1 -> Vector2d space2 units2
-normalize :: Vector2d space units -> Vector2d space Unitless
-transformBy :: Transform2d tag space units1 -> Vector2d space units2 -> Vector2d space units2
-placeIn :: Frame2d global frameUnits local -> Vector2d local units -> Vector2d global units
-relativeTo :: Frame2d global frameUnits local -> Vector2d global units -> Vector2d local units
+zero :: Vector2d units space
+coerce :: Vector2d units1 space1 -> Vector2d units2 space2
+normalize :: Vector2d units space -> Vector2d Unitless space
+transformBy :: Transform2d tag units1 space -> Vector2d units2 space -> Vector2d units2 space
+placeIn :: Frame2d frameUnits global local -> Vector2d units local -> Vector2d units global
+relativeTo :: Frame2d frameUnits global local -> Vector2d units global -> Vector2d units local

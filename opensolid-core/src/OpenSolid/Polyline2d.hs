@@ -33,5 +33,5 @@ end polyline = NonEmpty.last polyline.vertices
 segments :: Polyline2d vertex -> List (LineSegment2d vertex)
 segments polyline = NonEmpty.successive LineSegment2d polyline.vertices
 
-length :: Vertex2d vertex space units => Polyline2d vertex -> Quantity units
+length :: Vertex2d vertex units space => Polyline2d vertex -> Quantity units
 length polyline = Quantity.sumOf LineSegment2d.length (segments polyline)

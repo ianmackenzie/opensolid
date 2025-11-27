@@ -118,10 +118,10 @@ testTransformation = do
 
 offsetPoint ::
   Tolerance units =>
-  Point2d space units ->
-  Point2d space units ->
+  Point2d units space ->
+  Point2d units space ->
   Quantity units ->
-  Point2d space units
+  Point2d units space
 offsetPoint startPoint endPoint distance =
   case Direction2d.from startPoint endPoint of
     Error Direction2d.PointsAreCoincident -> startPoint
@@ -233,12 +233,12 @@ drawZeros path zeros = do
       , Drawing2d.combine (drawDot Color.orange) zeros.saddlePoints
       ]
 
-drawBounds :: Bounds2d space Meters -> Drawing2d space
+drawBounds :: Bounds2d Meters space -> Drawing2d space
 drawBounds bounds = do
   let corner x y = Bounds2d.interpolate bounds x y
   Drawing2d.polygon [corner 0 0, corner 1 0, corner 1 1, corner 0 1]
 
-drawCrossingCurve :: Int -> Curve2d UvSpace Unitless -> Drawing2d UvSpace
+drawCrossingCurve :: Int -> Curve2d Unitless UvSpace -> Drawing2d UvSpace
 drawCrossingCurve index curve = do
   let hue = (Number.fromInt index .*. Angle.goldenAngle) .%. Angle.twoPi
   let color = Color.hsl1 hue 0.5 0.5
@@ -247,7 +247,7 @@ drawCrossingCurve index curve = do
 toDrawing :: Quantity (Meters ?/? Unitless)
 toDrawing = Length.centimeters 10 ?/ 1
 
-drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d UvSpace Unitless -> Drawing2d UvSpace
+drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d Unitless UvSpace -> Drawing2d UvSpace
 drawUvCurve attributes curve = do
   let resolution = Resolution.maxError 0.0002
   let polyline = Curve2d.toPolyline resolution curve
@@ -291,9 +291,9 @@ testIOParallel = do
 drawBezier ::
   Tolerance Meters =>
   Color ->
-  Point2d space Unitless ->
-  [Point2d space Unitless] ->
-  Point2d space Unitless ->
+  Point2d Unitless space ->
+  [Point2d Unitless space] ->
+  Point2d Unitless space ->
   Drawing2d space
 drawBezier color startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2d.convert toDrawing startPoint
@@ -320,7 +320,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
 
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = do
-  let p1 = Point2d.origin @Global
+  let p1 = Point2d.origin @Unitless @Global
   let p2 = Point2d 0 5
   let p3 = Point2d 2.5 10
   let p4 = Point2d 5 0
@@ -333,7 +333,7 @@ testBezierSegment = do
 
 testHermiteBezier :: IO ()
 testHermiteBezier = do
-  let startPoint = Point2d.origin @Global
+  let startPoint = Point2d.origin @Meters @Global
   let startDerivatives = [Vector2d.centimeters 10 10]
   let endDerivatives = [Vector2d.centimeters 0 -10, Vector2d.zero]
   let endPoint = Point2d.centimeters 10 0
@@ -406,7 +406,7 @@ testCurve2dExpression :: IO ()
 testCurve2dExpression = do
   let x = Expression.Curve1d.constant 10 .*. Expression.t
   let y = Expression.sqrt Expression.t
-  let curve = Expression.xy x y :: Expression Number (Point2d Global Unitless)
+  let curve = Expression.xy x y :: Expression Number (Point2d Unitless Global)
   log "Evaluated 2D curve" (Expression.evaluate curve 3)
 
 testQuotientDesingularization :: IO ()

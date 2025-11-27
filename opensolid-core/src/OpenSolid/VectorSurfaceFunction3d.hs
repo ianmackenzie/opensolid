@@ -55,63 +55,63 @@ import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
-data VectorSurfaceFunction3d space units
+data VectorSurfaceFunction3d units space
   = VectorSurfaceFunction3d
-      (Compiled space units)
-      ~(VectorSurfaceFunction3d space units)
-      ~(VectorSurfaceFunction3d space units)
+      (Compiled units space)
+      ~(VectorSurfaceFunction3d units space)
+      ~(VectorSurfaceFunction3d units space)
 
 instance
   HasField
     "du"
-    (VectorSurfaceFunction3d space units)
-    (VectorSurfaceFunction3d space units)
+    (VectorSurfaceFunction3d units space)
+    (VectorSurfaceFunction3d units space)
   where
   getField (VectorSurfaceFunction3d _ du _) = du
 
 instance
   HasField
     "dv"
-    (VectorSurfaceFunction3d space units)
-    (VectorSurfaceFunction3d space units)
+    (VectorSurfaceFunction3d units space)
+    (VectorSurfaceFunction3d units space)
   where
   getField (VectorSurfaceFunction3d _ _ dv) = dv
 
-type Compiled space units =
+type Compiled units space =
   CompiledFunction
     UvPoint
-    (Vector3d space units)
+    (Vector3d units space)
     UvBounds
-    (VectorBounds3d space units)
+    (VectorBounds3d units space)
 
-instance HasUnits (VectorSurfaceFunction3d space units) units
+instance HasUnits (VectorSurfaceFunction3d units space) units
 
 instance
   space1 ~ space2 =>
   Units.Coercion
-    (VectorSurfaceFunction3d space1 unitsA)
-    (VectorSurfaceFunction3d space2 unitsB)
+    (VectorSurfaceFunction3d unitsA space1)
+    (VectorSurfaceFunction3d unitsB space2)
   where
   coerce (VectorSurfaceFunction3d c du dv) =
     VectorSurfaceFunction3d (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
-instance Negation (VectorSurfaceFunction3d space units) where
+instance Negation (VectorSurfaceFunction3d units space) where
   negative function = new (negative function.compiled) (\p -> negative (derivative p function))
 
 instance
   Multiplication
     Sign
-    (VectorSurfaceFunction3d space units)
-    (VectorSurfaceFunction3d space units)
+    (VectorSurfaceFunction3d units space)
+    (VectorSurfaceFunction3d units space)
   where
   Positive .*. function = function
   Negative .*. function = negative function
 
 instance
   Multiplication
-    (VectorSurfaceFunction3d space units)
+    (VectorSurfaceFunction3d units space)
     Sign
-    (VectorSurfaceFunction3d space units)
+    (VectorSurfaceFunction3d units space)
   where
   function .*. Positive = function
   function .*. Negative = negative function
@@ -121,9 +121,9 @@ instance
   , units1 ~ units2
   ) =>
   Addition
-    (VectorSurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (VectorSurfaceFunction3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
+    (VectorSurfaceFunction3d units1 space1)
   where
   lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (\p -> derivative p lhs .+. derivative p rhs)
 
@@ -132,9 +132,9 @@ instance
   , units1 ~ units2
   ) =>
   Addition
-    (VectorSurfaceFunction3d space1 units1)
-    (Vector3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (VectorSurfaceFunction3d units1 space1)
+    (Vector3d units2 space2)
+    (VectorSurfaceFunction3d units1 space1)
   where
   f .+. v = f .+. constant v
 
@@ -143,9 +143,9 @@ instance
   , units1 ~ units2
   ) =>
   Addition
-    (Vector3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (Vector3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
+    (VectorSurfaceFunction3d units1 space1)
   where
   v .+. f = constant v .+. f
 
@@ -154,9 +154,9 @@ instance
   , units1 ~ units2
   ) =>
   Subtraction
-    (VectorSurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (VectorSurfaceFunction3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
+    (VectorSurfaceFunction3d units1 space1)
   where
   lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (\p -> derivative p lhs .-. derivative p rhs)
 
@@ -165,9 +165,9 @@ instance
   , units1 ~ units2
   ) =>
   Subtraction
-    (VectorSurfaceFunction3d space1 units1)
-    (Vector3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (VectorSurfaceFunction3d units1 space1)
+    (Vector3d units2 space2)
+    (VectorSurfaceFunction3d units1 space1)
   where
   f .-. v = f .-. constant v
 
@@ -176,9 +176,9 @@ instance
   , units1 ~ units2
   ) =>
   Subtraction
-    (Vector3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 units1)
+    (Vector3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
+    (VectorSurfaceFunction3d units1 space1)
   where
   v .-. f = constant v .-. f
 
@@ -186,7 +186,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Addition
     (Point3d space1)
-    (VectorSurfaceFunction3d space2 meters)
+    (VectorSurfaceFunction3d meters space2)
     (SurfaceFunction3d space1)
   where
   point .+. function = SurfaceFunction3d.constant point .+. function
@@ -195,7 +195,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Subtraction
     (Point3d space1)
-    (VectorSurfaceFunction3d space2 meters)
+    (VectorSurfaceFunction3d meters space2)
     (SurfaceFunction3d space1)
   where
   point .-. function = SurfaceFunction3d.constant point .-. function
@@ -204,16 +204,16 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
-    (VectorSurfaceFunction3d space units2)
-    (VectorSurfaceFunction3d space units3)
+    (VectorSurfaceFunction3d units2 space)
+    (VectorSurfaceFunction3d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (SurfaceFunction units1)
-    (VectorSurfaceFunction3d space units2)
-    (VectorSurfaceFunction3d space (units1 ?*? units2))
+    (VectorSurfaceFunction3d units2 space)
+    (VectorSurfaceFunction3d (units1 ?*? units2) space)
   where
   lhs ?*? rhs =
     new
@@ -224,33 +224,33 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Quantity units1)
-    (VectorSurfaceFunction3d space units2)
-    (VectorSurfaceFunction3d space units3)
+    (VectorSurfaceFunction3d units2 space)
+    (VectorSurfaceFunction3d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (Quantity units1)
-    (VectorSurfaceFunction3d space units2)
-    (VectorSurfaceFunction3d space (units1 ?*? units2))
+    (VectorSurfaceFunction3d units2 space)
+    (VectorSurfaceFunction3d (units1 ?*? units2) space)
   where
   f1 ?*? f2 = SurfaceFunction.constant f1 ?*? f2
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (VectorSurfaceFunction3d space units1)
+    (VectorSurfaceFunction3d units1 space)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d space units3)
+    (VectorSurfaceFunction3d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (VectorSurfaceFunction3d space units1)
+    (VectorSurfaceFunction3d units1 space)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d space (units1 ?*? units2))
+    (VectorSurfaceFunction3d (units1 ?*? units2) space)
   where
   lhs ?*? rhs =
     new
@@ -260,52 +260,52 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (VectorSurfaceFunction3d space units1)
+    (VectorSurfaceFunction3d units1 space)
     (Quantity units2)
-    (VectorSurfaceFunction3d space units3)
+    (VectorSurfaceFunction3d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (VectorSurfaceFunction3d space units1)
+    (VectorSurfaceFunction3d units1 space)
     (Quantity units2)
-    (VectorSurfaceFunction3d space (units1 ?*? units2))
+    (VectorSurfaceFunction3d (units1 ?*? units2) space)
   where
   function ?*? value = function ?*? SurfaceFunction.constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (VectorSurfaceFunction3d space units1)
+    (VectorSurfaceFunction3d units1 space)
     (Quantity units2)
-    (VectorSurfaceFunction3d space units3)
+    (VectorSurfaceFunction3d units3 space)
   where
   lhs ./. rhs = Units.specialize (lhs ?/? rhs)
 
 instance
   Division_
-    (VectorSurfaceFunction3d space units1)
+    (VectorSurfaceFunction3d units1 space)
     (Quantity units2)
-    (VectorSurfaceFunction3d space (units1 ?/? units2))
+    (VectorSurfaceFunction3d (units1 ?/? units2) space)
   where
   function ?/? value = Units.simplify (function ?*? (1 /? value))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
-    (VectorSurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 units3)
+    (VectorSurfaceFunction3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
+    (VectorSurfaceFunction3d units3 space1)
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
 
 instance
   space1 ~ space2 =>
   CrossMultiplication_
-    (VectorSurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 (units1 ?*? units2))
+    (VectorSurfaceFunction3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
+    (VectorSurfaceFunction3d (units1 ?*? units2) space1)
   where
   lhs `cross_` rhs =
     new
@@ -315,45 +315,45 @@ instance
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
-    (VectorSurfaceFunction3d space1 units1)
-    (Vector3d space2 units2)
-    (VectorSurfaceFunction3d space1 units3)
+    (VectorSurfaceFunction3d units1 space1)
+    (Vector3d units2 space2)
+    (VectorSurfaceFunction3d units3 space1)
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
 
 instance
   space1 ~ space2 =>
   CrossMultiplication_
-    (VectorSurfaceFunction3d space1 units1)
-    (Vector3d space2 units2)
-    (VectorSurfaceFunction3d space1 (units1 ?*? units2))
+    (VectorSurfaceFunction3d units1 space1)
+    (Vector3d units2 space2)
+    (VectorSurfaceFunction3d (units1 ?*? units2) space1)
   where
   f `cross_` v = f `cross_` constant v
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
-    (Vector3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 units3)
+    (Vector3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
+    (VectorSurfaceFunction3d units3 space1)
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
 
 instance
   space1 ~ space2 =>
   CrossMultiplication_
-    (Vector3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
-    (VectorSurfaceFunction3d space1 (units1 ?*? units2))
+    (Vector3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
+    (VectorSurfaceFunction3d (units1 ?*? units2) space1)
   where
   v `cross_` f = constant v `cross_` f
 
 instance
   space1 ~ space2 =>
   CrossMultiplication
-    (VectorSurfaceFunction3d space1 units)
+    (VectorSurfaceFunction3d units space1)
     (Direction3d space2)
-    (VectorSurfaceFunction3d space1 units)
+    (VectorSurfaceFunction3d units space1)
   where
   lhs `cross` rhs = lhs `cross` Vector3d.unit rhs
 
@@ -361,16 +361,16 @@ instance
   space1 ~ space2 =>
   CrossMultiplication
     (Direction3d space1)
-    (VectorSurfaceFunction3d space2 units)
-    (VectorSurfaceFunction3d space2 units)
+    (VectorSurfaceFunction3d units space2)
+    (VectorSurfaceFunction3d units space2)
   where
   lhs `cross` rhs = Vector3d.unit lhs `cross` rhs
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
-    (VectorSurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
+    (VectorSurfaceFunction3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
     (SurfaceFunction units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
@@ -378,8 +378,8 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication_
-    (VectorSurfaceFunction3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
+    (VectorSurfaceFunction3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
     (SurfaceFunction (units1 ?*? units2))
   where
   lhs `dot_` rhs =
@@ -390,8 +390,8 @@ instance
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
-    (VectorSurfaceFunction3d space1 units1)
-    (Vector3d space2 units2)
+    (VectorSurfaceFunction3d units1 space1)
+    (Vector3d units2 space2)
     (SurfaceFunction units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
@@ -399,8 +399,8 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication_
-    (VectorSurfaceFunction3d space1 units1)
-    (Vector3d space2 units2)
+    (VectorSurfaceFunction3d units1 space1)
+    (Vector3d units2 space2)
     (SurfaceFunction (units1 ?*? units2))
   where
   function `dot_` vector = function `dot_` constant vector
@@ -408,8 +408,8 @@ instance
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
-    (Vector3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
+    (Vector3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
     (SurfaceFunction units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
@@ -417,8 +417,8 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication_
-    (Vector3d space1 units1)
-    (VectorSurfaceFunction3d space2 units2)
+    (Vector3d units1 space1)
+    (VectorSurfaceFunction3d units2 space2)
     (SurfaceFunction (units1 ?*? units2))
   where
   vector `dot_` function = constant vector `dot_` function
@@ -426,7 +426,7 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication
-    (VectorSurfaceFunction3d space1 units)
+    (VectorSurfaceFunction3d units space1)
     (Direction3d space2)
     (SurfaceFunction units)
   where
@@ -436,7 +436,7 @@ instance
   space1 ~ space2 =>
   DotMultiplication
     (Direction3d space1)
-    (VectorSurfaceFunction3d space2 units)
+    (VectorSurfaceFunction3d units space2)
     (SurfaceFunction units)
   where
   lhs `dot` rhs = Vector3d.unit lhs `dot` rhs
@@ -444,15 +444,15 @@ instance
 instance
   HasField
     "compiled"
-    (VectorSurfaceFunction3d space units)
-    (Compiled space units)
+    (VectorSurfaceFunction3d units space)
+    (Compiled units space)
   where
   getField (VectorSurfaceFunction3d c _ _) = c
 
 new ::
-  Compiled space units ->
-  (SurfaceParameter -> VectorSurfaceFunction3d space units) ->
-  VectorSurfaceFunction3d space units
+  Compiled units space ->
+  (SurfaceParameter -> VectorSurfaceFunction3d units space) ->
+  VectorSurfaceFunction3d units space
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
@@ -460,65 +460,65 @@ new c derivativeFunction = do
   VectorSurfaceFunction3d c du dv'
 
 recursive ::
-  Compiled space units ->
-  ( VectorSurfaceFunction3d space units ->
+  Compiled units space ->
+  ( VectorSurfaceFunction3d units space ->
     SurfaceParameter ->
-    VectorSurfaceFunction3d space units
+    VectorSurfaceFunction3d units space
   ) ->
-  VectorSurfaceFunction3d space units
+  VectorSurfaceFunction3d units space
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
 desingularize ::
-  VectorSurfaceFunction3d space units ->
+  VectorSurfaceFunction3d units space ->
   "singularityU0"
-    ::: Maybe (VectorSurfaceFunction3d space units, VectorSurfaceFunction3d space units) ->
+    ::: Maybe (VectorSurfaceFunction3d units space, VectorSurfaceFunction3d units space) ->
   "singularityU1"
-    ::: Maybe (VectorSurfaceFunction3d space units, VectorSurfaceFunction3d space units) ->
+    ::: Maybe (VectorSurfaceFunction3d units space, VectorSurfaceFunction3d units space) ->
   "singularityV0"
-    ::: Maybe (VectorSurfaceFunction3d space units, VectorSurfaceFunction3d space units) ->
+    ::: Maybe (VectorSurfaceFunction3d units space, VectorSurfaceFunction3d units space) ->
   "singularityV1"
-    ::: Maybe (VectorSurfaceFunction3d space units, VectorSurfaceFunction3d space units) ->
-  VectorSurfaceFunction3d space units
+    ::: Maybe (VectorSurfaceFunction3d units space, VectorSurfaceFunction3d units space) ->
+  VectorSurfaceFunction3d units space
 desingularize = SurfaceFunction.Blending.desingularize desingularized
 
 desingularized ::
   SurfaceFunction Unitless ->
-  VectorSurfaceFunction3d space units ->
-  VectorSurfaceFunction3d space units ->
-  VectorSurfaceFunction3d space units ->
-  VectorSurfaceFunction3d space units
+  VectorSurfaceFunction3d units space ->
+  VectorSurfaceFunction3d units space ->
+  VectorSurfaceFunction3d units space ->
+  VectorSurfaceFunction3d units space
 desingularized t start middle end =
   new
     (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
     (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
 
-zero :: VectorSurfaceFunction3d space units
+zero :: VectorSurfaceFunction3d units space
 zero = constant Vector3d.zero
 
-constant :: Vector3d space units -> VectorSurfaceFunction3d space units
+constant :: Vector3d units space -> VectorSurfaceFunction3d units space
 constant value = new (CompiledFunction.constant value) (const zero)
 
-evaluate :: VectorSurfaceFunction3d space units -> UvPoint -> Vector3d space units
+evaluate :: VectorSurfaceFunction3d units space -> UvPoint -> Vector3d units space
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 evaluateBounds ::
-  VectorSurfaceFunction3d space units ->
+  VectorSurfaceFunction3d units space ->
   UvBounds ->
-  VectorBounds3d space units
+  VectorBounds3d units space
 evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->
-  VectorSurfaceFunction3d space units ->
-  VectorSurfaceFunction3d space units
+  VectorSurfaceFunction3d units space ->
+  VectorSurfaceFunction3d units space
 derivative U = (.du)
 derivative V = (.dv)
 
 placeIn ::
   Frame3d global local ->
-  VectorSurfaceFunction3d local units ->
-  VectorSurfaceFunction3d global units
+  VectorSurfaceFunction3d units local ->
+  VectorSurfaceFunction3d units global
 placeIn frame function = do
   let compiledPlaced =
         CompiledFunction.map
@@ -530,14 +530,14 @@ placeIn frame function = do
 
 relativeTo ::
   Frame3d global local ->
-  VectorSurfaceFunction3d global units ->
-  VectorSurfaceFunction3d local units
+  VectorSurfaceFunction3d units global ->
+  VectorSurfaceFunction3d units local
 relativeTo frame function = placeIn (Frame3d.inverse frame) function
 
 transformBy ::
   Transform3d tag space ->
-  VectorSurfaceFunction3d space units ->
-  VectorSurfaceFunction3d space units
+  VectorSurfaceFunction3d units space ->
+  VectorSurfaceFunction3d units space
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
@@ -549,16 +549,16 @@ transformBy transform function = do
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
-  VectorSurfaceFunction3d space units1 ->
+  VectorSurfaceFunction3d units1 space ->
   SurfaceFunction units2 ->
-  Result DivisionByZero (VectorSurfaceFunction3d space units3)
+  Result DivisionByZero (VectorSurfaceFunction3d units3 space)
 quotient lhs rhs = Units.specialize (quotient_ lhs rhs)
 
 quotient_ ::
   Tolerance units2 =>
-  VectorSurfaceFunction3d space units1 ->
+  VectorSurfaceFunction3d units1 space ->
   SurfaceFunction units2 ->
-  Result DivisionByZero (VectorSurfaceFunction3d space (units1 ?/? units2))
+  Result DivisionByZero (VectorSurfaceFunction3d (units1 ?/? units2) space)
 quotient_ numerator denominator = do
   let lhopital p = do
         let numerator' = derivative p numerator
@@ -576,15 +576,15 @@ quotient_ numerator denominator = do
 
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
-  VectorSurfaceFunction3d space units1 ->
+  VectorSurfaceFunction3d units1 space ->
   SurfaceFunction units2 ->
-  VectorSurfaceFunction3d space units3
+  VectorSurfaceFunction3d units3 space
 unsafeQuotient lhs rhs = Units.specialize (unsafeQuotient_ lhs rhs)
 
 unsafeQuotient_ ::
-  VectorSurfaceFunction3d space units1 ->
+  VectorSurfaceFunction3d units1 space ->
   SurfaceFunction units2 ->
-  VectorSurfaceFunction3d space (units1 ?/? units2)
+  VectorSurfaceFunction3d (units1 ?/? units2) space
 unsafeQuotient_ lhs rhs = do
   let quotientDerivative self p =
         unsafeQuotient_ (derivative p lhs) rhs
@@ -593,7 +593,7 @@ unsafeQuotient_ lhs rhs = do
     (CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled)
     quotientDerivative
 
-squaredMagnitude_ :: VectorSurfaceFunction3d space units -> SurfaceFunction (units ?*? units)
+squaredMagnitude_ :: VectorSurfaceFunction3d units space -> SurfaceFunction (units ?*? units)
 squaredMagnitude_ function = do
   let compiledSquaredMagnitude =
         CompiledFunction.map
@@ -607,18 +607,18 @@ squaredMagnitude_ function = do
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
-  VectorSurfaceFunction3d space units1 ->
+  VectorSurfaceFunction3d units1 space ->
   SurfaceFunction units2
 squaredMagnitude = Units.specialize . squaredMagnitude_
 
-magnitude :: Tolerance units => VectorSurfaceFunction3d space units -> SurfaceFunction units
+magnitude :: Tolerance units => VectorSurfaceFunction3d units space -> SurfaceFunction units
 magnitude function = SurfaceFunction.sqrt_ (squaredMagnitude_ function)
 
 data IsZero = IsZero deriving (Eq, Show)
 
 direction ::
   Tolerance units =>
-  VectorSurfaceFunction3d space units ->
+  VectorSurfaceFunction3d units space ->
   Result IsZero (DirectionSurfaceFunction3d space)
 direction function = case quotient function (magnitude function) of
   Error DivisionByZero -> Error IsZero

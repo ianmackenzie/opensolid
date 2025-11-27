@@ -171,10 +171,10 @@ pass = Pass
 
 unique ::
   Tolerance units =>
-  (UvBounds -> VectorBounds2d space units) ->
-  (UvPoint -> Vector2d space units) ->
-  (UvPoint -> Vector2d space units) ->
-  (UvPoint -> Vector2d space units) ->
+  (UvBounds -> VectorBounds2d units space) ->
+  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2d units space) ->
   UvBounds ->
   Maybe UvPoint
 unique fBounds f fu fv uvBounds =
@@ -183,10 +183,10 @@ unique fBounds f fu fv uvBounds =
 solveUnique ::
   Tolerance units =>
   UvBounds ->
-  (UvBounds -> VectorBounds2d space units) ->
-  (UvPoint -> Vector2d space units) ->
-  (UvPoint -> Vector2d space units) ->
-  (UvPoint -> Vector2d space units) ->
+  (UvBounds -> VectorBounds2d units space) ->
+  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2d units space) ->
   UvBounds ->
   Maybe UvPoint
 solveUnique localBounds fBounds f fu fv globalBounds =
@@ -225,24 +225,24 @@ data Divergence = Divergence deriving (Eq, Show)
 
 newtonRaphson ::
   Tolerance units =>
-  (UvPoint -> Vector2d space units) ->
-  (UvPoint -> Vector2d space units) ->
-  (UvPoint -> Vector2d space units) ->
+  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2d units space) ->
   UvBounds ->
   UvPoint ->
-  Vector2d space units ->
+  Vector2d units space ->
   Result Divergence UvPoint
 newtonRaphson = solveNewtonRaphson 0
 
 solveNewtonRaphson ::
   Tolerance units =>
   Int ->
-  (UvPoint -> Vector2d space units) ->
-  (UvPoint -> Vector2d space units) ->
-  (UvPoint -> Vector2d space units) ->
+  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2d units space) ->
   UvBounds ->
   UvPoint ->
-  Vector2d space units ->
+  Vector2d units space ->
   Result Divergence UvPoint
 solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
   if iterations > 10 -- Check if we've entered an infinite loop

@@ -23,7 +23,7 @@ constant = Expression.constant
 
 on ::
   Plane3d space local ->
-  Expression UvPoint (Point2d local Meters) ->
+  Expression UvPoint (Point2d Meters local) ->
   Expression UvPoint (Point3d space)
 on = Expression.on
 
@@ -42,7 +42,7 @@ relativeTo = Expression.relativeTo
 projectInto ::
   Plane3d global local ->
   Expression UvPoint (Point3d global) ->
-  Expression UvPoint (Point2d local Meters)
+  Expression UvPoint (Point2d Meters local)
 projectInto = Expression.projectInto
 
 transformBy ::

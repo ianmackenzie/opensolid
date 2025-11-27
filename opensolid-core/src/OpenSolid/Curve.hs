@@ -242,57 +242,57 @@ instance Multiplication_ (Quantity units1) (Curve units2) (Curve (units1 ?*? uni
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve units1) (Vector2d space units2) (VectorCurve2d space units3)
+  Multiplication (Curve units1) (Vector2d units2 space) (VectorCurve2d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (Curve units1)
-    (Vector2d space units2)
-    (VectorCurve2d space (units1 ?*? units2))
+    (Vector2d units2 space)
+    (VectorCurve2d (units1 ?*? units2) space)
   where
   curve ?*? vector = curve ?*? VectorCurve2d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector2d space units1) (Curve units2) (VectorCurve2d space units3)
+  Multiplication (Vector2d units1 space) (Curve units2) (VectorCurve2d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (Vector2d space units1)
+    (Vector2d units1 space)
     (Curve units2)
-    (VectorCurve2d space (units1 ?*? units2))
+    (VectorCurve2d (units1 ?*? units2) space)
   where
   vector ?*? curve = VectorCurve2d.constant vector ?*? curve
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve units1) (Vector3d space units2) (VectorCurve3d space units3)
+  Multiplication (Curve units1) (Vector3d units2 space) (VectorCurve3d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (Curve units1)
-    (Vector3d space units2)
-    (VectorCurve3d space (units1 ?*? units2))
+    (Vector3d units2 space)
+    (VectorCurve3d (units1 ?*? units2) space)
   where
   curve ?*? vector = curve ?*? VectorCurve3d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector3d space units1) (Curve units2) (VectorCurve3d space units3)
+  Multiplication (Vector3d units1 space) (Curve units2) (VectorCurve3d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (Vector3d space units1)
+    (Vector3d units1 space)
     (Curve units2)
-    (VectorCurve3d space (units1 ?*? units2))
+    (VectorCurve3d (units1 ?*? units2) space)
   where
   vector ?*? curve = VectorCurve3d.constant vector ?*? curve
 

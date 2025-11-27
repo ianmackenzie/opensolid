@@ -25,7 +25,7 @@ formatLength :: Length -> Text
 formatLength length =
   Text.number (Length.inMeters length) <> "m"
 
-testCurve :: Text -> Curve2d Space Meters -> IO ()
+testCurve :: Text -> Curve2d Meters Space -> IO ()
 testCurve label curve = Tolerance.using (Length.meters 1e-12) do
   let (_, length) = Curve2d.arcLengthParameterization curve
   IO.printLine (label <> ": " <> formatLength length)
@@ -44,9 +44,9 @@ testQuadraticSplineLength = do
   IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
 analyticalLength ::
-  Point2d space Meters ->
-  Point2d space Meters ->
-  Point2d space Meters ->
+  Point2d Meters space ->
+  Point2d Meters space ->
+  Point2d Meters space ->
   Length
 analyticalLength (Point2d x0 y0) (Point2d x1 y1) (Point2d x2 y2) = do
   let ax = x0 .-. 2 *. x1 .+. x2

@@ -9,16 +9,16 @@ import OpenSolid.Prelude
 
 class
   Eq vertex =>
-  Vertex2d vertex space units
+  Vertex2d vertex units space
     | vertex -> space
     , vertex -> units
   where
-  position :: vertex -> Point2d space units
+  position :: vertex -> Point2d units space
 
-instance Vertex2d (Point2d space units) space units where
+instance Vertex2d (Point2d units space) units space where
   position = id
 
 {-# COMPLETE Vertex2d #-}
 
-pattern Vertex2d :: Vertex2d vertex space units => Point2d space units -> vertex
+pattern Vertex2d :: Vertex2d vertex units space => Point2d units space -> vertex
 pattern Vertex2d point <- (position -> point)

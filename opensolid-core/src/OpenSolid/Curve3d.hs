@@ -64,7 +64,7 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
-data Curve3d space = Curve3d (Compiled space) ~(VectorCurve3d space Meters)
+data Curve3d space = Curve3d (Compiled space) ~(VectorCurve3d Meters space)
 
 type Compiled space =
   CompiledFunction Number (Point3d space) (Bounds Unitless) (Bounds3d space)
@@ -72,7 +72,7 @@ type Compiled space =
 instance HasField "compiled" (Curve3d space) (Compiled space) where
   getField (Curve3d c _) = c
 
-instance HasField "derivative" (Curve3d space) (VectorCurve3d space Meters) where
+instance HasField "derivative" (Curve3d space) (VectorCurve3d Meters space) where
   getField (Curve3d _ d) = d
 
 instance Bounded3d (Curve3d space) space where
@@ -84,7 +84,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Addition
     (Curve3d space1)
-    (VectorCurve3d space2 meters)
+    (VectorCurve3d meters space2)
     (Curve3d space1)
   where
   lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
@@ -93,7 +93,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Subtraction
     (Curve3d space1)
-    (VectorCurve3d space2 meters)
+    (VectorCurve3d meters space2)
     (Curve3d space1)
   where
   lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
@@ -103,7 +103,7 @@ instance
   Subtraction
     (Curve3d space1)
     (Curve3d space2)
-    (VectorCurve3d space1 Meters)
+    (VectorCurve3d Meters space1)
   where
   lhs .-. rhs = VectorCurve3d.new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
@@ -125,17 +125,17 @@ instance
 instance ApproximateEquality (Curve3d space) Meters where
   curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
 
-new :: Compiled space -> VectorCurve3d space Meters -> Curve3d space
+new :: Compiled space -> VectorCurve3d Meters space -> Curve3d space
 new = Curve3d
 
-recursive :: Compiled space -> (Curve3d space -> VectorCurve3d space Meters) -> Curve3d space
+recursive :: Compiled space -> (Curve3d space -> VectorCurve3d Meters space) -> Curve3d space
 recursive givenCompiled derivativeFunction =
   let result = new givenCompiled (derivativeFunction result) in result
 
 constant :: Point3d space -> Curve3d space
 constant point = new (CompiledFunction.constant point) VectorCurve3d.zero
 
-on :: Plane3d global local -> Curve2d local Meters -> Curve3d global
+on :: Plane3d global local -> Curve2d Meters local -> Curve3d global
 on plane curve2d = do
   let compiledPlaced =
         CompiledFunction.map
@@ -187,9 +187,9 @@ derivatives given.
 -}
 hermite ::
   Point3d space ->
-  List (Vector3d space Meters) ->
+  List (Vector3d Meters space) ->
   Point3d space ->
-  List (Vector3d space Meters) ->
+  List (Vector3d Meters space) ->
   Curve3d space
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)

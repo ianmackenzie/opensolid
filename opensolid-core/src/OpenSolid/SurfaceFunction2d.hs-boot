@@ -23,65 +23,65 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d
 type role SurfaceFunction2d nominal nominal
 
 type SurfaceFunction2d :: Type -> Type -> Type
-data SurfaceFunction2d space units
+data SurfaceFunction2d units space
 
-type Compiled space units =
+type Compiled units space =
   CompiledFunction
     UvPoint
-    (Point2d space units)
+    (Point2d units space)
     UvBounds
-    (Bounds2d space units)
+    (Bounds2d units space)
 
-instance HasField "compiled" (SurfaceFunction2d space units) (Compiled space units)
+instance HasField "compiled" (SurfaceFunction2d units space) (Compiled units space)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (SurfaceFunction2d space1 units1)
-    (VectorSurfaceFunction2d space2 units2)
-    (SurfaceFunction2d space1 units1)
+    (SurfaceFunction2d units1 space1)
+    (VectorSurfaceFunction2d units2 space2)
+    (SurfaceFunction2d units1 space1)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (SurfaceFunction2d space1 units1)
-    (SurfaceFunction2d space2 units2)
-    (VectorSurfaceFunction2d space1 units1)
+    (SurfaceFunction2d units1 space1)
+    (SurfaceFunction2d units2 space2)
+    (VectorSurfaceFunction2d units1 space1)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Curve2d uvSpace unitless)
-    (SurfaceFunction2d space units)
-    (Curve2d space units)
+    (Curve2d unitless uvSpace)
+    (SurfaceFunction2d units space)
+    (Curve2d units space)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2d uvSpace unitless)
+    (SurfaceFunction2d unitless uvSpace)
     (SurfaceFunction units)
     (SurfaceFunction units)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2d uvSpace unitless)
-    (VectorSurfaceFunction2d space units)
-    (VectorSurfaceFunction2d space units)
+    (SurfaceFunction2d unitless uvSpace)
+    (VectorSurfaceFunction2d units space)
+    (VectorSurfaceFunction2d units space)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2d uvSpace unitless)
-    (VectorSurfaceFunction3d space units)
-    (VectorSurfaceFunction3d space units)
+    (SurfaceFunction2d unitless uvSpace)
+    (VectorSurfaceFunction3d units space)
+    (VectorSurfaceFunction3d units space)
 
 new ::
-  Compiled space units ->
-  (SurfaceParameter -> VectorSurfaceFunction2d space units) ->
-  SurfaceFunction2d space units
-xy :: SurfaceFunction units -> SurfaceFunction units -> SurfaceFunction2d space units
+  Compiled units space ->
+  (SurfaceParameter -> VectorSurfaceFunction2d units space) ->
+  SurfaceFunction2d units space
+xy :: SurfaceFunction units -> SurfaceFunction units -> SurfaceFunction2d units space
 derivative ::
   SurfaceParameter ->
-  SurfaceFunction2d space units ->
-  VectorSurfaceFunction2d space units
+  SurfaceFunction2d units space ->
+  VectorSurfaceFunction2d units space

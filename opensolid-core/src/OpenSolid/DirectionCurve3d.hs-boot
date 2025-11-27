@@ -8,7 +8,7 @@ where
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 
-newtype DirectionCurve3d space = DirectionCurve3d (VectorCurve3d space Unitless)
+newtype DirectionCurve3d space = DirectionCurve3d (VectorCurve3d Unitless space)
 
-unsafe :: VectorCurve3d space Unitless -> DirectionCurve3d space
-unwrap :: DirectionCurve3d space -> VectorCurve3d space Unitless
+unsafe :: VectorCurve3d Unitless space -> DirectionCurve3d space
+unwrap :: DirectionCurve3d space -> VectorCurve3d Unitless space

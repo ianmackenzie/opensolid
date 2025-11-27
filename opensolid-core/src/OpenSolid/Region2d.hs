@@ -84,23 +84,23 @@ import OpenSolid.Vertex2d (Vertex2d)
 type role Region2d nominal nominal
 
 -- | A closed 2D region (possibly with holes), defined by a set of boundary curves.
-data Region2d space units
-  = Region2d (Loop space units) (List (Loop space units))
+data Region2d units space
+  = Region2d (Loop units space) (List (Loop units space))
 
-type Loop space units =
-  NonEmpty (Curve2d space units)
+type Loop units space =
+  NonEmpty (Curve2d units space)
 
-instance FFI (Region2d FFI.Space Meters) where
+instance FFI (Region2d Meters FFI.Space) where
   representation = FFI.classRepresentation "Region2d"
 
-instance FFI (Region2d UvSpace Unitless) where
+instance FFI (Region2d Unitless UvSpace) where
   representation = FFI.classRepresentation "UvRegion"
 
-instance HasUnits (Region2d space units) units
+instance HasUnits (Region2d units space) units
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (Region2d space1 unitsA) (Region2d space2 unitsB)
+  Units.Coercion (Region2d unitsA space1) (Region2d unitsB space2)
   where
   coerce (Region2d outer inners) =
     Region2d
@@ -117,15 +117,15 @@ and there must not be any gaps between them.
 -}
 boundedBy ::
   Tolerance units =>
-  List (Curve2d space units) ->
-  Result BoundedBy.Error (Region2d space units)
+  List (Curve2d units space) ->
+  Result BoundedBy.Error (Region2d units space)
 boundedBy curves = do
   -- checkForInnerIntersection curves
   loops <- connect curves
   classifyLoops loops
 
 -- | The unit square in UV space.
-unitSquare :: Region2d UvSpace Unitless
+unitSquare :: Region2d Unitless UvSpace
 unitSquare = Tolerance.using Quantity.zero do
   case rectangle (Bounds2d Bounds.unitInterval Bounds.unitInterval) of
     Ok region -> region
@@ -140,8 +140,8 @@ Fails if the given bounds are empty
 -}
 rectangle ::
   Tolerance units =>
-  Bounds2d space units ->
-  Result EmptyRegion (Region2d space units)
+  Bounds2d units space ->
+  Result EmptyRegion (Region2d units space)
 rectangle (Bounds2d xBounds yBounds) =
   if Bounds.width xBounds ~= Quantity.zero || Bounds.width yBounds ~= Quantity.zero
     then Error EmptyRegion
@@ -166,9 +166,9 @@ Fails if the given dimeter is zero.
 -}
 circle ::
   Tolerance units =>
-  "centerPoint" ::: Point2d space units ->
+  "centerPoint" ::: Point2d units space ->
   "diameter" ::: Quantity units ->
-  Result EmptyRegion (Region2d space units)
+  Result EmptyRegion (Region2d units space)
 circle (Named centerPoint) (Named diameter) =
   if diameter ~= Quantity.zero
     then Error EmptyRegion
@@ -182,9 +182,9 @@ The hexagon will be oriented such that its top and bottom edges are horizontal.
 -}
 hexagon ::
   Tolerance units =>
-  "centerPoint" ::: Point2d space units ->
+  "centerPoint" ::: Point2d units space ->
   "height" ::: Quantity units ->
-  Result EmptyRegion (Region2d space units)
+  Result EmptyRegion (Region2d units space)
 hexagon (Named centerPoint) (Named height) =
   circumscribedPolygon 6 (#centerPoint centerPoint) (#diameter height)
 
@@ -197,9 +197,9 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 inscribedPolygon ::
   Tolerance units =>
   Int ->
-  "centerPoint" ::: Point2d space units ->
+  "centerPoint" ::: Point2d units space ->
   "diameter" ::: Quantity units ->
-  Result EmptyRegion (Region2d space units)
+  Result EmptyRegion (Region2d units space)
 inscribedPolygon n (Named centerPoint) (Named diameter) = do
   if diameter < Quantity.zero || diameter ~= Quantity.zero || n < 3
     then Error EmptyRegion
@@ -226,9 +226,9 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 circumscribedPolygon ::
   Tolerance units =>
   Int ->
-  "centerPoint" ::: Point2d space units ->
+  "centerPoint" ::: Point2d units space ->
   "diameter" ::: Quantity units ->
-  Result EmptyRegion (Region2d space units)
+  Result EmptyRegion (Region2d units space)
 circumscribedPolygon numSides (Named centerPoint) (Named diameter) =
   inscribedPolygon
     numSides
@@ -241,9 +241,9 @@ The last vertex will be connected back to the first vertex automatically if need
 (you do not have to close the polygon manually, although it will still work if you do).
 -}
 polygon ::
-  (Vertex2d vertex space units, Tolerance units) =>
+  (Vertex2d vertex units space, Tolerance units) =>
   List vertex ->
-  Result BoundedBy.Error (Region2d space units)
+  Result BoundedBy.Error (Region2d units space)
 polygon vertexList = case vertexList of
   [] -> Error BoundedBy.EmptyRegion
   NonEmpty vertices -> do
@@ -262,10 +262,10 @@ or if it is not possible to solve for a given fillet
 -}
 fillet ::
   Tolerance units =>
-  List (Point2d space units) ->
+  List (Point2d units space) ->
   "radius" ::: Quantity units ->
-  Region2d space units ->
-  Result Text (Region2d space units)
+  Region2d units space ->
+  Result Text (Region2d units space)
 fillet points (Named radius) region = do
   let initialCurves = NonEmpty.toList (boundaryCurves region)
   filletedCurves <- Result.orFail (Result.foldl (addFillet radius) initialCurves points)
@@ -274,9 +274,9 @@ fillet points (Named radius) region = do
 addFillet ::
   Tolerance units =>
   Quantity units ->
-  List (Curve2d space units) ->
-  Point2d space units ->
-  Result Text (List (Curve2d space units))
+  List (Curve2d units space) ->
+  Point2d units space ->
+  Result Text (List (Curve2d units space))
 addFillet radius curves point = do
   let couldNotFindPointToFillet = Error "Could not find point to fillet"
   let couldNotSolveForFilletLocation = Error "Could not solve for fillet location"
@@ -333,24 +333,24 @@ addFillet radius curves point = do
 
 curveIncidence ::
   Tolerance units =>
-  Point2d space units ->
-  Curve2d space units ->
-  (Curve2d space units, Maybe Number)
+  Point2d units space ->
+  Curve2d units space ->
+  (Curve2d units space, Maybe Number)
 curveIncidence point curve
   | point ~= curve.startPoint = (curve, Just 0)
   | point ~= curve.endPoint = (curve, Just 1)
   | otherwise = (curve, Nothing)
 
-incidentCurve :: (Curve2d space units, Maybe Number) -> Maybe (Curve2d space units, Number)
+incidentCurve :: (Curve2d units space, Maybe Number) -> Maybe (Curve2d units space, Number)
 incidentCurve (curve, maybeIncidence) = Maybe.map (curve,) maybeIncidence
 
-nonIncidentCurve :: (Curve2d space units, Maybe Number) -> Maybe (Curve2d space units)
+nonIncidentCurve :: (Curve2d units space, Maybe Number) -> Maybe (Curve2d units space)
 nonIncidentCurve (curve, Nothing) = Just curve
 nonIncidentCurve (_, Just _) = Nothing
 
 -- checkForInnerIntersection ::
 --   Tolerance units =>
---   List (Curve2d space units) ->
+--   List (Curve2d units space) ->
 --   Result BoundedBy.Error ()
 -- checkForInnerIntersection [] = Ok ()
 -- checkForInnerIntersection (first : rest) = do
@@ -359,8 +359,8 @@ nonIncidentCurve (_, Just _) = Nothing
 
 -- checkCurveForInnerIntersection ::
 --   Tolerance units =>
---   Curve2d space units ->
---   List (Curve2d space units) ->
+--   Curve2d units space ->
+--   List (Curve2d units space) ->
 --   Result BoundedBy.Error ()
 -- checkCurveForInnerIntersection _ [] = Ok ()
 -- checkCurveForInnerIntersection curve (first : rest) = do
@@ -369,8 +369,8 @@ nonIncidentCurve (_, Just _) = Nothing
 
 -- checkCurvesForInnerIntersection ::
 --   Tolerance units =>
---   Curve2d space units ->
---   Curve2d space units ->
+--   Curve2d units space ->
+--   Curve2d units space ->
 --   Result BoundedBy.Error ()
 -- checkCurvesForInnerIntersection curve1 curve2 =
 --   case Curve2d.intersections curve1 curve2 of
@@ -399,25 +399,25 @@ nonIncidentCurve (_, Just _) = Nothing
 
 connect ::
   Tolerance units =>
-  List (Curve2d space units) ->
-  Result BoundedBy.Error (List (Loop space units))
+  List (Curve2d units space) ->
+  Result BoundedBy.Error (List (Loop units space))
 connect [] = Ok []
 connect (first : rest) = do
   (loop, remainingCurves) <- buildLoop (startLoop first) rest
   remainingLoops <- connect remainingCurves
   Ok (loop : remainingLoops)
 
-data PartialLoop space units
+data PartialLoop units space
   = PartialLoop
-      (Point2d space units)
-      (NonEmpty (Curve2d space units))
-      (Point2d space units)
+      (Point2d units space)
+      (NonEmpty (Curve2d units space))
+      (Point2d units space)
 
 buildLoop ::
   Tolerance units =>
-  PartialLoop space units ->
-  List (Curve2d space units) ->
-  Result BoundedBy.Error (Loop space units, List (Curve2d space units))
+  PartialLoop units space ->
+  List (Curve2d units space) ->
+  Result BoundedBy.Error (Loop units space, List (Curve2d units space))
 buildLoop partialLoop@(PartialLoop currentStart currentCurves loopEnd) remainingCurves
   | currentStart ~= loopEnd = Ok (currentCurves, remainingCurves)
   | otherwise = do
@@ -426,9 +426,9 @@ buildLoop partialLoop@(PartialLoop currentStart currentCurves loopEnd) remaining
 
 extendPartialLoop ::
   Tolerance units =>
-  PartialLoop space units ->
-  List (Curve2d space units) ->
-  Result BoundedBy.Error (PartialLoop space units, List (Curve2d space units))
+  PartialLoop units space ->
+  List (Curve2d units space) ->
+  Result BoundedBy.Error (PartialLoop units space, List (Curve2d units space))
 extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
   case List.partition (hasEndpoint currentStart) curves of
     ([], _) -> Error BoundedBy.BoundaryHasGaps
@@ -438,33 +438,33 @@ extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
       Ok (PartialLoop newCurve.startPoint updatedCurves loopEnd, remaining)
     (List.TwoOrMore, _) -> Error BoundedBy.BoundaryIntersectsItself
 
-hasEndpoint :: Tolerance units => Point2d space units -> Curve2d space units -> Bool
+hasEndpoint :: Tolerance units => Point2d units space -> Curve2d units space -> Bool
 hasEndpoint point curve = point ~= curve.startPoint || point ~= curve.endPoint
 
-startLoop :: Curve2d space units -> PartialLoop space units
+startLoop :: Curve2d units space -> PartialLoop units space
 startLoop curve = PartialLoop curve.startPoint (NonEmpty.one curve) curve.endPoint
 
-outerLoop :: Region2d space units -> NonEmpty (Curve2d space units)
+outerLoop :: Region2d units space -> NonEmpty (Curve2d units space)
 outerLoop (Region2d loop _) = loop
 
-innerLoops :: Region2d space units -> List (NonEmpty (Curve2d space units))
+innerLoops :: Region2d units space -> List (NonEmpty (Curve2d units space))
 innerLoops (Region2d _ loops) = loops
 
-boundaryLoops :: Region2d space units -> NonEmpty (NonEmpty (Curve2d space units))
+boundaryLoops :: Region2d units space -> NonEmpty (NonEmpty (Curve2d units space))
 boundaryLoops region = outerLoop region :| innerLoops region
 
-boundaryCurves :: Region2d space units -> NonEmpty (Curve2d space units)
+boundaryCurves :: Region2d units space -> NonEmpty (Curve2d units space)
 boundaryCurves region = NonEmpty.concat (boundaryLoops region)
 
-placeIn :: Frame2d global units local -> Region2d local units -> Region2d global units
+placeIn :: Frame2d units global local -> Region2d units local -> Region2d units global
 placeIn frame (Region2d outer inners) = do
   let transformLoop = NonEmpty.map (Curve2d.placeIn frame)
   Region2d (transformLoop outer) (List.map transformLoop inners)
 
-relativeTo :: Frame2d global units local -> Region2d global units -> Region2d local units
+relativeTo :: Frame2d units global local -> Region2d units global -> Region2d units local
 relativeTo frame region = placeIn (Frame2d.inverse frame) region
 
-transformBy :: Transform2d tag space units -> Region2d space units -> Region2d space units
+transformBy :: Transform2d tag units space -> Region2d units space -> Region2d units space
 transformBy transform (Region2d outer inners) = do
   let transformLoop =
         case Transform2d.handedness transform of
@@ -473,56 +473,56 @@ transformBy transform (Region2d outer inners) = do
   Region2d (transformLoop outer) (List.map transformLoop inners)
 
 translateBy ::
-  Vector2d space units ->
-  Region2d space units ->
-  Region2d space units
+  Vector2d units space ->
+  Region2d units space ->
+  Region2d units space
 translateBy = Transform2d.translateByImpl transformBy
 
 translateIn ::
   Direction2d space ->
   Quantity units ->
-  Region2d space units ->
-  Region2d space units
+  Region2d units space ->
+  Region2d units space
 translateIn = Transform2d.translateInImpl transformBy
 
 translateAlong ::
-  Axis2d space units ->
+  Axis2d units space ->
   Quantity units ->
-  Region2d space units ->
-  Region2d space units
+  Region2d units space ->
+  Region2d units space
 translateAlong = Transform2d.translateAlongImpl transformBy
 
 rotateAround ::
-  Point2d space units ->
+  Point2d units space ->
   Angle ->
-  Region2d space units ->
-  Region2d space units
+  Region2d units space ->
+  Region2d units space
 rotateAround = Transform2d.rotateAroundImpl transformBy
 
 mirrorAcross ::
-  Axis2d space units ->
-  Region2d space units ->
-  Region2d space units
+  Axis2d units space ->
+  Region2d units space ->
+  Region2d units space
 mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
 scaleAbout ::
-  Point2d space units ->
+  Point2d units space ->
   Number ->
-  Region2d space units ->
-  Region2d space units
+  Region2d units space ->
+  Region2d units space
 scaleAbout = Transform2d.scaleAboutImpl transformBy
 
 scaleAlong ::
-  Axis2d space units ->
+  Axis2d units space ->
   Number ->
-  Region2d space units ->
-  Region2d space units
+  Region2d units space ->
+  Region2d units space
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 convert ::
   Quantity (units2 ?/? units1) ->
-  Region2d space units1 ->
-  Region2d space units2
+  Region2d units1 space ->
+  Region2d units2 space
 convert factor (Region2d outer inners) = do
   let transform =
         case Quantity.sign factor of
@@ -532,11 +532,11 @@ convert factor (Region2d outer inners) = do
 
 unconvert ::
   Quantity (units2 ?/? units1) ->
-  Region2d space units2 ->
-  Region2d space units1
+  Region2d units2 space ->
+  Region2d units1 space
 unconvert factor region = convert (Units.simplify (1 /? factor)) region
 
-contains :: Tolerance units => Point2d space units -> Region2d space units -> Bool
+contains :: Tolerance units => Point2d units space -> Region2d units space -> Bool
 contains point region =
   case classify point (boundaryCurves region) of
     Nothing -> True -- Point on boundary is considered contained
@@ -545,8 +545,8 @@ contains point region =
 
 classify ::
   Tolerance units =>
-  Point2d space units ->
-  NonEmpty (Curve2d space units) ->
+  Point2d units space ->
+  NonEmpty (Curve2d units space) ->
   Maybe Sign
 classify point curves =
   if NonEmpty.anySatisfy (intersects point) curves
@@ -555,8 +555,8 @@ classify point curves =
 
 fluxIntegral ::
   Tolerance units =>
-  Point2d space units ->
-  Curve2d space units ->
+  Point2d units space ->
+  Curve2d units space ->
   Estimate Unitless
 fluxIntegral point curve = do
   let displacement = point .-. curve
@@ -570,10 +570,10 @@ fluxIntegral point curve = do
             (VectorCurve2d.squaredMagnitude_ displacement)
   Curve.integrate integrand
 
-totalFlux :: Tolerance units => Point2d space units -> Loop space units -> Estimate Unitless
+totalFlux :: Tolerance units => Point2d units space -> Loop units space -> Estimate Unitless
 totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
 
-classifyNonBoundary :: Tolerance units => Point2d space units -> Loop space units -> Sign
+classifyNonBoundary :: Tolerance units => Point2d units space -> Loop units space -> Sign
 classifyNonBoundary point loop = do
   let flux = Estimate.satisfy containmentIsDeterminate (totalFlux point loop)
   if Bounds.includes Quantity.zero flux then Negative else Positive
@@ -586,8 +586,8 @@ containmentIsDeterminate flux = not (Bounds.contains bothPossibleFluxValues flux
 
 classifyLoops ::
   Tolerance units =>
-  List (Loop space units) ->
-  Result BoundedBy.Error (Region2d space units)
+  List (Loop units space) ->
+  Result BoundedBy.Error (Region2d units space)
 classifyLoops [] = Error BoundedBy.EmptyRegion
 classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
@@ -597,23 +597,23 @@ classifyLoops (NonEmpty loops) = do
     then Ok (Region2d outerLoopCandidate innerLoopCandidates)
     else Error BoundedBy.MultipleDisjointRegions
 
-fixSign :: Tolerance units => Sign -> Loop space units -> Loop space units
+fixSign :: Tolerance units => Sign -> Loop units space -> Loop units space
 fixSign desiredSign loop =
   Tolerance.using (Quantity.squared_ ?tolerance) do
     if Estimate.sign (loopSignedArea_ loop) == desiredSign then loop else reverseLoop loop
 
-reverseLoop :: Loop space units -> Loop space units
+reverseLoop :: Loop units space -> Loop units space
 reverseLoop loop = NonEmpty.reverseMap Curve2d.reverse loop
 
 pickLargestLoop ::
   Tolerance units =>
-  NonEmpty (Loop space units) ->
-  (Loop space units, List (Loop space units))
+  NonEmpty (Loop units space) ->
+  (Loop units space, List (Loop units space))
 pickLargestLoop loops =
   Tolerance.using (Quantity.squared_ ?tolerance) do
     Estimate.pickLargestBy loopSignedArea_ loops
 
-loopSignedArea_ :: Loop space units -> Estimate (units ?*? units)
+loopSignedArea_ :: Loop units space -> Estimate (units ?*? units)
 loopSignedArea_ loop = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first loop)
   let edgeIntegrals = NonEmpty.map (areaIntegral_ referencePoint) loop
@@ -621,20 +621,20 @@ loopSignedArea_ loop = do
 
 areaIntegral ::
   Units.Squared units1 units2 =>
-  Point2d space units1 ->
-  Curve2d space units1 ->
+  Point2d units1 space ->
+  Curve2d units1 space ->
   Estimate units2
 areaIntegral referencePoint curve =
   Units.specialize (areaIntegral_ referencePoint curve)
 
-areaIntegral_ :: Point2d space units -> Curve2d space units -> Estimate (units ?*? units)
+areaIntegral_ :: Point2d units space -> Curve2d units space -> Estimate (units ?*? units)
 areaIntegral_ referencePoint curve = do
   let displacement = curve .-. referencePoint
   let y = displacement.yComponent
   let dx = displacement.xComponent.derivative
   negative (Curve.integrate (y ?*? dx))
 
-loopIsInside :: Tolerance units => Loop space units -> Loop space units -> Bool
+loopIsInside :: Tolerance units => Loop units space -> Loop units space -> Bool
 loopIsInside outer inner = do
   let testPoint = Curve2d.startPoint (NonEmpty.first inner)
   case classify testPoint outer of
@@ -642,26 +642,26 @@ loopIsInside outer inner = do
     Just Positive -> True
     Just Negative -> False
 
-bounds :: Region2d space units -> Bounds2d space units
+bounds :: Region2d units space -> Bounds2d units space
 bounds region = do
   let outerEdgeBoundingBoxes = NonEmpty.map Curve2d.bounds (outerLoop region)
   NonEmpty.reduce Bounds2d.aggregate2 outerEdgeBoundingBoxes
 
-area :: Units.Squared units1 units2 => Region2d space units1 -> Estimate units2
+area :: Units.Squared units1 units2 => Region2d units1 space -> Estimate units2
 area region = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first (outerLoop region))
   let edgeIntegrals = NonEmpty.map (areaIntegral referencePoint) (boundaryCurves region)
   Estimate.sum edgeIntegrals
 
-toMesh :: Resolution units -> Region2d space units -> Mesh (Point2d space units)
+toMesh :: Resolution units -> Region2d units space -> Mesh (Point2d units space)
 toMesh resolution region = do
   let vertexLoops = NonEmpty.map (toVertexLoop resolution) (boundaryLoops region)
   CDT.unsafe vertexLoops []
 
 toVertexLoop ::
   Resolution units ->
-  NonEmpty (Curve2d space units) ->
-  NonEmpty (Point2d space units)
+  NonEmpty (Curve2d units space) ->
+  NonEmpty (Point2d units space)
 toVertexLoop resolution loop = do
   let trailingVertices curve = do
         let polyline = Curve2d.toPolyline resolution curve
