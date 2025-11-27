@@ -919,20 +919,20 @@ data Frame2d units global local
   , orientation :: Orientation2d global
   }
 
-instance HasField "xDirection" (Frame2d units space defines) (Direction2d space) where
+instance HasField "xDirection" (Frame2d units global local) (Direction2d global) where
   getField = (.orientation.xDirection)
 
-instance HasField "yDirection" (Frame2d units space defines) (Direction2d space) where
+instance HasField "yDirection" (Frame2d units global local) (Direction2d global) where
   getField = (.orientation.yDirection)
 
-deriving instance Eq (Frame2d units space defines)
+deriving instance Eq (Frame2d units global local)
 
-deriving instance Show (Frame2d units space defines)
+deriving instance Show (Frame2d units global local)
 
-instance FFI (Frame2d Meters FFI.Space defines) where
+instance FFI (Frame2d Meters FFI.Space local) where
   representation = FFI.classRepresentation "Frame2d"
 
-instance FFI (Frame2d Unitless UvSpace defines) where
+instance FFI (Frame2d Unitless UvSpace local) where
   representation = FFI.classRepresentation "UvFrame"
 
 ----- Transform2d -----
@@ -2072,31 +2072,31 @@ data Plane3d global local = Plane3d
   , orientation :: PlaneOrientation3d global
   }
 
-deriving instance Eq (Plane3d space defines)
+deriving instance Eq (Plane3d global local)
 
-deriving instance Ord (Plane3d space defines)
+deriving instance Ord (Plane3d global local)
 
-deriving instance Show (Plane3d space defines)
+deriving instance Show (Plane3d global local)
 
-instance FFI (Plane3d FFI.Space defines) where
+instance FFI (Plane3d FFI.Space local) where
   representation = FFI.classRepresentation "Plane3d"
 
-instance HasField "xDirection" (Plane3d space defines) (Direction3d space) where
+instance HasField "xDirection" (Plane3d global local) (Direction3d global) where
   getField = (.orientation.xDirection)
 
-instance HasField "yDirection" (Plane3d space defines) (Direction3d space) where
+instance HasField "yDirection" (Plane3d global local) (Direction3d global) where
   getField = (.orientation.yDirection)
 
-instance HasField "normalDirection" (Plane3d space defines) (Direction3d space) where
+instance HasField "normalDirection" (Plane3d global local) (Direction3d global) where
   getField = (.orientation.normalDirection)
 
-instance HasField "xAxis" (Plane3d space defines) (Axis3d space) where
+instance HasField "xAxis" (Plane3d global local) (Axis3d global) where
   getField plane = Axis3d plane.originPoint plane.xDirection
 
-instance HasField "yAxis" (Plane3d space defines) (Axis3d space) where
+instance HasField "yAxis" (Plane3d global local) (Axis3d global) where
   getField plane = Axis3d plane.originPoint plane.yDirection
 
-instance HasField "normalAxis" (Plane3d space defines) (Axis3d space) where
+instance HasField "normalAxis" (Plane3d global local) (Axis3d global) where
   getField plane = Axis3d plane.originPoint plane.normalDirection
 
 ----- Frame3d -----
@@ -2110,62 +2110,62 @@ data Frame3d global local = Frame3d
   , orientation :: Orientation3d global
   }
 
-instance HasField "rightwardDirection" (Frame3d space defines) (Direction3d space) where
+instance HasField "rightwardDirection" (Frame3d global local) (Direction3d global) where
   getField = (.orientation.rightwardDirection)
 
-instance HasField "leftwardDirection" (Frame3d space defines) (Direction3d space) where
+instance HasField "leftwardDirection" (Frame3d global local) (Direction3d global) where
   getField = (.orientation.leftwardDirection)
 
-instance HasField "forwardDirection" (Frame3d space defines) (Direction3d space) where
+instance HasField "forwardDirection" (Frame3d global local) (Direction3d global) where
   getField = (.orientation.forwardDirection)
 
-instance HasField "backwardDirection" (Frame3d space defines) (Direction3d space) where
+instance HasField "backwardDirection" (Frame3d global local) (Direction3d global) where
   getField = (.orientation.backwardDirection)
 
-instance HasField "upwardDirection" (Frame3d space defines) (Direction3d space) where
+instance HasField "upwardDirection" (Frame3d global local) (Direction3d global) where
   getField = (.orientation.upwardDirection)
 
-instance HasField "downwardDirection" (Frame3d space defines) (Direction3d space) where
+instance HasField "downwardDirection" (Frame3d global local) (Direction3d global) where
   getField = (.orientation.downwardDirection)
 
-instance HasField "rightwardAxis" (Frame3d space defines) (Axis3d space) where
+instance HasField "rightwardAxis" (Frame3d global local) (Axis3d global) where
   getField frame = Axis3d frame.originPoint frame.rightwardDirection
 
-instance HasField "leftwardAxis" (Frame3d space defines) (Axis3d space) where
+instance HasField "leftwardAxis" (Frame3d global local) (Axis3d global) where
   getField frame = Axis3d frame.originPoint frame.leftwardDirection
 
-instance HasField "forwardAxis" (Frame3d space defines) (Axis3d space) where
+instance HasField "forwardAxis" (Frame3d global local) (Axis3d global) where
   getField frame = Axis3d frame.originPoint frame.forwardDirection
 
-instance HasField "backwardAxis" (Frame3d space defines) (Axis3d space) where
+instance HasField "backwardAxis" (Frame3d global local) (Axis3d global) where
   getField frame = Axis3d frame.originPoint frame.backwardDirection
 
-instance HasField "upwardAxis" (Frame3d space defines) (Axis3d space) where
+instance HasField "upwardAxis" (Frame3d global local) (Axis3d global) where
   getField frame = Axis3d frame.originPoint frame.upwardDirection
 
-instance HasField "downwardAxis" (Frame3d space defines) (Axis3d space) where
+instance HasField "downwardAxis" (Frame3d global local) (Axis3d global) where
   getField frame = Axis3d frame.originPoint frame.downwardDirection
 
-instance HasField "backwardOrientation" (Frame3d space defines) (Orientation3d space) where
+instance HasField "backwardOrientation" (Frame3d global local) (Orientation3d global) where
   getField = (.orientation.backwardOrientation)
 
-instance HasField "rightwardOrientation" (Frame3d space defines) (Orientation3d space) where
+instance HasField "rightwardOrientation" (Frame3d global local) (Orientation3d global) where
   getField = (.orientation.rightwardOrientation)
 
-instance HasField "leftwardOrientation" (Frame3d space defines) (Orientation3d space) where
+instance HasField "leftwardOrientation" (Frame3d global local) (Orientation3d global) where
   getField = (.orientation.leftwardOrientation)
 
-instance HasField "upwardOrientation" (Frame3d space defines) (Orientation3d space) where
+instance HasField "upwardOrientation" (Frame3d global local) (Orientation3d global) where
   getField = (.orientation.upwardOrientation)
 
-instance HasField "downwardOrientation" (Frame3d space defines) (Orientation3d space) where
+instance HasField "downwardOrientation" (Frame3d global local) (Orientation3d global) where
   getField = (.orientation.downwardOrientation)
 
-deriving instance Eq (Frame3d space defines)
+deriving instance Eq (Frame3d global local)
 
-deriving instance Show (Frame3d space defines)
+deriving instance Show (Frame3d global local)
 
-instance FFI (Frame3d FFI.Space defines) where
+instance FFI (Frame3d FFI.Space local) where
   representation = FFI.classRepresentation "Frame3d"
 
 ----- Transform3d -----

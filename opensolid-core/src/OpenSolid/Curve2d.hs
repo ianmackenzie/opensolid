@@ -454,12 +454,12 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       line givenStartPoint givenEndPoint
 
 ellipticalArc ::
-  Frame2d units space defines ->
+  Frame2d units global local ->
   Quantity units ->
   Quantity units ->
   Angle ->
   Angle ->
-  Curve2d units space
+  Curve2d units global
 ellipticalArc axes xRadius yRadius startAngle endAngle = do
   let centerPoint = Frame2d.originPoint axes
   let xVector = xRadius .*. Frame2d.xDirection axes
@@ -494,10 +494,10 @@ The first radius given will be the radius along the X axis,
 and the second radius will be the radius along the Y axis.
 -}
 ellipse ::
-  Frame2d units space defines ->
+  Frame2d units global local ->
   Quantity units ->
   Quantity units ->
-  Curve2d units space
+  Curve2d units global
 ellipse axes xRadius yRadius = ellipticalArc axes xRadius yRadius Angle.zero Angle.twoPi
 
 {-| Construct a Bezier curve from its control points.

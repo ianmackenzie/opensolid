@@ -35,6 +35,6 @@ bounded ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Frame2d Unitless UvSpace defines ->
+  Frame2d Unitless UvSpace local ->
   List (Axis2d Unitless UvSpace) ->
   Curve2d Unitless UvSpace

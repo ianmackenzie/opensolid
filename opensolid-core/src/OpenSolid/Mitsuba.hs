@@ -44,7 +44,7 @@ import OpenSolid.Text qualified as Text
 
 -- | The lighting to use for a Mitsuba scene.
 data Lighting space where
-  EnvironmentMap :: Frame3d space defines -> Text -> Lighting space
+  EnvironmentMap :: Frame3d global local -> Text -> Lighting global
 
 instance FFI (Lighting FFI.Space) where
   representation = FFI.nestedClassRepresentation "Mitsuba" "Lighting"
@@ -60,13 +60,13 @@ convention =
     Orientation3d.upwardDirection
     Orientation3d.backwardDirection
 
-xDirection :: Frame3d space defines -> Direction3d space
+xDirection :: Frame3d global local -> Direction3d global
 xDirection frame = Convention3d.xDirection frame.orientation convention
 
-yDirection :: Frame3d space defines -> Direction3d space
+yDirection :: Frame3d global local -> Direction3d global
 yDirection frame = Convention3d.yDirection frame.orientation convention
 
-zDirection :: Frame3d space defines -> Direction3d space
+zDirection :: Frame3d global local -> Direction3d global
 zDirection frame = Convention3d.zDirection frame.orientation convention
 
 {-| Write a Mitsuba scene out to an XML scene description and a file containing binary mesh data.
@@ -146,7 +146,7 @@ and the path to the environment map image itself.
 The environment map image will typically be in OpenEXR format;
 https://polyhaven.com is a good source for free ones.
 -}
-environmentMap :: Frame3d space defines -> Text -> Lighting space
+environmentMap :: Frame3d global local -> Text -> Lighting global
 environmentMap = EnvironmentMap
 
 {-| Write a list of named meshes out to a single Mitsuba .serialized file.

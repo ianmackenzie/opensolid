@@ -44,7 +44,7 @@ The origin point of the plane will be the origin point of the axis,
 and the normal direction of the plane will be the direction of the axis.
 The X and Y directions of the plane will be chosen arbitrarily.
 -}
-normalPlane :: Axis3d space -> Plane3d space defines
+normalPlane :: Axis3d global -> Plane3d global local
 normalPlane (Axis3d p0 d) = Plane3d p0 (PlaneOrientation3d.fromNormalDirection d)
 
 {-| Move an axis so that its origin point is the given point.

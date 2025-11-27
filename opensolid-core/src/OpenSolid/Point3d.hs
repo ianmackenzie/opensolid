@@ -166,7 +166,7 @@ relativeTo (Frame3d p0 (Orientation3d i j k)) p =
   let d = p .-. p0 in Point3d (d `dot` i) (d `dot` j) (d `dot` k)
 
 -- | Project a point onto a plane.
-projectOnto :: Plane3d space defines -> Point3d space -> Point3d space
+projectOnto :: Plane3d global local -> Point3d global -> Point3d global
 projectOnto plane point =
   point .-. Vector3d.projectionIn plane.normalDirection (point .-. plane.originPoint)
 
@@ -196,7 +196,7 @@ translateAlong = Transform3d.translateAlongImpl transformBy
 rotateAround :: Axis3d space -> Angle -> Point3d space -> Point3d space
 rotateAround = Transform3d.rotateAroundImpl transformBy
 
-mirrorAcross :: Plane3d space defines -> Point3d space -> Point3d space
+mirrorAcross :: Plane3d global local -> Point3d global -> Point3d global
 mirrorAcross = Transform3d.mirrorAcrossImpl transformBy
 
 scaleAbout :: Point3d space -> Number -> Point3d space -> Point3d space

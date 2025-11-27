@@ -280,5 +280,5 @@ scaleAlong :: Axis3d space -> Number -> Vector3d units space -> Vector3d units s
 scaleAlong = Transform3d.scaleAlongImpl transformBy
 
 -- | Mirror across the given plane.
-mirrorAcross :: Plane3d space defines -> Vector3d units space -> Vector3d units space
+mirrorAcross :: Plane3d global local -> Vector3d units global -> Vector3d units global
 mirrorAcross plane vector = mirrorIn (Plane3d.normalDirection plane) vector

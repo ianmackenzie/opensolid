@@ -35,42 +35,42 @@ import OpenSolid.Primitives
   , PlaneOrientation3d (PlaneOrientation3d)
   )
 
-originPoint :: Frame2d units space defines -> Point2d units space
+originPoint :: Frame2d units global local -> Point2d units global
 originPoint (Frame2d p0 _) = p0
 
-orientation :: Frame2d units space defines -> Orientation2d space
+orientation :: Frame2d units global local -> Orientation2d global
 orientation (Frame2d _ o) = o
 
-coerce :: Frame2d units1 space1 defines1 -> Frame2d units2 space2 defines2
+coerce :: Frame2d units1 global1 local1 -> Frame2d units2 global2 local2
 coerce (Frame2d p o) = Frame2d (Point2d.coerce p) (Orientation2d.coerce o)
 
-erase :: Frame2d units space defines -> Frame2d Unitless space defines
+erase :: Frame2d units global local -> Frame2d Unitless global local
 erase = coerce
 
-xDirection :: Frame2d units space defines -> Direction2d space
+xDirection :: Frame2d units global local -> Direction2d global
 xDirection frame = Orientation2d.xDirection (orientation frame)
 
-yDirection :: Frame2d units space defines -> Direction2d space
+yDirection :: Frame2d units global local -> Direction2d global
 yDirection frame = Orientation2d.yDirection (orientation frame)
 
-xy :: Frame2d units space defines
+xy :: Frame2d units global local
 xy = atPoint Point2d.origin
 
-atPoint :: Point2d units space -> Frame2d units space defines
+atPoint :: Point2d units global -> Frame2d units global local
 atPoint p0 = Frame2d p0 Orientation2d.horizontal
 
-fromXAxis :: Axis2d units space -> Frame2d units space defines
+fromXAxis :: Axis2d units global -> Frame2d units global local
 fromXAxis axis =
   Frame2d (Axis2d.originPoint axis) (Orientation2d.fromXDirection (Axis2d.direction axis))
 
-fromYAxis :: Axis2d units space -> Frame2d units space defines
+fromYAxis :: Axis2d units global -> Frame2d units global local
 fromYAxis axis =
   Frame2d (Axis2d.originPoint axis) (Orientation2d.fromYDirection (Axis2d.direction axis))
 
-xAxis :: Frame2d units space defines -> Axis2d units space
+xAxis :: Frame2d units global local -> Axis2d units global
 xAxis frame = Axis2d.through (originPoint frame) (xDirection frame)
 
-yAxis :: Frame2d units space defines -> Axis2d units space
+yAxis :: Frame2d units global local -> Axis2d units global
 yAxis frame = Axis2d.through (originPoint frame) (yDirection frame)
 
 placeIn ::
@@ -91,7 +91,7 @@ relativeTo globalFrame frame =
     (Point2d.relativeTo globalFrame (originPoint frame))
     (Orientation2d.relativeTo globalFrame (orientation frame))
 
-placeOn :: Plane3d space local -> Frame2d Meters local defines -> Plane3d space defines
+placeOn :: Plane3d space1 space2 -> Frame2d Meters space2 space3 -> Plane3d space1 space3
 placeOn plane (Frame2d p0 (Orientation2d i j)) =
   Plane3d (Point2d.placeOn plane p0) $
     PlaneOrientation3d (Direction2d.placeOn plane i) (Direction2d.placeOn plane j)

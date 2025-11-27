@@ -132,7 +132,7 @@ frame = Frame3d originPoint forwardOrientation
 The X direction of the plane will be the global leftward direction,
 and the Y direction of the plane will be the global upward direction.
 -}
-frontPlane :: Plane3d space defines
+frontPlane :: Plane3d global local
 frontPlane = Plane3d originPoint (PlaneOrientation3d leftwardDirection upwardDirection)
 
 {-| A backward-facing plane through the global origin point.
@@ -140,7 +140,7 @@ frontPlane = Plane3d originPoint (PlaneOrientation3d leftwardDirection upwardDir
 The X direction of the plane will be the global rightward direction,
 and the Y direction of the plane will be the global upward direction.
 -}
-backPlane :: Plane3d space defines
+backPlane :: Plane3d global local
 backPlane = Plane3d originPoint (PlaneOrientation3d rightwardDirection upwardDirection)
 
 {-| An upward-facing plane through the global origin point.
@@ -148,7 +148,7 @@ backPlane = Plane3d originPoint (PlaneOrientation3d rightwardDirection upwardDir
 The X direction of the plane will be the global rightward direction,
 and the Y direction of the plane will be the global forward direction.
 -}
-topPlane :: Plane3d space defines
+topPlane :: Plane3d global local
 topPlane = Plane3d originPoint (PlaneOrientation3d rightwardDirection forwardDirection)
 
 {-| An downward-facing plane through the global origin point.
@@ -156,7 +156,7 @@ topPlane = Plane3d originPoint (PlaneOrientation3d rightwardDirection forwardDir
 The X direction of the plane will be the global leftward direction,
 and the Y direction of the plane will be the global forward direction.
 -}
-bottomPlane :: Plane3d space defines
+bottomPlane :: Plane3d global local
 bottomPlane = Plane3d originPoint (PlaneOrientation3d leftwardDirection forwardDirection)
 
 {-| A rightward-facing plane through the global origin point.
@@ -164,7 +164,7 @@ bottomPlane = Plane3d originPoint (PlaneOrientation3d leftwardDirection forwardD
 The X direction of the plane will be the global forward direction,
 and the Y direction of the plane will be the global upward direction.
 -}
-rightPlane :: Plane3d space defines
+rightPlane :: Plane3d global local
 rightPlane = Plane3d originPoint (PlaneOrientation3d forwardDirection upwardDirection)
 
 {-| A leftward-facing plane through the global origin point.
@@ -172,7 +172,7 @@ rightPlane = Plane3d originPoint (PlaneOrientation3d forwardDirection upwardDire
 The X direction of the plane will be the global backward direction,
 and the Y direction of the plane will be the global upward direction.
 -}
-leftPlane :: Plane3d space defines
+leftPlane :: Plane3d global local
 leftPlane = Plane3d originPoint (PlaneOrientation3d backwardDirection upwardDirection)
 
 -- | A forward-facing axis through the global origin point.
