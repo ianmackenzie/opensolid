@@ -66,6 +66,8 @@ import Prelude
   , Eq
   , Ord
   , Show
+  , floor
+  , fromIntegral
   , max
   , min
   , (*)
@@ -158,13 +160,13 @@ instance
 
 {-# INLINE (.//.) #-}
 (.//.) :: Quantity units -> Quantity units -> Int
-x .//. y = Prelude.floor (x ./. y)
+x .//. y = floor (x ./. y)
 
 infixl 7 .//.
 
 {-# INLINE (.%.) #-}
 (.%.) :: Quantity units -> Quantity units -> Quantity units
-x .%. y = x .-. y .* Prelude.fromIntegral (x .//. y)
+x .%. y = x .-. y .* fromIntegral (x .//. y)
 
 infixl 7 .%.
 
@@ -326,4 +328,4 @@ midpoints start end n = range start end (2 * n) [1, 3 .. 2 * n - 1]
 range :: Quantity units -> Quantity units -> Int -> List Int -> List (Quantity units)
 range start end n indices = do
   let delta = end .-. start
-  [start .+. (Prelude.fromIntegral i / Prelude.fromIntegral n) *. delta | i <- indices]
+  [start .+. (fromIntegral i / fromIntegral n) *. delta | i <- indices]
