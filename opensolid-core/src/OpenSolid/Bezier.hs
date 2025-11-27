@@ -32,7 +32,7 @@ type Constraints point vector =
 derivative :: Constraints point vector => NonEmpty point -> NonEmpty vector
 derivative controlPoints = do
   let scale = Number.fromInt (NonEmpty.length controlPoints - 1)
-  let scaledDifference p1 p2 = (p2 .-. p1) .* scale
+  let scaledDifference p1 p2 = (p2 .-. p1) .*. scale
   let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
   case scaledDifferences of
     [] -> NonEmpty.one zero
