@@ -87,7 +87,7 @@ toRgb1 color = do
 toRgb255 :: Color -> (Int, Int, Int)
 toRgb255 color = do
   let (r, g, b) = toRgb1 color
-  let toInt component = round (component .* 255)
+  let toInt component = round (255 *. component)
   (toInt r, toInt g, toInt b)
 
 {-| Get the hue, saturation and lightness of a color.
