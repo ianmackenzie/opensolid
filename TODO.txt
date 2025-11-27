@@ -1,3 +1,6 @@
+Move SurfaceLinearization.error to SurfaceFunction3d.linearizationError
+-> or 'linearDeviation' or 'nonlinearity'
+
 Replace use of e.g. curve.derivative with e.g. "let curve' = Curve2d.derivative curve"
 
 Reduce use of HasField instances
