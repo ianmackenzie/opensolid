@@ -45,9 +45,6 @@ cradle:
     - path: "executables/blended-surface/Main.hs"
       component: "executables:exe:blended-surface"
 
-    - path: "executables/blending-curves/Main.hs"
-      component: "executables:exe:blending-curves"
-
     - path: "executables/oblate-spheroid/Main.hs"
       component: "executables:exe:oblate-spheroid"
 

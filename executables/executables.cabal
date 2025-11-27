@@ -181,14 +181,6 @@ executable blended-surface
     base,
     opensolid-core,
 
-executable blending-curves
-  import: config
-  main-is: Main.hs
-  hs-source-dirs: blending-curves
-  build-depends:
-    base,
-    opensolid-core,
-
 executable oblate-spheroid
   import: config
   main-is: Main.hs
