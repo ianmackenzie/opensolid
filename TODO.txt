@@ -1,6 +1,3 @@
-Go back to custom *, /, +, - operators, with e.g. .* used for expressions like "2 .* vector"?
--> could make ".*." an alias for the built-in "*" operator...
-
 Replace use of e.g. curve.derivative with e.g. "let curve' = Curve2d.derivative curve"
 
 Reduce use of HasField instances
