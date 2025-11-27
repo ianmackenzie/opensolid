@@ -414,20 +414,24 @@ testQuotientDesingularization = Tolerance.using 1e-9 do
   let numerator = Curve.sin (Angle.pi .*. Curve.t)
   let denominator = Curve.t .*. (1 -. Curve.t)
   quotient <- Result.orFail (Curve.quotient numerator denominator)
+  let quotient' = Curve.derivative quotient
+  let quotient'' = Curve.derivative quotient'
+  let quotient''' = Curve.derivative quotient''
   let tValues = Quantity.steps 0 1 10
   IO.forEach tValues \tValue -> do
     log "quotient" (Curve.evaluate quotient tValue)
   IO.forEach tValues \tValue -> do
-    log "derivative" (Curve.evaluate quotient.derivative tValue)
+    log "derivative" (Curve.evaluate quotient' tValue)
   IO.forEach tValues \tValue -> do
-    log "second derivative" (Curve.evaluate quotient.derivative.derivative tValue)
+    log "second derivative" (Curve.evaluate quotient'' tValue)
   IO.forEach tValues \tValue -> do
-    log "third derivative" (Curve.evaluate quotient.derivative.derivative.derivative tValue)
+    log "third derivative" (Curve.evaluate quotient''' tValue)
 
 testCurveSqrt :: IO ()
 testCurveSqrt = Tolerance.using 1e-6 do
   let t = Curve.t
   let curve = Curve.sqrt (0.5 *. (1 -. Curve.cos (Angle.twoPi .*. t)))
+  let curve' = Curve.derivative curve
   Drawing2d.writeSvg
     "executables/sandbox/cos-sqrt.svg"
     (Debug.Plot.viewBox (Point2d -0.1 -4.1) (Point2d 1.1 4.1))
@@ -435,7 +439,7 @@ testCurveSqrt = Tolerance.using 1e-6 do
         [ Debug.Plot.xAxis 0 1
         , Debug.Plot.yAxis 0 1
         , Debug.Plot.curve curve
-        , Debug.Plot.curve curve.derivative
+        , Debug.Plot.curve curve'
         ]
     )
 

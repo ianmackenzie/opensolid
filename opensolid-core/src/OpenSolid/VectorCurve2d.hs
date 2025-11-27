@@ -730,11 +730,12 @@ unsafeQuotient_ ::
   Curve units2 ->
   VectorCurve2d space (units1 ?/? units2)
 unsafeQuotient_ numerator denominator = do
+  let compiledQuotient = numerator.compiled ?/? denominator.compiled
   let quotientDerivative = Units.simplify do
         unsafeQuotient_
-          (numerator.derivative ?*? denominator .-. numerator ?*? denominator.derivative)
+          (derivative numerator ?*? denominator .-. numerator ?*? Curve.derivative denominator)
           (Curve.squared_ denominator)
-  new (numerator.compiled ?/? denominator.compiled) quotientDerivative
+  new compiledQuotient quotientDerivative
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d space units1 -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
@@ -747,7 +748,8 @@ squaredMagnitude_ curve = do
           Vector2d.squaredMagnitude_
           VectorBounds2d.squaredMagnitude_
           curve.compiled
-  Curve.new compiledSquaredMagnitude (2 *. curve `dot_` curve.derivative)
+  let squaredMagnitudeDerivative = 2 *. curve `dot_` derivative curve
+  Curve.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 data HasZero = HasZero deriving (Eq, Show)
 
