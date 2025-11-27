@@ -1,4 +1,4 @@
-module OpenSolid.CoordinateSystem (UvSpace) where
+module OpenSolid.UvSpace (UvSpace) where
 
 import Prelude (Eq, Show)
 

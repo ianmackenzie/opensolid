@@ -133,7 +133,6 @@ import OpenSolid.Arithmetic
   , (?/)
   )
 import OpenSolid.Composition (Composition (compose))
-import OpenSolid.CoordinateSystem (UvSpace)
 import OpenSolid.Intersects (Intersects (intersects))
 import OpenSolid.List (List)
 import OpenSolid.Named ((:::) (Named))
@@ -145,4 +144,5 @@ import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Todo (pattern TODO)
 import OpenSolid.Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
 import OpenSolid.Units (Meters, Radians, Seconds, Unitless, type (?*?), type (?/?))
+import OpenSolid.UvSpace (UvSpace)
 import Prelude

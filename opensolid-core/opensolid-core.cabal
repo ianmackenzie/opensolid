@@ -116,7 +116,6 @@ library
     OpenSolid.CompiledFunction
     OpenSolid.Composition
     OpenSolid.Convention3d
-    OpenSolid.CoordinateSystem
     OpenSolid.Curve
     OpenSolid.Curve.Zero
     OpenSolid.Curve2d
@@ -227,6 +226,7 @@ library
     OpenSolid.Units
     OpenSolid.UvBounds
     OpenSolid.UvPoint
+    OpenSolid.UvSpace
     OpenSolid.Vector2d
     OpenSolid.Vector3d
     OpenSolid.VectorBounds2d
