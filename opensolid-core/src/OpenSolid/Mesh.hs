@@ -24,17 +24,20 @@ import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint)
 
-data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
+data Mesh vertex = Mesh
+  { vertices :: Array vertex
+  , faceIndices :: List (Int, Int, Int)
+  }
   deriving (Eq, Show)
 
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex
 indexed = Mesh
 
 vertices :: Mesh vertex -> Array vertex
-vertices (Mesh vs _) = vs
+vertices mesh = mesh.vertices
 
 faceIndices :: Mesh vertex -> List (Int, Int, Int)
-faceIndices (Mesh _ is) = is
+faceIndices mesh = mesh.faceIndices
 
 numVertices :: Mesh vertex -> Int
 numVertices mesh = Array.length (vertices mesh)
