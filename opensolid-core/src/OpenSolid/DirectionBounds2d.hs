@@ -205,7 +205,7 @@ yComponent :: DirectionBounds2d space -> Bounds Unitless
 yComponent (UnitBounds2d vectorBounds) = VectorBounds2d.yComponent vectorBounds
 
 placeIn ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   DirectionBounds2d local ->
   DirectionBounds2d global
 placeIn frame = placeInOrientation frame.orientation
@@ -214,7 +214,7 @@ placeInOrientation :: Orientation2d global -> DirectionBounds2d local -> Directi
 placeInOrientation orientation = lift (VectorBounds2d.placeInOrientation orientation)
 
 relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   DirectionBounds2d global ->
   DirectionBounds2d local
 relativeTo frame = relativeToOrientation frame.orientation
@@ -228,7 +228,7 @@ Given a 2D direction defined within a plane's coordinate system,
 this returns the corresponding 3D direction.
 -}
 placeOn ::
-  Plane3d global (Defines local) ->
+  Plane3d global local ->
   DirectionBounds2d local ->
   DirectionBounds3d global
 placeOn plane = placeOnOrientation plane.orientation

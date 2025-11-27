@@ -135,7 +135,7 @@ recursive givenCompiled derivativeFunction =
 constant :: Point3d space -> Curve3d space
 constant point = new (CompiledFunction.constant point) VectorCurve3d.zero
 
-on :: Plane3d space (Defines local) -> Curve2d local Meters -> Curve3d space
+on :: Plane3d global local -> Curve2d local Meters -> Curve3d global
 on plane curve2d = do
   let compiledPlaced =
         CompiledFunction.map
@@ -231,7 +231,7 @@ transformBy transform curve = do
           curve.compiled
   new compiledTransformed (VectorCurve3d.transformBy transform curve.derivative)
 
-placeIn :: Frame3d global (Defines local) -> Curve3d local -> Curve3d global
+placeIn :: Frame3d global local -> Curve3d local -> Curve3d global
 placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
@@ -241,5 +241,5 @@ placeIn frame curve = do
           curve.compiled
   new compiledPlaced (VectorCurve3d.placeIn frame curve.derivative)
 
-relativeTo :: Frame3d global (Defines local) -> Curve3d global -> Curve3d local
+relativeTo :: Frame3d global local -> Curve3d global -> Curve3d local
 relativeTo frame curve = placeIn (Frame3d.inverse frame) curve

@@ -526,7 +526,7 @@ xy x y = do
   new compiledXY (\p -> xy (SurfaceFunction.derivative p x) (SurfaceFunction.derivative p y))
 
 placeIn ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   VectorSurfaceFunction2d local units ->
   VectorSurfaceFunction2d global units
 placeIn frame function = do
@@ -539,7 +539,7 @@ placeIn frame function = do
   new compiledPlaced (\p -> placeIn frame (derivative p function))
 
 relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   VectorSurfaceFunction2d global units ->
   VectorSurfaceFunction2d local units
 relativeTo frame = placeIn (Frame2d.inverse frame)

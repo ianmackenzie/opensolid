@@ -46,19 +46,19 @@ magnitude :: Expression UvPoint (Vector2d space units) -> Expression UvPoint (Qu
 magnitude = Expression.magnitude
 
 placeIn ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   Expression UvPoint (Vector2d local units) ->
   Expression UvPoint (Vector2d global units)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   Expression UvPoint (Vector2d global units) ->
   Expression UvPoint (Vector2d local units)
 relativeTo = Expression.relativeTo
 
 placeOn ::
-  Plane3d global (Defines local) ->
+  Plane3d global local ->
   Expression UvPoint (Vector2d local units) ->
   Expression UvPoint (Vector3d global units)
 placeOn = Expression.on

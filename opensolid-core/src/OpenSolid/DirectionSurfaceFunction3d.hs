@@ -256,14 +256,14 @@ instance
   lhs `cross` DirectionSurfaceFunction3d rhs = lhs `cross` rhs
 
 placeIn ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   DirectionSurfaceFunction3d local ->
   DirectionSurfaceFunction3d global
 placeIn frame (DirectionSurfaceFunction3d function) =
   DirectionSurfaceFunction3d (VectorSurfaceFunction3d.placeIn frame function)
 
 relativeTo ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   DirectionSurfaceFunction3d global ->
   DirectionSurfaceFunction3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)

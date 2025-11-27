@@ -396,20 +396,14 @@ tiltDown :: Frame3d space defines1 -> Frame3d space defines2
 tiltDown = tiltDownBy Angle.halfPi
 
 -- | Convert a frame defined in local coordinates to one defined in global coordinates.
-placeIn ::
-  Frame3d global (Defines local1) ->
-  Frame3d local1 (Defines local2) ->
-  Frame3d global (Defines local2)
+placeIn :: Frame3d space1 space2 -> Frame3d space2 space3 -> Frame3d space1 space3
 placeIn globalFrame frame =
   Frame3d
     (Point3d.placeIn globalFrame (originPoint frame))
     (Orientation3d.placeIn globalFrame (orientation frame))
 
 -- | Convert a frame defined in global coordinates to one defined in local coordinates.
-relativeTo ::
-  Frame3d global (Defines local1) ->
-  Frame3d global (Defines local2) ->
-  Frame3d local1 (Defines local2)
+relativeTo :: Frame3d space1 space2 -> Frame3d space1 space3 -> Frame3d space2 space3
 relativeTo globalFrame frame =
   Frame3d
     (Point3d.relativeTo globalFrame (originPoint frame))
@@ -421,7 +415,7 @@ This is a frame that defines the current global coordinate system
 in terms of the frame's local coordinate system,
 instead of the other way around.
 -}
-inverse :: Frame3d global (Defines local) -> Frame3d local (Defines global)
+inverse :: Frame3d global local -> Frame3d local global
 inverse frame = relativeTo frame World3d.frame
 
 -- | Move a frame to a new origin point.
@@ -456,10 +450,7 @@ such that the two frames X and Y are aligned with each other.
 Given the two frames X and Y, this function returns a new frame
 that defines the necessary orientation of A ("local") relative to B ("global").
 -}
-align ::
-  Frame3d local (Defines space) ->
-  Frame3d global (Defines space) ->
-  Frame3d global (Defines local)
+align :: Frame3d space1 space3 -> Frame3d space2 space3 -> Frame3d space2 space1
 align frame referenceFrame = placeIn referenceFrame (inverse frame)
 
 {-| Compute the relative orientation of two parent frames in order to "mate" two child frames.
@@ -468,8 +459,5 @@ This is the same as 'align' except that the two child frames will end up facing 
 (with reversed forward directions, but the same upward directions)
 instead of being aligned with each other.
 -}
-mate ::
-  Frame3d local (Defines space) ->
-  Frame3d global (Defines space) ->
-  Frame3d global (Defines local)
+mate :: Frame3d space1 space3 -> Frame3d space2 space3 -> Frame3d space2 space1
 mate frame referenceFrame = align (backward frame) referenceFrame

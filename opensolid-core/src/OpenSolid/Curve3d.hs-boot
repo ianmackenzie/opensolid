@@ -48,7 +48,7 @@ instance
 
 constant :: Point3d space -> Curve3d space
 new :: Compiled space -> VectorCurve3d space Meters -> Curve3d space
-on :: Plane3d space (Defines local) -> Curve2d local Meters -> Curve3d space
+on :: Plane3d global local -> Curve2d local Meters -> Curve3d global
 evaluate :: Curve3d space -> Number -> Point3d space
 evaluateBounds :: Curve3d space -> Bounds Unitless -> Bounds3d space
 reverse :: Curve3d space -> Curve3d space

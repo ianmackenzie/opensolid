@@ -213,13 +213,13 @@ instance HasField "yComponent" (DirectionCurve2d space) (Curve Unitless) where
   getField (DirectionCurve2d curve) = curve.yComponent
 
 placeIn ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   DirectionCurve2d local ->
   DirectionCurve2d global
 placeIn frame (DirectionCurve2d curve) = DirectionCurve2d (VectorCurve2d.placeIn frame curve)
 
 relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   DirectionCurve2d global ->
   DirectionCurve2d local
 relativeTo frame = placeIn (Frame2d.inverse frame)

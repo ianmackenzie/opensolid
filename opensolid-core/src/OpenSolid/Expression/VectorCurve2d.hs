@@ -45,13 +45,13 @@ magnitude :: Expression Number (Vector2d space units) -> Expression Number (Quan
 magnitude = Expression.magnitude
 
 placeIn ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   Expression Number (Vector2d local units) ->
   Expression Number (Vector2d global units)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   Expression Number (Vector2d global units) ->
   Expression Number (Vector2d local units)
 relativeTo = Expression.relativeTo
@@ -63,7 +63,7 @@ transformBy ::
 transformBy = Expression.transformBy
 
 placeOn ::
-  Plane3d space (Defines local) ->
+  Plane3d space local ->
   Expression Number (Vector2d local units) ->
   Expression Number (Vector3d space units)
 placeOn = Expression.on

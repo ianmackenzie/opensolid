@@ -350,7 +350,7 @@ interpolate ::
 interpolate (VectorBounds3d x y z) u v w =
   Vector3d (Bounds.interpolate x u) (Bounds.interpolate y v) (Bounds.interpolate z w)
 
-on :: Plane3d space (Defines local) -> VectorBounds2d local units -> VectorBounds3d space units
+on :: Plane3d global local -> VectorBounds2d local units -> VectorBounds3d global units
 on plane bounds2d = do
   let VectorBounds2d bX bY = bounds2d
   let cX = Bounds.midpoint bX
@@ -369,10 +369,7 @@ on plane bounds2d = do
   let bU = Bounds (cU .-. rU) (cU .+. rU)
   VectorBounds3d bR bF bU
 
-placeIn ::
-  Frame3d global (Defines local) ->
-  VectorBounds3d local units ->
-  VectorBounds3d global units
+placeIn :: Frame3d global local -> VectorBounds3d local units -> VectorBounds3d global units
 placeIn frame (VectorBounds3d vR vF vU) = do
   let cR = Bounds.midpoint vR
   let cF = Bounds.midpoint vF
@@ -392,10 +389,7 @@ placeIn frame (VectorBounds3d vR vF vU) = do
     (Bounds (cF' .-. rF') (cF' .+. rF'))
     (Bounds (cU' .-. rU') (cU' .+. rU'))
 
-relativeTo ::
-  Frame3d global (Defines local) ->
-  VectorBounds3d global units ->
-  VectorBounds3d local units
+relativeTo :: Frame3d global local -> VectorBounds3d global units -> VectorBounds3d local units
 relativeTo frame (VectorBounds3d vR vF vU) = do
   let cR = Bounds.midpoint vR
   let cF = Bounds.midpoint vF

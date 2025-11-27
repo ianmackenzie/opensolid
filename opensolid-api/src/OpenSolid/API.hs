@@ -1148,7 +1148,7 @@ planeOrientation3d =
     , Class.member1 "Relative To" "Frame" (PlaneOrientation3d.relativeTo :: Frame3d -> PlaneOrientation3d -> PlaneOrientation3d) $(docs 'PlaneOrientation3d.relativeTo)
     ]
 
-type Plane3d = Plane3d.Plane3d FFI.Space (Defines FFI.Space)
+type Plane3d = Plane3d.Plane3d FFI.Space FFI.Space
 
 plane3d :: Class
 plane3d =
@@ -1197,7 +1197,7 @@ orientation3d =
     , Class.member1 "Relative To" "Frame" (Orientation3d.relativeTo :: Frame3d -> Orientation3d -> Orientation3d) $(docs 'Orientation3d.relativeTo)
     ]
 
-type Frame3d = Frame3d.Frame3d FFI.Space (Defines FFI.Space)
+type Frame3d = Frame3d.Frame3d FFI.Space FFI.Space
 
 frame3d :: Class
 frame3d =

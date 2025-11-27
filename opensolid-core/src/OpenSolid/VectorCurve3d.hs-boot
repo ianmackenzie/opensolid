@@ -93,7 +93,7 @@ instance
 
 constant :: Vector3d space units -> VectorCurve3d space units
 new :: Compiled space units -> VectorCurve3d space units -> VectorCurve3d space units
-on :: Plane3d space (Defines local) -> VectorCurve2d local units -> VectorCurve3d space units
+on :: Plane3d global local -> VectorCurve2d local units -> VectorCurve3d global units
 evaluate :: VectorCurve3d space units -> Number -> Vector3d space units
 evaluateBounds :: VectorCurve3d space units -> Bounds Unitless -> VectorBounds3d space units
 quotient ::

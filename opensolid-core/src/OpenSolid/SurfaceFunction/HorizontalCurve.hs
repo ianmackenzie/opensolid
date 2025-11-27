@@ -37,7 +37,7 @@ data MonotonicSpace
 
 data Monotonicity
   = Monotonic
-  | MonotonicIn (Frame2d UvSpace Unitless (Defines MonotonicSpace))
+  | MonotonicIn (Frame2d UvSpace Unitless MonotonicSpace)
   | NotMonotonic
   deriving (Eq, Show)
 

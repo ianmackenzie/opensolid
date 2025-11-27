@@ -166,19 +166,13 @@ rotateLeft = lift Vector2d.rotateLeft
 rotateRight :: Direction2d space -> Direction2d space
 rotateRight = lift Vector2d.rotateRight
 
-placeIn ::
-  Frame2d global frameUnits (Defines local) ->
-  Direction2d local ->
-  Direction2d global
+placeIn :: Frame2d global frameUnits local -> Direction2d local -> Direction2d global
 placeIn frame = placeInOrientation frame.orientation
 
 placeInOrientation :: Orientation2d global -> Direction2d local -> Direction2d global
 placeInOrientation orientation = lift (Vector2d.placeInOrientation orientation)
 
-relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
-  Direction2d global ->
-  Direction2d local
+relativeTo :: Frame2d global frameUnits local -> Direction2d global -> Direction2d local
 relativeTo frame = relativeToOrientation frame.orientation
 
 relativeToOrientation :: Orientation2d global -> Direction2d global -> Direction2d local
@@ -189,7 +183,7 @@ relativeToOrientation orientation = lift (Vector2d.relativeToOrientation orienta
 Given a 2D direction defined within a plane's coordinate system,
 this returns the corresponding 3D direction.
 -}
-placeOn :: Plane3d global (Defines local) -> Direction2d local -> Direction3d global
+placeOn :: Plane3d global local -> Direction2d local -> Direction3d global
 placeOn plane = placeOnOrientation plane.orientation
 
 placeOnOrientation :: PlaneOrientation3d global -> Direction2d local -> Direction3d global

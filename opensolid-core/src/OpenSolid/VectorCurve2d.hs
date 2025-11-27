@@ -779,7 +779,7 @@ direction curve = case quotient curve (magnitude curve) of
   Ok normalizedCurve -> Ok (DirectionCurve2d.unsafe normalizedCurve)
 
 placeIn ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   VectorCurve2d local units ->
   VectorCurve2d global units
 placeIn frame curve = do
@@ -792,15 +792,15 @@ placeIn frame curve = do
   new compiledPlaced (placeIn frame curve.derivative)
 
 relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   VectorCurve2d global units ->
   VectorCurve2d local units
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
 placeOn ::
-  Plane3d space (Defines local) ->
+  Plane3d global local ->
   VectorCurve2d local units ->
-  VectorCurve3d space units
+  VectorCurve3d global units
 placeOn plane curve = VectorCurve3d.on plane curve
 
 convert ::

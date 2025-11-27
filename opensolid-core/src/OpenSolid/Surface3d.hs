@@ -87,7 +87,7 @@ parametric givenFunction givenDomain = do
     , innerLoops = List.map boundaryLoop (Region2d.innerLoops givenDomain)
     }
 
-on :: Plane3d space (Defines local) -> Region2d local Meters -> Surface3d space
+on :: Plane3d global local -> Region2d local Meters -> Surface3d global
 on plane region = do
   let regionBounds = Region2d.bounds region
   let (width, height) = Bounds2d.dimensions regionBounds
@@ -122,11 +122,11 @@ ruled bottom top = do
 
 revolved ::
   Tolerance Meters =>
-  Plane3d space (Defines local) ->
+  Plane3d global local ->
   Curve2d local Meters ->
   Axis2d local Meters ->
   Angle ->
-  Result Revolved.Error (Surface3d space)
+  Result Revolved.Error (Surface3d global)
 revolved sketchPlane curve axis angle = do
   let frame2d = Frame2d.fromYAxis axis
   let localCurve = Curve2d.relativeTo frame2d curve
@@ -160,12 +160,12 @@ flip surface =
     (Region2d.mirrorAcross Axis2d.y surface.domain)
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d global (Defines local) -> Surface3d local -> Surface3d global
+placeIn :: Frame3d global local -> Surface3d local -> Surface3d global
 placeIn frame surface =
   parametric (SurfaceFunction3d.placeIn frame surface.function) surface.domain
 
 -- | Convert a surface defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global (Defines local) -> Surface3d global -> Surface3d local
+relativeTo :: Frame3d global local -> Surface3d global -> Surface3d local
 relativeTo frame surface =
   parametric (SurfaceFunction3d.relativeTo frame surface.function) surface.domain
 

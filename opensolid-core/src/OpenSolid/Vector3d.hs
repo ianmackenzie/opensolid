@@ -84,10 +84,7 @@ unit :: Direction3d space -> Vector3d space Unitless
 unit (Unit3d vector) = vector
 
 -- | Construct a 3D vector on the given plane, given a 2D vector within the plane.
-on ::
-  Plane3d space (Defines local) ->
-  Vector2d local units ->
-  Vector3d space units
+on :: Plane3d global local -> Vector2d local units -> Vector3d global units
 on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vX vY) = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
@@ -227,15 +224,15 @@ normalize vector = do
   if vm == Quantity.zero then zero else vector ./. vm
 
 -- | Convert a vectr defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d global (Defines local) -> Vector3d local units -> Vector3d global units
+placeIn :: Frame3d global local -> Vector3d local units -> Vector3d global units
 placeIn (Frame3d _ (Orientation3d i j k)) (Vector3d vx vy vz) = vx .*. i .+. vy .*. j .+. vz .*. k
 
 -- | Convert a vector defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global (Defines local) -> Vector3d global units -> Vector3d local units
+relativeTo :: Frame3d global local -> Vector3d global units -> Vector3d local units
 relativeTo (Frame3d _ (Orientation3d i j k)) vector =
   Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
 
-projectInto :: Plane3d global (Defines local) -> Vector3d global units -> Vector2d local units
+projectInto :: Plane3d global local -> Vector3d global units -> Vector2d local units
 projectInto (Plane3d _ (PlaneOrientation3d i j)) v = Vector2d (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3d space units) -> Vector3d space units

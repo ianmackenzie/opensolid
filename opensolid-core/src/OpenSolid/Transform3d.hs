@@ -148,7 +148,7 @@ mirrorAcross plane = do
   let vz = Vector3d axz ayz azz
   withFixedPoint plane.originPoint vx vy vz
 
-placeIn :: Frame3d global (Defines local) -> Transform3d tag local -> Transform3d tag global
+placeIn :: Frame3d global local -> Transform3d tag local -> Transform3d tag global
 placeIn frame transform = do
   let p0 =
         World3d.originPoint
@@ -172,7 +172,7 @@ placeIn frame transform = do
           & Vector3d.placeIn frame
   Transform3d p0 vx vy vz
 
-relativeTo :: Frame3d global (Defines local) -> Transform3d tag global -> Transform3d tag local
+relativeTo :: Frame3d global local -> Transform3d tag global -> Transform3d tag local
 relativeTo frame transform = do
   let p0 =
         World3d.originPoint

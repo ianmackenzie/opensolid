@@ -124,13 +124,13 @@ planeOrientation3d =
 orientation3d :: Generator (Orientation3d global)
 orientation3d = Random.map Frame3d.orientation frame3d
 
-plane3d :: Generator (Plane3d global (Defines local))
+plane3d :: Generator (Plane3d global local)
 plane3d = Random.map2 Plane3d point3d planeOrientation3d
 
-frame2d :: Generator (Frame2d global Meters (Defines local))
+frame2d :: Generator (Frame2d global Meters local)
 frame2d = Random.map Frame2d.fromXAxis axis2d
 
-frame3d :: Generator (Frame3d global (Defines local))
+frame3d :: Generator (Frame3d global local)
 frame3d = Random.map Frame3d.fromTopPlane plane3d
 
 bounds2d :: Generator (Bounds2d space Meters)

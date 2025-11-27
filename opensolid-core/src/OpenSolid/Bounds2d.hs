@@ -235,10 +235,7 @@ area (Bounds2d x y) = Bounds.width x .*. Bounds.width y
 interpolate :: Bounds2d space units -> Number -> Number -> Point2d space units
 interpolate (PositionBounds2d pb) u v = Position2d (VectorBounds2d.interpolate pb u v)
 
-placeIn ::
-  Frame2d global units (Defines local) ->
-  Bounds2d local units ->
-  Bounds2d global units
+placeIn :: Frame2d global units local -> Bounds2d local units -> Bounds2d global units
 placeIn frame (Bounds2d x y) = do
   let xMid = Bounds.midpoint x
   let yMid = Bounds.midpoint y
@@ -251,10 +248,7 @@ placeIn frame (Bounds2d x y) = do
   let ry = 0.5 *. xWidth .*. Number.abs iy .+. 0.5 *. yWidth .*. Number.abs jy
   Bounds2d (Bounds (x0 .-. rx) (x0 .+. rx)) (Bounds (y0 .-. ry) (y0 .+. ry))
 
-relativeTo ::
-  Frame2d global units (Defines local) ->
-  Bounds2d global units ->
-  Bounds2d local units
+relativeTo :: Frame2d global units local -> Bounds2d global units -> Bounds2d local units
 relativeTo frame (Bounds2d x y) = do
   let xMid = Bounds.midpoint x
   let yMid = Bounds.midpoint y
@@ -267,10 +261,7 @@ relativeTo frame (Bounds2d x y) = do
   let ry = 0.5 *. xWidth .*. Number.abs jx .+. 0.5 *. yWidth .*. Number.abs jy
   Bounds2d (Bounds (x0 .-. rx) (x0 .+. rx)) (Bounds (y0 .-. ry) (y0 .+. ry))
 
-placeOn ::
-  Plane3d space (Defines local) ->
-  Bounds2d local Meters ->
-  Bounds3d space
+placeOn :: Plane3d global local -> Bounds2d local Meters -> Bounds3d global
 placeOn plane (Bounds2d x y) = do
   let Plane3d _ (PlaneOrientation3d i j) = plane
   let Direction3d ix iy iz = i

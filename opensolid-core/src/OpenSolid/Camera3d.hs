@@ -51,7 +51,7 @@ data ScreenSpace
 
 -- | A perspective or orthographic camera in 3D.
 data Camera3d space = Camera3d
-  { frame :: Frame3d space (Defines CameraSpace)
+  { frame :: Frame3d space CameraSpace
   , focalDistance :: Length
   , projection :: Projection
   }
@@ -84,7 +84,7 @@ instance
   HasField
     "viewPlane"
     (Camera3d space)
-    (Plane3d space (Defines ScreenSpace))
+    (Plane3d space ScreenSpace)
   where
   getField camera = Frame3d.backPlane camera.frame
 
@@ -107,7 +107,7 @@ perspective (Named verticalFov) = Perspective verticalFov
 orthographic :: "viewportHeight" ::: Length -> Projection
 orthographic (Named viewportHeight) = Orthographic viewportHeight
 
-new :: Frame3d space (Defines CameraSpace) -> Length -> Projection -> Camera3d space
+new :: Frame3d space CameraSpace -> Length -> Projection -> Camera3d space
 new givenFrame givenFocalDistance projection =
   Camera3d
     { frame = givenFrame
@@ -184,11 +184,11 @@ moveTo :: Point3d space -> Camera3d space -> Camera3d space
 moveTo newEyePoint Camera3d{frame, focalDistance, projection} =
   Camera3d{frame = Frame3d.moveTo newEyePoint frame, focalDistance, projection}
 
-placeIn :: Frame3d global (Defines local) -> Camera3d local -> Camera3d global
+placeIn :: Frame3d global local -> Camera3d local -> Camera3d global
 placeIn givenFrame Camera3d{frame, focalDistance, projection} =
   Camera3d{frame = Frame3d.placeIn givenFrame frame, focalDistance, projection}
 
-relativeTo :: Frame3d global (Defines local) -> Camera3d global -> Camera3d local
+relativeTo :: Frame3d global local -> Camera3d global -> Camera3d local
 relativeTo givenFrame = placeIn (Frame3d.inverse givenFrame)
 
 transformBy :: Transform3d.Rigid space -> Camera3d space -> Camera3d space

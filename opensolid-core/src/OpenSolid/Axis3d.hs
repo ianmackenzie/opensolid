@@ -68,11 +68,11 @@ transformBy transform axis = do
   Axis3d transformedOriginPoint transformedDirection
 
 -- | Convert an axis defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d global (Defines local) -> Axis3d local -> Axis3d global
+placeIn :: Frame3d global local -> Axis3d local -> Axis3d global
 placeIn frame (Axis3d p0 d) =
   Axis3d (Point3d.placeIn frame p0) (Direction3d.placeIn frame d)
 
 -- | Convert an axis defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global (Defines local) -> Axis3d global -> Axis3d local
+relativeTo :: Frame3d global local -> Axis3d global -> Axis3d local
 relativeTo frame (Axis3d p0 d) =
   Axis3d (Point3d.relativeTo frame p0) (Direction3d.relativeTo frame d)

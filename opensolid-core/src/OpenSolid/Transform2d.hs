@@ -122,7 +122,7 @@ scaleAlong (Axis2d originPoint direction) scale = do
   withFixedPoint originPoint vx vy
 
 placeIn ::
-  Frame2d global units (Defines local) ->
+  Frame2d global units local ->
   Transform2d tag local units ->
   Transform2d tag global units
 placeIn frame transform = do
@@ -144,7 +144,7 @@ placeIn frame transform = do
   Transform2d p0 vx vy
 
 relativeTo ::
-  Frame2d global units (Defines local) ->
+  Frame2d global units local ->
   Transform2d tag global units ->
   Transform2d tag local units
 relativeTo frame transform = do

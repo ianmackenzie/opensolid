@@ -110,12 +110,12 @@ moveTo :: Point3d space -> Plane3d space defines -> Plane3d space defines
 moveTo p0 plane = Plane3d p0 (orientation plane)
 
 -- | Convert a plane defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d global (Defines local) -> Plane3d local defines -> Plane3d global defines
+placeIn :: Frame3d global local -> Plane3d local defines -> Plane3d global defines
 placeIn frame (Plane3d p o) =
   Plane3d (Point3d.placeIn frame p) (PlaneOrientation3d.placeIn frame o)
 
 -- | Convert a plane defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global (Defines local) -> Plane3d global defines -> Plane3d local defines
+relativeTo :: Frame3d global local -> Plane3d global defines -> Plane3d local defines
 relativeTo frame (Plane3d p o) =
   Plane3d (Point3d.relativeTo frame p) (PlaneOrientation3d.relativeTo frame o)
 

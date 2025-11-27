@@ -780,7 +780,7 @@ signature orientation curve tValue radius = do
   (firstOrder, secondOrder)
 
 placeIn ::
-  Frame2d global units (Defines local) ->
+  Frame2d global units local ->
   Curve2d local units ->
   Curve2d global units
 placeIn frame curve = do
@@ -793,12 +793,12 @@ placeIn frame curve = do
   new compiledPlaced (VectorCurve2d.placeIn frame curve.derivative)
 
 relativeTo ::
-  Frame2d global units (Defines local) ->
+  Frame2d global units local ->
   Curve2d global units ->
   Curve2d local units
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
-placeOn :: Plane3d space (Defines local) -> Curve2d local Meters -> Curve3d space
+placeOn :: Plane3d global local -> Curve2d local Meters -> Curve3d global
 placeOn plane curve = Curve3d.on plane curve
 
 transformBy ::

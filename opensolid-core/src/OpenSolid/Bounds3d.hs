@@ -156,7 +156,7 @@ diameter (Bounds3d x y z) = Quantity.hypot3 (Bounds.width x) (Bounds.width y) (B
 interpolate :: Bounds3d space -> Number -> Number -> Number -> Point3d space
 interpolate (PositionBounds3d pb) u v w = Position3d (VectorBounds3d.interpolate pb u v w)
 
-on :: Plane3d space (Defines local) -> Bounds2d local Meters -> Bounds3d space
+on :: Plane3d global local -> Bounds2d local Meters -> Bounds3d global
 on plane bounds2d = do
   let Bounds2d bX bY = bounds2d
   let rX = 0.5 *. Bounds.width bX
@@ -173,7 +173,7 @@ on plane bounds2d = do
   let bU = Bounds (cU .-. rU) (cU .+. rU)
   Bounds3d bR bF bU
 
-placeIn :: Frame3d global (Defines local) -> Bounds3d local -> Bounds3d global
+placeIn :: Frame3d global local -> Bounds3d local -> Bounds3d global
 placeIn frame (Bounds3d pR pF pU) = do
   let Frame3d _ (Orientation3d i j k) = frame
   let Direction3d iR iF iU = i
@@ -194,7 +194,7 @@ placeIn frame (Bounds3d pR pF pU) = do
     (Bounds (cF' .-. rF') (cF' .+. rF'))
     (Bounds (cU' .-. rU') (cU' .+. rU'))
 
-relativeTo :: Frame3d global (Defines local) -> Bounds3d global -> Bounds3d local
+relativeTo :: Frame3d global local -> Bounds3d global -> Bounds3d local
 relativeTo frame (Bounds3d pR pF pU) = do
   let Frame3d _ (Orientation3d i j k) = frame
   let Direction3d iR iF iU = i
@@ -215,7 +215,7 @@ relativeTo frame (Bounds3d pR pF pU) = do
     (Bounds (cF' .-. rF') (cF' .+. rF'))
     (Bounds (cU' .-. rU') (cU' .+. rU'))
 
-projectInto :: Plane3d global (Defines local) -> Bounds3d global -> Bounds2d local Meters
+projectInto :: Plane3d global local -> Bounds3d global -> Bounds2d local Meters
 projectInto plane (Bounds3d pR pF pU) = do
   let Plane3d _ (PlaneOrientation3d i j) = plane
   let Direction3d iR iF iU = i

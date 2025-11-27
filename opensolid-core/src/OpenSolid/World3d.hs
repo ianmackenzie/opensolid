@@ -124,7 +124,7 @@ downwardOrientation :: Orientation3d space
 downwardOrientation = Orientation3d rightwardDirection downwardDirection forwardDirection
 
 -- | A frame of reference defining a global coordinate system.
-frame :: Frame3d space (Defines space)
+frame :: Frame3d space space
 frame = Frame3d originPoint forwardOrientation
 
 {-| A forward-facing plane through the global origin point.

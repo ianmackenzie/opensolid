@@ -28,7 +28,6 @@ import Data.Coerce qualified
 import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds (Bounds#))
-import OpenSolid.CoordinateSystem (LocalSpace)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)
@@ -913,11 +912,11 @@ instance FFI (Axis2d UvSpace Unitless) where
 
 type role Frame2d phantom phantom phantom
 
-type Frame2d :: Type -> Type -> LocalSpace -> Type
-data Frame2d space units defines
+type Frame2d :: Type -> Type -> Type -> Type
+data Frame2d global units local
   = Frame2d
-  { originPoint :: Point2d space units
-  , orientation :: Orientation2d space
+  { originPoint :: Point2d global units
+  , orientation :: Orientation2d global
   }
 
 instance HasField "xDirection" (Frame2d space units defines) (Direction2d space) where
@@ -2061,16 +2060,16 @@ instance FFI (Axis3d FFI.Space) where
 
 type role Plane3d phantom phantom
 
-type Plane3d :: Type -> LocalSpace -> Type
+type Plane3d :: Type -> Type -> Type
 
 {-| A plane in 3D, defined by an origin point and two perpendicular X and Y directions.
 
 The normal direction  of the plane is then defined as
 the cross product of its X and Y directions.
 -}
-data Plane3d space defines = Plane3d
-  { originPoint :: Point3d space
-  , orientation :: PlaneOrientation3d space
+data Plane3d global local = Plane3d
+  { originPoint :: Point3d global
+  , orientation :: PlaneOrientation3d global
   }
 
 deriving instance Eq (Plane3d space defines)
@@ -2105,10 +2104,10 @@ instance HasField "normalAxis" (Plane3d space defines) (Axis3d space) where
 type role Frame3d phantom phantom
 
 -- | A frame of reference in 3D, defined by an origin point and orientation.
-type Frame3d :: Type -> LocalSpace -> Type
-data Frame3d space defines = Frame3d
-  { originPoint :: Point3d space
-  , orientation :: Orientation3d space
+type Frame3d :: Type -> Type -> Type
+data Frame3d global local = Frame3d
+  { originPoint :: Point3d global
+  , orientation :: Orientation3d global
   }
 
 instance HasField "rightwardDirection" (Frame3d space defines) (Direction3d space) where

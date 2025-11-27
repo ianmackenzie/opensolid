@@ -247,10 +247,7 @@ rotateRight :: Vector2d space units -> Vector2d space units
 rotateRight (Vector2d vx vy) = Vector2d vy (negative vx)
 
 {-# INLINE placeIn #-}
-placeIn ::
-  Frame2d global frameUnits (Defines local) ->
-  Vector2d local units ->
-  Vector2d global units
+placeIn :: Frame2d global frameUnits local -> Vector2d local units -> Vector2d global units
 placeIn frame = placeInOrientation frame.orientation
 
 placeInOrientation ::
@@ -260,10 +257,7 @@ placeInOrientation ::
 placeInOrientation (Orientation2d i j) (Vector2d vx vy) = vx .*. i .+. vy .*. j
 
 {-# INLINE relativeTo #-}
-relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
-  Vector2d global units ->
-  Vector2d local units
+relativeTo :: Frame2d global frameUnits local -> Vector2d global units -> Vector2d local units
 relativeTo frame = relativeToOrientation frame.orientation
 
 relativeToOrientation ::
@@ -278,17 +272,10 @@ Given a 2D vector defined within a plane's coordinate system,
 this returns the corresponding 3D vector.
 -}
 {-# INLINE placeOn #-}
-placeOn ::
-  forall local units space.
-  Plane3d space (Defines local) ->
-  Vector2d local units ->
-  Vector3d space units
+placeOn :: Plane3d global local -> Vector2d local units -> Vector3d global units
 placeOn plane = placeOnOrientation plane.orientation
 
-placeOnOrientation ::
-  PlaneOrientation3d global ->
-  Vector2d local units ->
-  Vector3d global units
+placeOnOrientation :: PlaneOrientation3d global -> Vector2d local units -> Vector3d global units
 placeOnOrientation (PlaneOrientation3d i j) (Vector2d vx vy) = vx .*. i .+. vy .*. j
 
 convert :: Quantity (units2 ?/? units1) -> Vector2d space units1 -> Vector2d space units2

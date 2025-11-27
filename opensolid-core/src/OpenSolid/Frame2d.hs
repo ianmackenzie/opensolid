@@ -74,27 +74,27 @@ yAxis :: Frame2d space units defines -> Axis2d space units
 yAxis frame = Axis2d.through (originPoint frame) (yDirection frame)
 
 placeIn ::
-  Frame2d global units (Defines space) ->
-  Frame2d space units (Defines local) ->
-  Frame2d global units (Defines local)
+  Frame2d space1 units space2 ->
+  Frame2d space2 units space3 ->
+  Frame2d space1 units space3
 placeIn globalFrame frame =
   Frame2d
     (Point2d.placeIn globalFrame (originPoint frame))
     (Orientation2d.placeIn globalFrame (orientation frame))
 
 relativeTo ::
-  Frame2d global units (Defines space) ->
-  Frame2d global units (Defines local) ->
-  Frame2d space units (Defines local)
+  Frame2d space1 units space2 ->
+  Frame2d space1 units space3 ->
+  Frame2d space2 units space3
 relativeTo globalFrame frame =
   Frame2d
     (Point2d.relativeTo globalFrame (originPoint frame))
     (Orientation2d.relativeTo globalFrame (orientation frame))
 
-placeOn :: Plane3d space (Defines local) -> Frame2d local Meters defines -> Plane3d space defines
+placeOn :: Plane3d space local -> Frame2d local Meters defines -> Plane3d space defines
 placeOn plane (Frame2d p0 (Orientation2d i j)) =
   Plane3d (Point2d.placeOn plane p0) $
     PlaneOrientation3d (Direction2d.placeOn plane i) (Direction2d.placeOn plane j)
 
-inverse :: Frame2d global units (Defines local) -> Frame2d local units (Defines global)
+inverse :: Frame2d global units local -> Frame2d local units global
 inverse frame = relativeTo frame xy

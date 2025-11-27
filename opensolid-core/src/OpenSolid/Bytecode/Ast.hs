@@ -114,7 +114,7 @@ import OpenSolid.Vector3d qualified as Vector3d
 
 data Space
 
-type Plane = Plane3d Space (Defines Space)
+type Plane = Plane3d Space Space
 
 data Ast1d input where
   Constant1d :: Number -> Ast1d input
@@ -1170,14 +1170,14 @@ transformPoint3d transform ast = do
       Variable3d (BezierCurve3d transformedControlPoints param)
     Variable3d var -> Variable3d (TransformPoint3d coercedTransform var)
 
-placementTransform2d :: Frame2d global units (Defines local) -> Transform2d.Affine Space Unitless
+placementTransform2d :: Frame2d global units local -> Transform2d.Affine Space Unitless
 placementTransform2d frame =
   Transform2d
     (Point2d.coerce (Frame2d.originPoint frame))
     (Vector2d.coerce (Vector2d.unit (Frame2d.xDirection frame)))
     (Vector2d.coerce (Vector2d.unit (Frame2d.yDirection frame)))
 
-placementTransform3d :: Frame3d global (Defines local) -> Transform3d.Affine Space
+placementTransform3d :: Frame3d global local -> Transform3d.Affine Space
 placementTransform3d frame =
   Transform3d
     (Point3d.coerce (Frame3d.originPoint frame))
@@ -1185,24 +1185,24 @@ placementTransform3d frame =
     (Vector3d.coerce (Vector3d.unit (Frame3d.forwardDirection frame)))
     (Vector3d.coerce (Vector3d.unit (Frame3d.upwardDirection frame)))
 
-placeVector2dIn :: Frame2d global frameUnits (Defines local) -> Ast2d input -> Ast2d input
+placeVector2dIn :: Frame2d global frameUnits local -> Ast2d input -> Ast2d input
 placeVector2dIn frame ast = transformVector2d (placementTransform2d frame) ast
 
-placePoint2dIn :: Frame2d global units (Defines local) -> Ast2d input -> Ast2d input
+placePoint2dIn :: Frame2d global units local -> Ast2d input -> Ast2d input
 placePoint2dIn frame ast = transformPoint2d (placementTransform2d frame) ast
 
-placeVector3dIn :: Frame3d global (Defines local) -> Ast3d input -> Ast3d input
+placeVector3dIn :: Frame3d global local -> Ast3d input -> Ast3d input
 placeVector3dIn frame ast = transformVector3d (placementTransform3d frame) ast
 
-placePoint3dIn :: Frame3d global (Defines local) -> Ast3d input -> Ast3d input
+placePoint3dIn :: Frame3d global local -> Ast3d input -> Ast3d input
 placePoint3dIn frame ast = transformPoint3d (placementTransform3d frame) ast
 
-placeVector2dOn :: Plane3d global (Defines local) -> Ast2d input -> Ast3d input
+placeVector2dOn :: Plane3d global local -> Ast2d input -> Ast3d input
 placeVector2dOn plane ast = case ast of
   Constant2d val -> Constant3d (Vector2d.placeOn (Plane3d.coerce plane) val)
   Variable2d var -> Variable3d (PlaceVector2d (Plane3d.coerce plane) var)
 
-placePoint2dOn :: Plane3d global (Defines local) -> Ast2d input -> Ast3d input
+placePoint2dOn :: Plane3d global local -> Ast2d input -> Ast3d input
 placePoint2dOn plane ast = case ast of
   Constant2d val -> do
     let point = Position2d (Vector2d.coerce val)
@@ -1210,12 +1210,12 @@ placePoint2dOn plane ast = case ast of
     Constant3d (Vector3d.coerce placed)
   Variable2d var -> Variable3d (PlacePoint2d (Plane3d.coerce plane) var)
 
-projectVector3dInto :: Plane3d global (Defines local) -> Ast3d input -> Ast2d input
+projectVector3dInto :: Plane3d global local -> Ast3d input -> Ast2d input
 projectVector3dInto plane ast = case ast of
   Constant3d val -> Constant2d (Vector3d.projectInto (Plane3d.coerce plane) val)
   Variable3d var -> Variable2d (ProjectVector3d (Plane3d.coerce plane) var)
 
-projectPoint3dInto :: Plane3d global (Defines local) -> Ast3d input -> Ast2d input
+projectPoint3dInto :: Plane3d global local -> Ast3d input -> Ast2d input
 projectPoint3dInto plane ast = case ast of
   Constant3d val -> do
     let point = Position3d (Vector3d.coerce val)

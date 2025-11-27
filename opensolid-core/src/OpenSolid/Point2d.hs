@@ -166,16 +166,10 @@ distanceLeftOf (Axis2d originPoint direction) point = direction `cross` (point .
 distanceRightOf :: Axis2d space units -> Point2d space units -> Quantity units
 distanceRightOf (Axis2d originPoint direction) point = direction `cross` (originPoint .-. point)
 
-placeIn ::
-  Frame2d global units (Defines local) ->
-  Point2d local units ->
-  Point2d global units
+placeIn :: Frame2d global units local -> Point2d local units -> Point2d global units
 placeIn (Frame2d p0 (Orientation2d i j)) (Point2d px py) = p0 .+. px .*. i .+. py .*. j
 
-relativeTo ::
-  Frame2d global units (Defines local) ->
-  Point2d global units ->
-  Point2d local units
+relativeTo :: Frame2d global units local -> Point2d global units -> Point2d local units
 relativeTo (Frame2d p0 (Orientation2d i j)) p = let d = p .-. p0 in Point2d (d `dot` i) (d `dot` j)
 
 {-| Convert a 2D point to 3D point by placing it on a plane.
@@ -183,7 +177,7 @@ relativeTo (Frame2d p0 (Orientation2d i j)) p = let d = p .-. p0 in Point2d (d `
 Given a 2D point defined within a plane's coordinate system,
 this returns the corresponding 3D point.
 -}
-placeOn :: Plane3d space (Defines local) -> Point2d local Meters -> Point3d space
+placeOn :: Plane3d global local -> Point2d local Meters -> Point3d global
 placeOn (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d px py) =
   originPoint .+. px .*. i .+. py .*. j
 

@@ -1415,7 +1415,7 @@ class
 instance
   local1 ~ local2 =>
   PlaceIn
-    (Frame2d global frameUnits (Defines local1))
+    (Frame2d global frameUnits local1)
     (Expression input (Vector2d local2 units))
     (Expression input (Vector2d global units))
   where
@@ -1425,7 +1425,7 @@ instance
 instance
   (local1 ~ local2, units1 ~ units2) =>
   PlaceIn
-    (Frame2d global units1 (Defines local1))
+    (Frame2d global units1 local1)
     (Expression input (Point2d local2 units2))
     (Expression input (Point2d global units2))
   where
@@ -1435,7 +1435,7 @@ instance
 instance
   local1 ~ local2 =>
   PlaceIn
-    (Frame3d global (Defines local1))
+    (Frame3d global local1)
     (Expression input (Vector3d local2 units))
     (Expression input (Vector3d global units))
   where
@@ -1445,7 +1445,7 @@ instance
 instance
   local1 ~ local2 =>
   PlaceIn
-    (Frame3d global (Defines local1))
+    (Frame3d global local1)
     (Expression input (Point3d local2))
     (Expression input (Point3d global))
   where
@@ -1462,7 +1462,7 @@ class
 instance
   global1 ~ global2 =>
   RelativeTo
-    (Frame2d global1 frameUnits (Defines local))
+    (Frame2d global1 frameUnits local)
     (Expression input (Vector2d global2 units))
     (Expression input (Vector2d local units))
   where
@@ -1471,7 +1471,7 @@ instance
 instance
   (global1 ~ global2, units1 ~ units2) =>
   RelativeTo
-    (Frame2d global1 units1 (Defines local))
+    (Frame2d global1 units1 local)
     (Expression input (Point2d global2 units2))
     (Expression input (Point2d local units2))
   where
@@ -1480,7 +1480,7 @@ instance
 instance
   global1 ~ global2 =>
   RelativeTo
-    (Frame3d global1 (Defines local))
+    (Frame3d global1 local)
     (Expression input (Vector3d global2 units))
     (Expression input (Vector3d local units))
   where
@@ -1489,7 +1489,7 @@ instance
 instance
   global1 ~ global2 =>
   RelativeTo
-    (Frame3d global1 (Defines local))
+    (Frame3d global1 local)
     (Expression input (Point3d global2))
     (Expression input (Point3d local))
   where
@@ -1501,7 +1501,7 @@ class On plane expression1 expression2 | plane expression1 -> expression2 where
 instance
   local1 ~ local2 =>
   On
-    (Plane3d global (Defines local1))
+    (Plane3d global local1)
     (Expression input (Vector2d local2 units))
     (Expression input (Vector3d global units))
   where
@@ -1511,7 +1511,7 @@ instance
 instance
   (local1 ~ local2, meters ~ Meters) =>
   On
-    (Plane3d global (Defines local1))
+    (Plane3d global local1)
     (Expression input (Point2d local2 meters))
     (Expression input (Point3d global))
   where
@@ -1524,7 +1524,7 @@ class ProjectInto plane expression1 expression2 | plane expression1 -> expressio
 instance
   global1 ~ global2 =>
   ProjectInto
-    (Plane3d global1 (Defines local))
+    (Plane3d global1 local)
     (Expression input (Vector3d global2 units))
     (Expression input (Vector2d local units))
   where
@@ -1534,7 +1534,7 @@ instance
 instance
   (global1 ~ global2, meters ~ Meters) =>
   ProjectInto
-    (Plane3d global1 (Defines local))
+    (Plane3d global1 local)
     (Expression input (Point3d global2))
     (Expression input (Point2d local meters))
   where

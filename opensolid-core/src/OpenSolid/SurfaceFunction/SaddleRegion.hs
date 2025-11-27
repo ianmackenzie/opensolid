@@ -44,7 +44,7 @@ data SaddleRegion units = SaddleRegion
 
 data PrincipalAxisSpace
 
-type Frame = Frame2d UvSpace Unitless (Defines PrincipalAxisSpace)
+type Frame = Frame2d UvSpace Unitless PrincipalAxisSpace
 
 data JoiningCurve
   = Incoming (Curve2d UvSpace Unitless)
@@ -126,7 +126,7 @@ connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
 connect ::
   Tolerance units =>
   Subproblem units ->
-  Frame2d UvSpace Unitless (Defines PrincipalAxisSpace) ->
+  Frame2d UvSpace Unitless PrincipalAxisSpace ->
   Direction2d UvSpace ->
   JoiningCurve ->
   List (Axis2d UvSpace Unitless) ->

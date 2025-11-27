@@ -22,25 +22,25 @@ constant :: Point3d space -> Expression UvPoint (Point3d space)
 constant = Expression.constant
 
 on ::
-  Plane3d space (Defines local) ->
+  Plane3d space local ->
   Expression UvPoint (Point2d local Meters) ->
   Expression UvPoint (Point3d space)
 on = Expression.on
 
 placeIn ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   Expression UvPoint (Point3d local) ->
   Expression UvPoint (Point3d global)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   Expression UvPoint (Point3d global) ->
   Expression UvPoint (Point3d local)
 relativeTo = Expression.relativeTo
 
 projectInto ::
-  Plane3d global (Defines local) ->
+  Plane3d global local ->
   Expression UvPoint (Point3d global) ->
   Expression UvPoint (Point2d local Meters)
 projectInto = Expression.projectInto

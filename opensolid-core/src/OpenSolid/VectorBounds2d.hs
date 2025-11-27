@@ -285,7 +285,7 @@ interpolate :: VectorBounds2d space units -> Number -> Number -> Vector2d space 
 interpolate (VectorBounds2d x y) u v = Vector2d (Bounds.interpolate x u) (Bounds.interpolate y v)
 
 placeIn ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   VectorBounds2d local units ->
   VectorBounds2d global units
 placeIn frame = placeInOrientation frame.orientation
@@ -308,7 +308,7 @@ placeInOrientation orientation (VectorBounds2d x y) = do
   VectorBounds2d (Bounds (x0 .-. rx) (x0 .+. rx)) (Bounds (y0 .-. ry) (y0 .+. ry))
 
 relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   VectorBounds2d global units ->
   VectorBounds2d local units
 relativeTo frame = relativeToOrientation frame.orientation
@@ -330,10 +330,7 @@ relativeToOrientation orientation (VectorBounds2d x y) = do
   let ry = 0.5 *. xWidth .*. Number.abs jx .+. 0.5 *. yWidth .*. Number.abs jy
   VectorBounds2d (Bounds (x0 .-. rx) (x0 .+. rx)) (Bounds (y0 .-. ry) (y0 .+. ry))
 
-placeOn ::
-  Plane3d global (Defines local) ->
-  VectorBounds2d local units ->
-  VectorBounds3d global units
+placeOn :: Plane3d global local -> VectorBounds2d local units -> VectorBounds3d global units
 placeOn plane = placeOnOrientation plane.orientation
 
 placeOnOrientation ::

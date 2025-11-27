@@ -226,7 +226,7 @@ transformBy transform function = do
         VectorSurfaceFunction3d.transformBy transform (derivative parameter function)
   new compiledTransformed transformedDerivative
 
-placeIn :: Frame3d global (Defines local) -> SurfaceFunction3d local -> SurfaceFunction3d global
+placeIn :: Frame3d global local -> SurfaceFunction3d local -> SurfaceFunction3d global
 placeIn frame function = do
   let compiledPlaced =
         CompiledFunction.map
@@ -238,5 +238,5 @@ placeIn frame function = do
         VectorSurfaceFunction3d.placeIn frame (derivative parameter function)
   new compiledPlaced placedDerivative
 
-relativeTo :: Frame3d global (Defines local) -> SurfaceFunction3d global -> SurfaceFunction3d local
+relativeTo :: Frame3d global local -> SurfaceFunction3d global -> SurfaceFunction3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)

@@ -27,19 +27,19 @@ xy ::
 xy = Expression.xy
 
 placeIn ::
-  Frame2d global units (Defines local) ->
+  Frame2d global units local ->
   Expression Number (Point2d local units) ->
   Expression Number (Point2d global units)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame2d global units (Defines local) ->
+  Frame2d global units local ->
   Expression Number (Point2d global units) ->
   Expression Number (Point2d local units)
 relativeTo = Expression.relativeTo
 
 placeOn ::
-  Plane3d global (Defines local) ->
+  Plane3d global local ->
   Expression Number (Point2d local Meters) ->
   Expression Number (Point3d global)
 placeOn = Expression.on

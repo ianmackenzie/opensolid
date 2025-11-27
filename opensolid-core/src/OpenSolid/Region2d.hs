@@ -456,24 +456,15 @@ boundaryLoops region = outerLoop region :| innerLoops region
 boundaryCurves :: Region2d space units -> NonEmpty (Curve2d space units)
 boundaryCurves region = NonEmpty.concat (boundaryLoops region)
 
-placeIn ::
-  Frame2d global units (Defines local) ->
-  Region2d local units ->
-  Region2d global units
+placeIn :: Frame2d global units local -> Region2d local units -> Region2d global units
 placeIn frame (Region2d outer inners) = do
   let transformLoop = NonEmpty.map (Curve2d.placeIn frame)
   Region2d (transformLoop outer) (List.map transformLoop inners)
 
-relativeTo ::
-  Frame2d global units (Defines local) ->
-  Region2d global units ->
-  Region2d local units
+relativeTo :: Frame2d global units local -> Region2d global units -> Region2d local units
 relativeTo frame region = placeIn (Frame2d.inverse frame) region
 
-transformBy ::
-  Transform2d tag space units ->
-  Region2d space units ->
-  Region2d space units
+transformBy :: Transform2d tag space units -> Region2d space units -> Region2d space units
 transformBy transform (Region2d outer inners) = do
   let transformLoop =
         case Transform2d.handedness transform of

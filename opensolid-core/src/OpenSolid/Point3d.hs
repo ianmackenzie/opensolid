@@ -96,7 +96,7 @@ along (Axis3d originPoint direction) distance = do
     (oU .+. dU .*. distance)
 
 -- | Construct a point on the given plane, at the given position within the plane.
-on :: Plane3d space (Defines local) -> Point2d local Meters -> Point3d space
+on :: Plane3d global local -> Point2d local Meters -> Point3d global
 on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2d pX pY) = do
   let Point3d oR oF oU = originPoint
   let Direction3d iR iF iU = i
@@ -156,12 +156,12 @@ distanceAlong :: Axis3d space -> Point3d space -> Length
 distanceAlong (Axis3d p0 d) p = (p .-. p0) `dot` d
 
 -- | Convert a point defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d global (Defines local) -> Point3d local -> Point3d global
+placeIn :: Frame3d global local -> Point3d local -> Point3d global
 placeIn (Frame3d p0 (Orientation3d i j k)) (Point3d px py pz) =
   p0 .+. px .*. i .+. py .*. j .+. pz .*. k
 
 -- | Convert a point defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global (Defines local) -> Point3d global -> Point3d local
+relativeTo :: Frame3d global local -> Point3d global -> Point3d local
 relativeTo (Frame3d p0 (Orientation3d i j k)) p =
   let d = p .-. p0 in Point3d (d `dot` i) (d `dot` j) (d `dot` k)
 
@@ -175,7 +175,7 @@ projectOnto plane point =
 Conceptualy, this projects the point onto the plane in 3D,
 then expresses the projected point in 2D planar XY coordinates.
 -}
-projectInto :: Plane3d space (Defines local) -> Point3d space -> Point2d local Meters
+projectInto :: Plane3d space local -> Point3d space -> Point2d local Meters
 projectInto (Plane3d p0 (PlaneOrientation3d i j)) p =
   let d = p .-. p0 in Point2d (d `dot` i) (d `dot` j)
 

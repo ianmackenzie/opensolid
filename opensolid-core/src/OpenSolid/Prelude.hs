@@ -76,7 +76,6 @@ module OpenSolid.Prelude
   , DotMultiplication_ (dot_)
   , CrossMultiplication_ (cross_)
   , Composition (compose)
-  , Defines
   , UvSpace
   , Number
   , Intersects (intersects)
@@ -134,7 +133,7 @@ import OpenSolid.Arithmetic
   , (?/)
   )
 import OpenSolid.Composition (Composition (compose))
-import OpenSolid.CoordinateSystem (Defines, UvSpace)
+import OpenSolid.CoordinateSystem (UvSpace)
 import OpenSolid.Intersects (Intersects (intersects))
 import OpenSolid.List (List)
 import OpenSolid.Named ((:::) (Named))

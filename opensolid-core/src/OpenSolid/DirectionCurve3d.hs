@@ -219,14 +219,14 @@ instance Composition (Curve Unitless) (DirectionCurve3d space) (DirectionCurve3d
   DirectionCurve3d curve `compose` curve1d = DirectionCurve3d (curve `compose` curve1d)
 
 placeIn ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   DirectionCurve3d local ->
   DirectionCurve3d global
 placeIn frame (DirectionCurve3d curve) =
   DirectionCurve3d (VectorCurve3d.placeIn frame curve)
 
 relativeTo ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   DirectionCurve3d global ->
   DirectionCurve3d local
 relativeTo frame = placeIn (Frame3d.inverse frame)

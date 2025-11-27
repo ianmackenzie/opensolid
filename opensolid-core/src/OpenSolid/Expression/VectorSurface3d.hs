@@ -26,7 +26,7 @@ constant :: Vector3d space units -> Expression UvPoint (Vector3d space units)
 constant = Expression.constant
 
 on ::
-  Plane3d space (Defines local) ->
+  Plane3d space local ->
   Expression UvPoint (Vector2d local units) ->
   Expression UvPoint (Vector3d space units)
 on = Expression.on
@@ -46,19 +46,19 @@ magnitude :: Expression UvPoint (Vector3d space units) -> Expression UvPoint (Qu
 magnitude = Expression.magnitude
 
 placeIn ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   Expression UvPoint (Vector3d local units) ->
   Expression UvPoint (Vector3d global units)
 placeIn = Expression.placeIn
 
 relativeTo ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   Expression UvPoint (Vector3d global units) ->
   Expression UvPoint (Vector3d local units)
 relativeTo = Expression.relativeTo
 
 projectInto ::
-  Plane3d global (Defines local) ->
+  Plane3d global local ->
   Expression UvPoint (Vector3d global units) ->
   Expression UvPoint (Vector2d local units)
 projectInto = Expression.projectInto

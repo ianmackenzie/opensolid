@@ -88,7 +88,7 @@ rightward = Orientation3d.rightwardDirection
 leftward :: Orientation3d space -> Direction3d space
 leftward = Orientation3d.leftwardDirection
 
-on :: Plane3d space (Defines local) -> Direction2d local -> Direction3d space
+on :: Plane3d global local -> Direction2d local -> Direction3d global
 on (Plane3d _ (PlaneOrientation3d i j)) (Direction2d x y) = Unit3d (x .*. i .+. y .*. j)
 
 polar :: Plane3d space defines -> Angle -> Direction3d space
@@ -138,11 +138,11 @@ angleFrom :: Direction3d space -> Direction3d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
 -- | Convert a direction defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d global (Defines local) -> Direction3d local -> Direction3d global
+placeIn :: Frame3d global local -> Direction3d local -> Direction3d global
 placeIn frame = lift (Vector3d.placeIn frame)
 
 -- | Convert a direction defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global (Defines local) -> Direction3d global -> Direction3d local
+relativeTo :: Frame3d global local -> Direction3d global -> Direction3d local
 relativeTo frame = lift (Vector3d.relativeTo frame)
 
 transformBy ::

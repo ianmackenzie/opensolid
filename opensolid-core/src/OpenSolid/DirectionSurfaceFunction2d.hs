@@ -263,14 +263,14 @@ instance HasField "yComponent" (DirectionSurfaceFunction2d space) (SurfaceFuncti
   getField (DirectionSurfaceFunction2d function) = function.yComponent
 
 placeIn ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   DirectionSurfaceFunction2d local ->
   DirectionSurfaceFunction2d global
 placeIn frame (DirectionSurfaceFunction2d function) =
   DirectionSurfaceFunction2d (VectorSurfaceFunction2d.placeIn frame function)
 
 relativeTo ::
-  Frame2d global frameUnits (Defines local) ->
+  Frame2d global frameUnits local ->
   DirectionSurfaceFunction2d global ->
   DirectionSurfaceFunction2d local
 relativeTo frame = placeIn (Frame2d.inverse frame)

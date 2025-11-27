@@ -73,7 +73,7 @@ reverse (Axis2d p0 d) = Axis2d p0 (negative d)
 Given a 2D axis defined within a plane's coordinate system,
 this returns the corresponding 3D axis.
 -}
-placeOn :: Plane3d space (Defines local) -> Axis2d local Meters -> Axis3d space
+placeOn :: Plane3d global local -> Axis2d local Meters -> Axis3d global
 placeOn plane (Axis2d p0 d) = Axis3d (Point2d.placeOn plane p0) (Direction2d.placeOn plane d)
 
 transformBy ::

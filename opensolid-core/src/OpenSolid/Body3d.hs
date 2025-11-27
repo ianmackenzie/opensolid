@@ -295,11 +295,11 @@ cylinderAlong axis d1 d2 (Named diameter) = do
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
   Tolerance Meters =>
-  Plane3d space (Defines local) ->
+  Plane3d global local ->
   Region2d local Meters ->
   Length ->
   Length ->
-  Result BoundedBy.Error (Body3d space)
+  Result BoundedBy.Error (Body3d global)
 extruded sketchPlane profile d1 d2 = do
   let normal = Plane3d.normalDirection sketchPlane
   let v1 = d1 .*. normal
@@ -308,10 +308,10 @@ extruded sketchPlane profile d1 d2 = do
 
 translational ::
   Tolerance Meters =>
-  Plane3d space (Defines local) ->
+  Plane3d global local ->
   Region2d local Meters ->
-  VectorCurve3d space Meters ->
-  Result BoundedBy.Error (Body3d space)
+  VectorCurve3d global Meters ->
+  Result BoundedBy.Error (Body3d global)
 translational sketchPlane profile displacement = do
   let v0 = VectorCurve3d.startValue displacement
   let v1 = VectorCurve3d.endValue displacement
@@ -336,11 +336,11 @@ and a negative angle will result in a clockwise revolution.
 -}
 revolved ::
   Tolerance Meters =>
-  Plane3d space (Defines local) ->
+  Plane3d global local ->
   Region2d local Meters ->
   Axis2d local Meters ->
   Angle ->
-  Result BoundedBy.Error (Body3d space)
+  Result BoundedBy.Error (Body3d global)
 revolved startPlane profile axis2d angle = do
   let axis3d = Axis2d.placeOn startPlane axis2d
   let profileCurves = Region2d.boundaryCurves profile
@@ -924,12 +924,12 @@ surfaces :: Body3d space -> NonEmpty (Surface3d space)
 surfaces (Body3d boundarySurfaces) = NonEmpty.map (.orientedSurface) boundarySurfaces
 
 -- | Convert a body defined in local coordinates to one defined in global coordinates.
-placeIn :: Frame3d global (Defines local) -> Body3d local -> Body3d global
+placeIn :: Frame3d global local -> Body3d local -> Body3d global
 placeIn frame (Body3d boundarySurfaces) =
   Body3d (NonEmpty.map (placeBoundarySurfaceIn frame) boundarySurfaces)
 
 placeBoundarySurfaceIn ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   BoundarySurface local ->
   BoundarySurface global
 placeBoundarySurfaceIn frame boundarySurface = do
@@ -950,7 +950,7 @@ placeBoundarySurfaceIn frame boundarySurface = do
     , edgeLoops = NonEmpty.map (NonEmpty.map (placeEdgeIn frame)) edgeLoops
     }
 
-placeEdgeIn :: Frame3d global (Defines local) -> Edge local -> Edge global
+placeEdgeIn :: Frame3d global local -> Edge local -> Edge global
 placeEdgeIn frame edge = case edge of
   PrimaryEdge
     { halfEdgeId
@@ -976,5 +976,5 @@ placeEdgeIn frame edge = case edge of
     DegenerateEdge{halfEdgeId, point = Point3d.placeIn frame point, uvCurve}
 
 -- | Convert a body defined in global coordinates to one defined in local coordinates.
-relativeTo :: Frame3d global (Defines local) -> Body3d global -> Body3d local
+relativeTo :: Frame3d global local -> Body3d global -> Body3d local
 relativeTo frame body = placeIn (Frame3d.inverse frame) body

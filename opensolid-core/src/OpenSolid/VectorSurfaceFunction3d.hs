@@ -516,7 +516,7 @@ derivative U = (.du)
 derivative V = (.dv)
 
 placeIn ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   VectorSurfaceFunction3d local units ->
   VectorSurfaceFunction3d global units
 placeIn frame function = do
@@ -529,7 +529,7 @@ placeIn frame function = do
   new compiledPlaced (\p -> placeIn frame (derivative p function))
 
 relativeTo ::
-  Frame3d global (Defines local) ->
+  Frame3d global local ->
   VectorSurfaceFunction3d global units ->
   VectorSurfaceFunction3d local units
 relativeTo frame function = placeIn (Frame3d.inverse frame) function
