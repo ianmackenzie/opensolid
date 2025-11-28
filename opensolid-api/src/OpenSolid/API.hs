@@ -39,6 +39,7 @@ import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -79,7 +80,7 @@ classes =
   , uvVector
   , direction2d
   , uvDirection
-  , point2d
+  , point2D
   , uvPoint
   , bounds2d
   , uvBounds
@@ -659,34 +660,34 @@ uvDirection =
     , Class.negateSelf
     ]
 
-type Point2d = Point2d.Point2d Meters FFI.Space
+type Point2D = Point2D.Point2D FFI.Space
 
-point2d :: Class
-point2d =
-  Class.new @Point2d "A point in 2D, defined by its X and Y coordinates." $
-    [ Class.constant "Origin" (Point2d.origin :: Point2d) $(docs 'Point2d.origin)
-    , Class.constructor2 "X Coordinate" "Y Coordinate" Point2d.Point2d $(docs 'Point2d.Point2d)
-    , Class.factory1 "X" "X Coordinate" Point2d.x $(docs 'Point2d.x)
-    , Class.factory1 "Y" "Y Coordinate" Point2d.y $(docs 'Point2d.y)
-    , Class.factory2 "Polar" "Radius" "Angle" Point2d.polar $(docs 'Point2d.polar)
-    , Class.factory2 "Meters" "X Coordinate" "Y Coordinate" Point2d.meters $(docs 'Point2d.meters)
-    , Class.factory2 "Centimeters" "X Coordinate" "Y Coordinate" Point2d.centimeters $(docs 'Point2d.centimeters)
-    , Class.factory2 "Cm" "X Coordinate" "Y Coordinate" Point2d.cm $(docs 'Point2d.cm)
-    , Class.factory2 "Millimeters" "X Coordinate" "Y Coordinate" Point2d.millimeters $(docs 'Point2d.millimeters)
-    , Class.factory2 "Mm" "X Coordinate" "Y Coordinate" Point2d.mm $(docs 'Point2d.mm)
-    , Class.factory2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches $(docs 'Point2d.inches)
-    , Class.property "Coordinates" Point2d.coordinates $(docs 'Point2d.coordinates)
-    , Class.property "X Coordinate" Point2d.xCoordinate $(docs 'Point2d.xCoordinate)
-    , Class.property "Y Coordinate" Point2d.yCoordinate $(docs 'Point2d.yCoordinate)
-    , Class.member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
-    , Class.member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
-    , Class.member1 "Place On" "Plane" (Point2d.placeOn :: Plane3d -> Point2d -> Point3d) $(docs 'Point2d.placeOn)
+point2D :: Class
+point2D =
+  Class.new @Point2D "A point in 2D, defined by its X and Y coordinates." $
+    [ Class.constant "Origin" (Point2D.origin @FFI.Space) $(docs 'Point2D.origin)
+    , Class.constructor2 "X Coordinate" "Y Coordinate" Point2D.Point2D $(docs 'Point2D.Point2D)
+    , Class.factory1 "X" "X Coordinate" Point2D.x $(docs 'Point2D.x)
+    , Class.factory1 "Y" "Y Coordinate" Point2D.y $(docs 'Point2D.y)
+    , Class.factory2 "Polar" "Radius" "Angle" Point2D.polar $(docs 'Point2D.polar)
+    , Class.factory2 "Meters" "X Coordinate" "Y Coordinate" Point2D.meters $(docs 'Point2D.meters)
+    , Class.factory2 "Centimeters" "X Coordinate" "Y Coordinate" Point2D.centimeters $(docs 'Point2D.centimeters)
+    , Class.factory2 "Cm" "X Coordinate" "Y Coordinate" Point2D.cm $(docs 'Point2D.cm)
+    , Class.factory2 "Millimeters" "X Coordinate" "Y Coordinate" Point2D.millimeters $(docs 'Point2D.millimeters)
+    , Class.factory2 "Mm" "X Coordinate" "Y Coordinate" Point2D.mm $(docs 'Point2D.mm)
+    , Class.factory2 "Inches" "X Coordinate" "Y Coordinate" Point2D.inches $(docs 'Point2D.inches)
+    , Class.property "Coordinates" Point2D.coordinates $(docs 'Point2D.coordinates)
+    , Class.property "X Coordinate" Point2D.xCoordinate $(docs 'Point2D.xCoordinate)
+    , Class.property "Y Coordinate" Point2D.yCoordinate $(docs 'Point2D.yCoordinate)
+    , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
+    , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
+    , Class.member1 "Place On" "Plane" Point2D.placeOn $(docs 'Point2D.placeOn)
     , Class.minusSelf
     , Class.minus @Displacement2d Self
     , Class.plus @Displacement2d Self
     , Class.minus @Curve2d Self
     ]
-      <> affineTransformations2d Point2d.transformBy
+      <> affineTransformations2d Point2D.transformBy
 
 uvPoint :: Class
 uvPoint =
@@ -711,7 +712,7 @@ bounds2d =
     [ Class.constructor2 "X Coordinate" "Y Coordinate" Bounds2d.Bounds2d $(docs 'Bounds2d.Bounds2d)
     , Class.factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
-    , Class.factory1 "Hull" "Points" (Bounds2d.hullN @Point2d) $(docs 'Bounds2d.hullN)
+    , Class.factory1 "Hull" "Points" (Bounds2d.hullN @Point2D) $(docs 'Bounds2d.hullN)
     , Class.factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , Class.property "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , Class.property "X Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
@@ -1388,7 +1389,7 @@ curve2d =
     , Class.plus @DisplacementCurve2d Self
     , Class.minus @DisplacementCurve2d Self
     , Class.minusSelf
-    , Class.minus @Point2d Self
+    , Class.minus @Point2D Self
     ]
       <> affineTransformations2d Curve2d.transformBy
 
@@ -1452,7 +1453,7 @@ region2d =
     , Class.property "Outer Loop" Region2d.outerLoop region2dOuterLoopDocs
     , Class.property "Inner Loops" Region2d.innerLoops region2dInnerLoopsDocs
     , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
-    , Class.factoryM1R "Polygon" "Points" (Region2d.polygon @Point2d) $(docs 'Region2d.polygon)
+    , Class.factoryM1R "Polygon" "Points" (Region2d.polygon @Point2D) $(docs 'Region2d.polygon)
     , Class.factoryM2R "Hexagon" "Center Point" "Height" Region2d.hexagon $(docs 'Region2d.hexagon)
     , Class.factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.inscribedPolygon $(docs 'Region2d.inscribedPolygon)
     , Class.factoryM3R "Circumscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.circumscribedPolygon $(docs 'Region2d.circumscribedPolygon)
