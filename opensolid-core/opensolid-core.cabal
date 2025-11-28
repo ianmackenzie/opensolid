@@ -185,6 +185,7 @@ library
     OpenSolid.PbrMaterial
     OpenSolid.Plane3d
     OpenSolid.PlaneOrientation3d
+    OpenSolid.Point2D
     OpenSolid.Point2d
     OpenSolid.Point3d
     OpenSolid.Polygon2d
