@@ -2078,7 +2078,7 @@ deriving instance Ord (Plane3d global local)
 
 deriving instance Show (Plane3d global local)
 
-instance FFI (Plane3d FFI.Space local) where
+instance (global ~ FFI.Space, local ~ FFI.Space) => FFI (Plane3d global local) where
   representation = FFI.classRepresentation "Plane3d"
 
 instance HasField "xDirection" (Plane3d global local) (Direction3d global) where

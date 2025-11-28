@@ -1092,8 +1092,8 @@ point3d =
     , Class.member0 "Y Up Coordinates" Point3d.yUpCoordinates $(docs 'Point3d.yUpCoordinates)
     , Class.member1 "Distance To" "Other" Point3d.distanceFrom $(docs 'Point3d.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point3d.midpoint $(docs 'Point3d.midpoint)
-    , Class.member1 "Project Onto" "Plane" (Point3d.projectOnto :: Plane3d -> Point3d -> Point3d) $(docs 'Point3d.projectOnto)
-    , Class.member1 "Project Into" "Plane" (Point3d.projectInto :: Plane3d -> Point3d -> Point2d) $(docs 'Point3d.projectInto)
+    , Class.member1 "Project Onto" "Plane" Point3d.projectOnto $(docs 'Point3d.projectOnto)
+    , Class.member1 "Project Into" "Plane" Point3d.projectInto $(docs 'Point3d.projectInto)
     , Class.minusSelf
     , Class.minus @Displacement3d Self
     , Class.plus @Displacement3d Self
