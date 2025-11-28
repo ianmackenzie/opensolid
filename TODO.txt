@@ -1,7 +1,21 @@
+Units-specific types/modules
+- 'type Point2D space = Point2d Meters space'
+- 'type UvPoint = Point2d Unitless UvSpace'
+- 'type Vector2D space = Vector2d Meters space'
+- 'type UvVector = Vector2d Unitless UvSpace'
+- 'type UvDirection = Direction2D UvSpace' <- a bit special...
+- 'type Curve2D = Curve2d Meters space'
+- 'type UvCurve = Curve2d Unitless UvSpace'
+- 'type Region2D = Region2d Meters space'
+- 'type UvRegion = Region2d Unitless UvSpace'
+- rule: lower-case 'd' has a units type parameter, capital 'D' does not (meters units for anything that *has* units)
+
 Add e.g. Point2D module and type alias, coexist with e.g. Point2d for now
 -> eventually, move Point2d under 'Polymorphic' namespace
 -> add monomorphic forwarding functions in Point2D module
 -> can move any Meters-specific functions like Point2d.meters into Point2D module
+-> or maybe have Point2d and Point2D modules coexist?
+  -> lower-case 'd' is reminiscent of lower-case type variables, e.g. 'Html msg' vs 'Html Msg' in Elm
 
 Move SurfaceLinearization.error to SurfaceFunction3d.linearizationError
 -> or 'linearDeviation' or 'nonlinearity'
