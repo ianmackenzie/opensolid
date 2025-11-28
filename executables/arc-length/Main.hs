@@ -11,8 +11,8 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D (Point2D, pattern Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Text qualified as Text
@@ -32,23 +32,19 @@ testCurve label curve = Tolerance.using (Length.meters 1e-12) do
 
 testLineLength :: IO ()
 testLineLength = Tolerance.using (Length.meters 1e-6) do
-  testCurve "Line" (Curve2d.line Point2d.origin (Point2d.centimeters 30 40))
+  testCurve "Line" (Curve2d.line Point2D.origin (Point2D.centimeters 30 40))
 
 testQuadraticSplineLength :: IO ()
 testQuadraticSplineLength = do
-  let p1 = Point2d.origin
-  let p2 = Point2d.centimeters 20 30
-  let p3 = Point2d.centimeters 40 0
+  let p1 = Point2D.origin
+  let p2 = Point2D.centimeters 20 30
+  let p3 = Point2D.centimeters 40 0
   let spline = Curve2d.quadraticBezier p1 p2 p3
   testCurve "Quadratic spline" spline
   IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
-analyticalLength ::
-  Point2d Meters space ->
-  Point2d Meters space ->
-  Point2d Meters space ->
-  Length
-analyticalLength (Point2d x0 y0) (Point2d x1 y1) (Point2d x2 y2) = do
+analyticalLength :: Point2D space -> Point2D space -> Point2D space -> Length
+analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
   let ax = x0 .-. 2 *. x1 .+. x2
   let ay = y0 .-. 2 *. y1 .+. y2
   let bx = 2 *. x1 .-. 2 *. x0
@@ -65,10 +61,10 @@ analyticalLength (Point2d x0 y0) (Point2d x1 y1) (Point2d x2 y2) = do
 
 testCubicSplineParameterization :: IO ()
 testCubicSplineParameterization = Tolerance.using Length.nanometer do
-  let p1 = Point2d.centimeters 5 5
-  let p2 = Point2d.centimeters 14 15
-  let p3 = Point2d.centimeters 16 15
-  let p4 = Point2d.centimeters 25 5
+  let p1 = Point2D.centimeters 5 5
+  let p2 = Point2D.centimeters 14 15
+  let p3 = Point2D.centimeters 16 15
+  let p4 = Point2D.centimeters 25 5
   let spline = Curve2d.cubicBezier p1 p2 p3 p4
   let (parameterized, length) = Curve2d.parameterizeByArcLength spline
   IO.printLine ("Cubic spline: " <> formatLength length)
@@ -79,7 +75,7 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer do
                 [Drawing2d.whiteFill]
                 (#centerPoint point)
                 (#diameter (Length.millimeters 3))
-        let drawingBounds = Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30 15)
+        let drawingBounds = Bounds2d.hull2 Point2D.origin (Point2D.centimeters 30 15)
         let resolution = Resolution.maxError Length.micrometer
         Drawing2d.writeSvg fileName drawingBounds $
           Drawing2d.group
