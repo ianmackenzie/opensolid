@@ -150,8 +150,8 @@ jobs:
   macos-x86:
     runs-on: macos-14-large
     env:
-      MACOSX_DEPLOYMENT_TARGET: "10.13"
-      _PYTHON_HOST_PLATFORM: macosx-10.13-x86_64
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+      _PYTHON_HOST_PLATFORM: macosx-11.0-x86_64
       ARCHFLAGS: -arch x86_64
     steps:
       - name: Clone repository
