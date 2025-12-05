@@ -58,6 +58,7 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -516,31 +517,31 @@ vector2d =
     ]
       <> vectorTransformations2d
 
-type Displacement2d = Vector2d.Vector2d Meters FFI.Space
+type Displacement2d = Vector2D.Vector2D FFI.Space
 
 displacement2d :: Class
 displacement2d =
   Class.new @Displacement2d "A displacement vector in 2D." $
-    [ Class.constant "Zero" (Vector2d.zero :: Displacement2d) $(docs 'Vector2d.zero)
-    , Class.constructor2 "X Component" "Y Component" Vector2d.Vector2d $(docs 'Vector2d.Vector2d)
-    , Class.factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
-    , Class.factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
-    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
-    , Class.factory2 "Meters" "X Component" "Y Component" Vector2d.meters $(docs 'Vector2d.meters)
-    , Class.factory2 "Centimeters" "X Component" "Y Component" Vector2d.centimeters $(docs 'Vector2d.centimeters)
-    , Class.factory2 "Cm" "X Component" "Y Component" Vector2d.cm $(docs 'Vector2d.cm)
-    , Class.factory2 "Millimeters" "X Component" "Y Component" Vector2d.millimeters $(docs 'Vector2d.millimeters)
-    , Class.factory2 "Mm" "X Component" "Y Component" Vector2d.mm $(docs 'Vector2d.mm)
-    , Class.factory2 "Inches" "X Component" "Y Component" Vector2d.inches $(docs 'Vector2d.inches)
-    , Class.property "Components" Vector2d.components $(docs 'Vector2d.components)
-    , Class.property "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
-    , Class.property "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
-    , Class.memberM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
-    , Class.member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
-    , Class.property "Angle" Vector2d.angle $(docs 'Vector2d.angle)
-    , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
-    , Class.memberM0 "Is Zero" (~= Vector2d.zero) "Check if a displacement is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> Displacement2d -> Displacement3d) $(docs 'Vector2d.placeOn)
+    [ Class.constant "Zero" (Vector2D.zero :: Displacement2d) $(docs 'Vector2D.zero)
+    , Class.constructor2 "X Component" "Y Component" Vector2D.Vector2D $(docs 'Vector2D.Vector2D)
+    , Class.factory1 "X" "X Component" Vector2D.x $(docs 'Vector2D.x)
+    , Class.factory1 "Y" "Y Component" Vector2D.y $(docs 'Vector2D.y)
+    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2D.polar $(docs 'Vector2D.polar)
+    , Class.factory2 "Meters" "X Component" "Y Component" Vector2D.meters $(docs 'Vector2D.meters)
+    , Class.factory2 "Centimeters" "X Component" "Y Component" Vector2D.centimeters $(docs 'Vector2D.centimeters)
+    , Class.factory2 "Cm" "X Component" "Y Component" Vector2D.cm $(docs 'Vector2D.cm)
+    , Class.factory2 "Millimeters" "X Component" "Y Component" Vector2D.millimeters $(docs 'Vector2D.millimeters)
+    , Class.factory2 "Mm" "X Component" "Y Component" Vector2D.mm $(docs 'Vector2D.mm)
+    , Class.factory2 "Inches" "X Component" "Y Component" Vector2D.inches $(docs 'Vector2D.inches)
+    , Class.property "Components" Vector2D.components $(docs 'Vector2D.components)
+    , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
+    , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
+    , Class.memberM0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
+    , Class.member0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
+    , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
+    , Class.memberM0 "Is Zero" (~= Vector2D.zero) "Check if a displacement is zero, within the current tolerance."
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3d -> Displacement2d -> Displacement3d) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
