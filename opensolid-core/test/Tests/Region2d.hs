@@ -8,8 +8,8 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Length qualified as Length
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D (pattern Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity (zero)
 import OpenSolid.Region2d (Region2d)
@@ -36,10 +36,10 @@ areaIsApproximately expectedArea region = do
 square :: Tolerance Meters => Test
 square = Test.verify "square" Test.do
   let width = Length.meters 2
-  let p1 = Point2d.origin
-  let p2 = Point2d width zero
-  let p3 = Point2d width width
-  let p4 = Point2d zero width
+  let p1 = Point2D.origin
+  let p2 = Point2D width zero
+  let p3 = Point2D width width
+  let p4 = Point2D zero width
   let line1 = Curve2d.line p1 p2
   let line2 = Curve2d.line p2 p3
   let line3 = Curve2d.line p4 p3
@@ -50,9 +50,9 @@ square = Test.verify "square" Test.do
 quarterCircle :: Tolerance Meters => Test
 quarterCircle = Test.verify "quarterCircle" Test.do
   let radius = Length.meters 1
-  let p1 = Point2d.origin
-  let p2 = Point2d radius zero
-  let p3 = Point2d zero radius
+  let p1 = Point2D.origin
+  let p2 = Point2D radius zero
+  let p3 = Point2D zero radius
   let line1 = Curve2d.line p1 p2
   let line2 = Curve2d.line p1 p3
   let arc = Curve2d.arc p2 p3 Angle.quarterTurn
@@ -63,15 +63,15 @@ quarterCircle = Test.verify "quarterCircle" Test.do
 squareWithHole :: Tolerance Meters => Test
 squareWithHole = Test.verify "squareWithHole" Test.do
   let width = Length.meters 2
-  let p1 = Point2d.origin
-  let p2 = Point2d width zero
-  let p3 = Point2d width width
-  let p4 = Point2d zero width
+  let p1 = Point2D.origin
+  let p2 = Point2D width zero
+  let p3 = Point2D width width
+  let p4 = Point2D zero width
   let line1 = Curve2d.line p1 p2
   let line2 = Curve2d.line p2 p3
   let line3 = Curve2d.line p4 p3
   let line4 = Curve2d.line p4 p1
-  let centerPoint = Point2d (0.5 *. width) (0.5 *. width)
+  let centerPoint = Point2D (0.5 *. width) (0.5 *. width)
   let holeDiameter = 0.5 *. width
   let holeRadius = 0.5 *. holeDiameter
   let hole = Curve2d.circle (#centerPoint centerPoint) (#diameter holeDiameter)
@@ -82,10 +82,10 @@ squareWithHole = Test.verify "squareWithHole" Test.do
 incompleteSquare :: Tolerance Meters => Test
 incompleteSquare = Test.verify "incompleteSquare" Test.do
   let width = Length.meters 2
-  let p1 = Point2d.origin
-  let p2 = Point2d width zero
-  let p3 = Point2d width width
-  let p4 = Point2d zero width
+  let p1 = Point2D.origin
+  let p2 = Point2D width zero
+  let p3 = Point2D width width
+  let p4 = Point2D zero width
   let line1 = Curve2d.line p1 p2
   let line2 = Curve2d.line p2 p3
   let line3 = Curve2d.line p4 p3
@@ -116,11 +116,11 @@ twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
   let circle1 =
         Curve2d.circle
-          (#centerPoint (Point2d.meters -2 0))
+          (#centerPoint (Point2D.meters -2 0))
           (#diameter (Length.meters 2))
   let circle2 =
         Curve2d.circle
-          (#centerPoint (Point2d.meters 1 0))
+          (#centerPoint (Point2D.meters 1 0))
           (#diameter (Length.meters 1))
   case Region2d.boundedBy [circle1, circle2] of
     Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"

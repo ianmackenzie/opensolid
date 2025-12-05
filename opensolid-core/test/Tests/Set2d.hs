@@ -5,8 +5,8 @@ import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point2d (Point2d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Set2d (Set2d)
 import OpenSolid.Set2d qualified as Set2d
@@ -19,10 +19,10 @@ tests =
   , filter
   ]
 
-point :: Int -> Int -> Point2d Meters space
-point x y = Point2d.centimeters (Number.fromInt x) (Number.fromInt y)
+point :: Int -> Int -> Point2D space
+point x y = Point2D.centimeters (Number.fromInt x) (Number.fromInt y)
 
-testSet :: Set2d (Point2d Meters space) Meters space
+testSet :: Set2d (Point2D space) Meters space
 testSet =
   Set2d.fromNonEmpty $
     NonEmpty.eight
