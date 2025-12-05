@@ -38,6 +38,7 @@ import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import OpenSolid.Number (Number)
+import OpenSolid.Quantity (Quantity (Quantity))
 import OpenSolid.Result (Result (Error, Ok))
 import Prelude
   ( Bool
@@ -67,7 +68,7 @@ int :: Int -> Text
 int = show
 
 number :: Number -> Text
-number = show
+number (Quantity x) = show x
 
 char :: Char -> Text
 char c = pack [c]
