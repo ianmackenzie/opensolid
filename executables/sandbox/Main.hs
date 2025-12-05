@@ -33,6 +33,8 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
@@ -51,7 +53,7 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.Volume qualified as Volume
@@ -78,20 +80,20 @@ testScalarArithmetic = do
 testVectorArithmetic :: IO ()
 testVectorArithmetic = do
   let vector x y z = Vector3d.zUp (Length.meters x) (Length.meters y) (Length.meters z)
-  let v1 = Vector2d.meters 1 2
-  let v2 = 0.5 *. Vector2d.meters 3 4
+  let v1 = Vector2D.meters 1 2
+  let v2 = 0.5 *. Vector2D.meters 3 4
   let dotProduct = v1 `dot` v2
   log "Dot product" dotProduct
   log "2D cross product" (v1 `cross` v2)
   let squareRoot = Quantity.sqrt dotProduct
   log "Square root" squareRoot
-  let translatedPoint = Point2d.meters 2 3 .+. Vector2d.meters 4 5
+  let translatedPoint = Point2D.meters 2 3 .+. Vector2D.meters 4 5
   log "Translated point" translatedPoint
-  let vectorSum = Vector2d.meters 1 2 .+. Vector2d.meters 2 3
+  let vectorSum = Vector2D.meters 1 2 .+. Vector2D.meters 2 3
   log "Vector sum" vectorSum
   let crossProduct = vector 1 2 3 `cross` vector 4 5 6
   log "Cross product" crossProduct
-  let scaledVector = Length.meters 2 .*. Vector2d.meters 3 4
+  let scaledVector = Length.meters 2 .*. Vector2D.meters 3 4
   log "Scaled vector" scaledVector
 
 testBoundsArithmetic :: IO ()
@@ -109,29 +111,24 @@ testEquality = Tolerance.using Length.centimeter do
 
 testTransformation :: IO ()
 testTransformation = do
-  let rotatedAxis = Axis2d.rotateAround (Point2d.meters 1 0) Angle.quarterTurn Axis2d.x
+  let rotatedAxis = Axis2d.rotateAround (Point2D.meters 1 0) Angle.quarterTurn Axis2d.x
   log "Rotated axis" rotatedAxis
-  let originalPoints = [Point2d.meters 1 0, Point2d.meters 2 0, Point2d.meters 3 0]
-  let rotationFunction = Point2d.rotateAround Point2d.origin Angle.quarterTurn
+  let originalPoints = [Point2D.meters 1 0, Point2D.meters 2 0, Point2D.meters 3 0]
+  let rotationFunction = Point2D.rotateAround Point2D.origin Angle.quarterTurn
   let rotatedPoints = List.map rotationFunction originalPoints
   log "Rotated points" rotatedPoints
 
-offsetPoint ::
-  Tolerance units =>
-  Point2d units space ->
-  Point2d units space ->
-  Quantity units ->
-  Point2d units space
+offsetPoint :: Tolerance Meters => Point2D space -> Point2D space -> Length -> Point2D space
 offsetPoint startPoint endPoint distance =
   case Direction2d.from startPoint endPoint of
     Error Direction2d.PointsAreCoincident -> startPoint
     Ok direction -> do
       let displacement = distance .*. Direction2d.perpendicularTo direction
-      Point2d.midpoint startPoint endPoint .+. displacement
+      Point2D.midpoint startPoint endPoint .+. displacement
 
 testCustomFunction :: Tolerance Meters => IO ()
 testCustomFunction = do
-  let point = offsetPoint (Point2d.meters 1 0) (Point2d.meters 3 0) (Length.meters 1)
+  let point = offsetPoint (Point2D.meters 1 0) (Point2D.meters 3 0) (Length.meters 1)
   log "Offset point" point
 
 testListOperations :: IO ()
@@ -143,8 +140,8 @@ testListOperations = do
 
 getCrossProduct :: Tolerance Meters => Result Text Number
 getCrossProduct = do
-  vectorDirection <- Result.orFail (Vector2d.direction (Vector2d.meters 2 3))
-  lineDirection <- Result.orFail (Direction2d.from Point2d.origin Point2d.origin)
+  vectorDirection <- Result.orFail (Vector2D.direction (Vector2D.meters 2 3))
+  lineDirection <- Result.orFail (Direction2d.from Point2D.origin Point2D.origin)
   Ok (vectorDirection `cross` lineDirection)
 
 testTry :: Tolerance Meters => IO ()
@@ -195,7 +192,7 @@ testPlaneTorusIntersection = do
   let majorRadius = Length.centimeters 2
   let crossSection =
         Curve2d.circle
-          (#centerPoint (Point2d.x majorRadius))
+          (#centerPoint (Point2D.x majorRadius))
           (#diameter (2 *. minorRadius))
   surface <- Result.orFail (Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi)
   let alpha = Angle.asin (minorRadius ./. majorRadius)
@@ -333,10 +330,10 @@ testBezierSegment = do
 
 testHermiteBezier :: IO ()
 testHermiteBezier = do
-  let startPoint = Point2d.origin @Meters @Global
-  let startDerivatives = [Vector2d.centimeters 10 10]
-  let endDerivatives = [Vector2d.centimeters 0 -10, Vector2d.zero]
-  let endPoint = Point2d.centimeters 10 0
+  let startPoint = Point2D.origin @Global
+  let startDerivatives = [Vector2D.centimeters 10 10]
+  let endDerivatives = [Vector2D.centimeters 0 -10, Vector2D.zero]
+  let endPoint = Point2D.centimeters 10 0
   let curve = Curve2d.hermite startPoint startDerivatives endPoint endDerivatives
   let curveAttributes =
         [ Drawing2d.strokeColor Color.blue
