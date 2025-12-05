@@ -1,3 +1,18 @@
+Use CBOR for FFI calls from target languages
+-> have single calling function:
+   void* opensolid_invoke(
+     char* function,
+     int64_t arguments_size,
+     void* arguments_data,
+     int64_t* result_size
+   )
+-> arguments are formatted as array
+-> result_size can be set to be negative, in which case arguments_data is an error object in JSON-RPC format
+   ('code', 'message')
+-> much less room for segfaults, weird data corruption etc. - can't accidentally treat int as double or whatever
+-> means that exact same format can be used in client-server way over WebSockets, HTTP, sockets, standard in/out streams etc.
+-> can use Haskell 'serialise' library which seems nice and well supported
+
 Units-specific types/modules
 - 'type Point2D space = Point2d Meters space'
 - 'type UvPoint = Point2d Unitless UvSpace'
@@ -9,6 +24,7 @@ Units-specific types/modules
 - 'type Region2D = Region2d Meters space'
 - 'type UvRegion = Region2d Unitless UvSpace'
 - rule: lower-case 'd' has a units type parameter, capital 'D' does not (meters units for anything that *has* units)
+- goal: application code does not need to use any lower-case 'd' types
 
 Add e.g. Point2D module and type alias, coexist with e.g. Point2d for now
 -> eventually, move Point2d under 'Polymorphic' namespace
