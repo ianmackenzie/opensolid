@@ -40,7 +40,6 @@ import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -58,6 +57,7 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
@@ -692,14 +692,14 @@ point2D =
 
 uvPoint :: Class
 uvPoint =
-  Class.new @UvPoint "A point in UV parameter space." $
-    [ Class.constant "Origin" (Point2d.origin :: UvPoint) "The point with coordinates (0,0)."
-    , Class.constructor2 "U Coordinate" "V Coordinate" Point2d.Point2d "Construct a point from its U and V coordinates."
-    , Class.property "Coordinates" Point2d.coordinates "Get the U and V coordinates of a point."
-    , Class.property "U Coordinate" Point2d.xCoordinate "Get the U coordinate of a point."
-    , Class.property "V Coordinate" Point2d.yCoordinate "Get the V coordinate of a point."
-    , Class.member1 "Distance To" "Other" Point2d.distanceFrom $(docs 'Point2d.distanceFrom)
-    , Class.member1 "Midpoint" "Other" Point2d.midpoint $(docs 'Point2d.midpoint)
+  Class.new @UvPoint $(docs ''UvPoint.UvPoint) $
+    [ Class.constant "Origin" UvPoint.origin $(docs 'UvPoint.origin)
+    , Class.constructor2 "U Coordinate" "V Coordinate" UvPoint.UvPoint $(docs 'UvPoint.UvPoint)
+    , Class.property "Coordinates" UvPoint.coordinates $(docs 'UvPoint.coordinates)
+    , Class.property "U Coordinate" UvPoint.uCoordinate $(docs 'UvPoint.uCoordinate)
+    , Class.property "V Coordinate" UvPoint.vCoordinate $(docs 'UvPoint.vCoordinate)
+    , Class.member1 "Distance To" "Other" UvPoint.distanceFrom $(docs 'UvPoint.distanceFrom)
+    , Class.member1 "Midpoint" "Other" UvPoint.midpoint $(docs 'UvPoint.midpoint)
     , Class.minusSelf
     , Class.minus @UvVector Self
     , Class.plus @UvVector Self
