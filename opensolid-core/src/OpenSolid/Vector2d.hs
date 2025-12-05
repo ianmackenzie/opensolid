@@ -6,12 +6,6 @@ module OpenSolid.Vector2d
   , x
   , y
   , from
-  , meters
-  , centimeters
-  , cm
-  , millimeters
-  , mm
-  , inches
   , squareMeters
   , polar
   , xComponent
@@ -53,7 +47,6 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -105,36 +98,6 @@ from p1 p2 = p2 .-. p1
 
 apply :: (Number -> Quantity units) -> Number -> Number -> Vector2d units space
 apply units px py = Vector2d (units px) (units py)
-
--- | Construct a vector from its X and Y components given in meters.
-meters :: Number -> Number -> Vector2d Meters space
-meters = apply Length.meters
-
--- | Construct a vector from its X and Y components given in centimeters.
-centimeters :: Number -> Number -> Vector2d Meters space
-centimeters = apply Length.centimeters
-
-{-| Construct a vector from its X and Y components given in centimeters.
-
-Short form alias for 'centimeters'.
--}
-cm :: Number -> Number -> Vector2d Meters space
-cm = centimeters
-
--- | Construct a vector from its X and Y components given in millimeters.
-millimeters :: Number -> Number -> Vector2d Meters space
-millimeters = apply Length.millimeters
-
-{-| Construct a vector from its X and Y components given in millimeters.
-
-Short form alias for 'millimeters'.
--}
-mm :: Number -> Number -> Vector2d Meters space
-mm = millimeters
-
--- | Construct a vector from its X and Y components given in inches.
-inches :: Number -> Number -> Vector2d Meters space
-inches = apply Length.inches
 
 -- | Construct a vector from its X and Y components given in square meters.
 squareMeters :: Number -> Number -> Vector2d SquareMeters space

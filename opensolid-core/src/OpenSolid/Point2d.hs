@@ -6,12 +6,6 @@ module OpenSolid.Point2d
   , y
   , along
   , polar
-  , meters
-  , centimeters
-  , cm
-  , millimeters
-  , mm
-  , inches
   , xCoordinate
   , yCoordinate
   , coordinates
@@ -41,7 +35,6 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
@@ -85,39 +78,6 @@ The angle is measured counterclockwise from the positive X axis.
 -}
 polar :: Quantity units -> Angle -> Point2d units space
 polar r theta = Position2d (Vector2d.polar r theta)
-
-apply :: (Number -> Quantity units) -> Number -> Number -> Point2d units space
-apply units fx fy = Point2d (units fx) (units fy)
-
--- | Construct a point from its X and Y coordinates given in meters.
-meters :: Number -> Number -> Point2d Meters space
-meters = apply Length.meters
-
--- | Construct a point from its X and Y coordinates given in centimeters.
-centimeters :: Number -> Number -> Point2d Meters space
-centimeters = apply Length.centimeters
-
--- | Construct a point from its X and Y coordinates given in millimeters.
-millimeters :: Number -> Number -> Point2d Meters space
-millimeters = apply Length.millimeters
-
-{-| Construct a point from its X and Y coordinates given in centimeters.
-
-Short form alias for 'centimeters'.
--}
-cm :: Number -> Number -> Point2d Meters space
-cm = centimeters
-
-{-| Construct a point from its X and Y coordinates given in millimeters.
-
-Short form alias for 'millimeters'.
--}
-mm :: Number -> Number -> Point2d Meters space
-mm = millimeters
-
--- | Construct a point from its X and Y coordinates given in inches.
-inches :: Number -> Number -> Point2d Meters space
-inches = apply Length.inches
 
 -- | Get the X coordinate of a point.
 {-# INLINE xCoordinate #-}
