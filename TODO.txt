@@ -1,5 +1,7 @@
 Remove Vertex3d from Stl module?
 
+Change Region2d.polygon to take a Polygon2d
+
 Use CBOR for FFI calls from target languages
 -> have single calling function:
    void* opensolid_invoke(
@@ -21,10 +23,14 @@ Units-specific types/modules
 - 'type Vector2D space = Vector2d Meters space'
 - 'type UvVector = Vector2d Unitless UvSpace'
 - 'type UvDirection = Direction2D UvSpace' <- a bit special...
-- 'type Curve2D = Curve2d Meters space'
+- 'type Curve2D space = Curve2d Meters space'
 - 'type UvCurve = Curve2d Unitless UvSpace'
-- 'type Region2D = Region2d Meters space'
+- 'type Region2D space = Region2d Meters space'
 - 'type UvRegion = Region2d Unitless UvSpace'
+- 'type LineSegment2D space = LineSegment2d Meters space
+- 'type UvLineSegment = LineSegment2d Unitless UvSpace'
+- 'type Set2D a space = Set2d a Meters space' <- allowed?
+- 'type UvSet a = Set2d a Unitless UvSpace' <- allowed?
 - rule: lower-case 'd' has a units type parameter, capital 'D' does not (meters units for anything that *has* units)
 - goal: application code does not need to use any lower-case 'd' types
 - eventually move polymorphic modules under Polymorphic namespace?
