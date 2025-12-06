@@ -31,6 +31,7 @@ import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
+import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.List qualified as List
 import OpenSolid.Mitsuba qualified as Mitsuba
 import OpenSolid.Model3d qualified as Model3d
@@ -41,6 +42,8 @@ import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Polygon2d qualified as Polygon2d
+import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d qualified as Region2d
@@ -54,6 +57,7 @@ import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.Triangle2d qualified as Triangle2d
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -85,6 +89,10 @@ classes =
   , uvPoint
   , bounds2d
   , uvBounds
+  , lineSegment2d
+  , triangle2d
+  , polyline2d
+  , polygon2d
   , curve
   , lengthCurve
   , areaCurve
@@ -736,6 +744,53 @@ uvBounds =
     , Class.property "V Coordinate" Bounds2d.yCoordinate "Get the V coordinate bounds of a bounding box."
     , Class.plus @UvVector Self
     , Class.minus @UvVector Self
+    ]
+
+type LineSegment2d = LineSegment2d.LineSegment2d Meters FFI.Space
+
+lineSegment2d :: Class
+lineSegment2d =
+  Class.new @LineSegment2d $(docs ''LineSegment2d.LineSegment2d) $
+    [ Class.constructor2 "Start Point" "End Point" LineSegment2d.LineSegment2d $(docs 'LineSegment2d.LineSegment2d)
+    , Class.property "Start Point" LineSegment2d.startPoint $(docs 'LineSegment2d.startPoint)
+    , Class.property "End Point" LineSegment2d.endPoint $(docs 'LineSegment2d.endPoint)
+    , Class.member0 "Length" LineSegment2d.length $(docs 'LineSegment2d.length)
+    , Class.member1 "Distance To" "Point" LineSegment2d.distanceTo $(docs 'LineSegment2d.distanceTo)
+    ]
+
+type Triangle2d = Triangle2d.Triangle2d Meters FFI.Space
+
+triangle2d :: Class
+triangle2d =
+  Class.new @Triangle2d $(docs ''Triangle2d.Triangle2d) $
+    [ Class.constructor3 "First Vertex" "Second Vertex" "Third Vertex" Triangle2d.Triangle2d $(docs 'Triangle2d.Triangle2d)
+    , Class.property "Vertices" Triangle2d.vertices $(docs 'Triangle2d.vertices)
+    , Class.member0 "Signed Area" Triangle2d.signedArea $(docs 'Triangle2d.signedArea)
+    ]
+
+type Polyline2d = Polyline2d.Polyline2d Meters FFI.Space
+
+polyline2d :: Class
+polyline2d =
+  Class.new @Polyline2d $(docs ''Polyline2d.Polyline2d) $
+    [ Class.constructor1 "Vertices" Polyline2d.Polyline2d $(docs 'Polyline2d.Polyline2d)
+    , Class.property "Vertices" Polyline2d.vertices $(docs 'Polyline2d.vertices)
+    , Class.property "Num Vertices" Polyline2d.numVertices $(docs 'Polyline2d.numVertices)
+    , Class.property "Start Point" Polyline2d.startPoint $(docs 'Polyline2d.startPoint)
+    , Class.property "End Point" Polyline2d.endPoint $(docs 'Polyline2d.endPoint)
+    , Class.member0 "Segments" Polyline2d.segments $(docs 'Polyline2d.segments)
+    , Class.member0 "Length" Polyline2d.length $(docs 'Polyline2d.length)
+    ]
+
+type Polygon2d = Polygon2d.Polygon2d Meters FFI.Space
+
+polygon2d :: Class
+polygon2d =
+  Class.new @Polygon2d $(docs ''Polygon2d.Polygon2d) $
+    [ Class.constructor1 "Vertices" Polygon2d.Polygon2d $(docs 'Polygon2d.Polygon2d)
+    , Class.property "Vertices" Polygon2d.vertices $(docs 'Polygon2d.vertices)
+    , Class.member0 "Edges" Polygon2d.edges $(docs 'Polygon2d.edges)
+    , Class.member0 "Signed Area" Polygon2d.signedArea $(docs 'Polygon2d.signedArea)
     ]
 
 type Curve = Curve.Curve Unitless
