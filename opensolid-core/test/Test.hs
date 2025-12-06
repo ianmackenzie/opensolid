@@ -17,7 +17,6 @@ module Test
   )
 where
 
-import Data.Foldable qualified
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
@@ -196,5 +195,5 @@ instance Show a => Show (Lines a) where
     Text.unpack $
       Text.concat (List.map (\value -> "\n  " <> Text.show value) values)
 
-lines :: Foldable list => list a -> Lines a
-lines = Lines . Data.Foldable.toList
+lines :: List a -> Lines a
+lines = Lines

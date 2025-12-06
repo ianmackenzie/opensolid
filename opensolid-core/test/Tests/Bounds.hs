@@ -82,8 +82,8 @@ largest = Test.check 1000 "largest" Test.do
   let largestValue = Quantity.largest values
   let largestBounds = Bounds.largest bounds
   Test.expect (Bounds.includes largestValue largestBounds)
-    & Test.output "values" (Test.lines values)
-    & Test.output "bounds" (Test.lines bounds)
+    & Test.output "values" (Test.lines (NonEmpty.toList values))
+    & Test.output "bounds" (Test.lines (NonEmpty.toList bounds))
     & Test.output "largestValue" largestValue
     & Test.output "largestBounds" largestBounds
 

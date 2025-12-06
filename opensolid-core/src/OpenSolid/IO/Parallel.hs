@@ -12,7 +12,6 @@ where
 
 import Control.Concurrent.Async (Concurrently (Concurrently))
 import Control.Concurrent.Async qualified as Async
-import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Foldable.WithIndex qualified
 import Data.Traversable.WithIndex (TraversableWithIndex)
 import Data.Traversable.WithIndex qualified
@@ -42,7 +41,7 @@ map4 function taskA taskB taskC taskD =
       <*> Concurrently taskC
       <*> Concurrently taskD
 
-run :: Foldable list => list (IO ()) -> IO ()
+run :: List (IO ()) -> IO ()
 run = Async.mapConcurrently_ id
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
@@ -53,10 +52,10 @@ collectWithIndex function list = do
   let task index item = Async.Concurrently (function index item)
   Async.runConcurrently (Data.Traversable.WithIndex.itraverse task list)
 
-forEach :: Foldable list => list a -> (a -> IO ()) -> IO ()
+forEach :: List a -> (a -> IO ()) -> IO ()
 forEach = Async.forConcurrently_
 
-forEachWithIndex :: FoldableWithIndex Int list => list a -> (Int -> a -> IO ()) -> IO ()
+forEachWithIndex :: List a -> (Int -> a -> IO ()) -> IO ()
 forEachWithIndex list function = do
   let task index item = Async.Concurrently (function index item)
   Async.runConcurrently (Data.Foldable.WithIndex.itraverse_ task list)

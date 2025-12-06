@@ -527,7 +527,7 @@ store ptr offset value = do
     MaybeRep -> do
       let tag = case value of Just{} -> 0; Nothing -> 1
       Foreign.pokeByteOff @Int64 ptr offset tag
-      IO.forEach value (store ptr (offset + 8))
+      IO.maybe (store ptr (offset + 8)) value
     ResultRep ->
       case value of
         Ok successfulValue -> do

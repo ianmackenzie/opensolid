@@ -311,7 +311,8 @@ drawBezier color startPoint innerControlPoints endPoint = do
     ]
     [ Svg.groupWith [Svg.opacity 0.3] $
         [ Svg.polyline (Polyline2d drawingControlPoints)
-        , Svg.combineWith [Svg.fillColor color] drawControlPoint drawingControlPoints
+        , Svg.combineWith [Svg.fillColor color] drawControlPoint $
+            NonEmpty.toList drawingControlPoints
         , Svg.combine drawSegmentBounds (Parameter.intervals 10)
         ]
     , Svg.curve resolution curve

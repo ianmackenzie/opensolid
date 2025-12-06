@@ -85,9 +85,9 @@ smallest = Test.check 100 "smallest" Test.do
   let smallestEstimate = Estimate.smallest estimates
   let (valid, finalBounds) = check smallestEstimate smallestValue
   Test.expect valid
-    & Test.output "values" (Test.lines values)
+    & Test.output "values" (Test.lines (NonEmpty.toList values))
     & Test.output "smallestValue" smallestValue
-    & Test.output "initial bounds list" (Test.lines bounds)
+    & Test.output "initial bounds list" (Test.lines (NonEmpty.toList bounds))
     & Test.output "finalBounds" finalBounds
 
 largest :: Tolerance Meters => Test
@@ -99,9 +99,9 @@ largest = Test.check 100 "largest" Test.do
   let largestEstimate = Estimate.largest estimates
   let (valid, finalBounds) = check largestEstimate largestValue
   Test.expect valid
-    & Test.output "values" (Test.lines values)
+    & Test.output "values" (Test.lines (NonEmpty.toList values))
     & Test.output "largestValue" largestValue
-    & Test.output "initial bounds list" (Test.lines bounds)
+    & Test.output "initial bounds list" (Test.lines (NonEmpty.toList bounds))
     & Test.output "finalBounds" finalBounds
 
 resolvesTo :: Tolerance units => Quantity units -> Estimate units -> Result Text Bool

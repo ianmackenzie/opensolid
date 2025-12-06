@@ -3,6 +3,7 @@ module OpenSolid.IO
   , fail
   , map
   , run
+  , maybe
   , forEach
   , forEachWithIndex
   , collect
@@ -25,7 +26,6 @@ import Control.Concurrent qualified
 import Data.ByteString qualified
 import Data.ByteString.Builder qualified as Builder
 import Data.Foldable qualified
-import Data.Foldable.WithIndex (FoldableWithIndex)
 import Data.Foldable.WithIndex qualified
 import Data.Text.IO.Utf8 qualified
 import Data.Traversable.WithIndex (TraversableWithIndex)
@@ -33,14 +33,12 @@ import Data.Traversable.WithIndex qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
-import OpenSolid.Result (Result (Error, Ok))
+import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
-import OpenSolid.Text (Text)
 import OpenSolid.Text qualified as Text
 import System.Directory
 import System.FilePath qualified
 import System.IO.Error qualified
-import Prelude (Foldable, IO, Int, Traversable, round, (.))
 import Prelude qualified
 
 succeed :: a -> IO a
@@ -52,13 +50,17 @@ fail message = Prelude.fail (Text.unpack message)
 map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap
 
-run :: Foldable list => list (IO ()) -> IO ()
+run :: List (IO ()) -> IO ()
 run = Data.Foldable.fold
 
-forEach :: Foldable list => list a -> (a -> IO ()) -> IO ()
+maybe :: (a -> IO ()) -> Maybe a -> IO ()
+maybe _ Nothing = succeed ()
+maybe callback (Just value) = callback value
+
+forEach :: List a -> (a -> IO ()) -> IO ()
 forEach = Data.Foldable.forM_
 
-forEachWithIndex :: FoldableWithIndex Int list => list a -> (Int -> a -> IO ()) -> IO ()
+forEachWithIndex :: List a -> (Int -> a -> IO ()) -> IO ()
 forEachWithIndex = Data.Foldable.WithIndex.iforM_
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)

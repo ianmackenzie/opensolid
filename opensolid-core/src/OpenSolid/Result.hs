@@ -17,7 +17,6 @@ import {-# SOURCE #-} OpenSolid.Text qualified as Text
 import Prelude
   ( Applicative
   , Eq
-  , Foldable
   , Functor
   , Monad
   , MonadFail
@@ -71,10 +70,10 @@ orFail (Error error) = Prelude.fail (Prelude.show error)
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM
 
-foldl :: Foldable list => (b -> a -> Result x b) -> b -> list a -> Result x b
+foldl :: (b -> a -> Result x b) -> b -> List a -> Result x b
 foldl = Data.Foldable.foldlM
 
-foldr :: Foldable list => (a -> b -> Result x b) -> b -> list a -> Result x b
+foldr :: (a -> b -> Result x b) -> b -> List a -> Result x b
 foldr = Data.Foldable.foldrM
 
 sequence :: List (Result x a) -> Result x (List a)
