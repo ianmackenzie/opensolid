@@ -6,30 +6,31 @@ module OpenSolid.Triangle2d
   )
 where
 
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
+import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vertex2d (Vertex2d)
-import OpenSolid.Vertex2d qualified as Vertex2d
 
-data Triangle2d vertex = Triangle2d vertex vertex vertex
+-- | A triangle in 2D.
+data Triangle2d units space
+  = -- | Construct a triangle from its three vertices.
+    Triangle2d (Point2d units space) (Point2d units space) (Point2d units space)
 
-vertices :: Triangle2d vertex -> (vertex, vertex, vertex)
-vertices (Triangle2d v1 v2 v3) = (v1, v2, v3)
+instance FFI (Triangle2d Meters FFI.Space) where
+  representation = FFI.classRepresentation "Triangle2d"
 
-signedArea_ ::
-  Vertex2d vertex units space =>
-  Triangle2d vertex ->
-  Quantity (units ?*? units)
-signedArea_ (Triangle2d v1 v2 v3) = do
-  let p1 = Vertex2d.position v1
-  let p2 = Vertex2d.position v2
-  let p3 = Vertex2d.position v3
-  0.5 *. (p2 .-. p1) `cross_` (p3 .-. p1)
+-- | Get the vertices of a triangle as a tuple.
+vertices :: Triangle2d units space -> (Point2d units space, Point2d units space, Point2d units space)
+vertices (Triangle2d p1 p2 p3) = (p1, p2, p3)
 
-signedArea ::
-  ( Vertex2d vertex units1 space
-  , Units.Product units1 units1 units2
-  ) =>
-  Triangle2d vertex ->
-  Quantity units2
+signedArea_ :: Triangle2d units space -> Quantity (units ?*? units)
+signedArea_ (Triangle2d p1 p2 p3) = 0.5 *. (p2 .-. p1) `cross_` (p3 .-. p1)
+
+{-| Compute the signed area of a triangle.
+
+This will be positive if the triangle's vertices are in counterclockwise order,
+and negative otherwise.
+-}
+signedArea :: Units.Product units1 units1 units2 => Triangle2d units1 space -> Quantity units2
 signedArea = Units.specialize . signedArea_

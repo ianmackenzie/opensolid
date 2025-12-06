@@ -63,8 +63,6 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Vertex2d (Vertex2d)
-import OpenSolid.Vertex2d qualified as Vertex2d
 
 type Drawing2d :: Type -> Type
 
@@ -174,15 +172,14 @@ line :: Point space -> Point space -> Drawing2d space
 line = lineWith []
 
 polylineWith ::
-  Vertex2d vertex Meters space =>
   List (Attribute space) ->
-  Polyline2d vertex ->
+  Polyline2d Meters space ->
   Drawing2d space
 polylineWith attributes givenPolyline = do
-  let vertices = List.map Vertex2d.position (NonEmpty.toList givenPolyline.vertices)
+  let vertices = NonEmpty.toList (Polyline2d.vertices givenPolyline)
   Node "polyline" (noFill : pointsAttribute vertices : attributes) []
 
-polyline :: Vertex2d vertex Meters space => Polyline2d vertex -> Drawing2d space
+polyline :: Polyline2d Meters space -> Drawing2d space
 polyline = polylineWith []
 
 -- | Create a polygon with the given attributes and vertices.

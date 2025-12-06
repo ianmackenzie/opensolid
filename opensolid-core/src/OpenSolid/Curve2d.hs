@@ -909,7 +909,7 @@ curvature ::
   Result IsPoint (Curve units2)
 curvature curve = Result.map Units.specialize (curvature_ curve)
 
-toPolyline :: Resolution units -> Curve2d units space -> Polyline2d (Point2d units space)
+toPolyline :: Resolution units -> Curve2d units space -> Polyline2d units space
 toPolyline resolution curve =
   Polyline2d (NonEmpty.map (evaluate curve) (samplingPoints resolution curve))
 

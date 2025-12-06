@@ -1,3 +1,5 @@
+Remove Vertex3d from Stl module?
+
 Use CBOR for FFI calls from target languages
 -> have single calling function:
    void* opensolid_invoke(

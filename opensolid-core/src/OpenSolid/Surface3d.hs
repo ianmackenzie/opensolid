@@ -182,7 +182,7 @@ toMesh accuracy surface = do
   let edgeSet = Set2d.fromNonEmpty boundaryEdges
   let domainBounds = Region2d.bounds surface.domain
   let steinerPoints = generateSteinerPoints accuracy domainBounds edgeSet fuu fuv fvv []
-  let boundaryVertexLoops = NonEmpty.map (.vertices) boundaryPolygons
+  let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
   let uvMesh = CDT.unsafe boundaryVertexLoops steinerPoints
   Mesh.map (SurfaceFunction3d.evaluate surface.function) uvMesh
 
@@ -193,7 +193,7 @@ toPolygon ::
   VectorSurfaceFunction3d Meters space ->
   VectorSurfaceFunction3d Meters space ->
   NonEmpty (Curve2d Unitless UvSpace) ->
-  Polygon2d UvPoint
+  Polygon2d Unitless UvSpace
 toPolygon accuracy f fuu fuv fvv loop =
   Polygon2d (NonEmpty.combine (boundaryPoints accuracy f fuu fuv fvv) loop)
 
@@ -243,7 +243,7 @@ linearizationPredicate accuracy fuu fuv fvv curve2d secondDerivative3d subdomain
 generateSteinerPoints ::
   Length ->
   UvBounds ->
-  Set2d (LineSegment2d UvPoint) Unitless UvSpace ->
+  Set2d (LineSegment2d Unitless UvSpace) Unitless UvSpace ->
   VectorSurfaceFunction3d Meters space ->
   VectorSurfaceFunction3d Meters space ->
   VectorSurfaceFunction3d Meters space ->
@@ -271,7 +271,10 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
         then Point2d (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
         else recurse
 
-includeSubdomain :: UvBounds -> Set2d (LineSegment2d UvPoint) Unitless UvSpace -> Fuzzy Bool
+includeSubdomain ::
+  UvBounds ->
+  Set2d (LineSegment2d Unitless UvSpace) Unitless UvSpace ->
+  Fuzzy Bool
 includeSubdomain subdomain edgeSet = Tolerance.using Quantity.zero $
   case edgeSet of
     Set2d.Node nodeBounds leftChild rightChild

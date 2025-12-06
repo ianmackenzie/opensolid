@@ -713,7 +713,7 @@ bounds2d =
     [ Class.constructor2 "X Coordinate" "Y Coordinate" Bounds2d.Bounds2d $(docs 'Bounds2d.Bounds2d)
     , Class.factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
-    , Class.factory1 "Hull" "Points" (Bounds2d.hullN @Point2D) $(docs 'Bounds2d.hullN)
+    , Class.factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
     , Class.factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , Class.property "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , Class.property "X Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
@@ -729,7 +729,7 @@ uvBounds =
     [ Class.constructor2 "U Coordinate" "V Coordinate" Bounds2d.Bounds2d "Construct a bounding box from its U and V coordinate bounds."
     , Class.factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
     , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
-    , Class.factory1 "Hull" "Points" (Bounds2d.hullN @UvPoint) $(docs 'Bounds2d.hullN)
+    , Class.factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
     , Class.factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , Class.property "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , Class.property "U Coordinate" Bounds2d.xCoordinate "Get the U coordinate bounds of a bounding box."
@@ -1454,7 +1454,7 @@ region2d =
     , Class.property "Outer Loop" Region2d.outerLoop region2dOuterLoopDocs
     , Class.property "Inner Loops" Region2d.innerLoops region2dInnerLoopsDocs
     , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
-    , Class.factoryM1R "Polygon" "Points" (Region2d.polygon @Point2D) $(docs 'Region2d.polygon)
+    , Class.factoryM1R "Polygon" "Points" Region2d.polygon $(docs 'Region2d.polygon)
     , Class.factoryM2R "Hexagon" "Center Point" "Height" Region2d.hexagon $(docs 'Region2d.hexagon)
     , Class.factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.inscribedPolygon $(docs 'Region2d.inscribedPolygon)
     , Class.factoryM3R "Circumscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.circumscribedPolygon $(docs 'Region2d.circumscribedPolygon)

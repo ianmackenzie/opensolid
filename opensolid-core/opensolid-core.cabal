@@ -239,7 +239,6 @@ library
     OpenSolid.VectorSurface3d
     OpenSolid.VectorSurfaceFunction2d
     OpenSolid.VectorSurfaceFunction3d
-    OpenSolid.Vertex2d
     OpenSolid.Vertex3d
     OpenSolid.Volume
     OpenSolid.World3d

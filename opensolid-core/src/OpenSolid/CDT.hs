@@ -13,18 +13,16 @@ import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
-import OpenSolid.Vertex2d (Vertex2d, pattern Vertex2d)
 import System.IO.Unsafe qualified
 
 unsafe ::
-  Vertex2d vertex units space =>
-  NonEmpty (NonEmpty vertex) ->
-  List vertex ->
-  Mesh vertex
+  NonEmpty (NonEmpty (Point2d units space)) ->
+  List (Point2d units space) ->
+  Mesh (Point2d units space)
 unsafe boundaryLoops steinerVertices = do
   let boundaryVertices = NonEmpty.concat boundaryLoops
   let inputVertices = NonEmpty.extend boundaryVertices steinerVertices
-  let prependCoordinates (Vertex2d (Point2d x y)) accumulated = x : y : accumulated
+  let prependCoordinates (Point2d x y) accumulated = x : y : accumulated
   let inputPointCoordinates = NonEmpty.foldr prependCoordinates [] inputVertices
   let inputEdgeIndices = collectEdgeIndices (NonEmpty.toList boundaryLoops) 0 []
   let numHoles = NonEmpty.length boundaryLoops - 1

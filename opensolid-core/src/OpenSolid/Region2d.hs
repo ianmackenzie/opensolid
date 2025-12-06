@@ -79,7 +79,6 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.Vertex2d (Vertex2d)
 
 type role Region2d nominal nominal
 
@@ -241,16 +240,16 @@ The last vertex will be connected back to the first vertex automatically if need
 (you do not have to close the polygon manually, although it will still work if you do).
 -}
 polygon ::
-  (Vertex2d vertex units space, Tolerance units) =>
-  List vertex ->
+  Tolerance units =>
+  List (Point2d units space) ->
   Result BoundedBy.Error (Region2d units space)
 polygon vertexList = case vertexList of
   [] -> Error BoundedBy.EmptyRegion
   NonEmpty vertices -> do
     let closedLoop = NonEmpty.push (NonEmpty.last vertices) vertices
     let segments = NonEmpty.successive LineSegment2d closedLoop
-    let nonZeroLengthSegments = List.filter (\segment -> segment.length != Quantity.zero) segments
-    let toCurve segment = Curve2d.line segment.startPoint segment.endPoint
+    let nonZeroLengthSegments = List.filter (\(LineSegment2d p1 p2) -> p1 != p2) segments
+    let toCurve (LineSegment2d p1 p2) = Curve2d.line p1 p2
     boundedBy (List.map toCurve nonZeroLengthSegments)
 
 {-| Fillet a region at the given corner points, with the given radius.
@@ -665,7 +664,7 @@ toVertexLoop ::
 toVertexLoop resolution loop = do
   let trailingVertices curve = do
         let polyline = Curve2d.toPolyline resolution curve
-        NonEmpty.rest polyline.vertices
+        NonEmpty.rest (Polyline2d.vertices polyline)
   let allVertices = List.combine trailingVertices (NonEmpty.toList loop)
   case allVertices of
     NonEmpty vertices -> vertices

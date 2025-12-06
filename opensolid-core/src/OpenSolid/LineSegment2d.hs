@@ -2,10 +2,9 @@
 
 module OpenSolid.LineSegment2d
   ( LineSegment2d (LineSegment2d)
-  , startVertex
-  , endVertex
   , startPoint
   , endPoint
+  , endpoints
   , length
   , length#
   , bounds
@@ -14,100 +13,73 @@ module OpenSolid.LineSegment2d
   )
 where
 
-import GHC.Records (HasField (getField))
 import OpenSolid.Bounded2d (Bounded2d)
 import OpenSolid.Bounded2d qualified as Bounded2d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Unboxed.Math
-import OpenSolid.Vertex2d (Vertex2d)
-import OpenSolid.Vertex2d qualified as Vertex2d
 
-data LineSegment2d vertex = LineSegment2d vertex vertex
+-- | A line segment in 2D, with a start point and end point.
+data LineSegment2d units space
+  = -- | Construct a line segment from its start and end points.
+    LineSegment2d
+    { startPoint :: Point2d units space
+    , endPoint :: Point2d units space
+    }
 
-instance HasField "startVertex" (LineSegment2d vertex) vertex where
-  getField = startVertex
+instance FFI (LineSegment2d Meters FFI.Space) where
+  representation = FFI.classRepresentation "LineSegment2d"
 
-instance HasField "endVertex" (LineSegment2d vertex) vertex where
-  getField = endVertex
-
-instance
-  Vertex2d vertex units space =>
-  HasField "startPoint" (LineSegment2d vertex) (Point2d units space)
-  where
-  getField = startPoint
-
-instance
-  Vertex2d vertex units space =>
-  HasField "endPoint" (LineSegment2d vertex) (Point2d units space)
-  where
-  getField = endPoint
-
-instance
-  Vertex2d vertex units space =>
-  HasField "length" (LineSegment2d vertex) (Quantity units)
-  where
-  getField = length
-
-instance
-  Vertex2d vertex units space =>
-  HasField "bounds" (LineSegment2d vertex) (Bounds2d units space)
-  where
-  getField = bounds
-
-instance
-  Vertex2d vertex units space =>
-  Bounded2d (LineSegment2d vertex) units space
-  where
+instance Bounded2d (LineSegment2d units space) units space where
   bounds = bounds
 
-{-# INLINE startVertex #-}
-startVertex :: LineSegment2d vertex -> vertex
-startVertex (LineSegment2d v1 _) = v1
-
-{-# INLINE endVertex #-}
-endVertex :: LineSegment2d vertex -> vertex
-endVertex (LineSegment2d _ v2) = v2
-
+-- | Get the start point of a line segment.
 {-# INLINE startPoint #-}
-startPoint :: Vertex2d vertex units space => LineSegment2d vertex -> Point2d units space
-startPoint (LineSegment2d v1 _) = Vertex2d.position v1
+startPoint :: LineSegment2d units space -> Point2d units space
+startPoint = (.startPoint)
 
+-- | Get the end point of a line segment.
 {-# INLINE endPoint #-}
-endPoint :: Vertex2d vertex units space => LineSegment2d vertex -> Point2d units space
-endPoint (LineSegment2d _ v2) = Vertex2d.position v2
+endPoint :: LineSegment2d units space -> Point2d units space
+endPoint = (.endPoint)
 
-length :: Vertex2d vertex units space => LineSegment2d vertex -> Quantity units
+-- | Get the start and end points of a line segment as a tuple.
+endpoints :: LineSegment2d units space -> (Point2d units space, Point2d units space)
+endpoints (LineSegment2d p1 p2) = (p1, p2)
+
+-- | Get the length of a line segment.
+length :: LineSegment2d units space -> Quantity units
 length segment = Quantity# (length# segment)
 
 {-# INLINE length# #-}
-length# :: Vertex2d vertex units space => LineSegment2d vertex -> Double#
-length# segment = Point2d.distanceFrom# (startPoint segment) (endPoint segment)
+length# :: LineSegment2d units space -> Double#
+length# (LineSegment2d p1 p2) = Point2d.distanceFrom# p1 p2
 
-bounds :: Vertex2d vertex units space => LineSegment2d vertex -> Bounds2d units space
-bounds segment = Bounds2d.hull2 (startPoint segment) (endPoint segment)
+bounds :: LineSegment2d units space -> Bounds2d units space
+bounds (LineSegment2d p1 p2) = Bounds2d.hull2 p1 p2
 
-distanceTo ::
-  Vertex2d vertex units space =>
-  Point2d units space ->
-  LineSegment2d vertex ->
-  Quantity units
+{-| Get the distance from a line segment to a point.
+
+This is measured from the point on the line segment closest to the given point
+(note that the closest point might be within the line segment,
+or might be one of the line segment's endpoints,
+so this is not necessarily a *perpendicular* distance).
+-}
+distanceTo :: Point2d units space -> LineSegment2d units space -> Quantity units
 distanceTo p0 segment = Quantity# (distanceTo# p0 segment)
 
 {-# INLINEABLE distanceTo# #-}
-distanceTo# ::
-  Vertex2d vertex units space =>
-  Point2d units space ->
-  LineSegment2d vertex ->
-  Double#
+distanceTo# :: Point2d units space -> LineSegment2d units space -> Double#
 distanceTo# p0 (LineSegment2d p1 p2) = do
   let !(Point2d (Quantity# x0#) (Quantity# y0#)) = p0
-  let !(Point2d (Quantity# x1#) (Quantity# y1#)) = Vertex2d.position p1
-  let !(Point2d (Quantity# x2#) (Quantity# y2#)) = Vertex2d.position p2
+  let !(Point2d (Quantity# x1#) (Quantity# y1#)) = p1
+  let !(Point2d (Quantity# x2#) (Quantity# y2#)) = p2
   let ux# = x0# -# x1#
   let uy# = y0# -# y1#
   let vx# = x2# -# x1#

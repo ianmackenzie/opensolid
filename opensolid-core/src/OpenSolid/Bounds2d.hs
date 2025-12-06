@@ -73,8 +73,6 @@ import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
-import OpenSolid.Vertex2d (Vertex2d)
-import OpenSolid.Vertex2d qualified as Vertex2d
 
 coerce :: Bounds2d units1 space1 -> Bounds2d units2 space2
 coerce (Bounds2d x y) = Bounds2d (Bounds.coerce x) (Bounds.coerce y)
@@ -189,12 +187,10 @@ hull4 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) = do
   Bounds2d (Bounds minX maxX) (Bounds minY maxY)
 
 -- | Construct a bounding box containing all vertices in the given non-empty list.
-hullN :: Vertex2d vertex units space => NonEmpty vertex -> Bounds2d units space
-hullN (v0 :| rest) = do
-  let Point2d x0 y0 = Vertex2d.position v0
+hullN :: NonEmpty (Point2d units space) -> Bounds2d units space
+hullN (Point2d x0 y0 :| rest) = do
   let go xLow xHigh yLow yHigh [] = Bounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
-      go xLow xHigh yLow yHigh (vertex : remaining) = do
-        let (x, y) = Point2d.coordinates (Vertex2d.position vertex)
+      go xLow xHigh yLow yHigh (Point2d x y : remaining) =
         go (min xLow x) (max xHigh x) (min yLow y) (max yHigh y) remaining
   go x0 x0 y0 y0 rest
 
