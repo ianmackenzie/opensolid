@@ -538,10 +538,7 @@ registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge
               let processedSurface = setHandedness matingHandedness unprocessedSurface
               registerSurfaceWithHalfEdges cornerSet halfEdgeSet updatedRegistry processedSurface
 
-setHandedness ::
-  Sign ->
-  SurfaceWithHalfEdges space ->
-  SurfaceWithHalfEdges space
+setHandedness :: Sign -> SurfaceWithHalfEdges space -> SurfaceWithHalfEdges space
 setHandedness handedness SurfaceWithHalfEdges{surfaceId, surface, halfEdgeLoops} =
   SurfaceWithHalfEdges{handedness, surfaceId, surface, halfEdgeLoops}
 
