@@ -24,7 +24,6 @@ import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3d qualified as Frame3d
@@ -51,6 +50,7 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Stl qualified as Stl
+import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d (Transform2d)
@@ -97,7 +97,7 @@ classes =
   , lengthCurve
   , areaCurve
   , angleCurve
-  , drawing2d
+  , svg
   , axis2d
   , uvAxis
   , convention3d
@@ -923,26 +923,28 @@ areaCurve =
     , Class.divByM Curve.quotient
     ]
 
-type Drawing2d = Drawing2d.Drawing2d FFI.Space
+type Svg = Svg.Svg FFI.Space
 
-drawing2d :: Class
-drawing2d =
-  Class.new @Drawing2d $(docs ''Drawing2d.Drawing2d) $
-    [ Class.member1 "To SVG" "View Box" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
-    , Class.member2 "Write SVG" "Path" "View Box" Drawing2d.writeSvg $(docs 'Drawing2d.writeSvg)
-    , Class.factory1 "Group" "Drawings" Drawing2d.group $(docs 'Drawing2d.group)
-    , Class.factory2 "Group With" "Attributes" "Drawings" Drawing2d.groupWith $(docs 'Drawing2d.groupWith)
-    , Class.factory1 "Polygon" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
-    , Class.factory2 "Polygon With" "Attributes" "Vertices" Drawing2d.polygonWith $(docs 'Drawing2d.polygonWith)
-    , Class.factory2 "Circle" "Center Point" "Diameter" Drawing2d.circle $(docs 'Drawing2d.circle)
-    , Class.factory3 "Circle With" "Attributes" "Center Point" "Diameter" Drawing2d.circleWith $(docs 'Drawing2d.circleWith)
-    , Class.factory2 "Curve" "Resolution" "Curve" Drawing2d.curve $(docs 'Drawing2d.curve)
-    , Class.factory3 "Curve With" "Attributes" "Resolution" "Curve" Drawing2d.curveWith $(docs 'Drawing2d.curveWith)
-    , Class.constant "Black Stroke" (Drawing2d.blackStroke @FFI.Space) $(docs 'Drawing2d.blackStroke)
-    , Class.static1 "Stroke Color" "Color" (Drawing2d.strokeColor @FFI.Space) $(docs 'Drawing2d.strokeColor)
-    , Class.constant "No Fill" (Drawing2d.noFill @FFI.Space) $(docs 'Drawing2d.noFill)
-    , Class.static1 "Fill Color" "Color" (Drawing2d.fillColor @FFI.Space) $(docs 'Drawing2d.fillColor)
-    , Class.nested @(Drawing2d.Attribute FFI.Space) "A drawing attribute such as fill color or stroke width." []
+svg :: Class
+svg =
+  Class.new @Svg $(docs ''Svg.Svg) $
+    [ Class.member1 "To Text" "View Box" Svg.toText $(docs 'Svg.toText)
+    , Class.member2 "Write" "Path" "View Box" Svg.write $(docs 'Svg.write)
+    , Class.factory1 "Group" "Children" Svg.group $(docs 'Svg.group)
+    , Class.factory2 "Group With" "Attributes" "Children" Svg.groupWith $(docs 'Svg.groupWith)
+    , Class.factory1 "Polyline" "Vertices" Svg.polyline $(docs 'Svg.polyline)
+    , Class.factory2 "Polyline With" "Attributes" "Polyline" Svg.polylineWith $(docs 'Svg.polylineWith)
+    , Class.factory1 "Polygon" "Polygon" Svg.polygon $(docs 'Svg.polygon)
+    , Class.factory2 "Polygon With" "Attributes" "Polygon" Svg.polygonWith $(docs 'Svg.polygonWith)
+    , Class.factory2 "Circle" "Center Point" "Diameter" Svg.circle $(docs 'Svg.circle)
+    , Class.factory3 "Circle With" "Attributes" "Center Point" "Diameter" Svg.circleWith $(docs 'Svg.circleWith)
+    , Class.factory2 "Curve" "Resolution" "Curve" Svg.curve $(docs 'Svg.curve)
+    , Class.factory3 "Curve With" "Attributes" "Resolution" "Curve" Svg.curveWith $(docs 'Svg.curveWith)
+    , Class.constant "Black Stroke" (Svg.blackStroke @FFI.Space) $(docs 'Svg.blackStroke)
+    , Class.static1 "Stroke Color" "Color" (Svg.strokeColor @FFI.Space) $(docs 'Svg.strokeColor)
+    , Class.constant "No Fill" (Svg.noFill @FFI.Space) $(docs 'Svg.noFill)
+    , Class.static1 "Fill Color" "Color" (Svg.fillColor @FFI.Space) $(docs 'Svg.fillColor)
+    , Class.nested @(Svg.Attribute FFI.Space) $(docs ''Svg.Attribute) []
     ]
 
 type Axis2d = Axis2d.Axis2d Meters FFI.Space

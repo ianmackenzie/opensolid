@@ -17,8 +17,6 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Debug.Plot qualified as Debug.Plot
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Drawing2d (Drawing2d)
-import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Expression (Expression)
@@ -37,6 +35,7 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
@@ -49,6 +48,8 @@ import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
+import OpenSolid.Svg (Svg)
+import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds qualified as UvBounds
@@ -223,37 +224,38 @@ drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
 drawZeros path zeros = do
   let uvBounds = Bounds.convert toDrawing (Bounds -0.05 1.05)
   let viewBox = Bounds2d uvBounds uvBounds
-  Drawing2d.writeSvg path viewBox $
-    Drawing2d.groupWith [Drawing2d.strokeWidth strokeWidth] $
+  Svg.write path viewBox $
+    Svg.groupWith [Svg.strokeWidth strokeWidth] $
       [ drawBounds (Bounds2d.convert toDrawing UvBounds.unitSquare)
-      , Drawing2d.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
-      , Drawing2d.combine (drawDot Color.orange) zeros.saddlePoints
+      , Svg.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
+      , Svg.combine (drawDot Color.orange) zeros.saddlePoints
       ]
 
-drawBounds :: Bounds2d Meters space -> Drawing2d space
+drawBounds :: Bounds2d Meters space -> Svg space
 drawBounds bounds = do
   let corner x y = Bounds2d.interpolate bounds x y
-  Drawing2d.polygon [corner 0 0, corner 1 0, corner 1 1, corner 0 1]
+  let vertices = NonEmpty.four (corner 0 0) (corner 1 0) (corner 1 1) (corner 0 1)
+  Svg.polygon (Polygon2d vertices)
 
-drawCrossingCurve :: Int -> Curve2d Unitless UvSpace -> Drawing2d UvSpace
+drawCrossingCurve :: Int -> Curve2d Unitless UvSpace -> Svg UvSpace
 drawCrossingCurve index curve = do
   let hue = (Number.fromInt index .*. Angle.goldenAngle) .%. Angle.twoPi
   let color = Color.hsl1 hue 0.5 0.5
-  drawUvCurve [Drawing2d.strokeColor color] curve
+  drawUvCurve [Svg.strokeColor color] curve
 
 toDrawing :: Quantity (Meters ?/? Unitless)
 toDrawing = Length.centimeters 10 ?/ 1
 
-drawUvCurve :: [Drawing2d.Attribute UvSpace] -> Curve2d Unitless UvSpace -> Drawing2d UvSpace
+drawUvCurve :: [Svg.Attribute UvSpace] -> Curve2d Unitless UvSpace -> Svg UvSpace
 drawUvCurve attributes curve = do
   let resolution = Resolution.maxError 0.0002
   let polyline = Curve2d.toPolyline resolution curve
-  Drawing2d.polylineWith attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
+  Svg.polylineWith attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
-drawDot :: Color -> UvPoint -> Drawing2d UvSpace
+drawDot :: Color -> UvPoint -> Svg UvSpace
 drawDot color point =
-  Drawing2d.circleWith
-    [Drawing2d.fillColor color]
+  Svg.circleWith
+    [Svg.fillColor color]
     (#centerPoint (Point2d.convert toDrawing point))
     (#diameter (Length.millimeters 1))
 
@@ -291,7 +293,7 @@ drawBezier ::
   Point2d Unitless space ->
   [Point2d Unitless space] ->
   Point2d Unitless space ->
-  Drawing2d space
+  Svg space
 drawBezier color startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2d.convert toDrawing startPoint
   let drawingEndPoint = Point2d.convert toDrawing endPoint
@@ -301,18 +303,18 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawSegmentBounds tBounds = drawBounds (Curve2d.evaluateBounds curve tBounds)
   let controlPointDiameter = Length.millimeters 10
   let drawControlPoint point =
-        Drawing2d.circle (#centerPoint point) (#diameter controlPointDiameter)
+        Svg.circle (#centerPoint point) (#diameter controlPointDiameter)
   let resolution = Resolution.maxError Length.millimeter
-  Drawing2d.groupWith
-    [ Drawing2d.strokeColor color
-    , Drawing2d.strokeWidth (Length.millimeters 1)
+  Svg.groupWith
+    [ Svg.strokeColor color
+    , Svg.strokeWidth (Length.millimeters 1)
     ]
-    [ Drawing2d.groupWith [Drawing2d.opacity 0.3] $
-        [ Drawing2d.polyline (Polyline2d drawingControlPoints)
-        , Drawing2d.combineWith [Drawing2d.fillColor color] drawControlPoint drawingControlPoints
-        , Drawing2d.combine drawSegmentBounds (Parameter.intervals 10)
+    [ Svg.groupWith [Svg.opacity 0.3] $
+        [ Svg.polyline (Polyline2d drawingControlPoints)
+        , Svg.combineWith [Svg.fillColor color] drawControlPoint drawingControlPoints
+        , Svg.combine drawSegmentBounds (Parameter.intervals 10)
         ]
-    , Drawing2d.curve resolution curve
+    , Svg.curve resolution curve
     ]
 
 testBezierSegment :: Tolerance Meters => IO ()
@@ -326,7 +328,7 @@ testBezierSegment = do
   let coordinateBounds = Bounds.convert toDrawing (Bounds -1 11)
   let drawingBounds = Bounds2d coordinateBounds coordinateBounds
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
-  Drawing2d.writeSvg "executables/sandbox/test-bezier-segment.svg" drawingBounds curveEntity
+  Svg.write "executables/sandbox/test-bezier-segment.svg" drawingBounds curveEntity
 
 testHermiteBezier :: IO ()
 testHermiteBezier = do
@@ -336,14 +338,14 @@ testHermiteBezier = do
   let endPoint = Point2D.centimeters 10 0
   let curve = Curve2d.hermite startPoint startDerivatives endPoint endDerivatives
   let curveAttributes =
-        [ Drawing2d.strokeColor Color.blue
-        , Drawing2d.strokeWidth (Length.millimeters 1)
+        [ Svg.strokeColor Color.blue
+        , Svg.strokeWidth (Length.millimeters 1)
         ]
   let curveResolution = Resolution.maxError (Length.millimeters 0.1)
-  let curveEntity = Drawing2d.curveWith curveAttributes curveResolution curve
+  let curveEntity = Svg.curveWith curveAttributes curveResolution curve
   let coordinateBounds = Bounds (Length.centimeters -1) (Length.centimeters 11)
   let drawingBounds = Bounds2d coordinateBounds coordinateBounds
-  Drawing2d.writeSvg "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity
+  Svg.write "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity
 
 testExplicitRandomStep :: IO ()
 testExplicitRandomStep = do
@@ -429,10 +431,10 @@ testCurveSqrt = Tolerance.using 1e-6 do
   let t = Curve.t
   let curve = Curve.sqrt (0.5 *. (1 -. Curve.cos (Angle.twoPi .*. t)))
   let curve' = Curve.derivative curve
-  Drawing2d.writeSvg
+  Svg.write
     "executables/sandbox/cos-sqrt.svg"
     (Debug.Plot.viewBox (Point2d -0.1 -4.1) (Point2d 1.1 4.1))
-    ( Drawing2d.group
+    ( Svg.group
         [ Debug.Plot.xAxis 0 1
         , Debug.Plot.yAxis 0 1
         , Debug.Plot.curve curve

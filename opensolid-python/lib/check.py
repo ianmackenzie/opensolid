@@ -3,10 +3,10 @@ from opensolid import (
     Bounds2d,
     Color,
     Curve,
-    Drawing2d,
     Length,
     LengthBounds,
     Point2d,
+    Svg,
     Tolerance,
     Vector2d,
 )
@@ -49,5 +49,5 @@ vertices = [
     Point2d.centimeters(25, 5),
     Point2d.centimeters(25, 15),
 ]
-triangle = Drawing2d.polygon(vertices)
-print(triangle.to_svg(bounds))
+triangle = Svg.polygon(vertices)
+print(triangle.to_text(bounds))

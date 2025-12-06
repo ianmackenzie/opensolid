@@ -4,7 +4,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Point2D (pattern Point2D)
@@ -13,7 +12,9 @@ import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
+import OpenSolid.Svg qualified as Svg
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Triangle2d (Triangle2d (Triangle2d))
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
@@ -41,12 +42,12 @@ main = Tolerance.using Length.nanometer do
   let triangles = Mesh.faceVertices mesh
   let drawingBounds = Bounds2d.hull2 (Point2D.centimeters -3 -3) (Point2D.centimeters 21 15)
   let drawTriangle (a, b, c) =
-        Drawing2d.polygonWith
-          [ Drawing2d.fillColor Color.lightGrey
-          , Drawing2d.strokeColor Color.lightBlue
-          , Drawing2d.strokeWidth (Length.millimeters 0.1)
-          , Drawing2d.roundStrokeJoins
+        Svg.triangleWith
+          [ Svg.fillColor Color.lightGrey
+          , Svg.strokeColor Color.lightBlue
+          , Svg.strokeWidth (Length.millimeters 0.1)
+          , Svg.roundStrokeJoins
           ]
-          [a, b, c]
-  Drawing2d.writeSvg "executables/region-triangulation/triangulated.svg" drawingBounds do
-    Drawing2d.combine drawTriangle triangles
+          (Triangle2d a b c)
+  Svg.write "executables/region-triangulation/triangulated.svg" drawingBounds do
+    Svg.combine drawTriangle triangles

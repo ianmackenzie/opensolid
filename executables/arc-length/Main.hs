@@ -4,7 +4,6 @@ import OpenSolid.Area qualified as Area
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
@@ -15,6 +14,7 @@ import OpenSolid.Point2D (Point2D, pattern Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import Prelude hiding (length)
@@ -71,16 +71,16 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer do
   let drawCurve fileName curve = do
         let pointLocations = List.map (Curve2d.evaluate curve) (Parameter.steps 30)
         let drawPoint point =
-              Drawing2d.circleWith
-                [Drawing2d.whiteFill]
+              Svg.circleWith
+                [Svg.whiteFill]
                 (#centerPoint point)
                 (#diameter (Length.millimeters 3))
         let drawingBounds = Bounds2d.hull2 Point2D.origin (Point2D.centimeters 30 15)
         let resolution = Resolution.maxError Length.micrometer
-        Drawing2d.writeSvg fileName drawingBounds $
-          Drawing2d.group
-            [ Drawing2d.curve resolution curve
-            , Drawing2d.combine drawPoint pointLocations
+        Svg.write fileName drawingBounds $
+          Svg.group
+            [ Svg.curve resolution curve
+            , Svg.combine drawPoint pointLocations
             ]
   drawCurve "executables/arc-length/cubic-spline.svg" spline
   drawCurve "executables/arc-length/parameterized-spline.svg" parameterized

@@ -1,9 +1,8 @@
-module OpenSolid.Drawing2d
-  ( Drawing2d
+module OpenSolid.Svg
+  ( Svg
   , Attribute
-  , Point
-  , toSvg
-  , writeSvg
+  , toText
+  , write
   , nothing
   , group
   , groupWith
@@ -15,6 +14,8 @@ module OpenSolid.Drawing2d
   , polylineWith
   , polygon
   , polygonWith
+  , triangle
+  , triangleWith
   , circle
   , circleWith
   , curve
@@ -54,8 +55,10 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2D (Point2D, pattern Point2D)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
+import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Polyline2d (Polyline2d)
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
@@ -63,45 +66,45 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Triangle2d (Triangle2d (Triangle2d))
 
-type Drawing2d :: Type -> Type
+-- | Some SVG drawing content such as a shape with attributes.
+data Svg space = Empty | Node Text (List (Attribute space)) (List (Svg space))
 
--- | A 2D drawing composed of shapes with attributes such as colour and stroke width.
-data Drawing2d space = Empty | Node Text (List (Attribute space)) (List (Drawing2d space))
-
+-- | An SVG attribute such as fill color or stroke width.
 data Attribute space = Attribute Text Text deriving (Show)
 
-type Point space = Point2d Meters space
-
-instance FFI (Drawing2d FFI.Space) where
-  representation = FFI.classRepresentation "Drawing2d"
+instance FFI (Svg FFI.Space) where
+  representation = FFI.classRepresentation "Svg"
 
 instance FFI (Attribute FFI.Space) where
-  representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute"
+  representation = FFI.nestedClassRepresentation "Svg" "Attribute"
 
-drawingText :: Text -> Drawing2d space -> Maybe Text
-drawingText indent drawing = case drawing of
-  Node name attributes children -> Just (nodeText indent name attributes children)
-  Empty -> Nothing
+svgText :: Text -> Svg space -> Maybe Text
+svgText _ Empty = Nothing
+svgText indent (Node name attributes children) = Just (nodeText indent name attributes children)
 
-nodeText :: Text -> Text -> List (Attribute space) -> List (Drawing2d space) -> Text
+nodeText :: Text -> Text -> List (Attribute space) -> List (Svg space) -> Text
 nodeText indent name attributes children = do
   let attributeLines = List.map (attributeText ("\n" <> indent <> "   ")) attributes
   let openingTag = indent <> "<" <> name <> Text.concat attributeLines <> ">"
-  let childLines = List.filterMap (drawingText (indent <> "  ")) children
+  let childLines = List.filterMap (svgText (indent <> "  ")) children
   let closingTag = indent <> "</" <> name <> ">"
   Text.multiline (openingTag : childLines) <> "\n" <> closingTag
 
 attributeText :: Text -> Attribute space -> Text
-attributeText indent (Attribute name value) = Text.concat [indent, name, "=\"", value, "\""]
+attributeText indent (Attribute name value) = indent <> name <> "=\"" <> value <> "\""
 
-{-| Render a drawing to SVG.
+{-| Convert an SVG drawing to text.
 
 The given bounding box defines the overall size of the drawing;
 anything outside of this will be cropped.
+
+In most cases it's more convenient to write a file directly using 'write',
+but 'toText' can be useful if you want to e.g. return the SVG text as part of an HTTP response.
 -}
-toSvg :: Bounds2d Meters space -> Drawing2d space -> Text
-toSvg viewBox drawing = do
+toText :: Bounds2d Meters space -> Svg space -> Text
+toText viewBox entity = do
   let Bounds2d xBounds yBounds = viewBox
   let Bounds x1 x2 = xBounds
   let Bounds y1 y2 = yBounds
@@ -125,118 +128,127 @@ toSvg viewBox drawing = do
         ]
   Text.multiline
     [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-    , nodeText "" "svg" attributes [drawing]
+    , nodeText "" "svg" attributes [entity]
     , "" -- Ensure file has trailing newline
     ]
 
-{-| Render SVG to a file.
+{-| Write an SVG drawing to a file.
 
 The given bounding box defines the overall size of the drawing;
 anything outside of this will be cropped.
 -}
-writeSvg :: Text -> Bounds2d Meters space -> Drawing2d space -> IO ()
-writeSvg path viewBox drawing = IO.writeUtf8 path (toSvg viewBox drawing)
+write :: Text -> Bounds2d Meters space -> Svg space -> IO ()
+write path viewBox entity = IO.writeUtf8 path (toText viewBox entity)
 
-nothing :: Drawing2d space
+{-| Don't draw anything at all.
+
+Can be useful if you want to conditionally render some content.
+-}
+nothing :: Svg space
 nothing = Empty
 
--- | Group several drawings into a single drawing, applying the given attributes to the group.
-groupWith :: List (Attribute space) -> List (Drawing2d space) -> Drawing2d space
+-- | Group several SVG entities into a single entity, applying the given attributes to the group.
+groupWith :: List (Attribute space) -> List (Svg space) -> Svg space
 groupWith = Node "g"
 
--- | Group several drawings into a single drawing.
-group :: List (Drawing2d space) -> Drawing2d space
+-- | Group several SVG entities into a single entity.
+group :: List (Svg space) -> Svg space
 group = groupWith []
 
-combine :: Foldable list => (a -> Drawing2d space) -> list a -> Drawing2d space
+combine :: Foldable list => (a -> Svg space) -> list a -> Svg space
 combine = combineWith []
 
 combineWith ::
   Foldable list =>
   List (Attribute space) ->
-  (a -> Drawing2d space) ->
+  (a -> Svg space) ->
   list a ->
-  Drawing2d space
+  Svg space
 combineWith attributes function list =
   groupWith attributes (List.map function (Data.Foldable.toList list))
 
-lineWith :: List (Attribute space) -> Point space -> Point space -> Drawing2d space
-lineWith attributes (Point2d x1 y1) (Point2d x2 y2) = do
+-- | Draw a line with the given attributes.
+lineWith :: List (Attribute space) -> Point2D space -> Point2D space -> Svg space
+lineWith attributes (Point2D x1 y1) (Point2D x2 y2) = do
   let x1Attribute = Attribute "x1" (lengthText x1)
   let y1Attribute = Attribute "y1" (lengthText (negative y1))
   let x2Attribute = Attribute "x2" (lengthText x2)
   let y2Attribute = Attribute "y2" (lengthText (negative y2))
   Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
 
-line :: Point space -> Point space -> Drawing2d space
+-- | Draw a line.
+line :: Point2D space -> Point2D space -> Svg space
 line = lineWith []
 
-polylineWith ::
-  List (Attribute space) ->
-  Polyline2d Meters space ->
-  Drawing2d space
+-- | Draw a polyline with the given attributes and vertices.
+polylineWith :: List (Attribute space) -> Polyline2d Meters space -> Svg space
 polylineWith attributes givenPolyline = do
-  let vertices = NonEmpty.toList (Polyline2d.vertices givenPolyline)
-  Node "polyline" (noFill : pointsAttribute vertices : attributes) []
+  let points = NonEmpty.toList (Polyline2d.vertices givenPolyline)
+  Node "polyline" (noFill : pointsAttribute points : attributes) []
 
-polyline :: Polyline2d Meters space -> Drawing2d space
+-- | Draw a polyline with the given vertices.
+polyline :: Polyline2d Meters space -> Svg space
 polyline = polylineWith []
 
--- | Create a polygon with the given attributes and vertices.
-polygonWith :: List (Attribute space) -> List (Point space) -> Drawing2d space
-polygonWith attributes vertices =
-  Node "polygon" (pointsAttribute vertices : attributes) []
+-- | Draw a polygon with the given attributes and vertices.
+polygonWith :: List (Attribute space) -> Polygon2d Meters space -> Svg space
+polygonWith attributes givenPolygon = do
+  let points = NonEmpty.toList (Polygon2d.vertices givenPolygon)
+  Node "polygon" (pointsAttribute points : attributes) []
 
--- | Create a polygon with the given vertices.
-polygon :: List (Point space) -> Drawing2d space
+-- | Draw a polygon with the given vertices.
+polygon :: Polygon2d Meters space -> Svg space
 polygon = polygonWith []
 
--- | Create a circle with the given attributes, center point and diameter.
+triangleWith :: List (Attribute space) -> Triangle2d Meters space -> Svg space
+triangleWith attributes (Triangle2d p1 p2 p3) = do
+  let vertices = NonEmpty.three p1 p2 p3
+  polygonWith attributes (Polygon2d vertices)
+
+triangle :: Triangle2d Meters space -> Svg space
+triangle = triangleWith []
+
+-- | Draw a circle with the given attributes, center point and diameter.
 circleWith ::
   List (Attribute space) ->
-  "centerPoint" ::: Point space ->
+  "centerPoint" ::: Point2D space ->
   "diameter" ::: Length ->
-  Drawing2d space
+  Svg space
 circleWith attributes (Named centerPoint) (Named diameter) = do
-  let Point2d cx cy = centerPoint
+  let Point2D cx cy = centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText (negative cy))
   let rAttribute = Attribute "r" (lengthText (0.5 *. diameter))
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
--- | Create a circle with the given center point and diameter.
-circle :: "centerPoint" ::: Point space -> "diameter" ::: Length -> Drawing2d space
+-- | Draw a circle with the given center point and diameter.
+circle :: "centerPoint" ::: Point2D space -> "diameter" ::: Length -> Svg space
 circle = circleWith []
 
 -- | Draw a curve with the given attributes and resolution.
-curveWith ::
-  List (Attribute space) ->
-  Resolution Meters ->
-  Curve2d Meters space ->
-  Drawing2d space
-curveWith attributes resolution givenCurve = do
-  let approximation = Curve2d.toPolyline resolution givenCurve
-  polylineWith attributes approximation
+curveWith :: List (Attribute space) -> Resolution Meters -> Curve2d Meters space -> Svg space
+curveWith attributes resolution givenCurve =
+  polylineWith attributes (Curve2d.toPolyline resolution givenCurve)
 
 -- | Draw a curve with the given resolution.
-curve :: Resolution Meters -> Curve2d Meters space -> Drawing2d space
+curve :: Resolution Meters -> Curve2d Meters space -> Svg space
 curve = curveWith []
 
 arrow ::
-  "start" ::: Point2d Meters space ->
-  "end" ::: Point2d Meters space ->
+  "start" ::: Point2D space ->
+  "end" ::: Point2D space ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
-  Drawing2d space
+  Svg space
 arrow = arrowWith []
 
 arrowWith ::
   List (Attribute space) ->
-  "start" ::: Point2d Meters space ->
-  "end" ::: Point2d Meters space ->
+  "start" ::: Point2D space ->
+  "end" ::: Point2D space ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
-  Drawing2d space
+  Svg space
 arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWidth) =
   case Tolerance.using Quantity.zero (Direction2d.from start end) of
     Error Direction2d.PointsAreCoincident -> nothing
@@ -246,18 +258,18 @@ arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWid
       let frame = Frame2d.fromXAxis axis
       let stemLength = length .-. headLength
       let stemEndPoint = Point2d.along axis stemLength
-      let leftPoint = Point2d.placeIn frame (Point2d stemLength (0.5 *. headWidth))
+      let leftPoint = Point2d.placeIn frame (Point2D stemLength (0.5 *. headWidth))
       let rightPoint = Point2d.mirrorAcross axis leftPoint
       let stem = line start stemEndPoint
-      let tip = polygon [leftPoint, rightPoint, end]
+      let tip = triangle (Triangle2d leftPoint rightPoint end)
       groupWith attributes [stem, tip]
 
-pointsAttribute :: List (Point space) -> Attribute space
+pointsAttribute :: List (Point2D space) -> Attribute space
 pointsAttribute givenPoints =
   Attribute "points" (Text.join " " (List.map coordinatesText givenPoints))
 
-coordinatesText :: Point space -> Text
-coordinatesText (Point2d x y) = lengthText x <> "," <> lengthText (negative y)
+coordinatesText :: Point2D space -> Text
+coordinatesText (Point2D x y) = lengthText x <> "," <> lengthText (negative y)
 
 lengthText :: Length -> Text
 lengthText givenLength = Text.number (Length.inMillimeters givenLength)

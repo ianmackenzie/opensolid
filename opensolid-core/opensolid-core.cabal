@@ -138,7 +138,6 @@ library
     OpenSolid.DivisionByZero
     OpenSolid.Domain1d
     OpenSolid.Domain2d
-    OpenSolid.Drawing2d
     OpenSolid.Duration
     OpenSolid.Estimate
     OpenSolid.Expression
@@ -215,6 +214,7 @@ library
     OpenSolid.SurfaceFunction2d
     OpenSolid.SurfaceFunction3d
     OpenSolid.SurfaceParameter
+    OpenSolid.Svg
     OpenSolid.Text
     OpenSolid.Timer
     OpenSolid.Todo

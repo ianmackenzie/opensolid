@@ -7,7 +7,6 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.MedialAxis qualified as Curve2d.MedialAxis
-import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
@@ -18,6 +17,7 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
+import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
@@ -68,20 +68,20 @@ testCurveMedialAxis label curve1 curve2 = do
               let t = Curve.evaluate parameterization u
               let centerPoint = Curve2d.evaluate segment.curve t
               let diameter = 2 *. Quantity.abs (Curve.evaluate segment.radius t)
-              Drawing2d.circleWith
-                [Drawing2d.strokeColor Color.gray, Drawing2d.strokeWidth (Length.millimeters 0.2)]
+              Svg.circleWith
+                [Svg.strokeColor Color.gray, Svg.strokeWidth (Length.millimeters 0.2)]
                 (#centerPoint centerPoint)
                 (#diameter diameter)
-        Drawing2d.combine drawTangentCircle (Parameter.steps 50)
+        Svg.combine drawTangentCircle (Parameter.steps 50)
   let resolution = Resolution.maxError (Length.millimeters 0.1)
-  let drawCurve = Drawing2d.curve resolution
+  let drawCurve = Svg.curve resolution
   let drawSegment segment = drawCurve segment.curve
   let drawingBounds =
         Bounds2d.hull2 (Point2D.centimeters -10 -10) (Point2D.centimeters 30 20)
-  Drawing2d.writeSvg ("executables/medial-axis/" <> label <> ".svg") drawingBounds $
-    Drawing2d.group
-      [ Drawing2d.combine drawTangentCircles segments
-      , Drawing2d.combine drawSegment segments
+  Svg.write ("executables/medial-axis/" <> label <> ".svg") drawingBounds $
+    Svg.group
+      [ Svg.combine drawTangentCircles segments
+      , Svg.combine drawSegment segments
       , drawCurve curve1
       , drawCurve curve2
       ]
