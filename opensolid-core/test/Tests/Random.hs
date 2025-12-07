@@ -58,7 +58,7 @@ import OpenSolid.Orientation3d (Orientation3d)
 import OpenSolid.Plane3d (Plane3d (Plane3d))
 import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
-import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2D (Point2D, pattern Point2D)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -84,8 +84,8 @@ length = Quantity.random (Length.meters -10) (Length.meters 10)
 lengthBounds :: Generator (Bounds Meters)
 lengthBounds = Bounds.random length
 
-point2d :: Generator (Point2d Meters space)
-point2d = Random.map2 Point2d length length
+point2d :: Generator (Point2D space)
+point2d = Random.map2 Point2D length length
 
 point3d :: Generator (Point3d space)
 point3d = Random.map3 Point3d length length length

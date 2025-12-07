@@ -22,15 +22,14 @@ import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
@@ -196,7 +195,7 @@ solveUnique localBounds fBounds f fu fv globalBounds =
       let Bounds2d uBounds vBounds = localBounds
       let uMid = Bounds.midpoint uBounds
       let vMid = Bounds.midpoint vBounds
-      let pMid = Point2d uMid vMid
+      let pMid = UvPoint uMid vMid
       let fMid = f pMid
       -- First, try applying Newton-Raphson starting at the center point of localBounds
       -- to see if that converges to a zero
@@ -273,15 +272,15 @@ boundedStep uvBounds p1 p2 =
       -- Stepped point is outside the given bounds,
       -- pull it back in along the step direction
       let Bounds2d uBounds vBounds = uvBounds
-      let Point2d u1 v1 = p1
-      let Point2d u2 v2 = p2
+      let UvPoint u1 v1 = p1
+      let UvPoint u2 v2 = p2
       let clampedU = Quantity.clampTo uBounds u2
       let clampedV = Quantity.clampTo vBounds v2
       let uScale = if u1 == u2 then 1 else (clampedU .-. u1) ./. (u2 .-. u1)
       let vScale = if v1 == v2 then 1 else (clampedV .-. v1) ./. (v2 .-. v1)
       let scale = min uScale vScale
-      let Point2d u v = Point2d.interpolateFrom p1 p2 scale
+      let UvPoint u v = UvPoint.interpolateFrom p1 p2 scale
       -- Perform a final clamping step
       -- in case numerical roundoff during interpolation
       -- left the point *slightly* outside uvBounds
-      Point2d (Quantity.clampTo uBounds u) (Quantity.clampTo vBounds v)
+      UvPoint (Quantity.clampTo uBounds u) (Quantity.clampTo vBounds v)

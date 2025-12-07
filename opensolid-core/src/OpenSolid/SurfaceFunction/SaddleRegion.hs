@@ -31,7 +31,7 @@ import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))
 import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 
@@ -135,8 +135,8 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2d.originPoint frame
   let Subproblem{f, dvdu, dudv, uvBounds} = subproblem
   let Bounds2d uBounds vBounds = uvBounds
-  let Point2d uP vP = saddlePoint
-  let Point2d uC vC = joiningPoint joiningCurve
+  let UvPoint uP vP = saddlePoint
+  let UvPoint uC vC = joiningPoint joiningCurve
   let Direction2d du dv = outgoingDirection
   if Quantity.abs du >= Quantity.abs dv
     then do

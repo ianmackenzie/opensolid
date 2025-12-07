@@ -45,13 +45,15 @@ import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D (Point2D, pattern Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude hiding (compose, (>>))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Vector2D (Vector2D, pattern Vector2D)
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 
@@ -321,20 +323,20 @@ direction2d =
               requiredField "x" Vector2d.xComponent number
               requiredField "y" Vector2d.yComponent number
 
-vector2d :: Json.Format (Vector2d Meters space)
+vector2d :: Json.Format (Vector2D space)
 vector2d =
   title "Vector2d" $
     description "A displacement vector in 2D space, given by its X and Y components" $
-      examples [Vector2d.zero] $
-        object Vector2d OpenSolid.Json.Format.do
-          requiredField "x" Vector2d.xComponent length
-          requiredField "y" Vector2d.yComponent length
+      examples [Vector2D.zero] $
+        object Vector2D OpenSolid.Json.Format.do
+          requiredField "x" Vector2D.xComponent length
+          requiredField "y" Vector2D.yComponent length
 
-point2d :: Json.Format (Point2d Meters space)
+point2d :: Json.Format (Point2D space)
 point2d =
   title "Point2d" $
     description "A position in 2D space, given by its X and Y coordinates" $
-      examples [Point2d.origin] $
-        object Point2d OpenSolid.Json.Format.do
-          requiredField "x" Point2d.xCoordinate length
-          requiredField "y" Point2d.yCoordinate length
+      examples [Point2D.origin] $
+        object Point2D OpenSolid.Json.Format.do
+          requiredField "x" Point2D.xCoordinate length
+          requiredField "y" Point2D.yCoordinate length

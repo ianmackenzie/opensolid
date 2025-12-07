@@ -5,7 +5,6 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -14,7 +13,7 @@ import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.World3d qualified as World3d
 import Test (Expectation, Test)
@@ -122,7 +121,7 @@ firstDerivativeIsConsistent surfaceFunction p0 parameter = do
       & Test.output "analyticalDerivative" analyticalDerivative
 
 samplingPoints :: UvPoint -> SurfaceParameter -> (UvPoint, UvPoint)
-samplingPoints (Point2d u0 v0) parameter =
+samplingPoints (UvPoint u0 v0) parameter =
   case parameter of
-    U -> (Point2d (u0 .-. samplingRadius) v0, Point2d (u0 .+. samplingRadius) v0)
-    V -> (Point2d u0 (v0 .-. samplingRadius), Point2d u0 (v0 .+. samplingRadius))
+    U -> (UvPoint (u0 .-. samplingRadius) v0, UvPoint (u0 .+. samplingRadius) v0)
+    V -> (UvPoint u0 (v0 .-. samplingRadius), UvPoint u0 (v0 .+. samplingRadius))

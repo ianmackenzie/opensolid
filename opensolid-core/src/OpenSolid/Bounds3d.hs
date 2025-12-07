@@ -46,7 +46,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2D (pattern Point2D)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -226,7 +226,7 @@ projectInto plane (Bounds3d pR pF pU) = do
   let rR = 0.5 *. Bounds.width pR
   let rF = 0.5 *. Bounds.width pF
   let rU = 0.5 *. Bounds.width pU
-  let Point2d cX cY = Point3d.projectInto plane (Point3d cR cF cU)
+  let Point2D cX cY = Point3d.projectInto plane (Point3d cR cF cU)
   let rX = rR .*. Number.abs iR .+. rF .*. Number.abs iF .+. rU .*. Number.abs iU
   let rY = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
   Bounds2d

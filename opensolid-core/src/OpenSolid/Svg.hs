@@ -55,7 +55,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D (Point2D, pattern Point2D)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Polyline2d (Polyline2d)
@@ -247,13 +247,13 @@ arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWid
   case Tolerance.using Quantity.zero (Direction2d.from start end) of
     Error Direction2d.PointsAreCoincident -> nothing
     Ok direction -> do
-      let length = Point2d.distanceFrom start end
+      let length = Point2D.distanceFrom start end
       let axis = Axis2d start direction
       let frame = Frame2d.fromXAxis axis
       let stemLength = length .-. headLength
-      let stemEndPoint = Point2d.along axis stemLength
-      let leftPoint = Point2d.placeIn frame (Point2D stemLength (0.5 *. headWidth))
-      let rightPoint = Point2d.mirrorAcross axis leftPoint
+      let stemEndPoint = Point2D.along axis stemLength
+      let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 *. headWidth))
+      let rightPoint = Point2D.mirrorAcross axis leftPoint
       let stem = line start stemEndPoint
       let tip = triangle (Triangle2d leftPoint rightPoint end)
       groupWith attributes [stem, tip]

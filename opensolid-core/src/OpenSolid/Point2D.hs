@@ -42,11 +42,10 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
-import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Plane3d, Point3d)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Vector2d (Vector2d)
 

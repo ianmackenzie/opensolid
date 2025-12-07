@@ -20,9 +20,8 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 
 data Mesh vertex = Mesh
   { vertices :: Array vertex
@@ -87,7 +86,7 @@ grid uSteps vSteps function =
 
 toIndexedFunction :: Int -> Int -> (UvPoint -> vertex) -> Int -> Int -> vertex
 toIndexedFunction uSteps vSteps function uIndex vIndex =
-  function (Point2d (Int.ratio uIndex uSteps) (Int.ratio vIndex vSteps))
+  function (UvPoint (Int.ratio uIndex uSteps) (Int.ratio vIndex vSteps))
 
 indexedGrid :: Int -> Int -> (Int -> Int -> vertex) -> Mesh vertex
 indexedGrid uSteps vSteps function =

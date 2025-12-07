@@ -14,7 +14,7 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -60,7 +60,7 @@ simpleSurface2d = do
   let x = SurfaceFunction.squared u .- 2
   let y = v .- 1
   let surface = VectorSurfaceFunction2d.xy x y
-  surface2d "Simple 2D surface" surface (Point2d 1 0) (Point2d (Number.sqrt 2) 1)
+  surface2d "Simple 2D surface" surface (UvPoint 1 0) (UvPoint (Number.sqrt 2) 1)
 
 expectedConvergence :: Expectation
 expectedConvergence = Test.fail "Expected Newton-Raphson to converge but it did not"

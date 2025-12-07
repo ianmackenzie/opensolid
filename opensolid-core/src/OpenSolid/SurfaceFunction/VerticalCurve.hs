@@ -22,7 +22,6 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -31,6 +30,7 @@ import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
 import OpenSolid.SurfaceFunction.ImplicitCurveBounds qualified as ImplicitCurveBounds
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
 import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data MonotonicSpace
@@ -103,7 +103,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
   let evaluate tValue = do
         let vValue = Number.interpolateFrom vStart vEnd tValue
         let uValue = solveForU vValue
-        Point2d uValue vValue
+        UvPoint uValue vValue
   let evaluateBounds tBounds = do
         let Bounds t1 t2 = tBounds
         let v1 = Number.interpolateFrom vStart vEnd t1
@@ -113,8 +113,8 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
         case monotonicity of
           Monotonic -> Bounds2d (Bounds u1 u2) (Bounds v1 v2)
           MonotonicIn frame -> do
-            let p1 = Point2d u1 v1
-            let p2 = Point2d u2 v2
+            let p1 = UvPoint u1 v1
+            let p2 = UvPoint u2 v2
             Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
               & Bounds2d.placeIn frame
           NotMonotonic -> do
@@ -131,7 +131,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
 
 clamp :: Number -> Bounds Unitless -> Axis2d Unitless UvSpace -> Bounds Unitless
 clamp v (Bounds uLow uHigh) axis = do
-  let Point2d u0 v0 = Axis2d.originPoint axis
+  let UvPoint u0 v0 = Axis2d.originPoint axis
   let Direction2d du dv = Axis2d.direction axis
   let u = u0 .+. (v .-. v0) .*. du ./. dv
   if

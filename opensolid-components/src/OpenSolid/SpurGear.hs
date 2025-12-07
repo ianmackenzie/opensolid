@@ -16,7 +16,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -83,7 +83,7 @@ profile gear = do
         | rd > rb = Vector2d.normalize (VectorCurve2d.startValue involuteLeftDerivative)
         | otherwise = Vector2d.polar 1 (Angle.halfPi .+. alpha)
   let leftEndTangent = Vector2d.normalize (VectorCurve2d.endValue involuteLeftDerivative)
-  let leftDerivativeMagnitude = Point2d.distanceFrom leftStart leftEnd
+  let leftDerivativeMagnitude = Point2D.distanceFrom leftStart leftEnd
   let leftApproximation =
         Curve2d.hermite
           leftStart
@@ -94,12 +94,12 @@ profile gear = do
   let tip = Curve2d.line leftApproximation.endPoint rightApproximation.endPoint
   let angularSpacing = Angle.twoPi ./. Number.fromInt n
   let nextToothStart =
-        Point2d.rotateAround Point2d.origin angularSpacing rightApproximation.startPoint
+        Point2D.rotateAround Point2D.origin angularSpacing rightApproximation.startPoint
   let connector
         | rd > rb = Curve2d.line leftStart nextToothStart
         | otherwise = Curve2d.arc leftStart nextToothStart (negative Angle.pi)
   let toothProfileCurves = [leftApproximation, rightApproximation, tip, connector]
   let rotatedProfileCurves i = do
         let angle = Number.fromInt i .*. angularSpacing
-        List.map (Curve2d.rotateAround Point2d.origin angle) toothProfileCurves
+        List.map (Curve2d.rotateAround Point2D.origin angle) toothProfileCurves
   List.combine rotatedProfileCurves [0 .. n - 1]

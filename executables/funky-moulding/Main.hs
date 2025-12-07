@@ -6,8 +6,8 @@ import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Length qualified as Length
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D (pattern Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
@@ -22,11 +22,11 @@ main = Tolerance.using Length.nanometer do
   let width = Length.centimeters 3
   let outerRadius = innerRadius .+. width
   let thickness = Length.millimeters 10
-  let p0 = Point2d.x innerRadius
-  let p1 = Point2d.x outerRadius
-  let p2 = Point2d outerRadius thickness
-  let p3 = Point2d (innerRadius .+. thickness) width
-  let p4 = Point2d innerRadius width
+  let p0 = Point2D.x innerRadius
+  let p1 = Point2D.x outerRadius
+  let p2 = Point2D outerRadius thickness
+  let p3 = Point2D (innerRadius .+. thickness) width
+  let p4 = Point2D innerRadius width
   profile <- Result.orFail do
     Region2d.boundedBy
       [ Curve2d.line p0 p1

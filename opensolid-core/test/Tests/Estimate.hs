@@ -16,7 +16,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
@@ -118,7 +118,7 @@ area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
   let curve =
         Curve2d.polarArc
-          (#centerPoint Point2d.origin)
+          (#centerPoint Point2D.origin)
           (#radius Length.meter)
           (#startAngle Angle.pi)
           (#endAngle Angle.zero)

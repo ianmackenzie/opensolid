@@ -8,12 +8,12 @@ where
 
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1d qualified as Solve1d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.UvPoint (pattern UvPoint)
 
 solveForU ::
   Tolerance units =>
@@ -23,7 +23,7 @@ solveForU ::
   Number ->
   Number
 solveForU f fu uBounds vValue = do
-  let uvPoint uValue = Point2d uValue vValue
+  let uvPoint uValue = UvPoint uValue vValue
   let fValue uValue = SurfaceFunction.evaluate f (uvPoint uValue)
   let fuValue uValue = SurfaceFunction.evaluate fu (uvPoint uValue)
   case Solve1d.monotonic fValue fuValue uBounds of
@@ -38,7 +38,7 @@ solveForV ::
   Bounds Unitless ->
   Number
 solveForV f fv uValue vBounds = do
-  let uvPoint vValue = Point2d uValue vValue
+  let uvPoint vValue = UvPoint uValue vValue
   let fValue vValue = SurfaceFunction.evaluate f (uvPoint vValue)
   let fvValue vValue = SurfaceFunction.evaluate fv (uvPoint vValue)
   case Solve1d.monotonic fValue fvValue vBounds of

@@ -5,7 +5,7 @@ import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Length qualified as Length
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
@@ -21,7 +21,7 @@ main = Tolerance.using Length.nanometer do
   let length = Length.meters 4
   let arc =
         Curve2d.polarArc
-          (#centerPoint Point2d.origin)
+          (#centerPoint Point2D.origin)
           (#radius radius)
           (#startAngle (Angle.degrees -45))
           (#endAngle (Angle.degrees 225))

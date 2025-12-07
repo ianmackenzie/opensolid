@@ -3,13 +3,12 @@ module OpenSolid.SurfaceFunction.Desingularization (isZero, testPoints) where
 
 import OpenSolid.List qualified as List
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 
 {-| Generate a list of test points at a given fixed U or V value, varying the other parameter.
 
@@ -19,8 +18,8 @@ suitable for testing if some function is zero everywhere at U=0.
 (Under the hood this calls 'Parameter.samples' to generate the varying parameter values.)
 -}
 testPoints :: SurfaceParameter -> Number -> List UvPoint
-testPoints U uValue = [Point2d uValue v | v <- Parameter.samples]
-testPoints V vValue = [Point2d u vValue | u <- Parameter.samples]
+testPoints U uValue = [UvPoint uValue v | v <- Parameter.samples]
+testPoints V vValue = [UvPoint u vValue | u <- Parameter.samples]
 
 {-| Check if a given surface function is zero everywhere at a given fixed U or V value.
 

@@ -10,8 +10,8 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.PbrMaterial qualified as PbrMaterial
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D (pattern Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Resolution qualified as Resolution
@@ -27,11 +27,11 @@ main = Tolerance.using Length.nanometer do
   let height = Length.centimeters 15
   let thickness = Length.centimeters 2
   let filletRadius = Length.millimeters 5
-  let p1 = Point2d.x (0.5 *. thickness)
-  let p2 = Point2d (0.5 *. thickness) (0.5 *. height .-. thickness)
-  let p3 = Point2d (0.5 *. width) (0.5 *. height .-. thickness)
-  let p4 = Point2d (0.5 *. width) (0.5 *. height)
-  let p5 = Point2d.y (0.5 *. height)
+  let p1 = Point2D.x (0.5 *. thickness)
+  let p2 = Point2D (0.5 *. thickness) (0.5 *. height .-. thickness)
+  let p3 = Point2D (0.5 *. width) (0.5 *. height .-. thickness)
+  let p4 = Point2D (0.5 *. width) (0.5 *. height)
+  let p5 = Point2D.y (0.5 *. height)
   let fillet =
         Curve2d.cornerArc
           p2

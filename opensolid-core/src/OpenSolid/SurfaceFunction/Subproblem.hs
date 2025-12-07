@@ -23,14 +23,13 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Internal qualified as Internal
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 
 data Subproblem units = Subproblem
   { f :: SurfaceFunction units
@@ -80,51 +79,51 @@ new f dudv dvdu subdomain = do
 cornerValues :: UvBounds -> SurfaceFunction units -> CornerValues units
 cornerValues (Bounds2d (Bounds u1 u2) (Bounds v1 v2)) function =
   CornerValues
-    { bottomLeft = SurfaceFunction.evaluate function (Point2d u1 v1)
-    , bottomRight = SurfaceFunction.evaluate function (Point2d u2 v1)
-    , topLeft = SurfaceFunction.evaluate function (Point2d u1 v2)
-    , topRight = SurfaceFunction.evaluate function (Point2d u2 v2)
+    { bottomLeft = SurfaceFunction.evaluate function (UvPoint u1 v1)
+    , bottomRight = SurfaceFunction.evaluate function (UvPoint u2 v1)
+    , topLeft = SurfaceFunction.evaluate function (UvPoint u1 v2)
+    , topRight = SurfaceFunction.evaluate function (UvPoint u2 v2)
     }
 
 leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 leftEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d (Bounds u1 _) vBounds = uvBounds
-  (Point2d u1 (Internal.solveForV f f.dv u1 vBounds), Domain2d.leftEdge subdomain)
+  (UvPoint u1 (Internal.solveForV f f.dv u1 vBounds), Domain2d.leftEdge subdomain)
 
 rightEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 rightEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d (Bounds _ u2) vBounds = uvBounds
-  (Point2d u2 (Internal.solveForV f f.dv u2 vBounds), Domain2d.rightEdge subdomain)
+  (UvPoint u2 (Internal.solveForV f f.dv u2 vBounds), Domain2d.rightEdge subdomain)
 
 bottomEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d uBounds (Bounds v1 _) = uvBounds
-  (Point2d (Internal.solveForU f f.du uBounds v1) v1, Domain2d.bottomEdge subdomain)
+  (UvPoint (Internal.solveForU f f.du uBounds v1) v1, Domain2d.bottomEdge subdomain)
 
 topEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 topEdgePoint Subproblem{f, subdomain, uvBounds} = do
   let Bounds2d uBounds (Bounds _ v2) = uvBounds
-  (Point2d (Internal.solveForU f f.du uBounds v2) v2, Domain2d.topEdge subdomain)
+  (UvPoint (Internal.solveForU f f.du uBounds v2) v2, Domain2d.topEdge subdomain)
 
 bottomLeftPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomLeftPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Bounds u1 _) (Bounds v1 _) = uvBounds
-  (Point2d u1 v1, Domain2d.bottomLeftCorner subdomain)
+  (UvPoint u1 v1, Domain2d.bottomLeftCorner subdomain)
 
 bottomRightPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomRightPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Bounds _ u2) (Bounds v1 _) = uvBounds
-  (Point2d u2 v1, Domain2d.bottomRightCorner subdomain)
+  (UvPoint u2 v1, Domain2d.bottomRightCorner subdomain)
 
 topLeftPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 topLeftPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Bounds u1 _) (Bounds _ v2) = uvBounds
-  (Point2d u1 v2, Domain2d.topLeftCorner subdomain)
+  (UvPoint u1 v2, Domain2d.topLeftCorner subdomain)
 
 topRightPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 topRightPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Bounds _ u2) (Bounds _ v2) = uvBounds
-  (Point2d u2 v2, Domain2d.topRightCorner subdomain)
+  (UvPoint u2 v2, Domain2d.topRightCorner subdomain)
 
 tightBounds :: Subproblem units -> Bounds units
 tightBounds Subproblem{uvBounds, fValues, fBounds, fuBounds, fvBounds} = do

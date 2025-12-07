@@ -60,8 +60,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d (Plane3d))
 import OpenSolid.Plane3d qualified as Plane3d
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
@@ -88,7 +87,8 @@ import OpenSolid.SurfaceVertex3d (SurfaceVertex3d (SurfaceVertex3d, normal, posi
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
@@ -222,8 +222,8 @@ sphere (Named centerPoint) (Named diameter) =
     else do
       let sketchPlane = Plane3d centerPoint World3d.frontPlane.orientation
       let radius = 0.5 *. diameter
-      let p1 = Point2d.y (negative radius)
-      let p2 = Point2d.y radius
+      let p1 = Point2D.y (negative radius)
+      let p2 = Point2D.y radius
       let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
       case Region2d.boundedBy profileCurves of
         Error _ -> throw (InternalError "Semicircle profile construction should always succeed")
@@ -267,7 +267,7 @@ cylinderAlong ::
   "diameter" ::: Length ->
   Result EmptyBody (Body3d space)
 cylinderAlong axis d1 d2 (Named diameter) = do
-  case Region2d.circle (#centerPoint Point2d.origin) (#diameter diameter) of
+  case Region2d.circle (#centerPoint Point2D.origin) (#diameter diameter) of
     Error Region2d.EmptyRegion -> Error EmptyBody
     Ok profile ->
       if d1 ~= d2
@@ -742,8 +742,8 @@ edgeLinearizationPredicate
     let matingUvEnd = Curve2d.evaluate matingUvCurve matingTEnd
     let uvBounds = Bounds2d.hull2 uvStart uvEnd
     let matingUvBounds = Bounds2d.hull2 matingUvStart matingUvEnd
-    let edgeSize = Point2d.distanceFrom uvStart uvEnd
-    let matingEdgeSize = Point2d.distanceFrom matingUvStart matingUvEnd
+    let edgeSize = UvPoint.distanceFrom uvStart uvEnd
+    let matingEdgeSize = UvPoint.distanceFrom matingUvStart matingUvEnd
     let startPoint = Curve3d.evaluate curve3d tStart
     let endPoint = Curve3d.evaluate curve3d tEnd
     let edgeLength = Point3d.distanceFrom startPoint endPoint
@@ -764,7 +764,7 @@ degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
   let uvStart = Curve2d.evaluate uvCurve tStart
   let uvEnd = Curve2d.evaluate uvCurve tEnd
   let uvBounds = Bounds2d.hull2 uvStart uvEnd
-  let edgeSize = Point2d.distanceFrom uvStart uvEnd
+  let edgeSize = UvPoint.distanceFrom uvStart uvEnd
   validEdge uvBounds edgeSize surfaceSegments
 
 validEdge :: UvBounds -> Number -> Set2d UvBounds Unitless UvSpace -> Bool
@@ -848,7 +848,7 @@ leadingEdgeVerticesImpl innerEdgeVerticesById edgeId uvStartPoint =
 steinerPoint :: Set2d (LineSegment2d Unitless UvSpace) Unitless UvSpace -> UvBounds -> Maybe UvPoint
 steinerPoint boundarySegmentSet uvBounds = do
   let Bounds2d uBounds vBounds = uvBounds
-  let uvPoint = Point2d (Bounds.midpoint uBounds) (Bounds.midpoint vBounds)
+  let uvPoint = UvPoint (Bounds.midpoint uBounds) (Bounds.midpoint vBounds)
   if isValidSteinerPoint boundarySegmentSet uvPoint then Just uvPoint else Nothing
 
 isValidSteinerPoint :: Set2d (LineSegment2d Unitless UvSpace) Unitless UvSpace -> UvPoint -> Bool

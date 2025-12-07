@@ -51,7 +51,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -140,7 +140,7 @@ on plane curve2d = do
   let compiledPlaced =
         CompiledFunction.map
           (Expression.Curve2d.placeOn plane)
-          (Point2d.placeOn plane)
+          (Point2D.placeOn plane)
           (Bounds2d.placeOn plane)
           curve2d.compiled
   new compiledPlaced (VectorCurve3d.on plane curve2d.derivative)

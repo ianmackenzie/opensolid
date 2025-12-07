@@ -40,8 +40,7 @@ import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
@@ -59,7 +58,7 @@ import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
@@ -96,7 +95,7 @@ on plane region = do
   let regionSize = max width height
   let centeredRegion = Region2d.relativeTo centerFrame region
   let normalizedRegion = Region2d.convert (1 /? regionSize) centeredRegion
-  let p0 = Point2d.placeOn plane centerPoint
+  let p0 = Point2D.placeOn plane centerPoint
   let vx = regionSize .*. Plane3d.xDirection plane
   let vy = regionSize .*. Plane3d.yDirection plane
   let planeFunction = p0 .+. SurfaceFunction.u .*. vx .+. SurfaceFunction.v .*. vy
@@ -268,7 +267,7 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
     Resolved False -> accumulated
     Resolved True ->
       if surfaceError fuu fuv fvv uvBounds <= accuracy
-        then Point2d (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
+        then UvPoint (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
         else recurse
 
 includeSubdomain ::

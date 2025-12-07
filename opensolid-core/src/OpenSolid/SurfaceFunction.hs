@@ -57,7 +57,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve2d qualified as Solve2d
@@ -800,8 +799,8 @@ horizontalCurve ::
 horizontalCurve Subproblem{f, dvdu, subdomain, uvBounds} start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
-  let uStart = Point2d.xCoordinate startPoint
-  let uEnd = Point2d.xCoordinate endPoint
+  let uStart = UvPoint.uCoordinate startPoint
+  let uEnd = UvPoint.uCoordinate endPoint
   let curve = HorizontalCurve.new f dvdu uStart uEnd (NonEmpty.one uvBounds)
   let Domain2d _ vSubdomain = subdomain
   let Bounds2d _ curveVBounds = Curve2d.bounds curve
@@ -849,8 +848,8 @@ verticalCurve ::
 verticalCurve Subproblem{f, dudv, subdomain, uvBounds} start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
-  let vStart = Point2d.yCoordinate startPoint
-  let vEnd = Point2d.yCoordinate endPoint
+  let vStart = UvPoint.vCoordinate startPoint
+  let vEnd = UvPoint.vCoordinate endPoint
   let curve = VerticalCurve.new f dudv vStart vEnd (NonEmpty.one uvBounds)
   let Domain2d uSubdomain _ = subdomain
   let Bounds2d curveUBounds _ = Curve2d.bounds curve

@@ -7,7 +7,6 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
@@ -15,6 +14,7 @@ import OpenSolid.Stl qualified as Stl
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
@@ -25,7 +25,7 @@ main = Tolerance.using 1e-9 do
   expression <- Result.orFail (CompiledFunction.expression f.compiled)
   IO.printLine (Expression.debug expression)
   let meshPoint uvPoint = do
-        let Point2d uValue vValue = uvPoint
+        let UvPoint uValue vValue = uvPoint
         Point3d.zUp
           (Length.meters uValue)
           (Length.meters vValue)

@@ -7,7 +7,6 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude ((.*.), (.+.))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Result qualified as Result
@@ -16,6 +15,7 @@ import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.World3d qualified as World3d
 
 main :: IO ()
@@ -28,7 +28,7 @@ main = do
           .+. r .*. SurfaceFunction.cos theta .*. World3d.rightwardDirection
           .+. r .*. SurfaceFunction.sin theta .*. World3d.forwardDirection
           .+. h .*. SurfaceFunction.v .*. World3d.upwardDirection
-  let domainCenter = Point2d 0.5 0.5
+  let domainCenter = UvPoint 0.5 0.5
   let domainDiameter = 2 / 3
   let domainCircle = Curve2d.circle (#centerPoint domainCenter) (#diameter domainDiameter)
   domain <- Result.orFail (Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle]))

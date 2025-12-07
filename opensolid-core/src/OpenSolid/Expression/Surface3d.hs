@@ -12,9 +12,8 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point3d (Point3d)
-import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.UvPoint (UvPoint)
 
@@ -23,7 +22,7 @@ constant = Expression.constant
 
 on ::
   Plane3d space local ->
-  Expression UvPoint (Point2d Meters local) ->
+  Expression UvPoint (Point2D local) ->
   Expression UvPoint (Point3d space)
 on = Expression.on
 
@@ -42,7 +41,7 @@ relativeTo = Expression.relativeTo
 projectInto ::
   Plane3d global local ->
   Expression UvPoint (Point3d global) ->
-  Expression UvPoint (Point2d Meters local)
+  Expression UvPoint (Point2D local)
 projectInto = Expression.projectInto
 
 transformBy ::

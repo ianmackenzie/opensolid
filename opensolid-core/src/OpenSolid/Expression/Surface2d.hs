@@ -12,6 +12,7 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
@@ -41,7 +42,7 @@ relativeTo = Expression.relativeTo
 
 placeOn ::
   Plane3d global local ->
-  Expression UvPoint (Point2d Meters local) ->
+  Expression UvPoint (Point2D local) ->
   Expression UvPoint (Point3d global)
 placeOn = Expression.on
 

@@ -19,7 +19,6 @@ import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -31,7 +30,7 @@ import OpenSolid.SurfaceFunction.Zeros (Zeros (Zeros))
 import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 
 data PartialZeros units = PartialZeros
   { crossingSegments :: List CrossingSegment
@@ -145,8 +144,8 @@ piecewiseCurve ::
   CrossingSegment ->
   PiecewiseCurve
 piecewiseCurve function dvdu dudv (CrossingSegment parameterization start end boxes) = do
-  let (Point2d uStart vStart, startBoundary) = start
-  let (Point2d uEnd vEnd, endBoundary) = end
+  let (UvPoint uStart vStart, startBoundary) = start
+  let (UvPoint uEnd vEnd, endBoundary) = end
   let curve = case parameterization of
         Horizontal -> HorizontalCurve.new function dvdu uStart uEnd boxes
         Vertical -> VerticalCurve.new function dudv vStart vEnd boxes
