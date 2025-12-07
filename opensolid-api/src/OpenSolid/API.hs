@@ -1537,10 +1537,12 @@ type Body3d = Body3d.Body3d FFI.Space
 
 body3d :: Class
 body3d = do
-  let writeStl path convention givenResolution body =
-        Stl.writeBinary path convention Length.inMillimeters (Body3d.toMesh givenResolution body)
-  let writeMitsuba path givenResolution body =
-        Mitsuba.writeMeshes path [(Body3d.toMesh givenResolution body, #name "")]
+  let writeStl path convention givenResolution body = do
+        let mesh = Body3d.toPointMesh givenResolution body
+        Stl.writeBinary path convention Length.inMillimeters mesh
+  let writeMitsuba path givenResolution body = do
+        let mesh = Body3d.toSurfaceMesh givenResolution body
+        Mitsuba.writeMeshes path [(mesh, #name "")]
   Class.new @Body3d $(docs ''Body3d.Body3d) $
     [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3d.extruded @FFI.Space @FFI.Space) $(docs 'Body3d.extruded)
     , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3d.revolved @FFI.Space @FFI.Space) $(docs 'Body3d.revolved)

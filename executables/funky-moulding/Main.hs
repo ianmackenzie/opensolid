@@ -37,5 +37,5 @@ main = Tolerance.using Length.nanometer do
       ]
   body <- Result.orFail (Body3d.revolved World3d.rightPlane profile Axis2d.y (Angle.degrees 270))
   let resolution = Resolution.maxError (Length.millimeters 0.2)
-  let mesh = Body3d.toMesh resolution body
+  let mesh = Body3d.toPointMesh resolution body
   Stl.writeBinary "executables/funky-moulding/mesh.stl" Convention3d.yUp Length.inMillimeters mesh

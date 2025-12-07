@@ -32,5 +32,5 @@ main = Tolerance.using Length.nanometer do
   let surface = Surface3d.parametric surfaceFunction Region2d.unitSquare
   body <- Result.orFail (Body3d.boundedBy [surface])
   let resolution = Resolution.maxSize (Length.centimeters 20)
-  let mesh = Body3d.toMesh resolution body
+  let mesh = Body3d.toPointMesh resolution body
   Stl.writeBinary "executables/croissant/mesh.stl" Convention3d.yUp Length.inMillimeters mesh

@@ -29,6 +29,6 @@ main = Tolerance.using Length.nanometer do
   profile <- Result.orFail (Region2d.boundedBy [arc, line])
   body <- Result.orFail (Body3d.extruded World3d.frontPlane profile (-0.5 *. length) (0.5 *. length))
   let resolution = Resolution.maxSize (Length.centimeters 30)
-  let mesh = Body3d.toMesh resolution body
+  let mesh = Body3d.toPointMesh resolution body
   let outputPath = "executables/body3d-meshing/mesh.stl"
   Stl.writeBinary outputPath Convention3d.yUp Length.inMillimeters mesh

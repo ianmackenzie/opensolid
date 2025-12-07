@@ -9,6 +9,7 @@ module OpenSolid.Bounds3d
   , hull3
   , hull4
   , hullN
+  , hullOfN
   , aggregate2
   , aggregateN
   , centerPoint
@@ -62,8 +63,6 @@ import OpenSolid.Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
-import OpenSolid.Vertex3d (Vertex3d)
-import OpenSolid.Vertex3d qualified as Vertex3d
 import OpenSolid.World3d qualified as World3d
 
 -- | Get the bounds on the rightward coordinate of a bounding box.
@@ -144,11 +143,12 @@ hull4 :: Point3d space -> Point3d space -> Point3d space -> Point3d space -> Bou
 hull4 (Position3d p1) (Position3d p2) (Position3d p3) (Position3d p4) =
   PositionBounds3d (VectorBounds3d.hull4 p1 p2 p3 p4)
 
--- | Construct a bounding box containing all vertices in the given non-empty list.
-hullN :: Vertex3d vertex space => NonEmpty vertex -> Bounds3d space
-hullN vertices = do
-  let positionVectors = Data.Coerce.coerce (NonEmpty.map Vertex3d.position vertices)
-  PositionBounds3d (VectorBounds3d.hullN positionVectors)
+-- | Construct a bounding box containing all points in the given non-empty list.
+hullN :: NonEmpty (Point3d space) -> Bounds3d space
+hullN vertices = PositionBounds3d (VectorBounds3d.hullN (Data.Coerce.coerce vertices))
+
+hullOfN :: (a -> Point3d space) -> NonEmpty a -> Bounds3d space
+hullOfN function values = hullN (NonEmpty.map function values)
 
 diameter :: Bounds3d space -> Length
 diameter (Bounds3d x y z) = Quantity.hypot3 (Bounds.width x) (Bounds.width y) (Bounds.width z)

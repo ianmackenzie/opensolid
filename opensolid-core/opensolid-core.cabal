@@ -214,6 +214,7 @@ library
     OpenSolid.SurfaceFunction2d
     OpenSolid.SurfaceFunction3d
     OpenSolid.SurfaceParameter
+    OpenSolid.SurfaceVertex3d
     OpenSolid.Svg
     OpenSolid.Text
     OpenSolid.Timer
@@ -239,7 +240,6 @@ library
     OpenSolid.VectorSurface3d
     OpenSolid.VectorSurfaceFunction2d
     OpenSolid.VectorSurfaceFunction3d
-    OpenSolid.Vertex3d
     OpenSolid.Volume
     OpenSolid.World3d
 

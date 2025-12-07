@@ -36,10 +36,11 @@ import OpenSolid.Model3d qualified as Model3d
 import OpenSolid.Orientation3d qualified as Orientation3d
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
-import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
+import OpenSolid.SurfaceVertex3d (SurfaceVertex3d)
+import OpenSolid.SurfaceVertex3d qualified as SurfaceVertex3d
 import OpenSolid.Text qualified as Text
 
 -- | The lighting to use for a Mitsuba scene.
@@ -108,9 +109,7 @@ writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named l
   let sceneFileName = path <> ".xml"
   IO.writeUtf8 sceneFileName sceneXml
 
-type Vertex space = (Point3d space, Direction3d space)
-
-type Mesh space = Mesh.Mesh (Vertex space)
+type Mesh space = Mesh.Mesh (SurfaceVertex3d space)
 
 data Properties = Properties
   { material :: PbrMaterial
@@ -126,7 +125,7 @@ collectMeshes ::
 collectMeshes resolution model = case model of
   Model3d.Group children -> List.combine (collectMeshes resolution) children
   Model3d.Body body -> do
-    let mesh = Body3d.toMesh resolution body
+    let mesh = Body3d.toSurfaceMesh resolution body
     let material = Model3d.traversal.currentPbrMaterial
     let opacity = Model3d.traversal.currentMultipliedOpacity
     let qualifiedName = case Model3d.traversal.ownName of
@@ -204,18 +203,18 @@ meshDataBuilder mesh name = do
     , Binary.combine faceIndicesBuilder meshFaceIndices
     ]
 
-pointBuilder :: Vertex space -> Builder
-pointBuilder (point, _) = do
-  let (px, py, pz) = Point3d.coordinates convention point
+pointBuilder :: SurfaceVertex3d space -> Builder
+pointBuilder vertex = do
+  let (px, py, pz) = Point3d.coordinates convention (SurfaceVertex3d.position vertex)
   Binary.concat
     [ Binary.float64LE (Length.inMeters px)
     , Binary.float64LE (Length.inMeters py)
     , Binary.float64LE (Length.inMeters pz)
     ]
 
-normalBuilder :: Vertex space -> Builder
-normalBuilder (_, normal) = do
-  let (nx, ny, nz) = Direction3d.components convention normal
+normalBuilder :: SurfaceVertex3d space -> Builder
+normalBuilder vertex = do
+  let (nx, ny, nz) = Direction3d.components convention (SurfaceVertex3d.normal vertex)
   Binary.concat
     [ Binary.float64LE nx
     , Binary.float64LE ny

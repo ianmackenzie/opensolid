@@ -8,7 +8,8 @@ module OpenSolid.Body3d
   , translational
   , revolved
   , boundedBy
-  , toMesh
+  , toPointMesh
+  , toSurfaceMesh
   , surfaces
   , placeIn
   , relativeTo
@@ -37,7 +38,7 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
-import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.DirectionSurfaceFunction3d (DirectionSurfaceFunction3d)
 import OpenSolid.DirectionSurfaceFunction3d qualified as DirectionSurfaceFunction3d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.FFI (FFI)
@@ -83,6 +84,7 @@ import OpenSolid.Surface3d.Revolved qualified as Surface3d.Revolved
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
+import OpenSolid.SurfaceVertex3d (SurfaceVertex3d (SurfaceVertex3d, normal, position))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
@@ -556,12 +558,33 @@ toMatingEdge id1 curve1 HalfEdge{halfEdgeId = id2, curve3d = curve2, uvCurve}
 
 ----- MESHING -----
 
-toMesh ::
+toPointMesh :: Tolerance Meters => Resolution Meters -> Body3d space -> Mesh (Point3d space)
+toPointMesh resolution body = do
+  let toVertex surfaceFunction _ _ uvPoint = SurfaceFunction3d.evaluate surfaceFunction uvPoint
+  toMesh resolution toVertex body
+
+toSurfaceMesh ::
   Tolerance Meters =>
   Resolution Meters ->
   Body3d space ->
-  Mesh (Point3d space, Direction3d space)
-toMesh resolution (Body3d boundarySurfaces) = do
+  Mesh (SurfaceVertex3d space)
+toSurfaceMesh resolution body = do
+  let toVertex surfaceFunction normalDirection handedness uvPoint =
+        SurfaceVertex3d
+          { position = SurfaceFunction3d.evaluate surfaceFunction uvPoint
+          , normal = handedness .*. DirectionSurfaceFunction3d.evaluate normalDirection uvPoint
+          }
+  toMesh resolution toVertex body
+
+type ToVertex vertex space =
+  SurfaceFunction3d space ->
+  DirectionSurfaceFunction3d space ->
+  Sign ->
+  UvPoint ->
+  vertex
+
+toMesh :: Tolerance Meters => Resolution Meters -> ToVertex vertex space -> Body3d space -> Mesh vertex
+toMesh resolution toVertex (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
   let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments resolution) boundarySurfaceList
   let innerEdgeVerticesById =
@@ -569,7 +592,9 @@ toMesh resolution (Body3d boundarySurfaces) = do
           (addBoundaryInnerEdgeVertices resolution surfaceSegmentsById)
           Map.empty
           boundarySurfaces
-  Mesh.combine (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById) boundarySurfaceList
+  Mesh.combine
+    (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex)
+    boundarySurfaceList
 
 boundarySurfaceSegments ::
   Resolution Meters ->
@@ -756,9 +781,10 @@ boundarySurfaceMesh ::
   Tolerance Meters =>
   Map SurfaceId (Set2d UvBounds Unitless UvSpace) ->
   Map HalfEdgeId (List UvPoint) ->
+  ToVertex vertex space ->
   BoundarySurface space ->
-  Mesh (Point3d space, Direction3d space)
-boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
+  Mesh vertex
+boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex boundarySurface = do
   let BoundarySurface{surfaceId, surfaceFunction, handedness, edgeLoops} = boundarySurface
   case SurfaceFunction3d.normalDirection surfaceFunction of
     Error SurfaceFunction3d.IsDegenerate -> Mesh.empty
@@ -781,17 +807,14 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
                     List.filterMap (steinerPoint boundarySegmentSet) (Set2d.toList surfaceSegments)
           let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
           -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
-          let vertexMesh = CDT.unsafe boundaryVertexLoops steinerPoints
-          let pointAndNormal uvPoint =
-                ( SurfaceFunction3d.evaluate surfaceFunction uvPoint
-                , handedness .*. DirectionSurfaceFunction3d.evaluate normalDirection uvPoint
-                )
-          let pointsAndNormals = Array.map pointAndNormal (Mesh.vertices vertexMesh)
+          let uvPointMesh = CDT.unsafe boundaryVertexLoops steinerPoints
+          let uvPoints = Mesh.vertices uvPointMesh
+          let vertices = Array.map (toVertex surfaceFunction normalDirection handedness) uvPoints
           let faceIndices =
                 case handedness of
-                  Positive -> Mesh.faceIndices vertexMesh
-                  Negative -> List.map (\(i, j, k) -> (k, j, i)) (Mesh.faceIndices vertexMesh)
-          Mesh.indexed pointsAndNormals faceIndices
+                  Positive -> Mesh.faceIndices uvPointMesh
+                  Negative -> List.map (\(i, j, k) -> (k, j, i)) (Mesh.faceIndices uvPointMesh)
+          Mesh.indexed vertices faceIndices
 
 toPolygon ::
   Map HalfEdgeId (List UvPoint) ->

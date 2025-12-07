@@ -22,10 +22,8 @@ import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.Vertex3d (Vertex3d)
-import OpenSolid.Vertex3d qualified as Vertex3d
 
-toText :: Vertex3d vertex space => Convention3d -> (Length -> Number) -> Mesh vertex -> Text
+toText :: Convention3d -> (Length -> Number) -> Mesh (Point3d space) -> Text
 toText convention units mesh =
   Text.multiline
     [ "solid"
@@ -33,7 +31,7 @@ toText convention units mesh =
     , "endsolid"
     ]
 
-toBinary :: Vertex3d vertex space => Convention3d -> (Length -> Number) -> Mesh vertex -> Builder
+toBinary :: Convention3d -> (Length -> Number) -> Mesh (Point3d space) -> Builder
 toBinary convention units mesh = do
   let emptyHeaderBytes = List.replicate 80 (Binary.uint8 0)
   let header = Binary.concat emptyHeaderBytes
@@ -41,22 +39,10 @@ toBinary convention units mesh = do
   let triangles = Binary.combine (triangleBuilder convention units) (Mesh.faceVertices mesh)
   Binary.concat [header, triangleCount, triangles]
 
-writeText ::
-  Vertex3d vertex space =>
-  Text ->
-  Convention3d ->
-  (Length -> Number) ->
-  Mesh vertex ->
-  IO ()
+writeText :: Text -> Convention3d -> (Length -> Number) -> Mesh (Point3d space) -> IO ()
 writeText path convention units mesh = IO.writeUtf8 path (toText convention units mesh)
 
-writeBinary ::
-  Vertex3d vertex space =>
-  Text ->
-  Convention3d ->
-  (Length -> Number) ->
-  Mesh vertex ->
-  IO ()
+writeBinary :: Text -> Convention3d -> (Length -> Number) -> Mesh (Point3d space) -> IO ()
 writeBinary path convention units mesh = IO.writeBinary path (toBinary convention units mesh)
 
 numberBuilder :: Number -> Builder
@@ -73,15 +59,11 @@ pointBuilder convention units point = do
   numberBuilder (units x) <> numberBuilder (units y) <> numberBuilder (units z)
 
 triangleBuilder ::
-  Vertex3d vertex space =>
   Convention3d ->
   (Length -> Number) ->
-  (vertex, vertex, vertex) ->
+  (Point3d space, Point3d space, Point3d space) ->
   Builder
-triangleBuilder convention units (v0, v1, v2) = do
-  let p0 = Vertex3d.position v0
-  let p1 = Vertex3d.position v1
-  let p2 = Vertex3d.position v2
+triangleBuilder convention units (p0, p1, p2) = do
   let normal = Vector3d.normalize ((p1 .-. p0) `cross_` (p2 .-. p0))
   Binary.concat
     [ vectorBuilder convention normal
@@ -92,15 +74,11 @@ triangleBuilder convention units (v0, v1, v2) = do
     ]
 
 triangleText ::
-  Vertex3d vertex space =>
   Convention3d ->
   (Length -> Number) ->
-  (vertex, vertex, vertex) ->
+  (Point3d space, Point3d space, Point3d space) ->
   Text
-triangleText convention units (v0, v1, v2) = do
-  let p0 = Vertex3d.position v0
-  let p1 = Vertex3d.position v1
-  let p2 = Vertex3d.position v2
+triangleText convention units (p0, p1, p2) = do
   let crossProduct = (p1 .-. p0) `cross_` (p2 .-. p0)
   let (nx, ny, nz) = Vector3d.components convention (Vector3d.normalize crossProduct)
   Text.multiline

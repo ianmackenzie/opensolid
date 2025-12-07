@@ -36,8 +36,9 @@ import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
+import OpenSolid.SurfaceVertex3d (SurfaceVertex3d)
+import OpenSolid.SurfaceVertex3d qualified as SurfaceVertex3d
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.Vertex3d qualified as Vertex3d
 
 convention :: Convention3d
 convention = Convention3d.yUp
@@ -118,13 +119,13 @@ data EncodedMesh = EncodedMesh
 gltfMeshes :: Model3d.Traversal => Resolution Meters -> Model3d space -> List GltfMesh
 gltfMeshes resolution model = case model of
   Model3d.Body body -> do
-    let mesh = Body3d.toMesh resolution body
+    let mesh = Body3d.toSurfaceMesh resolution body
     case Array.toList (Mesh.vertices mesh) of
       NonEmpty meshVertices -> do
         let numVertices = Array.length (Mesh.vertices mesh)
         let meshFaceIndices = Mesh.faceIndices mesh
         let numFaces = List.length meshFaceIndices
-        let meshBounds = Bounds3d.hullN meshVertices
+        let meshBounds = Bounds3d.hullOfN SurfaceVertex3d.position meshVertices
         let (xBounds, yBounds, zBounds) = Bounds3d.coordinates convention meshBounds
         let Bounds xLow xHigh = xBounds
         let Bounds yLow yHigh = yBounds
@@ -241,14 +242,14 @@ faceIndicesBuilder :: List (Int, Int, Int) -> Builder
 faceIndicesBuilder = Binary.combine do
   \(i, j, k) -> Binary.uint32LE i <> Binary.uint32LE j <> Binary.uint32LE k
 
-verticesBuilder :: Vertex3d.HasNormal vertex space => Array vertex -> Builder
+verticesBuilder :: Array (SurfaceVertex3d space) -> Builder
 verticesBuilder = Binary.combine vertexBuilder
 
-vertexBuilder :: Vertex3d.HasNormal vertex space => vertex -> Builder
+vertexBuilder :: SurfaceVertex3d space -> Builder
 vertexBuilder vertex = GHC.Exts.runRW# \state0# -> do
   let !(# state1#, mutableByteArray# #) = GHC.Exts.newByteArray# 24# state0#
-  let !(# px#, py#, pz# #) = Point3d.yUpCoordinates# (Vertex3d.position vertex)
-  let !(# nx#, ny#, nz# #) = Vector3d.yUpComponents# (Vertex3d.normal vertex)
+  let !(# px#, py#, pz# #) = Point3d.yUpCoordinates# (SurfaceVertex3d.position vertex)
+  let !(# nx#, ny#, nz# #) = Vector3d.yUpComponents# (SurfaceVertex3d.normalVector vertex)
   let state2# = GHC.Exts.writeFloatArray# mutableByteArray# 0# (GHC.Exts.double2Float# px#) state1#
   let state3# = GHC.Exts.writeFloatArray# mutableByteArray# 1# (GHC.Exts.double2Float# py#) state2#
   let state4# = GHC.Exts.writeFloatArray# mutableByteArray# 2# (GHC.Exts.double2Float# pz#) state3#
