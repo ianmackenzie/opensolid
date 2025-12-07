@@ -7,6 +7,7 @@ module OpenSolid.UvPoint
   , vCoordinate
   , distanceFrom
   , midpoint
+  , interpolateFrom
   , samples
   , random
   )
@@ -52,6 +53,9 @@ distanceFrom = Point2d.distanceFrom
 -- | Find the midpoint between two points.
 midpoint :: UvPoint -> UvPoint -> UvPoint
 midpoint = Point2d.midpoint
+
+interpolateFrom :: UvPoint -> UvPoint -> Number -> UvPoint
+interpolateFrom = Point2d.interpolateFrom
 
 samples :: List UvPoint
 samples = do
