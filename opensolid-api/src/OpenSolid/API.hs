@@ -936,6 +936,8 @@ svg =
     , Class.factory2 "Polyline With" "Attributes" "Polyline" Svg.polylineWith $(docs 'Svg.polylineWith)
     , Class.factory1 "Polygon" "Polygon" Svg.polygon $(docs 'Svg.polygon)
     , Class.factory2 "Polygon With" "Attributes" "Polygon" Svg.polygonWith $(docs 'Svg.polygonWith)
+    , Class.factory1 "Triangle" "Triangle" Svg.triangle $(docs 'Svg.triangle)
+    , Class.factory2 "Triangle With" "Attributes" "Triangle" Svg.triangleWith $(docs 'Svg.triangleWith)
     , Class.factory2 "Circle" "Center Point" "Diameter" Svg.circle $(docs 'Svg.circle)
     , Class.factory3 "Circle With" "Attributes" "Center Point" "Diameter" Svg.circleWith $(docs 'Svg.circleWith)
     , Class.factory2 "Curve" "Resolution" "Curve" Svg.curve $(docs 'Svg.curve)
