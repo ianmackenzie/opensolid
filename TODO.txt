@@ -1,5 +1,3 @@
-Remove Vertex3d from Stl module?
-
 Change Region2d.polygon to take a Polygon2d
 
 Use CBOR for FFI calls from target languages
