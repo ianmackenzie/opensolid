@@ -194,11 +194,13 @@ polygonWith attributes givenPolygon = do
 polygon :: Polygon2d Meters space -> Svg space
 polygon = polygonWith []
 
+-- | Draw a triangle with the given attributes.
 triangleWith :: List (Attribute space) -> Triangle2d Meters space -> Svg space
 triangleWith attributes (Triangle2d p1 p2 p3) = do
   let vertices = NonEmpty.three p1 p2 p3
   polygonWith attributes (Polygon2d vertices)
 
+-- | Draw a triangle.
 triangle :: Triangle2d Meters space -> Svg space
 triangle = triangleWith []
 
