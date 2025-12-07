@@ -9,8 +9,8 @@ Use CBOR for FFI calls from target languages
      int64_t* result_size
    )
 -> arguments are formatted as array
--> result_size can be set to be negative, in which case arguments_data is an error object in JSON-RPC format
-   ('code', 'message')
+-> result_size can be set to be negative,
+   in which case returned data is an error object in JSON-RPC format ('code', 'message')
 -> much less room for segfaults, weird data corruption etc. - can't accidentally treat int as double or whatever
 -> means that exact same format can be used in client-server way over WebSockets, HTTP, sockets, standard in/out streams etc.
 -> can use Haskell 'serialise' library which seems nice and well supported
@@ -41,28 +41,27 @@ Add Debug2D module
 
 Add Debug3D module
 
-Move SurfaceLinearization.error to SurfaceFunction3d.linearizationError
--> or 'linearDeviation' or 'nonlinearity'
+Move SurfaceLinearization.error to SurfaceFunction3d.linearDeviation
+-> Estimate with Gaussian integration instead of using e.g. second derivative bounds?
+   Should be more accurate *and* more efficient...
+   -> if curvature estimated by Gaussian integration changes by e.g. less than 1% when bisecting,
+      then use that estimated curvature to 'jump' to the necessary subdivision size for linearization
+-> probably OK if accuracy of mesh is not 100% guaranteed; it's an approximation anyways
 
 Replace use of e.g. curve.derivative with e.g. "let curve' = Curve2d.derivative curve"
+
+Add batch evaluation functions?
+- most important for target languages to avoid many FFI calls
+  - curve.evaluate(t)
+  - curve.evaluate_bounds(t_bounds)
+  - curve.to_polyline(resolution)
+  - curve.steps(n), curve.leading(n), curve.trailing(n) etc.?
 
 Reduce use of HasField instances
 -> 'actual Haskell fields' only? (including nested?)
 -> Switch types over to being records
   -> curves and surface functions ('compiled' and derivatives)
 -> maybe even disable OverloadedRecordDot? still use records for nice construction/destructuring...
-
-Have e.g. Point2D and UvPoint be newtypes over internal units-generic Point2d type?
--> Region2D/UvRegion, Curve2D/UvCurve, Direction2D/UvDirection, Axis2D/UvAxis, Frame2D/UvFrame
--> Vector2D is still units-generic (can be used to implement Point2d!)
--> some boilerplate with forwarding functions etc., but:
-  -> provides a nice place to put separate doc comments for e.g. UvPoint and Point2D
-  -> allows API to be slightly different between types, e.g. UvAxis.u vs. Axis2D.x
--> OpenSolid.Point2D, OpenSolid.UvPoint, and OpenSolid.Polymorphic.Point2d
--> Maybe:
-  -> type Point2D space = Point2d Meters space
-  -> type PointR2 space = Point2d Unitless space OR type UnitlessPoint2D space = Point2D Unitless space
-  -> type UvPoint = PointR2 UvSpace = Point2d Unitless UvSpace
 
 Move 't', 'u' and 'v' into Parameter module?
 -> then can rename e.g. 'Curve' to 'UnitlessCurve1D' (= Curve1d Unitless), 'Curve1D' can be 'Curve1d Meters' etc.
