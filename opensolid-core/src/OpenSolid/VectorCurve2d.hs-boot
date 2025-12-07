@@ -22,7 +22,7 @@ import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
 type role VectorCurve2d nominal nominal

@@ -1,4 +1,4 @@
-module OpenSolid.Vector2d
+module OpenSolid.Polymorphic.Vector2d
   ( Vector2d (Vector2d, Vector2d#)
   , zero
   , coerce

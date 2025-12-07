@@ -75,8 +75,8 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Point2d (Point2d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Polymorphic.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -86,8 +86,8 @@ import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)

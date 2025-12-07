@@ -50,7 +50,7 @@ import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 {-# COMPLETE Direction2d #-}
 

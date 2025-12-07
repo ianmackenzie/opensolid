@@ -16,7 +16,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
 import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Polymorphic.Point2d (Point2d)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 

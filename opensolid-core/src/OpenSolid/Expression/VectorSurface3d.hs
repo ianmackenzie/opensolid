@@ -19,7 +19,7 @@ import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)
 
 constant :: Vector3d units space -> Expression UvPoint (Vector3d units space)

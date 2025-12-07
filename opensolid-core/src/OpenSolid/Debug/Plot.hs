@@ -14,8 +14,8 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
-import OpenSolid.Point2d (Point2d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Polymorphic.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)

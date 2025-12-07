@@ -25,8 +25,8 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Orientation2d qualified as Orientation2d
-import OpenSolid.Point2d (Point2d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Polymorphic.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Frame2d (Frame2d, orientation, originPoint)

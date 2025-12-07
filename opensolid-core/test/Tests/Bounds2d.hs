@@ -3,8 +3,8 @@ module Tests.Bounds2d (tests) where
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2d (Point2d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Polymorphic.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random

@@ -11,7 +11,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import System.IO.Unsafe qualified
 

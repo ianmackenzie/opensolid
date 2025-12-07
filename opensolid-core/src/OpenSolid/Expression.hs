@@ -69,8 +69,8 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Point2d (Point2d)
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Polymorphic.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Bounds2d (PositionBounds2d)
@@ -88,8 +88,8 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2d (Vector2d)
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 

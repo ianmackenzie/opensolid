@@ -45,7 +45,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3d (Vector3d))
 import OpenSolid.Text qualified as Text
-import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import Prelude qualified
 
 newtype NumComponents = NumComponents Int deriving (Eq, Ord, Show)

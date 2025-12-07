@@ -25,8 +25,8 @@ import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Prelude
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d)
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 

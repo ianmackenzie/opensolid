@@ -13,7 +13,7 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 main :: IO ()

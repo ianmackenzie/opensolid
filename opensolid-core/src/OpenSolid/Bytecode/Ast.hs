@@ -91,7 +91,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Plane3d qualified as Plane3d
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Point2d qualified as Point2d
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -108,8 +108,8 @@ import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 
 data Space

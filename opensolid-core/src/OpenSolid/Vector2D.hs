@@ -58,8 +58,8 @@ import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
-import OpenSolid.Vector2d (IsZero (IsZero), Vector2d (Vector2d))
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d (IsZero (IsZero), Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d)
 
 type Vector2D space = Vector2d Meters space

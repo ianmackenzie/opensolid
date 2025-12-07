@@ -1,4 +1,4 @@
-module OpenSolid.Point2d
+module OpenSolid.Polymorphic.Point2d
   ( Point2d (Point2d)
   , origin
   , coerce
@@ -50,8 +50,8 @@ import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Unboxed.Math
-import OpenSolid.Vector2d (Vector2d)
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 -- | The point with coordinates (0,0).
 origin :: Point2d units space

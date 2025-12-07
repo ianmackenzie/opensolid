@@ -54,8 +54,8 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2D (Vector2D, pattern Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 data Format a = Format
   { encodeFunction :: a -> Json

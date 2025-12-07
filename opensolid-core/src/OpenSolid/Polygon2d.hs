@@ -13,7 +13,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Polymorphic.Point2d (Point2d)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Triangle2d (Triangle2d (Triangle2d))

@@ -185,10 +185,11 @@ library
     OpenSolid.Plane3d
     OpenSolid.PlaneOrientation3d
     OpenSolid.Point2D
-    OpenSolid.Point2d
     OpenSolid.Point3d
     OpenSolid.Polygon2d
     OpenSolid.Polyline2d
+    OpenSolid.Polymorphic.Point2d
+    OpenSolid.Polymorphic.Vector2d
     OpenSolid.Prelude
     OpenSolid.Primitives
     OpenSolid.Quantity
@@ -230,7 +231,6 @@ library
     OpenSolid.UvPoint
     OpenSolid.UvSpace
     OpenSolid.Vector2D
-    OpenSolid.Vector2d
     OpenSolid.Vector3d
     OpenSolid.VectorBounds2d
     OpenSolid.VectorBounds3d

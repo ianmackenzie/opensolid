@@ -33,8 +33,8 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Point2d (Point2d (Point2d))
-import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
+import OpenSolid.Polymorphic.Point2d qualified as Point2d
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d

@@ -87,7 +87,7 @@ import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d

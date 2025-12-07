@@ -75,7 +75,7 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d qualified as Transform3d
-import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 length :: Generator Length

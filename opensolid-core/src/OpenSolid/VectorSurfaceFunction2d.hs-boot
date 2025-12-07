@@ -20,7 +20,7 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
 type role VectorSurfaceFunction2d nominal nominal

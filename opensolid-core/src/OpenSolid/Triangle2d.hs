@@ -8,7 +8,7 @@ where
 
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Polymorphic.Point2d (Point2d)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 

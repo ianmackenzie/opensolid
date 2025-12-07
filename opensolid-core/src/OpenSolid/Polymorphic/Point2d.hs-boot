@@ -1,4 +1,4 @@
-module OpenSolid.Point2d
+module OpenSolid.Polymorphic.Point2d
   ( origin
   , coerce
   , transformBy

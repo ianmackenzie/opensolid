@@ -18,7 +18,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 -- | A metric spur gear.

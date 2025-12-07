@@ -72,8 +72,8 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 constant :: Vector2d units space -> VectorBounds2d units space
 constant (Vector2d x y) = VectorBounds2d (Bounds.constant x) (Bounds.constant y)
