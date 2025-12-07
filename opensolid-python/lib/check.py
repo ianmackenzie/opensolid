@@ -8,6 +8,7 @@ from opensolid import (
     Point2d,
     Svg,
     Tolerance,
+    Triangle2d,
     Vector2d,
 )
 
@@ -44,10 +45,10 @@ print(color2.to_hex())
 
 bounds = Bounds2d.from_corners(Point2d.origin, Point2d.centimeters(30, 20))
 print(bounds.x_coordinate)
-vertices = [
+triangle = Triangle2d(
     Point2d.centimeters(5, 5),
     Point2d.centimeters(25, 5),
     Point2d.centimeters(25, 15),
-]
-triangle = Svg.polygon(vertices)
+)
+triangle = Svg.triangle(triangle)
 print(triangle.to_text(bounds))
