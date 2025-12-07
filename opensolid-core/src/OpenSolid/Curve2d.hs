@@ -117,9 +117,11 @@ import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Orientation2d qualified as Orientation2d
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
 import OpenSolid.Polymorphic.Point2d qualified as Point2d
-import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
@@ -136,8 +138,6 @@ import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)

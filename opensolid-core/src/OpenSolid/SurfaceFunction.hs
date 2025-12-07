@@ -57,6 +57,8 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve2d qualified as Solve2d
@@ -79,8 +81,6 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))

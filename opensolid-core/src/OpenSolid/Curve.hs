@@ -79,6 +79,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1d qualified as Solve1d
@@ -87,7 +88,6 @@ import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Vector3d (Vector3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d

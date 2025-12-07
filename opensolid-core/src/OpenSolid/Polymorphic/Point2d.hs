@@ -35,6 +35,8 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
@@ -50,8 +52,6 @@ import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Unboxed.Math
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 -- | The point with coordinates (0,0).
 origin :: Point2d units space

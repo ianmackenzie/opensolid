@@ -63,6 +63,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -71,7 +72,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d

@@ -43,6 +43,7 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Polyline2d qualified as Polyline2d
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d qualified as Region2d
@@ -63,7 +64,6 @@ import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.World3d qualified as World3d

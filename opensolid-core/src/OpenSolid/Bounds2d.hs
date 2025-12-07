@@ -54,9 +54,10 @@ import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Number qualified as Number
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
 import OpenSolid.Polymorphic.Point2d qualified as Point2d
-import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Bounds2d (Bounds2d, PositionBounds2d)
@@ -71,7 +72,6 @@ import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 
 coerce :: Bounds2d units1 space1 -> Bounds2d units2 space2

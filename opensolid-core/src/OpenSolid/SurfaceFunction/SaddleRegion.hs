@@ -23,6 +23,8 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
 import OpenSolid.Polymorphic.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -32,8 +34,6 @@ import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 data SaddleRegion units = SaddleRegion
   { subproblem :: Subproblem units

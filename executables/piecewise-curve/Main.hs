@@ -8,12 +8,12 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 main :: IO ()

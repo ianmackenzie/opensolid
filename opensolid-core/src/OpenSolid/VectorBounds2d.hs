@@ -54,6 +54,8 @@ import {-# SOURCE #-} OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import {-# SOURCE #-} OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Number qualified as Number
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction2d (Direction2d)
@@ -72,8 +74,6 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 constant :: Vector2d units space -> VectorBounds2d units space
 constant (Vector2d x y) = VectorBounds2d (Bounds.constant x) (Bounds.constant y)

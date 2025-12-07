@@ -29,6 +29,8 @@ import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.IO qualified as IO
 import OpenSolid.Number qualified as Number
 import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d#))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3d (Vector3d#), VectorBounds3d (VectorBounds3d#))
 import OpenSolid.Quantity (Quantity (Quantity#))
@@ -36,8 +38,6 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d#))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d

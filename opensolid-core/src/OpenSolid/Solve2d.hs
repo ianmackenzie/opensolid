@@ -22,6 +22,8 @@ import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
@@ -30,8 +32,6 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
 data RecursionType

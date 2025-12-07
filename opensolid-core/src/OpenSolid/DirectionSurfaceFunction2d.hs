@@ -18,13 +18,13 @@ import OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 

@@ -64,8 +64,10 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
+import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
@@ -76,8 +78,6 @@ import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 type role Region2d nominal nominal

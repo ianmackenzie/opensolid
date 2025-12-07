@@ -26,6 +26,7 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Polymorphic.Point2d (Point2d)
 import OpenSolid.Polymorphic.Point2d qualified as Point2d
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d, direction, originPoint)
@@ -35,7 +36,6 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d qualified as Transform2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
 
 -- | Get the origin point of an axis.
 originPoint :: Axis2d units space -> Point2d units space

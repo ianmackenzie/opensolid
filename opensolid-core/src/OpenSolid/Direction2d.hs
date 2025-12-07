@@ -33,6 +33,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d
@@ -50,7 +51,6 @@ import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 {-# COMPLETE Direction2d #-}
 

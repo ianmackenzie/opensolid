@@ -22,11 +22,11 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Units qualified as Units
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 

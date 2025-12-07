@@ -47,6 +47,8 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D (Point2D, pattern Point2D)
 import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude hiding (compose, (>>))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
@@ -54,8 +56,6 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2D (Vector2D, pattern Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 
 data Format a = Format
   { encodeFunction :: a -> Json

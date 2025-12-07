@@ -24,13 +24,13 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified

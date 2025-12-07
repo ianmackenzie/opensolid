@@ -60,6 +60,7 @@ import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
 import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
 import OpenSolid.Point2D (Point2D, pattern Point2D)
 import OpenSolid.Point3d (Point3d)
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Bounds3d (Bounds3d)
@@ -75,7 +76,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Transform3d qualified as Transform3d
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 length :: Generator Length

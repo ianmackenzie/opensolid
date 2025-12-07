@@ -13,13 +13,13 @@ where
 import GHC.Exts qualified
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)

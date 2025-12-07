@@ -25,9 +25,9 @@ import OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Prelude
 import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Prelude
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
