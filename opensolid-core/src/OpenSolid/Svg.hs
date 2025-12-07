@@ -174,23 +174,23 @@ lineWith attributes (Point2D x1 y1) (Point2D x2 y2) = do
 line :: Point2D space -> Point2D space -> Svg space
 line = lineWith []
 
--- | Draw a polyline with the given attributes and vertices.
+-- | Draw a polyline with the given attributes.
 polylineWith :: List (Attribute space) -> Polyline2d Meters space -> Svg space
 polylineWith attributes givenPolyline = do
   let points = NonEmpty.toList (Polyline2d.vertices givenPolyline)
   Node "polyline" (noFill : pointsAttribute points : attributes) []
 
--- | Draw a polyline with the given vertices.
+-- | Draw a polyline.
 polyline :: Polyline2d Meters space -> Svg space
 polyline = polylineWith []
 
--- | Draw a polygon with the given attributes and vertices.
+-- | Draw a polygon with the given attributes.
 polygonWith :: List (Attribute space) -> Polygon2d Meters space -> Svg space
 polygonWith attributes givenPolygon = do
   let points = NonEmpty.toList (Polygon2d.vertices givenPolygon)
   Node "polygon" (pointsAttribute points : attributes) []
 
--- | Draw a polygon with the given vertices.
+-- | Draw a polygon.
 polygon :: Polygon2d Meters space -> Svg space
 polygon = polygonWith []
 
