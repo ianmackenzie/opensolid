@@ -20,8 +20,8 @@ import Network.Wai (Response)
 import Network.Wai qualified
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
+import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
-import OpenSolid.Json.Format qualified as Json.Format
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
@@ -72,5 +72,5 @@ data Body = Body Text Builder
 text :: Text -> Body
 text content = Body "text/plain" (Text.toUtf8 content)
 
-json :: Json.Format a -> a -> Body
-json format value = Body "application/json" (Json.toBinary (Json.Format.encode format value))
+json :: Json -> Body
+json content = Body "application/json" (Json.toBinary content)

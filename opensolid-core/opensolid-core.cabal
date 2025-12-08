@@ -163,8 +163,6 @@ library
     OpenSolid.InternalError
     OpenSolid.Intersects
     OpenSolid.Json
-    OpenSolid.Json.Format
-    OpenSolid.Json.Schema
     OpenSolid.Length
     OpenSolid.LineSegment2d
     OpenSolid.List
@@ -251,7 +249,6 @@ library
     OpenSolid.CDT
     OpenSolid.Curve.Bisection
     OpenSolid.HasZero
-    OpenSolid.Json.FieldSchema
     OpenSolid.Linearization
     OpenSolid.Lobatto
     OpenSolid.Quadrature

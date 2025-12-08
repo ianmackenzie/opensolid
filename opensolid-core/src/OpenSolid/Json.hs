@@ -1,10 +1,7 @@
 module OpenSolid.Json
   ( Json (.., OpenSolid.Json.Int, Object)
-  , Format
-  , Schema
-  , Field
+  , Field (Field)
   , field
-  , optional
   , object
   , text
   , int
@@ -20,15 +17,13 @@ where
 
 import Data.Aeson qualified
 import Data.Aeson.KeyMap qualified
+import Data.Coerce qualified
 import Data.Scientific
 import Data.Vector qualified
 import OpenSolid.Binary (Builder, ByteString)
-import {-# SOURCE #-} OpenSolid.Json.Format (Format)
-import {-# SOURCE #-} OpenSolid.Json.Schema (Schema)
 import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
-import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
@@ -43,7 +38,10 @@ data Json
   | Map (Map Text Json)
   deriving (Eq, Show)
 
-newtype Field = Field (Maybe (Text, Json))
+newtype Field = KeyValuePair (Text, Json)
+
+pattern Field :: Text -> Json -> Field
+pattern Field key value <- KeyValuePair (key, value)
 
 pattern Int :: Int -> Json
 pattern Int n <- (toInt -> Just n)
@@ -54,11 +52,11 @@ toInt (Number value) = do
   if Number.fromInt rounded == value then Just rounded else Nothing
 toInt _ = Nothing
 
-pattern Object :: List (Text, Json) -> Json
+pattern Object :: List Field -> Json
 pattern Object fields <- (getFields -> Just fields)
 
-getFields :: Json -> Maybe (List (Text, Json))
-getFields (Map fields) = Just (Map.toList fields)
+getFields :: Json -> Maybe (List Field)
+getFields (Map fields) = Just (Data.Coerce.coerce (Map.toList fields))
 getFields _ = Nothing
 
 {-# COMPLETE Null, Bool, Number, Text, List, Object #-}
@@ -82,16 +80,10 @@ listOf :: (a -> Json) -> List a -> Json
 listOf encodeItem items = List (List.map encodeItem items)
 
 field :: Text -> Json -> Field
-field name value = Field (Just (name, value))
-
-optional :: Text -> Maybe Json -> Field
-optional name maybeValue = Field (Maybe.map (name,) maybeValue)
-
-keyValuePair :: Field -> Maybe (Text, Json)
-keyValuePair (Field kv) = kv
+field key value = KeyValuePair (key, value)
 
 object :: List Field -> Json
-object fields = Map (Map.fromList (List.filterMap keyValuePair fields))
+object fields = Map (Map.fromList (Data.Coerce.coerce fields))
 
 map :: Map Text Json -> Json
 map = Map
