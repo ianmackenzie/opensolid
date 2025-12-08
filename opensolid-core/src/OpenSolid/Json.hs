@@ -91,7 +91,7 @@ keyValuePair :: Field -> Maybe (Text, Json)
 keyValuePair (Field kv) = kv
 
 object :: List Field -> Json
-object fields = Map (Map.fromKeyValuePairs (List.filterMap keyValuePair fields))
+object fields = Map (Map.fromList (List.filterMap keyValuePair fields))
 
 map :: Map Text Json -> Json
 map = Map

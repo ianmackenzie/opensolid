@@ -375,8 +375,9 @@ boundedBy (NonEmpty givenSurfaces) = do
   let initialSurfaceRegistry =
         SurfaceRegistry
           { unprocessed =
-              Map.fromList surfaceWithHalfEdgesMapEntry $
-                NonEmpty.toList surfacesWithHalfEdges
+              Map.fromList $
+                List.map surfaceWithHalfEdgesMapEntry $
+                  NonEmpty.toList surfacesWithHalfEdges
           , processed = Map.empty
           , edges = Map.empty
           }
@@ -586,7 +587,8 @@ type ToVertex vertex space =
 toMesh :: Tolerance Meters => Resolution Meters -> ToVertex vertex space -> Body3d space -> Mesh vertex
 toMesh resolution toVertex (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
-  let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments resolution) boundarySurfaceList
+  let surfaceSegmentsById =
+        Map.fromList (List.map (boundarySurfaceSegments resolution) boundarySurfaceList)
   let innerEdgeVerticesById =
         NonEmpty.foldr
           (addBoundaryInnerEdgeVertices resolution surfaceSegmentsById)
