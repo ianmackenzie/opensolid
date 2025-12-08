@@ -1,8 +1,12 @@
+Switch SurfaceFunction zero finding to use new Bisection module
+- will need to implement solution curve trimming/merging
+
 Change Region2d.polygon to take a Polygon2d
 
 Use CBOR for FFI calls from target languages
 -> have single calling function:
-   void* opensolid_invoke(
+   void*
+   opensolid_invoke(
      char* function,
      int64_t arguments_size,
      void* arguments_data,
@@ -102,15 +106,9 @@ Add more Curve2d intersection tests
 Try to avoid use of squared tolerance in general, if possible
 -> e.g. specialized implementation of Intersects for Curve2d and VectorCurve2d
 
-Split opensolid-core into opensolid-core and opensolid-geometry?
--> opensolid-core is basically an "alternative standard library", nothing about units or geometry
--> which one has OpenSolid.Prelude though?
-
 Switch back to 'normal' (non-recursive) form of quotient derivatives
 -> e.g. VectorSurfaceFunction3d
 -> search for 'recursive' calls in general?
-
-Juse use Aeson directly for JSON encoding/decoding?
 
 Rename 'interpolationParameter' to 'unterpolate'?
 
@@ -126,15 +124,8 @@ Clean up division by 'Curve units' or 'SurfaceFunction units' that is (approxima
 -> Faster to evaluate, gives actual infinities instead of just extremely large values (more correct!)
 -> Maybe also for division by e.g. 'Qty units', so division by *approximately* zero gives actual infinity?
 
-Tolerance-less desingularization?
--> detect degenerate endpoints by heuristic like 'endpoint value is less than 1e-9 times max of values at 3-point Gaussian quadrature points
-  -> or maybe use golden ratio to provide random sampling points...
-  -> still need to detect if denominator is zero *everywhere* though, and for that we still need a tolerance...
-
 Add Component3d class to Python library?
 -> 'front_plane', 'upward_direction', 'rightward_axis' etc. convenience accessors in addition to 'frame'
-
-Rationalize use of forEach
 
 Add vectorTransformations3d helper list in API module
 
@@ -142,26 +133,6 @@ Switch to upper-case 2D and 3D suffixes instead of 2d and 3d?
 -> Point2D vs Point2d
 -> Curve3D vs Curve3d
 -> Body3D vs Body3d
-
-Remove CoordinateSystem type and just use separate 'space' and 'units' type parameters where needed
-  -> could allow removal of HasUnits in favour of assuming types always have units as the last type parameter...
-  -> type names:
-        Position2D space units (internal Position2D constructor)
-        UvPoint (public UvPoint pattern)
-        Point2D space (public Point2D pattern)
-        Point3D space
-
-        Vector2D space units (plus public constructor)
-        UvVector (plus public pattern)
-        UnitlessVector2D space (plus public pattern)
-        Displacement2D space (plus public pattern)
-        AreaVector2D space (plus public pattern)
-
-        Vector3D space units
-        UnitlessVector3D space
-        Displacement3D space
-        AreaVector3D space
-    -> can have internal Position2D constructor and public UvPoint and Point2D patterns with fixed units
 
 Add indentation to debug output of Ast values for easier inspection
 
@@ -199,19 +170,11 @@ Add way to represent arc length parameterization in bytecode?
 Combine computeValue and computeBounds into single templated function?
 -> call out to generic or overloaded helper functions as needed
 
-Merge e.g. 'Subdomain' and 'Domain1d'?
-- just base on Float values instead of Int
-- store recursion type (even though that could be inferred from endpoints...)
-
 Try pdoc for Python documentation generation?
 -> or possibly Material for MkDocs + mkdocstrings
 
 Add hasZero functions that do simple check to see if a zero exists (plain bisection until bounds less than tolerance)
 -> then use to check validity of L'Hopital desingularization (see if derivative or denominator has *any* zero)
-
-Try switching back to plain let-in instead of abusing 'do' notation?
-
-Try using normal 'do' notation for monads? Possibly with Try.do
 
 Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
 
@@ -223,18 +186,9 @@ Split bytecode.h/bytecode.cpp into a few more files
 -> e.g. helper functions for Bezier/Hermite evaluation
 -> allow calling non-bytecode-specific functions from Haskell without having to use 'bytecode.h'...
 
-Refactor Solve2d searching to use 'cross product' of Solve1d?
-
 Add DirectionCurve2d.[rotateLeft,rotateRight] and use in Curve2d.offsetBy, Region2d.fillet
 -> best to implement right down to bytecode level...
 
 Normalize HasField instances:
 - move to top of file just under type definition
 - always match a corresponding accessor function (usually just forward to that function)
-
-Support optional named arguments in target languages
-- maybe via wrapper functions where one argument is something like an 'Options a' value,
-  wrapping a list of options/attributes in Haskell
-
-Add support for exponentiation operator in Python
--> possibly special-case it to only accept the literals 2 and possibly 3 as arguments
