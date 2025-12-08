@@ -44,10 +44,10 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
 import OpenSolid.Polymorphic.Point2d qualified as Point2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Plane3d, Point3d)
 import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Vector2D (Vector2D)
 
 type Point2D space = Point2d Meters space
 
@@ -168,7 +168,7 @@ placeOn = Point2d.placeOn
 transformBy :: Transform2d tag Meters space -> Point2D space -> Point2D space
 transformBy = Point2d.transformBy
 
-translateBy :: Vector2d Meters space -> Point2D space -> Point2D space
+translateBy :: Vector2D space -> Point2D space -> Point2D space
 translateBy = Point2d.translateBy
 
 translateIn :: Direction2d space -> Length -> Point2D space -> Point2D space

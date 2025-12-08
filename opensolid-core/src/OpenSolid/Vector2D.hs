@@ -53,12 +53,12 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Orientation2d (Orientation2d)
-import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
-import OpenSolid.Point2D (Point2D)
+import {-# SOURCE #-} OpenSolid.Point2D (Point2D)
 import OpenSolid.Polymorphic.Vector2d (IsZero (IsZero), Vector2d (Vector2d))
 import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Plane3d)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Vector3d (Vector3d)
 
@@ -96,33 +96,33 @@ apply :: (Number -> Length) -> Number -> Number -> Vector2D space
 apply units px py = Vector2D (units px) (units py)
 
 -- | Construct a vector from its X and Y components given in meters.
-meters :: Number -> Number -> Vector2d Meters space
+meters :: Number -> Number -> Vector2D space
 meters = apply Length.meters
 
 -- | Construct a vector from its X and Y components given in centimeters.
-centimeters :: Number -> Number -> Vector2d Meters space
+centimeters :: Number -> Number -> Vector2D space
 centimeters = apply Length.centimeters
 
 {-| Construct a vector from its X and Y components given in centimeters.
 
 Short form alias for 'centimeters'.
 -}
-cm :: Number -> Number -> Vector2d Meters space
+cm :: Number -> Number -> Vector2D space
 cm = centimeters
 
 -- | Construct a vector from its X and Y components given in millimeters.
-millimeters :: Number -> Number -> Vector2d Meters space
+millimeters :: Number -> Number -> Vector2D space
 millimeters = apply Length.millimeters
 
 {-| Construct a vector from its X and Y components given in millimeters.
 
 Short form alias for 'millimeters'.
 -}
-mm :: Number -> Number -> Vector2d Meters space
+mm :: Number -> Number -> Vector2D space
 mm = millimeters
 
 -- | Construct a vector from its X and Y components given in inches.
-inches :: Number -> Number -> Vector2d Meters space
+inches :: Number -> Number -> Vector2D space
 inches = apply Length.inches
 
 -- | Construct a vector from its magnitude (length) and angle.
