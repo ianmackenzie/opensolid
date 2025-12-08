@@ -61,6 +61,8 @@ getFields :: Json -> Maybe (List (Text, Json))
 getFields (Map fields) = Just (Map.toList fields)
 getFields _ = Nothing
 
+{-# COMPLETE Null, Bool, Number, Text, List, Object #-}
+
 int :: Int -> Json
 int = Number . Number.fromInt
 
