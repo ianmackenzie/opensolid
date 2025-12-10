@@ -2,6 +2,7 @@ module Main (main) where
 
 import OpenSolid.Body3d (Body3d)
 import OpenSolid.Body3d qualified as Body3d
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Gltf qualified as Gltf
@@ -27,7 +28,7 @@ gearBody numTeeth = do
   let holeDiameter = Length.millimeters 8
   let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
   let outerProfile = SpurGear.profile spurGear
-  let hole = Curve2d.circle (#centerPoint Point2D.origin) (#diameter holeDiameter)
+  let hole = Curve2d.circle (Circle2d.withDiameter holeDiameter Point2D.origin)
   profile <- Result.orFail (Region2d.boundedBy (hole : outerProfile))
   let width = Length.millimeters 8
   Result.orFail (Body3d.extruded World3d.frontPlane profile (-0.5 *. width) (0.5 *. width))

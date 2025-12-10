@@ -1,5 +1,8 @@
 module OpenSolid.Polygon2d
   ( Polygon2d (Polygon2d)
+  , inscribed
+  , circumscribed
+  , hexagon
   , vertices
   , edges
   , signedArea
@@ -8,11 +11,16 @@ module OpenSolid.Polygon2d
   )
 where
 
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Circle2d (Circle2d)
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Number qualified as Number
 import OpenSolid.Polymorphic.Point2d (Point2d)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -33,6 +41,49 @@ newtype Polygon2d units space
 
 instance FFI (Polygon2d Meters FFI.Space) where
   representation = FFI.classRepresentation "Polygon2d"
+
+instance FFI (Polygon2d Unitless UvSpace) where
+  representation = FFI.classRepresentation "UvPolygon"
+
+data IsEmpty = IsEmpty deriving (Eq, Show)
+
+{-| Create a regular polygon with the given number of vertices/sides.
+
+The polygon will be sized to fit within the given circle
+(each polygon vertex will lie on the circle).
+The polygon will be oriented such that its bottom-most edge is horizontal.
+-}
+inscribed :: Int -> Circle2d units space -> Result IsEmpty (Polygon2d units space)
+inscribed n circle
+  | n >= 3 = case Quantity.midpoints (Angle.degrees -90) (Angle.degrees 270) n of
+      NonEmpty vertexAngles -> Ok (Polygon2d (NonEmpty.map (Circle2d.pointOn circle) vertexAngles))
+      [] -> throw (InternalError "Should have at least three vertex angles")
+  | otherwise = Error IsEmpty
+
+{-| Create a regular polygon with the given number of vertices/sides.
+
+The polygon will be sized so that the given circle will just fit within the polygon
+(each polygon edge will touch the circle at the edge's midpoint).
+For a polygon with an even number of sides (square, hexagon, octagon etc.),
+this means that the "height" or "width across flats" will be equal to the given circle's diameter.
+The polygon will be oriented such that its bottom-most edge is horizontal.
+-}
+circumscribed :: Int -> Circle2d units space -> Result IsEmpty (Polygon2d units space)
+circumscribed n circle = do
+  let outerDiameter = Circle2d.diameter circle ./. Angle.cos (Angle.pi ./. Number.fromInt n)
+  let outerCircle = Circle2d.withDiameter outerDiameter (Circle2d.centerPoint circle)
+  inscribed n outerCircle
+
+{-| Create a hexagon with the given center point and height.
+
+The hexagon will be oriented such that its top and bottom edges are horizontal.
+-}
+hexagon ::
+  "centerPoint" ::: Point2d units space ->
+  "height" ::: Quantity units ->
+  Result IsEmpty (Polygon2d units space)
+hexagon (Named centerPoint) (Named height) =
+  circumscribed 6 (Circle2d.withDiameter height centerPoint)
 
 -- | Get the vertices of a polygon.
 vertices :: Polygon2d units space -> NonEmpty (Point2d units space)

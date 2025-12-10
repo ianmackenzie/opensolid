@@ -33,6 +33,7 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.CDT qualified as CDT
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -266,8 +267,8 @@ cylinderAlong ::
   Length ->
   "diameter" ::: Length ->
   Result EmptyBody (Body3d space)
-cylinderAlong axis d1 d2 (Named diameter) = do
-  case Region2d.circle (#centerPoint Point2D.origin) (#diameter diameter) of
+cylinderAlong axis d1 d2 (Named diameter) =
+  case Region2d.circle (Circle2d.withDiameter diameter Point2D.origin) of
     Error Region2d.EmptyRegion -> Error EmptyBody
     Ok profile ->
       if d1 ~= d2

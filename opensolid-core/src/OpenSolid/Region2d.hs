@@ -5,9 +5,6 @@ module OpenSolid.Region2d
   , unitSquare
   , rectangle
   , circle
-  , hexagon
-  , inscribedPolygon
-  , circumscribedPolygon
   , polygon
   , outerLoop
   , innerLoops
@@ -42,6 +39,8 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CDT qualified as CDT
+import OpenSolid.Circle2d (Circle2d)
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -65,10 +64,11 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Polygon2d (Polygon2d)
+import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
 import OpenSolid.Polymorphic.Vector2d (Vector2d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
@@ -160,98 +160,18 @@ rectangle (Bounds2d xBounds yBounds) =
               (Curve2d.line p12 p11)
       Region2d edges []
 
-{-| Create a circular region.
-
-Fails if the given dimeter is zero.
--}
-circle ::
-  Tolerance units =>
-  "centerPoint" ::: Point2d units space ->
-  "diameter" ::: Quantity units ->
-  Result EmptyRegion (Region2d units space)
-circle (Named centerPoint) (Named diameter) =
-  if diameter ~= Quantity.zero
+-- | Create a region from the given circle.
+circle :: Tolerance units => Circle2d units space -> Result EmptyRegion (Region2d units space)
+circle givenCircle =
+  if Circle2d.diameter givenCircle ~= Quantity.zero
     then Error EmptyRegion
-    else do
-      let curve = Curve2d.circle (#centerPoint centerPoint) (#diameter diameter)
-      Ok (Region2d (NonEmpty.one curve) [])
+    else Ok (Region2d (NonEmpty.one (Curve2d.circle givenCircle)) [])
 
-{-| Create a hexagon with the given center point and height.
-
-The hexagon will be oriented such that its top and bottom edges are horizontal.
--}
-hexagon ::
-  Tolerance units =>
-  "centerPoint" ::: Point2d units space ->
-  "height" ::: Quantity units ->
-  Result EmptyRegion (Region2d units space)
-hexagon (Named centerPoint) (Named height) =
-  circumscribedPolygon 6 (#centerPoint centerPoint) (#diameter height)
-
-{-| Create a regular polygon with the given number of sides.
-
-The polygon will be sized to fit within a circle with the given center point and diameter
-(each polygon vertex will lie on the circle).
-The polygon will be oriented such that its bottom-most edge is horizontal.
--}
-inscribedPolygon ::
-  Tolerance units =>
-  Int ->
-  "centerPoint" ::: Point2d units space ->
-  "diameter" ::: Quantity units ->
-  Result EmptyRegion (Region2d units space)
-inscribedPolygon n (Named centerPoint) (Named diameter) = do
-  if diameter < Quantity.zero || diameter ~= Quantity.zero || n < 3
-    then Error EmptyRegion
-    else Ok do
-      let radius = 0.5 *. diameter
-      let vertexAngles = Quantity.midpoints (Angle.degrees -90) (Angle.degrees 270) n
-      let vertex angle = centerPoint .+. Vector2d.polar radius angle
-      let vertices = List.map vertex vertexAngles
-      case polygon vertices of
-        Ok region -> region
-        Error _ -> do
-          let message = "Regular polygon construction with non-zero diameter should not fail"
-          throw (InternalError message)
-
-{-| Create a regular polygon with the given number of sides.
-
-The polygon will be sized so that
-a circle with the given center point and diameter will just fit within the polygon
-(each polygon edge will touch the circle at the edge's midpoint).
-For a polygon with an even number of sides (square, hexagon, octagon etc.),
-this means that the "width across flats" will be equal to the given circle diameter.
-The polygon will be oriented such that its bottom-most edge is horizontal.
--}
-circumscribedPolygon ::
-  Tolerance units =>
-  Int ->
-  "centerPoint" ::: Point2d units space ->
-  "diameter" ::: Quantity units ->
-  Result EmptyRegion (Region2d units space)
-circumscribedPolygon numSides (Named centerPoint) (Named diameter) =
-  inscribedPolygon
-    numSides
-    (#centerPoint centerPoint)
-    (#diameter (diameter ./. Angle.cos (Angle.pi ./. Number.fromInt numSides)))
-
-{-| Create a polygonal region from the given vertices.
-
-The last vertex will be connected back to the first vertex automatically if needed
-(you do not have to close the polygon manually, although it will still work if you do).
--}
-polygon ::
-  Tolerance units =>
-  List (Point2d units space) ->
-  Result BoundedBy.Error (Region2d units space)
-polygon vertexList = case vertexList of
-  [] -> Error BoundedBy.EmptyRegion
-  NonEmpty vertices -> do
-    let closedLoop = NonEmpty.push (NonEmpty.last vertices) vertices
-    let segments = NonEmpty.successive LineSegment2d closedLoop
-    let nonZeroLengthSegments = List.filter (\(LineSegment2d p1 p2) -> p1 != p2) segments
-    let toCurve (LineSegment2d p1 p2) = Curve2d.line p1 p2
-    boundedBy (List.map toCurve nonZeroLengthSegments)
+-- | Create a region from the given polygon.
+polygon :: Tolerance units => Polygon2d units space -> Result BoundedBy.Error (Region2d units space)
+polygon givenPolygon = do
+  let toCurve (LineSegment2d p1 p2) = if p1 ~= p2 then Nothing else Just (Curve2d.line p1 p2)
+  boundedBy (NonEmpty.filterMap toCurve (Polygon2d.edges givenPolygon))
 
 {-| Fillet a region at the given corner points, with the given radius.
 

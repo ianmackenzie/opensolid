@@ -83,6 +83,8 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Circle2d (Circle2d)
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
@@ -477,15 +479,12 @@ customArc p0 v1 v2 a b = do
   let angle = Curve.line a b
   p0 .+. v1 .*. Curve.cos angle .+. v2 .*. Curve.sin angle
 
--- | Create a circle with the given center point and diameter.
-circle ::
-  "centerPoint" ::: Point2d units space ->
-  "diameter" ::: Quantity units ->
-  Curve2d units space
-circle (Named centerPoint) (Named diameter) =
+-- | Create a curve from the given circle.
+circle :: Circle2d units space -> Curve2d units space
+circle givenCircle =
   polarArc
-    (#centerPoint centerPoint)
-    (#radius (0.5 *. diameter))
+    (#centerPoint (Circle2d.centerPoint givenCircle))
+    (#radius (Circle2d.radius givenCircle))
     (#startAngle Angle.zero)
     (#endAngle Angle.twoPi)
 

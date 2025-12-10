@@ -2,6 +2,7 @@ module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Length qualified as Length
@@ -35,7 +36,7 @@ main = Tolerance.using Length.nanometer do
       , Curve2d.arc p2 p3 Angle.quarterTurn
       , Curve2d.line p3 p4
       , Curve2d.line p4 p0
-      , Curve2d.circle (#centerPoint holeCenter) (#diameter holeDiameter)
+      , Curve2d.circle (Circle2d.withDiameter holeDiameter holeCenter)
       ]
   let resolution = Resolution.maxError (Length.millimeters 1)
   let mesh = Region2d.toMesh resolution region

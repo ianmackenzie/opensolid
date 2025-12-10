@@ -1,6 +1,7 @@
 module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.Convention3d qualified as Convention3d
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
@@ -30,7 +31,7 @@ main = do
           .+. h .*. SurfaceFunction.v .*. World3d.upwardDirection
   let domainCenter = UvPoint 0.5 0.5
   let domainDiameter = 2 / 3
-  let domainCircle = Curve2d.circle (#centerPoint domainCenter) (#diameter domainDiameter)
+  let domainCircle = Curve2d.circle (Circle2d.withDiameter domainDiameter domainCenter)
   domain <- Result.orFail (Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle]))
   let surface = Surface3d.parametric surfaceFunction domain
   let mesh = Surface3d.toMesh (Length.millimeters 2) surface

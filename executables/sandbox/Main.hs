@@ -9,6 +9,7 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve qualified as Curve
@@ -191,10 +192,7 @@ testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = do
   let minorRadius = Length.centimeters 1
   let majorRadius = Length.centimeters 2
-  let crossSection =
-        Curve2d.circle
-          (#centerPoint (Point2D.x majorRadius))
-          (#diameter (2 *. minorRadius))
+  let crossSection = Curve2d.circle (Circle2d.withRadius minorRadius (Point2D.x majorRadius))
   surface <- Result.orFail (Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi)
   let alpha = Angle.asin (minorRadius ./. majorRadius)
   -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z

@@ -15,6 +15,7 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Camera3d qualified as Camera3d
+import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3d (Convention3d)
@@ -92,9 +93,12 @@ classes =
   , lineSegment2d
   , uvLineSegment
   , triangle2d
+  , circle2d
+  , uvCircle
   , polyline2d
   , uvPolyline
   , polygon2d
+  , uvPolygon
   , curve
   , lengthCurve
   , areaCurve
@@ -782,6 +786,32 @@ triangle2d =
     , Class.member0 "Signed Area" Triangle2d.signedArea $(docs 'Triangle2d.signedArea)
     ]
 
+type Circle2d = Circle2d.Circle2d Meters FFI.Space
+
+circle2d :: Class
+circle2d =
+  Class.new @Circle2d $(docs ''Circle2d.Circle2d) $
+    [ Class.factory2 "With Radius" "Radius" "Center Point" Circle2d.withRadius $(docs 'Circle2d.withRadius)
+    , Class.factory2 "With Diameter" "Diameter" "Center Point" Circle2d.withDiameter $(docs 'Circle2d.withDiameter)
+    , Class.property "Center Point" Circle2d.centerPoint $(docs 'Circle2d.centerPoint)
+    , Class.property "Diameter" Circle2d.diameter $(docs 'Circle2d.diameter)
+    , Class.property "Radius" Circle2d.radius $(docs 'Circle2d.radius)
+    , Class.member1 "Point" "Angle" (flip Circle2d.pointOn) $(docs 'Circle2d.pointOn)
+    ]
+
+type UvCircle = Circle2d.Circle2d Unitless UvSpace
+
+uvCircle :: Class
+uvCircle =
+  Class.new @UvCircle $(docs ''Circle2d.Circle2d) $
+    [ Class.factory2 "With Radius" "Radius" "Center Point" Circle2d.withRadius $(docs 'Circle2d.withRadius)
+    , Class.factory2 "With Diameter" "Diameter" "Center Point" Circle2d.withDiameter $(docs 'Circle2d.withDiameter)
+    , Class.property "Center Point" Circle2d.centerPoint $(docs 'Circle2d.centerPoint)
+    , Class.property "Diameter" Circle2d.diameter $(docs 'Circle2d.diameter)
+    , Class.property "Radius" Circle2d.radius $(docs 'Circle2d.radius)
+    , Class.member1 "Point" "Angle" (flip Circle2d.pointOn) $(docs 'Circle2d.pointOn)
+    ]
+
 type Polyline2d = Polyline2d.Polyline2d Meters FFI.Space
 
 polyline2d :: Class
@@ -816,6 +846,23 @@ polygon2d :: Class
 polygon2d =
   Class.new @Polygon2d $(docs ''Polygon2d.Polygon2d) $
     [ Class.constructor1 "Vertices" Polygon2d.Polygon2d $(docs 'Polygon2d.Polygon2d)
+    , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2d.inscribed $(docs 'Polygon2d.inscribed)
+    , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2d.circumscribed $(docs 'Polygon2d.circumscribed)
+    , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2d.hexagon $(docs 'Polygon2d.hexagon)
+    , Class.property "Vertices" Polygon2d.vertices $(docs 'Polygon2d.vertices)
+    , Class.member0 "Edges" Polygon2d.edges $(docs 'Polygon2d.edges)
+    , Class.member0 "Signed Area" Polygon2d.signedArea $(docs 'Polygon2d.signedArea)
+    ]
+
+type UvPolygon = Polygon2d.Polygon2d Unitless UvSpace
+
+uvPolygon :: Class
+uvPolygon =
+  Class.new @UvPolygon $(docs ''Polygon2d.Polygon2d) $
+    [ Class.constructor1 "Vertices" Polygon2d.Polygon2d $(docs 'Polygon2d.Polygon2d)
+    , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2d.inscribed $(docs 'Polygon2d.inscribed)
+    , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2d.circumscribed $(docs 'Polygon2d.circumscribed)
+    , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2d.hexagon $(docs 'Polygon2d.hexagon)
     , Class.property "Vertices" Polygon2d.vertices $(docs 'Polygon2d.vertices)
     , Class.member0 "Edges" Polygon2d.edges $(docs 'Polygon2d.edges)
     , Class.member0 "Signed Area" Polygon2d.signedArea $(docs 'Polygon2d.signedArea)
@@ -1464,7 +1511,7 @@ curve2d =
     , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
     , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
     , Class.factoryM4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
-    , Class.factory2 "Circle" "Center Point" "Diameter" Curve2d.circle $(docs 'Curve2d.circle)
+    , Class.factory1 "Circle" "Circle" Curve2d.circle $(docs 'Curve2d.circle)
     , Class.factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
     , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
     , Class.property "Start Point" (.startPoint) "The start point of the curve."
@@ -1491,7 +1538,7 @@ uvCurve =
     , Class.factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
     , Class.factoryU3 "Arc" "Start Point" "End Point" "Swept Angle" Curve2d.arc $(docs 'Curve2d.arc)
     , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
-    , Class.factory2 "Circle" "Center Point" "Diameter" Curve2d.circle $(docs 'Curve2d.circle)
+    , Class.factory1 "Circle" "Circle" Curve2d.circle $(docs 'Curve2d.circle)
     , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
     , Class.factoryU4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
     , Class.factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
@@ -1537,14 +1584,11 @@ region2d =
   Class.new @Region2d $(docs ''Region2d.Region2d) $
     [ Class.factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , Class.factoryM1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
-    , Class.factoryM2R "Circle" "Center Point" "Diameter" Region2d.circle $(docs 'Region2d.circle)
+    , Class.factoryM1R "Circle" "Circle" Region2d.circle $(docs 'Region2d.circle)
     , Class.property "Outer Loop" Region2d.outerLoop region2dOuterLoopDocs
     , Class.property "Inner Loops" Region2d.innerLoops region2dInnerLoopsDocs
     , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
-    , Class.factoryM1R "Polygon" "Points" Region2d.polygon $(docs 'Region2d.polygon)
-    , Class.factoryM2R "Hexagon" "Center Point" "Height" Region2d.hexagon $(docs 'Region2d.hexagon)
-    , Class.factoryM3R "Inscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.inscribedPolygon $(docs 'Region2d.inscribedPolygon)
-    , Class.factoryM3R "Circumscribed Polygon" "Num Sides" "Center Point" "Diameter" Region2d.circumscribedPolygon $(docs 'Region2d.circumscribedPolygon)
+    , Class.factoryM1R "Polygon" "Polygon" Region2d.polygon $(docs 'Region2d.polygon)
     , Class.memberM2 "Fillet" "Points" "Radius" Region2d.fillet $(docs 'Region2d.fillet)
     ]
       <> affineTransformations2d Region2d.transformBy
@@ -1557,7 +1601,7 @@ uvRegion =
     [ Class.constant "Unit Square" Region2d.unitSquare $(docs 'Region2d.unitSquare)
     , Class.factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
     , Class.factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
-    , Class.factoryU2R "Circle" "Center Point" "Diameter" Region2d.circle $(docs 'Region2d.circle)
+    , Class.factoryU1R "Circle" "Circle" Region2d.circle $(docs 'Region2d.circle)
     , Class.property "Outer Loop" Region2d.outerLoop region2dOuterLoopDocs
     , Class.property "Inner Loops" Region2d.innerLoops region2dInnerLoopsDocs
     , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
