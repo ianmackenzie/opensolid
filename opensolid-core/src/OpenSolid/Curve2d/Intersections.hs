@@ -275,35 +275,37 @@ intersections ::
   Curve2d units space ->
   Curve2d units space ->
   Result Error (Maybe Intersections)
-intersections curve1 curve2 = do
-  endpointIntersections <- findEndpointIntersections curve1 curve2
-  case overlappingSegments curve1 curve2 endpointIntersections of
-    Just segments -> Ok (Just (OverlappingSegments segments))
-    Nothing -> do
-      let u = SurfaceFunction.u
-      let v = SurfaceFunction.v
-      let curve1Surface = curve1 `compose` u
-      let curve2Surface = curve2 `compose` v
-      let differenceSurface = curve2Surface .-. curve1Surface
-      tangentVector1Surface <- case Curve2d.tangentDirection curve1 of
-        Ok tangentDirection1 -> Ok (DirectionCurve2d.unwrap tangentDirection1 `compose` u)
-        Error Curve2d.IsPoint -> Error FirstCurveIsPoint
-      let problem =
-            Problem
-              { curve1
-              , curve2
-              , endpointIntersections
-              , crossingSolutionTarget = differenceSurface
-              , tangentSolutionTarget =
-                  VectorSurfaceFunction2d.xy
-                    (differenceSurface `dot` tangentVector1Surface)
-                    (SurfaceFunction2d.derivative U curve2Surface `cross` tangentVector1Surface)
-              }
-      case Bisection.search Bisection.curvePairDomain (findIntersectionPoint problem) of
-        Error Bisection.InfiniteRecursion -> throw HigherOrderZero
-        Ok solutions -> case deduplicate solutions [] & List.map Pair.second & List.sort of
-          [] -> Ok Nothing
-          NonEmpty intersectionPoints -> Ok (Just (IntersectionPoints intersectionPoints))
+intersections curve1 curve2
+  | not (Curve2d.bounds curve1 `intersects` Curve2d.bounds curve2) = Ok Nothing
+  | otherwise = do
+      endpointIntersections <- findEndpointIntersections curve1 curve2
+      case overlappingSegments curve1 curve2 endpointIntersections of
+        Just segments -> Ok (Just (OverlappingSegments segments))
+        Nothing -> do
+          let u = SurfaceFunction.u
+          let v = SurfaceFunction.v
+          let curve1Surface = curve1 `compose` u
+          let curve2Surface = curve2 `compose` v
+          let differenceSurface = curve2Surface .-. curve1Surface
+          tangentVector1Surface <- case Curve2d.tangentDirection curve1 of
+            Ok tangentDirection1 -> Ok (DirectionCurve2d.unwrap tangentDirection1 `compose` u)
+            Error Curve2d.IsPoint -> Error FirstCurveIsPoint
+          let problem =
+                Problem
+                  { curve1
+                  , curve2
+                  , endpointIntersections
+                  , crossingSolutionTarget = differenceSurface
+                  , tangentSolutionTarget =
+                      VectorSurfaceFunction2d.xy
+                        (differenceSurface `dot` tangentVector1Surface)
+                        (SurfaceFunction2d.derivative U curve2Surface `cross` tangentVector1Surface)
+                  }
+          case Bisection.search Bisection.curvePairDomain (findIntersectionPoint problem) of
+            Error Bisection.InfiniteRecursion -> throw HigherOrderZero
+            Ok solutions -> case deduplicate solutions [] & List.map Pair.second & List.sort of
+              [] -> Ok Nothing
+              NonEmpty intersectionPoints -> Ok (Just (IntersectionPoints intersectionPoints))
 
 type Solution = ((Bounds Unitless, Bounds Unitless), IntersectionPoint)
 
