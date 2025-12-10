@@ -18,6 +18,7 @@ module OpenSolid.API.Class
   , factoryU1R
   , factoryM1R
   , factory2
+  , factory2R
   , factoryU2
   , factoryU2R
   , factoryM2
@@ -250,6 +251,16 @@ factory2 ::
   Text ->
   Member value
 factory2 = static2
+
+factory2R ::
+  (FFI a, FFI b, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> Result x value) ->
+  Text ->
+  Member value
+factory2R = static2
 
 factoryU2 ::
   (FFI a, FFI b, FFI value) =>
