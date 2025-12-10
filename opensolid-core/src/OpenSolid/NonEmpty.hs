@@ -36,6 +36,7 @@ module OpenSolid.NonEmpty
   , mapWithIndex
   , indexed
   , reverseMap
+  , filterMap
   , forEach
   , map2
   , map3
@@ -106,6 +107,7 @@ import Prelude
   , compare
   , otherwise
   , (-)
+  , (.)
   , (<)
   , (==)
   , (>)
@@ -242,6 +244,9 @@ reverseMap function (x :| xs) = go x xs []
  where
   go item [] acc = function item :| acc
   go item (next : following) acc = go next following (function item : acc)
+
+filterMap :: (a -> Maybe b) -> NonEmpty a -> List b
+filterMap function = List.filterMap function . toList
 
 forEach :: NonEmpty a -> (a -> b) -> NonEmpty b
 forEach nonEmpty function = map function nonEmpty
