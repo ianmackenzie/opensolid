@@ -47,6 +47,7 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
+import OpenSolid.Curve2d.Intersections qualified as Curve2d.Intersections
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
@@ -119,7 +120,7 @@ boundedBy ::
   List (Curve2d units space) ->
   Result BoundedBy.Error (Region2d units space)
 boundedBy curves = do
-  -- checkForInnerIntersection curves
+  checkForInnerIntersection curves
   loops <- connect curves
   classifyLoops loops
 
@@ -347,54 +348,52 @@ nonIncidentCurve :: (Curve2d units space, Maybe Number) -> Maybe (Curve2d units 
 nonIncidentCurve (curve, Nothing) = Just curve
 nonIncidentCurve (_, Just _) = Nothing
 
--- checkForInnerIntersection ::
---   Tolerance units =>
---   List (Curve2d units space) ->
---   Result BoundedBy.Error ()
--- checkForInnerIntersection [] = Ok ()
--- checkForInnerIntersection (first : rest) = do
---   checkCurveForInnerIntersection first rest
---   checkForInnerIntersection rest
+checkForInnerIntersection ::
+  Tolerance units =>
+  List (Curve2d units space) ->
+  Result BoundedBy.Error ()
+checkForInnerIntersection [] = Ok ()
+checkForInnerIntersection (first : rest) = do
+  checkCurveForInnerIntersection first rest
+  checkForInnerIntersection rest
 
--- checkCurveForInnerIntersection ::
---   Tolerance units =>
---   Curve2d units space ->
---   List (Curve2d units space) ->
---   Result BoundedBy.Error ()
--- checkCurveForInnerIntersection _ [] = Ok ()
--- checkCurveForInnerIntersection curve (first : rest) = do
---   checkCurvesForInnerIntersection curve first
---   checkCurveForInnerIntersection curve rest
+checkCurveForInnerIntersection ::
+  Tolerance units =>
+  Curve2d units space ->
+  List (Curve2d units space) ->
+  Result BoundedBy.Error ()
+checkCurveForInnerIntersection _ [] = Ok ()
+checkCurveForInnerIntersection curve (first : rest) = do
+  checkCurvesForInnerIntersection curve first
+  checkCurveForInnerIntersection curve rest
 
--- checkCurvesForInnerIntersection ::
---   Tolerance units =>
---   Curve2d units space ->
---   Curve2d units space ->
---   Result BoundedBy.Error ()
--- checkCurvesForInnerIntersection curve1 curve2 =
---   case Curve2d.intersections curve1 curve2 of
---     Error Curve2d.Intersections.CurveHasDegeneracy ->
---       Error BoundedBy.BoundaryCurveHasDegeneracy
---     -- We can ignore cases where either curve is actually a point,
---     -- since we'll still find any inner intersections
---     -- when we check with the *neighbours* of those degenerate curves
---     Error Curve2d.Intersections.FirstCurveIsPoint -> Ok ()
---     Error Curve2d.Intersections.SecondCurveIsPoint -> Ok ()
---     -- Any overlap between boundary curves is bad
---     Ok (Just (Curve2d.OverlappingSegments _)) ->
---       Error BoundedBy.BoundaryIntersectsItself
---     -- If there are no intersections at all then we're good!
---     Ok Nothing -> Ok ()
---     -- Otherwise, make sure curves only intersect (meet) at endpoints
---     Ok (Just (Curve2d.IntersectionPoints intersectionPoints)) ->
---       if NonEmpty.allSatisfy isEndpointIntersection intersectionPoints
---         then Ok ()
---         else Error BoundedBy.BoundaryIntersectsItself
+checkCurvesForInnerIntersection ::
+  Tolerance units =>
+  Curve2d units space ->
+  Curve2d units space ->
+  Result BoundedBy.Error ()
+checkCurvesForInnerIntersection curve1 curve2 =
+  case Curve2d.intersections curve1 curve2 of
+    -- We can ignore cases where either curve is actually a point,
+    -- since we'll still find any inner intersections
+    -- when we check with the *neighbours* of those degenerate curves
+    Error Curve2d.Intersections.FirstCurveIsPoint -> Ok ()
+    Error Curve2d.Intersections.SecondCurveIsPoint -> Ok ()
+    Error Curve2d.Intersections.BothCurvesArePoints -> Ok ()
+    -- Any overlap between boundary curves is bad
+    Ok (Just (Curve2d.OverlappingSegments _)) ->
+      Error BoundedBy.BoundaryIntersectsItself
+    -- If there are no intersections at all then we're good!
+    Ok Nothing -> Ok ()
+    -- Otherwise, make sure curves only intersect (meet) at endpoints
+    Ok (Just (Curve2d.IntersectionPoints intersectionPoints)) ->
+      if NonEmpty.allSatisfy isEndpointIntersection intersectionPoints
+        then Ok ()
+        else Error BoundedBy.BoundaryIntersectsItself
 
--- isEndpointIntersection :: IntersectionPoint -> Bool
--- isEndpointIntersection intersectionPoint = do
---   let (t1, t2) = Curve2d.IntersectionPoint.parameterValues intersectionPoint
---   Curve.isEndpoint t1 && Curve.isEndpoint t2
+isEndpointIntersection :: IntersectionPoint -> Bool
+isEndpointIntersection intersectionPoint = do
+  Curve.isEndpoint intersectionPoint.t1 && Curve.isEndpoint intersectionPoint.t2
 
 connect ::
   Tolerance units =>
