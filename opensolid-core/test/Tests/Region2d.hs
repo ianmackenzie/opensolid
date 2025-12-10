@@ -24,8 +24,8 @@ tests =
   , quarterCircle
   , squareWithHole
   , incompleteSquare
-  , -- , squareWithTangentHole
-    twoCircles
+  , squareWithTangentHole
+  , twoCircles
   ]
 
 areaIsApproximately :: Area -> Region2d Meters space -> Bool
@@ -93,24 +93,22 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
     Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
     Error error -> Test.expect (error == Region2d.BoundedBy.BoundaryHasGaps)
 
--- Disabled while self-intersection checks in Region2d.boundedBy are disabled
--- squareWithTangentHole :: Tolerance Meters => Test
--- squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
---   let width = Length.meters 2
---   let p1 = Point2d.origin
---   let p2 = Point2d width zero
---   let p3 = Point2d width width
---   let p4 = Point2d zero width
---   let line1 = Curve2d.line p1 p2
---   let line2 = Curve2d.line p2 p3
---   let line3 = Curve2d.line p4 p3
---   let line4 = Curve2d.line p4 p1
---   let centerPoint = Point2d (0.5 *. width) (0.5 *. width)
---   let holeRadius = 0.5 *. width
---   let hole = Curve2d.circle centerPoint holeRadius
---   case Region2d.boundedBy [line1, line2, line3, line4, hole] of
---     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
---     Error error -> Test.expect (error == Region2d.BoundedBy.BoundaryIntersectsItself)
+squareWithTangentHole :: Tolerance Meters => Test
+squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
+  let width = Length.meters 2
+  let p1 = Point2D.origin
+  let p2 = Point2D width zero
+  let p3 = Point2D width width
+  let p4 = Point2D zero width
+  let line1 = Curve2d.line p1 p2
+  let line2 = Curve2d.line p2 p3
+  let line3 = Curve2d.line p4 p3
+  let line4 = Curve2d.line p4 p1
+  let centerPoint = Point2D (0.5 *. width) (0.5 *. width)
+  let hole = Curve2d.circle (#centerPoint centerPoint) (#diameter width)
+  case Region2d.boundedBy [line1, line2, line3, line4, hole] of
+    Ok _ -> Test.fail "Expected non-manifold region construction to fail"
+    Error error -> Test.expect (error == Region2d.BoundedBy.BoundaryIntersectsItself)
 
 twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
