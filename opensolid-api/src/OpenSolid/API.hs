@@ -90,8 +90,10 @@ classes =
   , bounds2d
   , uvBounds
   , lineSegment2d
+  , uvLineSegment
   , triangle2d
   , polyline2d
+  , uvPolyline
   , polygon2d
   , curve
   , lengthCurve
@@ -758,6 +760,18 @@ lineSegment2d =
     , Class.member1 "Distance To" "Point" LineSegment2d.distanceTo $(docs 'LineSegment2d.distanceTo)
     ]
 
+type UvLineSegment = LineSegment2d.LineSegment2d Unitless UvSpace
+
+uvLineSegment :: Class
+uvLineSegment =
+  Class.new @UvLineSegment $(docs ''LineSegment2d.LineSegment2d) $
+    [ Class.constructor2 "Start Point" "End Point" LineSegment2d.LineSegment2d $(docs 'LineSegment2d.LineSegment2d)
+    , Class.property "Start Point" LineSegment2d.startPoint $(docs 'LineSegment2d.startPoint)
+    , Class.property "End Point" LineSegment2d.endPoint $(docs 'LineSegment2d.endPoint)
+    , Class.member0 "Length" LineSegment2d.length $(docs 'LineSegment2d.length)
+    , Class.member1 "Distance To" "Point" LineSegment2d.distanceTo $(docs 'LineSegment2d.distanceTo)
+    ]
+
 type Triangle2d = Triangle2d.Triangle2d Meters FFI.Space
 
 triangle2d :: Class
@@ -773,6 +787,20 @@ type Polyline2d = Polyline2d.Polyline2d Meters FFI.Space
 polyline2d :: Class
 polyline2d =
   Class.new @Polyline2d $(docs ''Polyline2d.Polyline2d) $
+    [ Class.constructor1 "Vertices" Polyline2d.Polyline2d $(docs 'Polyline2d.Polyline2d)
+    , Class.property "Vertices" Polyline2d.vertices $(docs 'Polyline2d.vertices)
+    , Class.property "Num Vertices" Polyline2d.numVertices $(docs 'Polyline2d.numVertices)
+    , Class.property "Start Point" Polyline2d.startPoint $(docs 'Polyline2d.startPoint)
+    , Class.property "End Point" Polyline2d.endPoint $(docs 'Polyline2d.endPoint)
+    , Class.member0 "Segments" Polyline2d.segments $(docs 'Polyline2d.segments)
+    , Class.member0 "Length" Polyline2d.length $(docs 'Polyline2d.length)
+    ]
+
+type UvPolyline = Polyline2d.Polyline2d Unitless UvSpace
+
+uvPolyline :: Class
+uvPolyline =
+  Class.new @UvPolyline $(docs ''Polyline2d.Polyline2d) $
     [ Class.constructor1 "Vertices" Polyline2d.Polyline2d $(docs 'Polyline2d.Polyline2d)
     , Class.property "Vertices" Polyline2d.vertices $(docs 'Polyline2d.vertices)
     , Class.property "Num Vertices" Polyline2d.numVertices $(docs 'Polyline2d.numVertices)

@@ -28,6 +28,9 @@ newtype Polyline2d units space
 instance FFI (Polyline2d Meters FFI.Space) where
   representation = FFI.classRepresentation "Polyline2d"
 
+instance FFI (Polyline2d Unitless UvSpace) where
+  representation = FFI.classRepresentation "UvPolyline"
+
 -- | Get the vertices of a polyline.
 vertices :: Polyline2d units space -> NonEmpty (Point2d units space)
 vertices = (.vertices)

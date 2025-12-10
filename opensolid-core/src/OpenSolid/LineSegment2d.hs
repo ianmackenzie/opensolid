@@ -36,6 +36,9 @@ data LineSegment2d units space
 instance FFI (LineSegment2d Meters FFI.Space) where
   representation = FFI.classRepresentation "LineSegment2d"
 
+instance FFI (LineSegment2d Unitless UvSpace) where
+  representation = FFI.classRepresentation "UvLineSegment"
+
 instance Bounded2d (LineSegment2d units space) units space where
   bounds = bounds
 
