@@ -52,6 +52,7 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
+import OpenSolid.Line2d (Line2d (Line2d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D (Point2D, pattern Point2D)
@@ -162,8 +163,10 @@ combineWith attributes function list =
   groupWith attributes (List.map function list)
 
 -- | Draw a line with the given attributes.
-lineWith :: List (Attribute space) -> Point2D space -> Point2D space -> Svg space
-lineWith attributes (Point2D x1 y1) (Point2D x2 y2) = do
+lineWith :: List (Attribute space) -> Line2d Meters space -> Svg space
+lineWith attributes (Line2d p1 p2) = do
+  let Point2D x1 y1 = p1
+  let Point2D x2 y2 = p2
   let x1Attribute = Attribute "x1" (lengthText x1)
   let y1Attribute = Attribute "y1" (lengthText (negative y1))
   let x2Attribute = Attribute "x2" (lengthText x2)
@@ -171,7 +174,7 @@ lineWith attributes (Point2D x1 y1) (Point2D x2 y2) = do
   Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
 
 -- | Draw a line.
-line :: Point2D space -> Point2D space -> Svg space
+line :: Line2d Meters space -> Svg space
 line = lineWith []
 
 -- | Draw a polyline with the given attributes.
@@ -256,7 +259,7 @@ arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWid
       let stemEndPoint = Point2D.along axis stemLength
       let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 *. headWidth))
       let rightPoint = Point2D.mirrorAcross axis leftPoint
-      let stem = line start stemEndPoint
+      let stem = line (Line2d start stemEndPoint)
       let tip = triangle (Triangle2d leftPoint rightPoint end)
       groupWith attributes [stem, tip]
 
