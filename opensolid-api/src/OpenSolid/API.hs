@@ -1007,7 +1007,7 @@ svg =
     , Class.member2 "Write" "Path" "View Box" Svg.write $(docs 'Svg.write)
     , Class.factory1 "Group" "Children" Svg.group $(docs 'Svg.group)
     , Class.factory2 "Group With" "Attributes" "Children" Svg.groupWith $(docs 'Svg.groupWith)
-    , Class.factory1 "Polyline" "Vertices" Svg.polyline $(docs 'Svg.polyline)
+    , Class.factory1 "Polyline" "Polyline" Svg.polyline $(docs 'Svg.polyline)
     , Class.factory2 "Polyline With" "Attributes" "Polyline" Svg.polylineWith $(docs 'Svg.polylineWith)
     , Class.factory1 "Polygon" "Polygon" Svg.polygon $(docs 'Svg.polygon)
     , Class.factory2 "Polygon With" "Attributes" "Polygon" Svg.polygonWith $(docs 'Svg.polygonWith)
