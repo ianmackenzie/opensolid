@@ -327,13 +327,7 @@ constant point = new (CompiledFunction.constant point) VectorCurve2d.zero
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve units -> Curve units -> Curve2d units space
 xy x y = do
-  let compiledXY =
-        CompiledFunction.map2
-          Expression.xy
-          Point2d
-          Bounds2d
-          x.compiled
-          y.compiled
+  let compiledXY = CompiledFunction.map2 Expression.xy Point2d Bounds2d x.compiled y.compiled
   new compiledXY (VectorCurve2d.xy x.derivative y.derivative)
 
 -- | Create a line between two points.
