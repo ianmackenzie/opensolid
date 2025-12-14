@@ -289,7 +289,7 @@ extruded sketchPlane profile d1 d2 = do
   let normal = Plane3d.normalDirection sketchPlane
   let v1 = d1 .*. normal
   let v2 = d2 .*. normal
-  translational sketchPlane profile (VectorCurve3d.line v1 v2)
+  translational sketchPlane profile (VectorCurve3d.interpolateFrom v1 v2)
 
 translational ::
   Tolerance Meters =>

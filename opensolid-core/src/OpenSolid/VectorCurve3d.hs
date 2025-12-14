@@ -13,7 +13,7 @@ module OpenSolid.VectorCurve3d
   , evaluateBounds
   , zero
   , constant
-  , line
+  , interpolateFrom
   , arc
   , quadraticBezier
   , cubicBezier
@@ -482,8 +482,8 @@ on plane vectorCurve2d = do
           vectorCurve2d.compiled
   new compiledPlanar (on plane vectorCurve2d.derivative)
 
-line :: Vector3d units space -> Vector3d units space -> VectorCurve3d units space
-line v1 v2 = bezier (NonEmpty.two v1 v2)
+interpolateFrom :: Vector3d units space -> Vector3d units space -> VectorCurve3d units space
+interpolateFrom v1 v2 = bezier (NonEmpty.two v1 v2)
 
 arc ::
   Vector3d units space ->

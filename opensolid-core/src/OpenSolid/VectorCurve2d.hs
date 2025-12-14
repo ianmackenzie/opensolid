@@ -17,7 +17,7 @@ module OpenSolid.VectorCurve2d
   , constant
   , unit
   , xy
-  , line
+  , interpolateFrom
   , arc
   , quadraticBezier
   , cubicBezier
@@ -542,8 +542,8 @@ xy x y = do
           y.compiled
   new compiledXY (xy x.derivative y.derivative)
 
-line :: Vector2d units space -> Vector2d units space -> VectorCurve2d units space
-line v1 v2 = bezier (NonEmpty.two v1 v2)
+interpolateFrom :: Vector2d units space -> Vector2d units space -> VectorCurve2d units space
+interpolateFrom v1 v2 = bezier (NonEmpty.two v1 v2)
 
 arc ::
   Vector2d units space ->
