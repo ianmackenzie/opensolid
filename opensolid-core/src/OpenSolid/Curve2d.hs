@@ -6,6 +6,7 @@ module OpenSolid.Curve2d
   , recursive
   , constant
   , xy
+  , line
   , lineFrom
   , arcFrom
   , polarArc
@@ -111,6 +112,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Line2d (Line2d (Line2d))
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -329,6 +331,10 @@ xy :: Curve units -> Curve units -> Curve2d units space
 xy x y = do
   let compiledXY = CompiledFunction.map2 Expression.xy Point2d Bounds2d x.compiled y.compiled
   new compiledXY (VectorCurve2d.xy x.derivative y.derivative)
+
+-- | Convert a line to a curve.
+line :: Line2d units space -> Curve2d units space
+line (Line2d p1 p2) = lineFrom p1 p2
 
 -- | Create a line between two points.
 lineFrom :: Point2d units space -> Point2d units space -> Curve2d units space
