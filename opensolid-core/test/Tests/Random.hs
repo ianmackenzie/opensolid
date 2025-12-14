@@ -143,7 +143,7 @@ vectorBounds2d :: Generator (VectorBounds2d Meters space)
 vectorBounds2d = Random.map2 VectorBounds2d lengthBounds lengthBounds
 
 line2d :: Tolerance Meters => Generator (Curve2d Meters space)
-line2d = Random.map2 Curve2d.line point2d point2d
+line2d = Random.map2 Curve2d.lineFrom point2d point2d
 
 arc2d :: Tolerance Meters => Generator (Curve2d Meters space)
 arc2d = do
@@ -152,7 +152,7 @@ arc2d = do
   angleSign <- Sign.random
   angleMagnitude <- Quantity.random (Angle.degrees 5) (Angle.degrees 355)
   let sweptAngle = angleSign .*. angleMagnitude
-  Random.return (Curve2d.arc startPoint endPoint sweptAngle)
+  Random.return (Curve2d.arcFrom startPoint endPoint sweptAngle)
 
 quadraticSpline2d :: Tolerance Meters => Generator (Curve2d Meters space)
 quadraticSpline2d = Random.map3 Curve2d.quadraticBezier point2d point2d point2d

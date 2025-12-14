@@ -31,11 +31,11 @@ main = Tolerance.using Length.nanometer do
   let holeCenter = Point2D (width .-. cornerRadius) (height .-. cornerRadius)
   region <- Result.orFail do
     Region2d.boundedBy
-      [ Curve2d.line p0 p1
-      , Curve2d.line p1 p2
-      , Curve2d.arc p2 p3 Angle.quarterTurn
-      , Curve2d.line p3 p4
-      , Curve2d.line p4 p0
+      [ Curve2d.lineFrom p0 p1
+      , Curve2d.lineFrom p1 p2
+      , Curve2d.arcFrom p2 p3 Angle.quarterTurn
+      , Curve2d.lineFrom p3 p4
+      , Curve2d.lineFrom p4 p0
       , Curve2d.circle (Circle2d.withDiameter holeDiameter holeCenter)
       ]
   let resolution = Resolution.maxError (Length.millimeters 1)

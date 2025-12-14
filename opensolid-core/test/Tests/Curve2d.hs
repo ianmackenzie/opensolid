@@ -131,8 +131,8 @@ equalOverlapSegmentLists actualSegments expectedSegments =
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "curveOverlap1" Test.do
-  let arc1 = Curve2d.arc (Point2D.meters 1 0) (Point2D.meters -1 0) Angle.halfTurn
-  let arc2 = Curve2d.arc (Point2D.meters 0 -1) (Point2D.meters 0 1) Angle.halfTurn
+  let arc1 = Curve2d.arcFrom (Point2D.meters 1 0) (Point2D.meters -1 0) Angle.halfTurn
+  let arc2 = Curve2d.arcFrom (Point2D.meters 0 -1) (Point2D.meters 0 1) Angle.halfTurn
   actualSegments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.one (OverlappingSegment (Bounds 0 0.5) (Bounds 0.5 1) Positive)
@@ -161,8 +161,8 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "crossingIntersection" Test.do
-  let arc1 = Curve2d.arc Point2D.origin (Point2D.meters 0 1) Angle.halfTurn
-  let arc2 = Curve2d.arc Point2D.origin (Point2D.meters 1 0) (negative Angle.halfTurn)
+  let arc1 = Curve2d.arcFrom Point2D.origin (Point2D.meters 0 1) Angle.halfTurn
+  let arc2 = Curve2d.arcFrom Point2D.origin (Point2D.meters 1 0) (negative Angle.halfTurn)
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
@@ -205,7 +205,7 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "solving" Test.do
-  let arc = Curve2d.arc (Point2D.meters 0 1) (Point2D.meters 1 0) Angle.quarterTurn
+  let arc = Curve2d.arcFrom (Point2D.meters 0 1) (Point2D.meters 1 0) Angle.quarterTurn
   let distanceFromOrigin = VectorCurve2d.magnitude (arc .-. Point2D.origin)
   let desiredDistance = Length.meters 0.5
   zeros <- Curve.zeros (distanceFromOrigin .-. desiredDistance)
@@ -387,7 +387,7 @@ arcConstruction = do
         let sweptAngle = Angle.degrees (Number.fromInt numDegrees)
         let expectedPoint = Point2D.meters expectedX expectedY
         Test.verify label Test.do
-          let arc = Curve2d.arc Point2D.origin (Point2D.meters 1 1) sweptAngle
+          let arc = Curve2d.arcFrom Point2D.origin (Point2D.meters 1 1) sweptAngle
           Test.expect (Curve2d.evaluate arc 0.5 ~= expectedPoint)
   let invSqrt2 = 1 /. Number.sqrt 2
   Test.group "from" $

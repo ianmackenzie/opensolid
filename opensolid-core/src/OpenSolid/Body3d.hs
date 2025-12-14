@@ -225,7 +225,7 @@ sphere (Named centerPoint) (Named diameter) =
       let radius = 0.5 *. diameter
       let p1 = Point2D.y (negative radius)
       let p2 = Point2D.y radius
-      let profileCurves = [Curve2d.arc p1 p2 Angle.pi, Curve2d.line p2 p1]
+      let profileCurves = [Curve2d.arcFrom p1 p2 Angle.pi, Curve2d.lineFrom p2 p1]
       case Region2d.boundedBy profileCurves of
         Error _ -> throw (InternalError "Semicircle profile construction should always succeed")
         Ok profile ->

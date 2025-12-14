@@ -39,11 +39,11 @@ main = Tolerance.using Length.nanometer do
           (#outgoing Direction2d.x)
           (#radius filletRadius)
   let topRightCurves =
-        [ Curve2d.line p1 fillet.startPoint
+        [ Curve2d.lineFrom p1 fillet.startPoint
         , fillet
-        , Curve2d.line fillet.endPoint p3
-        , Curve2d.line p3 p4
-        , Curve2d.line p4 p5
+        , Curve2d.lineFrom fillet.endPoint p3
+        , Curve2d.lineFrom p3 p4
+        , Curve2d.lineFrom p4 p5
         ]
   let topCurves = topRightCurves <> List.map (Curve2d.mirrorAcross Axis2d.y) topRightCurves
   let allCurves = topCurves <> List.map (Curve2d.mirrorAcross Axis2d.x) topCurves

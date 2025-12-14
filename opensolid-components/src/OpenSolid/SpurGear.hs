@@ -91,13 +91,13 @@ profile gear = do
           leftEnd
           [leftDerivativeMagnitude .*. leftEndTangent]
   let rightApproximation = Curve2d.mirrorAcross Axis2d.y leftApproximation
-  let tip = Curve2d.line leftApproximation.endPoint rightApproximation.endPoint
+  let tip = Curve2d.lineFrom leftApproximation.endPoint rightApproximation.endPoint
   let angularSpacing = Angle.twoPi ./. Number.fromInt n
   let nextToothStart =
         Point2D.rotateAround Point2D.origin angularSpacing rightApproximation.startPoint
   let connector
-        | rd > rb = Curve2d.line leftStart nextToothStart
-        | otherwise = Curve2d.arc leftStart nextToothStart (negative Angle.pi)
+        | rd > rb = Curve2d.lineFrom leftStart nextToothStart
+        | otherwise = Curve2d.arcFrom leftStart nextToothStart (negative Angle.pi)
   let toothProfileCurves = [leftApproximation, rightApproximation, tip, connector]
   let rotatedProfileCurves i = do
         let angle = Number.fromInt i .*. angularSpacing

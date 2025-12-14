@@ -32,7 +32,7 @@ testCurve label curve = Tolerance.using (Length.meters 1e-12) do
 
 testLineLength :: IO ()
 testLineLength = Tolerance.using (Length.meters 1e-6) do
-  testCurve "Line" (Curve2d.line Point2D.origin (Point2D.centimeters 30 40))
+  testCurve "Line" (Curve2d.lineFrom Point2D.origin (Point2D.centimeters 30 40))
 
 testQuadraticSplineLength :: IO ()
 testQuadraticSplineLength = do

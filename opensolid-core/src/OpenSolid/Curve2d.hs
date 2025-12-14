@@ -6,8 +6,8 @@ module OpenSolid.Curve2d
   , recursive
   , constant
   , xy
-  , line
-  , arc
+  , lineFrom
+  , arcFrom
   , polarArc
   , sweptArc
   , cornerArc
@@ -337,31 +337,31 @@ xy x y = do
   new compiledXY (VectorCurve2d.xy x.derivative y.derivative)
 
 -- | Create a line between two points.
-line :: Point2d units space -> Point2d units space -> Curve2d units space
-line p1 p2 = bezier (NonEmpty.two p1 p2)
+lineFrom :: Point2d units space -> Point2d units space -> Curve2d units space
+lineFrom p1 p2 = bezier (NonEmpty.two p1 p2)
 
-{-| Create an arc with the given start point, end point and swept angle.
+{-| Create an arc from the given start point to the given end point, with the given swept angle.
 
 A positive swept angle means the arc turns counterclockwise (turns to the left),
 and a negative swept angle means it turns clockwise (turns to the right).
 For example, an arc with a swept angle of positive 90 degrees
 is quarter circle that turns to the left.
 -}
-arc ::
+arcFrom ::
   Tolerance units =>
   Point2d units space ->
   Point2d units space ->
   Angle ->
   Curve2d units space
-arc givenStartPoint givenEndPoint sweptAngle =
+arcFrom givenStartPoint givenEndPoint sweptAngle =
   case Vector2d.magnitudeAndDirection (givenEndPoint .-. givenStartPoint) of
-    Error Vector2d.IsZero -> line givenStartPoint givenEndPoint
+    Error Vector2d.IsZero -> lineFrom givenStartPoint givenEndPoint
     Ok (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 *. distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 *. sweptAngle)
       let linearDeviation = halfDistance .*. tanHalfAngle
       if linearDeviation ~= Quantity.zero
-        then line givenStartPoint givenEndPoint
+        then lineFrom givenStartPoint givenEndPoint
         else do
           let offset = (halfDistance ./. tanHalfAngle) .*. Direction2d.rotateLeft directionBetweenPoints
           let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint .+. offset
@@ -408,12 +408,12 @@ cornerArc cornerPoint (Named incomingDirection) (Named outgoingDirection) (Named
   let radius = Quantity.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
   if 0.25 *. radius .*. Number.squared (Angle.inRadians sweptAngle) ~= Quantity.zero
-    then line cornerPoint cornerPoint
+    then lineFrom cornerPoint cornerPoint
     else do
       let offset = radius .*. Number.abs (Angle.tan (0.5 *. sweptAngle))
       let computedStartPoint = cornerPoint .-. offset .*. incomingDirection
       let computedEndPoint = cornerPoint .+. offset .*. outgoingDirection
-      arc computedStartPoint computedEndPoint sweptAngle
+      arcFrom computedStartPoint computedEndPoint sweptAngle
 
 data WhichArc
   = SmallCounterclockwise
@@ -453,7 +453,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
               LargeCounterclockwise -> Angle.twoPi .-. shortAngle
       sweptArc centerPoint givenStartPoint sweptAngle
     Error Direction2d.PointsAreCoincident ->
-      line givenStartPoint givenEndPoint
+      lineFrom givenStartPoint givenEndPoint
 
 ellipticalArc ::
   Frame2d units global local ->

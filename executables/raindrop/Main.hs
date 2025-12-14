@@ -26,8 +26,8 @@ main = Tolerance.using Length.nanometer do
   profile <- Result.orFail do
     Region2d.boundedBy
       [ Curve2d.hermite p1 [] p2 [v2]
-      , Curve2d.arc p2 p3 Angle.quarterTurn
-      , Curve2d.line p3 p1
+      , Curve2d.arcFrom p2 p3 Angle.quarterTurn
+      , Curve2d.lineFrom p3 p1
       ]
   body <- Result.orFail (Body3d.revolved World3d.frontPlane profile Axis2d.y Angle.twoPi)
   let material = PbrMaterial.nonmetal Color.blue (#roughness 0.2)

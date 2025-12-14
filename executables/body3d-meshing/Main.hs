@@ -25,7 +25,7 @@ main = Tolerance.using Length.nanometer do
           (#radius radius)
           (#startAngle (Angle.degrees -45))
           (#endAngle (Angle.degrees 225))
-  let line = Curve2d.line arc.endPoint arc.startPoint
+  let line = Curve2d.lineFrom arc.endPoint arc.startPoint
   profile <- Result.orFail (Region2d.boundedBy [arc, line])
   body <- Result.orFail (Body3d.extruded World3d.frontPlane profile (-0.5 *. length) (0.5 *. length))
   let resolution = Resolution.maxSize (Length.centimeters 30)

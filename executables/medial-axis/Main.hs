@@ -39,7 +39,7 @@ testSplineAndArc = do
           (Point2D.centimeters 5 6)
           (Point2D.centimeters 10 9)
           (Point2D.centimeters 15 7)
-  let arc = Curve2d.arc (Point2D.centimeters 15 0) Point2D.origin (Angle.degrees 20)
+  let arc = Curve2d.arcFrom (Point2D.centimeters 15 0) Point2D.origin (Angle.degrees 20)
   testCurveMedialAxis "testSplineAndArc" spline arc
 
 testSplineAndLine :: Tolerance Meters => IO ()
@@ -50,7 +50,7 @@ testSplineAndLine = do
           (Point2D.centimeters 10 10)
           (Point2D.centimeters 10 10)
           (Point2D.centimeters 5 15)
-  let line = Curve2d.line Point2D.origin (Point2D.centimeters 20 0)
+  let line = Curve2d.lineFrom Point2D.origin (Point2D.centimeters 20 0)
   testCurveMedialAxis "testSplineAndLine" spline line
 
 testCurveMedialAxis ::

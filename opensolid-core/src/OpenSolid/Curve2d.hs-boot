@@ -10,7 +10,7 @@ module OpenSolid.Curve2d
   , tangentDirection
   , reverse
   , xy
-  , line
+  , lineFrom
   , hermite
   , desingularize
   , transformBy
@@ -85,7 +85,7 @@ tangentDirection ::
   Result IsPoint (DirectionCurve2d space)
 reverse :: Curve2d units space -> Curve2d units space
 xy :: Curve units -> Curve units -> Curve2d units space
-line :: Point2d units space -> Point2d units space -> Curve2d units space
+lineFrom :: Point2d units space -> Point2d units space -> Curve2d units space
 hermite ::
   Point2d units space ->
   List (Vector2d units space) ->

@@ -44,11 +44,11 @@ with Tolerance(Length.meters(1e-9)):
         radius=fillet_radius,
     )
     template = [
-        Curve2d.line(p1, fillet.start_point),
+        Curve2d.line_from(p1, fillet.start_point),
         fillet,
-        Curve2d.line(fillet.end_point, p3),
-        Curve2d.line(p3, p4),
-        Curve2d.line(p4, p5),
+        Curve2d.line_from(fillet.end_point, p3),
+        Curve2d.line_from(p3, p4),
+        Curve2d.line_from(p4, p5),
     ]
     top_curves = template + [curve.mirror_across(Axis2d.y) for curve in template]
     curves = top_curves + [curve.mirror_across(Axis2d.x) for curve in top_curves]

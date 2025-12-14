@@ -41,10 +41,10 @@ square = Test.verify "square" Test.do
   let p2 = Point2D width zero
   let p3 = Point2D width width
   let p4 = Point2D zero width
-  let line1 = Curve2d.line p1 p2
-  let line2 = Curve2d.line p2 p3
-  let line3 = Curve2d.line p4 p3
-  let line4 = Curve2d.line p4 p1
+  let line1 = Curve2d.lineFrom p1 p2
+  let line2 = Curve2d.lineFrom p2 p3
+  let line3 = Curve2d.lineFrom p4 p3
+  let line4 = Curve2d.lineFrom p4 p1
   region <- Region2d.boundedBy [line1, line3, line2, line4]
   Test.expect (areaIsApproximately (width .*. width) region)
 
@@ -54,9 +54,9 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   let p1 = Point2D.origin
   let p2 = Point2D radius zero
   let p3 = Point2D zero radius
-  let line1 = Curve2d.line p1 p2
-  let line2 = Curve2d.line p1 p3
-  let arc = Curve2d.arc p2 p3 Angle.quarterTurn
+  let line1 = Curve2d.lineFrom p1 p2
+  let line2 = Curve2d.lineFrom p1 p3
+  let arc = Curve2d.arcFrom p2 p3 Angle.quarterTurn
   region <- Region2d.boundedBy [line1, line2, arc]
   let expectedArea = 0.25 *. Number.pi .*. radius .*. radius
   Test.expect (areaIsApproximately expectedArea region)
@@ -68,10 +68,10 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let p2 = Point2D width zero
   let p3 = Point2D width width
   let p4 = Point2D zero width
-  let line1 = Curve2d.line p1 p2
-  let line2 = Curve2d.line p2 p3
-  let line3 = Curve2d.line p4 p3
-  let line4 = Curve2d.line p4 p1
+  let line1 = Curve2d.lineFrom p1 p2
+  let line2 = Curve2d.lineFrom p2 p3
+  let line3 = Curve2d.lineFrom p4 p3
+  let line4 = Curve2d.lineFrom p4 p1
   let centerPoint = Point2D (0.5 *. width) (0.5 *. width)
   let holeDiameter = 0.5 *. width
   let holeRadius = 0.5 *. holeDiameter
@@ -87,9 +87,9 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
   let p2 = Point2D width zero
   let p3 = Point2D width width
   let p4 = Point2D zero width
-  let line1 = Curve2d.line p1 p2
-  let line2 = Curve2d.line p2 p3
-  let line3 = Curve2d.line p4 p3
+  let line1 = Curve2d.lineFrom p1 p2
+  let line2 = Curve2d.lineFrom p2 p3
+  let line3 = Curve2d.lineFrom p4 p3
   case Region2d.boundedBy [line1, line2, line3] of
     Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
     Error error -> Test.expect (error == Region2d.BoundedBy.BoundaryHasGaps)
@@ -101,10 +101,10 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
   let p2 = Point2D width zero
   let p3 = Point2D width width
   let p4 = Point2D zero width
-  let line1 = Curve2d.line p1 p2
-  let line2 = Curve2d.line p2 p3
-  let line3 = Curve2d.line p4 p3
-  let line4 = Curve2d.line p4 p1
+  let line1 = Curve2d.lineFrom p1 p2
+  let line2 = Curve2d.lineFrom p2 p3
+  let line3 = Curve2d.lineFrom p4 p3
+  let line4 = Curve2d.lineFrom p4 p1
   let centerPoint = Point2D (0.5 *. width) (0.5 *. width)
   let hole = Curve2d.circle (Circle2d.withDiameter width centerPoint)
   case Region2d.boundedBy [line1, line2, line3, line4, hole] of

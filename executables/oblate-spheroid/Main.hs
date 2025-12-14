@@ -21,7 +21,7 @@ main = Tolerance.using Length.nanometer do
   let p3 = Point2D.centimeters 20 10
   let p4 = Point2D.centimeters 0 10
   let spline = Curve2d.cubicBezier p1 p2 p3 p4
-  profile <- Result.orFail (Region2d.boundedBy [spline, Curve2d.line p4 p1])
+  profile <- Result.orFail (Region2d.boundedBy [spline, Curve2d.lineFrom p4 p1])
   body <- Result.orFail (Body3d.revolved World3d.rightPlane profile Axis2d.y Angle.twoPi)
   let model = Model3d.body body
   let resolution = Resolution.maxError (Length.millimeters 0.05)

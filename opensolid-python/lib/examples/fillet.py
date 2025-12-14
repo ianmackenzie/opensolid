@@ -32,12 +32,12 @@ with Tolerance(Length.nanometers(1)):
     p7 = Point2d.centimeters(0, 3)
 
     right_curves = [
-        Curve2d.line(p1, p2),
-        Curve2d.line(p2, p3),
-        Curve2d.line(p3, p4),
-        Curve2d.line(p4, p5),
-        Curve2d.line(p5, p6),
-        Curve2d.arc(p6, p7, Angle.quarter_turn),
+        Curve2d.line_from(p1, p2),
+        Curve2d.line_from(p2, p3),
+        Curve2d.line_from(p3, p4),
+        Curve2d.line_from(p4, p5),
+        Curve2d.line_from(p5, p6),
+        Curve2d.arc_from(p6, p7, Angle.quarter_turn),
     ]
     left_curves = [curve.mirror_across(Axis2d.y) for curve in right_curves]
     base_region = Region2d.bounded_by(left_curves + right_curves)

@@ -29,11 +29,11 @@ main = Tolerance.using Length.nanometer do
   let p4 = Point2D innerRadius width
   profile <- Result.orFail do
     Region2d.boundedBy
-      [ Curve2d.line p0 p1
-      , Curve2d.line p1 p2
-      , Curve2d.arc p2 p3 (negative Angle.quarterTurn)
-      , Curve2d.line p3 p4
-      , Curve2d.line p4 p0
+      [ Curve2d.lineFrom p0 p1
+      , Curve2d.lineFrom p1 p2
+      , Curve2d.arcFrom p2 p3 (negative Angle.quarterTurn)
+      , Curve2d.lineFrom p3 p4
+      , Curve2d.lineFrom p4 p0
       ]
   body <- Result.orFail (Body3d.revolved World3d.rightPlane profile Axis2d.y (Angle.degrees 270))
   let resolution = Resolution.maxError (Length.millimeters 0.2)

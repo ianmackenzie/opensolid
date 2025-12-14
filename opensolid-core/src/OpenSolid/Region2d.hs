@@ -154,10 +154,10 @@ rectangle (Bounds2d xBounds yBounds) =
       let p22 = Point2d x2 y2
       let edges =
             NonEmpty.four
-              (Curve2d.line p11 p21)
-              (Curve2d.line p21 p22)
-              (Curve2d.line p22 p12)
-              (Curve2d.line p12 p11)
+              (Curve2d.lineFrom p11 p21)
+              (Curve2d.lineFrom p21 p22)
+              (Curve2d.lineFrom p22 p12)
+              (Curve2d.lineFrom p12 p11)
       Region2d edges []
 
 -- | Create a region from the given circle.
@@ -170,7 +170,7 @@ circle givenCircle =
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2d units space -> Result BoundedBy.Error (Region2d units space)
 polygon givenPolygon = do
-  let toCurve (Line2d p1 p2) = if p1 ~= p2 then Nothing else Just (Curve2d.line p1 p2)
+  let toCurve (Line2d p1 p2) = if p1 ~= p2 then Nothing else Just (Curve2d.lineFrom p1 p2)
   boundedBy (NonEmpty.filterMap toCurve (Polygon2d.edges givenPolygon))
 
 {-| Fillet a region at the given corner points, with the given radius.
