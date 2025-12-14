@@ -1506,6 +1506,7 @@ curve2d =
   Class.new @Curve2d $(docs ''Curve2d.Curve2d) $
     [ Class.factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
     , Class.factory2 "XY" "X Coordinate" "Y Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
+    , Class.factory1 "Line" "Line" Curve2d.line $(docs 'Curve2d.line)
     , Class.factory2 "Line From" "Start Point" "End Point" Curve2d.lineFrom $(docs 'Curve2d.lineFrom)
     , Class.factoryM3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2d.arcFrom $(docs 'Curve2d.arcFrom)
     , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
@@ -1535,6 +1536,7 @@ uvCurve =
   Class.new @UvCurve "A curve in UV parameter space." $
     [ Class.factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
     , Class.factory2 "UV" "U Coordinate" "V Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
+    , Class.factory1 "Line" "Line" Curve2d.line $(docs 'Curve2d.line)
     , Class.factory2 "Line From" "Start Point" "End Point" Curve2d.lineFrom $(docs 'Curve2d.lineFrom)
     , Class.factoryU3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2d.arcFrom $(docs 'Curve2d.arcFrom)
     , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
