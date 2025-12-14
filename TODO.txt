@@ -1,7 +1,35 @@
+Allow Set#d to be empty?
+- would have to remove Set#d.bounds but that's probably OK...
+
+Refactor Polygon2d.edges to filter out (approximately) zero-length edges?
+- useful for removing duplicate last edge if last vertex is equal to first vertex
+- often have polygons in UV space though...maybe just use *exact* equality?
+
+Refactor curve construction from line segments?
+- maybe also rename Curve2d.arc to Curve2d.arcFrom, add Arc2D type?
+  - then move:
+    - Curve2d.polarArc to Arc2d.polar
+    - Curve2d.sweptArc to Arc2d.swept
+    - Curve2d.cornerArc to Arc2d.corner
+      - or Curve2d.fillet, since it can produce a line
+      - or just remove it, since we have Region2d.fillet which is more flexible/powerful
+      - or change Curve2d.fillet to act on two arbitrary curves?
+    - Curve2d.radiusArc to Arc2d.withRadius or Arc2d.svg
+      - replace WhichArc type with named #small argument plus Sign argument?
+        - WhichArc seems nice, perhaps renamed to Arc2d.Which...
+    - keep Curve2d.arcFrom without equivalent in Arc2d,
+      since that can actually result in a line instead
+- could then add Curve2d.asLine, Curve2d.asArc, Curve2d.asCircle etc.
+- could also have Curve2D.Line, Curve2D.Arc, Curve2D.LineFrom, Curve2D.ArcFrom patterns
+  - should even be able to map those to Python patterns!
+- do for Curve3D too...add Line3D etc.
+
+Add Bezier#d etc. types/modules?
+- more complex to try to provide Curve#d.asBezier though...unless perhaps user has to pass desired degree
+  (e.g. 'Curve2d.asBezier 3' to attempt to convert to a cubic Bezier curve)
+
 Switch SurfaceFunction zero finding to use new Bisection module
 - will need to implement solution curve trimming/merging
-
-Change Region2d.polygon to take a Polygon2d
 
 Use CBOR for FFI calls from target languages
 -> have single calling function:
