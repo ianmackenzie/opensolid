@@ -476,7 +476,7 @@ customArc ::
   Angle ->
   Curve2d units space
 customArc p0 v1 v2 a b = do
-  let angle = Curve.line a b
+  let angle = Curve.interpolateFrom a b
   p0 .+. v1 .*. Curve.cos angle .+. v2 .*. Curve.sin angle
 
 -- | Create a curve from the given circle.

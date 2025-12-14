@@ -17,7 +17,7 @@ module OpenSolid.Curve
   , desingularize
   , desingularized
   , t
-  , line
+  , interpolateFrom
   , bezier
   , hermite
   , quadraticSpline
@@ -170,8 +170,8 @@ t :: Curve Unitless
 t = new (CompiledFunction.concrete Expression.t) (constant 1)
 
 -- | Create a curve that linearly interpolates from the first value to the second.
-line :: Quantity units -> Quantity units -> Curve units
-line a b = a .+. t .*. (b .-. a)
+interpolateFrom :: Quantity units -> Quantity units -> Curve units
+interpolateFrom a b = a .+. t .*. (b .-. a)
 
 -- | Get the derivative of a curve.
 derivative :: Curve units -> Curve units

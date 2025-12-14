@@ -876,7 +876,7 @@ curve =
     [ Class.constant "Zero" (Curve.zero @Unitless) $(docs 'Curve.zero)
     , Class.constant "T" Curve.t $(docs 'Curve.t)
     , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , Class.factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
+    , Class.factory2 "Interpolate From" "Start" "End" Curve.interpolateFrom $(docs 'Curve.interpolateFrom)
     , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
     , Class.member0 "Squared" Curve.squared $(docs 'Curve.squared)
     , Class.memberU0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
@@ -919,7 +919,7 @@ angleCurve =
   Class.new @AngleCurve "A parametric curve definining an angle in terms of a parameter value." $
     [ Class.constant "Zero" (Curve.zero @Radians) $(docs 'Curve.zero)
     , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , Class.factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
+    , Class.factory2 "Interpolate From" "Start" "End" Curve.interpolateFrom $(docs 'Curve.interpolateFrom)
     , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
     , Class.member0 "Sin" Curve.sin $(docs 'Curve.sin)
     , Class.member0 "Cos" Curve.cos $(docs 'Curve.cos)
@@ -947,7 +947,7 @@ lengthCurve =
   Class.new @LengthCurve "A parametric curve definining a length in terms of a parameter value." $
     [ Class.constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
     , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , Class.factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
+    , Class.factory2 "Interpolate From" "Start" "End" Curve.interpolateFrom $(docs 'Curve.interpolateFrom)
     , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
     , Class.member0 "Squared" Curve.squared $(docs 'Curve.squared)
     , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
@@ -976,7 +976,7 @@ areaCurve =
   Class.new @AreaCurve "A parametric curve definining an area in terms of a parameter value." $
     [ Class.constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
     , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , Class.factory2 "Line" "Start" "End" Curve.line $(docs 'Curve.line)
+    , Class.factory2 "Interpolate From" "Start" "End" Curve.interpolateFrom $(docs 'Curve.interpolateFrom)
     , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
     , Class.memberM0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
     , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)

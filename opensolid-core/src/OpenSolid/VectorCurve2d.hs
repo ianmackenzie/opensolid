@@ -555,7 +555,7 @@ arc v1 v2 a b
   | v1 == Vector2d.zero && v2 == Vector2d.zero = zero
   | a == b = constant (Angle.cos a .*. v1 .+. Angle.sin a .*. v2)
   | otherwise = do
-      let angle = Curve.line a b
+      let angle = Curve.interpolateFrom a b
       v1 .*. Curve.cos angle .+. v2 .*. Curve.sin angle
 
 quadraticBezier ::
