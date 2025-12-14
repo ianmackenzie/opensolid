@@ -25,10 +25,10 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.Transform2d (Transform2d)
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 
 type role Curve2d nominal nominal
