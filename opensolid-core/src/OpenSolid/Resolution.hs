@@ -25,7 +25,7 @@ instance FFI (Resolution Meters) where
 maxError :: Quantity units -> Resolution units
 maxError error = Resolution{maxError = error, maxSize = Quantity.infinity}
 
--- | Specify the maximum size of any element (line segment, triangle) in the approximation.
+-- | Specify the maximum size of any element (line, triangle) in the approximation.
 maxSize :: Quantity units -> Resolution units
 maxSize size = Resolution{maxError = Quantity.infinity, maxSize = size}
 

@@ -57,7 +57,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.InternalError (InternalError (InternalError))
-import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
+import OpenSolid.Line2d (Line2d (Line2d))
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
@@ -170,7 +170,7 @@ circle givenCircle =
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2d units space -> Result BoundedBy.Error (Region2d units space)
 polygon givenPolygon = do
-  let toCurve (LineSegment2d p1 p2) = if p1 ~= p2 then Nothing else Just (Curve2d.line p1 p2)
+  let toCurve (Line2d p1 p2) = if p1 ~= p2 then Nothing else Just (Curve2d.line p1 p2)
   boundedBy (NonEmpty.filterMap toCurve (Polygon2d.edges givenPolygon))
 
 {-| Fillet a region at the given corner points, with the given radius.

@@ -32,7 +32,7 @@ import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Length (Length)
-import OpenSolid.LineSegment2d (LineSegment2d)
+import OpenSolid.Line2d (Line2d)
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
@@ -242,7 +242,7 @@ linearizationPredicate accuracy fuu fuv fvv curve2d secondDerivative3d subdomain
 generateSteinerPoints ::
   Length ->
   UvBounds ->
-  Set2d (LineSegment2d Unitless UvSpace) Unitless UvSpace ->
+  Set2d (Line2d Unitless UvSpace) Unitless UvSpace ->
   VectorSurfaceFunction3d Meters space ->
   VectorSurfaceFunction3d Meters space ->
   VectorSurfaceFunction3d Meters space ->
@@ -270,10 +270,7 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
         then UvPoint (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
         else recurse
 
-includeSubdomain ::
-  UvBounds ->
-  Set2d (LineSegment2d Unitless UvSpace) Unitless UvSpace ->
-  Fuzzy Bool
+includeSubdomain :: UvBounds -> Set2d (Line2d Unitless UvSpace) Unitless UvSpace -> Fuzzy Bool
 includeSubdomain subdomain edgeSet = Tolerance.using Quantity.zero $
   case edgeSet of
     Set2d.Node nodeBounds leftChild rightChild

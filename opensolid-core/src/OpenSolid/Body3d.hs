@@ -48,8 +48,8 @@ import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Length (Length)
-import OpenSolid.LineSegment2d (LineSegment2d)
-import OpenSolid.LineSegment2d qualified as LineSegment2d
+import OpenSolid.Line2d (Line2d)
+import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
@@ -848,20 +848,20 @@ leadingEdgeVerticesImpl innerEdgeVerticesById edgeId uvStartPoint =
     Just innerEdgeVertices -> uvStartPoint :| innerEdgeVertices
     Nothing -> throw (InternalError "Should always be able to look up internal edge vertices by ID")
 
-steinerPoint :: Set2d (LineSegment2d Unitless UvSpace) Unitless UvSpace -> UvBounds -> Maybe UvPoint
+steinerPoint :: Set2d (Line2d Unitless UvSpace) Unitless UvSpace -> UvBounds -> Maybe UvPoint
 steinerPoint boundarySegmentSet uvBounds = do
   let Bounds2d uBounds vBounds = uvBounds
   let uvPoint = UvPoint (Bounds.midpoint uBounds) (Bounds.midpoint vBounds)
   if isValidSteinerPoint boundarySegmentSet uvPoint then Just uvPoint else Nothing
 
-isValidSteinerPoint :: Set2d (LineSegment2d Unitless UvSpace) Unitless UvSpace -> UvPoint -> Bool
+isValidSteinerPoint :: Set2d (Line2d Unitless UvSpace) Unitless UvSpace -> UvPoint -> Bool
 isValidSteinerPoint edgeSet uvPoint = case edgeSet of
   Set2d.Node nodeBounds left right ->
     case Bounds2d.exclusion# uvPoint nodeBounds >=# 0.5## *# Bounds2d.diameter# nodeBounds of
       1# -> True
       _ -> isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint
   Set2d.Leaf _ edge ->
-    case LineSegment2d.distanceTo# uvPoint edge >=# 0.5## *# LineSegment2d.length# edge of
+    case Line2d.distanceTo# uvPoint edge >=# 0.5## *# Line2d.length# edge of
       1# -> True
       _ -> False
 

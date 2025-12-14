@@ -31,7 +31,7 @@ import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
-import OpenSolid.LineSegment2d qualified as LineSegment2d
+import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.List qualified as List
 import OpenSolid.Mitsuba qualified as Mitsuba
 import OpenSolid.Model3d qualified as Model3d
@@ -90,8 +90,8 @@ classes =
   , uvPoint
   , bounds2d
   , uvBounds
-  , lineSegment2d
-  , uvLineSegment
+  , line2d
+  , uvLine
   , triangle2d
   , circle2d
   , uvCircle
@@ -752,28 +752,28 @@ uvBounds =
     , Class.minus @UvVector Self
     ]
 
-type LineSegment2d = LineSegment2d.LineSegment2d Meters FFI.Space
+type Line2d = Line2d.Line2d Meters FFI.Space
 
-lineSegment2d :: Class
-lineSegment2d =
-  Class.new @LineSegment2d $(docs ''LineSegment2d.LineSegment2d) $
-    [ Class.constructor2 "Start Point" "End Point" LineSegment2d.LineSegment2d $(docs 'LineSegment2d.LineSegment2d)
-    , Class.property "Start Point" LineSegment2d.startPoint $(docs 'LineSegment2d.startPoint)
-    , Class.property "End Point" LineSegment2d.endPoint $(docs 'LineSegment2d.endPoint)
-    , Class.member0 "Length" LineSegment2d.length $(docs 'LineSegment2d.length)
-    , Class.member1 "Distance To" "Point" LineSegment2d.distanceTo $(docs 'LineSegment2d.distanceTo)
+line2d :: Class
+line2d =
+  Class.new @Line2d $(docs ''Line2d.Line2d) $
+    [ Class.constructor2 "Start Point" "End Point" Line2d.Line2d $(docs 'Line2d.Line2d)
+    , Class.property "Start Point" Line2d.startPoint $(docs 'Line2d.startPoint)
+    , Class.property "End Point" Line2d.endPoint $(docs 'Line2d.endPoint)
+    , Class.member0 "Length" Line2d.length $(docs 'Line2d.length)
+    , Class.member1 "Distance To" "Point" Line2d.distanceTo $(docs 'Line2d.distanceTo)
     ]
 
-type UvLineSegment = LineSegment2d.LineSegment2d Unitless UvSpace
+type UvLine = Line2d.Line2d Unitless UvSpace
 
-uvLineSegment :: Class
-uvLineSegment =
-  Class.new @UvLineSegment $(docs ''LineSegment2d.LineSegment2d) $
-    [ Class.constructor2 "Start Point" "End Point" LineSegment2d.LineSegment2d $(docs 'LineSegment2d.LineSegment2d)
-    , Class.property "Start Point" LineSegment2d.startPoint $(docs 'LineSegment2d.startPoint)
-    , Class.property "End Point" LineSegment2d.endPoint $(docs 'LineSegment2d.endPoint)
-    , Class.member0 "Length" LineSegment2d.length $(docs 'LineSegment2d.length)
-    , Class.member1 "Distance To" "Point" LineSegment2d.distanceTo $(docs 'LineSegment2d.distanceTo)
+uvLine :: Class
+uvLine =
+  Class.new @UvLine $(docs ''Line2d.Line2d) $
+    [ Class.constructor2 "Start Point" "End Point" Line2d.Line2d $(docs 'Line2d.Line2d)
+    , Class.property "Start Point" Line2d.startPoint $(docs 'Line2d.startPoint)
+    , Class.property "End Point" Line2d.endPoint $(docs 'Line2d.endPoint)
+    , Class.member0 "Length" Line2d.length $(docs 'Line2d.length)
+    , Class.member1 "Distance To" "Point" Line2d.distanceTo $(docs 'Line2d.distanceTo)
     ]
 
 type Triangle2d = Triangle2d.Triangle2d Meters FFI.Space

@@ -165,7 +165,7 @@ library
     OpenSolid.Intersects
     OpenSolid.Json
     OpenSolid.Length
-    OpenSolid.LineSegment2d
+    OpenSolid.Line2d
     OpenSolid.List
     OpenSolid.Map
     OpenSolid.Maybe

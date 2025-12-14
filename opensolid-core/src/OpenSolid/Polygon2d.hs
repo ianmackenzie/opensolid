@@ -17,7 +17,7 @@ import OpenSolid.Circle2d qualified as Circle2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.InternalError (InternalError (InternalError))
-import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
+import OpenSolid.Line2d (Line2d (Line2d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
@@ -28,7 +28,7 @@ import OpenSolid.Triangle2d (Triangle2d (Triangle2d))
 import OpenSolid.Triangle2d qualified as Triangle2d
 import OpenSolid.Units qualified as Units
 
-{-| A non-empty list of points joined by line segments.
+{-| A non-empty list of points joined by lines.
 
 The last point will be joined back to the first.
 -}
@@ -90,7 +90,7 @@ vertices :: Polygon2d units space -> NonEmpty (Point2d units space)
 vertices = (.vertices)
 
 -- | Get the edges of a polygon.
-edges :: Polygon2d units space -> NonEmpty (LineSegment2d units space)
+edges :: Polygon2d units space -> NonEmpty (Line2d units space)
 edges polygon = do
   let v0 :| vs = vertices polygon
   collectEdges v0 v0 vs
@@ -113,10 +113,10 @@ collectEdges ::
   Point2d units space ->
   Point2d units space ->
   List (Point2d units space) ->
-  NonEmpty (LineSegment2d units space)
+  NonEmpty (Line2d units space)
 collectEdges first current remaining = case remaining of
-  [] -> NonEmpty.one (LineSegment2d current first)
-  next : following -> NonEmpty.push (LineSegment2d current next) (collectEdges first next following)
+  [] -> NonEmpty.one (Line2d current first)
+  next : following -> NonEmpty.push (Line2d current next) (collectEdges first next following)
 
 map ::
   (Point2d units1 space1 -> Point2d units2 space2) ->

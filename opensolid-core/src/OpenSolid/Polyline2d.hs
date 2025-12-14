@@ -13,14 +13,14 @@ where
 
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
-import OpenSolid.LineSegment2d qualified as LineSegment2d
+import OpenSolid.Line2d (Line2d (Line2d))
+import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Polymorphic.Point2d (Point2d)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 
--- | A non-empty list of points joined by line segments.
+-- | A non-empty list of points joined by lines.
 newtype Polyline2d units space
   = -- | Construct a polyline from its vertices.
     Polyline2d {vertices :: NonEmpty (Point2d units space)}
@@ -52,12 +52,12 @@ endpoints :: Polyline2d units space -> (Point2d units space, Point2d units space
 endpoints polyline = (startPoint polyline, endPoint polyline)
 
 -- | Get the individual segments (edges) of a polyline.
-segments :: Polyline2d units space -> List (LineSegment2d units space)
-segments polyline = NonEmpty.successive LineSegment2d (vertices polyline)
+segments :: Polyline2d units space -> List (Line2d units space)
+segments polyline = NonEmpty.successive Line2d (vertices polyline)
 
--- | Get the total length of a polyline (the sum of the lengths of its edges).
+-- | Get the total length of a polyline (the sum of the lengths of its segments).
 length :: Polyline2d units space -> Quantity units
-length polyline = Quantity.sumOf LineSegment2d.length (segments polyline)
+length polyline = Quantity.sumOf Line2d.length (segments polyline)
 
 map ::
   (Point2d units1 space1 -> Point2d units2 space2) ->
