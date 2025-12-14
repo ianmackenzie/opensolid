@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from opensolid import (
     Angle,
     Axis2d,
@@ -19,7 +21,6 @@ from opensolid import (
     Tolerance,
     World3d,
 )
-from pathlib import Path
 
 with Tolerance(Length.nanometers(1)):
     p1 = Point2d.centimeters(0, 1)
