@@ -15,7 +15,6 @@ import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
 import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.List qualified as List
@@ -28,9 +27,8 @@ import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
-import OpenSolid.SurfaceParameter (SurfaceParameter (U))
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -55,7 +53,7 @@ data Problem units space = Problem
   , curve2 :: Curve2d units space
   , endpointIntersections :: List EndpointIntersection
   , crossingSolutionTarget :: VectorSurfaceFunction2d units space
-  , tangentSolutionTarget :: VectorSurfaceFunction2d units TangentSolutionTargetSpace
+  , tangentSolutionTarget :: VectorSurfaceFunction2d (units ?*? units) TangentSolutionTargetSpace
   }
 
 data EndpointIntersection = EndpointIntersection
@@ -159,14 +157,23 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
     else do
       subdomain1 <- classifySubdomain tBounds1
       subdomain2 <- classifySubdomain tBounds2
-      let firstBounds1 = VectorCurve2d.evaluateBounds curve1.derivative tBounds1
-      let firstBounds2 = VectorCurve2d.evaluateBounds curve2.derivative tBounds2
-      let secondBounds1 = VectorCurve2d.evaluateBounds curve1.derivative.derivative tBounds1
-      let secondBounds2 = VectorCurve2d.evaluateBounds curve2.derivative.derivative tBounds2
+      let firstDerivative1 = Curve2d.derivative curve1
+      let firstDerivative2 = Curve2d.derivative curve2
+      let secondDerivative1 = VectorCurve2d.derivative firstDerivative1
+      let secondDerivative2 = VectorCurve2d.derivative firstDerivative2
+      let firstBounds1 = VectorCurve2d.evaluateBounds firstDerivative1 tBounds1
+      let firstBounds2 = VectorCurve2d.evaluateBounds firstDerivative2 tBounds2
+      let secondBounds1 = VectorCurve2d.evaluateBounds secondDerivative1 tBounds1
+      let secondBounds2 = VectorCurve2d.evaluateBounds secondDerivative2 tBounds2
       let firstCrossProductSign = Bounds.resolvedSign (firstBounds1 `cross_` firstBounds2)
       let uniqueTangentSolution =
             secondDerivativesIndependent firstBounds1 firstBounds2 secondBounds1 secondBounds2
       let isInterior t1 t2 = Bisection.isInterior t1 tBounds1 && Bisection.isInterior t2 tBounds2
+      let equalPoints t1 t2 = Curve2d.evaluate curve1 t1 ~= Curve2d.evaluate curve2 t2
+      let equalTangents t1 t2 = do
+            let tangent1 = Vector2d.normalize (VectorCurve2d.evaluate firstDerivative1 t1)
+            let tangent2 = Vector2d.normalize (VectorCurve2d.evaluate firstDerivative2 t2)
+            Tolerance.using 1e-9 (tangent1 `cross` tangent2 ~= Quantity.zero)
       let resolvedEndpointIntersection size allowedAlignment = do
             let isLocal EndpointIntersection{intersectionPoint} =
                   Bounds.includes intersectionPoint.t1 tBounds1
@@ -190,20 +197,16 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
         (Inner, Inner)
           | Resolved sign <- firstCrossProductSign -> do
               let uvPoint0 = Point2d (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
-              case NewtonRaphson.surface2d problem.crossingSolutionTarget uvPoint0 of
-                Error NewtonRaphson.Divergence -> Unresolved
-                Ok (Point2d t1 t2) ->
-                  if isInterior t1 t2
-                    then Resolved (Just (IntersectionPoint.crossing t1 t2 sign))
-                    else Unresolved
+              let Point2d t1 t2 = NewtonRaphson.surface2d problem.crossingSolutionTarget uvPoint0
+              if isInterior t1 t2 && equalPoints t1 t2
+                then Resolved (Just (IntersectionPoint.crossing t1 t2 sign))
+                else Unresolved
           | uniqueTangentSolution -> do
               let uvPoint0 = Point2d (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
-              case NewtonRaphson.surface2d problem.tangentSolutionTarget uvPoint0 of
-                Error NewtonRaphson.Divergence -> Unresolved
-                Ok (Point2d t1 t2) ->
-                  if isInterior t1 t2 && Curve2d.evaluate curve1 t1 ~= Curve2d.evaluate curve2 t2
-                    then Resolved (Just (IntersectionPoint.tangent t1 t2))
-                    else Unresolved
+              let Point2d t1 t2 = NewtonRaphson.surface2d problem.tangentSolutionTarget uvPoint0
+              if isInterior t1 t2 && equalPoints t1 t2 && equalTangents t1 t2
+                then Resolved (Just (IntersectionPoint.tangent t1 t2))
+                else Unresolved
           | otherwise -> Unresolved
         (Inner, Start size) -> resolvedEndpointIntersection size Nothing
         (Inner, End size) -> resolvedEndpointIntersection size Nothing
@@ -282,14 +285,11 @@ intersections curve1 curve2
       case overlappingSegments curve1 curve2 endpointIntersections of
         Just segments -> Ok (Just (OverlappingSegments segments))
         Nothing -> do
-          let u = SurfaceFunction.u
-          let v = SurfaceFunction.v
-          let curve1Surface = curve1 `compose` u
-          let curve2Surface = curve2 `compose` v
+          let curve1Surface = curve1 `compose` U
+          let curve2Surface = curve2 `compose` V
+          let derivative1Surface = Curve2d.derivative curve1 `compose` U
+          let derivative2Surface = Curve2d.derivative curve2 `compose` V
           let differenceSurface = curve2Surface .-. curve1Surface
-          tangentVector1Surface <- case Curve2d.tangentDirection curve1 of
-            Ok tangentDirection1 -> Ok (DirectionCurve2d.unwrap tangentDirection1 `compose` u)
-            Error Curve2d.IsPoint -> Error FirstCurveIsPoint
           let problem =
                 Problem
                   { curve1
@@ -298,8 +298,8 @@ intersections curve1 curve2
                   , crossingSolutionTarget = differenceSurface
                   , tangentSolutionTarget =
                       VectorSurfaceFunction2d.xy
-                        (differenceSurface `dot` tangentVector1Surface)
-                        (SurfaceFunction2d.derivative U curve2Surface `cross` tangentVector1Surface)
+                        (differenceSurface `dot_` derivative1Surface)
+                        (derivative2Surface `cross_` derivative1Surface)
                   }
           case Bisection.search Bisection.curvePairDomain (findIntersectionPoint problem) of
             Error Bisection.InfiniteRecursion -> throw HigherOrderZero
