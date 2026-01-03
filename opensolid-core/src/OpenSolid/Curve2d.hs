@@ -30,6 +30,7 @@ module OpenSolid.Curve2d
   , endPoint
   , endpoints
   , evaluateBounds
+  , derivative
   , tangentDirection
   , offsetLeftwardBy
   , offsetRightwardBy
@@ -645,6 +646,9 @@ reverse curve = curve `compose` (1 -. Curve.t)
 
 bounds :: Curve2d units space -> Bounds2d units space
 bounds curve = evaluateBounds curve Bounds.unitInterval
+
+derivative :: Curve2d units space -> VectorCurve2d units space
+derivative = (.derivative)
 
 tangentDirection ::
   Tolerance units =>

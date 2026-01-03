@@ -7,6 +7,7 @@ module OpenSolid.Curve2d
   , evaluate
   , evaluateBounds
   , bounds
+  , derivative
   , tangentDirection
   , reverse
   , xy
@@ -79,6 +80,7 @@ new :: Compiled units space -> VectorCurve2d units space -> Curve2d units space
 evaluate :: Curve2d units space -> Number -> Point2d units space
 evaluateBounds :: Curve2d units space -> Bounds Unitless -> Bounds2d units space
 bounds :: Curve2d units space -> Bounds2d units space
+derivative :: Curve2d units space -> VectorCurve2d units space
 tangentDirection ::
   Tolerance units =>
   Curve2d units space ->
