@@ -1,3 +1,5 @@
+Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
+
 Allow Set#d to be empty?
 - would have to remove Set#d.bounds but that's probably OK...
 
