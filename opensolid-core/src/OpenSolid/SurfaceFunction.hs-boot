@@ -5,6 +5,7 @@ module OpenSolid.SurfaceFunction
   , zero
   , u
   , v
+  , parameter
   , evaluate
   , evaluateBounds
   , derivative
@@ -106,6 +107,7 @@ constant :: Quantity units -> SurfaceFunction units
 zero :: SurfaceFunction units
 u :: SurfaceFunction Unitless
 v :: SurfaceFunction Unitless
+parameter :: SurfaceParameter -> SurfaceFunction Unitless
 evaluate :: SurfaceFunction units -> UvPoint -> Quantity units
 evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units

@@ -138,6 +138,7 @@ import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
+import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -273,6 +274,14 @@ instance
     SurfaceFunction2d.new
       (curve.compiled `compose` function.compiled)
       (\p -> curve.derivative `compose` function .*. SurfaceFunction.derivative p function)
+
+instance
+  Composition
+    SurfaceParameter
+    (Curve2d units space)
+    (SurfaceFunction2d units space)
+  where
+  curve `compose` parameter = curve `compose` SurfaceFunction.parameter parameter
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
