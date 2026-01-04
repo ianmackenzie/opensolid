@@ -144,7 +144,7 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
             case List.filter isLocal problem.endpointIntersections of
               [] -> Unresolved
               List.TwoOrMore -> Unresolved
-              List.One (EndpointIntersection{intersectionPoint, isSingular, alignment}) ->
+              List.One EndpointIntersection{intersectionPoint, isSingular, alignment} ->
                 if isSingular && size == Bisection.Small
                   then Resolved (Just intersectionPoint)
                   else case intersectionPoint.kind of
