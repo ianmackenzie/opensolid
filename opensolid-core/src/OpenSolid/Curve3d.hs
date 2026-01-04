@@ -2,6 +2,7 @@ module OpenSolid.Curve3d
   ( Curve3d
   , HasDegeneracy (HasDegeneracy)
   , Compiled
+  , IsPoint (IsPoint)
   , new
   , recursive
   , constant
@@ -22,6 +23,7 @@ module OpenSolid.Curve3d
   , transformBy
   , placeIn
   , relativeTo
+  , findPoint
   )
 where
 
@@ -68,6 +70,8 @@ data Curve3d space = Curve3d (Compiled space) ~(VectorCurve3d Meters space)
 
 type Compiled space =
   CompiledFunction Number (Point3d space) (Bounds Unitless) (Bounds3d space)
+
+data IsPoint = IsPoint deriving (Eq, Show)
 
 instance HasField "compiled" (Curve3d space) (Compiled space) where
   getField (Curve3d c _) = c
@@ -261,3 +265,9 @@ placeIn frame curve = do
 
 relativeTo :: Frame3d global local -> Curve3d global -> Curve3d local
 relativeTo frame curve = placeIn (Frame3d.inverse frame) curve
+
+findPoint :: Tolerance Meters => Point3d space -> Curve3d space -> Result IsPoint (List Number)
+findPoint point curve =
+  case VectorCurve3d.zeros (point .-. curve) of
+    Error VectorCurve3d.IsZero -> Error IsPoint
+    Ok parameterValues -> Ok parameterValues
