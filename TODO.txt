@@ -1,5 +1,8 @@
 Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
 
+Try removing Expression.* modules?
+- see if they're actually still necessary/useful for type inference...
+
 Allow Set#d to be empty?
 - would have to remove Set#d.bounds but that's probably OK...
 
