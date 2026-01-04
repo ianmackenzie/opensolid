@@ -128,6 +128,9 @@ library
     OpenSolid.Curve2D.MedialAxis
     OpenSolid.Curve2D.OverlappingSegment
     OpenSolid.Curve3D
+    OpenSolid.Curve3D.IntersectionPointWithSurface
+    OpenSolid.Curve3D.IntersectionsWithSurface
+    OpenSolid.Curve3D.SegmentOverlappingWithSurface
     OpenSolid.Debug
     OpenSolid.Debug.Plot
     OpenSolid.Desingularization
