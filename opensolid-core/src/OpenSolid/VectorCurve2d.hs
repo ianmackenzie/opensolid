@@ -701,21 +701,20 @@ quotient_ numerator denominator =
     else Ok do
       let singularity0 =
             if Curve.evaluate denominator 0 ~= Quantity.zero
-              then Just (lhopital numerator denominator 0)
+              then Just (lHopital numerator denominator 0)
               else Nothing
       let singularity1 =
             if Curve.evaluate denominator 1 ~= Quantity.zero
-              then Just (lhopital numerator denominator 1)
+              then Just (lHopital numerator denominator 1)
               else Nothing
       desingularize singularity0 (unsafeQuotient_ numerator denominator) singularity1
 
-lhopital ::
-  Tolerance units2 =>
+lHopital ::
   VectorCurve2d units1 space ->
   Curve units2 ->
   Number ->
   (Vector2d (units1 ?/? units2) space, Vector2d (units1 ?/? units2) space)
-lhopital numerator denominator tValue = do
+lHopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
   let numerator'' = evaluate numerator.derivative.derivative tValue
   let denominator' = Curve.evaluate denominator.derivative tValue
