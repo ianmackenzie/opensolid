@@ -206,9 +206,10 @@ d2ydx2Bounds x' y' x'' y'' =
   Units.simplify ((y'' ?*? x' .-. y' ?*? x'') ?/? (x' ?*? x' ?*? x'))
 
 candidateOverlappingSegment ::
-  (EndpointIntersection, EndpointIntersection) ->
+  EndpointIntersection ->
+  EndpointIntersection ->
   List OverlappingSegment
-candidateOverlappingSegment (first, second) = do
+candidateOverlappingSegment first second = do
   let tBounds1 = Bounds first.intersectionPoint.t1 second.intersectionPoint.t1
   let tBounds2 = Bounds first.intersectionPoint.t2 second.intersectionPoint.t2
   let firstIsStart = case first.alignment of
@@ -227,7 +228,7 @@ overlappingSegments ::
   List EndpointIntersection ->
   Maybe (NonEmpty OverlappingSegment)
 overlappingSegments curve1 curve2 endpointIntersections =
-  case List.combine candidateOverlappingSegment (List.successive (,) endpointIntersections) of
+  case List.concat (List.successive candidateOverlappingSegment endpointIntersections) of
     [] -> Nothing
     NonEmpty candidateOverlappingSegments -> do
       let boundsWidth1 segment = Bounds.width segment.tBounds1
