@@ -46,7 +46,6 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
-import OpenSolid.Curve2d.Intersections qualified as Curve2d.Intersections
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
@@ -297,9 +296,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
     -- We can ignore cases where either curve is actually a point,
     -- since we'll still find any inner intersections
     -- when we check with the *neighbours* of those degenerate curves
-    Error Curve2d.Intersections.FirstCurveIsPoint -> Ok ()
-    Error Curve2d.Intersections.SecondCurveIsPoint -> Ok ()
-    Error Curve2d.Intersections.BothCurvesArePoints -> Ok ()
+    Error Curve2d.IsPoint -> Ok ()
     -- Any overlap between boundary curves is bad
     Ok (Just (Curve2d.OverlappingSegments _)) ->
       Error BoundedBy.BoundaryIntersectsItself

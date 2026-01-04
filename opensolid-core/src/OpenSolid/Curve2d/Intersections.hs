@@ -1,6 +1,5 @@
 module OpenSolid.Curve2d.Intersections
-  ( Error (..)
-  , Intersections (..)
+  ( Intersections (..)
   , intersections
   )
 where
@@ -25,7 +24,6 @@ import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
@@ -33,12 +31,6 @@ import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-
-data Error
-  = FirstCurveIsPoint
-  | SecondCurveIsPoint
-  | BothCurvesArePoints
-  deriving (Eq, Show)
 
 data Intersections
   = IntersectionPoints (NonEmpty IntersectionPoint)
@@ -62,34 +54,23 @@ data EndpointIntersection = EndpointIntersection
   }
   deriving (Show)
 
-findEndpointsOf ::
-  Tolerance units =>
-  Curve2d units space ->
-  Curve2d units space ->
-  Result Curve2d.IsPoint (List Number, List Number)
-findEndpointsOf curve1 curve2 = do
-  let (start1, end1) = Curve2d.endpoints curve1
-  Result.map2 (,) (Curve2d.findPoint start1 curve2) (Curve2d.findPoint end1 curve2)
-
 findEndpointIntersections ::
   Tolerance units =>
   Curve2d units space ->
   Curve2d units space ->
-  Result Error (List EndpointIntersection)
-findEndpointIntersections curve1 curve2 =
-  case (findEndpointsOf curve1 curve2, findEndpointsOf curve2 curve1) of
-    (Ok (start1t2s, end1t2s), Ok (start2t1s, end2t1s)) -> Ok do
-      List.concat
-        [ List.map (0,) start1t2s
-        , List.map (1,) end1t2s
-        , List.map (,0) start2t1s
-        , List.map (,1) end2t1s
-        ]
-        & List.sortAndDeduplicate
-        & List.map (toEndpointIntersection curve1 curve2)
-    (Error Curve2d.IsPoint, Ok{}) -> Error FirstCurveIsPoint
-    (Ok{}, Error Curve2d.IsPoint) -> Error SecondCurveIsPoint
-    (Error Curve2d.IsPoint, Error Curve2d.IsPoint) -> Error BothCurvesArePoints
+  Result Curve2d.IsPoint (List EndpointIntersection)
+findEndpointIntersections curve1 curve2 = do
+  start1t2s <- Curve2d.findPoint (Curve2d.startPoint curve1) curve2
+  end1t2s <- Curve2d.findPoint (Curve2d.endPoint curve1) curve2
+  start2t1s <- Curve2d.findPoint (Curve2d.startPoint curve2) curve1
+  end2t1s <- Curve2d.findPoint (Curve2d.endPoint curve2) curve1
+  let start1Solutions = List.map (0,) start1t2s
+  let end1Solutions = List.map (1,) end1t2s
+  let start2Solutions = List.map (,0) start2t1s
+  let end2Solutions = List.map (,1) end2t1s
+  let allSolutions = List.concat [start1Solutions, end1Solutions, start2Solutions, end2Solutions]
+  let uniqueSolutions = List.sortAndDeduplicate allSolutions
+  Ok (List.map (toEndpointIntersection curve1 curve2) uniqueSolutions)
 
 toEndpointIntersection ::
   Tolerance units =>
@@ -261,7 +242,7 @@ intersections ::
   Tolerance units =>
   Curve2d units space ->
   Curve2d units space ->
-  Result Error (Maybe Intersections)
+  Result Curve2d.IsPoint (Maybe Intersections)
 intersections curve1 curve2
   | not (Curve2d.bounds curve1 `intersects` Curve2d.bounds curve2) = Ok Nothing
   | otherwise = do
