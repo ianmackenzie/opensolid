@@ -1,6 +1,8 @@
 module OpenSolid.Bisection
   ( InfiniteRecursion (InfiniteRecursion)
   , Domain
+  , Size (..)
+  , Classification (..)
   , parameterDomain
   , curveDomain
   , curvePairDomain
@@ -11,6 +13,7 @@ module OpenSolid.Bisection
   , interior
   , isInterior
   , includesEndpoint
+  , classify
   )
 where
 
@@ -18,6 +21,7 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
@@ -141,3 +145,14 @@ isInterior value (Bounds tLow tHigh) = do
 
 includesEndpoint :: Bounds Unitless -> Bool
 includesEndpoint (Bounds tLow tHigh) = tLow == 0 || tHigh == 1
+
+data Size = Small | Large deriving (Eq, Ord, Show)
+
+data Classification = Entire | Interior | Start Size | End Size
+
+classify :: Bounds Unitless -> Classification
+classify (Bounds low high)
+  | 0 < low && high < 1 = Interior
+  | high < 1 = Start (if high <= Desingularization.t0 then Small else Large)
+  | 0 < low = End (if low >= Desingularization.t1 then Small else Large)
+  | otherwise = Entire

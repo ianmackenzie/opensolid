@@ -14,7 +14,6 @@ import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
-import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.List qualified as List
@@ -62,21 +61,6 @@ data EndpointIntersection = EndpointIntersection
   , alignment :: Sign
   }
   deriving (Show)
-
-data SubdomainClassification
-  = Inner
-  | Start SubdomainSize
-  | End SubdomainSize
-  deriving (Show)
-
-data SubdomainSize = Small | Large deriving (Eq, Ord, Show)
-
-classifySubdomain :: Bounds Unitless -> Fuzzy SubdomainClassification
-classifySubdomain (Bounds tLow tHigh)
-  | 0 < tLow && tHigh < 1 = Resolved Inner
-  | tHigh < 1 = Resolved (Start (if tHigh <= Desingularization.t0 then Small else Large))
-  | 0 < tLow = Resolved (End (if tLow >= Desingularization.t1 then Small else Large))
-  | otherwise = Unresolved
 
 findEndpointsOf ::
   Tolerance units =>
@@ -155,8 +139,8 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
   if not (interiorBounds1 `intersects` interiorBounds2)
     then Resolved Nothing
     else do
-      subdomain1 <- classifySubdomain tBounds1
-      subdomain2 <- classifySubdomain tBounds2
+      let subdomain1 = Bisection.classify tBounds1
+      let subdomain2 = Bisection.classify tBounds2
       let firstDerivative1 = Curve2d.derivative curve1
       let firstDerivative2 = Curve2d.derivative curve2
       let secondDerivative1 = VectorCurve2d.derivative firstDerivative1
@@ -181,7 +165,7 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
             case List.filter isLocal problem.endpointIntersections of
               [] -> Unresolved
               List.One (EndpointIntersection{intersectionPoint, isSingular, alignment}) ->
-                if isSingular && size == Small
+                if isSingular && size == Bisection.Small
                   then Resolved (Just intersectionPoint)
                   else case intersectionPoint.kind of
                     IntersectionPoint.Crossing _ ->
@@ -194,7 +178,7 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
                         else Unresolved
               List.TwoOrMore -> Unresolved
       case (subdomain1, subdomain2) of
-        (Inner, Inner)
+        (Bisection.Interior, Bisection.Interior)
           | Resolved sign <- firstCrossProductSign -> do
               let uvPoint0 = Point2d (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
               let Point2d t1 t2 = NewtonRaphson.surface2d problem.crossingSolutionTarget uvPoint0
@@ -208,14 +192,16 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
                 then Resolved (Just (IntersectionPoint.tangent t1 t2))
                 else Unresolved
           | otherwise -> Unresolved
-        (Inner, Start size) -> resolvedEndpointIntersection size Nothing
-        (Inner, End size) -> resolvedEndpointIntersection size Nothing
-        (Start size, Inner) -> resolvedEndpointIntersection size Nothing
-        (End size, Inner) -> resolvedEndpointIntersection size Nothing
-        (Start size1, Start size2) -> resolvedEndpointIntersection (max size1 size2) (Just Negative)
-        (Start size1, End size2) -> resolvedEndpointIntersection (max size1 size2) (Just Positive)
-        (End size1, Start size2) -> resolvedEndpointIntersection (max size1 size2) (Just Positive)
-        (End size1, End size2) -> resolvedEndpointIntersection (max size1 size2) (Just Negative)
+        (Bisection.Interior, Bisection.Start size) -> resolvedEndpointIntersection size Nothing
+        (Bisection.Interior, Bisection.End size) -> resolvedEndpointIntersection size Nothing
+        (Bisection.Start size, Bisection.Interior) -> resolvedEndpointIntersection size Nothing
+        (Bisection.End size, Bisection.Interior) -> resolvedEndpointIntersection size Nothing
+        (Bisection.Start size1, Bisection.Start size2) -> resolvedEndpointIntersection (max size1 size2) (Just Negative)
+        (Bisection.Start size1, Bisection.End size2) -> resolvedEndpointIntersection (max size1 size2) (Just Positive)
+        (Bisection.End size1, Bisection.Start size2) -> resolvedEndpointIntersection (max size1 size2) (Just Positive)
+        (Bisection.End size1, Bisection.End size2) -> resolvedEndpointIntersection (max size1 size2) (Just Negative)
+        (Bisection.Entire, _) -> Unresolved
+        (_, Bisection.Entire) -> Unresolved
 
 secondDerivativesIndependent ::
   VectorBounds2d units space ->
