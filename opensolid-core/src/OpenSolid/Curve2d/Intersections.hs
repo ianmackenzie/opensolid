@@ -251,21 +251,19 @@ intersections curve1 curve2
       case overlappingSegments curve1 curve2 endpointIntersections of
         Just segments -> Ok (Just (OverlappingSegments segments))
         Nothing -> do
-          let curve1Surface = curve1 `compose` U
-          let curve2Surface = curve2 `compose` V
-          let derivative1Surface = Curve2d.derivative curve1 `compose` U
-          let derivative2Surface = Curve2d.derivative curve2 `compose` V
-          let differenceSurface = curve2Surface .-. curve1Surface
+          let differenceSurface = curve2 `compose` V .-. curve1 `compose` U
+          let derivativeSurface1 = Curve2d.derivative curve1 `compose` U
+          let derivativeSurface2 = Curve2d.derivative curve2 `compose` V
+          let tangentSolutionX = differenceSurface `dot_` derivativeSurface1
+          let tangentSolutionY = derivativeSurface2 `cross_` derivativeSurface1
+          let tangentSolutionTarget = VectorSurfaceFunction2d.xy tangentSolutionX tangentSolutionY
           let problem =
                 Problem
                   { curve1
                   , curve2
                   , endpointIntersections
                   , crossingSolutionTarget = differenceSurface
-                  , tangentSolutionTarget =
-                      VectorSurfaceFunction2d.xy
-                        (differenceSurface `dot_` derivative1Surface)
-                        (derivative2Surface `cross_` derivative1Surface)
+                  , tangentSolutionTarget
                   }
           case Bisection.search Bisection.curvePairDomain (findIntersectionPoint problem) of
             Error Bisection.InfiniteRecursion -> throw HigherOrderZero
