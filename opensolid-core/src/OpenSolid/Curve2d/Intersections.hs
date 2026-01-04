@@ -143,6 +143,7 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
                     && Bounds.includes intersectionPoint.t2 tBounds2
             case List.filter isLocal problem.endpointIntersections of
               [] -> Unresolved
+              List.TwoOrMore -> Unresolved
               List.One (EndpointIntersection{intersectionPoint, isSingular, alignment}) ->
                 if isSingular && size == Bisection.Small
                   then Resolved (Just intersectionPoint)
@@ -155,7 +156,6 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
                       if uniqueTangentSolution || allowedAlignment == Just alignment
                         then Resolved (Just intersectionPoint)
                         else Unresolved
-              List.TwoOrMore -> Unresolved
       case (subdomain1, subdomain2) of
         (Bisection.Interior, Bisection.Interior)
           | Resolved sign <- firstCrossProductSign -> do
