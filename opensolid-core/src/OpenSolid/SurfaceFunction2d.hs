@@ -257,9 +257,9 @@ instance
     (Curve2d units space)
   where
   function `compose` curve = do
-    let (dudt, dvdt) = curve.derivative.components
+    let (dudt, dvdt) = (Curve2d.derivative curve).components
     Curve2d.new
-      (function.compiled `compose` curve.compiled)
+      (function.compiled `compose` Curve2d.compiled curve)
       ((function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt)
 
 instance

@@ -481,7 +481,7 @@ fluxIntegral point curve = do
   let integrand =
         Tolerance.using (Quantity.squared_ ?tolerance) $
           Curve.unsafeQuotient
-            (curve.derivative `cross_` displacement)
+            (Curve2d.derivative curve `cross_` displacement)
             (VectorCurve2d.squaredMagnitude_ displacement)
   Curve.integrate integrand
 

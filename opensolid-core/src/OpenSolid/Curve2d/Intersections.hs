@@ -96,13 +96,15 @@ tangentSignature ::
   Number ->
   (Vector2d Unitless space, Bool)
 tangentSignature curve tValue = do
-  let firstDerivative = VectorCurve2d.evaluate curve.derivative tValue
-  let secondDerivative = VectorCurve2d.evaluate curve.derivative.derivative tValue
-  let isSingular = firstDerivative ~= Vector2d.zero
+  let firstDerivative = Curve2d.derivative curve
+  let secondDerivative = VectorCurve2d.derivative firstDerivative
+  let firstDerivativeValue = VectorCurve2d.evaluate firstDerivative tValue
+  let secondDerivativeValue = VectorCurve2d.evaluate secondDerivative tValue
+  let isSingular = firstDerivativeValue ~= Vector2d.zero
   let discriminator
-        | isSingular && tValue == 0 = secondDerivative
-        | isSingular && tValue == 1 = negative secondDerivative
-        | otherwise = firstDerivative
+        | isSingular && tValue == 0 = secondDerivativeValue
+        | isSingular && tValue == 1 = negative secondDerivativeValue
+        | otherwise = firstDerivativeValue
   let tangentVector = Vector2d.normalize discriminator
   (tangentVector, isSingular)
 

@@ -7,6 +7,7 @@ module OpenSolid.Curve2d
   , evaluate
   , evaluateBounds
   , bounds
+  , compiled
   , derivative
   , tangentDirection
   , reverse
@@ -46,10 +47,6 @@ type Compiled units space =
 
 data IsPoint = IsPoint
 
-instance HasField "compiled" (Curve2d units space) (Compiled units space)
-
-instance HasField "derivative" (Curve2d units space) (VectorCurve2d units space)
-
 instance HasField "startPoint" (Curve2d units space) (Point2d units space)
 
 instance HasField "endPoint" (Curve2d units space) (Point2d units space)
@@ -80,6 +77,7 @@ new :: Compiled units space -> VectorCurve2d units space -> Curve2d units space
 evaluate :: Curve2d units space -> Number -> Point2d units space
 evaluateBounds :: Curve2d units space -> Bounds Unitless -> Bounds2d units space
 bounds :: Curve2d units space -> Bounds2d units space
+compiled :: Curve2d units space -> Compiled units space
 derivative :: Curve2d units space -> VectorCurve2d units space
 tangentDirection ::
   Tolerance units =>

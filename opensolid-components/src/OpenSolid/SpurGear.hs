@@ -78,7 +78,7 @@ profile gear = do
   let involuteLeft = Curve2d.xy x y
   let leftStart = involuteLeft.startPoint
   let leftEnd = involuteLeft.endPoint
-  let involuteLeftDerivative = involuteLeft.derivative
+  let involuteLeftDerivative = Curve2d.derivative involuteLeft
   let leftStartTangent
         | rd > rb = Vector2d.normalize (VectorCurve2d.startValue involuteLeftDerivative)
         | otherwise = Vector2d.polar 1 (Angle.halfPi .+. alpha)

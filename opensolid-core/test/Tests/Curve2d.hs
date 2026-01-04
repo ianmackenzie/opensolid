@@ -313,7 +313,7 @@ firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let p1 = Curve2d.evaluate curve (tValue .-. dt)
   let p2 = Curve2d.evaluate curve (tValue .+. dt)
   let numericalFirstDerivative = (p2 .-. p1) ./ (2 *. dt)
-  let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
+  let analyticFirstDerivative = VectorCurve2d.evaluate (Curve2d.derivative curve) tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
       & Test.output "numericalFirstDerivative" numericalFirstDerivative
@@ -328,10 +328,11 @@ firstDerivativeConsistency curveGenerator = Test.check 100 "firstDerivativeConsi
 secondDerivativeIsConsistent :: Curve2d Meters space -> Number -> Expectation
 secondDerivativeIsConsistent curve tValue = do
   let dt :: Number = 1e-6
-  let v1 = VectorCurve2d.evaluate curve.derivative (tValue .-. dt)
-  let v2 = VectorCurve2d.evaluate curve.derivative (tValue .+. dt)
+  let firstDerivative = Curve2d.derivative curve
+  let secondDerivative = VectorCurve2d.derivative firstDerivative
+  let v1 = VectorCurve2d.evaluate firstDerivative (tValue .-. dt)
+  let v2 = VectorCurve2d.evaluate firstDerivative (tValue .+. dt)
   let numericalSecondDerivative = (v2 .-. v1) ./. (2 *. dt)
-  let secondDerivative = curve.derivative.derivative
   let analyticSecondDerivative = VectorCurve2d.evaluate secondDerivative tValue
   Tolerance.using Length.micrometer do
     Test.expect (numericalSecondDerivative ~= analyticSecondDerivative)

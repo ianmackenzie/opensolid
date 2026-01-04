@@ -34,6 +34,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
+import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2d (DirectionSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2d qualified as DirectionSurfaceFunction2d
@@ -448,9 +449,9 @@ instance
     (VectorCurve2d units space)
   where
   function `compose` curve = do
-    let (dudt, dvdt) = curve.derivative.components
+    let (dudt, dvdt) = (Curve2d.derivative curve).components
     VectorCurve2d.new
-      (function.compiled `compose` curve.compiled)
+      (function.compiled `compose` Curve2d.compiled curve)
       ((function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt)
 
 instance

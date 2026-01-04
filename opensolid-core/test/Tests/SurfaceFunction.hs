@@ -2,6 +2,7 @@ module Tests.SurfaceFunction (tests) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
@@ -15,6 +16,7 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.World3d qualified as World3d
 import Test (Expectation, Test)
 import Test qualified
@@ -73,21 +75,23 @@ intersectionCurveFirstDerivativeBoundsConsistency =
   withIntersectionCurves \curves ->
     Test.check 100 "intersectionCurveBoundsConsistency" Test.do
       curve <- Random.oneOf curves
-      Tolerance.using 1e-9 (Tests.VectorCurve2d.boundsConsistency curve.derivative)
+      Tolerance.using 1e-9 (Tests.VectorCurve2d.boundsConsistency (Curve2d.derivative curve))
 
 intersectionCurveSecondDerivativeConsistency :: Tolerance Meters => Test
 intersectionCurveSecondDerivativeConsistency =
   withIntersectionCurves \curves ->
     Test.check 100 "intersectionCurveSecondDerivativeConsistency" Test.do
       curve <- Random.oneOf curves
-      Tests.VectorCurve2d.derivativeConsistency 1e-6 curve.derivative
+      Tests.VectorCurve2d.derivativeConsistency 1e-6 (Curve2d.derivative curve)
 
 intersectionCurveSecondDerivativeBoundsConsistency :: Tolerance Meters => Test
 intersectionCurveSecondDerivativeBoundsConsistency =
   withIntersectionCurves \curves ->
     Test.check 100 "intersectionCurveSecondDerivativeBoundsConsistency" Test.do
       curve <- Random.oneOf curves
-      Tolerance.using 1e-9 (Tests.VectorCurve2d.boundsConsistency curve.derivative.derivative)
+      let firstDerivative = Curve2d.derivative curve
+      let secondDerivative = VectorCurve2d.derivative firstDerivative
+      Tolerance.using 1e-9 (Tests.VectorCurve2d.boundsConsistency secondDerivative)
 
 planeTorusSurface :: SurfaceFunction Meters
 planeTorusSurface = do

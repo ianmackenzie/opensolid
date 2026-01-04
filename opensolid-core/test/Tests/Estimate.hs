@@ -122,7 +122,7 @@ area = Test.verify "area" Test.do
           (#radius Length.meter)
           (#startAngle Angle.pi)
           (#endAngle Angle.zero)
-  let dAdt = Curve2d.yCoordinate curve .*. curve.derivative.xComponent
+  let dAdt = Curve2d.yCoordinate curve .*. (Curve2d.derivative curve).xComponent
   let areaEstimate = Curve.integrate dAdt
   let expectedArea = Area.squareMeters (Number.pi ./ 2)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)

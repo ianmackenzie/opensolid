@@ -30,6 +30,7 @@ module OpenSolid.Curve2d
   , endPoint
   , endpoints
   , evaluateBounds
+  , compiled
   , derivative
   , tangentDirection
   , offsetLeftwardBy
@@ -154,7 +155,10 @@ import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 
 -- | A parametric curve in 2D space.
-data Curve2d units space = Curve2d (Compiled units space) ~(VectorCurve2d units space)
+data Curve2d units space = Curve2d
+  { compiled :: Compiled units space
+  , derivative :: ~(VectorCurve2d units space)
+  }
 
 type Compiled units space =
   CompiledFunction
@@ -162,12 +166,6 @@ type Compiled units space =
     (Point2d units space)
     (Bounds Unitless)
     (Bounds2d units space)
-
-instance HasField "compiled" (Curve2d units space) (Compiled units space) where
-  getField (Curve2d c _) = c
-
-instance HasField "derivative" (Curve2d units space) (VectorCurve2d units space) where
-  getField (Curve2d _ d) = d
 
 instance HasField "secondDerivative" (Curve2d units space) (VectorCurve2d units space) where
   getField = (.derivative.derivative)
@@ -655,6 +653,9 @@ reverse curve = curve `compose` (1 -. Curve.t)
 
 bounds :: Curve2d units space -> Bounds2d units space
 bounds curve = evaluateBounds curve Bounds.unitInterval
+
+compiled :: Curve2d units space -> Compiled units space
+compiled = (.compiled)
 
 derivative :: Curve2d units space -> VectorCurve2d units space
 derivative = (.derivative)

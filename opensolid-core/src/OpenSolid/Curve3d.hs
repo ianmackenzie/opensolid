@@ -43,6 +43,7 @@ import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
+import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.Expression.Curve3d qualified as Expression.Curve3d
@@ -164,8 +165,8 @@ on plane curve2d = do
           (Expression.Curve2d.placeOn plane)
           (Point2D.placeOn plane)
           (Bounds2d.placeOn plane)
-          curve2d.compiled
-  new compiledPlaced (VectorCurve3d.on plane curve2d.derivative)
+          (Curve2d.compiled curve2d)
+  new compiledPlaced (VectorCurve3d.on plane (Curve2d.derivative curve2d))
 
 line :: Point3d space -> Point3d space -> Curve3d space
 line p1 p2 = constant p1 .+. Curve.t .*. (p2 .-. p1)
