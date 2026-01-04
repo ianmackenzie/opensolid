@@ -6,6 +6,7 @@ module OpenSolid.Surface3d
   , translational
   , ruled
   , revolved
+  , bounds
   , boundaryCurves
   , boundarySurfaceCurves
   , flip
@@ -22,6 +23,7 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
@@ -151,6 +153,9 @@ revolved sketchPlane curve axis angle = do
                 .+. radius .*. SurfaceFunction.sin theta .*. frame3d.forwardDirection
                 .+. height .*. frame3d.upwardDirection
         Ok (parametric function Region2d.unitSquare)
+
+bounds :: Surface3d space -> Bounds3d space
+bounds surface = SurfaceFunction3d.evaluateBounds surface.function (Region2d.bounds surface.domain)
 
 boundaryCurves :: Surface3d space -> NonEmpty (Curve3d space)
 boundaryCurves surface = NonEmpty.map SurfaceCurve3d.curve (boundarySurfaceCurves surface)
