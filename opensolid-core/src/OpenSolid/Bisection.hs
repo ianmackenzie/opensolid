@@ -14,6 +14,7 @@ module OpenSolid.Bisection
   , isInterior
   , includesEndpoint
   , classify
+  , IsBounds (overlaps)
   )
 where
 
@@ -27,6 +28,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
 
@@ -34,15 +36,19 @@ data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show)
 
 class IsBounds bounds where
   contains :: bounds -> bounds -> Bool
+  overlaps :: bounds -> bounds -> Bool
 
 instance IsBounds (Bounds units) where
   contains = Bounds.contains
+  overlaps bounds1 bounds2 = Bounds.overlap bounds1 bounds2 > Quantity.zero
 
 instance IsBounds (Bounds2d units space) where
   contains = Bounds2d.contains
+  overlaps (Bounds2d x1 y1) (Bounds2d x2 y2) = overlaps x1 x2 && overlaps y1 y2
 
 instance (IsBounds bounds1, IsBounds bounds2) => IsBounds (bounds1, bounds2) where
   contains (b1, b2) (a1, a2) = contains b1 a1 && contains b2 a2
+  overlaps (b1, b2) (a1, a2) = overlaps b1 a1 && overlaps b2 a2
 
 data Domain bounds where
   Domain :: IsBounds bounds => bounds -> ~(List (Domain bounds)) -> Domain bounds

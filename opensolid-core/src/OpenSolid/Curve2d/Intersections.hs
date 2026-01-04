@@ -281,5 +281,4 @@ deduplicate (first : rest) accumulated =
     else deduplicate rest (first : accumulated)
 
 isDuplicate :: Solution -> Solution -> Bool
-isDuplicate ((uBounds1, vBounds1), _) ((uBounds2, vBounds2), _) =
-  Bounds.overlap uBounds1 uBounds2 >= 0 && Bounds.overlap vBounds1 vBounds2 >= 0
+isDuplicate (uvBounds1, _) (uvBounds2, _) = Bisection.overlaps uvBounds1 uvBounds2
