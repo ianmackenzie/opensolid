@@ -98,12 +98,11 @@ toEndpointIntersection ::
   (Number, Number) ->
   EndpointIntersection
 toEndpointIntersection curve1 curve2 (t1, t2) = do
-  let (tangentVector1, scale1, singular1) = tangentSignature curve1 t1
-  let (tangentVector2, scale2, singular2) = tangentSignature curve2 t2
+  let (tangentVector1, singular1) = tangentSignature curve1 t1
+  let (tangentVector2, singular2) = tangentSignature curve2 t2
   let crossProduct = tangentVector1 `cross` tangentVector2
-  let scale = max scale1 scale2
   let intersectionPoint =
-        if scale .*. crossProduct ~= Quantity.zero
+        if Tolerance.using 1e-9 (crossProduct ~= Quantity.zero)
           then IntersectionPoint.tangent t1 t2
           else IntersectionPoint.crossing t1 t2 (Quantity.sign crossProduct)
   let isSingular = singular1 || singular2
@@ -114,18 +113,17 @@ tangentSignature ::
   Tolerance units =>
   Curve2d units space ->
   Number ->
-  (Vector2d Unitless space, Quantity units, Bool)
+  (Vector2d Unitless space, Bool)
 tangentSignature curve tValue = do
   let firstDerivative = VectorCurve2d.evaluate curve.derivative tValue
   let secondDerivative = VectorCurve2d.evaluate curve.derivative.derivative tValue
   let isSingular = firstDerivative ~= Vector2d.zero
   let discriminator
-        | isSingular && tValue == 0 = 0.5 *. secondDerivative
-        | isSingular && tValue == 1 = -0.5 *. secondDerivative
+        | isSingular && tValue == 0 = secondDerivative
+        | isSingular && tValue == 1 = negative secondDerivative
         | otherwise = firstDerivative
-  let scale = Vector2d.magnitude discriminator
-  let tangentVector = discriminator ./. scale
-  (tangentVector, scale, isSingular)
+  let tangentVector = Vector2d.normalize discriminator
+  (tangentVector, isSingular)
 
 findIntersectionPoint ::
   Tolerance units =>
