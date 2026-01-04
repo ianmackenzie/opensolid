@@ -7,6 +7,7 @@ module OpenSolid.Surface3d
   , ruled
   , revolved
   , boundaryCurves
+  , boundarySurfaceCurves
   , flip
   , placeIn
   , relativeTo
@@ -51,6 +52,8 @@ import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Set2d (Set2d)
 import OpenSolid.Set2d qualified as Set2d
 import OpenSolid.Surface3d.Revolved qualified as Revolved
+import OpenSolid.SurfaceCurve3d (SurfaceCurve3d)
+import OpenSolid.SurfaceCurve3d qualified as SurfaceCurve3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
@@ -69,8 +72,8 @@ import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 data Surface3d space = Surface3d
   { function :: SurfaceFunction3d space
   , domain :: Region2d Unitless UvSpace
-  , outerLoop :: ~(NonEmpty (Curve3d space))
-  , innerLoops :: ~(List (NonEmpty (Curve3d space)))
+  , outerLoop :: ~(NonEmpty (SurfaceCurve3d space))
+  , innerLoops :: ~(List (NonEmpty (SurfaceCurve3d space)))
   }
 
 parametric ::
@@ -78,7 +81,7 @@ parametric ::
   Region2d Unitless UvSpace ->
   Surface3d space
 parametric givenFunction givenDomain = do
-  let boundaryLoop domainLoop = NonEmpty.map (givenFunction `compose`) domainLoop
+  let boundaryLoop domainLoop = NonEmpty.map (SurfaceCurve3d.on givenFunction) domainLoop
   Surface3d
     { function = givenFunction
     , domain = givenDomain
@@ -150,7 +153,10 @@ revolved sketchPlane curve axis angle = do
         Ok (parametric function Region2d.unitSquare)
 
 boundaryCurves :: Surface3d space -> NonEmpty (Curve3d space)
-boundaryCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoops)
+boundaryCurves surface = NonEmpty.map SurfaceCurve3d.curve (boundarySurfaceCurves surface)
+
+boundarySurfaceCurves :: Surface3d space -> NonEmpty (SurfaceCurve3d space)
+boundarySurfaceCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoops)
 
 flip :: Surface3d space -> Surface3d space
 flip surface =
