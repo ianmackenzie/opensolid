@@ -107,6 +107,24 @@ instance
   where
   lhs .-. rhs = VectorCurve3d.new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
 
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (Curve3d space1)
+    (Point3d space2)
+    (VectorCurve3d Meters space1)
+  where
+  lhs .-. rhs = lhs .-. constant rhs
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (Point3d space1)
+    (Curve3d space2)
+    (VectorCurve3d Meters space1)
+  where
+  lhs .-. rhs = constant lhs .-. rhs
+
 instance Composition (Curve Unitless) (Curve3d space) (Curve3d space) where
   outer `compose` inner =
     new
