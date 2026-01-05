@@ -494,14 +494,14 @@ sqrt_ function =
             let functionIsZeroAt testPoint =
                   Tolerance.using (Quantity.squared_ ?tolerance) $
                     evaluate function testPoint ~= Quantity.zero
-            let functionIsZero = List.allSatisfy functionIsZeroAt testPoints
+            let functionIsZero = NonEmpty.allSatisfy functionIsZeroAt testPoints
             let firstDerivativeIsZeroAt testPoint = do
                   let secondDerivativeValue = evaluate secondDerivative testPoint
                   let firstDerivativeTolerance =
                         ?tolerance ?*? Quantity.sqrt_ (2 *. secondDerivativeValue)
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative testPoint ~= Quantity.zero
-            let firstDerivativeIsZero = List.allSatisfy firstDerivativeIsZeroAt testPoints
+            let firstDerivativeIsZero = NonEmpty.allSatisfy firstDerivativeIsZeroAt testPoints
             if functionIsZero && firstDerivativeIsZero
               then Just (zero, sign .*. unsafeSqrt_ (0.5 *. secondDerivative))
               else Nothing

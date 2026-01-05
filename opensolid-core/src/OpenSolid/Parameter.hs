@@ -13,6 +13,7 @@ where
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
@@ -36,10 +37,10 @@ midpoints n = List.map (midpointOf n) [0 .. n - 1]
 intervals :: Int -> List (Bounds Unitless)
 intervals n = if n > 0 then List.map (intervalOf n) [0 .. n - 1] else []
 
-samples :: List Number
+samples :: NonEmpty Number
 samples = do
   let (p1, p2, p3, p4, p5) = Quadrature.abscissae5
-  [p1, p2, p3, p4, p5]
+  NonEmpty.five p1 p2 p3 p4 p5
 
 random :: Random.Generator Number
 random = Number.random 0 1

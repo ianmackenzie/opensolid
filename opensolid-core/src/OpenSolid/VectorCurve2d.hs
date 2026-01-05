@@ -150,7 +150,9 @@ instance
   coerce curve = VectorCurve2d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
 instance ApproximateEquality (VectorCurve2d units space) units where
-  curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
+  curve1 ~= curve2 = do
+    let equalValues t = evaluate curve1 t ~= evaluate curve2 t
+    NonEmpty.allSatisfy equalValues Parameter.samples
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -761,11 +763,11 @@ data HasZero = HasZero deriving (Eq, Show)
 magnitude :: Tolerance units => VectorCurve2d units space -> Curve units
 magnitude curve = Curve.sqrt_ (squaredMagnitude_ curve)
 
-sampleValues :: VectorCurve2d units space -> List (Vector2d units space)
-sampleValues curve = List.map (evaluate curve) Parameter.samples
+sampleValues :: VectorCurve2d units space -> NonEmpty (Vector2d units space)
+sampleValues curve = NonEmpty.map (evaluate curve) Parameter.samples
 
 isZero :: Tolerance units => VectorCurve2d units space -> Bool
-isZero curve = List.allSatisfy (~= Vector2d.zero) (sampleValues curve)
+isZero curve = NonEmpty.allSatisfy (~= Vector2d.zero) (sampleValues curve)
 
 data IsZero = IsZero deriving (Eq, Show)
 

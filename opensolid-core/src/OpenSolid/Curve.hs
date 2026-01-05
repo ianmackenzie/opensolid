@@ -116,8 +116,9 @@ instance Units.Coercion (Curve units1) (Curve units2) where
   coerce curve = Curve (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
 instance ApproximateEquality (Curve units) units where
-  curve1 ~= curve2 =
-    List.allTrue [evaluate curve1 tValue ~= evaluate curve2 tValue | tValue <- Parameter.samples]
+  curve1 ~= curve2 = do
+    let equalPoints tValue = evaluate curve1 tValue ~= evaluate curve2 tValue
+    NonEmpty.allSatisfy equalPoints Parameter.samples
 
 instance
   units1 ~ units2 =>

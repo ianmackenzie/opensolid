@@ -549,12 +549,12 @@ toMatingEdge _ _ DegenerateHalfEdge{} = Nothing
 toMatingEdge id1 curve1 HalfEdge{halfEdgeId = id2, curve3d = curve2, uvCurve}
   | id1 == id2 = Nothing
   | otherwise = do
-      let points1 = List.map (Curve3d.evaluate curve1) Parameter.samples
-      let points2 = List.map (Curve3d.evaluate curve2) Parameter.samples
+      let points1 = NonEmpty.map (Curve3d.evaluate curve1) Parameter.samples
+      let points2 = NonEmpty.map (Curve3d.evaluate curve2) Parameter.samples
       if
         | points1 ~= points2 ->
             Just MatingEdge{halfEdgeId = id2, uvCurve, correctlyAligned = False}
-        | points1 ~= List.reverse points2 ->
+        | points1 ~= NonEmpty.reverse points2 ->
             Just MatingEdge{halfEdgeId = id2, uvCurve, correctlyAligned = True}
         | otherwise -> Nothing
 

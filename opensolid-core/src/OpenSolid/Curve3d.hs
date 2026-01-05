@@ -50,7 +50,6 @@ import OpenSolid.Expression.Curve3d qualified as Expression.Curve3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length (Length)
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
@@ -146,7 +145,9 @@ instance
       (\p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function)
 
 instance ApproximateEquality (Curve3d space) Meters where
-  curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
+  curve1 ~= curve2 = do
+    let equalPoints t = evaluate curve1 t ~= evaluate curve2 t
+    NonEmpty.allSatisfy equalPoints Parameter.samples
 
 new :: Compiled space -> VectorCurve3d Meters space -> Curve3d space
 new = Curve3d

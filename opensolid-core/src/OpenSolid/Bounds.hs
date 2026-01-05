@@ -73,7 +73,6 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.InternalError (InternalError (InternalError))
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
@@ -631,8 +630,8 @@ random randomQuantity = do
   b <- randomQuantity
   Random.return (Bounds a b)
 
-sampleValues :: Bounds units -> List (Quantity units)
-sampleValues bounds = List.map (interpolate bounds) Parameter.samples
+sampleValues :: Bounds units -> NonEmpty (Quantity units)
+sampleValues bounds = NonEmpty.map (interpolate bounds) Parameter.samples
 
 convert :: Quantity (units2 ?/? units1) -> Bounds units1 -> Bounds units2
 convert factor bounds = Units.simplify (bounds ?*? factor)

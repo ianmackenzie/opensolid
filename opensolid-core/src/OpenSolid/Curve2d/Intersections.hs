@@ -236,8 +236,8 @@ overlappingSegments curve1 curve2 endpointIntersections =
       let boundsWidth1 segment = Bounds.width segment.tBounds1
       let testSegment = NonEmpty.maximumBy boundsWidth1 candidateOverlappingSegments
       let tSampleValues1 = Bounds.sampleValues testSegment.tBounds1
-      let samplePoints1 = List.map (Curve2d.evaluate curve1) tSampleValues1
-      if List.allSatisfy (intersects curve2) samplePoints1
+      let samplePoints1 = NonEmpty.map (Curve2d.evaluate curve1) tSampleValues1
+      if NonEmpty.allSatisfy (intersects curve2) samplePoints1
         then Just candidateOverlappingSegments
         else Nothing
 

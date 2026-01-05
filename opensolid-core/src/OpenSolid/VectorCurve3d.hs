@@ -121,7 +121,9 @@ instance
   coerce curve = VectorCurve3d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
 instance ApproximateEquality (VectorCurve3d units space) units where
-  curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
+  curve1 ~= curve2 = do
+    let equalValues t = evaluate curve1 t ~= evaluate curve2 t
+    NonEmpty.allSatisfy equalValues Parameter.samples
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

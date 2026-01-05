@@ -649,8 +649,8 @@ endpoints curve = (startPoint curve, endPoint curve)
 evaluateBounds :: Curve2d units space -> Bounds Unitless -> Bounds2d units space
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
-samplePoints :: Curve2d units space -> List (Point2d units space)
-samplePoints curve = List.map (evaluate curve) Parameter.samples
+samplePoints :: Curve2d units space -> NonEmpty (Point2d units space)
+samplePoints curve = NonEmpty.map (evaluate curve) Parameter.samples
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2d units space -> Curve2d units space
@@ -710,7 +710,7 @@ then it is not considered to lie on the axis;
 it is only considered to lie on the axis if every point on the curve is also on the axis.
 -}
 isOnAxis :: Tolerance units => Axis2d units space -> Curve2d units space -> Bool
-isOnAxis axis curve = List.allSatisfy (intersects axis) (samplePoints curve)
+isOnAxis axis curve = NonEmpty.allSatisfy (intersects axis) (samplePoints curve)
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2d units space -> Curve units
