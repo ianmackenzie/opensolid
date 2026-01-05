@@ -21,7 +21,7 @@ derivativeConsistency givenTolerance curve = Test.do
   let v1 = VectorCurve2d.evaluate curve (tValue .-. dt)
   let v2 = VectorCurve2d.evaluate curve (tValue .+. dt)
   let numericalFirstDerivative = (v2 .-. v1) ./ (2 *. dt)
-  let analyticFirstDerivative = VectorCurve2d.evaluate curve.derivative tValue
+  let analyticFirstDerivative = VectorCurve2d.evaluate (VectorCurve2d.derivative curve) tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
       & Test.output "numericalFirstDerivative" numericalFirstDerivative

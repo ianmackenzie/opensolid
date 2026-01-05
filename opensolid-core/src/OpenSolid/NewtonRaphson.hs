@@ -68,7 +68,7 @@ curve1dImpl# function# derivative# x1# y1# = do
 curve2d :: Tolerance units => VectorCurve2d units space -> Number -> Number
 curve2d curve t1 = do
   let function = VectorCurve2d.evaluate curve
-  let derivative = VectorCurve2d.evaluate curve.derivative
+  let derivative = VectorCurve2d.evaluate (VectorCurve2d.derivative curve)
   curve2dImpl function derivative t1 (function t1)
 
 curve2dImpl ::

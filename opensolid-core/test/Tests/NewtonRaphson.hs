@@ -89,7 +89,7 @@ curve2d name curve t0 tExpected =
               let !(Vector2d (Quantity# x#) (Quantity# y#)) = vector
               (# x#, y# #)
         let evaluateDerivative# t# = do
-              let vector = VectorCurve2d.evaluate curve.derivative (Quantity# t#)
+              let vector = VectorCurve2d.evaluate (VectorCurve2d.derivative curve) (Quantity# t#)
               let !(Vector2d (Quantity# x#) (Quantity# y#)) = vector
               (# x#, y# #)
         let tSolution = NewtonRaphson.curve2d# evaluate# evaluateDerivative# t0

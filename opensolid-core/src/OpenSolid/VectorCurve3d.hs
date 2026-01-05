@@ -78,6 +78,7 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
@@ -479,8 +480,9 @@ on plane vectorCurve2d = do
           (Expression.VectorCurve2d.placeOn plane)
           (Vector2d.placeOn plane)
           (VectorBounds2d.placeOn plane)
-          vectorCurve2d.compiled
-  new compiledPlanar (on plane vectorCurve2d.derivative)
+          (VectorCurve2d.compiled vectorCurve2d)
+  let planarDerivative = on plane (VectorCurve2d.derivative vectorCurve2d)
+  new compiledPlanar planarDerivative
 
 interpolateFrom :: Vector3d units space -> Vector3d units space -> VectorCurve3d units space
 interpolateFrom v1 v2 = bezier (NonEmpty.two v1 v2)

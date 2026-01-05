@@ -97,7 +97,10 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
 data VectorCurve2d units space
-  = VectorCurve2d (Compiled units space) ~(VectorCurve2d units space)
+  = VectorCurve2d
+  { compiled :: Compiled units space
+  , derivative :: ~(VectorCurve2d units space)
+  }
 
 type Compiled units space =
   CompiledFunction
@@ -105,12 +108,6 @@ type Compiled units space =
     (Vector2d units space)
     (Bounds Unitless)
     (VectorBounds2d units space)
-
-instance HasField "compiled" (VectorCurve2d units space) (Compiled units space) where
-  getField = compiled
-
-instance HasField "derivative" (VectorCurve2d units space) (VectorCurve2d units space) where
-  getField = derivative
 
 instance HasField "xComponent" (VectorCurve2d units space) (Curve units) where
   getField = xComponent

@@ -3,6 +3,8 @@ module OpenSolid.VectorCurve2d
   , Compiled
   , constant
   , new
+  , compiled
+  , derivative
   , evaluate
   , evaluateBounds
   , quotient
@@ -13,7 +15,6 @@ module OpenSolid.VectorCurve2d
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
@@ -29,10 +30,6 @@ type role VectorCurve2d nominal nominal
 
 type VectorCurve2d :: Type -> Type -> Type
 data VectorCurve2d units space
-
-instance HasField "compiled" (VectorCurve2d units space) (Compiled units space)
-
-instance HasField "derivative" (VectorCurve2d units space) (VectorCurve2d units space)
 
 type Compiled units space =
   CompiledFunction
@@ -89,6 +86,8 @@ instance
 
 constant :: Vector2d units space -> VectorCurve2d units space
 new :: Compiled units space -> VectorCurve2d units space -> VectorCurve2d units space
+compiled :: VectorCurve2d units space -> Compiled units space
+derivative :: VectorCurve2d units space -> VectorCurve2d units space
 evaluate :: VectorCurve2d units space -> Number -> Vector2d units space
 evaluateBounds :: VectorCurve2d units space -> Bounds Unitless -> VectorBounds2d units space
 quotient ::

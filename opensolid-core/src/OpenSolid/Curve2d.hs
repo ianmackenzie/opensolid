@@ -167,9 +167,6 @@ type Compiled units space =
     (Bounds Unitless)
     (Bounds2d units space)
 
-instance HasField "secondDerivative" (Curve2d units space) (VectorCurve2d units space) where
-  getField = (.derivative.derivative)
-
 instance HasField "xCoordinate" (Curve2d units space) (Curve units) where
   getField = xCoordinate
 
@@ -218,7 +215,9 @@ instance
     (Curve2d units1 space1)
   where
   lhs .+. rhs =
-    new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
+    new
+      (compiled lhs .+. VectorCurve2d.compiled rhs)
+      (derivative lhs .+. VectorCurve2d.derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -228,7 +227,9 @@ instance
     (Curve2d units1 space1)
   where
   lhs .-. rhs =
-    new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
+    new
+      (compiled lhs .-. VectorCurve2d.compiled rhs)
+      (derivative lhs .-. VectorCurve2d.derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -577,8 +578,10 @@ desingularize startSingularity curve endSingularity = do
         Just (value0, firstDerivative0) -> do
           let t0 = Desingularization.t0
           let valueT0 = evaluate curve t0
-          let firstDerivativeT0 = VectorCurve2d.evaluate curve.derivative t0
-          let secondDerivativeT0 = VectorCurve2d.evaluate curve.derivative.derivative t0
+          let firstDerivative = derivative curve
+          let secondDerivative = VectorCurve2d.derivative firstDerivative
+          let firstDerivativeT0 = VectorCurve2d.evaluate firstDerivative t0
+          let secondDerivativeT0 = VectorCurve2d.evaluate secondDerivative t0
           bezier $
             Bezier.syntheticStart
               value0
@@ -591,8 +594,10 @@ desingularize startSingularity curve endSingularity = do
         Just (value1, firstDerivative1) -> do
           let t1 = Desingularization.t1
           let valueT1 = evaluate curve t1
-          let firstDerivativeT1 = VectorCurve2d.evaluate curve.derivative t1
-          let secondDerivativeT1 = VectorCurve2d.evaluate curve.derivative.derivative t1
+          let firstDerivative = derivative curve
+          let secondDerivative = VectorCurve2d.derivative firstDerivative
+          let firstDerivativeT1 = VectorCurve2d.evaluate firstDerivative t1
+          let secondDerivativeT1 = VectorCurve2d.evaluate secondDerivative t1
           bezier $
             Bezier.syntheticEnd
               valueT1
@@ -773,10 +778,10 @@ signature ::
   (Quantity units, Quantity units)
 signature orientation curve tValue radius = do
   let local vector = Vector2d.relativeToOrientation orientation vector
-  let firstDerivativeCurve = curve.derivative
-  let secondDerivativeCurve = firstDerivativeCurve.derivative
-  let firstDerivativeValue = VectorCurve2d.evaluate firstDerivativeCurve tValue
-  let secondDerivativeValue = VectorCurve2d.evaluate secondDerivativeCurve tValue
+  let firstDerivative = derivative curve
+  let secondDerivative = VectorCurve2d.derivative firstDerivative
+  let firstDerivativeValue = VectorCurve2d.evaluate firstDerivative tValue
+  let secondDerivativeValue = VectorCurve2d.evaluate secondDerivative tValue
   let Vector2d x' y' = local firstDerivativeValue
   let Vector2d x'' y'' = local secondDerivativeValue
   let dydx = if x' != Quantity.zero then y' ./. x' else y'' ./. x''
@@ -785,8 +790,9 @@ signature orientation curve tValue radius = do
         if x' != Quantity.zero
           then (y'' ?*? x' .-. y' ?*? x'') ?/? (x' ?*? x' ?*? x')
           else do
-            let fourthDerivativeCurve = secondDerivativeCurve.derivative.derivative
-            let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivativeCurve tValue
+            let thirdDerivative = VectorCurve2d.derivative secondDerivative
+            let fourthDerivative = VectorCurve2d.derivative thirdDerivative
+            let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivative tValue
             let Vector2d x'''' y'''' = local fourthDerivativeValue
             (y'''' ?*? x'' .-. y'' ?*? x'''') ?/? (x'' ?*? x'' ?*? x'')
   let secondOrder = Units.simplify (0.5 *. d2ydx2 ?*? Quantity.squared_ radius)
@@ -898,8 +904,8 @@ curvature_ ::
   Curve2d units space ->
   Result IsPoint (Curve (Unitless ?/? units))
 curvature_ curve = do
-  let firstDerivative = curve.derivative
-  let secondDerivative = firstDerivative.derivative
+  let firstDerivative = derivative curve
+  let secondDerivative = VectorCurve2d.derivative firstDerivative
   tangent <- tangentDirection curve
   let numerator = tangent `cross` secondDerivative
   let denominator = VectorCurve2d.squaredMagnitude_ firstDerivative
@@ -932,8 +938,10 @@ samplingPoints resolution curve = do
         let start = evaluate curve subdomain.lower
         let end = evaluate curve subdomain.upper
         Point2d.distanceFrom start end
+  let firstDerivative = derivative curve
+  let secondDerivative = VectorCurve2d.derivative firstDerivative
   let error subdomain = do
-        let secondDerivativeBounds = VectorCurve2d.evaluateBounds curve.secondDerivative subdomain
+        let secondDerivativeBounds = VectorCurve2d.evaluateBounds secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
         Linearization.error secondDerivativeMagnitude subdomain
   let predicate = Resolution.predicate (#size size) (#error error) resolution
@@ -1106,7 +1114,7 @@ piecewiseDerivativeTreeDerivative tree length = case tree of
       (piecewiseDerivativeTreeDerivative rightTree length)
   PiecewiseDerivativeLeaf curve segmentLength ->
     PiecewiseDerivativeLeaf
-      ((length ./. segmentLength) .*. curve.derivative)
+      ((length ./. segmentLength) .*. VectorCurve2d.derivative curve)
       segmentLength
 
 piecewiseDerivativeValue ::
