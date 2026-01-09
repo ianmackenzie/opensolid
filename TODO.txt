@@ -1,3 +1,10 @@
+Switch back to simpler naming convention for 2D geometry?
+- 'Point2D units space'
+- 'Vector3D units space'
+- 'Point3D space'
+- 'Direction2D space'
+- in general, both 2D geometry and vectors have units parameter, 3D positional values do not
+
 Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
 
 Try removing Expression.* modules?
@@ -85,13 +92,8 @@ Move SurfaceLinearization.error to SurfaceFunction3d.linearDeviation
       then use that estimated curvature to 'jump' to the necessary subdivision size for linearization
 -> probably OK if accuracy of mesh is not 100% guaranteed; it's an approximation anyways
 
-Replace use of e.g. curve.derivative with e.g. "let curve' = Curve2d.derivative curve"
-
 Add batch evaluation functions?
 - most important for target languages to avoid many FFI calls
-  - curve.evaluate(t)
-  - curve.evaluate_bounds(t_bounds)
-  - curve.to_polyline(resolution)
   - curve.steps(n), curve.leading(n), curve.trailing(n) etc.?
 
 Reduce use of HasField instances
