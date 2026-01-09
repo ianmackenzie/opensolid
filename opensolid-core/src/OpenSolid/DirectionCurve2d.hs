@@ -23,11 +23,15 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
+import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2d (DirectionSurfaceFunction2d)
+import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2d qualified as DirectionSurfaceFunction2d
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
@@ -205,6 +209,24 @@ instance
 
 instance Composition (Curve Unitless) (DirectionCurve2d space) (DirectionCurve2d space) where
   DirectionCurve2d curve `compose` curve1d = DirectionCurve2d (curve `compose` curve1d)
+
+instance
+  Composition
+    (SurfaceFunction Unitless)
+    (DirectionCurve2d space)
+    (DirectionSurfaceFunction2d space)
+  where
+  DirectionCurve2d curve `compose` surfaceFunction =
+    DirectionSurfaceFunction2d.unsafe (curve `compose` surfaceFunction)
+
+instance
+  Composition
+    SurfaceParameter
+    (DirectionCurve2d space)
+    (DirectionSurfaceFunction2d space)
+  where
+  DirectionCurve2d curve `compose` surfaceParameter =
+    DirectionSurfaceFunction2d.unsafe (curve `compose` surfaceParameter)
 
 instance HasField "xComponent" (DirectionCurve2d space) (Curve Unitless) where
   getField (DirectionCurve2d curve) = curve.xComponent
