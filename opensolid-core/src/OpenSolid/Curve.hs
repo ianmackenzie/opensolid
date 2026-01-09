@@ -176,7 +176,7 @@ interpolateFrom a b = a .+. t .*. (b .-. a)
 
 -- | Get the derivative of a curve.
 derivative :: Curve units -> Curve units
-derivative (Curve _ d) = d
+derivative = (.derivative)
 
 instance Negation (Curve units) where
   negative curve = new (negative curve.compiled) (negative curve.derivative)
