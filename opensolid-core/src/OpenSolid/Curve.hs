@@ -39,6 +39,7 @@ module OpenSolid.Curve
   , cubed
   , sin
   , cos
+  , singularityTolerance
   , IsZero (IsZero)
   , zeros
   , CrossesZero (CrossesZero)
@@ -585,6 +586,10 @@ instance Estimate.Interface (Integral units) units where
     let leftIntegral = Integral curve curveDerivative leftDomain
     let rightIntegral = Integral curve curveDerivative rightDomain
     Estimate.new leftIntegral .+. Estimate.new rightIntegral
+
+singularityTolerance :: Curve units -> Quantity units
+singularityTolerance curve =
+  1e-9 *. NonEmpty.maximumOf (Quantity.abs . evaluate curve) Parameter.samples
 
 ----- ZERO FINDING -----
 
