@@ -13,6 +13,8 @@ import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
+import OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.List qualified as List
@@ -20,7 +22,6 @@ import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -42,6 +43,8 @@ data TangentSolutionTargetSpace
 data Problem units space = Problem
   { curve1 :: Curve2d units space
   , curve2 :: Curve2d units space
+  , tangent1 :: DirectionCurve2d space
+  , tangent2 :: DirectionCurve2d space
   , endpointIntersections :: List EndpointIntersection
   , crossingSolutionTarget :: VectorSurfaceFunction2d units space
   , tangentSolutionTarget :: VectorSurfaceFunction2d (units ?*? units) TangentSolutionTargetSpace
@@ -58,8 +61,10 @@ findEndpointIntersections ::
   Tolerance units =>
   Curve2d units space ->
   Curve2d units space ->
+  DirectionCurve2d space ->
+  DirectionCurve2d space ->
   Result Curve2d.IsPoint (List EndpointIntersection)
-findEndpointIntersections curve1 curve2 = do
+findEndpointIntersections curve1 curve2 tangent1 tangent2 = do
   start1t2s <- Curve2d.findPoint (Curve2d.startPoint curve1) curve2
   end1t2s <- Curve2d.findPoint (Curve2d.endPoint curve1) curve2
   start2t1s <- Curve2d.findPoint (Curve2d.startPoint curve2) curve1
@@ -70,43 +75,29 @@ findEndpointIntersections curve1 curve2 = do
   let end2Solutions = List.map (,1) end2t1s
   let allSolutions = List.concat [start1Solutions, end1Solutions, start2Solutions, end2Solutions]
   let uniqueSolutions = List.sortAndDeduplicate allSolutions
-  Ok (List.map (toEndpointIntersection curve1 curve2) uniqueSolutions)
+  Ok (List.map (toEndpointIntersection curve1 curve2 tangent1 tangent2) uniqueSolutions)
 
 toEndpointIntersection ::
   Tolerance units =>
   Curve2d units space ->
   Curve2d units space ->
+  DirectionCurve2d space ->
+  DirectionCurve2d space ->
   (Number, Number) ->
   EndpointIntersection
-toEndpointIntersection curve1 curve2 (t1, t2) = do
-  let (tangentVector1, singular1) = tangentSignature curve1 t1
-  let (tangentVector2, singular2) = tangentSignature curve2 t2
-  let crossProduct = tangentVector1 `cross` tangentVector2
+toEndpointIntersection curve1 curve2 tangent1 tangent2 (t1, t2) = do
+  let tangentDirection1 = DirectionCurve2d.evaluate tangent1 t1
+  let tangentDirection2 = DirectionCurve2d.evaluate tangent2 t2
+  let crossProduct = tangentDirection1 `cross` tangentDirection2
+  let singular1 = VectorCurve2d.evaluate (Curve2d.derivative curve1) t1 ~= Vector2d.zero
+  let singular2 = VectorCurve2d.evaluate (Curve2d.derivative curve2) t2 ~= Vector2d.zero
   let intersectionPoint =
         if Tolerance.using 1e-9 (crossProduct ~= Quantity.zero)
           then IntersectionPoint.tangent t1 t2
           else IntersectionPoint.crossing t1 t2 (Quantity.sign crossProduct)
   let isSingular = singular1 || singular2
-  let alignment = Quantity.sign (tangentVector1 `dot` tangentVector2)
+  let alignment = Quantity.sign (tangentDirection1 `dot` tangentDirection2)
   EndpointIntersection{intersectionPoint, isSingular, alignment}
-
-tangentSignature ::
-  Tolerance units =>
-  Curve2d units space ->
-  Number ->
-  (Vector2d Unitless space, Bool)
-tangentSignature curve tValue = do
-  let firstDerivative = Curve2d.derivative curve
-  let secondDerivative = VectorCurve2d.derivative firstDerivative
-  let firstDerivativeValue = VectorCurve2d.evaluate firstDerivative tValue
-  let secondDerivativeValue = VectorCurve2d.evaluate secondDerivative tValue
-  let isSingular = firstDerivativeValue ~= Vector2d.zero
-  let discriminator
-        | isSingular && tValue == 0 = secondDerivativeValue
-        | isSingular && tValue == 1 = negative secondDerivativeValue
-        | otherwise = firstDerivativeValue
-  let tangentVector = Vector2d.normalize discriminator
-  (tangentVector, isSingular)
 
 findIntersectionPoint ::
   Tolerance units =>
@@ -114,7 +105,7 @@ findIntersectionPoint ::
   (Bounds Unitless, Bounds Unitless) ->
   Fuzzy (Maybe IntersectionPoint)
 findIntersectionPoint problem (tBounds1, tBounds2) = do
-  let Problem{curve1, curve2} = problem
+  let Problem{curve1, curve2, tangent1, tangent2} = problem
   let interiorBounds1 = Curve2d.evaluateBounds curve1 (Bisection.interior tBounds1)
   let interiorBounds2 = Curve2d.evaluateBounds curve2 (Bisection.interior tBounds2)
   if not (interiorBounds1 `intersects` interiorBounds2)
@@ -136,9 +127,9 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
       let isInterior t1 t2 = Bisection.isInterior t1 tBounds1 && Bisection.isInterior t2 tBounds2
       let equalPoints t1 t2 = Curve2d.evaluate curve1 t1 ~= Curve2d.evaluate curve2 t2
       let equalTangents t1 t2 = do
-            let tangent1 = Vector2d.normalize (VectorCurve2d.evaluate firstDerivative1 t1)
-            let tangent2 = Vector2d.normalize (VectorCurve2d.evaluate firstDerivative2 t2)
-            Tolerance.using 1e-9 (tangent1 `cross` tangent2 ~= Quantity.zero)
+            let tangentDirection1 = DirectionCurve2d.evaluate tangent1 t1
+            let tangentDirection2 = DirectionCurve2d.evaluate tangent2 t2
+            Tolerance.using 1e-9 (tangentDirection1 `cross` tangentDirection2 ~= Quantity.zero)
       let resolvedEndpointIntersection size allowedAlignment = do
             let isLocal EndpointIntersection{intersectionPoint} =
                   Bounds.includes intersectionPoint.t1 tBounds1
@@ -249,7 +240,9 @@ intersections ::
 intersections curve1 curve2
   | not (Curve2d.bounds curve1 `intersects` Curve2d.bounds curve2) = Ok Nothing
   | otherwise = do
-      endpointIntersections <- findEndpointIntersections curve1 curve2
+      tangent1 <- Curve2d.tangentDirection curve1
+      tangent2 <- Curve2d.tangentDirection curve2
+      endpointIntersections <- findEndpointIntersections curve1 curve2 tangent1 tangent2
       case overlappingSegments curve1 curve2 endpointIntersections of
         Just segments -> Ok (Just (OverlappingSegments segments))
         Nothing -> do
@@ -263,6 +256,8 @@ intersections curve1 curve2
                 Problem
                   { curve1
                   , curve2
+                  , tangent1
+                  , tangent2
                   , endpointIntersections
                   , crossingSolutionTarget = differenceSurface
                   , tangentSolutionTarget
