@@ -492,10 +492,10 @@ instance
   curve `compose` parameter = curve `compose` SurfaceFunction.parameter parameter
 
 compiled :: VectorCurve2d units space -> Compiled units space
-compiled (VectorCurve2d c _) = c
+compiled = (.compiled)
 
 derivative :: VectorCurve2d units space -> VectorCurve2d units space
-derivative (VectorCurve2d _ d) = d
+derivative = (.derivative)
 
 transformBy ::
   Transform2d tag translationUnits space ->
