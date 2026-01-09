@@ -60,6 +60,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve.WithNoInteriorZeros qualified as Curve.WithNoInteriorZeros
+import {-# SOURCE #-} OpenSolid.Curve.WithNoZeros qualified as Curve.WithNoZeros
 import OpenSolid.Curve.Zero (Zero)
 import OpenSolid.Curve.Zero qualified as Zero
 import OpenSolid.Desingularization qualified as Desingularization
@@ -446,10 +447,12 @@ instance Units.Coercion (WithNoZeros units1) (WithNoZeros units2) where
   coerce (WithNoZeros curve) = WithNoZeros (Units.coerce curve)
 
 instance Division_ (Curve units1) (WithNoZeros units2) (Curve (units1 ?/? units2)) where
-  lhs ?/? WithNoZeros rhs = do
+  lhs ?/? rhsWithNoZeros = do
+    let rhs = Curve.WithNoZeros.unwrap rhsWithNoZeros
     let quotientCompiled = lhs.compiled ?/? rhs.compiled
     let quotientDerivative = Units.simplify do
-          (lhs.derivative ?*? rhs .-. lhs ?*? rhs.derivative) ?/? WithNoZeros (squared_ rhs)
+          (lhs.derivative ?*? rhs .-. lhs ?*? rhs.derivative)
+            ?/? Curve.WithNoZeros.squared_ rhsWithNoZeros
     new quotientCompiled quotientDerivative
 
 instance

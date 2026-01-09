@@ -1,4 +1,11 @@
-module OpenSolid.Curve.WithNoZeros (unwrap, sqrt_, sqrt) where
+module OpenSolid.Curve.WithNoZeros
+  ( unwrap
+  , sqrt_
+  , sqrt
+  , squared_
+  , squared
+  )
+where
 
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -21,3 +28,9 @@ sqrt_ (WithNoZeros curve) = WithNoZeros do
 
 sqrt :: Units.Squared units1 units2 => WithNoZeros units2 -> WithNoZeros units1
 sqrt = sqrt_ . Units.unspecialize
+
+squared_ :: WithNoZeros units -> WithNoZeros (units ?*? units)
+squared_ (WithNoZeros curve) = WithNoZeros (Curve.squared_ curve)
+
+squared :: Units.Squared units1 units2 => WithNoZeros units1 -> WithNoZeros units2
+squared = Units.specialize . squared_
