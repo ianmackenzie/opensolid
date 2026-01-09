@@ -8,6 +8,7 @@ module OpenSolid.Curve
   , evaluateBounds
   , startValue
   , endValue
+  , compiled
   , derivative
   , new
   , concrete
@@ -173,6 +174,9 @@ t = new (CompiledFunction.concrete Expression.t) (constant 1)
 -- | Create a curve that linearly interpolates from the first value to the second.
 interpolateFrom :: Quantity units -> Quantity units -> Curve units
 interpolateFrom a b = a .+. t .*. (b .-. a)
+
+compiled :: Curve units -> Compiled units
+compiled = (.compiled)
 
 -- | Get the derivative of a curve.
 derivative :: Curve units -> Curve units
