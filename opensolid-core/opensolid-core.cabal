@@ -238,6 +238,8 @@ library
     OpenSolid.VectorBounds2d
     OpenSolid.VectorBounds3d
     OpenSolid.VectorCurve2d
+    OpenSolid.VectorCurve2d.WithNoInteriorZeros
+    OpenSolid.VectorCurve2d.WithNoZeros
     OpenSolid.VectorCurve3d
     OpenSolid.VectorSurface2d
     OpenSolid.VectorSurface3d

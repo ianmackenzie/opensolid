@@ -1,6 +1,8 @@
 module OpenSolid.VectorCurve2d
   ( VectorCurve2d
   , Compiled
+  , WithNoZeros (WithNoZeros)
+  , WithNoInteriorZeros (WithNoInteriorZeros)
   , new
   , recursive
   , compiled
@@ -26,8 +28,6 @@ module OpenSolid.VectorCurve2d
   , desingularized
   , quotient
   , quotient_
-  , unsafeQuotient
-  , unsafeQuotient_
   , magnitude
   , squaredMagnitude
   , squaredMagnitude_
@@ -57,6 +57,7 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.WithNoZeros qualified as Curve.WithNoZeros
 import OpenSolid.Curve.Zero qualified as Curve.Zero
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
@@ -91,15 +92,19 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
+import {-# SOURCE #-} OpenSolid.VectorCurve2d.WithNoInteriorZeros (WithNoInteriorZeros (WithNoInteriorZeros))
+import {-# SOURCE #-} OpenSolid.VectorCurve2d.WithNoInteriorZeros qualified as VectorCurve2d.WithNoInteriorZeros
+import {-# SOURCE #-} OpenSolid.VectorCurve2d.WithNoZeros (WithNoZeros (WithNoZeros))
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
-data VectorCurve2d units space
-  = VectorCurve2d
+data VectorCurve2d units space = VectorCurve2d
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2d units space)
+  , maxSampledMagnitude :: ~(Quantity units)
+  , normalized :: ~(VectorCurve2d Unitless space)
   }
 
 type Compiled units space =
@@ -147,7 +152,13 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve2d units1 space1) (VectorCurve2d units2 space2)
   where
-  coerce curve = VectorCurve2d (Units.coerce curve.compiled) (Units.coerce curve.derivative)
+  coerce curve =
+    VectorCurve2d
+      { compiled = Units.coerce curve.compiled
+      , derivative = Units.coerce curve.derivative
+      , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
+      , normalized = curve.normalized
+      }
 
 instance ApproximateEquality (VectorCurve2d units space) units where
   curve1 ~= curve2 = do
@@ -518,7 +529,19 @@ rotateBy ::
 rotateBy angle = transformBy (Transform2d.rotateAround (Point2d.origin @units @space) angle)
 
 new :: Compiled units space -> VectorCurve2d units space -> VectorCurve2d units space
-new = VectorCurve2d
+new givenCompiled givenDerivative = result
+ where
+  -- The test value to use to check if a curve is (likely) zero everywhere
+  maxSampledMagnitude = NonEmpty.maximumOf (Vector2d.magnitude . evaluate result) Parameter.samples
+  -- The normalized version of this curve, assuming it has no interior zeros
+  normalized = result ./. VectorCurve2d.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
+  result =
+    VectorCurve2d
+      { compiled = givenCompiled
+      , derivative = givenDerivative
+      , maxSampledMagnitude
+      , normalized
+      }
 
 recursive ::
   Compiled units space ->
@@ -694,19 +717,57 @@ quotient_ ::
   VectorCurve2d units1 space ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve2d (units1 ?/? units2) space)
-quotient_ numerator denominator =
-  if denominator ~= Curve.zero
+quotient_ lhs rhs =
+  if rhs ~= Curve.zero
     then Error DivisionByZero
-    else Ok do
-      let singularity0 =
-            if Curve.evaluate denominator 0 ~= Quantity.zero
-              then Just (lHopital numerator denominator 0)
-              else Nothing
-      let singularity1 =
-            if Curve.evaluate denominator 1 ~= Quantity.zero
-              then Just (lHopital numerator denominator 1)
-              else Nothing
-      desingularize singularity0 (unsafeQuotient_ numerator denominator) singularity1
+    else Ok (lhs ?/? Curve.WithNoInteriorZeros rhs)
+
+instance
+  Division_
+    (VectorCurve2d units1 space)
+    (Curve.WithNoZeros units2)
+    (VectorCurve2d (units1 ?/? units2) space)
+  where
+  lhs ?/? rhsWithNoZeros = do
+    let rhs = Curve.WithNoZeros.unwrap rhsWithNoZeros
+    let compiledQuotient = compiled lhs ?/? Curve.compiled rhs
+    let quotientDerivative = Units.simplify do
+          (derivative lhs ?*? rhs .-. lhs ?*? Curve.derivative rhs)
+            ?/? Curve.WithNoZeros.squared_ rhsWithNoZeros
+    new compiledQuotient quotientDerivative
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (VectorCurve2d units1 space)
+    (Curve.WithNoZeros units2)
+    (VectorCurve2d units3 space)
+  where
+  lhs ./. rhs = Units.specialize (lhs ?/? rhs)
+
+instance
+  Division_
+    (VectorCurve2d units1 space)
+    (Curve.WithNoInteriorZeros units2)
+    (VectorCurve2d (units1 ?/? units2) space)
+  where
+  lhs ?/? Curve.WithNoInteriorZeros rhs = do
+    let singularityTolerance = Curve.singularityTolerance rhs
+    let maybeSingularity tValue =
+          if Tolerance.using singularityTolerance (Curve.evaluate rhs tValue ~= Quantity.zero)
+            then Just (lHopital lhs rhs tValue)
+            else Nothing
+    let interiorQuotient = lhs ?/? Curve.WithNoZeros rhs
+    desingularize (maybeSingularity 0) interiorQuotient (maybeSingularity 1)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (VectorCurve2d units1 space)
+    (Curve.WithNoInteriorZeros units2)
+    (VectorCurve2d units3 space)
+  where
+  lhs ./. rhs = Units.specialize (lhs ?/? rhs)
 
 lHopital ::
   VectorCurve2d units1 space ->
@@ -724,25 +785,6 @@ lHopital numerator denominator tValue = do
           (numerator'' ?*? denominator' .-. numerator' ?*? denominator'')
             ?/? (2 *. Quantity.squared_ denominator')
   (value, firstDerivative)
-
-unsafeQuotient ::
-  Units.Quotient units1 units2 units3 =>
-  VectorCurve2d units1 space ->
-  Curve units2 ->
-  VectorCurve2d units3 space
-unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient_ numerator denominator)
-
-unsafeQuotient_ ::
-  VectorCurve2d units1 space ->
-  Curve units2 ->
-  VectorCurve2d (units1 ?/? units2) space
-unsafeQuotient_ numerator denominator = do
-  let compiledQuotient = numerator.compiled ?/? denominator.compiled
-  let quotientDerivative = Units.simplify do
-        unsafeQuotient_
-          (derivative numerator ?*? denominator .-. numerator ?*? Curve.derivative denominator)
-          (Curve.squared_ denominator)
-  new compiledQuotient quotientDerivative
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d units1 space -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
@@ -781,9 +823,10 @@ direction ::
   Tolerance units =>
   VectorCurve2d units space ->
   Result IsZero (DirectionCurve2d space)
-direction curve = case quotient curve (magnitude curve) of
-  Error DivisionByZero -> Error IsZero
-  Ok normalizedCurve -> Ok (DirectionCurve2d.unsafe normalizedCurve)
+direction curve =
+  if curve.maxSampledMagnitude ~= Quantity.zero
+    then Error IsZero
+    else Ok (DirectionCurve2d.unsafe curve.normalized)
 
 placeIn ::
   Frame2d frameUnits global local ->

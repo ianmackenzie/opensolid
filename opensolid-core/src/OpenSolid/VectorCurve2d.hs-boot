@@ -9,8 +9,6 @@ module OpenSolid.VectorCurve2d
   , evaluateBounds
   , quotient
   , quotient_
-  , unsafeQuotient
-  , unsafeQuotient_
   , transformBy
   )
 where
@@ -100,15 +98,6 @@ quotient_ ::
   VectorCurve2d units1 space ->
   Curve units2 ->
   Result DivisionByZero (VectorCurve2d (units1 ?/? units2) space)
-unsafeQuotient ::
-  Units.Quotient units1 units2 units3 =>
-  VectorCurve2d units1 space ->
-  Curve units2 ->
-  VectorCurve2d units3 space
-unsafeQuotient_ ::
-  VectorCurve2d units1 space ->
-  Curve units2 ->
-  VectorCurve2d (units1 ?/? units2) space
 transformBy ::
   Transform2d tag translationUnits space ->
   VectorCurve2d units space ->
