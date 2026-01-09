@@ -475,14 +475,12 @@ fluxIntegral ::
   Estimate Unitless
 fluxIntegral point curve = do
   let displacement = point .-. curve
-  -- By this point we've already checked whether the poing is *on* the curve,
-  -- so the Curve.unsafeQuotient call should be OK
-  -- (if the point is not on the curve, then the displacement will always be non-zero)
+  -- By this point we've already checked whether the point is *on* the curve,
+  -- so (since it's not) the displacement will always be non-zero
   let integrand =
         Tolerance.using (Quantity.squared_ ?tolerance) $
-          Curve.unsafeQuotient
-            (Curve2d.derivative curve `cross_` displacement)
-            (VectorCurve2d.squaredMagnitude_ displacement)
+          (Curve2d.derivative curve `cross_` displacement)
+            ./. Curve.WithNoZeros (VectorCurve2d.squaredMagnitude_ displacement)
   Curve.integrate integrand
 
 totalFlux :: Tolerance units => Point2d units space -> Loop units space -> Estimate Unitless

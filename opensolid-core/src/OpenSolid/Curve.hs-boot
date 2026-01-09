@@ -1,6 +1,8 @@
 module OpenSolid.Curve
   ( Curve (compiled, derivative)
   , Compiled
+  , WithNoInteriorZeros (WithNoInteriorZeros)
+  , WithNoZeros (WithNoZeros)
   , evaluate
   , evaluateBounds
   )
@@ -19,6 +21,10 @@ data Curve units = Curve {compiled :: Compiled units, derivative :: ~(Curve unit
 type Compiled units = CompiledFunction Number (Quantity units) (Bounds Unitless) (Bounds units)
 
 instance FFI (Curve Unitless)
+
+newtype WithNoZeros units = WithNoZeros (Curve units)
+
+newtype WithNoInteriorZeros units = WithNoInteriorZeros (Curve units)
 
 evaluate :: Curve units -> Number -> Quantity units
 evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units

@@ -119,6 +119,8 @@ library
     OpenSolid.Composition
     OpenSolid.Convention3d
     OpenSolid.Curve
+    OpenSolid.Curve.WithNoInteriorZeros
+    OpenSolid.Curve.WithNoZeros
     OpenSolid.Curve.Zero
     OpenSolid.Curve2d
     OpenSolid.Curve2d.IntersectionPoint
