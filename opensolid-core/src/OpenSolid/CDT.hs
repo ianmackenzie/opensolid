@@ -11,18 +11,18 @@ import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
+import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
 import System.IO.Unsafe qualified
 
 unsafe ::
-  NonEmpty (NonEmpty (Point2d units space)) ->
-  List (Point2d units space) ->
-  Mesh (Point2d units space)
+  NonEmpty (NonEmpty (Point2D units space)) ->
+  List (Point2D units space) ->
+  Mesh (Point2D units space)
 unsafe boundaryLoops steinerVertices = do
   let boundaryVertices = NonEmpty.concat boundaryLoops
   let inputVertices = NonEmpty.extend boundaryVertices steinerVertices
-  let prependCoordinates (Point2d x y) accumulated = x : y : accumulated
+  let prependCoordinates (Point2D x y) accumulated = x : y : accumulated
   let inputPointCoordinates = NonEmpty.foldr prependCoordinates [] inputVertices
   let inputEdgeIndices = collectEdgeIndices (NonEmpty.toList boundaryLoops) 0 []
   let numHoles = NonEmpty.length boundaryLoops - 1

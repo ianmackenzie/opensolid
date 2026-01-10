@@ -123,11 +123,9 @@ import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Orientation2d qualified as Orientation2d
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Point2D (Point2D (Point2D))
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
-import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
@@ -145,6 +143,8 @@ import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
@@ -163,7 +163,7 @@ data Curve2d units space = Curve2d
 type Compiled units space =
   CompiledFunction
     Number
-    (Point2d units space)
+    (Point2D units space)
     (Bounds Unitless)
     (Bounds2d units space)
 
@@ -192,13 +192,13 @@ instance
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Curve2d units1 space1) (Point2d units2 space2) units1
+  Intersects (Curve2d units1 space1) (Point2D units2 space2) units1
   where
-  curve `intersects` point = (curve .-. point) `intersects` Vector2d.zero
+  curve `intersects` point = (curve .-. point) `intersects` Vector2D.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Point2d units1 space1) (Curve2d units2 space2) units1
+  Intersects (Point2D units1 space1) (Curve2d units2 space2) units1
   where
   point `intersects` curve = curve `intersects` point
 
@@ -245,7 +245,7 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve2d units1 space1)
-    (Point2d units2 space2)
+    (Point2D units2 space2)
     (VectorCurve2d units1 space1)
   where
   curve .-. point = curve .-. constant point
@@ -253,7 +253,7 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Point2d units1 space1)
+    (Point2D units1 space1)
     (Curve2d units2 space2)
     (VectorCurve2d units1 space1)
   where
@@ -332,13 +332,13 @@ recursive givenCompiled derivativeFunction =
   let result = new givenCompiled (derivativeFunction result) in result
 
 -- | Create a degenerate curve that is actually just a single point.
-constant :: Point2d units space -> Curve2d units space
+constant :: Point2D units space -> Curve2d units space
 constant point = new (CompiledFunction.constant point) VectorCurve2d.zero
 
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve units -> Curve units -> Curve2d units space
 xy x y = do
-  let compiledXY = CompiledFunction.map2 Expression.xy Point2d Bounds2d x.compiled y.compiled
+  let compiledXY = CompiledFunction.map2 Expression.xy Point2D Bounds2d x.compiled y.compiled
   new compiledXY (VectorCurve2d.xy x.derivative y.derivative)
 
 -- | Convert a line to a curve.
@@ -346,7 +346,7 @@ line :: Line2d units space -> Curve2d units space
 line (Line2d p1 p2) = lineFrom p1 p2
 
 -- | Create a line between two points.
-lineFrom :: Point2d units space -> Point2d units space -> Curve2d units space
+lineFrom :: Point2D units space -> Point2D units space -> Curve2d units space
 lineFrom p1 p2 = bezier (NonEmpty.two p1 p2)
 
 {-| Create an arc from the given start point to the given end point, with the given swept angle.
@@ -358,13 +358,13 @@ is quarter circle that turns to the left.
 -}
 arcFrom ::
   Tolerance units =>
-  Point2d units space ->
-  Point2d units space ->
+  Point2D units space ->
+  Point2D units space ->
   Angle ->
   Curve2d units space
 arcFrom givenStartPoint givenEndPoint sweptAngle =
-  case Vector2d.magnitudeAndDirection (givenEndPoint .-. givenStartPoint) of
-    Error Vector2d.IsZero -> lineFrom givenStartPoint givenEndPoint
+  case Vector2D.magnitudeAndDirection (givenEndPoint .-. givenStartPoint) of
+    Error Vector2D.IsZero -> lineFrom givenStartPoint givenEndPoint
     Ok (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 *. distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 *. sweptAngle)
@@ -373,32 +373,32 @@ arcFrom givenStartPoint givenEndPoint sweptAngle =
         then lineFrom givenStartPoint givenEndPoint
         else do
           let offset = (halfDistance ./. tanHalfAngle) .*. Direction2d.rotateLeft directionBetweenPoints
-          let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint .+. offset
-          let radius = Point2d.distanceFrom centerPoint givenStartPoint
-          let xVector = Vector2d.x radius
-          let yVector = Vector2d.y radius
-          let startAngle = Point2d.angleFrom centerPoint givenStartPoint
+          let centerPoint = Point2D.midpoint givenStartPoint givenEndPoint .+. offset
+          let radius = Point2D.distanceFrom centerPoint givenStartPoint
+          let xVector = Vector2D.x radius
+          let yVector = Vector2D.y radius
+          let startAngle = Point2D.angleFrom centerPoint givenStartPoint
           let endAngle = startAngle .+. sweptAngle
           customArc centerPoint xVector yVector startAngle endAngle
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
-  "centerPoint" ::: Point2d units space ->
+  "centerPoint" ::: Point2D units space ->
   "radius" ::: Quantity units ->
   "startAngle" ::: Angle ->
   "endAngle" ::: Angle ->
   Curve2d units space
 polarArc (Named centerPoint) (Named radius) (Named startAngle) (Named endAngle) =
-  customArc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle
+  customArc centerPoint (Vector2D.x radius) (Vector2D.y radius) startAngle endAngle
 
 {-| Create an arc with the given center point, start point and swept angle.
 
 The start point will be swept around the center point by the given angle.
 -}
-sweptArc :: Point2d units space -> Point2d units space -> Angle -> Curve2d units space
+sweptArc :: Point2D units space -> Point2D units space -> Angle -> Curve2d units space
 sweptArc centerPoint givenStartPoint sweptAngle = do
-  let radius = Point2d.distanceFrom centerPoint givenStartPoint
-  let startAngle = Point2d.angleFrom centerPoint givenStartPoint
+  let radius = Point2D.distanceFrom centerPoint givenStartPoint
+  let startAngle = Point2D.angleFrom centerPoint givenStartPoint
   polarArc
     (#centerPoint centerPoint)
     (#radius radius)
@@ -408,7 +408,7 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
   Tolerance units =>
-  Point2d units space ->
+  Point2D units space ->
   "incoming" ::: Direction2d space ->
   "outgoing" ::: Direction2d space ->
   "radius" ::: Quantity units ->
@@ -433,14 +433,14 @@ data WhichArc
 radiusArc ::
   Tolerance units =>
   Quantity units ->
-  Point2d units space ->
-  Point2d units space ->
+  Point2D units space ->
+  Point2D units space ->
   WhichArc ->
   Curve2d units space
 radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
   case Direction2d.from givenStartPoint givenEndPoint of
     Ok chordDirection -> do
-      let halfDistance = 0.5 *. Point2d.distanceFrom givenStartPoint givenEndPoint
+      let halfDistance = 0.5 *. Point2D.distanceFrom givenStartPoint givenEndPoint
       let radius = max (Quantity.abs givenRadius) halfDistance
       let offsetMagnitude =
             Quantity.sqrt_ (Quantity.squared_ radius .-. Quantity.squared_ halfDistance)
@@ -452,7 +452,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
               LargeClockwise -> offsetMagnitude
               LargeCounterclockwise -> negative offsetMagnitude
       let offset = offsetDirection .*. offsetDistance
-      let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint .+. offset
+      let centerPoint = Point2D.midpoint givenStartPoint givenEndPoint .+. offset
       let shortAngle = 2 *. Angle.asin (halfDistance ./. givenRadius)
       let sweptAngle =
             case whichArc of
@@ -478,9 +478,9 @@ ellipticalArc axes xRadius yRadius startAngle endAngle = do
   customArc centerPoint xVector yVector startAngle endAngle
 
 customArc ::
-  Point2d units space ->
-  Vector2d units space ->
-  Vector2d units space ->
+  Point2D units space ->
+  Vector2D units space ->
+  Vector2D units space ->
   Angle ->
   Angle ->
   Curve2d units space
@@ -516,7 +516,7 @@ For example,
 
 will return a cubic Bezier curve with the given four control points.
 -}
-bezier :: NonEmpty (Point2d units space) -> Curve2d units space
+bezier :: NonEmpty (Point2D units space) -> Curve2d units space
 bezier controlPoints =
   new
     (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
@@ -524,18 +524,18 @@ bezier controlPoints =
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
-  Point2d units space ->
-  Point2d units space ->
-  Point2d units space ->
+  Point2D units space ->
+  Point2D units space ->
+  Point2D units space ->
   Curve2d units space
 quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 
 -- | Construct a cubic Bezier curve from the given control points.
 cubicBezier ::
-  Point2d units space ->
-  Point2d units space ->
-  Point2d units space ->
-  Point2d units space ->
+  Point2D units space ->
+  Point2D units space ->
+  Point2D units space ->
+  Point2D units space ->
   Curve2d units space
 cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
@@ -558,18 +558,18 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
-  Point2d units space ->
-  List (Vector2d units space) ->
-  Point2d units space ->
-  List (Vector2d units space) ->
+  Point2D units space ->
+  List (Vector2D units space) ->
+  Point2D units space ->
+  List (Vector2D units space) ->
   Curve2d units space
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
 desingularize ::
-  Maybe (Point2d units space, Vector2d units space) ->
+  Maybe (Point2D units space, Vector2D units space) ->
   Curve2d units space ->
-  Maybe (Point2d units space, Vector2d units space) ->
+  Maybe (Point2D units space, Vector2D units space) ->
   Curve2d units space
 desingularize Nothing curve Nothing = curve
 desingularize startSingularity curve endSingularity = do
@@ -617,39 +617,39 @@ desingularized start middle end =
     (CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled)
     (VectorCurve2d.desingularized start.derivative middle.derivative end.derivative)
 
-instance HasField "startPoint" (Curve2d units space) (Point2d units space) where
+instance HasField "startPoint" (Curve2d units space) (Point2D units space) where
   getField curve = evaluate curve 0
 
-instance HasField "endPoint" (Curve2d units space) (Point2d units space) where
+instance HasField "endPoint" (Curve2d units space) (Point2D units space) where
   getField curve = evaluate curve 1
 
 {-| Evaluate a curve at a given parameter value.
 
 The parameter value should be between 0 and 1.
 -}
-evaluate :: Curve2d units space -> Number -> Point2d units space
+evaluate :: Curve2d units space -> Number -> Point2D units space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 {-# INLINE evaluateAt #-}
-evaluateAt :: Number -> Curve2d units space -> Point2d units space
+evaluateAt :: Number -> Curve2d units space -> Point2D units space
 evaluateAt tValue curve = evaluate curve tValue
 
 -- | Get the start point of a curve.
-startPoint :: Curve2d units space -> Point2d units space
+startPoint :: Curve2d units space -> Point2D units space
 startPoint curve = evaluate curve 0
 
 -- | Get the end point of a curve.
-endPoint :: Curve2d units space -> Point2d units space
+endPoint :: Curve2d units space -> Point2D units space
 endPoint curve = evaluate curve 1
 
 -- | Get the start and end points of a curve.
-endpoints :: Curve2d units space -> (Point2d units space, Point2d units space)
+endpoints :: Curve2d units space -> (Point2D units space, Point2D units space)
 endpoints curve = (startPoint curve, endPoint curve)
 
 evaluateBounds :: Curve2d units space -> Bounds Unitless -> Bounds2d units space
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
-samplePoints :: Curve2d units space -> NonEmpty (Point2d units space)
+samplePoints :: Curve2d units space -> NonEmpty (Point2D units space)
 samplePoints curve = NonEmpty.map (evaluate curve) Parameter.samples
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
@@ -718,7 +718,7 @@ xCoordinate curve = do
   let compiledXCoordinate =
         CompiledFunction.map
           Expression.xCoordinate
-          Point2d.xCoordinate
+          Point2D.xCoordinate
           Bounds2d.xCoordinate
           curve.compiled
   Curve.new compiledXCoordinate (VectorCurve2d.xComponent curve.derivative)
@@ -729,7 +729,7 @@ yCoordinate curve = do
   let compiledYCoordinate =
         CompiledFunction.map
           Expression.yCoordinate
-          Point2d.yCoordinate
+          Point2D.yCoordinate
           Bounds2d.yCoordinate
           curve.compiled
   Curve.new compiledYCoordinate (VectorCurve2d.yComponent curve.derivative)
@@ -739,7 +739,7 @@ coordinates curve = (xCoordinate curve, yCoordinate curve)
 
 findPoint ::
   Tolerance units =>
-  Point2d units space ->
+  Point2D units space ->
   Curve2d units space ->
   Result IsPoint (List Number)
 findPoint point curve =
@@ -757,8 +757,8 @@ g2 (curve1, t1) (curve2, t2) radius =
   evaluate curve1 t1 ~= evaluate curve2 t2 && do
     let first1 = VectorCurve2d.evaluate curve1.derivative t1
     let first2 = VectorCurve2d.evaluate curve2.derivative t2
-    let Vector2d dxdt1 dydt1 = first1
-    let Vector2d dxdt2 dydt2 = first2
+    let Vector2D dxdt1 dydt1 = first1
+    let Vector2D dxdt2 dydt2 = first2
     let dxdtMin = min (Quantity.abs dxdt1) (Quantity.abs dxdt2)
     let dydtMin = min (Quantity.abs dydt1) (Quantity.abs dydt2)
     let orientation =
@@ -777,13 +777,13 @@ signature ::
   Quantity units ->
   (Quantity units, Quantity units)
 signature orientation curve tValue radius = do
-  let local vector = Vector2d.relativeToOrientation orientation vector
+  let local vector = Vector2D.relativeToOrientation orientation vector
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
   let firstDerivativeValue = VectorCurve2d.evaluate firstDerivative tValue
   let secondDerivativeValue = VectorCurve2d.evaluate secondDerivative tValue
-  let Vector2d x' y' = local firstDerivativeValue
-  let Vector2d x'' y'' = local secondDerivativeValue
+  let Vector2D x' y' = local firstDerivativeValue
+  let Vector2D x'' y'' = local secondDerivativeValue
   let dydx = if x' != Quantity.zero then y' ./. x' else y'' ./. x''
   let firstOrder = dydx .*. radius
   let d2ydx2 =
@@ -793,7 +793,7 @@ signature orientation curve tValue radius = do
             let thirdDerivative = VectorCurve2d.derivative secondDerivative
             let fourthDerivative = VectorCurve2d.derivative thirdDerivative
             let fourthDerivativeValue = VectorCurve2d.evaluate fourthDerivative tValue
-            let Vector2d x'''' y'''' = local fourthDerivativeValue
+            let Vector2D x'''' y'''' = local fourthDerivativeValue
             (y'''' ?*? x'' .-. y'' ?*? x'''') ?/? (x'' ?*? x'' ?*? x'')
   let secondOrder = Units.simplify (0.5 *. d2ydx2 ?*? Quantity.squared_ radius)
   (firstOrder, secondOrder)
@@ -806,7 +806,7 @@ placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
           (Expression.Curve2d.placeIn frame)
-          (Point2d.placeIn frame)
+          (Point2D.placeIn frame)
           (Bounds2d.placeIn frame)
           curve.compiled
   new compiledPlaced (VectorCurve2d.placeIn frame curve.derivative)
@@ -828,14 +828,14 @@ transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
           (Expression.Curve2d.transformBy transform)
-          (Point2d.transformBy transform)
+          (Point2D.transformBy transform)
           (Bounds2d.transformBy transform)
           curve.compiled
   new compiledTransformed (VectorCurve2d.transformBy transform curve.derivative)
 
 -- | Translate by the given displacement.
 translateBy ::
-  Vector2d units space ->
+  Vector2D units space ->
   Curve2d units space ->
   Curve2d units space
 translateBy = Transform2d.translateByImpl transformBy
@@ -858,7 +858,7 @@ translateAlong = Transform2d.translateAlongImpl transformBy
 
 -- | Rotate around the given point by the given angle.
 rotateAround ::
-  Point2d units space ->
+  Point2D units space ->
   Angle ->
   Curve2d units space ->
   Curve2d units space
@@ -873,7 +873,7 @@ mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
 -- | Scale uniformly about the given point by the given scaling factor.
 scaleAbout ::
-  Point2d units space ->
+  Point2D units space ->
   Number ->
   Curve2d units space ->
   Curve2d units space
@@ -891,7 +891,7 @@ convert ::
   Quantity (units2 ?/? units1) ->
   Curve2d units1 space ->
   Curve2d units2 space
-convert factor curve = Units.coerce (scaleAbout Point2d.origin (Units.erase factor) curve)
+convert factor curve = Units.coerce (scaleAbout Point2D.origin (Units.erase factor) curve)
 
 unconvert ::
   Quantity (units2 ?/? units1) ->
@@ -937,7 +937,7 @@ samplingPoints resolution curve = do
   let size subdomain = do
         let start = evaluate curve subdomain.lower
         let end = evaluate curve subdomain.upper
-        Point2d.distanceFrom start end
+        Point2D.distanceFrom start end
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
   let error subdomain = do
@@ -1041,7 +1041,7 @@ data PiecewiseTree units space where
     Quantity units ->
     PiecewiseTree units space
 
-piecewiseValue :: PiecewiseTree units space -> Quantity units -> Point2d units space
+piecewiseValue :: PiecewiseTree units space -> Quantity units -> Point2D units space
 piecewiseValue tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree
     | length < leftLength -> piecewiseValue leftTree length
@@ -1120,7 +1120,7 @@ piecewiseDerivativeTreeDerivative tree length = case tree of
 piecewiseDerivativeValue ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
-  Vector2d units space
+  Vector2D units space
 piecewiseDerivativeValue tree length = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
     | length < leftLength -> piecewiseDerivativeValue leftTree length

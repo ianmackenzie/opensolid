@@ -66,8 +66,8 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Polygon2d (Polygon2d)
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Polyline2d qualified as Polyline2d
-import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Point2D (Point2D (Point2D))
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
@@ -147,10 +147,10 @@ rectangle (Bounds2d xBounds yBounds) =
     else Ok do
       let Bounds x1 x2 = xBounds
       let Bounds y1 y2 = yBounds
-      let p11 = Point2d x1 y1
-      let p12 = Point2d x1 y2
-      let p21 = Point2d x2 y1
-      let p22 = Point2d x2 y2
+      let p11 = Point2D x1 y1
+      let p12 = Point2D x1 y2
+      let p21 = Point2D x2 y1
+      let p22 = Point2D x2 y2
       let edges =
             NonEmpty.four
               (Curve2d.lineFrom p11 p21)
@@ -181,7 +181,7 @@ or if it is not possible to solve for a given fillet
 -}
 fillet ::
   Tolerance units =>
-  List (Point2d units space) ->
+  List (Point2D units space) ->
   "radius" ::: Quantity units ->
   Region2d units space ->
   Result Text (Region2d units space)
@@ -194,7 +194,7 @@ addFillet ::
   Tolerance units =>
   Quantity units ->
   List (Curve2d units space) ->
-  Point2d units space ->
+  Point2D units space ->
   Result Text (List (Curve2d units space))
 addFillet radius curves point = do
   let couldNotFindPointToFillet = Error "Could not find point to fillet"
@@ -252,7 +252,7 @@ addFillet radius curves point = do
 
 curveIncidence ::
   Tolerance units =>
-  Point2d units space ->
+  Point2D units space ->
   Curve2d units space ->
   (Curve2d units space, Maybe Number)
 curveIncidence point curve
@@ -324,9 +324,9 @@ connect (first : rest) = do
 
 data PartialLoop units space
   = PartialLoop
-      (Point2d units space)
+      (Point2D units space)
       (NonEmpty (Curve2d units space))
-      (Point2d units space)
+      (Point2D units space)
 
 buildLoop ::
   Tolerance units =>
@@ -353,7 +353,7 @@ extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
       Ok (PartialLoop newCurve.startPoint updatedCurves loopEnd, remaining)
     (List.TwoOrMore, _) -> Error BoundedBy.BoundaryIntersectsItself
 
-hasEndpoint :: Tolerance units => Point2d units space -> Curve2d units space -> Bool
+hasEndpoint :: Tolerance units => Point2D units space -> Curve2d units space -> Bool
 hasEndpoint point curve = point ~= curve.startPoint || point ~= curve.endPoint
 
 startLoop :: Curve2d units space -> PartialLoop units space
@@ -388,7 +388,7 @@ transformBy transform (Region2d outer inners) = do
   Region2d (transformLoop outer) (List.map transformLoop inners)
 
 translateBy ::
-  Vector2d units space ->
+  Vector2D units space ->
   Region2d units space ->
   Region2d units space
 translateBy = Transform2d.translateByImpl transformBy
@@ -408,7 +408,7 @@ translateAlong ::
 translateAlong = Transform2d.translateAlongImpl transformBy
 
 rotateAround ::
-  Point2d units space ->
+  Point2D units space ->
   Angle ->
   Region2d units space ->
   Region2d units space
@@ -421,7 +421,7 @@ mirrorAcross ::
 mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
 scaleAbout ::
-  Point2d units space ->
+  Point2D units space ->
   Number ->
   Region2d units space ->
   Region2d units space
@@ -451,7 +451,7 @@ unconvert ::
   Region2d units1 space
 unconvert factor region = convert (Units.simplify (1 /? factor)) region
 
-contains :: Tolerance units => Point2d units space -> Region2d units space -> Bool
+contains :: Tolerance units => Point2D units space -> Region2d units space -> Bool
 contains point region =
   case classify point (boundaryCurves region) of
     Nothing -> True -- Point on boundary is considered contained
@@ -460,7 +460,7 @@ contains point region =
 
 classify ::
   Tolerance units =>
-  Point2d units space ->
+  Point2D units space ->
   NonEmpty (Curve2d units space) ->
   Maybe Sign
 classify point curves =
@@ -470,7 +470,7 @@ classify point curves =
 
 fluxIntegral ::
   Tolerance units =>
-  Point2d units space ->
+  Point2D units space ->
   Curve2d units space ->
   Estimate Unitless
 fluxIntegral point curve = do
@@ -483,10 +483,10 @@ fluxIntegral point curve = do
             ./. Curve.WithNoZeros (VectorCurve2d.squaredMagnitude_ displacement)
   Curve.integrate integrand
 
-totalFlux :: Tolerance units => Point2d units space -> Loop units space -> Estimate Unitless
+totalFlux :: Tolerance units => Point2D units space -> Loop units space -> Estimate Unitless
 totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
 
-classifyNonBoundary :: Tolerance units => Point2d units space -> Loop units space -> Sign
+classifyNonBoundary :: Tolerance units => Point2D units space -> Loop units space -> Sign
 classifyNonBoundary point loop = do
   let flux = Estimate.satisfy containmentIsDeterminate (totalFlux point loop)
   if Bounds.includes Quantity.zero flux then Negative else Positive
@@ -534,13 +534,13 @@ loopSignedArea_ loop = do
 
 areaIntegral ::
   Units.Squared units1 units2 =>
-  Point2d units1 space ->
+  Point2D units1 space ->
   Curve2d units1 space ->
   Estimate units2
 areaIntegral referencePoint curve =
   Units.specialize (areaIntegral_ referencePoint curve)
 
-areaIntegral_ :: Point2d units space -> Curve2d units space -> Estimate (units ?*? units)
+areaIntegral_ :: Point2D units space -> Curve2d units space -> Estimate (units ?*? units)
 areaIntegral_ referencePoint curve = do
   let displacement = curve .-. referencePoint
   let y = displacement.yComponent
@@ -566,7 +566,7 @@ area region = do
   let edgeIntegrals = NonEmpty.map (areaIntegral referencePoint) (boundaryCurves region)
   Estimate.sum edgeIntegrals
 
-toMesh :: Resolution units -> Region2d units space -> Mesh (Point2d units space)
+toMesh :: Resolution units -> Region2d units space -> Mesh (Point2D units space)
 toMesh resolution region = do
   let vertexLoops = NonEmpty.map (toVertexLoop resolution) (boundaryLoops region)
   CDT.unsafe vertexLoops []
@@ -574,7 +574,7 @@ toMesh resolution region = do
 toVertexLoop ::
   Resolution units ->
   NonEmpty (Curve2d units space) ->
-  NonEmpty (Point2d units space)
+  NonEmpty (Point2D units space)
 toVertexLoop resolution loop = do
   let trailingVertices curve = do
         let polyline = Curve2d.toPolyline resolution curve

@@ -57,7 +57,7 @@ import OpenSolid.Primitives
   , Frame3d
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Vector2d (Vector2d)
+  , Vector2D (Vector2D)
   , Vector3d (Vector3d)
   , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d (VectorBounds3d, VectorBounds3d#)
@@ -360,7 +360,7 @@ on plane bounds2d = do
   let Plane3d _ (PlaneOrientation3d i j) = plane
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
-  let Vector3d cR cF cU = Vector3d.on plane (Vector2d cX cY)
+  let Vector3d cR cF cU = Vector3d.on plane (Vector2D cX cY)
   let rR = rX .*. Number.abs iR .+. rY .*. Number.abs jR
   let rF = rX .*. Number.abs iF .+. rY .*. Number.abs jF
   let rU = rX .*. Number.abs iU .+. rY .*. Number.abs jU

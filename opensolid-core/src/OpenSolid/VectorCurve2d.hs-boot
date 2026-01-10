@@ -17,7 +17,7 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.DivisionByZero (DivisionByZero)
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units (HasUnits)
@@ -32,7 +32,7 @@ data VectorCurve2d units space
 type Compiled units space =
   CompiledFunction
     Number
-    (Vector2d units space)
+    (Vector2D units space)
     (Bounds Unitless)
     (VectorBounds2d units space)
 
@@ -82,11 +82,11 @@ instance
     (VectorCurve2d units2 space2)
     (Curve units3)
 
-constant :: Vector2d units space -> VectorCurve2d units space
+constant :: Vector2D units space -> VectorCurve2d units space
 new :: Compiled units space -> VectorCurve2d units space -> VectorCurve2d units space
 compiled :: VectorCurve2d units space -> Compiled units space
 derivative :: VectorCurve2d units space -> VectorCurve2d units space
-evaluate :: VectorCurve2d units space -> Number -> Vector2d units space
+evaluate :: VectorCurve2d units space -> Number -> Vector2D units space
 evaluateBounds :: VectorCurve2d units space -> Bounds Unitless -> VectorBounds2d units space
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

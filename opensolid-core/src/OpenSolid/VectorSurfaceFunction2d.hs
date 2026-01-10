@@ -43,8 +43,8 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -110,7 +110,7 @@ instance
 type Compiled units space =
   CompiledFunction
     UvPoint
-    (Vector2d units space)
+    (Vector2D units space)
     UvBounds
     (VectorBounds2d units space)
 
@@ -159,7 +159,7 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
     (VectorSurfaceFunction2d units1 space1)
-    (Vector2d units2 space2)
+    (Vector2D units2 space2)
     (VectorSurfaceFunction2d units1 space1)
   where
   f .+. v = f .+. constant v
@@ -167,7 +167,7 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Vector2d units1 space1)
+    (Vector2D units1 space1)
     (VectorSurfaceFunction2d units2 space2)
     (VectorSurfaceFunction2d units1 space1)
   where
@@ -186,7 +186,7 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (VectorSurfaceFunction2d units1 space1)
-    (Vector2d units2 space2)
+    (Vector2D units2 space2)
     (VectorSurfaceFunction2d units1 space1)
   where
   f .-. v = f .-. constant v
@@ -194,7 +194,7 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Vector2d units1 space1)
+    (Vector2D units1 space1)
     (VectorSurfaceFunction2d units2 space2)
     (VectorSurfaceFunction2d units1 space1)
   where
@@ -316,7 +316,7 @@ instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
     (VectorSurfaceFunction2d units1 space1)
-    (Vector2d units2 space2)
+    (Vector2D units2 space2)
     (SurfaceFunction units3)
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
@@ -325,7 +325,7 @@ instance
   space1 ~ space2 =>
   CrossMultiplication_
     (VectorSurfaceFunction2d units1 space1)
-    (Vector2d units2 space2)
+    (Vector2D units2 space2)
     (SurfaceFunction (units1 ?*? units2))
   where
   function `cross_` vector = function `cross_` constant vector
@@ -333,7 +333,7 @@ instance
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
-    (Vector2d units1 space1)
+    (Vector2D units1 space1)
     (VectorSurfaceFunction2d units2 space2)
     (SurfaceFunction units3)
   where
@@ -342,7 +342,7 @@ instance
 instance
   space1 ~ space2 =>
   CrossMultiplication_
-    (Vector2d units1 space1)
+    (Vector2D units1 space1)
     (VectorSurfaceFunction2d units2 space2)
     (SurfaceFunction (units1 ?*? units2))
   where
@@ -355,7 +355,7 @@ instance
     (Direction2d space2)
     (SurfaceFunction units)
   where
-  lhs `cross` rhs = lhs `cross` Vector2d.unit rhs
+  lhs `cross` rhs = lhs `cross` Vector2D.unit rhs
 
 instance
   space1 ~ space2 =>
@@ -364,7 +364,7 @@ instance
     (VectorSurfaceFunction2d units space2)
     (SurfaceFunction units)
   where
-  lhs `cross` rhs = Vector2d.unit lhs `cross` rhs
+  lhs `cross` rhs = Vector2D.unit lhs `cross` rhs
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -391,7 +391,7 @@ instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
     (VectorSurfaceFunction2d units1 space1)
-    (Vector2d units2 space2)
+    (Vector2D units2 space2)
     (SurfaceFunction units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
@@ -400,7 +400,7 @@ instance
   space1 ~ space2 =>
   DotMultiplication_
     (VectorSurfaceFunction2d units1 space1)
-    (Vector2d units2 space2)
+    (Vector2D units2 space2)
     (SurfaceFunction (units1 ?*? units2))
   where
   function `dot_` vector = function `dot_` constant vector
@@ -408,7 +408,7 @@ instance
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
-    (Vector2d units1 space1)
+    (Vector2D units1 space1)
     (VectorSurfaceFunction2d units2 space2)
     (SurfaceFunction units3)
   where
@@ -417,7 +417,7 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication_
-    (Vector2d units1 space1)
+    (Vector2D units1 space1)
     (VectorSurfaceFunction2d units2 space2)
     (SurfaceFunction (units1 ?*? units2))
   where
@@ -430,7 +430,7 @@ instance
     (Direction2d space2)
     (SurfaceFunction units)
   where
-  lhs `dot` rhs = lhs `dot` Vector2d.unit rhs
+  lhs `dot` rhs = lhs `dot` Vector2D.unit rhs
 
 instance
   space1 ~ space2 =>
@@ -439,7 +439,7 @@ instance
     (VectorSurfaceFunction2d units space2)
     (SurfaceFunction units)
   where
-  lhs `dot` rhs = Vector2d.unit lhs `dot` rhs
+  lhs `dot` rhs = Vector2D.unit lhs `dot` rhs
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -507,9 +507,9 @@ desingularized t start middle end =
     (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
 
 zero :: VectorSurfaceFunction2d units space
-zero = constant Vector2d.zero
+zero = constant Vector2D.zero
 
-constant :: Vector2d units space -> VectorSurfaceFunction2d units space
+constant :: Vector2D units space -> VectorSurfaceFunction2d units space
 constant value = new (CompiledFunction.constant value) (const zero)
 
 xy ::
@@ -520,7 +520,7 @@ xy x y = do
   let compiledXY =
         CompiledFunction.map2
           Expression.xy
-          Vector2d
+          Vector2D
           VectorBounds2d
           x.compiled
           y.compiled
@@ -534,7 +534,7 @@ placeIn frame function = do
   let compiledPlaced =
         CompiledFunction.map
           (Expression.VectorSurface2d.placeIn frame)
-          (Vector2d.placeIn frame)
+          (Vector2D.placeIn frame)
           (VectorBounds2d.placeIn frame)
           function.compiled
   new compiledPlaced (\p -> placeIn frame (derivative p function))
@@ -553,12 +553,12 @@ transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
           (Expression.VectorSurface2d.transformBy transform)
-          (Vector2d.transformBy transform)
+          (Vector2D.transformBy transform)
           (VectorBounds2d.transformBy transform)
           function.compiled
   new compiledTransformed (\p -> transformBy transform (derivative p function))
 
-evaluate :: VectorSurfaceFunction2d units space -> UvPoint -> Vector2d units space
+evaluate :: VectorSurfaceFunction2d units space -> UvPoint -> Vector2D units space
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 evaluateBounds ::
@@ -579,7 +579,7 @@ xComponent function = do
   let compiledXComponent =
         CompiledFunction.map
           Expression.xComponent
-          Vector2d.xComponent
+          Vector2D.xComponent
           VectorBounds2d.xComponent
           function.compiled
   SurfaceFunction.new
@@ -591,7 +591,7 @@ yComponent function = do
   let compiledYComponent =
         CompiledFunction.map
           Expression.yComponent
-          Vector2d.yComponent
+          Vector2D.yComponent
           VectorBounds2d.yComponent
           function.compiled
   SurfaceFunction.new
@@ -654,7 +654,7 @@ squaredMagnitude_ function = do
   let compiledSquaredMagnitude =
         CompiledFunction.map
           Expression.squaredMagnitude_
-          Vector2d.squaredMagnitude_
+          Vector2D.squaredMagnitude_
           VectorBounds2d.squaredMagnitude_
           function.compiled
   SurfaceFunction.new

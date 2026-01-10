@@ -22,8 +22,7 @@ import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue (Queue)
@@ -31,7 +30,8 @@ import OpenSolid.Queue qualified as Queue
 import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
-import OpenSolid.UvPoint qualified as UvPoint
+import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
 data RecursionType
@@ -171,9 +171,9 @@ pass = Pass
 unique ::
   Tolerance units =>
   (UvBounds -> VectorBounds2d units space) ->
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
   UvBounds ->
   Maybe UvPoint
 unique fBounds f fu fv uvBounds =
@@ -183,14 +183,14 @@ solveUnique ::
   Tolerance units =>
   UvBounds ->
   (UvBounds -> VectorBounds2d units space) ->
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
   UvBounds ->
   Maybe UvPoint
 solveUnique localBounds fBounds f fu fv globalBounds =
   -- First check if it's *possible* that there's a solution within localBounds
-  if fBounds localBounds `intersects` Vector2d.zero
+  if fBounds localBounds `intersects` Vector2D.zero
     then do
       let Bounds2d uBounds vBounds = localBounds
       let uMid = Bounds.midpoint uBounds
@@ -206,7 +206,7 @@ solveUnique localBounds fBounds f fu fv globalBounds =
               -- We can't bisect any further
               -- (Newton-Raphson somehow never converged),
               -- so check if we've found a zero by bisection
-              if fMid ~= Vector2d.zero then Just pMid else Nothing
+              if fMid ~= Vector2D.zero then Just pMid else Nothing
           | otherwise -> do
               -- Recurse into subdomains
               let (u1, u2) = Bounds.bisect uBounds
@@ -224,43 +224,43 @@ data Divergence = Divergence deriving (Eq, Show)
 
 newtonRaphson ::
   Tolerance units =>
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
   UvBounds ->
   UvPoint ->
-  Vector2d units space ->
+  Vector2D units space ->
   Result Divergence UvPoint
 newtonRaphson = solveNewtonRaphson 0
 
 solveNewtonRaphson ::
   Tolerance units =>
   Int ->
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
   UvBounds ->
   UvPoint ->
-  Vector2d units space ->
+  Vector2D units space ->
   Result Divergence UvPoint
 solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
   if iterations > 10 -- Check if we've entered an infinite loop
     then Error Divergence
     else do
-      let Vector2d x1 y1 = f1
-      let Vector2d xu1 yu1 = fu p1
-      let Vector2d xv1 yv1 = fv p1
+      let Vector2D x1 y1 = f1
+      let Vector2D xu1 yu1 = fu p1
+      let Vector2D xv1 yv1 = fv p1
       let determinant = xu1 ?*? yv1 .-. xv1 ?*? yu1
       if determinant == Quantity.zero
         then Error Divergence
         else do
           let deltaU = (xv1 ?*? y1 .-. yv1 ?*? x1) ./. determinant
           let deltaV = (yu1 ?*? x1 .-. xu1 ?*? y1) ./. determinant
-          let p2 = boundedStep uvBounds p1 (p1 .+. Vector2d deltaU deltaV)
+          let p2 = boundedStep uvBounds p1 (p1 .+. Vector2D deltaU deltaV)
           let f2 = f p2
-          if Vector2d.squaredMagnitude_ f2 >= Vector2d.squaredMagnitude_ f1
+          if Vector2D.squaredMagnitude_ f2 >= Vector2D.squaredMagnitude_ f1
             then -- We've stopped converging, check if we've actually found a root
-              if f1 ~= Vector2d.zero then Ok p1 else Error Divergence
+              if f1 ~= Vector2D.zero then Ok p1 else Error Divergence
             else -- We're still converging, so take another iteration
               solveNewtonRaphson (iterations + 1) f fu fv uvBounds p2 f2
 
@@ -279,7 +279,7 @@ boundedStep uvBounds p1 p2 =
       let uScale = if u1 == u2 then 1 else (clampedU .-. u1) ./. (u2 .-. u1)
       let vScale = if v1 == v2 then 1 else (clampedV .-. v1) ./. (v2 .-. v1)
       let scale = min uScale vScale
-      let UvPoint u v = UvPoint.interpolateFrom p1 p2 scale
+      let UvPoint u v = Point2D.interpolateFrom p1 p2 scale
       -- Perform a final clamping step
       -- in case numerical roundoff during interpolation
       -- left the point *slightly* outside uvBounds

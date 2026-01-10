@@ -25,8 +25,8 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Orientation2d qualified as Orientation2d
-import OpenSolid.Polymorphic.Point2d (Point2d)
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
+import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Frame2d (Frame2d, orientation, originPoint)
@@ -35,14 +35,14 @@ import OpenSolid.Primitives
   , PlaneOrientation3d (PlaneOrientation3d)
   )
 
-originPoint :: Frame2d units global local -> Point2d units global
+originPoint :: Frame2d units global local -> Point2D units global
 originPoint (Frame2d p0 _) = p0
 
 orientation :: Frame2d units global local -> Orientation2d global
 orientation (Frame2d _ o) = o
 
 coerce :: Frame2d units1 global1 local1 -> Frame2d units2 global2 local2
-coerce (Frame2d p o) = Frame2d (Point2d.coerce p) (Orientation2d.coerce o)
+coerce (Frame2d p o) = Frame2d (Point2D.coerce p) (Orientation2d.coerce o)
 
 erase :: Frame2d units global local -> Frame2d Unitless global local
 erase = coerce
@@ -54,9 +54,9 @@ yDirection :: Frame2d units global local -> Direction2d global
 yDirection frame = Orientation2d.yDirection (orientation frame)
 
 xy :: Frame2d units global local
-xy = atPoint Point2d.origin
+xy = atPoint Point2D.origin
 
-atPoint :: Point2d units global -> Frame2d units global local
+atPoint :: Point2D units global -> Frame2d units global local
 atPoint p0 = Frame2d p0 Orientation2d.horizontal
 
 fromXAxis :: Axis2d units global -> Frame2d units global local
@@ -79,7 +79,7 @@ placeIn ::
   Frame2d units space1 space3
 placeIn globalFrame frame =
   Frame2d
-    (Point2d.placeIn globalFrame (originPoint frame))
+    (Point2D.placeIn globalFrame (originPoint frame))
     (Orientation2d.placeIn globalFrame (orientation frame))
 
 relativeTo ::
@@ -88,12 +88,12 @@ relativeTo ::
   Frame2d units space2 space3
 relativeTo globalFrame frame =
   Frame2d
-    (Point2d.relativeTo globalFrame (originPoint frame))
+    (Point2D.relativeTo globalFrame (originPoint frame))
     (Orientation2d.relativeTo globalFrame (orientation frame))
 
 placeOn :: Plane3d space1 space2 -> Frame2d Meters space2 space3 -> Plane3d space1 space3
 placeOn plane (Frame2d p0 (Orientation2d i j)) =
-  Plane3d (Point2d.placeOn plane p0) $
+  Plane3d (Point2D.placeOn plane p0) $
     PlaneOrientation3d (Direction2d.placeOn plane i) (Direction2d.placeOn plane j)
 
 inverse :: Frame2d units global local -> Frame2d units local global

@@ -6,7 +6,7 @@ This package contains its official Python bindings. The bindings (and OpenSolid 
 under active development, but you're welcome to try them out!
 
 The package contains a single ``opensolid`` module containing a variety of classes representing
-geometric values and quantities, such as ``Length``, ``Angle``, ``Point2d``, and ``Direction2d``.
+geometric values and quantities, such as ``Length``, ``Angle``, ``Point2D``, and ``Direction2d``.
 Each class and function has a brief docstring, but here's a brief sampling of some of the
 operations you can do::
 
@@ -32,8 +32,8 @@ operations you can do::
 
     # Define a couple of points in 2D from their
     # X and Y coordinates, given in centimeters
-    >>> p1 = Point2d.centimeters(50, 60)
-    >>> p2 = Point2d.centimeters(100, 80)
+    >>> p1 = Point2D.centimeters(50, 60)
+    >>> p2 = Point2D.centimeters(100, 80)
 
     # Measure the distance between the points
     >>> p1.distance_to(p2)

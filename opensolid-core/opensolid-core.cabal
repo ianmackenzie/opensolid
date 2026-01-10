@@ -190,8 +190,6 @@ library
     OpenSolid.Point3d
     OpenSolid.Polygon2d
     OpenSolid.Polyline2d
-    OpenSolid.Polymorphic.Point2d
-    OpenSolid.Polymorphic.Vector2d
     OpenSolid.Prelude
     OpenSolid.Primitives
     OpenSolid.Quantity

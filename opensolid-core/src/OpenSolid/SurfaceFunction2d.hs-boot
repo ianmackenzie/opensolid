@@ -11,7 +11,7 @@ import GHC.Records (HasField)
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
@@ -28,7 +28,7 @@ data SurfaceFunction2d units space
 type Compiled units space =
   CompiledFunction
     UvPoint
-    (Point2d units space)
+    (Point2D units space)
     UvBounds
     (Bounds2d units space)
 

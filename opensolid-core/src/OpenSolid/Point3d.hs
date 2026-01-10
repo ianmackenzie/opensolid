@@ -96,7 +96,7 @@ along (Axis3d originPoint direction) distance = do
     (oU .+. dU .*. distance)
 
 -- | Construct a point on the given plane, at the given position within the plane.
-on :: Plane3d global local -> Point2D local -> Point3d global
+on :: Plane3d global local -> Point2D Meters local -> Point3d global
 on (Plane3d originPoint (PlaneOrientation3d i j)) (Point2D pX pY) = do
   let Point3d oR oF oU = originPoint
   let Direction3d iR iF iU = i
@@ -175,7 +175,7 @@ projectOnto plane point =
 Conceptualy, this projects the point onto the plane in 3D,
 then expresses the projected point in 2D planar XY coordinates.
 -}
-projectInto :: Plane3d space local -> Point3d space -> Point2D local
+projectInto :: Plane3d space local -> Point3d space -> Point2D Meters local
 projectInto (Plane3d p0 (PlaneOrientation3d i j)) p =
   let d = p .-. p0 in Point2D (d `dot` i) (d `dot` j)
 

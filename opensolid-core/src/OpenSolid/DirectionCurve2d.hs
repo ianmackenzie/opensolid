@@ -27,8 +27,8 @@ import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2d (DirectionSurfaceFunc
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2d qualified as DirectionSurfaceFunction2d
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
@@ -64,10 +64,10 @@ derivative :: DirectionCurve2d space -> VectorCurve2d Unitless space
 derivative (DirectionCurve2d vectorCurve) = VectorCurve2d.derivative vectorCurve
 
 constant :: Direction2d space -> DirectionCurve2d space
-constant direction = DirectionCurve2d (VectorCurve2d.constant (Vector2d.unit direction))
+constant direction = DirectionCurve2d (VectorCurve2d.constant (Vector2D.unit direction))
 
 arc :: Angle -> Angle -> DirectionCurve2d space
-arc a b = DirectionCurve2d (VectorCurve2d.arc (Vector2d 1 0) (Vector2d 0 1) a b)
+arc a b = DirectionCurve2d (VectorCurve2d.arc (Vector2D 1 0) (Vector2D 0 1) a b)
 
 reverse :: DirectionCurve2d space -> DirectionCurve2d space
 reverse (DirectionCurve2d vectorCurve) = DirectionCurve2d (VectorCurve2d.reverse vectorCurve)
@@ -155,13 +155,13 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2d space1) (Vector2d units space2) (Curve units)
+  DotMultiplication (DirectionCurve2d space1) (Vector2D units space2) (Curve units)
   where
   DirectionCurve2d lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Vector2d units space1) (DirectionCurve2d space2) (Curve units)
+  DotMultiplication (Vector2D units space1) (DirectionCurve2d space2) (Curve units)
   where
   lhs `dot` DirectionCurve2d rhs = lhs `dot` rhs
 
@@ -197,13 +197,13 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2d space1) (Vector2d units space2) (Curve units)
+  CrossMultiplication (DirectionCurve2d space1) (Vector2D units space2) (Curve units)
   where
   DirectionCurve2d lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Vector2d units space1) (DirectionCurve2d space2) (Curve units)
+  CrossMultiplication (Vector2D units space1) (DirectionCurve2d space2) (Curve units)
   where
   lhs `cross` DirectionCurve2d rhs = lhs `cross` rhs
 

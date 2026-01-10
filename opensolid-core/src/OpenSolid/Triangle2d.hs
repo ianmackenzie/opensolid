@@ -8,20 +8,20 @@ where
 
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 
 -- | A triangle in 2D.
 data Triangle2d units space
   = -- | Construct a triangle from its three vertices.
-    Triangle2d (Point2d units space) (Point2d units space) (Point2d units space)
+    Triangle2d (Point2D units space) (Point2D units space) (Point2D units space)
 
 instance FFI (Triangle2d Meters FFI.Space) where
   representation = FFI.classRepresentation "Triangle2d"
 
 -- | Get the vertices of a triangle as a tuple.
-vertices :: Triangle2d units space -> (Point2d units space, Point2d units space, Point2d units space)
+vertices :: Triangle2d units space -> (Point2D units space, Point2D units space, Point2D units space)
 vertices (Triangle2d p1 p2 p3) = (p1, p2, p3)
 
 signedArea_ :: Triangle2d units space -> Quantity (units ?*? units)

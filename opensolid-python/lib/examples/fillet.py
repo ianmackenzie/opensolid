@@ -14,7 +14,7 @@ from opensolid import (
     Mitsuba,
     Model3d,
     PbrMaterial,
-    Point2d,
+    Point2D,
     Point3d,
     Region2d,
     Resolution,
@@ -23,13 +23,13 @@ from opensolid import (
 )
 
 with Tolerance(Length.nanometers(1)):
-    p1 = Point2d.centimeters(0, 1)
-    p2 = Point2d.centimeters(1, 1)
-    p3 = Point2d.centimeters(1, 0)
-    p4 = Point2d.centimeters(2, 0)
-    p5 = Point2d.centimeters(2, 2)
-    p6 = Point2d.centimeters(1, 2)
-    p7 = Point2d.centimeters(0, 3)
+    p1 = Point2D.centimeters(0, 1)
+    p2 = Point2D.centimeters(1, 1)
+    p3 = Point2D.centimeters(1, 0)
+    p4 = Point2D.centimeters(2, 0)
+    p5 = Point2D.centimeters(2, 2)
+    p6 = Point2D.centimeters(1, 2)
+    p7 = Point2D.centimeters(0, 3)
 
     right_curves = [
         Curve2d.line_from(p1, p2),

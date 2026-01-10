@@ -54,8 +54,6 @@ import {-# SOURCE #-} OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import {-# SOURCE #-} OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Number qualified as Number
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction2d (Direction2d)
@@ -74,24 +72,26 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D qualified as Vector2D
 
-constant :: Vector2d units space -> VectorBounds2d units space
-constant (Vector2d x y) = VectorBounds2d (Bounds.constant x) (Bounds.constant y)
+constant :: Vector2D units space -> VectorBounds2d units space
+constant (Vector2D x y) = VectorBounds2d (Bounds.constant x) (Bounds.constant y)
 
 {-# INLINE coerce #-}
 coerce :: VectorBounds2d units1 space1 -> VectorBounds2d units2 space2
 coerce (VectorBounds2d x y) = VectorBounds2d (Bounds.coerce x) (Bounds.coerce y)
 
-hull2 :: Vector2d units space -> Vector2d units space -> VectorBounds2d units space
-hull2 (Vector2d x1 y1) (Vector2d x2 y2) =
+hull2 :: Vector2D units space -> Vector2D units space -> VectorBounds2d units space
+hull2 (Vector2D x1 y1) (Vector2D x2 y2) =
   VectorBounds2d (Bounds x1 x2) (Bounds y1 y2)
 
 hull3 ::
-  Vector2d units space ->
-  Vector2d units space ->
-  Vector2d units space ->
+  Vector2D units space ->
+  Vector2D units space ->
+  Vector2D units space ->
   VectorBounds2d units space
-hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) = do
+hull3 (Vector2D x1 y1) (Vector2D x2 y2) (Vector2D x3 y3) = do
   let minX = min (min x1 x2) x3
   let maxX = max (max x1 x2) x3
   let minY = min (min y1 y2) y3
@@ -99,30 +99,30 @@ hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) = do
   VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)
 
 hull4 ::
-  Vector2d units space ->
-  Vector2d units space ->
-  Vector2d units space ->
-  Vector2d units space ->
+  Vector2D units space ->
+  Vector2D units space ->
+  Vector2D units space ->
+  Vector2D units space ->
   VectorBounds2d units space
-hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) = do
+hull4 (Vector2D x1 y1) (Vector2D x2 y2) (Vector2D x3 y3) (Vector2D x4 y4) = do
   let minX = min (min (min x1 x2) x3) x4
   let maxX = max (max (max x1 x2) x3) x4
   let minY = min (min (min y1 y2) y3) y4
   let maxY = max (max (max y1 y2) y3) y4
   VectorBounds2d (Bounds minX maxX) (Bounds minY maxY)
 
-hullN :: NonEmpty (Vector2d units space) -> VectorBounds2d units space
-hullN (Vector2d x0 y0 :| rest) = go x0 x0 y0 y0 rest
+hullN :: NonEmpty (Vector2D units space) -> VectorBounds2d units space
+hullN (Vector2D x0 y0 :| rest) = go x0 x0 y0 y0 rest
  where
   go ::
     Quantity units ->
     Quantity units ->
     Quantity units ->
     Quantity units ->
-    List (Vector2d units space) ->
+    List (Vector2D units space) ->
     VectorBounds2d units space
   go xLow xHigh yLow yHigh [] = VectorBounds2d (Bounds xLow xHigh) (Bounds yLow yHigh)
-  go xLow xHigh yLow yHigh (Vector2d x y : remaining) =
+  go xLow xHigh yLow yHigh (Vector2D x y : remaining) =
     go (min xLow x) (max xHigh x) (min yLow y) (max yHigh y) remaining
 
 aggregate2 ::
@@ -218,12 +218,12 @@ clampNormalized :: Bounds Unitless -> Bounds Unitless
 clampNormalized (Bounds low high) =
   Bounds (Quantity.clampTo normalizedBounds low) (Quantity.clampTo normalizedBounds high)
 
-exclusion :: Vector2d units space -> VectorBounds2d units space -> Quantity units
+exclusion :: Vector2D units space -> VectorBounds2d units space -> Quantity units
 exclusion vector bounds = Quantity# (exclusion# vector bounds)
 
 {-# INLINEABLE exclusion# #-}
-exclusion# :: Vector2d units space -> VectorBounds2d units space -> Double#
-exclusion# (Vector2d (Quantity# vx#) (Quantity# vy#)) (VectorBounds2d bx by) = do
+exclusion# :: Vector2D units space -> VectorBounds2d units space -> Double#
+exclusion# (Vector2D (Quantity# vx#) (Quantity# vy#)) (VectorBounds2d bx by) = do
   let exclusionX# = Bounds.exclusion# vx# bx
   let exclusionY# = Bounds.exclusion# vy# by
   let positiveX# = exclusionX# >=# 0.0##
@@ -234,15 +234,15 @@ exclusion# (Vector2d (Quantity# vx#) (Quantity# vy#)) (VectorBounds2d bx by) = d
     (# _, 1# #) -> exclusionY#
     (# _, _ #) -> max# exclusionX# exclusionY#
 
-inclusion :: Vector2d units space -> VectorBounds2d units space -> Quantity units
+inclusion :: Vector2D units space -> VectorBounds2d units space -> Quantity units
 inclusion vector box = Quantity# (inclusion# vector box)
 
 {-# INLINE inclusion# #-}
-inclusion# :: Vector2d units space -> VectorBounds2d units space -> Double#
+inclusion# :: Vector2D units space -> VectorBounds2d units space -> Double#
 inclusion# vector box = negate# (exclusion# vector box)
 
-includes :: Vector2d units space -> VectorBounds2d units space -> Bool
-includes (Vector2d vx vy) (VectorBounds2d x y) = Bounds.includes vx x && Bounds.includes vy y
+includes :: Vector2D units space -> VectorBounds2d units space -> Bool
+includes (Vector2D vx vy) (VectorBounds2d x y) = Bounds.includes vx x && Bounds.includes vy y
 
 contains :: VectorBounds2d units space -> VectorBounds2d units space -> Bool
 contains (VectorBounds2d x2 y2) (VectorBounds2d x1 y1) =
@@ -281,8 +281,8 @@ intersection ::
 intersection (VectorBounds2d x1 y1) (VectorBounds2d x2 y2) =
   Maybe.map2 VectorBounds2d (Bounds.intersection x1 x2) (Bounds.intersection y1 y2)
 
-interpolate :: VectorBounds2d units space -> Number -> Number -> Vector2d units space
-interpolate (VectorBounds2d x y) u v = Vector2d (Bounds.interpolate x u) (Bounds.interpolate y v)
+interpolate :: VectorBounds2d units space -> Number -> Number -> Vector2D units space
+interpolate (VectorBounds2d x y) u v = Vector2D (Bounds.interpolate x u) (Bounds.interpolate y v)
 
 placeIn ::
   Frame2d frameUnits global local ->
@@ -299,7 +299,7 @@ placeInOrientation orientation (VectorBounds2d x y) = do
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector2d x0 y0 = Vector2d.placeInOrientation orientation (Vector2d xMid yMid)
+  let Vector2D x0 y0 = Vector2D.placeInOrientation orientation (Vector2D xMid yMid)
   let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
@@ -322,7 +322,7 @@ relativeToOrientation orientation (VectorBounds2d x y) = do
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector2d x0 y0 = Vector2d.relativeToOrientation orientation (Vector2d xMid yMid)
+  let Vector2D x0 y0 = Vector2D.relativeToOrientation orientation (Vector2D xMid yMid)
   let Orientation2d i j = orientation
   let Direction2d ix iy = i
   let Direction2d jx jy = j
@@ -342,7 +342,7 @@ placeOnOrientation orientation (VectorBounds2d x y) = do
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector3d x0 y0 z0 = Vector2d.placeOnOrientation orientation (Vector2d xMid yMid)
+  let Vector3d x0 y0 z0 = Vector2D.placeOnOrientation orientation (Vector2D xMid yMid)
   let PlaneOrientation3d i j = orientation
   let Direction3d ix iy iz = i
   let Direction3d jx jy jz = j
@@ -375,10 +375,10 @@ transformBy transform (VectorBounds2d x y) = do
   let yMid = Bounds.midpoint y
   let xWidth = Bounds.width x
   let yWidth = Bounds.width y
-  let Vector2d x0 y0 = Vector2d.transformBy transform (Vector2d xMid yMid)
+  let Vector2D x0 y0 = Vector2D.transformBy transform (Vector2D xMid yMid)
   let Transform2d _ i j = transform
-  let Vector2d ix iy = i
-  let Vector2d jx jy = j
+  let Vector2D ix iy = i
+  let Vector2D jx jy = j
   let rx = 0.5 *. Number.abs ix .*. xWidth .+. 0.5 *. Number.abs jx .*. yWidth
   let ry = 0.5 *. Number.abs iy .*. xWidth .+. 0.5 *. Number.abs jy .*. yWidth
   VectorBounds2d (Bounds (x0 .-. rx) (x0 .+. rx)) (Bounds (y0 .-. ry) (y0 .+. ry))

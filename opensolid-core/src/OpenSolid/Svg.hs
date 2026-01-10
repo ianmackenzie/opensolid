@@ -210,7 +210,7 @@ triangle = triangleWith []
 -- | Draw a circle with the given attributes, center point and diameter.
 circleWith ::
   List (Attribute space) ->
-  "centerPoint" ::: Point2D space ->
+  "centerPoint" ::: Point2D Meters space ->
   "diameter" ::: Length ->
   Svg space
 circleWith attributes (Named centerPoint) (Named diameter) = do
@@ -221,7 +221,7 @@ circleWith attributes (Named centerPoint) (Named diameter) = do
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 -- | Draw a circle with the given center point and diameter.
-circle :: "centerPoint" ::: Point2D space -> "diameter" ::: Length -> Svg space
+circle :: "centerPoint" ::: Point2D Meters space -> "diameter" ::: Length -> Svg space
 circle = circleWith []
 
 -- | Draw a curve with the given attributes and resolution.
@@ -234,8 +234,8 @@ curve :: Resolution Meters -> Curve2d Meters space -> Svg space
 curve = curveWith []
 
 arrow ::
-  "start" ::: Point2D space ->
-  "end" ::: Point2D space ->
+  "start" ::: Point2D Meters space ->
+  "end" ::: Point2D Meters space ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
   Svg space
@@ -243,8 +243,8 @@ arrow = arrowWith []
 
 arrowWith ::
   List (Attribute space) ->
-  "start" ::: Point2D space ->
-  "end" ::: Point2D space ->
+  "start" ::: Point2D Meters space ->
+  "end" ::: Point2D Meters space ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
   Svg space
@@ -263,11 +263,11 @@ arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWid
       let tip = triangle (Triangle2d leftPoint rightPoint end)
       groupWith attributes [stem, tip]
 
-pointsAttribute :: List (Point2D space) -> Attribute space
+pointsAttribute :: List (Point2D Meters space) -> Attribute space
 pointsAttribute givenPoints =
   Attribute "points" (Text.join " " (List.map coordinatesText givenPoints))
 
-coordinatesText :: Point2D space -> Text
+coordinatesText :: Point2D Meters space -> Text
 coordinatesText (Point2D x y) = lengthText x <> "," <> lengthText (negative y)
 
 lengthText :: Length -> Text

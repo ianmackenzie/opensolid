@@ -22,7 +22,7 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -115,7 +115,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
           MonotonicIn frame -> do
             let p1 = UvPoint u1 v1
             let p2 = UvPoint u2 v2
-            Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
+            Bounds2d.hull2 (Point2D.relativeTo frame p1) (Point2D.relativeTo frame p2)
               & Bounds2d.placeIn frame
           NotMonotonic -> do
             let vBounds = ImplicitCurveBounds.evaluateBounds bounds (Bounds u1 u2)

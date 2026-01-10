@@ -20,7 +20,7 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
 type role VectorSurfaceFunction2d nominal nominal
@@ -31,7 +31,7 @@ data VectorSurfaceFunction2d units space
 type Compiled units space =
   CompiledFunction
     UvPoint
-    (Vector2d units space)
+    (Vector2D units space)
     UvBounds
     (VectorBounds2d units space)
 
@@ -97,7 +97,7 @@ derivative ::
   SurfaceParameter ->
   VectorSurfaceFunction2d units space ->
   VectorSurfaceFunction2d units space
-constant :: Vector2d units space -> VectorSurfaceFunction2d units space
+constant :: Vector2D units space -> VectorSurfaceFunction2d units space
 xComponent :: VectorSurfaceFunction2d units space -> SurfaceFunction units
 yComponent :: VectorSurfaceFunction2d units space -> SurfaceFunction units
 components ::

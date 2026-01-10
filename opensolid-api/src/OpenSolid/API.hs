@@ -44,7 +44,6 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Polyline2d qualified as Polyline2d
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2d qualified as Region2d
@@ -80,9 +79,9 @@ classes =
   , areaBounds
   , angleBounds
   , color
-  , vector2d
-  , displacement2d
-  , areaVector2d
+  , vector2D
+  , displacement2D
+  , areaVector2D
   , uvVector
   , direction2d
   , uvDirection
@@ -184,8 +183,8 @@ length =
     , Class.times @Curve Self
     , Class.times @LengthCurve Self
     , Class.times @Direction2d Self
-    , Class.times @Vector2d Self
-    , Class.times @Displacement2d Self
+    , Class.times @Vector2D Self
+    , Class.times @Displacement2D Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Bounds Self
@@ -226,7 +225,7 @@ area =
     , Class.times @Bounds Self
     , Class.times @Curve Self
     , Class.times @Direction2d Self
-    , Class.times @Vector2d Self
+    , Class.times @Vector2D Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
@@ -480,40 +479,40 @@ color =
 
 vectorTransformations2d ::
   forall units.
-  FFI (Vector2d.Vector2d units FFI.Space) =>
-  List (Class.Member (Vector2d.Vector2d units FFI.Space))
+  FFI (Vector2D.Vector2D units FFI.Space) =>
+  List (Class.Member (Vector2D.Vector2D units FFI.Space))
 vectorTransformations2d =
-  [ Class.member0 "Rotate Left" Vector2d.rotateLeft $(docs 'Vector2d.rotateLeft)
-  , Class.member0 "Rotate Right" Vector2d.rotateRight $(docs 'Vector2d.rotateRight)
-  , Class.member1 "Rotate By" "Angle" Vector2d.rotateBy $(docs 'Vector2d.rotateBy)
-  , Class.member1 "Mirror In" "Direction" Vector2d.mirrorIn $(docs 'Vector2d.mirrorIn)
+  [ Class.member0 "Rotate Left" Vector2D.rotateLeft $(docs 'Vector2D.rotateLeft)
+  , Class.member0 "Rotate Right" Vector2D.rotateRight $(docs 'Vector2D.rotateRight)
+  , Class.member1 "Rotate By" "Angle" Vector2D.rotateBy $(docs 'Vector2D.rotateBy)
+  , Class.member1 "Mirror In" "Direction" Vector2D.mirrorIn $(docs 'Vector2D.mirrorIn)
   , Class.member1
       "Mirror Across"
       "Axis"
-      (Vector2d.mirrorAcross :: Axis2d -> Vector2d.Vector2d units FFI.Space -> Vector2d.Vector2d units FFI.Space)
-      $(docs 'Vector2d.mirrorAcross)
+      (Vector2D.mirrorAcross :: Axis2d -> Vector2D.Vector2D units FFI.Space -> Vector2D.Vector2D units FFI.Space)
+      $(docs 'Vector2D.mirrorAcross)
   ]
 
-type Vector2d = Vector2d.Vector2d Unitless FFI.Space
+type Vector2D = Vector2D.Vector2D Unitless FFI.Space
 
-vector2d :: Class
-vector2d =
-  Class.new @Vector2d "A unitless vector in 2D." $
-    [ Class.constant "Zero" (Vector2d.zero :: Vector2d) $(docs 'Vector2d.zero)
-    , Class.factory1 "Unit" "Direction" Vector2d.unit $(docs 'Vector2d.unit)
-    , Class.constructor2 "X Component" "Y Component" Vector2d.Vector2d $(docs 'Vector2d.Vector2d)
-    , Class.factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
-    , Class.factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
-    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
-    , Class.property "Components" Vector2d.components $(docs 'Vector2d.components)
-    , Class.property "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
-    , Class.property "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
-    , Class.memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
-    , Class.member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
-    , Class.property "Angle" Vector2d.angle $(docs 'Vector2d.angle)
-    , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
-    , Class.memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> Vector2d -> Vector3d) $(docs 'Vector2d.placeOn)
+vector2D :: Class
+vector2D =
+  Class.new @Vector2D "A unitless vector in 2D." $
+    [ Class.constant "Zero" (Vector2D.zero :: Vector2D) $(docs 'Vector2D.zero)
+    , Class.factory1 "Unit" "Direction" Vector2D.unit $(docs 'Vector2D.unit)
+    , Class.constructor2 "X Component" "Y Component" Vector2D.Vector2D $(docs 'Vector2D.Vector2D)
+    , Class.factory1 "Y" "Y Component" Vector2D.y $(docs 'Vector2D.y)
+    , Class.factory1 "X" "X Component" Vector2D.x $(docs 'Vector2D.x)
+    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2D.polar $(docs 'Vector2D.polar)
+    , Class.property "Components" Vector2D.components $(docs 'Vector2D.components)
+    , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
+    , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
+    , Class.memberU0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
+    , Class.member0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
+    , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
+    , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3d -> Vector2D -> Vector3d) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -523,20 +522,20 @@ vector2d =
     , Class.times @Area Self
     , Class.divByNumber
     , Class.dotSelf
-    , Class.dotProduct @Displacement2d Self
-    , Class.dotProduct @AreaVector2d Self
+    , Class.dotProduct @Displacement2D Self
+    , Class.dotProduct @AreaVector2D Self
     , Class.crossSelf
-    , Class.crossProduct @Displacement2d Self
-    , Class.crossProduct @AreaVector2d Self
+    , Class.crossProduct @Displacement2D Self
+    , Class.crossProduct @AreaVector2D Self
     ]
       <> vectorTransformations2d
 
-type Displacement2d = Vector2D.Vector2D FFI.Space
+type Displacement2D = Vector2D.Vector2D Meters FFI.Space
 
-displacement2d :: Class
-displacement2d =
-  Class.new @Displacement2d "A displacement vector in 2D." $
-    [ Class.constant "Zero" (Vector2D.zero :: Displacement2d) $(docs 'Vector2D.zero)
+displacement2D :: Class
+displacement2D =
+  Class.new @Displacement2D "A displacement vector in 2D." $
+    [ Class.constant "Zero" (Vector2D.zero :: Displacement2D) $(docs 'Vector2D.zero)
     , Class.constructor2 "X Component" "Y Component" Vector2D.Vector2D $(docs 'Vector2D.Vector2D)
     , Class.factory1 "X" "X Component" Vector2D.x $(docs 'Vector2D.x)
     , Class.factory1 "Y" "Y Component" Vector2D.y $(docs 'Vector2D.y)
@@ -555,7 +554,7 @@ displacement2d =
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberM0 "Is Zero" (~= Vector2D.zero) "Check if a displacement is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3d -> Displacement2d -> Displacement3d) $(docs 'Vector2D.placeOn)
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3d -> Displacement2D -> Displacement3d) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -565,32 +564,32 @@ displacement2d =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.dotSelf
-    , Class.dotProduct @Vector2d Self
+    , Class.dotProduct @Vector2D Self
     , Class.crossSelf
-    , Class.crossProduct @Vector2d Self
+    , Class.crossProduct @Vector2D Self
     ]
       <> vectorTransformations2d
 
-type AreaVector2d = Vector2d.Vector2d SquareMeters FFI.Space
+type AreaVector2D = Vector2D.Vector2D SquareMeters FFI.Space
 
-areaVector2d :: Class
-areaVector2d =
-  Class.new @AreaVector2d "A vector in 2D with units of area." $
-    [ Class.constant "Zero" (Vector2d.zero :: AreaVector2d) $(docs 'Vector2d.zero)
-    , Class.constructor2 "X Component" "Y Component" Vector2d.Vector2d $(docs 'Vector2d.Vector2d)
-    , Class.factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
-    , Class.factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
-    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
-    , Class.factory2 "Square Meters" "X Component" "Y Component" Vector2d.squareMeters $(docs 'Vector2d.squareMeters)
-    , Class.property "Components" Vector2d.components $(docs 'Vector2d.components)
-    , Class.property "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
-    , Class.property "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
-    , Class.memberS0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
-    , Class.member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
-    , Class.property "Angle" Vector2d.angle $(docs 'Vector2d.angle)
-    , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
-    , Class.memberS0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2d.placeOn :: Plane3d -> AreaVector2d -> AreaVector3d) $(docs 'Vector2d.placeOn)
+areaVector2D :: Class
+areaVector2D =
+  Class.new @AreaVector2D "A vector in 2D with units of area." $
+    [ Class.constant "Zero" (Vector2D.zero :: AreaVector2D) $(docs 'Vector2D.zero)
+    , Class.constructor2 "X Component" "Y Component" Vector2D.Vector2D $(docs 'Vector2D.Vector2D)
+    , Class.factory1 "X" "X Component" Vector2D.x $(docs 'Vector2D.x)
+    , Class.factory1 "Y" "Y Component" Vector2D.y $(docs 'Vector2D.y)
+    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2D.polar $(docs 'Vector2D.polar)
+    , Class.factory2 "Square Meters" "X Component" "Y Component" Vector2D.squareMeters $(docs 'Vector2D.squareMeters)
+    , Class.property "Components" Vector2D.components $(docs 'Vector2D.components)
+    , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
+    , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
+    , Class.memberS0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
+    , Class.member0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
+    , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
+    , Class.memberS0 "Is Zero" (~= Vector2D.zero) "Check if an area vector is zero, within the current tolerance."
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3d -> AreaVector2D -> AreaVector3d) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -599,33 +598,33 @@ areaVector2d =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.dotProduct @Vector2d Self
-    , Class.crossProduct @Vector2d Self
+    , Class.dotProduct @Vector2D Self
+    , Class.crossProduct @Vector2D Self
     ]
       <> vectorTransformations2d
 
-type UvVector = Vector2d.Vector2d Unitless UvSpace
+type UvVector = Vector2D.Vector2D Unitless UvSpace
 
 uvVector :: Class
 uvVector =
   Class.new @UvVector "A vector in UV parameter space." $
-    [ Class.constant "Zero" (Vector2d.zero :: UvVector) $(docs 'Vector2d.zero)
-    , Class.factory1 "Unit" "Direction" Vector2d.unit $(docs 'Vector2d.unit)
-    , Class.constructor2 "U Component" "V Component" Vector2d.Vector2d "Construct a vector from its U and V components."
-    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
-    , Class.property "Components" Vector2d.components $(docs 'Vector2d.components)
-    , Class.property "U Component" Vector2d.xComponent "Get the U component of a vector."
-    , Class.property "V Component" Vector2d.yComponent "Get the V component of a vector."
-    , Class.memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
-    , Class.member0 "Normalize" Vector2d.normalize $(docs 'Vector2d.normalize)
-    , Class.property "Angle" Vector2d.angle $(docs 'Vector2d.angle)
-    , Class.member1 "Angle To" "Other" (flip Vector2d.angleFrom) $(docs 'Vector2d.angleFrom)
-    , Class.memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
-    , Class.member0 "Rotate Left" Vector2d.rotateLeft $(docs 'Vector2d.rotateLeft)
-    , Class.member0 "Rotate Right" Vector2d.rotateRight $(docs 'Vector2d.rotateRight)
-    , Class.member1 "Rotate By" "Angle" Vector2d.rotateBy $(docs 'Vector2d.rotateBy)
-    , Class.member1 "Mirror In" "Direction" Vector2d.mirrorIn $(docs 'Vector2d.mirrorIn)
-    , Class.member1 "Mirror Across" "Axis" (Vector2d.mirrorAcross :: UvAxis -> UvVector -> UvVector) $(docs 'Vector2d.mirrorAcross)
+    [ Class.constant "Zero" (Vector2D.zero :: UvVector) $(docs 'Vector2D.zero)
+    , Class.factory1 "Unit" "Direction" Vector2D.unit $(docs 'Vector2D.unit)
+    , Class.constructor2 "U Component" "V Component" Vector2D.Vector2D "Construct a vector from its U and V components."
+    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2D.polar $(docs 'Vector2D.polar)
+    , Class.property "Components" Vector2D.components $(docs 'Vector2D.components)
+    , Class.property "U Component" Vector2D.xComponent "Get the U component of a vector."
+    , Class.property "V Component" Vector2D.yComponent "Get the V component of a vector."
+    , Class.memberU0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
+    , Class.member0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
+    , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
+    , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."
+    , Class.member0 "Rotate Left" Vector2D.rotateLeft $(docs 'Vector2D.rotateLeft)
+    , Class.member0 "Rotate Right" Vector2D.rotateRight $(docs 'Vector2D.rotateRight)
+    , Class.member1 "Rotate By" "Angle" Vector2D.rotateBy $(docs 'Vector2D.rotateBy)
+    , Class.member1 "Mirror In" "Direction" Vector2D.mirrorIn $(docs 'Vector2D.mirrorIn)
+    , Class.member1 "Mirror Across" "Axis" (Vector2D.mirrorAcross :: UvAxis -> UvVector -> UvVector) $(docs 'Vector2D.mirrorAcross)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -641,7 +640,7 @@ type Direction2d = Direction2d.Direction2d FFI.Space
 direction2d :: Class
 direction2d =
   Class.new @Direction2d $(docs ''Direction2d.Direction2d) $
-    [ Class.upcast Vector2d.unit
+    [ Class.upcast Vector2D.unit
     , Class.constant "X" (Direction2d.x :: Direction2d) $(docs 'Direction2d.x)
     , Class.constant "Y" (Direction2d.y :: Direction2d) $(docs 'Direction2d.y)
     , Class.factory1 "From Angle" "Angle" Direction2d.fromAngle $(docs 'Direction2d.fromAngle)
@@ -661,7 +660,7 @@ type UvDirection = Direction2d.Direction2d UvSpace
 uvDirection :: Class
 uvDirection =
   Class.new @UvDirection "A direction in UV parameter space." $
-    [ Class.upcast Vector2d.unit
+    [ Class.upcast Vector2D.unit
     , Class.constant "U" (Direction2d.x :: UvDirection) "The U direction."
     , Class.constant "V" (Direction2d.y :: UvDirection) "The V direction."
     , Class.factory1 "From Angle" "Angle" Direction2d.fromAngle $(docs 'Direction2d.fromAngle)
@@ -675,12 +674,12 @@ uvDirection =
     , Class.negateSelf
     ]
 
-type Point2D = Point2D.Point2D FFI.Space
+type Point2D = Point2D.Point2D Meters FFI.Space
 
 point2D :: Class
 point2D =
   Class.new @Point2D "A point in 2D, defined by its X and Y coordinates." $
-    [ Class.constant "Origin" (Point2D.origin @FFI.Space) $(docs 'Point2D.origin)
+    [ Class.constant "Origin" (Point2D.origin @Meters @FFI.Space) $(docs 'Point2D.origin)
     , Class.constructor2 "X Coordinate" "Y Coordinate" Point2D.Point2D $(docs 'Point2D.Point2D)
     , Class.factory1 "X" "X Coordinate" Point2D.x $(docs 'Point2D.x)
     , Class.factory1 "Y" "Y Coordinate" Point2D.y $(docs 'Point2D.y)
@@ -698,8 +697,8 @@ point2D =
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
     , Class.member1 "Place On" "Plane" Point2D.placeOn $(docs 'Point2D.placeOn)
     , Class.minusSelf
-    , Class.minus @Displacement2d Self
-    , Class.plus @Displacement2d Self
+    , Class.minus @Displacement2D Self
+    , Class.plus @Displacement2D Self
     , Class.minus @Curve2d Self
     ]
       <> affineTransformations2d Point2D.transformBy
@@ -707,13 +706,13 @@ point2D =
 uvPoint :: Class
 uvPoint =
   Class.new @UvPoint $(docs ''UvPoint.UvPoint) $
-    [ Class.constant "Origin" UvPoint.origin $(docs 'UvPoint.origin)
-    , Class.constructor2 "U Coordinate" "V Coordinate" UvPoint.UvPoint $(docs 'UvPoint.UvPoint)
-    , Class.property "Coordinates" UvPoint.coordinates $(docs 'UvPoint.coordinates)
-    , Class.property "U Coordinate" UvPoint.uCoordinate $(docs 'UvPoint.uCoordinate)
-    , Class.property "V Coordinate" UvPoint.vCoordinate $(docs 'UvPoint.vCoordinate)
-    , Class.member1 "Distance To" "Other" UvPoint.distanceFrom $(docs 'UvPoint.distanceFrom)
-    , Class.member1 "Midpoint" "Other" UvPoint.midpoint $(docs 'UvPoint.midpoint)
+    [ Class.constant "Origin" (Point2D.origin @Unitless @UvSpace) $(docs 'Point2D.origin)
+    , Class.constructor2 "U Coordinate" "V Coordinate" Point2D.Point2D $(docs 'Point2D.Point2D)
+    , Class.property "Coordinates" Point2D.coordinates $(docs 'Point2D.coordinates)
+    , Class.property "U Coordinate" Point2D.xCoordinate $(docs 'Point2D.xCoordinate)
+    , Class.property "V Coordinate" Point2D.yCoordinate $(docs 'Point2D.yCoordinate)
+    , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
+    , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
     , Class.minusSelf
     , Class.minus @UvVector Self
     , Class.plus @UvVector Self
@@ -732,8 +731,8 @@ bounds2d =
     , Class.property "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , Class.property "X Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
     , Class.property "Y Coordinate" Bounds2d.yCoordinate $(docs 'Bounds2d.yCoordinate)
-    , Class.plus @Displacement2d Self
-    , Class.minus @Displacement2d Self
+    , Class.plus @Displacement2D Self
+    , Class.minus @Displacement2D Self
     ]
       <> affineTransformations2d Bounds2d.transformBy
 

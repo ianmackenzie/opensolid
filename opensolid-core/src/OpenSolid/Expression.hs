@@ -69,15 +69,13 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Polymorphic.Point2d (Point2d)
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Bounds2d (PositionBounds2d)
   , Bounds3d (PositionBounds3d)
-  , Point2d (Position2d)
+  , Point2D (Position2D)
   , Point3d (Position3d)
   , Vector3d
   , VectorBounds3d
@@ -90,6 +88,8 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
@@ -106,20 +106,20 @@ data Expression input output where
     Expression UvPoint (Quantity units)
   Curve2d ::
     Ast2d Number ->
-    ~(Compiled Number (Vector2d Unitless Ast.Space)) ->
-    Expression Number (Point2d units space)
+    ~(Compiled Number (Vector2D Unitless Ast.Space)) ->
+    Expression Number (Point2D units space)
   Surface2d ::
     Ast2d UvPoint ->
-    ~(Compiled UvPoint (Vector2d Unitless Ast.Space)) ->
-    Expression UvPoint (Point2d units space)
+    ~(Compiled UvPoint (Vector2D Unitless Ast.Space)) ->
+    Expression UvPoint (Point2D units space)
   VectorCurve2d ::
     Ast2d Number ->
-    ~(Compiled Number (Vector2d Unitless Ast.Space)) ->
-    Expression Number (Vector2d units space)
+    ~(Compiled Number (Vector2D Unitless Ast.Space)) ->
+    Expression Number (Vector2D units space)
   VectorSurface2d ::
     Ast2d UvPoint ->
-    ~(Compiled UvPoint (Vector2d Unitless Ast.Space)) ->
-    Expression UvPoint (Vector2d units space)
+    ~(Compiled UvPoint (Vector2D Unitless Ast.Space)) ->
+    Expression UvPoint (Vector2D units space)
   Curve3d ::
     Ast3d Number ->
     ~(Compiled Number (Vector3d Unitless Ast.Space)) ->
@@ -143,16 +143,16 @@ curve1d ast = Curve1d ast (Ast.compileCurve1d ast)
 surface1d :: Ast1d UvPoint -> Expression UvPoint (Quantity units)
 surface1d ast = Surface1d ast (Ast.compileSurface1d ast)
 
-curve2d :: Ast2d Number -> Expression Number (Point2d units space)
+curve2d :: Ast2d Number -> Expression Number (Point2D units space)
 curve2d ast = Curve2d ast (Ast.compileCurve2d ast)
 
-surface2d :: Ast2d UvPoint -> Expression UvPoint (Point2d units space)
+surface2d :: Ast2d UvPoint -> Expression UvPoint (Point2D units space)
 surface2d ast = Surface2d ast (Ast.compileSurface2d ast)
 
-vectorCurve2d :: Ast2d Number -> Expression Number (Vector2d units space)
+vectorCurve2d :: Ast2d Number -> Expression Number (Vector2D units space)
 vectorCurve2d ast = VectorCurve2d ast (Ast.compileCurve2d ast)
 
-vectorSurface2d :: Ast2d UvPoint -> Expression UvPoint (Vector2d units space)
+vectorSurface2d :: Ast2d UvPoint -> Expression UvPoint (Vector2D units space)
 vectorSurface2d ast = VectorSurface2d ast (Ast.compileSurface2d ast)
 
 curve3d :: Ast3d Number -> Expression Number (Point3d space)
@@ -186,11 +186,11 @@ debug expression = case expression of
 
 instance HasUnits (Expression input (Quantity units)) units
 
-instance HasUnits (Expression input (Vector2d units space)) units
+instance HasUnits (Expression input (Vector2D units space)) units
 
 instance HasUnits (Expression input (Vector3d units space)) units
 
-instance HasUnits (Expression input (Point2d units space)) units
+instance HasUnits (Expression input (Point2D units space)) units
 
 instance
   input1 ~ input2 =>
@@ -204,8 +204,8 @@ instance
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Expression input1 (Point2d units1 space))
-    (Expression input2 (Point2d units2 space))
+    (Expression input1 (Point2D units1 space))
+    (Expression input2 (Point2D units2 space))
   where
   coerce (Curve2d ast functions) = Curve2d ast functions
   coerce (Surface2d ast functions) = Surface2d ast functions
@@ -213,8 +213,8 @@ instance
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Expression input1 (Vector2d units1 space))
-    (Expression input2 (Vector2d units2 space))
+    (Expression input1 (Vector2D units1 space))
+    (Expression input2 (Vector2D units2 space))
   where
   coerce (VectorCurve2d ast functions) = VectorCurve2d ast functions
   coerce (VectorSurface2d ast functions) = VectorSurface2d ast functions
@@ -238,10 +238,10 @@ instance Negation (Expression Number (Quantity units)) where
 instance Negation (Expression UvPoint (Quantity units)) where
   negative (Surface1d ast _) = surface1d (negative ast)
 
-instance Negation (Expression Number (Vector2d units space)) where
+instance Negation (Expression Number (Vector2D units space)) where
   negative (VectorCurve2d ast _) = vectorCurve2d (negative ast)
 
-instance Negation (Expression UvPoint (Vector2d units space)) where
+instance Negation (Expression UvPoint (Vector2D units space)) where
   negative (VectorSurface2d ast _) = vectorSurface2d (negative ast)
 
 instance Negation (Expression Number (Vector3d units space)) where
@@ -289,8 +289,8 @@ instance
 instance
   Multiplication
     Sign
-    (Expression Number (Vector2d units space))
-    (Expression Number (Vector2d units space))
+    (Expression Number (Vector2D units space))
+    (Expression Number (Vector2D units space))
   where
   Positive .*. expression = expression
   Negative .*. expression = negative expression
@@ -298,26 +298,26 @@ instance
 instance
   Multiplication
     Sign
-    (Expression UvPoint (Vector2d units space))
-    (Expression UvPoint (Vector2d units space))
+    (Expression UvPoint (Vector2D units space))
+    (Expression UvPoint (Vector2D units space))
   where
   Positive .*. expression = expression
   Negative .*. expression = negative expression
 
 instance
   Multiplication
-    (Expression Number (Vector2d units space))
+    (Expression Number (Vector2D units space))
     Sign
-    (Expression Number (Vector2d units space))
+    (Expression Number (Vector2D units space))
   where
   expression .*. Positive = expression
   expression .*. Negative = negative expression
 
 instance
   Multiplication
-    (Expression UvPoint (Vector2d units space))
+    (Expression UvPoint (Vector2D units space))
     Sign
-    (Expression UvPoint (Vector2d units space))
+    (Expression UvPoint (Vector2D units space))
   where
   expression .*. Positive = expression
   expression .*. Negative = negative expression
@@ -383,18 +383,18 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Expression Number (Vector2d units1 space1))
-    (Expression Number (Vector2d units2 space2))
-    (Expression Number (Vector2d units1 space1))
+    (Expression Number (Vector2D units1 space1))
+    (Expression Number (Vector2D units2 space2))
+    (Expression Number (Vector2D units1 space1))
   where
   VectorCurve2d lhs _ .+. VectorCurve2d rhs _ = vectorCurve2d (lhs .+. rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Expression UvPoint (Vector2d units1 space1))
-    (Expression UvPoint (Vector2d units2 space2))
-    (Expression UvPoint (Vector2d units1 space1))
+    (Expression UvPoint (Vector2D units1 space1))
+    (Expression UvPoint (Vector2D units2 space2))
+    (Expression UvPoint (Vector2D units1 space1))
   where
   VectorSurface2d lhs _ .+. VectorSurface2d rhs _ = vectorSurface2d (lhs .+. rhs)
 
@@ -419,18 +419,18 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Expression Number (Point2d units1 space1))
-    (Expression Number (Vector2d units2 space2))
-    (Expression Number (Point2d units1 space1))
+    (Expression Number (Point2D units1 space1))
+    (Expression Number (Vector2D units2 space2))
+    (Expression Number (Point2D units1 space1))
   where
   Curve2d lhs _ .+. VectorCurve2d rhs _ = curve2d (lhs .+. rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Expression UvPoint (Point2d units1 space1))
-    (Expression UvPoint (Vector2d units2 space2))
-    (Expression UvPoint (Point2d units1 space1))
+    (Expression UvPoint (Point2D units1 space1))
+    (Expression UvPoint (Vector2D units2 space2))
+    (Expression UvPoint (Point2D units1 space1))
   where
   Surface2d lhs _ .+. VectorSurface2d rhs _ = surface2d (lhs .+. rhs)
 
@@ -477,18 +477,18 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Number (Vector2d units1 space1))
-    (Expression Number (Vector2d units2 space2))
-    (Expression Number (Vector2d units1 space1))
+    (Expression Number (Vector2D units1 space1))
+    (Expression Number (Vector2D units2 space2))
+    (Expression Number (Vector2D units1 space1))
   where
   VectorCurve2d lhs _ .-. VectorCurve2d rhs _ = vectorCurve2d (lhs .-. rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression UvPoint (Vector2d units1 space1))
-    (Expression UvPoint (Vector2d units2 space2))
-    (Expression UvPoint (Vector2d units1 space1))
+    (Expression UvPoint (Vector2D units1 space1))
+    (Expression UvPoint (Vector2D units2 space2))
+    (Expression UvPoint (Vector2D units1 space1))
   where
   VectorSurface2d lhs _ .-. VectorSurface2d rhs _ = vectorSurface2d (lhs .-. rhs)
 
@@ -513,36 +513,36 @@ instance
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Number (Point2d units1 space1))
-    (Expression Number (Vector2d units2 space2))
-    (Expression Number (Point2d units1 space1))
+    (Expression Number (Point2D units1 space1))
+    (Expression Number (Vector2D units2 space2))
+    (Expression Number (Point2D units1 space1))
   where
   Curve2d lhs _ .-. VectorCurve2d rhs _ = curve2d (lhs .-. rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression UvPoint (Point2d units1 space1))
-    (Expression UvPoint (Vector2d units2 space2))
-    (Expression UvPoint (Point2d units1 space1))
+    (Expression UvPoint (Point2D units1 space1))
+    (Expression UvPoint (Vector2D units2 space2))
+    (Expression UvPoint (Point2D units1 space1))
   where
   Surface2d lhs _ .-. VectorSurface2d rhs _ = surface2d (lhs .-. rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression Number (Point2d units1 space1))
-    (Expression Number (Point2d units2 space2))
-    (Expression Number (Vector2d units1 space1))
+    (Expression Number (Point2D units1 space1))
+    (Expression Number (Point2D units2 space2))
+    (Expression Number (Vector2D units1 space1))
   where
   Curve2d lhs _ .-. Curve2d rhs _ = vectorCurve2d (lhs .-. rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Expression UvPoint (Point2d units1 space1))
-    (Expression UvPoint (Point2d units2 space2))
-    (Expression UvPoint (Vector2d units1 space1))
+    (Expression UvPoint (Point2D units1 space1))
+    (Expression UvPoint (Point2D units2 space2))
+    (Expression UvPoint (Vector2D units1 space1))
   where
   Surface2d lhs _ .-. Surface2d rhs _ = vectorSurface2d (lhs .-. rhs)
 
@@ -611,15 +611,15 @@ instance
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
---- Quantity-Vector2d ---
+--- Quantity-Vector2D ---
 --------------------
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Expression Number (Quantity units1))
-    (Expression Number (Vector2d units2 space))
-    (Expression Number (Vector2d units3 space))
+    (Expression Number (Vector2D units2 space))
+    (Expression Number (Vector2D units3 space))
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
@@ -627,29 +627,29 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Expression UvPoint (Quantity units1))
-    (Expression UvPoint (Vector2d units2 space))
-    (Expression UvPoint (Vector2d units3 space))
+    (Expression UvPoint (Vector2D units2 space))
+    (Expression UvPoint (Vector2D units3 space))
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
---- Vector2d-Quantity ---
+--- Vector2D-Quantity ---
 --------------------
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Expression Number (Vector2d units1 space))
+    (Expression Number (Vector2D units1 space))
     (Expression Number (Quantity units2))
-    (Expression Number (Vector2d units3 space))
+    (Expression Number (Vector2D units3 space))
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Expression UvPoint (Vector2d units1 space))
+    (Expression UvPoint (Vector2D units1 space))
     (Expression UvPoint (Quantity units2))
-    (Expression UvPoint (Vector2d units3 space))
+    (Expression UvPoint (Vector2D units3 space))
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
@@ -718,41 +718,41 @@ instance
   where
   Surface1d lhs _ ?*? Surface1d rhs _ = surface1d (lhs .*. rhs)
 
---- Quantity-Vector2d ---
+--- Quantity-Vector2D ---
 --------------------
 
 instance
   Multiplication_
     (Expression Number (Quantity units1))
-    (Expression Number (Vector2d units2 space))
-    (Expression Number (Vector2d (units1 ?*? units2) space))
+    (Expression Number (Vector2D units2 space))
+    (Expression Number (Vector2D (units1 ?*? units2) space))
   where
   Curve1d lhs _ ?*? VectorCurve2d rhs _ = vectorCurve2d (lhs .*. rhs)
 
 instance
   Multiplication_
     (Expression UvPoint (Quantity units1))
-    (Expression UvPoint (Vector2d units2 space))
-    (Expression UvPoint (Vector2d (units1 ?*? units2) space))
+    (Expression UvPoint (Vector2D units2 space))
+    (Expression UvPoint (Vector2D (units1 ?*? units2) space))
   where
   Surface1d lhs _ ?*? VectorSurface2d rhs _ = vectorSurface2d (lhs .*. rhs)
 
---- Vector2d-Quantity ---
+--- Vector2D-Quantity ---
 --------------------
 
 instance
   Multiplication_
-    (Expression Number (Vector2d units1 space))
+    (Expression Number (Vector2D units1 space))
     (Expression Number (Quantity units2))
-    (Expression Number (Vector2d (units1 ?*? units2) space))
+    (Expression Number (Vector2D (units1 ?*? units2) space))
   where
   VectorCurve2d lhs _ ?*? Curve1d rhs _ = vectorCurve2d (lhs .*. rhs)
 
 instance
   Multiplication_
-    (Expression UvPoint (Vector2d units1 space))
+    (Expression UvPoint (Vector2D units1 space))
     (Expression UvPoint (Quantity units2))
-    (Expression UvPoint (Vector2d (units1 ?*? units2) space))
+    (Expression UvPoint (Vector2D (units1 ?*? units2) space))
   where
   VectorSurface2d lhs _ ?*? Surface1d rhs _ = vectorSurface2d (lhs .*. rhs)
 
@@ -822,24 +822,24 @@ instance
   where
   lhs ./. rhs = Units.specialize (lhs ?/? rhs)
 
---- Vector2d-Quantity ---
+--- Vector2D-Quantity ---
 --------------------
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (Expression Number (Vector2d units1 space))
+    (Expression Number (Vector2D units1 space))
     (Expression Number (Quantity units2))
-    (Expression Number (Vector2d units3 space))
+    (Expression Number (Vector2D units3 space))
   where
   lhs ./. rhs = Units.specialize (lhs ?/? rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (Expression UvPoint (Vector2d units1 space))
+    (Expression UvPoint (Vector2D units1 space))
     (Expression UvPoint (Quantity units2))
-    (Expression UvPoint (Vector2d units3 space))
+    (Expression UvPoint (Vector2D units3 space))
   where
   lhs ./. rhs = Units.specialize (lhs ?/? rhs)
 
@@ -887,22 +887,22 @@ instance
   where
   Surface1d lhs _ ?/? Surface1d rhs _ = surface1d (lhs ./. rhs)
 
---- Vector2d-Quantity ---
+--- Vector2D-Quantity ---
 --------------------
 
 instance
   Division_
-    (Expression Number (Vector2d units1 space))
+    (Expression Number (Vector2D units1 space))
     (Expression Number (Quantity units2))
-    (Expression Number (Vector2d (units1 ?/? units2) space))
+    (Expression Number (Vector2D (units1 ?/? units2) space))
   where
   VectorCurve2d lhs _ ?/? Curve1d rhs _ = vectorCurve2d (lhs ./. rhs)
 
 instance
   Division_
-    (Expression UvPoint (Vector2d units1 space))
+    (Expression UvPoint (Vector2D units1 space))
     (Expression UvPoint (Quantity units2))
-    (Expression UvPoint (Vector2d (units1 ?/? units2) space))
+    (Expression UvPoint (Vector2D (units1 ?/? units2) space))
   where
   VectorSurface2d lhs _ ?/? Surface1d rhs _ = vectorSurface2d (lhs ./. rhs)
 
@@ -935,8 +935,8 @@ instance
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   DotMultiplication
-    (Expression Number (Vector2d units1 space1))
-    (Expression Number (Vector2d units2 space2))
+    (Expression Number (Vector2D units1 space1))
+    (Expression Number (Vector2D units2 space2))
     (Expression Number (Quantity units3))
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
@@ -944,8 +944,8 @@ instance
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   DotMultiplication
-    (Expression UvPoint (Vector2d units1 space1))
-    (Expression UvPoint (Vector2d units2 space2))
+    (Expression UvPoint (Vector2D units1 space1))
+    (Expression UvPoint (Vector2D units2 space2))
     (Expression UvPoint (Quantity units3))
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
@@ -974,8 +974,8 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication_
-    (Expression Number (Vector2d units1 space1))
-    (Expression Number (Vector2d units2 space2))
+    (Expression Number (Vector2D units1 space1))
+    (Expression Number (Vector2D units2 space2))
     (Expression Number (Quantity (units1 ?*? units2)))
   where
   VectorCurve2d lhs _ `dot_` VectorCurve2d rhs _ = curve1d (lhs `dot` rhs)
@@ -983,8 +983,8 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication_
-    (Expression UvPoint (Vector2d units1 space1))
-    (Expression UvPoint (Vector2d units2 space2))
+    (Expression UvPoint (Vector2D units1 space1))
+    (Expression UvPoint (Vector2D units2 space2))
     (Expression UvPoint (Quantity (units1 ?*? units2)))
   where
   VectorSurface2d lhs _ `dot_` VectorSurface2d rhs _ = surface1d (lhs `dot` rhs)
@@ -1017,8 +1017,8 @@ instance
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   CrossMultiplication
-    (Expression Number (Vector2d units1 space1))
-    (Expression Number (Vector2d units2 space2))
+    (Expression Number (Vector2D units1 space1))
+    (Expression Number (Vector2D units2 space2))
     (Expression Number (Quantity units3))
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
@@ -1026,8 +1026,8 @@ instance
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   CrossMultiplication
-    (Expression UvPoint (Vector2d units1 space1))
-    (Expression UvPoint (Vector2d units2 space2))
+    (Expression UvPoint (Vector2D units1 space1))
+    (Expression UvPoint (Vector2D units2 space2))
     (Expression UvPoint (Quantity units3))
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
@@ -1056,8 +1056,8 @@ instance
 instance
   space1 ~ space2 =>
   CrossMultiplication_
-    (Expression Number (Vector2d units1 space1))
-    (Expression Number (Vector2d units2 space2))
+    (Expression Number (Vector2D units1 space1))
+    (Expression Number (Vector2D units2 space2))
     (Expression Number (Quantity (units1 ?*? units2)))
   where
   VectorCurve2d lhs _ `cross_` VectorCurve2d rhs _ = curve1d (lhs `cross` rhs)
@@ -1065,8 +1065,8 @@ instance
 instance
   space1 ~ space2 =>
   CrossMultiplication_
-    (Expression UvPoint (Vector2d units1 space1))
-    (Expression UvPoint (Vector2d units2 space2))
+    (Expression UvPoint (Vector2D units1 space1))
+    (Expression UvPoint (Vector2D units2 space2))
     (Expression UvPoint (Quantity (units1 ?*? units2)))
   where
   VectorSurface2d lhs _ `cross_` VectorSurface2d rhs _ = surface1d (lhs `cross` rhs)
@@ -1162,11 +1162,11 @@ instance Zero Number (Quantity units) where
 instance Zero UvPoint (Quantity units) where
   zero = constant Quantity.zero
 
-instance Zero Number (Vector2d units space) where
-  zero = constant Vector2d.zero
+instance Zero Number (Vector2D units space) where
+  zero = constant Vector2D.zero
 
-instance Zero UvPoint (Vector2d units space) where
-  zero = constant Vector2d.zero
+instance Zero UvPoint (Vector2D units space) where
+  zero = constant Vector2D.zero
 
 instance Zero Number (Vector3d units space) where
   zero = constant Vector3d.zero
@@ -1177,11 +1177,11 @@ instance Zero UvPoint (Vector3d units space) where
 class Origin input output where
   origin :: Expression input output
 
-instance Origin Number (Point2d units space) where
-  origin = constant Point2d.origin
+instance Origin Number (Point2D units space) where
+  origin = constant Point2D.origin
 
-instance Origin UvPoint (Point2d units space) where
-  origin = constant Point2d.origin
+instance Origin UvPoint (Point2D units space) where
+  origin = constant Point2D.origin
 
 class Constant input output where
   constant :: output -> Expression input output
@@ -1192,10 +1192,10 @@ instance Constant Number (Quantity units) where
 instance Constant UvPoint (Quantity units) where
   constant value = surface1d (Ast.constant1d value)
 
-instance Constant Number (Vector2d units space) where
+instance Constant Number (Vector2D units space) where
   constant value = vectorCurve2d (Ast.constant2d value)
 
-instance Constant UvPoint (Vector2d units space) where
+instance Constant UvPoint (Vector2D units space) where
   constant value = vectorSurface2d (Ast.constant2d value)
 
 instance Constant Number (Vector3d units space) where
@@ -1204,11 +1204,11 @@ instance Constant Number (Vector3d units space) where
 instance Constant UvPoint (Vector3d units space) where
   constant value = vectorSurface3d (Ast.constant3d value)
 
-instance Constant Number (Point2d units space) where
-  constant (Position2d p) = curve2d (Ast.constant2d p)
+instance Constant Number (Point2D units space) where
+  constant (Position2D p) = curve2d (Ast.constant2d p)
 
-instance Constant UvPoint (Point2d units space) where
-  constant (Position2d p) = surface2d (Ast.constant2d p)
+instance Constant UvPoint (Point2D units space) where
+  constant (Position2D p) = surface2d (Ast.constant2d p)
 
 instance Constant Number (Point3d space) where
   constant (Position3d p) = curve3d (Ast.constant3d p)
@@ -1222,31 +1222,31 @@ class XY input output units | output -> units where
     Expression input (Quantity units) ->
     Expression input output
 
-instance XY Number (Vector2d units space) units where
+instance XY Number (Vector2D units space) units where
   xy (Curve1d x _) (Curve1d y _) = vectorCurve2d (Ast.xy x y)
 
-instance XY UvPoint (Vector2d units space) units where
+instance XY UvPoint (Vector2D units space) units where
   xy (Surface1d x _) (Surface1d y _) = vectorSurface2d (Ast.xy x y)
 
-instance XY Number (Point2d units space) units where
+instance XY Number (Point2D units space) units where
   xy (Curve1d x _) (Curve1d y _) = curve2d (Ast.xy x y)
 
-instance XY UvPoint (Point2d units space) units where
+instance XY UvPoint (Point2D units space) units where
   xy (Surface1d x _) (Surface1d y _) = surface2d (Ast.xy x y)
 
-xComponent :: Expression input (Vector2d units space) -> Expression input (Quantity units)
+xComponent :: Expression input (Vector2D units space) -> Expression input (Quantity units)
 xComponent (VectorCurve2d ast _) = curve1d (Ast.xComponent ast)
 xComponent (VectorSurface2d ast _) = surface1d (Ast.xComponent ast)
 
-yComponent :: Expression input (Vector2d units space) -> Expression input (Quantity units)
+yComponent :: Expression input (Vector2D units space) -> Expression input (Quantity units)
 yComponent (VectorCurve2d ast _) = curve1d (Ast.yComponent ast)
 yComponent (VectorSurface2d ast _) = surface1d (Ast.yComponent ast)
 
-xCoordinate :: Expression input (Point2d units space) -> Expression input (Quantity units)
+xCoordinate :: Expression input (Point2D units space) -> Expression input (Quantity units)
 xCoordinate (Curve2d ast _) = curve1d (Ast.xComponent ast)
 xCoordinate (Surface2d ast _) = surface1d (Ast.xComponent ast)
 
-yCoordinate :: Expression input (Point2d units space) -> Expression input (Quantity units)
+yCoordinate :: Expression input (Point2D units space) -> Expression input (Quantity units)
 yCoordinate (Curve2d ast _) = curve1d (Ast.yComponent ast)
 yCoordinate (Surface2d ast _) = surface1d (Ast.yComponent ast)
 
@@ -1299,7 +1299,7 @@ class SquaredMagnitude' expression1 expression2 | expression1 -> expression2 whe
 
 instance
   SquaredMagnitude'
-    (Expression input (Vector2d units space))
+    (Expression input (Vector2D units space))
     (Expression input (Quantity (units ?*? units)))
   where
   squaredMagnitude_ (VectorCurve2d ast _) = curve1d (Ast.squaredMagnitude2d ast)
@@ -1319,7 +1319,7 @@ class SquaredMagnitude expression1 expression2 | expression1 -> expression2 wher
 instance
   Units.Squared units1 units2 =>
   SquaredMagnitude
-    (Expression input (Vector2d units1 space))
+    (Expression input (Vector2D units1 space))
     (Expression input (Quantity units2))
   where
   squaredMagnitude = Units.specialize . squaredMagnitude_
@@ -1337,7 +1337,7 @@ class Magnitude expression1 expression2 | expression1 -> expression2 where
 
 instance
   Magnitude
-    (Expression input (Vector2d units space))
+    (Expression input (Vector2D units space))
     (Expression input (Quantity units))
   where
   magnitude (VectorCurve2d ast _) = curve1d (Ast.magnitude2d ast)
@@ -1361,25 +1361,25 @@ instance
   space1 ~ space2 =>
   TransformBy
     (Transform2d tag units1 space1)
-    (Expression input (Vector2d units2 space2))
-    (Expression input (Vector2d units2 space2))
+    (Expression input (Vector2D units2 space2))
+    (Expression input (Vector2D units2 space2))
   where
   transformBy transform (VectorCurve2d ast _) =
-    vectorCurve2d (Ast.transformVector2d transform ast)
+    vectorCurve2d (Ast.transformVector2D transform ast)
   transformBy transform (VectorSurface2d ast _) =
-    vectorSurface2d (Ast.transformVector2d transform ast)
+    vectorSurface2d (Ast.transformVector2D transform ast)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   TransformBy
     (Transform2d tag units1 space1)
-    (Expression input (Point2d units2 space2))
-    (Expression input (Point2d units2 space2))
+    (Expression input (Point2D units2 space2))
+    (Expression input (Point2D units2 space2))
   where
   transformBy transform (Curve2d ast _) =
-    curve2d (Ast.transformPoint2d transform ast)
+    curve2d (Ast.transformPoint2D transform ast)
   transformBy transform (Surface2d ast _) =
-    surface2d (Ast.transformPoint2d transform ast)
+    surface2d (Ast.transformPoint2D transform ast)
 
 instance
   space1 ~ space2 =>
@@ -1416,21 +1416,21 @@ instance
   local1 ~ local2 =>
   PlaceIn
     (Frame2d frameUnits global local1)
-    (Expression input (Vector2d units local2))
-    (Expression input (Vector2d units global))
+    (Expression input (Vector2D units local2))
+    (Expression input (Vector2D units global))
   where
-  placeIn frame (VectorCurve2d ast _) = vectorCurve2d (Ast.placeVector2dIn frame ast)
-  placeIn frame (VectorSurface2d ast _) = vectorSurface2d (Ast.placeVector2dIn frame ast)
+  placeIn frame (VectorCurve2d ast _) = vectorCurve2d (Ast.placeVector2DIn frame ast)
+  placeIn frame (VectorSurface2d ast _) = vectorSurface2d (Ast.placeVector2DIn frame ast)
 
 instance
   (local1 ~ local2, units1 ~ units2) =>
   PlaceIn
     (Frame2d units1 global local1)
-    (Expression input (Point2d units2 local2))
-    (Expression input (Point2d units2 global))
+    (Expression input (Point2D units2 local2))
+    (Expression input (Point2D units2 global))
   where
-  placeIn frame (Curve2d ast _) = curve2d (Ast.placePoint2dIn frame ast)
-  placeIn frame (Surface2d ast _) = surface2d (Ast.placePoint2dIn frame ast)
+  placeIn frame (Curve2d ast _) = curve2d (Ast.placePoint2DIn frame ast)
+  placeIn frame (Surface2d ast _) = surface2d (Ast.placePoint2DIn frame ast)
 
 instance
   local1 ~ local2 =>
@@ -1463,8 +1463,8 @@ instance
   global1 ~ global2 =>
   RelativeTo
     (Frame2d frameUnits global1 local)
-    (Expression input (Vector2d units global2))
-    (Expression input (Vector2d units local))
+    (Expression input (Vector2D units global2))
+    (Expression input (Vector2D units local))
   where
   relativeTo frame ast = placeIn (Frame2d.inverse frame) ast
 
@@ -1472,8 +1472,8 @@ instance
   (global1 ~ global2, units1 ~ units2) =>
   RelativeTo
     (Frame2d units1 global1 local)
-    (Expression input (Point2d units2 global2))
-    (Expression input (Point2d units2 local))
+    (Expression input (Point2D units2 global2))
+    (Expression input (Point2D units2 local))
   where
   relativeTo frame ast = placeIn (Frame2d.inverse frame) ast
 
@@ -1502,21 +1502,21 @@ instance
   local1 ~ local2 =>
   On
     (Plane3d global local1)
-    (Expression input (Vector2d units local2))
+    (Expression input (Vector2D units local2))
     (Expression input (Vector3d units global))
   where
-  on plane (VectorCurve2d ast _) = vectorCurve3d (Ast.placeVector2dOn plane ast)
-  on plane (VectorSurface2d ast _) = vectorSurface3d (Ast.placeVector2dOn plane ast)
+  on plane (VectorCurve2d ast _) = vectorCurve3d (Ast.placeVector2DOn plane ast)
+  on plane (VectorSurface2d ast _) = vectorSurface3d (Ast.placeVector2DOn plane ast)
 
 instance
   (local1 ~ local2, meters ~ Meters) =>
   On
     (Plane3d global local1)
-    (Expression input (Point2d meters local2))
+    (Expression input (Point2D meters local2))
     (Expression input (Point3d global))
   where
-  on plane (Curve2d ast _) = curve3d (Ast.placePoint2dOn plane ast)
-  on plane (Surface2d ast _) = surface3d (Ast.placePoint2dOn plane ast)
+  on plane (Curve2d ast _) = curve3d (Ast.placePoint2DOn plane ast)
+  on plane (Surface2d ast _) = surface3d (Ast.placePoint2DOn plane ast)
 
 class ProjectInto plane expression1 expression2 | plane expression1 -> expression2 where
   projectInto :: plane -> expression1 -> expression2
@@ -1526,7 +1526,7 @@ instance
   ProjectInto
     (Plane3d global1 local)
     (Expression input (Vector3d units global2))
-    (Expression input (Vector2d units local))
+    (Expression input (Vector2D units local))
   where
   projectInto plane (VectorCurve3d ast _) = vectorCurve2d (Ast.projectVector3dInto plane ast)
   projectInto plane (VectorSurface3d ast _) = vectorSurface2d (Ast.projectVector3dInto plane ast)
@@ -1536,7 +1536,7 @@ instance
   ProjectInto
     (Plane3d global1 local)
     (Expression input (Point3d global2))
-    (Expression input (Point2d meters local))
+    (Expression input (Point2D meters local))
   where
   projectInto plane (Curve3d ast _) = curve2d (Ast.projectPoint3dInto plane ast)
   projectInto plane (Surface3d ast _) = surface2d (Ast.projectPoint3dInto plane ast)
@@ -1547,10 +1547,10 @@ class BezierCurve output where
 instance BezierCurve (Quantity units) where
   bezierCurve controlPoints = curve1d (Ast.bezierCurve1d controlPoints)
 
-instance BezierCurve (Vector2d units space) where
+instance BezierCurve (Vector2D units space) where
   bezierCurve controlPoints = vectorCurve2d (Ast.bezierCurve2d controlPoints)
 
-instance BezierCurve (Point2d units space) where
+instance BezierCurve (Point2D units space) where
   bezierCurve controlPoints = curve2d (Ast.bezierCurve2d (Data.Coerce.coerce controlPoints))
 
 instance BezierCurve (Vector3d units space) where
@@ -1721,12 +1721,12 @@ instance
 instance
   Evaluation
     Number
-    (Point2d units space)
+    (Point2D units space)
     (Bounds Unitless)
     (Bounds2d units space)
   where
   evaluate (Curve2d _ compiled) tValue =
-    Position2d (Evaluate.curve2dValue compiled tValue)
+    Position2D (Evaluate.curve2dValue compiled tValue)
 
   evaluateBounds (Curve2d _ compiled) tBounds =
     PositionBounds2d (Evaluate.curve2dBounds compiled tBounds)
@@ -1734,12 +1734,12 @@ instance
 instance
   Evaluation
     UvPoint
-    (Point2d units space)
+    (Point2D units space)
     UvBounds
     (Bounds2d units space)
   where
   evaluate (Surface2d _ compiled) uvPoint =
-    Position2d (Evaluate.surface2dValue compiled uvPoint)
+    Position2D (Evaluate.surface2dValue compiled uvPoint)
 
   evaluateBounds (Surface2d _ compiled) uvBounds =
     PositionBounds2d (Evaluate.surface2dBounds compiled uvBounds)
@@ -1747,7 +1747,7 @@ instance
 instance
   Evaluation
     Number
-    (Vector2d units space)
+    (Vector2D units space)
     (Bounds Unitless)
     (VectorBounds2d units space)
   where
@@ -1757,7 +1757,7 @@ instance
 instance
   Evaluation
     UvPoint
-    (Vector2d units space)
+    (Vector2D units space)
     UvBounds
     (VectorBounds2d units space)
   where

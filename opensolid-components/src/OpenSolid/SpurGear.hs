@@ -17,7 +17,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
@@ -80,9 +80,9 @@ profile gear = do
   let leftEnd = involuteLeft.endPoint
   let involuteLeftDerivative = Curve2d.derivative involuteLeft
   let leftStartTangent
-        | rd > rb = Vector2d.normalize (VectorCurve2d.startValue involuteLeftDerivative)
-        | otherwise = Vector2d.polar 1 (Angle.halfPi .+. alpha)
-  let leftEndTangent = Vector2d.normalize (VectorCurve2d.endValue involuteLeftDerivative)
+        | rd > rb = Vector2D.normalize (VectorCurve2d.startValue involuteLeftDerivative)
+        | otherwise = Vector2D.polar 1 (Angle.halfPi .+. alpha)
+  let leftEndTangent = Vector2D.normalize (VectorCurve2d.endValue involuteLeftDerivative)
   let leftDerivativeMagnitude = Point2D.distanceFrom leftStart leftEnd
   let leftApproximation =
         Curve2d.hermite

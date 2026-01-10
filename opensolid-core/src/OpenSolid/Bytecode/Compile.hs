@@ -42,10 +42,10 @@ import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3d (Vector3d))
 import OpenSolid.Text qualified as Text
+import OpenSolid.Vector2D (Vector2D (Vector2D))
 import Prelude qualified
 
 newtype NumComponents = NumComponents Int deriving (Eq, Ord, Show)
@@ -121,8 +121,8 @@ addConstant components = Step \initialState ->
 addConstant1d :: Number -> Step ConstantIndex
 addConstant1d value = addConstant (NonEmpty.one value)
 
-addConstant2d :: Vector2d Unitless space -> Step ConstantIndex
-addConstant2d (Vector2d x y) = addConstant (NonEmpty.two x y)
+addConstant2d :: Vector2D Unitless space -> Step ConstantIndex
+addConstant2d (Vector2D x y) = addConstant (NonEmpty.two x y)
 
 addConstant3d :: Vector3d Unitless space -> Step ConstantIndex
 addConstant3d (Vector3d x y z) = addConstant (NonEmpty.three x y z)

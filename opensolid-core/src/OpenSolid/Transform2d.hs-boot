@@ -11,12 +11,12 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis2d, Direction2d, Point2d, Transform2d, Vector2d)
+import OpenSolid.Primitives (Axis2d, Direction2d, Point2D, Transform2d, Vector2D)
 import OpenSolid.Transform (Affine, Orthonormal, Rigid, Uniform)
 
 translateByImpl ::
   (Transform2d Rigid units space -> a -> b) ->
-  Vector2d units space ->
+  Vector2D units space ->
   a ->
   b
 translateInImpl ::
@@ -33,7 +33,7 @@ translateAlongImpl ::
   b
 rotateAroundImpl ::
   (Transform2d Rigid units space -> a -> b) ->
-  Point2d units space ->
+  Point2D units space ->
   Angle ->
   a ->
   b
@@ -44,7 +44,7 @@ mirrorAcrossImpl ::
   b
 scaleAboutImpl ::
   (Transform2d Uniform units space -> a -> b) ->
-  Point2d units space ->
+  Point2D units space ->
   Number ->
   a ->
   b

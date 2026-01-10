@@ -63,7 +63,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -480,7 +480,7 @@ on plane vectorCurve2d = do
   let compiledPlanar =
         CompiledFunction.map
           (Expression.VectorCurve2d.placeOn plane)
-          (Vector2d.placeOn plane)
+          (Vector2D.placeOn plane)
           (VectorBounds2d.placeOn plane)
           (VectorCurve2d.compiled vectorCurve2d)
   let planarDerivative = on plane (VectorCurve2d.derivative vectorCurve2d)

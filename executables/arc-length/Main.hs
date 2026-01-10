@@ -10,7 +10,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2D (Point2D, pattern Point2D)
+import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
@@ -43,7 +43,7 @@ testQuadraticSplineLength = do
   testCurve "Quadratic spline" spline
   IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
-analyticalLength :: Point2D space -> Point2D space -> Point2D space -> Length
+analyticalLength :: Point2D Meters space -> Point2D Meters space -> Point2D Meters space -> Length
 analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
   let ax = x0 .-. 2 *. x1 .+. x2
   let ay = y0 .-. 2 *. y1 .+. y2

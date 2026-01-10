@@ -57,8 +57,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve2d qualified as Solve2d
@@ -81,6 +80,8 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
+import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
@@ -232,7 +233,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
-    (Vector2d units2 space)
+    (Vector2D units2 space)
     (VectorSurfaceFunction2d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
@@ -240,7 +241,7 @@ instance
 instance
   Multiplication_
     (SurfaceFunction units1)
-    (Vector2d units2 space)
+    (Vector2D units2 space)
     (VectorSurfaceFunction2d (units1 ?*? units2) space)
   where
   function ?*? vector = function ?*? VectorSurfaceFunction2d.constant vector
@@ -248,7 +249,7 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Vector2d units1 space)
+    (Vector2D units1 space)
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d units3 space)
   where
@@ -256,7 +257,7 @@ instance
 
 instance
   Multiplication_
-    (Vector2d units1 space)
+    (Vector2D units1 space)
     (SurfaceFunction units2)
     (VectorSurfaceFunction2d (units1 ?*? units2) space)
   where
@@ -268,7 +269,7 @@ instance
     (Direction2d space)
     (VectorSurfaceFunction2d units space)
   where
-  lhs .*. rhs = lhs .*. Vector2d.unit rhs
+  lhs .*. rhs = lhs .*. Vector2D.unit rhs
 
 instance
   Multiplication
@@ -276,7 +277,7 @@ instance
     (SurfaceFunction units)
     (VectorSurfaceFunction2d units space)
   where
-  lhs .*. rhs = Vector2d.unit lhs .*. rhs
+  lhs .*. rhs = Vector2D.unit lhs .*. rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -618,9 +619,9 @@ findTangentSolutions subproblem = do
       let maybePoint =
             Solve2d.unique
               (\bounds -> VectorBounds2d (evaluateBounds fu bounds) (evaluateBounds fv bounds))
-              (\point -> Vector2d (evaluate fu point) (evaluate fv point))
-              (\point -> Vector2d (evaluate fuu point) (evaluate fuv point))
-              (\point -> Vector2d (evaluate fuv point) (evaluate fvv point))
+              (\point -> Vector2D (evaluate fu point) (evaluate fv point))
+              (\point -> Vector2D (evaluate fuu point) (evaluate fuv point))
+              (\point -> Vector2D (evaluate fuv point) (evaluate fvv point))
               uvBounds
       case maybePoint of
         Nothing -> Solve2d.recurse CrossingCurvesOnly
@@ -799,8 +800,8 @@ horizontalCurve ::
 horizontalCurve Subproblem{f, dvdu, subdomain, uvBounds} start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
-  let uStart = UvPoint.uCoordinate startPoint
-  let uEnd = UvPoint.uCoordinate endPoint
+  let uStart = Point2D.xCoordinate startPoint
+  let uEnd = Point2D.xCoordinate endPoint
   let curve = HorizontalCurve.new f dvdu uStart uEnd (NonEmpty.one uvBounds)
   let Domain2d _ vSubdomain = subdomain
   let Bounds2d _ curveVBounds = Curve2d.bounds curve
@@ -848,8 +849,8 @@ verticalCurve ::
 verticalCurve Subproblem{f, dudv, subdomain, uvBounds} start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
-  let vStart = UvPoint.vCoordinate startPoint
-  let vEnd = UvPoint.vCoordinate endPoint
+  let vStart = Point2D.yCoordinate startPoint
+  let vEnd = Point2D.yCoordinate endPoint
   let curve = VerticalCurve.new f dudv vStart vEnd (NonEmpty.one uvBounds)
   let Domain2d uSubdomain _ = subdomain
   let Bounds2d curveUBounds _ = Curve2d.bounds curve

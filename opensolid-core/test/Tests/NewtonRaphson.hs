@@ -8,9 +8,9 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Number qualified as Number
-import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Point2D (Point2D (Point2D))
+import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -41,11 +41,11 @@ arc2d :: Tolerance Unitless => Test
 arc2d = do
   let arc =
         Curve2d.polarArc
-          (Named @"centerPoint" Point2d.origin)
+          (Named @"centerPoint" Point2D.origin)
           (Named @"radius" 1)
           (Named @"startAngle" Angle.zero)
           (Named @"endAngle" Angle.pi)
-  let point = Point2d (Number.sqrt 2 ./ 2) (Number.sqrt 2 ./ 2)
+  let point = Point2D (Number.sqrt 2 ./ 2) (Number.sqrt 2 ./ 2)
   curve2d "Arc" (arc .-. point) 0.5 0.25
 
 simpleSurface2d :: Tolerance Unitless => Test
@@ -86,11 +86,11 @@ curve2d name curve t0 tExpected =
     , Test.verify "Unboxed" do
         let evaluate# t# = do
               let vector = VectorCurve2d.evaluate curve (Quantity# t#)
-              let !(Vector2d (Quantity# x#) (Quantity# y#)) = vector
+              let !(Vector2D (Quantity# x#) (Quantity# y#)) = vector
               (# x#, y# #)
         let evaluateDerivative# t# = do
               let vector = VectorCurve2d.evaluate (VectorCurve2d.derivative curve) (Quantity# t#)
-              let !(Vector2d (Quantity# x#) (Quantity# y#)) = vector
+              let !(Vector2D (Quantity# x#) (Quantity# y#)) = vector
               (# x#, y# #)
         let tSolution = NewtonRaphson.curve2d# evaluate# evaluateDerivative# t0
         Test.expect (tSolution ~= tExpected)

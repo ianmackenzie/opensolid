@@ -309,25 +309,25 @@ extraMemberFunctions className = do
         [ "r, g, b = self.to_rgb255()"
         , "return 'Color.rgb255(' + str(r) + ',' + str(g) + ',' + str(b) + ')'"
         ]
-    "Vector2d" ->
+    "Vector2D" ->
       repr
         [ "x, y = self.components"
-        , "return 'Vector2d(' + str(x) + ',' + str(y) + ')'"
+        , "return 'Vector2D(' + str(x) + ',' + str(y) + ')'"
         ]
-    "Displacement2d" ->
+    "Displacement2D" ->
       repr
         [ "x, y = self.components"
-        , "return 'Displacement2d(' + repr(x) + ',' + repr(y) + ')'"
+        , "return 'Displacement2D(' + repr(x) + ',' + repr(y) + ')'"
         ]
-    "AreaVector2d" ->
+    "AreaVector2D" ->
       repr
         [ "x, y = self.components"
-        , "return 'AreaVector2d(' + repr(x) + ',' + repr(y) + ')'"
+        , "return 'AreaVector2D(' + repr(x) + ',' + repr(y) + ')'"
         ]
-    "Point2d" ->
+    "Point2D" ->
       repr
         [ "x, y = self.coordinates"
-        , "return 'Point2d(' + repr(x) + ',' + repr(y) + ')'"
+        , "return 'Point2D(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "UvPoint" ->
       repr

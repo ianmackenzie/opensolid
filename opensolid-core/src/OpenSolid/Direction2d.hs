@@ -33,7 +33,6 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d
@@ -43,20 +42,21 @@ import OpenSolid.Primitives
   , Orientation2d
   , Plane3d
   , PlaneOrientation3d
-  , Point2d
+  , Point2D
   , Transform2d
-  , Vector2d (Vector2d)
+  , Vector2D (Vector2D)
   )
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform
+import OpenSolid.Vector2D qualified as Vector2D
 
 {-# COMPLETE Direction2d #-}
 
 {-# INLINE Direction2d #-}
 pattern Direction2d :: Number -> Number -> Direction2d space
-pattern Direction2d dx dy <- Unit2d (Vector2d dx dy)
+pattern Direction2d dx dy <- Unit2d (Vector2D dx dy)
 
 -- | Get the X component of a direction.
 xComponent :: Direction2d space -> Number
@@ -72,39 +72,39 @@ components :: Direction2d space -> (Number, Number)
 components (Direction2d dx dy) = (dx, dy)
 
 {-# INLINE unsafe #-}
-unsafe :: Vector2d Unitless space -> Direction2d space
+unsafe :: Vector2D Unitless space -> Direction2d space
 unsafe = Unit2d
 
 {-# INLINE coerce #-}
 coerce :: Direction2d space1 -> Direction2d space2
-coerce (Unit2d (Vector2d dx dy)) = Unit2d (Vector2d dx dy)
+coerce (Unit2d (Vector2D dx dy)) = Unit2d (Vector2D dx dy)
 
 {-# INLINE lift #-}
 lift ::
-  (Vector2d Unitless space1 -> Vector2d Unitless space2) ->
+  (Vector2D Unitless space1 -> Vector2D Unitless space2) ->
   Direction2d space1 ->
   Direction2d space2
 lift function (Unit2d vector) = Unit2d (function vector)
 
 -- | The X direction.
 x :: Direction2d space
-x = Unit2d (Vector2d 1 0)
+x = Unit2d (Vector2D 1 0)
 
 -- | The Y direction.
 y :: Direction2d space
-y = Unit2d (Vector2d 0 1)
+y = Unit2d (Vector2D 0 1)
 
 data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show)
 
 from ::
   Tolerance units =>
-  Point2d units space ->
-  Point2d units space ->
+  Point2D units space ->
+  Point2D units space ->
   Result PointsAreCoincident (Direction2d space)
 from p1 p2 = do
-  case Vector2d.direction (p2 .-. p1) of
+  case Vector2D.direction (p2 .-. p1) of
     Ok direction -> Ok direction
-    Error Vector2d.IsZero -> Error PointsAreCoincident
+    Error Vector2D.IsZero -> Error PointsAreCoincident
 
 {-| Construct a direction from an angle.
 
@@ -115,7 +115,7 @@ The angle is measured counterclockwise from the positive X direction, so:
   * An angle of 180 degrees (or -180 degrees) corresponds to the negative X direction
 -}
 fromAngle :: Angle -> Direction2d space
-fromAngle theta = Unit2d (Vector2d (Angle.cos theta) (Angle.sin theta))
+fromAngle theta = Unit2d (Vector2D (Angle.cos theta) (Angle.sin theta))
 
 {-| Construct a direction from an angle given in degrees.
 
@@ -145,7 +145,7 @@ The angle is measured counterclockwise from the positive X direction, so:
 The returned angle will be between -180 and +180 degrees.
 -}
 angle :: Direction2d space -> Angle
-angle (Unit2d vector) = Vector2d.angle vector
+angle (Unit2d vector) = Vector2D.angle vector
 
 {-| Measure the signed angle from one direction to another.
 
@@ -153,30 +153,30 @@ The angle will be measured counterclockwise from the first direction to the
 second, and will always be between -180 and +180 degrees.
 -}
 angleFrom :: Direction2d space -> Direction2d space -> Angle
-angleFrom (Unit2d v1) (Unit2d v2) = Vector2d.angleFrom v1 v2
+angleFrom (Unit2d v1) (Unit2d v2) = Vector2D.angleFrom v1 v2
 
 perpendicularTo :: Direction2d space -> Direction2d space
 perpendicularTo = rotateLeft
 
 -- | Rotate a direction left (counterclockwise) by 90 degrees.
 rotateLeft :: Direction2d space -> Direction2d space
-rotateLeft = lift Vector2d.rotateLeft
+rotateLeft = lift Vector2D.rotateLeft
 
 -- | Rotate a direction right (clockwise) by 90 degrees.
 rotateRight :: Direction2d space -> Direction2d space
-rotateRight = lift Vector2d.rotateRight
+rotateRight = lift Vector2D.rotateRight
 
 placeIn :: Frame2d frameUnits global local -> Direction2d local -> Direction2d global
 placeIn frame = placeInOrientation frame.orientation
 
 placeInOrientation :: Orientation2d global -> Direction2d local -> Direction2d global
-placeInOrientation orientation = lift (Vector2d.placeInOrientation orientation)
+placeInOrientation orientation = lift (Vector2D.placeInOrientation orientation)
 
 relativeTo :: Frame2d frameUnits global local -> Direction2d global -> Direction2d local
 relativeTo frame = relativeToOrientation frame.orientation
 
 relativeToOrientation :: Orientation2d global -> Direction2d global -> Direction2d local
-relativeToOrientation orientation = lift (Vector2d.relativeToOrientation orientation)
+relativeToOrientation orientation = lift (Vector2D.relativeToOrientation orientation)
 
 {-| Convert a 2D direction to 3D direction by placing it on a plane.
 
@@ -188,7 +188,7 @@ placeOn plane = placeOnOrientation plane.orientation
 
 placeOnOrientation :: PlaneOrientation3d global -> Direction2d local -> Direction3d global
 placeOnOrientation orientation (Unit2d vector) =
-  Unit3d (Vector2d.placeOnOrientation orientation vector)
+  Unit3d (Vector2D.placeOnOrientation orientation vector)
 
 random :: Random.Generator (Direction2d space)
 random = Random.map fromAngle (Quantity.random (negative Angle.pi) Angle.pi)
@@ -198,14 +198,14 @@ transformBy ::
   Transform2d tag translationUnits space ->
   Direction2d space ->
   Direction2d space
-transformBy transform = lift (Vector2d.transformBy transform)
+transformBy transform = lift (Vector2D.transformBy transform)
 
 {-| Rotate a direction by a given angle.
 
 A positive angle corresponds to a counterclockwise rotation.
 -}
 rotateBy :: Angle -> Direction2d space -> Direction2d space
-rotateBy theta = lift (Vector2d.rotateBy theta)
+rotateBy theta = lift (Vector2D.rotateBy theta)
 
 {-| Mirror a direction in/along a given other direction.
 
@@ -213,7 +213,7 @@ For example, mirroring in the X direction
 will negate the original direction's X component and leave its Y component unchanged.
 -}
 mirrorIn :: Direction2d space -> Direction2d space -> Direction2d space
-mirrorIn mirrorDirection = lift (Vector2d.mirrorIn mirrorDirection)
+mirrorIn mirrorDirection = lift (Vector2D.mirrorIn mirrorDirection)
 
 {-| Mirror a direction across a given axis.
 
@@ -226,4 +226,4 @@ mirrorAcross ::
   Axis2d originUnits space ->
   Direction2d space ->
   Direction2d space
-mirrorAcross axis = lift (Vector2d.mirrorAcross axis)
+mirrorAcross axis = lift (Vector2D.mirrorAcross axis)

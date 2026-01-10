@@ -8,7 +8,7 @@ from opensolid import (
     Length,
     Model3d,
     PbrMaterial,
-    Point2d,
+    Point2D,
     Region2d,
     Resolution,
     Tolerance,
@@ -30,11 +30,11 @@ with Tolerance(Length.meters(1e-9)):
     top_flange_bottom_y = top_flange_top_y - thickness
 
     # Define key points on sketch profile
-    p1 = Point2d.x(web_right_x)
-    p2 = Point2d(web_right_x, top_flange_bottom_y)
-    p3 = Point2d(flange_right_x, top_flange_bottom_y)
-    p4 = Point2d(flange_right_x, top_flange_top_y)
-    p5 = Point2d.y(top_flange_top_y)
+    p1 = Point2D.x(web_right_x)
+    p2 = Point2D(web_right_x, top_flange_bottom_y)
+    p3 = Point2D(flange_right_x, top_flange_bottom_y)
+    p4 = Point2D(flange_right_x, top_flange_top_y)
+    p5 = Point2D.y(top_flange_top_y)
 
     # Create the sketch profile
     fillet = Curve2d.corner_arc(

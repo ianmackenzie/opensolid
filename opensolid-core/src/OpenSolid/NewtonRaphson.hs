@@ -11,13 +11,13 @@ where
 
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
@@ -72,16 +72,16 @@ curve2d curve t1 = do
   curve2dImpl function derivative t1 (function t1)
 
 curve2dImpl ::
-  (Number -> Vector2d units space) ->
-  (Number -> Vector2d units space) ->
+  (Number -> Vector2D units space) ->
+  (Number -> Vector2D units space) ->
   Number ->
-  Vector2d units space ->
+  Vector2D units space ->
   Number
 curve2dImpl function derivative t1 v1 = do
   let d1 = derivative t1
   let t2 = t1 .-. (v1 `dot_` d1) ./. (d1 `dot_` d1)
   let v2 = function t2
-  if Vector2d.squaredMagnitude_ v2 < 0.5 *. Vector2d.squaredMagnitude_ v1
+  if Vector2D.squaredMagnitude_ v2 < 0.5 *. Vector2D.squaredMagnitude_ v1
     then curve2dImpl function derivative t2 v2
     else t1
 
@@ -120,21 +120,21 @@ surface2d surface uvPoint1 = do
   surface2dImpl function uDerivative vDerivative uvPoint1 (function uvPoint1)
 
 surface2dImpl ::
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
-  (UvPoint -> Vector2d units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
+  (UvPoint -> Vector2D units space) ->
   UvPoint ->
-  Vector2d units space ->
+  Vector2D units space ->
   UvPoint
 surface2dImpl function uDerivative vDerivative uvPoint1 value1 = do
-  let Vector2d x1 y1 = value1
-  let Vector2d dxdu1 dydu1 = uDerivative uvPoint1
-  let Vector2d dxdv1 dydv1 = vDerivative uvPoint1
+  let Vector2D x1 y1 = value1
+  let Vector2D dxdu1 dydu1 = uDerivative uvPoint1
+  let Vector2D dxdv1 dydv1 = vDerivative uvPoint1
   let determinant = dxdu1 ?*? dydv1 .-. dxdv1 ?*? dydu1
   let uStep = (dxdv1 ?*? y1 .-. dydv1 ?*? x1) ./. determinant
   let vStep = (dydu1 ?*? x1 .-. dxdu1 ?*? y1) ./. determinant
-  let uvPoint2 = uvPoint1 .+. Vector2d uStep vStep
+  let uvPoint2 = uvPoint1 .+. Vector2D uStep vStep
   let value2 = function uvPoint2
-  if Vector2d.squaredMagnitude_ value2 < 0.5 *. Vector2d.squaredMagnitude_ value1
+  if Vector2D.squaredMagnitude_ value2 < 0.5 *. Vector2D.squaredMagnitude_ value1
     then surface2dImpl function uDerivative vDerivative uvPoint2 value2
     else uvPoint1

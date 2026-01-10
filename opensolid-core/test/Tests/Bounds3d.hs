@@ -51,8 +51,8 @@ projectInto = Test.check 100 "projectInto" Test.do
   (bounds3d, point3d) <- boundsAndContainedPoint
   plane <- Tests.Random.plane3d
   let bounds2d = Bounds3d.projectInto plane bounds3d
-  let point2d = Point3d.projectInto plane point3d
-  Test.expect (point2d `intersects` bounds2d)
+  let point2D = Point3d.projectInto plane point3d
+  Test.expect (point2D `intersects` bounds2d)
 
 distanceAlong :: Tolerance Meters => Test
 distanceAlong = Test.check 100 "distanceAlong" Test.do

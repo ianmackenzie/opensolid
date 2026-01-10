@@ -33,9 +33,9 @@ import OpenSolid.DirectionSurfaceFunction3d (DirectionSurfaceFunction3d)
 import OpenSolid.DirectionSurfaceFunction3d qualified as DirectionSurfaceFunction3d
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Surface2d qualified as Expression.Surface2d
-import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Point2D (Point2D (Point2D))
+import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -99,7 +99,7 @@ instance
 type Compiled units space =
   CompiledFunction
     UvPoint
-    (Point2d units space)
+    (Point2D units space)
     UvBounds
     (Bounds2d units space)
 
@@ -132,7 +132,7 @@ instance
   ) =>
   Addition
     (SurfaceFunction2d units1 space1)
-    (Vector2d units2 space2)
+    (Vector2D units2 space2)
     (SurfaceFunction2d units1 space1)
   where
   f .+. v = f .+. VectorSurfaceFunction2d.constant v
@@ -157,7 +157,7 @@ instance
   ) =>
   Subtraction
     (SurfaceFunction2d units1 space1)
-    (Vector2d units2 space2)
+    (Vector2D units2 space2)
     (SurfaceFunction2d units1 space1)
   where
   f .-. v = f .-. VectorSurfaceFunction2d.constant v
@@ -197,7 +197,7 @@ recursive ::
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
-constant :: Point2d units space -> SurfaceFunction2d units space
+constant :: Point2D units space -> SurfaceFunction2d units space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction2d.zero)
 
 uv :: SurfaceFunction2d Unitless UvSpace
@@ -211,7 +211,7 @@ xy x y = do
   let compiledXY =
         CompiledFunction.map2
           Expression.xy
-          Point2d
+          Point2D
           Bounds2d
           x.compiled
           y.compiled
@@ -221,7 +221,7 @@ xy x y = do
           (SurfaceFunction.derivative p y)
   new compiledXY xyDerivative
 
-evaluate :: SurfaceFunction2d units space -> UvPoint -> Point2d units space
+evaluate :: SurfaceFunction2d units space -> UvPoint -> Point2D units space
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 evaluateBounds :: SurfaceFunction2d units space -> UvBounds -> Bounds2d units space
@@ -242,7 +242,7 @@ transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
           (Expression.Surface2d.transformBy transform)
-          (Point2d.transformBy transform)
+          (Point2D.transformBy transform)
           (Bounds2d.transformBy transform)
           function.compiled
   let transformedDerivative p =
@@ -345,7 +345,7 @@ xCoordinate function = do
   let compiledXCoordinate =
         CompiledFunction.map
           Expression.xCoordinate
-          Point2d.xCoordinate
+          Point2D.xCoordinate
           Bounds2d.xCoordinate
           function.compiled
   SurfaceFunction.new
@@ -357,7 +357,7 @@ yCoordinate function = do
   let compiledYCoordinate =
         CompiledFunction.map
           Expression.yCoordinate
-          Point2d.yCoordinate
+          Point2D.yCoordinate
           Bounds2d.yCoordinate
           function.compiled
   SurfaceFunction.new

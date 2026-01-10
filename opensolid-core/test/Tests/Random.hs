@@ -1,9 +1,9 @@
 module Tests.Random
   ( length
   , lengthBounds
-  , point2d
+  , point2D
   , point3d
-  , vector2d
+  , vector2D
   , vector3d
   , vectorBounds3d
   , axis2d
@@ -84,14 +84,14 @@ length = Quantity.random (Length.meters -10) (Length.meters 10)
 lengthBounds :: Generator (Bounds Meters)
 lengthBounds = Bounds.random length
 
-point2d :: Generator (Point2D space)
-point2d = Random.map2 Point2D length length
+point2D :: Generator (Point2D Meters space)
+point2D = Random.map2 Point2D length length
 
 point3d :: Generator (Point3d space)
 point3d = Random.map3 Point3d length length length
 
-vector2d :: Generator (Vector2D space)
-vector2d = Random.map2 Vector2D length length
+vector2D :: Generator (Vector2D Meters space)
+vector2D = Random.map2 Vector2D length length
 
 vector3d :: Generator (Vector3d Meters space)
 vector3d = Random.map3 Vector3d length length length
@@ -105,7 +105,7 @@ vectorBounds3d =
     lengthBounds
 
 axis2d :: Generator (Axis2d Meters space)
-axis2d = Random.map2 Axis2d point2d Direction2d.random
+axis2d = Random.map2 Axis2d point2D Direction2d.random
 
 axis3d :: Generator (Axis3d space)
 axis3d = Random.map2 Axis3d point3d Direction3d.random
@@ -143,29 +143,29 @@ vectorBounds2d :: Generator (VectorBounds2d Meters space)
 vectorBounds2d = Random.map2 VectorBounds2d lengthBounds lengthBounds
 
 line2d :: Tolerance Meters => Generator (Curve2d Meters space)
-line2d = Random.map2 Curve2d.lineFrom point2d point2d
+line2d = Random.map2 Curve2d.lineFrom point2D point2D
 
 arc2d :: Tolerance Meters => Generator (Curve2d Meters space)
 arc2d = do
-  startPoint <- point2d
-  endPoint <- point2d
+  startPoint <- point2D
+  endPoint <- point2D
   angleSign <- Sign.random
   angleMagnitude <- Quantity.random (Angle.degrees 5) (Angle.degrees 355)
   let sweptAngle = angleSign .*. angleMagnitude
   Random.return (Curve2d.arcFrom startPoint endPoint sweptAngle)
 
 quadraticSpline2d :: Tolerance Meters => Generator (Curve2d Meters space)
-quadraticSpline2d = Random.map3 Curve2d.quadraticBezier point2d point2d point2d
+quadraticSpline2d = Random.map3 Curve2d.quadraticBezier point2D point2D point2D
 
 cubicSpline2d :: Tolerance Meters => Generator (Curve2d Meters space)
-cubicSpline2d = Random.map4 Curve2d.cubicBezier point2d point2d point2d point2d
+cubicSpline2d = Random.map4 Curve2d.cubicBezier point2D point2D point2D point2D
 
 translation2d :: Generator (Transform2d.Rigid Meters space)
-translation2d = Random.map Transform2d.translateBy vector2d
+translation2d = Random.map Transform2d.translateBy vector2D
 
 rotation2d :: Generator (Transform2d.Rigid Meters space)
 rotation2d = do
-  centerPoint <- point2d
+  centerPoint <- point2D
   angle <- Quantity.random (Angle.degrees -360) (Angle.degrees 360)
   Random.return (Transform2d.rotateAround centerPoint angle)
 
@@ -187,7 +187,7 @@ scalingFactor :: Generator Number
 scalingFactor = Number.random 0.5 2
 
 uniformScaling2d :: Generator (Transform2d.Uniform Meters space)
-uniformScaling2d = Random.map2 Transform2d.scaleAbout point2d scalingFactor
+uniformScaling2d = Random.map2 Transform2d.scaleAbout point2D scalingFactor
 
 uniformTransform2d :: Generator (Transform2d.Uniform Meters space)
 uniformTransform2d =

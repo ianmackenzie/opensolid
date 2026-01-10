@@ -81,7 +81,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1d qualified as Solve1d
@@ -90,6 +89,7 @@ import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3d (Vector3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -248,27 +248,27 @@ instance Multiplication_ (Quantity units1) (Curve units2) (Curve (units1 ?*? uni
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve units1) (Vector2d units2 space) (VectorCurve2d units3 space)
+  Multiplication (Curve units1) (Vector2D units2 space) (VectorCurve2d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (Curve units1)
-    (Vector2d units2 space)
+    (Vector2D units2 space)
     (VectorCurve2d (units1 ?*? units2) space)
   where
   curve ?*? vector = curve ?*? VectorCurve2d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector2d units1 space) (Curve units2) (VectorCurve2d units3 space)
+  Multiplication (Vector2D units1 space) (Curve units2) (VectorCurve2d units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (Vector2d units1 space)
+    (Vector2D units1 space)
     (Curve units2)
     (VectorCurve2d (units1 ?*? units2) space)
   where

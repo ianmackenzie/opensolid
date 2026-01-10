@@ -21,8 +21,8 @@ import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Point2D (Point2D (Point2D))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
@@ -89,8 +89,8 @@ toEndpointIntersection curve1 curve2 tangent1 tangent2 (t1, t2) = do
   let tangentDirection1 = DirectionCurve2d.evaluate tangent1 t1
   let tangentDirection2 = DirectionCurve2d.evaluate tangent2 t2
   let crossProduct = tangentDirection1 `cross` tangentDirection2
-  let singular1 = VectorCurve2d.evaluate (Curve2d.derivative curve1) t1 ~= Vector2d.zero
-  let singular2 = VectorCurve2d.evaluate (Curve2d.derivative curve2) t2 ~= Vector2d.zero
+  let singular1 = VectorCurve2d.evaluate (Curve2d.derivative curve1) t1 ~= Vector2D.zero
+  let singular2 = VectorCurve2d.evaluate (Curve2d.derivative curve2) t2 ~= Vector2D.zero
   let intersectionPoint =
         if Tolerance.using 1e-9 (crossProduct ~= Quantity.zero)
           then IntersectionPoint.tangent t1 t2
@@ -152,14 +152,14 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
       case (subdomain1, subdomain2) of
         (Bisection.Interior, Bisection.Interior)
           | Resolved sign <- firstCrossProductSign -> do
-              let uvPoint0 = Point2d (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
-              let Point2d t1 t2 = NewtonRaphson.surface2d problem.crossingSolutionTarget uvPoint0
+              let uvPoint0 = Point2D (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
+              let Point2D t1 t2 = NewtonRaphson.surface2d problem.crossingSolutionTarget uvPoint0
               if isInterior t1 t2 && equalPoints t1 t2
                 then Resolved (Just (IntersectionPoint.crossing t1 t2 sign))
                 else Unresolved
           | uniqueTangentSolution -> do
-              let uvPoint0 = Point2d (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
-              let Point2d t1 t2 = NewtonRaphson.surface2d problem.tangentSolutionTarget uvPoint0
+              let uvPoint0 = Point2D (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
+              let Point2D t1 t2 = NewtonRaphson.surface2d problem.tangentSolutionTarget uvPoint0
               if isInterior t1 t2 && equalPoints t1 t2 && equalTangents t1 t2
                 then Resolved (Just (IntersectionPoint.tangent t1 t2))
                 else Unresolved

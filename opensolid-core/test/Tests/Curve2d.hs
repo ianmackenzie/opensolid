@@ -24,13 +24,13 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
@@ -214,9 +214,9 @@ solving = Test.verify "solving" Test.do
 
 degenerateStartPointTangent :: Tolerance Meters => Test
 degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.do
-  p0 <- Random.point2d
-  p1 <- Random.point2d
-  p2 <- Random.point2d
+  p0 <- Random.point2D
+  p1 <- Random.point2D
+  p2 <- Random.point2D
   let curve = Curve2d.cubicBezier p0 p0 p1 p2
   let decreasingTValues = [Number.pow 2 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
@@ -228,9 +228,9 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.
 
 degenerateEndPointTangent :: Tolerance Meters => Test
 degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
-  p0 <- Random.point2d
-  p1 <- Random.point2d
-  p2 <- Random.point2d
+  p0 <- Random.point2D
+  p1 <- Random.point2D
+  p2 <- Random.point2D
   let curve = Curve2d.cubicBezier p0 p1 p2 p2
   let increasingTValues = [1 -. Number.pow 2 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
@@ -243,10 +243,10 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
 tangentDerivativeIsPerpendicularToTangent :: Tolerance Meters => Test
 tangentDerivativeIsPerpendicularToTangent =
   Test.check 100 "tangentDerivativeIsPerpendicularToTangent" Test.do
-    p0 <- Random.point2d
-    p1 <- Random.point2d
-    p2 <- Random.point2d
-    p3 <- Random.point2d
+    p0 <- Random.point2D
+    p1 <- Random.point2D
+    p2 <- Random.point2D
+    p3 <- Random.point2D
     let curve = Curve2d.cubicBezier p0 p1 p2 p3
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
@@ -262,9 +262,9 @@ tangentDerivativeIsPerpendicularToTangent =
 degenerateStartPointTangentDerivative :: Tolerance Meters => Test
 degenerateStartPointTangentDerivative =
   Test.check 100 "degenerateStartPointTangentDerivative" Test.do
-    p0 <- Random.point2d
-    p1 <- Random.point2d
-    p2 <- Random.point2d
+    p0 <- Random.point2D
+    p1 <- Random.point2D
+    p2 <- Random.point2D
     let curve = Curve2d.cubicBezier p0 p0 p1 p2
     let decreasingTValues = [Number.pow 2 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
@@ -273,7 +273,7 @@ degenerateStartPointTangentDerivative =
     let otherTangentDerivatives =
           List.map (VectorCurve2d.evaluate tangentDerivative) decreasingTValues
     let differences =
-          List.map Vector2d.magnitude $
+          List.map Vector2D.magnitude $
             List.map (.-. startTangentDerivative) otherTangentDerivatives
     Test.expect (List.isDescending differences)
       & Test.output "differences" differences
@@ -282,9 +282,9 @@ degenerateStartPointTangentDerivative =
 degenerateEndPointTangentDerivative :: Tolerance Meters => Test
 degenerateEndPointTangentDerivative =
   Test.check 100 "degenerateEndPointTangentDerivative" Test.do
-    p0 <- Random.point2d
-    p1 <- Random.point2d
-    p2 <- Random.point2d
+    p0 <- Random.point2D
+    p1 <- Random.point2D
+    p2 <- Random.point2D
     let curve = Curve2d.cubicBezier p0 p1 p2 p2
     let increasingTValues = [1 -. Number.pow 2 (Number.fromInt -n) | n <- [8 :: Int .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
@@ -293,7 +293,7 @@ degenerateEndPointTangentDerivative =
     let otherTangentDerivatives =
           List.map (VectorCurve2d.evaluate tangentDerivative) increasingTValues
     let differences =
-          List.map Vector2d.magnitude $
+          List.map Vector2D.magnitude $
             List.map (.-. endTangentDerivative) otherTangentDerivatives
     Test.expect (List.isDescending differences)
       & Test.output "differences" differences
@@ -418,10 +418,10 @@ arcDeformation = Test.check 100 "deformation" Test.do
 
 g2 :: Tolerance Meters => Test
 g2 = Test.check 100 "G2 continuity" Test.do
-  p1 <- Random.point2d
-  p2 <- Random.point2d
-  p3 <- Random.point2d
-  p4 <- Random.point2d
+  p1 <- Random.point2D
+  p2 <- Random.point2D
+  p3 <- Random.point2D
+  p4 <- Random.point2D
   let spline = Curve2d.cubicBezier p1 p2 p3 p4
   t <- Parameter.random
   let point = Curve2d.evaluate spline t

@@ -89,7 +89,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
-import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
@@ -745,8 +744,8 @@ edgeLinearizationPredicate
     let matingUvEnd = Curve2d.evaluate matingUvCurve matingTEnd
     let uvBounds = Bounds2d.hull2 uvStart uvEnd
     let matingUvBounds = Bounds2d.hull2 matingUvStart matingUvEnd
-    let edgeSize = UvPoint.distanceFrom uvStart uvEnd
-    let matingEdgeSize = UvPoint.distanceFrom matingUvStart matingUvEnd
+    let edgeSize = Point2D.distanceFrom uvStart uvEnd
+    let matingEdgeSize = Point2D.distanceFrom matingUvStart matingUvEnd
     let startPoint = Curve3d.evaluate curve3d tStart
     let endPoint = Curve3d.evaluate curve3d tEnd
     let edgeLength = Point3d.distanceFrom startPoint endPoint
@@ -767,7 +766,7 @@ degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
   let uvStart = Curve2d.evaluate uvCurve tStart
   let uvEnd = Curve2d.evaluate uvCurve tEnd
   let uvBounds = Bounds2d.hull2 uvStart uvEnd
-  let edgeSize = UvPoint.distanceFrom uvStart uvEnd
+  let edgeSize = Point2D.distanceFrom uvStart uvEnd
   validEdge uvBounds edgeSize surfaceSegments
 
 validEdge :: UvBounds -> Number -> Set2d UvBounds Unitless UvSpace -> Bool

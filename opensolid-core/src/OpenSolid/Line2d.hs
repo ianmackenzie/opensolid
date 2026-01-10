@@ -19,8 +19,8 @@ import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Polymorphic.Point2d (Point2d (Point2d))
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
+import OpenSolid.Point2D (Point2D (Point2D))
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Unboxed.Math
@@ -29,8 +29,8 @@ import OpenSolid.Unboxed.Math
 data Line2d units space
   = -- | Construct a line from its start and end points.
     Line2d
-    { startPoint :: Point2d units space
-    , endPoint :: Point2d units space
+    { startPoint :: Point2D units space
+    , endPoint :: Point2D units space
     }
 
 instance FFI (Line2d Meters FFI.Space) where
@@ -44,16 +44,16 @@ instance Bounded2d (Line2d units space) units space where
 
 -- | Get the start point of a line.
 {-# INLINE startPoint #-}
-startPoint :: Line2d units space -> Point2d units space
+startPoint :: Line2d units space -> Point2D units space
 startPoint = (.startPoint)
 
 -- | Get the end point of a line.
 {-# INLINE endPoint #-}
-endPoint :: Line2d units space -> Point2d units space
+endPoint :: Line2d units space -> Point2D units space
 endPoint = (.endPoint)
 
 -- | Get the start and end points of a line as a tuple.
-endpoints :: Line2d units space -> (Point2d units space, Point2d units space)
+endpoints :: Line2d units space -> (Point2D units space, Point2D units space)
 endpoints (Line2d p1 p2) = (p1, p2)
 
 -- | Get the length of a line.
@@ -62,7 +62,7 @@ length line = Quantity# (length# line)
 
 {-# INLINE length# #-}
 length# :: Line2d units space -> Double#
-length# (Line2d p1 p2) = Point2d.distanceFrom# p1 p2
+length# (Line2d p1 p2) = Point2D.distanceFrom# p1 p2
 
 bounds :: Line2d units space -> Bounds2d units space
 bounds (Line2d p1 p2) = Bounds2d.hull2 p1 p2
@@ -74,15 +74,15 @@ This is measured from the point on the line closest to the given point
 or might be one of the line's endpoints,
 so this is not necessarily a *perpendicular* distance).
 -}
-distanceTo :: Point2d units space -> Line2d units space -> Quantity units
+distanceTo :: Point2D units space -> Line2d units space -> Quantity units
 distanceTo p0 line = Quantity# (distanceTo# p0 line)
 
 {-# INLINEABLE distanceTo# #-}
-distanceTo# :: Point2d units space -> Line2d units space -> Double#
+distanceTo# :: Point2D units space -> Line2d units space -> Double#
 distanceTo# p0 (Line2d p1 p2) = do
-  let !(Point2d (Quantity# x0#) (Quantity# y0#)) = p0
-  let !(Point2d (Quantity# x1#) (Quantity# y1#)) = p1
-  let !(Point2d (Quantity# x2#) (Quantity# y2#)) = p2
+  let !(Point2D (Quantity# x0#) (Quantity# y0#)) = p0
+  let !(Point2D (Quantity# x1#) (Quantity# y1#)) = p1
+  let !(Point2D (Quantity# x2#) (Quantity# y2#)) = p2
   let ux# = x0# -# x1#
   let uy# = y0# -# y1#
   let vx# = x2# -# x1#

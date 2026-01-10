@@ -53,8 +53,8 @@ data Instruction
   | Cross2d VariableIndex VariableIndex
   | CrossVariableConstant2d VariableIndex ConstantIndex
   | Bezier2d Int ConstantIndex VariableIndex
-  | TransformVector2d ConstantIndex VariableIndex
-  | TransformPoint2d ConstantIndex VariableIndex
+  | TransformVector2D ConstantIndex VariableIndex
+  | TransformPoint2D ConstantIndex VariableIndex
   | ProjectVector3d ConstantIndex VariableIndex
   | ProjectPoint3d ConstantIndex VariableIndex
   | RFU VariableIndex VariableIndex VariableIndex
@@ -83,8 +83,8 @@ data Instruction
   | Bezier3d Int ConstantIndex VariableIndex
   | TransformVector3d ConstantIndex VariableIndex
   | TransformPoint3d ConstantIndex VariableIndex
-  | PlaceVector2d ConstantIndex VariableIndex
-  | PlacePoint2d ConstantIndex VariableIndex
+  | PlaceVector2D ConstantIndex VariableIndex
+  | PlacePoint2D ConstantIndex VariableIndex
   | Desingularized1d VariableIndex VariableIndex VariableIndex VariableIndex
   | Desingularized2d VariableIndex VariableIndex VariableIndex VariableIndex
   | Desingularized3d VariableIndex VariableIndex VariableIndex VariableIndex
@@ -317,11 +317,11 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> Encode.int n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  TransformVector2d matrix vector ->
+  TransformVector2D matrix vector ->
     Encode.int 48
       <> encodeConstantIndex matrix
       <> encodeVariableIndex vector
-  TransformPoint2d matrix point ->
+  TransformPoint2D matrix point ->
     Encode.int 49
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
@@ -462,11 +462,11 @@ encodeOpcodeAndArguments instruction = case instruction of
     Encode.int 82
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
-  PlaceVector2d matrix vector ->
+  PlaceVector2D matrix vector ->
     Encode.int 83
       <> encodeConstantIndex matrix
       <> encodeVariableIndex vector
-  PlacePoint2d matrix point ->
+  PlacePoint2D matrix point ->
     Encode.int 84
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point

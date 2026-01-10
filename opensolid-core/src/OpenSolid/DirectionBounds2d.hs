@@ -22,8 +22,8 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Orientation2d (Orientation2d)
 import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.PlaneOrientation3d (PlaneOrientation3d)
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Units qualified as Units
@@ -129,13 +129,13 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionBounds2d space1) (Vector2d units space2) (Bounds units)
+  DotMultiplication (DirectionBounds2d space1) (Vector2D units space2) (Bounds units)
   where
   UnitBounds2d vectorBounds `dot` vector = vectorBounds `dot` vector
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Vector2d units space1) (DirectionBounds2d space2) (Bounds units)
+  DotMultiplication (Vector2D units space1) (DirectionBounds2d space2) (Bounds units)
   where
   vector `dot` UnitBounds2d vectorBounds = vector `dot` vectorBounds
 
@@ -172,13 +172,13 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionBounds2d space1) (Vector2d units space2) (Bounds units)
+  CrossMultiplication (DirectionBounds2d space1) (Vector2D units space2) (Bounds units)
   where
   UnitBounds2d vectorBounds `cross` vector = vectorBounds `cross` vector
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Vector2d units space1) (DirectionBounds2d space2) (Bounds units)
+  CrossMultiplication (Vector2D units space1) (DirectionBounds2d space2) (Bounds units)
   where
   vector `cross` UnitBounds2d vectorBounds = vector `cross` vectorBounds
 
@@ -196,7 +196,7 @@ lift ::
 lift function (UnitBounds2d vectorBounds) = UnitBounds2d (function vectorBounds)
 
 constant :: Direction2d space -> DirectionBounds2d space
-constant direction = UnitBounds2d (VectorBounds2d.constant (Vector2d.unit direction))
+constant direction = UnitBounds2d (VectorBounds2d.constant (Vector2D.unit direction))
 
 xComponent :: DirectionBounds2d space -> Bounds Unitless
 xComponent (UnitBounds2d vectorBounds) = VectorBounds2d.xComponent vectorBounds

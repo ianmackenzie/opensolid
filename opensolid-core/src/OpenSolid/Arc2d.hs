@@ -13,22 +13,22 @@ module OpenSolid.Arc2d
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Polymorphic.Point2d (Point2d)
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
+import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 
 -- | An arc in 2D.
 data Arc2d units space = Arc2d
-  { centerPoint :: Point2d units space
+  { centerPoint :: Point2D units space
   , radius :: Quantity units
   , startAngle :: Angle
   , endAngle :: Angle
   }
   deriving (Show)
 
-centerPoint :: Arc2d units space -> Point2d units space
+centerPoint :: Arc2d units space -> Point2D units space
 centerPoint = (.centerPoint)
 
 radius :: Arc2d units space -> Quantity units
@@ -40,19 +40,19 @@ startAngle = (.startAngle)
 endAngle :: Arc2d units space -> Angle
 endAngle = (.endAngle)
 
-startPoint :: Arc2d units space -> Point2d units space
-startPoint arc = centerPoint arc .+. Vector2d.polar (radius arc) (startAngle arc)
+startPoint :: Arc2d units space -> Point2D units space
+startPoint arc = centerPoint arc .+. Vector2D.polar (radius arc) (startAngle arc)
 
-endPoint :: Arc2d units space -> Point2d units space
-endPoint arc = centerPoint arc .+. Vector2d.polar (radius arc) (endAngle arc)
+endPoint :: Arc2d units space -> Point2D units space
+endPoint arc = centerPoint arc .+. Vector2D.polar (radius arc) (endAngle arc)
 
-pointOn :: Arc2d units space -> Number -> Point2d units space
+pointOn :: Arc2d units space -> Number -> Point2D units space
 pointOn arc t = do
   let angle = Quantity.interpolateFrom (startAngle arc) (endAngle arc) t
-  centerPoint arc .+. Vector2d.polar (radius arc) angle
+  centerPoint arc .+. Vector2D.polar (radius arc) angle
 
 polar ::
-  "centerPoint" ::: Point2d units space ->
+  "centerPoint" ::: Point2D units space ->
   "radius" ::: Quantity units ->
   "startAngle" ::: Angle ->
   "endAngle" ::: Angle ->
@@ -65,10 +65,10 @@ polar (Named givenCenterPoint) (Named givenRadius) (Named givenStartAngle) (Name
     , endAngle = givenEndAngle
     }
 
-sweptAround :: Point2d units space -> Point2d units space -> Angle -> Arc2d units space
+sweptAround :: Point2D units space -> Point2D units space -> Angle -> Arc2d units space
 sweptAround givenCenterPoint givenStartPoint givenSweptAngle = do
-  let computedRadius = Point2d.distanceFrom givenCenterPoint givenStartPoint
-  let computedStartAngle = Point2d.angleFrom givenCenterPoint givenStartPoint
+  let computedRadius = Point2D.distanceFrom givenCenterPoint givenStartPoint
+  let computedStartAngle = Point2D.angleFrom givenCenterPoint givenStartPoint
   Arc2d
     { centerPoint = givenCenterPoint
     , radius = computedRadius

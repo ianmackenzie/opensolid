@@ -8,7 +8,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polymorphic.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
@@ -19,14 +19,14 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 main :: IO ()
 main = Tolerance.using Length.nanometer do
   let weightCurve = Curve.quadraticSpline 1 (1 /. Number.sqrt 2) 1
-  let vE = Vector2d 1 0
-  let vNE = Vector2d 1 1 ./. Number.sqrt 2
-  let vN = Vector2d 0 1
-  let vNW = Vector2d -1 1 ./. Number.sqrt 2
-  let vW = Vector2d -1 0
-  let vSW = Vector2d -1 -1 ./. Number.sqrt 2
-  let vS = Vector2d 0 -1
-  let vSE = Vector2d 1 -1 ./. Number.sqrt 2
+  let vE = Vector2D 1 0
+  let vNE = Vector2D 1 1 ./. Number.sqrt 2
+  let vN = Vector2D 0 1
+  let vNW = Vector2D -1 1 ./. Number.sqrt 2
+  let vW = Vector2D -1 0
+  let vSW = Vector2D -1 -1 ./. Number.sqrt 2
+  let vS = Vector2D 0 -1
+  let vSE = Vector2D 1 -1 ./. Number.sqrt 2
   let radius = Length.centimeters 10
   let arc v1 v2 v3 = do
         radialUnitVector <- Result.orFail do

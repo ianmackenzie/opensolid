@@ -18,13 +18,13 @@ import OpenSolid.DirectionBounds2d (DirectionBounds2d)
 import OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
-import OpenSolid.Polymorphic.Vector2d qualified as Vector2d
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
@@ -54,7 +54,7 @@ derivative parameter (DirectionSurfaceFunction2d vectorSurfaceFunction) =
 
 constant :: Direction2d space -> DirectionSurfaceFunction2d space
 constant direction =
-  DirectionSurfaceFunction2d (VectorSurfaceFunction2d.constant (Vector2d.unit direction))
+  DirectionSurfaceFunction2d (VectorSurfaceFunction2d.constant (Vector2D.unit direction))
 
 instance Negation (DirectionSurfaceFunction2d space) where
   negative (DirectionSurfaceFunction2d vectorSurfaceFunction) =
@@ -179,7 +179,7 @@ instance
   space1 ~ space2 =>
   DotMultiplication
     (DirectionSurfaceFunction2d space1)
-    (Vector2d units space2)
+    (Vector2D units space2)
     (SurfaceFunction units)
   where
   DirectionSurfaceFunction2d lhs `dot` rhs = lhs `dot` rhs
@@ -187,7 +187,7 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication
-    (Vector2d units space1)
+    (Vector2D units space1)
     (DirectionSurfaceFunction2d space2)
     (SurfaceFunction units)
   where
@@ -242,7 +242,7 @@ instance
   space1 ~ space2 =>
   CrossMultiplication
     (DirectionSurfaceFunction2d space1)
-    (Vector2d units space2)
+    (Vector2D units space2)
     (SurfaceFunction units)
   where
   DirectionSurfaceFunction2d lhs `cross` rhs = lhs `cross` rhs
@@ -250,7 +250,7 @@ instance
 instance
   space1 ~ space2 =>
   CrossMultiplication
-    (Vector2d units space1)
+    (Vector2D units space1)
     (DirectionSurfaceFunction2d space2)
     (SurfaceFunction units)
   where

@@ -15,7 +15,7 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Plane3d (Plane3d)
-import OpenSolid.Polymorphic.Vector2d (Vector2d)
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
@@ -26,7 +26,7 @@ constant = Expression.constant
 
 on ::
   Plane3d space local ->
-  Expression Number (Vector2d units local) ->
+  Expression Number (Vector2D units local) ->
   Expression Number (Vector3d units space)
 on = Expression.on
 
@@ -59,7 +59,7 @@ relativeTo = Expression.relativeTo
 projectInto ::
   Plane3d global local ->
   Expression Number (Vector3d units global) ->
-  Expression Number (Vector2d units local)
+  Expression Number (Vector2D units local)
 projectInto = Expression.projectInto
 
 transformBy ::

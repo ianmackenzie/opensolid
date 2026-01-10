@@ -21,7 +21,7 @@ import OpenSolid.Line2d (Line2d (Line2d))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Polymorphic.Point2d (Point2d)
+import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Triangle2d (Triangle2d (Triangle2d))
@@ -37,7 +37,7 @@ newtype Polygon2d units space
     --
     -- These should generally be in counterclockwise order
     -- (clockwise order will be interpreted as a 'negative' polygon or hole).
-    Polygon2d {vertices :: NonEmpty (Point2d units space)}
+    Polygon2d {vertices :: NonEmpty (Point2D units space)}
 
 instance FFI (Polygon2d Meters FFI.Space) where
   representation = FFI.classRepresentation "Polygon2d"
@@ -79,14 +79,14 @@ circumscribed n circle = do
 The hexagon will be oriented such that its top and bottom edges are horizontal.
 -}
 hexagon ::
-  "centerPoint" ::: Point2d units space ->
+  "centerPoint" ::: Point2D units space ->
   "height" ::: Quantity units ->
   Result IsEmpty (Polygon2d units space)
 hexagon (Named centerPoint) (Named height) =
   circumscribed 6 (Circle2d.withDiameter height centerPoint)
 
 -- | Get the vertices of a polygon.
-vertices :: Polygon2d units space -> NonEmpty (Point2d units space)
+vertices :: Polygon2d units space -> NonEmpty (Point2D units space)
 vertices = (.vertices)
 
 -- | Get the edges of a polygon.
@@ -110,16 +110,16 @@ signedArea :: Units.Squared units1 units2 => Polygon2d units1 space -> Quantity 
 signedArea = Units.specialize . signedArea_
 
 collectEdges ::
-  Point2d units space ->
-  Point2d units space ->
-  List (Point2d units space) ->
+  Point2D units space ->
+  Point2D units space ->
+  List (Point2D units space) ->
   NonEmpty (Line2d units space)
 collectEdges first current remaining = case remaining of
   [] -> NonEmpty.one (Line2d current first)
   next : following -> NonEmpty.push (Line2d current next) (collectEdges first next following)
 
 map ::
-  (Point2d units1 space1 -> Point2d units2 space2) ->
+  (Point2D units1 space1 -> Point2D units2 space2) ->
   Polygon2d units1 space1 ->
   Polygon2d units2 space2
 map function polyline = Polygon2d (NonEmpty.map function (vertices polyline))

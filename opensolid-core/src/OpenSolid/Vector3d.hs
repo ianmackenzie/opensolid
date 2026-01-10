@@ -60,7 +60,7 @@ import OpenSolid.Primitives
   , Orientation3d (Orientation3d)
   , Plane3d (Plane3d)
   , PlaneOrientation3d (PlaneOrientation3d)
-  , Vector2d (Vector2d)
+  , Vector2D (Vector2D)
   , Vector3d (Vector3d, Vector3d#)
   )
 import OpenSolid.Quantity qualified as Quantity
@@ -84,8 +84,8 @@ unit :: Direction3d space -> Vector3d Unitless space
 unit (Unit3d vector) = vector
 
 -- | Construct a 3D vector on the given plane, given a 2D vector within the plane.
-on :: Plane3d global local -> Vector2d units local -> Vector3d units global
-on (Plane3d _ (PlaneOrientation3d i j)) (Vector2d vX vY) = do
+on :: Plane3d global local -> Vector2D units local -> Vector3d units global
+on (Plane3d _ (PlaneOrientation3d i j)) (Vector2D vX vY) = do
   let Direction3d iR iF iU = i
   let Direction3d jR jF jU = j
   let vR = vX .*. iR .+. vY .*. jR
@@ -232,8 +232,8 @@ relativeTo :: Frame3d global local -> Vector3d units global -> Vector3d units lo
 relativeTo (Frame3d _ (Orientation3d i j k)) vector =
   Vector3d (vector `dot` i) (vector `dot` j) (vector `dot` k)
 
-projectInto :: Plane3d global local -> Vector3d units global -> Vector2d units local
-projectInto (Plane3d _ (PlaneOrientation3d i j)) v = Vector2d (v `dot` i) (v `dot` j)
+projectInto :: Plane3d global local -> Vector3d units global -> Vector2D units local
+projectInto (Plane3d _ (PlaneOrientation3d i j)) v = Vector2D (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3d units space) -> Vector3d units space
 sum = List.foldl (.+.) zero

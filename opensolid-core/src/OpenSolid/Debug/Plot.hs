@@ -14,8 +14,8 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
-import OpenSolid.Polymorphic.Point2d (Point2d)
-import OpenSolid.Polymorphic.Point2d qualified as Point2d
+import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
@@ -37,22 +37,22 @@ axisHeadLength = Length.millimeters 3
 axisHeadWidth :: Length
 axisHeadWidth = Length.millimeters 2
 
-viewBox :: Point2d Unitless Space -> Point2d Unitless Space -> Bounds2d Meters Space
-viewBox p1 p2 = Bounds2d.hull2 (Point2d.convert scale p1) (Point2d.convert scale p2)
+viewBox :: Point2D Unitless Space -> Point2D Unitless Space -> Bounds2d Meters Space
+viewBox p1 p2 = Bounds2d.hull2 (Point2D.convert scale p1) (Point2D.convert scale p2)
 
 xAxis :: Number -> Number -> Svg Space
 xAxis x1 x2 =
   Svg.arrow
-    (#start (Point2d.x (Quantity.convert scale x1)))
-    (#end (Point2d.x (Quantity.convert scale x2 .+. axisHeadLength)))
+    (#start (Point2D.x (Quantity.convert scale x1)))
+    (#end (Point2D.x (Quantity.convert scale x2 .+. axisHeadLength)))
     (#headLength axisHeadLength)
     (#headWidth axisHeadWidth)
 
 yAxis :: Number -> Number -> Svg Space
 yAxis y1 y2 =
   Svg.arrow
-    (#start (Point2d.y (Quantity.convert scale y1)))
-    (#end (Point2d.y (Quantity.convert scale y2 .+. axisHeadLength)))
+    (#start (Point2D.y (Quantity.convert scale y1)))
+    (#end (Point2D.y (Quantity.convert scale y2 .+. axisHeadLength)))
     (#headLength axisHeadLength)
     (#headWidth axisHeadWidth)
 
