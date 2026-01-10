@@ -1,3 +1,35 @@
+Add missing operators
+- Failed to add UvPoint and Vector2D
+- Failed to add UvBounds and Vector2D
+- Failed to subtract UvPoint and Vector2D
+- Failed to subtract UvBounds and Vector2D
+- Failed to divide float and Curve
+- Failed to divide Length and Curve
+- Failed to divide Length and LengthCurve
+- Failed to divide Area and Curve
+- Failed to divide Area and LengthCurve
+- Failed to divide Area and AreaCurve
+- Failed to divide Angle and Curve
+- Failed to divide Angle and AngleCurve
+- Failed to divide Curve and Curve
+- Failed to divide LengthCurve and Curve
+- Failed to divide LengthCurve and LengthCurve
+- Failed to divide AreaCurve and Curve
+- Failed to divide AreaCurve and LengthCurve
+- Failed to divide AreaCurve and AreaCurve
+- Failed to divide AngleCurve and Curve
+- Failed to divide AngleCurve and AngleCurve
+
+Ensure check_operators.py includes all relevant classes
+
+Remove UvPoint and UvBounds modules?
+- replace UvBounds.unitSquare with Bounds2D.uvDomain
+- replace UvPoint.samples with Bounds2D.samples
+- replace UvPoint.random with Point2D.random
+
+Remove Quantity 'small' and 'large' functions in favour of using minimum/maximum functions with Quantity.abs
+-> e.g. 'Quantity.smallestBy foo' is 'NonEmpty.minimumBy (Quantity.abs . foo)'
+
 Switch back to simpler naming convention for 2D geometry?
 - 'Point2D units space'
 - 'Vector3D units space'
@@ -59,26 +91,6 @@ Use CBOR for FFI calls from target languages
 -> means that exact same format can be used in client-server way over WebSockets, HTTP, sockets, standard in/out streams etc.
 -> can use Haskell 'serialise' library which seems nice and well supported
 
-Units-specific types/modules
-- 'type Point2D space = Point2d Meters space'
-- 'type UvPoint = Point2d Unitless UvSpace'
-- 'type Vector2D space = Vector2d Meters space'
-- 'type UvVector = Vector2d Unitless UvSpace'
-- 'type UvDirection = Direction2D UvSpace' <- a bit special...
-- 'type Curve2D space = Curve2d Meters space'
-- 'type UvCurve = Curve2d Unitless UvSpace'
-- 'type Region2D space = Region2d Meters space'
-- 'type UvRegion = Region2d Unitless UvSpace'
-- 'type LineSegment2D space = LineSegment2d Meters space
-- 'type UvLineSegment = LineSegment2d Unitless UvSpace'
-- 'type Set2D a space = Set2d a Meters space' <- allowed?
-- 'type UvSet a = Set2d a Unitless UvSpace' <- allowed?
-- rule: lower-case 'd' has a units type parameter, capital 'D' does not (meters units for anything that *has* units)
-- goal: application code does not need to use any lower-case 'd' types
-- eventually move polymorphic modules under Polymorphic namespace?
-  - e.g. OpenSolid.Polymorphic.Point2d
-- remove doc comments from polymorphic modules
-
 Add UvDebug module
 
 Add Debug2D module
@@ -113,23 +125,6 @@ Make Transform2D Meters-only?
 -> Transform2D/UvTransform, Axis2D/UvAxis, Frame2D/UvFrame!
 
 Add modules for UvRegion, UvCurve etc.
-
-Switch to Meters-default naming convention, e.g.:
-- data Point2D_ units space
-- type Point2D space = Point2D_ Meters space
-- type UvPoint = Point2D_ Unitless UvSpace
-- what about Vector2D, Vector3D?
-  -> data Vector2D_ units space
-  -> type Vector2D space = Vector2D_ Meters space
-  -> type UnitlessVector2D space = Vector2D_ Unitless space
-  -> type UvVector = UnitlessVector2D UvSpace
-  -> type AreaVector2D space = Vector2D_ Area space
-- should generic operations be in Point2D module or Point2D_ module?
-- maybe keep 'Point2d' etc. names in Haskell, 'Point2D' and 'UvPoint' in target languages?
-  -> still have 'Point3D' in Haskell? messy...
-  -> maybe just have 'Point2D' be units-generic in Haskell, specific to meters in target languages
-    -> also Region2D, Vector2D etc.
-    -> still have UvPoint, UvVector, UvDirection, UvAxis, UvCurve etc. type aliases in Haskell
 
 Search for 'Unitless UvSpace' and 'Meters space' to see where type aliases can be used
 -> or new ones introduced...
@@ -185,8 +180,8 @@ Optimize VectorBounds3d.hullN
 
 Optimize general face indices operations...
 
-Replace 'Point2d (Qty# x#) (Qty# y#)' with 'Point2d# x# y#' once Point2d is migrated to use Double# values internally
--> or just create Point2d# as a *pattern* first, then eventually it will be the actual constructor...
+Replace 'Point2D (Qty# x#) (Qty# y#)' with 'Point2D# x# y#' once Point2D is migrated to use Double# values internally
+-> or just create Point2D# as a *pattern* first, then eventually it will be the actual constructor...
 
 To optimize:
 - Have Vector#d use unboxed fields
