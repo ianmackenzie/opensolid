@@ -33,20 +33,13 @@ Remove UvPoint and UvBounds modules?
 Remove Quantity 'small' and 'large' functions in favour of using minimum/maximum functions with Quantity.abs
 -> e.g. 'Quantity.smallestBy foo' is 'NonEmpty.minimumBy (Quantity.abs . foo)'
 
-Switch back to simpler naming convention for 2D geometry?
-- 'Point2D units space'
-- 'Vector3D units space'
-- 'Point3D space'
-- 'Direction2D space'
-- in general, both 2D geometry and vectors have units parameter, 3D positional values do not
-
 Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
 
 Try removing Expression.* modules?
 - see if they're actually still necessary/useful for type inference...
 
-Allow Set#d to be empty?
-- would have to remove Set#d.bounds but that's probably OK...
+Allow Set#D to be empty?
+- would have to remove Set#D.bounds but that's probably OK...
 
 Refactor Polygon2d.edges to filter out (approximately) zero-length edges?
 - useful for removing duplicate last edge if last vertex is equal to first vertex
@@ -71,8 +64,8 @@ Refactor curve construction from line segments?
   - should even be able to map those to Python patterns!
 - do for Curve3D too...add Line3D etc.
 
-Add Bezier#d etc. types/modules?
-- more complex to try to provide Curve#d.asBezier though...unless perhaps user has to pass desired degree
+Add Bezier#D etc. types/modules?
+- more complex to try to provide Curve#D.asBezier though...unless perhaps user has to pass desired degree
   (e.g. 'Curve2d.asBezier 3' to attempt to convert to a cubic Bezier curve)
 
 Switch SurfaceFunction zero finding to use new Bisection module
@@ -169,7 +162,7 @@ Switch to upper-case 2D and 3D suffixes instead of 2d and 3d?
 
 Add indentation to debug output of Ast values for easier inspection
 
-Optimization: check when e.g. VectorCurve#d or VectorSurface#d (squared) magnitude is a constant (within current tolerance)
+Optimization: check when e.g. VectorCurve#D or VectorSurface#D (squared) magnitude is a constant (within current tolerance)
 -> avoid expensive square root (or even squared magnitude calculation!)
 
 Add dedicated 'blend' expression
@@ -187,8 +180,8 @@ Replace 'Point2D (Qty# x#) (Qty# y#)' with 'Point2D# x# y#' once Point2D is migr
 -> or just create Point2D# as a *pattern* first, then eventually it will be the actual constructor...
 
 To optimize:
-- Have Vector#d use unboxed fields
-- 'Flatten' VectorBounds#d?
+- Have Vector#D use unboxed fields
+- 'Flatten' VectorBounds#D?
 - Point3d - Point3d
 
 Ensure target language bindings gracefully handle exceptions such as higher-order zeros
