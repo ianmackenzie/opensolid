@@ -123,6 +123,7 @@ library
     OpenSolid.Curve.WithNoZeros
     OpenSolid.Curve.Zero
     OpenSolid.Curve2D
+    OpenSolid.Curve2D.EndpointIntersection
     OpenSolid.Curve2D.IntersectionPoint
     OpenSolid.Curve2D.Intersections
     OpenSolid.Curve2D.MedialAxis
