@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Bisection
   ( InfiniteRecursion (InfiniteRecursion)
   , Domain
@@ -136,18 +138,22 @@ map2 function domain1 domain2 = do
     ]
 
 interior :: Bounds Unitless -> Bounds Unitless
-interior (Bounds tLow tHigh) = do
-  let margin = (tHigh .-. tLow) ./ 8
-  let lowMargin = if tLow == 0 then 0 else margin
-  let highMargin = if tHigh == 1 then 0 else margin
-  Bounds (tLow + lowMargin) (tHigh - highMargin)
+interior domain = do
+  let (# interiorLow, interiorHigh #) = interior# domain
+  Bounds interiorLow interiorHigh
 
 isInterior :: Number -> Bounds Unitless -> Bool
-isInterior value (Bounds tLow tHigh) = do
-  let margin = (tHigh .-. tLow) ./ 8
-  let lowMargin = if tLow == 0 then 0 else margin
-  let highMargin = if tHigh == 1 then 0 else margin
-  value >= tLow .+. lowMargin && value <= tHigh .-. highMargin
+isInterior value domain = do
+  let (# interiorLow, interiorHigh #) = interior# domain
+  interiorLow <= value && value <= interiorHigh
+
+{-# INLINE interior# #-}
+interior# :: Bounds Unitless -> (# Number, Number #)
+interior# (Bounds exteriorLow exteriorHigh) = do
+  let margin = 0.125 *. (exteriorHigh .-. exteriorLow)
+  let interiorLow = if exteriorLow == 0 then 0 else exteriorLow .+. margin
+  let interiorHigh = if exteriorHigh == 1 then 1 else exteriorHigh .-. margin
+  (# interiorLow, interiorHigh #)
 
 includesEndpoint :: Bounds Unitless -> Bool
 includesEndpoint (Bounds tLow tHigh) = tLow == 0 || tHigh == 1
