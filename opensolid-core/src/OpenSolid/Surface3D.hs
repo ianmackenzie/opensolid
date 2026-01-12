@@ -186,15 +186,14 @@ toMesh accuracy surface = do
   let fuv = f.du.dv
   let fvv = f.dv.dv
   let boundaryLoops = Region2D.boundaryLoops surface.domain
-  let boundaryPolygons =
-        NonEmpty.map (toPolygon accuracy surface.function fuu fuv fvv) boundaryLoops
+  let boundaryPolygons = NonEmpty.map (toPolygon accuracy f fuu fuv fvv) boundaryLoops
   let boundaryEdges = NonEmpty.combine Polygon2D.edges boundaryPolygons
   let edgeSet = Set2D.fromNonEmpty boundaryEdges
   let domainBounds = Region2D.bounds surface.domain
   let steinerPoints = generateSteinerPoints accuracy domainBounds edgeSet fuu fuv fvv []
   let boundaryVertexLoops = NonEmpty.map Polygon2D.vertices boundaryPolygons
   let uvMesh = CDT.unsafe boundaryVertexLoops steinerPoints
-  Mesh.map (SurfaceFunction3D.evaluate surface.function) uvMesh
+  Mesh.map (SurfaceFunction3D.evaluate f) uvMesh
 
 toPolygon ::
   Length ->
