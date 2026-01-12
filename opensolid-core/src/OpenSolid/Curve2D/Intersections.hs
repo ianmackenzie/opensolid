@@ -111,8 +111,6 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
   if not (interiorBounds1 `intersects` interiorBounds2)
     then Resolved Nothing
     else do
-      let subdomain1 = Bisection.classify tBounds1
-      let subdomain2 = Bisection.classify tBounds2
       let firstDerivative1 = Curve2D.derivative curve1
       let firstDerivative2 = Curve2D.derivative curve2
       let secondDerivative1 = VectorCurve2D.derivative firstDerivative1
@@ -149,7 +147,7 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
                       if uniqueTangentSolution || allowedAlignment == Just alignment
                         then Resolved (Just intersectionPoint)
                         else Unresolved
-      case (subdomain1, subdomain2) of
+      case (Bisection.classify tBounds1, Bisection.classify tBounds2) of
         (Bisection.Interior, Bisection.Interior)
           | Resolved sign <- firstCrossProductSign -> do
               let uvPoint0 = Point2D (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
