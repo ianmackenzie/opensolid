@@ -1,3 +1,5 @@
+Remove Array2D?
+
 Add missing operators
 - Failed to add UvPoint and Vector2D
 - Failed to add UvBounds and Vector2D
@@ -24,6 +26,7 @@ Ensure check_operators.py includes all relevant classes
 
 Remove UvPoint and UvBounds modules?
 - replace UvBounds.unitSquare with Bounds2D.uvDomain
+  - also rename Region2D.unitSquare to Region2D.uvDomain?
 - replace UvPoint.samples with Bounds2D.samples
 - replace UvPoint.random with Point2D.random
 
