@@ -10,7 +10,7 @@ import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Solve1d qualified as Solve1d
+import OpenSolid.Solve1D qualified as Solve1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.UvPoint (pattern UvPoint)
@@ -26,9 +26,9 @@ solveForU f fu uBounds vValue = do
   let uvPoint uValue = UvPoint uValue vValue
   let fValue uValue = SurfaceFunction.evaluate f (uvPoint uValue)
   let fuValue uValue = SurfaceFunction.evaluate fu (uvPoint uValue)
-  case Solve1d.monotonic fValue fuValue uBounds of
-    Solve1d.Exact uValue -> uValue
-    Solve1d.Closest uValue -> uValue
+  case Solve1D.monotonic fValue fuValue uBounds of
+    Solve1D.Exact uValue -> uValue
+    Solve1D.Closest uValue -> uValue
 
 solveForV ::
   Tolerance units =>
@@ -41,9 +41,9 @@ solveForV f fv uValue vBounds = do
   let uvPoint vValue = UvPoint uValue vValue
   let fValue vValue = SurfaceFunction.evaluate f (uvPoint vValue)
   let fvValue vValue = SurfaceFunction.evaluate fv (uvPoint vValue)
-  case Solve1d.monotonic fValue fvValue vBounds of
-    Solve1d.Exact vValue -> vValue
-    Solve1d.Closest vValue -> vValue
+  case Solve1D.monotonic fValue fvValue vBounds of
+    Solve1D.Exact vValue -> vValue
+    Solve1D.Closest vValue -> vValue
 
 curveBoundsAt :: Number -> Number -> Quantity units -> Quantity units -> Bounds units -> Bounds units
 curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)

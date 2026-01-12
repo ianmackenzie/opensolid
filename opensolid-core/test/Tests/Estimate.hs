@@ -5,7 +5,7 @@ import OpenSolid.Area qualified as Area
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Int qualified as Int
@@ -117,12 +117,12 @@ resolvesTo value estimate
 area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
   let curve =
-        Curve2d.polarArc
+        Curve2D.polarArc
           (#centerPoint Point2D.origin)
           (#radius Length.meter)
           (#startAngle Angle.pi)
           (#endAngle Angle.zero)
-  let dAdt = Curve2d.yCoordinate curve .*. (Curve2d.derivative curve).xComponent
+  let dAdt = Curve2D.yCoordinate curve .*. (Curve2D.derivative curve).xComponent
   let areaEstimate = Curve.integrate dAdt
   let expectedArea = Area.squareMeters (Number.pi ./ 2)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)

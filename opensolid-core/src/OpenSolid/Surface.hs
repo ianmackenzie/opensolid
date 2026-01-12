@@ -6,13 +6,13 @@ module OpenSolid.Surface
 where
 
 import OpenSolid.Prelude
-import OpenSolid.Region2d (Region2d)
+import OpenSolid.Region2D (Region2D)
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 
 data Surface units where
-  Parametric :: SurfaceFunction units -> Region2d Unitless UvSpace -> Surface units
+  Parametric :: SurfaceFunction units -> Region2D Unitless UvSpace -> Surface units
 
-parametric :: SurfaceFunction units -> Region2d Unitless UvSpace -> Surface units
+parametric :: SurfaceFunction units -> Region2D Unitless UvSpace -> Surface units
 parametric = Parametric
 
 function :: Surface units -> SurfaceFunction units

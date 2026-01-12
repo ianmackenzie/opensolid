@@ -7,10 +7,10 @@ where
 
 import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2D (Curve2D)
+import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Length (Length)
@@ -19,7 +19,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
+import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 -- | A metric spur gear.
 data SpurGear = Metric
@@ -58,7 +58,7 @@ any additional curves you want
 and then construct a profile region from the combined set of curves
 that you can then extrude to form a gear body.
 -}
-profile :: Tolerance Meters => SpurGear -> List (Curve2d Meters space)
+profile :: Tolerance Meters => SpurGear -> List (Curve2D Meters space)
 profile gear = do
   let n = gear.numTeeth
   let m = gear.module_
@@ -75,31 +75,31 @@ profile gear = do
   let alpha = Angle.radians (Angle.tan phi .-. Angle.inRadians phi .+. Number.pi ./. Number.fromInt (2 * n))
   let x = rb .*. (Curve.sin (theta .-. alpha) .-. theta ./. Angle.radian .*. Curve.cos (theta .-. alpha))
   let y = rb .*. (Curve.cos (theta .-. alpha) .+. theta ./. Angle.radian .*. Curve.sin (theta .-. alpha))
-  let involuteLeft = Curve2d.xy x y
+  let involuteLeft = Curve2D.xy x y
   let leftStart = involuteLeft.startPoint
   let leftEnd = involuteLeft.endPoint
-  let involuteLeftDerivative = Curve2d.derivative involuteLeft
+  let involuteLeftDerivative = Curve2D.derivative involuteLeft
   let leftStartTangent
-        | rd > rb = Vector2D.normalize (VectorCurve2d.startValue involuteLeftDerivative)
+        | rd > rb = Vector2D.normalize (VectorCurve2D.startValue involuteLeftDerivative)
         | otherwise = Vector2D.polar 1 (Angle.halfPi .+. alpha)
-  let leftEndTangent = Vector2D.normalize (VectorCurve2d.endValue involuteLeftDerivative)
+  let leftEndTangent = Vector2D.normalize (VectorCurve2D.endValue involuteLeftDerivative)
   let leftDerivativeMagnitude = Point2D.distanceFrom leftStart leftEnd
   let leftApproximation =
-        Curve2d.hermite
+        Curve2D.hermite
           leftStart
           [leftDerivativeMagnitude .*. leftStartTangent]
           leftEnd
           [leftDerivativeMagnitude .*. leftEndTangent]
-  let rightApproximation = Curve2d.mirrorAcross Axis2d.y leftApproximation
-  let tip = Curve2d.lineFrom leftApproximation.endPoint rightApproximation.endPoint
+  let rightApproximation = Curve2D.mirrorAcross Axis2D.y leftApproximation
+  let tip = Curve2D.lineFrom leftApproximation.endPoint rightApproximation.endPoint
   let angularSpacing = Angle.twoPi ./. Number.fromInt n
   let nextToothStart =
         Point2D.rotateAround Point2D.origin angularSpacing rightApproximation.startPoint
   let connector
-        | rd > rb = Curve2d.lineFrom leftStart nextToothStart
-        | otherwise = Curve2d.arcFrom leftStart nextToothStart (negative Angle.pi)
+        | rd > rb = Curve2D.lineFrom leftStart nextToothStart
+        | otherwise = Curve2D.arcFrom leftStart nextToothStart (negative Angle.pi)
   let toothProfileCurves = [leftApproximation, rightApproximation, tip, connector]
   let rotatedProfileCurves i = do
         let angle = Number.fromInt i .*. angularSpacing
-        List.map (Curve2d.rotateAround Point2D.origin angle) toothProfileCurves
+        List.map (Curve2D.rotateAround Point2D.origin angle) toothProfileCurves
   List.combine rotatedProfileCurves [0 .. n - 1]

@@ -38,8 +38,8 @@ module OpenSolid.Unboxed.Math
   , doubleOverBounds#
   , boundsOverDouble#
   , boundsOverBounds#
-  , determinantBounds2d#
-  , determinantBounds3d#
+  , determinantBounds2D#
+  , determinantBounds3D#
   )
 where
 
@@ -214,8 +214,8 @@ boundsOverBounds# low1# high1# low2# high2# =
     (# 1#, 1# #) -> (# -1.0## /# 0.0##, 1.0## /# 0.0## #)
     (# _, _ #) -> hull4# (low1# /# low2#) (low1# /# high2#) (high1# /# low2#) (high1# /# high2#)
 
-{-# INLINE determinantBounds2d# #-}
-determinantBounds2d# ::
+{-# INLINE determinantBounds2D# #-}
+determinantBounds2D# ::
   Double# ->
   Double# ->
   Double# ->
@@ -225,12 +225,12 @@ determinantBounds2d# ::
   Double# ->
   Double# ->
   (# Double#, Double# #)
-determinantBounds2d# x1Min# x1Max# y1Min# y1Max# x2Min# x2Max# y2Min# y2Max# = do
+determinantBounds2D# x1Min# x1Max# y1Min# y1Max# x2Min# x2Max# y2Min# y2Max# = do
   let !(# x1y2Min#, x1y2Max# #) = boundsTimesBounds# x1Min# x1Max# y2Min# y2Max#
   let !(# x2y1Min#, x2y1Max# #) = boundsTimesBounds# x2Min# x2Max# y1Min# y1Max#
   boundsMinusBounds# x1y2Min# x1y2Max# x2y1Min# x2y1Max#
 
-determinantBounds3d# ::
+determinantBounds3D# ::
   Double# ->
   Double# ->
   Double# ->
@@ -250,7 +250,7 @@ determinantBounds3d# ::
   Double# ->
   Double# ->
   (# Double#, Double# #)
-determinantBounds3d#
+determinantBounds3D#
   x1Min#
   x1Max#
   y1Min#
@@ -270,11 +270,11 @@ determinantBounds3d#
   z3Min#
   z3Max# = do
     let !(# x1DetMin#, x1DetMax# #) =
-          determinantBounds2d# y2Min# y2Max# z2Min# z2Max# y3Min# y3Max# z3Min# z3Max#
+          determinantBounds2D# y2Min# y2Max# z2Min# z2Max# y3Min# y3Max# z3Min# z3Max#
     let !(# y1DetMin#, y1DetMax# #) =
-          determinantBounds2d# x2Min# x2Max# z2Min# z2Max# x3Min# x3Max# z3Min# z3Max#
+          determinantBounds2D# x2Min# x2Max# z2Min# z2Max# x3Min# x3Max# z3Min# z3Max#
     let !(# z1DetMin#, z1DetMax# #) =
-          determinantBounds2d# x2Min# x2Max# y2Min# y2Max# x3Min# x3Max# y3Min# y3Max#
+          determinantBounds2D# x2Min# x2Max# y2Min# y2Max# x3Min# x3Max# y3Min# y3Max#
     let !(# x1ProdMin#, x1ProdMax# #) =
           boundsTimesBounds# x1Min# x1Max# x1DetMin# x1DetMax#
     let !(# y1ProdMin#, y1ProdMax# #) =

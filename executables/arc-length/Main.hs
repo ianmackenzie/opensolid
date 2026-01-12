@@ -1,9 +1,9 @@
 module Main (main) where
 
 import OpenSolid.Area qualified as Area
-import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Bounds2D qualified as Bounds2D
+import OpenSolid.Curve2D (Curve2D)
+import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
@@ -25,21 +25,21 @@ formatLength :: Length -> Text
 formatLength length =
   Text.number (Length.inMeters length) <> "m"
 
-testCurve :: Text -> Curve2d Meters Space -> IO ()
+testCurve :: Text -> Curve2D Meters Space -> IO ()
 testCurve label curve = Tolerance.using (Length.meters 1e-12) do
-  let (_, length) = Curve2d.arcLengthParameterization curve
+  let (_, length) = Curve2D.arcLengthParameterization curve
   IO.printLine (label <> ": " <> formatLength length)
 
 testLineLength :: IO ()
 testLineLength = Tolerance.using (Length.meters 1e-6) do
-  testCurve "Line" (Curve2d.lineFrom Point2D.origin (Point2D.centimeters 30 40))
+  testCurve "Line" (Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30 40))
 
 testQuadraticSplineLength :: IO ()
 testQuadraticSplineLength = do
   let p1 = Point2D.origin
   let p2 = Point2D.centimeters 20 30
   let p3 = Point2D.centimeters 40 0
-  let spline = Curve2d.quadraticBezier p1 p2 p3
+  let spline = Curve2D.quadraticBezier p1 p2 p3
   testCurve "Quadratic spline" spline
   IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
@@ -65,17 +65,17 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer do
   let p2 = Point2D.centimeters 14 15
   let p3 = Point2D.centimeters 16 15
   let p4 = Point2D.centimeters 25 5
-  let spline = Curve2d.cubicBezier p1 p2 p3 p4
-  let (parameterized, length) = Curve2d.parameterizeByArcLength spline
+  let spline = Curve2D.cubicBezier p1 p2 p3 p4
+  let (parameterized, length) = Curve2D.parameterizeByArcLength spline
   IO.printLine ("Cubic spline: " <> formatLength length)
   let drawCurve fileName curve = do
-        let pointLocations = List.map (Curve2d.evaluate curve) (Parameter.steps 30)
+        let pointLocations = List.map (Curve2D.evaluate curve) (Parameter.steps 30)
         let drawPoint point =
               Svg.circleWith
                 [Svg.whiteFill]
                 (#centerPoint point)
                 (#diameter (Length.millimeters 3))
-        let drawingBounds = Bounds2d.hull2 Point2D.origin (Point2D.centimeters 30 15)
+        let drawingBounds = Bounds2D.hull2 Point2D.origin (Point2D.centimeters 30 15)
         let resolution = Resolution.maxError Length.micrometer
         Svg.write fileName drawingBounds $
           Svg.group

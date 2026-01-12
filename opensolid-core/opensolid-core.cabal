@@ -92,72 +92,72 @@ library
   import: config
   exposed-modules:
     OpenSolid.Angle
-    OpenSolid.Arc2d
+    OpenSolid.Arc2D
     OpenSolid.ArcLength
     OpenSolid.Area
     OpenSolid.Arithmetic
     OpenSolid.Array
-    OpenSolid.Array2d
-    OpenSolid.Axis2d
-    OpenSolid.Axis3d
+    OpenSolid.Array2D
+    OpenSolid.Axis2D
+    OpenSolid.Axis3D
     OpenSolid.Bezier
     OpenSolid.Binary
     OpenSolid.Bisection
-    OpenSolid.Body3d
-    OpenSolid.Body3d.BoundedBy
+    OpenSolid.Body3D
+    OpenSolid.Body3D.BoundedBy
     OpenSolid.Bool
-    OpenSolid.Bounded2d
-    OpenSolid.Bounded3d
+    OpenSolid.Bounded2D
+    OpenSolid.Bounded3D
     OpenSolid.Bounds
-    OpenSolid.Bounds2d
-    OpenSolid.Bounds3d
+    OpenSolid.Bounds2D
+    OpenSolid.Bounds3D
     OpenSolid.Bytecode.Ast
-    OpenSolid.Camera3d
-    OpenSolid.Circle2d
+    OpenSolid.Camera3D
+    OpenSolid.Circle2D
     OpenSolid.Color
     OpenSolid.CompiledFunction
     OpenSolid.Composition
-    OpenSolid.Convention3d
+    OpenSolid.Convention3D
     OpenSolid.Curve
     OpenSolid.Curve.WithNoInteriorZeros
     OpenSolid.Curve.WithNoZeros
     OpenSolid.Curve.Zero
-    OpenSolid.Curve2d
-    OpenSolid.Curve2d.IntersectionPoint
-    OpenSolid.Curve2d.Intersections
-    OpenSolid.Curve2d.MedialAxis
-    OpenSolid.Curve2d.OverlappingSegment
-    OpenSolid.Curve3d
+    OpenSolid.Curve2D
+    OpenSolid.Curve2D.IntersectionPoint
+    OpenSolid.Curve2D.Intersections
+    OpenSolid.Curve2D.MedialAxis
+    OpenSolid.Curve2D.OverlappingSegment
+    OpenSolid.Curve3D
     OpenSolid.Debug
     OpenSolid.Debug.Plot
     OpenSolid.Desingularization
-    OpenSolid.Direction2d
-    OpenSolid.Direction3d
-    OpenSolid.DirectionBounds2d
-    OpenSolid.DirectionBounds3d
-    OpenSolid.DirectionCurve2d
-    OpenSolid.DirectionCurve3d
-    OpenSolid.DirectionSurfaceFunction2d
-    OpenSolid.DirectionSurfaceFunction3d
+    OpenSolid.Direction2D
+    OpenSolid.Direction3D
+    OpenSolid.DirectionBounds2D
+    OpenSolid.DirectionBounds3D
+    OpenSolid.DirectionCurve2D
+    OpenSolid.DirectionCurve3D
+    OpenSolid.DirectionSurfaceFunction2D
+    OpenSolid.DirectionSurfaceFunction3D
     OpenSolid.DivisionByZero
-    OpenSolid.Domain1d
-    OpenSolid.Domain2d
+    OpenSolid.Domain1D
+    OpenSolid.Domain2D
     OpenSolid.Duration
     OpenSolid.Estimate
     OpenSolid.Expression
-    OpenSolid.Expression.Curve1d
-    OpenSolid.Expression.Curve2d
-    OpenSolid.Expression.Curve3d
-    OpenSolid.Expression.Surface1d
-    OpenSolid.Expression.Surface2d
-    OpenSolid.Expression.Surface3d
-    OpenSolid.Expression.VectorCurve2d
-    OpenSolid.Expression.VectorCurve3d
-    OpenSolid.Expression.VectorSurface2d
-    OpenSolid.Expression.VectorSurface3d
+    OpenSolid.Expression.Curve1D
+    OpenSolid.Expression.Curve2D
+    OpenSolid.Expression.Curve3D
+    OpenSolid.Expression.Surface1D
+    OpenSolid.Expression.Surface2D
+    OpenSolid.Expression.Surface3D
+    OpenSolid.Expression.VectorCurve2D
+    OpenSolid.Expression.VectorCurve3D
+    OpenSolid.Expression.VectorSurface2D
+    OpenSolid.Expression.VectorSurface3D
     OpenSolid.FFI
-    OpenSolid.Frame2d
-    OpenSolid.Frame3d
+    OpenSolid.Frame2D
+    OpenSolid.Frame3D
     OpenSolid.Fuzzy
     OpenSolid.Gltf
     OpenSolid.HigherOrderZero
@@ -168,83 +168,83 @@ library
     OpenSolid.Intersects
     OpenSolid.Json
     OpenSolid.Length
-    OpenSolid.Line2d
+    OpenSolid.Line2D
     OpenSolid.List
     OpenSolid.Map
     OpenSolid.Maybe
     OpenSolid.Mesh
     OpenSolid.Mitsuba
-    OpenSolid.Model3d
+    OpenSolid.Model3D
     OpenSolid.Named
     OpenSolid.NewtonRaphson
     OpenSolid.NonEmpty
     OpenSolid.Number
-    OpenSolid.Orientation2d
-    OpenSolid.Orientation3d
+    OpenSolid.Orientation2D
+    OpenSolid.Orientation3D
     OpenSolid.Pair
     OpenSolid.Parameter
     OpenSolid.PbrMaterial
-    OpenSolid.Plane3d
-    OpenSolid.PlaneOrientation3d
+    OpenSolid.Plane3D
+    OpenSolid.PlaneOrientation3D
     OpenSolid.Point2D
-    OpenSolid.Point3d
-    OpenSolid.Polygon2d
-    OpenSolid.Polyline2d
+    OpenSolid.Point3D
+    OpenSolid.Polygon2D
+    OpenSolid.Polyline2D
     OpenSolid.Prelude
     OpenSolid.Primitives
     OpenSolid.Quantity
     OpenSolid.Queue
     OpenSolid.Random
-    OpenSolid.Region2d
-    OpenSolid.Region2d.BoundedBy
+    OpenSolid.Region2D
+    OpenSolid.Region2D.BoundedBy
     OpenSolid.Resolution
     OpenSolid.Result
-    OpenSolid.Set2d
-    OpenSolid.Set3d
+    OpenSolid.Set2D
+    OpenSolid.Set3D
     OpenSolid.Sign
-    OpenSolid.Solve1d
-    OpenSolid.Solve2d
+    OpenSolid.Solve1D
+    OpenSolid.Solve2D
     OpenSolid.Stl
     OpenSolid.Stream
     OpenSolid.Surface
-    OpenSolid.Surface2d
-    OpenSolid.Surface3d
-    OpenSolid.Surface3d.Revolved
-    OpenSolid.SurfaceCurve3d
+    OpenSolid.Surface2D
+    OpenSolid.Surface3D
+    OpenSolid.Surface3D.Revolved
+    OpenSolid.SurfaceCurve3D
     OpenSolid.SurfaceFunction
     OpenSolid.SurfaceFunction.Zeros
-    OpenSolid.SurfaceFunction2d
-    OpenSolid.SurfaceFunction3d
+    OpenSolid.SurfaceFunction2D
+    OpenSolid.SurfaceFunction3D
     OpenSolid.SurfaceParameter
-    OpenSolid.SurfaceVertex3d
+    OpenSolid.SurfaceVertex3D
     OpenSolid.Svg
     OpenSolid.Text
     OpenSolid.Timer
     OpenSolid.Todo
     OpenSolid.Tolerance
     OpenSolid.Transform
-    OpenSolid.Transform2d
-    OpenSolid.Transform3d
-    OpenSolid.Triangle2d
+    OpenSolid.Transform2D
+    OpenSolid.Transform3D
+    OpenSolid.Triangle2D
     OpenSolid.Unitless
     OpenSolid.Units
     OpenSolid.UvBounds
     OpenSolid.UvPoint
     OpenSolid.UvSpace
     OpenSolid.Vector2D
-    OpenSolid.Vector3d
-    OpenSolid.VectorBounds2d
-    OpenSolid.VectorBounds3d
-    OpenSolid.VectorCurve2d
-    OpenSolid.VectorCurve2d.WithNoInteriorZeros
-    OpenSolid.VectorCurve2d.WithNoZeros
-    OpenSolid.VectorCurve3d
-    OpenSolid.VectorSurface2d
-    OpenSolid.VectorSurface3d
-    OpenSolid.VectorSurfaceFunction2d
-    OpenSolid.VectorSurfaceFunction3d
+    OpenSolid.Vector3D
+    OpenSolid.VectorBounds2D
+    OpenSolid.VectorBounds3D
+    OpenSolid.VectorCurve2D
+    OpenSolid.VectorCurve2D.WithNoInteriorZeros
+    OpenSolid.VectorCurve2D.WithNoZeros
+    OpenSolid.VectorCurve3D
+    OpenSolid.VectorSurface2D
+    OpenSolid.VectorSurface3D
+    OpenSolid.VectorSurfaceFunction2D
+    OpenSolid.VectorSurfaceFunction3D
     OpenSolid.Volume
-    OpenSolid.World3d
+    OpenSolid.World3D
 
   other-modules:
     OpenSolid.Bytecode.Compile
@@ -307,11 +307,11 @@ test-suite opensolid-core-test
     Test
     Tests.Array
     Tests.Bounds
-    Tests.Bounds2d
-    Tests.Bounds3d
+    Tests.Bounds2D
+    Tests.Bounds3D
     Tests.Curve
-    Tests.Curve2d
-    Tests.Direction2d
+    Tests.Curve2D
+    Tests.Direction2D
     Tests.DivMod
     Tests.Estimate
     Tests.List
@@ -322,13 +322,13 @@ test-suite opensolid-core-test
     Tests.Parameter
     Tests.Quantity
     Tests.Random
-    Tests.Region2d
-    Tests.Set2d
+    Tests.Region2D
+    Tests.Set2D
     Tests.Stream
     Tests.SurfaceFunction
     Tests.Text
-    Tests.VectorBounds2d
-    Tests.VectorBounds3d
-    Tests.VectorCurve2d
+    Tests.VectorBounds2D
+    Tests.VectorBounds3D
+    Tests.VectorCurve2D
 
   hs-source-dirs: test

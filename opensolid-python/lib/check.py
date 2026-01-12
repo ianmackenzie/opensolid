@@ -1,6 +1,6 @@
 from opensolid import (
     Angle,
-    Bounds2d,
+    Bounds2D,
     Color,
     Curve,
     Length,
@@ -8,7 +8,7 @@ from opensolid import (
     Point2D,
     Svg,
     Tolerance,
-    Triangle2d,
+    Triangle2D,
     Vector2D,
 )
 
@@ -43,9 +43,9 @@ print(color1.to_rgb1())
 color2 = Color.rgb255(225, 225, 225)
 print(color2.to_hex())
 
-bounds = Bounds2d.from_corners(Point2D.origin, Point2D.centimeters(30, 20))
+bounds = Bounds2D.from_corners(Point2D.origin, Point2D.centimeters(30, 20))
 print(bounds.x_coordinate)
-triangle = Triangle2d(
+triangle = Triangle2D(
     Point2D.centimeters(5, 5),
     Point2D.centimeters(25, 5),
     Point2D.centimeters(25, 15),

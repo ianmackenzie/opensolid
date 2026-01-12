@@ -4,25 +4,25 @@ module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
-import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds (Bounds (Bounds))
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
-import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Circle2d qualified as Circle2d
+import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
+import OpenSolid.Bounds2D qualified as Bounds2D
+import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2D (Curve2D)
+import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Debug.Plot qualified as Debug.Plot
-import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Direction3d qualified as Direction3d
+import OpenSolid.Direction2D qualified as Direction2D
+import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
+import OpenSolid.Expression.Curve1D qualified as Expression.Curve1D
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Int qualified as Int
@@ -34,16 +34,16 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
-import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
-import OpenSolid.Polyline2d qualified as Polyline2d
+import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
+import OpenSolid.Polyline2D (Polyline2D (Polyline2D))
+import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
-import OpenSolid.Solve2d qualified as Solve2d
-import OpenSolid.Surface3d qualified as Surface3d
+import OpenSolid.Solve2D qualified as Solve2D
+import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
@@ -54,10 +54,10 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
+import OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import OpenSolid.Volume qualified as Volume
-import OpenSolid.World3d qualified as World3d
+import OpenSolid.World3D qualified as World3D
 import Prelude hiding (length, log, sum)
 
 data Global deriving (Eq, Show)
@@ -79,7 +79,7 @@ testScalarArithmetic = do
 
 testVectorArithmetic :: IO ()
 testVectorArithmetic = do
-  let vector x y z = Vector3d.zUp (Length.meters x) (Length.meters y) (Length.meters z)
+  let vector x y z = Vector3D.zUp (Length.meters x) (Length.meters y) (Length.meters z)
   let v1 = Vector2D.meters 1 2
   let v2 = 0.5 *. Vector2D.meters 3 4
   let dotProduct = v1 `dot` v2
@@ -111,7 +111,7 @@ testEquality = Tolerance.using Length.centimeter do
 
 testTransformation :: IO ()
 testTransformation = do
-  let rotatedAxis = Axis2d.rotateAround (Point2D.meters 1 0) Angle.quarterTurn Axis2d.x
+  let rotatedAxis = Axis2D.rotateAround (Point2D.meters 1 0) Angle.quarterTurn Axis2D.x
   log "Rotated axis" rotatedAxis
   let originalPoints = [Point2D.meters 1 0, Point2D.meters 2 0, Point2D.meters 3 0]
   let rotationFunction = Point2D.rotateAround Point2D.origin Angle.quarterTurn
@@ -125,10 +125,10 @@ offsetPoint ::
   Length ->
   Point2D Meters space
 offsetPoint startPoint endPoint distance =
-  case Direction2d.from startPoint endPoint of
-    Error Direction2d.PointsAreCoincident -> startPoint
+  case Direction2D.from startPoint endPoint of
+    Error Direction2D.PointsAreCoincident -> startPoint
     Ok direction -> do
-      let displacement = distance .*. Direction2d.perpendicularTo direction
+      let displacement = distance .*. Direction2D.perpendicularTo direction
       Point2D.midpoint startPoint endPoint .+. displacement
 
 testCustomFunction :: Tolerance Meters => IO ()
@@ -146,7 +146,7 @@ testListOperations = do
 getCrossProduct :: Tolerance Meters => Result Text Number
 getCrossProduct = do
   vectorDirection <- Result.orFail (Vector2D.direction (Vector2D.meters 2 3))
-  lineDirection <- Result.orFail (Direction2d.from Point2D.origin Point2D.origin)
+  lineDirection <- Result.orFail (Direction2D.from Point2D.origin Point2D.origin)
   Ok (vectorDirection `cross` lineDirection)
 
 testTry :: Tolerance Meters => IO ()
@@ -195,12 +195,12 @@ testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = do
   let minorRadius = Length.centimeters 1
   let majorRadius = Length.centimeters 2
-  let crossSection = Curve2d.circle (Circle2d.withRadius minorRadius (Point2D.x majorRadius))
-  surface <- Result.orFail (Surface3d.revolved World3d.frontPlane crossSection Axis2d.y Angle.twoPi)
+  let crossSection = Curve2D.circle (Circle2D.withRadius minorRadius (Point2D.x majorRadius))
+  surface <- Result.orFail (Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi)
   let alpha = Angle.asin (minorRadius ./. majorRadius)
-  -- Other possibilities: Direction3d.xy (Angle.degrees 45), Direction3d.z
-  let planeNormal = Direction3d.polar World3d.frontPlane (alpha .+. Angle.halfPi)
-  let f = planeNormal `dot` (surface.function .-. World3d.originPoint)
+  -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
+  let planeNormal = Direction3D.polar World3D.frontPlane (alpha .+. Angle.halfPi)
+  let f = planeNormal `dot` (surface.function .-. World3D.originPoint)
   zeros <- Result.orFail (SurfaceFunction.zeros f)
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
@@ -224,21 +224,21 @@ strokeWidth = Length.millimeters 0.1
 drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
 drawZeros path zeros = do
   let uvBounds = Bounds.convert toDrawing (Bounds -0.05 1.05)
-  let viewBox = Bounds2d uvBounds uvBounds
+  let viewBox = Bounds2D uvBounds uvBounds
   Svg.write path viewBox $
     Svg.groupWith [Svg.strokeWidth strokeWidth] $
-      [ drawBounds (Bounds2d.convert toDrawing UvBounds.unitSquare)
+      [ drawBounds (Bounds2D.convert toDrawing UvBounds.unitSquare)
       , Svg.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
       , Svg.combine (drawDot Color.orange) zeros.saddlePoints
       ]
 
-drawBounds :: Bounds2d Meters space -> Svg space
+drawBounds :: Bounds2D Meters space -> Svg space
 drawBounds bounds = do
-  let corner x y = Bounds2d.interpolate bounds x y
+  let corner x y = Bounds2D.interpolate bounds x y
   let vertices = NonEmpty.four (corner 0 0) (corner 1 0) (corner 1 1) (corner 0 1)
-  Svg.polygon (Polygon2d vertices)
+  Svg.polygon (Polygon2D vertices)
 
-drawCrossingCurve :: Int -> Curve2d Unitless UvSpace -> Svg UvSpace
+drawCrossingCurve :: Int -> Curve2D Unitless UvSpace -> Svg UvSpace
 drawCrossingCurve index curve = do
   let hue = (Number.fromInt index .*. Angle.goldenAngle) .%. Angle.twoPi
   let color = Color.hsl1 hue 0.5 0.5
@@ -247,11 +247,11 @@ drawCrossingCurve index curve = do
 toDrawing :: Quantity (Meters ?/? Unitless)
 toDrawing = Length.centimeters 10 ?/ 1
 
-drawUvCurve :: [Svg.Attribute UvSpace] -> Curve2d Unitless UvSpace -> Svg UvSpace
+drawUvCurve :: [Svg.Attribute UvSpace] -> Curve2D Unitless UvSpace -> Svg UvSpace
 drawUvCurve attributes curve = do
   let resolution = Resolution.maxError 0.0002
-  let polyline = Curve2d.toPolyline resolution curve
-  Svg.polylineWith attributes (Polyline2d.map (Point2D.convert toDrawing) polyline)
+  let polyline = Curve2D.toPolyline resolution curve
+  Svg.polylineWith attributes (Polyline2D.map (Point2D.convert toDrawing) polyline)
 
 drawDot :: Color -> UvPoint -> Svg UvSpace
 drawDot color point =
@@ -300,8 +300,8 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingEndPoint = Point2D.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2D.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
-  let curve = Curve2d.bezier drawingControlPoints
-  let drawSegmentBounds tBounds = drawBounds (Curve2d.evaluateBounds curve tBounds)
+  let curve = Curve2D.bezier drawingControlPoints
+  let drawSegmentBounds tBounds = drawBounds (Curve2D.evaluateBounds curve tBounds)
   let controlPointDiameter = Length.millimeters 10
   let drawControlPoint point =
         Svg.circle (#centerPoint point) (#diameter controlPointDiameter)
@@ -311,7 +311,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
     , Svg.strokeWidth (Length.millimeters 1)
     ]
     [ Svg.groupWith [Svg.opacity 0.3] $
-        [ Svg.polyline (Polyline2d drawingControlPoints)
+        [ Svg.polyline (Polyline2D drawingControlPoints)
         , Svg.combineWith [Svg.fillColor color] drawControlPoint $
             NonEmpty.toList drawingControlPoints
         , Svg.combine drawSegmentBounds (Parameter.intervals 10)
@@ -328,7 +328,7 @@ testBezierSegment = do
   let p5 = Point2D 10 5
   let p6 = Point2D 10 10
   let coordinateBounds = Bounds.convert toDrawing (Bounds -1 11)
-  let drawingBounds = Bounds2d coordinateBounds coordinateBounds
+  let drawingBounds = Bounds2D coordinateBounds coordinateBounds
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
   Svg.write "executables/sandbox/test-bezier-segment.svg" drawingBounds curveEntity
 
@@ -338,7 +338,7 @@ testHermiteBezier = do
   let startDerivatives = [Vector2D.centimeters 10 10]
   let endDerivatives = [Vector2D.centimeters 0 -10, Vector2D.zero]
   let endPoint = Point2D.centimeters 10 0
-  let curve = Curve2d.hermite startPoint startDerivatives endPoint endDerivatives
+  let curve = Curve2D.hermite startPoint startDerivatives endPoint endDerivatives
   let curveAttributes =
         [ Svg.strokeColor Color.blue
         , Svg.strokeWidth (Length.millimeters 1)
@@ -346,7 +346,7 @@ testHermiteBezier = do
   let curveResolution = Resolution.maxError (Length.millimeters 0.1)
   let curveEntity = Svg.curveWith curveAttributes curveResolution curve
   let coordinateBounds = Bounds (Length.centimeters -1) (Length.centimeters 11)
-  let drawingBounds = Bounds2d coordinateBounds coordinateBounds
+  let drawingBounds = Bounds2D coordinateBounds coordinateBounds
   Svg.write "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity
 
 testExplicitRandomStep :: IO ()
@@ -376,36 +376,36 @@ testTextSum = do
     sum <- Result.orFail (textSum "2" "3")
     log "sum" sum
 
-testNewtonRaphson2d :: IO ()
-testNewtonRaphson2d = Tolerance.using 1e-9 do
+testNewtonRaphson2D :: IO ()
+testNewtonRaphson2D = Tolerance.using 1e-9 do
   let u = SurfaceFunction.u
   let v = SurfaceFunction.v
   let f = SurfaceFunction.squared u .+. SurfaceFunction.squared v .- 4
   let g = u .-. v
-  let bounds = Bounds2d (Bounds 0 2) (Bounds 0 2)
-  let function = VectorSurfaceFunction2d.xy f g
-  let uDerivative = VectorSurfaceFunction2d.derivative SurfaceParameter.U function
-  let vDerivative = VectorSurfaceFunction2d.derivative SurfaceParameter.V function
+  let bounds = Bounds2D (Bounds 0 2) (Bounds 0 2)
+  let function = VectorSurfaceFunction2D.xy f g
+  let uDerivative = VectorSurfaceFunction2D.derivative SurfaceParameter.U function
+  let vDerivative = VectorSurfaceFunction2D.derivative SurfaceParameter.V function
   let solution =
-        Solve2d.unique
-          (VectorSurfaceFunction2d.evaluateBounds function)
-          (VectorSurfaceFunction2d.evaluate function)
-          (VectorSurfaceFunction2d.evaluate uDerivative)
-          (VectorSurfaceFunction2d.evaluate vDerivative)
+        Solve2D.unique
+          (VectorSurfaceFunction2D.evaluateBounds function)
+          (VectorSurfaceFunction2D.evaluate function)
+          (VectorSurfaceFunction2D.evaluate uDerivative)
+          (VectorSurfaceFunction2D.evaluate vDerivative)
           bounds
-  log "Solve2d.unique solution" solution
+  log "Solve2D.unique solution" solution
 
 testExpression :: IO ()
 testExpression = do
   let x = Expression.t
   let xSquared = Expression.squared x
-  let expression = xSquared ./. (xSquared .+. Expression.Curve1d.constant 1)
+  let expression = xSquared ./. (xSquared .+. Expression.Curve1D.constant 1)
   log "Expression value" (Expression.evaluate expression 2)
   log "Expression bounds" (Expression.evaluateBounds expression (Bounds 1 3))
 
 testCurve2dExpression :: IO ()
 testCurve2dExpression = do
-  let x = Expression.Curve1d.constant 10 .*. Expression.t
+  let x = Expression.Curve1D.constant 10 .*. Expression.t
   let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression Number (Point2D Unitless Global)
   log "Evaluated 2D curve" (Expression.evaluate curve 3)
@@ -468,6 +468,6 @@ main = Tolerance.using Length.nanometer do
   testConcurrency
   testIOParallel
   testTextSum
-  testNewtonRaphson2d
+  testNewtonRaphson2D
   testQuotientDesingularization
   testCurveSqrt

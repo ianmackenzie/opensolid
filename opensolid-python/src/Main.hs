@@ -334,10 +334,10 @@ extraMemberFunctions className = do
         [ "x, y = self.coordinates"
         , "return 'UvPoint(' + str(x) + ',' + str(y) + ')'"
         ]
-    "Bounds2d" ->
+    "Bounds2D" ->
       repr
         [ "x, y = self.coordinates"
-        , "return 'Bounds2d(' + repr(x) + ',' + repr(y) + ')'"
+        , "return 'Bounds2D(' + repr(x) + ',' + repr(y) + ')'"
         ]
     "UvBounds" ->
       repr

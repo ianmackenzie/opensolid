@@ -9,17 +9,17 @@ module OpenSolid.SurfaceFunction.SaddleRegion
 where
 
 import GHC.Records (HasField (getField))
-import OpenSolid.Axis2d (Axis2d)
-import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Axis2D (Axis2D)
+import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Direction2d (Direction2d (Direction2d))
-import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Domain2d (Domain2d)
-import OpenSolid.Frame2d (Frame2d)
-import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
+import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
+import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Direction2D (Direction2D (Direction2D))
+import OpenSolid.Direction2D qualified as Direction2D
+import OpenSolid.Domain2D (Domain2D)
+import OpenSolid.Frame2D (Frame2D)
+import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
@@ -38,26 +38,26 @@ import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 data SaddleRegion units = SaddleRegion
   { subproblem :: Subproblem units
   , frame :: Frame
-  , d1 :: Direction2d UvSpace
-  , d2 :: Direction2d UvSpace
+  , d1 :: Direction2D UvSpace
+  , d2 :: Direction2D UvSpace
   }
 
 data PrincipalAxisSpace
 
-type Frame = Frame2d Unitless UvSpace PrincipalAxisSpace
+type Frame = Frame2D Unitless UvSpace PrincipalAxisSpace
 
 data JoiningCurve
-  = Incoming (Curve2d Unitless UvSpace)
-  | Outgoing (Curve2d Unitless UvSpace)
+  = Incoming (Curve2D Unitless UvSpace)
+  | Outgoing (Curve2D Unitless UvSpace)
 
 joiningPoint :: JoiningCurve -> UvPoint
 joiningPoint (Incoming curve) = curve.endPoint
 joiningPoint (Outgoing curve) = curve.startPoint
 
 point :: SaddleRegion units -> UvPoint
-point SaddleRegion{frame} = Frame2d.originPoint frame
+point SaddleRegion{frame} = Frame2D.originPoint frame
 
-instance HasField "subdomain" (SaddleRegion units) Domain2d where
+instance HasField "subdomain" (SaddleRegion units) Domain2D where
   getField = (.subproblem.subdomain)
 
 instance HasField "bounds" (SaddleRegion units) UvBounds where
@@ -69,10 +69,10 @@ quadratic subproblem saddlePoint = do
   let fuu = SurfaceFunction.evaluate f.du.du saddlePoint
   let fuv = SurfaceFunction.evaluate f.du.dv saddlePoint
   let fvv = SurfaceFunction.evaluate f.dv.dv saddlePoint
-  let bDirectionCandidates = NonEmpty.three Direction2d.x Direction2d.y (Direction2d.degrees 45)
+  let bDirectionCandidates = NonEmpty.three Direction2D.x Direction2D.y (Direction2D.degrees 45)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Quantity.abs . directionalSecondDerivative) bDirectionCandidates
-  let dA = Direction2d.rotateRight dB
+  let dA = Direction2D.rotateRight dB
   let vA = Vector2D.unit dA
   let vB = Vector2D.unit dB
   let Vector2D ua va = vA
@@ -85,34 +85,34 @@ quadratic subproblem saddlePoint = do
   let (m1, m2) = Quantity.minmax ((negative fab .+. sqrtD) ./. fbb, (negative fab .-. sqrtD) ./. fbb)
   let v1 = Vector2D.normalize (vA .+. m1 .*. vB)
   let v2 = Vector2D.normalize (vA .+. m2 .*. vB)
-  let d1 = Direction2d.unsafe v1
-  let d2 = Direction2d.unsafe v2
+  let d1 = Direction2D.unsafe v1
+  let d2 = Direction2D.unsafe v2
   let vX = Vector2D.normalize (v1 .+. v2)
-  let dX = Direction2d.unsafe vX
-  let frame = Frame2d.fromXAxis (Axis2d.through saddlePoint dX)
+  let dX = Direction2D.unsafe vX
+  let frame = Frame2D.fromXAxis (Axis2D.through saddlePoint dX)
   SaddleRegion{subproblem, frame, d1, d2}
 
 secondDerivative ::
   Quantity units ->
   Quantity units ->
   Quantity units ->
-  Direction2d UvSpace ->
+  Direction2D UvSpace ->
   Quantity units
 secondDerivative fuu fuv fvv direction = do
-  let Direction2d du dv = direction
+  let Direction2D du dv = direction
   du .*. du .*. fuu .+. 2 *. du .*. dv .*. fuv .+. dv .*. dv .*. fvv
 
 connectingCurve ::
   Tolerance units =>
   JoiningCurve ->
   SaddleRegion units ->
-  Curve2d Unitless UvSpace
+  Curve2D Unitless UvSpace
 connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let Point2D x y = Point2D.relativeTo frame (joiningPoint joiningCurve)
-  let saddlePoint = Frame2d.originPoint frame
-  let dx = Frame2d.xDirection frame
-  let dy = Frame2d.yDirection frame
-  let boundingAxis direction = Axis2d.through saddlePoint direction
+  let saddlePoint = Frame2D.originPoint frame
+  let dx = Frame2D.xDirection frame
+  let dy = Frame2D.yDirection frame
+  let boundingAxis direction = Axis2D.through saddlePoint direction
   case (Quantity.sign x, Quantity.sign y) of
     (Positive, Positive) ->
       connect subproblem frame d2 joiningCurve [boundingAxis dx, boundingAxis (negative dy)]
@@ -126,42 +126,42 @@ connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
 connect ::
   Tolerance units =>
   Subproblem units ->
-  Frame2d Unitless UvSpace PrincipalAxisSpace ->
-  Direction2d UvSpace ->
+  Frame2D Unitless UvSpace PrincipalAxisSpace ->
+  Direction2D UvSpace ->
   JoiningCurve ->
-  List (Axis2d Unitless UvSpace) ->
-  Curve2d Unitless UvSpace
+  List (Axis2D Unitless UvSpace) ->
+  Curve2D Unitless UvSpace
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
-  let saddlePoint = Frame2d.originPoint frame
+  let saddlePoint = Frame2D.originPoint frame
   let Subproblem{f, dvdu, dudv, uvBounds} = subproblem
-  let Bounds2d uBounds vBounds = uvBounds
+  let Bounds2D uBounds vBounds = uvBounds
   let UvPoint uP vP = saddlePoint
   let UvPoint uC vC = joiningPoint joiningCurve
-  let Direction2d du dv = outgoingDirection
+  let Direction2D du dv = outgoingDirection
   if Quantity.abs du >= Quantity.abs dv
     then do
-      let implicitBounds = NonEmpty.one (Bounds2d (Bounds uP uC) vBounds)
+      let implicitBounds = NonEmpty.one (Bounds2D (Bounds uP uC) vBounds)
       case joiningCurve of
         Incoming _ -> do
           let dudt = uP .-. uC
           let endDerivative = Vector2D dudt (dudt .*. (dv ./. du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uC uP implicitBounds frame boundingAxes
-          Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
+          Curve2D.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
         Outgoing _ -> do
           let dudt = uC .-. uP
           let startDerivative = Vector2D dudt (dudt .*. (dv ./. du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
-          Curve2d.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
+          Curve2D.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
     else do
-      let implicitBounds = NonEmpty.one (Bounds2d uBounds (Bounds vP vC))
+      let implicitBounds = NonEmpty.one (Bounds2D uBounds (Bounds vP vC))
       case joiningCurve of
         Incoming _ -> do
           let dvdt = vP .-. vC
           let endDerivative = Vector2D (dvdt .*. (du ./. dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vC vP implicitBounds frame boundingAxes
-          Curve2d.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
+          Curve2D.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
         Outgoing _ -> do
           let dvdt = vC .-. vP
           let startDerivative = Vector2D (dvdt .*. (du ./. dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vP vC implicitBounds frame boundingAxes
-          Curve2d.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
+          Curve2D.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing

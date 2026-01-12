@@ -52,21 +52,21 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
-import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
+import {-# SOURCE #-} OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Axis2d (Axis2d)
-  , Direction2d (Unit2d)
-  , Frame2d
-  , Orientation2d (Orientation2d)
-  , Plane3d
-  , PlaneOrientation3d (PlaneOrientation3d)
+  ( Axis2D (Axis2D)
+  , Direction2D (Unit2D)
+  , Frame2D
+  , Orientation2D (Orientation2D)
+  , Plane3D
+  , PlaneOrientation3D (PlaneOrientation3D)
   , Point2D
-  , Transform2d (Transform2d)
+  , Transform2D (Transform2D)
   , Vector2D (Vector2D, Vector2D#)
-  , Vector3d
+  , Vector3D
   )
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
@@ -83,8 +83,8 @@ coerce (Vector2D vx vy) = Vector2D (Quantity.coerce vx) (Quantity.coerce vy)
 
 -- | Construct a unit vector in the given direction.
 {-# INLINE unit #-}
-unit :: Direction2d space -> Vector2D Unitless space
-unit (Unit2d vector) = vector
+unit :: Direction2D space -> Vector2D Unitless space
+unit (Unit2D vector) = vector
 
 {-| Construct a vector from just an X component.
 
@@ -152,10 +152,10 @@ xComponent (Vector2D vx _) = vx
 yComponent :: Vector2D units space -> Quantity units
 yComponent (Vector2D _ vy) = vy
 
-componentIn :: Direction2d space -> Vector2D units space -> Quantity units
+componentIn :: Direction2D space -> Vector2D units space -> Quantity units
 componentIn = dot
 
-projectionIn :: Direction2d space -> Vector2D units space -> Vector2D units space
+projectionIn :: Direction2D space -> Vector2D units space -> Vector2D units space
 projectionIn givenDirection vector = givenDirection .*. componentIn givenDirection vector
 
 -- | Get the X and Y components of a vector as a tuple.
@@ -215,18 +215,18 @@ data IsZero = IsZero deriving (Eq, Show)
 The current tolerance will be used to check if the vector is zero
 (and therefore does not have a direction).
 -}
-direction :: Tolerance units => Vector2D units space -> Result IsZero (Direction2d space)
+direction :: Tolerance units => Vector2D units space -> Result IsZero (Direction2D space)
 direction vector = do
   let vm = magnitude vector
-  if vm ~= Quantity.zero then Error IsZero else Ok (Unit2d (vector ./. vm))
+  if vm ~= Quantity.zero then Error IsZero else Ok (Unit2D (vector ./. vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
   Vector2D units space ->
-  Result IsZero (Quantity units, Direction2d space)
+  Result IsZero (Quantity units, Direction2D space)
 magnitudeAndDirection vector = do
   let vm = magnitude vector
-  if vm ~= Quantity.zero then Error IsZero else Ok (vm, Unit2d (vector ./. vm))
+  if vm ~= Quantity.zero then Error IsZero else Ok (vm, Unit2D (vector ./. vm))
 
 {-| Normalize a vector.
 
@@ -247,24 +247,24 @@ rotateRight :: Vector2D units space -> Vector2D units space
 rotateRight (Vector2D vx vy) = Vector2D vy (negative vx)
 
 {-# INLINE placeIn #-}
-placeIn :: Frame2d frameUnits global local -> Vector2D units local -> Vector2D units global
+placeIn :: Frame2D frameUnits global local -> Vector2D units local -> Vector2D units global
 placeIn frame = placeInOrientation frame.orientation
 
 placeInOrientation ::
-  Orientation2d global ->
+  Orientation2D global ->
   Vector2D units local ->
   Vector2D units global
-placeInOrientation (Orientation2d i j) (Vector2D vx vy) = vx .*. i .+. vy .*. j
+placeInOrientation (Orientation2D i j) (Vector2D vx vy) = vx .*. i .+. vy .*. j
 
 {-# INLINE relativeTo #-}
-relativeTo :: Frame2d frameUnits global local -> Vector2D units global -> Vector2D units local
+relativeTo :: Frame2D frameUnits global local -> Vector2D units global -> Vector2D units local
 relativeTo frame = relativeToOrientation frame.orientation
 
 relativeToOrientation ::
-  Orientation2d global ->
+  Orientation2D global ->
   Vector2D units global ->
   Vector2D units local
-relativeToOrientation (Orientation2d i j) vector = Vector2D (vector `dot` i) (vector `dot` j)
+relativeToOrientation (Orientation2D i j) vector = Vector2D (vector `dot` i) (vector `dot` j)
 
 {-| Convert a 2D vector to 3D vector by placing it on a plane.
 
@@ -272,11 +272,11 @@ Given a 2D vector defined within a plane's coordinate system,
 this returns the corresponding 3D vector.
 -}
 {-# INLINE placeOn #-}
-placeOn :: Plane3d global local -> Vector2D units local -> Vector3d units global
+placeOn :: Plane3D global local -> Vector2D units local -> Vector3D units global
 placeOn plane = placeOnOrientation plane.orientation
 
-placeOnOrientation :: PlaneOrientation3d global -> Vector2D units local -> Vector3d units global
-placeOnOrientation (PlaneOrientation3d i j) (Vector2D vx vy) = vx .*. i .+. vy .*. j
+placeOnOrientation :: PlaneOrientation3D global -> Vector2D units local -> Vector3D units global
+placeOnOrientation (PlaneOrientation3D i j) (Vector2D vx vy) = vx .*. i .+. vy .*. j
 
 convert :: Quantity (units2 ?/? units1) -> Vector2D units1 space -> Vector2D units2 space
 convert factor vector = Units.simplify (vector ?*? factor)
@@ -288,11 +288,11 @@ sum :: List (Vector2D units space) -> Vector2D units space
 sum = List.foldl (.+.) zero
 
 transformBy ::
-  Transform2d tag translationUnits space ->
+  Transform2D tag translationUnits space ->
   Vector2D units space ->
   Vector2D units space
 transformBy transform vector = do
-  let Transform2d _ i j = transform
+  let Transform2D _ i j = transform
   let Vector2D vx vy = vector
   vx .*. i .+. vy .*. j
 
@@ -311,7 +311,7 @@ rotateBy theta (Vector2D vx vy) = do
 For example, mirroring in the X direction
 will negate the vector's X component and leave its Y component unchanged.
 -}
-mirrorIn :: Direction2d space -> Vector2D units space -> Vector2D units space
+mirrorIn :: Direction2D space -> Vector2D units space -> Vector2D units space
 mirrorIn mirrorDirection vector = vector .-. 2 *. projectionIn mirrorDirection vector
 
 {-| Mirror a vector across a given axis.
@@ -321,11 +321,11 @@ For example, mirroring a vector across *any* axis parallel to the X axis
 will negate the vector's Y component while leaving its X component unchanged.
 -}
 mirrorAcross ::
-  Axis2d originUnits space ->
+  Axis2D originUnits space ->
   Vector2D units space ->
   Vector2D units space
-mirrorAcross (Axis2d _ axisDirection) = mirrorIn (Direction2d.rotateLeft axisDirection)
+mirrorAcross (Axis2D _ axisDirection) = mirrorIn (Direction2D.rotateLeft axisDirection)
 
-scaleIn :: Direction2d space -> Number -> Vector2D units space -> Vector2D units space
+scaleIn :: Direction2D space -> Number -> Vector2D units space -> Vector2D units space
 scaleIn scaleDirection scale vector =
   vector .+. (scale .- 1) .*. projectionIn scaleDirection vector

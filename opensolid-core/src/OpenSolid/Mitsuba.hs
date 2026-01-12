@@ -15,37 +15,37 @@ import Data.ByteString.Lazy qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
-import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Camera3d (Camera3d)
-import OpenSolid.Camera3d qualified as Camera3d
+import OpenSolid.Body3D qualified as Body3D
+import OpenSolid.Camera3D (Camera3D)
+import OpenSolid.Camera3D qualified as Camera3D
 import OpenSolid.Color qualified as Color
-import OpenSolid.Convention3d (Convention3d)
-import OpenSolid.Convention3d qualified as Convention3d
-import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Direction3d qualified as Direction3d
+import OpenSolid.Convention3D (Convention3D)
+import OpenSolid.Convention3D qualified as Convention3D
+import OpenSolid.Direction3D (Direction3D)
+import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Frame3d (Frame3d)
-import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Frame3D (Frame3D)
+import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.Model3d (Model3d)
-import OpenSolid.Model3d qualified as Model3d
-import OpenSolid.Orientation3d qualified as Orientation3d
+import OpenSolid.Model3D (Model3D)
+import OpenSolid.Model3D qualified as Model3D
+import OpenSolid.Orientation3D qualified as Orientation3D
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
-import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
-import OpenSolid.SurfaceVertex3d (SurfaceVertex3d)
-import OpenSolid.SurfaceVertex3d qualified as SurfaceVertex3d
+import OpenSolid.SurfaceVertex3D (SurfaceVertex3D)
+import OpenSolid.SurfaceVertex3D qualified as SurfaceVertex3D
 import OpenSolid.Text qualified as Text
 
 -- | The lighting to use for a Mitsuba scene.
 data Lighting space where
-  EnvironmentMap :: Frame3d global local -> Text -> Lighting global
+  EnvironmentMap :: Frame3D global local -> Text -> Lighting global
 
 instance FFI (Lighting FFI.Space) where
   representation = FFI.nestedClassRepresentation "Mitsuba" "Lighting"
@@ -54,21 +54,21 @@ instance FFI (Lighting FFI.Space) where
 
 Source: https://github.com/mitsuba-renderer/mitsuba-blender/discussions/47#discussioncomment-3847744
 -}
-convention :: Convention3d
+convention :: Convention3D
 convention =
-  Convention3d.custom
-    Orientation3d.rightwardDirection
-    Orientation3d.upwardDirection
-    Orientation3d.backwardDirection
+  Convention3D.custom
+    Orientation3D.rightwardDirection
+    Orientation3D.upwardDirection
+    Orientation3D.backwardDirection
 
-xDirection :: Frame3d global local -> Direction3d global
-xDirection frame = Convention3d.xDirection frame.orientation convention
+xDirection :: Frame3D global local -> Direction3D global
+xDirection frame = Convention3D.xDirection frame.orientation convention
 
-yDirection :: Frame3d global local -> Direction3d global
-yDirection frame = Convention3d.yDirection frame.orientation convention
+yDirection :: Frame3D global local -> Direction3D global
+yDirection frame = Convention3D.yDirection frame.orientation convention
 
-zDirection :: Frame3d global local -> Direction3d global
-zDirection frame = Convention3d.zDirection frame.orientation convention
+zDirection :: Frame3D global local -> Direction3D global
+zDirection frame = Convention3D.zDirection frame.orientation convention
 
 {-| Write a Mitsuba scene out to an XML scene description and a file containing binary mesh data.
 
@@ -90,13 +90,13 @@ for example with 'mitsuba.load_file(path_to_xml_file, spp=256, width=1920, heigh
 -}
 writeFiles ::
   "path" ::: Text ->
-  "model" ::: Model3d space ->
+  "model" ::: Model3D space ->
   "resolution" ::: Resolution Meters ->
-  "camera" ::: Camera3d space ->
+  "camera" ::: Camera3D space ->
   "lighting" ::: Lighting space ->
   IO ()
 writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named lighting) = do
-  let collectedMeshes = Model3d.inspect (collectMeshes resolution) model
+  let collectedMeshes = Model3D.inspect (collectMeshes resolution) model
   let (meshes, properties) = List.unzip2 collectedMeshes
   let meshFileName = path <> ".serialized"
   writeMeshes meshFileName meshes
@@ -109,7 +109,7 @@ writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named l
   let sceneFileName = path <> ".xml"
   IO.writeUtf8 sceneFileName sceneXml
 
-type Mesh space = Mesh.Mesh (SurfaceVertex3d space)
+type Mesh space = Mesh.Mesh (SurfaceVertex3D space)
 
 data Properties = Properties
   { material :: PbrMaterial
@@ -118,20 +118,20 @@ data Properties = Properties
   }
 
 collectMeshes ::
-  Model3d.Traversal =>
+  Model3D.Traversal =>
   Resolution Meters ->
-  Model3d space ->
+  Model3D space ->
   List ((Mesh space, "name" ::: Text), Properties)
 collectMeshes resolution model = case model of
-  Model3d.Group children -> List.combine (collectMeshes resolution) children
-  Model3d.Body body -> do
-    let mesh = Body3d.toSurfaceMesh resolution body
-    let material = Model3d.traversal.currentPbrMaterial
-    let opacity = Model3d.traversal.currentMultipliedOpacity
-    let qualifiedName = case Model3d.traversal.ownName of
+  Model3D.Group children -> List.combine (collectMeshes resolution) children
+  Model3D.Body body -> do
+    let mesh = Body3D.toSurfaceMesh resolution body
+    let material = Model3D.traversal.currentPbrMaterial
+    let opacity = Model3D.traversal.currentMultipliedOpacity
+    let qualifiedName = case Model3D.traversal.ownName of
           Nothing -> "" -- A mesh only has a fully-qualified name if it has a name of its own
           Just ownName -> do
-            let nameComponents = Model3d.traversal.parentNames <> [ownName]
+            let nameComponents = Model3D.traversal.parentNames <> [ownName]
             Text.join "." nameComponents
     let properties = Properties{material, opacity, qualifiedName}
     List.singleton ((mesh, #name qualifiedName), properties)
@@ -139,13 +139,13 @@ collectMeshes resolution model = case model of
 {-| Specify an environment map to be used as lighting.
 
 You should pass a frame that defines the orientation of the environment map
-(which can often just be 'World3d.frame')
+(which can often just be 'World3D.frame')
 and the path to the environment map image itself.
 
 The environment map image will typically be in OpenEXR format;
 https://polyhaven.com is a good source for free ones.
 -}
-environmentMap :: Frame3d global local -> Text -> Lighting global
+environmentMap :: Frame3D global local -> Text -> Lighting global
 environmentMap = EnvironmentMap
 
 {-| Write a list of named meshes out to a single Mitsuba .serialized file.
@@ -203,18 +203,18 @@ meshDataBuilder mesh name = do
     , Binary.combine faceIndicesBuilder meshFaceIndices
     ]
 
-pointBuilder :: SurfaceVertex3d space -> Builder
+pointBuilder :: SurfaceVertex3D space -> Builder
 pointBuilder vertex = do
-  let (px, py, pz) = Point3d.coordinates convention (SurfaceVertex3d.position vertex)
+  let (px, py, pz) = Point3D.coordinates convention (SurfaceVertex3D.position vertex)
   Binary.concat
     [ Binary.float64LE (Length.inMeters px)
     , Binary.float64LE (Length.inMeters py)
     , Binary.float64LE (Length.inMeters pz)
     ]
 
-normalBuilder :: SurfaceVertex3d space -> Builder
+normalBuilder :: SurfaceVertex3D space -> Builder
 normalBuilder vertex = do
-  let (nx, ny, nz) = Direction3d.components convention (SurfaceVertex3d.normal vertex)
+  let (nx, ny, nz) = Direction3D.components convention (SurfaceVertex3D.normal vertex)
   Binary.concat
     [ Binary.float64LE nx
     , Binary.float64LE ny
@@ -246,7 +246,7 @@ attributeText :: (Text, Text) -> Text
 attributeText (name, value) = name <> "=\"" <> value <> "\""
 
 sceneDocument ::
-  "camera" ::: Camera3d space ->
+  "camera" ::: Camera3D space ->
   "lighting" ::: Lighting space ->
   "meshProperties" ::: List Properties ->
   "meshFileName" ::: Text ->
@@ -271,13 +271,13 @@ defaultNode name value = XmlNode "default" [("name", name), ("value", value)] []
 lightingNode :: Lighting space -> XmlNode
 lightingNode lighting = case lighting of
   EnvironmentMap frame path -> do
-    let (x0, y0, z0) = Point3d.coordinates convention frame.originPoint
+    let (x0, y0, z0) = Point3D.coordinates convention frame.originPoint
     let px = Length.inMeters x0
     let py = Length.inMeters y0
     let pz = Length.inMeters z0
-    let (ix, iy, iz) = Direction3d.components convention (xDirection frame)
-    let (jx, jy, jz) = Direction3d.components convention (yDirection frame)
-    let (kx, ky, kz) = Direction3d.components convention (zDirection frame)
+    let (ix, iy, iz) = Direction3D.components convention (xDirection frame)
+    let (jx, jy, jz) = Direction3D.components convention (yDirection frame)
+    let (kx, ky, kz) = Direction3D.components convention (zDirection frame)
     let transformValues = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0, 0, 0, 1]
     let transformString = Text.join " " (List.map Text.number transformValues)
     let matrixNode = XmlNode "matrix" [("value", transformString)] []
@@ -316,7 +316,7 @@ bsdfNode material opacity = do
         , XmlNode "bsdf" [("type", "twosided")] [principledNode]
         ]
 
-cameraNode :: Camera3d space -> XmlNode
+cameraNode :: Camera3D space -> XmlNode
 cameraNode camera = do
   let filmNode =
         XmlNode "film" [("type", "hdrfilm")] $
@@ -327,7 +327,7 @@ cameraNode camera = do
         XmlNode "sampler" [("type", "multijitter")] $
           [typedNode "integer" "sample_count" "$spp"]
   case camera.projection of
-    Camera3d.Orthographic fovHeight -> do
+    Camera3D.Orthographic fovHeight -> do
       let scale = Length.inMeters fovHeight ./ 2
       XmlNode "sensor" [("type", "orthographic")] $
         [ XmlNode "transform" [("name", "to_world")] $
@@ -337,7 +337,7 @@ cameraNode camera = do
         , filmNode
         , samplerNode
         ]
-    Camera3d.Perspective fovAngle -> do
+    Camera3D.Perspective fovAngle -> do
       XmlNode "sensor" [("type", "perspective")] $
         [ floatNode "fov" (Angle.inDegrees fovAngle)
         , stringNode "fov_axis" "y"
@@ -358,14 +358,14 @@ floatNode name value = typedNode "float" name (Text.number value)
 stringNode :: Text -> Text -> XmlNode
 stringNode name value = typedNode "string" name value
 
-cameraTransformationNode :: Camera3d space -> XmlNode
+cameraTransformationNode :: Camera3D space -> XmlNode
 cameraTransformationNode camera = do
-  let (x0, y0, z0) = Point3d.coordinates convention camera.eyePoint
+  let (x0, y0, z0) = Point3D.coordinates convention camera.eyePoint
   let px = Length.inMeters x0
   let py = Length.inMeters y0
   let pz = Length.inMeters z0
-  let (ix, iy, iz) = Direction3d.components convention camera.leftwardDirection
-  let (jx, jy, jz) = Direction3d.components convention camera.upwardDirection
-  let (kx, ky, kz) = Direction3d.components convention camera.forwardDirection
+  let (ix, iy, iz) = Direction3D.components convention camera.leftwardDirection
+  let (jx, jy, jz) = Direction3D.components convention camera.upwardDirection
+  let (kx, ky, kz) = Direction3D.components convention camera.forwardDirection
   let matrixComponents = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0, 0, 0, 1]
   XmlNode "matrix" [("value", Text.join " " (List.map Text.number matrixComponents))] []

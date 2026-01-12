@@ -7,11 +7,11 @@ module OpenSolid.Debug.Plot
   )
 where
 
-import OpenSolid.Bounds2d (Bounds2d)
-import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds2D (Bounds2D)
+import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Point2D (Point2D)
@@ -37,8 +37,8 @@ axisHeadLength = Length.millimeters 3
 axisHeadWidth :: Length
 axisHeadWidth = Length.millimeters 2
 
-viewBox :: Point2D Unitless Space -> Point2D Unitless Space -> Bounds2d Meters Space
-viewBox p1 p2 = Bounds2d.hull2 (Point2D.convert scale p1) (Point2D.convert scale p2)
+viewBox :: Point2D Unitless Space -> Point2D Unitless Space -> Bounds2D Meters Space
+viewBox p1 p2 = Bounds2D.hull2 (Point2D.convert scale p1) (Point2D.convert scale p2)
 
 xAxis :: Number -> Number -> Svg Space
 xAxis x1 x2 =
@@ -61,5 +61,5 @@ curve = curveWith []
 
 curveWith :: List (Svg.Attribute Space) -> Curve Unitless -> Svg Space
 curveWith attributes givenCurve = do
-  let curve2d = Curve2d.xy Curve.t givenCurve
-  Svg.curveWith attributes resolution (Curve2d.convert scale curve2d)
+  let curve2D = Curve2D.xy Curve.t givenCurve
+  Svg.curveWith attributes resolution (Curve2D.convert scale curve2D)

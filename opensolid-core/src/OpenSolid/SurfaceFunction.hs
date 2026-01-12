@@ -35,20 +35,20 @@ where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
-import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
+import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
-import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Direction2d (Direction2d (Direction2d))
-import OpenSolid.Direction3d (Direction3d)
+import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Direction2D (Direction2D (Direction2D))
+import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DivisionByZero (DivisionByZero)
-import OpenSolid.Domain1d qualified as Domain1d
-import OpenSolid.Domain2d (Domain2d (Domain2d))
-import OpenSolid.Domain2d qualified as Domain2d
+import OpenSolid.Domain1D qualified as Domain1D
+import OpenSolid.Domain2D (Domain2D (Domain2D))
+import OpenSolid.Domain2D qualified as Domain2D
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
@@ -60,7 +60,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Solve2d qualified as Solve2d
+import OpenSolid.Solve2D qualified as Solve2D
 import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
 import OpenSolid.SurfaceFunction.Desingularization qualified as SurfaceFunction.Desingularization
 import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
@@ -82,13 +82,13 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.Vector3d (Vector3d)
-import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
+import OpenSolid.Vector3D (Vector3D)
+import OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 data SurfaceFunction units = SurfaceFunction
   { compiled :: Compiled units
@@ -114,7 +114,7 @@ instance
   Intersects (SurfaceFunction units1) (Quantity units2) units1
   where
   function `intersects` value =
-    -- TODO optimize this to use a special Solve2d.find or similar
+    -- TODO optimize this to use a special Solve2D.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and the full geometry of each)
     case zeros (function .-. value) of
@@ -234,7 +234,7 @@ instance
   Multiplication
     (SurfaceFunction units1)
     (Vector2D units2 space)
-    (VectorSurfaceFunction2d units3 space)
+    (VectorSurfaceFunction2D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
@@ -242,16 +242,16 @@ instance
   Multiplication_
     (SurfaceFunction units1)
     (Vector2D units2 space)
-    (VectorSurfaceFunction2d (units1 ?*? units2) space)
+    (VectorSurfaceFunction2D (units1 ?*? units2) space)
   where
-  function ?*? vector = function ?*? VectorSurfaceFunction2d.constant vector
+  function ?*? vector = function ?*? VectorSurfaceFunction2D.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Vector2D units1 space)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction2d units3 space)
+    (VectorSurfaceFunction2D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
@@ -259,23 +259,23 @@ instance
   Multiplication_
     (Vector2D units1 space)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction2d (units1 ?*? units2) space)
+    (VectorSurfaceFunction2D (units1 ?*? units2) space)
   where
-  vector ?*? function = VectorSurfaceFunction2d.constant vector ?*? function
+  vector ?*? function = VectorSurfaceFunction2D.constant vector ?*? function
 
 instance
   Multiplication
     (SurfaceFunction units)
-    (Direction2d space)
-    (VectorSurfaceFunction2d units space)
+    (Direction2D space)
+    (VectorSurfaceFunction2D units space)
   where
   lhs .*. rhs = lhs .*. Vector2D.unit rhs
 
 instance
   Multiplication
-    (Direction2d space)
+    (Direction2D space)
     (SurfaceFunction units)
-    (VectorSurfaceFunction2d units space)
+    (VectorSurfaceFunction2D units space)
   where
   lhs .*. rhs = Vector2D.unit lhs .*. rhs
 
@@ -283,51 +283,51 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction units1)
-    (Vector3d units2 space)
-    (VectorSurfaceFunction3d units3 space)
+    (Vector3D units2 space)
+    (VectorSurfaceFunction3D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (SurfaceFunction units1)
-    (Vector3d units2 space)
-    (VectorSurfaceFunction3d (units1 ?*? units2) space)
+    (Vector3D units2 space)
+    (VectorSurfaceFunction3D (units1 ?*? units2) space)
   where
-  function ?*? vector = function ?*? VectorSurfaceFunction3d.constant vector
+  function ?*? vector = function ?*? VectorSurfaceFunction3D.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Vector3d units1 space)
+    (Vector3D units1 space)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d units3 space)
+    (VectorSurfaceFunction3D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (Vector3d units1 space)
+    (Vector3D units1 space)
     (SurfaceFunction units2)
-    (VectorSurfaceFunction3d (units1 ?*? units2) space)
+    (VectorSurfaceFunction3D (units1 ?*? units2) space)
   where
-  vector ?*? function = VectorSurfaceFunction3d.constant vector ?*? function
+  vector ?*? function = VectorSurfaceFunction3D.constant vector ?*? function
 
 instance
   Multiplication
     (SurfaceFunction units)
-    (Direction3d space)
-    (VectorSurfaceFunction3d units space)
+    (Direction3D space)
+    (VectorSurfaceFunction3D units space)
   where
-  lhs .*. rhs = lhs .*. Vector3d.unit rhs
+  lhs .*. rhs = lhs .*. Vector3D.unit rhs
 
 instance
   Multiplication
-    (Direction3d space)
+    (Direction3D space)
     (SurfaceFunction units)
-    (VectorSurfaceFunction3d units space)
+    (VectorSurfaceFunction3D units space)
   where
-  lhs .*. rhs = Vector3d.unit lhs .*. rhs
+  lhs .*. rhs = Vector3D.unit lhs .*. rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -367,8 +367,8 @@ derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 derivative U = (.du)
 derivative V = (.dv)
 
-derivativeIn :: Direction2d UvSpace -> SurfaceFunction units -> SurfaceFunction units
-derivativeIn (Direction2d dx dy) function =
+derivativeIn :: Direction2D UvSpace -> SurfaceFunction units -> SurfaceFunction units
+derivativeIn (Direction2D dx dy) function =
   dx .*. function.du .+. dy .*. function.dv
 
 zero :: SurfaceFunction units
@@ -553,11 +553,11 @@ zeros function
       -- in subdomains where we know the denominator is non-zero
       let dudv = unsafeQuotient (negative fv) fu
       let dvdu = unsafeQuotient (negative fu) fv
-      case Solve2d.search (findZeros function dudv dvdu) AllZeroTypes of
+      case Solve2D.search (findZeros function dudv dvdu) AllZeroTypes of
         Ok solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions
           Ok (PartialZeros.finalize function dvdu dudv partialZeros)
-        Error Solve2d.InfiniteRecursion -> throw HigherOrderZero
+        Error Solve2D.InfiniteRecursion -> throw HigherOrderZero
 
 addSolution :: PartialZeros units -> Solution units -> PartialZeros units
 addSolution partialZeros solution = case solution of
@@ -581,19 +581,19 @@ findZeros ::
   SurfaceFunction Unitless ->
   SurfaceFunction Unitless ->
   FindZerosContext ->
-  Domain2d ->
-  Solve2d.Exclusions exclusions ->
-  Solve2d.Action exclusions FindZerosContext (Solution units)
+  Domain2D ->
+  Solve2D.Exclusions exclusions ->
+  Solve2D.Action exclusions FindZerosContext (Solution units)
 findZeros f dudv dvdu context subdomain exclusions = do
   -- TODO find zeros along unit domain boundaries
   -- (including nasty cases like curves emanating from a saddle point
   -- being along a domain boundary)
   let subproblem = Subproblem.new f dudv dvdu subdomain
   if not (Subproblem.isZeroCandidate subproblem)
-    then Solve2d.pass
+    then Solve2D.pass
     else case exclusions of
-      Solve2d.SomeExclusions -> Solve2d.recurse context
-      Solve2d.NoExclusions ->
+      Solve2D.SomeExclusions -> Solve2D.recurse context
+      Solve2D.NoExclusions ->
         case context of
           CrossingCurvesOnly -> findCrossingCurves subproblem
           AllZeroTypes -> do
@@ -605,7 +605,7 @@ findZeros f dudv dvdu context subdomain exclusions = do
 findTangentSolutions ::
   Tolerance units =>
   Subproblem units ->
-  Solve2d.Action Solve2d.NoExclusions FindZerosContext (Solution units)
+  Solve2D.Action Solve2D.NoExclusions FindZerosContext (Solution units)
 findTangentSolutions subproblem = do
   let Subproblem{f, subdomain, uvBounds, fuuBounds, fuvBounds, fvvBounds} = subproblem
   let determinant = fuuBounds ?*? fvvBounds .-. fuvBounds ?*? fuvBounds
@@ -617,16 +617,16 @@ findTangentSolutions subproblem = do
       let fuv = f.du.dv
       let fvv = f.dv.dv
       let maybePoint =
-            Solve2d.unique
-              (\bounds -> VectorBounds2d (evaluateBounds fu bounds) (evaluateBounds fv bounds))
+            Solve2D.unique
+              (\bounds -> VectorBounds2D (evaluateBounds fu bounds) (evaluateBounds fv bounds))
               (\point -> Vector2D (evaluate fu point) (evaluate fv point))
               (\point -> Vector2D (evaluate fuu point) (evaluate fuv point))
               (\point -> Vector2D (evaluate fuv point) (evaluate fvv point))
               uvBounds
       case maybePoint of
-        Nothing -> Solve2d.recurse CrossingCurvesOnly
+        Nothing -> Solve2D.recurse CrossingCurvesOnly
         Just point ->
-          if Bounds2d.includes point (Domain2d.interior subdomain)
+          if Bounds2D.includes point (Domain2D.interior subdomain)
             && evaluate f point ~= Quantity.zero
             then case determinantSign of
               Positive -> do
@@ -635,26 +635,26 @@ findTangentSolutions subproblem = do
                 -- to reach this code path, so we can take the sign of either one
                 -- to determine the sign of the tangent point
                 let sign = Quantity.sign (Bounds.lower fuuBounds)
-                Solve2d.return (TangentPointSolution (point, sign))
+                Solve2D.return (TangentPointSolution (point, sign))
               Negative -> do
                 -- Saddle region
                 let saddleRegion = SaddleRegion.quadratic subproblem point
-                Solve2d.return (SaddleRegionSolution saddleRegion)
+                Solve2D.return (SaddleRegionSolution saddleRegion)
             else do
-              Solve2d.recurse CrossingCurvesOnly
+              Solve2D.recurse CrossingCurvesOnly
     Unresolved -> do
       -- TODO check for tangent curves
-      Solve2d.recurse AllZeroTypes
+      Solve2D.recurse AllZeroTypes
 
 findCrossingCurves ::
   Tolerance units =>
   Subproblem units ->
-  Solve2d.Action Solve2d.NoExclusions FindZerosContext (Solution units)
+  Solve2D.Action Solve2D.NoExclusions FindZerosContext (Solution units)
 findCrossingCurves subproblem =
   case crossingCurve subproblem of
-    Unresolved -> Solve2d.recurse CrossingCurvesOnly
-    Resolved Nothing -> Solve2d.pass
-    Resolved (Just curve) -> Solve2d.return (CrossingCurveSolution curve)
+    Unresolved -> Solve2D.recurse CrossingCurvesOnly
+    Resolved Nothing -> Solve2D.pass
+    Resolved (Just curve) -> Solve2D.return (CrossingCurveSolution curve)
 
 crossingCurve ::
   Tolerance units =>
@@ -752,13 +752,13 @@ northwestCrossingCurve subproblem = do
 
 diagonalSegment ::
   Tolerance units =>
-  (UvPoint, Domain2d.Boundary) ->
-  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
   PartialZeros.CrossingSegment
 diagonalSegment start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
-  PartialZeros.diagonalSegment start end (Bounds2d.hull2 startPoint endPoint)
+  PartialZeros.diagonalSegment start end (Bounds2D.hull2 startPoint endPoint)
 
 horizontalCrossingCurve ::
   Tolerance units =>
@@ -794,8 +794,8 @@ westCrossingCurve subproblem = do
 horizontalCurve ::
   Tolerance units =>
   Subproblem units ->
-  (UvPoint, Domain2d.Boundary) ->
-  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
 horizontalCurve Subproblem{f, dvdu, subdomain, uvBounds} start end = do
   let startPoint = Pair.first start
@@ -803,9 +803,9 @@ horizontalCurve Subproblem{f, dvdu, subdomain, uvBounds} start end = do
   let uStart = Point2D.xCoordinate startPoint
   let uEnd = Point2D.xCoordinate endPoint
   let curve = HorizontalCurve.new f dvdu uStart uEnd (NonEmpty.one uvBounds)
-  let Domain2d _ vSubdomain = subdomain
-  let Bounds2d _ curveVBounds = Curve2d.bounds curve
-  if Bounds.contains curveVBounds (Domain1d.interior vSubdomain)
+  let Domain2D _ vSubdomain = subdomain
+  let Bounds2D _ curveVBounds = Curve2D.bounds curve
+  if Bounds.contains curveVBounds (Domain1D.interior vSubdomain)
     then Resolved (PartialZeros.horizontalSegment start end uvBounds)
     else Unresolved
 
@@ -843,8 +843,8 @@ northCrossingCurve subproblem = do
 verticalCurve ::
   Tolerance units =>
   Subproblem units ->
-  (UvPoint, Domain2d.Boundary) ->
-  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
 verticalCurve Subproblem{f, dudv, subdomain, uvBounds} start end = do
   let startPoint = Pair.first start
@@ -852,8 +852,8 @@ verticalCurve Subproblem{f, dudv, subdomain, uvBounds} start end = do
   let vStart = Point2D.yCoordinate startPoint
   let vEnd = Point2D.yCoordinate endPoint
   let curve = VerticalCurve.new f dudv vStart vEnd (NonEmpty.one uvBounds)
-  let Domain2d uSubdomain _ = subdomain
-  let Bounds2d curveUBounds _ = Curve2d.bounds curve
-  if Bounds.contains curveUBounds (Domain1d.interior uSubdomain)
+  let Domain2D uSubdomain _ = subdomain
+  let Bounds2D curveUBounds _ = Curve2D.bounds curve
+  if Bounds.contains curveUBounds (Domain1D.interior uSubdomain)
     then Resolved (PartialZeros.verticalSegment start end uvBounds)
     else Unresolved

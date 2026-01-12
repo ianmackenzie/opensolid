@@ -10,15 +10,15 @@ import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import Prelude qualified
 
 type Blendable function =
   ( Multiplication (SurfaceFunction Unitless) function function
   , Multiplication (Quantity Unitless) function function
   , Addition function function function
-  , Composition (SurfaceFunction2d Unitless UvSpace) function function
+  , Composition (SurfaceFunction2D Unitless UvSpace) function function
   , HasField "du" function function
   , HasField "dv" function function
   )
@@ -159,32 +159,32 @@ blend (f00, f01, f02) (f10, f11) t = do
   let b11 = Curve.b11 `compose` t
   b00 .*. f00 .+. b01 .*. f01 .+. b02 .*. f02 .+. b10 .*. f10 .+. b11 .*. f11
 
-uParameterization :: Number -> SurfaceFunction2d Unitless UvSpace
-uParameterization vValue = SurfaceFunction2d.xy SurfaceFunction.u (SurfaceFunction.constant vValue)
+uParameterization :: Number -> SurfaceFunction2D Unitless UvSpace
+uParameterization vValue = SurfaceFunction2D.xy SurfaceFunction.u (SurfaceFunction.constant vValue)
 
-uParameterizationV0 :: SurfaceFunction2d Unitless UvSpace
+uParameterizationV0 :: SurfaceFunction2D Unitless UvSpace
 uParameterizationV0 = uParameterization 0
 
-uParameterizationVT0 :: SurfaceFunction2d Unitless UvSpace
+uParameterizationVT0 :: SurfaceFunction2D Unitless UvSpace
 uParameterizationVT0 = uParameterization Desingularization.t0
 
-uParameterizationVT1 :: SurfaceFunction2d Unitless UvSpace
+uParameterizationVT1 :: SurfaceFunction2D Unitless UvSpace
 uParameterizationVT1 = uParameterization Desingularization.t1
 
-uParameterizationV1 :: SurfaceFunction2d Unitless UvSpace
+uParameterizationV1 :: SurfaceFunction2D Unitless UvSpace
 uParameterizationV1 = uParameterization 1
 
-vParameterization :: Number -> SurfaceFunction2d Unitless UvSpace
-vParameterization uValue = SurfaceFunction2d.xy (SurfaceFunction.constant uValue) SurfaceFunction.v
+vParameterization :: Number -> SurfaceFunction2D Unitless UvSpace
+vParameterization uValue = SurfaceFunction2D.xy (SurfaceFunction.constant uValue) SurfaceFunction.v
 
-vParameterizationU0 :: SurfaceFunction2d Unitless UvSpace
+vParameterizationU0 :: SurfaceFunction2D Unitless UvSpace
 vParameterizationU0 = vParameterization 0
 
-vParameterizationUT0 :: SurfaceFunction2d Unitless UvSpace
+vParameterizationUT0 :: SurfaceFunction2D Unitless UvSpace
 vParameterizationUT0 = vParameterization Desingularization.t0
 
-vParameterizationUT1 :: SurfaceFunction2d Unitless UvSpace
+vParameterizationUT1 :: SurfaceFunction2D Unitless UvSpace
 vParameterizationUT1 = vParameterization Desingularization.t1
 
-vParameterizationU1 :: SurfaceFunction2d Unitless UvSpace
+vParameterizationU1 :: SurfaceFunction2D Unitless UvSpace
 vParameterizationU1 = vParameterization 1

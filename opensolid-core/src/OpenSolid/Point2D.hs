@@ -40,22 +40,22 @@ module OpenSolid.Point2D
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Axis2d (Axis2d)
-  , Frame2d (Frame2d)
-  , Orientation2d (Orientation2d)
-  , Plane3d (Plane3d)
-  , PlaneOrientation3d (PlaneOrientation3d)
+  ( Axis2D (Axis2D)
+  , Frame2D (Frame2D)
+  , Orientation2D (Orientation2D)
+  , Plane3D (Plane3D)
+  , PlaneOrientation3D (PlaneOrientation3D)
   , Point2D (Point2D, Position2D)
-  , Point3d
-  , Transform2d (Transform2d)
+  , Point3D
+  , Transform2D (Transform2D)
   )
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
-import {-# SOURCE #-} OpenSolid.Transform2d qualified as Transform2d
+import {-# SOURCE #-} OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Unboxed.Math
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
@@ -76,8 +76,8 @@ x px = Point2D px Quantity.zero
 y :: Quantity units -> Point2D units space
 y py = Point2D Quantity.zero py
 
-along :: Axis2d units space -> Quantity units -> Point2D units space
-along (Axis2d originPoint direction) distance = originPoint .+. distance .*. direction
+along :: Axis2D units space -> Quantity units -> Point2D units space
+along (Axis2D originPoint direction) distance = originPoint .+. distance .*. direction
 
 {-| Construct a point from polar coordinates (radius and angle).
 
@@ -157,28 +157,28 @@ distanceFrom# (Point2D (Quantity# x1#) (Quantity# y1#)) (Point2D (Quantity# x2#)
 angleFrom :: Point2D units space -> Point2D units space -> Angle
 angleFrom p1 p2 = Vector2D.angle (p2 .-. p1)
 
-distanceAlong :: Axis2d units space -> Point2D units space -> Quantity units
-distanceAlong (Axis2d originPoint direction) point = direction `dot` (point .-. originPoint)
+distanceAlong :: Axis2D units space -> Point2D units space -> Quantity units
+distanceAlong (Axis2D originPoint direction) point = direction `dot` (point .-. originPoint)
 
-distanceLeftOf :: Axis2d units space -> Point2D units space -> Quantity units
-distanceLeftOf (Axis2d originPoint direction) point = direction `cross` (point .-. originPoint)
+distanceLeftOf :: Axis2D units space -> Point2D units space -> Quantity units
+distanceLeftOf (Axis2D originPoint direction) point = direction `cross` (point .-. originPoint)
 
-distanceRightOf :: Axis2d units space -> Point2D units space -> Quantity units
-distanceRightOf (Axis2d originPoint direction) point = direction `cross` (originPoint .-. point)
+distanceRightOf :: Axis2D units space -> Point2D units space -> Quantity units
+distanceRightOf (Axis2D originPoint direction) point = direction `cross` (originPoint .-. point)
 
-placeIn :: Frame2d units global local -> Point2D units local -> Point2D units global
-placeIn (Frame2d p0 (Orientation2d i j)) (Point2D px py) = p0 .+. px .*. i .+. py .*. j
+placeIn :: Frame2D units global local -> Point2D units local -> Point2D units global
+placeIn (Frame2D p0 (Orientation2D i j)) (Point2D px py) = p0 .+. px .*. i .+. py .*. j
 
-relativeTo :: Frame2d units global local -> Point2D units global -> Point2D units local
-relativeTo (Frame2d p0 (Orientation2d i j)) p = let d = p .-. p0 in Point2D (d `dot` i) (d `dot` j)
+relativeTo :: Frame2D units global local -> Point2D units global -> Point2D units local
+relativeTo (Frame2D p0 (Orientation2D i j)) p = let d = p .-. p0 in Point2D (d `dot` i) (d `dot` j)
 
 {-| Convert a 2D point to 3D point by placing it on a plane.
 
 Given a 2D point defined within a plane's coordinate system,
 this returns the corresponding 3D point.
 -}
-placeOn :: Plane3d global local -> Point2D Meters local -> Point3d global
-placeOn (Plane3d originPoint (PlaneOrientation3d i j)) (Point2D px py) =
+placeOn :: Plane3D global local -> Point2D Meters local -> Point3D global
+placeOn (Plane3D originPoint (PlaneOrientation3D i j)) (Point2D px py) =
   originPoint .+. px .*. i .+. py .*. j
 
 convert :: Quantity (units2 ?/? units1) -> Point2D units1 space -> Point2D units2 space
@@ -187,9 +187,9 @@ convert factor (Position2D p) = Position2D (Vector2D.convert factor p)
 unconvert :: Quantity (units2 ?/? units1) -> Point2D units2 space -> Point2D units1 space
 unconvert factor (Position2D p) = Position2D (Vector2D.unconvert factor p)
 
-transformBy :: Transform2d tag units space -> Point2D units space -> Point2D units space
+transformBy :: Transform2D tag units space -> Point2D units space -> Point2D units space
 transformBy transform point = do
-  let (Transform2d p0 vx vy) = transform
+  let (Transform2D p0 vx vy) = transform
   let (px, py) = coordinates point
   p0 .+. px .*. vx .+. py .*. vy
 
@@ -197,45 +197,45 @@ translateBy ::
   Vector2D units space ->
   Point2D units space ->
   Point2D units space
-translateBy = Transform2d.translateByImpl transformBy
+translateBy = Transform2D.translateByImpl transformBy
 
 translateIn ::
-  Direction2d space ->
+  Direction2D space ->
   Quantity units ->
   Point2D units space ->
   Point2D units space
-translateIn = Transform2d.translateInImpl transformBy
+translateIn = Transform2D.translateInImpl transformBy
 
 translateAlong ::
-  Axis2d units space ->
+  Axis2D units space ->
   Quantity units ->
   Point2D units space ->
   Point2D units space
-translateAlong = Transform2d.translateAlongImpl transformBy
+translateAlong = Transform2D.translateAlongImpl transformBy
 
 rotateAround ::
   Point2D units space ->
   Angle ->
   Point2D units space ->
   Point2D units space
-rotateAround = Transform2d.rotateAroundImpl transformBy
+rotateAround = Transform2D.rotateAroundImpl transformBy
 
 mirrorAcross ::
-  Axis2d units space ->
+  Axis2D units space ->
   Point2D units space ->
   Point2D units space
-mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
+mirrorAcross = Transform2D.mirrorAcrossImpl transformBy
 
 scaleAbout ::
   Point2D units space ->
   Number ->
   Point2D units space ->
   Point2D units space
-scaleAbout = Transform2d.scaleAboutImpl transformBy
+scaleAbout = Transform2D.scaleAboutImpl transformBy
 
 scaleAlong ::
-  Axis2d units space ->
+  Axis2D units space ->
   Number ->
   Point2D units space ->
   Point2D units space
-scaleAlong = Transform2d.scaleAlongImpl transformBy
+scaleAlong = Transform2D.scaleAlongImpl transformBy

@@ -1,18 +1,18 @@
 module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Convention3d qualified as Convention3d
-import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Body3D qualified as Body3D
+import OpenSolid.Convention3D qualified as Convention3D
+import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.World3d qualified as World3d
+import OpenSolid.World3D qualified as World3D
 import Prelude hiding (length)
 
 main :: IO ()
@@ -20,15 +20,15 @@ main = Tolerance.using Length.nanometer do
   let radius = Length.meters 1
   let length = Length.meters 4
   let arc =
-        Curve2d.polarArc
+        Curve2D.polarArc
           (#centerPoint Point2D.origin)
           (#radius radius)
           (#startAngle (Angle.degrees -45))
           (#endAngle (Angle.degrees 225))
-  let line = Curve2d.lineFrom arc.endPoint arc.startPoint
-  profile <- Result.orFail (Region2d.boundedBy [arc, line])
-  body <- Result.orFail (Body3d.extruded World3d.frontPlane profile (-0.5 *. length) (0.5 *. length))
+  let line = Curve2D.lineFrom arc.endPoint arc.startPoint
+  profile <- Result.orFail (Region2D.boundedBy [arc, line])
+  body <- Result.orFail (Body3D.extruded World3D.frontPlane profile (-0.5 *. length) (0.5 *. length))
   let resolution = Resolution.maxSize (Length.centimeters 30)
-  let mesh = Body3d.toPointMesh resolution body
-  let outputPath = "executables/body3d-meshing/mesh.stl"
-  Stl.writeBinary outputPath Convention3d.yUp Length.inMillimeters mesh
+  let mesh = Body3D.toPointMesh resolution body
+  let outputPath = "executables/body3D-meshing/mesh.stl"
+  Stl.writeBinary outputPath Convention3D.yUp Length.inMillimeters mesh

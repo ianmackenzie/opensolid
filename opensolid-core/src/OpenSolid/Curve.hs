@@ -65,8 +65,8 @@ import OpenSolid.Curve.Zero (Zero)
 import OpenSolid.Curve.Zero qualified as Zero
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Domain1d (Domain1d)
-import OpenSolid.Domain1d qualified as Domain1d
+import OpenSolid.Domain1D (Domain1D)
+import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Expression (Expression)
@@ -83,18 +83,18 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Solve1d qualified as Solve1d
+import OpenSolid.Solve1D qualified as Solve1D
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
-import OpenSolid.Vector3d (Vector3d)
-import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
-import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
-import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
+import OpenSolid.Vector3D (Vector3D)
+import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
+import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
+import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
+import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
 data Curve units = Curve {compiled :: Compiled units, derivative :: ~(Curve units)}
 
@@ -127,7 +127,7 @@ instance
   Intersects (Curve units1) (Quantity units2) units1
   where
   curve `intersects` value =
-    -- TODO optimize this to use a special Solve1d.find or similar
+    -- TODO optimize this to use a special Solve1D.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and their exact locations)
     case zeros (curve .-. value) of
@@ -248,7 +248,7 @@ instance Multiplication_ (Quantity units1) (Curve units2) (Curve (units1 ?*? uni
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve units1) (Vector2D units2 space) (VectorCurve2d units3 space)
+  Multiplication (Curve units1) (Vector2D units2 space) (VectorCurve2D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
@@ -256,13 +256,13 @@ instance
   Multiplication_
     (Curve units1)
     (Vector2D units2 space)
-    (VectorCurve2d (units1 ?*? units2) space)
+    (VectorCurve2D (units1 ?*? units2) space)
   where
-  curve ?*? vector = curve ?*? VectorCurve2d.constant vector
+  curve ?*? vector = curve ?*? VectorCurve2D.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector2D units1 space) (Curve units2) (VectorCurve2d units3 space)
+  Multiplication (Vector2D units1 space) (Curve units2) (VectorCurve2D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
@@ -270,37 +270,37 @@ instance
   Multiplication_
     (Vector2D units1 space)
     (Curve units2)
-    (VectorCurve2d (units1 ?*? units2) space)
+    (VectorCurve2D (units1 ?*? units2) space)
   where
-  vector ?*? curve = VectorCurve2d.constant vector ?*? curve
+  vector ?*? curve = VectorCurve2D.constant vector ?*? curve
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve units1) (Vector3d units2 space) (VectorCurve3d units3 space)
+  Multiplication (Curve units1) (Vector3D units2 space) (VectorCurve3D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (Curve units1)
-    (Vector3d units2 space)
-    (VectorCurve3d (units1 ?*? units2) space)
+    (Vector3D units2 space)
+    (VectorCurve3D (units1 ?*? units2) space)
   where
-  curve ?*? vector = curve ?*? VectorCurve3d.constant vector
+  curve ?*? vector = curve ?*? VectorCurve3D.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector3d units1 space) (Curve units2) (VectorCurve3d units3 space)
+  Multiplication (Vector3D units1 space) (Curve units2) (VectorCurve3D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (Vector3d units1 space)
+    (Vector3D units1 space)
     (Curve units2)
-    (VectorCurve3d (units1 ?*? units2) space)
+    (VectorCurve3D (units1 ?*? units2) space)
   where
-  vector ?*? curve = VectorCurve3d.constant vector ?*? curve
+  vector ?*? curve = VectorCurve3D.constant vector ?*? curve
 
 instance Composition (Curve Unitless) (Curve units) (Curve units) where
   f `compose` g =
@@ -625,40 +625,40 @@ zeros curve
   | otherwise = do
       let derivatives = Stream.iterate (.derivative) curve
       let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
-      let cache = Solve1d.init derivativeBounds
-      case Solve1d.search (findZeros derivatives) cache of
+      let cache = Solve1D.init derivativeBounds
+      case Solve1D.search (findZeros derivatives) cache of
         Ok foundZeros -> Ok (List.sortBy (.location) foundZeros)
-        Error Solve1d.InfiniteRecursion -> throw HigherOrderZero
+        Error Solve1D.InfiniteRecursion -> throw HigherOrderZero
 
 findZeros ::
   Tolerance units =>
   Stream (Curve units) ->
-  Domain1d ->
+  Domain1D ->
   Stream (Bounds units) ->
-  Solve1d.Exclusions exclusions ->
-  Solve1d.Action exclusions Zero
+  Solve1D.Exclusions exclusions ->
+  Solve1D.Action exclusions Zero
 findZeros derivatives subdomain derivativeBounds exclusions
   -- Skip the subdomain entirely if the curve itself is non-zero everywhere
-  | not (Stream.head derivativeBounds `intersects` Quantity.zero) = Solve1d.pass
+  | not (Stream.head derivativeBounds `intersects` Quantity.zero) = Solve1D.pass
   -- Optimization heuristic: bisect down to small subdomains first,
   -- to quickly eliminate most of the curve based on simple value bounds
   -- before attempting more complex/sophisticated solving
-  | Bounds.width (Domain1d.bounds subdomain) > 1 / 1024 = Solve1d.recurse
+  | Bounds.width (Domain1D.bounds subdomain) > 1 / 1024 = Solve1D.recurse
   | otherwise = case exclusions of
-      Solve1d.SomeExclusions -> Solve1d.recurse
-      Solve1d.NoExclusions ->
+      Solve1D.SomeExclusions -> Solve1D.recurse
+      Solve1D.NoExclusions ->
         case findZerosOrder 0 derivatives subdomain derivativeBounds of
-          Unresolved -> Solve1d.recurse
-          Resolved [] -> Solve1d.pass
+          Unresolved -> Solve1D.recurse
+          Resolved [] -> Solve1D.pass
           Resolved (NonEmpty subdomainZeros) -> do
-            let subdomainInterior = Domain1d.interior subdomain
+            let subdomainInterior = Domain1D.interior subdomain
             let isInterior (t0, _) = Bounds.includes t0 subdomainInterior
             if NonEmpty.allSatisfy isInterior subdomainZeros
-              then Solve1d.return (NonEmpty.map toZero subdomainZeros)
-              else Solve1d.recurse
+              then Solve1D.return (NonEmpty.map toZero subdomainZeros)
+              else Solve1D.recurse
 
-toZero :: (Number, Solve1d.Neighborhood units) -> Zero
-toZero (t0, neighborhood) = Solve1d.zero t0 neighborhood
+toZero :: (Number, Solve1D.Neighborhood units) -> Zero
+toZero (t0, neighborhood) = Solve1D.zero t0 neighborhood
 
 maxZeroOrder :: Int
 maxZeroOrder = 3
@@ -667,9 +667,9 @@ findZerosOrder ::
   Tolerance units =>
   Int ->
   Stream (Curve units) ->
-  Domain1d ->
+  Domain1D ->
   Stream (Bounds units) ->
-  Fuzzy (List (Number, Solve1d.Neighborhood units))
+  Fuzzy (List (Number, Solve1D.Neighborhood units))
 findZerosOrder k derivatives subdomain derivativeBounds
   -- A derivative is resolved, so it has no zeros
   -- (note that if k == 0, we already checked for the curve being non-zero in findZeros above)
@@ -682,13 +682,13 @@ findZerosOrder k derivatives subdomain derivativeBounds
       let higherDerivativeBounds = Stream.tail derivativeBounds
       let currentDerivative = Stream.head derivatives
       let nextDerivative = Stream.head higherDerivatives
-      let tBounds = Domain1d.bounds subdomain
+      let tBounds = Domain1D.bounds subdomain
       higherOrderZeros <- findZerosOrder (k + 1) higherDerivatives subdomain higherDerivativeBounds
       case higherOrderZeros of
         [] -> solveMonotonic k currentDerivative nextDerivative tBounds
         List.One (t0, neighborhood) -> do
           if Quantity.abs (evaluate currentDerivative t0)
-            <= Solve1d.derivativeTolerance neighborhood k
+            <= Solve1D.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
             else do
               let leftBounds = Bounds (Bounds.lower tBounds) t0
@@ -704,21 +704,21 @@ solveMonotonic ::
   Curve units ->
   Curve units ->
   Bounds Unitless ->
-  Fuzzy (List (Number, Solve1d.Neighborhood units))
+  Fuzzy (List (Number, Solve1D.Neighborhood units))
 solveMonotonic m fm fn tBounds = do
   let n = m + 1
   let Bounds tLow tHigh = tBounds
-  let startNeighborhood = Solve1d.neighborhood n (evaluate fn tLow)
-  if Quantity.abs (evaluate fm tLow) <= Solve1d.derivativeTolerance startNeighborhood m
+  let startNeighborhood = Solve1D.neighborhood n (evaluate fn tLow)
+  if Quantity.abs (evaluate fm tLow) <= Solve1D.derivativeTolerance startNeighborhood m
     then if tLow == 0 then Resolved [(0, startNeighborhood)] else Unresolved
     else do
-      let endNeighborhood = Solve1d.neighborhood n (evaluate fn tHigh)
-      if Quantity.abs (evaluate fm tHigh) <= Solve1d.derivativeTolerance endNeighborhood m
+      let endNeighborhood = Solve1D.neighborhood n (evaluate fn tHigh)
+      if Quantity.abs (evaluate fm tHigh) <= Solve1D.derivativeTolerance endNeighborhood m
         then if tHigh == 1 then Resolved [(1, endNeighborhood)] else Unresolved
         else do
-          case Solve1d.monotonic (evaluate fm) (evaluate fn) tBounds of
-            Solve1d.Exact t0 -> Resolved [(t0, Solve1d.neighborhood n (evaluate fn t0))]
-            Solve1d.Closest _ -> Unresolved
+          case Solve1D.monotonic (evaluate fm) (evaluate fn) tBounds of
+            Solve1D.Exact t0 -> Resolved [(t0, Solve1D.neighborhood n (evaluate fn t0))]
+            Solve1D.Closest _ -> Unresolved
 
 data CrossesZero = CrossesZero deriving (Eq, Show)
 

@@ -1,37 +1,37 @@
 module Main (main) where
 
-import OpenSolid.Body3d (Body3d)
-import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Circle2d qualified as Circle2d
-import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Body3D (Body3D)
+import OpenSolid.Body3D qualified as Body3D
+import OpenSolid.Circle2D qualified as Circle2D
+import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
-import OpenSolid.Model3d qualified as Model3d
+import OpenSolid.Model3D qualified as Model3D
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.World3d qualified as World3d
+import OpenSolid.World3D qualified as World3D
 
-gearBody :: Tolerance Meters => Int -> Result Text (Body3d space)
+gearBody :: Tolerance Meters => Int -> Result Text (Body3D space)
 gearBody numTeeth = do
   let gearModule = Length.millimeters 1
   let holeDiameter = Length.millimeters 8
   let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
   let outerProfile = SpurGear.profile spurGear
-  let hole = Curve2d.circle (Circle2d.withDiameter holeDiameter Point2D.origin)
-  profile <- Result.orFail (Region2d.boundedBy (hole : outerProfile))
+  let hole = Curve2D.circle (Circle2D.withDiameter holeDiameter Point2D.origin)
+  profile <- Result.orFail (Region2D.boundedBy (hole : outerProfile))
   let width = Length.millimeters 8
-  Result.orFail (Body3d.extruded World3d.frontPlane profile (-0.5 *. width) (0.5 *. width))
+  Result.orFail (Body3D.extruded World3D.frontPlane profile (-0.5 *. width) (0.5 *. width))
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
@@ -41,7 +41,7 @@ main = Tolerance.using Length.nanometer do
         body <- Result.orFail (gearBody numTeeth)
         let glbPath = "executables/gear-generation/gear" <> Text.int numTeeth <> ".glb"
         let material = PbrMaterial.iron (#roughness 0.3)
-        let model = Model3d.bodyWith [Model3d.pbrMaterial material] body
+        let model = Model3D.bodyWith [Model3D.pbrMaterial material] body
         Gltf.writeBinary glbPath model resolution
         elapsed <- Timer.elapsed timer
         let elapsedText = Text.number (Duration.inSeconds elapsed) <> "s"

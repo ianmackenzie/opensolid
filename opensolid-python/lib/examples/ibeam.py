@@ -1,18 +1,18 @@
 from opensolid import (
-    Axis2d,
-    Body3d,
+    Axis2D,
+    Body3D,
     Color,
-    Curve2d,
-    Direction2d,
+    Curve2D,
+    Direction2D,
     Gltf,
     Length,
-    Model3d,
+    Model3D,
     PbrMaterial,
     Point2D,
-    Region2d,
+    Region2D,
     Resolution,
     Tolerance,
-    World3d,
+    World3D,
 )
 
 with Tolerance(Length.meters(1e-9)):
@@ -37,28 +37,28 @@ with Tolerance(Length.meters(1e-9)):
     p5 = Point2D.y(top_flange_top_y)
 
     # Create the sketch profile
-    fillet = Curve2d.corner_arc(
+    fillet = Curve2D.corner_arc(
         p2,
-        incoming=Direction2d.y,
-        outgoing=Direction2d.x,
+        incoming=Direction2D.y,
+        outgoing=Direction2D.x,
         radius=fillet_radius,
     )
     template = [
-        Curve2d.line_from(p1, fillet.start_point),
+        Curve2D.line_from(p1, fillet.start_point),
         fillet,
-        Curve2d.line_from(fillet.end_point, p3),
-        Curve2d.line_from(p3, p4),
-        Curve2d.line_from(p4, p5),
+        Curve2D.line_from(fillet.end_point, p3),
+        Curve2D.line_from(p3, p4),
+        Curve2D.line_from(p4, p5),
     ]
-    top_curves = template + [curve.mirror_across(Axis2d.y) for curve in template]
-    curves = top_curves + [curve.mirror_across(Axis2d.x) for curve in top_curves]
-    profile = Region2d.bounded_by(curves)
+    top_curves = template + [curve.mirror_across(Axis2D.y) for curve in template]
+    curves = top_curves + [curve.mirror_across(Axis2D.x) for curve in top_curves]
+    profile = Region2D.bounded_by(curves)
 
     # Extrude the profile to create a solid body
-    body = Body3d.extruded(World3d.front_plane, profile, -length / 2, length / 2)
+    body = Body3D.extruded(World3D.front_plane, profile, -length / 2, length / 2)
 
     # Create a 3D model containing the body and write to GLB file
     material = PbrMaterial.metal(Color.rgb1(0.913, 0.921, 0.925), roughness=0.3)
-    model = Model3d.body(body).with_pbr_material(material)
+    model = Model3D.body(body).with_pbr_material(material)
     resolution = Resolution.max_error(Length.millimeters(0.1))
     Gltf(model).write_binary("ibeam.glb", resolution)

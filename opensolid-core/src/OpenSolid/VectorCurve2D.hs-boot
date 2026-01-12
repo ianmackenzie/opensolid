@@ -1,0 +1,104 @@
+module OpenSolid.VectorCurve2D
+  ( VectorCurve2D
+  , Compiled
+  , constant
+  , new
+  , compiled
+  , derivative
+  , evaluate
+  , evaluateBounds
+  , quotient
+  , quotient_
+  , transformBy
+  )
+where
+
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import OpenSolid.DivisionByZero (DivisionByZero)
+import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Prelude
+import OpenSolid.Transform2D (Transform2D)
+import OpenSolid.Units (HasUnits)
+import OpenSolid.Units qualified as Units
+import OpenSolid.VectorBounds2D (VectorBounds2D)
+
+type role VectorCurve2D nominal nominal
+
+type VectorCurve2D :: Type -> Type -> Type
+data VectorCurve2D units space
+
+type Compiled units space =
+  CompiledFunction
+    Number
+    (Vector2D units space)
+    (Bounds Unitless)
+    (VectorBounds2D units space)
+
+instance HasUnits (VectorCurve2D units space) units
+
+instance Negation (VectorCurve2D units space)
+
+instance Multiplication Sign (VectorCurve2D units space) (VectorCurve2D units space)
+
+instance Multiplication (VectorCurve2D units space) Sign (VectorCurve2D units space)
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion (VectorCurve2D unitsA space1) (VectorCurve2D unitsB space2)
+
+instance
+  Multiplication_
+    (Curve units1)
+    (VectorCurve2D units2 space)
+    (VectorCurve2D (units1 ?*? units2) space)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Curve units1) (VectorCurve2D units2 space) (VectorCurve2D units3 space)
+
+instance
+  Multiplication_
+    (VectorCurve2D units1 space)
+    (Curve units2)
+    (VectorCurve2D (units1 ?*? units2) space)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (VectorCurve2D units1 space) (Curve units2) (VectorCurve2D units3 space)
+
+instance
+  space1 ~ space2 =>
+  DotMultiplication_
+    (VectorCurve2D units1 space1)
+    (VectorCurve2D units2 space2)
+    (Curve (units1 ?*? units2))
+
+instance
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
+  DotMultiplication
+    (VectorCurve2D units1 space1)
+    (VectorCurve2D units2 space2)
+    (Curve units3)
+
+constant :: Vector2D units space -> VectorCurve2D units space
+new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units space
+compiled :: VectorCurve2D units space -> Compiled units space
+derivative :: VectorCurve2D units space -> VectorCurve2D units space
+evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
+evaluateBounds :: VectorCurve2D units space -> Bounds Unitless -> VectorBounds2D units space
+quotient ::
+  (Units.Quotient units1 units2 units3, Tolerance units2) =>
+  VectorCurve2D units1 space ->
+  Curve units2 ->
+  Result DivisionByZero (VectorCurve2D units3 space)
+quotient_ ::
+  Tolerance units2 =>
+  VectorCurve2D units1 space ->
+  Curve units2 ->
+  Result DivisionByZero (VectorCurve2D (units1 ?/? units2) space)
+transformBy ::
+  Transform2D tag translationUnits space ->
+  VectorCurve2D units space ->
+  VectorCurve2D units space

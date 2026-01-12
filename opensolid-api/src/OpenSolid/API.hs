@@ -8,45 +8,45 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
-import OpenSolid.Axis2d qualified as Axis2d
-import OpenSolid.Axis3d qualified as Axis3d
-import OpenSolid.Body3d qualified as Body3d
+import OpenSolid.Axis2D qualified as Axis2D
+import OpenSolid.Axis3D qualified as Axis3D
+import OpenSolid.Body3D qualified as Body3D
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d qualified as Bounds3d
-import OpenSolid.Camera3d qualified as Camera3d
-import OpenSolid.Circle2d qualified as Circle2d
+import OpenSolid.Bounds2D qualified as Bounds2D
+import OpenSolid.Bounds3D qualified as Bounds3D
+import OpenSolid.Camera3D qualified as Camera3D
+import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.Convention3d (Convention3d)
-import OpenSolid.Convention3d qualified as Convention3d
+import OpenSolid.Convention3D (Convention3D)
+import OpenSolid.Convention3D qualified as Convention3D
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
-import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Direction3d qualified as Direction3d
+import OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Direction2D qualified as Direction2D
+import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Gltf qualified as Gltf
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
-import OpenSolid.Line2d qualified as Line2d
+import OpenSolid.Line2D qualified as Line2D
 import OpenSolid.List qualified as List
 import OpenSolid.Mitsuba qualified as Mitsuba
-import OpenSolid.Model3d qualified as Model3d
-import OpenSolid.Orientation3d qualified as Orientation3d
+import OpenSolid.Model3D qualified as Model3D
+import OpenSolid.Orientation3D qualified as Orientation3D
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
-import OpenSolid.Plane3d qualified as Plane3d
-import OpenSolid.PlaneOrientation3d qualified as PlaneOrientation3d
+import OpenSolid.Plane3D qualified as Plane3D
+import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Polygon2d qualified as Polygon2d
-import OpenSolid.Polyline2d qualified as Polyline2d
+import OpenSolid.Point3D qualified as Point3D
+import OpenSolid.Polygon2D qualified as Polygon2D
+import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
@@ -54,19 +54,19 @@ import OpenSolid.Stl qualified as Stl
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Transform qualified as Transform
-import OpenSolid.Transform2d (Transform2d)
-import OpenSolid.Transform2d qualified as Transform2d
-import OpenSolid.Transform3d (Transform3d)
-import OpenSolid.Transform3d qualified as Transform3d
-import OpenSolid.Triangle2d qualified as Triangle2d
+import OpenSolid.Transform2D (Transform2D)
+import OpenSolid.Transform2D qualified as Transform2D
+import OpenSolid.Transform3D (Transform3D)
+import OpenSolid.Transform3D qualified as Transform3D
+import OpenSolid.Triangle2D qualified as Triangle2D
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.World3d qualified as World3d
+import OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.VectorCurve2D qualified as VectorCurve2D
+import OpenSolid.World3D qualified as World3D
 import Prelude (flip)
 
 classes :: List Class
@@ -83,55 +83,55 @@ classes =
   , displacement2D
   , areaVector2D
   , uvVector
-  , direction2d
+  , direction2D
   , uvDirection
   , point2D
   , uvPoint
-  , bounds2d
+  , bounds2D
   , uvBounds
-  , line2d
+  , line2D
   , uvLine
-  , triangle2d
-  , circle2d
+  , triangle2D
+  , circle2D
   , uvCircle
-  , polyline2d
+  , polyline2D
   , uvPolyline
-  , polygon2d
+  , polygon2D
   , uvPolygon
   , curve
   , lengthCurve
   , areaCurve
   , angleCurve
   , svg
-  , axis2d
+  , axis2D
   , uvAxis
-  , convention3d
-  , vector3d
-  , displacement3d
-  , areaVector3d
-  , direction3d
-  , point3d
-  , bounds3d
-  , axis3d
-  , planeOrientation3d
-  , plane3d
-  , orientation3d
-  , frame3d
-  , world3d
-  , vectorCurve2d
-  , displacementCurve2d
+  , convention3D
+  , vector3D
+  , displacement3D
+  , areaVector3D
+  , direction3D
+  , point3D
+  , bounds3D
+  , axis3D
+  , planeOrientation3D
+  , plane3D
+  , orientation3D
+  , frame3D
+  , world3D
+  , vectorCurve2D
+  , displacementCurve2D
   , uvVectorCurve
-  , curve2d
+  , curve2D
   , uvCurve
-  , region2d
+  , region2D
   , uvRegion
-  , body3d
+  , body3D
   , resolution
   , pbrMaterial
-  , model3d
+  , model3D
   , gltf
   , spurGear
-  , camera3d
+  , camera3D
   , mitsuba
   ]
 
@@ -182,7 +182,7 @@ length =
     , Class.times @LengthBounds Self
     , Class.times @Curve Self
     , Class.times @LengthCurve Self
-    , Class.times @Direction2d Self
+    , Class.times @Direction2D Self
     , Class.times @Vector2D Self
     , Class.times @Displacement2D Self
     , Class.divByNumber
@@ -224,7 +224,7 @@ area =
     , Class.timesNumber
     , Class.times @Bounds Self
     , Class.times @Curve Self
-    , Class.times @Direction2d Self
+    , Class.times @Direction2D Self
     , Class.times @Vector2D Self
     , Class.divByNumber
     , Class.divBySelf
@@ -477,11 +477,11 @@ color =
     , Class.constant "Dark Charcoal" Color.darkCharcoal $(docs 'Color.darkCharcoal)
     ]
 
-vectorTransformations2d ::
+vectorTransformations2D ::
   forall units.
   FFI (Vector2D.Vector2D units FFI.Space) =>
   List (Class.Member (Vector2D.Vector2D units FFI.Space))
-vectorTransformations2d =
+vectorTransformations2D =
   [ Class.member0 "Rotate Left" Vector2D.rotateLeft $(docs 'Vector2D.rotateLeft)
   , Class.member0 "Rotate Right" Vector2D.rotateRight $(docs 'Vector2D.rotateRight)
   , Class.member1 "Rotate By" "Angle" Vector2D.rotateBy $(docs 'Vector2D.rotateBy)
@@ -489,7 +489,7 @@ vectorTransformations2d =
   , Class.member1
       "Mirror Across"
       "Axis"
-      (Vector2D.mirrorAcross :: Axis2d -> Vector2D.Vector2D units FFI.Space -> Vector2D.Vector2D units FFI.Space)
+      (Vector2D.mirrorAcross :: Axis2D -> Vector2D.Vector2D units FFI.Space -> Vector2D.Vector2D units FFI.Space)
       $(docs 'Vector2D.mirrorAcross)
   ]
 
@@ -512,7 +512,7 @@ vector2D =
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3d -> Vector2D -> Vector3d) $(docs 'Vector2D.placeOn)
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Vector2D -> Vector3D) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -528,7 +528,7 @@ vector2D =
     , Class.crossProduct @Displacement2D Self
     , Class.crossProduct @AreaVector2D Self
     ]
-      <> vectorTransformations2d
+      <> vectorTransformations2D
 
 type Displacement2D = Vector2D.Vector2D Meters FFI.Space
 
@@ -554,7 +554,7 @@ displacement2D =
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberM0 "Is Zero" (~= Vector2D.zero) "Check if a displacement is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3d -> Displacement2D -> Displacement3d) $(docs 'Vector2D.placeOn)
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Displacement2D -> Displacement3D) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -568,7 +568,7 @@ displacement2D =
     , Class.crossSelf
     , Class.crossProduct @Vector2D Self
     ]
-      <> vectorTransformations2d
+      <> vectorTransformations2D
 
 type AreaVector2D = Vector2D.Vector2D SquareMeters FFI.Space
 
@@ -589,7 +589,7 @@ areaVector2D =
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberS0 "Is Zero" (~= Vector2D.zero) "Check if an area vector is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3d -> AreaVector2D -> AreaVector3d) $(docs 'Vector2D.placeOn)
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> AreaVector2D -> AreaVector3D) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -601,7 +601,7 @@ areaVector2D =
     , Class.dotProduct @Vector2D Self
     , Class.crossProduct @Vector2D Self
     ]
-      <> vectorTransformations2d
+      <> vectorTransformations2D
 
 type UvVector = Vector2D.Vector2D Unitless UvSpace
 
@@ -635,42 +635,42 @@ uvVector =
     , Class.crossSelf
     ]
 
-type Direction2d = Direction2d.Direction2d FFI.Space
+type Direction2D = Direction2D.Direction2D FFI.Space
 
-direction2d :: Class
-direction2d =
-  Class.new @Direction2d $(docs ''Direction2d.Direction2d) $
+direction2D :: Class
+direction2D =
+  Class.new @Direction2D $(docs ''Direction2D.Direction2D) $
     [ Class.upcast Vector2D.unit
-    , Class.constant "X" (Direction2d.x :: Direction2d) $(docs 'Direction2d.x)
-    , Class.constant "Y" (Direction2d.y :: Direction2d) $(docs 'Direction2d.y)
-    , Class.factory1 "From Angle" "Angle" Direction2d.fromAngle $(docs 'Direction2d.fromAngle)
-    , Class.factory1 "Degrees" "Value" Direction2d.degrees $(docs 'Direction2d.degrees)
-    , Class.factory1 "Radians" "Value" Direction2d.radians $(docs 'Direction2d.radians)
-    , Class.member0 "Rotate Left" Direction2d.rotateLeft $(docs 'Direction2d.rotateLeft)
-    , Class.member0 "Rotate Right" Direction2d.rotateRight $(docs 'Direction2d.rotateRight)
-    , Class.member1 "Rotate By" "Angle" Direction2d.rotateBy $(docs 'Direction2d.rotateBy)
-    , Class.member1 "Mirror In" "Direction" Direction2d.mirrorIn $(docs 'Direction2d.mirrorIn)
-    , Class.member1 "Mirror Across" "Axis" (Direction2d.mirrorAcross :: Axis2d -> Direction2d -> Direction2d) $(docs 'Direction2d.mirrorAcross)
-    , Class.member1 "Place On" "Plane" (Direction2d.placeOn :: Plane3d -> Direction2d -> Direction3d) $(docs 'Direction2d.placeOn)
+    , Class.constant "X" (Direction2D.x :: Direction2D) $(docs 'Direction2D.x)
+    , Class.constant "Y" (Direction2D.y :: Direction2D) $(docs 'Direction2D.y)
+    , Class.factory1 "From Angle" "Angle" Direction2D.fromAngle $(docs 'Direction2D.fromAngle)
+    , Class.factory1 "Degrees" "Value" Direction2D.degrees $(docs 'Direction2D.degrees)
+    , Class.factory1 "Radians" "Value" Direction2D.radians $(docs 'Direction2D.radians)
+    , Class.member0 "Rotate Left" Direction2D.rotateLeft $(docs 'Direction2D.rotateLeft)
+    , Class.member0 "Rotate Right" Direction2D.rotateRight $(docs 'Direction2D.rotateRight)
+    , Class.member1 "Rotate By" "Angle" Direction2D.rotateBy $(docs 'Direction2D.rotateBy)
+    , Class.member1 "Mirror In" "Direction" Direction2D.mirrorIn $(docs 'Direction2D.mirrorIn)
+    , Class.member1 "Mirror Across" "Axis" (Direction2D.mirrorAcross :: Axis2D -> Direction2D -> Direction2D) $(docs 'Direction2D.mirrorAcross)
+    , Class.member1 "Place On" "Plane" (Direction2D.placeOn :: Plane3D -> Direction2D -> Direction3D) $(docs 'Direction2D.placeOn)
     , Class.negateSelf
     ]
 
-type UvDirection = Direction2d.Direction2d UvSpace
+type UvDirection = Direction2D.Direction2D UvSpace
 
 uvDirection :: Class
 uvDirection =
   Class.new @UvDirection "A direction in UV parameter space." $
     [ Class.upcast Vector2D.unit
-    , Class.constant "U" (Direction2d.x :: UvDirection) "The U direction."
-    , Class.constant "V" (Direction2d.y :: UvDirection) "The V direction."
-    , Class.factory1 "From Angle" "Angle" Direction2d.fromAngle $(docs 'Direction2d.fromAngle)
-    , Class.factory1 "Degrees" "Value" Direction2d.degrees $(docs 'Direction2d.degrees)
-    , Class.factory1 "Radians" "Value" Direction2d.radians $(docs 'Direction2d.radians)
-    , Class.member0 "Rotate Left" Direction2d.rotateLeft $(docs 'Direction2d.rotateLeft)
-    , Class.member0 "Rotate Right" Direction2d.rotateRight $(docs 'Direction2d.rotateRight)
-    , Class.member1 "Rotate By" "Angle" Direction2d.rotateBy $(docs 'Direction2d.rotateBy)
-    , Class.member1 "Mirror In" "Direction" Direction2d.mirrorIn $(docs 'Direction2d.mirrorIn)
-    , Class.member1 "Mirror Across" "Axis" (Direction2d.mirrorAcross :: UvAxis -> UvDirection -> UvDirection) $(docs 'Direction2d.mirrorAcross)
+    , Class.constant "U" (Direction2D.x :: UvDirection) "The U direction."
+    , Class.constant "V" (Direction2D.y :: UvDirection) "The V direction."
+    , Class.factory1 "From Angle" "Angle" Direction2D.fromAngle $(docs 'Direction2D.fromAngle)
+    , Class.factory1 "Degrees" "Value" Direction2D.degrees $(docs 'Direction2D.degrees)
+    , Class.factory1 "Radians" "Value" Direction2D.radians $(docs 'Direction2D.radians)
+    , Class.member0 "Rotate Left" Direction2D.rotateLeft $(docs 'Direction2D.rotateLeft)
+    , Class.member0 "Rotate Right" Direction2D.rotateRight $(docs 'Direction2D.rotateRight)
+    , Class.member1 "Rotate By" "Angle" Direction2D.rotateBy $(docs 'Direction2D.rotateBy)
+    , Class.member1 "Mirror In" "Direction" Direction2D.mirrorIn $(docs 'Direction2D.mirrorIn)
+    , Class.member1 "Mirror Across" "Axis" (Direction2D.mirrorAcross :: UvAxis -> UvDirection -> UvDirection) $(docs 'Direction2D.mirrorAcross)
     , Class.negateSelf
     ]
 
@@ -699,9 +699,9 @@ point2D =
     , Class.minusSelf
     , Class.minus @Displacement2D Self
     , Class.plus @Displacement2D Self
-    , Class.minus @Curve2d Self
+    , Class.minus @Curve2D Self
     ]
-      <> affineTransformations2d Point2D.transformBy
+      <> affineTransformations2D Point2D.transformBy
 
 uvPoint :: Class
 uvPoint =
@@ -718,153 +718,153 @@ uvPoint =
     , Class.plus @UvVector Self
     ]
 
-type Bounds2d = Bounds2d.Bounds2d Meters FFI.Space
+type Bounds2D = Bounds2D.Bounds2D Meters FFI.Space
 
-bounds2d :: Class
-bounds2d =
-  Class.new @Bounds2d "A bounding box in 2D." $
-    [ Class.constructor2 "X Coordinate" "Y Coordinate" Bounds2d.Bounds2d $(docs 'Bounds2d.Bounds2d)
-    , Class.factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
-    , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
-    , Class.factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
-    , Class.factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
-    , Class.property "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
-    , Class.property "X Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
-    , Class.property "Y Coordinate" Bounds2d.yCoordinate $(docs 'Bounds2d.yCoordinate)
+bounds2D :: Class
+bounds2D =
+  Class.new @Bounds2D "A bounding box in 2D." $
+    [ Class.constructor2 "X Coordinate" "Y Coordinate" Bounds2D.Bounds2D $(docs 'Bounds2D.Bounds2D)
+    , Class.factory1 "Constant" "Point" Bounds2D.constant $(docs 'Bounds2D.constant)
+    , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2D.hull2 $(docs 'Bounds2D.hull2)
+    , Class.factory1 "Hull" "Points" Bounds2D.hullN $(docs 'Bounds2D.hullN)
+    , Class.factory1 "Aggregate" "Bounds" Bounds2D.aggregateN $(docs 'Bounds2D.aggregateN)
+    , Class.property "Coordinates" Bounds2D.coordinates $(docs 'Bounds2D.coordinates)
+    , Class.property "X Coordinate" Bounds2D.xCoordinate $(docs 'Bounds2D.xCoordinate)
+    , Class.property "Y Coordinate" Bounds2D.yCoordinate $(docs 'Bounds2D.yCoordinate)
     , Class.plus @Displacement2D Self
     , Class.minus @Displacement2D Self
     ]
-      <> affineTransformations2d Bounds2d.transformBy
+      <> affineTransformations2D Bounds2D.transformBy
 
 uvBounds :: Class
 uvBounds =
   Class.new @UvBounds "A bounding box in UV parameter space." $
-    [ Class.constructor2 "U Coordinate" "V Coordinate" Bounds2d.Bounds2d "Construct a bounding box from its U and V coordinate bounds."
-    , Class.factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
-    , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
-    , Class.factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
-    , Class.factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
-    , Class.property "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
-    , Class.property "U Coordinate" Bounds2d.xCoordinate "Get the U coordinate bounds of a bounding box."
-    , Class.property "V Coordinate" Bounds2d.yCoordinate "Get the V coordinate bounds of a bounding box."
+    [ Class.constructor2 "U Coordinate" "V Coordinate" Bounds2D.Bounds2D "Construct a bounding box from its U and V coordinate bounds."
+    , Class.factory1 "Constant" "Point" Bounds2D.constant $(docs 'Bounds2D.constant)
+    , Class.factory2 "From Corners" "First Point" "Second Point" Bounds2D.hull2 $(docs 'Bounds2D.hull2)
+    , Class.factory1 "Hull" "Points" Bounds2D.hullN $(docs 'Bounds2D.hullN)
+    , Class.factory1 "Aggregate" "Bounds" Bounds2D.aggregateN $(docs 'Bounds2D.aggregateN)
+    , Class.property "Coordinates" Bounds2D.coordinates $(docs 'Bounds2D.coordinates)
+    , Class.property "U Coordinate" Bounds2D.xCoordinate "Get the U coordinate bounds of a bounding box."
+    , Class.property "V Coordinate" Bounds2D.yCoordinate "Get the V coordinate bounds of a bounding box."
     , Class.plus @UvVector Self
     , Class.minus @UvVector Self
     ]
 
-type Line2d = Line2d.Line2d Meters FFI.Space
+type Line2D = Line2D.Line2D Meters FFI.Space
 
-line2d :: Class
-line2d =
-  Class.new @Line2d $(docs ''Line2d.Line2d) $
-    [ Class.constructor2 "Start Point" "End Point" Line2d.Line2d $(docs 'Line2d.Line2d)
-    , Class.property "Start Point" Line2d.startPoint $(docs 'Line2d.startPoint)
-    , Class.property "End Point" Line2d.endPoint $(docs 'Line2d.endPoint)
-    , Class.member0 "Length" Line2d.length $(docs 'Line2d.length)
-    , Class.member1 "Distance To" "Point" Line2d.distanceTo $(docs 'Line2d.distanceTo)
+line2D :: Class
+line2D =
+  Class.new @Line2D $(docs ''Line2D.Line2D) $
+    [ Class.constructor2 "Start Point" "End Point" Line2D.Line2D $(docs 'Line2D.Line2D)
+    , Class.property "Start Point" Line2D.startPoint $(docs 'Line2D.startPoint)
+    , Class.property "End Point" Line2D.endPoint $(docs 'Line2D.endPoint)
+    , Class.member0 "Length" Line2D.length $(docs 'Line2D.length)
+    , Class.member1 "Distance To" "Point" Line2D.distanceTo $(docs 'Line2D.distanceTo)
     ]
 
-type UvLine = Line2d.Line2d Unitless UvSpace
+type UvLine = Line2D.Line2D Unitless UvSpace
 
 uvLine :: Class
 uvLine =
-  Class.new @UvLine $(docs ''Line2d.Line2d) $
-    [ Class.constructor2 "Start Point" "End Point" Line2d.Line2d $(docs 'Line2d.Line2d)
-    , Class.property "Start Point" Line2d.startPoint $(docs 'Line2d.startPoint)
-    , Class.property "End Point" Line2d.endPoint $(docs 'Line2d.endPoint)
-    , Class.member0 "Length" Line2d.length $(docs 'Line2d.length)
-    , Class.member1 "Distance To" "Point" Line2d.distanceTo $(docs 'Line2d.distanceTo)
+  Class.new @UvLine $(docs ''Line2D.Line2D) $
+    [ Class.constructor2 "Start Point" "End Point" Line2D.Line2D $(docs 'Line2D.Line2D)
+    , Class.property "Start Point" Line2D.startPoint $(docs 'Line2D.startPoint)
+    , Class.property "End Point" Line2D.endPoint $(docs 'Line2D.endPoint)
+    , Class.member0 "Length" Line2D.length $(docs 'Line2D.length)
+    , Class.member1 "Distance To" "Point" Line2D.distanceTo $(docs 'Line2D.distanceTo)
     ]
 
-type Triangle2d = Triangle2d.Triangle2d Meters FFI.Space
+type Triangle2D = Triangle2D.Triangle2D Meters FFI.Space
 
-triangle2d :: Class
-triangle2d =
-  Class.new @Triangle2d $(docs ''Triangle2d.Triangle2d) $
-    [ Class.constructor3 "First Vertex" "Second Vertex" "Third Vertex" Triangle2d.Triangle2d $(docs 'Triangle2d.Triangle2d)
-    , Class.property "Vertices" Triangle2d.vertices $(docs 'Triangle2d.vertices)
-    , Class.member0 "Signed Area" Triangle2d.signedArea $(docs 'Triangle2d.signedArea)
+triangle2D :: Class
+triangle2D =
+  Class.new @Triangle2D $(docs ''Triangle2D.Triangle2D) $
+    [ Class.constructor3 "First Vertex" "Second Vertex" "Third Vertex" Triangle2D.Triangle2D $(docs 'Triangle2D.Triangle2D)
+    , Class.property "Vertices" Triangle2D.vertices $(docs 'Triangle2D.vertices)
+    , Class.member0 "Signed Area" Triangle2D.signedArea $(docs 'Triangle2D.signedArea)
     ]
 
-type Circle2d = Circle2d.Circle2d Meters FFI.Space
+type Circle2D = Circle2D.Circle2D Meters FFI.Space
 
-circle2d :: Class
-circle2d =
-  Class.new @Circle2d $(docs ''Circle2d.Circle2d) $
-    [ Class.factory2 "With Radius" "Radius" "Center Point" Circle2d.withRadius $(docs 'Circle2d.withRadius)
-    , Class.factory2 "With Diameter" "Diameter" "Center Point" Circle2d.withDiameter $(docs 'Circle2d.withDiameter)
-    , Class.property "Center Point" Circle2d.centerPoint $(docs 'Circle2d.centerPoint)
-    , Class.property "Diameter" Circle2d.diameter $(docs 'Circle2d.diameter)
-    , Class.property "Radius" Circle2d.radius $(docs 'Circle2d.radius)
-    , Class.member1 "Point" "Angle" (flip Circle2d.pointOn) $(docs 'Circle2d.pointOn)
+circle2D :: Class
+circle2D =
+  Class.new @Circle2D $(docs ''Circle2D.Circle2D) $
+    [ Class.factory2 "With Radius" "Radius" "Center Point" Circle2D.withRadius $(docs 'Circle2D.withRadius)
+    , Class.factory2 "With Diameter" "Diameter" "Center Point" Circle2D.withDiameter $(docs 'Circle2D.withDiameter)
+    , Class.property "Center Point" Circle2D.centerPoint $(docs 'Circle2D.centerPoint)
+    , Class.property "Diameter" Circle2D.diameter $(docs 'Circle2D.diameter)
+    , Class.property "Radius" Circle2D.radius $(docs 'Circle2D.radius)
+    , Class.member1 "Point" "Angle" (flip Circle2D.pointOn) $(docs 'Circle2D.pointOn)
     ]
 
-type UvCircle = Circle2d.Circle2d Unitless UvSpace
+type UvCircle = Circle2D.Circle2D Unitless UvSpace
 
 uvCircle :: Class
 uvCircle =
-  Class.new @UvCircle $(docs ''Circle2d.Circle2d) $
-    [ Class.factory2 "With Radius" "Radius" "Center Point" Circle2d.withRadius $(docs 'Circle2d.withRadius)
-    , Class.factory2 "With Diameter" "Diameter" "Center Point" Circle2d.withDiameter $(docs 'Circle2d.withDiameter)
-    , Class.property "Center Point" Circle2d.centerPoint $(docs 'Circle2d.centerPoint)
-    , Class.property "Diameter" Circle2d.diameter $(docs 'Circle2d.diameter)
-    , Class.property "Radius" Circle2d.radius $(docs 'Circle2d.radius)
-    , Class.member1 "Point" "Angle" (flip Circle2d.pointOn) $(docs 'Circle2d.pointOn)
+  Class.new @UvCircle $(docs ''Circle2D.Circle2D) $
+    [ Class.factory2 "With Radius" "Radius" "Center Point" Circle2D.withRadius $(docs 'Circle2D.withRadius)
+    , Class.factory2 "With Diameter" "Diameter" "Center Point" Circle2D.withDiameter $(docs 'Circle2D.withDiameter)
+    , Class.property "Center Point" Circle2D.centerPoint $(docs 'Circle2D.centerPoint)
+    , Class.property "Diameter" Circle2D.diameter $(docs 'Circle2D.diameter)
+    , Class.property "Radius" Circle2D.radius $(docs 'Circle2D.radius)
+    , Class.member1 "Point" "Angle" (flip Circle2D.pointOn) $(docs 'Circle2D.pointOn)
     ]
 
-type Polyline2d = Polyline2d.Polyline2d Meters FFI.Space
+type Polyline2D = Polyline2D.Polyline2D Meters FFI.Space
 
-polyline2d :: Class
-polyline2d =
-  Class.new @Polyline2d $(docs ''Polyline2d.Polyline2d) $
-    [ Class.constructor1 "Vertices" Polyline2d.Polyline2d $(docs 'Polyline2d.Polyline2d)
-    , Class.property "Vertices" Polyline2d.vertices $(docs 'Polyline2d.vertices)
-    , Class.property "Num Vertices" Polyline2d.numVertices $(docs 'Polyline2d.numVertices)
-    , Class.property "Start Point" Polyline2d.startPoint $(docs 'Polyline2d.startPoint)
-    , Class.property "End Point" Polyline2d.endPoint $(docs 'Polyline2d.endPoint)
-    , Class.member0 "Segments" Polyline2d.segments $(docs 'Polyline2d.segments)
-    , Class.member0 "Length" Polyline2d.length $(docs 'Polyline2d.length)
+polyline2D :: Class
+polyline2D =
+  Class.new @Polyline2D $(docs ''Polyline2D.Polyline2D) $
+    [ Class.constructor1 "Vertices" Polyline2D.Polyline2D $(docs 'Polyline2D.Polyline2D)
+    , Class.property "Vertices" Polyline2D.vertices $(docs 'Polyline2D.vertices)
+    , Class.property "Num Vertices" Polyline2D.numVertices $(docs 'Polyline2D.numVertices)
+    , Class.property "Start Point" Polyline2D.startPoint $(docs 'Polyline2D.startPoint)
+    , Class.property "End Point" Polyline2D.endPoint $(docs 'Polyline2D.endPoint)
+    , Class.member0 "Segments" Polyline2D.segments $(docs 'Polyline2D.segments)
+    , Class.member0 "Length" Polyline2D.length $(docs 'Polyline2D.length)
     ]
 
-type UvPolyline = Polyline2d.Polyline2d Unitless UvSpace
+type UvPolyline = Polyline2D.Polyline2D Unitless UvSpace
 
 uvPolyline :: Class
 uvPolyline =
-  Class.new @UvPolyline $(docs ''Polyline2d.Polyline2d) $
-    [ Class.constructor1 "Vertices" Polyline2d.Polyline2d $(docs 'Polyline2d.Polyline2d)
-    , Class.property "Vertices" Polyline2d.vertices $(docs 'Polyline2d.vertices)
-    , Class.property "Num Vertices" Polyline2d.numVertices $(docs 'Polyline2d.numVertices)
-    , Class.property "Start Point" Polyline2d.startPoint $(docs 'Polyline2d.startPoint)
-    , Class.property "End Point" Polyline2d.endPoint $(docs 'Polyline2d.endPoint)
-    , Class.member0 "Segments" Polyline2d.segments $(docs 'Polyline2d.segments)
-    , Class.member0 "Length" Polyline2d.length $(docs 'Polyline2d.length)
+  Class.new @UvPolyline $(docs ''Polyline2D.Polyline2D) $
+    [ Class.constructor1 "Vertices" Polyline2D.Polyline2D $(docs 'Polyline2D.Polyline2D)
+    , Class.property "Vertices" Polyline2D.vertices $(docs 'Polyline2D.vertices)
+    , Class.property "Num Vertices" Polyline2D.numVertices $(docs 'Polyline2D.numVertices)
+    , Class.property "Start Point" Polyline2D.startPoint $(docs 'Polyline2D.startPoint)
+    , Class.property "End Point" Polyline2D.endPoint $(docs 'Polyline2D.endPoint)
+    , Class.member0 "Segments" Polyline2D.segments $(docs 'Polyline2D.segments)
+    , Class.member0 "Length" Polyline2D.length $(docs 'Polyline2D.length)
     ]
 
-type Polygon2d = Polygon2d.Polygon2d Meters FFI.Space
+type Polygon2D = Polygon2D.Polygon2D Meters FFI.Space
 
-polygon2d :: Class
-polygon2d =
-  Class.new @Polygon2d $(docs ''Polygon2d.Polygon2d) $
-    [ Class.constructor1 "Vertices" Polygon2d.Polygon2d $(docs 'Polygon2d.Polygon2d)
-    , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2d.inscribed $(docs 'Polygon2d.inscribed)
-    , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2d.circumscribed $(docs 'Polygon2d.circumscribed)
-    , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2d.hexagon $(docs 'Polygon2d.hexagon)
-    , Class.property "Vertices" Polygon2d.vertices $(docs 'Polygon2d.vertices)
-    , Class.member0 "Edges" Polygon2d.edges $(docs 'Polygon2d.edges)
-    , Class.member0 "Signed Area" Polygon2d.signedArea $(docs 'Polygon2d.signedArea)
+polygon2D :: Class
+polygon2D =
+  Class.new @Polygon2D $(docs ''Polygon2D.Polygon2D) $
+    [ Class.constructor1 "Vertices" Polygon2D.Polygon2D $(docs 'Polygon2D.Polygon2D)
+    , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2D.inscribed $(docs 'Polygon2D.inscribed)
+    , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2D.circumscribed $(docs 'Polygon2D.circumscribed)
+    , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2D.hexagon $(docs 'Polygon2D.hexagon)
+    , Class.property "Vertices" Polygon2D.vertices $(docs 'Polygon2D.vertices)
+    , Class.member0 "Edges" Polygon2D.edges $(docs 'Polygon2D.edges)
+    , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
-type UvPolygon = Polygon2d.Polygon2d Unitless UvSpace
+type UvPolygon = Polygon2D.Polygon2D Unitless UvSpace
 
 uvPolygon :: Class
 uvPolygon =
-  Class.new @UvPolygon $(docs ''Polygon2d.Polygon2d) $
-    [ Class.constructor1 "Vertices" Polygon2d.Polygon2d $(docs 'Polygon2d.Polygon2d)
-    , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2d.inscribed $(docs 'Polygon2d.inscribed)
-    , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2d.circumscribed $(docs 'Polygon2d.circumscribed)
-    , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2d.hexagon $(docs 'Polygon2d.hexagon)
-    , Class.property "Vertices" Polygon2d.vertices $(docs 'Polygon2d.vertices)
-    , Class.member0 "Edges" Polygon2d.edges $(docs 'Polygon2d.edges)
-    , Class.member0 "Signed Area" Polygon2d.signedArea $(docs 'Polygon2d.signedArea)
+  Class.new @UvPolygon $(docs ''Polygon2D.Polygon2D) $
+    [ Class.constructor1 "Vertices" Polygon2D.Polygon2D $(docs 'Polygon2D.Polygon2D)
+    , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2D.inscribed $(docs 'Polygon2D.inscribed)
+    , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2D.circumscribed $(docs 'Polygon2D.circumscribed)
+    , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2D.hexagon $(docs 'Polygon2D.hexagon)
+    , Class.property "Vertices" Polygon2D.vertices $(docs 'Polygon2D.vertices)
+    , Class.member0 "Edges" Polygon2D.edges $(docs 'Polygon2D.edges)
+    , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
 type Curve = Curve.Curve Unitless
@@ -1025,93 +1025,93 @@ svg =
     , Class.nested @(Svg.Attribute FFI.Space) $(docs ''Svg.Attribute) []
     ]
 
-type Axis2d = Axis2d.Axis2d Meters FFI.Space
+type Axis2D = Axis2D.Axis2D Meters FFI.Space
 
-axis2d :: Class
-axis2d =
-  Class.new @Axis2d $(docs ''Axis2d.Axis2d) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis2d.Axis2d $(docs 'Axis2d.Axis2d)
-    , Class.property "Origin Point" (.originPoint) $(docs 'Axis2d.originPoint)
-    , Class.property "Direction" (.direction) $(docs 'Axis2d.direction)
-    , Class.constant "X" (Axis2d.x :: Axis2d) $(docs 'Axis2d.x)
-    , Class.constant "Y" (Axis2d.y :: Axis2d) $(docs 'Axis2d.y)
-    , Class.member1 "Place On" "Plane" (Axis2d.placeOn :: Plane3d -> Axis2d -> Axis3d) $(docs 'Axis2d.placeOn)
+axis2D :: Class
+axis2D =
+  Class.new @Axis2D $(docs ''Axis2D.Axis2D) $
+    [ Class.constructor2 "Origin Point" "Direction" Axis2D.Axis2D $(docs 'Axis2D.Axis2D)
+    , Class.property "Origin Point" (.originPoint) $(docs 'Axis2D.originPoint)
+    , Class.property "Direction" (.direction) $(docs 'Axis2D.direction)
+    , Class.constant "X" (Axis2D.x :: Axis2D) $(docs 'Axis2D.x)
+    , Class.constant "Y" (Axis2D.y :: Axis2D) $(docs 'Axis2D.y)
+    , Class.member1 "Place On" "Plane" (Axis2D.placeOn :: Plane3D -> Axis2D -> Axis3D) $(docs 'Axis2D.placeOn)
     ]
-      <> orthonormalTransformations2d Axis2d.transformBy
+      <> orthonormalTransformations2D Axis2D.transformBy
 
-type UvAxis = Axis2d.Axis2d Unitless UvSpace
+type UvAxis = Axis2D.Axis2D Unitless UvSpace
 
 uvAxis :: Class
 uvAxis =
-  Class.new @UvAxis $(docs ''Axis2d.Axis2d) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis2d.Axis2d $(docs 'Axis2d.Axis2d)
-    , Class.property "Origin Point" (.originPoint) $(docs 'Axis2d.originPoint)
-    , Class.property "Direction" (.direction) $(docs 'Axis2d.direction)
-    , Class.constant "U" (Axis2d.x :: UvAxis) "The U axis."
-    , Class.constant "V" (Axis2d.y :: UvAxis) "The V axis."
+  Class.new @UvAxis $(docs ''Axis2D.Axis2D) $
+    [ Class.constructor2 "Origin Point" "Direction" Axis2D.Axis2D $(docs 'Axis2D.Axis2D)
+    , Class.property "Origin Point" (.originPoint) $(docs 'Axis2D.originPoint)
+    , Class.property "Direction" (.direction) $(docs 'Axis2D.direction)
+    , Class.constant "U" (Axis2D.x :: UvAxis) "The U axis."
+    , Class.constant "V" (Axis2D.y :: UvAxis) "The V axis."
     ]
 
-world3d :: Class
-world3d =
-  Class.static "World3d" "A collection of global datums." $
-    [ Class.constant "Origin Point" (World3d.originPoint :: Point3d) $(docs 'World3d.originPoint)
-    , Class.constant "Forward Direction" (World3d.forwardDirection :: Direction3d) $(docs 'World3d.forwardDirection)
-    , Class.constant "Backward Direction" (World3d.backwardDirection :: Direction3d) $(docs 'World3d.backwardDirection)
-    , Class.constant "Leftward Direction" (World3d.leftwardDirection :: Direction3d) $(docs 'World3d.leftwardDirection)
-    , Class.constant "Rightward Direction" (World3d.rightwardDirection :: Direction3d) $(docs 'World3d.rightwardDirection)
-    , Class.constant "Upward Direction" (World3d.upwardDirection :: Direction3d) $(docs 'World3d.upwardDirection)
-    , Class.constant "Downward Direction" (World3d.downwardDirection :: Direction3d) $(docs 'World3d.downwardDirection)
-    , Class.constant "Forward Orientation" (World3d.forwardOrientation :: Orientation3d) $(docs 'World3d.forwardOrientation)
-    , Class.constant "Backward Orientation" (World3d.backwardOrientation :: Orientation3d) $(docs 'World3d.backwardOrientation)
-    , Class.constant "Leftward Orientation" (World3d.leftwardOrientation :: Orientation3d) $(docs 'World3d.leftwardOrientation)
-    , Class.constant "Rightward Orientation" (World3d.rightwardOrientation :: Orientation3d) $(docs 'World3d.rightwardOrientation)
-    , Class.constant "Upward Orientation" (World3d.upwardOrientation :: Orientation3d) $(docs 'World3d.upwardOrientation)
-    , Class.constant "Downward Orientation" (World3d.downwardOrientation :: Orientation3d) $(docs 'World3d.downwardOrientation)
-    , Class.constant "Frame" (World3d.frame :: Frame3d) $(docs 'World3d.frame)
-    , Class.constant "Forward Axis" (World3d.forwardAxis :: Axis3d) $(docs 'World3d.forwardAxis)
-    , Class.constant "Backward Axis" (World3d.backwardAxis :: Axis3d) $(docs 'World3d.backwardAxis)
-    , Class.constant "Leftward Axis" (World3d.leftwardAxis :: Axis3d) $(docs 'World3d.leftwardAxis)
-    , Class.constant "Rightward Axis" (World3d.rightwardAxis :: Axis3d) $(docs 'World3d.rightwardAxis)
-    , Class.constant "Upward Axis" (World3d.upwardAxis :: Axis3d) $(docs 'World3d.upwardAxis)
-    , Class.constant "Downward Axis" (World3d.downwardAxis :: Axis3d) $(docs 'World3d.downwardAxis)
-    , Class.constant "Front Plane" (World3d.frontPlane :: Plane3d) $(docs 'World3d.frontPlane)
-    , Class.constant "Back Plane" (World3d.backPlane :: Plane3d) $(docs 'World3d.backPlane)
-    , Class.constant "Left Plane" (World3d.leftPlane :: Plane3d) $(docs 'World3d.leftPlane)
-    , Class.constant "Right Plane" (World3d.rightPlane :: Plane3d) $(docs 'World3d.rightPlane)
-    , Class.constant "Top Plane" (World3d.topPlane :: Plane3d) $(docs 'World3d.topPlane)
-    , Class.constant "Bottom Plane" (World3d.bottomPlane :: Plane3d) $(docs 'World3d.bottomPlane)
+world3D :: Class
+world3D =
+  Class.static "World3D" "A collection of global datums." $
+    [ Class.constant "Origin Point" (World3D.originPoint :: Point3D) $(docs 'World3D.originPoint)
+    , Class.constant "Forward Direction" (World3D.forwardDirection :: Direction3D) $(docs 'World3D.forwardDirection)
+    , Class.constant "Backward Direction" (World3D.backwardDirection :: Direction3D) $(docs 'World3D.backwardDirection)
+    , Class.constant "Leftward Direction" (World3D.leftwardDirection :: Direction3D) $(docs 'World3D.leftwardDirection)
+    , Class.constant "Rightward Direction" (World3D.rightwardDirection :: Direction3D) $(docs 'World3D.rightwardDirection)
+    , Class.constant "Upward Direction" (World3D.upwardDirection :: Direction3D) $(docs 'World3D.upwardDirection)
+    , Class.constant "Downward Direction" (World3D.downwardDirection :: Direction3D) $(docs 'World3D.downwardDirection)
+    , Class.constant "Forward Orientation" (World3D.forwardOrientation :: Orientation3D) $(docs 'World3D.forwardOrientation)
+    , Class.constant "Backward Orientation" (World3D.backwardOrientation :: Orientation3D) $(docs 'World3D.backwardOrientation)
+    , Class.constant "Leftward Orientation" (World3D.leftwardOrientation :: Orientation3D) $(docs 'World3D.leftwardOrientation)
+    , Class.constant "Rightward Orientation" (World3D.rightwardOrientation :: Orientation3D) $(docs 'World3D.rightwardOrientation)
+    , Class.constant "Upward Orientation" (World3D.upwardOrientation :: Orientation3D) $(docs 'World3D.upwardOrientation)
+    , Class.constant "Downward Orientation" (World3D.downwardOrientation :: Orientation3D) $(docs 'World3D.downwardOrientation)
+    , Class.constant "Frame" (World3D.frame :: Frame3D) $(docs 'World3D.frame)
+    , Class.constant "Forward Axis" (World3D.forwardAxis :: Axis3D) $(docs 'World3D.forwardAxis)
+    , Class.constant "Backward Axis" (World3D.backwardAxis :: Axis3D) $(docs 'World3D.backwardAxis)
+    , Class.constant "Leftward Axis" (World3D.leftwardAxis :: Axis3D) $(docs 'World3D.leftwardAxis)
+    , Class.constant "Rightward Axis" (World3D.rightwardAxis :: Axis3D) $(docs 'World3D.rightwardAxis)
+    , Class.constant "Upward Axis" (World3D.upwardAxis :: Axis3D) $(docs 'World3D.upwardAxis)
+    , Class.constant "Downward Axis" (World3D.downwardAxis :: Axis3D) $(docs 'World3D.downwardAxis)
+    , Class.constant "Front Plane" (World3D.frontPlane :: Plane3D) $(docs 'World3D.frontPlane)
+    , Class.constant "Back Plane" (World3D.backPlane :: Plane3D) $(docs 'World3D.backPlane)
+    , Class.constant "Left Plane" (World3D.leftPlane :: Plane3D) $(docs 'World3D.leftPlane)
+    , Class.constant "Right Plane" (World3D.rightPlane :: Plane3D) $(docs 'World3D.rightPlane)
+    , Class.constant "Top Plane" (World3D.topPlane :: Plane3D) $(docs 'World3D.topPlane)
+    , Class.constant "Bottom Plane" (World3D.bottomPlane :: Plane3D) $(docs 'World3D.bottomPlane)
     ]
 
-convention3d :: Class
-convention3d =
-  Class.new @Convention3d $(docs ''Convention3d) $
-    [ Class.constant "Y Up" Convention3d.yUp $(docs 'Convention3d.yUp)
-    , Class.constant "Z Up" Convention3d.zUp $(docs 'Convention3d.zUp)
+convention3D :: Class
+convention3D =
+  Class.new @Convention3D $(docs ''Convention3D) $
+    [ Class.constant "Y Up" Convention3D.yUp $(docs 'Convention3D.yUp)
+    , Class.constant "Z Up" Convention3D.zUp $(docs 'Convention3D.zUp)
     ]
 
-type Vector3d = Vector3d.Vector3d Unitless FFI.Space
+type Vector3D = Vector3D.Vector3D Unitless FFI.Space
 
-vector3d :: Class
-vector3d =
-  Class.new @Vector3d "A unitless vector in 3D." $
-    [ Class.constant "Zero" (Vector3d.zero :: Vector3d) $(docs 'Vector3d.zero)
-    , Class.factory1 "Unit" "Direction" Vector3d.unit $(docs 'Vector3d.unit)
-    , Class.factory2 "XYZ" "Convention" "Components" Vector3d.xyz $(docs 'Vector3d.xyz)
-    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
-    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
-    , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
-    , Class.member0 "Z Up Components" Vector3d.zUpComponents $(docs 'Vector3d.zUpComponents)
-    , Class.member0 "Y Up Components" Vector3d.yUpComponents $(docs 'Vector3d.yUpComponents)
-    , Class.memberU0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
-    , Class.memberU0 "Is Zero" (~= Vector3d.zero) "Check if a vector is zero, within the current tolerance."
-    , Class.member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
-    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3d.rotateAround :: Axis3d -> Angle -> Vector3d -> Vector3d) $(docs 'Vector3d.rotateAround)
-    , Class.member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
-    , Class.member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross :: Plane3d -> Vector3d -> Vector3d) $(docs 'Vector3d.mirrorAcross)
-    , Class.member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
-    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Number -> Vector3d -> Vector3d) $(docs 'Vector3d.scaleAlong)
-    , Class.member1 "Place In" "Frame" (Vector3d.placeIn :: Frame3d -> Vector3d -> Vector3d) $(docs 'Vector3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Vector3d.relativeTo :: Frame3d -> Vector3d -> Vector3d) $(docs 'Vector3d.relativeTo)
+vector3D :: Class
+vector3D =
+  Class.new @Vector3D "A unitless vector in 3D." $
+    [ Class.constant "Zero" (Vector3D.zero :: Vector3D) $(docs 'Vector3D.zero)
+    , Class.factory1 "Unit" "Direction" Vector3D.unit $(docs 'Vector3D.unit)
+    , Class.factory2 "XYZ" "Convention" "Components" Vector3D.xyz $(docs 'Vector3D.xyz)
+    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
+    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
+    , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
+    , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
+    , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.memberU0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
+    , Class.memberU0 "Is Zero" (~= Vector3D.zero) "Check if a vector is zero, within the current tolerance."
+    , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
+    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Vector3D -> Vector3D) $(docs 'Vector3D.rotateAround)
+    , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
+    , Class.member1 "Mirror Across" "Plane" (Vector3D.mirrorAcross :: Plane3D -> Vector3D -> Vector3D) $(docs 'Vector3D.mirrorAcross)
+    , Class.member2 "Scale In" "Direction" "Scale" Vector3D.scaleIn $(docs 'Vector3D.scaleIn)
+    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> Vector3D -> Vector3D) $(docs 'Vector3D.scaleAlong)
+    , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> Vector3D -> Vector3D) $(docs 'Vector3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> Vector3D -> Vector3D) $(docs 'Vector3D.relativeTo)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -1121,35 +1121,35 @@ vector3d =
     , Class.times @Area Self
     , Class.divByNumber
     , Class.dotSelf
-    , Class.dotProduct @Displacement3d Self
-    , Class.dotProduct @AreaVector3d Self
+    , Class.dotProduct @Displacement3D Self
+    , Class.dotProduct @AreaVector3D Self
     , Class.crossSelf
-    , Class.crossProduct @Displacement3d Self
-    , Class.crossProduct @AreaVector3d Self
+    , Class.crossProduct @Displacement3D Self
+    , Class.crossProduct @AreaVector3D Self
     ]
 
-type Displacement3d = Vector3d.Vector3d Meters FFI.Space
+type Displacement3D = Vector3D.Vector3D Meters FFI.Space
 
-displacement3d :: Class
-displacement3d =
-  Class.new @Displacement3d "A displacement vector in 3D." $
-    [ Class.constant "Zero" (Vector3d.zero :: Displacement3d) $(docs 'Vector3d.zero)
-    , Class.factory2 "XYZ" "Convention" "Components" Vector3d.xyz $(docs 'Vector3d.xyz)
-    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
-    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
-    , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
-    , Class.member0 "Z Up Components" Vector3d.zUpComponents $(docs 'Vector3d.zUpComponents)
-    , Class.member0 "Y Up Components" Vector3d.yUpComponents $(docs 'Vector3d.yUpComponents)
-    , Class.memberM0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
-    , Class.memberM0 "Is Zero" (~= Vector3d.zero) "Check if a displacement is zero, within the current tolerance."
-    , Class.member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
-    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3d.rotateAround :: Axis3d -> Angle -> Displacement3d -> Displacement3d) $(docs 'Vector3d.rotateAround)
-    , Class.member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
-    , Class.member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross :: Plane3d -> Displacement3d -> Displacement3d) $(docs 'Vector3d.mirrorAcross)
-    , Class.member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
-    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Number -> Displacement3d -> Displacement3d) $(docs 'Vector3d.scaleAlong)
-    , Class.member1 "Place In" "Frame" (Vector3d.placeIn :: Frame3d -> Displacement3d -> Displacement3d) $(docs 'Vector3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Vector3d.relativeTo :: Frame3d -> Displacement3d -> Displacement3d) $(docs 'Vector3d.relativeTo)
+displacement3D :: Class
+displacement3D =
+  Class.new @Displacement3D "A displacement vector in 3D." $
+    [ Class.constant "Zero" (Vector3D.zero :: Displacement3D) $(docs 'Vector3D.zero)
+    , Class.factory2 "XYZ" "Convention" "Components" Vector3D.xyz $(docs 'Vector3D.xyz)
+    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
+    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
+    , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
+    , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
+    , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.memberM0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
+    , Class.memberM0 "Is Zero" (~= Vector3D.zero) "Check if a displacement is zero, within the current tolerance."
+    , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
+    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Displacement3D -> Displacement3D) $(docs 'Vector3D.rotateAround)
+    , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
+    , Class.member1 "Mirror Across" "Plane" (Vector3D.mirrorAcross :: Plane3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.mirrorAcross)
+    , Class.member2 "Scale In" "Direction" "Scale" Vector3D.scaleIn $(docs 'Vector3D.scaleIn)
+    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> Displacement3D -> Displacement3D) $(docs 'Vector3D.scaleAlong)
+    , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.relativeTo)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -1159,33 +1159,33 @@ displacement3d =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.dotSelf
-    , Class.dotProduct @Vector3d Self
+    , Class.dotProduct @Vector3D Self
     , Class.crossSelf
-    , Class.crossProduct @Vector3d Self
+    , Class.crossProduct @Vector3D Self
     ]
 
-type AreaVector3d = Vector3d.Vector3d SquareMeters FFI.Space
+type AreaVector3D = Vector3D.Vector3D SquareMeters FFI.Space
 
-areaVector3d :: Class
-areaVector3d =
-  Class.new @AreaVector3d "A vector in 3D with units of area." $
-    [ Class.constant "Zero" (Vector3d.zero :: AreaVector3d) $(docs 'Vector3d.zero)
-    , Class.factory2 "XYZ" "Convention" "Components" Vector3d.xyz $(docs 'Vector3d.xyz)
-    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3d.zUp $(docs 'Vector3d.zUp)
-    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3d.yUp $(docs 'Vector3d.yUp)
-    , Class.member1 "Components" "Convention" Vector3d.components $(docs 'Vector3d.components)
-    , Class.member0 "Z Up Components" Vector3d.zUpComponents $(docs 'Vector3d.zUpComponents)
-    , Class.member0 "Y Up Components" Vector3d.yUpComponents $(docs 'Vector3d.yUpComponents)
-    , Class.memberS0 "Direction" Vector3d.direction $(docs 'Vector3d.direction)
-    , Class.memberS0 "Is Zero" (~= Vector3d.zero) "Check if an area vector is zero, within the current tolerance."
-    , Class.member2 "Rotate In" "Direction" "Angle" Vector3d.rotateIn $(docs 'Vector3d.rotateIn)
-    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3d.rotateAround :: Axis3d -> Angle -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.rotateAround)
-    , Class.member1 "Mirror In" "Direction" Vector3d.mirrorIn $(docs 'Vector3d.mirrorIn)
-    , Class.member1 "Mirror Across" "Plane" (Vector3d.mirrorAcross :: Plane3d -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.mirrorAcross)
-    , Class.member2 "Scale In" "Direction" "Scale" Vector3d.scaleIn $(docs 'Vector3d.scaleIn)
-    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3d.scaleAlong :: Axis3d -> Number -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.scaleAlong)
-    , Class.member1 "Place In" "Frame" (Vector3d.placeIn :: Frame3d -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Vector3d.relativeTo :: Frame3d -> AreaVector3d -> AreaVector3d) $(docs 'Vector3d.relativeTo)
+areaVector3D :: Class
+areaVector3D =
+  Class.new @AreaVector3D "A vector in 3D with units of area." $
+    [ Class.constant "Zero" (Vector3D.zero :: AreaVector3D) $(docs 'Vector3D.zero)
+    , Class.factory2 "XYZ" "Convention" "Components" Vector3D.xyz $(docs 'Vector3D.xyz)
+    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
+    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
+    , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
+    , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
+    , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.memberS0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
+    , Class.memberS0 "Is Zero" (~= Vector3D.zero) "Check if an area vector is zero, within the current tolerance."
+    , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
+    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.rotateAround)
+    , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
+    , Class.member1 "Mirror Across" "Plane" (Vector3D.mirrorAcross :: Plane3D -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.mirrorAcross)
+    , Class.member2 "Scale In" "Direction" "Scale" Vector3D.scaleIn $(docs 'Vector3D.scaleIn)
+    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.scaleAlong)
+    , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.relativeTo)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -1194,363 +1194,363 @@ areaVector3d =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.dotProduct @Vector3d Self
-    , Class.crossProduct @Vector3d Self
+    , Class.dotProduct @Vector3D Self
+    , Class.crossProduct @Vector3D Self
     ]
 
-type Direction3d = Direction3d.Direction3d FFI.Space
+type Direction3D = Direction3D.Direction3D FFI.Space
 
-direction3d :: Class
-direction3d =
-  Class.new @Direction3d $(docs ''Direction3d.Direction3d) $
-    [ Class.upcast Vector3d.unit
-    , Class.member0 "Perpendicular Direction" Direction3d.perpendicularDirection $(docs 'Direction3d.perpendicularDirection)
-    , Class.member1 "Angle To" "Other" Direction3d.angleFrom $(docs 'Direction3d.angleFrom)
-    , Class.member2 "Rotate In" "Direction" "Angle" Direction3d.rotateIn $(docs 'Direction3d.rotateIn)
-    , Class.member2 "Rotate Around" "Axis" "Angle" (Direction3d.rotateAround :: Axis3d -> Angle -> Direction3d -> Direction3d) $(docs 'Direction3d.rotateAround)
-    , Class.member1 "Mirror In" "Direction" Direction3d.mirrorIn $(docs 'Direction3d.mirrorIn)
-    , Class.member1 "Mirror Across" "Plane" (Direction3d.mirrorAcross :: Plane3d -> Direction3d -> Direction3d) $(docs 'Direction3d.mirrorAcross)
-    , Class.member1 "Place In" "Frame" (Direction3d.placeIn :: Frame3d -> Direction3d -> Direction3d) $(docs 'Direction3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Direction3d.relativeTo :: Frame3d -> Direction3d -> Direction3d) $(docs 'Direction3d.relativeTo)
+direction3D :: Class
+direction3D =
+  Class.new @Direction3D $(docs ''Direction3D.Direction3D) $
+    [ Class.upcast Vector3D.unit
+    , Class.member0 "Perpendicular Direction" Direction3D.perpendicularDirection $(docs 'Direction3D.perpendicularDirection)
+    , Class.member1 "Angle To" "Other" Direction3D.angleFrom $(docs 'Direction3D.angleFrom)
+    , Class.member2 "Rotate In" "Direction" "Angle" Direction3D.rotateIn $(docs 'Direction3D.rotateIn)
+    , Class.member2 "Rotate Around" "Axis" "Angle" (Direction3D.rotateAround :: Axis3D -> Angle -> Direction3D -> Direction3D) $(docs 'Direction3D.rotateAround)
+    , Class.member1 "Mirror In" "Direction" Direction3D.mirrorIn $(docs 'Direction3D.mirrorIn)
+    , Class.member1 "Mirror Across" "Plane" (Direction3D.mirrorAcross :: Plane3D -> Direction3D -> Direction3D) $(docs 'Direction3D.mirrorAcross)
+    , Class.member1 "Place In" "Frame" (Direction3D.placeIn :: Frame3D -> Direction3D -> Direction3D) $(docs 'Direction3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Direction3D.relativeTo :: Frame3D -> Direction3D -> Direction3D) $(docs 'Direction3D.relativeTo)
     , Class.negateSelf
     ]
 
-type Point3d = Point3d.Point3d FFI.Space
+type Point3D = Point3D.Point3D FFI.Space
 
-point3d :: Class
-point3d =
-  Class.new @Point3d "A point in 3D." $
-    [ Class.factory2 "Along" "Axis" "Distance" Point3d.along $(docs 'Point3d.along)
-    , Class.factory2 "XYZ" "Convention" "Coordinates" Point3d.xyz $(docs 'Point3d.xyz)
-    , Class.factory3 "Z Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.zUp $(docs 'Point3d.zUp)
-    , Class.factory3 "Y Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3d.yUp $(docs 'Point3d.yUp)
-    , Class.member1 "Coordinates" "Convention" Point3d.coordinates $(docs 'Point3d.coordinates)
-    , Class.member0 "Z Up Coordinates" Point3d.zUpCoordinates $(docs 'Point3d.zUpCoordinates)
-    , Class.member0 "Y Up Coordinates" Point3d.yUpCoordinates $(docs 'Point3d.yUpCoordinates)
-    , Class.member1 "Distance To" "Other" Point3d.distanceFrom $(docs 'Point3d.distanceFrom)
-    , Class.member1 "Midpoint" "Other" Point3d.midpoint $(docs 'Point3d.midpoint)
-    , Class.member1 "Project Onto" "Plane" Point3d.projectOnto $(docs 'Point3d.projectOnto)
-    , Class.member1 "Project Into" "Plane" Point3d.projectInto $(docs 'Point3d.projectInto)
+point3D :: Class
+point3D =
+  Class.new @Point3D "A point in 3D." $
+    [ Class.factory2 "Along" "Axis" "Distance" Point3D.along $(docs 'Point3D.along)
+    , Class.factory2 "XYZ" "Convention" "Coordinates" Point3D.xyz $(docs 'Point3D.xyz)
+    , Class.factory3 "Z Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3D.zUp $(docs 'Point3D.zUp)
+    , Class.factory3 "Y Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3D.yUp $(docs 'Point3D.yUp)
+    , Class.member1 "Coordinates" "Convention" Point3D.coordinates $(docs 'Point3D.coordinates)
+    , Class.member0 "Z Up Coordinates" Point3D.zUpCoordinates $(docs 'Point3D.zUpCoordinates)
+    , Class.member0 "Y Up Coordinates" Point3D.yUpCoordinates $(docs 'Point3D.yUpCoordinates)
+    , Class.member1 "Distance To" "Other" Point3D.distanceFrom $(docs 'Point3D.distanceFrom)
+    , Class.member1 "Midpoint" "Other" Point3D.midpoint $(docs 'Point3D.midpoint)
+    , Class.member1 "Project Onto" "Plane" Point3D.projectOnto $(docs 'Point3D.projectOnto)
+    , Class.member1 "Project Into" "Plane" Point3D.projectInto $(docs 'Point3D.projectInto)
     , Class.minusSelf
-    , Class.minus @Displacement3d Self
-    , Class.plus @Displacement3d Self
-    , Class.member1 "Place In" "Frame" (Point3d.placeIn :: Frame3d -> Point3d -> Point3d) $(docs 'Point3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Point3d.relativeTo :: Frame3d -> Point3d -> Point3d) $(docs 'Point3d.relativeTo)
+    , Class.minus @Displacement3D Self
+    , Class.plus @Displacement3D Self
+    , Class.member1 "Place In" "Frame" (Point3D.placeIn :: Frame3D -> Point3D -> Point3D) $(docs 'Point3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Point3D.relativeTo :: Frame3D -> Point3D -> Point3D) $(docs 'Point3D.relativeTo)
     ]
-      <> affineTransformations3d Point3d.transformBy
+      <> affineTransformations3D Point3D.transformBy
 
-type Bounds3d = Bounds3d.Bounds3d FFI.Space
+type Bounds3D = Bounds3D.Bounds3D FFI.Space
 
-bounds3d :: Class
-bounds3d =
-  Class.new @Bounds3d $(docs ''Bounds3d.Bounds3d) $
-    [ Class.factory1 "Constant" "Point" Bounds3d.constant $(docs 'Bounds3d.constant)
-    , Class.factory2 "From Corners" "First Point" "Second Point" Bounds3d.hull2 $(docs 'Bounds3d.hull2)
-    , Class.factory1 @(NonEmpty Point3d) "Hull" "Points" Bounds3d.hullN $(docs 'Bounds3d.hullN)
-    , Class.factory1 "Aggregate" "Bounds" Bounds3d.aggregateN $(docs 'Bounds3d.aggregateN)
-    , Class.member1 "Coordinates" "Convention" Bounds3d.coordinates $(docs 'Bounds3d.coordinates)
-    , Class.plus @Displacement3d Self
-    , Class.minus @Displacement3d Self
+bounds3D :: Class
+bounds3D =
+  Class.new @Bounds3D $(docs ''Bounds3D.Bounds3D) $
+    [ Class.factory1 "Constant" "Point" Bounds3D.constant $(docs 'Bounds3D.constant)
+    , Class.factory2 "From Corners" "First Point" "Second Point" Bounds3D.hull2 $(docs 'Bounds3D.hull2)
+    , Class.factory1 @(NonEmpty Point3D) "Hull" "Points" Bounds3D.hullN $(docs 'Bounds3D.hullN)
+    , Class.factory1 "Aggregate" "Bounds" Bounds3D.aggregateN $(docs 'Bounds3D.aggregateN)
+    , Class.member1 "Coordinates" "Convention" Bounds3D.coordinates $(docs 'Bounds3D.coordinates)
+    , Class.plus @Displacement3D Self
+    , Class.minus @Displacement3D Self
     ]
-      <> affineTransformations3d Bounds3d.transformBy
+      <> affineTransformations3D Bounds3D.transformBy
 
-type Axis3d = Axis3d.Axis3d FFI.Space
+type Axis3D = Axis3D.Axis3D FFI.Space
 
-axis3d :: Class
-axis3d =
-  Class.new @Axis3d $(docs ''Axis3d.Axis3d) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis3d.Axis3d $(docs 'Axis3d.Axis3d)
-    , Class.property "Origin Point" (.originPoint) $(docs 'Axis3d.originPoint)
-    , Class.property "Direction" (.direction) $(docs 'Axis3d.direction)
-    , Class.member0 "Normal Plane" (Axis3d.normalPlane :: Axis3d -> Plane3d) $(docs 'Axis3d.normalPlane)
-    , Class.member1 "Move To" "Point" Axis3d.moveTo $(docs 'Axis3d.moveTo)
-    , Class.member0 "Reverse" Axis3d.reverse $(docs 'Axis3d.reverse)
-    , Class.member1 "Place In" "Frame" (Axis3d.placeIn :: Frame3d -> Axis3d -> Axis3d) $(docs 'Axis3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Axis3d.relativeTo :: Frame3d -> Axis3d -> Axis3d) $(docs 'Axis3d.relativeTo)
+axis3D :: Class
+axis3D =
+  Class.new @Axis3D $(docs ''Axis3D.Axis3D) $
+    [ Class.constructor2 "Origin Point" "Direction" Axis3D.Axis3D $(docs 'Axis3D.Axis3D)
+    , Class.property "Origin Point" (.originPoint) $(docs 'Axis3D.originPoint)
+    , Class.property "Direction" (.direction) $(docs 'Axis3D.direction)
+    , Class.member0 "Normal Plane" (Axis3D.normalPlane :: Axis3D -> Plane3D) $(docs 'Axis3D.normalPlane)
+    , Class.member1 "Move To" "Point" Axis3D.moveTo $(docs 'Axis3D.moveTo)
+    , Class.member0 "Reverse" Axis3D.reverse $(docs 'Axis3D.reverse)
+    , Class.member1 "Place In" "Frame" (Axis3D.placeIn :: Frame3D -> Axis3D -> Axis3D) $(docs 'Axis3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Axis3D.relativeTo :: Frame3D -> Axis3D -> Axis3D) $(docs 'Axis3D.relativeTo)
     ]
-      <> orthonormalTransformations3d Axis3d.transformBy
+      <> orthonormalTransformations3D Axis3D.transformBy
 
-type PlaneOrientation3d = PlaneOrientation3d.PlaneOrientation3d FFI.Space
+type PlaneOrientation3D = PlaneOrientation3D.PlaneOrientation3D FFI.Space
 
-planeOrientation3d :: Class
-planeOrientation3d =
-  Class.new @PlaneOrientation3d $(docs ''PlaneOrientation3d.PlaneOrientation3d) $
-    [ Class.factory1 "From Normal Direction" "Direction" PlaneOrientation3d.fromNormalDirection $(docs 'PlaneOrientation3d.fromNormalDirection)
-    , Class.factory1 "From X Direction" "Direction" PlaneOrientation3d.fromXDirection $(docs 'PlaneOrientation3d.fromXDirection)
-    , Class.factory1 "From Y Direction" "Direction" PlaneOrientation3d.fromYDirection $(docs 'PlaneOrientation3d.fromYDirection)
-    , Class.property "X Direction" (.xDirection) $(docs 'PlaneOrientation3d.xDirection)
-    , Class.property "Y Direction" (.yDirection) $(docs 'PlaneOrientation3d.yDirection)
-    , Class.property "Normal Direction" (.normalDirection) $(docs 'PlaneOrientation3d.normalDirection)
-    , Class.member1 "Place In" "Frame" (PlaneOrientation3d.placeIn :: Frame3d -> PlaneOrientation3d -> PlaneOrientation3d) $(docs 'PlaneOrientation3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (PlaneOrientation3d.relativeTo :: Frame3d -> PlaneOrientation3d -> PlaneOrientation3d) $(docs 'PlaneOrientation3d.relativeTo)
-    ]
-
-type Plane3d = Plane3d.Plane3d FFI.Space FFI.Space
-
-plane3d :: Class
-plane3d =
-  Class.new @Plane3d $(docs ''Plane3d.Plane3d) $
-    [ Class.factory2 "From Point And Normal" "Origin Point" "Normal Direction" Plane3d.fromPointAndNormal $(docs 'Plane3d.fromPointAndNormal)
-    , Class.factory1 "From X Axis" "Axis" Plane3d.fromXAxis $(docs 'Plane3d.fromXAxis)
-    , Class.factory1 "From Y Axis" "Axis" Plane3d.fromYAxis $(docs 'Plane3d.fromYAxis)
-    , Class.property "Origin Point" (.originPoint) $(docs 'Plane3d.originPoint)
-    , Class.property "X Direction" (.xDirection) $(docs 'Plane3d.xDirection)
-    , Class.property "Y Direction" (.yDirection) $(docs 'Plane3d.yDirection)
-    , Class.property "Normal Direction" (.normalDirection) $(docs 'Plane3d.normalDirection)
-    , Class.property "X Axis" (.xAxis) $(docs 'Plane3d.xAxis)
-    , Class.property "Y Axis" (.yAxis) $(docs 'Plane3d.yAxis)
-    , Class.property "Normal Axis" (.normalAxis) $(docs 'Plane3d.normalAxis)
-    , Class.member1 "Move To" "Point" Plane3d.moveTo $(docs 'Plane3d.moveTo)
-    , Class.member0 "Flip" Plane3d.flip $(docs 'Plane3d.flip)
-    , Class.member1 "Offset By" "Distance" Plane3d.offsetBy $(docs 'Plane3d.offsetBy)
-    , Class.member1 "Place In" "Frame" (Plane3d.placeIn :: Frame3d -> Plane3d -> Plane3d) $(docs 'Plane3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Plane3d.relativeTo :: Frame3d -> Plane3d -> Plane3d) $(docs 'Plane3d.relativeTo)
-    ]
-      <> rigidTransformations3d Plane3d.transformBy
-
-type Orientation3d = Orientation3d.Orientation3d FFI.Space
-
-orientation3d :: Class
-orientation3d =
-  Class.new @Orientation3d $(docs ''Orientation3d.Orientation3d) $
-    [ Class.property "Forward Direction" (.forwardDirection) $(docs 'Orientation3d.forwardDirection)
-    , Class.property "Backward Direction" (.backwardDirection) $(docs 'Orientation3d.backwardDirection)
-    , Class.property "Leftward Direction" (.leftwardDirection) $(docs 'Orientation3d.leftwardDirection)
-    , Class.property "Rightward Direction" (.rightwardDirection) $(docs 'Orientation3d.rightwardDirection)
-    , Class.property "Upward Direction" (.upwardDirection) $(docs 'Orientation3d.upwardDirection)
-    , Class.property "Downward Direction" (.downwardDirection) $(docs 'Orientation3d.downwardDirection)
-    , Class.property "Front Plane Orientation" (.frontPlaneOrientation) $(docs 'Orientation3d.frontPlaneOrientation)
-    , Class.property "Back Plane Orientation" (.backPlaneOrientation) $(docs 'Orientation3d.backPlaneOrientation)
-    , Class.property "Right Plane Orientation" (.rightPlaneOrientation) $(docs 'Orientation3d.rightPlaneOrientation)
-    , Class.property "Left Plane Orientation" (.leftPlaneOrientation) $(docs 'Orientation3d.leftPlaneOrientation)
-    , Class.property "Bottom Plane Orientation" (.bottomPlaneOrientation) $(docs 'Orientation3d.bottomPlaneOrientation)
-    , Class.property "Top Plane Orientation" (.topPlaneOrientation) $(docs 'Orientation3d.topPlaneOrientation)
-    , Class.property "Backward Orientation" (.backwardOrientation) $(docs 'Orientation3d.backwardOrientation)
-    , Class.property "Rightward Orientation" (.rightwardOrientation) $(docs 'Orientation3d.rightwardOrientation)
-    , Class.property "Leftward Orientation" (.leftwardOrientation) $(docs 'Orientation3d.leftwardOrientation)
-    , Class.property "Upward Orientation" (.upwardOrientation) $(docs 'Orientation3d.upwardOrientation)
-    , Class.property "Downward Orientation" (.downwardOrientation) $(docs 'Orientation3d.downwardOrientation)
-    , Class.member1 "Place In" "Frame" (Orientation3d.placeIn :: Frame3d -> Orientation3d -> Orientation3d) $(docs 'Orientation3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Orientation3d.relativeTo :: Frame3d -> Orientation3d -> Orientation3d) $(docs 'Orientation3d.relativeTo)
+planeOrientation3D :: Class
+planeOrientation3D =
+  Class.new @PlaneOrientation3D $(docs ''PlaneOrientation3D.PlaneOrientation3D) $
+    [ Class.factory1 "From Normal Direction" "Direction" PlaneOrientation3D.fromNormalDirection $(docs 'PlaneOrientation3D.fromNormalDirection)
+    , Class.factory1 "From X Direction" "Direction" PlaneOrientation3D.fromXDirection $(docs 'PlaneOrientation3D.fromXDirection)
+    , Class.factory1 "From Y Direction" "Direction" PlaneOrientation3D.fromYDirection $(docs 'PlaneOrientation3D.fromYDirection)
+    , Class.property "X Direction" (.xDirection) $(docs 'PlaneOrientation3D.xDirection)
+    , Class.property "Y Direction" (.yDirection) $(docs 'PlaneOrientation3D.yDirection)
+    , Class.property "Normal Direction" (.normalDirection) $(docs 'PlaneOrientation3D.normalDirection)
+    , Class.member1 "Place In" "Frame" (PlaneOrientation3D.placeIn :: Frame3D -> PlaneOrientation3D -> PlaneOrientation3D) $(docs 'PlaneOrientation3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (PlaneOrientation3D.relativeTo :: Frame3D -> PlaneOrientation3D -> PlaneOrientation3D) $(docs 'PlaneOrientation3D.relativeTo)
     ]
 
-type Frame3d = Frame3d.Frame3d FFI.Space FFI.Space
+type Plane3D = Plane3D.Plane3D FFI.Space FFI.Space
 
-frame3d :: Class
-frame3d =
-  Class.new @Frame3d $(docs ''Frame3d.Frame3d) $
-    [ Class.factory1 "From Front Plane" "Plane" (Frame3d.fromFrontPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromFrontPlane)
-    , Class.factory1 "From Back Plane" "Plane" (Frame3d.fromBackPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromBackPlane)
-    , Class.factory1 "From Right Plane" "Plane" (Frame3d.fromRightPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromRightPlane)
-    , Class.factory1 "From Left Plane" "Plane" (Frame3d.fromLeftPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromLeftPlane)
-    , Class.factory1 "From Top Plane" "Plane" (Frame3d.fromTopPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromTopPlane)
-    , Class.factory1 "From Bottom Plane" "Plane" (Frame3d.fromBottomPlane :: Plane3d -> Frame3d) $(docs 'Frame3d.fromBottomPlane)
-    , Class.factory2 "Align" "Frame" "Reference Frame" (Frame3d.align :: Frame3d -> Frame3d -> Frame3d) $(docs 'Frame3d.align)
-    , Class.factory2 "Mate" "Frame" "Reference Frame" (Frame3d.mate :: Frame3d -> Frame3d -> Frame3d) $(docs 'Frame3d.mate)
-    , Class.property "Origin Point" (.originPoint) $(docs 'Frame3d.originPoint)
-    , Class.property "Forward Direction" (.forwardDirection) $(docs 'Frame3d.forwardDirection)
-    , Class.property "Backward Direction" (.backwardDirection) $(docs 'Frame3d.backwardDirection)
-    , Class.property "Rightward Direction" (.rightwardDirection) $(docs 'Frame3d.rightwardDirection)
-    , Class.property "Leftward Direction" (.leftwardDirection) $(docs 'Frame3d.leftwardDirection)
-    , Class.property "Upward Direction" (.upwardDirection) $(docs 'Frame3d.upwardDirection)
-    , Class.property "Downward Direction" (.downwardDirection) $(docs 'Frame3d.downwardDirection)
-    , Class.property "Forward Axis" (.forwardAxis) $(docs 'Frame3d.forwardAxis)
-    , Class.property "Backward Axis" (.backwardAxis) $(docs 'Frame3d.backwardAxis)
-    , Class.property "Rightward Axis" (.rightwardAxis) $(docs 'Frame3d.rightwardAxis)
-    , Class.property "Leftward Axis" (.leftwardAxis) $(docs 'Frame3d.leftwardAxis)
-    , Class.property "Upward Axis" (.upwardAxis) $(docs 'Frame3d.upwardAxis)
-    , Class.property "Downward Axis" (.downwardAxis) $(docs 'Frame3d.downwardAxis)
-    , Class.property "Front Plane" (Frame3d.frontPlane :: Frame3d -> Plane3d) $(docs 'Frame3d.frontPlane)
-    , Class.property "Back Plane" (Frame3d.backPlane :: Frame3d -> Plane3d) $(docs 'Frame3d.backPlane)
-    , Class.property "Right Plane" (Frame3d.rightPlane :: Frame3d -> Plane3d) $(docs 'Frame3d.rightPlane)
-    , Class.property "Left Plane" (Frame3d.leftPlane :: Frame3d -> Plane3d) $(docs 'Frame3d.leftPlane)
-    , Class.property "Top Plane" (Frame3d.topPlane :: Frame3d -> Plane3d) $(docs 'Frame3d.topPlane)
-    , Class.property "Bottom Plane" (Frame3d.bottomPlane :: Frame3d -> Plane3d) $(docs 'Frame3d.bottomPlane)
-    , Class.property "Backward Frame" (Frame3d.backward :: Frame3d -> Frame3d) $(docs 'Frame3d.backward)
-    , Class.property "Leftward Frame" (Frame3d.leftward :: Frame3d -> Frame3d) $(docs 'Frame3d.leftward)
-    , Class.property "Rightward Frame" (Frame3d.rightward :: Frame3d -> Frame3d) $(docs 'Frame3d.rightward)
-    , Class.property "Upward Frame" (Frame3d.upward :: Frame3d -> Frame3d) $(docs 'Frame3d.upward)
-    , Class.property "Downward Frame" (Frame3d.downward :: Frame3d -> Frame3d) $(docs 'Frame3d.downward)
-    , Class.member1 "Place In" "Other Frame" (Frame3d.placeIn :: Frame3d -> Frame3d -> Frame3d) $(docs 'Frame3d.placeIn)
-    , Class.member1 "Relative To" "Other Frame" (Frame3d.relativeTo :: Frame3d -> Frame3d -> Frame3d) $(docs 'Frame3d.relativeTo)
-    , Class.member0 "Inverse" Frame3d.inverse $(docs 'Frame3d.inverse)
-    , Class.member1 "Move To" "Point" (Frame3d.moveTo :: Point3d -> Frame3d -> Frame3d) $(docs 'Frame3d.moveTo)
-    , Class.member1 "Offset Forward By" "Distance" (Frame3d.offsetForwardBy :: Length -> Frame3d -> Frame3d) $(docs 'Frame3d.offsetForwardBy)
-    , Class.member1 "Offset Backward By" "Distance" (Frame3d.offsetBackwardBy :: Length -> Frame3d -> Frame3d) $(docs 'Frame3d.offsetBackwardBy)
-    , Class.member1 "Offset Rightward By" "Distance" (Frame3d.offsetRightwardBy :: Length -> Frame3d -> Frame3d) $(docs 'Frame3d.offsetRightwardBy)
-    , Class.member1 "Offset Leftward By" "Distance" (Frame3d.offsetLeftwardBy :: Length -> Frame3d -> Frame3d) $(docs 'Frame3d.offsetLeftwardBy)
-    , Class.member1 "Offset Upward By" "Distance" (Frame3d.offsetUpwardBy :: Length -> Frame3d -> Frame3d) $(docs 'Frame3d.offsetUpwardBy)
-    , Class.member1 "Offset Downward By" "Distance" (Frame3d.offsetDownwardBy :: Length -> Frame3d -> Frame3d) $(docs 'Frame3d.offsetDownwardBy)
-    , Class.member1 "Turn Right By" "Angle" (Frame3d.turnRightBy :: Angle -> Frame3d -> Frame3d) $(docs 'Frame3d.turnRightBy)
-    , Class.member1 "Turn Left By" "Angle" (Frame3d.turnLeftBy :: Angle -> Frame3d -> Frame3d) $(docs 'Frame3d.turnLeftBy)
-    , Class.member1 "Roll Right By" "Angle" (Frame3d.rollRightBy :: Angle -> Frame3d -> Frame3d) $(docs 'Frame3d.rollRightBy)
-    , Class.member1 "Roll Left By" "Angle" (Frame3d.rollLeftBy :: Angle -> Frame3d -> Frame3d) $(docs 'Frame3d.rollLeftBy)
-    , Class.member1 "Tilt Up By" "Angle" (Frame3d.tiltUpBy :: Angle -> Frame3d -> Frame3d) $(docs 'Frame3d.tiltUpBy)
-    , Class.member1 "Tilt Down By" "Angle" (Frame3d.tiltDownBy :: Angle -> Frame3d -> Frame3d) $(docs 'Frame3d.tiltDownBy)
-    , Class.member0 "Turn Right" (Frame3d.turnRight :: Frame3d -> Frame3d) $(docs 'Frame3d.turnRight)
-    , Class.member0 "Turn Left" (Frame3d.turnLeft :: Frame3d -> Frame3d) $(docs 'Frame3d.turnLeft)
-    , Class.member0 "Roll Right" (Frame3d.rollRight :: Frame3d -> Frame3d) $(docs 'Frame3d.rollRight)
-    , Class.member0 "Roll Left" (Frame3d.rollLeft :: Frame3d -> Frame3d) $(docs 'Frame3d.rollLeft)
-    , Class.member0 "Tilt Up" (Frame3d.tiltUp :: Frame3d -> Frame3d) $(docs 'Frame3d.tiltUp)
-    , Class.member0 "Tilt Down" (Frame3d.tiltDown :: Frame3d -> Frame3d) $(docs 'Frame3d.tiltDown)
+plane3D :: Class
+plane3D =
+  Class.new @Plane3D $(docs ''Plane3D.Plane3D) $
+    [ Class.factory2 "From Point And Normal" "Origin Point" "Normal Direction" Plane3D.fromPointAndNormal $(docs 'Plane3D.fromPointAndNormal)
+    , Class.factory1 "From X Axis" "Axis" Plane3D.fromXAxis $(docs 'Plane3D.fromXAxis)
+    , Class.factory1 "From Y Axis" "Axis" Plane3D.fromYAxis $(docs 'Plane3D.fromYAxis)
+    , Class.property "Origin Point" (.originPoint) $(docs 'Plane3D.originPoint)
+    , Class.property "X Direction" (.xDirection) $(docs 'Plane3D.xDirection)
+    , Class.property "Y Direction" (.yDirection) $(docs 'Plane3D.yDirection)
+    , Class.property "Normal Direction" (.normalDirection) $(docs 'Plane3D.normalDirection)
+    , Class.property "X Axis" (.xAxis) $(docs 'Plane3D.xAxis)
+    , Class.property "Y Axis" (.yAxis) $(docs 'Plane3D.yAxis)
+    , Class.property "Normal Axis" (.normalAxis) $(docs 'Plane3D.normalAxis)
+    , Class.member1 "Move To" "Point" Plane3D.moveTo $(docs 'Plane3D.moveTo)
+    , Class.member0 "Flip" Plane3D.flip $(docs 'Plane3D.flip)
+    , Class.member1 "Offset By" "Distance" Plane3D.offsetBy $(docs 'Plane3D.offsetBy)
+    , Class.member1 "Place In" "Frame" (Plane3D.placeIn :: Frame3D -> Plane3D -> Plane3D) $(docs 'Plane3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Plane3D.relativeTo :: Frame3D -> Plane3D -> Plane3D) $(docs 'Plane3D.relativeTo)
     ]
-      <> rigidTransformations3d Frame3d.transformBy
+      <> rigidTransformations3D Plane3D.transformBy
 
-type VectorCurve2d = VectorCurve2d.VectorCurve2d Unitless FFI.Space
+type Orientation3D = Orientation3D.Orientation3D FFI.Space
 
-vectorCurve2d :: Class
-vectorCurve2d =
-  Class.new @VectorCurve2d "A parametric curve defining a 2D unitless vector in terms of a parameter value." $
-    [ Class.constant "Zero" (VectorCurve2d.zero :: VectorCurve2d) $(docs 'VectorCurve2d.zero)
-    , Class.factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
-    , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2d.xy $(docs 'VectorCurve2d.xy)
-    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2d.evaluate) $(docs 'VectorCurve2d.evaluate)
+orientation3D :: Class
+orientation3D =
+  Class.new @Orientation3D $(docs ''Orientation3D.Orientation3D) $
+    [ Class.property "Forward Direction" (.forwardDirection) $(docs 'Orientation3D.forwardDirection)
+    , Class.property "Backward Direction" (.backwardDirection) $(docs 'Orientation3D.backwardDirection)
+    , Class.property "Leftward Direction" (.leftwardDirection) $(docs 'Orientation3D.leftwardDirection)
+    , Class.property "Rightward Direction" (.rightwardDirection) $(docs 'Orientation3D.rightwardDirection)
+    , Class.property "Upward Direction" (.upwardDirection) $(docs 'Orientation3D.upwardDirection)
+    , Class.property "Downward Direction" (.downwardDirection) $(docs 'Orientation3D.downwardDirection)
+    , Class.property "Front Plane Orientation" (.frontPlaneOrientation) $(docs 'Orientation3D.frontPlaneOrientation)
+    , Class.property "Back Plane Orientation" (.backPlaneOrientation) $(docs 'Orientation3D.backPlaneOrientation)
+    , Class.property "Right Plane Orientation" (.rightPlaneOrientation) $(docs 'Orientation3D.rightPlaneOrientation)
+    , Class.property "Left Plane Orientation" (.leftPlaneOrientation) $(docs 'Orientation3D.leftPlaneOrientation)
+    , Class.property "Bottom Plane Orientation" (.bottomPlaneOrientation) $(docs 'Orientation3D.bottomPlaneOrientation)
+    , Class.property "Top Plane Orientation" (.topPlaneOrientation) $(docs 'Orientation3D.topPlaneOrientation)
+    , Class.property "Backward Orientation" (.backwardOrientation) $(docs 'Orientation3D.backwardOrientation)
+    , Class.property "Rightward Orientation" (.rightwardOrientation) $(docs 'Orientation3D.rightwardOrientation)
+    , Class.property "Leftward Orientation" (.leftwardOrientation) $(docs 'Orientation3D.leftwardOrientation)
+    , Class.property "Upward Orientation" (.upwardOrientation) $(docs 'Orientation3D.upwardOrientation)
+    , Class.property "Downward Orientation" (.downwardOrientation) $(docs 'Orientation3D.downwardOrientation)
+    , Class.member1 "Place In" "Frame" (Orientation3D.placeIn :: Frame3D -> Orientation3D -> Orientation3D) $(docs 'Orientation3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Orientation3D.relativeTo :: Frame3D -> Orientation3D -> Orientation3D) $(docs 'Orientation3D.relativeTo)
     ]
 
-type DisplacementCurve2d = VectorCurve2d.VectorCurve2d Meters FFI.Space
+type Frame3D = Frame3D.Frame3D FFI.Space FFI.Space
 
-displacementCurve2d :: Class
-displacementCurve2d =
-  Class.new @DisplacementCurve2d "A parametric curve defining a 2D displacement vector in terms of a parameter value." $
-    [ Class.constant "Zero" (VectorCurve2d.zero :: DisplacementCurve2d) $(docs 'VectorCurve2d.zero)
-    , Class.factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
-    , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2d.xy $(docs 'VectorCurve2d.xy)
-    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2d.evaluate) $(docs 'VectorCurve2d.evaluate)
+frame3D :: Class
+frame3D =
+  Class.new @Frame3D $(docs ''Frame3D.Frame3D) $
+    [ Class.factory1 "From Front Plane" "Plane" (Frame3D.fromFrontPlane :: Plane3D -> Frame3D) $(docs 'Frame3D.fromFrontPlane)
+    , Class.factory1 "From Back Plane" "Plane" (Frame3D.fromBackPlane :: Plane3D -> Frame3D) $(docs 'Frame3D.fromBackPlane)
+    , Class.factory1 "From Right Plane" "Plane" (Frame3D.fromRightPlane :: Plane3D -> Frame3D) $(docs 'Frame3D.fromRightPlane)
+    , Class.factory1 "From Left Plane" "Plane" (Frame3D.fromLeftPlane :: Plane3D -> Frame3D) $(docs 'Frame3D.fromLeftPlane)
+    , Class.factory1 "From Top Plane" "Plane" (Frame3D.fromTopPlane :: Plane3D -> Frame3D) $(docs 'Frame3D.fromTopPlane)
+    , Class.factory1 "From Bottom Plane" "Plane" (Frame3D.fromBottomPlane :: Plane3D -> Frame3D) $(docs 'Frame3D.fromBottomPlane)
+    , Class.factory2 "Align" "Frame" "Reference Frame" (Frame3D.align :: Frame3D -> Frame3D -> Frame3D) $(docs 'Frame3D.align)
+    , Class.factory2 "Mate" "Frame" "Reference Frame" (Frame3D.mate :: Frame3D -> Frame3D -> Frame3D) $(docs 'Frame3D.mate)
+    , Class.property "Origin Point" (.originPoint) $(docs 'Frame3D.originPoint)
+    , Class.property "Forward Direction" (.forwardDirection) $(docs 'Frame3D.forwardDirection)
+    , Class.property "Backward Direction" (.backwardDirection) $(docs 'Frame3D.backwardDirection)
+    , Class.property "Rightward Direction" (.rightwardDirection) $(docs 'Frame3D.rightwardDirection)
+    , Class.property "Leftward Direction" (.leftwardDirection) $(docs 'Frame3D.leftwardDirection)
+    , Class.property "Upward Direction" (.upwardDirection) $(docs 'Frame3D.upwardDirection)
+    , Class.property "Downward Direction" (.downwardDirection) $(docs 'Frame3D.downwardDirection)
+    , Class.property "Forward Axis" (.forwardAxis) $(docs 'Frame3D.forwardAxis)
+    , Class.property "Backward Axis" (.backwardAxis) $(docs 'Frame3D.backwardAxis)
+    , Class.property "Rightward Axis" (.rightwardAxis) $(docs 'Frame3D.rightwardAxis)
+    , Class.property "Leftward Axis" (.leftwardAxis) $(docs 'Frame3D.leftwardAxis)
+    , Class.property "Upward Axis" (.upwardAxis) $(docs 'Frame3D.upwardAxis)
+    , Class.property "Downward Axis" (.downwardAxis) $(docs 'Frame3D.downwardAxis)
+    , Class.property "Front Plane" (Frame3D.frontPlane :: Frame3D -> Plane3D) $(docs 'Frame3D.frontPlane)
+    , Class.property "Back Plane" (Frame3D.backPlane :: Frame3D -> Plane3D) $(docs 'Frame3D.backPlane)
+    , Class.property "Right Plane" (Frame3D.rightPlane :: Frame3D -> Plane3D) $(docs 'Frame3D.rightPlane)
+    , Class.property "Left Plane" (Frame3D.leftPlane :: Frame3D -> Plane3D) $(docs 'Frame3D.leftPlane)
+    , Class.property "Top Plane" (Frame3D.topPlane :: Frame3D -> Plane3D) $(docs 'Frame3D.topPlane)
+    , Class.property "Bottom Plane" (Frame3D.bottomPlane :: Frame3D -> Plane3D) $(docs 'Frame3D.bottomPlane)
+    , Class.property "Backward Frame" (Frame3D.backward :: Frame3D -> Frame3D) $(docs 'Frame3D.backward)
+    , Class.property "Leftward Frame" (Frame3D.leftward :: Frame3D -> Frame3D) $(docs 'Frame3D.leftward)
+    , Class.property "Rightward Frame" (Frame3D.rightward :: Frame3D -> Frame3D) $(docs 'Frame3D.rightward)
+    , Class.property "Upward Frame" (Frame3D.upward :: Frame3D -> Frame3D) $(docs 'Frame3D.upward)
+    , Class.property "Downward Frame" (Frame3D.downward :: Frame3D -> Frame3D) $(docs 'Frame3D.downward)
+    , Class.member1 "Place In" "Other Frame" (Frame3D.placeIn :: Frame3D -> Frame3D -> Frame3D) $(docs 'Frame3D.placeIn)
+    , Class.member1 "Relative To" "Other Frame" (Frame3D.relativeTo :: Frame3D -> Frame3D -> Frame3D) $(docs 'Frame3D.relativeTo)
+    , Class.member0 "Inverse" Frame3D.inverse $(docs 'Frame3D.inverse)
+    , Class.member1 "Move To" "Point" (Frame3D.moveTo :: Point3D -> Frame3D -> Frame3D) $(docs 'Frame3D.moveTo)
+    , Class.member1 "Offset Forward By" "Distance" (Frame3D.offsetForwardBy :: Length -> Frame3D -> Frame3D) $(docs 'Frame3D.offsetForwardBy)
+    , Class.member1 "Offset Backward By" "Distance" (Frame3D.offsetBackwardBy :: Length -> Frame3D -> Frame3D) $(docs 'Frame3D.offsetBackwardBy)
+    , Class.member1 "Offset Rightward By" "Distance" (Frame3D.offsetRightwardBy :: Length -> Frame3D -> Frame3D) $(docs 'Frame3D.offsetRightwardBy)
+    , Class.member1 "Offset Leftward By" "Distance" (Frame3D.offsetLeftwardBy :: Length -> Frame3D -> Frame3D) $(docs 'Frame3D.offsetLeftwardBy)
+    , Class.member1 "Offset Upward By" "Distance" (Frame3D.offsetUpwardBy :: Length -> Frame3D -> Frame3D) $(docs 'Frame3D.offsetUpwardBy)
+    , Class.member1 "Offset Downward By" "Distance" (Frame3D.offsetDownwardBy :: Length -> Frame3D -> Frame3D) $(docs 'Frame3D.offsetDownwardBy)
+    , Class.member1 "Turn Right By" "Angle" (Frame3D.turnRightBy :: Angle -> Frame3D -> Frame3D) $(docs 'Frame3D.turnRightBy)
+    , Class.member1 "Turn Left By" "Angle" (Frame3D.turnLeftBy :: Angle -> Frame3D -> Frame3D) $(docs 'Frame3D.turnLeftBy)
+    , Class.member1 "Roll Right By" "Angle" (Frame3D.rollRightBy :: Angle -> Frame3D -> Frame3D) $(docs 'Frame3D.rollRightBy)
+    , Class.member1 "Roll Left By" "Angle" (Frame3D.rollLeftBy :: Angle -> Frame3D -> Frame3D) $(docs 'Frame3D.rollLeftBy)
+    , Class.member1 "Tilt Up By" "Angle" (Frame3D.tiltUpBy :: Angle -> Frame3D -> Frame3D) $(docs 'Frame3D.tiltUpBy)
+    , Class.member1 "Tilt Down By" "Angle" (Frame3D.tiltDownBy :: Angle -> Frame3D -> Frame3D) $(docs 'Frame3D.tiltDownBy)
+    , Class.member0 "Turn Right" (Frame3D.turnRight :: Frame3D -> Frame3D) $(docs 'Frame3D.turnRight)
+    , Class.member0 "Turn Left" (Frame3D.turnLeft :: Frame3D -> Frame3D) $(docs 'Frame3D.turnLeft)
+    , Class.member0 "Roll Right" (Frame3D.rollRight :: Frame3D -> Frame3D) $(docs 'Frame3D.rollRight)
+    , Class.member0 "Roll Left" (Frame3D.rollLeft :: Frame3D -> Frame3D) $(docs 'Frame3D.rollLeft)
+    , Class.member0 "Tilt Up" (Frame3D.tiltUp :: Frame3D -> Frame3D) $(docs 'Frame3D.tiltUp)
+    , Class.member0 "Tilt Down" (Frame3D.tiltDown :: Frame3D -> Frame3D) $(docs 'Frame3D.tiltDown)
+    ]
+      <> rigidTransformations3D Frame3D.transformBy
+
+type VectorCurve2D = VectorCurve2D.VectorCurve2D Unitless FFI.Space
+
+vectorCurve2D :: Class
+vectorCurve2D =
+  Class.new @VectorCurve2D "A parametric curve defining a 2D unitless vector in terms of a parameter value." $
+    [ Class.constant "Zero" (VectorCurve2D.zero :: VectorCurve2D) $(docs 'VectorCurve2D.zero)
+    , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
+    , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
+    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2D.evaluate) $(docs 'VectorCurve2D.evaluate)
     ]
 
-type UvVectorCurve = VectorCurve2d.VectorCurve2d Unitless UvSpace
+type DisplacementCurve2D = VectorCurve2D.VectorCurve2D Meters FFI.Space
+
+displacementCurve2D :: Class
+displacementCurve2D =
+  Class.new @DisplacementCurve2D "A parametric curve defining a 2D displacement vector in terms of a parameter value." $
+    [ Class.constant "Zero" (VectorCurve2D.zero :: DisplacementCurve2D) $(docs 'VectorCurve2D.zero)
+    , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
+    , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
+    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2D.evaluate) $(docs 'VectorCurve2D.evaluate)
+    ]
+
+type UvVectorCurve = VectorCurve2D.VectorCurve2D Unitless UvSpace
 
 uvVectorCurve :: Class
 uvVectorCurve =
   Class.new @UvVectorCurve "A parametric vector curve in UV parameter space." $
-    [ Class.constant "Zero" (VectorCurve2d.zero :: UvVectorCurve) $(docs 'VectorCurve2d.zero)
-    , Class.factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
-    , Class.factory2 "UV" "U Component" "V Component" VectorCurve2d.xy "Construct a UV vector curve from its U and V components."
-    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2d.evaluate) $(docs 'VectorCurve2d.evaluate)
+    [ Class.constant "Zero" (VectorCurve2D.zero :: UvVectorCurve) $(docs 'VectorCurve2D.zero)
+    , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
+    , Class.factory2 "UV" "U Component" "V Component" VectorCurve2D.xy "Construct a UV vector curve from its U and V components."
+    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2D.evaluate) $(docs 'VectorCurve2D.evaluate)
     ]
 
-rigidTransformations2d ::
+rigidTransformations2D ::
   FFI value =>
-  (Transform2d.Rigid Meters FFI.Space -> value -> value) ->
+  (Transform2D.Rigid Meters FFI.Space -> value -> value) ->
   List (Class.Member value)
-rigidTransformations2d transformBy =
-  [ Class.member1 "Translate By" "Displacement" (Transform2d.translateByImpl transformBy) "Translate by the given displacement."
-  , Class.member2 "Translate In" "Direction" "Distance" (Transform2d.translateInImpl transformBy) "Translate in the given direction by the given distance."
-  , Class.member2 "Translate Along" "Axis" "Distance" (Transform2d.translateAlongImpl transformBy) "Translate along the given axis by the given distance."
-  , Class.member2 "Rotate Around" "Point" "Angle" (Transform2d.rotateAroundImpl transformBy) "Rotate around the given point by the given angle."
+rigidTransformations2D transformBy =
+  [ Class.member1 "Translate By" "Displacement" (Transform2D.translateByImpl transformBy) "Translate by the given displacement."
+  , Class.member2 "Translate In" "Direction" "Distance" (Transform2D.translateInImpl transformBy) "Translate in the given direction by the given distance."
+  , Class.member2 "Translate Along" "Axis" "Distance" (Transform2D.translateAlongImpl transformBy) "Translate along the given axis by the given distance."
+  , Class.member2 "Rotate Around" "Point" "Angle" (Transform2D.rotateAroundImpl transformBy) "Rotate around the given point by the given angle."
   ]
 
-orthonormalTransformations2d ::
+orthonormalTransformations2D ::
   FFI value =>
-  (forall tag. Transform.IsOrthonormal tag => Transform2d tag Meters FFI.Space -> value -> value) ->
+  (forall tag. Transform.IsOrthonormal tag => Transform2D tag Meters FFI.Space -> value -> value) ->
   List (Class.Member value)
-orthonormalTransformations2d transformBy =
-  Class.member1 "Mirror Across" "Axis" (Transform2d.mirrorAcrossImpl transformBy) "Mirror across the given axis."
-    : rigidTransformations2d transformBy
+orthonormalTransformations2D transformBy =
+  Class.member1 "Mirror Across" "Axis" (Transform2D.mirrorAcrossImpl transformBy) "Mirror across the given axis."
+    : rigidTransformations2D transformBy
 
-uniformTransformations2d ::
+uniformTransformations2D ::
   FFI value =>
-  (forall tag. Transform.IsUniform tag => Transform2d tag Meters FFI.Space -> value -> value) ->
+  (forall tag. Transform.IsUniform tag => Transform2D tag Meters FFI.Space -> value -> value) ->
   List (Class.Member value)
-uniformTransformations2d transformBy =
-  Class.member2 "Scale About" "Point" "Scale" (Transform2d.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
-    : orthonormalTransformations2d transformBy
+uniformTransformations2D transformBy =
+  Class.member2 "Scale About" "Point" "Scale" (Transform2D.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
+    : orthonormalTransformations2D transformBy
 
-affineTransformations2d ::
+affineTransformations2D ::
   FFI value =>
-  (forall tag. Transform2d tag Meters FFI.Space -> value -> value) ->
+  (forall tag. Transform2D tag Meters FFI.Space -> value -> value) ->
   List (Class.Member value)
-affineTransformations2d transformBy =
-  Class.member2 "Scale Along" "Axis" "Scale" (Transform2d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
-    : uniformTransformations2d transformBy
+affineTransformations2D transformBy =
+  Class.member2 "Scale Along" "Axis" "Scale" (Transform2D.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
+    : uniformTransformations2D transformBy
 
-rigidTransformations3d ::
+rigidTransformations3D ::
   FFI value =>
-  (Transform3d.Rigid FFI.Space -> value -> value) ->
+  (Transform3D.Rigid FFI.Space -> value -> value) ->
   List (Class.Member value)
-rigidTransformations3d transformBy =
-  [ Class.member1 "Translate By" "Displacement" (Transform3d.translateByImpl transformBy) "Translate by the given displacement."
-  , Class.member2 "Translate In" "Direction" "Distance" (Transform3d.translateInImpl transformBy) "Translate in the given direction by the given distance."
-  , Class.member2 "Translate Along" "Axis" "Distance" (Transform3d.translateAlongImpl transformBy) "Translate along the given axis by the given distance."
-  , Class.member2 "Rotate Around" "Axis" "Angle" (Transform3d.rotateAroundImpl transformBy) "Rotate around the given axis by the given angle."
+rigidTransformations3D transformBy =
+  [ Class.member1 "Translate By" "Displacement" (Transform3D.translateByImpl transformBy) "Translate by the given displacement."
+  , Class.member2 "Translate In" "Direction" "Distance" (Transform3D.translateInImpl transformBy) "Translate in the given direction by the given distance."
+  , Class.member2 "Translate Along" "Axis" "Distance" (Transform3D.translateAlongImpl transformBy) "Translate along the given axis by the given distance."
+  , Class.member2 "Rotate Around" "Axis" "Angle" (Transform3D.rotateAroundImpl transformBy) "Rotate around the given axis by the given angle."
   ]
 
-orthonormalTransformations3d ::
+orthonormalTransformations3D ::
   forall value.
   FFI value =>
-  (forall tag. Transform.IsOrthonormal tag => Transform3d tag FFI.Space -> value -> value) ->
+  (forall tag. Transform.IsOrthonormal tag => Transform3D tag FFI.Space -> value -> value) ->
   List (Class.Member value)
-orthonormalTransformations3d transformBy =
-  Class.member1 "Mirror Across" "Plane" (Transform3d.mirrorAcrossImpl transformBy :: Plane3d -> value -> value) "Mirror across the given plane."
-    : rigidTransformations3d transformBy
+orthonormalTransformations3D transformBy =
+  Class.member1 "Mirror Across" "Plane" (Transform3D.mirrorAcrossImpl transformBy :: Plane3D -> value -> value) "Mirror across the given plane."
+    : rigidTransformations3D transformBy
 
-uniformTransformations3d ::
+uniformTransformations3D ::
   FFI value =>
-  (forall tag. Transform.IsUniform tag => Transform3d tag FFI.Space -> value -> value) ->
+  (forall tag. Transform.IsUniform tag => Transform3D tag FFI.Space -> value -> value) ->
   List (Class.Member value)
-uniformTransformations3d transformBy =
-  Class.member2 "Scale About" "Point" "Scale" (Transform3d.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
-    : orthonormalTransformations3d transformBy
+uniformTransformations3D transformBy =
+  Class.member2 "Scale About" "Point" "Scale" (Transform3D.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
+    : orthonormalTransformations3D transformBy
 
-affineTransformations3d ::
+affineTransformations3D ::
   FFI value =>
-  (forall tag. Transform3d tag FFI.Space -> value -> value) ->
+  (forall tag. Transform3D tag FFI.Space -> value -> value) ->
   List (Class.Member value)
-affineTransformations3d transformBy =
-  Class.member2 "Scale Along" "Axis" "Scale" (Transform3d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
-    : uniformTransformations3d transformBy
+affineTransformations3D transformBy =
+  Class.member2 "Scale Along" "Axis" "Scale" (Transform3D.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
+    : uniformTransformations3D transformBy
 
-type Curve2d = Curve2d.Curve2d Meters FFI.Space
+type Curve2D = Curve2D.Curve2D Meters FFI.Space
 
-curve2d :: Class
-curve2d =
-  Class.new @Curve2d $(docs ''Curve2d.Curve2d) $
-    [ Class.factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
-    , Class.factory2 "XY" "X Coordinate" "Y Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
-    , Class.factory1 "Line" "Line" Curve2d.line $(docs 'Curve2d.line)
-    , Class.factory2 "Line From" "Start Point" "End Point" Curve2d.lineFrom $(docs 'Curve2d.lineFrom)
-    , Class.factoryM3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2d.arcFrom $(docs 'Curve2d.arcFrom)
-    , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
-    , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
-    , Class.factoryM4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
-    , Class.factory1 "Circle" "Circle" Curve2d.circle $(docs 'Curve2d.circle)
-    , Class.factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
-    , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
+curve2D :: Class
+curve2D =
+  Class.new @Curve2D $(docs ''Curve2D.Curve2D) $
+    [ Class.factory1 "Constant" "Point" Curve2D.constant $(docs 'Curve2D.constant)
+    , Class.factory2 "XY" "X Coordinate" "Y Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
+    , Class.factory1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
+    , Class.factory2 "Line From" "Start Point" "End Point" Curve2D.lineFrom $(docs 'Curve2D.lineFrom)
+    , Class.factoryM3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2D.arcFrom $(docs 'Curve2D.arcFrom)
+    , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2D.polarArc $(docs 'Curve2D.polarArc)
+    , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
+    , Class.factoryM4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
+    , Class.factory1 "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
+    , Class.factory1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
+    , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (.startPoint) "The start point of the curve."
     , Class.property "End Point" (.endPoint) "The end point of the curve."
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
-    , Class.property "Derivative" Curve2d.derivative "The derivative of the curve."
-    , Class.member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
-    , Class.property "X Coordinate" (.xCoordinate) $(docs 'Curve2d.xCoordinate)
-    , Class.property "Y Coordinate" (.yCoordinate) $(docs 'Curve2d.yCoordinate)
-    , Class.plus @DisplacementCurve2d Self
-    , Class.minus @DisplacementCurve2d Self
+    , Class.member1 "Evaluate" "Parameter Value" (flip Curve2D.evaluate) $(docs 'Curve2D.evaluate)
+    , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
+    , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
+    , Class.property "X Coordinate" (.xCoordinate) $(docs 'Curve2D.xCoordinate)
+    , Class.property "Y Coordinate" (.yCoordinate) $(docs 'Curve2D.yCoordinate)
+    , Class.plus @DisplacementCurve2D Self
+    , Class.minus @DisplacementCurve2D Self
     , Class.minusSelf
     , Class.minus @Point2D Self
     ]
-      <> affineTransformations2d Curve2d.transformBy
+      <> affineTransformations2D Curve2D.transformBy
 
-type UvCurve = Curve2d.Curve2d Unitless UvSpace
+type UvCurve = Curve2D.Curve2D Unitless UvSpace
 
 uvCurve :: Class
 uvCurve =
   Class.new @UvCurve "A curve in UV parameter space." $
-    [ Class.factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
-    , Class.factory2 "UV" "U Coordinate" "V Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
-    , Class.factory1 "Line" "Line" Curve2d.line $(docs 'Curve2d.line)
-    , Class.factory2 "Line From" "Start Point" "End Point" Curve2d.lineFrom $(docs 'Curve2d.lineFrom)
-    , Class.factoryU3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2d.arcFrom $(docs 'Curve2d.arcFrom)
-    , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
-    , Class.factory1 "Circle" "Circle" Curve2d.circle $(docs 'Curve2d.circle)
-    , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
-    , Class.factoryU4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
-    , Class.factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
-    , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
+    [ Class.factory1 "Constant" "Point" Curve2D.constant $(docs 'Curve2D.constant)
+    , Class.factory2 "UV" "U Coordinate" "V Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
+    , Class.factory1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
+    , Class.factory2 "Line From" "Start Point" "End Point" Curve2D.lineFrom $(docs 'Curve2D.lineFrom)
+    , Class.factoryU3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2D.arcFrom $(docs 'Curve2D.arcFrom)
+    , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2D.polarArc $(docs 'Curve2D.polarArc)
+    , Class.factory1 "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
+    , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
+    , Class.factoryU4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
+    , Class.factory1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
+    , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (.startPoint) "The start point of the curve."
     , Class.property "End Point" (.endPoint) "The end point of the curve."
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
-    , Class.property "Derivative" Curve2d.derivative "The derivative of the curve."
-    , Class.member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
+    , Class.member1 "Evaluate" "Parameter Value" (flip Curve2D.evaluate) $(docs 'Curve2D.evaluate)
+    , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
+    , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "U Coordinate" (.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
     , Class.property "V Coordinate" (.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
     , Class.plus @UvVectorCurve Self
@@ -1580,55 +1580,55 @@ region2dInnerLoopsDocs =
 region2dBoundaryCurvesDocs :: Text
 region2dBoundaryCurvesDocs = "The list of all (outer and inner) boundary curves of a region."
 
-type Region2d = Region2d.Region2d Meters FFI.Space
+type Region2D = Region2D.Region2D Meters FFI.Space
 
-region2d :: Class
-region2d =
-  Class.new @Region2d $(docs ''Region2d.Region2d) $
-    [ Class.factoryM1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
-    , Class.factoryM1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
-    , Class.factoryM1R "Circle" "Circle" Region2d.circle $(docs 'Region2d.circle)
-    , Class.property "Outer Loop" Region2d.outerLoop region2dOuterLoopDocs
-    , Class.property "Inner Loops" Region2d.innerLoops region2dInnerLoopsDocs
-    , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
-    , Class.factoryM1R "Polygon" "Polygon" Region2d.polygon $(docs 'Region2d.polygon)
-    , Class.memberM2 "Fillet" "Points" "Radius" Region2d.fillet $(docs 'Region2d.fillet)
+region2D :: Class
+region2D =
+  Class.new @Region2D $(docs ''Region2D.Region2D) $
+    [ Class.factoryM1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
+    , Class.factoryM1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
+    , Class.factoryM1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
+    , Class.property "Outer Loop" Region2D.outerLoop region2dOuterLoopDocs
+    , Class.property "Inner Loops" Region2D.innerLoops region2dInnerLoopsDocs
+    , Class.property "Boundary Curves" Region2D.boundaryCurves region2dBoundaryCurvesDocs
+    , Class.factoryM1R "Polygon" "Polygon" Region2D.polygon $(docs 'Region2D.polygon)
+    , Class.memberM2 "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
     ]
-      <> affineTransformations2d Region2d.transformBy
+      <> affineTransformations2D Region2D.transformBy
 
-type UvRegion = Region2d.Region2d Unitless UvSpace
+type UvRegion = Region2D.Region2D Unitless UvSpace
 
 uvRegion :: Class
 uvRegion =
   Class.new @UvRegion "A region in UV parameter space." $
-    [ Class.constant "Unit Square" Region2d.unitSquare $(docs 'Region2d.unitSquare)
-    , Class.factoryU1R "Bounded By" "Curves" Region2d.boundedBy $(docs 'Region2d.boundedBy)
-    , Class.factoryU1R "Rectangle" "Bounding Box" Region2d.rectangle $(docs 'Region2d.rectangle)
-    , Class.factoryU1R "Circle" "Circle" Region2d.circle $(docs 'Region2d.circle)
-    , Class.property "Outer Loop" Region2d.outerLoop region2dOuterLoopDocs
-    , Class.property "Inner Loops" Region2d.innerLoops region2dInnerLoopsDocs
-    , Class.property "Boundary Curves" Region2d.boundaryCurves region2dBoundaryCurvesDocs
+    [ Class.constant "Unit Square" Region2D.unitSquare $(docs 'Region2D.unitSquare)
+    , Class.factoryU1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
+    , Class.factoryU1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
+    , Class.factoryU1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
+    , Class.property "Outer Loop" Region2D.outerLoop region2dOuterLoopDocs
+    , Class.property "Inner Loops" Region2D.innerLoops region2dInnerLoopsDocs
+    , Class.property "Boundary Curves" Region2D.boundaryCurves region2dBoundaryCurvesDocs
     ]
 
-type Body3d = Body3d.Body3d FFI.Space
+type Body3D = Body3D.Body3D FFI.Space
 
-body3d :: Class
-body3d = do
+body3D :: Class
+body3D = do
   let writeStl path convention givenResolution body = do
-        let mesh = Body3d.toPointMesh givenResolution body
+        let mesh = Body3D.toPointMesh givenResolution body
         Stl.writeBinary path convention Length.inMillimeters mesh
   let writeMitsuba path givenResolution body = do
-        let mesh = Body3d.toSurfaceMesh givenResolution body
+        let mesh = Body3D.toSurfaceMesh givenResolution body
         Mitsuba.writeMeshes path [(mesh, #name "")]
-  Class.new @Body3d $(docs ''Body3d.Body3d) $
-    [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3d.extruded @FFI.Space @FFI.Space) $(docs 'Body3d.extruded)
-    , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3d.revolved @FFI.Space @FFI.Space) $(docs 'Body3d.revolved)
-    , Class.factoryM1R "Block" "Bounding Box" Body3d.block $(docs 'Body3d.block)
-    , Class.factoryM2R "Sphere" "Center Point" "Diameter" Body3d.sphere $(docs 'Body3d.sphere)
-    , Class.factoryM3R "Cylinder" "Start Point" "End Point" "Diameter" Body3d.cylinder $(docs 'Body3d.cylinder)
-    , Class.factoryM4R "Cylinder Along" "Axis" "Start" "End" "Diameter" Body3d.cylinderAlong $(docs 'Body3d.cylinderAlong)
-    , Class.member1 "Place In" "Frame" (Body3d.placeIn :: Frame3d -> Body3d -> Body3d) $(docs 'Body3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Body3d.relativeTo :: Frame3d -> Body3d -> Body3d) $(docs 'Body3d.relativeTo)
+  Class.new @Body3D $(docs ''Body3D.Body3D) $
+    [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3D.extruded @FFI.Space @FFI.Space) $(docs 'Body3D.extruded)
+    , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @FFI.Space @FFI.Space) $(docs 'Body3D.revolved)
+    , Class.factoryM1R "Block" "Bounding Box" Body3D.block $(docs 'Body3D.block)
+    , Class.factoryM2R "Sphere" "Center Point" "Diameter" Body3D.sphere $(docs 'Body3D.sphere)
+    , Class.factoryM3R "Cylinder" "Start Point" "End Point" "Diameter" Body3D.cylinder $(docs 'Body3D.cylinder)
+    , Class.factoryM4R "Cylinder Along" "Axis" "Start" "End" "Diameter" Body3D.cylinderAlong $(docs 'Body3D.cylinderAlong)
+    , Class.member1 "Place In" "Frame" (Body3D.placeIn :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Body3D.relativeTo :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.relativeTo)
     , Class.memberM3 "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."
     , Class.memberM2 "Write Mitsuba" "Path" "Resolution" writeMitsuba "Write a body to Mitsuba 'serialized' file."
     ]
@@ -1660,30 +1660,30 @@ pbrMaterial =
     , Class.factory3 "Custom" "Base Color" "Metallic" "Roughness" PbrMaterial.custom $(docs 'PbrMaterial.custom)
     ]
 
-type Model3d = Model3d.Model3d FFI.Space
+type Model3D = Model3D.Model3D FFI.Space
 
-model3d :: Class
-model3d =
-  Class.new @Model3d $(docs ''Model3d.Model3d) $
-    [ Class.constant "Nothing" (Model3d.nothing :: Model3d) $(docs 'Model3d.nothing)
-    , Class.factoryM1 "Body" "Body" Model3d.body $(docs 'Model3d.body)
-    , Class.factoryM2 "Body With" "Attributes" "Body" Model3d.bodyWith $(docs 'Model3d.bodyWith)
-    , Class.factory1 "Group" "Children" Model3d.group $(docs 'Model3d.group)
-    , Class.factory2 "Group With" "Attributes" "Children" Model3d.groupWith $(docs 'Model3d.groupWith)
-    , Class.member1 "With Name" "Name" Model3d.withName $(docs 'Model3d.withName)
-    , Class.member1 "With PBR Material" "Material" Model3d.withPbrMaterial $(docs 'Model3d.withPbrMaterial)
-    , Class.member1 "With Opacity" "Opacity" Model3d.withOpacity $(docs 'Model3d.withOpacity)
-    , Class.member1 "With Attributes" "Attributes" Model3d.withAttributes $(docs 'Model3d.withAttributes)
-    , Class.nested @Model3d.Attribute $(docs ''Model3d.Attribute) []
-    , Class.static1 "Name" "Name" Model3d.name $(docs 'Model3d.name)
-    , Class.static1 "PBR Material" "Material" Model3d.pbrMaterial $(docs 'Model3d.pbrMaterial)
-    , Class.static1 "Opacity" "Opacity" Model3d.opacity $(docs 'Model3d.opacity)
-    , Class.member1 "Place In" "Frame" (Model3d.placeIn :: Frame3d -> Model3d -> Model3d) $(docs 'Model3d.placeIn)
-    , Class.member1 "Relative To" "Frame" (Model3d.relativeTo :: Frame3d -> Model3d -> Model3d) $(docs 'Model3d.relativeTo)
+model3D :: Class
+model3D =
+  Class.new @Model3D $(docs ''Model3D.Model3D) $
+    [ Class.constant "Nothing" (Model3D.nothing :: Model3D) $(docs 'Model3D.nothing)
+    , Class.factoryM1 "Body" "Body" Model3D.body $(docs 'Model3D.body)
+    , Class.factoryM2 "Body With" "Attributes" "Body" Model3D.bodyWith $(docs 'Model3D.bodyWith)
+    , Class.factory1 "Group" "Children" Model3D.group $(docs 'Model3D.group)
+    , Class.factory2 "Group With" "Attributes" "Children" Model3D.groupWith $(docs 'Model3D.groupWith)
+    , Class.member1 "With Name" "Name" Model3D.withName $(docs 'Model3D.withName)
+    , Class.member1 "With PBR Material" "Material" Model3D.withPbrMaterial $(docs 'Model3D.withPbrMaterial)
+    , Class.member1 "With Opacity" "Opacity" Model3D.withOpacity $(docs 'Model3D.withOpacity)
+    , Class.member1 "With Attributes" "Attributes" Model3D.withAttributes $(docs 'Model3D.withAttributes)
+    , Class.nested @Model3D.Attribute $(docs ''Model3D.Attribute) []
+    , Class.static1 "Name" "Name" Model3D.name $(docs 'Model3D.name)
+    , Class.static1 "PBR Material" "Material" Model3D.pbrMaterial $(docs 'Model3D.pbrMaterial)
+    , Class.static1 "Opacity" "Opacity" Model3D.opacity $(docs 'Model3D.opacity)
+    , Class.member1 "Place In" "Frame" (Model3D.placeIn :: Frame3D -> Model3D -> Model3D) $(docs 'Model3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Model3D.relativeTo :: Frame3D -> Model3D -> Model3D) $(docs 'Model3D.relativeTo)
     ]
-      <> rigidTransformations3d Model3d.transformBy
+      <> rigidTransformations3D Model3D.transformBy
 
-newtype Gltf = Gltf Model3d
+newtype Gltf = Gltf Model3D
 
 instance FFI Gltf where
   representation = FFI.classRepresentation "Gltf"
@@ -1696,19 +1696,19 @@ gltf = do
     , Class.member2 "Write Binary" "Path" "Resolution" writeBinary $(docs 'Gltf.writeBinary)
     ]
 
-type Camera3d = Camera3d.Camera3d FFI.Space
+type Camera3D = Camera3D.Camera3D FFI.Space
 
-camera3d :: Class
-camera3d =
-  Class.new @Camera3d $(docs ''Camera3d.Camera3d) $
-    [ Class.factory3 "Look At" "Eye Point" "Focal Point" "Projection" Camera3d.lookAt $(docs 'Camera3d.lookAt)
-    , Class.factory5 "Orbit" "Focal Point" "Azimuth" "Elevation" "Distance" "Projection" Camera3d.orbit $(docs 'Camera3d.orbit)
-    , Class.nested @Camera3d.Projection $(docs ''Camera3d.Projection) []
-    , Class.static1 "Perspective" "Vertical FOV" Camera3d.perspective $(docs 'Camera3d.perspective)
-    , Class.static1 "Orthographic" "Viewport Height" Camera3d.orthographic $(docs 'Camera3d.orthographic)
+camera3D :: Class
+camera3D =
+  Class.new @Camera3D $(docs ''Camera3D.Camera3D) $
+    [ Class.factory3 "Look At" "Eye Point" "Focal Point" "Projection" Camera3D.lookAt $(docs 'Camera3D.lookAt)
+    , Class.factory5 "Orbit" "Focal Point" "Azimuth" "Elevation" "Distance" "Projection" Camera3D.orbit $(docs 'Camera3D.orbit)
+    , Class.nested @Camera3D.Projection $(docs ''Camera3D.Projection) []
+    , Class.static1 "Perspective" "Vertical FOV" Camera3D.perspective $(docs 'Camera3D.perspective)
+    , Class.static1 "Orthographic" "Viewport Height" Camera3D.orthographic $(docs 'Camera3D.orthographic)
     ]
 
-data Mitsuba = Mitsuba Model3d Camera3d (Mitsuba.Lighting FFI.Space)
+data Mitsuba = Mitsuba Model3D Camera3D (Mitsuba.Lighting FFI.Space)
 
 instance FFI Mitsuba where
   representation = FFI.classRepresentation "Mitsuba"
@@ -1727,7 +1727,7 @@ mitsuba = do
     [ Class.constructor3 "Model" "Camera" "Lighting" Mitsuba "Construct a Mitsuba scene from a 3D model, a camera and some lighting."
     , Class.member2 "Write Files" "Path" "Resolution" writeFiles $(docs 'Mitsuba.writeFiles)
     , Class.nested @(Mitsuba.Lighting FFI.Space) $(docs ''Mitsuba.Lighting) []
-    , Class.static2 "Environment Map" "Frame" "Image" (Mitsuba.environmentMap :: Frame3d -> Text -> Mitsuba.Lighting FFI.Space) $(docs 'Mitsuba.environmentMap)
+    , Class.static2 "Environment Map" "Frame" "Image" (Mitsuba.environmentMap :: Frame3D -> Text -> Mitsuba.Lighting FFI.Space) $(docs 'Mitsuba.environmentMap)
     ]
 
 spurGear :: Class
@@ -1738,5 +1738,5 @@ spurGear =
     , Class.property "Module" (.module_) "The module of a gear."
     , Class.property "Pitch Diameter" (.pitchDiameter) "The pitch diameter of a gear."
     , Class.property "Outer Diameter" (.outerDiameter) "The outer diameter of a gear."
-    , Class.memberM0 "Profile" (SpurGear.profile :: SpurGear -> List Curve2d) $(docs 'SpurGear.profile)
+    , Class.memberM0 "Profile" (SpurGear.profile :: SpurGear -> List Curve2D) $(docs 'SpurGear.profile)
     ]

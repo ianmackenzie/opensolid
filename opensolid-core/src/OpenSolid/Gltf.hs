@@ -16,12 +16,12 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
-import OpenSolid.Body3d qualified as Body3d
+import OpenSolid.Body3D qualified as Body3D
 import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds3d qualified as Bounds3d
+import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Color qualified as Color
-import OpenSolid.Convention3d (Convention3d)
-import OpenSolid.Convention3d qualified as Convention3d
+import OpenSolid.Convention3D (Convention3D)
+import OpenSolid.Convention3D qualified as Convention3D
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
 import OpenSolid.Json (Json)
@@ -29,23 +29,23 @@ import OpenSolid.Json qualified as Json
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.Model3d (Model3d)
-import OpenSolid.Model3d qualified as Model3d
+import OpenSolid.Model3D (Model3D)
+import OpenSolid.Model3D qualified as Model3D
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
-import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
-import OpenSolid.SurfaceVertex3d (SurfaceVertex3d)
-import OpenSolid.SurfaceVertex3d qualified as SurfaceVertex3d
-import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.SurfaceVertex3D (SurfaceVertex3D)
+import OpenSolid.SurfaceVertex3D qualified as SurfaceVertex3D
+import OpenSolid.Vector3D qualified as Vector3D
 
-convention :: Convention3d
-convention = Convention3d.yUp
+convention :: Convention3D
+convention = Convention3D.yUp
 
-builder :: Resolution Meters -> Model3d space -> Builder
+builder :: Resolution Meters -> Model3D space -> Builder
 builder resolution model = do
-  let meshes = Model3d.inspect (gltfMeshes resolution) model
+  let meshes = Model3D.inspect (gltfMeshes resolution) model
   let sceneObject =
         Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
   let unpaddedBufferBuilder = Binary.combine meshBuilder meshes
@@ -93,7 +93,7 @@ builder resolution model = do
     ]
 
 -- | Write a model to a binary glTF file with the given resolution.
-writeBinary :: Text -> Model3d space -> Resolution Meters -> IO ()
+writeBinary :: Text -> Model3D space -> Resolution Meters -> IO ()
 writeBinary path model resolution = IO.writeBinary path (builder resolution model)
 
 data GltfMesh = GltfMesh
@@ -116,21 +116,21 @@ data EncodedMesh = EncodedMesh
   , materialObject :: Json
   }
 
-gltfMeshes :: Model3d.Traversal => Resolution Meters -> Model3d space -> List GltfMesh
+gltfMeshes :: Model3D.Traversal => Resolution Meters -> Model3D space -> List GltfMesh
 gltfMeshes resolution model = case model of
-  Model3d.Body body -> do
-    let mesh = Body3d.toSurfaceMesh resolution body
+  Model3D.Body body -> do
+    let mesh = Body3D.toSurfaceMesh resolution body
     case Array.toList (Mesh.vertices mesh) of
       NonEmpty meshVertices -> do
         let numVertices = Array.length (Mesh.vertices mesh)
         let meshFaceIndices = Mesh.faceIndices mesh
         let numFaces = List.length meshFaceIndices
-        let meshBounds = Bounds3d.hullOfN SurfaceVertex3d.position meshVertices
-        let (xBounds, yBounds, zBounds) = Bounds3d.coordinates convention meshBounds
+        let meshBounds = Bounds3D.hullOfN SurfaceVertex3D.position meshVertices
+        let (xBounds, yBounds, zBounds) = Bounds3D.coordinates convention meshBounds
         let Bounds xLow xHigh = xBounds
         let Bounds yLow yHigh = yBounds
         let Bounds zLow zHigh = zBounds
-        let pbrMaterial = Model3d.traversal.currentPbrMaterial
+        let pbrMaterial = Model3D.traversal.currentPbrMaterial
         List.singleton
           GltfMesh
             { gltfMaterial = encodeMaterial pbrMaterial
@@ -144,7 +144,7 @@ gltfMeshes resolution model = case model of
             , maxPosition = Json.listOf (Json.number . Length.inMeters) [xHigh, yHigh, zHigh]
             }
       [] -> []
-  Model3d.Group children -> List.combine (gltfMeshes resolution) children
+  Model3D.Group children -> List.combine (gltfMeshes resolution) children
 
 encodeMeshes :: Int -> Int -> List GltfMesh -> List EncodedMesh
 encodeMeshes index offset meshes = case meshes of
@@ -242,14 +242,14 @@ faceIndicesBuilder :: List (Int, Int, Int) -> Builder
 faceIndicesBuilder = Binary.combine do
   \(i, j, k) -> Binary.uint32LE i <> Binary.uint32LE j <> Binary.uint32LE k
 
-verticesBuilder :: Array (SurfaceVertex3d space) -> Builder
+verticesBuilder :: Array (SurfaceVertex3D space) -> Builder
 verticesBuilder = Binary.combine vertexBuilder
 
-vertexBuilder :: SurfaceVertex3d space -> Builder
+vertexBuilder :: SurfaceVertex3D space -> Builder
 vertexBuilder vertex = GHC.Exts.runRW# \state0# -> do
   let !(# state1#, mutableByteArray# #) = GHC.Exts.newByteArray# 24# state0#
-  let !(# px#, py#, pz# #) = Point3d.yUpCoordinates# (SurfaceVertex3d.position vertex)
-  let !(# nx#, ny#, nz# #) = Vector3d.yUpComponents# (SurfaceVertex3d.normalVector vertex)
+  let !(# px#, py#, pz# #) = Point3D.yUpCoordinates# (SurfaceVertex3D.position vertex)
+  let !(# nx#, ny#, nz# #) = Vector3D.yUpComponents# (SurfaceVertex3D.normalVector vertex)
   let state2# = GHC.Exts.writeFloatArray# mutableByteArray# 0# (GHC.Exts.double2Float# px#) state1#
   let state3# = GHC.Exts.writeFloatArray# mutableByteArray# 1# (GHC.Exts.double2Float# py#) state2#
   let state4# = GHC.Exts.writeFloatArray# mutableByteArray# 2# (GHC.Exts.double2Float# pz#) state3#

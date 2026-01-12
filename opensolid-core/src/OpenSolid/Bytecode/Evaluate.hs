@@ -25,23 +25,23 @@ import GHC.Foreign (CString)
 import OpenSolid.Binary (ByteString)
 import OpenSolid.Bounds (Bounds (Bounds, Bounds#))
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.IO qualified as IO
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Vector2D (Vector2D (Vector2D#))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Vector3d (Vector3d#), VectorBounds3d (VectorBounds3d#))
+import OpenSolid.Primitives (Vector3D (Vector3D#), VectorBounds3D (VectorBounds3D#))
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import OpenSolid.VectorBounds2d qualified as VectorBounds2d
-import OpenSolid.VectorBounds3d qualified as VectorBounds3d
+import OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
+import OpenSolid.VectorBounds2D qualified as VectorBounds2D
+import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import System.IO.Unsafe qualified
 
 data Compiled input output
@@ -78,30 +78,30 @@ curve2dValue (Bytecode bytecode) (Quantity# t#) =
 curve2dBounds ::
   Compiled Number (Vector2D units1 space1) ->
   Bounds Unitless ->
-  VectorBounds2d units2 space2
-curve2dBounds (Constant value) _ = VectorBounds2d.constant (Vector2D.coerce value)
+  VectorBounds2D units2 space2
+curve2dBounds (Constant value) _ = VectorBounds2D.constant (Vector2D.coerce value)
 curve2dBounds (Bytecode bytecode) (Bounds# tLow# tHigh#) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh# #) = opensolid_cmm_curve2d_bounds f# tLow# tHigh#
-    IO.succeed (VectorBounds2d (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#))
+    IO.succeed (VectorBounds2D (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#))
 
-curve3dValue :: Compiled Number (Vector3d units1 space1) -> Number -> Vector3d units2 space2
-curve3dValue (Constant value) _ = Vector3d.coerce value
+curve3dValue :: Compiled Number (Vector3D units1 space1) -> Number -> Vector3D units2 space2
+curve3dValue (Constant value) _ = Vector3D.coerce value
 curve3dValue (Bytecode bytecode) (Quantity# t#) =
   callFunction bytecode \f# -> do
     let !(# x#, y#, z# #) = opensolid_cmm_curve3d_value f# t#
-    IO.succeed (Vector3d# x# y# z#)
+    IO.succeed (Vector3D# x# y# z#)
 
 curve3dBounds ::
-  Compiled Number (Vector3d units1 space1) ->
+  Compiled Number (Vector3D units1 space1) ->
   Bounds Unitless ->
-  VectorBounds3d units2 space2
-curve3dBounds (Constant value) _ = VectorBounds3d.constant (Vector3d.coerce value)
+  VectorBounds3D units2 space2
+curve3dBounds (Constant value) _ = VectorBounds3D.constant (Vector3D.coerce value)
 curve3dBounds (Bytecode bytecode) (Bounds# tLow# tHigh#) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh#, zLow#, zHigh# #) =
           opensolid_cmm_curve3d_bounds f# tLow# tHigh#
-    IO.succeed (VectorBounds3d# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
+    IO.succeed (VectorBounds3D# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
 
 surface1dValue :: Compiled UvPoint (Quantity units1) -> UvPoint -> Quantity units2
 surface1dValue (Constant value) _ = Quantity.coerce value
@@ -112,7 +112,7 @@ surface1dValue (Bytecode bytecode) (Point2D (Quantity# u#) (Quantity# v#)) =
 
 surface1dBounds :: Compiled UvPoint (Quantity units1) -> UvBounds -> Bounds units2
 surface1dBounds (Constant value) _ = Bounds.constant (Quantity.coerce value)
-surface1dBounds (Bytecode bytecode) (Bounds2d (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
+surface1dBounds (Bytecode bytecode) (Bounds2D (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh# #) = opensolid_cmm_surface1d_bounds f# uLow# uHigh# vLow# vHigh#
     IO.succeed (Bounds# xLow# xHigh#)
@@ -130,34 +130,34 @@ surface2dValue (Bytecode bytecode) (Point2D (Quantity# u#) (Quantity# v#)) =
 surface2dBounds ::
   Compiled UvPoint (Vector2D units1 space1) ->
   UvBounds ->
-  VectorBounds2d units2 space2
-surface2dBounds (Constant value) _ = VectorBounds2d.constant (Vector2D.coerce value)
-surface2dBounds (Bytecode bytecode) (Bounds2d (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
+  VectorBounds2D units2 space2
+surface2dBounds (Constant value) _ = VectorBounds2D.constant (Vector2D.coerce value)
+surface2dBounds (Bytecode bytecode) (Bounds2D (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh# #) =
           opensolid_cmm_surface2d_bounds f# uLow# uHigh# vLow# vHigh#
-    IO.succeed (VectorBounds2d (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#))
+    IO.succeed (VectorBounds2D (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#))
 
 surface3dValue ::
-  Compiled UvPoint (Vector3d units1 space1) ->
+  Compiled UvPoint (Vector3D units1 space1) ->
   UvPoint ->
-  Vector3d units2 space2
-surface3dValue (Constant value) _ = Vector3d.coerce value
+  Vector3D units2 space2
+surface3dValue (Constant value) _ = Vector3D.coerce value
 surface3dValue (Bytecode bytecode) (Point2D (Quantity# u#) (Quantity# v#)) =
   callFunction bytecode \f# -> do
     let !(# x#, y#, z# #) = opensolid_cmm_surface3d_value f# u# v#
-    IO.succeed (Vector3d# x# y# z#)
+    IO.succeed (Vector3D# x# y# z#)
 
 surface3dBounds ::
-  Compiled UvPoint (Vector3d units1 space1) ->
+  Compiled UvPoint (Vector3D units1 space1) ->
   UvBounds ->
-  VectorBounds3d units2 space2
-surface3dBounds (Constant value) _ = VectorBounds3d.constant (Vector3d.coerce value)
-surface3dBounds (Bytecode bytecode) (Bounds2d (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
+  VectorBounds3D units2 space2
+surface3dBounds (Constant value) _ = VectorBounds3D.constant (Vector3D.coerce value)
+surface3dBounds (Bytecode bytecode) (Bounds2D (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh#, zLow#, zHigh# #) =
           opensolid_cmm_surface3d_bounds f# uLow# uHigh# vLow# vHigh#
-    IO.succeed (VectorBounds3d# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
+    IO.succeed (VectorBounds3D# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
 
 callSolver :: ByteString -> ByteString -> (CString -> CString -> IO a) -> a
 callSolver functionBytes derivativeBytes callback =

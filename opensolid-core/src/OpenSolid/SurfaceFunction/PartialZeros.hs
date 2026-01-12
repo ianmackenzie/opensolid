@@ -13,9 +13,9 @@ module OpenSolid.SurfaceFunction.PartialZeros
   )
 where
 
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Domain2d qualified as Domain2d
+import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
+import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Domain2D qualified as Domain2D
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
@@ -43,27 +43,27 @@ data Parameterization = Horizontal | Vertical | Diagonal
 data CrossingSegment
   = CrossingSegment
       Parameterization
-      (UvPoint, Domain2d.Boundary)
-      (UvPoint, Domain2d.Boundary)
+      (UvPoint, Domain2D.Boundary)
+      (UvPoint, Domain2D.Boundary)
       (NonEmpty UvBounds)
 
 diagonalSegment ::
-  (UvPoint, Domain2d.Boundary) ->
-  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
   UvBounds ->
   CrossingSegment
 diagonalSegment start end uvBounds = CrossingSegment Diagonal start end (NonEmpty.one uvBounds)
 
 horizontalSegment ::
-  (UvPoint, Domain2d.Boundary) ->
-  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
   UvBounds ->
   CrossingSegment
 horizontalSegment start end uvBounds = CrossingSegment Horizontal start end (NonEmpty.one uvBounds)
 
 verticalSegment ::
-  (UvPoint, Domain2d.Boundary) ->
-  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
+  (UvPoint, Domain2D.Boundary) ->
   UvBounds ->
   CrossingSegment
 verticalSegment start end uvBounds = CrossingSegment Vertical start end (NonEmpty.one uvBounds)
@@ -106,9 +106,9 @@ joinCrossingSegments segment1 segment2 = do
   let (_, endBoundary2) = end2
   parameterization <- jointParameterization parameterization1 parameterization2
   if
-    | Domain2d.adjacent endBoundary1 startBoundary2 ->
+    | Domain2D.adjacent endBoundary1 startBoundary2 ->
         Just (CrossingSegment parameterization start1 end2 (boxes1 <> boxes2))
-    | Domain2d.adjacent endBoundary2 startBoundary1 ->
+    | Domain2D.adjacent endBoundary2 startBoundary1 ->
         Just (CrossingSegment parameterization start2 end1 (boxes2 <> boxes1))
     | otherwise -> Nothing
 
@@ -134,7 +134,7 @@ addSaddleRegion saddleRegion partialZeros = do
   partialZeros{saddleRegions = saddleRegion : saddleRegions}
 
 data PiecewiseCurve
-  = PiecewiseCurve Domain2d.Boundary Domain2d.Boundary (NonEmpty (Curve2d Unitless UvSpace))
+  = PiecewiseCurve Domain2D.Boundary Domain2D.Boundary (NonEmpty (Curve2D Unitless UvSpace))
 
 piecewiseCurve ::
   Tolerance units =>
@@ -152,7 +152,7 @@ piecewiseCurve function dvdu dudv (CrossingSegment parameterization start end bo
         Diagonal -> HorizontalCurve.new function dvdu uStart uEnd boxes
   PiecewiseCurve startBoundary endBoundary (NonEmpty.one curve)
 
-type PartialCurves = (List PiecewiseCurve, List (NonEmpty (Curve2d Unitless UvSpace)))
+type PartialCurves = (List PiecewiseCurve, List (NonEmpty (Curve2D Unitless UvSpace)))
 
 insertPiecewiseCurve :: PiecewiseCurve -> PartialCurves -> PartialCurves
 insertPiecewiseCurve newPiecewiseCurve (piecewiseCurves, crossingLoops) =
@@ -170,15 +170,15 @@ insertPiecewiseCurve newPiecewiseCurve (piecewiseCurves, crossingLoops) =
 
 data JoinPiecewiseCurveResult
   = JoinedPiecewiseCurve PiecewiseCurve
-  | NewCrossingLoop (NonEmpty (Curve2d Unitless UvSpace))
+  | NewCrossingLoop (NonEmpty (Curve2D Unitless UvSpace))
 
 joinPiecewiseCurves :: PiecewiseCurve -> PiecewiseCurve -> Maybe JoinPiecewiseCurveResult
 joinPiecewiseCurves (PiecewiseCurve start1 end1 segments1) (PiecewiseCurve start2 end2 segments2)
-  | Domain2d.adjacent end1 start2 && Domain2d.adjacent end2 start1 =
+  | Domain2D.adjacent end1 start2 && Domain2D.adjacent end2 start1 =
       Just (NewCrossingLoop (segments1 <> segments2))
-  | Domain2d.adjacent end1 start2 =
+  | Domain2D.adjacent end1 start2 =
       Just (JoinedPiecewiseCurve (PiecewiseCurve start1 end2 (segments1 <> segments2)))
-  | Domain2d.adjacent end2 start1 =
+  | Domain2D.adjacent end2 start1 =
       Just (JoinedPiecewiseCurve (PiecewiseCurve start2 end1 (segments2 <> segments1)))
   | otherwise = Nothing
 
@@ -204,16 +204,16 @@ finalize function dvdu dudv partialZeros = do
     , saddlePoints =
         List.map SaddleRegion.point saddleRegions
     , crossingCurves =
-        List.map (Tolerance.using Quantity.zero Curve2d.piecewise) crossingCurveSegments
+        List.map (Tolerance.using Quantity.zero Curve2D.piecewise) crossingCurveSegments
     , crossingLoops =
-        List.map (Tolerance.using Quantity.zero Curve2d.piecewise) crossingLoopSegments
+        List.map (Tolerance.using Quantity.zero Curve2D.piecewise) crossingLoopSegments
     }
 
 extend :: Tolerance units => PiecewiseCurve -> SaddleRegion units -> PiecewiseCurve
 extend curve saddleRegion = do
   let (PiecewiseCurve start end segments) = curve
-  let extendStart = Domain2d.contacts saddleRegion.subdomain start
-  let extendEnd = Domain2d.contacts saddleRegion.subdomain end
+  let extendStart = Domain2D.contacts saddleRegion.subdomain start
+  let extendEnd = Domain2D.contacts saddleRegion.subdomain end
   let outgoingSegment = SaddleRegion.Outgoing (NonEmpty.first segments)
   let incomingSegment = SaddleRegion.Incoming (NonEmpty.last segments)
   let startExtension = NonEmpty.one (SaddleRegion.connectingCurve outgoingSegment saddleRegion)

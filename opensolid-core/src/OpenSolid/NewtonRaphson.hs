@@ -1,11 +1,11 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.NewtonRaphson
-  ( curve1d
-  , curve1d#
-  , curve2d
-  , curve2d#
-  , surface2d
+  ( curve1D
+  , curve1D#
+  , curve2D
+  , curve2D#
+  , surface2D
   )
 where
 
@@ -18,13 +18,13 @@ import OpenSolid.Unboxed.Math
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.VectorCurve2d (VectorCurve2d)
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
-import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
+import OpenSolid.VectorCurve2D (VectorCurve2D)
+import OpenSolid.VectorCurve2D qualified as VectorCurve2D
+import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
+import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 
-curve1d :: Tolerance units => Curve units -> Number -> Number
-curve1d curve x1 = do
+curve1D :: Tolerance units => Curve units -> Number -> Number
+curve1D curve x1 = do
   let function = Curve.evaluate curve
   let derivative = Curve.evaluate curve.derivative
   curve1dImpl function derivative x1 (function x1)
@@ -43,12 +43,12 @@ curve1dImpl function derivative x1 y1 = do
     then curve1dImpl function derivative x2 y2
     else x1
 
-curve1d# ::
+curve1D# ::
   (Double# -> Double#) ->
   (Double# -> Double#) ->
   Number ->
   Number
-curve1d# function# derivative# (Quantity# x1#) =
+curve1D# function# derivative# (Quantity# x1#) =
   curve1dImpl# function# derivative# x1# (function# x1#)
 
 curve1dImpl# ::
@@ -65,10 +65,10 @@ curve1dImpl# function# derivative# x1# y1# = do
     1# -> curve1dImpl# function# derivative# x2# y2#
     _ -> Quantity (D# x1#)
 
-curve2d :: Tolerance units => VectorCurve2d units space -> Number -> Number
-curve2d curve t1 = do
-  let function = VectorCurve2d.evaluate curve
-  let derivative = VectorCurve2d.evaluate (VectorCurve2d.derivative curve)
+curve2D :: Tolerance units => VectorCurve2D units space -> Number -> Number
+curve2D curve t1 = do
+  let function = VectorCurve2D.evaluate curve
+  let derivative = VectorCurve2D.evaluate (VectorCurve2D.derivative curve)
   curve2dImpl function derivative t1 (function t1)
 
 curve2dImpl ::
@@ -85,12 +85,12 @@ curve2dImpl function derivative t1 v1 = do
     then curve2dImpl function derivative t2 v2
     else t1
 
-curve2d# ::
+curve2D# ::
   (Double# -> (# Double#, Double# #)) ->
   (Double# -> (# Double#, Double# #)) ->
   Number ->
   Number
-curve2d# function# derivative# (Quantity# t1#) = do
+curve2D# function# derivative# (Quantity# t1#) = do
   let !(# x1#, y1# #) = function# t1#
   let squaredMagnitude1# = x1# *# x1# +# y1# *# y1#
   curve2dImpl# function# derivative# t1# x1# y1# squaredMagnitude1#
@@ -112,11 +112,11 @@ curve2dImpl# function# derivative# t1# x1# y1# squaredMagnitude1# = do
     1# -> curve2dImpl# function# derivative# t2# x2# y2# squaredMagnitude2#
     _ -> Quantity (D# t1#)
 
-surface2d :: VectorSurfaceFunction2d units space -> UvPoint -> UvPoint
-surface2d surface uvPoint1 = do
-  let function = VectorSurfaceFunction2d.evaluate surface
-  let uDerivative = VectorSurfaceFunction2d.evaluate surface.du
-  let vDerivative = VectorSurfaceFunction2d.evaluate surface.dv
+surface2D :: VectorSurfaceFunction2D units space -> UvPoint -> UvPoint
+surface2D surface uvPoint1 = do
+  let function = VectorSurfaceFunction2D.evaluate surface
+  let uDerivative = VectorSurfaceFunction2D.evaluate surface.du
+  let vDerivative = VectorSurfaceFunction2D.evaluate surface.dv
   surface2dImpl function uDerivative vDerivative uvPoint1 (function uvPoint1)
 
 surface2dImpl ::

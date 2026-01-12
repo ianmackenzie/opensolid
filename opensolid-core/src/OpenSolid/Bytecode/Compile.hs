@@ -9,20 +9,20 @@ module OpenSolid.Bytecode.Compile
   , map
   , collect
   , addConstant
-  , addConstant1d
-  , addConstant2d
-  , addConstant3d
+  , addConstant1D
+  , addConstant2D
+  , addConstant3D
   , addVariable
-  , addVariable1d
-  , addVariable2d
-  , addVariable3d
+  , addVariable1D
+  , addVariable2D
+  , addVariable3D
   , compile
-  , surface1d
-  , curve1d
-  , curve2d
-  , curve3d
-  , surface2d
-  , surface3d
+  , surface1D
+  , curve1D
+  , curve2D
+  , curve3D
+  , surface2D
+  , surface3D
   , debugCurve
   , debugSurface
   )
@@ -43,7 +43,7 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Vector3d (Vector3d))
+import OpenSolid.Primitives (Vector3D (Vector3D))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import Prelude qualified
@@ -118,14 +118,14 @@ addConstant components = Step \initialState ->
               }
       (# updatedCompilation, constantIndex #)
 
-addConstant1d :: Number -> Step ConstantIndex
-addConstant1d value = addConstant (NonEmpty.one value)
+addConstant1D :: Number -> Step ConstantIndex
+addConstant1D value = addConstant (NonEmpty.one value)
 
-addConstant2d :: Vector2D Unitless space -> Step ConstantIndex
-addConstant2d (Vector2D x y) = addConstant (NonEmpty.two x y)
+addConstant2D :: Vector2D Unitless space -> Step ConstantIndex
+addConstant2D (Vector2D x y) = addConstant (NonEmpty.two x y)
 
-addConstant3d :: Vector3d Unitless space -> Step ConstantIndex
-addConstant3d (Vector3d x y z) = addConstant (NonEmpty.three x y z)
+addConstant3D :: Vector3D Unitless space -> Step ConstantIndex
+addConstant3D (Vector3D x y z) = addConstant (NonEmpty.three x y z)
 
 nextVariableIndex :: State -> VariableIndex
 nextVariableIndex State{variableComponents = NumComponents n} = VariableIndex n
@@ -147,14 +147,14 @@ addVariable instruction (OutputComponents outputComponents) = Step \initialState
               }
       (# updatedState, resultIndex #)
 
-addVariable1d :: Instruction -> Step VariableIndex
-addVariable1d instruction = addVariable instruction (OutputComponents 1)
+addVariable1D :: Instruction -> Step VariableIndex
+addVariable1D instruction = addVariable instruction (OutputComponents 1)
 
-addVariable2d :: Instruction -> Step VariableIndex
-addVariable2d instruction = addVariable instruction (OutputComponents 2)
+addVariable2D :: Instruction -> Step VariableIndex
+addVariable2D instruction = addVariable instruction (OutputComponents 2)
 
-addVariable3d :: Instruction -> Step VariableIndex
-addVariable3d instruction = addVariable instruction (OutputComponents 3)
+addVariable3D :: Instruction -> Step VariableIndex
+addVariable3D instruction = addVariable instruction (OutputComponents 3)
 
 init :: InputComponents -> State
 init (InputComponents inputComponents) =
@@ -183,23 +183,23 @@ compile (InputComponents inputComponents) (OutputComponents outputComponents) (S
       , Instruction.return outputComponents finalOutput
       ]
 
-curve1d :: Step VariableIndex -> ByteString
-curve1d = compile (InputComponents 1) (OutputComponents 1)
+curve1D :: Step VariableIndex -> ByteString
+curve1D = compile (InputComponents 1) (OutputComponents 1)
 
-curve2d :: Step VariableIndex -> ByteString
-curve2d = compile (InputComponents 1) (OutputComponents 2)
+curve2D :: Step VariableIndex -> ByteString
+curve2D = compile (InputComponents 1) (OutputComponents 2)
 
-curve3d :: Step VariableIndex -> ByteString
-curve3d = compile (InputComponents 1) (OutputComponents 3)
+curve3D :: Step VariableIndex -> ByteString
+curve3D = compile (InputComponents 1) (OutputComponents 3)
 
-surface1d :: Step VariableIndex -> ByteString
-surface1d = compile (InputComponents 2) (OutputComponents 1)
+surface1D :: Step VariableIndex -> ByteString
+surface1D = compile (InputComponents 2) (OutputComponents 1)
 
-surface2d :: Step VariableIndex -> ByteString
-surface2d = compile (InputComponents 2) (OutputComponents 2)
+surface2D :: Step VariableIndex -> ByteString
+surface2D = compile (InputComponents 2) (OutputComponents 2)
 
-surface3d :: Step VariableIndex -> ByteString
-surface3d = compile (InputComponents 2) (OutputComponents 3)
+surface3D :: Step VariableIndex -> ByteString
+surface3D = compile (InputComponents 2) (OutputComponents 3)
 
 debug :: InputComponents -> Step VariableIndex -> Text
 debug (InputComponents inputComponents) step = do

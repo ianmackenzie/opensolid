@@ -19,44 +19,44 @@ data Instruction
   = Component0 VariableIndex
   | Component1 VariableIndex
   | Component2 VariableIndex
-  | Negate1d VariableIndex
-  | Add1d VariableIndex VariableIndex
-  | AddVariableConstant1d VariableIndex ConstantIndex
-  | Subtract1d VariableIndex VariableIndex
-  | SubtractConstantVariable1d ConstantIndex VariableIndex
-  | Multiply1d VariableIndex VariableIndex
-  | MultiplyVariableConstant1d VariableIndex ConstantIndex
-  | Divide1d VariableIndex VariableIndex
-  | DivideConstantVariable1d ConstantIndex VariableIndex
-  | Square1d VariableIndex
-  | Sqrt1d VariableIndex
-  | Sin1d VariableIndex
-  | Cos1d VariableIndex
-  | Bezier1d Int ConstantIndex VariableIndex
+  | Negate1D VariableIndex
+  | Add1D VariableIndex VariableIndex
+  | AddVariableConstant1D VariableIndex ConstantIndex
+  | Subtract1D VariableIndex VariableIndex
+  | SubtractConstantVariable1D ConstantIndex VariableIndex
+  | Multiply1D VariableIndex VariableIndex
+  | MultiplyVariableConstant1D VariableIndex ConstantIndex
+  | Divide1D VariableIndex VariableIndex
+  | DivideConstantVariable1D ConstantIndex VariableIndex
+  | Square1D VariableIndex
+  | Sqrt1D VariableIndex
+  | Sin1D VariableIndex
+  | Cos1D VariableIndex
+  | Bezier1D Int ConstantIndex VariableIndex
   | XY VariableIndex VariableIndex
   | XC VariableIndex ConstantIndex
   | CY ConstantIndex VariableIndex
-  | Negate2d VariableIndex
-  | Add2d VariableIndex VariableIndex
-  | AddVariableConstant2d VariableIndex ConstantIndex
-  | Subtract2d VariableIndex VariableIndex
-  | SubtractConstantVariable2d ConstantIndex VariableIndex
-  | Multiply2d VariableIndex VariableIndex
-  | MultiplyVariableConstant2d VariableIndex ConstantIndex
-  | MultiplyConstantVariable2d ConstantIndex VariableIndex
-  | Divide2d VariableIndex VariableIndex
-  | DivideConstantVariable2d ConstantIndex VariableIndex
-  | SquaredMagnitude2d VariableIndex
-  | Magnitude2d VariableIndex
-  | Dot2d VariableIndex VariableIndex
-  | DotVariableConstant2d VariableIndex ConstantIndex
-  | Cross2d VariableIndex VariableIndex
-  | CrossVariableConstant2d VariableIndex ConstantIndex
-  | Bezier2d Int ConstantIndex VariableIndex
+  | Negate2D VariableIndex
+  | Add2D VariableIndex VariableIndex
+  | AddVariableConstant2D VariableIndex ConstantIndex
+  | Subtract2D VariableIndex VariableIndex
+  | SubtractConstantVariable2D ConstantIndex VariableIndex
+  | Multiply2D VariableIndex VariableIndex
+  | MultiplyVariableConstant2D VariableIndex ConstantIndex
+  | MultiplyConstantVariable2D ConstantIndex VariableIndex
+  | Divide2D VariableIndex VariableIndex
+  | DivideConstantVariable2D ConstantIndex VariableIndex
+  | SquaredMagnitude2D VariableIndex
+  | Magnitude2D VariableIndex
+  | Dot2D VariableIndex VariableIndex
+  | DotVariableConstant2D VariableIndex ConstantIndex
+  | Cross2D VariableIndex VariableIndex
+  | CrossVariableConstant2D VariableIndex ConstantIndex
+  | Bezier2D Int ConstantIndex VariableIndex
   | TransformVector2D ConstantIndex VariableIndex
   | TransformPoint2D ConstantIndex VariableIndex
-  | ProjectVector3d ConstantIndex VariableIndex
-  | ProjectPoint3d ConstantIndex VariableIndex
+  | ProjectVector3D ConstantIndex VariableIndex
+  | ProjectPoint3D ConstantIndex VariableIndex
   | RFU VariableIndex VariableIndex VariableIndex
   | RFC VariableIndex VariableIndex ConstantIndex
   | RCU VariableIndex ConstantIndex VariableIndex
@@ -64,31 +64,31 @@ data Instruction
   | RCC VariableIndex ConstantIndex ConstantIndex
   | CFC ConstantIndex VariableIndex ConstantIndex
   | CCU ConstantIndex ConstantIndex VariableIndex
-  | Negate3d VariableIndex
-  | Add3d VariableIndex VariableIndex
-  | AddVariableConstant3d VariableIndex ConstantIndex
-  | Subtract3d VariableIndex VariableIndex
-  | SubtractConstantVariable3d ConstantIndex VariableIndex
-  | Multiply3d VariableIndex VariableIndex
-  | MultiplyVariableConstant3d VariableIndex ConstantIndex
-  | MultiplyConstantVariable3d ConstantIndex VariableIndex
-  | Divide3d VariableIndex VariableIndex
-  | DivideConstantVariable3d ConstantIndex VariableIndex
-  | SquaredMagnitude3d VariableIndex
-  | Magnitude3d VariableIndex
-  | Dot3d VariableIndex VariableIndex
-  | DotVariableConstant3d VariableIndex ConstantIndex
-  | Cross3d VariableIndex VariableIndex
-  | CrossVariableConstant3d VariableIndex ConstantIndex
-  | Bezier3d Int ConstantIndex VariableIndex
-  | TransformVector3d ConstantIndex VariableIndex
-  | TransformPoint3d ConstantIndex VariableIndex
+  | Negate3D VariableIndex
+  | Add3D VariableIndex VariableIndex
+  | AddVariableConstant3D VariableIndex ConstantIndex
+  | Subtract3D VariableIndex VariableIndex
+  | SubtractConstantVariable3D ConstantIndex VariableIndex
+  | Multiply3D VariableIndex VariableIndex
+  | MultiplyVariableConstant3D VariableIndex ConstantIndex
+  | MultiplyConstantVariable3D ConstantIndex VariableIndex
+  | Divide3D VariableIndex VariableIndex
+  | DivideConstantVariable3D ConstantIndex VariableIndex
+  | SquaredMagnitude3D VariableIndex
+  | Magnitude3D VariableIndex
+  | Dot3D VariableIndex VariableIndex
+  | DotVariableConstant3D VariableIndex ConstantIndex
+  | Cross3D VariableIndex VariableIndex
+  | CrossVariableConstant3D VariableIndex ConstantIndex
+  | Bezier3D Int ConstantIndex VariableIndex
+  | TransformVector3D ConstantIndex VariableIndex
+  | TransformPoint3D ConstantIndex VariableIndex
   | PlaceVector2D ConstantIndex VariableIndex
   | PlacePoint2D ConstantIndex VariableIndex
-  | Desingularized1d VariableIndex VariableIndex VariableIndex VariableIndex
-  | Desingularized2d VariableIndex VariableIndex VariableIndex VariableIndex
-  | Desingularized3d VariableIndex VariableIndex VariableIndex VariableIndex
-  | Cube1d VariableIndex
+  | Desingularized1D VariableIndex VariableIndex VariableIndex VariableIndex
+  | Desingularized2D VariableIndex VariableIndex VariableIndex VariableIndex
+  | Desingularized3D VariableIndex VariableIndex VariableIndex VariableIndex
+  | Cube1D VariableIndex
   | B00 VariableIndex
   | B00d1 VariableIndex
   | B00d2 VariableIndex
@@ -147,74 +147,74 @@ encodeOpcodeAndArguments instruction = case instruction of
   Component2 arg ->
     Encode.int 3
       <> encodeVariableIndex arg
-  Negate1d arg ->
+  Negate1D arg ->
     Encode.int 4
       <> encodeVariableIndex arg
-  Add1d lhs rhs ->
+  Add1D lhs rhs ->
     Encode.int 5
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  AddVariableConstant1d lhs rhs ->
+  AddVariableConstant1D lhs rhs ->
     Encode.int 6
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  Subtract1d lhs rhs ->
+  Subtract1D lhs rhs ->
     Encode.int 7
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  SubtractConstantVariable1d lhs rhs ->
+  SubtractConstantVariable1D lhs rhs ->
     Encode.int 8
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  Multiply1d lhs rhs ->
+  Multiply1D lhs rhs ->
     Encode.int 9
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  MultiplyVariableConstant1d lhs rhs ->
+  MultiplyVariableConstant1D lhs rhs ->
     Encode.int 10
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  Divide1d lhs rhs ->
+  Divide1D lhs rhs ->
     Encode.int 11
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  DivideConstantVariable1d lhs rhs ->
+  DivideConstantVariable1D lhs rhs ->
     Encode.int 12
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  Square1d arg ->
+  Square1D arg ->
     Encode.int 13
       <> encodeVariableIndex arg
-  Sqrt1d arg ->
+  Sqrt1D arg ->
     Encode.int 14
       <> encodeVariableIndex arg
-  Sin1d arg ->
+  Sin1D arg ->
     Encode.int 15
       <> encodeVariableIndex arg
-  Cos1d arg ->
+  Cos1D arg ->
     Encode.int 16
       <> encodeVariableIndex arg
-  Bezier1d 2 controlPoints parameter ->
+  Bezier1D 2 controlPoints parameter ->
     Encode.int 17
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier1d 3 controlPoints parameter ->
+  Bezier1D 3 controlPoints parameter ->
     Encode.int 18
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier1d 4 controlPoints parameter ->
+  Bezier1D 4 controlPoints parameter ->
     Encode.int 19
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier1d 5 controlPoints parameter ->
+  Bezier1D 5 controlPoints parameter ->
     Encode.int 20
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier1d 6 controlPoints parameter ->
+  Bezier1D 6 controlPoints parameter ->
     Encode.int 21
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier1d n controlPoints parameter ->
+  Bezier1D n controlPoints parameter ->
     Encode.int 22
       <> Encode.int n
       <> encodeConstantIndex controlPoints
@@ -231,88 +231,88 @@ encodeOpcodeAndArguments instruction = case instruction of
     Encode.int 25
       <> encodeConstantIndex x
       <> encodeVariableIndex y
-  Negate2d arg ->
+  Negate2D arg ->
     Encode.int 26
       <> encodeVariableIndex arg
-  Add2d lhs rhs ->
+  Add2D lhs rhs ->
     Encode.int 27
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  AddVariableConstant2d lhs rhs ->
+  AddVariableConstant2D lhs rhs ->
     Encode.int 28
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  Subtract2d lhs rhs ->
+  Subtract2D lhs rhs ->
     Encode.int 29
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  SubtractConstantVariable2d lhs rhs ->
+  SubtractConstantVariable2D lhs rhs ->
     Encode.int 30
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  Multiply2d lhs rhs ->
+  Multiply2D lhs rhs ->
     Encode.int 31
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  MultiplyVariableConstant2d lhs rhs ->
+  MultiplyVariableConstant2D lhs rhs ->
     Encode.int 32
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  MultiplyConstantVariable2d lhs rhs ->
+  MultiplyConstantVariable2D lhs rhs ->
     Encode.int 33
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  Divide2d lhs rhs ->
+  Divide2D lhs rhs ->
     Encode.int 34
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  DivideConstantVariable2d lhs rhs ->
+  DivideConstantVariable2D lhs rhs ->
     Encode.int 35
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  SquaredMagnitude2d arg ->
+  SquaredMagnitude2D arg ->
     Encode.int 36
       <> encodeVariableIndex arg
-  Magnitude2d arg ->
+  Magnitude2D arg ->
     Encode.int 37
       <> encodeVariableIndex arg
-  Dot2d lhs rhs ->
+  Dot2D lhs rhs ->
     Encode.int 38
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  DotVariableConstant2d lhs rhs ->
+  DotVariableConstant2D lhs rhs ->
     Encode.int 39
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  Cross2d lhs rhs ->
+  Cross2D lhs rhs ->
     Encode.int 40
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  CrossVariableConstant2d lhs rhs ->
+  CrossVariableConstant2D lhs rhs ->
     Encode.int 41
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  Bezier2d 2 controlPoints parameter ->
+  Bezier2D 2 controlPoints parameter ->
     Encode.int 42
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier2d 3 controlPoints parameter ->
+  Bezier2D 3 controlPoints parameter ->
     Encode.int 43
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier2d 4 controlPoints parameter ->
+  Bezier2D 4 controlPoints parameter ->
     Encode.int 44
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier2d 5 controlPoints parameter ->
+  Bezier2D 5 controlPoints parameter ->
     Encode.int 45
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier2d 6 controlPoints parameter ->
+  Bezier2D 6 controlPoints parameter ->
     Encode.int 46
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier2d n controlPoints parameter ->
+  Bezier2D n controlPoints parameter ->
     Encode.int 47
       <> Encode.int n
       <> encodeConstantIndex controlPoints
@@ -325,11 +325,11 @@ encodeOpcodeAndArguments instruction = case instruction of
     Encode.int 49
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
-  ProjectVector3d matrix vector ->
+  ProjectVector3D matrix vector ->
     Encode.int 50
       <> encodeConstantIndex matrix
       <> encodeVariableIndex vector
-  ProjectPoint3d matrix point ->
+  ProjectPoint3D matrix point ->
     Encode.int 51
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
@@ -368,97 +368,97 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeConstantIndex r
       <> encodeConstantIndex f
       <> encodeVariableIndex u
-  Negate3d arg ->
+  Negate3D arg ->
     Encode.int 59
       <> encodeVariableIndex arg
-  Add3d lhs rhs ->
+  Add3D lhs rhs ->
     Encode.int 60
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  AddVariableConstant3d lhs rhs ->
+  AddVariableConstant3D lhs rhs ->
     Encode.int 61
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  Subtract3d lhs rhs ->
+  Subtract3D lhs rhs ->
     Encode.int 62
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  SubtractConstantVariable3d lhs rhs ->
+  SubtractConstantVariable3D lhs rhs ->
     Encode.int 63
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  Multiply3d lhs rhs ->
+  Multiply3D lhs rhs ->
     Encode.int 64
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  MultiplyVariableConstant3d lhs rhs ->
+  MultiplyVariableConstant3D lhs rhs ->
     Encode.int 65
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  MultiplyConstantVariable3d lhs rhs ->
+  MultiplyConstantVariable3D lhs rhs ->
     Encode.int 66
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  Divide3d lhs rhs ->
+  Divide3D lhs rhs ->
     Encode.int 67
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  DivideConstantVariable3d lhs rhs ->
+  DivideConstantVariable3D lhs rhs ->
     Encode.int 68
       <> encodeConstantIndex lhs
       <> encodeVariableIndex rhs
-  SquaredMagnitude3d arg ->
+  SquaredMagnitude3D arg ->
     Encode.int 69
       <> encodeVariableIndex arg
-  Magnitude3d arg ->
+  Magnitude3D arg ->
     Encode.int 70
       <> encodeVariableIndex arg
-  Dot3d lhs rhs ->
+  Dot3D lhs rhs ->
     Encode.int 71
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  DotVariableConstant3d lhs rhs ->
+  DotVariableConstant3D lhs rhs ->
     Encode.int 72
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  Cross3d lhs rhs ->
+  Cross3D lhs rhs ->
     Encode.int 73
       <> encodeVariableIndex lhs
       <> encodeVariableIndex rhs
-  CrossVariableConstant3d lhs rhs ->
+  CrossVariableConstant3D lhs rhs ->
     Encode.int 74
       <> encodeVariableIndex lhs
       <> encodeConstantIndex rhs
-  Bezier3d 2 controlPoints parameter ->
+  Bezier3D 2 controlPoints parameter ->
     Encode.int 75
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier3d 3 controlPoints parameter ->
+  Bezier3D 3 controlPoints parameter ->
     Encode.int 76
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier3d 4 controlPoints parameter ->
+  Bezier3D 4 controlPoints parameter ->
     Encode.int 77
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier3d 5 controlPoints parameter ->
+  Bezier3D 5 controlPoints parameter ->
     Encode.int 78
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier3d 6 controlPoints parameter ->
+  Bezier3D 6 controlPoints parameter ->
     Encode.int 79
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  Bezier3d n controlPoints parameter ->
+  Bezier3D n controlPoints parameter ->
     Encode.int 80
       <> Encode.int n
       <> encodeConstantIndex controlPoints
       <> encodeVariableIndex parameter
-  TransformVector3d matrix vector ->
+  TransformVector3D matrix vector ->
     Encode.int 81
       <> encodeConstantIndex matrix
       <> encodeVariableIndex vector
-  TransformPoint3d matrix point ->
+  TransformPoint3D matrix point ->
     Encode.int 82
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
@@ -470,25 +470,25 @@ encodeOpcodeAndArguments instruction = case instruction of
     Encode.int 84
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
-  Desingularized1d parameterValue left middle right ->
+  Desingularized1D parameterValue left middle right ->
     Encode.int 85
       <> encodeVariableIndex parameterValue
       <> encodeVariableIndex left
       <> encodeVariableIndex middle
       <> encodeVariableIndex right
-  Desingularized2d parameterValue left middle right ->
+  Desingularized2D parameterValue left middle right ->
     Encode.int 86
       <> encodeVariableIndex parameterValue
       <> encodeVariableIndex left
       <> encodeVariableIndex middle
       <> encodeVariableIndex right
-  Desingularized3d parameterValue left middle right ->
+  Desingularized3D parameterValue left middle right ->
     Encode.int 87
       <> encodeVariableIndex parameterValue
       <> encodeVariableIndex left
       <> encodeVariableIndex middle
       <> encodeVariableIndex right
-  Cube1d arg ->
+  Cube1D arg ->
     Encode.int 91
       <> encodeVariableIndex arg
   B00 arg ->

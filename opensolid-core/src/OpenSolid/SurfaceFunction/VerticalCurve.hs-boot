@@ -5,9 +5,9 @@ module OpenSolid.SurfaceFunction.VerticalCurve
   )
 where
 
-import OpenSolid.Axis2d (Axis2d)
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Axis2D (Axis2D)
+import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
+import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.UvBounds (UvBounds)
@@ -19,7 +19,7 @@ new ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2d Unitless UvSpace
+  Curve2D Unitless UvSpace
 monotonic ::
   Tolerance units =>
   SurfaceFunction units ->
@@ -27,7 +27,7 @@ monotonic ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2d Unitless UvSpace
+  Curve2D Unitless UvSpace
 bounded ::
   Tolerance units =>
   SurfaceFunction units ->
@@ -35,6 +35,6 @@ bounded ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Frame2d Unitless UvSpace local ->
-  List (Axis2d Unitless UvSpace) ->
-  Curve2d Unitless UvSpace
+  Frame2D Unitless UvSpace local ->
+  List (Axis2D Unitless UvSpace) ->
+  Curve2D Unitless UvSpace
