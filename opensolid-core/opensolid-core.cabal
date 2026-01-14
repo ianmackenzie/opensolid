@@ -210,7 +210,7 @@ library
     OpenSolid.Solve2D
     OpenSolid.Stl
     OpenSolid.Stream
-    OpenSolid.Surface
+    OpenSolid.Surface1D
     OpenSolid.Surface2D
     OpenSolid.Surface3D
     OpenSolid.Surface3D.Revolved
