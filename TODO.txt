@@ -1,26 +1,4 @@
-Add missing operators
-- Failed to add UvPoint and Vector2D
-- Failed to add UvBounds and Vector2D
-- Failed to subtract UvPoint and Vector2D
-- Failed to subtract UvBounds and Vector2D
-- Failed to divide float and Curve
-- Failed to divide Length and Curve
-- Failed to divide Length and LengthCurve
-- Failed to divide Area and Curve
-- Failed to divide Area and LengthCurve
-- Failed to divide Area and AreaCurve
-- Failed to divide Angle and Curve
-- Failed to divide Angle and AngleCurve
-- Failed to divide Curve and Curve
-- Failed to divide LengthCurve and Curve
-- Failed to divide LengthCurve and LengthCurve
-- Failed to divide AreaCurve and Curve
-- Failed to divide AreaCurve and LengthCurve
-- Failed to divide AreaCurve and AreaCurve
-- Failed to divide AngleCurve and Curve
-- Failed to divide AngleCurve and AngleCurve
-
-Ensure check_operators.py includes all relevant classes
+Add 3D types to check_operators script
 
 Remove UvPoint and UvBounds modules?
 - replace UvBounds.unitSquare with Bounds2D.uvDomain
