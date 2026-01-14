@@ -15,7 +15,7 @@ t0 :: Number
 t0 = 0.00390625 -- 1/256
 
 t1 :: Number
--- Should be kept in sync with CUTOFF_1 in bytecode.cpp
+-- Should be kept in sync with T1 in bytecode.cpp
 t1 = 0.99609375 -- 1 minus 1/256
 
 value :: Number -> a -> a -> a -> a
