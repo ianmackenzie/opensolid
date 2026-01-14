@@ -219,7 +219,9 @@ def get_output_topology(t1, t2):
             )
 
 
-def find_output_type(output_behaviour, output_dimension, output_topology, output_units):
+def find_output_type(
+    output_behaviour, output_dimension, output_topology, output_units, output_space
+):
     valid_output_types = [
         t
         for t in types
@@ -227,6 +229,7 @@ def find_output_type(output_behaviour, output_dimension, output_topology, output
         and dimension[t] == output_dimension
         and topology[t] == output_topology
         and units[t] == output_units
+        and space[t] == output_space
         and behaviour[t] != "direction"
     ]
     match valid_output_types:
@@ -301,7 +304,9 @@ if __name__ == "__main__":
                 continue
 
             # Check if spaces are equal
-            if space[t1] != space[t2]:
+            if space[t1] == space[t2]:
+                output_space = space[t1]
+            else:
                 print("Skipping addition of " + str(t1) + " and " + str(t2))
                 continue
 
@@ -311,6 +316,7 @@ if __name__ == "__main__":
                 output_dimension=output_dimension,
                 output_topology=output_topology,
                 output_units=output_units,
+                output_space=output_space,
             )
             if output_type is None:
                 continue
@@ -382,7 +388,9 @@ if __name__ == "__main__":
                 continue
 
             # Check if spaces are equal
-            if space[t1] != space[t2]:
+            if space[t1] == space[t2]:
+                output_space = space[t1]
+            else:
                 print("Skipping subtraction of " + str(t1) + " and " + str(t2))
                 continue
 
@@ -392,6 +400,7 @@ if __name__ == "__main__":
                 output_dimension=output_dimension,
                 output_topology=output_topology,
                 output_units=output_units,
+                output_space=output_space,
             )
             if output_type is None:
                 continue
@@ -456,12 +465,18 @@ if __name__ == "__main__":
             # Determine output units
             output_units = units[t1] * units[t2]
 
+            if space[t1] is None or space[t2] is None:
+                output_space = space[t1] or space[t2]
+            else:
+                assert False, "Expected at least one product operand to be non-spatial"
+
             # Check if there actually is a valid output type
             output_type = find_output_type(
                 output_behaviour=output_behaviour,
                 output_dimension=output_dimension,
                 output_topology=output_topology,
                 output_units=output_units,
+                output_space=output_space,
             )
             if output_type is None:
                 continue
@@ -520,6 +535,8 @@ if __name__ == "__main__":
             # Determine output units
             output_units = units[t1] / units[t2]
 
+            assert space[t2] is None, "Expected quotient denominator to be non-spatial"
+
             # Check if there actually is a valid output type
             # Check if there actually is a valid output type
             output_type = find_output_type(
@@ -527,6 +544,7 @@ if __name__ == "__main__":
                 output_dimension=output_dimension,
                 output_topology=output_topology,
                 output_units=output_units,
+                output_space=space[t1],
             )
             if output_type is None:
                 continue
