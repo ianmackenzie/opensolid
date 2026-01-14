@@ -1,3 +1,14 @@
+Generic modules to add:
+- Point
+- Vector
+- Direction
+- Bounds
+- VectorBounds
+- DirectionBounds
+- Curve
+- VectorCurve
+- DirectionCurve
+
 Add 3D types to check_operators script
 
 Remove UvPoint and UvBounds modules?
