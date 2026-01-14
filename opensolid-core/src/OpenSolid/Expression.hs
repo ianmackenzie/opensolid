@@ -58,7 +58,7 @@ where
 
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bytecode.Ast (Ast1D, Ast2D, Ast3D)
 import OpenSolid.Bytecode.Ast qualified as Ast
@@ -1702,8 +1702,8 @@ instance
   Evaluation
     Number
     (Quantity units)
-    (Bounds Unitless)
-    (Bounds units)
+    (Interval Unitless)
+    (Interval units)
   where
   evaluate (Curve1D _ compiled) tValue = Evaluate.curve1dValue compiled tValue
   evaluateBounds (Curve1D _ compiled) tBounds = Evaluate.curve1dBounds compiled tBounds
@@ -1713,7 +1713,7 @@ instance
     UvPoint
     (Quantity units)
     UvBounds
-    (Bounds units)
+    (Interval units)
   where
   evaluate (Surface1D _ compiled) uvPoint = Evaluate.surface1dValue compiled uvPoint
   evaluateBounds (Surface1D _ compiled) uvBounds = Evaluate.surface1dBounds compiled uvBounds
@@ -1722,7 +1722,7 @@ instance
   Evaluation
     Number
     (Point2D units space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (Bounds2D units space)
   where
   evaluate (Curve2D _ compiled) tValue =
@@ -1748,7 +1748,7 @@ instance
   Evaluation
     Number
     (Vector2D units space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (VectorBounds2D units space)
   where
   evaluate (VectorCurve2D _ compiled) tValue = Evaluate.curve2dValue compiled tValue
@@ -1768,7 +1768,7 @@ instance
   Evaluation
     Number
     (Point3D space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (Bounds3D space)
   where
   evaluate (Curve3D _ compiled) tValue =
@@ -1794,7 +1794,7 @@ instance
   Evaluation
     Number
     (Vector3D units space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (VectorBounds3D units space)
   where
   evaluate (VectorCurve3D _ compiled) tValue = Evaluate.curve3dValue compiled tValue
@@ -1814,7 +1814,7 @@ solveMonotonicSurfaceU ::
   Tolerance units =>
   Expression UvPoint (Quantity units) ->
   Expression UvPoint (Quantity units) ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Number ->
   Number
 solveMonotonicSurfaceU (Surface1D _ function) (Surface1D _ derivative) uBounds vValue =
@@ -1825,7 +1825,7 @@ solveMonotonicSurfaceV ::
   Expression UvPoint (Quantity units) ->
   Expression UvPoint (Quantity units) ->
   Number ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Number
 solveMonotonicSurfaceV (Surface1D _ function) (Surface1D _ derivative) uValue vBounds =
   Evaluate.solveMonotonicSurfaceV function derivative uValue vBounds

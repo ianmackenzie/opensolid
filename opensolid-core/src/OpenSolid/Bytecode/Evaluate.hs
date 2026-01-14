@@ -23,14 +23,12 @@ import Data.ByteString.Unsafe qualified
 import GHC.Exts (Addr#, Ptr (Ptr))
 import GHC.Foreign (CString)
 import OpenSolid.Binary (ByteString)
-import OpenSolid.Bounds (Bounds (Bounds, Bounds#))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.IO qualified as IO
+import OpenSolid.Interval (Interval (Interval, Interval#))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
-import OpenSolid.Vector2D (Vector2D (Vector2D#))
-import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3D (Vector3D#), VectorBounds3D (VectorBounds3D#))
 import OpenSolid.Quantity (Quantity (Quantity#))
@@ -38,6 +36,8 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.Vector2D (Vector2D (Vector2D#))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
@@ -61,12 +61,12 @@ curve1dValue (Bytecode bytecode) (Quantity# t#) =
     let x# = opensolid_cmm_curve1d_value f# t#
     IO.succeed (Quantity# x#)
 
-curve1dBounds :: Compiled Number (Quantity units1) -> Bounds Unitless -> Bounds units2
-curve1dBounds (Constant value) _ = Bounds.constant (Quantity.coerce value)
-curve1dBounds (Bytecode bytecode) (Bounds# tLow# tHigh#) =
+curve1dBounds :: Compiled Number (Quantity units1) -> Interval Unitless -> Interval units2
+curve1dBounds (Constant value) _ = Interval.constant (Quantity.coerce value)
+curve1dBounds (Bytecode bytecode) (Interval# tLow# tHigh#) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh# #) = opensolid_cmm_curve1d_bounds f# tLow# tHigh#
-    IO.succeed (Bounds# xLow# xHigh#)
+    IO.succeed (Interval# xLow# xHigh#)
 
 curve2dValue :: Compiled Number (Vector2D units1 space1) -> Number -> Vector2D units2 space2
 curve2dValue (Constant value) _ = Vector2D.coerce value
@@ -77,13 +77,13 @@ curve2dValue (Bytecode bytecode) (Quantity# t#) =
 
 curve2dBounds ::
   Compiled Number (Vector2D units1 space1) ->
-  Bounds Unitless ->
+  Interval Unitless ->
   VectorBounds2D units2 space2
 curve2dBounds (Constant value) _ = VectorBounds2D.constant (Vector2D.coerce value)
-curve2dBounds (Bytecode bytecode) (Bounds# tLow# tHigh#) =
+curve2dBounds (Bytecode bytecode) (Interval# tLow# tHigh#) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh# #) = opensolid_cmm_curve2d_bounds f# tLow# tHigh#
-    IO.succeed (VectorBounds2D (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#))
+    IO.succeed (VectorBounds2D (Interval# xLow# xHigh#) (Interval# yLow# yHigh#))
 
 curve3dValue :: Compiled Number (Vector3D units1 space1) -> Number -> Vector3D units2 space2
 curve3dValue (Constant value) _ = Vector3D.coerce value
@@ -94,10 +94,10 @@ curve3dValue (Bytecode bytecode) (Quantity# t#) =
 
 curve3dBounds ::
   Compiled Number (Vector3D units1 space1) ->
-  Bounds Unitless ->
+  Interval Unitless ->
   VectorBounds3D units2 space2
 curve3dBounds (Constant value) _ = VectorBounds3D.constant (Vector3D.coerce value)
-curve3dBounds (Bytecode bytecode) (Bounds# tLow# tHigh#) =
+curve3dBounds (Bytecode bytecode) (Interval# tLow# tHigh#) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh#, zLow#, zHigh# #) =
           opensolid_cmm_curve3d_bounds f# tLow# tHigh#
@@ -110,12 +110,12 @@ surface1dValue (Bytecode bytecode) (Point2D (Quantity# u#) (Quantity# v#)) =
     let x# = opensolid_cmm_surface1d_value f# u# v#
     IO.succeed (Quantity# x#)
 
-surface1dBounds :: Compiled UvPoint (Quantity units1) -> UvBounds -> Bounds units2
-surface1dBounds (Constant value) _ = Bounds.constant (Quantity.coerce value)
-surface1dBounds (Bytecode bytecode) (Bounds2D (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
+surface1dBounds :: Compiled UvPoint (Quantity units1) -> UvBounds -> Interval units2
+surface1dBounds (Constant value) _ = Interval.constant (Quantity.coerce value)
+surface1dBounds (Bytecode bytecode) (Bounds2D (Interval# uLow# uHigh#) (Interval# vLow# vHigh#)) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh# #) = opensolid_cmm_surface1d_bounds f# uLow# uHigh# vLow# vHigh#
-    IO.succeed (Bounds# xLow# xHigh#)
+    IO.succeed (Interval# xLow# xHigh#)
 
 surface2dValue ::
   Compiled UvPoint (Vector2D units1 space1) ->
@@ -132,11 +132,11 @@ surface2dBounds ::
   UvBounds ->
   VectorBounds2D units2 space2
 surface2dBounds (Constant value) _ = VectorBounds2D.constant (Vector2D.coerce value)
-surface2dBounds (Bytecode bytecode) (Bounds2D (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
+surface2dBounds (Bytecode bytecode) (Bounds2D (Interval# uLow# uHigh#) (Interval# vLow# vHigh#)) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh# #) =
           opensolid_cmm_surface2d_bounds f# uLow# uHigh# vLow# vHigh#
-    IO.succeed (VectorBounds2D (Bounds# xLow# xHigh#) (Bounds# yLow# yHigh#))
+    IO.succeed (VectorBounds2D (Interval# xLow# xHigh#) (Interval# yLow# yHigh#))
 
 surface3dValue ::
   Compiled UvPoint (Vector3D units1 space1) ->
@@ -153,7 +153,7 @@ surface3dBounds ::
   UvBounds ->
   VectorBounds3D units2 space2
 surface3dBounds (Constant value) _ = VectorBounds3D.constant (Vector3D.coerce value)
-surface3dBounds (Bytecode bytecode) (Bounds2D (Bounds# uLow# uHigh#) (Bounds# vLow# vHigh#)) =
+surface3dBounds (Bytecode bytecode) (Bounds2D (Interval# uLow# uHigh#) (Interval# vLow# vHigh#)) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh#, zLow#, zHigh# #) =
           opensolid_cmm_surface3d_bounds f# uLow# uHigh# vLow# vHigh#
@@ -170,11 +170,11 @@ solveMonotonicSurfaceU ::
   Tolerance units =>
   Compiled UvPoint Number ->
   Compiled UvPoint Number ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Number ->
   Number
-solveMonotonicSurfaceU (Constant _) _ (Bounds u1 _) _ = u1
-solveMonotonicSurfaceU linearFunction (Constant slope) (Bounds u1 _) vValue =
+solveMonotonicSurfaceU (Constant _) _ (Interval u1 _) _ = u1
+solveMonotonicSurfaceU linearFunction (Constant slope) (Interval u1 _) vValue =
   if slope == 0 then u1 else u1 .-. surface1dValue linearFunction (Point2D u1 vValue) ./. slope
 solveMonotonicSurfaceU (Bytecode functionBytecode) (Bytecode derivativeBytecode) uBounds vValue =
   callSolver functionBytecode derivativeBytecode $
@@ -185,8 +185,8 @@ solveMonotonicSurfaceU (Bytecode functionBytecode) (Bytecode derivativeBytecode)
             (Number.toDouble (Quantity.coerce ?tolerance))
             functionPointer
             derivativePointer
-            (Number.toDouble (Bounds.lower uBounds))
-            (Number.toDouble (Bounds.upper uBounds))
+            (Number.toDouble (Interval.lower uBounds))
+            (Number.toDouble (Interval.upper uBounds))
             (Number.toDouble vValue)
 
 solveMonotonicSurfaceV ::
@@ -194,10 +194,10 @@ solveMonotonicSurfaceV ::
   Compiled UvPoint Number ->
   Compiled UvPoint Number ->
   Number ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Number
-solveMonotonicSurfaceV (Constant _) _ _ (Bounds v1 _) = v1
-solveMonotonicSurfaceV linearFunction (Constant slope) uValue (Bounds v1 _) =
+solveMonotonicSurfaceV (Constant _) _ _ (Interval v1 _) = v1
+solveMonotonicSurfaceV linearFunction (Constant slope) uValue (Interval v1 _) =
   if slope == 0 then v1 else v1 .-. surface1dValue linearFunction (Point2D uValue v1) ./. slope
 solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode) uValue vBounds =
   callSolver functionBytecode derivativeBytecode $
@@ -209,8 +209,8 @@ solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode)
             functionPointer
             derivativePointer
             (Number.toDouble uValue)
-            (Number.toDouble (Bounds.lower vBounds))
-            (Number.toDouble (Bounds.upper vBounds))
+            (Number.toDouble (Interval.lower vBounds))
+            (Number.toDouble (Interval.upper vBounds))
 
 foreign import prim "opensolid_cmm_curve1d_value"
   opensolid_cmm_curve1d_value :: Addr# -> Double# -> Double#

@@ -14,8 +14,8 @@ where
 
 import OpenSolid.Bounded2D (Bounded2D)
 import OpenSolid.Bounded2D qualified as Bounded2D
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
@@ -65,7 +65,7 @@ buildY :: Int -> NonEmpty (Bounds2D units space, a) -> Set2D a units space
 buildY = build Bounds2D.yCoordinate buildX
 
 build ::
-  (Bounds2D units space -> Bounds units) ->
+  (Bounds2D units space -> Interval units) ->
   (Int -> NonEmpty (Bounds2D units space, a) -> Set2D a units space) ->
   Int ->
   NonEmpty (Bounds2D units space, a) ->
@@ -75,7 +75,7 @@ build boundsCoordinate buildSubset n boundedItems
       let (itemBounds, item) = NonEmpty.first boundedItems
       Leaf itemBounds item
   | otherwise = assert (n >= 2 && NonEmpty.length boundedItems == n) do
-      let sorted = NonEmpty.sortBy (Bounds.midpoint . boundsCoordinate . Pair.first) boundedItems
+      let sorted = NonEmpty.sortBy (Interval.midpoint . boundsCoordinate . Pair.first) boundedItems
       let leftN = n `div` 2
       let rightN = n - leftN
       let (leftBoundedItems, rightBoundedItems) = splitAtIndex leftN sorted

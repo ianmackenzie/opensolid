@@ -1,6 +1,6 @@
 module OpenSolid.ArcLength (parameterization) where
 
-import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
@@ -37,7 +37,7 @@ parameterization derivativeMagnitude = do
         let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
         let (tree, length) = buildTree 1 dsdt d2sdt2 0 1 dsdt1 dsdt4 coarseEstimate
         let evaluate uValue = evaluateIn tree (uValue .*. length)
-        let evaluateBounds (Bounds uLow uHigh) = Bounds (evaluate uLow) (evaluate uHigh)
+        let evaluateBounds (Interval uLow uHigh) = Interval (evaluate uLow) (evaluate uHigh)
         let compiled = CompiledFunction.abstract evaluate evaluateBounds
         case Curve.quotient (Curve.constant length) derivativeMagnitude of
           Ok quotient -> (Curve.recursive compiled (quotient `compose`), length)

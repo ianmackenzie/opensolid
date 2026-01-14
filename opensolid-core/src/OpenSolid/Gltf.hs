@@ -17,7 +17,7 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Body3D qualified as Body3D
-import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3D (Convention3D)
@@ -127,9 +127,9 @@ gltfMeshes resolution model = case model of
         let numFaces = List.length meshFaceIndices
         let meshBounds = Bounds3D.hullOfN SurfaceVertex3D.position meshVertices
         let (xBounds, yBounds, zBounds) = Bounds3D.coordinates convention meshBounds
-        let Bounds xLow xHigh = xBounds
-        let Bounds yLow yHigh = yBounds
-        let Bounds zLow zHigh = zBounds
+        let Interval xLow xHigh = xBounds
+        let Interval yLow yHigh = yBounds
+        let Interval zLow zHigh = zBounds
         let pbrMaterial = Model3D.traversal.currentPbrMaterial
         List.singleton
           GltfMesh

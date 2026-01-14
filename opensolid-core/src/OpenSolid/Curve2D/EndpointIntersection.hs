@@ -5,8 +5,8 @@ module OpenSolid.Curve2D.EndpointIntersection
   )
 where
 
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
@@ -69,6 +69,6 @@ toEndpointIntersection curve1 curve2 tangent1 tangent2 (t1, t2) = do
   let alignment = Quantity.sign (tangentDirection1 `dot` tangentDirection2)
   EndpointIntersection{intersectionPoint, isSingular, alignment}
 
-isLocal :: Bounds Unitless -> Bounds Unitless -> EndpointIntersection -> Bool
+isLocal :: Interval Unitless -> Interval Unitless -> EndpointIntersection -> Bool
 isLocal tBounds1 tBounds2 EndpointIntersection{intersectionPoint} =
-  Bounds.includes intersectionPoint.t1 tBounds1 && Bounds.includes intersectionPoint.t2 tBounds2
+  Interval.includes intersectionPoint.t1 tBounds1 && Interval.includes intersectionPoint.t2 tBounds2

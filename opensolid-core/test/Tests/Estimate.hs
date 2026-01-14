@@ -2,8 +2,8 @@ module Tests.Estimate (tests) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Estimate (Estimate)
@@ -41,19 +41,19 @@ tests =
   , pickLargestBy
   ]
 
-data DummyEstimate = DummyEstimate Length (Bounds Meters)
+data DummyEstimate = DummyEstimate Length (Interval Meters)
 
 instance Estimate.Interface DummyEstimate Meters where
   boundsImpl (DummyEstimate _ bounds) = bounds
-  refineImpl (DummyEstimate value (Bounds low high)) = do
-    let refinedBounds = Bounds (Quantity.midpoint low value) (Quantity.midpoint value high)
+  refineImpl (DummyEstimate value (Interval low high)) = do
+    let refinedBounds = Interval (Quantity.midpoint low value) (Quantity.midpoint value high)
     Estimate.new (DummyEstimate value refinedBounds)
 
 dummyEstimate :: Generator (Length, Estimate Meters)
 dummyEstimate = do
-  bounds <- Bounds.random Random.length
+  bounds <- Interval.random Random.length
   t <- Parameter.random
-  let value = Bounds.interpolate bounds t
+  let value = Interval.interpolate bounds t
   Random.return (value, Estimate.new (DummyEstimate value bounds))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
@@ -68,12 +68,12 @@ dummyEstimates = do
   let flattened = NonEmpty.concat nested
   NonEmpty.shuffle flattened
 
-check :: Tolerance units => Estimate units -> Quantity units -> (Bool, Bounds units)
+check :: Tolerance units => Estimate units -> Quantity units -> (Bool, Interval units)
 check estimate value = do
   let bounds = Estimate.bounds estimate
   if
-    | not (Bounds.includes value bounds) -> (False, bounds)
-    | Bounds.width bounds ~= Quantity.zero -> (True, bounds)
+    | not (Interval.includes value bounds) -> (False, bounds)
+    | Interval.width bounds ~= Quantity.zero -> (True, bounds)
     | otherwise -> check (Estimate.refine estimate) value
 
 smallest :: Tolerance Meters => Test
@@ -107,10 +107,10 @@ largest = Test.check 100 "largest" Test.do
 resolvesTo :: Tolerance units => Quantity units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
   | not (value `intersects` Estimate.bounds estimate) = Ok False
-  | Bounds.width (Estimate.bounds estimate) ~= Quantity.zero = Ok True
+  | Interval.width (Estimate.bounds estimate) ~= Quantity.zero = Ok True
   | otherwise = do
       let refinedEstimate = Estimate.refine estimate
-      if Bounds.width (Estimate.bounds refinedEstimate) < Bounds.width (Estimate.bounds estimate)
+      if Interval.width (Estimate.bounds refinedEstimate) < Interval.width (Estimate.bounds estimate)
         then resolvesTo value refinedEstimate
         else Error "Refined bounds are not narrower than original bounds"
 

@@ -1,6 +1,6 @@
 module Tests.Random
   ( length
-  , lengthBounds
+  , lengthInterval
   , point2D
   , point3D
   , vector2D
@@ -36,8 +36,6 @@ where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D (Axis2D (Axis2D))
 import OpenSolid.Axis3D (Axis3D (Axis3D))
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve2D (Curve2D)
@@ -48,6 +46,8 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -81,8 +81,8 @@ import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 length :: Generator Length
 length = Quantity.random (Length.meters -10) (Length.meters 10)
 
-lengthBounds :: Generator (Bounds Meters)
-lengthBounds = Bounds.random length
+lengthInterval :: Generator (Interval Meters)
+lengthInterval = Interval.random length
 
 point2D :: Generator (Point2D Meters space)
 point2D = Random.map2 Point2D length length
@@ -100,9 +100,9 @@ vectorBounds3D :: Generator (VectorBounds3D Meters space)
 vectorBounds3D =
   Random.map3
     VectorBounds3D
-    lengthBounds
-    lengthBounds
-    lengthBounds
+    lengthInterval
+    lengthInterval
+    lengthInterval
 
 axis2D :: Generator (Axis2D Meters space)
 axis2D = Random.map2 Axis2D point2D Direction2D.random
@@ -134,13 +134,13 @@ frame3D :: Generator (Frame3D global local)
 frame3D = Random.map Frame3D.fromTopPlane plane3D
 
 bounds2D :: Generator (Bounds2D Meters space)
-bounds2D = Random.map2 Bounds2D lengthBounds lengthBounds
+bounds2D = Random.map2 Bounds2D lengthInterval lengthInterval
 
 bounds3D :: Generator (Bounds3D space)
-bounds3D = Random.map3 Bounds3D lengthBounds lengthBounds lengthBounds
+bounds3D = Random.map3 Bounds3D lengthInterval lengthInterval lengthInterval
 
 vectorBounds2D :: Generator (VectorBounds2D Meters space)
-vectorBounds2D = Random.map2 VectorBounds2D lengthBounds lengthBounds
+vectorBounds2D = Random.map2 VectorBounds2D lengthInterval lengthInterval
 
 line2D :: Tolerance Meters => Generator (Curve2D Meters space)
 line2D = Random.map2 Curve2D.lineFrom point2D point2D

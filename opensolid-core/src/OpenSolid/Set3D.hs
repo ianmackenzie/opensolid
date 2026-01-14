@@ -13,8 +13,8 @@ where
 
 import OpenSolid.Bounded3D (Bounded3D)
 import OpenSolid.Bounded3D qualified as Bounded3D
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
@@ -60,7 +60,7 @@ buildUpward :: Int -> NonEmpty (Bounds3D space, a) -> Set3D a space
 buildUpward = build Bounds3D.upwardCoordinate buildRightward
 
 build ::
-  (Bounds3D space -> Bounds Meters) ->
+  (Bounds3D space -> Interval Meters) ->
   (Int -> NonEmpty (Bounds3D space, a) -> Set3D a space) ->
   Int ->
   NonEmpty (Bounds3D space, a) ->
@@ -70,7 +70,7 @@ build boundsCoordinate buildSubset n boundedItems
       let (itemBounds, item) = NonEmpty.first boundedItems
       Leaf itemBounds item
   | otherwise = assert (n >= 2 && NonEmpty.length boundedItems == n) do
-      let sorted = NonEmpty.sortBy (Bounds.midpoint . boundsCoordinate . Pair.first) boundedItems
+      let sorted = NonEmpty.sortBy (Interval.midpoint . boundsCoordinate . Pair.first) boundedItems
       let leftN = n `div` 2
       let rightN = n - leftN
       let (leftBoundedItems, rightBoundedItems) = splitAtIndex leftN sorted

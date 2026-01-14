@@ -13,7 +13,7 @@ module OpenSolid.VectorCurve2D
   )
 where
 
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Interval (Interval)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.DivisionByZero (DivisionByZero)
@@ -33,7 +33,7 @@ type Compiled units space =
   CompiledFunction
     Number
     (Vector2D units space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (VectorBounds2D units space)
 
 instance HasUnits (VectorCurve2D units space) units
@@ -87,7 +87,7 @@ new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units 
 compiled :: VectorCurve2D units space -> Compiled units space
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
 evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
-evaluateBounds :: VectorCurve2D units space -> Bounds Unitless -> VectorBounds2D units space
+evaluateBounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorCurve2D units1 space ->

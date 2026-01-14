@@ -11,7 +11,7 @@ where
 import GHC.Records (HasField (getField))
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
@@ -140,7 +140,7 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let Direction2D du dv = outgoingDirection
   if Quantity.abs du >= Quantity.abs dv
     then do
-      let implicitBounds = NonEmpty.one (Bounds2D (Bounds uP uC) vBounds)
+      let implicitBounds = NonEmpty.one (Bounds2D (Interval uP uC) vBounds)
       case joiningCurve of
         Incoming _ -> do
           let dudt = uP .-. uC
@@ -153,7 +153,7 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
           let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
           Curve2D.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
     else do
-      let implicitBounds = NonEmpty.one (Bounds2D uBounds (Bounds vP vC))
+      let implicitBounds = NonEmpty.one (Bounds2D uBounds (Interval vP vC))
       case joiningCurve of
         Incoming _ -> do
           let dvdt = vP .-. vC

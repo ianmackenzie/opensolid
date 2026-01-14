@@ -82,8 +82,6 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2D (Axis2D (Axis2D))
 import OpenSolid.Bezier qualified as Bezier
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
@@ -114,6 +112,8 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Line2D (Line2D (Line2D))
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
@@ -164,7 +164,7 @@ type Compiled units space =
   CompiledFunction
     Number
     (Point2D units space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (Bounds2D units space)
 
 instance HasField "xCoordinate" (Curve2D units space) (Curve units) where
@@ -646,7 +646,7 @@ endPoint curve = evaluate curve 1
 endpoints :: Curve2D units space -> (Point2D units space, Point2D units space)
 endpoints curve = (startPoint curve, endPoint curve)
 
-evaluateBounds :: Curve2D units space -> Bounds Unitless -> Bounds2D units space
+evaluateBounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 samplePoints :: Curve2D units space -> NonEmpty (Point2D units space)
@@ -657,7 +657,7 @@ reverse :: Curve2D units space -> Curve2D units space
 reverse curve = curve `compose` (1 -. Curve.t)
 
 bounds :: Curve2D units space -> Bounds2D units space
-bounds curve = evaluateBounds curve Bounds.unitInterval
+bounds curve = evaluateBounds curve Interval.unit
 
 compiled :: Curve2D units space -> Compiled units space
 compiled = (.compiled)
@@ -1006,7 +1006,7 @@ makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   let evaluateImpl t = piecewiseValue tree (arcLength .*. t)
-  let evaluateBoundsImpl (Bounds t1 t2) =
+  let evaluateBoundsImpl (Interval t1 t2) =
         piecewiseBounds tree (arcLength .*. t1) (arcLength .*. t2)
   new
     (CompiledFunction.abstract evaluateImpl evaluateBoundsImpl)
@@ -1064,7 +1064,7 @@ piecewiseBounds tree startLength endLength = case tree of
           (piecewiseBounds leftTree startLength leftLength)
           (piecewiseBounds rightTree Quantity.zero (endLength .-. leftLength))
   PiecewiseLeaf curve segmentLength ->
-    evaluateBounds curve (Bounds (startLength ./. segmentLength) (endLength ./. segmentLength))
+    evaluateBounds curve (Interval (startLength ./. segmentLength) (endLength ./. segmentLength))
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree units space ->
@@ -1072,7 +1072,7 @@ piecewiseDerivative ::
   VectorCurve2D units space
 piecewiseDerivative tree length = do
   let evaluateImpl t = piecewiseDerivativeValue tree (length .*. t)
-  let evaluateBoundsImpl (Bounds t1 t2) =
+  let evaluateBoundsImpl (Interval t1 t2) =
         piecewiseDerivativeBounds tree (length .*. t1) (length .*. t2)
   VectorCurve2D.new
     (CompiledFunction.abstract evaluateImpl evaluateBoundsImpl)
@@ -1148,4 +1148,4 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
           (piecewiseDerivativeBounds rightTree Quantity.zero (endLength .-. leftLength))
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2D.evaluateBounds curve $
-      Bounds (startLength ./. segmentLength) (endLength ./. segmentLength)
+      Interval (startLength ./. segmentLength) (endLength ./. segmentLength)

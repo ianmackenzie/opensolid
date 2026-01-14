@@ -284,25 +284,25 @@ extraMemberFunctions className = do
     "Length" -> repr ["return 'Length.meters(' + str(self.in_meters()) + ')'"]
     "Area" -> repr ["return 'Area.square_meters(' + str(self.in_square_meters()) + ')'"]
     "Angle" -> repr ["return 'Angle.radians(' + str(self.in_radians()) + ')'"]
-    "Bounds" ->
+    "Interval" ->
       repr
         [ "low, high = self.endpoints"
-        , "return 'Bounds(' + str(low) + ',' + str(high) + ')'"
+        , "return 'Interval(' + str(low) + ',' + str(high) + ')'"
         ]
-    "LengthBounds" ->
+    "LengthInterval" ->
       repr
         [ "low, high = self.endpoints"
-        , "return 'LengthBounds(' + repr(low) + ',' + repr(high) + ')'"
+        , "return 'LengthInterval(' + repr(low) + ',' + repr(high) + ')'"
         ]
-    "AreaBounds" ->
+    "AreaInterval" ->
       repr
         [ "low, high = self.endpoints"
-        , "return 'AreaBounds(' + repr(low) + ',' + repr(high) + ')'"
+        , "return 'AreaInterval(' + repr(low) + ',' + repr(high) + ')'"
         ]
-    "AngleBounds" ->
+    "AngleInterval" ->
       repr
         [ "low, high = self.endpoints"
-        , "return 'AngleBounds(' + repr(low) + ',' + repr(high) + ')'"
+        , "return 'AngleInterval(' + repr(low) + ',' + repr(high) + ')'"
         ]
     "Color" ->
       repr

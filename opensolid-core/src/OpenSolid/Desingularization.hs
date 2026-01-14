@@ -7,7 +7,7 @@ module OpenSolid.Desingularization
   )
 where
 
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 
 t0 :: Number
@@ -24,7 +24,7 @@ value t start middle end
   | t >= t1 = end
   | otherwise = middle
 
-bounds :: Bounds Unitless -> a -> a -> a -> a
+bounds :: Interval Unitless -> a -> a -> a -> a
 bounds t start middle end
   | t.upper <= t0 = start
   | t.lower >= t1 = end

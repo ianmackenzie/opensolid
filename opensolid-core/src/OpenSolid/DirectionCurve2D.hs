@@ -17,7 +17,7 @@ where
 
 import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Curve (Curve)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
@@ -56,7 +56,7 @@ evaluate :: DirectionCurve2D space -> Number -> Direction2D space
 evaluate (DirectionCurve2D vectorCurve) tValue =
   Direction2D.unsafe (VectorCurve2D.evaluate vectorCurve tValue)
 
-evaluateBounds :: DirectionCurve2D space -> Bounds Unitless -> DirectionBounds2D space
+evaluateBounds :: DirectionCurve2D space -> Interval Unitless -> DirectionBounds2D space
 evaluateBounds (DirectionCurve2D vectorCurve) tBounds =
   DirectionBounds2D.unsafe (VectorCurve2D.evaluateBounds vectorCurve tBounds)
 

@@ -42,7 +42,7 @@ import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Interval (Interval)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
@@ -89,7 +89,7 @@ type Compiled units space =
   CompiledFunction
     Number
     (Vector3D units space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (VectorBounds3D units space)
 
 instance HasField "compiled" (VectorCurve3D units space) (Compiled units space) where
@@ -583,7 +583,7 @@ evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 evaluateAt :: Number -> VectorCurve3D units space -> Vector3D units space
 evaluateAt tValue curve = evaluate curve tValue
 
-evaluateBounds :: VectorCurve3D units space -> Bounds Unitless -> VectorBounds3D units space
+evaluateBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 reverse :: VectorCurve3D units space -> VectorCurve3D units space

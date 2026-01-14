@@ -26,8 +26,6 @@ import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Body3D.BoundedBy qualified as BoundedBy
 import OpenSolid.Bounded3D (Bounded3D)
 import OpenSolid.Bounded3D qualified as Bounded3D
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
@@ -47,6 +45,8 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Line2D qualified as Line2D
@@ -199,7 +199,7 @@ block bounds =
   case Region2D.rectangle (Bounds3D.projectInto World3D.topPlane bounds) of
     Error Region2D.EmptyRegion -> Error EmptyBody
     Ok profile -> do
-      let Bounds h1 h2 = Bounds3D.upwardCoordinate bounds
+      let Interval h1 h2 = Bounds3D.upwardCoordinate bounds
       if h1 ~= h2
         then Error EmptyBody
         else case extruded World3D.topPlane profile h1 h2 of
@@ -621,8 +621,8 @@ boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
     then Set2D.Leaf uvBounds uvBounds
     else do
       let Bounds2D uBounds vBounds = uvBounds
-      let (u1, u2) = Bounds.bisect uBounds
-      let (v1, v2) = Bounds.bisect vBounds
+      let (u1, u2) = Interval.bisect uBounds
+      let (v1, v2) = Interval.bisect vBounds
       let set11 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2D u1 v1)
       let set12 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2D u1 v2)
       let set21 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2D u2 v1)
@@ -723,7 +723,7 @@ edgeLinearizationPredicate ::
   Set2D UvBounds Unitless UvSpace ->
   Set2D UvBounds Unitless UvSpace ->
   VectorCurve3D Meters space ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Bool
 edgeLinearizationPredicate
   resolution
@@ -735,7 +735,7 @@ edgeLinearizationPredicate
   matingSurfaceSegments
   edgeSecondDerivative
   tBounds = do
-    let Bounds tStart tEnd = tBounds
+    let Interval tStart tEnd = tBounds
     let uvStart = Curve2D.evaluate uvCurve tStart
     let uvEnd = Curve2D.evaluate uvCurve tEnd
     let matingTStart = if correctlyAligned then 1 -. tStart else tStart
@@ -759,10 +759,10 @@ edgeLinearizationPredicate
 degenerateEdgeLinearizationPredicate ::
   Curve2D Unitless UvSpace ->
   Set2D UvBounds Unitless UvSpace ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Bool
 degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
-  let Bounds tStart tEnd = tBounds
+  let Interval tStart tEnd = tBounds
   let uvStart = Curve2D.evaluate uvCurve tStart
   let uvEnd = Curve2D.evaluate uvCurve tEnd
   let uvBounds = Bounds2D.hull2 uvStart uvEnd
@@ -850,7 +850,7 @@ leadingEdgeVerticesImpl innerEdgeVerticesById edgeId uvStartPoint =
 steinerPoint :: Set2D (Line2D Unitless UvSpace) Unitless UvSpace -> UvBounds -> Maybe UvPoint
 steinerPoint boundarySegmentSet uvBounds = do
   let Bounds2D uBounds vBounds = uvBounds
-  let uvPoint = UvPoint (Bounds.midpoint uBounds) (Bounds.midpoint vBounds)
+  let uvPoint = UvPoint (Interval.midpoint uBounds) (Interval.midpoint vBounds)
   if isValidSteinerPoint boundarySegmentSet uvPoint then Just uvPoint else Nothing
 
 isValidSteinerPoint :: Set2D (Line2D Unitless UvSpace) Unitless UvSpace -> UvPoint -> Bool

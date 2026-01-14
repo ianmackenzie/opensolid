@@ -47,10 +47,10 @@ import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Foreign.Storable (Storable)
 import OpenSolid.Arithmetic
-import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
-import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
+import {-# SOURCE #-} OpenSolid.Interval (Interval)
+import {-# SOURCE #-} OpenSolid.Interval qualified as Interval
 import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Number (Number)
@@ -222,8 +222,8 @@ hypot3 (Quantity# x#) (Quantity# y#) (Quantity# z#) = Quantity# (hypot3# x# y# z
 abs :: Quantity units -> Quantity units
 abs (Quantity x) = Quantity (Prelude.abs x)
 
-clampTo :: Bounds units -> Quantity units -> Quantity units
-clampTo bounds value = min (max (Bounds.lower bounds) value) (Bounds.upper bounds)
+clampTo :: Interval units -> Quantity units -> Quantity units
+clampTo interval value = min (max (Interval.lower interval) value) (Interval.upper interval)
 
 {-# INLINE minmax #-}
 minmax :: (Quantity units, Quantity units) -> (Quantity units, Quantity units)

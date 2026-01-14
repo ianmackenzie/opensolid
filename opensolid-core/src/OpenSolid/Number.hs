@@ -39,7 +39,7 @@ where
 
 import Data.Text (Text)
 import OpenSolid.Arithmetic
-import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
+import {-# SOURCE #-} OpenSolid.Interval (Interval)
 import OpenSolid.List (List)
 import OpenSolid.NonEmpty (NonEmpty)
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -88,7 +88,7 @@ cubed value = value .*. value .*. value
 abs :: Number -> Number
 abs = Quantity.abs
 
-clampTo :: Bounds Unitless -> Number -> Number
+clampTo :: Interval Unitless -> Number -> Number
 clampTo = Quantity.clampTo
 
 interpolateFrom :: Number -> Number -> Number -> Number

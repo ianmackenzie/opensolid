@@ -1,6 +1,6 @@
 module OpenSolid.SurfaceLinearization (error) where
 
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
@@ -24,8 +24,8 @@ error# ::
   UvBounds ->
   Double#
 error# fuu fuv fvv (Bounds2D uBounds vBounds) = do
-  let uWidthSquared# = squared# (Bounds.width# uBounds)
-  let vWidthSquared# = squared# (Bounds.width# vBounds)
+  let uWidthSquared# = squared# (Interval.width# uBounds)
+  let vWidthSquared# = squared# (Interval.width# vBounds)
   let uvWidthSquared# = uWidthSquared# +# vWidthSquared#
   let uuMagnitude# = VectorBounds3D.maxMagnitude# fuu
   let vvMagnitude# = VectorBounds3D.maxMagnitude# fvv

@@ -13,12 +13,12 @@ module OpenSolid.Solve2D
   )
 where
 
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Domain2D (Domain2D (Domain2D))
 import OpenSolid.Domain2D qualified as Domain2D
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
@@ -193,8 +193,8 @@ solveUnique localBounds fBounds f fu fv globalBounds =
   if fBounds localBounds `intersects` Vector2D.zero
     then do
       let Bounds2D uBounds vBounds = localBounds
-      let uMid = Bounds.midpoint uBounds
-      let vMid = Bounds.midpoint vBounds
+      let uMid = Interval.midpoint uBounds
+      let vMid = Interval.midpoint vBounds
       let pMid = UvPoint uMid vMid
       let fMid = f pMid
       -- First, try applying Newton-Raphson starting at the center point of localBounds
@@ -202,15 +202,15 @@ solveUnique localBounds fBounds f fu fv globalBounds =
       case newtonRaphson f fu fv globalBounds pMid fMid of
         Ok point -> Just point -- Newton-Raphson converged to a zero, return it
         Error Divergence -- Newton-Raphson did not converge starting from pMid
-          | Bounds.isAtomic uBounds || Bounds.isAtomic vBounds ->
+          | Interval.isAtomic uBounds || Interval.isAtomic vBounds ->
               -- We can't bisect any further
               -- (Newton-Raphson somehow never converged),
               -- so check if we've found a zero by bisection
               if fMid ~= Vector2D.zero then Just pMid else Nothing
           | otherwise -> do
               -- Recurse into subdomains
-              let (u1, u2) = Bounds.bisect uBounds
-              let (v1, v2) = Bounds.bisect vBounds
+              let (u1, u2) = Interval.bisect uBounds
+              let (v1, v2) = Interval.bisect vBounds
               let solveRecursively uv = solveUnique uv fBounds f fu fv globalBounds
               Maybe.oneOf
                 [ solveRecursively (Bounds2D u1 v1)

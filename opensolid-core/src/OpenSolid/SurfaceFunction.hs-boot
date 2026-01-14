@@ -19,10 +19,10 @@ module OpenSolid.SurfaceFunction
   )
 where
 
-import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.DivisionByZero (DivisionByZero)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units qualified as Units
@@ -37,7 +37,7 @@ data SurfaceFunction units = SurfaceFunction
   , dv :: ~(SurfaceFunction units)
   }
 
-type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Bounds units)
+type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
 
 instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units)
 
@@ -109,7 +109,7 @@ u :: SurfaceFunction Unitless
 v :: SurfaceFunction Unitless
 parameter :: SurfaceParameter -> SurfaceFunction Unitless
 evaluate :: SurfaceFunction units -> UvPoint -> Quantity units
-evaluateBounds :: SurfaceFunction units -> UvBounds -> Bounds units
+evaluateBounds :: SurfaceFunction units -> UvBounds -> Interval units
 derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared_ :: SurfaceFunction units1 -> SurfaceFunction (units1 ?*? units1)

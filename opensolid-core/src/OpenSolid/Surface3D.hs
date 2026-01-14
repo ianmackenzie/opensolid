@@ -19,8 +19,8 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
@@ -240,7 +240,7 @@ linearizationPredicate ::
   VectorSurfaceFunction3D Meters space ->
   Curve2D Unitless UvSpace ->
   VectorCurve3D Meters space ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Bool
 linearizationPredicate accuracy fuu fuv fvv curve2D secondDerivative3D subdomain = do
   let curveSecondDerivativeBounds = VectorCurve3D.evaluateBounds secondDerivative3D subdomain
@@ -261,8 +261,8 @@ generateSteinerPoints ::
 generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
   let Bounds2D uBounds vBounds = uvBounds
   let recurse = do
-        let (u1, u2) = Bounds.bisect uBounds
-        let (v1, v2) = Bounds.bisect vBounds
+        let (u1, u2) = Interval.bisect uBounds
+        let (v1, v2) = Interval.bisect vBounds
         let bounds11 = Bounds2D u1 v1
         let bounds12 = Bounds2D u1 v2
         let bounds21 = Bounds2D u2 v1
@@ -277,7 +277,7 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
     Resolved False -> accumulated
     Resolved True ->
       if surfaceError fuu fuv fvv uvBounds <= accuracy
-        then UvPoint (Bounds.midpoint uBounds) (Bounds.midpoint vBounds) : accumulated
+        then UvPoint (Interval.midpoint uBounds) (Interval.midpoint vBounds) : accumulated
         else recurse
 
 includeSubdomain :: UvBounds -> Set2D (Line2D Unitless UvSpace) Unitless UvSpace -> Fuzzy Bool

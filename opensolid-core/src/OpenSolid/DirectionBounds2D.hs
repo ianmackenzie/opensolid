@@ -14,19 +14,19 @@ module OpenSolid.DirectionBounds2D
   )
 where
 
-import OpenSolid.Bounds (Bounds)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
 import OpenSolid.Frame2D (Frame2D)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Orientation2D (Orientation2D)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.PlaneOrientation3D (PlaneOrientation3D)
-import OpenSolid.Vector2D (Vector2D)
-import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 
@@ -42,7 +42,7 @@ instance
 
 {-# COMPLETE DirectionBounds2D #-}
 
-pattern DirectionBounds2D :: Bounds Unitless -> Bounds Unitless -> DirectionBounds2D space
+pattern DirectionBounds2D :: Interval Unitless -> Interval Unitless -> DirectionBounds2D space
 pattern DirectionBounds2D dx dy <- UnitBounds2D (VectorBounds2D dx dy)
 
 instance Negation (DirectionBounds2D space) where
@@ -82,103 +82,103 @@ instance
 
 instance
   Multiplication
-    (Bounds units)
+    (Interval units)
     (DirectionBounds2D space)
     (VectorBounds2D units space)
   where
-  bounds .*. UnitBounds2D vectorBounds = bounds .*. vectorBounds
+  interval .*. UnitBounds2D vectorBounds = interval .*. vectorBounds
 
 instance
   Multiplication
     (DirectionBounds2D space)
-    (Bounds units)
+    (Interval units)
     (VectorBounds2D units space)
   where
-  UnitBounds2D vectorBounds .*. bounds = vectorBounds .*. bounds
+  UnitBounds2D vectorBounds .*. interval = vectorBounds .*. interval
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionBounds2D space1) (DirectionBounds2D space2) (Bounds Unitless)
+  DotMultiplication (DirectionBounds2D space1) (DirectionBounds2D space2) (Interval Unitless)
   where
   UnitBounds2D vectorBounds1 `dot` UnitBounds2D vectorBounds2 =
     vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionBounds2D space1) (VectorBounds2D units space2) (Bounds units)
+  DotMultiplication (DirectionBounds2D space1) (VectorBounds2D units space2) (Interval units)
   where
   UnitBounds2D vectorBounds1 `dot` vectorBounds2 = vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (VectorBounds2D units space1) (DirectionBounds2D space2) (Bounds units)
+  DotMultiplication (VectorBounds2D units space1) (DirectionBounds2D space2) (Interval units)
   where
   vectorBounds1 `dot` UnitBounds2D vectorBounds2 = vectorBounds1 `dot` vectorBounds2
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionBounds2D space1) (Direction2D space2) (Bounds Unitless)
+  DotMultiplication (DirectionBounds2D space1) (Direction2D space2) (Interval Unitless)
   where
   UnitBounds2D vectorBounds `dot` direction = vectorBounds `dot` direction
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Direction2D space1) (DirectionBounds2D space2) (Bounds Unitless)
+  DotMultiplication (Direction2D space1) (DirectionBounds2D space2) (Interval Unitless)
   where
   direction `dot` UnitBounds2D vectorBounds = direction `dot` vectorBounds
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionBounds2D space1) (Vector2D units space2) (Bounds units)
+  DotMultiplication (DirectionBounds2D space1) (Vector2D units space2) (Interval units)
   where
   UnitBounds2D vectorBounds `dot` vector = vectorBounds `dot` vector
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Vector2D units space1) (DirectionBounds2D space2) (Bounds units)
+  DotMultiplication (Vector2D units space1) (DirectionBounds2D space2) (Interval units)
   where
   vector `dot` UnitBounds2D vectorBounds = vector `dot` vectorBounds
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionBounds2D space1) (DirectionBounds2D space2) (Bounds Unitless)
+  CrossMultiplication (DirectionBounds2D space1) (DirectionBounds2D space2) (Interval Unitless)
   where
   UnitBounds2D vectorBounds1 `cross` UnitBounds2D vectorBounds2 =
     vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionBounds2D space1) (VectorBounds2D units space2) (Bounds units)
+  CrossMultiplication (DirectionBounds2D space1) (VectorBounds2D units space2) (Interval units)
   where
   UnitBounds2D vectorBounds1 `cross` vectorBounds2 = vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (VectorBounds2D units space1) (DirectionBounds2D space2) (Bounds units)
+  CrossMultiplication (VectorBounds2D units space1) (DirectionBounds2D space2) (Interval units)
   where
   vectorBounds1 `cross` UnitBounds2D vectorBounds2 = vectorBounds1 `cross` vectorBounds2
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionBounds2D space1) (Direction2D space2) (Bounds Unitless)
+  CrossMultiplication (DirectionBounds2D space1) (Direction2D space2) (Interval Unitless)
   where
   UnitBounds2D vectorBounds `cross` direction = vectorBounds `cross` direction
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Direction2D space1) (DirectionBounds2D space2) (Bounds Unitless)
+  CrossMultiplication (Direction2D space1) (DirectionBounds2D space2) (Interval Unitless)
   where
   direction `cross` UnitBounds2D vectorBounds = direction `cross` vectorBounds
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionBounds2D space1) (Vector2D units space2) (Bounds units)
+  CrossMultiplication (DirectionBounds2D space1) (Vector2D units space2) (Interval units)
   where
   UnitBounds2D vectorBounds `cross` vector = vectorBounds `cross` vector
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Vector2D units space1) (DirectionBounds2D space2) (Bounds units)
+  CrossMultiplication (Vector2D units space1) (DirectionBounds2D space2) (Interval units)
   where
   vector `cross` UnitBounds2D vectorBounds = vector `cross` vectorBounds
 
@@ -198,10 +198,10 @@ lift function (UnitBounds2D vectorBounds) = UnitBounds2D (function vectorBounds)
 constant :: Direction2D space -> DirectionBounds2D space
 constant direction = UnitBounds2D (VectorBounds2D.constant (Vector2D.unit direction))
 
-xComponent :: DirectionBounds2D space -> Bounds Unitless
+xComponent :: DirectionBounds2D space -> Interval Unitless
 xComponent (UnitBounds2D vectorBounds) = VectorBounds2D.xComponent vectorBounds
 
-yComponent :: DirectionBounds2D space -> Bounds Unitless
+yComponent :: DirectionBounds2D space -> Interval Unitless
 yComponent (UnitBounds2D vectorBounds) = VectorBounds2D.yComponent vectorBounds
 
 placeIn ::

@@ -17,7 +17,7 @@ module OpenSolid.CompiledFunction
   )
 where
 
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
@@ -316,7 +316,7 @@ expression Abstract{} = Error IsAbstract
 
 desingularized ::
   Expression.Evaluation inputValue outputValue inputBounds outputBounds =>
-  CompiledFunction inputValue Number inputBounds (Bounds Unitless) ->
+  CompiledFunction inputValue Number inputBounds (Interval Unitless) ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->

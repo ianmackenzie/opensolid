@@ -19,12 +19,12 @@ module OpenSolid.Solve1D
   )
 where
 
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve.Zero (Zero (Zero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Int qualified as Int
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
@@ -70,16 +70,16 @@ data Node cached
   | Splittable ~(Cache cached) ~(Cache cached) ~(Cache cached)
   | Shrinkable ~(Cache cached)
 
-init :: (Bounds Unitless -> cached) -> Cache cached
+init :: (Interval Unitless -> cached) -> Cache cached
 init function = split function Domain1D.unit
 
-tree :: (Bounds Unitless -> cached) -> Domain1D -> Node cached -> Cache cached
+tree :: (Interval Unitless -> cached) -> Domain1D -> Node cached -> Cache cached
 tree function subdomain givenNode = do
   let cached = function (Domain1D.bounds subdomain)
   let node = if Domain1D.isAtomic subdomain then Atomic else givenNode
   Tree subdomain cached node
 
-split :: (Bounds Unitless -> cached) -> Domain1D -> Cache cached
+split :: (Interval Unitless -> cached) -> Domain1D -> Cache cached
 split function subdomain = do
   let middleSubdomain = Domain1D.half subdomain
   let (leftSubdomain, rightSubdomain) = Domain1D.bisect subdomain
@@ -88,7 +88,7 @@ split function subdomain = do
   let rightChild = split function rightSubdomain
   tree function subdomain (Splittable middleChild leftChild rightChild)
 
-shrink :: (Bounds Unitless -> cached) -> Domain1D -> Cache cached
+shrink :: (Interval Unitless -> cached) -> Domain1D -> Cache cached
 shrink function subdomain = do
   let child = shrink function (Domain1D.half subdomain)
   tree function subdomain (Shrinkable child)
@@ -183,10 +183,10 @@ monotonic ::
   Tolerance units =>
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Root
-monotonic function derivative bounds = do
-  let Bounds x1 x2 = bounds
+monotonic function derivative interval = do
+  let Interval x1 x2 = interval
   let y1 = function x1
   let y2 = function x2
   if
@@ -194,33 +194,33 @@ monotonic function derivative bounds = do
     | y2 == Quantity.zero -> Exact x2
     | Quantity.sign y1 == Quantity.sign y2 ->
         if Quantity.abs y1 <= Quantity.abs y2 then Closest x1 else Closest x2
-    | otherwise -> solveMonotonic function derivative bounds (Quantity.sign y1) x1 x2
+    | otherwise -> solveMonotonic function derivative interval (Quantity.sign y1) x1 x2
 
 solveMonotonic ::
   Tolerance units =>
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Sign ->
   Number ->
   Number ->
   Root
-solveMonotonic function derivative bounds sign1 x1 x2 = do
+solveMonotonic function derivative interval sign1 x1 x2 = do
   -- First, try applying Newton-Raphson within [x1,x2]
   -- to see if that converges to a zero
   let xMid = Quantity.midpoint x1 x2
   let yMid = function xMid
   if yMid == Quantity.zero
     then Exact xMid
-    else case newtonRaphson function derivative bounds xMid yMid 0 of
+    else case newtonRaphson function derivative interval xMid yMid 0 of
       Ok root -> Exact root -- Newton-Raphson converged to a zero, return it
       Error Divergence -- Newton-Raphson did not converge within [x1, x2]
         | x1 < xMid && xMid < x2 ->
             -- It's possible to bisect further,
             -- so recurse into whichever subdomain brackets the zero
             if Quantity.sign yMid == sign1
-              then solveMonotonic function derivative bounds sign1 xMid x2
-              else solveMonotonic function derivative bounds sign1 x1 xMid
+              then solveMonotonic function derivative interval sign1 xMid x2
+              else solveMonotonic function derivative interval sign1 x1 xMid
         | otherwise -> Exact xMid -- We've converged to a zero by bisection
 
 data Divergence = Divergence deriving (Eq, Show)
@@ -229,12 +229,12 @@ newtonRaphson ::
   Tolerance units =>
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Number ->
   Quantity units ->
   Int ->
   Result Divergence Number
-newtonRaphson function derivative bounds x y iterations =
+newtonRaphson function derivative interval x y iterations =
   if iterations > 10 -- Check if we've entered an infinite loop
     then Error Divergence
     else do
@@ -244,20 +244,20 @@ newtonRaphson function derivative bounds x y iterations =
         else do
           let xStepped = x .-. y ./. dy
           x2 <-
-            if Bounds.includes xStepped bounds
-              then Ok xStepped -- Newton step stayed within bounds
+            if Interval.includes xStepped interval
+              then Ok xStepped -- Newton step stayed within interval
               else do
-                -- Newton step went outside bounds,
+                -- Newton step went outside interval,
                 -- attempt to recover by making another step
                 -- starting at the boundary
-                let xClamped = Quantity.clampTo bounds xStepped
+                let xClamped = Quantity.clampTo interval xStepped
                 let yClamped = function xClamped
                 let dyClamped = derivative xClamped
                 if dyClamped == Quantity.zero
                   then Error Divergence
                   else do
                     let xStepped2 = xClamped .-. yClamped ./. dyClamped
-                    if Bounds.includes xStepped2 bounds
+                    if Interval.includes xStepped2 interval
                       then Ok xStepped2
                       else Error Divergence
           let y2 = function x2
@@ -265,4 +265,4 @@ newtonRaphson function derivative bounds x y iterations =
             then -- We've stopped converging, check if we're actually at a root
               if y ~= Quantity.zero then Ok x else Error Divergence
             else -- We're still converging, so take another iteration
-              newtonRaphson function derivative bounds x2 y2 (iterations + 1)
+              newtonRaphson function derivative interval x2 y2 (iterations + 1)

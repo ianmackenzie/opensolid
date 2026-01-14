@@ -29,10 +29,10 @@ module OpenSolid.Estimate
 where
 
 import Control.Exception qualified
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
@@ -42,15 +42,15 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 
 class Interface a units | a -> units where
-  boundsImpl :: a -> Bounds units
+  boundsImpl :: a -> Interval units
   refineImpl :: a -> Estimate units
 
 instance Interface (Quantity units) units where
-  boundsImpl = Bounds.constant
+  boundsImpl = Interval.constant
   refineImpl = exact
 
 data Estimate units where
-  Estimate :: Interface a units => a -> Bounds units -> Estimate units
+  Estimate :: Interface a units => a -> Interval units -> Estimate units
   Coerce :: Estimate units1 -> Estimate units2
 
 instance HasUnits (Estimate units) units
@@ -65,9 +65,9 @@ new implementation = Estimate implementation (boundsImpl implementation)
 exact :: Quantity units -> Estimate units
 exact value = new value
 
-bounds :: Estimate units -> Bounds units
+bounds :: Estimate units -> Interval units
 bounds (Estimate _ cachedBounds) = cachedBounds
-bounds (Coerce estimate) = Bounds.coerce (bounds estimate)
+bounds (Coerce estimate) = Interval.coerce (bounds estimate)
 
 refine :: Estimate units -> Estimate units
 refine estimate = checkRefinement 0 estimate
@@ -83,19 +83,19 @@ checkRefinement stepsWithoutProgress estimate = case estimate of
   Estimate implementation initialBounds -> do
     let refinedEstimate = refineImpl implementation
     if
-      | Bounds.width (bounds refinedEstimate) < initialBounds.width -> refinedEstimate
+      | Interval.width (bounds refinedEstimate) < initialBounds.width -> refinedEstimate
       | stepsWithoutProgress < 10 -> checkRefinement (stepsWithoutProgress + 1) refinedEstimate
       | otherwise -> throw RefinementStalled
 
-satisfy :: (Bounds units -> Bool) -> Estimate units -> Bounds units
+satisfy :: (Interval units -> Bool) -> Estimate units -> Interval units
 satisfy predicate estimate = do
   let current = bounds estimate
   if predicate current then current else satisfy predicate (refine estimate)
 
-within :: Quantity units -> Estimate units -> Bounds units
+within :: Quantity units -> Estimate units -> Interval units
 within tolerance = satisfy (\current -> current.width <= tolerance)
 
-resolve :: (Bounds units -> Fuzzy a) -> Estimate units -> a
+resolve :: (Interval units -> Fuzzy a) -> Estimate units -> a
 resolve function estimate =
   case function (bounds estimate) of
     Resolved value -> value
@@ -123,8 +123,8 @@ data Add units = Add (Estimate units) (Estimate units)
 instance Interface (Add units) units where
   boundsImpl (Add first second) = bounds first .+. bounds second
   refineImpl (Add first second) = do
-    let width1 = Bounds.width (bounds first)
-    let width2 = Bounds.width (bounds second)
+    let width1 = Interval.width (bounds first)
+    let width2 = Interval.width (bounds second)
     if
       | width1 >= 2 *. width2 -> refine first .+. second
       | width2 >= 2 *. width1 -> first .+. refine second
@@ -144,8 +144,8 @@ data Subtract units = Subtract (Estimate units) (Estimate units)
 instance Interface (Subtract units) units where
   boundsImpl (Subtract first second) = bounds first .-. bounds second
   refineImpl (Subtract first second) = do
-    let width1 = Bounds.width (bounds first)
-    let width2 = Bounds.width (bounds second)
+    let width1 = Interval.width (bounds first)
+    let width2 = Interval.width (bounds second)
     if
       | width1 >= 2 *. width2 -> refine first .-. second
       | width2 >= 2 *. width1 -> first .-. refine second
@@ -167,10 +167,10 @@ instance Interface (Product units1 units2) (units1 ?*? units2) where
   refineImpl (Product first second) = do
     let firstBounds = bounds first
     let secondBounds = bounds second
-    let firstWidth = Bounds.width firstBounds
-    let secondWidth = Bounds.width secondBounds
-    let firstMetric = firstWidth ?*? Bounds.midpoint secondBounds
-    let secondMetric = Bounds.midpoint firstBounds ?*? secondWidth
+    let firstWidth = Interval.width firstBounds
+    let secondWidth = Interval.width secondBounds
+    let firstMetric = firstWidth ?*? Interval.midpoint secondBounds
+    let secondMetric = Interval.midpoint firstBounds ?*? secondWidth
     let combinedMetric = firstWidth ?*? secondWidth
     let refinedProduct
           | firstMetric > secondMetric && firstMetric > combinedMetric =
@@ -241,7 +241,7 @@ instance Interface (Sum units) units where
 newtype Abs units = Abs (Estimate units)
 
 instance Interface (Abs units) units where
-  boundsImpl (Abs estimate) = Bounds.abs (bounds estimate)
+  boundsImpl (Abs estimate) = Interval.abs (bounds estimate)
   refineImpl (Abs estimate) = new (Abs (refine estimate))
 
 abs :: Estimate units -> Estimate units
@@ -259,10 +259,10 @@ sum = new . Sum
 data Min units = Min (Estimate units) (Estimate units)
 
 instance Interface (Min units) units where
-  boundsImpl (Min first second) = Bounds.min (bounds first) (bounds second)
+  boundsImpl (Min first second) = Interval.min (bounds first) (bounds second)
   refineImpl (Min first second) = do
-    let (Bounds min1 max1) = bounds first
-    let (Bounds min2 max2) = bounds second
+    let Interval min1 max1 = bounds first
+    let Interval min2 max2 = bounds second
     if
       | max1 <= min2 -> refine first
       | max2 <= min1 -> refine second
@@ -274,10 +274,10 @@ min first second = new (Min first second)
 data Max units = Max (Estimate units) (Estimate units)
 
 instance Interface (Max units) units where
-  boundsImpl (Max first second) = Bounds.max (bounds first) (bounds second)
+  boundsImpl (Max first second) = Interval.max (bounds first) (bounds second)
   refineImpl (Max first second) = do
-    let (Bounds min1 max1) = bounds first
-    let (Bounds min2 max2) = bounds second
+    let Interval min1 max1 = bounds first
+    let Interval min2 max2 = bounds second
     if
       | min1 >= max2 -> refine first
       | min2 >= max1 -> refine second
@@ -289,10 +289,10 @@ max first second = new (Max first second)
 data Smaller units = Smaller (Estimate units) (Estimate units)
 
 instance Interface (Smaller units) units where
-  boundsImpl (Smaller first second) = Bounds.smaller (bounds first) (bounds second)
+  boundsImpl (Smaller first second) = Interval.smaller (bounds first) (bounds second)
   refineImpl (Smaller first second) = do
-    let (Bounds low1 high1) = Bounds.abs (bounds first)
-    let (Bounds low2 high2) = Bounds.abs (bounds second)
+    let Interval low1 high1 = Interval.abs (bounds first)
+    let Interval low2 high2 = Interval.abs (bounds second)
     if
       | high1 <= low2 -> refine first
       | high2 <= low1 -> refine second
@@ -304,10 +304,10 @@ smaller first second = new (Smaller first second)
 data Larger units = Larger (Estimate units) (Estimate units)
 
 instance Interface (Larger units) units where
-  boundsImpl (Larger first second) = Bounds.larger (bounds first) (bounds second)
+  boundsImpl (Larger first second) = Interval.larger (bounds first) (bounds second)
   refineImpl (Larger first second) = do
-    let (Bounds low1 high1) = Bounds.abs (bounds first)
-    let (Bounds low2 high2) = Bounds.abs (bounds second)
+    let Interval low1 high1 = Interval.abs (bounds first)
+    let Interval low2 high2 = Interval.abs (bounds second)
     if
       | low1 >= high2 -> refine first
       | low2 >= high1 -> refine second
@@ -321,12 +321,12 @@ internalErrorFilteredListIsEmpty =
   throw (InternalError "Filtered list should be non-empty by construction")
 
 boundsWidth :: Estimate units -> Quantity units
-boundsWidth estimate = Bounds.width (bounds estimate)
+boundsWidth estimate = Interval.width (bounds estimate)
 
-overlaps :: Bounds units -> Estimate units -> Bool
-overlaps givenBounds estimate = Bounds.overlap givenBounds (bounds estimate) > Quantity.zero
+overlaps :: Interval units -> Estimate units -> Bool
+overlaps givenInterval estimate = Interval.overlap givenInterval (bounds estimate) > Quantity.zero
 
-data Smallest units = Smallest (NonEmpty (Estimate units)) (Bounds units)
+data Smallest units = Smallest (NonEmpty (Estimate units)) (Interval units)
 
 instance Interface (Smallest units) units where
   boundsImpl (Smallest _ currentBounds) = currentBounds
@@ -341,9 +341,9 @@ instance Interface (Smallest units) units where
 
 smallest :: NonEmpty (Estimate units) -> Estimate units
 smallest estimates =
-  new (Smallest estimates (Bounds.smallest (NonEmpty.map bounds estimates)))
+  new (Smallest estimates (Interval.smallest (NonEmpty.map bounds estimates)))
 
-data Largest units = Largest (NonEmpty (Estimate units)) (Bounds units)
+data Largest units = Largest (NonEmpty (Estimate units)) (Interval units)
 
 instance Interface (Largest units) units where
   boundsImpl (Largest _ currentBounds) = currentBounds
@@ -358,22 +358,22 @@ instance Interface (Largest units) units where
 
 largest :: NonEmpty (Estimate units) -> Estimate units
 largest estimates =
-  new (Largest estimates (Bounds.largest (NonEmpty.map bounds estimates)))
+  new (Largest estimates (Interval.largest (NonEmpty.map bounds estimates)))
 
 estimateUpperBound :: (a, Estimate units) -> Quantity units
-estimateUpperBound (_, estimate) = Bounds.upper (bounds estimate)
+estimateUpperBound (_, estimate) = Interval.upper (bounds estimate)
 
 estimateUpperBoundAtLeast :: Quantity units -> (a, Estimate units) -> Bool
 estimateUpperBoundAtLeast cutoff pair = estimateUpperBound pair >= cutoff
 
 estimateLowerBound :: (a, Estimate units) -> Quantity units
-estimateLowerBound (_, estimate) = Bounds.lower (bounds estimate)
+estimateLowerBound (_, estimate) = Interval.lower (bounds estimate)
 
 estimateLowerBoundAtMost :: Quantity units -> (a, Estimate units) -> Bool
 estimateLowerBoundAtMost cutoff pair = estimateLowerBound pair <= cutoff
 
 itemBoundsWidth :: (a, Estimate units) -> Quantity units
-itemBoundsWidth (_, estimate) = Bounds.width (bounds estimate)
+itemBoundsWidth (_, estimate) = Interval.width (bounds estimate)
 
 refinePairs :: NonEmpty (a, Estimate units) -> NonEmpty (a, Estimate units)
 refinePairs pairs = do
@@ -450,7 +450,7 @@ pickLargestBy function items = pickMaximumBy (abs . function) items
 
 sign :: Tolerance units => Estimate units -> Sign
 sign estimate
-  | Bounds.lower (bounds estimate) > ?tolerance = Positive
-  | Bounds.upper (bounds estimate) < negative ?tolerance = Negative
-  | Bounds.width (bounds estimate) ~= Quantity.zero = Positive
+  | Interval.lower (bounds estimate) > ?tolerance = Positive
+  | Interval.upper (bounds estimate) < negative ?tolerance = Negative
+  | Interval.width (bounds estimate) ~= Quantity.zero = Positive
   | otherwise = sign (refine estimate)

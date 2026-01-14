@@ -6,8 +6,8 @@ module OpenSolid.SurfaceFunction.Internal
   )
 where
 
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1D qualified as Solve1D
@@ -19,7 +19,7 @@ solveForU ::
   Tolerance units =>
   SurfaceFunction units ->
   SurfaceFunction units ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Number ->
   Number
 solveForU f fu uBounds vValue = do
@@ -35,7 +35,7 @@ solveForV ::
   SurfaceFunction units ->
   SurfaceFunction units ->
   Number ->
-  Bounds Unitless ->
+  Interval Unitless ->
   Number
 solveForV f fv uValue vBounds = do
   let uvPoint vValue = UvPoint uValue vValue
@@ -45,14 +45,14 @@ solveForV f fv uValue vBounds = do
     Solve1D.Exact vValue -> vValue
     Solve1D.Closest vValue -> vValue
 
-curveBoundsAt :: Number -> Number -> Quantity units -> Quantity units -> Bounds units -> Bounds units
-curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)
-  | mLow >= Quantity.zero || mHigh <= Quantity.zero = Bounds y1 y2 -- Monotonic case
+curveBoundsAt :: Number -> Number -> Quantity units -> Quantity units -> Interval units -> Interval units
+curveBoundsAt x1 x2 y1 y2 (Interval mLow mHigh)
+  | mLow >= Quantity.zero || mHigh <= Quantity.zero = Interval y1 y2 -- Monotonic case
   | otherwise = do
       let dX = x2 .-. x1
       let dY = y2 .-. y1
-      let dXValley = Quantity.clampTo (Bounds 0 dX) ((mHigh .*. dX .-. dY) ./. (mHigh .-. mLow))
-      let dXPeak = Quantity.clampTo (Bounds 0 dX) ((dY .-. mLow .*. dX) ./. (mHigh .-. mLow))
+      let dXValley = Quantity.clampTo (Interval 0 dX) ((mHigh .*. dX .-. dY) ./. (mHigh .-. mLow))
+      let dXPeak = Quantity.clampTo (Interval 0 dX) ((dY .-. mLow .*. dX) ./. (mHigh .-. mLow))
       let yValley =
             if Quantity.isInfinite mLow
               then negative Quantity.infinity
@@ -61,19 +61,19 @@ curveBoundsAt x1 x2 y1 y2 (Bounds mLow mHigh)
             if Quantity.isInfinite mHigh
               then Quantity.infinity
               else y1 .+. mHigh .*. dXPeak
-      Bounds yValley yPeak
+      Interval yValley yPeak
 
-curveBoundsOver :: Number -> Number -> Bounds units -> Bounds units -> Bounds units -> Bounds units
-curveBoundsOver x1 x2 y1 y2 (Bounds mLow mHigh)
-  | mLow >= Quantity.zero || mHigh <= Quantity.zero = Bounds.aggregate2 y1 y2 -- Monotonic case
+curveBoundsOver :: Number -> Number -> Interval units -> Interval units -> Interval units -> Interval units
+curveBoundsOver x1 x2 y1 y2 (Interval mLow mHigh)
+  | mLow >= Quantity.zero || mHigh <= Quantity.zero = Interval.aggregate2 y1 y2 -- Monotonic case
   | otherwise = do
       let dX = x2 .-. x1
-      let Bounds low1 high1 = y1
-      let Bounds low2 high2 = y2
+      let Interval low1 high1 = y1
+      let Interval low2 high2 = y2
       let dYLow = low2 .-. low1
       let dYHigh = high2 .-. high1
-      let dXValley = Quantity.clampTo (Bounds 0 dX) ((mHigh .*. dX .-. dYLow) ./. (mHigh .-. mLow))
-      let dXPeak = Quantity.clampTo (Bounds 0 dX) ((dYHigh .-. mLow .*. dX) ./. (mHigh .-. mLow))
+      let dXValley = Quantity.clampTo (Interval 0 dX) ((mHigh .*. dX .-. dYLow) ./. (mHigh .-. mLow))
+      let dXPeak = Quantity.clampTo (Interval 0 dX) ((dYHigh .-. mLow .*. dX) ./. (mHigh .-. mLow))
       let yValley =
             if Quantity.isInfinite mLow
               then negative Quantity.infinity
@@ -82,4 +82,4 @@ curveBoundsOver x1 x2 y1 y2 (Bounds mLow mHigh)
             if Quantity.isInfinite mHigh
               then Quantity.infinity
               else high1 .+. mHigh .*. dXPeak
-      Bounds yValley yPeak
+      Interval yValley yPeak

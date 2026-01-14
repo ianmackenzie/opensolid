@@ -11,7 +11,6 @@ import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Body3D qualified as Body3D
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Camera3D qualified as Camera3D
@@ -29,6 +28,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Gltf qualified as Gltf
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Line2D qualified as Line2D
@@ -74,10 +74,10 @@ classes =
   [ length
   , area
   , angle
-  , bounds
-  , lengthBounds
-  , areaBounds
-  , angleBounds
+  , interval
+  , lengthInterval
+  , areaInterval
+  , angleInterval
   , color
   , vector2D
   , displacement2D
@@ -171,15 +171,15 @@ length =
     , Class.absSelf Quantity.abs
     , Class.numberTimes
     , Class.plusSelf
-    , Class.plus @LengthBounds Self
+    , Class.plus @LengthInterval Self
     , Class.plus @LengthCurve Self
     , Class.minusSelf
-    , Class.minus @LengthBounds Self
+    , Class.minus @LengthInterval Self
     , Class.minus @LengthCurve Self
     , Class.timesNumber
     , Class.timesSelf
-    , Class.times @Bounds Self
-    , Class.times @LengthBounds Self
+    , Class.times @Interval Self
+    , Class.times @LengthInterval Self
     , Class.times @Curve Self
     , Class.times @LengthCurve Self
     , Class.times @Direction2D Self
@@ -187,8 +187,8 @@ length =
     , Class.times @Displacement2D Self
     , Class.divByNumber
     , Class.divBySelf
-    , Class.divBy @Bounds Self
-    , Class.divBy @LengthBounds Self
+    , Class.divBy @Interval Self
+    , Class.divBy @LengthInterval Self
     , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.divByM (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.floorDivBySelf
@@ -216,22 +216,22 @@ area =
     , Class.absSelf Quantity.abs
     , Class.numberTimes
     , Class.plusSelf
-    , Class.plus @AreaBounds Self
+    , Class.plus @AreaInterval Self
     , Class.plus @AreaCurve Self
     , Class.minusSelf
-    , Class.minus @AreaBounds Self
+    , Class.minus @AreaInterval Self
     , Class.minus @AreaCurve Self
     , Class.timesNumber
-    , Class.times @Bounds Self
+    , Class.times @Interval Self
     , Class.times @Curve Self
     , Class.times @Direction2D Self
     , Class.times @Vector2D Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
-    , Class.divBy @Bounds Self
-    , Class.divBy @LengthBounds Self
-    , Class.divBy @AreaBounds Self
+    , Class.divBy @Interval Self
+    , Class.divBy @LengthInterval Self
+    , Class.divBy @AreaInterval Self
     , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.divByM (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.divByS (\val crv -> Curve.quotient (Curve.constant val) crv)
@@ -275,44 +275,44 @@ angle =
     , Class.absSelf Quantity.abs
     , Class.numberTimes
     , Class.plusSelf
-    , Class.plus @AngleBounds Self
+    , Class.plus @AngleInterval Self
     , Class.plus @AngleCurve Self
     , Class.minusSelf
-    , Class.minus @AngleBounds Self
+    , Class.minus @AngleInterval Self
     , Class.minus @AngleCurve Self
     , Class.timesNumber
-    , Class.times @Bounds Self
+    , Class.times @Interval Self
     , Class.times @Curve Self
     , Class.divByNumber
     , Class.divBySelf
-    , Class.divBy @Bounds Self
-    , Class.divBy @AngleBounds Self
+    , Class.divBy @Interval Self
+    , Class.divBy @AngleInterval Self
     , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.divByR (\val crv -> Curve.quotient (Curve.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
 
-type Bounds = Bounds.Bounds Unitless
+type Interval = Interval.Interval Unitless
 
-bounds :: Class
-bounds =
-  Class.new @Bounds "A range of unitless values, with a lower bound and upper bound." $
-    [ Class.constant "Unit Interval" Bounds.unitInterval $(docs 'Bounds.unitInterval)
-    , Class.constructor2 "First Value" "Second Value" Bounds.Bounds $(docs 'Bounds.Bounds)
-    , Class.factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
-    , Class.factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
-    , Class.factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
-    , Class.factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
-    , Class.factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
-    , Class.property "Endpoints" (.endpoints) $(docs 'Bounds.endpoints)
-    , Class.property "Lower" (.lower) $(docs 'Bounds.lower)
-    , Class.property "Upper" (.upper) $(docs 'Bounds.upper)
-    , Class.member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
-    , Class.member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
-    , Class.member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
+interval :: Class
+interval =
+  Class.new @Interval "A range of unitless values, with a lower bound and upper bound." $
+    [ Class.constant "Unit" Interval.unit $(docs 'Interval.unit)
+    , Class.constructor2 "First Value" "Second Value" Interval.Interval $(docs 'Interval.Interval)
+    , Class.factory1 "Constant" "Value" Interval.constant $(docs 'Interval.constant)
+    , Class.factory1 "Zero To" "Value" Interval.zeroTo $(docs 'Interval.zeroTo)
+    , Class.factory1 "Symmetric" "Width" Interval.symmetric $(docs 'Interval.symmetric)
+    , Class.factory1 "Hull" "Values" Interval.hullN $(docs 'Interval.hullN)
+    , Class.factory1 "Aggregate" "Interval" Interval.aggregateN $(docs 'Interval.aggregateN)
+    , Class.property "Endpoints" (.endpoints) $(docs 'Interval.endpoints)
+    , Class.property "Lower" (.lower) $(docs 'Interval.lower)
+    , Class.property "Upper" (.upper) $(docs 'Interval.upper)
+    , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
+    , Class.member1 "Includes" "Value" Interval.includes $(docs 'Interval.includes)
+    , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
     , Class.negateSelf
-    , Class.absSelf Bounds.abs
+    , Class.absSelf Interval.abs
     , Class.numberPlus
     , Class.numberMinus
     , Class.numberTimes
@@ -326,32 +326,32 @@ bounds =
     , Class.times @Length Self
     , Class.times @Area Self
     , Class.times @Angle Self
-    , Class.times @LengthBounds Self
-    , Class.times @AreaBounds Self
-    , Class.times @AngleBounds Self
+    , Class.times @LengthInterval Self
+    , Class.times @AreaInterval Self
+    , Class.times @AngleInterval Self
     , Class.divByNumber
     , Class.divBySelf
     ]
 
-type LengthBounds = Bounds.Bounds Meters
+type LengthInterval = Interval.Interval Meters
 
-lengthBounds :: Class
-lengthBounds =
-  Class.new @LengthBounds "A range of length values, with a lower bound and upper bound." $
-    [ Class.constructor2 "First Value" "Second Value" Bounds.Bounds $(docs 'Bounds.Bounds)
-    , Class.factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
-    , Class.factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
-    , Class.factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
-    , Class.factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
-    , Class.factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
-    , Class.property "Endpoints" (.endpoints) $(docs 'Bounds.endpoints)
-    , Class.property "Lower" (.lower) $(docs 'Bounds.lower)
-    , Class.property "Upper" (.upper) $(docs 'Bounds.upper)
-    , Class.member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
-    , Class.member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
-    , Class.member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
+lengthInterval :: Class
+lengthInterval =
+  Class.new @LengthInterval "A range of length values, with a lower bound and upper bound." $
+    [ Class.constructor2 "First Value" "Second Value" Interval.Interval $(docs 'Interval.Interval)
+    , Class.factory1 "Constant" "Value" Interval.constant $(docs 'Interval.constant)
+    , Class.factory1 "Zero To" "Value" Interval.zeroTo $(docs 'Interval.zeroTo)
+    , Class.factory1 "Symmetric" "Width" Interval.symmetric $(docs 'Interval.symmetric)
+    , Class.factory1 "Hull" "Values" Interval.hullN $(docs 'Interval.hullN)
+    , Class.factory1 "Aggregate" "Interval" Interval.aggregateN $(docs 'Interval.aggregateN)
+    , Class.property "Endpoints" (.endpoints) $(docs 'Interval.endpoints)
+    , Class.property "Lower" (.lower) $(docs 'Interval.lower)
+    , Class.property "Upper" (.upper) $(docs 'Interval.upper)
+    , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
+    , Class.member1 "Includes" "Value" Interval.includes $(docs 'Interval.includes)
+    , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
     , Class.negateSelf
-    , Class.absSelf Bounds.abs
+    , Class.absSelf Interval.abs
     , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Length Self
@@ -360,77 +360,77 @@ lengthBounds =
     , Class.timesNumber
     , Class.timesSelf
     , Class.times @Length Self
-    , Class.times @Bounds Self
+    , Class.times @Interval Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
-    , Class.divBy @Bounds Self
+    , Class.divBy @Interval Self
     ]
 
-type AreaBounds = Bounds.Bounds SquareMeters
+type AreaInterval = Interval.Interval SquareMeters
 
-areaBounds :: Class
-areaBounds =
-  Class.new @AreaBounds "A range of area values, with a lower bound and upper bound." $
-    [ Class.constructor2 "First Value" "Second Value" Bounds.Bounds $(docs 'Bounds.Bounds)
-    , Class.factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
-    , Class.factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
-    , Class.factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
-    , Class.factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
-    , Class.factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
-    , Class.property "Endpoints" (.endpoints) $(docs 'Bounds.endpoints)
-    , Class.property "Lower" (.lower) $(docs 'Bounds.lower)
-    , Class.property "Upper" (.upper) $(docs 'Bounds.upper)
-    , Class.member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
-    , Class.member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
-    , Class.member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
+areaInterval :: Class
+areaInterval =
+  Class.new @AreaInterval "A range of area values, with a lower bound and upper bound." $
+    [ Class.constructor2 "First Value" "Second Value" Interval.Interval $(docs 'Interval.Interval)
+    , Class.factory1 "Constant" "Value" Interval.constant $(docs 'Interval.constant)
+    , Class.factory1 "Zero To" "Value" Interval.zeroTo $(docs 'Interval.zeroTo)
+    , Class.factory1 "Symmetric" "Width" Interval.symmetric $(docs 'Interval.symmetric)
+    , Class.factory1 "Hull" "Values" Interval.hullN $(docs 'Interval.hullN)
+    , Class.factory1 "Aggregate" "Interval" Interval.aggregateN $(docs 'Interval.aggregateN)
+    , Class.property "Endpoints" (.endpoints) $(docs 'Interval.endpoints)
+    , Class.property "Lower" (.lower) $(docs 'Interval.lower)
+    , Class.property "Upper" (.upper) $(docs 'Interval.upper)
+    , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
+    , Class.member1 "Includes" "Value" Interval.includes $(docs 'Interval.includes)
+    , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
     , Class.negateSelf
-    , Class.absSelf Bounds.abs
+    , Class.absSelf Interval.abs
     , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Area Self
     , Class.minusSelf
     , Class.minus @Area Self
     , Class.timesNumber
-    , Class.times @Bounds Self
+    , Class.times @Interval Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.divBy @Bounds Self
-    , Class.divBy @LengthBounds Self
+    , Class.divBy @Interval Self
+    , Class.divBy @LengthInterval Self
     ]
 
-type AngleBounds = Bounds.Bounds Radians
+type AngleInterval = Interval.Interval Radians
 
-angleBounds :: Class
-angleBounds =
-  Class.new @AngleBounds "A range of angle values, with a lower bound and upper bound." $
-    [ Class.constructor2 "First Value" "Second Value" Bounds.Bounds $(docs 'Bounds.Bounds)
-    , Class.factory1 "Constant" "Value" Bounds.constant $(docs 'Bounds.constant)
-    , Class.factory1 "Zero To" "Value" Bounds.zeroTo $(docs 'Bounds.zeroTo)
-    , Class.factory1 "Symmetric" "Width" Bounds.symmetric $(docs 'Bounds.symmetric)
-    , Class.factory1 "Hull" "Values" Bounds.hullN $(docs 'Bounds.hullN)
-    , Class.factory1 "Aggregate" "Bounds" Bounds.aggregateN $(docs 'Bounds.aggregateN)
-    , Class.property "Endpoints" (.endpoints) $(docs 'Bounds.endpoints)
-    , Class.property "Lower" (.lower) $(docs 'Bounds.lower)
-    , Class.property "Upper" (.upper) $(docs 'Bounds.upper)
-    , Class.member1 "Intersection" "Other" Bounds.intersection $(docs 'Bounds.intersection)
-    , Class.member1 "Includes" "Value" Bounds.includes $(docs 'Bounds.includes)
-    , Class.member1 "Contains" "Other" Bounds.contains $(docs 'Bounds.contains)
+angleInterval :: Class
+angleInterval =
+  Class.new @AngleInterval "A range of angle values, with a lower bound and upper bound." $
+    [ Class.constructor2 "First Value" "Second Value" Interval.Interval $(docs 'Interval.Interval)
+    , Class.factory1 "Constant" "Value" Interval.constant $(docs 'Interval.constant)
+    , Class.factory1 "Zero To" "Value" Interval.zeroTo $(docs 'Interval.zeroTo)
+    , Class.factory1 "Symmetric" "Width" Interval.symmetric $(docs 'Interval.symmetric)
+    , Class.factory1 "Hull" "Values" Interval.hullN $(docs 'Interval.hullN)
+    , Class.factory1 "Aggregate" "Interval" Interval.aggregateN $(docs 'Interval.aggregateN)
+    , Class.property "Endpoints" (.endpoints) $(docs 'Interval.endpoints)
+    , Class.property "Lower" (.lower) $(docs 'Interval.lower)
+    , Class.property "Upper" (.upper) $(docs 'Interval.upper)
+    , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
+    , Class.member1 "Includes" "Value" Interval.includes $(docs 'Interval.includes)
+    , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
     , Class.negateSelf
-    , Class.absSelf Bounds.abs
+    , Class.absSelf Interval.abs
     , Class.numberTimes
     , Class.plusSelf
     , Class.plus @Angle Self
     , Class.minusSelf
     , Class.minus @Angle Self
     , Class.timesNumber
-    , Class.times @Bounds Self
+    , Class.times @Interval Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Angle Self
-    , Class.divBy @Bounds Self
+    , Class.divBy @Interval Self
     ]
 
 color :: Class

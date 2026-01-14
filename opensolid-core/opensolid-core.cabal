@@ -108,7 +108,6 @@ library
     OpenSolid.Bool
     OpenSolid.Bounded2D
     OpenSolid.Bounded3D
-    OpenSolid.Bounds
     OpenSolid.Bounds2D
     OpenSolid.Bounds3D
     OpenSolid.Bytecode.Ast
@@ -167,6 +166,7 @@ library
     OpenSolid.Int
     OpenSolid.InternalError
     OpenSolid.Intersects
+    OpenSolid.Interval
     OpenSolid.Json
     OpenSolid.Length
     OpenSolid.Line2D
@@ -307,7 +307,6 @@ test-suite opensolid-core-test
   other-modules:
     Test
     Tests.Array
-    Tests.Bounds
     Tests.Bounds2D
     Tests.Bounds3D
     Tests.Curve
@@ -315,6 +314,7 @@ test-suite opensolid-core-test
     Tests.Direction2D
     Tests.DivMod
     Tests.Estimate
+    Tests.Interval
     Tests.List
     Tests.Map
     Tests.NewtonRaphson

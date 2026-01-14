@@ -3,7 +3,7 @@ module Tests.Region2D (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Estimate qualified as Estimate
@@ -32,7 +32,7 @@ tests =
 areaIsApproximately :: Area -> Region2D Meters space -> Bool
 areaIsApproximately expectedArea region = do
   let measuredArea = Estimate.within (Area.squareMeters 1e-4) (Region2D.area region)
-  Bounds.includes expectedArea measuredArea
+  Interval.includes expectedArea measuredArea
 
 square :: Tolerance Meters => Test
 square = Test.verify "square" Test.do

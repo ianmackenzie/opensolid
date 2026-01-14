@@ -35,13 +35,13 @@ module OpenSolid.Bounds3D
 where
 
 import Data.Coerce qualified
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Convention3D qualified as Convention3D
 import OpenSolid.Frame3D (Frame3D)
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -66,19 +66,19 @@ import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.World3D qualified as World3D
 
 -- | Get the bounds on the rightward coordinate of a bounding box.
-rightwardCoordinate :: Bounds3D space -> Bounds Meters
+rightwardCoordinate :: Bounds3D space -> Interval Meters
 rightwardCoordinate (Bounds3D r _ _) = r
 
 -- | Get the bounds on the forward coordinate of a bounding box.
-forwardCoordinate :: Bounds3D space -> Bounds Meters
+forwardCoordinate :: Bounds3D space -> Interval Meters
 forwardCoordinate (Bounds3D _ f _) = f
 
 -- | Get the bounds on the upward coordinate of a bounding box.
-upwardCoordinate :: Bounds3D space -> Bounds Meters
+upwardCoordinate :: Bounds3D space -> Interval Meters
 upwardCoordinate (Bounds3D _ _ u) = u
 
 -- | Get the XYZ coordinate ranges of a bounding box, given an XYZ coordinate convention to use.
-coordinates :: Convention3D -> Bounds3D space -> (Bounds Meters, Bounds Meters, Bounds Meters)
+coordinates :: Convention3D -> Bounds3D space -> (Interval Meters, Interval Meters, Interval Meters)
 coordinates convention bounds =
   ( distanceAlong (Convention3D.xAxis World3D.frame convention) bounds
   , distanceAlong (Convention3D.yAxis World3D.frame convention) bounds
@@ -98,16 +98,17 @@ aggregateN :: NonEmpty (Bounds3D space) -> Bounds3D space
 aggregateN list = PositionBounds3D (VectorBounds3D.aggregateN (Data.Coerce.coerce list))
 
 centerPoint :: Bounds3D space -> Point3D space
-centerPoint (Bounds3D r f u) = Point3D (Bounds.midpoint r) (Bounds.midpoint f) (Bounds.midpoint u)
+centerPoint (Bounds3D r f u) =
+  Point3D (Interval.midpoint r) (Interval.midpoint f) (Interval.midpoint u)
 
 length :: Bounds3D space -> Length
-length (Bounds3D _ f _) = Bounds.width f
+length (Bounds3D _ f _) = Interval.width f
 
 width :: Bounds3D space -> Length
-width (Bounds3D r _ _) = Bounds.width r
+width (Bounds3D r _ _) = Interval.width r
 
 height :: Bounds3D space -> Length
-height (Bounds3D _ _ u) = Bounds.width u
+height (Bounds3D _ _ u) = Interval.width u
 
 exclusion :: Point3D space -> Bounds3D space -> Length
 exclusion (Position3D p) (PositionBounds3D pb) = VectorBounds3D.exclusion p pb
@@ -151,7 +152,7 @@ hullOfN :: (a -> Point3D space) -> NonEmpty a -> Bounds3D space
 hullOfN function values = hullN (NonEmpty.map function values)
 
 diameter :: Bounds3D space -> Length
-diameter (Bounds3D x y z) = Quantity.hypot3 (Bounds.width x) (Bounds.width y) (Bounds.width z)
+diameter (Bounds3D x y z) = Quantity.hypot3 (Interval.width x) (Interval.width y) (Interval.width z)
 
 interpolate :: Bounds3D space -> Number -> Number -> Number -> Point3D space
 interpolate (PositionBounds3D pb) u v w = Position3D (VectorBounds3D.interpolate pb u v w)
@@ -159,8 +160,8 @@ interpolate (PositionBounds3D pb) u v w = Position3D (VectorBounds3D.interpolate
 on :: Plane3D global local -> Bounds2D Meters local -> Bounds3D global
 on plane bounds2D = do
   let Bounds2D bX bY = bounds2D
-  let rX = 0.5 *. Bounds.width bX
-  let rY = 0.5 *. Bounds.width bY
+  let rX = 0.5 *. Interval.width bX
+  let rY = 0.5 *. Interval.width bY
   let Plane3D _ (PlaneOrientation3D i j) = plane
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
@@ -168,9 +169,9 @@ on plane bounds2D = do
   let rR = rX .*. Number.abs iR .+. rY .*. Number.abs jR
   let rF = rX .*. Number.abs iF .+. rY .*. Number.abs jF
   let rU = rX .*. Number.abs iU .+. rY .*. Number.abs jU
-  let bR = Bounds (cR .-. rR) (cR .+. rR)
-  let bF = Bounds (cF .-. rF) (cF .+. rF)
-  let bU = Bounds (cU .-. rU) (cU .+. rU)
+  let bR = Interval (cR .-. rR) (cR .+. rR)
+  let bF = Interval (cF .-. rF) (cF .+. rF)
+  let bU = Interval (cU .-. rU) (cU .+. rU)
   Bounds3D bR bF bU
 
 placeIn :: Frame3D global local -> Bounds3D local -> Bounds3D global
@@ -179,20 +180,20 @@ placeIn frame (Bounds3D pR pF pU) = do
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
   let Direction3D kR kF kU = k
-  let cR = Bounds.midpoint pR
-  let cF = Bounds.midpoint pF
-  let cU = Bounds.midpoint pU
-  let rR = 0.5 *. Bounds.width pR
-  let rF = 0.5 *. Bounds.width pF
-  let rU = 0.5 *. Bounds.width pU
+  let cR = Interval.midpoint pR
+  let cF = Interval.midpoint pF
+  let cU = Interval.midpoint pU
+  let rR = 0.5 *. Interval.width pR
+  let rF = 0.5 *. Interval.width pF
+  let rU = 0.5 *. Interval.width pU
   let Point3D cR' cF' cU' = Point3D.placeIn frame (Point3D cR cF cU)
   let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs jR .+. rU .*. Number.abs kR
   let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
   let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   Bounds3D
-    (Bounds (cR' .-. rR') (cR' .+. rR'))
-    (Bounds (cF' .-. rF') (cF' .+. rF'))
-    (Bounds (cU' .-. rU') (cU' .+. rU'))
+    (Interval (cR' .-. rR') (cR' .+. rR'))
+    (Interval (cF' .-. rF') (cF' .+. rF'))
+    (Interval (cU' .-. rU') (cU' .+. rU'))
 
 relativeTo :: Frame3D global local -> Bounds3D global -> Bounds3D local
 relativeTo frame (Bounds3D pR pF pU) = do
@@ -200,40 +201,40 @@ relativeTo frame (Bounds3D pR pF pU) = do
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
   let Direction3D kR kF kU = k
-  let cR = Bounds.midpoint pR
-  let cF = Bounds.midpoint pF
-  let cU = Bounds.midpoint pU
-  let rR = 0.5 *. Bounds.width pR
-  let rF = 0.5 *. Bounds.width pF
-  let rU = 0.5 *. Bounds.width pU
+  let cR = Interval.midpoint pR
+  let cF = Interval.midpoint pF
+  let cU = Interval.midpoint pU
+  let rR = 0.5 *. Interval.width pR
+  let rF = 0.5 *. Interval.width pF
+  let rU = 0.5 *. Interval.width pU
   let Point3D cR' cF' cU' = Point3D.relativeTo frame (Point3D cR cF cU)
   let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs iF .+. rU .*. Number.abs iU
   let rF' = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
   let rU' = rR .*. Number.abs kR .+. rF .*. Number.abs kF .+. rU .*. Number.abs kU
   Bounds3D
-    (Bounds (cR' .-. rR') (cR' .+. rR'))
-    (Bounds (cF' .-. rF') (cF' .+. rF'))
-    (Bounds (cU' .-. rU') (cU' .+. rU'))
+    (Interval (cR' .-. rR') (cR' .+. rR'))
+    (Interval (cF' .-. rF') (cF' .+. rF'))
+    (Interval (cU' .-. rU') (cU' .+. rU'))
 
 projectInto :: Plane3D global local -> Bounds3D global -> Bounds2D Meters local
 projectInto plane (Bounds3D pR pF pU) = do
   let Plane3D _ (PlaneOrientation3D i j) = plane
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
-  let cR = Bounds.midpoint pR
-  let cF = Bounds.midpoint pF
-  let cU = Bounds.midpoint pU
-  let rR = 0.5 *. Bounds.width pR
-  let rF = 0.5 *. Bounds.width pF
-  let rU = 0.5 *. Bounds.width pU
+  let cR = Interval.midpoint pR
+  let cF = Interval.midpoint pF
+  let cU = Interval.midpoint pU
+  let rR = 0.5 *. Interval.width pR
+  let rF = 0.5 *. Interval.width pF
+  let rU = 0.5 *. Interval.width pU
   let Point2D cX cY = Point3D.projectInto plane (Point3D cR cF cU)
   let rX = rR .*. Number.abs iR .+. rF .*. Number.abs iF .+. rU .*. Number.abs iU
   let rY = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
   Bounds2D
-    (Bounds (cX .-. rX) (cX .+. rX))
-    (Bounds (cY .-. rY) (cY .+. rY))
+    (Interval (cX .-. rX) (cX .+. rX))
+    (Interval (cY .-. rY) (cY .+. rY))
 
-distanceAlong :: Axis3D space -> Bounds3D space -> Bounds Meters
+distanceAlong :: Axis3D space -> Bounds3D space -> Interval Meters
 distanceAlong axis bounds = do
   let Axis3D _ (Direction3D dR dF dU) = axis
   let mid = Point3D.distanceAlong axis (centerPoint bounds)
@@ -241,16 +242,16 @@ distanceAlong axis bounds = do
   let rF = 0.5 *. length bounds
   let rU = 0.5 *. height bounds
   let radius = rR .*. Number.abs dR .+. rF .*. Number.abs dF .+. rU .*. Number.abs dU
-  Bounds (mid .-. radius) (mid .+. radius)
+  Interval (mid .-. radius) (mid .+. radius)
 
 transformBy :: Transform3D tag space -> Bounds3D space -> Bounds3D space
 transformBy transform (Bounds3D pR pF pU) = do
-  let cR = Bounds.midpoint pR
-  let cF = Bounds.midpoint pF
-  let cU = Bounds.midpoint pU
-  let rR = 0.5 *. Bounds.width pR
-  let rF = 0.5 *. Bounds.width pF
-  let rU = 0.5 *. Bounds.width pU
+  let cR = Interval.midpoint pR
+  let cF = Interval.midpoint pF
+  let cU = Interval.midpoint pU
+  let rR = 0.5 *. Interval.width pR
+  let rF = 0.5 *. Interval.width pF
+  let rU = 0.5 *. Interval.width pU
   let Point3D cR' cF' cU' = Point3D.transformBy transform (Point3D cR cF cU)
   let Transform3D _ i j k = transform
   let Vector3D iR iF iU = i
@@ -260,6 +261,6 @@ transformBy transform (Bounds3D pR pF pU) = do
   let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
   let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
   Bounds3D
-    (Bounds (cR' .-. rR') (cR' .+. rR'))
-    (Bounds (cF' .-. rF') (cF' .+. rF'))
-    (Bounds (cU' .-. rU') (cU' .+. rU'))
+    (Interval (cR' .-. rR') (cR' .+. rR'))
+    (Interval (cF' .-. rF') (cF' .+. rF'))
+    (Interval (cU' .-. rU') (cU' .+. rU'))

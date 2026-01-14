@@ -25,19 +25,19 @@ module OpenSolid.Unboxed.Math
   , hull2#
   , hull3#
   , hull4#
-  , negateBounds#
-  , doublePlusBounds#
-  , boundsPlusDouble#
-  , boundsPlusBounds#
-  , doubleMinusBounds#
-  , boundsMinusDouble#
-  , boundsMinusBounds#
-  , doubleTimesBounds#
-  , boundsTimesDouble#
-  , boundsTimesBounds#
-  , doubleOverBounds#
-  , boundsOverDouble#
-  , boundsOverBounds#
+  , negateInterval#
+  , doublePlusInterval#
+  , intervalPlusDouble#
+  , intervalPlusInterval#
+  , doubleMinusInterval#
+  , intervalMinusDouble#
+  , intervalMinusInterval#
+  , doubleTimesInterval#
+  , intervalTimesDouble#
+  , intervalTimesInterval#
+  , doubleOverInterval#
+  , intervalOverDouble#
+  , intervalOverInterval#
   , determinantBounds2D#
   , determinantBounds3D#
   )
@@ -152,64 +152,64 @@ hull4# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
 hull4# a# b# c# d# =
   hull2# (min# a# (min# b# (min# c# d#))) (max# a# (max# b# (max# c# d#)))
 
-{-# INLINE negateBounds# #-}
-negateBounds# :: Double# -> Double# -> (# Double#, Double# #)
-negateBounds# low# high# = (# high#, low# #)
+{-# INLINE negateInterval# #-}
+negateInterval# :: Double# -> Double# -> (# Double#, Double# #)
+negateInterval# low# high# = (# high#, low# #)
 
-{-# INLINE doublePlusBounds# #-}
-doublePlusBounds# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
-doublePlusBounds# value# low# high# = hull2# (value# +# low#) (value# +# high#)
+{-# INLINE doublePlusInterval# #-}
+doublePlusInterval# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
+doublePlusInterval# value# low# high# = hull2# (value# +# low#) (value# +# high#)
 
-{-# INLINE boundsPlusDouble# #-}
-boundsPlusDouble# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
-boundsPlusDouble# low# high# value# = hull2# (low# +# value#) (high# +# value#)
+{-# INLINE intervalPlusDouble# #-}
+intervalPlusDouble# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
+intervalPlusDouble# low# high# value# = hull2# (low# +# value#) (high# +# value#)
 
-{-# INLINE boundsPlusBounds# #-}
-boundsPlusBounds# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
-boundsPlusBounds# low1# high1# low2# high2# = hull2# (low1# +# low2#) (high1# +# high2#)
+{-# INLINE intervalPlusInterval# #-}
+intervalPlusInterval# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
+intervalPlusInterval# low1# high1# low2# high2# = hull2# (low1# +# low2#) (high1# +# high2#)
 
-{-# INLINE doubleMinusBounds# #-}
-doubleMinusBounds# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
-doubleMinusBounds# value# low# high# = hull2# (value# -# high#) (value# -# low#)
+{-# INLINE doubleMinusInterval# #-}
+doubleMinusInterval# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
+doubleMinusInterval# value# low# high# = hull2# (value# -# high#) (value# -# low#)
 
-{-# INLINE boundsMinusDouble# #-}
-boundsMinusDouble# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
-boundsMinusDouble# low# high# value# = hull2# (low# -# value#) (high# -# value#)
+{-# INLINE intervalMinusDouble# #-}
+intervalMinusDouble# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
+intervalMinusDouble# low# high# value# = hull2# (low# -# value#) (high# -# value#)
 
-{-# INLINE boundsMinusBounds# #-}
-boundsMinusBounds# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
-boundsMinusBounds# low1# high1# low2# high2# = hull2# (low1# -# high2#) (high1# -# low2#)
+{-# INLINE intervalMinusInterval# #-}
+intervalMinusInterval# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
+intervalMinusInterval# low1# high1# low2# high2# = hull2# (low1# -# high2#) (high1# -# low2#)
 
-{-# INLINE doubleTimesBounds# #-}
-doubleTimesBounds# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
-doubleTimesBounds# value# low# high# = hull2# (value# *# low#) (value# *# high#)
+{-# INLINE doubleTimesInterval# #-}
+doubleTimesInterval# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
+doubleTimesInterval# value# low# high# = hull2# (value# *# low#) (value# *# high#)
 
-{-# INLINE boundsTimesDouble# #-}
-boundsTimesDouble# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
-boundsTimesDouble# low# high# value# = hull2# (low# *# value#) (high# *# value#)
+{-# INLINE intervalTimesDouble# #-}
+intervalTimesDouble# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
+intervalTimesDouble# low# high# value# = hull2# (low# *# value#) (high# *# value#)
 
-{-# INLINE boundsTimesBounds# #-}
-boundsTimesBounds# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
-boundsTimesBounds# low1# high1# low2# high2# =
+{-# INLINE intervalTimesInterval# #-}
+intervalTimesInterval# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
+intervalTimesInterval# low1# high1# low2# high2# =
   hull4# (low1# *# low2#) (low1# *# high2#) (high1# *# low2#) (high1# *# high2#)
 
-{-# INLINE doubleOverBounds# #-}
-doubleOverBounds# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
-doubleOverBounds# value# low# high# =
+{-# INLINE doubleOverInterval# #-}
+doubleOverInterval# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
+doubleOverInterval# value# low# high# =
   case (# low# <=# 0.0##, high# >=# 0.0## #) of
     (# 1#, 1# #) -> (# -1.0## /# 0.0##, 1.0## /# 0.0## #)
     (# _, _ #) -> hull2# (value# /# low#) (value# /# high#)
 
-{-# INLINE boundsOverDouble# #-}
-boundsOverDouble# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
-boundsOverDouble# low# high# value# =
+{-# INLINE intervalOverDouble# #-}
+intervalOverDouble# :: Double# -> Double# -> Double# -> (# Double#, Double# #)
+intervalOverDouble# low# high# value# =
   case value# ==# 0.0## of
     1# -> (# -1.0## /# 0.0##, 1.0## /# 0.0## #)
     _ -> hull2# (low# /# value#) (high# /# value#)
 
-{-# INLINE boundsOverBounds# #-}
-boundsOverBounds# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
-boundsOverBounds# low1# high1# low2# high2# =
+{-# INLINE intervalOverInterval# #-}
+intervalOverInterval# :: Double# -> Double# -> Double# -> Double# -> (# Double#, Double# #)
+intervalOverInterval# low1# high1# low2# high2# =
   case (# low2# <=# 0.0##, high2# >=# 0.0## #) of
     (# 1#, 1# #) -> (# -1.0## /# 0.0##, 1.0## /# 0.0## #)
     (# _, _ #) -> hull4# (low1# /# low2#) (low1# /# high2#) (high1# /# low2#) (high1# /# high2#)
@@ -226,9 +226,9 @@ determinantBounds2D# ::
   Double# ->
   (# Double#, Double# #)
 determinantBounds2D# x1Min# x1Max# y1Min# y1Max# x2Min# x2Max# y2Min# y2Max# = do
-  let !(# x1y2Min#, x1y2Max# #) = boundsTimesBounds# x1Min# x1Max# y2Min# y2Max#
-  let !(# x2y1Min#, x2y1Max# #) = boundsTimesBounds# x2Min# x2Max# y1Min# y1Max#
-  boundsMinusBounds# x1y2Min# x1y2Max# x2y1Min# x2y1Max#
+  let !(# x1y2Min#, x1y2Max# #) = intervalTimesInterval# x1Min# x1Max# y2Min# y2Max#
+  let !(# x2y1Min#, x2y1Max# #) = intervalTimesInterval# x2Min# x2Max# y1Min# y1Max#
+  intervalMinusInterval# x1y2Min# x1y2Max# x2y1Min# x2y1Max#
 
 determinantBounds3D# ::
   Double# ->
@@ -276,11 +276,11 @@ determinantBounds3D#
     let !(# z1DetMin#, z1DetMax# #) =
           determinantBounds2D# x2Min# x2Max# y2Min# y2Max# x3Min# x3Max# y3Min# y3Max#
     let !(# x1ProdMin#, x1ProdMax# #) =
-          boundsTimesBounds# x1Min# x1Max# x1DetMin# x1DetMax#
+          intervalTimesInterval# x1Min# x1Max# x1DetMin# x1DetMax#
     let !(# y1ProdMin#, y1ProdMax# #) =
-          boundsTimesBounds# y1Min# y1Max# y1DetMin# y1DetMax#
+          intervalTimesInterval# y1Min# y1Max# y1DetMin# y1DetMax#
     let !(# z1ProdMin#, z1ProdMax# #) =
-          boundsTimesBounds# z1Min# z1Max# z1DetMin# z1DetMax#
+          intervalTimesInterval# z1Min# z1Max# z1DetMin# z1DetMax#
     let !(# dxyMin#, dxyMax# #) =
-          boundsMinusBounds# x1ProdMin# x1ProdMax# y1ProdMin# y1ProdMax#
-    boundsPlusBounds# dxyMin# dxyMax# z1ProdMin# z1ProdMax#
+          intervalMinusInterval# x1ProdMin# x1ProdMax# y1ProdMin# y1ProdMax#
+    intervalPlusInterval# dxyMin# dxyMax# z1ProdMin# z1ProdMax#

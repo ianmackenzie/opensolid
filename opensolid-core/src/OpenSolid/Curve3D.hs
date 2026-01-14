@@ -32,8 +32,6 @@ import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounded3D (Bounded3D)
 import OpenSolid.Bounded3D qualified as Bounded3D
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
@@ -49,6 +47,8 @@ import OpenSolid.Expression.Curve2D qualified as Expression.Curve2D
 import OpenSolid.Expression.Curve3D qualified as Expression.Curve3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -69,7 +69,7 @@ import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 data Curve3D space = Curve3D (Compiled space) ~(VectorCurve3D Meters space)
 
 type Compiled space =
-  CompiledFunction Number (Point3D space) (Bounds Unitless) (Bounds3D space)
+  CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
 
 data IsPoint = IsPoint deriving (Eq, Show)
 
@@ -227,11 +227,11 @@ endPoint curve = evaluate curve 1
 evaluate :: Curve3D space -> Number -> Point3D space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
-evaluateBounds :: Curve3D space -> Bounds Unitless -> Bounds3D space
+evaluateBounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 bounds :: Curve3D space -> Bounds3D space
-bounds curve = evaluateBounds curve Bounds.unitInterval
+bounds curve = evaluateBounds curve Interval.unit
 
 reverse :: Curve3D space -> Curve3D space
 reverse curve = curve `compose` (1 -. Curve.t)

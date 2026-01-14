@@ -51,7 +51,6 @@ import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
-import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
@@ -72,6 +71,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
+import OpenSolid.Interval (Interval)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -111,7 +111,7 @@ type Compiled units space =
   CompiledFunction
     Number
     (Vector2D units space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (VectorBounds2D units space)
 
 instance HasField "xComponent" (VectorCurve2D units space) (Curve units) where
@@ -674,7 +674,7 @@ evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 evaluateAt :: Number -> VectorCurve2D units space -> Vector2D units space
 evaluateAt tValue curve = evaluate curve tValue
 
-evaluateBounds :: VectorCurve2D units space -> Bounds Unitless -> VectorBounds2D units space
+evaluateBounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.

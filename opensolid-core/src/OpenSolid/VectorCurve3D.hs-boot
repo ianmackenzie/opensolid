@@ -16,10 +16,10 @@ module OpenSolid.VectorCurve3D
 where
 
 import GHC.Records (HasField)
-import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.DivisionByZero (DivisionByZero)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Transform3D (Transform3D)
@@ -42,7 +42,7 @@ type Compiled units space =
   CompiledFunction
     Number
     (Vector3D units space)
-    (Bounds Unitless)
+    (Interval Unitless)
     (VectorBounds3D units space)
 
 instance HasUnits (VectorCurve3D units space) units
@@ -95,7 +95,7 @@ constant :: Vector3D units space -> VectorCurve3D units space
 new :: Compiled units space -> VectorCurve3D units space -> VectorCurve3D units space
 on :: Plane3D global local -> VectorCurve2D units local -> VectorCurve3D units global
 evaluate :: VectorCurve3D units space -> Number -> Vector3D units space
-evaluateBounds :: VectorCurve3D units space -> Bounds Unitless -> VectorBounds3D units space
+evaluateBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorCurve3D units1 space ->

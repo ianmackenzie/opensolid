@@ -5,8 +5,6 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D qualified as Circle2D
@@ -26,6 +24,8 @@ import OpenSolid.Expression.Curve1D qualified as Expression.Curve1D
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Int qualified as Int
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -96,14 +96,14 @@ testVectorArithmetic = do
   let scaledVector = Length.meters 2 .*. Vector2D.meters 3 4
   log "Scaled vector" scaledVector
 
-testBoundsArithmetic :: IO ()
-testBoundsArithmetic = do
-  let boundsDifference =
-        Bounds (Length.meters 2) (Length.meters 3) .-. Length.centimeters 50
-  log "Bounds difference" boundsDifference
-  let boundsProduct =
-        Length.centimeters 20 .*. Bounds (Length.meters 2) (Length.meters 3)
-  log "Bounds product" boundsProduct
+testIntervalArithmetic :: IO ()
+testIntervalArithmetic = do
+  let intervalDifference =
+        Interval (Length.meters 2) (Length.meters 3) .-. Length.centimeters 50
+  log "Interval difference" intervalDifference
+  let intervalProduct =
+        Length.centimeters 20 .*. Interval (Length.meters 2) (Length.meters 3)
+  log "Interval product" intervalProduct
 
 testEquality :: IO ()
 testEquality = Tolerance.using Length.centimeter do
@@ -139,7 +139,7 @@ testCustomFunction = do
 testListOperations :: IO ()
 testListOperations = do
   let deltas :: [Int] = List.successive subtract [0, 1, 4, 9, 16, 25]
-  let intervals :: [Bounds Unitless] = List.successive Bounds [1, 2, 3, 4]
+  let intervals :: [Interval Unitless] = List.successive Interval [1, 2, 3, 4]
   log "Successive deltas" deltas
   log "Successive intervals" intervals
 
@@ -223,7 +223,7 @@ strokeWidth = Length.millimeters 0.1
 
 drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
 drawZeros path zeros = do
-  let uvBounds = Bounds.convert toDrawing (Bounds -0.05 1.05)
+  let uvBounds = Interval.convert toDrawing (Interval -0.05 1.05)
   let viewBox = Bounds2D uvBounds uvBounds
   Svg.write path viewBox $
     Svg.groupWith [Svg.strokeWidth strokeWidth] $
@@ -327,7 +327,7 @@ testBezierSegment = do
   let p4 = Point2D 5 0
   let p5 = Point2D 10 5
   let p6 = Point2D 10 10
-  let coordinateBounds = Bounds.convert toDrawing (Bounds -1 11)
+  let coordinateBounds = Interval.convert toDrawing (Interval -1 11)
   let drawingBounds = Bounds2D coordinateBounds coordinateBounds
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
   Svg.write "executables/sandbox/test-bezier-segment.svg" drawingBounds curveEntity
@@ -345,7 +345,7 @@ testHermiteBezier = do
         ]
   let curveResolution = Resolution.maxError (Length.millimeters 0.1)
   let curveEntity = Svg.curveWith curveAttributes curveResolution curve
-  let coordinateBounds = Bounds (Length.centimeters -1) (Length.centimeters 11)
+  let coordinateBounds = Interval (Length.centimeters -1) (Length.centimeters 11)
   let drawingBounds = Bounds2D coordinateBounds coordinateBounds
   Svg.write "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity
 
@@ -382,7 +382,7 @@ testNewtonRaphson2D = Tolerance.using 1e-9 do
   let v = SurfaceFunction.v
   let f = SurfaceFunction.squared u .+. SurfaceFunction.squared v .- 4
   let g = u .-. v
-  let bounds = Bounds2D (Bounds 0 2) (Bounds 0 2)
+  let bounds = Bounds2D (Interval 0 2) (Interval 0 2)
   let function = VectorSurfaceFunction2D.xy f g
   let uDerivative = VectorSurfaceFunction2D.derivative SurfaceParameter.U function
   let vDerivative = VectorSurfaceFunction2D.derivative SurfaceParameter.V function
@@ -401,7 +401,7 @@ testExpression = do
   let xSquared = Expression.squared x
   let expression = xSquared ./. (xSquared .+. Expression.Curve1D.constant 1)
   log "Expression value" (Expression.evaluate expression 2)
-  log "Expression bounds" (Expression.evaluateBounds expression (Bounds 1 3))
+  log "Expression bounds" (Expression.evaluateBounds expression (Interval 1 3))
 
 testCurve2dExpression :: IO ()
 testCurve2dExpression = do
@@ -448,7 +448,7 @@ main :: IO ()
 main = Tolerance.using Length.nanometer do
   testScalarArithmetic
   testVectorArithmetic
-  testBoundsArithmetic
+  testIntervalArithmetic
   testEquality
   testTransformation
   testTry

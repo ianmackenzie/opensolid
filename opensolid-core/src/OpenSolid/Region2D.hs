@@ -34,8 +34,6 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D (Axis2D)
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CDT qualified as CDT
@@ -56,6 +54,8 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Line2D (Line2D (Line2D))
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
@@ -63,11 +63,10 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Polygon2D (Polygon2D)
 import OpenSolid.Polygon2D qualified as Polygon2D
 import OpenSolid.Polyline2D qualified as Polyline2D
-import OpenSolid.Point2D (Point2D (Point2D))
-import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D.BoundedBy qualified as BoundedBy
@@ -78,6 +77,7 @@ import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 type role Region2D nominal nominal
@@ -126,7 +126,7 @@ boundedBy curves = do
 -- | The unit square in UV space.
 unitSquare :: Region2D Unitless UvSpace
 unitSquare = Tolerance.using Quantity.zero do
-  case rectangle (Bounds2D Bounds.unitInterval Bounds.unitInterval) of
+  case rectangle (Bounds2D Interval.unit Interval.unit) of
     Ok region -> region
     Error EmptyRegion -> throw (InternalError "Constructing unit square region should not fail")
 
@@ -142,11 +142,11 @@ rectangle ::
   Bounds2D units space ->
   Result EmptyRegion (Region2D units space)
 rectangle (Bounds2D xBounds yBounds) =
-  if Bounds.width xBounds ~= Quantity.zero || Bounds.width yBounds ~= Quantity.zero
+  if Interval.width xBounds ~= Quantity.zero || Interval.width yBounds ~= Quantity.zero
     then Error EmptyRegion
     else Ok do
-      let Bounds x1 x2 = xBounds
-      let Bounds y1 y2 = yBounds
+      let Interval x1 x2 = xBounds
+      let Interval y1 y2 = yBounds
       let p11 = Point2D x1 y1
       let p12 = Point2D x1 y2
       let p21 = Point2D x2 y1
@@ -489,13 +489,13 @@ totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
 classifyNonBoundary :: Tolerance units => Point2D units space -> Loop units space -> Sign
 classifyNonBoundary point loop = do
   let flux = Estimate.satisfy containmentIsDeterminate (totalFlux point loop)
-  if Bounds.includes Quantity.zero flux then Negative else Positive
+  if Interval.includes Quantity.zero flux then Negative else Positive
 
-bothPossibleFluxValues :: Bounds Unitless
-bothPossibleFluxValues = Bounds 0 Number.twoPi
+bothPossibleFluxValues :: Interval Unitless
+bothPossibleFluxValues = Interval 0 Number.twoPi
 
-containmentIsDeterminate :: Bounds Unitless -> Bool
-containmentIsDeterminate flux = not (Bounds.contains bothPossibleFluxValues flux)
+containmentIsDeterminate :: Interval Unitless -> Bool
+containmentIsDeterminate flux = not (Interval.contains bothPossibleFluxValues flux)
 
 classifyLoops ::
   Tolerance units =>

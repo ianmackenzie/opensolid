@@ -26,9 +26,9 @@ module OpenSolid.Domain1D
 where
 
 import GHC.Records (HasField (getField))
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 
@@ -39,7 +39,7 @@ data Domain1D = Domain1D
   }
   deriving (Show)
 
-instance HasField "bounds" Domain1D (Bounds Unitless) where
+instance HasField "bounds" Domain1D (Interval Unitless) where
   getField = bounds
 
 instance Eq Domain1D where
@@ -97,16 +97,16 @@ half (Domain1D{n, i, j}) = do
   let delta = j .-. i
   Domain1D (4 *. n) (4 *. i .+. delta) (4 *. j .-. delta)
 
-bounds :: Domain1D -> Bounds Unitless
-bounds (Domain1D{n, i, j}) = Bounds (i ./. n) (j ./. n)
+bounds :: Domain1D -> Interval Unitless
+bounds (Domain1D{n, i, j}) = Interval (i ./. n) (j ./. n)
 
-interior :: Domain1D -> Bounds Unitless
+interior :: Domain1D -> Interval Unitless
 interior (Domain1D{n, i, j}) = do
   let n8 = 8 *. n
   let delta = j .-. i
   let low = if i == 0 then 0 else (8 *. i .+. delta) ./. n8
   let high = if j == n then 1 else (8 *. j .-. delta) ./. n8
-  Bounds low high
+  Interval low high
 
 overlaps :: Domain1D -> Domain1D -> Bool
 overlaps (Domain1D n2 i2 j2) (Domain1D n1 i1 j1) =
@@ -130,30 +130,30 @@ intersectionWidth (Domain1D n1 i1 j1) (Domain1D n2 i2 j2) = do
   let high = min (j1 ./. n1) (j2 ./. n2)
   max (high .-. low) 0
 
-samplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
-samplingPoints predicate = 0 :| collectSamplingPoints predicate Bounds.unitInterval [1]
+samplingPoints :: (Interval Unitless -> Bool) -> NonEmpty Number
+samplingPoints predicate = 0 :| collectSamplingPoints predicate Interval.unit [1]
 
-innerSamplingPoints :: (Bounds Unitless -> Bool) -> List Number
-innerSamplingPoints predicate = collectSamplingPoints predicate Bounds.unitInterval []
+innerSamplingPoints :: (Interval Unitless -> Bool) -> List Number
+innerSamplingPoints predicate = collectSamplingPoints predicate Interval.unit []
 
-leadingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
+leadingSamplingPoints :: (Interval Unitless -> Bool) -> NonEmpty Number
 leadingSamplingPoints predicate = 0 :| innerSamplingPoints predicate
 
-trailingSamplingPoints :: (Bounds Unitless -> Bool) -> NonEmpty Number
+trailingSamplingPoints :: (Interval Unitless -> Bool) -> NonEmpty Number
 trailingSamplingPoints predicate =
-  case collectSamplingPoints predicate Bounds.unitInterval [1] of
+  case collectSamplingPoints predicate Interval.unit [1] of
     NonEmpty points -> points
     [] -> do
       let message = "collectSamplingPoints should always return at least the point it was given"
       throw (InternalError message)
 
-collectSamplingPoints :: (Bounds Unitless -> Bool) -> Bounds Unitless -> List Number -> List Number
+collectSamplingPoints :: (Interval Unitless -> Bool) -> Interval Unitless -> List Number -> List Number
 collectSamplingPoints predicate subdomain accumulated
   | predicate subdomain = accumulated
-  | Bounds.isAtomic subdomain =
+  | Interval.isAtomic subdomain =
       throw (InternalError "Infinite recursion in Domain1D.samplingPoints")
   | otherwise = do
-      let (left, right) = Bounds.bisect subdomain
-      let subdomainMidpoint = Bounds.midpoint subdomain
+      let (left, right) = Interval.bisect subdomain
+      let subdomainMidpoint = Interval.midpoint subdomain
       let rightAccumulated = collectSamplingPoints predicate right accumulated
       collectSamplingPoints predicate left (subdomainMidpoint : rightAccumulated)

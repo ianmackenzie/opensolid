@@ -14,7 +14,7 @@ module OpenSolid.DirectionCurve3D
   )
 where
 
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Curve (Curve)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
@@ -46,7 +46,7 @@ evaluate :: DirectionCurve3D space -> Number -> Direction3D space
 evaluate (DirectionCurve3D vectorCurve) tValue =
   Direction3D.unsafe (VectorCurve3D.evaluate vectorCurve tValue)
 
-evaluateBounds :: DirectionCurve3D space -> Bounds Unitless -> DirectionBounds3D space
+evaluateBounds :: DirectionCurve3D space -> Interval Unitless -> DirectionBounds3D space
 evaluateBounds (DirectionCurve3D vectorCurve) tBounds =
   DirectionBounds3D.unsafe (VectorCurve3D.evaluateBounds vectorCurve tBounds)
 

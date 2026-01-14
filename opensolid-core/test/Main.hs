@@ -6,7 +6,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
 import Tests.Array qualified
-import Tests.Bounds qualified
 import Tests.Bounds2D qualified
 import Tests.Bounds3D qualified
 import Tests.Curve qualified
@@ -14,6 +13,7 @@ import Tests.Curve2D qualified
 import Tests.Direction2D qualified
 import Tests.DivMod qualified
 import Tests.Estimate qualified
+import Tests.Interval qualified
 import Tests.List qualified
 import Tests.Map qualified
 import Tests.NewtonRaphson qualified
@@ -34,7 +34,7 @@ tests =
   Tolerance.using Length.nanometer $
     [ Test.group "Tests.Parameter" Tests.Parameter.tests
     , Test.group "Tests.Quantity" Tests.Quantity.tests
-    , Test.group "Tests.Bounds" Tests.Bounds.tests
+    , Test.group "Tests.Interval" Tests.Interval.tests
     , Test.group "Tests.VectorBounds3D" Tests.VectorBounds3D.tests
     , Test.group "Tests.Curve" Tests.Curve.tests
     , Test.group "Tests.Curve2D" Tests.Curve2D.tests

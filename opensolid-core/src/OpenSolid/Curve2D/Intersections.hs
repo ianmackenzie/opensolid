@@ -5,8 +5,6 @@ module OpenSolid.Curve2D.Intersections
 where
 
 import OpenSolid.Bisection qualified as Bisection
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.EndpointIntersection (EndpointIntersection (EndpointIntersection))
@@ -19,6 +17,8 @@ import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -56,7 +56,7 @@ data Classification
   | InteriorEndpoint Bisection.Size
   | EndpointEndpoint Bisection.Size Sign
 
-classify :: Bounds Unitless -> Bounds Unitless -> Fuzzy Classification
+classify :: Interval Unitless -> Interval Unitless -> Fuzzy Classification
 classify tBounds1 tBounds2 =
   case (Bisection.classify tBounds1, Bisection.classify tBounds2) of
     (Bisection.Interior, Bisection.Interior) -> Resolved InteriorInterior
@@ -74,13 +74,13 @@ classify tBounds1 tBounds2 =
 crossingIntersection ::
   Tolerance units =>
   Problem units space ->
-  Bounds Unitless ->
-  Bounds Unitless ->
+  Interval Unitless ->
+  Interval Unitless ->
   Sign ->
   Fuzzy (Maybe IntersectionPoint)
 crossingIntersection problem tBounds1 tBounds2 sign = do
   let Problem{curve1, curve2, crossingSolutionTarget} = problem
-  let uvPoint0 = Point2D (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
+  let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = NewtonRaphson.surface2D crossingSolutionTarget uvPoint0
   let isInterior = Bisection.isInterior t1 tBounds1 && Bisection.isInterior t2 tBounds2
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
@@ -91,12 +91,12 @@ crossingIntersection problem tBounds1 tBounds2 sign = do
 tangentIntersection ::
   Tolerance units =>
   Problem units space ->
-  Bounds Unitless ->
-  Bounds Unitless ->
+  Interval Unitless ->
+  Interval Unitless ->
   Fuzzy (Maybe IntersectionPoint)
 tangentIntersection problem tBounds1 tBounds2 = do
   let Problem{curve1, curve2, tangent1, tangent2, tangentSolutionTarget} = problem
-  let uvPoint0 = Point2D (Bounds.midpoint tBounds1) (Bounds.midpoint tBounds2)
+  let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = NewtonRaphson.surface2D tangentSolutionTarget uvPoint0
   let isInterior = Bisection.isInterior t1 tBounds1 && Bisection.isInterior t2 tBounds2
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
@@ -111,7 +111,7 @@ tangentIntersection problem tBounds1 tBounds2 = do
 findIntersectionPoint ::
   Tolerance units =>
   Problem units space ->
-  (Bounds Unitless, Bounds Unitless) ->
+  (Interval Unitless, Interval Unitless) ->
   Fuzzy (Maybe IntersectionPoint)
 findIntersectionPoint problem (tBounds1, tBounds2) = do
   let Problem{curve1, curve2, tangent1, tangent2} = problem
@@ -123,7 +123,7 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
       classification <- classify tBounds1 tBounds2
       let tangentBounds1 = DirectionCurve2D.evaluateBounds tangent1 tBounds1
       let tangentBounds2 = DirectionCurve2D.evaluateBounds tangent2 tBounds2
-      let crossingSign = Bounds.resolvedSign (tangentBounds1 `cross` tangentBounds2)
+      let crossingSign = Interval.resolvedSign (tangentBounds1 `cross` tangentBounds2)
       let uniqueTangentSolution = secondDerivativesIndependent curve1 curve2 tBounds1 tBounds2
       let interiorIntersection
             | Resolved sign <- crossingSign = crossingIntersection problem tBounds1 tBounds2 sign
@@ -154,8 +154,8 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
 secondDerivativesIndependent ::
   Curve2D units space ->
   Curve2D units space ->
-  Bounds Unitless ->
-  Bounds Unitless ->
+  Interval Unitless ->
+  Interval Unitless ->
   Bool
 secondDerivativesIndependent curve1 curve2 tBounds1 tBounds2 = do
   let firstDerivative1 = Curve2D.derivative curve1
@@ -166,15 +166,15 @@ secondDerivativesIndependent curve1 curve2 tBounds1 tBounds2 = do
   let VectorBounds2D x'2 y'2 = VectorCurve2D.evaluateBounds firstDerivative2 tBounds2
   let VectorBounds2D x''1 y''1 = VectorCurve2D.evaluateBounds secondDerivative1 tBounds1
   let VectorBounds2D x''2 y''2 = VectorCurve2D.evaluateBounds secondDerivative2 tBounds2
-  Bounds.isResolved (d2ydx2Bounds x'1 y'1 x''1 y''1 .-. d2ydx2Bounds x'2 y'2 x''2 y''2)
-    || Bounds.isResolved (d2ydx2Bounds y'1 x'1 y''1 x''1 .-. d2ydx2Bounds y'2 x'2 y''2 x''2)
+  Interval.isResolved (d2ydx2Bounds x'1 y'1 x''1 y''1 .-. d2ydx2Bounds x'2 y'2 x''2 y''2)
+    || Interval.isResolved (d2ydx2Bounds y'1 x'1 y''1 x''1 .-. d2ydx2Bounds y'2 x'2 y''2 x''2)
 
 d2ydx2Bounds ::
-  Bounds units ->
-  Bounds units ->
-  Bounds units ->
-  Bounds units ->
-  Bounds (Unitless ?/? units)
+  Interval units ->
+  Interval units ->
+  Interval units ->
+  Interval units ->
+  Interval (Unitless ?/? units)
 d2ydx2Bounds x' y' x'' y'' =
   Units.simplify ((y'' ?*? x' .-. y' ?*? x'') ?/? (x' ?*? x' ?*? x'))
 
@@ -183,8 +183,8 @@ candidateOverlappingSegment ::
   EndpointIntersection ->
   List OverlappingSegment
 candidateOverlappingSegment first second = do
-  let tBounds1 = Bounds first.intersectionPoint.t1 second.intersectionPoint.t1
-  let tBounds2 = Bounds first.intersectionPoint.t2 second.intersectionPoint.t2
+  let tBounds1 = Interval first.intersectionPoint.t1 second.intersectionPoint.t1
+  let tBounds2 = Interval first.intersectionPoint.t2 second.intersectionPoint.t2
   let firstIsStart = case first.alignment of
         Positive -> first.intersectionPoint.t2 < 1
         Negative -> first.intersectionPoint.t2 > 0
@@ -204,9 +204,9 @@ overlappingSegments curve1 curve2 endpointIntersections =
   case List.concat (List.successive candidateOverlappingSegment endpointIntersections) of
     [] -> Nothing
     NonEmpty candidateOverlappingSegments -> do
-      let boundsWidth1 segment = Bounds.width segment.tBounds1
+      let boundsWidth1 segment = Interval.width segment.tBounds1
       let testSegment = NonEmpty.maximumBy boundsWidth1 candidateOverlappingSegments
-      let tSampleValues1 = Bounds.sampleValues testSegment.tBounds1
+      let tSampleValues1 = Interval.sampleValues testSegment.tBounds1
       let samplePoints1 = NonEmpty.map (Curve2D.evaluate curve1) tSampleValues1
       if NonEmpty.allSatisfy (intersects curve2) samplePoints1
         then Just candidateOverlappingSegments
@@ -248,7 +248,7 @@ intersections curve1 curve2
               [] -> Ok Nothing
               NonEmpty intersectionPoints -> Ok (Just (IntersectionPoints intersectionPoints))
 
-type Solution = ((Bounds Unitless, Bounds Unitless), IntersectionPoint)
+type Solution = ((Interval Unitless, Interval Unitless), IntersectionPoint)
 
 deduplicate :: List Solution -> List Solution -> List Solution
 deduplicate [] accumulated = accumulated

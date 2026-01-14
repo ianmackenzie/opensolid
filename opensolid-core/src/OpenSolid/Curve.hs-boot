@@ -8,7 +8,7 @@ module OpenSolid.Curve
   )
 where
 
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Interval (Interval)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Prelude
@@ -18,7 +18,7 @@ type role Curve nominal
 type Curve :: Type -> Type
 data Curve units = Curve {compiled :: Compiled units, derivative :: ~(Curve units)}
 
-type Compiled units = CompiledFunction Number (Quantity units) (Bounds Unitless) (Bounds units)
+type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
 
 instance FFI (Curve Unitless)
 
@@ -27,4 +27,4 @@ newtype WithNoZeros units = WithNoZeros (Curve units)
 newtype WithNoInteriorZeros units = WithNoInteriorZeros (Curve units)
 
 evaluate :: Curve units -> Number -> Quantity units
-evaluateBounds :: Curve units -> Bounds Unitless -> Bounds units
+evaluateBounds :: Curve units -> Interval Unitless -> Interval units

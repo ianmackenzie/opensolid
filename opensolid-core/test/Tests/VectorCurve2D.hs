@@ -1,6 +1,6 @@
 module Tests.VectorCurve2D (boundsConsistency, derivativeConsistency) where
 
-import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
@@ -32,8 +32,8 @@ boundsConsistency ::
   VectorCurve2D units space ->
   Expectation
 boundsConsistency vectorCurve = Test.do
-  tBounds <- Bounds.random Parameter.random
-  tValue <- Random.map (Bounds.interpolate tBounds) Parameter.random
+  tBounds <- Interval.random Parameter.random
+  tValue <- Random.map (Interval.interpolate tBounds) Parameter.random
   let vectorCurveValue = VectorCurve2D.evaluate vectorCurve tValue
   let vectorCurveBounds = VectorCurve2D.evaluateBounds vectorCurve tBounds
   Test.expect (vectorCurveValue `intersects` vectorCurveBounds)

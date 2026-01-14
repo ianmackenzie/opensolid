@@ -8,7 +8,7 @@ where
 
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -105,23 +105,23 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
         let vValue = solveForV uValue
         UvPoint uValue vValue
   let evaluateBounds tBounds = do
-        let Bounds t1 t2 = tBounds
+        let Interval t1 t2 = tBounds
         let u1 = Number.interpolateFrom uStart uEnd t1
         let u2 = Number.interpolateFrom uStart uEnd t2
         let v1 = solveForV u1
         let v2 = solveForV u2
         case monotonicity of
-          Monotonic -> Bounds2D (Bounds u1 u2) (Bounds v1 v2)
+          Monotonic -> Bounds2D (Interval u1 u2) (Interval v1 v2)
           MonotonicIn frame -> do
             let p1 = UvPoint u1 v1
             let p2 = UvPoint u2 v2
             Bounds2D.hull2 (Point2D.relativeTo frame p1) (Point2D.relativeTo frame p2)
               & Bounds2D.placeIn frame
           NotMonotonic -> do
-            let vBounds = ImplicitCurveBounds.evaluateBounds bounds (Bounds u1 u2)
-            let slopeBounds = SurfaceFunction.evaluateBounds dvdu (Bounds2D (Bounds u1 u2) vBounds)
+            let vBounds = ImplicitCurveBounds.evaluateBounds bounds (Interval u1 u2)
+            let slopeBounds = SurfaceFunction.evaluateBounds dvdu (Bounds2D (Interval u1 u2) vBounds)
             let segmentVBounds = Internal.curveBoundsAt u1 u2 v1 v2 slopeBounds
-            Bounds2D (Bounds u1 u2) segmentVBounds
+            Bounds2D (Interval u1 u2) segmentVBounds
   let derivative self = do
         let deltaU = uEnd .-. uStart
         let dudt = Curve.constant deltaU
@@ -129,12 +129,12 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
         VectorCurve2D.xy dudt dvdt
   Curve2D.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
 
-clamp :: Number -> Bounds Unitless -> Axis2D Unitless UvSpace -> Bounds Unitless
-clamp u (Bounds vLow vHigh) axis = do
+clamp :: Number -> Interval Unitless -> Axis2D Unitless UvSpace -> Interval Unitless
+clamp u (Interval vLow vHigh) axis = do
   let UvPoint u0 v0 = Axis2D.originPoint axis
   let Direction2D du dv = Axis2D.direction axis
   let v = v0 .+. (u .-. u0) .*. dv ./. du
   if
-    | du > 0 -> Bounds (max vLow v) vHigh
-    | du < 0 -> Bounds vLow (min vHigh v)
-    | otherwise -> Bounds vLow vHigh
+    | du > 0 -> Interval (max vLow v) vHigh
+    | du < 0 -> Interval vLow (min vHigh v)
+    | otherwise -> Interval vLow vHigh

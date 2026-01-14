@@ -11,10 +11,10 @@ module OpenSolid.Curve3D
 where
 
 import GHC.Records (HasField)
-import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
@@ -26,7 +26,7 @@ type Curve3D :: Type -> Type
 data Curve3D space
 
 type Compiled space =
-  CompiledFunction Number (Point3D space) (Bounds Unitless) (Bounds3D space)
+  CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
 
 instance HasField "compiled" (Curve3D space) (Compiled space)
 
@@ -50,5 +50,5 @@ constant :: Point3D space -> Curve3D space
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 on :: Plane3D global local -> Curve2D Meters local -> Curve3D global
 evaluate :: Curve3D space -> Number -> Point3D space
-evaluateBounds :: Curve3D space -> Bounds Unitless -> Bounds3D space
+evaluateBounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space

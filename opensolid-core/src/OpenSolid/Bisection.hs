@@ -20,12 +20,12 @@ module OpenSolid.Bisection
   )
 where
 
-import OpenSolid.Bounds (Bounds (Bounds))
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
@@ -40,9 +40,9 @@ class IsBounds bounds where
   contains :: bounds -> bounds -> Bool
   overlaps :: bounds -> bounds -> Bool
 
-instance IsBounds (Bounds units) where
-  contains = Bounds.contains
-  overlaps bounds1 bounds2 = Bounds.overlap bounds1 bounds2 > Quantity.zero
+instance IsBounds (Interval units) where
+  contains = Interval.contains
+  overlaps interval1 interval2 = Interval.overlap interval1 interval2 > Quantity.zero
 
 instance IsBounds (Bounds2D units space) where
   contains = Bounds2D.contains
@@ -55,37 +55,37 @@ instance (IsBounds bounds1, IsBounds bounds2) => IsBounds (bounds1, bounds2) whe
 data Domain bounds where
   Domain :: IsBounds bounds => bounds -> ~(List (Domain bounds)) -> Domain bounds
 
-split :: Bounds Unitless -> Domain (Bounds Unitless)
-split bounds = Domain bounds do
-  let Bounds low high = bounds
+split :: Interval Unitless -> Domain (Interval Unitless)
+split interval = Domain interval do
+  let Interval low high = interval
   let mid = Number.midpoint low high
   let lowMid = Number.midpoint low mid
   let highMid = Number.midpoint mid high
   if mid > low && mid < high
-    then [split (Bounds low mid), shrink (Bounds lowMid highMid), split (Bounds mid high)]
+    then [split (Interval low mid), shrink (Interval lowMid highMid), split (Interval mid high)]
     else []
 
-shrink :: Bounds Unitless -> Domain (Bounds Unitless)
-shrink bounds = Domain bounds do
-  let Bounds low high = bounds
+shrink :: Interval Unitless -> Domain (Interval Unitless)
+shrink interval = Domain interval do
+  let Interval low high = interval
   let mid = Number.midpoint low high
   let lowMid = Number.midpoint low mid
   let highMid = Number.midpoint mid high
-  [shrink (Bounds lowMid highMid) | lowMid > low && highMid < high]
+  [shrink (Interval lowMid highMid) | lowMid > low && highMid < high]
 
-parameterDomain :: Domain (Bounds Unitless)
-parameterDomain = split Bounds.unitInterval
+parameterDomain :: Domain (Interval Unitless)
+parameterDomain = split Interval.unit
 
-curveDomain :: Domain (Bounds Unitless)
+curveDomain :: Domain (Interval Unitless)
 curveDomain = parameterDomain
 
-curvePairDomain :: Domain (Bounds Unitless, Bounds Unitless)
+curvePairDomain :: Domain (Interval Unitless, Interval Unitless)
 curvePairDomain = map2 (,) curveDomain curveDomain
 
 surfaceDomain :: Domain UvBounds
 surfaceDomain = map2 Bounds2D parameterDomain parameterDomain
 
-curveSurfaceDomain :: Domain (Bounds Unitless, UvBounds)
+curveSurfaceDomain :: Domain (Interval Unitless, UvBounds)
 curveSurfaceDomain = map2 (,) curveDomain surfaceDomain
 
 surfacePairDomain :: Domain (UvBounds, UvBounds)
@@ -137,33 +137,33 @@ map2 function domain1 domain2 = do
     , child2 <- children2
     ]
 
-interior :: Bounds Unitless -> Bounds Unitless
+interior :: Interval Unitless -> Interval Unitless
 interior domain = do
   let (# interiorLow, interiorHigh #) = interior# domain
-  Bounds interiorLow interiorHigh
+  Interval interiorLow interiorHigh
 
-isInterior :: Number -> Bounds Unitless -> Bool
+isInterior :: Number -> Interval Unitless -> Bool
 isInterior value domain = do
   let (# interiorLow, interiorHigh #) = interior# domain
   interiorLow <= value && value <= interiorHigh
 
 {-# INLINE interior# #-}
-interior# :: Bounds Unitless -> (# Number, Number #)
-interior# (Bounds exteriorLow exteriorHigh) = do
+interior# :: Interval Unitless -> (# Number, Number #)
+interior# (Interval exteriorLow exteriorHigh) = do
   let margin = 0.125 *. (exteriorHigh .-. exteriorLow)
   let interiorLow = if exteriorLow == 0 then 0 else exteriorLow .+. margin
   let interiorHigh = if exteriorHigh == 1 then 1 else exteriorHigh .-. margin
   (# interiorLow, interiorHigh #)
 
-includesEndpoint :: Bounds Unitless -> Bool
-includesEndpoint (Bounds tLow tHigh) = tLow == 0 || tHigh == 1
+includesEndpoint :: Interval Unitless -> Bool
+includesEndpoint (Interval tLow tHigh) = tLow == 0 || tHigh == 1
 
 data Size = Small | Large deriving (Eq, Ord, Show)
 
 data Classification = Entire | Interior | Start Size | End Size
 
-classify :: Bounds Unitless -> Classification
-classify (Bounds low high)
+classify :: Interval Unitless -> Classification
+classify (Interval low high)
   | 0 < low && high < 1 = Interior
   | high < 1 = Start (if high <= Desingularization.t0 then Small else Large)
   | 0 < low = End (if low >= Desingularization.t1 then Small else Large)

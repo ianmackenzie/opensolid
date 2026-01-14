@@ -39,7 +39,7 @@ module OpenSolid.Svg
 where
 
 import OpenSolid.Axis2D (Axis2D (Axis2D))
-import OpenSolid.Bounds (Bounds (Bounds))
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
@@ -106,8 +106,8 @@ but 'toText' can be useful if you want to e.g. return the SVG text as part of an
 toText :: Bounds2D Meters space -> Svg space -> Text
 toText viewBox entity = do
   let Bounds2D xBounds yBounds = viewBox
-  let Bounds x1 x2 = xBounds
-  let Bounds y1 y2 = yBounds
+  let Interval x1 x2 = xBounds
+  let Interval y1 y2 = yBounds
   let width = x2 .-. x1
   let height = y2 .-. y1
   let attributes =
