@@ -65,8 +65,8 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.SurfaceFunction (SurfaceFunction)
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units (HasUnits)
@@ -434,14 +434,14 @@ instance
 
 instance
   Composition
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
     (VectorCurve3D units space)
     (VectorSurfaceFunction3D units space)
   where
   curve `compose` function =
     VectorSurfaceFunction3D.new
       (curve.compiled `compose` function.compiled)
-      (\p -> curve.derivative `compose` function .*. SurfaceFunction.derivative p function)
+      (\p -> curve.derivative `compose` function .*. SurfaceFunction1D.derivative p function)
 
 compiled :: VectorCurve3D units space -> Compiled units space
 compiled (VectorCurve3D c _) = c

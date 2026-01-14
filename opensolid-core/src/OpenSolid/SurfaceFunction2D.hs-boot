@@ -13,7 +13,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -59,8 +59,8 @@ instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (SurfaceFunction2D unitless uvSpace)
-    (SurfaceFunction units)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
+    (SurfaceFunction1D units)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -80,7 +80,7 @@ new ::
   Compiled units space ->
   (SurfaceParameter -> VectorSurfaceFunction2D units space) ->
   SurfaceFunction2D units space
-xy :: SurfaceFunction units -> SurfaceFunction units -> SurfaceFunction2D units space
+xy :: SurfaceFunction1D units -> SurfaceFunction1D units -> SurfaceFunction2D units space
 derivative ::
   SurfaceParameter ->
   SurfaceFunction2D units space ->

@@ -44,8 +44,8 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2D qualified as Solve2D
 import OpenSolid.Surface3D qualified as Surface3D
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Svg (Svg)
 import OpenSolid.Svg qualified as Svg
@@ -201,7 +201,7 @@ testPlaneTorusIntersection = do
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
   let planeNormal = Direction3D.polar World3D.frontPlane (alpha .+. Angle.halfPi)
   let f = planeNormal `dot` (surface.function .-. World3D.originPoint)
-  zeros <- Result.orFail (SurfaceFunction.zeros f)
+  zeros <- Result.orFail (SurfaceFunction1D.zeros f)
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -209,10 +209,10 @@ testPlaneTorusIntersection = do
 
 testPlaneParaboloidIntersection :: IO ()
 testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
-  let u = SurfaceFunction.u
-  let v = SurfaceFunction.v
-  let f = SurfaceFunction.squared u .+. SurfaceFunction.squared v .- 0.5
-  zeros <- Result.orFail (SurfaceFunction.zeros f)
+  let u = SurfaceFunction1D.u
+  let v = SurfaceFunction1D.v
+  let f = SurfaceFunction1D.squared u .+. SurfaceFunction1D.squared v .- 0.5
+  zeros <- Result.orFail (SurfaceFunction1D.zeros f)
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -221,7 +221,7 @@ testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
 strokeWidth :: Length
 strokeWidth = Length.millimeters 0.1
 
-drawZeros :: Text -> SurfaceFunction.Zeros -> IO ()
+drawZeros :: Text -> SurfaceFunction1D.Zeros -> IO ()
 drawZeros path zeros = do
   let uvBounds = Interval.convert toDrawing (Interval -0.05 1.05)
   let viewBox = Bounds2D uvBounds uvBounds
@@ -378,9 +378,9 @@ testTextSum = do
 
 testNewtonRaphson2D :: IO ()
 testNewtonRaphson2D = Tolerance.using 1e-9 do
-  let u = SurfaceFunction.u
-  let v = SurfaceFunction.v
-  let f = SurfaceFunction.squared u .+. SurfaceFunction.squared v .- 4
+  let u = SurfaceFunction1D.u
+  let v = SurfaceFunction1D.v
+  let f = SurfaceFunction1D.squared u .+. SurfaceFunction1D.squared v .- 4
   let g = u .-. v
   let bounds = Bounds2D (Interval 0 2) (Interval 0 2)
   let function = VectorSurfaceFunction2D.xy f g

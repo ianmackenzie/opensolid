@@ -10,7 +10,7 @@ where
 import GHC.Records (HasField)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -47,20 +47,20 @@ instance
 
 instance
   Multiplication_
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (VectorSurfaceFunction3D units2 space)
     (VectorSurfaceFunction3D (units1 ?*? units2) space)
 
 instance
   Multiplication_
     (VectorSurfaceFunction3D units1 space)
-    (SurfaceFunction units2)
+    (SurfaceFunction1D units2)
     (VectorSurfaceFunction3D (units1 ?*? units2) space)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (VectorSurfaceFunction3D units2 space)
     (VectorSurfaceFunction3D units3 space)
 
@@ -68,7 +68,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (VectorSurfaceFunction3D units1 space)
-    (SurfaceFunction units2)
+    (SurfaceFunction1D units2)
     (VectorSurfaceFunction3D units3 space)
 
 new ::

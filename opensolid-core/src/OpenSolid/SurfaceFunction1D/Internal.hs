@@ -1,4 +1,4 @@
-module OpenSolid.SurfaceFunction.Internal
+module OpenSolid.SurfaceFunction1D.Internal
   ( solveForU
   , solveForV
   , curveBoundsAt
@@ -11,36 +11,36 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1D qualified as Solve1D
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.UvPoint (pattern UvPoint)
 
 solveForU ::
   Tolerance units =>
-  SurfaceFunction units ->
-  SurfaceFunction units ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D units ->
   Interval Unitless ->
   Number ->
   Number
 solveForU f fu uBounds vValue = do
   let uvPoint uValue = UvPoint uValue vValue
-  let fValue uValue = SurfaceFunction.evaluate f (uvPoint uValue)
-  let fuValue uValue = SurfaceFunction.evaluate fu (uvPoint uValue)
+  let fValue uValue = SurfaceFunction1D.evaluate f (uvPoint uValue)
+  let fuValue uValue = SurfaceFunction1D.evaluate fu (uvPoint uValue)
   case Solve1D.monotonic fValue fuValue uBounds of
     Solve1D.Exact uValue -> uValue
     Solve1D.Closest uValue -> uValue
 
 solveForV ::
   Tolerance units =>
-  SurfaceFunction units ->
-  SurfaceFunction units ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D units ->
   Number ->
   Interval Unitless ->
   Number
 solveForV f fv uValue vBounds = do
   let uvPoint vValue = UvPoint uValue vValue
-  let fValue vValue = SurfaceFunction.evaluate f (uvPoint vValue)
-  let fvValue vValue = SurfaceFunction.evaluate fv (uvPoint vValue)
+  let fValue vValue = SurfaceFunction1D.evaluate f (uvPoint vValue)
+  let fvValue vValue = SurfaceFunction1D.evaluate fv (uvPoint vValue)
   case Solve1D.monotonic fValue fvValue vBounds of
     Solve1D.Exact vValue -> vValue
     Solve1D.Closest vValue -> vValue

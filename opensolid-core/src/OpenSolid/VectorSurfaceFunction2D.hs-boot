@@ -14,7 +14,7 @@ where
 import GHC.Records (HasField)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -52,7 +52,7 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (VectorSurfaceFunction2D units2 space)
     (VectorSurfaceFunction2D units3 space)
 
@@ -60,19 +60,19 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (VectorSurfaceFunction2D units1 space)
-    (SurfaceFunction units2)
+    (SurfaceFunction1D units2)
     (VectorSurfaceFunction2D units3 space)
 
 instance
   Multiplication_
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (VectorSurfaceFunction2D units2 space)
     (VectorSurfaceFunction2D (units1 ?*? units2) space)
 
 instance
   Multiplication_
     (VectorSurfaceFunction2D units1 space)
-    (SurfaceFunction units2)
+    (SurfaceFunction1D units2)
     (VectorSurfaceFunction2D (units1 ?*? units2) space)
 
 instance
@@ -80,14 +80,14 @@ instance
   DotMultiplication_
     (VectorSurfaceFunction2D units1 space1)
     (VectorSurfaceFunction2D units2 space2)
-    (SurfaceFunction (units1 ?*? units2))
+    (SurfaceFunction1D (units1 ?*? units2))
 
 instance
   space1 ~ space2 =>
   CrossMultiplication_
     (VectorSurfaceFunction2D units1 space1)
     (VectorSurfaceFunction2D units2 space2)
-    (SurfaceFunction (units1 ?*? units2))
+    (SurfaceFunction1D (units1 ?*? units2))
 
 new ::
   Compiled units space ->
@@ -98,9 +98,9 @@ derivative ::
   VectorSurfaceFunction2D units space ->
   VectorSurfaceFunction2D units space
 constant :: Vector2D units space -> VectorSurfaceFunction2D units space
-xComponent :: VectorSurfaceFunction2D units space -> SurfaceFunction units
-yComponent :: VectorSurfaceFunction2D units space -> SurfaceFunction units
+xComponent :: VectorSurfaceFunction2D units space -> SurfaceFunction1D units
+yComponent :: VectorSurfaceFunction2D units space -> SurfaceFunction1D units
 components ::
   VectorSurfaceFunction2D units space ->
-  (SurfaceFunction units, SurfaceFunction units)
-squaredMagnitude_ :: VectorSurfaceFunction2D units space -> SurfaceFunction (units ?*? units)
+  (SurfaceFunction1D units, SurfaceFunction1D units)
+squaredMagnitude_ :: VectorSurfaceFunction2D units space -> SurfaceFunction1D (units ?*? units)

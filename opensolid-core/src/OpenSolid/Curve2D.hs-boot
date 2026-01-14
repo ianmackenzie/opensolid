@@ -21,16 +21,16 @@ module OpenSolid.Curve2D
 where
 
 import GHC.Records (HasField)
-import OpenSolid.Interval (Interval)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Point2D (Point2D)
-import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.Transform2D (Transform2D)
+import OpenSolid.Vector2D (Vector2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
 type role Curve2D nominal nominal
@@ -69,7 +69,7 @@ instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (Curve2D unitless uvSpace)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (Curve1D units)
 
 constant :: Point2D units space -> Curve2D units space

@@ -80,8 +80,8 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D (Transform2D)
@@ -485,14 +485,14 @@ instance
 
 instance
   Composition
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
     (VectorCurve2D units space)
     (VectorSurfaceFunction2D units space)
   where
   curve `compose` function =
     VectorSurfaceFunction2D.new
       (curve.compiled `compose` function.compiled)
-      (\p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function)
+      (\p -> (curve.derivative `compose` function) .*. SurfaceFunction1D.derivative p function)
 
 instance
   Composition
@@ -500,7 +500,7 @@ instance
     (VectorCurve2D units space)
     (VectorSurfaceFunction2D units space)
   where
-  curve `compose` parameter = curve `compose` SurfaceFunction.parameter parameter
+  curve `compose` parameter = curve `compose` SurfaceFunction1D.parameter parameter
 
 compiled :: VectorCurve2D units space -> Compiled units space
 compiled = (.compiled)

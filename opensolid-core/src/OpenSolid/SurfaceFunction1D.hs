@@ -1,5 +1,5 @@
-module OpenSolid.SurfaceFunction
-  ( SurfaceFunction (compiled, du, dv)
+module OpenSolid.SurfaceFunction1D
+  ( SurfaceFunction1D (compiled, du, dv)
   , Compiled
   , evaluate
   , evaluateAt
@@ -61,18 +61,18 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve2D qualified as Solve2D
-import OpenSolid.SurfaceFunction.Blending qualified as SurfaceFunction.Blending
-import OpenSolid.SurfaceFunction.Desingularization qualified as SurfaceFunction.Desingularization
-import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
-import OpenSolid.SurfaceFunction.PartialZeros (PartialZeros)
-import OpenSolid.SurfaceFunction.PartialZeros qualified as PartialZeros
-import OpenSolid.SurfaceFunction.Quotient qualified as SurfaceFunction.Quotient
-import OpenSolid.SurfaceFunction.SaddleRegion (SaddleRegion)
-import OpenSolid.SurfaceFunction.SaddleRegion qualified as SaddleRegion
-import OpenSolid.SurfaceFunction.Subproblem (CornerValues (..), Subproblem (..))
-import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
-import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
-import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
+import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
+import OpenSolid.SurfaceFunction1D.Desingularization qualified as SurfaceFunction1D.Desingularization
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.HorizontalCurve qualified as HorizontalCurve
+import OpenSolid.SurfaceFunction1D.PartialZeros (PartialZeros)
+import OpenSolid.SurfaceFunction1D.PartialZeros qualified as PartialZeros
+import OpenSolid.SurfaceFunction1D.Quotient qualified as SurfaceFunction1D.Quotient
+import OpenSolid.SurfaceFunction1D.SaddleRegion (SaddleRegion)
+import OpenSolid.SurfaceFunction1D.SaddleRegion qualified as SaddleRegion
+import OpenSolid.SurfaceFunction1D.Subproblem (CornerValues (..), Subproblem (..))
+import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
+import OpenSolid.SurfaceFunction1D.Zeros (Zeros (..))
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits)
@@ -90,28 +90,28 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfa
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
-data SurfaceFunction units = SurfaceFunction
+data SurfaceFunction1D units = SurfaceFunction1D
   { compiled :: Compiled units
-  , du :: ~(SurfaceFunction units)
-  , dv :: ~(SurfaceFunction units)
+  , du :: ~(SurfaceFunction1D units)
+  , dv :: ~(SurfaceFunction1D units)
   }
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
 
-instance HasUnits (SurfaceFunction units) units
+instance HasUnits (SurfaceFunction1D units) units
 
-instance Units.Coercion (SurfaceFunction unitsA) (SurfaceFunction unitsB) where
-  coerce (SurfaceFunction c du dv) =
-    SurfaceFunction (Units.coerce c) (Units.coerce du) (Units.coerce dv)
+instance Units.Coercion (SurfaceFunction1D unitsA) (SurfaceFunction1D unitsB) where
+  coerce (SurfaceFunction1D c du dv) =
+    SurfaceFunction1D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
-instance ApproximateEquality (SurfaceFunction units) units where
+instance ApproximateEquality (SurfaceFunction1D units) units where
   function1 ~= function2 =
     List.allTrue
       [evaluate function1 uvPoint ~= evaluate function2 uvPoint | uvPoint <- UvPoint.samples]
 
 instance
   units1 ~ units2 =>
-  Intersects (SurfaceFunction units1) (Quantity units2) units1
+  Intersects (SurfaceFunction1D units1) (Quantity units2) units1
   where
   function `intersects` value =
     -- TODO optimize this to use a special Solve2D.find or similar
@@ -124,36 +124,36 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (Quantity units1) (SurfaceFunction units2) units1
+  Intersects (Quantity units1) (SurfaceFunction1D units2) units1
   where
   value `intersects` function = function `intersects` value
 
-instance Negation (SurfaceFunction units) where
+instance Negation (SurfaceFunction1D units) where
   negative function = new (negative function.compiled) (\p -> negative (derivative p function))
 
-instance Multiplication Sign (SurfaceFunction units) (SurfaceFunction units) where
+instance Multiplication Sign (SurfaceFunction1D units) (SurfaceFunction1D units) where
   Positive .*. function = function
   Negative .*. function = negative function
 
-instance Multiplication (SurfaceFunction units) Sign (SurfaceFunction units) where
+instance Multiplication (SurfaceFunction1D units) Sign (SurfaceFunction1D units) where
   function .*. Positive = function
   function .*. Negative = negative function
 
 instance
   units1 ~ units2 =>
   Addition
-    (SurfaceFunction units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
+    (SurfaceFunction1D units2)
+    (SurfaceFunction1D units1)
   where
   lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (\p -> derivative p lhs .+. derivative p rhs)
 
 instance
   units1 ~ units2 =>
   Addition
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (Quantity units2)
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
   where
   function .+. value = function .+. constant value
 
@@ -161,40 +161,40 @@ instance
   units1 ~ units2 =>
   Addition
     (Quantity units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units2)
+    (SurfaceFunction1D units1)
   where
   value .+. function = constant value .+. function
 
 instance
   units1 ~ units2 =>
-  Subtraction (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units1)
+  Subtraction (SurfaceFunction1D units1) (SurfaceFunction1D units2) (SurfaceFunction1D units1)
   where
   lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (\p -> derivative p lhs .-. derivative p rhs)
 
 instance
   units1 ~ units2 =>
-  Subtraction (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units1)
+  Subtraction (SurfaceFunction1D units1) (Quantity units2) (SurfaceFunction1D units1)
   where
   function .-. value = function .-. constant value
 
 instance
   units1 ~ units2 =>
-  Subtraction (Quantity units1) (SurfaceFunction units2) (SurfaceFunction units1)
+  Subtraction (Quantity units1) (SurfaceFunction1D units2) (SurfaceFunction1D units1)
   where
   value .-. function = constant value .-. function
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units3)
+  Multiplication (SurfaceFunction1D units1) (SurfaceFunction1D units2) (SurfaceFunction1D units3)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (SurfaceFunction units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction (units1 ?*? units2))
+    (SurfaceFunction1D units1)
+    (SurfaceFunction1D units2)
+    (SurfaceFunction1D (units1 ?*? units2))
   where
   lhs ?*? rhs =
     new
@@ -203,36 +203,36 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
+  Multiplication (SurfaceFunction1D units1) (Quantity units2) (SurfaceFunction1D units3)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (Quantity units2)
-    (SurfaceFunction (units1 ?*? units2))
+    (SurfaceFunction1D (units1 ?*? units2))
   where
   function ?*? value = function ?*? constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (SurfaceFunction units2) (SurfaceFunction units3)
+  Multiplication (Quantity units1) (SurfaceFunction1D units2) (SurfaceFunction1D units3)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (Quantity units1)
-    (SurfaceFunction units2)
-    (SurfaceFunction (units1 ?*? units2))
+    (SurfaceFunction1D units2)
+    (SurfaceFunction1D (units1 ?*? units2))
   where
   value ?*? function = constant value ?*? function
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (Vector2D units2 space)
     (VectorSurfaceFunction2D units3 space)
   where
@@ -240,7 +240,7 @@ instance
 
 instance
   Multiplication_
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (Vector2D units2 space)
     (VectorSurfaceFunction2D (units1 ?*? units2) space)
   where
@@ -250,7 +250,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Vector2D units1 space)
-    (SurfaceFunction units2)
+    (SurfaceFunction1D units2)
     (VectorSurfaceFunction2D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
@@ -258,14 +258,14 @@ instance
 instance
   Multiplication_
     (Vector2D units1 space)
-    (SurfaceFunction units2)
+    (SurfaceFunction1D units2)
     (VectorSurfaceFunction2D (units1 ?*? units2) space)
   where
   vector ?*? function = VectorSurfaceFunction2D.constant vector ?*? function
 
 instance
   Multiplication
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (Direction2D space)
     (VectorSurfaceFunction2D units space)
   where
@@ -274,7 +274,7 @@ instance
 instance
   Multiplication
     (Direction2D space)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (VectorSurfaceFunction2D units space)
   where
   lhs .*. rhs = Vector2D.unit lhs .*. rhs
@@ -282,7 +282,7 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (Vector3D units2 space)
     (VectorSurfaceFunction3D units3 space)
   where
@@ -290,7 +290,7 @@ instance
 
 instance
   Multiplication_
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (Vector3D units2 space)
     (VectorSurfaceFunction3D (units1 ?*? units2) space)
   where
@@ -300,7 +300,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Vector3D units1 space)
-    (SurfaceFunction units2)
+    (SurfaceFunction1D units2)
     (VectorSurfaceFunction3D units3 space)
   where
   lhs .*. rhs = Units.specialize (lhs ?*? rhs)
@@ -308,14 +308,14 @@ instance
 instance
   Multiplication_
     (Vector3D units1 space)
-    (SurfaceFunction units2)
+    (SurfaceFunction1D units2)
     (VectorSurfaceFunction3D (units1 ?*? units2) space)
   where
   vector ?*? function = VectorSurfaceFunction3D.constant vector ?*? function
 
 instance
   Multiplication
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (Direction3D space)
     (VectorSurfaceFunction3D units space)
   where
@@ -324,100 +324,100 @@ instance
 instance
   Multiplication
     (Direction3D space)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (VectorSurfaceFunction3D units space)
   where
   lhs .*. rhs = Vector3D.unit lhs .*. rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (SurfaceFunction units1) (Quantity units2) (SurfaceFunction units3)
+  Division (SurfaceFunction1D units1) (Quantity units2) (SurfaceFunction1D units3)
   where
   lhs ./. rhs = Units.specialize (lhs ?/? rhs)
 
 instance
   Division_
-    (SurfaceFunction units1)
+    (SurfaceFunction1D units1)
     (Quantity units2)
-    (SurfaceFunction (units1 ?/? units2))
+    (SurfaceFunction1D (units1 ?/? units2))
   where
   function ?/? value = Units.simplify (function ?*? (1 /? value))
 
-instance Composition (SurfaceFunction Unitless) (Curve1D units) (SurfaceFunction units) where
+instance Composition (SurfaceFunction1D Unitless) (Curve1D units) (SurfaceFunction1D units) where
   curve `compose` function =
     new
       (curve.compiled `compose` function.compiled)
       (\p -> curve.derivative `compose` function .*. derivative p function)
 
-evaluate :: SurfaceFunction units -> UvPoint -> Quantity units
+evaluate :: SurfaceFunction1D units -> UvPoint -> Quantity units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 {-# INLINE evaluateAt #-}
-evaluateAt :: UvPoint -> SurfaceFunction units -> Quantity units
+evaluateAt :: UvPoint -> SurfaceFunction1D units -> Quantity units
 evaluateAt uvPoint function = evaluate function uvPoint
 
-evaluateBounds :: SurfaceFunction units -> UvBounds -> Interval units
+evaluateBounds :: SurfaceFunction1D units -> UvBounds -> Interval units
 evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
 
 {-# INLINE evaluateBoundsWithin #-}
-evaluateBoundsWithin :: UvBounds -> SurfaceFunction units -> Interval units
+evaluateBoundsWithin :: UvBounds -> SurfaceFunction1D units -> Interval units
 evaluateBoundsWithin uvBounds function = evaluateBounds function uvBounds
 
-derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
+derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivative U = (.du)
 derivative V = (.dv)
 
-derivativeIn :: Direction2D UvSpace -> SurfaceFunction units -> SurfaceFunction units
+derivativeIn :: Direction2D UvSpace -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivativeIn (Direction2D dx dy) function =
   dx .*. function.du .+. dy .*. function.dv
 
-zero :: SurfaceFunction units
+zero :: SurfaceFunction1D units
 zero = constant Quantity.zero
 
-one :: SurfaceFunction Unitless
+one :: SurfaceFunction1D Unitless
 one = constant 1
 
-constant :: Quantity units -> SurfaceFunction units
+constant :: Quantity units -> SurfaceFunction1D units
 constant value = new (CompiledFunction.constant value) (const zero)
 
-u :: SurfaceFunction Unitless
+u :: SurfaceFunction1D Unitless
 u = new (CompiledFunction.concrete Expression.u) (\case U -> one; V -> zero)
 
-v :: SurfaceFunction Unitless
+v :: SurfaceFunction1D Unitless
 v = new (CompiledFunction.concrete Expression.v) (\case U -> zero; V -> one)
 
-parameter :: SurfaceParameter -> SurfaceFunction Unitless
+parameter :: SurfaceParameter -> SurfaceFunction1D Unitless
 parameter U = u
 parameter V = v
 
-new :: Compiled units -> (SurfaceParameter -> SurfaceFunction units) -> SurfaceFunction units
+new :: Compiled units -> (SurfaceParameter -> SurfaceFunction1D units) -> SurfaceFunction1D units
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  SurfaceFunction c du (SurfaceFunction dv.compiled du.dv dv.dv)
+  SurfaceFunction1D c du (SurfaceFunction1D dv.compiled du.dv dv.dv)
 
 recursive ::
   Compiled units ->
-  (SurfaceFunction units -> SurfaceParameter -> SurfaceFunction units) ->
-  SurfaceFunction units
+  (SurfaceFunction1D units -> SurfaceParameter -> SurfaceFunction1D units) ->
+  SurfaceFunction1D units
 recursive givenCompiled derivativeFunction =
   let self = new givenCompiled (derivativeFunction self) in self
 
 desingularize ::
-  SurfaceFunction units ->
-  "singularityU0" ::: Maybe (SurfaceFunction units, SurfaceFunction units) ->
-  "singularityU1" ::: Maybe (SurfaceFunction units, SurfaceFunction units) ->
-  "singularityV0" ::: Maybe (SurfaceFunction units, SurfaceFunction units) ->
-  "singularityV1" ::: Maybe (SurfaceFunction units, SurfaceFunction units) ->
-  SurfaceFunction units
-desingularize = SurfaceFunction.Blending.desingularize desingularized
+  SurfaceFunction1D units ->
+  "singularityU0" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  "singularityU1" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  "singularityV0" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  "singularityV1" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  SurfaceFunction1D units
+desingularize = SurfaceFunction1D.Blending.desingularize desingularized
 
 desingularized ::
-  SurfaceFunction Unitless ->
-  SurfaceFunction units ->
-  SurfaceFunction units ->
-  SurfaceFunction units ->
-  SurfaceFunction units
+  SurfaceFunction1D Unitless ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D units
 desingularized t start middle end =
   new
     (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
@@ -425,16 +425,16 @@ desingularized t start middle end =
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
-  SurfaceFunction units1 ->
-  SurfaceFunction units2 ->
-  Result DivisionByZero (SurfaceFunction units3)
+  SurfaceFunction1D units1 ->
+  SurfaceFunction1D units2 ->
+  Result DivisionByZero (SurfaceFunction1D units3)
 quotient lhs rhs = Units.specialize (quotient_ lhs rhs)
 
 quotient_ ::
   Tolerance units2 =>
-  SurfaceFunction units1 ->
-  SurfaceFunction units2 ->
-  Result DivisionByZero (SurfaceFunction (units1 ?/? units2))
+  SurfaceFunction1D units1 ->
+  SurfaceFunction1D units2 ->
+  Result DivisionByZero (SurfaceFunction1D (units1 ?/? units2))
 quotient_ numerator denominator = do
   let lhopital p = do
         let numerator' = derivative p numerator
@@ -448,19 +448,19 @@ quotient_ numerator denominator = do
                   (numerator'' ?*? denominator' .-. numerator' ?*? denominator'')
                   (2 *. squared_ denominator')
         (value, firstDerivative)
-  SurfaceFunction.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
+  SurfaceFunction1D.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
 
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
-  SurfaceFunction units1 ->
-  SurfaceFunction units2 ->
-  SurfaceFunction units3
+  SurfaceFunction1D units1 ->
+  SurfaceFunction1D units2 ->
+  SurfaceFunction1D units3
 unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient_ numerator denominator)
 
 unsafeQuotient_ ::
-  SurfaceFunction units1 ->
-  SurfaceFunction units2 ->
-  SurfaceFunction (units1 ?/? units2)
+  SurfaceFunction1D units1 ->
+  SurfaceFunction1D units2 ->
+  SurfaceFunction1D (units1 ?/? units2)
 unsafeQuotient_ lhs rhs = do
   let quotientDerivative self p =
         unsafeQuotient_ (derivative p lhs) rhs .-. self .*. unsafeQuotient (derivative p rhs) rhs
@@ -468,10 +468,10 @@ unsafeQuotient_ lhs rhs = do
     (CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled)
     quotientDerivative
 
-squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
+squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFunction1D units2
 squared function = Units.specialize (squared_ function)
 
-squared_ :: SurfaceFunction units -> SurfaceFunction (units ?*? units)
+squared_ :: SurfaceFunction1D units -> SurfaceFunction1D (units ?*? units)
 squared_ function =
   new
     (CompiledFunction.map Expression.squared_ Quantity.squared_ Interval.squared_ function.compiled)
@@ -479,11 +479,11 @@ squared_ function =
 
 sqrt ::
   (Tolerance units1, Units.Squared units1 units2) =>
-  SurfaceFunction units2 ->
-  SurfaceFunction units1
+  SurfaceFunction1D units2 ->
+  SurfaceFunction1D units1
 sqrt function = sqrt_ (Units.unspecialize function)
 
-sqrt_ :: Tolerance units => SurfaceFunction (units ?*? units) -> SurfaceFunction units
+sqrt_ :: Tolerance units => SurfaceFunction1D (units ?*? units) -> SurfaceFunction1D units
 sqrt_ function =
   if Tolerance.using (Quantity.squared_ ?tolerance) (function ~= zero)
     then zero
@@ -491,7 +491,7 @@ sqrt_ function =
       let maybeSingularity param value sign = do
             let firstDerivative = derivative param function
             let secondDerivative = derivative param firstDerivative
-            let testPoints = SurfaceFunction.Desingularization.testPoints param value
+            let testPoints = SurfaceFunction1D.Desingularization.testPoints param value
             let functionIsZeroAt testPoint =
                   Tolerance.using (Quantity.squared_ ?tolerance) $
                     evaluate function testPoint ~= Quantity.zero
@@ -513,28 +513,28 @@ sqrt_ function =
         (#singularityV0 (maybeSingularity V 0 Positive))
         (#singularityV1 (maybeSingularity V 1 Negative))
 
-unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction units2 -> SurfaceFunction units1
+unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction1D units2 -> SurfaceFunction1D units1
 unsafeSqrt function = unsafeSqrt_ (Units.unspecialize function)
 
-unsafeSqrt_ :: SurfaceFunction (units ?*? units) -> SurfaceFunction units
+unsafeSqrt_ :: SurfaceFunction1D (units ?*? units) -> SurfaceFunction1D units
 unsafeSqrt_ function =
   recursive
     (CompiledFunction.map Expression.sqrt_ Quantity.sqrt_ Interval.sqrt_ function.compiled)
     (\self p -> Units.coerce (unsafeQuotient_ (derivative p function) (2 *. self)))
 
-cubed :: SurfaceFunction Unitless -> SurfaceFunction Unitless
+cubed :: SurfaceFunction1D Unitless -> SurfaceFunction1D Unitless
 cubed function =
   new
     (CompiledFunction.map Expression.cubed Number.cubed Interval.cubed function.compiled)
     (\p -> 3 *. squared function .*. derivative p function)
 
-sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
+sin :: SurfaceFunction1D Radians -> SurfaceFunction1D Unitless
 sin function =
   new
     (CompiledFunction.map Expression.sin Angle.sin Interval.sin function.compiled)
     (\p -> cos function .*. (derivative p function ./. Angle.radian))
 
-cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
+cos :: SurfaceFunction1D Radians -> SurfaceFunction1D Unitless
 cos function =
   new
     (CompiledFunction.map Expression.cos Angle.cos Interval.cos function.compiled)
@@ -542,7 +542,7 @@ cos function =
 
 data IsZero = IsZero deriving (Eq, Show)
 
-zeros :: Tolerance units => SurfaceFunction units -> Result IsZero Zeros
+zeros :: Tolerance units => SurfaceFunction1D units -> Result IsZero Zeros
 zeros function
   | function ~= zero = Error IsZero
   | otherwise = do
@@ -577,9 +577,9 @@ data Solution units
 
 findZeros ::
   Tolerance units =>
-  SurfaceFunction units ->
-  SurfaceFunction Unitless ->
-  SurfaceFunction Unitless ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D Unitless ->
+  SurfaceFunction1D Unitless ->
   FindZerosContext ->
   Domain2D ->
   Solve2D.Exclusions exclusions ->

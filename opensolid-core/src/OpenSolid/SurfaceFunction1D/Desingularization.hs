@@ -1,12 +1,12 @@
 -- | Helper functions for surface function desingularization.
-module OpenSolid.SurfaceFunction.Desingularization (isZero, testPoints) where
+module OpenSolid.SurfaceFunction1D.Desingularization (isZero, testPoints) where
 
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 
@@ -26,7 +26,7 @@ testPoints V vValue = NonEmpty.map (\u -> UvPoint u vValue) Parameter.samples
 The given value should generally either be 0 or 1, for example 'isZero U 0 function'
 will check if the given function is zero everywhere along U=0.
 -}
-isZero :: Tolerance units => SurfaceParameter -> Number -> SurfaceFunction units -> Bool
+isZero :: Tolerance units => SurfaceParameter -> Number -> SurfaceFunction1D units -> Bool
 isZero parameter value function = do
-  let isZeroAt testPoint = SurfaceFunction.evaluate function testPoint ~= Quantity.zero
+  let isZeroAt testPoint = SurfaceFunction1D.evaluate function testPoint ~= Quantity.zero
   NonEmpty.allSatisfy isZeroAt (testPoints parameter value)

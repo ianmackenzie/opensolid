@@ -1,4 +1,4 @@
-module OpenSolid.SurfaceFunction.SaddleRegion
+module OpenSolid.SurfaceFunction1D.SaddleRegion
   ( SaddleRegion
   , Frame
   , JoiningCurve (Incoming, Outgoing)
@@ -25,11 +25,11 @@ import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
-import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))
-import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
-import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.HorizontalCurve qualified as HorizontalCurve
+import OpenSolid.SurfaceFunction1D.Subproblem (Subproblem (Subproblem))
+import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
@@ -66,9 +66,9 @@ instance HasField "bounds" (SaddleRegion units) UvBounds where
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
   let f = subproblem.f
-  let fuu = SurfaceFunction.evaluate f.du.du saddlePoint
-  let fuv = SurfaceFunction.evaluate f.du.dv saddlePoint
-  let fvv = SurfaceFunction.evaluate f.dv.dv saddlePoint
+  let fuu = SurfaceFunction1D.evaluate f.du.du saddlePoint
+  let fuv = SurfaceFunction1D.evaluate f.du.dv saddlePoint
+  let fvv = SurfaceFunction1D.evaluate f.dv.dv saddlePoint
   let bDirectionCandidates = NonEmpty.three Direction2D.x Direction2D.y (Direction2D.degrees 45)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Quantity.abs . directionalSecondDerivative) bDirectionCandidates

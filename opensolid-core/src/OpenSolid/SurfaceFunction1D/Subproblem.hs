@@ -1,4 +1,4 @@
-module OpenSolid.SurfaceFunction.Subproblem
+module OpenSolid.SurfaceFunction1D.Subproblem
   ( Subproblem (..)
   , CornerValues (..)
   , new
@@ -25,16 +25,16 @@ import OpenSolid.Domain2D qualified as Domain2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction.Internal qualified as Internal
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 
 data Subproblem units = Subproblem
-  { f :: SurfaceFunction units
-  , dudv :: SurfaceFunction Unitless
-  , dvdu :: SurfaceFunction Unitless
+  { f :: SurfaceFunction1D units
+  , dudv :: SurfaceFunction1D Unitless
+  , dvdu :: SurfaceFunction1D Unitless
   , subdomain :: Domain2D
   , uvBounds :: UvBounds
   , fValues :: ~(CornerValues units)
@@ -54,9 +54,9 @@ data CornerValues units = CornerValues
   }
 
 new ::
-  SurfaceFunction units ->
-  SurfaceFunction Unitless ->
-  SurfaceFunction Unitless ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D Unitless ->
+  SurfaceFunction1D Unitless ->
   Domain2D ->
   Subproblem units
 new f dudv dvdu subdomain = do
@@ -68,21 +68,21 @@ new f dudv dvdu subdomain = do
     , subdomain
     , uvBounds
     , fValues = cornerValues uvBounds f
-    , fBounds = SurfaceFunction.evaluateBounds f uvBounds
-    , fuBounds = SurfaceFunction.evaluateBounds f.du uvBounds
-    , fvBounds = SurfaceFunction.evaluateBounds f.dv uvBounds
-    , fuuBounds = SurfaceFunction.evaluateBounds f.du.du uvBounds
-    , fuvBounds = SurfaceFunction.evaluateBounds f.du.dv uvBounds
-    , fvvBounds = SurfaceFunction.evaluateBounds f.dv.dv uvBounds
+    , fBounds = SurfaceFunction1D.evaluateBounds f uvBounds
+    , fuBounds = SurfaceFunction1D.evaluateBounds f.du uvBounds
+    , fvBounds = SurfaceFunction1D.evaluateBounds f.dv uvBounds
+    , fuuBounds = SurfaceFunction1D.evaluateBounds f.du.du uvBounds
+    , fuvBounds = SurfaceFunction1D.evaluateBounds f.du.dv uvBounds
+    , fvvBounds = SurfaceFunction1D.evaluateBounds f.dv.dv uvBounds
     }
 
-cornerValues :: UvBounds -> SurfaceFunction units -> CornerValues units
+cornerValues :: UvBounds -> SurfaceFunction1D units -> CornerValues units
 cornerValues (Bounds2D (Interval u1 u2) (Interval v1 v2)) function =
   CornerValues
-    { bottomLeft = SurfaceFunction.evaluate function (UvPoint u1 v1)
-    , bottomRight = SurfaceFunction.evaluate function (UvPoint u2 v1)
-    , topLeft = SurfaceFunction.evaluate function (UvPoint u1 v2)
-    , topRight = SurfaceFunction.evaluate function (UvPoint u2 v2)
+    { bottomLeft = SurfaceFunction1D.evaluate function (UvPoint u1 v1)
+    , bottomRight = SurfaceFunction1D.evaluate function (UvPoint u2 v1)
+    , topLeft = SurfaceFunction1D.evaluate function (UvPoint u1 v2)
+    , topRight = SurfaceFunction1D.evaluate function (UvPoint u2 v2)
     }
 
 leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)

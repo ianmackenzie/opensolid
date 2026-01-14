@@ -56,7 +56,7 @@ import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Surface3D.Revolved qualified as Revolved
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
@@ -103,26 +103,26 @@ on plane region = do
   let p0 = Point2D.placeOn plane centerPoint
   let vx = regionSize .*. Plane3D.xDirection plane
   let vy = regionSize .*. Plane3D.yDirection plane
-  let planeFunction = p0 .+. SurfaceFunction.u .*. vx .+. SurfaceFunction.v .*. vy
+  let planeFunction = p0 .+. SurfaceFunction1D.u .*. vx .+. SurfaceFunction1D.v .*. vy
   parametric planeFunction normalizedRegion
 
 extruded :: Curve3D space -> Vector3D Meters space -> Surface3D space
 extruded curve displacement =
   parametric
-    (curve `compose` SurfaceFunction.u .+. SurfaceFunction.v .*. displacement)
+    (curve `compose` SurfaceFunction1D.u .+. SurfaceFunction1D.v .*. displacement)
     Region2D.unitSquare
 
 translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
 translational uCurve vCurve =
   parametric
-    (uCurve `compose` SurfaceFunction.u .+. vCurve `compose` SurfaceFunction.v)
+    (uCurve `compose` SurfaceFunction1D.u .+. vCurve `compose` SurfaceFunction1D.v)
     Region2D.unitSquare
 
 ruled :: Curve3D space -> Curve3D space -> Surface3D space
 ruled bottom top = do
-  let f1 = bottom `compose` SurfaceFunction.u
-  let f2 = top `compose` SurfaceFunction.u
-  parametric (f1 .+. SurfaceFunction.v .*. (f2 .-. f1)) Region2D.unitSquare
+  let f1 = bottom `compose` SurfaceFunction1D.u
+  let f2 = top `compose` SurfaceFunction1D.u
+  parametric (f1 .+. SurfaceFunction1D.v .*. (f2 .-. f1)) Region2D.unitSquare
 
 revolved ::
   Tolerance Meters =>
@@ -142,15 +142,15 @@ revolved sketchPlane curve axis angle = do
       Ok profileSign -> do
         let frame3D = Frame3D.fromBackPlane (Frame2D.placeOn sketchPlane frame2D)
         let (revolutionParameter, curveParameter) = case profileSign of
-              Positive -> (SurfaceFunction.u, SurfaceFunction.v)
-              Negative -> (SurfaceFunction.v, SurfaceFunction.u)
+              Positive -> (SurfaceFunction1D.u, SurfaceFunction1D.v)
+              Negative -> (SurfaceFunction1D.v, SurfaceFunction1D.u)
         let theta = angle .*. revolutionParameter
         let radius = xCoordinate `compose` curveParameter
         let height = localCurve.yCoordinate `compose` curveParameter
         let function =
               frame3D.originPoint
-                .+. radius .*. SurfaceFunction.cos theta .*. frame3D.rightwardDirection
-                .+. radius .*. SurfaceFunction.sin theta .*. frame3D.forwardDirection
+                .+. radius .*. SurfaceFunction1D.cos theta .*. frame3D.rightwardDirection
+                .+. radius .*. SurfaceFunction1D.sin theta .*. frame3D.forwardDirection
                 .+. height .*. frame3D.upwardDirection
         Ok (parametric function Region2D.unitSquare)
 
@@ -166,7 +166,7 @@ boundarySurfaceCurves surface = NonEmpty.concat (surface.outerLoop :| surface.in
 flip :: Surface3D space -> Surface3D space
 flip surface =
   parametric
-    (surface.function `compose` SurfaceFunction2D.xy (negative SurfaceFunction.u) SurfaceFunction.v)
+    (surface.function `compose` SurfaceFunction2D.xy (negative SurfaceFunction1D.u) SurfaceFunction1D.v)
     (Region2D.mirrorAcross Axis2D.y surface.domain)
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.

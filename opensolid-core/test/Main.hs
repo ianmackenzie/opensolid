@@ -24,7 +24,7 @@ import Tests.Quantity qualified
 import Tests.Region2D qualified
 import Tests.Set2D qualified
 import Tests.Stream qualified
-import Tests.SurfaceFunction qualified
+import Tests.SurfaceFunction1D qualified
 import Tests.Text qualified
 import Tests.VectorBounds2D qualified
 import Tests.VectorBounds3D qualified
@@ -53,7 +53,7 @@ tests =
     , Test.group "Tests.Bounds3D" Tests.Bounds3D.tests
     , Test.group "Tests.Array" Tests.Array.tests
     , Test.group "Tests.Set2D" Tests.Set2D.tests
-    , Test.group "Tests.SurfaceFunction" Tests.SurfaceFunction.tests
+    , Test.group "Tests.SurfaceFunction1D" Tests.SurfaceFunction1D.tests
     , Test.group "Tests.NewtonRaphson" Tests.NewtonRaphson.tests
     ]
 

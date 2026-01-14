@@ -57,8 +57,8 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
-import OpenSolid.SurfaceFunction (SurfaceFunction)
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.Transform3D (Transform3D)
@@ -137,12 +137,12 @@ instance Composition (Curve1D Unitless) (Curve3D space) (Curve3D space) where
 
 instance
   unitless ~ Unitless =>
-  Composition (SurfaceFunction unitless) (Curve3D space) (SurfaceFunction3D space)
+  Composition (SurfaceFunction1D unitless) (Curve3D space) (SurfaceFunction3D space)
   where
   curve `compose` function =
     SurfaceFunction3D.new
       (curve.compiled `compose` function.compiled)
-      (\p -> (curve.derivative `compose` function) .*. SurfaceFunction.derivative p function)
+      (\p -> (curve.derivative `compose` function) .*. SurfaceFunction1D.derivative p function)
 
 instance ApproximateEquality (Curve3D space) Meters where
   curve1 ~= curve2 = do

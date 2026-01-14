@@ -18,7 +18,7 @@ import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Prelude
-import OpenSolid.SurfaceFunction (SurfaceFunction)
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -113,7 +113,7 @@ instance
 
 instance
   Multiplication
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (DirectionSurfaceFunction3D space)
     (VectorSurfaceFunction3D units space)
   where
@@ -123,7 +123,7 @@ instance
 instance
   Multiplication
     (DirectionSurfaceFunction3D space)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (VectorSurfaceFunction3D units space)
   where
   DirectionSurfaceFunction3D vectorSurfaceFunction .*. scalarSurfaceFunction =
@@ -134,7 +134,7 @@ instance
   DotMultiplication
     (DirectionSurfaceFunction3D space1)
     (DirectionSurfaceFunction3D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction3D lhs `dot` DirectionSurfaceFunction3D rhs = lhs `dot` rhs
 
@@ -143,7 +143,7 @@ instance
   DotMultiplication
     (DirectionSurfaceFunction3D space1)
     (VectorSurfaceFunction3D units space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction3D lhs `dot` rhs = lhs `dot` rhs
 
@@ -152,7 +152,7 @@ instance
   DotMultiplication
     (VectorSurfaceFunction3D units space1)
     (DirectionSurfaceFunction3D space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   lhs `dot` DirectionSurfaceFunction3D rhs = lhs `dot` rhs
 
@@ -161,7 +161,7 @@ instance
   DotMultiplication
     (DirectionSurfaceFunction3D space1)
     (Direction3D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction3D lhs `dot` rhs = lhs `dot` rhs
 
@@ -170,7 +170,7 @@ instance
   DotMultiplication
     (Direction3D space1)
     (DirectionSurfaceFunction3D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   lhs `dot` DirectionSurfaceFunction3D rhs = lhs `dot` rhs
 
@@ -179,7 +179,7 @@ instance
   DotMultiplication
     (DirectionSurfaceFunction3D space1)
     (Vector3D units space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction3D lhs `dot` rhs = lhs `dot` rhs
 
@@ -188,7 +188,7 @@ instance
   DotMultiplication
     (Vector3D units space1)
     (DirectionSurfaceFunction3D space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   lhs `dot` DirectionSurfaceFunction3D rhs = lhs `dot` rhs
 

@@ -1,4 +1,4 @@
-module Tests.SurfaceFunction (tests) where
+module Tests.SurfaceFunction1D (tests) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve2D (Curve2D)
@@ -8,9 +8,9 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
-import OpenSolid.SurfaceFunction (SurfaceFunction)
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -48,7 +48,7 @@ firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" Test.do
 
 withIntersectionCurves :: Tolerance Meters => (NonEmpty (Curve2D Unitless UvSpace) -> Test) -> Test
 withIntersectionCurves callback =
-  case SurfaceFunction.zeros planeTorusSurface of
+  case SurfaceFunction1D.zeros planeTorusSurface of
     Error error -> Test.abort (Text.show error)
     Ok zeros -> case zeros.crossingCurves of
       [] -> Test.abort "No intersection curves found"
@@ -93,32 +93,32 @@ intersectionCurveSecondDerivativeBoundsConsistency =
       let secondDerivative = VectorCurve2D.derivative firstDerivative
       Tolerance.using 1e-9 (Tests.VectorCurve2D.boundsConsistency secondDerivative)
 
-planeTorusSurface :: SurfaceFunction Meters
+planeTorusSurface :: SurfaceFunction1D Meters
 planeTorusSurface = do
-  let theta = Angle.twoPi .*. SurfaceFunction.u
-  let phi = Angle.twoPi .*. SurfaceFunction.v
+  let theta = Angle.twoPi .*. SurfaceFunction1D.u
+  let phi = Angle.twoPi .*. SurfaceFunction1D.v
   let minorRadius = Length.centimeters 1
   let majorRadius = Length.centimeters 2
-  let r = majorRadius .+. minorRadius .*. SurfaceFunction.cos phi
+  let r = majorRadius .+. minorRadius .*. SurfaceFunction1D.cos phi
   let alpha = Angle.asin (minorRadius ./. majorRadius)
   let normalDirection = Direction3D.polar World3D.frontPlane (alpha .+. Angle.halfPi)
   let surfaceFunction =
-        r .*. SurfaceFunction.cos theta .*. World3D.rightwardDirection
-          .+. r .*. SurfaceFunction.sin theta .*. World3D.forwardDirection
-          .+. minorRadius .*. SurfaceFunction.sin phi .*. World3D.upwardDirection
+        r .*. SurfaceFunction1D.cos theta .*. World3D.rightwardDirection
+          .+. r .*. SurfaceFunction1D.sin theta .*. World3D.forwardDirection
+          .+. minorRadius .*. SurfaceFunction1D.sin phi .*. World3D.upwardDirection
   normalDirection `dot` surfaceFunction
 
 samplingRadius :: Number
 samplingRadius = 1e-6
 
-firstDerivativeIsConsistent :: SurfaceFunction Meters -> UvPoint -> SurfaceParameter -> Expectation
+firstDerivativeIsConsistent :: SurfaceFunction1D Meters -> UvPoint -> SurfaceParameter -> Expectation
 firstDerivativeIsConsistent surfaceFunction p0 parameter = do
-  let partialDerivative = SurfaceFunction.derivative parameter surfaceFunction
+  let partialDerivative = SurfaceFunction1D.derivative parameter surfaceFunction
   let (p1, p2) = samplingPoints p0 parameter
-  let value1 = SurfaceFunction.evaluate surfaceFunction p1
-  let value2 = SurfaceFunction.evaluate surfaceFunction p2
+  let value1 = SurfaceFunction1D.evaluate surfaceFunction p1
+  let value2 = SurfaceFunction1D.evaluate surfaceFunction p2
   let numericalDerivative = (value2 .-. value1) ./. (2 *. samplingRadius)
-  let analyticalDerivative = SurfaceFunction.evaluate partialDerivative p0
+  let analyticalDerivative = SurfaceFunction1D.evaluate partialDerivative p0
   Tolerance.using Length.micrometer do
     Test.expect (numericalDerivative ~= analyticalDerivative)
       & Test.output "numericalDerivative" numericalDerivative

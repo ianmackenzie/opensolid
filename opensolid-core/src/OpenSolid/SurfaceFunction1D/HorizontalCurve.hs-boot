@@ -1,4 +1,4 @@
-module OpenSolid.SurfaceFunction.HorizontalCurve
+module OpenSolid.SurfaceFunction1D.HorizontalCurve
   ( new
   , monotonic
   , bounded
@@ -9,29 +9,29 @@ import OpenSolid.Axis2D (Axis2D)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.UvBounds (UvBounds)
 
 new ::
   Tolerance units =>
-  SurfaceFunction units ->
-  SurfaceFunction Unitless ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D Unitless ->
   Number ->
   Number ->
   NonEmpty UvBounds ->
   Curve2D Unitless UvSpace
 monotonic ::
   Tolerance units =>
-  SurfaceFunction units ->
-  SurfaceFunction Unitless ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D Unitless ->
   Number ->
   Number ->
   NonEmpty UvBounds ->
   Curve2D Unitless UvSpace
 bounded ::
   Tolerance units =>
-  SurfaceFunction units ->
-  SurfaceFunction Unitless ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D Unitless ->
   Number ->
   Number ->
   NonEmpty UvBounds ->

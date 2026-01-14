@@ -19,7 +19,7 @@ import OpenSolid.DirectionBounds2D qualified as DirectionBounds2D
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Prelude
-import OpenSolid.SurfaceFunction (SurfaceFunction)
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -114,7 +114,7 @@ instance
 
 instance
   Multiplication
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (DirectionSurfaceFunction2D space)
     (VectorSurfaceFunction2D units space)
   where
@@ -124,7 +124,7 @@ instance
 instance
   Multiplication
     (DirectionSurfaceFunction2D space)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (VectorSurfaceFunction2D units space)
   where
   DirectionSurfaceFunction2D vectorSurfaceFunction .*. scalarSurfaceFunction =
@@ -135,7 +135,7 @@ instance
   DotMultiplication
     (DirectionSurfaceFunction2D space1)
     (DirectionSurfaceFunction2D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction2D lhs `dot` DirectionSurfaceFunction2D rhs = lhs `dot` rhs
 
@@ -144,7 +144,7 @@ instance
   DotMultiplication
     (DirectionSurfaceFunction2D space1)
     (VectorSurfaceFunction2D units space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction2D lhs `dot` rhs = lhs `dot` rhs
 
@@ -153,7 +153,7 @@ instance
   DotMultiplication
     (VectorSurfaceFunction2D units space1)
     (DirectionSurfaceFunction2D space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   lhs `dot` DirectionSurfaceFunction2D rhs = lhs `dot` rhs
 
@@ -162,7 +162,7 @@ instance
   DotMultiplication
     (DirectionSurfaceFunction2D space1)
     (Direction2D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction2D lhs `dot` rhs = lhs `dot` rhs
 
@@ -171,7 +171,7 @@ instance
   DotMultiplication
     (Direction2D space1)
     (DirectionSurfaceFunction2D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   lhs `dot` DirectionSurfaceFunction2D rhs = lhs `dot` rhs
 
@@ -180,7 +180,7 @@ instance
   DotMultiplication
     (DirectionSurfaceFunction2D space1)
     (Vector2D units space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction2D lhs `dot` rhs = lhs `dot` rhs
 
@@ -189,7 +189,7 @@ instance
   DotMultiplication
     (Vector2D units space1)
     (DirectionSurfaceFunction2D space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   lhs `dot` DirectionSurfaceFunction2D rhs = lhs `dot` rhs
 
@@ -198,7 +198,7 @@ instance
   CrossMultiplication
     (DirectionSurfaceFunction2D space1)
     (DirectionSurfaceFunction2D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction2D lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
 
@@ -207,7 +207,7 @@ instance
   CrossMultiplication
     (DirectionSurfaceFunction2D space1)
     (VectorSurfaceFunction2D units space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction2D lhs `cross` rhs = lhs `cross` rhs
 
@@ -216,7 +216,7 @@ instance
   CrossMultiplication
     (VectorSurfaceFunction2D units space1)
     (DirectionSurfaceFunction2D space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
 
@@ -225,7 +225,7 @@ instance
   CrossMultiplication
     (DirectionSurfaceFunction2D space1)
     (Direction2D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction2D lhs `cross` rhs = lhs `cross` rhs
 
@@ -234,7 +234,7 @@ instance
   CrossMultiplication
     (Direction2D space1)
     (DirectionSurfaceFunction2D space2)
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
   where
   lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
 
@@ -243,7 +243,7 @@ instance
   CrossMultiplication
     (DirectionSurfaceFunction2D space1)
     (Vector2D units space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction2D lhs `cross` rhs = lhs `cross` rhs
 
@@ -252,14 +252,14 @@ instance
   CrossMultiplication
     (Vector2D units space1)
     (DirectionSurfaceFunction2D space2)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
 
-instance HasField "xComponent" (DirectionSurfaceFunction2D space) (SurfaceFunction Unitless) where
+instance HasField "xComponent" (DirectionSurfaceFunction2D space) (SurfaceFunction1D Unitless) where
   getField (DirectionSurfaceFunction2D function) = function.xComponent
 
-instance HasField "yComponent" (DirectionSurfaceFunction2D space) (SurfaceFunction Unitless) where
+instance HasField "yComponent" (DirectionSurfaceFunction2D space) (SurfaceFunction1D Unitless) where
   getField (DirectionSurfaceFunction2D function) = function.yComponent
 
 placeIn ::

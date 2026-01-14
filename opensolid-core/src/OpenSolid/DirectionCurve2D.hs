@@ -28,7 +28,7 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
@@ -212,7 +212,7 @@ instance Composition (Curve1D Unitless) (DirectionCurve2D space) (DirectionCurve
 
 instance
   Composition
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
     (DirectionCurve2D space)
     (DirectionSurfaceFunction2D space)
   where

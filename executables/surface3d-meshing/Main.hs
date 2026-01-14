@@ -13,7 +13,7 @@ import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3D qualified as Surface3D
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (pattern UvPoint)
@@ -23,12 +23,12 @@ main :: IO ()
 main = do
   let r = Length.meters 1
   let h = Number.twoPi .*. r
-  let theta = Angle.twoPi .*. SurfaceFunction.u
+  let theta = Angle.twoPi .*. SurfaceFunction1D.u
   let surfaceFunction =
         World3D.originPoint
-          .+. r .*. SurfaceFunction.cos theta .*. World3D.rightwardDirection
-          .+. r .*. SurfaceFunction.sin theta .*. World3D.forwardDirection
-          .+. h .*. SurfaceFunction.v .*. World3D.upwardDirection
+          .+. r .*. SurfaceFunction1D.cos theta .*. World3D.rightwardDirection
+          .+. r .*. SurfaceFunction1D.sin theta .*. World3D.forwardDirection
+          .+. h .*. SurfaceFunction1D.v .*. World3D.upwardDirection
   let domainCenter = UvPoint 0.5 0.5
   let domainDiameter = 2 / 3
   let domainCircle = Curve2D.circle (Circle2D.withDiameter domainDiameter domainCenter)

@@ -11,7 +11,7 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (pattern UvPoint)
@@ -19,9 +19,9 @@ import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
 main = Tolerance.using 1e-9 do
-  let u = SurfaceFunction.u
-  let v = SurfaceFunction.v
-  f <- Result.orFail (SurfaceFunction.quotient (u .*. (5 -. 2 *. v)) (u .*. (1 +. v)))
+  let u = SurfaceFunction1D.u
+  let v = SurfaceFunction1D.v
+  f <- Result.orFail (SurfaceFunction1D.quotient (u .*. (5 -. 2 *. v)) (u .*. (1 +. v)))
   expression <- Result.orFail (CompiledFunction.expression f.compiled)
   IO.printLine (Expression.debug expression)
   let meshPoint uvPoint = do
@@ -29,7 +29,7 @@ main = Tolerance.using 1e-9 do
         Point3D.zUp
           (Length.meters uValue)
           (Length.meters vValue)
-          (Length.meters (SurfaceFunction.evaluate f uvPoint))
+          (Length.meters (SurfaceFunction1D.evaluate f uvPoint))
   let mesh = Mesh.grid 512 512 meshPoint
   let numOriginPoints =
         Array.foldl

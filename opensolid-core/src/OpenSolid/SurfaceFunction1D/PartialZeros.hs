@@ -1,4 +1,4 @@
-module OpenSolid.SurfaceFunction.PartialZeros
+module OpenSolid.SurfaceFunction1D.PartialZeros
   ( PartialZeros (..)
   , Parameterization (..)
   , CrossingSegment (..)
@@ -21,13 +21,13 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
-import OpenSolid.SurfaceFunction.SaddleRegion (SaddleRegion)
-import OpenSolid.SurfaceFunction.SaddleRegion qualified as SaddleRegion
-import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
-import OpenSolid.SurfaceFunction.Zeros (Zeros (Zeros))
-import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.HorizontalCurve qualified as HorizontalCurve
+import OpenSolid.SurfaceFunction1D.SaddleRegion (SaddleRegion)
+import OpenSolid.SurfaceFunction1D.SaddleRegion qualified as SaddleRegion
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
+import OpenSolid.SurfaceFunction1D.Zeros (Zeros (Zeros))
+import OpenSolid.SurfaceFunction1D.Zeros qualified as Zeros
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
@@ -138,9 +138,9 @@ data PiecewiseCurve
 
 piecewiseCurve ::
   Tolerance units =>
-  SurfaceFunction units ->
-  SurfaceFunction Unitless ->
-  SurfaceFunction Unitless ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D Unitless ->
+  SurfaceFunction1D Unitless ->
   CrossingSegment ->
   PiecewiseCurve
 piecewiseCurve function dvdu dudv (CrossingSegment parameterization start end boxes) = do
@@ -184,9 +184,9 @@ joinPiecewiseCurves (PiecewiseCurve start1 end1 segments1) (PiecewiseCurve start
 
 finalize ::
   Tolerance units =>
-  SurfaceFunction units ->
-  SurfaceFunction Unitless ->
-  SurfaceFunction Unitless ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D Unitless ->
+  SurfaceFunction1D Unitless ->
   PartialZeros units ->
   Zeros
 finalize function dvdu dudv partialZeros = do

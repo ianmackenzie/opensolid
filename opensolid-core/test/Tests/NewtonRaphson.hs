@@ -12,7 +12,7 @@ import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
@@ -50,9 +50,9 @@ arc2D = do
 
 simpleSurface2D :: Tolerance Unitless => Test
 simpleSurface2D = do
-  let u = SurfaceFunction.u
-  let v = SurfaceFunction.v
-  let x = SurfaceFunction.squared u .- 2
+  let u = SurfaceFunction1D.u
+  let v = SurfaceFunction1D.v
+  let x = SurfaceFunction1D.squared u .- 2
   let y = v .- 1
   let surface = VectorSurfaceFunction2D.xy x y
   surface2D "Simple 2D surface" surface (UvPoint 1 0) (UvPoint (Number.sqrt 2) 1)

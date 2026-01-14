@@ -36,8 +36,8 @@ import OpenSolid.Expression.Surface2D qualified as Expression.Surface2D
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.SurfaceFunction (SurfaceFunction)
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Units (HasUnits)
@@ -60,7 +60,7 @@ instance
   HasField
     "xCoordinate"
     (SurfaceFunction2D units space)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   getField = xCoordinate
 
@@ -68,7 +68,7 @@ instance
   HasField
     "yCoordinate"
     (SurfaceFunction2D units space)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
   where
   getField = yCoordinate
 
@@ -76,7 +76,7 @@ instance
   HasField
     "coordinates"
     (SurfaceFunction2D units space)
-    (SurfaceFunction units, SurfaceFunction units)
+    (SurfaceFunction1D units, SurfaceFunction1D units)
   where
   getField = coordinates
 
@@ -201,11 +201,11 @@ constant :: Point2D units space -> SurfaceFunction2D units space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction2D.zero)
 
 uv :: SurfaceFunction2D Unitless UvSpace
-uv = xy SurfaceFunction.u SurfaceFunction.v
+uv = xy SurfaceFunction1D.u SurfaceFunction1D.v
 
 xy ::
-  SurfaceFunction units ->
-  SurfaceFunction units ->
+  SurfaceFunction1D units ->
+  SurfaceFunction1D units ->
   SurfaceFunction2D units space
 xy x y = do
   let compiledXY =
@@ -217,8 +217,8 @@ xy x y = do
           y.compiled
   let xyDerivative p =
         VectorSurfaceFunction2D.xy
-          (SurfaceFunction.derivative p x)
-          (SurfaceFunction.derivative p y)
+          (SurfaceFunction1D.derivative p x)
+          (SurfaceFunction1D.derivative p y)
   new compiledXY xyDerivative
 
 evaluate :: SurfaceFunction2D units space -> UvPoint -> Point2D units space
@@ -266,8 +266,8 @@ instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (SurfaceFunction2D unitless uvSpace)
-    (SurfaceFunction units)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
+    (SurfaceFunction1D units)
   where
   f `compose` g = do
     let dfdu = f.du `compose` g
@@ -275,7 +275,7 @@ instance
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
           dfdu .*. dudp .+. dfdv .*. dvdp
-    SurfaceFunction.new
+    SurfaceFunction1D.new
       (f.compiled `compose` g.compiled)
       composedDerivative
 
@@ -336,11 +336,11 @@ instance
 distanceAlong ::
   Axis2D units space ->
   SurfaceFunction2D units space ->
-  SurfaceFunction units
+  SurfaceFunction1D units
 distanceAlong axis function =
   (function .-. constant (Axis2D.originPoint axis)) `dot` Axis2D.direction axis
 
-xCoordinate :: SurfaceFunction2D units space -> SurfaceFunction units
+xCoordinate :: SurfaceFunction2D units space -> SurfaceFunction1D units
 xCoordinate function = do
   let compiledXCoordinate =
         CompiledFunction.map
@@ -348,11 +348,11 @@ xCoordinate function = do
           Point2D.xCoordinate
           Bounds2D.xCoordinate
           function.compiled
-  SurfaceFunction.new
+  SurfaceFunction1D.new
     compiledXCoordinate
     (\parameter -> VectorSurfaceFunction2D.xComponent (derivative parameter function))
 
-yCoordinate :: SurfaceFunction2D units space -> SurfaceFunction units
+yCoordinate :: SurfaceFunction2D units space -> SurfaceFunction1D units
 yCoordinate function = do
   let compiledYCoordinate =
         CompiledFunction.map
@@ -360,9 +360,9 @@ yCoordinate function = do
           Point2D.yCoordinate
           Bounds2D.yCoordinate
           function.compiled
-  SurfaceFunction.new
+  SurfaceFunction1D.new
     compiledYCoordinate
     (\parameter -> VectorSurfaceFunction2D.yComponent (derivative parameter function))
 
-coordinates :: SurfaceFunction2D units space -> (SurfaceFunction units, SurfaceFunction units)
+coordinates :: SurfaceFunction2D units space -> (SurfaceFunction1D units, SurfaceFunction1D units)
 coordinates function = (xCoordinate function, yCoordinate function)

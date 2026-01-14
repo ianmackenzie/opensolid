@@ -1,4 +1,4 @@
-module OpenSolid.SurfaceFunction.Blending
+module OpenSolid.SurfaceFunction1D.Blending
   ( Blendable
   , desingularize
   )
@@ -8,14 +8,14 @@ import GHC.Records (HasField)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import Prelude qualified
 
 type Blendable function =
-  ( Multiplication (SurfaceFunction Unitless) function function
+  ( Multiplication (SurfaceFunction1D Unitless) function function
   , Multiplication (Quantity Unitless) function function
   , Addition function function function
   , Composition (SurfaceFunction2D Unitless UvSpace) function function
@@ -33,7 +33,7 @@ instance Show UnsupportedCombinationOfSingularities where
 
 desingularize ::
   Blendable function =>
-  (SurfaceFunction Unitless -> function -> function -> function -> function) ->
+  (SurfaceFunction1D Unitless -> function -> function -> function -> function) ->
   function ->
   "singularityU0" ::: Maybe (function, function) ->
   "singularityU1" ::: Maybe (function, function) ->
@@ -51,37 +51,37 @@ desingularize
       (Nothing, Nothing, Nothing, Nothing) -> function
       (Just singularityU0, Nothing, Nothing, Nothing) ->
         desingularized
-          SurfaceFunction.u
+          SurfaceFunction1D.u
           (blendU0 singularityU0 function)
           function
           function
       (Nothing, Just singularityU1, Nothing, Nothing) ->
         desingularized
-          SurfaceFunction.u
+          SurfaceFunction1D.u
           function
           function
           (blendU1 function singularityU1)
       (Just singularityU0, Just singularityU1, Nothing, Nothing) ->
         desingularized
-          SurfaceFunction.u
+          SurfaceFunction1D.u
           (blendU0 singularityU0 function)
           function
           (blendU1 function singularityU1)
       (Nothing, Nothing, Just singularityV0, Nothing) ->
         desingularized
-          SurfaceFunction.v
+          SurfaceFunction1D.v
           (blendV0 singularityV0 function)
           function
           function
       (Nothing, Nothing, Nothing, Just singularityV1) ->
         desingularized
-          SurfaceFunction.v
+          SurfaceFunction1D.v
           function
           function
           (blendV1 function singularityV1)
       (Nothing, Nothing, Just singularityV0, Just singularityV1) ->
         desingularized
-          SurfaceFunction.v
+          SurfaceFunction1D.v
           (blendV0 singularityV0 function)
           function
           (blendV1 function singularityV1)
@@ -99,7 +99,7 @@ blendU0 (f0, dfdu0) f = do
   blend
     (f `compose` uT0, negative t0 .*. f.du `compose` uT0, t0 .*. t0 .*. f.du.du `compose` uT0)
     (f0 `compose` u0, negative t0 .*. dfdu0 `compose` u0)
-    ((t0 .-. SurfaceFunction.u) ./. t0)
+    ((t0 .-. SurfaceFunction1D.u) ./. t0)
 
 blendU1 ::
   Blendable function =>
@@ -114,7 +114,7 @@ blendU1 f (f1, dfdu1) = do
   blend
     (f `compose` uT1, t0 .*. f.du `compose` uT1, t0 .*. t0 .*. f.du.du `compose` uT1)
     (f1 `compose` u1, t0 .*. dfdu1 `compose` u1)
-    ((SurfaceFunction.u .-. t1) ./. t0)
+    ((SurfaceFunction1D.u .-. t1) ./. t0)
 
 blendV0 ::
   Blendable function =>
@@ -128,7 +128,7 @@ blendV0 (f0, dfdv0) f = do
   blend
     (f `compose` vT0, negative t0 .*. f.dv `compose` vT0, t0 .*. t0 .*. f.dv.dv `compose` vT0)
     (f0 `compose` v0, negative t0 .*. dfdv0 `compose` v0)
-    ((t0 .-. SurfaceFunction.v) ./. t0)
+    ((t0 .-. SurfaceFunction1D.v) ./. t0)
 
 blendV1 ::
   Blendable function =>
@@ -143,13 +143,13 @@ blendV1 f (f1, dfdv1) = do
   blend
     (f `compose` uT1, t0 .*. f.dv `compose` uT1, t0 .*. t0 .*. f.dv.dv `compose` uT1)
     (f1 `compose` u1, t0 .*. dfdv1 `compose` u1)
-    ((SurfaceFunction.v .-. t1) ./. t0)
+    ((SurfaceFunction1D.v .-. t1) ./. t0)
 
 blend ::
   Blendable function =>
   (function, function, function) ->
   (function, function) ->
-  SurfaceFunction Unitless ->
+  SurfaceFunction1D Unitless ->
   function
 blend (f00, f01, f02) (f10, f11) t = do
   let b00 = Curve1D.b00 `compose` t
@@ -160,7 +160,7 @@ blend (f00, f01, f02) (f10, f11) t = do
   b00 .*. f00 .+. b01 .*. f01 .+. b02 .*. f02 .+. b10 .*. f10 .+. b11 .*. f11
 
 uParameterization :: Number -> SurfaceFunction2D Unitless UvSpace
-uParameterization vValue = SurfaceFunction2D.xy SurfaceFunction.u (SurfaceFunction.constant vValue)
+uParameterization vValue = SurfaceFunction2D.xy SurfaceFunction1D.u (SurfaceFunction1D.constant vValue)
 
 uParameterizationV0 :: SurfaceFunction2D Unitless UvSpace
 uParameterizationV0 = uParameterization 0
@@ -175,7 +175,7 @@ uParameterizationV1 :: SurfaceFunction2D Unitless UvSpace
 uParameterizationV1 = uParameterization 1
 
 vParameterization :: Number -> SurfaceFunction2D Unitless UvSpace
-vParameterization uValue = SurfaceFunction2D.xy (SurfaceFunction.constant uValue) SurfaceFunction.v
+vParameterization uValue = SurfaceFunction2D.xy (SurfaceFunction1D.constant uValue) SurfaceFunction1D.v
 
 vParameterizationU0 :: SurfaceFunction2D Unitless UvSpace
 vParameterizationU0 = vParameterization 0

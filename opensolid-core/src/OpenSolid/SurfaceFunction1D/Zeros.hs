@@ -1,4 +1,4 @@
-module OpenSolid.SurfaceFunction.Zeros
+module OpenSolid.SurfaceFunction1D.Zeros
   ( Zeros (Zeros, crossingCurves, crossingLoops, tangentPoints, saddlePoints)
   , empty
   )

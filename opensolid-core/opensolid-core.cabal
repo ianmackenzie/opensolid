@@ -215,8 +215,8 @@ library
     OpenSolid.Surface3D
     OpenSolid.Surface3D.Revolved
     OpenSolid.SurfaceCurve3D
-    OpenSolid.SurfaceFunction
-    OpenSolid.SurfaceFunction.Zeros
+    OpenSolid.SurfaceFunction1D
+    OpenSolid.SurfaceFunction1D.Zeros
     OpenSolid.SurfaceFunction2D
     OpenSolid.SurfaceFunction3D
     OpenSolid.SurfaceParameter
@@ -262,16 +262,16 @@ library
     OpenSolid.Lobatto
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
-    OpenSolid.SurfaceFunction.Blending
-    OpenSolid.SurfaceFunction.Desingularization
-    OpenSolid.SurfaceFunction.HorizontalCurve
-    OpenSolid.SurfaceFunction.ImplicitCurveBounds
-    OpenSolid.SurfaceFunction.Internal
-    OpenSolid.SurfaceFunction.PartialZeros
-    OpenSolid.SurfaceFunction.Quotient
-    OpenSolid.SurfaceFunction.SaddleRegion
-    OpenSolid.SurfaceFunction.Subproblem
-    OpenSolid.SurfaceFunction.VerticalCurve
+    OpenSolid.SurfaceFunction1D.Blending
+    OpenSolid.SurfaceFunction1D.Desingularization
+    OpenSolid.SurfaceFunction1D.HorizontalCurve
+    OpenSolid.SurfaceFunction1D.ImplicitCurveBounds
+    OpenSolid.SurfaceFunction1D.Internal
+    OpenSolid.SurfaceFunction1D.PartialZeros
+    OpenSolid.SurfaceFunction1D.Quotient
+    OpenSolid.SurfaceFunction1D.SaddleRegion
+    OpenSolid.SurfaceFunction1D.Subproblem
+    OpenSolid.SurfaceFunction1D.VerticalCurve
     OpenSolid.SurfaceLinearization
     OpenSolid.Text.Parse
     OpenSolid.Unboxed.Math
@@ -329,7 +329,7 @@ test-suite opensolid-core-test
     Tests.Region2D
     Tests.Set2D
     Tests.Stream
-    Tests.SurfaceFunction
+    Tests.SurfaceFunction1D
     Tests.Text
     Tests.VectorBounds2D
     Tests.VectorBounds3D

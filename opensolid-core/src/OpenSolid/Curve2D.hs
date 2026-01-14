@@ -131,9 +131,9 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
-import OpenSolid.SurfaceFunction (SurfaceFunction)
-import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
@@ -265,14 +265,14 @@ instance Composition (Curve1D Unitless) (Curve2D units space) (Curve2D units spa
 
 instance
   Composition
-    (SurfaceFunction Unitless)
+    (SurfaceFunction1D Unitless)
     (Curve2D units space)
     (SurfaceFunction2D units space)
   where
   curve `compose` function =
     SurfaceFunction2D.new
       (curve.compiled `compose` function.compiled)
-      (\p -> curve.derivative `compose` function .*. SurfaceFunction.derivative p function)
+      (\p -> curve.derivative `compose` function .*. SurfaceFunction1D.derivative p function)
 
 instance
   Composition
@@ -280,13 +280,13 @@ instance
     (Curve2D units space)
     (SurfaceFunction2D units space)
   where
-  curve `compose` parameter = curve `compose` SurfaceFunction.parameter parameter
+  curve `compose` parameter = curve `compose` SurfaceFunction1D.parameter parameter
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (Curve2D unitless uvSpace)
-    (SurfaceFunction units)
+    (SurfaceFunction1D units)
     (Curve1D units)
   where
   f `compose` g = do
@@ -954,28 +954,28 @@ medialAxis ::
   Curve2D units space ->
   Result IsPoint (List (MedialAxis.Segment units space))
 medialAxis curve1 curve2 = do
-  let p1 = curve1 `compose` SurfaceFunction.u
-  let p2 = curve2 `compose` SurfaceFunction.v
-  let v1 = curve1.derivative `compose` SurfaceFunction.u
-  let v2 = curve2.derivative `compose` SurfaceFunction.v
+  let p1 = curve1 `compose` SurfaceFunction1D.u
+  let p2 = curve2 `compose` SurfaceFunction1D.v
+  let v1 = curve1.derivative `compose` SurfaceFunction1D.u
+  let v2 = curve2.derivative `compose` SurfaceFunction1D.v
   let d = p2 .-. p1
   let target =
         v2 `cross_` (2 *. (v1 `dot_` d) ?*? d .-. VectorSurfaceFunction2D.squaredMagnitude_ d ?*? v1)
   let targetTolerance = ?tolerance ?*? ((?tolerance ?*? ?tolerance) ?*? ?tolerance)
-  case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
-    Error SurfaceFunction.IsZero -> TODO -- curves are identical arcs?
+  case Tolerance.using targetTolerance (SurfaceFunction1D.zeros target) of
+    Error SurfaceFunction1D.IsZero -> TODO -- curves are identical arcs?
     Ok zeros ->
       assert (List.isEmpty zeros.crossingLoops && List.isEmpty zeros.tangentPoints) do
         tangentDirection1 <- tangentDirection curve1
         let tangentVector1 = VectorCurve2D.unit tangentDirection1
         let normal1 = VectorCurve2D.rotateBy Angle.quarterTurn tangentVector1
-        let radius :: SurfaceFunction units =
+        let radius :: SurfaceFunction1D units =
               Units.coerce $
-                SurfaceFunction.unsafeQuotient_
+                SurfaceFunction1D.unsafeQuotient_
                   (d `dot_` d)
-                  (2 *. (tangentVector1 `compose` SurfaceFunction.u) `cross` d)
+                  (2 *. (tangentVector1 `compose` SurfaceFunction1D.u) `cross` d)
         let curve :: SurfaceFunction2D units space =
-              (curve1 `compose` SurfaceFunction.u) .+. radius .*. (normal1 `compose` SurfaceFunction.u)
+              (curve1 `compose` SurfaceFunction1D.u) .+. radius .*. (normal1 `compose` SurfaceFunction1D.u)
         let toSegment solutionCurve =
               MedialAxis.Segment
                 { t1 = solutionCurve.xCoordinate
