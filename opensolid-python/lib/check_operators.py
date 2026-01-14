@@ -17,6 +17,7 @@ from opensolid import (
     LengthCurve,
     LengthInterval,
     Point2D,
+    Tolerance,
     UvBounds,
     UvPoint,
     Vector2D,
@@ -214,6 +215,19 @@ def find_output_type(output_behaviour, output_dimension, output_topology, output
             assert False, "Found more than one possible product type: " + ",".join(
                 [t.__name__ for t in valid_output_types]
             )
+
+
+def tolerance_value(units):
+    if units == unitless:
+        return 1e-9
+    elif units == length_units:
+        return Length.meters(1e-9)
+    elif units == area_units:
+        return Area.square_meters(1e-9)
+    elif units == angle_units:
+        return Angle.radians(1e-9)
+    else:
+        assert False, "Unrecognized units type: " + str(units)
 
 
 if __name__ == "__main__":
@@ -487,7 +501,8 @@ if __name__ == "__main__":
             dummy2 = dummy_value[t2]
             try:
                 print("Checking quotient of " + t1.__name__ + " and " + t2.__name__)
-                quotient = dummy1 / dummy2
+                with Tolerance(tolerance_value(units[t2])):
+                    quotient = dummy1 / dummy2
             except Exception:
                 print("Failed to divide " + t1.__name__ + " and " + t2.__name__)
                 continue
