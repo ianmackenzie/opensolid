@@ -68,7 +68,7 @@ signature overload = case overload of
     (Just ImplicitArgument.ToleranceMeters, rhsType, returnType)
   PostOperatorOverloadS f -> do
     let (_selfType, rhsType, returnType) = BinaryOperator.functionSignatureS f
-    (Just ImplicitArgument.ToleranceMeters, rhsType, returnType)
+    (Just ImplicitArgument.ToleranceSquareMeters, rhsType, returnType)
 
 rhsName :: Name
 rhsName = FFI.name "Rhs"
