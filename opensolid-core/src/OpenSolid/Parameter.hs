@@ -11,8 +11,8 @@ module OpenSolid.Parameter
   )
 where
 
-import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Int qualified as Int
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number

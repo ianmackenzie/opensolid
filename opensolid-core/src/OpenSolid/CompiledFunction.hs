@@ -17,10 +17,10 @@ module OpenSolid.CompiledFunction
   )
 where
 
-import OpenSolid.Interval (Interval)
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 

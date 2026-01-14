@@ -14,12 +14,12 @@ where
 
 import OpenSolid.Bounded2D (Bounded2D)
 import OpenSolid.Bounded2D qualified as Bounded2D
-import OpenSolid.Interval (Interval)
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude

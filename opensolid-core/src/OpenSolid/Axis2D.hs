@@ -26,7 +26,6 @@ import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2D (Axis2D, direction, originPoint)
@@ -36,6 +35,7 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2D qualified as Transform2D
+import OpenSolid.Vector2D (Vector2D)
 
 -- | Get the origin point of an axis.
 originPoint :: Axis2D units space -> Point2D units space

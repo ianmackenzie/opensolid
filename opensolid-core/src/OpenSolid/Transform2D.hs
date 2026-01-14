@@ -36,7 +36,6 @@ import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2D (Axis2D)
@@ -46,6 +45,7 @@ import OpenSolid.Primitives
   , Vector2D (Vector2D)
   )
 import OpenSolid.Transform qualified as Transform
+import OpenSolid.Vector2D qualified as Vector2D
 
 type Rigid units space = Transform2D Transform.Rigid units space
 

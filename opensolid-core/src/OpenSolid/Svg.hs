@@ -39,7 +39,6 @@ module OpenSolid.Svg
 where
 
 import OpenSolid.Axis2D (Axis2D (Axis2D))
-import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
@@ -50,6 +49,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.IO qualified as IO
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Line2D (Line2D (Line2D))

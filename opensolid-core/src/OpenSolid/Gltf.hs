@@ -17,13 +17,13 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Body3D qualified as Body3D
-import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Convention3D qualified as Convention3D
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
 import OpenSolid.Length qualified as Length

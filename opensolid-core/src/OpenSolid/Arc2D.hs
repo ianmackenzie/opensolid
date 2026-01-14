@@ -15,9 +15,9 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Vector2D qualified as Vector2D
 
 -- | An arc in 2D.
 data Arc2D units space = Arc2D

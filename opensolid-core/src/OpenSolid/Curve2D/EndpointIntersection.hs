@@ -5,14 +5,14 @@ module OpenSolid.Curve2D.EndpointIntersection
   )
 where
 
-import OpenSolid.Interval (Interval)
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2D.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity

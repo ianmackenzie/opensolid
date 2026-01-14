@@ -8,8 +8,6 @@ module Tests.Curve2D
 where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import OpenSolid.Curve2D (Curve2D)
@@ -18,6 +16,8 @@ import OpenSolid.Curve2D.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2D.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty

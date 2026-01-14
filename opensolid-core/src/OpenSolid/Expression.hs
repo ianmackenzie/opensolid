@@ -58,7 +58,6 @@ where
 
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
-import OpenSolid.Interval (Interval)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bytecode.Ast (Ast1D, Ast2D, Ast3D)
 import OpenSolid.Bytecode.Ast qualified as Ast
@@ -68,6 +67,7 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.Interval (Interval)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D

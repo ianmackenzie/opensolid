@@ -48,10 +48,10 @@ where
 import Data.Coerce qualified
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Frame2D (Frame2D)
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))

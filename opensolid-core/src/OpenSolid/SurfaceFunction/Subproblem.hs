@@ -19,10 +19,10 @@ module OpenSolid.SurfaceFunction.Subproblem
   )
 where
 
-import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Domain2D (Domain2D)
 import OpenSolid.Domain2D qualified as Domain2D
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)

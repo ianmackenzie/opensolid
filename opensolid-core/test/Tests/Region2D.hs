@@ -3,10 +3,10 @@ module Tests.Region2D (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Estimate qualified as Estimate
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length qualified as Length
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (pattern Point2D)

@@ -15,11 +15,11 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Plane3D (Plane3D)
-import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3D (Vector3D)
 
 constant :: Vector2D units space -> Expression UvPoint (Vector2D units space)

@@ -15,10 +15,10 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Plane3D (Plane3D)
-import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3D (Vector3D)
 
 constant :: Vector3D units space -> Expression Number (Vector3D units space)

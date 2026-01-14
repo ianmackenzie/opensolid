@@ -1,7 +1,7 @@
 module OpenSolid.SurfaceLinearization (error) where
 
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Unboxed.Math

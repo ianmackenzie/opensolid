@@ -1,10 +1,10 @@
 module OpenSolid.ArcLength (parameterization) where
 
-import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
