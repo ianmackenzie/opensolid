@@ -1,7 +1,3 @@
-Rename Bounds to Interval?
-- allows use of Bounds as typeclass / name of generic module
-- make sure comment in Body3D.hs stays as "Bounds on 3D curve" instead of "Interval on 3D curve"...
-
 Add missing operators
 - Failed to add UvPoint and Vector2D
 - Failed to add UvBounds and Vector2D
