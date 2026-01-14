@@ -19,13 +19,11 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Interval (Interval)
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.CDT qualified as CDT
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
@@ -34,6 +32,8 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Linearization qualified as Linearization
@@ -135,10 +135,10 @@ revolved sketchPlane curve axis angle = do
   let frame2D = Frame2D.fromYAxis axis
   let localCurve = Curve2D.relativeTo frame2D curve
   let xCoordinate = localCurve.xCoordinate
-  if xCoordinate ~= Curve.zero
+  if xCoordinate ~= Curve1D.zero
     then Error Revolved.ProfileIsOnAxis
-    else case Curve.sign xCoordinate of
-      Error Curve.CrossesZero -> Error Revolved.ProfileCrossesAxis
+    else case Curve1D.sign xCoordinate of
+      Error Curve1D.CrossesZero -> Error Revolved.ProfileCrossesAxis
       Ok profileSign -> do
         let frame3D = Frame3D.fromBackPlane (Frame2D.placeOn sketchPlane frame2D)
         let (revolutionParameter, curveParameter) = case profileSign of

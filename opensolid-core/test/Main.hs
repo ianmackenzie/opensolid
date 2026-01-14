@@ -8,7 +8,7 @@ import Test qualified
 import Tests.Array qualified
 import Tests.Bounds2D qualified
 import Tests.Bounds3D qualified
-import Tests.Curve qualified
+import Tests.Curve1D qualified
 import Tests.Curve2D qualified
 import Tests.Direction2D qualified
 import Tests.DivMod qualified
@@ -36,7 +36,7 @@ tests =
     , Test.group "Tests.Quantity" Tests.Quantity.tests
     , Test.group "Tests.Interval" Tests.Interval.tests
     , Test.group "Tests.VectorBounds3D" Tests.VectorBounds3D.tests
-    , Test.group "Tests.Curve" Tests.Curve.tests
+    , Test.group "Tests.Curve1D" Tests.Curve1D.tests
     , Test.group "Tests.Curve2D" Tests.Curve2D.tests
     , Test.group "Tests.Estimate" Tests.Estimate.tests
     , Test.group "Tests.List" Tests.List.tests

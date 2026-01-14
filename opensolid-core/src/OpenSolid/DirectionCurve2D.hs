@@ -17,8 +17,7 @@ where
 
 import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
-import OpenSolid.Interval (Interval)
-import OpenSolid.Curve (Curve)
+import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -27,11 +26,12 @@ import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D (DirectionSurfaceFunc
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D qualified as DirectionSurfaceFunction2D
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
-import OpenSolid.Vector2D (Vector2D (Vector2D))
-import OpenSolid.Vector2D qualified as Vector2D
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
+import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
@@ -109,7 +109,7 @@ instance
 
 instance
   Multiplication
-    (Curve units)
+    (Curve1D units)
     (DirectionCurve2D space)
     (VectorCurve2D units space)
   where
@@ -118,96 +118,96 @@ instance
 instance
   Multiplication
     (DirectionCurve2D space)
-    (Curve units)
+    (Curve1D units)
     (VectorCurve2D units space)
   where
   DirectionCurve2D vectorCurve .*. scalarCurve = vectorCurve .*. scalarCurve
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2D space1) (DirectionCurve2D space2) (Curve Unitless)
+  DotMultiplication (DirectionCurve2D space1) (DirectionCurve2D space2) (Curve1D Unitless)
   where
   DirectionCurve2D lhs `dot` DirectionCurve2D rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2D space1) (VectorCurve2D units space2) (Curve units)
+  DotMultiplication (DirectionCurve2D space1) (VectorCurve2D units space2) (Curve1D units)
   where
   DirectionCurve2D lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (VectorCurve2D units space1) (DirectionCurve2D space2) (Curve units)
+  DotMultiplication (VectorCurve2D units space1) (DirectionCurve2D space2) (Curve1D units)
   where
   lhs `dot` DirectionCurve2D rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2D space1) (Direction2D space2) (Curve Unitless)
+  DotMultiplication (DirectionCurve2D space1) (Direction2D space2) (Curve1D Unitless)
   where
   DirectionCurve2D lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Direction2D space1) (DirectionCurve2D space2) (Curve Unitless)
+  DotMultiplication (Direction2D space1) (DirectionCurve2D space2) (Curve1D Unitless)
   where
   lhs `dot` DirectionCurve2D rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2D space1) (Vector2D units space2) (Curve units)
+  DotMultiplication (DirectionCurve2D space1) (Vector2D units space2) (Curve1D units)
   where
   DirectionCurve2D lhs `dot` rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Vector2D units space1) (DirectionCurve2D space2) (Curve units)
+  DotMultiplication (Vector2D units space1) (DirectionCurve2D space2) (Curve1D units)
   where
   lhs `dot` DirectionCurve2D rhs = lhs `dot` rhs
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2D space1) (DirectionCurve2D space2) (Curve Unitless)
+  CrossMultiplication (DirectionCurve2D space1) (DirectionCurve2D space2) (Curve1D Unitless)
   where
   DirectionCurve2D lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2D space1) (VectorCurve2D units space2) (Curve units)
+  CrossMultiplication (DirectionCurve2D space1) (VectorCurve2D units space2) (Curve1D units)
   where
   DirectionCurve2D lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (VectorCurve2D units space1) (DirectionCurve2D space2) (Curve units)
+  CrossMultiplication (VectorCurve2D units space1) (DirectionCurve2D space2) (Curve1D units)
   where
   lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2D space1) (Direction2D space2) (Curve Unitless)
+  CrossMultiplication (DirectionCurve2D space1) (Direction2D space2) (Curve1D Unitless)
   where
   DirectionCurve2D lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Direction2D space1) (DirectionCurve2D space2) (Curve Unitless)
+  CrossMultiplication (Direction2D space1) (DirectionCurve2D space2) (Curve1D Unitless)
   where
   lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2D space1) (Vector2D units space2) (Curve units)
+  CrossMultiplication (DirectionCurve2D space1) (Vector2D units space2) (Curve1D units)
   where
   DirectionCurve2D lhs `cross` rhs = lhs `cross` rhs
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Vector2D units space1) (DirectionCurve2D space2) (Curve units)
+  CrossMultiplication (Vector2D units space1) (DirectionCurve2D space2) (Curve1D units)
   where
   lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
-instance Composition (Curve Unitless) (DirectionCurve2D space) (DirectionCurve2D space) where
+instance Composition (Curve1D Unitless) (DirectionCurve2D space) (DirectionCurve2D space) where
   DirectionCurve2D curve `compose` curve1D = DirectionCurve2D (curve `compose` curve1D)
 
 instance
@@ -228,10 +228,10 @@ instance
   DirectionCurve2D curve `compose` surfaceParameter =
     DirectionSurfaceFunction2D.unsafe (curve `compose` surfaceParameter)
 
-instance HasField "xComponent" (DirectionCurve2D space) (Curve Unitless) where
+instance HasField "xComponent" (DirectionCurve2D space) (Curve1D Unitless) where
   getField (DirectionCurve2D curve) = curve.xComponent
 
-instance HasField "yComponent" (DirectionCurve2D space) (Curve Unitless) where
+instance HasField "yComponent" (DirectionCurve2D space) (Curve1D Unitless) where
   getField (DirectionCurve2D curve) = curve.yComponent
 
 placeIn ::

@@ -1,4 +1,4 @@
-module OpenSolid.Curve.Zero (Zero (Zero, location, order, sign)) where
+module OpenSolid.Curve1D.Zero (Zero (Zero, location, order, sign)) where
 
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI

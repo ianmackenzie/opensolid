@@ -9,8 +9,8 @@ where
 
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bounds2D qualified as Bounds2D
-import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
@@ -56,10 +56,10 @@ yAxis y1 y2 =
     (#headLength axisHeadLength)
     (#headWidth axisHeadWidth)
 
-curve :: Curve Unitless -> Svg Space
+curve :: Curve1D Unitless -> Svg Space
 curve = curveWith []
 
-curveWith :: List (Svg.Attribute Space) -> Curve Unitless -> Svg Space
+curveWith :: List (Svg.Attribute Space) -> Curve1D Unitless -> Svg Space
 curveWith attributes givenCurve = do
-  let curve2D = Curve2D.xy Curve.t givenCurve
+  let curve2D = Curve2D.xy Curve1D.t givenCurve
   Svg.curveWith attributes resolution (Curve2D.convert scale curve2D)

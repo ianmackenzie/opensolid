@@ -19,7 +19,7 @@ module OpenSolid.Solve1D
   )
 where
 
-import OpenSolid.Curve.Zero (Zero (Zero))
+import OpenSolid.Curve1D.Zero (Zero (Zero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Int qualified as Int

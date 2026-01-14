@@ -17,7 +17,7 @@ where
 
 import GHC.Records (HasField)
 import OpenSolid.CompiledFunction (CompiledFunction)
-import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Plane3D (Plane3D)
@@ -59,37 +59,37 @@ instance
 
 instance
   Multiplication_
-    (Curve units1)
+    (Curve1D units1)
     (VectorCurve3D units2 space)
     (VectorCurve3D (units1 ?*? units2) space)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve units1) (VectorCurve3D units2 space) (VectorCurve3D units3 space)
+  Multiplication (Curve1D units1) (VectorCurve3D units2 space) (VectorCurve3D units3 space)
 
 instance
   Multiplication_
     (VectorCurve3D units1 space)
-    (Curve units2)
+    (Curve1D units2)
     (VectorCurve3D (units1 ?*? units2) space)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve3D units1 space) (Curve units2) (VectorCurve3D units3 space)
+  Multiplication (VectorCurve3D units1 space) (Curve1D units2) (VectorCurve3D units3 space)
 
 instance
   space1 ~ space2 =>
   DotMultiplication_
     (VectorCurve3D units1 space1)
     (VectorCurve3D units2 space2)
-    (Curve (units1 ?*? units2))
+    (Curve1D (units1 ?*? units2))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
     (VectorCurve3D units1 space1)
     (VectorCurve3D units2 space2)
-    (Curve units3)
+    (Curve1D units3)
 
 constant :: Vector3D units space -> VectorCurve3D units space
 new :: Compiled units space -> VectorCurve3D units space -> VectorCurve3D units space
@@ -99,21 +99,21 @@ evaluateBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorCurve3D units1 space ->
-  Curve units2 ->
+  Curve1D units2 ->
   Result DivisionByZero (VectorCurve3D units3 space)
 quotient_ ::
   Tolerance units2 =>
   VectorCurve3D units1 space ->
-  Curve units2 ->
+  Curve1D units2 ->
   Result DivisionByZero (VectorCurve3D (units1 ?/? units2) space)
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
   VectorCurve3D units1 space ->
-  Curve units2 ->
+  Curve1D units2 ->
   VectorCurve3D units3 space
 unsafeQuotient_ ::
   VectorCurve3D units1 space ->
-  Curve units2 ->
+  Curve1D units2 ->
   VectorCurve3D (units1 ?/? units2) space
-magnitude :: Tolerance units => VectorCurve3D units space -> Curve units
+magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 transformBy :: Transform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space

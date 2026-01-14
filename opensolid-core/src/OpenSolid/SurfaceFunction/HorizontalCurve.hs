@@ -8,17 +8,17 @@ where
 
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
@@ -124,7 +124,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
             Bounds2D (Interval u1 u2) segmentVBounds
   let derivative self = do
         let deltaU = uEnd .-. uStart
-        let dudt = Curve.constant deltaU
+        let dudt = Curve1D.constant deltaU
         let dvdt = dudt .*. dvdu `compose` self
         VectorCurve2D.xy dudt dvdt
   Curve2D.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative

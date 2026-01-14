@@ -89,8 +89,8 @@ import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
-import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve2D.Intersections
   ( Intersections (IntersectionPoints, OverlappingSegments)
@@ -167,13 +167,13 @@ type Compiled units space =
     (Interval Unitless)
     (Bounds2D units space)
 
-instance HasField "xCoordinate" (Curve2D units space) (Curve units) where
+instance HasField "xCoordinate" (Curve2D units space) (Curve1D units) where
   getField = xCoordinate
 
-instance HasField "yCoordinate" (Curve2D units space) (Curve units) where
+instance HasField "yCoordinate" (Curve2D units space) (Curve1D units) where
   getField = yCoordinate
 
-instance HasField "coordinates" (Curve2D units space) (Curve units, Curve units) where
+instance HasField "coordinates" (Curve2D units space) (Curve1D units, Curve1D units) where
   getField = coordinates
 
 instance FFI (Curve2D Meters FFI.Space) where
@@ -259,7 +259,7 @@ instance
   where
   point .-. curve = constant point .-. curve
 
-instance Composition (Curve Unitless) (Curve2D units space) (Curve2D units space) where
+instance Composition (Curve1D Unitless) (Curve2D units space) (Curve2D units space) where
   f `compose` g =
     new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) .*. g.derivative)
 
@@ -287,11 +287,11 @@ instance
   Composition
     (Curve2D unitless uvSpace)
     (SurfaceFunction units)
-    (Curve units)
+    (Curve1D units)
   where
   f `compose` g = do
     let (dudt, dvdt) = g.derivative.components
-    Curve.new
+    Curve1D.new
       (f.compiled `compose` g.compiled)
       (f.du `compose` g .*. dudt .+. f.dv `compose` g .*. dvdt)
 
@@ -336,7 +336,7 @@ constant :: Point2D units space -> Curve2D units space
 constant point = new (CompiledFunction.constant point) VectorCurve2D.zero
 
 -- | Create a curve from its X and Y coordinate curves.
-xy :: Curve units -> Curve units -> Curve2D units space
+xy :: Curve1D units -> Curve1D units -> Curve2D units space
 xy x y = do
   let compiledXY = CompiledFunction.map2 Expression.xy Point2D Bounds2D x.compiled y.compiled
   new compiledXY (VectorCurve2D.xy x.derivative y.derivative)
@@ -485,8 +485,8 @@ customArc ::
   Angle ->
   Curve2D units space
 customArc p0 v1 v2 a b = do
-  let angle = Curve.interpolateFrom a b
-  p0 .+. v1 .*. Curve.cos angle .+. v2 .*. Curve.sin angle
+  let angle = Curve1D.interpolateFrom a b
+  p0 .+. v1 .*. Curve1D.cos angle .+. v2 .*. Curve1D.sin angle
 
 -- | Create a curve from the given circle.
 circle :: Circle2D units space -> Curve2D units space
@@ -614,7 +614,7 @@ desingularized ::
   Curve2D units space
 desingularized start middle end =
   new
-    (CompiledFunction.desingularized Curve.t.compiled start.compiled middle.compiled end.compiled)
+    (CompiledFunction.desingularized Curve1D.t.compiled start.compiled middle.compiled end.compiled)
     (VectorCurve2D.desingularized start.derivative middle.derivative end.derivative)
 
 instance HasField "startPoint" (Curve2D units space) (Point2D units space) where
@@ -654,7 +654,7 @@ samplePoints curve = NonEmpty.map (evaluate curve) Parameter.samples
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2D units space -> Curve2D units space
-reverse curve = curve `compose` (1 -. Curve.t)
+reverse curve = curve `compose` (1 -. Curve1D.t)
 
 bounds :: Curve2D units space -> Bounds2D units space
 bounds curve = evaluateBounds curve Interval.unit
@@ -691,13 +691,13 @@ offsetRightwardBy ::
   Result IsPoint (Curve2D units space)
 offsetRightwardBy distance = offsetLeftwardBy (negative distance)
 
-distanceAlong :: Axis2D units space -> Curve2D units space -> Curve units
+distanceAlong :: Axis2D units space -> Curve2D units space -> Curve1D units
 distanceAlong (Axis2D p0 d) curve = (curve .-. p0) `dot` d
 
-distanceLeftOf :: Axis2D units space -> Curve2D units space -> Curve units
+distanceLeftOf :: Axis2D units space -> Curve2D units space -> Curve1D units
 distanceLeftOf (Axis2D p0 d) curve = (curve .-. p0) `dot` Direction2D.rotateLeft d
 
-distanceRightOf :: Axis2D units space -> Curve2D units space -> Curve units
+distanceRightOf :: Axis2D units space -> Curve2D units space -> Curve1D units
 distanceRightOf (Axis2D p0 d) curve = (curve .-. p0) `dot` Direction2D.rotateRight d
 
 isPoint :: Tolerance units => Curve2D units space -> Bool
@@ -713,7 +713,7 @@ isOnAxis :: Tolerance units => Axis2D units space -> Curve2D units space -> Bool
 isOnAxis axis curve = NonEmpty.allSatisfy (intersects axis) (samplePoints curve)
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
-xCoordinate :: Curve2D units space -> Curve units
+xCoordinate :: Curve2D units space -> Curve1D units
 xCoordinate curve = do
   let compiledXCoordinate =
         CompiledFunction.map
@@ -721,10 +721,10 @@ xCoordinate curve = do
           Point2D.xCoordinate
           Bounds2D.xCoordinate
           curve.compiled
-  Curve.new compiledXCoordinate (VectorCurve2D.xComponent curve.derivative)
+  Curve1D.new compiledXCoordinate (VectorCurve2D.xComponent curve.derivative)
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
-yCoordinate :: Curve2D units space -> Curve units
+yCoordinate :: Curve2D units space -> Curve1D units
 yCoordinate curve = do
   let compiledYCoordinate =
         CompiledFunction.map
@@ -732,9 +732,9 @@ yCoordinate curve = do
           Point2D.yCoordinate
           Bounds2D.yCoordinate
           curve.compiled
-  Curve.new compiledYCoordinate (VectorCurve2D.yComponent curve.derivative)
+  Curve1D.new compiledYCoordinate (VectorCurve2D.yComponent curve.derivative)
 
-coordinates :: Curve2D units space -> (Curve units, Curve units)
+coordinates :: Curve2D units space -> (Curve1D units, Curve1D units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
 
 findPoint ::
@@ -902,14 +902,14 @@ unconvert factor curve = convert (Units.simplify (1 /? factor)) curve
 curvature_ ::
   Tolerance units =>
   Curve2D units space ->
-  Result IsPoint (Curve (Unitless ?/? units))
+  Result IsPoint (Curve1D (Unitless ?/? units))
 curvature_ curve = do
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2D.derivative firstDerivative
   tangent <- tangentDirection curve
   let numerator = tangent `cross` secondDerivative
   let denominator = VectorCurve2D.squaredMagnitude_ firstDerivative
-  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve.quotient_ numerator denominator) of
+  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.quotient_ numerator denominator) of
     Ok quotient_ -> Ok (Units.simplify quotient_)
     Error DivisionByZero -> Error IsPoint
 
@@ -925,7 +925,7 @@ Positive curvature is defined as curving to the left (relative to the curve's ta
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2D units1 space ->
-  Result IsPoint (Curve units2)
+  Result IsPoint (Curve1D units2)
 curvature curve = Result.map Units.specialize (curvature_ curve)
 
 toPolyline :: Resolution units -> Curve2D units space -> Polyline2D units space
@@ -989,7 +989,7 @@ medialAxis curve1 curve2 = do
 arcLengthParameterization ::
   Tolerance units =>
   Curve2D units space ->
-  (Curve Unitless, Quantity units)
+  (Curve1D Unitless, Quantity units)
 arcLengthParameterization curve =
   ArcLength.parameterization (VectorCurve2D.magnitude curve.derivative)
 

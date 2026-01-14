@@ -117,10 +117,10 @@ library
     OpenSolid.CompiledFunction
     OpenSolid.Composition
     OpenSolid.Convention3D
-    OpenSolid.Curve
-    OpenSolid.Curve.WithNoInteriorZeros
-    OpenSolid.Curve.WithNoZeros
-    OpenSolid.Curve.Zero
+    OpenSolid.Curve1D
+    OpenSolid.Curve1D.WithNoInteriorZeros
+    OpenSolid.Curve1D.WithNoZeros
+    OpenSolid.Curve1D.Zero
     OpenSolid.Curve2D
     OpenSolid.Curve2D.EndpointIntersection
     OpenSolid.Curve2D.IntersectionPoint
@@ -256,7 +256,7 @@ library
     OpenSolid.Bytecode.Evaluate
     OpenSolid.Bytecode.Instruction
     OpenSolid.CDT
-    OpenSolid.Curve.Bisection
+    OpenSolid.Curve1D.Bisection
     OpenSolid.HasZero
     OpenSolid.Linearization
     OpenSolid.Lobatto
@@ -312,7 +312,7 @@ test-suite opensolid-core-test
     Tests.Array
     Tests.Bounds2D
     Tests.Bounds3D
-    Tests.Curve
+    Tests.Curve1D
     Tests.Curve2D
     Tests.Direction2D
     Tests.DivMod

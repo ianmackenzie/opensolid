@@ -20,7 +20,7 @@ module OpenSolid.SurfaceFunction
 where
 
 import OpenSolid.CompiledFunction (CompiledFunction)
-import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -39,7 +39,7 @@ data SurfaceFunction units = SurfaceFunction
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
 
-instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units)
+instance Composition (SurfaceFunction Unitless) (Curve1D units) (SurfaceFunction units)
 
 instance ApproximateEquality (SurfaceFunction units) units
 

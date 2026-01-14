@@ -32,7 +32,7 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D qualified as Circle2D
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
@@ -331,8 +331,8 @@ revolved startPlane profile axis2D angle = do
   let offAxisCurves = NonEmpty.filter (not . Curve2D.isOnAxis axis2D) profileCurves
   let signedDistanceCurves = List.map (Curve2D.distanceRightOf axis2D) offAxisCurves
   profileSign <-
-    case Result.collect Curve.sign signedDistanceCurves of
-      Error Curve.CrossesZero -> Error BoundedBy.BoundaryIntersectsItself
+    case Result.collect Curve1D.sign signedDistanceCurves of
+      Error Curve1D.CrossesZero -> Error BoundedBy.BoundaryIntersectsItself
       Ok curveSigns
         | List.allSatisfy (== Positive) curveSigns -> Ok Positive
         | List.allSatisfy (== Negative) curveSigns -> Ok Negative

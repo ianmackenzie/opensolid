@@ -10,7 +10,7 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Debug.Plot qualified as Debug.Plot
@@ -412,27 +412,27 @@ testCurve2dExpression = do
 
 testQuotientDesingularization :: IO ()
 testQuotientDesingularization = Tolerance.using 1e-9 do
-  let numerator = Curve.sin (Angle.pi .*. Curve.t)
-  let denominator = Curve.t .*. (1 -. Curve.t)
-  quotient <- Result.orFail (Curve.quotient numerator denominator)
-  let quotient' = Curve.derivative quotient
-  let quotient'' = Curve.derivative quotient'
-  let quotient''' = Curve.derivative quotient''
+  let numerator = Curve1D.sin (Angle.pi .*. Curve1D.t)
+  let denominator = Curve1D.t .*. (1 -. Curve1D.t)
+  quotient <- Result.orFail (Curve1D.quotient numerator denominator)
+  let quotient' = Curve1D.derivative quotient
+  let quotient'' = Curve1D.derivative quotient'
+  let quotient''' = Curve1D.derivative quotient''
   let tValues = Quantity.steps 0 1 10
   IO.forEach tValues \tValue -> do
-    log "quotient" (Curve.evaluate quotient tValue)
+    log "quotient" (Curve1D.evaluate quotient tValue)
   IO.forEach tValues \tValue -> do
-    log "derivative" (Curve.evaluate quotient' tValue)
+    log "derivative" (Curve1D.evaluate quotient' tValue)
   IO.forEach tValues \tValue -> do
-    log "second derivative" (Curve.evaluate quotient'' tValue)
+    log "second derivative" (Curve1D.evaluate quotient'' tValue)
   IO.forEach tValues \tValue -> do
-    log "third derivative" (Curve.evaluate quotient''' tValue)
+    log "third derivative" (Curve1D.evaluate quotient''' tValue)
 
 testCurveSqrt :: IO ()
 testCurveSqrt = Tolerance.using 1e-6 do
-  let t = Curve.t
-  let curve = Curve.sqrt (0.5 *. (1 -. Curve.cos (Angle.twoPi .*. t)))
-  let curve' = Curve.derivative curve
+  let t = Curve1D.t
+  let curve = Curve1D.sqrt (0.5 *. (1 -. Curve1D.cos (Angle.twoPi .*. t)))
+  let curve' = Curve1D.derivative curve
   Svg.write
     "executables/sandbox/cos-sqrt.svg"
     (Debug.Plot.viewBox (Point2D -0.1 -4.1) (Point2D 1.1 4.1))

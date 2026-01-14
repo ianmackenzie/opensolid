@@ -9,8 +9,8 @@ module OpenSolid.NewtonRaphson
   )
 where
 
-import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
@@ -23,10 +23,10 @@ import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 
-curve1D :: Tolerance units => Curve units -> Number -> Number
+curve1D :: Tolerance units => Curve1D units -> Number -> Number
 curve1D curve x1 = do
-  let function = Curve.evaluate curve
-  let derivative = Curve.evaluate curve.derivative
+  let function = Curve1D.evaluate curve
+  let derivative = Curve1D.evaluate curve.derivative
   curve1dImpl function derivative x1 (function x1)
 
 curve1dImpl ::

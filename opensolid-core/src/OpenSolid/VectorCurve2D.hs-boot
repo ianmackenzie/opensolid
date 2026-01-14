@@ -15,7 +15,7 @@ where
 
 import OpenSolid.Interval (Interval)
 import OpenSolid.CompiledFunction (CompiledFunction)
-import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Prelude
@@ -50,37 +50,37 @@ instance
 
 instance
   Multiplication_
-    (Curve units1)
+    (Curve1D units1)
     (VectorCurve2D units2 space)
     (VectorCurve2D (units1 ?*? units2) space)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve units1) (VectorCurve2D units2 space) (VectorCurve2D units3 space)
+  Multiplication (Curve1D units1) (VectorCurve2D units2 space) (VectorCurve2D units3 space)
 
 instance
   Multiplication_
     (VectorCurve2D units1 space)
-    (Curve units2)
+    (Curve1D units2)
     (VectorCurve2D (units1 ?*? units2) space)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve2D units1 space) (Curve units2) (VectorCurve2D units3 space)
+  Multiplication (VectorCurve2D units1 space) (Curve1D units2) (VectorCurve2D units3 space)
 
 instance
   space1 ~ space2 =>
   DotMultiplication_
     (VectorCurve2D units1 space1)
     (VectorCurve2D units2 space2)
-    (Curve (units1 ?*? units2))
+    (Curve1D (units1 ?*? units2))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
     (VectorCurve2D units1 space1)
     (VectorCurve2D units2 space2)
-    (Curve units3)
+    (Curve1D units3)
 
 constant :: Vector2D units space -> VectorCurve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units space
@@ -91,12 +91,12 @@ evaluateBounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorCurve2D units1 space ->
-  Curve units2 ->
+  Curve1D units2 ->
   Result DivisionByZero (VectorCurve2D units3 space)
 quotient_ ::
   Tolerance units2 =>
   VectorCurve2D units1 space ->
-  Curve units2 ->
+  Curve1D units2 ->
   Result DivisionByZero (VectorCurve2D (units1 ?/? units2) space)
 transformBy ::
   Transform2D tag translationUnits space ->

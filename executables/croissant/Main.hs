@@ -3,7 +3,7 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Body3D qualified as Body3D
 import OpenSolid.Convention3D qualified as Convention3D
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
@@ -20,8 +20,8 @@ main = Tolerance.using Length.nanometer do
   let majorRadius = Length.meter
   let k = Length.meters 2
   let minorRadius =
-        Curve.hermite Length.zero [k] Length.zero [negative k] `compose` SurfaceFunction.u
-  let theta = Curve.interpolateFrom (Angle.degrees 45) (Angle.degrees 315) `compose` SurfaceFunction.u
+        Curve1D.hermite Length.zero [k] Length.zero [negative k] `compose` SurfaceFunction.u
+  let theta = Curve1D.interpolateFrom (Angle.degrees 45) (Angle.degrees 315) `compose` SurfaceFunction.u
   let phi = Angle.twoPi .*. SurfaceFunction.v
   let r = majorRadius .+. minorRadius .*. SurfaceFunction.cos phi
   let surfaceFunction =

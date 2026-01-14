@@ -19,8 +19,8 @@ import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Convention3D qualified as Convention3D
-import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.Zero qualified as Curve.Zero
+import OpenSolid.Curve1D qualified as Curve1D
+import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D qualified as Direction3D
@@ -189,8 +189,8 @@ length =
     , Class.divBySelf
     , Class.divBy @Interval Self
     , Class.divBy @LengthInterval Self
-    , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
-    , Class.divByM (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
+    , Class.divByM (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -232,9 +232,9 @@ area =
     , Class.divBy @Interval Self
     , Class.divBy @LengthInterval Self
     , Class.divBy @AreaInterval Self
-    , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
-    , Class.divByM (\val crv -> Curve.quotient (Curve.constant val) crv)
-    , Class.divByS (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
+    , Class.divByM (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
+    , Class.divByS (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -287,8 +287,8 @@ angle =
     , Class.divBySelf
     , Class.divBy @Interval Self
     , Class.divBy @AngleInterval Self
-    , Class.divByU (\val crv -> Curve.quotient (Curve.constant val) crv)
-    , Class.divByR (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
+    , Class.divByR (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -867,29 +867,29 @@ uvPolygon =
     , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
-type Curve = Curve.Curve Unitless
+type Curve = Curve1D.Curve1D Unitless
 
 curve :: Class
 curve =
   Class.new @Curve "A parametric curve definining a unitless value in terms of a parameter value." $
-    [ Class.constant "Zero" (Curve.zero @Unitless) $(docs 'Curve.zero)
-    , Class.constant "T" Curve.t $(docs 'Curve.t)
-    , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , Class.factory2 "Interpolate From" "Start" "End" Curve.interpolateFrom $(docs 'Curve.interpolateFrom)
-    , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
-    , Class.member0 "Squared" Curve.squared $(docs 'Curve.squared)
-    , Class.memberU0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
-    , Class.member0 "Cubed" Curve.cubed $(docs 'Curve.cubed)
-    , Class.member0 "Sin" (Curve.sin . (Angle.radian .*.)) $(docs 'Curve.sin)
-    , Class.member0 "Cos" (Curve.cos . (Angle.radian .*.)) $(docs 'Curve.cos)
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
-    , Class.memberU0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , Class.memberU0 "Is Zero" (~= Curve.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    [ Class.constant "Zero" (Curve1D.zero @Unitless) $(docs 'Curve1D.zero)
+    , Class.constant "T" Curve1D.t $(docs 'Curve1D.t)
+    , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
+    , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
+    , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
+    , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
+    , Class.memberU0 "Sqrt" Curve1D.sqrt $(docs 'Curve1D.sqrt)
+    , Class.member0 "Cubed" Curve1D.cubed $(docs 'Curve1D.cubed)
+    , Class.member0 "Sin" (Curve1D.sin . (Angle.radian .*.)) $(docs 'Curve1D.sin)
+    , Class.member0 "Cos" (Curve1D.cos . (Angle.radian .*.)) $(docs 'Curve1D.cos)
+    , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
+    , Class.memberU0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
+    , Class.memberU0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
     , Class.numberPlus
     , Class.numberMinus
     , Class.numberTimes
-    , Class.numberDivByU (\val crv -> Curve.quotient (Curve.constant val) crv)
+    , Class.numberDivByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.plusNumber
     , Class.plusSelf
     , Class.minusNumber
@@ -903,28 +903,28 @@ curve =
     , Class.times @AreaCurve Self
     , Class.times @AngleCurve Self
     , Class.divByNumber
-    , Class.divByU Curve.quotient
-    , Class.nested @Curve.Zero "A point where a given curve is equal to zero." $
+    , Class.divByU Curve1D.quotient
+    , Class.nested @Curve1D.Zero "A point where a given curve is equal to zero." $
         [ Class.property "Location" (.location) "The parameter value at which the curve is zero."
         , Class.property "Order" (.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
         , Class.property "Sign" (.sign) "The sign of the solution: the sign of the curve to the right of the solution."
         ]
     ]
 
-type AngleCurve = Curve.Curve Radians
+type AngleCurve = Curve1D.Curve1D Radians
 
 angleCurve :: Class
 angleCurve =
   Class.new @AngleCurve "A parametric curve definining an angle in terms of a parameter value." $
-    [ Class.constant "Zero" (Curve.zero @Radians) $(docs 'Curve.zero)
-    , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , Class.factory2 "Interpolate From" "Start" "End" Curve.interpolateFrom $(docs 'Curve.interpolateFrom)
-    , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
-    , Class.member0 "Sin" Curve.sin $(docs 'Curve.sin)
-    , Class.member0 "Cos" Curve.cos $(docs 'Curve.cos)
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
-    , Class.memberR0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , Class.memberR0 "Is Zero" (~= Curve.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    [ Class.constant "Zero" (Curve1D.zero @Radians) $(docs 'Curve1D.zero)
+    , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
+    , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
+    , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
+    , Class.member0 "Sin" Curve1D.sin $(docs 'Curve1D.sin)
+    , Class.member0 "Cos" Curve1D.cos $(docs 'Curve1D.cos)
+    , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
+    , Class.memberR0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
+    , Class.memberR0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -934,24 +934,24 @@ angleCurve =
     , Class.timesNumber
     , Class.times @Curve Self
     , Class.divByNumber
-    , Class.divByR Curve.quotient
+    , Class.divByR Curve1D.quotient
     , Class.divBy @Angle Self
-    , Class.divByU Curve.quotient
+    , Class.divByU Curve1D.quotient
     ]
 
-type LengthCurve = Curve.Curve Meters
+type LengthCurve = Curve1D.Curve1D Meters
 
 lengthCurve :: Class
 lengthCurve =
   Class.new @LengthCurve "A parametric curve definining a length in terms of a parameter value." $
-    [ Class.constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
-    , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , Class.factory2 "Interpolate From" "Start" "End" Curve.interpolateFrom $(docs 'Curve.interpolateFrom)
-    , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
-    , Class.member0 "Squared" Curve.squared $(docs 'Curve.squared)
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
-    , Class.memberM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , Class.memberM0 "Is Zero" (~= Curve.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    [ Class.constant "Zero" (Curve1D.zero @Meters) $(docs 'Curve1D.zero)
+    , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
+    , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
+    , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
+    , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
+    , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
+    , Class.memberM0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
+    , Class.memberM0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -963,24 +963,24 @@ lengthCurve =
     , Class.times @Length Self
     , Class.times @Curve Self
     , Class.divByNumber
-    , Class.divByM Curve.quotient
+    , Class.divByM Curve1D.quotient
     , Class.divBy @Length Self
-    , Class.divByU Curve.quotient
+    , Class.divByU Curve1D.quotient
     ]
 
-type AreaCurve = Curve.Curve SquareMeters
+type AreaCurve = Curve1D.Curve1D SquareMeters
 
 areaCurve :: Class
 areaCurve =
   Class.new @AreaCurve "A parametric curve definining an area in terms of a parameter value." $
-    [ Class.constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
-    , Class.factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , Class.factory2 "Interpolate From" "Start" "End" Curve.interpolateFrom $(docs 'Curve.interpolateFrom)
-    , Class.property "Derivative" Curve.derivative $(docs 'Curve.derivative)
-    , Class.memberM0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
-    , Class.memberS0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
-    , Class.memberS0 "Is Zero" (~= Curve.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    [ Class.constant "Zero" (Curve1D.zero @SquareMeters) $(docs 'Curve1D.zero)
+    , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
+    , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
+    , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
+    , Class.memberM0 "Sqrt" Curve1D.sqrt $(docs 'Curve1D.sqrt)
+    , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
+    , Class.memberS0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
+    , Class.memberS0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -990,11 +990,11 @@ areaCurve =
     , Class.timesNumber
     , Class.times @Curve Self
     , Class.divByNumber
-    , Class.divByS Curve.quotient
+    , Class.divByS Curve1D.quotient
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.divByU Curve.quotient
-    , Class.divByM Curve.quotient
+    , Class.divByU Curve1D.quotient
+    , Class.divByM Curve1D.quotient
     ]
 
 type Svg = Svg.Svg FFI.Space

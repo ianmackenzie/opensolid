@@ -8,7 +8,7 @@ where
 import GHC.Records (HasField (getField))
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.FFI (FFI)
@@ -71,10 +71,10 @@ profile gear = do
         | rd > rb = Angle.radians (Number.sqrt (Number.squared (rd ./. rb) .- 1))
         | otherwise = Angle.zero
   let theta2 = Angle.radians (Number.sqrt (Number.squared (ra ./. rb) .- 1))
-  let theta = Curve.interpolateFrom theta1 theta2
+  let theta = Curve1D.interpolateFrom theta1 theta2
   let alpha = Angle.radians (Angle.tan phi .-. Angle.inRadians phi .+. Number.pi ./. Number.fromInt (2 * n))
-  let x = rb .*. (Curve.sin (theta .-. alpha) .-. theta ./. Angle.radian .*. Curve.cos (theta .-. alpha))
-  let y = rb .*. (Curve.cos (theta .-. alpha) .+. theta ./. Angle.radian .*. Curve.sin (theta .-. alpha))
+  let x = rb .*. (Curve1D.sin (theta .-. alpha) .-. theta ./. Angle.radian .*. Curve1D.cos (theta .-. alpha))
+  let y = rb .*. (Curve1D.cos (theta .-. alpha) .+. theta ./. Angle.radian .*. Curve1D.sin (theta .-. alpha))
   let involuteLeft = Curve2D.xy x y
   let leftStart = involuteLeft.startPoint
   let leftEnd = involuteLeft.endPoint

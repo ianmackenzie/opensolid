@@ -38,8 +38,8 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
-import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Direction3D (Direction3D)
@@ -343,7 +343,7 @@ instance
   where
   function ?/? value = Units.simplify (function ?*? (1 /? value))
 
-instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
+instance Composition (SurfaceFunction Unitless) (Curve1D units) (SurfaceFunction units) where
   curve `compose` function =
     new
       (curve.compiled `compose` function.compiled)

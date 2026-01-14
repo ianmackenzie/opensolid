@@ -7,8 +7,8 @@ module OpenSolid.VectorCurve2D.WithNoZeros
   )
 where
 
-import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.WithNoZeros qualified as Curve.WithNoZeros
+import OpenSolid.Curve1D qualified as Curve1D
+import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
 import OpenSolid.Prelude
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -28,14 +28,14 @@ instance
 unwrap :: WithNoZeros units space -> VectorCurve2D units space
 unwrap (WithNoZeros curve) = curve
 
-squaredMagnitude_ :: WithNoZeros units space -> Curve.WithNoZeros (units ?*? units)
-squaredMagnitude_ (WithNoZeros curve) = Curve.WithNoZeros (VectorCurve2D.squaredMagnitude_ curve)
+squaredMagnitude_ :: WithNoZeros units space -> Curve1D.WithNoZeros (units ?*? units)
+squaredMagnitude_ (WithNoZeros curve) = Curve1D.WithNoZeros (VectorCurve2D.squaredMagnitude_ curve)
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
   WithNoZeros units1 space ->
-  Curve.WithNoZeros units2
+  Curve1D.WithNoZeros units2
 squaredMagnitude = Units.specialize . squaredMagnitude_
 
-magnitude :: WithNoZeros units space -> Curve.WithNoZeros units
-magnitude withNoZeros = Curve.WithNoZeros.sqrt_ (squaredMagnitude_ withNoZeros)
+magnitude :: WithNoZeros units space -> Curve1D.WithNoZeros units
+magnitude withNoZeros = Curve1D.WithNoZeros.sqrt_ (squaredMagnitude_ withNoZeros)

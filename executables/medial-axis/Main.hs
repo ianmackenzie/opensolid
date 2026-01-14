@@ -3,7 +3,7 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Color qualified as Color
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.MedialAxis qualified as Curve2D.MedialAxis
@@ -65,9 +65,9 @@ testCurveMedialAxis label curve1 curve2 = do
   let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters Global) = do
         let (parameterization, _) = Curve2D.arcLengthParameterization segment.curve
         let drawTangentCircle u = do
-              let t = Curve.evaluate parameterization u
+              let t = Curve1D.evaluate parameterization u
               let centerPoint = Curve2D.evaluate segment.curve t
-              let diameter = 2 *. Quantity.abs (Curve.evaluate segment.radius t)
+              let diameter = 2 *. Quantity.abs (Curve1D.evaluate segment.radius t)
               Svg.circleWith
                 [Svg.strokeColor Color.gray, Svg.strokeWidth (Length.millimeters 0.2)]
                 (#centerPoint centerPoint)

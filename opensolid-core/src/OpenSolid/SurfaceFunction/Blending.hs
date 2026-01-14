@@ -5,7 +5,7 @@ module OpenSolid.SurfaceFunction.Blending
 where
 
 import GHC.Records (HasField)
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -152,11 +152,11 @@ blend ::
   SurfaceFunction Unitless ->
   function
 blend (f00, f01, f02) (f10, f11) t = do
-  let b00 = Curve.b00 `compose` t
-  let b01 = Curve.b01 `compose` t
-  let b02 = Curve.b02 `compose` t
-  let b10 = Curve.b10 `compose` t
-  let b11 = Curve.b11 `compose` t
+  let b00 = Curve1D.b00 `compose` t
+  let b01 = Curve1D.b01 `compose` t
+  let b02 = Curve1D.b02 `compose` t
+  let b10 = Curve1D.b10 `compose` t
+  let b11 = Curve1D.b11 `compose` t
   b00 .*. f00 .+. b01 .*. f01 .+. b02 .*. f02 .+. b10 .*. f10 .+. b11 .*. f11
 
 uParameterization :: Number -> SurfaceFunction2D Unitless UvSpace

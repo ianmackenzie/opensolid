@@ -3,8 +3,8 @@
 module Tests.NewtonRaphson (tests) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Number qualified as Number
@@ -35,7 +35,7 @@ tests =
 
 quadratic1D :: Tolerance Unitless => Test
 quadratic1D =
-  curve1D "Quadratic" (Curve.squared Curve.t .- 2) 1 (Number.sqrt 2)
+  curve1D "Quadratic" (Curve1D.squared Curve1D.t .- 2) 1 (Number.sqrt 2)
 
 arc2D :: Tolerance Unitless => Test
 arc2D = do
@@ -57,7 +57,7 @@ simpleSurface2D = do
   let surface = VectorSurfaceFunction2D.xy x y
   surface2D "Simple 2D surface" surface (UvPoint 1 0) (UvPoint (Number.sqrt 2) 1)
 
-curve1D :: Tolerance Unitless => Text -> Curve Unitless -> Number -> Number -> Test
+curve1D :: Tolerance Unitless => Text -> Curve1D Unitless -> Number -> Number -> Test
 curve1D name curve t0 tExpected =
   Test.group name $
     [ Test.verify "Boxed" do
@@ -66,9 +66,9 @@ curve1D name curve t0 tExpected =
           & Test.output "Expected solution" tExpected
           & Test.output "Actual solution" tSolution
     , Test.verify "Unboxed" do
-        let evaluate# t# = let !(Quantity# x#) = Curve.evaluate curve (Quantity# t#) in x#
+        let evaluate# t# = let !(Quantity# x#) = Curve1D.evaluate curve (Quantity# t#) in x#
         let evaluateDerivative# t# =
-              let !(Quantity# y'##) = Curve.evaluate curve.derivative (Quantity# t#) in y'##
+              let !(Quantity# y'##) = Curve1D.evaluate curve.derivative (Quantity# t#) in y'##
         let tSolution = NewtonRaphson.curve1D# evaluate# evaluateDerivative# t0
         Test.expect (tSolution ~= tExpected)
           & Test.output "Expected solution" tExpected

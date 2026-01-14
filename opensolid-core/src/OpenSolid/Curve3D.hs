@@ -38,8 +38,8 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
-import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Expression qualified as Expression
@@ -129,7 +129,7 @@ instance
   where
   lhs .-. rhs = constant lhs .-. rhs
 
-instance Composition (Curve Unitless) (Curve3D space) (Curve3D space) where
+instance Composition (Curve1D Unitless) (Curve3D space) (Curve3D space) where
   outer `compose` inner =
     new
       (outer.compiled `compose` inner.compiled)
@@ -170,7 +170,7 @@ on plane curve2D = do
   new compiledPlaced (VectorCurve3D.on plane (Curve2D.derivative curve2D))
 
 line :: Point3D space -> Point3D space -> Curve3D space
-line p1 p2 = constant p1 .+. Curve.t .*. (p2 .-. p1)
+line p1 p2 = constant p1 .+. Curve1D.t .*. (p2 .-. p1)
 
 {-| Construct a Bezier curve from its control points. For example,
 
@@ -234,9 +234,9 @@ bounds :: Curve3D space -> Bounds3D space
 bounds curve = evaluateBounds curve Interval.unit
 
 reverse :: Curve3D space -> Curve3D space
-reverse curve = curve `compose` (1 -. Curve.t)
+reverse curve = curve `compose` (1 -. Curve1D.t)
 
-arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Curve Unitless, Length)
+arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Curve1D Unitless, Length)
 arcLengthParameterization curve =
   ArcLength.parameterization (VectorCurve3D.magnitude curve.derivative)
 

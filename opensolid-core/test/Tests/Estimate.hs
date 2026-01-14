@@ -4,7 +4,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
@@ -123,7 +123,7 @@ area = Test.verify "area" Test.do
           (#startAngle Angle.pi)
           (#endAngle Angle.zero)
   let dAdt = Curve2D.yCoordinate curve .*. (Curve2D.derivative curve).xComponent
-  let areaEstimate = Curve.integrate dAdt
+  let areaEstimate = Curve1D.integrate dAdt
   let expectedArea = Area.squareMeters (Number.pi ./ 2)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect

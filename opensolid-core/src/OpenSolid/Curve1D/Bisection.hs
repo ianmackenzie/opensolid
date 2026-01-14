@@ -1,4 +1,4 @@
-module OpenSolid.Curve.Bisection (deduplicate) where
+module OpenSolid.Curve1D.Bisection (deduplicate) where
 
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval

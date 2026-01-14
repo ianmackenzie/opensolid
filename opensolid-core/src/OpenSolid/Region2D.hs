@@ -39,7 +39,7 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint (IntersectionPoint))
@@ -246,8 +246,8 @@ addFillet radius curves point = do
                       (DirectionCurve2D.evaluate firstTangent t1)
                       (DirectionCurve2D.evaluate secondTangent t2)
               let filletArc = Curve2D.sweptArc centerPoint startPoint sweptAngle
-              let trimmedFirstCurve = firstCurve `compose` Curve.interpolateFrom 0 t1
-              let trimmedSecondCurve = secondCurve `compose` Curve.interpolateFrom t2 1
+              let trimmedFirstCurve = firstCurve `compose` Curve1D.interpolateFrom 0 t1
+              let trimmedSecondCurve = secondCurve `compose` Curve1D.interpolateFrom t2 1
               Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence ::
@@ -310,7 +310,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
 
 isEndpointIntersection :: IntersectionPoint -> Bool
 isEndpointIntersection intersectionPoint = do
-  Curve.isEndpoint intersectionPoint.t1 && Curve.isEndpoint intersectionPoint.t2
+  Curve1D.isEndpoint intersectionPoint.t1 && Curve1D.isEndpoint intersectionPoint.t2
 
 connect ::
   Tolerance units =>
@@ -480,8 +480,8 @@ fluxIntegral point curve = do
   let integrand =
         Tolerance.using (Quantity.squared_ ?tolerance) $
           (Curve2D.derivative curve `cross_` displacement)
-            ./. Curve.WithNoZeros (VectorCurve2D.squaredMagnitude_ displacement)
-  Curve.integrate integrand
+            ./. Curve1D.WithNoZeros (VectorCurve2D.squaredMagnitude_ displacement)
+  Curve1D.integrate integrand
 
 totalFlux :: Tolerance units => Point2D units space -> Loop units space -> Estimate Unitless
 totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
@@ -545,7 +545,7 @@ areaIntegral_ referencePoint curve = do
   let displacement = curve .-. referencePoint
   let y = displacement.yComponent
   let dx = displacement.xComponent.derivative
-  negative (Curve.integrate (y ?*? dx))
+  negative (Curve1D.integrate (y ?*? dx))
 
 loopIsInside :: Tolerance units => Loop units space -> Loop units space -> Bool
 loopIsInside outer inner = do

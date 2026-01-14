@@ -24,7 +24,7 @@ import GHC.Records (HasField)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.CompiledFunction (CompiledFunction)
-import OpenSolid.Curve (Curve)
+import OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Vector2D (Vector2D)
@@ -70,7 +70,7 @@ instance
   Composition
     (Curve2D unitless uvSpace)
     (SurfaceFunction units)
-    (Curve units)
+    (Curve1D units)
 
 constant :: Point2D units space -> Curve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
@@ -84,7 +84,7 @@ tangentDirection ::
   Curve2D units space ->
   Result IsPoint (DirectionCurve2D space)
 reverse :: Curve2D units space -> Curve2D units space
-xy :: Curve units -> Curve units -> Curve2D units space
+xy :: Curve1D units -> Curve1D units -> Curve2D units space
 lineFrom :: Point2D units space -> Point2D units space -> Curve2D units space
 hermite ::
   Point2D units space ->

@@ -11,7 +11,7 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D (Direction2D))
@@ -124,7 +124,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
             Bounds2D segmentUBounds (Interval v1 v2)
   let derivative self = do
         let deltaV = vEnd .-. vStart
-        let dvdt = Curve.constant deltaV
+        let dvdt = Curve1D.constant deltaV
         let dudt = dvdt .*. dudv `compose` self
         VectorCurve2D.xy dudt dvdt
   Curve2D.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative

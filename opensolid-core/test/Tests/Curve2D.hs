@@ -10,8 +10,8 @@ where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.Zero qualified as Curve.Zero
+import OpenSolid.Curve1D qualified as Curve1D
+import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.IntersectionPoint qualified as IntersectionPoint
@@ -208,7 +208,7 @@ solving = Test.verify "solving" Test.do
   let arc = Curve2D.arcFrom (Point2D.meters 0 1) (Point2D.meters 1 0) Angle.quarterTurn
   let distanceFromOrigin = VectorCurve2D.magnitude (arc .-. Point2D.origin)
   let desiredDistance = Length.meters 0.5
-  zeros <- Curve.zeros (distanceFromOrigin .-. desiredDistance)
+  zeros <- Curve1D.zeros (distanceFromOrigin .-. desiredDistance)
   let distanceAt zero = Point2D.distanceFrom Point2D.origin (Curve2D.evaluate arc zero.location)
   Test.expect (List.map distanceAt zeros ~= [desiredDistance, desiredDistance])
 
@@ -428,7 +428,7 @@ g2 = Test.check 100 "G2 continuity" Test.do
   tangentCurve <- Curve2D.tangentDirection spline
   curvatureCurve <- Curve2D.curvature spline
   let tangentDirection = DirectionCurve2D.evaluate tangentCurve t
-  let signedRadius = 1 /. Curve.evaluate curvatureCurve t
+  let signedRadius = 1 /. Curve1D.evaluate curvatureCurve t
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point .+. signedRadius .*. normalDirection
   let arc = Curve2D.sweptArc arcCenter point (Angle.degrees 30)
