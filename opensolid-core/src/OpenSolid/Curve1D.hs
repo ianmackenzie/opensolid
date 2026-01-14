@@ -2,7 +2,6 @@ module OpenSolid.Curve1D
   ( Curve1D (compiled, derivative)
   , Compiled
   , Zero
-  , isEndpoint
   , evaluate
   , evaluateAt
   , evaluateBounds
@@ -140,9 +139,6 @@ instance
   Intersects (Quantity units1) (Curve1D units2) units1
   where
   value `intersects` curve = curve `intersects` value
-
-isEndpoint :: Number -> Bool
-isEndpoint tValue = tValue == 0 || tValue == 1
 
 new :: Compiled units -> Curve1D units -> Curve1D units
 new = Curve1D
@@ -746,7 +742,7 @@ sign curve = case zeros curve of
             Ok (Quantity.sign (evaluate curve testPoint))
 
 isInnerZero :: Zero -> Bool
-isInnerZero curveZero = not (isEndpoint curveZero.location)
+isInnerZero curveZero = not (Parameter.isEndpoint curveZero.location)
 
 isCrossingZero :: Zero -> Bool
 isCrossingZero curveZero =

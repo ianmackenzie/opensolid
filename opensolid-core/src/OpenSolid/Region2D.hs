@@ -63,6 +63,7 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Polygon2D (Polygon2D)
 import OpenSolid.Polygon2D qualified as Polygon2D
@@ -310,7 +311,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
 
 isEndpointIntersection :: IntersectionPoint -> Bool
 isEndpointIntersection intersectionPoint = do
-  Curve1D.isEndpoint intersectionPoint.t1 && Curve1D.isEndpoint intersectionPoint.t2
+  Parameter.isEndpoint intersectionPoint.t1 && Parameter.isEndpoint intersectionPoint.t2
 
 connect ::
   Tolerance units =>
