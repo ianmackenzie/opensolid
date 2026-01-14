@@ -69,6 +69,29 @@ dimension = {
     AngleCurve: 1,
 }
 
+space = {
+    float: None,
+    Length: None,
+    Area: None,
+    Angle: None,
+    Interval: None,
+    LengthInterval: None,
+    AreaInterval: None,
+    AngleInterval: None,
+    Vector2D: "Space",
+    Displacement2D: "Space",
+    AreaVector2D: "Space",
+    Direction2D: "Space",
+    Point2D: "Space",
+    UvPoint: "UvSpace",
+    Bounds2D: "Space",
+    UvBounds: "UvSpace",
+    Curve: None,
+    LengthCurve: None,
+    AreaCurve: None,
+    AngleCurve: None,
+}
+
 behaviour = {
     float: "scalar",
     Length: "scalar",
@@ -277,6 +300,11 @@ if __name__ == "__main__":
             else:
                 continue
 
+            # Check if spaces are equal
+            if space[t1] != space[t2]:
+                print("Skipping addition of " + str(t1) + " and " + str(t2))
+                continue
+
             # Check if there actually is a valid output type
             output_type = find_output_type(
                 output_behaviour=output_behaviour,
@@ -351,6 +379,11 @@ if __name__ == "__main__":
             if units[t1] == units[t2]:
                 output_units = units[t1]
             else:
+                continue
+
+            # Check if spaces are equal
+            if space[t1] != space[t2]:
+                print("Skipping subtraction of " + str(t1) + " and " + str(t2))
                 continue
 
             # Check if there actually is a valid output type
