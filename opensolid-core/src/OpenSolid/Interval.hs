@@ -54,7 +54,6 @@ module OpenSolid.Interval
   , cos
   , interpolate
   , interpolationParameter
-  , resolve
   , resolution
   , isResolved
   , resolvedSign
@@ -611,18 +610,6 @@ resolvedSign interval = do
   if Number.abs intervalResolution >= resolutionThreshold
     then Resolved (Number.sign intervalResolution)
     else Unresolved
-
-resolve :: Eq a => (Interval units -> Fuzzy a) -> Interval units -> Fuzzy a
-resolve assess interval =
-  case assess interval of
-    Resolved value -> Resolved value
-    Unresolved
-      | isAtomic interval -> Unresolved
-      | otherwise -> do
-          let (left, right) = bisect interval
-          leftValue <- resolve assess left
-          rightValue <- resolve assess right
-          if leftValue == rightValue then Resolved leftValue else Unresolved
 
 random :: Random.Generator (Quantity units) -> Random.Generator (Interval units)
 random randomQuantity = do
