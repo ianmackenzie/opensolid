@@ -115,13 +115,13 @@ If either argument is NaN, then the result will be open/infinite
 -}
 {-# INLINE Interval #-}
 pattern Interval :: Quantity units -> Quantity units -> Interval units
-pattern Interval low high <- (viewBounds -> (# low, high #))
+pattern Interval low high <- (viewInterval -> (# low, high #))
   where
     Interval (Quantity# a#) (Quantity# b#) = Interval# a# b#
 
-{-# INLINE viewBounds #-}
-viewBounds :: Interval units -> (# Quantity units, Quantity units #)
-viewBounds (Ordered# low# high#) = (# Quantity# low#, Quantity# high# #)
+{-# INLINE viewInterval #-}
+viewInterval :: Interval units -> (# Quantity units, Quantity units #)
+viewInterval (Ordered# low# high#) = (# Quantity# low#, Quantity# high# #)
 
 {-# COMPLETE Interval #-}
 
