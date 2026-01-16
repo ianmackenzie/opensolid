@@ -54,7 +54,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import {-# SOURCE #-} OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Length qualified as Length
-import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2D (Axis2D)
@@ -72,10 +71,12 @@ import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector (IsZero (IsZero))
+import OpenSolid.Vector qualified as Vector
 
 -- | The zero vector.
 zero :: Vector2D units space
-zero = Vector2D Quantity.zero Quantity.zero
+zero = Vector.zero
 
 {-# INLINE coerce #-}
 coerce :: Vector2D units1 space1 -> Vector2D units2 space2
@@ -153,10 +154,10 @@ yComponent :: Vector2D units space -> Quantity units
 yComponent (Vector2D _ vy) = vy
 
 componentIn :: Direction2D space -> Vector2D units space -> Quantity units
-componentIn = dot
+componentIn = Vector.componentIn
 
 projectionIn :: Direction2D space -> Vector2D units space -> Vector2D units space
-projectionIn givenDirection vector = givenDirection .*. componentIn givenDirection vector
+projectionIn = Vector.projectionIn
 
 -- | Get the X and Y components of a vector as a tuple.
 {-# INLINE components #-}
@@ -176,13 +177,13 @@ midpoint (Vector2D x1 y1) (Vector2D x2 y2) =
   Vector2D (0.5 *. (x1 .+. x2)) (0.5 *. (y1 .+. y2))
 
 magnitude :: Vector2D units space -> Quantity units
-magnitude (Vector2D vx vy) = Quantity.hypot2 vx vy
+magnitude = Vector.magnitude
 
 squaredMagnitude :: Units.Squared units1 units2 => Vector2D units1 space -> Quantity units2
-squaredMagnitude = Units.specialize . squaredMagnitude_
+squaredMagnitude = Vector.squaredMagnitude
 
 squaredMagnitude_ :: Vector2D units space -> Quantity (units ?*? units)
-squaredMagnitude_ (Vector2D vx vy) = vx ?*? vx .+. vy ?*? vy
+squaredMagnitude_ = Vector.squaredMagnitude_
 
 {-| Get the angle of a vector.
 
@@ -208,35 +209,27 @@ second, and will always be between -180 and +180 degrees.
 angleFrom :: Vector2D units space -> Vector2D units space -> Angle
 angleFrom v1 v2 = Angle.atan2 (v1 `cross_` v2) (v1 `dot_` v2)
 
-data IsZero = IsZero deriving (Eq, Show)
-
 {-| Attempt to get the direction of a vector.
 
 The current tolerance will be used to check if the vector is zero
 (and therefore does not have a direction).
 -}
 direction :: Tolerance units => Vector2D units space -> Result IsZero (Direction2D space)
-direction vector = do
-  let vm = magnitude vector
-  if vm ~= Quantity.zero then Error IsZero else Ok (Unit2D (vector ./. vm))
+direction = Vector.direction
 
 magnitudeAndDirection ::
   Tolerance units =>
   Vector2D units space ->
   Result IsZero (Quantity units, Direction2D space)
-magnitudeAndDirection vector = do
-  let vm = magnitude vector
-  if vm ~= Quantity.zero then Error IsZero else Ok (vm, Unit2D (vector ./. vm))
+magnitudeAndDirection = Vector.magnitudeAndDirection
 
 {-| Normalize a vector.
 
-If the original vector is exactly zero, then the result will be zero as well.
+If the original vector is zero (within the current tolerance), then the result will be zero as well.
 Otherwise, the result will be a unit vector.
 -}
-normalize :: Vector2D units space -> Vector2D Unitless space
-normalize vector = do
-  let vm = magnitude vector
-  if vm == Quantity.zero then zero else vector ./. vm
+normalize :: Tolerance units => Vector2D units space -> Vector2D Unitless space
+normalize = Vector.normalize
 
 -- | Rotate a vector left (counterclockwise) by 90 degrees.
 rotateLeft :: Vector2D units space -> Vector2D units space
@@ -285,7 +278,7 @@ unconvert :: Quantity (units2 ?/? units1) -> Vector2D units2 space -> Vector2D u
 unconvert factor vector = Units.simplify (vector ?/? factor)
 
 sum :: List (Vector2D units space) -> Vector2D units space
-sum = List.foldl (.+.) zero
+sum = Vector.sum
 
 transformBy ::
   Transform2D tag translationUnits space ->

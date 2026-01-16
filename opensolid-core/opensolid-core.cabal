@@ -117,6 +117,8 @@ library
     OpenSolid.CompiledFunction
     OpenSolid.Composition
     OpenSolid.Convention3D
+    OpenSolid.CoordinateSystem
+    OpenSolid.Curve
     OpenSolid.Curve1D
     OpenSolid.Curve1D.WithNoInteriorZeros
     OpenSolid.Curve1D.WithNoZeros
@@ -134,10 +136,12 @@ library
     OpenSolid.Debug
     OpenSolid.Debug.Plot
     OpenSolid.Desingularization
+    OpenSolid.Direction
     OpenSolid.Direction2D
     OpenSolid.Direction3D
     OpenSolid.DirectionBounds2D
     OpenSolid.DirectionBounds3D
+    OpenSolid.DirectionCurve
     OpenSolid.DirectionCurve2D
     OpenSolid.DirectionCurve3D
     OpenSolid.DirectionSurfaceFunction2D
@@ -235,14 +239,18 @@ library
     OpenSolid.UvBounds
     OpenSolid.UvPoint
     OpenSolid.UvSpace
+    OpenSolid.Vector
     OpenSolid.Vector2D
     OpenSolid.Vector3D
     OpenSolid.VectorBounds2D
     OpenSolid.VectorBounds3D
+    OpenSolid.VectorCurve
     OpenSolid.VectorCurve2D
     OpenSolid.VectorCurve2D.WithNoInteriorZeros
     OpenSolid.VectorCurve2D.WithNoZeros
     OpenSolid.VectorCurve3D
+    OpenSolid.VectorCurve3D.WithNoInteriorZeros
+    OpenSolid.VectorCurve3D.WithNoZeros
     OpenSolid.VectorSurface2D
     OpenSolid.VectorSurface3D
     OpenSolid.VectorSurfaceFunction2D

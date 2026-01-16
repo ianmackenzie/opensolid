@@ -1,5 +1,6 @@
 module OpenSolid.Direction3D
   ( Direction3D
+  , unsafe
   , upward
   , downward
   , forward
@@ -9,8 +10,10 @@ module OpenSolid.Direction3D
   )
 where
 
-import OpenSolid.Primitives (Direction3D, Orientation3D)
+import OpenSolid.Prelude
+import OpenSolid.Primitives (Direction3D, Orientation3D, Vector3D)
 
+unsafe :: Vector3D Unitless space -> Direction3D space
 upward :: Orientation3D space -> Direction3D space
 downward :: Orientation3D space -> Direction3D space
 forward :: Orientation3D space -> Direction3D space

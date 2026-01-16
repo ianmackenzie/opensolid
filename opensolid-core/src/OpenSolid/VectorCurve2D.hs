@@ -36,6 +36,7 @@ module OpenSolid.VectorCurve2D
   , IsZero (IsZero)
   , zeros
   , HasZero (HasZero)
+  , normalize
   , direction
   , placeIn
   , relativeTo
@@ -92,6 +93,7 @@ import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
+import OpenSolid.VectorCurve (IsZero (IsZero))
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoInteriorZeros (WithNoInteriorZeros (WithNoInteriorZeros))
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoInteriorZeros qualified as VectorCurve2D.WithNoInteriorZeros
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoZeros (WithNoZeros (WithNoZeros))
@@ -104,7 +106,7 @@ data VectorCurve2D units space = VectorCurve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
   , maxSampledMagnitude :: ~(Quantity units)
-  , normalized :: ~(VectorCurve2D Unitless space)
+  , nonZeroNormalized :: ~(VectorCurve2D Unitless space)
   }
 
 type Compiled units space =
@@ -157,7 +159,7 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
-      , normalized = curve.normalized
+      , nonZeroNormalized = curve.nonZeroNormalized
       }
 
 instance ApproximateEquality (VectorCurve2D units space) units where
@@ -534,13 +536,14 @@ new givenCompiled givenDerivative = result
   -- The test value to use to check if a curve is (likely) zero everywhere
   maxSampledMagnitude = NonEmpty.maximumOf (Vector2D.magnitude . evaluate result) Parameter.samples
   -- The normalized version of this curve, assuming it has no interior zeros
-  normalized = result ./. VectorCurve2D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
+  nonZeroNormalized =
+    result ./. VectorCurve2D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
   result =
     VectorCurve2D
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
-      , normalized
+      , nonZeroNormalized
       }
 
 recursive ::
@@ -805,13 +808,8 @@ data HasZero = HasZero deriving (Eq, Show)
 magnitude :: Tolerance units => VectorCurve2D units space -> Curve1D units
 magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
 
-sampleValues :: VectorCurve2D units space -> NonEmpty (Vector2D units space)
-sampleValues curve = NonEmpty.map (evaluate curve) Parameter.samples
-
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
-isZero curve = NonEmpty.allSatisfy (~= Vector2D.zero) (sampleValues curve)
-
-data IsZero = IsZero deriving (Eq, Show)
+isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
 zeros :: Tolerance units => VectorCurve2D units space -> Result IsZero (List Number)
 zeros curve =
@@ -819,14 +817,17 @@ zeros curve =
     Ok zeros1D -> Ok (List.map (.location) zeros1D)
     Error Curve1D.IsZero -> Error IsZero
 
+normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
+normalize curve = if isZero curve then zero else curve.nonZeroNormalized
+
 direction ::
   Tolerance units =>
   VectorCurve2D units space ->
   Result IsZero (DirectionCurve2D space)
 direction curve =
-  if curve.maxSampledMagnitude ~= Quantity.zero
+  if isZero curve
     then Error IsZero
-    else Ok (DirectionCurve2D.unsafe curve.normalized)
+    else Ok (DirectionCurve2D.unsafe curve.nonZeroNormalized)
 
 placeIn ::
   Frame2D frameUnits global local ->

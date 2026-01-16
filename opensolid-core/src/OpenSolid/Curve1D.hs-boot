@@ -8,9 +8,9 @@ module OpenSolid.Curve1D
   )
 where
 
-import OpenSolid.Interval (Interval)
-import OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.FFI (FFI)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 
 type role Curve1D nominal

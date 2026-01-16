@@ -508,7 +508,7 @@ vector2D =
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
     , Class.memberU0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
-    , Class.member0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.memberU0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."
@@ -550,7 +550,7 @@ displacement2D =
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
     , Class.memberM0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
-    , Class.member0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.memberM0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberM0 "Is Zero" (~= Vector2D.zero) "Check if a displacement is zero, within the current tolerance."
@@ -585,7 +585,7 @@ areaVector2D =
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
     , Class.memberS0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
-    , Class.member0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.memberS0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberS0 "Is Zero" (~= Vector2D.zero) "Check if an area vector is zero, within the current tolerance."
@@ -616,7 +616,7 @@ uvVector =
     , Class.property "U Component" Vector2D.xComponent "Get the U component of a vector."
     , Class.property "V Component" Vector2D.yComponent "Get the V component of a vector."
     , Class.memberU0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
-    , Class.member0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.memberU0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."

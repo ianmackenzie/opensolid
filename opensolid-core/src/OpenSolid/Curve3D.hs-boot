@@ -4,6 +4,7 @@ module OpenSolid.Curve3D
   , constant
   , new
   , on
+  , derivative
   , evaluate
   , evaluateBounds
   , reverse
@@ -11,13 +12,11 @@ module OpenSolid.Curve3D
 where
 
 import GHC.Records (HasField)
-import OpenSolid.Bounds3D (Bounds3D)
-import OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Interval (Interval)
-import OpenSolid.Plane3D (Plane3D)
-import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Bounds3D, Plane3D, Point3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
 type role Curve3D nominal
@@ -49,6 +48,7 @@ instance
 constant :: Point3D space -> Curve3D space
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 on :: Plane3D global local -> Curve2D Meters local -> Curve3D global
+derivative :: Curve3D space -> VectorCurve3D Meters space
 evaluate :: Curve3D space -> Number -> Point3D space
 evaluateBounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space

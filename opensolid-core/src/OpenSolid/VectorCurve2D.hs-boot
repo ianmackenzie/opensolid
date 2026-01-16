@@ -5,24 +5,24 @@ module OpenSolid.VectorCurve2D
   , new
   , compiled
   , derivative
+  , isZero
   , evaluate
   , evaluateBounds
+  , normalize
   , quotient
   , quotient_
   , transformBy
   )
 where
 
-import OpenSolid.Interval (Interval)
-import OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.DivisionByZero (DivisionByZero)
-import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
-import OpenSolid.Transform2D (Transform2D)
+import OpenSolid.Primitives (Transform2D, Vector2D, VectorBounds2D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.VectorBounds2D (VectorBounds2D)
 
 type role VectorCurve2D nominal nominal
 
@@ -86,6 +86,7 @@ constant :: Vector2D units space -> VectorCurve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units space
 compiled :: VectorCurve2D units space -> Compiled units space
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
+isZero :: Tolerance units => VectorCurve2D units space -> Bool
 evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
 evaluateBounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 quotient ::
@@ -98,6 +99,7 @@ quotient_ ::
   VectorCurve2D units1 space ->
   Curve1D units2 ->
   Result DivisionByZero (VectorCurve2D (units1 ?/? units2) space)
+normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
 transformBy ::
   Transform2D tag translationUnits space ->
   VectorCurve2D units space ->

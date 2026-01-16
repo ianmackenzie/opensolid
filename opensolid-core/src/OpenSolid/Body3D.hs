@@ -305,7 +305,7 @@ translational sketchPlane profile displacement = do
   let endCap = Surface3D.on endPlane profile
   let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
   let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2D.boundaryCurves profile))
-  let initialDerivative = VectorCurve3D.startValue displacement.derivative
+  let initialDerivative = VectorCurve3D.startValue (VectorCurve3D.derivative displacement)
   case Quantity.sign (initialDerivative `dot` Plane3D.normalDirection sketchPlane) of
     Positive -> boundedBy (endCap : startCap : sideSurfaces)
     Negative -> boundedBy (startCap : endCap : sideSurfaces)
@@ -702,7 +702,7 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
                   correctlyAligned
                   surfaceSegments
                   matingSurfaceSegments
-                  curve3D.derivative.derivative
+                  (curve3D & Curve3D.derivative & VectorCurve3D.derivative)
           let tValues = Domain1D.innerSamplingPoints edgePredicate
           let matingTValues = if correctlyAligned then List.reverseMap (1 -.) tValues else tValues
           let vertices = List.map (Curve2D.evaluate uvCurve) tValues

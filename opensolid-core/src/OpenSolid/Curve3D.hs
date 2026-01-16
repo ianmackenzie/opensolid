@@ -12,6 +12,7 @@ module OpenSolid.Curve3D
   , quadraticBezier
   , cubicBezier
   , hermite
+  , derivative
   , startPoint
   , endPoint
   , evaluate
@@ -91,7 +92,10 @@ instance
     (VectorCurve3D meters space2)
     (Curve3D space1)
   where
-  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
+  lhs .+. rhs =
+    new
+      (lhs.compiled .+. VectorCurve3D.compiled rhs)
+      (lhs.derivative .+. VectorCurve3D.derivative rhs)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -100,7 +104,10 @@ instance
     (VectorCurve3D meters space2)
     (Curve3D space1)
   where
-  lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
+  lhs .-. rhs =
+    new
+      (lhs.compiled .-. VectorCurve3D.compiled rhs)
+      (lhs.derivative .-. VectorCurve3D.derivative rhs)
 
 instance
   space1 ~ space2 =>
@@ -109,7 +116,10 @@ instance
     (Curve3D space2)
     (VectorCurve3D Meters space1)
   where
-  lhs .-. rhs = VectorCurve3D.new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
+  lhs .-. rhs =
+    VectorCurve3D.new
+      (lhs.compiled .-. rhs.compiled)
+      (lhs.derivative .-. rhs.derivative)
 
 instance
   space1 ~ space2 =>
@@ -217,6 +227,9 @@ hermite ::
   Curve3D space
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
+
+derivative :: Curve3D space -> VectorCurve3D Meters space
+derivative = (.derivative)
 
 startPoint :: Curve3D space -> Point3D space
 startPoint curve = evaluate curve 0

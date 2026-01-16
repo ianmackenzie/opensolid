@@ -30,6 +30,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.HorizontalCurve qualified as H
 import OpenSolid.SurfaceFunction1D.Subproblem (Subproblem (Subproblem))
 import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
@@ -83,11 +84,11 @@ quadratic subproblem saddlePoint = do
   let determinant = fab ?*? fab .-. faa ?*? fbb
   let sqrtD = Quantity.sqrt_ determinant
   let (m1, m2) = Quantity.minmax ((negative fab .+. sqrtD) ./. fbb, (negative fab .-. sqrtD) ./. fbb)
-  let v1 = Vector2D.normalize (vA .+. m1 .*. vB)
-  let v2 = Vector2D.normalize (vA .+. m2 .*. vB)
+  let v1 = Tolerance.using Quantity.zero (Vector2D.normalize (vA .+. m1 .*. vB))
+  let v2 = Tolerance.using Quantity.zero (Vector2D.normalize (vA .+. m2 .*. vB))
   let d1 = Direction2D.unsafe v1
   let d2 = Direction2D.unsafe v2
-  let vX = Vector2D.normalize (v1 .+. v2)
+  let vX = Tolerance.using Quantity.zero (Vector2D.normalize (v1 .+. v2))
   let dX = Direction2D.unsafe vX
   let frame = Frame2D.fromXAxis (Axis2D.through saddlePoint dX)
   SaddleRegion{subproblem, frame, d1, d2}

@@ -27,6 +27,7 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
+import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
@@ -216,7 +217,7 @@ boundaryPoints ::
   NonEmpty UvPoint
 boundaryPoints accuracy surfaceFunction fuu fuv fvv uvCurve = do
   let curve3D = surfaceFunction `compose` uvCurve
-  let secondDerivative3D = curve3D.derivative.derivative
+  let secondDerivative3D = curve3D & Curve3D.derivative & VectorCurve3D.derivative
   let predicate = linearizationPredicate accuracy fuu fuv fvv uvCurve secondDerivative3D
   let parameterValues = Domain1D.leadingSamplingPoints predicate
   NonEmpty.map (Curve2D.evaluate uvCurve) parameterValues
