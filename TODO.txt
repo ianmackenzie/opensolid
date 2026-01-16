@@ -1,3 +1,14 @@
+Add Curve#d.secondDerivative
+- could be in Curve module!
+
+Maybe have Curve.intersections that returns slightly simplified IntersectionPoint type, with no sign?
+- crossing or tangent indicator only
+- Curve2D (and maybe SurfaceCurve3D) can add crossing sign if desired
+
+Refer to IsZero as VectorCurve.IsZero everywhere
+
+Refer to IsPoint as Curve.IsPoint everywhere
+
 Generic modules to add:
 - Point
 - Vector
