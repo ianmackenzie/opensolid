@@ -8,6 +8,7 @@ module OpenSolid.VectorCurve2D
   , isZero
   , evaluate
   , evaluateBounds
+  , squaredMagnitude_
   , normalize
   , quotient
   , quotient_
@@ -99,6 +100,7 @@ quotient_ ::
   VectorCurve2D units1 space ->
   Curve1D units2 ->
   Result DivisionByZero (VectorCurve2D (units1 ?/? units2) space)
+squaredMagnitude_ :: VectorCurve2D units space -> Curve1D (units ?*? units)
 normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
 transformBy ::
   Transform2D tag translationUnits space ->

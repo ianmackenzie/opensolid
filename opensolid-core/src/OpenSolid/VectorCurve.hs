@@ -2,6 +2,7 @@ module OpenSolid.VectorCurve
   ( IsZero (IsZero)
   , isZero
   , derivative
+  , squaredMagnitude_
   , normalize
   , direction
   )
@@ -9,6 +10,7 @@ where
 
 import OpenSolid.CoordinateSystem (VectorCoordinateSystem (DirectionCurve, VectorCurve))
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
+import OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Prelude
 
@@ -25,6 +27,12 @@ derivative ::
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 derivative = CoordinateSystem.vectorCurveDerivative
+
+squaredMagnitude_ ::
+  VectorCoordinateSystem dimension units space =>
+  VectorCurve dimension units space ->
+  Curve1D (units ?*? units)
+squaredMagnitude_ = CoordinateSystem.vectorCurveSquaredMagnitude_
 
 normalize ::
   (VectorCoordinateSystem dimension units space, Tolerance units) =>

@@ -7,6 +7,7 @@ module OpenSolid.CoordinateSystem
 where
 
 import GHC.Num (Natural)
+import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -80,6 +81,9 @@ class
     VectorCurve dimension units space ->
     Interval Unitless ->
     VectorBounds dimension units space
+  vectorCurveSquaredMagnitude_ ::
+    VectorCurve dimension units space ->
+    Curve1D (units ?*? units)
   normalizeVectorCurve ::
     Tolerance units =>
     VectorCurve dimension units space ->
@@ -124,6 +128,7 @@ instance VectorCoordinateSystem 2 units space where
   vectorCurveIsZero = VectorCurve2D.isZero
   evaluateVectorCurve = VectorCurve2D.evaluate
   evaluateVectorCurveBounds = VectorCurve2D.evaluateBounds
+  vectorCurveSquaredMagnitude_ = VectorCurve2D.squaredMagnitude_
   normalizeVectorCurve = VectorCurve2D.normalize
 
   unsafeDirectionCurve = DirectionCurve2D.unsafe
@@ -153,6 +158,7 @@ instance VectorCoordinateSystem 3 units space where
   vectorCurveIsZero = VectorCurve3D.isZero
   evaluateVectorCurve = VectorCurve3D.evaluate
   evaluateVectorCurveBounds = VectorCurve3D.evaluateBounds
+  vectorCurveSquaredMagnitude_ = VectorCurve3D.squaredMagnitude_
   normalizeVectorCurve = VectorCurve3D.normalize
 
   unsafeDirectionCurve = DirectionCurve3D.unsafe
