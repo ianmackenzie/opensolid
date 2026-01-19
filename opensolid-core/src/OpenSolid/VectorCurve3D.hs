@@ -50,7 +50,6 @@ import OpenSolid.Composition
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
-import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction3D (Direction3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
@@ -61,7 +60,6 @@ import OpenSolid.Expression.VectorCurve3D qualified as Expression.VectorCurve3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
@@ -720,10 +718,7 @@ magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result IsZero (List Number)
-zeros curve =
-  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.zeros (squaredMagnitude_ curve)) of
-    Ok zeros1D -> Ok (List.map (.location) zeros1D)
-    Error Curve1D.IsZero -> Error IsZero
+zeros = VectorCurve.zeros
 
 direction ::
   Tolerance units =>

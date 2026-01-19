@@ -58,7 +58,6 @@ import OpenSolid.Composition
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
-import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Desingularization qualified as Desingularization
@@ -73,7 +72,6 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
@@ -813,10 +811,7 @@ isZero :: Tolerance units => VectorCurve2D units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
 zeros :: Tolerance units => VectorCurve2D units space -> Result IsZero (List Number)
-zeros curve =
-  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.zeros curve.squaredMagnitude_) of
-    Ok zeros1D -> Ok (List.map (.location) zeros1D)
-    Error Curve1D.IsZero -> Error IsZero
+zeros = VectorCurve.zeros
 
 normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
 normalize curve = if isZero curve then zero else curve.nonZeroNormalized
