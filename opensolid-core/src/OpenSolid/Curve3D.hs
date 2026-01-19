@@ -39,6 +39,7 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
+import OpenSolid.Curve (IsPoint (IsPoint))
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
@@ -71,8 +72,6 @@ data Curve3D space = Curve3D (Compiled space) ~(VectorCurve3D Meters space)
 
 type Compiled space =
   CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
-
-data IsPoint = IsPoint deriving (Eq, Show)
 
 instance HasField "compiled" (Curve3D space) (Compiled space) where
   getField (Curve3D c _) = c
