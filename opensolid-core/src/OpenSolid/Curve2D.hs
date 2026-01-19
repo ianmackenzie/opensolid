@@ -687,10 +687,7 @@ tangentDirection ::
   Tolerance units =>
   Curve2D units space ->
   Result IsPoint (DirectionCurve2D space)
-tangentDirection curve =
-  case VectorCurve2D.direction curve.derivative of
-    Ok directionCurve -> Ok directionCurve
-    Error VectorCurve2D.IsZero -> Error IsPoint
+tangentDirection = Curve.tangentDirection
 
 offsetLeftwardBy ::
   Tolerance units =>
