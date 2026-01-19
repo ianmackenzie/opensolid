@@ -1,3 +1,3 @@
-module OpenSolid.Curve (IsPoint) where
+module OpenSolid.Curve (IsPoint (IsPoint)) where
 
-data IsPoint
+data IsPoint = IsPoint

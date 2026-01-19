@@ -89,6 +89,7 @@ import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
+import OpenSolid.Curve (IsPoint (IsPoint))
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
@@ -204,8 +205,6 @@ instance
 
 instance ApproximateEquality (Curve2D units space) units where
   curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
-
-data IsPoint = IsPoint deriving (Eq, Show)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

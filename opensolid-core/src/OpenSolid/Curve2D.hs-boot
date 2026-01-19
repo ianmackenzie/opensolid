@@ -22,6 +22,7 @@ where
 
 import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.Curve (IsPoint (IsPoint))
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.Interval (Interval)
@@ -41,8 +42,6 @@ type Compiled units space =
     (Point2D units space)
     (Interval Unitless)
     (Bounds2D units space)
-
-data IsPoint = IsPoint
 
 instance HasField "startPoint" (Curve2D units space) (Point2D units space)
 
