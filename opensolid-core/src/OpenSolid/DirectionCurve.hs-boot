@@ -5,10 +5,11 @@ module OpenSolid.DirectionCurve
   )
 where
 
-import OpenSolid.CoordinateSystem (CoordinateSystem (DirectionCurve, UnitlessVectorCurve))
+import OpenSolid.CoordinateSystem (VectorCoordinateSystem (DirectionCurve, VectorCurve))
+import OpenSolid.Prelude
 
 unsafe ::
   forall dimension units space.
-  CoordinateSystem dimension units space =>
-  UnitlessVectorCurve dimension space ->
+  VectorCoordinateSystem dimension units space =>
+  VectorCurve dimension Unitless space ->
   DirectionCurve dimension space

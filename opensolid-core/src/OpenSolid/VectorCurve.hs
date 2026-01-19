@@ -7,7 +7,7 @@ module OpenSolid.VectorCurve
   )
 where
 
-import OpenSolid.CoordinateSystem (CoordinateSystem (DirectionCurve, UnitlessVectorCurve, VectorCurve))
+import OpenSolid.CoordinateSystem (VectorCoordinateSystem (DirectionCurve, VectorCurve))
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Prelude
@@ -15,26 +15,26 @@ import OpenSolid.Prelude
 data IsZero = IsZero deriving (Eq, Show)
 
 isZero ::
-  (CoordinateSystem dimension units space, Tolerance units) =>
+  (VectorCoordinateSystem dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Bool
 isZero = CoordinateSystem.vectorCurveIsZero
 
 derivative ::
-  CoordinateSystem dimension units space =>
+  VectorCoordinateSystem dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 derivative = CoordinateSystem.vectorCurveDerivative
 
 normalize ::
-  (CoordinateSystem dimension units space, Tolerance units) =>
+  (VectorCoordinateSystem dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
-  UnitlessVectorCurve dimension space
+  VectorCurve dimension Unitless space
 normalize = CoordinateSystem.normalizeVectorCurve
 
 direction ::
   forall dimension units space.
-  (CoordinateSystem dimension units space, Tolerance units) =>
+  (VectorCoordinateSystem dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (DirectionCurve dimension space)
 direction vectorCurve =
