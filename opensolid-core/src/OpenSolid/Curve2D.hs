@@ -90,6 +90,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (IsPoint (IsPoint))
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
@@ -759,10 +760,7 @@ findPoint ::
   Point2D units space ->
   Curve2D units space ->
   Result IsPoint (List Number)
-findPoint point curve =
-  case VectorCurve2D.zeros (point .-. curve) of
-    Error VectorCurve2D.IsZero -> Error IsPoint
-    Ok parameterValues -> Ok parameterValues
+findPoint = Curve.findPoint
 
 g2 ::
   Tolerance units =>

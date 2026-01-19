@@ -40,6 +40,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.Curve (IsPoint (IsPoint))
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
@@ -299,7 +300,4 @@ relativeTo :: Frame3D global local -> Curve3D global -> Curve3D local
 relativeTo frame curve = placeIn (Frame3D.inverse frame) curve
 
 findPoint :: Tolerance Meters => Point3D space -> Curve3D space -> Result IsPoint (List Number)
-findPoint point curve =
-  case VectorCurve3D.zeros (point .-. curve) of
-    Error VectorCurve3D.IsZero -> Error IsPoint
-    Ok parameterValues -> Ok parameterValues
+findPoint = Curve.findPoint
