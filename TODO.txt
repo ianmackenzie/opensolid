@@ -25,8 +25,8 @@ Add 3D types to check_operators script
 Remove UvPoint and UvBounds modules?
 - replace UvBounds.unitSquare with Bounds2D.uvDomain
   - also rename Region2D.unitSquare to Region2D.uvDomain?
-- replace UvPoint.samples with Bounds2D.samples
-- replace UvPoint.random with Point2D.random
+- replace UvPoint.samples with 'Bounds2D.samples Bounds2D.uvDomain'
+- replace UvPoint.random with 'Point2D.random Bounds2D.uvDomain'
 
 Remove Quantity 'small' and 'large' functions in favour of using minimum/maximum functions with Quantity.abs
 -> e.g. 'Quantity.smallestBy foo' is 'NonEmpty.minimumBy (Quantity.abs . foo)'
