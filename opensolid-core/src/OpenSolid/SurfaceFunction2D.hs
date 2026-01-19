@@ -45,6 +45,7 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -257,7 +258,7 @@ instance
     (Curve2D units space)
   where
   function `compose` curve = do
-    let (dudt, dvdt) = (Curve2D.derivative curve).components
+    let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
     Curve2D.new
       (function.compiled `compose` Curve2D.compiled curve)
       ((function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt)

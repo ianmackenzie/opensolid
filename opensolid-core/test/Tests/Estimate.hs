@@ -22,6 +22,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
@@ -122,7 +123,7 @@ area = Test.verify "area" Test.do
           (#radius Length.meter)
           (#startAngle Angle.pi)
           (#endAngle Angle.zero)
-  let dAdt = Curve2D.yCoordinate curve .*. (Curve2D.derivative curve).xComponent
+  let dAdt = Curve2D.yCoordinate curve .*. VectorCurve2D.xComponent (Curve2D.derivative curve)
   let areaEstimate = Curve1D.integrate dAdt
   let expectedArea = Area.squareMeters (Number.pi ./ 2)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)

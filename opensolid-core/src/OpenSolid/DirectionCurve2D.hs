@@ -229,10 +229,10 @@ instance
     DirectionSurfaceFunction2D.unsafe (curve `compose` surfaceParameter)
 
 instance HasField "xComponent" (DirectionCurve2D space) (Curve1D Unitless) where
-  getField (DirectionCurve2D curve) = curve.xComponent
+  getField (DirectionCurve2D curve) = VectorCurve2D.xComponent curve
 
 instance HasField "yComponent" (DirectionCurve2D space) (Curve1D Unitless) where
-  getField (DirectionCurve2D curve) = curve.yComponent
+  getField (DirectionCurve2D curve) = VectorCurve2D.yComponent curve
 
 placeIn ::
   Frame2D frameUnits global local ->

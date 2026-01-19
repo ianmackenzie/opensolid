@@ -308,7 +308,7 @@ instance
     (Curve1D units)
   where
   f `compose` g = do
-    let (dudt, dvdt) = g.derivative.components
+    let (dudt, dvdt) = VectorCurve2D.components g.derivative
     Curve1D.new
       (f.compiled `compose` g.compiled)
       (f.du `compose` g .*. dudt .+. f.dv `compose` g .*. dvdt)
@@ -321,7 +321,7 @@ instance
     (VectorCurve3D units space)
   where
   function `compose` uvCurve = do
-    let (dudt, dvdt) = uvCurve.derivative.components
+    let (dudt, dvdt) = VectorCurve2D.components uvCurve.derivative
     VectorCurve3D.new
       (function.compiled `compose` uvCurve.compiled)
       (function.du `compose` uvCurve .*. dudt .+. function.dv `compose` uvCurve .*. dvdt)
@@ -334,7 +334,7 @@ instance
     (Curve3D space)
   where
   function `compose` uvCurve = do
-    let (dudt, dvdt) = uvCurve.derivative.components
+    let (dudt, dvdt) = VectorCurve2D.components uvCurve.derivative
     Curve3D.new
       (function.compiled `compose` uvCurve.compiled)
       (function.du `compose` uvCurve .*. dudt .+. function.dv `compose` uvCurve .*. dvdt)

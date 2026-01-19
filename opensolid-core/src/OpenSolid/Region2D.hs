@@ -543,10 +543,8 @@ areaIntegral referencePoint curve =
 
 areaIntegral_ :: Point2D units space -> Curve2D units space -> Estimate (units ?*? units)
 areaIntegral_ referencePoint curve = do
-  let displacement = curve .-. referencePoint
-  let y = displacement.yComponent
-  let dx = displacement.xComponent.derivative
-  negative (Curve1D.integrate (y ?*? dx))
+  let (x, y) = VectorCurve2D.components (curve .-. referencePoint)
+  negative (Curve1D.integrate (y ?*? Curve1D.derivative x))
 
 loopIsInside :: Tolerance units => Loop units space -> Loop units space -> Bool
 loopIsInside outer inner = do

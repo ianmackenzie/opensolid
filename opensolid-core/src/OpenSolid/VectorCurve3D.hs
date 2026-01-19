@@ -40,7 +40,6 @@ module OpenSolid.VectorCurve3D
   )
 where
 
-import GHC.Records (HasField (getField))
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
@@ -101,20 +100,6 @@ type Compiled units space =
     (Interval Unitless)
     (VectorBounds3D units space)
 
-instance
-  Units.Squared units1 units2 =>
-  HasField "squaredMagnitude" (VectorCurve3D units1 space) (Curve1D units2)
-  where
-  getField = squaredMagnitude
-
-instance
-  HasField
-    "squaredMagnitude_"
-    (VectorCurve3D units space)
-    (Curve1D (units ?*? units))
-  where
-  getField = squaredMagnitude_
-
 instance HasUnits (VectorCurve3D units space) units
 
 instance
@@ -142,7 +127,7 @@ instance
     units1
   where
   curve `intersects` vector = Tolerance.using (Quantity.squared_ ?tolerance) do
-    (curve .-. vector).squaredMagnitude_ `intersects` Quantity.zero
+    squaredMagnitude_ (curve .-. vector) `intersects` Quantity.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

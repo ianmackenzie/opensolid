@@ -449,7 +449,7 @@ instance
     (VectorCurve2D units space)
   where
   function `compose` curve = do
-    let (dudt, dvdt) = (Curve2D.derivative curve).components
+    let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
     VectorCurve2D.new
       (function.compiled `compose` Curve2D.compiled curve)
       ((function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt)
