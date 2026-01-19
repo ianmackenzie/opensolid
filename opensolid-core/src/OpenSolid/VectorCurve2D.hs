@@ -94,6 +94,7 @@ import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve (IsZero (IsZero))
+import OpenSolid.VectorCurve qualified as VectorCurve
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoInteriorZeros (WithNoInteriorZeros (WithNoInteriorZeros))
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoInteriorZeros qualified as VectorCurve2D.WithNoInteriorZeros
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoZeros (WithNoZeros (WithNoZeros))
@@ -824,10 +825,7 @@ direction ::
   Tolerance units =>
   VectorCurve2D units space ->
   Result IsZero (DirectionCurve2D space)
-direction curve =
-  if isZero curve
-    then Error IsZero
-    else Ok (DirectionCurve2D.unsafe curve.nonZeroNormalized)
+direction = VectorCurve.direction
 
 placeIn ::
   Frame2D frameUnits global local ->

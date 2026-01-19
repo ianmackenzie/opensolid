@@ -54,7 +54,6 @@ import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction3D (Direction3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
-import {-# SOURCE #-} OpenSolid.DirectionCurve3D qualified as DirectionCurve3D
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2D qualified as Expression.VectorCurve2D
@@ -81,6 +80,7 @@ import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve (IsZero (IsZero))
+import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D.WithNoInteriorZeros (WithNoInteriorZeros (WithNoInteriorZeros))
@@ -729,9 +729,7 @@ direction ::
   Tolerance units =>
   VectorCurve3D units space ->
   Result IsZero (DirectionCurve3D space)
-direction curve = case quotient curve (magnitude curve) of
-  Error DivisionByZero -> Error IsZero
-  Ok normalizedCurve -> Ok (DirectionCurve3D.unsafe normalizedCurve)
+direction = VectorCurve.direction
 
 placeIn ::
   Frame3D global local ->
