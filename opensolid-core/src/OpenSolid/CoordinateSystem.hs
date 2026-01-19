@@ -100,6 +100,34 @@ class
       (Point dimension units space)
       (Point dimension units space)
       (Vector dimension units space)
+  , Addition
+      (Curve dimension units space)
+      (Vector dimension units space)
+      (Curve dimension units space)
+  , Subtraction
+      (Curve dimension units space)
+      (Vector dimension units space)
+      (Curve dimension units space)
+  , Addition
+      (Curve dimension units space)
+      (VectorCurve dimension units space)
+      (Curve dimension units space)
+  , Subtraction
+      (Curve dimension units space)
+      (VectorCurve dimension units space)
+      (Curve dimension units space)
+  , Subtraction
+      (Curve dimension units space)
+      (Curve dimension units space)
+      (VectorCurve dimension units space)
+  , Subtraction
+      (Curve dimension units space)
+      (Point dimension units space)
+      (VectorCurve dimension units space)
+  , Subtraction
+      (Point dimension units space)
+      (Curve dimension units space)
+      (VectorCurve dimension units space)
   , VectorCoordinateSystem dimension units space
   ) =>
   CoordinateSystem (dimension :: Natural) (units :: Type) (space :: Type)

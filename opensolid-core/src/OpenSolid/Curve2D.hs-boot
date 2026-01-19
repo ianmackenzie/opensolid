@@ -56,10 +56,45 @@ instance
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Curve2D units1 space1)
+    (Vector2D units2 space2)
+    (Curve2D units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve2D units1 space1)
     (VectorCurve2D units2 space2)
     (Curve2D units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve2D units1 space1)
+    (Vector2D units2 space2)
+    (Curve2D units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve2D units1 space1)
+    (Curve2D units2 space2)
+    (VectorCurve2D units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve2D units1 space1)
+    (Point2D units2 space2)
+    (VectorCurve2D units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Point2D units1 space1)
+    (Curve2D units2 space2)
+    (VectorCurve2D units1 space1)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>

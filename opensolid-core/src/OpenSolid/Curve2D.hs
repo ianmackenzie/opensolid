@@ -232,6 +232,24 @@ instance
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Curve2D units1 space1)
+    (Vector2D units2 space2)
+    (Curve2D units1 space1)
+  where
+  lhs .+. rhs = lhs .+. VectorCurve2D.constant rhs
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve2D units1 space1)
+    (Vector2D units2 space2)
+    (Curve2D units1 space1)
+  where
+  lhs .-. rhs = lhs .-. VectorCurve2D.constant rhs
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve2D units1 space1)
     (Curve2D units2 space2)
