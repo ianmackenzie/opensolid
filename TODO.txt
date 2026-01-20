@@ -5,10 +5,6 @@ Maybe have Curve.intersections that returns slightly simplified IntersectionPoin
 - crossing or tangent indicator only
 - Curve2D (and maybe SurfaceCurve3D) can add crossing sign if desired
 
-Refer to IsZero as VectorCurve.IsZero everywhere
-
-Refer to IsPoint as Curve.IsPoint everywhere
-
 Generic modules to add:
 - Point
 - Vector
@@ -32,9 +28,6 @@ Remove Quantity 'small' and 'large' functions in favour of using minimum/maximum
 -> e.g. 'Quantity.smallestBy foo' is 'NonEmpty.minimumBy (Quantity.abs . foo)'
 
 Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
-
-Try removing Expression.* modules?
-- see if they're actually still necessary/useful for type inference...
 
 Allow Set#D to be empty?
 - would have to remove Set#D.bounds but that's probably OK...
