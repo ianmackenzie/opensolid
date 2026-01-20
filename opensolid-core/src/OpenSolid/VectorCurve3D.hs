@@ -484,7 +484,7 @@ on :: Plane3D global local -> VectorCurve2D units local -> VectorCurve3D units g
 on plane vectorCurve2D = do
   let compiledPlanar =
         CompiledFunction.map
-          (Expression.on plane)
+          (Expression.placeOn plane)
           (Vector2D.placeOn plane)
           (VectorBounds2D.placeOn plane)
           (VectorCurve2D.compiled vectorCurve2D)

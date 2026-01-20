@@ -187,7 +187,7 @@ on :: Plane3D global local -> Curve2D Meters local -> Curve3D global
 on plane curve2D = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.on plane)
+          (Expression.placeOn plane)
           (Point2D.placeOn plane)
           (Bounds2D.placeOn plane)
           (Curve2D.compiled curve2D)
