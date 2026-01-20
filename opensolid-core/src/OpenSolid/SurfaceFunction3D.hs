@@ -21,7 +21,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
-import OpenSolid.Expression.Surface3D qualified as Expression.Surface3D
+import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Point3D (Point3D)
@@ -218,7 +218,7 @@ transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFuncti
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
-          (Expression.Surface3D.transformBy transform)
+          (Expression.transformBy transform)
           (Point3D.transformBy transform)
           (Bounds3D.transformBy transform)
           function.compiled
@@ -230,7 +230,7 @@ placeIn :: Frame3D global local -> SurfaceFunction3D local -> SurfaceFunction3D 
 placeIn frame function = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.Surface3D.placeIn frame)
+          (Expression.placeIn frame)
           (Point3D.placeIn frame)
           (Bounds3D.placeIn frame)
           function.compiled

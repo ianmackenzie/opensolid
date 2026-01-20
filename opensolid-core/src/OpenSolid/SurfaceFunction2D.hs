@@ -32,7 +32,6 @@ import OpenSolid.DirectionSurfaceFunction2D qualified as DirectionSurfaceFunctio
 import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.Surface2D qualified as Expression.Surface2D
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
@@ -242,7 +241,7 @@ transformBy ::
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
-          (Expression.Surface2D.transformBy transform)
+          (Expression.transformBy transform)
           (Point2D.transformBy transform)
           (Bounds2D.transformBy transform)
           function.compiled

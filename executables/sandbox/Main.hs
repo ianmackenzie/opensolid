@@ -20,7 +20,6 @@ import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.Curve1D qualified as Expression.Curve1D
 import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Int qualified as Int
@@ -399,13 +398,13 @@ testExpression :: IO ()
 testExpression = do
   let x = Expression.t
   let xSquared = Expression.squared x
-  let expression = xSquared ./. (xSquared .+. Expression.Curve1D.constant 1)
+  let expression = xSquared ./. (xSquared .+. Expression.constant @Number @Number 1)
   log "Expression value" (Expression.evaluate expression 2)
   log "Expression bounds" (Expression.evaluateBounds expression (Interval 1 3))
 
 testCurve2dExpression :: IO ()
 testCurve2dExpression = do
-  let x = Expression.Curve1D.constant 10 .*. Expression.t
+  let x = Expression.constant @Number @Number 10 .*. Expression.t
   let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression Number (Point2D Unitless Global)
   log "Evaluated 2D curve" (Expression.evaluate curve 3)

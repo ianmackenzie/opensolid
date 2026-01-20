@@ -40,7 +40,6 @@ import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D (DirectionSurfaceFunc
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D qualified as DirectionSurfaceFunction2D
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.VectorSurface2D qualified as Expression.VectorSurface2D
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Prelude
@@ -533,7 +532,7 @@ placeIn ::
 placeIn frame function = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.VectorSurface2D.placeIn frame)
+          (Expression.placeIn frame)
           (Vector2D.placeIn frame)
           (VectorBounds2D.placeIn frame)
           function.compiled
@@ -552,7 +551,7 @@ transformBy ::
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
-          (Expression.VectorSurface2D.transformBy transform)
+          (Expression.transformBy transform)
           (Vector2D.transformBy transform)
           (VectorBounds2D.transformBy transform)
           function.compiled

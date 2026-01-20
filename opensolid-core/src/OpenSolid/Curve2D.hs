@@ -108,7 +108,6 @@ import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.Curve2D qualified as Expression.Curve2D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
@@ -817,7 +816,7 @@ placeIn ::
 placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.Curve2D.placeIn frame)
+          (Expression.placeIn frame)
           (Point2D.placeIn frame)
           (Bounds2D.placeIn frame)
           curve.compiled
@@ -839,7 +838,7 @@ transformBy ::
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
-          (Expression.Curve2D.transformBy transform)
+          (Expression.transformBy transform)
           (Point2D.transformBy transform)
           (Bounds2D.transformBy transform)
           curve.compiled

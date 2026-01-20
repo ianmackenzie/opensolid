@@ -44,8 +44,6 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.Curve2D qualified as Expression.Curve2D
-import OpenSolid.Expression.Curve3D qualified as Expression.Curve3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
@@ -189,7 +187,7 @@ on :: Plane3D global local -> Curve2D Meters local -> Curve3D global
 on plane curve2D = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.Curve2D.placeOn plane)
+          (Expression.on plane)
           (Point2D.placeOn plane)
           (Bounds2D.placeOn plane)
           (Curve2D.compiled curve2D)
@@ -278,7 +276,7 @@ transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
-          (Expression.Curve3D.transformBy transform)
+          (Expression.transformBy transform)
           (Point3D.transformBy transform)
           (Bounds3D.transformBy transform)
           curve.compiled
@@ -288,7 +286,7 @@ placeIn :: Frame3D global local -> Curve3D local -> Curve3D global
 placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.Curve3D.placeIn frame)
+          (Expression.placeIn frame)
           (Point3D.placeIn frame)
           (Bounds3D.placeIn frame)
           curve.compiled

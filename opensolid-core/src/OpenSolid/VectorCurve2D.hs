@@ -63,7 +63,6 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.VectorCurve2D qualified as Expression.VectorCurve2D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
@@ -489,7 +488,7 @@ transformBy ::
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
-          (Expression.VectorCurve2D.transformBy transform)
+          (Expression.transformBy transform)
           (Vector2D.transformBy transform)
           (VectorBounds2D.transformBy transform)
           curve.compiled
@@ -768,7 +767,7 @@ squaredMagnitude_ :: VectorCurve2D units space -> Curve1D (units ?*? units)
 squaredMagnitude_ curve = do
   let compiledSquaredMagnitude =
         CompiledFunction.map
-          Expression.VectorCurve2D.squaredMagnitude_
+          Expression.squaredMagnitude_
           Vector2D.squaredMagnitude_
           VectorBounds2D.squaredMagnitude_
           curve.compiled
@@ -800,7 +799,7 @@ placeIn ::
 placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.VectorCurve2D.placeIn frame)
+          (Expression.placeIn frame)
           (Vector2D.placeIn frame)
           (VectorBounds2D.placeIn frame)
           curve.compiled

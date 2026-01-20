@@ -152,16 +152,6 @@ library
     OpenSolid.Duration
     OpenSolid.Estimate
     OpenSolid.Expression
-    OpenSolid.Expression.Curve1D
-    OpenSolid.Expression.Curve2D
-    OpenSolid.Expression.Curve3D
-    OpenSolid.Expression.Surface1D
-    OpenSolid.Expression.Surface2D
-    OpenSolid.Expression.Surface3D
-    OpenSolid.Expression.VectorCurve2D
-    OpenSolid.Expression.VectorCurve3D
-    OpenSolid.Expression.VectorSurface2D
-    OpenSolid.Expression.VectorSurface3D
     OpenSolid.FFI
     OpenSolid.Frame2D
     OpenSolid.Frame3D

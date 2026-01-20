@@ -33,7 +33,6 @@ import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunc
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.VectorSurface3D qualified as Expression.VectorSurface3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Point3D (Point3D)
@@ -522,7 +521,7 @@ placeIn ::
 placeIn frame function = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.VectorSurface3D.placeIn frame)
+          (Expression.placeIn frame)
           (Vector3D.placeIn frame)
           (VectorBounds3D.placeIn frame)
           function.compiled
@@ -541,7 +540,7 @@ transformBy ::
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
-          (Expression.VectorSurface3D.transformBy transform)
+          (Expression.transformBy transform)
           (Vector3D.transformBy transform)
           (VectorBounds3D.transformBy transform)
           function.compiled

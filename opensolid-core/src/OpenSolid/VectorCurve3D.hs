@@ -52,8 +52,6 @@ import OpenSolid.Direction3D (Direction3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.VectorCurve2D qualified as Expression.VectorCurve2D
-import OpenSolid.Expression.VectorCurve3D qualified as Expression.VectorCurve3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
@@ -447,7 +445,7 @@ transformBy :: Transform3D tag space -> VectorCurve3D units space -> VectorCurve
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
-          (Expression.VectorCurve3D.transformBy transform)
+          (Expression.transformBy transform)
           (Vector3D.transformBy transform)
           (VectorBounds3D.transformBy transform)
           curve.compiled
@@ -486,7 +484,7 @@ on :: Plane3D global local -> VectorCurve2D units local -> VectorCurve3D units g
 on plane vectorCurve2D = do
   let compiledPlanar =
         CompiledFunction.map
-          (Expression.VectorCurve2D.placeOn plane)
+          (Expression.on plane)
           (Vector2D.placeOn plane)
           (VectorBounds2D.placeOn plane)
           (VectorCurve2D.compiled vectorCurve2D)
@@ -687,7 +685,7 @@ squaredMagnitude_ :: VectorCurve3D units space -> Curve1D (units ?*? units)
 squaredMagnitude_ curve = do
   let compiledSquaredMagnitude =
         CompiledFunction.map
-          Expression.VectorCurve3D.squaredMagnitude_
+          Expression.squaredMagnitude_
           Vector3D.squaredMagnitude_
           VectorBounds3D.squaredMagnitude_
           curve.compiled
@@ -713,7 +711,7 @@ placeIn ::
 placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
-          (Expression.VectorCurve3D.placeIn frame)
+          (Expression.placeIn frame)
           (Vector3D.placeIn frame)
           (VectorBounds3D.placeIn frame)
           curve.compiled
