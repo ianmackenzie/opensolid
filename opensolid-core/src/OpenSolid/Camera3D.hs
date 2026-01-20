@@ -41,6 +41,7 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D qualified as Transform3D
+import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.World3D qualified as World3D
@@ -140,7 +141,7 @@ lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
                     Frame3D eyePoint World3D.upwardOrientation
                 | otherwise ->
                     Frame3D eyePoint World3D.downwardOrientation
-          Error Vector3D.IsZero ->
+          Error Vector.IsZero ->
             -- Given eye and focal points are coincident,
             -- so just look straight forward
             Frame3D eyePoint World3D.forwardOrientation

@@ -1,7 +1,6 @@
 module OpenSolid.Curve2D
   ( Curve2D
   , Compiled
-  , IsPoint (IsPoint)
   , constant
   , new
   , evaluate
@@ -22,7 +21,7 @@ where
 
 import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
-import {-# SOURCE #-} OpenSolid.Curve (IsPoint (IsPoint))
+import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.Interval (Interval)
@@ -113,7 +112,7 @@ derivative :: Curve2D units space -> VectorCurve2D units space
 tangentDirection ::
   Tolerance units =>
   Curve2D units space ->
-  Result IsPoint (DirectionCurve2D space)
+  Result Curve.IsPoint (DirectionCurve2D space)
 reverse :: Curve2D units space -> Curve2D units space
 xy :: Curve1D units -> Curve1D units -> Curve2D units space
 lineFrom :: Point2D units space -> Point2D units space -> Curve2D units space

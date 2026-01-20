@@ -2,7 +2,6 @@ module OpenSolid.Curve3D
   ( Curve3D
   , HasDegeneracy (HasDegeneracy)
   , Compiled
-  , IsPoint (IsPoint)
   , new
   , recursive
   , constant
@@ -39,7 +38,6 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
-import OpenSolid.Curve (IsPoint (IsPoint))
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -299,5 +297,9 @@ placeIn frame curve = do
 relativeTo :: Frame3D global local -> Curve3D global -> Curve3D local
 relativeTo frame curve = placeIn (Frame3D.inverse frame) curve
 
-findPoint :: Tolerance Meters => Point3D space -> Curve3D space -> Result IsPoint (List Number)
+findPoint ::
+  Tolerance Meters =>
+  Point3D space ->
+  Curve3D space ->
+  Result Curve.IsPoint (List Number)
 findPoint = Curve.findPoint

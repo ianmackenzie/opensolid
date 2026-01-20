@@ -5,6 +5,7 @@ module OpenSolid.Curve2D.Intersections
 where
 
 import OpenSolid.Bisection qualified as Bisection
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.EndpointIntersection (EndpointIntersection (EndpointIntersection))
@@ -216,7 +217,7 @@ intersections ::
   Tolerance units =>
   Curve2D units space ->
   Curve2D units space ->
-  Result Curve2D.IsPoint (Maybe Intersections)
+  Result Curve.IsPoint (Maybe Intersections)
 intersections curve1 curve2
   | not (Curve2D.bounds curve1 `intersects` Curve2D.bounds curve2) = Ok Nothing
   | otherwise = do

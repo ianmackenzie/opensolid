@@ -29,7 +29,6 @@ module OpenSolid.VectorCurve3D
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
-  , IsZero (IsZero)
   , zeros
   , HasZero (HasZero)
   , normalize
@@ -76,7 +75,6 @@ import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
-import OpenSolid.VectorCurve (IsZero (IsZero))
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -702,13 +700,13 @@ data HasZero = HasZero deriving (Eq, Show)
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
 
-zeros :: Tolerance units => VectorCurve3D units space -> Result IsZero (List Number)
+zeros :: Tolerance units => VectorCurve3D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros
 
 direction ::
   Tolerance units =>
   VectorCurve3D units space ->
-  Result IsZero (DirectionCurve3D space)
+  Result VectorCurve.IsZero (DirectionCurve3D space)
 direction = VectorCurve.direction
 
 placeIn ::

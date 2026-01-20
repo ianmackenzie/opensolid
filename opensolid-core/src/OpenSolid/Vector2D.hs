@@ -26,7 +26,6 @@ module OpenSolid.Vector2D
   , squaredMagnitude_
   , angle
   , angleFrom
-  , IsZero (IsZero)
   , direction
   , magnitudeAndDirection
   , normalize
@@ -71,7 +70,6 @@ import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector (IsZero (IsZero))
 import OpenSolid.Vector qualified as Vector
 
 -- | The zero vector.
@@ -214,13 +212,13 @@ angleFrom v1 v2 = Angle.atan2 (v1 `cross_` v2) (v1 `dot_` v2)
 The current tolerance will be used to check if the vector is zero
 (and therefore does not have a direction).
 -}
-direction :: Tolerance units => Vector2D units space -> Result IsZero (Direction2D space)
+direction :: Tolerance units => Vector2D units space -> Result Vector.IsZero (Direction2D space)
 direction = Vector.direction
 
 magnitudeAndDirection ::
   Tolerance units =>
   Vector2D units space ->
-  Result IsZero (Quantity units, Direction2D space)
+  Result Vector.IsZero (Quantity units, Direction2D space)
 magnitudeAndDirection = Vector.magnitudeAndDirection
 
 {-| Normalize a vector.

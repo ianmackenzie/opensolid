@@ -33,7 +33,6 @@ module OpenSolid.VectorCurve2D
   , squaredMagnitude_
   , reverse
   , isZero
-  , IsZero (IsZero)
   , zeros
   , HasZero (HasZero)
   , normalize
@@ -90,7 +89,6 @@ import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
-import OpenSolid.VectorCurve (IsZero (IsZero))
 import OpenSolid.VectorCurve qualified as VectorCurve
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoInteriorZeros (WithNoInteriorZeros (WithNoInteriorZeros))
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoInteriorZeros qualified as VectorCurve2D.WithNoInteriorZeros
@@ -786,7 +784,7 @@ magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
-zeros :: Tolerance units => VectorCurve2D units space -> Result IsZero (List Number)
+zeros :: Tolerance units => VectorCurve2D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros
 
 normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
@@ -795,7 +793,7 @@ normalize curve = if isZero curve then zero else curve.nonZeroNormalized
 direction ::
   Tolerance units =>
   VectorCurve2D units space ->
-  Result IsZero (DirectionCurve2D space)
+  Result VectorCurve.IsZero (DirectionCurve2D space)
 direction = VectorCurve.direction
 
 placeIn ::

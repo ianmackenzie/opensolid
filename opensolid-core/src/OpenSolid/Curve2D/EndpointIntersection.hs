@@ -5,6 +5,7 @@ module OpenSolid.Curve2D.EndpointIntersection
   )
 where
 
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
@@ -33,7 +34,7 @@ find ::
   Curve2D units space ->
   DirectionCurve2D space ->
   DirectionCurve2D space ->
-  Result Curve2D.IsPoint (List EndpointIntersection)
+  Result Curve.IsPoint (List EndpointIntersection)
 find curve1 curve2 tangent1 tangent2 = do
   start1t2s <- Curve2D.findPoint (Curve2D.startPoint curve1) curve2
   end1t2s <- Curve2D.findPoint (Curve2D.endPoint curve1) curve2

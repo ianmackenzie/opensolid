@@ -89,6 +89,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -245,7 +246,7 @@ cylinder ::
   Result EmptyBody (Body3D space)
 cylinder startPoint endPoint (Named diameter) =
   case Vector3D.magnitudeAndDirection (endPoint .-. startPoint) of
-    Error Vector3D.IsZero -> Error EmptyBody
+    Error Vector.IsZero -> Error EmptyBody
     Ok (length, direction) ->
       cylinderAlong (Axis3D startPoint direction) Quantity.zero length (#diameter diameter)
 

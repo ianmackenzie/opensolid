@@ -27,7 +27,6 @@ module OpenSolid.Vector3D
   , magnitude
   , squaredMagnitude
   , squaredMagnitude_
-  , IsZero (IsZero)
   , direction
   , magnitudeAndDirection
   , normalize
@@ -68,6 +67,7 @@ import OpenSolid.Transform3D (Transform3D (Transform3D))
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector qualified as Vector
 import OpenSolid.World3D qualified as World3D
 
 -- | The zero vector.
@@ -198,25 +198,19 @@ squaredMagnitude = Units.specialize . squaredMagnitude_
 squaredMagnitude_ :: Vector3D units space -> Quantity (units ?*? units)
 squaredMagnitude_ (Vector3D vx vy vz) = vx ?*? vx .+. vy ?*? vy .+. vz ?*? vz
 
-data IsZero = IsZero deriving (Eq, Show)
-
 {-| Attempt to get the direction of a vector.
 
 The current tolerance will be used to check if the vector is zero
 (and therefore does not have a direction).
 -}
-direction :: Tolerance units => Vector3D units space -> Result IsZero (Direction3D space)
-direction vector = do
-  let vm = magnitude vector
-  if vm ~= Quantity.zero then Error IsZero else Ok (Unit3D (vector ./. vm))
+direction :: Tolerance units => Vector3D units space -> Result Vector.IsZero (Direction3D space)
+direction = Vector.direction
 
 magnitudeAndDirection ::
   Tolerance units =>
   Vector3D units space ->
-  Result IsZero (Quantity units, Direction3D space)
-magnitudeAndDirection vector = do
-  let vm = magnitude vector
-  if vm ~= Quantity.zero then Error IsZero else Ok (vm, Unit3D (vector ./. vm))
+  Result Vector.IsZero (Quantity units, Direction3D space)
+magnitudeAndDirection = Vector.magnitudeAndDirection
 
 normalize :: Vector3D units space -> Vector3D Unitless space
 normalize vector = do

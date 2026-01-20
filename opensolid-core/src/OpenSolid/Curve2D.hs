@@ -1,6 +1,5 @@
 module OpenSolid.Curve2D
   ( Curve2D
-  , IsPoint (IsPoint)
   , Compiled
   , new
   , recursive
@@ -145,6 +144,7 @@ import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D)
@@ -382,7 +382,7 @@ arcFrom ::
   Curve2D units space
 arcFrom givenStartPoint givenEndPoint sweptAngle =
   case Vector2D.magnitudeAndDirection (givenEndPoint .-. givenStartPoint) of
-    Error Vector2D.IsZero -> lineFrom givenStartPoint givenEndPoint
+    Error Vector.IsZero -> lineFrom givenStartPoint givenEndPoint
     Ok (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 *. distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 *. sweptAngle)

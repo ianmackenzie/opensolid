@@ -4,8 +4,8 @@ module OpenSolid.Curve2D.Intersections
   )
 where
 
+import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
-import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2D.OverlappingSegment (OverlappingSegment)
 import OpenSolid.Prelude
@@ -18,4 +18,4 @@ intersections ::
   Tolerance units =>
   Curve2D units space ->
   Curve2D units space ->
-  Result Curve2D.IsPoint (Maybe Intersections)
+  Result Curve.IsPoint (Maybe Intersections)

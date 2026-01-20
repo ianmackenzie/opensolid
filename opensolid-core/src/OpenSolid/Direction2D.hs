@@ -50,6 +50,7 @@ import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform
+import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D qualified as Vector2D
 
 {-# COMPLETE Direction2D #-}
@@ -104,7 +105,7 @@ from ::
 from p1 p2 = do
   case Vector2D.direction (p2 .-. p1) of
     Ok direction -> Ok direction
-    Error Vector2D.IsZero -> Error PointsAreCoincident
+    Error Vector.IsZero -> Error PointsAreCoincident
 
 {-| Construct a direction from an angle.
 

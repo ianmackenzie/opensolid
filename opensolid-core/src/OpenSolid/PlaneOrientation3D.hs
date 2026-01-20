@@ -31,6 +31,7 @@ import OpenSolid.Primitives
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform qualified as Transform
+import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D qualified as Vector3D
 
 coerce :: PlaneOrientation3D space1 -> PlaneOrientation3D space2
@@ -81,7 +82,7 @@ fromVectors ::
   Maybe (PlaneOrientation3D space)
 fromVectors vx vxy =
   case Vector3D.direction vx of
-    Error Vector3D.IsZero -> Nothing
+    Error Vector.IsZero -> Nothing
     Ok dx -> gramSchmidt dx vxy
 
 gramSchmidt ::
@@ -92,7 +93,7 @@ gramSchmidt ::
 gramSchmidt dx vxy = do
   let vy = vxy .-. Vector3D.projectionIn dx vxy
   case Vector3D.direction vy of
-    Error Vector3D.IsZero -> Nothing
+    Error Vector.IsZero -> Nothing
     Ok dy -> Just (PlaneOrientation3D dx dy)
 
 flip :: PlaneOrientation3D space -> PlaneOrientation3D space
