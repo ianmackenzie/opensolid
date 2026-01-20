@@ -34,7 +34,6 @@ module OpenSolid.VectorCurve2D
   , reverse
   , isZero
   , zeros
-  , HasZero (HasZero)
   , normalize
   , direction
   , placeIn
@@ -775,8 +774,6 @@ squaredMagnitude_ curve = do
           curve.compiled
   let squaredMagnitudeDerivative = 2 *. curve `dot_` derivative curve
   Curve1D.new compiledSquaredMagnitude squaredMagnitudeDerivative
-
-data HasZero = HasZero deriving (Eq, Show)
 
 magnitude :: Tolerance units => VectorCurve2D units space -> Curve1D units
 magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
