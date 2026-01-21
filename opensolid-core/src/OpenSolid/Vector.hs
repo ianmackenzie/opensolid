@@ -1,5 +1,3 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-
 module OpenSolid.Vector
   ( Vector
   , IsZero (IsZero)
@@ -63,7 +61,6 @@ normalize vector = do
     else vector ./. vectorMagnitude
 
 direction ::
-  forall dimension units space.
   (Tolerance units, VectorCoordinateSystem dimension units space) =>
   Vector dimension units space ->
   Result IsZero (Direction dimension space)
@@ -71,10 +68,9 @@ direction vector = do
   let vectorMagnitude = magnitude vector
   if vectorMagnitude ~= Quantity.zero
     then Error IsZero
-    else Ok (Direction.unsafe @dimension @units @space (vector ./. vectorMagnitude))
+    else Ok (Direction.unsafe (vector ./. vectorMagnitude))
 
 magnitudeAndDirection ::
-  forall dimension units space.
   (VectorCoordinateSystem dimension units space, Tolerance units) =>
   Vector dimension units space ->
   Result IsZero (Quantity units, Direction dimension space)
@@ -83,7 +79,7 @@ magnitudeAndDirection vector = do
   if vectorMagnitude ~= Quantity.zero
     then Error IsZero
     else do
-      let vectorDirection = Direction.unsafe @dimension @units @space (vector ./. vectorMagnitude)
+      let vectorDirection = Direction.unsafe (vector ./. vectorMagnitude)
       Ok (vectorMagnitude, vectorDirection)
 
 {-# INLINEABLE componentIn #-}

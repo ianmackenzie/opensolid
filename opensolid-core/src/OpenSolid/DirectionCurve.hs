@@ -1,17 +1,14 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-
 module OpenSolid.DirectionCurve
   ( unsafe
   )
 where
 
-import OpenSolid.CoordinateSystem (VectorCoordinateSystem (DirectionCurve, VectorCurve))
+import OpenSolid.CoordinateSystem (DirectionCoordinateSystem, DirectionCurve, VectorCurve)
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Prelude
 
 unsafe ::
-  forall dimension units space.
-  VectorCoordinateSystem dimension units space =>
+  DirectionCoordinateSystem dimension space =>
   VectorCurve dimension Unitless space ->
   DirectionCurve dimension space
-unsafe = CoordinateSystem.unsafeDirectionCurve @dimension @units @space
+unsafe = CoordinateSystem.unsafeDirectionCurve

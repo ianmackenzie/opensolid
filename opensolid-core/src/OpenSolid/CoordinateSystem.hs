@@ -1,7 +1,6 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-
 module OpenSolid.CoordinateSystem
-  ( VectorCoordinateSystem (..)
+  ( DirectionCoordinateSystem (..)
+  , VectorCoordinateSystem (..)
   , CoordinateSystem (..)
   )
 where
@@ -32,6 +31,18 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
 class
+  DotMultiplication (Direction dimension space) (Direction dimension space) Number =>
+  DirectionCoordinateSystem (dimension :: Natural) (space :: Type)
+  where
+  type Direction dimension space = direction | direction -> dimension space
+  type DirectionBounds dimension space = directionBounds | directionBounds -> dimension space
+  type DirectionCurve dimension space = directionCurve | directionCurve -> dimension space
+
+  unsafeDirection :: Vector dimension Unitless space -> Direction dimension space
+  unsafeDirectionBounds :: VectorBounds dimension Unitless space -> DirectionBounds dimension space
+  unsafeDirectionCurve :: VectorCurve dimension Unitless space -> DirectionCurve dimension space
+
+class
   ( HasZero (Vector dimension units space)
   , Eq (Vector dimension units space)
   , Negation (Vector dimension units space)
@@ -53,23 +64,16 @@ class
       (Quantity (units ?*? units))
   , DotMultiplication (Vector dimension units space) (Direction dimension space) (Quantity units)
   , DotMultiplication (Direction dimension space) (Vector dimension units space) (Quantity units)
-  , DotMultiplication (Direction dimension space) (Direction dimension space) Number
   , Division (Vector dimension units space) Number (Vector dimension units space)
   , Division (Vector dimension units space) (Quantity units) (Vector dimension Unitless space)
+  , DirectionCoordinateSystem dimension space
   , VectorCoordinateSystem dimension Unitless space
   ) =>
   VectorCoordinateSystem (dimension :: Natural) (units :: Type) (space :: Type)
   where
   type Vector dimension units space = vector | vector -> dimension units space
-  type Direction dimension space = direction | direction -> dimension space
   type VectorBounds dimension units space = vectorBounds | vectorBounds -> dimension units space
-  type DirectionBounds dimension space = directionBounds | directionBounds -> dimension space
   type VectorCurve dimension units space = vectorCurve | vectorCurve -> dimension units space
-  type DirectionCurve dimension space = directionCurve | directionCurve -> dimension space
-
-  unsafeDirection :: Vector dimension Unitless space -> Direction dimension space
-
-  unsafeDirectionBounds :: VectorBounds dimension Unitless space -> DirectionBounds dimension space
 
   vectorCurveDerivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   vectorCurveIsZero :: Tolerance units => VectorCurve dimension units space -> Bool
@@ -88,8 +92,6 @@ class
     Tolerance units =>
     VectorCurve dimension units space ->
     VectorCurve dimension Unitless space
-
-  unsafeDirectionCurve :: VectorCurve dimension Unitless space -> DirectionCurve dimension space
 
 class
   ( Addition
@@ -138,19 +140,24 @@ class
 
   curveDerivative :: Curve dimension units space -> VectorCurve dimension units space
 
-instance VectorCoordinateSystem 2 units space where
-  type Vector 2 units space = Vector2D units space
+instance DirectionCoordinateSystem 2 space where
   type Direction 2 space = Direction2D space
-  type VectorBounds 2 units space = VectorBounds2D units space
   type DirectionBounds 2 space = DirectionBounds2D space
-  type VectorCurve 2 units space = VectorCurve2D units space
   type DirectionCurve 2 space = DirectionCurve2D space
 
-  {-# INLINEABLE unsafeDirection #-}
+  {-# INLINE unsafeDirection #-}
   unsafeDirection = Direction2D.unsafe
 
-  {-# INLINEABLE unsafeDirectionBounds #-}
+  {-# INLINE unsafeDirectionBounds #-}
   unsafeDirectionBounds = DirectionBounds2D.unsafe
+
+  {-# INLINE unsafeDirectionCurve #-}
+  unsafeDirectionCurve = DirectionCurve2D.unsafe
+
+instance VectorCoordinateSystem 2 units space where
+  type Vector 2 units space = Vector2D units space
+  type VectorBounds 2 units space = VectorBounds2D units space
+  type VectorCurve 2 units space = VectorCurve2D units space
 
   vectorCurveDerivative = VectorCurve2D.derivative
   vectorCurveIsZero = VectorCurve2D.isZero
@@ -159,8 +166,6 @@ instance VectorCoordinateSystem 2 units space where
   vectorCurveSquaredMagnitude_ = VectorCurve2D.squaredMagnitude_
   normalizeVectorCurve = VectorCurve2D.normalize
 
-  unsafeDirectionCurve = DirectionCurve2D.unsafe
-
 instance CoordinateSystem 2 units space where
   type Point 2 units space = Point2D units space
   type Bounds 2 units space = Bounds2D units space
@@ -168,19 +173,24 @@ instance CoordinateSystem 2 units space where
 
   curveDerivative = Curve2D.derivative
 
-instance VectorCoordinateSystem 3 units space where
-  type Vector 3 units space = Vector3D units space
+instance DirectionCoordinateSystem 3 space where
   type Direction 3 space = Direction3D space
-  type VectorBounds 3 units space = VectorBounds3D units space
   type DirectionBounds 3 space = DirectionBounds3D space
-  type VectorCurve 3 units space = VectorCurve3D units space
   type DirectionCurve 3 space = DirectionCurve3D space
 
-  {-# INLINEABLE unsafeDirection #-}
+  {-# INLINE unsafeDirection #-}
   unsafeDirection = Direction3D.unsafe
 
-  {-# INLINEABLE unsafeDirectionBounds #-}
+  {-# INLINE unsafeDirectionBounds #-}
   unsafeDirectionBounds = DirectionBounds3D.unsafe
+
+  {-# INLINE unsafeDirectionCurve #-}
+  unsafeDirectionCurve = DirectionCurve3D.unsafe
+
+instance VectorCoordinateSystem 3 units space where
+  type Vector 3 units space = Vector3D units space
+  type VectorBounds 3 units space = VectorBounds3D units space
+  type VectorCurve 3 units space = VectorCurve3D units space
 
   vectorCurveDerivative = VectorCurve3D.derivative
   vectorCurveIsZero = VectorCurve3D.isZero
@@ -188,8 +198,6 @@ instance VectorCoordinateSystem 3 units space where
   evaluateVectorCurveBounds = VectorCurve3D.evaluateBounds
   vectorCurveSquaredMagnitude_ = VectorCurve3D.squaredMagnitude_
   normalizeVectorCurve = VectorCurve3D.normalize
-
-  unsafeDirectionCurve = DirectionCurve3D.unsafe
 
 instance CoordinateSystem 3 Meters space where
   type Point 3 Meters space = Point3D space

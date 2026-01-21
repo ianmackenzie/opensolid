@@ -47,14 +47,13 @@ normalize ::
 normalize = CoordinateSystem.normalizeVectorCurve
 
 direction ::
-  forall dimension units space.
   (VectorCoordinateSystem dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (DirectionCurve dimension space)
 direction vectorCurve =
   if isZero vectorCurve
     then Error IsZero
-    else Ok (DirectionCurve.unsafe @dimension @units @space (normalize vectorCurve))
+    else Ok (DirectionCurve.unsafe (normalize vectorCurve))
 
 zeros ::
   (VectorCoordinateSystem dimension units space, Tolerance units) =>
