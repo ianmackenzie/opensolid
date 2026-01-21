@@ -526,7 +526,7 @@ pickLargestLoop ::
   (Loop units space, List (Loop units space))
 pickLargestLoop loops =
   Tolerance.using (Quantity.squared_ ?tolerance) do
-    Estimate.pickLargestBy loopSignedArea_ loops
+    Estimate.pickMaximumBy (Estimate.abs . loopSignedArea_) loops
 
 loopSignedArea_ :: Loop units space -> Estimate (units ?*? units)
 loopSignedArea_ loop = do

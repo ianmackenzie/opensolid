@@ -46,10 +46,6 @@ module OpenSolid.Interval
   , max
   , minimum
   , maximum
-  , smaller
-  , larger
-  , smallest
-  , largest
   , sin
   , cos
   , interpolate
@@ -502,59 +498,11 @@ max :: Interval units -> Interval units -> Interval units
 max (Interval low1 high1) (Interval low2 high2) =
   Interval (Prelude.max low1 low2) (Prelude.max high1 high2)
 
-smaller :: Interval units -> Interval units -> Interval units
-smaller first second = do
-  let Interval low1 high1 = abs first
-  let Interval low2 high2 = abs second
-  if
-    | high1 < low2 -> first
-    | high2 < low1 -> second
-    | otherwise -> do
-        let Interval aggregateMin aggregateMax = aggregate2 first second
-        let high = Prelude.min high1 high2
-        Interval (Prelude.max (negative high) aggregateMin) (Prelude.min aggregateMax high)
-
-larger :: Interval units -> Interval units -> Interval units
-larger first second = do
-  let Interval low1 high1 = abs first
-  let Interval low2 high2 = abs second
-  let low = Prelude.max low1 low2
-  let aggregate = aggregate2 first second
-  let Interval aggregateMin aggregateMax = aggregate
-  if
-    | low1 > high2 -> first
-    | low2 > high1 -> second
-    | aggregateMin > negative low -> Interval (Prelude.max aggregateMin low) aggregateMax
-    | aggregateMax < low -> Interval aggregateMin (Prelude.min aggregateMax (negative low))
-    | otherwise -> aggregate
-
 minimum :: NonEmpty (Interval units) -> Interval units
 minimum = NonEmpty.reduce min
 
 maximum :: NonEmpty (Interval units) -> Interval units
 maximum = NonEmpty.reduce max
-
-smallest :: NonEmpty (Interval units) -> Interval units
-smallest list = do
-  let initial = NonEmpty.minimumBy maxAbs list
-  let clipRadius = maxAbs initial
-  let conditionalAggregate current (Interval low high)
-        | low > clipRadius || high < negative clipRadius = current
-        | otherwise =
-            aggregate2 current $
-              Interval (Prelude.max low (negative clipRadius)) (Prelude.min high clipRadius)
-  NonEmpty.foldl conditionalAggregate initial list
-
-largest :: NonEmpty (Interval units) -> Interval units
-largest list = do
-  let initial = NonEmpty.maximumBy minAbs list
-  let clipRadius = minAbs initial
-  let conditionalAggregate current interval@(Interval low high)
-        | low > negative clipRadius && high < clipRadius = current
-        | low > negative clipRadius = aggregate2 current (Interval clipRadius high)
-        | high < clipRadius = aggregate2 current (Interval low (negative clipRadius))
-        | otherwise = aggregate2 current interval
-  NonEmpty.foldl conditionalAggregate initial list
 
 sin :: Interval Radians -> Interval Unitless
 sin interval@(Interval low high) = do

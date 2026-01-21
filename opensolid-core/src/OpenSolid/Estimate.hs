@@ -12,25 +12,16 @@ module OpenSolid.Estimate
   , sum
   , min
   , max
-  , smaller
-  , larger
-  , smallest
-  , largest
   , minimumBy
   , maximumBy
-  , smallestBy
-  , largestBy
   , pickMinimumBy
   , pickMaximumBy
-  , pickSmallestBy
-  , pickLargestBy
   , sign
   )
 where
 
 import Control.Exception qualified
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
@@ -286,79 +277,8 @@ instance Interface (Max units) units where
 max :: Estimate units -> Estimate units -> Estimate units
 max first second = new (Max first second)
 
-data Smaller units = Smaller (Estimate units) (Estimate units)
-
-instance Interface (Smaller units) units where
-  boundsImpl (Smaller first second) = Interval.smaller (bounds first) (bounds second)
-  refineImpl (Smaller first second) = do
-    let Interval low1 high1 = Interval.abs (bounds first)
-    let Interval low2 high2 = Interval.abs (bounds second)
-    if
-      | high1 <= low2 -> refine first
-      | high2 <= low1 -> refine second
-      | otherwise -> smaller (refine first) (refine second)
-
-smaller :: Estimate units -> Estimate units -> Estimate units
-smaller first second = new (Smaller first second)
-
-data Larger units = Larger (Estimate units) (Estimate units)
-
-instance Interface (Larger units) units where
-  boundsImpl (Larger first second) = Interval.larger (bounds first) (bounds second)
-  refineImpl (Larger first second) = do
-    let Interval low1 high1 = Interval.abs (bounds first)
-    let Interval low2 high2 = Interval.abs (bounds second)
-    if
-      | low1 >= high2 -> refine first
-      | low2 >= high1 -> refine second
-      | otherwise -> larger (refine first) (refine second)
-
-larger :: Estimate units -> Estimate units -> Estimate units
-larger first second = new (Larger first second)
-
-internalErrorFilteredListIsEmpty :: a
-internalErrorFilteredListIsEmpty =
-  throw (InternalError "Filtered list should be non-empty by construction")
-
 boundsWidth :: Estimate units -> Quantity units
 boundsWidth estimate = Interval.width (bounds estimate)
-
-overlaps :: Interval units -> Estimate units -> Bool
-overlaps givenInterval estimate = Interval.overlap givenInterval (bounds estimate) > Quantity.zero
-
-data Smallest units = Smallest (NonEmpty (Estimate units)) (Interval units)
-
-instance Interface (Smallest units) units where
-  boundsImpl (Smallest _ currentBounds) = currentBounds
-  refineImpl (Smallest estimates currentBounds) =
-    case NonEmpty.filter (overlaps currentBounds) estimates of
-      [singleEstimate] -> refine singleEstimate
-      NonEmpty filteredEstimates -> do
-        let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
-        let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 *. maxWidth)) filteredEstimates
-        smallest refinedEstimates
-      [] -> internalErrorFilteredListIsEmpty
-
-smallest :: NonEmpty (Estimate units) -> Estimate units
-smallest estimates =
-  new (Smallest estimates (Interval.smallest (NonEmpty.map bounds estimates)))
-
-data Largest units = Largest (NonEmpty (Estimate units)) (Interval units)
-
-instance Interface (Largest units) units where
-  boundsImpl (Largest _ currentBounds) = currentBounds
-  refineImpl (Largest estimates currentBounds) =
-    case NonEmpty.filter (overlaps currentBounds) estimates of
-      [singleEstimate] -> refine singleEstimate
-      NonEmpty filteredEstimates -> do
-        let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
-        let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 *. maxWidth)) filteredEstimates
-        largest refinedEstimates
-      [] -> internalErrorFilteredListIsEmpty
-
-largest :: NonEmpty (Estimate units) -> Estimate units
-largest estimates =
-  new (Largest estimates (Interval.largest (NonEmpty.map bounds estimates)))
 
 estimateUpperBound :: (a, Estimate units) -> Quantity units
 estimateUpperBound (_, estimate) = Interval.upper (bounds estimate)
@@ -412,12 +332,6 @@ maximumBy function items = go (NonEmpty.map (Pair.decorate function) items)
       then Pair.first leader
       else go (refinePairs (leader :| filtered))
 
-smallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
-smallestBy function items = minimumBy (abs . function) items
-
-largestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
-largestBy function items = maximumBy (abs . function) items
-
 pickMinimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
 pickMinimumBy function items = go (NonEmpty.map (Pair.decorate function) items) []
  where
@@ -441,12 +355,6 @@ pickMaximumBy function items = go (NonEmpty.map (Pair.decorate function) items) 
     if allResolved filtered
       then (Pair.first leader, prependItems filtered updated)
       else go (refinePairs (leader :| filtered)) updated
-
-pickSmallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-pickSmallestBy function items = pickMinimumBy (abs . function) items
-
-pickLargestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-pickLargestBy function items = pickMaximumBy (abs . function) items
 
 sign :: Tolerance units => Estimate units -> Sign
 sign estimate

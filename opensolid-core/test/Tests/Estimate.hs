@@ -29,17 +29,11 @@ import Tests.Random qualified as Random
 
 tests :: Tolerance Meters => List Test
 tests =
-  [ smallest
-  , largest
-  , area
+  [ area
   , minimumBy
   , maximumBy
-  , smallestBy
-  , largestBy
   , pickMinimumBy
   , pickMaximumBy
-  , pickSmallestBy
-  , pickLargestBy
   ]
 
 data DummyEstimate = DummyEstimate Length (Interval Meters)
@@ -68,42 +62,6 @@ dummyEstimates = do
   nested <- NonEmpty.random 10 duplicatedDummyEstimates
   let flattened = NonEmpty.concat nested
   NonEmpty.shuffle flattened
-
-check :: Tolerance units => Estimate units -> Quantity units -> (Bool, Interval units)
-check estimate value = do
-  let bounds = Estimate.bounds estimate
-  if
-    | not (Interval.includes value bounds) -> (False, bounds)
-    | Interval.width bounds ~= Quantity.zero -> (True, bounds)
-    | otherwise -> check (Estimate.refine estimate) value
-
-smallest :: Tolerance Meters => Test
-smallest = Test.check 100 "smallest" Test.do
-  valuesAndEstimates <- dummyEstimates
-  let (values, estimates) = NonEmpty.unzip2 valuesAndEstimates
-  let bounds = NonEmpty.map Estimate.bounds estimates
-  let smallestValue = Quantity.smallest values
-  let smallestEstimate = Estimate.smallest estimates
-  let (valid, finalBounds) = check smallestEstimate smallestValue
-  Test.expect valid
-    & Test.output "values" (Test.lines (NonEmpty.toList values))
-    & Test.output "smallestValue" smallestValue
-    & Test.output "initial bounds list" (Test.lines (NonEmpty.toList bounds))
-    & Test.output "finalBounds" finalBounds
-
-largest :: Tolerance Meters => Test
-largest = Test.check 100 "largest" Test.do
-  valuesAndEstimates <- dummyEstimates
-  let (values, estimates) = NonEmpty.unzip2 valuesAndEstimates
-  let bounds = NonEmpty.map Estimate.bounds estimates
-  let largestValue = Quantity.largest values
-  let largestEstimate = Estimate.largest estimates
-  let (valid, finalBounds) = check largestEstimate largestValue
-  Test.expect valid
-    & Test.output "values" (Test.lines (NonEmpty.toList values))
-    & Test.output "largestValue" largestValue
-    & Test.output "initial bounds list" (Test.lines (NonEmpty.toList bounds))
-    & Test.output "finalBounds" finalBounds
 
 resolvesTo :: Tolerance units => Quantity units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
@@ -143,20 +101,6 @@ maximumBy = Test.check 100 "maximumBy" Test.do
   let maximumValueFromEstimates = Pair.first (Estimate.maximumBy Pair.second valuesAndEstimates)
   Test.expect (maximumValueFromEstimates == maximumValue)
 
-smallestBy :: Tolerance Meters => Test
-smallestBy = Test.check 100 "smallestBy" Test.do
-  valuesAndEstimates <- dummyEstimates
-  let smallestValue = Quantity.smallest (NonEmpty.map Pair.first valuesAndEstimates)
-  let smallestValueFromEstimates = Pair.first (Estimate.smallestBy Pair.second valuesAndEstimates)
-  Test.expect (smallestValueFromEstimates == smallestValue)
-
-largestBy :: Tolerance Meters => Test
-largestBy = Test.check 100 "largestBy" Test.do
-  valuesAndEstimates <- dummyEstimates
-  let largestValue = Quantity.largest (NonEmpty.map Pair.first valuesAndEstimates)
-  let largestValueFromEstimates = Pair.first (Estimate.largestBy Pair.second valuesAndEstimates)
-  Test.expect (largestValueFromEstimates == largestValue)
-
 pickMinimumBy :: Tolerance Meters => Test
 pickMinimumBy = Test.check 100 "pickMinimumBy" Test.do
   valuesAndEstimates <- dummyEstimates
@@ -180,33 +124,3 @@ pickMaximumBy = Test.check 100 "pickMaximumBy" Test.do
   let allValuesArePresent =
         NonEmpty.sort originalValues == NonEmpty.sort (maxValue :| remainingValues)
   Test.expect (maxValueIsCorrect && allValuesArePresent)
-
-pickSmallestBy :: Tolerance Meters => Test
-pickSmallestBy = Test.check 100 "pickSmallestBy" Test.do
-  valuesAndEstimates <- dummyEstimates
-  let (smallestPair, remainingPairs) = Estimate.pickSmallestBy Pair.second valuesAndEstimates
-  let smallestValue = Pair.first smallestPair
-  let remainingValues = List.map Pair.first remainingPairs
-  let originalValues = NonEmpty.map Pair.first valuesAndEstimates
-  let smallestValueIsCorrect =
-        List.allTrue [Quantity.abs smallestValue <= Quantity.abs value | value <- remainingValues]
-  let allValuesArePresent =
-        NonEmpty.sort originalValues == NonEmpty.sort (smallestValue :| remainingValues)
-  Test.expect (smallestValueIsCorrect && allValuesArePresent)
-    & Test.output "smallestValueIsCorrect" smallestValueIsCorrect
-    & Test.output "allValuesArePresent" allValuesArePresent
-    & Test.output "smallestValue" smallestValue
-    & Test.output "remainingValues" remainingValues
-
-pickLargestBy :: Tolerance Meters => Test
-pickLargestBy = Test.check 100 "pickLargestBy" Test.do
-  valuesAndEstimates <- dummyEstimates
-  let (largestPair, remainingPairs) = Estimate.pickLargestBy Pair.second valuesAndEstimates
-  let largestValue = Pair.first largestPair
-  let remainingValues = List.map Pair.first remainingPairs
-  let originalValues = NonEmpty.map Pair.first valuesAndEstimates
-  let largestValueIsCorrect =
-        List.allTrue [Quantity.abs largestValue >= Quantity.abs value | value <- remainingValues]
-  let allValuesArePresent =
-        NonEmpty.sort originalValues == NonEmpty.sort (largestValue :| remainingValues)
-  Test.expect (largestValueIsCorrect && allValuesArePresent)

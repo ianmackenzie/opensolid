@@ -19,14 +19,6 @@ module OpenSolid.Quantity
   , hypot3
   , abs
   , minmax
-  , smaller
-  , larger
-  , smallerBy
-  , largerBy
-  , smallest
-  , largest
-  , smallestBy
-  , largestBy
   , clampTo
   , convert
   , unconvert
@@ -44,7 +36,6 @@ where
 import Data.Coerce qualified
 import Data.Hashable (Hashable)
 import Data.Kind (Type)
-import Data.List.NonEmpty (NonEmpty ((:|)))
 import Foreign.Storable (Storable)
 import OpenSolid.Arithmetic
 import OpenSolid.HasZero (HasZero)
@@ -74,7 +65,6 @@ import Prelude
   , (+)
   , (-)
   , (/)
-  , (<)
   , (<=)
   , (>)
   , (>=)
@@ -228,48 +218,6 @@ clampTo interval value = min (max (Interval.lower interval) value) (Interval.upp
 {-# INLINE minmax #-}
 minmax :: (Quantity units, Quantity units) -> (Quantity units, Quantity units)
 minmax (a, b) = if a <= b then (a, b) else (b, a)
-
-smaller :: Quantity units -> Quantity units -> Quantity units
-smaller x y = if abs x <= abs y then x else y
-
-larger :: Quantity units -> Quantity units -> Quantity units
-larger x y = if abs x >= abs y then x else y
-
-smallerBy :: (a -> Quantity units) -> a -> a -> a
-smallerBy function first second =
-  if abs (function first) <= abs (function second) then first else second
-
-largerBy :: (a -> Quantity units) -> a -> a -> a
-largerBy function first second =
-  if abs (function first) >= abs (function second) then first else second
-
-smallest :: NonEmpty (Quantity units) -> Quantity units
-smallest (x :| xs) = List.foldl smaller x xs
-
-largest :: NonEmpty (Quantity units) -> Quantity units
-largest (x :| xs) = List.foldl larger x xs
-
-smallestBy :: (a -> Quantity units) -> NonEmpty a -> a
-smallestBy _ (x :| []) = x
-smallestBy function (x :| xs) = go x (abs (function x)) xs
- where
-  go current _ [] = current
-  go current currentAbsValue (next : remaining) = do
-    let nextAbsValue = abs (function next)
-    if nextAbsValue < currentAbsValue
-      then go next nextAbsValue remaining
-      else go current currentAbsValue remaining
-
-largestBy :: (a -> Quantity units) -> NonEmpty a -> a
-largestBy _ (x :| []) = x
-largestBy function (x :| xs) = go x (abs (function x)) xs
- where
-  go current _ [] = current
-  go current currentAbsValue (next : remaining) = do
-    let nextAbsValue = abs (function next)
-    if nextAbsValue > currentAbsValue
-      then go next nextAbsValue remaining
-      else go current currentAbsValue remaining
 
 -- | Interpolate from one value to another, based on a parameter that ranges from 0 to 1.
 {-# INLINE interpolateFrom #-}
