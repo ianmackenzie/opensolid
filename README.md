@@ -28,12 +28,12 @@ OpenSolid is an under-development 2D/3D CAD library aiming to be:
 
 It's not really ready to be used yet, but the current rough roadmap is:
 
-- [ ] Set up automated publishing of Python bindings pre-built for Linux, macOS and Windows
-- [ ] Fill out Python bindings with existing 2D geometry functionality already implemented in
+- [x] Set up automated publishing of Python bindings pre-built for Linux, macOS and Windows
+- [x] Fill out Python bindings with existing 2D geometry functionality already implemented in
       Haskell, so it's possible to at least make interesting 2D drawings
 - [ ] Add some additional 2D geometry functionality related to 2D CNC toolpath planning, so that
       it's possible to use OpenSolid for cutting out simple objects on a CNC mill/router
-- [ ] Add enough initial 3D modelling functionality to be able to generate simple models for 3D
+- [x] Add enough initial 3D modelling functionality to be able to generate simple models for 3D
       printing or visualization
 - [ ] Add support for more complex 3D operations like tricky Boolean operations, rounds/fillets,
       shelling etc.
