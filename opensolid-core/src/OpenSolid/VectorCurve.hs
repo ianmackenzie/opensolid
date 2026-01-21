@@ -9,7 +9,7 @@ module OpenSolid.VectorCurve
   )
 where
 
-import OpenSolid.CoordinateSystem (VectorCoordinateSystem (DirectionCurve, VectorCurve))
+import OpenSolid.CoordinateSystem (DirectionCurve, VectorCoordinateSystem, VectorCurve)
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D

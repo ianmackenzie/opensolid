@@ -6,10 +6,7 @@ module OpenSolid.Curve
   )
 where
 
-import OpenSolid.CoordinateSystem
-  ( CoordinateSystem (Curve, Point)
-  , VectorCoordinateSystem (DirectionCurve, VectorCurve)
-  )
+import OpenSolid.CoordinateSystem (CoordinateSystem, Curve, DirectionCurve, Point, VectorCurve)
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Prelude
 import OpenSolid.VectorCurve qualified as VectorCurve

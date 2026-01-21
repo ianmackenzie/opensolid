@@ -16,7 +16,7 @@ module OpenSolid.Vector
   )
 where
 
-import OpenSolid.CoordinateSystem (VectorCoordinateSystem (Direction, Vector))
+import OpenSolid.CoordinateSystem (Direction, Vector, VectorCoordinateSystem)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.List qualified as List
