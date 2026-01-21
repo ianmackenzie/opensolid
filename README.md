@@ -63,8 +63,8 @@ Running `nix develop` in a checkout of this repository will give you a developme
 `ghc`, `cabal` and `haskell-language-server` installed (plus a variety of other useful tools such as
 `fourmolu` for source code formatting). You can then run
 
-- `cabal build opensolid` to build the main Haskell library
-- `cabal test opensolid` to run the main library tests
+- `cabal build opensolid-core` to build the main Haskell library
+- `cabal test opensolid-core` to run the main library tests
 - `cabal run sandbox` to run the 'sandbox' executable at `opensolid-sandbox/src/Main.hs`; this can
   be a good place to play around with writing Haskell code that uses OpenSolid
 - `generate-python-bindings` to generate the necessary files into `opensolid-python/lib/src` for
