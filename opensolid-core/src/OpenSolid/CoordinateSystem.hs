@@ -1,6 +1,6 @@
 module OpenSolid.CoordinateSystem
-  ( DirectionCoordinateSystem (..)
-  , VectorCoordinateSystem (..)
+  ( Unitless (..)
+  , Linear (..)
   , CoordinateSystem (..)
   )
 where
@@ -23,24 +23,27 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D qualified as DirectionCurve3D
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.Interval (Interval)
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (Unitless)
 import OpenSolid.Primitives
+import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
 class
-  DotMultiplication (Direction dimension space) (Direction dimension space) Number =>
-  DirectionCoordinateSystem (dimension :: Natural) (space :: Type)
+  ( DotMultiplication (Direction dimension space) (Direction dimension space) Number
+  , Linear dimension Units.Unitless space
+  ) =>
+  Unitless (dimension :: Natural) (space :: Type)
   where
   type Direction dimension space = direction | direction -> dimension space
   type DirectionBounds dimension space = directionBounds | directionBounds -> dimension space
   type DirectionCurve dimension space = directionCurve | directionCurve -> dimension space
 
-  unsafeDirection :: Vector dimension Unitless space -> Direction dimension space
-  unsafeDirectionBounds :: VectorBounds dimension Unitless space -> DirectionBounds dimension space
-  unsafeDirectionCurve :: VectorCurve dimension Unitless space -> DirectionCurve dimension space
+  unsafeDirection :: Vector dimension Units.Unitless space -> Direction dimension space
+  unsafeDirectionBounds :: VectorBounds dimension Units.Unitless space -> DirectionBounds dimension space
+  unsafeDirectionCurve :: VectorCurve dimension Units.Unitless space -> DirectionCurve dimension space
 
 class
   ( HasZero (Vector dimension units space)
@@ -65,11 +68,11 @@ class
   , DotMultiplication (Vector dimension units space) (Direction dimension space) (Quantity units)
   , DotMultiplication (Direction dimension space) (Vector dimension units space) (Quantity units)
   , Division (Vector dimension units space) Number (Vector dimension units space)
-  , Division (Vector dimension units space) (Quantity units) (Vector dimension Unitless space)
-  , DirectionCoordinateSystem dimension space
-  , VectorCoordinateSystem dimension Unitless space
+  , Division (Vector dimension units space) (Quantity units) (Vector dimension Units.Unitless space)
+  , Unitless dimension space
+  , Linear dimension Units.Unitless space
   ) =>
-  VectorCoordinateSystem (dimension :: Natural) (units :: Type) (space :: Type)
+  Linear (dimension :: Natural) (units :: Type) (space :: Type)
   where
   type Vector dimension units space = vector | vector -> dimension units space
   type VectorBounds dimension units space = vectorBounds | vectorBounds -> dimension units space
@@ -83,7 +86,7 @@ class
     Vector dimension units space
   evaluateVectorCurveBounds ::
     VectorCurve dimension units space ->
-    Interval Unitless ->
+    Interval Units.Unitless ->
     VectorBounds dimension units space
   vectorCurveSquaredMagnitude_ ::
     VectorCurve dimension units space ->
@@ -91,7 +94,7 @@ class
   normalizeVectorCurve ::
     Tolerance units =>
     VectorCurve dimension units space ->
-    VectorCurve dimension Unitless space
+    VectorCurve dimension Units.Unitless space
 
 class
   ( Addition
@@ -130,7 +133,7 @@ class
       (Point dimension units space)
       (Curve dimension units space)
       (VectorCurve dimension units space)
-  , VectorCoordinateSystem dimension units space
+  , Linear dimension units space
   ) =>
   CoordinateSystem (dimension :: Natural) (units :: Type) (space :: Type)
   where
@@ -140,7 +143,7 @@ class
 
   curveDerivative :: Curve dimension units space -> VectorCurve dimension units space
 
-instance DirectionCoordinateSystem 2 space where
+instance Unitless 2 space where
   type Direction 2 space = Direction2D space
   type DirectionBounds 2 space = DirectionBounds2D space
   type DirectionCurve 2 space = DirectionCurve2D space
@@ -154,7 +157,7 @@ instance DirectionCoordinateSystem 2 space where
   {-# INLINE unsafeDirectionCurve #-}
   unsafeDirectionCurve = DirectionCurve2D.unsafe
 
-instance VectorCoordinateSystem 2 units space where
+instance Linear 2 units space where
   type Vector 2 units space = Vector2D units space
   type VectorBounds 2 units space = VectorBounds2D units space
   type VectorCurve 2 units space = VectorCurve2D units space
@@ -173,7 +176,7 @@ instance CoordinateSystem 2 units space where
 
   curveDerivative = Curve2D.derivative
 
-instance DirectionCoordinateSystem 3 space where
+instance Unitless 3 space where
   type Direction 3 space = Direction3D space
   type DirectionBounds 3 space = DirectionBounds3D space
   type DirectionCurve 3 space = DirectionCurve3D space
@@ -187,7 +190,7 @@ instance DirectionCoordinateSystem 3 space where
   {-# INLINE unsafeDirectionCurve #-}
   unsafeDirectionCurve = DirectionCurve3D.unsafe
 
-instance VectorCoordinateSystem 3 units space where
+instance Linear 3 units space where
   type Vector 3 units space = Vector3D units space
   type VectorBounds 3 units space = VectorBounds3D units space
   type VectorCurve 3 units space = VectorCurve3D units space

@@ -4,12 +4,12 @@ module OpenSolid.Direction
   )
 where
 
-import OpenSolid.CoordinateSystem (Direction, DirectionCoordinateSystem, Vector)
+import OpenSolid.CoordinateSystem (Direction, Vector)
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Prelude
 
 unsafe ::
-  DirectionCoordinateSystem dimension space =>
+  CoordinateSystem.Unitless dimension space =>
   Vector dimension Unitless space ->
   Direction dimension space
 unsafe = CoordinateSystem.unsafeDirection

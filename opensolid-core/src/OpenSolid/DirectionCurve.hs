@@ -3,12 +3,12 @@ module OpenSolid.DirectionCurve
   )
 where
 
-import OpenSolid.CoordinateSystem (DirectionCoordinateSystem, DirectionCurve, VectorCurve)
+import OpenSolid.CoordinateSystem (DirectionCurve, VectorCurve)
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Prelude
 
 unsafe ::
-  DirectionCoordinateSystem dimension space =>
+  CoordinateSystem.Unitless dimension space =>
   VectorCurve dimension Unitless space ->
   DirectionCurve dimension space
 unsafe = CoordinateSystem.unsafeDirectionCurve

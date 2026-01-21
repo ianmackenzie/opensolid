@@ -9,7 +9,7 @@ module OpenSolid.VectorCurve
   )
 where
 
-import OpenSolid.CoordinateSystem (DirectionCurve, VectorCoordinateSystem, VectorCurve)
+import OpenSolid.CoordinateSystem (DirectionCurve, VectorCurve)
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -23,31 +23,31 @@ import OpenSolid.Tolerance qualified as Tolerance
 data IsZero = IsZero deriving (Eq, Show)
 
 isZero ::
-  (VectorCoordinateSystem dimension units space, Tolerance units) =>
+  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Bool
 isZero = CoordinateSystem.vectorCurveIsZero
 
 derivative ::
-  VectorCoordinateSystem dimension units space =>
+  CoordinateSystem.Linear dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 derivative = CoordinateSystem.vectorCurveDerivative
 
 squaredMagnitude_ ::
-  VectorCoordinateSystem dimension units space =>
+  CoordinateSystem.Linear dimension units space =>
   VectorCurve dimension units space ->
   Curve1D (units ?*? units)
 squaredMagnitude_ = CoordinateSystem.vectorCurveSquaredMagnitude_
 
 normalize ::
-  (VectorCoordinateSystem dimension units space, Tolerance units) =>
+  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   VectorCurve dimension Unitless space
 normalize = CoordinateSystem.normalizeVectorCurve
 
 direction ::
-  (VectorCoordinateSystem dimension units space, Tolerance units) =>
+  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (DirectionCurve dimension space)
 direction vectorCurve =
@@ -56,7 +56,7 @@ direction vectorCurve =
     else Ok (DirectionCurve.unsafe (normalize vectorCurve))
 
 zeros ::
-  (VectorCoordinateSystem dimension units space, Tolerance units) =>
+  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (List Number)
 zeros vectorCurve =
