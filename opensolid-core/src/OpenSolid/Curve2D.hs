@@ -31,6 +31,7 @@ module OpenSolid.Curve2D
   , evaluateBounds
   , compiled
   , derivative
+  , secondDerivative
   , tangentDirection
   , offsetLeftwardBy
   , offsetRightwardBy
@@ -595,10 +596,8 @@ desingularize startSingularity curve endSingularity = do
         Just (value0, firstDerivative0) -> do
           let t0 = Desingularization.t0
           let valueT0 = evaluate curve t0
-          let firstDerivative = derivative curve
-          let secondDerivative = VectorCurve2D.derivative firstDerivative
-          let firstDerivativeT0 = VectorCurve2D.evaluate firstDerivative t0
-          let secondDerivativeT0 = VectorCurve2D.evaluate secondDerivative t0
+          let firstDerivativeT0 = VectorCurve2D.evaluate (derivative curve) t0
+          let secondDerivativeT0 = VectorCurve2D.evaluate (secondDerivative curve) t0
           bezier $
             Bezier.syntheticStart
               value0
@@ -611,10 +610,8 @@ desingularize startSingularity curve endSingularity = do
         Just (value1, firstDerivative1) -> do
           let t1 = Desingularization.t1
           let valueT1 = evaluate curve t1
-          let firstDerivative = derivative curve
-          let secondDerivative = VectorCurve2D.derivative firstDerivative
-          let firstDerivativeT1 = VectorCurve2D.evaluate firstDerivative t1
-          let secondDerivativeT1 = VectorCurve2D.evaluate secondDerivative t1
+          let firstDerivativeT1 = VectorCurve2D.evaluate (derivative curve) t1
+          let secondDerivativeT1 = VectorCurve2D.evaluate (secondDerivative curve) t1
           bezier $
             Bezier.syntheticEnd
               valueT1
@@ -681,6 +678,9 @@ compiled = (.compiled)
 
 derivative :: Curve2D units space -> VectorCurve2D units space
 derivative = (.derivative)
+
+secondDerivative :: Curve2D units space -> VectorCurve2D units space
+secondDerivative = Curve.secondDerivative
 
 tangentDirection ::
   Tolerance units =>
@@ -789,10 +789,10 @@ signature ::
   (Quantity units, Quantity units)
 signature orientation curve tValue radius = do
   let local vector = Vector2D.relativeToOrientation orientation vector
-  let firstDerivative = derivative curve
-  let secondDerivative = VectorCurve2D.derivative firstDerivative
-  let firstDerivativeValue = VectorCurve2D.evaluate firstDerivative tValue
-  let secondDerivativeValue = VectorCurve2D.evaluate secondDerivative tValue
+  let curveFirstDerivative = derivative curve
+  let curveSecondDerivative = secondDerivative curve
+  let firstDerivativeValue = VectorCurve2D.evaluate curveFirstDerivative tValue
+  let secondDerivativeValue = VectorCurve2D.evaluate curveSecondDerivative tValue
   let Vector2D x' y' = local firstDerivativeValue
   let Vector2D x'' y'' = local secondDerivativeValue
   let dydx = if x' != Quantity.zero then y' ./. x' else y'' ./. x''
@@ -801,9 +801,9 @@ signature orientation curve tValue radius = do
         if x' != Quantity.zero
           then (y'' ?*? x' .-. y' ?*? x'') ?/? (x' ?*? x' ?*? x')
           else do
-            let thirdDerivative = VectorCurve2D.derivative secondDerivative
-            let fourthDerivative = VectorCurve2D.derivative thirdDerivative
-            let fourthDerivativeValue = VectorCurve2D.evaluate fourthDerivative tValue
+            let curveThirdDerivative = VectorCurve2D.derivative curveSecondDerivative
+            let curveFourthDerivative = VectorCurve2D.derivative curveThirdDerivative
+            let fourthDerivativeValue = VectorCurve2D.evaluate curveFourthDerivative tValue
             let Vector2D x'''' y'''' = local fourthDerivativeValue
             (y'''' ?*? x'' .-. y'' ?*? x'''') ?/? (x'' ?*? x'' ?*? x'')
   let secondOrder = Units.simplify (0.5 *. d2ydx2 ?*? Quantity.squared_ radius)
@@ -915,11 +915,9 @@ curvature_ ::
   Curve2D units space ->
   Result IsPoint (Curve1D (Unitless ?/? units))
 curvature_ curve = do
-  let firstDerivative = derivative curve
-  let secondDerivative = VectorCurve2D.derivative firstDerivative
   tangent <- tangentDirection curve
-  let numerator = tangent `cross` secondDerivative
-  let denominator = VectorCurve2D.squaredMagnitude_ firstDerivative
+  let numerator = tangent `cross` secondDerivative curve
+  let denominator = VectorCurve2D.squaredMagnitude_ (derivative curve)
   case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.quotient_ numerator denominator) of
     Ok quotient_ -> Ok (Units.simplify quotient_)
     Error DivisionByZero -> Error IsPoint
@@ -949,10 +947,9 @@ samplingPoints resolution curve = do
         let start = evaluate curve subdomain.lower
         let end = evaluate curve subdomain.upper
         Point2D.distanceFrom start end
-  let firstDerivative = derivative curve
-  let secondDerivative = VectorCurve2D.derivative firstDerivative
+  let curveSecondDerivative = secondDerivative curve
   let error subdomain = do
-        let secondDerivativeBounds = VectorCurve2D.evaluateBounds secondDerivative subdomain
+        let secondDerivativeBounds = VectorCurve2D.evaluateBounds curveSecondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2D.magnitude secondDerivativeBounds
         Linearization.error secondDerivativeMagnitude subdomain
   let predicate = Resolution.predicate (#size size) (#error error) resolution

@@ -703,7 +703,7 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
                   correctlyAligned
                   surfaceSegments
                   matingSurfaceSegments
-                  (curve3D & Curve3D.derivative & VectorCurve3D.derivative)
+                  (Curve3D.secondDerivative curve3D)
           let tValues = Domain1D.innerSamplingPoints edgePredicate
           let matingTValues = if correctlyAligned then List.reverseMap (1 -.) tValues else tValues
           let vertices = List.map (Curve2D.evaluate uvCurve) tValues

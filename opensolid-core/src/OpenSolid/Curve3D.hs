@@ -12,6 +12,7 @@ module OpenSolid.Curve3D
   , cubicBezier
   , hermite
   , derivative
+  , secondDerivative
   , startPoint
   , endPoint
   , evaluate
@@ -244,6 +245,9 @@ hermite start startDerivatives end endDerivatives =
 
 derivative :: Curve3D space -> VectorCurve3D Meters space
 derivative = (.derivative)
+
+secondDerivative :: Curve3D space -> VectorCurve3D Meters space
+secondDerivative = Curve.secondDerivative
 
 startPoint :: Curve3D space -> Point3D space
 startPoint curve = evaluate curve 0

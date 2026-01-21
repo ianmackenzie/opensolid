@@ -1,6 +1,7 @@
 module OpenSolid.Curve
   ( IsPoint (IsPoint)
   , derivative
+  , secondDerivative
   , tangentDirection
   , findPoint
   )
@@ -18,6 +19,12 @@ derivative ::
   Curve dimension units space ->
   VectorCurve dimension units space
 derivative = CoordinateSystem.curveDerivative
+
+secondDerivative ::
+  CoordinateSystem dimension units space =>
+  Curve dimension units space ->
+  VectorCurve dimension units space
+secondDerivative = VectorCurve.derivative . derivative
 
 tangentDirection ::
   (CoordinateSystem dimension units space, Tolerance units) =>
