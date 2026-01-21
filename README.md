@@ -18,9 +18,9 @@ OpenSolid is an under-development 2D/3D CAD library aiming to be:
   prevent common errors like mixing up units; units conversions are handled automatically and
   you'll get a type error if you e.g. attempt to add a `Length` to an `Area`. In addition, where
   many geometry libraries use a single `Vector3D` or similar type for everything, OpenSolid has
-  separate types for e.g. `Point3d`, `Direction3d` and `Displacement3d` that have their own rules
-  (e.g. you can add a `Displacement3d` to a `Point3d` to get a new `Point3d`, or you can subtract
-  two `Point3d` values from each other to get a `Displacement3d`, but you can't add two `Point3d`
+  separate types for e.g. `Point3D`, `Direction3D` and `Displacement3D` that have their own rules
+  (e.g. you can add a `Displacement3D` to a `Point3D` to get a new `Point3D`, or you can subtract
+  two `Point3D` values from each other to get a `Displacement3D`, but you can't add two `Point3D`
   values since that doesn't make sense).
 - **Enjoyable to use**: This is of course _very_ subjective, but a lot of effort has gone into
   making OpenSolid as pleasant to use as possible, via careful API design and (reasonably)
