@@ -108,6 +108,7 @@ library
     OpenSolid.Bool
     OpenSolid.Bounded2D
     OpenSolid.Bounded3D
+    OpenSolid.Bounds
     OpenSolid.Bounds2D
     OpenSolid.Bounds3D
     OpenSolid.Bytecode.Ast

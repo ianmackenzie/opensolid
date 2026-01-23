@@ -6,6 +6,8 @@ module OpenSolid.CoordinateSystem
 where
 
 import GHC.Num (Natural)
+import {-# SOURCE #-} OpenSolid.Bounds2D qualified as Bounds2D
+import {-# SOURCE #-} OpenSolid.Bounds3D qualified as Bounds3D
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
@@ -133,6 +135,9 @@ class
       (Point dimension units space)
       (Curve dimension units space)
       (VectorCurve dimension units space)
+  , Intersects (Point dimension units space) (Bounds dimension units space) units
+  , Intersects (Bounds dimension units space) (Point dimension units space) units
+  , Intersects (Bounds dimension units space) (Bounds dimension units space) units
   , Linear dimension units space
   ) =>
   CoordinateSystem (dimension :: Natural) (units :: Type) (space :: Type)
@@ -140,6 +145,16 @@ class
   type Point dimension units space = point | point -> dimension units space
   type Bounds dimension units space = bounds | bounds -> dimension units space
   type Curve dimension units space = curve | curve -> dimension units space
+
+  cyclicBoundsCoordinate :: Int -> Bounds dimension units space -> Interval units
+  boundsContains ::
+    Bounds dimension units space ->
+    Bounds dimension units space ->
+    Bool
+  boundsAggregate2 ::
+    Bounds dimension units space ->
+    Bounds dimension units space ->
+    Bounds dimension units space
 
   curveDerivative :: Curve dimension units space -> VectorCurve dimension units space
 
@@ -174,6 +189,13 @@ instance CoordinateSystem 2 units space where
   type Bounds 2 units space = Bounds2D units space
   type Curve 2 units space = Curve2D units space
 
+  cyclicBoundsCoordinate index (Bounds2D x y) =
+    case index `mod` 2 of
+      0 -> x
+      _ -> y
+  boundsContains = Bounds2D.contains
+  boundsAggregate2 = Bounds2D.aggregate2
+
   curveDerivative = Curve2D.derivative
 
 instance Unitless 3 space where
@@ -206,5 +228,13 @@ instance CoordinateSystem 3 Meters space where
   type Point 3 Meters space = Point3D space
   type Bounds 3 Meters space = Bounds3D space
   type Curve 3 Meters space = Curve3D space
+
+  cyclicBoundsCoordinate index (Bounds3D x y z) =
+    case index `mod` 3 of
+      0 -> x
+      1 -> y
+      _ -> z
+  boundsContains = Bounds3D.contains
+  boundsAggregate2 = Bounds3D.aggregate2
 
   curveDerivative = Curve3D.derivative
