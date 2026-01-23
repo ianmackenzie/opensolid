@@ -1,30 +1,6 @@
-Add generic Set module!
-- will need to add some sort of "get bounding box coordinate interval by index modulo current dimension" function
-  - cyclicBoundsCoordinate? indexedBoundsCoordinate?
-  - could be implemented directly in CoordinateSystem module instead of being an exposed function from Bounds#D modules
-  - alternatively, be able to look up coordinates/components by a 'Coordinate' type?
-    - 'data XY = X | Y', 'coordinates = NonEmpty.two X Y'
-    - 'data RFU = R | F | U', 'coordinates = NonEmpty.three X Y Z'
-    - have 'NonEmpty.cycle :: NonEmpty a -> Stream a'?
-    - complex...
-- Set? SpatialSet? RTree?
-  - Maybe just Set for now...prefixed as OpenSolid.Set so no naming collisions anyways,
-    and 'Set2D'/'Set3D' is much nicer than 'RTree2D'/'RTree3D'
-
 Maybe have Curve.intersections that returns slightly simplified IntersectionPoint type, with no sign?
 - crossing or tangent indicator only
 - Curve2D (and maybe SurfaceCurve3D) can add crossing sign if desired
-
-Generic modules to add:
-- Point
-- Vector
-- Direction
-- Bounds
-- VectorBounds
-- DirectionBounds
-- Curve
-- VectorCurve
-- DirectionCurve
 
 Add 3D types to check_operators script
 
@@ -35,10 +11,6 @@ Remove UvPoint and UvBounds modules?
 - replace UvPoint.random with 'Point2D.random Bounds2D.uvDomain'
 
 Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
-
-Allow Set#D to be empty?
-- allow construction from List
-- would have to remove Set#D.bounds but that's probably OK...
 
 Refactor Polygon2d.edges to filter out (approximately) zero-length edges?
 - useful for removing duplicate last edge if last vertex is equal to first vertex
