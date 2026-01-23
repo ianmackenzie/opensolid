@@ -13,8 +13,6 @@ module OpenSolid.Line2D
   )
 where
 
-import OpenSolid.Bounded2D (Bounded2D)
-import OpenSolid.Bounded2D qualified as Bounded2D
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.FFI (FFI)
@@ -38,9 +36,6 @@ instance FFI (Line2D Meters FFI.Space) where
 
 instance FFI (Line2D Unitless UvSpace) where
   representation = FFI.classRepresentation "UvLine"
-
-instance Bounded2D (Line2D units space) units space where
-  bounds = bounds
 
 -- | Get the start point of a line.
 {-# INLINE startPoint #-}

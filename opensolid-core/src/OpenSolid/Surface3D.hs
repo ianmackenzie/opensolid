@@ -37,6 +37,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Line2D (Line2D)
+import OpenSolid.Line2D qualified as Line2D
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
@@ -189,7 +190,7 @@ toMesh accuracy surface = do
   let boundaryLoops = Region2D.boundaryLoops surface.domain
   let boundaryPolygons = NonEmpty.map (toPolygon accuracy f fuu fuv fvv) boundaryLoops
   let boundaryEdges = NonEmpty.combine Polygon2D.edges boundaryPolygons
-  let edgeSet = Set2D.fromNonEmpty boundaryEdges
+  let edgeSet = Set2D.partitionBy Line2D.bounds boundaryEdges
   let domainBounds = Region2D.bounds surface.domain
   let steinerPoints = generateSteinerPoints accuracy domainBounds edgeSet fuu fuv fvv []
   let boundaryVertexLoops = NonEmpty.map Polygon2D.vertices boundaryPolygons

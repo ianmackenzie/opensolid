@@ -31,8 +31,6 @@ where
 import GHC.Records (HasField (getField))
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bezier qualified as Bezier
-import OpenSolid.Bounded3D (Bounded3D)
-import OpenSolid.Bounded3D qualified as Bounded3D
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
@@ -76,9 +74,6 @@ instance HasField "compiled" (Curve3D space) (Compiled space) where
 
 instance HasField "derivative" (Curve3D space) (VectorCurve3D Meters space) where
   getField (Curve3D _ d) = d
-
-instance Bounded3D (Curve3D space) space where
-  bounds = bounds
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
 

@@ -24,8 +24,6 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Axis3D (Axis3D (Axis3D))
 import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Body3D.BoundedBy qualified as BoundedBy
-import OpenSolid.Bounded3D (Bounded3D)
-import OpenSolid.Bounded3D qualified as Bounded3D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
@@ -172,9 +170,9 @@ data HalfEdge space where
     } ->
     HalfEdge space
 
-instance Bounded3D (HalfEdge space) space where
-  bounds HalfEdge{bounds} = bounds
-  bounds DegenerateHalfEdge{point} = Bounds3D.constant point
+halfEdgeBounds :: HalfEdge space -> Bounds3D space
+halfEdgeBounds HalfEdge{bounds} = bounds
+halfEdgeBounds DegenerateHalfEdge{point} = Bounds3D.constant point
 
 data MatingEdge = MatingEdge
   { halfEdgeId :: HalfEdgeId
@@ -372,7 +370,7 @@ boundedBy (NonEmpty givenSurfaces) = do
   let surfacesWithHalfEdges = NonEmpty.mapWithIndex toSurfaceWithHalfEdges givenSurfaces
   let firstSurfaceWithHalfEdges = NonEmpty.first surfacesWithHalfEdges
   let halfEdges = NonEmpty.combine getAllHalfEdges surfacesWithHalfEdges
-  let halfEdgeSet = Set3D.fromNonEmpty halfEdges
+  let halfEdgeSet = Set3D.partitionBy halfEdgeBounds halfEdges
   let initialSurfaceRegistry =
         SurfaceRegistry
           { unprocessed =
@@ -477,7 +475,7 @@ registerHalfEdge parentHandedness halfEdgeSet surfaceRegistry halfEdge = do
       let edge = DegenerateEdge{halfEdgeId, uvCurve}
       Ok SurfaceRegistry{unprocessed, processed, edges = Map.set halfEdgeId edge edges}
     HalfEdge{halfEdgeId, uvCurve, curve3D} -> do
-      let matingEdgeCandidates = Set3D.filter (Bounded3D.bounds halfEdge) halfEdgeSet
+      let matingEdgeCandidates = Set3D.filter (halfEdgeBounds halfEdge) halfEdgeSet
       case List.filterMap (toMatingEdge halfEdgeId curve3D) matingEdgeCandidates of
         [] -> Error BoundedBy.BoundaryHasGaps
         List.TwoOrMore -> Error BoundedBy.BoundaryIntersectsItself
@@ -794,7 +792,7 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex boundaryS
     Ok normalDirection -> do
       let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
       let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons
-      let boundarySegmentSet = Set2D.fromNonEmpty boundarySegments
+      let boundarySegmentSet = Set2D.partitionBy Line2D.bounds boundarySegments
       case Map.get surfaceId surfaceSegmentsById of
         Nothing -> throw (InternalError "Should always be able to look up surface segments by ID")
         Just surfaceSegments -> do

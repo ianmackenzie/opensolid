@@ -3,7 +3,8 @@ module OpenSolid.Set
   , bounds
   , one
   , two
-  , fromNonEmpty
+  , partition
+  , partitionBy
   , toNonEmpty
   , toList
   , union
@@ -59,11 +60,18 @@ two (firstItem, firstBounds) (secondItem, secondBounds) = do
   let nodeBounds = Bounds.aggregate2 firstBounds secondBounds
   Node nodeBounds (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
 
-fromNonEmpty ::
+partition ::
   CoordinateSystem dimension units space =>
   NonEmpty (item, Bounds dimension units space) ->
   Set dimension units space item
-fromNonEmpty boundedItems = build (NonEmpty.length boundedItems) boundedItems 0
+partition boundedItems = build (NonEmpty.length boundedItems) boundedItems 0
+
+partitionBy ::
+  CoordinateSystem dimension units space =>
+  (item -> Bounds dimension units space) ->
+  NonEmpty item ->
+  Set dimension units space item
+partitionBy function items = partition (NonEmpty.map (Pair.decorate function) items)
 
 build ::
   CoordinateSystem dimension units space =>

@@ -5,7 +5,8 @@ module OpenSolid.Set2D
   , one
   , two
   , bounds
-  , fromNonEmpty
+  , partition
+  , partitionBy
   , toNonEmpty
   , toList
   , union
@@ -14,12 +15,8 @@ module OpenSolid.Set2D
   )
 where
 
-import OpenSolid.Bounded2D (Bounded2D)
-import OpenSolid.Bounded2D qualified as Bounded2D
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Fuzzy (Fuzzy)
-import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
@@ -41,16 +38,17 @@ pattern Node nodeBounds leftChild rightChild = Set.Node nodeBounds leftChild rig
 bounds :: Set2D units space item -> Bounds2D units space
 bounds = Set.bounds
 
-one :: Bounded2D item units space => item -> Set2D units space item
-one item = Set.one (item, Bounded2D.bounds item)
+one :: (item, Bounds2D units space) -> Set2D units space item
+one = Set.one
 
-two :: Bounded2D item units space => item -> item -> Set2D units space item
-two firstItem secondItem =
-  Set.two (firstItem, Bounded2D.bounds firstItem) (secondItem, Bounded2D.bounds secondItem)
+two :: (item, Bounds2D units space) -> (item, Bounds2D units space) -> Set2D units space item
+two = Set.two
 
-fromNonEmpty :: Bounded2D item units space => NonEmpty item -> Set2D units space item
-fromNonEmpty givenItems =
-  Set.fromNonEmpty (NonEmpty.map (Pair.decorate Bounded2D.bounds) givenItems)
+partition :: NonEmpty (item, Bounds2D units space) -> Set2D units space item
+partition = Set.partition
+
+partitionBy :: (item -> Bounds2D units space) -> NonEmpty item -> Set2D units space item
+partitionBy = Set.partitionBy
 
 toNonEmpty :: Set2D units space item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
