@@ -22,7 +22,7 @@ tests =
 point :: Int -> Int -> Point2D Meters space
 point x y = Point2D.centimeters (Number.fromInt x) (Number.fromInt y)
 
-testSet :: Set2D (Point2D Meters space) Meters space
+testSet :: Set2D Meters space (Point2D Meters space)
 testSet =
   Set2D.fromNonEmpty $
     NonEmpty.eight

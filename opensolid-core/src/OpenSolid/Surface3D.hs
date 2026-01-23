@@ -253,7 +253,7 @@ linearizationPredicate accuracy fuu fuv fvv curve2D secondDerivative3D subdomain
 generateSteinerPoints ::
   Length ->
   UvBounds ->
-  Set2D (Line2D Unitless UvSpace) Unitless UvSpace ->
+  Set2D Unitless UvSpace (Line2D Unitless UvSpace) ->
   VectorSurfaceFunction3D Meters space ->
   VectorSurfaceFunction3D Meters space ->
   VectorSurfaceFunction3D Meters space ->
@@ -281,7 +281,7 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
         then UvPoint (Interval.midpoint uBounds) (Interval.midpoint vBounds) : accumulated
         else recurse
 
-includeSubdomain :: UvBounds -> Set2D (Line2D Unitless UvSpace) Unitless UvSpace -> Fuzzy Bool
+includeSubdomain :: UvBounds -> Set2D Unitless UvSpace (Line2D Unitless UvSpace) -> Fuzzy Bool
 includeSubdomain subdomain edgeSet = Tolerance.using Quantity.zero $
   case edgeSet of
     Set2D.Node nodeBounds leftChild rightChild

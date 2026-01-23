@@ -198,6 +198,7 @@ library
     OpenSolid.Region2D.BoundedBy
     OpenSolid.Resolution
     OpenSolid.Result
+    OpenSolid.Set
     OpenSolid.Set2D
     OpenSolid.Set3D
     OpenSolid.Sign

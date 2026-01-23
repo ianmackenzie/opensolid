@@ -447,7 +447,7 @@ getAllHalfEdges SurfaceWithHalfEdges{halfEdgeLoops} = NonEmpty.concat halfEdgeLo
 
 registerSurfaceWithHalfEdges ::
   Tolerance Meters =>
-  Set3D (HalfEdge space) space ->
+  Set3D space (HalfEdge space) ->
   SurfaceRegistry space ->
   SurfaceWithHalfEdges space ->
   Result BoundedBy.Error (SurfaceRegistry space)
@@ -466,7 +466,7 @@ registerSurfaceWithHalfEdges halfEdgeSet surfaceRegistry surfaceWithHalfEdges = 
 registerHalfEdge ::
   Tolerance Meters =>
   Sign ->
-  Set3D (HalfEdge space) space ->
+  Set3D space (HalfEdge space) ->
   SurfaceRegistry space ->
   HalfEdge space ->
   Result BoundedBy.Error (SurfaceRegistry space)
@@ -602,7 +602,7 @@ toMesh resolution toVertex (Body3D boundarySurfaces) = do
 boundarySurfaceSegments ::
   Resolution Meters ->
   BoundarySurface space ->
-  (SurfaceId, Set2D UvBounds Unitless UvSpace)
+  (SurfaceId, Set2D Unitless UvSpace UvBounds)
 boundarySurfaceSegments resolution BoundarySurface{surfaceId, surfaceFunction, uvBounds} =
   (surfaceId, boundarySurfaceSegmentSet resolution surfaceFunction uvBounds)
 
@@ -610,7 +610,7 @@ boundarySurfaceSegmentSet ::
   Resolution Meters ->
   SurfaceFunction3D space ->
   UvBounds ->
-  Set2D UvBounds Unitless UvSpace
+  Set2D Unitless UvSpace UvBounds
 boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
   let acceptableSize =
         Quantity.isInfinite resolution.maxSize
@@ -655,7 +655,7 @@ surfaceError f uvBounds = do
 
 addBoundaryInnerEdgeVertices ::
   Resolution Meters ->
-  Map SurfaceId (Set2D UvBounds Unitless UvSpace) ->
+  Map SurfaceId (Set2D Unitless UvSpace UvBounds) ->
   BoundarySurface space ->
   Map HalfEdgeId (List UvPoint) ->
   Map HalfEdgeId (List UvPoint)
@@ -665,7 +665,7 @@ addBoundaryInnerEdgeVertices resolution surfaceSegmentsById boundarySurface accu
 
 addLoopInnerEdgeVertices ::
   Resolution Meters ->
-  Map SurfaceId (Set2D UvBounds Unitless UvSpace) ->
+  Map SurfaceId (Set2D Unitless UvSpace UvBounds) ->
   NonEmpty (Edge space) ->
   Map HalfEdgeId (List UvPoint) ->
   Map HalfEdgeId (List UvPoint)
@@ -674,7 +674,7 @@ addLoopInnerEdgeVertices resolution surfaceSegmentsById loop accumulated =
 
 addInnerEdgeVertices ::
   Resolution Meters ->
-  Map SurfaceId (Set2D UvBounds Unitless UvSpace) ->
+  Map SurfaceId (Set2D Unitless UvSpace UvBounds) ->
   Edge space ->
   Map HalfEdgeId (List UvPoint) ->
   Map HalfEdgeId (List UvPoint)
@@ -721,8 +721,8 @@ edgeLinearizationPredicate ::
   Curve2D Unitless UvSpace ->
   Curve2D Unitless UvSpace ->
   Bool ->
-  Set2D UvBounds Unitless UvSpace ->
-  Set2D UvBounds Unitless UvSpace ->
+  Set2D Unitless UvSpace UvBounds ->
+  Set2D Unitless UvSpace UvBounds ->
   VectorCurve3D Meters space ->
   Interval Unitless ->
   Bool
@@ -759,7 +759,7 @@ edgeLinearizationPredicate
 
 degenerateEdgeLinearizationPredicate ::
   Curve2D Unitless UvSpace ->
-  Set2D UvBounds Unitless UvSpace ->
+  Set2D Unitless UvSpace UvBounds ->
   Interval Unitless ->
   Bool
 degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
@@ -770,7 +770,7 @@ degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
   let edgeSize = Point2D.distanceFrom uvStart uvEnd
   validEdge uvBounds edgeSize surfaceSegments
 
-validEdge :: UvBounds -> Number -> Set2D UvBounds Unitless UvSpace -> Bool
+validEdge :: UvBounds -> Number -> Set2D Unitless UvSpace UvBounds -> Bool
 validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero do
   case surfaceSegments of
     Set2D.Node nodeBounds left right ->
@@ -782,7 +782,7 @@ validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero 
 
 boundarySurfaceMesh ::
   Tolerance Meters =>
-  Map SurfaceId (Set2D UvBounds Unitless UvSpace) ->
+  Map SurfaceId (Set2D Unitless UvSpace UvBounds) ->
   Map HalfEdgeId (List UvPoint) ->
   ToVertex vertex space ->
   BoundarySurface space ->
@@ -848,13 +848,13 @@ leadingEdgeVerticesImpl innerEdgeVerticesById edgeId uvStartPoint =
     Just innerEdgeVertices -> uvStartPoint :| innerEdgeVertices
     Nothing -> throw (InternalError "Should always be able to look up internal edge vertices by ID")
 
-steinerPoint :: Set2D (Line2D Unitless UvSpace) Unitless UvSpace -> UvBounds -> Maybe UvPoint
+steinerPoint :: Set2D Unitless UvSpace (Line2D Unitless UvSpace) -> UvBounds -> Maybe UvPoint
 steinerPoint boundarySegmentSet uvBounds = do
   let Bounds2D uBounds vBounds = uvBounds
   let uvPoint = UvPoint (Interval.midpoint uBounds) (Interval.midpoint vBounds)
   if isValidSteinerPoint boundarySegmentSet uvPoint then Just uvPoint else Nothing
 
-isValidSteinerPoint :: Set2D (Line2D Unitless UvSpace) Unitless UvSpace -> UvPoint -> Bool
+isValidSteinerPoint :: Set2D Unitless UvSpace (Line2D Unitless UvSpace) -> UvPoint -> Bool
 isValidSteinerPoint edgeSet uvPoint = case edgeSet of
   Set2D.Node nodeBounds left right ->
     case Bounds2D.exclusion# uvPoint nodeBounds >=# 0.5## *# Bounds2D.diameter# nodeBounds of
