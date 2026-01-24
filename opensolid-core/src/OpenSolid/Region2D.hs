@@ -2,7 +2,6 @@ module OpenSolid.Region2D
   ( Region2D
   , EmptyRegion (EmptyRegion)
   , boundedBy
-  , unitSquare
   , rectangle
   , circle
   , polygon
@@ -124,13 +123,6 @@ boundedBy curves = do
   checkForInnerIntersection curves
   loops <- connect curves
   classifyLoops loops
-
--- | The unit square in UV space.
-unitSquare :: Region2D Unitless UvSpace
-unitSquare = Tolerance.using Quantity.zero do
-  case rectangle (Bounds2D Interval.unit Interval.unit) of
-    Ok region -> region
-    Error EmptyRegion -> throw (InternalError "Constructing unit square region should not fail")
 
 data EmptyRegion = EmptyRegion deriving (Eq, Show)
 

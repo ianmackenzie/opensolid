@@ -63,6 +63,8 @@ import OpenSolid.Units (SquareMeters)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
+import OpenSolid.UvRegion (UvRegion)
+import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -1596,12 +1598,10 @@ region2D =
     ]
       <> affineTransformations2D Region2D.transformBy
 
-type UvRegion = Region2D.Region2D Unitless UvSpace
-
 uvRegion :: Class
 uvRegion =
   Class.new @UvRegion "A region in UV parameter space." $
-    [ Class.constant "Unit Square" Region2D.unitSquare $(docs 'Region2D.unitSquare)
+    [ Class.constant "Unit Square" UvRegion.unitSquare $(docs 'UvRegion.unitSquare)
     , Class.factoryU1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
     , Class.factoryU1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
     , Class.factoryU1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)

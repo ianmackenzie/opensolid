@@ -66,6 +66,7 @@ import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -112,19 +113,19 @@ extruded :: Curve3D space -> Vector3D Meters space -> Surface3D space
 extruded curve displacement =
   parametric
     (curve `compose` SurfaceFunction1D.u .+. SurfaceFunction1D.v .*. displacement)
-    Region2D.unitSquare
+    UvRegion.unitSquare
 
 translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
 translational uCurve vCurve =
   parametric
     (uCurve `compose` SurfaceFunction1D.u .+. vCurve `compose` SurfaceFunction1D.v)
-    Region2D.unitSquare
+    UvRegion.unitSquare
 
 ruled :: Curve3D space -> Curve3D space -> Surface3D space
 ruled bottom top = do
   let f1 = bottom `compose` SurfaceFunction1D.u
   let f2 = top `compose` SurfaceFunction1D.u
-  parametric (f1 .+. SurfaceFunction1D.v .*. (f2 .-. f1)) Region2D.unitSquare
+  parametric (f1 .+. SurfaceFunction1D.v .*. (f2 .-. f1)) UvRegion.unitSquare
 
 revolved ::
   Tolerance Meters =>
@@ -154,7 +155,7 @@ revolved sketchPlane curve axis angle = do
                 .+. radius .*. SurfaceFunction1D.cos theta .*. frame3D.rightwardDirection
                 .+. radius .*. SurfaceFunction1D.sin theta .*. frame3D.forwardDirection
                 .+. height .*. frame3D.upwardDirection
-        Ok (parametric function Region2D.unitSquare)
+        Ok (parametric function UvRegion.unitSquare)
 
 bounds :: Surface3D space -> Bounds3D space
 bounds surface = SurfaceFunction3D.evaluateBounds surface.function (Region2D.bounds surface.domain)
