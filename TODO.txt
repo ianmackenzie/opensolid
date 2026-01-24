@@ -4,40 +4,34 @@ Maybe have Curve.intersections that returns slightly simplified IntersectionPoin
 
 Add 3D types to check_operators script
 
-Remove UvPoint and UvBounds modules?
-- replace UvBounds.unitSquare with Bounds2D.uvDomain
-  - also rename Region2D.unitSquare to Region2D.uvDomain?
-- replace UvPoint.samples with 'Bounds2D.samples Bounds2D.uvDomain'
-- replace UvPoint.random with 'Point2D.random Bounds2D.uvDomain'
-
 Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
 
-Refactor Polygon2d.edges to filter out (approximately) zero-length edges?
+Refactor Polygon2D.edges to filter out (approximately) zero-length edges?
 - useful for removing duplicate last edge if last vertex is equal to first vertex
 - often have polygons in UV space though...maybe just use *exact* equality?
 
 Refactor curve construction from line segments?
-- maybe also rename Curve2d.arc to Curve2d.arcFrom, add Arc2D type?
+- maybe also rename Curve2D.arc to Curve2D.arcFrom, add Arc2D type?
   - then move:
-    - Curve2d.polarArc to Arc2d.polar
-    - Curve2d.sweptArc to Arc2d.swept
-    - Curve2d.cornerArc to Arc2d.corner
-      - or Curve2d.fillet, since it can produce a line
-      - or just remove it, since we have Region2d.fillet which is more flexible/powerful
-      - or change Curve2d.fillet to act on two arbitrary curves?
-    - Curve2d.radiusArc to Arc2d.withRadius or Arc2d.svg
+    - Curve2D.polarArc to Arc2D.polar
+    - Curve2D.sweptArc to Arc2D.swept
+    - Curve2D.cornerArc to Arc2D.corner
+      - or Curve2D.fillet, since it can produce a line
+      - or just remove it, since we have Region2D.fillet which is more flexible/powerful
+      - or change Curve2D.fillet to act on two arbitrary curves?
+    - Curve2D.radiusArc to Arc2D.withRadius or Arc2D.svg
       - replace WhichArc type with named #small argument plus Sign argument?
-        - WhichArc seems nice, perhaps renamed to Arc2d.Which...
-    - keep Curve2d.arcFrom without equivalent in Arc2d,
+        - WhichArc seems nice, perhaps renamed to Arc2D.Which...
+    - keep Curve2D.arcFrom without equivalent in Arc2D,
       since that can actually result in a line instead
-- could then add Curve2d.asLine, Curve2d.asArc, Curve2d.asCircle etc.
+- could then add Curve2D.asLine, Curve2D.asArc, Curve2D.asCircle etc.
 - could also have Curve2D.Line, Curve2D.Arc, Curve2D.LineFrom, Curve2D.ArcFrom patterns
   - should even be able to map those to Python patterns!
 - do for Curve3D too...add Line3D etc.
 
 Add Bezier#D etc. types/modules?
 - more complex to try to provide Curve#D.asBezier though...unless perhaps user has to pass desired degree
-  (e.g. 'Curve2d.asBezier 3' to attempt to convert to a cubic Bezier curve)
+  (e.g. 'Curve2D.asBezier 3' to attempt to convert to a cubic Bezier curve)
 
 Switch SurfaceFunction zero finding to use new Bisection module
 - will need to implement solution curve trimming/merging
@@ -64,7 +58,7 @@ Add Debug2D module
 
 Add Debug3D module
 
-Move SurfaceLinearization.error to SurfaceFunction3d.linearDeviation
+Move SurfaceLinearization.error to SurfaceFunction3D.linearDeviation
 -> Estimate with Gaussian integration instead of using e.g. second derivative bounds?
    Should be more accurate *and* more efficient...
    -> if curvature estimated by Gaussian integration changes by e.g. less than 1% when bisecting,
@@ -85,26 +79,26 @@ Move 't', 'u' and 'v' into Parameter module?
 -> then can rename e.g. 'Curve' to 'UnitlessCurve1D' (= Curve1d Unitless), 'Curve1D' can be 'Curve1d Meters' etc.
 -> Parameter.t is a UnitlessCurve1D, Parameter.u is a UnitlessSurfaceFunction1D
 
-Make Transform2D Meters-only?
--> *shouldn't* need to e.g. mirror UV points very often...
--> maybe also Axis2d, Frame2d
--> probably most consistent to just have all 2D types have units, though...
--> Transform2D/UvTransform, Axis2D/UvAxis, Frame2D/UvFrame!
-
-Add modules for UvRegion, UvCurve etc.
+Add more UV-specific modules/types/functions:
+- UvAxis.[u,v]
+- UvDirection.[u,v]
+- UvVector
+- UvCurve
+- UvFrame
+- UvOrientation
 
 Search for 'Unitless UvSpace' and 'Meters space' to see where type aliases can be used
 -> or new ones introduced...
 
-Add more Curve2d intersection tests
+Add more Curve2D intersection tests
 -> use cycloid as example of curve with singularity?
   -> make sure to test *end* singularity as well
 
 Try to avoid use of squared tolerance in general, if possible
--> e.g. specialized implementation of Intersects for Curve2d and VectorCurve2d
+-> e.g. specialized implementation of Intersects for Curve2D and VectorCurve2D
 
 Switch back to 'normal' (non-recursive) form of quotient derivatives
--> e.g. VectorSurfaceFunction3d
+-> e.g. VectorSurfaceFunction3D
 -> search for 'recursive' calls in general?
 
 Rename 'interpolationParameter' to 'unterpolate'?
@@ -112,7 +106,7 @@ Rename 'interpolationParameter' to 'unterpolate'?
 Flip argument order in Composition typeclass
 -> rename to Composition2 temporarily to ensure all instances are updated
 
-Rework Curve2d.medialAxis to use tangent directions instead of derivative vectors
+Rework Curve2D.medialAxis to use tangent directions instead of derivative vectors
 
 Remove 'unconvert' functions
 
@@ -121,15 +115,10 @@ Clean up division by 'Curve units' or 'SurfaceFunction units' that is (approxima
 -> Faster to evaluate, gives actual infinities instead of just extremely large values (more correct!)
 -> Maybe also for division by e.g. 'Qty units', so division by *approximately* zero gives actual infinity?
 
-Add Component3d class to Python library?
+Add Component3D class to Python library?
 -> 'front_plane', 'upward_direction', 'rightward_axis' etc. convenience accessors in addition to 'frame'
 
-Add vectorTransformations3d helper list in API module
-
-Switch to upper-case 2D and 3D suffixes instead of 2d and 3d?
--> Point2D vs Point2d
--> Curve3D vs Curve3d
--> Body3D vs Body3d
+Add vectorTransformations3D helper list in API module
 
 Add indentation to debug output of Ast values for easier inspection
 
@@ -143,7 +132,7 @@ Add dedicated 'blend' expression
 
 Optimize dot and cross products of constants with Bezier curves in Ast module
 
-Optimize VectorBounds3d.hullN
+Optimize VectorBounds3D.hullN
 
 Optimize general face indices operations...
 
@@ -153,7 +142,7 @@ Replace 'Point2D (Qty# x#) (Qty# y#)' with 'Point2D# x# y#' once Point2D is migr
 To optimize:
 - Have Vector#D use unboxed fields
 - 'Flatten' VectorBounds#D?
-- Point3d - Point3d
+- Point3D - Point3D
 
 Ensure target language bindings gracefully handle exceptions such as higher-order zeros
 
@@ -183,7 +172,7 @@ Split bytecode.h/bytecode.cpp into a few more files
 -> e.g. helper functions for Bezier/Hermite evaluation
 -> allow calling non-bytecode-specific functions from Haskell without having to use 'bytecode.h'...
 
-Add DirectionCurve2d.[rotateLeft,rotateRight] and use in Curve2d.offsetBy, Region2d.fillet
+Add DirectionCurve2D.[rotateLeft,rotateRight] and use in Curve2D.offsetBy, Region2D.fillet
 -> best to implement right down to bytecode level...
 
 Normalize HasField instances:
