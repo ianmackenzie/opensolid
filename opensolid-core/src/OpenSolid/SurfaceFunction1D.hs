@@ -17,6 +17,7 @@ module OpenSolid.SurfaceFunction1D
   , IsZero (IsZero)
   , zeros
   , new
+  , recursive
   , quotient
   , quotient_
   , unsafeQuotient
