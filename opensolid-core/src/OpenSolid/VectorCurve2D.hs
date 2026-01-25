@@ -57,7 +57,10 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.CurveParameter (CurveParameter (T))
 import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.Differentiable (Differentiable)
+import OpenSolid.Differentiable qualified as Differentiable
 import OpenSolid.Direction2D (Direction2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
@@ -132,6 +135,9 @@ instance
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
       , nonZeroNormalized = curve.nonZeroNormalized
       }
+
+instance Differentiable CurveParameter (VectorCurve2D units space) (VectorCurve2D units space) where
+  derivative T = derivative
 
 instance ApproximateEquality (VectorCurve2D units space) units where
   curve1 ~= curve2 = do

@@ -4,14 +4,15 @@ module OpenSolid.SurfaceFunction1D.Blending
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.Differentiable (Differentiable (derivative))
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import Prelude qualified
 
 type Blendable function =
@@ -19,8 +20,7 @@ type Blendable function =
   , Multiplication (Quantity Unitless) function function
   , Addition function function function
   , Composition (SurfaceFunction2D Unitless UvSpace) function function
-  , HasField "du" function function
-  , HasField "dv" function function
+  , Differentiable SurfaceParameter function function
   )
 
 data UnsupportedCombinationOfSingularities
@@ -97,8 +97,13 @@ blendU0 (f0, dfdu0) f = do
   let u0 = vParameterizationU0
   let uT0 = vParameterizationUT0
   blend
-    (f `compose` uT0, negative t0 .*. f.du `compose` uT0, t0 .*. t0 .*. f.du.du `compose` uT0)
-    (f0 `compose` u0, negative t0 .*. dfdu0 `compose` u0)
+    ( f `compose` uT0
+    , negative t0 .*. derivative U f `compose` uT0
+    , t0 .*. t0 .*. derivative U (derivative U f) `compose` uT0
+    )
+    ( f0 `compose` u0
+    , negative t0 .*. dfdu0 `compose` u0
+    )
     ((t0 .-. SurfaceFunction1D.u) ./. t0)
 
 blendU1 ::
@@ -112,7 +117,10 @@ blendU1 f (f1, dfdu1) = do
   let uT1 = vParameterizationUT1
   let u1 = vParameterizationU1
   blend
-    (f `compose` uT1, t0 .*. f.du `compose` uT1, t0 .*. t0 .*. f.du.du `compose` uT1)
+    ( f `compose` uT1
+    , t0 .*. derivative U f `compose` uT1
+    , t0 .*. t0 .*. derivative U (derivative U f) `compose` uT1
+    )
     (f1 `compose` u1, t0 .*. dfdu1 `compose` u1)
     ((SurfaceFunction1D.u .-. t1) ./. t0)
 
@@ -126,7 +134,10 @@ blendV0 (f0, dfdv0) f = do
   let v0 = uParameterizationV0
   let vT0 = uParameterizationVT0
   blend
-    (f `compose` vT0, negative t0 .*. f.dv `compose` vT0, t0 .*. t0 .*. f.dv.dv `compose` vT0)
+    ( f `compose` vT0
+    , negative t0 .*. derivative V f `compose` vT0
+    , t0 .*. t0 .*. derivative V (derivative V f) `compose` vT0
+    )
     (f0 `compose` v0, negative t0 .*. dfdv0 `compose` v0)
     ((t0 .-. SurfaceFunction1D.v) ./. t0)
 
@@ -141,7 +152,10 @@ blendV1 f (f1, dfdv1) = do
   let uT1 = uParameterizationVT1
   let u1 = uParameterizationV1
   blend
-    (f `compose` uT1, t0 .*. f.dv `compose` uT1, t0 .*. t0 .*. f.dv.dv `compose` uT1)
+    ( f `compose` uT1
+    , t0 .*. derivative V f `compose` uT1
+    , t0 .*. t0 .*. derivative V (derivative V f) `compose` uT1
+    )
     (f1 `compose` u1, t0 .*. dfdv1 `compose` u1)
     ((SurfaceFunction1D.v .-. t1) ./. t0)
 

@@ -13,6 +13,8 @@ import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
+import OpenSolid.CurveParameter (CurveParameter)
+import OpenSolid.Differentiable (Differentiable)
 import {-# SOURCE #-} OpenSolid.Direction2D qualified as Direction2D
 import {-# SOURCE #-} OpenSolid.Direction3D qualified as Direction3D
 import {-# SOURCE #-} OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -71,6 +73,10 @@ class
   , DotMultiplication (Direction dimension space) (Vector dimension units space) (Quantity units)
   , Division (Vector dimension units space) Number (Vector dimension units space)
   , Division (Vector dimension units space) (Quantity units) (Vector dimension Units.Unitless space)
+  , Differentiable
+      CurveParameter
+      (VectorCurve dimension units space)
+      (VectorCurve dimension units space)
   , Unitless dimension space
   , Linear dimension Units.Unitless space
   ) =>
@@ -138,6 +144,10 @@ class
   , Intersects (Point dimension units space) (Bounds dimension units space) units
   , Intersects (Bounds dimension units space) (Point dimension units space) units
   , Intersects (Bounds dimension units space) (Bounds dimension units space) units
+  , Differentiable
+      CurveParameter
+      (Curve dimension units space)
+      (VectorCurve dimension units space)
   , Linear dimension units space
   ) =>
   CoordinateSystem (dimension :: Natural) (units :: Type) (space :: Type)

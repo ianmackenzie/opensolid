@@ -42,6 +42,9 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.CurveParameter (CurveParameter (T))
+import OpenSolid.Differentiable (Differentiable)
+import OpenSolid.Differentiable qualified as Differentiable
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
@@ -74,6 +77,9 @@ instance HasField "compiled" (Curve3D space) (Compiled space) where
 
 instance HasField "derivative" (Curve3D space) (VectorCurve3D Meters space) where
   getField (Curve3D _ d) = d
+
+instance Differentiable CurveParameter (Curve3D space) (VectorCurve3D Meters space) where
+  derivative T = derivative
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
 

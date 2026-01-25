@@ -132,9 +132,11 @@ library
     OpenSolid.Curve3D.IntersectionPointWithSurface
     OpenSolid.Curve3D.IntersectionsWithSurface
     OpenSolid.Curve3D.SegmentOverlappingWithSurface
+    OpenSolid.CurveParameter
     OpenSolid.Debug
     OpenSolid.Debug.Plot
     OpenSolid.Desingularization
+    OpenSolid.Differentiable
     OpenSolid.Direction
     OpenSolid.Direction2D
     OpenSolid.Direction3D

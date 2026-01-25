@@ -28,6 +28,8 @@ where
 import GHC.Records (HasField (getField))
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
+import OpenSolid.Differentiable (Differentiable)
+import OpenSolid.Differentiable qualified as Differentiable
 import OpenSolid.Direction3D (Direction3D)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
@@ -93,6 +95,14 @@ instance
   where
   coerce (VectorSurfaceFunction3D c du dv) =
     VectorSurfaceFunction3D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
+
+instance
+  Differentiable
+    SurfaceParameter
+    (VectorSurfaceFunction3D units space)
+    (VectorSurfaceFunction3D units space)
+  where
+  derivative = derivative
 
 instance Negation (VectorSurfaceFunction3D units space) where
   negative function = new (negative function.compiled) (\p -> negative (derivative p function))
