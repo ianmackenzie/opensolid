@@ -7,6 +7,7 @@ module OpenSolid.SurfaceFunction1D
   , evaluateBoundsWithin
   , derivative
   , derivativeIn
+  , compiled
   , zero
   , constant
   , u
@@ -370,6 +371,9 @@ derivative V = (.dv)
 derivativeIn :: Direction2D UvSpace -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivativeIn (Direction2D dx dy) function =
   dx .*. function.du .+. dy .*. function.dv
+
+compiled :: SurfaceFunction1D units -> Compiled units
+compiled = (.compiled)
 
 zero :: SurfaceFunction1D units
 zero = constant Quantity.zero
