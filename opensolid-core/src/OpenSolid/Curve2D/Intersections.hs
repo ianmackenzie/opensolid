@@ -17,7 +17,6 @@ import OpenSolid.Curve2D.OverlappingSegment qualified as OverlappingSegment
 import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
@@ -116,8 +115,8 @@ findIntersectionPoint ::
   Fuzzy (Maybe IntersectionPoint)
 findIntersectionPoint problem (tBounds1, tBounds2) = do
   let Problem{curve1, curve2, tangent1, tangent2} = problem
-  let interiorBounds1 = Curve2D.evaluateBounds curve1 (Bisection.interior tBounds1)
-  let interiorBounds2 = Curve2D.evaluateBounds curve2 (Bisection.interior tBounds2)
+  let interiorBounds1 = Curve2D.evaluateBounds curve1 (Bisection.interiorOf tBounds1)
+  let interiorBounds2 = Curve2D.evaluateBounds curve2 (Bisection.interiorOf tBounds2)
   if not (interiorBounds1 `intersects` interiorBounds2)
     then Resolved Nothing
     else do
@@ -243,11 +242,10 @@ intersections curve1 curve2
                   , crossingSolutionTarget = differenceSurface
                   , tangentSolutionTarget
                   }
-          case Bisection.search Bisection.curvePairDomain (findIntersectionPoint problem) of
-            Error Bisection.InfiniteRecursion -> throw HigherOrderZero
-            Ok solutions -> case deduplicate solutions [] & List.map Pair.second & List.sort of
-              [] -> Ok Nothing
-              NonEmpty intersectionPoints -> Ok (Just (IntersectionPoints intersectionPoints))
+          let solutions = Bisection.search (findIntersectionPoint problem)
+          case deduplicate solutions [] & List.map Pair.second & List.sort of
+            [] -> Ok Nothing
+            NonEmpty intersectionPoints -> Ok (Just (IntersectionPoints intersectionPoints))
 
 type Solution = ((Interval Unitless, Interval Unitless), IntersectionPoint)
 

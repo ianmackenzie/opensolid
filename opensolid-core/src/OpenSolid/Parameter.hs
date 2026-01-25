@@ -1,5 +1,6 @@
 module OpenSolid.Parameter
   ( isEndpoint
+  , hasEndpoint
   , steps
   , random
   , leading
@@ -20,8 +21,13 @@ import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random qualified as Random
 
+{-# INLINEABLE isEndpoint #-}
 isEndpoint :: Number -> Bool
 isEndpoint tValue = tValue == 0 || tValue == 1
+
+{-# INLINEABLE hasEndpoint #-}
+hasEndpoint :: Interval Unitless -> Bool
+hasEndpoint (Interval tLow tHigh) = tLow == 0 || tHigh == 1
 
 steps :: Int -> List Number
 steps n = if n > 0 then List.map (divideBy n) [0 .. n] else []

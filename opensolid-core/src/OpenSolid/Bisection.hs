@@ -1,22 +1,18 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Bisection
-  ( InfiniteRecursion (InfiniteRecursion)
-  , Domain
+  ( Domain (contains, overlaps, interiorOf, isInterior, domain)
+  , Subdomain
+  , bounds
+  , bisect
+  , map2
+  , map3
   , Size (..)
   , Classification (..)
-  , parameterDomain
-  , curveDomain
-  , curvePairDomain
-  , surfaceDomain
-  , curveSurfaceDomain
-  , surfacePairDomain
   , search
-  , interior
-  , isInterior
-  , includesEndpoint
   , classify
-  , IsBounds (overlaps)
+  , Tree (Tree)
+  , tree
   )
 where
 
@@ -31,148 +27,165 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 
-data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show)
-
-class IsBounds bounds value | bounds -> value where
+class Domain bounds value | bounds -> value, value -> bounds where
   contains :: bounds -> bounds -> Bool
   overlaps :: bounds -> bounds -> Bool
+  interiorOf :: bounds -> bounds
   isInterior :: value -> bounds -> Bool
-  interior :: bounds -> bounds
+  domain :: Subdomain bounds
 
-instance IsBounds (Interval Unitless) Number where
+data Subdomain bounds where
+  Split :: Interval Unitless -> Subdomain (Interval Unitless)
+  Shrink :: Interval Unitless -> Subdomain (Interval Unitless)
+  Map2 ::
+    (bounds1 -> bounds2 -> bounds3) ->
+    Subdomain bounds1 ->
+    Subdomain bounds2 ->
+    Subdomain bounds3
+  Map3 ::
+    (bounds1 -> bounds2 -> bounds3 -> bounds4) ->
+    Subdomain bounds1 ->
+    Subdomain bounds2 ->
+    Subdomain bounds3 ->
+    Subdomain bounds4
+
+bounds :: Subdomain bounds -> bounds
+bounds (Split interval) = interval
+bounds (Shrink interval) = interval
+bounds (Map2 function subdomain1 subdomain2) =
+  function (bounds subdomain1) (bounds subdomain2)
+bounds (Map3 function subdomain1 subdomain2 subdomain3) =
+  function (bounds subdomain1) (bounds subdomain2) (bounds subdomain3)
+
+data InfiniteRecursion = InfiniteRecursion deriving (Show, Exception)
+
+bisect :: Subdomain bounds -> List (Subdomain bounds)
+bisect (Split interval) = do
+  let (# low, lowMid, mid, highMid, high #) = quadrisectInterval# interval
+  [Split (Interval low mid), Shrink (Interval lowMid highMid), Split (Interval mid high)]
+bisect (Shrink interval) = do
+  let (# _, lowMid, _, highMid, _ #) = quadrisectInterval# interval
+  [Shrink (Interval lowMid highMid)]
+bisect (Map2 function subdomain1 subdomain2) =
+  [Map2 function child1 child2 | child1 <- bisect subdomain1, child2 <- bisect subdomain2]
+bisect (Map3 function subdomain1 subdomain2 subdomain3) =
+  [ Map3 function child1 child2 child3
+  | child1 <- bisect subdomain1
+  , child2 <- bisect subdomain2
+  , child3 <- bisect subdomain3
+  ]
+
+map2 ::
+  (bounds1 -> bounds2 -> bounds3) ->
+  Subdomain bounds1 ->
+  Subdomain bounds2 ->
+  Subdomain bounds3
+map2 = Map2
+
+map3 ::
+  (bounds1 -> bounds2 -> bounds3 -> bounds4) ->
+  Subdomain bounds1 ->
+  Subdomain bounds2 ->
+  Subdomain bounds3 ->
+  Subdomain bounds4
+map3 = Map3
+
+quadrisectInterval# :: Interval Unitless -> (# Number, Number, Number, Number, Number #)
+quadrisectInterval# (Interval low high) = do
+  let mid = Number.midpoint low high
+  let lowMid = Number.midpoint low mid
+  let highMid = Number.midpoint mid high
+  if low < lowMid && lowMid < mid && mid < highMid && highMid < high
+    then (# low, lowMid, mid, highMid, high #)
+    else throw InfiniteRecursion
+
+instance Domain (Interval Unitless) Number where
   contains = Interval.contains
   overlaps interval1 interval2 = Interval.overlap interval1 interval2 > Quantity.zero
-  isInterior value domain = do
-    let (# interiorLow, interiorHigh #) = interior# domain
-    interiorLow <= value && value <= interiorHigh
-  interior domain = do
-    let (# interiorLow, interiorHigh #) = interior# domain
+  interiorOf interval = do
+    let (# interiorLow, interiorHigh #) = intervalInterior# interval
     Interval interiorLow interiorHigh
+  isInterior value interval = do
+    let (# interiorLow, interiorHigh #) = intervalInterior# interval
+    interiorLow <= value && value <= interiorHigh
+  domain = Split Interval.unit
 
-{-# INLINEABLE interior# #-}
-interior# :: Interval Unitless -> (# Number, Number #)
-interior# (Interval exteriorLow exteriorHigh) = do
+intervalInterior# :: Interval Unitless -> (# Number, Number #)
+intervalInterior# (Interval exteriorLow exteriorHigh) = do
   let margin = 0.125 *. (exteriorHigh .-. exteriorLow)
   let interiorLow = if exteriorLow == 0 then 0 else exteriorLow .+. margin
   let interiorHigh = if exteriorHigh == 1 then 1 else exteriorHigh .-. margin
   (# interiorLow, interiorHigh #)
 
-instance IsBounds UvBounds UvPoint where
+instance Domain UvBounds UvPoint where
   contains = Bounds2D.contains
   overlaps (Bounds2D x1 y1) (Bounds2D x2 y2) = overlaps x1 x2 && overlaps y1 y2
+  interiorOf (UvBounds uBounds vBounds) =
+    UvBounds (interiorOf uBounds) (interiorOf vBounds)
   isInterior (UvPoint uValue vValue) (UvBounds uBounds vBounds) =
     isInterior uValue uBounds && isInterior vValue vBounds
-  interior (UvBounds uBounds vBounds) =
-    UvBounds (interior uBounds) (interior vBounds)
+  domain = Map2 UvBounds domain domain
 
 instance
-  (IsBounds bounds1 value1, IsBounds bounds2 value2) =>
-  IsBounds (bounds1, bounds2) (value1, value2)
+  (Domain bounds1 value1, Domain bounds2 value2) =>
+  Domain (bounds1, bounds2) (value1, value2)
   where
   contains (b1, b2) (a1, a2) = contains b1 a1 && contains b2 a2
   overlaps (b1, b2) (a1, a2) = overlaps b1 a1 && overlaps b2 a2
+  interiorOf (b1, b2) = (interiorOf b1, interiorOf b2)
   isInterior (v1, v2) (b1, b2) = isInterior v1 b1 && isInterior v2 b2
-  interior (b1, b2) = (interior b1, interior b2)
+  domain = Map2 (,) domain domain
 
-data Domain bounds where
-  Domain :: IsBounds bounds value => bounds -> ~(List (Domain bounds)) -> Domain bounds
-
-split :: Interval Unitless -> Domain (Interval Unitless)
-split interval = Domain interval do
-  let Interval low high = interval
-  let mid = Number.midpoint low high
-  let lowMid = Number.midpoint low mid
-  let highMid = Number.midpoint mid high
-  if mid > low && mid < high
-    then [split (Interval low mid), shrink (Interval lowMid highMid), split (Interval mid high)]
-    else []
-
-shrink :: Interval Unitless -> Domain (Interval Unitless)
-shrink interval = Domain interval do
-  let Interval low high = interval
-  let mid = Number.midpoint low high
-  let lowMid = Number.midpoint low mid
-  let highMid = Number.midpoint mid high
-  [shrink (Interval lowMid highMid) | lowMid > low && highMid < high]
-
-parameterDomain :: Domain (Interval Unitless)
-parameterDomain = split Interval.unit
-
-curveDomain :: Domain (Interval Unitless)
-curveDomain = parameterDomain
-
-curvePairDomain :: Domain (Interval Unitless, Interval Unitless)
-curvePairDomain = map2 (,) curveDomain curveDomain
-
-surfaceDomain :: Domain UvBounds
-surfaceDomain = map2 Bounds2D parameterDomain parameterDomain
-
-curveSurfaceDomain :: Domain (Interval Unitless, UvBounds)
-curveSurfaceDomain = map2 (,) curveDomain surfaceDomain
-
-surfacePairDomain :: Domain (UvBounds, UvBounds)
-surfacePairDomain = map2 (,) surfaceDomain surfaceDomain
-
-search ::
-  Domain bounds ->
-  (bounds -> Fuzzy (Maybe solution)) ->
-  Result InfiniteRecursion (List (bounds, solution))
-search domain callback = searchImpl [domain] callback []
+search :: Domain bounds value => (bounds -> Fuzzy (Maybe solution)) -> List (bounds, solution)
+search callback = searchImpl callback [] [domain]
 
 searchImpl ::
-  List (Domain bounds) ->
+  Domain bounds value =>
   (bounds -> Fuzzy (Maybe solution)) ->
   List (bounds, solution) ->
-  Result InfiniteRecursion (List (bounds, solution))
-searchImpl [] _ accumulated = Ok accumulated
-searchImpl domains callback accumulated = do
-  solutionsAndChildren <- Result.collect (visit callback accumulated) domains
+  List (Subdomain bounds) ->
+  List (bounds, solution)
+searchImpl _ accumulated [] = accumulated
+searchImpl callback accumulated subdomains = do
+  let solutionsAndChildren = List.map (visit callback accumulated) subdomains
   let (solutions, children) = List.unzip2 solutionsAndChildren
-  searchImpl (List.concat children) callback (List.concat (accumulated : solutions))
+  searchImpl callback (List.concat (accumulated : solutions)) (List.concat children)
 
 visit ::
+  Domain bounds value =>
   (bounds -> Fuzzy (Maybe solution)) ->
   List (bounds, solution) ->
-  Domain bounds ->
-  Result InfiniteRecursion (List (bounds, solution), List (Domain bounds))
-visit callback accumulated (Domain bounds children)
-  | List.anySatisfy (contains bounds . Pair.first) accumulated = Ok ([], [])
-  | otherwise = case callback bounds of
-      Resolved Nothing -> Ok ([], [])
-      Resolved (Just solution) -> Ok ([(bounds, solution)], [])
-      Unresolved -> case children of
-        [] -> Error InfiniteRecursion
-        _ -> Ok ([], children)
-
-map2 ::
-  IsBounds bounds3 value3 =>
-  (bounds1 -> bounds2 -> bounds3) ->
-  Domain bounds1 ->
-  Domain bounds2 ->
-  Domain bounds3
-map2 function domain1 domain2 = do
-  let Domain bounds1 children1 = domain1
-  let Domain bounds2 children2 = domain2
-  Domain (function bounds1 bounds2) $
-    [ map2 function child1 child2
-    | child1 <- children1
-    , child2 <- children2
-    ]
-
-includesEndpoint :: Interval Unitless -> Bool
-includesEndpoint (Interval tLow tHigh) = tLow == 0 || tHigh == 1
+  Subdomain bounds ->
+  (List (bounds, solution), List (Subdomain bounds))
+visit callback accumulated subdomain = do
+  let subdomainBounds = bounds subdomain
+  if List.anySatisfy (contains subdomainBounds . Pair.first) accumulated
+    then ([], [])
+    else case callback subdomainBounds of
+      Resolved Nothing -> ([], [])
+      Resolved (Just solution) -> ([(subdomainBounds, solution)], [])
+      Unresolved -> ([], bisect subdomain)
 
 data Size = Small | Large deriving (Eq, Ord, Show)
 
 data Classification = Entire | Interior | Start Size | End Size
 
 classify :: Interval Unitless -> Classification
-classify (Interval low high)
-  | 0 < low && high < 1 = Interior
-  | high < 1 = Start (if high <= Desingularization.t0 then Small else Large)
-  | 0 < low = End (if low >= Desingularization.t1 then Small else Large)
-  | otherwise = Entire
+classify (Interval 0 1) = Entire
+classify (Interval 0 t) = Start (if t <= Desingularization.t0 then Small else Large)
+classify (Interval t 1) = End (if t >= Desingularization.t1 then Small else Large)
+classify (Interval _ _) = Interior
+
+data Tree a = Tree a ~(List (Tree a))
+
+tree :: Domain bounds value => (bounds -> a) -> Tree a
+tree callback = buildTree callback domain
+
+buildTree :: Domain bounds value => (bounds -> a) -> Subdomain bounds -> Tree a
+buildTree callback subdomain = do
+  let value = callback (bounds subdomain)
+  let children = List.map (buildTree callback) (bisect subdomain)
+  Tree value children
