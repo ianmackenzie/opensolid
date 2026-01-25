@@ -207,9 +207,12 @@ library
     OpenSolid.Solve2D
     OpenSolid.Stl
     OpenSolid.Stream
+    OpenSolid.Surface
     OpenSolid.Surface1D
     OpenSolid.Surface2D
     OpenSolid.Surface3D
+    OpenSolid.Surface3D.Intersections
+    OpenSolid.Surface3D.OverlappingSegment
     OpenSolid.Surface3D.Revolved
     OpenSolid.SurfaceCurve3D
     OpenSolid.SurfaceFunction1D
