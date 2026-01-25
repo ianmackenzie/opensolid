@@ -12,16 +12,15 @@ module OpenSolid.VectorSurfaceFunction2D
 where
 
 import GHC.Records (HasField)
-import OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Vector2D, VectorBounds2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2D (Vector2D)
-import OpenSolid.VectorBounds2D (VectorBounds2D)
+import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
+import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
 
 type role VectorSurfaceFunction2D nominal nominal
 

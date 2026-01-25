@@ -8,15 +8,14 @@ module OpenSolid.SurfaceFunction2D
 where
 
 import GHC.Records (HasField)
-import OpenSolid.Bounds2D (Bounds2D)
-import OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
-import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Bounds2D, Point2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
-import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
+import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 

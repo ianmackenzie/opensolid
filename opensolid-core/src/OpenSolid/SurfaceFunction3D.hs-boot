@@ -10,14 +10,13 @@ module OpenSolid.SurfaceFunction3D
 where
 
 import GHC.Records (HasField)
-import OpenSolid.Bounds3D (Bounds3D)
-import OpenSolid.CompiledFunction (CompiledFunction)
-import OpenSolid.Point3D (Point3D)
+import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Bounds3D, Point3D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Transform3D (Transform3D)
-import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
+import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 
 type role SurfaceFunction3D nominal

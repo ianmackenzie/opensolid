@@ -25,15 +25,23 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D qualified as DirectionCurve3D
+import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D (DirectionSurfaceFunction2D)
+import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D qualified as DirectionSurfaceFunction2D
+import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
+import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude hiding (Unitless)
 import OpenSolid.Primitives
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 
 class
   ( DotMultiplication (Direction dimension space) (Direction dimension space) Number
@@ -44,10 +52,12 @@ class
   type Direction dimension space = direction | direction -> dimension space
   type DirectionBounds dimension space = directionBounds | directionBounds -> dimension space
   type DirectionCurve dimension space = directionCurve | directionCurve -> dimension space
+  type DirectionSurfaceFunction dimension space = directionSurfaceFunction | directionSurfaceFunction -> dimension space
 
   unsafeDirection :: Vector dimension Units.Unitless space -> Direction dimension space
   unsafeDirectionBounds :: VectorBounds dimension Units.Unitless space -> DirectionBounds dimension space
   unsafeDirectionCurve :: VectorCurve dimension Units.Unitless space -> DirectionCurve dimension space
+  unsafeDirectionSurfaceFunction :: VectorSurfaceFunction dimension Units.Unitless space -> DirectionSurfaceFunction dimension space
 
 class
   ( HasZero (Vector dimension units space)
@@ -85,6 +95,7 @@ class
   type Vector dimension units space = vector | vector -> dimension units space
   type VectorBounds dimension units space = vectorBounds | vectorBounds -> dimension units space
   type VectorCurve dimension units space = vectorCurve | vectorCurve -> dimension units space
+  type VectorSurfaceFunction dimension units space = vectorSurfaceFunction | vectorSurfaceFunction -> dimension units space
 
   vectorCurveDerivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   vectorCurveIsZero :: Tolerance units => VectorCurve dimension units space -> Bool
@@ -155,6 +166,7 @@ class
   type Point dimension units space = point | point -> dimension units space
   type Bounds dimension units space = bounds | bounds -> dimension units space
   type Curve dimension units space = curve | curve -> dimension units space
+  type SurfaceFunction dimension units space = surfaceFunction | surfaceFunction -> dimension units space
 
   cyclicBoundsCoordinate :: Int -> Bounds dimension units space -> Interval units
   boundsContains ::
@@ -172,6 +184,7 @@ instance Unitless 2 space where
   type Direction 2 space = Direction2D space
   type DirectionBounds 2 space = DirectionBounds2D space
   type DirectionCurve 2 space = DirectionCurve2D space
+  type DirectionSurfaceFunction 2 space = DirectionSurfaceFunction2D space
 
   {-# INLINE unsafeDirection #-}
   unsafeDirection = Direction2D.unsafe
@@ -182,10 +195,14 @@ instance Unitless 2 space where
   {-# INLINE unsafeDirectionCurve #-}
   unsafeDirectionCurve = DirectionCurve2D.unsafe
 
+  {-# INLINE unsafeDirectionSurfaceFunction #-}
+  unsafeDirectionSurfaceFunction = DirectionSurfaceFunction2D.unsafe
+
 instance Linear 2 units space where
   type Vector 2 units space = Vector2D units space
   type VectorBounds 2 units space = VectorBounds2D units space
   type VectorCurve 2 units space = VectorCurve2D units space
+  type VectorSurfaceFunction 2 units space = VectorSurfaceFunction2D units space
 
   vectorCurveDerivative = VectorCurve2D.derivative
   vectorCurveIsZero = VectorCurve2D.isZero
@@ -198,6 +215,7 @@ instance CoordinateSystem 2 units space where
   type Point 2 units space = Point2D units space
   type Bounds 2 units space = Bounds2D units space
   type Curve 2 units space = Curve2D units space
+  type SurfaceFunction 2 units space = SurfaceFunction2D units space
 
   cyclicBoundsCoordinate index (Bounds2D x y) =
     case index `mod` 2 of
@@ -212,6 +230,7 @@ instance Unitless 3 space where
   type Direction 3 space = Direction3D space
   type DirectionBounds 3 space = DirectionBounds3D space
   type DirectionCurve 3 space = DirectionCurve3D space
+  type DirectionSurfaceFunction 3 space = DirectionSurfaceFunction3D space
 
   {-# INLINE unsafeDirection #-}
   unsafeDirection = Direction3D.unsafe
@@ -222,10 +241,14 @@ instance Unitless 3 space where
   {-# INLINE unsafeDirectionCurve #-}
   unsafeDirectionCurve = DirectionCurve3D.unsafe
 
+  {-# INLINE unsafeDirectionSurfaceFunction #-}
+  unsafeDirectionSurfaceFunction = DirectionSurfaceFunction3D.unsafe
+
 instance Linear 3 units space where
   type Vector 3 units space = Vector3D units space
   type VectorBounds 3 units space = VectorBounds3D units space
   type VectorCurve 3 units space = VectorCurve3D units space
+  type VectorSurfaceFunction 3 units space = VectorSurfaceFunction3D units space
 
   vectorCurveDerivative = VectorCurve3D.derivative
   vectorCurveIsZero = VectorCurve3D.isZero
@@ -238,6 +261,7 @@ instance CoordinateSystem 3 Meters space where
   type Point 3 Meters space = Point3D space
   type Bounds 3 Meters space = Bounds3D space
   type Curve 3 Meters space = Curve3D space
+  type SurfaceFunction 3 Meters space = SurfaceFunction3D space
 
   cyclicBoundsCoordinate index (Bounds3D x y z) =
     case index `mod` 3 of
