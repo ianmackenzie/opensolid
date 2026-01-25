@@ -66,7 +66,8 @@ instance IsBounds UvBounds UvPoint where
   overlaps (Bounds2D x1 y1) (Bounds2D x2 y2) = overlaps x1 x2 && overlaps y1 y2
   isInterior (UvPoint uValue vValue) (UvBounds uBounds vBounds) =
     isInterior uValue uBounds && isInterior vValue vBounds
-  interior (UvBounds uBounds vBounds) = UvBounds (interior uBounds) (interior vBounds)
+  interior (UvBounds uBounds vBounds) =
+    UvBounds (interior uBounds) (interior vBounds)
 
 instance
   (IsBounds bounds1 value1, IsBounds bounds2 value2) =>
