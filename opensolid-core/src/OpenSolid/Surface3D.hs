@@ -66,6 +66,7 @@ import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvRegion (UvRegion)
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
@@ -76,15 +77,12 @@ import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 data Surface3D space = Surface3D
   { function :: SurfaceFunction3D space
-  , domain :: Region2D Unitless UvSpace
+  , domain :: UvRegion
   , outerLoop :: ~(NonEmpty (SurfaceCurve3D space))
   , innerLoops :: ~(List (NonEmpty (SurfaceCurve3D space)))
   }
 
-parametric ::
-  SurfaceFunction3D space ->
-  Region2D Unitless UvSpace ->
-  Surface3D space
+parametric :: SurfaceFunction3D space -> UvRegion -> Surface3D space
 parametric givenFunction givenDomain = do
   let boundaryLoop domainLoop = NonEmpty.map (SurfaceCurve3D.on givenFunction) domainLoop
   Surface3D

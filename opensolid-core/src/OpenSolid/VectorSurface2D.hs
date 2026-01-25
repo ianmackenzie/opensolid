@@ -5,20 +5,13 @@ module OpenSolid.VectorSurface2D
   )
 where
 
-import OpenSolid.Prelude
-import OpenSolid.Region2D (Region2D)
+import OpenSolid.UvRegion (UvRegion)
 import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 
 data VectorSurface2D units space where
-  Parametric ::
-    VectorSurfaceFunction2D units space ->
-    Region2D Unitless UvSpace ->
-    VectorSurface2D units space
+  Parametric :: VectorSurfaceFunction2D units space -> UvRegion -> VectorSurface2D units space
 
-parametric ::
-  VectorSurfaceFunction2D units space ->
-  Region2D Unitless UvSpace ->
-  VectorSurface2D units space
+parametric :: VectorSurfaceFunction2D units space -> UvRegion -> VectorSurface2D units space
 parametric = Parametric
 
 function :: VectorSurface2D units space -> VectorSurfaceFunction2D units space
