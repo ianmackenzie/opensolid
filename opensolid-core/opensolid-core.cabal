@@ -210,6 +210,8 @@ library
     OpenSolid.Surface3D.Revolved
     OpenSolid.SurfaceCurve3D
     OpenSolid.SurfaceFunction1D
+    OpenSolid.SurfaceFunction1D.WithNoInteriorZeros
+    OpenSolid.SurfaceFunction1D.WithNoZeros
     OpenSolid.SurfaceFunction1D.Zeros
     OpenSolid.SurfaceFunction2D
     OpenSolid.SurfaceFunction3D

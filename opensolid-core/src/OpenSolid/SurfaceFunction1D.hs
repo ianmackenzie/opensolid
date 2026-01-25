@@ -20,6 +20,8 @@ module OpenSolid.SurfaceFunction1D
   , recursive
   , quotient
   , quotient_
+  , WithNoZeros (WithNoZeros)
+  , WithNoInteriorZeros (WithNoInteriorZeros)
   , unsafeQuotient
   , unsafeQuotient_
   , squared
@@ -74,6 +76,7 @@ import OpenSolid.SurfaceFunction1D.SaddleRegion qualified as SaddleRegion
 import OpenSolid.SurfaceFunction1D.Subproblem (CornerValues (..), Subproblem (..))
 import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.WithNoZeros qualified as SurfaceFunction1D.WithNoZeros
 import OpenSolid.SurfaceFunction1D.Zeros (Zeros (..))
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
@@ -454,6 +457,40 @@ quotient_ numerator denominator = do
                   (2 *. squared_ denominator')
         (value, firstDerivative)
   SurfaceFunction1D.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
+
+newtype WithNoZeros units = WithNoZeros (SurfaceFunction1D units)
+
+instance HasUnits (WithNoZeros units) units
+
+instance Units.Coercion (WithNoZeros units1) (WithNoZeros units2) where
+  coerce (WithNoZeros function) = WithNoZeros (Units.coerce function)
+
+instance
+  Division_
+    (SurfaceFunction1D units1)
+    (WithNoZeros units2)
+    (SurfaceFunction1D (units1 ?/? units2))
+  where
+  lhs ?/? rhsWithNoZeros = do
+    let rhs = SurfaceFunction1D.WithNoZeros.unwrap rhsWithNoZeros
+    let quotientCompiled = lhs.compiled ?/? rhs.compiled
+    let quotientDerivative p = Units.simplify do
+          (derivative p lhs ?*? rhs .-. lhs ?*? derivative p rhs)
+            ?/? SurfaceFunction1D.WithNoZeros.squared_ rhsWithNoZeros
+    new quotientCompiled quotientDerivative
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (SurfaceFunction1D units1) (WithNoZeros units2) (SurfaceFunction1D units3)
+  where
+  lhs ./. rhs = Units.specialize (lhs ?/? rhs)
+
+newtype WithNoInteriorZeros units = WithNoInteriorZeros (SurfaceFunction1D units)
+
+instance HasUnits (WithNoInteriorZeros units) units
+
+instance Units.Coercion (WithNoInteriorZeros units1) (WithNoInteriorZeros units2) where
+  coerce (WithNoInteriorZeros function) = WithNoInteriorZeros (Units.coerce function)
 
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>

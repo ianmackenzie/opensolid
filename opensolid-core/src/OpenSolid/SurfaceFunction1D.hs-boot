@@ -1,6 +1,8 @@
 module OpenSolid.SurfaceFunction1D
   ( SurfaceFunction1D (compiled, du, dv)
   , Compiled
+  , WithNoInteriorZeros (WithNoInteriorZeros)
+  , WithNoZeros (WithNoZeros)
   , constant
   , zero
   , u
@@ -38,6 +40,10 @@ data SurfaceFunction1D units = SurfaceFunction1D
   }
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
+
+newtype WithNoZeros units = WithNoZeros (SurfaceFunction1D units)
+
+newtype WithNoInteriorZeros units = WithNoInteriorZeros (SurfaceFunction1D units)
 
 instance Composition (SurfaceFunction1D Unitless) (Curve1D units) (SurfaceFunction1D units)
 
