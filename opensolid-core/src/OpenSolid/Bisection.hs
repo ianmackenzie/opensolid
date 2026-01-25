@@ -32,28 +32,53 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
-import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show)
 
-class IsBounds bounds where
+class IsBounds bounds value | bounds -> value where
   contains :: bounds -> bounds -> Bool
   overlaps :: bounds -> bounds -> Bool
+  isInterior :: value -> bounds -> Bool
+  interior :: bounds -> bounds
 
-instance IsBounds (Interval units) where
+instance IsBounds (Interval Unitless) Number where
   contains = Interval.contains
   overlaps interval1 interval2 = Interval.overlap interval1 interval2 > Quantity.zero
+  isInterior value domain = do
+    let (# interiorLow, interiorHigh #) = interior# domain
+    interiorLow <= value && value <= interiorHigh
+  interior domain = do
+    let (# interiorLow, interiorHigh #) = interior# domain
+    Interval interiorLow interiorHigh
 
-instance IsBounds (Bounds2D units space) where
+{-# INLINEABLE interior# #-}
+interior# :: Interval Unitless -> (# Number, Number #)
+interior# (Interval exteriorLow exteriorHigh) = do
+  let margin = 0.125 *. (exteriorHigh .-. exteriorLow)
+  let interiorLow = if exteriorLow == 0 then 0 else exteriorLow .+. margin
+  let interiorHigh = if exteriorHigh == 1 then 1 else exteriorHigh .-. margin
+  (# interiorLow, interiorHigh #)
+
+instance IsBounds UvBounds UvPoint where
   contains = Bounds2D.contains
   overlaps (Bounds2D x1 y1) (Bounds2D x2 y2) = overlaps x1 x2 && overlaps y1 y2
+  isInterior (UvPoint uValue vValue) (UvBounds uBounds vBounds) =
+    isInterior uValue uBounds && isInterior vValue vBounds
+  interior (UvBounds uBounds vBounds) = UvBounds (interior uBounds) (interior vBounds)
 
-instance (IsBounds bounds1, IsBounds bounds2) => IsBounds (bounds1, bounds2) where
+instance
+  (IsBounds bounds1 value1, IsBounds bounds2 value2) =>
+  IsBounds (bounds1, bounds2) (value1, value2)
+  where
   contains (b1, b2) (a1, a2) = contains b1 a1 && contains b2 a2
   overlaps (b1, b2) (a1, a2) = overlaps b1 a1 && overlaps b2 a2
+  isInterior (v1, v2) (b1, b2) = isInterior v1 b1 && isInterior v2 b2
+  interior (b1, b2) = (interior b1, interior b2)
 
 data Domain bounds where
-  Domain :: IsBounds bounds => bounds -> ~(List (Domain bounds)) -> Domain bounds
+  Domain :: IsBounds bounds value => bounds -> ~(List (Domain bounds)) -> Domain bounds
 
 split :: Interval Unitless -> Domain (Interval Unitless)
 split interval = Domain interval do
@@ -123,7 +148,7 @@ visit callback accumulated (Domain bounds children)
         _ -> Ok ([], children)
 
 map2 ::
-  IsBounds bounds3 =>
+  IsBounds bounds3 value3 =>
   (bounds1 -> bounds2 -> bounds3) ->
   Domain bounds1 ->
   Domain bounds2 ->
@@ -136,24 +161,6 @@ map2 function domain1 domain2 = do
     | child1 <- children1
     , child2 <- children2
     ]
-
-interior :: Interval Unitless -> Interval Unitless
-interior domain = do
-  let (# interiorLow, interiorHigh #) = interior# domain
-  Interval interiorLow interiorHigh
-
-isInterior :: Number -> Interval Unitless -> Bool
-isInterior value domain = do
-  let (# interiorLow, interiorHigh #) = interior# domain
-  interiorLow <= value && value <= interiorHigh
-
-{-# INLINE interior# #-}
-interior# :: Interval Unitless -> (# Number, Number #)
-interior# (Interval exteriorLow exteriorHigh) = do
-  let margin = 0.125 *. (exteriorHigh .-. exteriorLow)
-  let interiorLow = if exteriorLow == 0 then 0 else exteriorLow .+. margin
-  let interiorHigh = if exteriorHigh == 1 then 1 else exteriorHigh .-. margin
-  (# interiorLow, interiorHigh #)
 
 includesEndpoint :: Interval Unitless -> Bool
 includesEndpoint (Interval tLow tHigh) = tLow == 0 || tHigh == 1
