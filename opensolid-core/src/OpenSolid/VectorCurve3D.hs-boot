@@ -46,6 +46,8 @@ instance HasUnits (VectorCurve3D units space) units
 
 instance Differentiable CurveParameter (VectorCurve3D units space) (VectorCurve3D units space)
 
+instance Composition (Curve1D Unitless) (VectorCurve3D units space) (VectorCurve3D units space)
+
 instance Negation (VectorCurve3D units space)
 
 instance Multiplication Sign (VectorCurve3D units space) (VectorCurve3D units space)
@@ -55,6 +57,13 @@ instance Multiplication (VectorCurve3D units space) Sign (VectorCurve3D units sp
 instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve3D unitsA space1) (VectorCurve3D unitsB space2)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (VectorCurve3D units1 space1)
+    (VectorCurve3D units2 space2)
+    (VectorCurve3D units1 space1)
 
 instance
   Multiplication_
@@ -75,6 +84,14 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve3D units1 space) (Curve1D units2) (VectorCurve3D units3 space)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Quantity units1) (VectorCurve3D units2 space) (VectorCurve3D units3 space)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (VectorCurve3D units1 space) (Quantity units2) (VectorCurve3D units3 space)
 
 instance
   space1 ~ space2 =>

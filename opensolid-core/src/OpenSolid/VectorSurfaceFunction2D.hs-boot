@@ -13,6 +13,7 @@ where
 
 import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.Differentiable (Differentiable)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector2D, VectorBounds2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
@@ -49,6 +50,19 @@ instance
     (VectorSurfaceFunction2D units2 space2)
 
 instance
+  Differentiable
+    SurfaceParameter
+    (VectorSurfaceFunction2D units space)
+    (VectorSurfaceFunction2D units space)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (VectorSurfaceFunction2D units1 space1)
+    (VectorSurfaceFunction2D units2 space2)
+    (VectorSurfaceFunction2D units1 space1)
+
+instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction1D units1)
@@ -73,6 +87,20 @@ instance
     (VectorSurfaceFunction2D units1 space)
     (SurfaceFunction1D units2)
     (VectorSurfaceFunction2D (units1 ?*? units2) space)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Quantity units1)
+    (VectorSurfaceFunction2D units2 space)
+    (VectorSurfaceFunction2D units3 space)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (VectorSurfaceFunction2D units1 space)
+    (Quantity units2)
+    (VectorSurfaceFunction2D units3 space)
 
 instance
   space1 ~ space2 =>
