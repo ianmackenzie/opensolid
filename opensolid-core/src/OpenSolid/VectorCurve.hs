@@ -23,31 +23,31 @@ import OpenSolid.Tolerance qualified as Tolerance
 data IsZero = IsZero deriving (Eq, Show)
 
 isZero ::
-  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
+  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Bool
 isZero = CoordinateSystem.vectorCurveIsZero
 
 derivative ::
-  CoordinateSystem.Linear dimension units space =>
+  CoordinateSystem.Vectorial dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 derivative = CoordinateSystem.vectorCurveDerivative
 
 squaredMagnitude_ ::
-  CoordinateSystem.Linear dimension units space =>
+  CoordinateSystem.Vectorial dimension units space =>
   VectorCurve dimension units space ->
   Curve1D (units ?*? units)
 squaredMagnitude_ = CoordinateSystem.vectorCurveSquaredMagnitude_
 
 normalize ::
-  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
+  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   VectorCurve dimension Unitless space
 normalize = CoordinateSystem.normalizeVectorCurve
 
 direction ::
-  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
+  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (DirectionCurve dimension space)
 direction vectorCurve =
@@ -56,7 +56,7 @@ direction vectorCurve =
     else Ok (DirectionCurve.unsafe (normalize vectorCurve))
 
 zeros ::
-  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
+  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (List Number)
 zeros vectorCurve =

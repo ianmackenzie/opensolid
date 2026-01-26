@@ -8,7 +8,7 @@ import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Prelude
 
 unsafe ::
-  CoordinateSystem.Unitless dimension space =>
+  CoordinateSystem.Directional dimension space =>
   VectorCurve dimension Unitless space ->
   DirectionCurve dimension space
 unsafe = CoordinateSystem.unsafeDirectionCurve

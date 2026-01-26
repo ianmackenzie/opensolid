@@ -26,33 +26,33 @@ import OpenSolid.Units qualified as Units
 data IsZero = IsZero deriving (Eq, Show)
 
 {-# INLINEABLE zero #-}
-zero :: CoordinateSystem.Linear dimension units space => Vector dimension units space
+zero :: CoordinateSystem.Vectorial dimension units space => Vector dimension units space
 zero = HasZero.zero
 
 {-# INLINEABLE squaredMagnitude_ #-}
 squaredMagnitude_ ::
-  CoordinateSystem.Linear dimension units space =>
+  CoordinateSystem.Vectorial dimension units space =>
   Vector dimension units space ->
   Quantity (units ?*? units)
 squaredMagnitude_ vector = vector `dot_` vector
 
 {-# INLINEABLE squaredMagnitude #-}
 squaredMagnitude ::
-  (CoordinateSystem.Linear dimension units1 space, Units.Squared units1 units2) =>
+  (CoordinateSystem.Vectorial dimension units1 space, Units.Squared units1 units2) =>
   Vector dimension units1 space ->
   Quantity units2
 squaredMagnitude = Units.specialize . squaredMagnitude_
 
 {-# INLINEABLE magnitude #-}
 magnitude ::
-  CoordinateSystem.Linear dimension units space =>
+  CoordinateSystem.Vectorial dimension units space =>
   Vector dimension units space ->
   Quantity units
 magnitude = Quantity.sqrt_ . squaredMagnitude_
 
 normalize ::
   forall dimension units space.
-  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
+  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
   Vector dimension units space ->
   Vector dimension Unitless space
 normalize vector = do
@@ -62,7 +62,7 @@ normalize vector = do
     else vector ./. vectorMagnitude
 
 direction ::
-  (Tolerance units, CoordinateSystem.Linear dimension units space) =>
+  (Tolerance units, CoordinateSystem.Vectorial dimension units space) =>
   Vector dimension units space ->
   Result IsZero (Direction dimension space)
 direction vector = do
@@ -72,7 +72,7 @@ direction vector = do
     else Ok (Direction.unsafe (vector ./. vectorMagnitude))
 
 magnitudeAndDirection ::
-  (CoordinateSystem.Linear dimension units space, Tolerance units) =>
+  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
   Vector dimension units space ->
   Result IsZero (Quantity units, Direction dimension space)
 magnitudeAndDirection vector = do
@@ -85,14 +85,14 @@ magnitudeAndDirection vector = do
 
 {-# INLINEABLE componentIn #-}
 componentIn ::
-  CoordinateSystem.Linear dimension units space =>
+  CoordinateSystem.Vectorial dimension units space =>
   Direction dimension space ->
   Vector dimension units space ->
   Quantity units
 componentIn = dot
 
 projectionIn ::
-  CoordinateSystem.Linear dimension units space =>
+  CoordinateSystem.Vectorial dimension units space =>
   Direction dimension space ->
   Vector dimension units space ->
   Vector dimension units space
@@ -100,7 +100,7 @@ projectionIn givenDirection vector =
   givenDirection .*. componentIn givenDirection vector
 
 sum ::
-  CoordinateSystem.Linear dimension units space =>
+  CoordinateSystem.Vectorial dimension units space =>
   List (Vector dimension units space) ->
   Vector dimension units space
 sum = List.foldl (.+.) zero
