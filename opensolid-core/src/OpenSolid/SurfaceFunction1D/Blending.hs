@@ -1,9 +1,7 @@
-module OpenSolid.SurfaceFunction1D.Blending
-  ( Blendable
-  , desingularize
-  )
-where
+module OpenSolid.SurfaceFunction1D.Blending (desingularize) where
 
+import OpenSolid.CoordinateSystem (VectorSurfaceFunction)
+import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Differentiable (Differentiable (derivative))
@@ -15,14 +13,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import Prelude qualified
 
-type Blendable function =
-  ( Multiplication (SurfaceFunction1D Unitless) function function
-  , Multiplication (Quantity Unitless) function function
-  , Addition function function function
-  , Composition (SurfaceFunction2D Unitless UvSpace) function function
-  , Differentiable SurfaceParameter function function
-  )
-
 data UnsupportedCombinationOfSingularities
   = UnsupportedCombinationOfSingularities
   deriving (Exception)
@@ -31,15 +21,25 @@ instance Show UnsupportedCombinationOfSingularities where
   show UnsupportedCombinationOfSingularities =
     "Unsupported combination of singularities for surface function: singularities may only be in U or V direction, not both"
 
+type Singularity dimension units space =
+  ( VectorSurfaceFunction dimension units space
+  , VectorSurfaceFunction dimension units space
+  )
+
 desingularize ::
-  Blendable function =>
-  (SurfaceFunction1D Unitless -> function -> function -> function -> function) ->
-  function ->
-  "singularityU0" ::: Maybe (function, function) ->
-  "singularityU1" ::: Maybe (function, function) ->
-  "singularityV0" ::: Maybe (function, function) ->
-  "singularityV1" ::: Maybe (function, function) ->
-  function
+  CoordinateSystem.Generic dimension units space =>
+  ( SurfaceFunction1D Unitless ->
+    VectorSurfaceFunction dimension units space ->
+    VectorSurfaceFunction dimension units space ->
+    VectorSurfaceFunction dimension units space ->
+    VectorSurfaceFunction dimension units space
+  ) ->
+  VectorSurfaceFunction dimension units space ->
+  "singularityU0" ::: Maybe (Singularity dimension units space) ->
+  "singularityU1" ::: Maybe (Singularity dimension units space) ->
+  "singularityV0" ::: Maybe (Singularity dimension units space) ->
+  "singularityV1" ::: Maybe (Singularity dimension units space) ->
+  VectorSurfaceFunction dimension units space
 desingularize
   desingularized
   function
@@ -88,10 +88,10 @@ desingularize
       _ -> throw UnsupportedCombinationOfSingularities
 
 blendU0 ::
-  Blendable function =>
-  (function, function) ->
-  function ->
-  function
+  CoordinateSystem.Generic dimension units space =>
+  Singularity dimension units space ->
+  VectorSurfaceFunction dimension units space ->
+  VectorSurfaceFunction dimension units space
 blendU0 (f0, dfdu0) f = do
   let t0 = Desingularization.t0
   let u0 = vParameterizationU0
@@ -107,10 +107,10 @@ blendU0 (f0, dfdu0) f = do
     ((t0 .-. SurfaceFunction1D.u) ./. t0)
 
 blendU1 ::
-  Blendable function =>
-  function ->
-  (function, function) ->
-  function
+  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction dimension units space ->
+  Singularity dimension units space ->
+  VectorSurfaceFunction dimension units space
 blendU1 f (f1, dfdu1) = do
   let t0 = Desingularization.t0
   let t1 = Desingularization.t1
@@ -121,14 +121,16 @@ blendU1 f (f1, dfdu1) = do
     , t0 .*. derivative U f `compose` uT1
     , t0 .*. t0 .*. derivative U (derivative U f) `compose` uT1
     )
-    (f1 `compose` u1, t0 .*. dfdu1 `compose` u1)
+    ( f1 `compose` u1
+    , t0 .*. dfdu1 `compose` u1
+    )
     ((SurfaceFunction1D.u .-. t1) ./. t0)
 
 blendV0 ::
-  Blendable function =>
-  (function, function) ->
-  function ->
-  function
+  CoordinateSystem.Generic dimension units space =>
+  Singularity dimension units space ->
+  VectorSurfaceFunction dimension units space ->
+  VectorSurfaceFunction dimension units space
 blendV0 (f0, dfdv0) f = do
   let t0 = Desingularization.t0
   let v0 = uParameterizationV0
@@ -138,14 +140,16 @@ blendV0 (f0, dfdv0) f = do
     , negative t0 .*. derivative V f `compose` vT0
     , t0 .*. t0 .*. derivative V (derivative V f) `compose` vT0
     )
-    (f0 `compose` v0, negative t0 .*. dfdv0 `compose` v0)
+    ( f0 `compose` v0
+    , negative t0 .*. dfdv0 `compose` v0
+    )
     ((t0 .-. SurfaceFunction1D.v) ./. t0)
 
 blendV1 ::
-  Blendable function =>
-  function ->
-  (function, function) ->
-  function
+  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction dimension units space ->
+  Singularity dimension units space ->
+  VectorSurfaceFunction dimension units space
 blendV1 f (f1, dfdv1) = do
   let t0 = Desingularization.t0
   let t1 = Desingularization.t1
@@ -156,15 +160,22 @@ blendV1 f (f1, dfdv1) = do
     , t0 .*. derivative V f `compose` uT1
     , t0 .*. t0 .*. derivative V (derivative V f) `compose` uT1
     )
-    (f1 `compose` u1, t0 .*. dfdv1 `compose` u1)
+    ( f1 `compose` u1
+    , t0 .*. dfdv1 `compose` u1
+    )
     ((SurfaceFunction1D.v .-. t1) ./. t0)
 
 blend ::
-  Blendable function =>
-  (function, function, function) ->
-  (function, function) ->
+  CoordinateSystem.Generic dimension units space =>
+  ( VectorSurfaceFunction dimension units space
+  , VectorSurfaceFunction dimension units space
+  , VectorSurfaceFunction dimension units space
+  ) ->
+  ( VectorSurfaceFunction dimension units space
+  , VectorSurfaceFunction dimension units space
+  ) ->
   SurfaceFunction1D Unitless ->
-  function
+  VectorSurfaceFunction dimension units space
 blend (f00, f01, f02) (f10, f11) t = do
   let b00 = Curve1D.b00 `compose` t
   let b01 = Curve1D.b01 `compose` t
