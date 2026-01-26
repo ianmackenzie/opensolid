@@ -230,7 +230,7 @@ instance
       (\p -> SurfaceFunction1D.derivative p lhs ?*? rhs .+. lhs ?*? derivative p rhs)
 
 instance
-  (space1 ~ space2, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Quantity units1)
     (VectorSurfaceFunction2D units2 space)
@@ -267,7 +267,7 @@ instance
       (\p -> derivative p lhs ?*? rhs .+. lhs ?*? SurfaceFunction1D.derivative p rhs)
 
 instance
-  (space1 ~ space2, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (VectorSurfaceFunction2D units1 space)
     (Quantity units2)
