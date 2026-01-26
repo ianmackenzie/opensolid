@@ -15,8 +15,6 @@ import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
-import OpenSolid.CurveParameter (CurveParameter)
-import OpenSolid.Differentiable (Differentiable)
 import {-# SOURCE #-} OpenSolid.Direction2D qualified as Direction2D
 import {-# SOURCE #-} OpenSolid.Direction3D qualified as Direction3D
 import {-# SOURCE #-} OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -47,6 +45,7 @@ import OpenSolid.Primitives
   , VectorBounds3D
   )
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
@@ -55,7 +54,9 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 class
   ( HasZero (Vector dimension units space)
@@ -107,14 +108,6 @@ class
       (VectorSurfaceFunction dimension units space)
       (SurfaceFunction1D Unitless)
       (VectorSurfaceFunction dimension units space)
-  , Differentiable
-      CurveParameter
-      (VectorCurve dimension units space)
-      (VectorCurve dimension units space)
-  , Differentiable
-      SurfaceParameter
-      (VectorSurfaceFunction dimension units space)
-      (VectorSurfaceFunction dimension units space)
   , Composition
       (Curve1D Unitless)
       (VectorCurve dimension units space)
@@ -140,6 +133,11 @@ class
     VectorCurve dimension units space ->
     Interval Unitless ->
     VectorBounds dimension units space
+
+  vectorSurfaceFunctionDerivative ::
+    SurfaceParameter ->
+    VectorSurfaceFunction dimension units space ->
+    VectorSurfaceFunction dimension units space
 
 class
   ( DotMultiplication (Direction dimension space) (Direction dimension space) Number
@@ -226,10 +224,6 @@ class
   , Intersects (Point dimension units space) (Bounds dimension units space) units
   , Intersects (Bounds dimension units space) (Point dimension units space) units
   , Intersects (Bounds dimension units space) (Bounds dimension units space) units
-  , Differentiable
-      CurveParameter
-      (Curve dimension units space)
-      (VectorCurve dimension units space)
   , Vectorial dimension units space
   ) =>
   CoordinateSystem (dimension :: Natural) (units :: Type) (space :: Type)
@@ -261,6 +255,8 @@ instance Generic 1 units () where
   evaluateVectorCurve = Curve1D.evaluate
   evaluateVectorCurveBounds = Curve1D.evaluateBounds
 
+  vectorSurfaceFunctionDerivative = SurfaceFunction1D.derivative
+
 instance Generic 2 units space where
   type Vector 2 units space = Vector2D units space
   type VectorBounds 2 units space = VectorBounds2D units space
@@ -270,6 +266,8 @@ instance Generic 2 units space where
   vectorCurveDerivative = VectorCurve2D.derivative
   evaluateVectorCurve = VectorCurve2D.evaluate
   evaluateVectorCurveBounds = VectorCurve2D.evaluateBounds
+
+  vectorSurfaceFunctionDerivative = VectorSurfaceFunction2D.derivative
 
 instance Directional 2 space where
   type Direction 2 space = Direction2D space
@@ -312,6 +310,8 @@ instance Generic 3 units space where
   vectorCurveDerivative = VectorCurve3D.derivative
   evaluateVectorCurve = VectorCurve3D.evaluate
   evaluateVectorCurveBounds = VectorCurve3D.evaluateBounds
+
+  vectorSurfaceFunctionDerivative = VectorSurfaceFunction3D.derivative
 
 instance Directional 3 space where
   type Direction 3 space = Direction3D space

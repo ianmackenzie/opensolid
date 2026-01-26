@@ -23,8 +23,6 @@ import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import OpenSolid.CurveParameter (CurveParameter)
-import OpenSolid.Differentiable (Differentiable)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -47,8 +45,6 @@ type Compiled units space =
 instance HasField "startPoint" (Curve2D units space) (Point2D units space)
 
 instance HasField "endPoint" (Curve2D units space) (Point2D units space)
-
-instance Differentiable CurveParameter (Curve2D units space) (VectorCurve2D units space)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

@@ -23,7 +23,6 @@ where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import OpenSolid.Differentiable (Differentiable)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -45,8 +44,6 @@ type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interv
 newtype WithNoZeros units = WithNoZeros (SurfaceFunction1D units)
 
 newtype WithNoInteriorZeros units = WithNoInteriorZeros (SurfaceFunction1D units)
-
-instance Differentiable SurfaceParameter (SurfaceFunction1D units) (SurfaceFunction1D units)
 
 instance Composition (SurfaceFunction1D Unitless) (Curve1D units) (SurfaceFunction1D units)
 

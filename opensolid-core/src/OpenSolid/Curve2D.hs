@@ -102,10 +102,7 @@ import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
 import OpenSolid.Curve2D.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
-import OpenSolid.CurveParameter (CurveParameter (T))
 import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Differentiable (Differentiable)
-import OpenSolid.Differentiable qualified as Differentiable
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionCurve2D (DirectionCurve2D)
@@ -194,9 +191,6 @@ instance
   Units.Coercion (Curve2D unitsA space1) (Curve2D unitsB space2)
   where
   coerce curve = Curve2D (Units.coerce curve.compiled) (Units.coerce curve.derivative)
-
-instance Differentiable CurveParameter (Curve2D units space) (VectorCurve2D units space) where
-  derivative T = derivative
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

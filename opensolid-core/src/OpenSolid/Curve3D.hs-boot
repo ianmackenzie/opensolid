@@ -14,8 +14,6 @@ where
 import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
-import OpenSolid.CurveParameter (CurveParameter)
-import OpenSolid.Differentiable (Differentiable)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Plane3D, Point3D, Vector3D)
@@ -32,8 +30,6 @@ type Compiled space =
 instance HasField "compiled" (Curve3D space) (Compiled space)
 
 instance HasField "derivative" (Curve3D space) (VectorCurve3D Meters space)
-
-instance Differentiable CurveParameter (Curve3D space) (VectorCurve3D Meters space)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>

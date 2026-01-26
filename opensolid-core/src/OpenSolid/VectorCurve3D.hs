@@ -47,10 +47,7 @@ import OpenSolid.Composition
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
-import OpenSolid.CurveParameter (CurveParameter (T))
 import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Differentiable (Differentiable)
-import OpenSolid.Differentiable qualified as Differentiable
 import OpenSolid.Direction3D (Direction3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
@@ -111,9 +108,6 @@ instance
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
       , nonZeroNormalized = curve.nonZeroNormalized
       }
-
-instance Differentiable CurveParameter (VectorCurve3D units space) (VectorCurve3D units space) where
-  derivative T = derivative
 
 instance ApproximateEquality (VectorCurve3D units space) units where
   curve1 ~= curve2 = do

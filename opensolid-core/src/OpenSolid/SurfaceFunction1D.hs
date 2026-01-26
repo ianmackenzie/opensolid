@@ -45,8 +45,6 @@ import OpenSolid.Composition
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.Differentiable (Differentiable)
-import OpenSolid.Differentiable qualified as Differentiable
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DivisionByZero (DivisionByZero)
@@ -110,9 +108,6 @@ instance HasUnits (SurfaceFunction1D units) units
 instance Units.Coercion (SurfaceFunction1D unitsA) (SurfaceFunction1D unitsB) where
   coerce (SurfaceFunction1D c du dv) =
     SurfaceFunction1D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
-
-instance Differentiable SurfaceParameter (SurfaceFunction1D units) (SurfaceFunction1D units) where
-  derivative = derivative
 
 instance ApproximateEquality (SurfaceFunction1D units) units where
   function1 ~= function2 =

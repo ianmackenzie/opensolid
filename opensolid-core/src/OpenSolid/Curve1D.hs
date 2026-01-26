@@ -60,10 +60,7 @@ import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
 import OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.Curve1D.Zero qualified as Zero
-import OpenSolid.CurveParameter (CurveParameter (T))
 import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Differentiable (Differentiable)
-import OpenSolid.Differentiable qualified as Differentiable
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
@@ -118,9 +115,6 @@ instance HasUnits (Curve1D units) units
 
 instance Units.Coercion (Curve1D units1) (Curve1D units2) where
   coerce curve = Curve1D (Units.coerce curve.compiled) (Units.coerce curve.derivative)
-
-instance Differentiable CurveParameter (Curve1D units) (Curve1D units) where
-  derivative T = derivative
 
 instance ApproximateEquality (Curve1D units) units where
   curve1 ~= curve2 = do

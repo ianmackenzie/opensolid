@@ -35,8 +35,6 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.Differentiable (Differentiable)
-import OpenSolid.Differentiable qualified as Differentiable
 import OpenSolid.Direction2D (Direction2D)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D (DirectionSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D qualified as DirectionSurfaceFunction2D
@@ -125,14 +123,6 @@ instance
   where
   coerce (VectorSurfaceFunction2D c du dv) =
     VectorSurfaceFunction2D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
-
-instance
-  Differentiable
-    SurfaceParameter
-    (VectorSurfaceFunction2D units space)
-    (VectorSurfaceFunction2D units space)
-  where
-  derivative = derivative
 
 instance Negation (VectorSurfaceFunction2D units space) where
   negative function = new (negative function.compiled) (\p -> negative (derivative p function))

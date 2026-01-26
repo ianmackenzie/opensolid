@@ -20,8 +20,6 @@ where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import OpenSolid.CurveParameter (CurveParameter)
-import OpenSolid.Differentiable (Differentiable)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -43,8 +41,6 @@ type Compiled units space =
     (VectorBounds3D units space)
 
 instance HasUnits (VectorCurve3D units space) units
-
-instance Differentiable CurveParameter (VectorCurve3D units space) (VectorCurve3D units space)
 
 instance Composition (Curve1D Unitless) (VectorCurve3D units space) (VectorCurve3D units space)
 

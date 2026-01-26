@@ -13,7 +13,6 @@ where
 
 import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
-import OpenSolid.Differentiable (Differentiable)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector2D, VectorBounds2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
@@ -48,12 +47,6 @@ instance
   Units.Coercion
     (VectorSurfaceFunction2D units1 space1)
     (VectorSurfaceFunction2D units2 space2)
-
-instance
-  Differentiable
-    SurfaceParameter
-    (VectorSurfaceFunction2D units space)
-    (VectorSurfaceFunction2D units space)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

@@ -132,11 +132,9 @@ library
     OpenSolid.Curve3D.IntersectionPointWithSurface
     OpenSolid.Curve3D.IntersectionsWithSurface
     OpenSolid.Curve3D.SegmentOverlappingWithSurface
-    OpenSolid.CurveParameter
     OpenSolid.Debug
     OpenSolid.Debug.Plot
     OpenSolid.Desingularization
-    OpenSolid.Differentiable
     OpenSolid.Direction
     OpenSolid.Direction2D
     OpenSolid.Direction3D
@@ -248,6 +246,7 @@ library
     OpenSolid.VectorCurve3D.WithNoZeros
     OpenSolid.VectorSurface2D
     OpenSolid.VectorSurface3D
+    OpenSolid.VectorSurfaceFunction
     OpenSolid.VectorSurfaceFunction2D
     OpenSolid.VectorSurfaceFunction3D
     OpenSolid.Volume

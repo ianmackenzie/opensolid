@@ -9,8 +9,6 @@ module OpenSolid.Curve1D
 where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
-import OpenSolid.CurveParameter (CurveParameter)
-import OpenSolid.Differentiable (Differentiable)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -20,8 +18,6 @@ type role Curve1D nominal
 
 type Curve1D :: Type -> Type
 data Curve1D units = Curve1D {compiled :: Compiled units, derivative :: ~(Curve1D units)}
-
-instance Differentiable CurveParameter (Curve1D units) (Curve1D units)
 
 instance Composition (Curve1D Unitless) (Curve1D units) (Curve1D units)
 

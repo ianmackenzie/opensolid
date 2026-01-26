@@ -4,13 +4,13 @@ import OpenSolid.CoordinateSystem (VectorSurfaceFunction)
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization (t0, t1)
-import OpenSolid.Differentiable (Differentiable (derivative))
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.VectorSurfaceFunction qualified as VectorSurfaceFunction
 import Prelude qualified
 
 data UnsupportedCombinationOfSingularities
@@ -95,8 +95,8 @@ blendU0 ::
 blendU0 (f0, dfdu0) f =
   blend
     ( f `compose` uT0
-    , negative t0 .*. derivative U f `compose` uT0
-    , t0 .*. t0 .*. derivative U (derivative U f) `compose` uT0
+    , negative t0 .*. d U f `compose` uT0
+    , t0 .*. t0 .*. d U (d U f) `compose` uT0
     )
     ( f0 `compose` u0
     , negative t0 .*. dfdu0 `compose` u0
@@ -111,8 +111,8 @@ blendU1 ::
 blendU1 f (f1, dfdu1) =
   blend
     ( f `compose` uT1
-    , t0 .*. derivative U f `compose` uT1
-    , t0 .*. t0 .*. derivative U (derivative U f) `compose` uT1
+    , t0 .*. d U f `compose` uT1
+    , t0 .*. t0 .*. d U (d U f) `compose` uT1
     )
     ( f1 `compose` u1
     , t0 .*. dfdu1 `compose` u1
@@ -127,8 +127,8 @@ blendV0 ::
 blendV0 (f0, dfdv0) f =
   blend
     ( f `compose` vT0
-    , negative t0 .*. derivative V f `compose` vT0
-    , t0 .*. t0 .*. derivative V (derivative V f) `compose` vT0
+    , negative t0 .*. d V f `compose` vT0
+    , t0 .*. t0 .*. d V (d V f) `compose` vT0
     )
     ( f0 `compose` v0
     , negative t0 .*. dfdv0 `compose` v0
@@ -143,8 +143,8 @@ blendV1 ::
 blendV1 f (f1, dfdv1) =
   blend
     ( f `compose` vT1
-    , t0 .*. derivative V f `compose` vT1
-    , t0 .*. t0 .*. derivative V (derivative V f) `compose` vT1
+    , t0 .*. d V f `compose` vT1
+    , t0 .*. t0 .*. d V (d V f) `compose` vT1
     )
     ( f1 `compose` v1
     , t0 .*. dfdv1 `compose` v1
@@ -169,6 +169,13 @@ blend (f00, f01, f02) (f10, f11) t = do
   let b10 = Curve1D.b10 `compose` t
   let b11 = Curve1D.b11 `compose` t
   b00 .*. f00 .+. b01 .*. f01 .+. b02 .*. f02 .+. b10 .*. f10 .+. b11 .*. f11
+
+d ::
+  CoordinateSystem.Generic dimension units space =>
+  SurfaceParameter ->
+  VectorSurfaceFunction dimension units space ->
+  VectorSurfaceFunction dimension units space
+d = VectorSurfaceFunction.derivative
 
 v :: Number -> SurfaceFunction2D Unitless UvSpace
 v vValue =
