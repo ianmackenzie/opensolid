@@ -174,7 +174,8 @@ blend (f00, f01, f02) (f10, f11) t = do
   b00 .*. f00 .+. b01 .*. f01 .+. b02 .*. f02 .+. b10 .*. f10 .+. b11 .*. f11
 
 uParameterization :: Number -> SurfaceFunction2D Unitless UvSpace
-uParameterization vValue = SurfaceFunction2D.xy SurfaceFunction1D.u (SurfaceFunction1D.constant vValue)
+uParameterization vValue =
+  SurfaceFunction2D.xy SurfaceFunction1D.u (SurfaceFunction1D.constant vValue)
 
 uParameterizationV0 :: SurfaceFunction2D Unitless UvSpace
 uParameterizationV0 = uParameterization 0
@@ -189,7 +190,8 @@ uParameterizationV1 :: SurfaceFunction2D Unitless UvSpace
 uParameterizationV1 = uParameterization 1
 
 vParameterization :: Number -> SurfaceFunction2D Unitless UvSpace
-vParameterization uValue = SurfaceFunction2D.xy (SurfaceFunction1D.constant uValue) SurfaceFunction1D.v
+vParameterization uValue =
+  SurfaceFunction2D.xy (SurfaceFunction1D.constant uValue) SurfaceFunction1D.v
 
 vParameterizationU0 :: SurfaceFunction2D Unitless UvSpace
 vParameterizationU0 = vParameterization 0
