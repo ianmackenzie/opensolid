@@ -251,7 +251,7 @@ instance Generic 1 units () where
   type VectorCurve 1 units () = Curve1D units
   type VectorSurfaceFunction 1 units () = SurfaceFunction1D units
 
-  vectorCurveDerivative curve = curve.derivative
+  vectorCurveDerivative = Curve1D.derivative
   evaluateVectorCurve = Curve1D.evaluate
   evaluateVectorCurveBounds = Curve1D.evaluateBounds
 

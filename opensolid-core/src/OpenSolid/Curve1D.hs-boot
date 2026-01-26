@@ -1,8 +1,10 @@
 module OpenSolid.Curve1D
-  ( Curve1D (compiled, derivative)
+  ( Curve1D
   , Compiled
   , WithNoInteriorZeros (WithNoInteriorZeros)
   , WithNoZeros (WithNoZeros)
+  , compiled
+  , derivative
   , evaluate
   , evaluateBounds
   )
@@ -17,7 +19,7 @@ import OpenSolid.Units qualified as Units
 type role Curve1D nominal
 
 type Curve1D :: Type -> Type
-data Curve1D units = Curve1D {compiled :: Compiled units, derivative :: ~(Curve1D units)}
+data Curve1D units
 
 instance Composition (Curve1D Unitless) (Curve1D units) (Curve1D units)
 
@@ -43,5 +45,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Curve1D units2) (Curve1D units3)
 
+compiled :: Curve1D units -> Compiled units
+derivative :: Curve1D units -> Curve1D units
 evaluate :: Curve1D units -> Number -> Quantity units
 evaluateBounds :: Curve1D units -> Interval Unitless -> Interval units

@@ -26,7 +26,7 @@ import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 curve1D :: Tolerance units => Curve1D units -> Number -> Number
 curve1D curve x1 = do
   let function = Curve1D.evaluate curve
-  let derivative = Curve1D.evaluate curve.derivative
+  let derivative = Curve1D.evaluate (Curve1D.derivative curve)
   curve1dImpl function derivative x1 (function x1)
 
 curve1dImpl ::

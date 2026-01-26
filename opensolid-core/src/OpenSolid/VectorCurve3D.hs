@@ -212,8 +212,8 @@ instance
   where
   lhs ?*? rhs =
     new
-      (lhs.compiled ?*? rhs.compiled)
-      (lhs.derivative ?*? rhs .+. lhs ?*? rhs.derivative)
+      (Curve1D.compiled lhs ?*? rhs.compiled)
+      (Curve1D.derivative lhs ?*? rhs .+. lhs ?*? rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -243,8 +243,8 @@ instance
   where
   lhs ?*? rhs =
     new
-      (lhs.compiled ?*? rhs.compiled)
-      (lhs.derivative ?*? rhs .+. lhs ?*? rhs.derivative)
+      (lhs.compiled ?*? Curve1D.compiled rhs)
+      (lhs.derivative ?*? rhs .+. lhs ?*? Curve1D.derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -419,7 +419,9 @@ instance
     (VectorCurve3D units space)
   where
   f `compose` g =
-    new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) .*. g.derivative)
+    new
+      (f.compiled `compose` Curve1D.compiled g)
+      ((f.derivative `compose` g) .*. Curve1D.derivative g)
 
 instance
   Composition
@@ -576,10 +578,15 @@ desingularized ::
   VectorCurve3D units space ->
   VectorCurve3D units space ->
   VectorCurve3D units space
-desingularized start middle end =
-  new
-    (CompiledFunction.desingularized Curve1D.t.compiled start.compiled middle.compiled end.compiled)
-    (desingularized start.derivative middle.derivative end.derivative)
+desingularized start middle end = do
+  let compiledDesingularized =
+        CompiledFunction.desingularized
+          (Curve1D.compiled Curve1D.t)
+          start.compiled
+          middle.compiled
+          end.compiled
+  let desingularizedDerivative = desingularized start.derivative middle.derivative end.derivative
+  new compiledDesingularized desingularizedDerivative
 
 evaluate :: VectorCurve3D units space -> Number -> Vector3D units space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
@@ -666,8 +673,8 @@ lHopital ::
 lHopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
   let numerator'' = evaluate numerator.derivative.derivative tValue
-  let denominator' = Curve1D.evaluate denominator.derivative tValue
-  let denominator'' = Curve1D.evaluate denominator.derivative.derivative tValue
+  let denominator' = Curve1D.evaluate (Curve1D.derivative denominator) tValue
+  let denominator'' = Curve1D.evaluate (Curve1D.derivative (Curve1D.derivative denominator)) tValue
   let value = numerator' ?/? denominator'
   let firstDerivative =
         Units.simplify $

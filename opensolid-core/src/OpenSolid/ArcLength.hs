@@ -18,7 +18,7 @@ data Tree units
 parameterization :: Tolerance units => Curve1D units -> (Curve1D Unitless, Quantity units)
 parameterization derivativeMagnitude = do
   let dsdt = Curve1D.evaluate derivativeMagnitude
-  let d2sdt2 = Curve1D.evaluate derivativeMagnitude.derivative
+  let d2sdt2 = Curve1D.evaluate (Curve1D.derivative derivativeMagnitude)
   let dsdt1 = dsdt 0
   let dsdt2 = dsdt Lobatto.p2
   let dsdt3 = dsdt Lobatto.p3

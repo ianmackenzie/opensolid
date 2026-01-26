@@ -351,8 +351,8 @@ instance
 instance Composition (SurfaceFunction1D Unitless) (Curve1D units) (SurfaceFunction1D units) where
   curve `compose` function =
     new
-      (curve.compiled `compose` function.compiled)
-      (\p -> curve.derivative `compose` function .*. derivative p function)
+      (Curve1D.compiled curve `compose` function.compiled)
+      (\p -> Curve1D.derivative curve `compose` function .*. derivative p function)
 
 evaluate :: SurfaceFunction1D units -> UvPoint -> Quantity units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint

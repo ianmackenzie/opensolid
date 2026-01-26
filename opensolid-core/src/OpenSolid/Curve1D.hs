@@ -1,5 +1,5 @@
 module OpenSolid.Curve1D
-  ( Curve1D (compiled, derivative)
+  ( Curve1D
   , Compiled
   , Zero
   , evaluate
@@ -445,9 +445,9 @@ instance Units.Coercion (WithNoZeros units1) (WithNoZeros units2) where
 instance Division_ (Curve1D units1) (WithNoZeros units2) (Curve1D (units1 ?/? units2)) where
   lhs ?/? rhsWithNoZeros = do
     let rhs = Curve1D.WithNoZeros.unwrap rhsWithNoZeros
-    let quotientCompiled = lhs.compiled ?/? rhs.compiled
+    let quotientCompiled = compiled lhs ?/? compiled rhs
     let quotientDerivative = Units.simplify do
-          (lhs.derivative ?*? rhs .-. lhs ?*? rhs.derivative)
+          (derivative lhs ?*? rhs .-. lhs ?*? derivative rhs)
             ?/? Curve1D.WithNoZeros.squared_ rhsWithNoZeros
     new quotientCompiled quotientDerivative
 

@@ -238,7 +238,9 @@ instance
     (VectorCurve2D (units1 ?*? units2) space)
   where
   lhs ?*? rhs =
-    new (lhs.compiled ?*? rhs.compiled) (lhs.derivative ?*? rhs .+. lhs ?*? rhs.derivative)
+    new
+      (Curve1D.compiled lhs ?*? rhs.compiled)
+      (Curve1D.derivative lhs ?*? rhs .+. lhs ?*? rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -267,7 +269,9 @@ instance
     (VectorCurve2D (units1 ?*? units2) space)
   where
   lhs ?*? rhs =
-    new (lhs.compiled ?*? rhs.compiled) (lhs.derivative ?*? rhs .+. lhs ?*? rhs.derivative)
+    new
+      (lhs.compiled ?*? Curve1D.compiled rhs)
+      (lhs.derivative ?*? rhs .+. lhs ?*? Curve1D.derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -454,7 +458,9 @@ instance
     (VectorCurve2D units space)
   where
   f `compose` g =
-    new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) .*. g.derivative)
+    new
+      (f.compiled `compose` Curve1D.compiled g)
+      ((f.derivative `compose` g) .*. Curve1D.derivative g)
 
 instance
   Composition
@@ -543,9 +549,10 @@ xy x y = do
           Expression.xy
           Vector2D
           VectorBounds2D
-          x.compiled
-          y.compiled
-  new compiledXY (xy x.derivative y.derivative)
+          (Curve1D.compiled x)
+          (Curve1D.compiled y)
+  let xyDerivative = xy (Curve1D.derivative x) (Curve1D.derivative y)
+  new compiledXY xyDerivative
 
 interpolateFrom :: Vector2D units space -> Vector2D units space -> VectorCurve2D units space
 interpolateFrom v1 v2 = bezier (NonEmpty.two v1 v2)
@@ -632,10 +639,15 @@ desingularized ::
   VectorCurve2D units space ->
   VectorCurve2D units space ->
   VectorCurve2D units space
-desingularized start middle end =
-  new
-    (CompiledFunction.desingularized Curve1D.t.compiled start.compiled middle.compiled end.compiled)
-    (desingularized start.derivative middle.derivative end.derivative)
+desingularized start middle end = do
+  let compiledDesingularized =
+        CompiledFunction.desingularized
+          (Curve1D.compiled Curve1D.t)
+          start.compiled
+          middle.compiled
+          end.compiled
+  let desingularizedDerivative = desingularized start.derivative middle.derivative end.derivative
+  new compiledDesingularized desingularizedDerivative
 
 {-| Evaluate a curve at a given parameter value.
 
@@ -751,8 +763,8 @@ lHopital ::
 lHopital numerator denominator tValue = do
   let numerator' = evaluate numerator.derivative tValue
   let numerator'' = evaluate numerator.derivative.derivative tValue
-  let denominator' = Curve1D.evaluate denominator.derivative tValue
-  let denominator'' = Curve1D.evaluate denominator.derivative.derivative tValue
+  let denominator' = Curve1D.evaluate (Curve1D.derivative denominator) tValue
+  let denominator'' = Curve1D.evaluate (Curve1D.derivative (Curve1D.derivative denominator)) tValue
   let value = numerator' ?/? denominator'
   let firstDerivative =
         Units.simplify $

@@ -67,8 +67,9 @@ curve1D name curve t0 tExpected =
           & Test.output "Actual solution" tSolution
     , Test.verify "Unboxed" do
         let evaluate# t# = let !(Quantity# x#) = Curve1D.evaluate curve (Quantity# t#) in x#
-        let evaluateDerivative# t# =
-              let !(Quantity# y'##) = Curve1D.evaluate curve.derivative (Quantity# t#) in y'##
+        let evaluateDerivative# t# = do
+              let !(Quantity# y'##) = Curve1D.evaluate (Curve1D.derivative curve) (Quantity# t#)
+              y'##
         let tSolution = NewtonRaphson.curve1D# evaluate# evaluateDerivative# t0
         Test.expect (tSolution ~= tExpected)
           & Test.output "Expected solution" tExpected

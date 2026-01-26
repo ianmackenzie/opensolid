@@ -152,8 +152,8 @@ instance
 instance Composition (Curve1D Unitless) (Curve3D space) (Curve3D space) where
   outer `compose` inner =
     new
-      (outer.compiled `compose` inner.compiled)
-      ((outer.derivative `compose` inner) .*. inner.derivative)
+      (outer.compiled `compose` Curve1D.compiled inner)
+      ((outer.derivative `compose` inner) .*. Curve1D.derivative inner)
 
 instance
   unitless ~ Unitless =>

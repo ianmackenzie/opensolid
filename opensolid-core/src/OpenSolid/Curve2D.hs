@@ -279,7 +279,9 @@ instance
 
 instance Composition (Curve1D Unitless) (Curve2D units space) (Curve2D units space) where
   f `compose` g =
-    new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) .*. g.derivative)
+    new
+      (f.compiled `compose` Curve1D.compiled g)
+      ((f.derivative `compose` g) .*. Curve1D.derivative g)
 
 instance
   Composition
@@ -356,8 +358,11 @@ constant point = new (CompiledFunction.constant point) VectorCurve2D.zero
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve1D units -> Curve1D units -> Curve2D units space
 xy x y = do
-  let compiledXY = CompiledFunction.map2 Expression.xy Point2D Bounds2D x.compiled y.compiled
-  new compiledXY (VectorCurve2D.xy x.derivative y.derivative)
+  let compiledX = Curve1D.compiled x
+  let compiledY = Curve1D.compiled y
+  let compiledXY = CompiledFunction.map2 Expression.xy Point2D Bounds2D compiledX compiledY
+  let xyDerivative = VectorCurve2D.xy (Curve1D.derivative x) (Curve1D.derivative y)
+  new compiledXY xyDerivative
 
 -- | Convert a line to a curve.
 line :: Line2D units space -> Curve2D units space
@@ -626,10 +631,16 @@ desingularized ::
   Curve2D units space ->
   Curve2D units space ->
   Curve2D units space
-desingularized start middle end =
-  new
-    (CompiledFunction.desingularized Curve1D.t.compiled start.compiled middle.compiled end.compiled)
-    (VectorCurve2D.desingularized start.derivative middle.derivative end.derivative)
+desingularized start middle end = do
+  let compiledDesingularized =
+        CompiledFunction.desingularized
+          (Curve1D.compiled Curve1D.t)
+          start.compiled
+          middle.compiled
+          end.compiled
+  let desingularizedDerivative =
+        VectorCurve2D.desingularized start.derivative middle.derivative end.derivative
+  new compiledDesingularized desingularizedDerivative
 
 instance HasField "startPoint" (Curve2D units space) (Point2D units space) where
   getField curve = evaluate curve 0
