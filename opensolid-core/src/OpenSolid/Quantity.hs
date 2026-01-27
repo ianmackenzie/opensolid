@@ -46,7 +46,7 @@ import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Number (Number)
 import OpenSolid.Random.Internal qualified as Random
-import OpenSolid.Sign (Sign (Negative, Positive))
+import OpenSolid.Sign (Sign (Negative, Positive, Sign))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Unitless (Unitless)
 import OpenSolid.Units (type (?*?), type (?/?))
@@ -110,13 +110,11 @@ instance Negation (Quantity units) where
 
 instance Multiplication Sign (Quantity units) (Quantity units) where
   {-# INLINEABLE (.*.) #-}
-  Positive .*. value = value
-  Negative .*. value = negative value
+  Sign sign_ .*. value = sign_ .*. value
 
 instance Multiplication (Quantity units) Sign (Quantity units) where
   {-# INLINEABLE (.*.) #-}
-  value .*. Positive = value
-  value .*. Negative = negative value
+  value .*. Sign sign_ = value .*. sign_
 
 instance units1 ~ units2 => Addition (Quantity units1) (Quantity units2) (Quantity units1) where
   {-# INLINE (.+.) #-}

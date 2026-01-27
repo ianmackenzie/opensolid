@@ -1,3 +1,5 @@
-module OpenSolid.Sign (Sign (Positive, Negative)) where
+module OpenSolid.Sign (Sign) where
 
-data Sign = Negative | Positive
+import {-# SOURCE #-} OpenSolid.Number (Number)
+
+newtype Sign = Unit Number

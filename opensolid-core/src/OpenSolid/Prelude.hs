@@ -85,7 +85,7 @@ module OpenSolid.Prelude
   , pattern NonEmpty
   , (:::) (Named)
   , Result (Ok, Error)
-  , Sign (Positive, Negative)
+  , Sign (Sign, Positive, Negative)
   , Tolerance
   , ApproximateEquality ((~=))
   , (!=)
@@ -140,7 +140,7 @@ import OpenSolid.NonEmpty (pattern NonEmpty)
 import OpenSolid.Number (Number)
 import OpenSolid.Quantity (Quantity (Quantity), (.%.), (.//.))
 import OpenSolid.Result (Result (Error, Ok))
-import OpenSolid.Sign (Sign (Negative, Positive))
+import OpenSolid.Sign (Sign (Negative, Positive, Sign))
 import OpenSolid.Todo (pattern TODO)
 import OpenSolid.Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
 import OpenSolid.Units (Meters, Radians, Seconds, Unitless, type (?*?), type (?/?))

@@ -55,7 +55,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding (Type, pattern NonEmpty)
+import OpenSolid.Prelude hiding (Type, pattern NonEmpty, pattern Sign)
 import OpenSolid.Text qualified as Text
 
 class FFI a where
