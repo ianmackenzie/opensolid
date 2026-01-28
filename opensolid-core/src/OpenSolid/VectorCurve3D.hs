@@ -639,17 +639,7 @@ lHopital ::
   Curve1D units2 ->
   Number ->
   (Vector3D (units1 ?/? units2) space, Vector3D (units1 ?/? units2) space)
-lHopital numerator denominator tValue = do
-  let numerator' = evaluate numerator.derivative tValue
-  let numerator'' = evaluate numerator.derivative.derivative tValue
-  let denominator' = Curve1D.evaluate (Curve1D.derivative denominator) tValue
-  let denominator'' = Curve1D.evaluate (Curve1D.derivative (Curve1D.derivative denominator)) tValue
-  let value = numerator' ?/? denominator'
-  let firstDerivative =
-        Units.simplify $
-          (numerator'' ?*? denominator' .-. numerator' ?*? denominator'')
-            ?/? (2 *. Quantity.squared_ denominator')
-  (value, firstDerivative)
+lHopital = VectorCurve.lHopital
 
 normalize :: Tolerance units => VectorCurve3D units space -> VectorCurve3D Unitless space
 normalize curve = if isZero curve then zero else curve.nonZeroNormalized

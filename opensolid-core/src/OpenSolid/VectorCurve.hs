@@ -10,6 +10,7 @@ module OpenSolid.VectorCurve
   , direction
   , zeros
   , desingularize
+  , lHopital
   )
 where
 
@@ -26,6 +27,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units qualified as Units
 
 data IsZero = IsZero deriving (Eq, Show)
 
@@ -133,3 +135,35 @@ desingularize desingularized startSingularity curve endSingularity = do
               value1
               firstDerivative1
   desingularized startCurve curve endCurve
+
+lHopital ::
+  ( CoordinateSystem.Generic dimension units1 space
+  , Units.Coercion (Vector dimension Unitless space) (Vector dimension (units1 ?/? units2) space)
+  ) =>
+  VectorCurve dimension units1 space ->
+  Curve1D units2 ->
+  Number ->
+  ( Vector dimension (units1 ?/? units2) space
+  , Vector dimension (units1 ?/? units2) space
+  )
+lHopital lhs rhs tValue = do
+  let lhs' = erase (evaluate (derivative lhs) tValue)
+  let lhs'' = erase (evaluate (derivative (derivative lhs)) tValue)
+  let rhs' = erase (evaluate (derivative rhs) tValue)
+  let rhs'' = erase (evaluate (derivative (derivative rhs)) tValue)
+  let value_ = lhs' ./. rhs'
+  let firstDerivative_ = (lhs'' .*. rhs' .-. lhs' .*. rhs'') ./. (2 *. Quantity.squared rhs')
+  (coerce value_, coerce firstDerivative_)
+
+coerce ::
+  forall units2 units1 dimension space.
+  Units.Coercion (Vector dimension units1 space) (Vector dimension units2 space) =>
+  Vector dimension units1 space ->
+  Vector dimension units2 space
+coerce = Units.coerce
+
+erase ::
+  Units.Coercion (Vector dimension units space) (Vector dimension Unitless space) =>
+  Vector dimension units space ->
+  Vector dimension Unitless space
+erase = coerce

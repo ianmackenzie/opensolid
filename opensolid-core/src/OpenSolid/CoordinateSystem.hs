@@ -62,6 +62,8 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
+import OpenSolid.Units (HasUnits)
+import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -125,6 +127,9 @@ type family SurfaceFunction (dimension :: Natural) units space = surfaceFunction
 
 class
   ( HasZero (Vector dimension units space)
+  , HasUnits (Vector dimension units space) units
+  , Units.Coercion (Vector dimension units space) (Vector dimension Unitless space)
+  , Units.Coercion (Vector dimension Unitless space) (Vector dimension units space)
   , Eq (Vector dimension units space)
   , ApproximateEquality (Vector dimension units space) units
   , Negation (Vector dimension units space)
@@ -186,6 +191,7 @@ class
       (SurfaceFunction2D Unitless UvSpace)
       (VectorSurfaceFunction dimension units space)
       (VectorSurfaceFunction dimension units space)
+  , Generic dimension Unitless space
   ) =>
   Generic (dimension :: Natural) (units :: Type) (space :: Type)
   where

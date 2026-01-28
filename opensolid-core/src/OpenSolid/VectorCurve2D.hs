@@ -729,17 +729,7 @@ lHopital ::
   Curve1D units2 ->
   Number ->
   (Vector2D (units1 ?/? units2) space, Vector2D (units1 ?/? units2) space)
-lHopital numerator denominator tValue = do
-  let numerator' = evaluate numerator.derivative tValue
-  let numerator'' = evaluate numerator.derivative.derivative tValue
-  let denominator' = Curve1D.evaluate (Curve1D.derivative denominator) tValue
-  let denominator'' = Curve1D.evaluate (Curve1D.derivative (Curve1D.derivative denominator)) tValue
-  let value = numerator' ?/? denominator'
-  let firstDerivative =
-        Units.simplify $
-          (numerator'' ?*? denominator' .-. numerator' ?*? denominator'')
-            ?/? (2 *. Quantity.squared_ denominator')
-  (value, firstDerivative)
+lHopital = VectorCurve.lHopital
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2D units1 space -> Curve1D units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)

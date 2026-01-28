@@ -455,14 +455,7 @@ lHopital ::
   Curve1D units2 ->
   Number ->
   (Quantity (units1 ?/? units2), Quantity (units1 ?/? units2))
-lHopital lhs rhs tValue = do
-  let lhs' = evaluate lhs.derivative tValue
-  let lhs'' = evaluate lhs.derivative.derivative tValue
-  let rhs' = evaluate rhs.derivative tValue
-  let rhs'' = evaluate rhs.derivative.derivative tValue
-  let value_ = lhs' ?/? rhs'
-  let firstDerivative_ = (lhs'' ?*? rhs' .-. lhs' ?*? rhs'') ?/? (2 *. Quantity.squared_ rhs')
-  (value_, Units.simplify firstDerivative_)
+lHopital = VectorCurve.lHopital
 
 instance
   Units.Quotient units1 units2 units3 =>
