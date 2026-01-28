@@ -1,5 +1,17 @@
 module OpenSolid.CoordinateSystem
-  ( Directional (..)
+  ( Vector
+  , VectorBounds
+  , VectorCurve
+  , VectorSurfaceFunction
+  , Direction
+  , DirectionBounds
+  , DirectionCurve
+  , DirectionSurfaceFunction
+  , Point
+  , Bounds
+  , Curve
+  , SurfaceFunction
+  , Directional (..)
   , Generic (..)
   , Vectorial (..)
   , CoordinateSystem (..)
@@ -59,11 +71,67 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfa
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
+type family Vector (dimension :: Natural) units space = vector | vector -> dimension units space where
+  Vector 1 units () = Quantity units
+  Vector 2 units space = Vector2D units space
+  Vector 3 units space = Vector3D units space
+
+type family VectorBounds (dimension :: Natural) units space = vectorBounds | vectorBounds -> dimension units space where
+  VectorBounds 1 units () = Interval units
+  VectorBounds 2 units space = VectorBounds2D units space
+  VectorBounds 3 units space = VectorBounds3D units space
+
+type family VectorCurve (dimension :: Natural) units space = vectorCurve | vectorCurve -> dimension units space where
+  VectorCurve 1 units () = Curve1D units
+  VectorCurve 2 units space = VectorCurve2D units space
+  VectorCurve 3 units space = VectorCurve3D units space
+
+type family VectorSurfaceFunction (dimension :: Natural) units space = vectorSurfaceFunction | vectorSurfaceFunction -> dimension units space where
+  VectorSurfaceFunction 1 units () = SurfaceFunction1D units
+  VectorSurfaceFunction 2 units space = VectorSurfaceFunction2D units space
+  VectorSurfaceFunction 3 units space = VectorSurfaceFunction3D units space
+
+type family Direction (dimension :: Natural) space = direction | direction -> dimension space where
+  Direction 2 space = Direction2D space
+  Direction 3 space = Direction3D space
+
+type family DirectionBounds (dimension :: Natural) space = directionBounds | directionBounds -> dimension space where
+  DirectionBounds 2 space = DirectionBounds2D space
+  DirectionBounds 3 space = DirectionBounds3D space
+
+type family DirectionCurve (dimension :: Natural) space = directionCurve | directionCurve -> dimension space where
+  DirectionCurve 2 space = DirectionCurve2D space
+  DirectionCurve 3 space = DirectionCurve3D space
+
+type family DirectionSurfaceFunction (dimension :: Natural) space = directionSurfaceFunction | directionSurfaceFunction -> dimension space where
+  DirectionSurfaceFunction 2 space = DirectionSurfaceFunction2D space
+  DirectionSurfaceFunction 3 space = DirectionSurfaceFunction3D space
+
+type family Point (dimension :: Natural) units space = point | point -> dimension units space where
+  Point 2 units space = Point2D units space
+  Point 3 Meters space = Point3D space
+
+type family Bounds (dimension :: Natural) units space = bounds | bounds -> dimension units space where
+  Bounds 2 units space = Bounds2D units space
+  Bounds 3 Meters space = Bounds3D space
+
+type family Curve (dimension :: Natural) units space = curve | curve -> dimension units space where
+  Curve 2 units space = Curve2D units space
+  Curve 3 Meters space = Curve3D space
+
+type family SurfaceFunction (dimension :: Natural) units space = surfaceFunction | surfaceFunction -> dimension units space where
+  SurfaceFunction 2 units space = SurfaceFunction2D units space
+  SurfaceFunction 3 Meters space = SurfaceFunction3D space
+
 class
   ( HasZero (Vector dimension units space)
   , Eq (Vector dimension units space)
   , ApproximateEquality (Vector dimension units space) units
   , Negation (Vector dimension units space)
+  , Addition
+      (Vector dimension units space)
+      (Vector dimension units space)
+      (Vector dimension units space)
   , Addition
       (Vector dimension units space)
       (Vector dimension units space)
@@ -121,11 +189,6 @@ class
   ) =>
   Generic (dimension :: Natural) (units :: Type) (space :: Type)
   where
-  type Vector dimension units space = vector | vector -> dimension units space
-  type VectorBounds dimension units space = vectorBounds | vectorBounds -> dimension units space
-  type VectorCurve dimension units space = vectorCurve | vectorCurve -> dimension units space
-  type VectorSurfaceFunction dimension units space = vectorSurfaceFunction | vectorSurfaceFunction -> dimension units space
-
   vectorCurveIsZero :: Tolerance units => VectorCurve dimension units space -> Bool
   vectorCurveDerivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   evaluateVectorCurve ::
@@ -143,21 +206,57 @@ class
     VectorSurfaceFunction dimension units space ->
     VectorSurfaceFunction dimension units space
 
+instance Generic 1 units () where
+  vectorCurveIsZero curve = curve ~= Curve1D.constant Quantity.zero
+  vectorCurveDerivative = Curve1D.derivative
+  evaluateVectorCurve = Curve1D.evaluate
+  evaluateVectorCurveBounds = Curve1D.evaluateBounds
+  bezierVectorCurve = Curve1D.bezier
+
+  vectorSurfaceFunctionDerivative = SurfaceFunction1D.derivative
+
+instance Generic 2 units space where
+  vectorCurveIsZero = VectorCurve2D.isZero
+  vectorCurveDerivative = VectorCurve2D.derivative
+  evaluateVectorCurve = VectorCurve2D.evaluate
+  evaluateVectorCurveBounds = VectorCurve2D.evaluateBounds
+  bezierVectorCurve = VectorCurve2D.bezier
+
+  vectorSurfaceFunctionDerivative = VectorSurfaceFunction2D.derivative
+
+instance Generic 3 units space where
+  vectorCurveIsZero = VectorCurve3D.isZero
+  vectorCurveDerivative = VectorCurve3D.derivative
+  evaluateVectorCurve = VectorCurve3D.evaluate
+  evaluateVectorCurveBounds = VectorCurve3D.evaluateBounds
+  bezierVectorCurve = VectorCurve3D.bezier
+
+  vectorSurfaceFunctionDerivative = VectorSurfaceFunction3D.derivative
+
 class
   ( DotMultiplication (Direction dimension space) (Direction dimension space) Number
   , Vectorial dimension Unitless space
   ) =>
   Directional (dimension :: Natural) (space :: Type)
   where
-  type Direction dimension space = direction | direction -> dimension space
-  type DirectionBounds dimension space = directionBounds | directionBounds -> dimension space
-  type DirectionCurve dimension space = directionCurve | directionCurve -> dimension space
-  type DirectionSurfaceFunction dimension space = directionSurfaceFunction | directionSurfaceFunction -> dimension space
-
   unsafeDirection :: Vector dimension Unitless space -> Direction dimension space
   unsafeDirectionBounds :: VectorBounds dimension Unitless space -> DirectionBounds dimension space
   unsafeDirectionCurve :: VectorCurve dimension Unitless space -> DirectionCurve dimension space
   unsafeDirectionSurfaceFunction :: VectorSurfaceFunction dimension Unitless space -> DirectionSurfaceFunction dimension space
+
+instance Directional 2 space where
+  unsafeDirection = Direction2D.unsafe
+  unsafeDirectionBounds = DirectionBounds2D.unsafe
+
+  unsafeDirectionCurve = DirectionCurve2D.unsafe
+  unsafeDirectionSurfaceFunction = DirectionSurfaceFunction2D.unsafe
+
+instance Directional 3 space where
+  unsafeDirection = Direction3D.unsafe
+  unsafeDirectionBounds = DirectionBounds3D.unsafe
+
+  unsafeDirectionCurve = DirectionCurve3D.unsafe
+  unsafeDirectionSurfaceFunction = DirectionSurfaceFunction3D.unsafe
 
 class
   ( Multiplication (Quantity units) (Direction dimension space) (Vector dimension units space)
@@ -186,6 +285,14 @@ class
     Tolerance units =>
     VectorCurve dimension units space ->
     VectorCurve dimension Unitless space
+
+instance Vectorial 2 units space where
+  vectorCurveSquaredMagnitude_ = VectorCurve2D.squaredMagnitude_
+  normalizeVectorCurve = VectorCurve2D.normalize
+
+instance Vectorial 3 units space where
+  vectorCurveSquaredMagnitude_ = VectorCurve3D.squaredMagnitude_
+  normalizeVectorCurve = VectorCurve3D.normalize
 
 class
   ( Addition
@@ -231,11 +338,6 @@ class
   ) =>
   CoordinateSystem (dimension :: Natural) (units :: Type) (space :: Type)
   where
-  type Point dimension units space = point | point -> dimension units space
-  type Bounds dimension units space = bounds | bounds -> dimension units space
-  type Curve dimension units space = curve | curve -> dimension units space
-  type SurfaceFunction dimension units space = surfaceFunction | surfaceFunction -> dimension units space
-
   cyclicBoundsCoordinate :: Int -> Bounds dimension units space -> Interval units
   boundsContains ::
     Bounds dimension units space ->
@@ -248,104 +350,14 @@ class
 
   curveDerivative :: Curve dimension units space -> VectorCurve dimension units space
 
-instance Generic 1 units () where
-  type Vector 1 units () = Quantity units
-  type VectorBounds 1 units () = Interval units
-  type VectorCurve 1 units () = Curve1D units
-  type VectorSurfaceFunction 1 units () = SurfaceFunction1D units
-
-  vectorCurveIsZero curve = curve ~= Curve1D.constant Quantity.zero
-  vectorCurveDerivative = Curve1D.derivative
-  evaluateVectorCurve = Curve1D.evaluate
-  evaluateVectorCurveBounds = Curve1D.evaluateBounds
-  bezierVectorCurve = Curve1D.bezier
-
-  vectorSurfaceFunctionDerivative = SurfaceFunction1D.derivative
-
-instance Generic 2 units space where
-  type Vector 2 units space = Vector2D units space
-  type VectorBounds 2 units space = VectorBounds2D units space
-  type VectorCurve 2 units space = VectorCurve2D units space
-  type VectorSurfaceFunction 2 units space = VectorSurfaceFunction2D units space
-
-  vectorCurveIsZero = VectorCurve2D.isZero
-  vectorCurveDerivative = VectorCurve2D.derivative
-  evaluateVectorCurve = VectorCurve2D.evaluate
-  evaluateVectorCurveBounds = VectorCurve2D.evaluateBounds
-  bezierVectorCurve = VectorCurve2D.bezier
-
-  vectorSurfaceFunctionDerivative = VectorSurfaceFunction2D.derivative
-
-instance Directional 2 space where
-  type Direction 2 space = Direction2D space
-  type DirectionBounds 2 space = DirectionBounds2D space
-  type DirectionCurve 2 space = DirectionCurve2D space
-  type DirectionSurfaceFunction 2 space = DirectionSurfaceFunction2D space
-
-  {-# INLINE unsafeDirection #-}
-  unsafeDirection = Direction2D.unsafe
-
-  {-# INLINE unsafeDirectionBounds #-}
-  unsafeDirectionBounds = DirectionBounds2D.unsafe
-
-  unsafeDirectionCurve = DirectionCurve2D.unsafe
-  unsafeDirectionSurfaceFunction = DirectionSurfaceFunction2D.unsafe
-
-instance Vectorial 2 units space where
-  vectorCurveSquaredMagnitude_ = VectorCurve2D.squaredMagnitude_
-  normalizeVectorCurve = VectorCurve2D.normalize
-
 instance CoordinateSystem 2 units space where
-  type Point 2 units space = Point2D units space
-  type Bounds 2 units space = Bounds2D units space
-  type Curve 2 units space = Curve2D units space
-  type SurfaceFunction 2 units space = SurfaceFunction2D units space
-
   cyclicBoundsCoordinate i (Bounds2D x y) = case i `mod` 2 of 0 -> x; _ -> y
   boundsContains = Bounds2D.contains
   boundsAggregate2 = Bounds2D.aggregate2
 
   curveDerivative = Curve2D.derivative
 
-instance Generic 3 units space where
-  type Vector 3 units space = Vector3D units space
-  type VectorBounds 3 units space = VectorBounds3D units space
-  type VectorCurve 3 units space = VectorCurve3D units space
-  type VectorSurfaceFunction 3 units space = VectorSurfaceFunction3D units space
-
-  vectorCurveIsZero = VectorCurve3D.isZero
-  vectorCurveDerivative = VectorCurve3D.derivative
-  evaluateVectorCurve = VectorCurve3D.evaluate
-  evaluateVectorCurveBounds = VectorCurve3D.evaluateBounds
-  bezierVectorCurve = VectorCurve3D.bezier
-
-  vectorSurfaceFunctionDerivative = VectorSurfaceFunction3D.derivative
-
-instance Directional 3 space where
-  type Direction 3 space = Direction3D space
-  type DirectionBounds 3 space = DirectionBounds3D space
-  type DirectionCurve 3 space = DirectionCurve3D space
-  type DirectionSurfaceFunction 3 space = DirectionSurfaceFunction3D space
-
-  {-# INLINE unsafeDirection #-}
-  unsafeDirection = Direction3D.unsafe
-
-  {-# INLINE unsafeDirectionBounds #-}
-  unsafeDirectionBounds = DirectionBounds3D.unsafe
-
-  unsafeDirectionCurve = DirectionCurve3D.unsafe
-  unsafeDirectionSurfaceFunction = DirectionSurfaceFunction3D.unsafe
-
-instance Vectorial 3 units space where
-  vectorCurveSquaredMagnitude_ = VectorCurve3D.squaredMagnitude_
-  normalizeVectorCurve = VectorCurve3D.normalize
-
 instance CoordinateSystem 3 Meters space where
-  type Point 3 Meters space = Point3D space
-  type Bounds 3 Meters space = Bounds3D space
-  type Curve 3 Meters space = Curve3D space
-  type SurfaceFunction 3 Meters space = SurfaceFunction3D space
-
   cyclicBoundsCoordinate i (Bounds3D x y z) = case i `mod` 3 of 0 -> x; 1 -> y; _ -> z
   boundsContains = Bounds3D.contains
   boundsAggregate2 = Bounds3D.aggregate2
