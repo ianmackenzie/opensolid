@@ -3,6 +3,7 @@ module OpenSolid.VectorCurve2D
   , Compiled
   , constant
   , new
+  , bezier
   , compiled
   , derivative
   , isZero
@@ -102,6 +103,7 @@ instance
 
 constant :: Vector2D units space -> VectorCurve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units space
+bezier :: NonEmpty (Vector2D units space) -> VectorCurve2D units space
 compiled :: VectorCurve2D units space -> Compiled units space
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
 isZero :: Tolerance units => VectorCurve2D units space -> Bool

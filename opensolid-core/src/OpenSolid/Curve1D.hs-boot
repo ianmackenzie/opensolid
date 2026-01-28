@@ -1,16 +1,22 @@
 module OpenSolid.Curve1D
   ( Curve1D
   , Compiled
+  , Zero
+  , IsZero (IsZero)
   , WithNoInteriorZeros (WithNoInteriorZeros)
   , WithNoZeros (WithNoZeros)
+  , constant
+  , bezier
   , compiled
   , derivative
   , evaluate
   , evaluateBounds
+  , zeros
   )
 where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -21,6 +27,8 @@ type role Curve1D nominal
 type Curve1D :: Type -> Type
 data Curve1D units
 
+data IsZero = IsZero
+
 instance Composition (Curve1D Unitless) (Curve1D units) (Curve1D units)
 
 type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
@@ -30,6 +38,8 @@ instance FFI (Curve1D Unitless)
 newtype WithNoZeros units = WithNoZeros (Curve1D units)
 
 newtype WithNoInteriorZeros units = WithNoInteriorZeros (Curve1D units)
+
+instance ApproximateEquality (Curve1D units) units
 
 instance units1 ~ units2 => Addition (Curve1D units1) (Curve1D units2) (Curve1D units1)
 
@@ -45,7 +55,10 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Curve1D units2) (Curve1D units3)
 
+constant :: Quantity units -> Curve1D units
+bezier :: NonEmpty (Quantity units) -> Curve1D units
 compiled :: Curve1D units -> Compiled units
 derivative :: Curve1D units -> Curve1D units
 evaluate :: Curve1D units -> Number -> Quantity units
 evaluateBounds :: Curve1D units -> Interval Unitless -> Interval units
+zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)

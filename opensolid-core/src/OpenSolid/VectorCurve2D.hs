@@ -57,7 +57,6 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2D (Direction2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
@@ -602,37 +601,7 @@ desingularize ::
   VectorCurve2D units space ->
   Maybe (Vector2D units space, Vector2D units space) ->
   VectorCurve2D units space
-desingularize Nothing curve Nothing = curve
-desingularize startSingularity curve endSingularity = do
-  let startCurve = case startSingularity of
-        Nothing -> curve
-        Just (value0, firstDerivative0) -> do
-          let t0 = Desingularization.t0
-          let valueT0 = evaluate curve t0
-          let firstDerivativeT0 = evaluate curve.derivative t0
-          let secondDerivativeT0 = evaluate curve.derivative.derivative t0
-          bezier $
-            Bezier.syntheticStart
-              value0
-              firstDerivative0
-              valueT0
-              firstDerivativeT0
-              secondDerivativeT0
-  let endCurve = case endSingularity of
-        Nothing -> curve
-        Just (value1, firstDerivative1) -> do
-          let t1 = Desingularization.t1
-          let valueT1 = evaluate curve t1
-          let firstDerivativeT1 = evaluate curve.derivative t1
-          let secondDerivativeT1 = evaluate curve.derivative.derivative t1
-          bezier $
-            Bezier.syntheticEnd
-              valueT1
-              firstDerivativeT1
-              secondDerivativeT1
-              value1
-              firstDerivative1
-  desingularized startCurve curve endCurve
+desingularize = VectorCurve.desingularize desingularized
 
 desingularized ::
   VectorCurve2D units space ->

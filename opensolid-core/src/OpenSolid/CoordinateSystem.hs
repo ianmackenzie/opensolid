@@ -44,6 +44,7 @@ import OpenSolid.Primitives
   , VectorBounds2D
   , VectorBounds3D
   )
+import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
@@ -61,6 +62,7 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfa
 class
   ( HasZero (Vector dimension units space)
   , Eq (Vector dimension units space)
+  , ApproximateEquality (Vector dimension units space) units
   , Negation (Vector dimension units space)
   , Addition
       (Vector dimension units space)
@@ -124,6 +126,7 @@ class
   type VectorCurve dimension units space = vectorCurve | vectorCurve -> dimension units space
   type VectorSurfaceFunction dimension units space = vectorSurfaceFunction | vectorSurfaceFunction -> dimension units space
 
+  vectorCurveIsZero :: Tolerance units => VectorCurve dimension units space -> Bool
   vectorCurveDerivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   evaluateVectorCurve ::
     VectorCurve dimension units space ->
@@ -133,6 +136,7 @@ class
     VectorCurve dimension units space ->
     Interval Unitless ->
     VectorBounds dimension units space
+  bezierVectorCurve :: NonEmpty (Vector dimension units space) -> VectorCurve dimension units space
 
   vectorSurfaceFunctionDerivative ::
     SurfaceParameter ->
@@ -178,7 +182,6 @@ class
   vectorCurveSquaredMagnitude_ ::
     VectorCurve dimension units space ->
     Curve1D (units ?*? units)
-  vectorCurveIsZero :: Tolerance units => VectorCurve dimension units space -> Bool
   normalizeVectorCurve ::
     Tolerance units =>
     VectorCurve dimension units space ->
@@ -251,9 +254,11 @@ instance Generic 1 units () where
   type VectorCurve 1 units () = Curve1D units
   type VectorSurfaceFunction 1 units () = SurfaceFunction1D units
 
+  vectorCurveIsZero curve = curve ~= Curve1D.constant Quantity.zero
   vectorCurveDerivative = Curve1D.derivative
   evaluateVectorCurve = Curve1D.evaluate
   evaluateVectorCurveBounds = Curve1D.evaluateBounds
+  bezierVectorCurve = Curve1D.bezier
 
   vectorSurfaceFunctionDerivative = SurfaceFunction1D.derivative
 
@@ -263,9 +268,11 @@ instance Generic 2 units space where
   type VectorCurve 2 units space = VectorCurve2D units space
   type VectorSurfaceFunction 2 units space = VectorSurfaceFunction2D units space
 
+  vectorCurveIsZero = VectorCurve2D.isZero
   vectorCurveDerivative = VectorCurve2D.derivative
   evaluateVectorCurve = VectorCurve2D.evaluate
   evaluateVectorCurveBounds = VectorCurve2D.evaluateBounds
+  bezierVectorCurve = VectorCurve2D.bezier
 
   vectorSurfaceFunctionDerivative = VectorSurfaceFunction2D.derivative
 
@@ -286,7 +293,6 @@ instance Directional 2 space where
 
 instance Vectorial 2 units space where
   vectorCurveSquaredMagnitude_ = VectorCurve2D.squaredMagnitude_
-  vectorCurveIsZero = VectorCurve2D.isZero
   normalizeVectorCurve = VectorCurve2D.normalize
 
 instance CoordinateSystem 2 units space where
@@ -307,9 +313,11 @@ instance Generic 3 units space where
   type VectorCurve 3 units space = VectorCurve3D units space
   type VectorSurfaceFunction 3 units space = VectorSurfaceFunction3D units space
 
+  vectorCurveIsZero = VectorCurve3D.isZero
   vectorCurveDerivative = VectorCurve3D.derivative
   evaluateVectorCurve = VectorCurve3D.evaluate
   evaluateVectorCurveBounds = VectorCurve3D.evaluateBounds
+  bezierVectorCurve = VectorCurve3D.bezier
 
   vectorSurfaceFunctionDerivative = VectorSurfaceFunction3D.derivative
 
@@ -330,7 +338,6 @@ instance Directional 3 space where
 
 instance Vectorial 3 units space where
   vectorCurveSquaredMagnitude_ = VectorCurve3D.squaredMagnitude_
-  vectorCurveIsZero = VectorCurve3D.isZero
   normalizeVectorCurve = VectorCurve3D.normalize
 
 instance CoordinateSystem 3 Meters space where

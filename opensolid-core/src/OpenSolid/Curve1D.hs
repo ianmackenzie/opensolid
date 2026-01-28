@@ -60,7 +60,6 @@ import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
 import OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.Curve1D.Zero qualified as Zero
-import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
@@ -90,6 +89,7 @@ import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3D (Vector3D)
+import OpenSolid.VectorCurve qualified as VectorCurve
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -380,37 +380,7 @@ desingularize ::
   Curve1D units ->
   Maybe (Quantity units, Quantity units) ->
   Curve1D units
-desingularize Nothing curve Nothing = curve
-desingularize startSingularity curve endSingularity = do
-  let startCurve = case startSingularity of
-        Nothing -> curve
-        Just (value0, firstDerivative0) -> do
-          let t0 = Desingularization.t0
-          let valueT0 = evaluate curve t0
-          let firstDerivativeT0 = evaluate curve.derivative t0
-          let secondDerivativeT0 = evaluate curve.derivative.derivative t0
-          bezier $
-            Bezier.syntheticStart
-              value0
-              firstDerivative0
-              valueT0
-              firstDerivativeT0
-              secondDerivativeT0
-  let endCurve = case endSingularity of
-        Nothing -> curve
-        Just (value1, firstDerivative1) -> do
-          let t1 = Desingularization.t1
-          let valueT1 = evaluate curve t1
-          let firstDerivativeT1 = evaluate curve.derivative t1
-          let secondDerivativeT1 = evaluate curve.derivative.derivative t1
-          bezier $
-            Bezier.syntheticEnd
-              valueT1
-              firstDerivativeT1
-              secondDerivativeT1
-              value1
-              firstDerivative1
-  desingularized startCurve curve endCurve
+desingularize = VectorCurve.desingularize desingularized
 
 desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
 desingularized start middle end =

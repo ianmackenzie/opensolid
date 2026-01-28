@@ -4,6 +4,7 @@ module OpenSolid.VectorCurve3D
   , constant
   , new
   , on
+  , bezier
   , compiled
   , derivative
   , isZero
@@ -106,6 +107,7 @@ instance
 constant :: Vector3D units space -> VectorCurve3D units space
 new :: Compiled units space -> VectorCurve3D units space -> VectorCurve3D units space
 on :: Plane3D global local -> VectorCurve2D units local -> VectorCurve3D units global
+bezier :: NonEmpty (Vector3D units space) -> VectorCurve3D units space
 compiled :: VectorCurve3D units space -> Compiled units space
 derivative :: VectorCurve3D units space -> VectorCurve3D units space
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
