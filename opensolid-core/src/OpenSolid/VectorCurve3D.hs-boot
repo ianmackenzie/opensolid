@@ -16,6 +16,7 @@ module OpenSolid.VectorCurve3D
   , normalize
   , magnitude
   , transformBy
+  , desingularized
   )
 where
 
@@ -127,3 +128,8 @@ squaredMagnitude_ :: VectorCurve3D units space -> Curve1D (units ?*? units)
 normalize :: Tolerance units => VectorCurve3D units space -> VectorCurve3D Unitless space
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 transformBy :: Transform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space
+desingularized ::
+  VectorCurve3D units space ->
+  VectorCurve3D units space ->
+  VectorCurve3D units space ->
+  VectorCurve3D units space

@@ -12,6 +12,7 @@ module OpenSolid.Curve1D
   , evaluate
   , evaluateBounds
   , zeros
+  , desingularized
   )
 where
 
@@ -62,3 +63,4 @@ derivative :: Curve1D units -> Curve1D units
 evaluate :: Curve1D units -> Number -> Quantity units
 evaluateBounds :: Curve1D units -> Interval Unitless -> Interval units
 zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
+desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units

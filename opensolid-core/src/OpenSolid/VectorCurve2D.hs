@@ -601,7 +601,7 @@ desingularize ::
   VectorCurve2D units space ->
   Maybe (Vector2D units space, Vector2D units space) ->
   VectorCurve2D units space
-desingularize = VectorCurve.desingularize desingularized
+desingularize = VectorCurve.desingularize
 
 desingularized ::
   VectorCurve2D units space ->

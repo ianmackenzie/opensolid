@@ -9,6 +9,7 @@ module OpenSolid.VectorCurve
   , normalize
   , direction
   , zeros
+  , desingularized
   , desingularize
   , lHopital
   )
@@ -93,19 +94,22 @@ zeros vectorCurve =
     Ok zeros1D -> Ok (List.map (.location) zeros1D)
     Error Curve1D.IsZero -> Error IsZero
 
+desingularized ::
+  CoordinateSystem.Generic dimension units space =>
+  VectorCurve dimension units space ->
+  VectorCurve dimension units space ->
+  VectorCurve dimension units space ->
+  VectorCurve dimension units space
+desingularized = CoordinateSystem.desingularizedVectorCurve
+
 desingularize ::
   CoordinateSystem.Generic dimension units space =>
-  ( VectorCurve dimension units space ->
-    VectorCurve dimension units space ->
-    VectorCurve dimension units space ->
-    VectorCurve dimension units space
-  ) ->
   Maybe (Vector dimension units space, Vector dimension units space) ->
   VectorCurve dimension units space ->
   Maybe (Vector dimension units space, Vector dimension units space) ->
   VectorCurve dimension units space
-desingularize _ Nothing curve Nothing = curve
-desingularize desingularized startSingularity curve endSingularity = do
+desingularize Nothing curve Nothing = curve
+desingularize startSingularity curve endSingularity = do
   let startCurve = case startSingularity of
         Nothing -> curve
         Just (value0, firstDerivative0) -> do

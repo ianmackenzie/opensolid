@@ -380,7 +380,7 @@ desingularize ::
   Curve1D units ->
   Maybe (Quantity units, Quantity units) ->
   Curve1D units
-desingularize = VectorCurve.desingularize desingularized
+desingularize = VectorCurve.desingularize
 
 desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
 desingularized start middle end =

@@ -206,6 +206,11 @@ class
     Interval Unitless ->
     VectorBounds dimension units space
   bezierVectorCurve :: NonEmpty (Vector dimension units space) -> VectorCurve dimension units space
+  desingularizedVectorCurve ::
+    VectorCurve dimension units space ->
+    VectorCurve dimension units space ->
+    VectorCurve dimension units space ->
+    VectorCurve dimension units space
 
   vectorSurfaceFunctionDerivative ::
     SurfaceParameter ->
@@ -218,6 +223,7 @@ instance Generic 1 units () where
   evaluateVectorCurve = Curve1D.evaluate
   evaluateVectorCurveBounds = Curve1D.evaluateBounds
   bezierVectorCurve = Curve1D.bezier
+  desingularizedVectorCurve = Curve1D.desingularized
 
   vectorSurfaceFunctionDerivative = SurfaceFunction1D.derivative
 
@@ -227,6 +233,7 @@ instance Generic 2 units space where
   evaluateVectorCurve = VectorCurve2D.evaluate
   evaluateVectorCurveBounds = VectorCurve2D.evaluateBounds
   bezierVectorCurve = VectorCurve2D.bezier
+  desingularizedVectorCurve = VectorCurve2D.desingularized
 
   vectorSurfaceFunctionDerivative = VectorSurfaceFunction2D.derivative
 
@@ -236,6 +243,7 @@ instance Generic 3 units space where
   evaluateVectorCurve = VectorCurve3D.evaluate
   evaluateVectorCurveBounds = VectorCurve3D.evaluateBounds
   bezierVectorCurve = VectorCurve3D.bezier
+  desingularizedVectorCurve = VectorCurve3D.desingularized
 
   vectorSurfaceFunctionDerivative = VectorSurfaceFunction3D.derivative
 

@@ -14,6 +14,7 @@ module OpenSolid.VectorCurve2D
   , quotient
   , quotient_
   , transformBy
+  , desingularized
   )
 where
 
@@ -123,5 +124,10 @@ squaredMagnitude_ :: VectorCurve2D units space -> Curve1D (units ?*? units)
 normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
 transformBy ::
   Transform2D tag translationUnits space ->
+  VectorCurve2D units space ->
+  VectorCurve2D units space
+desingularized ::
+  VectorCurve2D units space ->
+  VectorCurve2D units space ->
   VectorCurve2D units space ->
   VectorCurve2D units space

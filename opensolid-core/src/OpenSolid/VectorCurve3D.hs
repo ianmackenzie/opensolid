@@ -540,7 +540,7 @@ desingularize ::
   VectorCurve3D units space ->
   Maybe (Vector3D units space, Vector3D units space) ->
   VectorCurve3D units space
-desingularize = VectorCurve.desingularize desingularized
+desingularize = VectorCurve.desingularize
 
 desingularized ::
   VectorCurve3D units space ->
