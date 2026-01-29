@@ -28,7 +28,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units qualified as Units
+import OpenSolid.Vector qualified as Vector
 
 data IsZero = IsZero deriving (Eq, Show)
 
@@ -151,23 +151,10 @@ lHopital ::
   , Vector dimension (units1 ?/? units2) space
   )
 lHopital lhs rhs tValue = do
-  let lhs' = erase (evaluate (derivative lhs) tValue)
-  let lhs'' = erase (evaluate (derivative (derivative lhs)) tValue)
-  let rhs' = erase (evaluate (derivative rhs) tValue)
-  let rhs'' = erase (evaluate (derivative (derivative rhs)) tValue)
+  let lhs' = Vector.erase (evaluate (derivative lhs) tValue)
+  let lhs'' = Vector.erase (evaluate (derivative (derivative lhs)) tValue)
+  let rhs' = Vector.erase (evaluate (derivative rhs) tValue)
+  let rhs'' = Vector.erase (evaluate (derivative (derivative rhs)) tValue)
   let value_ = lhs' ./. rhs'
   let firstDerivative_ = (lhs'' .*. rhs' .-. lhs' .*. rhs'') ./. (2 *. Quantity.squared rhs')
-  (coerce value_, coerce firstDerivative_)
-
-coerce ::
-  forall units2 units1 dimension space.
-  Units.Coercion (Vector dimension units1 space) (Vector dimension units2 space) =>
-  Vector dimension units1 space ->
-  Vector dimension units2 space
-coerce = Units.coerce
-
-erase ::
-  Units.Coercion (Vector dimension units space) (Vector dimension Unitless space) =>
-  Vector dimension units space ->
-  Vector dimension Unitless space
-erase = coerce
+  (Vector.unerase value_, Vector.unerase firstDerivative_)
