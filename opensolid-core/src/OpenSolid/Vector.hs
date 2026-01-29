@@ -26,7 +26,7 @@ import OpenSolid.Units qualified as Units
 data IsZero = IsZero deriving (Eq, Show)
 
 {-# INLINEABLE zero #-}
-zero :: CoordinateSystem.Vectorial dimension units space => Vector dimension units space
+zero :: CoordinateSystem.Generic dimension units space => Vector dimension units space
 zero = HasZero.zero
 
 {-# INLINEABLE squaredMagnitude_ #-}
@@ -100,7 +100,7 @@ projectionIn givenDirection vector =
   givenDirection .*. componentIn givenDirection vector
 
 sum ::
-  CoordinateSystem.Vectorial dimension units space =>
+  CoordinateSystem.Generic dimension units space =>
   List (Vector dimension units space) ->
   Vector dimension units space
 sum = List.foldl (.+.) zero
