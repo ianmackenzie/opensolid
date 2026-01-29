@@ -142,7 +142,7 @@ desingularize startSingularity curve endSingularity = do
 
 lHopital ::
   ( CoordinateSystem.Generic dimension units1 space
-  , Units.Coercion (Vector dimension Unitless space) (Vector dimension (units1 ?/? units2) space)
+  , CoordinateSystem.Generic dimension (units1 ?/? units2) space
   ) =>
   VectorCurve dimension units1 space ->
   Curve1D units2 ->
