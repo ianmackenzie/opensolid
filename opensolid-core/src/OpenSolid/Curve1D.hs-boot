@@ -61,6 +61,10 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Curve1D units2) (Curve1D units3)
 
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Curve1D units1) (WithNoZeros units2) (Curve1D units3)
+
 constant :: Quantity units -> Curve1D units
 bezier :: NonEmpty (Quantity units) -> Curve1D units
 compiled :: Curve1D units -> Compiled units

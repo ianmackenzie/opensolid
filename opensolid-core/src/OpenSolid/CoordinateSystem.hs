@@ -169,6 +169,14 @@ class
       (VectorCurve dimension units space)
       (Curve1D Unitless)
       (VectorCurve dimension units space)
+  , Division
+      (VectorCurve dimension units space)
+      (Curve1D.WithNoZeros Unitless)
+      (VectorCurve dimension units space)
+  , Division
+      (VectorCurve dimension units space)
+      (Curve1D.WithNoZeros units)
+      (VectorCurve dimension Unitless space)
   , Multiplication
       Number
       (VectorSurfaceFunction dimension units space)

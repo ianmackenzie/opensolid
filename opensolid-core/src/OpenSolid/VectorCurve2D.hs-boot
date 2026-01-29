@@ -20,6 +20,7 @@ where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
+import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -87,6 +88,10 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve2D units1 space) (Quantity units2) (VectorCurve2D units3 space)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (VectorCurve2D units1 space) (Curve1D.WithNoZeros units2) (VectorCurve2D units3 space)
 
 instance
   space1 ~ space2 =>
