@@ -706,14 +706,7 @@ instance
     (Curve1D.WithNoInteriorZeros units2)
     (VectorCurve2D (units1 ?/? units2) space)
   where
-  lhs ?/? Curve1D.WithNoInteriorZeros rhs = do
-    let singularityTolerance = Curve1D.singularityTolerance rhs
-    let maybeSingularity tValue =
-          if Tolerance.using singularityTolerance (Curve1D.evaluate rhs tValue ~= Quantity.zero)
-            then Just (lHopital lhs rhs tValue)
-            else Nothing
-    let interiorQuotient = lhs ?/? Curve1D.WithNoZeros rhs
-    desingularize (maybeSingularity 0) interiorQuotient (maybeSingularity 1)
+  (?/?) = VectorCurve.desingularizedQuotient
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -723,13 +716,6 @@ instance
     (VectorCurve2D units3 space)
   where
   lhs ./. rhs = Units.specialize (lhs ?/? rhs)
-
-lHopital ::
-  VectorCurve2D units1 space ->
-  Curve1D units2 ->
-  Number ->
-  (Vector2D (units1 ?/? units2) space, Vector2D (units1 ?/? units2) space)
-lHopital = VectorCurve.lHopital
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2D units1 space -> Curve1D units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)

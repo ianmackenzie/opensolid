@@ -435,27 +435,13 @@ instance Units.Coercion (WithNoInteriorZeros units1) (WithNoInteriorZeros units2
   coerce (WithNoInteriorZeros curve) = WithNoInteriorZeros (Units.coerce curve)
 
 instance Division_ (Curve1D units1) (WithNoInteriorZeros units2) (Curve1D (units1 ?/? units2)) where
-  lhs ?/? WithNoInteriorZeros rhs = do
-    let rhsSingularityTolerance = singularityTolerance rhs
-    let maybeSingularity tValue =
-          if Tolerance.using rhsSingularityTolerance (evaluate rhs tValue ~= Quantity.zero)
-            then Just (lHopital lhs rhs tValue)
-            else Nothing
-    let interiorQuotient = lhs ?/? WithNoZeros rhs
-    desingularize (maybeSingularity 0) interiorQuotient (maybeSingularity 1)
+  (?/?) = VectorCurve.desingularizedQuotient
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (WithNoInteriorZeros units2) (Curve1D units3)
   where
   lhs ./. rhs = Units.specialize (lhs ?/? rhs)
-
-lHopital ::
-  Curve1D units1 ->
-  Curve1D units2 ->
-  Number ->
-  (Quantity (units1 ?/? units2), Quantity (units1 ?/? units2))
-lHopital = VectorCurve.lHopital
 
 instance
   Units.Quotient units1 units2 units3 =>

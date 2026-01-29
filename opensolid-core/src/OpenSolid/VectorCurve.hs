@@ -11,7 +11,7 @@ module OpenSolid.VectorCurve
   , zeros
   , desingularized
   , desingularize
-  , lHopital
+  , desingularizedQuotient
   , erase
   , unerase
   )
@@ -22,6 +22,7 @@ import OpenSolid.CoordinateSystem (DirectionCurve, Vector, VectorBounds, VectorC
 import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
+import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1d
 import OpenSolid.Curve1D.Zero qualified
 import OpenSolid.Desingularization qualified as Desingularization
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
@@ -142,6 +143,22 @@ desingularize startSingularity curve endSingularity = do
               value1
               firstDerivative1
   desingularized startCurve curve endCurve
+
+desingularizedQuotient ::
+  ( CoordinateSystem.Generic dimension units1 space
+  , CoordinateSystem.Generic dimension (units1 ?/? units2) space
+  ) =>
+  VectorCurve dimension units1 space ->
+  Curve1d.WithNoInteriorZeros units2 ->
+  VectorCurve dimension (units1 ?/? units2) space
+desingularizedQuotient lhs (Curve1D.WithNoInteriorZeros rhs) = do
+  let singularityTolerance = Curve1D.singularityTolerance rhs
+  let maybeSingularity tValue =
+        if Tolerance.using singularityTolerance (Curve1D.evaluate rhs tValue ~= Quantity.zero)
+          then Just (lHopital lhs rhs tValue)
+          else Nothing
+  let interiorQuotient = unerase (erase lhs ./. Curve1D.WithNoZeros (erase rhs))
+  desingularize (maybeSingularity 0) interiorQuotient (maybeSingularity 1)
 
 lHopital ::
   ( CoordinateSystem.Generic dimension units1 space
