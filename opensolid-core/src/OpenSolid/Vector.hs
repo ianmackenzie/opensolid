@@ -11,6 +11,8 @@ module OpenSolid.Vector
   , direction
   , magnitudeAndDirection
   , sum
+  , erase
+  , unerase
   )
 where
 
@@ -104,3 +106,15 @@ sum ::
   List (Vector dimension units space) ->
   Vector dimension units space
 sum = List.foldl (.+.) zero
+
+erase ::
+  CoordinateSystem.Generic dimension units space =>
+  Vector dimension units space ->
+  Vector dimension Unitless space
+erase = Units.coerce
+
+unerase ::
+  CoordinateSystem.Generic dimension units space =>
+  Vector dimension Unitless space ->
+  Vector dimension units space
+unerase = Units.coerce
