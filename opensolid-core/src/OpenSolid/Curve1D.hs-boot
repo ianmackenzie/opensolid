@@ -21,6 +21,7 @@ import {-# SOURCE #-} OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 
 type role Curve1D nominal
@@ -35,6 +36,10 @@ instance Composition (Curve1D Unitless) (Curve1D units) (Curve1D units)
 type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
 
 instance FFI (Curve1D Unitless)
+
+instance HasUnits (Curve1D units) units
+
+instance Units.Coercion (Curve1D units1) (Curve1D units2)
 
 newtype WithNoZeros units = WithNoZeros (Curve1D units)
 

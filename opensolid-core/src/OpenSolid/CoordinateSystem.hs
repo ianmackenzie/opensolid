@@ -130,6 +130,8 @@ class
   , HasUnits (Vector dimension units space) units
   , Units.Coercion (Vector dimension units space) (Vector dimension Unitless space)
   , Units.Coercion (Vector dimension Unitless space) (Vector dimension units space)
+  , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
+  , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
   , Eq (Vector dimension units space)
   , ApproximateEquality (Vector dimension units space) units
   , Negation (Vector dimension units space)
