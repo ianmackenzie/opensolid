@@ -62,7 +62,7 @@ normalize vector = do
     else vector ./. vectorMagnitude
 
 direction ::
-  (Tolerance units, CoordinateSystem.Vectorial dimension units space) =>
+  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
   Vector dimension units space ->
   Result IsZero (Direction dimension space)
 direction vector = do
