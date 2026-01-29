@@ -12,6 +12,8 @@ module OpenSolid.VectorCurve
   , desingularized
   , desingularize
   , lHopital
+  , erase
+  , unerase
   )
 where
 
@@ -28,6 +30,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector qualified as Vector
 
 data IsZero = IsZero deriving (Eq, Show)
@@ -158,3 +161,15 @@ lHopital lhs rhs tValue = do
   let value_ = lhs' ./. rhs'
   let firstDerivative_ = (lhs'' .*. rhs' .-. lhs' .*. rhs'') ./. (2 *. Quantity.squared rhs')
   (Vector.unerase value_, Vector.unerase firstDerivative_)
+
+erase ::
+  CoordinateSystem.Generic dimension units space =>
+  VectorCurve dimension units space ->
+  VectorCurve dimension Unitless space
+erase = Units.coerce
+
+unerase ::
+  CoordinateSystem.Generic dimension units space =>
+  VectorCurve dimension Unitless space ->
+  VectorCurve dimension units space
+unerase = Units.coerce
