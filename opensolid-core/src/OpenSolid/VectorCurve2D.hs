@@ -511,9 +511,10 @@ new givenCompiled givenDerivative = result
  where
   -- The test value to use to check if a curve is (likely) zero everywhere
   maxSampledMagnitude = NonEmpty.maximumOf (Vector2D.magnitude . evaluate result) Parameter.samples
+  -- The magnitude of this curve, assuming it has no interior zeros
+  nonZeroMagnitude = VectorCurve2D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
   -- The normalized version of this curve, assuming it has no interior zeros
-  nonZeroNormalized =
-    result ./. VectorCurve2D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
+  nonZeroNormalized = result ./. nonZeroMagnitude
   result =
     VectorCurve2D
       { compiled = givenCompiled
