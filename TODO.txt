@@ -1,3 +1,14 @@
+Split CoordinateSystem into multiple modules/typeclasses
+- Vector module with Vector type family and Exists typeclass
+- might not even need to have Direction.Exists instance for 1D!
+  - can constrain some vector operations by Direction.Exists...
+- switch to Void for 'space' type of 1D values?
+  - maybe add Void (and Natural) to OpenSolid.Prelude...
+- might not need CoordinateSystem at all any more
+  - nice for compile times!
+
+Add generic VectorCurve.arc
+
 Maybe have Curve.intersections that returns slightly simplified IntersectionPoint type, with no sign?
 - crossing or tangent indicator only
 - Curve2D (and maybe SurfaceCurve3D) can add crossing sign if desired
