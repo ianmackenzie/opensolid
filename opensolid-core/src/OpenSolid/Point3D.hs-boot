@@ -1,5 +1,6 @@
 module OpenSolid.Point3D
-  ( coerce
+  ( Point3D
+  , coerce
   , transformBy
   , placeIn
   , relativeTo

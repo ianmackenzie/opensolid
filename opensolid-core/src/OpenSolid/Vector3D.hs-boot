@@ -1,5 +1,6 @@
 module OpenSolid.Vector3D
-  ( zero
+  ( Vector3D
+  , zero
   , coerce
   , transformBy
   , placeIn

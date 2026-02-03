@@ -1,5 +1,6 @@
 module OpenSolid.Point2D
-  ( origin
+  ( Point2D
+  , origin
   , coerce
   , transformBy
   , placeIn

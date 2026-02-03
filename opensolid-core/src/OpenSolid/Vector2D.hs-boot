@@ -1,5 +1,6 @@
 module OpenSolid.Vector2D
-  ( zero
+  ( Vector2D
+  , zero
   , coerce
   , normalize
   , transformBy
