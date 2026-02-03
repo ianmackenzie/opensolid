@@ -128,12 +128,23 @@ instance Multiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?
   {-# INLINE (?*?) #-}
   Quantity x ?*? Quantity y = Quantity (x * y)
 
+instance DotMultiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?*? units2)) where
+  {-# INLINE dot_ #-}
+  dot_ = (?*?)
+
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Quantity units2) (Quantity units3)
   where
   {-# INLINEABLE (.*.) #-}
   Quantity x .*. Quantity y = Quantity (x * y)
+
+instance
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Quantity units1) (Quantity units2) (Quantity units3)
+  where
+  {-# INLINE dot #-}
+  dot = (.*.)
 
 instance Division_ (Quantity units1) (Quantity units2) (Quantity (units1 ?/? units2)) where
   {-# INLINE (?/?) #-}
