@@ -4,6 +4,7 @@ module OpenSolid.Direction2D
   , yComponent
   , components
   , unsafe
+  , unwrap
   , coerce
   , x
   , y
@@ -75,6 +76,10 @@ components (Direction2D dx dy) = (dx, dy)
 {-# INLINE unsafe #-}
 unsafe :: Vector2D Unitless space -> Direction2D space
 unsafe = Unit2D
+
+{-# INLINE unwrap #-}
+unwrap :: Direction2D space -> Vector2D Unitless space
+unwrap (Unit2D vector) = vector
 
 {-# INLINE coerce #-}
 coerce :: Direction2D space1 -> Direction2D space2

@@ -2,6 +2,7 @@ module OpenSolid.Direction3D
   ( Direction3D
   , components
   , unsafe
+  , unwrap
   , coerce
   , upward
   , downward
@@ -58,6 +59,10 @@ components convention (Unit3D vector) = Vector3D.components convention vector
 
 unsafe :: Vector3D Unitless space -> Direction3D space
 unsafe = Unit3D
+
+{-# INLINE unwrap #-}
+unwrap :: Direction3D space -> Vector3D Unitless space
+unwrap (Unit3D vector) = vector
 
 {-# INLINE coerce #-}
 coerce :: Direction3D space1 -> Direction3D space2
