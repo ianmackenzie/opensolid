@@ -1,7 +1,5 @@
 module OpenSolid.SurfaceFunction1D.Blending (desingularize) where
 
-import OpenSolid.CoordinateSystem (VectorSurfaceFunction)
-import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization (t0, t1)
 import OpenSolid.Prelude
@@ -10,6 +8,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.VectorSurfaceFunction (VectorSurfaceFunction)
 import OpenSolid.VectorSurfaceFunction qualified as VectorSurfaceFunction
 import Prelude qualified
 
@@ -27,7 +26,7 @@ type Singularity dimension units space =
   )
 
 desingularize ::
-  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction.Exists dimension units space =>
   ( SurfaceFunction1D Unitless ->
     VectorSurfaceFunction dimension units space ->
     VectorSurfaceFunction dimension units space ->
@@ -88,7 +87,7 @@ desingularize
       _ -> throw UnsupportedCombinationOfSingularities
 
 blendU0 ::
-  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction.Exists dimension units space =>
   Singularity dimension units space ->
   VectorSurfaceFunction dimension units space ->
   VectorSurfaceFunction dimension units space
@@ -104,7 +103,7 @@ blendU0 (f0, dfdu0) f =
     ((t0 .-. SurfaceFunction1D.u) ./. t0)
 
 blendU1 ::
-  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction.Exists dimension units space =>
   VectorSurfaceFunction dimension units space ->
   Singularity dimension units space ->
   VectorSurfaceFunction dimension units space
@@ -120,7 +119,7 @@ blendU1 f (f1, dfdu1) =
     ((SurfaceFunction1D.u .-. t1) ./. t0)
 
 blendV0 ::
-  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction.Exists dimension units space =>
   Singularity dimension units space ->
   VectorSurfaceFunction dimension units space ->
   VectorSurfaceFunction dimension units space
@@ -136,7 +135,7 @@ blendV0 (f0, dfdv0) f =
     ((t0 .-. SurfaceFunction1D.v) ./. t0)
 
 blendV1 ::
-  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction.Exists dimension units space =>
   VectorSurfaceFunction dimension units space ->
   Singularity dimension units space ->
   VectorSurfaceFunction dimension units space
@@ -152,7 +151,7 @@ blendV1 f (f1, dfdv1) =
     ((SurfaceFunction1D.v .-. t1) ./. t0)
 
 blend ::
-  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction.Exists dimension units space =>
   ( VectorSurfaceFunction dimension units space
   , VectorSurfaceFunction dimension units space
   , VectorSurfaceFunction dimension units space
@@ -171,7 +170,7 @@ blend (f00, f01, f02) (f10, f11) t = do
   b00 .*. f00 .+. b01 .*. f01 .+. b02 .*. f02 .+. b10 .*. f10 .+. b11 .*. f11
 
 d ::
-  CoordinateSystem.Generic dimension units space =>
+  VectorSurfaceFunction.Exists dimension units space =>
   SurfaceParameter ->
   VectorSurfaceFunction dimension units space ->
   VectorSurfaceFunction dimension units space

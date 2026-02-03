@@ -1,5 +1,7 @@
 module OpenSolid.VectorCurve
-  ( IsZero (IsZero)
+  ( VectorCurve
+  , Exists
+  , IsZero (IsZero)
   , isZero
   , bezier
   , evaluate
@@ -17,71 +19,133 @@ module OpenSolid.VectorCurve
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Bezier qualified as Bezier
-import OpenSolid.CoordinateSystem (DirectionCurve, Vector, VectorBounds, VectorCurve)
-import OpenSolid.CoordinateSystem qualified as CoordinateSystem
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1d
 import OpenSolid.Curve1D.Zero qualified
 import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.DirectionCurve (DirectionCurve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
-import OpenSolid.Interval (Interval)
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Sign qualified as Sign
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
+import OpenSolid.VectorBounds (VectorBounds)
+import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
+import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
+import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
+import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
+
+type family
+  VectorCurve dimension units space =
+    vectorCurve | vectorCurve -> dimension units space
+  where
+  VectorCurve 1 units Void = Curve1D units
+  VectorCurve 2 units space = VectorCurve2D units space
+  VectorCurve 3 units space = VectorCurve3D units space
 
 data IsZero = IsZero deriving (Eq, Show)
 
-isZero ::
-  (CoordinateSystem.Generic dimension units space, Tolerance units) =>
-  VectorCurve dimension units space ->
-  Bool
-isZero = CoordinateSystem.vectorCurveIsZero
+class
+  ( Vector.Exists dimension units space
+  , Exists dimension Unitless space
+  , HasUnits (Vector dimension units space) units
+  , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
+  , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
+  , Multiplication Number (VectorCurve dimension units space) (VectorCurve dimension units space)
+  , Multiplication (VectorCurve dimension units space) Number (VectorCurve dimension units space)
+  , Multiplication
+      (Curve1D Unitless)
+      (VectorCurve dimension units space)
+      (VectorCurve dimension units space)
+  , Multiplication
+      (VectorCurve dimension units space)
+      (Curve1D Unitless)
+      (VectorCurve dimension units space)
+  , Division
+      (VectorCurve dimension units space)
+      (Curve1D.WithNoZeros Unitless)
+      (VectorCurve dimension units space)
+  , Division
+      (VectorCurve dimension units space)
+      (Curve1D.WithNoZeros units)
+      (VectorCurve dimension Unitless space)
+  ) =>
+  Exists dimension units space
+  where
+  constant :: Vector dimension units space -> VectorCurve dimension units space
+  isZero :: Tolerance units => VectorCurve dimension units space -> Bool
+  bezier :: NonEmpty (Vector dimension units space) -> VectorCurve dimension units space
+  evaluate :: VectorCurve dimension units space -> Number -> Vector dimension units space
+  evaluateBounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
+  derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
+  squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
+  normalize :: Tolerance units => VectorCurve dimension units space -> VectorCurve dimension Unitless space
+  desingularized ::
+    VectorCurve dimension units space ->
+    VectorCurve dimension units space ->
+    VectorCurve dimension units space ->
+    VectorCurve dimension units space
 
-bezier ::
-  CoordinateSystem.Generic dimension units space =>
-  NonEmpty (Vector dimension units space) ->
-  VectorCurve dimension units space
-bezier = CoordinateSystem.bezierVectorCurve
+instance Exists 1 units Void where
+  constant = Curve1D.constant
+  isZero curve = curve ~= Curve1D.constant Quantity.zero
+  derivative = Curve1D.derivative
+  evaluate = Curve1D.evaluate
+  evaluateBounds = Curve1D.evaluateBounds
+  bezier = Curve1D.bezier
+  desingularized = Curve1D.desingularized
+  squaredMagnitude_ = Curve1D.squared_
+  normalize curve
+    | isZero curve = zero
+    | otherwise = do
+        let normalizedValue = normalizeQuantity . evaluate curve
+        let normalizedBounds = normalizeInterval . evaluateBounds curve
+        let compiledNormalized = CompiledFunction.abstract normalizedValue normalizedBounds
+        Curve1d.new compiledNormalized zero
 
-evaluate ::
-  CoordinateSystem.Generic dimension units space =>
-  VectorCurve dimension units space ->
-  Number ->
-  Vector dimension units space
-evaluate = CoordinateSystem.evaluateVectorCurve
+normalizeQuantity :: Quantity units -> Number
+normalizeQuantity = Sign.value . Quantity.sign
 
-evaluateBounds ::
-  CoordinateSystem.Generic dimension units space =>
-  VectorCurve dimension units space ->
-  Interval Unitless ->
-  VectorBounds dimension units space
-evaluateBounds = CoordinateSystem.evaluateVectorCurveBounds
+normalizeInterval :: Interval units -> Interval Unitless
+normalizeInterval (Interval low high) = Interval (normalizeQuantity low) (normalizeQuantity high)
 
-derivative ::
-  CoordinateSystem.Generic dimension units space =>
-  VectorCurve dimension units space ->
-  VectorCurve dimension units space
-derivative = CoordinateSystem.vectorCurveDerivative
+instance Exists 2 units space where
+  constant = VectorCurve2D.constant
+  isZero = VectorCurve2D.isZero
+  derivative = VectorCurve2D.derivative
+  evaluate = VectorCurve2D.evaluate
+  evaluateBounds = VectorCurve2D.evaluateBounds
+  bezier = VectorCurve2D.bezier
+  desingularized = VectorCurve2D.desingularized
+  normalize = VectorCurve2D.normalize
+  squaredMagnitude_ = VectorCurve2D.squaredMagnitude_
 
-squaredMagnitude_ ::
-  CoordinateSystem.Vectorial dimension units space =>
-  VectorCurve dimension units space ->
-  Curve1D (units ?*? units)
-squaredMagnitude_ = CoordinateSystem.vectorCurveSquaredMagnitude_
+instance Exists 3 units space where
+  constant = VectorCurve3D.constant
+  isZero = VectorCurve3D.isZero
+  derivative = VectorCurve3D.derivative
+  evaluate = VectorCurve3D.evaluate
+  evaluateBounds = VectorCurve3D.evaluateBounds
+  bezier = VectorCurve3D.bezier
+  desingularized = VectorCurve3D.desingularized
+  normalize = VectorCurve3D.normalize
+  squaredMagnitude_ = VectorCurve3D.squaredMagnitude_
 
-normalize ::
-  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
-  VectorCurve dimension units space ->
-  VectorCurve dimension Unitless space
-normalize = CoordinateSystem.normalizeVectorCurve
+zero :: Exists dimension units space => VectorCurve dimension units space
+zero = constant Vector.zero
 
 direction ::
-  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
+  (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (DirectionCurve dimension space)
 direction vectorCurve =
@@ -90,7 +154,7 @@ direction vectorCurve =
     else Ok (DirectionCurve.unsafe (normalize vectorCurve))
 
 zeros ::
-  (CoordinateSystem.Vectorial dimension units space, Tolerance units) =>
+  (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (List Number)
 zeros vectorCurve =
@@ -98,16 +162,8 @@ zeros vectorCurve =
     Ok zeros1D -> Ok (List.map (.location) zeros1D)
     Error Curve1D.IsZero -> Error IsZero
 
-desingularized ::
-  CoordinateSystem.Generic dimension units space =>
-  VectorCurve dimension units space ->
-  VectorCurve dimension units space ->
-  VectorCurve dimension units space ->
-  VectorCurve dimension units space
-desingularized = CoordinateSystem.desingularizedVectorCurve
-
 desingularize ::
-  CoordinateSystem.Generic dimension units space =>
+  Exists dimension units space =>
   Maybe (Vector dimension units space, Vector dimension units space) ->
   VectorCurve dimension units space ->
   Maybe (Vector dimension units space, Vector dimension units space) ->
@@ -145,8 +201,8 @@ desingularize startSingularity curve endSingularity = do
   desingularized startCurve curve endCurve
 
 desingularizedQuotient ::
-  ( CoordinateSystem.Generic dimension units1 space
-  , CoordinateSystem.Generic dimension (units1 ?/? units2) space
+  ( Exists dimension units1 space
+  , Exists dimension (units1 ?/? units2) space
   ) =>
   VectorCurve dimension units1 space ->
   Curve1d.WithNoInteriorZeros units2 ->
@@ -161,8 +217,8 @@ desingularizedQuotient lhs (Curve1D.WithNoInteriorZeros rhs) = do
   desingularize (maybeSingularity 0) interiorQuotient (maybeSingularity 1)
 
 lHopital ::
-  ( CoordinateSystem.Generic dimension units1 space
-  , CoordinateSystem.Generic dimension (units1 ?/? units2) space
+  ( Exists dimension units1 space
+  , Exists dimension (units1 ?/? units2) space
   ) =>
   VectorCurve dimension units1 space ->
   Curve1D units2 ->
@@ -180,13 +236,13 @@ lHopital lhs rhs tValue = do
   (Vector.unerase value_, Vector.unerase firstDerivative_)
 
 erase ::
-  CoordinateSystem.Generic dimension units space =>
+  Exists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension Unitless space
 erase = Units.coerce
 
 unerase ::
-  CoordinateSystem.Generic dimension units space =>
+  Exists dimension units space =>
   VectorCurve dimension Unitless space ->
   VectorCurve dimension units space
 unerase = Units.coerce

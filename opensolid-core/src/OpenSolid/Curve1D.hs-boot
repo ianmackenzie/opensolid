@@ -5,6 +5,7 @@ module OpenSolid.Curve1D
   , IsZero (IsZero)
   , WithNoInteriorZeros (WithNoInteriorZeros)
   , WithNoZeros (WithNoZeros)
+  , new
   , constant
   , bezier
   , compiled
@@ -14,6 +15,7 @@ module OpenSolid.Curve1D
   , zeros
   , singularityTolerance
   , desingularized
+  , squared_
   )
 where
 
@@ -66,6 +68,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (WithNoZeros units2) (Curve1D units3)
 
+new :: Compiled units -> Curve1D units -> Curve1D units
 constant :: Quantity units -> Curve1D units
 bezier :: NonEmpty (Quantity units) -> Curve1D units
 compiled :: Curve1D units -> Compiled units
@@ -75,3 +78,4 @@ evaluateBounds :: Curve1D units -> Interval Unitless -> Interval units
 zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
 singularityTolerance :: Curve1D units -> Quantity units
 desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
+squared_ :: Curve1D units -> Curve1D (units ?*? units)

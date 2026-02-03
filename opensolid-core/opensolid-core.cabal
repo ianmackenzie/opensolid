@@ -116,7 +116,6 @@ library
     OpenSolid.CompiledFunction
     OpenSolid.Composition
     OpenSolid.Convention3D
-    OpenSolid.CoordinateSystem
     OpenSolid.Curve
     OpenSolid.Curve1D
     OpenSolid.Curve1D.WithNoInteriorZeros
@@ -183,6 +182,7 @@ library
     OpenSolid.PbrMaterial
     OpenSolid.Plane3D
     OpenSolid.PlaneOrientation3D
+    OpenSolid.Point
     OpenSolid.Point2D
     OpenSolid.Point3D
     OpenSolid.Polygon2D
@@ -235,6 +235,7 @@ library
     OpenSolid.Vector
     OpenSolid.Vector2D
     OpenSolid.Vector3D
+    OpenSolid.VectorBounds
     OpenSolid.VectorBounds2D
     OpenSolid.VectorBounds3D
     OpenSolid.VectorCurve

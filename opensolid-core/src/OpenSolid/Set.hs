@@ -13,11 +13,8 @@ module OpenSolid.Set
   )
 where
 
-import GHC.Num (Natural)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.CoordinateSystem (CoordinateSystem)
-import OpenSolid.CoordinateSystem qualified as CoordinateSystem
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Interval qualified as Interval
@@ -25,34 +22,32 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 
-data Set (dimension :: Natural) (units :: Type) (space :: Type) (item :: Type) where
+data Set dimension units space item where
   Leaf ::
-    CoordinateSystem dimension units space =>
     Bounds dimension units space ->
     item ->
     Set dimension units space item
   Node ::
-    CoordinateSystem dimension units space =>
     Bounds dimension units space ->
     Set dimension units space item ->
     Set dimension units space item ->
     Set dimension units space item
 
 bounds ::
-  CoordinateSystem dimension units space =>
+  Bounds.Exists dimension units space =>
   Set dimension units space item ->
   Bounds dimension units space
 bounds (Node nodeBounds _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
 one ::
-  CoordinateSystem dimension units space =>
+  Bounds.Exists dimension units space =>
   (item, Bounds dimension units space) ->
   Set dimension units space item
 one (item, itemBounds) = Leaf itemBounds item
 
 two ::
-  CoordinateSystem dimension units space =>
+  Bounds.Exists dimension units space =>
   (item, Bounds dimension units space) ->
   (item, Bounds dimension units space) ->
   Set dimension units space item
@@ -61,20 +56,20 @@ two (firstItem, firstBounds) (secondItem, secondBounds) = do
   Node nodeBounds (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
 
 partition ::
-  CoordinateSystem dimension units space =>
+  Bounds.Exists dimension units space =>
   NonEmpty (item, Bounds dimension units space) ->
   Set dimension units space item
 partition boundedItems = build (NonEmpty.length boundedItems) boundedItems 0
 
 partitionBy ::
-  CoordinateSystem dimension units space =>
+  Bounds.Exists dimension units space =>
   (item -> Bounds dimension units space) ->
   NonEmpty item ->
   Set dimension units space item
 partitionBy function items = partition (NonEmpty.map (Pair.decorate function) items)
 
 build ::
-  CoordinateSystem dimension units space =>
+  Bounds.Exists dimension units space =>
   Int ->
   NonEmpty (item, Bounds dimension units space) ->
   Int ->
@@ -85,7 +80,7 @@ build count boundedItems index
       Leaf itemBounds item
   | otherwise = assert (count >= 2 && NonEmpty.length boundedItems == count) do
       let indexedCoordinateMidpoint (_, itemBounds) =
-            Interval.midpoint (CoordinateSystem.cyclicBoundsCoordinate index itemBounds)
+            Interval.midpoint (Bounds.cyclicCoordinate index itemBounds)
       let sorted = NonEmpty.sortBy indexedCoordinateMidpoint boundedItems
       let leftCount = count `div` 2
       let rightCount = count - leftCount
@@ -115,7 +110,7 @@ gather set accumulated = case set of
   Leaf _ item -> NonEmpty.push item accumulated
 
 union ::
-  CoordinateSystem dimension units space =>
+  Bounds.Exists dimension units space =>
   Set dimension units space item ->
   Set dimension units space item ->
   Set dimension units space item
@@ -124,7 +119,7 @@ union left right = do
   Node aggregateBounds left right
 
 find ::
-  (CoordinateSystem dimension units space, Tolerance units) =>
+  (Bounds.Exists dimension units space, Tolerance units) =>
   Bounds dimension units space ->
   Set dimension units space item ->
   Fuzzy (Maybe item)
@@ -142,14 +137,14 @@ find searchBounds set = case set of
     Resolved (if searchBounds `intersects` itemBounds then Just item else Nothing)
 
 filter ::
-  (CoordinateSystem dimension units space, Tolerance units) =>
+  (Bounds.Exists dimension units space, Tolerance units) =>
   Bounds dimension units space ->
   Set dimension units space item ->
   List item
 filter searchBounds set = search searchBounds set []
 
 search ::
-  (CoordinateSystem dimension units space, Tolerance units) =>
+  (Bounds.Exists dimension units space, Tolerance units) =>
   Bounds dimension units space ->
   Set dimension units space item ->
   List item ->
