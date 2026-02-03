@@ -1,6 +1,7 @@
 module OpenSolid.Sign
   ( Sign (Sign, Positive, Negative)
   , random
+  , value
   )
 where
 
@@ -55,3 +56,7 @@ instance Multiplication Sign Sign Sign where
 
 random :: Random.Generator Sign
 random = Random.Generator System.Random.uniform
+
+{-# INLINE value #-}
+value :: Sign -> Number
+value (Unit x) = x
