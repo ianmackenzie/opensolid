@@ -9,6 +9,7 @@ module OpenSolid.Curve
   )
 where
 
+import OpenSolid.Bounds qualified as Bounds
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -16,6 +17,7 @@ import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Point (Point)
+import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
@@ -27,7 +29,9 @@ type family Curve dimension units space = curve | curve -> dimension units space
 data IsPoint = IsPoint deriving (Eq, Show)
 
 class
-  ( VectorCurve.Exists dimension units space
+  ( Point.Exists dimension units space
+  , Bounds.Exists dimension units space
+  , VectorCurve.Exists dimension units space
   , Subtraction
       (Curve dimension units space)
       (Point dimension units space)
