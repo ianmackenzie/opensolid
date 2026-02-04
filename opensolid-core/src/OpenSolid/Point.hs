@@ -1,5 +1,6 @@
 module OpenSolid.Point
   ( Point
+  , Exists
   )
 where
 
