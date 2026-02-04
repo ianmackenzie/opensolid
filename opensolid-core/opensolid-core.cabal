@@ -117,6 +117,9 @@ library
     OpenSolid.Composition
     OpenSolid.Convention3D
     OpenSolid.Curve
+    OpenSolid.Curve.IntersectionPoint
+    OpenSolid.Curve.Intersections
+    OpenSolid.Curve.OverlappingSegment
     OpenSolid.Curve1D
     OpenSolid.Curve1D.WithNoInteriorZeros
     OpenSolid.Curve1D.WithNoZeros
