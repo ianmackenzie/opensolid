@@ -7,6 +7,7 @@ module OpenSolid.Curve3D
   , derivative
   , evaluate
   , evaluateBounds
+  , bounds
   , reverse
   )
 where
@@ -86,4 +87,5 @@ on :: Plane3D global local -> Curve2D Meters local -> Curve3D global
 derivative :: Curve3D space -> VectorCurve3D Meters space
 evaluate :: Curve3D space -> Number -> Point3D space
 evaluateBounds :: Curve3D space -> Interval Unitless -> Bounds3D space
+bounds :: Curve3D space -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space
