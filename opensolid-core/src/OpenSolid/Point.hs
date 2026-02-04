@@ -4,17 +4,21 @@ module OpenSolid.Point
   )
 where
 
+import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Vector (Vector)
+import OpenSolid.Vector qualified as Vector
 
 type family Point dimension units space where
   Point 2 units space = Point2D units space
   Point 3 Meters space = Point3D space
 
 class
-  ( Addition
+  ( Vector.Exists dimension units space
+  , Bounds.Exists dimension units space
+  , Addition
       (Point dimension units space)
       (Vector dimension units space)
       (Point dimension units space)

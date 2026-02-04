@@ -11,6 +11,7 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Point (Point)
+import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D (Bounds2D), Bounds3D (Bounds3D))
 
@@ -19,7 +20,8 @@ type family Bounds dimension units space = bounds | bounds -> dimension units sp
   Bounds 3 Meters space = Bounds3D space
 
 class
-  ( Intersects (Point dimension units space) (Bounds dimension units space) units
+  ( Point.Exists dimension units space
+  , Intersects (Point dimension units space) (Bounds dimension units space) units
   , Intersects (Bounds dimension units space) (Point dimension units space) units
   , Intersects (Bounds dimension units space) (Bounds dimension units space) units
   ) =>
