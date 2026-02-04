@@ -9,6 +9,7 @@ module OpenSolid.Text
   , char
   , show
   , isEmpty
+  , length
   , replace
   , split
   , lines
@@ -78,6 +79,9 @@ show value = pack (Prelude.show value)
 
 isEmpty :: Text -> Bool
 isEmpty = Data.Text.null
+
+length :: Text -> Int
+length = Data.Text.length
 
 replace :: Text -> Text -> Text -> Text
 replace = Data.Text.replace
