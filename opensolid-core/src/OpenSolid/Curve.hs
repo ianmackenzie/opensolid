@@ -3,12 +3,14 @@ module OpenSolid.Curve
   , Exists
   , IsPoint (IsPoint)
   , derivative
+  , bounds
   , secondDerivative
   , tangentDirection
   , findPoint
   )
 where
 
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
@@ -44,12 +46,15 @@ class
   Exists dimension units space
   where
   derivative :: Curve dimension units space -> VectorCurve dimension units space
+  bounds :: Curve dimension units space -> Bounds dimension units space
 
 instance Exists 2 units space where
   derivative = Curve2D.derivative
+  bounds = Curve2D.bounds
 
 instance Exists 3 Meters space where
   derivative = Curve3D.derivative
+  bounds = Curve3D.bounds
 
 secondDerivative ::
   Exists dimension units space =>
