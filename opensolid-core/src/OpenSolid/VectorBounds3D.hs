@@ -41,6 +41,7 @@ module OpenSolid.VectorBounds3D
   , rotateIn
   , rotateAround
   , tripleProduct
+  , tripleProduct_
   )
 where
 
@@ -449,11 +450,22 @@ rotateAround :: Axis3D space -> Angle -> VectorBounds3D units space -> VectorBou
 rotateAround = Transform3D.rotateAroundImpl transformBy
 
 tripleProduct ::
+  ( Units.Product units units squaredUnits
+  , Units.Product squaredUnits units cubedUnits
+  ) =>
+  VectorBounds3D units space ->
+  VectorBounds3D units space ->
+  VectorBounds3D units space ->
+  Interval cubedUnits
+tripleProduct bounds1 bounds2 bounds3 =
+  Units.coerce (tripleProduct_ bounds1 bounds2 bounds3)
+
+tripleProduct_ ::
   VectorBounds3D units space ->
   VectorBounds3D units space ->
   VectorBounds3D units space ->
   Interval ((units ?*? units) ?*? units)
-tripleProduct bounds1 bounds2 bounds3 = do
+tripleProduct_ bounds1 bounds2 bounds3 = do
   let !(VectorBounds3D# xMin1# xMax1# yMin1# yMax1# zMin1# zMax1#) = bounds1
   let !(VectorBounds3D# xMin2# xMax2# yMin2# yMax2# zMin2# zMax2#) = bounds2
   let !(VectorBounds3D# xMin3# xMax3# yMin3# yMax3# zMin3# zMax3#) = bounds3

@@ -1,6 +1,5 @@
 module Tests.VectorBounds3D (tests) where
 
-import OpenSolid.Length qualified as Length
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Random (Generator)
@@ -10,6 +9,7 @@ import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
+import OpenSolid.Volume qualified as Volume
 import Test (Test)
 import Test qualified
 import Tests.Random qualified
@@ -73,6 +73,6 @@ tripleProduct = Test.check 1000 "tripleProduct" Test.do
   (bounds2, vector2) <- boundsAndContainedVector
   (bounds3, vector3) <- boundsAndContainedVector
   let boundsTripleProduct = VectorBounds3D.tripleProduct bounds1 bounds2 bounds3
-  let vectorTripleProduct = (vector1 `cross_` vector2) `dot_` vector3
-  Tolerance.using (1e-9 * (Length.meter ?*? Length.meter ?*? Length.meter)) $
+  let vectorTripleProduct = (vector1 `cross` vector2) `dot` vector3
+  Tolerance.using (1e-9 * Volume.cubicMeter) $
     Test.expect (vectorTripleProduct `intersects` boundsTripleProduct)
