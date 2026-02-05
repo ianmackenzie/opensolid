@@ -1,5 +1,3 @@
-{-# LANGUAGE NoFieldSelectors #-}
-
 module OpenSolid.FFI
   ( FFI (representation)
   , Space
