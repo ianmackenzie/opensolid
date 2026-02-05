@@ -4,7 +4,6 @@ module OpenSolid.Curve2D.Intersections
   )
 where
 
-import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -26,6 +25,8 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Search qualified as Search
+import OpenSolid.Search.Domain qualified as Domain
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
@@ -53,23 +54,23 @@ data Problem units space = Problem
 
 data Classification
   = InteriorInterior
-  | InteriorEndpoint Bisection.Size
-  | EndpointEndpoint Bisection.Size Sign
+  | InteriorEndpoint Domain.Size
+  | EndpointEndpoint Domain.Size Sign
 
 classify :: Interval Unitless -> Interval Unitless -> Fuzzy Classification
 classify tBounds1 tBounds2 =
-  case (Bisection.classify tBounds1, Bisection.classify tBounds2) of
-    (Bisection.Interior, Bisection.Interior) -> Resolved InteriorInterior
-    (Bisection.Interior, Bisection.Start size) -> Resolved (InteriorEndpoint size)
-    (Bisection.Interior, Bisection.End size) -> Resolved (InteriorEndpoint size)
-    (Bisection.Start size, Bisection.Interior) -> Resolved (InteriorEndpoint size)
-    (Bisection.End size, Bisection.Interior) -> Resolved (InteriorEndpoint size)
-    (Bisection.Start size1, Bisection.Start size2) -> Resolved (EndpointEndpoint (max size1 size2) Negative)
-    (Bisection.Start size1, Bisection.End size2) -> Resolved (EndpointEndpoint (max size1 size2) Positive)
-    (Bisection.End size1, Bisection.Start size2) -> Resolved (EndpointEndpoint (max size1 size2) Positive)
-    (Bisection.End size1, Bisection.End size2) -> Resolved (EndpointEndpoint (max size1 size2) Negative)
-    (Bisection.Entire, _) -> Unresolved
-    (_, Bisection.Entire) -> Unresolved
+  case (Domain.classify tBounds1, Domain.classify tBounds2) of
+    (Domain.Interior, Domain.Interior) -> Resolved InteriorInterior
+    (Domain.Interior, Domain.Start size) -> Resolved (InteriorEndpoint size)
+    (Domain.Interior, Domain.End size) -> Resolved (InteriorEndpoint size)
+    (Domain.Start size, Domain.Interior) -> Resolved (InteriorEndpoint size)
+    (Domain.End size, Domain.Interior) -> Resolved (InteriorEndpoint size)
+    (Domain.Start size1, Domain.Start size2) -> Resolved (EndpointEndpoint (max size1 size2) Negative)
+    (Domain.Start size1, Domain.End size2) -> Resolved (EndpointEndpoint (max size1 size2) Positive)
+    (Domain.End size1, Domain.Start size2) -> Resolved (EndpointEndpoint (max size1 size2) Positive)
+    (Domain.End size1, Domain.End size2) -> Resolved (EndpointEndpoint (max size1 size2) Negative)
+    (Domain.Entire, _) -> Unresolved
+    (_, Domain.Entire) -> Unresolved
 
 crossingIntersection ::
   Tolerance units =>
@@ -82,7 +83,7 @@ crossingIntersection problem tBounds1 tBounds2 sign = do
   let Problem{curve1, curve2, crossingSolutionTarget} = problem
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = NewtonRaphson.surface2D crossingSolutionTarget uvPoint0
-  let isInterior = Bisection.isInterior t1 tBounds1 && Bisection.isInterior t2 tBounds2
+  let isInterior = Domain.isInterior t1 tBounds1 && Domain.isInterior t2 tBounds2
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
   if isInterior && pointsAreEqual
     then Resolved (Just (IntersectionPoint.crossing t1 t2 sign))
@@ -98,7 +99,7 @@ tangentIntersection problem tBounds1 tBounds2 = do
   let Problem{curve1, curve2, tangent1, tangent2, tangentSolutionTarget} = problem
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = NewtonRaphson.surface2D tangentSolutionTarget uvPoint0
-  let isInterior = Bisection.isInterior t1 tBounds1 && Bisection.isInterior t2 tBounds2
+  let isInterior = Domain.isInterior t1 tBounds1 && Domain.isInterior t2 tBounds2
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
   let tangentDirection1 = DirectionCurve2D.evaluate tangent1 t1
   let tangentDirection2 = DirectionCurve2D.evaluate tangent2 t2
@@ -112,11 +113,12 @@ findIntersectionPoint ::
   Tolerance units =>
   Problem units space ->
   (Interval Unitless, Interval Unitless) ->
+  (Interval Unitless, Interval Unitless) ->
   Fuzzy (Maybe IntersectionPoint)
-findIntersectionPoint problem (tBounds1, tBounds2) = do
+findIntersectionPoint problem _ (tBounds1, tBounds2) = do
   let Problem{curve1, curve2, tangent1, tangent2} = problem
-  let interiorBounds1 = Curve2D.evaluateBounds curve1 (Bisection.interiorOf tBounds1)
-  let interiorBounds2 = Curve2D.evaluateBounds curve2 (Bisection.interiorOf tBounds2)
+  let interiorBounds1 = Curve2D.evaluateBounds curve1 (Domain.interiorOf tBounds1)
+  let interiorBounds2 = Curve2D.evaluateBounds curve2 (Domain.interiorOf tBounds2)
   if not (interiorBounds1 `intersects` interiorBounds2)
     then Resolved Nothing
     else do
@@ -135,7 +137,7 @@ findIntersectionPoint problem (tBounds1, tBounds2) = do
               [] -> Unresolved
               List.TwoOrMore -> Unresolved
               List.One EndpointIntersection{intersectionPoint, isSingular, alignment} ->
-                if isSingular && size == Bisection.Small
+                if isSingular && size == Domain.Small
                   then Resolved (Just intersectionPoint)
                   else case intersectionPoint.kind of
                     IntersectionPoint.Crossing _ ->
@@ -242,7 +244,13 @@ intersections curve1 curve2
                   , crossingSolutionTarget = differenceSurface
                   , tangentSolutionTarget
                   }
-          let solutions = Bisection.search (findIntersectionPoint problem)
+          -- TODO use search trees that cache useful data (bounds, derivative bounds etc.)
+          -- (generic curve search tree?)
+          let searchTree =
+                Search.pairwise
+                  (Search.tree id Search.curveDomain)
+                  (Search.tree id Search.curveDomain)
+          let solutions = Search.exclusive (findIntersectionPoint problem) searchTree
           case deduplicate solutions [] & List.map Pair.second & List.sort of
             [] -> Ok Nothing
             NonEmpty intersectionPoints -> Ok (Just (IntersectionPoints intersectionPoints))
@@ -257,4 +265,4 @@ deduplicate (first : rest) accumulated =
     else deduplicate rest (first : accumulated)
 
 isDuplicate :: Solution -> Solution -> Bool
-isDuplicate (uvBounds1, _) (uvBounds2, _) = Bisection.overlaps uvBounds1 uvBounds2
+isDuplicate (uvBounds1, _) (uvBounds2, _) = Domain.touching uvBounds1 uvBounds2

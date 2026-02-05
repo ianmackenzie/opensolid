@@ -102,7 +102,6 @@ library
     OpenSolid.Axis3D
     OpenSolid.Bezier
     OpenSolid.Binary
-    OpenSolid.Bisection
     OpenSolid.Body3D
     OpenSolid.Body3D.BoundedBy
     OpenSolid.Bool
@@ -199,6 +198,8 @@ library
     OpenSolid.Region2D.BoundedBy
     OpenSolid.Resolution
     OpenSolid.Result
+    OpenSolid.Search
+    OpenSolid.Search.Domain
     OpenSolid.Set
     OpenSolid.Set2D
     OpenSolid.Set3D
