@@ -31,6 +31,7 @@ import OpenSolid.SurfaceFunction1D.ImplicitCurveBounds qualified as ImplicitCurv
 import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (pattern UvPoint)
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 data MonotonicSpace
@@ -123,9 +124,9 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
             let segmentVBounds = Internal.curveBoundsAt u1 u2 v1 v2 slopeBounds
             Bounds2D (Interval u1 u2) segmentVBounds
   let derivative self = do
-        let deltaU = uEnd .-. uStart
+        let deltaU = uEnd - uStart
         let dudt = Curve1D.constant deltaU
-        let dvdt = dudt .*. dvdu `compose` self
+        let dvdt = dudt * dvdu `compose` self
         VectorCurve2D.xy dudt dvdt
   Curve2D.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
 
@@ -133,8 +134,8 @@ clamp :: Number -> Interval Unitless -> Axis2D Unitless UvSpace -> Interval Unit
 clamp u (Interval vLow vHigh) axis = do
   let UvPoint u0 v0 = Axis2D.originPoint axis
   let Direction2D du dv = Axis2D.direction axis
-  let v = v0 .+. (u .-. u0) .*. dv ./. du
+  let v = v0 + (u - u0) * dv / du
   if
-    | du > 0 -> Interval (max vLow v) vHigh
-    | du < 0 -> Interval vLow (min vHigh v)
+    | du > 0.0 -> Interval (max vLow v) vHigh
+    | du < 0.0 -> Interval vLow (min vHigh v)
     | otherwise -> Interval vLow vHigh

@@ -215,8 +215,8 @@ desingularizedQuotient lhs (Curve1D.WithNoInteriorZeros rhs) = do
         if Tolerance.using singularityTolerance (Curve1D.evaluate rhs tValue ~= Quantity.zero)
           then Just (lHopital lhs rhs tValue)
           else Nothing
-  let interiorQuotient = unerase (erase lhs ./. Curve1D.WithNoZeros (erase rhs))
-  desingularize (maybeSingularity 0) interiorQuotient (maybeSingularity 1)
+  let interiorQuotient = unerase (erase lhs / Curve1D.WithNoZeros (erase rhs))
+  desingularize (maybeSingularity 0.0) interiorQuotient (maybeSingularity 1.0)
 
 lHopital ::
   ( Exists dimension units1 space
@@ -233,8 +233,8 @@ lHopital lhs rhs tValue = do
   let lhs'' = Vector.erase (evaluate (derivative (derivative lhs)) tValue)
   let rhs' = Vector.erase (evaluate (derivative rhs) tValue)
   let rhs'' = Vector.erase (evaluate (derivative (derivative rhs)) tValue)
-  let value_ = lhs' ./. rhs'
-  let firstDerivative_ = (lhs'' .*. rhs' .-. lhs' .*. rhs'') ./. (2 *. Quantity.squared rhs')
+  let value_ = lhs' / rhs'
+  let firstDerivative_ = (lhs'' * rhs' - lhs' * rhs'') / (2.0 * Quantity.squared rhs')
   (Vector.unerase value_, Vector.unerase firstDerivative_)
 
 erase ::

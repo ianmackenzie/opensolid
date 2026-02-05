@@ -28,7 +28,7 @@ module OpenSolid.Curve3D
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds2D qualified as Bounds2D
@@ -36,7 +36,6 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Composition
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -84,10 +83,10 @@ instance
     (VectorCurve3D meters space2)
     (Curve3D space1)
   where
-  lhs .+. rhs =
+  lhs + rhs =
     new
-      (lhs.compiled .+. VectorCurve3D.compiled rhs)
-      (lhs.derivative .+. VectorCurve3D.derivative rhs)
+      (lhs.compiled + VectorCurve3D.compiled rhs)
+      (lhs.derivative + VectorCurve3D.derivative rhs)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -96,10 +95,10 @@ instance
     (VectorCurve3D meters space2)
     (Curve3D space1)
   where
-  lhs .-. rhs =
+  lhs - rhs =
     new
-      (lhs.compiled .-. VectorCurve3D.compiled rhs)
-      (lhs.derivative .-. VectorCurve3D.derivative rhs)
+      (lhs.compiled - VectorCurve3D.compiled rhs)
+      (lhs.derivative - VectorCurve3D.derivative rhs)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -108,7 +107,7 @@ instance
     (Vector3D meters space2)
     (Curve3D space1)
   where
-  lhs .+. rhs = lhs .+. VectorCurve3D.constant rhs
+  lhs + rhs = lhs + VectorCurve3D.constant rhs
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -117,7 +116,7 @@ instance
     (Vector3D meters space2)
     (Curve3D space1)
   where
-  lhs .-. rhs = lhs .-. VectorCurve3D.constant rhs
+  lhs - rhs = lhs - VectorCurve3D.constant rhs
 
 instance
   space1 ~ space2 =>
@@ -126,10 +125,10 @@ instance
     (Curve3D space2)
     (VectorCurve3D Meters space1)
   where
-  lhs .-. rhs =
+  lhs - rhs =
     VectorCurve3D.new
-      (lhs.compiled .-. rhs.compiled)
-      (lhs.derivative .-. rhs.derivative)
+      (lhs.compiled - rhs.compiled)
+      (lhs.derivative - rhs.derivative)
 
 instance
   space1 ~ space2 =>
@@ -138,7 +137,7 @@ instance
     (Point3D space2)
     (VectorCurve3D Meters space1)
   where
-  lhs .-. rhs = lhs .-. constant rhs
+  lhs - rhs = lhs - constant rhs
 
 instance
   space1 ~ space2 =>
@@ -147,13 +146,13 @@ instance
     (Curve3D space2)
     (VectorCurve3D Meters space1)
   where
-  lhs .-. rhs = constant lhs .-. rhs
+  lhs - rhs = constant lhs - rhs
 
 instance Composition (Curve1D Unitless) (Curve3D space) (Curve3D space) where
   outer `compose` inner =
     new
       (outer.compiled `compose` Curve1D.compiled inner)
-      ((outer.derivative `compose` inner) .*. Curve1D.derivative inner)
+      ((outer.derivative `compose` inner) * Curve1D.derivative inner)
 
 instance
   unitless ~ Unitless =>
@@ -162,7 +161,7 @@ instance
   curve `compose` function =
     SurfaceFunction3D.new
       (curve.compiled `compose` function.compiled)
-      (\p -> (curve.derivative `compose` function) .*. SurfaceFunction1D.derivative p function)
+      (\p -> (curve.derivative `compose` function) * SurfaceFunction1D.derivative p function)
 
 instance ApproximateEquality (Curve3D space) Meters where
   curve1 ~= curve2 = do
@@ -190,7 +189,7 @@ on plane curve2D = do
   new compiledPlaced (VectorCurve3D.on plane (Curve2D.derivative curve2D))
 
 line :: Point3D space -> Point3D space -> Curve3D space
-line p1 p2 = constant p1 .+. Curve1D.t .*. (p2 .-. p1)
+line p1 p2 = constant p1 + Curve1D.t * (p2 - p1)
 
 {-| Construct a Bezier curve from its control points. For example,
 
@@ -245,10 +244,10 @@ secondDerivative :: Curve3D space -> VectorCurve3D Meters space
 secondDerivative = Curve.secondDerivative
 
 startPoint :: Curve3D space -> Point3D space
-startPoint curve = evaluate curve 0
+startPoint curve = evaluate curve 0.0
 
 endPoint :: Curve3D space -> Point3D space
-endPoint curve = evaluate curve 1
+endPoint curve = evaluate curve 1.0
 
 evaluate :: Curve3D space -> Number -> Point3D space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
@@ -260,7 +259,7 @@ bounds :: Curve3D space -> Bounds3D space
 bounds curve = evaluateBounds curve Interval.unit
 
 reverse :: Curve3D space -> Curve3D space
-reverse curve = curve `compose` (1 -. Curve1D.t)
+reverse curve = curve `compose` (1.0 - Curve1D.t)
 
 arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Curve1D Unitless, Length)
 arcLengthParameterization curve =

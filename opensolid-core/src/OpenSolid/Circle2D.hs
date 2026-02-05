@@ -15,6 +15,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D qualified as Vector2D
 
 -- | A circle in 2D.
@@ -40,7 +41,7 @@ radius = (.radius)
 
 -- | Get the diameter of a circle.
 diameter :: Circle2D units space -> Quantity units
-diameter circle = 2 *. radius circle
+diameter circle = 2.0 * radius circle
 
 -- | Construct a circle with the given radius and center point.
 withRadius :: Quantity units -> Point2D units space -> Circle2D units space
@@ -52,11 +53,11 @@ withRadius givenRadius givenCenterPoint =
 
 -- | Construct a circle with the given diameter and center point.
 withDiameter :: Quantity units -> Point2D units space -> Circle2D units space
-withDiameter givenDiameter = withRadius (0.5 *. givenDiameter)
+withDiameter givenDiameter = withRadius (0.5 * givenDiameter)
 
 {-| Construct a point on the circle, at the given angle.
 
 The angle is measured counterclockwise from the positive X direction.
 -}
 pointOn :: Circle2D units space -> Angle -> Point2D units space
-pointOn circle angle = centerPoint circle .+. Vector2D.polar (radius circle) angle
+pointOn circle angle = centerPoint circle + Vector2D.polar (radius circle) angle

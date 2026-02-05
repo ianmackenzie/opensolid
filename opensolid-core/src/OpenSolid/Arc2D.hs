@@ -41,15 +41,15 @@ endAngle :: Arc2D units space -> Angle
 endAngle = (.endAngle)
 
 startPoint :: Arc2D units space -> Point2D units space
-startPoint arc = centerPoint arc .+. Vector2D.polar (radius arc) (startAngle arc)
+startPoint arc = centerPoint arc + Vector2D.polar (radius arc) (startAngle arc)
 
 endPoint :: Arc2D units space -> Point2D units space
-endPoint arc = centerPoint arc .+. Vector2D.polar (radius arc) (endAngle arc)
+endPoint arc = centerPoint arc + Vector2D.polar (radius arc) (endAngle arc)
 
 pointOn :: Arc2D units space -> Number -> Point2D units space
 pointOn arc t = do
   let angle = Quantity.interpolateFrom (startAngle arc) (endAngle arc) t
-  centerPoint arc .+. Vector2D.polar (radius arc) angle
+  centerPoint arc + Vector2D.polar (radius arc) angle
 
 polar ::
   "centerPoint" ::: Point2D units space ->
@@ -73,5 +73,5 @@ sweptAround givenCenterPoint givenStartPoint givenSweptAngle = do
     { centerPoint = givenCenterPoint
     , radius = computedRadius
     , startAngle = computedStartAngle
-    , endAngle = computedStartAngle .+. givenSweptAngle
+    , endAngle = computedStartAngle + givenSweptAngle
     }

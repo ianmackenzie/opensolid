@@ -79,7 +79,7 @@ import OpenSolid.Vector2D (Vector2D, pattern Vector2D)
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 
 length :: Generator Length
-length = Quantity.random (Length.meters -10) (Length.meters 10)
+length = Quantity.random (Length.meters -10.0) (Length.meters 10.0)
 
 lengthInterval :: Generator (Interval Meters)
 lengthInterval = Interval.random length
@@ -150,8 +150,8 @@ arc2D = do
   startPoint <- point2D
   endPoint <- point2D
   angleSign <- Sign.random
-  angleMagnitude <- Quantity.random (Angle.degrees 5) (Angle.degrees 355)
-  let sweptAngle = angleSign .*. angleMagnitude
+  angleMagnitude <- Quantity.random (Angle.degrees 5.0) (Angle.degrees 355.0)
+  let sweptAngle = angleSign * angleMagnitude
   Random.return (Curve2D.arcFrom startPoint endPoint sweptAngle)
 
 quadraticSpline2D :: Tolerance Meters => Generator (Curve2D Meters space)
@@ -166,7 +166,7 @@ translation2D = Random.map Transform2D.translateBy vector2D
 rotation2D :: Generator (Transform2D.Rigid Meters space)
 rotation2D = do
   centerPoint <- point2D
-  angle <- Quantity.random (Angle.degrees -360) (Angle.degrees 360)
+  angle <- Quantity.random (Angle.degrees -360.0) (Angle.degrees 360.0)
   Random.return (Transform2D.rotateAround centerPoint angle)
 
 mirror2D :: Generator (Transform2D.Orthonormal Meters space)
@@ -184,7 +184,7 @@ orthonormalTransform2D =
       mirror2D
 
 scalingFactor :: Generator Number
-scalingFactor = Number.random 0.5 2
+scalingFactor = Number.random 0.5 2.0
 
 uniformScaling2D :: Generator (Transform2D.Uniform Meters space)
 uniformScaling2D = Random.map2 Transform2D.scaleAbout point2D scalingFactor
@@ -220,7 +220,7 @@ translation3D = Random.map Transform3D.translateBy vector3D
 rotation3D :: Generator (Transform3D.Rigid space)
 rotation3D = do
   axis <- axis3D
-  angle <- Quantity.random (Angle.degrees -360) (Angle.degrees 360)
+  angle <- Quantity.random (Angle.degrees -360.0) (Angle.degrees 360.0)
   Random.return (Transform3D.rotateAround axis angle)
 
 mirror3D :: Generator (Transform3D.Orthonormal space)

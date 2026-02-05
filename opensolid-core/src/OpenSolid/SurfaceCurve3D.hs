@@ -11,6 +11,7 @@ import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
+import OpenSolid.UvSpace (UvSpace)
 
 data SurfaceCurve3D space = SurfaceCurve3D
   { surfaceFunction :: SurfaceFunction3D space

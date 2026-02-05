@@ -33,10 +33,10 @@ impl unsafeQuotient lhopital desingularize numerator denominator
                   then Error DivisionByZero
                   else Ok (Just (lhopital parameter))
             | otherwise = Ok Nothing
-      maybeSingularityU0 <- maybeSingularity U 0
-      maybeSingularityU1 <- maybeSingularity U 1
-      maybeSingularityV0 <- maybeSingularity V 0
-      maybeSingularityV1 <- maybeSingularity V 1
+      maybeSingularityU0 <- maybeSingularity U 0.0
+      maybeSingularityU1 <- maybeSingularity U 1.0
+      maybeSingularityV0 <- maybeSingularity V 0.0
+      maybeSingularityV1 <- maybeSingularity V 1.0
       Ok $
         desingularize
           (unsafeQuotient numerator denominator)

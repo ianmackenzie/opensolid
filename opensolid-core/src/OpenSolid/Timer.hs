@@ -17,4 +17,4 @@ start = IO.map Timer getMonotonicTime
 elapsed :: Timer -> IO Duration
 elapsed (Timer startTime) = do
   endTime <- getMonotonicTime
-  IO.succeed (Duration.seconds (endTime .-. startTime))
+  IO.succeed (Duration.seconds (endTime - startTime))

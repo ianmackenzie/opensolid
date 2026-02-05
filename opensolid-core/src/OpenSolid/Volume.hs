@@ -21,7 +21,7 @@ zero :: Volume
 zero = Quantity.zero
 
 cubicMeter :: Volume
-cubicMeter = cubicMeters 1
+cubicMeter = cubicMeters 1.0
 
 cubicMeters :: Number -> Volume
 cubicMeters = Quantity.coerce
@@ -30,10 +30,10 @@ inCubicMeters :: Volume -> Number
 inCubicMeters = Quantity.coerce
 
 cubicCentimeter :: Volume
-cubicCentimeter = Length.centimeter .*. Length.centimeter .*. Length.centimeter
+cubicCentimeter = Length.centimeter * Length.centimeter * Length.centimeter
 
 cubicCentimeters :: Number -> Volume
-cubicCentimeters = (.*. cubicCentimeter)
+cubicCentimeters = (* cubicCentimeter)
 
 inCubicCentimeters :: Volume -> Number
-inCubicCentimeters = (./. cubicCentimeter)
+inCubicCentimeters = (/ cubicCentimeter)

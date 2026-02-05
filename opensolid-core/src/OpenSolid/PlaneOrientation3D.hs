@@ -91,13 +91,13 @@ gramSchmidt ::
   Vector3D units space ->
   Maybe (PlaneOrientation3D space)
 gramSchmidt dx vxy = do
-  let vy = vxy .-. Vector3D.projectionIn dx vxy
+  let vy = vxy - Vector3D.projectionIn dx vxy
   case Vector3D.direction vy of
     Error Vector.IsZero -> Nothing
     Ok dy -> Just (PlaneOrientation3D dx dy)
 
 flip :: PlaneOrientation3D space -> PlaneOrientation3D space
-flip (PlaneOrientation3D i j) = PlaneOrientation3D (negative i) j
+flip (PlaneOrientation3D i j) = PlaneOrientation3D -i j
 
 -- | Get the X direction of a plane orientation.
 xDirection :: PlaneOrientation3D space -> Direction3D space

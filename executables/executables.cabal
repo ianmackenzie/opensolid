@@ -45,6 +45,7 @@ common config
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
+    RebindableSyntax
     TypeApplications
 
 executable sandbox

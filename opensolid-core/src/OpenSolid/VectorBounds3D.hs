@@ -200,7 +200,7 @@ squaredMagnitude = Units.specialize . squaredMagnitude_
 
 squaredMagnitude_ :: VectorBounds3D units space -> Interval (units ?*? units)
 squaredMagnitude_ (VectorBounds3D x y z) =
-  Interval.squared_ x .+. Interval.squared_ y .+. Interval.squared_ z
+  Interval.squared_ x + Interval.squared_ y + Interval.squared_ z
 
 magnitude :: VectorBounds3D units space -> Interval units
 magnitude bounds = do
@@ -266,21 +266,21 @@ maxSquaredMagnitude_ (VectorBounds3D x y z) = do
   let xMagnitude = max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
   let zMagnitude = max (Quantity.abs minZ) (Quantity.abs maxZ)
-  Quantity.squared_ xMagnitude .+. Quantity.squared_ yMagnitude .+. Quantity.squared_ zMagnitude
+  Quantity.squared_ xMagnitude + Quantity.squared_ yMagnitude + Quantity.squared_ zMagnitude
 
 direction :: VectorBounds3D units space -> DirectionBounds3D space
 direction vectorBounds = DirectionBounds3D.unsafe (normalize vectorBounds)
 
 normalize :: VectorBounds3D units space -> VectorBounds3D Unitless space
 normalize vectorBounds = do
-  let VectorBounds3D x y z = vectorBounds ./. magnitude vectorBounds
+  let VectorBounds3D x y z = vectorBounds / magnitude vectorBounds
   let nx = clampNormalized x
   let ny = clampNormalized y
   let nz = clampNormalized z
   VectorBounds3D nx ny nz
 
 normalizedBounds :: Interval Unitless
-normalizedBounds = Interval -1 1
+normalizedBounds = Interval -1.0 1.0
 
 clampNormalized :: Interval Unitless -> Interval Unitless
 clampNormalized (Interval low high) =
@@ -305,7 +305,7 @@ exclusion (Vector3D x y z) (VectorBounds3D bx by bz) = do
     | otherwise -> max (max exclusionX exclusionY) exclusionZ
 
 inclusion :: Vector3D units space -> VectorBounds3D units space -> Quantity units
-inclusion point box = negative (exclusion point box)
+inclusion point box = negate (exclusion point box)
 
 includes :: Vector3D units space -> VectorBounds3D units space -> Bool
 includes (Vector3D vx vy vz) (VectorBounds3D x y z) =
@@ -337,7 +337,7 @@ separation (VectorBounds3D x1 y1 z1) (VectorBounds3D x2 y2 z2) = do
     | otherwise -> max (max separationX separationY) separationZ
 
 overlap :: VectorBounds3D units space -> VectorBounds3D units space -> Quantity units
-overlap first second = negative (separation first second)
+overlap first second = negate (separation first second)
 
 intersection ::
   VectorBounds3D units space ->
@@ -363,18 +363,18 @@ on plane bounds2D = do
   let VectorBounds2D bX bY = bounds2D
   let cX = Interval.midpoint bX
   let cY = Interval.midpoint bY
-  let rX = 0.5 *. Interval.width bX
-  let rY = 0.5 *. Interval.width bY
+  let rX = 0.5 * Interval.width bX
+  let rY = 0.5 * Interval.width bY
   let Plane3D _ (PlaneOrientation3D i j) = plane
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
   let Vector3D cR cF cU = Vector3D.on plane (Vector2D cX cY)
-  let rR = rX .*. Number.abs iR .+. rY .*. Number.abs jR
-  let rF = rX .*. Number.abs iF .+. rY .*. Number.abs jF
-  let rU = rX .*. Number.abs iU .+. rY .*. Number.abs jU
-  let bR = Interval (cR .-. rR) (cR .+. rR)
-  let bF = Interval (cF .-. rF) (cF .+. rF)
-  let bU = Interval (cU .-. rU) (cU .+. rU)
+  let rR = rX * Number.abs iR + rY * Number.abs jR
+  let rF = rX * Number.abs iF + rY * Number.abs jF
+  let rU = rX * Number.abs iU + rY * Number.abs jU
+  let bR = Interval (cR - rR) (cR + rR)
+  let bF = Interval (cF - rF) (cF + rF)
+  let bU = Interval (cU - rU) (cU + rU)
   VectorBounds3D bR bF bU
 
 placeIn :: Frame3D global local -> VectorBounds3D units local -> VectorBounds3D units global
@@ -382,61 +382,61 @@ placeIn frame (VectorBounds3D vR vF vU) = do
   let cR = Interval.midpoint vR
   let cF = Interval.midpoint vF
   let cU = Interval.midpoint vU
-  let rR = 0.5 *. Interval.width vR
-  let rF = 0.5 *. Interval.width vF
-  let rU = 0.5 *. Interval.width vU
+  let rR = 0.5 * Interval.width vR
+  let rF = 0.5 * Interval.width vF
+  let rU = 0.5 * Interval.width vU
   let Vector3D cR' cF' cU' = Vector3D.placeIn frame (Vector3D cR cF cU)
   let Direction3D iR iF iU = frame.rightwardDirection
   let Direction3D jR jF jU = frame.forwardDirection
   let Direction3D kR kF kU = frame.upwardDirection
-  let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs jR .+. rU .*. Number.abs kR
-  let rF' = rR .*. Number.abs iF .+. rF .*. Number.abs jF .+. rU .*. Number.abs kF
-  let rU' = rR .*. Number.abs iU .+. rF .*. Number.abs jU .+. rU .*. Number.abs kU
+  let rR' = rR * Number.abs iR + rF * Number.abs jR + rU * Number.abs kR
+  let rF' = rR * Number.abs iF + rF * Number.abs jF + rU * Number.abs kF
+  let rU' = rR * Number.abs iU + rF * Number.abs jU + rU * Number.abs kU
   VectorBounds3D
-    (Interval (cR' .-. rR') (cR' .+. rR'))
-    (Interval (cF' .-. rF') (cF' .+. rF'))
-    (Interval (cU' .-. rU') (cU' .+. rU'))
+    (Interval (cR' - rR') (cR' + rR'))
+    (Interval (cF' - rF') (cF' + rF'))
+    (Interval (cU' - rU') (cU' + rU'))
 
 relativeTo :: Frame3D global local -> VectorBounds3D units global -> VectorBounds3D units local
 relativeTo frame (VectorBounds3D vR vF vU) = do
   let cR = Interval.midpoint vR
   let cF = Interval.midpoint vF
   let cU = Interval.midpoint vU
-  let rR = 0.5 *. Interval.width vR
-  let rF = 0.5 *. Interval.width vF
-  let rU = 0.5 *. Interval.width vU
+  let rR = 0.5 * Interval.width vR
+  let rF = 0.5 * Interval.width vF
+  let rU = 0.5 * Interval.width vU
   let Vector3D cR' cF' cU' = Vector3D.relativeTo frame (Vector3D cR cF cU)
   let Direction3D iR iF iU = frame.rightwardDirection
   let Direction3D jR jF jU = frame.forwardDirection
   let Direction3D kR kF kU = frame.upwardDirection
-  let rR' = rR .*. Number.abs iR .+. rF .*. Number.abs iF .+. rU .*. Number.abs iU
-  let rF' = rR .*. Number.abs jR .+. rF .*. Number.abs jF .+. rU .*. Number.abs jU
-  let rU' = rR .*. Number.abs kR .+. rF .*. Number.abs kF .+. rU .*. Number.abs kU
+  let rR' = rR * Number.abs iR + rF * Number.abs iF + rU * Number.abs iU
+  let rF' = rR * Number.abs jR + rF * Number.abs jF + rU * Number.abs jU
+  let rU' = rR * Number.abs kR + rF * Number.abs kF + rU * Number.abs kU
   VectorBounds3D
-    (Interval (cR' .-. rR') (cR' .+. rR'))
-    (Interval (cF' .-. rF') (cF' .+. rF'))
-    (Interval (cU' .-. rU') (cU' .+. rU'))
+    (Interval (cR' - rR') (cR' + rR'))
+    (Interval (cF' - rF') (cF' + rF'))
+    (Interval (cU' - rU') (cU' + rU'))
 
 transformBy :: Transform3D tag space -> VectorBounds3D units space -> VectorBounds3D units space
 transformBy transform (VectorBounds3D vR vF vU) = do
   let cR = Interval.midpoint vR
   let cF = Interval.midpoint vF
   let cU = Interval.midpoint vU
-  let rR = 0.5 *. Interval.width vR
-  let rF = 0.5 *. Interval.width vF
-  let rU = 0.5 *. Interval.width vU
+  let rR = 0.5 * Interval.width vR
+  let rF = 0.5 * Interval.width vF
+  let rU = 0.5 * Interval.width vU
   let Vector3D cR' cF' cU' = Vector3D.transformBy transform (Vector3D cR cF cU)
   let Transform3D _ i j k = transform
   let Vector3D iR iF iU = i
   let Vector3D jR jF jU = j
   let Vector3D kR kF kU = k
-  let rR' = Number.abs iR .*. rR .+. Number.abs jR .*. rF .+. Number.abs kR .*. rU
-  let rF' = Number.abs iF .*. rR .+. Number.abs jF .*. rF .+. Number.abs kF .*. rU
-  let rU' = Number.abs iU .*. rR .+. Number.abs jU .*. rF .+. Number.abs kU .*. rU
+  let rR' = Number.abs iR * rR + Number.abs jR * rF + Number.abs kR * rU
+  let rF' = Number.abs iF * rR + Number.abs jF * rF + Number.abs kF * rU
+  let rU' = Number.abs iU * rR + Number.abs jU * rF + Number.abs kU * rU
   VectorBounds3D
-    (Interval (cR' .-. rR') (cR' .+. rR'))
-    (Interval (cF' .-. rF') (cF' .+. rF'))
-    (Interval (cU' .-. rU') (cU' .+. rU'))
+    (Interval (cR' - rR') (cR' + rR'))
+    (Interval (cF' - rF') (cF' + rF'))
+    (Interval (cU' - rU') (cU' + rU'))
 
 rotateIn ::
   Direction3D space ->

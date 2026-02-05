@@ -56,7 +56,7 @@ instance
   ) =>
   Negation (CompiledFunction inputValue outputValue inputBounds outputBounds)
   where
-  negative = map negative negative negative
+  negate = map negate negate negate
 
 instance
   ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
@@ -69,8 +69,8 @@ instance
     (CompiledFunction inputValue outputValue inputBounds outputBounds)
     (CompiledFunction inputValue outputValue inputBounds outputBounds)
   where
-  Positive .*. compiled = compiled
-  Negative .*. compiled = negative compiled
+  Positive * compiled = compiled
+  Negative * compiled = -compiled
 
 instance
   ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
@@ -83,8 +83,8 @@ instance
     Sign
     (CompiledFunction inputValue outputValue inputBounds outputBounds)
   where
-  compiled .*. Positive = compiled
-  compiled .*. Negative = negative compiled
+  compiled * Positive = compiled
+  compiled * Negative = -compiled
 
 instance
   ( inputValue1 ~ inputValue2
@@ -104,7 +104,7 @@ instance
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (.+.) = map2 (.+.) (.+.) (.+.)
+  (+) = map2 (+) (+) (+)
 
 instance
   ( inputValue1 ~ inputValue2
@@ -124,7 +124,7 @@ instance
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (.-.) = map2 (.-.) (.-.) (.-.)
+  (-) = map2 (-) (-) (-)
 
 instance
   ( inputValue1 ~ inputValue2
@@ -184,7 +184,7 @@ instance
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (.*.) = map2 (.*.) (.*.) (.*.)
+  (*) = map2 (*) (*) (*)
 
 instance
   ( inputValue1 ~ inputValue2
@@ -204,7 +204,7 @@ instance
     (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
     (CompiledFunction inputValue1 outputValue3 inputBounds1 outputBounds3)
   where
-  (./.) = map2 (./.) (./.) (./.)
+  (/) = map2 (/) (/) (/)
 
 instance
   ( inputValue1 ~ inputValue2

@@ -37,10 +37,10 @@ unwrap :: DirectionCurve3D space -> VectorCurve3D Unitless space
 unwrap (DirectionCurve3D vectorCurve) = vectorCurve
 
 startValue :: DirectionCurve3D space -> Direction3D space
-startValue curve = evaluate curve 0
+startValue curve = evaluate curve 0.0
 
 endValue :: DirectionCurve3D space -> Direction3D space
-endValue curve = evaluate curve 1
+endValue curve = evaluate curve 1.0
 
 evaluate :: DirectionCurve3D space -> Number -> Direction3D space
 evaluate (DirectionCurve3D vectorCurve) tValue =
@@ -60,23 +60,23 @@ reverse :: DirectionCurve3D space -> DirectionCurve3D space
 reverse (DirectionCurve3D vectorCurve) = DirectionCurve3D (VectorCurve3D.reverse vectorCurve)
 
 instance Negation (DirectionCurve3D space) where
-  negative (DirectionCurve3D vectorCurve) = DirectionCurve3D (negative vectorCurve)
+  negate (DirectionCurve3D vectorCurve) = DirectionCurve3D (negate vectorCurve)
 
 instance Multiplication Sign (DirectionCurve3D space) (DirectionCurve3D space) where
-  Positive .*. curve = curve
-  Negative .*. curve = negative curve
+  Positive * curve = curve
+  Negative * curve = -curve
 
 instance Multiplication_ Sign (DirectionCurve3D space) (DirectionCurve3D space) where
   Positive ?*? curve = curve
-  Negative ?*? curve = negative curve
+  Negative ?*? curve = -curve
 
 instance Multiplication (DirectionCurve3D space) Sign (DirectionCurve3D space) where
-  curve .*. Positive = curve
-  curve .*. Negative = negative curve
+  curve * Positive = curve
+  curve * Negative = -curve
 
 instance Multiplication_ (DirectionCurve3D space) Sign (DirectionCurve3D space) where
   curve ?*? Positive = curve
-  curve ?*? Negative = negative curve
+  curve ?*? Negative = -curve
 
 instance
   Multiplication
@@ -84,7 +84,7 @@ instance
     (DirectionCurve3D space)
     (VectorCurve3D units space)
   where
-  value .*. DirectionCurve3D vectorCurve = value .*. vectorCurve
+  value * DirectionCurve3D vectorCurve = value * vectorCurve
 
 instance
   Multiplication
@@ -92,7 +92,7 @@ instance
     (Quantity units)
     (VectorCurve3D units space)
   where
-  DirectionCurve3D vectorCurve .*. value = vectorCurve .*. value
+  DirectionCurve3D vectorCurve * value = vectorCurve * value
 
 instance
   Multiplication
@@ -100,7 +100,7 @@ instance
     (DirectionCurve3D space)
     (VectorCurve3D units space)
   where
-  scalarCurve .*. DirectionCurve3D vectorCurve = scalarCurve .*. vectorCurve
+  scalarCurve * DirectionCurve3D vectorCurve = scalarCurve * vectorCurve
 
 instance
   Multiplication
@@ -108,7 +108,7 @@ instance
     (Curve1D units)
     (VectorCurve3D units space)
   where
-  DirectionCurve3D vectorCurve .*. scalarCurve = vectorCurve .*. scalarCurve
+  DirectionCurve3D vectorCurve * scalarCurve = vectorCurve * scalarCurve
 
 instance
   space1 ~ space2 =>

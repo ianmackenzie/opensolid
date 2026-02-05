@@ -162,8 +162,8 @@ secondDerivativesIndependent segment1 segment2 = do
   let VectorBounds2D x'2 y'2 = Segment.firstDerivativeBounds segment2
   let VectorBounds2D x''1 y''1 = Segment.secondDerivativeBounds segment1
   let VectorBounds2D x''2 y''2 = Segment.secondDerivativeBounds segment2
-  Interval.isResolved (d2ydx2Bounds x'1 y'1 x''1 y''1 .-. d2ydx2Bounds x'2 y'2 x''2 y''2)
-    || Interval.isResolved (d2ydx2Bounds y'1 x'1 y''1 x''1 .-. d2ydx2Bounds y'2 x'2 y''2 x''2)
+  Interval.isResolved (d2ydx2Bounds x'1 y'1 x''1 y''1 - d2ydx2Bounds x'2 y'2 x''2 y''2)
+    || Interval.isResolved (d2ydx2Bounds y'1 x'1 y''1 x''1 - d2ydx2Bounds y'2 x'2 y''2 x''2)
 
 d2ydx2Bounds ::
   Interval units ->
@@ -172,7 +172,7 @@ d2ydx2Bounds ::
   Interval units ->
   Interval (Unitless ?/? units)
 d2ydx2Bounds x' y' x'' y'' =
-  Units.simplify ((y'' ?*? x' .-. y' ?*? x'') ?/? (x' ?*? x' ?*? x'))
+  Units.simplify ((y'' ?*? x' - y' ?*? x'') ?/? (x' ?*? x' ?*? x'))
 
 candidateOverlappingSegment ::
   EndpointIntersection ->
@@ -182,11 +182,11 @@ candidateOverlappingSegment first second = do
   let tBounds1 = Interval first.intersectionPoint.t1 second.intersectionPoint.t1
   let tBounds2 = Interval first.intersectionPoint.t2 second.intersectionPoint.t2
   let firstIsStart = case first.alignment of
-        Positive -> first.intersectionPoint.t2 < 1
-        Negative -> first.intersectionPoint.t2 > 0
+        Positive -> first.intersectionPoint.t2 < 1.0
+        Negative -> first.intersectionPoint.t2 > 0.0
   let secondIsEnd = case second.alignment of
-        Positive -> second.intersectionPoint.t2 > 0
-        Negative -> second.intersectionPoint.t2 < 1
+        Positive -> second.intersectionPoint.t2 > 0.0
+        Negative -> second.intersectionPoint.t2 < 1.0
   let isCandidate = firstIsStart && secondIsEnd && first.alignment == second.alignment
   [OverlappingSegment{tBounds1, tBounds2, alignment = first.alignment} | isCandidate]
 
@@ -223,7 +223,7 @@ intersections curve1 curve2
       case overlappingSegments curve1 curve2 endpointIntersections of
         Just segments -> Ok (Just (OverlappingSegments segments))
         Nothing -> do
-          let differenceSurface = curve2 `compose` V .-. curve1 `compose` U
+          let differenceSurface = curve2 `compose` V - curve1 `compose` U
           let derivativeSurface1 = Curve2D.derivative curve1 `compose` U
           let derivativeSurface2 = Curve2D.derivative curve2 `compose` V
           let tangentSolutionX = differenceSurface `dot_` derivativeSurface1

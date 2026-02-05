@@ -104,7 +104,7 @@ normalize vector = do
   let vectorMagnitude = magnitude vector
   if vectorMagnitude ~= Quantity.zero
     then zero
-    else vector ./. vectorMagnitude
+    else vector / vectorMagnitude
 
 direction ::
   (Exists dimension units space, Direction.Exists dimension space, Tolerance units) =>
@@ -114,7 +114,7 @@ direction vector = do
   let vectorMagnitude = magnitude vector
   if vectorMagnitude ~= Quantity.zero
     then Error IsZero
-    else Ok (Direction.unsafe (vector ./. vectorMagnitude))
+    else Ok (Direction.unsafe (vector / vectorMagnitude))
 
 magnitudeAndDirection ::
   (Exists dimension units space, Direction.Exists dimension space, Tolerance units) =>
@@ -124,7 +124,7 @@ magnitudeAndDirection vector = do
   let vectorMagnitude = magnitude vector
   if vectorMagnitude ~= Quantity.zero
     then Error IsZero
-    else Ok (vectorMagnitude, Direction.unsafe (vector ./. vectorMagnitude))
+    else Ok (vectorMagnitude, Direction.unsafe (vector / vectorMagnitude))
 
 {-# INLINEABLE componentIn #-}
 componentIn ::
@@ -141,13 +141,13 @@ projectionIn ::
   Vector dimension units space ->
   Vector dimension units space
 projectionIn givenDirection vector =
-  Direction.unwrap givenDirection .*. componentIn givenDirection vector
+  Direction.unwrap givenDirection * componentIn givenDirection vector
 
 sum ::
   Exists dimension units space =>
   List (Vector dimension units space) ->
   Vector dimension units space
-sum = List.foldl (.+.) zero
+sum = List.foldl (+) zero
 
 {-# INLINE erase #-}
 erase ::

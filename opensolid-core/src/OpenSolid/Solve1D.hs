@@ -50,14 +50,14 @@ neighborhood n value = do
   let magnitude = Quantity.abs value
   let radius =
         Number.pow
-          (Number.fromInt (Int.factorial n) .*. ?tolerance ./. magnitude)
-          (1 /. Number.fromInt n)
+          (Number.fromInt (Int.factorial n) * ?tolerance / magnitude)
+          (1.0 / Number.fromInt n)
   Neighborhood{n, sign, magnitude, radius}
 
 derivativeTolerance :: Neighborhood units -> Int -> Quantity units
 derivativeTolerance Neighborhood{n, magnitude, radius} k = do
-  (magnitude .*. Number.pow radius (Number.fromInt (n - k)))
-    ./. Number.fromInt (Int.factorial (n - k))
+  (magnitude * Number.pow radius (Number.fromInt (n - k)))
+    / Number.fromInt (Int.factorial (n - k))
 
 zero :: Number -> Neighborhood units -> Zero
 zero location Neighborhood{n, sign} = Zero location (n - 1) sign
@@ -159,9 +159,9 @@ recurseIntoChildrenOf node callback queue solutions exclusions = do
   let continueWith updatedQueue = process callback updatedQueue solutions exclusions
   case node of
     Atomic -> Error InfiniteRecursion
-    Shrinkable child -> continueWith (queue .+. child)
+    Shrinkable child -> continueWith (queue + child)
     Splittable middleChild leftChild rightChild ->
-      continueWith (queue .+. middleChild .+. leftChild .+. rightChild)
+      continueWith (queue + middleChild + leftChild + rightChild)
 
 data Action exclusions solution where
   Return :: NonEmpty solution -> Action NoExclusions solution
@@ -242,7 +242,7 @@ newtonRaphson function derivative interval x y iterations =
       if dy == Quantity.zero -- Can't take Newton step if derivative is zero
         then Error Divergence
         else do
-          let xStepped = x .-. y ./. dy
+          let xStepped = x - y / dy
           x2 <-
             if Interval.includes xStepped interval
               then Ok xStepped -- Newton step stayed within interval
@@ -256,7 +256,7 @@ newtonRaphson function derivative interval x y iterations =
                 if dyClamped == Quantity.zero
                   then Error Divergence
                   else do
-                    let xStepped2 = xClamped .-. yClamped ./. dyClamped
+                    let xStepped2 = xClamped - yClamped / dyClamped
                     if Interval.includes xStepped2 interval
                       then Ok xStepped2
                       else Error Divergence

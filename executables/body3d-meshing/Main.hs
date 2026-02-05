@@ -13,22 +13,21 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
-import Prelude hiding (length)
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let radius = Length.meters 1
-  let length = Length.meters 4
+  let radius = Length.meters 1.0
+  let length = Length.meters 4.0
   let arc =
         Curve2D.polarArc
           (#centerPoint Point2D.origin)
           (#radius radius)
-          (#startAngle (Angle.degrees -45))
-          (#endAngle (Angle.degrees 225))
+          (#startAngle (Angle.degrees -45.0))
+          (#endAngle (Angle.degrees 225.0))
   let line = Curve2D.lineFrom arc.endPoint arc.startPoint
   profile <- Result.orFail (Region2D.boundedBy [arc, line])
-  body <- Result.orFail (Body3D.extruded World3D.frontPlane profile (-0.5 *. length) (0.5 *. length))
-  let resolution = Resolution.maxSize (Length.centimeters 30)
+  body <- Result.orFail (Body3D.extruded World3D.frontPlane profile (-0.5 * length) (0.5 * length))
+  let resolution = Resolution.maxSize (Length.centimeters 30.0)
   let mesh = Body3D.toPointMesh resolution body
   let outputPath = "executables/body3D-meshing/mesh.stl"
   Stl.writeBinary outputPath Convention3D.yUp Length.inMillimeters mesh

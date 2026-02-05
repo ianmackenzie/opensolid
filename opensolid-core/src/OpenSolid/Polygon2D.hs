@@ -27,6 +27,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
 import OpenSolid.Triangle2D qualified as Triangle2D
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvSpace (UvSpace)
 
 {-| A non-empty list of points joined by lines.
 
@@ -55,7 +56,7 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 -}
 inscribed :: Int -> Circle2D units space -> Result IsEmpty (Polygon2D units space)
 inscribed n circle
-  | n >= 3 = case Quantity.midpoints (Angle.degrees -90) (Angle.degrees 270) n of
+  | n >= 3 = case Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n of
       NonEmpty vertexAngles -> Ok (Polygon2D (NonEmpty.map (Circle2D.pointOn circle) vertexAngles))
       [] -> throw (InternalError "Should have at least three vertex angles")
   | otherwise = Error IsEmpty
@@ -70,7 +71,7 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 -}
 circumscribed :: Int -> Circle2D units space -> Result IsEmpty (Polygon2D units space)
 circumscribed n circle = do
-  let outerDiameter = Circle2D.diameter circle ./. Angle.cos (Angle.pi ./. Number.fromInt n)
+  let outerDiameter = Circle2D.diameter circle / Angle.cos (Angle.pi / Number.fromInt n)
   let outerCircle = Circle2D.withDiameter outerDiameter (Circle2D.centerPoint circle)
   inscribed n outerCircle
 

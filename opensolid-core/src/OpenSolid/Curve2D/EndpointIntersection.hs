@@ -42,10 +42,10 @@ find searchTree1 searchTree2 = do
   let end1t2s = Curve.Search.findPoint (Curve2D.endPoint curve1) searchTree2
   let start2t1s = Curve.Search.findPoint (Curve2D.startPoint curve2) searchTree1
   let end2t1s = Curve.Search.findPoint (Curve2D.endPoint curve2) searchTree1
-  let start1Solutions = List.map (0,) start1t2s
-  let end1Solutions = List.map (1,) end1t2s
-  let start2Solutions = List.map (,0) start2t1s
-  let end2Solutions = List.map (,1) end2t1s
+  let start1Solutions = List.map (0.0,) start1t2s
+  let end1Solutions = List.map (1.0,) end1t2s
+  let start2Solutions = List.map (,0.0) start2t1s
+  let end2Solutions = List.map (,1.0) end2t1s
   let allSolutions = List.concat [start1Solutions, end1Solutions, start2Solutions, end2Solutions]
   let uniqueSolutions = List.sortAndDeduplicate allSolutions
   List.map (toEndpointIntersection curve1 curve2 tangent1 tangent2) uniqueSolutions

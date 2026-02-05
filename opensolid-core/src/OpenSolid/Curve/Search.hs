@@ -62,23 +62,23 @@ findPoint ::
   List Number
 findPoint point searchTree = do
   let searchCurve = curve searchTree
-  let displacementFunction tValue = Curve.evaluate searchCurve tValue .-. point
+  let displacementFunction tValue = Curve.evaluate searchCurve tValue - point
   let derivativeFunction = VectorCurve.evaluate (Curve.derivative searchCurve)
   let startIsSolution = Curve.startPoint searchCurve ~= point
-  let startIsSingular = derivativeFunction 0 ~= Vector.zero
+  let startIsSingular = derivativeFunction 0.0 ~= Vector.zero
   let endIsSolution = Curve.endPoint searchCurve ~= point
-  let endIsSingular = derivativeFunction 1 ~= Vector.zero
+  let endIsSingular = derivativeFunction 1.0 ~= Vector.zero
   let callback tBounds segment
         | not (point `intersects` Segment.bounds segment) =
             Resolved Nothing
-        | Interval.lower tBounds == 0
+        | Interval.lower tBounds == 0.0
         , startIsSolution
         , Segment.monotonic segment || (startIsSingular && Domain.isSmall tBounds) =
-            Resolved (Just 0)
-        | Interval.upper tBounds == 1
+            Resolved (Just 0.0)
+        | Interval.upper tBounds == 1.0
         , endIsSolution
         , Segment.monotonic segment || (endIsSingular && Domain.isSmall tBounds) =
-            Resolved (Just 1)
+            Resolved (Just 1.0)
         | Segment.monotonic segment
         , let tMid = Interval.midpoint tBounds
         , let tSolution = NewtonRaphson.curve displacementFunction derivativeFunction tMid

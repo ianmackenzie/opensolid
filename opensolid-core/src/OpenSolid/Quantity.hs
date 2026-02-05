@@ -1,7 +1,5 @@
 module OpenSolid.Quantity
   ( Quantity (Quantity, Quantity#)
-  , (.//.)
-  , (.%.)
   , zero
   , unit
   , infinity
@@ -34,48 +32,15 @@ module OpenSolid.Quantity
 where
 
 import Data.Coerce qualified
-import Data.Hashable (Hashable)
-import Data.Kind (Type)
-import Foreign.Storable (Storable)
-import OpenSolid.Arithmetic
-import OpenSolid.HasZero (HasZero)
-import OpenSolid.HasZero qualified as HasZero
 import {-# SOURCE #-} OpenSolid.Interval (Interval)
 import {-# SOURCE #-} OpenSolid.Interval qualified as Interval
-import OpenSolid.List (List)
 import OpenSolid.List qualified as List
-import {-# SOURCE #-} OpenSolid.Number (Number)
+import OpenSolid.Prelude
 import OpenSolid.Random.Internal qualified as Random
-import OpenSolid.Sign (Sign (Negative, Positive, Sign))
 import OpenSolid.Unboxed.Math
-import OpenSolid.Unitless (Unitless)
-import OpenSolid.Units (type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
-import Prelude
-  ( Bool
-  , Eq
-  , Ord
-  , Show
-  , floor
-  , fromIntegral
-  , max
-  , min
-  , (*)
-  , (+)
-  , (-)
-  , (/)
-  , (<=)
-  , (>)
-  , (>=)
-  , type (~)
-  )
 import Prelude qualified
-
-type role Quantity phantom
-
-type Quantity :: Type -> Type
-newtype Quantity units = Quantity Double deriving (Eq, Ord, Show)
 
 {-# COMPLETE Quantity# #-}
 
@@ -83,102 +48,16 @@ newtype Quantity units = Quantity Double deriving (Eq, Ord, Show)
 pattern Quantity# :: Double# -> Quantity units
 pattern Quantity# x# = Quantity (D# x#)
 
-deriving newtype instance units ~ Unitless => Prelude.Num (Quantity units)
-
-deriving newtype instance units ~ Unitless => Prelude.Real (Quantity units)
-
-deriving newtype instance units ~ Unitless => Prelude.Fractional (Quantity units)
-
-deriving newtype instance units ~ Unitless => Prelude.RealFrac (Quantity units)
-
-deriving newtype instance units ~ Unitless => Prelude.Floating (Quantity units)
-
-deriving newtype instance units ~ Unitless => Prelude.RealFloat (Quantity units)
-
-deriving newtype instance units ~ Unitless => Prelude.Read (Quantity units)
-
-deriving newtype instance Storable (Quantity units)
-
-deriving newtype instance Hashable (Quantity units)
-
-instance HasZero (Quantity units) where
-  zero = zero
-
-instance Negation (Quantity units) where
-  {-# INLINE negative #-}
-  negative (Quantity x) = Quantity (Prelude.negate x)
-
-instance Multiplication Sign (Quantity units) (Quantity units) where
-  {-# INLINEABLE (.*.) #-}
-  Sign sign_ .*. value = sign_ .*. value
-
-instance Multiplication (Quantity units) Sign (Quantity units) where
-  {-# INLINEABLE (.*.) #-}
-  value .*. Sign sign_ = value .*. sign_
-
-instance units1 ~ units2 => Addition (Quantity units1) (Quantity units2) (Quantity units1) where
-  {-# INLINE (.+.) #-}
-  Quantity x .+. Quantity y = Quantity (x + y)
-
-instance units1 ~ units2 => Subtraction (Quantity units1) (Quantity units2) (Quantity units1) where
-  {-# INLINE (.-.) #-}
-  Quantity x .-. Quantity y = Quantity (x - y)
-
-instance Multiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?*? units2)) where
-  {-# INLINE (?*?) #-}
-  Quantity x ?*? Quantity y = Quantity (x * y)
-
-instance DotMultiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?*? units2)) where
-  {-# INLINE dot_ #-}
-  dot_ = (?*?)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (Quantity units2) (Quantity units3)
-  where
-  {-# INLINEABLE (.*.) #-}
-  Quantity x .*. Quantity y = Quantity (x * y)
-
-instance
-  Units.Product units1 units2 units3 =>
-  DotMultiplication (Quantity units1) (Quantity units2) (Quantity units3)
-  where
-  {-# INLINE dot #-}
-  dot = (.*.)
-
-instance Division_ (Quantity units1) (Quantity units2) (Quantity (units1 ?/? units2)) where
-  {-# INLINE (?/?) #-}
-  Quantity x ?/? Quantity y = Quantity (x / y)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (Quantity units1) (Quantity units2) (Quantity units3)
-  where
-  {-# INLINEABLE (./.) #-}
-  Quantity x ./. Quantity y = Quantity (x / y)
-
-{-# INLINE (.//.) #-}
-(.//.) :: Quantity units -> Quantity units -> Int
-x .//. y = floor (x ./. y)
-
-infixl 7 .//.
-
-{-# INLINE (.%.) #-}
-(.%.) :: Quantity units -> Quantity units -> Quantity units
-x .%. y = x .-. y .* fromIntegral (x .//. y)
-
-infixl 7 .%.
-
 {-# INLINE zero #-}
 zero :: Quantity units
-zero = Quantity 0
+zero = Quantity (D# 0.0##)
 
 {-# INLINE unit #-}
 unit :: Quantity units
-unit = Quantity 1
+unit = Quantity (D# 1.0##)
 
 infinity :: Quantity units
-infinity = unit ./. (zero :: Number)
+infinity = Quantity (D# (1.0## /# 0.0##))
 
 {-# INLINE coerce #-}
 coerce :: Quantity units1 -> Quantity units2
@@ -197,7 +76,7 @@ isInfinite (Quantity x) = Prelude.isInfinite x
 
 {-# INLINE squared #-}
 squared :: Units.Squared units1 units2 => Quantity units1 -> Quantity units2
-squared x = x .*. x
+squared x = x * x
 
 {-# INLINE squared_ #-}
 squared_ :: Quantity units -> Quantity (units ?*? units)
@@ -231,14 +110,14 @@ minmax (a, b) = if a <= b then (a, b) else (b, a)
 -- | Interpolate from one value to another, based on a parameter that ranges from 0 to 1.
 {-# INLINE interpolateFrom #-}
 interpolateFrom :: Quantity units -> Quantity units -> Number -> Quantity units
-interpolateFrom a b t = a .+. (b .-. a) .*. t
+interpolateFrom a b t = a + (b - a) * t
 
 {-# INLINE midpoint #-}
 midpoint :: Quantity units -> Quantity units -> Quantity units
-midpoint a b = 0.5 *. (a .+. b)
+midpoint a b = 0.5 * (a + b)
 
 sum :: List (Quantity units) -> Quantity units
-sum = List.foldl (.+.) zero
+sum = List.foldl (+) zero
 
 sumOf :: (a -> Quantity units) -> List a -> Quantity units
 sumOf f list = sum (List.map f list)
@@ -284,5 +163,5 @@ midpoints start end n = range start end (2 * n) [1, 3 .. 2 * n - 1]
 
 range :: Quantity units -> Quantity units -> Int -> List Int -> List (Quantity units)
 range start end n indices = do
-  let delta = end .-. start
-  [start .+. (fromIntegral i / fromIntegral n) *. delta | i <- indices]
+  let delta = end - start
+  [start + (i / n) * delta | i <- indices]

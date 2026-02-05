@@ -135,7 +135,7 @@ bottomPlaneOrientation = (.bottomPlaneOrientation)
 -- | Construct an orientation from its front plane orientation.
 fromFrontPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
 fromFrontPlaneOrientation (PlaneOrientation3D l u) =
-  Orientation3D (negative l) (Unit3D (l `cross` u)) u
+  Orientation3D -l (Unit3D (l `cross` u)) u
 
 -- | Construct an orientation from its back plane orientation.
 fromBackPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
@@ -145,7 +145,7 @@ fromBackPlaneOrientation (PlaneOrientation3D r u) =
 -- | Construct an orientation from its left plane orientation.
 fromLeftPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
 fromLeftPlaneOrientation (PlaneOrientation3D b u) =
-  Orientation3D (Unit3D (u `cross` b)) (negative b) u
+  Orientation3D (Unit3D (u `cross` b)) -b u
 
 -- | Construct an orientation from its right plane orientation.
 fromRightPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
@@ -160,7 +160,7 @@ fromTopPlaneOrientation (PlaneOrientation3D r f) =
 -- | Construct an orientation from its bottom plane orientation.
 fromBottomPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
 fromBottomPlaneOrientation (PlaneOrientation3D l f) =
-  Orientation3D (negative l) f (Unit3D (f `cross` l))
+  Orientation3D -l f (Unit3D (f `cross` l))
 
 {-| Construct a backward facing orientation relative to a parent/reference orientation.
 

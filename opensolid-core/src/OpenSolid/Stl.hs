@@ -64,13 +64,13 @@ triangleBuilder ::
   (Point3D space, Point3D space, Point3D space) ->
   Builder
 triangleBuilder convention units (p0, p1, p2) = do
-  let normal = Vector3D.normalize ((p1 .-. p0) `cross_` (p2 .-. p0))
+  let normal = Vector3D.normalize ((p1 - p0) `cross_` (p2 - p0))
   Binary.concat
     [ vectorBuilder convention normal
     , pointBuilder convention units p0
     , pointBuilder convention units p1
     , pointBuilder convention units p2
-    , Builder.word16LE 0
+    , Builder.word16LE (fromIntegral 0)
     ]
 
 triangleText ::
@@ -79,7 +79,7 @@ triangleText ::
   (Point3D space, Point3D space, Point3D space) ->
   Text
 triangleText convention units (p0, p1, p2) = do
-  let crossProduct = (p1 .-. p0) `cross_` (p2 .-. p0)
+  let crossProduct = (p1 - p0) `cross_` (p2 - p0)
   let (nx, ny, nz) = Vector3D.components convention (Vector3D.normalize crossProduct)
   Text.multiline
     [ "facet normal " <> Text.number nx <> " " <> Text.number ny <> " " <> Text.number nz

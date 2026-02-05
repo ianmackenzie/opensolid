@@ -42,7 +42,7 @@ zero = Quantity.zero
 
 -- | One meter.
 meter :: Length
-meter = meters 1
+meter = meters 1.0
 
 -- | Construct a length from a number of meters.
 meters :: Number -> Length
@@ -58,7 +58,7 @@ millimeter = meters 0.001
 
 -- | Construct a length value from a number of millimeters.
 millimeters :: Number -> Length
-millimeters = (.*. millimeter)
+millimeters = (* millimeter)
 
 {-| Construct a length value from a number of millimeters.
 
@@ -69,7 +69,7 @@ mm = millimeters
 
 -- | Convert a length to a number of millimeters.
 inMillimeters :: Length -> Number
-inMillimeters = (./. millimeter)
+inMillimeters = (/ millimeter)
 
 -- | One centimeter.
 centimeter :: Length
@@ -77,7 +77,7 @@ centimeter = meters 0.01
 
 -- | Construct a length from a number of centimeters.
 centimeters :: Number -> Length
-centimeters = (.*. centimeter)
+centimeters = (* centimeter)
 
 {-| Construct a length from a number of centimeters.
 
@@ -88,7 +88,7 @@ cm = centimeters
 
 -- | Convert a length to a number of centimeters.
 inCentimeters :: Length -> Number
-inCentimeters = (./. centimeter)
+inCentimeters = (/ centimeter)
 
 -- | One micrometer.
 micrometer :: Length
@@ -96,11 +96,11 @@ micrometer = meters 1e-6
 
 -- | Construct a length from a number of micrometers.
 micrometers :: Number -> Length
-micrometers = (.*. micrometer)
+micrometers = (* micrometer)
 
 -- | Convert a length to a number of micrometers.
 inMicrometers :: Length -> Number
-inMicrometers = (./. micrometer)
+inMicrometers = (/ micrometer)
 
 -- | One nanometer.
 nanometer :: Length
@@ -108,11 +108,11 @@ nanometer = meters 1e-9
 
 -- | Construct a length from a number of nanometers.
 nanometers :: Number -> Length
-nanometers = (.*. nanometer)
+nanometers = (* nanometer)
 
 -- | Convert a length to a number of nanometers.
 inNanometers :: Length -> Number
-inNanometers = (./. nanometer)
+inNanometers = (/ nanometer)
 
 -- | One inch.
 inch :: Length
@@ -120,20 +120,20 @@ inch = millimeters 25.4
 
 -- | Construct a length from a number of inches.
 inches :: Number -> Length
-inches = (.*. inch)
+inches = (* inch)
 
 -- | Convert a length to a number of inches.
 inInches :: Length -> Number
-inInches = (./. inch)
+inInches = (/ inch)
 
 -- | One CSS pixel, equal to 1/96 of an inch.
 pixel :: Length
-pixel = inch ./ 96
+pixel = inch / 96.0
 
 -- | Construct a length from a number of CSS pixels.
 pixels :: Number -> Length
-pixels = (.*. pixel)
+pixels = (* pixel)
 
 -- | Convert a length into a number of CSS pixels.
 inPixels :: Length -> Number
-inPixels = (./. pixel)
+inPixels = (/ pixel)

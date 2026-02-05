@@ -16,6 +16,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
 import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvSpace (UvSpace)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 

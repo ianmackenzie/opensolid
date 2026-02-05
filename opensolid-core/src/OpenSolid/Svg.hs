@@ -108,8 +108,8 @@ toText viewBox entity = do
   let Bounds2D xBounds yBounds = viewBox
   let Interval x1 x2 = xBounds
   let Interval y1 y2 = yBounds
-  let width = x2 .-. x1
-  let height = y2 .-. y1
+  let width = x2 - x1
+  let height = y2 - y1
   let attributes =
         [ Attribute "xmlns" "http://www.w3.org/2000/svg"
         , Attribute "version" "1.1"
@@ -118,12 +118,12 @@ toText viewBox entity = do
         , Attribute "viewBox" $
             Text.join " " $
               [ lengthText x1
-              , lengthText (negative y2)
+              , lengthText -y2
               , lengthText width
               , lengthText height
               ]
         , blackStroke
-        , strokeWidth (Length.pixels 1)
+        , strokeWidth (Length.pixels 1.0)
         , noFill
         ]
   Text.multiline
@@ -168,9 +168,9 @@ lineWith attributes (Line2D p1 p2) = do
   let Point2D x1 y1 = p1
   let Point2D x2 y2 = p2
   let x1Attribute = Attribute "x1" (lengthText x1)
-  let y1Attribute = Attribute "y1" (lengthText (negative y1))
+  let y1Attribute = Attribute "y1" (lengthText -y1)
   let x2Attribute = Attribute "x2" (lengthText x2)
-  let y2Attribute = Attribute "y2" (lengthText (negative y2))
+  let y2Attribute = Attribute "y2" (lengthText -y2)
   Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
 
 -- | Draw a line.
@@ -216,8 +216,8 @@ circleWith ::
 circleWith attributes (Named centerPoint) (Named diameter) = do
   let Point2D cx cy = centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
-  let cyAttribute = Attribute "cy" (lengthText (negative cy))
-  let rAttribute = Attribute "r" (lengthText (0.5 *. diameter))
+  let cyAttribute = Attribute "cy" (lengthText -cy)
+  let rAttribute = Attribute "r" (lengthText (0.5 * diameter))
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 -- | Draw a circle with the given center point and diameter.
@@ -255,9 +255,9 @@ arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWid
       let length = Point2D.distanceFrom start end
       let axis = Axis2D start direction
       let frame = Frame2D.fromXAxis axis
-      let stemLength = length .-. headLength
+      let stemLength = length - headLength
       let stemEndPoint = Point2D.along axis stemLength
-      let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 *. headWidth))
+      let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 * headWidth))
       let rightPoint = Point2D.mirrorAcross axis leftPoint
       let stem = line (Line2D start stemEndPoint)
       let tip = triangle (Triangle2D leftPoint rightPoint end)
@@ -268,7 +268,7 @@ pointsAttribute givenPoints =
   Attribute "points" (Text.join " " (List.map coordinatesText givenPoints))
 
 coordinatesText :: Point2D Meters space -> Text
-coordinatesText (Point2D x y) = lengthText x <> "," <> lengthText (negative y)
+coordinatesText (Point2D x y) = lengthText x <> "," <> lengthText -y
 
 lengthText :: Length -> Text
 lengthText givenLength = Text.number (Length.inMillimeters givenLength)

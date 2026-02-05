@@ -31,26 +31,17 @@ where
 import Data.Coerce qualified
 import Data.Kind (Constraint, Type)
 import Data.List.NonEmpty (NonEmpty)
-import OpenSolid.List (List)
-import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
-import {-# SOURCE #-} OpenSolid.Result (Result (Error, Ok))
-import {-# SOURCE #-} OpenSolid.Sign (Sign)
-import OpenSolid.Unitless (Unitless)
 import Prelude (Eq, Int, Maybe (Just, Nothing), Show, type (~))
 
 class HasUnits (a :: k) units | a -> units
 
+data Unitless deriving (Eq, Show)
+
 instance HasUnits Int Unitless
-
-instance HasUnits (Quantity units) units
-
-instance HasUnits Sign Unitless
 
 instance HasUnits a units => HasUnits (Maybe a) units
 
-instance HasUnits a units => HasUnits (Result x a) units
-
-instance HasUnits a units => HasUnits (List a) units
+instance HasUnits a units => HasUnits [a] units
 
 instance HasUnits a units => HasUnits (NonEmpty a) units
 
@@ -58,26 +49,18 @@ type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
   coerce :: a -> b
 
-instance Coercion (Quantity units1) (Quantity units2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 instance Coercion a b => Coercion (Maybe a) (Maybe b) where
   coerce (Just value) = Just (coerce value)
   coerce Nothing = Nothing
 
-instance Coercion a b => Coercion (Result x a) (Result x b) where
-  coerce (Ok value) = Ok (coerce value)
-  coerce (Error error) = Error error
-
-instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (List a) (List b) where
+instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion [a] [b] where
   coerce = Data.Coerce.coerce
 
 instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (NonEmpty b) where
   coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
-erase :: forall b a units. (Coercion a b, HasUnits a units, HasUnits b Unitless) => a -> b
+erase :: (Coercion a b, HasUnits a units, HasUnits b Unitless) => a -> b
 erase = coerce
 
 data a ?*? b

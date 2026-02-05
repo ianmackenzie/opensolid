@@ -14,12 +14,11 @@ module OpenSolid.SurfaceFunction3D
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Composition
 import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -37,6 +36,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
@@ -73,10 +73,10 @@ instance
     (VectorSurfaceFunction3D meters space2)
     (SurfaceFunction3D space1)
   where
-  lhs .+. rhs =
+  lhs + rhs =
     new
-      (lhs.compiled .+. rhs.compiled)
-      (\parameter -> derivative parameter lhs .+. VectorSurfaceFunction3D.derivative parameter rhs)
+      (lhs.compiled + rhs.compiled)
+      (\parameter -> derivative parameter lhs + VectorSurfaceFunction3D.derivative parameter rhs)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -85,7 +85,7 @@ instance
     (Vector3D meters space2)
     (SurfaceFunction3D space1)
   where
-  f .+. v = f .+. VectorSurfaceFunction3D.constant v
+  f + v = f + VectorSurfaceFunction3D.constant v
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -94,10 +94,10 @@ instance
     (VectorSurfaceFunction3D meters space2)
     (SurfaceFunction3D space1)
   where
-  lhs .-. rhs =
+  lhs - rhs =
     new
-      (lhs.compiled .-. rhs.compiled)
-      (\parameter -> derivative parameter lhs .-. VectorSurfaceFunction3D.derivative parameter rhs)
+      (lhs.compiled - rhs.compiled)
+      (\parameter -> derivative parameter lhs - VectorSurfaceFunction3D.derivative parameter rhs)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -106,7 +106,7 @@ instance
     (Vector3D meters space2)
     (SurfaceFunction3D space1)
   where
-  f .-. v = f .-. VectorSurfaceFunction3D.constant v
+  f - v = f - VectorSurfaceFunction3D.constant v
 
 instance
   space1 ~ space2 =>
@@ -115,10 +115,10 @@ instance
     (SurfaceFunction3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  lhs .-. rhs =
+  lhs - rhs =
     VectorSurfaceFunction3D.new
-      (lhs.compiled .-. rhs.compiled)
-      (\parameter -> derivative parameter lhs .-. derivative parameter rhs)
+      (lhs.compiled - rhs.compiled)
+      (\parameter -> derivative parameter lhs - derivative parameter rhs)
 
 instance
   space1 ~ space2 =>
@@ -127,7 +127,7 @@ instance
     (Point3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  function .-. point = function .-. constant point
+  function - point = function - constant point
 
 instance
   space1 ~ space2 =>
@@ -136,7 +136,7 @@ instance
     (SurfaceFunction3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  point .-. function = constant point .-. function
+  point - function = constant point - function
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -160,7 +160,7 @@ instance
     let composedDerivative parameter = do
           let innerDerivative = SurfaceFunction2D.derivative parameter inner
           let (dU, dV) = innerDerivative.components
-          duOuter .*. dU .+. dvOuter .*. dV
+          duOuter * dU + dvOuter * dV
     new (outer.compiled `compose` inner.compiled) composedDerivative
 
 instance HasField "compiled" (SurfaceFunction3D space) (Compiled space) where

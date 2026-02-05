@@ -56,8 +56,8 @@ constant direction =
   DirectionSurfaceFunction3D (VectorSurfaceFunction3D.constant (Vector3D.unit direction))
 
 instance Negation (DirectionSurfaceFunction3D space) where
-  negative (DirectionSurfaceFunction3D vectorSurfaceFunction) =
-    DirectionSurfaceFunction3D (negative vectorSurfaceFunction)
+  negate (DirectionSurfaceFunction3D vectorSurfaceFunction) =
+    DirectionSurfaceFunction3D (negate vectorSurfaceFunction)
 
 instance
   Multiplication
@@ -65,8 +65,8 @@ instance
     (DirectionSurfaceFunction3D space)
     (DirectionSurfaceFunction3D space)
   where
-  Positive .*. function = function
-  Negative .*. function = negative function
+  Positive * function = function
+  Negative * function = -function
 
 instance
   Multiplication_
@@ -75,7 +75,7 @@ instance
     (DirectionSurfaceFunction3D space)
   where
   Positive ?*? function = function
-  Negative ?*? function = negative function
+  Negative ?*? function = -function
 
 instance
   Multiplication
@@ -83,8 +83,8 @@ instance
     Sign
     (DirectionSurfaceFunction3D space)
   where
-  function .*. Positive = function
-  function .*. Negative = negative function
+  function * Positive = function
+  function * Negative = -function
 
 instance
   Multiplication_
@@ -93,7 +93,7 @@ instance
     (DirectionSurfaceFunction3D space)
   where
   function ?*? Positive = function
-  function ?*? Negative = negative function
+  function ?*? Negative = -function
 
 instance
   Multiplication
@@ -101,7 +101,7 @@ instance
     (DirectionSurfaceFunction3D space)
     (VectorSurfaceFunction3D units space)
   where
-  value .*. DirectionSurfaceFunction3D vectorSurfaceFunction = value .*. vectorSurfaceFunction
+  value * DirectionSurfaceFunction3D vectorSurfaceFunction = value * vectorSurfaceFunction
 
 instance
   Multiplication
@@ -109,7 +109,7 @@ instance
     (Quantity units)
     (VectorSurfaceFunction3D units space)
   where
-  DirectionSurfaceFunction3D vectorSurfaceFunction .*. value = vectorSurfaceFunction .*. value
+  DirectionSurfaceFunction3D vectorSurfaceFunction * value = vectorSurfaceFunction * value
 
 instance
   Multiplication
@@ -117,8 +117,8 @@ instance
     (DirectionSurfaceFunction3D space)
     (VectorSurfaceFunction3D units space)
   where
-  scalarSurfaceFunction .*. DirectionSurfaceFunction3D vectorSurfaceFunction =
-    scalarSurfaceFunction .*. vectorSurfaceFunction
+  scalarSurfaceFunction * DirectionSurfaceFunction3D vectorSurfaceFunction =
+    scalarSurfaceFunction * vectorSurfaceFunction
 
 instance
   Multiplication
@@ -126,8 +126,8 @@ instance
     (SurfaceFunction1D units)
     (VectorSurfaceFunction3D units space)
   where
-  DirectionSurfaceFunction3D vectorSurfaceFunction .*. scalarSurfaceFunction =
-    vectorSurfaceFunction .*. scalarSurfaceFunction
+  DirectionSurfaceFunction3D vectorSurfaceFunction * scalarSurfaceFunction =
+    vectorSurfaceFunction * scalarSurfaceFunction
 
 instance
   space1 ~ space2 =>

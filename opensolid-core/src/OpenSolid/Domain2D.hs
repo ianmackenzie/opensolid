@@ -24,7 +24,7 @@ module OpenSolid.Domain2D
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
@@ -138,8 +138,8 @@ contains :: Domain2D -> Domain2D -> Bool
 contains (Domain2D x2 y2) (Domain2D x1 y1) = Domain1D.contains x2 x1 && Domain1D.contains y2 y1
 
 area :: Domain2D -> Number
-area (Domain2D x y) = Domain1D.width x .*. Domain1D.width y
+area (Domain2D x y) = Domain1D.width x * Domain1D.width y
 
 intersectionArea :: Domain2D -> Domain2D -> Number
 intersectionArea (Domain2D x1 y1) (Domain2D x2 y2) =
-  Domain1D.intersectionWidth x1 x2 .*. Domain1D.intersectionWidth y1 y2
+  Domain1D.intersectionWidth x1 x2 * Domain1D.intersectionWidth y1 y2

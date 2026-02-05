@@ -8,7 +8,7 @@ module OpenSolid.SurfaceFunction1D.SaddleRegion
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
@@ -33,6 +33,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as Ver
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 
@@ -70,7 +71,7 @@ quadratic subproblem saddlePoint = do
   let fuu = SurfaceFunction1D.evaluate f.du.du saddlePoint
   let fuv = SurfaceFunction1D.evaluate f.du.dv saddlePoint
   let fvv = SurfaceFunction1D.evaluate f.dv.dv saddlePoint
-  let bDirectionCandidates = NonEmpty.three Direction2D.x Direction2D.y (Direction2D.degrees 45)
+  let bDirectionCandidates = NonEmpty.three Direction2D.x Direction2D.y (Direction2D.degrees 45.0)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Quantity.abs . directionalSecondDerivative) bDirectionCandidates
   let dA = Direction2D.rotateRight dB
@@ -78,17 +79,17 @@ quadratic subproblem saddlePoint = do
   let vB = Vector2D.unit dB
   let Vector2D ua va = vA
   let Vector2D ub vb = vB
-  let faa = ua .*. ua .*. fuu .+. 2 *. ua .*. va .*. fuv .+. va .*. va .*. fvv
-  let fab = ua .*. ub .*. fuu .+. (ua .*. vb .+. ub .*. va) .*. fuv .+. va .*. vb .*. fvv
-  let fbb = ub .*. ub .*. fuu .+. 2 *. ub .*. vb .*. fuv .+. vb .*. vb .*. fvv
-  let determinant = fab ?*? fab .-. faa ?*? fbb
+  let faa = ua * ua * fuu + 2.0 * ua * va * fuv + va * va * fvv
+  let fab = ua * ub * fuu + (ua * vb + ub * va) * fuv + va * vb * fvv
+  let fbb = ub * ub * fuu + 2.0 * ub * vb * fuv + vb * vb * fvv
+  let determinant = fab ?*? fab - faa ?*? fbb
   let sqrtD = Quantity.sqrt_ determinant
-  let (m1, m2) = Quantity.minmax ((negative fab .+. sqrtD) ./. fbb, (negative fab .-. sqrtD) ./. fbb)
-  let v1 = Tolerance.using Quantity.zero (Vector2D.normalize (vA .+. m1 .*. vB))
-  let v2 = Tolerance.using Quantity.zero (Vector2D.normalize (vA .+. m2 .*. vB))
+  let (m1, m2) = Quantity.minmax ((-fab + sqrtD) / fbb, (-fab - sqrtD) / fbb)
+  let v1 = Tolerance.using Quantity.zero (Vector2D.normalize (vA + m1 * vB))
+  let v2 = Tolerance.using Quantity.zero (Vector2D.normalize (vA + m2 * vB))
   let d1 = Direction2D.unsafe v1
   let d2 = Direction2D.unsafe v2
-  let vX = Tolerance.using Quantity.zero (Vector2D.normalize (v1 .+. v2))
+  let vX = Tolerance.using Quantity.zero (Vector2D.normalize (v1 + v2))
   let dX = Direction2D.unsafe vX
   let frame = Frame2D.fromXAxis (Axis2D.through saddlePoint dX)
   SaddleRegion{subproblem, frame, d1, d2}
@@ -101,7 +102,7 @@ secondDerivative ::
   Quantity units
 secondDerivative fuu fuv fvv direction = do
   let Direction2D du dv = direction
-  du .*. du .*. fuu .+. 2 *. du .*. dv .*. fuv .+. dv .*. dv .*. fvv
+  du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
 
 connectingCurve ::
   Tolerance units =>
@@ -116,13 +117,13 @@ connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let boundingAxis direction = Axis2D.through saddlePoint direction
   case (Quantity.sign x, Quantity.sign y) of
     (Positive, Positive) ->
-      connect subproblem frame d2 joiningCurve [boundingAxis dx, boundingAxis (negative dy)]
+      connect subproblem frame d2 joiningCurve [boundingAxis dx, boundingAxis -dy]
     (Positive, Negative) ->
-      connect subproblem frame d1 joiningCurve [boundingAxis (negative dx), boundingAxis (negative dy)]
+      connect subproblem frame d1 joiningCurve [boundingAxis -dx, boundingAxis -dy]
     (Negative, Positive) ->
-      connect subproblem frame (negative d1) joiningCurve [boundingAxis dx, boundingAxis dy]
+      connect subproblem frame -d1 joiningCurve [boundingAxis dx, boundingAxis dy]
     (Negative, Negative) ->
-      connect subproblem frame (negative d2) joiningCurve [boundingAxis (negative dx), boundingAxis dy]
+      connect subproblem frame -d2 joiningCurve [boundingAxis -dx, boundingAxis dy]
 
 connect ::
   Tolerance units =>
@@ -144,25 +145,25 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
       let implicitBounds = NonEmpty.one (Bounds2D (Interval uP uC) vBounds)
       case joiningCurve of
         Incoming _ -> do
-          let dudt = uP .-. uC
-          let endDerivative = Vector2D dudt (dudt .*. (dv ./. du))
+          let dudt = uP - uC
+          let endDerivative = Vector2D dudt (dudt * (dv / du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uC uP implicitBounds frame boundingAxes
           Curve2D.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
         Outgoing _ -> do
-          let dudt = uC .-. uP
-          let startDerivative = Vector2D dudt (dudt .*. (dv ./. du))
+          let dudt = uC - uP
+          let startDerivative = Vector2D dudt (dudt * (dv / du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
           Curve2D.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
     else do
       let implicitBounds = NonEmpty.one (Bounds2D uBounds (Interval vP vC))
       case joiningCurve of
         Incoming _ -> do
-          let dvdt = vP .-. vC
-          let endDerivative = Vector2D (dvdt .*. (du ./. dv)) dvdt
+          let dvdt = vP - vC
+          let endDerivative = Vector2D (dvdt * (du / dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vC vP implicitBounds frame boundingAxes
           Curve2D.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
         Outgoing _ -> do
-          let dvdt = vC .-. vP
-          let startDerivative = Vector2D (dvdt .*. (du ./. dv)) dvdt
+          let dvdt = vC - vP
+          let startDerivative = Vector2D (dvdt * (du / dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vP vC implicitBounds frame boundingAxes
           Curve2D.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing

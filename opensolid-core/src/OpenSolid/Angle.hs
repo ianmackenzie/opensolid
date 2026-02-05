@@ -26,12 +26,9 @@ module OpenSolid.Angle
   )
 where
 
-import OpenSolid.Arithmetic
-import OpenSolid.Number (Number)
 import OpenSolid.Number qualified as Number
-import OpenSolid.Quantity (Quantity (Quantity))
+import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Units (Radians)
 import Prelude qualified
 
 {-|  An angle in degrees, radians, turns etc.
@@ -46,7 +43,7 @@ zero = Quantity.zero
 
 -- | The [golden angle](https://en.wikipedia.org/wiki/Golden_angle).
 goldenAngle :: Angle
-goldenAngle = radians (Number.pi .*. (3 -. Number.sqrt 5))
+goldenAngle = radians (Number.pi * (3.0 - Number.sqrt 5.0))
 
 -- | Compute the sine of an angle.
 sin :: Angle -> Number
@@ -108,15 +105,15 @@ twoPi = radians Number.twoPi
 
 -- | One degree.
 degree :: Angle
-degree = fullTurn ./ 360.0
+degree = fullTurn / 360.0
 
 -- | Construct an angle from a number of degrees.
 degrees :: Number -> Angle
-degrees = (.*. degree)
+degrees = (* degree)
 
 -- | Convert an angle to a number of degrees.
 inDegrees :: Angle -> Number
-inDegrees = (./. degree)
+inDegrees = (/ degree)
 
 -- | One full turn, or 360 degrees.
 fullTurn :: Angle
@@ -135,11 +132,11 @@ quarterTurn = halfPi
 One turn is equal to 360 degrees.
 -}
 turns :: Number -> Angle
-turns = (.*. fullTurn)
+turns = (* fullTurn)
 
 {-| Convert an angle to a number of turns.
 
 One turn is equal to 360 degrees.
 -}
 inTurns :: Angle -> Number
-inTurns = (./. fullTurn)
+inTurns = (/ fullTurn)

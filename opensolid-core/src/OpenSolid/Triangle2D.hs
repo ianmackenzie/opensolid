@@ -25,7 +25,7 @@ vertices :: Triangle2D units space -> (Point2D units space, Point2D units space,
 vertices (Triangle2D p1 p2 p3) = (p1, p2, p3)
 
 signedArea_ :: Triangle2D units space -> Quantity (units ?*? units)
-signedArea_ (Triangle2D p1 p2 p3) = 0.5 *. (p2 .-. p1) `cross_` (p3 .-. p1)
+signedArea_ (Triangle2D p1 p2 p3) = 0.5 * (p2 - p1) `cross_` (p3 - p1)
 
 {-| Compute the signed area of a triangle.
 

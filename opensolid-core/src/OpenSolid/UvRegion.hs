@@ -11,6 +11,7 @@ import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds qualified as UvBounds
+import OpenSolid.UvSpace (UvSpace)
 
 type UvRegion = Region2D Unitless UvSpace
 

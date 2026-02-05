@@ -58,13 +58,13 @@ type Uniform space = Transform3D Transform.Uniform space
 type Affine space = Transform3D Transform.Affine space
 
 unitX :: Vector3D Unitless space
-unitX = Vector3D 1 0 0
+unitX = Vector3D 1.0 0.0 0.0
 
 unitY :: Vector3D Unitless space
-unitY = Vector3D 0 1 0
+unitY = Vector3D 0.0 1.0 0.0
 
 unitZ :: Vector3D Unitless space
-unitZ = Vector3D 0 0 1
+unitZ = Vector3D 0.0 0.0 1.0
 
 identity :: Rigid space
 identity = Transform3D World3D.originPoint unitX unitY unitZ
@@ -81,14 +81,14 @@ withFixedPoint ::
   Transform3D tag space
 withFixedPoint fixedPoint vx vy vz = do
   let Point3D x0 y0 z0 = fixedPoint
-  let originPoint = fixedPoint .-. x0 .*. vx .-. y0 .*. vy .-. z0 .*. vz
+  let originPoint = fixedPoint - x0 * vx - y0 * vy - z0 * vz
   Transform3D originPoint vx vy vz
 
 translateBy :: Vector3D Meters space -> Rigid space
 translateBy vector = Transform3D (Position3D vector) unitX unitY unitZ
 
 translateIn :: Direction3D space -> Length -> Rigid space
-translateIn direction distance = translateBy (direction .*. distance)
+translateIn direction distance = translateBy (direction * distance)
 
 translateAlong :: Axis3D space -> Length -> Rigid space
 translateAlong (Axis3D _ direction) distance = translateIn direction distance
@@ -96,31 +96,31 @@ translateAlong (Axis3D _ direction) distance = translateIn direction distance
 rotateAround :: Axis3D space -> Angle -> Rigid space
 rotateAround axis angle = do
   let Direction3D dx dy dz = axis.direction
-  let halfAngle = 0.5 *. angle
+  let halfAngle = 0.5 * angle
   let sinHalfAngle = Angle.sin halfAngle
-  let qx = dx .*. sinHalfAngle
-  let qy = dy .*. sinHalfAngle
-  let qz = dz .*. sinHalfAngle
+  let qx = dx * sinHalfAngle
+  let qy = dy * sinHalfAngle
+  let qz = dz * sinHalfAngle
   let qw = Angle.cos halfAngle
-  let wx = qw .*. qx
-  let wy = qw .*. qy
-  let wz = qw .*. qz
-  let xx = qx .*. qx
-  let xy = qx .*. qy
-  let xz = qx .*. qz
-  let yy = qy .*. qy
-  let yz = qy .*. qz
-  let zz = qz .*. qz
-  let vx = Vector3D (1 -. 2 *. (yy .+. zz)) (2 *. (xy .+. wz)) (2 *. (xz .-. wy))
-  let vy = Vector3D (2 *. (xy .-. wz)) (1 -. 2 *. (xx .+. zz)) (2 *. (yz .+. wx))
-  let vz = Vector3D (2 *. (xz .+. wy)) (2 *. (yz .-. wx)) (1 -. 2 *. (xx .+. yy))
+  let wx = qw * qx
+  let wy = qw * qy
+  let wz = qw * qz
+  let xx = qx * qx
+  let xy = qx * qy
+  let xz = qx * qz
+  let yy = qy * qy
+  let yz = qy * qz
+  let zz = qz * qz
+  let vx = Vector3D (1.0 - 2.0 * (yy + zz)) (2.0 * (xy + wz)) (2.0 * (xz - wy))
+  let vy = Vector3D (2.0 * (xy - wz)) (1.0 - 2.0 * (xx + zz)) (2.0 * (yz + wx))
+  let vz = Vector3D (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))
   withFixedPoint axis.originPoint vx vy vz
 
 scaleAbout :: Point3D space -> Number -> Uniform space
 scaleAbout point scale = do
-  let vx = Vector3D scale 0 0
-  let vy = Vector3D 0 scale 0
-  let vz = Vector3D 0 0 scale
+  let vx = Vector3D scale 0.0 0.0
+  let vy = Vector3D 0.0 scale 0.0
+  let vz = Vector3D 0.0 0.0 scale
   withFixedPoint point vx vy vz
 
 scaleAlong :: Axis3D space -> Number -> Affine space
@@ -128,21 +128,21 @@ scaleAlong axis scale = do
   let d = axis.direction
   let Direction3D dx dy dz = d
   -- TODO refactor to use Vector3D.scaleIn?
-  let vx = unitX .+. (scale .- 1) .*. dx .*. d
-  let vy = unitY .+. (scale .- 1) .*. dy .*. d
-  let vz = unitZ .+. (scale .- 1) .*. dz .*. d
+  let vx = unitX + (scale - 1.0) * dx * d
+  let vy = unitY + (scale - 1.0) * dy * d
+  let vz = unitZ + (scale - 1.0) * dz * d
   withFixedPoint axis.originPoint vx vy vz
 
 mirrorAcross :: Plane3D global local -> Orthonormal global
 mirrorAcross plane = do
   let PlaneOrientation3D i j = plane.orientation
   let Vector3D nx ny nz = i `cross` j
-  let axx = 1 -. 2 *. nx .*. nx
-  let ayy = 1 -. 2 *. ny .*. ny
-  let azz = 1 -. 2 *. nz .*. nz
-  let ayz = -2 *. ny .*. nz
-  let axz = -2 *. nx .*. nz
-  let axy = -2 *. nx .*. ny
+  let axx = 1.0 - 2.0 * nx * nx
+  let ayy = 1.0 - 2.0 * ny * ny
+  let azz = 1.0 - 2.0 * nz * nz
+  let ayz = -2.0 * ny * nz
+  let axz = -2.0 * nx * nz
+  let axy = -2.0 * nx * ny
   let vx = Vector3D axx axy axz
   let vy = Vector3D axy ayy ayz
   let vz = Vector3D axz ayz azz

@@ -78,6 +78,7 @@ import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
@@ -202,7 +203,7 @@ addFillet radius curves point = do
           -- sort them by the negation of the incident parameter value
           -- so that the curve with parameter value 1 (the incoming curve) is first
           -- is and the curve with parameter value 0 (the outgoing curve) is second
-          & List.sortBy (negative . Pair.second)
+          & List.sortBy (negate . Pair.second)
           & List.map Pair.first
   let otherCurves = List.filterMap nonIncidentCurve curveIncidences
   case incidentCurves of
@@ -215,13 +216,13 @@ addFillet radius curves point = do
       let firstEndDirection = DirectionCurve2D.endValue firstTangent
       let secondStartDirection = DirectionCurve2D.startValue secondTangent
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
-      let offset = Quantity.sign cornerAngle .*. Quantity.abs radius
+      let offset = Quantity.sign cornerAngle * Quantity.abs radius
       let firstOffsetDisplacement =
-            VectorCurve2D.rotateBy Angle.quarterTurn (offset .*. firstTangent)
+            VectorCurve2D.rotateBy Angle.quarterTurn (offset * firstTangent)
       let secondOffsetDisplacement =
-            VectorCurve2D.rotateBy Angle.quarterTurn (offset .*. secondTangent)
-      let firstOffsetCurve = firstCurve .+. firstOffsetDisplacement
-      let secondOffsetCurve = secondCurve .+. secondOffsetDisplacement
+            VectorCurve2D.rotateBy Angle.quarterTurn (offset * secondTangent)
+      let firstOffsetCurve = firstCurve + firstOffsetDisplacement
+      let secondOffsetCurve = secondCurve + secondOffsetDisplacement
       maybeIntersections <- Result.orFail (Curve2D.intersections firstOffsetCurve secondOffsetCurve)
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
@@ -240,8 +241,8 @@ addFillet radius curves point = do
                       (DirectionCurve2D.evaluate firstTangent t1)
                       (DirectionCurve2D.evaluate secondTangent t2)
               let filletArc = Curve2D.sweptArc centerPoint startPoint sweptAngle
-              let trimmedFirstCurve = firstCurve `compose` Curve1D.interpolateFrom 0 t1
-              let trimmedSecondCurve = secondCurve `compose` Curve1D.interpolateFrom t2 1
+              let trimmedFirstCurve = firstCurve `compose` Curve1D.interpolateFrom 0.0 t1
+              let trimmedSecondCurve = secondCurve `compose` Curve1D.interpolateFrom t2 1.0
               Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence ::
@@ -250,8 +251,8 @@ curveIncidence ::
   Curve2D units space ->
   (Curve2D units space, Maybe Number)
 curveIncidence point curve
-  | point ~= curve.startPoint = (curve, Just 0)
-  | point ~= curve.endPoint = (curve, Just 1)
+  | point ~= curve.startPoint = (curve, Just 0.0)
+  | point ~= curve.endPoint = (curve, Just 1.0)
   | otherwise = (curve, Nothing)
 
 incidentCurve :: (Curve2D units space, Maybe Number) -> Maybe (Curve2D units space, Number)
@@ -443,7 +444,7 @@ unconvert ::
   Quantity (units2 ?/? units1) ->
   Region2D units2 space ->
   Region2D units1 space
-unconvert factor region = convert (Units.simplify (1 /? factor)) region
+unconvert factor region = convert (Units.simplify (1.0 ?/? factor)) region
 
 contains :: Tolerance units => Point2D units space -> Region2D units space -> Bool
 contains point region =
@@ -468,13 +469,13 @@ fluxIntegral ::
   Curve2D units space ->
   Estimate Unitless
 fluxIntegral point curve = do
-  let displacement = point .-. curve
+  let displacement = point - curve
   -- By this point we've already checked whether the point is *on* the curve,
   -- so (since it's not) the displacement will always be non-zero
   let integrand =
         Tolerance.using (Quantity.squared_ ?tolerance) $
           (Curve2D.derivative curve `cross_` displacement)
-            ./. Curve1D.WithNoZeros (VectorCurve2D.squaredMagnitude_ displacement)
+            / Curve1D.WithNoZeros (VectorCurve2D.squaredMagnitude_ displacement)
   Curve1D.integrate integrand
 
 totalFlux :: Tolerance units => Point2D units space -> Loop units space -> Estimate Unitless
@@ -486,7 +487,7 @@ classifyNonBoundary point loop = do
   if Interval.includes Quantity.zero flux then Negative else Positive
 
 bothPossibleFluxValues :: Interval Unitless
-bothPossibleFluxValues = Interval 0 Number.twoPi
+bothPossibleFluxValues = Interval 0.0 Number.twoPi
 
 containmentIsDeterminate :: Interval Unitless -> Bool
 containmentIsDeterminate flux = not (Interval.contains bothPossibleFluxValues flux)
@@ -536,8 +537,8 @@ areaIntegral referencePoint curve =
 
 areaIntegral_ :: Point2D units space -> Curve2D units space -> Estimate (units ?*? units)
 areaIntegral_ referencePoint curve = do
-  let (x, y) = VectorCurve2D.components (curve .-. referencePoint)
-  negative (Curve1D.integrate (y ?*? Curve1D.derivative x))
+  let (x, y) = VectorCurve2D.components (curve - referencePoint)
+  negate (Curve1D.integrate (y ?*? Curve1D.derivative x))
 
 loopIsInside :: Tolerance units => Loop units space -> Loop units space -> Bool
 loopIsInside outer inner = do

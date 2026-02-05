@@ -14,8 +14,8 @@ curveImpl ::
   Number
 curveImpl function derivative x1 y1 = do
   let dy1 = derivative x1
-  let x2 = x1 .-. y1 ./. dy1
+  let x2 = x1 - y1 / dy1
   let y2 = function x2
-  if Quantity.abs y2 < 0.5 *. Quantity.abs y1
+  if Quantity.abs y2 < 0.5 * Quantity.abs y1
     then curveImpl function derivative x2 y2
     else x1

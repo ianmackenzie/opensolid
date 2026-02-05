@@ -48,7 +48,7 @@ pattern Int n <- (toInt -> Just n)
 
 toInt :: Json -> Maybe Int
 toInt (Number value) = do
-  let rounded = round value
+  let rounded = Number.round value
   if Number.fromInt rounded == value then Just rounded else Nothing
 toInt _ = Nothing
 

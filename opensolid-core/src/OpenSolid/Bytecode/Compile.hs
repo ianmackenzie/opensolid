@@ -51,10 +51,10 @@ import Prelude qualified
 newtype NumComponents = NumComponents Int deriving (Eq, Ord, Show)
 
 instance Addition NumComponents NumComponents NumComponents where
-  NumComponents a .+. NumComponents b = NumComponents (a + b)
+  NumComponents a + NumComponents b = NumComponents (a + b)
 
 instance Addition NumComponents Int NumComponents where
-  NumComponents a .+. b = NumComponents (a + b)
+  NumComponents a + b = NumComponents (a + b)
 
 newtype OutputComponents = OutputComponents Int deriving (Eq, Ord, Show)
 
@@ -114,7 +114,7 @@ addConstant components = Step \initialState ->
               , constants =
                   Map.set components constantIndex initialState.constants
               , constantComponents =
-                  initialState.constantComponents .+. NonEmpty.length components
+                  initialState.constantComponents + NonEmpty.length components
               }
       (# updatedCompilation, constantIndex #)
 
@@ -143,7 +143,7 @@ addVariable instruction (OutputComponents outputComponents) = Step \initialState
               , variables =
                   Map.set instruction resultIndex initialState.variables
               , variableComponents =
-                  initialState.variableComponents .+. outputComponents
+                  initialState.variableComponents + outputComponents
               }
       (# updatedState, resultIndex #)
 

@@ -22,4 +22,4 @@ deduplicateImpl (first : remaining) accumulated =
 
 isDuplicate :: (Interval Unitless, Number) -> (Interval Unitless, Number) -> Bool
 isDuplicate (subdomain1, _) (subdomain2, _) =
-  Interval.overlap subdomain1 subdomain2 >= 0
+  Interval.overlap subdomain1 subdomain2 >= 0.0

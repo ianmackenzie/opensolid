@@ -46,23 +46,23 @@ pattern DirectionBounds2D :: Interval Unitless -> Interval Unitless -> Direction
 pattern DirectionBounds2D dx dy <- UnitBounds2D (VectorBounds2D dx dy)
 
 instance Negation (DirectionBounds2D space) where
-  negative (UnitBounds2D vectorBounds) = UnitBounds2D (negative vectorBounds)
+  negate (UnitBounds2D vectorBounds) = UnitBounds2D (negate vectorBounds)
 
 instance Multiplication Sign (DirectionBounds2D space) (DirectionBounds2D space) where
-  Positive .*. directionBounds = directionBounds
-  Negative .*. directionBounds = negative directionBounds
+  Positive * directionBounds = directionBounds
+  Negative * directionBounds = -directionBounds
 
 instance Multiplication_ Sign (DirectionBounds2D space) (DirectionBounds2D space) where
   Positive ?*? directionBounds = directionBounds
-  Negative ?*? directionBounds = negative directionBounds
+  Negative ?*? directionBounds = -directionBounds
 
 instance Multiplication (DirectionBounds2D space) Sign (DirectionBounds2D space) where
-  directionBounds .*. Positive = directionBounds
-  directionBounds .*. Negative = negative directionBounds
+  directionBounds * Positive = directionBounds
+  directionBounds * Negative = -directionBounds
 
 instance Multiplication_ (DirectionBounds2D space) Sign (DirectionBounds2D space) where
   directionBounds ?*? Positive = directionBounds
-  directionBounds ?*? Negative = negative directionBounds
+  directionBounds ?*? Negative = -directionBounds
 
 instance
   Multiplication
@@ -70,7 +70,7 @@ instance
     (DirectionBounds2D space)
     (VectorBounds2D units space)
   where
-  value .*. UnitBounds2D vectorBounds = value .*. vectorBounds
+  value * UnitBounds2D vectorBounds = value * vectorBounds
 
 instance
   Multiplication
@@ -78,7 +78,7 @@ instance
     (Quantity units)
     (VectorBounds2D units space)
   where
-  UnitBounds2D vectorBounds .*. value = vectorBounds .*. value
+  UnitBounds2D vectorBounds * value = vectorBounds * value
 
 instance
   Multiplication
@@ -86,7 +86,7 @@ instance
     (DirectionBounds2D space)
     (VectorBounds2D units space)
   where
-  interval .*. UnitBounds2D vectorBounds = interval .*. vectorBounds
+  interval * UnitBounds2D vectorBounds = interval * vectorBounds
 
 instance
   Multiplication
@@ -94,7 +94,7 @@ instance
     (Interval units)
     (VectorBounds2D units space)
   where
-  UnitBounds2D vectorBounds .*. interval = vectorBounds .*. interval
+  UnitBounds2D vectorBounds * interval = vectorBounds * interval
 
 instance
   space1 ~ space2 =>

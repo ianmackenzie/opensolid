@@ -94,11 +94,11 @@ leftward :: Orientation3D space -> Direction3D space
 leftward = Orientation3D.leftwardDirection
 
 on :: Plane3D global local -> Direction2D local -> Direction3D global
-on (Plane3D _ (PlaneOrientation3D i j)) (Direction2D x y) = Unit3D (x .*. i .+. y .*. j)
+on (Plane3D _ (PlaneOrientation3D i j)) (Direction2D x y) = Unit3D (x * i + y * j)
 
 polar :: Plane3D global local -> Angle -> Direction3D global
 polar (Plane3D _ (PlaneOrientation3D i j)) angle =
-  Unit3D (Angle.cos angle .*. i .+. Angle.sin angle .*. j)
+  Unit3D (Angle.cos angle * i + Angle.sin angle * j)
 
 -- | Generate an arbitrary direction perpendicular to the given one.
 perpendicularDirection :: Direction3D space -> Direction3D space
@@ -109,13 +109,13 @@ perpendicularDirection (Direction3D dx dy dz) = do
   if
     | absX <= absY && absX <= absZ -> do
         let scale = Number.hypot2 dy dz
-        Direction3D 0 (-dz ./. scale) (dy ./. scale)
+        Direction3D 0.0 (-dz / scale) (dy / scale)
     | absY <= absX && absY <= absZ -> do
         let scale = Number.hypot2 dx dz
-        Direction3D (dz ./. scale) 0 (-dx ./. scale)
+        Direction3D (dz / scale) 0.0 (-dx / scale)
     | otherwise -> do
         let scale = Number.hypot2 dx dy
-        Direction3D (-dy ./. scale) (dx ./. scale) 0
+        Direction3D (-dy / scale) (dx / scale) 0.0
 
 forwardComponent :: Direction3D space -> Number
 forwardComponent (Unit3D vector) = Vector3D.forwardComponent vector
@@ -189,11 +189,11 @@ random = do
   -- (to avoid roundoff error during normalization),
   -- and only accept vectors inside the unit sphere
   -- (otherwise we'll get a non-uniform distribution)
-  if magnitude > 0.1 && magnitude <= 1
-    then Random.return (Unit3D (vector ./. magnitude))
+  if magnitude > 0.1 && magnitude <= 1.0
+    then Random.return (Unit3D (vector / magnitude))
     else random -- Generated a 'bad' vector, try again
 
 randomVector :: Random.Generator (Vector3D Unitless space)
 randomVector = do
-  let randomComponent = Number.random -1 1
+  let randomComponent = Number.random -1.0 1.0
   Random.map3 Vector3D randomComponent randomComponent randomComponent

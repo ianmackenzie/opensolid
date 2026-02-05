@@ -94,11 +94,11 @@ lift function (Unit2D vector) = Unit2D (function vector)
 
 -- | The X direction.
 x :: Direction2D space
-x = Unit2D (Vector2D 1 0)
+x = Unit2D (Vector2D 1.0 0.0)
 
 -- | The Y direction.
 y :: Direction2D space
-y = Unit2D (Vector2D 0 1)
+y = Unit2D (Vector2D 0.0 1.0)
 
 data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show)
 
@@ -108,7 +108,7 @@ from ::
   Point2D units space ->
   Result PointsAreCoincident (Direction2D space)
 from p1 p2 = do
-  case Vector2D.direction (p2 .-. p1) of
+  case Vector2D.direction (p2 - p1) of
     Ok direction -> Ok direction
     Error Vector.IsZero -> Error PointsAreCoincident
 
@@ -197,7 +197,7 @@ placeOnOrientation orientation (Unit2D vector) =
   Unit3D (Vector2D.placeOnOrientation orientation vector)
 
 random :: Random.Generator (Direction2D space)
-random = Random.map fromAngle (Quantity.random (negative Angle.pi) Angle.pi)
+random = Random.map fromAngle (Quantity.random -Angle.pi Angle.pi)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

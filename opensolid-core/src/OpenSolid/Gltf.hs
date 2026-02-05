@@ -232,7 +232,7 @@ encodeMaterial material = do
   Json.object
     [ Json.field "pbrMetallicRoughness" do
         Json.object
-          [ Json.field "baseColorFactor" $ Json.listOf Json.number [r, g, b, 1]
+          [ Json.field "baseColorFactor" $ Json.listOf Json.number [r, g, b, 1.0]
           , Json.field "metallicFactor" $ Json.number material.metallic
           , Json.field "roughnessFactor" $ Json.number material.roughness
           ]
@@ -261,7 +261,7 @@ vertexBuilder vertex = GHC.Exts.runRW# \state0# -> do
 
 paddedByteLength :: Int -> Int
 paddedByteLength unpaddedLength = do
-  let excess = unpaddedLength `mod` 4
+  let excess = unpaddedLength % 4
   if excess == 0 then unpaddedLength else unpaddedLength + (4 - excess)
 
 padWith :: Char -> Builder -> Int -> (Builder, Int)

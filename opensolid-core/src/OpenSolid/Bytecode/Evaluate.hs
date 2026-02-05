@@ -175,7 +175,7 @@ solveMonotonicSurfaceU ::
   Number
 solveMonotonicSurfaceU (Constant _) _ (Interval u1 _) _ = u1
 solveMonotonicSurfaceU linearFunction (Constant slope) (Interval u1 _) vValue =
-  if slope == 0 then u1 else u1 .-. surface1dValue linearFunction (Point2D u1 vValue) ./. slope
+  if slope == 0.0 then u1 else u1 - surface1dValue linearFunction (Point2D u1 vValue) / slope
 solveMonotonicSurfaceU (Bytecode functionBytecode) (Bytecode derivativeBytecode) uBounds vValue =
   callSolver functionBytecode derivativeBytecode $
     \functionPointer derivativePointer ->
@@ -198,7 +198,7 @@ solveMonotonicSurfaceV ::
   Number
 solveMonotonicSurfaceV (Constant _) _ _ (Interval v1 _) = v1
 solveMonotonicSurfaceV linearFunction (Constant slope) uValue (Interval v1 _) =
-  if slope == 0 then v1 else v1 .-. surface1dValue linearFunction (Point2D uValue v1) ./. slope
+  if slope == 0.0 then v1 else v1 - surface1dValue linearFunction (Point2D uValue v1) / slope
 solveMonotonicSurfaceV (Bytecode functionBytecode) (Bytecode derivativeBytecode) uValue vBounds =
   callSolver functionBytecode derivativeBytecode $
     \functionPointer derivativePointer ->

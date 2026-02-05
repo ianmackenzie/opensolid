@@ -17,14 +17,13 @@ module OpenSolid.SurfaceFunction2D
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.DirectionSurfaceFunction2D (DirectionSurfaceFunction2D)
@@ -43,6 +42,7 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
@@ -121,10 +121,10 @@ instance
     (VectorSurfaceFunction2D units2 space2)
     (SurfaceFunction2D units1 space1)
   where
-  lhs .+. rhs =
+  lhs + rhs =
     new
-      (lhs.compiled .+. rhs.compiled)
-      (\p -> derivative p lhs .+. VectorSurfaceFunction2D.derivative p rhs)
+      (lhs.compiled + rhs.compiled)
+      (\p -> derivative p lhs + VectorSurfaceFunction2D.derivative p rhs)
 
 instance
   ( space1 ~ space2
@@ -135,7 +135,7 @@ instance
     (Vector2D units2 space2)
     (SurfaceFunction2D units1 space1)
   where
-  f .+. v = f .+. VectorSurfaceFunction2D.constant v
+  f + v = f + VectorSurfaceFunction2D.constant v
 
 instance
   ( space1 ~ space2
@@ -146,10 +146,10 @@ instance
     (VectorSurfaceFunction2D units2 space2)
     (SurfaceFunction2D units1 space1)
   where
-  lhs .-. rhs =
+  lhs - rhs =
     new
-      (lhs.compiled .-. rhs.compiled)
-      (\p -> derivative p lhs .-. VectorSurfaceFunction2D.derivative p rhs)
+      (lhs.compiled - rhs.compiled)
+      (\p -> derivative p lhs - VectorSurfaceFunction2D.derivative p rhs)
 
 instance
   ( space1 ~ space2
@@ -160,7 +160,7 @@ instance
     (Vector2D units2 space2)
     (SurfaceFunction2D units1 space1)
   where
-  f .-. v = f .-. VectorSurfaceFunction2D.constant v
+  f - v = f - VectorSurfaceFunction2D.constant v
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -169,10 +169,10 @@ instance
     (SurfaceFunction2D units2 space2)
     (VectorSurfaceFunction2D units1 space1)
   where
-  lhs .-. rhs =
+  lhs - rhs =
     VectorSurfaceFunction2D.new
-      (lhs.compiled .-. rhs.compiled)
-      (\p -> derivative p lhs .-. derivative p rhs)
+      (lhs.compiled - rhs.compiled)
+      (\p -> derivative p lhs - derivative p rhs)
 
 instance HasField "compiled" (SurfaceFunction2D units space) (Compiled units space) where
   getField (SurfaceFunction2D c _ _) = c
@@ -260,7 +260,7 @@ instance
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
     Curve2D.new
       (function.compiled `compose` Curve2D.compiled curve)
-      ((function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt)
+      ((function.du `compose` curve) * dudt + (function.dv `compose` curve) * dvdt)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -274,7 +274,7 @@ instance
     let dfdv = f.dv `compose` g
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
-          dfdu .*. dudp .+. dfdv .*. dvdp
+          dfdu * dudp + dfdv * dvdp
     SurfaceFunction1D.new
       (f.compiled `compose` g.compiled)
       composedDerivative
@@ -291,7 +291,7 @@ instance
     let dfdv = f.dv `compose` g
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
-          dfdu .*. dudp .+. dfdv .*. dvdp
+          dfdu * dudp + dfdv * dvdp
     VectorSurfaceFunction2D.new
       (f.compiled `compose` g.compiled)
       composedDerivative
@@ -308,7 +308,7 @@ instance
     let dfdv = f.dv `compose` g
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
-          dfdu .*. dudp .+. dfdv .*. dvdp
+          dfdu * dudp + dfdv * dvdp
     VectorSurfaceFunction3D.new
       (f.compiled `compose` g.compiled)
       composedDerivative
@@ -338,7 +338,7 @@ distanceAlong ::
   SurfaceFunction2D units space ->
   SurfaceFunction1D units
 distanceAlong axis function =
-  (function .-. constant (Axis2D.originPoint axis)) `dot` Axis2D.direction axis
+  (function - constant (Axis2D.originPoint axis)) `dot` Axis2D.direction axis
 
 xCoordinate :: SurfaceFunction2D units space -> SurfaceFunction1D units
 xCoordinate function = do

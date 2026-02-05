@@ -10,6 +10,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Model3D qualified as Model3D
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
@@ -19,10 +20,10 @@ import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let p1 = Point2D.meters 0 -2
-  let p2 = Point2D.meters 1 0
-  let v2 = Vector2D.meters 0 2
-  let p3 = Point2D.meters 0 1
+  let p1 = Point2D.meters 0.0 -2.0
+  let p2 = Point2D.meters 1.0 0.0
+  let v2 = Vector2D.meters 0.0 2.0
+  let p3 = Point2D.meters 0.0 1.0
   profile <- Result.orFail do
     Region2D.boundedBy
       [ Curve2D.hermite p1 [] p2 [v2]
@@ -32,5 +33,5 @@ main = Tolerance.using Length.nanometer do
   body <- Result.orFail (Body3D.revolved World3D.frontPlane profile Axis2D.y Angle.twoPi)
   let material = PbrMaterial.nonmetal Color.blue (#roughness 0.2)
   let model = Model3D.bodyWith [Model3D.pbrMaterial material] body
-  let resolution = Resolution.maxSize (Length.centimeters 20)
+  let resolution = Resolution.maxSize (Length.centimeters 20.0)
   Gltf.writeBinary "executables/raindrop/mesh.glb" model resolution

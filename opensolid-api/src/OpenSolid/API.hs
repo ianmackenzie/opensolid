@@ -65,6 +65,7 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.UvRegion (UvRegion)
 import OpenSolid.UvRegion qualified as UvRegion
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -882,8 +883,8 @@ curve =
     , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
     , Class.memberU0 "Sqrt" Curve1D.sqrt $(docs 'Curve1D.sqrt)
     , Class.member0 "Cubed" Curve1D.cubed $(docs 'Curve1D.cubed)
-    , Class.member0 "Sin" (Curve1D.sin . (Angle.radian .*.)) $(docs 'Curve1D.sin)
-    , Class.member0 "Cos" (Curve1D.cos . (Angle.radian .*.)) $(docs 'Curve1D.cos)
+    , Class.member0 "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
+    , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
     , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
     , Class.memberU0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberU0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."

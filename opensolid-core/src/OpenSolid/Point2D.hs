@@ -77,7 +77,7 @@ y :: Quantity units -> Point2D units space
 y py = Point2D Quantity.zero py
 
 along :: Axis2D units space -> Quantity units -> Point2D units space
-along (Axis2D originPoint direction) distance = originPoint .+. distance .*. direction
+along (Axis2D originPoint direction) distance = originPoint + distance * direction
 
 {-| Construct a point from polar coordinates (radius and angle).
 
@@ -155,22 +155,22 @@ distanceFrom# (Point2D (Quantity# x1#) (Quantity# y1#)) (Point2D (Quantity# x2#)
   hypot2# (x2# -# x1#) (y2# -# y1#)
 
 angleFrom :: Point2D units space -> Point2D units space -> Angle
-angleFrom p1 p2 = Vector2D.angle (p2 .-. p1)
+angleFrom p1 p2 = Vector2D.angle (p2 - p1)
 
 distanceAlong :: Axis2D units space -> Point2D units space -> Quantity units
-distanceAlong (Axis2D originPoint direction) point = direction `dot` (point .-. originPoint)
+distanceAlong (Axis2D originPoint direction) point = direction `dot` (point - originPoint)
 
 distanceLeftOf :: Axis2D units space -> Point2D units space -> Quantity units
-distanceLeftOf (Axis2D originPoint direction) point = direction `cross` (point .-. originPoint)
+distanceLeftOf (Axis2D originPoint direction) point = direction `cross` (point - originPoint)
 
 distanceRightOf :: Axis2D units space -> Point2D units space -> Quantity units
-distanceRightOf (Axis2D originPoint direction) point = direction `cross` (originPoint .-. point)
+distanceRightOf (Axis2D originPoint direction) point = direction `cross` (originPoint - point)
 
 placeIn :: Frame2D units global local -> Point2D units local -> Point2D units global
-placeIn (Frame2D p0 (Orientation2D i j)) (Point2D px py) = p0 .+. px .*. i .+. py .*. j
+placeIn (Frame2D p0 (Orientation2D i j)) (Point2D px py) = p0 + px * i + py * j
 
 relativeTo :: Frame2D units global local -> Point2D units global -> Point2D units local
-relativeTo (Frame2D p0 (Orientation2D i j)) p = let d = p .-. p0 in Point2D (d `dot` i) (d `dot` j)
+relativeTo (Frame2D p0 (Orientation2D i j)) p = let d = p - p0 in Point2D (d `dot` i) (d `dot` j)
 
 {-| Convert a 2D point to 3D point by placing it on a plane.
 
@@ -179,7 +179,7 @@ this returns the corresponding 3D point.
 -}
 placeOn :: Plane3D global local -> Point2D Meters local -> Point3D global
 placeOn (Plane3D originPoint (PlaneOrientation3D i j)) (Point2D px py) =
-  originPoint .+. px .*. i .+. py .*. j
+  originPoint + px * i + py * j
 
 convert :: Quantity (units2 ?/? units1) -> Point2D units1 space -> Point2D units2 space
 convert factor (Position2D p) = Position2D (Vector2D.convert factor p)
@@ -191,7 +191,7 @@ transformBy :: Transform2D tag units space -> Point2D units space -> Point2D uni
 transformBy transform point = do
   let (Transform2D p0 vx vy) = transform
   let (px, py) = coordinates point
-  p0 .+. px .*. vx .+. py .*. vy
+  p0 + px * vx + py * vy
 
 translateBy ::
   Vector2D units space ->

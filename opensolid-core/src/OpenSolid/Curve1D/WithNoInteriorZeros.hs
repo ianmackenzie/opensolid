@@ -19,7 +19,7 @@ sqrt_ (WithNoInteriorZeros curve) = WithNoInteriorZeros do
   let curveTolerance = Curve1D.singularityTolerance curve
   let firstDerivativeTolerance = Curve1D.singularityTolerance firstDerivative
   let singularity tValue sign =
-        (Quantity.zero, sign .*. Quantity.sqrt_ (0.5 *. Curve1D.evaluate secondDerivative tValue))
+        (Quantity.zero, sign * Quantity.sqrt_ (0.5 * Curve1D.evaluate secondDerivative tValue))
   let maybeSingularity tValue sign = do
         let curveIsZero = Tolerance.using curveTolerance do
               Curve1D.evaluate curve tValue ~= Quantity.zero
@@ -27,7 +27,7 @@ sqrt_ (WithNoInteriorZeros curve) = WithNoInteriorZeros do
               Curve1D.evaluate firstDerivative tValue ~= Quantity.zero
         if curveIsZero && firstDerivativeIsZero then Just (singularity tValue sign) else Nothing
   let WithNoZeros interiorSqrt = Curve1D.WithNoZeros.sqrt_ (WithNoZeros curve)
-  Curve1D.desingularize (maybeSingularity 0 Positive) interiorSqrt (maybeSingularity 1 Negative)
+  Curve1D.desingularize (maybeSingularity 0.0 Positive) interiorSqrt (maybeSingularity 1.0 Negative)
 
 sqrt :: Units.Squared units1 units2 => WithNoInteriorZeros units2 -> WithNoInteriorZeros units1
 sqrt = sqrt_ . Units.unspecialize

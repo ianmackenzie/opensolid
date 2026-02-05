@@ -19,6 +19,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.UvSpace (UvSpace)
 
 -- | A non-empty list of points joined by lines.
 newtype Polyline2D units space

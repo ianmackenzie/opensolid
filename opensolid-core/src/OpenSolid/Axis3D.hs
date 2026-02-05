@@ -59,7 +59,7 @@ moveTo newOriginPoint axis = Axis3D newOriginPoint (direction axis)
 The origin point of the axis will remain unchanged.
 -}
 reverse :: Axis3D space -> Axis3D space
-reverse (Axis3D p0 d) = Axis3D p0 (negative d)
+reverse (Axis3D p0 d) = Axis3D p0 -d
 
 transformBy :: Transform.IsOrthonormal tag => Transform3D tag space -> Axis3D space -> Axis3D space
 transformBy transform axis = do

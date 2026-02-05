@@ -3,6 +3,7 @@ module OpenSolid.Curve2D.MedialAxis (Segment (..)) where
 import OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Prelude
+import OpenSolid.UvSpace (UvSpace)
 
 data Segment units space = Segment
   { t1 :: Curve1D Unitless

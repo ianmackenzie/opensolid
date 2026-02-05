@@ -36,7 +36,7 @@ horizontal :: Orientation2D space
 horizontal = Orientation2D Direction2D.x Direction2D.y
 
 vertical :: Orientation2D space
-vertical = Orientation2D Direction2D.y (negative Direction2D.x)
+vertical = Orientation2D Direction2D.y -Direction2D.x
 
 fromXDirection :: Direction2D space -> Orientation2D space
 fromXDirection i = Orientation2D i (Direction2D.rotateLeft i)

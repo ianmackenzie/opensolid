@@ -30,10 +30,9 @@ module OpenSolid.VectorSurfaceFunction2D
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
@@ -45,6 +44,7 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
 import OpenSolid.Prelude
+import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
@@ -55,6 +55,7 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
@@ -127,7 +128,7 @@ instance
     VectorSurfaceFunction2D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
 instance Negation (VectorSurfaceFunction2D units space) where
-  negative function = new (negative function.compiled) (\p -> negative (derivative p function))
+  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
 
 instance
   Multiplication
@@ -135,8 +136,8 @@ instance
     (VectorSurfaceFunction2D units space)
     (VectorSurfaceFunction2D units space)
   where
-  Positive .*. function = function
-  Negative .*. function = negative function
+  Positive * function = function
+  Negative * function = -function
 
 instance
   Multiplication
@@ -144,8 +145,8 @@ instance
     Sign
     (VectorSurfaceFunction2D units space)
   where
-  function .*. Positive = function
-  function .*. Negative = negative function
+  function * Positive = function
+  function * Negative = -function
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -154,7 +155,7 @@ instance
     (VectorSurfaceFunction2D units2 space2)
     (VectorSurfaceFunction2D units1 space1)
   where
-  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (\p -> derivative p lhs .+. derivative p rhs)
+  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -163,7 +164,7 @@ instance
     (Vector2D units2 space2)
     (VectorSurfaceFunction2D units1 space1)
   where
-  f .+. v = f .+. constant v
+  f + v = f + constant v
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -172,7 +173,7 @@ instance
     (VectorSurfaceFunction2D units2 space2)
     (VectorSurfaceFunction2D units1 space1)
   where
-  v .+. f = constant v .+. f
+  v + f = constant v + f
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -181,7 +182,7 @@ instance
     (VectorSurfaceFunction2D units2 space2)
     (VectorSurfaceFunction2D units1 space1)
   where
-  lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (\p -> derivative p lhs .-. derivative p rhs)
+  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -190,7 +191,7 @@ instance
     (Vector2D units2 space2)
     (VectorSurfaceFunction2D units1 space1)
   where
-  f .-. v = f .-. constant v
+  f - v = f - constant v
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -199,7 +200,7 @@ instance
     (VectorSurfaceFunction2D units2 space2)
     (VectorSurfaceFunction2D units1 space1)
   where
-  v .-. f = constant v .-. f
+  v - f = constant v - f
 
 instance
   Units.Product units1 units2 units3 =>
@@ -208,7 +209,7 @@ instance
     (VectorSurfaceFunction2D units2 space)
     (VectorSurfaceFunction2D units3 space)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
@@ -219,7 +220,7 @@ instance
   lhs ?*? rhs =
     new
       (lhs.compiled ?*? rhs.compiled)
-      (\p -> SurfaceFunction1D.derivative p lhs ?*? rhs .+. lhs ?*? derivative p rhs)
+      (\p -> SurfaceFunction1D.derivative p lhs ?*? rhs + lhs ?*? derivative p rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -228,7 +229,7 @@ instance
     (VectorSurfaceFunction2D units2 space)
     (VectorSurfaceFunction2D units3 space)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
@@ -245,7 +246,7 @@ instance
     (SurfaceFunction1D units2)
     (VectorSurfaceFunction2D units3 space)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
@@ -256,7 +257,7 @@ instance
   lhs ?*? rhs =
     new
       (lhs.compiled ?*? rhs.compiled)
-      (\p -> derivative p lhs ?*? rhs .+. lhs ?*? SurfaceFunction1D.derivative p rhs)
+      (\p -> derivative p lhs ?*? rhs + lhs ?*? SurfaceFunction1D.derivative p rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -265,7 +266,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction2D units3 space)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
@@ -282,7 +283,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction2D units3 space)
   where
-  lhs ./. rhs = Units.specialize (lhs ?/? rhs)
+  lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 instance
   Division_
@@ -290,7 +291,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction2D (units1 ?/? units2) space)
   where
-  function ?/? value = Units.simplify (function ?*? (1 /? value))
+  function ?/? value = Units.simplify (function ?*? (1.0 ?/? value))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -311,7 +312,7 @@ instance
   lhs `cross_` rhs =
     SurfaceFunction1D.new
       (lhs.compiled `cross_` rhs.compiled)
-      (\p -> derivative p lhs `cross_` rhs .+. lhs `cross_` derivative p rhs)
+      (\p -> derivative p lhs `cross_` rhs + lhs `cross_` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -386,7 +387,7 @@ instance
   lhs `dot_` rhs =
     SurfaceFunction1D.new
       (lhs.compiled `dot_` rhs.compiled)
-      (\p -> derivative p lhs `dot_` rhs .+. lhs `dot_` derivative p rhs)
+      (\p -> derivative p lhs `dot_` rhs + lhs `dot_` derivative p rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -453,7 +454,7 @@ instance
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
     VectorCurve2D.new
       (function.compiled `compose` Curve2D.compiled curve)
-      ((function.du `compose` curve) .*. dudt .+. (function.dv `compose` curve) .*. dvdt)
+      ((function.du `compose` curve) * dudt + (function.dv `compose` curve) * dvdt)
 
 instance
   HasField
@@ -609,7 +610,7 @@ quotient ::
   VectorSurfaceFunction2D units1 space ->
   SurfaceFunction1D units2 ->
   Result DivisionByZero (VectorSurfaceFunction2D units3 space)
-quotient lhs rhs = Units.specialize (quotient_ lhs rhs)
+quotient lhs rhs = Result.map Units.specialize (quotient_ lhs rhs)
 
 quotient_ ::
   Tolerance units2 =>
@@ -626,8 +627,8 @@ quotient_ numerator denominator = do
         let firstDerivative =
               Units.simplify $
                 unsafeQuotient_
-                  (numerator'' ?*? denominator' .-. numerator' ?*? denominator'')
-                  (2 *. SurfaceFunction1D.squared_ denominator')
+                  (numerator'' ?*? denominator' - numerator' ?*? denominator'')
+                  (2.0 * SurfaceFunction1D.squared_ denominator')
         (value, firstDerivative)
   SurfaceFunction1D.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
 
@@ -645,7 +646,7 @@ unsafeQuotient_ ::
 unsafeQuotient_ lhs rhs = do
   let quotientDerivative self p =
         unsafeQuotient_ (derivative p lhs) rhs
-          .-. self .*. SurfaceFunction1D.unsafeQuotient (SurfaceFunction1D.derivative p rhs) rhs
+          - self * SurfaceFunction1D.unsafeQuotient (SurfaceFunction1D.derivative p rhs) rhs
   recursive
     (CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled)
     quotientDerivative
@@ -660,7 +661,7 @@ squaredMagnitude_ function = do
           function.compiled
   SurfaceFunction1D.new
     compiledSquaredMagnitude
-    (\p -> 2 *. function `dot_` derivative p function)
+    (\p -> 2.0 * function `dot_` derivative p function)
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>

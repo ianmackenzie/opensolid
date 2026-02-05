@@ -26,27 +26,27 @@ steps :: Test
 steps =
   Test.group "steps" $
     [ check Parameter.steps 0 []
-    , check Parameter.steps 1 [0, 1]
-    , check Parameter.steps 2 [0, 0.5, 1]
-    , check Parameter.steps 5 [0, 0.2, 0.4, 0.6, 0.8, 1]
+    , check Parameter.steps 1 [0.0, 1.0]
+    , check Parameter.steps 2 [0.0, 0.5, 1.0]
+    , check Parameter.steps 5 [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
     ]
 
 leading :: Test
 leading =
   Test.group "leading" $
     [ check Parameter.leading 0 []
-    , check Parameter.leading 1 [0]
-    , check Parameter.leading 2 [0, 0.5]
-    , check Parameter.leading 5 [0, 0.2, 0.4, 0.6, 0.8]
+    , check Parameter.leading 1 [0.0]
+    , check Parameter.leading 2 [0.0, 0.5]
+    , check Parameter.leading 5 [0.0, 0.2, 0.4, 0.6, 0.8]
     ]
 
 trailing :: Test
 trailing =
   Test.group "trailing" $
     [ check Parameter.trailing 0 []
-    , check Parameter.trailing 1 [1]
-    , check Parameter.trailing 2 [0.5, 1]
-    , check Parameter.trailing 5 [0.2, 0.4, 0.6, 0.8, 1]
+    , check Parameter.trailing 1 [1.0]
+    , check Parameter.trailing 2 [0.5, 1.0]
+    , check Parameter.trailing 5 [0.2, 0.4, 0.6, 0.8, 1.0]
     ]
 
 inBetween :: Test

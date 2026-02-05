@@ -24,7 +24,7 @@ sqrt_ :: WithNoZeros (units ?*? units) -> WithNoZeros units
 sqrt_ (WithNoZeros curve) = WithNoZeros do
   Curve1D.recursive
     (CompiledFunction.map Expression.sqrt_ Quantity.sqrt_ Interval.sqrt_ (Curve1D.compiled curve))
-    (\self -> Units.coerce (0.5 *. Curve1D.derivative curve ?/? WithNoZeros self))
+    (\self -> Units.coerce (0.5 * Curve1D.derivative curve ?/? WithNoZeros self))
 
 sqrt :: Units.Squared units1 units2 => WithNoZeros units2 -> WithNoZeros units1
 sqrt = sqrt_ . Units.unspecialize

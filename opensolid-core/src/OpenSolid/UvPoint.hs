@@ -11,6 +11,7 @@ import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random qualified as Random
+import OpenSolid.UvSpace (UvSpace)
 
 -- | A point in UV parameter space.
 type UvPoint = Point2D Unitless UvSpace

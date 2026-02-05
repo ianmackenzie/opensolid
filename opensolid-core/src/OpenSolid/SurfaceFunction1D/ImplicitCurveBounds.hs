@@ -27,7 +27,7 @@ subtree :: Array (Interval Unitless, Interval Unitless) -> Int -> Int -> Implici
 subtree boxes begin end = case end - begin of
   1 -> Leaf (Pair.second (Array.get begin boxes))
   n -> assert (n >= 2) do
-    let mid = begin + n `div` 2
+    let mid = begin + n // 2
     let left = subtree boxes begin mid
     let right = subtree boxes mid end
     let split = Interval.lower (Pair.first (Array.get mid boxes))

@@ -46,27 +46,27 @@ originPoint = Point3D Length.zero Length.zero Length.zero
 
 -- | The global rightward direction of a coordinate system.
 rightwardDirection :: Direction3D space
-rightwardDirection = Direction3D 1 0 0
+rightwardDirection = Direction3D 1.0 0.0 0.0
 
 -- | The global leftward direction of a coordinate system.
 leftwardDirection :: Direction3D space
-leftwardDirection = negative rightwardDirection
+leftwardDirection = -rightwardDirection
 
 -- | The global forward direction of a coordinate system.
 forwardDirection :: Direction3D space
-forwardDirection = Direction3D 0 1 0
+forwardDirection = Direction3D 0.0 1.0 0.0
 
 -- | The global backward direction of a coordinate system.
 backwardDirection :: Direction3D space
-backwardDirection = negative forwardDirection
+backwardDirection = -forwardDirection
 
 -- | The global upward direction of a coordinate system.
 upwardDirection :: Direction3D space
-upwardDirection = Direction3D 0 0 1
+upwardDirection = Direction3D 0.0 0.0 1.0
 
 -- | The global downward direction of a coordinate system.
 downwardDirection :: Direction3D space
-downwardDirection = negative upwardDirection
+downwardDirection = -upwardDirection
 
 {-| The forward-facing or 'default' orientation of the global coordinate system.
 

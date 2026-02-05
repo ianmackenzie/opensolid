@@ -57,6 +57,7 @@ common config
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
+    RebindableSyntax
     RoleAnnotations
     StrictData
     TypeFamilies

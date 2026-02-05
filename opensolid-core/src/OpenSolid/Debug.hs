@@ -9,13 +9,12 @@ module OpenSolid.Debug
   )
 where
 
-import Data.Text (Text)
 import Data.Text qualified
 import Debug.Trace qualified
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
+import OpenSolid.Prelude hiding ((>>))
 import OpenSolid.Text qualified as Text
-import Prelude (Show, (<>))
 import Prelude qualified
 
 newtype Debug = Debug (() -> ())

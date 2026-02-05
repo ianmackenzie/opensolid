@@ -68,6 +68,7 @@ import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.UvRegion (UvRegion)
 import OpenSolid.UvRegion qualified as UvRegion
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -100,30 +101,30 @@ on plane region = do
   let centerFrame = Frame2D.atPoint centerPoint
   let regionSize = max width height
   let centeredRegion = Region2D.relativeTo centerFrame region
-  let normalizedRegion = Region2D.convert (1 /? regionSize) centeredRegion
+  let normalizedRegion = Region2D.convert (1.0 ?/? regionSize) centeredRegion
   let p0 = Point2D.placeOn plane centerPoint
-  let vx = regionSize .*. Plane3D.xDirection plane
-  let vy = regionSize .*. Plane3D.yDirection plane
-  let planeFunction = p0 .+. SurfaceFunction1D.u .*. vx .+. SurfaceFunction1D.v .*. vy
+  let vx = regionSize * Plane3D.xDirection plane
+  let vy = regionSize * Plane3D.yDirection plane
+  let planeFunction = p0 + SurfaceFunction1D.u * vx + SurfaceFunction1D.v * vy
   parametric planeFunction normalizedRegion
 
 extruded :: Curve3D space -> Vector3D Meters space -> Surface3D space
 extruded curve displacement =
   parametric
-    (curve `compose` SurfaceFunction1D.u .+. SurfaceFunction1D.v .*. displacement)
+    (curve `compose` SurfaceFunction1D.u + SurfaceFunction1D.v * displacement)
     UvRegion.unitSquare
 
 translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
 translational uCurve vCurve =
   parametric
-    (uCurve `compose` SurfaceFunction1D.u .+. vCurve `compose` SurfaceFunction1D.v)
+    (uCurve `compose` SurfaceFunction1D.u + vCurve `compose` SurfaceFunction1D.v)
     UvRegion.unitSquare
 
 ruled :: Curve3D space -> Curve3D space -> Surface3D space
 ruled bottom top = do
   let f1 = bottom `compose` SurfaceFunction1D.u
   let f2 = top `compose` SurfaceFunction1D.u
-  parametric (f1 .+. SurfaceFunction1D.v .*. (f2 .-. f1)) UvRegion.unitSquare
+  parametric (f1 + SurfaceFunction1D.v * (f2 - f1)) UvRegion.unitSquare
 
 revolved ::
   Tolerance Meters =>
@@ -145,14 +146,14 @@ revolved sketchPlane curve axis angle = do
         let (revolutionParameter, curveParameter) = case profileSign of
               Positive -> (SurfaceFunction1D.u, SurfaceFunction1D.v)
               Negative -> (SurfaceFunction1D.v, SurfaceFunction1D.u)
-        let theta = angle .*. revolutionParameter
+        let theta = angle * revolutionParameter
         let radius = xCoordinate `compose` curveParameter
         let height = localCurve.yCoordinate `compose` curveParameter
         let function =
               frame3D.originPoint
-                .+. radius .*. SurfaceFunction1D.cos theta .*. frame3D.rightwardDirection
-                .+. radius .*. SurfaceFunction1D.sin theta .*. frame3D.forwardDirection
-                .+. height .*. frame3D.upwardDirection
+                + radius * SurfaceFunction1D.cos theta * frame3D.rightwardDirection
+                + radius * SurfaceFunction1D.sin theta * frame3D.forwardDirection
+                + height * frame3D.upwardDirection
         Ok (parametric function UvRegion.unitSquare)
 
 bounds :: Surface3D space -> Bounds3D space
@@ -167,7 +168,7 @@ boundarySurfaceCurves surface = NonEmpty.concat (surface.outerLoop :| surface.in
 flip :: Surface3D space -> Surface3D space
 flip surface =
   parametric
-    (surface.function `compose` SurfaceFunction2D.xy (negative SurfaceFunction1D.u) SurfaceFunction1D.v)
+    (surface.function `compose` SurfaceFunction2D.xy -SurfaceFunction1D.u SurfaceFunction1D.v)
     (Region2D.mirrorAcross Axis2D.y surface.domain)
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.

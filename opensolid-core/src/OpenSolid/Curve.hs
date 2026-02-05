@@ -96,13 +96,13 @@ startPoint ::
   Exists dimension units space =>
   Curve dimension units space ->
   Point dimension units space
-startPoint curve = evaluate curve 0
+startPoint curve = evaluate curve 0.0
 
 endPoint ::
   Exists dimension units space =>
   Curve dimension units space ->
   Point dimension units space
-endPoint curve = evaluate curve 1
+endPoint curve = evaluate curve 1.0
 
 findPoint ::
   (Exists dimension units space, Tolerance units) =>

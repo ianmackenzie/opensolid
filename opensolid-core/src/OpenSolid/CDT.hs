@@ -60,7 +60,7 @@ collectLoopEdgeIndices :: Int -> Int -> List Int -> List Int
 collectLoopEdgeIndices startIndex loopLength accumulated = do
   let addEdge i acc = do
         let edgeStart = startIndex + i
-        let edgeEnd = startIndex + (i + 1) `mod` loopLength
+        let edgeEnd = startIndex + (i + 1) % loopLength
         edgeStart : edgeEnd : acc
   List.foldr addEdge accumulated [0 .. loopLength - 1]
 

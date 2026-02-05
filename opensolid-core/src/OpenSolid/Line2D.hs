@@ -22,6 +22,7 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Unboxed.Math
+import OpenSolid.UvSpace (UvSpace)
 
 -- | A line in 2D, with a start point and end point.
 data Line2D units space

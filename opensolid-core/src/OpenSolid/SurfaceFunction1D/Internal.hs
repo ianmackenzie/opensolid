@@ -49,37 +49,37 @@ curveBoundsAt :: Number -> Number -> Quantity units -> Quantity units -> Interva
 curveBoundsAt x1 x2 y1 y2 (Interval mLow mHigh)
   | mLow >= Quantity.zero || mHigh <= Quantity.zero = Interval y1 y2 -- Monotonic case
   | otherwise = do
-      let dX = x2 .-. x1
-      let dY = y2 .-. y1
-      let dXValley = Quantity.clampTo (Interval 0 dX) ((mHigh .*. dX .-. dY) ./. (mHigh .-. mLow))
-      let dXPeak = Quantity.clampTo (Interval 0 dX) ((dY .-. mLow .*. dX) ./. (mHigh .-. mLow))
+      let dX = x2 - x1
+      let dY = y2 - y1
+      let dXValley = Quantity.clampTo (Interval 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
+      let dXPeak = Quantity.clampTo (Interval 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
       let yValley =
             if Quantity.isInfinite mLow
-              then negative Quantity.infinity
-              else y1 .+. mLow .*. dXValley
+              then -Quantity.infinity
+              else y1 + mLow * dXValley
       let yPeak =
             if Quantity.isInfinite mHigh
               then Quantity.infinity
-              else y1 .+. mHigh .*. dXPeak
+              else y1 + mHigh * dXPeak
       Interval yValley yPeak
 
 curveBoundsOver :: Number -> Number -> Interval units -> Interval units -> Interval units -> Interval units
 curveBoundsOver x1 x2 y1 y2 (Interval mLow mHigh)
   | mLow >= Quantity.zero || mHigh <= Quantity.zero = Interval.aggregate2 y1 y2 -- Monotonic case
   | otherwise = do
-      let dX = x2 .-. x1
+      let dX = x2 - x1
       let Interval low1 high1 = y1
       let Interval low2 high2 = y2
-      let dYLow = low2 .-. low1
-      let dYHigh = high2 .-. high1
-      let dXValley = Quantity.clampTo (Interval 0 dX) ((mHigh .*. dX .-. dYLow) ./. (mHigh .-. mLow))
-      let dXPeak = Quantity.clampTo (Interval 0 dX) ((dYHigh .-. mLow .*. dX) ./. (mHigh .-. mLow))
+      let dYLow = low2 - low1
+      let dYHigh = high2 - high1
+      let dXValley = Quantity.clampTo (Interval 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
+      let dXPeak = Quantity.clampTo (Interval 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
       let yValley =
             if Quantity.isInfinite mLow
-              then negative Quantity.infinity
-              else low1 .+. mLow .*. dXValley
+              then -Quantity.infinity
+              else low1 + mLow * dXValley
       let yPeak =
             if Quantity.isInfinite mHigh
               then Quantity.infinity
-              else high1 .+. mHigh .*. dXPeak
+              else high1 + mHigh * dXPeak
       Interval yValley yPeak

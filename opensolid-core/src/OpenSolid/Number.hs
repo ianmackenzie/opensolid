@@ -3,6 +3,9 @@ module OpenSolid.Number
   , fromDouble
   , toDouble
   , fromInt
+  , floor
+  , ceiling
+  , round
   , parse
   , pi
   , halfPi
@@ -37,23 +40,13 @@ module OpenSolid.Number
   )
 where
 
-import Data.Text (Text)
-import OpenSolid.Arithmetic
 import {-# SOURCE #-} OpenSolid.Interval (Interval)
-import OpenSolid.List (List)
-import OpenSolid.NonEmpty (NonEmpty)
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Quantity (Quantity (Quantity))
+import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random.Internal qualified as Random
-import {-# SOURCE #-} OpenSolid.Result (Result)
-import OpenSolid.Sign (Sign)
 import OpenSolid.Text.Parse qualified as Text.Parse
-import OpenSolid.Units (Unitless)
-import Prelude (Bool, Double, Int)
 import Prelude qualified
-
-type Number = Quantity Unitless
 
 {-# INLINE fromDouble #-}
 fromDouble :: Double -> Number
@@ -66,6 +59,18 @@ toDouble (Quantity x) = x
 {-# INLINE fromInt #-}
 fromInt :: Int -> Number
 fromInt = Prelude.fromIntegral
+
+{-# INLINE floor #-}
+floor :: Number -> Int
+floor = Prelude.floor
+
+{-# INLINE ceiling #-}
+ceiling :: Number -> Int
+ceiling = Prelude.ceiling
+
+{-# INLINE round #-}
+round :: Number -> Int
+round = Prelude.round
 
 parse :: Text -> Result Text Number
 parse = Text.Parse.number
@@ -83,7 +88,7 @@ squared :: Number -> Number
 squared = Quantity.squared
 
 cubed :: Number -> Number
-cubed value = value .*. value .*. value
+cubed value = value * value * value
 
 abs :: Number -> Number
 abs = Quantity.abs
@@ -101,13 +106,13 @@ pi :: Number
 pi = Prelude.pi
 
 halfPi :: Number
-halfPi = 0.5 *. pi
+halfPi = 0.5 * pi
 
 twoPi :: Number
-twoPi = 2 *. pi
+twoPi = 2.0 * pi
 
 goldenRatio :: Number
-goldenRatio = 0.5 *. (1 +. sqrt 5)
+goldenRatio = 0.5 * (1.0 + sqrt 5.0)
 
 sqrt :: Number -> Number
 sqrt = Quantity.sqrt
@@ -152,7 +157,7 @@ sum :: List Number -> Number
 sum = Quantity.sum
 
 product :: NonEmpty Number -> Number
-product = NonEmpty.reduce (.*.)
+product = NonEmpty.reduce (*)
 
 random :: Number -> Number -> Random.Generator Number
 random = Quantity.random

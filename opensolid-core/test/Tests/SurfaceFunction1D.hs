@@ -16,6 +16,7 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.World3D qualified as World3D
 import Test (Expectation, Test)
@@ -95,17 +96,17 @@ intersectionCurveSecondDerivativeBoundsConsistency =
 
 planeTorusSurface :: SurfaceFunction1D Meters
 planeTorusSurface = do
-  let theta = Angle.twoPi .*. SurfaceFunction1D.u
-  let phi = Angle.twoPi .*. SurfaceFunction1D.v
-  let minorRadius = Length.centimeters 1
-  let majorRadius = Length.centimeters 2
-  let r = majorRadius .+. minorRadius .*. SurfaceFunction1D.cos phi
-  let alpha = Angle.asin (minorRadius ./. majorRadius)
-  let normalDirection = Direction3D.polar World3D.frontPlane (alpha .+. Angle.halfPi)
+  let theta = Angle.twoPi * SurfaceFunction1D.u
+  let phi = Angle.twoPi * SurfaceFunction1D.v
+  let minorRadius = Length.centimeters 1.0
+  let majorRadius = Length.centimeters 2.0
+  let r = majorRadius + minorRadius * SurfaceFunction1D.cos phi
+  let alpha = Angle.asin (minorRadius / majorRadius)
+  let normalDirection = Direction3D.polar World3D.frontPlane (alpha + Angle.halfPi)
   let surfaceFunction =
-        r .*. SurfaceFunction1D.cos theta .*. World3D.rightwardDirection
-          .+. r .*. SurfaceFunction1D.sin theta .*. World3D.forwardDirection
-          .+. minorRadius .*. SurfaceFunction1D.sin phi .*. World3D.upwardDirection
+        r * SurfaceFunction1D.cos theta * World3D.rightwardDirection
+          + r * SurfaceFunction1D.sin theta * World3D.forwardDirection
+          + minorRadius * SurfaceFunction1D.sin phi * World3D.upwardDirection
   normalDirection `dot` surfaceFunction
 
 samplingRadius :: Number
@@ -117,7 +118,7 @@ firstDerivativeIsConsistent surfaceFunction p0 parameter = do
   let (p1, p2) = samplingPoints p0 parameter
   let value1 = SurfaceFunction1D.evaluate surfaceFunction p1
   let value2 = SurfaceFunction1D.evaluate surfaceFunction p2
-  let numericalDerivative = (value2 .-. value1) ./. (2 *. samplingRadius)
+  let numericalDerivative = (value2 - value1) / (2.0 * samplingRadius)
   let analyticalDerivative = SurfaceFunction1D.evaluate partialDerivative p0
   Tolerance.using Length.micrometer do
     Test.expect (numericalDerivative ~= analyticalDerivative)
@@ -127,5 +128,5 @@ firstDerivativeIsConsistent surfaceFunction p0 parameter = do
 samplingPoints :: UvPoint -> SurfaceParameter -> (UvPoint, UvPoint)
 samplingPoints (UvPoint u0 v0) parameter =
   case parameter of
-    U -> (UvPoint (u0 .-. samplingRadius) v0, UvPoint (u0 .+. samplingRadius) v0)
-    V -> (UvPoint u0 (v0 .-. samplingRadius), UvPoint u0 (v0 .+. samplingRadius))
+    U -> (UvPoint (u0 - samplingRadius) v0, UvPoint (u0 + samplingRadius) v0)
+    V -> (UvPoint u0 (v0 - samplingRadius), UvPoint u0 (v0 + samplingRadius))

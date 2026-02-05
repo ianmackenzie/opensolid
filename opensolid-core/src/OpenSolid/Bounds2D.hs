@@ -226,7 +226,7 @@ area_ :: Bounds2D units space -> Quantity (units ?*? units)
 area_ (Bounds2D x y) = Interval.width x ?*? Interval.width y
 
 area :: Units.Squared units1 units2 => Bounds2D units1 space -> Quantity units2
-area (Bounds2D x y) = Interval.width x .*. Interval.width y
+area (Bounds2D x y) = Interval.width x * Interval.width y
 
 interpolate :: Bounds2D units space -> Number -> Number -> Point2D units space
 interpolate (PositionBounds2D pb) u v = Position2D (VectorBounds2D.interpolate pb u v)
@@ -240,9 +240,9 @@ placeIn frame (Bounds2D x y) = do
   let Point2D x0 y0 = Point2D.placeIn frame (Point2D xMid yMid)
   let Direction2D ix iy = frame.xDirection
   let Direction2D jx jy = frame.yDirection
-  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs jx
-  let ry = 0.5 *. xWidth .*. Number.abs iy .+. 0.5 *. yWidth .*. Number.abs jy
-  Bounds2D (Interval (x0 .-. rx) (x0 .+. rx)) (Interval (y0 .-. ry) (y0 .+. ry))
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
+  Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
 relativeTo :: Frame2D units global local -> Bounds2D units global -> Bounds2D units local
 relativeTo frame (Bounds2D x y) = do
@@ -253,9 +253,9 @@ relativeTo frame (Bounds2D x y) = do
   let Point2D x0 y0 = Point2D.relativeTo frame (Point2D xMid yMid)
   let Direction2D ix iy = frame.xDirection
   let Direction2D jx jy = frame.yDirection
-  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs iy
-  let ry = 0.5 *. xWidth .*. Number.abs jx .+. 0.5 *. yWidth .*. Number.abs jy
-  Bounds2D (Interval (x0 .-. rx) (x0 .+. rx)) (Interval (y0 .-. ry) (y0 .+. ry))
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs iy
+  let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
+  Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
 placeOn :: Plane3D global local -> Bounds2D Meters local -> Bounds3D global
 placeOn plane (Bounds2D x y) = do
@@ -267,12 +267,12 @@ placeOn plane (Bounds2D x y) = do
   let xWidth = Interval.width x
   let yWidth = Interval.width y
   let Point3D x0 y0 z0 = Point3D.on plane (Point2D xMid yMid)
-  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs jx
-  let ry = 0.5 *. xWidth .*. Number.abs iy .+. 0.5 *. yWidth .*. Number.abs jy
-  let rz = 0.5 *. xWidth .*. Number.abs iz .+. 0.5 *. yWidth .*. Number.abs jz
-  let bx = Interval (x0 .-. rx) (x0 .+. rx)
-  let by = Interval (y0 .-. ry) (y0 .+. ry)
-  let bz = Interval (z0 .-. rz) (z0 .+. rz)
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
+  let rz = 0.5 * xWidth * Number.abs iz + 0.5 * yWidth * Number.abs jz
+  let bx = Interval (x0 - rx) (x0 + rx)
+  let by = Interval (y0 - ry) (y0 + ry)
+  let bz = Interval (z0 - rz) (z0 + rz)
   Bounds3D bx by bz
 
 transformBy ::
@@ -288,9 +288,9 @@ transformBy transform (Bounds2D x y) = do
   let Transform2D _ i j = transform
   let Vector2D ix iy = i
   let Vector2D jx jy = j
-  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs jx
-  let ry = 0.5 *. xWidth .*. Number.abs iy .+. 0.5 *. yWidth .*. Number.abs jy
-  Bounds2D (Interval (x0 .-. rx) (x0 .+. rx)) (Interval (y0 .-. ry) (y0 .+. ry))
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
+  Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
 distanceAlong :: Axis2D units space -> Bounds2D units space -> Interval units
 distanceAlong axis (Bounds2D x y) = do
@@ -300,8 +300,8 @@ distanceAlong axis (Bounds2D x y) = do
   let yWidth = Interval.width y
   let d0 = Point2D.distanceAlong axis (Point2D xMid yMid)
   let Direction2D ax ay = Axis2D.direction axis
-  let r = 0.5 *. xWidth .*. Number.abs ax .+. 0.5 *. yWidth .*. Number.abs ay
-  Interval (d0 .-. r) (d0 .+. r)
+  let r = 0.5 * xWidth * Number.abs ax + 0.5 * yWidth * Number.abs ay
+  Interval (d0 - r) (d0 + r)
 
 convert :: Quantity (units2 ?/? units1) -> Bounds2D units1 space -> Bounds2D units2 space
 convert factor (PositionBounds2D pb) = PositionBounds2D (VectorBounds2D.convert factor pb)

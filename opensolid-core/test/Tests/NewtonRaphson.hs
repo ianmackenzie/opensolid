@@ -30,27 +30,27 @@ tests =
 
 quadratic1D :: Tolerance Unitless => Test
 quadratic1D =
-  curve1D "Quadratic" (Curve1D.squared Curve1D.t .- 2) 1 (Number.sqrt 2)
+  curve1D "Quadratic" (Curve1D.squared Curve1D.t - 2.0) 1.0 (Number.sqrt 2.0)
 
 arc2D :: Tolerance Unitless => Test
 arc2D = do
   let arc =
         Curve2D.polarArc
-          (Named @"centerPoint" Point2D.origin)
-          (Named @"radius" 1)
-          (Named @"startAngle" Angle.zero)
-          (Named @"endAngle" Angle.pi)
-  let point = Point2D (Number.sqrt 2 ./ 2) (Number.sqrt 2 ./ 2)
-  curve2D "Arc" (arc .-. point) 0.5 0.25
+          (#centerPoint Point2D.origin)
+          (#radius 1.0)
+          (#startAngle Angle.zero)
+          (#endAngle Angle.pi)
+  let point = Point2D (Number.sqrt 2.0 / 2.0) (Number.sqrt 2.0 / 2.0)
+  curve2D "Arc" (arc - point) 0.5 0.25
 
 simpleSurface2D :: Tolerance Unitless => Test
 simpleSurface2D = do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
-  let x = SurfaceFunction1D.squared u .- 2
-  let y = v .- 1
+  let x = SurfaceFunction1D.squared u - 2.0
+  let y = v - 1.0
   let surface = VectorSurfaceFunction2D.xy x y
-  surface2D "Simple 2D surface" surface (UvPoint 1 0) (UvPoint (Number.sqrt 2) 1)
+  surface2D "Simple 2D surface" surface (UvPoint 1.0 0.0) (UvPoint (Number.sqrt 2.0) 1.0)
 
 curve1D :: Tolerance Unitless => Text -> Curve1D Unitless -> Number -> Number -> Test
 curve1D name curve t0 tExpected =

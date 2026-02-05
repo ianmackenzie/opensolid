@@ -65,28 +65,10 @@ where
 import Data.List qualified
 import Data.Maybe qualified
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Prelude
 import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
-import Prelude
-  ( Bool (True)
-  , Eq
-  , Int
-  , Maybe (Just, Nothing)
-  , Ord
-  , Ordering
-  , otherwise
-  , (&&)
-  , (+)
-  , (-)
-  , (<)
-  , (<=)
-  , (==)
-  , (>)
-  , (>=)
-  )
 import Prelude qualified
-
-type List a = [a]
 
 singleton :: a -> List a
 singleton = Data.List.singleton

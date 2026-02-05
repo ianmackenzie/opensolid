@@ -40,14 +40,14 @@ class Bounds bounds where
 
 instance Bounds (Interval Unitless) where
   contains = Interval.contains
-  touching interval1 interval2 = Interval.overlap interval1 interval2 >= 0
-  overlapping interval1 interval2 = Interval.overlap interval1 interval2 > 0
+  touching interval1 interval2 = Interval.overlap interval1 interval2 >= 0.0
+  overlapping interval1 interval2 = Interval.overlap interval1 interval2 > 0.0
   isSmall interval = Interval.width interval <= Desingularization.t0
   isBoundary = Parameter.hasEndpoint
   interior (Interval exteriorLow exteriorHigh) = do
-    let margin = 0.125 *. (exteriorHigh .-. exteriorLow)
-    let interiorLow = if exteriorLow == 0 then 0 else exteriorLow .+. margin
-    let interiorHigh = if exteriorHigh == 1 then 1 else exteriorHigh .-. margin
+    let margin = 0.125 * (exteriorHigh - exteriorLow)
+    let interiorLow = if exteriorLow == 0.0 then 0.0 else exteriorLow + margin
+    let interiorHigh = if exteriorHigh == 1.0 then 1.0 else exteriorHigh - margin
     Interval interiorLow interiorHigh
 
 instance Bounds UvBounds where
@@ -103,7 +103,7 @@ data Size = Small | Large deriving (Eq, Ord, Show)
 data Classification = Entire | Interior | Start Size | End Size
 
 classify :: Interval Unitless -> Classification
-classify (Interval 0 1) = Entire
-classify (Interval 0 t) = Start (if t <= Desingularization.t0 then Small else Large)
-classify (Interval t 1) = End (if t >= Desingularization.t1 then Small else Large)
+classify (Interval 0.0 1.0) = Entire
+classify (Interval 0.0 t) = Start (if t <= Desingularization.t0 then Small else Large)
+classify (Interval t 1.0) = End (if t >= Desingularization.t1 then Small else Large)
 classify (Interval _ _) = Interior

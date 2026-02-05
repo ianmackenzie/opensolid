@@ -9,6 +9,7 @@ import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
+import OpenSolid.UvSpace (UvSpace)
 
 type UvBounds = Bounds2D Unitless UvSpace
 

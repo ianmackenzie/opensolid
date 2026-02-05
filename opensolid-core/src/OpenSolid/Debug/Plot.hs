@@ -29,13 +29,13 @@ resolution :: Resolution Meters
 resolution = Resolution.maxError (Length.millimeters 0.1)
 
 scale :: Quantity (Meters ?/? Unitless)
-scale = Length.centimeters 10 ?/ 1
+scale = Length.centimeters 10.0 ?/? 1.0
 
 axisHeadLength :: Length
-axisHeadLength = Length.millimeters 3
+axisHeadLength = Length.millimeters 3.0
 
 axisHeadWidth :: Length
-axisHeadWidth = Length.millimeters 2
+axisHeadWidth = Length.millimeters 2.0
 
 viewBox :: Point2D Unitless Space -> Point2D Unitless Space -> Bounds2D Meters Space
 viewBox p1 p2 = Bounds2D.hull2 (Point2D.convert scale p1) (Point2D.convert scale p2)
@@ -44,7 +44,7 @@ xAxis :: Number -> Number -> Svg Space
 xAxis x1 x2 =
   Svg.arrow
     (#start (Point2D.x (Quantity.convert scale x1)))
-    (#end (Point2D.x (Quantity.convert scale x2 .+. axisHeadLength)))
+    (#end (Point2D.x (Quantity.convert scale x2 + axisHeadLength)))
     (#headLength axisHeadLength)
     (#headWidth axisHeadWidth)
 
@@ -52,7 +52,7 @@ yAxis :: Number -> Number -> Svg Space
 yAxis y1 y2 =
   Svg.arrow
     (#start (Point2D.y (Quantity.convert scale y1)))
-    (#end (Point2D.y (Quantity.convert scale y2 .+. axisHeadLength)))
+    (#end (Point2D.y (Quantity.convert scale y2 + axisHeadLength)))
     (#headLength axisHeadLength)
     (#headWidth axisHeadWidth)
 

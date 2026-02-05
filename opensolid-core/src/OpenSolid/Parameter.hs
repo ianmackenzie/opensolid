@@ -23,11 +23,11 @@ import OpenSolid.Random qualified as Random
 
 {-# INLINEABLE isEndpoint #-}
 isEndpoint :: Number -> Bool
-isEndpoint tValue = tValue == 0 || tValue == 1
+isEndpoint tValue = tValue == 0.0 || tValue == 1.0
 
 {-# INLINEABLE hasEndpoint #-}
 hasEndpoint :: Interval Unitless -> Bool
-hasEndpoint (Interval tLow tHigh) = tLow == 0 || tHigh == 1
+hasEndpoint (Interval tLow tHigh) = tLow == 0.0 || tHigh == 1.0
 
 steps :: Int -> List Number
 steps n = if n > 0 then List.map (divideBy n) [0 .. n] else []
@@ -53,7 +53,7 @@ samples = do
   NonEmpty.five p1 p2 p3 p4 p5
 
 random :: Random.Generator Number
-random = Number.random 0 1
+random = Number.random 0.0 1.0
 
 {-# INLINE divideBy #-}
 divideBy :: Int -> Int -> Number

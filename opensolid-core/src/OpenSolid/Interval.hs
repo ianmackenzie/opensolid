@@ -62,7 +62,7 @@ module OpenSolid.Interval
 where
 
 import Data.Coerce qualified
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -158,38 +158,38 @@ instance units1 ~ units2 => Intersects (Interval units1) (Interval units2) units
   first `intersects` second = separation first second <= ?tolerance
 
 instance Negation (Interval units) where
-  negative (Interval# low# high#) = Interval# (negate# high#) (negate# low#)
+  negate (Interval# low# high#) = Interval# (negate# high#) (negate# low#)
 
 instance Multiplication Sign (Interval units) (Interval units) where
-  Positive .*. interval = interval
-  Negative .*. interval = negative interval
+  Positive * interval = interval
+  Negative * interval = -interval
 
 instance Multiplication (Interval units) Sign (Interval units) where
-  interval .*. Positive = interval
-  interval .*. Negative = negative interval
+  interval * Positive = interval
+  interval * Negative = -interval
 
 instance units1 ~ units2 => Addition (Interval units1) (Interval units2) (Interval units1) where
-  Interval# low1# high1# .+. Interval# low2# high2# =
+  Interval# low1# high1# + Interval# low2# high2# =
     Interval# (low1# +# low2#) (high1# +# high2#)
 
 instance units1 ~ units2 => Addition (Interval units1) (Quantity units2) (Interval units1) where
-  Interval# low# high# .+. Quantity# value# =
+  Interval# low# high# + Quantity# value# =
     Interval# (low# +# value#) (high# +# value#)
 
 instance units1 ~ units2 => Addition (Quantity units1) (Interval units2) (Interval units1) where
-  Quantity# value# .+. Interval# low# high# =
+  Quantity# value# + Interval# low# high# =
     Interval# (value# +# low#) (value# +# high#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Interval units2) (Interval units1) where
-  Interval# low1# high1# .-. Interval# low2# high2# =
+  Interval# low1# high1# - Interval# low2# high2# =
     Interval# (low1# -# high2#) (high1# -# low2#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Quantity units2) (Interval units1) where
-  Interval# low# high# .-. Quantity# value# =
+  Interval# low# high# - Quantity# value# =
     Interval# (low# -# value#) (high# -# value#)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Interval units2) (Interval units1) where
-  Quantity# value# .-. Interval# low# high# =
+  Quantity# value# - Interval# low# high# =
     Interval# (value# -# high#) (value# -# low#)
 
 instance Multiplication_ (Quantity units1) (Interval units2) (Interval (units1 ?*? units2)) where
@@ -200,7 +200,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Interval units2) (Interval units3)
   where
-  Quantity# value# .*. Interval# low# high# = Interval# (value# *# low#) (value# *# high#)
+  Quantity# value# * Interval# low# high# = Interval# (value# *# low#) (value# *# high#)
 
 instance Multiplication_ (Interval units1) (Quantity units2) (Interval (units1 ?*? units2)) where
   Interval# low# high# ?*? Quantity# value# = Interval# (low# *# value#) (high# *# value#)
@@ -209,7 +209,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Quantity units2) (Interval units3)
   where
-  Interval# low# high# .*. Quantity# value# = Interval# (low# *# value#) (high# *# value#)
+  Interval# low# high# * Quantity# value# = Interval# (low# *# value#) (high# *# value#)
 
 instance Multiplication_ (Interval units1) (Interval units2) (Interval (units1 ?*? units2)) where
   Interval# low1# high1# ?*? Interval# low2# high2# = do
@@ -220,7 +220,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Interval units2) (Interval units3)
   where
-  Interval# low1# high1# .*. Interval# low2# high2# = do
+  Interval# low1# high1# * Interval# low2# high2# = do
     let !(# low#, high# #) = intervalTimesInterval# low1# high1# low2# high2#
     Ordered# low# high#
 
@@ -233,7 +233,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Interval units2) (Interval units3)
   where
-  Quantity# n# ./. Interval# dl# dh# = do
+  Quantity# n# / Interval# dl# dh# = do
     let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
     Ordered# low# high#
 
@@ -246,7 +246,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Quantity units2) (Interval units3)
   where
-  Interval# nl# nh# ./. Quantity# d# = do
+  Interval# nl# nh# / Quantity# d# = do
     let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
     Ordered# low# high#
 
@@ -259,7 +259,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Interval units2) (Interval units3)
   where
-  Interval# nl# nh# ./. Interval# dl# dh# = do
+  Interval# nl# nh# / Interval# dl# dh# = do
     let !(# low#, high# #) = intervalOverInterval# nl# nh# dl# dh#
     Ordered# low# high#
 
@@ -270,7 +270,7 @@ constant value = Interval value value
 
 -- | The bounding range with endoints [0,1].
 unit :: Interval Unitless
-unit = Interval 0 1
+unit = Interval 0.0 1.0
 
 {-# INLINE coerce #-}
 coerce :: Interval units1 -> Interval units2
@@ -285,10 +285,10 @@ zeroTo value = Interval Quantity.zero value
 The lower bound of the range will be -w/2 and the upper bound will be w/2.
 -}
 symmetric :: "width" ::: Quantity units -> Interval units
-symmetric (Named width_) = let r = 0.5 *. width_ in Interval (negative r) r
+symmetric (Named width_) = let r = 0.5 * width_ in Interval -r r
 
 infinite :: Interval units
-infinite = Interval (negative Quantity.infinity) Quantity.infinity
+infinite = Interval -Quantity.infinity Quantity.infinity
 
 aggregate2 :: Interval units -> Interval units -> Interval units
 aggregate2 (Interval low1 high1) (Interval low2 high2) =
@@ -367,7 +367,7 @@ maxAbs (Interval low high) = Prelude.max (Quantity.abs low) (Quantity.abs high)
 minAbs :: Interval units -> Quantity units
 minAbs (Interval low high)
   | low >= Quantity.zero = low
-  | high <= Quantity.zero = negative high
+  | high <= Quantity.zero = -high
   | otherwise = Quantity.zero
 
 squared :: Units.Squared units1 units2 => Interval units1 -> Interval units2
@@ -380,7 +380,7 @@ squared_ (Interval low high) = do
   if
     | low >= Quantity.zero -> Interval ll hh
     | high <= Quantity.zero -> Interval hh ll
-    | otherwise -> Interval Quantity.zero (Prelude.max ll hh)
+    | otherwise -> zeroTo (Prelude.max ll hh)
 
 sqrt_ :: Interval (units ?*? units) -> Interval units
 sqrt_ (Interval low high) =
@@ -412,7 +412,7 @@ hypot2 (Interval# xMin# xMax#) (Interval# yMin# yMax#) = do
     (# _, _, _, _ #) -> Interval# 0.0## maxMagnitude#
 
 cubed :: Interval Unitless -> Interval Unitless
-cubed (Interval low high) = Interval (low .*. low .*. low) (high .*. high .*. high)
+cubed (Interval low high) = Interval (low * low * low) (high * high * high)
 
 {-| Check if a given value is included in a bounding range.
 
@@ -458,19 +458,19 @@ separation# (Interval# low1# high1#) (Interval# low2# high2#) =
   max# (low1# -# high2#) (low2# -# high1#)
 
 overlap :: Interval units -> Interval units -> Quantity units
-overlap first second = negative (separation first second)
+overlap first second = negate (separation first second)
 
 bisect :: Interval units -> (Interval units, Interval units)
 bisect (Interval low high) = do
   let mid
-        | low > negative Quantity.infinity && high < Quantity.infinity = do
+        | low > -Quantity.infinity && high < Quantity.infinity = do
             let value = Quantity.midpoint low high
             assert (low < value && value < high) value
         | low < Quantity.zero && high > Quantity.zero = Quantity.zero
-        | low == Quantity.zero = Quantity 1
-        | high == Quantity.zero = Quantity -1
-        | low > Quantity.zero = 2 *. low
-        | high < Quantity.zero = 2 *. high
+        | low == Quantity.zero = Quantity.unit
+        | high == Quantity.zero = -Quantity.unit
+        | low > Quantity.zero = 2.0 * low
+        | high < Quantity.zero = 2.0 * high
         | otherwise = throw (InternalError "'Impossible' case hit in Interval.bisect")
   (Interval low mid, Interval mid high)
 
@@ -482,13 +482,13 @@ isAtomic (Interval low high) = do
 
 {-# INLINE isFinite #-}
 isFinite :: Interval units -> Bool
-isFinite (Interval low high) = negative Quantity.infinity < low && high < Quantity.infinity
+isFinite (Interval low high) = -Quantity.infinity < low && high < Quantity.infinity
 
 abs :: Interval units -> Interval units
 abs interval@(Interval low high)
   | low >= Quantity.zero = interval
-  | high <= Quantity.zero = negative interval
-  | otherwise = Interval Quantity.zero (Prelude.max high (negative low))
+  | high <= Quantity.zero = -interval
+  | otherwise = zeroTo (Prelude.max high -low)
 
 min :: Interval units -> Interval units -> Interval units
 min (Interval low1 high1) (Interval low2 high2) =
@@ -507,27 +507,27 @@ maximum = NonEmpty.reduce max
 sin :: Interval Radians -> Interval Unitless
 sin interval@(Interval low high) = do
   let (includesMin, includesMax) = sinIncludesMinMax interval
-  let newLow = if includesMin then -1 else Prelude.min (Angle.sin low) (Angle.sin high)
-  let newHigh = if includesMax then 1 else Prelude.max (Angle.sin low) (Angle.sin high)
+  let newLow = if includesMin then -1.0 else Prelude.min (Angle.sin low) (Angle.sin high)
+  let newHigh = if includesMax then 1.0 else Prelude.max (Angle.sin low) (Angle.sin high)
   Interval newLow newHigh
 
 cos :: Interval Radians -> Interval Unitless
 cos interval@(Interval low high) = do
   let (includesMin, includesMax) = cosIncludesMinMax interval
-  let newLow = if includesMin then -1 else Prelude.min (Angle.cos low) (Angle.cos high)
-  let newHigh = if includesMax then 1 else Prelude.max (Angle.cos low) (Angle.cos high)
+  let newLow = if includesMin then -1.0 else Prelude.min (Angle.cos low) (Angle.cos high)
+  let newHigh = if includesMax then 1.0 else Prelude.max (Angle.cos low) (Angle.cos high)
   Interval newLow newHigh
 
 sinIncludesMinMax :: Interval Radians -> (Bool, Bool)
-sinIncludesMinMax interval = cosIncludesMinMax (interval .-. Angle.halfPi)
+sinIncludesMinMax interval = cosIncludesMinMax (interval - Angle.halfPi)
 
 cosIncludesMinMax :: Interval Radians -> (Bool, Bool)
-cosIncludesMinMax interval = (cosIncludesMax (interval .+. Angle.pi), cosIncludesMax interval)
+cosIncludesMinMax interval = (cosIncludesMax (interval + Angle.pi), cosIncludesMax interval)
 
 cosIncludesMax :: Interval Radians -> Bool
 cosIncludesMax (Interval low high) =
   (Quantity.isInfinite low || Quantity.isInfinite high)
-    || (low .//. Angle.twoPi /= high .//. Angle.twoPi)
+    || (low // Angle.twoPi /= high // Angle.twoPi)
 
 interpolate :: Interval units -> Number -> Quantity units
 interpolate (Interval low high) t =
@@ -535,16 +535,16 @@ interpolate (Interval low high) t =
 
 interpolationParameter :: Interval units -> Quantity units -> Number
 interpolationParameter (Interval low high) value
-  | low < high = (value .-. low) ./. (high .-. low)
-  | value < low = negative Quantity.infinity
+  | low < high = (value - low) / (high - low)
+  | value < low = -Quantity.infinity
   | value > high = Quantity.infinity
-  | otherwise = 0
+  | otherwise = 0.0
 
 resolution :: Interval units -> Number
 resolution (Interval low high)
-  | low > Quantity.zero = low ./. high
-  | high < Quantity.zero = negative high ./. low
-  | otherwise = 0
+  | low > Quantity.zero = low / high
+  | high < Quantity.zero = -high / low
+  | otherwise = 0.0
 
 resolutionThreshold :: Number
 resolutionThreshold = 0.5

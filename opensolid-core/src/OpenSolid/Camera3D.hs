@@ -21,7 +21,7 @@ module OpenSolid.Camera3D
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3D (Axis3D)
@@ -79,7 +79,7 @@ instance HasField "downwardDirection" (Camera3D space) (Direction3D space) where
   getField camera = camera.frame.downwardDirection
 
 instance HasField "focalPoint" (Camera3D space) (Point3D space) where
-  getField camera = camera.eyePoint .+. camera.focalDistance .*. camera.forwardDirection
+  getField camera = camera.eyePoint + camera.focalDistance * camera.forwardDirection
 
 instance
   HasField
@@ -129,7 +129,7 @@ lookAt ::
 lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
   let computedFocalDistance = Point3D.distanceFrom eyePoint focalPoint
   let computedFrame =
-        case Tolerance.using Quantity.zero (Vector3D.direction (focalPoint .-. eyePoint)) of
+        case Tolerance.using Quantity.zero (Vector3D.direction (focalPoint - eyePoint)) of
           Ok computedForwardDirection -> do
             let viewVector = Vector3D.unit computedForwardDirection
             let upVector = Vector3D.unit World3D.upwardDirection
@@ -137,7 +137,7 @@ lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
               Just rightPlaneOrientation ->
                 Frame3D.fromRightPlane (Plane3D eyePoint rightPlaneOrientation)
               Nothing -- View direction is either straight up or straight down
-                | Direction3D.upwardComponent computedForwardDirection > 0 ->
+                | Direction3D.upwardComponent computedForwardDirection > 0.0 ->
                     Frame3D eyePoint World3D.upwardOrientation
                 | otherwise ->
                     Frame3D eyePoint World3D.downwardOrientation
@@ -170,13 +170,13 @@ orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Nam
   new computedFrame distance projection
 
 isometricElevation :: Angle
-isometricElevation = Angle.atan2 1 (Number.sqrt 2)
+isometricElevation = Angle.atan2 1.0 (Number.sqrt 2.0)
 
 isometric :: Point3D space -> Length -> Projection -> Camera3D space
 isometric givenFocalPoint distance givenProjection =
   orbit
     (#focalPoint givenFocalPoint)
-    (#azimuth (Angle.degrees 45))
+    (#azimuth (Angle.degrees 45.0))
     (#elevation isometricElevation)
     (#distance distance)
     (#projection givenProjection)

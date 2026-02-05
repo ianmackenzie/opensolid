@@ -164,7 +164,7 @@ aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
     remaining
 
 polar :: Interval units -> Interval Radians -> VectorBounds2D units space
-polar r theta = VectorBounds2D (r .*. Interval.cos theta) (r .*. Interval.sin theta)
+polar r theta = VectorBounds2D (r * Interval.cos theta) (r * Interval.sin theta)
 
 xComponent :: VectorBounds2D units space -> Interval units
 xComponent (VectorBounds2D vx _) = vx
@@ -182,7 +182,7 @@ squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2D units1 space -
 squaredMagnitude = Units.specialize . squaredMagnitude_
 
 squaredMagnitude_ :: VectorBounds2D units space -> Interval (units ?*? units)
-squaredMagnitude_ (VectorBounds2D x y) = Interval.squared_ x .+. Interval.squared_ y
+squaredMagnitude_ (VectorBounds2D x y) = Interval.squared_ x + Interval.squared_ y
 
 magnitude :: VectorBounds2D units space -> Interval units
 magnitude (VectorBounds2D x y) = Interval.hypot2 x y
@@ -203,20 +203,20 @@ maxSquaredMagnitude_ :: VectorBounds2D units space -> Quantity (units ?*? units)
 maxSquaredMagnitude_ (VectorBounds2D (Interval minX maxX) (Interval minY maxY)) = do
   let xMagnitude = max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
-  Quantity.squared_ xMagnitude .+. Quantity.squared_ yMagnitude
+  Quantity.squared_ xMagnitude + Quantity.squared_ yMagnitude
 
 direction :: VectorBounds2D units space -> DirectionBounds2D space
 direction vectorBounds = DirectionBounds2D.unsafe (normalize vectorBounds)
 
 normalize :: VectorBounds2D units space -> VectorBounds2D Unitless space
 normalize vectorBounds = do
-  let VectorBounds2D x y = vectorBounds ./. magnitude vectorBounds
+  let VectorBounds2D x y = vectorBounds / magnitude vectorBounds
   let nx = clampNormalized x
   let ny = clampNormalized y
   VectorBounds2D nx ny
 
 normalizedBounds :: Interval Unitless
-normalizedBounds = Interval -1 1
+normalizedBounds = Interval -1.0 1.0
 
 clampNormalized :: Interval Unitless -> Interval Unitless
 clampNormalized (Interval low high) =
@@ -308,9 +308,9 @@ placeInOrientation orientation (VectorBounds2D x y) = do
   let Orientation2D i j = orientation
   let Direction2D ix iy = i
   let Direction2D jx jy = j
-  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs jx
-  let ry = 0.5 *. xWidth .*. Number.abs iy .+. 0.5 *. yWidth .*. Number.abs jy
-  VectorBounds2D (Interval (x0 .-. rx) (x0 .+. rx)) (Interval (y0 .-. ry) (y0 .+. ry))
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
+  VectorBounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
 relativeTo ::
   Frame2D frameUnits global local ->
@@ -331,9 +331,9 @@ relativeToOrientation orientation (VectorBounds2D x y) = do
   let Orientation2D i j = orientation
   let Direction2D ix iy = i
   let Direction2D jx jy = j
-  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs iy
-  let ry = 0.5 *. xWidth .*. Number.abs jx .+. 0.5 *. yWidth .*. Number.abs jy
-  VectorBounds2D (Interval (x0 .-. rx) (x0 .+. rx)) (Interval (y0 .-. ry) (y0 .+. ry))
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs iy
+  let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
+  VectorBounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
 placeOn :: Plane3D global local -> VectorBounds2D units local -> VectorBounds3D units global
 placeOn plane = placeOnOrientation plane.orientation
@@ -351,13 +351,13 @@ placeOnOrientation orientation (VectorBounds2D x y) = do
   let PlaneOrientation3D i j = orientation
   let Direction3D ix iy iz = i
   let Direction3D jx jy jz = j
-  let rx = 0.5 *. xWidth .*. Number.abs ix .+. 0.5 *. yWidth .*. Number.abs jx
-  let ry = 0.5 *. xWidth .*. Number.abs iy .+. 0.5 *. yWidth .*. Number.abs jy
-  let rz = 0.5 *. xWidth .*. Number.abs iz .+. 0.5 *. yWidth .*. Number.abs jz
+  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
+  let rz = 0.5 * xWidth * Number.abs iz + 0.5 * yWidth * Number.abs jz
   VectorBounds3D
-    (Interval (x0 .-. rx) (x0 .+. rx))
-    (Interval (y0 .-. ry) (y0 .+. ry))
-    (Interval (z0 .-. rz) (z0 .+. rz))
+    (Interval (x0 - rx) (x0 + rx))
+    (Interval (y0 - ry) (y0 + ry))
+    (Interval (z0 - rz) (z0 + rz))
 
 convert ::
   Quantity (units2 ?/? units1) ->
@@ -384,6 +384,6 @@ transformBy transform (VectorBounds2D x y) = do
   let Transform2D _ i j = transform
   let Vector2D ix iy = i
   let Vector2D jx jy = j
-  let rx = 0.5 *. Number.abs ix .*. xWidth .+. 0.5 *. Number.abs jx .*. yWidth
-  let ry = 0.5 *. Number.abs iy .*. xWidth .+. 0.5 *. Number.abs jy .*. yWidth
-  VectorBounds2D (Interval (x0 .-. rx) (x0 .+. rx)) (Interval (y0 .-. ry) (y0 .+. ry))
+  let rx = 0.5 * Number.abs ix * xWidth + 0.5 * Number.abs jx * yWidth
+  let ry = 0.5 * Number.abs iy * xWidth + 0.5 * Number.abs jy * yWidth
+  VectorBounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))

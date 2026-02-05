@@ -56,7 +56,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
 import {-# SOURCE #-} OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
 import OpenSolid.Curve1D.Zero (Zero)
@@ -83,6 +82,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Result qualified as Result
 import OpenSolid.Solve1D qualified as Solve1D
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
@@ -131,7 +131,7 @@ instance
     -- TODO optimize this to use a special Solve1D.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and their exact locations)
-    case zeros (curve .-. value) of
+    case zeros (curve - value) of
       Ok [] -> False
       Ok List.OneOrMore -> True
       Error IsZero -> True
@@ -168,11 +168,11 @@ When defining parametric curves, you will typically start with 'Curve1D.t'
 and then use arithmetic operators etc. to build up more complex curves.
 -}
 t :: Curve1D Unitless
-t = new (CompiledFunction.concrete Expression.t) (constant 1)
+t = new (CompiledFunction.concrete Expression.t) (constant 1.0)
 
 -- | Create a curve that linearly interpolates from the first value to the second.
 interpolateFrom :: Quantity units -> Quantity units -> Curve1D units
-interpolateFrom a b = a .+. t .*. (b .-. a)
+interpolateFrom a b = a + t * (b - a)
 
 compiled :: Curve1D units -> Compiled units
 compiled = (.compiled)
@@ -182,55 +182,55 @@ derivative :: Curve1D units -> Curve1D units
 derivative = (.derivative)
 
 instance Negation (Curve1D units) where
-  negative curve = new (negative curve.compiled) (negative curve.derivative)
+  negate curve = new (negate curve.compiled) (negate curve.derivative)
 
 instance Multiplication Sign (Curve1D units) (Curve1D units) where
-  Positive .*. curve = curve
-  Negative .*. curve = negative curve
+  Positive * curve = curve
+  Negative * curve = -curve
 
 instance Multiplication (Curve1D units) Sign (Curve1D units) where
-  curve .*. Positive = curve
-  curve .*. Negative = negative curve
+  curve * Positive = curve
+  curve * Negative = -curve
 
 instance units1 ~ units2 => Addition (Curve1D units1) (Curve1D units2) (Curve1D units1) where
-  lhs .+. rhs = new (lhs.compiled .+. rhs.compiled) (lhs.derivative .+. rhs.derivative)
+  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
 
 instance units1 ~ units2 => Addition (Curve1D units1) (Quantity units2) (Curve1D units1) where
-  curve .+. value = curve .+. constant value
+  curve + value = curve + constant value
 
 instance units1 ~ units2 => Addition (Quantity units1) (Curve1D units2) (Curve1D units1) where
-  value .+. curve = constant value .+. curve
+  value + curve = constant value + curve
 
 instance units1 ~ units2 => Subtraction (Curve1D units1) (Curve1D units2) (Curve1D units1) where
-  lhs .-. rhs = new (lhs.compiled .-. rhs.compiled) (lhs.derivative .-. rhs.derivative)
+  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
 
 instance
   units1 ~ units2 =>
   Subtraction (Curve1D units1) (Quantity units2) (Curve1D units1)
   where
-  curve .-. value = curve .-. constant value
+  curve - value = curve - constant value
 
 instance
   units1 ~ units2 =>
   Subtraction (Quantity units1) (Curve1D units2) (Curve1D units1)
   where
-  value .-. curve = constant value .-. curve
+  value - curve = constant value - curve
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Curve1D units2) (Curve1D units3)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance Multiplication_ (Curve1D units1) (Curve1D units2) (Curve1D (units1 ?*? units2)) where
   lhs ?*? rhs =
-    new (lhs.compiled ?*? rhs.compiled) (lhs.derivative ?*? rhs .+. lhs ?*? rhs.derivative)
+    new (lhs.compiled ?*? rhs.compiled) (lhs.derivative ?*? rhs + lhs ?*? rhs.derivative)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Quantity units2) (Curve1D units3)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance Multiplication_ (Curve1D units1) (Quantity units2) (Curve1D (units1 ?*? units2)) where
   curve ?*? value = curve ?*? constant value
@@ -239,7 +239,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Curve1D units2) (Curve1D units3)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance Multiplication_ (Quantity units1) (Curve1D units2) (Curve1D (units1 ?*? units2)) where
   value ?*? curve = constant value ?*? curve
@@ -248,7 +248,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Vector2D units2 space) (VectorCurve2D units3 space)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
@@ -262,7 +262,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2D units1 space) (Curve1D units2) (VectorCurve2D units3 space)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
@@ -276,7 +276,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Vector3D units2 space) (VectorCurve3D units3 space)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
@@ -290,7 +290,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector3D units1 space) (Curve1D units2) (VectorCurve3D units3 space)
   where
-  lhs .*. rhs = Units.specialize (lhs ?*? rhs)
+  lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
@@ -302,10 +302,10 @@ instance
 
 instance Composition (Curve1D Unitless) (Curve1D units) (Curve1D units) where
   f `compose` g =
-    new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) .*. g.derivative)
+    new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) * g.derivative)
 
 reverse :: Curve1D units -> Curve1D units
-reverse curve = curve `compose` (1 -. t)
+reverse curve = curve `compose` (1.0 - t)
 
 bezier :: NonEmpty (Quantity units) -> Curve1D units
 bezier controlPoints =
@@ -333,7 +333,7 @@ rationalBezier ::
   NonEmpty (Quantity units, Number) ->
   Result DivisionByZero (Curve1D units)
 rationalBezier pointsAndWeights = do
-  let scaledPoint (point, weight) = point .*. weight
+  let scaledPoint (point, weight) = point * weight
   quotient
     (bezier (NonEmpty.map scaledPoint pointsAndWeights))
     (bezier (NonEmpty.map Pair.second pointsAndWeights))
@@ -372,10 +372,10 @@ evaluateBounds :: Curve1D units -> Interval Unitless -> Interval units
 evaluateBounds curve = CompiledFunction.evaluateBounds curve.compiled
 
 startValue :: Curve1D units -> Quantity units
-startValue curve = evaluate curve 0
+startValue curve = evaluate curve 0.0
 
 endValue :: Curve1D units -> Quantity units
-endValue curve = evaluate curve 1
+endValue curve = evaluate curve 1.0
 
 desingularize ::
   Maybe (Quantity units, Quantity units) ->
@@ -395,7 +395,7 @@ quotient ::
   Curve1D units1 ->
   Curve1D units2 ->
   Result DivisionByZero (Curve1D units3)
-quotient lhs rhs = Units.specialize (quotient_ lhs rhs)
+quotient lhs rhs = Result.map Units.specialize (quotient_ lhs rhs)
 
 quotient_ ::
   Tolerance units2 =>
@@ -419,7 +419,7 @@ instance Division_ (Curve1D units1) (WithNoZeros units2) (Curve1D (units1 ?/? un
     let rhs = Curve1D.WithNoZeros.unwrap rhsWithNoZeros
     let quotientCompiled = compiled lhs ?/? compiled rhs
     let quotientDerivative = Units.simplify do
-          (derivative lhs ?*? rhs .-. lhs ?*? derivative rhs)
+          (derivative lhs ?*? rhs - lhs ?*? derivative rhs)
             ?/? Curve1D.WithNoZeros.squared_ rhsWithNoZeros
     new quotientCompiled quotientDerivative
 
@@ -427,7 +427,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (WithNoZeros units2) (Curve1D units3)
   where
-  lhs ./. rhs = Units.specialize (lhs ?/? rhs)
+  lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 newtype WithNoInteriorZeros units = WithNoInteriorZeros (Curve1D units)
 
@@ -443,16 +443,16 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (WithNoInteriorZeros units2) (Curve1D units3)
   where
-  lhs ./. rhs = Units.specialize (lhs ?/? rhs)
+  lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (Quantity units2) (Curve1D units3)
   where
-  lhs ./. rhs = Units.specialize (lhs ?/? rhs)
+  lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 instance Division_ (Curve1D units1) (Quantity units2) (Curve1D (units1 ?/? units2)) where
-  curve ?/? value = Units.simplify (curve ?*? (1 /? value))
+  curve ?/? value = Units.simplify (curve ?*? (1.0 ?/? value))
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve1D units1 -> Curve1D units2
@@ -462,7 +462,7 @@ squared_ :: Curve1D units -> Curve1D (units ?*? units)
 squared_ curve =
   new
     (CompiledFunction.map Expression.squared_ Quantity.squared_ Interval.squared_ curve.compiled)
-    (2 *. curve ?*? curve.derivative)
+    (2.0 * curve ?*? curve.derivative)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve1D units2 -> Curve1D units1
@@ -481,21 +481,21 @@ cubed :: Curve1D Unitless -> Curve1D Unitless
 cubed curve =
   new
     (CompiledFunction.map Expression.cubed Number.cubed Interval.cubed curve.compiled)
-    (3 *. squared curve .*. curve.derivative)
+    (3.0 * squared curve * curve.derivative)
 
 -- | Compute the sine of a curve.
 sin :: Curve1D Radians -> Curve1D Unitless
 sin curve =
   new
     (CompiledFunction.map Expression.sin Angle.sin Interval.sin curve.compiled)
-    (cos curve .*. (curve.derivative ./. Angle.radian))
+    (cos curve * (curve.derivative / Angle.radian))
 
 -- | Compute the cosine of a curve.
 cos :: Curve1D Radians -> Curve1D Unitless
 cos curve =
   new
     (CompiledFunction.map Expression.cos Angle.cos Interval.cos curve.compiled)
-    (negative (sin curve) .*. (curve.derivative ./. Angle.radian))
+    (negate (sin curve) * (curve.derivative / Angle.radian))
 
 integrate :: Curve1D units -> Estimate units
 integrate curve = Estimate.new (Integral curve curve.derivative Interval.unit)
@@ -506,12 +506,12 @@ instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve curveDerivative domain) = do
     let dx = Interval.width domain
     let derivativeBounds = evaluateBounds curveDerivative domain
-    let estimate0 = dx .*. evaluateBounds curve domain
+    let estimate0 = dx * evaluateBounds curve domain
     let y1 = evaluate curve (Interval.lower domain)
     let y2 = evaluate curve (Interval.upper domain)
     let m = Interval.width derivativeBounds
-    let error1 = 0.125 *. m .*. dx .*. dx
-    let estimate1 = dx .*. Quantity.midpoint y1 y2 .+. Interval (negative error1) error1
+    let error1 = 0.125 * m * dx * dx
+    let estimate1 = dx * Quantity.midpoint y1 y2 + Interval -error1 error1
     case Interval.intersection estimate0 estimate1 of
       Just intersection -> intersection
       Nothing -> estimate0 -- Shouldn't happen if bounds are correct
@@ -520,11 +520,11 @@ instance Estimate.Interface (Integral units) units where
     let (leftDomain, rightDomain) = Interval.bisect domain
     let leftIntegral = Integral curve curveDerivative leftDomain
     let rightIntegral = Integral curve curveDerivative rightDomain
-    Estimate.new leftIntegral .+. Estimate.new rightIntegral
+    Estimate.new leftIntegral + Estimate.new rightIntegral
 
 singularityTolerance :: Curve1D units -> Quantity units
 singularityTolerance curve =
-  1e-9 *. NonEmpty.maximumOf (Quantity.abs . evaluate curve) Parameter.samples
+  1e-9 * NonEmpty.maximumOf (Quantity.abs . evaluate curve) Parameter.samples
 
 ----- ZERO FINDING -----
 
@@ -657,11 +657,11 @@ solveMonotonic m fm fn tBounds = do
   let Interval tLow tHigh = tBounds
   let startNeighborhood = Solve1D.neighborhood n (evaluate fn tLow)
   if Quantity.abs (evaluate fm tLow) <= Solve1D.derivativeTolerance startNeighborhood m
-    then if tLow == 0 then Resolved [(0, startNeighborhood)] else Unresolved
+    then if tLow == 0.0 then Resolved [(0.0, startNeighborhood)] else Unresolved
     else do
       let endNeighborhood = Solve1D.neighborhood n (evaluate fn tHigh)
       if Quantity.abs (evaluate fm tHigh) <= Solve1D.derivativeTolerance endNeighborhood m
-        then if tHigh == 1 then Resolved [(1, endNeighborhood)] else Unresolved
+        then if tHigh == 1.0 then Resolved [(1.0, endNeighborhood)] else Unresolved
         else do
           case Solve1D.monotonic (evaluate fm) (evaluate fn) tBounds of
             Solve1D.Exact t0 -> Resolved [(t0, Solve1D.neighborhood n (evaluate fn t0))]
@@ -689,7 +689,7 @@ sign curve = case zeros curve of
             -- so we can safely test the curve
             -- halfway between t=0 and the first inner zero
             let firstInnerZero = NonEmpty.first innerZeros
-            let testPoint = 0.5 *. firstInnerZero.location
+            let testPoint = 0.5 * firstInnerZero.location
             Ok (Quantity.sign (evaluate curve testPoint))
 
 isInnerZero :: Zero -> Bool
@@ -709,7 +709,7 @@ b00 =
     concrete Expression.b00d1 $
       concrete Expression.b00d2 $
         concrete Expression.b00d3 $
-          constant 72
+          constant 72.0
 
 b01 :: Curve1D Unitless
 b01 =
@@ -717,7 +717,7 @@ b01 =
     concrete Expression.b01d1 $
       concrete Expression.b01d2 $
         concrete Expression.b01d3 $
-          constant 48
+          constant 48.0
 
 b02 :: Curve1D Unitless
 b02 =
@@ -725,7 +725,7 @@ b02 =
     concrete Expression.b02d1 $
       concrete Expression.b02d2 $
         concrete Expression.b02d3 $
-          constant 12
+          constant 12.0
 
 b10 :: Curve1D Unitless
 b10 =
@@ -733,7 +733,7 @@ b10 =
     concrete Expression.b10d1 $
       concrete Expression.b10d2 $
         concrete Expression.b10d3 $
-          constant -72
+          constant -72.0
 
 b11 :: Curve1D Unitless
 b11 =
@@ -741,7 +741,7 @@ b11 =
     concrete Expression.b11d1 $
       concrete Expression.b11d2 $
         concrete Expression.b11d3 $
-          constant 24
+          constant 24.0
 
 newtonRaphson :: Curve1D units -> Number -> Number
 newtonRaphson curve tValue =

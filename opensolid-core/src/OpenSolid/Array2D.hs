@@ -26,7 +26,7 @@ new :: (a -> b -> c) -> Array a -> Array b -> Array2D c
 new f uItems vItems = do
   let n = Array.length uItems
   let m = Array.length vItems
-  let item i = f (Array.get (i `div` m) uItems) (Array.get (i `mod` m) vItems)
+  let item i = f (Array.get (i // m) uItems) (Array.get (i % m) vItems)
   let items = List.map item [0 .. n * m - 1]
   Array2D (n, m) (Data.Array.listArray ((0, 0), (n - 1, m - 1)) items)
 
@@ -45,8 +45,8 @@ map2 f (Array2D (n1, m1) array1) (Array2D (n2, m2) array2) = do
   let n = min n1 n2
   let m = min m1 m2
   let newItem index = do
-        let i = index `div` m
-        let j = index `mod` m
+        let i = index // m
+        let j = index % m
         let indices = (i, j)
         f (array1 ! indices) (array2 ! indices)
   let newItems = List.map newItem [0 .. n * m - 1]

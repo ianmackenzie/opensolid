@@ -18,9 +18,9 @@ derivativeConsistency ::
 derivativeConsistency givenTolerance curve = Test.do
   tValue <- Parameter.random
   let dt :: Number = 1e-6
-  let v1 = VectorCurve2D.evaluate curve (tValue .-. dt)
-  let v2 = VectorCurve2D.evaluate curve (tValue .+. dt)
-  let numericalFirstDerivative = (v2 .-. v1) ./ (2 *. dt)
+  let v1 = VectorCurve2D.evaluate curve (tValue - dt)
+  let v2 = VectorCurve2D.evaluate curve (tValue + dt)
+  let numericalFirstDerivative = (v2 - v1) / (2.0 * dt)
   let analyticFirstDerivative = VectorCurve2D.evaluate (VectorCurve2D.derivative curve) tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)

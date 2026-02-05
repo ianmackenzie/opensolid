@@ -87,6 +87,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
@@ -220,8 +221,8 @@ sphere (Named centerPoint) (Named diameter) =
     then Error EmptyBody
     else do
       let sketchPlane = Plane3D centerPoint World3D.frontPlane.orientation
-      let radius = 0.5 *. diameter
-      let p1 = Point2D.y (negative radius)
+      let radius = 0.5 * diameter
+      let p1 = Point2D.y -radius
       let p2 = Point2D.y radius
       let profileCurves = [Curve2D.arcFrom p1 p2 Angle.pi, Curve2D.lineFrom p2 p1]
       case Region2D.boundedBy profileCurves of
@@ -243,7 +244,7 @@ cylinder ::
   "diameter" ::: Length ->
   Result EmptyBody (Body3D space)
 cylinder startPoint endPoint (Named diameter) =
-  case Vector3D.magnitudeAndDirection (endPoint .-. startPoint) of
+  case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
     Error Vector.IsZero -> Error EmptyBody
     Ok (length, direction) ->
       cylinderAlong (Axis3D startPoint direction) Quantity.zero length (#diameter diameter)
@@ -285,8 +286,8 @@ extruded ::
   Result BoundedBy.Error (Body3D global)
 extruded sketchPlane profile d1 d2 = do
   let normal = Plane3D.normalDirection sketchPlane
-  let v1 = d1 .*. normal
-  let v2 = d2 .*. normal
+  let v1 = d1 * normal
+  let v2 = d2 * normal
   translational sketchPlane profile (VectorCurve3D.interpolateFrom v1 v2)
 
 translational ::
@@ -495,7 +496,7 @@ registerHalfEdge parentHandedness halfEdgeSet surfaceRegistry halfEdge = do
                   else SecondaryEdge{halfEdgeId, uvStartPoint = uvCurve.startPoint}
           let updatedRegistry =
                 SurfaceRegistry{unprocessed, processed, edges = Map.set halfEdgeId edge edges}
-          let matingHandedness = if correctlyAligned then parentHandedness else negative parentHandedness
+          let matingHandedness = if correctlyAligned then parentHandedness else -parentHandedness
           case (Map.get matingSurfaceId unprocessed, Map.get matingSurfaceId processed) of
             (Nothing, Nothing) -> throw (InternalError "No surface found for half-edge")
             (Just _, Just _) -> throw (InternalError "Multiple surfaces found for half-edge")
@@ -572,7 +573,7 @@ toSurfaceMesh resolution body = do
   let toVertex surfaceFunction normalDirection handedness uvPoint =
         SurfaceVertex3D
           { position = SurfaceFunction3D.evaluate surfaceFunction uvPoint
-          , normal = handedness .*. DirectionSurfaceFunction3D.evaluate normalDirection uvPoint
+          , normal = handedness * DirectionSurfaceFunction3D.evaluate normalDirection uvPoint
           }
   toMesh resolution toVertex body
 
@@ -703,7 +704,7 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
                   matingSurfaceSegments
                   (Curve3D.secondDerivative curve3D)
           let tValues = Domain1D.innerSamplingPoints edgePredicate
-          let matingTValues = if correctlyAligned then List.reverseMap (1 -.) tValues else tValues
+          let matingTValues = if correctlyAligned then List.reverseMap (1.0 -) tValues else tValues
           let vertices = List.map (Curve2D.evaluate uvCurve) tValues
           let matingVertices = List.map (Curve2D.evaluate matingUvCurve) matingTValues
           accumulated
@@ -737,8 +738,8 @@ edgeLinearizationPredicate
     let Interval tStart tEnd = tBounds
     let uvStart = Curve2D.evaluate uvCurve tStart
     let uvEnd = Curve2D.evaluate uvCurve tEnd
-    let matingTStart = if correctlyAligned then 1 -. tStart else tStart
-    let matingTEnd = if correctlyAligned then 1 -. tEnd else tEnd
+    let matingTStart = if correctlyAligned then 1.0 - tStart else tStart
+    let matingTEnd = if correctlyAligned then 1.0 - tEnd else tEnd
     let matingUvStart = Curve2D.evaluate matingUvCurve matingTStart
     let matingUvEnd = Curve2D.evaluate matingUvCurve matingTEnd
     let uvBounds = Bounds2D.hull2 uvStart uvEnd
@@ -776,7 +777,7 @@ validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero 
         || (validEdge edgeBounds edgeLength left && validEdge edgeBounds edgeLength right)
     Set2D.Leaf leafBounds _ ->
       not (edgeBounds `intersects` leafBounds)
-        || edgeLength <= Number.sqrt 2 .*. Bounds2D.diameter leafBounds
+        || edgeLength <= Number.sqrt 2.0 * Bounds2D.diameter leafBounds
 
 boundarySurfaceMesh ::
   Tolerance Meters =>

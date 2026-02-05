@@ -25,6 +25,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D, Transform2D, Vector2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.UvSpace (UvSpace)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
 type role Curve2D nominal nominal

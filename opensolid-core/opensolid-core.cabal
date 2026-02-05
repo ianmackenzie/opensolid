@@ -55,6 +55,7 @@ common config
     -hiedir=.hie
     -haddock
     -dcmm-lint
+    -dcore-lint
 
   default-extensions:
     BlockArguments
@@ -79,6 +80,7 @@ common config
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
+    RebindableSyntax
     RoleAnnotations
     StrictData
     TypeFamilies
@@ -95,7 +97,6 @@ library
     OpenSolid.Arc2D
     OpenSolid.ArcLength
     OpenSolid.Area
-    OpenSolid.Arithmetic
     OpenSolid.Array
     OpenSolid.Array2D
     OpenSolid.Axis2D
@@ -113,7 +114,6 @@ library
     OpenSolid.Circle2D
     OpenSolid.Color
     OpenSolid.CompiledFunction
-    OpenSolid.Composition
     OpenSolid.Convention3D
     OpenSolid.Curve
     OpenSolid.Curve.IntersectionPoint
@@ -165,7 +165,6 @@ library
     OpenSolid.IO.Parallel
     OpenSolid.Int
     OpenSolid.InternalError
-    OpenSolid.Intersects
     OpenSolid.Interval
     OpenSolid.Json
     OpenSolid.Length
@@ -176,7 +175,6 @@ library
     OpenSolid.Mesh
     OpenSolid.Mitsuba
     OpenSolid.Model3D
-    OpenSolid.Named
     OpenSolid.NewtonRaphson
     OpenSolid.NewtonRaphson1D
     OpenSolid.NewtonRaphson2D
@@ -233,13 +231,11 @@ library
     OpenSolid.Svg
     OpenSolid.Text
     OpenSolid.Timer
-    OpenSolid.Todo
     OpenSolid.Tolerance
     OpenSolid.Transform
     OpenSolid.Transform2D
     OpenSolid.Transform3D
     OpenSolid.Triangle2D
-    OpenSolid.Unitless
     OpenSolid.Units
     OpenSolid.UvBounds
     OpenSolid.UvPoint

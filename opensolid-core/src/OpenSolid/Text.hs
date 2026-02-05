@@ -32,25 +32,11 @@ module OpenSolid.Text
 where
 
 import Data.Char qualified
-import Data.Text (Text)
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import OpenSolid.Binary (Builder, ByteString)
-import OpenSolid.List (List)
 import OpenSolid.List qualified as List
-import OpenSolid.Number (Number)
-import OpenSolid.Quantity (Quantity (Quantity))
-import OpenSolid.Result (Result (Error, Ok))
-import Prelude
-  ( Bool
-  , Char
-  , Either (Left, Right)
-  , Eq
-  , Int
-  , Maybe (Just, Nothing)
-  , Show
-  , (<>)
-  )
+import OpenSolid.Prelude
 import Prelude qualified
 
 concat :: List Text -> Text

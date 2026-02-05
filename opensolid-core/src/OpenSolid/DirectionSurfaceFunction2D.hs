@@ -11,7 +11,7 @@ module OpenSolid.DirectionSurfaceFunction2D
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -57,8 +57,8 @@ constant direction =
   DirectionSurfaceFunction2D (VectorSurfaceFunction2D.constant (Vector2D.unit direction))
 
 instance Negation (DirectionSurfaceFunction2D space) where
-  negative (DirectionSurfaceFunction2D vectorSurfaceFunction) =
-    DirectionSurfaceFunction2D (negative vectorSurfaceFunction)
+  negate (DirectionSurfaceFunction2D vectorSurfaceFunction) =
+    DirectionSurfaceFunction2D (negate vectorSurfaceFunction)
 
 instance
   Multiplication
@@ -66,8 +66,8 @@ instance
     (DirectionSurfaceFunction2D space)
     (DirectionSurfaceFunction2D space)
   where
-  Positive .*. function = function
-  Negative .*. function = negative function
+  Positive * function = function
+  Negative * function = -function
 
 instance
   Multiplication_
@@ -76,7 +76,7 @@ instance
     (DirectionSurfaceFunction2D space)
   where
   Positive ?*? function = function
-  Negative ?*? function = negative function
+  Negative ?*? function = -function
 
 instance
   Multiplication
@@ -84,8 +84,8 @@ instance
     Sign
     (DirectionSurfaceFunction2D space)
   where
-  function .*. Positive = function
-  function .*. Negative = negative function
+  function * Positive = function
+  function * Negative = -function
 
 instance
   Multiplication_
@@ -94,7 +94,7 @@ instance
     (DirectionSurfaceFunction2D space)
   where
   function ?*? Positive = function
-  function ?*? Negative = negative function
+  function ?*? Negative = -function
 
 instance
   Multiplication
@@ -102,7 +102,7 @@ instance
     (DirectionSurfaceFunction2D space)
     (VectorSurfaceFunction2D units space)
   where
-  value .*. DirectionSurfaceFunction2D vectorSurfaceFunction = value .*. vectorSurfaceFunction
+  value * DirectionSurfaceFunction2D vectorSurfaceFunction = value * vectorSurfaceFunction
 
 instance
   Multiplication
@@ -110,7 +110,7 @@ instance
     (Quantity units)
     (VectorSurfaceFunction2D units space)
   where
-  DirectionSurfaceFunction2D vectorSurfaceFunction .*. value = vectorSurfaceFunction .*. value
+  DirectionSurfaceFunction2D vectorSurfaceFunction * value = vectorSurfaceFunction * value
 
 instance
   Multiplication
@@ -118,8 +118,8 @@ instance
     (DirectionSurfaceFunction2D space)
     (VectorSurfaceFunction2D units space)
   where
-  scalarSurfaceFunction .*. DirectionSurfaceFunction2D vectorSurfaceFunction =
-    scalarSurfaceFunction .*. vectorSurfaceFunction
+  scalarSurfaceFunction * DirectionSurfaceFunction2D vectorSurfaceFunction =
+    scalarSurfaceFunction * vectorSurfaceFunction
 
 instance
   Multiplication
@@ -127,8 +127,8 @@ instance
     (SurfaceFunction1D units)
     (VectorSurfaceFunction2D units space)
   where
-  DirectionSurfaceFunction2D vectorSurfaceFunction .*. scalarSurfaceFunction =
-    vectorSurfaceFunction .*. scalarSurfaceFunction
+  DirectionSurfaceFunction2D vectorSurfaceFunction * scalarSurfaceFunction =
+    vectorSurfaceFunction * scalarSurfaceFunction
 
 instance
   space1 ~ space2 =>

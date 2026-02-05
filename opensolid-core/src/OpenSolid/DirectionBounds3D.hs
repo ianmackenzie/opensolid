@@ -29,23 +29,23 @@ instance
   coerce = id
 
 instance Negation (DirectionBounds3D space) where
-  negative (UnitBounds3D vectorBounds) = UnitBounds3D (negative vectorBounds)
+  negate (UnitBounds3D vectorBounds) = UnitBounds3D (negate vectorBounds)
 
 instance Multiplication Sign (DirectionBounds3D space) (DirectionBounds3D space) where
-  Positive .*. directionBounds = directionBounds
-  Negative .*. directionBounds = negative directionBounds
+  Positive * directionBounds = directionBounds
+  Negative * directionBounds = -directionBounds
 
 instance Multiplication_ Sign (DirectionBounds3D space) (DirectionBounds3D space) where
   Positive ?*? directionBounds = directionBounds
-  Negative ?*? directionBounds = negative directionBounds
+  Negative ?*? directionBounds = -directionBounds
 
 instance Multiplication (DirectionBounds3D space) Sign (DirectionBounds3D space) where
-  directionBounds .*. Positive = directionBounds
-  directionBounds .*. Negative = negative directionBounds
+  directionBounds * Positive = directionBounds
+  directionBounds * Negative = -directionBounds
 
 instance Multiplication_ (DirectionBounds3D space) Sign (DirectionBounds3D space) where
   directionBounds ?*? Positive = directionBounds
-  directionBounds ?*? Negative = negative directionBounds
+  directionBounds ?*? Negative = -directionBounds
 
 instance
   Multiplication
@@ -53,7 +53,7 @@ instance
     (DirectionBounds3D space)
     (VectorBounds3D units space)
   where
-  value .*. UnitBounds3D vectorBounds = value .*. vectorBounds
+  value * UnitBounds3D vectorBounds = value * vectorBounds
 
 instance
   Multiplication
@@ -61,7 +61,7 @@ instance
     (Quantity units)
     (VectorBounds3D units space)
   where
-  UnitBounds3D vectorBounds .*. value = vectorBounds .*. value
+  UnitBounds3D vectorBounds * value = vectorBounds * value
 
 instance
   Multiplication
@@ -69,7 +69,7 @@ instance
     (DirectionBounds3D space)
     (VectorBounds3D units space)
   where
-  interval .*. UnitBounds3D vectorBounds = interval .*. vectorBounds
+  interval * UnitBounds3D vectorBounds = interval * vectorBounds
 
 instance
   Multiplication
@@ -77,7 +77,7 @@ instance
     (Interval units)
     (VectorBounds3D units space)
   where
-  UnitBounds3D vectorBounds .*. interval = vectorBounds .*. interval
+  UnitBounds3D vectorBounds * interval = vectorBounds * interval
 
 instance
   space1 ~ space2 =>

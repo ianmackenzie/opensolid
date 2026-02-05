@@ -95,61 +95,61 @@ resolve function estimate =
 newtype Negate units = Negate (Estimate units)
 
 instance Interface (Negate units) units where
-  boundsImpl (Negate estimate) = negative (bounds estimate)
-  refineImpl (Negate estimate) = negative (refine estimate)
+  boundsImpl (Negate estimate) = negate (bounds estimate)
+  refineImpl (Negate estimate) = negate (refine estimate)
 
 instance Negation (Estimate units) where
-  negative estimate = new (Negate estimate)
+  negate estimate = new (Negate estimate)
 
 instance Multiplication Sign (Estimate units) (Estimate units) where
-  Positive .*. estimate = estimate
-  Negative .*. estimate = negative estimate
+  Positive * estimate = estimate
+  Negative * estimate = -estimate
 
 instance Multiplication (Estimate units) Sign (Estimate units) where
-  estimate .*. Positive = estimate
-  estimate .*. Negative = negative estimate
+  estimate * Positive = estimate
+  estimate * Negative = -estimate
 
 data Add units = Add (Estimate units) (Estimate units)
 
 instance Interface (Add units) units where
-  boundsImpl (Add first second) = bounds first .+. bounds second
+  boundsImpl (Add first second) = bounds first + bounds second
   refineImpl (Add first second) = do
     let width1 = Interval.width (bounds first)
     let width2 = Interval.width (bounds second)
     if
-      | width1 >= 2 *. width2 -> refine first .+. second
-      | width2 >= 2 *. width1 -> first .+. refine second
-      | otherwise -> refine first .+. refine second
+      | width1 >= 2.0 * width2 -> refine first + second
+      | width2 >= 2.0 * width1 -> first + refine second
+      | otherwise -> refine first + refine second
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
-  first .+. second = new (Add first second)
+  first + second = new (Add first second)
 
 instance Addition (Estimate units) (Quantity units) (Estimate units) where
-  estimate .+. value = estimate .+. exact value
+  estimate + value = estimate + exact value
 
 instance Addition (Quantity units) (Estimate units) (Estimate units) where
-  value .+. estimate = exact value .+. estimate
+  value + estimate = exact value + estimate
 
 data Subtract units = Subtract (Estimate units) (Estimate units)
 
 instance Interface (Subtract units) units where
-  boundsImpl (Subtract first second) = bounds first .-. bounds second
+  boundsImpl (Subtract first second) = bounds first - bounds second
   refineImpl (Subtract first second) = do
     let width1 = Interval.width (bounds first)
     let width2 = Interval.width (bounds second)
     if
-      | width1 >= 2 *. width2 -> refine first .-. second
-      | width2 >= 2 *. width1 -> first .-. refine second
-      | otherwise -> refine first .-. refine second
+      | width1 >= 2.0 * width2 -> refine first - second
+      | width2 >= 2.0 * width1 -> first - refine second
+      | otherwise -> refine first - refine second
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
-  first .-. second = new (Subtract first second)
+  first - second = new (Subtract first second)
 
 instance Subtraction (Estimate units) (Quantity units) (Estimate units) where
-  estimate .-. value = estimate .-. exact value
+  estimate - value = estimate - exact value
 
 instance Subtraction (Quantity units) (Estimate units) (Estimate units) where
-  value .-. estimate = exact value .-. estimate
+  value - estimate = exact value - estimate
 
 data Product units1 units2 = Product (Estimate units1) (Estimate units2)
 
@@ -188,7 +188,7 @@ instance
     (Estimate units2)
     (Estimate units3)
   where
-  first .*. second = Units.specialize (first ?*? second)
+  first * second = Units.specialize (first ?*? second)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -197,7 +197,7 @@ instance
     (Quantity units2)
     (Estimate units3)
   where
-  estimate .*. value = estimate .*. exact value
+  estimate * value = estimate * exact value
 
 instance
   Units.Product units1 units2 units3 =>
@@ -206,10 +206,10 @@ instance
     (Estimate units2)
     (Estimate units3)
   where
-  value .*. estimate = exact value .*. estimate
+  value * estimate = exact value * estimate
 
 instance Division_ (Estimate units1) (Quantity units2) (Estimate (units1 ?/? units2)) where
-  estimate ?/? value = Units.simplify (estimate ?*? (1 /? value))
+  estimate ?/? value = Units.simplify (estimate ?*? (1.0 ?/? value))
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -218,7 +218,7 @@ instance
     (Quantity units2)
     (Estimate units3)
   where
-  estimate ./. value = Units.specialize (estimate ?/? value)
+  estimate / value = Units.specialize (estimate ?/? value)
 
 newtype Sum units = Sum (NonEmpty (Estimate units))
 
@@ -226,7 +226,7 @@ instance Interface (Sum units) units where
   boundsImpl (Sum estimates) = NonEmpty.sum (NonEmpty.map bounds estimates)
   refineImpl (Sum estimates) = do
     let maxWidth = NonEmpty.maximumOf boundsWidth estimates
-    let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 *. maxWidth)) estimates
+    let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates
     new (Sum refinedEstimates)
 
 newtype Abs units = Abs (Estimate units)
@@ -297,7 +297,7 @@ itemBoundsWidth (_, estimate) = Interval.width (bounds estimate)
 
 refinePairs :: NonEmpty (a, Estimate units) -> NonEmpty (a, Estimate units)
 refinePairs pairs = do
-  let widthCutoff = 0.5 *. NonEmpty.maximumOf itemBoundsWidth pairs
+  let widthCutoff = 0.5 * NonEmpty.maximumOf itemBoundsWidth pairs
   NonEmpty.map (Pair.mapSecond (refineWiderThan widthCutoff)) pairs
 
 prependItems :: List (a, Estimate units) -> List a -> List a
@@ -359,6 +359,6 @@ pickMaximumBy function items = go (NonEmpty.map (Pair.decorate function) items) 
 sign :: Tolerance units => Estimate units -> Sign
 sign estimate
   | Interval.lower (bounds estimate) > ?tolerance = Positive
-  | Interval.upper (bounds estimate) < negative ?tolerance = Negative
+  | Interval.upper (bounds estimate) < negate ?tolerance = Negative
   | Interval.width (bounds estimate) ~= Quantity.zero = Positive
   | otherwise = sign (refine estimate)

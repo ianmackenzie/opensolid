@@ -87,7 +87,7 @@ process callback queue solutions exclusions =
               Pass -> process callback remaining solutions exclusions
               Recurse updatedContext -> do
                 children <- recurseInto subdomain updatedContext recursionType
-                process callback (remaining .+. children) solutions exclusions
+                process callback (remaining + children) solutions exclusions
               Return newSolution -> do
                 let updatedSolutions = newSolution : solutions
                 let updatedExclusions = subdomain : exclusions
@@ -96,7 +96,7 @@ process callback queue solutions exclusions =
               Pass -> process callback remaining solutions exclusions
               Recurse updatedContext -> do
                 children <- recurseInto subdomain updatedContext recursionType
-                process callback (remaining .+. children) solutions exclusions
+                process callback (remaining + children) solutions exclusions
 
 convergenceDomain :: Domain2D -> RecursionType -> Domain2D
 convergenceDomain subdomain recursionType = do
@@ -250,13 +250,13 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
       let Vector2D x1 y1 = f1
       let Vector2D xu1 yu1 = fu p1
       let Vector2D xv1 yv1 = fv p1
-      let determinant = xu1 ?*? yv1 .-. xv1 ?*? yu1
+      let determinant = xu1 ?*? yv1 - xv1 ?*? yu1
       if determinant == Quantity.zero
         then Error Divergence
         else do
-          let deltaU = (xv1 ?*? y1 .-. yv1 ?*? x1) ./. determinant
-          let deltaV = (yu1 ?*? x1 .-. xu1 ?*? y1) ./. determinant
-          let p2 = boundedStep uvBounds p1 (p1 .+. Vector2D deltaU deltaV)
+          let deltaU = (xv1 ?*? y1 - yv1 ?*? x1) / determinant
+          let deltaV = (yu1 ?*? x1 - xu1 ?*? y1) / determinant
+          let p2 = boundedStep uvBounds p1 (p1 + Vector2D deltaU deltaV)
           let f2 = f p2
           if Vector2D.squaredMagnitude_ f2 >= Vector2D.squaredMagnitude_ f1
             then -- We've stopped converging, check if we've actually found a root
@@ -276,8 +276,8 @@ boundedStep uvBounds p1 p2 =
       let UvPoint u2 v2 = p2
       let clampedU = Quantity.clampTo uBounds u2
       let clampedV = Quantity.clampTo vBounds v2
-      let uScale = if u1 == u2 then 1 else (clampedU .-. u1) ./. (u2 .-. u1)
-      let vScale = if v1 == v2 then 1 else (clampedV .-. v1) ./. (v2 .-. v1)
+      let uScale = if u1 == u2 then 1.0 else (clampedU - u1) / (u2 - u1)
+      let vScale = if v1 == v2 then 1.0 else (clampedV - v1) / (v2 - v1)
       let scale = min uScale vScale
       let UvPoint u v = Point2D.interpolateFrom p1 p2 scale
       -- Perform a final clamping step

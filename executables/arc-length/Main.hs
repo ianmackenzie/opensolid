@@ -17,7 +17,6 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import Prelude hiding (length)
 
 data Space
 
@@ -32,39 +31,39 @@ testCurve label curve = Tolerance.using (Length.meters 1e-12) do
 
 testLineLength :: IO ()
 testLineLength = Tolerance.using (Length.meters 1e-6) do
-  testCurve "Line" (Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30 40))
+  testCurve "Line" (Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0))
 
 testQuadraticSplineLength :: IO ()
 testQuadraticSplineLength = do
   let p1 = Point2D.origin
-  let p2 = Point2D.centimeters 20 30
-  let p3 = Point2D.centimeters 40 0
+  let p2 = Point2D.centimeters 20.0 30.0
+  let p3 = Point2D.centimeters 40.0 0.0
   let spline = Curve2D.quadraticBezier p1 p2 p3
   testCurve "Quadratic spline" spline
   IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
 analyticalLength :: Point2D Meters space -> Point2D Meters space -> Point2D Meters space -> Length
 analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
-  let ax = x0 .-. 2 *. x1 .+. x2
-  let ay = y0 .-. 2 *. y1 .+. y2
-  let bx = 2 *. x1 .-. 2 *. x0
-  let by = 2 *. y1 .-. 2 *. y0
-  let a = 4 *. (ax .*. ax .+. ay .*. ay)
-  let b = 4 *. (ax .*. bx .+. ay .*. by)
-  let c = bx .*. bx .+. by .*. by
-  let s_abc = 2 *. Area.sqrt (a .+. b .+. c)
+  let ax = x0 - 2.0 * x1 + x2
+  let ay = y0 - 2.0 * y1 + y2
+  let bx = 2.0 * x1 - 2.0 * x0
+  let by = 2.0 * y1 - 2.0 * y0
+  let a = 4.0 * (ax * ax + ay * ay)
+  let b = 4.0 * (ax * bx + ay * by)
+  let c = bx * bx + by * by
+  let s_abc = 2.0 * Area.sqrt (a + b + c)
   let a_2 = Area.sqrt a
-  let a_32 = 2 *. a .*. a_2
-  let c_2 = 2 *. Area.sqrt c
-  let ba = b ./. a_2
-  (a_32 .*. s_abc .+. a_2 .*. b .*. (s_abc .-. c_2) .+. (4 *. c .*. a .-. b .*. b) .*. Number.log ((2 *. a_2 .+. ba .+. s_abc) ./. (ba .+. c_2))) ./. (4 *. a_32)
+  let a_32 = 2.0 * a * a_2
+  let c_2 = 2.0 * Area.sqrt c
+  let ba = b / a_2
+  (a_32 * s_abc + a_2 * b * (s_abc - c_2) + (4.0 * c * a - b * b) * Number.log ((2.0 * a_2 + ba + s_abc) / (ba + c_2))) / (4.0 * a_32)
 
 testCubicSplineParameterization :: IO ()
 testCubicSplineParameterization = Tolerance.using Length.nanometer do
-  let p1 = Point2D.centimeters 5 5
-  let p2 = Point2D.centimeters 14 15
-  let p3 = Point2D.centimeters 16 15
-  let p4 = Point2D.centimeters 25 5
+  let p1 = Point2D.centimeters 5.0 5.0
+  let p2 = Point2D.centimeters 14.0 15.0
+  let p3 = Point2D.centimeters 16.0 15.0
+  let p4 = Point2D.centimeters 25.0 5.0
   let spline = Curve2D.cubicBezier p1 p2 p3 p4
   let (parameterized, length) = Curve2D.parameterizeByArcLength spline
   IO.printLine ("Cubic spline: " <> formatLength length)
@@ -74,8 +73,8 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer do
               Svg.circleWith
                 [Svg.whiteFill]
                 (#centerPoint point)
-                (#diameter (Length.millimeters 3))
-        let drawingBounds = Bounds2D.hull2 Point2D.origin (Point2D.centimeters 30 15)
+                (#diameter (Length.millimeters 3.0))
+        let drawingBounds = Bounds2D.hull2 Point2D.origin (Point2D.centimeters 30.0 15.0)
         let resolution = Resolution.maxError Length.micrometer
         Svg.write fileName drawingBounds $
           Svg.group

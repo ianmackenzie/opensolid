@@ -32,9 +32,8 @@ where
 
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified
-import OpenSolid.List (List)
 import OpenSolid.Pair qualified as Pair
-import Prelude (Bool, Int, Maybe (Just, Nothing), Ord)
+import OpenSolid.Prelude
 import Prelude qualified
 
 empty :: Map k v

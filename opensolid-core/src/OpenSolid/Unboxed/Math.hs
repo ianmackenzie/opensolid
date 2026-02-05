@@ -15,6 +15,7 @@ module OpenSolid.Unboxed.Math
   , (<#)
   , (>=#)
   , (<=#)
+  , (~=#)
   , squared#
   , sqrt#
   , max#
@@ -45,6 +46,7 @@ where
 
 import GHC.Exts (Double (D#), Double#, Int (I#), Int#)
 import GHC.Exts qualified
+import OpenSolid.Prelude
 
 {-# INLINE (+#) #-}
 (+#) :: Double# -> Double# -> Double#
@@ -99,6 +101,12 @@ infix 4 >=#
 (<=#) = (GHC.Exts.<=##)
 
 infix 4 <=#
+
+{-# INLINE (~=#) #-}
+(~=#) :: Tolerance units => Double# -> Double# -> Int#
+(~=#) x# y# = let !(Quantity (D# tolerance#)) = ?tolerance in abs# (x# -# y#) <=# tolerance#
+
+infix 4 ~=#
 
 {-# INLINE negate# #-}
 negate# :: Double# -> Double#

@@ -88,33 +88,14 @@ where
 import Data.Foldable qualified
 import Data.Foldable1 qualified as Foldable1
 import Data.Functor qualified
-import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
-import OpenSolid.Arithmetic
-import OpenSolid.List (List)
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Prelude
 import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
-import Prelude
-  ( Bool
-  , Eq
-  , Int
-  , Maybe (Just)
-  , Ord
-  , Ordering
-  , compare
-  , otherwise
-  , (-)
-  , (.)
-  , (<)
-  , (==)
-  , (>)
-  )
 import Prelude qualified
-
-{-# COMPLETE [], NonEmpty #-}
 
 {-# COMPLETE One, TwoOrMore #-}
 
@@ -131,9 +112,6 @@ import Prelude qualified
 {-# COMPLETE One, Two, Three, Four, Five, Six, Seven, EightOrMore #-}
 
 {-# COMPLETE One, Two, Three, Four, Five, Six, Seven, Eight, NineOrMore #-}
-
-pattern NonEmpty :: NonEmpty a -> List a
-pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
 
 pattern One :: a -> NonEmpty a
 pattern One item <- item :| []
@@ -319,7 +297,7 @@ drop :: Int -> NonEmpty a -> List a
 drop = Data.List.NonEmpty.drop
 
 sum :: Addition a a a => NonEmpty a -> a
-sum = reduce (.+.)
+sum = reduce (+)
 
 sumOf :: Addition b b b => (a -> b) -> NonEmpty a -> b
 sumOf function nonEmpty = sum (map function nonEmpty)

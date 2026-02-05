@@ -91,9 +91,9 @@ along (Axis3D originPoint direction) distance = do
   let Point3D oR oF oU = originPoint
   let Direction3D dR dF dU = direction
   Point3D
-    (oR .+. dR .*. distance)
-    (oF .+. dF .*. distance)
-    (oU .+. dU .*. distance)
+    (oR + dR * distance)
+    (oF + dF * distance)
+    (oU + dU * distance)
 
 -- | Construct a point on the given plane, at the given position within the plane.
 on :: Plane3D global local -> Point2D Meters local -> Point3D global
@@ -102,9 +102,9 @@ on (Plane3D originPoint (PlaneOrientation3D i j)) (Point2D pX pY) = do
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
   Point3D
-    (oR .+. pX .*. iR .+. pY .*. jR)
-    (oF .+. pX .*. iF .+. pY .*. jF)
-    (oU .+. pX .*. iU .+. pY .*. jU)
+    (oR + pX * iR + pY * jR)
+    (oF + pX * iF + pY * jF)
+    (oU + pX * iU + pY * jU)
 
 {-# INLINE coerce #-}
 coerce :: Point3D space1 -> Point3D space2
@@ -127,7 +127,7 @@ zUp pX pY pZ = Point3D pX pY pZ
 This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
 -}
 yUp :: Length -> Length -> Length -> Point3D space
-yUp pX pY pZ = Point3D (negative pX) pZ pY
+yUp pX pY pZ = Point3D -pX pZ pY
 
 interpolateFrom :: Point3D space -> Point3D space -> Number -> Point3D space
 interpolateFrom (Position3D p1) (Position3D p2) t = Position3D (Vector3D.interpolateFrom p1 p2 t)
@@ -153,22 +153,22 @@ distanceFrom#
 This is the position along the axis of the given point projected onto the axis.
 -}
 distanceAlong :: Axis3D space -> Point3D space -> Length
-distanceAlong (Axis3D p0 d) p = (p .-. p0) `dot` d
+distanceAlong (Axis3D p0 d) p = (p - p0) `dot` d
 
 -- | Convert a point defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Point3D local -> Point3D global
 placeIn (Frame3D p0 (Orientation3D i j k)) (Point3D px py pz) =
-  p0 .+. px .*. i .+. py .*. j .+. pz .*. k
+  p0 + px * i + py * j + pz * k
 
 -- | Convert a point defined in global coordinates to one defined in local coordinates.
 relativeTo :: Frame3D global local -> Point3D global -> Point3D local
 relativeTo (Frame3D p0 (Orientation3D i j k)) p =
-  let d = p .-. p0 in Point3D (d `dot` i) (d `dot` j) (d `dot` k)
+  let d = p - p0 in Point3D (d `dot` i) (d `dot` j) (d `dot` k)
 
 -- | Project a point onto a plane.
 projectOnto :: Plane3D global local -> Point3D global -> Point3D global
 projectOnto plane point =
-  point .-. Vector3D.projectionIn plane.normalDirection (point .-. plane.originPoint)
+  point - Vector3D.projectionIn plane.normalDirection (point - plane.originPoint)
 
 {-| Project a point *into* a plane.
 
@@ -177,12 +177,12 @@ then expresses the projected point in 2D planar XY coordinates.
 -}
 projectInto :: Plane3D space local -> Point3D space -> Point2D Meters local
 projectInto (Plane3D p0 (PlaneOrientation3D i j)) p =
-  let d = p .-. p0 in Point2D (d `dot` i) (d `dot` j)
+  let d = p - p0 in Point2D (d `dot` i) (d `dot` j)
 
 transformBy :: Transform3D tag space -> Point3D space -> Point3D space
 transformBy transform (Point3D px py pz) = do
   let (Transform3D p0 vx vy vz) = transform
-  p0 .+. px .*. vx .+. py .*. vy .+. pz .*. vz
+  p0 + px * vx + py * vy + pz * vz
 
 translateBy :: Vector3D Meters space -> Point3D space -> Point3D space
 translateBy = Transform3D.translateByImpl transformBy

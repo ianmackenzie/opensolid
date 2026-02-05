@@ -82,7 +82,7 @@ build count boundedItems index
       let indexedCoordinateMidpoint (_, itemBounds) =
             Interval.midpoint (Bounds.cyclicCoordinate index itemBounds)
       let sorted = NonEmpty.sortBy indexedCoordinateMidpoint boundedItems
-      let leftCount = count `div` 2
+      let leftCount = count // 2
       let rightCount = count - leftCount
       let (leftBoundedItems, rightBoundedItems) = splitAtIndex leftCount sorted
       let leftChild = build leftCount leftBoundedItems (index + 1)

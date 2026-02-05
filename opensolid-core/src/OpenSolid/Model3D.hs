@@ -92,7 +92,7 @@ inChildContext childAttributes callback = do
           , parentNames = parentContext.parentNames <> List.maybe parentContext.ownName
           , ownPbrMaterial = Nothing
           , currentPbrMaterial = parentContext.currentPbrMaterial
-          , ownOpacity = 1
+          , ownOpacity = 1.0
           , currentMultipliedOpacity = parentContext.currentMultipliedOpacity
           }
   let appliedContext = List.foldl applyAttribute initialContext childAttributes
@@ -103,7 +103,7 @@ inChildContext childAttributes callback = do
   let updatedContext =
         appliedContext
           { currentMultipliedOpacity =
-              appliedContext.currentMultipliedOpacity .*. appliedContext.ownOpacity
+              appliedContext.currentMultipliedOpacity * appliedContext.ownOpacity
           }
   let ?context = updatedContext in callback
 
@@ -114,8 +114,8 @@ rootContext =
     , parentNames = []
     , ownPbrMaterial = Nothing
     , currentPbrMaterial = PbrMaterial.aluminum (#roughness 0.2)
-    , ownOpacity = 1
-    , currentMultipliedOpacity = 1
+    , ownOpacity = 1.0
+    , currentMultipliedOpacity = 1.0
     }
 
 data BodyWithContext space where

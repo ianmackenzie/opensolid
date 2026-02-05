@@ -23,6 +23,6 @@ angleFrom = do
           Tolerance.using (Angle.radians 1e-12) do
             Test.expect (computedAngle ~= expectedAngle)
   Test.group "angleFrom" $
-    [ testCase 10 30 20
-    , testCase 10 350 -20
+    [ testCase 10.0 30.0 20.0
+    , testCase 10.0 350.0 -20.0
     ]

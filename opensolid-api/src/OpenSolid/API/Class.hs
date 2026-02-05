@@ -730,7 +730,7 @@ comparisonImpl :: Ord a => a -> a -> Int
 comparisonImpl lhs rhs = case compare lhs rhs of LT -> -1; EQ -> 0; GT -> 1
 
 negateSelf :: forall value. (FFI value, Negation value) => Member value
-negateSelf = Negate (NegationFunction (negative @value))
+negateSelf = Negate (NegationFunction (negate @value))
 
 absSelf :: FFI value => (value -> value) -> Member value
 absSelf = Abs . AbsFunction
@@ -741,7 +741,7 @@ numberPlus ::
   Member value
 numberPlus =
   PreOverload BinaryOperator.Add $
-    PreOperatorOverload ((.+.) :: Number -> value -> result)
+    PreOperatorOverload ((+) :: Number -> value -> result)
 
 numberMinus ::
   forall value result.
@@ -749,7 +749,7 @@ numberMinus ::
   Member value
 numberMinus =
   PreOverload BinaryOperator.Sub $
-    PreOperatorOverload ((.-.) :: Number -> value -> result)
+    PreOperatorOverload ((-) :: Number -> value -> result)
 
 numberTimes ::
   forall value result.
@@ -757,7 +757,7 @@ numberTimes ::
   Member value
 numberTimes =
   PreOverload BinaryOperator.Mul $
-    PreOperatorOverload ((.*.) :: Number -> value -> result)
+    PreOperatorOverload ((*) :: Number -> value -> result)
 
 numberDivBy ::
   forall value result.
@@ -765,7 +765,7 @@ numberDivBy ::
   Member value
 numberDivBy =
   PreOverload BinaryOperator.Div $
-    PreOperatorOverload ((./.) :: Number -> value -> result)
+    PreOperatorOverload ((/) :: Number -> value -> result)
 
 numberDivByU ::
   (FFI value, FFI result) =>
@@ -798,7 +798,7 @@ plus ::
   Member value
 plus _ =
   PostOverload BinaryOperator.Add $
-    PostOperatorOverload ((.+.) :: value -> rhs -> result)
+    PostOperatorOverload ((+) :: value -> rhs -> result)
 
 plusNumber ::
   forall value result.
@@ -819,7 +819,7 @@ minus ::
   Member value
 minus _ =
   PostOverload BinaryOperator.Sub $
-    PostOperatorOverload ((.-.) :: value -> rhs -> result)
+    PostOperatorOverload ((-) :: value -> rhs -> result)
 
 minusNumber ::
   forall value result.
@@ -840,7 +840,7 @@ times ::
   Member value
 times _ =
   PostOverload BinaryOperator.Mul $
-    PostOperatorOverload ((.*.) :: value -> rhs -> result)
+    PostOperatorOverload ((*) :: value -> rhs -> result)
 
 timesNumber ::
   forall value result.
@@ -861,7 +861,7 @@ divBy ::
   Member value
 divBy _ =
   PostOverload BinaryOperator.Div $
-    PostOperatorOverload ((./.) :: value -> rhs -> result)
+    PostOperatorOverload ((/) :: value -> rhs -> result)
 
 divByU ::
   (FFI value, FFI rhs, FFI result) =>
@@ -902,12 +902,12 @@ divBySelf = divBy @value Self
 floorDivBySelf :: forall units. FFI (Quantity units) => Member (Quantity units)
 floorDivBySelf =
   PostOverload BinaryOperator.FloorDiv $
-    PostOperatorOverload ((.//.) :: Quantity units -> Quantity units -> Int)
+    PostOperatorOverload ((//) :: Quantity units -> Quantity units -> Int)
 
 modBySelf :: forall units. FFI (Quantity units) => Member (Quantity units)
 modBySelf =
   PostOverload BinaryOperator.Mod $
-    PostOperatorOverload ((.%.) :: Quantity units -> Quantity units -> Quantity units)
+    PostOperatorOverload ((%) :: Quantity units -> Quantity units -> Quantity units)
 
 dotProduct ::
   forall rhs value result.

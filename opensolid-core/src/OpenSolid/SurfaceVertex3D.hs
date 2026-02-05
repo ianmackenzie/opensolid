@@ -6,7 +6,7 @@ module OpenSolid.SurfaceVertex3D
   )
 where
 
-import GHC.Records (HasField (getField))
+import GHC.Records (HasField)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude

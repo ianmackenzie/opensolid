@@ -6,9 +6,7 @@ module OpenSolid.Interval
   )
 where
 
-import Data.Kind (Type)
-import {-# SOURCE #-} OpenSolid.Quantity (Quantity)
-import OpenSolid.Unitless (Unitless)
+import OpenSolid.Prelude
 
 type role Interval phantom
 

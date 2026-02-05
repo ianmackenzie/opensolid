@@ -408,20 +408,20 @@ instance FFI a => FFI (Result x a) where
 instance FFI a => FFI (IO a) where
   representation _ = IORep
 
-store :: forall parent value. FFI value => Ptr parent -> Int -> value -> IO ()
+store :: forall value parent. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
   let proxy = Proxy @value
   case representation proxy of
-    UnitRep -> Foreign.pokeByteOff @Int64 ptr offset 0
+    UnitRep -> store @Int ptr offset 0
     IntRep -> Foreign.pokeByteOff @Int64 ptr offset (fromIntegral value)
     NumberRep -> Foreign.pokeByteOff ptr offset (Number.toDouble value)
-    BoolRep -> Foreign.pokeByteOff @Int64 ptr offset (if value then 1 else 0)
-    SignRep -> Foreign.pokeByteOff @Int64 ptr offset (case value of Positive -> 1; Negative -> -1)
+    BoolRep -> store @Int ptr offset (if value then 1 else 0)
+    SignRep -> store @Int ptr offset (case value of Positive -> 1; Negative -> -1)
     TextRep -> do
       let numBytes = Data.Text.Foreign.lengthWord8 value
       contentsPtr <- Foreign.Marshal.Alloc.mallocBytes (numBytes + 1)
       Data.Text.Foreign.unsafeCopyToPtr value contentsPtr
-      Foreign.pokeByteOff contentsPtr numBytes (0 :: Word8)
+      Foreign.pokeByteOff contentsPtr numBytes (fromIntegral 0 :: Word8)
       Foreign.pokeByteOff ptr offset contentsPtr
     ListRep -> do
       let numItems = List.length value
@@ -429,7 +429,7 @@ store ptr offset value = do
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
       let storeItem index item = store itemsPtr (index * itemSize) item
       IO.forEachWithIndex value storeItem
-      Foreign.pokeByteOff @Int64 ptr offset (fromIntegral numItems)
+      store @Int ptr offset numItems
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
     NonEmptyRep -> store ptr offset (NonEmpty.toList value)
     ArrayRep -> store ptr offset (Array.toList value)
@@ -526,15 +526,15 @@ store ptr offset value = do
       store ptr offset8 value8
     MaybeRep -> do
       let tag = case value of Just{} -> 0; Nothing -> 1
-      Foreign.pokeByteOff @Int64 ptr offset tag
+      store @Int ptr offset tag
       IO.maybe (store ptr (offset + 8)) value
     ResultRep ->
       case value of
         Ok successfulValue -> do
-          Foreign.pokeByteOff @Int64 ptr offset 0
+          store @Int ptr offset 0
           store ptr (offset + 16) successfulValue
         Error errorValue -> do
-          Foreign.pokeByteOff @Int64 ptr offset 1
+          store @Int ptr offset 1
           store ptr (offset + 8) (Text.show errorValue)
     ClassRep _ -> do
       stablePtr <- Foreign.newStablePtr value
@@ -545,22 +545,22 @@ store ptr offset value = do
     NamedArgumentRep{} ->
       throw (InternalError "Should never have a named argument as a Haskell return type")
 
-load :: forall parent value. FFI value => Ptr parent -> Int -> IO value
+load :: forall value parent. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
   let proxy = Proxy @value
   case representation proxy of
     UnitRep -> IO.succeed ()
     IntRep -> IO.map fromIntegral (Foreign.peekByteOff @Int64 ptr offset)
     NumberRep -> IO.map Number.fromDouble (Foreign.peekByteOff ptr offset)
-    BoolRep -> IO.map (/= 0) (Foreign.peekByteOff @Int64 ptr offset)
-    SignRep -> IO.map Int.sign (load ptr offset)
+    BoolRep -> IO.map (/= 0) (load @Int ptr offset)
+    SignRep -> IO.map Int.sign (load @Int ptr offset)
     TextRep -> do
       dataPtr <- Foreign.peekByteOff ptr offset
       byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr
       IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
     ListRep -> do
       let itemSize = listItemSize proxy
-      numItems <- IO.map fromIntegral (Foreign.peekByteOff @Int64 ptr offset)
+      numItems <- load @Int ptr offset
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
       IO.collect loadItem [0 .. numItems - 1]
@@ -662,7 +662,7 @@ load ptr offset = do
       value8 <- load ptr offset8
       IO.succeed (value1, value2, value3, value4, value5, value6, value7, value8)
     MaybeRep -> do
-      tag <- Foreign.peekByteOff @Int64 ptr offset
+      tag <- load @Int ptr offset
       if tag == 0
         then IO.map Just (load ptr (offset + 8))
         else IO.succeed Nothing
