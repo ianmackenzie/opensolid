@@ -1,5 +1,3 @@
-{-# LANGUAGE UnboxedTuples #-}
-
 module OpenSolid.Search.Domain
   ( Domain (Domain)
   , InfiniteRecursion (InfiniteRecursion)
@@ -73,7 +71,7 @@ unitInterval = split Interval.unit
 
 split :: Interval Unitless -> Domain (Interval Unitless)
 split interval = do
-  let (# low, lowMid, mid, highMid, high #) = quadrisect# interval
+  let (low, lowMid, mid, highMid, high) = quadrisect interval
   Domain interval $
     [ split (Interval low mid)
     , shrink (Interval lowMid highMid)
@@ -82,16 +80,17 @@ split interval = do
 
 shrink :: Interval Unitless -> Domain (Interval Unitless)
 shrink interval = do
-  let (# _, lowMid, _, highMid, _ #) = quadrisect# interval
+  let (_, lowMid, _, highMid, _) = quadrisect interval
   Domain interval [shrink (Interval lowMid highMid)]
 
-quadrisect# :: Interval Unitless -> (# Number, Number, Number, Number, Number #)
-quadrisect# (Interval low high) = do
+{-# INLINE quadrisect #-}
+quadrisect :: Interval Unitless -> (Number, Number, Number, Number, Number)
+quadrisect (Interval low high) = do
   let mid = Number.midpoint low high
   let lowMid = Number.midpoint low mid
   let highMid = Number.midpoint mid high
   if low < lowMid && lowMid < mid && mid < highMid && highMid < high
-    then (# low, lowMid, mid, highMid, high #)
+    then (low, lowMid, mid, highMid, high)
     else throw InfiniteRecursion
 
 pairwise :: Bounds c => (a -> b -> c) -> Domain a -> Domain b -> Domain c
