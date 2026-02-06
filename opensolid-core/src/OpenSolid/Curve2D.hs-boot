@@ -8,7 +8,6 @@ module OpenSolid.Curve2D
   , bounds
   , compiled
   , derivative
-  , tangentDirection
   , reverse
   , xy
   , lineFrom
@@ -21,9 +20,7 @@ where
 
 import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
-import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D, Transform2D, Vector2D)
@@ -109,10 +106,6 @@ evaluateBounds :: Curve2D units space -> Interval Unitless -> Bounds2D units spa
 bounds :: Curve2D units space -> Bounds2D units space
 compiled :: Curve2D units space -> Compiled units space
 derivative :: Curve2D units space -> VectorCurve2D units space
-tangentDirection ::
-  Tolerance units =>
-  Curve2D units space ->
-  Result Curve.IsPoint (DirectionCurve2D space)
 reverse :: Curve2D units space -> Curve2D units space
 xy :: Curve1D units -> Curve1D units -> Curve2D units space
 lineFrom :: Point2D units space -> Point2D units space -> Curve2D units space
