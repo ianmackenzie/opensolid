@@ -31,6 +31,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
+import OpenSolid.Result qualified as Result
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 
@@ -108,10 +109,7 @@ findPoint ::
   Point dimension units space ->
   Curve dimension units space ->
   Result IsPoint (List Number)
-findPoint point curve =
-  case VectorCurve.zeros (point .-. curve) of
-    Error VectorCurve.IsZero -> Error IsPoint
-    Ok parameterValues -> Ok parameterValues
+findPoint point curve = Result.map (Search.findPoint point) (searchTree curve)
 
 searchTree ::
   (Exists dimension units space, Tolerance units) =>
