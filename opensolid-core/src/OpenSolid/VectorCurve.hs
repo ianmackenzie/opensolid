@@ -31,6 +31,7 @@ import OpenSolid.DirectionCurve (DirectionCurve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.List qualified as List
+import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Sign qualified as Sign
@@ -79,6 +80,7 @@ class
       (VectorCurve dimension units space)
       (Curve1D.WithNoZeros units)
       (VectorCurve dimension Unitless space)
+  , NewtonRaphson.Curve dimension units space
   ) =>
   Exists dimension units space
   where
