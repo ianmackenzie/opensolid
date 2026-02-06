@@ -11,7 +11,10 @@ import OpenSolid.Prelude
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 
-type family Point dimension units space where
+type family
+  Point dimension units space =
+    point | point -> dimension units space
+  where
   Point 2 units space = Point2D units space
   Point 3 Meters space = Point3D space
 
