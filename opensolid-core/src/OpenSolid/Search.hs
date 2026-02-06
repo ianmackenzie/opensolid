@@ -36,10 +36,14 @@ tree :: (bounds -> value) -> Domain bounds -> Tree bounds value
 tree function (Domain domainBounds subdomains) =
   Tree domainBounds (function domainBounds) (List.map (tree function) subdomains)
 
-pairwise :: Tree bounds1 value1 -> Tree bounds2 value2 -> Tree (bounds1, bounds2) (value1, value2)
-pairwise (Tree domainBounds1 value1 children1) (Tree domainBounds2 value2 children2) =
-  Tree (domainBounds1, domainBounds2) (value1, value2) $
-    [pairwise child1 child2 | child1 <- children1, child2 <- children2]
+pairwise ::
+  (value1 -> value2 -> value3) ->
+  Tree bounds1 value1 ->
+  Tree bounds2 value2 ->
+  Tree (bounds1, bounds2) value3
+pairwise function (Tree domainBounds1 value1 children1) (Tree domainBounds2 value2 children2) =
+  Tree (domainBounds1, domainBounds2) (function value1 value2) $
+    [pairwise function child1 child2 | child1 <- children1, child2 <- children2]
 
 data SolutionTree bounds solution
   = Leaf bounds (Maybe solution)

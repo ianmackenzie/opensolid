@@ -235,7 +235,7 @@ intersections curve1 curve2
                   }
           searchTree1 <- Curve2D.searchTree curve1
           searchTree2 <- Curve2D.searchTree curve2
-          let searchTree = Search.pairwise searchTree1 searchTree2
+          let searchTree = Search.pairwise (,) searchTree1 searchTree2
           let solutions = Search.exclusive (findIntersectionPoint problem) searchTree
           case deduplicate solutions [] & List.map Pair.second & List.sort of
             [] -> Ok Nothing
