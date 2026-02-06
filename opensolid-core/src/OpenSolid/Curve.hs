@@ -4,6 +4,8 @@ module OpenSolid.Curve
   , IsPoint (IsPoint)
   , derivative
   , bounds
+  , evaluate
+  , evaluateBounds
   , secondDerivative
   , tangentDirection
   , findPoint
@@ -18,6 +20,7 @@ import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
+import OpenSolid.Interval (Interval)
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
@@ -47,14 +50,20 @@ class
   where
   derivative :: Curve dimension units space -> VectorCurve dimension units space
   bounds :: Curve dimension units space -> Bounds dimension units space
+  evaluate :: Curve dimension units space -> Number -> Point dimension units space
+  evaluateBounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
 
 instance Exists 2 units space where
   derivative = Curve2D.derivative
   bounds = Curve2D.bounds
+  evaluate = Curve2D.evaluate
+  evaluateBounds = Curve2D.evaluateBounds
 
 instance Exists 3 Meters space where
   derivative = Curve3D.derivative
   bounds = Curve3D.bounds
+  evaluate = Curve3D.evaluate
+  evaluateBounds = Curve3D.evaluateBounds
 
 secondDerivative ::
   Exists dimension units space =>
