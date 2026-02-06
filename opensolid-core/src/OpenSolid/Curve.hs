@@ -8,6 +8,8 @@ module OpenSolid.Curve
   , bounds
   , evaluate
   , evaluateBounds
+  , startPoint
+  , endPoint
   , secondDerivative
   , tangentDirection
   , findPoint
@@ -89,6 +91,18 @@ tangentDirection curve =
   case VectorCurve.direction (derivative curve) of
     Ok directionCurve -> Ok directionCurve
     Error VectorCurve.IsZero -> Error IsPoint
+
+startPoint ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Point dimension units space
+startPoint curve = evaluate curve 0
+
+endPoint ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Point dimension units space
+endPoint curve = evaluate curve 1
 
 findPoint ::
   (Exists dimension units space, Tolerance units) =>

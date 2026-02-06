@@ -4,6 +4,8 @@ module OpenSolid.Curve
   , IsPoint
   , evaluate
   , evaluateBounds
+  , startPoint
+  , endPoint
   , derivative
   , tangentDirection
   )
@@ -37,6 +39,14 @@ evaluateBounds ::
   Curve dimension units space ->
   Interval Unitless ->
   Bounds dimension units space
+startPoint ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Point dimension units space
+endPoint ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Point dimension units space
 derivative ::
   Exists dimension units space =>
   Curve dimension units space ->
