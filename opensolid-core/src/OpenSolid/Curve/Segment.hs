@@ -8,6 +8,7 @@ module OpenSolid.Curve.Segment
   , secondDerivativeBounds
   , tangentBounds
   , evaluate
+  , monotonic
   )
 where
 
@@ -19,7 +20,9 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
+import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
+import OpenSolid.VectorBounds qualified as VectorBounds
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 data Segment dimension units space = Segment
@@ -52,6 +55,9 @@ secondDerivativeBounds = (.secondDerivativeBounds)
 
 tangentBounds :: Segment dimension units space -> DirectionBounds dimension space
 tangentBounds = (.tangentBounds)
+
+monotonic :: VectorBounds.Exists dimension units space => Segment dimension units space -> Bool
+monotonic segment = not (VectorBounds.includes Vector.zero segment.firstDerivativeBounds)
 
 evaluate ::
   ( Curve.Exists dimension units space
