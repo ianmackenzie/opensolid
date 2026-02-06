@@ -37,6 +37,7 @@ class
   ( Point.Exists dimension units space
   , Bounds.Exists dimension units space
   , VectorCurve.Exists dimension units space
+  , DirectionCurve.Exists dimension space
   , Subtraction
       (Curve dimension units space)
       (Point dimension units space)
@@ -72,7 +73,7 @@ secondDerivative ::
 secondDerivative = VectorCurve.derivative . derivative
 
 tangentDirection ::
-  (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
+  (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Result IsPoint (DirectionCurve dimension space)
 tangentDirection curve =
