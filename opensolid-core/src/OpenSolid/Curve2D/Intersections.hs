@@ -210,9 +210,12 @@ intersections ::
 intersections curve1 curve2
   | not (Curve2D.bounds curve1 `intersects` Curve2D.bounds curve2) = Ok Nothing
   | otherwise = do
+      searchTree1 <- Curve2D.searchTree curve1
+      searchTree2 <- Curve2D.searchTree curve2
+      let searchTree = Search.pairwise (,) searchTree1 searchTree2
       tangent1 <- Curve2D.tangentDirection curve1
       tangent2 <- Curve2D.tangentDirection curve2
-      endpointIntersections <- EndpointIntersection.find curve1 curve2 tangent1 tangent2
+      let endpointIntersections = EndpointIntersection.find searchTree1 searchTree2
       case overlappingSegments curve1 curve2 endpointIntersections of
         Just segments -> Ok (Just (OverlappingSegments segments))
         Nothing -> do
@@ -232,9 +235,6 @@ intersections curve1 curve2
                   , crossingSolutionTarget = differenceSurface
                   , tangentSolutionTarget
                   }
-          searchTree1 <- Curve2D.searchTree curve1
-          searchTree2 <- Curve2D.searchTree curve2
-          let searchTree = Search.pairwise (,) searchTree1 searchTree2
           let solutions = Search.exclusive (findIntersectionPoint problem) searchTree
           case deduplicate solutions [] & List.map Pair.second & List.sort of
             [] -> Ok Nothing

@@ -5,7 +5,7 @@ module OpenSolid.Curve2D.EndpointIntersection
   )
 where
 
-import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
@@ -30,23 +30,25 @@ data EndpointIntersection = EndpointIntersection
 
 find ::
   Tolerance units =>
-  Curve2D units space ->
-  Curve2D units space ->
-  DirectionCurve2D space ->
-  DirectionCurve2D space ->
-  Result Curve.IsPoint (List EndpointIntersection)
-find curve1 curve2 tangent1 tangent2 = do
-  start1t2s <- Curve2D.findPoint (Curve2D.startPoint curve1) curve2
-  end1t2s <- Curve2D.findPoint (Curve2D.endPoint curve1) curve2
-  start2t1s <- Curve2D.findPoint (Curve2D.startPoint curve2) curve1
-  end2t1s <- Curve2D.findPoint (Curve2D.endPoint curve2) curve1
+  Curve2D.SearchTree units space ->
+  Curve2D.SearchTree units space ->
+  List EndpointIntersection
+find searchTree1 searchTree2 = do
+  let curve1 = Curve.Search.curve searchTree1
+  let curve2 = Curve.Search.curve searchTree2
+  let tangent1 = Curve.Search.tangentCurve searchTree1
+  let tangent2 = Curve.Search.tangentCurve searchTree2
+  let start1t2s = Curve.Search.findPoint (Curve2D.startPoint curve1) searchTree2
+  let end1t2s = Curve.Search.findPoint (Curve2D.endPoint curve1) searchTree2
+  let start2t1s = Curve.Search.findPoint (Curve2D.startPoint curve2) searchTree1
+  let end2t1s = Curve.Search.findPoint (Curve2D.endPoint curve2) searchTree1
   let start1Solutions = List.map (0,) start1t2s
   let end1Solutions = List.map (1,) end1t2s
   let start2Solutions = List.map (,0) start2t1s
   let end2Solutions = List.map (,1) end2t1s
   let allSolutions = List.concat [start1Solutions, end1Solutions, start2Solutions, end2Solutions]
   let uniqueSolutions = List.sortAndDeduplicate allSolutions
-  Ok (List.map (toEndpointIntersection curve1 curve2 tangent1 tangent2) uniqueSolutions)
+  List.map (toEndpointIntersection curve1 curve2 tangent1 tangent2) uniqueSolutions
 
 toEndpointIntersection ::
   Tolerance units =>
