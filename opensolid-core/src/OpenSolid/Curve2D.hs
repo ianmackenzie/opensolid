@@ -1,6 +1,8 @@
 module OpenSolid.Curve2D
   ( Curve2D
   , Compiled
+  , Segment
+  , SearchTree
   , new
   , recursive
   , constant
@@ -71,6 +73,7 @@ module OpenSolid.Curve2D
   , arcLengthParameterization
   , parameterizeByArcLength
   , piecewise
+  , searchTree
   )
 where
 
@@ -168,6 +171,10 @@ type Compiled units space =
     (Point2D units space)
     (Interval Unitless)
     (Bounds2D units space)
+
+type Segment units space = Curve.Segment 2 units space
+
+type SearchTree units space = Curve.SearchTree 2 units space
 
 instance HasField "xCoordinate" (Curve2D units space) (Curve1D units) where
   getField = xCoordinate
@@ -1168,3 +1175,6 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2D.evaluateBounds curve $
       Interval (startLength ./. segmentLength) (endLength ./. segmentLength)
+
+searchTree :: Tolerance units => Curve2D units space -> Result IsPoint (SearchTree units space)
+searchTree = Curve.searchTree
