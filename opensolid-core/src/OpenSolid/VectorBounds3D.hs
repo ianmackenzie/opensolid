@@ -15,6 +15,7 @@ module OpenSolid.VectorBounds3D
   , yComponent
   , zComponent
   , components
+  , center
   , squaredMagnitude
   , squaredMagnitude_
   , magnitude
@@ -189,6 +190,10 @@ zComponent (VectorBounds3D _ _ vz) = vz
 
 components :: VectorBounds3D units space -> (Interval units, Interval units, Interval units)
 components (VectorBounds3D vx vy vz) = (vx, vy, vz)
+
+center :: VectorBounds3D units space -> Vector3D units space
+center (VectorBounds3D vx vy vz) =
+  Vector3D (Interval.midpoint vx) (Interval.midpoint vy) (Interval.midpoint vz)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds3D units1 space -> Interval units2
 squaredMagnitude = Units.specialize . squaredMagnitude_

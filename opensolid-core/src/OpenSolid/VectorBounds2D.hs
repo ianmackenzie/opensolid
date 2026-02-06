@@ -15,6 +15,7 @@ module OpenSolid.VectorBounds2D
   , xComponent
   , yComponent
   , components
+  , center
   , squaredMagnitude
   , squaredMagnitude_
   , magnitude
@@ -173,6 +174,9 @@ yComponent (VectorBounds2D _ vy) = vy
 
 components :: VectorBounds2D units space -> (Interval units, Interval units)
 components (VectorBounds2D vx vy) = (vx, vy)
+
+center :: VectorBounds2D units space -> Vector2D units space
+center (VectorBounds2D vx vy) = Vector2D (Interval.midpoint vx) (Interval.midpoint vy)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2D units1 space -> Interval units2
 squaredMagnitude = Units.specialize . squaredMagnitude_
