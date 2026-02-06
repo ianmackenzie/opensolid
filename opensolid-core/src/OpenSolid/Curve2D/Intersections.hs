@@ -5,6 +5,7 @@ module OpenSolid.Curve2D.Intersections
 where
 
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Curve.Segment qualified as Segment
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -14,7 +15,6 @@ import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2D.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2D.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Curve2D.OverlappingSegment qualified as OverlappingSegment
-import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval (Interval))
@@ -42,11 +42,7 @@ data Intersections
 data TangentSolutionTargetSpace
 
 data Problem units space = Problem
-  { curve1 :: Curve2D units space
-  , curve2 :: Curve2D units space
-  , tangent1 :: DirectionCurve2D space
-  , tangent2 :: DirectionCurve2D space
-  , endpointIntersections :: List EndpointIntersection
+  { endpointIntersections :: List EndpointIntersection
   , crossingSolutionTarget :: VectorSurfaceFunction2D units space
   , tangentSolutionTarget :: VectorSurfaceFunction2D (units ?*? units) TangentSolutionTargetSpace
   }
@@ -77,12 +73,16 @@ isInterior tValue tBounds = Interval.includes tValue (Domain.interior tBounds)
 crossingIntersection ::
   Tolerance units =>
   Problem units space ->
-  Interval Unitless ->
-  Interval Unitless ->
+  Curve2D.Segment units space ->
+  Curve2D.Segment units space ->
   Sign ->
   Fuzzy (Maybe IntersectionPoint)
-crossingIntersection problem tBounds1 tBounds2 sign = do
-  let Problem{curve1, curve2, crossingSolutionTarget} = problem
+crossingIntersection problem segment1 segment2 sign = do
+  let curve1 = Curve.Segment.curve segment1
+  let curve2 = Curve.Segment.curve segment2
+  let tBounds1 = Curve.Segment.parameterBounds segment1
+  let tBounds2 = Curve.Segment.parameterBounds segment2
+  let Problem{crossingSolutionTarget} = problem
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = VectorSurfaceFunction2D.newtonRaphson crossingSolutionTarget uvPoint0
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
@@ -93,11 +93,17 @@ crossingIntersection problem tBounds1 tBounds2 sign = do
 tangentIntersection ::
   Tolerance units =>
   Problem units space ->
-  Interval Unitless ->
-  Interval Unitless ->
+  Curve2D.Segment units space ->
+  Curve2D.Segment units space ->
   Fuzzy (Maybe IntersectionPoint)
-tangentIntersection problem tBounds1 tBounds2 = do
-  let Problem{curve1, curve2, tangent1, tangent2, tangentSolutionTarget} = problem
+tangentIntersection problem segment1 segment2 = do
+  let Problem{tangentSolutionTarget} = problem
+  let curve1 = Curve.Segment.curve segment1
+  let curve2 = Curve.Segment.curve segment2
+  let tangent1 = Curve.Segment.tangentCurve segment1
+  let tangent2 = Curve.Segment.tangentCurve segment2
+  let tBounds1 = Curve.Segment.parameterBounds segment1
+  let tBounds2 = Curve.Segment.parameterBounds segment2
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = VectorSurfaceFunction2D.newtonRaphson tangentSolutionTarget uvPoint0
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
@@ -125,8 +131,8 @@ findIntersectionPoint problem (tBounds1, tBounds2) (segment1, segment2) = do
       let crossingSign = Interval.resolvedSign (tangentBounds1 `cross` tangentBounds2)
       let uniqueTangentSolution = secondDerivativesIndependent segment1 segment2
       let interiorIntersection
-            | Resolved sign <- crossingSign = crossingIntersection problem tBounds1 tBounds2 sign
-            | uniqueTangentSolution = tangentIntersection problem tBounds1 tBounds2
+            | Resolved sign <- crossingSign = crossingIntersection problem segment1 segment2 sign
+            | uniqueTangentSolution = tangentIntersection problem segment1 segment2
             | otherwise = Unresolved
       let endpointIntersection size allowedAlignment = do
             let isLocal = EndpointIntersection.isLocal tBounds1 tBounds2
@@ -213,8 +219,6 @@ intersections curve1 curve2
       searchTree1 <- Curve2D.searchTree curve1
       searchTree2 <- Curve2D.searchTree curve2
       let searchTree = Search.pairwise (,) searchTree1 searchTree2
-      tangent1 <- Curve2D.tangentDirection curve1
-      tangent2 <- Curve2D.tangentDirection curve2
       let endpointIntersections = EndpointIntersection.find searchTree1 searchTree2
       case overlappingSegments curve1 curve2 endpointIntersections of
         Just segments -> Ok (Just (OverlappingSegments segments))
@@ -227,11 +231,7 @@ intersections curve1 curve2
           let tangentSolutionTarget = VectorSurfaceFunction2D.xy tangentSolutionX tangentSolutionY
           let problem =
                 Problem
-                  { curve1
-                  , curve2
-                  , tangent1
-                  , tangent2
-                  , endpointIntersections
+                  { endpointIntersections
                   , crossingSolutionTarget = differenceSurface
                   , tangentSolutionTarget
                   }
