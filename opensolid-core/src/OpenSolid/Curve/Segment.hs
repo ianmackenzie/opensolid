@@ -1,5 +1,8 @@
 module OpenSolid.Curve.Segment
   ( Segment
+  , curve
+  , tangentCurve
+  , parameterBounds
   , bounds
   , firstDerivativeBounds
   , secondDerivativeBounds
@@ -20,11 +23,23 @@ import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 data Segment dimension units space = Segment
-  { bounds :: ~(Bounds dimension units space)
+  { curve :: Curve dimension units space
+  , tangentCurve :: DirectionCurve dimension space
+  , parameterBounds :: Interval Unitless
+  , bounds :: ~(Bounds dimension units space)
   , firstDerivativeBounds :: ~(VectorBounds dimension units space)
   , secondDerivativeBounds :: ~(VectorBounds dimension units space)
   , tangentBounds :: ~(DirectionBounds dimension space)
   }
+
+curve :: Segment dimension units space -> Curve dimension units space
+curve = (.curve)
+
+tangentCurve :: Segment dimension units space -> DirectionCurve dimension space
+tangentCurve = (.tangentCurve)
+
+parameterBounds :: Segment dimension units space -> Interval Unitless
+parameterBounds = (.parameterBounds)
 
 bounds :: Segment dimension units space -> Bounds dimension units space
 bounds = (.bounds)
@@ -47,12 +62,15 @@ evaluate ::
   DirectionCurve dimension space ->
   Interval Unitless ->
   Segment dimension units space
-evaluate curve tangentCurve tBounds = do
-  let firstDerivativeCurve = Curve.derivative curve
+evaluate givenCurve givenTangentCurve givenParameterBounds = do
+  let firstDerivativeCurve = Curve.derivative givenCurve
   let secondDerivativeCurve = VectorCurve.derivative firstDerivativeCurve
   Segment
-    { bounds = Curve.evaluateBounds curve tBounds
-    , firstDerivativeBounds = VectorCurve.evaluateBounds firstDerivativeCurve tBounds
-    , secondDerivativeBounds = VectorCurve.evaluateBounds secondDerivativeCurve tBounds
-    , tangentBounds = DirectionCurve.evaluateBounds tangentCurve tBounds
+    { curve = givenCurve
+    , tangentCurve = givenTangentCurve
+    , parameterBounds = givenParameterBounds
+    , bounds = Curve.evaluateBounds givenCurve givenParameterBounds
+    , firstDerivativeBounds = VectorCurve.evaluateBounds firstDerivativeCurve givenParameterBounds
+    , secondDerivativeBounds = VectorCurve.evaluateBounds secondDerivativeCurve givenParameterBounds
+    , tangentBounds = DirectionCurve.evaluateBounds givenTangentCurve givenParameterBounds
     }
