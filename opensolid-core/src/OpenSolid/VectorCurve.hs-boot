@@ -1,9 +1,19 @@
-module OpenSolid.VectorCurve (VectorCurve, Exists) where
+module OpenSolid.VectorCurve
+  ( VectorCurve
+  , Exists
+  , evaluate
+  , evaluateBounds
+  , derivative
+  )
+where
 
 import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
+import OpenSolid.Vector (Vector)
+import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
@@ -22,3 +32,18 @@ instance Exists 1 units Void
 instance Exists 2 units space
 
 instance Exists 3 units space
+
+evaluate ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  Number ->
+  Vector dimension units space
+evaluateBounds ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  Interval Unitless ->
+  VectorBounds dimension units space
+derivative ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  VectorCurve dimension units space
