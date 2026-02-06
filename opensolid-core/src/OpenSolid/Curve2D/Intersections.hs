@@ -72,6 +72,9 @@ classify tBounds1 tBounds2 =
     (Domain.Entire, _) -> Unresolved
     (_, Domain.Entire) -> Unresolved
 
+isInterior :: Number -> Interval Unitless -> Bool
+isInterior tValue tBounds = Interval.includes tValue (Domain.interior tBounds)
+
 crossingIntersection ::
   Tolerance units =>
   Problem units space ->
@@ -83,9 +86,8 @@ crossingIntersection problem tBounds1 tBounds2 sign = do
   let Problem{curve1, curve2, crossingSolutionTarget} = problem
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = NewtonRaphson.surface2D crossingSolutionTarget uvPoint0
-  let isInterior = Domain.isInterior t1 tBounds1 && Domain.isInterior t2 tBounds2
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
-  if isInterior && pointsAreEqual
+  if isInterior t1 tBounds1 && isInterior t2 tBounds2 && pointsAreEqual
     then Resolved (Just (IntersectionPoint.crossing t1 t2 sign))
     else Unresolved
 
@@ -99,13 +101,12 @@ tangentIntersection problem tBounds1 tBounds2 = do
   let Problem{curve1, curve2, tangent1, tangent2, tangentSolutionTarget} = problem
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = NewtonRaphson.surface2D tangentSolutionTarget uvPoint0
-  let isInterior = Domain.isInterior t1 tBounds1 && Domain.isInterior t2 tBounds2
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
   let tangentDirection1 = DirectionCurve2D.evaluate tangent1 t1
   let tangentDirection2 = DirectionCurve2D.evaluate tangent2 t2
   let crossProduct = tangentDirection1 `cross` tangentDirection2
   let tangentsAreParallel = Tolerance.using 1e-9 (crossProduct ~= Quantity.zero)
-  if isInterior && pointsAreEqual && tangentsAreParallel
+  if isInterior t1 tBounds1 && isInterior t2 tBounds2 && pointsAreEqual && tangentsAreParallel
     then Resolved (Just (IntersectionPoint.tangent t1 t2))
     else Unresolved
 
@@ -117,8 +118,8 @@ findIntersectionPoint ::
   Fuzzy (Maybe IntersectionPoint)
 findIntersectionPoint problem _ (tBounds1, tBounds2) = do
   let Problem{curve1, curve2, tangent1, tangent2} = problem
-  let interiorBounds1 = Curve2D.evaluateBounds curve1 (Domain.interiorOf tBounds1)
-  let interiorBounds2 = Curve2D.evaluateBounds curve2 (Domain.interiorOf tBounds2)
+  let interiorBounds1 = Curve2D.evaluateBounds curve1 (Domain.interior tBounds1)
+  let interiorBounds2 = Curve2D.evaluateBounds curve2 (Domain.interior tBounds2)
   if not (interiorBounds1 `intersects` interiorBounds2)
     then Resolved Nothing
     else do
