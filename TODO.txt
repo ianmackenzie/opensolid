@@ -1,3 +1,5 @@
+Get rid of fields other than internally in modules...
+
 Add generic VectorCurve.arc
 
 Maybe have Curve.intersections that returns slightly simplified IntersectionPoint type, with no sign?
@@ -35,7 +37,7 @@ Add Bezier#D etc. types/modules?
 - more complex to try to provide Curve#D.asBezier though...unless perhaps user has to pass desired degree
   (e.g. 'Curve2D.asBezier 3' to attempt to convert to a cubic Bezier curve)
 
-Switch SurfaceFunction zero finding to use new Bisection module
+Switch SurfaceFunction zero finding to use new Search module
 - will need to implement solution curve trimming/merging
 
 Use CBOR for FFI calls from target languages
@@ -76,10 +78,6 @@ Reduce use of HasField instances
 -> Switch types over to being records
   -> curves and surface functions ('compiled' and derivatives)
 -> maybe even disable OverloadedRecordDot? still use records for nice construction/destructuring...
-
-Move 't', 'u' and 'v' into Parameter module?
--> then can rename e.g. 'Curve' to 'UnitlessCurve1D' (= Curve1d Unitless), 'Curve1D' can be 'Curve1d Meters' etc.
--> Parameter.t is a UnitlessCurve1D, Parameter.u is a UnitlessSurfaceFunction1D
 
 Add more UV-specific modules/types/functions:
 - UvAxis.[u,v]
