@@ -17,6 +17,8 @@ module Test
   )
 where
 
+import Control.Exception (SomeException)
+import Control.Exception qualified
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
@@ -112,16 +114,19 @@ runImpl args context test = case test of
   Abort message -> reportError context [message]
   Check count label generator -> do
     let fullName = appendTo context label
-    let initialSeed = Random.init 0
+    let runCheck =
+          Control.Exception.catch
+            (fuzzImpl fullName count (Random.init 0) generator)
+            (\(exception :: SomeException) -> reportError fullName [Text.show exception])
     if
       | List.isEmpty args ->
           -- No test filter specified, silently run all tests
-          fuzzImpl fullName count initialSeed generator
+          runCheck
       | List.anySatisfy (\arg -> Text.contains arg fullName) args -> Prelude.do
           -- Test filter specified, so print out which tests we're running
           -- and how long they took (with an extra emoji to flag slow tests)
           timer <- Timer.start
-          results <- fuzzImpl fullName count initialSeed generator
+          results <- runCheck
           elapsed <- Timer.elapsed timer
           let elapsedText = fixed 3 (Duration.inSeconds elapsed) <> "s"
           let elapsedSuffix = if elapsed > Duration.seconds 0.1 then " ⏲️" else ""
