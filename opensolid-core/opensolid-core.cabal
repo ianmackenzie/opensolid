@@ -177,6 +177,9 @@ library
     OpenSolid.Model3D
     OpenSolid.Named
     OpenSolid.NewtonRaphson
+    OpenSolid.NewtonRaphson1D
+    OpenSolid.NewtonRaphson2D
+    OpenSolid.NewtonRaphson3D
     OpenSolid.NonEmpty
     OpenSolid.Number
     OpenSolid.Orientation2D

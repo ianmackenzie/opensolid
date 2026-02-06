@@ -43,6 +43,7 @@ module OpenSolid.VectorCurve2D
   , rotateBy
   , convert
   , unconvert
+  , newtonRaphson
   )
 where
 
@@ -67,6 +68,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
+import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
@@ -786,3 +788,7 @@ unconvert ::
   VectorCurve2D units2 space ->
   VectorCurve2D units1 space
 unconvert factor curve = Units.simplify (curve ?/? factor)
+
+newtonRaphson :: VectorCurve2D units space -> Number -> Number
+newtonRaphson curve t1 =
+  NewtonRaphson2D.curve (evaluate curve) (evaluate (derivative curve)) t1

@@ -26,6 +26,7 @@ module OpenSolid.VectorSurfaceFunction2D
   , magnitude
   , IsZero (IsZero)
   , direction
+  , newtonRaphson
   )
 where
 
@@ -42,6 +43,7 @@ import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
+import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
@@ -678,3 +680,7 @@ direction ::
 direction function = case quotient function (magnitude function) of
   Error DivisionByZero -> Error IsZero
   Ok normalizedFunction -> Ok (DirectionSurfaceFunction2D.unsafe normalizedFunction)
+
+newtonRaphson :: VectorSurfaceFunction2D units space -> UvPoint -> UvPoint
+newtonRaphson function uvPoint =
+  NewtonRaphson2D.surface (evaluate function) (evaluate function.du) (evaluate function.dv) uvPoint

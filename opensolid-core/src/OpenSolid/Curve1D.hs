@@ -48,6 +48,7 @@ module OpenSolid.Curve1D
   , b02
   , b10
   , b11
+  , newtonRaphson
   )
 where
 
@@ -75,6 +76,7 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
+import OpenSolid.NewtonRaphson1D qualified as NewtonRaphson1D
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
@@ -740,3 +742,7 @@ b11 =
       concrete Expression.b11d2 $
         concrete Expression.b11d3 $
           constant 24
+
+newtonRaphson :: Curve1D units -> Number -> Number
+newtonRaphson curve tValue =
+  NewtonRaphson1D.curve (evaluate curve) (evaluate (derivative curve)) tValue

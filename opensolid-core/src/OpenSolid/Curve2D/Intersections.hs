@@ -20,7 +20,6 @@ import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
-import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2D (Point2D (Point2D))
@@ -85,7 +84,7 @@ crossingIntersection ::
 crossingIntersection problem tBounds1 tBounds2 sign = do
   let Problem{curve1, curve2, crossingSolutionTarget} = problem
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
-  let Point2D t1 t2 = NewtonRaphson.surface2D crossingSolutionTarget uvPoint0
+  let Point2D t1 t2 = VectorSurfaceFunction2D.newtonRaphson crossingSolutionTarget uvPoint0
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
   if isInterior t1 tBounds1 && isInterior t2 tBounds2 && pointsAreEqual
     then Resolved (Just (IntersectionPoint.crossing t1 t2 sign))
@@ -100,7 +99,7 @@ tangentIntersection ::
 tangentIntersection problem tBounds1 tBounds2 = do
   let Problem{curve1, curve2, tangent1, tangent2, tangentSolutionTarget} = problem
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
-  let Point2D t1 t2 = NewtonRaphson.surface2D tangentSolutionTarget uvPoint0
+  let Point2D t1 t2 = VectorSurfaceFunction2D.newtonRaphson tangentSolutionTarget uvPoint0
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
   let tangentDirection1 = DirectionCurve2D.evaluate tangent1 t1
   let tangentDirection2 = DirectionCurve2D.evaluate tangent2 t2

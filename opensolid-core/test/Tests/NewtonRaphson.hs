@@ -1,21 +1,16 @@
-{-# LANGUAGE UnboxedTuples #-}
-
 module Tests.NewtonRaphson (tests) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
-import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
@@ -59,45 +54,19 @@ simpleSurface2D = do
 
 curve1D :: Tolerance Unitless => Text -> Curve1D Unitless -> Number -> Number -> Test
 curve1D name curve t0 tExpected =
-  Test.group name $
-    [ Test.verify "Boxed" do
-        let tSolution = NewtonRaphson.curve1D curve t0
-        Test.expect (tSolution ~= tExpected)
-          & Test.output "Expected solution" tExpected
-          & Test.output "Actual solution" tSolution
-    , Test.verify "Unboxed" do
-        let evaluate# t# = let !(Quantity# x#) = Curve1D.evaluate curve (Quantity# t#) in x#
-        let evaluateDerivative# t# = do
-              let !(Quantity# y'##) = Curve1D.evaluate (Curve1D.derivative curve) (Quantity# t#)
-              y'##
-        let tSolution = NewtonRaphson.curve1D# evaluate# evaluateDerivative# t0
-        Test.expect (tSolution ~= tExpected)
-          & Test.output "Expected solution" tExpected
-          & Test.output "Actual solution" tSolution
-    ]
+  Test.verify name do
+    let tSolution = Curve1D.newtonRaphson curve t0
+    Test.expect (tSolution ~= tExpected)
+      & Test.output "Expected solution" tExpected
+      & Test.output "Actual solution" tSolution
 
 curve2D :: Tolerance Unitless => Text -> VectorCurve2D Unitless Space -> Number -> Number -> Test
 curve2D name curve t0 tExpected =
-  Test.group name $
-    [ Test.verify "Boxed" do
-        let tSolution = NewtonRaphson.curve2D curve t0
-        Test.expect (tSolution ~= tExpected)
-          & Test.output "Expected solution" tExpected
-          & Test.output "Actual solution" tSolution
-    , Test.verify "Unboxed" do
-        let evaluate# t# = do
-              let vector = VectorCurve2D.evaluate curve (Quantity# t#)
-              let !(Vector2D (Quantity# x#) (Quantity# y#)) = vector
-              (# x#, y# #)
-        let evaluateDerivative# t# = do
-              let vector = VectorCurve2D.evaluate (VectorCurve2D.derivative curve) (Quantity# t#)
-              let !(Vector2D (Quantity# x#) (Quantity# y#)) = vector
-              (# x#, y# #)
-        let tSolution = NewtonRaphson.curve2D# evaluate# evaluateDerivative# t0
-        Test.expect (tSolution ~= tExpected)
-          & Test.output "Expected solution" tExpected
-          & Test.output "Actual solution" tSolution
-    ]
+  Test.verify name do
+    let tSolution = VectorCurve2D.newtonRaphson curve t0
+    Test.expect (tSolution ~= tExpected)
+      & Test.output "Expected solution" tExpected
+      & Test.output "Actual solution" tSolution
 
 surface2D ::
   Tolerance Unitless =>
@@ -108,7 +77,7 @@ surface2D ::
   Test
 surface2D name surface uv0 uvExpected =
   Test.verify name do
-    let uvSolution = NewtonRaphson.surface2D surface uv0
+    let uvSolution = VectorSurfaceFunction2D.newtonRaphson surface uv0
     Test.expect (uvSolution ~= uvExpected)
       & Test.output "Expected solution" uvExpected
       & Test.output "Actual solution" uvSolution
