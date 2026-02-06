@@ -3,12 +3,17 @@ module OpenSolid.DirectionCurve
   , Exists
   , unsafe
   , unwrap
+  , evaluate
+  , evaluateBounds
   )
 where
 
 import GHC.TypeLits (Natural)
+import OpenSolid.Direction (Direction)
+import OpenSolid.DirectionBounds (DirectionBounds)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
 
@@ -33,3 +38,13 @@ unwrap ::
   Exists dimension space =>
   DirectionCurve dimension space ->
   VectorCurve dimension Unitless space
+evaluate ::
+  Exists dimension space =>
+  DirectionCurve dimension space ->
+  Number ->
+  Direction dimension space
+evaluateBounds ::
+  Exists dimension space =>
+  DirectionCurve dimension space ->
+  Interval Unitless ->
+  DirectionBounds dimension space
