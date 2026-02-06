@@ -19,8 +19,8 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Curve.Search qualified as Search
 import OpenSolid.Curve.Segment (Segment)
-import OpenSolid.Curve.Segment qualified as Segment
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -31,7 +31,6 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
-import OpenSolid.Search qualified as Search
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 
@@ -42,7 +41,7 @@ type family Curve dimension units space = curve | curve -> dimension units space
 data IsPoint = IsPoint deriving (Eq, Show)
 
 type SearchTree dimension units space =
-  Search.Tree (Interval Unitless) (Segment dimension units space)
+  Search.Tree dimension units space
 
 class
   ( Point.Exists dimension units space
@@ -118,6 +117,4 @@ searchTree ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Result IsPoint (SearchTree dimension units space)
-searchTree curve = do
-  tangentCurve <- tangentDirection curve
-  Ok (Search.tree (Segment.evaluate curve tangentCurve) Search.curveDomain)
+searchTree = Search.tree
