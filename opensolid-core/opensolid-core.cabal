@@ -139,6 +139,7 @@ library
     OpenSolid.Direction
     OpenSolid.Direction2D
     OpenSolid.Direction3D
+    OpenSolid.DirectionBounds
     OpenSolid.DirectionBounds2D
     OpenSolid.DirectionBounds3D
     OpenSolid.DirectionCurve
