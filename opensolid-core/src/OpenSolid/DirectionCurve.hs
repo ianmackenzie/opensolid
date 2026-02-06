@@ -6,6 +6,7 @@ module OpenSolid.DirectionCurve
   )
 where
 
+import OpenSolid.Direction qualified as Direction
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
@@ -22,7 +23,9 @@ type family
   DirectionCurve 3 space = DirectionCurve3D space
 
 class
-  VectorCurve.Exists dimension Unitless space =>
+  ( Direction.Exists dimension space
+  , VectorCurve.Exists dimension Unitless space
+  ) =>
   Exists dimension space
   where
   unsafeImpl :: VectorCurve dimension Unitless space -> DirectionCurve dimension space
