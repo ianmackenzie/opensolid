@@ -30,8 +30,6 @@ where
 
 import Data.ByteString.Unsafe qualified
 import Data.Char qualified
-import Data.Coerce (Coercible)
-import Data.Coerce qualified
 import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
@@ -132,7 +130,7 @@ data Representation a where
   -- Some IO that returns a representable value
   IORep :: FFI a => Representation (IO a)
   -- A function argument that should be named-only if supported
-  NamedArgumentRep :: (FFI a, Coercible n a) => Name -> Proxy a -> Representation n
+  NamedArgumentRep :: (KnownSymbol name, FFI a) => Representation (name ::: a)
 
 classRepresentation :: FFI a => Text -> Proxy a -> Representation a
 classRepresentation givenName _ =
@@ -187,7 +185,7 @@ typeOf proxy = case representation proxy of
   ResultRep -> resultType proxy
   ClassRep class_ -> Class class_
   IORep -> ioResultType proxy
-  NamedArgumentRep _ innerProxy -> typeOf innerProxy
+  NamedArgumentRep -> namedArgumentType proxy
 
 listType :: forall a. FFI a => Proxy (List a) -> Type
 listType _ = List (typeOf @a Proxy)
@@ -278,6 +276,9 @@ resultType _ = Result (typeOf @a Proxy)
 ioResultType :: forall a. FFI a => Proxy (IO a) -> Type
 ioResultType _ = Result (typeOf @a Proxy)
 
+namedArgumentType :: forall name a. FFI a => Proxy (name ::: a) -> Type
+namedArgumentType _ = typeOf @a Proxy
+
 typeName :: Type -> Text
 typeName ffiType = case ffiType of
   Unit -> "Unit"
@@ -353,9 +354,7 @@ instance FFI Angle where
   representation = classRepresentation "Angle"
 
 instance (KnownSymbol name, FFI a) => FFI (name ::: a) where
-  representation _ = do
-    let camelCaseName = Text.pack (GHC.TypeLits.symbolVal @name Proxy)
-    NamedArgumentRep (splitCamelCase camelCaseName) (Proxy @a)
+  representation _ = NamedArgumentRep
 
 splitCamelCase :: Text -> Name
 splitCamelCase text = do
@@ -671,10 +670,7 @@ load ptr offset = do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
     IORep -> throw (InternalError "Passing IO values as FFI arguments is not supported")
-    NamedArgumentRep _ innerProxy -> IO.map (wrapNamedArgument innerProxy) (load ptr offset)
-
-wrapNamedArgument :: Coercible n a => Proxy a -> a -> n
-wrapNamedArgument _ = Data.Coerce.coerce
+    NamedArgumentRep -> IO.map Named (load ptr offset)
 
 listItemSize :: forall item. FFI item => Proxy (List item) -> Int
 listItemSize _ = size (typeOf @item Proxy)
@@ -764,5 +760,8 @@ tuple8ItemSizes _ =
 
 argumentName :: FFI a => Proxy a -> Maybe Name
 argumentName proxy = case representation proxy of
-  NamedArgumentRep argName _ -> Just argName
+  NamedArgumentRep -> Just (namedArgumentName proxy)
   _ -> Nothing
+
+namedArgumentName :: forall name a. KnownSymbol name => Proxy (name ::: a) -> Name
+namedArgumentName _ = splitCamelCase (Text.pack (GHC.TypeLits.symbolVal @name Proxy))
