@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeAbstractions #-}
+
 module OpenSolid.FFI
   ( FFI (representation)
   , Space
@@ -122,7 +124,7 @@ data Representation a where
   MaybeRep :: FFI a => Representation (Maybe a)
   -- A struct with a 64-bit signed integer tag (0 = Ok, 1+ = Error)
   -- followed by the representation of the successful value or exception
-  ResultRep :: FFI a => Representation (Result x a)
+  ResultRep :: forall x a. FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
   ClassRep :: FFI a => ClassName -> Representation a
   -- Some IO that returns a representable value
@@ -169,113 +171,21 @@ typeOf proxy = case representation proxy of
   BoolRep -> Bool
   SignRep -> Sign
   TextRep -> Text
-  ListRep -> listType proxy
-  NonEmptyRep -> nonEmptyType proxy
-  ArrayRep -> arrayType proxy
-  Tuple2Rep -> tuple2Type proxy
-  Tuple3Rep -> tuple3Type proxy
-  Tuple4Rep -> tuple4Type proxy
-  Tuple5Rep -> tuple5Type proxy
-  Tuple6Rep -> tuple6Type proxy
-  Tuple7Rep -> tuple7Type proxy
-  Tuple8Rep -> tuple8Type proxy
-  MaybeRep -> maybeType proxy
-  ResultRep -> resultType proxy
+  ListRep @a -> List (typeOf @a Proxy)
+  NonEmptyRep @a -> NonEmpty (typeOf @a Proxy)
+  ArrayRep @a -> Array (typeOf @a Proxy)
+  Tuple2Rep @a @b -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) []
+  Tuple3Rep @a @b @c -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy]
+  Tuple4Rep @a @b @c @d -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy]
+  Tuple5Rep @a @b @c @d @e -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy, typeOf @e Proxy]
+  Tuple6Rep @a @b @c @d @e @f -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy, typeOf @e Proxy, typeOf @f Proxy]
+  Tuple7Rep @a @b @c @d @e @f @g -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy, typeOf @e Proxy, typeOf @f Proxy, typeOf @g Proxy]
+  Tuple8Rep @a @b @c @d @e @f @g @h -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy, typeOf @e Proxy, typeOf @f Proxy, typeOf @g Proxy, typeOf @h Proxy]
+  MaybeRep @a -> Maybe (typeOf @a Proxy)
+  ResultRep @_x @a -> Result (typeOf @a Proxy)
   ClassRep class_ -> Class class_
-  IORep -> ioResultType proxy
-  NamedArgumentRep -> namedArgumentType proxy
-
-listType :: forall a. FFI a => Proxy (List a) -> Type
-listType _ = List (typeOf @a Proxy)
-
-nonEmptyType :: forall a. FFI a => Proxy (NonEmpty a) -> Type
-nonEmptyType _ = NonEmpty (typeOf @a Proxy)
-
-arrayType :: forall a. FFI a => Proxy (Array a) -> Type
-arrayType _ = Array (typeOf @a Proxy)
-
-tuple2Type :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Type
-tuple2Type _ = Tuple (typeOf @a Proxy) (typeOf @b Proxy) []
-
-tuple3Type :: forall a b c. (FFI a, FFI b, FFI c) => Proxy (a, b, c) -> Type
-tuple3Type _ = Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy]
-
-tuple4Type :: forall a b c d. (FFI a, FFI b, FFI c, FFI d) => Proxy (a, b, c, d) -> Type
-tuple4Type _ = Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy]
-
-tuple5Type ::
-  forall a b c d e.
-  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
-  Proxy (a, b, c, d, e) ->
-  Type
-tuple5Type _ =
-  Tuple
-    (typeOf @a Proxy)
-    (typeOf @b Proxy)
-    [ typeOf @c Proxy
-    , typeOf @d Proxy
-    , typeOf @e Proxy
-    ]
-
-tuple6Type ::
-  forall a b c d e f.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
-  Proxy (a, b, c, d, e, f) ->
-  Type
-tuple6Type _ =
-  Tuple
-    (typeOf @a Proxy)
-    (typeOf @b Proxy)
-    [ typeOf @c Proxy
-    , typeOf @d Proxy
-    , typeOf @e Proxy
-    , typeOf @f Proxy
-    ]
-
-tuple7Type ::
-  forall a b c d e f g.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
-  Proxy (a, b, c, d, e, f, g) ->
-  Type
-tuple7Type _ =
-  Tuple
-    (typeOf @a Proxy)
-    (typeOf @b Proxy)
-    [ typeOf @c Proxy
-    , typeOf @d Proxy
-    , typeOf @e Proxy
-    , typeOf @f Proxy
-    , typeOf @g Proxy
-    ]
-
-tuple8Type ::
-  forall a b c d e f g h.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) =>
-  Proxy (a, b, c, d, e, f, g, h) ->
-  Type
-tuple8Type _ =
-  Tuple
-    (typeOf @a Proxy)
-    (typeOf @b Proxy)
-    [ typeOf @c Proxy
-    , typeOf @d Proxy
-    , typeOf @e Proxy
-    , typeOf @f Proxy
-    , typeOf @g Proxy
-    , typeOf @h Proxy
-    ]
-
-maybeType :: forall a. FFI a => Proxy (Maybe a) -> Type
-maybeType _ = Maybe (typeOf @a Proxy)
-
-resultType :: forall x a. FFI a => Proxy (Result x a) -> Type
-resultType _ = Result (typeOf @a Proxy)
-
-ioResultType :: forall a. FFI a => Proxy (IO a) -> Type
-ioResultType _ = Result (typeOf @a Proxy)
-
-namedArgumentType :: forall name a. FFI a => Proxy (name ::: a) -> Type
-namedArgumentType _ = typeOf @a Proxy
+  IORep @a -> Result (typeOf @a Proxy)
+  NamedArgumentRep @_name @a -> typeOf @a Proxy
 
 typeName :: Type -> Text
 typeName ffiType = case ffiType of
@@ -420,9 +330,9 @@ store ptr offset value = do
       Data.Text.Foreign.unsafeCopyToPtr value contentsPtr
       Foreign.pokeByteOff contentsPtr numBytes (fromIntegral 0 :: Word8)
       Foreign.pokeByteOff ptr offset contentsPtr
-    ListRep -> do
+    ListRep @item -> do
       let numItems = List.length value
-      let itemSize = listItemSize proxy
+      let itemSize = size (typeOf @item Proxy)
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
       let storeItem index item = store itemsPtr (index * itemSize) item
       IO.forEachWithIndex value storeItem
@@ -555,8 +465,8 @@ load ptr offset = do
       dataPtr <- Foreign.peekByteOff ptr offset
       byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr
       IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
-    ListRep -> do
-      let itemSize = listItemSize proxy
+    ListRep @item -> do
+      let itemSize = size (typeOf @item Proxy)
       numItems <- load @Int ptr offset
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
@@ -670,9 +580,6 @@ load ptr offset = do
     IORep -> throw (InternalError "Passing IO values as FFI arguments is not supported")
     NamedArgumentRep -> IO.map Named (load ptr offset)
 
-listItemSize :: forall item. FFI item => Proxy (List item) -> Int
-listItemSize _ = size (typeOf @item Proxy)
-
 tuple2ItemSizes :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> (Int, Int)
 tuple2ItemSizes _ =
   ( size (typeOf @a Proxy)
@@ -758,8 +665,7 @@ tuple8ItemSizes _ =
 
 argumentName :: FFI a => Proxy a -> Maybe Name
 argumentName proxy = case representation proxy of
-  NamedArgumentRep -> Just (namedArgumentName proxy)
+  NamedArgumentRep @name @_a -> do
+    let camelCaseName = Text.pack (GHC.TypeLits.symbolVal @name Proxy)
+    Just (splitCamelCase camelCaseName)
   _ -> Nothing
-
-namedArgumentName :: forall name a. KnownSymbol name => Proxy (name ::: a) -> Name
-namedArgumentName _ = splitCamelCase (Text.pack (GHC.TypeLits.symbolVal @name Proxy))
