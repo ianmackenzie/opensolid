@@ -154,11 +154,11 @@ erase ::
   Exists dimension units space =>
   Vector dimension units space ->
   Vector dimension Unitless space
-erase = Units.coerce
+erase = Units.erase
 
 {-# INLINE unerase #-}
 unerase ::
   Exists dimension units space =>
   Vector dimension Unitless space ->
   Vector dimension units space
-unerase = Units.coerce
+unerase = Units.unerase
