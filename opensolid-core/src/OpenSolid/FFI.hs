@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeAbstractions #-}
-
 module OpenSolid.FFI
   ( FFI (representation)
   , Space
