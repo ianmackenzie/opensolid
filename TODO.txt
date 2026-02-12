@@ -1,42 +1,3 @@
-Rename VectorBounds3D.tripleProduct to tripleProduct_
-- add tripleProduct that uses concrete units
-
-Remove most (all?) 'forall's by using TypeAbstractions instead
-- https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/type_abstractions.html#type-abstractions-in-functions
-
-Add OpenSolid module to be used qualified
-- negate, sum, difference, subtract
-- product, quotient, dotProduct, crossProduct, plus underscored versions
-- compose
-- intersects
-- approximatelyEquals
-- Named
-- core types from OpenSolid.Prelude
-  - Quantity
-  - Number
-  - Tolerance
-  - Result(Ok, Error)
-  - Unitless, Radians, Meters
-  - Sign(Sign, Positive, Negative)
-
-Rename ':::' to '#'?
-- shorter
-- more consistent with how named arguments are set
-
-Add OpenSolid.Operators module?
-- .+., .-.
-- .*., ./., plus single dot versions
-- ?*?, ?/?, plus single question mark versions
-- but would still need to use OpenSolid.negate qualified...maybe simpler to just have "DSL or nothing"
-
-Re-add custom numeric/geometric operators
-- Redefine '.' back to be from Composition typeclass
-  - consistent with arithmetic operators: extend to support differentiable functions
-  - fix Composition typeclass type parameter order at the same time?
-- Rename `intersects` back to '^'
-- Add ** as generic exponentiation operator
-  - implement for Number/Number, Int/Int, Number/Int etc.
-
 Get rid of fields other than internally in modules
 
 Add generic VectorCurve.arc
@@ -184,6 +145,7 @@ To optimize:
 - Point3D - Point3D
 
 Ensure target language bindings gracefully handle exceptions such as higher-order zeros
+- use Control.Exception.catch like in Test module
 
 Try adding -fexcess-precision as an optimization
 -> in general, try: https://wiki.haskell.org/Performance/GHC#Crank_up_the_gcc_flags
