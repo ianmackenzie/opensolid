@@ -59,7 +59,7 @@ data IsZero = IsZero deriving (Eq, Show)
 class
   ( Vector.Exists dimension units space
   , Exists dimension Unitless space
-  , HasUnits (Vector dimension units space) units
+  , HasUnits (VectorCurve dimension units space) units
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
   , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
   , Multiplication Number (VectorCurve dimension units space) (VectorCurve dimension units space)
