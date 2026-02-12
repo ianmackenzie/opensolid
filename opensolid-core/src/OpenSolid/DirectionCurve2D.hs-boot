@@ -4,6 +4,7 @@ module OpenSolid.DirectionCurve2D
   , unwrap
   , evaluate
   , evaluateBounds
+  , derivative
   )
 where
 
@@ -19,3 +20,4 @@ unsafe :: VectorCurve2D Unitless space -> DirectionCurve2D space
 unwrap :: DirectionCurve2D space -> VectorCurve2D Unitless space
 evaluate :: DirectionCurve2D space -> Number -> Direction2D space
 evaluateBounds :: DirectionCurve2D space -> Interval Unitless -> DirectionBounds2D space
+derivative :: DirectionCurve2D space -> VectorCurve2D Unitless space

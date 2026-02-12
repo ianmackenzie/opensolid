@@ -4,6 +4,7 @@ module OpenSolid.DirectionCurve3D
   , unwrap
   , evaluate
   , evaluateBounds
+  , derivative
   )
 where
 
@@ -19,3 +20,4 @@ unsafe :: VectorCurve3D Unitless space -> DirectionCurve3D space
 unwrap :: DirectionCurve3D space -> VectorCurve3D Unitless space
 evaluate :: DirectionCurve3D space -> Number -> Direction3D space
 evaluateBounds :: DirectionCurve3D space -> Interval Unitless -> DirectionBounds3D space
+derivative :: DirectionCurve3D space -> VectorCurve3D Unitless space
