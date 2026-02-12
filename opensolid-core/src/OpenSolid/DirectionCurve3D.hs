@@ -215,7 +215,7 @@ instance
   where
   lhs `cross` DirectionCurve3D rhs = lhs `cross` rhs
 
-instance Composition (Curve1D Unitless) (DirectionCurve3D space) (DirectionCurve3D space) where
+instance Composition (DirectionCurve3D space) (Curve1D Unitless) (DirectionCurve3D space) where
   DirectionCurve3D curve `compose` curve1D = DirectionCurve3D (curve `compose` curve1D)
 
 placeIn ::

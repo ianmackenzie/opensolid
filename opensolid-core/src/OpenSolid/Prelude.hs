@@ -307,8 +307,8 @@ instance (name1 ~ name2, a1 ~ a2) => IsLabel name1 (a1 -> name2 # a2) where
 
 ----- Composition -----
 
-class Composition a b c | a b -> c where
-  compose :: b -> a -> c
+class Composition f g h | f g -> h where
+  compose :: f -> g -> h
 
 infixr 9 `compose`
 

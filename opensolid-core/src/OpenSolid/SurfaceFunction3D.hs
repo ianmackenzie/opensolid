@@ -141,8 +141,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Region2D unitless uvSpace)
     (SurfaceFunction3D space)
+    (Region2D unitless uvSpace)
     (Surface3D space)
   where
   function `compose` domain = Surface3D.parametric function domain
@@ -150,8 +150,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2D unitless uvSpace)
     (SurfaceFunction3D space)
+    (SurfaceFunction2D unitless uvSpace)
     (SurfaceFunction3D space)
   where
   outer `compose` inner = do

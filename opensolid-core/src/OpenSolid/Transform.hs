@@ -40,46 +40,46 @@ instance IsUniform Uniform
 instance Composition Rigid Rigid Rigid where
   Rigid `compose` Rigid = Rigid
 
-instance Composition Rigid Orthonormal Orthonormal where
+instance Composition Orthonormal Rigid Orthonormal where
   Orthonormal `compose` Rigid = Orthonormal
 
-instance Composition Rigid Uniform Uniform where
+instance Composition Uniform Rigid Uniform where
   Uniform `compose` Rigid = Uniform
 
-instance Composition Rigid Affine Affine where
+instance Composition Affine Rigid Affine where
   Affine `compose` Rigid = Affine
 
-instance Composition Orthonormal Rigid Orthonormal where
+instance Composition Rigid Orthonormal Orthonormal where
   Rigid `compose` Orthonormal = Orthonormal
 
 instance Composition Orthonormal Orthonormal Orthonormal where
   Orthonormal `compose` Orthonormal = Orthonormal
 
-instance Composition Orthonormal Uniform Uniform where
+instance Composition Uniform Orthonormal Uniform where
   Uniform `compose` Orthonormal = Uniform
 
-instance Composition Orthonormal Affine Affine where
+instance Composition Affine Orthonormal Affine where
   Affine `compose` Orthonormal = Affine
 
-instance Composition Uniform Rigid Uniform where
+instance Composition Rigid Uniform Uniform where
   Rigid `compose` Uniform = Uniform
 
-instance Composition Uniform Orthonormal Uniform where
+instance Composition Orthonormal Uniform Uniform where
   Orthonormal `compose` Uniform = Uniform
 
 instance Composition Uniform Uniform Uniform where
   Uniform `compose` Uniform = Uniform
 
-instance Composition Uniform Affine Affine where
+instance Composition Affine Uniform Affine where
   Affine `compose` Uniform = Affine
 
-instance Composition Affine Rigid Affine where
+instance Composition Rigid Affine Affine where
   Rigid `compose` Affine = Affine
 
-instance Composition Affine Orthonormal Affine where
+instance Composition Orthonormal Affine Affine where
   Orthonormal `compose` Affine = Affine
 
-instance Composition Affine Uniform Affine where
+instance Composition Uniform Affine Affine where
   Uniform `compose` Affine = Affine
 
 instance Composition Affine Affine Affine where

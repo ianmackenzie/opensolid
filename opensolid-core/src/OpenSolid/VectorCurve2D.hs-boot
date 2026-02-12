@@ -42,7 +42,7 @@ type Compiled units space =
 
 instance HasUnits (VectorCurve2D units space) units
 
-instance Composition (Curve1D Unitless) (VectorCurve2D units space) (VectorCurve2D units space)
+instance Composition (VectorCurve2D units space) (Curve1D Unitless) (VectorCurve2D units space)
 
 instance Negation (VectorCurve2D units space)
 

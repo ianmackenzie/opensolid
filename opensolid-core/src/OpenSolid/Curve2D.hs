@@ -284,7 +284,7 @@ instance
   where
   point - curve = constant point - curve
 
-instance Composition (Curve1D Unitless) (Curve2D units space) (Curve2D units space) where
+instance Composition (Curve2D units space) (Curve1D Unitless) (Curve2D units space) where
   f `compose` g =
     new
       (f.compiled `compose` Curve1D.compiled g)
@@ -292,8 +292,8 @@ instance Composition (Curve1D Unitless) (Curve2D units space) (Curve2D units spa
 
 instance
   Composition
-    (SurfaceFunction1D Unitless)
     (Curve2D units space)
+    (SurfaceFunction1D Unitless)
     (SurfaceFunction2D units space)
   where
   curve `compose` function =
@@ -303,8 +303,8 @@ instance
 
 instance
   Composition
-    SurfaceParameter
     (Curve2D units space)
+    SurfaceParameter
     (SurfaceFunction2D units space)
   where
   curve `compose` parameter = curve `compose` SurfaceFunction1D.parameter parameter
@@ -312,8 +312,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Curve2D unitless uvSpace)
     (SurfaceFunction1D units)
+    (Curve2D unitless uvSpace)
     (Curve1D units)
   where
   f `compose` g = do
@@ -325,8 +325,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Curve2D unitless uvSpace)
     (VectorSurfaceFunction3D units space)
+    (Curve2D unitless uvSpace)
     (VectorCurve3D units space)
   where
   function `compose` uvCurve = do
@@ -338,8 +338,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Curve2D unitless uvSpace)
     (SurfaceFunction3D space)
+    (Curve2D unitless uvSpace)
     (Curve3D space)
   where
   function `compose` uvCurve = do

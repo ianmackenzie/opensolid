@@ -96,8 +96,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Curve2D unitless uvSpace)
     (SurfaceFunction1D units)
+    (Curve2D unitless uvSpace)
     (Curve1D units)
 
 constant :: Point2D units space -> Curve2D units space

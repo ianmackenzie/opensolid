@@ -252,8 +252,8 @@ transformBy transform function = do
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Curve2D unitless uvSpace)
     (SurfaceFunction2D units space)
+    (Curve2D unitless uvSpace)
     (Curve2D units space)
   where
   function `compose` curve = do
@@ -265,8 +265,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2D unitless uvSpace)
     (SurfaceFunction1D units)
+    (SurfaceFunction2D unitless uvSpace)
     (SurfaceFunction1D units)
   where
   f `compose` g = do
@@ -282,8 +282,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2D unitless uvSpace)
     (VectorSurfaceFunction2D units space)
+    (SurfaceFunction2D unitless uvSpace)
     (VectorSurfaceFunction2D units space)
   where
   f `compose` g = do
@@ -299,8 +299,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2D unitless uvSpace)
     (VectorSurfaceFunction3D units space)
+    (SurfaceFunction2D unitless uvSpace)
     (VectorSurfaceFunction3D units space)
   where
   f `compose` g = do
@@ -316,8 +316,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2D unitless uvSpace)
     (DirectionSurfaceFunction2D space)
+    (SurfaceFunction2D unitless uvSpace)
     (DirectionSurfaceFunction2D space)
   where
   f `compose` g =
@@ -326,8 +326,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (SurfaceFunction2D unitless uvSpace)
     (DirectionSurfaceFunction3D space)
+    (SurfaceFunction2D unitless uvSpace)
     (DirectionSurfaceFunction3D space)
   where
   f `compose` g =

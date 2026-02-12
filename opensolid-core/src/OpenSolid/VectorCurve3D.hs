@@ -413,8 +413,8 @@ instance
 
 instance
   Composition
-    (Curve1D Unitless)
     (VectorCurve3D units space)
+    (Curve1D Unitless)
     (VectorCurve3D units space)
   where
   f `compose` g =
@@ -424,8 +424,8 @@ instance
 
 instance
   Composition
-    (SurfaceFunction1D Unitless)
     (VectorCurve3D units space)
+    (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction3D units space)
   where
   curve `compose` function =

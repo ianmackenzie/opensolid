@@ -148,7 +148,7 @@ instance
   where
   lhs - rhs = constant lhs - rhs
 
-instance Composition (Curve1D Unitless) (Curve3D space) (Curve3D space) where
+instance Composition (Curve3D space) (Curve1D Unitless) (Curve3D space) where
   outer `compose` inner =
     new
       (outer.compiled `compose` Curve1D.compiled inner)
@@ -156,7 +156,7 @@ instance Composition (Curve1D Unitless) (Curve3D space) (Curve3D space) where
 
 instance
   unitless ~ Unitless =>
-  Composition (SurfaceFunction1D unitless) (Curve3D space) (SurfaceFunction3D space)
+  Composition (Curve3D space) (SurfaceFunction1D unitless) (SurfaceFunction3D space)
   where
   curve `compose` function =
     SurfaceFunction3D.new

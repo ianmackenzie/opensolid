@@ -1095,8 +1095,8 @@ instance
 
 instance
   Composition
-    (Expression Number Number)
     (Expression Number output)
+    (Expression Number Number)
     (Expression Number output)
   where
   curve `compose` Curve1D inner _ =
@@ -1109,8 +1109,8 @@ instance
 
 instance
   Composition
-    (Expression UvPoint Number)
     (Expression Number output)
+    (Expression UvPoint Number)
     (Expression UvPoint output)
   where
   curve `compose` Surface1D inner _ =
@@ -1123,8 +1123,8 @@ instance
 
 instance
   Composition
-    (Expression Number UvPoint)
     (Expression UvPoint output)
+    (Expression Number UvPoint)
     (Expression Number output)
   where
   surface `compose` Curve2D inner _ =
@@ -1137,8 +1137,8 @@ instance
 
 instance
   Composition
-    (Expression UvPoint UvPoint)
     (Expression UvPoint output)
+    (Expression UvPoint UvPoint)
     (Expression UvPoint output)
   where
   surface `compose` Surface2D inner _ =

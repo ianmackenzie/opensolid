@@ -431,14 +431,14 @@ instance
   ( innerOutputValue ~ outerInputValue
   , innerOutputBounds ~ outerInputBounds
   , Composition
-      (Expression innerInputValue innerOutputValue)
       (Expression outerInputValue outerOutputValue)
+      (Expression innerInputValue innerOutputValue)
       (Expression innerInputValue outerOutputValue)
   , Expression.Evaluation innerInputValue outerOutputValue innerInputBounds outerOutputBounds
   ) =>
   Composition
-    (CompiledFunction innerInputValue innerOutputValue innerInputBounds innerOutputBounds)
     (CompiledFunction outerInputValue outerOutputValue outerInputBounds outerOutputBounds)
+    (CompiledFunction innerInputValue innerOutputValue innerInputBounds innerOutputBounds)
     (CompiledFunction innerInputValue outerOutputValue innerInputBounds outerOutputBounds)
   where
   Concrete outer `compose` Concrete inner = Concrete (outer `compose` inner)

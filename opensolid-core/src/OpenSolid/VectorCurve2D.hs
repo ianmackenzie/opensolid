@@ -455,8 +455,8 @@ instance
 
 instance
   Composition
-    (Curve1D Unitless)
     (VectorCurve2D units space)
+    (Curve1D Unitless)
     (VectorCurve2D units space)
   where
   f `compose` g =
@@ -466,8 +466,8 @@ instance
 
 instance
   Composition
-    (SurfaceFunction1D Unitless)
     (VectorCurve2D units space)
+    (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction2D units space)
   where
   curve `compose` function =
@@ -477,8 +477,8 @@ instance
 
 instance
   Composition
-    SurfaceParameter
     (VectorCurve2D units space)
+    SurfaceParameter
     (VectorSurfaceFunction2D units space)
   where
   curve `compose` parameter = curve `compose` SurfaceFunction1D.parameter parameter

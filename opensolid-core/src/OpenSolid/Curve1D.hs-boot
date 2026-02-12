@@ -34,7 +34,7 @@ data Curve1D units
 
 data IsZero = IsZero
 
-instance Composition (Curve1D Unitless) (Curve1D units) (Curve1D units)
+instance Composition (Curve1D units) (Curve1D Unitless) (Curve1D units)
 
 type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
 

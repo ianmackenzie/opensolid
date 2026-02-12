@@ -276,12 +276,12 @@ deriving instance Show (Variable3D input)
 uvPoint :: Vector2D Unitless Space -> UvPoint
 uvPoint position = Point2D.coerce (Position2D position)
 
-instance Composition (Ast1D input) (Ast1D Number) (Ast1D input) where
+instance Composition (Ast1D Number) (Ast1D input) (Ast1D input) where
   Constant1D outer `compose` _ = Constant1D outer
   Variable1D outer `compose` Variable1D inner = outer `compose` inner
   outer `compose` Constant1D inner = Constant1D (evaluateCurve1D outer inner)
 
-instance Composition (Variable1D input) (Variable1D Number) (Ast1D input) where
+instance Composition (Variable1D Number) (Variable1D input) (Ast1D input) where
   input `compose` CurveParameter = Variable1D input
   CurveParameter `compose` input = Variable1D input
   XComponent arg `compose` input = xComponent (arg `compose` input)
@@ -380,12 +380,12 @@ instance Composition (Variable1D input) (Variable1D Number) (Ast1D input) where
     Constant1D paramVal -> Constant1D (evaluateCurve1D b11d3 paramVal)
     Variable1D paramVar -> Variable1D (B11d3 paramVar)
 
-instance Composition (Ast1D input) (Ast2D Number) (Ast2D input) where
+instance Composition (Ast2D Number) (Ast1D input) (Ast2D input) where
   Constant2D outer `compose` _ = Constant2D outer
   Variable2D outer `compose` Variable1D inner = outer `compose` inner
   outer `compose` Constant1D inner = Constant2D (evaluateCurve2D outer inner)
 
-instance Composition (Variable1D input) (Variable2D Number) (Ast2D input) where
+instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
   input `compose` CurveParameter = Variable2D input
   XY x y `compose` input = xy (x `compose` input) (y `compose` input)
   XC x y `compose` input = xy (x `compose` input) (Constant1D y)
@@ -418,12 +418,12 @@ instance Composition (Variable1D input) (Variable2D Number) (Ast2D input) where
       (middle `compose` input)
       (right `compose` input)
 
-instance Composition (Ast1D input) (Ast3D Number) (Ast3D input) where
+instance Composition (Ast3D Number) (Ast1D input) (Ast3D input) where
   Constant3D outer `compose` _ = Constant3D outer
   Variable3D outer `compose` Variable1D inner = outer `compose` inner
   outer `compose` Constant1D inner = Constant3D (evaluateCurve3D outer inner)
 
-instance Composition (Variable1D input) (Variable3D Number) (Ast3D input) where
+instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
   input `compose` CurveParameter = Variable3D input
   Negated3D arg `compose` input = negate (arg `compose` input)
   Sum3D lhs rhs `compose` input = lhs `compose` input + rhs `compose` input
@@ -455,12 +455,12 @@ instance Composition (Variable1D input) (Variable3D Number) (Ast3D input) where
       (middle `compose` input)
       (right `compose` input)
 
-instance Composition (Ast2D input) (Ast1D UvPoint) (Ast1D input) where
+instance Composition (Ast1D UvPoint) (Ast2D input) (Ast1D input) where
   Constant1D outer `compose` _ = Constant1D outer
   Variable1D outer `compose` Variable2D inner = outer `compose` inner
   outer `compose` Constant2D parameter = Constant1D (evaluateSurface1D outer (uvPoint parameter))
 
-instance Composition (Variable2D input) (Variable1D UvPoint) (Ast1D input) where
+instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
   input `compose` SurfaceParameters = Variable1D input
   SurfaceParameter U `compose` input = xComponent (Variable2D input)
   SurfaceParameter V `compose` input = yComponent (Variable2D input)
@@ -560,12 +560,12 @@ instance Composition (Variable2D input) (Variable1D UvPoint) (Ast1D input) where
     Constant1D paramVal -> Constant1D (evaluateCurve1D b11d3 paramVal)
     Variable1D paramVar -> Variable1D (B11d3 paramVar)
 
-instance Composition (Ast2D input) (Ast2D UvPoint) (Ast2D input) where
+instance Composition (Ast2D UvPoint) (Ast2D input) (Ast2D input) where
   Constant2D outer `compose` _ = Constant2D outer
   Variable2D outer `compose` Variable2D inner = outer `compose` inner
   outer `compose` Constant2D parameter = Constant2D (evaluateSurface2D outer (uvPoint parameter))
 
-instance Composition (Variable2D input) (Variable2D UvPoint) (Ast2D input) where
+instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
   input `compose` SurfaceParameters = Variable2D input
   SurfaceParameters `compose` input = Variable2D input
   XY x y `compose` input = xy (x `compose` input) (y `compose` input)
@@ -599,12 +599,12 @@ instance Composition (Variable2D input) (Variable2D UvPoint) (Ast2D input) where
       (middle `compose` input)
       (right `compose` input)
 
-instance Composition (Ast2D input) (Ast3D UvPoint) (Ast3D input) where
+instance Composition (Ast3D UvPoint) (Ast2D input) (Ast3D input) where
   Constant3D outer `compose` _ = Constant3D outer
   Variable3D outer `compose` Variable2D inner = outer `compose` inner
   outer `compose` Constant2D parameter = Constant3D (evaluateSurface3D outer (uvPoint parameter))
 
-instance Composition (Variable2D input) (Variable3D UvPoint) (Ast3D input) where
+instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   input `compose` SurfaceParameters = Variable3D input
   Negated3D arg `compose` input = negate (arg `compose` input)
   Sum3D lhs rhs `compose` input = lhs `compose` input + rhs `compose` input

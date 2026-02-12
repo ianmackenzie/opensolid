@@ -996,17 +996,17 @@ instance
   transform * point = point * transform
 
 instance
-  (Composition tag1 tag2 tag3, space1 ~ space2, units1 ~ units2) =>
+  (Composition outer inner composed, space1 ~ space2, units1 ~ units2) =>
   Composition
-    (Transform2D tag1 units1 space1)
-    (Transform2D tag2 units2 space2)
-    (Transform2D tag3 units1 space1)
+    (Transform2D outer units1 space1)
+    (Transform2D inner units2 space2)
+    (Transform2D composed units1 space1)
   where
-  transform2 `compose` transform1 =
+  outer `compose` inner =
     Transform2D
-      (Point2D Quantity.zero Quantity.zero * transform1 * transform2)
-      (Vector2D 1.0 0.0 * transform1 * transform2)
-      (Vector2D 0.0 1.0 * transform1 * transform2)
+      (Point2D Quantity.zero Quantity.zero * inner * outer)
+      (Vector2D 1.0 0.0 * inner * outer)
+      (Vector2D 0.0 1.0 * inner * outer)
 
 ----- Vector3D -----
 
@@ -2229,17 +2229,17 @@ instance
   transform * point = point * transform
 
 instance
-  ( Composition tag1 tag2 tag3
+  ( Composition outer inner composed
   , space1 ~ space2
   ) =>
   Composition
-    (Transform3D tag1 space1)
-    (Transform3D tag2 space2)
-    (Transform3D tag3 space1)
+    (Transform3D outer space1)
+    (Transform3D inner space2)
+    (Transform3D composed space1)
   where
-  transform2 `compose` transform1 =
+  outer `compose` inner =
     Transform3D
-      (Point3D Quantity.zero Quantity.zero Quantity.zero * transform1 * transform2)
-      (Vector3D 1.0 0.0 0.0 * transform1 * transform2)
-      (Vector3D 0.0 1.0 0.0 * transform1 * transform2)
-      (Vector3D 0.0 0.0 1.0 * transform1 * transform2)
+      (Point3D Quantity.zero Quantity.zero Quantity.zero * inner * outer)
+      (Vector3D 1.0 0.0 0.0 * inner * outer)
+      (Vector3D 0.0 1.0 0.0 * inner * outer)
+      (Vector3D 0.0 0.0 1.0 * inner * outer)

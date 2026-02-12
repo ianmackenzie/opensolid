@@ -207,13 +207,13 @@ instance
   where
   lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
-instance Composition (Curve1D Unitless) (DirectionCurve2D space) (DirectionCurve2D space) where
+instance Composition (DirectionCurve2D space) (Curve1D Unitless) (DirectionCurve2D space) where
   DirectionCurve2D curve `compose` curve1D = DirectionCurve2D (curve `compose` curve1D)
 
 instance
   Composition
-    (SurfaceFunction1D Unitless)
     (DirectionCurve2D space)
+    (SurfaceFunction1D Unitless)
     (DirectionSurfaceFunction2D space)
   where
   DirectionCurve2D curve `compose` surfaceFunction =
@@ -221,8 +221,8 @@ instance
 
 instance
   Composition
-    SurfaceParameter
     (DirectionCurve2D space)
+    SurfaceParameter
     (DirectionSurfaceFunction2D space)
   where
   DirectionCurve2D curve `compose` surfaceParameter =

@@ -300,7 +300,7 @@ instance
   where
   vector ?*? curve = VectorCurve3D.constant vector ?*? curve
 
-instance Composition (Curve1D Unitless) (Curve1D units) (Curve1D units) where
+instance Composition (Curve1D units) (Curve1D Unitless) (Curve1D units) where
   f `compose` g =
     new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) * g.derivative)
 

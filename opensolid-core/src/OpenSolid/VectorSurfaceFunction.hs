@@ -47,8 +47,8 @@ class
       (SurfaceFunction1D Unitless)
       (VectorSurfaceFunction dimension units space)
   , Composition
-      (SurfaceFunction2D Unitless UvSpace)
       (VectorSurfaceFunction dimension units space)
+      (SurfaceFunction2D Unitless UvSpace)
       (VectorSurfaceFunction dimension units space)
   ) =>
   Exists dimension units space

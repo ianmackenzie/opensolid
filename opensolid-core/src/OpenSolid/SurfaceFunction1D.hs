@@ -349,7 +349,7 @@ instance
   where
   function ?/? value = Units.simplify (function ?*? (1.0 ?/? value))
 
-instance Composition (SurfaceFunction1D Unitless) (Curve1D units) (SurfaceFunction1D units) where
+instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units) where
   curve `compose` function =
     new
       (Curve1D.compiled curve `compose` function.compiled)

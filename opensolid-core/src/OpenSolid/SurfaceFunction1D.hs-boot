@@ -45,7 +45,7 @@ newtype WithNoZeros units = WithNoZeros (SurfaceFunction1D units)
 
 newtype WithNoInteriorZeros units = WithNoInteriorZeros (SurfaceFunction1D units)
 
-instance Composition (SurfaceFunction1D Unitless) (Curve1D units) (SurfaceFunction1D units)
+instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units)
 
 instance ApproximateEquality (SurfaceFunction1D units) units
 

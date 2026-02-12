@@ -446,8 +446,8 @@ instance
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
-    (Curve2D unitless uvSpace)
     (VectorSurfaceFunction2D units space)
+    (Curve2D unitless uvSpace)
     (VectorCurve2D units space)
   where
   function `compose` curve = do
