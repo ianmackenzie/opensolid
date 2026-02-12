@@ -8,6 +8,8 @@ module OpenSolid.VectorCurve
   , evaluateBounds
   , derivative
   , squaredMagnitude_
+  , squaredMagnitude
+  , magnitude
   , normalize
   , direction
   , zeros
@@ -244,6 +246,18 @@ lHopital lhs rhs tValue = do
   let value_ = lhs' / rhs'
   let firstDerivative_ = (lhs'' * rhs' - lhs' * rhs'') / (2.0 * Quantity.squared rhs')
   (Vector.unerase value_, Vector.unerase firstDerivative_)
+
+squaredMagnitude ::
+  (Exists dimension units1 space, Units.Squared units1 units2) =>
+  VectorCurve dimension units1 space ->
+  Curve1D units2
+squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
+
+magnitude ::
+  (Exists dimension units space, Tolerance units) =>
+  VectorCurve dimension units space ->
+  Curve1D units
+magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
 
 erase ::
   Exists dimension units space =>
