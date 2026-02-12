@@ -12,6 +12,7 @@ module OpenSolid.Curve
   , endPoint
   , secondDerivative
   , tangentDirection
+  , curvatureVector_
   , findPoint
   , searchTree
   )
@@ -21,6 +22,8 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve.Search qualified as Search
 import OpenSolid.Curve.Segment (Segment)
+import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
+import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -91,6 +94,19 @@ tangentDirection curve =
   case VectorCurve.direction (derivative curve) of
     Ok directionCurve -> Ok directionCurve
     Error VectorCurve.IsZero -> Error IsPoint
+
+curvatureVector_ ::
+  ( Exists dimension units space
+  , VectorCurve.Exists dimension (Unitless ?/? units) space
+  , Tolerance units
+  ) =>
+  Curve dimension units space ->
+  Result IsPoint (VectorCurve dimension (Unitless ?/? units) space)
+curvatureVector_ curve = do
+  tangent <- tangentDirection curve
+  let dsdt = Curve1D.WithNoInteriorZeros (VectorCurve.magnitude (derivative curve))
+  let quotient_ = DirectionCurve.derivative tangent / Curve1D.WithNoInteriorZeros.erase dsdt
+  Ok (VectorCurve.unerase quotient_)
 
 startPoint ::
   Exists dimension units space =>
