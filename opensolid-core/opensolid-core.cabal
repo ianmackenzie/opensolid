@@ -94,6 +94,7 @@ common config
 library
   import: config
   exposed-modules:
+    OpenSolid
     OpenSolid.Angle
     OpenSolid.Arc2D
     OpenSolid.ArcLength
