@@ -1,7 +1,6 @@
 module OpenSolid.Frame2D
   ( Frame2D (Frame2D, originPoint, orientation)
   , coerce
-  , erase
   , xy
   , atPoint
   , originPoint
@@ -43,9 +42,6 @@ orientation (Frame2D _ o) = o
 
 coerce :: Frame2D units1 global1 local1 -> Frame2D units2 global2 local2
 coerce (Frame2D p o) = Frame2D (Point2D.coerce p) (Orientation2D.coerce o)
-
-erase :: Frame2D units global local -> Frame2D Unitless global local
-erase = coerce
 
 xDirection :: Frame2D units global local -> Direction2D global
 xDirection frame = Orientation2D.xDirection (orientation frame)
