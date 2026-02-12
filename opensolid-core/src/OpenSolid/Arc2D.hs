@@ -52,10 +52,10 @@ pointOn arc t = do
   centerPoint arc + Vector2D.polar (radius arc) angle
 
 polar ::
-  "centerPoint" ::: Point2D units space ->
-  "radius" ::: Quantity units ->
-  "startAngle" ::: Angle ->
-  "endAngle" ::: Angle ->
+  "centerPoint" # Point2D units space ->
+  "radius" # Quantity units ->
+  "startAngle" # Angle ->
+  "endAngle" # Angle ->
   Arc2D units space
 polar (Named givenCenterPoint) (Named givenRadius) (Named givenStartAngle) (Named givenEndAngle) =
   Arc2D

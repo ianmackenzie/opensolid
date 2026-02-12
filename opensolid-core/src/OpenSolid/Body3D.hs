@@ -213,8 +213,8 @@ Fails if the diameter is zero.
 -}
 sphere ::
   Tolerance Meters =>
-  "centerPoint" ::: Point3D space ->
-  "diameter" ::: Length ->
+  "centerPoint" # Point3D space ->
+  "diameter" # Length ->
   Result EmptyBody (Body3D space)
 sphere (Named centerPoint) (Named diameter) =
   if diameter ~= Quantity.zero
@@ -241,7 +241,7 @@ cylinder ::
   Tolerance Meters =>
   Point3D space ->
   Point3D space ->
-  "diameter" ::: Length ->
+  "diameter" # Length ->
   Result EmptyBody (Body3D space)
 cylinder startPoint endPoint (Named diameter) =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
@@ -264,7 +264,7 @@ cylinderAlong ::
   Axis3D space ->
   Length ->
   Length ->
-  "diameter" ::: Length ->
+  "diameter" # Length ->
   Result EmptyBody (Body3D space)
 cylinderAlong axis d1 d2 (Named diameter) =
   case Region2D.circle (Circle2D.withDiameter diameter Point2D.origin) of

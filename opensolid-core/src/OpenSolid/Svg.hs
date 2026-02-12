@@ -210,8 +210,8 @@ triangle = triangleWith []
 -- | Draw a circle with the given attributes, center point and diameter.
 circleWith ::
   List (Attribute space) ->
-  "centerPoint" ::: Point2D Meters space ->
-  "diameter" ::: Length ->
+  "centerPoint" # Point2D Meters space ->
+  "diameter" # Length ->
   Svg space
 circleWith attributes (Named centerPoint) (Named diameter) = do
   let Point2D cx cy = centerPoint
@@ -221,7 +221,7 @@ circleWith attributes (Named centerPoint) (Named diameter) = do
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 -- | Draw a circle with the given center point and diameter.
-circle :: "centerPoint" ::: Point2D Meters space -> "diameter" ::: Length -> Svg space
+circle :: "centerPoint" # Point2D Meters space -> "diameter" # Length -> Svg space
 circle = circleWith []
 
 -- | Draw a curve with the given attributes and resolution.
@@ -234,19 +234,19 @@ curve :: Resolution Meters -> Curve2D Meters space -> Svg space
 curve = curveWith []
 
 arrow ::
-  "start" ::: Point2D Meters space ->
-  "end" ::: Point2D Meters space ->
-  "headLength" ::: Length ->
-  "headWidth" ::: Length ->
+  "start" # Point2D Meters space ->
+  "end" # Point2D Meters space ->
+  "headLength" # Length ->
+  "headWidth" # Length ->
   Svg space
 arrow = arrowWith []
 
 arrowWith ::
   List (Attribute space) ->
-  "start" ::: Point2D Meters space ->
-  "end" ::: Point2D Meters space ->
-  "headLength" ::: Length ->
-  "headWidth" ::: Length ->
+  "start" # Point2D Meters space ->
+  "end" # Point2D Meters space ->
+  "headLength" # Length ->
+  "headWidth" # Length ->
   Svg space
 arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWidth) =
   case Tolerance.using Quantity.zero (Direction2D.from start end) of

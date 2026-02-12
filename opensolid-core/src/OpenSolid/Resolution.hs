@@ -30,13 +30,13 @@ maxSize :: Quantity units -> Resolution units
 maxSize size = Resolution{maxError = Quantity.infinity, maxSize = size}
 
 -- | Specify both the maximum error and maximum element size in the approximation.
-custom :: "maxError" ::: Quantity units -> "maxSize" ::: Quantity units -> Resolution units
+custom :: "maxError" # Quantity units -> "maxSize" # Quantity units -> Resolution units
 custom (Named givenMaxError) (Named givenMaxSize) =
   Resolution{maxError = givenMaxError, maxSize = givenMaxSize}
 
 predicate ::
-  "size" ::: (a -> Quantity units) ->
-  "error" ::: (a -> Quantity units) ->
+  "size" # (a -> Quantity units) ->
+  "error" # (a -> Quantity units) ->
   Resolution units ->
   a ->
   Bool

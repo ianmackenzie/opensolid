@@ -413,10 +413,10 @@ arcFrom givenStartPoint givenEndPoint sweptAngle =
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
-  "centerPoint" ::: Point2D units space ->
-  "radius" ::: Quantity units ->
-  "startAngle" ::: Angle ->
-  "endAngle" ::: Angle ->
+  "centerPoint" # Point2D units space ->
+  "radius" # Quantity units ->
+  "startAngle" # Angle ->
+  "endAngle" # Angle ->
   Curve2D units space
 polarArc (Named centerPoint) (Named radius) (Named startAngle) (Named endAngle) =
   customArc centerPoint (Vector2D.x radius) (Vector2D.y radius) startAngle endAngle
@@ -439,9 +439,9 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
 cornerArc ::
   Tolerance units =>
   Point2D units space ->
-  "incoming" ::: Direction2D space ->
-  "outgoing" ::: Direction2D space ->
-  "radius" ::: Quantity units ->
+  "incoming" # Direction2D space ->
+  "outgoing" # Direction2D space ->
+  "radius" # Quantity units ->
   Curve2D units space
 cornerArc cornerPoint (Named incomingDirection) (Named outgoingDirection) (Named givenRadius) = do
   let radius = Quantity.abs givenRadius

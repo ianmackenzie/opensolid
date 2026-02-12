@@ -414,10 +414,10 @@ recursive givenCompiled derivativeFunction =
 
 desingularize ::
   SurfaceFunction1D units ->
-  "singularityU0" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
-  "singularityU1" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
-  "singularityV0" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
-  "singularityV1" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  "singularityU0" # Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  "singularityU1" # Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  "singularityV0" # Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  "singularityV1" # Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
   SurfaceFunction1D units
 desingularize = SurfaceFunction1D.Blending.desingularize desingularized
 

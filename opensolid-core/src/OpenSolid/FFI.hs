@@ -128,7 +128,7 @@ data Representation a where
   -- Some IO that returns a representable value
   IORep :: FFI a => Representation (IO a)
   -- A function argument that should be named-only if supported
-  NamedArgumentRep :: (KnownSymbol name, FFI a) => Representation (name ::: a)
+  NamedArgumentRep :: (KnownSymbol name, FFI a) => Representation (name # a)
 
 classRepresentation :: FFI a => Text -> Proxy a -> Representation a
 classRepresentation givenName _ =
@@ -259,7 +259,7 @@ instance FFI Area where
 instance FFI Angle where
   representation = classRepresentation "Angle"
 
-instance (KnownSymbol name, FFI a) => FFI (name ::: a) where
+instance (KnownSymbol name, FFI a) => FFI (name # a) where
   representation _ = NamedArgumentRep
 
 splitCamelCase :: Text -> Name

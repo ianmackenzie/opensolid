@@ -33,7 +33,7 @@ instance FFI SpurGear where
   representation = FFI.classRepresentation "SpurGear"
 
 -- | Create a metric spur gear with the given number of teeth and module.
-metric :: "numTeeth" ::: Int -> "module" ::: Length -> SpurGear
+metric :: "numTeeth" # Int -> "module" # Length -> SpurGear
 metric (Named numTeeth) (Named module_) = Metric{numTeeth, module_}
 
 -- | The pitch diameter of a gear.

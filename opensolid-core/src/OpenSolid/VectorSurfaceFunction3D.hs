@@ -472,13 +472,13 @@ recursive givenCompiled derivativeFunction =
 desingularize ::
   VectorSurfaceFunction3D units space ->
   "singularityU0"
-    ::: Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
+    # Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
   "singularityU1"
-    ::: Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
+    # Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
   "singularityV0"
-    ::: Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
+    # Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
   "singularityV1"
-    ::: Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
+    # Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
   VectorSurfaceFunction3D units space
 desingularize = SurfaceFunction1D.Blending.desingularize desingularized
 

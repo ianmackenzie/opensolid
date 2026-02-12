@@ -284,7 +284,7 @@ zeroTo value = Interval Quantity.zero value
 
 The lower bound of the range will be -w/2 and the upper bound will be w/2.
 -}
-symmetric :: "width" ::: Quantity units -> Interval units
+symmetric :: "width" # Quantity units -> Interval units
 symmetric (Named width_) = let r = 0.5 * width_ in Interval -r r
 
 infinite :: Interval units

@@ -9,10 +9,10 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 
 type Desingularize function =
   function ->
-  "singularityU0" ::: Maybe (function, function) ->
-  "singularityU1" ::: Maybe (function, function) ->
-  "singularityV0" ::: Maybe (function, function) ->
-  "singularityV1" ::: Maybe (function, function) ->
+  "singularityU0" # Maybe (function, function) ->
+  "singularityU1" # Maybe (function, function) ->
+  "singularityV0" # Maybe (function, function) ->
+  "singularityV1" # Maybe (function, function) ->
   function
 
 impl ::

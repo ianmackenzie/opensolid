@@ -89,11 +89,11 @@ setting the 'spp', 'width' and 'height' parameters when loading the scene,
 for example with 'mitsuba.load_file(path_to_xml_file, spp=256, width=1920, height=1080)'.
 -}
 writeFiles ::
-  "path" ::: Text ->
-  "model" ::: Model3D space ->
-  "resolution" ::: Resolution Meters ->
-  "camera" ::: Camera3D space ->
-  "lighting" ::: Lighting space ->
+  "path" # Text ->
+  "model" # Model3D space ->
+  "resolution" # Resolution Meters ->
+  "camera" # Camera3D space ->
+  "lighting" # Lighting space ->
   IO ()
 writeFiles (Named path) (Named model) (Named resolution) (Named camera) (Named lighting) = do
   let collectedMeshes = Model3D.inspect (collectMeshes resolution) model
@@ -121,7 +121,7 @@ collectMeshes ::
   Model3D.Traversal =>
   Resolution Meters ->
   Model3D space ->
-  List ((Mesh space, "name" ::: Text), Properties)
+  List ((Mesh space, "name" # Text), Properties)
 collectMeshes resolution model = case model of
   Model3D.Group children -> List.combine (collectMeshes resolution) children
   Model3D.Body body -> do
@@ -152,11 +152,11 @@ environmentMap = EnvironmentMap
 
 The names may all be empty if desired.
 -}
-writeMeshes :: Text -> List (Mesh space, "name" ::: Text) -> IO ()
+writeMeshes :: Text -> List (Mesh space, "name" # Text) -> IO ()
 writeMeshes path meshes = IO.writeBinary path (meshesBuilder meshes)
 
 -- | Generate the binary content of a Mitsuba .serialized file containing the given meshes.
-meshesBuilder :: List (Mesh space, "name" ::: Text) -> Builder
+meshesBuilder :: List (Mesh space, "name" # Text) -> Builder
 meshesBuilder meshes = do
   let (meshBuilders, meshSizes) = List.unzip2 (List.map buildSingleMesh meshes)
   Binary.concat
@@ -172,7 +172,7 @@ meshOffsets currentOffset meshSizes = case meshSizes of
     let nextOffset = currentOffset + currentSize
     Binary.uint64LE currentOffset <> meshOffsets nextOffset remainingSizes
 
-buildSingleMesh :: (Mesh space, "name" ::: Text) -> (Builder, Int)
+buildSingleMesh :: (Mesh space, "name" # Text) -> (Builder, Int)
 buildSingleMesh (mesh, Named name) = do
   let header =
         Binary.concat
@@ -246,10 +246,10 @@ attributeText :: (Text, Text) -> Text
 attributeText (name, value) = name <> "=\"" <> value <> "\""
 
 sceneDocument ::
-  "camera" ::: Camera3D space ->
-  "lighting" ::: Lighting space ->
-  "meshProperties" ::: List Properties ->
-  "meshFileName" ::: Text ->
+  "camera" # Camera3D space ->
+  "lighting" # Lighting space ->
+  "meshProperties" # List Properties ->
+  "meshFileName" # Text ->
   Text
 sceneDocument (Named camera) (Named lighting) (Named meshProperties) (Named meshFileName) = do
   let shapeNodes = List.mapWithIndex (shapeNode meshFileName) meshProperties

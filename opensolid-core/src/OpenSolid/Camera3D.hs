@@ -101,11 +101,11 @@ instance FFI Projection where
   representation = FFI.nestedClassRepresentation "Camera3D" "Projection"
 
 -- | Define a perspective projection with a given vertical field of view.
-perspective :: "verticalFov" ::: Angle -> Projection
+perspective :: "verticalFov" # Angle -> Projection
 perspective (Named verticalFov) = Perspective verticalFov
 
 -- | Define an orthographic projection with a given viewport height.
-orthographic :: "viewportHeight" ::: Length -> Projection
+orthographic :: "viewportHeight" # Length -> Projection
 orthographic (Named viewportHeight) = Orthographic viewportHeight
 
 new :: Frame3D space CameraSpace -> Length -> Projection -> Camera3D space
@@ -122,9 +122,9 @@ The camera will be oriented such that its local up direction
 will be as close as possible to the global up direction.
 -}
 lookAt ::
-  "eyePoint" ::: Point3D space ->
-  "focalPoint" ::: Point3D space ->
-  "projection" ::: Projection ->
+  "eyePoint" # Point3D space ->
+  "focalPoint" # Point3D space ->
+  "projection" # Projection ->
   Camera3D space
 lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
   let computedFocalDistance = Point3D.distanceFrom eyePoint focalPoint
@@ -155,11 +155,11 @@ The elevation is the vertical angle towards the camera from the focal point,
 measure upwards from the global top plane.
 -}
 orbit ::
-  "focalPoint" ::: Point3D space ->
-  "azimuth" ::: Angle ->
-  "elevation" ::: Angle ->
-  "distance" ::: Length ->
-  "projection" ::: Projection ->
+  "focalPoint" # Point3D space ->
+  "azimuth" # Angle ->
+  "elevation" # Angle ->
+  "distance" # Length ->
+  "projection" # Projection ->
   Camera3D space
 orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Named projection) = do
   let computedFrame =

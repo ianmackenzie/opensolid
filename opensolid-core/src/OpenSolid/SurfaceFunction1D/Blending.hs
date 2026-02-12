@@ -35,10 +35,10 @@ desingularize ::
     VectorSurfaceFunction dimension units space
   ) ->
   VectorSurfaceFunction dimension units space ->
-  "singularityU0" ::: Maybe (Singularity dimension units space) ->
-  "singularityU1" ::: Maybe (Singularity dimension units space) ->
-  "singularityV0" ::: Maybe (Singularity dimension units space) ->
-  "singularityV1" ::: Maybe (Singularity dimension units space) ->
+  "singularityU0" # Maybe (Singularity dimension units space) ->
+  "singularityU1" # Maybe (Singularity dimension units space) ->
+  "singularityV0" # Maybe (Singularity dimension units space) ->
+  "singularityV1" # Maybe (Singularity dimension units space) ->
   VectorSurfaceFunction dimension units space
 desingularize
   desingularized
