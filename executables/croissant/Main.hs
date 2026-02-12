@@ -20,8 +20,8 @@ main = Tolerance.using Length.nanometer do
   let majorRadius = Length.meter
   let k = Length.meters 2.0
   let minorRadius =
-        Curve1D.hermite Length.zero [k] Length.zero [-k] `compose` SurfaceFunction1D.u
-  let theta = Curve1D.interpolateFrom (Angle.degrees 45.0) (Angle.degrees 315.0) `compose` SurfaceFunction1D.u
+        Curve1D.hermite Length.zero [k] Length.zero [-k] . SurfaceFunction1D.u
+  let theta = Curve1D.interpolateFrom (Angle.degrees 45.0) (Angle.degrees 315.0) . SurfaceFunction1D.u
   let phi = Angle.twoPi * SurfaceFunction1D.v
   let r = majorRadius + minorRadius * SurfaceFunction1D.cos phi
   let surfaceFunction =

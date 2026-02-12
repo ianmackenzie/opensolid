@@ -24,7 +24,7 @@ on givenSurfaceFunction givenUvCurve =
   SurfaceCurve3D
     { surfaceFunction = givenSurfaceFunction
     , uvCurve = givenUvCurve
-    , curve = givenSurfaceFunction `compose` givenUvCurve
+    , curve = givenSurfaceFunction . givenUvCurve
     }
 
 curve :: SurfaceCurve3D space -> Curve3D space

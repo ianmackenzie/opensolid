@@ -149,19 +149,19 @@ instance
   lhs - rhs = constant lhs - rhs
 
 instance Composition (Curve3D space) (Curve1D Unitless) (Curve3D space) where
-  outer `compose` inner =
+  outer . inner =
     new
-      (outer.compiled `compose` Curve1D.compiled inner)
-      ((outer.derivative `compose` inner) * Curve1D.derivative inner)
+      (outer.compiled . Curve1D.compiled inner)
+      ((outer.derivative . inner) * Curve1D.derivative inner)
 
 instance
   unitless ~ Unitless =>
   Composition (Curve3D space) (SurfaceFunction1D unitless) (SurfaceFunction3D space)
   where
-  curve `compose` function =
+  curve . function =
     SurfaceFunction3D.new
-      (curve.compiled `compose` function.compiled)
-      (\p -> (curve.derivative `compose` function) * SurfaceFunction1D.derivative p function)
+      (curve.compiled . function.compiled)
+      (\p -> (curve.derivative . function) * SurfaceFunction1D.derivative p function)
 
 instance ApproximateEquality (Curve3D space) Meters where
   curve1 ~= curve2 = do
@@ -259,7 +259,7 @@ bounds :: Curve3D space -> Bounds3D space
 bounds curve = evaluateBounds curve Interval.unit
 
 reverse :: Curve3D space -> Curve3D space
-reverse curve = curve `compose` (1.0 - Curve1D.t)
+reverse curve = curve . (1.0 - Curve1D.t)
 
 arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Curve1D Unitless, Length)
 arcLengthParameterization curve =
@@ -268,7 +268,7 @@ arcLengthParameterization curve =
 parameterizeByArcLength :: Tolerance Meters => Curve3D space -> (Curve3D space, Length)
 parameterizeByArcLength curve = do
   let (parameterization, length) = arcLengthParameterization curve
-  (curve `compose` parameterization, length)
+  (curve . parameterization, length)
 
 transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space
 transformBy transform curve = do

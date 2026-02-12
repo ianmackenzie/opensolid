@@ -25,7 +25,7 @@ module OpenSolid.Prelude
   , CrossMultiplication (cross)
   , DivMod ((//), (%))
   , Exponentiation ((**))
-  , Composition (compose)
+  , Composition ((.))
   , Tolerance
   , ApproximateEquality ((~=))
   , (!=)
@@ -95,7 +95,6 @@ import Prelude
   , otherwise
   , ($)
   , (&&)
-  , (.)
   , (/=)
   , (<)
   , (<$>)
@@ -308,9 +307,12 @@ instance (name1 ~ name2, a1 ~ a2) => IsLabel name1 (a1 -> name2 # a2) where
 ----- Composition -----
 
 class Composition f g h | f g -> h where
-  compose :: f -> g -> h
+  (.) :: f -> g -> h
 
-infixr 9 `compose`
+instance b1 ~ b2 => Composition (b2 -> c) (a -> b1) (a -> c) where
+  (.) = (Prelude..)
+
+infixr 9 .
 
 ----- List -----
 

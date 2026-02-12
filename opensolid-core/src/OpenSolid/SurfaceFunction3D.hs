@@ -145,7 +145,7 @@ instance
     (Region2D unitless uvSpace)
     (Surface3D space)
   where
-  function `compose` domain = Surface3D.parametric function domain
+  function . domain = Surface3D.parametric function domain
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -154,14 +154,14 @@ instance
     (SurfaceFunction2D unitless uvSpace)
     (SurfaceFunction3D space)
   where
-  outer `compose` inner = do
-    let duOuter = outer.du `compose` inner
-    let dvOuter = outer.dv `compose` inner
+  outer . inner = do
+    let duOuter = outer.du . inner
+    let dvOuter = outer.dv . inner
     let composedDerivative parameter = do
           let innerDerivative = SurfaceFunction2D.derivative parameter inner
           let (dU, dV) = innerDerivative.components
           duOuter * dU + dvOuter * dV
-    new (outer.compiled `compose` inner.compiled) composedDerivative
+    new (outer.compiled . inner.compiled) composedDerivative
 
 instance HasField "compiled" (SurfaceFunction3D space) (Compiled space) where
   getField (SurfaceFunction3D c _ _) = c

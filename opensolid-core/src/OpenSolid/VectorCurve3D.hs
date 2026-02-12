@@ -417,10 +417,7 @@ instance
     (Curve1D Unitless)
     (VectorCurve3D units space)
   where
-  f `compose` g =
-    new
-      (f.compiled `compose` Curve1D.compiled g)
-      ((f.derivative `compose` g) * Curve1D.derivative g)
+  f . g = new (f.compiled . Curve1D.compiled g) ((f.derivative . g) * Curve1D.derivative g)
 
 instance
   Composition
@@ -428,10 +425,10 @@ instance
     (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction3D units space)
   where
-  curve `compose` function =
+  curve . function =
     VectorSurfaceFunction3D.new
-      (curve.compiled `compose` function.compiled)
-      (\p -> curve.derivative `compose` function * SurfaceFunction1D.derivative p function)
+      (curve.compiled . function.compiled)
+      (\p -> curve.derivative . function * SurfaceFunction1D.derivative p function)
 
 compiled :: VectorCurve3D units space -> Compiled units space
 compiled = (.compiled)
@@ -568,7 +565,7 @@ evaluateBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
 
 reverse :: VectorCurve3D units space -> VectorCurve3D units space
-reverse curve = curve `compose` (1.0 - Curve1D.t)
+reverse curve = curve . (1.0 - Curve1D.t)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

@@ -301,11 +301,10 @@ instance
   vector ?*? curve = VectorCurve3D.constant vector ?*? curve
 
 instance Composition (Curve1D units) (Curve1D Unitless) (Curve1D units) where
-  f `compose` g =
-    new (f.compiled `compose` g.compiled) ((f.derivative `compose` g) * g.derivative)
+  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
 
 reverse :: Curve1D units -> Curve1D units
-reverse curve = curve `compose` (1.0 - t)
+reverse curve = curve . (1.0 - t)
 
 bezier :: NonEmpty (Quantity units) -> Curve1D units
 bezier controlPoints =

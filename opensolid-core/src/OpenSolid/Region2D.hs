@@ -241,8 +241,8 @@ addFillet radius curves point = do
                       (DirectionCurve2D.evaluate firstTangent t1)
                       (DirectionCurve2D.evaluate secondTangent t2)
               let filletArc = Curve2D.sweptArc centerPoint startPoint sweptAngle
-              let trimmedFirstCurve = firstCurve `compose` Curve1D.interpolateFrom 0.0 t1
-              let trimmedSecondCurve = secondCurve `compose` Curve1D.interpolateFrom t2 1.0
+              let trimmedFirstCurve = firstCurve . Curve1D.interpolateFrom 0.0 t1
+              let trimmedSecondCurve = secondCurve . Curve1D.interpolateFrom t2 1.0
               Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence ::

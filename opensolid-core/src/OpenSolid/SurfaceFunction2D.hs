@@ -256,11 +256,11 @@ instance
     (Curve2D unitless uvSpace)
     (Curve2D units space)
   where
-  function `compose` curve = do
+  function . curve = do
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
     Curve2D.new
-      (function.compiled `compose` Curve2D.compiled curve)
-      ((function.du `compose` curve) * dudt + (function.dv `compose` curve) * dvdt)
+      (function.compiled . Curve2D.compiled curve)
+      ((function.du . curve) * dudt + (function.dv . curve) * dvdt)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -269,15 +269,13 @@ instance
     (SurfaceFunction2D unitless uvSpace)
     (SurfaceFunction1D units)
   where
-  f `compose` g = do
-    let dfdu = f.du `compose` g
-    let dfdv = f.dv `compose` g
+  f . g = do
+    let dfdu = f.du . g
+    let dfdv = f.dv . g
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
           dfdu * dudp + dfdv * dvdp
-    SurfaceFunction1D.new
-      (f.compiled `compose` g.compiled)
-      composedDerivative
+    SurfaceFunction1D.new (f.compiled . g.compiled) composedDerivative
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -286,15 +284,13 @@ instance
     (SurfaceFunction2D unitless uvSpace)
     (VectorSurfaceFunction2D units space)
   where
-  f `compose` g = do
-    let dfdu = f.du `compose` g
-    let dfdv = f.dv `compose` g
+  f . g = do
+    let dfdu = f.du . g
+    let dfdv = f.dv . g
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
           dfdu * dudp + dfdv * dvdp
-    VectorSurfaceFunction2D.new
-      (f.compiled `compose` g.compiled)
-      composedDerivative
+    VectorSurfaceFunction2D.new (f.compiled . g.compiled) composedDerivative
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -303,15 +299,13 @@ instance
     (SurfaceFunction2D unitless uvSpace)
     (VectorSurfaceFunction3D units space)
   where
-  f `compose` g = do
-    let dfdu = f.du `compose` g
-    let dfdv = f.dv `compose` g
+  f . g = do
+    let dfdu = f.du . g
+    let dfdv = f.dv . g
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
           dfdu * dudp + dfdv * dvdp
-    VectorSurfaceFunction3D.new
-      (f.compiled `compose` g.compiled)
-      composedDerivative
+    VectorSurfaceFunction3D.new (f.compiled . g.compiled) composedDerivative
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -320,8 +314,7 @@ instance
     (SurfaceFunction2D unitless uvSpace)
     (DirectionSurfaceFunction2D space)
   where
-  f `compose` g =
-    DirectionSurfaceFunction2D.unsafe (DirectionSurfaceFunction2D.unwrap f `compose` g)
+  f . g = DirectionSurfaceFunction2D.unsafe (DirectionSurfaceFunction2D.unwrap f . g)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -330,8 +323,7 @@ instance
     (SurfaceFunction2D unitless uvSpace)
     (DirectionSurfaceFunction3D space)
   where
-  f `compose` g =
-    DirectionSurfaceFunction3D.unsafe (DirectionSurfaceFunction3D.unwrap f `compose` g)
+  f . g = DirectionSurfaceFunction3D.unsafe (DirectionSurfaceFunction3D.unwrap f . g)
 
 distanceAlong ::
   Axis2D units space ->

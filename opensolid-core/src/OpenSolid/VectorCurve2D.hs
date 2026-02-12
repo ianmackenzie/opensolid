@@ -459,10 +459,10 @@ instance
     (Curve1D Unitless)
     (VectorCurve2D units space)
   where
-  f `compose` g =
+  f . g =
     new
-      (f.compiled `compose` Curve1D.compiled g)
-      ((f.derivative `compose` g) * Curve1D.derivative g)
+      (f.compiled . Curve1D.compiled g)
+      ((f.derivative . g) * Curve1D.derivative g)
 
 instance
   Composition
@@ -470,10 +470,10 @@ instance
     (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction2D units space)
   where
-  curve `compose` function =
+  curve . function =
     VectorSurfaceFunction2D.new
-      (curve.compiled `compose` function.compiled)
-      (\p -> (curve.derivative `compose` function) * SurfaceFunction1D.derivative p function)
+      (curve.compiled . function.compiled)
+      (\p -> (curve.derivative . function) * SurfaceFunction1D.derivative p function)
 
 instance
   Composition
@@ -481,7 +481,7 @@ instance
     SurfaceParameter
     (VectorSurfaceFunction2D units space)
   where
-  curve `compose` parameter = curve `compose` SurfaceFunction1D.parameter parameter
+  curve . parameter = curve . SurfaceFunction1D.parameter parameter
 
 compiled :: VectorCurve2D units space -> Compiled units space
 compiled = (.compiled)
@@ -662,7 +662,7 @@ components :: VectorCurve2D units space -> (Curve1D units, Curve1D units)
 components curve = (xComponent curve, yComponent curve)
 
 reverse :: VectorCurve2D units space -> VectorCurve2D units space
-reverse curve = curve `compose` (1.0 - Curve1D.t)
+reverse curve = curve . (1.0 - Curve1D.t)
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

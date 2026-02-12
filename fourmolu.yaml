@@ -17,14 +17,13 @@ fixities:
   - "infixl 4 <$>, <*>"
   - "infixr 6 <>"
   - "infixl 9 >>"
-  - "infixr 9 ."
   # Custom operators
   - "infix 0 #"
   - "infix 4 ~=, !=, `intersects`, ==#, >#, <#, >=#, <=#, ~=#"
   - "infixl 6 +, -, +#, -#"
   - "infixl 7 *, /, ?*?, ?/?, *#, /#, //, %, `dot`, `cross`, `dot_`, `cross_`"
   - "infixr 8 **"
-  - "infixr 9 `compose`"
+  - "infixr 9 ."
 
 let-style: inline
 single-constraint-parens: never

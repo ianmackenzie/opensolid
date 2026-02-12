@@ -38,49 +38,49 @@ instance IsUniform Orthonormal
 instance IsUniform Uniform
 
 instance Composition Rigid Rigid Rigid where
-  Rigid `compose` Rigid = Rigid
+  Rigid . Rigid = Rigid
 
 instance Composition Orthonormal Rigid Orthonormal where
-  Orthonormal `compose` Rigid = Orthonormal
+  Orthonormal . Rigid = Orthonormal
 
 instance Composition Uniform Rigid Uniform where
-  Uniform `compose` Rigid = Uniform
+  Uniform . Rigid = Uniform
 
 instance Composition Affine Rigid Affine where
-  Affine `compose` Rigid = Affine
+  Affine . Rigid = Affine
 
 instance Composition Rigid Orthonormal Orthonormal where
-  Rigid `compose` Orthonormal = Orthonormal
+  Rigid . Orthonormal = Orthonormal
 
 instance Composition Orthonormal Orthonormal Orthonormal where
-  Orthonormal `compose` Orthonormal = Orthonormal
+  Orthonormal . Orthonormal = Orthonormal
 
 instance Composition Uniform Orthonormal Uniform where
-  Uniform `compose` Orthonormal = Uniform
+  Uniform . Orthonormal = Uniform
 
 instance Composition Affine Orthonormal Affine where
-  Affine `compose` Orthonormal = Affine
+  Affine . Orthonormal = Affine
 
 instance Composition Rigid Uniform Uniform where
-  Rigid `compose` Uniform = Uniform
+  Rigid . Uniform = Uniform
 
 instance Composition Orthonormal Uniform Uniform where
-  Orthonormal `compose` Uniform = Uniform
+  Orthonormal . Uniform = Uniform
 
 instance Composition Uniform Uniform Uniform where
-  Uniform `compose` Uniform = Uniform
+  Uniform . Uniform = Uniform
 
 instance Composition Affine Uniform Affine where
-  Affine `compose` Uniform = Affine
+  Affine . Uniform = Affine
 
 instance Composition Rigid Affine Affine where
-  Rigid `compose` Affine = Affine
+  Rigid . Affine = Affine
 
 instance Composition Orthonormal Affine Affine where
-  Orthonormal `compose` Affine = Affine
+  Orthonormal . Affine = Affine
 
 instance Composition Uniform Affine Affine where
-  Uniform `compose` Affine = Affine
+  Uniform . Affine = Affine
 
 instance Composition Affine Affine Affine where
-  Affine `compose` Affine = Affine
+  Affine . Affine = Affine

@@ -1002,7 +1002,7 @@ instance
     (Transform2D inner units2 space2)
     (Transform2D composed units1 space1)
   where
-  outer `compose` inner =
+  outer . inner =
     Transform2D
       (Point2D Quantity.zero Quantity.zero * inner * outer)
       (Vector2D 1.0 0.0 * inner * outer)
@@ -2237,7 +2237,7 @@ instance
     (Transform3D inner space2)
     (Transform3D composed space1)
   where
-  outer `compose` inner =
+  outer . inner =
     Transform3D
       (Point3D Quantity.zero Quantity.zero Quantity.zero * inner * outer)
       (Vector3D 1.0 0.0 0.0 * inner * outer)

@@ -94,12 +94,12 @@ blendU0 ::
   VectorSurfaceFunction dimension units space
 blendU0 (f0, dfdu0) f =
   blend
-    ( f `compose` uT0
-    , -t0 * d U f `compose` uT0
-    , t0 * t0 * d U (d U f) `compose` uT0
+    ( f . uT0
+    , -t0 * d U f . uT0
+    , t0 * t0 * d U (d U f) . uT0
     )
-    ( f0 `compose` u0
-    , -t0 * dfdu0 `compose` u0
+    ( f0 . u0
+    , -t0 * dfdu0 . u0
     )
     ((t0 - SurfaceFunction1D.u) / t0)
 
@@ -110,12 +110,12 @@ blendU1 ::
   VectorSurfaceFunction dimension units space
 blendU1 f (f1, dfdu1) =
   blend
-    ( f `compose` uT1
-    , t0 * d U f `compose` uT1
-    , t0 * t0 * d U (d U f) `compose` uT1
+    ( f . uT1
+    , t0 * d U f . uT1
+    , t0 * t0 * d U (d U f) . uT1
     )
-    ( f1 `compose` u1
-    , t0 * dfdu1 `compose` u1
+    ( f1 . u1
+    , t0 * dfdu1 . u1
     )
     ((SurfaceFunction1D.u - t1) / t0)
 
@@ -126,12 +126,12 @@ blendV0 ::
   VectorSurfaceFunction dimension units space
 blendV0 (f0, dfdv0) f =
   blend
-    ( f `compose` vT0
-    , -t0 * d V f `compose` vT0
-    , t0 * t0 * d V (d V f) `compose` vT0
+    ( f . vT0
+    , -t0 * d V f . vT0
+    , t0 * t0 * d V (d V f) . vT0
     )
-    ( f0 `compose` v0
-    , -t0 * dfdv0 `compose` v0
+    ( f0 . v0
+    , -t0 * dfdv0 . v0
     )
     ((t0 - SurfaceFunction1D.v) / t0)
 
@@ -142,12 +142,12 @@ blendV1 ::
   VectorSurfaceFunction dimension units space
 blendV1 f (f1, dfdv1) =
   blend
-    ( f `compose` vT1
-    , t0 * d V f `compose` vT1
-    , t0 * t0 * d V (d V f) `compose` vT1
+    ( f . vT1
+    , t0 * d V f . vT1
+    , t0 * t0 * d V (d V f) . vT1
     )
-    ( f1 `compose` v1
-    , t0 * dfdv1 `compose` v1
+    ( f1 . v1
+    , t0 * dfdv1 . v1
     )
     ((SurfaceFunction1D.v - t1) / t0)
 
@@ -163,11 +163,11 @@ blend ::
   SurfaceFunction1D Unitless ->
   VectorSurfaceFunction dimension units space
 blend (f00, f01, f02) (f10, f11) t = do
-  let b00 = Curve1D.b00 `compose` t
-  let b01 = Curve1D.b01 `compose` t
-  let b02 = Curve1D.b02 `compose` t
-  let b10 = Curve1D.b10 `compose` t
-  let b11 = Curve1D.b11 `compose` t
+  let b00 = Curve1D.b00 . t
+  let b01 = Curve1D.b01 . t
+  let b02 = Curve1D.b02 . t
+  let b10 = Curve1D.b10 . t
+  let b11 = Curve1D.b11 . t
   b00 * f00 + b01 * f01 + b02 * f02 + b10 * f10 + b11 * f11
 
 d ::

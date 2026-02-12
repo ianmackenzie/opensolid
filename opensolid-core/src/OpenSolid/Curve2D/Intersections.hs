@@ -223,9 +223,9 @@ intersections curve1 curve2
       case overlappingSegments curve1 curve2 endpointIntersections of
         Just segments -> Ok (Just (OverlappingSegments segments))
         Nothing -> do
-          let differenceSurface = curve2 `compose` V - curve1 `compose` U
-          let derivativeSurface1 = Curve2D.derivative curve1 `compose` U
-          let derivativeSurface2 = Curve2D.derivative curve2 `compose` V
+          let differenceSurface = curve2 . V - curve1 . U
+          let derivativeSurface1 = Curve2D.derivative curve1 . U
+          let derivativeSurface2 = Curve2D.derivative curve2 . V
           let tangentSolutionX = differenceSurface `dot_` derivativeSurface1
           let tangentSolutionY = derivativeSurface2 `cross_` derivativeSurface1
           let tangentSolutionTarget = VectorSurfaceFunction2D.xy tangentSolutionX tangentSolutionY

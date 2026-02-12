@@ -208,7 +208,7 @@ instance
   lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
 instance Composition (DirectionCurve2D space) (Curve1D Unitless) (DirectionCurve2D space) where
-  DirectionCurve2D curve `compose` curve1D = DirectionCurve2D (curve `compose` curve1D)
+  DirectionCurve2D curve . curve1D = DirectionCurve2D (curve . curve1D)
 
 instance
   Composition
@@ -216,8 +216,8 @@ instance
     (SurfaceFunction1D Unitless)
     (DirectionSurfaceFunction2D space)
   where
-  DirectionCurve2D curve `compose` surfaceFunction =
-    DirectionSurfaceFunction2D.unsafe (curve `compose` surfaceFunction)
+  DirectionCurve2D curve . surfaceFunction =
+    DirectionSurfaceFunction2D.unsafe (curve . surfaceFunction)
 
 instance
   Composition
@@ -225,8 +225,8 @@ instance
     SurfaceParameter
     (DirectionSurfaceFunction2D space)
   where
-  DirectionCurve2D curve `compose` surfaceParameter =
-    DirectionSurfaceFunction2D.unsafe (curve `compose` surfaceParameter)
+  DirectionCurve2D curve . surfaceParameter =
+    DirectionSurfaceFunction2D.unsafe (curve . surfaceParameter)
 
 instance HasField "xComponent" (DirectionCurve2D space) (Curve1D Unitless) where
   getField (DirectionCurve2D curve) = VectorCurve2D.xComponent curve

@@ -450,11 +450,11 @@ instance
     (Curve2D unitless uvSpace)
     (VectorCurve2D units space)
   where
-  function `compose` curve = do
+  function . curve = do
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
     VectorCurve2D.new
-      (function.compiled `compose` Curve2D.compiled curve)
-      ((function.du `compose` curve) * dudt + (function.dv `compose` curve) * dvdt)
+      (function.compiled . Curve2D.compiled curve)
+      ((function.du . curve) * dudt + (function.dv . curve) * dvdt)
 
 instance
   HasField
