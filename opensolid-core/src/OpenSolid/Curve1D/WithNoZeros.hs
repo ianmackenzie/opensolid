@@ -4,6 +4,8 @@ module OpenSolid.Curve1D.WithNoZeros
   , sqrt
   , squared_
   , squared
+  , erase
+  , unerase
   )
 where
 
@@ -34,3 +36,9 @@ squared_ (WithNoZeros curve) = WithNoZeros (Curve1D.squared_ curve)
 
 squared :: Units.Squared units1 units2 => WithNoZeros units1 -> WithNoZeros units2
 squared = Units.specialize . squared_
+
+erase :: WithNoZeros units -> WithNoZeros Unitless
+erase = Units.erase
+
+unerase :: WithNoZeros Unitless -> WithNoZeros units
+unerase = Units.unerase

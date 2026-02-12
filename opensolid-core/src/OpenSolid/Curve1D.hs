@@ -49,6 +49,8 @@ module OpenSolid.Curve1D
   , b10
   , b11
   , newtonRaphson
+  , erase
+  , unerase
   )
 where
 
@@ -745,3 +747,9 @@ b11 =
 newtonRaphson :: Curve1D units -> Number -> Number
 newtonRaphson curve tValue =
   NewtonRaphson1D.curve (evaluate curve) (evaluate (derivative curve)) tValue
+
+erase :: Curve1D units -> Curve1D Unitless
+erase = Units.erase
+
+unerase :: Curve1D Unitless -> Curve1D units
+unerase = Units.unerase

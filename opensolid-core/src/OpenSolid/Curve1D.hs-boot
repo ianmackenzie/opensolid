@@ -17,6 +17,8 @@ module OpenSolid.Curve1D
   , desingularized
   , squared_
   , sqrt_
+  , erase
+  , unerase
   )
 where
 
@@ -47,7 +49,15 @@ instance Units.Coercion (Curve1D units1) (Curve1D units2)
 
 newtype WithNoZeros units = WithNoZeros (Curve1D units)
 
+instance HasUnits (WithNoZeros units) units
+
+instance Units.Coercion (WithNoZeros units1) (WithNoZeros units2)
+
 newtype WithNoInteriorZeros units = WithNoInteriorZeros (Curve1D units)
+
+instance HasUnits (WithNoInteriorZeros units) units
+
+instance Units.Coercion (WithNoInteriorZeros units1) (WithNoInteriorZeros units2)
 
 instance ApproximateEquality (Curve1D units) units
 
@@ -85,3 +95,5 @@ singularityTolerance :: Curve1D units -> Quantity units
 desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
 squared_ :: Curve1D units -> Curve1D (units ?*? units)
 sqrt_ :: Tolerance units => Curve1D (units ?*? units) -> Curve1D units
+erase :: Curve1D units -> Curve1D Unitless
+unerase :: Curve1D Unitless -> Curve1D units

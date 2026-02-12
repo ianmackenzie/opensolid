@@ -1,4 +1,11 @@
-module OpenSolid.Curve1D.WithNoInteriorZeros (unwrap, sqrt, sqrt_) where
+module OpenSolid.Curve1D.WithNoInteriorZeros
+  ( unwrap
+  , sqrt
+  , sqrt_
+  , erase
+  , unerase
+  )
+where
 
 import OpenSolid.Curve1D (Curve1D, WithNoInteriorZeros (WithNoInteriorZeros), WithNoZeros (WithNoZeros))
 import OpenSolid.Curve1D qualified as Curve1D
@@ -31,3 +38,9 @@ sqrt_ (WithNoInteriorZeros curve) = WithNoInteriorZeros do
 
 sqrt :: Units.Squared units1 units2 => WithNoInteriorZeros units2 -> WithNoInteriorZeros units1
 sqrt = sqrt_ . Units.unspecialize
+
+erase :: WithNoInteriorZeros units -> WithNoInteriorZeros Unitless
+erase = Units.erase
+
+unerase :: WithNoInteriorZeros Unitless -> WithNoInteriorZeros units
+unerase = Units.unerase
