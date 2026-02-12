@@ -241,10 +241,10 @@ erase ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension Unitless space
-erase = Units.coerce
+erase = Units.erase
 
 unerase ::
   Exists dimension units space =>
   VectorCurve dimension Unitless space ->
   VectorCurve dimension units space
-unerase = Units.coerce
+unerase = Units.unerase
