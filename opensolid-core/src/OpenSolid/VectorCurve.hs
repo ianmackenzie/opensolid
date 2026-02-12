@@ -80,6 +80,14 @@ class
       (VectorCurve dimension units space)
       (Curve1D.WithNoZeros units)
       (VectorCurve dimension Unitless space)
+  , Division
+      (VectorCurve dimension units space)
+      (Curve1D.WithNoInteriorZeros Unitless)
+      (VectorCurve dimension units space)
+  , Division
+      (VectorCurve dimension units space)
+      (Curve1D.WithNoInteriorZeros units)
+      (VectorCurve dimension Unitless space)
   , NewtonRaphson.Curve dimension units space
   ) =>
   Exists dimension units space
