@@ -2,6 +2,7 @@ module OpenSolid.Units
   ( HasUnits
   , Coercion (coerce)
   , erase
+  , unerase
   , type (?*?)
   , type (?/?)
   , Specialize
@@ -62,6 +63,10 @@ instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (Non
 {-# INLINE erase #-}
 erase :: (Coercion a b, HasUnits a units, HasUnits b Unitless) => a -> b
 erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: (Coercion a b, HasUnits a Unitless, HasUnits b units) => a -> b
+unerase = coerce
 
 data a ?*? b
 
