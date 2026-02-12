@@ -22,7 +22,6 @@ module OpenSolid.Number
   , atan2
   , log
   , logBase
-  , pow
   , infinity
   , sign
   , isNaN
@@ -149,9 +148,6 @@ log = Prelude.log
 
 logBase :: Number -> Number -> Number
 logBase = Prelude.logBase
-
-pow :: Number -> Number -> Number
-pow = (Prelude.**)
 
 sum :: List Number -> Number
 sum = Quantity.sum

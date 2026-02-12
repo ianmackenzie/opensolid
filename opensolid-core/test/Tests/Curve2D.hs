@@ -218,7 +218,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.
   p1 <- Random.point2D
   p2 <- Random.point2D
   let curve = Curve2D.cubicBezier p0 p0 p1 p2
-  let decreasingTValues = [Number.pow 2.0 (Number.fromInt -n) | n <- [8 .. 16]]
+  let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
   tangentDirection <- Curve2D.tangentDirection curve
   let startTangent = DirectionCurve2D.startValue tangentDirection
   let otherTangents = List.map (DirectionCurve2D.evaluate tangentDirection) decreasingTValues
@@ -232,7 +232,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
   p1 <- Random.point2D
   p2 <- Random.point2D
   let curve = Curve2D.cubicBezier p0 p1 p2 p2
-  let increasingTValues = [1.0 - Number.pow 2.0 (Number.fromInt -n) | n <- [8 .. 16]]
+  let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
   tangentDirection <- Curve2D.tangentDirection curve
   let endTangent = DirectionCurve2D.endValue tangentDirection
   let otherTangents = List.map (DirectionCurve2D.evaluate tangentDirection) increasingTValues
@@ -266,7 +266,7 @@ degenerateStartPointTangentDerivative =
     p1 <- Random.point2D
     p2 <- Random.point2D
     let curve = Curve2D.cubicBezier p0 p0 p1 p2
-    let decreasingTValues = [Number.pow 2.0 (Number.fromInt -n) | n <- [8 .. 16]]
+    let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
     tangentDirection <- Curve2D.tangentDirection curve
     let tangentDerivative = DirectionCurve2D.derivative tangentDirection
     let startTangentDerivative = VectorCurve2D.startValue tangentDerivative
@@ -286,7 +286,7 @@ degenerateEndPointTangentDerivative =
     p1 <- Random.point2D
     p2 <- Random.point2D
     let curve = Curve2D.cubicBezier p0 p1 p2 p2
-    let increasingTValues = [1.0 - Number.pow 2.0 (Number.fromInt -n) | n <- [8 .. 16]]
+    let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
     tangentDirection <- Curve2D.tangentDirection curve
     let tangentDerivative = DirectionCurve2D.derivative tangentDirection
     let endTangentDerivative = VectorCurve2D.endValue tangentDerivative

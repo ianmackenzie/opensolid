@@ -24,6 +24,7 @@ module OpenSolid.Prelude
   , CrossMultiplication_ (cross_)
   , CrossMultiplication (cross)
   , DivMod ((//), (%))
+  , Exponentiation ((**))
   , Composition (compose)
   , Tolerance
   , ApproximateEquality ((~=))
@@ -209,6 +210,23 @@ instance DivMod Int where
   (//) = Prelude.div
   {-# INLINE (%) #-}
   (%) = Prelude.mod
+
+class Exponentiation a b c | a b -> c where
+  (**) :: a -> b -> c
+
+infixr 8 **
+
+instance Exponentiation Int Int Int where
+  {-# INLINE (**) #-}
+  (**) = (Prelude.^)
+
+instance Exponentiation Number Number Number where
+  {-# INLINE (**) #-}
+  (**) = (Prelude.**)
+
+instance Exponentiation Number Int Number where
+  {-# INLINE (**) #-}
+  (**) = (Prelude.^^)
 
 ----- Tolerance -----
 

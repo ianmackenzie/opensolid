@@ -23,6 +23,7 @@ fixities:
   - "infix 4 ~=, !=, `intersects`, ==#, >#, <#, >=#, <=#, ~=#"
   - "infixl 6 +, -, +#, -#"
   - "infixl 7 *, /, ?*?, ?/?, *#, /#, //, %, `dot`, `cross`, `dot_`, `cross_`"
+  - "infixr 8 **"
   - "infixr 9 `compose`"
 
 let-style: inline

@@ -14,7 +14,6 @@ module OpenSolid.Int
   , sumOf
   , product
   , random
-  , pow
   , gcd
   , lcm
   )
@@ -87,9 +86,6 @@ sumOf f list = sum (List.map f list)
 
 product :: NonEmpty Int -> Int
 product = NonEmpty.reduce (*)
-
-pow :: Int -> Int -> Int
-pow = (Prelude.^)
 
 random :: Int -> Int -> Generator Int
 random low high = Generator (System.Random.uniformR (low, high))

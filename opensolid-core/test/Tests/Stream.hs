@@ -17,7 +17,7 @@ mapWithIndex :: Test
 mapWithIndex = Test.verify "mapWithIndex" Test.do
   let sum =
         Stream.repeat 1
-          & Stream.mapWithIndex (\i n -> Int.ratio n (Int.pow 2 i))
+          & Stream.mapWithIndex (\i n -> Int.ratio n (2 ** i))
           & Stream.take 11
           & Number.sum
   let expected = 2.0
