@@ -97,6 +97,13 @@ instance
   Division (VectorCurve3D units1 space) (Curve1D.WithNoZeros units2) (VectorCurve3D units3 space)
 
 instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (VectorCurve3D units1 space)
+    (Curve1D.WithNoInteriorZeros units2)
+    (VectorCurve3D units3 space)
+
+instance
   space1 ~ space2 =>
   DotMultiplication_
     (VectorCurve3D units1 space1)

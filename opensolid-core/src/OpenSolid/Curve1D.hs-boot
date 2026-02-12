@@ -69,6 +69,10 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (WithNoZeros units2) (Curve1D units3)
 
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Curve1D units1) (WithNoInteriorZeros units2) (Curve1D units3)
+
 new :: Compiled units -> Curve1D units -> Curve1D units
 constant :: Quantity units -> Curve1D units
 bezier :: NonEmpty (Quantity units) -> Curve1D units
