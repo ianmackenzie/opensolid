@@ -5,6 +5,7 @@ module OpenSolid.DirectionCurve
   , unwrap
   , evaluate
   , evaluateBounds
+  , derivative
   )
 where
 
@@ -37,18 +38,21 @@ class
   unwrapImpl :: DirectionCurve dimension space -> VectorCurve dimension Unitless space
   evaluate :: DirectionCurve dimension space -> Number -> Direction dimension space
   evaluateBounds :: DirectionCurve dimension space -> Interval Unitless -> DirectionBounds dimension space
+  derivative :: DirectionCurve dimension space -> VectorCurve dimension Unitless space
 
 instance Exists 2 space where
   unsafeImpl = DirectionCurve2D.unsafe
   unwrapImpl = DirectionCurve2D.unwrap
   evaluate = DirectionCurve2D.evaluate
   evaluateBounds = DirectionCurve2D.evaluateBounds
+  derivative = DirectionCurve2D.derivative
 
 instance Exists 3 space where
   unsafeImpl = DirectionCurve3D.unsafe
   unwrapImpl = DirectionCurve3D.unwrap
   evaluate = DirectionCurve3D.evaluate
   evaluateBounds = DirectionCurve3D.evaluateBounds
+  derivative = DirectionCurve3D.derivative
 
 unsafe ::
   Exists dimension space =>
