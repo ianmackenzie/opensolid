@@ -12,6 +12,7 @@ module OpenSolid.VectorCurve
   , squaredMagnitude_
   , squaredMagnitude
   , magnitude
+  , unsafeMagnitude
   , normalize
   , unsafeNormalize
   , direction
@@ -29,6 +30,7 @@ import OpenSolid.Bezier qualified as Bezier
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1d
+import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
 import OpenSolid.Curve1D.Zero qualified
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.DirectionCurve (DirectionCurve)
@@ -111,6 +113,7 @@ class
   evaluateBounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
   derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
+  unsafeMagnitude :: VectorCurve dimension units space -> Curve1D.WithNoInteriorZeros units
   unsafeNormalize :: VectorCurve dimension units space -> VectorCurve dimension Unitless space
   desingularized ::
     VectorCurve dimension units space ->
@@ -127,6 +130,12 @@ instance Exists 1 units Void where
   bezier = Curve1D.bezier
   desingularized = Curve1D.desingularized
   squaredMagnitude_ = Curve1D.squared_
+  unsafeMagnitude curve =
+    -- If a 1D curve has no interior zeros,
+    -- then it is either always non-negative or always non-positive,
+    -- and so its magnitude (absolute value) is either just the curve itself or its negation
+    Curve1D.WithNoInteriorZeros $
+      if evaluate curve 0.5 > Quantity.zero then curve else -curve
   unsafeNormalize curve =
     -- If a 1D curve has no interior zeros,
     -- then it is either always non-negative or always non-positive,
@@ -142,6 +151,7 @@ instance Exists 2 units space where
   evaluateBounds = VectorCurve2D.evaluateBounds
   bezier = VectorCurve2D.bezier
   desingularized = VectorCurve2D.desingularized
+  unsafeMagnitude = VectorCurve2D.unsafeMagnitude
   unsafeNormalize = VectorCurve2D.unsafeNormalize
   squaredMagnitude_ = VectorCurve2D.squaredMagnitude_
 
@@ -153,6 +163,7 @@ instance Exists 3 units space where
   evaluateBounds = VectorCurve3D.evaluateBounds
   bezier = VectorCurve3D.bezier
   desingularized = VectorCurve3D.desingularized
+  unsafeMagnitude = VectorCurve3D.unsafeMagnitude
   unsafeNormalize = VectorCurve3D.unsafeNormalize
   squaredMagnitude_ = VectorCurve3D.squaredMagnitude_
 
@@ -266,7 +277,8 @@ magnitude ::
   (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Curve1D units
-magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
+magnitude curve =
+  if isZero curve then Curve1D.zero else Curve1D.WithNoInteriorZeros.unwrap (unsafeMagnitude curve)
 
 erase ::
   Exists dimension units space =>
