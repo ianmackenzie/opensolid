@@ -1,3 +1,16 @@
+Switch to e.g. Curve2D.tangentDirection, Curve.tangentDirection that uses it and:
+- Curve.tangentDirectionImpl
+- Curve.unsafeTangentDirection
+- VectorCurve.normalizeImpl
+- VectorCurve.unsafeNormalized
+- Curve.curvatureVectorImpl_
+- Curve.unsafeCurvatureVector_
+
+Cache:
+- tangentDirection
+- curvatureVector_ (erased)
+- normalDirection
+
 Get rid of fields other than internally in modules
 
 Add generic VectorCurve.arc
