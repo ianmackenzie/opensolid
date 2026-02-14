@@ -11,6 +11,7 @@ module OpenSolid.Curve
   , startPoint
   , endPoint
   , secondDerivative
+  , isPoint
   , tangentDirection
   , curvatureVector_
   , findPoint
@@ -85,6 +86,9 @@ secondDerivative ::
   Curve dimension units space ->
   VectorCurve dimension units space
 secondDerivative = VectorCurve.derivative . derivative
+
+isPoint :: (Exists dimension units space, Tolerance units) => Curve dimension units space -> Bool
+isPoint curve = VectorCurve.isZero (derivative curve)
 
 tangentDirection ::
   (Exists dimension units space, Tolerance units) =>
