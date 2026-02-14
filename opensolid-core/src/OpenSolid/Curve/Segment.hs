@@ -6,6 +6,7 @@ module OpenSolid.Curve.Segment
   , bounds
   , firstDerivativeBounds
   , secondDerivativeBounds
+  , curvatureVectorBounds_
   , tangentBounds
   , evaluate
   , monotonic
@@ -23,6 +24,7 @@ import OpenSolid.Prelude
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
+import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 data Segment dimension units space = Segment
@@ -32,6 +34,7 @@ data Segment dimension units space = Segment
   , bounds :: ~(Bounds dimension units space)
   , firstDerivativeBounds :: ~(VectorBounds dimension units space)
   , secondDerivativeBounds :: ~(VectorBounds dimension units space)
+  , curvatureVectorBounds_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
   , tangentBounds :: ~(DirectionBounds dimension space)
   }
 
@@ -53,6 +56,11 @@ firstDerivativeBounds = (.firstDerivativeBounds)
 secondDerivativeBounds :: Segment dimension units space -> VectorBounds dimension units space
 secondDerivativeBounds = (.secondDerivativeBounds)
 
+curvatureVectorBounds_ ::
+  Segment dimension units space ->
+  VectorBounds dimension (Unitless ?/? units) space
+curvatureVectorBounds_ = (.curvatureVectorBounds_)
+
 tangentBounds :: Segment dimension units space -> DirectionBounds dimension space
 tangentBounds = (.tangentBounds)
 
@@ -62,13 +70,15 @@ monotonic segment = not (VectorBounds.includes Vector.zero segment.firstDerivati
 evaluate ::
   ( Curve.Exists dimension units space
   , VectorCurve.Exists dimension units space
+  , VectorCurve.Exists dimension (Unitless ?/? units) space
   , DirectionCurve.Exists dimension space
   ) =>
   Curve dimension units space ->
   DirectionCurve dimension space ->
+  VectorCurve dimension (Unitless ?/? units) space ->
   Interval Unitless ->
   Segment dimension units space
-evaluate givenCurve givenTangentCurve givenParameterBounds = do
+evaluate givenCurve givenTangentCurve givenCurvatureVectorCurve_ givenParameterBounds = do
   let firstDerivativeCurve = Curve.derivative givenCurve
   let secondDerivativeCurve = VectorCurve.derivative firstDerivativeCurve
   Segment
@@ -78,5 +88,6 @@ evaluate givenCurve givenTangentCurve givenParameterBounds = do
     , bounds = Curve.evaluateBounds givenCurve givenParameterBounds
     , firstDerivativeBounds = VectorCurve.evaluateBounds firstDerivativeCurve givenParameterBounds
     , secondDerivativeBounds = VectorCurve.evaluateBounds secondDerivativeCurve givenParameterBounds
+    , curvatureVectorBounds_ = VectorCurve.evaluateBounds givenCurvatureVectorCurve_ givenParameterBounds
     , tangentBounds = DirectionCurve.evaluateBounds givenTangentCurve givenParameterBounds
     }

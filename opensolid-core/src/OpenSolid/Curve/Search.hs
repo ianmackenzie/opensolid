@@ -35,13 +35,17 @@ tree ::
   ( Curve.Exists dimension units space
   , VectorCurve.Exists dimension units space
   , DirectionCurve.Exists dimension space
+  , VectorCurve.Exists dimension (Unitless ?/? units) space
   , Tolerance units
   ) =>
   Curve dimension units space ->
   Result Curve.IsPoint (Tree dimension units space)
 tree givenCurve = do
   computedTangentCurve <- Curve.tangentDirection givenCurve
-  Ok (Search.tree (Segment.evaluate givenCurve computedTangentCurve) Search.curveDomain)
+  computedCurvatureVectorCurve_ <- Curve.curvatureVector_ givenCurve
+  let evaluateSegment tBounds =
+        Segment.evaluate givenCurve computedTangentCurve computedCurvatureVectorCurve_ tBounds
+  Ok (Search.tree evaluateSegment Search.curveDomain)
 
 curve :: Tree dimension units space -> Curve dimension units space
 curve (Search.Tree _ segment _) = Segment.curve segment
