@@ -25,7 +25,6 @@ where
 
 import Data.Void (Void)
 import OpenSolid.Bezier qualified as Bezier
-import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1d
@@ -33,12 +32,11 @@ import OpenSolid.Curve1D.Zero qualified
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.DirectionCurve (DirectionCurve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
-import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval (Interval)
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Sign qualified as Sign
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -128,17 +126,12 @@ instance Exists 1 units Void where
   bezier = Curve1D.bezier
   desingularized = Curve1D.desingularized
   squaredMagnitude_ = Curve1D.squared_
-  unsafeNormalize curve = do
-    let normalizedValue = normalizeQuantity . evaluate curve
-    let normalizedBounds = normalizeInterval . evaluateBounds curve
-    let compiledNormalized = CompiledFunction.abstract normalizedValue normalizedBounds
-    Curve1d.new compiledNormalized zero
-
-normalizeQuantity :: Quantity units -> Number
-normalizeQuantity = Sign.value . Quantity.sign
-
-normalizeInterval :: Interval units -> Interval Unitless
-normalizeInterval (Interval low high) = Interval (normalizeQuantity low) (normalizeQuantity high)
+  unsafeNormalize curve =
+    -- If a 1D curve has no interior zeros,
+    -- then it is either always non-negative or always non-positive,
+    -- and so the normalized version of that curve (the curve divided by its magnitude)
+    -- will be a constant equal to either positive or negative one
+    if evaluate curve 0.5 > Quantity.zero then constant 1.0 else constant -1.0
 
 instance Exists 2 units space where
   constant = VectorCurve2D.constant
