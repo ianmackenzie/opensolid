@@ -26,6 +26,7 @@ module OpenSolid.VectorCurve3D
   , quotient
   , quotient_
   , magnitude
+  , unsafeMagnitude
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
@@ -85,6 +86,7 @@ data VectorCurve3D units space = VectorCurve3D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve3D units space)
   , maxSampledMagnitude :: ~(Quantity units)
+  , unsafeMagnitude :: ~(Curve1D.WithNoInteriorZeros units)
   , unsafeNormalized :: ~(VectorCurve3D Unitless space)
   }
 
@@ -106,6 +108,7 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
+      , unsafeMagnitude = Units.coerce curve.unsafeMagnitude
       , unsafeNormalized = curve.unsafeNormalized
       }
 
@@ -455,14 +458,16 @@ new givenCompiled givenDerivative = result
  where
   -- The test value to use to check if a curve is (likely) zero everywhere
   maxSampledMagnitude = NonEmpty.maximumOf (Vector3D.magnitude . evaluate result) Parameter.samples
+  -- The magnitude of this curve, assuming it has no interior zeros
+  computedUnsafeMagnitude = VectorCurve3D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
   -- The normalized version of this curve, assuming it has no interior zeros
-  unsafeNormalized =
-    result / VectorCurve3D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
+  unsafeNormalized = result / computedUnsafeMagnitude
   result =
     VectorCurve3D
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
+      , unsafeMagnitude = computedUnsafeMagnitude
       , unsafeNormalized
       }
 
@@ -647,6 +652,9 @@ squaredMagnitude_ curve = do
 
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 magnitude = VectorCurve.magnitude
+
+unsafeMagnitude :: VectorCurve3D units space -> Curve1D.WithNoInteriorZeros units
+unsafeMagnitude = (.unsafeMagnitude)
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros

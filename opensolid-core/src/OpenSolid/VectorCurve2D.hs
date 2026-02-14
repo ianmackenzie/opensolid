@@ -29,6 +29,7 @@ module OpenSolid.VectorCurve2D
   , quotient
   , quotient_
   , magnitude
+  , unsafeMagnitude
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
@@ -103,6 +104,7 @@ data VectorCurve2D units space = VectorCurve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
   , maxSampledMagnitude :: ~(Quantity units)
+  , unsafeMagnitude :: ~(Curve1D.WithNoInteriorZeros units)
   , unsafeNormalized :: ~(VectorCurve2D Unitless space)
   }
 
@@ -133,6 +135,7 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
+      , unsafeMagnitude = Units.coerce curve.unsafeMagnitude
       , unsafeNormalized = curve.unsafeNormalized
       }
 
@@ -516,14 +519,15 @@ new givenCompiled givenDerivative = result
   -- The test value to use to check if a curve is (likely) zero everywhere
   maxSampledMagnitude = NonEmpty.maximumOf (Vector2D.magnitude . evaluate result) Parameter.samples
   -- The magnitude of this curve, assuming it has no interior zeros
-  nonZeroMagnitude = VectorCurve2D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
+  computedUnsafeMagnitude = VectorCurve2D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
   -- The normalized version of this curve, assuming it has no interior zeros
-  unsafeNormalized = result / nonZeroMagnitude
+  unsafeNormalized = result / computedUnsafeMagnitude
   result =
     VectorCurve2D
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
+      , unsafeMagnitude = computedUnsafeMagnitude
       , unsafeNormalized
       }
 
@@ -747,6 +751,9 @@ zeros = VectorCurve.zeros
 
 unsafeNormalize :: VectorCurve2D units space -> VectorCurve2D Unitless space
 unsafeNormalize = (.unsafeNormalized)
+
+unsafeMagnitude :: VectorCurve2D units space -> Curve1D.WithNoInteriorZeros units
+unsafeMagnitude = (.unsafeMagnitude)
 
 normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
 normalize = VectorCurve.normalize
