@@ -38,6 +38,8 @@ import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector qualified as Vector
+import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 
@@ -53,7 +55,12 @@ type SearchTree dimension units space =
 class
   ( Point.Exists dimension units space
   , Bounds.Exists dimension units space
+  , Vector.Exists dimension units space
+  , Vector.Exists dimension (Unitless ?/? units) space
+  , VectorBounds.Exists dimension units space
+  , VectorBounds.Exists dimension (Unitless ?/? units) space
   , VectorCurve.Exists dimension units space
+  , VectorCurve.Exists dimension (Unitless ?/? units) space
   , DirectionCurve.Exists dimension space
   , Subtraction
       (Curve dimension units space)
