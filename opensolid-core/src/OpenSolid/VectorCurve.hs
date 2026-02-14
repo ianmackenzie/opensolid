@@ -64,6 +64,15 @@ class
   , HasUnits (VectorCurve dimension units space) units
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
   , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
+  , Negation (VectorCurve dimension units space)
+  , Addition
+      (VectorCurve dimension units space)
+      (VectorCurve dimension units space)
+      (VectorCurve dimension units space)
+  , Subtraction
+      (VectorCurve dimension units space)
+      (VectorCurve dimension units space)
+      (VectorCurve dimension units space)
   , Multiplication Number (VectorCurve dimension units space) (VectorCurve dimension units space)
   , Multiplication (VectorCurve dimension units space) Number (VectorCurve dimension units space)
   , Multiplication

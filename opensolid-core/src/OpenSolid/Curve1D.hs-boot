@@ -61,7 +61,11 @@ instance Units.Coercion (WithNoInteriorZeros units1) (WithNoInteriorZeros units2
 
 instance ApproximateEquality (Curve1D units) units
 
+instance Negation (Curve1D units)
+
 instance units1 ~ units2 => Addition (Curve1D units1) (Curve1D units2) (Curve1D units1)
+
+instance units1 ~ units2 => Subtraction (Curve1D units1) (Curve1D units2) (Curve1D units1)
 
 instance
   Units.Product units1 units2 units3 =>

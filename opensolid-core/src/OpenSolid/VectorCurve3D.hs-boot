@@ -65,6 +65,13 @@ instance
     (VectorCurve3D units1 space1)
 
 instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (VectorCurve3D units1 space1)
+    (VectorCurve3D units2 space2)
+    (VectorCurve3D units1 space1)
+
+instance
   Multiplication_
     (Curve1D units1)
     (VectorCurve3D units2 space)
