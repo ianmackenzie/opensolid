@@ -628,7 +628,7 @@ normalize :: Tolerance units => VectorCurve3D units space -> VectorCurve3D Unitl
 normalize curve = if isZero curve then zero else curve.nonZeroNormalized
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3D units1 space -> Curve1D units2
-squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
+squaredMagnitude = VectorCurve.squaredMagnitude
 
 squaredMagnitude_ :: VectorCurve3D units space -> Curve1D (units ?*? units)
 squaredMagnitude_ curve = do
@@ -642,7 +642,7 @@ squaredMagnitude_ curve = do
   Curve1D.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
-magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
+magnitude = VectorCurve.magnitude
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros

@@ -722,7 +722,7 @@ instance
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2D units1 space -> Curve1D units2
-squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
+squaredMagnitude = VectorCurve.squaredMagnitude
 
 squaredMagnitude_ :: VectorCurve2D units space -> Curve1D (units ?*? units)
 squaredMagnitude_ curve = do
@@ -736,7 +736,7 @@ squaredMagnitude_ curve = do
   Curve1D.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 magnitude :: Tolerance units => VectorCurve2D units space -> Curve1D units
-magnitude curve = Curve1D.sqrt_ (squaredMagnitude_ curve)
+magnitude = VectorCurve.magnitude
 
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
