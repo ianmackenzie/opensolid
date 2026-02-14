@@ -13,6 +13,7 @@ module OpenSolid.Curve3D
   , hermite
   , derivative
   , secondDerivative
+  , tangentDirection
   , startPoint
   , endPoint
   , evaluate
@@ -36,11 +37,13 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
+import OpenSolid.Curve (IsPoint)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
@@ -242,6 +245,9 @@ derivative = (.derivative)
 
 secondDerivative :: Curve3D space -> VectorCurve3D Meters space
 secondDerivative = Curve.secondDerivative
+
+tangentDirection :: Tolerance Meters => Curve3D space -> Result IsPoint (DirectionCurve3D space)
+tangentDirection = Curve.tangentDirection
 
 startPoint :: Curve3D space -> Point3D space
 startPoint curve = evaluate curve 0.0
