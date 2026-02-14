@@ -22,6 +22,7 @@ module OpenSolid.VectorCurve
   , desingularizedQuotient
   , erase
   , unerase
+  , coerce
   )
 where
 
@@ -291,3 +292,9 @@ unerase ::
   VectorCurve dimension Unitless space ->
   VectorCurve dimension units space
 unerase = Units.unerase
+
+coerce ::
+  (Exists dimension units1 space, Exists dimension units2 space) =>
+  VectorCurve dimension units1 space ->
+  VectorCurve dimension units2 space
+coerce curve = unerase (erase curve)
