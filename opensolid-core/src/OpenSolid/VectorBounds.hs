@@ -10,6 +10,7 @@ where
 
 import Data.Void (Void)
 import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -74,6 +75,12 @@ class
   center :: VectorBounds dimension units space -> Vector dimension units space
   squaredMagnitude_ :: VectorBounds dimension units space -> Interval (units ?*? units)
   magnitude :: VectorBounds dimension units space -> Interval units
+
+instance Exists 1 units Void where
+  includes = Interval.includes
+  center = Interval.midpoint
+  squaredMagnitude_ = Interval.squared_
+  magnitude = Interval.abs
 
 instance Exists 2 units space where
   includes = VectorBounds2D.includes
