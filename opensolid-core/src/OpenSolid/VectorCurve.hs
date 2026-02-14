@@ -3,6 +3,8 @@ module OpenSolid.VectorCurve
   , Exists
   , IsZero (IsZero)
   , isZero
+  , constant
+  , zero
   , bezier
   , evaluate
   , evaluateBounds
