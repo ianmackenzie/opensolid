@@ -1,15 +1,14 @@
-Switch to e.g. Curve2D.tangentDirection, Curve.tangentDirection that uses it and:
-- Curve.tangentDirectionImpl
-- Curve.unsafeTangentDirection
-- VectorCurve.normalizeImpl
-- VectorCurve.unsafeNormalized
-- Curve.curvatureVectorImpl_
-- Curve.unsafeCurvatureVector_
+Have WithNoZeros, WithNoInteriorZeros capture the tolerance value that was used when constructing them?
+- hopefully avoid Curve1D.singularityTolerance...
 
-Cache:
-- tangentDirection
-- curvatureVector_ (erased)
-- normalDirection
+Switch to Vector, VectorBounds purely *forwarding* to Vector2D, VectorBounds2D etc.?
+- don't call back into e.g. Vector from Vector2D
+- more efficient (all operations on primitives are monomorphized, easily inlineable etc.)
+- don't have to have 'fat' .hs-boot files for primitives
+
+Add "mutually exclusive" callback to generic bisection search?
+- perform deduplication *during* search instead of as a post-processing step;
+  a bit cleaner and should hopefully also be more efficient
 
 Get rid of fields other than internally in modules
 
