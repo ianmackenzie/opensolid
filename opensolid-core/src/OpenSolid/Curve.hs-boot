@@ -8,6 +8,7 @@ module OpenSolid.Curve
   , endPoint
   , derivative
   , tangentDirection
+  , curvatureVector_
   )
 where
 
@@ -20,6 +21,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
+import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 type family Curve dimension units space = curve | curve -> dimension units space where
   Curve 2 units space = Curve2D units space
@@ -55,3 +57,10 @@ tangentDirection ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Result IsPoint (DirectionCurve dimension space)
+curvatureVector_ ::
+  ( Exists dimension units space
+  , VectorCurve.Exists dimension (Unitless ?/? units) space
+  , Tolerance units
+  ) =>
+  Curve dimension units space ->
+  Result IsPoint (VectorCurve dimension (Unitless ?/? units) space)
