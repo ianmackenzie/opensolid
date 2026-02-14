@@ -7,6 +7,7 @@ module OpenSolid.Curve1D
   , WithNoZeros (WithNoZeros)
   , new
   , constant
+  , zero
   , bezier
   , compiled
   , derivative
@@ -89,6 +90,7 @@ instance
 
 new :: Compiled units -> Curve1D units -> Curve1D units
 constant :: Quantity units -> Curve1D units
+zero :: Curve1D units
 bezier :: NonEmpty (Quantity units) -> Curve1D units
 compiled :: Curve1D units -> Compiled units
 derivative :: Curve1D units -> Curve1D units
