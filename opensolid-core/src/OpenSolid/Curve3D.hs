@@ -14,12 +14,14 @@ module OpenSolid.Curve3D
   , derivative
   , secondDerivative
   , tangentDirection
+  , curvatureVector
   , startPoint
   , endPoint
   , evaluate
   , evaluateBounds
   , bounds
   , reverse
+  , unsafeCurvatureVector
   , arcLengthParameterization
   , parameterizeByArcLength
   , transformBy
@@ -29,7 +31,6 @@ module OpenSolid.Curve3D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds2D qualified as Bounds2D
@@ -57,25 +58,26 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
+import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.Transform3D (Transform3D)
+import OpenSolid.Units (InverseMeters)
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
-data Curve3D space = Curve3D (Compiled space) ~(VectorCurve3D Meters space)
+data Curve3D space = Curve3D
+  { compiled :: Compiled space
+  , derivative :: ~(VectorCurve3D Meters space)
+  , unsafeCurvatureVector :: ~(VectorCurve3D InverseMeters space)
+  }
 
 type Compiled space =
   CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
-
-instance HasField "compiled" (Curve3D space) (Compiled space) where
-  getField (Curve3D c _) = c
-
-instance HasField "derivative" (Curve3D space) (VectorCurve3D Meters space) where
-  getField (Curve3D _ d) = d
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
 
@@ -172,7 +174,12 @@ instance ApproximateEquality (Curve3D space) Meters where
     NonEmpty.allSatisfy equalPoints Parameter.samples
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
-new = Curve3D
+new givenCompiled givenDerivative =
+  Curve3D
+    { compiled = givenCompiled
+    , derivative = givenDerivative
+    , unsafeCurvatureVector = Units.specialize (Curve.unsafeCurvatureVectorImpl_ givenDerivative)
+    }
 
 recursive :: Compiled space -> (Curve3D space -> VectorCurve3D Meters space) -> Curve3D space
 recursive givenCompiled derivativeFunction =
@@ -249,6 +256,12 @@ secondDerivative = Curve.secondDerivative
 tangentDirection :: Tolerance Meters => Curve3D space -> Result IsPoint (DirectionCurve3D space)
 tangentDirection = Curve.tangentDirection
 
+curvatureVector ::
+  Tolerance Meters =>
+  Curve3D space ->
+  Result IsPoint (VectorCurve3D InverseMeters space)
+curvatureVector curve = Result.map Units.specialize (Curve.curvatureVector_ curve)
+
 startPoint :: Curve3D space -> Point3D space
 startPoint curve = evaluate curve 0.0
 
@@ -266,6 +279,9 @@ bounds curve = evaluateBounds curve Interval.unit
 
 reverse :: Curve3D space -> Curve3D space
 reverse curve = curve . (1.0 - Curve1D.t)
+
+unsafeCurvatureVector :: Curve3D space -> VectorCurve3D InverseMeters space
+unsafeCurvatureVector = (.unsafeCurvatureVector)
 
 arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Curve1D Unitless, Length)
 arcLengthParameterization curve =

@@ -9,15 +9,16 @@ module OpenSolid.Curve3D
   , evaluateBounds
   , bounds
   , reverse
+  , unsafeCurvatureVector
   )
 where
 
-import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Plane3D, Point3D, Vector3D)
+import OpenSolid.Units (InverseMeters)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
 type role Curve3D nominal
@@ -27,10 +28,6 @@ data Curve3D space
 
 type Compiled space =
   CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
-
-instance HasField "compiled" (Curve3D space) (Compiled space)
-
-instance HasField "derivative" (Curve3D space) (VectorCurve3D Meters space)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -89,3 +86,4 @@ evaluate :: Curve3D space -> Number -> Point3D space
 evaluateBounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 bounds :: Curve3D space -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space
+unsafeCurvatureVector :: Curve3D space -> VectorCurve3D InverseMeters space

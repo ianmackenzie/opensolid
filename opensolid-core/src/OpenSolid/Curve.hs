@@ -14,6 +14,8 @@ module OpenSolid.Curve
   , isPoint
   , tangentDirection
   , curvatureVector_
+  , unsafeCurvatureVector_
+  , unsafeCurvatureVectorImpl_
   , findPoint
   , searchTree
   )
@@ -23,7 +25,6 @@ import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve.Search qualified as Search
 import OpenSolid.Curve.Segment (Segment)
-import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
@@ -36,6 +37,7 @@ import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
+import OpenSolid.Units qualified as Units
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 
@@ -68,18 +70,21 @@ class
   bounds :: Curve dimension units space -> Bounds dimension units space
   evaluate :: Curve dimension units space -> Number -> Point dimension units space
   evaluateBounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
+  unsafeCurvatureVector_ :: Curve dimension units space -> VectorCurve dimension (Unitless ?/? units) space
 
 instance Exists 2 units space where
   derivative = Curve2D.derivative
   bounds = Curve2D.bounds
   evaluate = Curve2D.evaluate
   evaluateBounds = Curve2D.evaluateBounds
+  unsafeCurvatureVector_ = Curve2D.unsafeCurvatureVector_
 
 instance Exists 3 Meters space where
   derivative = Curve3D.derivative
   bounds = Curve3D.bounds
   evaluate = Curve3D.evaluate
   evaluateBounds = Curve3D.evaluateBounds
+  unsafeCurvatureVector_ = Units.unspecialize . Curve3D.unsafeCurvatureVector
 
 secondDerivative ::
   Exists dimension units space =>
@@ -106,11 +111,17 @@ curvatureVector_ ::
   ) =>
   Curve dimension units space ->
   Result IsPoint (VectorCurve dimension (Unitless ?/? units) space)
-curvatureVector_ curve = do
-  tangent <- tangentDirection curve
-  let dsdt = Curve1D.WithNoInteriorZeros (VectorCurve.magnitude (derivative curve))
-  let quotient_ = DirectionCurve.derivative tangent / Curve1D.WithNoInteriorZeros.erase dsdt
-  Ok (VectorCurve.unerase quotient_)
+curvatureVector_ curve =
+  if isPoint curve then Error IsPoint else Ok (unsafeCurvatureVector_ curve)
+
+unsafeCurvatureVectorImpl_ ::
+  (Exists dimension units space, VectorCurve.Exists dimension (Unitless ?/? units) space) =>
+  VectorCurve dimension units space ->
+  VectorCurve dimension (Unitless ?/? units) space
+unsafeCurvatureVectorImpl_ firstDerivative = do
+  let dsdt = VectorCurve.unsafeMagnitude firstDerivative
+  let tangent = VectorCurve.unsafeNormalize firstDerivative
+  VectorCurve.unerase (VectorCurve.derivative tangent / Curve1D.WithNoInteriorZeros.erase dsdt)
 
 startPoint ::
   Exists dimension units space =>
