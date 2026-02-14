@@ -20,6 +20,7 @@ module OpenSolid.Units
   , Unitless
   , Radians
   , Meters
+  , InverseMeters
   , Seconds
   , MetersPerSecond
   , MetersPerSecondSquared
