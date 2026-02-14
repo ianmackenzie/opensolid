@@ -224,6 +224,33 @@ instance
     let !(# low#, high# #) = intervalTimesInterval# low1# high1# low2# high2#
     Ordered# low# high#
 
+instance DotMultiplication_ (Quantity units1) (Interval units2) (Interval (units1 ?*? units2)) where
+  dot_ = (?*?)
+
+instance
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Quantity units1) (Interval units2) (Interval units3)
+  where
+  dot = (*)
+
+instance DotMultiplication_ (Interval units1) (Quantity units2) (Interval (units1 ?*? units2)) where
+  dot_ = (?*?)
+
+instance
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Interval units1) (Quantity units2) (Interval units3)
+  where
+  dot = (*)
+
+instance DotMultiplication_ (Interval units1) (Interval units2) (Interval (units1 ?*? units2)) where
+  dot_ = (?*?)
+
+instance
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Interval units1) (Interval units2) (Interval units3)
+  where
+  dot = (*)
+
 instance Division_ (Quantity units1) (Interval units2) (Interval (units1 ?/? units2)) where
   Quantity# n# ?/? Interval# dl# dh# = do
     let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
