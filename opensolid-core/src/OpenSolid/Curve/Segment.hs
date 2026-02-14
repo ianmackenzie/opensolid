@@ -20,8 +20,8 @@ import OpenSolid.DirectionBounds (DirectionBounds)
 import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
-import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
@@ -65,7 +65,7 @@ tangentBounds :: Segment dimension units space -> DirectionBounds dimension spac
 tangentBounds = (.tangentBounds)
 
 monotonic :: VectorBounds.Exists dimension units space => Segment dimension units space -> Bool
-monotonic segment = not (VectorBounds.includes Vector.zero segment.firstDerivativeBounds)
+monotonic segment = Interval.isResolved (VectorBounds.magnitude segment.firstDerivativeBounds)
 
 evaluate ::
   ( Curve.Exists dimension units space
