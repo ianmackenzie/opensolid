@@ -3,6 +3,8 @@ module OpenSolid.VectorBounds
   , Exists
   , includes
   , center
+  , squaredMagnitude_
+  , magnitude
   )
 where
 
@@ -70,11 +72,17 @@ class
   where
   includes :: Vector dimension units space -> VectorBounds dimension units space -> Bool
   center :: VectorBounds dimension units space -> Vector dimension units space
+  squaredMagnitude_ :: VectorBounds dimension units space -> Interval (units ?*? units)
+  magnitude :: VectorBounds dimension units space -> Interval units
 
 instance Exists 2 units space where
   includes = VectorBounds2D.includes
   center = VectorBounds2D.center
+  squaredMagnitude_ = VectorBounds2D.squaredMagnitude_
+  magnitude = VectorBounds2D.magnitude
 
 instance Exists 3 units space where
   includes = VectorBounds3D.includes
   center = VectorBounds3D.center
+  squaredMagnitude_ = VectorBounds3D.squaredMagnitude_
+  magnitude = VectorBounds3D.magnitude
