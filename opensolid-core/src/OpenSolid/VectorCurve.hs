@@ -13,6 +13,7 @@ module OpenSolid.VectorCurve
   , squaredMagnitude
   , magnitude
   , normalize
+  , unsafeNormalize
   , direction
   , zeros
   , desingularized
