@@ -30,6 +30,7 @@ module OpenSolid.VectorCurve3D
   , squaredMagnitude_
   , reverse
   , zeros
+  , unsafeNormalize
   , normalize
   , direction
   , placeIn
@@ -84,7 +85,7 @@ data VectorCurve3D units space = VectorCurve3D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve3D units space)
   , maxSampledMagnitude :: ~(Quantity units)
-  , nonZeroNormalized :: ~(VectorCurve3D Unitless space)
+  , unsafeNormalized :: ~(VectorCurve3D Unitless space)
   }
 
 type Compiled units space =
@@ -105,7 +106,7 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
-      , nonZeroNormalized = curve.nonZeroNormalized
+      , unsafeNormalized = curve.unsafeNormalized
       }
 
 instance ApproximateEquality (VectorCurve3D units space) units where
@@ -455,14 +456,14 @@ new givenCompiled givenDerivative = result
   -- The test value to use to check if a curve is (likely) zero everywhere
   maxSampledMagnitude = NonEmpty.maximumOf (Vector3D.magnitude . evaluate result) Parameter.samples
   -- The normalized version of this curve, assuming it has no interior zeros
-  nonZeroNormalized =
+  unsafeNormalized =
     result / VectorCurve3D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
   result =
     VectorCurve3D
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
-      , nonZeroNormalized
+      , unsafeNormalized
       }
 
 recursive ::
@@ -624,8 +625,11 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
+unsafeNormalize :: VectorCurve3D units space -> VectorCurve3D Unitless space
+unsafeNormalize = (.unsafeNormalized)
+
 normalize :: Tolerance units => VectorCurve3D units space -> VectorCurve3D Unitless space
-normalize curve = if isZero curve then zero else curve.nonZeroNormalized
+normalize = VectorCurve.normalize
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3D units1 space -> Curve1D units2
 squaredMagnitude = VectorCurve.squaredMagnitude

@@ -101,7 +101,7 @@ class
   evaluateBounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
   derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
-  normalize :: Tolerance units => VectorCurve dimension units space -> VectorCurve dimension Unitless space
+  unsafeNormalize :: VectorCurve dimension units space -> VectorCurve dimension Unitless space
   desingularized ::
     VectorCurve dimension units space ->
     VectorCurve dimension units space ->
@@ -117,13 +117,11 @@ instance Exists 1 units Void where
   bezier = Curve1D.bezier
   desingularized = Curve1D.desingularized
   squaredMagnitude_ = Curve1D.squared_
-  normalize curve
-    | isZero curve = zero
-    | otherwise = do
-        let normalizedValue = normalizeQuantity . evaluate curve
-        let normalizedBounds = normalizeInterval . evaluateBounds curve
-        let compiledNormalized = CompiledFunction.abstract normalizedValue normalizedBounds
-        Curve1d.new compiledNormalized zero
+  unsafeNormalize curve = do
+    let normalizedValue = normalizeQuantity . evaluate curve
+    let normalizedBounds = normalizeInterval . evaluateBounds curve
+    let compiledNormalized = CompiledFunction.abstract normalizedValue normalizedBounds
+    Curve1d.new compiledNormalized zero
 
 normalizeQuantity :: Quantity units -> Number
 normalizeQuantity = Sign.value . Quantity.sign
@@ -139,7 +137,7 @@ instance Exists 2 units space where
   evaluateBounds = VectorCurve2D.evaluateBounds
   bezier = VectorCurve2D.bezier
   desingularized = VectorCurve2D.desingularized
-  normalize = VectorCurve2D.normalize
+  unsafeNormalize = VectorCurve2D.unsafeNormalize
   squaredMagnitude_ = VectorCurve2D.squaredMagnitude_
 
 instance Exists 3 units space where
@@ -150,11 +148,17 @@ instance Exists 3 units space where
   evaluateBounds = VectorCurve3D.evaluateBounds
   bezier = VectorCurve3D.bezier
   desingularized = VectorCurve3D.desingularized
-  normalize = VectorCurve3D.normalize
+  unsafeNormalize = VectorCurve3D.unsafeNormalize
   squaredMagnitude_ = VectorCurve3D.squaredMagnitude_
 
 zero :: Exists dimension units space => VectorCurve dimension units space
 zero = constant Vector.zero
+
+normalize ::
+  (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
+  VectorCurve dimension units space ->
+  VectorCurve dimension Unitless space
+normalize curve = if isZero curve then zero else unsafeNormalize curve
 
 direction ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
@@ -163,7 +167,7 @@ direction ::
 direction vectorCurve =
   if isZero vectorCurve
     then Error IsZero
-    else Ok (DirectionCurve.unsafe (normalize vectorCurve))
+    else Ok (DirectionCurve.unsafe (unsafeNormalize vectorCurve))
 
 zeros ::
   (Exists dimension units space, Tolerance units) =>

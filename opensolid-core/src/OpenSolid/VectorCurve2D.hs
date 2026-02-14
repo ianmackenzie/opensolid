@@ -34,6 +34,7 @@ module OpenSolid.VectorCurve2D
   , reverse
   , isZero
   , zeros
+  , unsafeNormalize
   , normalize
   , direction
   , placeIn
@@ -102,7 +103,7 @@ data VectorCurve2D units space = VectorCurve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
   , maxSampledMagnitude :: ~(Quantity units)
-  , nonZeroNormalized :: ~(VectorCurve2D Unitless space)
+  , unsafeNormalized :: ~(VectorCurve2D Unitless space)
   }
 
 type Compiled units space =
@@ -132,7 +133,7 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
-      , nonZeroNormalized = curve.nonZeroNormalized
+      , unsafeNormalized = curve.unsafeNormalized
       }
 
 instance ApproximateEquality (VectorCurve2D units space) units where
@@ -517,13 +518,13 @@ new givenCompiled givenDerivative = result
   -- The magnitude of this curve, assuming it has no interior zeros
   nonZeroMagnitude = VectorCurve2D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
   -- The normalized version of this curve, assuming it has no interior zeros
-  nonZeroNormalized = result / nonZeroMagnitude
+  unsafeNormalized = result / nonZeroMagnitude
   result =
     VectorCurve2D
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
-      , nonZeroNormalized
+      , unsafeNormalized
       }
 
 recursive ::
@@ -744,8 +745,11 @@ isZero curve = curve.maxSampledMagnitude <= ?tolerance
 zeros :: Tolerance units => VectorCurve2D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros
 
+unsafeNormalize :: VectorCurve2D units space -> VectorCurve2D Unitless space
+unsafeNormalize = (.unsafeNormalized)
+
 normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
-normalize curve = if isZero curve then zero else curve.nonZeroNormalized
+normalize = VectorCurve.normalize
 
 direction ::
   Tolerance units =>
