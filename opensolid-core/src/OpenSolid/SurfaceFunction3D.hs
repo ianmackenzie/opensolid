@@ -211,7 +211,7 @@ normalDirection function = do
   duDirection <- derivativeDirection function.du
   dvDirection <- derivativeDirection function.dv
   let crossProduct = duDirection `cross` dvDirection
-  case Tolerance.using 1e-9 (VectorSurfaceFunction3D.direction crossProduct) of
+  case Tolerance.using Tolerance.unitless (VectorSurfaceFunction3D.direction crossProduct) of
     Ok directionFunction -> Ok directionFunction
     Error VectorSurfaceFunction3D.IsZero -> Error IsDegenerate
 
