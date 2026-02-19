@@ -131,9 +131,7 @@ lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
   let computedFrame =
         case Tolerance.using Quantity.zero (Vector3D.direction (focalPoint - eyePoint)) of
           Ok computedForwardDirection -> do
-            let viewVector = Vector3D.unit computedForwardDirection
-            let upVector = Vector3D.unit World3D.upwardDirection
-            case Tolerance.using 1e-9 (PlaneOrientation3D.fromVectors viewVector upVector) of
+            case PlaneOrientation3D.fromDirections computedForwardDirection World3D.upwardDirection of
               Just rightPlaneOrientation ->
                 Frame3D.fromRightPlane (Plane3D eyePoint rightPlaneOrientation)
               Nothing -- View direction is either straight up or straight down
