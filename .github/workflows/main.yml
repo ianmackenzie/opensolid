@@ -170,6 +170,9 @@ jobs:
             dist-newstyle
             opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
+      - name: Check GHC/Cabal availability via GHCup
+        run: |
+          ghcup list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
@@ -235,6 +238,9 @@ jobs:
             dist-newstyle
             opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
+      - name: Check GHC/Cabal availability via GHCup
+        run: |
+          ghcup list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
