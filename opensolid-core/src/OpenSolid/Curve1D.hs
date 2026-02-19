@@ -330,17 +330,15 @@ cubicSpline :: Quantity units -> Quantity units -> Quantity units -> Quantity un
 cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
 rationalBezier ::
-  Tolerance Unitless =>
   NonEmpty (Quantity units, Number) ->
   Result DivisionByZero (Curve1D units)
 rationalBezier pointsAndWeights = do
   let scaledPoint (point, weight) = point * weight
-  quotient
-    (bezier (NonEmpty.map scaledPoint pointsAndWeights))
-    (bezier (NonEmpty.map Pair.second pointsAndWeights))
+  let numerator = bezier (NonEmpty.map scaledPoint pointsAndWeights)
+  let denominator = bezier (NonEmpty.map Pair.second pointsAndWeights)
+  Tolerance.using Tolerance.unitless (quotient numerator denominator)
 
 rationalQuadraticSpline ::
-  Tolerance Unitless =>
   (Quantity units, Number) ->
   (Quantity units, Number) ->
   (Quantity units, Number) ->
@@ -348,7 +346,6 @@ rationalQuadraticSpline ::
 rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.three pw1 pw2 pw3)
 
 rationalCubicSpline ::
-  Tolerance Unitless =>
   (Quantity units, Number) ->
   (Quantity units, Number) ->
   (Quantity units, Number) ->
