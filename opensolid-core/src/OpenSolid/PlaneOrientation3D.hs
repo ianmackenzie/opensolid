@@ -68,12 +68,9 @@ but otherwise will be chosen arbitrarily.
 fromYDirection :: Direction3D space -> PlaneOrientation3D space
 fromYDirection dy = PlaneOrientation3D (Direction3D.perpendicularDirection dy) dy
 
-fromDirections ::
-  Tolerance Unitless =>
-  Direction3D space ->
-  Direction3D space ->
-  Maybe (PlaneOrientation3D space)
-fromDirections dx dxy = gramSchmidt dx (Vector3D.unit dxy)
+fromDirections :: Direction3D space -> Direction3D space -> Maybe (PlaneOrientation3D space)
+fromDirections dx dxy = Tolerance.using Tolerance.unitless do
+  gramSchmidt dx (Vector3D.unit dxy)
 
 fromVectors ::
   Tolerance units =>
