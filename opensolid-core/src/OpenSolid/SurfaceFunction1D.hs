@@ -110,7 +110,7 @@ instance Units.Coercion (SurfaceFunction1D unitsA) (SurfaceFunction1D unitsB) wh
   coerce (SurfaceFunction1D c du dv) =
     SurfaceFunction1D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
-instance ApproximateEquality (SurfaceFunction1D units) units where
+instance ApproximateEquality (SurfaceFunction1D units) (Tolerance units) where
   function1 ~= function2 =
     List.allTrue
       [evaluate function1 uvPoint ~= evaluate function2 uvPoint | uvPoint <- UvPoint.samples]

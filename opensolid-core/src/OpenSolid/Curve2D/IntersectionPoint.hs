@@ -17,7 +17,7 @@ data IntersectionPoint = IntersectionPoint
   }
   deriving (Eq, Ord, Show)
 
-instance ApproximateEquality IntersectionPoint Unitless where
+instance ApproximateEquality IntersectionPoint (Tolerance Unitless) where
   first ~= second = first.kind == second.kind && first.t1 ~= second.t1 && first.t2 ~= second.t2
 
 crossing :: Number -> Number -> Sign -> IntersectionPoint

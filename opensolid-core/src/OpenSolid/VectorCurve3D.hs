@@ -112,7 +112,7 @@ instance
       , unsafeNormalized = curve.unsafeNormalized
       }
 
-instance ApproximateEquality (VectorCurve3D units space) units where
+instance ApproximateEquality (VectorCurve3D units space) (Tolerance units) where
   curve1 ~= curve2 = do
     let equalValues t = evaluate curve1 t ~= evaluate curve2 t
     NonEmpty.allSatisfy equalValues Parameter.samples

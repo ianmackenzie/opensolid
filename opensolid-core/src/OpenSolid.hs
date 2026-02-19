@@ -85,7 +85,7 @@ crossProduct_ = cross_
 compose :: Composition f g h => f -> g -> h
 compose = (.)
 
-approximatelyEquals :: (ApproximateEquality a units, Tolerance units) => a -> a -> Bool
+approximatelyEquals :: (ApproximateEquality a constraint, constraint) => a -> a -> Bool
 approximatelyEquals = (~=)
 
 type Named name a = name # a

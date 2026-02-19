@@ -120,7 +120,7 @@ instance HasUnits (Curve1D units) units
 instance Units.Coercion (Curve1D units1) (Curve1D units2) where
   coerce curve = Curve1D (Units.coerce curve.compiled) (Units.coerce curve.derivative)
 
-instance ApproximateEquality (Curve1D units) units where
+instance ApproximateEquality (Curve1D units) (Tolerance units) where
   curve1 ~= curve2 = do
     let equalPoints tValue = evaluate curve1 tValue ~= evaluate curve2 tValue
     NonEmpty.allSatisfy equalPoints Parameter.samples

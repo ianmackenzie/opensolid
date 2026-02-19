@@ -233,18 +233,18 @@ type Tolerance units = ?tolerance :: Quantity units
 
 ----- Approximate equality -----
 
-class ApproximateEquality a units | a -> units where
-  (~=) :: Tolerance units => a -> a -> Bool
+class ApproximateEquality a constraint | a -> constraint where
+  (~=) :: constraint => a -> a -> Bool
 
 infix 4 ~=
 
 {-# INLINE (!=) #-}
-(!=) :: (ApproximateEquality a units, Tolerance units) => a -> a -> Bool
+(!=) :: (ApproximateEquality a constraint, constraint) => a -> a -> Bool
 (!=) first second = not (first ~= second)
 
 infix 4 !=
 
-instance ApproximateEquality (Quantity units) units where
+instance ApproximateEquality (Quantity units) (Tolerance units) where
   x ~= y = x >= y - ?tolerance && x <= y + ?tolerance
 
 instance ApproximateEquality a units => ApproximateEquality (List a) units where

@@ -84,7 +84,7 @@ instance
   where
   coerce = Data.Coerce.coerce
 
-instance ApproximateEquality (Vector2D units space) units where
+instance ApproximateEquality (Vector2D units space) (Tolerance units) where
   Vector2D# x1# y1# ~= Vector2D# x2# y2# =
     case hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0## of 1# -> True; _ -> False
 
@@ -267,7 +267,7 @@ instance FFI (Direction2D FFI.Space) where
 instance FFI (Direction2D UvSpace) where
   representation = FFI.classRepresentation "UvDirection"
 
-instance ApproximateEquality (Direction2D space) Radians where
+instance ApproximateEquality (Direction2D space) (Tolerance Radians) where
   d1 ~= d2 = Angle.atan2 (d1 `cross` d2) (d1 `dot` d2) ~= Angle.zero
 
 instance Negation (Direction2D space) where
@@ -412,7 +412,7 @@ instance
   where
   Position2D p - vb = PositionBounds2D (p - vb)
 
-instance ApproximateEquality (Point2D units space) units where
+instance ApproximateEquality (Point2D units space) (Tolerance units) where
   Position2D p1 ~= Position2D p2 = p1 ~= p2
 
 ----- VectorBounds2D -----
@@ -1048,7 +1048,7 @@ instance
   where
   coerce = Data.Coerce.coerce
 
-instance ApproximateEquality (Vector3D units space) units where
+instance ApproximateEquality (Vector3D units space) (Tolerance units) where
   Vector3D x1 y1 z1 ~= Vector3D x2 y2 z2 =
     Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Quantity.zero
 
@@ -1243,7 +1243,7 @@ pattern Direction3D dR dF dU = Unit3D (Vector3D dR dF dU)
 instance FFI (Direction3D FFI.Space) where
   representation = FFI.classRepresentation "Direction3D"
 
-instance ApproximateEquality (Direction3D space) Radians where
+instance ApproximateEquality (Direction3D space) (Tolerance Radians) where
   d1 ~= d2 = do
     let parallel = d1 `dot` d2
     let Vector3D cx cy cz = d1 `cross` d2
@@ -1487,7 +1487,7 @@ instance
   where
   Position3D p - vb = PositionBounds3D (p - vb)
 
-instance ApproximateEquality (Point3D space) Meters where
+instance ApproximateEquality (Point3D space) (Tolerance Meters) where
   Position3D p1 ~= Position3D p2 = p1 ~= p2
 
 ----- VectorBounds3D -----

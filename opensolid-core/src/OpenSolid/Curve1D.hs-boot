@@ -60,7 +60,7 @@ instance HasUnits (WithNoInteriorZeros units) units
 
 instance Units.Coercion (WithNoInteriorZeros units1) (WithNoInteriorZeros units2)
 
-instance ApproximateEquality (Curve1D units) units
+instance ApproximateEquality (Curve1D units) (Tolerance units)
 
 instance Negation (Curve1D units)
 

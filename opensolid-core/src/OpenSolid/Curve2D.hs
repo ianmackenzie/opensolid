@@ -220,7 +220,7 @@ instance
   where
   point `intersects` curve = curve `intersects` point
 
-instance ApproximateEquality (Curve2D units space) units where
+instance ApproximateEquality (Curve2D units space) (Tolerance units) where
   curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
 
 instance

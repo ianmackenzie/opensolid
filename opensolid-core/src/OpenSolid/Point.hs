@@ -21,7 +21,7 @@ type family
 class
   ( Vector.Exists dimension units space
   , Bounds.Exists dimension units space
-  , ApproximateEquality (Point dimension units space) units
+  , ApproximateEquality (Point dimension units space) (Tolerance units)
   , Addition
       (Point dimension units space)
       (Vector dimension units space)

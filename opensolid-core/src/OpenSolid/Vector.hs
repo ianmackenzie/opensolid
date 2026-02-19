@@ -41,7 +41,7 @@ class
   , Units.Coercion (Vector dimension units space) (Vector dimension Unitless space)
   , Units.Coercion (Vector dimension Unitless space) (Vector dimension units space)
   , Eq (Vector dimension units space)
-  , ApproximateEquality (Vector dimension units space) units
+  , ApproximateEquality (Vector dimension units space) (Tolerance units)
   , Negation (Vector dimension units space)
   , Addition
       (Vector dimension units space)

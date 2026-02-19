@@ -168,7 +168,7 @@ instance
       (curve.compiled . function.compiled)
       (\p -> (curve.derivative . function) * SurfaceFunction1D.derivative p function)
 
-instance ApproximateEquality (Curve3D space) Meters where
+instance ApproximateEquality (Curve3D space) (Tolerance Meters) where
   curve1 ~= curve2 = do
     let equalPoints t = evaluate curve1 t ~= evaluate curve2 t
     NonEmpty.allSatisfy equalPoints Parameter.samples

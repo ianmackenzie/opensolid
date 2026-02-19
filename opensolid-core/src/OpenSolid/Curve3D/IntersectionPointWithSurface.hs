@@ -18,7 +18,7 @@ data IntersectionPointWithSurface = IntersectionPointWithSurface
   }
   deriving (Eq, Ord, Show)
 
-instance ApproximateEquality IntersectionPointWithSurface Unitless where
+instance ApproximateEquality IntersectionPointWithSurface (Tolerance Unitless) where
   first ~= second = first.kind == second.kind && first.t ~= second.t && first.uv ~= second.uv
 
 crossing :: Number -> UvPoint -> Sign -> IntersectionPointWithSurface
