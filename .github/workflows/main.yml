@@ -35,8 +35,8 @@ jobs:
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
-          ghc-version: 9.12.2
-          cabal-version: 3.14.2.0
+          ghc-version: 9.14.1
+          cabal-version: 3.16.1.0
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -106,8 +106,8 @@ jobs:
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
-          ghc-version: 9.12.2
-          cabal-version: 3.14.2.0
+          ghc-version: 9.14.1
+          cabal-version: 3.16.1.0
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -173,8 +173,8 @@ jobs:
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
-          ghc-version: 9.12.2
-          cabal-version: 3.14.2.0
+          ghc-version: 9.14.1
+          cabal-version: 3.16.1.0
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -238,8 +238,8 @@ jobs:
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
-          ghc-version: 9.12.2
-          cabal-version: 3.14.2.0
+          ghc-version: 9.14.1
+          cabal-version: 3.16.1.0
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
