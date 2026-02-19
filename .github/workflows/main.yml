@@ -171,7 +171,11 @@ jobs:
             opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
       - name: Check GHC/Cabal availability via GHCup
+        env:
+          BOOTSTRAP_HASKELL_NONINTERACTIVE: "1"
+          BOOTSTRAP_HASKELL_MINIMAL: "1"
         run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
           ghcup list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
@@ -239,7 +243,11 @@ jobs:
             opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
       - name: Check GHC/Cabal availability via GHCup
+        env:
+          BOOTSTRAP_HASKELL_NONINTERACTIVE: "1"
+          BOOTSTRAP_HASKELL_MINIMAL: "1"
         run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
           ghcup list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
