@@ -198,9 +198,10 @@ derivativeDirection ::
   Tolerance units =>
   VectorSurfaceFunction3D units space ->
   Result IsDegenerate (DirectionSurfaceFunction3D space)
-derivativeDirection partialDerivative = case VectorSurfaceFunction3D.direction partialDerivative of
-  Ok direction -> Ok direction
-  Error VectorSurfaceFunction3D.IsZero -> Error IsDegenerate
+derivativeDirection partialDerivative =
+  case VectorSurfaceFunction3D.direction partialDerivative of
+    Ok direction -> Ok direction
+    Error VectorSurfaceFunction3D.IsZero -> Error IsDegenerate
 
 normalDirection ::
   Tolerance Meters =>
