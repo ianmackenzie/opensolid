@@ -3,6 +3,7 @@ module OpenSolid.Curve1D.Zero (Zero (Zero, location, order, sign)) where
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
+import OpenSolid.Tolerance qualified as Tolerance
 
 -- | Contains details about a single point where a curve is zero.
 data Zero = Zero
@@ -29,9 +30,10 @@ data Zero = Zero
   }
   deriving (Eq, Show)
 
-instance ApproximateEquality Zero (Tolerance Unitless) where
+instance ApproximateEquality Zero () where
   Zero location1 order1 sign1 ~= Zero location2 order2 sign2 =
-    location1 ~= location2 && order1 == order2 && sign1 == sign2
+    Tolerance.using Tolerance.unitless do
+      location1 ~= location2 && order1 == order2 && sign1 == sign2
 
 instance FFI Zero where
   representation = FFI.nestedClassRepresentation "Curve" "Zero"

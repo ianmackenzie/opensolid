@@ -171,7 +171,7 @@ crossingIntersection = Test.verify "crossingIntersection" Test.do
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve2D.IntersectionPoints actualIntersectionPoints) ->
-      Tolerance.using 1e-12 (Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints))
+      Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just (Curve2D.OverlappingSegments _) ->
@@ -196,10 +196,9 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve2D.IntersectionPoints actualIntersectionPoints) ->
-      Tolerance.using 1e-12 do
-        Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints)
-          & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
-          & Test.output "actualIntersectionPoints" actualIntersectionPoints
+      Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints)
+        & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
+        & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just (Curve2D.OverlappingSegments _) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 

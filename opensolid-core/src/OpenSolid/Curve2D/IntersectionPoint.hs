@@ -7,6 +7,7 @@ module OpenSolid.Curve2D.IntersectionPoint
 where
 
 import OpenSolid.Prelude
+import OpenSolid.Tolerance qualified as Tolerance
 
 data Kind = Crossing Sign | Tangent deriving (Eq, Ord, Show)
 
@@ -17,8 +18,9 @@ data IntersectionPoint = IntersectionPoint
   }
   deriving (Eq, Ord, Show)
 
-instance ApproximateEquality IntersectionPoint (Tolerance Unitless) where
-  first ~= second = first.kind == second.kind && first.t1 ~= second.t1 && first.t2 ~= second.t2
+instance ApproximateEquality IntersectionPoint () where
+  first ~= second = Tolerance.using Tolerance.unitless do
+    first.kind == second.kind && first.t1 ~= second.t1 && first.t2 ~= second.t2
 
 crossing :: Number -> Number -> Sign -> IntersectionPoint
 crossing t1 t2 sign = IntersectionPoint{t1, t2, kind = Crossing sign}
