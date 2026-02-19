@@ -26,7 +26,6 @@ where
 
 import Data.Coerce qualified
 import GHC.Records (HasField)
-import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)
@@ -36,6 +35,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
@@ -267,8 +267,8 @@ instance FFI (Direction2D FFI.Space) where
 instance FFI (Direction2D UvSpace) where
   representation = FFI.classRepresentation "UvDirection"
 
-instance ApproximateEquality (Direction2D space) (Tolerance Radians) where
-  d1 ~= d2 = Angle.atan2 (d1 `cross` d2) (d1 `dot` d2) ~= Angle.zero
+instance ApproximateEquality (Direction2D space) () where
+  Unit2D v1 ~= Unit2D v2 = Tolerance.using Tolerance.unitless (v1 ~= v2)
 
 instance Negation (Direction2D space) where
   negate (Unit2D v) = Unit2D (negate v)
@@ -1243,12 +1243,8 @@ pattern Direction3D dR dF dU = Unit3D (Vector3D dR dF dU)
 instance FFI (Direction3D FFI.Space) where
   representation = FFI.classRepresentation "Direction3D"
 
-instance ApproximateEquality (Direction3D space) (Tolerance Radians) where
-  d1 ~= d2 = do
-    let parallel = d1 `dot` d2
-    let Vector3D cx cy cz = d1 `cross` d2
-    let perpendicular = Quantity.hypot3 cx cy cz
-    Angle.atan2 perpendicular parallel ~= Quantity.zero
+instance ApproximateEquality (Direction3D space) () where
+  Unit3D v1 ~= Unit3D v2 = Tolerance.using Tolerance.unitless (v1 ~= v2)
 
 instance Negation (Direction3D space) where
   negate (Unit3D vector) = Unit3D (negate vector)
