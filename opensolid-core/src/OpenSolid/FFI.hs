@@ -425,10 +425,13 @@ store ptr offset value = do
       store ptr offset6 value6
       store ptr offset7 value7
       store ptr offset8 value8
-    MaybeRep -> do
-      let tag = case value of Just{} -> 0; Nothing -> 1
-      store @Int ptr offset tag
-      IO.maybe (store ptr (offset + 8)) value
+    MaybeRep ->
+      case value of
+        Just item -> do
+          store @Int ptr offset 0
+          store ptr (offset + 8) item
+        Nothing ->
+          store @Int ptr offset 1
     ResultRep ->
       case value of
         Ok successfulValue -> do
