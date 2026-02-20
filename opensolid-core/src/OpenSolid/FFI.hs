@@ -104,19 +104,33 @@ data Representation a where
   -- Same representation as a list, but with a runtime check for emptiness
   ArrayRep :: FFI a => Representation (Array a)
   -- A struct with the first item and then the second
-  Tuple2Rep :: (FFI a, FFI b) => Representation (a, b)
+  Tuple2Rep ::
+    (FFI a, FFI b) =>
+    Representation (a, b)
   -- A struct with the three items in order
-  Tuple3Rep :: (FFI a, FFI b, FFI c) => Representation (a, b, c)
+  Tuple3Rep ::
+    (FFI a, FFI b, FFI c) =>
+    Representation (a, b, c)
   -- A struct with the four items in order
-  Tuple4Rep :: (FFI a, FFI b, FFI c, FFI d) => Representation (a, b, c, d)
+  Tuple4Rep ::
+    (FFI a, FFI b, FFI c, FFI d) =>
+    Representation (a, b, c, d)
   -- A struct with the five items in order
-  Tuple5Rep :: (FFI a, FFI b, FFI c, FFI d, FFI e) => Representation (a, b, c, d, e)
+  Tuple5Rep ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+    Representation (a, b, c, d, e)
   -- A struct with the six items in order
-  Tuple6Rep :: (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) => Representation (a, b, c, d, e, f)
+  Tuple6Rep ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+    Representation (a, b, c, d, e, f)
   -- A struct with the seven items in order
-  Tuple7Rep :: (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) => Representation (a, b, c, d, e, f, g)
+  Tuple7Rep ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+    Representation (a, b, c, d, e, f, g)
   -- A struct with the eight items in order
-  Tuple8Rep :: (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) => Representation (a, b, c, d, e, f, g, h)
+  Tuple8Rep ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) =>
+    Representation (a, b, c, d, e, f, g, h)
   -- A struct with a 64-bit integer tag (0 = Just, 1 = Nothing)
   -- followed by the representation of the value
   MaybeRep :: FFI a => Representation (Maybe a)
@@ -172,13 +186,20 @@ typeOf t = case representation (Proxy @t) of
   ListRep @a -> List (typeOf a)
   NonEmptyRep @a -> NonEmpty (typeOf a)
   ArrayRep @a -> Array (typeOf a)
-  Tuple2Rep @a @b -> Tuple (typeOf a) (typeOf b) []
-  Tuple3Rep @a @b @c -> Tuple (typeOf a) (typeOf b) [typeOf c]
-  Tuple4Rep @a @b @c @d -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d]
-  Tuple5Rep @a @b @c @d @e -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e]
-  Tuple6Rep @a @b @c @d @e @f -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f]
-  Tuple7Rep @a @b @c @d @e @f @g -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g]
-  Tuple8Rep @a @b @c @d @e @f @g @h -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g, typeOf h]
+  Tuple2Rep @a @b ->
+    Tuple (typeOf a) (typeOf b) []
+  Tuple3Rep @a @b @c ->
+    Tuple (typeOf a) (typeOf b) [typeOf c]
+  Tuple4Rep @a @b @c @d ->
+    Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d]
+  Tuple5Rep @a @b @c @d @e ->
+    Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e]
+  Tuple6Rep @a @b @c @d @e @f ->
+    Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f]
+  Tuple7Rep @a @b @c @d @e @f @g ->
+    Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g]
+  Tuple8Rep @a @b @c @d @e @f @g @h ->
+    Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g, typeOf h]
   MaybeRep @a -> Maybe (typeOf a)
   ResultRep @_x @a -> Result (typeOf a)
   ClassRep class_ -> Class class_
@@ -286,25 +307,46 @@ instance FFI item => FFI (NonEmpty item) where
 instance FFI item => FFI (Array item) where
   representation _ = ArrayRep
 
-instance (FFI a, FFI b) => FFI (a, b) where
+instance
+  (FFI a, FFI b) =>
+  FFI (a, b)
+  where
   representation _ = Tuple2Rep
 
-instance (FFI a, FFI b, FFI c) => FFI (a, b, c) where
+instance
+  (FFI a, FFI b, FFI c) =>
+  FFI (a, b, c)
+  where
   representation _ = Tuple3Rep
 
-instance (FFI a, FFI b, FFI c, FFI d) => FFI (a, b, c, d) where
+instance
+  (FFI a, FFI b, FFI c, FFI d) =>
+  FFI (a, b, c, d)
+  where
   representation _ = Tuple4Rep
 
-instance (FFI a, FFI b, FFI c, FFI d, FFI e) => FFI (a, b, c, d, e) where
+instance
+  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+  FFI (a, b, c, d, e)
+  where
   representation _ = Tuple5Rep
 
-instance (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) => FFI (a, b, c, d, e, f) where
+instance
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  FFI (a, b, c, d, e, f)
+  where
   representation _ = Tuple6Rep
 
-instance (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) => FFI (a, b, c, d, e, f, g) where
+instance
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+  FFI (a, b, c, d, e, f, g)
+  where
   representation _ = Tuple7Rep
 
-instance (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) => FFI (a, b, c, d, e, f, g, h) where
+instance
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) =>
+  FFI (a, b, c, d, e, f, g, h)
+  where
   representation _ = Tuple8Rep
 
 instance FFI a => FFI (Maybe a) where
