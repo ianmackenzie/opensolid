@@ -34,10 +34,11 @@ import OpenSolid.UvSpace (UvSpace)
 The last point will be joined back to the first.
 -}
 newtype Polygon2D units space
-  = -- | Construct a polygon from its boundary vertices.
-    --
-    -- These should generally be in counterclockwise order
-    -- (clockwise order will be interpreted as a 'negative' polygon or hole).
+  = {-| Construct a polygon from its boundary vertices.
+
+    These should generally be in counterclockwise order
+    (clockwise order will be interpreted as a 'negative' polygon or hole).
+    -}
     Polygon2D {vertices :: NonEmpty (Point2D units space)}
 
 instance FFI (Polygon2D Meters FFI.Space) where
