@@ -22,22 +22,17 @@ source-repository head
 common config
   default-language: GHC2021
   build-depends:
-    aeson,
     array,
     async,
     base,
     bytestring,
     colour,
     containers,
-    deque,
     directory,
     filepath,
     hashable,
-    indexed-traversable,
     random,
-    scientific,
     text,
-    vector,
     zlib,
 
   ghc-options:
@@ -56,6 +51,7 @@ common config
     -haddock
     -dcmm-lint
     -dcore-lint
+    -Wno-pattern-namespace-specifier
 
   default-extensions:
     BlockArguments

@@ -17,44 +17,24 @@
         system:
         # Get the Nix packages for the current platform/architecture
         let
-          overlay = final: prev: {
-            haskell-language-server = prev.haskell-language-server.override {
-              supportedGhcVersions = [ "912" ];
-            };
-          };
-          pkgs = nixpkgs.legacyPackages.${system}.extend overlay;
+          pkgs = nixpkgs.legacyPackages.${system};
           # Allow Python packages to be built against libstdc++.so
           ld_library_path = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
         in
         {
           # Define the configuration for an OpenSolid development shell
-          default = pkgs.mkShell {
+          default = pkgs.mkShellNoCC {
             # Development tools
             packages = [
               # Get Nix to provide a proper Bash shell with builtins like 'complete', see e.g.
               # https://discourse.nixos.org/t/non-interactive-bash-errors-from-flake-nix-mkshell/33310
               pkgs.bashInteractive
-              # The Haskell compiler itself
-              pkgs.haskell.compiler.ghc912
-              # The Cabal build tool for Haskell
-              pkgs.cabal-install
-              # Haskell editor/IDE support
-              pkgs.haskell-language-server
-              # Needed so that GHC can link against it
-              pkgs.zlib
-              # Haskell static analysis tool,
-              # provides various warnings/suggestions
-              pkgs.haskellPackages.stan
               # For formatting Haskell files
               pkgs.haskellPackages.fourmolu
               # For formatting .cabal files;
               # only needed if you're editing .cabal files,
               # e.g. when adding/removing/renaming Haskell source files
               pkgs.haskellPackages.cabal-gild
-              # For (re)generating hie.yaml;
-              # only needed if you add/remove/rename .cabal files,
-              # e.g. when adding a whole new sub-project
-              pkgs.haskellPackages.implicit-hie
               # For visualizing Haskell profiling (.prof) files
               pkgs.haskellPackages.profiteur
               # For formatting this file =)

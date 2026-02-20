@@ -32,6 +32,7 @@ common config
     -threaded
     -rtsopts
     -with-rtsopts=-N
+    -Wno-pattern-namespace-specifier
 
   default-extensions:
     BlockArguments

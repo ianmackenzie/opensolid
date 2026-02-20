@@ -7,7 +7,6 @@ module OpenSolid.IO
   , forEach
   , forEachWithIndex
   , collect
-  , collectWithIndex
   , sleep
   , onError
   , attempt
@@ -26,13 +25,11 @@ import Control.Concurrent qualified
 import Data.ByteString qualified
 import Data.ByteString.Builder qualified as Builder
 import Data.Foldable qualified
-import Data.Foldable.WithIndex qualified
 import Data.Text.IO.Utf8 qualified
-import Data.Traversable.WithIndex (TraversableWithIndex)
-import Data.Traversable.WithIndex qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
+import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
@@ -59,16 +56,13 @@ maybe _ Nothing = succeed ()
 maybe callback (Just value) = callback value
 
 forEach :: List a -> (a -> IO ()) -> IO ()
-forEach = Data.Foldable.forM_
+forEach items callback = run (List.map callback items)
 
 forEachWithIndex :: List a -> (Int -> a -> IO ()) -> IO ()
-forEachWithIndex = Data.Foldable.WithIndex.iforM_
+forEachWithIndex items callback = run (List.mapWithIndex callback items)
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Prelude.mapM
-
-collectWithIndex :: TraversableWithIndex Int list => (Int -> a -> IO b) -> list a -> IO (list b)
-collectWithIndex = Data.Traversable.WithIndex.imapM
 
 sleep :: Duration -> IO ()
 sleep duration = Control.Concurrent.threadDelay (Number.round (Duration.inMicroseconds duration))

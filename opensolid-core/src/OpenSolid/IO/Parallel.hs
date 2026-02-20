@@ -4,7 +4,6 @@ module OpenSolid.IO.Parallel
   , map4
   , run
   , collect
-  , collectWithIndex
   , forEach
   , forEachWithIndex
   )
@@ -12,9 +11,7 @@ where
 
 import Control.Concurrent.Async (Concurrently (Concurrently))
 import Control.Concurrent.Async qualified as Async
-import Data.Foldable.WithIndex qualified
-import Data.Traversable.WithIndex (TraversableWithIndex)
-import Data.Traversable.WithIndex qualified
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 
 map2 :: (a -> b -> c) -> IO a -> IO b -> IO c
@@ -47,15 +44,8 @@ run = Async.mapConcurrently_ id
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Async.mapConcurrently
 
-collectWithIndex :: TraversableWithIndex Int list => (Int -> a -> IO b) -> list a -> IO (list b)
-collectWithIndex function list = do
-  let task index item = Async.Concurrently (function index item)
-  Async.runConcurrently (Data.Traversable.WithIndex.itraverse task list)
-
 forEach :: List a -> (a -> IO ()) -> IO ()
-forEach = Async.forConcurrently_
+forEach list function = run (List.map function list)
 
 forEachWithIndex :: List a -> (Int -> a -> IO ()) -> IO ()
-forEachWithIndex list function = do
-  let task index item = Async.Concurrently (function index item)
-  Async.runConcurrently (Data.Foldable.WithIndex.itraverse_ task list)
+forEachWithIndex list function = run (List.mapWithIndex function list)
