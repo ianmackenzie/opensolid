@@ -1,6 +1,5 @@
 module OpenSolid.API.Upcast (Upcast (Upcast), ffiName, invoke, parentClassName) where
 
-import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -23,4 +22,4 @@ parentClassName :: Upcast -> FFI.ClassName
 parentClassName (Upcast f) = parentClassNameImpl f
 
 parentClassNameImpl :: forall parent child. FFI parent => (child -> parent) -> FFI.ClassName
-parentClassNameImpl _ = FFI.className @parent Proxy
+parentClassNameImpl _ = FFI.className parent

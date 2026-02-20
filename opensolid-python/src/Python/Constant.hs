@@ -12,8 +12,8 @@ import Python.FFI qualified
 import Python.Type qualified
 
 declaration :: (Name, Constant) -> Text
-declaration (name, (Constant value documentation)) = do
-  let typeName = Python.Type.qualifiedName (Constant.valueType value)
+declaration (name, (Constant @t _ documentation)) = do
+  let typeName = Python.Type.qualifiedName (FFI.typeOf t)
   Python.lines
     [ FFI.snakeCase name <> ": " <> typeName <> " = None # type: ignore[assignment]"
     , Python.docstring documentation
@@ -21,8 +21,8 @@ declaration (name, (Constant value documentation)) = do
     ]
 
 definition :: FFI.ClassName -> (Name, Constant) -> Text
-definition className (name, (Constant value _)) = do
-  let valueType = Constant.valueType value
+definition className (name, (Constant @t _ _)) = do
+  let valueType = FFI.typeOf t
   let ffiFunctionName = Constant.ffiName className name
   let constantName = FFI.snakeCase name
   let pythonClassName = Python.Class.qualifiedName className

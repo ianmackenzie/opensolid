@@ -7,7 +7,6 @@ module OpenSolid.API.Property
   )
 where
 
-import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
@@ -30,7 +29,7 @@ returnType :: Property -> FFI.Type
 returnType (Property f _) = functionReturnType f
 
 functionReturnType :: forall value result. (FFI value, FFI result) => (value -> result) -> FFI.Type
-functionReturnType _ = FFI.typeOf @result Proxy
+functionReturnType _ = FFI.typeOf result
 
 documentation :: Property -> Text
 documentation (Property _ docs) = docs

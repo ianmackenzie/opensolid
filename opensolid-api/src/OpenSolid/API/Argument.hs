@@ -1,6 +1,5 @@
 module OpenSolid.API.Argument (Kind (Positional, Named), kind) where
 
-import Data.Proxy (Proxy)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.InternalError (InternalError (InternalError))
@@ -9,9 +8,9 @@ import OpenSolid.Text qualified as Text
 
 data Kind = Positional | Named deriving (Eq, Ord)
 
-kind :: FFI a => Name -> Proxy a -> Kind
-kind name proxy =
-  case FFI.argumentName proxy of
+kind :: forall t -> FFI t => Name -> Kind
+kind t name =
+  case FFI.argumentName t of
     Nothing -> Positional
     Just argName ->
       -- Slight hack: use conversion to snake case as a way to do case-insensitive comparison,

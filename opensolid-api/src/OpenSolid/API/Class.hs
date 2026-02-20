@@ -91,7 +91,6 @@ where
 
 import Data.Hashable (Hashable)
 import Data.Hashable qualified
-import Data.Proxy (Proxy (Proxy))
 import Data.Void (Void)
 import OpenSolid.API.AbsFunction (AbsFunction (AbsFunction))
 import OpenSolid.API.AbsFunction qualified as AbsFunction
@@ -163,9 +162,9 @@ data Member value where
   PostOverload :: BinaryOperator.Id -> PostOperatorOverload -> Member value
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
 
-new :: forall value. FFI value => Text -> List (Member value) -> Class
+new :: forall t. FFI t => Text -> List (Member t) -> Class
 new givenDocumentation members =
-  buildClass members (init (FFI.className @value Proxy) givenDocumentation)
+  buildClass members (init (FFI.className t) givenDocumentation)
 
 static :: Text -> Text -> List (Member Void) -> Class
 static className givenDocumentation members =
@@ -1068,12 +1067,12 @@ upcastInfo className maybeToParent = case maybeToParent of
         }
 
 constantFunctionInfo :: FFI.ClassName -> (FFI.Name, Constant) -> Function
-constantFunctionInfo className (constantName, constantFunction@(Constant value _)) =
+constantFunctionInfo className (constantName, constantFunction@(Constant @t _ _)) =
   Function
     { ffiName = Constant.ffiName className constantName
     , implicitArgument = Nothing
     , argumentTypes = []
-    , returnType = Constant.valueType value
+    , returnType = FFI.typeOf t
     , invoke = Constant.invoke constantFunction
     }
 
@@ -1170,7 +1169,7 @@ equalityAndHashFunctionInfo className maybeFunctions = case maybeFunctions of
             { ffiName = EqualityFunction.ffiName className
             , implicitArgument = Nothing
             , argumentTypes = [selfType, selfType]
-            , returnType = FFI.typeOf @Bool Proxy
+            , returnType = FFI.typeOf Bool
             , invoke = EqualityFunction.invoke equalityFunction
             }
     let hashFunctionInfo =
@@ -1178,7 +1177,7 @@ equalityAndHashFunctionInfo className maybeFunctions = case maybeFunctions of
             { ffiName = HashFunction.ffiName className
             , implicitArgument = Nothing
             , argumentTypes = [selfType]
-            , returnType = FFI.typeOf @Int Proxy
+            , returnType = FFI.typeOf Int
             , invoke = HashFunction.invoke hashFunction
             }
     [equalityFunctionInfo, hashFunctionInfo]
@@ -1193,7 +1192,7 @@ comparisonFunctionInfo className maybeComparisonFunction = case maybeComparisonF
         { ffiName = ComparisonFunction.ffiName className
         , implicitArgument = Nothing
         , argumentTypes = [selfType, selfType]
-        , returnType = FFI.typeOf @Int Proxy
+        , returnType = FFI.typeOf Int
         , invoke = ComparisonFunction.invoke comparisonFunction
         }
 

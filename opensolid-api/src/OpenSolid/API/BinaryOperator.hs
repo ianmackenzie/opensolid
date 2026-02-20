@@ -9,7 +9,6 @@ module OpenSolid.API.BinaryOperator
   )
 where
 
-import Data.Proxy (Proxy (Proxy))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
@@ -44,52 +43,32 @@ functionSignature ::
   (FFI a, FFI b, FFI c) =>
   (a -> b -> c) ->
   (FFI.Type, FFI.Type, FFI.Type)
-functionSignature _ =
-  ( FFI.typeOf @a Proxy
-  , FFI.typeOf @b Proxy
-  , FFI.typeOf @c Proxy
-  )
+functionSignature _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
 
 functionSignatureU ::
   forall a b c.
   (FFI a, FFI b, FFI c) =>
   (Tolerance Unitless => a -> b -> c) ->
   (FFI.Type, FFI.Type, FFI.Type)
-functionSignatureU _ =
-  ( FFI.typeOf @a Proxy
-  , FFI.typeOf @b Proxy
-  , FFI.typeOf @c Proxy
-  )
+functionSignatureU _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
 
 functionSignatureR ::
   forall a b c.
   (FFI a, FFI b, FFI c) =>
   (Tolerance Radians => a -> b -> c) ->
   (FFI.Type, FFI.Type, FFI.Type)
-functionSignatureR _ =
-  ( FFI.typeOf @a Proxy
-  , FFI.typeOf @b Proxy
-  , FFI.typeOf @c Proxy
-  )
+functionSignatureR _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
 
 functionSignatureM ::
   forall a b c.
   (FFI a, FFI b, FFI c) =>
   (Tolerance Meters => a -> b -> c) ->
   (FFI.Type, FFI.Type, FFI.Type)
-functionSignatureM _ =
-  ( FFI.typeOf @a Proxy
-  , FFI.typeOf @b Proxy
-  , FFI.typeOf @c Proxy
-  )
+functionSignatureM _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
 
 functionSignatureS ::
   forall a b c.
   (FFI a, FFI b, FFI c) =>
   (Tolerance SquareMeters => a -> b -> c) ->
   (FFI.Type, FFI.Type, FFI.Type)
-functionSignatureS _ =
-  ( FFI.typeOf @a Proxy
-  , FFI.typeOf @b Proxy
-  , FFI.typeOf @c Proxy
-  )
+functionSignatureS _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)

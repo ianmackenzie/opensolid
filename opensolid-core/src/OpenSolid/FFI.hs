@@ -156,34 +156,34 @@ data Type where
   Result :: Type -> Type
   Class :: ClassName -> Type
 
-className :: FFI a => Proxy a -> ClassName
-className proxy = case representation proxy of
+className :: forall t -> FFI t => ClassName
+className t = case representation (Proxy @t) of
   ClassRep className_ -> className_
   _ -> throw (InternalError "Attempting to get the class name of a non-class type")
 
-typeOf :: FFI a => Proxy a -> Type
-typeOf proxy = case representation proxy of
+typeOf :: forall t -> FFI t => Type
+typeOf t = case representation (Proxy @t) of
   UnitRep -> Unit
   IntRep -> Int
   NumberRep -> Number
   BoolRep -> Bool
   SignRep -> Sign
   TextRep -> Text
-  ListRep @a -> List (typeOf @a Proxy)
-  NonEmptyRep @a -> NonEmpty (typeOf @a Proxy)
-  ArrayRep @a -> Array (typeOf @a Proxy)
-  Tuple2Rep @a @b -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) []
-  Tuple3Rep @a @b @c -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy]
-  Tuple4Rep @a @b @c @d -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy]
-  Tuple5Rep @a @b @c @d @e -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy, typeOf @e Proxy]
-  Tuple6Rep @a @b @c @d @e @f -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy, typeOf @e Proxy, typeOf @f Proxy]
-  Tuple7Rep @a @b @c @d @e @f @g -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy, typeOf @e Proxy, typeOf @f Proxy, typeOf @g Proxy]
-  Tuple8Rep @a @b @c @d @e @f @g @h -> Tuple (typeOf @a Proxy) (typeOf @b Proxy) [typeOf @c Proxy, typeOf @d Proxy, typeOf @e Proxy, typeOf @f Proxy, typeOf @g Proxy, typeOf @h Proxy]
-  MaybeRep @a -> Maybe (typeOf @a Proxy)
-  ResultRep @_x @a -> Result (typeOf @a Proxy)
+  ListRep @a -> List (typeOf a)
+  NonEmptyRep @a -> NonEmpty (typeOf a)
+  ArrayRep @a -> Array (typeOf a)
+  Tuple2Rep @a @b -> Tuple (typeOf a) (typeOf b) []
+  Tuple3Rep @a @b @c -> Tuple (typeOf a) (typeOf b) [typeOf c]
+  Tuple4Rep @a @b @c @d -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d]
+  Tuple5Rep @a @b @c @d @e -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e]
+  Tuple6Rep @a @b @c @d @e @f -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f]
+  Tuple7Rep @a @b @c @d @e @f @g -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g]
+  Tuple8Rep @a @b @c @d @e @f @g @h -> Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g, typeOf h]
+  MaybeRep @a -> Maybe (typeOf a)
+  ResultRep @_x @a -> Result (typeOf a)
   ClassRep class_ -> Class class_
-  IORep @a -> Result (typeOf @a Proxy)
-  NamedArgumentRep @_name @a -> typeOf @a Proxy
+  IORep @a -> Result (typeOf a)
+  NamedArgumentRep @_name @a -> typeOf a
 
 typeName :: Type -> Text
 typeName ffiType = case ffiType of
@@ -228,6 +228,9 @@ size ffiType = case ffiType of
   Maybe valueType -> 8 + size valueType
   Result valueType -> 16 + size valueType
   Class _ -> 8
+
+sizeOf :: forall t -> FFI t => Int
+sizeOf t = size (typeOf t)
 
 instance FFI () where
   representation _ = UnitRep
@@ -330,7 +333,7 @@ store ptr offset value = do
       Foreign.pokeByteOff ptr offset contentsPtr
     ListRep @item -> do
       let numItems = List.length value
-      let itemSize = size (typeOf @item Proxy)
+      let itemSize = sizeOf item
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
       let storeItem index item = store itemsPtr (index * itemSize) item
       IO.forEachWithIndex value storeItem
@@ -338,71 +341,65 @@ store ptr offset value = do
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
     NonEmptyRep -> store ptr offset (NonEmpty.toList value)
     ArrayRep -> store ptr offset (Array.toList value)
-    Tuple2Rep -> do
+    Tuple2Rep @a @_ -> do
       let (value1, value2) = value
-      let (size1, _) = tuple2ItemSizes proxy
       let offset1 = offset
-      let offset2 = offset1 + size1
+      let offset2 = offset1 + sizeOf a
       store ptr offset1 value1
       store ptr offset2 value2
-    Tuple3Rep -> do
+    Tuple3Rep @a @b @_ -> do
       let (value1, value2, value3) = value
-      let (size1, size2, _) = tuple3ItemSizes proxy
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
       store ptr offset1 value1
       store ptr offset2 value2
       store ptr offset3 value3
-    Tuple4Rep -> do
+    Tuple4Rep @a @b @c @_ -> do
       let (value1, value2, value3, value4) = value
-      let (size1, size2, size3, _) = tuple4ItemSizes proxy
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
       store ptr offset1 value1
       store ptr offset2 value2
       store ptr offset3 value3
       store ptr offset4 value4
-    Tuple5Rep -> do
+    Tuple5Rep @a @b @c @d @_ -> do
       let (value1, value2, value3, value4, value5) = value
-      let (size1, size2, size3, size4, _) = tuple5ItemSizes proxy
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
-      let offset5 = offset4 + size4
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
       store ptr offset1 value1
       store ptr offset2 value2
       store ptr offset3 value3
       store ptr offset4 value4
       store ptr offset5 value5
-    Tuple6Rep -> do
+    Tuple6Rep @a @b @c @d @e @_ -> do
       let (value1, value2, value3, value4, value5, value6) = value
-      let (size1, size2, size3, size4, size5, _) = tuple6ItemSizes proxy
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
-      let offset5 = offset4 + size4
-      let offset6 = offset5 + size5
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
       store ptr offset1 value1
       store ptr offset2 value2
       store ptr offset3 value3
       store ptr offset4 value4
       store ptr offset5 value5
       store ptr offset6 value6
-    Tuple7Rep -> do
+    Tuple7Rep @a @b @c @d @e @f @_ -> do
       let (value1, value2, value3, value4, value5, value6, value7) = value
-      let (size1, size2, size3, size4, size5, size6, _) = tuple7ItemSizes proxy
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
-      let offset5 = offset4 + size4
-      let offset6 = offset5 + size5
-      let offset7 = offset6 + size6
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
+      let offset7 = offset6 + sizeOf f
       store ptr offset1 value1
       store ptr offset2 value2
       store ptr offset3 value3
@@ -410,17 +407,16 @@ store ptr offset value = do
       store ptr offset5 value5
       store ptr offset6 value6
       store ptr offset7 value7
-    Tuple8Rep -> do
+    Tuple8Rep @a @b @c @d @e @f @g @_ -> do
       let (value1, value2, value3, value4, value5, value6, value7, value8) = value
-      let (size1, size2, size3, size4, size5, size6, size7, _) = tuple8ItemSizes proxy
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
-      let offset5 = offset4 + size4
-      let offset6 = offset5 + size5
-      let offset7 = offset6 + size6
-      let offset8 = offset7 + size7
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
+      let offset7 = offset6 + sizeOf f
+      let offset8 = offset7 + sizeOf g
       store ptr offset1 value1
       store ptr offset2 value2
       store ptr offset3 value3
@@ -464,7 +460,7 @@ load ptr offset = do
       byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr
       IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
     ListRep @item -> do
-      let itemSize = size (typeOf @item Proxy)
+      let itemSize = sizeOf item
       numItems <- load @Int ptr offset
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
@@ -475,54 +471,49 @@ load ptr offset = do
         [] -> IO.fail "Empty list passed to FFI function expecting a non-empty list"
         first : rest -> IO.succeed (first :| rest)
     ArrayRep -> IO.map Array.fromList (load ptr offset)
-    Tuple2Rep -> do
-      let (size1, _) = tuple2ItemSizes proxy
+    Tuple2Rep @a @_ -> do
       let offset1 = offset
-      let offset2 = offset1 + size1
+      let offset2 = offset1 + sizeOf a
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       IO.succeed (value1, value2)
-    Tuple3Rep -> do
-      let (size1, size2, _) = tuple3ItemSizes proxy
+    Tuple3Rep @a @b @_ -> do
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       value3 <- load ptr offset3
       IO.succeed (value1, value2, value3)
-    Tuple4Rep -> do
-      let (size1, size2, size3, _) = tuple4ItemSizes proxy
+    Tuple4Rep @a @b @c @_ -> do
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       value3 <- load ptr offset3
       value4 <- load ptr offset4
       IO.succeed (value1, value2, value3, value4)
-    Tuple5Rep -> do
-      let (size1, size2, size3, size4, _) = tuple5ItemSizes proxy
+    Tuple5Rep @a @b @c @d @_ -> do
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
-      let offset5 = offset4 + size4
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       value3 <- load ptr offset3
       value4 <- load ptr offset4
       value5 <- load ptr offset5
       IO.succeed (value1, value2, value3, value4, value5)
-    Tuple6Rep -> do
-      let (size1, size2, size3, size4, size5, _) = tuple6ItemSizes proxy
+    Tuple6Rep @a @b @c @d @e @_ -> do
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
-      let offset5 = offset4 + size4
-      let offset6 = offset5 + size5
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       value3 <- load ptr offset3
@@ -530,15 +521,14 @@ load ptr offset = do
       value5 <- load ptr offset5
       value6 <- load ptr offset6
       IO.succeed (value1, value2, value3, value4, value5, value6)
-    Tuple7Rep -> do
-      let (size1, size2, size3, size4, size5, size6, _) = tuple7ItemSizes proxy
+    Tuple7Rep @a @b @c @d @e @f @_ -> do
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
-      let offset5 = offset4 + size4
-      let offset6 = offset5 + size5
-      let offset7 = offset6 + size6
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
+      let offset7 = offset6 + sizeOf f
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       value3 <- load ptr offset3
@@ -547,16 +537,15 @@ load ptr offset = do
       value6 <- load ptr offset6
       value7 <- load ptr offset7
       IO.succeed (value1, value2, value3, value4, value5, value6, value7)
-    Tuple8Rep -> do
-      let (size1, size2, size3, size4, size5, size6, size7, _) = tuple8ItemSizes proxy
+    Tuple8Rep @a @b @c @d @e @f @g @_ -> do
       let offset1 = offset
-      let offset2 = offset1 + size1
-      let offset3 = offset2 + size2
-      let offset4 = offset3 + size3
-      let offset5 = offset4 + size4
-      let offset6 = offset5 + size5
-      let offset7 = offset6 + size6
-      let offset8 = offset7 + size7
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
+      let offset7 = offset6 + sizeOf f
+      let offset8 = offset7 + sizeOf g
       value1 <- load ptr offset1
       value2 <- load ptr offset2
       value3 <- load ptr offset3
@@ -578,91 +567,8 @@ load ptr offset = do
     IORep -> throw (InternalError "Passing IO values as FFI arguments is not supported")
     NamedArgumentRep @name_ -> IO.map (name_ :::) (load ptr offset)
 
-tuple2ItemSizes :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> (Int, Int)
-tuple2ItemSizes _ =
-  ( size (typeOf @a Proxy)
-  , size (typeOf @b Proxy)
-  )
-
-tuple3ItemSizes :: forall a b c. (FFI a, FFI b, FFI c) => Proxy (a, b, c) -> (Int, Int, Int)
-tuple3ItemSizes _ =
-  ( size (typeOf @a Proxy)
-  , size (typeOf @b Proxy)
-  , size (typeOf @c Proxy)
-  )
-
-tuple4ItemSizes ::
-  forall a b c d.
-  (FFI a, FFI b, FFI c, FFI d) =>
-  Proxy (a, b, c, d) ->
-  (Int, Int, Int, Int)
-tuple4ItemSizes _ =
-  ( size (typeOf @a Proxy)
-  , size (typeOf @b Proxy)
-  , size (typeOf @c Proxy)
-  , size (typeOf @d Proxy)
-  )
-
-tuple5ItemSizes ::
-  forall a b c d e.
-  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
-  Proxy (a, b, c, d, e) ->
-  (Int, Int, Int, Int, Int)
-tuple5ItemSizes _ =
-  ( size (typeOf @a Proxy)
-  , size (typeOf @b Proxy)
-  , size (typeOf @c Proxy)
-  , size (typeOf @d Proxy)
-  , size (typeOf @e Proxy)
-  )
-
-tuple6ItemSizes ::
-  forall a b c d e f.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
-  Proxy (a, b, c, d, e, f) ->
-  (Int, Int, Int, Int, Int, Int)
-tuple6ItemSizes _ =
-  ( size (typeOf @a Proxy)
-  , size (typeOf @b Proxy)
-  , size (typeOf @c Proxy)
-  , size (typeOf @d Proxy)
-  , size (typeOf @e Proxy)
-  , size (typeOf @f Proxy)
-  )
-
-tuple7ItemSizes ::
-  forall a b c d e f g.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
-  Proxy (a, b, c, d, e, f, g) ->
-  (Int, Int, Int, Int, Int, Int, Int)
-tuple7ItemSizes _ =
-  ( size (typeOf @a Proxy)
-  , size (typeOf @b Proxy)
-  , size (typeOf @c Proxy)
-  , size (typeOf @d Proxy)
-  , size (typeOf @e Proxy)
-  , size (typeOf @f Proxy)
-  , size (typeOf @g Proxy)
-  )
-
-tuple8ItemSizes ::
-  forall a b c d e f g h.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) =>
-  Proxy (a, b, c, d, e, f, g, h) ->
-  (Int, Int, Int, Int, Int, Int, Int, Int)
-tuple8ItemSizes _ =
-  ( size (typeOf @a Proxy)
-  , size (typeOf @b Proxy)
-  , size (typeOf @c Proxy)
-  , size (typeOf @d Proxy)
-  , size (typeOf @e Proxy)
-  , size (typeOf @f Proxy)
-  , size (typeOf @g Proxy)
-  , size (typeOf @h Proxy)
-  )
-
-argumentName :: FFI a => Proxy a -> Maybe Name
-argumentName proxy = case representation proxy of
+argumentName :: forall t -> FFI t => Maybe Name
+argumentName t = case representation (Proxy @t) of
   NamedArgumentRep @name @_a -> do
     let camelCaseName = Text.pack (GHC.TypeLits.symbolVal @name Proxy)
     Just (splitCamelCase camelCaseName)

@@ -67,6 +67,7 @@ library
     QualifiedDo
     RequiredTypeArguments
     TemplateHaskell
+    TypeAbstractions
     ViewPatterns
 
   ghc-options:

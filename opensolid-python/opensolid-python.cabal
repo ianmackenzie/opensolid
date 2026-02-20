@@ -70,4 +70,5 @@ executable opensolid-python
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
+    TypeAbstractions
     ViewPatterns

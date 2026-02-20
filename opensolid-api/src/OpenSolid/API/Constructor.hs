@@ -7,7 +7,6 @@ module OpenSolid.API.Constructor
   )
 where
 
-import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
@@ -92,7 +91,7 @@ signature1 ::
   Name ->
   (a -> value) ->
   Signature
-signature1 arg1 _ = [(arg1, FFI.typeOf @a Proxy)]
+signature1 arg1 _ = [(arg1, FFI.typeOf a)]
 
 signature2 ::
   forall a b value.
@@ -102,7 +101,7 @@ signature2 ::
   (a -> b -> value) ->
   Signature
 signature2 arg1 arg2 _ =
-  [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)]
+  [(arg1, FFI.typeOf a), (arg2, FFI.typeOf b)]
 
 signature3 ::
   forall a b c value.
@@ -113,7 +112,7 @@ signature3 ::
   (a -> b -> c -> value) ->
   Signature
 signature3 arg1 arg2 arg3 _ =
-  [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy), (arg3, FFI.typeOf @c Proxy)]
+  [(arg1, FFI.typeOf a), (arg2, FFI.typeOf b), (arg3, FFI.typeOf c)]
 
 signature4 ::
   forall a b c d value.
@@ -125,10 +124,10 @@ signature4 ::
   (a -> b -> c -> d -> value) ->
   Signature
 signature4 arg1 arg2 arg3 arg4 _ =
-  [ (arg1, FFI.typeOf @a Proxy)
-  , (arg2, FFI.typeOf @b Proxy)
-  , (arg3, FFI.typeOf @c Proxy)
-  , (arg4, FFI.typeOf @d Proxy)
+  [ (arg1, FFI.typeOf a)
+  , (arg2, FFI.typeOf b)
+  , (arg3, FFI.typeOf c)
+  , (arg4, FFI.typeOf d)
   ]
 
 documentation :: Constructor -> Text

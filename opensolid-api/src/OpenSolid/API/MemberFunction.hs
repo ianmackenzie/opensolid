@@ -7,7 +7,6 @@ module OpenSolid.API.MemberFunction
   )
 where
 
-import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid.API.Argument qualified as Argument
 import OpenSolid.API.ImplicitArgument (ImplicitArgument (..))
@@ -354,43 +353,46 @@ signature memberFunction = normalizeSignature $ case memberFunction of
   MemberFunctionM4 arg1 arg2 arg3 arg4 f _ -> signatureM4 arg1 arg2 arg3 arg4 f
   MemberFunctionS4 arg1 arg2 arg3 arg4 f _ -> signatureS4 arg1 arg2 arg3 arg4 f
 
-arg :: forall a. FFI a => Name -> Proxy a -> (Name, FFI.Type, Argument.Kind)
-arg name proxy = (name, FFI.typeOf proxy, Argument.kind name proxy)
+arg :: forall t -> FFI t => Name -> (Name, FFI.Type, Argument.Kind)
+arg t name = (name, FFI.typeOf t, Argument.kind t name)
 
 signature0 ::
   forall value result.
   (FFI value, FFI result) =>
   (value -> result) ->
   Signature
-signature0 _ = (Nothing, [], FFI.typeOf @result Proxy)
+signature0 _ = (Nothing, [], FFI.typeOf result)
 
 signatureU0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Unitless => value -> result) ->
   Signature
-signatureU0 _ = (Just ToleranceUnitless, [], FFI.typeOf @result Proxy)
+signatureU0 _ = (Just ToleranceUnitless, [], FFI.typeOf result)
 
 signatureR0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Radians => value -> result) ->
   Signature
-signatureR0 _ = (Just ToleranceRadians, [], FFI.typeOf @result Proxy)
+signatureR0 _ =
+  (Just ToleranceRadians, [], FFI.typeOf result)
 
 signatureM0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Meters => value -> result) ->
   Signature
-signatureM0 _ = (Just ToleranceMeters, [], FFI.typeOf @result Proxy)
+signatureM0 _ =
+  (Just ToleranceMeters, [], FFI.typeOf result)
 
 signatureS0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance SquareMeters => value -> result) ->
   Signature
-signatureS0 _ = (Just ToleranceSquareMeters, [], FFI.typeOf @result Proxy)
+signatureS0 _ =
+  (Just ToleranceSquareMeters, [], FFI.typeOf result)
 
 signature1 ::
   forall a value result.
@@ -399,10 +401,7 @@ signature1 ::
   (a -> value -> result) ->
   Signature
 signature1 arg1 _ =
-  ( Nothing
-  , [arg @a arg1 Proxy]
-  , FFI.typeOf @result Proxy
-  )
+  (Nothing, [arg a arg1], FFI.typeOf result)
 
 signatureU1 ::
   forall a value result.
@@ -411,10 +410,7 @@ signatureU1 ::
   (Tolerance Unitless => a -> value -> result) ->
   Signature
 signatureU1 arg1 _ =
-  ( Just ToleranceUnitless
-  , [arg @a arg1 Proxy]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceUnitless, [arg a arg1], FFI.typeOf result)
 
 signatureR1 ::
   forall a value result.
@@ -423,10 +419,7 @@ signatureR1 ::
   (Tolerance Radians => a -> value -> result) ->
   Signature
 signatureR1 arg1 _ =
-  ( Just ToleranceRadians
-  , [arg @a arg1 Proxy]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceRadians, [arg a arg1], FFI.typeOf result)
 
 signatureM1 ::
   forall a value result.
@@ -434,11 +427,7 @@ signatureM1 ::
   Name ->
   (Tolerance Meters => a -> value -> result) ->
   Signature
-signatureM1 arg1 _ =
-  ( Just ToleranceMeters
-  , [arg @a arg1 Proxy]
-  , FFI.typeOf @result Proxy
-  )
+signatureM1 arg1 _ = (Just ToleranceMeters, [arg a arg1], FFI.typeOf result)
 
 signatureS1 ::
   forall a value result.
@@ -447,10 +436,7 @@ signatureS1 ::
   (Tolerance SquareMeters => a -> value -> result) ->
   Signature
 signatureS1 arg1 _ =
-  ( Just ToleranceSquareMeters
-  , [arg @a arg1 Proxy]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceSquareMeters, [arg a arg1], FFI.typeOf result)
 
 signature2 ::
   forall a b value result.
@@ -460,13 +446,7 @@ signature2 ::
   (a -> b -> value -> result) ->
   Signature
 signature2 arg1 arg2 _ =
-  ( Nothing
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Nothing, [arg a arg1, arg b arg2], FFI.typeOf result)
 
 signatureU2 ::
   forall a b value result.
@@ -476,13 +456,7 @@ signatureU2 ::
   (Tolerance Unitless => a -> b -> value -> result) ->
   Signature
 signatureU2 arg1 arg2 _ =
-  ( Just ToleranceUnitless
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceUnitless, [arg a arg1, arg b arg2], FFI.typeOf result)
 
 signatureR2 ::
   forall a b value result.
@@ -492,13 +466,7 @@ signatureR2 ::
   (Tolerance Radians => a -> b -> value -> result) ->
   Signature
 signatureR2 arg1 arg2 _ =
-  ( Just ToleranceRadians
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceRadians, [arg a arg1, arg b arg2], FFI.typeOf result)
 
 signatureM2 ::
   forall a b value result.
@@ -508,13 +476,7 @@ signatureM2 ::
   (Tolerance Meters => a -> b -> value -> result) ->
   Signature
 signatureM2 arg1 arg2 _ =
-  ( Just ToleranceMeters
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceMeters, [arg a arg1, arg b arg2], FFI.typeOf result)
 
 signatureS2 ::
   forall a b value result.
@@ -524,13 +486,7 @@ signatureS2 ::
   (Tolerance SquareMeters => a -> b -> value -> result) ->
   Signature
 signatureS2 arg1 arg2 _ =
-  ( Just ToleranceSquareMeters
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceSquareMeters, [arg a arg1, arg b arg2], FFI.typeOf result)
 
 signature3 ::
   forall a b c value result.
@@ -541,14 +497,7 @@ signature3 ::
   (a -> b -> c -> value -> result) ->
   Signature
 signature3 arg1 arg2 arg3 _ =
-  ( Nothing
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Nothing, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
 
 signatureU3 ::
   forall a b c value result.
@@ -559,14 +508,7 @@ signatureU3 ::
   (Tolerance Unitless => a -> b -> c -> value -> result) ->
   Signature
 signatureU3 arg1 arg2 arg3 _ =
-  ( Just ToleranceUnitless
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceUnitless, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
 
 signatureR3 ::
   forall a b c value result.
@@ -577,14 +519,7 @@ signatureR3 ::
   (Tolerance Radians => a -> b -> c -> value -> result) ->
   Signature
 signatureR3 arg1 arg2 arg3 _ =
-  ( Just ToleranceRadians
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceRadians, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
 
 signatureM3 ::
   forall a b c value result.
@@ -595,14 +530,7 @@ signatureM3 ::
   (Tolerance Meters => a -> b -> c -> value -> result) ->
   Signature
 signatureM3 arg1 arg2 arg3 _ =
-  ( Just ToleranceMeters
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
 
 signatureS3 ::
   forall a b c value result.
@@ -613,14 +541,7 @@ signatureS3 ::
   (Tolerance SquareMeters => a -> b -> c -> value -> result) ->
   Signature
 signatureS3 arg1 arg2 arg3 _ =
-  ( Just ToleranceSquareMeters
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceSquareMeters, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
 
 signature4 ::
   forall a b c d value result.
@@ -632,15 +553,7 @@ signature4 ::
   (a -> b -> c -> d -> value -> result) ->
   Signature
 signature4 arg1 arg2 arg3 arg4 _ =
-  ( Nothing
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    , arg @d arg4 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Nothing, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
 
 signatureU4 ::
   forall a b c d value result.
@@ -652,15 +565,7 @@ signatureU4 ::
   (Tolerance Unitless => a -> b -> c -> d -> value -> result) ->
   Signature
 signatureU4 arg1 arg2 arg3 arg4 _ =
-  ( Just ToleranceUnitless
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    , arg @d arg4 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceUnitless, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
 
 signatureR4 ::
   forall a b c d value result.
@@ -672,15 +577,7 @@ signatureR4 ::
   (Tolerance Radians => a -> b -> c -> d -> value -> result) ->
   Signature
 signatureR4 arg1 arg2 arg3 arg4 _ =
-  ( Just ToleranceRadians
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    , arg @d arg4 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceRadians, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
 
 signatureM4 ::
   forall a b c d value result.
@@ -692,15 +589,7 @@ signatureM4 ::
   (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
   Signature
 signatureM4 arg1 arg2 arg3 arg4 _ =
-  ( Just ToleranceMeters
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    , arg @d arg4 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
 
 signatureS4 ::
   forall a b c d value result.
@@ -712,15 +601,7 @@ signatureS4 ::
   (Tolerance SquareMeters => a -> b -> c -> d -> value -> result) ->
   Signature
 signatureS4 arg1 arg2 arg3 arg4 _ =
-  ( Just ToleranceSquareMeters
-  ,
-    [ arg @a arg1 Proxy
-    , arg @b arg2 Proxy
-    , arg @c arg3 Proxy
-    , arg @d arg4 Proxy
-    ]
-  , FFI.typeOf @result Proxy
-  )
+  (Just ToleranceSquareMeters, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
 
 documentation :: MemberFunction -> Text
 documentation memberFunction = case memberFunction of
