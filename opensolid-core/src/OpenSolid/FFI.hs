@@ -259,7 +259,7 @@ instance FFI Area where
 instance FFI Angle where
   representation = classRepresentation "Angle"
 
-instance (KnownSymbol name, FFI a) => FFI (name # a) where
+instance forall name a. (KnownSymbol name, FFI a) => FFI (name # a) where
   representation _ = NamedArgumentRep
 
 splitCamelCase :: Text -> Name

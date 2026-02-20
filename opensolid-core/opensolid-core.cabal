@@ -81,6 +81,7 @@ common config
     PatternSynonyms
     QualifiedDo
     RebindableSyntax
+    RequiredTypeArguments
     RoleAnnotations
     StrictData
     TypeAbstractions
