@@ -939,7 +939,7 @@ crossSelf ::
   Member value
 crossSelf = crossProduct @value Self
 
-nested :: FFI nested => Text -> List (Member nested) -> Member value
+nested :: FFI nestedValue => Text -> List (Member nestedValue) -> Member value
 nested = Nested
 
 addPreOverload ::

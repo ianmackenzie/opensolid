@@ -101,12 +101,12 @@ instance FFI Projection where
   representation = FFI.nestedClassRepresentation "Camera3D" "Projection"
 
 -- | Define a perspective projection with a given vertical field of view.
-perspective :: "verticalFov" # Angle -> Projection
-perspective (Named verticalFov) = Perspective verticalFov
+perspective :: "verticalFov" ::: Angle -> Projection
+perspective ("verticalFov" ::: verticalFov) = Perspective verticalFov
 
 -- | Define an orthographic projection with a given viewport height.
-orthographic :: "viewportHeight" # Length -> Projection
-orthographic (Named viewportHeight) = Orthographic viewportHeight
+orthographic :: "viewportHeight" ::: Length -> Projection
+orthographic ("viewportHeight" ::: viewportHeight) = Orthographic viewportHeight
 
 new :: Frame3D space CameraSpace -> Length -> Projection -> Camera3D space
 new givenFrame givenFocalDistance projection =
@@ -122,11 +122,11 @@ The camera will be oriented such that its local up direction
 will be as close as possible to the global up direction.
 -}
 lookAt ::
-  "eyePoint" # Point3D space ->
-  "focalPoint" # Point3D space ->
-  "projection" # Projection ->
+  "eyePoint" ::: Point3D space ->
+  "focalPoint" ::: Point3D space ->
+  "projection" ::: Projection ->
   Camera3D space
-lookAt (Named eyePoint) (Named focalPoint) (Named projection) = do
+lookAt ("eyePoint" ::: eyePoint) ("focalPoint" ::: focalPoint) ("projection" ::: projection) = do
   let computedFocalDistance = Point3D.distanceFrom eyePoint focalPoint
   let computedFrame =
         case Tolerance.using Quantity.zero (Vector3D.direction (focalPoint - eyePoint)) of
@@ -153,19 +153,24 @@ The elevation is the vertical angle towards the camera from the focal point,
 measure upwards from the global top plane.
 -}
 orbit ::
-  "focalPoint" # Point3D space ->
-  "azimuth" # Angle ->
-  "elevation" # Angle ->
-  "distance" # Length ->
-  "projection" # Projection ->
+  "focalPoint" ::: Point3D space ->
+  "azimuth" ::: Angle ->
+  "elevation" ::: Angle ->
+  "distance" ::: Length ->
+  "projection" ::: Projection ->
   Camera3D space
-orbit (Named focalPoint) (Named azimuth) (Named elevation) (Named distance) (Named projection) = do
-  let computedFrame =
-        Frame3D focalPoint World3D.backwardOrientation
-          & Frame3D.turnRightBy azimuth
-          & Frame3D.tiltDownBy elevation
-          & Frame3D.offsetBackwardBy distance
-  new computedFrame distance projection
+orbit
+  ("focalPoint" ::: focalPoint)
+  ("azimuth" ::: azimuth)
+  ("elevation" ::: elevation)
+  ("distance" ::: distance)
+  ("projection" ::: projection) = do
+    let computedFrame =
+          Frame3D focalPoint World3D.backwardOrientation
+            & Frame3D.turnRightBy azimuth
+            & Frame3D.tiltDownBy elevation
+            & Frame3D.offsetBackwardBy distance
+    new computedFrame distance projection
 
 isometricElevation :: Angle
 isometricElevation = Angle.atan2 1.0 (Number.sqrt 2.0)
@@ -173,11 +178,11 @@ isometricElevation = Angle.atan2 1.0 (Number.sqrt 2.0)
 isometric :: Point3D space -> Length -> Projection -> Camera3D space
 isometric givenFocalPoint distance givenProjection =
   orbit
-    (#focalPoint givenFocalPoint)
-    (#azimuth (Angle.degrees 45.0))
-    (#elevation isometricElevation)
-    (#distance distance)
-    (#projection givenProjection)
+    ("focalPoint" ::: givenFocalPoint)
+    ("azimuth" ::: (Angle.degrees 45.0))
+    ("elevation" ::: isometricElevation)
+    ("distance" ::: distance)
+    ("projection" ::: givenProjection)
 
 moveTo :: Point3D space -> Camera3D space -> Camera3D space
 moveTo newEyePoint Camera3D{frame, focalDistance, projection} =

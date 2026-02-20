@@ -177,10 +177,10 @@ or if it is not possible to solve for a given fillet
 fillet ::
   Tolerance units =>
   List (Point2D units space) ->
-  "radius" # Quantity units ->
+  "radius" ::: Quantity units ->
   Region2D units space ->
   Result Text (Region2D units space)
-fillet points (Named radius) region = do
+fillet points ("radius" ::: radius) region = do
   let initialCurves = NonEmpty.toList (boundaryCurves region)
   filletedCurves <- Result.orFail (Result.foldl (addFillet radius) initialCurves points)
   Result.orFail (boundedBy filletedCurves)

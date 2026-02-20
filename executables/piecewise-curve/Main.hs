@@ -43,7 +43,7 @@ main = Tolerance.using Length.nanometer do
   let circle = Curve2D.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point = do
         let diameter = Length.millimeters 4.0
-        Svg.circleWith [Svg.whiteFill] (#centerPoint point) (#diameter diameter)
+        Svg.circleWith [Svg.whiteFill] ("centerPoint" ::: point) ("diameter" ::: diameter)
   let drawCurve n curve =
         Svg.group
           [ Svg.curve (Resolution.maxError Length.micrometer) curve

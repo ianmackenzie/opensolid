@@ -65,6 +65,7 @@ library
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
+    RequiredTypeArguments
     TemplateHaskell
     ViewPatterns
 

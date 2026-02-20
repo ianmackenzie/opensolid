@@ -113,7 +113,7 @@ rootContext =
     { ownName = Nothing
     , parentNames = []
     , ownPbrMaterial = Nothing
-    , currentPbrMaterial = PbrMaterial.aluminum (#roughness 0.2)
+    , currentPbrMaterial = PbrMaterial.aluminum ("roughness" ::: 0.2)
     , ownOpacity = 1.0
     , currentMultipliedOpacity = 1.0
     }

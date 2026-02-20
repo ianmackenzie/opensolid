@@ -43,18 +43,18 @@ viewBox p1 p2 = Bounds2D.hull2 (Point2D.convert scale p1) (Point2D.convert scale
 xAxis :: Number -> Number -> Svg Space
 xAxis x1 x2 =
   Svg.arrow
-    (#start (Point2D.x (Quantity.convert scale x1)))
-    (#end (Point2D.x (Quantity.convert scale x2 + axisHeadLength)))
-    (#headLength axisHeadLength)
-    (#headWidth axisHeadWidth)
+    ("start" ::: Point2D.x (Quantity.convert scale x1))
+    ("end" ::: Point2D.x (Quantity.convert scale x2 + axisHeadLength))
+    ("headLength" ::: axisHeadLength)
+    ("headWidth" ::: axisHeadWidth)
 
 yAxis :: Number -> Number -> Svg Space
 yAxis y1 y2 =
   Svg.arrow
-    (#start (Point2D.y (Quantity.convert scale y1)))
-    (#end (Point2D.y (Quantity.convert scale y2 + axisHeadLength)))
-    (#headLength axisHeadLength)
-    (#headWidth axisHeadWidth)
+    ("start" ::: Point2D.y (Quantity.convert scale y1))
+    ("end" ::: Point2D.y (Quantity.convert scale y2 + axisHeadLength))
+    ("headLength" ::: axisHeadLength)
+    ("headWidth" ::: axisHeadWidth)
 
 curve :: Curve1D Unitless -> Svg Space
 curve = curveWith []

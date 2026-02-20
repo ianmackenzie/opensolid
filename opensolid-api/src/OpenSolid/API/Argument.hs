@@ -4,7 +4,7 @@ import Data.Proxy (Proxy)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.InternalError (InternalError (InternalError))
-import OpenSolid.Prelude hiding (Named)
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 data Kind = Positional | Named deriving (Eq, Ord)

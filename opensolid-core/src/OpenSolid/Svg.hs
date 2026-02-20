@@ -210,10 +210,10 @@ triangle = triangleWith []
 -- | Draw a circle with the given attributes, center point and diameter.
 circleWith ::
   List (Attribute space) ->
-  "centerPoint" # Point2D Meters space ->
-  "diameter" # Length ->
+  "centerPoint" ::: Point2D Meters space ->
+  "diameter" ::: Length ->
   Svg space
-circleWith attributes (Named centerPoint) (Named diameter) = do
+circleWith attributes ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) = do
   let Point2D cx cy = centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
@@ -221,7 +221,7 @@ circleWith attributes (Named centerPoint) (Named diameter) = do
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 -- | Draw a circle with the given center point and diameter.
-circle :: "centerPoint" # Point2D Meters space -> "diameter" # Length -> Svg space
+circle :: "centerPoint" ::: Point2D Meters space -> "diameter" ::: Length -> Svg space
 circle = circleWith []
 
 -- | Draw a curve with the given attributes and resolution.
@@ -234,34 +234,39 @@ curve :: Resolution Meters -> Curve2D Meters space -> Svg space
 curve = curveWith []
 
 arrow ::
-  "start" # Point2D Meters space ->
-  "end" # Point2D Meters space ->
-  "headLength" # Length ->
-  "headWidth" # Length ->
+  "start" ::: Point2D Meters space ->
+  "end" ::: Point2D Meters space ->
+  "headLength" ::: Length ->
+  "headWidth" ::: Length ->
   Svg space
 arrow = arrowWith []
 
 arrowWith ::
   List (Attribute space) ->
-  "start" # Point2D Meters space ->
-  "end" # Point2D Meters space ->
-  "headLength" # Length ->
-  "headWidth" # Length ->
+  "start" ::: Point2D Meters space ->
+  "end" ::: Point2D Meters space ->
+  "headLength" ::: Length ->
+  "headWidth" ::: Length ->
   Svg space
-arrowWith attributes (Named start) (Named end) (Named headLength) (Named headWidth) =
-  case Tolerance.using Quantity.zero (Direction2D.from start end) of
-    Error Direction2D.PointsAreCoincident -> nothing
-    Ok direction -> do
-      let length = Point2D.distanceFrom start end
-      let axis = Axis2D start direction
-      let frame = Frame2D.fromXAxis axis
-      let stemLength = length - headLength
-      let stemEndPoint = Point2D.along axis stemLength
-      let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 * headWidth))
-      let rightPoint = Point2D.mirrorAcross axis leftPoint
-      let stem = line (Line2D start stemEndPoint)
-      let tip = triangle (Triangle2D leftPoint rightPoint end)
-      groupWith attributes [stem, tip]
+arrowWith
+  attributes
+  ("start" ::: start)
+  ("end" ::: end)
+  ("headLength" ::: headLength)
+  ("headWidth" ::: headWidth) =
+    case Tolerance.using Quantity.zero (Direction2D.from start end) of
+      Error Direction2D.PointsAreCoincident -> nothing
+      Ok direction -> do
+        let length = Point2D.distanceFrom start end
+        let axis = Axis2D start direction
+        let frame = Frame2D.fromXAxis axis
+        let stemLength = length - headLength
+        let stemEndPoint = Point2D.along axis stemLength
+        let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 * headWidth))
+        let rightPoint = Point2D.mirrorAcross axis leftPoint
+        let stem = line (Line2D start stemEndPoint)
+        let tip = triangle (Triangle2D leftPoint rightPoint end)
+        groupWith attributes [stem, tip]
 
 pointsAttribute :: List (Point2D Meters space) -> Attribute space
 pointsAttribute givenPoints =

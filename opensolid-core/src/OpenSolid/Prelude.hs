@@ -7,7 +7,7 @@ module OpenSolid.Prelude
   , Result (Ok, Error)
   , Exception
   , pattern NonEmpty
-  , type (#) (Named)
+  , type (:::) ((:::))
   , (&)
   , Negation (negate)
   , Addition ((+))
@@ -55,15 +55,17 @@ import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
+import Data.Proxy (Proxy (Proxy))
 import Data.String (fromString)
 import Data.Text (Text)
 import Data.Text qualified
 import Foreign.Storable (Storable)
 import GHC.OverloadedLabels (IsLabel (fromLabel))
-import GHC.Records (getField)
+import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
-import GHC.TypeLits (Symbol)
+import GHC.TypeLits (KnownSymbol, Symbol)
+import GHC.TypeLits qualified
 import OpenSolid.Units (HasUnits, Meters, Radians, Unitless, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
 import System.Random.Stateful qualified
@@ -297,12 +299,49 @@ instance
 
 ----- Named -----
 
-newtype (name :: Symbol) # a = Named a
+newtype (name :: Symbol) ::: value where
+  (:::) :: forall name -> value -> name ::: value
 
-infix 0 #
+infix 0 :::
 
-instance (name1 ~ name2, a1 ~ a2) => IsLabel name1 (a1 -> name2 # a2) where
-  fromLabel = Named
+instance (KnownSymbol name, Show value) => Show (name ::: value) where
+  showsPrec precedence (_ ::: value) = do
+    let nameString = GHC.TypeLits.symbolVal @name Proxy
+    Prelude.showParen (precedence > 0) $
+      Prelude.showString nameString . Prelude.showString " ::: " . Prelude.shows value
+
+instance Eq value => Eq (name ::: value) where
+  (_ ::: value1) == (_ ::: value2) = value1 == value2
+
+instance Ord value => Ord (name ::: value) where
+  compare (_ ::: value1) (_ ::: value2) = compare value1 value2
+
+instance HasField name1 (name1 ::: value1, name2 ::: value2) value1 where
+  getField (_ ::: value, _) = value
+
+instance HasField name2 (name1 ::: value1, name2 ::: value2) value2 where
+  getField (_, _ ::: value) = value
+
+instance HasField name1 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value1 where
+  getField (_ ::: value, _, _) = value
+
+instance HasField name2 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value2 where
+  getField (_, _ ::: value, _) = value
+
+instance HasField name3 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value3 where
+  getField (_, _, _ ::: value) = value
+
+instance HasField name1 (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4) value1 where
+  getField (_ ::: value, _, _, _) = value
+
+instance HasField name2 (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4) value2 where
+  getField (_, _ ::: value, _, _) = value
+
+instance HasField name3 (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4) value3 where
+  getField (_, _, _ ::: value, _) = value
+
+instance HasField name4 (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4) value4 where
+  getField (_, _, _, _ ::: value) = value
 
 ----- Composition -----
 

@@ -81,10 +81,10 @@ circumscribed n circle = do
 The hexagon will be oriented such that its top and bottom edges are horizontal.
 -}
 hexagon ::
-  "centerPoint" # Point2D units space ->
-  "height" # Quantity units ->
+  "centerPoint" ::: Point2D units space ->
+  "height" ::: Quantity units ->
   Result IsEmpty (Polygon2D units space)
-hexagon (Named centerPoint) (Named height) =
+hexagon ("centerPoint" ::: centerPoint) ("height" ::: height) =
   circumscribed 6 (Circle2D.withDiameter height centerPoint)
 
 -- | Get the vertices of a polygon.

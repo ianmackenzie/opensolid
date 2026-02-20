@@ -422,13 +422,17 @@ arcFrom givenStartPoint givenEndPoint sweptAngle =
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
-  "centerPoint" # Point2D units space ->
-  "radius" # Quantity units ->
-  "startAngle" # Angle ->
-  "endAngle" # Angle ->
+  ("centerPoint" ::: Point2D units space) ->
+  ("radius" ::: Quantity units) ->
+  ("startAngle" ::: Angle) ->
+  ("endAngle" ::: Angle) ->
   Curve2D units space
-polarArc (Named centerPoint) (Named radius) (Named startAngle) (Named endAngle) =
-  customArc centerPoint (Vector2D.x radius) (Vector2D.y radius) startAngle endAngle
+polarArc
+  ("centerPoint" ::: centerPoint)
+  ("radius" ::: radius)
+  ("startAngle" ::: startAngle)
+  ("endAngle" ::: endAngle) =
+    customArc centerPoint (Vector2D.x radius) (Vector2D.y radius) startAngle endAngle
 
 {-| Create an arc with the given center point, start point and swept angle.
 
@@ -439,29 +443,33 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2D.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2D.angleFrom centerPoint givenStartPoint
   polarArc
-    (#centerPoint centerPoint)
-    (#radius radius)
-    (#startAngle startAngle)
-    (#endAngle (startAngle + sweptAngle))
+    ("centerPoint" ::: centerPoint)
+    ("radius" ::: radius)
+    ("startAngle" ::: startAngle)
+    ("endAngle" ::: (startAngle + sweptAngle))
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
   Tolerance units =>
   Point2D units space ->
-  "incoming" # Direction2D space ->
-  "outgoing" # Direction2D space ->
-  "radius" # Quantity units ->
+  "incoming" ::: Direction2D space ->
+  "outgoing" ::: Direction2D space ->
+  "radius" ::: Quantity units ->
   Curve2D units space
-cornerArc cornerPoint (Named incomingDirection) (Named outgoingDirection) (Named givenRadius) = do
-  let radius = Quantity.abs givenRadius
-  let sweptAngle = Direction2D.angleFrom incomingDirection outgoingDirection
-  if 0.25 * radius * Number.squared (Angle.inRadians sweptAngle) ~= Quantity.zero
-    then lineFrom cornerPoint cornerPoint
-    else do
-      let offset = radius * Number.abs (Angle.tan (0.5 * sweptAngle))
-      let computedStartPoint = cornerPoint - offset * incomingDirection
-      let computedEndPoint = cornerPoint + offset * outgoingDirection
-      arcFrom computedStartPoint computedEndPoint sweptAngle
+cornerArc
+  cornerPoint
+  ("incoming" ::: incomingDirection)
+  ("outgoing" ::: outgoingDirection)
+  ("radius" ::: givenRadius) = do
+    let radius = Quantity.abs givenRadius
+    let sweptAngle = Direction2D.angleFrom incomingDirection outgoingDirection
+    if 0.25 * radius * Number.squared (Angle.inRadians sweptAngle) ~= Quantity.zero
+      then lineFrom cornerPoint cornerPoint
+      else do
+        let offset = radius * Number.abs (Angle.tan (0.5 * sweptAngle))
+        let computedStartPoint = cornerPoint - offset * incomingDirection
+        let computedEndPoint = cornerPoint + offset * outgoingDirection
+        arcFrom computedStartPoint computedEndPoint sweptAngle
 
 data WhichArc
   = SmallCounterclockwise
@@ -531,10 +539,10 @@ customArc p0 v1 v2 a b = do
 circle :: Circle2D units space -> Curve2D units space
 circle givenCircle =
   polarArc
-    (#centerPoint (Circle2D.centerPoint givenCircle))
-    (#radius (Circle2D.radius givenCircle))
-    (#startAngle Angle.zero)
-    (#endAngle Angle.twoPi)
+    ("centerPoint" ::: Circle2D.centerPoint givenCircle)
+    ("radius" ::: Circle2D.radius givenCircle)
+    ("startAngle" ::: Angle.zero)
+    ("endAngle" ::: Angle.twoPi)
 
 {-| Create an ellipes with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,
@@ -994,7 +1002,7 @@ samplingPoints resolution curve = do
         let secondDerivativeBounds = VectorCurve2D.evaluateBounds curveSecondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2D.magnitude secondDerivativeBounds
         Linearization.error secondDerivativeMagnitude subdomain
-  let predicate = Resolution.predicate (#size size) (#error error) resolution
+  let predicate = Resolution.predicate ("size" ::: size) ("error" ::: error) resolution
   Domain1D.samplingPoints predicate
 
 medialAxis ::

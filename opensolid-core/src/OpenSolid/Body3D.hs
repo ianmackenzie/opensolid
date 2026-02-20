@@ -213,10 +213,10 @@ Fails if the diameter is zero.
 -}
 sphere ::
   Tolerance Meters =>
-  "centerPoint" # Point3D space ->
-  "diameter" # Length ->
+  "centerPoint" ::: Point3D space ->
+  "diameter" ::: Length ->
   Result EmptyBody (Body3D space)
-sphere (Named centerPoint) (Named diameter) =
+sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
   if diameter ~= Quantity.zero
     then Error EmptyBody
     else do
@@ -241,13 +241,13 @@ cylinder ::
   Tolerance Meters =>
   Point3D space ->
   Point3D space ->
-  "diameter" # Length ->
+  "diameter" ::: Length ->
   Result EmptyBody (Body3D space)
-cylinder startPoint endPoint (Named diameter) =
+cylinder startPoint endPoint ("diameter" ::: diameter) =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
     Error Vector.IsZero -> Error EmptyBody
     Ok (length, direction) ->
-      cylinderAlong (Axis3D startPoint direction) Quantity.zero length (#diameter diameter)
+      cylinderAlong (Axis3D startPoint direction) Quantity.zero length ("diameter" ::: diameter)
 
 {-| Create a cylindrical body along a given axis.
 
@@ -264,9 +264,9 @@ cylinderAlong ::
   Axis3D space ->
   Length ->
   Length ->
-  "diameter" # Length ->
+  "diameter" ::: Length ->
   Result EmptyBody (Body3D space)
-cylinderAlong axis d1 d2 (Named diameter) =
+cylinderAlong axis d1 d2 ("diameter" ::: diameter) =
   case Region2D.circle (Circle2D.withDiameter diameter Point2D.origin) of
     Error Region2D.EmptyRegion -> Error EmptyBody
     Ok profile ->

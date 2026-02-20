@@ -128,7 +128,7 @@ data Representation a where
   -- Some IO that returns a representable value
   IORep :: FFI a => Representation (IO a)
   -- A function argument that should be named-only if supported
-  NamedArgumentRep :: (KnownSymbol name, FFI a) => Representation (name # a)
+  NamedArgumentRep :: (KnownSymbol name, FFI a) => Representation (name ::: a)
 
 classRepresentation :: FFI a => Text -> Proxy a -> Representation a
 classRepresentation givenName _ =
@@ -259,7 +259,7 @@ instance FFI Area where
 instance FFI Angle where
   representation = classRepresentation "Angle"
 
-instance forall name a. (KnownSymbol name, FFI a) => FFI (name # a) where
+instance forall name a. (KnownSymbol name, FFI a) => FFI (name ::: a) where
   representation _ = NamedArgumentRep
 
 splitCamelCase :: Text -> Name
@@ -576,7 +576,7 @@ load ptr offset = do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
     IORep -> throw (InternalError "Passing IO values as FFI arguments is not supported")
-    NamedArgumentRep -> IO.map Named (load ptr offset)
+    NamedArgumentRep @name_ -> IO.map (name_ :::) (load ptr offset)
 
 tuple2ItemSizes :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> (Int, Int)
 tuple2ItemSizes _ =

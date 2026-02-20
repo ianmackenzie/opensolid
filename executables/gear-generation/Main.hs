@@ -26,7 +26,7 @@ gearBody :: Tolerance Meters => Int -> Result Text (Body3D space)
 gearBody numTeeth = do
   let gearModule = Length.millimeters 1.0
   let holeDiameter = Length.millimeters 8.0
-  let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
+  let spurGear = SpurGear.metric ("numTeeth" ::: numTeeth) ("module" ::: gearModule)
   let outerProfile = SpurGear.profile spurGear
   let hole = Curve2D.circle (Circle2D.withDiameter holeDiameter Point2D.origin)
   profile <- Result.orFail (Region2D.boundedBy (hole : outerProfile))
@@ -40,7 +40,7 @@ main = Tolerance.using Length.nanometer do
         timer <- Timer.start
         body <- Result.orFail (gearBody numTeeth)
         let glbPath = "executables/gear-generation/gear" <> Text.int numTeeth <> ".glb"
-        let material = PbrMaterial.iron (#roughness 0.3)
+        let material = PbrMaterial.iron ("roughness" ::: 0.3)
         let model = Model3D.bodyWith [Model3D.pbrMaterial material] body
         Gltf.writeBinary glbPath model resolution
         elapsed <- Timer.elapsed timer

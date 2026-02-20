@@ -1620,7 +1620,7 @@ body3D = do
         Stl.writeBinary path convention Length.inMillimeters mesh
   let writeMitsuba path givenResolution body = do
         let mesh = Body3D.toSurfaceMesh givenResolution body
-        Mitsuba.writeMeshes path [(mesh, #name "")]
+        Mitsuba.writeMeshes path [(mesh, "name" ::: "")]
   Class.new @Body3D $(docs ''Body3D.Body3D) $
     [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3D.extruded @FFI.Space @FFI.Space) $(docs 'Body3D.extruded)
     , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @FFI.Space @FFI.Space) $(docs 'Body3D.revolved)
@@ -1719,11 +1719,11 @@ mitsuba = do
   let writeFiles :: Text -> Resolution -> Mitsuba -> IO ()
       writeFiles path res (Mitsuba model camera lighting) =
         Mitsuba.writeFiles
-          (#path path)
-          (#model model)
-          (#resolution res)
-          (#camera camera)
-          (#lighting lighting)
+          ("path" ::: path)
+          ("model" ::: model)
+          ("resolution" ::: res)
+          ("camera" ::: camera)
+          ("lighting" ::: lighting)
   Class.new @Mitsuba "A Mitsuba scene that can be written out to a file." $
     [ Class.constructor3 "Model" "Camera" "Lighting" Mitsuba "Construct a Mitsuba scene from a 3D model, a camera and some lighting."
     , Class.member2 "Write Files" "Path" "Resolution" writeFiles $(docs 'Mitsuba.writeFiles)
@@ -1735,9 +1735,9 @@ spurGear :: Class
 spurGear =
   Class.new @SpurGear $(docs ''SpurGear) $
     [ Class.factory2 "Metric" "Num Teeth" "Module" SpurGear.metric $(docs 'SpurGear.metric)
-    , Class.property "Num Teeth" (.numTeeth) "The number of teeth of a gear."
-    , Class.property "Module" (.module_) "The module of a gear."
-    , Class.property "Pitch Diameter" (.pitchDiameter) "The pitch diameter of a gear."
-    , Class.property "Outer Diameter" (.outerDiameter) "The outer diameter of a gear."
+    , Class.property "Num Teeth" (SpurGear.numTeeth) $(docs 'SpurGear.numTeeth)
+    , Class.property "Module" (SpurGear.module_) $(docs 'SpurGear.module_)
+    , Class.property "Pitch Diameter" (SpurGear.pitchDiameter) $(docs 'SpurGear.pitchDiameter)
+    , Class.property "Outer Diameter" (SpurGear.outerDiameter) $(docs 'SpurGear.outerDiameter)
     , Class.memberM0 "Profile" (SpurGear.profile :: SpurGear -> List Curve2D) $(docs 'SpurGear.profile)
     ]

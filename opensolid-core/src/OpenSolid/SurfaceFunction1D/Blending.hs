@@ -35,18 +35,18 @@ desingularize ::
     VectorSurfaceFunction dimension units space
   ) ->
   VectorSurfaceFunction dimension units space ->
-  "singularityU0" # Maybe (Singularity dimension units space) ->
-  "singularityU1" # Maybe (Singularity dimension units space) ->
-  "singularityV0" # Maybe (Singularity dimension units space) ->
-  "singularityV1" # Maybe (Singularity dimension units space) ->
+  "singularityU0" ::: Maybe (Singularity dimension units space) ->
+  "singularityU1" ::: Maybe (Singularity dimension units space) ->
+  "singularityV0" ::: Maybe (Singularity dimension units space) ->
+  "singularityV1" ::: Maybe (Singularity dimension units space) ->
   VectorSurfaceFunction dimension units space
 desingularize
   desingularized
   function
-  (Named maybeSingularityU0)
-  (Named maybeSingularityU1)
-  (Named maybeSingularityV0)
-  (Named maybeSingularityV1) =
+  ("singularityU0" ::: maybeSingularityU0)
+  ("singularityU1" ::: maybeSingularityU1)
+  ("singularityV0" ::: maybeSingularityV0)
+  ("singularityV1" ::: maybeSingularityV1) =
     case (maybeSingularityU0, maybeSingularityU1, maybeSingularityV0, maybeSingularityV1) of
       (Nothing, Nothing, Nothing, Nothing) -> function
       (Just singularityU0, Nothing, Nothing, Nothing) ->

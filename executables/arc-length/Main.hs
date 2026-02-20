@@ -72,8 +72,8 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer do
         let drawPoint point =
               Svg.circleWith
                 [Svg.whiteFill]
-                (#centerPoint point)
-                (#diameter (Length.millimeters 3.0))
+                ("centerPoint" ::: point)
+                ("diameter" ::: Length.millimeters 3.0)
         let drawingBounds = Bounds2D.hull2 Point2D.origin (Point2D.centimeters 30.0 15.0)
         let resolution = Resolution.maxError Length.micrometer
         Svg.write fileName drawingBounds $

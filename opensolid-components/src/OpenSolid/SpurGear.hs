@@ -1,11 +1,14 @@
 module OpenSolid.SpurGear
-  ( SpurGear (numTeeth, module_)
+  ( SpurGear
+  , numTeeth
+  , module_
+  , pitchDiameter
+  , outerDiameter
   , metric
   , profile
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Curve1D qualified as Curve1D
@@ -22,30 +25,34 @@ import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 -- | A metric spur gear.
-data SpurGear = Metric
-  { numTeeth :: Int
-  -- ^ The number of teeth of a gear.
-  , module_ :: Length
-  -- ^ The module of a gear.
-  }
+newtype SpurGear = Metric ("numTeeth" ::: Int, "module_" ::: Length)
 
 instance FFI SpurGear where
   representation = FFI.classRepresentation "SpurGear"
 
 -- | Create a metric spur gear with the given number of teeth and module.
-metric :: "numTeeth" # Int -> "module" # Length -> SpurGear
-metric (Named numTeeth) (Named module_) = Metric{numTeeth, module_}
+metric :: "numTeeth" ::: Int -> "module" ::: Length -> SpurGear
+metric ("numTeeth" ::: givenNumTeeth) ("module" ::: givenModule) =
+  Metric ("numTeeth" ::: givenNumTeeth, "module_" ::: givenModule)
+
+-- | The number of teeth of a gear.
+numTeeth :: SpurGear -> Int
+numTeeth (Metric fields) = fields.numTeeth
+
+-- | The module of a gear.
+module_ :: SpurGear -> Length
+module_ (Metric fields) = fields.module_
 
 -- | The pitch diameter of a gear.
-instance HasField "pitchDiameter" SpurGear Length where
-  getField gear = gear.module_ * Number.fromInt gear.numTeeth
+pitchDiameter :: SpurGear -> Length
+pitchDiameter gear = module_ gear * Number.fromInt (numTeeth gear)
 
 {-| The outer diameter of a gear.
 
 This is equal to the pitch diameter plus twice the module.
 -}
-instance HasField "outerDiameter" SpurGear Length where
-  getField gear = gear.pitchDiameter + 2.0 * gear.module_
+outerDiameter :: SpurGear -> Length
+outerDiameter gear = pitchDiameter gear + 2.0 * module_ gear
 
 {-| Get the outer profile of a gear as a list of curves, centered at the origin.
 
@@ -60,8 +67,8 @@ that you can then extrude to form a gear body.
 -}
 profile :: Tolerance Meters => SpurGear -> List (Curve2D Meters space)
 profile gear = do
-  let n = gear.numTeeth
-  let m = gear.module_
+  let n = numTeeth gear
+  let m = module_ gear
   let phi = Angle.degrees 20.0 -- pressure angle
   let r0 = m * Number.fromInt n / 2.0 -- pitch radius
   let rb = r0 * Angle.cos phi -- involute tooth profile base radius
