@@ -1,14 +1,20 @@
 {
-  inputs.nixpkgs.url =
-    "github:nixos/nixpkgs?rev=62e0f05ede1da0d54515d4ea8ce9c733f12d9f08";
-  outputs = { nixpkgs, ... }:
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+  outputs =
+    { nixpkgs, ... }:
     # All supported platforms/architectures
     let
-      supportedSystems =
-        [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-    in {
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+    in
+    {
       # Define a dev shell for each supported platform/architecture
-      devShells = nixpkgs.lib.genAttrs supportedSystems (system:
+      devShells = nixpkgs.lib.genAttrs supportedSystems (
+        system:
         # Get the Nix packages for the current platform/architecture
         let
           overlay = final: prev: {
@@ -19,7 +25,8 @@
           pkgs = nixpkgs.legacyPackages.${system}.extend overlay;
           # Allow Python packages to be built against libstdc++.so
           ld_library_path = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
-        in {
+        in
+        {
           # Define the configuration for an OpenSolid development shell
           default = pkgs.mkShell {
             # Development tools
@@ -80,6 +87,7 @@
               "export CPATH=$(find $(ghc --print-libdir) -name Rts.h | sed -r 's|Rts.h||')"
             ];
           };
-        });
+        }
+      );
     };
 }
