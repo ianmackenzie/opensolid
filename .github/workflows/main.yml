@@ -179,7 +179,7 @@ jobs:
           source ~/.ghcup/env
           ghcup config show
           ghcup debug-info
-          ghcup list
+          ghcup --metadata-caching 0 --metadata-fetching-mode Strict list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
@@ -254,7 +254,7 @@ jobs:
           source ~/.ghcup/env
           ghcup config show
           ghcup debug-info
-          ghcup list
+          ghcup --metadata-caching 0 --metadata-fetching-mode Strict list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
