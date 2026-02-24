@@ -1,5 +1,9 @@
-Have WithNoZeros, WithNoInteriorZeros capture the tolerance value that was used when constructing them?
-- hopefully avoid Curve1D.singularityTolerance...
+Cache e.g. search trees in curve values, but provide function for stripping cached values?
+- possible names:
+  - Curve2D.strip
+  - Curve2D.clean
+  - Curve2D.compact
+- probably can't get rid of cached derivatives though...
 
 Switch to Vector, VectorBounds purely *forwarding* to Vector2D, VectorBounds2D etc.?
 - don't call back into e.g. Vector from Vector2D
@@ -114,9 +118,6 @@ Switch back to 'normal' (non-recursive) form of quotient derivatives
 -> search for 'recursive' calls in general?
 
 Rename 'interpolationParameter' to 'unterpolate'?
-
-Flip argument order in Composition typeclass
--> rename to Composition2 temporarily to ensure all instances are updated
 
 Rework Curve2D.medialAxis to use tangent directions instead of derivative vectors
 
