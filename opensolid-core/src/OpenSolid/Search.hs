@@ -58,15 +58,16 @@ excluded maxDepthIndex bounds (Node nodeBounds children)
 
 exclusive ::
   (bounds -> value -> Fuzzy (Maybe solution)) ->
+  ((bounds, solution) -> (bounds, solution) -> Bool) ->
   Tree bounds value ->
   List (bounds, solution)
-exclusive callback (Tree bounds value children) =
+exclusive callback duplicateCallback (Tree bounds value children) =
   case callback bounds value of
     Resolved Nothing -> []
     Resolved (Just solution) -> [(bounds, solution)]
     Unresolved -> do
       let solutionTree = buildNode 0 callback bounds children solutionTree
-      collectSolutions solutionTree []
+      collectSolutions solutionTree [] & deduplicate duplicateCallback
 
 buildNode ::
   Domain.Bounds bounds =>
@@ -98,3 +99,19 @@ collectSolutions ::
 collectSolutions (Leaf _ Nothing) accumulated = accumulated
 collectSolutions (Leaf bounds (Just solution)) accumulated = (bounds, solution) : accumulated
 collectSolutions (Node _ children) accumulated = List.foldr collectSolutions accumulated children
+
+deduplicate ::
+  ((bounds, solution) -> (bounds, solution) -> Bool) ->
+  List (bounds, solution) ->
+  List (bounds, solution)
+deduplicate callback solutions = deduplicateImpl callback solutions []
+
+deduplicateImpl ::
+  ((bounds, solution) -> (bounds, solution) -> Bool) ->
+  List (bounds, solution) ->
+  List (bounds, solution) ->
+  List (bounds, solution)
+deduplicateImpl _ [] accumulated = accumulated
+deduplicateImpl callback (first : rest) accumulated
+  | List.anySatisfy (callback first) rest = deduplicateImpl callback rest accumulated
+  | otherwise = deduplicateImpl callback rest (first : accumulated)

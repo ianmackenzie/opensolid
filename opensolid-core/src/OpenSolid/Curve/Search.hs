@@ -91,18 +91,7 @@ findPoint point searchTree = do
             Resolved (Just tSolution)
         | otherwise =
             Unresolved
-  let solutions = Search.exclusive callback searchTree
-  List.map Pair.second (deduplicate solutions [])
-
-deduplicate ::
-  List (Interval Unitless, Number) ->
-  List (Interval Unitless, Number) ->
-  List (Interval Unitless, Number)
-deduplicate [] accumulated = accumulated
-deduplicate (first : rest) accumulated =
-  if List.anySatisfy (isDuplicate first) accumulated
-    then deduplicate rest accumulated
-    else deduplicate rest (first : accumulated)
+  List.map Pair.second (Search.exclusive callback isDuplicate searchTree)
 
 isDuplicate :: (Interval Unitless, Number) -> (Interval Unitless, Number) -> Bool
 isDuplicate (tBounds1, _) (tBounds2, _) = Domain.overlapping tBounds1 tBounds2

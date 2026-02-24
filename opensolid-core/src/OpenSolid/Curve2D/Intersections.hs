@@ -235,19 +235,14 @@ intersections curve1 curve2
                   , crossingSolutionTarget = differenceSurface
                   , tangentSolutionTarget
                   }
-          let solutions = Search.exclusive (findIntersectionPoint problem) searchTree
-          case deduplicate solutions [] & List.map Pair.second & List.sort of
+          let solutions = Search.exclusive (findIntersectionPoint problem) isDuplicate searchTree
+          case List.sort (List.map Pair.second solutions) of
             [] -> Ok Nothing
             NonEmpty intersectionPoints -> Ok (Just (IntersectionPoints intersectionPoints))
 
-type Solution = ((Interval Unitless, Interval Unitless), IntersectionPoint)
-
-deduplicate :: List Solution -> List Solution -> List Solution
-deduplicate [] accumulated = accumulated
-deduplicate (first : rest) accumulated =
-  if List.anySatisfy (isDuplicate first) accumulated
-    then deduplicate rest accumulated
-    else deduplicate rest (first : accumulated)
-
-isDuplicate :: Solution -> Solution -> Bool
-isDuplicate (uvBounds1, _) (uvBounds2, _) = Domain.touching uvBounds1 uvBounds2
+isDuplicate ::
+  ((Interval Unitless, Interval Unitless), IntersectionPoint) ->
+  ((Interval Unitless, Interval Unitless), IntersectionPoint) ->
+  Bool
+isDuplicate (parameterBounds1, _) (parameterBounds2, _) =
+  Domain.overlapping parameterBounds1 parameterBounds2
