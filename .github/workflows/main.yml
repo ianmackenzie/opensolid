@@ -176,6 +176,7 @@ jobs:
           BOOTSTRAP_HASKELL_MINIMAL: "1"
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+          source ~/.ghcup/env
           ghcup list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
@@ -248,6 +249,7 @@ jobs:
           BOOTSTRAP_HASKELL_MINIMAL: "1"
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+          source ~/.ghcup/env
           ghcup list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
