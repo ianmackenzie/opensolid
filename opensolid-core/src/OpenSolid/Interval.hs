@@ -30,7 +30,7 @@ module OpenSolid.Interval
   , overlap
   , separation
   , separation#
-  , isContainedIn
+  , containedIn
   , bisect
   , isAtomic
   , isFinite
@@ -473,8 +473,8 @@ roundoff) will be reported as not contained by that range.
 contains :: Interval units -> Interval units -> Bool
 contains (Interval low2 high2) (Interval low1 high1) = low1 <= low2 && high2 <= high1
 
-isContainedIn :: Interval units -> Interval units -> Bool
-isContainedIn interval value = contains value interval
+containedIn :: Interval units -> Interval units -> Bool
+containedIn interval value = contains value interval
 
 separation :: Interval units -> Interval units -> Quantity units
 separation interval1 interval2 = Quantity# (separation# interval1 interval2)
