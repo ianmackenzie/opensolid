@@ -91,7 +91,5 @@ findPoint point searchTree = do
             Resolved (Just tSolution)
         | otherwise =
             Unresolved
+  let isDuplicate (tBounds1, _) (tBounds2, _) = Domain.overlapping tBounds1 tBounds2
   List.map Pair.second (Search.exclusive callback isDuplicate searchTree)
-
-isDuplicate :: (Interval Unitless, Number) -> (Interval Unitless, Number) -> Bool
-isDuplicate (tBounds1, _) (tBounds2, _) = Domain.overlapping tBounds1 tBounds2
