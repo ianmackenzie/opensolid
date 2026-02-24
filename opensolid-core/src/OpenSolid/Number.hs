@@ -29,6 +29,7 @@ module OpenSolid.Number
   , cubed
   , abs
   , clampTo
+  , includedIn
   , interpolateFrom
   , midpoint
   , goldenRatio
@@ -94,6 +95,9 @@ abs = Quantity.abs
 
 clampTo :: Interval Unitless -> Number -> Number
 clampTo = Quantity.clampTo
+
+includedIn :: Interval Unitless -> Number -> Bool
+includedIn = Quantity.includedIn
 
 interpolateFrom :: Number -> Number -> Number -> Number
 interpolateFrom = Quantity.interpolateFrom

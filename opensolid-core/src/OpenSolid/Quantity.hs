@@ -18,6 +18,7 @@ module OpenSolid.Quantity
   , abs
   , minmax
   , clampTo
+  , includedIn
   , convert
   , unconvert
   , sum
@@ -102,6 +103,9 @@ abs (Quantity x) = Quantity (Prelude.abs x)
 
 clampTo :: Interval units -> Quantity units -> Quantity units
 clampTo interval value = min (max (Interval.lower interval) value) (Interval.upper interval)
+
+includedIn :: Interval units -> Quantity units -> Bool
+includedIn interval value = Interval.lower interval <= value && value <= Interval.upper interval
 
 {-# INLINE minmax #-}
 minmax :: (Quantity units, Quantity units) -> (Quantity units, Quantity units)
