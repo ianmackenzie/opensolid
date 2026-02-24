@@ -114,8 +114,8 @@ instance
 
 instance ApproximateEquality (VectorCurve3D units space) (Tolerance units) where
   curve1 ~= curve2 = do
-    let equalValues t = evaluate curve1 t ~= evaluate curve2 t
-    NonEmpty.allSatisfy equalValues Parameter.samples
+    let equalValuesAt t = evaluate curve1 t ~= evaluate curve2 t
+    NonEmpty.all equalValuesAt Parameter.samples
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

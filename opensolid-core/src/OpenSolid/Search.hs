@@ -54,7 +54,7 @@ excluded _ bounds (Leaf leafBounds _) = Domain.contains bounds leafBounds
 excluded maxDepthIndex bounds (Node nodeBounds children)
   | maxDepthIndex == 0 = False -- Ensure we don't cause infinite recursion
   | not (Domain.contains bounds nodeBounds) = False -- Stop early if possible
-  | otherwise = List.anySatisfy (excluded (maxDepthIndex - 1) bounds) children
+  | otherwise = List.any (excluded (maxDepthIndex - 1) bounds) children
 
 exclusive ::
   (bounds -> value -> Fuzzy (Maybe solution)) ->
@@ -112,6 +112,6 @@ deduplicateImpl ::
   List (bounds, solution) ->
   List (bounds, solution)
 deduplicateImpl _ [] accumulated = accumulated
-deduplicateImpl callback (first : rest) accumulated
-  | List.anySatisfy (callback first) rest = deduplicateImpl callback rest accumulated
-  | otherwise = deduplicateImpl callback rest (first : accumulated)
+deduplicateImpl isDuplicate (first : rest) accumulated
+  | List.any (isDuplicate first) rest = deduplicateImpl isDuplicate rest accumulated
+  | otherwise = deduplicateImpl isDuplicate rest (first : accumulated)

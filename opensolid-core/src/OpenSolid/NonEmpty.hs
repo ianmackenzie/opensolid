@@ -65,10 +65,8 @@ module OpenSolid.NonEmpty
   , sortAndDeduplicate
   , intersperse
   , partition
-  , allSatisfy
-  , allTrue
-  , anySatisfy
-  , anyTrue
+  , all
+  , any
   , successive
   , minimum
   , maximum
@@ -323,17 +321,11 @@ dedup current (next : remaining)
   | current == next = dedup current remaining
   | otherwise = push current (dedup next remaining)
 
-allSatisfy :: (a -> Bool) -> NonEmpty a -> Bool
-allSatisfy = Prelude.all
+all :: (a -> Bool) -> NonEmpty a -> Bool
+all = Prelude.all
 
-allTrue :: NonEmpty Bool -> Bool
-allTrue = Prelude.and
-
-anySatisfy :: (a -> Bool) -> NonEmpty a -> Bool
-anySatisfy = Prelude.any
-
-anyTrue :: NonEmpty Bool -> Bool
-anyTrue = Prelude.or
+any :: (a -> Bool) -> NonEmpty a -> Bool
+any = Prelude.any
 
 successive :: (a -> a -> b) -> NonEmpty a -> List b
 successive function nonEmpty = List.successive function (toList nonEmpty)

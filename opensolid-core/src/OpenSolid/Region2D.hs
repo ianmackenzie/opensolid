@@ -299,7 +299,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
     Ok Nothing -> Ok ()
     -- Otherwise, make sure curves only intersect (meet) at endpoints
     Ok (Just (Curve2D.IntersectionPoints intersectionPoints)) ->
-      if NonEmpty.allSatisfy isEndpointIntersection intersectionPoints
+      if NonEmpty.all isEndpointIntersection intersectionPoints
         then Ok ()
         else Error BoundedBy.BoundaryIntersectsItself
 
@@ -459,7 +459,7 @@ classify ::
   NonEmpty (Curve2D units space) ->
   Maybe Sign
 classify point curves =
-  if NonEmpty.anySatisfy (intersects point) curves
+  if NonEmpty.any (intersects point) curves
     then Nothing
     else Just (classifyNonBoundary point curves)
 
@@ -501,7 +501,7 @@ classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerLoopCandidate = fixSign Positive largestLoop
   let innerLoopCandidates = List.map (fixSign Negative) smallerLoops
-  if List.allSatisfy (loopIsInside outerLoopCandidate) innerLoopCandidates
+  if List.all (loopIsInside outerLoopCandidate) innerLoopCandidates
     then Ok (Region2D outerLoopCandidate innerLoopCandidates)
     else Error BoundedBy.MultipleDisjointRegions
 

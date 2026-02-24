@@ -67,7 +67,7 @@ name :: Text -> Name
 name input =
   case Text.split " " input of
     first : rest ->
-      if NonEmpty.allSatisfy isCapitalized (first :| rest)
+      if NonEmpty.all isCapitalized (first :| rest)
         then Name (first :| rest)
         else throw (InternalError ("API name has non-capitalized component: " <> input))
     _ -> throw (InternalError "Text.split should always return at least one component")

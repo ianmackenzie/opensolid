@@ -334,8 +334,8 @@ revolved startPlane profile axis2D angle = do
     case Result.collect Curve1D.sign signedDistanceCurves of
       Error Curve1D.CrossesZero -> Error BoundedBy.BoundaryIntersectsItself
       Ok curveSigns
-        | List.allSatisfy (== Positive) curveSigns -> Ok Positive
-        | List.allSatisfy (== Negative) curveSigns -> Ok Negative
+        | List.all (== Positive) curveSigns -> Ok Positive
+        | List.all (== Negative) curveSigns -> Ok Negative
         | otherwise -> Error BoundedBy.BoundaryIntersectsItself
 
   let endPlane = Plane3D.rotateAround axis3D angle startPlane

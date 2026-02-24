@@ -16,7 +16,7 @@ deduplicateImpl ::
   List (Interval Unitless, Number)
 deduplicateImpl [] accumulated = accumulated
 deduplicateImpl (first : remaining) accumulated =
-  if List.anySatisfy (isDuplicate first) accumulated
+  if List.any (isDuplicate first) accumulated
     then deduplicateImpl remaining accumulated
     else deduplicateImpl remaining (first : accumulated)
 

@@ -48,10 +48,8 @@ module OpenSolid.List
   , isAscending
   , isNonAscending
   , isDescending
-  , allSatisfy
-  , allTrue
-  , anySatisfy
-  , anyTrue
+  , all
+  , any
   , successive
   , count
   , intersperse
@@ -244,17 +242,11 @@ isNonAscending = isOrdered (>=)
 isDescending :: Ord a => List a -> Bool
 isDescending = isOrdered (>)
 
-allSatisfy :: (a -> Bool) -> List a -> Bool
-allSatisfy = Prelude.all
+all :: (a -> Bool) -> List a -> Bool
+all = Prelude.all
 
-allTrue :: List Bool -> Bool
-allTrue = Prelude.and
-
-anySatisfy :: (a -> Bool) -> List a -> Bool
-anySatisfy = Prelude.any
-
-anyTrue :: List Bool -> Bool
-anyTrue = Prelude.or
+any :: (a -> Bool) -> List a -> Bool
+any = Prelude.any
 
 successive :: (a -> a -> b) -> List a -> List b
 successive function list = map2 function list (drop 1 list)

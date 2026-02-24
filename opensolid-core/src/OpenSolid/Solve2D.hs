@@ -79,7 +79,7 @@ process callback queue solutions exclusions =
       -- if the subdomain is actually contained?)
       let filteredExclusions = List.filter (Domain2D.overlaps subdomain) exclusions
       let convergenceSubdomain = convergenceDomain subdomain recursionType
-      if List.anySatisfy (Domain2D.contains convergenceSubdomain) filteredExclusions
+      if List.any (Domain2D.contains convergenceSubdomain) filteredExclusions
         then process callback remaining solutions exclusions
         else do
           case filteredExclusions of

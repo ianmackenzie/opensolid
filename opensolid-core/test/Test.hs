@@ -122,7 +122,7 @@ runImpl args context test = case test of
       | List.isEmpty args ->
           -- No test filter specified, silently run all tests
           runCheck
-      | List.anySatisfy (\arg -> Text.contains arg fullName) args -> Prelude.do
+      | List.any (\arg -> Text.contains arg fullName) args -> Prelude.do
           -- Test filter specified, so print out which tests we're running
           -- and how long they took (with an extra emoji to flag slow tests)
           timer <- Timer.start

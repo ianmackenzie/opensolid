@@ -308,7 +308,7 @@ isResolved :: Tolerance units => Estimate units -> Bool
 isResolved estimate = boundsWidth estimate ~= Quantity.zero
 
 allResolved :: Tolerance units => List (a, Estimate units) -> Bool
-allResolved pairs = List.allSatisfy (isResolved . Pair.second) pairs
+allResolved pairs = List.all (isResolved . Pair.second) pairs
 
 minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 minimumBy function items = go (NonEmpty.map (Pair.decorate function) items)

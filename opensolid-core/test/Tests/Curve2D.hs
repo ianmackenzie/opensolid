@@ -118,8 +118,8 @@ equalUBounds :: Interval Unitless -> Interval Unitless -> Bool
 equalUBounds (Interval actualLow actualHigh) (Interval expectedLow expectedHigh) =
   Tolerance.using 1e-12 (actualLow ~= expectedLow && actualHigh ~= expectedHigh)
 
-equalOverlapSegments :: OverlappingSegment -> OverlappingSegment -> Bool
-equalOverlapSegments segment1 segment2 = do
+equalOverlapSegments :: (OverlappingSegment, OverlappingSegment) -> Bool
+equalOverlapSegments (segment1, segment2) = do
   let OverlappingSegment actual1 actual2 actualSign = segment1
   let OverlappingSegment expected1 expected2 expectedSign = segment2
   equalUBounds actual1 expected1 && equalUBounds actual2 expected2 && actualSign == expectedSign
@@ -127,7 +127,7 @@ equalOverlapSegments segment1 segment2 = do
 equalOverlapSegmentLists :: NonEmpty OverlappingSegment -> NonEmpty OverlappingSegment -> Bool
 equalOverlapSegmentLists actualSegments expectedSegments =
   NonEmpty.length actualSegments == NonEmpty.length expectedSegments
-    && NonEmpty.allTrue (NonEmpty.map2 equalOverlapSegments actualSegments expectedSegments)
+    && NonEmpty.all equalOverlapSegments (NonEmpty.zip2 actualSegments expectedSegments)
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "curveOverlap1" Test.do

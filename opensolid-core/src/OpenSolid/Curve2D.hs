@@ -774,7 +774,7 @@ then it is not considered to lie on the axis;
 it is only considered to lie on the axis if every point on the curve is also on the axis.
 -}
 isOnAxis :: Tolerance units => Axis2D units space -> Curve2D units space -> Bool
-isOnAxis axis curve = NonEmpty.allSatisfy (intersects axis) (samplePoints curve)
+isOnAxis axis curve = NonEmpty.all (intersects axis) (samplePoints curve)
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2D units space -> Curve1D units

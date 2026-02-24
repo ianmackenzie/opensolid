@@ -111,9 +111,9 @@ instance Units.Coercion (SurfaceFunction1D unitsA) (SurfaceFunction1D unitsB) wh
     SurfaceFunction1D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 
 instance ApproximateEquality (SurfaceFunction1D units) (Tolerance units) where
-  function1 ~= function2 =
-    List.allTrue
-      [evaluate function1 uvPoint ~= evaluate function2 uvPoint | uvPoint <- UvPoint.samples]
+  function1 ~= function2 = do
+    let equalValuesAt uvPoint = evaluate function1 uvPoint ~= evaluate function2 uvPoint
+    List.all equalValuesAt UvPoint.samples
 
 instance
   units1 ~ units2 =>
@@ -538,14 +538,14 @@ sqrt_ function =
             let functionIsZeroAt testPoint =
                   Tolerance.using (Quantity.squared_ ?tolerance) $
                     evaluate function testPoint ~= Quantity.zero
-            let functionIsZero = NonEmpty.allSatisfy functionIsZeroAt testPoints
+            let functionIsZero = NonEmpty.all functionIsZeroAt testPoints
             let firstDerivativeIsZeroAt testPoint = do
                   let secondDerivativeValue = evaluate secondDerivative testPoint
                   let firstDerivativeTolerance =
                         ?tolerance ?*? Quantity.sqrt_ (2.0 * secondDerivativeValue)
                   Tolerance.using firstDerivativeTolerance $
                     evaluate firstDerivative testPoint ~= Quantity.zero
-            let firstDerivativeIsZero = NonEmpty.allSatisfy firstDerivativeIsZeroAt testPoints
+            let firstDerivativeIsZero = NonEmpty.all firstDerivativeIsZeroAt testPoints
             if functionIsZero && firstDerivativeIsZero
               then Just (zero, sign * unsafeSqrt_ (0.5 * secondDerivative))
               else Nothing

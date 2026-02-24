@@ -108,7 +108,7 @@ pickMinimumBy = Test.check 100 "pickMinimumBy" Test.do
   let minValue = Pair.first minPair
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
-  let minValueIsCorrect = List.allSatisfy (>= minValue) remainingValues
+  let minValueIsCorrect = List.all (>= minValue) remainingValues
   let allValuesArePresent =
         NonEmpty.sort originalValues == NonEmpty.sort (minValue :| remainingValues)
   Test.expect (minValueIsCorrect && allValuesArePresent)
@@ -120,7 +120,7 @@ pickMaximumBy = Test.check 100 "pickMaximumBy" Test.do
   let maxValue = Pair.first maxPair
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
-  let maxValueIsCorrect = List.allSatisfy (<= maxValue) remainingValues
+  let maxValueIsCorrect = List.all (<= maxValue) remainingValues
   let allValuesArePresent =
         NonEmpty.sort originalValues == NonEmpty.sort (maxValue :| remainingValues)
   Test.expect (maxValueIsCorrect && allValuesArePresent)

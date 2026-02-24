@@ -170,8 +170,8 @@ instance
 
 instance ApproximateEquality (Curve3D space) (Tolerance Meters) where
   curve1 ~= curve2 = do
-    let equalPoints t = evaluate curve1 t ~= evaluate curve2 t
-    NonEmpty.allSatisfy equalPoints Parameter.samples
+    let equalPointsAt t = evaluate curve1 t ~= evaluate curve2 t
+    NonEmpty.all equalPointsAt Parameter.samples
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new givenCompiled givenDerivative =

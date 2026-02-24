@@ -122,8 +122,8 @@ instance Units.Coercion (Curve1D units1) (Curve1D units2) where
 
 instance ApproximateEquality (Curve1D units) (Tolerance units) where
   curve1 ~= curve2 = do
-    let equalPoints tValue = evaluate curve1 tValue ~= evaluate curve2 tValue
-    NonEmpty.allSatisfy equalPoints Parameter.samples
+    let equalPointsAt tValue = evaluate curve1 tValue ~= evaluate curve2 tValue
+    NonEmpty.all equalPointsAt Parameter.samples
 
 instance
   units1 ~ units2 =>
@@ -598,7 +598,7 @@ findZeros derivatives subdomain derivativeBounds exclusions
           Resolved (NonEmpty subdomainZeros) -> do
             let subdomainInterior = Domain1D.interior subdomain
             let isInterior (t0, _) = Interval.includes t0 subdomainInterior
-            if NonEmpty.allSatisfy isInterior subdomainZeros
+            if NonEmpty.all isInterior subdomainZeros
               then Solve1D.return (NonEmpty.map toZero subdomainZeros)
               else Solve1D.recurse
 
