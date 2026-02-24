@@ -443,10 +443,10 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2D.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2D.angleFrom centerPoint givenStartPoint
   polarArc
-    ("centerPoint" ::: centerPoint)
-    ("radius" ::: radius)
-    ("startAngle" ::: startAngle)
-    ("endAngle" ::: (startAngle + sweptAngle))
+    (#centerPoint centerPoint)
+    (#radius radius)
+    (#startAngle startAngle)
+    (#endAngle (startAngle + sweptAngle))
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
@@ -539,10 +539,10 @@ customArc p0 v1 v2 a b = do
 circle :: Circle2D units space -> Curve2D units space
 circle givenCircle =
   polarArc
-    ("centerPoint" ::: Circle2D.centerPoint givenCircle)
-    ("radius" ::: Circle2D.radius givenCircle)
-    ("startAngle" ::: Angle.zero)
-    ("endAngle" ::: Angle.twoPi)
+    (#centerPoint (Circle2D.centerPoint givenCircle))
+    (#radius (Circle2D.radius givenCircle))
+    (#startAngle Angle.zero)
+    (#endAngle Angle.twoPi)
 
 {-| Create an ellipes with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,
@@ -1002,7 +1002,7 @@ samplingPoints resolution curve = do
         let secondDerivativeBounds = VectorCurve2D.evaluateBounds curveSecondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2D.magnitude secondDerivativeBounds
         Linearization.error secondDerivativeMagnitude subdomain
-  let predicate = Resolution.predicate ("size" ::: size) ("error" ::: error) resolution
+  let predicate = Resolution.predicate (#size size) (#error error) resolution
   Domain1D.samplingPoints predicate
 
 medialAxis ::

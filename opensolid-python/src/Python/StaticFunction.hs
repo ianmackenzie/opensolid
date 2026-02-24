@@ -26,7 +26,7 @@ definition className (functionName, staticFunction) = do
     , "def "
         <> FFI.snakeCase functionName
         <> "("
-        <> Python.Function.arguments ("includeSelf" ::: False) positionalArguments namedArguments
+        <> Python.Function.arguments (#includeSelf False) positionalArguments namedArguments
         <> ") -> "
         <> Python.Type.qualifiedName returnType
         <> ":"

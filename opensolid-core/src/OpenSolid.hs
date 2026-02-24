@@ -31,8 +31,6 @@ module OpenSolid
   , intersects
   , ApproximateEquality
   , approximatelyEquals
-  , Argument
-  , argument
   , Quantity
   , Number
   , Sign (Sign, Positive, Negative)
@@ -87,8 +85,3 @@ compose = (.)
 
 approximatelyEquals :: (ApproximateEquality a constraint, constraint) => a -> a -> Bool
 approximatelyEquals = (~=)
-
-type Argument name value = name ::: value
-
-argument :: forall name -> value -> Argument name value
-argument name value = name ::: value

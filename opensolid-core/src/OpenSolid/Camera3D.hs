@@ -178,11 +178,11 @@ isometricElevation = Angle.atan2 1.0 (Number.sqrt 2.0)
 isometric :: Point3D space -> Length -> Projection -> Camera3D space
 isometric givenFocalPoint distance givenProjection =
   orbit
-    ("focalPoint" ::: givenFocalPoint)
-    ("azimuth" ::: (Angle.degrees 45.0))
-    ("elevation" ::: isometricElevation)
-    ("distance" ::: distance)
-    ("projection" ::: givenProjection)
+    (#focalPoint givenFocalPoint)
+    (#azimuth (Angle.degrees 45.0))
+    (#elevation isometricElevation)
+    (#distance distance)
+    (#projection givenProjection)
 
 moveTo :: Point3D space -> Camera3D space -> Camera3D space
 moveTo newEyePoint Camera3D{frame, focalDistance, projection} =

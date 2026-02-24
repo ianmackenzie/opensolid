@@ -247,7 +247,7 @@ cylinder startPoint endPoint ("diameter" ::: diameter) =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
     Error Vector.IsZero -> Error EmptyBody
     Ok (length, direction) ->
-      cylinderAlong (Axis3D startPoint direction) Quantity.zero length ("diameter" ::: diameter)
+      cylinderAlong (Axis3D startPoint direction) Quantity.zero length (#diameter diameter)
 
 {-| Create a cylindrical body along a given axis.
 

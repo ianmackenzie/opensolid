@@ -107,10 +107,10 @@ writeFiles
     writeMeshes meshFileName meshes
     let sceneXml =
           sceneDocument
-            ("camera" ::: camera)
-            ("lighting" ::: lighting)
-            ("meshProperties" ::: properties)
-            ("meshFileName" ::: meshFileName)
+            (#camera camera)
+            (#lighting lighting)
+            (#meshProperties properties)
+            (#meshFileName meshFileName)
     let sceneFileName = path <> ".xml"
     IO.writeUtf8 sceneFileName sceneXml
 
@@ -139,7 +139,7 @@ collectMeshes resolution model = case model of
             let nameComponents = Model3D.traversal.parentNames <> [ownName]
             Text.join "." nameComponents
     let properties = Properties{material, opacity, qualifiedName}
-    List.singleton ((mesh, "name" ::: qualifiedName), properties)
+    List.singleton ((mesh, #name qualifiedName), properties)
 
 {-| Specify an environment map to be used as lighting.
 

@@ -73,10 +73,9 @@ testCurveMedialAxis label curve1 curve2 = do
               let t = Curve1D.evaluate parameterization u
               let centerPoint = Curve2D.evaluate segment.curve t
               let diameter = 2.0 * Quantity.abs (Curve1D.evaluate segment.radius t)
-              Svg.circleWith
-                [Svg.strokeColor Color.gray, Svg.strokeWidth (Length.millimeters 0.2)]
-                ("centerPoint" ::: centerPoint)
-                ("diameter" ::: diameter)
+              let strokeWidth = Length.millimeters 0.2
+              let attributes = [Svg.strokeColor Color.gray, Svg.strokeWidth strokeWidth]
+              Svg.circleWith attributes (#centerPoint centerPoint) (#diameter diameter)
         Svg.combine drawTangentCircle (Parameter.steps 50)
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   let drawCurve = Svg.curve resolution

@@ -253,11 +253,10 @@ drawUvCurve attributes curve = do
   Svg.polylineWith attributes (Polyline2D.map (Point2D.convert toDrawing) polyline)
 
 drawDot :: Color -> UvPoint -> Svg UvSpace
-drawDot color point =
-  Svg.circleWith
-    [Svg.fillColor color]
-    ("centerPoint" ::: Point2D.convert toDrawing point)
-    ("diameter" ::: Length.millimeters 1.0)
+drawDot color point = do
+  let centerPoint = Point2D.convert toDrawing point
+  let diameter = Length.millimeters 1.0
+  Svg.circleWith [Svg.fillColor color] (#centerPoint centerPoint) (#diameter diameter)
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint n delay = do
@@ -302,8 +301,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let curve = Curve2D.bezier drawingControlPoints
   let drawSegmentBounds tBounds = drawBounds (Curve2D.evaluateBounds curve tBounds)
   let controlPointDiameter = Length.millimeters 10.0
-  let drawControlPoint point =
-        Svg.circle ("centerPoint" ::: point) ("diameter" ::: controlPointDiameter)
+  let drawControlPoint point = Svg.circle (#centerPoint point) (#diameter controlPointDiameter)
   let resolution = Resolution.maxError Length.millimeter
   Svg.groupWith
     [ Svg.strokeColor color

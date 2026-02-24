@@ -69,11 +69,9 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer do
   IO.printLine ("Cubic spline: " <> formatLength length)
   let drawCurve fileName curve = do
         let pointLocations = List.map (Curve2D.evaluate curve) (Parameter.steps 30)
-        let drawPoint point =
-              Svg.circleWith
-                [Svg.whiteFill]
-                ("centerPoint" ::: point)
-                ("diameter" ::: Length.millimeters 3.0)
+        let drawPoint point = do
+              let diameter = Length.millimeters 3.0
+              Svg.circleWith [Svg.whiteFill] (#centerPoint point) (#diameter diameter)
         let drawingBounds = Bounds2D.hull2 Point2D.origin (Point2D.centimeters 30.0 15.0)
         let resolution = Resolution.maxError Length.micrometer
         Svg.write fileName drawingBounds $

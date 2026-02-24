@@ -316,6 +316,12 @@ instance Eq value => Eq (name ::: value) where
 instance Ord value => Ord (name ::: value) where
   compare (_ ::: value1) (_ ::: value2) = compare value1 value2
 
+instance
+  (KnownSymbol name1, name1 ~ name2, value1 ~ value2) =>
+  IsLabel name1 (value1 -> name2 ::: value2)
+  where
+  fromLabel = (name1 :::)
+
 instance HasField name1 (name1 ::: value1, name2 ::: value2) value1 where
   getField (_ ::: value, _) = value
 

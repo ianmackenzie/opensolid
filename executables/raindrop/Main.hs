@@ -31,7 +31,7 @@ main = Tolerance.using Length.nanometer do
       , Curve2D.lineFrom p3 p1
       ]
   body <- Result.orFail (Body3D.revolved World3D.frontPlane profile Axis2D.y Angle.twoPi)
-  let material = PbrMaterial.nonmetal Color.blue ("roughness" ::: 0.2)
+  let material = PbrMaterial.nonmetal Color.blue (#roughness 0.2)
   let model = Model3D.bodyWith [Model3D.pbrMaterial material] body
   let resolution = Resolution.maxSize (Length.centimeters 20.0)
   Gltf.writeBinary "executables/raindrop/mesh.glb" model resolution

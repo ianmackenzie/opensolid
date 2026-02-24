@@ -71,6 +71,7 @@ common config
     MultiWayIf
     NoFieldSelectors
     NoImplicitPrelude
+    OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
