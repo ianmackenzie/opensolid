@@ -177,6 +177,7 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
           source ~/.ghcup/env
+          ghcup config show
           ghcup debug-info
           ghcup list
       - name: Install Haskell tooling
@@ -251,6 +252,7 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
           source ~/.ghcup/env
+          ghcup config show
           ghcup debug-info
           ghcup list
       - name: Install Haskell tooling
