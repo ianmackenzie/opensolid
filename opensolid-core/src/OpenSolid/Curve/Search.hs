@@ -19,12 +19,13 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Search qualified as Search
-import OpenSolid.Search.Domain as Domain
+import OpenSolid.Search.Domain qualified as Search.Domain
 import OpenSolid.Vector qualified as Vector
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
@@ -66,30 +67,30 @@ findPoint ::
   List Number
 findPoint point searchTree = do
   let searchCurve = curve searchTree
-  let displacementFunction tValue = Curve.evaluate searchCurve tValue - point
-  let derivativeFunction = VectorCurve.evaluate (Curve.derivative searchCurve)
-  let startIsSolution = Curve.startPoint searchCurve ~= point
-  let startIsSingular = derivativeFunction 0.0 ~= Vector.zero
-  let endIsSolution = Curve.endPoint searchCurve ~= point
-  let endIsSingular = derivativeFunction 1.0 ~= Vector.zero
-  let callback tBounds segment
-        | not (point `intersects` Segment.bounds segment) =
-            Resolved Nothing
-        | Interval.lower tBounds == 0.0
-        , startIsSolution
-        , Segment.monotonic segment || (startIsSingular && Domain.isSmall tBounds) =
-            Resolved (Just 0.0)
-        | Interval.upper tBounds == 1.0
-        , endIsSolution
-        , Segment.monotonic segment || (endIsSingular && Domain.isSmall tBounds) =
-            Resolved (Just 1.0)
-        | Segment.monotonic segment
-        , let tMid = Interval.midpoint tBounds
-        , let tSolution = NewtonRaphson.curve displacementFunction derivativeFunction tMid
-        , Interval.includes tSolution (Domain.interior tBounds)
-        , Curve.evaluate (Segment.curve segment) tSolution ~= point =
-            Resolved (Just tSolution)
-        | otherwise =
-            Unresolved
-  let isDuplicate (tBounds1, _) (tBounds2, _) = Domain.overlapping tBounds1 tBounds2
-  List.map Pair.second (Search.exclusive callback isDuplicate searchTree)
+  let curveDerivative = Curve.derivative searchCurve
+  let displacement tValue = Curve.evaluate searchCurve tValue - point
+  let displacementDerivative tValue = VectorCurve.evaluate curveDerivative tValue
+  let isSolution tValue = Curve.evaluate searchCurve tValue ~= point
+  let isDegenerate tValue = VectorCurve.evaluate curveDerivative tValue ~= Vector.zero
+  let endpointSolutions = List.filter isSolution [0.0, 1.0]
+  let solveMonotonic tBounds = do
+        let tMid = Interval.midpoint tBounds
+        let tSolution = NewtonRaphson.curve displacement displacementDerivative tMid
+        if Interval.includes tSolution (Search.Domain.interior tBounds) && isSolution tSolution
+          then Resolved (Just tSolution)
+          else Unresolved
+  let interiorSolution tBounds segment
+        | not (point `intersects` Segment.bounds segment) = Resolved Nothing
+        | otherwise = do
+            let isMonotonic = Segment.monotonic segment
+            let isSmall = Search.Domain.isSmall tBounds
+            let endpointSolution = List.find (Number.includedIn tBounds) endpointSolutions
+            let hasEndpointSolution = endpointSolution /= Nothing
+            if
+              | isMonotonic, hasEndpointSolution -> Resolved Nothing
+              | isSmall, Just tValue <- endpointSolution, isDegenerate tValue -> Resolved Nothing
+              | isMonotonic -> solveMonotonic tBounds
+              | otherwise -> Unresolved
+  let isDuplicate (tBounds1, _) (tBounds2, _) = Search.Domain.overlapping tBounds1 tBounds2
+  let interiorSolutions = List.map Pair.second (Search.exclusive interiorSolution isDuplicate searchTree)
+  List.sort (endpointSolutions <> interiorSolutions)
