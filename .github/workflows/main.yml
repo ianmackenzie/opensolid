@@ -170,16 +170,15 @@ jobs:
             dist-newstyle
             opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
-      - name: Check GHC/Cabal availability via GHCup
+      - name: Update GHCup cached metadata
         env:
           BOOTSTRAP_HASKELL_NONINTERACTIVE: "1"
           BOOTSTRAP_HASKELL_MINIMAL: "1"
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
           source ~/.ghcup/env
-          ghcup config show
-          ghcup debug-info
-          ghcup --metadata-caching 0 --metadata-fetching-mode Strict list
+          ghcup --metadata-caching 0 --metadata-fetching-mode Strict prefetch metadata
+          ghcup list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
@@ -245,16 +244,15 @@ jobs:
             dist-newstyle
             opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
-      - name: Check GHC/Cabal availability via GHCup
+      - name: Update GHCup cached metadata
         env:
           BOOTSTRAP_HASKELL_NONINTERACTIVE: "1"
           BOOTSTRAP_HASKELL_MINIMAL: "1"
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
           source ~/.ghcup/env
-          ghcup config show
-          ghcup debug-info
-          ghcup --metadata-caching 0 --metadata-fetching-mode Strict list
+          ghcup --metadata-caching 0 --metadata-fetching-mode Strict prefetch metadata
+          ghcup list
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
