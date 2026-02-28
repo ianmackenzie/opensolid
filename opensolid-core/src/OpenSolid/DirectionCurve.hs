@@ -12,6 +12,7 @@ where
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionBounds (DirectionBounds)
+import OpenSolid.DirectionBounds qualified as DirectionBounds
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
@@ -30,6 +31,7 @@ type family
 
 class
   ( Direction.Exists dimension space
+  , DirectionBounds.Exists dimension space
   , VectorCurve.Exists dimension Unitless space
   ) =>
   Exists dimension space
