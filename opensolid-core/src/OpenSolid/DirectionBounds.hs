@@ -3,6 +3,7 @@ module OpenSolid.DirectionBounds
   , Exists
   , unsafe
   , unwrap
+  , areDistinct
   , areIndependent
   )
 where
@@ -62,14 +63,19 @@ unwrap ::
   VectorBounds dimension Unitless space
 unwrap = unwrapImpl
 
+areDistinct ::
+  Exists dimension space =>
+  DirectionBounds dimension space ->
+  DirectionBounds dimension space ->
+  Bool
+areDistinct directionBounds1 directionBounds2 =
+  VectorBounds.areDistinct (unwrap directionBounds1) (unwrap directionBounds2)
+
 areIndependent ::
   Exists dimension space =>
   DirectionBounds dimension space ->
   DirectionBounds dimension space ->
   Bool
-areIndependent directionBounds1 directionBounds2 = do
-  let unwrapped1 = unwrap directionBounds1
-  let unwrapped2 = unwrap directionBounds2
-  let notEqual = VectorBounds.isResolved (unwrapped1 - unwrapped2)
-  let notOpposite = VectorBounds.isResolved (unwrapped1 + unwrapped2)
-  notEqual && notOpposite
+areIndependent directionBounds1 directionBounds2 =
+  areDistinct directionBounds1 directionBounds2
+    && areDistinct directionBounds1 -directionBounds2
