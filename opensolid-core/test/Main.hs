@@ -10,6 +10,7 @@ import Tests.Bounds2D qualified
 import Tests.Bounds3D qualified
 import Tests.Curve1D qualified
 import Tests.Curve2D qualified
+import Tests.Curve3D qualified
 import Tests.Direction2D qualified
 import Tests.DivMod qualified
 import Tests.Estimate qualified
@@ -55,6 +56,7 @@ tests =
     , Test.group "Tests.Set2D" Tests.Set2D.tests
     , Test.group "Tests.SurfaceFunction1D" Tests.SurfaceFunction1D.tests
     , Test.group "Tests.NewtonRaphson" Tests.NewtonRaphson.tests
+    , Test.group "Tests.Curve3D" Tests.Curve3D.tests
     ]
 
 main :: IO ()

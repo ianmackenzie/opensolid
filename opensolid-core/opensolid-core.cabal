@@ -324,6 +324,7 @@ test-suite opensolid-core-test
     Tests.Bounds3D
     Tests.Curve1D
     Tests.Curve2D
+    Tests.Curve3D
     Tests.Direction2D
     Tests.DivMod
     Tests.Estimate
