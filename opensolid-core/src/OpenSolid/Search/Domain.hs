@@ -5,7 +5,6 @@ module OpenSolid.Search.Domain
   , contains
   , overlapping
   , isSmall
-  , interior
   , unitInterval
   , pairwise
   , Size (..)
@@ -88,10 +87,3 @@ classify (Interval 0.0 1.0) = Entire
 classify (Interval 0.0 t) = Start (if t <= Desingularization.t0 then Small else Large)
 classify (Interval t 1.0) = End (if t >= Desingularization.t1 then Small else Large)
 classify (Interval _ _) = Interior
-
-interior :: Interval Unitless -> Interval Unitless
-interior (Interval exteriorLow exteriorHigh) = do
-  let margin = 0.125 * (exteriorHigh - exteriorLow)
-  let interiorLow = if exteriorLow == 0.0 then 0.0 else exteriorLow + margin
-  let interiorHigh = if exteriorHigh == 1.0 then 1.0 else exteriorHigh - margin
-  Interval interiorLow interiorHigh

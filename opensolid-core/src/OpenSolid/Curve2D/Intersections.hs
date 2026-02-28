@@ -67,9 +67,6 @@ classify tBounds1 tBounds2 =
     (Domain.Entire, _) -> Unresolved
     (_, Domain.Entire) -> Unresolved
 
-isInterior :: Number -> Interval Unitless -> Bool
-isInterior tValue tBounds = Interval.includes tValue (Domain.interior tBounds)
-
 crossingIntersection ::
   Tolerance units =>
   Problem units space ->
@@ -86,7 +83,7 @@ crossingIntersection problem segment1 segment2 sign = do
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = VectorSurfaceFunction2D.newtonRaphson crossingSolutionTarget uvPoint0
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
-  if isInterior t1 tBounds1 && isInterior t2 tBounds2 && pointsAreEqual
+  if Search.isInterior t1 tBounds1 && Search.isInterior t2 tBounds2 && pointsAreEqual
     then Resolved (Just (IntersectionPoint.crossing t1 t2 sign))
     else Unresolved
 
@@ -106,12 +103,13 @@ tangentIntersection problem segment1 segment2 = do
   let tBounds2 = Curve.Segment.parameterBounds segment2
   let uvPoint0 = Point2D (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
   let Point2D t1 t2 = VectorSurfaceFunction2D.newtonRaphson tangentSolutionTarget uvPoint0
+  let isInteriorSolution = Search.isInterior t1 tBounds1 && Search.isInterior t2 tBounds2
   let pointsAreEqual = Curve2D.evaluate curve1 t1 ~= Curve2D.evaluate curve2 t2
   let tangentDirection1 = DirectionCurve2D.evaluate tangent1 t1
   let tangentDirection2 = DirectionCurve2D.evaluate tangent2 t2
   let crossProduct = tangentDirection1 `cross` tangentDirection2
   let tangentsAreParallel = Tolerance.using 1e-9 (crossProduct ~= Quantity.zero)
-  if isInterior t1 tBounds1 && isInterior t2 tBounds2 && pointsAreEqual && tangentsAreParallel
+  if isInteriorSolution && pointsAreEqual && tangentsAreParallel
     then Resolved (Just (IntersectionPoint.tangent t1 t2))
     else Unresolved
 

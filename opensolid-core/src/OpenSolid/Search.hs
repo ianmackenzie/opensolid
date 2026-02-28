@@ -7,11 +7,13 @@ module OpenSolid.Search
   , tree
   , pairwise
   , exclusive
+  , isInterior
   )
 where
 
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Search.Domain (Domain (Domain), InfiniteRecursion (InfiniteRecursion))
@@ -115,3 +117,6 @@ deduplicateImpl _ [] accumulated = accumulated
 deduplicateImpl isDuplicate (first : rest) accumulated
   | List.any (isDuplicate first) rest = deduplicateImpl isDuplicate rest accumulated
   | otherwise = deduplicateImpl isDuplicate rest (first : accumulated)
+
+isInterior :: Number -> Interval Unitless -> Bool
+isInterior value interval = Interval.inclusion value interval >= 0.125 * Interval.width interval

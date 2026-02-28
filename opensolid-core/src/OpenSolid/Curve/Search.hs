@@ -78,7 +78,7 @@ findPoint point searchTree = do
   let solveMonotonic tBounds = do
         let tMid = Interval.midpoint tBounds
         let tSolution = NewtonRaphson.curve evaluateFirstOrder tMid
-        if Interval.includes tSolution (Search.Domain.interior tBounds) && isSolution tSolution
+        if Search.isInterior tSolution tBounds && isSolution tSolution
           then Resolved (Just tSolution)
           else Unresolved
   let interiorSolution tBounds segment
