@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.NewtonRaphson
   ( Curve
   , curve
@@ -13,8 +15,7 @@ import OpenSolid.Vector (Vector)
 
 class Curve dimension units space where
   curve ::
-    (Number -> Vector dimension units space) ->
-    (Number -> Vector dimension units space) ->
+    (Number -> (# Vector dimension units space, Vector dimension units space #)) ->
     Number ->
     Number
 

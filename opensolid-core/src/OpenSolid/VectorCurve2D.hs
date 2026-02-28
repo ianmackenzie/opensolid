@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.VectorCurve2D
   ( VectorCurve2D
   , Compiled
@@ -802,5 +804,7 @@ unconvert ::
 unconvert factor curve = Units.simplify (curve ?/? factor)
 
 newtonRaphson :: VectorCurve2D units space -> Number -> Number
-newtonRaphson curve t1 =
-  NewtonRaphson2D.curve (evaluate curve) (evaluate (derivative curve)) t1
+newtonRaphson curve t1 = do
+  let curveDerivative = derivative curve
+  let evaluateFirstOrder tValue = (# evaluate curve tValue, evaluate curveDerivative tValue #)
+  NewtonRaphson2D.curve evaluateFirstOrder t1

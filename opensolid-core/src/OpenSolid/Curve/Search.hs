@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Curve.Search
   ( Tree
   , tree
@@ -68,14 +70,14 @@ findPoint ::
 findPoint point searchTree = do
   let searchCurve = curve searchTree
   let curveDerivative = Curve.derivative searchCurve
-  let displacement tValue = Curve.evaluate searchCurve tValue - point
-  let displacementDerivative tValue = VectorCurve.evaluate curveDerivative tValue
+  let evaluateFirstOrder tValue =
+        (# Curve.evaluate searchCurve tValue - point, VectorCurve.evaluate curveDerivative tValue #)
   let isSolution tValue = Curve.evaluate searchCurve tValue ~= point
   let isDegenerate tValue = VectorCurve.evaluate curveDerivative tValue ~= Vector.zero
   let endpointSolutions = List.filter isSolution [0.0, 1.0]
   let solveMonotonic tBounds = do
         let tMid = Interval.midpoint tBounds
-        let tSolution = NewtonRaphson.curve displacement displacementDerivative tMid
+        let tSolution = NewtonRaphson.curve evaluateFirstOrder tMid
         if Interval.includes tSolution (Search.Domain.interior tBounds) && isSolution tSolution
           then Resolved (Just tSolution)
           else Unresolved

@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Curve1D
   ( Curve1D
   , Compiled
@@ -742,8 +744,10 @@ b11 =
           constant 24.0
 
 newtonRaphson :: Curve1D units -> Number -> Number
-newtonRaphson curve tValue =
-  NewtonRaphson1D.curve (evaluate curve) (evaluate (derivative curve)) tValue
+newtonRaphson curve t0 = do
+  let curveDerivative = derivative curve
+  let evaluateFirstOrder tValue = (# evaluate curve tValue, evaluate curveDerivative tValue #)
+  NewtonRaphson1D.curve evaluateFirstOrder t0
 
 erase :: Curve1D units -> Curve1D Unitless
 erase = Units.erase

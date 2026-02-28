@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.VectorSurfaceFunction2D
   ( VectorSurfaceFunction2D
   , Compiled
@@ -683,5 +685,9 @@ direction function = case quotient function (magnitude function) of
   Ok normalizedFunction -> Ok (DirectionSurfaceFunction2D.unsafe normalizedFunction)
 
 newtonRaphson :: VectorSurfaceFunction2D units space -> UvPoint -> UvPoint
-newtonRaphson function uvPoint =
-  NewtonRaphson2D.surface (evaluate function) (evaluate function.du) (evaluate function.dv) uvPoint
+newtonRaphson function uvPoint0 = do
+  let uDerivative = derivative U function
+  let vDerivative = derivative V function
+  let evaluateFirstOrder uvPoint =
+        (# evaluate function uvPoint, evaluate uDerivative uvPoint, evaluate vDerivative uvPoint #)
+  NewtonRaphson2D.surface evaluateFirstOrder uvPoint0
