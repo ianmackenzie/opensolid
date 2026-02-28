@@ -28,6 +28,7 @@ module OpenSolid.Curve3D
   , placeIn
   , relativeTo
   , findPoint
+  , intersections
   )
 where
 
@@ -331,3 +332,10 @@ findPoint ::
   Curve3D space ->
   Result Curve.IsPoint (List Number)
 findPoint = Curve.findPoint
+
+intersections ::
+  Tolerance Meters =>
+  Curve3D space ->
+  Curve3D space ->
+  Result Curve.IsPoint (Maybe Curve.Intersections)
+intersections = Curve.intersections
