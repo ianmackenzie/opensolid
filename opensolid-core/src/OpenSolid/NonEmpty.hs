@@ -64,6 +64,8 @@ module OpenSolid.NonEmpty
   , sortWith
   , uniqueValues
   , uniqueValuesOf
+  , uniqueValue
+  , uniqueValueOf
   , intersperse
   , partition
   , all
@@ -324,6 +326,19 @@ dedup current (next : remaining)
 
 uniqueValuesOf :: Ord b => (a -> b) -> NonEmpty a -> NonEmpty b
 uniqueValuesOf function nonEmpty = uniqueValues (map function nonEmpty)
+
+uniqueValue :: Eq a => NonEmpty a -> Maybe a
+uniqueValue = uniqueValueOf id
+
+uniqueValueOf :: Eq b => (a -> b) -> NonEmpty a -> Maybe b
+uniqueValueOf function nonEmpty = do
+  let firstValue = function (first nonEmpty)
+  uniqueValueImpl function firstValue (rest nonEmpty)
+
+uniqueValueImpl :: Eq b => (a -> b) -> b -> List a -> Maybe b
+uniqueValueImpl _ firstValue [] = Just firstValue
+uniqueValueImpl function firstValue (next : remaining) =
+  if firstValue == function next then uniqueValueImpl function firstValue remaining else Nothing
 
 all :: (a -> Bool) -> NonEmpty a -> Bool
 all = Prelude.all
