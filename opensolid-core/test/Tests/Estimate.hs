@@ -21,6 +21,7 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
+import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import Test (Test)
@@ -74,7 +75,7 @@ resolvesTo value estimate
         else Error "Refined bounds are not narrower than original bounds"
 
 area :: Tolerance Meters => Test
-area = Test.verify "area" Test.do
+area = Test.verify "area" do
   let curve =
         Curve2D.polarArc
           (#centerPoint Point2D.origin)
@@ -84,26 +85,28 @@ area = Test.verify "area" Test.do
   let dAdt = Curve2D.yCoordinate curve * VectorCurve2D.xComponent (Curve2D.derivative curve)
   let areaEstimate = Curve1D.integrate dAdt
   let expectedArea = Area.squareMeters Number.halfPi
-  areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)
+  areaIsCorrect <-
+    Tolerance.using (Area.squareMeters 1e-4) $
+      Result.orFail (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect
 
 minimumBy :: Tolerance Meters => Test
-minimumBy = Test.check 100 "minimumBy" Test.do
-  valuesAndEstimates <- dummyEstimates
+minimumBy = Test.check 100 "minimumBy" do
+  valuesAndEstimates <- Test.generate dummyEstimates
   let minimumValue = NonEmpty.minimumOf Pair.first valuesAndEstimates
   let minimumValueFromEstimates = Pair.first (Estimate.minimumBy Pair.second valuesAndEstimates)
   Test.expect (minimumValueFromEstimates == minimumValue)
 
 maximumBy :: Tolerance Meters => Test
-maximumBy = Test.check 100 "maximumBy" Test.do
-  valuesAndEstimates <- dummyEstimates
+maximumBy = Test.check 100 "maximumBy" do
+  valuesAndEstimates <- Test.generate dummyEstimates
   let maximumValue = NonEmpty.maximumOf Pair.first valuesAndEstimates
   let maximumValueFromEstimates = Pair.first (Estimate.maximumBy Pair.second valuesAndEstimates)
   Test.expect (maximumValueFromEstimates == maximumValue)
 
 pickMinimumBy :: Tolerance Meters => Test
-pickMinimumBy = Test.check 100 "pickMinimumBy" Test.do
-  valuesAndEstimates <- dummyEstimates
+pickMinimumBy = Test.check 100 "pickMinimumBy" do
+  valuesAndEstimates <- Test.generate dummyEstimates
   let (minPair, remainingPairs) = Estimate.pickMinimumBy Pair.second valuesAndEstimates
   let minValue = Pair.first minPair
   let remainingValues = List.map Pair.first remainingPairs
@@ -114,8 +117,8 @@ pickMinimumBy = Test.check 100 "pickMinimumBy" Test.do
   Test.expect (minValueIsCorrect && allValuesArePresent)
 
 pickMaximumBy :: Tolerance Meters => Test
-pickMaximumBy = Test.check 100 "pickMaximumBy" Test.do
-  valuesAndEstimates <- dummyEstimates
+pickMaximumBy = Test.check 100 "pickMaximumBy" do
+  valuesAndEstimates <- Test.generate dummyEstimates
   let (maxPair, remainingPairs) = Estimate.pickMaximumBy Pair.second valuesAndEstimates
   let maxValue = Pair.first maxPair
   let remainingValues = List.map Pair.first remainingPairs

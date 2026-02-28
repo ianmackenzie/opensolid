@@ -24,11 +24,11 @@ tests =
   ]
 
 magnitude :: Tolerance Meters => Test
-magnitude = Test.check 100 "magnitude" Test.do
-  vectorBounds <- Tests.Random.vectorBounds3D
-  tx <- Parameter.random
-  ty <- Parameter.random
-  tz <- Parameter.random
+magnitude = Test.check 100 "magnitude" do
+  vectorBounds <- Test.generate Tests.Random.vectorBounds3D
+  tx <- Test.generate Parameter.random
+  ty <- Test.generate Parameter.random
+  tz <- Test.generate Parameter.random
   let vector = VectorBounds3D.interpolate vectorBounds tx ty tz
   let vectorMagnitude = Vector3D.magnitude vector
   let magnitudeBounds = VectorBounds3D.magnitude vectorBounds
@@ -44,34 +44,34 @@ boundsAndContainedVector = do
   Random.return (bounds, vector)
 
 placeIn :: Tolerance Meters => Test
-placeIn = Test.check 100 "placeIn" Test.do
-  (localBounds, localVector) <- boundsAndContainedVector
-  frame <- Tests.Random.frame3D
+placeIn = Test.check 100 "placeIn" do
+  (localBounds, localVector) <- Test.generate boundsAndContainedVector
+  frame <- Test.generate Tests.Random.frame3D
   let globalBounds = VectorBounds3D.placeIn frame localBounds
   let globalVector = Vector3D.placeIn frame localVector
   Test.expect (globalVector `intersects` globalBounds)
 
 relativeTo :: Tolerance Meters => Test
-relativeTo = Test.check 100 "relativeTo" Test.do
-  (globalBounds, globalVector) <- boundsAndContainedVector
-  frame <- Tests.Random.frame3D
+relativeTo = Test.check 100 "relativeTo" do
+  (globalBounds, globalVector) <- Test.generate boundsAndContainedVector
+  frame <- Test.generate Tests.Random.frame3D
   let localBounds = VectorBounds3D.relativeTo frame globalBounds
   let localVector = Vector3D.relativeTo frame globalVector
   Test.expect (localVector `intersects` localBounds)
 
 transformBy :: Tolerance Meters => Test
-transformBy = Test.check 100 "transformBy" Test.do
-  (originalBounds, originalVector) <- boundsAndContainedVector
-  transform <- Tests.Random.affineTransform3D
+transformBy = Test.check 100 "transformBy" do
+  (originalBounds, originalVector) <- Test.generate boundsAndContainedVector
+  transform <- Test.generate Tests.Random.affineTransform3D
   let transformedBounds = VectorBounds3D.transformBy transform originalBounds
   let transformedVector = Vector3D.transformBy transform originalVector
   Test.expect (transformedVector `intersects` transformedBounds)
 
 tripleProduct :: Test
-tripleProduct = Test.check 1000 "tripleProduct" Test.do
-  (bounds1, vector1) <- boundsAndContainedVector
-  (bounds2, vector2) <- boundsAndContainedVector
-  (bounds3, vector3) <- boundsAndContainedVector
+tripleProduct = Test.check 1000 "tripleProduct" do
+  (bounds1, vector1) <- Test.generate boundsAndContainedVector
+  (bounds2, vector2) <- Test.generate boundsAndContainedVector
+  (bounds3, vector3) <- Test.generate boundsAndContainedVector
   let boundsTripleProduct = VectorBounds3D.tripleProduct bounds1 bounds2 bounds3
   let vectorTripleProduct = (vector1 `cross` vector2) `dot` vector3
   Tolerance.using (1e-9 * Volume.cubicMeter) $

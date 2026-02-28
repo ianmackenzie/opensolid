@@ -12,6 +12,6 @@ tests =
   ]
 
 reverseMap :: Test
-reverseMap = Test.check 100 "reverseMap" Test.do
-  ints <- List.random 10 (Int.random 1 10)
+reverseMap = Test.check 100 "reverseMap" do
+  ints <- Test.generate (List.random 10 (Int.random 1 10))
   Test.expect (List.reverseMap (2 *) ints == List.reverse (List.map (2 *) ints))

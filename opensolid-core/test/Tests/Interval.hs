@@ -15,10 +15,10 @@ tests =
   ]
 
 quantityIntervalDivision :: Test
-quantityIntervalDivision = Test.check 1000 "quantityIntervalDivision" Test.do
-  x <- Random.length
-  interval <- Interval.random Random.length
-  t <- Parameter.random
+quantityIntervalDivision = Test.check 1000 "quantityIntervalDivision" do
+  x <- Test.generate Random.length
+  interval <- Test.generate (Interval.random Random.length)
+  t <- Test.generate Parameter.random
   let y = Interval.interpolate interval t
   let quotient = x / y
   let intervalQuotient = x / interval
@@ -30,11 +30,11 @@ quantityIntervalDivision = Test.check 1000 "quantityIntervalDivision" Test.do
     & Test.output "intervalQuotient" intervalQuotient
 
 intervalQuantityDivision :: Test
-intervalQuantityDivision = Test.check 1000 "intervalQuantityDivision" Test.do
-  interval <- Interval.random Random.length
-  t <- Parameter.random
+intervalQuantityDivision = Test.check 1000 "intervalQuantityDivision" do
+  interval <- Test.generate (Interval.random Random.length)
+  t <- Test.generate Parameter.random
   let x = Interval.interpolate interval t
-  y <- Random.length
+  y <- Test.generate Random.length
   let quotient = x / y
   let intervalQuotient = interval / y
   Test.expect (Interval.includes quotient intervalQuotient)
@@ -48,11 +48,11 @@ intervalQuantityDivision = Test.check 1000 "intervalQuantityDivision" Test.do
 Interval function with corresponding Quantity function
 -}
 intervalIntervalDivision :: Test
-intervalIntervalDivision = Test.check 1000 "intervalIntervalDivision" Test.do
-  interval1 <- Interval.random Random.length
-  interval2 <- Interval.random Random.length
-  t1 <- Parameter.random
-  t2 <- Parameter.random
+intervalIntervalDivision = Test.check 1000 "intervalIntervalDivision" do
+  interval1 <- Test.generate (Interval.random Random.length)
+  interval2 <- Test.generate (Interval.random Random.length)
+  t1 <- Test.generate Parameter.random
+  t2 <- Test.generate Parameter.random
   let x1 = Interval.interpolate interval1 t1
   let x2 = Interval.interpolate interval2 t2
   let quotient = x1 / x2

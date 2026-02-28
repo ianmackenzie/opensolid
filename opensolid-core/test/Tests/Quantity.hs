@@ -17,20 +17,20 @@ tests =
   , largestBy
   ]
 
-pointListGenerator :: Generator (NonEmpty (Point2D Meters space))
-pointListGenerator = NonEmpty.random 10 Random.point2D
+randomPointList :: Generator (NonEmpty (Point2D Meters space))
+randomPointList = NonEmpty.random 10 Random.point2D
 
 xMagnitude :: Point2D Meters space -> Length
 xMagnitude point = Quantity.abs (Point2D.xCoordinate point)
 
 smallestBy :: Test
-smallestBy = Test.check 100 "smallestBy" Test.do
-  points <- pointListGenerator
+smallestBy = Test.check 100 "smallestBy" do
+  points <- Test.generate randomPointList
   let smallest = NonEmpty.minimumBy (Quantity.abs . Point2D.xCoordinate) points
   Test.expect (NonEmpty.all (\point -> xMagnitude point >= xMagnitude smallest) points)
 
 largestBy :: Test
-largestBy = Test.check 100 "largestBy" Test.do
-  points <- pointListGenerator
+largestBy = Test.check 100 "largestBy" do
+  points <- Test.generate randomPointList
   let largest = NonEmpty.maximumBy (Quantity.abs . Point2D.xCoordinate) points
   Test.expect (NonEmpty.all (\point -> xMagnitude point <= xMagnitude largest) points)

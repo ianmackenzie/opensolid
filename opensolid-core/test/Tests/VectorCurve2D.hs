@@ -15,8 +15,8 @@ derivativeConsistency ::
   Quantity units ->
   VectorCurve2D units space ->
   Expectation
-derivativeConsistency givenTolerance curve = Test.do
-  tValue <- Parameter.random
+derivativeConsistency givenTolerance curve = do
+  tValue <- Test.generate Parameter.random
   let dt :: Number = 1e-6
   let v1 = VectorCurve2D.evaluate curve (tValue - dt)
   let v2 = VectorCurve2D.evaluate curve (tValue + dt)
@@ -31,9 +31,9 @@ boundsConsistency ::
   (Tolerance units, Show (Quantity units)) =>
   VectorCurve2D units space ->
   Expectation
-boundsConsistency vectorCurve = Test.do
-  tBounds <- Interval.random Parameter.random
-  tValue <- Random.map (Interval.interpolate tBounds) Parameter.random
+boundsConsistency vectorCurve = do
+  tBounds <- Test.generate (Interval.random Parameter.random)
+  tValue <- Test.generate (Random.map (Interval.interpolate tBounds) Parameter.random)
   let vectorCurveValue = VectorCurve2D.evaluate vectorCurve tValue
   let vectorCurveBounds = VectorCurve2D.evaluateBounds vectorCurve tBounds
   Test.expect (vectorCurveValue `intersects` vectorCurveBounds)

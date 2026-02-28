@@ -31,41 +31,41 @@ boundsAndContainedPoint = do
   Random.return (bounds, point)
 
 placeIn :: Tolerance Meters => Test
-placeIn = Test.check 100 "placeIn" Test.do
-  (localBounds, localPoint) <- boundsAndContainedPoint
-  frame <- Tests.Random.frame3D
+placeIn = Test.check 100 "placeIn" do
+  (localBounds, localPoint) <- Test.generate boundsAndContainedPoint
+  frame <- Test.generate Tests.Random.frame3D
   let globalBounds = Bounds3D.placeIn frame localBounds
   let globalPoint = Point3D.placeIn frame localPoint
   Test.expect (globalPoint `intersects` globalBounds)
 
 relativeTo :: Tolerance Meters => Test
-relativeTo = Test.check 100 "relativeTo" Test.do
-  (globalBounds, globalPoint) <- boundsAndContainedPoint
-  frame <- Tests.Random.frame3D
+relativeTo = Test.check 100 "relativeTo" do
+  (globalBounds, globalPoint) <- Test.generate boundsAndContainedPoint
+  frame <- Test.generate Tests.Random.frame3D
   let localBounds = Bounds3D.relativeTo frame globalBounds
   let localPoint = Point3D.relativeTo frame globalPoint
   Test.expect (localPoint `intersects` localBounds)
 
 projectInto :: Tolerance Meters => Test
-projectInto = Test.check 100 "projectInto" Test.do
-  (bounds3D, point3D) <- boundsAndContainedPoint
-  plane <- Tests.Random.plane3D
+projectInto = Test.check 100 "projectInto" do
+  (bounds3D, point3D) <- Test.generate boundsAndContainedPoint
+  plane <- Test.generate Tests.Random.plane3D
   let bounds2D = Bounds3D.projectInto plane bounds3D
   let point2D = Point3D.projectInto plane point3D
   Test.expect (point2D `intersects` bounds2D)
 
 distanceAlong :: Tolerance Meters => Test
-distanceAlong = Test.check 100 "distanceAlong" Test.do
-  (bounds3D, point3D) <- boundsAndContainedPoint
-  axis <- Tests.Random.axis3D
+distanceAlong = Test.check 100 "distanceAlong" do
+  (bounds3D, point3D) <- Test.generate boundsAndContainedPoint
+  axis <- Test.generate Tests.Random.axis3D
   let distanceBounds = Bounds3D.distanceAlong axis bounds3D
   let distance = Point3D.distanceAlong axis point3D
   Test.expect (distance `intersects` distanceBounds)
 
 transformBy :: Tolerance Meters => Test
-transformBy = Test.check 100 "transformBy" Test.do
-  (originalBounds, originalPoint) <- boundsAndContainedPoint
-  transform <- Tests.Random.affineTransform3D
+transformBy = Test.check 100 "transformBy" do
+  (originalBounds, originalPoint) <- Test.generate boundsAndContainedPoint
+  transform <- Test.generate Tests.Random.affineTransform3D
   let transformedBounds = Bounds3D.transformBy transform originalBounds
   let transformedPoint = Point3D.transformBy transform originalPoint
   Test.expect (transformedPoint `intersects` transformedBounds)

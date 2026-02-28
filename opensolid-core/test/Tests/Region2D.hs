@@ -16,6 +16,7 @@ import OpenSolid.Quantity (zero)
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Region2D.BoundedBy qualified as Region2D.BoundedBy
+import OpenSolid.Result qualified as Result
 import Test (Test)
 import Test qualified
 
@@ -35,7 +36,7 @@ areaIsApproximately expectedArea region = do
   Interval.includes expectedArea measuredArea
 
 square :: Tolerance Meters => Test
-square = Test.verify "square" Test.do
+square = Test.verify "square" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
   let p2 = Point2D width zero
@@ -45,11 +46,11 @@ square = Test.verify "square" Test.do
   let line2 = Curve2D.lineFrom p2 p3
   let line3 = Curve2D.lineFrom p4 p3
   let line4 = Curve2D.lineFrom p4 p1
-  region <- Region2D.boundedBy [line1, line3, line2, line4]
+  region <- Result.orFail (Region2D.boundedBy [line1, line3, line2, line4])
   Test.expect (areaIsApproximately (width * width) region)
 
 quarterCircle :: Tolerance Meters => Test
-quarterCircle = Test.verify "quarterCircle" Test.do
+quarterCircle = Test.verify "quarterCircle" do
   let radius = Length.meters 1.0
   let p1 = Point2D.origin
   let p2 = Point2D radius zero
@@ -57,12 +58,12 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   let line1 = Curve2D.lineFrom p1 p2
   let line2 = Curve2D.lineFrom p1 p3
   let arc = Curve2D.arcFrom p2 p3 Angle.quarterTurn
-  region <- Region2D.boundedBy [line1, line2, arc]
+  region <- Result.orFail (Region2D.boundedBy [line1, line2, arc])
   let expectedArea = 0.25 * Number.pi * radius * radius
   Test.expect (areaIsApproximately expectedArea region)
 
 squareWithHole :: Tolerance Meters => Test
-squareWithHole = Test.verify "squareWithHole" Test.do
+squareWithHole = Test.verify "squareWithHole" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
   let p2 = Point2D width zero
@@ -76,12 +77,12 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let holeDiameter = 0.5 * width
   let holeRadius = 0.5 * holeDiameter
   let hole = Curve2D.circle (Circle2D.withDiameter holeDiameter centerPoint)
-  region <- Region2D.boundedBy [line1, line3, line2, line4, hole]
+  region <- Result.orFail (Region2D.boundedBy [line1, line3, line2, line4, hole])
   let expectedArea = width * width - Number.pi * holeRadius * holeRadius
   Test.expect (areaIsApproximately expectedArea region)
 
 incompleteSquare :: Tolerance Meters => Test
-incompleteSquare = Test.verify "incompleteSquare" Test.do
+incompleteSquare = Test.verify "incompleteSquare" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
   let p2 = Point2D width zero
@@ -95,7 +96,7 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
     Error error -> Test.expect (error == Region2D.BoundedBy.BoundaryHasGaps)
 
 squareWithTangentHole :: Tolerance Meters => Test
-squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
+squareWithTangentHole = Test.verify "squareWithTangentHole" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
   let p2 = Point2D width zero
@@ -112,7 +113,7 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
     Error error -> Test.expect (error == Region2D.BoundedBy.BoundaryIntersectsItself)
 
 twoCircles :: Tolerance Meters => Test
-twoCircles = Test.verify "twoCircles" Test.do
+twoCircles = Test.verify "twoCircles" do
   let circle1 = Curve2D.circle (Circle2D.withDiameter (Length.meters 2.0) (Point2D.meters -2.0 0.0))
   let circle2 = Curve2D.circle (Circle2D.withDiameter (Length.meters 1.0) (Point2D.meters 1.0 0.0))
   case Region2D.boundedBy [circle1, circle2] of

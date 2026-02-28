@@ -28,25 +28,25 @@ boundsAndContainedPoint = do
   Random.return (bounds, point)
 
 placeIn :: Tolerance Meters => Test
-placeIn = Test.check 100 "placeIn" Test.do
-  (localBounds, localPoint) <- boundsAndContainedPoint
-  frame <- Random.frame2D
+placeIn = Test.check 100 "placeIn" do
+  (localBounds, localPoint) <- Test.generate boundsAndContainedPoint
+  frame <- Test.generate Random.frame2D
   let globalBounds = Bounds2D.placeIn frame localBounds
   let globalPoint = Point2D.placeIn frame localPoint
   Test.expect (globalPoint `intersects` globalBounds)
 
 relativeTo :: Tolerance Meters => Test
-relativeTo = Test.check 100 "relativeTo" Test.do
-  (globalBounds, globalPoint) <- boundsAndContainedPoint
-  frame <- Random.frame2D
+relativeTo = Test.check 100 "relativeTo" do
+  (globalBounds, globalPoint) <- Test.generate boundsAndContainedPoint
+  frame <- Test.generate Random.frame2D
   let localBounds = Bounds2D.relativeTo frame globalBounds
   let localPoint = Point2D.relativeTo frame globalPoint
   Test.expect (localPoint `intersects` localBounds)
 
 transformBy :: Tolerance Meters => Test
-transformBy = Test.check 100 "transformBy" Test.do
-  (originalBounds, originalPoint) <- boundsAndContainedPoint
-  transform <- Random.affineTransform2D
+transformBy = Test.check 100 "transformBy" do
+  (originalBounds, originalPoint) <- Test.generate boundsAndContainedPoint
+  transform <- Test.generate Random.affineTransform2D
   let transformedBounds = Bounds2D.transformBy transform originalBounds
   let transformedPoint = Point2D.transformBy transform originalPoint
   Test.expect (transformedPoint `intersects` transformedBounds)

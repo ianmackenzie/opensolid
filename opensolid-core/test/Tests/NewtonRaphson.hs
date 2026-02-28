@@ -13,6 +13,7 @@ import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
+import OpenSolid.Result qualified as Result
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
@@ -54,7 +55,7 @@ arc2D = do
   curve2D "Arc" (arc - point) 0.5 0.25
 
 simpleSurface2D :: Test
-simpleSurface2D = Test.verify "Simple 2D surface" Test.do
+simpleSurface2D = Test.verify "Simple 2D surface" do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let x = SurfaceFunction1D.squared u - 2.0
@@ -63,7 +64,7 @@ simpleSurface2D = Test.verify "Simple 2D surface" Test.do
   surface2D surface (UvPoint 1.0 0.0) (UvPoint (Number.sqrt 2.0) 1.0)
 
 pointOnSphere3D :: Tolerance Meters => Test
-pointOnSphere3D = Test.verify "Point on sphere" Test.do
+pointOnSphere3D = Test.verify "Point on sphere" do
   let radius = Length.meters 1.0
   let profileCurve =
         Curve2D.polarArc
@@ -71,7 +72,7 @@ pointOnSphere3D = Test.verify "Point on sphere" Test.do
           (#radius radius)
           (#startAngle Angle.zero)
           (#endAngle Angle.halfPi)
-  surface <- Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi
+  surface <- Result.orFail (Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi)
   let point =
         Point2D.polar radius (Angle.degrees 45.0)
           & Point2D.placeOn World3D.rightPlane

@@ -42,9 +42,9 @@ planeTorusIntersection =
     ]
 
 firstDerivativeConsistency :: Test
-firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" Test.do
-  uvPoint <- UvPoint.random
-  parameter <- Random.surfaceParameter
+firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" do
+  uvPoint <- Test.generate UvPoint.random
+  parameter <- Test.generate Random.surfaceParameter
   firstDerivativeIsConsistent planeTorusSurface uvPoint parameter
 
 withIntersectionCurves :: Tolerance Meters => (NonEmpty (Curve2D Unitless UvSpace) -> Test) -> Test
@@ -58,38 +58,38 @@ withIntersectionCurves callback =
 intersectionCurveFirstDerivativeConsistency :: Tolerance Meters => Test
 intersectionCurveFirstDerivativeConsistency =
   withIntersectionCurves \curves ->
-    Test.check 100 "intersectionCurveFirstDerivativeConsistency" Test.do
-      curve <- Random.oneOf curves
-      tValue <- Parameter.random
+    Test.check 100 "intersectionCurveFirstDerivativeConsistency" do
+      curve <- Test.generate (Random.oneOf curves)
+      tValue <- Test.generate Parameter.random
       Tests.Curve2D.firstDerivativeIsConsistentWithin 1e-6 curve tValue
         & Test.output "tValue" tValue
 
 intersectionCurveBoundsConsistency :: Tolerance Meters => Test
 intersectionCurveBoundsConsistency =
   withIntersectionCurves \curves ->
-    Test.check 100 "intersectionCurveBoundsConsistency" Test.do
-      curve <- Random.oneOf curves
+    Test.check 100 "intersectionCurveBoundsConsistency" do
+      curve <- Test.generate (Random.oneOf curves)
       Tolerance.using 1e-9 (Tests.Curve2D.boundsConsistency curve)
 
 intersectionCurveFirstDerivativeBoundsConsistency :: Tolerance Meters => Test
 intersectionCurveFirstDerivativeBoundsConsistency =
   withIntersectionCurves \curves ->
-    Test.check 100 "intersectionCurveBoundsConsistency" Test.do
-      curve <- Random.oneOf curves
+    Test.check 100 "intersectionCurveBoundsConsistency" do
+      curve <- Test.generate (Random.oneOf curves)
       Tolerance.using 1e-9 (Tests.VectorCurve2D.boundsConsistency (Curve2D.derivative curve))
 
 intersectionCurveSecondDerivativeConsistency :: Tolerance Meters => Test
 intersectionCurveSecondDerivativeConsistency =
   withIntersectionCurves \curves ->
-    Test.check 100 "intersectionCurveSecondDerivativeConsistency" Test.do
-      curve <- Random.oneOf curves
+    Test.check 100 "intersectionCurveSecondDerivativeConsistency" do
+      curve <- Test.generate (Random.oneOf curves)
       Tests.VectorCurve2D.derivativeConsistency 1e-6 (Curve2D.derivative curve)
 
 intersectionCurveSecondDerivativeBoundsConsistency :: Tolerance Meters => Test
 intersectionCurveSecondDerivativeBoundsConsistency =
   withIntersectionCurves \curves ->
-    Test.check 100 "intersectionCurveSecondDerivativeBoundsConsistency" Test.do
-      curve <- Random.oneOf curves
+    Test.check 100 "intersectionCurveSecondDerivativeBoundsConsistency" do
+      curve <- Test.generate (Random.oneOf curves)
       let firstDerivative = Curve2D.derivative curve
       let secondDerivative = VectorCurve2D.derivative firstDerivative
       Tolerance.using 1e-9 (Tests.VectorCurve2D.boundsConsistency secondDerivative)
