@@ -3,6 +3,7 @@ module OpenSolid.Curve.IntersectionPoint
   , IntersectionPoint
   , parameterValues
   , kind
+  , new
   , crossing
   , tangent
   )
@@ -29,6 +30,9 @@ parameterValues = (.parameterValues)
 
 kind :: IntersectionPoint -> Kind
 kind = (.kind)
+
+new :: Kind -> Number -> Number -> IntersectionPoint
+new givenKind t1 t2 = IntersectionPoint{parameterValues = (t1, t2), kind = givenKind}
 
 crossing :: Number -> Number -> IntersectionPoint
 crossing t1 t2 = IntersectionPoint{parameterValues = (t1, t2), kind = Crossing}
