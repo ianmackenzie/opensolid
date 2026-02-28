@@ -87,7 +87,7 @@ findPoint point searchTree = do
             let endpointSolution = List.find (Number.includedIn tBounds) endpointSolutions
             let hasEndpointSolution = endpointSolution /= Nothing
             if
-              | isMonotonic, hasEndpointSolution -> Resolved Nothing
+              | isMonotonic && hasEndpointSolution -> Resolved Nothing
               | isSmall, Just tValue <- endpointSolution, isDegenerate tValue -> Resolved Nothing
               | isMonotonic -> solveMonotonic tBounds
               | otherwise -> Unresolved
