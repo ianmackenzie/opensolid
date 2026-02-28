@@ -3,6 +3,8 @@ module OpenSolid.Direction
   , Exists
   , unsafe
   , unwrap
+  , parallel
+  , perpendicular
   )
 where
 
@@ -29,18 +31,28 @@ class
   where
   unsafeImpl :: Vector dimension Unitless space -> Direction dimension space
   unwrapImpl :: Direction dimension space -> Vector dimension Unitless space
+  parallel :: Direction dimension space -> Direction dimension space -> Bool
+  perpendicular :: Direction dimension space -> Direction dimension space -> Bool
 
 instance Exists 2 space where
   {-# INLINEABLE unsafeImpl #-}
   unsafeImpl = Direction2D.unsafe
   {-# INLINEABLE unwrapImpl #-}
   unwrapImpl = Direction2D.unwrap
+  {-# INLINEABLE parallel #-}
+  parallel = Direction2D.parallel
+  {-# INLINEABLE perpendicular #-}
+  perpendicular = Direction2D.perpendicular
 
 instance Exists 3 space where
   {-# INLINEABLE unsafeImpl #-}
   unsafeImpl = Direction3D.unsafe
   {-# INLINEABLE unwrapImpl #-}
   unwrapImpl = Direction3D.unwrap
+  {-# INLINEABLE parallel #-}
+  parallel = Direction3D.parallel
+  {-# INLINEABLE perpendicular #-}
+  perpendicular = Direction3D.perpendicular
 
 {-# INLINE unsafe #-}
 unsafe :: Exists dimension space => Vector dimension Unitless space -> Direction dimension space
