@@ -15,6 +15,8 @@ module OpenSolid.Direction2D
   , degrees
   , radians
   , angleFrom
+  , parallel
+  , perpendicular
   , perpendicularTo
   , rotateLeft
   , rotateRight
@@ -50,6 +52,7 @@ import OpenSolid.Primitives
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D qualified as Vector2D
@@ -160,6 +163,12 @@ second, and will always be between -180 and +180 degrees.
 -}
 angleFrom :: Direction2D space -> Direction2D space -> Angle
 angleFrom (Unit2D v1) (Unit2D v2) = Vector2D.angleFrom v1 v2
+
+perpendicular :: Direction2D space -> Direction2D space -> Bool
+perpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
+
+parallel :: Direction2D space -> Direction2D space -> Bool
+parallel d1 d2 = d1 ~= d2 || d1 ~= -d2
 
 perpendicularTo :: Direction2D space -> Direction2D space
 perpendicularTo = rotateLeft

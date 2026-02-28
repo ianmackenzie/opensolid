@@ -20,6 +20,8 @@ module OpenSolid.Direction3D
   , upwardComponent
   , downwardComponent
   , angleFrom
+  , parallel
+  , perpendicular
   , placeIn
   , relativeTo
   , transformBy
@@ -48,6 +50,7 @@ import OpenSolid.Primitives
   , Vector3D (Vector3D)
   )
 import OpenSolid.Random qualified as Random
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Vector3D qualified as Vector3D
@@ -141,6 +144,12 @@ The result will always be between 0 and 180 degrees.
 -}
 angleFrom :: Direction3D space -> Direction3D space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3D.magnitude (d1 `cross` d2)) (d1 `dot` d2)
+
+parallel :: Direction3D space -> Direction3D space -> Bool
+parallel d1 d2 = d1 ~= d2 || d1 ~= -d2
+
+perpendicular :: Direction3D space -> Direction3D space -> Bool
+perpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
 
 -- | Convert a direction defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Direction3D local -> Direction3D global
