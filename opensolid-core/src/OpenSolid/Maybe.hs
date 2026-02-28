@@ -3,6 +3,7 @@ module OpenSolid.Maybe
   , map
   , map2
   , oneOf
+  , collect
   , isJust
   , isNothing
   )
@@ -24,6 +25,9 @@ oneOf maybes = case maybes of
   Just value : _ -> Just value
   Nothing : rest -> oneOf rest
   [] -> Nothing
+
+collect :: Traversable list => (a -> Maybe b) -> list a -> Maybe (list b)
+collect = Prelude.mapM
 
 isJust :: Maybe a -> Bool
 isJust (Just _) = True
