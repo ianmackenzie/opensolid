@@ -277,7 +277,7 @@ instance
   function ?*? value = function ?*? SurfaceFunction1D.constant value
 
 instance
-  (space1 ~ space2, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (VectorSurfaceFunction2D units1 space)
     (Quantity units2)
