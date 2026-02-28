@@ -16,6 +16,7 @@ module OpenSolid.VectorCurve
   , normalize
   , unsafeNormalize
   , direction
+  , unsafeDirection
   , zeros
   , desingularized
   , desingularize
@@ -182,9 +183,13 @@ direction ::
   VectorCurve dimension units space ->
   Result IsZero (DirectionCurve dimension space)
 direction vectorCurve =
-  if isZero vectorCurve
-    then Error IsZero
-    else Ok (DirectionCurve.unsafe (unsafeNormalize vectorCurve))
+  if isZero vectorCurve then Error IsZero else Ok (unsafeDirection vectorCurve)
+
+unsafeDirection ::
+  (Exists dimension units space, DirectionCurve.Exists dimension space) =>
+  VectorCurve dimension units space ->
+  DirectionCurve dimension space
+unsafeDirection vectorCurve = DirectionCurve.unsafe (unsafeNormalize vectorCurve)
 
 zeros ::
   (Exists dimension units space, Tolerance units) =>
