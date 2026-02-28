@@ -22,6 +22,7 @@ module OpenSolid.VectorSurfaceFunction3D
   , magnitude
   , IsZero (IsZero)
   , direction
+  , newtonRaphson
   )
 where
 
@@ -35,6 +36,7 @@ import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.NewtonRaphson3D qualified as NewtonRaphson3D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
@@ -623,3 +625,7 @@ direction ::
 direction function = case quotient function (magnitude function) of
   Error DivisionByZero -> Error IsZero
   Ok normalizedFunction -> Ok (DirectionSurfaceFunction3D.unsafe normalizedFunction)
+
+newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> UvPoint
+newtonRaphson function uvPoint =
+  NewtonRaphson3D.surface (evaluate function) (evaluate function.du) (evaluate function.dv) uvPoint
