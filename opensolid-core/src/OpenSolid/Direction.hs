@@ -25,6 +25,8 @@ type family
 
 class
   ( Vector.Exists dimension Unitless space
+  , Negation (Direction dimension space)
+  , ApproximateEquality (Direction dimension space) ()
   , DotMultiplication (Direction dimension space) (Direction dimension space) Number
   ) =>
   Exists (dimension :: Natural) (space :: Type)
