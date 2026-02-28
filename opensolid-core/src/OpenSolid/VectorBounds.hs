@@ -5,6 +5,8 @@ module OpenSolid.VectorBounds
   , center
   , squaredMagnitude_
   , magnitude
+  , isResolved
+  , areDistinct
   )
 where
 
@@ -75,21 +77,32 @@ class
   center :: VectorBounds dimension units space -> Vector dimension units space
   squaredMagnitude_ :: VectorBounds dimension units space -> Interval (units ?*? units)
   magnitude :: VectorBounds dimension units space -> Interval units
+  isResolved :: VectorBounds dimension units space -> Bool
 
 instance Exists 1 units Void where
   includes = Interval.includes
   center = Interval.midpoint
   squaredMagnitude_ = Interval.squared_
   magnitude = Interval.abs
+  isResolved = Interval.isResolved
 
 instance Exists 2 units space where
   includes = VectorBounds2D.includes
   center = VectorBounds2D.center
   squaredMagnitude_ = VectorBounds2D.squaredMagnitude_
   magnitude = VectorBounds2D.magnitude
+  isResolved = VectorBounds2D.isResolved
 
 instance Exists 3 units space where
   includes = VectorBounds3D.includes
   center = VectorBounds3D.center
   squaredMagnitude_ = VectorBounds3D.squaredMagnitude_
   magnitude = VectorBounds3D.magnitude
+  isResolved = VectorBounds3D.isResolved
+
+areDistinct ::
+  Exists dimension units space =>
+  VectorBounds dimension units space ->
+  VectorBounds dimension units space ->
+  Bool
+areDistinct first second = isResolved (second - first)

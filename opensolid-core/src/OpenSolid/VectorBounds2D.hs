@@ -22,6 +22,7 @@ module OpenSolid.VectorBounds2D
   , maxMagnitude
   , maxSquaredMagnitude
   , maxSquaredMagnitude_
+  , isResolved
   , direction
   , normalize
   , exclusion
@@ -204,6 +205,9 @@ maxSquaredMagnitude_ (VectorBounds2D (Interval minX maxX) (Interval minY maxY)) 
   let xMagnitude = max (Quantity.abs minX) (Quantity.abs maxX)
   let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
   Quantity.squared_ xMagnitude + Quantity.squared_ yMagnitude
+
+isResolved :: VectorBounds2D units space -> Bool
+isResolved (VectorBounds2D x y) = Interval.isResolved x || Interval.isResolved y
 
 direction :: VectorBounds2D units space -> DirectionBounds2D space
 direction vectorBounds = DirectionBounds2D.unsafe (normalize vectorBounds)

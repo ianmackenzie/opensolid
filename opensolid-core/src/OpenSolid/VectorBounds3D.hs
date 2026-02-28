@@ -23,6 +23,7 @@ module OpenSolid.VectorBounds3D
   , maxMagnitude#
   , maxSquaredMagnitude
   , maxSquaredMagnitude_
+  , isResolved
   , direction
   , normalize
   , exclusion
@@ -268,6 +269,10 @@ maxSquaredMagnitude_ (VectorBounds3D x y z) = do
   let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
   let zMagnitude = max (Quantity.abs minZ) (Quantity.abs maxZ)
   Quantity.squared_ xMagnitude + Quantity.squared_ yMagnitude + Quantity.squared_ zMagnitude
+
+isResolved :: VectorBounds3D units space -> Bool
+isResolved (VectorBounds3D x y z) =
+  Interval.isResolved x || Interval.isResolved y || Interval.isResolved z
 
 direction :: VectorBounds3D units space -> DirectionBounds3D space
 direction vectorBounds = DirectionBounds3D.unsafe (normalize vectorBounds)
