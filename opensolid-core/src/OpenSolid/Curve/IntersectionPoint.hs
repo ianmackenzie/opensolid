@@ -9,6 +9,7 @@ module OpenSolid.Curve.IntersectionPoint
 where
 
 import OpenSolid.Prelude
+import OpenSolid.Tolerance qualified as Tolerance
 
 data Kind = Crossing | Tangent deriving (Eq, Ord, Show)
 
@@ -17,6 +18,11 @@ data IntersectionPoint = IntersectionPoint
   , kind :: Kind
   }
   deriving (Eq, Ord, Show)
+
+instance ApproximateEquality IntersectionPoint () where
+  point1 ~= point2 =
+    Tolerance.using Tolerance.unitless (point1.parameterValues ~= point2.parameterValues)
+      && point1.kind == point2.kind
 
 parameterValues :: IntersectionPoint -> (Number, Number)
 parameterValues = (.parameterValues)
