@@ -1,6 +1,6 @@
 {-# LANGUAGE UnboxedTuples #-}
 
-module OpenSolid.NewtonRaphson3D (curve, surface) where
+module OpenSolid.NewtonRaphson3D (EvaluateCurve, curve, EvaluateSurface, surface) where
 
 import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint)
@@ -8,13 +8,15 @@ import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 
-curve :: (Number -> (# Vector3D units space, Vector3D units space #)) -> Number -> Number
+type EvaluateCurve units space = Number -> (# Vector3D units space, Vector3D units space #)
+
+curve :: EvaluateCurve units space -> Number -> Number
 curve evaluateFirstOrder t1 = do
   let (# v1, d1 #) = evaluateFirstOrder t1
   curveImpl evaluateFirstOrder t1 v1 d1
 
 curveImpl ::
-  (Number -> (# Vector3D units space, Vector3D units space #)) ->
+  EvaluateCurve units space ->
   Number ->
   Vector3D units space ->
   Vector3D units space ->
@@ -26,8 +28,11 @@ curveImpl evaluateFirstOrder t1 v1 d1 = do
     then curveImpl evaluateFirstOrder t2 v2 d2
     else t1
 
+type EvaluateSurface units space =
+  UvPoint -> (# Vector3D units space, Vector3D units space, Vector3D units space #)
+
 surface ::
-  (UvPoint -> (# Vector3D units space, Vector3D units space, Vector3D units space #)) ->
+  EvaluateSurface units space ->
   UvPoint ->
   UvPoint
 surface evaluateFirstOrder uvPoint1 = do
@@ -35,7 +40,7 @@ surface evaluateFirstOrder uvPoint1 = do
   surfaceImpl evaluateFirstOrder uvPoint1 v1 du1 dv1
 
 surfaceImpl ::
-  (UvPoint -> (# Vector3D units space, Vector3D units space, Vector3D units space #)) ->
+  EvaluateSurface units space ->
   UvPoint ->
   Vector3D units space ->
   Vector3D units space ->

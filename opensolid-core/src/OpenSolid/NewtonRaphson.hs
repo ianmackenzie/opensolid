@@ -1,8 +1,10 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.NewtonRaphson
-  ( Curve
+  ( EvaluateCurve
+  , Curve
   , curve
+  , EvaluateSurface
   , Surface
   , surface
   )
@@ -16,11 +18,11 @@ import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector (Vector)
 
+type EvaluateCurve dimension units space =
+  Number -> (# Vector dimension units space, Vector dimension units space #)
+
 class Curve dimension units space where
-  curve ::
-    (Number -> (# Vector dimension units space, Vector dimension units space #)) ->
-    Number ->
-    Number
+  curve :: EvaluateCurve dimension units space -> Number -> Number
 
 instance Curve 1 units Void where
   curve = NewtonRaphson1D.curve
@@ -31,11 +33,12 @@ instance Curve 2 units space where
 instance Curve 3 units space where
   curve = NewtonRaphson3D.curve
 
+type EvaluateSurface dimension units space =
+  UvPoint ->
+  (# Vector dimension units space, Vector dimension units space, Vector dimension units space #)
+
 class Surface dimension units space where
-  surface ::
-    (UvPoint -> (# Vector dimension units space, Vector dimension units space, Vector dimension units space #)) ->
-    UvPoint ->
-    UvPoint
+  surface :: EvaluateSurface dimension units space -> UvPoint -> UvPoint
 
 instance Surface 2 units space where
   surface = NewtonRaphson2D.surface

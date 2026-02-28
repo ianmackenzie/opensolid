@@ -1,19 +1,21 @@
 {-# LANGUAGE UnboxedTuples #-}
 
-module OpenSolid.NewtonRaphson2D (curve, surface) where
+module OpenSolid.NewtonRaphson2D (EvaluateCurve, curve, EvaluateSurface, surface) where
 
 import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 
-curve :: (Number -> (# Vector2D units space, Vector2D units space #)) -> Number -> Number
+type EvaluateCurve units space = Number -> (# Vector2D units space, Vector2D units space #)
+
+curve :: EvaluateCurve units space -> Number -> Number
 curve evaluateFirstOrder t1 = do
   let (# v1, d1 #) = evaluateFirstOrder t1
   curveImpl evaluateFirstOrder t1 v1 d1
 
 curveImpl ::
-  (Number -> (# Vector2D units space, Vector2D units space #)) ->
+  EvaluateCurve units space ->
   Number ->
   Vector2D units space ->
   Vector2D units space ->
@@ -25,16 +27,16 @@ curveImpl evaluateFirstOrder t1 v1 d1 = do
     then curveImpl evaluateFirstOrder t2 v2 d2
     else t1
 
-surface ::
-  (UvPoint -> (# Vector2D units space, Vector2D units space, Vector2D units space #)) ->
-  UvPoint ->
-  UvPoint
+type EvaluateSurface units space =
+  UvPoint -> (# Vector2D units space, Vector2D units space, Vector2D units space #)
+
+surface :: EvaluateSurface units space -> UvPoint -> UvPoint
 surface evaluateFirstOrder uvPoint1 = do
   let (# v1, du1, dv1 #) = evaluateFirstOrder uvPoint1
   surfaceImpl evaluateFirstOrder uvPoint1 v1 du1 dv1
 
 surfaceImpl ::
-  (UvPoint -> (# Vector2D units space, Vector2D units space, Vector2D units space #)) ->
+  EvaluateSurface units space ->
   UvPoint ->
   Vector2D units space ->
   Vector2D units space ->
