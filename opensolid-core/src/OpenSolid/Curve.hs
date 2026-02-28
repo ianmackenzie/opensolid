@@ -70,6 +70,14 @@ class
       (Point dimension units space)
       (Curve dimension units space)
       (VectorCurve dimension units space)
+  , Intersects
+      (Point dimension units space)
+      (Curve dimension units space)
+      units
+  , Intersects
+      (Curve dimension units space)
+      (Point dimension units space)
+      units
   ) =>
   Exists dimension units space
   where
