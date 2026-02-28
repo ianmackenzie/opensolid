@@ -12,7 +12,7 @@ where
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
 
-data Kind = Crossing | Tangent deriving (Eq, Ord, Show)
+data Kind = Crossing | Tangent Sign deriving (Eq, Ord, Show)
 
 data IntersectionPoint = IntersectionPoint
   { parameterValues :: (Number, Number)
@@ -37,5 +37,5 @@ new givenKind t1 t2 = IntersectionPoint{parameterValues = (t1, t2), kind = given
 crossing :: Number -> Number -> IntersectionPoint
 crossing t1 t2 = IntersectionPoint{parameterValues = (t1, t2), kind = Crossing}
 
-tangent :: Number -> Number -> IntersectionPoint
-tangent t1 t2 = IntersectionPoint{parameterValues = (t1, t2), kind = Tangent}
+tangent :: Number -> Number -> Sign -> IntersectionPoint
+tangent t1 t2 sign = IntersectionPoint{parameterValues = (t1, t2), kind = Tangent sign}

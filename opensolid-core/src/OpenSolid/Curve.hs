@@ -18,11 +18,17 @@ module OpenSolid.Curve
   , unsafeCurvatureVectorImpl_
   , findPoint
   , searchTree
+  , Intersections (IntersectionPoints, OverlappingSegments)
+  , IntersectionPoint
+  , intersections
   )
 where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
+import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
 import OpenSolid.Curve.Search qualified as Search
 import OpenSolid.Curve.Segment (Segment)
 import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
@@ -33,6 +39,7 @@ import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
+import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
@@ -162,3 +169,13 @@ searchTree ::
   Curve dimension units space ->
   Result IsPoint (SearchTree dimension units space)
 searchTree = Search.tree
+
+intersections ::
+  ( Exists dimension units space
+  , NewtonRaphson.Surface dimension units space
+  , Tolerance units
+  ) =>
+  Curve dimension units space ->
+  Curve dimension units space ->
+  Result IsPoint (Maybe Intersections)
+intersections = Intersections.intersections
