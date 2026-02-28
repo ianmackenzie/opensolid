@@ -1451,9 +1451,7 @@ instance
   Position3D p - v = Position3D (p - v)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  space1 ~ space2 =>
   Subtraction
     (Point3D space1)
     (Point3D space2)
