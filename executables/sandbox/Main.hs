@@ -199,7 +199,7 @@ testPlaneTorusIntersection = do
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
   let planeNormal = Direction3D.polar World3D.frontPlane (alpha + Angle.halfPi)
-  let f = planeNormal `dot` (surface.function - World3D.originPoint)
+  let f = planeNormal `dot` (Surface3D.function surface - World3D.originPoint)
   zeros <- Result.orFail (SurfaceFunction1D.zeros f)
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"

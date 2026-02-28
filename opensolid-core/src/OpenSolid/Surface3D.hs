@@ -1,5 +1,9 @@
 module OpenSolid.Surface3D
-  ( Surface3D (function, domain, outerLoop, innerLoops)
+  ( Surface3D
+  , function
+  , domain
+  , outerLoop
+  , innerLoops
   , parametric
   , on
   , extruded
@@ -83,6 +87,18 @@ data Surface3D space = Surface3D
   , innerLoops :: ~(List (NonEmpty (SurfaceCurve3D space)))
   }
 
+function :: Surface3D space -> SurfaceFunction3D space
+function = (.function)
+
+domain :: Surface3D space -> UvRegion
+domain = (.domain)
+
+outerLoop :: Surface3D space -> NonEmpty (SurfaceCurve3D space)
+outerLoop = (.outerLoop)
+
+innerLoops :: Surface3D space -> List (NonEmpty (SurfaceCurve3D space))
+innerLoops = (.innerLoops)
+
 parametric :: SurfaceFunction3D space -> UvRegion -> Surface3D space
 parametric givenFunction givenDomain = do
   let boundaryLoop domainLoop = NonEmpty.map (SurfaceCurve3D.on givenFunction) domainLoop
@@ -149,12 +165,12 @@ revolved sketchPlane curve axis angle = do
         let theta = angle * revolutionParameter
         let radius = xCoordinate . curveParameter
         let height = localCurve.yCoordinate . curveParameter
-        let function =
+        let surfaceFunction =
               frame3D.originPoint
                 + radius * SurfaceFunction1D.cos theta * frame3D.rightwardDirection
                 + radius * SurfaceFunction1D.sin theta * frame3D.forwardDirection
                 + height * frame3D.upwardDirection
-        Ok (parametric function UvRegion.unitSquare)
+        Ok (parametric surfaceFunction UvRegion.unitSquare)
 
 bounds :: Surface3D space -> Bounds3D space
 bounds surface = SurfaceFunction3D.evaluateBounds surface.function (Region2D.bounds surface.domain)

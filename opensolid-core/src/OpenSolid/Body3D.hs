@@ -402,9 +402,9 @@ surfaceWithHalfEdgesMapEntry surfaceWithHalfEdges = do
 
 toSurfaceWithHalfEdges :: Tolerance Meters => Int -> Surface3D space -> SurfaceWithHalfEdges space
 toSurfaceWithHalfEdges surfaceIndex surface = do
-  let loops = Region2D.boundaryLoops surface.domain
+  let loops = Region2D.boundaryLoops (Surface3D.domain surface)
   let surfaceId = SurfaceId surfaceIndex
-  let halfEdges = NonEmpty.mapWithIndex (loopHalfEdges surfaceId surface.function) loops
+  let halfEdges = NonEmpty.mapWithIndex (loopHalfEdges surfaceId (Surface3D.function surface)) loops
   SurfaceWithHalfEdges surfaceId surface Positive halfEdges
 
 loopHalfEdges ::
@@ -522,9 +522,9 @@ toBoundarySurface edges SurfaceWithHalfEdges{surfaceId, surface, handedness, hal
     , orientedSurface = case handedness of
         Positive -> surface
         Negative -> Surface3D.flip surface
-    , surfaceFunction = surface.function
+    , surfaceFunction = Surface3D.function surface
     , handedness
-    , uvBounds = Region2D.bounds surface.domain
+    , uvBounds = Region2D.bounds (Surface3D.domain surface)
     , edgeLoops = NonEmpty.map (NonEmpty.map (toEdge edges)) halfEdgeLoops
     }
 
