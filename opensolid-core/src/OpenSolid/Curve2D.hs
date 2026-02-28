@@ -212,7 +212,11 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Curve2D units1 space1) (Point2D units2 space2) units1
   where
-  curve `intersects` point = (curve - point) `intersects` Vector2D.zero
+  curve `intersects` point =
+    case findPoint point curve of
+      Ok [] -> False
+      Ok (NonEmpty _) -> True
+      Error Curve.IsPoint -> point ~= startPoint curve
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
