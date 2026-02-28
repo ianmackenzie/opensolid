@@ -25,6 +25,7 @@ type family
 
 class
   ( VectorBounds.Exists dimension Unitless space
+  , Negation (DirectionBounds dimension space)
   , DotMultiplication
       (DirectionBounds dimension space)
       (DirectionBounds dimension space)
