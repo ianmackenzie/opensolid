@@ -1,9 +1,50 @@
+Move Curve.Intersections.solveInterior to Search module or similar?
+
+Add ParameterInterval module and move 'includes' and 'isInterior' functions there
+- also move Bounds2D.includes and Domain.isInterior to UvBounds.[includes,iInterior]
+- generally avoid having no-tolerance functions in units-generic modules
+- maybe also move 'overlapping' functions from Search.Domain into ParameterInterval and UvBounds
+
+Simplify Debug module
+- remove Debug type and >> operator
+- remove Debug.log and rename Debug.intercept to Debug.log
+
+Move WithNoZeros and WithNoInteriorZeros into generic VectorCurve module?
+- then could potentially have e.g. VectorCurve.WithNoInteriorZeros.direction instead of VectorCurve.unsafeDirection
+
+Instead of Curve.SearchTree, have Curve.Nondegenerate?
+- include tangent direction, curvature and search tree
+- Curve.Nondegenerate value could include a VectorCurve.WithNoInteriorZeros...
+- Curve.Nondegenerate.curve, Curve.Nondegenerate.tangentDirection, Curve.Nondegenerate.curvatureVector_, Curve.Nondegenerate.searchTree...
+- Curve.Nondegenerate.clean to save space?
+- have optimized implementation for e.g. 'Intersects Point2D Curve2D.Nondegenerate' that uses cached search tree
+
+Optimize Region2d.contains
+- instead of existing flux integral code, rely on optimization:
+  if a curve segment bounds doesn't include the test point,
+  can calculate "swept angle around point" by just looking at the two endpoints!
+  Then take sum of swept angles for each segment
+
+Deduplicate code from Tests.Curve2D and Tests.Curve3D into Tests.Curve?
+
+Remove "Test." prefix from Test.group calls in test/Main.hs?
+
+Rename OpenSolid.Search to OpenSolid.Bisection?
+- rename 'exclusive' to just 'search'
+- add 'find' that just attempts to find a *single* solution
+
+Add generic Curve.g2 that uses curvature vector
+- then switch Curve2D.g2 to use it
+
 Cache e.g. search trees in curve values, but provide function for stripping cached values?
 - possible names:
   - Curve2D.strip
   - Curve2D.clean
   - Curve2D.compact
 - probably can't get rid of cached derivatives though...
+- would have to store 'unsafe' search tree, since it depends on a tolerance...
+  - store search tree result computed with zero tolerance,
+    then return that if curve is not a point according to the *current* tolerance?
 
 Switch to Vector, VectorBounds purely *forwarding* to Vector2D, VectorBounds2D etc.?
 - don't call back into e.g. Vector from Vector2D
