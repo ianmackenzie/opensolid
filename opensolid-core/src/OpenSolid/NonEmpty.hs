@@ -63,6 +63,7 @@ module OpenSolid.NonEmpty
   , sortBy
   , sortWith
   , uniqueValues
+  , uniqueValuesOf
   , intersperse
   , partition
   , all
@@ -320,6 +321,9 @@ dedup current [] = current :| []
 dedup current (next : remaining)
   | current == next = dedup current remaining
   | otherwise = push current (dedup next remaining)
+
+uniqueValuesOf :: Ord b => (a -> b) -> NonEmpty a -> NonEmpty b
+uniqueValuesOf function nonEmpty = uniqueValues (map function nonEmpty)
 
 all :: (a -> Bool) -> NonEmpty a -> Bool
 all = Prelude.all
