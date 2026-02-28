@@ -3,11 +3,12 @@ module OpenSolid.Maybe
   , map
   , map2
   , oneOf
+  , isJust
+  , isNothing
   )
 where
 
-import OpenSolid.List (List)
-import Prelude (Maybe (Just, Nothing))
+import OpenSolid.Prelude
 import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
@@ -23,3 +24,11 @@ oneOf maybes = case maybes of
   Just value : _ -> Just value
   Nothing : rest -> oneOf rest
   [] -> Nothing
+
+isJust :: Maybe a -> Bool
+isJust (Just _) = True
+isJust Nothing = False
+
+isNothing :: Maybe a -> Bool
+isNothing Nothing = True
+isNothing (Just _) = False
