@@ -62,7 +62,7 @@ module OpenSolid.NonEmpty
   , sort
   , sortBy
   , sortWith
-  , sortAndDeduplicate
+  , uniqueValues
   , intersperse
   , partition
   , all
@@ -309,8 +309,8 @@ sortBy property = sortWith (\a b -> compare (property a) (property b))
 sortWith :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a
 sortWith = Data.List.NonEmpty.sortBy
 
-sortAndDeduplicate :: Ord a => NonEmpty a -> NonEmpty a
-sortAndDeduplicate nonEmpty = deduplicate (sort nonEmpty)
+uniqueValues :: Ord a => NonEmpty a -> NonEmpty a
+uniqueValues nonEmpty = deduplicate (sort nonEmpty)
 
 deduplicate :: Eq a => NonEmpty a -> NonEmpty a
 deduplicate nonEmpty = dedup (first nonEmpty) (rest nonEmpty)

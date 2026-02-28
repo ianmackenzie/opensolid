@@ -42,7 +42,7 @@ module OpenSolid.List
   , sort
   , sortBy
   , sortWith
-  , sortAndDeduplicate
+  , uniqueValues
   , isOrdered
   , isNonDescending
   , isAscending
@@ -209,8 +209,8 @@ sortBy = Data.List.sortOn
 sortWith :: (a -> a -> Ordering) -> List a -> List a
 sortWith = Data.List.sortBy
 
-sortAndDeduplicate :: Ord a => List a -> List a
-sortAndDeduplicate list = deduplicate (sort list)
+uniqueValues :: Ord a => List a -> List a
+uniqueValues list = deduplicate (sort list)
 
 deduplicate :: Eq a => List a -> List a
 deduplicate [] = []
