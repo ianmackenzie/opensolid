@@ -21,3 +21,6 @@ __pycache__
 # Editor stuff
 .zed
 .ropeproject
+
+# Local Claude preferences
+CLAUDE.local.md
