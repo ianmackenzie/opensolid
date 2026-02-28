@@ -14,6 +14,7 @@ module OpenSolid.Random
   , retry
   , filter
   , sequence
+  , collect
   , return
   )
 where
@@ -97,3 +98,6 @@ filter predicate generator = do
 
 sequence :: Traversable list => list (Generator a) -> Generator (list a)
 sequence = Prelude.sequence
+
+collect :: Traversable list => (a -> Generator b) -> list a -> Generator (list b)
+collect = Prelude.mapM
