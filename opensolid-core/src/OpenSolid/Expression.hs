@@ -204,8 +204,8 @@ instance
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Expression input1 (Point2D units1 space))
-    (Expression input2 (Point2D units2 space))
+    (Expression input1 (Point2D units1 space1))
+    (Expression input2 (Point2D units2 space2))
   where
   coerce (Curve2D ast functions) = Curve2D ast functions
   coerce (Surface2D ast functions) = Surface2D ast functions
@@ -213,8 +213,8 @@ instance
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Expression input1 (Vector2D units1 space))
-    (Expression input2 (Vector2D units2 space))
+    (Expression input1 (Vector2D units1 space1))
+    (Expression input2 (Vector2D units2 space2))
   where
   coerce (VectorCurve2D ast functions) = VectorCurve2D ast functions
   coerce (VectorSurface2D ast functions) = VectorSurface2D ast functions
@@ -222,8 +222,8 @@ instance
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Expression input1 (Vector3D units1 space))
-    (Expression input2 (Vector3D units2 space))
+    (Expression input1 (Vector3D units1 space1))
+    (Expression input2 (Vector3D units2 space2))
   where
   coerce (VectorCurve3D ast functions) = VectorCurve3D ast functions
   coerce (VectorSurface3D ast functions) = VectorSurface3D ast functions
