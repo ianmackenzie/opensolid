@@ -129,7 +129,7 @@ instance ApproximateEquality (Curve1D units) (Tolerance units) where
 
 instance
   units1 ~ units2 =>
-  Intersects (Curve1D units1) (Quantity units2) units1
+  Intersects (Curve1D units1) (Quantity units2) (Tolerance units1)
   where
   curve `intersects` value =
     -- TODO optimize this to use a special Solve1D.find or similar
@@ -142,7 +142,7 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (Quantity units1) (Curve1D units2) units1
+  Intersects (Quantity units1) (Curve1D units2) (Tolerance units1)
   where
   value `intersects` curve = curve `intersects` value
 

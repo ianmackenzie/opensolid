@@ -73,11 +73,11 @@ class
   , Intersects
       (Point dimension units space)
       (Curve dimension units space)
-      units
+      (Tolerance units)
   , Intersects
       (Curve dimension units space)
       (Point dimension units space)
-      units
+      (Tolerance units)
   ) =>
   Exists dimension units space
   where

@@ -23,9 +23,9 @@ type family Bounds dimension units space = bounds | bounds -> dimension units sp
 class
   ( Point.Exists dimension units space
   , VectorBounds.Exists dimension units space
-  , Intersects (Point dimension units space) (Bounds dimension units space) units
-  , Intersects (Bounds dimension units space) (Point dimension units space) units
-  , Intersects (Bounds dimension units space) (Bounds dimension units space) units
+  , Intersects (Point dimension units space) (Bounds dimension units space) (Tolerance units)
+  , Intersects (Bounds dimension units space) (Point dimension units space) (Tolerance units)
+  , Intersects (Bounds dimension units space) (Bounds dimension units space) (Tolerance units)
   ) =>
   Exists dimension units space
   where

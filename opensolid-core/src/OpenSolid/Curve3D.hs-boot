@@ -80,11 +80,11 @@ instance
 
 instance
   space1 ~ space2 =>
-  Intersects (Curve3D space1) (Point3D space2) Meters
+  Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters)
 
 instance
   space1 ~ space2 =>
-  Intersects (Point3D space1) (Curve3D space2) Meters
+  Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters)
 
 constant :: Point3D space -> Curve3D space
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space

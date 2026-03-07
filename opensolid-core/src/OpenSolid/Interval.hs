@@ -148,13 +148,13 @@ instance HasUnits (Interval units) units
 instance Units.Coercion (Interval unitsA) (Interval unitsB) where
   coerce = Data.Coerce.coerce
 
-instance units1 ~ units2 => Intersects (Quantity units1) (Interval units2) units1 where
+instance units1 ~ units2 => Intersects (Quantity units1) (Interval units2) (Tolerance units1) where
   value `intersects` interval = exclusion value interval <= ?tolerance
 
-instance units1 ~ units2 => Intersects (Interval units1) (Quantity units2) units1 where
+instance units1 ~ units2 => Intersects (Interval units1) (Quantity units2) (Tolerance units1) where
   interval `intersects` value = value `intersects` interval
 
-instance units1 ~ units2 => Intersects (Interval units1) (Interval units2) units1 where
+instance units1 ~ units2 => Intersects (Interval units1) (Interval units2) (Tolerance units1) where
   first `intersects` second = separation first second <= ?tolerance
 
 instance Negation (Interval units) where

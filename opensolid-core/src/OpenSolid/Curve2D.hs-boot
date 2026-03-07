@@ -103,11 +103,11 @@ instance
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Curve2D units1 space1) (Point2D units2 space2) units1
+  Intersects (Curve2D units1 space1) (Point2D units2 space2) (Tolerance units1)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Point2D units1 space1) (Curve2D units2 space2) units1
+  Intersects (Point2D units1 space1) (Curve2D units2 space2) (Tolerance units1)
 
 constant :: Point2D units space -> Curve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space

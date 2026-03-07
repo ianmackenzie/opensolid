@@ -173,14 +173,14 @@ instance ApproximateEquality (Curve3D space) (Tolerance Meters) where
     let equalPointsAt t = evaluate curve1 t ~= evaluate curve2 t
     NonEmpty.all equalPointsAt Parameter.samples
 
-instance space1 ~ space2 => Intersects (Point3D space1) (Curve3D space2) Meters where
+instance space1 ~ space2 => Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters) where
   point `intersects` curve =
     case findPoint point curve of
       Ok [] -> False
       Ok (NonEmpty _) -> True
       Error Curve.IsPoint -> point ~= startPoint curve
 
-instance space1 ~ space2 => Intersects (Curve3D space1) (Point3D space2) Meters where
+instance space1 ~ space2 => Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters) where
   curve `intersects` point = point `intersects` curve
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space

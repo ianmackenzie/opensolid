@@ -210,7 +210,7 @@ instance
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Curve2D units1 space1) (Point2D units2 space2) units1
+  Intersects (Curve2D units1 space1) (Point2D units2 space2) (Tolerance units1)
   where
   curve `intersects` point =
     case findPoint point curve of
@@ -220,7 +220,7 @@ instance
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Point2D units1 space1) (Curve2D units2 space2) units1
+  Intersects (Point2D units1 space1) (Curve2D units2 space2) (Tolerance units1)
   where
   point `intersects` curve = curve `intersects` point
 

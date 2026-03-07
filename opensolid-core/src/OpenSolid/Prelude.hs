@@ -488,8 +488,8 @@ instance DivMod (Quantity units) where
 
 ----- Intersection -----
 
-class Intersects b a units => Intersects a b units | a b -> units where
-  intersects :: Tolerance units => a -> b -> Bool
+class Intersects b a constraint => Intersects a b constraint | a b -> constraint where
+  intersects :: constraint => a -> b -> Bool
 
 infix 4 `intersects`
 

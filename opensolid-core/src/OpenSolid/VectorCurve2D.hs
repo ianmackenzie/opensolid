@@ -151,7 +151,7 @@ instance
   Intersects
     (VectorCurve2D units1 space1)
     (Vector2D units2 space2)
-    units1
+    (Tolerance units1)
   where
   curve `intersects` vector = Tolerance.using (Quantity.squared_ ?tolerance) do
     squaredMagnitude_ (curve - vector) `intersects` Quantity.zero
@@ -161,7 +161,7 @@ instance
   Intersects
     (Vector2D units1 space1)
     (VectorCurve2D units2 space2)
-    units1
+    (Tolerance units1)
   where
   vector `intersects` curve = curve `intersects` vector
 
