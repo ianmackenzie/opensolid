@@ -1,41 +1,21 @@
 module OpenSolid.Debug
-  ( Debug
-  , (>>)
-  , print
+  ( trace
   , log
-  , trace
-  , intercept
   , callStack
   )
 where
 
-import Data.Text qualified
 import Debug.Trace qualified
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
-import OpenSolid.Prelude hiding ((>>))
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import Prelude qualified
-
-newtype Debug = Debug (() -> ())
-
-(>>) :: Debug -> a -> a
-Debug action >> value = Prelude.seq (action ()) value
-
-labelled :: Show a => Text -> a -> Text
-labelled label value = label <> ": " <> Text.show value
-
-print :: Text -> Debug
-print message = Debug (trace message)
-
-log :: Show a => Text -> a -> Debug
-log label value = print (labelled label value)
 
 trace :: Text -> a -> a
-trace text = Debug.Trace.trace (Data.Text.unpack text)
+trace message value = Debug.Trace.trace (Text.unpack message) value
 
-intercept :: Show a => Text -> a -> a
-intercept label value = trace (labelled label value) value
+log :: Show a => Text -> a -> a
+log label value = trace (label <> ": " <> Text.show value) value
 
 callStack :: HasCallStack => Text
 callStack = do
