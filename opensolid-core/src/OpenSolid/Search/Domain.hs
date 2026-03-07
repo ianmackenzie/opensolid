@@ -3,10 +3,8 @@ module OpenSolid.Search.Domain
   , InfiniteRecursion (InfiniteRecursion)
   , Bounds
   , contains
-  , touching
   , overlapping
   , isSmall
-  , isBoundary
   , interior
   , unitInterval
   , pairwise
@@ -21,7 +19,6 @@ import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
-import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
 
@@ -32,39 +29,23 @@ data InfiniteRecursion = InfiniteRecursion deriving (Show, Exception)
 
 class Bounds bounds where
   contains :: bounds -> bounds -> Bool
-  touching :: bounds -> bounds -> Bool
   overlapping :: bounds -> bounds -> Bool
   isSmall :: bounds -> Bool
-  isBoundary :: bounds -> Bool
-  interior :: bounds -> bounds
 
 instance Bounds (Interval Unitless) where
   contains = Interval.contains
-  touching interval1 interval2 = Interval.overlap interval1 interval2 >= 0.0
   overlapping interval1 interval2 = Interval.overlap interval1 interval2 > 0.0
   isSmall interval = Interval.width interval <= Desingularization.t0
-  isBoundary = Parameter.hasEndpoint
-  interior (Interval exteriorLow exteriorHigh) = do
-    let margin = 0.125 * (exteriorHigh - exteriorLow)
-    let interiorLow = if exteriorLow == 0.0 then 0.0 else exteriorLow + margin
-    let interiorHigh = if exteriorHigh == 1.0 then 1.0 else exteriorHigh - margin
-    Interval interiorLow interiorHigh
 
 instance Bounds UvBounds where
   contains = Bounds2D.contains
-  touching (UvBounds u1 v1) (UvBounds u2 v2) = touching u1 u2 && touching v1 v2
   overlapping (UvBounds u1 v1) (UvBounds u2 v2) = overlapping u1 u2 && overlapping v1 v2
   isSmall (UvBounds u v) = isSmall u && isSmall v
-  isBoundary (UvBounds u v) = isBoundary u || isBoundary v
-  interior (UvBounds uBounds vBounds) = UvBounds (interior uBounds) (interior vBounds)
 
 instance (Bounds bounds1, Bounds bounds2) => Bounds (bounds1, bounds2) where
   contains (b1, b2) (a1, a2) = contains b1 a1 && contains b2 a2
-  touching (b1, b2) (a1, a2) = touching b1 a1 && touching b2 a2
   overlapping (b1, b2) (a1, a2) = overlapping b1 a1 && overlapping b2 a2
   isSmall (b1, b2) = isSmall b1 && isSmall b2
-  isBoundary (b1, b2) = isBoundary b1 || isBoundary b2
-  interior (b1, b2) = (interior b1, interior b2)
 
 unitInterval :: Domain (Interval Unitless)
 unitInterval = split Interval.unit
@@ -107,3 +88,10 @@ classify (Interval 0.0 1.0) = Entire
 classify (Interval 0.0 t) = Start (if t <= Desingularization.t0 then Small else Large)
 classify (Interval t 1.0) = End (if t >= Desingularization.t1 then Small else Large)
 classify (Interval _ _) = Interior
+
+interior :: Interval Unitless -> Interval Unitless
+interior (Interval exteriorLow exteriorHigh) = do
+  let margin = 0.125 * (exteriorHigh - exteriorLow)
+  let interiorLow = if exteriorLow == 0.0 then 0.0 else exteriorLow + margin
+  let interiorHigh = if exteriorHigh == 1.0 then 1.0 else exteriorHigh - margin
+  Interval interiorLow interiorHigh
