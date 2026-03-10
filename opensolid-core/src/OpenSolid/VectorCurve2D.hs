@@ -4,11 +4,12 @@ module OpenSolid.VectorCurve2D
   ( VectorCurve2D
   , Compiled
   , WithNoZeros (WithNoZeros)
-  , WithNoInteriorZeros (WithNoInteriorZeros)
+  , Nondegenerate
   , new
   , recursive
   , compiled
   , derivative
+  , nondegenerate
   , startValue
   , endValue
   , evaluate
@@ -94,6 +95,7 @@ import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve qualified as VectorCurve
+import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoInteriorZeros (WithNoInteriorZeros (WithNoInteriorZeros))
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoInteriorZeros qualified as VectorCurve2D.WithNoInteriorZeros
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoZeros (WithNoZeros (WithNoZeros))
@@ -106,6 +108,7 @@ data VectorCurve2D units space = VectorCurve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
   , maxSampledMagnitude :: ~(Quantity units)
+  , nondegenerate :: ~(Nondegenerate units space)
   , unsafeMagnitude :: ~(Curve1D.Nondegenerate units)
   , unsafeNormalized :: ~(VectorCurve2D Unitless space)
   }
@@ -116,6 +119,8 @@ type Compiled units space =
     (Vector2D units space)
     (Interval Unitless)
     (VectorBounds2D units space)
+
+type Nondegenerate units space = VectorCurve.Nondegenerate 2 units space
 
 instance FFI (VectorCurve2D Unitless FFI.Space) where
   representation = FFI.classRepresentation "VectorCurve2D"
@@ -137,6 +142,7 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
+      , nondegenerate = Units.coerce curve.nondegenerate
       , unsafeMagnitude = Units.coerce curve.unsafeMagnitude
       , unsafeNormalized = curve.unsafeNormalized
       }
@@ -495,6 +501,12 @@ compiled = (.compiled)
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
 derivative = (.derivative)
 
+nondegenerate ::
+  Tolerance units =>
+  VectorCurve2D units space ->
+  Result VectorCurve.IsZero (Nondegenerate units space)
+nondegenerate curve = if isZero curve then Error VectorCurve.IsZero else Ok curve.nondegenerate
+
 transformBy ::
   Transform2D tag translationUnits space ->
   VectorCurve2D units space ->
@@ -529,6 +541,7 @@ new givenCompiled givenDerivative = result
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
+      , nondegenerate = VectorCurve.Nondegenerate.unsafe result
       , unsafeMagnitude = computedUnsafeMagnitude
       , unsafeNormalized
       }
