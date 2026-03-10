@@ -272,6 +272,7 @@ library
     OpenSolid.Lobatto
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
+    OpenSolid.Region2D.BoundaryTree
     OpenSolid.SurfaceFunction1D.Blending
     OpenSolid.SurfaceFunction1D.Desingularization
     OpenSolid.SurfaceFunction1D.HorizontalCurve
