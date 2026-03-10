@@ -5,6 +5,8 @@ module OpenSolid.VectorCurve.Nondegenerate
   , magnitude
   , normalized
   , direction
+  , squaredMagnitude_
+  , squaredMagnitude
   )
 where
 
@@ -63,6 +65,19 @@ magnitude = (.magnitude)
 
 normalized :: Nondegenerate dimension units space -> VectorCurve dimension Unitless space
 normalized = (.normalized)
+
+squaredMagnitude_ ::
+  VectorCurve.Exists dimension units space =>
+  Nondegenerate dimension units space ->
+  Curve1D.Nondegenerate (units ?*? units)
+squaredMagnitude_ nondegenerate =
+  Curve1D.Nondegenerate (VectorCurve.squaredMagnitude_ nondegenerate.curve)
+
+squaredMagnitude ::
+  (VectorCurve.Exists dimension units1 space, Units.Squared units1 units2) =>
+  Nondegenerate dimension units1 space ->
+  Curve1D.Nondegenerate units2
+squaredMagnitude = Units.specialize . squaredMagnitude_
 
 direction ::
   DirectionCurve.Exists dimension space =>
