@@ -2,6 +2,10 @@ Try moving e.g. Curve type family into Curve.Exists typeclass?
 - then add Nondegenerate as well...
 - or have Curve.Nondegenerate module with Nondegenerate type and its own Exists typeclass?
 
+Remove unsafeMagnitude and unsafeNormalize?
+
+Rename maxSampledMagnitude to nominalMagnitude?
+
 Add NonEmpty and Fuzzy to Prelude?
 
 Add ParameterInterval module and move 'includes' and 'isInterior' functions there
