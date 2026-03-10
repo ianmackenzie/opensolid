@@ -78,8 +78,6 @@ import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
-import {-# SOURCE #-} OpenSolid.VectorCurve3D.WithNoInteriorZeros (WithNoInteriorZeros (WithNoInteriorZeros))
-import {-# SOURCE #-} OpenSolid.VectorCurve3D.WithNoInteriorZeros qualified as VectorCurve3D.WithNoInteriorZeros
 import {-# SOURCE #-} OpenSolid.VectorCurve3D.WithNoZeros (WithNoZeros (WithNoZeros))
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
@@ -89,8 +87,6 @@ data VectorCurve3D units space = VectorCurve3D
   , derivative :: ~(VectorCurve3D units space)
   , maxSampledMagnitude :: ~(Quantity units)
   , nondegenerate :: ~(Nondegenerate units space)
-  , unsafeMagnitude :: ~(Curve1D.Nondegenerate units)
-  , unsafeNormalized :: ~(VectorCurve3D Unitless space)
   }
 
 type Compiled units space =
@@ -114,8 +110,6 @@ instance
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
       , nondegenerate = Units.coerce curve.nondegenerate
-      , unsafeMagnitude = Units.coerce curve.unsafeMagnitude
-      , unsafeNormalized = curve.unsafeNormalized
       }
 
 instance ApproximateEquality (VectorCurve3D units space) (Tolerance units) where
@@ -470,18 +464,12 @@ new givenCompiled givenDerivative = result
  where
   -- The test value to use to check if a curve is (likely) zero everywhere
   maxSampledMagnitude = NonEmpty.maximumOf (Vector3D.magnitude . evaluate result) Parameter.samples
-  -- The magnitude of this curve, assuming it has no interior zeros
-  computedUnsafeMagnitude = VectorCurve3D.WithNoInteriorZeros.magnitude (WithNoInteriorZeros result)
-  -- The normalized version of this curve, assuming it has no interior zeros
-  unsafeNormalized = result / computedUnsafeMagnitude
   result =
     VectorCurve3D
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
       , nondegenerate = VectorCurve.Nondegenerate.unsafe result
-      , unsafeMagnitude = computedUnsafeMagnitude
-      , unsafeNormalized
       }
 
 recursive ::
@@ -644,7 +632,7 @@ instance
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 unsafeNormalize :: VectorCurve3D units space -> VectorCurve3D Unitless space
-unsafeNormalize = (.unsafeNormalized)
+unsafeNormalize curve = VectorCurve.Nondegenerate.normalize curve.nondegenerate
 
 normalize :: Tolerance units => VectorCurve3D units space -> VectorCurve3D Unitless space
 normalize = VectorCurve.normalize
@@ -667,7 +655,7 @@ magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 magnitude = VectorCurve.magnitude
 
 unsafeMagnitude :: VectorCurve3D units space -> Curve1D.Nondegenerate units
-unsafeMagnitude = (.unsafeMagnitude)
+unsafeMagnitude curve = VectorCurve.Nondegenerate.magnitude curve.nondegenerate
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros
