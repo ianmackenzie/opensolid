@@ -1,13 +1,9 @@
-Move Curve.Intersections.solveInterior to Search module or similar?
+Add NonEmpty and Fuzzy to Prelude?
 
 Add ParameterInterval module and move 'includes' and 'isInterior' functions there
 - also move Bounds2D.includes and Domain.isInterior to UvBounds.[includes,iInterior]
 - generally avoid having no-tolerance functions in units-generic modules
 - maybe also move 'overlapping' functions from Search.Domain into ParameterInterval and UvBounds
-
-Simplify Debug module
-- remove Debug type and >> operator
-- remove Debug.log and rename Debug.intercept to Debug.log
 
 Move WithNoZeros and WithNoInteriorZeros into generic VectorCurve module?
 - then could potentially have e.g. VectorCurve.WithNoInteriorZeros.direction instead of VectorCurve.unsafeDirection
@@ -24,6 +20,9 @@ Optimize Region2d.contains
   if a curve segment bounds doesn't include the test point,
   can calculate "swept angle around point" by just looking at the two endpoints!
   Then take sum of swept angles for each segment
+
+Switch Curve2D over to using new generic intersection algorithm
+- add in logic to determine sign of crossing intersections?
 
 Deduplicate code from Tests.Curve2D and Tests.Curve3D into Tests.Curve?
 
