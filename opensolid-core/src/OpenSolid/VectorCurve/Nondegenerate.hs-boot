@@ -1,6 +1,7 @@
 module OpenSolid.VectorCurve.Nondegenerate
   ( Nondegenerate
   , unsafe
+  , curve
   , magnitude
   , normalized
   , direction
@@ -22,6 +23,7 @@ data Nondegenerate (dimension :: Natural) (units :: Type) (space :: Type)
 unsafe ::
   VectorCurve.Exists dimension units space =>
   VectorCurve dimension units space -> Nondegenerate dimension units space
+curve :: Nondegenerate dimension units space -> VectorCurve dimension units space
 magnitude :: Nondegenerate dimension units space -> Curve1D.Nondegenerate units
 normalized :: Nondegenerate dimension units space -> VectorCurve dimension Unitless space
 direction ::
