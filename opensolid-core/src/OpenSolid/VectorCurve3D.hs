@@ -2,13 +2,14 @@ module OpenSolid.VectorCurve3D
   ( VectorCurve3D
   , Compiled
   , WithNoZeros (WithNoZeros)
-  , WithNoInteriorZeros (WithNoInteriorZeros)
+  , Nondegenerate
   , new
   , recursive
   , on
   , compiled
   , isZero
   , derivative
+  , nondegenerate
   , startValue
   , endValue
   , evaluate
@@ -74,6 +75,7 @@ import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve qualified as VectorCurve
+import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D.WithNoInteriorZeros (WithNoInteriorZeros (WithNoInteriorZeros))
@@ -86,6 +88,7 @@ data VectorCurve3D units space = VectorCurve3D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve3D units space)
   , maxSampledMagnitude :: ~(Quantity units)
+  , nondegenerate :: ~(Nondegenerate units space)
   , unsafeMagnitude :: ~(Curve1D.Nondegenerate units)
   , unsafeNormalized :: ~(VectorCurve3D Unitless space)
   }
@@ -96,6 +99,8 @@ type Compiled units space =
     (Vector3D units space)
     (Interval Unitless)
     (VectorBounds3D units space)
+
+type Nondegenerate units space = VectorCurve.Nondegenerate 3 units space
 
 instance HasUnits (VectorCurve3D units space) units
 
@@ -108,6 +113,7 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
+      , nondegenerate = Units.coerce curve.nondegenerate
       , unsafeMagnitude = Units.coerce curve.unsafeMagnitude
       , unsafeNormalized = curve.unsafeNormalized
       }
@@ -440,6 +446,12 @@ compiled = (.compiled)
 derivative :: VectorCurve3D units space -> VectorCurve3D units space
 derivative = (.derivative)
 
+nondegenerate ::
+  Tolerance units =>
+  VectorCurve3D units space ->
+  Result VectorCurve.IsZero (Nondegenerate units space)
+nondegenerate curve = if isZero curve then Error VectorCurve.IsZero else Ok curve.nondegenerate
+
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
@@ -467,6 +479,7 @@ new givenCompiled givenDerivative = result
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
+      , nondegenerate = VectorCurve.Nondegenerate.unsafe result
       , unsafeMagnitude = computedUnsafeMagnitude
       , unsafeNormalized
       }
