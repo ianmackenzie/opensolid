@@ -1,6 +1,7 @@
 module OpenSolid.VectorCurve.Nondegenerate
   ( Nondegenerate
   , unsafe
+  , unsafe1D
   , curve
   , magnitude
   , normalize
@@ -10,11 +11,15 @@ module OpenSolid.VectorCurve.Nondegenerate
   )
 where
 
+import Data.Void (Void)
+import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Sign qualified as Sign
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorCurve (VectorCurve)
@@ -55,6 +60,15 @@ unsafe givenCurve = do
     { curve = givenCurve
     , magnitude = curveMagnitude
     , normalized = givenCurve / curveMagnitude
+    }
+
+unsafe1D :: Curve1D units -> Nondegenerate 1 units Void
+unsafe1D givenCurve = do
+  let curveSign = Quantity.sign (Curve1D.evaluate givenCurve 0.5)
+  Nondegenerate
+    { curve = givenCurve
+    , magnitude = Curve1D.Nondegenerate (givenCurve * curveSign)
+    , normalized = Curve1D.constant (Sign.value curveSign)
     }
 
 curve :: Nondegenerate dimension units space -> VectorCurve dimension units space
