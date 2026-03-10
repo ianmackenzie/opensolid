@@ -3,7 +3,7 @@ module OpenSolid.VectorCurve.Nondegenerate
   , unsafe
   , curve
   , magnitude
-  , normalized
+  , normalize
   , direction
   , squaredMagnitude_
   , squaredMagnitude
@@ -63,8 +63,8 @@ curve = (.curve)
 magnitude :: Nondegenerate dimension units space -> Curve1D.Nondegenerate units
 magnitude = (.magnitude)
 
-normalized :: Nondegenerate dimension units space -> VectorCurve dimension Unitless space
-normalized = (.normalized)
+normalize :: Nondegenerate dimension units space -> VectorCurve dimension Unitless space
+normalize = (.normalized)
 
 squaredMagnitude_ ::
   VectorCurve.Exists dimension units space =>
