@@ -13,6 +13,8 @@ import OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Prelude
+import OpenSolid.Units (HasUnits)
+import OpenSolid.Units qualified as Units
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 
@@ -21,6 +23,25 @@ data Nondegenerate dimension units space = Nondegenerate
   , magnitude :: ~(Curve1D.Nondegenerate units)
   , normalized :: ~(VectorCurve dimension Unitless space)
   }
+
+instance HasUnits (Nondegenerate dimension units space) units
+
+instance
+  ( VectorCurve.Exists dimension1 units1 space1
+  , VectorCurve.Exists dimension2 units2 space2
+  , dimension1 ~ dimension2
+  , space1 ~ space2
+  ) =>
+  Units.Coercion
+    (Nondegenerate dimension1 units1 space1)
+    (Nondegenerate dimension2 units2 space2)
+  where
+  coerce nondegenerate =
+    Nondegenerate
+      { curve = VectorCurve.coerce nondegenerate.curve
+      , magnitude = Units.coerce nondegenerate.magnitude
+      , normalized = nondegenerate.normalized
+      }
 
 unsafe ::
   VectorCurve.Exists dimension units space =>
