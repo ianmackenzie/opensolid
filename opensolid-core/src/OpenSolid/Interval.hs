@@ -53,6 +53,8 @@ module OpenSolid.Interval
   , resolution
   , isResolved
   , resolvedSign
+  , areDistinct
+  , isDistinctFrom
   , intersection
   , random
   , sampleValues
@@ -585,6 +587,12 @@ resolvedSign interval = do
   if Number.abs intervalResolution >= resolutionThreshold
     then Resolved (Number.sign intervalResolution)
     else Unresolved
+
+areDistinct :: Interval units -> Interval units -> Bool
+areDistinct first second = isResolved (second - first)
+
+isDistinctFrom :: Quantity units -> Interval units -> Bool
+isDistinctFrom value interval = isResolved (interval - value)
 
 random :: Random.Generator (Quantity units) -> Random.Generator (Interval units)
 random randomQuantity = do

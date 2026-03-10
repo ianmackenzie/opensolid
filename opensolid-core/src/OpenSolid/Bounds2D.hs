@@ -42,6 +42,8 @@ module OpenSolid.Bounds2D
   , distanceAlong
   , convert
   , unconvert
+  , areDistinct
+  , isDistinctFrom
   )
 where
 
@@ -308,3 +310,11 @@ convert factor (PositionBounds2D pb) = PositionBounds2D (VectorBounds2D.convert 
 
 unconvert :: Quantity (units2 ?/? units1) -> Bounds2D units2 space -> Bounds2D units1 space
 unconvert factor (PositionBounds2D pb) = PositionBounds2D (VectorBounds2D.unconvert factor pb)
+
+areDistinct :: Bounds2D units space -> Bounds2D units space -> Bool
+areDistinct (Bounds2D x1 y1) (Bounds2D x2 y2) =
+  Interval.areDistinct x1 x2 || Interval.areDistinct y1 y2
+
+isDistinctFrom :: Point2D units space -> Bounds2D units space -> Bool
+isDistinctFrom (Point2D px py) (Bounds2D bx by) =
+  Interval.isDistinctFrom px bx || Interval.isDistinctFrom py by
