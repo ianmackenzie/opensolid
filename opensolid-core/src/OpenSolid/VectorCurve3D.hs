@@ -86,7 +86,7 @@ data VectorCurve3D units space = VectorCurve3D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve3D units space)
   , maxSampledMagnitude :: ~(Quantity units)
-  , unsafeMagnitude :: ~(Curve1D.WithNoInteriorZeros units)
+  , unsafeMagnitude :: ~(Curve1D.Nondegenerate units)
   , unsafeNormalized :: ~(VectorCurve3D Unitless space)
   }
 
@@ -588,7 +588,7 @@ quotient_ ::
 quotient_ lhs rhs =
   if rhs ~= Curve1D.zero
     then Error DivisionByZero
-    else Ok (lhs ?/? Curve1D.WithNoInteriorZeros rhs)
+    else Ok (lhs ?/? Curve1D.Nondegenerate rhs)
 
 instance
   Division_
@@ -616,7 +616,7 @@ instance
 instance
   Division_
     (VectorCurve3D units1 space)
-    (Curve1D.WithNoInteriorZeros units2)
+    (Curve1D.Nondegenerate units2)
     (VectorCurve3D (units1 ?/? units2) space)
   where
   (?/?) = VectorCurve.desingularizedQuotient
@@ -625,7 +625,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division
     (VectorCurve3D units1 space)
-    (Curve1D.WithNoInteriorZeros units2)
+    (Curve1D.Nondegenerate units2)
     (VectorCurve3D units3 space)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
@@ -653,7 +653,7 @@ squaredMagnitude_ curve = do
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 magnitude = VectorCurve.magnitude
 
-unsafeMagnitude :: VectorCurve3D units space -> Curve1D.WithNoInteriorZeros units
+unsafeMagnitude :: VectorCurve3D units space -> Curve1D.Nondegenerate units
 unsafeMagnitude = (.unsafeMagnitude)
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result VectorCurve.IsZero (List Number)

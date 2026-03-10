@@ -22,7 +22,7 @@ data Nondegenerate (dimension :: Natural) (units :: Type) (space :: Type)
 unsafe ::
   VectorCurve.Exists dimension units space =>
   VectorCurve dimension units space -> Nondegenerate dimension units space
-magnitude :: Nondegenerate dimension units space -> Curve1D.WithNoInteriorZeros units
+magnitude :: Nondegenerate dimension units space -> Curve1D.Nondegenerate units
 normalized :: Nondegenerate dimension units space -> VectorCurve dimension Unitless space
 direction ::
   DirectionCurve.Exists dimension space =>

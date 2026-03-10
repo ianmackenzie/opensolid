@@ -1,5 +1,5 @@
-module OpenSolid.Curve1D.WithNoInteriorZeros
-  ( unwrap
+module OpenSolid.Curve1D.Nondegenerate
+  ( curve
   , sqrt
   , sqrt_
   , erase
@@ -7,7 +7,7 @@ module OpenSolid.Curve1D.WithNoInteriorZeros
   )
 where
 
-import OpenSolid.Curve1D (Curve1D, WithNoInteriorZeros (WithNoInteriorZeros), WithNoZeros (WithNoZeros))
+import OpenSolid.Curve1D (Curve1D, Nondegenerate (Nondegenerate), WithNoZeros (WithNoZeros))
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
 import OpenSolid.Prelude
@@ -15,32 +15,32 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
 
-{-# INLINE unwrap #-}
-unwrap :: WithNoInteriorZeros units -> Curve1D units
-unwrap (WithNoInteriorZeros curve) = curve
+{-# INLINE curve #-}
+curve :: Nondegenerate units -> Curve1D units
+curve (Nondegenerate c) = c
 
-sqrt_ :: WithNoInteriorZeros (units ?*? units) -> WithNoInteriorZeros units
-sqrt_ (WithNoInteriorZeros curve) = WithNoInteriorZeros do
-  let firstDerivative = Curve1D.derivative curve
+sqrt_ :: Nondegenerate (units ?*? units) -> Nondegenerate units
+sqrt_ (Nondegenerate givenCurve) = Nondegenerate do
+  let firstDerivative = Curve1D.derivative givenCurve
   let secondDerivative = Curve1D.derivative firstDerivative
-  let curveTolerance = Curve1D.singularityTolerance curve
+  let curveTolerance = Curve1D.singularityTolerance givenCurve
   let firstDerivativeTolerance = Curve1D.singularityTolerance firstDerivative
   let singularity tValue sign =
         (Quantity.zero, sign * Quantity.sqrt_ (0.5 * Curve1D.evaluate secondDerivative tValue))
   let maybeSingularity tValue sign = do
         let curveIsZero = Tolerance.using curveTolerance do
-              Curve1D.evaluate curve tValue ~= Quantity.zero
+              Curve1D.evaluate givenCurve tValue ~= Quantity.zero
         let firstDerivativeIsZero = Tolerance.using firstDerivativeTolerance do
               Curve1D.evaluate firstDerivative tValue ~= Quantity.zero
         if curveIsZero && firstDerivativeIsZero then Just (singularity tValue sign) else Nothing
-  let WithNoZeros interiorSqrt = Curve1D.WithNoZeros.sqrt_ (WithNoZeros curve)
+  let WithNoZeros interiorSqrt = Curve1D.WithNoZeros.sqrt_ (WithNoZeros givenCurve)
   Curve1D.desingularize (maybeSingularity 0.0 Positive) interiorSqrt (maybeSingularity 1.0 Negative)
 
-sqrt :: Units.Squared units1 units2 => WithNoInteriorZeros units2 -> WithNoInteriorZeros units1
+sqrt :: Units.Squared units1 units2 => Nondegenerate units2 -> Nondegenerate units1
 sqrt = sqrt_ . Units.unspecialize
 
-erase :: WithNoInteriorZeros units -> WithNoInteriorZeros Unitless
+erase :: Nondegenerate units -> Nondegenerate Unitless
 erase = Units.erase
 
-unerase :: WithNoInteriorZeros Unitless -> WithNoInteriorZeros units
+unerase :: Nondegenerate Unitless -> Nondegenerate units
 unerase = Units.unerase

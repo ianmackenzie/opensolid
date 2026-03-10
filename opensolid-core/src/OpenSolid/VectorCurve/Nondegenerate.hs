@@ -8,7 +8,7 @@ module OpenSolid.VectorCurve.Nondegenerate
 where
 
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
+import OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Prelude
@@ -17,7 +17,7 @@ import OpenSolid.VectorCurve qualified as VectorCurve
 
 data Nondegenerate dimension units space = Nondegenerate
   { vectorCurve :: VectorCurve dimension units space
-  , magnitude :: ~(Curve1D.WithNoInteriorZeros units)
+  , magnitude :: ~(Curve1D.Nondegenerate units)
   , normalized :: ~(VectorCurve dimension Unitless space)
   }
 
@@ -25,16 +25,15 @@ unsafe ::
   VectorCurve.Exists dimension units space =>
   VectorCurve dimension units space -> Nondegenerate dimension units space
 unsafe vectorCurve = do
-  let curveSquaredMagnitude_ =
-        Curve1D.WithNoInteriorZeros (VectorCurve.squaredMagnitude_ vectorCurve)
-  let curveMagnitude = Curve1D.WithNoInteriorZeros.sqrt_ curveSquaredMagnitude_
+  let curveSquaredMagnitude_ = Curve1D.Nondegenerate (VectorCurve.squaredMagnitude_ vectorCurve)
+  let curveMagnitude = Curve1D.Nondegenerate.sqrt_ curveSquaredMagnitude_
   Nondegenerate
     { vectorCurve
     , magnitude = curveMagnitude
     , normalized = vectorCurve / curveMagnitude
     }
 
-magnitude :: Nondegenerate dimension units space -> Curve1D.WithNoInteriorZeros units
+magnitude :: Nondegenerate dimension units space -> Curve1D.Nondegenerate units
 magnitude = (.magnitude)
 
 normalized :: Nondegenerate dimension units space -> VectorCurve dimension Unitless space

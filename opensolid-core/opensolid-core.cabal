@@ -120,7 +120,7 @@ library
     OpenSolid.Curve.Search
     OpenSolid.Curve.Segment
     OpenSolid.Curve1D
-    OpenSolid.Curve1D.WithNoInteriorZeros
+    OpenSolid.Curve1D.Nondegenerate
     OpenSolid.Curve1D.WithNoZeros
     OpenSolid.Curve1D.Zero
     OpenSolid.Curve2D

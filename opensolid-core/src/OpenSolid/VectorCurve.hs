@@ -32,7 +32,7 @@ import OpenSolid.Bezier qualified as Bezier
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1d
-import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
+import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import OpenSolid.Curve1D.Zero qualified
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.DirectionCurve (DirectionCurve)
@@ -98,11 +98,11 @@ class
       (VectorCurve dimension Unitless space)
   , Division
       (VectorCurve dimension units space)
-      (Curve1D.WithNoInteriorZeros Unitless)
+      (Curve1D.Nondegenerate Unitless)
       (VectorCurve dimension units space)
   , Division
       (VectorCurve dimension units space)
-      (Curve1D.WithNoInteriorZeros units)
+      (Curve1D.Nondegenerate units)
       (VectorCurve dimension Unitless space)
   , NewtonRaphson.Curve dimension units space
   ) =>
@@ -115,7 +115,7 @@ class
   evaluateBounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
   derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
-  unsafeMagnitude :: VectorCurve dimension units space -> Curve1D.WithNoInteriorZeros units
+  unsafeMagnitude :: VectorCurve dimension units space -> Curve1D.Nondegenerate units
   unsafeNormalize :: VectorCurve dimension units space -> VectorCurve dimension Unitless space
   desingularized ::
     VectorCurve dimension units space ->
@@ -136,7 +136,7 @@ instance Exists 1 units Void where
     -- If a 1D curve has no interior zeros,
     -- then it is either always non-negative or always non-positive,
     -- and so its magnitude (absolute value) is either just the curve itself or its negation
-    Curve1D.WithNoInteriorZeros $
+    Curve1D.Nondegenerate $
       if evaluate curve 0.5 > Quantity.zero then curve else -curve
   unsafeNormalize curve =
     -- If a 1D curve has no interior zeros,
@@ -243,9 +243,9 @@ desingularizedQuotient ::
   , Exists dimension (units1 ?/? units2) space
   ) =>
   VectorCurve dimension units1 space ->
-  Curve1d.WithNoInteriorZeros units2 ->
+  Curve1d.Nondegenerate units2 ->
   VectorCurve dimension (units1 ?/? units2) space
-desingularizedQuotient lhs (Curve1D.WithNoInteriorZeros rhs) = do
+desingularizedQuotient lhs (Curve1D.Nondegenerate rhs) = do
   let singularityTolerance = Curve1D.singularityTolerance rhs
   let maybeSingularity tValue =
         if Tolerance.using singularityTolerance (Curve1D.evaluate rhs tValue ~= Quantity.zero)
@@ -284,7 +284,7 @@ magnitude ::
   VectorCurve dimension units space ->
   Curve1D units
 magnitude curve =
-  if isZero curve then Curve1D.zero else Curve1D.WithNoInteriorZeros.unwrap (unsafeMagnitude curve)
+  if isZero curve then Curve1D.zero else Curve1D.Nondegenerate.curve (unsafeMagnitude curve)
 
 erase ::
   Exists dimension units space =>

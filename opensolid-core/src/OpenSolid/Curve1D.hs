@@ -30,7 +30,7 @@ module OpenSolid.Curve1D
   , quotient
   , quotient_
   , WithNoZeros (WithNoZeros)
-  , WithNoInteriorZeros (WithNoInteriorZeros)
+  , Nondegenerate (Nondegenerate)
   , squared
   , squared_
   , sqrt
@@ -60,7 +60,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
+import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import {-# SOURCE #-} OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
 import OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.Curve1D.Zero qualified as Zero
@@ -405,7 +405,7 @@ quotient_ ::
 quotient_ lhs rhs =
   if rhs ~= zero
     then Error DivisionByZero
-    else Ok (lhs ?/? WithNoInteriorZeros rhs)
+    else Ok (lhs ?/? Nondegenerate rhs)
 
 newtype WithNoZeros units = WithNoZeros (Curve1D units)
 
@@ -429,19 +429,19 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
-newtype WithNoInteriorZeros units = WithNoInteriorZeros (Curve1D units)
+newtype Nondegenerate units = Nondegenerate (Curve1D units)
 
-instance HasUnits (WithNoInteriorZeros units) units
+instance HasUnits (Nondegenerate units) units
 
-instance Units.Coercion (WithNoInteriorZeros units1) (WithNoInteriorZeros units2) where
-  coerce (WithNoInteriorZeros curve) = WithNoInteriorZeros (Units.coerce curve)
+instance Units.Coercion (Nondegenerate units1) (Nondegenerate units2) where
+  coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
 
-instance Division_ (Curve1D units1) (WithNoInteriorZeros units2) (Curve1D (units1 ?/? units2)) where
+instance Division_ (Curve1D units1) (Nondegenerate units2) (Curve1D (units1 ?/? units2)) where
   (?/?) = VectorCurve.desingularizedQuotient
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Curve1D units1) (WithNoInteriorZeros units2) (Curve1D units3)
+  Division (Curve1D units1) (Nondegenerate units2) (Curve1D units3)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
@@ -472,9 +472,7 @@ sqrt_ :: Tolerance units => Curve1D (units ?*? units) -> Curve1D units
 sqrt_ curve =
   if Tolerance.using (Quantity.squared_ ?tolerance) (curve ~= zero)
     then zero
-    else
-      Curve1D.WithNoInteriorZeros.unwrap $
-        Curve1D.WithNoInteriorZeros.sqrt_ (WithNoInteriorZeros curve)
+    else Curve1D.Nondegenerate.curve (Curve1D.Nondegenerate.sqrt_ (Nondegenerate curve))
 
 -- | Compute the cube of a curve.
 cubed :: Curve1D Unitless -> Curve1D Unitless

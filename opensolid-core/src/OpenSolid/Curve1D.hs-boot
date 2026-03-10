@@ -3,7 +3,7 @@ module OpenSolid.Curve1D
   , Compiled
   , Zero
   , IsZero (IsZero)
-  , WithNoInteriorZeros (WithNoInteriorZeros)
+  , Nondegenerate (Nondegenerate)
   , WithNoZeros (WithNoZeros)
   , new
   , constant
@@ -54,11 +54,11 @@ instance HasUnits (WithNoZeros units) units
 
 instance Units.Coercion (WithNoZeros units1) (WithNoZeros units2)
 
-newtype WithNoInteriorZeros units = WithNoInteriorZeros (Curve1D units)
+newtype Nondegenerate units = Nondegenerate (Curve1D units)
 
-instance HasUnits (WithNoInteriorZeros units) units
+instance HasUnits (Nondegenerate units) units
 
-instance Units.Coercion (WithNoInteriorZeros units1) (WithNoInteriorZeros units2)
+instance Units.Coercion (Nondegenerate units1) (Nondegenerate units2)
 
 instance ApproximateEquality (Curve1D units) (Tolerance units)
 
@@ -86,7 +86,7 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Curve1D units1) (WithNoInteriorZeros units2) (Curve1D units3)
+  Division (Curve1D units1) (Nondegenerate units2) (Curve1D units3)
 
 new :: Compiled units -> Curve1D units -> Curve1D units
 constant :: Quantity units -> Curve1D units

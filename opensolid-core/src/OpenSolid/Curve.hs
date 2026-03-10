@@ -31,7 +31,7 @@ import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
 import OpenSolid.Curve.Search qualified as Search
 import OpenSolid.Curve.Segment (Segment)
-import {-# SOURCE #-} OpenSolid.Curve1D.WithNoInteriorZeros qualified as Curve1D.WithNoInteriorZeros
+import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -143,7 +143,7 @@ unsafeCurvatureVectorImpl_ ::
 unsafeCurvatureVectorImpl_ firstDerivative = do
   let dsdt = VectorCurve.unsafeMagnitude firstDerivative
   let tangent = VectorCurve.unsafeNormalize firstDerivative
-  VectorCurve.unerase (VectorCurve.derivative tangent / Curve1D.WithNoInteriorZeros.erase dsdt)
+  VectorCurve.unerase (VectorCurve.derivative tangent / Curve1D.Nondegenerate.erase dsdt)
 
 startPoint ::
   Exists dimension units space =>

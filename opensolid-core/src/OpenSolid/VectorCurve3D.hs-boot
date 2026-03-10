@@ -108,7 +108,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division
     (VectorCurve3D units1 space)
-    (Curve1D.WithNoInteriorZeros units2)
+    (Curve1D.Nondegenerate units2)
     (VectorCurve3D units3 space)
 
 instance
@@ -145,7 +145,7 @@ quotient_ ::
   Curve1D units2 ->
   Result DivisionByZero (VectorCurve3D (units1 ?/? units2) space)
 squaredMagnitude_ :: VectorCurve3D units space -> Curve1D (units ?*? units)
-unsafeMagnitude :: VectorCurve3D units space -> Curve1D.WithNoInteriorZeros units
+unsafeMagnitude :: VectorCurve3D units space -> Curve1D.Nondegenerate units
 unsafeNormalize :: VectorCurve3D units space -> VectorCurve3D Unitless space
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 transformBy :: Transform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space
