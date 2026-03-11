@@ -95,7 +95,8 @@ import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve qualified as VectorCurve
-import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
+import OpenSolid.VectorCurve2D.Nondegenerate (Nondegenerate)
+import OpenSolid.VectorCurve2D.Nondegenerate qualified as Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoZeros (WithNoZeros (WithNoZeros))
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
@@ -115,8 +116,6 @@ type Compiled units space =
     (Vector2D units space)
     (Interval Unitless)
     (VectorBounds2D units space)
-
-type Nondegenerate units space = VectorCurve.Nondegenerate 2 units space
 
 instance FFI (VectorCurve2D Unitless FFI.Space) where
   representation = FFI.classRepresentation "VectorCurve2D"
@@ -531,7 +530,7 @@ new givenCompiled givenDerivative = result
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
-      , nondegenerate = VectorCurve.Nondegenerate.unsafe result
+      , nondegenerate = Nondegenerate.unsafe result
       }
 
 recursive ::
@@ -753,10 +752,10 @@ zeros :: Tolerance units => VectorCurve2D units space -> Result VectorCurve.IsZe
 zeros = VectorCurve.zeros
 
 unsafeNormalize :: VectorCurve2D units space -> VectorCurve2D Unitless space
-unsafeNormalize curve = VectorCurve.Nondegenerate.normalize curve.nondegenerate
+unsafeNormalize curve = Nondegenerate.normalize curve.nondegenerate
 
 unsafeMagnitude :: VectorCurve2D units space -> Curve1D.Nondegenerate units
-unsafeMagnitude curve = VectorCurve.Nondegenerate.magnitude curve.nondegenerate
+unsafeMagnitude curve = Nondegenerate.magnitude curve.nondegenerate
 
 normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
 normalize = VectorCurve.normalize

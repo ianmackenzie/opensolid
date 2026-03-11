@@ -75,9 +75,10 @@ import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve qualified as VectorCurve
-import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
+import OpenSolid.VectorCurve3D.Nondegenerate (Nondegenerate)
+import OpenSolid.VectorCurve3D.Nondegenerate qualified as Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve3D.WithNoZeros (WithNoZeros (WithNoZeros))
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
@@ -95,8 +96,6 @@ type Compiled units space =
     (Vector3D units space)
     (Interval Unitless)
     (VectorBounds3D units space)
-
-type Nondegenerate units space = VectorCurve.Nondegenerate 3 units space
 
 instance HasUnits (VectorCurve3D units space) units
 
@@ -469,7 +468,7 @@ new givenCompiled givenDerivative = result
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
-      , nondegenerate = VectorCurve.Nondegenerate.unsafe result
+      , nondegenerate = Nondegenerate.unsafe result
       }
 
 recursive ::
@@ -632,7 +631,7 @@ instance
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 unsafeNormalize :: VectorCurve3D units space -> VectorCurve3D Unitless space
-unsafeNormalize curve = VectorCurve.Nondegenerate.normalize curve.nondegenerate
+unsafeNormalize curve = Nondegenerate.normalize curve.nondegenerate
 
 normalize :: Tolerance units => VectorCurve3D units space -> VectorCurve3D Unitless space
 normalize = VectorCurve.normalize
@@ -655,7 +654,7 @@ magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 magnitude = VectorCurve.magnitude
 
 unsafeMagnitude :: VectorCurve3D units space -> Curve1D.Nondegenerate units
-unsafeMagnitude curve = VectorCurve.Nondegenerate.magnitude curve.nondegenerate
+unsafeMagnitude curve = Nondegenerate.magnitude curve.nondegenerate
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros
