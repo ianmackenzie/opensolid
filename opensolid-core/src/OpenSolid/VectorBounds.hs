@@ -7,6 +7,7 @@ module OpenSolid.VectorBounds
   , magnitude
   , isResolved
   , areDistinct
+  , areIndependent
   )
 where
 
@@ -78,6 +79,8 @@ class
   squaredMagnitude_ :: VectorBounds dimension units space -> Interval (units ?*? units)
   magnitude :: VectorBounds dimension units space -> Interval units
   isResolved :: VectorBounds dimension units space -> Bool
+  areDistinct :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
+  areIndependent :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
 
 instance Exists 1 units Void where
   includes = Interval.includes
@@ -85,6 +88,8 @@ instance Exists 1 units Void where
   squaredMagnitude_ = Interval.squared_
   magnitude = Interval.abs
   isResolved = Interval.isResolved
+  areDistinct = Interval.areDistinct
+  areIndependent _ _ = False
 
 instance Exists 2 units space where
   includes = VectorBounds2D.includes
@@ -92,6 +97,8 @@ instance Exists 2 units space where
   squaredMagnitude_ = VectorBounds2D.squaredMagnitude_
   magnitude = VectorBounds2D.magnitude
   isResolved = VectorBounds2D.isResolved
+  areDistinct = VectorBounds2D.areDistinct
+  areIndependent = VectorBounds2D.areIndependent
 
 instance Exists 3 units space where
   includes = VectorBounds3D.includes
@@ -99,10 +106,5 @@ instance Exists 3 units space where
   squaredMagnitude_ = VectorBounds3D.squaredMagnitude_
   magnitude = VectorBounds3D.magnitude
   isResolved = VectorBounds3D.isResolved
-
-areDistinct ::
-  Exists dimension units space =>
-  VectorBounds dimension units space ->
-  VectorBounds dimension units space ->
-  Bool
-areDistinct first second = isResolved (second - first)
+  areDistinct = VectorBounds3D.areDistinct
+  areIndependent = VectorBounds3D.areIndependent

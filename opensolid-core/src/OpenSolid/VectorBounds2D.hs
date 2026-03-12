@@ -23,6 +23,8 @@ module OpenSolid.VectorBounds2D
   , maxSquaredMagnitude
   , maxSquaredMagnitude_
   , isResolved
+  , areDistinct
+  , areIndependent
   , direction
   , normalize
   , exclusion
@@ -208,6 +210,13 @@ maxSquaredMagnitude_ (VectorBounds2D (Interval minX maxX) (Interval minY maxY)) 
 
 isResolved :: VectorBounds2D units space -> Bool
 isResolved (VectorBounds2D x y) = Interval.isResolved x || Interval.isResolved y
+
+areDistinct :: VectorBounds2D units space -> VectorBounds2D units space -> Bool
+areDistinct (VectorBounds2D x1 y1) (VectorBounds2D x2 y2) =
+  Interval.areDistinct x1 x2 || Interval.areDistinct y1 y2
+
+areIndependent :: VectorBounds2D units space -> VectorBounds2D units space -> Bool
+areIndependent bounds1 bounds2 = Interval.isResolved (bounds1 `cross_` bounds2)
 
 direction :: VectorBounds2D units space -> DirectionBounds2D space
 direction vectorBounds = DirectionBounds2D.unsafe (normalize vectorBounds)

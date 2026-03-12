@@ -24,6 +24,8 @@ module OpenSolid.VectorBounds3D
   , maxSquaredMagnitude
   , maxSquaredMagnitude_
   , isResolved
+  , areDistinct
+  , areIndependent
   , direction
   , normalize
   , exclusion
@@ -273,6 +275,13 @@ maxSquaredMagnitude_ (VectorBounds3D x y z) = do
 isResolved :: VectorBounds3D units space -> Bool
 isResolved (VectorBounds3D x y z) =
   Interval.isResolved x || Interval.isResolved y || Interval.isResolved z
+
+areDistinct :: VectorBounds3D units space -> VectorBounds3D units space -> Bool
+areDistinct (VectorBounds3D x1 y1 z1) (VectorBounds3D x2 y2 z2) =
+  Interval.areDistinct x1 x2 || Interval.areDistinct y1 y2 || Interval.areDistinct z1 z2
+
+areIndependent :: VectorBounds3D units space -> VectorBounds3D units space -> Bool
+areIndependent bounds1 bounds2 = isResolved (bounds1 `cross_` bounds2)
 
 direction :: VectorBounds3D units space -> DirectionBounds3D space
 direction vectorBounds = DirectionBounds3D.unsafe (normalize vectorBounds)

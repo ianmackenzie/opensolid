@@ -2,6 +2,8 @@ module OpenSolid.VectorBounds2D
   ( VectorBounds2D
   , center
   , isResolved
+  , areDistinct
+  , areIndependent
   )
 where
 
@@ -11,3 +13,5 @@ import {-# SOURCE #-} OpenSolid.Vector2D (Vector2D)
 
 center :: VectorBounds2D units space -> Vector2D units space
 isResolved :: VectorBounds2D units space -> Bool
+areDistinct :: VectorBounds2D units space -> VectorBounds2D units space -> Bool
+areIndependent :: VectorBounds2D units space -> VectorBounds2D units space -> Bool
