@@ -33,13 +33,11 @@ module OpenSolid.VectorCurve2D
   , quotient
   , quotient_
   , magnitude
-  , unsafeMagnitude
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
   , isZero
   , zeros
-  , unsafeNormalize
   , normalize
   , direction
   , placeIn
@@ -754,12 +752,6 @@ isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
 zeros :: Tolerance units => VectorCurve2D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros
-
-unsafeNormalize :: VectorCurve2D units space -> VectorCurve2D Unitless space
-unsafeNormalize curve = Nondegenerate.normalize curve.nondegenerate
-
-unsafeMagnitude :: VectorCurve2D units space -> Curve1D.Nondegenerate units
-unsafeMagnitude curve = Nondegenerate.magnitude curve.nondegenerate
 
 normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
 normalize = VectorCurve.normalize

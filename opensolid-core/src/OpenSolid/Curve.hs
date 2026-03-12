@@ -49,6 +49,7 @@ import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
+import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
 type family Curve dimension units space = curve | curve -> dimension units space where
   Curve 2 units space = Curve2D units space
@@ -141,8 +142,9 @@ unsafeCurvatureVectorImpl_ ::
   VectorCurve dimension units space ->
   VectorCurve dimension (Unitless ?/? units) space
 unsafeCurvatureVectorImpl_ firstDerivative = do
-  let dsdt = VectorCurve.unsafeMagnitude firstDerivative
-  let tangent = VectorCurve.unsafeNormalize firstDerivative
+  let nondegenerateFirstDerivative = VectorCurve.unsafeNondegenerate firstDerivative
+  let dsdt = VectorCurve.Nondegenerate.magnitude nondegenerateFirstDerivative
+  let tangent = VectorCurve.Nondegenerate.normalize nondegenerateFirstDerivative
   VectorCurve.unerase (VectorCurve.derivative tangent / Curve1D.Nondegenerate.erase dsdt)
 
 startPoint ::

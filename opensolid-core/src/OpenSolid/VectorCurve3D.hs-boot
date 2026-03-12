@@ -14,8 +14,6 @@ module OpenSolid.VectorCurve3D
   , quotient
   , quotient_
   , squaredMagnitude_
-  , unsafeNormalize
-  , unsafeMagnitude
   , magnitude
   , transformBy
   , desingularized
@@ -148,8 +146,6 @@ quotient_ ::
   Curve1D units2 ->
   Result DivisionByZero (VectorCurve3D (units1 ?/? units2) space)
 squaredMagnitude_ :: VectorCurve3D units space -> Curve1D (units ?*? units)
-unsafeMagnitude :: VectorCurve3D units space -> Curve1D.Nondegenerate units
-unsafeNormalize :: VectorCurve3D units space -> VectorCurve3D Unitless space
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 transformBy :: Transform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space
 desingularized ::

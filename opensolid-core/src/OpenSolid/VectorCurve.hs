@@ -14,13 +14,11 @@ module OpenSolid.VectorCurve
   , derivative
   , squaredMagnitude_
   , squaredMagnitude
+  , unsafeNondegenerate
   , nondegenerate
   , magnitude
-  , unsafeMagnitude
   , normalize
-  , unsafeNormalize
   , direction
-  , unsafeDirection
   , zeros
   , desingularized
   , desingularize
@@ -46,6 +44,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -53,6 +52,7 @@ import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorCurve.Nondegenerate (Nondegenerate)
+import OpenSolid.VectorCurve.Nondegenerate qualified as Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -70,6 +70,7 @@ data IsZero = IsZero deriving (Eq, Show)
 
 class
   ( Vector.Exists dimension units space
+  , Nondegenerate.Exists dimension units space
   , Exists dimension Unitless space
   , HasUnits (VectorCurve dimension units space) units
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
@@ -121,8 +122,6 @@ class
   derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
   unsafeNondegenerate :: VectorCurve dimension units space -> Nondegenerate dimension units space
-  unsafeMagnitude :: VectorCurve dimension units space -> Curve1D.Nondegenerate units
-  unsafeNormalize :: VectorCurve dimension units space -> VectorCurve dimension Unitless space
   desingularized ::
     VectorCurve dimension units space ->
     VectorCurve dimension units space ->
@@ -139,18 +138,6 @@ instance Exists 1 units Void where
   desingularized = Curve1D.desingularized
   squaredMagnitude_ = Curve1D.squared_
   unsafeNondegenerate = Curve1D.Nondegenerate
-  unsafeMagnitude curve =
-    -- If a 1D curve has no interior zeros,
-    -- then it is either always non-negative or always non-positive,
-    -- and so its magnitude (absolute value) is either just the curve itself or its negation
-    Curve1D.Nondegenerate $
-      if evaluate curve 0.5 > Quantity.zero then curve else -curve
-  unsafeNormalize curve =
-    -- If a 1D curve has no interior zeros,
-    -- then it is either always non-negative or always non-positive,
-    -- and so the normalized version of that curve (the curve divided by its magnitude)
-    -- will be a constant equal to either positive or negative one
-    if evaluate curve 0.5 > Quantity.zero then constant 1.0 else constant -1.0
 
 instance Exists 2 units space where
   constant = VectorCurve2D.constant
@@ -160,8 +147,6 @@ instance Exists 2 units space where
   evaluateBounds = VectorCurve2D.evaluateBounds
   bezier = VectorCurve2D.bezier
   desingularized = VectorCurve2D.desingularized
-  unsafeMagnitude = VectorCurve2D.unsafeMagnitude
-  unsafeNormalize = VectorCurve2D.unsafeNormalize
   squaredMagnitude_ = VectorCurve2D.squaredMagnitude_
   unsafeNondegenerate = VectorCurve2D.unsafeNondegenerate
 
@@ -173,8 +158,6 @@ instance Exists 3 units space where
   evaluateBounds = VectorCurve3D.evaluateBounds
   bezier = VectorCurve3D.bezier
   desingularized = VectorCurve3D.desingularized
-  unsafeMagnitude = VectorCurve3D.unsafeMagnitude
-  unsafeNormalize = VectorCurve3D.unsafeNormalize
   squaredMagnitude_ = VectorCurve3D.squaredMagnitude_
   unsafeNondegenerate = VectorCurve3D.unsafeNondegenerate
 
@@ -202,20 +185,14 @@ normalize ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
   VectorCurve dimension units space ->
   VectorCurve dimension Unitless space
-normalize curve = if isZero curve then zero else unsafeNormalize curve
+normalize Zero = zero
+normalize (Nondegenerate curve) = Nondegenerate.normalize curve
 
 direction ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (DirectionCurve dimension space)
-direction vectorCurve =
-  if isZero vectorCurve then Error IsZero else Ok (unsafeDirection vectorCurve)
-
-unsafeDirection ::
-  (Exists dimension units space, DirectionCurve.Exists dimension space) =>
-  VectorCurve dimension units space ->
-  DirectionCurve dimension space
-unsafeDirection vectorCurve = DirectionCurve.unsafe (unsafeNormalize vectorCurve)
+direction vectorCurve = Result.map Nondegenerate.direction (nondegenerate vectorCurve)
 
 zeros ::
   (Exists dimension units space, Tolerance units) =>
@@ -309,8 +286,8 @@ magnitude ::
   (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Curve1D units
-magnitude curve =
-  if isZero curve then Curve1D.zero else Curve1D.Nondegenerate.curve (unsafeMagnitude curve)
+magnitude Zero = Curve1D.zero
+magnitude (Nondegenerate curve) = Curve1D.Nondegenerate.curve (Nondegenerate.magnitude curve)
 
 erase ::
   Exists dimension units space =>

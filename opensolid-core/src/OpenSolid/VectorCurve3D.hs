@@ -28,12 +28,10 @@ module OpenSolid.VectorCurve3D
   , quotient
   , quotient_
   , magnitude
-  , unsafeMagnitude
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
   , zeros
-  , unsafeNormalize
   , normalize
   , direction
   , placeIn
@@ -634,9 +632,6 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
-unsafeNormalize :: VectorCurve3D units space -> VectorCurve3D Unitless space
-unsafeNormalize curve = Nondegenerate.normalize curve.nondegenerate
-
 normalize :: Tolerance units => VectorCurve3D units space -> VectorCurve3D Unitless space
 normalize = VectorCurve.normalize
 
@@ -656,9 +651,6 @@ squaredMagnitude_ curve = do
 
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 magnitude = VectorCurve.magnitude
-
-unsafeMagnitude :: VectorCurve3D units space -> Curve1D.Nondegenerate units
-unsafeMagnitude curve = Nondegenerate.magnitude curve.nondegenerate
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros

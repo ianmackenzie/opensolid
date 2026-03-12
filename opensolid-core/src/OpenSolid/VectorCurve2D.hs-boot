@@ -12,8 +12,6 @@ module OpenSolid.VectorCurve2D
   , evaluate
   , evaluateBounds
   , squaredMagnitude_
-  , unsafeNormalize
-  , unsafeMagnitude
   , quotient
   , quotient_
   , transformBy
@@ -145,8 +143,6 @@ quotient_ ::
   Curve1D units2 ->
   Result DivisionByZero (VectorCurve2D (units1 ?/? units2) space)
 squaredMagnitude_ :: VectorCurve2D units space -> Curve1D (units ?*? units)
-unsafeNormalize :: VectorCurve2D units space -> VectorCurve2D Unitless space
-unsafeMagnitude :: VectorCurve2D units space -> Curve1D.Nondegenerate units
 transformBy ::
   Transform2D tag translationUnits space ->
   VectorCurve2D units space ->
