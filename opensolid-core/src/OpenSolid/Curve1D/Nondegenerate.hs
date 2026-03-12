@@ -1,5 +1,7 @@
 module OpenSolid.Curve1D.Nondegenerate
   ( curve
+  , squared
+  , squared_
   , sqrt
   , sqrt_
   , erase
@@ -18,6 +20,12 @@ import OpenSolid.Units qualified as Units
 {-# INLINE curve #-}
 curve :: Nondegenerate units -> Curve1D units
 curve (Nondegenerate c) = c
+
+squared_ :: Nondegenerate units -> Nondegenerate (units ?*? units)
+squared_ (Nondegenerate givenCurve) = Nondegenerate (Curve1D.squared_ givenCurve)
+
+squared :: Units.Squared units1 units2 => Nondegenerate units1 -> Nondegenerate units2
+squared = Units.specialize . squared_
 
 sqrt_ :: Nondegenerate (units ?*? units) -> Nondegenerate units
 sqrt_ (Nondegenerate givenCurve) = Nondegenerate do
