@@ -7,6 +7,7 @@ module OpenSolid.VectorCurve3D
   , bezier
   , compiled
   , derivative
+  , unsafeNondegenerate
   , isZero
   , evaluate
   , evaluateBounds
@@ -31,6 +32,7 @@ import OpenSolid.Primitives (Plane3D, Transform3D, Vector3D, VectorBounds3D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
+import {-# SOURCE #-} OpenSolid.VectorCurve3D.Nondegenerate (Nondegenerate)
 
 type role VectorCurve3D nominal nominal
 
@@ -131,6 +133,7 @@ on :: Plane3D global local -> VectorCurve2D units local -> VectorCurve3D units g
 bezier :: NonEmpty (Vector3D units space) -> VectorCurve3D units space
 compiled :: VectorCurve3D units space -> Compiled units space
 derivative :: VectorCurve3D units space -> VectorCurve3D units space
+unsafeNondegenerate :: VectorCurve3D units space -> Nondegenerate units space
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
 evaluate :: VectorCurve3D units space -> Number -> Vector3D units space
 evaluateBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space

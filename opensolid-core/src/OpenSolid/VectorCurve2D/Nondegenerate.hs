@@ -10,8 +10,8 @@ module OpenSolid.VectorCurve2D.Nondegenerate
   )
 where
 
-import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
+import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
+import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.Prelude

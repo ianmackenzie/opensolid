@@ -22,8 +22,8 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
-import {-# SOURCE #-} OpenSolid.VectorCurve2D.Nondegenerate qualified as VectorCurve2D.Nondegenerate
-import {-# SOURCE #-} OpenSolid.VectorCurve3D.Nondegenerate qualified as VectorCurve3D.Nondegenerate
+import OpenSolid.VectorCurve2D.Nondegenerate qualified as VectorCurve2D.Nondegenerate
+import OpenSolid.VectorCurve3D.Nondegenerate qualified as VectorCurve3D.Nondegenerate
 
 type family
   Nondegenerate dimension units space =

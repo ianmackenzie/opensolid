@@ -9,6 +9,7 @@ module OpenSolid.VectorCurve2D
   , recursive
   , compiled
   , derivative
+  , unsafeNondegenerate
   , nondegenerate
   , startValue
   , endValue
@@ -494,11 +495,14 @@ compiled = (.compiled)
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
 derivative = (.derivative)
 
+unsafeNondegenerate :: VectorCurve2D units space -> Nondegenerate units space
+unsafeNondegenerate = (.nondegenerate)
+
 nondegenerate ::
   Tolerance units =>
   VectorCurve2D units space ->
   Result VectorCurve.IsZero (Nondegenerate units space)
-nondegenerate curve = if isZero curve then Error VectorCurve.IsZero else Ok curve.nondegenerate
+nondegenerate = VectorCurve.nondegenerate
 
 transformBy ::
   Transform2D tag translationUnits space ->

@@ -9,6 +9,7 @@ module OpenSolid.VectorCurve3D
   , compiled
   , isZero
   , derivative
+  , unsafeNondegenerate
   , nondegenerate
   , startValue
   , endValue
@@ -439,11 +440,14 @@ compiled = (.compiled)
 derivative :: VectorCurve3D units space -> VectorCurve3D units space
 derivative = (.derivative)
 
+unsafeNondegenerate :: VectorCurve3D units space -> Nondegenerate units space
+unsafeNondegenerate = (.nondegenerate)
+
 nondegenerate ::
   Tolerance units =>
   VectorCurve3D units space ->
   Result VectorCurve.IsZero (Nondegenerate units space)
-nondegenerate curve = if isZero curve then Error VectorCurve.IsZero else Ok curve.nondegenerate
+nondegenerate = VectorCurve.nondegenerate
 
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance

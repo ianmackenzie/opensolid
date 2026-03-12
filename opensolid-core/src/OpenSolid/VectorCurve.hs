@@ -12,6 +12,7 @@ module OpenSolid.VectorCurve
   , derivative
   , squaredMagnitude_
   , squaredMagnitude
+  , nondegenerate
   , magnitude
   , unsafeMagnitude
   , normalize
@@ -117,6 +118,7 @@ class
   evaluateBounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
   derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
+  unsafeNondegenerate :: VectorCurve dimension units space -> Nondegenerate dimension units space
   unsafeMagnitude :: VectorCurve dimension units space -> Curve1D.Nondegenerate units
   unsafeNormalize :: VectorCurve dimension units space -> VectorCurve dimension Unitless space
   desingularized ::
@@ -134,6 +136,7 @@ instance Exists 1 units Void where
   bezier = Curve1D.bezier
   desingularized = Curve1D.desingularized
   squaredMagnitude_ = Curve1D.squared_
+  unsafeNondegenerate = Curve1D.Nondegenerate
   unsafeMagnitude curve =
     -- If a 1D curve has no interior zeros,
     -- then it is either always non-negative or always non-positive,
@@ -158,6 +161,7 @@ instance Exists 2 units space where
   unsafeMagnitude = VectorCurve2D.unsafeMagnitude
   unsafeNormalize = VectorCurve2D.unsafeNormalize
   squaredMagnitude_ = VectorCurve2D.squaredMagnitude_
+  unsafeNondegenerate = VectorCurve2D.unsafeNondegenerate
 
 instance Exists 3 units space where
   constant = VectorCurve3D.constant
@@ -170,9 +174,16 @@ instance Exists 3 units space where
   unsafeMagnitude = VectorCurve3D.unsafeMagnitude
   unsafeNormalize = VectorCurve3D.unsafeNormalize
   squaredMagnitude_ = VectorCurve3D.squaredMagnitude_
+  unsafeNondegenerate = VectorCurve3D.unsafeNondegenerate
 
 zero :: Exists dimension units space => VectorCurve dimension units space
 zero = constant Vector.zero
+
+nondegenerate ::
+  (Exists dimension units space, Tolerance units) =>
+  VectorCurve dimension units space ->
+  Result IsZero (Nondegenerate dimension units space)
+nondegenerate curve = if isZero curve then Error IsZero else Ok (unsafeNondegenerate curve)
 
 normalize ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>

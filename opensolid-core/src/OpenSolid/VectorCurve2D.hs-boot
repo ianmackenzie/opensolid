@@ -1,11 +1,13 @@
 module OpenSolid.VectorCurve2D
   ( VectorCurve2D
   , Compiled
+  , Nondegenerate
   , constant
   , new
   , bezier
   , compiled
   , derivative
+  , unsafeNondegenerate
   , isZero
   , evaluate
   , evaluateBounds
@@ -28,6 +30,7 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives (Transform2D, Vector2D, VectorBounds2D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import {-# SOURCE #-} OpenSolid.VectorCurve2D.Nondegenerate (Nondegenerate)
 
 type role VectorCurve2D nominal nominal
 
@@ -127,6 +130,7 @@ new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units 
 bezier :: NonEmpty (Vector2D units space) -> VectorCurve2D units space
 compiled :: VectorCurve2D units space -> Compiled units space
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
+unsafeNondegenerate :: VectorCurve2D units space -> Nondegenerate units space
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
 evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
 evaluateBounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
