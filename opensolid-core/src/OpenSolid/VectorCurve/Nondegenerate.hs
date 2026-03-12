@@ -1,7 +1,5 @@
 module OpenSolid.VectorCurve.Nondegenerate
   ( Nondegenerate
-  , unsafe
-  , unsafe1D
   , curve
   , magnitude
   , normalize
@@ -12,9 +10,9 @@ module OpenSolid.VectorCurve.Nondegenerate
 where
 
 import Data.Void (Void)
-import OpenSolid.Curve1D (Curve1D)
-import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
+import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
+import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
+import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Prelude
@@ -22,79 +20,67 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Sign qualified as Sign
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.VectorCurve (VectorCurve)
-import OpenSolid.VectorCurve qualified as VectorCurve
+import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
+import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
+import {-# SOURCE #-} OpenSolid.VectorCurve2D.Nondegenerate qualified as VectorCurve2D.Nondegenerate
+import {-# SOURCE #-} OpenSolid.VectorCurve3D.Nondegenerate qualified as VectorCurve3D.Nondegenerate
 
-data Nondegenerate dimension units space = Nondegenerate
-  { curve :: VectorCurve dimension units space
-  , magnitude :: ~(Curve1D.Nondegenerate units)
-  , normalized :: ~(VectorCurve dimension Unitless space)
-  }
-
-instance HasUnits (Nondegenerate dimension units space) units
-
-instance
-  ( VectorCurve.Exists dimension1 units1 space1
-  , VectorCurve.Exists dimension2 units2 space2
-  , dimension1 ~ dimension2
-  , space1 ~ space2
-  ) =>
-  Units.Coercion
-    (Nondegenerate dimension1 units1 space1)
-    (Nondegenerate dimension2 units2 space2)
+type family
+  Nondegenerate dimension units space =
+    nondegenerate | nondegenerate -> dimension units space
   where
-  coerce nondegenerate =
-    Nondegenerate
-      { curve = VectorCurve.coerce nondegenerate.curve
-      , magnitude = Units.coerce nondegenerate.magnitude
-      , normalized = nondegenerate.normalized
-      }
+  Nondegenerate 1 units Void = Curve1D.Nondegenerate units
+  Nondegenerate 2 units space = VectorCurve2D.Nondegenerate.Nondegenerate units space
+  Nondegenerate 3 units space = VectorCurve3D.Nondegenerate.Nondegenerate units space
 
-unsafe ::
-  VectorCurve.Exists dimension units space =>
-  VectorCurve dimension units space -> Nondegenerate dimension units space
-unsafe givenCurve = do
-  let curveSquaredMagnitude_ = Curve1D.Nondegenerate (VectorCurve.squaredMagnitude_ givenCurve)
-  let curveMagnitude = Curve1D.Nondegenerate.sqrt_ curveSquaredMagnitude_
-  Nondegenerate
-    { curve = givenCurve
-    , magnitude = curveMagnitude
-    , normalized = givenCurve / curveMagnitude
-    }
+class
+  ( HasUnits (Nondegenerate dimension units space) units
+  , Units.Coercion (Nondegenerate dimension units space) (Nondegenerate dimension Unitless space)
+  , Units.Coercion (Nondegenerate dimension Unitless space) (Nondegenerate dimension units space)
+  ) =>
+  Exists dimension units space
+  where
+  curve :: Nondegenerate dimension units space -> VectorCurve dimension units space
+  squaredMagnitude_ :: Nondegenerate dimension units space -> Curve1D.Nondegenerate (units ?*? units)
+  magnitude :: Nondegenerate dimension units space -> Curve1D.Nondegenerate units
+  normalize :: Nondegenerate dimension units space -> VectorCurve dimension Unitless space
 
-unsafe1D :: Curve1D units -> Nondegenerate 1 units Void
-unsafe1D givenCurve = do
-  let curveSign = Quantity.sign (Curve1D.evaluate givenCurve 0.5)
-  Nondegenerate
-    { curve = givenCurve
-    , magnitude = Curve1D.Nondegenerate (givenCurve * curveSign)
-    , normalized = Curve1D.constant (Sign.value curveSign)
-    }
+nondegenerateSign1D :: Curve1D units -> Sign
+nondegenerateSign1D givenCurve = Quantity.sign (Curve1D.evaluate givenCurve 0.5)
 
-curve :: Nondegenerate dimension units space -> VectorCurve dimension units space
-curve = (.curve)
+instance Exists 1 units Void where
+  curve = Curve1D.Nondegenerate.curve
+  squaredMagnitude_ = Curve1D.Nondegenerate.squared_
+  magnitude (Curve1D.Nondegenerate givenCurve) =
+    Curve1D.Nondegenerate (nondegenerateSign1D givenCurve * givenCurve)
+  normalize (Curve1D.Nondegenerate givenCurve) =
+    Curve1D.constant (Sign.value (nondegenerateSign1D givenCurve))
 
-magnitude :: Nondegenerate dimension units space -> Curve1D.Nondegenerate units
-magnitude = (.magnitude)
+instance Exists 2 units space where
+  curve = VectorCurve2D.Nondegenerate.curve
+  squaredMagnitude_ = VectorCurve2D.Nondegenerate.squaredMagnitude_
+  magnitude = VectorCurve2D.Nondegenerate.magnitude
+  normalize = VectorCurve2D.Nondegenerate.normalize
 
-normalize :: Nondegenerate dimension units space -> VectorCurve dimension Unitless space
-normalize = (.normalized)
-
-squaredMagnitude_ ::
-  VectorCurve.Exists dimension units space =>
-  Nondegenerate dimension units space ->
-  Curve1D.Nondegenerate (units ?*? units)
-squaredMagnitude_ nondegenerate =
-  Curve1D.Nondegenerate (VectorCurve.squaredMagnitude_ nondegenerate.curve)
+instance Exists 3 units space where
+  curve = VectorCurve3D.Nondegenerate.curve
+  squaredMagnitude_ = VectorCurve3D.Nondegenerate.squaredMagnitude_
+  magnitude = VectorCurve3D.Nondegenerate.magnitude
+  normalize = VectorCurve3D.Nondegenerate.normalize
 
 squaredMagnitude ::
-  (VectorCurve.Exists dimension units1 space, Units.Squared units1 units2) =>
+  ( Exists dimension units1 space
+  , VectorCurve.Exists dimension units1 space
+  , Units.Squared units1 units2
+  ) =>
   Nondegenerate dimension units1 space ->
   Curve1D.Nondegenerate units2
 squaredMagnitude = Units.specialize . squaredMagnitude_
 
 direction ::
-  DirectionCurve.Exists dimension space =>
+  ( Exists dimension units space
+  , DirectionCurve.Exists dimension space
+  ) =>
   Nondegenerate dimension units space ->
   DirectionCurve dimension space
-direction nondegenerate = DirectionCurve.unsafe nondegenerate.normalized
+direction = DirectionCurve.unsafe . normalize
