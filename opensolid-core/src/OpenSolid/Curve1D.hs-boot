@@ -64,6 +64,10 @@ instance ApproximateEquality (Curve1D units) (Tolerance units)
 
 instance Negation (Curve1D units)
 
+instance Multiplication Sign (Curve1D units) (Curve1D units)
+
+instance Multiplication (Curve1D units) Sign (Curve1D units)
+
 instance units1 ~ units2 => Addition (Curve1D units1) (Curve1D units2) (Curve1D units1)
 
 instance units1 ~ units2 => Subtraction (Curve1D units1) (Curve1D units2) (Curve1D units1)
