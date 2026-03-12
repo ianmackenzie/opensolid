@@ -3,6 +3,8 @@ module OpenSolid.VectorCurve
   , Exists
   , Nondegenerate
   , IsZero (IsZero)
+  , pattern Zero
+  , pattern Nondegenerate
   , isZero
   , constant
   , zero
@@ -175,6 +177,17 @@ instance Exists 3 units space where
   unsafeNormalize = VectorCurve3D.unsafeNormalize
   squaredMagnitude_ = VectorCurve3D.squaredMagnitude_
   unsafeNondegenerate = VectorCurve3D.unsafeNondegenerate
+
+{-# COMPLETE Zero, Nondegenerate #-}
+
+pattern Zero :: (Exists dimension units space, Tolerance units) => VectorCurve dimension units space
+pattern Zero <- (nondegenerate -> Error IsZero)
+
+pattern Nondegenerate ::
+  (Exists dimension units space, Tolerance units) =>
+  Nondegenerate dimension units space ->
+  VectorCurve dimension units space
+pattern Nondegenerate nondegenerateCurve <- (nondegenerate -> Ok nondegenerateCurve)
 
 zero :: Exists dimension units space => VectorCurve dimension units space
 zero = constant Vector.zero
