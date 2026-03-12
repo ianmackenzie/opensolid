@@ -16,6 +16,8 @@ Add ParameterInterval module and move 'includes' and 'isInterior' functions ther
 Move WithNoZeros and WithNoInteriorZeros into generic VectorCurve module?
 - then could potentially have e.g. VectorCurve.WithNoInteriorZeros.direction instead of VectorCurve.unsafeDirection
 
+Have Nondegenerate.normalize return a NonZero value
+
 Instead of Curve.SearchTree, have Curve.Nondegenerate?
 - include tangent direction, curvature and search tree
 - Curve.Nondegenerate value could include a VectorCurve.WithNoInteriorZeros...
