@@ -1,5 +1,6 @@
 module OpenSolid.VectorCurve.Nondegenerate
   ( Nondegenerate
+  , Exists
   , curve
   , magnitude
   , normalize
