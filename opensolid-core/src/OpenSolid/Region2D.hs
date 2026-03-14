@@ -549,9 +549,7 @@ loopIsInside outer inner = do
     Just Negative -> False
 
 bounds :: Region2D units space -> Bounds2D units space
-bounds region = do
-  let outerEdgeBoundingBoxes = NonEmpty.map Curve2D.overallBounds (outerLoop region)
-  NonEmpty.reduce Bounds2D.aggregate2 outerEdgeBoundingBoxes
+bounds region = Bounds2D.aggregateOf Curve2D.overallBounds (outerLoop region)
 
 area :: Units.Squared units1 units2 => Region2D units1 space -> Estimate units2
 area region = do
