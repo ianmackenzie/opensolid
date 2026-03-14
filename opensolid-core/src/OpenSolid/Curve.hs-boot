@@ -7,6 +7,11 @@ module OpenSolid.Curve
   , startPoint
   , endPoint
   , derivative
+  , derivativeValue
+  , derivativeBounds
+  , secondDerivative
+  , secondDerivativeValue
+  , secondDerivativeBounds
   , tangentDirection
   , curvatureVector_
   )
@@ -20,6 +25,8 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
+import OpenSolid.Vector (Vector)
+import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
@@ -53,6 +60,30 @@ derivative ::
   Exists dimension units space =>
   Curve dimension units space ->
   VectorCurve dimension units space
+derivativeValue ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Number ->
+  Vector dimension units space
+derivativeBounds ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Interval Unitless ->
+  VectorBounds dimension units space
+secondDerivative ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  VectorCurve dimension units space
+secondDerivativeValue ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Number ->
+  Vector dimension units space
+secondDerivativeBounds ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Interval Unitless ->
+  VectorBounds dimension units space
 tangentDirection ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->

@@ -15,6 +15,10 @@ module OpenSolid.Curve1D
   , recursive
   , zero
   , constant
+  , derivativeValue
+  , derivativeBounds
+  , secondDerivativeValue
+  , secondDerivativeBounds
   , desingularize
   , desingularized
   , t
@@ -372,6 +376,22 @@ startValue curve = evaluate curve 0.0
 endValue :: Curve1D units -> Quantity units
 endValue curve = evaluate curve 1.0
 
+{-# INLINE derivativeValue #-}
+derivativeValue :: Curve1D units -> Number -> Quantity units
+derivativeValue = VectorCurve.derivativeValue
+
+{-# INLINE derivativeBounds #-}
+derivativeBounds :: Curve1D units -> Interval Unitless -> Interval units
+derivativeBounds = VectorCurve.derivativeBounds
+
+{-# INLINE secondDerivativeValue #-}
+secondDerivativeValue :: Curve1D units -> Number -> Quantity units
+secondDerivativeValue = VectorCurve.secondDerivativeValue
+
+{-# INLINE secondDerivativeBounds #-}
+secondDerivativeBounds :: Curve1D units -> Interval Unitless -> Interval units
+secondDerivativeBounds = VectorCurve.secondDerivativeBounds
+
 desingularize ::
   Maybe (Quantity units, Quantity units) ->
   Curve1D units ->
@@ -491,28 +511,27 @@ cos curve =
     (negate (sin curve) * (curve.derivative / Angle.radian))
 
 integrate :: Curve1D units -> Estimate units
-integrate curve = Estimate.new (Integral curve curve.derivative Interval.unit)
+integrate curve = Estimate.new (Integral curve Interval.unit)
 
-data Integral units = Integral (Curve1D units) (Curve1D units) (Interval Unitless)
+data Integral units = Integral (Curve1D units) (Interval Unitless)
 
 instance Estimate.Interface (Integral units) units where
-  boundsImpl (Integral curve curveDerivative domain) = do
+  boundsImpl (Integral curve domain) = do
     let dx = Interval.width domain
-    let derivativeBounds = bounds curveDerivative domain
     let estimate0 = dx * bounds curve domain
     let y1 = evaluate curve (Interval.lower domain)
     let y2 = evaluate curve (Interval.upper domain)
-    let m = Interval.width derivativeBounds
+    let m = Interval.width (derivativeBounds curve domain)
     let error1 = 0.125 * m * dx * dx
     let estimate1 = dx * Quantity.midpoint y1 y2 + Interval -error1 error1
     case Interval.intersection estimate0 estimate1 of
       Just intersection -> intersection
       Nothing -> estimate0 -- Shouldn't happen if bounds are correct
 
-  refineImpl (Integral curve curveDerivative domain) = do
+  refineImpl (Integral curve domain) = do
     let (leftDomain, rightDomain) = Interval.bisect domain
-    let leftIntegral = Integral curve curveDerivative leftDomain
-    let rightIntegral = Integral curve curveDerivative rightDomain
+    let leftIntegral = Integral curve leftDomain
+    let rightIntegral = Integral curve rightDomain
     Estimate.new leftIntegral + Estimate.new rightIntegral
 
 singularityTolerance :: Curve1D units -> Quantity units
@@ -564,8 +583,8 @@ zeros curve
   | curve ~= zero = Error IsZero
   | otherwise = do
       let derivatives = Stream.iterate (.derivative) curve
-      let derivativeBounds tBounds = Stream.map (\f -> bounds f tBounds) derivatives
-      let cache = Solve1D.init derivativeBounds
+      let derivativeBoundsStream tBounds = Stream.map (\f -> bounds f tBounds) derivatives
+      let cache = Solve1D.init derivativeBoundsStream
       case Solve1D.search (findZeros derivatives) cache of
         Ok foundZeros -> Ok (List.sortBy (.location) foundZeros)
         Error Solve1D.InfiniteRecursion -> throw HigherOrderZero
@@ -577,9 +596,9 @@ findZeros ::
   Stream (Interval units) ->
   Solve1D.Exclusions exclusions ->
   Solve1D.Action exclusions Zero
-findZeros derivatives subdomain derivativeBounds exclusions
+findZeros derivatives subdomain derivativeBoundsStream exclusions
   -- Skip the subdomain entirely if the curve itself is non-zero everywhere
-  | not (Stream.head derivativeBounds `intersects` Quantity.zero) = Solve1D.pass
+  | not (Stream.head derivativeBoundsStream `intersects` Quantity.zero) = Solve1D.pass
   -- Optimization heuristic: bisect down to small subdomains first,
   -- to quickly eliminate most of the curve based on simple value bounds
   -- before attempting more complex/sophisticated solving
@@ -587,7 +606,7 @@ findZeros derivatives subdomain derivativeBounds exclusions
   | otherwise = case exclusions of
       Solve1D.SomeExclusions -> Solve1D.recurse
       Solve1D.NoExclusions ->
-        case findZerosOrder 0 derivatives subdomain derivativeBounds of
+        case findZerosOrder 0 derivatives subdomain derivativeBoundsStream of
           Unresolved -> Solve1D.recurse
           Resolved [] -> Solve1D.pass
           Resolved (NonEmpty subdomainZeros) -> do
@@ -610,16 +629,16 @@ findZerosOrder ::
   Domain1D ->
   Stream (Interval units) ->
   Fuzzy (List (Number, Solve1D.Neighborhood units))
-findZerosOrder k derivatives subdomain derivativeBounds
+findZerosOrder k derivatives subdomain derivativeBoundsStream
   -- A derivative is resolved, so it has no zeros
   -- (note that if k == 0, we already checked for the curve being non-zero in findZeros above)
-  | k > 0 && Interval.isResolved (Stream.head derivativeBounds) = Resolved []
+  | k > 0 && Interval.isResolved (Stream.head derivativeBoundsStream) = Resolved []
   -- We've exceeded the maximum zero order without finding a non-zero derivative
   | k > maxZeroOrder = Unresolved
   -- Otherwise, find higher-order zeros and then search in between them
   | otherwise = do
       let higherDerivatives = Stream.tail derivatives
-      let higherDerivativeBounds = Stream.tail derivativeBounds
+      let higherDerivativeBounds = Stream.tail derivativeBoundsStream
       let currentDerivative = Stream.head derivatives
       let nextDerivative = Stream.head higherDerivatives
       let tBounds = Domain1D.bounds subdomain

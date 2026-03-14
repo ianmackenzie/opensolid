@@ -12,6 +12,11 @@ module OpenSolid.VectorCurve
   , evaluate
   , bounds
   , derivative
+  , secondDerivative
+  , derivativeValue
+  , derivativeBounds
+  , secondDerivativeValue
+  , secondDerivativeBounds
   , squaredMagnitude_
   , squaredMagnitude
   , unsafeNondegenerate
@@ -180,6 +185,40 @@ nondegenerate ::
   VectorCurve dimension units space ->
   Result IsZero (Nondegenerate dimension units space)
 nondegenerate curve = if isZero curve then Error IsZero else Ok (unsafeNondegenerate curve)
+
+secondDerivative ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  VectorCurve dimension units space
+secondDerivative = derivative . derivative
+
+derivativeValue ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  Number ->
+  Vector dimension units space
+derivativeValue curve tValue = evaluate (derivative curve) tValue
+
+derivativeBounds ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  Interval Unitless ->
+  VectorBounds dimension units space
+derivativeBounds curve tBounds = bounds (derivative curve) tBounds
+
+secondDerivativeValue ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  Number ->
+  Vector dimension units space
+secondDerivativeValue curve tValue = evaluate (secondDerivative curve) tValue
+
+secondDerivativeBounds ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  Interval Unitless ->
+  VectorBounds dimension units space
+secondDerivativeBounds curve tBounds = bounds (secondDerivative curve) tBounds
 
 normalize ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>

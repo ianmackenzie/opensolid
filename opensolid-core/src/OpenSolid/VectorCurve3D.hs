@@ -15,6 +15,10 @@ module OpenSolid.VectorCurve3D
   , endValue
   , evaluate
   , bounds
+  , derivativeValue
+  , derivativeBounds
+  , secondDerivativeValue
+  , secondDerivativeBounds
   , zero
   , constant
   , interpolateFrom
@@ -566,6 +570,25 @@ evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 bounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
+
+{-# INLINE derivativeValue #-}
+derivativeValue :: VectorCurve3D units space -> Number -> Vector3D units space
+derivativeValue = VectorCurve.derivativeValue
+
+{-# INLINE derivativeBounds #-}
+derivativeBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
+derivativeBounds = VectorCurve.derivativeBounds
+
+{-# INLINE secondDerivativeValue #-}
+secondDerivativeValue :: VectorCurve3D units space -> Number -> Vector3D units space
+secondDerivativeValue = VectorCurve.secondDerivativeValue
+
+{-# INLINE secondDerivativeBounds #-}
+secondDerivativeBounds ::
+  VectorCurve3D units space ->
+  Interval Unitless ->
+  VectorBounds3D units space
+secondDerivativeBounds = VectorCurve.secondDerivativeBounds
 
 reverse :: VectorCurve3D units space -> VectorCurve3D units space
 reverse curve = curve . (1.0 - Curve1D.t)

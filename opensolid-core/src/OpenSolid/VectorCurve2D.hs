@@ -15,6 +15,10 @@ module OpenSolid.VectorCurve2D
   , endValue
   , evaluate
   , bounds
+  , derivativeValue
+  , derivativeBounds
+  , secondDerivativeValue
+  , secondDerivativeBounds
   , xComponent
   , yComponent
   , components
@@ -639,6 +643,25 @@ evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
 bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
+
+{-# INLINE derivativeValue #-}
+derivativeValue :: VectorCurve2D units space -> Number -> Vector2D units space
+derivativeValue = VectorCurve.derivativeValue
+
+{-# INLINE derivativeBounds #-}
+derivativeBounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
+derivativeBounds = VectorCurve.derivativeBounds
+
+{-# INLINE secondDerivativeValue #-}
+secondDerivativeValue :: VectorCurve2D units space -> Number -> Vector2D units space
+secondDerivativeValue = VectorCurve.secondDerivativeValue
+
+{-# INLINE secondDerivativeBounds #-}
+secondDerivativeBounds ::
+  VectorCurve2D units space ->
+  Interval Unitless ->
+  VectorBounds2D units space
+secondDerivativeBounds = VectorCurve.secondDerivativeBounds
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xComponent :: VectorCurve2D units space -> Curve1D units

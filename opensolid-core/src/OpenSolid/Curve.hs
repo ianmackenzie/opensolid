@@ -11,6 +11,10 @@ module OpenSolid.Curve
   , startPoint
   , endPoint
   , secondDerivative
+  , derivativeValue
+  , derivativeBounds
+  , secondDerivativeValue
+  , secondDerivativeBounds
   , isPoint
   , tangentDirection
   , curvatureVector_
@@ -45,7 +49,9 @@ import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
+import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
@@ -158,6 +164,34 @@ endPoint ::
   Curve dimension units space ->
   Point dimension units space
 endPoint curve = evaluate curve 1.0
+
+derivativeValue ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Number ->
+  Vector dimension units space
+derivativeValue curve tValue = VectorCurve.evaluate (derivative curve) tValue
+
+derivativeBounds ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Interval Unitless ->
+  VectorBounds dimension units space
+derivativeBounds curve tBounds = VectorCurve.bounds (derivative curve) tBounds
+
+secondDerivativeValue ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Number ->
+  Vector dimension units space
+secondDerivativeValue curve tValue = VectorCurve.evaluate (secondDerivative curve) tValue
+
+secondDerivativeBounds ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Interval Unitless ->
+  VectorBounds dimension units space
+secondDerivativeBounds curve tBounds = VectorCurve.bounds (secondDerivative curve) tBounds
 
 findPoint ::
   (Exists dimension units space, Tolerance units) =>

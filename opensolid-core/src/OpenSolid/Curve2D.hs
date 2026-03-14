@@ -23,6 +23,10 @@ module OpenSolid.Curve2D
   , quadraticBezier
   , cubicBezier
   , hermite
+  , derivativeValue
+  , derivativeBounds
+  , secondDerivativeValue
+  , secondDerivativeBounds
   , desingularize
   , desingularized
   , evaluate
@@ -616,6 +620,34 @@ hermite ::
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
+{-# INLINE derivativeValue #-}
+derivativeValue ::
+  Curve2D units space ->
+  Number ->
+  Vector2D units space
+derivativeValue = Curve.derivativeValue
+
+{-# INLINE derivativeBounds #-}
+derivativeBounds ::
+  Curve2D units space ->
+  Interval Unitless ->
+  VectorBounds2D units space
+derivativeBounds = Curve.derivativeBounds
+
+{-# INLINE secondDerivativeValue #-}
+secondDerivativeValue ::
+  Curve2D units space ->
+  Number ->
+  Vector2D units space
+secondDerivativeValue = Curve.secondDerivativeValue
+
+{-# INLINE secondDerivativeBounds #-}
+secondDerivativeBounds ::
+  Curve2D units space ->
+  Interval Unitless ->
+  VectorBounds2D units space
+secondDerivativeBounds = Curve.secondDerivativeBounds
+
 desingularize ::
   Maybe (Point2D units space, Vector2D units space) ->
   Curve2D units space ->
@@ -838,22 +870,21 @@ signature ::
   (Quantity units, Quantity units)
 signature orientation curve tValue radius = do
   let local vector = Vector2D.relativeToOrientation orientation vector
-  let curveFirstDerivative = derivative curve
-  let curveSecondDerivative = secondDerivative curve
-  let firstDerivativeValue = VectorCurve2D.evaluate curveFirstDerivative tValue
-  let secondDerivativeValue = VectorCurve2D.evaluate curveSecondDerivative tValue
-  let Vector2D x' y' = local firstDerivativeValue
-  let Vector2D x'' y'' = local secondDerivativeValue
+  let Vector2D x' y' = local (derivativeValue curve tValue)
+  let Vector2D x'' y'' = local (secondDerivativeValue curve tValue)
   let dydx = if x' != Quantity.zero then y' / x' else y'' / x''
   let firstOrder = dydx * radius
   let d2ydx2 =
         if x' != Quantity.zero
           then (y'' ?*? x' - y' ?*? x'') ?/? (x' ?*? x' ?*? x')
           else do
-            let curveThirdDerivative = VectorCurve2D.derivative curveSecondDerivative
-            let curveFourthDerivative = VectorCurve2D.derivative curveThirdDerivative
-            let fourthDerivativeValue = VectorCurve2D.evaluate curveFourthDerivative tValue
-            let Vector2D x'''' y'''' = local fourthDerivativeValue
+            let fourthDerivative =
+                  curve
+                    & derivative
+                    & VectorCurve2D.derivative
+                    & VectorCurve2D.derivative
+                    & VectorCurve2D.derivative
+            let Vector2D x'''' y'''' = local (VectorCurve2D.evaluate fourthDerivative tValue)
             (y'''' ?*? x'' - y'' ?*? x'''') ?/? (x'' ?*? x'' ?*? x'')
   let secondOrder = Units.simplify (0.5 * d2ydx2 ?*? Quantity.squared_ radius)
   (firstOrder, secondOrder)
@@ -996,11 +1027,10 @@ samplingPoints resolution curve = do
         let start = evaluate curve subdomain.lower
         let end = evaluate curve subdomain.upper
         Point2D.distanceFrom start end
-  let curveSecondDerivative = secondDerivative curve
-  let error subdomain = do
-        let secondDerivativeBounds = VectorCurve2D.bounds curveSecondDerivative subdomain
-        let secondDerivativeMagnitude = VectorBounds2D.magnitude secondDerivativeBounds
-        Linearization.error secondDerivativeMagnitude subdomain
+  let error subdomain =
+        Linearization.error
+          (VectorBounds2D.magnitude (secondDerivativeBounds curve subdomain))
+          subdomain
   let predicate = Resolution.predicate (#size size) (#error error) resolution
   Domain1D.samplingPoints predicate
 

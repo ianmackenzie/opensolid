@@ -13,6 +13,10 @@ module OpenSolid.Curve3D
   , hermite
   , derivative
   , secondDerivative
+  , derivativeValue
+  , derivativeBounds
+  , secondDerivativeValue
+  , secondDerivativeBounds
   , tangentDirection
   , curvatureVector
   , startPoint
@@ -68,6 +72,7 @@ import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units (InverseMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
+import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
@@ -263,6 +268,34 @@ derivative = (.derivative)
 
 secondDerivative :: Curve3D space -> VectorCurve3D Meters space
 secondDerivative = Curve.secondDerivative
+
+{-# INLINE derivativeValue #-}
+derivativeValue ::
+  Curve3D space ->
+  Number ->
+  Vector3D Meters space
+derivativeValue = Curve.derivativeValue
+
+{-# INLINE derivativeBounds #-}
+derivativeBounds ::
+  Curve3D space ->
+  Interval Unitless ->
+  VectorBounds3D Meters space
+derivativeBounds = Curve.derivativeBounds
+
+{-# INLINE secondDerivativeValue #-}
+secondDerivativeValue ::
+  Curve3D space ->
+  Number ->
+  Vector3D Meters space
+secondDerivativeValue = Curve.secondDerivativeValue
+
+{-# INLINE secondDerivativeBounds #-}
+secondDerivativeBounds ::
+  Curve3D space ->
+  Interval Unitless ->
+  VectorBounds3D Meters space
+secondDerivativeBounds = Curve.secondDerivativeBounds
 
 tangentDirection :: Tolerance Meters => Curve3D space -> Result IsPoint (DirectionCurve3D space)
 tangentDirection = Curve.tangentDirection
