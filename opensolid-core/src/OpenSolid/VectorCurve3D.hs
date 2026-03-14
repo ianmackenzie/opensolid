@@ -14,7 +14,6 @@ module OpenSolid.VectorCurve3D
   , startValue
   , endValue
   , evaluate
-  , evaluateAt
   , evaluateBounds
   , zero
   , constant
@@ -564,10 +563,6 @@ desingularized start middle end = do
 
 evaluate :: VectorCurve3D units space -> Number -> Vector3D units space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
-
-{-# INLINE evaluateAt #-}
-evaluateAt :: Number -> VectorCurve3D units space -> Vector3D units space
-evaluateAt tValue curve = evaluate curve tValue
 
 evaluateBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
 evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds

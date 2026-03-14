@@ -5,7 +5,6 @@ module OpenSolid.Curve1D
   , Compiled
   , Zero
   , evaluate
-  , evaluateAt
   , evaluateBounds
   , startValue
   , endValue
@@ -362,10 +361,6 @@ The parameter value should be between 0 and 1.
 {-# INLINE evaluate #-}
 evaluate :: Curve1D units -> Number -> Quantity units
 evaluate curve = CompiledFunction.evaluate curve.compiled
-
-{-# INLINE evaluateAt #-}
-evaluateAt :: Number -> Curve1D units -> Quantity units
-evaluateAt tValue curve = evaluate curve tValue
 
 {-# INLINE evaluateBounds #-}
 evaluateBounds :: Curve1D units -> Interval Unitless -> Interval units

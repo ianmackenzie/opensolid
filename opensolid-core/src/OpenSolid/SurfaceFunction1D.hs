@@ -2,7 +2,6 @@ module OpenSolid.SurfaceFunction1D
   ( SurfaceFunction1D (compiled, du, dv)
   , Compiled
   , evaluate
-  , evaluateAt
   , evaluateBounds
   , evaluateBoundsWithin
   , derivative
@@ -357,10 +356,6 @@ instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFuncti
 
 evaluate :: SurfaceFunction1D units -> UvPoint -> Quantity units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
-
-{-# INLINE evaluateAt #-}
-evaluateAt :: UvPoint -> SurfaceFunction1D units -> Quantity units
-evaluateAt uvPoint function = evaluate function uvPoint
 
 evaluateBounds :: SurfaceFunction1D units -> UvBounds -> Interval units
 evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
