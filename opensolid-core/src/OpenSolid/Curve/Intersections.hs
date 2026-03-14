@@ -94,8 +94,8 @@ findEndpointSolutions searchTree1 searchTree2 = do
               | tangentDirection1 ~= -tangentDirection2 = Tangent Negative
               | otherwise = Crossing
         let isDegenerate =
-              VectorCurve.evaluate (Curve.derivative curve1) t1 ~= Vector.zero
-                || VectorCurve.evaluate (Curve.derivative curve2) t2 ~= Vector.zero
+              Curve.derivativeValue curve1 t1 ~= Vector.zero
+                || Curve.derivativeValue curve2 t2 ~= Vector.zero
         EndpointSolution{t1, t2, kind, isDegenerate}
   List.map endpointSolution parameterValues
 
@@ -131,25 +131,21 @@ findInteriorIntersectionPoints searchTree1 searchTree2 endpointSolutions = do
   let curve1 = Curve.Search.curve searchTree1
   let curve2 = Curve.Search.curve searchTree2
   let searchTree = Search.pairwise (,) searchTree1 searchTree2
-  let firstDerivative1 = Curve.derivative curve1
-  let firstDerivative2 = Curve.derivative curve2
-  let secondDerivative1 = VectorCurve.derivative firstDerivative1
-  let secondDerivative2 = VectorCurve.derivative firstDerivative2
   let tangentCurve1 = Curve.Search.tangentCurve searchTree1
   let tangentCurve2 = Curve.Search.tangentCurve searchTree2
   let evaluateCrossing (UvPoint t1 t2) = do
         let displacement = Curve.evaluate curve2 t2 - Curve.evaluate curve1 t1
-        let uDerivative = negate (VectorCurve.evaluate firstDerivative1 t1)
-        let vDerivative = VectorCurve.evaluate firstDerivative2 t2
+        let uDerivative = negate (Curve.derivativeValue curve1 t1)
+        let vDerivative = Curve.derivativeValue curve2 t2
         (# displacement, uDerivative, vDerivative #)
   let evaluateTangent (UvPoint u v) = do
         let f = Curve.evaluate curve1 u
         let g = Curve.evaluate curve2 v
         let d = g - f
-        let fu = VectorCurve.evaluate firstDerivative1 u
-        let fuu = VectorCurve.evaluate secondDerivative1 v
-        let gv = VectorCurve.evaluate firstDerivative2 v
-        let gvv = VectorCurve.evaluate secondDerivative2 v
+        let fu = Curve.derivativeValue curve1 u
+        let fuu = Curve.secondDerivativeValue curve1 u
+        let gv = Curve.derivativeValue curve2 v
+        let gvv = Curve.secondDerivativeValue curve2 v
         let x = d `dot_` fu
         let y = d `dot_` gv
         let xu = negate (fu `dot_` fu) + d `dot_` fuu

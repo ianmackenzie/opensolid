@@ -660,8 +660,8 @@ desingularize startSingularity curve endSingularity = do
         Just (value0, firstDerivative0) -> do
           let t0 = Desingularization.t0
           let valueT0 = evaluate curve t0
-          let firstDerivativeT0 = VectorCurve2D.evaluate (derivative curve) t0
-          let secondDerivativeT0 = VectorCurve2D.evaluate (secondDerivative curve) t0
+          let firstDerivativeT0 = derivativeValue curve t0
+          let secondDerivativeT0 = secondDerivativeValue curve t0
           bezier $
             Bezier.syntheticStart
               value0
@@ -674,8 +674,8 @@ desingularize startSingularity curve endSingularity = do
         Just (value1, firstDerivative1) -> do
           let t1 = Desingularization.t1
           let valueT1 = evaluate curve t1
-          let firstDerivativeT1 = VectorCurve2D.evaluate (derivative curve) t1
-          let secondDerivativeT1 = VectorCurve2D.evaluate (secondDerivative curve) t1
+          let firstDerivativeT1 = derivativeValue curve t1
+          let secondDerivativeT1 = secondDerivativeValue curve t1
           bezier $
             Bezier.syntheticEnd
               valueT1

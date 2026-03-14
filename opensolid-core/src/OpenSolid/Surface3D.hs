@@ -76,7 +76,6 @@ import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
-import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
@@ -234,8 +233,7 @@ boundaryPoints ::
   NonEmpty UvPoint
 boundaryPoints accuracy surfaceFunction fuu fuv fvv uvCurve = do
   let curve3D = surfaceFunction . uvCurve
-  let secondDerivative3D = curve3D & Curve3D.derivative & VectorCurve3D.derivative
-  let predicate = linearizationPredicate accuracy fuu fuv fvv uvCurve secondDerivative3D
+  let predicate = linearizationPredicate accuracy fuu fuv fvv uvCurve curve3D
   let parameterValues = Domain1D.leadingSamplingPoints predicate
   NonEmpty.map (Curve2D.evaluate uvCurve) parameterValues
 
@@ -257,11 +255,11 @@ linearizationPredicate ::
   VectorSurfaceFunction3D Meters space ->
   VectorSurfaceFunction3D Meters space ->
   Curve2D Unitless UvSpace ->
-  VectorCurve3D Meters space ->
+  Curve3D space ->
   Interval Unitless ->
   Bool
-linearizationPredicate accuracy fuu fuv fvv curve2D secondDerivative3D subdomain = do
-  let curveSecondDerivativeBounds = VectorCurve3D.bounds secondDerivative3D subdomain
+linearizationPredicate accuracy fuu fuv fvv curve2D curve3D subdomain = do
+  let curveSecondDerivativeBounds = Curve3D.secondDerivativeBounds curve3D subdomain
   let curveSecondDerivativeMagnitude = VectorBounds3D.magnitude curveSecondDerivativeBounds
   let uvBounds = Curve2D.bounds curve2D subdomain
   Linearization.error curveSecondDerivativeMagnitude subdomain <= accuracy

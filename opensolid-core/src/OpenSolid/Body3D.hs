@@ -305,7 +305,7 @@ translational sketchPlane profile displacement = do
   let endCap = Surface3D.on endPlane profile
   let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
   let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2D.boundaryCurves profile))
-  let initialDerivative = VectorCurve3D.startValue (VectorCurve3D.derivative displacement)
+  let initialDerivative = VectorCurve3D.derivativeValue displacement 0.0
   case Quantity.sign (initialDerivative `dot` Plane3D.normalDirection sketchPlane) of
     Positive -> boundedBy (endCap : startCap : sideSurfaces)
     Negative -> boundedBy (startCap : endCap : sideSurfaces)
@@ -702,7 +702,6 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
                   correctlyAligned
                   surfaceSegments
                   matingSurfaceSegments
-                  (Curve3D.secondDerivative curve3D)
           let tValues = Domain1D.innerSamplingPoints edgePredicate
           let matingTValues = if correctlyAligned then List.reverseMap (1.0 -) tValues else tValues
           let vertices = List.map (Curve2D.evaluate uvCurve) tValues
@@ -722,7 +721,6 @@ edgeLinearizationPredicate ::
   Bool ->
   Set2D Unitless UvSpace UvBounds ->
   Set2D Unitless UvSpace UvBounds ->
-  VectorCurve3D Meters space ->
   Interval Unitless ->
   Bool
 edgeLinearizationPredicate
@@ -733,7 +731,6 @@ edgeLinearizationPredicate
   correctlyAligned
   surfaceSegments
   matingSurfaceSegments
-  edgeSecondDerivative
   tBounds = do
     let Interval tStart tEnd = tBounds
     let uvStart = Curve2D.evaluate uvCurve tStart
@@ -749,7 +746,7 @@ edgeLinearizationPredicate
     let startPoint = Curve3D.evaluate curve3D tStart
     let endPoint = Curve3D.evaluate curve3D tEnd
     let edgeLength = Point3D.distanceFrom startPoint endPoint
-    let edgeSecondDerivativeBounds = VectorCurve3D.bounds edgeSecondDerivative tBounds
+    let edgeSecondDerivativeBounds = Curve3D.secondDerivativeBounds curve3D tBounds
     let edgeSecondDerivativeMagnitude = VectorBounds3D.magnitude edgeSecondDerivativeBounds
     edgeLength <= resolution.maxSize
       && Linearization.error edgeSecondDerivativeMagnitude tBounds <= resolution.maxError

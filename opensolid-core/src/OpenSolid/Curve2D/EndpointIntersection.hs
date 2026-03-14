@@ -19,7 +19,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 data EndpointIntersection = EndpointIntersection
   { intersectionPoint :: IntersectionPoint
@@ -62,8 +61,8 @@ toEndpointIntersection curve1 curve2 tangent1 tangent2 (t1, t2) = do
   let tangentDirection1 = DirectionCurve2D.evaluate tangent1 t1
   let tangentDirection2 = DirectionCurve2D.evaluate tangent2 t2
   let crossProduct = tangentDirection1 `cross` tangentDirection2
-  let singular1 = VectorCurve2D.evaluate (Curve2D.derivative curve1) t1 ~= Vector2D.zero
-  let singular2 = VectorCurve2D.evaluate (Curve2D.derivative curve2) t2 ~= Vector2D.zero
+  let singular1 = Curve2D.derivativeValue curve1 t1 ~= Vector2D.zero
+  let singular2 = Curve2D.derivativeValue curve2 t2 ~= Vector2D.zero
   let intersectionPoint =
         if Tolerance.using 1e-9 (crossProduct ~= Quantity.zero)
           then IntersectionPoint.tangent t1 t2

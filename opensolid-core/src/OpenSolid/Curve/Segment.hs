@@ -105,16 +105,14 @@ evaluate ::
   VectorCurve dimension (Unitless ?/? units) space ->
   Interval Unitless ->
   Segment dimension units space
-evaluate givenCurve givenTangentCurve givenCurvatureVectorCurve_ givenParameterBounds = do
-  let firstDerivativeCurve = Curve.derivative givenCurve
-  let secondDerivativeCurve = VectorCurve.derivative firstDerivativeCurve
+evaluate givenCurve givenTangentCurve givenCurvatureVectorCurve_ givenParameterBounds =
   Segment
     { curve = givenCurve
     , tangentCurve = givenTangentCurve
     , parameterBounds = givenParameterBounds
     , bounds = Curve.bounds givenCurve givenParameterBounds
-    , firstDerivativeBounds = VectorCurve.bounds firstDerivativeCurve givenParameterBounds
-    , secondDerivativeBounds = VectorCurve.bounds secondDerivativeCurve givenParameterBounds
+    , firstDerivativeBounds = Curve.derivativeBounds givenCurve givenParameterBounds
+    , secondDerivativeBounds = Curve.secondDerivativeBounds givenCurve givenParameterBounds
     , curvatureVectorBounds_ = VectorCurve.bounds givenCurvatureVectorCurve_ givenParameterBounds
     , tangentBounds = DirectionCurve.bounds givenTangentCurve givenParameterBounds
     }

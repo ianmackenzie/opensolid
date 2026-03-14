@@ -29,18 +29,18 @@ squared = Units.specialize . squared_
 
 sqrt_ :: Nondegenerate (units ?*? units) -> Nondegenerate units
 sqrt_ (Nondegenerate givenCurve) = Nondegenerate do
-  let firstDerivative = Curve1D.derivative givenCurve
-  let secondDerivative = Curve1D.derivative firstDerivative
   let curveTolerance = Curve1D.singularityTolerance givenCurve
-  let firstDerivativeTolerance = Curve1D.singularityTolerance firstDerivative
+  let derivativeTolerance = Curve1D.singularityTolerance (Curve1D.derivative givenCurve)
   let singularity tValue sign =
-        (Quantity.zero, sign * Quantity.sqrt_ (0.5 * Curve1D.evaluate secondDerivative tValue))
+        ( Quantity.zero
+        , sign * Quantity.sqrt_ (0.5 * Curve1D.secondDerivativeValue givenCurve tValue)
+        )
   let maybeSingularity tValue sign = do
         let curveIsZero = Tolerance.using curveTolerance do
               Curve1D.evaluate givenCurve tValue ~= Quantity.zero
-        let firstDerivativeIsZero = Tolerance.using firstDerivativeTolerance do
-              Curve1D.evaluate firstDerivative tValue ~= Quantity.zero
-        if curveIsZero && firstDerivativeIsZero then Just (singularity tValue sign) else Nothing
+        let derivativeIsZero = Tolerance.using derivativeTolerance do
+              Curve1D.derivativeValue givenCurve tValue ~= Quantity.zero
+        if curveIsZero && derivativeIsZero then Just (singularity tValue sign) else Nothing
   let WithNoZeros interiorSqrt = Curve1D.WithNoZeros.sqrt_ (WithNoZeros givenCurve)
   Curve1D.desingularize (maybeSingularity 0.0 Positive) interiorSqrt (maybeSingularity 1.0 Negative)
 

@@ -255,8 +255,8 @@ desingularize startSingularity curve endSingularity = do
         Just (value0, firstDerivative0) -> do
           let t0 = Desingularization.t0
           let valueT0 = evaluate curve t0
-          let firstDerivativeT0 = evaluate (derivative curve) t0
-          let secondDerivativeT0 = evaluate (derivative (derivative curve)) t0
+          let firstDerivativeT0 = derivativeValue curve t0
+          let secondDerivativeT0 = secondDerivativeValue curve t0
           bezier $
             Bezier.syntheticStart
               value0
@@ -269,8 +269,8 @@ desingularize startSingularity curve endSingularity = do
         Just (value1, firstDerivative1) -> do
           let t1 = Desingularization.t1
           let valueT1 = evaluate curve t1
-          let firstDerivativeT1 = evaluate (derivative curve) t1
-          let secondDerivativeT1 = evaluate (derivative (derivative curve)) t1
+          let firstDerivativeT1 = derivativeValue curve t1
+          let secondDerivativeT1 = secondDerivativeValue curve t1
           bezier $
             Bezier.syntheticEnd
               valueT1
@@ -307,10 +307,10 @@ lHopital ::
   , Vector dimension (units1 ?/? units2) space
   )
 lHopital lhs rhs tValue = do
-  let lhs' = Vector.erase (evaluate (derivative lhs) tValue)
-  let lhs'' = Vector.erase (evaluate (derivative (derivative lhs)) tValue)
-  let rhs' = Vector.erase (evaluate (derivative rhs) tValue)
-  let rhs'' = Vector.erase (evaluate (derivative (derivative rhs)) tValue)
+  let lhs' = Vector.erase (derivativeValue lhs tValue)
+  let lhs'' = Vector.erase (secondDerivativeValue lhs tValue)
+  let rhs' = Vector.erase (derivativeValue rhs tValue)
+  let rhs'' = Vector.erase (secondDerivativeValue rhs tValue)
   let value_ = lhs' / rhs'
   let firstDerivative_ = (lhs'' * rhs' - lhs' * rhs'') / (2.0 * Quantity.squared rhs')
   (Vector.unerase value_, Vector.unerase firstDerivative_)

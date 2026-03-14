@@ -22,7 +22,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Vector2D qualified as Vector2D
-import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 -- | A metric spur gear.
 newtype SpurGear = Metric ("numTeeth" ::: Int, "module_" ::: Length)
@@ -85,11 +84,10 @@ profile gear = do
   let involuteLeft = Curve2D.xy x y
   let leftStart = involuteLeft.startPoint
   let leftEnd = involuteLeft.endPoint
-  let involuteLeftDerivative = Curve2D.derivative involuteLeft
   let leftStartTangent
-        | rd > rb = Vector2D.normalize (VectorCurve2D.startValue involuteLeftDerivative)
+        | rd > rb = Vector2D.normalize (Curve2D.derivativeValue involuteLeft 0.0)
         | otherwise = Vector2D.polar 1.0 (Angle.halfPi + alpha)
-  let leftEndTangent = Vector2D.normalize (VectorCurve2D.endValue involuteLeftDerivative)
+  let leftEndTangent = Vector2D.normalize (Curve2D.derivativeValue involuteLeft 1.0)
   let leftDerivativeMagnitude = Point2D.distanceFrom leftStart leftEnd
   let leftApproximation =
         Curve2D.hermite
