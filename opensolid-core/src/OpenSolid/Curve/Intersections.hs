@@ -25,6 +25,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Search qualified as Search
 import OpenSolid.Search.Domain qualified as Search.Domain
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D (Vector2D))
@@ -131,8 +132,6 @@ findInteriorIntersectionPoints searchTree1 searchTree2 endpointSolutions = do
   let curve1 = Curve.Search.curve searchTree1
   let curve2 = Curve.Search.curve searchTree2
   let searchTree = Search.pairwise (,) searchTree1 searchTree2
-  let tangentCurve1 = Curve.Search.tangentCurve searchTree1
-  let tangentCurve2 = Curve.Search.tangentCurve searchTree2
   let evaluateCrossing (UvPoint t1 t2) = do
         let displacement = Curve.evaluate curve2 t2 - Curve.evaluate curve1 t1
         let uDerivative = negate (Curve.derivativeValue curve1 t1)
@@ -207,14 +206,15 @@ findInteriorIntersectionPoints searchTree1 searchTree2 endpointSolutions = do
               | curvatureVectorsAreDistinct ->
                   case findInteriorSolution evaluateTangent curve1 curve2 tBounds1 tBounds2 of
                     Just (t1, t2) -> do
-                      let tangentDirection1 = DirectionCurve.evaluate tangentCurve1 t1
-                      let tangentDirection2 = DirectionCurve.evaluate tangentCurve2 t2
-                      if
-                        | tangentDirection1 ~= tangentDirection2 ->
-                            Resolved (Just (IntersectionPoint.tangent t1 t2 Positive))
-                        | tangentDirection1 ~= -tangentDirection2 ->
-                            Resolved (Just (IntersectionPoint.tangent t1 t2 Negative))
-                        | otherwise -> Unresolved
+                      let tangentVector1 = Vector.normalize (Curve.derivativeValue curve1 t1)
+                      let tangentVector2 = Vector.normalize (Curve.derivativeValue curve2 t2)
+                      Tolerance.using Tolerance.unitless do
+                        if
+                          | tangentVector1 ~= tangentVector2 ->
+                              Resolved (Just (IntersectionPoint.tangent t1 t2 Positive))
+                          | tangentVector1 ~= -tangentVector2 ->
+                              Resolved (Just (IntersectionPoint.tangent t1 t2 Negative))
+                          | otherwise -> Unresolved
                     Nothing -> Unresolved
               | otherwise -> Unresolved
   let isDuplicate (tBounds1, _) (tBounds2, _) = Search.Domain.overlapping tBounds1 tBounds2
