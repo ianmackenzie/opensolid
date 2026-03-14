@@ -10,7 +10,8 @@ module OpenSolid.Interval
   , infinite
   , hull3
   , hull4
-  , hullN
+  , hull
+  , hullOf
   , lower
   , upper
   , midpoint
@@ -41,7 +42,8 @@ module OpenSolid.Interval
   , cubed
   , aggregate2
   , aggregate3
-  , aggregateN
+  , aggregate
+  , aggregateOf
   , min
   , max
   , minimum
@@ -330,12 +332,15 @@ aggregate3 (Interval low1 high1) (Interval low2 high2) (Interval low3 high3) =
     (Prelude.max (Prelude.max high1 high2) high3)
 
 -- | Build a bounding range containing all ranges in the given non-empty list.
-aggregateN :: NonEmpty (Interval units) -> Interval units
-aggregateN (Interval low1 high1 :| rest) = do
+aggregate :: NonEmpty (Interval units) -> Interval units
+aggregate (Interval low1 high1 :| rest) = do
   let go low high [] = Interval low high
       go low high (Interval nextLow nextHigh : remaining) =
         go (Prelude.min low nextLow) (Prelude.max high nextHigh) remaining
   go low1 high1 rest
+
+aggregateOf :: (a -> Interval units) -> NonEmpty a -> Interval units
+aggregateOf function nonEmpty = aggregate (NonEmpty.map function nonEmpty)
 
 -- | Attempt to find the intersection of two bounding ranges.
 intersection :: Interval units -> Interval units -> Maybe (Interval units)
@@ -355,12 +360,15 @@ hull4 (Quantity# a#) (Quantity# b#) (Quantity# c#) (Quantity# d#) = do
   Ordered# low# high#
 
 -- | Build a bounding range containing all values in the given non-empty list.
-hullN :: NonEmpty (Quantity units) -> Interval units
-hullN (first :| rest) = do
+hull :: NonEmpty (Quantity units) -> Interval units
+hull (first :| rest) = do
   let go low high [] = Interval low high
       go low high (next : remaining) =
         go (Prelude.min low next) (Prelude.max high next) remaining
   go first first rest
+
+hullOf :: (a -> Quantity units) -> NonEmpty a -> Interval units
+hullOf function nonEmpty = hull (NonEmpty.map function nonEmpty)
 
 -- | Get the lower bound of a range.
 {-# INLINE lower #-}

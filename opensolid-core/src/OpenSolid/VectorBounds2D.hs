@@ -6,11 +6,13 @@ module OpenSolid.VectorBounds2D
   , coerce
   , aggregate2
   , aggregate3
-  , aggregateN
+  , aggregate
+  , aggregateOf
   , hull2
   , hull3
   , hull4
-  , hullN
+  , hull
+  , hullOf
   , polar
   , xComponent
   , yComponent
@@ -57,6 +59,7 @@ import {-# SOURCE #-} OpenSolid.DirectionBounds2D qualified as DirectionBounds2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -115,8 +118,8 @@ hull4 (Vector2D x1 y1) (Vector2D x2 y2) (Vector2D x3 y3) (Vector2D x4 y4) = do
   let maxY = max (max (max y1 y2) y3) y4
   VectorBounds2D (Interval minX maxX) (Interval minY maxY)
 
-hullN :: NonEmpty (Vector2D units space) -> VectorBounds2D units space
-hullN (Vector2D x0 y0 :| rest) = go x0 x0 y0 y0 rest
+hull :: NonEmpty (Vector2D units space) -> VectorBounds2D units space
+hull (Vector2D x0 y0 :| rest) = go x0 x0 y0 y0 rest
  where
   go ::
     Quantity units ->
@@ -128,6 +131,9 @@ hullN (Vector2D x0 y0 :| rest) = go x0 x0 y0 y0 rest
   go xLow xHigh yLow yHigh [] = VectorBounds2D (Interval xLow xHigh) (Interval yLow yHigh)
   go xLow xHigh yLow yHigh (Vector2D x y : remaining) =
     go (min xLow x) (max xHigh x) (min yLow y) (max yHigh y) remaining
+
+hullOf :: (a -> Vector2D units space) -> NonEmpty a -> VectorBounds2D units space
+hullOf function nonEmpty = hull (NonEmpty.map function nonEmpty)
 
 aggregate2 ::
   VectorBounds2D units space ->
@@ -145,8 +151,8 @@ aggregate3 (VectorBounds2D x1 y1) (VectorBounds2D x2 y2) (VectorBounds2D x3 y3) 
   VectorBounds2D (Interval.aggregate3 x1 x2 x3) (Interval.aggregate3 y1 y2 y3)
 
 -- | Construct a vector bounding box containing all vector bounding boxes in the given list.
-aggregateN :: NonEmpty (VectorBounds2D units space) -> VectorBounds2D units space
-aggregateN (VectorBounds2D (Interval xLow0 xHigh0) (Interval yLow0 yHigh0) :| rest) =
+aggregate :: NonEmpty (VectorBounds2D units space) -> VectorBounds2D units space
+aggregate (VectorBounds2D (Interval xLow0 xHigh0) (Interval yLow0 yHigh0) :| rest) =
   aggregateImpl xLow0 xHigh0 yLow0 yHigh0 rest
 
 aggregateImpl ::
@@ -165,6 +171,9 @@ aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
     (min yLow yLowNext)
     (max yHigh yHighNext)
     remaining
+
+aggregateOf :: (a -> VectorBounds2D units space) -> NonEmpty a -> VectorBounds2D units space
+aggregateOf function nonEmpty = aggregate (NonEmpty.map function nonEmpty)
 
 polar :: Interval units -> Interval Radians -> VectorBounds2D units space
 polar r theta = VectorBounds2D (r * Interval.cos theta) (r * Interval.sin theta)

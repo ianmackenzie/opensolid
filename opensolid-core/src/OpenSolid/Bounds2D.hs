@@ -10,9 +10,10 @@ module OpenSolid.Bounds2D
   , hull2
   , hull3
   , hull4
-  , hullN
+  , hull
   , aggregate2
-  , aggregateN
+  , aggregate
+  , aggregateOf
   , exclusion
   , exclusion#
   , inclusion
@@ -55,6 +56,7 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
@@ -107,8 +109,11 @@ aggregate2 (PositionBounds2D pb1) (PositionBounds2D pb2) =
   PositionBounds2D (VectorBounds2D.aggregate2 pb1 pb2)
 
 -- | Construct a bounding box containing all bounding boxes in the given non-empty list.
-aggregateN :: NonEmpty (Bounds2D units space) -> Bounds2D units space
-aggregateN list = PositionBounds2D (VectorBounds2D.aggregateN (Data.Coerce.coerce list))
+aggregate :: NonEmpty (Bounds2D units space) -> Bounds2D units space
+aggregate list = PositionBounds2D (VectorBounds2D.aggregate (Data.Coerce.coerce list))
+
+aggregateOf :: (a -> Bounds2D units space) -> NonEmpty a -> Bounds2D units space
+aggregateOf function nonEmpty = aggregate (NonEmpty.map function nonEmpty)
 
 exclusion :: Point2D units space -> Bounds2D units space -> Quantity units
 exclusion (Position2D p) (PositionBounds2D pb) = VectorBounds2D.exclusion p pb
@@ -189,8 +194,8 @@ hull4 (Point2D x1 y1) (Point2D x2 y2) (Point2D x3 y3) (Point2D x4 y4) = do
   Bounds2D (Interval minX maxX) (Interval minY maxY)
 
 -- | Construct a bounding box containing all vertices in the given non-empty list.
-hullN :: NonEmpty (Point2D units space) -> Bounds2D units space
-hullN (Point2D x0 y0 :| rest) = do
+hull :: NonEmpty (Point2D units space) -> Bounds2D units space
+hull (Point2D x0 y0 :| rest) = do
   let go xLow xHigh yLow yHigh [] = Bounds2D (Interval xLow xHigh) (Interval yLow yHigh)
       go xLow xHigh yLow yHigh (Point2D x y : remaining) =
         go (min xLow x) (max xHigh x) (min yLow y) (max yHigh y) remaining

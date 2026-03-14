@@ -8,10 +8,11 @@ module OpenSolid.Bounds3D
   , hull2
   , hull3
   , hull4
-  , hullN
-  , hullOfN
+  , hull
+  , hullOf
   , aggregate2
-  , aggregateN
+  , aggregate
+  , aggregateOf
   , centerPoint
   , length
   , width
@@ -94,8 +95,11 @@ aggregate2 (PositionBounds3D pb1) (PositionBounds3D pb2) =
   PositionBounds3D (VectorBounds3D.aggregate2 pb1 pb2)
 
 -- | Construct a bounding box containing all bounding boxes in the given non-empty list.
-aggregateN :: NonEmpty (Bounds3D space) -> Bounds3D space
-aggregateN list = PositionBounds3D (VectorBounds3D.aggregateN (Data.Coerce.coerce list))
+aggregate :: NonEmpty (Bounds3D space) -> Bounds3D space
+aggregate list = PositionBounds3D (VectorBounds3D.aggregateN (Data.Coerce.coerce list))
+
+aggregateOf :: (a -> Bounds3D space) -> NonEmpty a -> Bounds3D space
+aggregateOf function nonEmpty = aggregate (NonEmpty.map function nonEmpty)
 
 centerPoint :: Bounds3D space -> Point3D space
 centerPoint (Bounds3D r f u) =
@@ -145,11 +149,11 @@ hull4 (Position3D p1) (Position3D p2) (Position3D p3) (Position3D p4) =
   PositionBounds3D (VectorBounds3D.hull4 p1 p2 p3 p4)
 
 -- | Construct a bounding box containing all points in the given non-empty list.
-hullN :: NonEmpty (Point3D space) -> Bounds3D space
-hullN vertices = PositionBounds3D (VectorBounds3D.hullN (Data.Coerce.coerce vertices))
+hull :: NonEmpty (Point3D space) -> Bounds3D space
+hull vertices = PositionBounds3D (VectorBounds3D.hullN (Data.Coerce.coerce vertices))
 
-hullOfN :: (a -> Point3D space) -> NonEmpty a -> Bounds3D space
-hullOfN function values = hullN (NonEmpty.map function values)
+hullOf :: (a -> Point3D space) -> NonEmpty a -> Bounds3D space
+hullOf function values = hull (NonEmpty.map function values)
 
 diameter :: Bounds3D space -> Length
 diameter (Bounds3D x y z) = Quantity.hypot3 (Interval.width x) (Interval.width y) (Interval.width z)
