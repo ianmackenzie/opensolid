@@ -15,4 +15,4 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
-dev = ["ipykernel>=6.29.5", "setuptools>=75.6.0"]
+dev = ["setuptools>=75.6.0"]
