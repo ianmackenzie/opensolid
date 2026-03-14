@@ -27,6 +27,6 @@ intersectionsWithSurface ::
   Curve3D space ->
   Result Error (Maybe (Intersections space))
 intersectionsWithSurface surface curve
-  | not (Curve3D.bounds curve `intersects` Surface3D.bounds surface) = Ok Nothing
+  | not (Curve3D.overallBounds curve `intersects` Surface3D.overallBounds surface) = Ok Nothing
   | otherwise = do
       TODO

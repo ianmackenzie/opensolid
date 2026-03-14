@@ -438,7 +438,7 @@ toHalfEdge surfaceId loopId surfaceFunction curveIndex uvCurve = do
         , uvCurve = uvCurve . parameterization
         , curve3D = curve3D . parameterization
         , length
-        , bounds = Curve3D.bounds curve3D
+        , bounds = Curve3D.overallBounds curve3D
         }
 
 getAllHalfEdges :: SurfaceWithHalfEdges space -> NonEmpty (HalfEdge space)

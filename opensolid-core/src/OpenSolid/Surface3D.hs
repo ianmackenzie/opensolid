@@ -10,7 +10,7 @@ module OpenSolid.Surface3D
   , translational
   , ruled
   , revolved
-  , bounds
+  , overallBounds
   , boundaryCurves
   , boundarySurfaceCurves
   , flip
@@ -172,8 +172,9 @@ revolved sketchPlane curve axis angle = do
                 + height * frame3D.upwardDirection
         Ok (parametric surfaceFunction UvRegion.unitSquare)
 
-bounds :: Surface3D space -> Bounds3D space
-bounds surface = SurfaceFunction3D.evaluateBounds surface.function (Region2D.bounds surface.domain)
+overallBounds :: Surface3D space -> Bounds3D space
+overallBounds surface =
+  SurfaceFunction3D.evaluateBounds surface.function (Region2D.bounds surface.domain)
 
 boundaryCurves :: Surface3D space -> NonEmpty (Curve3D space)
 boundaryCurves surface = NonEmpty.map SurfaceCurve3D.curve (boundarySurfaceCurves surface)

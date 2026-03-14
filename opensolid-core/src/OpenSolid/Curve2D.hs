@@ -40,7 +40,7 @@ module OpenSolid.Curve2D
   , offsetLeftwardBy
   , offsetRightwardBy
   , reverse
-  , bounds
+  , overallBounds
   , g2
   , Intersections (IntersectionPoints, OverlappingSegments)
   , IntersectionPoint
@@ -704,8 +704,8 @@ samplePoints curve = NonEmpty.map (evaluate curve) Parameter.samples
 reverse :: Curve2D units space -> Curve2D units space
 reverse curve = curve . (1.0 - Curve1D.t)
 
-bounds :: Curve2D units space -> Bounds2D units space
-bounds curve = evaluateBounds curve Interval.unit
+overallBounds :: Curve2D units space -> Bounds2D units space
+overallBounds curve = evaluateBounds curve Interval.unit
 
 compiled :: Curve2D units space -> Compiled units space
 compiled = (.compiled)

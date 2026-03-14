@@ -212,7 +212,7 @@ intersections ::
   Curve2D units space ->
   Result Curve.IsPoint (Maybe Intersections)
 intersections curve1 curve2
-  | not (Curve2D.bounds curve1 `intersects` Curve2D.bounds curve2) = Ok Nothing
+  | not (Curve2D.overallBounds curve1 `intersects` Curve2D.overallBounds curve2) = Ok Nothing
   | otherwise = do
       searchTree1 <- Curve2D.searchTree curve1
       searchTree2 <- Curve2D.searchTree curve2

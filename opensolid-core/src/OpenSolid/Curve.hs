@@ -5,7 +5,7 @@ module OpenSolid.Curve
   , SearchTree
   , IsPoint (IsPoint)
   , derivative
-  , bounds
+  , overallBounds
   , evaluate
   , evaluateBounds
   , startPoint
@@ -90,21 +90,21 @@ class
   Exists dimension units space
   where
   derivative :: Curve dimension units space -> VectorCurve dimension units space
-  bounds :: Curve dimension units space -> Bounds dimension units space
+  overallBounds :: Curve dimension units space -> Bounds dimension units space
   evaluate :: Curve dimension units space -> Number -> Point dimension units space
   evaluateBounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
   unsafeCurvatureVector_ :: Curve dimension units space -> VectorCurve dimension (Unitless ?/? units) space
 
 instance Exists 2 units space where
   derivative = Curve2D.derivative
-  bounds = Curve2D.bounds
+  overallBounds = Curve2D.overallBounds
   evaluate = Curve2D.evaluate
   evaluateBounds = Curve2D.evaluateBounds
   unsafeCurvatureVector_ = Curve2D.unsafeCurvatureVector_
 
 instance Exists 3 Meters space where
   derivative = Curve3D.derivative
-  bounds = Curve3D.bounds
+  overallBounds = Curve3D.overallBounds
   evaluate = Curve3D.evaluate
   evaluateBounds = Curve3D.evaluateBounds
   unsafeCurvatureVector_ = Units.unspecialize . Curve3D.unsafeCurvatureVector

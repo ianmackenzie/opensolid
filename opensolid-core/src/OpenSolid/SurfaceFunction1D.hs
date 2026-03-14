@@ -842,7 +842,7 @@ horizontalCurve Subproblem{f, dvdu, subdomain, uvBounds} start end = do
   let uEnd = Point2D.xCoordinate endPoint
   let curve = HorizontalCurve.new f dvdu uStart uEnd (NonEmpty.one uvBounds)
   let Domain2D _ vSubdomain = subdomain
-  let Bounds2D _ curveVBounds = Curve2D.bounds curve
+  let Bounds2D _ curveVBounds = Curve2D.overallBounds curve
   if Interval.contains curveVBounds (Domain1D.interior vSubdomain)
     then Resolved (PartialZeros.horizontalSegment start end uvBounds)
     else Unresolved
@@ -891,7 +891,7 @@ verticalCurve Subproblem{f, dudv, subdomain, uvBounds} start end = do
   let vEnd = Point2D.yCoordinate endPoint
   let curve = VerticalCurve.new f dudv vStart vEnd (NonEmpty.one uvBounds)
   let Domain2D uSubdomain _ = subdomain
-  let Bounds2D curveUBounds _ = Curve2D.bounds curve
+  let Bounds2D curveUBounds _ = Curve2D.overallBounds curve
   if Interval.contains curveUBounds (Domain1D.interior uSubdomain)
     then Resolved (PartialZeros.verticalSegment start end uvBounds)
     else Unresolved

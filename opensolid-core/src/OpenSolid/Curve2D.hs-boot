@@ -5,7 +5,7 @@ module OpenSolid.Curve2D
   , new
   , evaluate
   , evaluateBounds
-  , bounds
+  , overallBounds
   , compiled
   , derivative
   , reverse
@@ -113,7 +113,7 @@ constant :: Point2D units space -> Curve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
 evaluate :: Curve2D units space -> Number -> Point2D units space
 evaluateBounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
-bounds :: Curve2D units space -> Bounds2D units space
+overallBounds :: Curve2D units space -> Bounds2D units space
 compiled :: Curve2D units space -> Compiled units space
 derivative :: Curve2D units space -> VectorCurve2D units space
 reverse :: Curve2D units space -> Curve2D units space

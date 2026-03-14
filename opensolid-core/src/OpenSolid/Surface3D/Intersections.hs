@@ -16,6 +16,7 @@ intersections ::
   Surface3D space ->
   Result Surface.IsDegenerate (Maybe Intersections)
 intersections surface1 surface2
-  | not (Surface3D.bounds surface1 `intersects` Surface3D.bounds surface2) = Ok Nothing
+  | not (Surface3D.overallBounds surface1 `intersects` Surface3D.overallBounds surface2) =
+      Ok Nothing
   | otherwise = do
       TODO
