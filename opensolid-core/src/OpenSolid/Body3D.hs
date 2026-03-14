@@ -647,9 +647,9 @@ surfaceSize f uvBounds = do
 
 surfaceError :: SurfaceFunction3D space -> UvBounds -> Length
 surfaceError f uvBounds = do
-  let fuuBounds = VectorSurfaceFunction3D.evaluateBounds f.du.du uvBounds
-  let fuvBounds = VectorSurfaceFunction3D.evaluateBounds f.du.dv uvBounds
-  let fvvBounds = VectorSurfaceFunction3D.evaluateBounds f.dv.dv uvBounds
+  let fuuBounds = VectorSurfaceFunction3D.bounds f.du.du uvBounds
+  let fuvBounds = VectorSurfaceFunction3D.bounds f.du.dv uvBounds
+  let fvvBounds = VectorSurfaceFunction3D.bounds f.dv.dv uvBounds
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 addBoundaryInnerEdgeVertices ::
@@ -749,7 +749,7 @@ edgeLinearizationPredicate
     let startPoint = Curve3D.evaluate curve3D tStart
     let endPoint = Curve3D.evaluate curve3D tEnd
     let edgeLength = Point3D.distanceFrom startPoint endPoint
-    let edgeSecondDerivativeBounds = VectorCurve3D.evaluateBounds edgeSecondDerivative tBounds
+    let edgeSecondDerivativeBounds = VectorCurve3D.bounds edgeSecondDerivative tBounds
     let edgeSecondDerivativeMagnitude = VectorBounds3D.magnitude edgeSecondDerivativeBounds
     edgeLength <= resolution.maxSize
       && Linearization.error edgeSecondDerivativeMagnitude tBounds <= resolution.maxError

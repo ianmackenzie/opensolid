@@ -11,7 +11,7 @@ module OpenSolid.VectorSurfaceFunction2D
   , constant
   , xy
   , evaluate
-  , evaluateBounds
+  , bounds
   , xComponent
   , yComponent
   , components
@@ -565,11 +565,11 @@ transformBy transform function = do
 evaluate :: VectorSurfaceFunction2D units space -> UvPoint -> Vector2D units space
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
-evaluateBounds ::
+bounds ::
   VectorSurfaceFunction2D units space ->
   UvBounds ->
   VectorBounds2D units space
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
+bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->

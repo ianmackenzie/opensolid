@@ -35,7 +35,7 @@ boundsConsistency vectorCurve = do
   tBounds <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (Interval.interpolate tBounds) Parameter.random)
   let vectorCurveValue = VectorCurve2D.evaluate vectorCurve tValue
-  let vectorCurveBounds = VectorCurve2D.evaluateBounds vectorCurve tBounds
+  let vectorCurveBounds = VectorCurve2D.bounds vectorCurve tBounds
   Test.expect (vectorCurveValue `intersects` vectorCurveBounds)
     & Test.output "tValue" tValue
     & Test.output "tBounds" tBounds

@@ -3,7 +3,7 @@ module OpenSolid.Curve
   , Exists
   , IsPoint
   , evaluate
-  , evaluateBounds
+  , bounds
   , startPoint
   , endPoint
   , derivative
@@ -36,7 +36,7 @@ evaluate ::
   Curve dimension units space ->
   Number ->
   Point dimension units space
-evaluateBounds ::
+bounds ::
   Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->

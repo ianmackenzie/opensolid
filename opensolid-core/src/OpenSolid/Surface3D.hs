@@ -173,8 +173,7 @@ revolved sketchPlane curve axis angle = do
         Ok (parametric surfaceFunction UvRegion.unitSquare)
 
 overallBounds :: Surface3D space -> Bounds3D space
-overallBounds surface =
-  SurfaceFunction3D.evaluateBounds surface.function (Region2D.bounds surface.domain)
+overallBounds surface = SurfaceFunction3D.bounds surface.function (Region2D.bounds surface.domain)
 
 boundaryCurves :: Surface3D space -> NonEmpty (Curve3D space)
 boundaryCurves surface = NonEmpty.map SurfaceCurve3D.curve (boundarySurfaceCurves surface)
@@ -247,9 +246,9 @@ surfaceError ::
   UvBounds ->
   Length
 surfaceError fuu fuv fvv uvBounds = do
-  let fuuBounds = VectorSurfaceFunction3D.evaluateBounds fuu uvBounds
-  let fuvBounds = VectorSurfaceFunction3D.evaluateBounds fuv uvBounds
-  let fvvBounds = VectorSurfaceFunction3D.evaluateBounds fvv uvBounds
+  let fuuBounds = VectorSurfaceFunction3D.bounds fuu uvBounds
+  let fuvBounds = VectorSurfaceFunction3D.bounds fuv uvBounds
+  let fvvBounds = VectorSurfaceFunction3D.bounds fvv uvBounds
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 linearizationPredicate ::
@@ -262,9 +261,9 @@ linearizationPredicate ::
   Interval Unitless ->
   Bool
 linearizationPredicate accuracy fuu fuv fvv curve2D secondDerivative3D subdomain = do
-  let curveSecondDerivativeBounds = VectorCurve3D.evaluateBounds secondDerivative3D subdomain
+  let curveSecondDerivativeBounds = VectorCurve3D.bounds secondDerivative3D subdomain
   let curveSecondDerivativeMagnitude = VectorBounds3D.magnitude curveSecondDerivativeBounds
-  let uvBounds = Curve2D.evaluateBounds curve2D subdomain
+  let uvBounds = Curve2D.bounds curve2D subdomain
   Linearization.error curveSecondDerivativeMagnitude subdomain <= accuracy
     && surfaceError fuu fuv fvv uvBounds <= accuracy
 

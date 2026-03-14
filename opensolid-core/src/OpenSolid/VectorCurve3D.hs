@@ -14,7 +14,7 @@ module OpenSolid.VectorCurve3D
   , startValue
   , endValue
   , evaluate
-  , evaluateBounds
+  , bounds
   , zero
   , constant
   , interpolateFrom
@@ -564,8 +564,8 @@ desingularized start middle end = do
 evaluate :: VectorCurve3D units space -> Number -> Vector3D units space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
-evaluateBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
-evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
+bounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
+bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
 
 reverse :: VectorCurve3D units space -> VectorCurve3D units space
 reverse curve = curve . (1.0 - Curve1D.t)

@@ -4,7 +4,7 @@ module OpenSolid.SurfaceFunction3D
   , new
   , constant
   , evaluate
-  , evaluateBounds
+  , bounds
   , derivative
   , IsDegenerate (IsDegenerate)
   , normalDirection
@@ -182,8 +182,8 @@ constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunct
 evaluate :: SurfaceFunction3D space -> UvPoint -> Point3D space
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
-evaluateBounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
+bounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
+bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->

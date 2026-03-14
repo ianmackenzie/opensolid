@@ -7,7 +7,7 @@ module OpenSolid.Curve
   , derivative
   , overallBounds
   , evaluate
-  , evaluateBounds
+  , bounds
   , startPoint
   , endPoint
   , secondDerivative
@@ -92,21 +92,21 @@ class
   derivative :: Curve dimension units space -> VectorCurve dimension units space
   overallBounds :: Curve dimension units space -> Bounds dimension units space
   evaluate :: Curve dimension units space -> Number -> Point dimension units space
-  evaluateBounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
+  bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
   unsafeCurvatureVector_ :: Curve dimension units space -> VectorCurve dimension (Unitless ?/? units) space
 
 instance Exists 2 units space where
   derivative = Curve2D.derivative
   overallBounds = Curve2D.overallBounds
   evaluate = Curve2D.evaluate
-  evaluateBounds = Curve2D.evaluateBounds
+  bounds = Curve2D.bounds
   unsafeCurvatureVector_ = Curve2D.unsafeCurvatureVector_
 
 instance Exists 3 Meters space where
   derivative = Curve3D.derivative
   overallBounds = Curve3D.overallBounds
   evaluate = Curve3D.evaluate
-  evaluateBounds = Curve3D.evaluateBounds
+  bounds = Curve3D.bounds
   unsafeCurvatureVector_ = Units.unspecialize . Curve3D.unsafeCurvatureVector
 
 secondDerivative ::

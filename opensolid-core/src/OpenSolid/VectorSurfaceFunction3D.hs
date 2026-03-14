@@ -10,7 +10,7 @@ module OpenSolid.VectorSurfaceFunction3D
   , zero
   , constant
   , evaluate
-  , evaluateBounds
+  , bounds
   , derivative
   , placeIn
   , relativeTo
@@ -506,11 +506,8 @@ constant value = new (CompiledFunction.constant value) (const zero)
 evaluate :: VectorSurfaceFunction3D units space -> UvPoint -> Vector3D units space
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
-evaluateBounds ::
-  VectorSurfaceFunction3D units space ->
-  UvBounds ->
-  VectorBounds3D units space
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
+bounds :: VectorSurfaceFunction3D units space -> UvBounds -> VectorBounds3D units space
+bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->

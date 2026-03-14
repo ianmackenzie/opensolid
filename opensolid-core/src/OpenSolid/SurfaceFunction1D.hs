@@ -2,8 +2,8 @@ module OpenSolid.SurfaceFunction1D
   ( SurfaceFunction1D (compiled, du, dv)
   , Compiled
   , evaluate
-  , evaluateBounds
-  , evaluateBoundsWithin
+  , bounds
+  , boundsWithin
   , derivative
   , derivativeIn
   , compiled
@@ -357,12 +357,12 @@ instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFuncti
 evaluate :: SurfaceFunction1D units -> UvPoint -> Quantity units
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
-evaluateBounds :: SurfaceFunction1D units -> UvBounds -> Interval units
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
+bounds :: SurfaceFunction1D units -> UvBounds -> Interval units
+bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
 
-{-# INLINE evaluateBoundsWithin #-}
-evaluateBoundsWithin :: UvBounds -> SurfaceFunction1D units -> Interval units
-evaluateBoundsWithin uvBounds function = evaluateBounds function uvBounds
+{-# INLINE boundsWithin #-}
+boundsWithin :: UvBounds -> SurfaceFunction1D units -> Interval units
+boundsWithin uvBounds function = bounds function uvBounds
 
 derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivative U = (.du)
@@ -656,10 +656,10 @@ findTangentSolutions subproblem = do
       let fvv = f.dv.dv
       let maybePoint =
             Solve2D.unique
-              (\bounds -> VectorBounds2D (evaluateBounds fu bounds) (evaluateBounds fv bounds))
-              (\point -> Vector2D (evaluate fu point) (evaluate fv point))
-              (\point -> Vector2D (evaluate fuu point) (evaluate fuv point))
-              (\point -> Vector2D (evaluate fuv point) (evaluate fvv point))
+              (\testBounds -> VectorBounds2D (bounds fu testBounds) (bounds fv testBounds))
+              (\testPoint -> Vector2D (evaluate fu testPoint) (evaluate fv testPoint))
+              (\testPoint -> Vector2D (evaluate fuu testPoint) (evaluate fuv testPoint))
+              (\testPoint -> Vector2D (evaluate fuv testPoint) (evaluate fvv testPoint))
               uvBounds
       case maybePoint of
         Nothing -> Solve2D.recurse CrossingCurvesOnly

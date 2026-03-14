@@ -3,7 +3,7 @@ module OpenSolid.DirectionSurfaceFunction3D
   , unsafe
   , unwrap
   , evaluate
-  , evaluateBounds
+  , bounds
   , derivative
   , constant
   , placeIn
@@ -40,9 +40,9 @@ evaluate :: DirectionSurfaceFunction3D space -> UvPoint -> Direction3D space
 evaluate (DirectionSurfaceFunction3D vectorSurfaceFunction) uvPoint =
   Direction3D.unsafe (VectorSurfaceFunction3D.evaluate vectorSurfaceFunction uvPoint)
 
-evaluateBounds :: DirectionSurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
-evaluateBounds (DirectionSurfaceFunction3D vectorSurfaceFunction) uvBounds =
-  DirectionBounds3D.unsafe (VectorSurfaceFunction3D.evaluateBounds vectorSurfaceFunction uvBounds)
+bounds :: DirectionSurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
+bounds (DirectionSurfaceFunction3D vectorSurfaceFunction) uvBounds =
+  DirectionBounds3D.unsafe (VectorSurfaceFunction3D.bounds vectorSurfaceFunction uvBounds)
 
 derivative ::
   SurfaceParameter ->

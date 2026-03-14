@@ -374,7 +374,7 @@ boundsConsistency curve = do
   tBounds <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (Interval.interpolate tBounds) Parameter.random)
   let curveValue = Curve2D.evaluate curve tValue
-  let curveBounds = Curve2D.evaluateBounds curve tBounds
+  let curveBounds = Curve2D.bounds curve tBounds
   Test.expect (curveValue `intersects` curveBounds)
     & Test.output "tValue" tValue
     & Test.output "tBounds" tBounds

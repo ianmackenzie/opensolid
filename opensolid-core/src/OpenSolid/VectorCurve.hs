@@ -10,7 +10,7 @@ module OpenSolid.VectorCurve
   , zero
   , bezier
   , evaluate
-  , evaluateBounds
+  , bounds
   , derivative
   , squaredMagnitude_
   , squaredMagnitude
@@ -118,7 +118,7 @@ class
   isZero :: Tolerance units => VectorCurve dimension units space -> Bool
   bezier :: NonEmpty (Vector dimension units space) -> VectorCurve dimension units space
   evaluate :: VectorCurve dimension units space -> Number -> Vector dimension units space
-  evaluateBounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
+  bounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
   derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
   unsafeNondegenerate :: VectorCurve dimension units space -> Nondegenerate dimension units space
@@ -133,7 +133,7 @@ instance Exists 1 units Void where
   isZero curve = curve ~= Curve1D.constant Quantity.zero
   derivative = Curve1D.derivative
   evaluate = Curve1D.evaluate
-  evaluateBounds = Curve1D.evaluateBounds
+  bounds = Curve1D.bounds
   bezier = Curve1D.bezier
   desingularized = Curve1D.desingularized
   squaredMagnitude_ = Curve1D.squared_
@@ -144,7 +144,7 @@ instance Exists 2 units space where
   isZero = VectorCurve2D.isZero
   derivative = VectorCurve2D.derivative
   evaluate = VectorCurve2D.evaluate
-  evaluateBounds = VectorCurve2D.evaluateBounds
+  bounds = VectorCurve2D.bounds
   bezier = VectorCurve2D.bezier
   desingularized = VectorCurve2D.desingularized
   squaredMagnitude_ = VectorCurve2D.squaredMagnitude_
@@ -155,7 +155,7 @@ instance Exists 3 units space where
   isZero = VectorCurve3D.isZero
   derivative = VectorCurve3D.derivative
   evaluate = VectorCurve3D.evaluate
-  evaluateBounds = VectorCurve3D.evaluateBounds
+  bounds = VectorCurve3D.bounds
   bezier = VectorCurve3D.bezier
   desingularized = VectorCurve3D.desingularized
   squaredMagnitude_ = VectorCurve3D.squaredMagnitude_

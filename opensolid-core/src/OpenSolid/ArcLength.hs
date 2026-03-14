@@ -37,8 +37,8 @@ parameterization derivativeMagnitude = do
         let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
         let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
         let evaluate uValue = evaluateIn tree (uValue * length)
-        let evaluateBounds (Interval uLow uHigh) = Interval (evaluate uLow) (evaluate uHigh)
-        let compiled = CompiledFunction.abstract evaluate evaluateBounds
+        let bounds (Interval uLow uHigh) = Interval (evaluate uLow) (evaluate uHigh)
+        let compiled = CompiledFunction.abstract evaluate bounds
         case Curve1D.quotient (Curve1D.constant length) derivativeMagnitude of
           Ok quotient -> (Curve1D.recursive compiled (quotient .), length)
           Error DivisionByZero -> (Curve1D.t, Quantity.zero)

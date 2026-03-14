@@ -93,9 +93,9 @@ verticalCurve ::
   List (Axis2D Unitless UvSpace) ->
   Curve2D Unitless UvSpace
 verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
-  let bounds = implicitCurveBounds boxes
+  let curveBounds = implicitCurveBounds boxes
   let clampedUBounds vValue =
-        List.foldl (clamp vValue) (ImplicitCurveBounds.evaluate bounds vValue) boundingAxes
+        List.foldl (clamp vValue) (ImplicitCurveBounds.evaluate curveBounds vValue) boundingAxes
   let solveForU =
         case (f.compiled, f.du.compiled) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fuExpr) ->
@@ -105,7 +105,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
         let vValue = Number.interpolateFrom vStart vEnd tValue
         let uValue = solveForU vValue
         UvPoint uValue vValue
-  let evaluateBounds tBounds = do
+  let bounds tBounds = do
         let Interval t1 t2 = tBounds
         let v1 = Number.interpolateFrom vStart vEnd t1
         let v2 = Number.interpolateFrom vStart vEnd t2
@@ -119,8 +119,8 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
             Bounds2D.hull2 (Point2D.relativeTo frame p1) (Point2D.relativeTo frame p2)
               & Bounds2D.placeIn frame
           NotMonotonic -> do
-            let uBounds = ImplicitCurveBounds.evaluateBounds bounds (Interval v1 v2)
-            let slopeBounds = SurfaceFunction1D.evaluateBounds dudv (Bounds2D uBounds (Interval v1 v2))
+            let uBounds = ImplicitCurveBounds.bounds curveBounds (Interval v1 v2)
+            let slopeBounds = SurfaceFunction1D.bounds dudv (Bounds2D uBounds (Interval v1 v2))
             let segmentUBounds = Internal.curveBoundsAt v1 v2 u1 u2 slopeBounds
             Bounds2D segmentUBounds (Interval v1 v2)
   let derivative self = do
@@ -128,7 +128,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
         let dvdt = Curve1D.constant deltaV
         let dudt = dvdt * dudv . self
         VectorCurve2D.xy dudt dvdt
-  Curve2D.recursive (CompiledFunction.abstract evaluate evaluateBounds) derivative
+  Curve2D.recursive (CompiledFunction.abstract evaluate bounds) derivative
 
 clamp :: Number -> Interval Unitless -> Axis2D Unitless UvSpace -> Interval Unitless
 clamp v (Interval uLow uHigh) axis = do

@@ -5,7 +5,7 @@ module OpenSolid.DirectionCurve2D
   , startValue
   , endValue
   , evaluate
-  , evaluateBounds
+  , bounds
   , derivative
   , constant
   , arc
@@ -56,9 +56,9 @@ evaluate :: DirectionCurve2D space -> Number -> Direction2D space
 evaluate (DirectionCurve2D vectorCurve) tValue =
   Direction2D.unsafe (VectorCurve2D.evaluate vectorCurve tValue)
 
-evaluateBounds :: DirectionCurve2D space -> Interval Unitless -> DirectionBounds2D space
-evaluateBounds (DirectionCurve2D vectorCurve) tBounds =
-  DirectionBounds2D.unsafe (VectorCurve2D.evaluateBounds vectorCurve tBounds)
+bounds :: DirectionCurve2D space -> Interval Unitless -> DirectionBounds2D space
+bounds (DirectionCurve2D vectorCurve) tBounds =
+  DirectionBounds2D.unsafe (VectorCurve2D.bounds vectorCurve tBounds)
 
 derivative :: DirectionCurve2D space -> VectorCurve2D Unitless space
 derivative (DirectionCurve2D vectorCurve) = VectorCurve2D.derivative vectorCurve

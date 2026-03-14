@@ -2,7 +2,7 @@ module OpenSolid.VectorCurve
   ( VectorCurve
   , Exists
   , evaluate
-  , evaluateBounds
+  , bounds
   , derivative
   )
 where
@@ -38,7 +38,7 @@ evaluate ::
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
-evaluateBounds ::
+bounds ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Interval Unitless ->

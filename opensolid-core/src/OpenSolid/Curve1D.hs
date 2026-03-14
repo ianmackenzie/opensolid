@@ -5,7 +5,7 @@ module OpenSolid.Curve1D
   , Compiled
   , Zero
   , evaluate
-  , evaluateBounds
+  , bounds
   , startValue
   , endValue
   , compiled
@@ -362,9 +362,9 @@ The parameter value should be between 0 and 1.
 evaluate :: Curve1D units -> Number -> Quantity units
 evaluate curve = CompiledFunction.evaluate curve.compiled
 
-{-# INLINE evaluateBounds #-}
-evaluateBounds :: Curve1D units -> Interval Unitless -> Interval units
-evaluateBounds curve = CompiledFunction.evaluateBounds curve.compiled
+{-# INLINE bounds #-}
+bounds :: Curve1D units -> Interval Unitless -> Interval units
+bounds curve = CompiledFunction.bounds curve.compiled
 
 startValue :: Curve1D units -> Quantity units
 startValue curve = evaluate curve 0.0
@@ -498,8 +498,8 @@ data Integral units = Integral (Curve1D units) (Curve1D units) (Interval Unitles
 instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve curveDerivative domain) = do
     let dx = Interval.width domain
-    let derivativeBounds = evaluateBounds curveDerivative domain
-    let estimate0 = dx * evaluateBounds curve domain
+    let derivativeBounds = bounds curveDerivative domain
+    let estimate0 = dx * bounds curve domain
     let y1 = evaluate curve (Interval.lower domain)
     let y2 = evaluate curve (Interval.upper domain)
     let m = Interval.width derivativeBounds
@@ -564,7 +564,7 @@ zeros curve
   | curve ~= zero = Error IsZero
   | otherwise = do
       let derivatives = Stream.iterate (.derivative) curve
-      let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
+      let derivativeBounds tBounds = Stream.map (\f -> bounds f tBounds) derivatives
       let cache = Solve1D.init derivativeBounds
       case Solve1D.search (findZeros derivatives) cache of
         Ok foundZeros -> Ok (List.sortBy (.location) foundZeros)

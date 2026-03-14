@@ -29,7 +29,7 @@ module OpenSolid.Curve2D
   , startPoint
   , endPoint
   , endpoints
-  , evaluateBounds
+  , bounds
   , compiled
   , derivative
   , secondDerivative
@@ -694,8 +694,8 @@ endPoint curve = evaluate curve 1.0
 endpoints :: Curve2D units space -> (Point2D units space, Point2D units space)
 endpoints curve = (startPoint curve, endPoint curve)
 
-evaluateBounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
-evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
+bounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
+bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
 
 samplePoints :: Curve2D units space -> NonEmpty (Point2D units space)
 samplePoints curve = NonEmpty.map (evaluate curve) Parameter.samples
@@ -705,7 +705,7 @@ reverse :: Curve2D units space -> Curve2D units space
 reverse curve = curve . (1.0 - Curve1D.t)
 
 overallBounds :: Curve2D units space -> Bounds2D units space
-overallBounds curve = evaluateBounds curve Interval.unit
+overallBounds curve = bounds curve Interval.unit
 
 compiled :: Curve2D units space -> Compiled units space
 compiled = (.compiled)
@@ -998,7 +998,7 @@ samplingPoints resolution curve = do
         Point2D.distanceFrom start end
   let curveSecondDerivative = secondDerivative curve
   let error subdomain = do
-        let secondDerivativeBounds = VectorCurve2D.evaluateBounds curveSecondDerivative subdomain
+        let secondDerivativeBounds = VectorCurve2D.bounds curveSecondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2D.magnitude secondDerivativeBounds
         Linearization.error secondDerivativeMagnitude subdomain
   let predicate = Resolution.predicate (#size size) (#error error) resolution
@@ -1063,10 +1063,9 @@ makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   let evaluateImpl t = piecewiseValue tree (arcLength * t)
-  let evaluateBoundsImpl (Interval t1 t2) =
-        piecewiseBounds tree (arcLength * t1) (arcLength * t2)
+  let boundsImpl (Interval t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
   new
-    (CompiledFunction.abstract evaluateImpl evaluateBoundsImpl)
+    (CompiledFunction.abstract evaluateImpl boundsImpl)
     (piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength)
 
 piecewise :: Tolerance units => NonEmpty (Curve2D units space) -> Curve2D units space
@@ -1121,7 +1120,7 @@ piecewiseBounds tree startLength endLength = case tree of
           (piecewiseBounds leftTree startLength leftLength)
           (piecewiseBounds rightTree Quantity.zero (endLength - leftLength))
   PiecewiseLeaf curve segmentLength ->
-    evaluateBounds curve (Interval (startLength / segmentLength) (endLength / segmentLength))
+    bounds curve (Interval (startLength / segmentLength) (endLength / segmentLength))
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree units space ->
@@ -1129,10 +1128,9 @@ piecewiseDerivative ::
   VectorCurve2D units space
 piecewiseDerivative tree length = do
   let evaluateImpl t = piecewiseDerivativeValue tree (length * t)
-  let evaluateBoundsImpl (Interval t1 t2) =
-        piecewiseDerivativeBounds tree (length * t1) (length * t2)
+  let boundsImpl (Interval t1 t2) = piecewiseDerivativeBounds tree (length * t1) (length * t2)
   VectorCurve2D.new
-    (CompiledFunction.abstract evaluateImpl evaluateBoundsImpl)
+    (CompiledFunction.abstract evaluateImpl boundsImpl)
     (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
 
 data PiecewiseDerivativeTree units space where
@@ -1203,9 +1201,9 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
         VectorBounds2D.aggregate2
           (piecewiseDerivativeBounds leftTree startLength leftLength)
           (piecewiseDerivativeBounds rightTree Quantity.zero (endLength - leftLength))
-  PiecewiseDerivativeLeaf curve segmentLength ->
-    VectorCurve2D.evaluateBounds curve $
-      Interval (startLength / segmentLength) (endLength / segmentLength)
+  PiecewiseDerivativeLeaf curve segmentLength -> do
+    let tBounds = Interval (startLength / segmentLength) (endLength / segmentLength)
+    VectorCurve2D.bounds curve tBounds
 
 searchTree :: Tolerance units => Curve2D units space -> Result IsPoint (SearchTree units space)
 searchTree = Curve.searchTree

@@ -18,7 +18,7 @@ module OpenSolid.Curve3D
   , startPoint
   , endPoint
   , evaluate
-  , evaluateBounds
+  , bounds
   , overallBounds
   , reverse
   , unsafeCurvatureVector
@@ -282,11 +282,11 @@ endPoint curve = evaluate curve 1.0
 evaluate :: Curve3D space -> Number -> Point3D space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
-evaluateBounds :: Curve3D space -> Interval Unitless -> Bounds3D space
-evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
+bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
+bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
 
 overallBounds :: Curve3D space -> Bounds3D space
-overallBounds curve = evaluateBounds curve Interval.unit
+overallBounds curve = bounds curve Interval.unit
 
 reverse :: Curve3D space -> Curve3D space
 reverse curve = curve . (1.0 - Curve1D.t)

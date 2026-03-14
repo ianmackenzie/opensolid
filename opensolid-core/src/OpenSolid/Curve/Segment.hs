@@ -112,9 +112,9 @@ evaluate givenCurve givenTangentCurve givenCurvatureVectorCurve_ givenParameterB
     { curve = givenCurve
     , tangentCurve = givenTangentCurve
     , parameterBounds = givenParameterBounds
-    , bounds = Curve.evaluateBounds givenCurve givenParameterBounds
-    , firstDerivativeBounds = VectorCurve.evaluateBounds firstDerivativeCurve givenParameterBounds
-    , secondDerivativeBounds = VectorCurve.evaluateBounds secondDerivativeCurve givenParameterBounds
-    , curvatureVectorBounds_ = VectorCurve.evaluateBounds givenCurvatureVectorCurve_ givenParameterBounds
-    , tangentBounds = DirectionCurve.evaluateBounds givenTangentCurve givenParameterBounds
+    , bounds = Curve.bounds givenCurve givenParameterBounds
+    , firstDerivativeBounds = VectorCurve.bounds firstDerivativeCurve givenParameterBounds
+    , secondDerivativeBounds = VectorCurve.bounds secondDerivativeCurve givenParameterBounds
+    , curvatureVectorBounds_ = VectorCurve.bounds givenCurvatureVectorCurve_ givenParameterBounds
+    , tangentBounds = DirectionCurve.bounds givenTangentCurve givenParameterBounds
     }

@@ -10,7 +10,7 @@ module OpenSolid.VectorCurve2D
   , unsafeNondegenerate
   , isZero
   , evaluate
-  , evaluateBounds
+  , bounds
   , squaredMagnitude_
   , quotient
   , quotient_
@@ -131,7 +131,7 @@ derivative :: VectorCurve2D units space -> VectorCurve2D units space
 unsafeNondegenerate :: VectorCurve2D units space -> Nondegenerate units space
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
 evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
-evaluateBounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
+bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
   VectorCurve2D units1 space ->

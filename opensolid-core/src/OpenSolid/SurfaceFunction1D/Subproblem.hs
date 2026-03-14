@@ -68,12 +68,12 @@ new f dudv dvdu subdomain = do
     , subdomain
     , uvBounds
     , fValues = cornerValues uvBounds f
-    , fBounds = SurfaceFunction1D.evaluateBounds f uvBounds
-    , fuBounds = SurfaceFunction1D.evaluateBounds f.du uvBounds
-    , fvBounds = SurfaceFunction1D.evaluateBounds f.dv uvBounds
-    , fuuBounds = SurfaceFunction1D.evaluateBounds f.du.du uvBounds
-    , fuvBounds = SurfaceFunction1D.evaluateBounds f.du.dv uvBounds
-    , fvvBounds = SurfaceFunction1D.evaluateBounds f.dv.dv uvBounds
+    , fBounds = SurfaceFunction1D.bounds f uvBounds
+    , fuBounds = SurfaceFunction1D.bounds f.du uvBounds
+    , fvBounds = SurfaceFunction1D.bounds f.dv uvBounds
+    , fuuBounds = SurfaceFunction1D.bounds f.du.du uvBounds
+    , fuvBounds = SurfaceFunction1D.bounds f.du.dv uvBounds
+    , fvvBounds = SurfaceFunction1D.bounds f.dv.dv uvBounds
     }
 
 cornerValues :: UvBounds -> SurfaceFunction1D units -> CornerValues units

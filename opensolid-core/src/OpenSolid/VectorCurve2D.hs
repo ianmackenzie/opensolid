@@ -14,7 +14,7 @@ module OpenSolid.VectorCurve2D
   , startValue
   , endValue
   , evaluate
-  , evaluateBounds
+  , bounds
   , xComponent
   , yComponent
   , components
@@ -637,8 +637,8 @@ The parameter value should be between 0 and 1.
 evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
 evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
 
-evaluateBounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
-evaluateBounds curve tBounds = CompiledFunction.evaluateBounds curve.compiled tBounds
+bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
+bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xComponent :: VectorCurve2D units space -> Curve1D units

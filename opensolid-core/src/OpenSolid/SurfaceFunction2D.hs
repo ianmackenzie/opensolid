@@ -7,7 +7,7 @@ module OpenSolid.SurfaceFunction2D
   , uv
   , xy
   , evaluate
-  , evaluateBounds
+  , bounds
   , derivative
   , distanceAlong
   , xCoordinate
@@ -224,8 +224,8 @@ xy x y = do
 evaluate :: SurfaceFunction2D units space -> UvPoint -> Point2D units space
 evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
-evaluateBounds :: SurfaceFunction2D units space -> UvBounds -> Bounds2D units space
-evaluateBounds function uvBounds = CompiledFunction.evaluateBounds function.compiled uvBounds
+bounds :: SurfaceFunction2D units space -> UvBounds -> Bounds2D units space
+bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
 
 derivative ::
   SurfaceParameter ->

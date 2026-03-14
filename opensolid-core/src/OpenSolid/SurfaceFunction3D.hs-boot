@@ -3,7 +3,7 @@ module OpenSolid.SurfaceFunction3D
   , Compiled
   , constant
   , evaluate
-  , evaluateBounds
+  , bounds
   , derivative
   , transformBy
   )
@@ -57,7 +57,7 @@ instance
 
 constant :: Point3D space -> SurfaceFunction3D space
 evaluate :: SurfaceFunction3D space -> UvPoint -> Point3D space
-evaluateBounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
+bounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
 derivative ::
   SurfaceParameter ->
   SurfaceFunction3D space ->

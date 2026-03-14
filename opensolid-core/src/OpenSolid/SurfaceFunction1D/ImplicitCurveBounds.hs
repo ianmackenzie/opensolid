@@ -2,7 +2,7 @@ module OpenSolid.SurfaceFunction1D.ImplicitCurveBounds
   ( ImplicitCurveBounds
   , build
   , evaluate
-  , evaluateBounds
+  , bounds
   )
 where
 
@@ -36,12 +36,12 @@ subtree boxes begin end = case end - begin of
 evaluate :: ImplicitCurveBounds -> Number -> Interval Unitless
 evaluate implicitCurveBounds x = case implicitCurveBounds of
   Node left split right -> if x < split then evaluate left x else evaluate right x
-  Leaf bounds -> bounds
+  Leaf leafBounds -> leafBounds
 
-evaluateBounds :: ImplicitCurveBounds -> Interval Unitless -> Interval Unitless
-evaluateBounds implicitCurveBounds x = case implicitCurveBounds of
+bounds :: ImplicitCurveBounds -> Interval Unitless -> Interval Unitless
+bounds implicitCurveBounds x = case implicitCurveBounds of
   Node left split right
-    | Interval.upper x <= split -> evaluateBounds left x
-    | Interval.lower x >= split -> evaluateBounds right x
-    | otherwise -> Interval.aggregate2 (evaluateBounds left x) (evaluateBounds right x)
-  Leaf bounds -> bounds
+    | Interval.upper x <= split -> bounds left x
+    | Interval.lower x >= split -> bounds right x
+    | otherwise -> Interval.aggregate2 (bounds left x) (bounds right x)
+  Leaf leafBounds -> leafBounds
