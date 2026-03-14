@@ -1,10 +1,30 @@
+Rename 'evaluate' to just 'value' for consistency with e.g. 'derivativeValue'?
+
+Update Curve.Segment.evaluate to take a Curve.Nondegenerate value
+
+Make 'compiled' fields lazy, to avoid actually compiling intermediate expressions?
+- or maybe actually remove StrictData as global setting, just use strict fields explicitly for primitives etc.?
+
+Use larger 'pebble' value?
+- even something like 1/16 should probably be OK, since 1/16 of the domain should equate to roughly 1/256 of the geometry
+  (zero first derivative at start means function is roughly quadratic)
+  - or 1/32, so roughly 1/1024 of the geometry?
+    - 1/16th probably good: then can use 1/256th for size of box around saddle point, for consistency
+
 Add search tree to Nondegenerate types
+
+Add Curve#D.steps etc. functions
+- then search for uses of Parameter.steps etc. that can be replaced
 
 Try moving e.g. Curve type family into Curve.Exists typeclass?
 - then add Nondegenerate as well...
 - or have Curve.Nondegenerate module with Nondegenerate type and its own Exists typeclass?
 
+Try using involve profile directly in SpurGear module, instead of spline approximation
+
 Rename maxSampledMagnitude to nominalMagnitude?
+
+Switch to using |> and <| instead of & and $
 
 Add NonEmpty and Fuzzy to Prelude?
 
