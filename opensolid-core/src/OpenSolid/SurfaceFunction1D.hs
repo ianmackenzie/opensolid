@@ -3,7 +3,6 @@ module OpenSolid.SurfaceFunction1D
   , Compiled
   , evaluate
   , bounds
-  , boundsWithin
   , derivative
   , derivativeIn
   , compiled
@@ -359,10 +358,6 @@ evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
 
 bounds :: SurfaceFunction1D units -> UvBounds -> Interval units
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
-
-{-# INLINE boundsWithin #-}
-boundsWithin :: UvBounds -> SurfaceFunction1D units -> Interval units
-boundsWithin uvBounds function = bounds function uvBounds
 
 derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivative U = (.du)
