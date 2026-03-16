@@ -267,6 +267,7 @@ library
     OpenSolid.Bytecode.Evaluate
     OpenSolid.Bytecode.Instruction
     OpenSolid.CDT
+    OpenSolid.Curve.CurvatureVector
     OpenSolid.Curve1D.Bisection
     OpenSolid.HasZero
     OpenSolid.Linearization
