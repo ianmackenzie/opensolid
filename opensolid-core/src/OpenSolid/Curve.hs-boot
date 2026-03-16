@@ -38,6 +38,8 @@ class Exists (dimension :: Natural) (units :: Type) (space :: Type)
 
 data IsPoint
 
+data HasSingularity
+
 evaluate ::
   Exists dimension units space =>
   Curve dimension units space ->
@@ -94,4 +96,4 @@ curvatureVector_ ::
   , Tolerance units
   ) =>
   Curve dimension units space ->
-  Result IsPoint (VectorCurve dimension (Unitless ?/? units) space)
+  Result HasSingularity (VectorCurve dimension (Unitless ?/? units) space)

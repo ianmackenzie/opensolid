@@ -9,7 +9,6 @@ module OpenSolid.Curve2D
   , compiled
   , derivative
   , reverse
-  , unsafeCurvatureVector_
   , xy
   , lineFrom
   , hermite
@@ -117,7 +116,6 @@ overallBounds :: Curve2D units space -> Bounds2D units space
 compiled :: Curve2D units space -> Compiled units space
 derivative :: Curve2D units space -> VectorCurve2D units space
 reverse :: Curve2D units space -> Curve2D units space
-unsafeCurvatureVector_ :: Curve2D units space -> VectorCurve2D (Unitless ?/? units) space
 xy :: Curve1D units -> Curve1D units -> Curve2D units space
 lineFrom :: Point2D units space -> Point2D units space -> Curve2D units space
 hermite ::

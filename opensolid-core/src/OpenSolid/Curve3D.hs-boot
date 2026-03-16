@@ -9,7 +9,6 @@ module OpenSolid.Curve3D
   , bounds
   , overallBounds
   , reverse
-  , unsafeCurvatureVector
   )
 where
 
@@ -18,7 +17,6 @@ import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Plane3D, Point3D, Vector3D)
-import OpenSolid.Units (InverseMeters)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
 type role Curve3D nominal
@@ -94,4 +92,3 @@ evaluate :: Curve3D space -> Number -> Point3D space
 bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 overallBounds :: Curve3D space -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space
-unsafeCurvatureVector :: Curve3D space -> VectorCurve3D InverseMeters space

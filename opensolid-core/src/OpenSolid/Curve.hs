@@ -21,8 +21,6 @@ module OpenSolid.Curve
   , nonzero
   , tangentDirection
   , curvatureVector_
-  , unsafeCurvatureVector_
-  , unsafeCurvatureVectorImpl_
   , findPoint
   , searchTree
   , Intersections (IntersectionPoints, OverlappingSegments)
@@ -36,9 +34,9 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
+import {-# SOURCE #-} OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Search qualified as Search
 import OpenSolid.Curve.Segment (Segment)
-import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -53,14 +51,13 @@ import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
-import OpenSolid.Units qualified as Units
+import OpenSolid.Result qualified as Result
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
-import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
 type family Curve dimension units space = curve | curve -> dimension units space where
   Curve 2 units space = Curve2D units space
@@ -107,21 +104,18 @@ class
   overallBounds :: Curve dimension units space -> Bounds dimension units space
   evaluate :: Curve dimension units space -> Number -> Point dimension units space
   bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
-  unsafeCurvatureVector_ :: Curve dimension units space -> VectorCurve dimension (Unitless ?/? units) space
 
 instance Exists 2 units space where
   derivative = Curve2D.derivative
   overallBounds = Curve2D.overallBounds
   evaluate = Curve2D.evaluate
   bounds = Curve2D.bounds
-  unsafeCurvatureVector_ = Curve2D.unsafeCurvatureVector_
 
 instance Exists 3 Meters space where
   derivative = Curve3D.derivative
   overallBounds = Curve3D.overallBounds
   evaluate = Curve3D.evaluate
   bounds = Curve3D.bounds
-  unsafeCurvatureVector_ = Units.unspecialize . Curve3D.unsafeCurvatureVector
 
 secondDerivative ::
   Exists dimension units space =>
@@ -163,18 +157,8 @@ curvatureVector_ ::
   , Tolerance units
   ) =>
   Curve dimension units space ->
-  Result IsPoint (VectorCurve dimension (Unitless ?/? units) space)
-curvatureVector_ curve =
-  if isPoint curve then Error IsPoint else Ok (unsafeCurvatureVector_ curve)
-
-unsafeCurvatureVectorImpl_ ::
-  (Exists dimension units space, VectorCurve.Exists dimension (Unitless ?/? units) space) =>
-  VectorCurve dimension units space ->
-  VectorCurve dimension (Unitless ?/? units) space
-unsafeCurvatureVectorImpl_ firstDerivative = do
-  let dsdt = VectorCurve.Nondegenerate.magnitude (Nondegenerate firstDerivative)
-  let tangent = firstDerivative / dsdt
-  VectorCurve.unerase (VectorCurve.derivative tangent / Curve1D.Nondegenerate.erase dsdt)
+  Result HasSingularity (VectorCurve dimension (Unitless ?/? units) space)
+curvatureVector_ curve = Result.map Curve.Nonzero.curvatureVector_ (nonzero curve)
 
 startPoint ::
   Exists dimension units space =>

@@ -40,7 +40,6 @@ module OpenSolid.Curve2D
   , tangentDirection
   , curvatureVector_
   , curvatureVector
-  , unsafeCurvatureVector_
   , offsetLeftwardBy
   , offsetRightwardBy
   , reverse
@@ -94,7 +93,7 @@ import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (IsPoint (IsPoint))
+import OpenSolid.Curve (HasSingularity, IsPoint (IsPoint))
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -160,7 +159,6 @@ import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 data Curve2D units space = Curve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
-  , unsafeCurvatureVector_ :: ~(VectorCurve2D (Unitless ?/? units) space)
   }
 
 type Compiled units space =
@@ -199,7 +197,6 @@ instance
     Curve2D
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
-      , unsafeCurvatureVector_ = Units.coerce curve.unsafeCurvatureVector_
       }
 
 instance
@@ -351,7 +348,6 @@ new givenCompiled givenDerivative =
   Curve2D
     { compiled = givenCompiled
     , derivative = givenDerivative
-    , unsafeCurvatureVector_ = Curve.unsafeCurvatureVectorImpl_ givenDerivative
     }
 
 recursive ::
@@ -744,17 +740,14 @@ tangentDirection = Curve.tangentDirection
 curvatureVector_ ::
   Tolerance units =>
   Curve2D units space ->
-  Result IsPoint (VectorCurve2D (Unitless ?/? units) space)
+  Result HasSingularity (VectorCurve2D (Unitless ?/? units) space)
 curvatureVector_ = Curve.curvatureVector_
 
 curvatureVector ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2D units1 space ->
-  Result IsPoint (VectorCurve2D units2 space)
+  Result HasSingularity (VectorCurve2D units2 space)
 curvatureVector curve = Result.map Units.specialize (curvatureVector_ curve)
-
-unsafeCurvatureVector_ :: Curve2D units space -> VectorCurve2D (Unitless ?/? units) space
-unsafeCurvatureVector_ = (.unsafeCurvatureVector_)
 
 offsetLeftwardBy ::
   Tolerance units =>

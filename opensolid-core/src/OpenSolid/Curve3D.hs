@@ -25,7 +25,6 @@ module OpenSolid.Curve3D
   , bounds
   , overallBounds
   , reverse
-  , unsafeCurvatureVector
   , arcLengthParameterization
   , parameterizeByArcLength
   , transformBy
@@ -43,7 +42,7 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (IsPoint)
+import OpenSolid.Curve (HasSingularity, IsPoint)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -80,7 +79,6 @@ import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 data Curve3D space = Curve3D
   { compiled :: Compiled space
   , derivative :: ~(VectorCurve3D Meters space)
-  , unsafeCurvatureVector :: ~(VectorCurve3D InverseMeters space)
   }
 
 type Compiled space =
@@ -191,7 +189,6 @@ new givenCompiled givenDerivative =
   Curve3D
     { compiled = givenCompiled
     , derivative = givenDerivative
-    , unsafeCurvatureVector = Units.specialize (Curve.unsafeCurvatureVectorImpl_ givenDerivative)
     }
 
 recursive :: Compiled space -> (Curve3D space -> VectorCurve3D Meters space) -> Curve3D space
@@ -300,7 +297,7 @@ tangentDirection = Curve.tangentDirection
 curvatureVector ::
   Tolerance Meters =>
   Curve3D space ->
-  Result IsPoint (VectorCurve3D InverseMeters space)
+  Result HasSingularity (VectorCurve3D InverseMeters space)
 curvatureVector curve = Result.map Units.specialize (Curve.curvatureVector_ curve)
 
 startPoint :: Curve3D space -> Point3D space
@@ -320,9 +317,6 @@ overallBounds curve = bounds curve Interval.unit
 
 reverse :: Curve3D space -> Curve3D space
 reverse curve = curve . (1.0 - Curve1D.t)
-
-unsafeCurvatureVector :: Curve3D space -> VectorCurve3D InverseMeters space
-unsafeCurvatureVector = (.unsafeCurvatureVector)
 
 arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Curve1D Unitless, Length)
 arcLengthParameterization curve =
