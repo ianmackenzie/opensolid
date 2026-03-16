@@ -252,6 +252,15 @@ instance
 instance Multiplication_ (Quantity units1) (Curve1D units2) (Curve1D (units1 ?*? units2)) where
   value ?*? curve = constant value ?*? curve
 
+instance DotMultiplication_ (Curve1D units1) (Curve1D units2) (Curve1D (units1 ?*? units2)) where
+  dot_ = (?*?)
+
+instance
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Curve1D units1) (Curve1D units2) (Curve1D units3)
+  where
+  dot = (*)
+
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Vector2D units2 space) (VectorCurve2D units3 space)

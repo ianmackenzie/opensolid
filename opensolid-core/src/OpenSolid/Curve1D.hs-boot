@@ -80,6 +80,12 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1D units1) (Curve1D units2) (Curve1D units3)
 
+instance DotMultiplication_ (Curve1D units1) (Curve1D units2) (Curve1D (units1 ?*? units2))
+
+instance
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Curve1D units1) (Curve1D units2) (Curve1D units3)
+
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D units3)
