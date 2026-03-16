@@ -1,5 +1,8 @@
 module OpenSolid.Curve.Nonzero
-  ( curvatureVector_
+  ( tangentDirection
+  , tangentDirectionValue
+  , tangentDirectionBounds
+  , curvatureVector_
   , curvatureVectorValue_
   , curvatureVectorBounds_
   )
@@ -9,6 +12,12 @@ import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
 import OpenSolid.Curve1D qualified as Curve1D
+import OpenSolid.Direction (Direction)
+import OpenSolid.Direction qualified as Direction
+import OpenSolid.DirectionBounds (DirectionBounds)
+import OpenSolid.DirectionBounds qualified as DirectionBounds
+import OpenSolid.DirectionCurve (DirectionCurve)
+import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
@@ -18,6 +27,32 @@ import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
+import OpenSolid.VectorCurve.Nonzero qualified as VectorCurve.Nonzero
+
+tangentDirection ::
+  (Curve.Exists dimension units space, DirectionCurve.Exists dimension space) =>
+  Nonzero (Curve dimension units space) ->
+  DirectionCurve dimension space
+tangentDirection (Nonzero curve) =
+  VectorCurve.Nonzero.direction (Nonzero (Curve.derivative curve))
+
+tangentDirectionValue ::
+  (Curve.Exists dimension units space, Direction.Exists dimension space) =>
+  Nonzero (Curve dimension units space) ->
+  Number ->
+  Direction dimension space
+tangentDirectionValue (Nonzero curve) tValue = do
+  let derivativeValue = Curve.derivativeValue curve tValue
+  Direction.unsafe (derivativeValue / Vector.magnitude derivativeValue)
+
+tangentDirectionBounds ::
+  (Curve.Exists dimension units space, DirectionBounds.Exists dimension space) =>
+  Nonzero (Curve dimension units space) ->
+  Interval Unitless ->
+  DirectionBounds dimension space
+tangentDirectionBounds (Nonzero curve) tBounds = do
+  let derivativeBounds = Curve.derivativeBounds curve tBounds
+  DirectionBounds.unsafe (derivativeBounds / VectorBounds.magnitude derivativeBounds)
 
 curvatureVector_ ::
   (Curve.Exists dimension units space, VectorCurve.Exists dimension (Unitless ?/? units) space) =>
