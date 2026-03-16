@@ -1,3 +1,5 @@
+{-# LANGUAGE UnboxedTuples #-}
+
 module OpenSolid.Curve
   ( Curve
   , Exists
@@ -35,8 +37,9 @@ import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
-import OpenSolid.Curve.Search qualified as Search
+import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve.Segment (Segment)
+import OpenSolid.Curve.Segment qualified as Curve.Segment
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -44,14 +47,21 @@ import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
+import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
+import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
+import OpenSolid.Number qualified as Number
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
+import OpenSolid.Search qualified as Search
+import OpenSolid.Search.Domain qualified as Search.Domain
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
@@ -68,7 +78,7 @@ data IsPoint = IsPoint deriving (Eq, Show)
 data HasSingularity = HasSingularity deriving (Eq, Show)
 
 type SearchTree dimension units space =
-  Search.Tree dimension units space
+  Curve.Search.Tree dimension units space
 
 class
   ( Point.Exists dimension units space
@@ -208,7 +218,36 @@ findPoint ::
   Point dimension units space ->
   Curve dimension units space ->
   List Number
-findPoint point curve = Search.findPoint point curve (searchTree curve)
+findPoint point curve = do
+  let curveDerivative = derivative curve
+  let evaluateFirstOrder tValue =
+        (# evaluate curve tValue - point, VectorCurve.evaluate curveDerivative tValue #)
+  let isSolution tValue = evaluate curve tValue ~= point
+  let isDegenerate tValue = VectorCurve.evaluate curveDerivative tValue ~= Vector.zero
+  let endpointSolutions = List.filter isSolution [0.0, 1.0]
+  let solveMonotonic tBounds = do
+        let tMid = Interval.midpoint tBounds
+        let tSolution = NewtonRaphson.curve evaluateFirstOrder tMid
+        if Search.isInterior tSolution tBounds && isSolution tSolution
+          then Resolved (Just tSolution)
+          else Unresolved
+  let interiorSolution tBounds segment
+        | not (point `intersects` Curve.Segment.bounds segment) = Resolved Nothing
+        | otherwise = do
+            let isMonotonic = Curve.Segment.monotonic segment
+            let isSmall = Search.Domain.isSmall tBounds
+            let endpointSolution = List.find (Number.includedIn tBounds) endpointSolutions
+            let hasEndpointSolution = endpointSolution /= Nothing
+            if
+              | isMonotonic && hasEndpointSolution -> Resolved Nothing
+              | isSmall, Just tValue <- endpointSolution, isDegenerate tValue -> Resolved Nothing
+              | isMonotonic -> solveMonotonic tBounds
+              | otherwise -> Unresolved
+  let isDuplicate (tBounds1, _) (tBounds2, _) = Search.Domain.overlapping tBounds1 tBounds2
+  let interiorSolutions =
+        Search.exclusive interiorSolution isDuplicate (searchTree curve)
+          & List.map Pair.second
+  List.sort (endpointSolutions <> interiorSolutions)
 
 intersections ::
   ( Exists dimension units space
