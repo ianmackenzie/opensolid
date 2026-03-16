@@ -208,7 +208,7 @@ findPoint ::
 findPoint point curve = Search.findPoint point curve (searchTree curve)
 
 searchTree ::
-  (Exists dimension units space, Tolerance units) =>
+  Exists dimension units space =>
   Curve dimension units space ->
   SearchTree dimension units space
 searchTree = Search.tree

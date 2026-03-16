@@ -37,7 +37,6 @@ tree ::
   , VectorBounds.Exists dimension units space
   , VectorBounds.Exists dimension (Unitless ?/? units) space
   , DirectionBounds.Exists dimension space
-  , Tolerance units
   ) =>
   Curve dimension units space ->
   Tree dimension units space

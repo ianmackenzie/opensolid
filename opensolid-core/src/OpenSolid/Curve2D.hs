@@ -1218,5 +1218,5 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
     let tBounds = Interval (startLength / segmentLength) (endLength / segmentLength)
     VectorCurve2D.bounds curve tBounds
 
-searchTree :: Tolerance units => Curve2D units space -> SearchTree units space
+searchTree :: Curve2D units space -> SearchTree units space
 searchTree = Curve.searchTree
