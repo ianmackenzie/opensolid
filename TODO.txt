@@ -1,5 +1,13 @@
 Rename 'evaluate' to just 'value' for consistency with e.g. 'derivativeValue'?
 
+Only allow dividing by Nonzero values?
+- add machinery to FFI module to implicitly convert e.g. 'Nonzero Number' to and from 'Number', with a check on inputs
+
+Remove Random.Internal by adding Random.[int,number,bool,quantity,sign]?
+- general pattern: Random module implements generators for scalar/atomic values
+- everything else implements their own random generators (e.g. List.random, List.shuffle)
+- can then also remove Bool module
+
 Update Curve.Segment.evaluate to take a Curve.Nondegenerate value
 
 Make 'compiled' fields lazy, to avoid actually compiling intermediate expressions?
@@ -11,16 +19,16 @@ Use larger 'pebble' value?
   - or 1/32, so roughly 1/1024 of the geometry?
     - 1/16th probably good: then can use 1/256th for size of box around saddle point, for consistency
 
-Add search tree to Nondegenerate types
-
 Add Curve#D.steps etc. functions
 - then search for uses of Parameter.steps etc. that can be replaced
+
+Try to remove unsafeQuotient and unsafeSqrt functions in favour of using Nonzero/Nondegenerate machinery?
 
 Try moving e.g. Curve type family into Curve.Exists typeclass?
 - then add Nondegenerate as well...
 - or have Curve.Nondegenerate module with Nondegenerate type and its own Exists typeclass?
 
-Try using involve profile directly in SpurGear module, instead of spline approximation
+Try using involute profile directly in SpurGear module, instead of spline approximation
 
 Rename maxSampledMagnitude to nominalMagnitude?
 
@@ -33,16 +41,11 @@ Add ParameterInterval module and move 'includes' and 'isInterior' functions ther
 - generally avoid having no-tolerance functions in units-generic modules
 - maybe also move 'overlapping' functions from Search.Domain into ParameterInterval and UvBounds
 
-Move WithNoZeros and WithNoInteriorZeros into generic VectorCurve module?
-- then could potentially have e.g. VectorCurve.WithNoInteriorZeros.direction instead of VectorCurve.unsafeDirection
-
 Have Nondegenerate.normalize return a NonZero value
 
 Instead of Curve.SearchTree, have Curve.Nondegenerate?
 - include tangent direction, curvature and search tree
-- Curve.Nondegenerate value could include a VectorCurve.WithNoInteriorZeros...
 - Curve.Nondegenerate.curve, Curve.Nondegenerate.tangentDirection, Curve.Nondegenerate.curvatureVector_, Curve.Nondegenerate.searchTree...
-- Curve.Nondegenerate.clean to save space?
 - have optimized implementation for e.g. 'Intersects Point2D Curve2D.Nondegenerate' that uses cached search tree
 
 Optimize Region2d.contains
