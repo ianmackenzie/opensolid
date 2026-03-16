@@ -18,6 +18,8 @@ import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Search.Domain (Domain (Domain), InfiniteRecursion (InfiniteRecursion))
 import OpenSolid.Search.Domain qualified as Domain
+import OpenSolid.Units (HasUnits)
+import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
 
 data Tree bounds value where
@@ -27,6 +29,15 @@ data Tree bounds value where
     value ->
     ~(List (Tree bounds value)) ->
     Tree bounds value
+
+instance HasUnits value units => HasUnits (Tree bounds value) units
+
+instance
+  (bounds1 ~ bounds2, Units.Coercion value1 value2) =>
+  Units.Coercion (Tree bounds1 value1) (Tree bounds2 value2)
+  where
+  coerce (Tree domainBounds value children) =
+    Tree domainBounds (Units.coerce value) (List.map Units.coerce children)
 
 curveDomain :: Domain (Interval Unitless)
 curveDomain = Domain.unitInterval
