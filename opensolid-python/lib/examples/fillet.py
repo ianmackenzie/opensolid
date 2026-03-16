@@ -10,7 +10,7 @@ from opensolid import (
     Curve2D,
     Gltf,
     Length,
-    LengthBounds,
+    LengthInterval,
     Mitsuba,
     Model3D,
     PbrMaterial,
@@ -56,7 +56,7 @@ with Tolerance(Length.nanometers(1)):
 
     material = PbrMaterial.nonmetal(Color.blue, roughness=0.3)
     model = Model3D.body(body).with_pbr_material(material).with_name("Body")
-    ground_limits = LengthBounds.symmetric(width=Length.meters(2))
+    ground_limits = LengthInterval.symmetric(width=Length.meters(2))
     ground_body = Body3D.extruded(
         World3D.bottom_plane,
         Region2D.rectangle(Bounds2D(ground_limits, ground_limits)),
