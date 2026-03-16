@@ -22,6 +22,8 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
+import OpenSolid.Units (HasUnits)
+import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 
@@ -32,6 +34,30 @@ data Segment dimension units space = Segment
   , tangentBounds :: ~(DirectionBounds dimension space)
   , curvatureVectorBounds_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
   }
+
+instance HasUnits (Segment dimension units space) units
+
+instance
+  ( dimension1 ~ dimension2
+  , space1 ~ space2
+  , VectorBounds.Exists dimension1 units1 space1
+  , VectorBounds.Exists dimension2 units2 space2
+  , VectorBounds.Exists dimension1 (Unitless ?/? units1) space1
+  , VectorBounds.Exists dimension2 (Unitless ?/? units2) space2
+  , Units.Coercion (Bounds dimension1 units1 space1) (Bounds dimension2 units2 space2)
+  ) =>
+  Units.Coercion
+    (Segment dimension1 units1 space1)
+    (Segment dimension2 units2 space2)
+  where
+  coerce segment =
+    Segment
+      { bounds = Units.coerce segment.bounds
+      , derivativeBounds = VectorBounds.coerce segment.derivativeBounds
+      , secondDerivativeBounds = VectorBounds.coerce segment.secondDerivativeBounds
+      , tangentBounds = segment.tangentBounds
+      , curvatureVectorBounds_ = VectorBounds.coerce segment.curvatureVectorBounds_
+      }
 
 bounds :: Segment dimension units space -> Bounds dimension units space
 bounds = (.bounds)
