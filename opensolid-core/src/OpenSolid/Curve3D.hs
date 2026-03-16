@@ -2,6 +2,8 @@ module OpenSolid.Curve3D
   ( Curve3D
   , HasDegeneracy (HasDegeneracy)
   , Compiled
+  , Segment
+  , SearchTree
   , new
   , recursive
   , constant
@@ -32,6 +34,7 @@ module OpenSolid.Curve3D
   , relativeTo
   , findPoint
   , intersections
+  , searchTree
   )
 where
 
@@ -44,6 +47,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (HasSingularity, IsPoint)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
@@ -79,10 +83,15 @@ import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 data Curve3D space = Curve3D
   { compiled :: Compiled space
   , derivative :: ~(VectorCurve3D Meters space)
+  , searchTree :: ~(SearchTree space)
   }
 
 type Compiled space =
   CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
+
+type Segment space = Curve.Segment 3 Meters space
+
+type SearchTree space = Curve.SearchTree 3 Meters space
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
 
@@ -186,10 +195,7 @@ instance space1 ~ space2 => Intersects (Curve3D space1) (Point3D space2) (Tolera
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new givenCompiled givenDerivative =
-  Curve3D
-    { compiled = givenCompiled
-    , derivative = givenDerivative
-    }
+  let result = Curve3D givenCompiled givenDerivative (Curve.Search.tree result) in result
 
 recursive :: Compiled space -> (Curve3D space -> VectorCurve3D Meters space) -> Curve3D space
 recursive givenCompiled derivativeFunction =
@@ -359,3 +365,6 @@ intersections ::
   Curve3D space ->
   Result Curve.IsPoint (Maybe Curve.Intersections)
 intersections = Curve.intersections
+
+searchTree :: Curve3D space -> SearchTree space
+searchTree = (.searchTree)

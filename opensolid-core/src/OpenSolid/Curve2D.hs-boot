@@ -1,6 +1,7 @@
 module OpenSolid.Curve2D
   ( Curve2D
   , Compiled
+  , SearchTree
   , constant
   , new
   , evaluate
@@ -15,11 +16,13 @@ module OpenSolid.Curve2D
   , desingularize
   , transformBy
   , piecewise
+  , searchTree
   )
 where
 
 import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -39,6 +42,8 @@ type Compiled units space =
     (Point2D units space)
     (Interval Unitless)
     (Bounds2D units space)
+
+type SearchTree units space = Curve.Search.Tree 2 units space
 
 instance HasField "startPoint" (Curve2D units space) (Point2D units space)
 
@@ -137,3 +142,4 @@ piecewise ::
   Tolerance units =>
   NonEmpty (Curve2D units space) ->
   Curve2D units space
+searchTree :: Curve2D units space -> SearchTree units space

@@ -104,18 +104,21 @@ class
   overallBounds :: Curve dimension units space -> Bounds dimension units space
   evaluate :: Curve dimension units space -> Number -> Point dimension units space
   bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
+  searchTree :: Curve dimension units space -> SearchTree dimension units space
 
 instance Exists 2 units space where
   derivative = Curve2D.derivative
   overallBounds = Curve2D.overallBounds
   evaluate = Curve2D.evaluate
   bounds = Curve2D.bounds
+  searchTree = Curve2D.searchTree
 
 instance Exists 3 Meters space where
   derivative = Curve3D.derivative
   overallBounds = Curve3D.overallBounds
   evaluate = Curve3D.evaluate
   bounds = Curve3D.bounds
+  searchTree = Curve3D.searchTree
 
 secondDerivative ::
   Exists dimension units space =>
@@ -206,12 +209,6 @@ findPoint ::
   Curve dimension units space ->
   List Number
 findPoint point curve = Search.findPoint point curve (searchTree curve)
-
-searchTree ::
-  Exists dimension units space =>
-  Curve dimension units space ->
-  SearchTree dimension units space
-searchTree = Search.tree
 
 intersections ::
   ( Exists dimension units space

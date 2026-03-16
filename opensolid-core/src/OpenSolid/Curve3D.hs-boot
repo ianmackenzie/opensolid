@@ -1,6 +1,7 @@
 module OpenSolid.Curve3D
   ( Curve3D
   , Compiled
+  , SearchTree
   , constant
   , new
   , on
@@ -9,10 +10,12 @@ module OpenSolid.Curve3D
   , bounds
   , overallBounds
   , reverse
+  , searchTree
   )
 where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -26,6 +29,8 @@ data Curve3D space
 
 type Compiled space =
   CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
+
+type SearchTree space = Curve.Search.Tree 3 Meters space
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -92,3 +97,4 @@ evaluate :: Curve3D space -> Number -> Point3D space
 bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 overallBounds :: Curve3D space -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space
+searchTree :: Curve3D space -> SearchTree space

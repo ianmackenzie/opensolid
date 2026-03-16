@@ -95,6 +95,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (HasSingularity, IsPoint (IsPoint))
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
@@ -159,6 +160,7 @@ import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 data Curve2D units space = Curve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
+  , searchTree :: ~(SearchTree units space)
   }
 
 type Compiled units space =
@@ -170,7 +172,7 @@ type Compiled units space =
 
 type Segment units space = Curve.Segment 2 units space
 
-type SearchTree units space = Curve.SearchTree 2 units space
+type SearchTree units space = Curve.Search.Tree 2 units space
 
 instance HasField "xCoordinate" (Curve2D units space) (Curve1D units) where
   getField = xCoordinate
@@ -197,6 +199,7 @@ instance
     Curve2D
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
+      , searchTree = Units.coerce curve.searchTree
       }
 
 instance
@@ -345,10 +348,7 @@ instance
 
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
 new givenCompiled givenDerivative =
-  Curve2D
-    { compiled = givenCompiled
-    , derivative = givenDerivative
-    }
+  let result = Curve2D givenCompiled givenDerivative (Curve.Search.tree result) in result
 
 recursive ::
   Compiled units space ->
@@ -1219,4 +1219,4 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
     VectorCurve2D.bounds curve tBounds
 
 searchTree :: Curve2D units space -> SearchTree units space
-searchTree = Curve.searchTree
+searchTree = (.searchTree)
