@@ -5,6 +5,7 @@ module OpenSolid.Interval
   , constant
   , unit
   , coerce
+  , erase
   , zeroTo
   , symmetric
   , infinite
@@ -306,6 +307,10 @@ unit = Interval 0.0 1.0
 {-# INLINE coerce #-}
 coerce :: Interval units1 -> Interval units2
 coerce = Data.Coerce.coerce
+
+{-# INLINE erase #-}
+erase :: Interval units -> Interval Unitless
+erase = coerce
 
 -- | Create a bounding range with zero as one of its endpoints and the given value as the other.
 zeroTo :: Quantity units -> Interval units
