@@ -32,7 +32,6 @@ module OpenSolid.Curve1D
   , rationalCubicSpline
   , quotient
   , quotient_
-  , WithNoZeros (WithNoZeros)
   , squared
   , squared_
   , sqrt
@@ -63,7 +62,7 @@ import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
-import {-# SOURCE #-} OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
+import {-# SOURCE #-} OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.Curve1D.Zero qualified as Zero
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
@@ -85,6 +84,7 @@ import OpenSolid.NewtonRaphson1D qualified as NewtonRaphson1D
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
@@ -423,25 +423,17 @@ quotient_ lhs rhs =
     then Error DivisionByZero
     else Ok (lhs ?/? Nondegenerate rhs)
 
-newtype WithNoZeros units = WithNoZeros (Curve1D units)
-
-instance HasUnits (WithNoZeros units) units
-
-instance Units.Coercion (WithNoZeros units1) (WithNoZeros units2) where
-  coerce (WithNoZeros curve) = WithNoZeros (Units.coerce curve)
-
-instance Division_ (Curve1D units1) (WithNoZeros units2) (Curve1D (units1 ?/? units2)) where
-  lhs ?/? rhsWithNoZeros = do
-    let rhs = Curve1D.WithNoZeros.unwrap rhsWithNoZeros
+instance Division_ (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D (units1 ?/? units2)) where
+  lhs ?/? Nonzero rhs = do
     let quotientCompiled = compiled lhs ?/? compiled rhs
     let quotientDerivative = Units.simplify do
           (derivative lhs ?*? rhs - lhs ?*? derivative rhs)
-            ?/? Curve1D.WithNoZeros.squared_ rhsWithNoZeros
+            ?/? Curve1D.Nonzero.squared_ (Nonzero rhs)
     new quotientCompiled quotientDerivative
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Curve1D units1) (WithNoZeros units2) (Curve1D units3)
+  Division (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D units3)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
@@ -449,6 +441,11 @@ instance HasUnits (Nondegenerate (Curve1D units)) units
 
 instance Units.Coercion (Nondegenerate (Curve1D units1)) (Nondegenerate (Curve1D units2)) where
   coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
+
+instance HasUnits (Nonzero (Curve1D units)) units
+
+instance Units.Coercion (Nonzero (Curve1D units1)) (Nonzero (Curve1D units2)) where
+  coerce (Nonzero curve) = Nonzero (Units.coerce curve)
 
 instance
   Division_

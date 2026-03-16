@@ -43,6 +43,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
@@ -95,11 +96,11 @@ class
       (VectorCurve dimension units space)
   , Division
       (VectorCurve dimension units space)
-      (Curve1D.WithNoZeros Unitless)
+      (Nonzero (Curve1D Unitless))
       (VectorCurve dimension units space)
   , Division
       (VectorCurve dimension units space)
-      (Curve1D.WithNoZeros units)
+      (Nonzero (Curve1D units))
       (VectorCurve dimension Unitless space)
   , Division
       (VectorCurve dimension units space)
@@ -265,7 +266,7 @@ desingularizedQuotient lhs (Nondegenerate rhs) = do
         if Tolerance.using singularityTolerance (Curve1D.evaluate rhs tValue ~= Quantity.zero)
           then Just (lHopital lhs rhs tValue)
           else Nothing
-  let interiorQuotient = unerase (erase lhs / Curve1D.WithNoZeros (Curve1D.erase rhs))
+  let interiorQuotient = unerase (erase lhs / Nonzero (Curve1D.erase rhs))
   desingularize (maybeSingularity 0.0) interiorQuotient (maybeSingularity 1.0)
 
 lHopital ::

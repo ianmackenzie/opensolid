@@ -61,6 +61,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
@@ -473,9 +474,8 @@ fluxIntegral point curve = do
   -- By this point we've already checked whether the point is *on* the curve,
   -- so (since it's not) the displacement will always be non-zero
   let integrand =
-        Tolerance.using (Quantity.squared_ ?tolerance) $
-          (Curve2D.derivative curve `cross_` displacement)
-            / Curve1D.WithNoZeros (VectorCurve2D.squaredMagnitude_ displacement)
+        (Curve2D.derivative curve `cross_` displacement)
+          / Nonzero (VectorCurve2D.squaredMagnitude_ displacement)
   Curve1D.integrate integrand
 
 totalFlux :: Tolerance units => Point2D units space -> Loop units space -> Estimate Unitless

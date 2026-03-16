@@ -8,10 +8,11 @@ module OpenSolid.Curve1D.Nondegenerate
   )
 where
 
-import OpenSolid.Curve1D (Curve1D, WithNoZeros (WithNoZeros))
+import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
+import OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
@@ -40,7 +41,7 @@ sqrt_ (Nondegenerate curve) = Nondegenerate do
         let derivativeIsZero = Tolerance.using derivativeTolerance do
               Curve1D.derivativeValue curve tValue ~= Quantity.zero
         if curveIsZero && derivativeIsZero then Just (singularity tValue sign) else Nothing
-  let WithNoZeros interiorSqrt = Curve1D.WithNoZeros.sqrt_ (WithNoZeros curve)
+  let Nonzero interiorSqrt = Curve1D.Nonzero.sqrt_ (Nonzero curve)
   Curve1D.desingularize (maybeSingularity 0.0 Positive) interiorSqrt (maybeSingularity 1.0 Negative)
 
 sqrt ::

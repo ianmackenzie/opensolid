@@ -18,7 +18,6 @@ module OpenSolid.SurfaceFunction1D
   , recursive
   , quotient
   , quotient_
-  , WithNoZeros (WithNoZeros)
   , WithNoInteriorZeros (WithNoInteriorZeros)
   , unsafeQuotient
   , unsafeQuotient_
@@ -56,6 +55,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2D qualified as Point2D
@@ -66,6 +66,7 @@ import OpenSolid.Solve2D qualified as Solve2D
 import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
 import OpenSolid.SurfaceFunction1D.Desingularization qualified as SurfaceFunction1D.Desingularization
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.HorizontalCurve qualified as HorizontalCurve
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.Nonzero qualified as SurfaceFunction1D.Nonzero
 import OpenSolid.SurfaceFunction1D.PartialZeros (PartialZeros)
 import OpenSolid.SurfaceFunction1D.PartialZeros qualified as PartialZeros
 import OpenSolid.SurfaceFunction1D.Quotient qualified as SurfaceFunction1D.Quotient
@@ -74,7 +75,6 @@ import OpenSolid.SurfaceFunction1D.SaddleRegion qualified as SaddleRegion
 import OpenSolid.SurfaceFunction1D.Subproblem (CornerValues (..), Subproblem (..))
 import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
-import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.WithNoZeros qualified as SurfaceFunction1D.WithNoZeros
 import OpenSolid.SurfaceFunction1D.Zeros (Zeros (..))
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
@@ -449,30 +449,34 @@ quotient_ numerator denominator = do
         (value, firstDerivative)
   SurfaceFunction1D.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
 
-newtype WithNoZeros units = WithNoZeros (SurfaceFunction1D units)
+instance HasUnits (Nonzero (SurfaceFunction1D units)) units
 
-instance HasUnits (WithNoZeros units) units
-
-instance Units.Coercion (WithNoZeros units1) (WithNoZeros units2) where
-  coerce (WithNoZeros function) = WithNoZeros (Units.coerce function)
+instance
+  Units.Coercion
+    (Nonzero (SurfaceFunction1D units1))
+    (Nonzero (SurfaceFunction1D units2))
+  where
+  coerce (Nonzero function) = Nonzero (Units.coerce function)
 
 instance
   Division_
     (SurfaceFunction1D units1)
-    (WithNoZeros units2)
+    (Nonzero (SurfaceFunction1D units2))
     (SurfaceFunction1D (units1 ?/? units2))
   where
-  lhs ?/? rhsWithNoZeros = do
-    let rhs = SurfaceFunction1D.WithNoZeros.unwrap rhsWithNoZeros
+  lhs ?/? Nonzero rhs = do
     let quotientCompiled = lhs.compiled ?/? rhs.compiled
     let quotientDerivative p = Units.simplify do
           (derivative p lhs ?*? rhs - lhs ?*? derivative p rhs)
-            ?/? SurfaceFunction1D.WithNoZeros.squared_ rhsWithNoZeros
+            ?/? SurfaceFunction1D.Nonzero.squared_ (Nonzero rhs)
     new quotientCompiled quotientDerivative
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (SurfaceFunction1D units1) (WithNoZeros units2) (SurfaceFunction1D units3)
+  Division
+    (SurfaceFunction1D units1)
+    (Nonzero (SurfaceFunction1D units2))
+    (SurfaceFunction1D units3)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 

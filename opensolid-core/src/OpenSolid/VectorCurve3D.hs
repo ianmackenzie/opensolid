@@ -1,7 +1,6 @@
 module OpenSolid.VectorCurve3D
   ( VectorCurve3D
   , Compiled
-  , WithNoZeros (WithNoZeros)
   , Nondegenerate
   , new
   , recursive
@@ -48,7 +47,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve1D.WithNoZeros qualified as Curve1D.WithNoZeros
+import OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Direction3D (Direction3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
@@ -58,6 +57,7 @@ import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
@@ -78,7 +78,6 @@ import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
-import {-# SOURCE #-} OpenSolid.VectorCurve3D.WithNoZeros (WithNoZeros (WithNoZeros))
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
@@ -117,6 +116,16 @@ instance
     (Nondegenerate (VectorCurve3D units2 space2))
   where
   coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
+
+instance HasUnits (Nonzero (VectorCurve3D units space)) units
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion
+    (Nonzero (VectorCurve3D units1 space1))
+    (Nonzero (VectorCurve3D units2 space2))
+  where
+  coerce (Nonzero curve) = Nonzero (Units.coerce curve)
 
 instance ApproximateEquality (VectorCurve3D units space) (Tolerance units) where
   curve1 ~= curve2 = do
@@ -614,22 +623,21 @@ quotient_ lhs rhs =
 instance
   Division_
     (VectorCurve3D units1 space)
-    (Curve1D.WithNoZeros units2)
+    (Nonzero (Curve1D units2))
     (VectorCurve3D (units1 ?/? units2) space)
   where
-  lhs ?/? rhsWithNoZeros = do
-    let rhs = Curve1D.WithNoZeros.unwrap rhsWithNoZeros
+  lhs ?/? Nonzero rhs = do
     let compiledQuotient = compiled lhs ?/? Curve1D.compiled rhs
     let quotientDerivative = Units.simplify do
           (derivative lhs ?*? rhs - lhs ?*? Curve1D.derivative rhs)
-            ?/? Curve1D.WithNoZeros.squared_ rhsWithNoZeros
+            ?/? Curve1D.Nonzero.squared_ (Nonzero rhs)
     new compiledQuotient quotientDerivative
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division
     (VectorCurve3D units1 space)
-    (Curve1D.WithNoZeros units2)
+    (Nonzero (Curve1D units2))
     (VectorCurve3D units3 space)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)

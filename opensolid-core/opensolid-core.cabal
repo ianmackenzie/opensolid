@@ -122,7 +122,7 @@ library
     OpenSolid.Curve.Segment
     OpenSolid.Curve1D
     OpenSolid.Curve1D.Nondegenerate
-    OpenSolid.Curve1D.WithNoZeros
+    OpenSolid.Curve1D.Nonzero
     OpenSolid.Curve1D.Zero
     OpenSolid.Curve2D
     OpenSolid.Curve2D.EndpointIntersection
@@ -180,6 +180,7 @@ library
     OpenSolid.NewtonRaphson3D
     OpenSolid.NonEmpty
     OpenSolid.Nondegenerate
+    OpenSolid.Nonzero
     OpenSolid.Number
     OpenSolid.Orientation2D
     OpenSolid.Orientation3D
@@ -221,8 +222,8 @@ library
     OpenSolid.Surface3D.Revolved
     OpenSolid.SurfaceCurve3D
     OpenSolid.SurfaceFunction1D
+    OpenSolid.SurfaceFunction1D.Nonzero
     OpenSolid.SurfaceFunction1D.WithNoInteriorZeros
-    OpenSolid.SurfaceFunction1D.WithNoZeros
     OpenSolid.SurfaceFunction1D.Zeros
     OpenSolid.SurfaceFunction2D
     OpenSolid.SurfaceFunction3D
@@ -250,9 +251,9 @@ library
     OpenSolid.VectorCurve
     OpenSolid.VectorCurve.Nondegenerate
     OpenSolid.VectorCurve2D
-    OpenSolid.VectorCurve2D.WithNoZeros
+    OpenSolid.VectorCurve2D.Nonzero
     OpenSolid.VectorCurve3D
-    OpenSolid.VectorCurve3D.WithNoZeros
+    OpenSolid.VectorCurve3D.Nonzero
     OpenSolid.VectorSurface2D
     OpenSolid.VectorSurface3D
     OpenSolid.VectorSurfaceFunction

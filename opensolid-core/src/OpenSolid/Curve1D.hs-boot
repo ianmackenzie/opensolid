@@ -3,7 +3,6 @@ module OpenSolid.Curve1D
   , Compiled
   , Zero
   , IsZero (IsZero)
-  , WithNoZeros (WithNoZeros)
   , new
   , constant
   , zero
@@ -27,6 +26,7 @@ import {-# SOURCE #-} OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (Nondegenerate)
+import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -48,11 +48,9 @@ instance HasUnits (Curve1D units) units
 
 instance Units.Coercion (Curve1D units1) (Curve1D units2)
 
-newtype WithNoZeros units = WithNoZeros (Curve1D units)
+instance HasUnits (Nonzero (Curve1D units)) units
 
-instance HasUnits (WithNoZeros units) units
-
-instance Units.Coercion (WithNoZeros units1) (WithNoZeros units2)
+instance Units.Coercion (Nonzero (Curve1D units1)) (Nonzero (Curve1D units2))
 
 instance HasUnits (Nondegenerate (Curve1D units)) units
 
@@ -84,7 +82,7 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Curve1D units1) (WithNoZeros units2) (Curve1D units3)
+  Division (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D units3)
 
 instance
   Units.Quotient units1 units2 units3 =>

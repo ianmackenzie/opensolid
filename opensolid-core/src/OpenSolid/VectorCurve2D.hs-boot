@@ -20,10 +20,10 @@ where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (Nondegenerate)
+import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Transform2D, Vector2D, VectorBounds2D)
 import OpenSolid.Units (HasUnits)
@@ -107,7 +107,7 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve2D units1 space) (Curve1D.WithNoZeros units2) (VectorCurve2D units3 space)
+  Division (VectorCurve2D units1 space) (Nonzero (Curve1D units2)) (VectorCurve2D units3 space)
 
 instance
   Units.Quotient units1 units2 units3 =>
