@@ -8,6 +8,8 @@ module OpenSolid.VectorBounds
   , isResolved
   , areDistinct
   , areIndependent
+  , erase
+  , unerase
   )
 where
 
@@ -108,3 +110,17 @@ instance Exists 3 units space where
   isResolved = VectorBounds3D.isResolved
   areDistinct = VectorBounds3D.areDistinct
   areIndependent = VectorBounds3D.areIndependent
+
+{-# INLINE erase #-}
+erase ::
+  Exists dimension units space =>
+  VectorBounds dimension units space ->
+  VectorBounds dimension Unitless space
+erase = Units.erase
+
+{-# INLINE unerase #-}
+unerase ::
+  Exists dimension units space =>
+  VectorBounds dimension Unitless space ->
+  VectorBounds dimension units space
+unerase = Units.unerase
