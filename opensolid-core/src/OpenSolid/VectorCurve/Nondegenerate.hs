@@ -1,9 +1,9 @@
 module OpenSolid.VectorCurve.Nondegenerate
   ( magnitude
   , direction
+  , directionValue
   , squaredMagnitude_
   , squaredMagnitude
-  , directionValue
   )
 where
 
