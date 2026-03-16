@@ -2,6 +2,7 @@ module OpenSolid.Nondegenerate
   ( Nondegenerate (Nondegenerate)
   , unwrap
   , interior
+  , exterior
   )
 where
 
@@ -22,3 +23,6 @@ for cases where you're only working with the interior portion of a nondegenerate
 -}
 interior :: Nondegenerate a -> Nonzero a
 interior (Nondegenerate value) = Nonzero value
+
+exterior :: Nonzero a -> Nondegenerate a
+exterior (Nonzero value) = Nondegenerate value
