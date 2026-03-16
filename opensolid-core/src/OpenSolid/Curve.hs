@@ -4,6 +4,7 @@ module OpenSolid.Curve
   , Segment
   , SearchTree
   , IsPoint (IsPoint)
+  , HasSingularity (HasSingularity)
   , derivative
   , overallBounds
   , evaluate
@@ -16,6 +17,8 @@ module OpenSolid.Curve
   , secondDerivativeValue
   , secondDerivativeBounds
   , isPoint
+  , nondegenerate
+  , nonzero
   , tangentDirection
   , curvatureVector_
   , unsafeCurvatureVector_
@@ -45,6 +48,7 @@ import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
@@ -63,6 +67,8 @@ type family Curve dimension units space = curve | curve -> dimension units space
   Curve 3 Meters space = Curve3D space
 
 data IsPoint = IsPoint deriving (Eq, Show)
+
+data HasSingularity = HasSingularity deriving (Eq, Show)
 
 type SearchTree dimension units space =
   Search.Tree dimension units space
@@ -124,6 +130,22 @@ secondDerivative = VectorCurve.derivative . derivative
 
 isPoint :: (Exists dimension units space, Tolerance units) => Curve dimension units space -> Bool
 isPoint curve = VectorCurve.isZero (derivative curve)
+
+nondegenerate ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  Result IsPoint (Nondegenerate (Curve dimension units space))
+nondegenerate curve =
+  if VectorCurve.isZero (derivative curve) then Error IsPoint else Ok (Nondegenerate curve)
+
+nonzero ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  Result HasSingularity (Nonzero (Curve dimension units space))
+nonzero curve =
+  if derivativeValue curve 0.0 ~= Vector.zero || derivativeValue curve 1.0 ~= Vector.zero
+    then Error HasSingularity
+    else Ok (Nonzero curve)
 
 tangentDirection ::
   (Exists dimension units space, Tolerance units) =>
