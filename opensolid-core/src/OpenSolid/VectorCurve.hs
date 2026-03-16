@@ -19,7 +19,6 @@ module OpenSolid.VectorCurve
   , squaredMagnitude
   , nondegenerate
   , magnitude
-  , normalize
   , direction
   , zeros
   , desingularized
@@ -71,7 +70,6 @@ data IsZero = IsZero deriving (Eq, Show)
 
 class
   ( Vector.Exists dimension units space
-  , VectorCurve.Nondegenerate.Exists dimension units space
   , Exists dimension Unitless space
   , HasUnits (VectorCurve dimension units space) units
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
@@ -200,13 +198,6 @@ secondDerivativeBounds ::
   Interval Unitless ->
   VectorBounds dimension units space
 secondDerivativeBounds curve tBounds = bounds (secondDerivative curve) tBounds
-
-normalize ::
-  (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
-  VectorCurve dimension units space ->
-  VectorCurve dimension Unitless space
-normalize curve =
-  if isZero curve then zero else VectorCurve.Nondegenerate.normalize (Nondegenerate curve)
 
 direction ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>

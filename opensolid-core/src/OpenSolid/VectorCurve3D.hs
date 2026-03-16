@@ -34,7 +34,6 @@ module OpenSolid.VectorCurve3D
   , squaredMagnitude_
   , reverse
   , zeros
-  , normalize
   , direction
   , placeIn
   , relativeTo
@@ -651,9 +650,6 @@ instance
     (VectorCurve3D units3 space)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
-
-normalize :: Tolerance units => VectorCurve3D units space -> VectorCurve3D Unitless space
-normalize = VectorCurve.normalize
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3D units1 space -> Curve1D units2
 squaredMagnitude = VectorCurve.squaredMagnitude

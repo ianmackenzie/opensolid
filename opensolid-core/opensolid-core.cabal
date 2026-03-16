@@ -249,10 +249,8 @@ library
     OpenSolid.VectorCurve
     OpenSolid.VectorCurve.Nondegenerate
     OpenSolid.VectorCurve2D
-    OpenSolid.VectorCurve2D.Nondegenerate
     OpenSolid.VectorCurve2D.WithNoZeros
     OpenSolid.VectorCurve3D
-    OpenSolid.VectorCurve3D.Nondegenerate
     OpenSolid.VectorCurve3D.WithNoZeros
     OpenSolid.VectorSurface2D
     OpenSolid.VectorSurface3D

@@ -40,7 +40,6 @@ module OpenSolid.VectorCurve2D
   , reverse
   , isZero
   , zeros
-  , normalize
   , direction
   , placeIn
   , relativeTo
@@ -772,9 +771,6 @@ isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
 zeros :: Tolerance units => VectorCurve2D units space -> Result VectorCurve.IsZero (List Number)
 zeros = VectorCurve.zeros
-
-normalize :: Tolerance units => VectorCurve2D units space -> VectorCurve2D Unitless space
-normalize = VectorCurve.normalize
 
 direction ::
   Tolerance units =>
