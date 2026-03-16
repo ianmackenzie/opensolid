@@ -18,7 +18,6 @@ module OpenSolid.SurfaceFunction1D
   , recursive
   , quotient
   , quotient_
-  , WithNoInteriorZeros (WithNoInteriorZeros)
   , unsafeQuotient
   , unsafeQuotient_
   , squared
@@ -55,6 +54,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
@@ -480,12 +480,14 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
-newtype WithNoInteriorZeros units = WithNoInteriorZeros (SurfaceFunction1D units)
+instance HasUnits (Nondegenerate (SurfaceFunction1D units)) units
 
-instance HasUnits (WithNoInteriorZeros units) units
-
-instance Units.Coercion (WithNoInteriorZeros units1) (WithNoInteriorZeros units2) where
-  coerce (WithNoInteriorZeros function) = WithNoInteriorZeros (Units.coerce function)
+instance
+  Units.Coercion
+    (Nondegenerate (SurfaceFunction1D units1))
+    (Nondegenerate (SurfaceFunction1D units2))
+  where
+  coerce (Nondegenerate function) = Nondegenerate (Units.coerce function)
 
 unsafeQuotient ::
   Units.Quotient units1 units2 units3 =>
