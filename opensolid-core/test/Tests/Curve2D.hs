@@ -8,6 +8,7 @@ module Tests.Curve2D
 where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import OpenSolid.Curve2D (Curve2D)
@@ -21,6 +22,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
@@ -31,6 +33,7 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import Test (Expectation, Test)
@@ -64,6 +67,7 @@ tests =
   , arcConstruction
   , arcDeformation
   , g2
+  , curvatureVectorIsTangentDerivative
   ]
 
 findPoint :: Tolerance Meters => Test
@@ -431,3 +435,31 @@ g2 = Test.check 100 "G2 continuity" do
   let arcCenter = point + signedRadius * normalDirection
   let arc = Curve2D.sweptArc arcCenter point (Angle.degrees 30.0)
   Test.expect (Curve2D.g2 (spline, t) (arc, 0.0) Length.meter)
+
+curvatureVectorIsTangentDerivative :: Tolerance Meters => Test
+curvatureVectorIsTangentDerivative =
+  Test.check 100 "Curvature vector is equal to tangent derivative" do
+    p1 <- Test.generate Random.point2D
+    p2 <- Test.generate Random.point2D
+    p3 <- Test.generate Random.point2D
+    p4 <- Test.generate Random.point2D
+    let spline = Curve2D.cubicBezier p1 p2 p3 p4
+    if p1 ~= p2 || p2 ~= p3 || p3 ~= p4
+      then Test.fail "Randomly generated points are equal"
+      else do
+        tangent <- Result.orFail (Curve2D.tangentDirection spline)
+        let tangentDerivative = DirectionCurve2D.derivative tangent
+        let firstDerivative = Curve2D.derivative spline
+        let curvatureVector = Units.specialize (Curve.Nonzero.curvatureVector_ (Nonzero spline))
+        tValue <- Test.generate Parameter.random
+        let curvatureVector1 = VectorCurve2D.evaluate curvatureVector tValue
+        let curvatureVector2 =
+              Units.specialize (Curve.Nonzero.curvatureVectorValue_ (Nonzero spline) tValue)
+        let curvatureVector3 =
+              VectorCurve2D.evaluate tangentDerivative tValue
+                / Vector2D.magnitude (VectorCurve2D.evaluate firstDerivative tValue)
+        Tolerance.using (1e-12 / Length.meter) do
+          Test.all
+            [ Test.expect (curvatureVector1 ~= curvatureVector2)
+            , Test.expect (curvatureVector1 ~= curvatureVector3)
+            ]

@@ -118,6 +118,7 @@ library
     OpenSolid.Curve.IntersectionPoint
     OpenSolid.Curve.Intersections
     OpenSolid.Curve.Nondegenerate
+    OpenSolid.Curve.Nonzero
     OpenSolid.Curve.Search
     OpenSolid.Curve.Segment
     OpenSolid.Curve1D
