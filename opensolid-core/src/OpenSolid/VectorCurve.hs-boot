@@ -4,6 +4,7 @@ module OpenSolid.VectorCurve
   , evaluate
   , bounds
   , derivative
+  , derivativeValue
   , squaredMagnitude_
   )
 where
@@ -48,6 +49,11 @@ derivative ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
+derivativeValue ::
+  Exists dimension units space =>
+  VectorCurve dimension units space ->
+  Number ->
+  Vector dimension units space
 squaredMagnitude_ ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
