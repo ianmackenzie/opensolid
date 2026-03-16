@@ -126,11 +126,8 @@ library
     OpenSolid.Curve1D.Nonzero
     OpenSolid.Curve1D.Zero
     OpenSolid.Curve2D
-    OpenSolid.Curve2D.EndpointIntersection
     OpenSolid.Curve2D.IntersectionPoint
-    OpenSolid.Curve2D.Intersections
     OpenSolid.Curve2D.MedialAxis
-    OpenSolid.Curve2D.OverlappingSegment
     OpenSolid.Curve3D
     OpenSolid.Curve3D.IntersectionPointWithSurface
     OpenSolid.Curve3D.IntersectionsWithSurface

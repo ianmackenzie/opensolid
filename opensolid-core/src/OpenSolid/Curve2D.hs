@@ -46,9 +46,6 @@ module OpenSolid.Curve2D
   , reverse
   , overallBounds
   , g2
-  , Intersections (IntersectionPoints, OverlappingSegments)
-  , IntersectionPoint
-  , OverlappingSegment (OverlappingSegment)
   , intersections
   , findPoint
   , distanceAlong
@@ -101,13 +98,7 @@ import OpenSolid.Curve (IsPoint (IsPoint))
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint)
-import {-# SOURCE #-} OpenSolid.Curve2D.Intersections
-  ( Intersections (IntersectionPoints, OverlappingSegments)
-  , intersections
-  )
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
-import OpenSolid.Curve2D.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Desingularization qualified as Desingularization
@@ -215,11 +206,7 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Curve2D units1 space1) (Point2D units2 space2) (Tolerance units1)
   where
-  curve `intersects` point =
-    case findPoint point curve of
-      Ok [] -> False
-      Ok (NonEmpty _) -> True
-      Error Curve.IsPoint -> point ~= startPoint curve
+  curve `intersects` point = not (List.isEmpty (findPoint point curve))
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -832,12 +819,15 @@ yCoordinate curve = do
 coordinates :: Curve2D units space -> (Curve1D units, Curve1D units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
 
-findPoint ::
-  Tolerance units =>
-  Point2D units space ->
-  Curve2D units space ->
-  Result IsPoint (List Number)
+findPoint :: Tolerance units => Point2D units space -> Curve2D units space -> List Number
 findPoint = Curve.findPoint
+
+intersections ::
+  Tolerance units =>
+  Curve2D units space ->
+  Curve2D units space ->
+  Result Curve.IsPoint (Maybe Curve.Intersections)
+intersections = Curve.intersections
 
 g2 ::
   Tolerance units =>
@@ -1235,5 +1225,5 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
     let tBounds = Interval (startLength / segmentLength) (endLength / segmentLength)
     VectorCurve2D.bounds curve tBounds
 
-searchTree :: Tolerance units => Curve2D units space -> Result IsPoint (SearchTree units space)
+searchTree :: Tolerance units => Curve2D units space -> SearchTree units space
 searchTree = Curve.searchTree

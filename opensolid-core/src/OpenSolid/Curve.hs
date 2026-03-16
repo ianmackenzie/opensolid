@@ -43,6 +43,7 @@ import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
+import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
@@ -52,7 +53,6 @@ import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
@@ -80,6 +80,7 @@ class
   , Vector.Exists dimension (Unitless ?/? units) space
   , VectorBounds.Exists dimension units space
   , VectorBounds.Exists dimension (Unitless ?/? units) space
+  , DirectionBounds.Exists dimension space
   , VectorCurve.Exists dimension units space
   , VectorCurve.Exists dimension (Unitless ?/? units) space
   , DirectionCurve.Exists dimension space
@@ -219,13 +220,13 @@ findPoint ::
   (Exists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Curve dimension units space ->
-  Result IsPoint (List Number)
-findPoint point curve = Result.map (Search.findPoint point) (searchTree curve)
+  List Number
+findPoint point curve = Search.findPoint point curve (searchTree curve)
 
 searchTree ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Result IsPoint (SearchTree dimension units space)
+  SearchTree dimension units space
 searchTree = Search.tree
 
 intersections ::

@@ -39,11 +39,11 @@ import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.Curve2D.IntersectionPoint (IntersectionPoint (IntersectionPoint))
-import OpenSolid.Curve2D.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
@@ -227,14 +227,18 @@ addFillet radius curves point = do
       maybeIntersections <- Result.orFail (Curve2D.intersections firstOffsetCurve secondOffsetCurve)
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
-        Just Curve2D.OverlappingSegments{} -> couldNotSolveForFilletLocation
-        Just (Curve2D.IntersectionPoints intersectionPoints) -> do
-          let intersection1 = NonEmpty.maximumBy (.t1) intersectionPoints
-          let intersection2 = NonEmpty.minimumBy (.t2) intersectionPoints
+        Just Curve.OverlappingSegments{} -> couldNotSolveForFilletLocation
+        Just (Curve.IntersectionPoints intersectionPoints) -> do
+          let intersection1 =
+                intersectionPoints
+                  & NonEmpty.maximumBy (Pair.first . Curve.IntersectionPoint.parameterValues)
+          let intersection2 =
+                intersectionPoints
+                  & NonEmpty.minimumBy (Pair.second . Curve.IntersectionPoint.parameterValues)
           if intersection1 /= intersection2
             then couldNotSolveForFilletLocation
             else do
-              let IntersectionPoint{t1, t2} = intersection1
+              let (t1, t2) = Curve.IntersectionPoint.parameterValues intersection1
               let centerPoint = Curve2D.evaluate firstOffsetCurve t1
               let startPoint = Curve2D.evaluate firstCurve t1
               let sweptAngle =
@@ -294,19 +298,20 @@ checkCurvesForInnerIntersection curve1 curve2 =
     -- when we check with the *neighbours* of those degenerate curves
     Error Curve.IsPoint -> Ok ()
     -- Any overlap between boundary curves is bad
-    Ok (Just (Curve2D.OverlappingSegments _)) ->
+    Ok (Just Curve.OverlappingSegments{}) ->
       Error BoundedBy.BoundaryIntersectsItself
     -- If there are no intersections at all then we're good!
     Ok Nothing -> Ok ()
     -- Otherwise, make sure curves only intersect (meet) at endpoints
-    Ok (Just (Curve2D.IntersectionPoints intersectionPoints)) ->
+    Ok (Just (Curve.IntersectionPoints intersectionPoints)) ->
       if NonEmpty.all isEndpointIntersection intersectionPoints
         then Ok ()
         else Error BoundedBy.BoundaryIntersectsItself
 
 isEndpointIntersection :: IntersectionPoint -> Bool
 isEndpointIntersection intersectionPoint = do
-  Parameter.isEndpoint intersectionPoint.t1 && Parameter.isEndpoint intersectionPoint.t2
+  let (t1, t2) = Curve.IntersectionPoint.parameterValues intersectionPoint
+  Parameter.isEndpoint t1 && Parameter.isEndpoint t2
 
 connect ::
   Tolerance units =>

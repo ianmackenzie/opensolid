@@ -56,6 +56,7 @@ import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
+import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
@@ -180,11 +181,7 @@ instance ApproximateEquality (Curve3D space) (Tolerance Meters) where
     NonEmpty.all equalPointsAt Parameter.samples
 
 instance space1 ~ space2 => Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters) where
-  point `intersects` curve =
-    case findPoint point curve of
-      Ok [] -> False
-      Ok (NonEmpty _) -> True
-      Error Curve.IsPoint -> point ~= startPoint curve
+  point `intersects` curve = not (List.isEmpty (findPoint point curve))
 
 instance space1 ~ space2 => Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters) where
   curve `intersects` point = point `intersects` curve
@@ -359,11 +356,7 @@ placeIn frame curve = do
 relativeTo :: Frame3D global local -> Curve3D global -> Curve3D local
 relativeTo frame curve = placeIn (Frame3D.inverse frame) curve
 
-findPoint ::
-  Tolerance Meters =>
-  Point3D space ->
-  Curve3D space ->
-  Result Curve.IsPoint (List Number)
+findPoint :: Tolerance Meters => Point3D space -> Curve3D space -> List Number
 findPoint = Curve.findPoint
 
 intersections ::

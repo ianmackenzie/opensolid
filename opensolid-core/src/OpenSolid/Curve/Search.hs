@@ -3,8 +3,6 @@
 module OpenSolid.Curve.Search
   ( Tree
   , tree
-  , curve
-  , tangentCurve
   , findPoint
   )
 where
@@ -14,8 +12,7 @@ import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Segment
-import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
-import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
+import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
@@ -29,6 +26,7 @@ import OpenSolid.Prelude
 import OpenSolid.Search qualified as Search
 import OpenSolid.Search.Domain qualified as Search.Domain
 import OpenSolid.Vector qualified as Vector
+import OpenSolid.VectorBounds qualified as VectorBounds
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 type Tree dimension units space =
@@ -36,25 +34,16 @@ type Tree dimension units space =
 
 tree ::
   ( Curve.Exists dimension units space
-  , VectorCurve.Exists dimension units space
-  , DirectionCurve.Exists dimension space
-  , VectorCurve.Exists dimension (Unitless ?/? units) space
+  , VectorBounds.Exists dimension units space
+  , VectorBounds.Exists dimension (Unitless ?/? units) space
+  , DirectionBounds.Exists dimension space
   , Tolerance units
   ) =>
   Curve dimension units space ->
-  Result Curve.IsPoint (Tree dimension units space)
+  Tree dimension units space
 tree givenCurve = do
-  computedTangentCurve <- Curve.tangentDirection givenCurve
-  computedCurvatureVectorCurve_ <- Curve.curvatureVector_ givenCurve
-  let evaluateSegment tBounds =
-        Segment.evaluate givenCurve computedTangentCurve computedCurvatureVectorCurve_ tBounds
-  Ok (Search.tree evaluateSegment Search.curveDomain)
-
-curve :: Tree dimension units space -> Curve dimension units space
-curve (Search.Tree _ segment _) = Segment.curve segment
-
-tangentCurve :: Tree dimension units space -> DirectionCurve dimension space
-tangentCurve (Search.Tree _ segment _) = Segment.tangentCurve segment
+  let evaluateSegment tBounds = Segment.evaluate givenCurve tBounds
+  Search.tree evaluateSegment Search.curveDomain
 
 findPoint ::
   ( Point.Exists dimension units space
@@ -65,10 +54,10 @@ findPoint ::
   , Tolerance units
   ) =>
   Point dimension units space ->
+  Curve dimension units space ->
   Tree dimension units space ->
   List Number
-findPoint point searchTree = do
-  let searchCurve = curve searchTree
+findPoint point searchCurve searchTree = do
   let curveDerivative = Curve.derivative searchCurve
   let evaluateFirstOrder tValue =
         (# Curve.evaluate searchCurve tValue - point, VectorCurve.evaluate curveDerivative tValue #)

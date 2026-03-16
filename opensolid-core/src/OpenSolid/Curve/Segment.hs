@@ -1,10 +1,7 @@
 module OpenSolid.Curve.Segment
   ( Segment
-  , curve
-  , tangentCurve
-  , parameterBounds
   , bounds
-  , firstDerivativeBounds
+  , derivativeBounds
   , secondDerivativeBounds
   , curvatureVectorBounds_
   , tangentBounds
@@ -18,43 +15,29 @@ where
 import OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
-import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
-import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
-import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
-import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 data Segment dimension units space = Segment
-  { curve :: Curve dimension units space
-  , tangentCurve :: DirectionCurve dimension space
-  , parameterBounds :: Interval Unitless
-  , bounds :: ~(Bounds dimension units space)
-  , firstDerivativeBounds :: ~(VectorBounds dimension units space)
+  { bounds :: ~(Bounds dimension units space)
+  , derivativeBounds :: ~(VectorBounds dimension units space)
   , secondDerivativeBounds :: ~(VectorBounds dimension units space)
-  , curvatureVectorBounds_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
   , tangentBounds :: ~(DirectionBounds dimension space)
+  , curvatureVectorBounds_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
   }
-
-curve :: Segment dimension units space -> Curve dimension units space
-curve = (.curve)
-
-tangentCurve :: Segment dimension units space -> DirectionCurve dimension space
-tangentCurve = (.tangentCurve)
-
-parameterBounds :: Segment dimension units space -> Interval Unitless
-parameterBounds = (.parameterBounds)
 
 bounds :: Segment dimension units space -> Bounds dimension units space
 bounds = (.bounds)
 
-firstDerivativeBounds :: Segment dimension units space -> VectorBounds dimension units space
-firstDerivativeBounds = (.firstDerivativeBounds)
+derivativeBounds :: Segment dimension units space -> VectorBounds dimension units space
+derivativeBounds = (.derivativeBounds)
 
 secondDerivativeBounds :: Segment dimension units space -> VectorBounds dimension units space
 secondDerivativeBounds = (.secondDerivativeBounds)
@@ -62,20 +45,20 @@ secondDerivativeBounds = (.secondDerivativeBounds)
 curvatureVectorBounds_ ::
   Segment dimension units space ->
   VectorBounds dimension (Unitless ?/? units) space
-curvatureVectorBounds_ = (.curvatureVectorBounds_)
+curvatureVectorBounds_ segment = segment.curvatureVectorBounds_
 
 tangentBounds :: Segment dimension units space -> DirectionBounds dimension space
-tangentBounds = (.tangentBounds)
+tangentBounds segment = segment.tangentBounds
 
 monotonic :: VectorBounds.Exists dimension units space => Segment dimension units space -> Bool
-monotonic segment = Interval.isResolved (VectorBounds.magnitude segment.firstDerivativeBounds)
+monotonic segment = Interval.isResolved (VectorBounds.magnitude segment.derivativeBounds)
 
 crossingTangents ::
   DirectionBounds.Exists dimension space =>
-  Segment dimension units space ->
-  Segment dimension units space ->
+  Nonzero (Segment dimension units space) ->
+  Nonzero (Segment dimension units space) ->
   Bool
-crossingTangents segment1 segment2 = do
+crossingTangents (Nonzero segment1) (Nonzero segment2) = do
   let bounds1 = DirectionBounds.unwrap segment1.tangentBounds
   let bounds2 = DirectionBounds.unwrap segment2.tangentBounds
   let notEqual = Interval.isResolved (VectorBounds.magnitude (bounds1 - bounds2))
@@ -96,23 +79,24 @@ distinctCurvatures segment1 segment2 = do
 
 evaluate ::
   ( Curve.Exists dimension units space
-  , VectorCurve.Exists dimension units space
-  , VectorCurve.Exists dimension (Unitless ?/? units) space
-  , DirectionCurve.Exists dimension space
+  , DirectionBounds.Exists dimension space
+  , VectorBounds.Exists dimension units space
+  , VectorBounds.Exists dimension (Unitless ?/? units) space
   ) =>
   Curve dimension units space ->
-  DirectionCurve dimension space ->
-  VectorCurve dimension (Unitless ?/? units) space ->
   Interval Unitless ->
   Segment dimension units space
-evaluate givenCurve givenTangentCurve givenCurvatureVectorCurve_ givenParameterBounds =
+evaluate givenCurve givenParameterBounds = do
+  let curveBounds = Curve.bounds givenCurve givenParameterBounds
+  let curveDerivativeBounds = Curve.derivativeBounds givenCurve givenParameterBounds
+  let curveSecondDerivativeBounds = Curve.secondDerivativeBounds givenCurve givenParameterBounds
   Segment
-    { curve = givenCurve
-    , tangentCurve = givenTangentCurve
-    , parameterBounds = givenParameterBounds
-    , bounds = Curve.bounds givenCurve givenParameterBounds
-    , firstDerivativeBounds = Curve.derivativeBounds givenCurve givenParameterBounds
-    , secondDerivativeBounds = Curve.secondDerivativeBounds givenCurve givenParameterBounds
-    , curvatureVectorBounds_ = VectorCurve.bounds givenCurvatureVectorCurve_ givenParameterBounds
-    , tangentBounds = DirectionCurve.bounds givenTangentCurve givenParameterBounds
+    { bounds = curveBounds
+    , derivativeBounds = curveDerivativeBounds
+    , secondDerivativeBounds = curveSecondDerivativeBounds
+    , tangentBounds =
+        DirectionBounds.unsafe
+          (curveDerivativeBounds / VectorBounds.magnitude curveDerivativeBounds)
+    , curvatureVectorBounds_ =
+        Curve.CurvatureVector.bounds_ curveDerivativeBounds curveSecondDerivativeBounds
     }
