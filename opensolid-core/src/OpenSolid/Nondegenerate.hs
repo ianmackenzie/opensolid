@@ -1,7 +1,24 @@
-module OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate), unwrap) where
+module OpenSolid.Nondegenerate
+  ( Nondegenerate (Nondegenerate)
+  , unwrap
+  , interior
+  )
+where
+
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 
 newtype Nondegenerate a = Nondegenerate a
 
 {-# INLINE unwrap #-}
 unwrap :: Nondegenerate a -> a
 unwrap (Nondegenerate value) = value
+
+{-| If a value (curve, surface etc.) is nondegenerate,
+that means it can only be zero at its boundaries.
+Therefore, the interior of a nondegenerate value is a nonzero value.
+This function simply extracts the underlying value
+and returns it wrapped as a nonzero value,
+for cases where you're only working with the interior portion of a nondegenerate value.
+-}
+interior :: Nondegenerate a -> Nonzero a
+interior (Nondegenerate value) = Nonzero value
