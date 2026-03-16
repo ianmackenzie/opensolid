@@ -12,7 +12,6 @@ import OpenSolid.Curve.IntersectionPoint (IntersectionPoint, Kind (Crossing, Tan
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
-import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
@@ -63,18 +62,17 @@ intersections curve1 curve2 = do
   if not (Curve.overallBounds curve1 `intersects` Curve.overallBounds curve2)
     then Ok Nothing
     else do
-      let searchTree1 = Curve.searchTree curve1
-      let searchTree2 = Curve.searchTree curve2
-      let endpointSolutions = findEndpointSolutions nondegenerate1 nondegenerate2 searchTree1 searchTree2
-      Ok $ case findOverlappingSegments curve1 curve2 searchTree2 endpointSolutions of
+      let endpointSolutions = findEndpointSolutions nondegenerate1 nondegenerate2
+      Ok $ case findOverlappingSegments curve1 curve2 endpointSolutions of
         Just (alignment, segments) -> Just (OverlappingSegments alignment segments)
         Nothing -> do
           let toIntersectionPoint EndpointSolution{kind, t1, t2} = IntersectionPoint.new kind t1 t2
           let endpointIntersectionPoints = List.map toIntersectionPoint endpointSolutions
-          let nonzero1 = Nondegenerate.interior nondegenerate1
-          let nonzero2 = Nondegenerate.interior nondegenerate2
           let interiorIntersectionPoints =
-                findInteriorIntersectionPoints nonzero1 nonzero2 searchTree1 searchTree2 endpointSolutions
+                findInteriorIntersectionPoints
+                  (Nondegenerate.interior nondegenerate1)
+                  (Nondegenerate.interior nondegenerate2)
+                  endpointSolutions
           case List.sort (endpointIntersectionPoints <> interiorIntersectionPoints) of
             NonEmpty intersectionPoints -> Just (IntersectionPoints intersectionPoints)
             [] -> Nothing
@@ -86,16 +84,13 @@ findEndpointSolutions ::
   ) =>
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (Curve dimension units space) ->
-  Curve.Search.Tree dimension units space ->
-  Curve.Search.Tree dimension units space ->
   List (EndpointSolution dimension space)
-findEndpointSolutions nondegenerate1 nondegenerate2 searchTree1 searchTree2 = do
+findEndpointSolutions nondegenerate1 nondegenerate2 = do
   let curve1 = Nondegenerate.unwrap nondegenerate1
   let curve2 = Nondegenerate.unwrap nondegenerate2
-  let findPoint curve t searchCurve searchTree =
-        Curve.Search.findPoint (Curve.evaluate curve t) searchCurve searchTree
-  let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 curve2 searchTree2]
-  let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 curve1 searchTree1]
+  let findPoint curve t searchCurve = Curve.findPoint (Curve.evaluate curve t) searchCurve
+  let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 curve2]
+  let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 curve1]
   let parameterValues = List.uniqueValues (endpoints1On2 <> endpoints2On1)
   let endpointSolution (t1, t2) = do
         let tangentDirection1 = Curve.Nondegenerate.tangentDirectionValue nondegenerate1 t1
@@ -136,16 +131,14 @@ findInteriorIntersectionPoints ::
   ) =>
   Nonzero (Curve dimension units space) ->
   Nonzero (Curve dimension units space) ->
-  Curve.Search.Tree dimension units space ->
-  Curve.Search.Tree dimension units space ->
   List (EndpointSolution dimension space) ->
   List IntersectionPoint
-findInteriorIntersectionPoints nonzero1 nonzero2 searchTree1 searchTree2 endpointSolutions = do
+findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
   let nondegenerate1 = Nondegenerate.exterior nonzero1
   let nondegenerate2 = Nondegenerate.exterior nonzero2
   let curve1 = Nondegenerate.unwrap nondegenerate1
   let curve2 = Nondegenerate.unwrap nondegenerate2
-  let searchTree = Search.pairwise (,) searchTree1 searchTree2
+  let searchTree = Search.pairwise (,) (Curve.searchTree curve1) (Curve.searchTree curve2)
   let evaluateCrossing (UvPoint t1 t2) = do
         let displacement = Curve.evaluate curve2 t2 - Curve.evaluate curve1 t1
         let uDerivative = negate (Curve.derivativeValue curve1 t1)
@@ -238,11 +231,10 @@ findOverlappingSegments ::
   (Curve.Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Curve.Search.Tree dimension units space ->
   List (EndpointSolution dimension space) ->
   Maybe (Sign, NonEmpty (Interval Unitless, Interval Unitless))
-findOverlappingSegments _ _ _ [] = Nothing
-findOverlappingSegments curve1 curve2 searchTree2 (NonEmpty endpointSolutions) = do
+findOverlappingSegments _ _ [] = Nothing
+findOverlappingSegments curve1 curve2 (NonEmpty endpointSolutions) = do
   let alignmentAt EndpointSolution{kind} = case kind of
         Tangent alignment -> Just alignment
         Crossing -> Nothing
@@ -258,7 +250,7 @@ findOverlappingSegments curve1 curve2 searchTree2 (NonEmpty endpointSolutions) =
   let isOverlappingSegment start end = do
         let tValues1 = Interval.sampleValues (Interval start.t1 end.t1)
         let samplePoints1 = NonEmpty.map (Curve.evaluate curve1) tValues1
-        let onCurve2 point = not (List.isEmpty (Curve.Search.findPoint point curve2 searchTree2))
+        let onCurve2 point = not (List.isEmpty (Curve.findPoint point curve2))
         NonEmpty.all onCurve2 samplePoints1
   let overlappingSegment start end = (Interval start.t1 end.t1, Interval start.t2 end.t2)
   case candidateEndpoints of
