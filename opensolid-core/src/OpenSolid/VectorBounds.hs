@@ -49,6 +49,18 @@ class
       (VectorBounds dimension units space)
       (VectorBounds dimension units space)
       (VectorBounds dimension units space)
+  , Multiplication Number (VectorBounds dimension units space) (VectorBounds dimension units space)
+  , Multiplication (VectorBounds dimension units space) Number (VectorBounds dimension units space)
+  , Multiplication (Quantity units) (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
+  , Multiplication (VectorBounds dimension Unitless space) (Quantity units) (VectorBounds dimension units space)
+  , Division (VectorBounds dimension units space) Number (VectorBounds dimension units space)
+  , Division (VectorBounds dimension units space) (Quantity units) (VectorBounds dimension Unitless space)
+  , Multiplication (Interval Unitless) (VectorBounds dimension units space) (VectorBounds dimension units space)
+  , Multiplication (VectorBounds dimension units space) (Interval Unitless) (VectorBounds dimension units space)
+  , Multiplication (Interval units) (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
+  , Multiplication (VectorBounds dimension Unitless space) (Interval units) (VectorBounds dimension units space)
+  , Division (VectorBounds dimension units space) (Interval Unitless) (VectorBounds dimension units space)
+  , Division (VectorBounds dimension units space) (Interval units) (VectorBounds dimension Unitless space)
   , DotMultiplication
       (VectorBounds dimension units space)
       (Vector dimension Unitless space)
@@ -73,6 +85,10 @@ class
       (VectorBounds dimension Unitless space)
       (VectorBounds dimension units space)
       (Interval units)
+  , DotMultiplication_
+      (VectorBounds dimension units space)
+      (VectorBounds dimension units space)
+      (Interval (units ?*? units))
   ) =>
   Exists dimension units space
   where
