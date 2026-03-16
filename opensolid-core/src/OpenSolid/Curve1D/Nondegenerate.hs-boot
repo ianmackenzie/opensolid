@@ -1,6 +1,5 @@
 module OpenSolid.Curve1D.Nondegenerate
-  ( curve
-  , squared
+  ( squared
   , squared_
   , sqrt
   , sqrt_
@@ -9,14 +8,14 @@ module OpenSolid.Curve1D.Nondegenerate
   )
 where
 
-import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D, Nondegenerate)
+import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 
-curve :: Nondegenerate units -> Curve1D units
-squared_ :: Nondegenerate units -> Nondegenerate (units ?*? units)
-squared :: Units.Squared units1 units2 => Nondegenerate units1 -> Nondegenerate units2
-sqrt_ :: Nondegenerate (units ?*? units) -> Nondegenerate units
-sqrt :: Units.Squared units1 units2 => Nondegenerate units2 -> Nondegenerate units1
-erase :: Nondegenerate units -> Nondegenerate Unitless
-unerase :: Nondegenerate Unitless -> Nondegenerate units
+squared_ :: Nondegenerate (Curve1D units) -> Nondegenerate (Curve1D (units ?*? units))
+squared :: Units.Squared units1 units2 => Nondegenerate (Curve1D units1) -> Nondegenerate (Curve1D units2)
+sqrt_ :: Nondegenerate (Curve1D (units ?*? units)) -> Nondegenerate (Curve1D units)
+sqrt :: Units.Squared units1 units2 => Nondegenerate (Curve1D units2) -> Nondegenerate (Curve1D units1)
+erase :: Nondegenerate (Curve1D units) -> Nondegenerate (Curve1D Unitless)
+unerase :: Nondegenerate (Curve1D Unitless) -> Nondegenerate (Curve1D units)

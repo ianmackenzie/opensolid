@@ -178,6 +178,7 @@ library
     OpenSolid.NewtonRaphson2D
     OpenSolid.NewtonRaphson3D
     OpenSolid.NonEmpty
+    OpenSolid.Nondegenerate
     OpenSolid.Number
     OpenSolid.Orientation2D
     OpenSolid.Orientation3D

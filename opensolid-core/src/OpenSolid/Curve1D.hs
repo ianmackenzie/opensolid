@@ -33,7 +33,6 @@ module OpenSolid.Curve1D
   , quotient
   , quotient_
   , WithNoZeros (WithNoZeros)
-  , Nondegenerate (Nondegenerate)
   , squared
   , squared_
   , sqrt
@@ -84,6 +83,8 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson1D qualified as NewtonRaphson1D
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
@@ -444,19 +445,22 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
-newtype Nondegenerate units = Nondegenerate (Curve1D units)
+instance HasUnits (Nondegenerate (Curve1D units)) units
 
-instance HasUnits (Nondegenerate units) units
-
-instance Units.Coercion (Nondegenerate units1) (Nondegenerate units2) where
+instance Units.Coercion (Nondegenerate (Curve1D units1)) (Nondegenerate (Curve1D units2)) where
   coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
 
-instance Division_ (Curve1D units1) (Nondegenerate units2) (Curve1D (units1 ?/? units2)) where
+instance
+  Division_
+    (Curve1D units1)
+    (Nondegenerate (Curve1D units2))
+    (Curve1D (units1 ?/? units2))
+  where
   (?/?) = VectorCurve.desingularizedQuotient
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Curve1D units1) (Nondegenerate units2) (Curve1D units3)
+  Division (Curve1D units1) (Nondegenerate (Curve1D units2)) (Curve1D units3)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
@@ -487,7 +491,7 @@ sqrt_ :: Tolerance units => Curve1D (units ?*? units) -> Curve1D units
 sqrt_ curve =
   if Tolerance.using (Quantity.squared_ ?tolerance) (curve ~= zero)
     then zero
-    else Curve1D.Nondegenerate.curve (Curve1D.Nondegenerate.sqrt_ (Nondegenerate curve))
+    else Nondegenerate.unwrap (Curve1D.Nondegenerate.sqrt_ (Nondegenerate curve))
 
 -- | Compute the cube of a curve.
 cubed :: Curve1D Unitless -> Curve1D Unitless

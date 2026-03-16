@@ -44,6 +44,7 @@ import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
@@ -148,9 +149,8 @@ unsafeCurvatureVectorImpl_ ::
   VectorCurve dimension units space ->
   VectorCurve dimension (Unitless ?/? units) space
 unsafeCurvatureVectorImpl_ firstDerivative = do
-  let nondegenerateFirstDerivative = VectorCurve.unsafeNondegenerate firstDerivative
-  let dsdt = VectorCurve.Nondegenerate.magnitude nondegenerateFirstDerivative
-  let tangent = VectorCurve.Nondegenerate.normalize nondegenerateFirstDerivative
+  let dsdt = VectorCurve.Nondegenerate.magnitude (Nondegenerate firstDerivative)
+  let tangent = firstDerivative / dsdt
   VectorCurve.unerase (VectorCurve.derivative tangent / Curve1D.Nondegenerate.erase dsdt)
 
 startPoint ::

@@ -9,7 +9,6 @@ module OpenSolid.VectorCurve3D
   , compiled
   , isZero
   , derivative
-  , unsafeNondegenerate
   , nondegenerate
   , startValue
   , endValue
@@ -59,6 +58,7 @@ import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
@@ -79,8 +79,6 @@ import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
-import OpenSolid.VectorCurve3D.Nondegenerate (Nondegenerate)
-import OpenSolid.VectorCurve3D.Nondegenerate qualified as Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve3D.WithNoZeros (WithNoZeros (WithNoZeros))
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
@@ -89,7 +87,6 @@ data VectorCurve3D units space = VectorCurve3D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve3D units space)
   , maxSampledMagnitude :: ~(Quantity units)
-  , nondegenerate :: ~(Nondegenerate units space)
   }
 
 type Compiled units space =
@@ -110,8 +107,17 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
-      , nondegenerate = Units.coerce curve.nondegenerate
       }
+
+instance HasUnits (Nondegenerate (VectorCurve3D units space)) units
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion
+    (Nondegenerate (VectorCurve3D units1 space1))
+    (Nondegenerate (VectorCurve3D units2 space2))
+  where
+  coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
 
 instance ApproximateEquality (VectorCurve3D units space) (Tolerance units) where
   curve1 ~= curve2 = do
@@ -441,13 +447,10 @@ compiled = (.compiled)
 derivative :: VectorCurve3D units space -> VectorCurve3D units space
 derivative = (.derivative)
 
-unsafeNondegenerate :: VectorCurve3D units space -> Nondegenerate units space
-unsafeNondegenerate = (.nondegenerate)
-
 nondegenerate ::
   Tolerance units =>
   VectorCurve3D units space ->
-  Result VectorCurve.IsZero (Nondegenerate units space)
+  Result VectorCurve.IsZero (Nondegenerate (VectorCurve3D units space))
 nondegenerate = VectorCurve.nondegenerate
 
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
@@ -473,7 +476,6 @@ new givenCompiled givenDerivative = result
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
-      , nondegenerate = Nondegenerate.unsafe result
       }
 
 recursive ::
@@ -608,7 +610,7 @@ quotient_ ::
 quotient_ lhs rhs =
   if rhs ~= Curve1D.zero
     then Error DivisionByZero
-    else Ok (lhs ?/? Curve1D.Nondegenerate rhs)
+    else Ok (lhs ?/? Nondegenerate rhs)
 
 instance
   Division_
@@ -636,7 +638,7 @@ instance
 instance
   Division_
     (VectorCurve3D units1 space)
-    (Curve1D.Nondegenerate units2)
+    (Nondegenerate (Curve1D units2))
     (VectorCurve3D (units1 ?/? units2) space)
   where
   (?/?) = VectorCurve.desingularizedQuotient
@@ -645,7 +647,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division
     (VectorCurve3D units1 space)
-    (Curve1D.Nondegenerate units2)
+    (Nondegenerate (Curve1D units2))
     (VectorCurve3D units3 space)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)

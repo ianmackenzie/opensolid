@@ -7,7 +7,6 @@ module OpenSolid.VectorCurve3D
   , bezier
   , compiled
   , derivative
-  , unsafeNondegenerate
   , isZero
   , evaluate
   , bounds
@@ -25,12 +24,12 @@ import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Plane3D, Transform3D, Vector3D, VectorBounds3D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
-import {-# SOURCE #-} OpenSolid.VectorCurve3D.Nondegenerate (Nondegenerate)
 
 type role VectorCurve3D nominal nominal
 
@@ -57,6 +56,14 @@ instance Multiplication (VectorCurve3D units space) Sign (VectorCurve3D units sp
 instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve3D unitsA space1) (VectorCurve3D unitsB space2)
+
+instance HasUnits (Nondegenerate (VectorCurve3D units space)) units
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion
+    (Nondegenerate (VectorCurve3D units1 space1))
+    (Nondegenerate (VectorCurve3D units2 space2))
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -108,7 +115,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division
     (VectorCurve3D units1 space)
-    (Curve1D.Nondegenerate units2)
+    (Nondegenerate (Curve1D units2))
     (VectorCurve3D units3 space)
 
 instance
@@ -131,7 +138,6 @@ on :: Plane3D global local -> VectorCurve2D units local -> VectorCurve3D units g
 bezier :: NonEmpty (Vector3D units space) -> VectorCurve3D units space
 compiled :: VectorCurve3D units space -> Compiled units space
 derivative :: VectorCurve3D units space -> VectorCurve3D units space
-unsafeNondegenerate :: VectorCurve3D units space -> Nondegenerate units space
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
 evaluate :: VectorCurve3D units space -> Number -> Vector3D units space
 bounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space

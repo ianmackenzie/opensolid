@@ -7,7 +7,6 @@ module OpenSolid.VectorCurve2D
   , bezier
   , compiled
   , derivative
-  , unsafeNondegenerate
   , isZero
   , evaluate
   , bounds
@@ -24,11 +23,11 @@ import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Transform2D, Vector2D, VectorBounds2D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import {-# SOURCE #-} OpenSolid.VectorCurve2D.Nondegenerate (Nondegenerate)
 
 type role VectorCurve2D nominal nominal
 
@@ -55,6 +54,14 @@ instance Multiplication (VectorCurve2D units space) Sign (VectorCurve2D units sp
 instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve2D unitsA space1) (VectorCurve2D unitsB space2)
+
+instance HasUnits (Nondegenerate (VectorCurve2D units space)) units
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion
+    (Nondegenerate (VectorCurve2D units1 space1))
+    (Nondegenerate (VectorCurve2D units2 space2))
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -106,7 +113,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division
     (VectorCurve2D units1 space)
-    (Curve1D.Nondegenerate units2)
+    (Nondegenerate (Curve1D units2))
     (VectorCurve2D units3 space)
 
 instance
@@ -128,7 +135,6 @@ new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units 
 bezier :: NonEmpty (Vector2D units space) -> VectorCurve2D units space
 compiled :: VectorCurve2D units space -> Compiled units space
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
-unsafeNondegenerate :: VectorCurve2D units space -> Nondegenerate units space
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
 evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
 bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space

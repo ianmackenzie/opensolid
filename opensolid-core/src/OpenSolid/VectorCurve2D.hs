@@ -9,7 +9,6 @@ module OpenSolid.VectorCurve2D
   , recursive
   , compiled
   , derivative
-  , unsafeNondegenerate
   , nondegenerate
   , startValue
   , endValue
@@ -76,6 +75,7 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D)
@@ -97,8 +97,6 @@ import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve qualified as VectorCurve
-import OpenSolid.VectorCurve2D.Nondegenerate (Nondegenerate)
-import OpenSolid.VectorCurve2D.Nondegenerate qualified as Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve2D.WithNoZeros (WithNoZeros (WithNoZeros))
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
@@ -109,7 +107,6 @@ data VectorCurve2D units space = VectorCurve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
   , maxSampledMagnitude :: ~(Quantity units)
-  , nondegenerate :: ~(Nondegenerate units space)
   }
 
 type Compiled units space =
@@ -139,8 +136,17 @@ instance
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
-      , nondegenerate = Units.coerce curve.nondegenerate
       }
+
+instance HasUnits (Nondegenerate (VectorCurve2D units space)) units
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion
+    (Nondegenerate (VectorCurve2D units1 space1))
+    (Nondegenerate (VectorCurve2D units2 space2))
+  where
+  coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
 
 instance ApproximateEquality (VectorCurve2D units space) (Tolerance units) where
   curve1 ~= curve2 = do
@@ -496,13 +502,10 @@ compiled = (.compiled)
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
 derivative = (.derivative)
 
-unsafeNondegenerate :: VectorCurve2D units space -> Nondegenerate units space
-unsafeNondegenerate = (.nondegenerate)
-
 nondegenerate ::
   Tolerance units =>
   VectorCurve2D units space ->
-  Result VectorCurve.IsZero (Nondegenerate units space)
+  Result VectorCurve.IsZero (Nondegenerate (VectorCurve2D units space))
 nondegenerate = VectorCurve.nondegenerate
 
 transformBy ::
@@ -535,7 +538,6 @@ new givenCompiled givenDerivative = result
       { compiled = givenCompiled
       , derivative = givenDerivative
       , maxSampledMagnitude
-      , nondegenerate = Nondegenerate.unsafe result
       }
 
 recursive ::
@@ -706,7 +708,7 @@ quotient_ ::
 quotient_ lhs rhs =
   if rhs ~= Curve1D.zero
     then Error DivisionByZero
-    else Ok (lhs ?/? Curve1D.Nondegenerate rhs)
+    else Ok (lhs ?/? Nondegenerate rhs)
 
 instance
   Division_
@@ -734,7 +736,7 @@ instance
 instance
   Division_
     (VectorCurve2D units1 space)
-    (Curve1D.Nondegenerate units2)
+    (Nondegenerate (Curve1D units2))
     (VectorCurve2D (units1 ?/? units2) space)
   where
   (?/?) = VectorCurve.desingularizedQuotient
@@ -743,7 +745,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division
     (VectorCurve2D units1 space)
-    (Curve1D.Nondegenerate units2)
+    (Nondegenerate (Curve1D units2))
     (VectorCurve2D units3 space)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)

@@ -3,8 +3,6 @@ module OpenSolid.VectorCurve
   , Exists
   , Nondegenerate
   , IsZero (IsZero)
-  , pattern Zero
-  , pattern Nondegenerate
   , isZero
   , constant
   , zero
@@ -19,7 +17,6 @@ module OpenSolid.VectorCurve
   , secondDerivativeBounds
   , squaredMagnitude_
   , squaredMagnitude
-  , unsafeNondegenerate
   , nondegenerate
   , magnitude
   , normalize
@@ -38,8 +35,6 @@ import Data.Void (Void)
 import OpenSolid.Bezier qualified as Bezier
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
-import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1d
-import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import OpenSolid.Curve1D.Zero qualified
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.DirectionCurve (DirectionCurve)
@@ -47,6 +42,8 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
@@ -56,8 +53,7 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
-import OpenSolid.VectorCurve.Nondegenerate (Nondegenerate)
-import OpenSolid.VectorCurve.Nondegenerate qualified as Nondegenerate
+import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -75,7 +71,7 @@ data IsZero = IsZero deriving (Eq, Show)
 
 class
   ( Vector.Exists dimension units space
-  , Nondegenerate.Exists dimension units space
+  , VectorCurve.Nondegenerate.Exists dimension units space
   , Exists dimension Unitless space
   , HasUnits (VectorCurve dimension units space) units
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
@@ -109,11 +105,11 @@ class
       (VectorCurve dimension Unitless space)
   , Division
       (VectorCurve dimension units space)
-      (Curve1D.Nondegenerate Unitless)
+      (Nondegenerate (Curve1D Unitless))
       (VectorCurve dimension units space)
   , Division
       (VectorCurve dimension units space)
-      (Curve1D.Nondegenerate units)
+      (Nondegenerate (Curve1D units))
       (VectorCurve dimension Unitless space)
   , NewtonRaphson.Curve dimension units space
   ) =>
@@ -126,7 +122,6 @@ class
   bounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
   derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
-  unsafeNondegenerate :: VectorCurve dimension units space -> Nondegenerate dimension units space
   desingularized ::
     VectorCurve dimension units space ->
     VectorCurve dimension units space ->
@@ -142,7 +137,6 @@ instance Exists 1 units Void where
   bezier = Curve1D.bezier
   desingularized = Curve1D.desingularized
   squaredMagnitude_ = Curve1D.squared_
-  unsafeNondegenerate = Curve1D.Nondegenerate
 
 instance Exists 2 units space where
   constant = VectorCurve2D.constant
@@ -153,7 +147,6 @@ instance Exists 2 units space where
   bezier = VectorCurve2D.bezier
   desingularized = VectorCurve2D.desingularized
   squaredMagnitude_ = VectorCurve2D.squaredMagnitude_
-  unsafeNondegenerate = VectorCurve2D.unsafeNondegenerate
 
 instance Exists 3 units space where
   constant = VectorCurve3D.constant
@@ -164,18 +157,6 @@ instance Exists 3 units space where
   bezier = VectorCurve3D.bezier
   desingularized = VectorCurve3D.desingularized
   squaredMagnitude_ = VectorCurve3D.squaredMagnitude_
-  unsafeNondegenerate = VectorCurve3D.unsafeNondegenerate
-
-{-# COMPLETE Zero, Nondegenerate #-}
-
-pattern Zero :: (Exists dimension units space, Tolerance units) => VectorCurve dimension units space
-pattern Zero <- (nondegenerate -> Error IsZero)
-
-pattern Nondegenerate ::
-  (Exists dimension units space, Tolerance units) =>
-  Nondegenerate dimension units space ->
-  VectorCurve dimension units space
-pattern Nondegenerate nondegenerateCurve <- (nondegenerate -> Ok nondegenerateCurve)
 
 zero :: Exists dimension units space => VectorCurve dimension units space
 zero = constant Vector.zero
@@ -183,8 +164,8 @@ zero = constant Vector.zero
 nondegenerate ::
   (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
-  Result IsZero (Nondegenerate dimension units space)
-nondegenerate curve = if isZero curve then Error IsZero else Ok (unsafeNondegenerate curve)
+  Result IsZero (Nondegenerate (VectorCurve dimension units space))
+nondegenerate curve = if isZero curve then Error IsZero else Ok (Nondegenerate curve)
 
 secondDerivative ::
   Exists dimension units space =>
@@ -224,14 +205,14 @@ normalize ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
   VectorCurve dimension units space ->
   VectorCurve dimension Unitless space
-normalize Zero = zero
-normalize (Nondegenerate curve) = Nondegenerate.normalize curve
+normalize curve =
+  if isZero curve then zero else VectorCurve.Nondegenerate.normalize (Nondegenerate curve)
 
 direction ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (DirectionCurve dimension space)
-direction vectorCurve = Result.map Nondegenerate.direction (nondegenerate vectorCurve)
+direction vectorCurve = Result.map VectorCurve.Nondegenerate.direction (nondegenerate vectorCurve)
 
 zeros ::
   (Exists dimension units space, Tolerance units) =>
@@ -285,9 +266,9 @@ desingularizedQuotient ::
   , Exists dimension (units1 ?/? units2) space
   ) =>
   VectorCurve dimension units1 space ->
-  Curve1d.Nondegenerate units2 ->
+  Nondegenerate (Curve1D units2) ->
   VectorCurve dimension (units1 ?/? units2) space
-desingularizedQuotient lhs (Curve1D.Nondegenerate rhs) = do
+desingularizedQuotient lhs (Nondegenerate rhs) = do
   let singularityTolerance = Curve1D.singularityTolerance rhs
   let maybeSingularity tValue =
         if Tolerance.using singularityTolerance (Curve1D.evaluate rhs tValue ~= Quantity.zero)
@@ -325,8 +306,10 @@ magnitude ::
   (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Curve1D units
-magnitude Zero = Curve1D.zero
-magnitude (Nondegenerate curve) = Curve1D.Nondegenerate.curve (Nondegenerate.magnitude curve)
+magnitude curve =
+  if isZero curve
+    then Curve1D.zero
+    else Nondegenerate.unwrap (VectorCurve.Nondegenerate.magnitude (Nondegenerate curve))
 
 erase ::
   Exists dimension units space =>
