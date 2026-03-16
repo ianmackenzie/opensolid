@@ -47,10 +47,6 @@ class
       (Vector dimension units space)
       (Vector dimension units space)
       (Vector dimension units space)
-  , Addition
-      (Vector dimension units space)
-      (Vector dimension units space)
-      (Vector dimension units space)
   , Subtraction
       (Vector dimension units space)
       (Vector dimension units space)
