@@ -10,6 +10,7 @@ module OpenSolid.VectorBounds
   , areIndependent
   , erase
   , unerase
+  , coerce
   )
 where
 
@@ -140,3 +141,10 @@ unerase ::
   VectorBounds dimension Unitless space ->
   VectorBounds dimension units space
 unerase = Units.unerase
+
+{-# INLINE coerce #-}
+coerce ::
+  (Exists dimension units1 space, Exists dimension units2 space) =>
+  VectorBounds dimension units1 space ->
+  VectorBounds dimension units2 space
+coerce = unerase . erase

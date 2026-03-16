@@ -14,6 +14,7 @@ module OpenSolid.Vector
   , sum
   , erase
   , unerase
+  , coerce
   )
 where
 
@@ -159,3 +160,10 @@ unerase ::
   Vector dimension Unitless space ->
   Vector dimension units space
 unerase = Units.unerase
+
+{-# INLINE coerce #-}
+coerce ::
+  (Exists dimension units1 space, Exists dimension units2 space) =>
+  Vector dimension units1 space ->
+  Vector dimension units2 space
+coerce = unerase . erase
