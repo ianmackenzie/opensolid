@@ -2,7 +2,7 @@ module OpenSolid.Curve
   ( Curve
   , Exists
   , IsPoint
-  , evaluate
+  , point
   , bounds
   , startPoint
   , endPoint
@@ -40,7 +40,7 @@ data IsPoint
 
 data HasSingularity
 
-evaluate ::
+point ::
   Exists dimension units space =>
   Curve dimension units space ->
   Number ->

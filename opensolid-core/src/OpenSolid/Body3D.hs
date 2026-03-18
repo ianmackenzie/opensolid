@@ -548,8 +548,8 @@ toMatingEdge _ _ DegenerateHalfEdge{} = Nothing
 toMatingEdge id1 curve1 HalfEdge{halfEdgeId = id2, curve3D = curve2, uvCurve}
   | id1 == id2 = Nothing
   | otherwise = do
-      let points1 = NonEmpty.map (Curve3D.evaluate curve1) Parameter.samples
-      let points2 = NonEmpty.map (Curve3D.evaluate curve2) Parameter.samples
+      let points1 = NonEmpty.map (Curve3D.point curve1) Parameter.samples
+      let points2 = NonEmpty.map (Curve3D.point curve2) Parameter.samples
       if
         | points1 ~= points2 ->
             Just MatingEdge{halfEdgeId = id2, uvCurve, correctlyAligned = False}
@@ -685,7 +685,7 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
         Just surfaceSegments -> do
           let edgePredicate = degenerateEdgeLinearizationPredicate uvCurve surfaceSegments
           let tValues = Domain1D.innerSamplingPoints edgePredicate
-          Map.set halfEdgeId (List.map (Curve2D.evaluate uvCurve) tValues) accumulated
+          Map.set halfEdgeId (List.map (Curve2D.point uvCurve) tValues) accumulated
         Nothing ->
           throw (InternalError "Should always be able to look up surface segments for a given edge")
     PrimaryEdge{halfEdgeId, matingId, curve3D, uvCurve, matingUvCurve, correctlyAligned} -> do
@@ -704,8 +704,8 @@ addInnerEdgeVertices resolution surfaceSegmentsById edge accumulated = do
                   matingSurfaceSegments
           let tValues = Domain1D.innerSamplingPoints edgePredicate
           let matingTValues = if correctlyAligned then List.reverseMap (1.0 -) tValues else tValues
-          let vertices = List.map (Curve2D.evaluate uvCurve) tValues
-          let matingVertices = List.map (Curve2D.evaluate matingUvCurve) matingTValues
+          let vertices = List.map (Curve2D.point uvCurve) tValues
+          let matingVertices = List.map (Curve2D.point matingUvCurve) matingTValues
           accumulated
             & Map.set halfEdgeId vertices
             & Map.set matingId matingVertices
@@ -733,18 +733,18 @@ edgeLinearizationPredicate
   matingSurfaceSegments
   tBounds = do
     let Interval tStart tEnd = tBounds
-    let uvStart = Curve2D.evaluate uvCurve tStart
-    let uvEnd = Curve2D.evaluate uvCurve tEnd
+    let uvStart = Curve2D.point uvCurve tStart
+    let uvEnd = Curve2D.point uvCurve tEnd
     let matingTStart = if correctlyAligned then 1.0 - tStart else tStart
     let matingTEnd = if correctlyAligned then 1.0 - tEnd else tEnd
-    let matingUvStart = Curve2D.evaluate matingUvCurve matingTStart
-    let matingUvEnd = Curve2D.evaluate matingUvCurve matingTEnd
+    let matingUvStart = Curve2D.point matingUvCurve matingTStart
+    let matingUvEnd = Curve2D.point matingUvCurve matingTEnd
     let uvBounds = Bounds2D.hull2 uvStart uvEnd
     let matingUvBounds = Bounds2D.hull2 matingUvStart matingUvEnd
     let edgeSize = Point2D.distanceFrom uvStart uvEnd
     let matingEdgeSize = Point2D.distanceFrom matingUvStart matingUvEnd
-    let startPoint = Curve3D.evaluate curve3D tStart
-    let endPoint = Curve3D.evaluate curve3D tEnd
+    let startPoint = Curve3D.point curve3D tStart
+    let endPoint = Curve3D.point curve3D tEnd
     let edgeLength = Point3D.distanceFrom startPoint endPoint
     let edgeSecondDerivativeBounds = Curve3D.secondDerivativeBounds curve3D tBounds
     let edgeSecondDerivativeMagnitude = VectorBounds3D.magnitude edgeSecondDerivativeBounds
@@ -760,8 +760,8 @@ degenerateEdgeLinearizationPredicate ::
   Bool
 degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
   let Interval tStart tEnd = tBounds
-  let uvStart = Curve2D.evaluate uvCurve tStart
-  let uvEnd = Curve2D.evaluate uvCurve tEnd
+  let uvStart = Curve2D.point uvCurve tStart
+  let uvEnd = Curve2D.point uvCurve tEnd
   let uvBounds = Bounds2D.hull2 uvStart uvEnd
   let edgeSize = Point2D.distanceFrom uvStart uvEnd
   validEdge uvBounds edgeSize surfaceSegments

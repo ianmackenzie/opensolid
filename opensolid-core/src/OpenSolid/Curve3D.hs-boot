@@ -6,7 +6,7 @@ module OpenSolid.Curve3D
   , new
   , on
   , derivative
-  , evaluate
+  , point
   , bounds
   , overallBounds
   , reverse
@@ -93,7 +93,7 @@ constant :: Point3D space -> Curve3D space
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 on :: Plane3D global local -> Curve2D Meters local -> Curve3D global
 derivative :: Curve3D space -> VectorCurve3D Meters space
-evaluate :: Curve3D space -> Number -> Point3D space
+point :: Curve3D space -> Number -> Point3D space
 bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 overallBounds :: Curve3D space -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space

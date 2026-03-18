@@ -235,7 +235,7 @@ boundaryPoints accuracy surfaceFunction fuu fuv fvv uvCurve = do
   let curve3D = surfaceFunction . uvCurve
   let predicate = linearizationPredicate accuracy fuu fuv fvv uvCurve curve3D
   let parameterValues = Domain1D.leadingSamplingPoints predicate
-  NonEmpty.map (Curve2D.evaluate uvCurve) parameterValues
+  NonEmpty.map (Curve2D.point uvCurve) parameterValues
 
 surfaceError ::
   VectorSurfaceFunction3D Meters space ->

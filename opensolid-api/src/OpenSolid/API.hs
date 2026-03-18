@@ -1521,7 +1521,7 @@ curve2D =
     , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (.startPoint) "The start point of the curve."
     , Class.property "End Point" (.endPoint) "The end point of the curve."
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve2D.evaluate) $(docs 'Curve2D.evaluate)
+    , Class.member1 "Point" "Parameter Value" (flip Curve2D.point) $(docs 'Curve2D.point)
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "X Coordinate" (.xCoordinate) $(docs 'Curve2D.xCoordinate)
@@ -1551,7 +1551,7 @@ uvCurve =
     , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (.startPoint) "The start point of the curve."
     , Class.property "End Point" (.endPoint) "The end point of the curve."
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve2D.evaluate) $(docs 'Curve2D.evaluate)
+    , Class.member1 "Point" "Parameter Value" (flip Curve2D.point) $(docs 'Curve2D.point)
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "U Coordinate" (.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."

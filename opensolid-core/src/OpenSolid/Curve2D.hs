@@ -29,7 +29,7 @@ module OpenSolid.Curve2D
   , secondDerivativeBounds
   , desingularize
   , desingularized
-  , evaluate
+  , point
   , startPoint
   , endPoint
   , endpoints
@@ -206,13 +206,13 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Curve2D units1 space1) (Point2D units2 space2) (Tolerance units1)
   where
-  curve `intersects` point = not (List.isEmpty (findPoint point curve))
+  curve `intersects` givenPoint = not (List.isEmpty (findPoint givenPoint curve))
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (Point2D units1 space1) (Curve2D units2 space2) (Tolerance units1)
   where
-  point `intersects` curve = curve `intersects` point
+  givenPoint `intersects` curve = curve `intersects` givenPoint
 
 instance ApproximateEquality (Curve2D units space) (Tolerance units) where
   curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
@@ -276,7 +276,7 @@ instance
     (Point2D units2 space2)
     (VectorCurve2D units1 space1)
   where
-  curve - point = curve - constant point
+  curve - givenPoint = curve - constant givenPoint
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -285,7 +285,7 @@ instance
     (Curve2D units2 space2)
     (VectorCurve2D units1 space1)
   where
-  point - curve = constant point - curve
+  givenPoint - curve = constant givenPoint - curve
 
 instance Composition (Curve2D units space) (Curve1D Unitless) (Curve2D units space) where
   f . g = new (f.compiled . Curve1D.compiled g) ((f.derivative . g) * Curve1D.derivative g)
@@ -359,7 +359,7 @@ recursive givenCompiled derivativeFunction =
 
 -- | Create a degenerate curve that is actually just a single point.
 constant :: Point2D units space -> Curve2D units space
-constant point = new (CompiledFunction.constant point) VectorCurve2D.zero
+constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve2D.zero
 
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve1D units -> Curve1D units -> Curve2D units space
@@ -642,7 +642,7 @@ desingularize startSingularity curve endSingularity = do
         Nothing -> curve
         Just (value0, firstDerivative0) -> do
           let t0 = Desingularization.t0
-          let valueT0 = evaluate curve t0
+          let valueT0 = point curve t0
           let firstDerivativeT0 = derivativeValue curve t0
           let secondDerivativeT0 = secondDerivativeValue curve t0
           bezier $
@@ -656,7 +656,7 @@ desingularize startSingularity curve endSingularity = do
         Nothing -> curve
         Just (value1, firstDerivative1) -> do
           let t1 = Desingularization.t1
-          let valueT1 = evaluate curve t1
+          let valueT1 = point curve t1
           let firstDerivativeT1 = derivativeValue curve t1
           let secondDerivativeT1 = secondDerivativeValue curve t1
           bezier $
@@ -685,25 +685,25 @@ desingularized start middle end = do
   new compiledDesingularized desingularizedDerivative
 
 instance HasField "startPoint" (Curve2D units space) (Point2D units space) where
-  getField curve = evaluate curve 0.0
+  getField curve = point curve 0.0
 
 instance HasField "endPoint" (Curve2D units space) (Point2D units space) where
-  getField curve = evaluate curve 1.0
+  getField curve = point curve 1.0
 
-{-| Evaluate a curve at a given parameter value.
+{-| Get the point on a curve at a given parameter value.
 
 The parameter value should be between 0 and 1.
 -}
-evaluate :: Curve2D units space -> Number -> Point2D units space
-evaluate curve tValue = CompiledFunction.value curve.compiled tValue
+point :: Curve2D units space -> Number -> Point2D units space
+point curve tValue = CompiledFunction.value curve.compiled tValue
 
 -- | Get the start point of a curve.
 startPoint :: Curve2D units space -> Point2D units space
-startPoint curve = evaluate curve 0.0
+startPoint curve = point curve 0.0
 
 -- | Get the end point of a curve.
 endPoint :: Curve2D units space -> Point2D units space
-endPoint curve = evaluate curve 1.0
+endPoint curve = point curve 1.0
 
 -- | Get the start and end points of a curve.
 endpoints :: Curve2D units space -> (Point2D units space, Point2D units space)
@@ -713,7 +713,7 @@ bounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
 
 samplePoints :: Curve2D units space -> NonEmpty (Point2D units space)
-samplePoints curve = NonEmpty.map (evaluate curve) Parameter.samples
+samplePoints curve = NonEmpty.map (point curve) Parameter.samples
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2D units space -> Curve2D units space
@@ -829,11 +829,9 @@ g2 ::
   Quantity units ->
   Bool
 g2 (curve1, t1) (curve2, t2) radius =
-  evaluate curve1 t1 ~= evaluate curve2 t2 && do
-    let first1 = VectorCurve2D.evaluate curve1.derivative t1
-    let first2 = VectorCurve2D.evaluate curve2.derivative t2
-    let Vector2D dxdt1 dydt1 = first1
-    let Vector2D dxdt2 dydt2 = first2
+  point curve1 t1 ~= point curve2 t2 && do
+    let Vector2D dxdt1 dydt1 = derivativeValue curve1 t1
+    let Vector2D dxdt2 dydt2 = derivativeValue curve2 t2
     let dxdtMin = min (Quantity.abs dxdt1) (Quantity.abs dxdt2)
     let dydtMin = min (Quantity.abs dydt1) (Quantity.abs dydt2)
     let orientation =
@@ -1002,14 +1000,12 @@ curvature curve = Result.map Units.specialize (curvature_ curve)
 
 toPolyline :: Resolution units -> Curve2D units space -> Polyline2D units space
 toPolyline resolution curve =
-  Polyline2D (NonEmpty.map (evaluate curve) (samplingPoints resolution curve))
+  Polyline2D (NonEmpty.map (point curve) (samplingPoints resolution curve))
 
 samplingPoints :: Resolution units -> Curve2D units space -> NonEmpty Number
 samplingPoints resolution curve = do
-  let size subdomain = do
-        let start = evaluate curve subdomain.lower
-        let end = evaluate curve subdomain.upper
-        Point2D.distanceFrom start end
+  let size subdomain =
+        Point2D.distanceFrom (point curve subdomain.lower) (point curve subdomain.upper)
   let error subdomain =
         Linearization.error
           (VectorBounds2D.magnitude (secondDerivativeBounds curve subdomain))
@@ -1075,10 +1071,10 @@ makePiecewise :: NonEmpty (Curve2D units space, Quantity units) -> Curve2D units
 makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
-  let evaluateImpl t = piecewiseValue tree (arcLength * t)
+  let pointImpl t = piecewisePoint tree (arcLength * t)
   let boundsImpl (Interval t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
   new
-    (CompiledFunction.abstract evaluateImpl boundsImpl)
+    (CompiledFunction.abstract pointImpl boundsImpl)
     (piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength)
 
 piecewise :: Tolerance units => NonEmpty (Curve2D units space) -> Curve2D units space
@@ -1110,12 +1106,12 @@ data PiecewiseTree units space where
     Quantity units ->
     PiecewiseTree units space
 
-piecewiseValue :: PiecewiseTree units space -> Quantity units -> Point2D units space
-piecewiseValue tree length = case tree of
+piecewisePoint :: PiecewiseTree units space -> Quantity units -> Point2D units space
+piecewisePoint tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree
-    | length < leftLength -> piecewiseValue leftTree length
-    | otherwise -> piecewiseValue rightTree (length - leftLength)
-  PiecewiseLeaf curve segmentLength -> evaluate curve (length / segmentLength)
+    | length < leftLength -> piecewisePoint leftTree length
+    | otherwise -> piecewisePoint rightTree (length - leftLength)
+  PiecewiseLeaf curve segmentLength -> point curve (length / segmentLength)
 
 piecewiseBounds ::
   PiecewiseTree units space ->
@@ -1140,10 +1136,10 @@ piecewiseDerivative ::
   Quantity units ->
   VectorCurve2D units space
 piecewiseDerivative tree length = do
-  let evaluateImpl t = piecewiseDerivativeValue tree (length * t)
+  let valueImpl t = piecewiseDerivativeValue tree (length * t)
   let boundsImpl (Interval t1 t2) = piecewiseDerivativeBounds tree (length * t1) (length * t2)
   VectorCurve2D.new
-    (CompiledFunction.abstract evaluateImpl boundsImpl)
+    (CompiledFunction.abstract valueImpl boundsImpl)
     (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
 
 data PiecewiseDerivativeTree units space where

@@ -23,7 +23,7 @@ module OpenSolid.Curve3D
   , curvatureVector
   , startPoint
   , endPoint
-  , evaluate
+  , point
   , bounds
   , overallBounds
   , reverse
@@ -184,14 +184,14 @@ instance
 
 instance ApproximateEquality (Curve3D space) (Tolerance Meters) where
   curve1 ~= curve2 = do
-    let equalPointsAt t = evaluate curve1 t ~= evaluate curve2 t
+    let equalPointsAt t = point curve1 t ~= point curve2 t
     NonEmpty.all equalPointsAt Parameter.samples
 
 instance space1 ~ space2 => Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters) where
-  point `intersects` curve = not (List.isEmpty (findPoint point curve))
+  givenPoint `intersects` curve = not (List.isEmpty (findPoint givenPoint curve))
 
 instance space1 ~ space2 => Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters) where
-  curve `intersects` point = point `intersects` curve
+  curve `intersects` givenPoint = givenPoint `intersects` curve
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new givenCompiled givenDerivative =
@@ -202,7 +202,7 @@ recursive givenCompiled derivativeFunction =
   let result = new givenCompiled (derivativeFunction result) in result
 
 constant :: Point3D space -> Curve3D space
-constant point = new (CompiledFunction.constant point) VectorCurve3D.zero
+constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve3D.zero
 
 on :: Plane3D global local -> Curve2D Meters local -> Curve3D global
 on plane curve2D = do
@@ -307,13 +307,13 @@ curvatureVector ::
 curvatureVector curve = Result.map Units.specialize (Curve.curvatureVector_ curve)
 
 startPoint :: Curve3D space -> Point3D space
-startPoint curve = evaluate curve 0.0
+startPoint curve = point curve 0.0
 
 endPoint :: Curve3D space -> Point3D space
-endPoint curve = evaluate curve 1.0
+endPoint curve = point curve 1.0
 
-evaluate :: Curve3D space -> Number -> Point3D space
-evaluate curve tValue = CompiledFunction.value curve.compiled tValue
+point :: Curve3D space -> Number -> Point3D space
+point curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds

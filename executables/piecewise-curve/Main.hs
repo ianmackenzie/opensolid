@@ -47,7 +47,7 @@ main = Tolerance.using Length.nanometer do
   let drawCurve n curve =
         Svg.group
           [ Svg.curve (Resolution.maxError Length.micrometer) curve
-          , Svg.combine (drawDot . Curve2D.evaluate curve) (Parameter.steps n)
+          , Svg.combine (drawDot . Curve2D.point curve) (Parameter.steps n)
           ]
   let drawingBounds =
         Bounds2D.hull2 (Point2D.centimeters -12.0 -12.0) (Point2D.centimeters 12.0 12.0)

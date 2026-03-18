@@ -99,7 +99,7 @@ findOwnPoint = Test.check 500 "findOwnPoint" do
   let p3 = Point2D.meters 2.0 0.0
   let testSpline = Curve2D.quadraticBezier p1 p2 p3
   t <- Test.generate Parameter.random
-  let p = Curve2D.evaluate testSpline t
+  let p = Curve2D.point testSpline t
   let solutions = Curve2D.findPoint p testSpline
   Tolerance.using 1e-12 do
     Test.expect (solutions ~= [t])
@@ -219,7 +219,7 @@ solving = Test.verify "solving" do
   let distanceFromOrigin = VectorCurve2D.magnitude (arc - Point2D.origin)
   let desiredDistance = Length.meters 0.5
   zeros <- Result.orFail (Curve1D.zeros (distanceFromOrigin - desiredDistance))
-  let distanceAt zero = Point2D.distanceFrom Point2D.origin (Curve2D.evaluate arc zero.location)
+  let distanceAt zero = Point2D.distanceFrom Point2D.origin (Curve2D.point arc zero.location)
   Test.expect (List.map distanceAt zeros ~= [desiredDistance, desiredDistance])
 
 degenerateStartPointTangent :: Tolerance Meters => Test
@@ -320,8 +320,8 @@ firstDerivativeIsConsistentWithin ::
   Expectation
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let dt :: Number = 1e-6
-  let p1 = Curve2D.evaluate curve (tValue - dt)
-  let p2 = Curve2D.evaluate curve (tValue + dt)
+  let p1 = Curve2D.point curve (tValue - dt)
+  let p2 = Curve2D.point curve (tValue + dt)
   let numericalFirstDerivative = (p2 - p1) / (2.0 * dt)
   let analyticFirstDerivative = Curve2D.derivativeValue curve tValue
   Tolerance.using givenTolerance do
@@ -372,7 +372,7 @@ reversalConsistency =
           curve <- Test.generate randomCurve
           let reversedCurve = Curve2D.reverse curve
           t <- Test.generate Parameter.random
-          Test.expect (Curve2D.evaluate curve t ~= Curve2D.evaluate reversedCurve (1.0 - t))
+          Test.expect (Curve2D.point curve t ~= Curve2D.point reversedCurve (1.0 - t))
 
 boundsConsistency ::
   (Tolerance units, Show (Quantity units)) =>
@@ -381,7 +381,7 @@ boundsConsistency ::
 boundsConsistency curve = do
   tBounds <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (Interval.interpolate tBounds) Parameter.random)
-  let curveValue = Curve2D.evaluate curve tValue
+  let curveValue = Curve2D.point curve tValue
   let curveBounds = Curve2D.bounds curve tBounds
   Test.expect (curveValue `intersects` curveBounds)
     & Test.output "tValue" tValue
@@ -397,7 +397,7 @@ arcConstruction = do
         let expectedPoint = Point2D.meters expectedX expectedY
         Test.verify label do
           let arc = Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 1.0) sweptAngle
-          Test.expect (Curve2D.evaluate arc 0.5 ~= expectedPoint)
+          Test.expect (Curve2D.point arc 0.5 ~= expectedPoint)
   let invSqrt2 = 1.0 / Number.sqrt 2.0
   Test.group "from" $
     [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
@@ -412,10 +412,10 @@ arcDeformation = Test.check 100 "deformation" do
   transform <- Test.generate Random.affineTransform2D
   t <- Test.generate Parameter.random
   let transformedArc = Curve2D.transformBy transform initialArc
-  let pointOnTransformed = Curve2D.evaluate transformedArc t
+  let pointOnTransformed = Curve2D.point transformedArc t
   let transformOfStart = Point2D.transformBy transform initialArc.startPoint
   let transformOfEnd = Point2D.transformBy transform initialArc.endPoint
-  let transformOfPoint = Point2D.transformBy transform (Curve2D.evaluate initialArc t)
+  let transformOfPoint = Point2D.transformBy transform (Curve2D.point initialArc t)
   Test.all
     [ Test.expect (transformedArc.startPoint ~= transformOfStart)
         & Test.output "transformedArc.startPoint" transformedArc.startPoint
@@ -432,7 +432,7 @@ g2 = Test.check 100 "G2 continuity" do
   p4 <- Test.generate Random.point2D
   let spline = Curve2D.cubicBezier p1 p2 p3 p4
   t <- Test.generate Parameter.random
-  let point = Curve2D.evaluate spline t
+  let point = Curve2D.point spline t
   tangentCurve <- Result.orFail (Curve2D.tangentDirection spline)
   curvatureCurve <- Result.orFail (Curve2D.curvature spline)
   let tangentDirection = DirectionCurve2D.evaluate tangentCurve t

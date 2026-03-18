@@ -9,7 +9,7 @@ module OpenSolid.Curve
   , HasSingularity (HasSingularity)
   , derivative
   , overallBounds
-  , evaluate
+  , point
   , bounds
   , startPoint
   , endPoint
@@ -112,21 +112,21 @@ class
   where
   derivative :: Curve dimension units space -> VectorCurve dimension units space
   overallBounds :: Curve dimension units space -> Bounds dimension units space
-  evaluate :: Curve dimension units space -> Number -> Point dimension units space
+  point :: Curve dimension units space -> Number -> Point dimension units space
   bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
   searchTree :: Curve dimension units space -> SearchTree dimension units space
 
 instance Exists 2 units space where
   derivative = Curve2D.derivative
   overallBounds = Curve2D.overallBounds
-  evaluate = Curve2D.evaluate
+  point = Curve2D.point
   bounds = Curve2D.bounds
   searchTree = Curve2D.searchTree
 
 instance Exists 3 Meters space where
   derivative = Curve3D.derivative
   overallBounds = Curve3D.overallBounds
-  evaluate = Curve3D.evaluate
+  point = Curve3D.point
   bounds = Curve3D.bounds
   searchTree = Curve3D.searchTree
 
@@ -177,13 +177,13 @@ startPoint ::
   Exists dimension units space =>
   Curve dimension units space ->
   Point dimension units space
-startPoint curve = evaluate curve 0.0
+startPoint curve = point curve 0.0
 
 endPoint ::
   Exists dimension units space =>
   Curve dimension units space ->
   Point dimension units space
-endPoint curve = evaluate curve 1.0
+endPoint curve = point curve 1.0
 
 derivativeValue ::
   Exists dimension units space =>
@@ -218,11 +218,11 @@ findPoint ::
   Point dimension units space ->
   Curve dimension units space ->
   List Number
-findPoint point curve = do
+findPoint givenPoint curve = do
   let curveDerivative = derivative curve
   let evaluateFirstOrder tValue =
-        (# evaluate curve tValue - point, VectorCurve.evaluate curveDerivative tValue #)
-  let isSolution tValue = evaluate curve tValue ~= point
+        (# point curve tValue - givenPoint, VectorCurve.evaluate curveDerivative tValue #)
+  let isSolution tValue = point curve tValue ~= givenPoint
   let isDegenerate tValue = VectorCurve.evaluate curveDerivative tValue ~= Vector.zero
   let endpointSolutions = List.filter isSolution [0.0, 1.0]
   let solveMonotonic tBounds = do
@@ -232,7 +232,7 @@ findPoint point curve = do
           then Resolved (Just tSolution)
           else Unresolved
   let interiorSolution tBounds segment
-        | not (point `intersects` Curve.Segment.bounds segment) = Resolved Nothing
+        | not (givenPoint `intersects` Curve.Segment.bounds segment) = Resolved Nothing
         | otherwise = do
             let isMonotonic = Curve.Segment.monotonic segment
             let isSmall = Search.Domain.isSmall tBounds

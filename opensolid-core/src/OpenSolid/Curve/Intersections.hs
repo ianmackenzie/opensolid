@@ -88,7 +88,7 @@ findEndpointSolutions ::
 findEndpointSolutions nondegenerate1 nondegenerate2 = do
   let curve1 = Nondegenerate.unwrap nondegenerate1
   let curve2 = Nondegenerate.unwrap nondegenerate2
-  let findPoint curve t searchCurve = Curve.findPoint (Curve.evaluate curve t) searchCurve
+  let findPoint curve t searchCurve = Curve.findPoint (Curve.point curve t) searchCurve
   let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 curve2]
   let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 curve1]
   let parameterValues = List.uniqueValues (endpoints1On2 <> endpoints2On1)
@@ -121,7 +121,7 @@ findInteriorSolution evaluate curve1 curve2 tBounds1 tBounds2 = do
   let UvPoint t1 t2 = NewtonRaphson.surface evaluate uvPoint0
   let isInterior1 = Search.isInterior t1 tBounds1
   let isInterior2 = Search.isInterior t2 tBounds2
-  let pointsAreEqual = Curve.evaluate curve1 t1 ~= Curve.evaluate curve2 t2
+  let pointsAreEqual = Curve.point curve1 t1 ~= Curve.point curve2 t2
   if isInterior1 && isInterior2 && pointsAreEqual then Just (t1, t2) else Nothing
 
 findInteriorIntersectionPoints ::
@@ -140,13 +140,13 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
   let curve2 = Nondegenerate.unwrap nondegenerate2
   let searchTree = Search.pairwise (,) (Curve.searchTree curve1) (Curve.searchTree curve2)
   let evaluateCrossing (UvPoint t1 t2) = do
-        let displacement = Curve.evaluate curve2 t2 - Curve.evaluate curve1 t1
+        let displacement = Curve.point curve2 t2 - Curve.point curve1 t1
         let uDerivative = negate (Curve.derivativeValue curve1 t1)
         let vDerivative = Curve.derivativeValue curve2 t2
         (# displacement, uDerivative, vDerivative #)
   let evaluateTangent (UvPoint u v) = do
-        let f = Curve.evaluate curve1 u
-        let g = Curve.evaluate curve2 v
+        let f = Curve.point curve1 u
+        let g = Curve.point curve2 v
         let d = g - f
         let fu = Curve.derivativeValue curve1 u
         let fuu = Curve.secondDerivativeValue curve1 u
@@ -249,7 +249,7 @@ findOverlappingSegments curve1 curve2 (NonEmpty endpointSolutions) = do
           & List.sortBy (.t1)
   let isOverlappingSegment start end = do
         let tValues1 = Interval.sampleValues (Interval start.t1 end.t1)
-        let samplePoints1 = NonEmpty.map (Curve.evaluate curve1) tValues1
+        let samplePoints1 = NonEmpty.map (Curve.point curve1) tValues1
         let onCurve2 point = not (List.isEmpty (Curve.findPoint point curve2))
         NonEmpty.all onCurve2 samplePoints1
   let overlappingSegment start end = (Interval start.t1 end.t1, Interval start.t2 end.t2)

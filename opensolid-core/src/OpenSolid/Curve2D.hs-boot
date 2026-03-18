@@ -4,7 +4,7 @@ module OpenSolid.Curve2D
   , SearchTree
   , constant
   , new
-  , evaluate
+  , point
   , bounds
   , overallBounds
   , compiled
@@ -115,7 +115,7 @@ instance
 
 constant :: Point2D units space -> Curve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
-evaluate :: Curve2D units space -> Number -> Point2D units space
+point :: Curve2D units space -> Number -> Point2D units space
 bounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
 overallBounds :: Curve2D units space -> Bounds2D units space
 compiled :: Curve2D units space -> Compiled units space

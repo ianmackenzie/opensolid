@@ -66,7 +66,7 @@ buildCurveImpl ::
 buildCurveImpl curve tBounds startPoint endPoint = do
   let Interval tLow tHigh = tBounds
   let tMid = Number.midpoint tLow tHigh
-  let midpoint = Curve2D.evaluate curve tMid
+  let midpoint = Curve2D.point curve tMid
   BoundaryTree
     { bounds = Curve2D.bounds curve tBounds
     , startPoint
