@@ -1,3 +1,11 @@
+Add generic Curve.samplingPoints and update Curve2D to use it
+- check overall bounds size and first derivative bounds size as well as second derivative
+- maybe implement via search tree! then can use tangent bounds if that helps...
+  - have positional check, first derivative check, tangent check *and* second derivative check?
+
+Refactor Curve.Segment construction to use L'Hopital for tangents where appropriate
+- normalize second derivative (or negated second derivative) if subdomain includes a singular endpoint
+
 Refactor bisection search to throw during *search*, not during domain *construction*?
 - more useful stack traces, not just traced back to Domain.unitInterval
 - add 'children' accessor function instead of exposing constructor,
@@ -5,7 +13,21 @@ Refactor bisection search to throw during *search*, not during domain *construct
 - maybe go back to the list of children being a Result or 'Maybe NonEmpty'?
 - or have an Atomic or Leaf constructor for Domain...
 
+Refactor involute curve construction to use optimized (simplified) derivatives
+
+Tighten vector bounds normalization
+- add C++ code callable via primop that computes normalized vector bounds
+  - properly handle cases where component intervals cross zero
+
+Optimize bounds construction in Curve.Segment to take monotonicity into account
+- for each monotonic coordinate in first derivative bounds, can just use hull of start/end for position bounds
+  - generic Bounds function that takes two Point values, a Bounds value and a VectorBounds value
+    and returns a (possibly tightened) Bounds value? maybe call it "tighten"...
+- use tangent instead of first derivative to exploit L'Hopital where appropriate...
+
 Update Curve2D.curvature_ to be based on curvatureVector_
+
+Add Bounds#D.expandBy?
 
 Move arc length parameterization to generic Curve module
 
