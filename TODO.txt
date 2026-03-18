@@ -1,4 +1,6 @@
-Rename 'evaluate' to just 'value' for consistency with e.g. 'derivativeValue'?
+Update Curve2D.curvature_ to be based on curvatureVector_
+
+Move arc length parameterization to generic Curve module
 
 Only allow dividing by Nonzero values?
 - add machinery to FFI module to implicitly convert e.g. 'Nonzero Number' to and from 'Number', with a check on inputs
@@ -7,8 +9,6 @@ Remove Random.Internal by adding Random.[int,number,bool,quantity,sign]?
 - general pattern: Random module implements generators for scalar/atomic values
 - everything else implements their own random generators (e.g. List.random, List.shuffle)
 - can then also remove Bool module
-
-Update Curve.Segment.evaluate to take a Curve.Nondegenerate value
 
 Make 'compiled' fields lazy, to avoid actually compiling intermediate expressions?
 - or maybe actually remove StrictData as global setting, just use strict fields explicitly for primitives etc.?
