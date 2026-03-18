@@ -47,7 +47,7 @@ operations you can do::
     >>> y = x.squared() - 5 * x + 1
 
     # Evaluate the curve at t=0.5
-    >>> y.evaluate(0.5)
+    >>> y.value(0.5)
     -5.25
 
     # Find the values of t for which y=0. For this, we need
@@ -61,28 +61,28 @@ operations you can do::
     >>> with Tolerance(1e-6):
     ...     # Get the location of each zero, i.e. the
     ...     # value of t (not x!) for which y is zero
-    ...     roots = [zero.location() for zero in y.zeros()]
+    ...     roots = [zero.location for zero in y.zeros()]
     >>> roots
     [0.041742430504416, 0.9582575694955838]
 
     # Find the values of x at which y is zero,
     # by evaluating x at those roots
-    >>> [x.evaluate(t) for t in roots]
+    >>> [x.value(t) for t in roots]
     [0.20871215252208, 4.7912878474779195]
 
     # Check that y is in fact zero at those roots
-    >>> [y.evaluate(root) for root in roots]
+    >>> [y.value(root) for root in roots]
     [0.0, 0.0]
 
     # Construct a displacement (vector with length units)
     # from its components in meters
-    >>> d = Displacement2d.meters(1, 2)
+    >>> d = Displacement2D.meters(1, 2)
 
     # To get the direction of a vector, we also need to
     # define a tolerance (any vector with magnitude
     # smaller than this value will be considered 'zero'
     # and therefore have no direction, so attempting to
     # get its direction will raise an exception).
-    >>> with Tolerance(Length.nanometer):
+    >>> with Tolerance(Length.nanometers(1)):
     ...     d.direction()
-    Direction2d.degrees(63.434948822922)
+    Direction2D(0.4472135954999579,0.8944271909999159)
