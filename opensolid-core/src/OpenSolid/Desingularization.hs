@@ -12,11 +12,11 @@ import OpenSolid.Prelude
 
 t0 :: Number
 -- Should be kept in sync with T0 in bytecode.cpp
-t0 = 0.00390625 -- 1/256
+t0 = 0.0625 -- 1/16
 
 t1 :: Number
 -- Should be kept in sync with T1 in bytecode.cpp
-t1 = 0.99609375 -- 1 minus 1/256
+t1 = 0.9375 -- 15/16
 
 value :: Number -> a -> a -> a -> a
 value t start middle end

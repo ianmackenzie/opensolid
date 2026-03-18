@@ -13,8 +13,8 @@
 // to determine whether a given parameter value is at a given endpoint
 // or whether a given parameter range includes a given endpoint;
 // should be kept in sync with the constants used in Desingularization.hs
-#define T0 0.00390625 // 1/256
-#define T1 0.99609375 // 1 minus 1/256
+#define T0 0.0625 // 1/16
+#define T1 0.9375 // 15/16
 
 inline double
 squared(double x) {
