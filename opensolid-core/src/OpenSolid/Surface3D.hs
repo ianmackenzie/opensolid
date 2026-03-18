@@ -210,7 +210,7 @@ toMesh accuracy surface = do
   let steinerPoints = generateSteinerPoints accuracy domainBounds edgeSet fuu fuv fvv []
   let boundaryVertexLoops = NonEmpty.map Polygon2D.vertices boundaryPolygons
   let uvMesh = CDT.unsafe boundaryVertexLoops steinerPoints
-  Mesh.map (SurfaceFunction3D.evaluate f) uvMesh
+  Mesh.map (SurfaceFunction3D.point f) uvMesh
 
 toPolygon ::
   Length ->

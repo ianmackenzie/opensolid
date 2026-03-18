@@ -3,7 +3,7 @@ module OpenSolid.SurfaceFunction3D
   , Compiled
   , new
   , constant
-  , evaluate
+  , point
   , bounds
   , derivative
   , IsDegenerate (IsDegenerate)
@@ -127,7 +127,7 @@ instance
     (Point3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  function - point = function - constant point
+  function - givenPoint = function - constant givenPoint
 
 instance
   space1 ~ space2 =>
@@ -136,7 +136,7 @@ instance
     (SurfaceFunction3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  point - function = constant point - function
+  givenPoint - function = constant givenPoint - function
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -179,8 +179,8 @@ new c derivativeFunction = do
 constant :: Point3D space -> SurfaceFunction3D space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3D.zero)
 
-evaluate :: SurfaceFunction3D space -> UvPoint -> Point3D space
-evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
+point :: SurfaceFunction3D space -> UvPoint -> Point3D space
+point function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds

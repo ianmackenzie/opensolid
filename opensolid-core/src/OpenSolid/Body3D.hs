@@ -561,7 +561,7 @@ toMatingEdge id1 curve1 HalfEdge{halfEdgeId = id2, curve3D = curve2, uvCurve}
 
 toPointMesh :: Tolerance Meters => Resolution Meters -> Body3D space -> Mesh (Point3D space)
 toPointMesh resolution body = do
-  let toVertex surfaceFunction _ _ uvPoint = SurfaceFunction3D.evaluate surfaceFunction uvPoint
+  let toVertex surfaceFunction _ _ uvPoint = SurfaceFunction3D.point surfaceFunction uvPoint
   toMesh resolution toVertex body
 
 toSurfaceMesh ::
@@ -572,7 +572,7 @@ toSurfaceMesh ::
 toSurfaceMesh resolution body = do
   let toVertex surfaceFunction normalDirection handedness uvPoint =
         SurfaceVertex3D
-          { position = SurfaceFunction3D.evaluate surfaceFunction uvPoint
+          { position = SurfaceFunction3D.point surfaceFunction uvPoint
           , normal = handedness * DirectionSurfaceFunction3D.evaluate normalDirection uvPoint
           }
   toMesh resolution toVertex body
@@ -633,10 +633,10 @@ boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
 
 surfaceSize :: SurfaceFunction3D space -> UvBounds -> Length
 surfaceSize f uvBounds = do
-  let p00 = SurfaceFunction3D.evaluate f (Bounds2D.lowerLeftCorner uvBounds)
-  let p10 = SurfaceFunction3D.evaluate f (Bounds2D.lowerRightCorner uvBounds)
-  let p01 = SurfaceFunction3D.evaluate f (Bounds2D.upperLeftCorner uvBounds)
-  let p11 = SurfaceFunction3D.evaluate f (Bounds2D.upperRightCorner uvBounds)
+  let p00 = SurfaceFunction3D.point f (Bounds2D.lowerLeftCorner uvBounds)
+  let p10 = SurfaceFunction3D.point f (Bounds2D.lowerRightCorner uvBounds)
+  let p01 = SurfaceFunction3D.point f (Bounds2D.upperLeftCorner uvBounds)
+  let p11 = SurfaceFunction3D.point f (Bounds2D.upperRightCorner uvBounds)
   let d1# = Point3D.distanceFrom# p00 p10
   let d2# = Point3D.distanceFrom# p10 p11
   let d3# = Point3D.distanceFrom# p11 p01
