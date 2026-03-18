@@ -309,6 +309,11 @@ extraMemberFunctions className = do
         [ "r, g, b = self.to_rgb255()"
         , "return 'Color.rgb255(' + str(r) + ',' + str(g) + ',' + str(b) + ')'"
         ]
+    "Direction2D" ->
+      repr
+        [ "x, y = self.components"
+        , "return 'Direction2D(' + str(x) + ',' + str(y) + ')'"
+        ]
     "Vector2D" ->
       repr
         [ "x, y = self.components"
