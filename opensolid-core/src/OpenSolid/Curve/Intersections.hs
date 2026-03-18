@@ -195,17 +195,15 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
                     Tangent _ -> True
                     Crossing -> False
                   Nothing -> False
-            let hasDegenerateTangentEndpointSolution = case singleEndpointSolution of
-                  Just EndpointSolution{kind, isDegenerate} -> case kind of
-                    Tangent _ -> isDegenerate
-                    Crossing -> False
+            let hasDegenerateEndpointSolution = case singleEndpointSolution of
+                  Just EndpointSolution{isDegenerate} -> isDegenerate
                   Nothing -> False
             let isSmall = Search.Domain.isSmall tBounds1
             if
               | hasContinuation -> Resolved Nothing
               | isCrossing && hasCrossingEndpointSolution -> Resolved Nothing
               | curvatureVectorsAreDistinct && hasTangentEndpointSolution -> Resolved Nothing
-              | isSmall && hasDegenerateTangentEndpointSolution -> Resolved Nothing
+              | isSmall && hasDegenerateEndpointSolution -> Resolved Nothing
               | isCrossing ->
                   case findInteriorSolution evaluateCrossing curve1 curve2 tBounds1 tBounds2 of
                     Just (t1, t2) -> Resolved (Just (IntersectionPoint.crossing t1 t2))
