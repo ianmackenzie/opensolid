@@ -436,7 +436,7 @@ g2 = Test.check 100 "G2 continuity" do
   tangentCurve <- Result.orFail (Curve2D.tangentDirection spline)
   curvatureCurve <- Result.orFail (Curve2D.curvature spline)
   let tangentDirection = DirectionCurve2D.evaluate tangentCurve t
-  let signedRadius = 1.0 / Curve1D.evaluate curvatureCurve t
+  let signedRadius = 1.0 / Curve1D.value curvatureCurve t
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection
   let arc = Curve2D.sweptArc arcCenter point (Angle.degrees 30.0)

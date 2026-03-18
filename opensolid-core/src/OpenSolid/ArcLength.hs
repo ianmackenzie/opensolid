@@ -17,7 +17,7 @@ data Tree units
 
 parameterization :: Tolerance units => Curve1D units -> (Curve1D Unitless, Quantity units)
 parameterization derivativeMagnitude = do
-  let dsdt tValue = Curve1D.evaluate derivativeMagnitude tValue
+  let dsdt tValue = Curve1D.value derivativeMagnitude tValue
   let d2sdt2 tValue = Curve1D.derivativeValue derivativeMagnitude tValue
   let dsdt1 = dsdt 0.0
   let dsdt2 = dsdt Lobatto.p2
@@ -69,7 +69,7 @@ evaluateIn tree length = case tree of
   Node leftTree leftLength rightTree
     | length < leftLength -> evaluateIn leftTree length
     | otherwise -> evaluateIn rightTree (length - leftLength)
-  Leaf segmentLength curve -> Curve1D.evaluate curve (length / segmentLength)
+  Leaf segmentLength curve -> Curve1D.value curve (length / segmentLength)
 
 buildTree ::
   Int ->

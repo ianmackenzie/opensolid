@@ -9,7 +9,7 @@ module OpenSolid.Curve1D
   , bezier
   , compiled
   , derivative
-  , evaluate
+  , value
   , bounds
   , zeros
   , singularityTolerance
@@ -100,7 +100,7 @@ zero :: Curve1D units
 bezier :: NonEmpty (Quantity units) -> Curve1D units
 compiled :: Curve1D units -> Compiled units
 derivative :: Curve1D units -> Curve1D units
-evaluate :: Curve1D units -> Number -> Quantity units
+value :: Curve1D units -> Number -> Quantity units
 bounds :: Curve1D units -> Interval Unitless -> Interval units
 zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
 singularityTolerance :: Curve1D units -> Quantity units

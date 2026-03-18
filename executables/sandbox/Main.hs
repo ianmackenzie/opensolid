@@ -417,13 +417,13 @@ testQuotientDesingularization = Tolerance.using 1e-9 do
   let quotient''' = Curve1D.derivative quotient''
   let tValues = Quantity.steps 0.0 1.0 10
   IO.forEach tValues \tValue -> do
-    log "quotient" (Curve1D.evaluate quotient tValue)
+    log "quotient" (Curve1D.value quotient tValue)
   IO.forEach tValues \tValue -> do
-    log "derivative" (Curve1D.evaluate quotient' tValue)
+    log "derivative" (Curve1D.value quotient' tValue)
   IO.forEach tValues \tValue -> do
-    log "second derivative" (Curve1D.evaluate quotient'' tValue)
+    log "second derivative" (Curve1D.value quotient'' tValue)
   IO.forEach tValues \tValue -> do
-    log "third derivative" (Curve1D.evaluate quotient''' tValue)
+    log "third derivative" (Curve1D.value quotient''' tValue)
 
 testCurveSqrt :: IO ()
 testCurveSqrt = Tolerance.using 1e-6 do

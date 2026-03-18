@@ -885,7 +885,7 @@ curve =
     , Class.member0 "Cubed" Curve1D.cubed $(docs 'Curve1D.cubed)
     , Class.member0 "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
     , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
+    , Class.member1 "Value" "Parameter Value" (flip Curve1D.value) $(docs 'Curve1D.value)
     , Class.memberU0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberU0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
@@ -925,7 +925,7 @@ angleCurve =
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member0 "Sin" Curve1D.sin $(docs 'Curve1D.sin)
     , Class.member0 "Cos" Curve1D.cos $(docs 'Curve1D.cos)
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
+    , Class.member1 "Value" "Parameter Value" (flip Curve1D.value) $(docs 'Curve1D.value)
     , Class.memberR0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberR0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
@@ -952,7 +952,7 @@ lengthCurve =
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
+    , Class.member1 "Value" "Parameter Value" (flip Curve1D.value) $(docs 'Curve1D.value)
     , Class.memberM0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberM0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf
@@ -981,7 +981,7 @@ areaCurve =
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.memberM0 "Sqrt" Curve1D.sqrt $(docs 'Curve1D.sqrt)
-    , Class.member1 "Evaluate" "Parameter Value" (flip Curve1D.evaluate) $(docs 'Curve1D.evaluate)
+    , Class.member1 "Value" "Parameter Value" (flip Curve1D.value) $(docs 'Curve1D.value)
     , Class.memberS0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberS0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negateSelf

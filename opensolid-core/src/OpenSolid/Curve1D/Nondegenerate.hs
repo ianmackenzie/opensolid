@@ -37,7 +37,7 @@ sqrt_ (Nondegenerate curve) = Nondegenerate do
         )
   let maybeSingularity tValue sign = do
         let curveIsZero = Tolerance.using curveTolerance do
-              Curve1D.evaluate curve tValue ~= Quantity.zero
+              Curve1D.value curve tValue ~= Quantity.zero
         let derivativeIsZero = Tolerance.using derivativeTolerance do
               Curve1D.derivativeValue curve tValue ~= Quantity.zero
         if curveIsZero && derivativeIsZero then Just (singularity tValue sign) else Nothing

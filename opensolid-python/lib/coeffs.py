@@ -1,5 +1,6 @@
-from opensolid import Curve
 import math
+
+from opensolid import Curve
 
 
 def curve_power(curve: Curve, n: int) -> Curve:
@@ -22,8 +23,8 @@ def coeff(n: int) -> float:
     t = Curve.t
     f = curve_power(t, n) * curve_power(1 - t, n)
     d = nth_derivative(f, n)
-    k = 1 / d.evaluate(0)
-    return 1.0 / (k * f.evaluate(0.5))
+    k = 1 / d.value(0)
+    return 1.0 / (k * f.value(0.5))
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ module OpenSolid.Curve1D
   ( Curve1D
   , Compiled
   , Zero
-  , evaluate
+  , value
   , bounds
   , startValue
   , endValue
@@ -128,18 +128,18 @@ instance Units.Coercion (Curve1D units1) (Curve1D units2) where
 
 instance ApproximateEquality (Curve1D units) (Tolerance units) where
   curve1 ~= curve2 = do
-    let equalPointsAt tValue = evaluate curve1 tValue ~= evaluate curve2 tValue
+    let equalPointsAt tValue = value curve1 tValue ~= value curve2 tValue
     NonEmpty.all equalPointsAt Parameter.samples
 
 instance
   units1 ~ units2 =>
   Intersects (Curve1D units1) (Quantity units2) (Tolerance units1)
   where
-  curve `intersects` value =
+  curve `intersects` quantity =
     -- TODO optimize this to use a special Solve1D.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and their exact locations)
-    case zeros (curve - value) of
+    case zeros (curve - quantity) of
       Ok [] -> False
       Ok List.OneOrMore -> True
       Error IsZero -> True
@@ -148,7 +148,7 @@ instance
   units1 ~ units2 =>
   Intersects (Quantity units1) (Curve1D units2) (Tolerance units1)
   where
-  value `intersects` curve = curve `intersects` value
+  quantity `intersects` curve = curve `intersects` quantity
 
 new :: Compiled units -> Curve1D units -> Curve1D units
 new = Curve1D
@@ -167,7 +167,7 @@ zero = constant Quantity.zero
 
 -- | Create a curve with the given constant value.
 constant :: Quantity units -> Curve1D units
-constant value = new (CompiledFunction.constant value) zero
+constant quantity = new (CompiledFunction.constant quantity) zero
 
 {-| A curve parameter.
 
@@ -204,10 +204,10 @@ instance units1 ~ units2 => Addition (Curve1D units1) (Curve1D units2) (Curve1D 
   lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
 
 instance units1 ~ units2 => Addition (Curve1D units1) (Quantity units2) (Curve1D units1) where
-  curve + value = curve + constant value
+  curve + quantity = curve + constant quantity
 
 instance units1 ~ units2 => Addition (Quantity units1) (Curve1D units2) (Curve1D units1) where
-  value + curve = constant value + curve
+  quantity + curve = constant quantity + curve
 
 instance units1 ~ units2 => Subtraction (Curve1D units1) (Curve1D units2) (Curve1D units1) where
   lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
@@ -216,13 +216,13 @@ instance
   units1 ~ units2 =>
   Subtraction (Curve1D units1) (Quantity units2) (Curve1D units1)
   where
-  curve - value = curve - constant value
+  curve - quantity = curve - constant quantity
 
 instance
   units1 ~ units2 =>
   Subtraction (Quantity units1) (Curve1D units2) (Curve1D units1)
   where
-  value - curve = constant value - curve
+  quantity - curve = constant quantity - curve
 
 instance
   Units.Product units1 units2 units3 =>
@@ -241,7 +241,7 @@ instance
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance Multiplication_ (Curve1D units1) (Quantity units2) (Curve1D (units1 ?*? units2)) where
-  curve ?*? value = curve ?*? constant value
+  curve ?*? quantity = curve ?*? constant quantity
 
 instance
   Units.Product units1 units2 units3 =>
@@ -250,7 +250,7 @@ instance
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance Multiplication_ (Quantity units1) (Curve1D units2) (Curve1D (units1 ?*? units2)) where
-  value ?*? curve = constant value ?*? curve
+  quantity ?*? curve = constant quantity ?*? curve
 
 instance DotMultiplication_ (Curve1D units1) (Curve1D units2) (Curve1D (units1 ?*? units2)) where
   dot_ = (?*?)
@@ -372,19 +372,19 @@ rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 
 
 The parameter value should be between 0 and 1.
 -}
-{-# INLINE evaluate #-}
-evaluate :: Curve1D units -> Number -> Quantity units
-evaluate curve = CompiledFunction.value curve.compiled
+{-# INLINE value #-}
+value :: Curve1D units -> Number -> Quantity units
+value curve = CompiledFunction.value curve.compiled
 
 {-# INLINE bounds #-}
 bounds :: Curve1D units -> Interval Unitless -> Interval units
 bounds curve = CompiledFunction.bounds curve.compiled
 
 startValue :: Curve1D units -> Quantity units
-startValue curve = evaluate curve 0.0
+startValue curve = value curve 0.0
 
 endValue :: Curve1D units -> Quantity units
-endValue curve = evaluate curve 1.0
+endValue curve = value curve 1.0
 
 {-# INLINE derivativeValue #-}
 derivativeValue :: Curve1D units -> Number -> Quantity units
@@ -477,7 +477,7 @@ instance
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 instance Division_ (Curve1D units1) (Quantity units2) (Curve1D (units1 ?/? units2)) where
-  curve ?/? value = Units.simplify (curve ?*? (1.0 ?/? value))
+  curve ?/? quantity = Units.simplify (curve ?*? (1.0 ?/? quantity))
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve1D units1 -> Curve1D units2
@@ -529,8 +529,8 @@ instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve domain) = do
     let dx = Interval.width domain
     let estimate0 = dx * bounds curve domain
-    let y1 = evaluate curve (Interval.lower domain)
-    let y2 = evaluate curve (Interval.upper domain)
+    let y1 = value curve (Interval.lower domain)
+    let y2 = value curve (Interval.upper domain)
     let m = Interval.width (derivativeBounds curve domain)
     let error1 = 0.125 * m * dx * dx
     let estimate1 = dx * Quantity.midpoint y1 y2 + Interval -error1 error1
@@ -546,7 +546,7 @@ instance Estimate.Interface (Integral units) units where
 
 singularityTolerance :: Curve1D units -> Quantity units
 singularityTolerance curve =
-  1e-9 * NonEmpty.maximumOf (Quantity.abs . evaluate curve) Parameter.samples
+  1e-9 * NonEmpty.maximumOf (Quantity.abs . value curve) Parameter.samples
 
 ----- ZERO FINDING -----
 
@@ -656,7 +656,7 @@ findZerosOrder k derivatives subdomain derivativeBoundsStream
       case higherOrderZeros of
         [] -> solveMonotonic k currentDerivative nextDerivative tBounds
         List.One (t0, neighborhood) -> do
-          if Quantity.abs (evaluate currentDerivative t0)
+          if Quantity.abs (value currentDerivative t0)
             <= Solve1D.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
             else do
@@ -677,16 +677,16 @@ solveMonotonic ::
 solveMonotonic m fm fn tBounds = do
   let n = m + 1
   let Interval tLow tHigh = tBounds
-  let startNeighborhood = Solve1D.neighborhood n (evaluate fn tLow)
-  if Quantity.abs (evaluate fm tLow) <= Solve1D.derivativeTolerance startNeighborhood m
+  let startNeighborhood = Solve1D.neighborhood n (value fn tLow)
+  if Quantity.abs (value fm tLow) <= Solve1D.derivativeTolerance startNeighborhood m
     then if tLow == 0.0 then Resolved [(0.0, startNeighborhood)] else Unresolved
     else do
-      let endNeighborhood = Solve1D.neighborhood n (evaluate fn tHigh)
-      if Quantity.abs (evaluate fm tHigh) <= Solve1D.derivativeTolerance endNeighborhood m
+      let endNeighborhood = Solve1D.neighborhood n (value fn tHigh)
+      if Quantity.abs (value fm tHigh) <= Solve1D.derivativeTolerance endNeighborhood m
         then if tHigh == 1.0 then Resolved [(1.0, endNeighborhood)] else Unresolved
         else do
-          case Solve1D.monotonic (evaluate fm) (evaluate fn) tBounds of
-            Solve1D.Exact t0 -> Resolved [(t0, Solve1D.neighborhood n (evaluate fn t0))]
+          case Solve1D.monotonic (value fm) (value fn) tBounds of
+            Solve1D.Exact t0 -> Resolved [(t0, Solve1D.neighborhood n (value fn t0))]
             Solve1D.Closest _ -> Unresolved
 
 data CrossesZero = CrossesZero deriving (Eq, Show)
@@ -702,7 +702,7 @@ sign curve = case zeros curve of
   Error IsZero -> Ok Positive
   Ok curveZeros ->
     case List.filter isInnerZero curveZeros of
-      [] -> Ok (Quantity.sign (evaluate curve 0.5)) -- No inner zeros, so check sign at t=0.5
+      [] -> Ok (Quantity.sign (value curve 0.5)) -- No inner zeros, so check sign at t=0.5
       NonEmpty innerZeros ->
         case NonEmpty.filter isCrossingZero innerZeros of
           List.OneOrMore -> Error CrossesZero -- There exists at least one inner crossing zero
@@ -712,7 +712,7 @@ sign curve = case zeros curve of
             -- halfway between t=0 and the first inner zero
             let firstInnerZero = NonEmpty.first innerZeros
             let testPoint = 0.5 * firstInnerZero.location
-            Ok (Quantity.sign (evaluate curve testPoint))
+            Ok (Quantity.sign (value curve testPoint))
 
 isInnerZero :: Zero -> Bool
 isInnerZero curveZero = not (Parameter.isEndpoint curveZero.location)
@@ -768,7 +768,7 @@ b11 =
 newtonRaphson :: Curve1D units -> Number -> Number
 newtonRaphson curve t0 = do
   let curveDerivative = derivative curve
-  let evaluateFirstOrder tValue = (# evaluate curve tValue, evaluate curveDerivative tValue #)
+  let evaluateFirstOrder tValue = (# value curve tValue, value curveDerivative tValue #)
   NewtonRaphson1D.curve evaluateFirstOrder t0
 
 erase :: Curve1D units -> Curve1D Unitless

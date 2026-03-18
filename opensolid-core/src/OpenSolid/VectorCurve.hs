@@ -134,7 +134,7 @@ instance Exists 1 units Void where
   constant = Curve1D.constant
   isZero curve = curve ~= Curve1D.constant Quantity.zero
   derivative = Curve1D.derivative
-  evaluate = Curve1D.evaluate
+  evaluate = Curve1D.value
   bounds = Curve1D.bounds
   bezier = Curve1D.bezier
   desingularized = Curve1D.desingularized
@@ -266,7 +266,7 @@ desingularizedQuotient ::
 desingularizedQuotient lhs (Nondegenerate rhs) = do
   let singularityTolerance = Curve1D.singularityTolerance rhs
   let maybeSingularity tValue =
-        if Tolerance.using singularityTolerance (Curve1D.evaluate rhs tValue ~= Quantity.zero)
+        if Tolerance.using singularityTolerance (Curve1D.value rhs tValue ~= Quantity.zero)
           then Just (lHopital lhs rhs tValue)
           else Nothing
   let interiorQuotient = unerase (erase lhs / Nonzero (Curve1D.erase rhs))
