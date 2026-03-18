@@ -767,9 +767,8 @@ b11 =
 
 newtonRaphson :: Curve1D units -> Number -> Number
 newtonRaphson curve t0 = do
-  let curveDerivative = derivative curve
-  let evaluateFirstOrder tValue = (# value curve tValue, value curveDerivative tValue #)
-  NewtonRaphson1D.curve evaluateFirstOrder t0
+  let evaluate tValue = (# value curve tValue, derivativeValue curve tValue #)
+  NewtonRaphson1D.curve evaluate t0
 
 erase :: Curve1D units -> Curve1D Unitless
 erase = Units.erase

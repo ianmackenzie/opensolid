@@ -688,6 +688,6 @@ newtonRaphson :: VectorSurfaceFunction2D units space -> UvPoint -> UvPoint
 newtonRaphson function uvPoint0 = do
   let uDerivative = derivative U function
   let vDerivative = derivative V function
-  let evaluateFirstOrder uvPoint =
+  let evaluate uvPoint =
         (# value function uvPoint, value uDerivative uvPoint, value vDerivative uvPoint #)
-  NewtonRaphson2D.surface evaluateFirstOrder uvPoint0
+  NewtonRaphson2D.surface evaluate uvPoint0

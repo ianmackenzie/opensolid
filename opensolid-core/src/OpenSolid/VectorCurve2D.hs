@@ -825,6 +825,5 @@ unconvert factor curve = Units.simplify (curve ?/? factor)
 
 newtonRaphson :: VectorCurve2D units space -> Number -> Number
 newtonRaphson curve t1 = do
-  let curveDerivative = derivative curve
-  let evaluateFirstOrder tValue = (# value curve tValue, value curveDerivative tValue #)
-  NewtonRaphson2D.curve evaluateFirstOrder t1
+  let evaluate tValue = (# value curve tValue, derivativeValue curve tValue #)
+  NewtonRaphson2D.curve evaluate t1
