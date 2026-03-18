@@ -95,7 +95,7 @@ horizontalCurve ::
 horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
   let curveBounds = implicitCurveBounds boxes
   let clampedVBounds uValue =
-        List.foldl (clamp uValue) (ImplicitCurveBounds.evaluate curveBounds uValue) boundingAxes
+        List.foldl (clamp uValue) (ImplicitCurveBounds.at uValue curveBounds) boundingAxes
   let solveForV =
         case (f.compiled, f.dv.compiled) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fvExpr) ->
@@ -119,7 +119,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
             Bounds2D.hull2 (Point2D.relativeTo frame p1) (Point2D.relativeTo frame p2)
               & Bounds2D.placeIn frame
           NotMonotonic -> do
-            let vBounds = ImplicitCurveBounds.bounds curveBounds (Interval u1 u2)
+            let vBounds = ImplicitCurveBounds.over (Interval u1 u2) curveBounds
             let slopeBounds = SurfaceFunction1D.bounds dvdu (Bounds2D (Interval u1 u2) vBounds)
             let segmentVBounds = Internal.curveBoundsAt u1 u2 v1 v2 slopeBounds
             Bounds2D (Interval u1 u2) segmentVBounds

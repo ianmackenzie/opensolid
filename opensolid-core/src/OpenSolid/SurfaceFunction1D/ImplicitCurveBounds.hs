@@ -1,8 +1,8 @@
 module OpenSolid.SurfaceFunction1D.ImplicitCurveBounds
   ( ImplicitCurveBounds
   , build
-  , evaluate
-  , bounds
+  , at
+  , over
   )
 where
 
@@ -33,15 +33,15 @@ subtree boxes begin end = case end - begin of
     let split = Interval.lower (Pair.first (Array.get mid boxes))
     Node left split right
 
-evaluate :: ImplicitCurveBounds -> Number -> Interval Unitless
-evaluate implicitCurveBounds x = case implicitCurveBounds of
-  Node left split right -> if x < split then evaluate left x else evaluate right x
+at :: Number -> ImplicitCurveBounds -> Interval Unitless
+at x implicitCurveBounds = case implicitCurveBounds of
+  Node left split right -> if x < split then at x left else at x right
   Leaf leafBounds -> leafBounds
 
-bounds :: ImplicitCurveBounds -> Interval Unitless -> Interval Unitless
-bounds implicitCurveBounds x = case implicitCurveBounds of
+over :: Interval Unitless -> ImplicitCurveBounds -> Interval Unitless
+over x implicitCurveBounds = case implicitCurveBounds of
   Node left split right
-    | Interval.upper x <= split -> bounds left x
-    | Interval.lower x >= split -> bounds right x
-    | otherwise -> Interval.aggregate2 (bounds left x) (bounds right x)
+    | Interval.upper x <= split -> over x left
+    | Interval.lower x >= split -> over x right
+    | otherwise -> Interval.aggregate2 (over x left) (over x right)
   Leaf leafBounds -> leafBounds
