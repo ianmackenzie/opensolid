@@ -18,6 +18,8 @@ module OpenSolid.Svg
   , triangleWith
   , circle
   , circleWith
+  , bounds
+  , boundsWith
   , curve
   , curveWith
   , arrow
@@ -50,6 +52,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.IO qualified as IO
 import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Line2D (Line2D (Line2D))
@@ -206,6 +209,17 @@ triangleWith attributes (Triangle2D p1 p2 p3) = do
 -- | Draw a triangle.
 triangle :: Triangle2D Meters space -> Svg space
 triangle = triangleWith []
+
+bounds :: Bounds2D Meters space -> Svg space
+bounds = boundsWith []
+
+boundsWith :: List (Attribute space) -> Bounds2D Meters space -> Svg space
+boundsWith attributes (Bounds2D xInterval yInterval) = do
+  let xAttribute = Attribute "x" (lengthText (Interval.lower xInterval))
+  let yAttribute = Attribute "y" (lengthText (negate (Interval.upper yInterval)))
+  let widthAttribute = Attribute "width" (lengthText (Interval.width xInterval))
+  let heightAttribute = Attribute "height" (lengthText (Interval.width yInterval))
+  Node "rect" (xAttribute : yAttribute : widthAttribute : heightAttribute : attributes) []
 
 -- | Draw a circle with the given attributes, center point and diameter.
 circleWith ::
