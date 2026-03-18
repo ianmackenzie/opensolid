@@ -573,7 +573,7 @@ toSurfaceMesh resolution body = do
   let toVertex surfaceFunction normalDirection handedness uvPoint =
         SurfaceVertex3D
           { position = SurfaceFunction3D.point surfaceFunction uvPoint
-          , normal = handedness * DirectionSurfaceFunction3D.evaluate normalDirection uvPoint
+          , normal = handedness * DirectionSurfaceFunction3D.value normalDirection uvPoint
           }
   toMesh resolution toVertex body
 

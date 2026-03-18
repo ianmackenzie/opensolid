@@ -386,9 +386,9 @@ testNewtonRaphson2D = Tolerance.using 1e-9 do
   let solution =
         Solve2D.unique
           (VectorSurfaceFunction2D.bounds function)
-          (VectorSurfaceFunction2D.evaluate function)
-          (VectorSurfaceFunction2D.evaluate uDerivative)
-          (VectorSurfaceFunction2D.evaluate vDerivative)
+          (VectorSurfaceFunction2D.value function)
+          (VectorSurfaceFunction2D.value uDerivative)
+          (VectorSurfaceFunction2D.value vDerivative)
           bounds
   log "Solve2D.unique solution" solution
 

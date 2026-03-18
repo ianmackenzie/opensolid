@@ -10,7 +10,7 @@ module OpenSolid.VectorSurfaceFunction2D
   , zero
   , constant
   , xy
-  , evaluate
+  , value
   , bounds
   , xComponent
   , yComponent
@@ -276,7 +276,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction2D (units1 ?*? units2) space)
   where
-  function ?*? value = function ?*? SurfaceFunction1D.constant value
+  function ?*? quantity = function ?*? SurfaceFunction1D.constant quantity
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -293,7 +293,7 @@ instance
     (Quantity units2)
     (VectorSurfaceFunction2D (units1 ?/? units2) space)
   where
-  function ?/? value = Units.simplify (function ?*? (1.0 ?/? value))
+  function ?/? quantity = Units.simplify (function ?*? (1.0 ?/? quantity))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -514,7 +514,7 @@ zero :: VectorSurfaceFunction2D units space
 zero = constant Vector2D.zero
 
 constant :: Vector2D units space -> VectorSurfaceFunction2D units space
-constant value = new (CompiledFunction.constant value) (const zero)
+constant vector = new (CompiledFunction.constant vector) (const zero)
 
 xy ::
   SurfaceFunction1D units ->
@@ -562,8 +562,8 @@ transformBy transform function = do
           function.compiled
   new compiledTransformed (\p -> transformBy transform (derivative p function))
 
-evaluate :: VectorSurfaceFunction2D units space -> UvPoint -> Vector2D units space
-evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
+value :: VectorSurfaceFunction2D units space -> UvPoint -> Vector2D units space
+value function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds ::
   VectorSurfaceFunction2D units space ->
@@ -625,13 +625,13 @@ quotient_ numerator denominator = do
         let numerator'' = derivative p numerator'
         let denominator' = SurfaceFunction1D.derivative p denominator
         let denominator'' = SurfaceFunction1D.derivative p denominator'
-        let value = unsafeQuotient_ numerator' denominator'
-        let firstDerivative =
+        let lhopitalSurface = unsafeQuotient_ numerator' denominator'
+        let lhopitalDerivative =
               Units.simplify $
                 unsafeQuotient_
                   (numerator'' ?*? denominator' - numerator' ?*? denominator'')
                   (2.0 * SurfaceFunction1D.squared_ denominator')
-        (value, firstDerivative)
+        (lhopitalSurface, lhopitalDerivative)
   SurfaceFunction1D.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
 
 unsafeQuotient ::
@@ -689,5 +689,5 @@ newtonRaphson function uvPoint0 = do
   let uDerivative = derivative U function
   let vDerivative = derivative V function
   let evaluateFirstOrder uvPoint =
-        (# evaluate function uvPoint, evaluate uDerivative uvPoint, evaluate vDerivative uvPoint #)
+        (# value function uvPoint, value uDerivative uvPoint, value vDerivative uvPoint #)
   NewtonRaphson2D.surface evaluateFirstOrder uvPoint0

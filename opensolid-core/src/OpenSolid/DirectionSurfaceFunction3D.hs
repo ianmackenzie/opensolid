@@ -2,7 +2,7 @@ module OpenSolid.DirectionSurfaceFunction3D
   ( DirectionSurfaceFunction3D
   , unsafe
   , unwrap
-  , evaluate
+  , value
   , bounds
   , derivative
   , constant
@@ -36,9 +36,9 @@ unsafe = DirectionSurfaceFunction3D
 unwrap :: DirectionSurfaceFunction3D space -> VectorSurfaceFunction3D Unitless space
 unwrap (DirectionSurfaceFunction3D vectorSurfaceFunction) = vectorSurfaceFunction
 
-evaluate :: DirectionSurfaceFunction3D space -> UvPoint -> Direction3D space
-evaluate (DirectionSurfaceFunction3D vectorSurfaceFunction) uvPoint =
-  Direction3D.unsafe (VectorSurfaceFunction3D.evaluate vectorSurfaceFunction uvPoint)
+value :: DirectionSurfaceFunction3D space -> UvPoint -> Direction3D space
+value (DirectionSurfaceFunction3D vectorSurfaceFunction) uvPoint =
+  Direction3D.unsafe (VectorSurfaceFunction3D.value vectorSurfaceFunction uvPoint)
 
 bounds :: DirectionSurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
 bounds (DirectionSurfaceFunction3D vectorSurfaceFunction) uvBounds =
@@ -101,7 +101,7 @@ instance
     (DirectionSurfaceFunction3D space)
     (VectorSurfaceFunction3D units space)
   where
-  value * DirectionSurfaceFunction3D vectorSurfaceFunction = value * vectorSurfaceFunction
+  quantity * DirectionSurfaceFunction3D vectorSurfaceFunction = quantity * vectorSurfaceFunction
 
 instance
   Multiplication
@@ -109,7 +109,7 @@ instance
     (Quantity units)
     (VectorSurfaceFunction3D units space)
   where
-  DirectionSurfaceFunction3D vectorSurfaceFunction * value = vectorSurfaceFunction * value
+  DirectionSurfaceFunction3D vectorSurfaceFunction * quantity = vectorSurfaceFunction * quantity
 
 instance
   Multiplication
