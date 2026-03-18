@@ -6,7 +6,7 @@ module OpenSolid.SurfaceFunction2D
   , constant
   , uv
   , xy
-  , evaluate
+  , point
   , bounds
   , derivative
   , distanceAlong
@@ -221,8 +221,8 @@ xy x y = do
           (SurfaceFunction1D.derivative p y)
   new compiledXY xyDerivative
 
-evaluate :: SurfaceFunction2D units space -> UvPoint -> Point2D units space
-evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
+point :: SurfaceFunction2D units space -> UvPoint -> Point2D units space
+point function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: SurfaceFunction2D units space -> UvBounds -> Bounds2D units space
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
