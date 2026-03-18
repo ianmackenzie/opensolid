@@ -83,6 +83,8 @@ import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 data VectorCurve3D units space = VectorCurve3D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve3D units space)
+  , startValue :: ~(Vector3D units space)
+  , endValue :: ~(Vector3D units space)
   , maxSampledMagnitude :: ~(Quantity units)
   }
 
@@ -103,6 +105,8 @@ instance
     VectorCurve3D
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
+      , startValue = Units.coerce curve.startValue
+      , endValue = Units.coerce curve.endValue
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
       }
 
@@ -482,6 +486,8 @@ new givenCompiled givenDerivative = result
     VectorCurve3D
       { compiled = givenCompiled
       , derivative = givenDerivative
+      , startValue = CompiledFunction.value givenCompiled 0.0
+      , endValue = CompiledFunction.value givenCompiled 1.0
       , maxSampledMagnitude
       }
 
@@ -540,10 +546,10 @@ bezier controlPoints =
     (bezier (Bezier.derivative controlPoints))
 
 startValue :: VectorCurve3D units space -> Vector3D units space
-startValue curve = value curve 0.0
+startValue = (.startValue)
 
 endValue :: VectorCurve3D units space -> Vector3D units space
-endValue curve = value curve 1.0
+endValue = (.endValue)
 
 desingularize ::
   Maybe (Vector3D units space, Vector3D units space) ->
@@ -568,6 +574,8 @@ desingularized start middle end = do
   new compiledDesingularized desingularizedDerivative
 
 value :: VectorCurve3D units space -> Number -> Vector3D units space
+value curve 0.0 = curve.startValue
+value curve 1.0 = curve.endValue
 value curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space

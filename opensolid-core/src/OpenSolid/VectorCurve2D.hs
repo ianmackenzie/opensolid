@@ -103,6 +103,8 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfa
 data VectorCurve2D units space = VectorCurve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
+  , startValue :: ~(Vector2D units space)
+  , endValue :: ~(Vector2D units space)
   , maxSampledMagnitude :: ~(Quantity units)
   }
 
@@ -132,6 +134,8 @@ instance
     VectorCurve2D
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
+      , startValue = Units.coerce curve.startValue
+      , endValue = Units.coerce curve.endValue
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
       }
 
@@ -544,6 +548,8 @@ new givenCompiled givenDerivative = result
     VectorCurve2D
       { compiled = givenCompiled
       , derivative = givenDerivative
+      , startValue = CompiledFunction.value givenCompiled 0.0
+      , endValue = CompiledFunction.value givenCompiled 1.0
       , maxSampledMagnitude
       }
 
@@ -609,10 +615,10 @@ bezier controlPoints =
     (bezier (Bezier.derivative controlPoints))
 
 startValue :: VectorCurve2D units space -> Vector2D units space
-startValue curve = value curve 0.0
+startValue = (.startValue)
 
 endValue :: VectorCurve2D units space -> Vector2D units space
-endValue curve = value curve 1.0
+endValue = (.endValue)
 
 desingularize ::
   Maybe (Vector2D units space, Vector2D units space) ->
@@ -641,6 +647,8 @@ desingularized start middle end = do
 The parameter value should be between 0 and 1.
 -}
 value :: VectorCurve2D units space -> Number -> Vector2D units space
+value curve 0.0 = curve.startValue
+value curve 1.0 = curve.endValue
 value curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
