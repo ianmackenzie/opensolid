@@ -339,7 +339,7 @@ evaluate ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   inputValue ->
   outputValue
-evaluate (Concrete expr) inputValue = Expression.evaluate expr inputValue
+evaluate (Concrete expr) inputValue = Expression.value expr inputValue
 evaluate (Abstract evaluateImpl _) inputValue = evaluateImpl inputValue
 
 bounds ::
@@ -352,7 +352,7 @@ bounds (Abstract _ boundsImpl) inputValue = boundsImpl inputValue
 evaluators ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   (inputValue -> outputValue, inputBounds -> outputBounds)
-evaluators (Concrete expr) = (Expression.evaluate expr, Expression.bounds expr)
+evaluators (Concrete expr) = (Expression.value expr, Expression.bounds expr)
 evaluators (Abstract evaluateImpl boundsImpl) = (evaluateImpl, boundsImpl)
 
 map2 ::

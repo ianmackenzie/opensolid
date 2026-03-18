@@ -17,13 +17,13 @@ main = do
   let one :: Expression Number Number = Expression.constant 1.0
   let fraction = tSquared / (one + tSquared)
   IO.forEach [0 .. 5] \i -> do
-    let evaluated = Expression.evaluate fraction (Number.fromInt i)
+    let evaluated = Expression.value fraction (Number.fromInt i)
     IO.printLine (Text.number evaluated)
 
   IO.printLine "Bezier curve"
   let bezier = Expression.bezierCurve (0.0 :| [0.5, 1.0, 1.0, 1.0, 1.0, 0.5, 0.0])
   IO.forEach (Parameter.steps 10) \tValue -> do
-    let evaluated = Expression.evaluate bezier tValue
+    let evaluated = Expression.value bezier tValue
     IO.printLine (Text.number evaluated)
   IO.forEach (Parameter.intervals 10) \tBounds -> do
     let evaluated = Expression.bounds bezier tBounds

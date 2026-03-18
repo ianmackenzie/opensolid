@@ -397,7 +397,7 @@ testExpression = do
   let x = Expression.t
   let xSquared = Expression.squared x
   let expression = xSquared / (xSquared + Expression.constant @Number @Number 1.0)
-  log "Expression value" (Expression.evaluate expression 2.0)
+  log "Expression value" (Expression.value expression 2.0)
   log "Expression bounds" (Expression.bounds expression (Interval 1.0 3.0))
 
 testCurve2dExpression :: IO ()
@@ -405,7 +405,7 @@ testCurve2dExpression = do
   let x = Expression.constant @Number @Number 10.0 * Expression.t
   let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression Number (Point2D Unitless Global)
-  log "Evaluated 2D curve" (Expression.evaluate curve 3.0)
+  log "Evaluated 2D curve" (Expression.value curve 3.0)
 
 testQuotientDesingularization :: IO ()
 testQuotientDesingularization = Tolerance.using 1e-9 do

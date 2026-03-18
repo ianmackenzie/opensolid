@@ -50,7 +50,7 @@ module OpenSolid.Expression
   , b11d2
   , b11d3
   , desingularized
-  , Evaluation (evaluate, bounds)
+  , Evaluation (value, bounds)
   , solveMonotonicSurfaceU
   , solveMonotonicSurfaceV
   )
@@ -1187,22 +1187,22 @@ class Constant input output where
   constant :: output -> Expression input output
 
 instance Constant Number (Quantity units) where
-  constant value = curve1D (Ast.constant1D value)
+  constant = curve1D . Ast.constant1D
 
 instance Constant UvPoint (Quantity units) where
-  constant value = surface1D (Ast.constant1D value)
+  constant = surface1D . Ast.constant1D
 
 instance Constant Number (Vector2D units space) where
-  constant value = vectorCurve2D (Ast.constant2D value)
+  constant = vectorCurve2D . Ast.constant2D
 
 instance Constant UvPoint (Vector2D units space) where
-  constant value = vectorSurface2D (Ast.constant2D value)
+  constant = vectorSurface2D . Ast.constant2D
 
 instance Constant Number (Vector3D units space) where
-  constant value = vectorCurve3D (Ast.constant3D value)
+  constant = vectorCurve3D . Ast.constant3D
 
 instance Constant UvPoint (Vector3D units space) where
-  constant value = vectorSurface3D (Ast.constant3D value)
+  constant = vectorSurface3D . Ast.constant3D
 
 instance Constant Number (Point2D units space) where
   constant (Position2D p) = curve2D (Ast.constant2D p)
@@ -1695,7 +1695,7 @@ class
     | input -> inputBounds
     , output -> outputBounds
   where
-  evaluate :: Expression input output -> input -> output
+  value :: Expression input output -> input -> output
   bounds :: Expression input output -> inputBounds -> outputBounds
 
 instance
@@ -1705,7 +1705,7 @@ instance
     (Interval Unitless)
     (Interval units)
   where
-  evaluate (Curve1D _ compiled) tValue = Evaluate.curve1dValue compiled tValue
+  value (Curve1D _ compiled) tValue = Evaluate.curve1dValue compiled tValue
   bounds (Curve1D _ compiled) tBounds = Evaluate.curve1dBounds compiled tBounds
 
 instance
@@ -1715,7 +1715,7 @@ instance
     UvBounds
     (Interval units)
   where
-  evaluate (Surface1D _ compiled) uvPoint = Evaluate.surface1dValue compiled uvPoint
+  value (Surface1D _ compiled) uvPoint = Evaluate.surface1dValue compiled uvPoint
   bounds (Surface1D _ compiled) uvBounds = Evaluate.surface1dBounds compiled uvBounds
 
 instance
@@ -1725,7 +1725,7 @@ instance
     (Interval Unitless)
     (Bounds2D units space)
   where
-  evaluate (Curve2D _ compiled) tValue = Position2D (Evaluate.curve2dValue compiled tValue)
+  value (Curve2D _ compiled) tValue = Position2D (Evaluate.curve2dValue compiled tValue)
   bounds (Curve2D _ compiled) tBounds = PositionBounds2D (Evaluate.curve2dBounds compiled tBounds)
 
 instance
@@ -1735,7 +1735,7 @@ instance
     UvBounds
     (Bounds2D units space)
   where
-  evaluate (Surface2D _ compiled) uvPoint = Position2D (Evaluate.surface2dValue compiled uvPoint)
+  value (Surface2D _ compiled) uvPoint = Position2D (Evaluate.surface2dValue compiled uvPoint)
   bounds (Surface2D _ compiled) uvBounds = PositionBounds2D (Evaluate.surface2dBounds compiled uvBounds)
 
 instance
@@ -1745,7 +1745,7 @@ instance
     (Interval Unitless)
     (VectorBounds2D units space)
   where
-  evaluate (VectorCurve2D _ compiled) tValue = Evaluate.curve2dValue compiled tValue
+  value (VectorCurve2D _ compiled) tValue = Evaluate.curve2dValue compiled tValue
   bounds (VectorCurve2D _ compiled) tBounds = Evaluate.curve2dBounds compiled tBounds
 
 instance
@@ -1755,7 +1755,7 @@ instance
     UvBounds
     (VectorBounds2D units space)
   where
-  evaluate (VectorSurface2D _ compiled) uvPoint = Evaluate.surface2dValue compiled uvPoint
+  value (VectorSurface2D _ compiled) uvPoint = Evaluate.surface2dValue compiled uvPoint
   bounds (VectorSurface2D _ compiled) uvBounds = Evaluate.surface2dBounds compiled uvBounds
 
 instance
@@ -1765,7 +1765,7 @@ instance
     (Interval Unitless)
     (Bounds3D space)
   where
-  evaluate (Curve3D _ compiled) tValue = Position3D (Evaluate.curve3dValue compiled tValue)
+  value (Curve3D _ compiled) tValue = Position3D (Evaluate.curve3dValue compiled tValue)
   bounds (Curve3D _ compiled) tBounds = PositionBounds3D (Evaluate.curve3dBounds compiled tBounds)
 
 instance
@@ -1775,7 +1775,7 @@ instance
     UvBounds
     (Bounds3D space)
   where
-  evaluate (Surface3D _ compiled) uvPoint = Position3D (Evaluate.surface3dValue compiled uvPoint)
+  value (Surface3D _ compiled) uvPoint = Position3D (Evaluate.surface3dValue compiled uvPoint)
   bounds (Surface3D _ compiled) uvBounds = PositionBounds3D (Evaluate.surface3dBounds compiled uvBounds)
 
 instance
@@ -1785,7 +1785,7 @@ instance
     (Interval Unitless)
     (VectorBounds3D units space)
   where
-  evaluate (VectorCurve3D _ compiled) tValue = Evaluate.curve3dValue compiled tValue
+  value (VectorCurve3D _ compiled) tValue = Evaluate.curve3dValue compiled tValue
   bounds (VectorCurve3D _ compiled) tBounds = Evaluate.curve3dBounds compiled tBounds
 
 instance
@@ -1795,7 +1795,7 @@ instance
     UvBounds
     (VectorBounds3D units space)
   where
-  evaluate (VectorSurface3D _ compiled) uvPoint = Evaluate.surface3dValue compiled uvPoint
+  value (VectorSurface3D _ compiled) uvPoint = Evaluate.surface3dValue compiled uvPoint
   bounds (VectorSurface3D _ compiled) uvBounds = Evaluate.surface3dBounds compiled uvBounds
 
 solveMonotonicSurfaceU ::
