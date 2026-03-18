@@ -1,7 +1,7 @@
 module OpenSolid.SurfaceFunction1D
   ( SurfaceFunction1D (compiled, du, dv)
   , Compiled
-  , evaluate
+  , value
   , bounds
   , derivative
   , derivativeIn
@@ -110,18 +110,18 @@ instance Units.Coercion (SurfaceFunction1D unitsA) (SurfaceFunction1D unitsB) wh
 
 instance ApproximateEquality (SurfaceFunction1D units) (Tolerance units) where
   function1 ~= function2 = do
-    let equalValuesAt uvPoint = evaluate function1 uvPoint ~= evaluate function2 uvPoint
+    let equalValuesAt uvPoint = value function1 uvPoint ~= value function2 uvPoint
     List.all equalValuesAt UvPoint.samples
 
 instance
   units1 ~ units2 =>
   Intersects (SurfaceFunction1D units1) (Quantity units2) (Tolerance units1)
   where
-  function `intersects` value =
+  function `intersects` quantity =
     -- TODO optimize this to use a special Solve2D.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and the full geometry of each)
-    case zeros (function - value) of
+    case zeros (function - quantity) of
       Ok (Zeros [] [] [] []) -> False
       Ok (Zeros{}) -> True
       Error IsZero -> True
@@ -130,7 +130,7 @@ instance
   units1 ~ units2 =>
   Intersects (Quantity units1) (SurfaceFunction1D units2) (Tolerance units1)
   where
-  value `intersects` function = function `intersects` value
+  quantity `intersects` function = function `intersects` quantity
 
 instance Negation (SurfaceFunction1D units) where
   negate function = new (negate function.compiled) (\p -> negate (derivative p function))
@@ -159,7 +159,7 @@ instance
     (Quantity units2)
     (SurfaceFunction1D units1)
   where
-  function + value = function + constant value
+  function + quantity = function + constant quantity
 
 instance
   units1 ~ units2 =>
@@ -168,7 +168,7 @@ instance
     (SurfaceFunction1D units2)
     (SurfaceFunction1D units1)
   where
-  value + function = constant value + function
+  quantity + function = constant quantity + function
 
 instance
   units1 ~ units2 =>
@@ -180,13 +180,13 @@ instance
   units1 ~ units2 =>
   Subtraction (SurfaceFunction1D units1) (Quantity units2) (SurfaceFunction1D units1)
   where
-  function - value = function - constant value
+  function - quantity = function - constant quantity
 
 instance
   units1 ~ units2 =>
   Subtraction (Quantity units1) (SurfaceFunction1D units2) (SurfaceFunction1D units1)
   where
-  value - function = constant value - function
+  quantity - function = constant quantity - function
 
 instance
   Units.Product units1 units2 units3 =>
@@ -217,7 +217,7 @@ instance
     (Quantity units2)
     (SurfaceFunction1D (units1 ?*? units2))
   where
-  function ?*? value = function ?*? constant value
+  function ?*? quantity = function ?*? constant quantity
 
 instance
   Units.Product units1 units2 units3 =>
@@ -231,7 +231,7 @@ instance
     (SurfaceFunction1D units2)
     (SurfaceFunction1D (units1 ?*? units2))
   where
-  value ?*? function = constant value ?*? function
+  quantity ?*? function = constant quantity ?*? function
 
 instance
   Units.Product units1 units2 units3 =>
@@ -345,7 +345,7 @@ instance
     (Quantity units2)
     (SurfaceFunction1D (units1 ?/? units2))
   where
-  function ?/? value = Units.simplify (function ?*? (1.0 ?/? value))
+  function ?/? quantity = Units.simplify (function ?*? (1.0 ?/? quantity))
 
 instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units) where
   curve . function =
@@ -353,8 +353,8 @@ instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFuncti
       (Curve1D.compiled curve . function.compiled)
       (\p -> Curve1D.derivative curve . function * derivative p function)
 
-evaluate :: SurfaceFunction1D units -> UvPoint -> Quantity units
-evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
+value :: SurfaceFunction1D units -> UvPoint -> Quantity units
+value function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: SurfaceFunction1D units -> UvBounds -> Interval units
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
@@ -377,7 +377,7 @@ one :: SurfaceFunction1D Unitless
 one = constant 1.0
 
 constant :: Quantity units -> SurfaceFunction1D units
-constant value = new (CompiledFunction.constant value) (const zero)
+constant quantity = new (CompiledFunction.constant quantity) (const zero)
 
 u :: SurfaceFunction1D Unitless
 u = new (CompiledFunction.concrete Expression.u) (\case U -> one; V -> zero)
@@ -440,13 +440,13 @@ quotient_ numerator denominator = do
         let numerator'' = derivative p numerator'
         let denominator' = derivative p denominator
         let denominator'' = derivative p denominator'
-        let value = unsafeQuotient_ numerator' denominator'
-        let firstDerivative =
+        let lhopitalSurface = unsafeQuotient_ numerator' denominator'
+        let lhopitalDerivative =
               Units.simplify $
                 unsafeQuotient_
                   (numerator'' ?*? denominator' - numerator' ?*? denominator'')
                   (2.0 * squared_ denominator')
-        (value, firstDerivative)
+        (lhopitalSurface, lhopitalDerivative)
   SurfaceFunction1D.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
 
 instance HasUnits (Nonzero (SurfaceFunction1D units)) units
@@ -527,20 +527,20 @@ sqrt_ function =
   if Tolerance.using (Quantity.squared_ ?tolerance) (function ~= zero)
     then zero
     else do
-      let maybeSingularity param value sign = do
+      let maybeSingularity param parameterValue sign = do
             let firstDerivative = derivative param function
             let secondDerivative = derivative param firstDerivative
-            let testPoints = SurfaceFunction1D.Desingularization.testPoints param value
+            let testPoints = SurfaceFunction1D.Desingularization.testPoints param parameterValue
             let functionIsZeroAt testPoint =
                   Tolerance.using (Quantity.squared_ ?tolerance) $
-                    evaluate function testPoint ~= Quantity.zero
+                    value function testPoint ~= Quantity.zero
             let functionIsZero = NonEmpty.all functionIsZeroAt testPoints
             let firstDerivativeIsZeroAt testPoint = do
-                  let secondDerivativeValue = evaluate secondDerivative testPoint
+                  let secondDerivativeValue = value secondDerivative testPoint
                   let firstDerivativeTolerance =
                         ?tolerance ?*? Quantity.sqrt_ (2.0 * secondDerivativeValue)
                   Tolerance.using firstDerivativeTolerance $
-                    evaluate firstDerivative testPoint ~= Quantity.zero
+                    value firstDerivative testPoint ~= Quantity.zero
             let firstDerivativeIsZero = NonEmpty.all firstDerivativeIsZeroAt testPoints
             if functionIsZero && firstDerivativeIsZero
               then Just (zero, sign * unsafeSqrt_ (0.5 * secondDerivative))
@@ -658,15 +658,15 @@ findTangentSolutions subproblem = do
       let maybePoint =
             Solve2D.unique
               (\testBounds -> VectorBounds2D (bounds fu testBounds) (bounds fv testBounds))
-              (\testPoint -> Vector2D (evaluate fu testPoint) (evaluate fv testPoint))
-              (\testPoint -> Vector2D (evaluate fuu testPoint) (evaluate fuv testPoint))
-              (\testPoint -> Vector2D (evaluate fuv testPoint) (evaluate fvv testPoint))
+              (\testPoint -> Vector2D (value fu testPoint) (value fv testPoint))
+              (\testPoint -> Vector2D (value fuu testPoint) (value fuv testPoint))
+              (\testPoint -> Vector2D (value fuv testPoint) (value fvv testPoint))
               uvBounds
       case maybePoint of
         Nothing -> Solve2D.recurse CrossingCurvesOnly
         Just point ->
           if Bounds2D.includes point (Domain2D.interior subdomain)
-            && evaluate f point ~= Quantity.zero
+            && value f point ~= Quantity.zero
             then case determinantSign of
               Positive -> do
                 -- Non-saddle tangent point

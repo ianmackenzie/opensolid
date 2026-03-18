@@ -29,7 +29,7 @@ main = Tolerance.using 1e-9 do
         Point3D.zUp
           (Length.meters uValue)
           (Length.meters vValue)
-          (Length.meters (SurfaceFunction1D.evaluate f uvPoint))
+          (Length.meters (SurfaceFunction1D.value f uvPoint))
   let mesh = Mesh.grid 512 512 meshPoint
   let numOriginPoints =
         Array.foldl

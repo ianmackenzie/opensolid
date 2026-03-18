@@ -28,5 +28,5 @@ will check if the given function is zero everywhere along U=0.
 -}
 isZero :: Tolerance units => SurfaceParameter -> Number -> SurfaceFunction1D units -> Bool
 isZero parameter value function = do
-  let isZeroAt testPoint = SurfaceFunction1D.evaluate function testPoint ~= Quantity.zero
+  let isZeroAt testPoint = SurfaceFunction1D.value function testPoint ~= Quantity.zero
   NonEmpty.all isZeroAt (testPoints parameter value)

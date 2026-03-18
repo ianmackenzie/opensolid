@@ -116,10 +116,10 @@ firstDerivativeIsConsistent :: SurfaceFunction1D Meters -> UvPoint -> SurfacePar
 firstDerivativeIsConsistent surfaceFunction p0 parameter = do
   let partialDerivative = SurfaceFunction1D.derivative parameter surfaceFunction
   let (p1, p2) = samplingPoints p0 parameter
-  let value1 = SurfaceFunction1D.evaluate surfaceFunction p1
-  let value2 = SurfaceFunction1D.evaluate surfaceFunction p2
+  let value1 = SurfaceFunction1D.value surfaceFunction p1
+  let value2 = SurfaceFunction1D.value surfaceFunction p2
   let numericalDerivative = (value2 - value1) / (2.0 * samplingRadius)
-  let analyticalDerivative = SurfaceFunction1D.evaluate partialDerivative p0
+  let analyticalDerivative = SurfaceFunction1D.value partialDerivative p0
   Tolerance.using Length.micrometer do
     Test.expect (numericalDerivative ~= analyticalDerivative)
       & Test.output "numericalDerivative" numericalDerivative

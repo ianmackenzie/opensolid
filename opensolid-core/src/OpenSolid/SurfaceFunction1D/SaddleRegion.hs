@@ -68,9 +68,9 @@ instance HasField "bounds" (SaddleRegion units) UvBounds where
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
   let f = subproblem.f
-  let fuu = SurfaceFunction1D.evaluate f.du.du saddlePoint
-  let fuv = SurfaceFunction1D.evaluate f.du.dv saddlePoint
-  let fvv = SurfaceFunction1D.evaluate f.dv.dv saddlePoint
+  let fuu = SurfaceFunction1D.value f.du.du saddlePoint
+  let fuv = SurfaceFunction1D.value f.du.dv saddlePoint
+  let fvv = SurfaceFunction1D.value f.dv.dv saddlePoint
   let bDirectionCandidates = NonEmpty.three Direction2D.x Direction2D.y (Direction2D.degrees 45.0)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Quantity.abs . directionalSecondDerivative) bDirectionCandidates
