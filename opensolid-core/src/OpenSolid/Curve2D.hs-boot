@@ -4,6 +4,8 @@ module OpenSolid.Curve2D
   , SearchTree
   , constant
   , new
+  , startPoint
+  , endPoint
   , point
   , bounds
   , overallBounds
@@ -20,7 +22,6 @@ module OpenSolid.Curve2D
   )
 where
 
-import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
@@ -44,10 +45,6 @@ type Compiled units space =
     (Bounds2D units space)
 
 type SearchTree units space = Curve.Search.Tree 2 units space
-
-instance HasField "startPoint" (Curve2D units space) (Point2D units space)
-
-instance HasField "endPoint" (Curve2D units space) (Point2D units space)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -115,6 +112,8 @@ instance
 
 constant :: Point2D units space -> Curve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
+startPoint :: Curve2D units space -> Point2D units space
+endPoint :: Curve2D units space -> Point2D units space
 point :: Curve2D units space -> Number -> Point2D units space
 bounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
 overallBounds :: Curve2D units space -> Bounds2D units space

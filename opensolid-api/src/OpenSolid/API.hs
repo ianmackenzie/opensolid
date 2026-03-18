@@ -1519,8 +1519,8 @@ curve2D =
     , Class.factory1 "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
     , Class.factory1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
     , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
-    , Class.property "Start Point" (.startPoint) "The start point of the curve."
-    , Class.property "End Point" (.endPoint) "The end point of the curve."
+    , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
+    , Class.property "End Point" (Curve2D.endPoint) "The end point of the curve."
     , Class.member1 "Point" "Parameter Value" (flip Curve2D.point) $(docs 'Curve2D.point)
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
@@ -1549,8 +1549,8 @@ uvCurve =
     , Class.factoryU4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
     , Class.factory1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
     , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
-    , Class.property "Start Point" (.startPoint) "The start point of the curve."
-    , Class.property "End Point" (.endPoint) "The end point of the curve."
+    , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
+    , Class.property "End Point" (Curve2D.endPoint) "The end point of the curve."
     , Class.member1 "Point" "Parameter Value" (flip Curve2D.point) $(docs 'Curve2D.point)
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)

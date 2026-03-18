@@ -53,8 +53,8 @@ data JoiningCurve
   | Outgoing (Curve2D Unitless UvSpace)
 
 joiningPoint :: JoiningCurve -> UvPoint
-joiningPoint (Incoming curve) = curve.endPoint
-joiningPoint (Outgoing curve) = curve.startPoint
+joiningPoint (Incoming curve) = Curve2D.endPoint curve
+joiningPoint (Outgoing curve) = Curve2D.startPoint curve
 
 point :: SaddleRegion units -> UvPoint
 point SaddleRegion{frame} = Frame2D.originPoint frame

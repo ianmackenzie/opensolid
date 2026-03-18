@@ -676,12 +676,6 @@ desingularized start middle end = do
         VectorCurve2D.desingularized start.derivative middle.derivative end.derivative
   new compiledDesingularized desingularizedDerivative
 
-instance HasField "startPoint" (Curve2D units space) (Point2D units space) where
-  getField curve = point curve 0.0
-
-instance HasField "endPoint" (Curve2D units space) (Point2D units space) where
-  getField curve = point curve 1.0
-
 {-| Get the point on a curve at a given parameter value.
 
 The parameter value should be between 0 and 1.

@@ -82,8 +82,8 @@ profile gear = do
   let x = rb * (Curve1D.sin (theta - alpha) - theta / Angle.radian * Curve1D.cos (theta - alpha))
   let y = rb * (Curve1D.cos (theta - alpha) + theta / Angle.radian * Curve1D.sin (theta - alpha))
   let involuteLeft = Curve2D.xy x y
-  let leftStart = involuteLeft.startPoint
-  let leftEnd = involuteLeft.endPoint
+  let leftStart = Curve2D.startPoint involuteLeft
+  let leftEnd = Curve2D.endPoint involuteLeft
   let leftStartTangent
         | rd > rb = Vector2D.normalize (Curve2D.derivativeValue involuteLeft 0.0)
         | otherwise = Vector2D.polar 1.0 (Angle.halfPi + alpha)
@@ -96,10 +96,10 @@ profile gear = do
           leftEnd
           [leftDerivativeMagnitude * leftEndTangent]
   let rightApproximation = Curve2D.mirrorAcross Axis2D.y leftApproximation
-  let tip = Curve2D.lineFrom leftApproximation.endPoint rightApproximation.endPoint
+  let tip = Curve2D.lineFrom (Curve2D.endPoint leftApproximation) (Curve2D.endPoint rightApproximation)
   let angularSpacing = Angle.twoPi / Number.fromInt n
   let nextToothStart =
-        Point2D.rotateAround Point2D.origin angularSpacing rightApproximation.startPoint
+        Point2D.rotateAround Point2D.origin angularSpacing (Curve2D.startPoint rightApproximation)
   let connector
         | rd > rb = Curve2D.lineFrom leftStart nextToothStart
         | otherwise = Curve2D.arcFrom leftStart nextToothStart -Angle.pi

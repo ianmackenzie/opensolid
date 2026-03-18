@@ -413,14 +413,14 @@ arcDeformation = Test.check 100 "deformation" do
   t <- Test.generate Parameter.random
   let transformedArc = Curve2D.transformBy transform initialArc
   let pointOnTransformed = Curve2D.point transformedArc t
-  let transformOfStart = Point2D.transformBy transform initialArc.startPoint
-  let transformOfEnd = Point2D.transformBy transform initialArc.endPoint
+  let transformOfStart = Point2D.transformBy transform (Curve2D.startPoint initialArc)
+  let transformOfEnd = Point2D.transformBy transform (Curve2D.endPoint initialArc)
   let transformOfPoint = Point2D.transformBy transform (Curve2D.point initialArc t)
   Test.all
-    [ Test.expect (transformedArc.startPoint ~= transformOfStart)
-        & Test.output "transformedArc.startPoint" transformedArc.startPoint
+    [ Test.expect (Curve2D.startPoint transformedArc ~= transformOfStart)
+        & Test.output "transformedArc.startPoint" (Curve2D.startPoint transformedArc)
         & Test.output "transformOfStart" transformOfStart
-    , Test.expect (transformedArc.endPoint ~= transformOfEnd)
+    , Test.expect (Curve2D.endPoint transformedArc ~= transformOfEnd)
     , Test.expect (pointOnTransformed ~= transformOfPoint)
     ]
 

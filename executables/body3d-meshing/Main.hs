@@ -29,7 +29,7 @@ main = Tolerance.using Length.nanometer do
           (#radius radius)
           (#startAngle (Angle.degrees -45.0))
           (#endAngle (Angle.degrees 225.0))
-  let line = Curve2D.lineFrom arc.endPoint arc.startPoint
+  let line = Curve2D.lineFrom (Curve2D.endPoint arc) (Curve2D.startPoint arc)
   profile <- Result.orFail (Region2D.boundedBy [arc, line])
   let extrusionStart = OpenSolid.product (OpenSolid.number -0.5) length
   let extrusionEnd = OpenSolid.product (OpenSolid.number 0.5) length

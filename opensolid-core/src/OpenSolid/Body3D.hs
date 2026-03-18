@@ -493,7 +493,7 @@ registerHalfEdge parentHandedness halfEdgeSet surfaceRegistry halfEdge = do
                       , matingUvCurve
                       , correctlyAligned
                       }
-                  else SecondaryEdge{halfEdgeId, uvStartPoint = uvCurve.startPoint}
+                  else SecondaryEdge{halfEdgeId, uvStartPoint = Curve2D.startPoint uvCurve}
           let updatedRegistry =
                 SurfaceRegistry{unprocessed, processed, edges = Map.set halfEdgeId edge edges}
           let matingHandedness = if correctlyAligned then parentHandedness else -parentHandedness
@@ -828,9 +828,9 @@ leadingEdgeVertices ::
   NonEmpty UvPoint
 leadingEdgeVertices innerEdgeVerticesById edge = case edge of
   DegenerateEdge{halfEdgeId, uvCurve} ->
-    leadingEdgeVerticesImpl innerEdgeVerticesById halfEdgeId uvCurve.startPoint
+    leadingEdgeVerticesImpl innerEdgeVerticesById halfEdgeId (Curve2D.startPoint uvCurve)
   PrimaryEdge{halfEdgeId, uvCurve} ->
-    leadingEdgeVerticesImpl innerEdgeVerticesById halfEdgeId uvCurve.startPoint
+    leadingEdgeVerticesImpl innerEdgeVerticesById halfEdgeId (Curve2D.startPoint uvCurve)
   SecondaryEdge{halfEdgeId, uvStartPoint} ->
     leadingEdgeVerticesImpl innerEdgeVerticesById halfEdgeId uvStartPoint
 

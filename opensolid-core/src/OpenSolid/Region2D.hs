@@ -256,8 +256,8 @@ curveIncidence ::
   Curve2D units space ->
   (Curve2D units space, Maybe Number)
 curveIncidence point curve
-  | point ~= curve.startPoint = (curve, Just 0.0)
-  | point ~= curve.endPoint = (curve, Just 1.0)
+  | point ~= Curve2D.startPoint curve = (curve, Just 0.0)
+  | point ~= Curve2D.endPoint curve = (curve, Just 1.0)
   | otherwise = (curve, Nothing)
 
 incidentCurve :: (Curve2D units space, Maybe Number) -> Maybe (Curve2D units space, Number)
@@ -349,16 +349,17 @@ extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
   case List.partition (hasEndpoint currentStart) curves of
     ([], _) -> Error BoundedBy.BoundaryHasGaps
     (List.One curve, remaining) -> do
-      let newCurve = if curve.endPoint ~= currentStart then curve else Curve2D.reverse curve
+      let newCurve = if Curve2D.endPoint curve ~= currentStart then curve else Curve2D.reverse curve
       let updatedCurves = NonEmpty.push newCurve currentCurves
-      Ok (PartialLoop newCurve.startPoint updatedCurves loopEnd, remaining)
+      Ok (PartialLoop (Curve2D.startPoint newCurve) updatedCurves loopEnd, remaining)
     (List.TwoOrMore, _) -> Error BoundedBy.BoundaryIntersectsItself
 
 hasEndpoint :: Tolerance units => Point2D units space -> Curve2D units space -> Bool
-hasEndpoint point curve = point ~= curve.startPoint || point ~= curve.endPoint
+hasEndpoint point curve = point ~= Curve2D.startPoint curve || point ~= Curve2D.endPoint curve
 
 startLoop :: Curve2D units space -> PartialLoop units space
-startLoop curve = PartialLoop curve.startPoint (NonEmpty.one curve) curve.endPoint
+startLoop curve =
+  PartialLoop (Curve2D.startPoint curve) (NonEmpty.one curve) (Curve2D.endPoint curve)
 
 outerLoop :: Region2D units space -> NonEmpty (Curve2D units space)
 outerLoop (Region2D loop _) = loop
