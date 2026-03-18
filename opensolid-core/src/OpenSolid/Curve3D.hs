@@ -82,6 +82,8 @@ import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 data Curve3D space = Curve3D
   { compiled :: Compiled space
   , derivative :: ~(VectorCurve3D Meters space)
+  , startPoint :: ~(Point3D space)
+  , endPoint :: ~(Point3D space)
   , searchTree :: ~(SearchTree space)
   }
 
@@ -194,7 +196,14 @@ instance space1 ~ space2 => Intersects (Curve3D space1) (Point3D space2) (Tolera
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new givenCompiled givenDerivative =
-  let result = Curve3D givenCompiled givenDerivative (Curve.Search.tree result) in result
+  recursive \self ->
+    Curve3D
+      { compiled = givenCompiled
+      , derivative = givenDerivative
+      , startPoint = CompiledFunction.value givenCompiled 0.0
+      , endPoint = CompiledFunction.value givenCompiled 1.0
+      , searchTree = Curve.Search.tree self
+      }
 
 constant :: Point3D space -> Curve3D space
 constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve3D.zero
@@ -302,12 +311,14 @@ curvatureVector ::
 curvatureVector curve = Result.map Units.specialize (Curve.curvatureVector_ curve)
 
 startPoint :: Curve3D space -> Point3D space
-startPoint curve = point curve 0.0
+startPoint = (.startPoint)
 
 endPoint :: Curve3D space -> Point3D space
-endPoint curve = point curve 1.0
+endPoint = (.endPoint)
 
 point :: Curve3D space -> Number -> Point3D space
+point curve 0.0 = curve.startPoint
+point curve 1.0 = curve.endPoint
 point curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: Curve3D space -> Interval Unitless -> Bounds3D space

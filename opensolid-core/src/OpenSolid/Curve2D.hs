@@ -159,6 +159,8 @@ import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 data Curve2D units space = Curve2D
   { compiled :: Compiled units space
   , derivative :: ~(VectorCurve2D units space)
+  , startPoint :: ~(Point2D units space)
+  , endPoint :: ~(Point2D units space)
   , searchTree :: ~(SearchTree units space)
   }
 
@@ -198,6 +200,8 @@ instance
     Curve2D
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
+      , startPoint = Units.coerce curve.startPoint
+      , endPoint = Units.coerce curve.endPoint
       , searchTree = Units.coerce curve.searchTree
       }
 
@@ -347,7 +351,14 @@ instance
 
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
 new givenCompiled givenDerivative =
-  let result = Curve2D givenCompiled givenDerivative (Curve.Search.tree result) in result
+  recursive \self ->
+    Curve2D
+      { compiled = givenCompiled
+      , derivative = givenDerivative
+      , startPoint = CompiledFunction.value givenCompiled 0.0
+      , endPoint = CompiledFunction.value givenCompiled 1.0
+      , searchTree = Curve.Search.tree self
+      }
 
 -- | Create a degenerate curve that is actually just a single point.
 constant :: Point2D units space -> Curve2D units space
@@ -681,15 +692,17 @@ desingularized start middle end = do
 The parameter value should be between 0 and 1.
 -}
 point :: Curve2D units space -> Number -> Point2D units space
+point curve 0.0 = curve.startPoint
+point curve 1.0 = curve.endPoint
 point curve tValue = CompiledFunction.value curve.compiled tValue
 
 -- | Get the start point of a curve.
 startPoint :: Curve2D units space -> Point2D units space
-startPoint curve = point curve 0.0
+startPoint = (.startPoint)
 
 -- | Get the end point of a curve.
 endPoint :: Curve2D units space -> Point2D units space
-endPoint curve = point curve 1.0
+endPoint = (.endPoint)
 
 -- | Get the start and end points of a curve.
 endpoints :: Curve2D units space -> (Point2D units space, Point2D units space)
