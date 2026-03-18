@@ -6,7 +6,6 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
-import OpenSolid.Int qualified as Int
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
@@ -55,7 +54,7 @@ dummyEstimate = do
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 duplicatedDummyEstimates = do
   pair <- dummyEstimate
-  numPairs <- Int.random 1 3
+  numPairs <- Random.int 1 3
   Random.return (pair :| List.replicate (numPairs - 1) pair)
 
 dummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))

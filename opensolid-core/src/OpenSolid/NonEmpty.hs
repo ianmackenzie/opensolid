@@ -94,8 +94,7 @@ import Data.Semigroup qualified
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import OpenSolid.Random.Internal qualified as Random
-import System.Random qualified
+import OpenSolid.Random qualified as Random
 import Prelude qualified
 
 {-# COMPLETE One, TwoOrMore #-}
@@ -419,6 +418,7 @@ random n randomItem = do
 
 shuffle :: NonEmpty a -> Random.Generator (NonEmpty a)
 shuffle original = do
-  keys <- random (length original) (Random.Generator System.Random.genWord64)
+  let keyGenerator = Random.int Prelude.minBound Prelude.maxBound
+  keys <- random (length original) keyGenerator
   let shuffledPairs = sortBy Pair.second (zip2 original keys)
   Random.return (map Pair.first shuffledPairs)

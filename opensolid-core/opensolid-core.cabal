@@ -104,7 +104,6 @@ library
     OpenSolid.Binary
     OpenSolid.Body3D
     OpenSolid.Body3D.BoundedBy
-    OpenSolid.Bool
     OpenSolid.Bounds
     OpenSolid.Bounds2D
     OpenSolid.Bounds3D
@@ -270,7 +269,6 @@ library
     OpenSolid.Linearization
     OpenSolid.Lobatto
     OpenSolid.Quadrature
-    OpenSolid.Random.Internal
     OpenSolid.Region2D.BoundaryTree
     OpenSolid.SurfaceFunction1D.Blending
     OpenSolid.SurfaceFunction1D.Desingularization

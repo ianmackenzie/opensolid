@@ -204,5 +204,5 @@ random = do
 
 randomVector :: Random.Generator (Vector3D Unitless space)
 randomVector = do
-  let randomComponent = Number.random -1.0 1.0
+  let randomComponent = Random.number -1.0 1.0
   Random.map3 Vector3D randomComponent randomComponent randomComponent

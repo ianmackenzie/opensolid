@@ -24,7 +24,6 @@ module OpenSolid.Quantity
   , unconvert
   , sum
   , sumOf
-  , random
   , steps
   , leading
   , trailing
@@ -38,10 +37,8 @@ import {-# SOURCE #-} OpenSolid.Interval (Interval)
 import {-# SOURCE #-} OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
-import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
-import System.Random qualified
 import Prelude qualified
 
 {-# COMPLETE Quantity# #-}
@@ -136,10 +133,6 @@ convert factor value = Units.simplify (value ?*? factor)
 
 unconvert :: Quantity (units2 ?/? units1) -> Quantity units2 -> Quantity units1
 unconvert factor value = Units.simplify (value ?/? factor)
-
-random :: Quantity units -> Quantity units -> Random.Generator (Quantity units)
-random (Quantity low) (Quantity high) =
-  Random.map Quantity (Random.Generator (System.Random.uniformR (low, high)))
 
 {-| Interpolate between two values by subdividing into the given number of steps.
 

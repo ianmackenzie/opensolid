@@ -16,7 +16,6 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random qualified as Random
@@ -53,7 +52,7 @@ samples = do
   NonEmpty.five p1 p2 p3 p4 p5
 
 random :: Random.Generator Number
-random = Number.random 0.0 1.0
+random = Random.number 0.0 1.0
 
 {-# INLINE divideBy #-}
 divideBy :: Int -> Int -> Number

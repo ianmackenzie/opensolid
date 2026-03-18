@@ -4,6 +4,11 @@ module OpenSolid.Random
   , init
   , generate
   , step
+  , int
+  , number
+  , quantity
+  , bool
+  , sign
   , map
   , map2
   , map3
@@ -19,16 +24,44 @@ module OpenSolid.Random
   )
 where
 
-import OpenSolid.Array qualified as Array
-import OpenSolid.Int qualified as Int
-import OpenSolid.NonEmpty qualified as NonEmpty
+import Data.List.NonEmpty ((!!))
+import Data.List.NonEmpty qualified
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import OpenSolid.Random.Internal
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
 import Prelude qualified
+
+newtype Generator a = Generator (StdGen -> (a, StdGen))
+
+instance Functor Generator where
+  fmap = map
+
+instance Applicative Generator where
+  pure value = Generator (value,)
+
+  functionGenerator <*> valueGenerator =
+    Generator \stdGen1 -> do
+      let (function, stdGen2) = run functionGenerator stdGen1
+      let (value, stdGen3) = run valueGenerator stdGen2
+      (function value, stdGen3)
+
+instance Monad Generator where
+  valueGenerator >>= function =
+    Generator \stdGen1 -> do
+      let (value, stdGen2) = run valueGenerator stdGen1
+      let newGenerator = function value
+      run newGenerator stdGen2
+
+return :: a -> Generator a
+return value = Generator (value,)
+
+run :: Generator a -> StdGen -> (a, StdGen)
+run (Generator generator) stdgen = generator stdgen
+
+map :: (a -> b) -> Generator a -> Generator b
+map function (Generator generator) = Generator (Pair.mapFirst function . generator)
 
 newtype Seed = Seed StdGen
 
@@ -37,6 +70,22 @@ init givenSeed = Seed (System.Random.mkStdGen givenSeed)
 
 step :: Generator a -> Seed -> (a, Seed)
 step generator (Seed stdGen) = Pair.mapSecond Seed (run generator stdGen)
+
+int :: Int -> Int -> Generator Int
+int low high = Generator (System.Random.uniformR (low, high))
+
+number :: Number -> Number -> Generator Number
+number = quantity
+
+quantity :: Quantity units -> Quantity units -> Generator (Quantity units)
+quantity (Quantity low) (Quantity high) =
+  map Quantity (Generator (System.Random.uniformR (low, high)))
+
+bool :: Generator Bool
+bool = Generator System.Random.uniform
+
+sign :: Generator Sign
+sign = Generator System.Random.uniform
 
 generate :: Generator a -> IO a
 generate generator =
@@ -73,14 +122,13 @@ seed :: Generator Seed
 seed = Generator (Pair.mapFirst Seed . System.Random.splitGen)
 
 oneOf :: NonEmpty a -> Generator a
-oneOf values = merge (NonEmpty.map return values)
+oneOf values = merge (Data.List.NonEmpty.map return values)
 
 merge :: NonEmpty (Generator a) -> Generator a
 merge generators = do
-  let generatorArray = Array.fromNonEmpty generators
-  let indexGenerator = Int.random 0 (Array.length generatorArray - 1)
-  index <- indexGenerator
-  Array.get index generatorArray
+  let n = Data.List.NonEmpty.length generators
+  index <- int 0 (n - 1)
+  generators !! index
 
 retry :: Generator (Maybe a) -> Generator a
 retry fallibleGenerator = do

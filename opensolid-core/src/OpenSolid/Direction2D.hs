@@ -50,7 +50,6 @@ import OpenSolid.Primitives
   , Vector2D (Vector2D)
   )
 import OpenSolid.Primitives qualified as Primitives
-import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform qualified as Transform
@@ -206,7 +205,7 @@ placeOnOrientation orientation (Unit2D vector) =
   Unit3D (Vector2D.placeOnOrientation orientation vector)
 
 random :: Random.Generator (Direction2D space)
-random = Random.map fromAngle (Quantity.random -Angle.pi Angle.pi)
+random = Random.map fromAngle (Random.quantity -Angle.pi Angle.pi)
 
 transformBy ::
   Transform.IsOrthonormal tag =>

@@ -35,7 +35,6 @@ module OpenSolid.Number
   , goldenRatio
   , sum
   , product
-  , random
   , epsilon
   )
 where
@@ -44,7 +43,6 @@ import {-# SOURCE #-} OpenSolid.Interval (Interval)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Text.Parse qualified as Text.Parse
 import Prelude qualified
 
@@ -158,9 +156,6 @@ sum = Quantity.sum
 
 product :: NonEmpty Number -> Number
 product = NonEmpty.reduce (*)
-
-random :: Number -> Number -> Random.Generator Number
-random = Quantity.random
 
 epsilon :: Number
 epsilon = 2.2204460492503131e-16

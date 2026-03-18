@@ -13,7 +13,6 @@ module OpenSolid.Int
   , sum
   , sumOf
   , product
-  , random
   , gcd
   , lcm
   )
@@ -23,9 +22,7 @@ import Data.Ord qualified
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Random.Internal (Generator (Generator))
 import OpenSolid.Text.Parse qualified as Text.Parse
-import System.Random qualified
 import Prelude qualified
 
 parse :: Text -> Result Text Int
@@ -86,9 +83,6 @@ sumOf f list = sum (List.map f list)
 
 product :: NonEmpty Int -> Int
 product = NonEmpty.reduce (*)
-
-random :: Int -> Int -> Generator Int
-random low high = Generator (System.Random.uniformR (low, high))
 
 gcd :: Int -> Int -> Int
 gcd = Prelude.gcd
