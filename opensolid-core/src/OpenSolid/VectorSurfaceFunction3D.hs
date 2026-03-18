@@ -4,7 +4,6 @@ module OpenSolid.VectorSurfaceFunction3D
   ( VectorSurfaceFunction3D
   , Compiled
   , new
-  , recursive
   , desingularize
   , desingularized
   , zero
@@ -463,16 +462,6 @@ new c derivativeFunction = do
   let dv' = VectorSurfaceFunction3D dv.compiled du.dv dv.dv
   VectorSurfaceFunction3D c du dv'
 
-recursive ::
-  Compiled units space ->
-  ( VectorSurfaceFunction3D units space ->
-    SurfaceParameter ->
-    VectorSurfaceFunction3D units space
-  ) ->
-  VectorSurfaceFunction3D units space
-recursive givenCompiled derivativeFunction =
-  let self = new givenCompiled (derivativeFunction self) in self
-
 desingularize ::
   VectorSurfaceFunction3D units space ->
   "singularityU0"
@@ -587,12 +576,12 @@ unsafeQuotient_ ::
   SurfaceFunction1D units2 ->
   VectorSurfaceFunction3D (units1 ?/? units2) space
 unsafeQuotient_ lhs rhs = do
-  let quotientDerivative self p =
-        unsafeQuotient_ (derivative p lhs) rhs
-          - self * SurfaceFunction1D.unsafeQuotient (SurfaceFunction1D.derivative p rhs) rhs
-  recursive
-    (CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled)
-    quotientDerivative
+  let compiledQuotient = CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled
+  recursive \self -> do
+    let quotientDerivative p =
+          unsafeQuotient_ (derivative p lhs) rhs
+            - self * SurfaceFunction1D.unsafeQuotient (SurfaceFunction1D.derivative p rhs) rhs
+    new compiledQuotient quotientDerivative
 
 squaredMagnitude_ :: VectorSurfaceFunction3D units space -> SurfaceFunction1D (units ?*? units)
 squaredMagnitude_ function = do

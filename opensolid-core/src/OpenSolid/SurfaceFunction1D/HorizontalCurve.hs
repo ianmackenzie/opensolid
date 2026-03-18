@@ -101,7 +101,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fvExpr) ->
             \uValue -> Expression.solveMonotonicSurfaceV fExpr fvExpr uValue (clampedVBounds uValue)
           _ -> \uValue -> Internal.solveForV f f.dv uValue (clampedVBounds uValue)
-  let evaluate tValue = do
+  let value tValue = do
         let uValue = Number.interpolateFrom uStart uEnd tValue
         let vValue = solveForV uValue
         UvPoint uValue vValue
@@ -123,12 +123,10 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
             let slopeBounds = SurfaceFunction1D.bounds dvdu (Bounds2D (Interval u1 u2) vBounds)
             let segmentVBounds = Internal.curveBoundsAt u1 u2 v1 v2 slopeBounds
             Bounds2D (Interval u1 u2) segmentVBounds
-  let derivative self = do
-        let deltaU = uEnd - uStart
-        let dudt = Curve1D.constant deltaU
-        let dvdt = dudt * dvdu . self
-        VectorCurve2D.xy dudt dvdt
-  Curve2D.recursive (CompiledFunction.abstract evaluate bounds) derivative
+  recursive \self -> do
+    let dudt = Curve1D.constant (uEnd - uStart)
+    let dvdt = dudt * dvdu . self
+    Curve2D.new (CompiledFunction.abstract value bounds) (VectorCurve2D.xy dudt dvdt)
 
 clamp :: Number -> Interval Unitless -> Axis2D Unitless UvSpace -> Interval Unitless
 clamp u (Interval vLow vHigh) axis = do

@@ -2,7 +2,6 @@ module OpenSolid.SurfaceFunction2D
   ( SurfaceFunction2D
   , Compiled
   , new
-  , recursive
   , constant
   , uv
   , xy
@@ -186,16 +185,6 @@ new c derivativeFunction = do
   let dv = derivativeFunction V
   let dv' = VectorSurfaceFunction2D.new dv.compiled (\case U -> du.dv; V -> dv.dv)
   SurfaceFunction2D c du dv'
-
-recursive ::
-  Compiled units space ->
-  ( SurfaceFunction2D units space ->
-    SurfaceParameter ->
-    VectorSurfaceFunction2D units space
-  ) ->
-  SurfaceFunction2D units space
-recursive givenCompiled derivativeFunction =
-  let self = new givenCompiled (derivativeFunction self) in self
 
 constant :: Point2D units space -> SurfaceFunction2D units space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction2D.zero)

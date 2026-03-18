@@ -5,7 +5,6 @@ module OpenSolid.VectorCurve2D
   , Compiled
   , Nondegenerate
   , new
-  , recursive
   , compiled
   , derivative
   , nondegenerate
@@ -547,13 +546,6 @@ new givenCompiled givenDerivative = result
       , derivative = givenDerivative
       , maxSampledMagnitude
       }
-
-recursive ::
-  Compiled units space ->
-  (VectorCurve2D units space -> VectorCurve2D units space) ->
-  VectorCurve2D units space
-recursive givenCompiled derivativeFunction =
-  let result = new givenCompiled (derivativeFunction result) in result
 
 -- | The constant zero vector.
 zero :: VectorCurve2D units space

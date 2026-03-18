@@ -3,7 +3,6 @@ module OpenSolid.VectorCurve3D
   , Compiled
   , Nondegenerate
   , new
-  , recursive
   , on
   , compiled
   , isZero
@@ -485,13 +484,6 @@ new givenCompiled givenDerivative = result
       , derivative = givenDerivative
       , maxSampledMagnitude
       }
-
-recursive ::
-  Compiled units space ->
-  (VectorCurve3D units space -> VectorCurve3D units space) ->
-  VectorCurve3D units space
-recursive givenCompiled derivativeFunction =
-  let result = new givenCompiled (derivativeFunction result) in result
 
 zero :: VectorCurve3D units space
 zero = constant Vector3D.zero

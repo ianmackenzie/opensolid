@@ -5,7 +5,6 @@ module OpenSolid.Curve3D
   , Segment
   , SearchTree
   , new
-  , recursive
   , constant
   , on
   , line
@@ -196,10 +195,6 @@ instance space1 ~ space2 => Intersects (Curve3D space1) (Point3D space2) (Tolera
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new givenCompiled givenDerivative =
   let result = Curve3D givenCompiled givenDerivative (Curve.Search.tree result) in result
-
-recursive :: Compiled space -> (Curve3D space -> VectorCurve3D Meters space) -> Curve3D space
-recursive givenCompiled derivativeFunction =
-  let result = new givenCompiled (derivativeFunction result) in result
 
 constant :: Point3D space -> Curve3D space
 constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve3D.zero

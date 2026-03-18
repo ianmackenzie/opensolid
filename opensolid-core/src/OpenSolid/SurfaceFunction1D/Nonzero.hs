@@ -18,15 +18,15 @@ import OpenSolid.Units qualified as Units
 
 sqrt_ :: Nonzero (SurfaceFunction1D (units ?*? units)) -> Nonzero (SurfaceFunction1D units)
 sqrt_ (Nonzero function) = Nonzero do
-  let compiledSqrt_ =
+  let compiled =
         CompiledFunction.map
           Expression.sqrt_
           Quantity.sqrt_
           Interval.sqrt_
           (SurfaceFunction1D.compiled function)
-  let sqrtDerivative_ self p =
-        Units.coerce (0.5 * SurfaceFunction1D.derivative p function ?/? Nonzero self)
-  SurfaceFunction1D.recursive compiledSqrt_ sqrtDerivative_
+  recursive \self -> do
+    let derivative p = Units.coerce (0.5 * SurfaceFunction1D.derivative p function ?/? Nonzero self)
+    SurfaceFunction1D.new compiled derivative
 
 sqrt ::
   Units.Squared units1 units2 =>

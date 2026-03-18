@@ -4,7 +4,6 @@ module OpenSolid.Curve2D
   , Segment
   , SearchTree
   , new
-  , recursive
   , constant
   , xy
   , line
@@ -349,13 +348,6 @@ instance
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
 new givenCompiled givenDerivative =
   let result = Curve2D givenCompiled givenDerivative (Curve.Search.tree result) in result
-
-recursive ::
-  Compiled units space ->
-  (Curve2D units space -> VectorCurve2D units space) ->
-  Curve2D units space
-recursive givenCompiled derivativeFunction =
-  let result = new givenCompiled (derivativeFunction result) in result
 
 -- | Create a degenerate curve that is actually just a single point.
 constant :: Point2D units space -> Curve2D units space

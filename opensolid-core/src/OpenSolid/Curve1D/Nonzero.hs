@@ -20,9 +20,15 @@ import OpenSolid.Units qualified as Units
 
 sqrt_ :: Nonzero (Curve1D (units ?*? units)) -> Nonzero (Curve1D units)
 sqrt_ (Nonzero curve) = Nonzero do
-  Curve1D.recursive
-    (CompiledFunction.map Expression.sqrt_ Quantity.sqrt_ Interval.sqrt_ (Curve1D.compiled curve))
-    (\self -> Units.coerce (0.5 * Curve1D.derivative curve ?/? Nonzero self))
+  let compiled =
+        CompiledFunction.map
+          Expression.sqrt_
+          Quantity.sqrt_
+          Interval.sqrt_
+          (Curve1D.compiled curve)
+  recursive \self -> do
+    let derivative = Units.coerce (0.5 * Curve1D.derivative curve ?/? Nonzero self)
+    Curve1D.new compiled derivative
 
 sqrt :: Units.Squared units1 units2 => Nonzero (Curve1D units2) -> Nonzero (Curve1D units1)
 sqrt = sqrt_ . Units.unspecialize

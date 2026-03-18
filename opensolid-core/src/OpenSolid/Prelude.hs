@@ -45,6 +45,7 @@ module OpenSolid.Prelude
   , assert
   , throw
   , pattern TODO
+  , recursive
   )
 where
 
@@ -558,3 +559,7 @@ pattern TODO <- (GHC.Stack.withFrozenCallStack todoImpl -> ())
 
 todoImpl :: a
 todoImpl = Prelude.error "Not implemented"
+
+{-# INLINE recursive #-}
+recursive :: (a -> a) -> a
+recursive callback = let value = callback value in value

@@ -36,11 +36,13 @@ parameterization derivativeMagnitude = do
     | otherwise -> do
         let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
         let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
-        let evaluate uValue = evaluateIn tree (uValue * length)
-        let bounds (Interval uLow uHigh) = Interval (evaluate uLow) (evaluate uHigh)
-        let compiled = CompiledFunction.abstract evaluate bounds
         case Curve1D.quotient (Curve1D.constant length) derivativeMagnitude of
-          Ok quotient -> (Curve1D.recursive compiled (quotient .), length)
+          Ok quotient -> do
+            let value uValue = evaluateIn tree (uValue * length)
+            let bounds (Interval uLow uHigh) = Interval (value uLow) (value uHigh)
+            let compiled = CompiledFunction.abstract value bounds
+            let curve = Curve1D.new compiled (quotient . curve)
+            (curve, length)
           Error DivisionByZero -> (Curve1D.t, Quantity.zero)
 
 isConstant ::

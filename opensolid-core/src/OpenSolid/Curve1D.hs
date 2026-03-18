@@ -12,7 +12,6 @@ module OpenSolid.Curve1D
   , derivative
   , new
   , concrete
-  , recursive
   , zero
   , constant
   , derivativeValue
@@ -156,10 +155,6 @@ new = Curve1D
 concrete :: Expression Number (Quantity units) -> Curve1D units -> Curve1D units
 concrete givenExpression givenDerivative =
   new (CompiledFunction.concrete givenExpression) givenDerivative
-
-recursive :: Compiled units -> (Curve1D units -> Curve1D units) -> Curve1D units
-recursive givenCompiled derivativeFunction =
-  let result = Curve1D givenCompiled (derivativeFunction result) in result
 
 -- | A curve equal to zero everywhere.
 zero :: Curve1D units

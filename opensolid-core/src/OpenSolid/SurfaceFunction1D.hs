@@ -15,7 +15,6 @@ module OpenSolid.SurfaceFunction1D
   , IsZero (IsZero)
   , zeros
   , new
-  , recursive
   , quotient
   , quotient_
   , unsafeQuotient
@@ -395,13 +394,6 @@ new c derivativeFunction = do
   let dv = derivativeFunction V
   SurfaceFunction1D c du (SurfaceFunction1D dv.compiled du.dv dv.dv)
 
-recursive ::
-  Compiled units ->
-  (SurfaceFunction1D units -> SurfaceParameter -> SurfaceFunction1D units) ->
-  SurfaceFunction1D units
-recursive givenCompiled derivativeFunction =
-  let self = new givenCompiled (derivativeFunction self) in self
-
 desingularize ::
   SurfaceFunction1D units ->
   "singularityU0" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
@@ -501,11 +493,11 @@ unsafeQuotient_ ::
   SurfaceFunction1D units2 ->
   SurfaceFunction1D (units1 ?/? units2)
 unsafeQuotient_ lhs rhs = do
-  let quotientDerivative self p =
-        unsafeQuotient_ (derivative p lhs) rhs - self * unsafeQuotient (derivative p rhs) rhs
-  recursive
-    (CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled)
-    quotientDerivative
+  let compiledQuotient = CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled
+  recursive \self -> do
+    let quotientDerivative p =
+          unsafeQuotient_ (derivative p lhs) rhs - self * unsafeQuotient (derivative p rhs) rhs
+    new compiledQuotient quotientDerivative
 
 squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFunction1D units2
 squared function = Units.specialize (squared_ function)
@@ -556,10 +548,12 @@ unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction1D units2 -> Surface
 unsafeSqrt function = unsafeSqrt_ (Units.unspecialize function)
 
 unsafeSqrt_ :: SurfaceFunction1D (units ?*? units) -> SurfaceFunction1D units
-unsafeSqrt_ function =
-  recursive
-    (CompiledFunction.map Expression.sqrt_ Quantity.sqrt_ Interval.sqrt_ function.compiled)
-    (\self p -> Units.coerce (unsafeQuotient_ (derivative p function) (2.0 * self)))
+unsafeSqrt_ function = do
+  let compiledSqrt =
+        CompiledFunction.map Expression.sqrt_ Quantity.sqrt_ Interval.sqrt_ function.compiled
+  recursive \self -> do
+    let sqrtDerivative p = Units.coerce (unsafeQuotient_ (derivative p function) (2.0 * self))
+    new compiledSqrt sqrtDerivative
 
 cubed :: SurfaceFunction1D Unitless -> SurfaceFunction1D Unitless
 cubed function =
