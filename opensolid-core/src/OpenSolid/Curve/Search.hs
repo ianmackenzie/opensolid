@@ -21,4 +21,4 @@ tree ::
   ) =>
   Curve dimension units space ->
   Tree dimension units space
-tree curve = Search.tree (Segment.evaluate curve) Search.curveDomain
+tree curve = Search.tree (Segment.new curve) Search.curveDomain

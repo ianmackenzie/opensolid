@@ -5,7 +5,7 @@ module OpenSolid.Curve.Segment
   , secondDerivativeBounds
   , curvatureVectorBounds_
   , tangentBounds
-  , evaluate
+  , new
   , monotonic
   , crossingTangents
   , distinctCurvatures
@@ -103,7 +103,7 @@ distinctCurvatures segment1 segment2 = do
   let bounds2 = curvatureVectorBounds_ segment2
   Interval.isResolved (VectorBounds.magnitude (bounds1 - bounds2))
 
-evaluate ::
+new ::
   ( Curve.Exists dimension units space
   , DirectionBounds.Exists dimension space
   , VectorBounds.Exists dimension units space
@@ -112,7 +112,7 @@ evaluate ::
   Curve dimension units space ->
   Interval Unitless ->
   Segment dimension units space
-evaluate givenCurve givenParameterBounds = do
+new givenCurve givenParameterBounds = do
   let curveBounds = Curve.bounds givenCurve givenParameterBounds
   let curveDerivativeBounds = Curve.derivativeBounds givenCurve givenParameterBounds
   let curveSecondDerivativeBounds = Curve.secondDerivativeBounds givenCurve givenParameterBounds
