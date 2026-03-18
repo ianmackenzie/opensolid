@@ -22,6 +22,8 @@ module OpenSolid.Svg
   , boundsWith
   , curve
   , curveWith
+  , region
+  , regionWith
   , arrow
   , arrowWith
   , blackStroke
@@ -66,6 +68,8 @@ import OpenSolid.Polyline2D (Polyline2D)
 import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Region2D (Region2D)
+import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -246,6 +250,39 @@ curveWith attributes resolution givenCurve =
 -- | Draw a curve with the given resolution.
 curve :: Resolution Meters -> Curve2D Meters space -> Svg space
 curve = curveWith []
+
+region :: Resolution Meters -> Region2D Meters space -> Svg space
+region = regionWith []
+
+regionWith :: List (Attribute space) -> Resolution Meters -> Region2D Meters space -> Svg space
+regionWith attributes resolution givenRegion = do
+  let loops = NonEmpty.toList (Region2D.boundaryLoops givenRegion)
+  let dAttribute = Attribute "d" (Text.join " " (List.map (loopCommands resolution) loops))
+  Node "path" (dAttribute : attributes) []
+
+loopCommands :: Resolution Meters -> NonEmpty (Curve2D Meters space) -> Text
+loopCommands resolution curves = do
+  let startPoint = Curve2D.startPoint (NonEmpty.first curves)
+  let numCurves = NonEmpty.length curves
+  let drawCurve curveIndex loopCurve = do
+        let points =
+              Curve2D.toPolyline resolution loopCurve
+                & Polyline2D.vertices
+                & NonEmpty.rest -- drop the first point, we're assumed to be there already
+        let numPoints = List.length points
+        let isLastCurve = curveIndex == numCurves - 1
+        let pointCommand pointIndex curvePoint = do
+              let isLastPoint = pointIndex == numPoints - 1
+              if isLastCurve && isLastPoint then "Z" else lineTo curvePoint
+        let pointCommands = List.mapWithIndex pointCommand points
+        Text.join " " pointCommands
+  Text.join " " (moveTo startPoint : List.mapWithIndex drawCurve (NonEmpty.toList curves))
+
+moveTo :: Point2D Meters space -> Text
+moveTo (Point2D x y) = Text.join " " ["M", lengthText x, lengthText -y]
+
+lineTo :: Point2D Meters space -> Text
+lineTo (Point2D x y) = Text.join " " ["L", lengthText x, lengthText -y]
 
 arrow ::
   "start" ::: Point2D Meters space ->
