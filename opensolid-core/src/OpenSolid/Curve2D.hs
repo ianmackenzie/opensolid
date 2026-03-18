@@ -695,7 +695,7 @@ instance HasField "endPoint" (Curve2D units space) (Point2D units space) where
 The parameter value should be between 0 and 1.
 -}
 evaluate :: Curve2D units space -> Number -> Point2D units space
-evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
+evaluate curve tValue = CompiledFunction.value curve.compiled tValue
 
 -- | Get the start point of a curve.
 startPoint :: Curve2D units space -> Point2D units space

@@ -504,7 +504,7 @@ constant :: Vector3D units space -> VectorSurfaceFunction3D units space
 constant value = new (CompiledFunction.constant value) (const zero)
 
 evaluate :: VectorSurfaceFunction3D units space -> UvPoint -> Vector3D units space
-evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
+evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: VectorSurfaceFunction3D units space -> UvBounds -> VectorBounds3D units space
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds

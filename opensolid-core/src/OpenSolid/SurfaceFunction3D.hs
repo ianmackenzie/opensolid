@@ -180,7 +180,7 @@ constant :: Point3D space -> SurfaceFunction3D space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3D.zero)
 
 evaluate :: SurfaceFunction3D space -> UvPoint -> Point3D space
-evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
+evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds

@@ -354,7 +354,7 @@ instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFuncti
       (\p -> Curve1D.derivative curve . function * derivative p function)
 
 evaluate :: SurfaceFunction1D units -> UvPoint -> Quantity units
-evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
+evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: SurfaceFunction1D units -> UvBounds -> Interval units
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds

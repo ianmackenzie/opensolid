@@ -313,7 +313,7 @@ endPoint :: Curve3D space -> Point3D space
 endPoint curve = evaluate curve 1.0
 
 evaluate :: Curve3D space -> Number -> Point3D space
-evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
+evaluate curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds

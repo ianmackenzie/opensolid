@@ -222,7 +222,7 @@ xy x y = do
   new compiledXY xyDerivative
 
 evaluate :: SurfaceFunction2D units space -> UvPoint -> Point2D units space
-evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
+evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: SurfaceFunction2D units space -> UvBounds -> Bounds2D units space
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds

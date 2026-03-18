@@ -374,7 +374,7 @@ The parameter value should be between 0 and 1.
 -}
 {-# INLINE evaluate #-}
 evaluate :: Curve1D units -> Number -> Quantity units
-evaluate curve = CompiledFunction.evaluate curve.compiled
+evaluate curve = CompiledFunction.value curve.compiled
 
 {-# INLINE bounds #-}
 bounds :: Curve1D units -> Interval Unitless -> Interval units

@@ -576,7 +576,7 @@ desingularized start middle end = do
   new compiledDesingularized desingularizedDerivative
 
 evaluate :: VectorCurve3D units space -> Number -> Vector3D units space
-evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
+evaluate curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds

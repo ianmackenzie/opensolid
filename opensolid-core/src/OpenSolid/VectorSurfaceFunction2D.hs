@@ -563,7 +563,7 @@ transformBy transform function = do
   new compiledTransformed (\p -> transformBy transform (derivative p function))
 
 evaluate :: VectorSurfaceFunction2D units space -> UvPoint -> Vector2D units space
-evaluate function uvPoint = CompiledFunction.evaluate function.compiled uvPoint
+evaluate function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds ::
   VectorSurfaceFunction2D units space ->

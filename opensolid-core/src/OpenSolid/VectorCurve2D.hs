@@ -649,7 +649,7 @@ desingularized start middle end = do
 The parameter value should be between 0 and 1.
 -}
 evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
-evaluate curve tValue = CompiledFunction.evaluate curve.compiled tValue
+evaluate curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds

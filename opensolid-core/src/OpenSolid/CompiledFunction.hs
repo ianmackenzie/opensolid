@@ -6,7 +6,7 @@ module OpenSolid.CompiledFunction
   , IsAbstract (IsAbstract)
   , expression
   , desingularized
-  , evaluate
+  , value
   , bounds
   , evaluators
   , map
@@ -46,8 +46,8 @@ instance
     (CompiledFunction inputValue outputValue2 inputBounds outputBounds2)
   where
   coerce (Concrete expr) = Concrete (Units.coerce expr)
-  coerce (Abstract evaluateImpl boundsImpl) =
-    Abstract (Units.coerce . evaluateImpl) (Units.coerce . boundsImpl)
+  coerce (Abstract valueImpl boundsImpl) =
+    Abstract (Units.coerce . valueImpl) (Units.coerce . boundsImpl)
 
 instance
   ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
@@ -299,7 +299,7 @@ constant ::
   ) =>
   outputValue ->
   CompiledFunction inputValue outputValue inputBounds outputBounds
-constant value = Concrete (Expression.constant value)
+constant = Concrete . Expression.constant
 
 abstract ::
   (inputValue -> outputValue) ->
@@ -332,15 +332,15 @@ map ::
   CompiledFunction inputValue outputValue1 inputBounds outputBounds1 ->
   CompiledFunction inputValue outputValue2 inputBounds outputBounds2
 map mapExpression _ _ (Concrete expr) = Concrete (mapExpression expr)
-map _ mapValue mapBounds (Abstract evaluateImpl boundsImpl) =
-  Abstract (mapValue . evaluateImpl) (mapBounds . boundsImpl)
+map _ mapValue mapBounds (Abstract valueImpl boundsImpl) =
+  Abstract (mapValue . valueImpl) (mapBounds . boundsImpl)
 
-evaluate ::
+value ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   inputValue ->
   outputValue
-evaluate (Concrete expr) inputValue = Expression.value expr inputValue
-evaluate (Abstract evaluateImpl _) inputValue = evaluateImpl inputValue
+value (Concrete expr) inputValue = Expression.value expr inputValue
+value (Abstract valueImpl _) inputValue = valueImpl inputValue
 
 bounds ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
@@ -353,7 +353,7 @@ evaluators ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   (inputValue -> outputValue, inputBounds -> outputBounds)
 evaluators (Concrete expr) = (Expression.value expr, Expression.bounds expr)
-evaluators (Abstract evaluateImpl boundsImpl) = (evaluateImpl, boundsImpl)
+evaluators (Abstract valueImpl boundsImpl) = (valueImpl, boundsImpl)
 
 map2 ::
   Expression.Evaluation inputValue outputValue3 inputBounds outputBounds3 =>
