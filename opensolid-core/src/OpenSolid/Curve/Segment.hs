@@ -1,5 +1,7 @@
 module OpenSolid.Curve.Segment
   ( Segment
+  , startPoint
+  , endPoint
   , bounds
   , derivativeBounds
   , secondDerivativeBounds
@@ -21,6 +23,7 @@ import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Nonzero (Nonzero (Nonzero))
+import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -28,7 +31,9 @@ import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 
 data Segment dimension units space = Segment
-  { bounds :: ~(Bounds dimension units space)
+  { startPoint :: ~(Point dimension units space)
+  , endPoint :: ~(Point dimension units space)
+  , bounds :: ~(Bounds dimension units space)
   , derivativeBounds :: ~(VectorBounds dimension units space)
   , secondDerivativeBounds :: ~(VectorBounds dimension units space)
   , tangentBounds :: ~(DirectionBounds dimension space)
@@ -44,6 +49,7 @@ instance
   , VectorBounds.Exists dimension2 units2 space2
   , VectorBounds.Exists dimension1 (Unitless ?/? units1) space1
   , VectorBounds.Exists dimension2 (Unitless ?/? units2) space2
+  , Units.Coercion (Point dimension1 units1 space1) (Point dimension2 units2 space2)
   , Units.Coercion (Bounds dimension1 units1 space1) (Bounds dimension2 units2 space2)
   ) =>
   Units.Coercion
@@ -52,12 +58,20 @@ instance
   where
   coerce segment =
     Segment
-      { bounds = Units.coerce segment.bounds
+      { startPoint = Units.coerce segment.startPoint
+      , endPoint = Units.coerce segment.endPoint
+      , bounds = Units.coerce segment.bounds
       , derivativeBounds = VectorBounds.coerce segment.derivativeBounds
       , secondDerivativeBounds = VectorBounds.coerce segment.secondDerivativeBounds
       , tangentBounds = segment.tangentBounds
       , curvatureVectorBounds_ = VectorBounds.coerce segment.curvatureVectorBounds_
       }
+
+startPoint :: Segment dimension units space -> Point dimension units space
+startPoint = (.startPoint)
+
+endPoint :: Segment dimension units space -> Point dimension units space
+endPoint = (.endPoint)
 
 bounds :: Segment dimension units space -> Bounds dimension units space
 bounds = (.bounds)
@@ -113,11 +127,15 @@ new ::
   Interval Unitless ->
   Segment dimension units space
 new givenCurve givenParameterBounds = do
+  let curveStartPoint = Curve.startPoint givenCurve
+  let curveEndPoint = Curve.endPoint givenCurve
   let curveBounds = Curve.bounds givenCurve givenParameterBounds
   let curveDerivativeBounds = Curve.derivativeBounds givenCurve givenParameterBounds
   let curveSecondDerivativeBounds = Curve.secondDerivativeBounds givenCurve givenParameterBounds
   Segment
-    { bounds = curveBounds
+    { startPoint = curveStartPoint
+    , endPoint = curveEndPoint
+    , bounds = curveBounds
     , derivativeBounds = curveDerivativeBounds
     , secondDerivativeBounds = curveSecondDerivativeBounds
     , tangentBounds =
