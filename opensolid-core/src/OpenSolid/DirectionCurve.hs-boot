@@ -3,7 +3,7 @@ module OpenSolid.DirectionCurve
   , Exists
   , unsafe
   , unwrap
-  , evaluate
+  , value
   , bounds
   )
 where
@@ -38,7 +38,7 @@ unwrap ::
   Exists dimension space =>
   DirectionCurve dimension space ->
   VectorCurve dimension Unitless space
-evaluate ::
+value ::
   Exists dimension space =>
   DirectionCurve dimension space ->
   Number ->

@@ -7,7 +7,7 @@ module OpenSolid.VectorCurve
   , constant
   , zero
   , bezier
-  , evaluate
+  , value
   , bounds
   , derivative
   , secondDerivative
@@ -120,7 +120,7 @@ class
   constant :: Vector dimension units space -> VectorCurve dimension units space
   isZero :: Tolerance units => VectorCurve dimension units space -> Bool
   bezier :: NonEmpty (Vector dimension units space) -> VectorCurve dimension units space
-  evaluate :: VectorCurve dimension units space -> Number -> Vector dimension units space
+  value :: VectorCurve dimension units space -> Number -> Vector dimension units space
   bounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
   derivative :: VectorCurve dimension units space -> VectorCurve dimension units space
   squaredMagnitude_ :: VectorCurve dimension units space -> Curve1D (units ?*? units)
@@ -134,7 +134,7 @@ instance Exists 1 units Void where
   constant = Curve1D.constant
   isZero curve = curve ~= Curve1D.constant Quantity.zero
   derivative = Curve1D.derivative
-  evaluate = Curve1D.value
+  value = Curve1D.value
   bounds = Curve1D.bounds
   bezier = Curve1D.bezier
   desingularized = Curve1D.desingularized
@@ -144,7 +144,7 @@ instance Exists 2 units space where
   constant = VectorCurve2D.constant
   isZero = VectorCurve2D.isZero
   derivative = VectorCurve2D.derivative
-  evaluate = VectorCurve2D.evaluate
+  value = VectorCurve2D.value
   bounds = VectorCurve2D.bounds
   bezier = VectorCurve2D.bezier
   desingularized = VectorCurve2D.desingularized
@@ -154,7 +154,7 @@ instance Exists 3 units space where
   constant = VectorCurve3D.constant
   isZero = VectorCurve3D.isZero
   derivative = VectorCurve3D.derivative
-  evaluate = VectorCurve3D.evaluate
+  value = VectorCurve3D.value
   bounds = VectorCurve3D.bounds
   bezier = VectorCurve3D.bezier
   desingularized = VectorCurve3D.desingularized
@@ -180,7 +180,7 @@ derivativeValue ::
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
-derivativeValue curve tValue = evaluate (derivative curve) tValue
+derivativeValue curve tValue = value (derivative curve) tValue
 
 derivativeBounds ::
   Exists dimension units space =>
@@ -194,7 +194,7 @@ secondDerivativeValue ::
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
-secondDerivativeValue curve tValue = evaluate (secondDerivative curve) tValue
+secondDerivativeValue curve tValue = value (secondDerivative curve) tValue
 
 secondDerivativeBounds ::
   Exists dimension units space =>
@@ -230,7 +230,7 @@ desingularize startSingularity curve endSingularity = do
         Nothing -> curve
         Just (value0, firstDerivative0) -> do
           let t0 = Desingularization.t0
-          let valueT0 = evaluate curve t0
+          let valueT0 = value curve t0
           let firstDerivativeT0 = derivativeValue curve t0
           let secondDerivativeT0 = secondDerivativeValue curve t0
           bezier $
@@ -244,7 +244,7 @@ desingularize startSingularity curve endSingularity = do
         Nothing -> curve
         Just (value1, firstDerivative1) -> do
           let t1 = Desingularization.t1
-          let valueT1 = evaluate curve t1
+          let valueT1 = value curve t1
           let firstDerivativeT1 = derivativeValue curve t1
           let secondDerivativeT1 = secondDerivativeValue curve t1
           bezier $

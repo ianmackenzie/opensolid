@@ -1407,7 +1407,7 @@ vectorCurve2D =
     [ Class.constant "Zero" (VectorCurve2D.zero :: VectorCurve2D) $(docs 'VectorCurve2D.zero)
     , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
     , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
-    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2D.evaluate) $(docs 'VectorCurve2D.evaluate)
+    , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
     ]
 
 type DisplacementCurve2D = VectorCurve2D.VectorCurve2D Meters FFI.Space
@@ -1418,7 +1418,7 @@ displacementCurve2D =
     [ Class.constant "Zero" (VectorCurve2D.zero :: DisplacementCurve2D) $(docs 'VectorCurve2D.zero)
     , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
     , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
-    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2D.evaluate) $(docs 'VectorCurve2D.evaluate)
+    , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
     ]
 
 type UvVectorCurve = VectorCurve2D.VectorCurve2D Unitless UvSpace
@@ -1429,7 +1429,7 @@ uvVectorCurve =
     [ Class.constant "Zero" (VectorCurve2D.zero :: UvVectorCurve) $(docs 'VectorCurve2D.zero)
     , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
     , Class.factory2 "UV" "U Component" "V Component" VectorCurve2D.xy "Construct a UV vector curve from its U and V components."
-    , Class.member1 "Evaluate" "Parameter Value" (flip VectorCurve2D.evaluate) $(docs 'VectorCurve2D.evaluate)
+    , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
     ]
 
 rigidTransformations2D ::

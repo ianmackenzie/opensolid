@@ -18,10 +18,10 @@ derivativeConsistency ::
 derivativeConsistency givenTolerance curve = do
   tValue <- Test.generate Parameter.random
   let dt :: Number = 1e-6
-  let v1 = VectorCurve2D.evaluate curve (tValue - dt)
-  let v2 = VectorCurve2D.evaluate curve (tValue + dt)
+  let v1 = VectorCurve2D.value curve (tValue - dt)
+  let v2 = VectorCurve2D.value curve (tValue + dt)
   let numericalFirstDerivative = (v2 - v1) / (2.0 * dt)
-  let analyticFirstDerivative = VectorCurve2D.evaluate (VectorCurve2D.derivative curve) tValue
+  let analyticFirstDerivative = VectorCurve2D.value (VectorCurve2D.derivative curve) tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
       & Test.output "numericalFirstDerivative" numericalFirstDerivative
@@ -34,7 +34,7 @@ boundsConsistency ::
 boundsConsistency vectorCurve = do
   tBounds <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (Interval.interpolate tBounds) Parameter.random)
-  let vectorCurveValue = VectorCurve2D.evaluate vectorCurve tValue
+  let vectorCurveValue = VectorCurve2D.value vectorCurve tValue
   let vectorCurveBounds = VectorCurve2D.bounds vectorCurve tBounds
   Test.expect (vectorCurveValue `intersects` vectorCurveBounds)
     & Test.output "tValue" tValue

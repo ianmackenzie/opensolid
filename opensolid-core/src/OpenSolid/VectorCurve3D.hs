@@ -11,7 +11,7 @@ module OpenSolid.VectorCurve3D
   , nondegenerate
   , startValue
   , endValue
-  , evaluate
+  , value
   , bounds
   , derivativeValue
   , derivativeBounds
@@ -129,7 +129,7 @@ instance
 
 instance ApproximateEquality (VectorCurve3D units space) (Tolerance units) where
   curve1 ~= curve2 = do
-    let equalValuesAt t = evaluate curve1 t ~= evaluate curve2 t
+    let equalValuesAt t = value curve1 t ~= value curve2 t
     NonEmpty.all equalValuesAt Parameter.samples
 
 instance
@@ -276,7 +276,7 @@ instance
     (Quantity units2)
     (VectorCurve3D (units1 ?*? units2) space)
   where
-  curve ?*? value = curve ?*? Curve1D.constant value
+  curve ?*? quantity = curve ?*? Curve1D.constant quantity
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -290,7 +290,7 @@ instance
     (Quantity units2)
     (VectorCurve3D (units1 ?/? units2) space)
   where
-  curve ?/? value = Units.simplify (curve ?*? (1.0 ?/? value))
+  curve ?/? quantity = Units.simplify (curve ?*? (1.0 ?/? quantity))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -478,7 +478,7 @@ new :: Compiled units space -> VectorCurve3D units space -> VectorCurve3D units 
 new givenCompiled givenDerivative = result
  where
   -- The test value to use to check if a curve is (likely) zero everywhere
-  maxSampledMagnitude = NonEmpty.maximumOf (Vector3D.magnitude . evaluate result) Parameter.samples
+  maxSampledMagnitude = NonEmpty.maximumOf (Vector3D.magnitude . value result) Parameter.samples
   result =
     VectorCurve3D
       { compiled = givenCompiled
@@ -497,7 +497,7 @@ zero :: VectorCurve3D units space
 zero = constant Vector3D.zero
 
 constant :: Vector3D units space -> VectorCurve3D units space
-constant value = new (CompiledFunction.constant value) zero
+constant vector = new (CompiledFunction.constant vector) zero
 
 on :: Plane3D global local -> VectorCurve2D units local -> VectorCurve3D units global
 on plane vectorCurve2D = do
@@ -548,10 +548,10 @@ bezier controlPoints =
     (bezier (Bezier.derivative controlPoints))
 
 startValue :: VectorCurve3D units space -> Vector3D units space
-startValue curve = evaluate curve 0.0
+startValue curve = value curve 0.0
 
 endValue :: VectorCurve3D units space -> Vector3D units space
-endValue curve = evaluate curve 1.0
+endValue curve = value curve 1.0
 
 desingularize ::
   Maybe (Vector3D units space, Vector3D units space) ->
@@ -575,8 +575,8 @@ desingularized start middle end = do
   let desingularizedDerivative = desingularized start.derivative middle.derivative end.derivative
   new compiledDesingularized desingularizedDerivative
 
-evaluate :: VectorCurve3D units space -> Number -> Vector3D units space
-evaluate curve tValue = CompiledFunction.value curve.compiled tValue
+value :: VectorCurve3D units space -> Number -> Vector3D units space
+value curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds

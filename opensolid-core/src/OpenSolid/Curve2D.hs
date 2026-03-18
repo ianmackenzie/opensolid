@@ -865,7 +865,7 @@ signature orientation curve tValue radius = do
                     & VectorCurve2D.derivative
                     & VectorCurve2D.derivative
                     & VectorCurve2D.derivative
-            let Vector2D x'''' y'''' = local (VectorCurve2D.evaluate fourthDerivative tValue)
+            let Vector2D x'''' y'''' = local (VectorCurve2D.value fourthDerivative tValue)
             (y'''' ?*? x'' - y'' ?*? x'''') ?/? (x'' ?*? x'' ?*? x'')
   let secondOrder = Units.simplify (0.5 * d2ydx2 ?*? Quantity.squared_ radius)
   (firstOrder, secondOrder)
@@ -1190,7 +1190,7 @@ piecewiseDerivativeValue tree length = case tree of
     | length < leftLength -> piecewiseDerivativeValue leftTree length
     | otherwise -> piecewiseDerivativeValue rightTree (length - leftLength)
   PiecewiseDerivativeLeaf curve segmentLength ->
-    VectorCurve2D.evaluate curve (length / segmentLength)
+    VectorCurve2D.value curve (length / segmentLength)
 
 piecewiseDerivativeBounds ::
   PiecewiseDerivativeTree units space ->

@@ -8,7 +8,7 @@ module OpenSolid.VectorCurve2D
   , compiled
   , derivative
   , isZero
-  , evaluate
+  , value
   , bounds
   , squaredMagnitude_
   , quotient
@@ -136,7 +136,7 @@ bezier :: NonEmpty (Vector2D units space) -> VectorCurve2D units space
 compiled :: VectorCurve2D units space -> Compiled units space
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
-evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
+value :: VectorCurve2D units space -> Number -> Vector2D units space
 bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>

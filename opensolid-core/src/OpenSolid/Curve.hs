@@ -190,7 +190,7 @@ derivativeValue ::
   Curve dimension units space ->
   Number ->
   Vector dimension units space
-derivativeValue curve tValue = VectorCurve.evaluate (derivative curve) tValue
+derivativeValue curve tValue = VectorCurve.value (derivative curve) tValue
 
 derivativeBounds ::
   Exists dimension units space =>
@@ -204,7 +204,7 @@ secondDerivativeValue ::
   Curve dimension units space ->
   Number ->
   Vector dimension units space
-secondDerivativeValue curve tValue = VectorCurve.evaluate (secondDerivative curve) tValue
+secondDerivativeValue curve tValue = VectorCurve.value (secondDerivative curve) tValue
 
 secondDerivativeBounds ::
   Exists dimension units space =>
@@ -221,9 +221,9 @@ findPoint ::
 findPoint givenPoint curve = do
   let curveDerivative = derivative curve
   let evaluateFirstOrder tValue =
-        (# point curve tValue - givenPoint, VectorCurve.evaluate curveDerivative tValue #)
+        (# point curve tValue - givenPoint, VectorCurve.value curveDerivative tValue #)
   let isSolution tValue = point curve tValue ~= givenPoint
-  let isDegenerate tValue = VectorCurve.evaluate curveDerivative tValue ~= Vector.zero
+  let isDegenerate tValue = VectorCurve.value curveDerivative tValue ~= Vector.zero
   let endpointSolutions = List.filter isSolution [0.0, 1.0]
   let solveMonotonic tBounds = do
         let tMid = Interval.midpoint tBounds

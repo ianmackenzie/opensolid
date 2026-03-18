@@ -231,7 +231,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" do
   let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
   tangentDirection <- Result.orFail (Curve2D.tangentDirection curve)
   let startTangent = DirectionCurve2D.startValue tangentDirection
-  let otherTangents = List.map (DirectionCurve2D.evaluate tangentDirection) decreasingTValues
+  let otherTangents = List.map (DirectionCurve2D.value tangentDirection) decreasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom startTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -245,7 +245,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" do
   let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
   tangentDirection <- Result.orFail (Curve2D.tangentDirection curve)
   let endTangent = DirectionCurve2D.endValue tangentDirection
-  let otherTangents = List.map (DirectionCurve2D.evaluate tangentDirection) increasingTValues
+  let otherTangents = List.map (DirectionCurve2D.value tangentDirection) increasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom endTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -261,8 +261,8 @@ tangentDerivativeIsPerpendicularToTangent =
     tangentDirection <- Result.orFail (Curve2D.tangentDirection curve)
     let tangentDerivative = DirectionCurve2D.derivative tangentDirection
     tValue <- Test.generate Parameter.random
-    let tangent = DirectionCurve2D.evaluate tangentDirection tValue
-    let derivative = VectorCurve2D.evaluate tangentDerivative tValue
+    let tangent = DirectionCurve2D.value tangentDirection tValue
+    let derivative = VectorCurve2D.value tangentDerivative tValue
     Test.expect (Tolerance.using 1e-12 (derivative `dot` tangent ~= 0.0))
       & Test.output "tValue" tValue
       & Test.output "tangent" tangent
@@ -281,7 +281,7 @@ degenerateStartPointTangentDerivative =
     let tangentDerivative = DirectionCurve2D.derivative tangentDirection
     let startTangentDerivative = VectorCurve2D.startValue tangentDerivative
     let otherTangentDerivatives =
-          List.map (VectorCurve2D.evaluate tangentDerivative) decreasingTValues
+          List.map (VectorCurve2D.value tangentDerivative) decreasingTValues
     let differences =
           List.map Vector2D.magnitude $
             List.map (- startTangentDerivative) otherTangentDerivatives
@@ -301,7 +301,7 @@ degenerateEndPointTangentDerivative =
     let tangentDerivative = DirectionCurve2D.derivative tangentDirection
     let endTangentDerivative = VectorCurve2D.endValue tangentDerivative
     let otherTangentDerivatives =
-          List.map (VectorCurve2D.evaluate tangentDerivative) increasingTValues
+          List.map (VectorCurve2D.value tangentDerivative) increasingTValues
     let differences =
           List.map Vector2D.magnitude $
             List.map (- endTangentDerivative) otherTangentDerivatives
@@ -435,7 +435,7 @@ g2 = Test.check 100 "G2 continuity" do
   let point = Curve2D.point spline t
   tangentCurve <- Result.orFail (Curve2D.tangentDirection spline)
   curvatureCurve <- Result.orFail (Curve2D.curvature spline)
-  let tangentDirection = DirectionCurve2D.evaluate tangentCurve t
+  let tangentDirection = DirectionCurve2D.value tangentCurve t
   let signedRadius = 1.0 / Curve1D.value curvatureCurve t
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection
@@ -458,12 +458,12 @@ curvatureVectorIsTangentDerivative =
         let firstDerivative = Curve2D.derivative spline
         let curvatureVector = Units.specialize (Curve.Nonzero.curvatureVector_ (Nonzero spline))
         tValue <- Test.generate Parameter.random
-        let curvatureVector1 = VectorCurve2D.evaluate curvatureVector tValue
+        let curvatureVector1 = VectorCurve2D.value curvatureVector tValue
         let curvatureVector2 =
               Units.specialize (Curve.Nonzero.curvatureVectorValue_ (Nonzero spline) tValue)
         let curvatureVector3 =
-              VectorCurve2D.evaluate tangentDerivative tValue
-                / Vector2D.magnitude (VectorCurve2D.evaluate firstDerivative tValue)
+              VectorCurve2D.value tangentDerivative tValue
+                / Vector2D.magnitude (VectorCurve2D.value firstDerivative tValue)
         Tolerance.using (1e-12 / Length.meter) do
           Test.all
             [ Test.expect (curvatureVector1 ~= curvatureVector2)

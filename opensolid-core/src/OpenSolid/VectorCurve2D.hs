@@ -11,7 +11,7 @@ module OpenSolid.VectorCurve2D
   , nondegenerate
   , startValue
   , endValue
-  , evaluate
+  , value
   , bounds
   , derivativeValue
   , derivativeBounds
@@ -158,7 +158,7 @@ instance
 
 instance ApproximateEquality (VectorCurve2D units space) (Tolerance units) where
   curve1 ~= curve2 = do
-    let equalValuesAt t = evaluate curve1 t ~= evaluate curve2 t
+    let equalValuesAt t = value curve1 t ~= value curve2 t
     NonEmpty.all equalValuesAt Parameter.samples
 
 instance
@@ -314,7 +314,7 @@ instance
     (Quantity units2)
     (VectorCurve2D (units1 ?/? units2) space)
   where
-  curve ?/? value = Units.simplify (curve ?*? (1.0 ?/? value))
+  curve ?/? quantity = Units.simplify (curve ?*? (1.0 ?/? quantity))
 
 instance
   Multiplication_
@@ -322,7 +322,7 @@ instance
     (Quantity units2)
     (VectorCurve2D (units1 ?*? units2) space)
   where
-  curve ?*? value = curve ?*? Curve1D.constant value
+  curve ?*? quantity = curve ?*? Curve1D.constant quantity
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -540,7 +540,7 @@ new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units 
 new givenCompiled givenDerivative = result
  where
   -- The test value to use to check if a curve is (likely) zero everywhere
-  maxSampledMagnitude = NonEmpty.maximumOf (Vector2D.magnitude . evaluate result) Parameter.samples
+  maxSampledMagnitude = NonEmpty.maximumOf (Vector2D.magnitude . value result) Parameter.samples
   result =
     VectorCurve2D
       { compiled = givenCompiled
@@ -561,7 +561,7 @@ zero = constant Vector2D.zero
 
 -- | Create a curve with a constant value.
 constant :: Vector2D units space -> VectorCurve2D units space
-constant value = new (CompiledFunction.constant value) zero
+constant vector = new (CompiledFunction.constant vector) zero
 
 unit :: DirectionCurve2D space -> VectorCurve2D Unitless space
 unit = DirectionCurve2D.unwrap
@@ -617,10 +617,10 @@ bezier controlPoints =
     (bezier (Bezier.derivative controlPoints))
 
 startValue :: VectorCurve2D units space -> Vector2D units space
-startValue curve = evaluate curve 0.0
+startValue curve = value curve 0.0
 
 endValue :: VectorCurve2D units space -> Vector2D units space
-endValue curve = evaluate curve 1.0
+endValue curve = value curve 1.0
 
 desingularize ::
   Maybe (Vector2D units space, Vector2D units space) ->
@@ -648,8 +648,8 @@ desingularized start middle end = do
 
 The parameter value should be between 0 and 1.
 -}
-evaluate :: VectorCurve2D units space -> Number -> Vector2D units space
-evaluate curve tValue = CompiledFunction.value curve.compiled tValue
+value :: VectorCurve2D units space -> Number -> Vector2D units space
+value curve tValue = CompiledFunction.value curve.compiled tValue
 
 bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
@@ -826,5 +826,5 @@ unconvert factor curve = Units.simplify (curve ?/? factor)
 newtonRaphson :: VectorCurve2D units space -> Number -> Number
 newtonRaphson curve t1 = do
   let curveDerivative = derivative curve
-  let evaluateFirstOrder tValue = (# evaluate curve tValue, evaluate curveDerivative tValue #)
+  let evaluateFirstOrder tValue = (# value curve tValue, value curveDerivative tValue #)
   NewtonRaphson2D.curve evaluateFirstOrder t1

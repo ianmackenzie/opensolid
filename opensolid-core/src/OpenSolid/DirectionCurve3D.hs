@@ -4,7 +4,7 @@ module OpenSolid.DirectionCurve3D
   , unwrap
   , startValue
   , endValue
-  , evaluate
+  , value
   , bounds
   , derivative
   , constant
@@ -37,14 +37,14 @@ unwrap :: DirectionCurve3D space -> VectorCurve3D Unitless space
 unwrap (DirectionCurve3D vectorCurve) = vectorCurve
 
 startValue :: DirectionCurve3D space -> Direction3D space
-startValue curve = evaluate curve 0.0
+startValue curve = value curve 0.0
 
 endValue :: DirectionCurve3D space -> Direction3D space
-endValue curve = evaluate curve 1.0
+endValue curve = value curve 1.0
 
-evaluate :: DirectionCurve3D space -> Number -> Direction3D space
-evaluate (DirectionCurve3D vectorCurve) tValue =
-  Direction3D.unsafe (VectorCurve3D.evaluate vectorCurve tValue)
+value :: DirectionCurve3D space -> Number -> Direction3D space
+value (DirectionCurve3D vectorCurve) tValue =
+  Direction3D.unsafe (VectorCurve3D.value vectorCurve tValue)
 
 bounds :: DirectionCurve3D space -> Interval Unitless -> DirectionBounds3D space
 bounds (DirectionCurve3D vectorCurve) tBounds =
@@ -84,7 +84,7 @@ instance
     (DirectionCurve3D space)
     (VectorCurve3D units space)
   where
-  value * DirectionCurve3D vectorCurve = value * vectorCurve
+  quantity * DirectionCurve3D vectorCurve = quantity * vectorCurve
 
 instance
   Multiplication
@@ -92,7 +92,7 @@ instance
     (Quantity units)
     (VectorCurve3D units space)
   where
-  DirectionCurve3D vectorCurve * value = vectorCurve * value
+  DirectionCurve3D vectorCurve * quantity = vectorCurve * quantity
 
 instance
   Multiplication

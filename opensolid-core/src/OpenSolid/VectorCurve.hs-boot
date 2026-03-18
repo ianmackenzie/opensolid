@@ -1,7 +1,7 @@
 module OpenSolid.VectorCurve
   ( VectorCurve
   , Exists
-  , evaluate
+  , value
   , bounds
   , derivative
   , derivativeValue
@@ -35,7 +35,7 @@ instance Exists 2 units space
 
 instance Exists 3 units space
 
-evaluate ::
+value ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Number ->

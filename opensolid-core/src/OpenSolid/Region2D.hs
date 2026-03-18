@@ -243,8 +243,8 @@ addFillet radius curves point = do
               let startPoint = Curve2D.point firstCurve t1
               let sweptAngle =
                     Direction2D.angleFrom
-                      (DirectionCurve2D.evaluate firstTangent t1)
-                      (DirectionCurve2D.evaluate secondTangent t2)
+                      (DirectionCurve2D.value firstTangent t1)
+                      (DirectionCurve2D.value secondTangent t2)
               let filletArc = Curve2D.sweptArc centerPoint startPoint sweptAngle
               let trimmedFirstCurve = firstCurve . Curve1D.interpolateFrom 0.0 t1
               let trimmedSecondCurve = secondCurve . Curve1D.interpolateFrom t2 1.0

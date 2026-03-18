@@ -50,7 +50,7 @@ directionValue ::
   Number ->
   Direction dimension space
 directionValue (Nondegenerate curve) tValue = do
-  let value = VectorCurve.evaluate curve tValue
+  let value = VectorCurve.value curve tValue
   Direction.unsafe $
     Vector.normalize $
       if

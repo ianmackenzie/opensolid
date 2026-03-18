@@ -4,7 +4,7 @@ module OpenSolid.DirectionCurve2D
   , unwrap
   , startValue
   , endValue
-  , evaluate
+  , value
   , bounds
   , derivative
   , constant
@@ -47,14 +47,14 @@ unwrap :: DirectionCurve2D space -> VectorCurve2D Unitless space
 unwrap (DirectionCurve2D vectorCurve) = vectorCurve
 
 startValue :: DirectionCurve2D space -> Direction2D space
-startValue curve = evaluate curve 0.0
+startValue curve = value curve 0.0
 
 endValue :: DirectionCurve2D space -> Direction2D space
-endValue curve = evaluate curve 1.0
+endValue curve = value curve 1.0
 
-evaluate :: DirectionCurve2D space -> Number -> Direction2D space
-evaluate (DirectionCurve2D vectorCurve) tValue =
-  Direction2D.unsafe (VectorCurve2D.evaluate vectorCurve tValue)
+value :: DirectionCurve2D space -> Number -> Direction2D space
+value (DirectionCurve2D vectorCurve) tValue =
+  Direction2D.unsafe (VectorCurve2D.value vectorCurve tValue)
 
 bounds :: DirectionCurve2D space -> Interval Unitless -> DirectionBounds2D space
 bounds (DirectionCurve2D vectorCurve) tBounds =
@@ -97,7 +97,7 @@ instance
     (DirectionCurve2D space)
     (VectorCurve2D units space)
   where
-  value * DirectionCurve2D vectorCurve = value * vectorCurve
+  quantity * DirectionCurve2D vectorCurve = quantity * vectorCurve
 
 instance
   Multiplication
@@ -105,7 +105,7 @@ instance
     (Quantity units)
     (VectorCurve2D units space)
   where
-  DirectionCurve2D vectorCurve * value = vectorCurve * value
+  DirectionCurve2D vectorCurve * quantity = vectorCurve * quantity
 
 instance
   Multiplication
